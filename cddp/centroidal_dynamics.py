@@ -207,7 +207,7 @@ terminal_interval = problem.terminal_interval
 
 problem.forwardPass(update_control=False)
 
-K = 2
+K = 1
 for k in range(K):
 
   problem.backwardPass()
