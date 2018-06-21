@@ -113,11 +113,11 @@ class CostManagerData():
 
 
 class DynamicsData(object):
-    """ Data structure for the system dynamics.
-
-    We only define the Jacobians of the dynamics, and not the Hessians of it, because
-    our optimal controller by default uses the Gauss-Newton approximation.
-    """
+  """ Data structure for the system dynamics.
+  
+  We only define the Jacobians of the dynamics, and not the Hessians of it, because
+  our optimal controller by default uses the Gauss-Newton approximation.
+  """
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, n, m):
