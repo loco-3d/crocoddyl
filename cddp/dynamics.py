@@ -14,7 +14,6 @@ class DynamicModel(ODEBase):
   def __init__(self):
     return None
 
-  @abc.abstractmethod
   def createData(self, n, m):
     """
     :param n: dimension of the state
@@ -56,16 +55,16 @@ class DynamicModel(ODEBase):
     """
     pass
 
-  @abc.abstractmethod
-  def fxx(self, data, x, u):
-    """
-    Eval the hessian of the dynamics with respect to the state
-    :param x:
-    :param u:
-    :param data:
-    :return:
-    """
-    pass
+  # @abc.abstractmethod
+  # def fxx(self, data, x, u):
+  #   """
+  #   Eval the hessian of the dynamics with respect to the state
+  #   :param x:
+  #   :param u:
+  #   :param data:
+  #   :return:
+  #   """
+  #   pass
 
   # @abc.abstractmethod
   # def fxu(self, data, x, u):
