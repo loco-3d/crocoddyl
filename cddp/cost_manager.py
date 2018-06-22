@@ -38,22 +38,36 @@ class CostManager(object):
         name + " class has to derived from the XCost abstract class."
     self.running.append(cost)
 
-  def createData(self, n, m):
-    """ Creates the entired cost data.
+  def createTerminalData(self, n):
+    """ Creates the data of the stack of terminal costs.
 
-    Before creating the data, it's needed to add all the terminal and running cost
+    Before creating the data, it's needed to add all the terminal costs
     of your problem.
     """
-    from data import CostManagerData
+    from data import XCostData, CostManagerData
     data = CostManagerData()
 
-    # Creating the total, terminal and running cost data
-    assert len(self.running) > 0, "You need to define at least one running cost."
-    data.total = self.running[0].createData(n, m)
-    for cost in self.terminal:
-      data.terminal.append(cost.createData(n))
-    for cost in self.running:
-      data.running.append(cost.createData(n, m))
+    # Creating the terminal cost data, the residual data isn't needed
+    data.total = XCostData(n)
+
+    # Creating the terminal stack-of-cost data
+    data.soc = [cost.createData(n) for cost in self.terminal]
+    return data
+
+  def createRunningData(self, n, m):
+    """ Creates the data of the stack of running costs.
+
+    Before creating the data, it's needed to add all the running costs
+    of your problem.
+    """
+    from data import XUCostData, CostManagerData
+    data = CostManagerData()
+
+    # Creating the running cost data, the residual data isn't needed
+    data.total = XUCostData(n, m)
+    
+    # Creating the running stack-of-cost data
+    data.soc = [cost.createData(n) for cost in self.running]
     return data
 
   def computeTerminalCost(self, data, x):

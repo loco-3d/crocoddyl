@@ -116,15 +116,16 @@ class RunningResidualCostData(XUCostData):
 class CostManagerData():
   """ Data structure for the cost manager.
 
-  The cost manager containts the terminal and running costs. Additionally,
-  we create a dedicated data structure for the total cost; the sum of cost data.
-  The terminal and running costs are stacked in the list.
+  The cost manager contains the total cost and a stack-of-cost (SoC) functions. It
+  creates a dedicated data structure for the total cost, the sum of cost data, an
+  another one for the SoC. The total cost and SoC can contained the data of the terminal
+  or running costs.
   """
+  __metaclass__ = abc.ABCMeta
 
   def __init__(self):
     self.total = None
-    self.terminal = []
-    self.running = []
+    self.soc = []
 
 
 class DynamicsData(object):
