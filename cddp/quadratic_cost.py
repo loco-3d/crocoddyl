@@ -33,19 +33,19 @@ class TerminalQuadraticCost(TerminalCost):
     self._Q = np.diag(self._q.reshape(-1))
 
   def l(self, data, x):
-    # The quadratic term is as follows 0.5 * r^T Q r. We compute it efficiently
+    # The quadratic term is as follows 0.5 * xr^T Q xr. We compute it efficiently
     # by exploiting the fact thar Q is a diagonal matrix
-    r = self.xr(data, x)
-    assert r.shape == (
-        data.k, 1), "The residual should have dimension equals (" + str(data.k) + ",1)."
-    data.l[0] = 0.5 * np.asscalar(r.T * np.multiply(self._q[:, None], r))
+    xr = self.xr(data, x)
+    assert xr.shape == (
+        data.n, 1), "The residual should have dimension equals (" + str(data.n) + ",1)."
+    data.l[0] = 0.5 * np.asscalar(xr.T * np.multiply(self._q[:, None], xr))
     return data.l[0]
 
   def lx(self, data, x):
-    # The 1st derivative of a quadratic term is Q r. We compute it efficiently
+    # The 1st derivative of a quadratic term is Q xr. We compute it efficiently
     # by exploiting the fact that Q is a diagonal matrix
-    r = data.r  # for efficiency we assume that you run l() first
-    np.copyto(data.lx, np.multiply(self._q[:, None], r))
+    xr = data.xr  # for efficiency we assume that you run l() first
+    np.copyto(data.lx, np.multiply(self._q[:, None], xr))
     return data.lx
 
   def lxx(self, data, x):

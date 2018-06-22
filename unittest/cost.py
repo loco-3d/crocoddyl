@@ -9,8 +9,8 @@ class GoalQuadraticCost(TerminalQuadraticCost):
     self.x_des = np.zeros((n, 1))
 
   def xr(self, data, x):
-    np.copyto(data.r, x - self.x_des)
-    return data.r
+    np.copyto(data.xr, x - self.x_des)
+    return data.xr
 
 
 class GoalResidualQuadraticCost(TerminalResidualQuadraticCost):

@@ -2,7 +2,43 @@ import numpy as np
 import abc
 
 
-class TerminalCostData(object):
+class XCostData(object):
+  """ Data structure for state-dependent cost functions
+  """
+  __metaclass__ = abc.ABCMeta
+
+  def __init__(self, n):
+    # State dimension
+    self.n = n
+
+    # Creating the data structure of state cost function
+    # and its derivatives
+    self.l = np.matrix(np.zeros(1))
+    self.lx = np.matrix(np.zeros((self.n, 1)))
+    self.lxx = np.matrix(np.zeros((self.n, self.n)))
+
+
+class XUCostData(object):
+  """ Data structure for state/control-dependent cost functions
+  """
+  __metaclass__ = abc.ABCMeta
+
+  def __init__(self, n, m):
+    # State and control dimension
+    self.n = n
+    self.m = m
+
+    # Creating the data structure of state-control cost function and its
+    # derivatives
+    self.l = np.matrix(np.zeros(1))
+    self.lx = np.matrix(np.zeros((self.n, 1)))
+    self.lu = np.matrix(np.zeros((self.m, 1)))
+    self.lxx = np.matrix(np.zeros((self.n, self.n)))
+    self.luu = np.matrix(np.zeros((self.m, self.m)))
+    self.lux = np.matrix(np.zeros((self.m, self.n)))
+
+
+class TerminalCostData(XCostData):
   """ Data structure for terminal costs with a linear residual function.
 
   The residual is n-dimensional because it depends linearly on the state.
@@ -10,20 +46,14 @@ class TerminalCostData(object):
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, n):
-    # State and residual dimension. Note that the residual is linear
-    # function that depends on the state
-    self.n = n
-    self.k = n
+    # Creating the state-related data
+    XCostData.__init__(self, n)
 
-    # Creating the data structure of cost function
-    # and its derivatives
-    self.r = np.matrix(np.zeros((self.k, 1)))
-    self.l = np.matrix(np.zeros(1))
-    self.lx = np.matrix(np.zeros((self.n, 1)))
-    self.lxx = np.matrix(np.zeros((self.n, self.n)))
+    # Creating the state residual and its derivatives
+    self.xr = np.matrix(np.zeros((self.n, 1)))
 
 
-class TerminalResidualCostData(TerminalCostData):
+class TerminalResidualCostData(XCostData):
   """ Data structure for terminal costs with a general residual function.
 
   In general, the residual is k-dimensional, its dimension depends on the
@@ -32,18 +62,19 @@ class TerminalResidualCostData(TerminalCostData):
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, n, k):
-    TerminalCostData.__init__(self, n)
+    # Creating the state-related data
+    XCostData.__init__(self, n)
+
     # Residual dimension. Note that the residual is a general function
     # of the state
     self.k = k
 
-    # Creating the data structure of cost function
-    # and its derivatives
+    # Creating the data structure of the residual and its derivatives
     self.r = np.matrix(np.zeros((self.k, 1)))
     self.rx = np.matrix(np.zeros((self.k, self.n)))
 
 
-class RunningCostData(object):
+class RunningCostData(XUCostData):
   """ Data structure for running costs with a linear residual function.
 
   The residual depends on the state and control. So we split it in the state and
@@ -53,24 +84,15 @@ class RunningCostData(object):
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, n, m):
-    # State, control and residual dimension. Note that the residual
-    # is linear function that depends on the state and contol
-    self.n = n
-    self.m = m
+    # Creating the state-control cost data
+    XUCostData.__init__(self, n, m)
 
-    # Adding the derivatives of the cost function w.r.t.
-    # the control into the data structure
+    # Adding the state and control residual vectors
     self.xr = np.matrix(np.zeros((self.n, 1)))
     self.ur = np.matrix(np.zeros((self.m, 1)))
-    self.l = np.matrix(np.zeros(1))
-    self.lx = np.matrix(np.zeros((self.n, 1)))
-    self.lu = np.matrix(np.zeros((self.m, 1)))
-    self.lxx = np.matrix(np.zeros((self.n, self.n)))
-    self.luu = np.matrix(np.zeros((self.m, self.m)))
-    self.lux = np.matrix(np.zeros((self.m, self.n)))
 
 
-class RunningResidualCostData(object):
+class RunningResidualCostData(XUCostData):
   """ Data structure for running costs with a general residual function.
 
   In general, the residual is k-dimensional and depends on the state and control.
@@ -79,23 +101,16 @@ class RunningResidualCostData(object):
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, n, m, k):
-    # State, control and residual dimension. Note that the residual
-    # is linear function that depends on the state and contol
-    self.n = n
-    self.m = m
+    # Creating the state-control cost data
+    XUCostData.__init__(self, n, m)
+
+    # Residual dimension
     self.k = k
 
-    # Adding the derivatives of the cost function w.r.t.
-    # the control into the data structure
+    # Adding the residual and its derivatives
     self.r = np.matrix(np.zeros((self.k, 1)))
     self.rx = np.matrix(np.zeros((self.k, self.n)))
     self.ru = np.matrix(np.zeros((self.k, self.m)))
-    self.l = np.matrix(np.zeros(1))
-    self.lx = np.matrix(np.zeros((self.n, 1)))
-    self.lu = np.matrix(np.zeros((self.m, 1)))
-    self.lxx = np.matrix(np.zeros((self.n, self.n)))
-    self.luu = np.matrix(np.zeros((self.m, self.m)))
-    self.lux = np.matrix(np.zeros((self.m, self.n)))
 
 
 class CostManagerData():
@@ -114,7 +129,7 @@ class CostManagerData():
 
 class DynamicsData(object):
   """ Data structure for the system dynamics.
-  
+
   We only define the Jacobians of the dynamics, and not the Hessians of it, because
   our optimal controller by default uses the Gauss-Newton approximation.
   """
