@@ -191,9 +191,10 @@ class ConstrainedDDP:
         np.copyto(it.x, it.x_new)
 
   def forwardSimulation(self, x0, U=None):
-    """ Inital forward simulation for starting the DDP algorithm
+    """ Initial forward simulation for starting the DDP algorithm.
 
-    It integrates the system's dynamics given an initial state, and a control sequences. This provides the initial nominal trajectory.
+    It integrates the system's dynamics given an initial state, and a control sequence.
+    This provides the initial nominal state trajectory.
     """
     # Setting the initial state
     self.setInitalState(x0)

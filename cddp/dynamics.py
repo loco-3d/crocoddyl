@@ -61,6 +61,16 @@ class DynamicModel(ODEBase):
     """
     pass
 
+  def getStateDimension(self):
+    """ Returns the state dimension
+    """
+    return self.n
+  
+  def getControlDimension(self):
+    """ Returns the control dimension
+    """
+    return self.m
+
   # @abc.abstractmethod
   # def fxx(self, data, x, u):
   #   """
