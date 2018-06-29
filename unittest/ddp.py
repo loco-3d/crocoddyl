@@ -88,10 +88,10 @@ integrator = EulerIntegrator()
 from cddp.ddp_formulation import ConstrainedDDP
 timeline = np.arange(0.0, 3., 0.01) #np.linspace(0., 0.5, 51)
 ddp = ConstrainedDDP(dynamics, cost_manager, integrator, timeline)
-ddp.setInitalState(np.matrix([ [0.1], [0.2] ]))
 
-ddp.init()
-ddp.compute()
+# Running the DDP solver
+x0 = np.matrix([ [0.1], [0.2] ])
+ddp.compute(x0)
 
 
 # l = 0.

@@ -47,59 +47,13 @@ class ConstrainedDDP:
     self.change_lb = 0.
     self.change_ub = 100.
 
-  def setInitalState(self, x0):
-    """ Initializes the actual state of the dynamical system.
-
-    :param x0: initial state vector (n-dimensional vector).
-    """
-    np.copyto(self.initial_interval.x, x0)
-
-  def setInitialControl(self, U):
-    """ Initializes the control sequences.
-
-    :param U: initial control sequence (stack of m-dimensional vector).
-    """
-    assert len(U) == self.N, "Incompleted control sequence."
-    for k in range(self.N):
-      it = self.intervals[k]
-      np.copyto(it.u, U[k])
-      np.copyto(it.u_new, U[k])
-
-  def init(self):
-    """ Initializes the DDP algorithm
-
-    It integrates the system's dynamics given an initial state, and a control sequences. This provides the initial nominal trajectory.
-    """
-    # Initializing the forward pass with the initial state
-    it = self.initial_interval
-    x0 = it.x
-    np.copyto(it.x, x0)
-    np.copyto(it.x_new, x0)
-    self.V[0] = 0.
-
-    # Integrate the system along the initial control sequences
-    for k in range(self.N):
-      # Getting the current DDP interval
-      it = self.intervals[k]
-      it_next = self.intervals[k+1]
-
-      # Integrating the dynamics and updating the new state value
-      dt = it.tf - it.t0
-      x_next = self.integrator.integrate(self.dynamics, it.dynamics, it.x, it.u, dt)
-      np.copyto(it_next.x, x_next)
-      np.copyto(it_next.x_new, x_next)
-
-      # Integrating the cost and updating the new value function
-      self.V[0] += self.cost_manager.computeRunningCost(it.cost, it.x, it.u) * dt
-
-    # Including the terminal state and cost
-    it = self.terminal_interval
-    it.x = self.intervals[self.N-1].x
-    self.V[0] += self.cost_manager.computeTerminalCost(it.cost, it.x)
-
-  def compute(self):
+  def compute(self, x0, U=None):
     """ Computes the DDP algorithm
     """
+    # Running an initial forward simulation given the initial state and
+    # the control sequence
+    self.forwardSimulation(x0, U)
+
     alpha = 1.
     self.backwardPass(alpha)
     self.forwardPass(alpha)
@@ -235,6 +189,64 @@ class ConstrainedDDP:
         it = self.intervals[k]
         np.copyto(it.u, it.u_new)
         np.copyto(it.x, it.x_new)
+
+  def forwardSimulation(self, x0, U=None):
+    """ Inital forward simulation for starting the DDP algorithm
+
+    It integrates the system's dynamics given an initial state, and a control sequences. This provides the initial nominal trajectory.
+    """
+    # Setting the initial state
+    self.setInitalState(x0)
+
+    # Setting the initial control sequence
+    if U != None:
+      self.setInitialControlSequence(U)
+
+    # Initializing the forward pass with the initial state
+    it = self.initial_interval
+    x0 = it.x
+    np.copyto(it.x, x0)
+    np.copyto(it.x_new, x0)
+    self.V[0] = 0.
+
+    # Integrate the system along the initial control sequences
+    for k in range(self.N):
+      # Getting the current DDP interval
+      it = self.intervals[k]
+      it_next = self.intervals[k+1]
+
+      # Integrating the dynamics and updating the new state value
+      dt = it.tf - it.t0
+      x_next = self.integrator.integrate(self.dynamics, it.dynamics, it.x, it.u, dt)
+      np.copyto(it_next.x, x_next)
+      np.copyto(it_next.x_new, x_next)
+
+      # Integrating the cost and updating the new value function
+      self.V[0] += self.cost_manager.computeRunningCost(it.cost, it.x, it.u) * dt
+
+    # Including the terminal state and cost
+    it = self.terminal_interval
+    it.x = self.intervals[self.N-1].x
+    self.V[0] += self.cost_manager.computeTerminalCost(it.cost, it.x)
+
+  def setInitalState(self, x0):
+    """ Initializes the actual state of the dynamical system.
+
+    :param x0: initial state vector (n-dimensional vector).
+    """
+    np.copyto(self.initial_interval.x, x0)
+
+  def setInitialControlSequence(self, U):
+    """ Initializes the control sequences.
+
+    :param U: initial control sequence (stack of m-dimensional vector).
+    """
+    assert len(U) == self.N, "Incompleted control sequence."
+    for k in range(self.N):
+      it = self.intervals[k]
+      np.copyto(it.u, U[k])
+      np.copyto(it.u_new, U[k])
+
 
   # def getControlTrajectory(self):
 
