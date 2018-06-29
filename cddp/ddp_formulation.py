@@ -1,233 +1,255 @@
 import numpy as np
-from numpy.linalg import inv
+from data import RunningDDPData, TerminalDDPData
 
 
-class DDPPhase:
+class ConstrainedDDP:
 
-  def __init__(self,model,running_cost,terminal_cost,integrator,timeline):
-    self.model = model
-    self.running_cost = running_cost
-    self.terminal_cost = terminal_cost
+  def __init__(self, dynamics, cost_manager, integrator, timeline):
+    self.dynamics = dynamics
+    self.cost_manager = cost_manager
     self.integrator = integrator
     self.timeline = timeline
-    self.N = len(timeline)-1
+    self.N = len(timeline) - 1
 
-    ## Allocation of data
-    self.intervals = [DDPRunningInterval(model,running_cost) for k in range(self.N)]
-    for k,it in enumerate(self.intervals):
+    # Allocation of data for all the DDP intervals
+    self.intervals = []
+    for k in range(self.N + 1):
+      # Creating the dynamic and cost data
+      ddata = self.dynamics.createData()
+      if k == self.N:
+        cdata = self.cost_manager.createTerminalData(ddata.n)
+        self.intervals.append(TerminalDDPData(ddata, cdata))
+      else:
+        cdata = self.cost_manager.createRunningData(ddata.n, ddata.m)
+        self.intervals.append(RunningDDPData(ddata, cdata))
+
+    # Global variables for the DDP algorithm
+    self.V = np.matrix(np.zeros(1))
+    self.V_new = np.matrix(np.zeros(1))
+    self.dV_exp = np.matrix(np.zeros(1))
+
+    # Setting the time values of the running intervals
+    for k in range(self.N):
+      it = self.intervals[k]
       it.t0 = timeline[k]
-      it.t1 = timeline[k+1]
+      it.tf = timeline[k+1]
 
-
-    self.intervals.append(DDPFinalInterval(model,terminal_cost))
+    # Defining the inital and terminal intervals
     self.terminal_interval = self.intervals[-1]
-    self.intial_interval = self.intervals[0]
+    self.initial_interval = self.intervals[0]
 
     self.total_cost = float('Inf')
 
     # Regularization
+    self.mu = 1e-8
 
-    self.mu1 = 0e-6
-    self.mu2 = 0e-6
+    # Lower and upper bound of iteration acceptance (line-search)
+    self.change_lb = 0.
+    self.change_ub = 100.
 
-  def setInitalState(self,x0):
-    self.intial_interval.x0[:] = x0
+  def setInitalState(self, x0):
+    """ Initializes the actual state of the dynamical system.
 
-  def initControl(self,controls):
-    assert len(controls) == self.N
+    :param x0: initial state vector (n-dimensional vector).
+    """
+    np.copyto(self.initial_interval.x, x0)
+
+  def setInitialControl(self, U):
+    """ Initializes the control sequences.
+
+    :param U: initial control sequence (stack of m-dimensional vector).
+    """
+    assert len(U) == self.N, "Incompleted control sequence."
     for k in range(self.N):
       it = self.intervals[k]
-      it.u[:] = controls[k]
+      np.copyto(it.u, U[k])
+      np.copyto(it.u_new, U[k])
 
-  def forwardPass(self,update_control=True):
-    it = self.intial_interval
-    x_new = it.x0.copy()
+  def init(self):
+    """ Initializes the DDP algorithm
+
+    It integrates the system's dynamics given an initial state, and a control sequences. This provides the initial nominal trajectory.
+    """
+    # Initializing the forward pass with the initial state
+    it = self.initial_interval
+    x0 = it.x
+    np.copyto(it.x, x0)
+    np.copyto(it.x_new, x0)
+    self.V[0] = 0.
+
+    # Integrate the system along the initial control sequences
     for k in range(self.N):
-      it = self.intervals[k]
-      if update_control:
-        it.u += it.K * (x_new - it.x0) + it.j
-      dt = it.t1 - it.t0
-      it.x0[:] = x_new
-      x_next_new = self.integrator.integrate(self.model,it.model_data,it.t0,it.x0,it.u,dt)
-      it.x1[:] = x_next_new
-      x_new = x_next_new
-
-    it_terminal = self.terminal_interval
-    it_terminal.x[:] = x_next_new
-
-  def evalObjectiveFunction(self):
-    total_cost = 0.
-    for it in self.intervals[:-1]:
-      dt = it.t1 - it.t0
-      total_cost += self.running_cost.l(it.x0,it.u,it.cost_data) * dt
-
-    terminal_interval = self.terminal_interval
-    total_cost += self.terminal_cost.l(terminal_interval.x,terminal_interval.cost_data)
-
-    self.total_cost = total_cost
-    return total_cost
-
-  def backwardPass(self):
-
-    # Terminal interval
-    terminal_cost = self.terminal_cost
-    terminal_interval = self.terminal_interval
-
-    x_terminal = terminal_interval.x
-    terminal_interval.V = terminal_cost.l(x_terminal,terminal_interval.cost_data) # V
-    terminal_interval.A = terminal_cost.l_xx(x_terminal,terminal_interval.cost_data) # Vxx
-    terminal_interval.b = terminal_cost.l_x(x_terminal,terminal_interval.cost_data) # Vx
-
-    # Backward pass
-    running_cost = self.running_cost
-    model = self.model
-
-    for k in range(self.N-1,-1,-1):
+      # Getting the current DDP interval
       it = self.intervals[k]
       it_next = self.intervals[k+1]
 
-      dt = it.t1 - it.t0
-      model_data = it.model_data
-      cost_data = it.cost_data
-      x = it.x0
+      # Integrating the dynamics and updating the new state value
+      dt = it.tf - it.t0
+      x_next = self.integrator.integrate(self.dynamics, it.dynamics, it.x, it.u, dt)
+      np.copyto(it_next.x, x_next)
+      np.copyto(it_next.x_new, x_next)
+
+      # Integrating the cost and updating the new value function
+      self.V[0] += self.cost_manager.computeRunningCost(it.cost, it.x, it.u) * dt
+
+    # Including the terminal state and cost
+    it = self.terminal_interval
+    it.x = self.intervals[self.N-1].x
+    self.V[0] += self.cost_manager.computeTerminalCost(it.cost, it.x)
+
+  def compute(self):
+    """ Computes the DDP algorithm
+    """
+    alpha = 1.
+    self.backwardPass(alpha)
+    self.forwardPass(alpha)
+
+  def backwardPass(self, alpha):
+    """ Runs the forward pass of the DDP algorithm
+
+    :param alpha: scaling factor of open-loop control modification (line-search strategy)
+    """
+    # Setting up the final value function as the terminal cost, so we proceed with
+    # the backward sweep
+    it = self.terminal_interval
+    xf = it.x
+    it.V, it.Vx, it.Vxx = self.cost_manager.computeTerminalTerms(it.cost, xf)
+
+    # Setting up the initial cost value, and the expected reduction equals zero
+    self.V[0] = it.V.copy()
+    self.dV_exp[0] = 0.
+
+    # Computing the regularization term
+    muI = self.mu * np.eye(it.dynamics.n)
+
+    # Running the backward sweep
+    for k in range(self.N-1, -1, -1):
+      it = self.intervals[k]
+      it_next = self.intervals[k+1]
+      cost_data = it.cost
+      dyn_data = it.dynamics
+
+      # Getting the state, control and step time of the interval
+      x = it.x
       u = it.u
-      model.f_x(x,u,model_data)
-      f_x = model_data.m_fx * dt + np.eye(model.n)
-      model.f_u(x, u, model_data)
-      f_u = model_data.m_fu * dt
+      dt = it.tf - it.t0
 
-      A_reg = it_next.A.copy()
-      A_reg[np.diag_indices_from(A_reg)] += self.mu1
+      # Computing the cost and its derivatives
+      l, lx, lu, lxx, luu, lux = self.cost_manager.computeRunningTerms(cost_data, x, u)
 
+      # Integrating the derivatives of the cost function
+      # TODO we need to use the integrator class for this
+      l *= dt
+      lx *= dt
+      lu *= dt
+      lxx *= dt
+      luu *= dt
+      lux *= dt
 
-      it.Q = running_cost.l(x,u,cost_data) * dt + it_next.V
-      #print "l(x,u)",running_cost.l(x,u,cost_data)
-      #print "lu", running_cost.l_u(x, u, cost_data)
-      #print "luu", running_cost.l_uu(x, u, cost_data)
-      #print "k -",k,"Q:",it.Q
+      # Computing the dynamics and its derivatives
+      _, fx, fu = self.dynamics.computeAllTerms(dyn_data, x, u)
 
-      it.Q_x = running_cost.l_x(x,u,cost_data) * dt + f_x.T * it_next.b
-      it.Q_u = running_cost.l_u(x,u,cost_data) * dt + f_u.T * it_next.b
-      it.Q_xx = running_cost.l_xx(x,u,cost_data) * dt + f_x.T * (A_reg * f_x)
-      it.Q_uu = running_cost.l_uu(x,u,cost_data) * dt + f_u.T * (A_reg * f_u)
-      it.Q_xu = running_cost.l_xu(x,u,cost_data) * dt + f_x.T * (A_reg * f_u)
+      # Integrating the derivatives of the system dynamics
+      # TODO we need to use the integrator class for this
+      np.copyto(fx, fx * dt + np.eye(dyn_data.n))
+      np.copyto(fu, fu * dt)
 
-      #print "Quu",it.Q_uu
-      #print "Qxu",it.Q_xu
-      it.Q_uu[np.diag_indices_from(it.Q_uu)] += self.mu2
+      # Getting the value function values of the next interval (prime interval)
+      Vx_p = it_next.Vx
+      Vxx_p = it_next.Vxx
 
-      Q_uu_inv = inv(it.Q_uu)
-      K = -Q_uu_inv * it.Q_xu.T
-      #print "K",K
-      j = -Q_uu_inv * it.Q_u
-      #print "j",j
+      # Updating the Q derivatives. Note that this is Gauss-Newton step because
+      # we neglect the Hessian, it's also called iLQR.
+      np.copyto(it.Qx, lx + fx.T * Vx_p)
+      np.copyto(it.Qu, lu + fu.T * Vx_p)
+      np.copyto(it.Qxx, lxx + fx.T * Vxx_p * fx)
+      np.copyto(it.Quu, luu + fu.T * Vxx_p * fu)
+      np.copyto(it.Qux, lux + fu.T * Vxx_p * fx)
 
-      it.K = K
-      it.j = j
+      # We apply a regularization on the Quu and Qux as Tassa.
+      # This regularization is needed when the Hessian is not
+      # positive-definitive or when the minimum is far and the
+      # quadratic model is inaccurate
+      np.copyto(it.Quu_r, it.Quu + fu.T * muI * fu)
+      np.copyto(it.Qux_r, it.Qux + fu.T * muI * fx)
 
-      A = it.Q_xx.copy()
-      A += K.T * it.Q_uu * K
-      A += it.Q_xu * K
-      A += K.T * it.Q_xu.T
+      # Computing the feedback and feedforward terms
+      L_inv = np.linalg.inv(np.linalg.cholesky(it.Quu_r))
+      Quu_inv = L_inv.T * L_inv
+      np.copyto(it.K, - Quu_inv * it.Qux_r)
+      np.copyto(it.j, - Quu_inv * it.Qu)
 
-      it.A = A
-      #print "A",A
+      # Computing the value function derivatives of this interval
+      jt_Quu_j = 0.5 * it.j.T * it.Quu * it.j
+      jt_Qu = it.j.T * it.Qu
+      np.copyto(it.Vx, it.Qx + it.K.T * it.Quu * it.j + it.K.T * it.Qu + it.Qux.T * it.j)
+      np.copyto(it.Vxx, it.Qxx + it.K.T * it.Quu * it.K + it.K.T * it.Qux + it.Qux.T * it.K)
 
-      b = it.Q_x.copy()
-      #b -= K.T * (it.Q_uu * j)
-      b += K.T * (it.Q_uu * j)
-      b += it.Q_xu * j
-      b += K.T * it.Q_u
+      # Updating the local cost and expected reduction. The total values are used to check
+      # the changes in the forward pass. This is method is explained in Tassa's PhD thesis
+      self.V[0] += l
+      self.dV_exp[0] += alpha * (alpha * jt_Quu_j + jt_Qu)
 
-      it.b = b
+  def forwardPass(self, alpha):
+    """ Runs the forward pass of the DDP algorithm
 
-      it.c = -0.5*it.j.T*(it.Q_uu*it.j)
+    :param alpha: scaling factor of open-loop control modification (line-search strategy)
+    """
+    # Initializing the forward pass with the initial state
+    it = self.initial_interval
+    it.x_new = it.x.copy()
+    self.V_new = 0.
 
-  def getControlTrajectory(self):
+    # Integrate the system along the new trajectory
+    for k in range(self.N):
+      # Getting the current DDP interval
+      it = self.intervals[k]
+      it_next = self.intervals[k+1]
 
-    control_traj = np.matrix(np.zeros((self.model.m,self.N)))
-    for k,it in enumerate(self.intervals[:-1]):
-      control_traj[:,k] = it.u
+      # Computing the new control command
+      np.copyto(it.u_new, it.u + alpha * it.j + it.K * (it.x_new - it.x))
 
-    return control_traj
+      # Integrating the dynamics and updating the new state value
+      dt = it.tf - it.t0
+      np.copyto(it_next.x_new,
+                self.integrator.integrate(self.dynamics, it.dynamics, it.x_new, it.u_new, dt))
 
-  def getStateTrajectory(self):
+      # Integrating the cost and updating the new value function
+      # TODO we need to use the integrator class for this
+      self.V_new += self.cost_manager.computeRunningCost(it.cost, it.x_new, it.u_new) * dt
 
-    state_traj = np.matrix(np.zeros((self.model.n,self.N+1)))
-    for k,it in enumerate(self.intervals[:-1]):
-      state_traj[:,k] = it.x0
+    # Including the terminal cost
+    it = self.terminal_interval
+    it.x = self.intervals[self.N-1].x_new
+    self.V_new += self.cost_manager.computeTerminalCost(it.cost, it.x)
 
-    state_traj[:,-1] = self.terminal_interval.x
+    # Checking the changes
+    z = (self.V_new - self.V) / self.dV_exp
+    print z, self.V, self.V_new, self.dV_exp
+    print "Expected Reduction:", -self.dV_exp[0, 0]
+    print "Actual Reduction:", np.asscalar(self.V - self.V_new)
+    print "Reduction Ratio", -np.asscalar(self.V - self.V_new) / self.dV_exp[0, 0]
+    if z > self.change_lb and z < self.change_ub:
+      # Accepting the new trajectory and control, defining them as nominal ones
+      for k in range(self.N-1):
+        it = self.intervals[k]
+        np.copyto(it.u, it.u_new)
+        np.copyto(it.x, it.x_new)
 
-    return state_traj
+  # def getControlTrajectory(self):
 
+  #   control_traj = np.matrix(np.zeros((self.model.m,self.N)))
+  #   for k,it in enumerate(self.intervals[:-1]):
+  #     control_traj[:,k] = it.u
 
+  #   return control_traj
 
+  # def getStateTrajectory(self):
 
-class DDPRunningInterval:
-  """
-  Class containing the date related to one interval of the DDP
-  """
+  #   state_traj = np.matrix(np.zeros((self.model.n,self.N+1)))
+  #   for k,it in enumerate(self.intervals[:-1]):
+  #     state_traj[:,k] = it.x0
 
-  def __init__(self,model,cost):
-    self.model_data = model.createData()
-    self.cost_data = cost.createData(self.model_data)
+  #   state_traj[:,-1] = self.terminal_interval.x
 
-    self.n = model.n
-    self.m = model.m
-
-    # control on the interval
-    self.u = np.matrix(np.zeros((model.m,1)))
-
-    # starting state in the interval
-    self.x0 = np.matrix(np.zeros((model.n,1)))
-    # final state on the interval
-    self.x1 = np.matrix(np.zeros((model.n,1)))
-
-    # start and terminal time on the interval
-    self.t0 = 0.
-    self.t1 = 0.
-
-    # Value function
-    self.V = float('Inf')
-    self.Q = float('Inf')
-    self.Q_x = np.matrix(np.zeros((self.n,1))); self.Q_x.fill(float('Inf'))
-    self.Q_u = np.matrix(np.zeros((self.m,1))); self.Q_u.fill(float('Inf'))
-    self.Q_xx = np.matrix(np.zeros((self.n,self.n))); self.Q_xx.fill(float('Inf'))
-    self.Q_xu = np.matrix(np.zeros((self.n,self.m))); self.Q_xu.fill(float('Inf'))
-    self.Q_uu = np.matrix(np.zeros((self.m,self.m))); self.Q_uu.fill(float('Inf'))
-
-    # Feedback
-    self.K = np.matrix(np.zeros((self.m,self.n))); self.K.fill(float('Inf'))
-    self.j = np.matrix(np.zeros((self.m,1))); self.j.fill(float('Inf'))
-
-    # Quadratic approximation of the value function
-    self.A = np.matrix(np.zeros((self.n,self.n))); self.A.fill(float('Inf'))
-    self.b = np.matrix(np.zeros((self.n,1))); self.b.fill(float('Inf'))
-    self.c = float('Inf')
-
-
-class DDPFinalInterval:
-  """
-  Class containing the date related to one interval of the DDP
-  """
-
-  def __init__(self,model,cost):
-    self.model_data = model.createData()
-    self.cost_data = cost.createData(self.model_data)
-
-    self.n = model.n
-
-    # state of the final interval
-    self.x = np.matrix(np.zeros((model.n,1)))
-
-    # time of the final interval
-    self.t = 0.
-
-    # Value function
-    self.V = float('Inf')
-
-    # Quadratic approximation of the value function
-    self.A = np.matrix(np.zeros((self.n,self.n))); self.A.fill(float('Inf'))
-    self.b = np.matrix(np.zeros((self.n,1))); self.b.fill(float('Inf'))
-    self.c = float('Inf')
+  #   return state_traj

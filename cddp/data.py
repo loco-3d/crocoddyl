@@ -148,25 +148,57 @@ class DynamicsData(object):
     self.fu = np.matrix(np.zeros((self.n, self.m)))
 
 
-class DDPData(object):
-  def __init__(self, cost_data, dyn_data):
+class TerminalDDPData(object):
+  """ Data structure for the terminal interval of the DDP.
+
+  We create data for the nominal and new state values.
+  """
+  def __init__(self, dyn_data, cost_data):
+    self.dynamics = dyn_data
     self.cost = cost_data
-    self.dyn = dyn_data
+
+    # State dimension
+    self.n = self.dynamics.n
+
+    # Nominal and new state on the interval
+    self.x = np.matrix(np.zeros((self.n, 1)))
+    self.x_new = np.matrix(np.zeros((self.n, 1)))
+
+    # Time of the terminal interval
+    self.t = np.matrix(np.zeros(1))
+
+
+class RunningDDPData(object):
+  """ Data structure for the running interval of the DDP.
+
+  We create data for the nominal and new state and control values. Additionally,
+  this data structure containts regularized terms too (e.g. Quu_r).
+  """
+  def __init__(self, dyn_data, cost_data):
+    self.dynamics = dyn_data
+    self.cost = cost_data
 
     # State and control dimensions
-    self.n = self.dyn.n
-    self.m = self.dyn.m
+    self.n = self.dynamics.n
+    self.m = self.dynamics.m
 
-    # State and control vectors
+    # Nominal and new state on the interval
     self.x = np.matrix(np.zeros((self.n, 1)))
-    self.u = np.matrix(np.zeros((self.m, 1)))
+    self.x_new = np.matrix(np.zeros((self.n, 1)))
 
-    # Feedforward and feedback terms
-    self.ufb = np.matrix(np.zeros((self.m, self.n)))
-    self.uff = np.matrix(np.zeros((self.m, 1)))
+    # Nominal and new control command on the interval
+    self.u = np.matrix(np.zeros((self.m, 1)))
+    self.u_new = np.matrix(np.zeros((self.m, 1)))
+
+    # Starting and final time on the interval
+    self.t0 = np.matrix(np.zeros(1))
+    self.tf = np.matrix(np.zeros(1))
+
+    # Feedback and feedforward terms
+    self.K = np.matrix(np.zeros((self.m, self.n)))
+    self.j = np.matrix(np.zeros((self.m, 1)))
 
     # Value function and its derivatives
-    self.dV = np.matrix(np.zeros(1))
     self.Vx = np.matrix(np.zeros((self.n, 1)))
     self.Vxx = np.matrix(np.zeros((self.n, self.n)))
 
@@ -174,18 +206,7 @@ class DDPData(object):
     self.Qx = np.matrix(np.zeros((self.n, 1)))
     self.Qu = np.matrix(np.zeros((self.m, 1)))
     self.Qxx = np.matrix(np.zeros((self.n, self.n)))
-    self.Qxu = np.matrix(np.zeros((self.n, self.m)))
+    self.Qux = np.matrix(np.zeros((self.m, self.n)))
     self.Quu = np.matrix(np.zeros((self.m, self.m)))
-
-    # start and terminal time on the interval
-    # self.t0 = 0.
-    # self.t1 = 0.
-
-    # starting state in the interval
-    # self.x0 = np.matrix(np.zeros((self.n, 1)))
-    # # final state on the interval
-    # self.x1 = np.matrix(np.zeros((self.n, 1)))
-
-    # self.A = np.matrix(np.zeros((self.n,self.n)))
-    # self.b = np.matrix(np.zeros((self.n,1)))
-    # self.c = float('Inf')
+    self.Qux_r = np.matrix(np.zeros((self.m, self.n)))
+    self.Quu_r = np.matrix(np.zeros((self.m, self.m)))
