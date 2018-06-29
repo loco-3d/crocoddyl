@@ -11,16 +11,22 @@ class DynamicModel(ODEBase):
   """
   __metaclass__ = abc.ABCMeta
 
-  def __init__(self):
-    return None
-
-  def createData(self, n, m):
-    """
+  def __init__(self, n, m):
+    """ Construct the dynamics object
     :param n: dimension of the state
     :param m: dimension of the control
     """
+    self.n = n
+    self.m = m
+
+  def createData(self):
+    """ Creates the system dynamics data
+    """
     from data import DynamicsData
-    return DynamicsData(n, m)
+    return DynamicsData(self.n, self.m)
+  
+  def computeAllTerms(self, data, x, u):
+    return self.f(data, x, u), self.fx(data, x, u), self.fu(data, x, u)
 
   @abc.abstractmethod
   def f(self, data, x, u):
