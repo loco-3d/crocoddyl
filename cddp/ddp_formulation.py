@@ -38,14 +38,17 @@ class ConstrainedDDP:
     self.terminal_interval = self.intervals[-1]
     self.initial_interval = self.intervals[0]
 
-    self.total_cost = float('Inf')
 
-    # Regularization
-    self.mu = 1e-8
+    # Regularization parameters (factor and increased rate)
+    self.mu = 0.
+    self.increased_rate = 10.
 
-    # Lower and upper bound of iteration acceptance (line-search)
+    # Line search parameters (step, lower and upper bound of iteration
+    # acceptance and decreased rate)
+    self.alpha = 1.
     self.change_lb = 0.
     self.change_ub = 100.
+    self.decreased_rate = 2.
 
   def compute(self, x0, U=None):
     """ Computes the DDP algorithm
@@ -54,11 +57,17 @@ class ConstrainedDDP:
     # the control sequence
     self.forwardSimulation(x0, U)
 
-    alpha = 1.
-    self.backwardPass(alpha)
-    self.forwardPass(alpha)
+    # Resetting mu and alpha
+    self.mu = 0.
+    self.alpha = 1.
 
-  def backwardPass(self, alpha):
+    # Running the backward sweep
+    self.backwardPass(self.mu, self.alpha)
+
+    # Running the forward pass
+    self.forwardPass(self.alpha)
+
+  def backwardPass(self, mu, alpha):
     """ Runs the forward pass of the DDP algorithm
 
     :param alpha: scaling factor of open-loop control modification (line-search strategy)
@@ -74,7 +83,7 @@ class ConstrainedDDP:
     self.dV_exp[0] = 0.
 
     # Computing the regularization term
-    muI = self.mu * np.eye(it.dynamics.n)
+    muI = mu * np.eye(it.dynamics.n)
 
     # Running the backward sweep
     for k in range(self.N-1, -1, -1):
