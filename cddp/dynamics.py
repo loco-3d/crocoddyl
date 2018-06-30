@@ -61,6 +61,14 @@ class DynamicModel(ODEBase):
     """
     pass
 
+  def stateDifference(self, xf, x0):
+    """ Returns the state different between xf and x0 (i.e. xf - x0).
+
+    :param xf: system's state
+    :param x: system's state
+    """
+    return xf - x0
+
   def getStateDimension(self):
     """ Returns the state dimension
     """

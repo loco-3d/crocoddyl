@@ -170,7 +170,7 @@ class ConstrainedDDP:
       it_next = self.intervals[k+1]
 
       # Computing the new control command
-      np.copyto(it.u_new, it.u + alpha * it.j + it.K * (it.x_new - it.x))
+      np.copyto(it.u_new, it.u + alpha * it.j + it.K * self.dynamics.stateDifference(it.x_new, it.x))
 
       # Integrating the dynamics and updating the new state value
       dt = it.tf - it.t0
