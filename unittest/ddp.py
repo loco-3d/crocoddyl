@@ -1,5 +1,5 @@
 import unittest
-from cddp.ddp_formulation import ConstrainedDDP
+from cddp.ddp import DDP
 from cddp.cost_manager import CostManager, np
 from cddp.quadratic_cost import *
 from cddp.dynamics import DynamicModel
@@ -95,7 +95,7 @@ class LinearDDPTest(unittest.TestCase):
 
     # Creating the DDP solver
     timeline = np.arange(0.0, 3., 0.01)  # np.linspace(0., 0.5, 51)
-    self.ddp = ConstrainedDDP(dynamics, cost_manager, integrator, timeline)
+    self.ddp = DDP(dynamics, cost_manager, integrator, timeline)
 
     # Running the DDP solver
     self.ddp.compute(x0)

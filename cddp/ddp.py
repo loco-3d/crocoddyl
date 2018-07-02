@@ -3,7 +3,7 @@ from data import RunningDDPData, TerminalDDPData
 import utils
 
 
-class ConstrainedDDP(object):
+class DDP(object):
   def __init__(self, dynamics, cost_manager, integrator, timeline):
     self.dynamics = dynamics
     self.cost_manager = cost_manager
