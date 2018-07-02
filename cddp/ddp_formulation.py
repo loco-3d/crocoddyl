@@ -1,9 +1,9 @@
 import numpy as np
 from data import RunningDDPData, TerminalDDPData
+import utils
 
 
-class ConstrainedDDP:
-
+class ConstrainedDDP(object):
   def __init__(self, dynamics, cost_manager, integrator, timeline):
     self.dynamics = dynamics
     self.cost_manager = cost_manager
@@ -26,6 +26,7 @@ class ConstrainedDDP:
     # Global variables for the DDP algorithm
     self.V = np.matrix(np.zeros(1))
     self.V_new = np.matrix(np.zeros(1))
+    self.dV = np.matrix(np.zeros(1))
     self.dV_exp = np.matrix(np.zeros(1))
 
     # Setting the time values of the running intervals
@@ -38,6 +39,9 @@ class ConstrainedDDP:
     self.terminal_interval = self.intervals[-1]
     self.initial_interval = self.intervals[0]
 
+    # Convergence tolerance and maximum number of iterations
+    self.tol = 1e-3
+    self.max_iter = 1
 
     # Regularization parameters (factor and increased rate)
     self.mu = 0.
@@ -61,11 +65,34 @@ class ConstrainedDDP:
     self.mu = 0.
     self.alpha = 1.
 
-    # Running the backward sweep
-    self.backwardPass(self.mu, self.alpha)
+    self.n_iter = 0
+    for i in range(self.max_iter):
+      # Recording the number of iterations
+      self.n_iter = i
 
-    # Running the forward pass
-    self.forwardPass(self.alpha)
+      # Running the backward sweep
+      while not self.backwardPass(self.mu, self.alpha):
+        # Quu is not positive-definitive, so increasing the
+        # regularization factor
+        if self.mu == 0.:
+          self.mu += 1e-8
+        else:
+          self.mu *= self.increased_rate
+
+      # Running the forward pass
+      while not self.forwardPass(self.alpha):
+        self.alpha /= self.decreased_rate
+        if self.alpha == 0.:
+          print 'No found solution'
+          break
+        if self.alpha < 1e-8:
+          self.alpha = 0.
+
+      # Checking convergence
+      if abs(self.dV) <= self.tol:
+        return True
+
+    return False
 
   def backwardPass(self, mu, alpha):
     """ Runs the forward pass of the DDP algorithm
@@ -76,10 +103,10 @@ class ConstrainedDDP:
     # the backward sweep
     it = self.terminal_interval
     xf = it.x
-    it.V, it.Vx, it.Vxx = self.cost_manager.computeTerminalTerms(it.cost, xf)
+    l, it.Vx, it.Vxx = self.cost_manager.computeTerminalTerms(it.cost, xf)
 
     # Setting up the initial cost value, and the expected reduction equals zero
-    self.V[0] = it.V.copy()
+    self.V[0] = l.copy()
     self.dV_exp[0] = 0.
 
     # Computing the regularization term
@@ -134,6 +161,8 @@ class ConstrainedDDP:
       # positive-definitive or when the minimum is far and the
       # quadratic model is inaccurate
       np.copyto(it.Quu_r, it.Quu + fu.T * muI * fu)
+      if not utils.isPositiveDefinitive(it.Quu_r):
+        return False
       np.copyto(it.Qux_r, it.Qux + fu.T * muI * fx)
 
       # Computing the feedback and feedforward terms
@@ -152,6 +181,7 @@ class ConstrainedDDP:
       # the changes in the forward pass. This is method is explained in Tassa's PhD thesis
       self.V[0] += l
       self.dV_exp[0] += alpha * (alpha * jt_Quu_j + jt_Qu)
+    return True
 
   def forwardPass(self, alpha):
     """ Runs the forward pass of the DDP algorithm
@@ -161,7 +191,7 @@ class ConstrainedDDP:
     # Initializing the forward pass with the initial state
     it = self.initial_interval
     it.x_new = it.x.copy()
-    self.V_new = 0.
+    self.V_new[0] = 0.
 
     # Integrate the system along the new trajectory
     for k in range(self.N):
@@ -170,7 +200,8 @@ class ConstrainedDDP:
       it_next = self.intervals[k+1]
 
       # Computing the new control command
-      np.copyto(it.u_new, it.u + alpha * it.j + it.K * self.dynamics.stateDifference(it.x_new, it.x))
+      np.copyto(it.u_new, it.u + alpha * it.j + it.K *
+                self.dynamics.stateDifference(it.x_new, it.x))
 
       # Integrating the dynamics and updating the new state value
       dt = it.tf - it.t0
@@ -179,25 +210,29 @@ class ConstrainedDDP:
 
       # Integrating the cost and updating the new value function
       # TODO we need to use the integrator class for this
-      self.V_new += self.cost_manager.computeRunningCost(it.cost, it.x_new, it.u_new) * dt
+      self.V_new[0] += self.cost_manager.computeRunningCost(it.cost, it.x_new, it.u_new) * dt
 
     # Including the terminal cost
     it = self.terminal_interval
-    it.x = self.intervals[self.N-1].x_new
-    self.V_new += self.cost_manager.computeTerminalCost(it.cost, it.x)
+    self.V_new[0] += self.cost_manager.computeTerminalCost(it.cost, it.x_new)
 
     # Checking the changes
-    z = (self.V_new - self.V) / self.dV_exp
-    print z, self.V, self.V_new, self.dV_exp
+    self.dV[0] = self.V_new - self.V
+    z = self.dV[0, 0] / self.dV_exp[0, 0]
     print "Expected Reduction:", -self.dV_exp[0, 0]
-    print "Actual Reduction:", np.asscalar(self.V - self.V_new)
-    print "Reduction Ratio", -np.asscalar(self.V - self.V_new) / self.dV_exp[0, 0]
+    print "Actual Reduction:", -self.dV[0, 0]
+    print "Reduction Ratio", z
     if z > self.change_lb and z < self.change_ub:
       # Accepting the new trajectory and control, defining them as nominal ones
-      for k in range(self.N-1):
+      for k in range(self.N):
         it = self.intervals[k]
         np.copyto(it.u, it.u_new)
         np.copyto(it.x, it.x_new)
+      it = self.terminal_interval
+      np.copyto(it.x, it.x_new)
+      return True
+    else:
+      return False
 
   def forwardSimulation(self, x0, U=None):
     """ Initial forward simulation for starting the DDP algorithm.
@@ -256,7 +291,6 @@ class ConstrainedDDP:
       it = self.intervals[k]
       np.copyto(it.u, U[k])
       np.copyto(it.u_new, U[k])
-
 
   # def getControlTrajectory(self):
 

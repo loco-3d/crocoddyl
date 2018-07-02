@@ -20,6 +20,7 @@ class GoalQuadraticCost(TerminalResidualQuadraticCost):
     np.copyto(data.rx, np.eye(data.n))
     return data.rx
 
+
 class StateControlQuadraticCost(RunningQuadraticCost):
   def __init__(self, goal):
     RunningQuadraticCost.__init__(self)
@@ -32,6 +33,7 @@ class StateControlQuadraticCost(RunningQuadraticCost):
   def ur(self, data, x, u):
     np.copyto(data.ur, u)
     return data.ur
+
 
 class SpringMass(DynamicModel):
   def __init__(self):
@@ -60,7 +62,9 @@ class SpringMass(DynamicModel):
     return data.fu
 
 
-plot_enable = True
+plot_enable = False
+
+
 class LinearDDPTest(unittest.TestCase):
   def setUp(self):
     # Creating the dynamic model of the system
@@ -90,12 +94,12 @@ class LinearDDPTest(unittest.TestCase):
     integrator = EulerIntegrator()
 
     # Creating the DDP solver
-    timeline = np.arange(0.0, 3., 0.01) #np.linspace(0., 0.5, 51)
+    timeline = np.arange(0.0, 3., 0.01)  # np.linspace(0., 0.5, 51)
     self.ddp = ConstrainedDDP(dynamics, cost_manager, integrator, timeline)
 
     # Running the DDP solver
-    self.ddp.compute(x0);
-  
+    self.ddp.compute(x0)
+
     if plot_enable:
       import cddp.utils as utils
       t = timeline[1:-1]
@@ -109,11 +113,11 @@ class LinearDDPTest(unittest.TestCase):
     self.assertGreater(-self.ddp.dV_exp, 0., "The expected improvement is not positive.")
 
   def test_positive_obtained_improvement(self):
-    self.assertGreater(self.ddp.V - self.ddp.V_new, 0., "The obtained improvement is not positive.")
+    self.assertGreater(-self.ddp.dV, 0., "The obtained improvement is not positive.")
 
   def test_improvement_ratio_equals_one(self):
-    self.assertAlmostEqual(np.asscalar(self.ddp.V_new - self.ddp.V) / np.asscalar(self.ddp.dV_exp), 1., 2, "The improvement ration is not equals to 1.")
-    
+    self.assertAlmostEqual(np.asscalar(self.ddp.dV) / np.asscalar(self.ddp.dV_exp), 1., 2, "The improvement ration is not equals to 1.")
+
 
 if __name__ == '__main__':
   unittest.main()
