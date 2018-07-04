@@ -17,10 +17,10 @@ class DDP(object):
       # Creating the dynamic and cost data
       ddata = self.dynamics.createData()
       if k == self.N:
-        cdata = self.cost_manager.createTerminalData(ddata.n)
+        cdata = self.cost_manager.createTerminalData(ddata.nv)
         self.intervals.append(TerminalDDPData(ddata, cdata))
       else:
-        cdata = self.cost_manager.createRunningData(ddata.n, ddata.m)
+        cdata = self.cost_manager.createRunningData(ddata.nv, ddata.m)
         self.intervals.append(RunningDDPData(ddata, cdata))
 
     # Global variables for the DDP algorithm
@@ -110,7 +110,7 @@ class DDP(object):
     self.dV_exp[0] = 0.
 
     # Computing the regularization term
-    muI = mu * np.eye(it.dynamics.n)
+    muI = mu * np.eye(it.dynamics.nv)
 
     # Running the backward sweep
     for k in range(self.N-1, -1, -1):
@@ -141,7 +141,7 @@ class DDP(object):
 
       # Integrating the derivatives of the system dynamics
       # TODO we need to use the integrator class for this
-      np.copyto(fx, fx * dt + np.eye(dyn_data.n))
+      np.copyto(fx, fx * dt + np.eye(dyn_data.nv))
       np.copyto(fu, fu * dt)
 
       # Getting the value function values of the next interval (prime interval)

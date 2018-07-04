@@ -15,7 +15,7 @@ class NumDiffDynamicsTest(unittest.TestCase):
     self.numdiff_data = self.numdiff_dyn.createData()
 
     # Creating the random state and control
-    self.x0 = np.random.rand(self.analytic_dyn.getStateDimension(), 1)
+    self.x0 = np.random.rand(self.analytic_dyn.getConfigurationDimension(), 1)
     self.u0 = np.random.rand(self.analytic_dyn.getControlDimension(), 1)
 
   def test_numerical_state_derivative(self):

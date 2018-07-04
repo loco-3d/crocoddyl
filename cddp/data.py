@@ -8,6 +8,12 @@ class XCostData(object):
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, n):
+    """ Construct the data structure for only state-based cost functions
+
+    It requires the dimension of the state space or tangent manifold in case of
+    diffeomorphism systems.
+    :param n: state or tangent manifold dimension
+    """
     # State dimension
     self.n = n
 
@@ -24,6 +30,14 @@ class XUCostData(object):
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, n, m):
+    """ Construct the data structure for cost functions
+
+    It requires the dimension of the state and control spaces. In case of diffeomorphism
+    systems, it's needed the dimension of the tangent space instead of the state one.
+    manifold.
+    :param n: state or tangent manifold dimension
+    :param m: control dimension
+    """
     # State and control dimension
     self.n = n
     self.m = m
@@ -46,6 +60,12 @@ class TerminalCostData(XCostData):
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, n):
+    """ Construct the data structure for only state-based cost functions
+
+    It requires the dimension of the state space or tangent manifold in case of
+    diffeomorphism systems.
+    :param n: state or tangent manifold dimension
+    """
     # Creating the state-related data
     XCostData.__init__(self, n)
 
@@ -62,6 +82,12 @@ class TerminalResidualCostData(XCostData):
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, n, k):
+    """ Construct the data structure for only state-based cost functions
+
+    It requires the dimension of the state space, or tangent manifold in case of
+    diffeomorphism systems, and the dimension of the residual vector.
+    :param n: state or tangent manifold dimension
+    """
     # Creating the state-related data
     XCostData.__init__(self, n)
 
@@ -84,6 +110,13 @@ class RunningCostData(XUCostData):
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, n, m):
+    """ Construct the data structure for cost functions
+
+    It requires the dimension of the state and control spaces. In case of diffeomorphism
+    systems, it's needed the dimension of the tangent space instead of state one.
+    :param n: state or tangent manifold dimension
+    :param m: control dimension
+    """
     # Creating the state-control cost data
     XUCostData.__init__(self, n, m)
 
@@ -101,6 +134,14 @@ class RunningResidualCostData(XUCostData):
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, n, m, k):
+    """ Construct the data structure for cost functions
+
+    It requires the dimension of the state and control spaces, and residual vector. In case
+    of diffeomorphism systems, it's needed the dimension of the tangent space instead of the
+    state one.
+    :param n: state or tangent manifold dimension
+    :param m: control dimension
+    """
     # Creating the state-control cost data
     XUCostData.__init__(self, n, m)
 
@@ -136,16 +177,17 @@ class DynamicsData(object):
   """
   __metaclass__ = abc.ABCMeta
 
-  def __init__(self, n, m):
-    # State and control dimensions
-    self.n = n
+  def __init__(self, nq, nv, m):
+    # Configuration and its tangent and control dimensions
+    self.nq = nq
+    self.nv = nv
     self.m = m
 
     # Creating the data structure for the ODE and its
     # derivative
-    self.f = np.matrix(np.zeros((self.n, 1)))
-    self.fx = np.matrix(np.zeros((self.n, self.n)))
-    self.fu = np.matrix(np.zeros((self.n, self.m)))
+    self.f = np.matrix(np.zeros((self.nv, 1)))
+    self.fx = np.matrix(np.zeros((self.nv, self.nv)))
+    self.fu = np.matrix(np.zeros((self.nv, self.m)))
 
 
 class TerminalDDPData(object):
@@ -157,12 +199,13 @@ class TerminalDDPData(object):
     self.dynamics = dyn_data
     self.cost = cost_data
 
-    # State dimension
-    self.n = self.dynamics.n
+    # Configuration and tangent manifold dimension
+    self.nq = self.dynamics.nq
+    self.nv = self.dynamics.nv
 
     # Nominal and new state on the interval
-    self.x = np.matrix(np.zeros((self.n, 1)))
-    self.x_new = np.matrix(np.zeros((self.n, 1)))
+    self.x = np.matrix(np.zeros((self.nq, 1)))
+    self.x_new = np.matrix(np.zeros((self.nq, 1)))
 
     # Time of the terminal interval
     self.t = np.matrix(np.zeros(1))
@@ -178,13 +221,14 @@ class RunningDDPData(object):
     self.dynamics = dyn_data
     self.cost = cost_data
 
-    # State and control dimensions
-    self.n = self.dynamics.n
+    # Configuration manifold, tangent manifold and control dimensions
+    self.nq = self.dynamics.nq
+    self.nv = self.dynamics.nv
     self.m = self.dynamics.m
 
     # Nominal and new state on the interval
-    self.x = np.matrix(np.zeros((self.n, 1)))
-    self.x_new = np.matrix(np.zeros((self.n, 1)))
+    self.x = np.matrix(np.zeros((self.nq, 1)))
+    self.x_new = np.matrix(np.zeros((self.nq, 1)))
 
     # Nominal and new control command on the interval
     self.u = np.matrix(np.zeros((self.m, 1)))
@@ -195,18 +239,18 @@ class RunningDDPData(object):
     self.tf = np.matrix(np.zeros(1))
 
     # Feedback and feedforward terms
-    self.K = np.matrix(np.zeros((self.m, self.n)))
+    self.K = np.matrix(np.zeros((self.m, self.nv)))
     self.j = np.matrix(np.zeros((self.m, 1)))
 
     # Value function and its derivatives
-    self.Vx = np.matrix(np.zeros((self.n, 1)))
-    self.Vxx = np.matrix(np.zeros((self.n, self.n)))
+    self.Vx = np.matrix(np.zeros((self.nv, 1)))
+    self.Vxx = np.matrix(np.zeros((self.nv, self.nv)))
 
     # Quadratic approximation of the value function
-    self.Qx = np.matrix(np.zeros((self.n, 1)))
+    self.Qx = np.matrix(np.zeros((self.nv, 1)))
     self.Qu = np.matrix(np.zeros((self.m, 1)))
-    self.Qxx = np.matrix(np.zeros((self.n, self.n)))
-    self.Qux = np.matrix(np.zeros((self.m, self.n)))
+    self.Qxx = np.matrix(np.zeros((self.nv, self.nv)))
+    self.Qux = np.matrix(np.zeros((self.m, self.nv)))
     self.Quu = np.matrix(np.zeros((self.m, self.m)))
-    self.Qux_r = np.matrix(np.zeros((self.m, self.n)))
+    self.Qux_r = np.matrix(np.zeros((self.m, self.nv)))
     self.Quu_r = np.matrix(np.zeros((self.m, self.m)))

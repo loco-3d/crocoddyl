@@ -6,26 +6,31 @@ class DynamicModel(ODEBase):
   """ This abstract class declares virtual methods for defining the system's evolution and its
   derivatives.
 
-  It allows us to define any kind of smooth system dynamcs of the form dx = f(x,u), where n and m
-  are the dimension of the state (x) and control (u) vectors, respectively.
+  It allows us to define any kind of smooth system dynamcs of the form v = f(x,u),
+  where nq, nv and m are the dimension of the configuration manifold (x), its tangent
+  space (v) and control (u) vectors, respectively.
   """
   __metaclass__ = abc.ABCMeta
 
-  def __init__(self, n, m):
+  def __init__(self, nq, nv, m):
     """ Construct the dynamics object
-    :param n: dimension of the state
+    :param nq: dimension of the configuration manifold
+    :param nv: dimension of the tangent space of the configuration manifold
     :param m: dimension of the control
     """
-    self.n = n
+    self.nq = nq
+    self.nv = nv
     self.m = m
 
   def createData(self):
     """ Creates the system dynamics data
     """
     from data import DynamicsData
-    return DynamicsData(self.n, self.m)
-  
+    return DynamicsData(self.nq, self.nv, self.m)
+
   def computeAllTerms(self, data, x, u):
+    """ Computes the evolution function and its derivatives
+    """
     return self.f(data, x, u), self.fx(data, x, u), self.fu(data, x, u)
 
   @abc.abstractmethod
@@ -33,7 +38,7 @@ class DynamicModel(ODEBase):
     """ Evaluates the evolution function and stores the result in data.
 
     :param data: dynamics data
-    :param x: system's state
+    :param x: system's configuration
     :param u: control input
     :return: state variation
     """
@@ -44,7 +49,7 @@ class DynamicModel(ODEBase):
     """ Evaluates the dynamics Jacobian w.r.t. the state and stores the result in data.
 
     :param data: dynamics data
-    :param x: system's state
+    :param x: system's configuration
     :param u: control input
     :return: Jacobian of the state variation w.r.t the state
     """
@@ -55,7 +60,7 @@ class DynamicModel(ODEBase):
     """ Evaluates the dynamics Jacobian w.r.t. the control and stores the result in data.
 
     :param data: dynamics data
-    :param x: system's state
+    :param x: system's configuration
     :param u: control input
     :return: Jacobian of the state variation w.r.t the control
     """
@@ -64,16 +69,21 @@ class DynamicModel(ODEBase):
   def stateDifference(self, xf, x0):
     """ Returns the state different between xf and x0 (i.e. xf - x0).
 
-    :param xf: system's state
-    :param x0: system's state
+    :param xf: system's configuration
+    :param x0: system's configuration
     """
     return xf - x0
 
-  def getStateDimension(self):
-    """ Returns the state dimension
+  def getConfigurationDimension(self):
+    """ Returns the configuration manifold dimension
     """
-    return self.n
-  
+    return self.nq
+
+  def getTangentDimension(self):
+    """ Returns the tangent manifold dimension
+    """
+    return self.nv
+
   def getControlDimension(self):
     """ Returns the control dimension
     """
@@ -108,10 +118,10 @@ class NumDiffDynamicModel(DynamicModel):
   derivatives of a dynamic model.
   """
   __metaclass__ = abc.ABCMeta
-  def __init__(self, n, m):
-    DynamicModel.__init__(self, n, m)
+  def __init__(self, nq, nv, m):
+    DynamicModel.__init__(self, nq, nv, m)
     self.sqrt_eps = math.sqrt(np.finfo(float).eps)
-    self.f_nom = np.matrix(np.zeros((n, 1)))
+    self.f_nom = np.matrix(np.zeros((nv, 1)))
   
   def computePertubatedState(self, x, index):
     x_pert = x.copy()
@@ -124,18 +134,16 @@ class NumDiffDynamicModel(DynamicModel):
     return u_pert
 
   def fx(self, data, x, u):
-    n = len(x)
     np.copyto(self.f_nom, self.f(data, x, u))
-    for i in range(n):
+    for i in range(data.nv):
       x_pert = self.computePertubatedState(x, i)
       data.fx[:, i] = (self.f(data, x_pert, u).copy() - self.f_nom) / self.sqrt_eps
     np.copyto(data.f, self.f_nom)
     return data.fx
 
   def fu(self, data, x, u):
-    m = len(u)
     np.copyto(self.f_nom, self.f(data, x, u))
-    for i in range(m):
+    for i in range(data.m):
       u_pert = self.computePertubatedControl(u, i)
       data.fu[:, i] = (self.f(data, x, u_pert).copy() - self.f_nom) / self.sqrt_eps
     np.copyto(data.f, self.f_nom)

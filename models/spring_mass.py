@@ -10,7 +10,7 @@ class SpringMass(DynamicModel):
   """
   def __init__(self):
     # State and control dimension
-    DynamicModel.__init__(self, 2, 1)
+    DynamicModel.__init__(self, 2, 2, 1)
 
     # Mass, spring and damper values
     self._mass = 10.
@@ -42,7 +42,7 @@ class NumDiffSpringMass(NumDiffDynamicModel):
   """
   def __init__(self):
     # State and control dimension
-    NumDiffDynamicModel.__init__(self, 2, 1)
+    NumDiffDynamicModel.__init__(self, 2, 2, 1)
 
     # Mass, spring and damper values
     self._mass = 10.

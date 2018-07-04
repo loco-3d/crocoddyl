@@ -17,8 +17,8 @@ class LinearDDPTest(unittest.TestCase):
     dynamics = SpringMass()
 
     # Create random initial and desired state
-    x0 = np.random.rand(dynamics.getStateDimension(), 1)
-    x_des = np.random.rand(dynamics.getStateDimension(), 1)
+    x0 = np.random.rand(dynamics.getConfigurationDimension(), 1)
+    x_des = np.random.rand(dynamics.getConfigurationDimension(), 1)
     x_des[1] = 0.
 
     # Creating the cost manager and its cost functions
