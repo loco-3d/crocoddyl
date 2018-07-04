@@ -65,7 +65,7 @@ class DynamicModel(ODEBase):
     """ Returns the state different between xf and x0 (i.e. xf - x0).
 
     :param xf: system's state
-    :param x: system's state
+    :param x0: system's state
     """
     return xf - x0
 

@@ -1,69 +1,15 @@
 import unittest
+import numpy as np
 from cddp.ddp import DDP
-from cddp.cost_manager import CostManager, np
-from cddp.quadratic_cost import *
-from cddp.dynamics import DynamicModel
-from cddp.integrator import *
+from cddp.cost_manager import CostManager
+from cddp.integrator import EulerIntegrator
+from models.spring_mass import SpringMass
+from models.simple_cost import GoalResidualQuadraticCost, StateControlRunningQuadraticCost
 
 
-class GoalQuadraticCost(TerminalResidualQuadraticCost):
-  def __init__(self, goal):
-    k = len(goal)
-    TerminalResidualQuadraticCost.__init__(self, k)
-    self.x_des = goal
-
-  def r(self, data, x):
-    np.copyto(data.r, x - self.x_des)
-    return data.r
-
-  def rx(self, data, x):
-    np.copyto(data.rx, np.eye(data.n))
-    return data.rx
-
-
-class StateControlQuadraticCost(RunningQuadraticCost):
-  def __init__(self, goal):
-    RunningQuadraticCost.__init__(self)
-    self.x_des = goal
-
-  def xr(self, data, x, u):
-    np.copyto(data.xr, x - self.x_des)
-    return data.xr
-
-  def ur(self, data, x, u):
-    np.copyto(data.ur, u)
-    return data.ur
-
-
-class SpringMass(DynamicModel):
-  def __init__(self):
-    # State and control dimension
-    DynamicModel.__init__(self, 2, 1)
-
-    # Mass, spring and damper values
-    self._mass = 10.
-    self._stiff = 10.
-    self._damping = 5.
-    # This is a LTI system, so we can computed onces the A and B matrices
-    self._A = np.matrix([[0., 1.],
-                         [-self._stiff / self._mass, -self._damping / self._mass]])
-    self._B = np.matrix([[0.], [1 / self._mass]])
-
-  def f(self, data, x, u):
-    np.copyto(data.f, self._A * x + self._B * u)
-    return data.f
-
-  def fx(self, data, x, u):
-    np.copyto(data.fx, self._A)
-    return data.fx
-
-  def fu(self, data, x, u):
-    np.copyto(data.fu, self._B)
-    return data.fu
 
 
 plot_enable = False
-
 
 class LinearDDPTest(unittest.TestCase):
   def setUp(self):
@@ -77,8 +23,8 @@ class LinearDDPTest(unittest.TestCase):
 
     # Creating the cost manager and its cost functions
     cost_manager = CostManager()
-    goal_cost = GoalQuadraticCost(x_des)
-    xu_cost = StateControlQuadraticCost(x_des)
+    goal_cost = GoalResidualQuadraticCost(x_des)
+    xu_cost = StateControlRunningQuadraticCost(x_des)
 
     # Setting up the weights of the quadratic terms
     wx = np.array([100., 100.])
