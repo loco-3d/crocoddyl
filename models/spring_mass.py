@@ -56,3 +56,10 @@ class NumDiffSpringMass(NumDiffDynamicModel):
   def f(self, data, x, u):
     np.copyto(data.f, self._A * x + self._B * u)
     return data.f
+
+  def computePerturbatedConfiguration(self, x, index):
+    # A perturbation in the tangent manifold has the same effect in the
+    # configuration manifold because it's a classical system.
+    x_pert = x.copy()
+    x_pert[index] += self.sqrt_eps
+    return x_pert

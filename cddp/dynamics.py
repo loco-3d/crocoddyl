@@ -122,13 +122,23 @@ class NumDiffDynamicModel(DynamicModel):
     DynamicModel.__init__(self, nq, nv, m)
     self.sqrt_eps = math.sqrt(np.finfo(float).eps)
     self.f_nom = np.matrix(np.zeros((nv, 1)))
-  
-  def computePertubatedState(self, x, index):
-    x_pert = x.copy()
-    x_pert[index] += self.sqrt_eps
-    return x_pert
 
-  def computePertubatedControl(self, u, index):
+  @abc.abstractmethod
+  def computePerturbatedConfiguration(self, x, index):
+    """ Computes the perturbated configuration from a perturbation in its tangent space
+
+    In general, computing the perturbated configuration is done by using an integrator.
+    However, this integrator depends on the manifold itself (e.g. SE(3) manifold). So, this
+    integration rule depends on the particular diffeomorphism of our dynamical system. For
+    instance, in a classical system, we compute this quantity as x[index] += sqrt(eps),
+    where eps is the machine epsilone; you can see an implementation in SpringMass system
+    class.
+    :param x: configuration state
+    :param index: index (in the configuration state) for computing the perturbation
+    """
+    pass
+
+  def computePerturbatedControl(self, u, index):
     u_pert = u.copy()
     u_pert[index] += self.sqrt_eps
     return u_pert
@@ -136,7 +146,7 @@ class NumDiffDynamicModel(DynamicModel):
   def fx(self, data, x, u):
     np.copyto(self.f_nom, self.f(data, x, u))
     for i in range(data.nv):
-      x_pert = self.computePertubatedState(x, i)
+      x_pert = self.computePerturbatedConfiguration(x, i)
       data.fx[:, i] = (self.f(data, x_pert, u).copy() - self.f_nom) / self.sqrt_eps
     np.copyto(data.f, self.f_nom)
     return data.fx
@@ -144,7 +154,7 @@ class NumDiffDynamicModel(DynamicModel):
   def fu(self, data, x, u):
     np.copyto(self.f_nom, self.f(data, x, u))
     for i in range(data.m):
-      u_pert = self.computePertubatedControl(u, i)
+      u_pert = self.computePerturbatedControl(u, i)
       data.fu[:, i] = (self.f(data, x, u_pert).copy() - self.f_nom) / self.sqrt_eps
     np.copyto(data.f, self.f_nom)
     return data.fu
