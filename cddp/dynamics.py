@@ -97,3 +97,46 @@ class DynamicModel(ODEBase):
   # @abc.abstractmethod
   # def fuu(self, data, x, u):
   #   pass
+
+
+import numpy as np
+import math
+class NumDiffDynamicModel(DynamicModel):
+  """ Dynamic model with derivatives computation using numerical differentiation
+
+  This class uses numerical differentiation for computing the state and control
+  derivatives of a dynamic model.
+  """
+  __metaclass__ = abc.ABCMeta
+  def __init__(self, n, m):
+    DynamicModel.__init__(self, n, m)
+    self.sqrt_eps = math.sqrt(np.finfo(float).eps)
+    self.f_nom = np.matrix(np.zeros((n, 1)))
+  
+  def computePertubatedState(self, x, index):
+    x_pert = x.copy()
+    x_pert[index] += self.sqrt_eps
+    return x_pert
+
+  def computePertubatedControl(self, u, index):
+    u_pert = u.copy()
+    u_pert[index] += self.sqrt_eps
+    return u_pert
+
+  def fx(self, data, x, u):
+    n = len(x)
+    np.copyto(self.f_nom, self.f(data, x, u))
+    for i in range(n):
+      x_pert = self.computePertubatedState(x, i)
+      data.fx[:, i] = (self.f(data, x_pert, u).copy() - self.f_nom) / self.sqrt_eps
+    np.copyto(data.f, self.f_nom)
+    return data.fx
+
+  def fu(self, data, x, u):
+    m = len(u)
+    np.copyto(self.f_nom, self.f(data, x, u))
+    for i in range(m):
+      u_pert = self.computePertubatedControl(u, i)
+      data.fu[:, i] = (self.f(data, x, u_pert).copy() - self.f_nom) / self.sqrt_eps
+    np.copyto(data.f, self.f_nom)
+    return data.fu
