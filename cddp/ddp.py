@@ -55,7 +55,7 @@ class DDP(object):
     self.decreased_rate = 2.
 
   def compute(self, x0, U=None):
-    """ Computes the DDP algorithm
+    """ Computes the DDP algorithm.
     """
     # Running an initial forward simulation given the initial state and
     # the control sequence
@@ -95,12 +95,14 @@ class DDP(object):
     return False
 
   def backwardPass(self, mu, alpha):
-    """ Runs the forward pass of the DDP algorithm
+    """ Runs the forward pass of the DDP algorithm.
 
-    :param alpha: scaling factor of open-loop control modification (line-search strategy)
+    :param mu: regularization factor
+    :param alpha: scaling factor of open-loop control modification (line-search
+    strategy)
     """
-    # Setting up the final value function as the terminal cost, so we proceed with
-    # the backward sweep
+    # Setting up the final value function as the terminal cost, so we proceed
+    # with the backward sweep
     it = self.terminal_interval
     xf = it.x
     l, it.Vx, it.Vxx = self.cost_manager.computeTerminalTerms(it.cost, xf)
@@ -125,7 +127,8 @@ class DDP(object):
       dt = it.tf - it.t0
 
       # Computing the cost and its derivatives
-      l, lx, lu, lxx, luu, lux = self.cost_manager.computeRunningTerms(cost_data, x, u)
+      l, lx, lu, lxx, luu, lux = \
+        self.cost_manager.computeRunningTerms(cost_data, x, u)
 
       # Integrating the derivatives of the cost function
       # TODO we need to use the integrator class for this
@@ -174,19 +177,23 @@ class DDP(object):
       # Computing the value function derivatives of this interval
       jt_Quu_j = 0.5 * it.j.T * it.Quu * it.j
       jt_Qu = it.j.T * it.Qu
-      np.copyto(it.Vx, it.Qx + it.K.T * it.Quu * it.j + it.K.T * it.Qu + it.Qux.T * it.j)
-      np.copyto(it.Vxx, it.Qxx + it.K.T * it.Quu * it.K + it.K.T * it.Qux + it.Qux.T * it.K)
+      np.copyto(it.Vx, \
+                it.Qx + it.K.T * it.Quu * it.j + it.K.T * it.Qu + it.Qux.T * it.j)
+      np.copyto(it.Vxx, \
+                it.Qxx + it.K.T * it.Quu * it.K + it.K.T * it.Qux + it.Qux.T * it.K)
 
-      # Updating the local cost and expected reduction. The total values are used to check
-      # the changes in the forward pass. This is method is explained in Tassa's PhD thesis
+      # Updating the local cost and expected reduction. The total values are
+      # used to check the changes in the forward pass. This is method is
+      # explained in Tassa's PhD thesis
       self.V[0] += l
       self.dV_exp[0] += alpha * (alpha * jt_Quu_j + jt_Qu)
     return True
 
   def forwardPass(self, alpha):
-    """ Runs the forward pass of the DDP algorithm
+    """ Runs the forward pass of the DDP algorithm.
 
-    :param alpha: scaling factor of open-loop control modification (line-search strategy)
+    :param alpha: scaling factor of open-loop control modification (line-search
+    strategy)
     """
     # Initializing the forward pass with the initial state
     it = self.initial_interval
@@ -206,11 +213,13 @@ class DDP(object):
       # Integrating the dynamics and updating the new state value
       dt = it.tf - it.t0
       np.copyto(it_next.x_new,
-                self.integrator.integrate(self.dynamics, it.dynamics, it.x_new, it.u_new, dt))
+                self.integrator.integrate(self.dynamics, it.dynamics,
+                                          it.x_new, it.u_new, dt))
 
       # Integrating the cost and updating the new value function
       # TODO we need to use the integrator class for this
-      self.V_new[0] += self.cost_manager.computeRunningCost(it.cost, it.x_new, it.u_new) * dt
+      self.V_new[0] += \
+        self.cost_manager.computeRunningCost(it.cost, it.x_new, it.u_new) * dt
 
     # Including the terminal cost
     it = self.terminal_interval
@@ -237,8 +246,8 @@ class DDP(object):
   def forwardSimulation(self, x0, U=None):
     """ Initial forward simulation for starting the DDP algorithm.
 
-    It integrates the system's dynamics given an initial state, and a control sequence.
-    This provides the initial nominal state trajectory.
+    It integrates the system's dynamics given an initial state, and a control
+    sequence. This provides the initial nominal state trajectory.
     """
     # Setting the initial state
     self.setInitalState(x0)
@@ -262,12 +271,14 @@ class DDP(object):
 
       # Integrating the dynamics and updating the new state value
       dt = it.tf - it.t0
-      x_next = self.integrator.integrate(self.dynamics, it.dynamics, it.x, it.u, dt)
+      x_next = \
+        self.integrator.integrate(self.dynamics, it.dynamics, it.x, it.u, dt)
       np.copyto(it_next.x, x_next)
       np.copyto(it_next.x_new, x_next)
 
       # Integrating the cost and updating the new value function
-      self.V[0] += self.cost_manager.computeRunningCost(it.cost, it.x, it.u) * dt
+      self.V[0] += \
+        self.cost_manager.computeRunningCost(it.cost, it.x, it.u) * dt
 
     # Including the terminal state and cost
     it = self.terminal_interval
@@ -286,7 +297,7 @@ class DDP(object):
 
     :param U: initial control sequence (stack of m-dimensional vector).
     """
-    assert len(U) == self.N, "Incompleted control sequence."
+    assert len(U) == self.N, "Incomplete control sequence."
     for k in range(self.N):
       it = self.intervals[k]
       np.copyto(it.u, U[k])

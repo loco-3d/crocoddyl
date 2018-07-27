@@ -13,6 +13,10 @@ class bcolors:
 
 
 def isPositiveDefinitive(A):
+  """ Checks if the matrix is positive definitive.
+
+  :param A matrix
+  """
   try:
     _ = np.linalg.cholesky(A)
   except np.linalg.LinAlgError:
@@ -33,7 +37,8 @@ def plot(x, y, yerr=None, color=None, alpha_fill=0.3, ax=None):
       ymax = y + yerr
     elif len(yerr) == 2:
       ymin, ymax = yerr
-    ax.fill_between(x, ymax.reshape(-1), ymin.reshape(-1), color=color, alpha=alpha_fill)
+    ax.fill_between(x,
+      ymax.reshape(-1), ymin.reshape(-1), color=color, alpha=alpha_fill)
 
 
 def show_plot():

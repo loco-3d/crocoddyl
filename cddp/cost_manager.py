@@ -4,13 +4,15 @@ import inspect
 
 
 class CostManager(object):
-  """ It computes the total cost and its derivatives for a set of running and terminal costs.
+  """ It computes the total cost and its derivatives for a set of running and
+  terminal costs.
 
-  The cost manager stacks a set of terminal and running cost, and from them, it computes
-  the total cost and its derivatives. The derivatives are Jacobian and Hessian with 
-  respect to the state and control vectors. Each cost function and the total has its own data,
-  which it is allocated by calling the createData function. Note that before doing that, you
-  have to add the running and terminal cost functions of your problem.
+  The cost manager stacks a set of terminal and running cost, and from them,
+  it computes the total cost and its derivatives. The derivatives are Jacobian
+  and Hessian with respect to the state and control vectors. Each cost function
+  and the total has its own data, which it is allocated by calling the
+  createData function. Note that before doing that, you have to add the
+  running and terminal cost functions of your problem.
   """
   __metaclass__ = abc.ABCMeta
 
@@ -25,7 +27,7 @@ class CostManager(object):
     """
     name = cost.__class__.__name__
     assert inspect.getmro(cost.__class__)[-2].__name__ == 'XCost', "The " + \
-        name + " class has to derived from the XCost abstract class."
+      name + " class has to derived from the XCost abstract class."
     self.terminal.append(cost)
 
   def addRunning(self, cost):
@@ -35,7 +37,7 @@ class CostManager(object):
     """
     name = cost.__class__.__name__
     assert inspect.getmro(cost.__class__)[-2].__name__ == 'XUCost', "The " + \
-        name + " class has to derived from the XCost abstract class."
+      name + " class has to derived from the XCost abstract class."
     self.running.append(cost)
 
   def createTerminalData(self, n):
@@ -57,8 +59,8 @@ class CostManager(object):
   def createRunningData(self, n, m):
     """ Creates the data of the stack of running costs.
 
-    Before creating the data, it's needed to add all the running costs
-    of your problem.
+    Before creating the data, it's needed to add all the running costs of your
+    problem.
     """
     from data import XUCostData, CostManagerData
     data = CostManagerData()
@@ -73,8 +75,8 @@ class CostManager(object):
   def computeTerminalCost(self, data, x):
     assert self.terminal > 0, "You didn't add the terminal costs"
     name = data.total.__class__.__name__
-    assert inspect.getmro(data.total.__class__)[-2].__name__ == 'XCostData', "The " + \
-        name + " class has to derived from the XCostData abstract class."
+    assert inspect.getmro(data.total.__class__)[-2].__name__ == 'XCostData', \
+      "The " + name + " class has to derived from the XCostData abstract class."
 
     l = data.total.l[0]
     l.fill(0.)
@@ -86,8 +88,8 @@ class CostManager(object):
   def computeRunningCost(self, data, x, u):
     assert self.running > 0, "You didn't add the running costs"
     name = data.total.__class__.__name__
-    assert inspect.getmro(data.total.__class__)[-2].__name__ == 'XUCostData', "The " + \
-        name + " class has to derived from the XUCostData abstract class."
+    assert inspect.getmro(data.total.__class__)[-2].__name__ == 'XUCostData', \
+      "The " + name + " class has to derived from the XUCostData abstract class."
     
     l = data.total.l[0]
     l.fill(0.)
@@ -99,8 +101,8 @@ class CostManager(object):
   def computeTerminalTerms(self, data, x):
     assert self.terminal > 0, "You didn't add the terminal costs"
     name = data.total.__class__.__name__
-    assert inspect.getmro(data.total.__class__)[-2].__name__ == 'XCostData', "The " + \
-        name + " class has to derived from the XCostData abstract class."
+    assert inspect.getmro(data.total.__class__)[-2].__name__ == 'XCostData', \
+      "The " + name + " class has to derived from the XCostData abstract class."
     
     l = data.total.l[0]
     lx = data.total.lx
@@ -118,8 +120,8 @@ class CostManager(object):
   def computeRunningTerms(self, data, x, u):
     assert self.running > 0, "You didn't add the running costs"
     name = data.total.__class__.__name__
-    assert inspect.getmro(data.total.__class__)[-2].__name__ == 'XUCostData', "The " + \
-        name + " class has to derived from the XUCostData abstract class."
+    assert inspect.getmro(data.total.__class__)[-2].__name__ == 'XUCostData', \
+      "The " + name + " class has to derived from the XUCostData abstract class."
     
     l = data.total.l[0]
     lx = data.total.lx

@@ -56,10 +56,12 @@ class LinearDDPTest(unittest.TestCase):
       utils.show_plot()
 
   def test_positive_expected_improvement(self):
-    self.assertGreater(-self.ddp.dV_exp, 0., "The expected improvement is not positive.")
+    self.assertGreater(-self.ddp.dV_exp, 0.,
+                       "The expected improvement is not positive.")
 
   def test_positive_obtained_improvement(self):
-    self.assertGreater(-self.ddp.dV, 0., "The obtained improvement is not positive.")
+    self.assertGreater(-self.ddp.dV, 0.,
+                       "The obtained improvement is not positive.")
 
   def test_improvement_ratio_equals_one(self):
     self.assertAlmostEqual(np.asscalar(self.ddp.dV) / np.asscalar(self.ddp.dV_exp), 1., 2, "The improvement ration is not equals to 1.")

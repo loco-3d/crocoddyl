@@ -2,8 +2,8 @@ import abc
 
 
 class XCost(object):
-  """ This abstract class declares virtual methods for computing the terminal cost value and
-  its derivatives.
+  """ This abstract class declares virtual methods for computing the terminal
+  cost value and its derivatives.
 
   The running cost depends on the state vectors, which it has n values.
   """
@@ -19,41 +19,43 @@ class XCost(object):
 
   @abc.abstractmethod
   def l(self, data, x):
-    """ Evaluates the terminal cost and stores the result in data.
+    """ Evaluates the terminal cost function and stores the result in data.
 
     :param data: terminal cost data
     :param x: state vector
-    :return: terminal cost
+    :returns: terminal cost
     """
     pass
 
   @abc.abstractmethod
   def lx(self, data, x):
-    """ Evaluates the Jacobian of the terminal cost and stores the result in data.
+    """ Evaluates the Jacobian of the terminal cost function and stores the
+    result in data.
 
     :param data: terminal cost data
     :param x: state vector
-    :return: Jacobian of the terminal cost
+    :returns: Jacobian of the terminal cost
     """
     pass
 
   @abc.abstractmethod
   def lxx(self, data, x):
-    """ Evaluates the Hessian of the terminal cost and stores the result in data.
+    """ Evaluates the Hessian of the terminal cost function and stores the
+    result in data.
 
     :param data: terminal cost data
     :param x: state vector
-    :return: Hessian of the terminal cost
+    :returns: Hessian of the terminal cost
     """
     pass
 
 
 class XUCost(object):
-  """ This abstract class declares virtual methods for computing the running cost value and
-  its derivatives.
+  """ This abstract class declares virtual methods for computing the running
+  cost value and its derivatives.
 
-  The running cost depends on the state and control vectors, those vectors have n and m dimensions,
-  respectively.
+  The running cost depends on the state and control vectors, those vectors have
+  n and m dimensions, respectively.
   """
   __metaclass__ = abc.ABCMeta
 
@@ -68,76 +70,82 @@ class XUCost(object):
 
   @abc.abstractmethod
   def l(self, data, x, u):
-    """ Evaluates the running cost and stores the result in data.
+    """ Evaluates the running cost function and stores the result in data.
 
     :param data: running cost data
     :param x: state vector
     :param u: control vector
-    :return: running cost
+    :returns: running cost
     """
     pass
 
   @abc.abstractmethod
   def lx(self, data, x, u):
-    """ Evaluates the Jacobian of the running cost w.r.t. the state and stores the result in data.
+    """ Evaluates the Jacobian of the running cost function w.r.t. the state
+    and stores the result in data.
 
     :param data: running cost data
     :param x: state vector
     :param u: control vector
-    :return: Jacobian of the running cost with respect to the state
+    :returns: Jacobian of the running cost w.r.t. the state
     """
     pass
 
   @abc.abstractmethod
   def lu(self, data, x, u):
-    """ Evaluates the Jacobian of the running cost w.r.t. the control and stores the result in data.
+    """ Evaluates the Jacobian of the running cost function w.r.t. the control
+    and stores the result in data.
 
     :param data: running cost data
     :param x: state vector
     :param u: control vector
-    :return: Jacobian of the residual vector w.r.t. the control
+    :returns: Jacobian of the residual vector w.r.t. the control
     """
     pass
 
   @abc.abstractmethod
   def lxx(self, data, x, u):
-    """ Evaluates the Hessian of the running cost w.r.t. the state and stores the result in data.
+    """ Evaluates the Hessian of the running cost w.r.t. the state function and
+    stores the result in data.
 
     :param data: running cost data
     :param x: state vector
     :param u: control vector
-    :return: Hessian of the running cost w.r.t. the state
+    :returns: Hessian of the running cost w.r.t. the state
     """
     pass
 
   @abc.abstractmethod
   def luu(self, data, x, u):
-    """ Evaluates the Hessian of the running cost w.r.t. the control and stores the result in data.
+    """ Evaluates the Hessian of the running cost function w.r.t. the control
+    and stores the result in data.
 
     :param data: running cost data
     :param x: state vector
     :param u: control vector
-    :return: Hessian of the running cost w.r.t. the control
+    :returns: Hessian of the running cost w.r.t. the control
     """
     pass
 
   @abc.abstractmethod
   def lux(self, data, x, u):
-    """ Evaluates the running cost derivatives w.r.t. the control and state and stores the result in data.
+    """ Evaluates the running cost derivatives w.r.t. the control and state and
+    stores the result in data.
 
     :param data: running cost data
     :param x: state vector
     :param u: control vector
-    :return: derivatives of the running cost w.r.t. the state and control
+    :returns: derivatives of the running cost w.r.t. the state and control
     """
     pass
 
 
 class TerminalCost(XCost):
-  """ This abstract class declares virtual methods for computing the terminal cost value and
-  its derivatives.
+  """ This abstract class declares virtual methods for computing the terminal
+  cost value and its derivatives.
 
-  An important remark here is that the terminal cost is computed from linear residual vector.
+  An important remark here is that the terminal cost is computed from linear
+  residual vector.
   """
   __metaclass__ = abc.ABCMeta
 
@@ -155,22 +163,30 @@ class TerminalCost(XCost):
 
     :param data: terminal cost data
     :param x: state vector
-    :return: state-residual vector
+    :returns: state-residual vector
     """
     pass
 
 
 class TerminalResidualCost(XCost):
-  """ This abstract class declares virtual methods for computing the terminal cost value and
-  its derivatives.
+  """ This abstract class declares virtual methods for computing the terminal
+  cost value and its derivatives.
 
-  An important remark here is that the terminal cost is computed from general residual vector r.
-  Therefore, compared with the TerminalCost class, it is needed additionally to provide
-  information about the residual derivatives (i.e. rx and ru)
+  An important remark here is that the terminal cost is computed from general
+  residual vector r(x). Therefore, compared to the TerminalCost class, it is
+  needed additionally to provide information about the residual derivatives
+  w.r.t. the state rx.
   """
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, k):
+    """ Constructs a terminal cost and its residual vector data.
+
+    The residual vector dimension is defined by the user and passed it in the
+    construction of this class. It generates later the appropriate data
+    structure of the user-defined terminal cost function.
+    :param k: residual vector dimension
+    """
     # Residual vector dimension
     self.k = k
 
@@ -188,27 +204,28 @@ class TerminalResidualCost(XCost):
 
     :param data: terminal cost data
     :param x: state vector
-    :return: residual vector
+    :returns: residual vector
     """
     pass
 
   @abc.abstractmethod
   def rx(self, data, x):
-    """ Evaluates the Jacobian of the residual vector and stores the result in data.
+    """ Evaluates the Jacobian of the residual vector and stores the result in
+    data.
 
     :param data: terminal cost data
     :param x: state vector
-    :return: Jacobian of the residual vector
+    :returns: Jacobian of the residual vector
     """
     pass
 
 
 class RunningCost(XUCost):
-  """ This abstract class declares virtual methods for computing the running cost value and
-  its derivatives.
+  """ This abstract class declares virtual methods for computing the running
+  cost value and its derivatives.
 
-  An important remark here is that the running cost is computed from linear residual vector
-  on the state (xr) and control (ur).
+  An important remark here is that the running cost is computed from linear
+  residual vector on the state xr and control ur.
   """
   __metaclass__ = abc.ABCMeta
 
@@ -227,7 +244,7 @@ class RunningCost(XUCost):
     :param data: running cost data
     :param x: state vector
     :param u: control vector
-    :return: state-residual vector
+    :returns: state-residual vector
     """
     pass
 
@@ -238,23 +255,31 @@ class RunningCost(XUCost):
     :param data: running cost data
     :param x: state vector
     :param u: control vector
-    :return: control-residual vector
+    :returns: control-residual vector
     """
     pass
 
 
 class RunningResidualCost(XUCost):
-  """ This abstract class declares virtual methods for computing the running cost value and
-  its derivatives.
+  """ This abstract class declares virtual methods for computing the running
+  cost value and its derivatives.
 
-  An important remark here is that the running cost is computed from general residual vector
-  on the state and control, i.e. r(x,u). Therefore, compared with the RunningCost class, it is
-  additionally needed to provide the information of the residual derivatives (i.e. rx, ru).
-  The residual Hessians (rxx, ruu and rux) are neglected which is common in Gauss-Newton steps.
+  An important remark here is that the running cost is computed from general
+  residual vector on the state and control, i.e. r(x,u). Therefore, compared
+  to the RunningCost class, it is additionally needed to provide the information
+  of the residual derivatives w.r.t. the state rx and control ru. The residual
+  Hessians (rxx, ruu and rux) are neglected in Gauss-Newton steps.
   """
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, k):
+    """ Constructs a terminal cost and its residual vector data.
+
+    The residual vector dimension is defined by the user and passed it in the
+    construction of this class. It generates later the appropriate data
+    structure of the user-defined terminal cost function.
+    :param k: residual vector dimension
+    """
     # Residual vector dimension
     self.k = k
 
@@ -274,28 +299,30 @@ class RunningResidualCost(XUCost):
     :param data: running cost data
     :param x: state vector
     :param u: control vector
-    :return: residual vector
+    :returns: residual vector
     """
     pass
 
   @abc.abstractmethod
   def rx(self, data, x, u):
-    """ Evaluates the Jacobian of the residual vector w.r.t. the state and stores the result in data.
+    """ Evaluates the Jacobian of the residual vector w.r.t. the state and 
+    stores the result in data.
 
     :param data: running cost data
     :param x: state vector
     :param u: control vector
-    :return: Jacobian of the residual vector w.r.t. the state
+    :returns: Jacobian of the residual vector w.r.t. the state
     """
     pass
 
   @abc.abstractmethod
   def ru(self, data, x, u):
-    """ Evaluates the Jacobian of the residual vector w.r.t. the control and stores the result in data.
+    """ Evaluates the Jacobian of the residual vector w.r.t. the control and
+    stores the result in data.
 
     :param data: running cost data
     :param x: state vector
     :param u: control vector
-    :return: Jacobian of the residual vector w.r.t. the control
+    :returns: Jacobian of the residual vector w.r.t. the control
     """
     pass

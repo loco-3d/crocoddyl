@@ -2,7 +2,7 @@ import abc
 
 
 class Integrator(object):
-  """ This abstract class declared the virtual method for any integrator.
+  """ This abstract class declares the virtual method for any integrator.
   """
   __metaclass__ = abc.ABCMeta
 
@@ -18,6 +18,8 @@ class EulerIntegrator(Integrator):
   """
   @staticmethod
   def integrate(model, data, x, u, dt):
+    """ Integrates the system dynamics using the forward Euler rule.
+    """
     return x + model.f(data, x, u) * dt
 
 
@@ -26,6 +28,8 @@ class RK4Integrator(Integrator):
   """
   @staticmethod
   def integrate(model, data, x, u, dt):
+    """ Integrates the function using the fourth-order Runge-Kutta method
+    """
     k1 = model.f(data, x, u)
 
     x2 = x + dt / 2. * k1

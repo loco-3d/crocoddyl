@@ -3,12 +3,12 @@ import abc
 
 
 class XCostData(object):
-  """ Data structure for state-dependent cost functions
+  """ Data structure for state-dependent cost functions.
   """
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, n):
-    """ Construct the data structure for only state-based cost functions
+    """ Constructs the data structure for only state-based cost functions.
 
     It requires the dimension of the state space or tangent manifold in case of
     diffeomorphism systems.
@@ -25,16 +25,16 @@ class XCostData(object):
 
 
 class XUCostData(object):
-  """ Data structure for state/control-dependent cost functions
+  """ Data structure for state/control-dependent cost functions.
   """
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, n, m):
-    """ Construct the data structure for cost functions
+    """ Constructs the data structure for cost functions.
 
-    It requires the dimension of the state and control spaces. In case of diffeomorphism
-    systems, it's needed the dimension of the tangent space instead of the state one.
-    manifold.
+    It requires the dimension of the state and control spaces. In case of
+    diffeomorphism systems, it's needed the dimension of the tangent space
+    instead of the state one.
     :param n: state or tangent manifold dimension
     :param m: control dimension
     """
@@ -60,7 +60,7 @@ class TerminalCostData(XCostData):
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, n):
-    """ Construct the data structure for only state-based cost functions
+    """ Constructs the data structure for only state-based cost functions.
 
     It requires the dimension of the state space or tangent manifold in case of
     diffeomorphism systems.
@@ -84,8 +84,8 @@ class TerminalResidualCostData(XCostData):
   def __init__(self, n, k):
     """ Construct the data structure for only state-based cost functions
 
-    It requires the dimension of the state space, or tangent manifold in case of
-    diffeomorphism systems, and the dimension of the residual vector.
+    It requires the dimension of the state space, or tangent manifold in case
+    of diffeomorphism systems, and the dimension of the residual vector.
     :param n: state or tangent manifold dimension
     """
     # Creating the state-related data
@@ -103,17 +103,18 @@ class TerminalResidualCostData(XCostData):
 class RunningCostData(XUCostData):
   """ Data structure for running costs with a linear residual function.
 
-  The residual depends on the state and control. So we split it in the state and
-  control residual. The state and control residual have a dimension of n and m,
-  respectively.
+  The residual depends on the state and control. So we split it in the state
+  and control residual. The state and control residual have a dimension of n 
+  and m, respectively.
   """
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, n, m):
-    """ Construct the data structure for cost functions
+    """ Constructs the data structure for cost functions.
 
-    It requires the dimension of the state and control spaces. In case of diffeomorphism
-    systems, it's needed the dimension of the tangent space instead of state one.
+    It requires the dimension of the state and control spaces. In case of
+    diffeomorphism systems, it's needed the dimension of the tangent space
+    instead of state one.
     :param n: state or tangent manifold dimension
     :param m: control dimension
     """
@@ -128,17 +129,17 @@ class RunningCostData(XUCostData):
 class RunningResidualCostData(XUCostData):
   """ Data structure for running costs with a general residual function.
 
-  In general, the residual is k-dimensional and depends on the state and control.
-  Its dimension is defined in the implementation of it.
+  In general, the residual is k-dimensional and depends on the state and
+  control. Its dimension is defined in the implementation of it.
   """
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, n, m, k):
-    """ Construct the data structure for cost functions
+    """ Constructs the data structure for cost functions.
 
-    It requires the dimension of the state and control spaces, and residual vector. In case
-    of diffeomorphism systems, it's needed the dimension of the tangent space instead of the
-    state one.
+    It requires the dimension of the state and control spaces, and residual
+    vector. In case of diffeomorphism systems, it's needed the dimension of the
+    tangent space instead of the state one.
     :param n: state or tangent manifold dimension
     :param m: control dimension
     """
@@ -157,10 +158,10 @@ class RunningResidualCostData(XUCostData):
 class CostManagerData():
   """ Data structure for the cost manager.
 
-  The cost manager contains the total cost and a stack-of-cost (SoC) functions. It
-  creates a dedicated data structure for the total cost, the sum of cost data, an
-  another one for the SoC. The total cost and SoC can contained the data of the terminal
-  or running costs.
+  The cost manager contains the total cost and a stack-of-cost (SoC) functions.
+  It creates a dedicated data structure for the total cost, the sum of cost
+  data, an another one for the SoC. The total cost and SoC can contained the
+  data of the terminal or running costs.
   """
   __metaclass__ = abc.ABCMeta
 
@@ -172,8 +173,8 @@ class CostManagerData():
 class DynamicsData(object):
   """ Data structure for the system dynamics.
 
-  We only define the Jacobians of the dynamics, and not the Hessians of it, because
-  our optimal controller by default uses the Gauss-Newton approximation.
+  We only define the Jacobians of the dynamics, and not the Hessians of it,
+  because our optimal controller by default uses the Gauss-Newton approximation.
   """
   __metaclass__ = abc.ABCMeta
 
@@ -215,7 +216,7 @@ class RunningDDPData(object):
   """ Data structure for the running interval of the DDP.
 
   We create data for the nominal and new state and control values. Additionally,
-  this data structure containts regularized terms too (e.g. Quu_r).
+  this data structure contains regularized terms too (e.g. Quu_r).
   """
   def __init__(self, dyn_data, cost_data):
     self.dynamics = dyn_data
