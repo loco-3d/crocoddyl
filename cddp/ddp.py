@@ -22,6 +22,9 @@ class DDP(object):
       else:
         cdata = self.cost_manager.createRunningData(ddata.nv, ddata.m)
         self.intervals.append(RunningDDPData(ddata, cdata))
+    
+    # Allocating data for the integrator
+    self.integrator.createData(ddata)
 
     # Global variables for the DDP algorithm
     self.V = np.matrix(np.zeros(1))
@@ -144,8 +147,9 @@ class DDP(object):
 
       # Integrating the derivatives of the system dynamics
       # TODO we need to use the integrator class for this
-      np.copyto(fx, fx * dt + np.eye(dyn_data.nv))
-      np.copyto(fu, fu * dt)
+      # np.copyto(fx, fx * dt + np.eye(dyn_data.nv))
+      # np.copyto(fu, fu * dt)
+      self.integrator.discretize(dyn_data, dt)
 
       # Getting the value function values of the next interval (prime interval)
       Vx_p = it_next.Vx

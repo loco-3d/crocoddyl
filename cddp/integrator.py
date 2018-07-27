@@ -1,5 +1,5 @@
 import abc
-
+import numpy as np
 
 class Integrator(object):
   """ This abstract class declares the virtual method for any integrator.
@@ -8,12 +8,21 @@ class Integrator(object):
 
   def __init__(self):
     pass
+  
+  @abc.abstractmethod
+  def createData(self, data): pass
 
   @abc.abstractmethod
   def integrate(self, model, data, x, u, dt): pass
+  
+  @abc.abstractmethod
+  def discretize(self, model, data, x, u, dt): pass
 
 
 class EulerIntegrator(Integrator):
+  def createData(self, data):
+    self._I = np.eye(data.nv) 
+
   """ Integrates the function using the forward Euler method
   """
   @staticmethod
@@ -21,6 +30,11 @@ class EulerIntegrator(Integrator):
     """ Integrates the system dynamics using the forward Euler rule.
     """
     return x + model.f(data, x, u) * dt
+
+  def discretize(self, data, dt):
+    np.copyto(data.fx, self._I + data.fx * dt)
+    np.copyto(data.fu, data.fu * dt)
+    return data.fx, data.fu
 
 
 class RK4Integrator(Integrator):
