@@ -64,7 +64,9 @@ class LinearDDPTest(unittest.TestCase):
                        "The obtained improvement is not positive.")
 
   def test_improvement_ratio_equals_one(self):
-    self.assertAlmostEqual(np.asscalar(self.ddp.dV) / np.asscalar(self.ddp.dV_exp), 1., 2, "The improvement ration is not equals to 1.")
+    self.assertAlmostEqual(
+      np.asscalar(self.ddp.dV) / np.asscalar(self.ddp.dV_exp), 1., 2, \
+      "The improvement ration is not equals to 1.")
 
 
 if __name__ == '__main__':

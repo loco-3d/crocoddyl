@@ -21,12 +21,14 @@ class NumDiffDynamicsTest(unittest.TestCase):
   def test_numerical_state_derivative(self):
     fx = self.analytic_dyn.fx(self.analytic_data, self.x0, self.u0)
     fx_ndiff = self.numdiff_dyn.fx(self.numdiff_data, self.x0, self.u0)
-    self.assertEqual(fx.all(), fx_ndiff.all(), "The state derivative computation is wrong.")
+    self.assertEqual(fx.all(), fx_ndiff.all(), \
+      "The state derivative computation is wrong.")
 
   def test_numerical_control_derivative(self):
     fu = self.analytic_dyn.fu(self.analytic_data, self.x0, self.u0)
     fu_ndiff = self.numdiff_dyn.fu(self.numdiff_data, self.x0, self.u0)
-    self.assertEqual(fu.all(), fu_ndiff.all(), "The control derivative computation is wrong.")
+    self.assertEqual(fu.all(), fu_ndiff.all(), \
+      "The control derivative computation is wrong.")
 
 
 if __name__ == '__main__':
