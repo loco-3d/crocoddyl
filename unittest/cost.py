@@ -1,44 +1,6 @@
 import unittest
-from cddp.quadratic_cost import *
 import numpy as np
-
-
-class GoalQuadraticCost(TerminalQuadraticCost):
-  def __init__(self, n):
-    TerminalQuadraticCost.__init__(self)
-    self.x_des = np.zeros((n, 1))
-
-  def xr(self, data, x):
-    np.copyto(data.r, x - self.x_des)
-    return data.r
-
-
-class GoalResidualQuadraticCost(TerminalResidualQuadraticCost):
-  def __init__(self, n):
-    TerminalResidualQuadraticCost.__init__(self, n)
-    self.x_des = np.zeros((n, 1))
-
-  def r(self, data, x):
-    np.copyto(data.r, x - self.x_des)
-    return data.r
-
-  def rx(self, data, x):
-    np.copyto(data.rx, np.eye(data.n))
-    return data.rx
-
-
-class StateRunningQuadraticCost(RunningQuadraticCost):
-  def __init__(self, n):
-    RunningCost.__init__(self)
-    self.x_des = np.zeros((n, 1))
-
-  def xr(self, data, x, u):
-    np.copyto(data.xr, x - self.x_des)
-    return data.xr
-
-  def ur(self, data, x, u):
-    # Do nothing since it's a cost in the state
-    return data.ur
+from models.simple_cost import GoalQuadraticCost, GoalResidualQuadraticCost, StateRunningQuadraticCost
 
 
 class QuadraticCostTest(unittest.TestCase):
@@ -51,16 +13,19 @@ class QuadraticCostTest(unittest.TestCase):
     self.x = np.random.rand(self.n, 1)
     self.u = np.random.rand(self.m, 1)
 
+    # Create desired state
+    x_des = np.matrix(np.zeros((self.n, 1)))
+
     # Create random state and control weights
     self.q = np.random.rand(self.n)
     self.r = np.random.rand(self.m)
 
     # Create the different cost function and them data
-    self.t_cost = GoalQuadraticCost(self.n)
+    self.t_cost = GoalQuadraticCost(x_des)
     self.t_data = self.t_cost.createData(self.n)
-    self.tr_cost = GoalResidualQuadraticCost(self.n)
+    self.tr_cost = GoalResidualQuadraticCost(x_des)
     self.tr_data = self.tr_cost.createData(self.n)
-    self.r_cost = StateRunningQuadraticCost(self.n)
+    self.r_cost = StateRunningQuadraticCost(x_des)
     self.r_data = self.r_cost.createData(self.n, self.m)
 
     # Set the state or control weights
