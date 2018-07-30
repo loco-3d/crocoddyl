@@ -23,7 +23,7 @@ class TerminalQuadraticCost(TerminalCost):
     TerminalCost.__init__(self)
 
   def setWeights(self, q):
-    """ Sets the diagonal value of the Q matrix.
+    """ Set the diagonal value of the Q matrix.
 
     :param q: array of n elements, where n is the number of state variables
     """
@@ -81,7 +81,7 @@ class TerminalResidualQuadraticCost(TerminalResidualCost):
     TerminalResidualCost.__init__(self, k)
 
   def setWeights(self, q):
-    """ Defines the Q matrix.
+    """ Define the Q matrix.
 
     :param q: array of n elements, where n is the number of state variables
     """
@@ -145,7 +145,7 @@ class RunningQuadraticCost(RunningCost):
     RunningCost.__init__(self)
 
   def setWeights(self, q, r):
-    """ Defines the Q and R weighting matrices.
+    """ Define the Q and R weighting matrices.
 
     :param q: array of n elements, where n is the number of state variables
     :param r: array of m elements, where n is the number of control variables
@@ -229,7 +229,7 @@ class RunningResidualQuadraticCost(RunningResidualCost):
     RunningResidualCost.__init__(self, k)
 
   def setWeights(self, q):
-    """ Defines the Q matrix.
+    """ Define the Q matrix.
 
     :param q: array of n elements, where n is the number of state variables
     """

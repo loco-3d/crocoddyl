@@ -8,7 +8,7 @@ class XCostData(object):
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, n):
-    """ Constructs the data structure for only state-based cost functions.
+    """ Construct the data structure for only state-based cost functions.
 
     It requires the dimension of the state space or tangent manifold in case of
     diffeomorphism systems.
@@ -30,7 +30,7 @@ class XUCostData(object):
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, n, m):
-    """ Constructs the data structure for cost functions.
+    """ Construct the data structure for cost functions.
 
     It requires the dimension of the state and control spaces. In case of
     diffeomorphism systems, it's needed the dimension of the tangent space
@@ -60,7 +60,7 @@ class TerminalCostData(XCostData):
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, n):
-    """ Constructs the data structure for only state-based cost functions.
+    """ Construct the data structure for only state-based cost functions.
 
     It requires the dimension of the state space or tangent manifold in case of
     diffeomorphism systems.
@@ -110,7 +110,7 @@ class RunningCostData(XUCostData):
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, n, m):
-    """ Constructs the data structure for cost functions.
+    """ Construct the data structure for cost functions.
 
     It requires the dimension of the state and control spaces. In case of
     diffeomorphism systems, it's needed the dimension of the tangent space
@@ -135,7 +135,7 @@ class RunningResidualCostData(XUCostData):
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, n, m, k):
-    """ Constructs the data structure for cost functions.
+    """ Construct the data structure for cost functions.
 
     It requires the dimension of the state and control spaces, and residual
     vector. In case of diffeomorphism systems, it's needed the dimension of the
