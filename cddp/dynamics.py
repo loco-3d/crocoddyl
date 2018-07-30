@@ -12,8 +12,8 @@ class DynamicModel(object):
   """
   __metaclass__ = abc.ABCMeta
 
-  def __init__(self, nq, nv, m):
-    """ Constructs the dynamics model.
+  def __init__(self, nq, nv, m, integrator):
+    """ Construct the dynamics model.
 
     :param nq: dimension of the configuration manifold
     :param nv: dimension of the tangent space of the configuration manifold
@@ -22,6 +22,10 @@ class DynamicModel(object):
     self.nq = nq
     self.nv = nv
     self.m = m
+    self.integrator = integrator
+
+    # Creates internally the integrator data
+    self.integrator.createData(nv)
 
   def createData(self):
     """ Create the system dynamics data.
@@ -29,10 +33,30 @@ class DynamicModel(object):
     from data import DynamicsData
     return DynamicsData(self.nq, self.nv, self.m)
 
-  def computeAllTerms(self, data, x, u):
-    """ Computes the evolution function and its derivatives.
+  def stepForward(self, data, x, u, dt):
+    """ Compute the next state value
+
+    :param data: dynamic model data
+    :param x: state vector
+    :param u: control vector
+    :param dt: integration step
     """
-    return self.f(data, x, u), self.fx(data, x, u), self.fu(data, x, u)
+    # Integrate the time-continuos dynamics in order to get the next state
+    # value
+    return self.integrator.integrate(self, data, x, u, dt)
+  
+  def computeDerivatives(self, data, x, u, dt):
+    """ Compute the discrete-time derivatives of dynamics
+
+    :param data: dynamic model data
+    :param x: state vector
+    :param u: control vector
+    :param dt: integration step
+    """
+    # Computing the time-continuos linearized system, i.e. dv = fx*dx + fu*du,
+    # and converting it into discrete one
+    self.integrator.discretization(self, data, x, u, dt)
+    return data.fx, data.fu
 
   @abc.abstractmethod
   def f(self, data, x, u):
@@ -53,7 +77,7 @@ class DynamicModel(object):
     :param data: dynamics data
     :param x: system configuration
     :param u: control input
-    :return: Jacobian of the state variation w.r.t the state
+    :returns: Jacobian of the state variation w.r.t the state
     """
     pass
 
@@ -80,21 +104,21 @@ class DynamicModel(object):
   def getConfigurationDimension(self):
     """ Get the configuration manifold dimension.
 
-    :returns dimension of configuration manifold
+    :returns: dimension of configuration manifold
     """
     return self.nq
 
   def getTangentDimension(self):
     """ Get the tangent manifold dimension.
 
-    :returns dimension of tangent space of the configuration manifold
+    :returns: dimension of tangent space of the configuration manifold
     """
     return self.nv
 
   def getControlDimension(self):
     """ Get the control dimension.
 
-    :returns dimension of the control space
+    :returns: dimension of the control space
     """
     return self.m
 

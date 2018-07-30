@@ -10,52 +10,153 @@ class Integrator(object):
     pass
   
   @abc.abstractmethod
-  def createData(self, data): pass
+  def createData(self, nv):
+    """ Create the data for the numerical integrator and discretizer.
+
+    Due to the integrator data is needed internally, we create inside the
+    implementation class. It aims is to create data for the integrator and
+    sampler, and both depends on the dimension of the tangential space nv.
+    :param nv: dimension of the tangent space of the configuration manifold
+    """
+    pass
 
   @abc.abstractmethod
-  def integrate(self, model, data, x, u, dt): pass
+  def integrate(self, model, data, x, u, dt):
+    """ Integrate the system dynamics.
+
+    This abstract method allows us to define integration rules of our ODE. It
+    uses the model and data classes which defines the evolution function and
+    its data, respectively. For more information about the model and data see
+    the Dynamics class and and its data structure.
+    :param model: dynamic model
+    :param data: dynamic model data
+    :para x: state vector
+    :param u: control vector
+    :param dt: integration step
+    :returns: next state vector
+    """
+    pass
   
   @abc.abstractmethod
-  def discretize(self, model, data, x, u, dt): pass
+  def discretization(self, model, data, x, u, dt):
+    """ Convert the continuos, and linearized, dynamic model into discrete one.
+
+    This abstract method allows us to define a discretization rule for the 
+    linearized dynamic (dv = fx*dx + fu*du) which is compatible withe its 
+    integration scheme. Note that we assume a first-order Taylor linearization.
+    :param model: dynamic model
+    :param data: dynamic model data
+    :para x: state vector
+    :param u: control vector
+    :param dt: sampling period
+    :returns: time-discrete state and control derivatives
+    """
+    pass
 
 
 class EulerIntegrator(Integrator):
-  def createData(self, data):
-    self._I = np.eye(data.nv) 
+  def createData(self, nv):
+    """ Create the internal data of forward Euler sampler.
 
-  """ Integrates the function using the forward Euler method
-  """
-  @staticmethod
-  def integrate(model, data, x, u, dt):
-    """ Integrates the system dynamics using the forward Euler rule.
+    :param nv: dimension of the tangent space of the configuration manifold
     """
-    return x + model.f(data, x, u) * dt
+    # Data for integration
+    self.x_next = np.matrix(np.zeros((nv, 1)))
 
-  def discretize(self, data, dt):
+    # Data for discretization
+    self._I = np.eye(nv)
+
+  def integrate(self, model, data, x, u, dt):
+    """ Integrate the system dynamics using the forward Euler scheme.
+
+    :param model: dynamic model
+    :param data: dynamic model data
+    :para x: state vector
+    :param u: control vector
+    :param dt: sampling period
+    :returns: next state vector
+    """
+    np.copyto(self.x_next, x + dt * model.f(data, x, u))
+    return self.x_next
+
+  def discretization(self, model, data, x, u, dt):
+    """ Convert the time-continuos dynamics into discrete one using forward
+    Euler rule.
+
+    :param model: dynamic model
+    :param data: dynamic model data
+    :para x: state vector
+    :param u: control vector
+    :param dt: sampling period
+    :returns: discrete time state and control derivatives
+    """
+    model.fx(data, x, u)
+    model.fu(data, x, u)
     np.copyto(data.fx, self._I + data.fx * dt)
     np.copyto(data.fu, data.fu * dt)
     return data.fx, data.fu
 
 
 class RK4Integrator(Integrator):
-  """ Integrates the function using the fourth-order Runge-Kutta method
-  """
-  @staticmethod
-  def integrate(model, data, x, u, dt):
-    """ Integrates the function using the fourth-order Runge-Kutta method
+  def createData(self, nv):
+    # Data for integration
+    self.x_next = np.matrix(np.zeros((nv, 1)))
+    self.k1 = np.matrix(np.zeros((nv, 1)))
+    self.k2 = np.matrix(np.zeros((nv, 1)))
+    self.k3 = np.matrix(np.zeros((nv, 1)))
+    self.k4 = np.matrix(np.zeros((nv, 1)))
+
+    # Data for discretization
+    self._I = np.eye(nv)
+    self.f1 = np.matrix(np.zeros((nv, nv)))
+    self.f2 = np.matrix(np.zeros((nv, nv)))
+    self.f3 = np.matrix(np.zeros((nv, nv)))
+    self.f4 = np.matrix(np.zeros((nv, nv)))
+    self.sum_f = np.matrix(np.zeros((nv, nv)))
+
+  def integrate(self, model, data, x, u, dt):
+    """ Integrate the system dynamics using the fourth-order Runge-Kutta method.
+
+    :param model: dynamic model
+    :param data: dynamic model data
+    :para x: state vector
+    :param u: control vector
+    :param dt: sampling period
+    :returns: next state vector
     """
-    k1 = model.f(data, x, u)
+    np.copyto(self.k1, dt * model.f(data, x, u))
+    np.copyto(self.k2, dt * model.f(data, x + 0.5 * self.k1, u))
+    np.copyto(self.k3, dt * model.f(data, x + 0.5 * self.k2, u))
+    np.copyto(self.k4, dt * model.f(data, x + self.k3, u))
+    np.copyto(self.x_next, x + \
+      1. / 6 * (self.k1 + 2. * self.k2 + 2. * self.k3 + self.k4))
+    return self.x_next
 
-    x2 = x + dt / 2. * k1
-    k2 = model.f(data, x2, u)
+  def discretization(self, model, data, x, u, dt):
+    """ Convert the time-continuos dynamics into discrete one using
+    fourth-order Runge-Kutta method.
 
-    x3 = x + dt / 2. * k2
-    k3 = model.f(data, x3, u)
+    :param model: dynamic model
+    :param data: dynamic model data
+    :para x: state vector
+    :param u: control vector
+    :param dt: sampling period
+    :returns: discrete time state and control derivatives
+    """
+    # Computing four stages of RK4
+    model.fx(data, x, u)
+    model.fu(data, x, u)
+    np.copyto(self.f1, dt * self._I)
+    np.copyto(self.f2, dt * (self._I + 0.5 * data.fx * dt))
+    np.copyto(self.f3, dt * (self._I + 0.5 * data.fx * self.f2))
+    np.copyto(self.f4, dt * (self._I + data.fx * self.f3))
+    np.copyto(self.sum_f, \
+      1. / 6 * (self.f1 + 2. * self.f2 + 2. * self.f3 + self.f4))
 
-    x4 = x + dt * k3
-    k4 = model.f(data, x4, u)
-    return x + dt / 6. * (k1 + 2. * k2 + 2. * k3 + k4)
-
+    # Computing the discrete time state and control derivatives
+    np.copyto(data.fx, self._I + self.sum_f * data.fx)
+    np.copyto(data.fu, self.sum_f * data.fu)
+    return data.fx, data.fu
 
 def computeFlow(integrator, model, data, timeline, x, controls):
   N = len(timeline)
