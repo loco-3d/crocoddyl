@@ -12,7 +12,7 @@ class DynamicModel(object):
   """
   __metaclass__ = abc.ABCMeta
 
-  def __init__(self, nq, nv, m, integrator):
+  def __init__(self, nq, nv, m, integrator, discretizer):
     """ Construct the dynamics model.
 
     :param nq: dimension of the configuration manifold
@@ -23,9 +23,11 @@ class DynamicModel(object):
     self.nv = nv
     self.m = m
     self.integrator = integrator
+    self.discretizer = discretizer
 
-    # Creates internally the integrator data
+    # Creates internally the integrator and discretizer data
     self.integrator.createData(nv)
+    self.discretizer.createData(nv)
 
   def createData(self):
     """ Create the system dynamics data.
@@ -55,7 +57,7 @@ class DynamicModel(object):
     """
     # Computing the time-continuos linearized system, i.e. dv = fx*dx + fu*du,
     # and converting it into discrete one
-    self.integrator.discretization(self, data, x, u, dt)
+    self.discretizer.discretization(self, data, x, u, dt)
     return data.fx, data.fu
 
   @abc.abstractmethod
@@ -122,24 +124,6 @@ class DynamicModel(object):
     """
     return self.m
 
-  # @abc.abstractmethod
-  # def fxx(self, data, x, u):
-  #   """
-  #   Eval the hessian of the dynamics with respect to the state
-  #   :param x:
-  #   :param u:
-  #   :param data:
-  #   :return:
-  #   """
-  #   pass
-
-  # @abc.abstractmethod
-  # def fxu(self, data, x, u):
-  #   pass
-
-  # @abc.abstractmethod
-  # def fuu(self, data, x, u):
-  #   pass
 
 
 import numpy as np
@@ -153,14 +137,14 @@ class NumDiffDynamicModel(DynamicModel):
   """
   __metaclass__ = abc.ABCMeta
 
-  def __init__(self, nq, nv, m):
+  def __init__(self, nq, nv, m, integrator):
     """ Construct the dynamics model.
 
     :param nq: dimension of the configuration manifold
     :param nv: dimension of the tangent space of the configuration manifold
     :param m: dimension of the control space
     """
-    DynamicModel.__init__(self, nq, nv, m)
+    DynamicModel.__init__(self, nq, nv, m, integrator)
     self.sqrt_eps = math.sqrt(np.finfo(float).eps)
     self.f_nom = np.matrix(np.zeros((nv, 1)))
 

@@ -8,9 +8,9 @@ class SpringMass(DynamicModel):
   It defines the continuos evolution function (i.e. f(x, u)) and its state and
   control derivatives.
   """
-  def __init__(self, integrator):
+  def __init__(self, integrator, discretizer):
     # State and control dimension
-    DynamicModel.__init__(self, 2, 2, 1, integrator)
+    DynamicModel.__init__(self, 2, 2, 1, integrator, discretizer)
 
     # Mass, spring and damper values
     self._mass = 10.
