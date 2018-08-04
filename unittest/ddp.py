@@ -3,6 +3,7 @@ import numpy as np
 from cddp.ddp import DDP
 from cddp.cost_manager import CostManager
 from cddp.integrator import EulerIntegrator, RK4Integrator
+from cddp.discretizer import EulerDiscretizer, RK4Discretizer
 from models.spring_mass import SpringMass
 from models.simple_cost import GoalResidualQuadraticCost, StateControlRunningQuadraticCost
 
@@ -15,7 +16,8 @@ class LinearDDPTest(unittest.TestCase):
   def setUp(self):
     # Creating the dynamic model of the system and its integrator
     integrator = EulerIntegrator()
-    dynamics = SpringMass(integrator)
+    discretizer = EulerDiscretizer()
+    dynamics = SpringMass(integrator, discretizer)
 
     # Create random initial and desired state
     x0 = np.random.rand(dynamics.getConfigurationDimension(), 1)

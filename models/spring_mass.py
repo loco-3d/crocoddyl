@@ -40,9 +40,9 @@ class NumDiffSpringMass(NumDiffDynamicModel):
   It defines the continuos evolution function (i.e. f(x, u)) and computes its state and
   control derivatives through numerical differentiation.
   """
-  def __init__(self):
+  def __init__(self, integrator, discretizer):
     # State and control dimension
-    NumDiffDynamicModel.__init__(self, 2, 2, 1)
+    NumDiffDynamicModel.__init__(self, 2, 2, 1, integrator, discretizer)
 
     # Mass, spring and damper values
     self._mass = 10.

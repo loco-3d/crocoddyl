@@ -137,14 +137,14 @@ class NumDiffDynamicModel(DynamicModel):
   """
   __metaclass__ = abc.ABCMeta
 
-  def __init__(self, nq, nv, m, integrator):
+  def __init__(self, nq, nv, m, integrator, discretizer):
     """ Construct the dynamics model.
 
     :param nq: dimension of the configuration manifold
     :param nv: dimension of the tangent space of the configuration manifold
     :param m: dimension of the control space
     """
-    DynamicModel.__init__(self, nq, nv, m, integrator)
+    DynamicModel.__init__(self, nq, nv, m, integrator, discretizer)
     self.sqrt_eps = math.sqrt(np.finfo(float).eps)
     self.f_nom = np.matrix(np.zeros((nv, 1)))
 
