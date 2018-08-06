@@ -21,7 +21,7 @@ class Integrator(object):
     pass
 
   @abc.abstractmethod
-  def integrate(self, model, data, x, u, dt):
+  def __call__(self, model, data, x, u, dt):
     """ Integrate the system dynamics.
 
     This abstract method allows us to define integration rules of our ODE. It
@@ -47,7 +47,7 @@ class EulerIntegrator(Integrator):
     # Data for integration
     self.x_next = np.matrix(np.zeros((nv, 1)))
 
-  def integrate(self, model, data, x, u, dt):
+  def __call__(self, model, data, x, u, dt):
     """ Integrate the system dynamics using the forward Euler scheme.
 
     :param model: dynamic model
@@ -70,7 +70,7 @@ class RK4Integrator(Integrator):
     self.k3 = np.matrix(np.zeros((nv, 1)))
     self.k4 = np.matrix(np.zeros((nv, 1)))
 
-  def integrate(self, model, data, x, u, dt):
+  def __call__(self, model, data, x, u, dt):
     """ Integrate the system dynamics using the fourth-order Runge-Kutta method.
 
     :param model: dynamic model

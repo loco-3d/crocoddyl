@@ -22,7 +22,7 @@ class Discretizer(object):
     pass
 
   @abc.abstractmethod
-  def discretization(self, model, data, x, u, dt):
+  def __call__(self, model, data, x, u, dt):
     """ Convert the continuos, and linearized, dynamic model into discrete one.
 
     This abstract method allows us to define a discretization rule for the 
@@ -49,7 +49,7 @@ class EulerDiscretizer(Discretizer):
     # Data for discretization
     self._I = np.eye(nv)
 
-  def discretization(self, model, data, x, u, dt):
+  def __call__(self, model, data, x, u, dt):
     """ Convert the time-continuos dynamics into discrete one using forward
     Euler rule.
 
@@ -77,7 +77,7 @@ class RK4Discretizer(Discretizer):
     self.f4 = np.matrix(np.zeros((nv, nv)))
     self.sum_f = np.matrix(np.zeros((nv, nv)))
 
-  def discretization(self, model, data, x, u, dt):
+  def __call__(self, model, data, x, u, dt):
     """ Convert the time-continuos dynamics into discrete one using
     fourth-order Runge-Kutta method.
 

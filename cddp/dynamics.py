@@ -45,7 +45,7 @@ class DynamicModel(object):
     """
     # Integrate the time-continuos dynamics in order to get the next state
     # value
-    return self.integrator.integrate(self, data, x, u, dt)
+    return self.integrator(self, data, x, u, dt)
   
   def computeDerivatives(self, data, x, u, dt):
     """ Compute the discrete-time derivatives of dynamics
@@ -57,7 +57,7 @@ class DynamicModel(object):
     """
     # Computing the time-continuos linearized system, i.e. dv = fx*dx + fu*du,
     # and converting it into discrete one
-    self.discretizer.discretization(self, data, x, u, dt)
+    self.discretizer(self, data, x, u, dt)
     return data.fx, data.fu
 
   @abc.abstractmethod
