@@ -1,4 +1,5 @@
 import abc
+from utils import assertClass
 from ode import ODEBase
 
 
@@ -19,6 +20,9 @@ class DynamicModel(object):
     :param nv: dimension of the tangent space of the configuration manifold
     :param m: dimension of the control space
     """
+    assertClass(integrator, 'Integrator')
+    assertClass(discretizer, 'Discretizer')
+
     self.nq = nq
     self.nv = nv
     self.m = m

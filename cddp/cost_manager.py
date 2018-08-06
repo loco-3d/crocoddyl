@@ -1,6 +1,6 @@
 import numpy as np
 import abc
-import inspect
+from utils import assertClass
 
 
 class CostManager(object):
@@ -25,9 +25,7 @@ class CostManager(object):
 
     Before adding it, it checks if this is a terminal cost objects.
     """
-    name = cost.__class__.__name__
-    assert inspect.getmro(cost.__class__)[-2].__name__ == 'XCost', "The " + \
-      name + " class has to derived from the XCost abstract class."
+    assertClass(cost, 'XCost')
     self.terminal.append(cost)
 
   def addRunning(self, cost):
@@ -35,9 +33,7 @@ class CostManager(object):
 
     Before adding it, it checks if this is a terminal cost objects.
     """
-    name = cost.__class__.__name__
-    assert inspect.getmro(cost.__class__)[-2].__name__ == 'XUCost', "The " + \
-      name + " class has to derived from the XCost abstract class."
+    assertClass(cost, 'XUCost')
     self.running.append(cost)
 
   def createTerminalData(self, n):
@@ -74,9 +70,7 @@ class CostManager(object):
 
   def computeTerminalCost(self, data, x):
     assert self.terminal > 0, "You didn't add the terminal costs"
-    name = data.total.__class__.__name__
-    assert inspect.getmro(data.total.__class__)[-2].__name__ == 'XCostData', \
-      "The " + name + " class has to derived from the XCostData abstract class."
+    assertClass(data.total, 'XCostData')
 
     l = data.total.l[0]
     l.fill(0.)
@@ -87,9 +81,7 @@ class CostManager(object):
 
   def computeRunningCost(self, data, x, u):
     assert self.running > 0, "You didn't add the running costs"
-    name = data.total.__class__.__name__
-    assert inspect.getmro(data.total.__class__)[-2].__name__ == 'XUCostData', \
-      "The " + name + " class has to derived from the XUCostData abstract class."
+    assertClass(data.total, 'XUCostData')
     
     l = data.total.l[0]
     l.fill(0.)
@@ -100,9 +92,7 @@ class CostManager(object):
 
   def computeTerminalTerms(self, data, x):
     assert self.terminal > 0, "You didn't add the terminal costs"
-    name = data.total.__class__.__name__
-    assert inspect.getmro(data.total.__class__)[-2].__name__ == 'XCostData', \
-      "The " + name + " class has to derived from the XCostData abstract class."
+    assertClass(data.total, 'XCostData')
     
     l = data.total.l[0]
     lx = data.total.lx
@@ -119,9 +109,7 @@ class CostManager(object):
 
   def computeRunningTerms(self, data, x, u):
     assert self.running > 0, "You didn't add the running costs"
-    name = data.total.__class__.__name__
-    assert inspect.getmro(data.total.__class__)[-2].__name__ == 'XUCostData', \
-      "The " + name + " class has to derived from the XUCostData abstract class."
+    assertClass(data.total, 'XUCostData')
     
     l = data.total.l[0]
     lx = data.total.lx

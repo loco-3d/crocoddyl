@@ -44,3 +44,9 @@ def plot(x, y, yerr=None, color=None, alpha_fill=0.3, ax=None):
 def show_plot():
   import matplotlib.pyplot as plt
   plt.show()
+
+def assertClass(derivated, abstract):
+  import inspect
+  assert inspect.getmro(derivated.__class__)[-2].__name__ == abstract, \
+      'The ' + derivated.__class__.__name__ + ' class has to derived from the ' +\
+      abstract + ' abstract class.'
