@@ -1,15 +1,14 @@
 import unittest
 import numpy as np
+import cddp
 from models.spring_mass import SpringMass, NumDiffSpringMass
-from cddp.integrator import EulerIntegrator, RK4Integrator
-from cddp.discretizer import EulerDiscretizer, RK4Discretizer
 
 
 class NumDiffDynamicsTest(unittest.TestCase):
   def setUp(self):
     # Creating the dynamic model with analytical and numerical derivatives
-    integrator = EulerIntegrator()
-    discretizer = EulerDiscretizer()
+    integrator = cddp.EulerIntegrator()
+    discretizer = cddp.EulerDiscretizer()
     self.analytic_dyn = SpringMass(integrator, discretizer)
     self.numdiff_dyn = NumDiffSpringMass(integrator, discretizer)
 

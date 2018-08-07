@@ -1,6 +1,7 @@
 import abc
 import numpy as np
 
+
 class Discretizer(object):
   """ This abstract class declares the virtual method for any discretization
   method.

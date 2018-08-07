@@ -1,24 +1,24 @@
 import numpy as np
-import cddp.quadratic_cost as qc
+import cddp
 
 
-class GoalQuadraticCost(qc.TerminalQuadraticCost):
+class GoalQuadraticCost(cddp.TerminalQuadraticCost):
   """ Terminal quadratic cost
   """
   def __init__(self, goal):
-    qc.TerminalQuadraticCost.__init__(self)
+    cddp.TerminalQuadraticCost.__init__(self)
     self.x_des = goal
 
   def xr(self, data, x):
     np.copyto(data.xr, x - self.x_des)
     return data.xr
 
-class GoalResidualQuadraticCost(qc.TerminalResidualQuadraticCost):
+class GoalResidualQuadraticCost(cddp.TerminalResidualQuadraticCost):
   """ Terminal residual-quadratic cost
   """
   def __init__(self, goal):
     k = len(goal)
-    qc.TerminalResidualQuadraticCost.__init__(self, k)
+    cddp.TerminalResidualQuadraticCost.__init__(self, k)
     self.x_des = goal
 
   def r(self, data, x):
@@ -29,11 +29,11 @@ class GoalResidualQuadraticCost(qc.TerminalResidualQuadraticCost):
     np.copyto(data.rx, np.eye(data.n))
     return data.rx
 
-class StateRunningQuadraticCost(qc.RunningQuadraticCost):
+class StateRunningQuadraticCost(cddp.RunningQuadraticCost):
   """ State running quadratic cost
   """
   def __init__(self, goal):
-    qc.RunningCost.__init__(self)
+    cddp.RunningCost.__init__(self)
     self.x_des = goal
 
   def xr(self, data, x, u):
@@ -44,11 +44,11 @@ class StateRunningQuadraticCost(qc.RunningQuadraticCost):
     # Do nothing since it's a cost in the state
     return data.ur
 
-class StateControlRunningQuadraticCost(qc.RunningQuadraticCost):
+class StateControlRunningQuadraticCost(cddp.RunningQuadraticCost):
   """ State-control running quadratic cost
   """
   def __init__(self, goal):
-    qc.RunningQuadraticCost.__init__(self)
+    cddp.RunningQuadraticCost.__init__(self)
     self.x_des = goal
 
   def xr(self, data, x, u):
@@ -59,11 +59,11 @@ class StateControlRunningQuadraticCost(qc.RunningQuadraticCost):
     np.copyto(data.ur, u)
     return data.ur
 
-class StateControlQuadraticRegularization(qc.RunningQuadraticCost):
+class StateControlQuadraticRegularization(cddp.RunningQuadraticCost):
   """ State-control running quadratic cost
   """
   def __init__(self):
-    qc.RunningQuadraticCost.__init__(self)
+    cddp.RunningQuadraticCost.__init__(self)
 
   def xr(self, data, x, u):
     np.copyto(data.xr, x)

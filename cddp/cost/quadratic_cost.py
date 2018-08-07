@@ -1,6 +1,6 @@
-from cost import TerminalCost, RunningCost, TerminalResidualCost, RunningResidualCost
-import numpy as np
 import abc
+import numpy as np
+from cddp.cost import TerminalCost, RunningCost, TerminalResidualCost, RunningResidualCost
 
 
 class TerminalQuadraticCost(TerminalCost):

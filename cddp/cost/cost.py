@@ -154,7 +154,7 @@ class TerminalCost(XCost):
 
     :param n: dimension of the state
     """
-    from data import TerminalCostData
+    from cddp.data import TerminalCostData
     return TerminalCostData(n)
 
   @abc.abstractmethod
@@ -195,7 +195,7 @@ class TerminalResidualCost(XCost):
 
     :param n: dimension of the state
     """
-    from data import TerminalResidualCostData
+    from cddp.data import TerminalResidualCostData
     return TerminalResidualCostData(n, self.k)
 
   @abc.abstractmethod
@@ -234,7 +234,7 @@ class RunningCost(XUCost):
     :param n: dimension of the state
     :param m: dimensions of the control
     """
-    from data import RunningCostData
+    from cddp.data import RunningCostData
     return RunningCostData(n, m)
 
   @abc.abstractmethod
@@ -289,7 +289,7 @@ class RunningResidualCost(XUCost):
     :param n: dimension of the state
     :param m: dimensions of the control
     """
-    from data import RunningResidualCostData
+    from cddp.data import RunningResidualCostData
     return RunningResidualCostData(n, m, self.k)
 
   @abc.abstractmethod

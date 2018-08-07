@@ -1,22 +1,16 @@
 import unittest
 import numpy as np
-from cddp.ddp import DDP
-from cddp.cost_manager import CostManager
-from cddp.integrator import EulerIntegrator, RK4Integrator
-from cddp.discretizer import EulerDiscretizer, RK4Discretizer
+import cddp
 from models.spring_mass import SpringMass
 from models.simple_cost import GoalResidualQuadraticCost, StateControlRunningQuadraticCost
 
 
-
-
 plot_enable = False
-
 class LinearDDPTest(unittest.TestCase):
   def setUp(self):
     # Creating the dynamic model of the system and its integrator
-    integrator = EulerIntegrator()
-    discretizer = EulerDiscretizer()
+    integrator = cddp.EulerIntegrator()
+    discretizer = cddp.EulerDiscretizer()
     dynamics = SpringMass(integrator, discretizer)
 
     # Create random initial and desired state
@@ -25,7 +19,7 @@ class LinearDDPTest(unittest.TestCase):
     x_des[1] = 0.
 
     # Creating the cost manager and its cost functions
-    cost_manager = CostManager()
+    cost_manager = cddp.CostManager()
     goal_cost = GoalResidualQuadraticCost(x_des)
     xu_cost = StateControlRunningQuadraticCost(x_des)
 
@@ -41,7 +35,7 @@ class LinearDDPTest(unittest.TestCase):
 
     # Creating the DDP solver
     timeline = np.arange(0.0, 3., 0.01)  # np.linspace(0., 0.5, 51)
-    self.ddp = DDP(dynamics, cost_manager, timeline)
+    self.ddp = cddp.DDP(dynamics, cost_manager, timeline)
 
     # Running the DDP solver
     self.ddp.compute(x0)

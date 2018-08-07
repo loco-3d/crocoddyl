@@ -1,6 +1,6 @@
-import numpy as np
 import abc
-from utils import assertClass
+import numpy as np
+from cddp.utils import assertClass
 
 
 class CostManager(object):
@@ -42,7 +42,7 @@ class CostManager(object):
     Before creating the data, it's needed to add all the terminal costs
     of your problem.
     """
-    from data import XCostData, CostManagerData
+    from cddp.data import XCostData, CostManagerData
     data = CostManagerData()
 
     # Creating the terminal cost data, the residual data isn't needed
@@ -58,7 +58,7 @@ class CostManager(object):
     Before creating the data, it's needed to add all the running costs of your
     problem.
     """
-    from data import XUCostData, CostManagerData
+    from cddp.data import XUCostData, CostManagerData
     data = CostManagerData()
 
     # Creating the running cost data, the residual data isn't needed

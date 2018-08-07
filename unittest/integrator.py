@@ -1,14 +1,13 @@
 import unittest
 import numpy as np
-from cddp.integrator import EulerIntegrator, RK4Integrator
-from cddp.discretizer import EulerDiscretizer, RK4Discretizer
+import cddp
 from models.spring_mass import SpringMass
 
 
 class IntegratorTest(unittest.TestCase):
   def test_forward_Euler(self):
-    integrator = EulerIntegrator()
-    discretizer = EulerDiscretizer()
+    integrator = cddp.EulerIntegrator()
+    discretizer = cddp.EulerDiscretizer()
     dynamics = SpringMass(integrator, discretizer)
     data = dynamics.createData()
 
@@ -23,8 +22,8 @@ class IntegratorTest(unittest.TestCase):
       "The forward Euler discretizer is wrong.")
   
   def test_RK4(self):
-    integrator = RK4Integrator()
-    discretizer = EulerDiscretizer()
+    integrator = cddp.RK4Integrator()
+    discretizer = cddp.EulerDiscretizer()
     dynamics = SpringMass(integrator, discretizer)
     data = dynamics.createData()
 

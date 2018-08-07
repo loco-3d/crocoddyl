@@ -1,6 +1,6 @@
 import numpy as np
-from data import RunningDDPData, TerminalDDPData
-import utils
+from cddp.data import RunningDDPData, TerminalDDPData
+from cddp.utils import isPositiveDefinitive
 
 
 class DDP(object):
@@ -158,7 +158,7 @@ class DDP(object):
       # positive-definitive or when the minimum is far and the
       # quadratic model is inaccurate
       np.copyto(it.Quu_r, it.Quu + fu.T * muI * fu)
-      if not utils.isPositiveDefinitive(it.Quu_r):
+      if not isPositiveDefinitive(it.Quu_r):
         return False
       np.copyto(it.Qux_r, it.Qux + fu.T * muI * fx)
 
