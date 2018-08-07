@@ -58,3 +58,17 @@ class StateControlRunningQuadraticCost(qc.RunningQuadraticCost):
   def ur(self, data, x, u):
     np.copyto(data.ur, u)
     return data.ur
+
+class StateControlQuadraticRegularization(qc.RunningQuadraticCost):
+  """ State-control running quadratic cost
+  """
+  def __init__(self):
+    qc.RunningQuadraticCost.__init__(self)
+
+  def xr(self, data, x, u):
+    np.copyto(data.xr, x)
+    return data.xr
+
+  def ur(self, data, x, u):
+    np.copyto(data.ur, u)
+    return data.ur
