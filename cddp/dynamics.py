@@ -1,24 +1,26 @@
 import abc
 from utils import assertClass
-from ode import ODEBase
 
 
-class DynamicModel(object):
+class DynamicalSystem(object):
   """ This abstract class declares virtual methods for defining the system
   evolution and its derivatives.
 
   It allows us to define any kind of smooth system dynamics of the form
-  v = f(x,u), where nq, nv and m are the dimension of the configuration
-  manifold x, its tangent space v and control u vectors, respectively.
+  v = f(x,u). The vector field v belongs to the tangent space TxQ of given
+  configuration point x on the configuration manifold Q. The control (input)
+  vector u allows the system to evolves toward a desired configuration point.
+  The dimension of the configuration space Q, its tanget space TxQ and the
+  control (input) vector are nq, nv and m, respectively.
   """
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, nq, nv, m, integrator, discretizer):
     """ Construct the dynamics model.
 
-    :param nq: dimension of the configuration manifold
-    :param nv: dimension of the tangent space of the configuration manifold
-    :param m: dimension of the control space
+    :param nq: dimension of the configuration space Q
+    :param nv: dimension of the tangent bundle over the configuration space TQ
+    :param m: dimension of the control input
     """
     assertClass(integrator, 'Integrator')
     assertClass(discretizer, 'Discretizer')
@@ -43,7 +45,7 @@ class DynamicModel(object):
     """ Compute the next state value
 
     :param data: dynamic model data
-    :param x: state vector
+    :param x: configuration point
     :param u: control vector
     :param dt: integration step
     """
@@ -55,7 +57,7 @@ class DynamicModel(object):
     """ Compute the discrete-time derivatives of dynamics
 
     :param data: dynamic model data
-    :param x: state vector
+    :param x: configuration point
     :param u: control vector
     :param dt: integration step
     """
@@ -69,62 +71,62 @@ class DynamicModel(object):
     """ Evaluate the evolution function and stores the result in data.
 
     :param data: dynamics data
-    :param x: system configuration
+    :param x: configuration point
     :param u: control input
-    :returns: state variation
+    :returns: generalized velocity in x configuration
     """
     pass
 
   @abc.abstractmethod
   def fx(self, data, x, u):
-    """ Evaluate the dynamics Jacobian w.r.t. the state and stores the
-    result in data.
+    """ Evaluate the system Jacobian w.r.t. the configuration point and stores
+    the result in data.
 
     :param data: dynamics data
-    :param x: system configuration
+    :param x: configuration point
     :param u: control input
-    :returns: Jacobian of the state variation w.r.t the state
+    :returns: system Jacobian w.r.t the configuration point
     """
     pass
 
   @abc.abstractmethod
   def fu(self, data, x, u):
-    """ Evaluate the dynamics Jacobian w.r.t. the control and stores the
-    result in data.
+    """ Evaluate the system Jacobian w.r.t. the control and stores the result
+    in data.
 
     :param data: dynamics data
-    :param x: system configuration
+    :param x: configuration point
     :param u: control input
-    :returns: Jacobian of the state variation w.r.t the control
+    :returns: system Jacobian w.r.t the control
     """
     pass
 
   def stateDifference(self, xf, x0):
     """ Get the state different between xf and x0 (i.e. xf - x0).
 
-    :param xf: system configuration
-    :param x0: system configuration
+    :param xf: configuration point
+    :param x0: configuration point
     """
     return xf - x0
 
   def getConfigurationDimension(self):
-    """ Get the configuration manifold dimension.
+    """ Get the configuration space dimension.
 
-    :returns: dimension of configuration manifold
+    :returns: dimension of configuration space
     """
     return self.nq
 
   def getTangentDimension(self):
-    """ Get the tangent manifold dimension.
+    """ Get the tangent bundle dimension.
 
-    :returns: dimension of tangent space of the configuration manifold
+    :returns: dimension of tangent bundle of the configuration space
     """
     return self.nv
 
   def getControlDimension(self):
     """ Get the control dimension.
 
-    :returns: dimension of the control space
+    :returns: dimension of the control vector
     """
     return self.m
 
@@ -132,9 +134,9 @@ class DynamicModel(object):
 
 import numpy as np
 import math
-class NumDiffDynamicModel(DynamicModel):
-  """ Compute the dynamic model evolution and its derivatives computation
-  through numerical differentiation.
+class NumDiffDynamicalSystem(DynamicalSystem):
+  """ This abstract class declares virtual methods for defining the system
+  evolution where its derivatives are computed numerically.
 
   This class uses numerical differentiation for computing the state and control
   derivatives of a dynamic model.
@@ -148,7 +150,7 @@ class NumDiffDynamicModel(DynamicModel):
     :param nv: dimension of the tangent space of the configuration manifold
     :param m: dimension of the control space
     """
-    DynamicModel.__init__(self, nq, nv, m, integrator, discretizer)
+    DynamicalSystem.__init__(self, nq, nv, m, integrator, discretizer)
     self.sqrt_eps = math.sqrt(np.finfo(float).eps)
     self.f_nom = np.matrix(np.zeros((nv, 1)))
 
