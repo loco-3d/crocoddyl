@@ -29,7 +29,7 @@ class TerminalQuadraticCost(TerminalCost):
     """
     assert q.shape > 1, "The Q weights have to be described as an array. \
       We define it as diagonal matrix."
-    assert (q > 0).all(), "The Q weights have to be positive."
+    assert (q >= 0).all(), "The Q weights have to be positive."
 
     # Setting up the weight values
     self._q = q
@@ -89,7 +89,7 @@ class TerminalResidualQuadraticCost(TerminalResidualCost):
       We define it as diagonal matrix."
     assert len(q) == self.k, "Wrong dimension of the Q array, it should be "\
       + str(self.k) + "."
-    assert (q > 0).all(), "The Q weights have to be positive."
+    assert (q >= 0).all(), "The Q weights have to be positive."
 
     # Setting up the weight values
     self._q = q
@@ -237,7 +237,7 @@ class RunningResidualQuadraticCost(RunningResidualCost):
       define it as diagonal matrix."
     assert len(q) == self.k, "Wrong dimension of the Q array, it should be " \
       + str(self.k) + "."
-    assert (q > 0).all(), "The Q weights have to be positive."
+    assert (q >= 0).all(), "The Q weights have to be positive."
 
     # Setting up the weight values
     self._q = q
