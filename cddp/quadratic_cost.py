@@ -148,14 +148,14 @@ class RunningQuadraticCost(RunningCost):
     """ Define the Q and R weighting matrices.
 
     :param q: array of n elements, where n is the number of state variables
-    :param r: array of m elements, where n is the number of control variables
+    :param r: array of m elements, where m is the number of control variables
     """
     assert q.shape > 1, "The Q weights have to be described as an array. We \
       define it as diagonal matrix."
     assert r.shape > 1, "The R weights have to be described as an array. We \
       define it as diagonal matrix."
-    assert (q > 0).all(), "The Q weights have to be positive."
-    assert (r > 0).all(), "The R weights have to be positive."
+    assert (q >= 0).all(), "The Q weights have to be positive."
+    assert (r >= 0).all(), "The R weights have to be positive."
 
     # Setting up the weight values
     self._q = q
