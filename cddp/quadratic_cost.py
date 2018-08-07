@@ -202,7 +202,7 @@ class RunningQuadraticCost(RunningCost):
 
   def lux(self, data, x, u):
     # This derivative is zero, so we do anything.
-    return data.luu
+    return data.lux
 
 
 class RunningResidualQuadraticCost(RunningResidualCost):
