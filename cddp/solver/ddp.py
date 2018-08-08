@@ -175,7 +175,10 @@ class DDP(object):
                 it.Qx + it.K.T * it.Quu * it.j + it.K.T * it.Qu + it.Qux.T * it.j)
       np.copyto(it.Vxx, \
                 it.Qxx + it.K.T * it.Quu * it.K + it.K.T * it.Qux + it.Qux.T * it.K)
-
+      
+      # Symmetric can be lost due to round-off error. This ensures the symmetric
+      np.copyto(it.Vxx, 0.5 * (it.Vxx + it.Vxx.T))
+      
       # Updating the local cost and expected reduction. The total values are
       # used to check the changes in the forward pass. This is method is
       # explained in Tassa's PhD thesis
