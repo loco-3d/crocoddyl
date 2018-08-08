@@ -110,9 +110,6 @@ class DDP(object):
     self.V[0] = l.copy()
     self.dV_exp[0] = 0.
 
-    # Computing the regularization term
-    muI = mu * np.eye(it.dynamics.nv)
-
     # Running the backward sweep
     for k in range(self.N-1, -1, -1):
       it = self.intervals[k]
@@ -157,10 +154,10 @@ class DDP(object):
       # This regularization is needed when the Hessian is not
       # positive-definitive or when the minimum is far and the
       # quadratic model is inaccurate
-      np.copyto(it.Quu_r, it.Quu + fu.T * muI * fu)
+      np.copyto(it.Quu_r, it.Quu + mu * fu.T * fu)
       if not isPositiveDefinitive(it.Quu_r):
         return False
-      np.copyto(it.Qux_r, it.Qux + fu.T * muI * fx)
+      np.copyto(it.Qux_r, it.Qux + mu * fu.T * fx)
 
       # Computing the feedback and feedforward terms
       L_inv = np.linalg.inv(np.linalg.cholesky(it.Quu_r))
