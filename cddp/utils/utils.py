@@ -20,7 +20,6 @@ def isPositiveDefinitive(A):
   try:
     _ = np.linalg.cholesky(A)
   except np.linalg.LinAlgError:
-    print "Matrix is not positive definitive"
     return False
   return True
 
