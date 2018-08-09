@@ -4,8 +4,8 @@ from cddp.utils import isPositiveDefinitive
 
 
 class DDP(object):
-  def __init__(self, dynamics, cost_manager, timeline):
-    self.dynamics = dynamics
+  def __init__(self, system, cost_manager, timeline):
+    self.system = system
     self.cost_manager = cost_manager
     self.timeline = timeline
     self.N = len(timeline) - 1
@@ -13,15 +13,15 @@ class DDP(object):
     # Allocation of data for all the DDP intervals
     self.intervals = []
     for k in range(self.N + 1):
-      # Creating the dynamic and cost data
-      ddata = self.dynamics.createData()
+      # Creating the system dynamic and cost data
+      sdata = self.system.createData()
       if k == self.N:
-        cdata = self.cost_manager.createTerminalData(ddata.nv)
-        self.intervals.append(TerminalDDPData(ddata, cdata))
+        cdata = self.cost_manager.createTerminalData(sdata.nv)
+        self.intervals.append(TerminalDDPData(sdata, cdata))
       else:
-        cdata = self.cost_manager.createRunningData(ddata.nv, ddata.m)
-        self.intervals.append(RunningDDPData(ddata, cdata))
-    
+        cdata = self.cost_manager.createRunningData(sdata.nv, sdata.m)
+        self.intervals.append(RunningDDPData(sdata, cdata))
+
     # Global variables for the DDP algorithm
     self.V = np.matrix(np.zeros(1))
     self.V_new = np.matrix(np.zeros(1))
@@ -39,8 +39,8 @@ class DDP(object):
     self.initial_interval = self.intervals[0]
 
     # Convergence tolerance and maximum number of iterations
-    self.tol = 1e-3
-    self.max_iter = 1
+    self.tol = 1e-5
+    self.max_iter = 20
 
     # Regularization parameters (factor and increased rate)
     self.mu = 0.
@@ -68,6 +68,7 @@ class DDP(object):
     for i in range(self.max_iter):
       # Recording the number of iterations
       self.n_iter = i
+      print ("Iteration", self.n_iter, 'mu_tassa', self.mu)
 
       # Running the backward sweep
       while not self.backwardPass(self.mu, self.alpha):
@@ -77,6 +78,7 @@ class DDP(object):
           self.mu += 1e-8
         else:
           self.mu *= self.increased_rate
+          print ("Quu isn't positive. New mu_tassa", self.mu)
 
       # Running the forward pass
       while not self.forwardPass(self.alpha):
@@ -115,7 +117,7 @@ class DDP(object):
       it = self.intervals[k]
       it_next = self.intervals[k+1]
       cost_data = it.cost
-      dyn_data = it.dynamics
+      system_data = it.system
 
       # Getting the state, control and step time of the interval
       x = it.x
@@ -135,8 +137,8 @@ class DDP(object):
       luu *= dt
       lux *= dt
 
-      # Computing the discrete time dynamics derivatives
-      fx, fu = self.dynamics.computeDerivatives(dyn_data, x, u, dt)
+      # Computing the discrete time system derivatives
+      fx, fu = self.system.computeDerivatives(system_data, x, u, dt)
 
       # Getting the value function values of the next interval (prime interval)
       Vx_p = it_next.Vx
@@ -202,12 +204,12 @@ class DDP(object):
 
       # Computing the new control command
       np.copyto(it.u_new, it.u + alpha * it.j + it.K *
-                self.dynamics.stateDifference(it.x_new, it.x))
+                self.system.stateDifference(it.x_new, it.x))
 
-      # Integrating the dynamics and updating the new state value
+      # Integrating the system dynamics and updating the new state value
       dt = it.tf - it.t0
       np.copyto(it_next.x_new,
-                self.dynamics.stepForward(it.dynamics, it.x_new, it.u_new, dt))
+                self.system.stepForward(it.system, it.x_new, it.u_new, dt))
 
       # Integrating the cost and updating the new value function
       # TODO we need to use the integrator class for this
@@ -239,7 +241,7 @@ class DDP(object):
   def forwardSimulation(self, x0, U=None):
     """ Initial forward simulation for starting the DDP algorithm.
 
-    It integrates the system's dynamics given an initial state, and a control
+    It integrates the system dynamics given an initial state, and a control
     sequence. This provides the initial nominal state trajectory.
     """
     # Setting the initial state
@@ -262,10 +264,10 @@ class DDP(object):
       it = self.intervals[k]
       it_next = self.intervals[k+1]
 
-      # Integrating the dynamics and updating the new state value
+      # Integrating the system dynamics and updating the new state value
       dt = it.tf - it.t0
       x_next = \
-        self.dynamics.stepForward(it.dynamics, it.x, it.u, dt)
+        self.system.stepForward(it.system, it.x, it.u, dt)
       np.copyto(it_next.x, x_next)
       np.copyto(it_next.x_new, x_next)
 

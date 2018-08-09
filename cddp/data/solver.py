@@ -6,13 +6,13 @@ class TerminalDDPData(object):
 
   We create data for the nominal and new state values.
   """
-  def __init__(self, dyn_data, cost_data):
-    self.dynamics = dyn_data
+  def __init__(self, system_data, cost_data):
+    self.system = system_data
     self.cost = cost_data
 
     # Configuration and tangent manifold dimension
-    self.nq = self.dynamics.nq
-    self.nv = self.dynamics.nv
+    self.nq = self.system.nq
+    self.nv = self.system.nv
 
     # Nominal and new state on the interval
     self.x = np.matrix(np.zeros((self.nq, 1)))
@@ -28,14 +28,14 @@ class RunningDDPData(object):
   We create data for the nominal and new state and control values. Additionally,
   this data structure contains regularized terms too (e.g. Quu_r).
   """
-  def __init__(self, dyn_data, cost_data):
-    self.dynamics = dyn_data
+  def __init__(self, system_data, cost_data):
+    self.system = system_data
     self.cost = cost_data
 
     # Configuration manifold, tangent manifold and control dimensions
-    self.nq = self.dynamics.nq
-    self.nv = self.dynamics.nv
-    self.m = self.dynamics.m
+    self.nq = self.system.nq
+    self.nv = self.system.nv
+    self.m = self.system.m
 
     # Nominal and new state on the interval
     self.x = np.matrix(np.zeros((self.nq, 1)))
