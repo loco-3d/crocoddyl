@@ -34,7 +34,7 @@ class LinearDDPTest(unittest.TestCase):
     cost_manager.addRunning(xu_cost)
 
     # Creating the DDP solver
-    timeline = np.arange(0.0, 3., 0.01)  # np.linspace(0., 0.5, 51)
+    timeline = np.arange(0.0, 3., 0.001)  # np.linspace(0., 0.5, 51)
     self.ddp = cddp.DDP(dynamics, cost_manager, timeline)
 
     # Running the DDP solver
@@ -59,7 +59,7 @@ class LinearDDPTest(unittest.TestCase):
 
   def test_improvement_ratio_equals_one(self):
     self.assertAlmostEqual(
-      np.asscalar(self.ddp.dV) / np.asscalar(self.ddp.dV_exp), 1., 2, \
+      self.ddp.z, 1., 3, \
       "The improvement ration is not equals to 1.")
 
 

@@ -23,6 +23,7 @@ class DDP(object):
         self.intervals.append(RunningDDPData(sdata, cdata))
 
     # Global variables for the DDP algorithm
+    self.z = 0.
     self.V = np.matrix(np.zeros(1))
     self.V_new = np.matrix(np.zeros(1))
     self.dV = np.matrix(np.zeros(1))
@@ -39,6 +40,7 @@ class DDP(object):
     self.initial_interval = self.intervals[0]
 
     # Convergence tolerance and maximum number of iterations
+    self._convergence = False
     self.tol = 1e-4
     self.max_iter = 20
 
@@ -56,6 +58,9 @@ class DDP(object):
   def compute(self, x0, U=None):
     """ Computes the DDP algorithm.
     """
+    # Resetting convergence flag
+    self._convergence = False
+
     # Running an initial forward simulation given the initial state and
     # the control sequence
     self.forwardSimulation(x0, U)
@@ -92,7 +97,7 @@ class DDP(object):
           self.alpha = 0.
 
       # Checking convergence
-      if abs(self.dV / self.V) <= self.tol:
+      if self._convergence:
         return True
 
     return False
@@ -222,13 +227,18 @@ class DDP(object):
     it = self.terminal_interval
     self.V_new[0] += self.cost_manager.computeTerminalCost(it.cost, it.x_new)
 
-    # Checking the changes
+    # Checking convergence of the previous iteration
     self.dV[0] = self.V_new - self.V
-    z = self.dV[0, 0] / self.dV_exp[0, 0]
+    if abs(self.dV[0] / self.V) <= self.tol:
+        self._convergence = True
+        return True
+
+    # Checking the changes
+    self.z = self.dV[0, 0] / self.dV_exp[0, 0]
     # print "Expected Reduction:", -self.dV_exp[0, 0]
     # print "Actual Reduction:", -self.dV[0, 0]
-    # print "Reduction Ratio", z
-    if z > self.change_lb and z < self.change_ub:
+    # print "Reduction Ratio", self.z
+    if self.z > self.change_lb and self.z < self.change_ub:
       # Accepting the new trajectory and control, defining them as nominal ones
       for k in range(self.N):
         it = self.intervals[k]
