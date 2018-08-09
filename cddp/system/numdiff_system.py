@@ -54,12 +54,13 @@ class NumDiffDynamicalSystem(DynamicalSystem):
     return u_pert
 
   def fx(self, data, x, u):
-    """ Compute numerically the state derivative of the system dynamics and
-    stores the result in data.
+    """ Compute numerically the system Jacobian w.r.t. the configuration point
+    and stores the result in data.
 
     :param data: dynamic system data
     :param x: configuration state
     :param u: control input
+    :returns: system Jacobian w.r.t. the configuration point
     """
     np.copyto(self.f_nom, self.f(data, x, u))
     for i in range(data.nv):
@@ -69,12 +70,13 @@ class NumDiffDynamicalSystem(DynamicalSystem):
     return data.fx
 
   def fu(self, data, x, u):
-    """ Compute numerically the control derivative of the system dynamics and
-    stores the result in data.
+    """ Compute numerically the system Jacobian w.r.t. the control and stores
+    the result in data.
 
     :param data: dynamic system data
     :param x: configuration state
     :param u: control input
+    :returns: system Jacobian w.r.t. the control
     """
     np.copyto(self.f_nom, self.f(data, x, u))
     for i in range(data.m):
