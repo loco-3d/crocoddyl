@@ -39,7 +39,7 @@ class DDP(object):
     self.initial_interval = self.intervals[0]
 
     # Convergence tolerance and maximum number of iterations
-    self.tol = 1e-5
+    self.tol = 1e-4
     self.max_iter = 20
 
     # Regularization parameters (factor and increased rate)
@@ -68,7 +68,7 @@ class DDP(object):
     for i in range(self.max_iter):
       # Recording the number of iterations
       self.n_iter = i
-      print ("Iteration", self.n_iter, 'mu_tassa', self.mu)
+      print ("Iteration", self.n_iter, 'mu_tassa', self.mu, 'alpha', self.alpha)
 
       # Running the backward sweep
       while not self.backwardPass(self.mu, self.alpha):
@@ -78,13 +78,14 @@ class DDP(object):
           self.mu += 1e-8
         else:
           self.mu *= self.increased_rate
-          print ("Quu isn't positive. New mu_tassa", self.mu)
+          print "\t", ("Quu isn't positive. Increasing mu_tassa to", self.mu)
 
       # Running the forward pass
       while not self.forwardPass(self.alpha):
         self.alpha /= self.decreased_rate
+        print "\t", ("Rejected changes. Decreasing alpha to", self.alpha)
         if self.alpha == 0.:
-          print 'No found solution'
+          print "\t", ('No found solution')
           break
         if self.alpha < 1e-8:
           self.alpha = 0.
@@ -223,9 +224,9 @@ class DDP(object):
     # Checking the changes
     self.dV[0] = self.V_new - self.V
     z = self.dV[0, 0] / self.dV_exp[0, 0]
-    print "Expected Reduction:", -self.dV_exp[0, 0]
-    print "Actual Reduction:", -self.dV[0, 0]
-    print "Reduction Ratio", z
+    # print "Expected Reduction:", -self.dV_exp[0, 0]
+    # print "Actual Reduction:", -self.dV[0, 0]
+    # print "Reduction Ratio", z
     if z > self.change_lb and z < self.change_ub:
       # Accepting the new trajectory and control, defining them as nominal ones
       for k in range(self.N):
