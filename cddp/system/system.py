@@ -166,7 +166,7 @@ class NumDiffDynamicalSystem(DynamicalSystem):
     machine epsilon; you can see an implementation in SpringMass system class.
 
     :param x: configuration state
-    :param index: index (in the configuration state) for computing the
+    :param index: index (in the configuration tangent) for computing the
     perturbation
     """
     pass
