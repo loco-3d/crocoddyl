@@ -81,6 +81,7 @@ class DDP(object):
           print "\t", ("Quu isn't positive. Increasing mu_tassa to", self.mu)
 
       # Running the forward pass
+      self.alpha = 1. # resetting alpha
       while not self.forwardPass(self.alpha):
         self.alpha /= self.decreased_rate
         print "\t", ("Rejected changes. Decreasing alpha to", self.alpha)
