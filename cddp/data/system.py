@@ -21,3 +21,29 @@ class SystemData(object):
     self.f = np.matrix(np.zeros((self.nv, 1)))
     self.fx = np.matrix(np.zeros((self.nv, self.nv)))
     self.fu = np.matrix(np.zeros((self.nv, self.m)))
+
+
+class GeometricSystemData(object):
+  """ Data structure for the geometric system dynamics.
+
+  We only define the Jacobians of the dynamics, and not the Hessians of it,
+  because our optimal controller by default uses the Gauss-Newton approximation.
+  """
+  __metaclass__ = abc.ABCMeta
+
+  def __init__(self, nq, nv, m):
+    # Configuration and its tangent and control dimensions
+    self.nq = nq
+    self.nv = nv
+    self.m = m
+
+    # Creating the data structure for the ODE and its
+    # derivative
+    self.f = np.matrix(np.zeros((self.nq + self.nv, 1)))
+    self.fx = np.matrix(np.zeros((2 * self.nv, 2 * self.nv)))
+    self.fu = np.matrix(np.zeros((2 * self.nv, self.m)))
+
+    self.g = np.matrix(np.zeros((self.nv, 1)))
+    self.gq = np.matrix(np.zeros((self.nv, self.nv)))
+    self.gv = np.matrix(np.zeros((self.nv, self.nv)))
+    self.gtau = np.matrix(np.zeros((self.nv, self.m)))
