@@ -38,8 +38,8 @@ class DynamicalSystem(object):
   def createData(self):
     """ Create the system dynamics data.
     """
-    from cddp.data.system import DynamicalSystemData
-    return DynamicalSystemData(self.nq, self.nv, self.m)
+    from cddp.data.system import SystemData
+    return SystemData(self.nq, self.nv, self.m)
 
   def stepForward(self, data, x, u, dt):
     """ Compute the next state value
