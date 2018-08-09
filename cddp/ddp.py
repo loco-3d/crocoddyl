@@ -4,10 +4,9 @@ import utils
 
 
 class DDP(object):
-  def __init__(self, dynamics, cost_manager, integrator, timeline):
+  def __init__(self, dynamics, cost_manager, timeline):
     self.dynamics = dynamics
     self.cost_manager = cost_manager
-    self.integrator = integrator
     self.timeline = timeline
     self.N = len(timeline) - 1
 
@@ -22,7 +21,7 @@ class DDP(object):
       else:
         cdata = self.cost_manager.createRunningData(ddata.nv, ddata.m)
         self.intervals.append(RunningDDPData(ddata, cdata))
-
+    
     # Global variables for the DDP algorithm
     self.V = np.matrix(np.zeros(1))
     self.V_new = np.matrix(np.zeros(1))
@@ -139,13 +138,8 @@ class DDP(object):
       luu *= dt
       lux *= dt
 
-      # Computing the dynamics and its derivatives
-      _, fx, fu = self.dynamics.computeAllTerms(dyn_data, x, u)
-
-      # Integrating the derivatives of the system dynamics
-      # TODO we need to use the integrator class for this
-      np.copyto(fx, fx * dt + np.eye(dyn_data.nv))
-      np.copyto(fu, fu * dt)
+      # Computing the discrete time dynamics derivatives
+      fx, fu = self.dynamics.computeDerivatives(dyn_data, x, u, dt)
 
       # Getting the value function values of the next interval (prime interval)
       Vx_p = it_next.Vx
@@ -213,8 +207,7 @@ class DDP(object):
       # Integrating the dynamics and updating the new state value
       dt = it.tf - it.t0
       np.copyto(it_next.x_new,
-                self.integrator.integrate(self.dynamics, it.dynamics,
-                                          it.x_new, it.u_new, dt))
+                self.dynamics.stepForward(it.dynamics, it.x_new, it.u_new, dt))
 
       # Integrating the cost and updating the new value function
       # TODO we need to use the integrator class for this
@@ -272,7 +265,7 @@ class DDP(object):
       # Integrating the dynamics and updating the new state value
       dt = it.tf - it.t0
       x_next = \
-        self.integrator.integrate(self.dynamics, it.dynamics, it.x, it.u, dt)
+        self.dynamics.stepForward(it.dynamics, it.x, it.u, dt)
       np.copyto(it_next.x, x_next)
       np.copyto(it_next.x_new, x_next)
 

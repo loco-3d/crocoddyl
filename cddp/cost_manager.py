@@ -21,7 +21,7 @@ class CostManager(object):
     self.running = []
 
   def addTerminal(self, cost):
-    """ Adds a terminal cost object to the cost manager.
+    """ Add a terminal cost object to the cost manager.
 
     Before adding it, it checks if this is a terminal cost objects.
     """
@@ -31,7 +31,7 @@ class CostManager(object):
     self.terminal.append(cost)
 
   def addRunning(self, cost):
-    """ Adds a running cost object to the cost manager.
+    """ Add a running cost object to the cost manager.
 
     Before adding it, it checks if this is a terminal cost objects.
     """
@@ -57,7 +57,7 @@ class CostManager(object):
     return data
 
   def createRunningData(self, n, m):
-    """ Creates the data of the stack of running costs.
+    """ Create the data of the stack of running costs.
 
     Before creating the data, it's needed to add all the running costs of your
     problem.

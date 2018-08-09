@@ -12,8 +12,8 @@ class DynamicModel(object):
   """
   __metaclass__ = abc.ABCMeta
 
-  def __init__(self, nq, nv, m):
-    """ Constructs the dynamics model.
+  def __init__(self, nq, nv, m, integrator):
+    """ Construct the dynamics model.
 
     :param nq: dimension of the configuration manifold
     :param nv: dimension of the tangent space of the configuration manifold
@@ -22,21 +22,45 @@ class DynamicModel(object):
     self.nq = nq
     self.nv = nv
     self.m = m
+    self.integrator = integrator
+
+    # Creates internally the integrator data
+    self.integrator.createData(nv)
 
   def createData(self):
-    """ Creates the system dynamics data.
+    """ Create the system dynamics data.
     """
     from data import DynamicsData
     return DynamicsData(self.nq, self.nv, self.m)
 
-  def computeAllTerms(self, data, x, u):
-    """ Computes the evolution function and its derivatives.
+  def stepForward(self, data, x, u, dt):
+    """ Compute the next state value
+
+    :param data: dynamic model data
+    :param x: state vector
+    :param u: control vector
+    :param dt: integration step
     """
-    return self.f(data, x, u), self.fx(data, x, u), self.fu(data, x, u)
+    # Integrate the time-continuos dynamics in order to get the next state
+    # value
+    return self.integrator.integrate(self, data, x, u, dt)
+  
+  def computeDerivatives(self, data, x, u, dt):
+    """ Compute the discrete-time derivatives of dynamics
+
+    :param data: dynamic model data
+    :param x: state vector
+    :param u: control vector
+    :param dt: integration step
+    """
+    # Computing the time-continuos linearized system, i.e. dv = fx*dx + fu*du,
+    # and converting it into discrete one
+    self.integrator.discretization(self, data, x, u, dt)
+    return data.fx, data.fu
 
   @abc.abstractmethod
   def f(self, data, x, u):
-    """ Evaluates the evolution function and stores the result in data.
+    """ Evaluate the evolution function and stores the result in data.
 
     :param data: dynamics data
     :param x: system configuration
@@ -47,19 +71,19 @@ class DynamicModel(object):
 
   @abc.abstractmethod
   def fx(self, data, x, u):
-    """ Evaluates the dynamics Jacobian w.r.t. the state and stores the
+    """ Evaluate the dynamics Jacobian w.r.t. the state and stores the
     result in data.
 
     :param data: dynamics data
     :param x: system configuration
     :param u: control input
-    :return: Jacobian of the state variation w.r.t the state
+    :returns: Jacobian of the state variation w.r.t the state
     """
     pass
 
   @abc.abstractmethod
   def fu(self, data, x, u):
-    """ Evaluates the dynamics Jacobian w.r.t. the control and stores the
+    """ Evaluate the dynamics Jacobian w.r.t. the control and stores the
     result in data.
 
     :param data: dynamics data
@@ -70,7 +94,7 @@ class DynamicModel(object):
     pass
 
   def stateDifference(self, xf, x0):
-    """ Returns the state different between xf and x0 (i.e. xf - x0).
+    """ Get the state different between xf and x0 (i.e. xf - x0).
 
     :param xf: system configuration
     :param x0: system configuration
@@ -78,23 +102,23 @@ class DynamicModel(object):
     return xf - x0
 
   def getConfigurationDimension(self):
-    """ Returns the configuration manifold dimension.
+    """ Get the configuration manifold dimension.
 
-    :returns dimension of configuration manifold
+    :returns: dimension of configuration manifold
     """
     return self.nq
 
   def getTangentDimension(self):
-    """ Returns the tangent manifold dimension.
+    """ Get the tangent manifold dimension.
 
-    :returns dimension of tangent space of the configuration manifold
+    :returns: dimension of tangent space of the configuration manifold
     """
     return self.nv
 
   def getControlDimension(self):
-    """ Returns the control dimension.
+    """ Get the control dimension.
 
-    :returns dimension of the control space
+    :returns: dimension of the control space
     """
     return self.m
 
@@ -121,7 +145,7 @@ class DynamicModel(object):
 import numpy as np
 import math
 class NumDiffDynamicModel(DynamicModel):
-  """ Computes the dynamic model evolution and its derivatives computation
+  """ Compute the dynamic model evolution and its derivatives computation
   through numerical differentiation.
 
   This class uses numerical differentiation for computing the state and control
@@ -130,7 +154,7 @@ class NumDiffDynamicModel(DynamicModel):
   __metaclass__ = abc.ABCMeta
 
   def __init__(self, nq, nv, m):
-    """ Constructs the dynamics model.
+    """ Construct the dynamics model.
 
     :param nq: dimension of the configuration manifold
     :param nv: dimension of the tangent space of the configuration manifold
@@ -142,7 +166,7 @@ class NumDiffDynamicModel(DynamicModel):
 
   @abc.abstractmethod
   def computePerturbedConfiguration(self, x, index):
-    """ Computes the perturbed configuration by perturbing its tangent space.
+    """ Compute the perturbed configuration by perturbing its tangent space.
 
     In general, computing the perturbed configuration is done by using an
     integrator. However, this integrator depends on the manifold itself (e.g.
@@ -158,7 +182,7 @@ class NumDiffDynamicModel(DynamicModel):
     pass
 
   def computePerturbedControl(self, u, index):
-    """ Computes the perturbed control.
+    """ Compute the perturbed control.
 
     We assume that the control space lie in real coordinate space where we
     can apply classical calculus.
@@ -170,7 +194,7 @@ class NumDiffDynamicModel(DynamicModel):
     return u_pert
 
   def fx(self, data, x, u):
-    """ Computes numerically the state derivative of the system dynamics and
+    """ Compute numerically the state derivative of the system dynamics and
     stores the result in data.
 
     :param data: dynamic system data
@@ -185,7 +209,7 @@ class NumDiffDynamicModel(DynamicModel):
     return data.fx
 
   def fu(self, data, x, u):
-    """ Computes numerically the control derivative of the system dynamics and
+    """ Compute numerically the control derivative of the system dynamics and
     stores the result in data.
 
     :param data: dynamic system data
