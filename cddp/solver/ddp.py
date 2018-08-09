@@ -228,12 +228,12 @@ class DDP(object):
     self.V_new[0] += self.cost_manager.computeTerminalCost(it.cost, it.x_new)
 
     # Checking convergence of the previous iteration
-    self.dV[0] = self.V_new - self.V
-    if abs(self.dV[0] / self.V) <= self.tol:
-        self._convergence = True
-        return True
+    if abs(self.V_new / self.V - 1) <= self.tol:
+      self._convergence = True
+      return True
 
     # Checking the changes
+    self.dV[0] = self.V_new - self.V
     self.z = self.dV[0, 0] / self.dV_exp[0, 0]
     # print "Expected Reduction:", -self.dV_exp[0, 0]
     # print "Actual Reduction:", -self.dV[0, 0]
