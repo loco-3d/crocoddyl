@@ -11,11 +11,11 @@ class LinearDDPTest(unittest.TestCase):
     # Creating the dynamic model of the system and its integrator
     integrator = cddp.EulerIntegrator()
     discretizer = cddp.EulerDiscretizer()
-    dynamics = SpringMass(integrator, discretizer)
+    system = SpringMass(integrator, discretizer)
 
     # Create random initial and desired state
-    x0 = np.random.rand(dynamics.getConfigurationDimension(), 1)
-    x_des = np.random.rand(dynamics.getConfigurationDimension(), 1)
+    x0 = np.random.rand(system.getConfigurationDimension(), 1)
+    x_des = np.random.rand(system.getConfigurationDimension(), 1)
     x_des[1] = 0.
 
     # Creating the cost manager and its cost functions
@@ -35,7 +35,7 @@ class LinearDDPTest(unittest.TestCase):
 
     # Creating the DDP solver
     timeline = np.arange(0.0, 3., 0.001)  # np.linspace(0., 0.5, 51)
-    self.ddp = cddp.DDP(dynamics, cost_manager, timeline)
+    self.ddp = cddp.DDP(system, cost_manager, timeline)
 
     # Running the DDP solver
     self.ddp.compute(x0)
