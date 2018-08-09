@@ -91,7 +91,7 @@ class DDP(object):
           self.alpha = 0.
 
       # Checking convergence
-      if abs(self.dV) <= self.tol:
+      if abs(self.dV / self.V) <= self.tol:
         return True
 
     return False
