@@ -33,6 +33,10 @@ class SpringMass(cddp.DynamicalSystem):
     np.copyto(data.fu, self._B)
     return data.fu
 
+  def advanceConfiguration(self, x, dx):
+    return x + dx
+
+
 
 class NumDiffSpringMass(cddp.NumDiffDynamicalSystem):
   """ Spring mass system
@@ -57,9 +61,5 @@ class NumDiffSpringMass(cddp.NumDiffDynamicalSystem):
     np.copyto(data.f, self._A * x + self._B * u)
     return data.f
 
-  def computePerturbedConfiguration(self, x, index):
-    # A perturbation in the tangent manifold has the same effect in the
-    # configuration manifold because it's a classical system.
-    x_pert = x.copy()
-    x_pert[index] += self.sqrt_eps
-    return x_pert
+  def advanceConfiguration(self, x, dx):
+    return x + dx

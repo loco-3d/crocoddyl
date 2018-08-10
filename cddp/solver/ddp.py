@@ -16,10 +16,10 @@ class DDP(object):
       # Creating the system dynamic and cost data
       sdata = self.system.createData()
       if k == self.N:
-        cdata = self.cost_manager.createTerminalData(sdata.nv)
+        cdata = self.cost_manager.createTerminalData(sdata.ndx)
         self.intervals.append(TerminalDDPData(sdata, cdata))
       else:
-        cdata = self.cost_manager.createRunningData(sdata.nv, sdata.m)
+        cdata = self.cost_manager.createRunningData(sdata.ndx, sdata.m)
         self.intervals.append(RunningDDPData(sdata, cdata))
 
     # Global variables for the DDP algorithm

@@ -34,7 +34,7 @@ class DynamicalSystem(object):
     self.discretizer = discretizer
 
     # Creates internally the integrator and discretizer data
-    self.integrator.createData(nv)
+    self.integrator.createData(nq, nv)
     self.discretizer.createData(nv)
 
   def createData(self):
@@ -67,6 +67,16 @@ class DynamicalSystem(object):
     # and converting it into discrete one
     self.discretizer(self, data, x, u, dt)
     return data.fx, data.fu
+
+  @abc.abstractmethod
+  def advanceConfiguration(self, x, dx):
+    """ Operator that advance the configuration state
+
+    :param x: configuration point
+    :param dx: displacement in tangent space of configuration manifold
+    :returns: next configuration point
+    """
+    pass
 
   @abc.abstractmethod
   def f(self, data, x, u):
@@ -155,33 +165,14 @@ class NumDiffDynamicalSystem(DynamicalSystem):
     self.f_nom = np.matrix(np.zeros((nv, 1)))
 
   @abc.abstractmethod
-  def computePerturbedConfiguration(self, x, index):
-    """ Compute the perturbed configuration by perturbing its tangent space.
+  def advanceConfiguration(self, x, dx):
+    """ Operator that advance the configuration state
 
-    In general, computing the perturbed configuration is done by using an
-    integrator. However, this integrator depends on the manifold itself (e.g.
-    SE(3) manifold). So, this integration rule depends on the particular
-    diffeomorphism of our dynamical system. For instance, in a classical system,
-    we might compute this quantity as x[index] += sqrt(eps), where eps is the
-    machine epsilon; you can see an implementation in SpringMass system class.
-
-    :param x: configuration state
-    :param index: index (in the configuration tangent) for computing the
-    perturbation
+    :param x: configuration point
+    :param dx: displacement in tangent space of configuration manifold
+    :returns: next configuration point
     """
     pass
-
-  def computePerturbedControl(self, u, index):
-    """ Compute the perturbed control.
-
-    We assume that the control space lie in real coordinate space where we
-    can apply classical calculus.
-    :param u: control input
-    :param index: index for computing the perturbation
-    """
-    u_pert = u.copy()
-    u_pert[index] += self.sqrt_eps
-    return u_pert
 
   def fx(self, data, x, u):
     """ Compute numerically the system Jacobian w.r.t. the configuration point
@@ -194,7 +185,9 @@ class NumDiffDynamicalSystem(DynamicalSystem):
     """
     np.copyto(self.f_nom, self.f(data, x, u))
     for i in range(data.nv):
-      x_pert = self.computePerturbedConfiguration(x, i)
+      v_pert = np.zeros((data.nv, 1))
+      v_pert[i] += self.sqrt_eps
+      x_pert = self.advanceConfiguration(x.copy(), v_pert)
       data.fx[:, i] = (self.f(data, x_pert, u).copy() - self.f_nom) / self.sqrt_eps
     np.copyto(data.f, self.f_nom)
     return data.fx
@@ -210,7 +203,8 @@ class NumDiffDynamicalSystem(DynamicalSystem):
     """
     np.copyto(self.f_nom, self.f(data, x, u))
     for i in range(data.m):
-      u_pert = self.computePerturbedControl(u, i)
+      u_pert = u.copy()
+      u_pert[i] += self.sqrt_eps
       data.fu[:, i] = (self.f(data, x, u_pert).copy() - self.f_nom) / self.sqrt_eps
     np.copyto(data.f, self.f_nom)
     return data.fu

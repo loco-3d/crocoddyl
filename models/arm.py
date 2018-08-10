@@ -26,21 +26,12 @@ class Arm(cddp.NumDiffDynamicalSystem):
     data.f[self.robot.nq:] = self.rdata.ddq
     return data.f
 
-  def computePerturbedConfiguration(self, x, index):
-    if index < self.robot.nv:
-      x_pert = x.copy()
-      v_pert = np.zeros((self.robot.nv, 1))
-      v_pert[index] += self.sqrt_eps
-
-      q = x[:self.robot.nq]
-      x_pert[:self.robot.nq] = se3.integrate(self.rmodel, q, v_pert)
-    else:
-      # A perturbation in the tangent manifold has the same effect in the
-      # configuration manifold because it's a classical system.
-      x_pert = x.copy()
-      x_pert[index] += self.sqrt_eps
-    return x_pert
-
+  def advanceConfiguration(self, x, dx):
+    q = x[:self.robot.nq]
+    dq = dx[:self.robot.nv]
+    x[:self.robot.nq] = se3.integrate(self.rmodel, q, dq)
+    x[self.robot.nq:] += dx[self.robot.nv:]
+    return x
 
 
 

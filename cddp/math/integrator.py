@@ -9,14 +9,14 @@ class Integrator(object):
 
   def __init__(self):
     pass
-  
+
   @abc.abstractmethod
-  def createData(self, nv):
+  def createData(self, nq, nv):
     """ Create the data for the numerical integrator and discretizer.
 
     Due to the integrator data is needed internally, we create inside the
-    implementation class. It aims is to create data for the integrator and
-    sampler, and both depends on the dimension of the tangential space nv.
+    implementation class. It aims is to create data for the integrator.
+    :param nq: dimension of the configuration manifold
     :param nv: dimension of the tangent space of the configuration manifold
     """
     pass
@@ -31,7 +31,7 @@ class Integrator(object):
     the Dynamics class and and its data structure.
     :param model: system model
     :param data: system data
-    :para x: state vector
+    :para x: configuration point
     :param u: control vector
     :param dt: integration step
     :returns: next state vector
@@ -46,14 +46,14 @@ class GeometricIntegrator(object):
 
   def __init__(self):
     pass
-  
+
   @abc.abstractmethod
-  def createData(self, nv):
+  def createData(self, nq, nv):
     """ Create the data for the numerical integrator and discretizer.
 
     Due to the integrator data is needed internally, we create inside the
-    implementation class. It aims is to create data for the integrator and
-    sampler, and both depends on the dimension of the tangential space nv.
+    implementation class. It aims is to create data for the integrator.
+    :param nq: dimension of the configuration manifold
     :param nv: dimension of the tangent space of the configuration manifold
     """
     pass
@@ -78,25 +78,26 @@ class GeometricIntegrator(object):
 
 
 class EulerIntegrator(Integrator):
-  def createData(self, nv):
+  def createData(self, nq, nv):
     """ Create the internal data of forward Euler integrator.
 
+    :param nq: dimension of the configuration manifold
     :param nv: dimension of the tangent space of the configuration manifold
     """
-    # Data for integration
-    self.x_next = np.matrix(np.zeros((nv, 1)))
+    self.x_next = np.matrix(np.zeros((nq, 1)))
 
   def __call__(self, model, data, x, u, dt):
     """ Integrate the system dynamics using the forward Euler scheme.
 
     :param model: system model
     :param data: system data
-    :para x: state vector
+    :para x: configuration point
     :param u: control vector
     :param dt: sampling period
     :returns: next state vector
     """
-    np.copyto(self.x_next, x + dt * model.f(data, x, u))
+    np.copyto(self.x_next,
+             model.advanceConfiguration(x.copy(), dt * model.f(data, x, u)))
     return self.x_next
 
 
@@ -104,7 +105,7 @@ class GeometricEulerIntegrator(GeometricIntegrator):
   def createData(self, nq, nv):
     """ Create the internal data of forward Euler integrator.
 
-    :param nq: dimension of the configuration space Q
+    :param nq: dimension of the configuration manifold
     :param nv: dimension of the tangent space of the configuration manifold
     """
     # Data for integration
@@ -123,18 +124,23 @@ class GeometricEulerIntegrator(GeometricIntegrator):
     """
     self.x_next[data.nq:] = v + model.g(data, q, v, tau) * dt
     self.x_next[:data.nq] = \
-      model.advanceGeometric(q, self.x_next[data.nq:] * dt)
+      model.advanceConfiguration(q.copy(), self.x_next[data.nq:] * dt)
     return self.x_next
 
 
 class RK4Integrator(Integrator):
-  def createData(self, nv):
-    # Data for integration
-    self.x_next = np.matrix(np.zeros((nv, 1)))
+  def createData(self, nq, nv):
+    """ Create the internal data of forward Euler integrator.
+
+    :param nq: dimension of the configuration manifold
+    :param nv: dimension of the tangent space of the configuration manifold
+    """
+    self.x_next = np.matrix(np.zeros((nq, 1)))
     self.k1 = np.matrix(np.zeros((nv, 1)))
     self.k2 = np.matrix(np.zeros((nv, 1)))
     self.k3 = np.matrix(np.zeros((nv, 1)))
     self.k4 = np.matrix(np.zeros((nv, 1)))
+    self.sum_k = np.matrix(np.zeros((nv, 1)))
 
   def __call__(self, model, data, x, u, dt):
     """ Integrate the system dynamics using the fourth-order Runge-Kutta method.
@@ -147,11 +153,11 @@ class RK4Integrator(Integrator):
     :returns: next state vector
     """
     np.copyto(self.k1, dt * model.f(data, x, u))
-    np.copyto(self.k2, dt * model.f(data, x + 0.5 * self.k1, u))
-    np.copyto(self.k3, dt * model.f(data, x + 0.5 * self.k2, u))
-    np.copyto(self.k4, dt * model.f(data, x + self.k3, u))
-    np.copyto(self.x_next, x + \
-      1. / 6 * (self.k1 + 2. * self.k2 + 2. * self.k3 + self.k4))
+    np.copyto(self.k2, dt * model.f(data, model.advanceConfiguration(x.copy(), 0.5 * self.k1), u))
+    np.copyto(self.k3, dt * model.f(data, model.advanceConfiguration(x.copy(), 0.5 * self.k2), u))
+    np.copyto(self.k4, dt * model.f(data, model.advanceConfiguration(x.copy(), self.k3), u))
+    np.copyto(self.sum_k, 1. / 6 * (self.k1 + 2. * self.k2 + 2. * self.k3 + self.k4))
+    np.copyto(self.x_next, model.advanceConfiguration(x.copy(), self.sum_k))
     return self.x_next
 
 

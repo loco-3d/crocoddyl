@@ -49,15 +49,15 @@ class GeometricDynamicalSystem(DynamicalSystem):
   def stepForward(self, data, x, u, dt):
     # Integrate the time-continuos dynamics in order to get the next state
     # value
-    q = x[:self.nq]
-    v = x[self.nq:]
+    q = x[:data.nq]
+    v = x[data.nq:]
     return self.integrator(self, data, q, v, u, dt)
 
   def computeDerivatives(self, data, x, u, dt):
     # Computing the time-continuos linearized system, i.e.
     # [dq,dv]^T = fqv*[q,v]^T + [0,fu]*du, and converting it into discrete one
-    q = x[:self.nq]
-    v = x[self.nq:]
+    q = x[:data.nq]
+    v = x[data.nq:]
     self.discretizer(self, data, q, v, u, dt)
     return data.fx, data.fu
 
@@ -71,12 +71,12 @@ class GeometricDynamicalSystem(DynamicalSystem):
     :returns: state velocity
     """
     # Getting the configuration point and its generalized velocity
-    q = x[:self.nq]
-    v = x[self.nq:]
+    q = x[:data.nq]
+    v = x[data.nq:]
 
     # Computing the system evolution
-    data.f[:self.nv] = v
-    data.f[self.nv:] = self.g(data, q, v, u)
+    data.f[:data.nv] = v
+    data.f[data.nv:] = self.g(data, q, v, u)
     return data.f
 
   def fx(self, data, x, u):
@@ -89,29 +89,29 @@ class GeometricDynamicalSystem(DynamicalSystem):
     :returns: geometric system Jacobian w.r.t the state
     """
     # Getting the configuration point and its generalized velocity
-    q = x[:self.nq]
-    v = x[self.nq:]
+    q = x[:data.nq]
+    v = x[data.nq:]
 
     # Computing the Jacobian w.r.t. the configuration point (fq) and its
     # tangent space (fv)
-    data.fx[:self.nv,:self.nv] = np.zeros((self.nv, self.nv))
-    data.fx[:self.nv,self.nv:] = np.eye(self.nv)
-    data.fx[self.nv:,:self.nv] = self.gq(data, q, v, u)
-    data.fx[self.nv:,self.nv:] = self.gv(data, q, v, u)
+    data.fx[:data.nv,:data.nv] = np.zeros((data.nv, data.nv))
+    data.fx[:data.nv,data.nv:] = np.eye(data.nv)
+    data.fx[data.nv:,:data.nv] = self.gq(data, q, v, u)
+    data.fx[data.nv:,data.nv:] = self.gv(data, q, v, u)
     return data.fx
 
   def fu(self, data, x, u):
     # Getting the configuration point and its generalized velocity
-    q = x[:self.nq]
-    v = x[self.nq:]
+    q = x[:data.nq]
+    v = x[data.nq:]
 
     # Computing the Jacobian w.r.t torque input
-    data.fu[:self.nv,:] = np.zeros((self.nv, self.m))
-    data.fu[self.nv:,:] = self.gtau(data, q, v, u)
+    data.fu[:data.nv,:] = np.zeros((data.nv, data.m))
+    data.fu[data.nv:,:] = self.gtau(data, q, v, u)
     return data.fu
 
   @abc.abstractmethod
-  def advanceGeometric(self, q, dq):
+  def advanceConfiguration(self, q, dq):
     """ Operator that advance the configuration state
 
     :param q: configuration point
@@ -188,7 +188,7 @@ class NumDiffGeometricDynamicalSystem(GeometricDynamicalSystem):
     self.g_nom = np.matrix(np.zeros((nv, 1)))
 
   @abc.abstractmethod
-  def advanceGeometric(self, q, dq):
+  def advanceConfiguration(self, q, dq):
     """ Operator that advance the configuration state
 
     :param q: configuration point
@@ -222,9 +222,9 @@ class NumDiffGeometricDynamicalSystem(GeometricDynamicalSystem):
     np.copyto(self.g_nom, self.g(data, q, v, tau))
     for i in range(data.nv):
       q_pert = q.copy()
-      v_pert = np.zeros((self.robot.nv, 1))
+      v_pert = np.zeros((data.nv, 1))
       v_pert[i] += self.sqrt_eps
-      q_pert[:self.robot.nq] = self.advanceGeometric(q, v_pert)
+      q_pert[:data.nq] = self.advanceConfiguration(q.copy(), v_pert)
       data.gq[:, i] = \
         (self.g(data, q_pert, v, tau).copy() - self.g_nom) / self.sqrt_eps
     np.copyto(data.g, self.g_nom)

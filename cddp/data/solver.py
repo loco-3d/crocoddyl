@@ -10,13 +10,9 @@ class TerminalDDPData(object):
     self.system = system_data
     self.cost = cost_data
 
-    # Configuration and tangent manifold dimension
-    self.nq = self.system.nq
-    self.nv = self.system.nv
-
     # Nominal and new state on the interval
-    self.x = np.matrix(np.zeros((self.nq, 1)))
-    self.x_new = np.matrix(np.zeros((self.nq, 1)))
+    self.x = np.matrix(np.zeros((self.system.nx, 1)))
+    self.x_new = np.matrix(np.zeros((self.system.ndx, 1)))
 
     # Time of the terminal interval
     self.t = np.matrix(np.zeros(1))
@@ -32,36 +28,31 @@ class RunningDDPData(object):
     self.system = system_data
     self.cost = cost_data
 
-    # Configuration manifold, tangent manifold and control dimensions
-    self.nq = self.system.nq
-    self.nv = self.system.nv
-    self.m = self.system.m
-
     # Nominal and new state on the interval
-    self.x = np.matrix(np.zeros((self.nq, 1)))
-    self.x_new = np.matrix(np.zeros((self.nq, 1)))
+    self.x = np.matrix(np.zeros((self.system.nx, 1)))
+    self.x_new = np.matrix(np.zeros((self.system.nx, 1)))
 
     # Nominal and new control command on the interval
-    self.u = np.matrix(np.zeros((self.m, 1)))
-    self.u_new = np.matrix(np.zeros((self.m, 1)))
+    self.u = np.matrix(np.zeros((self.system.m, 1)))
+    self.u_new = np.matrix(np.zeros((self.system.m, 1)))
 
     # Starting and final time on the interval
     self.t0 = np.matrix(np.zeros(1))
     self.tf = np.matrix(np.zeros(1))
 
     # Feedback and feedforward terms
-    self.K = np.matrix(np.zeros((self.m, self.nv)))
-    self.j = np.matrix(np.zeros((self.m, 1)))
+    self.K = np.matrix(np.zeros((self.system.m, self.system.ndx)))
+    self.j = np.matrix(np.zeros((self.system.m, 1)))
 
     # Value function and its derivatives
-    self.Vx = np.matrix(np.zeros((self.nv, 1)))
-    self.Vxx = np.matrix(np.zeros((self.nv, self.nv)))
+    self.Vx = np.matrix(np.zeros((self.system.ndx, 1)))
+    self.Vxx = np.matrix(np.zeros((self.system.ndx, self.system.ndx)))
 
     # Quadratic approximation of the value function
-    self.Qx = np.matrix(np.zeros((self.nv, 1)))
-    self.Qu = np.matrix(np.zeros((self.m, 1)))
-    self.Qxx = np.matrix(np.zeros((self.nv, self.nv)))
-    self.Qux = np.matrix(np.zeros((self.m, self.nv)))
-    self.Quu = np.matrix(np.zeros((self.m, self.m)))
-    self.Qux_r = np.matrix(np.zeros((self.m, self.nv)))
-    self.Quu_r = np.matrix(np.zeros((self.m, self.m)))
+    self.Qx = np.matrix(np.zeros((self.system.ndx, 1)))
+    self.Qu = np.matrix(np.zeros((self.system.m, 1)))
+    self.Qxx = np.matrix(np.zeros((self.system.ndx, self.system.ndx)))
+    self.Qux = np.matrix(np.zeros((self.system.m, self.system.ndx)))
+    self.Quu = np.matrix(np.zeros((self.system.m, self.system.m)))
+    self.Qux_r = np.matrix(np.zeros((self.system.m, self.system.ndx)))
+    self.Quu_r = np.matrix(np.zeros((self.system.m, self.system.m)))
