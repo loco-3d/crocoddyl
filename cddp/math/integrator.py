@@ -29,8 +29,8 @@ class Integrator(object):
     uses the model and data classes which defines the evolution function and
     its data, respectively. For more information about the model and data see
     the Dynamics class and and its data structure.
-    :param model: dynamic model
-    :param data: dynamic model data
+    :param model: system model
+    :param data: system data
     :para x: state vector
     :param u: control vector
     :param dt: integration step
@@ -51,8 +51,8 @@ class EulerIntegrator(Integrator):
   def __call__(self, model, data, x, u, dt):
     """ Integrate the system dynamics using the forward Euler scheme.
 
-    :param model: dynamic model
-    :param data: dynamic model data
+    :param model: system model
+    :param data: system data
     :para x: state vector
     :param u: control vector
     :param dt: sampling period
@@ -74,8 +74,8 @@ class RK4Integrator(Integrator):
   def __call__(self, model, data, x, u, dt):
     """ Integrate the system dynamics using the fourth-order Runge-Kutta method.
 
-    :param model: dynamic model
-    :param data: dynamic model data
+    :param model: system model
+    :param data: system data
     :para x: state vector
     :param u: control vector
     :param dt: sampling period

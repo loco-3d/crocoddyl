@@ -29,8 +29,8 @@ class Discretizer(object):
     This abstract method allows us to define a discretization rule for the 
     linearized dynamic (dv = fx*dx + fu*du) which is compatible with its 
     integration scheme. Note that we assume a first-order Taylor linearization.
-    :param model: dynamic model
-    :param data: dynamic model data
+    :param model: system model
+    :param data: system data
     :para x: state vector
     :param u: control vector
     :param dt: sampling period
@@ -44,9 +44,6 @@ class EulerDiscretizer(Discretizer):
 
     :param nv: dimension of the tangent space of the configuration manifold
     """
-    # Data for integration
-    self.x_next = np.matrix(np.zeros((nv, 1)))
-
     # Data for discretization
     self._I = np.eye(nv)
 
@@ -54,9 +51,9 @@ class EulerDiscretizer(Discretizer):
     """ Convert the time-continuos dynamics into discrete one using forward
     Euler rule.
 
-    :param model: dynamic model
-    :param data: dynamic model data
-    :para x: state vector
+    :param model: system model
+    :param data: system data
+    :param x: state vector
     :param u: control vector
     :param dt: sampling period
     :returns: discrete time state and control derivatives
@@ -82,9 +79,9 @@ class RK4Discretizer(Discretizer):
     """ Convert the time-continuos dynamics into discrete one using
     fourth-order Runge-Kutta method.
 
-    :param model: dynamic model
-    :param data: dynamic model data
-    :para x: state vector
+    :param model: system model
+    :param data: system data
+    :param x: state vector
     :param u: control vector
     :param dt: sampling period
     :returns: discrete time state and control derivatives

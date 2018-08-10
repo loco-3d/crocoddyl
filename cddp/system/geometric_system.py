@@ -117,7 +117,7 @@ class GeometricDynamicalSystem(DynamicalSystem):
     :param data: system data
     :param q: configuration point
     :param v: generalized velocity
-    :param u: torque input
+    :param tau: torque input
     :returns: generalized acceleration
     """
     pass
@@ -130,7 +130,7 @@ class GeometricDynamicalSystem(DynamicalSystem):
     :param data: system data
     :param q: configuration point
     :param v: generalized velocity
-    :param u: torque input
+    :param tau: torque input
     :returns: system Jacobian w.r.t the configuration point
     """
     pass
@@ -143,7 +143,7 @@ class GeometricDynamicalSystem(DynamicalSystem):
     :param data: system data
     :param q: configuration point
     :param v: generalized velocity
-    :param u: torque input
+    :param tau: torque input
     :returns: system Jacobian w.r.t the generalized velocity
     """
     pass
@@ -156,7 +156,7 @@ class GeometricDynamicalSystem(DynamicalSystem):
     :param data: system data
     :param q: configuration point
     :param v: generalized velocity
-    :param u: torque input
+    :param tau: torque input
     :returns: system Jacobian w.r.t the torque input
     """
     pass
@@ -203,7 +203,7 @@ class NumDiffGeometricDynamicalSystem(GeometricDynamicalSystem):
     :param data: system data
     :param q: configuration point
     :param v: generalized velocity
-    :param u: torque input
+    :param tau: torque input
     :returns: system Jacobian w.r.t. the configuration point
     """
     np.copyto(self.g_nom, self.g(data, q, v, tau))
@@ -221,7 +221,7 @@ class NumDiffGeometricDynamicalSystem(GeometricDynamicalSystem):
     :param data: system data
     :param q: configuration point
     :param v: generalized velocity
-    :param u: torque input
+    :param tau: torque input
     :returns: system Jacobian w.r.t. the generalized velocity
     """
     np.copyto(self.g_nom, self.g(data, q, v, tau))
@@ -240,7 +240,7 @@ class NumDiffGeometricDynamicalSystem(GeometricDynamicalSystem):
     :param data: system data
     :param q: configuration point
     :param v: generalized velocity
-    :param u: torque input
+    :param tau: torque input
     :returns: system Jacobian w.r.t. the torque input
     """
     np.copyto(self.g_nom, self.g(data, q, v, tau))
