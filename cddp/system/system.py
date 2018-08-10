@@ -46,7 +46,7 @@ class DynamicalSystem(object):
   def stepForward(self, data, x, u, dt):
     """ Compute the next state value
 
-    :param data: dynamic model data
+    :param data: system data
     :param x: configuration point
     :param u: control vector
     :param dt: integration step
@@ -58,7 +58,7 @@ class DynamicalSystem(object):
   def computeDerivatives(self, data, x, u, dt):
     """ Compute the discrete-time derivatives of dynamics
 
-    :param data: dynamic model data
+    :param data: system data
     :param x: configuration point
     :param u: control vector
     :param dt: integration step
@@ -72,7 +72,7 @@ class DynamicalSystem(object):
   def f(self, data, x, u):
     """ Evaluate the evolution function and stores the result in data.
 
-    :param data: dynamics data
+    :param data: system data
     :param x: configuration point
     :param u: control input
     :returns: generalized velocity in x configuration
@@ -84,7 +84,7 @@ class DynamicalSystem(object):
     """ Evaluate the system Jacobian w.r.t. the configuration point and stores
     the result in data.
 
-    :param data: dynamics data
+    :param data: system data
     :param x: configuration point
     :param u: control input
     :returns: system Jacobian w.r.t the configuration point
@@ -96,7 +96,7 @@ class DynamicalSystem(object):
     """ Evaluate the system Jacobian w.r.t. the control and stores the result
     in data.
 
-    :param data: dynamics data
+    :param data: system data
     :param x: configuration point
     :param u: control input
     :returns: system Jacobian w.r.t the control
@@ -187,7 +187,7 @@ class NumDiffDynamicalSystem(DynamicalSystem):
     """ Compute numerically the system Jacobian w.r.t. the configuration point
     and stores the result in data.
 
-    :param data: dynamic system data
+    :param data: system data
     :param x: configuration state
     :param u: control input
     :returns: system Jacobian w.r.t. the configuration point
@@ -203,7 +203,7 @@ class NumDiffDynamicalSystem(DynamicalSystem):
     """ Compute numerically the system Jacobian w.r.t. the control and stores
     the result in data.
 
-    :param data: dynamic system data
+    :param data: system data
     :param x: configuration state
     :param u: control input
     :returns: system Jacobian w.r.t. the control

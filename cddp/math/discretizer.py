@@ -27,7 +27,7 @@ class Discretizer(object):
     """ Convert the continuos, and linearized, dynamic model into discrete one.
 
     This abstract method allows us to define a discretization rule for the 
-    linearized dynamic (dv = fx*dx + fu*du) which is compatible withe its 
+    linearized dynamic (dv = fx*dx + fu*du) which is compatible with its 
     integration scheme. Note that we assume a first-order Taylor linearization.
     :param model: dynamic model
     :param data: dynamic model data

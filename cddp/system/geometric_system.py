@@ -114,7 +114,7 @@ class GeometricDynamicalSystem(DynamicalSystem):
   def g(self, data, q, v, tau):
     """ Evaluate the evolution function and stores the result in data.
 
-    :param data: dynamics data
+    :param data: system data
     :param q: configuration point
     :param v: generalized velocity
     :param u: torque input
@@ -127,7 +127,7 @@ class GeometricDynamicalSystem(DynamicalSystem):
     """ Evaluate the system Jacobian w.r.t. the configuration point and storesimport math
     the result in data.
 
-    :param data: dynamics data
+    :param data: system data
     :param q: configuration point
     :param v: generalized velocity
     :param u: torque input
@@ -140,7 +140,7 @@ class GeometricDynamicalSystem(DynamicalSystem):
     """ Evaluate the system Jacobian w.r.t. the generalized velocity and stores
     the result in data.
 
-    :param data: dynamics data
+    :param data: system data
     :param q: configuration point
     :param v: generalized velocity
     :param u: torque input
@@ -153,7 +153,7 @@ class GeometricDynamicalSystem(DynamicalSystem):
     """ Evaluate the system Jacobian w.r.t. the torque input and stores
     the result in data.
 
-    :param data: dynamics data
+    :param data: system data
     :param q: configuration point
     :param v: generalized velocity
     :param u: torque input
@@ -200,7 +200,7 @@ class NumDiffGeometricDynamicalSystem(GeometricDynamicalSystem):
     """ Compute numerically the Jacobian of the system w.r.t. the configuration
     point and stores the result in data.
 
-    :param data: dynamic system data
+    :param data: system data
     :param q: configuration point
     :param v: generalized velocity
     :param u: torque input
@@ -218,7 +218,7 @@ class NumDiffGeometricDynamicalSystem(GeometricDynamicalSystem):
     """ Compute numerically the Jacobian of the system w.r.t. the generalized
     velocity and stores the result in data.
 
-    :param data: dynamic system data
+    :param data: system data
     :param q: configuration point
     :param v: generalized velocity
     :param u: torque input
@@ -237,7 +237,7 @@ class NumDiffGeometricDynamicalSystem(GeometricDynamicalSystem):
     """ Compute numerically the Jacobian of the system w.r.t. the torque input
     and stores the result in data.
 
-    :param data: dynamic system data
+    :param data: system data
     :param q: configuration point
     :param v: generalized velocity
     :param u: torque input
