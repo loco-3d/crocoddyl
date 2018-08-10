@@ -111,6 +111,16 @@ class GeometricDynamicalSystem(DynamicalSystem):
     return data.fu
 
   @abc.abstractmethod
+  def advanceGeometric(self, q, dq):
+    """ Operator that advance the configuration state
+
+    :param q: configuration point
+    :param dq: displacement in tangent space of configuration manifold
+    :returns: next configuration point
+    """
+    pass
+
+  @abc.abstractmethod
   def g(self, data, q, v, tau):
     """ Evaluate the evolution function and stores the result in data.
 
@@ -124,7 +134,7 @@ class GeometricDynamicalSystem(DynamicalSystem):
 
   @abc.abstractmethod
   def gq(self, data, q, v, tau):
-    """ Evaluate the system Jacobian w.r.t. the configuration point and storesimport math
+    """ Evaluate the system Jacobian w.r.t. the configuration point and store
     the result in data.
 
     :param data: system data
@@ -178,21 +188,24 @@ class NumDiffGeometricDynamicalSystem(GeometricDynamicalSystem):
     self.g_nom = np.matrix(np.zeros((nv, 1)))
 
   @abc.abstractmethod
-  def g(self, data, q, v, tau): pass
-  
-  @abc.abstractmethod
-  def computePerturbedConfiguration(self, q, index):
-    """ Compute the perturbed configuration by perturbing its tangent space.
-
-    In general, computing the perturbed configuration is done by using an
-    manifold integrator. So, this integration rule depends on the particular
-    diffeomorphism of our geometric system. For instance, in a classical system,
-    we might compute this quantity as x[index] += sqrt(eps), where eps is the
-    machine epsilon; you can see an implementation in SpringMass system class.
+  def advanceGeometric(self, q, dq):
+    """ Operator that advance the configuration state
 
     :param q: configuration point
-    :param index: index (in the tangent space) for computing the
-    perturbation
+    :param dq: displacement in tangent space of configuration manifold
+    :returns: next configuration point
+    """
+    pass
+
+  @abc.abstractmethod
+  def g(self, data, q, v, tau):
+    """ Evaluate the evolution function and stores the result in data.
+
+    :param data: system data
+    :param q: configuration point
+    :param v: generalized velocity
+    :param tau: torque input
+    :returns: generalized acceleration
     """
     pass
 
@@ -208,7 +221,10 @@ class NumDiffGeometricDynamicalSystem(GeometricDynamicalSystem):
     """
     np.copyto(self.g_nom, self.g(data, q, v, tau))
     for i in range(data.nv):
-      q_pert = self.computePerturbedConfiguration(q, i)
+      q_pert = q.copy()
+      v_pert = np.zeros((self.robot.nv, 1))
+      v_pert[i] += self.sqrt_eps
+      q_pert[:self.robot.nq] = self.advanceGeometric(q, v_pert)
       data.gq[:, i] = \
         (self.g(data, q_pert, v, tau).copy() - self.g_nom) / self.sqrt_eps
     np.copyto(data.g, self.g_nom)
