@@ -16,8 +16,7 @@ class SystemData(object):
     self.nv = nv
     self.m = m
 
-    # Creating the data structure for the ODE and its
-    # derivative
+    # Creating the data structure for the ODE and its derivative
     self.f = np.matrix(np.zeros((self.nv, 1)))
     self.fx = np.matrix(np.zeros((self.nv, self.nv)))
     self.fu = np.matrix(np.zeros((self.nv, self.m)))
@@ -37,8 +36,7 @@ class GeometricSystemData(object):
     self.nv = nv
     self.m = m
 
-    # Creating the data structure for the ODE and its
-    # derivative
+    # Creating the data structure for the ODE and its derivative
     self.f = np.matrix(np.zeros((self.nq + self.nv, 1)))
     self.fx = np.matrix(np.zeros((2 * self.nv, 2 * self.nv)))
     self.fu = np.matrix(np.zeros((2 * self.nv, self.m)))

@@ -37,7 +37,7 @@ class GeometricDynamicalSystem(DynamicalSystem):
     self.discretizer = discretizer
 
     # Creates internally the integrator and discretizer data
-    self.integrator.createData(nv)
+    self.integrator.createData(nq, nv)
     self.discretizer.createData(nv)
 
   def createData(self):
@@ -52,10 +52,10 @@ class GeometricDynamicalSystem(DynamicalSystem):
     q = x[:self.nq]
     v = x[self.nq:]
     return self.integrator(self, data, q, v, u, dt)
-  
+
   def computeDerivatives(self, data, x, u, dt):
-    # Computing the time-continuos linearized system, i.e. dv = fx*dx + fu*du,
-    # and converting it into discrete one
+    # Computing the time-continuos linearized system, i.e.
+    # [dq,dv]^T = fqv*[q,v]^T + [0,fu]*du, and converting it into discrete one
     q = x[:self.nq]
     v = x[self.nq:]
     self.discretizer(self, data, q, v, u, dt)

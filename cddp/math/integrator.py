@@ -39,6 +39,44 @@ class Integrator(object):
     pass
 
 
+class GeometricIntegrator(object):
+  """ This abstract class declares the virtual method for any integrator.
+  """
+  __metaclass__ = abc.ABCMeta
+
+  def __init__(self):
+    pass
+  
+  @abc.abstractmethod
+  def createData(self, nv):
+    """ Create the data for the numerical integrator and discretizer.
+
+    Due to the integrator data is needed internally, we create inside the
+    implementation class. It aims is to create data for the integrator and
+    sampler, and both depends on the dimension of the tangential space nv.
+    :param nv: dimension of the tangent space of the configuration manifold
+    """
+    pass
+
+  @abc.abstractmethod
+  def __call__(self, model, data, q, v, tau, dt):
+    """ Integrate the system dynamics.
+
+    This abstract method allows us to define integration rules of our ODE. It
+    uses the model and data classes which defines the evolution function and
+    its data, respectively. For more information about the model and data see
+    the Dynamics class and and its data structure.
+    :param model: system model
+    :param data: system data
+    :param q: configuration point
+    :param v: generalized velocity
+    :param tau: control vector
+    :param dt: integration step
+    :returns: next state vector
+    """
+    pass
+
+
 class EulerIntegrator(Integrator):
   def createData(self, nv):
     """ Create the internal data of forward Euler integrator.
@@ -59,6 +97,33 @@ class EulerIntegrator(Integrator):
     :returns: next state vector
     """
     np.copyto(self.x_next, x + dt * model.f(data, x, u))
+    return self.x_next
+
+
+class GeometricEulerIntegrator(GeometricIntegrator):
+  def createData(self, nq, nv):
+    """ Create the internal data of forward Euler integrator.
+
+    :param nq: dimension of the configuration space Q
+    :param nv: dimension of the tangent space of the configuration manifold
+    """
+    # Data for integration
+    self.x_next = np.matrix(np.zeros((nq + nv, 1)))
+
+  def __call__(self, model, data, q, v, tau, dt):
+    """ Integrate the system dynamics using the forward Euler scheme.
+
+    :param model: system model
+    :param data: system data
+    :param q: configuration point
+    :param v: generalized velocity
+    :param tau: control vector
+    :param dt: sampling period
+    :returns: next state vector
+    """
+    self.x_next[data.nq:] = v + model.g(data, q, v, tau) * dt
+    self.x_next[:data.nq] = \
+      model.advanceGeometric(q, self.x_next[data.nq:] * dt)
     return self.x_next
 
 
