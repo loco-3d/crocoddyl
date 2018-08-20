@@ -6,7 +6,7 @@ import numpy as np
 import pinocchio as se3
 
 
-class NumDiffRobotID(NumDiffDynamicalSystem):
+class NumDiffRobotFD(NumDiffDynamicalSystem):
   def __init__(self, urdf, path):
     # Getting the Pinocchio model of the robot
     self.robot = se3.robot_wrapper.RobotWrapper(urdf, path)
@@ -37,7 +37,7 @@ class NumDiffRobotID(NumDiffDynamicalSystem):
     return x
 
 
-class NumDiffSparseRobotID(NumDiffGeometricDynamicalSystem):
+class NumDiffSparseRobotFD(NumDiffGeometricDynamicalSystem):
   def __init__(self, urdf, path):
     # Getting the Pinocchio model of the robot
     self.robot = se3.robot_wrapper.RobotWrapper(urdf, path)
