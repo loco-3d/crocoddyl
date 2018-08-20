@@ -3,34 +3,6 @@ import numpy as np
 
 
 
-class GeomArm(cddp.NumDiffGeometricDynamicalSystem):
-  def __init__(self, urdf, arm):
-    # Getting the Pinocchio model of the robot
-    self.robot = cddp.se3.robot_wrapper.RobotWrapper(urdf, path)
-    self.rmodel = self.robot.model
-    self.rdata = self.robot.data
-
-    # Initializing the dynamic model with numerical differentiation
-    nq = self.robot.nq
-    nv = self.robot.nv
-    m = self.robot.nv
-    integrator = cddp.GeometricEulerIntegrator()
-    discretizer = cddp.GeometricEulerDiscretizer()
-    cddp.NumDiffGeometricDynamicalSystem.__init__(self, nq, nv, m, integrator, discretizer)
-
-  def g(self, data, q, v, tau):
-    cddp.se3.aba(self.rmodel, self.rdata, q, v, tau)
-    np.copyto(data.g, self.rdata.ddq)
-    return data.g
-
-  def advanceConfiguration(self, q, dq):
-    return cddp.se3.integrate(self.rmodel, q, dq)
-
-
-
-
-
-
 np.set_printoptions(linewidth=400, suppress=True, threshold=np.nan)
 # # Creating the system model
 # import rospkg
@@ -54,7 +26,7 @@ if display:
 import rospkg
 path = rospkg.RosPack().get_path('talos_data')
 urdf = path + '/robots/talos_left_arm.urdf'
-system = GeomArm(urdf, path)
+system = cddp.NumDiffSparseRobotID(urdf, path)
 # x0 = np.zeros((system.getConfigurationDimension(), 1))
 # x0[:system.robot.nq] = np.matrix([ 0.173046, 1., -0.525366, 0., 0., 0.1,-0.005]).T
 q0 = np.matrix([ 0.173046, 1., -0.525366, 0., 0., 0.1,-0.005]).T

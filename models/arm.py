@@ -2,41 +2,6 @@ import numpy as np
 import cddp
 
 
-class Arm(cddp.NumDiffDynamicalSystem):
-  def __init__(self, urdf, path):
-    # Getting the Pinocchio model of the robot
-    self.robot = cddp.se3.robot_wrapper.RobotWrapper(urdf, path)
-    self.rmodel = self.robot.model
-    self.rdata = self.robot.data
-
-    # Initializing the dynamic model with numerical differentiation
-    nq = self.robot.nq + self.robot.nv
-    nv = self.robot.nv + self.robot.nv
-    m = self.robot.nv
-    integrator = cddp.EulerIntegrator()
-    discretizer = cddp.EulerDiscretizer()
-    cddp.NumDiffDynamicalSystem.__init__(self, nq, nv, m, integrator, discretizer)
-  
-  def f(self, data, x, u):
-    q = x[:self.robot.nq]
-    v = x[self.robot.nq:]
-    cddp.se3.aba(self.rmodel, self.rdata, q, v, u)
-    data.f[:self.robot.nq] = v
-    data.f[self.robot.nq:] = self.rdata.ddq
-    return data.f
-
-  def advanceConfiguration(self, x, dx):
-    q = x[:self.robot.nq]
-    dq = dx[:self.robot.nv]
-    x[:self.robot.nq] = cddp.se3.integrate(self.rmodel, q, dq)
-    x[self.robot.nq:] += dx[self.robot.nv:]
-    return x
-
-
-
-
-
-
 np.set_printoptions(linewidth=400, suppress=True, threshold=np.nan)
 
 display = True
@@ -50,7 +15,7 @@ if display:
 import rospkg
 path = rospkg.RosPack().get_path('talos_data')
 urdf = path + '/robots/talos_left_arm.urdf'
-system = Arm(urdf, path)
+system = cddp.NumDiffRobotID(urdf, path)
 x0 = np.zeros((system.getConfigurationDimension(), 1))
 x0[:system.robot.nq] = np.matrix([ 0.173046, 1., -0.525366, 0., 0., 0.1,-0.005]).T
 
