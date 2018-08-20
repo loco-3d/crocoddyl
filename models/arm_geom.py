@@ -1,13 +1,12 @@
-import numpy as np
-import pinocchio as se3
 import cddp
+import numpy as np
 
 
 
 class GeomArm(cddp.NumDiffGeometricDynamicalSystem):
   def __init__(self, urdf, arm):
     # Getting the Pinocchio model of the robot
-    self.robot = se3.robot_wrapper.RobotWrapper(urdf, path)
+    self.robot = cddp.se3.robot_wrapper.RobotWrapper(urdf, path)
     self.rmodel = self.robot.model
     self.rdata = self.robot.data
 
@@ -20,40 +19,12 @@ class GeomArm(cddp.NumDiffGeometricDynamicalSystem):
     cddp.NumDiffGeometricDynamicalSystem.__init__(self, nq, nv, m, integrator, discretizer)
 
   def g(self, data, q, v, tau):
-    se3.aba(self.rmodel, self.rdata, q, v, tau)
+    cddp.se3.aba(self.rmodel, self.rdata, q, v, tau)
     np.copyto(data.g, self.rdata.ddq)
     return data.g
 
   def advanceConfiguration(self, q, dq):
-    return se3.integrate(self.rmodel, q, dq)
-
-
-
-# class SE3Task
-import math
-
-class SE3RunningCost(cddp.RunningResidualQuadraticCost):
-  def __init__(self, robot, ee_frame, M_des):
-    self.robot = robot
-    self._frame_idx = self.robot.model.getFrameId(ee_frame)
-    self.M_des = M_des
-    cddp.RunningResidualQuadraticCost.__init__(self, 6)
-
-  def r(self, data, x, u):
-    q = x[:self.robot.nq]
-    np.copyto(data.r,
-      se3.log(self.M_des.inverse() * self.robot.framePosition(q, self._frame_idx)).vector)
-    return data.r
-
-  def rx(self, data, x, u):
-    q = x[:self.robot.nq]
-    data.rx[:, :self.robot.nq] = \
-      se3.jacobian(self.robot.model, self.robot.data, q,
-                   self.robot.model.frames[self._frame_idx].parent, False, True)
-    return data.rx
-
-  def ru(self, data, x, u):
-    return data.ru
+    return cddp.se3.integrate(self.rmodel, q, dq)
 
 
 
@@ -100,8 +71,8 @@ if display:
 
 # Defining the SE3 task
 frame_name = 'gripper_left_joint'
-M_des = se3.SE3(np.eye(3), np.array([ [0.], [0.], [0.4] ]))
-se3_cost = SE3RunningCost(system.robot, frame_name, M_des)
+M_des = cddp.se3.SE3(np.eye(3), np.array([ [0.], [0.], [0.4] ]))
+se3_cost = cddp.SE3RunningCost(system.robot, frame_name, M_des)
 w_se3 = np.ones(6)
 se3_cost.setWeights(w_se3)
 
@@ -125,7 +96,7 @@ ddp = cddp.DDP(system, cost_manager, timeline)
 ddp.compute(x0)
 
 # Printing the final goal
-robot = se3.robot_wrapper.RobotWrapper(urdf, path)
+robot = cddp.se3.robot_wrapper.RobotWrapper(urdf, path)
 frame_idx = robot.model.getFrameId(frame_name)
 xf = ddp.intervals[-1].x
 qf = xf[:7]
@@ -146,7 +117,7 @@ if display:
     qk = k.x[:robot.nq]
     robot.display(qk)
     M_pos = robot.framePosition(qk, frame_idx)
-    gui.applyConfiguration(traj_node, se3.utils.se3ToXYZQUAT(M_pos))
+    gui.applyConfiguration(traj_node, cddp.se3.utils.se3ToXYZQUAT(M_pos))
     gui.refresh()
 
     # gui.addSphere(traj_node+str(it), ball_size/5, [0.5,0.5,0.,1.])
