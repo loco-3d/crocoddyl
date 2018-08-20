@@ -4,16 +4,6 @@ import numpy as np
 
 
 np.set_printoptions(linewidth=400, suppress=True, threshold=np.nan)
-# # Creating the system model
-# import rospkg
-# path = rospkg.RosPack().get_path('talos_data')
-# urdf = path + '/robots/talos_left_arm.urdf'
-# system = GeomArm(urdf, path)
-# data = system.createData()
-# q = np.random.rand(system.getConfigurationDimension(), 1)
-# v = np.random.rand(system.getTangentDimension(), 1)
-# u = np.random.rand(system.getControlDimension(), 1)
-# x = np.vstack([q, v])
 
 display = True
 if display:
