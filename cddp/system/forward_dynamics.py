@@ -6,7 +6,7 @@ import numpy as np
 import pinocchio as se3
 
 
-class NumDiffRobotFD(NumDiffDynamicalSystem):
+class NumDiffForwardDynamics(NumDiffDynamicalSystem):
   """ Robot forward dynamics with numerical computation of derivatives.
 
   The continuos evolution function (i.e. f(x, u)) is defined by the robot
@@ -63,7 +63,7 @@ class NumDiffRobotFD(NumDiffDynamicalSystem):
     return x
 
 
-class NumDiffSparseRobotFD(NumDiffGeometricDynamicalSystem):
+class NumDiffSparseForwardDynamics(NumDiffGeometricDynamicalSystem):
   """ Sparse robot forward dynamics with numerical computation of derivatives.
 
   The continuos evolution function (i.e. f(q,v,tau)=[v, g(q,v,tau)]) is defined

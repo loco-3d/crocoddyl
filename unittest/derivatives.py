@@ -39,7 +39,7 @@ class ArmNumDiffTest(unittest.TestCase):
     # Creating the system model
     path = rospkg.RosPack().get_path('talos_data')
     urdf = path + '/robots/talos_left_arm.urdf'
-    self.system = cddp.NumDiffRobotID(urdf, path)
+    self.system = cddp.NumDiffForwardDynamics(urdf, path)
 
     # Creating the system data
     self.data = self.system.createData()

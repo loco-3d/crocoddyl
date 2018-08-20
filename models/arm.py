@@ -15,7 +15,7 @@ if display:
 import rospkg
 path = rospkg.RosPack().get_path('talos_data')
 urdf = path + '/robots/talos_left_arm.urdf'
-system = cddp.NumDiffRobotFD(urdf, path)
+system = cddp.NumDiffForwardDynamics(urdf, path)
 x0 = np.zeros((system.getConfigurationDimension(), 1))
 x0[:system.robot.nq] = np.matrix([ 0.173046, 1., -0.525366, 0., 0., 0.1,-0.005]).T
 
