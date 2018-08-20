@@ -99,8 +99,9 @@ class NumDiffSparseForwardDynamics(NumDiffGeometricDynamicalSystem):
     data.
 
     :param data: geometric system data
-    :param x: configuration state [joint configuration, joint velocity]
-    :param u: control input
+    :param q: joint configuration
+    :param v: joint velocity
+    :param tau: torque input
     """
     se3.aba(self.rmodel, self.rdata, q, v, tau)
     np.copyto(data.g, self.rdata.ddq)
