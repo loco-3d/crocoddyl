@@ -1,14 +1,13 @@
 import unittest
 import numpy as np
 import cddp
-from models.spring_mass import SpringMass
 
 
 class IntegratorTest(unittest.TestCase):
   def test_forward_Euler(self):
     integrator = cddp.EulerIntegrator()
     discretizer = cddp.EulerDiscretizer()
-    dynamics = SpringMass(integrator, discretizer)
+    dynamics = cddp.SpringMass(integrator, discretizer)
     data = dynamics.createData()
 
     dt = 1
@@ -24,7 +23,7 @@ class IntegratorTest(unittest.TestCase):
   def test_RK4(self):
     integrator = cddp.RK4Integrator()
     discretizer = cddp.EulerDiscretizer()
-    dynamics = SpringMass(integrator, discretizer)
+    dynamics = cddp.SpringMass(integrator, discretizer)
     data = dynamics.createData()
 
     dt = 1

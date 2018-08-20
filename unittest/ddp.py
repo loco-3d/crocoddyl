@@ -1,7 +1,6 @@
 import unittest
 import numpy as np
 import cddp
-from models.spring_mass import SpringMass
 
 
 plot_enable = False
@@ -10,7 +9,7 @@ class LinearDDPTest(unittest.TestCase):
     # Creating the dynamic model of the system and its integrator
     integrator = cddp.EulerIntegrator()
     discretizer = cddp.EulerDiscretizer()
-    system = SpringMass(integrator, discretizer)
+    system = cddp.SpringMass(integrator, discretizer)
 
     # Create random initial and desired state
     x0 = np.random.rand(system.getConfigurationDimension(), 1)

@@ -1,8 +1,8 @@
 import numpy as np
-import cddp
+from cddp.system import DynamicalSystem, NumDiffDynamicalSystem
 
 
-class SpringMass(cddp.DynamicalSystem):
+class SpringMass(DynamicalSystem):
   """ Spring mass system
 
   It defines the continuos evolution function (i.e. f(x, u)) and its state and
@@ -10,7 +10,7 @@ class SpringMass(cddp.DynamicalSystem):
   """
   def __init__(self, integrator, discretizer):
     # State and control dimension
-    cddp.DynamicalSystem.__init__(self, 2, 2, 1, integrator, discretizer)
+    DynamicalSystem.__init__(self, 2, 2, 1, integrator, discretizer)
 
     # Mass, spring and damper values
     self._mass = 10.
@@ -38,7 +38,7 @@ class SpringMass(cddp.DynamicalSystem):
 
 
 
-class NumDiffSpringMass(cddp.NumDiffDynamicalSystem):
+class NumDiffSpringMass(NumDiffDynamicalSystem):
   """ Spring mass system
 
   It defines the continuos evolution function (i.e. f(x, u)) and computes its state and
@@ -46,7 +46,7 @@ class NumDiffSpringMass(cddp.NumDiffDynamicalSystem):
   """
   def __init__(self, integrator, discretizer):
     # State and control dimension
-    cddp.NumDiffDynamicalSystem.__init__(self, 2, 2, 1, integrator, discretizer)
+    NumDiffDynamicalSystem.__init__(self, 2, 2, 1, integrator, discretizer)
 
     # Mass, spring and damper values
     self._mass = 10.

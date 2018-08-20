@@ -5,12 +5,11 @@ import cddp
 
 class SpringMassNumDiffTest(unittest.TestCase):
   def setUp(self):
-    from models.spring_mass import SpringMass, NumDiffSpringMass
     # Creating the dynamic model with analytical and numerical derivatives
     integrator = cddp.EulerIntegrator()
     discretizer = cddp.EulerDiscretizer()
-    self.analytic_dyn = SpringMass(integrator, discretizer)
-    self.numdiff_dyn = NumDiffSpringMass(integrator, discretizer)
+    self.analytic_dyn = cddp.SpringMass(integrator, discretizer)
+    self.numdiff_dyn = cddp.NumDiffSpringMass(integrator, discretizer)
 
     # Creating the data for both dynamic models
     self.analytic_data = self.analytic_dyn.createData()
