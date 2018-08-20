@@ -235,9 +235,9 @@ class DDP(object):
     # Checking the changes
     self.dV[0] = self.V_new - self.V
     self.z = self.dV[0, 0] / self.dV_exp[0, 0]
-    # print "Expected Reduction:", -self.dV_exp[0, 0]
-    # print "Actual Reduction:", -self.dV[0, 0]
-    # print "Reduction Ratio", self.z
+    print "\t","\t", "Expected Reduction:", -self.dV_exp[0, 0]
+    print "\t","\t", "Actual Reduction:", -self.dV[0, 0]
+    print "\t","\t", "Reduction Ratio", self.z
     if self.z > self.change_lb and self.z < self.change_ub:
       # Accepting the new trajectory and control, defining them as nominal ones
       for k in range(self.N):
