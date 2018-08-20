@@ -69,8 +69,7 @@ w_se3 = np.ones(6)
 se3_cost.setWeights(w_se3)
 
 # Defining the velocity and control regularization
-from simple_cost import StateControlQuadraticRegularization
-xu_reg = StateControlQuadraticRegularization()
+xu_reg = cddp.StateControlQuadraticRegularization()
 wx = 1e-4 * np.hstack([ np.zeros(system.robot.nq), np.ones(system.robot.nv) ])
 wu = 1e-4 * np.ones(system.getControlDimension())
 xu_reg.setWeights(wx, wu)

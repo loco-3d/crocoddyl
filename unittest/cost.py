@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from models.simple_cost import GoalQuadraticCost, GoalResidualQuadraticCost, StateRunningQuadraticCost
+import cddp
 
 
 class QuadraticCostTest(unittest.TestCase):
@@ -21,11 +21,11 @@ class QuadraticCostTest(unittest.TestCase):
     self.r = np.random.rand(self.m)
 
     # Create the different cost function and them data
-    self.t_cost = GoalQuadraticCost(x_des)
+    self.t_cost = cddp.GoalQuadraticCost(x_des)
     self.t_data = self.t_cost.createData(self.n)
-    self.tr_cost = GoalResidualQuadraticCost(x_des)
+    self.tr_cost = cddp.GoalResidualQuadraticCost(x_des)
     self.tr_data = self.tr_cost.createData(self.n)
-    self.r_cost = StateRunningQuadraticCost(x_des)
+    self.r_cost = cddp.StateRunningQuadraticCost(x_des)
     self.r_data = self.r_cost.createData(self.n, self.m)
 
     # Set the state or control weights

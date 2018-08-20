@@ -2,7 +2,6 @@ import unittest
 import numpy as np
 import cddp
 from models.spring_mass import SpringMass
-from models.simple_cost import GoalResidualQuadraticCost, StateControlRunningQuadraticCost
 
 
 plot_enable = False
@@ -20,8 +19,8 @@ class LinearDDPTest(unittest.TestCase):
 
     # Creating the cost manager and its cost functions
     cost_manager = cddp.CostManager()
-    goal_cost = GoalResidualQuadraticCost(x_des)
-    xu_cost = StateControlRunningQuadraticCost(x_des)
+    goal_cost = cddp.GoalResidualQuadraticCost(x_des)
+    xu_cost = cddp.StateControlRunningQuadraticCost(x_des)
 
     # Setting up the weights of the quadratic terms
     wx = np.array([100., 100.])
