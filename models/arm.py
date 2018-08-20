@@ -123,13 +123,14 @@ xf = ddp.intervals[-1].x
 qf = xf[:7]
 print robot.framePosition(qf, frame_idx)
 
-gui.refresh()
-ball_size = 0.04
-traj_node = "world/ee_ball"
-if gui.nodeExists(traj_node):
-  gui.deleteNode(traj_node,True)
-gui.addSphere(traj_node, ball_size, [0.,1.,0.,1.])
+
 if display:
+  gui.refresh()
+  ball_size = 0.04
+  traj_node = "world/ee_ball"
+  if gui.nodeExists(traj_node):
+    gui.deleteNode(traj_node,True)
+  gui.addSphere(traj_node, ball_size, [0.,1.,0.,1.])
   from time import sleep
   robot.initDisplay(loadModel=True)
   it = 0

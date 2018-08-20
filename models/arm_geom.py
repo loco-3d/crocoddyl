@@ -4,7 +4,7 @@ import cddp
 
 
 
-class Arm(cddp.NumDiffGeometricDynamicalSystem):
+class GeomArm(cddp.NumDiffGeometricDynamicalSystem):
   def __init__(self, urdf, arm):
     # Getting the Pinocchio model of the robot
     self.robot = se3.robot_wrapper.RobotWrapper(urdf, path)
@@ -61,6 +61,16 @@ class SE3RunningCost(cddp.RunningResidualQuadraticCost):
 
 
 np.set_printoptions(linewidth=400, suppress=True, threshold=np.nan)
+# # Creating the system model
+# import rospkg
+# path = rospkg.RosPack().get_path('talos_data')
+# urdf = path + '/robots/talos_left_arm.urdf'
+# system = GeomArm(urdf, path)
+# data = system.createData()
+# q = np.random.rand(system.getConfigurationDimension(), 1)
+# v = np.random.rand(system.getTangentDimension(), 1)
+# u = np.random.rand(system.getControlDimension(), 1)
+# x = np.vstack([q, v])
 
 display = True
 if display:
@@ -73,10 +83,10 @@ if display:
 import rospkg
 path = rospkg.RosPack().get_path('talos_data')
 urdf = path + '/robots/talos_left_arm.urdf'
-system = Arm(urdf, path)
+system = GeomArm(urdf, path)
 # x0 = np.zeros((system.getConfigurationDimension(), 1))
 # x0[:system.robot.nq] = np.matrix([ 0.173046, 1., -0.525366, 0., 0., 0.1,-0.005]).T
-q0 = np.zeros((system.getConfigurationDimension(), 1))
+q0 = np.matrix([ 0.173046, 1., -0.525366, 0., 0., 0.1,-0.005]).T
 v0 = np.zeros((system.getTangentDimension(), 1))
 x0 = np.vstack([q0, v0])
 
@@ -121,13 +131,14 @@ xf = ddp.intervals[-1].x
 qf = xf[:7]
 print robot.framePosition(qf, frame_idx)
 
-gui.refresh()
-ball_size = 0.04
-traj_node = "world/ee_ball"
-if gui.nodeExists(traj_node):
-  gui.deleteNode(traj_node,True)
-gui.addSphere(traj_node, ball_size, [0.,1.,0.,1.])
+
 if display:
+  gui.refresh()
+  ball_size = 0.04
+  traj_node = "world/ee_ball"
+  if gui.nodeExists(traj_node):
+    gui.deleteNode(traj_node,True)
+  gui.addSphere(traj_node, ball_size, [0.,1.,0.,1.])
   from time import sleep
   robot.initDisplay(loadModel=True)
   it = 0
