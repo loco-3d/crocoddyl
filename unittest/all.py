@@ -1,6 +1,7 @@
 import unittest
 testmodules = [
   'cost',
+  'soft_constraint',
   'derivatives',
   'integrator',
   'ddp',
