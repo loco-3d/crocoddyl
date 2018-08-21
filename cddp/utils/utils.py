@@ -49,3 +49,6 @@ def assertClass(derivated, abstract):
   assert inspect.getmro(derivated.__class__)[-2].__name__ == abstract, \
       'The ' + derivated.__class__.__name__ + ' class has to derived from the ' +\
       abstract + ' abstract class.'
+
+def assertGreaterThan(a, b):
+  assert (a >= b).all(), 'The first vector is not greater than the second one.'
