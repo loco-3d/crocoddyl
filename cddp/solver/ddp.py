@@ -115,13 +115,11 @@ class DDP(object):
         print ("Reached convergence", self.theta[0,0])
 
         # Recording the solution
-        for k in range(self.N):
-          self.X_opt[k] = self.intervals[k].x_new
-          self.U_opt[k] = self.intervals[k].u_new
-          self.Uff_opt[k] = self.intervals[k].j
-          self.Ufb_opt[k] = self.intervals[k].K
+        self._recordSolution()
         return True
 
+    # Recording the solution
+    self._recordSolution()
     return False
 
   def backwardPass(self, mu, alpha):
@@ -332,12 +330,19 @@ class DDP(object):
 
   def getStateTrajectory(self):
     return self.X_opt
-  
+
   def getControlSequence(self):
     return self.U_opt
-  
+
   def getFeedbackGainSequence(self):
     return self.Ufb_opt
-  
+
   def getFeedforwardSequence(self):
     return self.Uff_opt
+
+  def _recordSolution(self):
+    for k in range(self.N):
+      self.X_opt[k] = self.intervals[k].x_new
+      self.U_opt[k] = self.intervals[k].u_new
+      self.Uff_opt[k] = self.intervals[k].j
+      self.Ufb_opt[k] = self.intervals[k].K
