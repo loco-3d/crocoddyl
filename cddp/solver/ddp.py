@@ -10,8 +10,12 @@ class DDP(object):
     self.timeline = timeline
     self.N = len(timeline) - 1
 
-    # Allocation of data for all the DDP intervals
+    # Allocation of data for all the DDP intervals and its solution
     self.intervals = []
+    self.X_opt = []
+    self.U_opt = []
+    self.Uff_opt = []
+    self.Ufb_opt = []
     for k in range(self.N + 1):
       # Creating the system dynamic and cost data
       sdata = self.system.createData()
@@ -21,6 +25,12 @@ class DDP(object):
       else:
         cdata = self.cost_manager.createRunningData(sdata.ndx, sdata.m)
         self.intervals.append(RunningDDPData(sdata, cdata))
+
+        # Creating the solution data
+        self.X_opt.append(np.matrix(np.zeros((sdata.nx, 1))))
+        self.U_opt.append(np.matrix(np.zeros((sdata.m, 1))))
+        self.Uff_opt.append(np.matrix(np.zeros((sdata.m, 1))))
+        self.Ufb_opt.append(np.matrix(np.zeros((sdata.m, sdata.ndx))))
 
     # Global variables for the DDP algorithm
     self.z = 0.
@@ -103,6 +113,13 @@ class DDP(object):
       # Checking convergence
       if self._convergence:
         print ("Reached convergence", self.theta[0,0])
+
+        # Recording the solution
+        for k in range(self.N):
+          self.X_opt[k] = self.intervals[k].x_new
+          self.U_opt[k] = self.intervals[k].u_new
+          self.Uff_opt[k] = self.intervals[k].j
+          self.Ufb_opt[k] = self.intervals[k].K
         return True
 
     return False
@@ -313,20 +330,14 @@ class DDP(object):
       np.copyto(it.u, U[k])
       np.copyto(it.u_new, U[k])
 
-  # def getControlTrajectory(self):
-
-  #   control_traj = np.matrix(np.zeros((self.model.m,self.N)))
-  #   for k,it in enumerate(self.intervals[:-1]):
-  #     control_traj[:,k] = it.u
-
-  #   return control_traj
-
-  # def getStateTrajectory(self):
-
-  #   state_traj = np.matrix(np.zeros((self.model.n,self.N+1)))
-  #   for k,it in enumerate(self.intervals[:-1]):
-  #     state_traj[:,k] = it.x0
-
-  #   state_traj[:,-1] = self.terminal_interval.x
-
-  #   return state_traj
+  def getStateTrajectory(self):
+    return self.X_opt
+  
+  def getControlSequence(self):
+    return self.U_opt
+  
+  def getFeedbackGainSequence(self):
+    return self.Ufb_opt
+  
+  def getFeedforwardSequence(self):
+    return self.Uff_opt
