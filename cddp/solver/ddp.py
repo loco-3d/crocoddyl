@@ -28,6 +28,7 @@ class DDP(object):
     self.V_new = np.matrix(np.zeros(1))
     self.dV = np.matrix(np.zeros(1))
     self.dV_exp = np.matrix(np.zeros(1))
+    self.theta = np.matrix(np.zeros(1))
 
     # Setting the time values of the running intervals
     for k in range(self.N):
@@ -90,6 +91,9 @@ class DDP(object):
       while not self.forwardPass(self.alpha):
         self.alpha /= self.decreased_rate
         print "\t", ("Rejected changes. Decreasing alpha to", self.alpha)
+        print "\t","\t", "Reduction Ratio", self.z
+        print "\t","\t", "Expected Reduction:", -self.dV_exp[0, 0]
+        print "\t","\t", "Actual Reduction:", -self.dV[0, 0]
         if self.alpha == 0.:
           print "\t", ('No found solution')
           break
@@ -98,6 +102,7 @@ class DDP(object):
 
       # Checking convergence
       if self._convergence:
+        print ("Reached convergence", self.theta[0,0])
         return True
 
     return False
@@ -181,10 +186,10 @@ class DDP(object):
                 it.Qx + it.K.T * it.Quu * it.j + it.K.T * it.Qu + it.Qux.T * it.j)
       np.copyto(it.Vxx, \
                 it.Qxx + it.K.T * it.Quu * it.K + it.K.T * it.Qux + it.Qux.T * it.K)
-      
+
       # Symmetric can be lost due to round-off error. This ensures the symmetric
       np.copyto(it.Vxx, 0.5 * (it.Vxx + it.Vxx.T))
-      
+
       # Updating the local cost and expected reduction. The total values are
       # used to check the changes in the forward pass. This is method is
       # explained in Tassa's PhD thesis
@@ -228,16 +233,14 @@ class DDP(object):
     self.V_new[0] += self.cost_manager.computeTerminalCost(it.cost, it.x_new)
 
     # Checking convergence of the previous iteration
-    if abs(self.V_new / self.V - 1) <= self.tol:
+    self.theta[0,0] = np.asscalar(abs(self.V_new / self.V - 1))
+    if self.theta[0,0] <= self.tol:
       self._convergence = True
       return True
 
     # Checking the changes
     self.dV[0] = self.V_new - self.V
     self.z = self.dV[0, 0] / self.dV_exp[0, 0]
-    print "\t","\t", "Expected Reduction:", -self.dV_exp[0, 0]
-    print "\t","\t", "Actual Reduction:", -self.dV[0, 0]
-    print "\t","\t", "Reduction Ratio", self.z
     if self.z > self.change_lb and self.z < self.change_ub:
       # Accepting the new trajectory and control, defining them as nominal ones
       for k in range(self.N):
