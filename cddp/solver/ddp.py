@@ -101,7 +101,7 @@ class DDP(object):
       while not self.forwardPass(self.alpha):
         self.alpha /= self.decreased_rate
         print "\t", ("Rejected changes. Decreasing alpha to", self.alpha)
-        print "\t","\t", "Reduction Ratio", self.z
+        print "\t","\t", "Reduction Ratio:", self.z
         print "\t","\t", "Expected Reduction:", -self.dV_exp[0, 0]
         print "\t","\t", "Actual Reduction:", -self.dV[0, 0]
         if self.alpha == 0.:
