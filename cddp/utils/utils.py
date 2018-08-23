@@ -23,6 +23,79 @@ def isPositiveDefinitive(A):
     return False
   return True
 
+def assertClass(derivated, abstract):
+  import inspect
+  assert inspect.getmro(derivated.__class__)[-2].__name__ == abstract, \
+    'The ' + derivated.__class__.__name__ + ' class has to derived from the ' +\
+    abstract + ' abstract class.'
+
+def assertGreaterThan(a, b):
+  assert (a >= b).all(), 'The first vector is not greater than the second one.'
+
+def visualizePlan(robot, x0, X, frame_idx=None, path=False):
+  import gepetto.corbaserver
+  cl = gepetto.corbaserver.Client()
+  gui = cl.gui
+
+  if gui.nodeExists("world"):
+    gui.deleteNode("world",True)
+  robot.initDisplay(loadModel=True)
+  robot.display(x0[:robot.nq])
+
+  gui.refresh()
+  if frame_idx != None and path:
+    ball_size = 0.04
+    traj_node = "world/ee_ball"
+    if gui.nodeExists(traj_node):
+      gui.deleteNode(traj_node,True)
+    gui.addSphere(traj_node, ball_size, [0., 1., 0., 1.])
+  
+  from time import sleep
+  robot.initDisplay(loadModel=True)
+  it = 0
+  for k in range(len(X)):
+    qk = X[k][:robot.nq]
+    robot.display(qk)
+    if frame_idx != None and path:
+      import pinocchio as se3
+      M_pos = robot.framePosition(qk, frame_idx)
+      gui.applyConfiguration(traj_node, se3.utils.se3ToXYZQUAT(M_pos))
+      gui.addSphere(traj_node+str(it), ball_size/5, [0., 0., 1., 1.])
+      gui.applyConfiguration(traj_node+str(it), se3.utils.se3ToXYZQUAT(M_pos))
+      gui.refresh()
+    sleep(1e-3)
+    it += 1
+
+def plotDDPSolution(robot, X, U, V):
+  import matplotlib.pyplot as plt
+  # Getting the joint position and commands
+  q = []
+  tau = []
+  for i in range(robot.nq):
+    q.append([np.asscalar(k[i]) for k in X])
+    tau.append([np.asscalar(k[i]) for k in U])
+
+  plt.figure(1)
+  # Plotting the joint position
+  plt.subplot(311)
+  [plt.plot(q[i], label='q'+str(i)) for i in range(robot.nq)]
+  plt.legend()
+  plt.ylabel('rad')
+
+  # Plotting the joint torques
+  plt.subplot(312)
+  [plt.plot(tau[i], label='u'+str(i)) for i in range(robot.nq)]
+  plt.legend()
+  plt.ylabel('Nm')
+  plt.xlabel('knots')
+
+  # Plotting the total cost sequence
+  plt.subplot(313)
+  plt.plot(V)
+  plt.xlabel('iteration')
+  # plt.subplots_adjust(hspace=0.5)
+  plt.show()
+
 
 def plot(x, y, yerr=None, color=None, alpha_fill=0.3, ax=None):
   import matplotlib.pyplot as plt
@@ -43,12 +116,3 @@ def plot(x, y, yerr=None, color=None, alpha_fill=0.3, ax=None):
 def show_plot():
   import matplotlib.pyplot as plt
   plt.show()
-
-def assertClass(derivated, abstract):
-  import inspect
-  assert inspect.getmro(derivated.__class__)[-2].__name__ == abstract, \
-      'The ' + derivated.__class__.__name__ + ' class has to derived from the ' +\
-      abstract + ' abstract class.'
-
-def assertGreaterThan(a, b):
-  assert (a >= b).all(), 'The first vector is not greater than the second one.'
