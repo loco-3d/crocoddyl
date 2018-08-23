@@ -34,10 +34,15 @@ wx = 1e-4 * np.hstack([ np.zeros(system.robot.nq), np.ones(system.robot.nv) ])
 wu = 1e-4 * np.ones(system.getControlDimension())
 xu_reg.setWeights(wx, wu)
 
+# Defining the joint limits as soft-constraint TODO
+jpos_lim = cddp.JointPositionBarrier(system.robot)
+
+
 # Adding the cost functions to the cost manager
 cost_manager = cddp.CostManager()
 cost_manager.addRunning(xu_reg)
 cost_manager.addRunning(se3_cost)
+# cost_manager.addRunning(jpos_lim)
 
 # Setting up the DDP problem
 timeline = np.arange(0.0, 0.25, 1e-3)  # np.linspace(0., 0.5, 51)
