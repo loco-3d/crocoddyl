@@ -46,7 +46,7 @@ class DDP(object):
       it.t0 = timeline[k]
       it.tf = timeline[k+1]
 
-    # Defining the inital and terminal intervals
+    # Defining the initial and terminal intervals
     self.terminal_interval = self.intervals[-1]
     self.initial_interval = self.intervals[0]
 
@@ -57,14 +57,17 @@ class DDP(object):
 
     # Regularization parameters (factor and increased rate)
     self.mu = 0.
-    self.increased_rate = 10.
+    self.mu0 = 1e-8
+    self.mu_inc = 10.
+    self.mu_dec = 0.5
 
     # Line search parameters (step, lower and upper bound of iteration
     # acceptance and decreased rate)
     self.alpha = 1.
+    self.alpha_inc = 2.
+    self.alpha_dec = 0.5
     self.change_lb = 0.
     self.change_ub = 100.
-    self.decreased_rate = 2.
 
   def compute(self, x0, U=None):
     """ Computes the DDP algorithm.
@@ -76,8 +79,11 @@ class DDP(object):
     # the control sequence
     self.forwardSimulation(x0, U)
 
-    # Resetting mu and alpha
-    self.mu = 0.
+    # Resetting mu and alpha. As general rule of thumb we assume that the 
+    # quadratic model has some error respect to the true model. So we start
+    # closer to steeppest descent by adjusting the initial Levenberg-Marquardt
+    # parameter (i.e. mu)
+    self.mu = self.mu0
     self.alpha = 1.
 
     self.n_iter = 0
@@ -91,15 +97,14 @@ class DDP(object):
         # Quu is not positive-definitive, so increasing the
         # regularization factor
         if self.mu == 0.:
-          self.mu += 1e-8
+          self.mu += self.mu0
         else:
-          self.mu *= self.increased_rate
+          self.mu *= self.mu_inc
           print "\t", ("Quu isn't positive. Increasing mu_tassa to", self.mu)
 
       # Running the forward pass
-      self.alpha = 1. # resetting alpha
       while not self.forwardPass(self.alpha):
-        self.alpha /= self.decreased_rate
+        self.alpha *= self.alpha_dec
         print "\t", ("Rejected changes. Decreasing alpha to", self.alpha)
         print "\t","\t", "Reduction Ratio:", self.z
         print "\t","\t", "Expected Reduction:", -self.dV_exp[0, 0]
@@ -110,6 +115,13 @@ class DDP(object):
         if self.alpha < 1e-8:
           self.alpha = 0.
 
+      # The quadratic model is accepted so for faster convergence it's better
+      # to approach to Newton search direction. We can do it by decreasing the
+      # Levenberg-Marquardt parameter
+      self.mu *= self.mu_dec
+
+      # Increasing the stepsize for the next iteration
+      self.alpha = min(self.alpha_inc * self.alpha, 1.)
       # Checking convergence
       if self._convergence:
         print ("Reached convergence", self.theta[0,0])
