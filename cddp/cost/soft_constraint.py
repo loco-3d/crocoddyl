@@ -19,8 +19,8 @@ class XLogBarrier(RunningResidualCost):
 
   def __init__(self, bound):
     self._bound = bound
-    self._mu = 1.
-    self._inf = np.finfo(float).max
+    self._mu = 0.1
+    self._inf = 10e
     RunningResidualCost.__init__(self, self._bound.size)
 
   def l(self, data, x, u):
