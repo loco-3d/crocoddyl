@@ -272,8 +272,8 @@ class DDP(object):
       return True
 
     # Checking the changes
-    self.dV[0] = self.V_new - self.V
-    self.z = self.dV[0, 0] / self.dV_exp[0, 0]
+    self.dV[0] = (self.V_new - self.V).copy()
+    self.z = (self.dV[0, 0] / self.dV_exp[0, 0]).copy()
     if self.z > self.change_lb and self.z < self.change_ub:
       # Accepting the new trajectory and control, defining them as nominal ones
       for k in range(self.N):
