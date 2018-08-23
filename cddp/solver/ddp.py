@@ -86,6 +86,7 @@ class DDP(object):
     self.mu = self.mu0
     self.alpha = 1.
 
+    self.V_itr = []
     self.n_iter = 0
     for i in range(self.max_iter):
       # Recording the number of iterations
@@ -122,6 +123,11 @@ class DDP(object):
 
       # Increasing the stepsize for the next iteration
       self.alpha = min(self.alpha_inc * self.alpha, 1.)
+
+      # Recording the total cost for each iteration. This is useful for
+      # analysing the solver performance
+      self.V_itr.append(self.V_new[0,0].copy())
+
       # Checking convergence
       if self._convergence:
         print ("Reached convergence", self.theta[0,0])
@@ -351,6 +357,9 @@ class DDP(object):
 
   def getFeedforwardSequence(self):
     return self.Uff_opt
+
+  def getTotalCostSequence(self):
+    return np.asarray(self.V_itr)
 
   def _recordSolution(self):
     for k in range(self.N):
