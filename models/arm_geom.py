@@ -7,6 +7,7 @@ np.set_printoptions(linewidth=400, suppress=True, threshold=np.nan)
 
 display = True
 plot = True
+constraint = True
 
 
 # Creating the system model
@@ -34,15 +35,10 @@ wx = 1e-4 * np.hstack([ np.zeros(system.robot.nq), np.ones(system.robot.nv) ])
 wu = 1e-4 * np.ones(system.getControlDimension())
 xu_reg.setWeights(wx, wu)
 
-# Defining the joint limits as soft-constraint TODO
-jpos_lim = cddp.JointPositionBarrier(system.robot)
-
-
 # Adding the cost functions to the cost manager
 cost_manager = cddp.CostManager()
 cost_manager.addRunning(xu_reg)
 cost_manager.addRunning(se3_cost)
-# cost_manager.addRunning(jpos_lim)
 
 # Setting up the DDP problem
 timeline = np.arange(0.0, 0.25, 1e-3)  # np.linspace(0., 0.5, 51)
@@ -64,8 +60,26 @@ if plot:
   V = ddp.getTotalCostSequence()
   cddp.plotDDPSolution(system.robot, X, U, V)
 
-
 if display:
   X = ddp.getStateTrajectory()
   cddp.visualizePlan(system.robot, x0, X, frame_idx)
 
+
+if constraint:
+  # Defining the joint limits as soft-constraint
+  jpos_lim = cddp.JointPositionBarrier(system.robot)
+  cost_manager.addRunning(jpos_lim)
+  
+  # Solving the problem with constraints
+  ddp = cddp.DDP(system, cost_manager, timeline)
+  ddp.compute(x0, ddp.getControlSequence())
+
+  if plot:
+    X = ddp.getStateTrajectory()
+    U = ddp.getControlSequence()
+    V = ddp.getTotalCostSequence()
+    cddp.plotDDPSolution(system.robot, X, U, V)
+
+  if display:
+    X = ddp.getStateTrajectory()
+    cddp.visualizePlan(system.robot, x0, X, frame_idx)
