@@ -112,11 +112,20 @@ class GeometricDynamicalSystem(DynamicalSystem):
 
   @abc.abstractmethod
   def advanceConfiguration(self, q, dq):
-    """ Operator that advance the configuration state
+    """ Operator that advances the configuration state
 
     :param q: configuration point
     :param dq: displacement in tangent space of configuration manifold
     :returns: next configuration point
+    """
+    pass
+
+  @abc.abstractmethod
+  def differentiateConfiguration(self, q_next, q_curr):
+    """ Operator that differentiates the configuration state.
+
+    :param q_next: next configuration point
+    :param q_curr: current configuration point
     """
     pass
 
@@ -189,11 +198,20 @@ class NumDiffGeometricDynamicalSystem(GeometricDynamicalSystem):
 
   @abc.abstractmethod
   def advanceConfiguration(self, q, dq):
-    """ Operator that advance the configuration state
+    """ Operator that advances the configuration state
 
     :param q: configuration point
     :param dq: displacement in tangent space of configuration manifold
     :returns: next configuration point
+    """
+    pass
+
+  @abc.abstractmethod
+  def differentiateConfiguration(self, q_next, q_curr):
+    """ Operator that differentiates the configuration state.
+
+    :param q_next: next configuration point
+    :param q_curr: current configuration point
     """
     pass
 

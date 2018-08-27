@@ -113,13 +113,25 @@ class DynamicalSystem(object):
     """
     pass
 
-  def stateDifference(self, xf, x0):
-    """ Get the state different between xf and x0 (i.e. xf - x0).
+  @abc.abstractmethod
+  def advanceConfiguration(self, x, dx):
+    """ Operator that advances the configuration state
 
-    :param xf: configuration point
-    :param x0: configuration point
+    :param x: configuration point
+    :param dx: displacement in tangent space of configuration manifold
+    :returns: next configuration point
     """
-    return xf - x0
+    pass
+
+  @abc.abstractmethod
+  def differentiateConfiguration(self, x_next, x_curr):
+    """ Operator that differentiates the configuration state.
+
+    :param x_next: next configuration point
+    :param x_curr: current configuration point
+    """
+    # return xf - x0
+    pass
 
   def getConfigurationDimension(self):
     """ Get the configuration space dimension.
@@ -166,11 +178,20 @@ class NumDiffDynamicalSystem(DynamicalSystem):
 
   @abc.abstractmethod
   def advanceConfiguration(self, x, dx):
-    """ Operator that advance the configuration state
+    """ Operator that advances the configuration state
 
     :param x: configuration point
     :param dx: displacement in tangent space of configuration manifold
     :returns: next configuration point
+    """
+    pass
+
+  @abc.abstractmethod
+  def differentiateConfiguration(self, x_next, x_curr):
+    """ Operator that differentiates the configuration state.
+
+    :param x_next: next configuration point
+    :param x_curr: current configuration point
     """
     pass
 

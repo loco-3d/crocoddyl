@@ -50,7 +50,7 @@ class NumDiffForwardDynamics(NumDiffDynamicalSystem):
     return data.f
 
   def advanceConfiguration(self, x, dx):
-    """ Describe the operator that advance the configuration state.
+    """ Operator that advances the configuration state.
 
     :param x: configuration state [joint configuration, joint velocity]
     :param dx: configuration state displacement
@@ -61,6 +61,18 @@ class NumDiffForwardDynamics(NumDiffDynamicalSystem):
     x[:self.robot.nq] = se3.integrate(self.rmodel, q, dq)
     x[self.robot.nq:] += dx[self.robot.nv:]
     return x
+
+  def differentiateConfiguration(self, x_next, x_curr):
+    """ Operator that differentiates the configuration state.
+
+    :param x_next: next configuration state [joint configuration, joint velocity]
+    :param x_curr: current configuration state [joint configuration, joint velocity]
+    """
+    q_next = x_next[:self.robot.nq]
+    q_curr = x_curr[:self.robot.nq]
+    dq = se3.differentiate(self.rmodel, q_curr, q_next)
+    dv = x_next[self.robot.nq:] - x_curr[self.robot.nq:]
+    return np.vstack([dq, dv])
 
 
 class NumDiffSparseForwardDynamics(NumDiffGeometricDynamicalSystem):
@@ -108,10 +120,22 @@ class NumDiffSparseForwardDynamics(NumDiffGeometricDynamicalSystem):
     return data.g
 
   def advanceConfiguration(self, q, dq):
-    """ Describe the operator that advance the configuration state.
+    """ Operator that advances the configuration state.
 
-    :param q: configuration point
-    :param dq: configuration point displacement
+    :param q: joint configuration
+    :param dq: joint configuration displacement
     :returns: the next configuration point
     """
     return se3.integrate(self.rmodel, q, dq)
+
+  def differentiateConfiguration(self, x_next, x_curr):
+    """ Operator that differentiates the configuration state.
+
+    :param x_next: next joint configuration and velocity [q_next, v_next]
+    :param x_curr: current joint configuration and velocity [q_curr, v_curr]
+    """
+    q_next = x_next[:self.robot.nq]
+    q_curr = x_curr[:self.robot.nq]
+    dq = se3.differentiate(self.rmodel, q_curr, q_next)
+    dv = x_next[self.robot.nq:] - x_curr[self.robot.nq:]
+    return np.vstack([dq, dv])

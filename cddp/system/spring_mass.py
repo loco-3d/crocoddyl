@@ -59,7 +59,7 @@ class SpringMass(DynamicalSystem):
     return data.fu
 
   def advanceConfiguration(self, x, dx):
-    """ Describe the operator that advance the configuration state.
+    """ Operator that advances the configuration state.
 
     :param x: state vector
     :param dx: state vector displacement
@@ -67,6 +67,13 @@ class SpringMass(DynamicalSystem):
     """
     return x + dx
 
+  def differentiateConfiguration(self, x_next, x_curr):
+    """ Operator that differentiates the configuration state.
+
+    :param x_next: next state
+    :param x_curr: current state
+    """
+    return x_next - x_curr
 
 
 class NumDiffSpringMass(NumDiffDynamicalSystem):
@@ -105,10 +112,18 @@ class NumDiffSpringMass(NumDiffDynamicalSystem):
     return data.f
 
   def advanceConfiguration(self, x, dx):
-    """ Describe the operator that advance the configuration state.
+    """ Operator that advances the configuration state.
 
     :param x: state vector
     :param dx: state vector displacement
     :returns: the next state value
     """
     return x + dx
+
+  def differentiateConfiguration(self, x_next, x_curr):
+    """ Operator that differentiates the configuration state.
+
+    :param x_next: next state
+    :param x_curr: current state
+    """
+    return x_next - x_curr
