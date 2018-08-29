@@ -1,6 +1,7 @@
 import numpy as np
 from cddp.data import RunningDDPData, TerminalDDPData
 from cddp.utils import isPositiveDefinitive
+import time
 
 
 class DDP(object):
@@ -72,6 +73,9 @@ class DDP(object):
   def compute(self, x0, U=None):
     """ Computes the DDP algorithm.
     """
+    # Starting time
+    start = time.time()
+
     # Resetting convergence flag
     self._convergence = False
 
@@ -130,7 +134,9 @@ class DDP(object):
 
       # Checking convergence
       if self._convergence:
-        print ("Reached convergence", self.theta[0,0])
+        # Final time
+        end = time.time()
+        print ("Reached convergence", self.theta[0,0], " in", end - start, "sec.")
 
         # Recording the solution
         self._recordSolution()
