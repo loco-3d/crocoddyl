@@ -80,7 +80,6 @@ class GeometricDiscretizer(object):
     pass
 
 
-
 class EulerDiscretizer(Discretizer):
   def createData(self, nv):
     """ Create the internal data of forward Euler discretizer.
@@ -129,6 +128,7 @@ class GeometricEulerDiscretizer(GeometricDiscretizer):
     :param dt: sampling period
     :returns: discrete time state and control derivatives
     """
+    model.g(data, q, v, tau)
     model.gq(data, q, v, tau)
     model.gv(data, q, v, tau)
     model.gtau(data, q, v, tau)
@@ -167,6 +167,7 @@ class RK4Discretizer(Discretizer):
     :returns: discrete time state and control derivatives
     """
     # Computing four stages of RK4
+    model.f(data, x, u)
     model.fx(data, x, u)
     model.fu(data, x, u)
     np.copyto(self.f1, dt * self._I)

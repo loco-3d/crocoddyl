@@ -166,15 +166,14 @@ class SparseForwardDynamics(GeometricDynamicalSystem):
     GeometricDynamicalSystem.__init__(self, nq, nv, m, integrator, discretizer)
 
   def g(self, data, q, v, tau):
-    """ Compute the forward dynamics through ABA and store it the result in
-    data.
+    """ Compute the ABA and its derivatives and store the ABA result in data.
 
     :param data: geometric system data
     :param q: joint configuration
     :param v: joint velocity
     :param tau: torque input
     """
-    se3.aba(self._model, self._data, q, v, tau)
+    se3.computeABADerivatives(self._model, self._data, q, v, tau)
     np.copyto(data.g, self._data.ddq)
     return data.g
 
@@ -187,7 +186,6 @@ class SparseForwardDynamics(GeometricDynamicalSystem):
     :param tau: torque input
     :returns: system Jacobian w.r.t the configuration point
     """
-    se3.computeABADerivatives(self._model, self._data, q, v, tau)
     np.copyto(data.gq, self._data.ddq_dq)
     return data.gq
 
