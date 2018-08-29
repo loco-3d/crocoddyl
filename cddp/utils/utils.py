@@ -73,9 +73,11 @@ def plotDDPSolution(model, X, U, V):
   tau = []
   for i in range(model.nq):
     q.append([np.asscalar(k[i]) for k in X])
+  for i in range(model.nv):
     tau.append([np.asscalar(k[i]) for k in U])
 
   plt.figure(1)
+
   # Plotting the joint position
   plt.subplot(311)
   [plt.plot(q[i], label='q'+str(i)) for i in range(model.nq)]
@@ -84,7 +86,7 @@ def plotDDPSolution(model, X, U, V):
 
   # Plotting the joint torques
   plt.subplot(312)
-  [plt.plot(tau[i], label='u'+str(i)) for i in range(model.nq)]
+  [plt.plot(tau[i], label='u'+str(i)) for i in range(model.nv)]
   plt.legend()
   plt.ylabel('Nm')
   plt.xlabel('knots')
