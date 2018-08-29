@@ -139,5 +139,105 @@ class NumDiffSparseForwardDynamics(NumDiffGeometricDynamicalSystem):
     dq = se3.difference(self.rmodel, q_curr, q_next)
     dv = x_next[self.robot.nq:] - x_curr[self.robot.nq:]
     return np.vstack([dq, dv])
+
+
+class SparseForwardDynamics(GeometricDynamicalSystem):
+  """ Sparse robot forward dynamics with analytical derivatives.
+
+  The continuos evolution function (i.e. f(q,v,tau)=[v, g(q,v,tau)]) is defined
+  by the current joint velocity and the forward dynamics g() which is computed
+  using the Articulated Body Algorithm (ABA). Describing as geometrical system
+  allows us to exploit the sparsity of the derivatives computation and to
+  preserve the geometry of the Lie manifold thanks to a sympletic integration
+  rule. Note that ABA computes the forward dynamics for unconstrained rigid body
+  system; it cannot be modeled contact interations.
+  """
+  def __init__(self, urdf, path):
+    """ Construct the robot forward dynamics model.
+
+    :param urdf: URDF file
+    :param path: package path
+    """
+    # Getting the Pinocchio model of the robot
+    self.robot = se3.robot_wrapper.RobotWrapper(urdf, path)
+    self.rmodel = self.robot.model
+    self.rdata = self.robot.data
+
+    # Initializing the dynamic model with numerical differentiation
+    nq = self.robot.nq
+    nv = self.robot.nv
+    m = self.robot.nv
+    integrator = GeometricEulerIntegrator()
+    discretizer = GeometricEulerDiscretizer()
+    GeometricDynamicalSystem.__init__(self, nq, nv, m, integrator, discretizer)
+
+  def g(self, data, q, v, tau):
+    """ Compute the forward dynamics through ABA and store it the result in
+    data.
+
+    :param data: geometric system data
+    :param q: joint configuration
+    :param v: joint velocity
+    :param tau: torque input
+    """
+    se3.aba(self.rmodel, self.rdata, q, v, tau)
+    np.copyto(data.g, self.rdata.ddq)
+    return data.g
+
+  def gq(self, data, q, v, tau):
+    """ Compute the ABA derivatives and and store the result in data.
+
+    :param data: system data
+    :param q: configuration point
+    :param v: generalized velocity
+    :param tau: torque input
+    :returns: system Jacobian w.r.t the configuration point
+    """
+    se3.computeABADerivatives(self.rmodel, self.rdata, q, v, tau)
+    np.copyto(data.gq, self.rdata.ddq_dq)
+    return data.gq
+
+  def gv(self, data, q, v, tau):
+    """ Store the Jacobian w.r.t. the generalized velocity in data which it was
+    previously computed by calling g() function
+
+    :param data: system data
+    :param q: configuration point
+    :param v: generalized velocity
+    :param tau: torque input
+    :returns: system Jacobian w.r.t the generalized velocity
+    """
+    np.copyto(data.gv, self.rdata.ddq_dv)
+
+  def gtau(self, data, q, v, tau):
+    """ Store the Jacobian w.r.t. the torque input in data which it was
+    previously computed by calling g() function.
+
+    :param data: system data
+    :param q: configuration point
+    :param v: generalized velocity
+    :param tau: torque input
+    :returns: system Jacobian w.r.t the torque input
+    """
+    np.copyto(data.gtau, self.rdata.Minv)
+
+  def advanceConfiguration(self, q, dq):
+    """ Operator that advances the configuration state.
+
+    :param q: joint configuration
+    :param dq: joint configuration displacement
+    :returns: the next configuration point
+    """
+    return se3.integrate(self.rmodel, q, dq)
+
+  def differenceConfiguration(self, x_next, x_curr):
+    """ Operator that differentiates the configuration state.
+
+    :param x_next: next joint configuration and velocity [q_next, v_next]
+    :param x_curr: current joint configuration and velocity [q_curr, v_curr]
+    """
+    q_next = x_next[:self.robot.nq]
+    q_curr = x_curr[:self.robot.nq]
+    dq = se3.difference(self.rmodel, q_curr, q_next)
     dv = x_next[self.robot.nq:] - x_curr[self.robot.nq:]
     return np.vstack([dq, dv])

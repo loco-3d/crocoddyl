@@ -14,7 +14,8 @@ constraint = True
 import rospkg
 path = rospkg.RosPack().get_path('talos_data')
 urdf = path + '/robots/talos_left_arm.urdf'
-system = cddp.NumDiffSparseForwardDynamics(urdf, path)
+# system = cddp.NumDiffSparseForwardDynamics(urdf, path)
+system = cddp.SparseForwardDynamics(urdf, path)
 # x0 = np.zeros((system.getConfigurationDimension(), 1))
 # x0[:system.robot.nq] = np.matrix([ 0.173046, 1., -0.525366, 0., 0., 0.1,-0.005]).T
 q0 = np.matrix([ 0.173046, 1., -0.525366, 0., 0., 0.1,-0.005]).T
