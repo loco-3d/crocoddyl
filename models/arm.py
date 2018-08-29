@@ -60,5 +60,6 @@ if plot:
 
 
 if display:
+  T = timeline
   X = ddp.getStateTrajectory()
-  cddp.visualizePlan(robot, x0, X, frame_idx)
+  cddp.visualizePlan(robot, x0, T, X, frame_idx)

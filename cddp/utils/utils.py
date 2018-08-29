@@ -32,7 +32,7 @@ def assertClass(derivated, abstract):
 def assertGreaterThan(a, b):
   assert (a >= b).all(), 'The first vector is not greater than the second one.'
 
-def visualizePlan(robot, x0, X, frame_idx=None, path=False):
+def visualizePlan(robot, x0, T, X, frame_idx=None, path=False):
   import gepetto.corbaserver
   cl = gepetto.corbaserver.Client()
   gui = cl.gui
@@ -53,6 +53,7 @@ def visualizePlan(robot, x0, X, frame_idx=None, path=False):
   from time import sleep
   robot.initDisplay(loadModel=True)
   it = 0
+  t0 = 0.
   for k in range(len(X)):
     qk = X[k][:robot.nq]
     robot.display(qk)
@@ -63,7 +64,8 @@ def visualizePlan(robot, x0, X, frame_idx=None, path=False):
       gui.addSphere(traj_node+str(it), ball_size/5, [0., 0., 1., 1.])
       gui.applyConfiguration(traj_node+str(it), se3.utils.se3ToXYZQUAT(M_pos))
       gui.refresh()
-    sleep(1e-3)
+    sleep(T[k+1]-t0)
+    t0 = T[k+1]
     it += 1
 
 def plotDDPSolution(model, X, U, V):

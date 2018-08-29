@@ -64,8 +64,9 @@ if plot:
   cddp.plotDDPSolution(model, X, U, V)
 
 if display:
+  T = timeline
   X = ddp.getStateTrajectory()
-  cddp.visualizePlan(robot, x0, X, frame_idx)
+  cddp.visualizePlan(robot, x0, T, X, frame_idx)
 
 
 if constraint:
@@ -85,4 +86,4 @@ if constraint:
 
   if display:
     X = ddp.getStateTrajectory()
-    cddp.visualizePlan(robot, x0, X, frame_idx)
+    cddp.visualizePlan(robot, x0, T, X, frame_idx)
