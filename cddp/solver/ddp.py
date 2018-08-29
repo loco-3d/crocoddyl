@@ -58,7 +58,7 @@ class DDP(object):
 
     # Regularization parameters (factor and increased rate)
     self.mu = 0.
-    self.mu0 = 1e-8
+    self.mu0 = self.sqrt_eps # Full Newton direction as default
     self.mu_inc = 10.
     self.mu_dec = 0.5
 
@@ -117,16 +117,20 @@ class DDP(object):
         if self.alpha == 0.:
           print "\t", ('No found solution')
           break
-        if self.alpha < 1e-8:
+        if self.alpha < self.sqrt_eps:
           self.alpha = 0.
 
       # The quadratic model is accepted so for faster convergence it's better
       # to approach to Newton search direction. We can do it by decreasing the
       # Levenberg-Marquardt parameter
       self.mu *= self.mu_dec
+      if self.mu < self.sqrt_eps: # this is full Newton direction
+        self.mu = self.sqrt_eps
 
       # Increasing the stepsize for the next iteration
-      self.alpha = min(self.alpha_inc * self.alpha, 1.)
+      self.alpha *= self.alpha_inc
+      if self.alpha > 1.:
+        self.alpha = 1.
 
       # Recording the total cost for each iteration. This is useful for
       # analysing the solver performance
@@ -136,11 +140,15 @@ class DDP(object):
       if self._convergence:
         # Final time
         end = time.time()
-        print ("Reached convergence", self.gradU[0,0], " in", end - start, "sec.")
+        print ("Reached convergence", self.gradU[0,0], " in", end-start, "sec.")
 
         # Recording the solution
         self._recordSolution()
         return True
+
+    # Final time
+    end = time.time()
+    print ("Reached allowed iterations", self.gradU[0,0], " in", end-start, "sec.")
 
     # Recording the solution
     self._recordSolution()
