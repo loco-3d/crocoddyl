@@ -13,17 +13,18 @@ class SE3RunningCost(RunningResidualQuadraticCost):
   tangent space TxQ and the control (input) vector are nq, nv and m,
   respectively.
   """
-  def __init__(self, robot, ee_frame, M_des):
+  def __init__(self, model, ee_frame, M_des):
     """ Construct the running cost for a desired SE3.
 
     It requires the robot model created by Pinocchio, the frame name and its
     desired SE3 pose.
-    :param robot: Pinocchio robot model
+    :param model: Pinocchio model
     :ee_frame: frame name
     :M_des: desired SE3 pose
     """
-    self.robot = robot
-    self._frame_idx = self.robot.model.getFrameId(ee_frame)
+    self._model = model
+    self._data = self._model.createData()
+    self._frame_idx = self._model.getFrameId(ee_frame)
     self.M_des = M_des
     # Residual vector lies in the tangent space of the SE3 manifold
     RunningResidualQuadraticCost.__init__(self, 6)
@@ -39,10 +40,15 @@ class SE3RunningCost(RunningResidualQuadraticCost):
     :param u: control vector
     :returns: SE3 error
     """
+    # Computing the frame position
+    q = x[:self._model.nq]
+    se3.forwardKinematics(self._model, self._data, q)
+    frame = self._model.frames[self._frame_idx]
+    oMf = self._data.oMi[frame.parent].act(frame.placement)
+
     # SE3 error mapping in its tangent manifold
-    q = x[:self.robot.nq]
     np.copyto(data.r,
-      se3.log(self.M_des.inverse() * self.robot.framePosition(q, self._frame_idx)).vector)
+      se3.log(self.M_des.inverse() * oMf).vector)
     return data.r
 
   def rx(self, data, x, u):
@@ -54,10 +60,10 @@ class SE3RunningCost(RunningResidualQuadraticCost):
     :param u: control vector
     :returns: state Jacobian of the SE3 error vector
     """
-    q = x[:self.robot.nq]
-    data.rx[:, :self.robot.nv] = \
-      se3.jointJacobian(self.robot.model, self.robot.data, q,
-                   self.robot.model.frames[self._frame_idx].parent,
+    q = x[:self._model.nq]
+    data.rx[:, :self._model.nv] = \
+      se3.jointJacobian(self._model, self._data, q,
+                   self._model.frames[self._frame_idx].parent,
                    se3.ReferenceFrame.LOCAL, True)
     return data.rx
 

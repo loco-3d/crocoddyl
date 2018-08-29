@@ -66,25 +66,25 @@ def visualizePlan(robot, x0, X, frame_idx=None, path=False):
     sleep(1e-3)
     it += 1
 
-def plotDDPSolution(robot, X, U, V):
+def plotDDPSolution(model, X, U, V):
   import matplotlib.pyplot as plt
   # Getting the joint position and commands
   q = []
   tau = []
-  for i in range(robot.nq):
+  for i in range(model.nq):
     q.append([np.asscalar(k[i]) for k in X])
     tau.append([np.asscalar(k[i]) for k in U])
 
   plt.figure(1)
   # Plotting the joint position
   plt.subplot(311)
-  [plt.plot(q[i], label='q'+str(i)) for i in range(robot.nq)]
+  [plt.plot(q[i], label='q'+str(i)) for i in range(model.nq)]
   plt.legend()
   plt.ylabel('rad')
 
   # Plotting the joint torques
   plt.subplot(312)
-  [plt.plot(tau[i], label='u'+str(i)) for i in range(robot.nq)]
+  [plt.plot(tau[i], label='u'+str(i)) for i in range(model.nq)]
   plt.legend()
   plt.ylabel('Nm')
   plt.xlabel('knots')

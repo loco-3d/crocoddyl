@@ -7,22 +7,22 @@ class JointPositionBarrier(XLogBarrier):
   """ Log-barrier for joint position limits of the robot.
   """
 
-  def __init__(self, robot):
+  def __init__(self, model):
     """ Construct the barrier function for the joint position limits.
 
-    :param robot: Pinocchio robot model
+    :param model: Pinocchio model
     :param lb: lower bound
     """
-    self.robot = robot
-    self._n_joint = self.robot.nq
+    self._model = model
+    self._n_joint = self._model.nq
 
-    ub = self.robot.model.upperPositionLimit
-    lb = self.robot.model.lowerPositionLimit
+    ub = self._model.upperPositionLimit
+    lb = self._model.lowerPositionLimit
     bound = np.vstack([ub, -lb])
     XLogBarrier.__init__(self, bound)
 
   def r(self, data, x, u):
-    q = x[:self.robot.nq]
+    q = x[:self._model.nq]
     data.r[:self._n_joint] = q
     data.r[self._n_joint:] = -q
     return data.r

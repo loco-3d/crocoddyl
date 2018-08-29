@@ -15,21 +15,19 @@ class NumDiffForwardDynamics(NumDiffDynamicalSystem):
   rigid body system. Indeed it does not model contact interations. The Jacobian
   are computed through numerical differentiation.
   """
-  def __init__(self, urdf, path):
+  def __init__(self, model):
     """ Construct the robot forward dynamic model.
 
-    :param urdf: URDF file
-    :param path: package path
+    :param model: Pinocchio model
     """
     # Getting the Pinocchio model of the robot
-    self.robot = se3.robot_wrapper.RobotWrapper(urdf, path)
-    self.rmodel = self.robot.model
-    self.rdata = self.robot.data
+    self._model = model
+    self._data = self._model.createData()
 
     # Initializing the dynamic model with numerical differentiation
-    nq = self.robot.nq + self.robot.nv
-    nv = self.robot.nv + self.robot.nv
-    m = self.robot.nv
+    nq = self._model.nq + self._model.nv
+    nv = self._model.nv + self._model.nv
+    m = self._model.nv
     integrator = EulerIntegrator()
     discretizer = EulerDiscretizer()
     NumDiffDynamicalSystem.__init__(self, nq, nv, m, integrator, discretizer)
@@ -42,11 +40,11 @@ class NumDiffForwardDynamics(NumDiffDynamicalSystem):
     :param x: configuration state [joint configuration, joint velocity]
     :param u: control input
     """
-    q = x[:self.robot.nq]
-    v = x[self.robot.nq:]
-    se3.aba(self.rmodel, self.rdata, q, v, u)
-    data.f[:self.robot.nq] = v
-    data.f[self.robot.nq:] = self.rdata.ddq
+    q = x[:self._model.nq]
+    v = x[self._model.nq:]
+    se3.aba(self._model, self._data, q, v, u)
+    data.f[:self._model.nq] = v
+    data.f[self._model.nq:] = self._data.ddq
     return data.f
 
   def advanceConfiguration(self, x, dx):
@@ -56,10 +54,10 @@ class NumDiffForwardDynamics(NumDiffDynamicalSystem):
     :param dx: configuration state displacement
     :returns: the next configuration state
     """
-    q = x[:self.robot.nq]
-    dq = dx[:self.robot.nv]
-    x[:self.robot.nq] = se3.integrate(self.rmodel, q, dq)
-    x[self.robot.nq:] += dx[self.robot.nv:]
+    q = x[:self._model.nq]
+    dq = dx[:self._model.nv]
+    x[:self._model.nq] = se3.integrate(self._model, q, dq)
+    x[self._model.nq:] += dx[self._model.nv:]
     return x
 
   def differenceConfiguration(self, x_next, x_curr):
@@ -68,10 +66,10 @@ class NumDiffForwardDynamics(NumDiffDynamicalSystem):
     :param x_next: next configuration state [joint configuration, joint velocity]
     :param x_curr: current configuration state [joint configuration, joint velocity]
     """
-    q_next = x_next[:self.robot.nq]
-    q_curr = x_curr[:self.robot.nq]
-    dq = se3.difference(self.rmodel, q_curr, q_next)
-    dv = x_next[self.robot.nq:] - x_curr[self.robot.nq:]
+    q_next = x_next[:self._model.nq]
+    q_curr = x_curr[:self._model.nq]
+    dq = se3.difference(self._model, q_curr, q_next)
+    dv = x_next[self._model.nq:] - x_curr[self._model.nq:]
     return np.vstack([dq, dv])
 
 
@@ -87,21 +85,19 @@ class NumDiffSparseForwardDynamics(NumDiffGeometricDynamicalSystem):
   system; it cannot be modeled contact interations. The Jacobian are computed
   through numerical differentiation.
   """
-  def __init__(self, urdf, path):
+  def __init__(self, model):
     """ Construct the robot forward dynamics model.
 
-    :param urdf: URDF file
-    :param path: package path
+    :param model: Pinocchio model
     """
     # Getting the Pinocchio model of the robot
-    self.robot = se3.robot_wrapper.RobotWrapper(urdf, path)
-    self.rmodel = self.robot.model
-    self.rdata = self.robot.data
+    self._model = model
+    self._data = self._model.createData()
 
     # Initializing the dynamic model with numerical differentiation
-    nq = self.robot.nq
-    nv = self.robot.nv
-    m = self.robot.nv
+    nq = self._model.nq
+    nv = self._model.nv
+    m = self._model.nv
     integrator = GeometricEulerIntegrator()
     discretizer = GeometricEulerDiscretizer()
     NumDiffGeometricDynamicalSystem.__init__(self, nq, nv, m, integrator, discretizer)
@@ -115,8 +111,8 @@ class NumDiffSparseForwardDynamics(NumDiffGeometricDynamicalSystem):
     :param v: joint velocity
     :param tau: torque input
     """
-    se3.aba(self.rmodel, self.rdata, q, v, tau)
-    np.copyto(data.g, self.rdata.ddq)
+    se3.aba(self._model, self._data, q, v, tau)
+    np.copyto(data.g, self._data.ddq)
     return data.g
 
   def advanceConfiguration(self, q, dq):
@@ -126,7 +122,7 @@ class NumDiffSparseForwardDynamics(NumDiffGeometricDynamicalSystem):
     :param dq: joint configuration displacement
     :returns: the next configuration point
     """
-    return se3.integrate(self.rmodel, q, dq)
+    return se3.integrate(self._model, q, dq)
 
   def differenceConfiguration(self, x_next, x_curr):
     """ Operator that differentiates the configuration state.
@@ -134,10 +130,10 @@ class NumDiffSparseForwardDynamics(NumDiffGeometricDynamicalSystem):
     :param x_next: next joint configuration and velocity [q_next, v_next]
     :param x_curr: current joint configuration and velocity [q_curr, v_curr]
     """
-    q_next = x_next[:self.robot.nq]
-    q_curr = x_curr[:self.robot.nq]
-    dq = se3.difference(self.rmodel, q_curr, q_next)
-    dv = x_next[self.robot.nq:] - x_curr[self.robot.nq:]
+    q_next = x_next[:self.nq]
+    q_curr = x_curr[:self.nq]
+    dq = se3.difference(self._model, q_curr, q_next)
+    dv = x_next[self.nq:] - x_curr[self.nq:]
     return np.vstack([dq, dv])
 
 
@@ -152,21 +148,19 @@ class SparseForwardDynamics(GeometricDynamicalSystem):
   rule. Note that ABA computes the forward dynamics for unconstrained rigid body
   system; it cannot be modeled contact interations.
   """
-  def __init__(self, urdf, path):
+  def __init__(self, model):
     """ Construct the robot forward dynamics model.
 
-    :param urdf: URDF file
-    :param path: package path
+    :param model: Pinocchio model
     """
     # Getting the Pinocchio model of the robot
-    self.robot = se3.robot_wrapper.RobotWrapper(urdf, path)
-    self.rmodel = self.robot.model
-    self.rdata = self.robot.data
+    self._model = model
+    self._data = self._model.createData()
 
     # Initializing the dynamic model with numerical differentiation
-    nq = self.robot.nq
-    nv = self.robot.nv
-    m = self.robot.nv
+    nq = self._model.nq
+    nv = self._model.nv
+    m = self._model.nv
     integrator = GeometricEulerIntegrator()
     discretizer = GeometricEulerDiscretizer()
     GeometricDynamicalSystem.__init__(self, nq, nv, m, integrator, discretizer)
@@ -180,8 +174,8 @@ class SparseForwardDynamics(GeometricDynamicalSystem):
     :param v: joint velocity
     :param tau: torque input
     """
-    se3.aba(self.rmodel, self.rdata, q, v, tau)
-    np.copyto(data.g, self.rdata.ddq)
+    se3.aba(self._model, self._data, q, v, tau)
+    np.copyto(data.g, self._data.ddq)
     return data.g
 
   def gq(self, data, q, v, tau):
@@ -193,8 +187,8 @@ class SparseForwardDynamics(GeometricDynamicalSystem):
     :param tau: torque input
     :returns: system Jacobian w.r.t the configuration point
     """
-    se3.computeABADerivatives(self.rmodel, self.rdata, q, v, tau)
-    np.copyto(data.gq, self.rdata.ddq_dq)
+    se3.computeABADerivatives(self._model, self._data, q, v, tau)
+    np.copyto(data.gq, self._data.ddq_dq)
     return data.gq
 
   def gv(self, data, q, v, tau):
@@ -207,7 +201,7 @@ class SparseForwardDynamics(GeometricDynamicalSystem):
     :param tau: torque input
     :returns: system Jacobian w.r.t the generalized velocity
     """
-    np.copyto(data.gv, self.rdata.ddq_dv)
+    np.copyto(data.gv, self._data.ddq_dv)
 
   def gtau(self, data, q, v, tau):
     """ Store the Jacobian w.r.t. the torque input in data which it was
@@ -219,7 +213,7 @@ class SparseForwardDynamics(GeometricDynamicalSystem):
     :param tau: torque input
     :returns: system Jacobian w.r.t the torque input
     """
-    np.copyto(data.gtau, self.rdata.Minv)
+    np.copyto(data.gtau, self._data.Minv)
 
   def advanceConfiguration(self, q, dq):
     """ Operator that advances the configuration state.
@@ -228,7 +222,7 @@ class SparseForwardDynamics(GeometricDynamicalSystem):
     :param dq: joint configuration displacement
     :returns: the next configuration point
     """
-    return se3.integrate(self.rmodel, q, dq)
+    return se3.integrate(self._model, q, dq)
 
   def differenceConfiguration(self, x_next, x_curr):
     """ Operator that differentiates the configuration state.
@@ -236,8 +230,8 @@ class SparseForwardDynamics(GeometricDynamicalSystem):
     :param x_next: next joint configuration and velocity [q_next, v_next]
     :param x_curr: current joint configuration and velocity [q_curr, v_curr]
     """
-    q_next = x_next[:self.robot.nq]
-    q_curr = x_curr[:self.robot.nq]
-    dq = se3.difference(self.rmodel, q_curr, q_next)
-    dv = x_next[self.robot.nq:] - x_curr[self.robot.nq:]
+    q_next = x_next[:self._model.nq]
+    q_curr = x_curr[:self._model.nq]
+    dq = se3.difference(self._model, q_curr, q_next)
+    dv = x_next[self._model.nq:] - x_curr[self._model.nq:]
     return np.vstack([dq, dv])

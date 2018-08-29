@@ -1,6 +1,6 @@
 import cddp
 import numpy as np
-
+import pinocchio as se3
 
 
 np.set_printoptions(linewidth=400, suppress=True, threshold=np.nan)
@@ -13,21 +13,23 @@ plot = True
 import rospkg
 path = rospkg.RosPack().get_path('talos_data')
 urdf = path + '/robots/talos_left_arm.urdf'
-system = cddp.NumDiffForwardDynamics(urdf, path)
+robot = se3.robot_wrapper.RobotWrapper(urdf, path)
+model = robot.model
+system = cddp.NumDiffForwardDynamics(model)
 x0 = np.zeros((system.getConfigurationDimension(), 1))
-x0[:system.robot.nq] = np.matrix([ 0.173046, 1., -0.525366, 0., 0., 0.1,-0.005]).T
+x0[:model.nq] = np.matrix([ 0.173046, 1., -0.525366, 0., 0., 0.1,-0.005]).T
 
 
 # Defining the SE3 task
 frame_name = 'gripper_left_joint'
 M_des = cddp.se3.SE3(np.eye(3), np.array([ [0.], [0.], [0.5] ]))
-se3_cost = cddp.SE3RunningCost(system.robot, frame_name, M_des)
+se3_cost = cddp.SE3RunningCost(model, frame_name, M_des)
 w_se3 = np.ones(6)
 se3_cost.setWeights(w_se3)
 
 # Defining the velocity and control regularization
 xu_reg = cddp.StateControlQuadraticRegularization()
-wx = 1e-4 * np.hstack([ np.zeros(system.robot.nq), np.ones(system.robot.nv) ])
+wx = 1e-4 * np.hstack([ np.zeros(model.nq), np.ones(model.nv) ])
 wu = 1e-4 * np.ones(system.getControlDimension())
 xu_reg.setWeights(wx, wu)
 
@@ -44,20 +46,19 @@ ddp = cddp.DDP(system, cost_manager, timeline)
 ddp.compute(x0)
 
 # Printing the final goal
-frame_idx = system.robot.model.getFrameId(frame_name)
+frame_idx = model.getFrameId(frame_name)
 xf = ddp.intervals[-1].x
 qf = xf[:7]
-print system.robot.framePosition(qf, frame_idx)
+print robot.framePosition(qf, frame_idx)
 
 
 if plot:
   X = ddp.getStateTrajectory()
   U = ddp.getControlSequence()
   V = ddp.getTotalCostSequence()
-  cddp.plotDDPSolution(system.robot, X, U, V)
+  cddp.plotDDPSolution(model, X, U, V)
 
 
 if display:
   X = ddp.getStateTrajectory()
-  cddp.visualizePlan(system.robot, x0, X, frame_idx)
-
+  cddp.visualizePlan(robot, x0, X, frame_idx)
