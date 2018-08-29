@@ -33,7 +33,7 @@ class StateLogBarrierTest(unittest.TestCase):
     x = 10. * np.ones((self.n, 1))
     u = np.zeros((self.m, 1))
     l = logb.l(data, x, u)
-    self.assertEqual(np.asscalar(l[0]), np.finfo(float).max, "Barrier isn't inf.")
+    self.assertEqual(np.asscalar(l[0]), logb._inf, "Barrier isn't inf.")
 
   def test_state_jacobian_signed_in_lower_bound(self):
     # Defining the state barrier with bounds equals 1 and -1
