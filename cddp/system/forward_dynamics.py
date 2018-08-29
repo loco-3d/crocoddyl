@@ -62,7 +62,7 @@ class NumDiffForwardDynamics(NumDiffDynamicalSystem):
     x[self.robot.nq:] += dx[self.robot.nv:]
     return x
 
-  def differentiateConfiguration(self, x_next, x_curr):
+  def differenceConfiguration(self, x_next, x_curr):
     """ Operator that differentiates the configuration state.
 
     :param x_next: next configuration state [joint configuration, joint velocity]
@@ -70,7 +70,7 @@ class NumDiffForwardDynamics(NumDiffDynamicalSystem):
     """
     q_next = x_next[:self.robot.nq]
     q_curr = x_curr[:self.robot.nq]
-    dq = se3.differentiate(self.rmodel, q_curr, q_next)
+    dq = se3.difference(self.rmodel, q_curr, q_next)
     dv = x_next[self.robot.nq:] - x_curr[self.robot.nq:]
     return np.vstack([dq, dv])
 
@@ -128,7 +128,7 @@ class NumDiffSparseForwardDynamics(NumDiffGeometricDynamicalSystem):
     """
     return se3.integrate(self.rmodel, q, dq)
 
-  def differentiateConfiguration(self, x_next, x_curr):
+  def differenceConfiguration(self, x_next, x_curr):
     """ Operator that differentiates the configuration state.
 
     :param x_next: next joint configuration and velocity [q_next, v_next]
@@ -136,6 +136,8 @@ class NumDiffSparseForwardDynamics(NumDiffGeometricDynamicalSystem):
     """
     q_next = x_next[:self.robot.nq]
     q_curr = x_curr[:self.robot.nq]
-    dq = se3.differentiate(self.rmodel, q_curr, q_next)
+    dq = se3.difference(self.rmodel, q_curr, q_next)
+    dv = x_next[self.robot.nq:] - x_curr[self.robot.nq:]
+    return np.vstack([dq, dv])
     dv = x_next[self.robot.nq:] - x_curr[self.robot.nq:]
     return np.vstack([dq, dv])

@@ -67,7 +67,7 @@ class SpringMass(DynamicalSystem):
     """
     return x + dx
 
-  def differentiateConfiguration(self, x_next, x_curr):
+  def differenceConfiguration(self, x_next, x_curr):
     """ Operator that differentiates the configuration state.
 
     :param x_next: next state
@@ -120,7 +120,7 @@ class NumDiffSpringMass(NumDiffDynamicalSystem):
     """
     return x + dx
 
-  def differentiateConfiguration(self, x_next, x_curr):
+  def differenceConfiguration(self, x_next, x_curr):
     """ Operator that differentiates the configuration state.
 
     :param x_next: next state

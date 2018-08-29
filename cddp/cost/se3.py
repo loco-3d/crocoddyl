@@ -55,9 +55,10 @@ class SE3RunningCost(RunningResidualQuadraticCost):
     :returns: state Jacobian of the SE3 error vector
     """
     q = x[:self.robot.nq]
-    data.rx[:, :self.robot.nq] = \
-      se3.jacobian(self.robot.model, self.robot.data, q,
-                   self.robot.model.frames[self._frame_idx].parent, False, True)
+    data.rx[:, :self.robot.nv] = \
+      se3.jointJacobian(self.robot.model, self.robot.data, q,
+                   self.robot.model.frames[self._frame_idx].parent,
+                   se3.ReferenceFrame.LOCAL, True)
     return data.rx
 
   def ru(self, data, x, u):

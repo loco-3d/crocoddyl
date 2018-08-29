@@ -255,7 +255,7 @@ class DDP(object):
 
       # Computing the new control command
       np.copyto(it.u_new, it.u + alpha * it.j + it.K *
-                self.system.differentiateConfiguration(it.x_new, it.x))
+                self.system.differenceConfiguration(it.x_new, it.x))
 
       # Integrating the system dynamics and updating the new state value
       dt = it.tf - it.t0

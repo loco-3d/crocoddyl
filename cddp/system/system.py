@@ -124,7 +124,7 @@ class DynamicalSystem(object):
     pass
 
   @abc.abstractmethod
-  def differentiateConfiguration(self, x_next, x_curr):
+  def differenceConfiguration(self, x_next, x_curr):
     """ Operator that differentiates the configuration state.
 
     :param x_next: next configuration point
@@ -187,7 +187,7 @@ class NumDiffDynamicalSystem(DynamicalSystem):
     pass
 
   @abc.abstractmethod
-  def differentiateConfiguration(self, x_next, x_curr):
+  def differenceConfiguration(self, x_next, x_curr):
     """ Operator that differentiates the configuration state.
 
     :param x_next: next configuration point
