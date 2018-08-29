@@ -39,7 +39,7 @@ class DDP(object):
     self.V_new = np.matrix(np.zeros(1))
     self.dV = np.matrix(np.zeros(1))
     self.dV_exp = np.matrix(np.zeros(1))
-    self.theta = np.matrix(np.zeros(1))
+    self.gradU = np.matrix(np.zeros(1))
 
     # Setting the time values of the running intervals
     for k in range(self.N):
@@ -136,7 +136,7 @@ class DDP(object):
       if self._convergence:
         # Final time
         end = time.time()
-        print ("Reached convergence", self.theta[0,0], " in", end - start, "sec.")
+        print ("Reached convergence", self.gradU[0,0], " in", end - start, "sec.")
 
         # Recording the solution
         self._recordSolution()
@@ -164,6 +164,7 @@ class DDP(object):
     self.dV_exp[0] = 0.
 
     # Running the backward sweep
+    self.gradU[0,0] = 0.
     for k in range(self.N-1, -1, -1):
       it = self.intervals[k]
       it_next = self.intervals[k+1]
@@ -218,6 +219,10 @@ class DDP(object):
       np.copyto(it.K, - Quu_inv * it.Qux_r)
       np.copyto(it.j, - Quu_inv * it.Qu)
 
+      # Updating the gradient given the actual knot
+      self.gradU[0,0] += np.linalg.norm(it.Qu)
+      # self.gradU[0,0] += it.Qu.T * Quu_inv * it.Qu #TODO study this method
+
       # Computing the value function derivatives of this interval
       jt_Quu_j = 0.5 * it.j.T * it.Quu * it.j
       jt_Qu = it.j.T * it.Qu
@@ -234,6 +239,10 @@ class DDP(object):
       # explained in Tassa's PhD thesis
       self.V[0] += l
       self.dV_exp[0] += alpha * (alpha * jt_Quu_j + jt_Qu)
+
+    # Computing the gradient w.r.t. U={u0, ..., uN}
+    self.gradU[0,0] = np.sqrt(self.gradU[0,0]) / self.N
+    # self.gradU[0,0] /= self.N #TODO study this method
     return True
 
   def forwardPass(self, alpha):
@@ -272,8 +281,7 @@ class DDP(object):
     self.V_new[0] += self.cost_manager.computeTerminalCost(it.cost, it.x_new)
 
     # Checking convergence of the previous iteration
-    self.theta[0,0] = np.asscalar(abs(self.V_new / self.V - 1))
-    if self.theta[0,0] <= self.tol:
+    if self.gradU[0,0] <= self.tol:
       self._convergence = True
       return True
 
