@@ -170,7 +170,8 @@ class DDP(object):
     # with the backward sweep
     it = self.terminal_interval
     xf = it.x
-    l, it.Vx, it.Vxx = self.cost_manager.computeTerminalTerms(it.cost, xf)
+    l, it.Vx, it.Vxx = \
+      self.cost_manager.computeTerminalTerms(self.system, it.cost, xf)
 
     # Setting up the initial cost value, and the expected reduction equals zero
     self.V_exp[0] = l.copy()
@@ -191,7 +192,7 @@ class DDP(object):
 
       # Computing the cost and its derivatives
       l, lx, lu, lxx, luu, lux = \
-        self.cost_manager.computeRunningTerms(cost_data, x, u)
+        self.cost_manager.computeRunningTerms(self.system, cost_data, x, u)
 
       # Integrating the derivatives of the cost function
       # TODO we need to use the integrator class for this
@@ -287,11 +288,11 @@ class DDP(object):
       # Integrating the cost and updating the new value function
       # TODO we need to use the integrator class for this
       self.V[0] += \
-        self.cost_manager.computeRunningCost(it.cost, it.x_new, it.u_new) * dt
+        self.cost_manager.computeRunningCost(self.system, it.cost, it.x_new, it.u_new) * dt
 
     # Including the terminal cost
     it = self.terminal_interval
-    self.V[0] += self.cost_manager.computeTerminalCost(it.cost, it.x_new)
+    self.V[0] += self.cost_manager.computeTerminalCost(self.system, it.cost, it.x_new)
 
     # Checking convergence of the previous iteration
     if self.gradU[0,0] <= self.tol:
@@ -348,12 +349,13 @@ class DDP(object):
 
       # Integrating the cost and updating the new value function
       self.V_exp[0] += \
-        self.cost_manager.computeRunningCost(it.cost, it.x, it.u) * dt
+        self.cost_manager.computeRunningCost(self.system, it.cost, it.x, it.u) * dt
 
     # Including the terminal state and cost
     it = self.terminal_interval
     it.x = self.intervals[self.N-1].x
-    self.V_exp[0] += self.cost_manager.computeTerminalCost(it.cost, it.x)
+    self.V_exp[0] += \
+      self.cost_manager.computeTerminalCost(self.system, it.cost, it.x)
 
   def setInitalState(self, x0):
     """ Initializes the actual state of the dynamical system.

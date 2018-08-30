@@ -21,13 +21,13 @@ class JointPositionBarrier(XLogBarrier):
     bound = np.vstack([ub, -lb])
     XLogBarrier.__init__(self, bound)
 
-  def r(self, data, x, u):
+  def r(self, system, data, x, u):
     q = x[:self._model.nq]
     data.r[:self._n_joint] = q
     data.r[self._n_joint:] = -q
     return data.r
 
-  def rx(self, data, x, u):
+  def rx(self, system, data, x, u):
     data.rx[:self._n_joint,:self._n_joint] = np.ones((self._n_joint, self._n_joint))
     data.rx[self._n_joint:,:self._n_joint] = -np.ones((self._n_joint, self._n_joint))
     return data.rx

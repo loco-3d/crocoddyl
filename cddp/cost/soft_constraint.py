@@ -23,9 +23,9 @@ class XLogBarrier(RunningResidualCost):
     self._inf = 10e5
     RunningResidualCost.__init__(self, self._bound.size)
 
-  def l(self, data, x, u):
+  def l(self, system, data, x, u):
     # Compute the inequality constraint function
-    r = self.r(data, x, u)
+    r = self.r(system, data, x, u)
 
     # Compute the log-barrier function and store the result in data
     data.l[0] = 0.
@@ -38,11 +38,11 @@ class XLogBarrier(RunningResidualCost):
         return data.l[0] # it doesn't make sense to continue
     return data.l[0]
 
-  def lx(self, data, x, u):
+  def lx(self, system, data, x, u):
     # Compute the inequality constraint function and its state Jacobian. Note
     # that for efficiency we assume that you run l() first
     r = data.r
-    rx = self.rx(data, x, u)
+    rx = self.rx(system, data, x, u)
 
     # Compute the state Jacobian of the log-barrier function and store the
     # result in data
@@ -56,7 +56,7 @@ class XLogBarrier(RunningResidualCost):
         return data.lx # it doesn't make sense to continue
     return data.lx
 
-  def lxx(self, data, x, u):
+  def lxx(self, system, data, x, u):
     # Compute the inequality constraint function and its state Jacobian. We
     # neglect the Hessian of the inequality constraint. Additionally, for
     # efficiency we assume that you run l() and lx() first
@@ -75,19 +75,19 @@ class XLogBarrier(RunningResidualCost):
         return data.lxx  # it doesn't make sense to continue
     return data.lxx
 
-  def ru(self, data, x, u):
+  def ru(self, system, data, x, u):
     # This residual vector is zero, so we do anything.
     return data.ru
 
-  def lu(self, data, x, u):
+  def lu(self, system, data, x, u):
     # This derivative is zero, so we do anything.
     return data.lu
 
-  def luu(self, data, x, u):
+  def luu(self, system, data, x, u):
     # This derivative is zero, so we do anything.
     return data.luu
 
-  def lux(self, data, x, u):
+  def lux(self, system, data, x, u):
     # This derivative is zero, so we do anything.
     return data.lux
 
@@ -111,9 +111,9 @@ class ULogBarrier(RunningResidualCost):
     self._inf = np.finfo(float).max
     RunningResidualCost.__init__(self, self._bound.size)
 
-  def l(self, data, x, u):
+  def l(self, system, data, x, u):
     # Compute the inequality constraint function
-    r = self.r(data, x, u)
+    r = self.r(system, data, x, u)
 
     # Compute the log-barrier function and store the result in data
     data.l[0] = 0.
@@ -126,11 +126,11 @@ class ULogBarrier(RunningResidualCost):
         return data.l[0] # it doesn't make sense to continue
     return data.l[0]
 
-  def lu(self, data, x, u):
+  def lu(self, system, data, x, u):
     # Compute the inequality constraint function and its control Jacobian. Note
     # that for efficiency we assume that you run l() first
     r = data.r
-    ru = self.ru(data, x, u)
+    ru = self.ru(system, data, x, u)
 
     # Compute the control Jacobian of the log-barrier function and store the
     # result in data
@@ -144,7 +144,7 @@ class ULogBarrier(RunningResidualCost):
         return data.lu  # it doesn't make sense to continue
     return data.lu
 
-  def luu(self, data, x, u):
+  def luu(self, system, data, x, u):
     # Compute the inequality constraint function and its control Jacobian. We
     # neglect the Hessian of the inequality constraint. Additionally, for
     # efficiency we assume that you run l() and lu() first
@@ -163,19 +163,19 @@ class ULogBarrier(RunningResidualCost):
         return data.luu  # it doesn't make sense to continue
     return data.luu
 
-  def rx(self, data, x, u):
+  def rx(self, system, data, x, u):
     # This residual vector is zero, so we do anything.
     return data.rx
 
-  def lx(self, data, x, u):
+  def lx(self, system, data, x, u):
     # This residual vector is zero, so we do anything.
     return data.lx
-  
-  def lxx(self, data, x, u):
+
+  def lxx(self, system, data, x, u):
     # This residual vector is zero, so we do anything.
     return data.lxx
 
-  def lux(self, data, x, u):
+  def lux(self, system, data, x, u):
     # This residual vector is zero, so we do anything.
     return data.lux
 
@@ -204,13 +204,13 @@ class XULogBarrier(XLogBarrier):
     XLogBarrier.__init__(self, self._bound.size)
 
   @abc.abstractmethod
-  def ru(self, data, x, u): pass
+  def ru(self, system, data, x, u): pass
 
-  def lu(self, data, x, u):
+  def lu(self, system, data, x, u):
     # Compute the inequality constraint function and its control Jacobian. Note
     # that for efficiency we assume that you run l() first
     r = data.r
-    ru = self.ru(data, x, u)
+    ru = self.ru(system, data, x, u)
 
     # Compute the control Jacobian of the log-barrier function and store the
     # result in data
@@ -224,7 +224,7 @@ class XULogBarrier(XLogBarrier):
         return data.lu  # it doesn't make sense to continue
     return data.lu
 
-  def luu(self, data, x, u):
+  def luu(self, system, data, x, u):
     # Compute the inequality constraint function and its control Jacobian. We
     # neglect the Hessian of the inequality constraint. Additionally, for
     # efficiency we assume that you run l() and lu() first
@@ -243,7 +243,7 @@ class XULogBarrier(XLogBarrier):
         return data.luu  # it doesn't make sense to continue
     return data.luu
 
-  def lux(self, data, x, u):
+  def lux(self, system, data, x, u):
     # Compute the inequality constraint function and its state and control
     # Jacobian. We neglect the Hessians of the inequality constraint.
     # Additionally, for efficiency we assume that you run l(), lx() and lu()
@@ -282,12 +282,12 @@ class StateBarrier(XLogBarrier):
     bound = np.vstack([ub, -lb])
     XLogBarrier.__init__(self, bound)
 
-  def r(self, data, x, u):
+  def r(self, system, data, x, u):
     data.r[:data.n] = x
     data.r[data.n:] = -x
     return data.r
 
-  def rx(self, data, x, u):
+  def rx(self, system, data, x, u):
     data.rx[:data.n,:] = np.ones((data.n, data.n))
     data.rx[data.n:,:] = -np.ones((data.n, data.n))
     return data.rx
@@ -313,12 +313,12 @@ class ControlBarrier(ULogBarrier):
     bound = np.vstack([ub, -lb])
     ULogBarrier.__init__(self, bound)
 
-  def r(self, data, x, u):
+  def r(self, system, data, x, u):
     data.r[:data.m] = u
     data.r[data.m:] = -u
     return data.r
 
-  def ru(self, data, x, u):
+  def ru(self, system, data, x, u):
     data.ru[:data.m,:] = np.ones((data.m, data.m))
     data.ru[data.m:,:] = -np.ones((data.m, data.m))
     return data.ru

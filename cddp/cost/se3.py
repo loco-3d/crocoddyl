@@ -29,12 +29,13 @@ class SE3RunningCost(RunningResidualQuadraticCost):
     # Residual vector lies in the tangent space of the SE3 manifold
     RunningResidualQuadraticCost.__init__(self, 6)
 
-  def r(self, data, x, u):
+  def r(self, system, data, x, u):
     """ Compute SE3 error vector and store the result in data.
 
     The SE3 error is mapped in the tangent space of the SE3 manifold. We
     computed the frame SE3 pose given a state x. Then we map this to its tangent
     motion through the log function.
+    :param system: system
     :param data: running cost data
     :param x: state vector [joint configuration, joint velocity]
     :param u: control vector
@@ -51,10 +52,11 @@ class SE3RunningCost(RunningResidualQuadraticCost):
       se3.log(self.M_des.inverse() * oMf).vector)
     return data.r
 
-  def rx(self, data, x, u):
+  def rx(self, system, data, x, u):
     """ Compute the state Jacobian of the SE3 error vector and store the result
     in data.
 
+    :param system: system
     :param data: running cost data
     :param x: state vector [joint configuration, joint velocity]
     :param u: control vector
@@ -67,10 +69,11 @@ class SE3RunningCost(RunningResidualQuadraticCost):
                    se3.ReferenceFrame.LOCAL, True)
     return data.rx
 
-  def ru(self, data, x, u):
+  def ru(self, system, data, x, u):
     """ Compute the control Jacobian of the SE3 error vector and store the result
     in data.
 
+    :param system: system
     :param data: running cost data
     :param x: state vector [joint configuration, joint velocity]
     :param u: control vector

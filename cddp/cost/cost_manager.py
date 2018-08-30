@@ -68,7 +68,7 @@ class CostManager(object):
     data.soc = [cost.createData(n, m) for cost in self.running]
     return data
 
-  def computeTerminalCost(self, data, x):
+  def computeTerminalCost(self, system, data, x):
     assert self.terminal > 0, "You didn't add the terminal costs"
     assertClass(data.total, 'XCostData')
 
@@ -76,10 +76,10 @@ class CostManager(object):
     l.fill(0.)
     for k, cost in enumerate(self.terminal):
       cost_data = data.soc[k]
-      l += cost.l(cost_data, x)
+      l += cost.l(system, cost_data, x)
     return l
 
-  def computeRunningCost(self, data, x, u):
+  def computeRunningCost(self, system, data, x, u):
     assert self.running > 0, "You didn't add the running costs"
     assertClass(data.total, 'XUCostData')
     
@@ -87,10 +87,10 @@ class CostManager(object):
     l.fill(0.)
     for k, cost in enumerate(self.running):
       cost_data = data.soc[k]
-      l += cost.l(cost_data, x, u)
+      l += cost.l(system, cost_data, x, u)
     return l
 
-  def computeTerminalTerms(self, data, x):
+  def computeTerminalTerms(self, system, data, x):
     assert self.terminal > 0, "You didn't add the terminal costs"
     assertClass(data.total, 'XCostData')
     
@@ -102,12 +102,12 @@ class CostManager(object):
     lxx.fill(0.)
     for k, cost in enumerate(self.terminal):
       cost_data = data.soc[k]
-      l += cost.l(cost_data, x)
-      lx += cost.lx(cost_data, x)
-      lxx += cost.lxx(cost_data, x)
+      l += cost.l(system, cost_data, x)
+      lx += cost.lx(system, cost_data, x)
+      lxx += cost.lxx(system, cost_data, x)
     return l, lx, lxx
 
-  def computeRunningTerms(self, data, x, u):
+  def computeRunningTerms(self, system, data, x, u):
     assert self.running > 0, "You didn't add the running costs"
     assertClass(data.total, 'XUCostData')
     
@@ -125,29 +125,10 @@ class CostManager(object):
     lux.fill(0.)
     for k, cost in enumerate(self.running):
       cost_data = data.soc[k]
-      l += cost.l(cost_data, x, u)
-      lx += cost.lx(cost_data, x, u)
-      lu += cost.lu(cost_data, x, u)
-      lxx += cost.lxx(cost_data, x, u)
-      luu += cost.luu(cost_data, x, u)
-      lux += cost.lux(cost_data, x, u)
+      l += cost.l(system, cost_data, x, u)
+      lx += cost.lx(system, cost_data, x, u)
+      lu += cost.lu(system, cost_data, x, u)
+      lxx += cost.lxx(system, cost_data, x, u)
+      luu += cost.luu(system, cost_data, x, u)
+      lux += cost.lux(system, cost_data, x, u)
     return l, lx, lu, lxx, luu, lux
-
-  # def lx(self, data, x):
-  #     lx = data.total.lx
-  #     lx.fill(0.)
-
-  #     for k, cost in enumerate(self.terminal):
-  #             cost_data = data.terminal[k]
-  #         cost_value += cost.l(cost_data, x)
-  #     data.total.l[0] = cost_value
-  #     return cost_value
-
-  # @abc.abstractmethod
-  # def computeFinalCost(self, t, x): pass
-
-  # @abc.abstractmethod
-  # def computeAllTerms(self, t, x, u): pass
-
-  # @abc.abstractmethod
-  # def computeFinalTerms(self, t, x): pass

@@ -10,7 +10,7 @@ class GoalQuadraticCost(TerminalQuadraticCost):
     TerminalQuadraticCost.__init__(self)
     self.x_des = goal
 
-  def xr(self, data, x):
+  def xr(self, system, data, x):
     np.copyto(data.xr, x - self.x_des)
     return data.xr
 
@@ -23,11 +23,11 @@ class GoalResidualQuadraticCost(TerminalResidualQuadraticCost):
     TerminalResidualQuadraticCost.__init__(self, k)
     self.x_des = goal
 
-  def r(self, data, x):
+  def r(self, system, data, x):
     np.copyto(data.r, x - self.x_des)
     return data.r
 
-  def rx(self, data, x):
+  def rx(self, system, data, x):
     np.copyto(data.rx, np.eye(data.n))
     return data.rx
 
@@ -39,11 +39,11 @@ class StateRunningQuadraticCost(RunningQuadraticCost):
     RunningQuadraticCost.__init__(self)
     self.x_des = goal
 
-  def xr(self, data, x, u):
+  def xr(self, system, data, x, u):
     np.copyto(data.xr, x - self.x_des)
     return data.xr
 
-  def ur(self, data, x, u):
+  def ur(self, system, data, x, u):
     # Do nothing since it's a cost in the state
     return data.ur
 
@@ -55,11 +55,11 @@ class StateControlRunningQuadraticCost(RunningQuadraticCost):
     RunningQuadraticCost.__init__(self)
     self.x_des = goal
 
-  def xr(self, data, x, u):
+  def xr(self, system, data, x, u):
     np.copyto(data.xr, x - self.x_des)
     return data.xr
 
-  def ur(self, data, x, u):
+  def ur(self, system, data, x, u):
     np.copyto(data.ur, u)
     return data.ur
 
@@ -70,10 +70,11 @@ class StateControlQuadraticRegularization(RunningQuadraticCost):
   def __init__(self):
     RunningQuadraticCost.__init__(self)
 
-  def xr(self, data, x, u):
-    np.copyto(data.xr, x)
+  def xr(self, system, data, x, u):
+    np.copyto(data.xr, x[1:])
+    # np.copyto(data.xr, x)
     return data.xr
 
-  def ur(self, data, x, u):
+  def ur(self, system, data, x, u):
     np.copyto(data.ur, u)
     return data.ur
