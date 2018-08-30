@@ -22,9 +22,9 @@ class QuadraticCostTest(unittest.TestCase):
     self.r = np.random.rand(self.m)
 
     # Create the different cost function and them data
-    self.t_cost = cddp.GoalQuadraticCost(x_des)
+    self.t_cost = cddp.StateTerminalQuadraticCost(x_des)
     self.t_data = self.t_cost.createData(self.n)
-    self.tr_cost = cddp.GoalResidualQuadraticCost(x_des)
+    self.tr_cost = cddp.StateResidualTerminalQuadraticCost(x_des)
     self.tr_data = self.tr_cost.createData(self.n)
     self.r_cost = cddp.StateRunningQuadraticCost(x_des)
     self.r_data = self.r_cost.createData(self.n, self.m)

@@ -18,12 +18,12 @@ class LinearDDPTest(unittest.TestCase):
 
     # Creating the cost manager and its cost functions
     cost_manager = cddp.CostManager()
-    goal_cost = cddp.GoalResidualQuadraticCost(x_des)
+    goal_cost = cddp.StateResidualTerminalQuadraticCost(x_des)
     xu_cost = cddp.StateControlRunningQuadraticCost(x_des)
 
     # Setting up the weights of the quadratic terms
-    wx = np.array([100., 100.])
-    wu = np.array([0.001])
+    wx = 100.* np.ones(system.getConfigurationDimension())
+    wu = 0.001 * np.ones(system.getControlDimension())
     goal_cost.setWeights(0.5 * wx)
     xu_cost.setWeights(wx, wu)
 
