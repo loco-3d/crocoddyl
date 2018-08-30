@@ -12,13 +12,15 @@ class bcolors:
   UNDERLINE = '\033[4m'
 
 
-def isPositiveDefinitive(A):
+def isPositiveDefinitive(A, L):
   """ Checks if the matrix is positive definitive.
 
-  :param A matrix
+  :param A: squared matrix
+  :param L: Cholesky decomposition of A
+  :return: True is the matrix is definitive position, otherwise False
   """
   try:
-    _ = np.linalg.cholesky(A)
+    np.copyto(L, np.linalg.cholesky(A))
   except np.linalg.LinAlgError:
     return False
   return True

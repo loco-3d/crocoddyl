@@ -40,6 +40,11 @@ class DDP(object):
     self.dV_exp = np.matrix(np.zeros(1)) # Expected total cost reduction given alpha
     self.dV = np.matrix(np.zeros(1)) # Total cost reduction
     self.gradU = np.matrix(np.zeros(1)) # Gradient of the total cost
+    self.L = np.matrix(np.zeros((sdata.m, sdata.m))) # Cholesky decomposition of Quu
+    self.L_inv = np.matrix(np.zeros((sdata.m, sdata.m))) # Inverse of L
+    self.Quu_inv_minus = np.matrix(np.zeros((sdata.m, sdata.m))) # Inverse of -Quu
+    self.jt_Quu_j = np.matrix(np.zeros(1))
+    self.jt_Qu = np.matrix(np.zeros(1))
 
     # Setting the time values of the running intervals
     for k in range(self.N):
@@ -217,23 +222,23 @@ class DDP(object):
       # positive-definitive or when the minimum is far and the
       # quadratic model is inaccurate
       np.copyto(it.Quu_r, it.Quu + mu * fu.T * fu)
-      if not isPositiveDefinitive(it.Quu_r):
+      if not isPositiveDefinitive(it.Quu_r, self.L):
         return False
       np.copyto(it.Qux_r, it.Qux + mu * fu.T * fx)
 
       # Computing the feedback and feedforward terms
-      L_inv = np.linalg.inv(np.linalg.cholesky(it.Quu_r))
-      Quu_inv = L_inv.T * L_inv
-      np.copyto(it.K, - Quu_inv * it.Qux_r)
-      np.copyto(it.j, - Quu_inv * it.Qu)
+      np.copyto(self.L_inv, np.linalg.inv(self.L))
+      np.copyto(self.Quu_inv_minus, -1. *self.L_inv.T * self.L_inv)
+      np.copyto(it.K, self.Quu_inv_minus * it.Qux_r)
+      np.copyto(it.j, self.Quu_inv_minus * it.Qu)
 
       # Updating the gradient given the actual knot
       self.gradU[0,0] += np.linalg.norm(it.Qu)
       # self.gradU[0,0] += it.Qu.T * Quu_inv * it.Qu #TODO study this method
 
       # Computing the value function derivatives of this interval
-      jt_Quu_j = 0.5 * it.j.T * it.Quu * it.j
-      jt_Qu = it.j.T * it.Qu
+      np.copyto(self.jt_Quu_j, 0.5 * it.j.T * it.Quu * it.j)
+      np.copyto(self.jt_Qu, it.j.T * it.Qu)
       np.copyto(it.Vx, \
                 it.Qx + it.K.T * it.Quu * it.j + it.K.T * it.Qu + it.Qux.T * it.j)
       np.copyto(it.Vxx, \
@@ -246,7 +251,7 @@ class DDP(object):
       # used to check the changes in the forward pass. This is method is
       # explained in Tassa's PhD thesis
       self.V_exp[0] += l
-      self.dV_exp[0] += alpha * (alpha * jt_Quu_j + jt_Qu)
+      self.dV_exp[0] += alpha * (alpha * self.jt_Quu_j + self.jt_Qu)
 
     # Computing the gradient w.r.t. U={u0, ..., uN}
     self.gradU[0,0] = np.sqrt(self.gradU[0,0]) / self.N
