@@ -35,11 +35,11 @@ class DDP(object):
 
     # Global variables for the DDP algorithm
     self.z = 0.
-    self.V = np.matrix(np.zeros(1))
-    self.V_new = np.matrix(np.zeros(1))
-    self.dV = np.matrix(np.zeros(1))
-    self.dV_exp = np.matrix(np.zeros(1))
-    self.gradU = np.matrix(np.zeros(1))
+    self.V_exp = np.matrix(np.zeros(1)) # Backward-pass Value function at t0
+    self.V = np.matrix(np.zeros(1)) # Forward-pass Value function at t0
+    self.dV_exp = np.matrix(np.zeros(1)) # Expected total cost reduction given alpha
+    self.dV = np.matrix(np.zeros(1)) # Total cost reduction
+    self.gradU = np.matrix(np.zeros(1)) # Gradient of the total cost
 
     # Setting the time values of the running intervals
     for k in range(self.N):
@@ -134,7 +134,7 @@ class DDP(object):
 
       # Recording the total cost for each iteration. This is useful for
       # analysing the solver performance
-      self.V_itr.append(self.V_new[0,0].copy())
+      self.V_itr.append(self.V[0,0].copy())
 
       # Checking convergence
       if self._convergence:
@@ -168,7 +168,7 @@ class DDP(object):
     l, it.Vx, it.Vxx = self.cost_manager.computeTerminalTerms(it.cost, xf)
 
     # Setting up the initial cost value, and the expected reduction equals zero
-    self.V[0] = l.copy()
+    self.V_exp[0] = l.copy()
     self.dV_exp[0] = 0.
 
     # Running the backward sweep
@@ -245,7 +245,7 @@ class DDP(object):
       # Updating the local cost and expected reduction. The total values are
       # used to check the changes in the forward pass. This is method is
       # explained in Tassa's PhD thesis
-      self.V[0] += l
+      self.V_exp[0] += l
       self.dV_exp[0] += alpha * (alpha * jt_Quu_j + jt_Qu)
 
     # Computing the gradient w.r.t. U={u0, ..., uN}
@@ -262,7 +262,7 @@ class DDP(object):
     # Initializing the forward pass with the initial state
     it = self.initial_interval
     it.x_new = it.x.copy()
-    self.V_new[0] = 0.
+    self.V[0] = 0.
 
     # Integrate the system along the new trajectory
     for k in range(self.N):
@@ -281,12 +281,12 @@ class DDP(object):
 
       # Integrating the cost and updating the new value function
       # TODO we need to use the integrator class for this
-      self.V_new[0] += \
+      self.V[0] += \
         self.cost_manager.computeRunningCost(it.cost, it.x_new, it.u_new) * dt
 
     # Including the terminal cost
     it = self.terminal_interval
-    self.V_new[0] += self.cost_manager.computeTerminalCost(it.cost, it.x_new)
+    self.V[0] += self.cost_manager.computeTerminalCost(it.cost, it.x_new)
 
     # Checking convergence of the previous iteration
     if self.gradU[0,0] <= self.tol:
@@ -294,7 +294,7 @@ class DDP(object):
       return True
 
     # Checking the changes
-    self.dV[0] = (self.V_new - self.V).copy()
+    self.dV[0] = (self.V - self.V_exp).copy()
     self.z = (self.dV[0, 0] / self.dV_exp[0, 0]).copy()
     if self.z > self.change_lb and self.z < self.change_ub:
       # Accepting the new trajectory and control, defining them as nominal ones
@@ -326,7 +326,7 @@ class DDP(object):
     x0 = it.x
     np.copyto(it.x, x0)
     np.copyto(it.x_new, x0)
-    self.V[0] = 0.
+    self.V_exp[0] = 0.
 
     # Integrate the system along the initial control sequences
     for k in range(self.N):
@@ -342,13 +342,13 @@ class DDP(object):
       np.copyto(it_next.x_new, x_next)
 
       # Integrating the cost and updating the new value function
-      self.V[0] += \
+      self.V_exp[0] += \
         self.cost_manager.computeRunningCost(it.cost, it.x, it.u) * dt
 
     # Including the terminal state and cost
     it = self.terminal_interval
     it.x = self.intervals[self.N-1].x
-    self.V[0] += self.cost_manager.computeTerminalCost(it.cost, it.x)
+    self.V_exp[0] += self.cost_manager.computeTerminalCost(it.cost, it.x)
 
   def setInitalState(self, x0):
     """ Initializes the actual state of the dynamical system.
