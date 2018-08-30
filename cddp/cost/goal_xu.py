@@ -3,19 +3,19 @@ from cddp.cost import RunningQuadraticCost
 import numpy as np
 
 
-class GoalQuadraticCost(TerminalQuadraticCost):
-  """ Terminal quadratic cost
+class StateTerminalQuadraticCost(TerminalQuadraticCost):
+  """ State terminal quadratic cost
   """
   def __init__(self, goal):
     TerminalQuadraticCost.__init__(self)
     self.x_des = goal
 
   def xr(self, system, data, x):
-    np.copyto(data.xr, x - self.x_des)
+    np.copyto(data.xr, system.differenceConfiguration(x, self.x_des))
     return data.xr
 
 
-class GoalResidualQuadraticCost(TerminalResidualQuadraticCost):
+class StateResidualTerminalQuadraticCost(TerminalResidualQuadraticCost):
   """ Terminal residual-quadratic cost
   """
   def __init__(self, goal):
@@ -24,7 +24,7 @@ class GoalResidualQuadraticCost(TerminalResidualQuadraticCost):
     self.x_des = goal
 
   def r(self, system, data, x):
-    np.copyto(data.r, x - self.x_des)
+    np.copyto(data.r, system.differenceConfiguration(x, self.x_des))
     return data.r
 
   def rx(self, system, data, x):
@@ -40,7 +40,7 @@ class StateRunningQuadraticCost(RunningQuadraticCost):
     self.x_des = goal
 
   def xr(self, system, data, x, u):
-    np.copyto(data.xr, x - self.x_des)
+    np.copyto(data.xr, system.differenceConfiguration(x, self.x_des))
     return data.xr
 
   def ur(self, system, data, x, u):
@@ -56,7 +56,7 @@ class StateControlRunningQuadraticCost(RunningQuadraticCost):
     self.x_des = goal
 
   def xr(self, system, data, x, u):
-    np.copyto(data.xr, x - self.x_des)
+    np.copyto(data.xr, system.differenceConfiguration(x, self.x_des))
     return data.xr
 
   def ur(self, system, data, x, u):
@@ -71,8 +71,7 @@ class StateControlQuadraticRegularization(RunningQuadraticCost):
     RunningQuadraticCost.__init__(self)
 
   def xr(self, system, data, x, u):
-    np.copyto(data.xr, x[1:])
-    # np.copyto(data.xr, x)
+    np.copyto(data.xr, system.differenceConfiguration(x, np.zeros_like(x)))
     return data.xr
 
   def ur(self, system, data, x, u):
