@@ -22,14 +22,14 @@ class Integrator(object):
     pass
 
   @abc.abstractmethod
-  def __call__(self, model, data, x, u, dt):
+  def __call__(self, system, data, x, u, dt):
     """ Integrate the system dynamics.
 
     This abstract method allows us to define integration rules of our ODE. It
-    uses the model and data classes which defines the evolution function and
-    its data, respectively. For more information about the model and data see
+    uses the system and data classes which defines the evolution function and
+    its data, respectively. For more information about the system and data see
     the Dynamics class and and its data structure.
-    :param model: system model
+    :param system: system model
     :param data: system data
     :para x: configuration point
     :param u: control vector
@@ -59,14 +59,14 @@ class GeometricIntegrator(object):
     pass
 
   @abc.abstractmethod
-  def __call__(self, model, data, q, v, tau, dt):
+  def __call__(self, system, data, q, v, tau, dt):
     """ Integrate the system dynamics.
 
     This abstract method allows us to define integration rules of our ODE. It
-    uses the model and data classes which defines the evolution function and
-    its data, respectively. For more information about the model and data see
+    uses the system and data classes which defines the evolution function and
+    its data, respectively. For more information about the system and data see
     the Dynamics class and and its data structure.
-    :param model: system model
+    :param system: system model
     :param data: system data
     :param q: configuration point
     :param v: generalized velocity
@@ -86,10 +86,10 @@ class EulerIntegrator(Integrator):
     """
     self.x_next = np.matrix(np.zeros((nq, 1)))
 
-  def __call__(self, model, data, x, u, dt):
+  def __call__(self, system, data, x, u, dt):
     """ Integrate the system dynamics using the forward Euler scheme.
 
-    :param model: system model
+    :param system: system model
     :param data: system data
     :para x: configuration point
     :param u: control vector
@@ -97,7 +97,7 @@ class EulerIntegrator(Integrator):
     :returns: next state vector
     """
     np.copyto(self.x_next,
-             model.advanceConfiguration(x.copy(), dt * model.f(data, x, u)))
+             system.advanceConfiguration(x.copy(), dt * system.f(data, x, u)))
     return self.x_next
 
 
@@ -111,10 +111,10 @@ class GeometricEulerIntegrator(GeometricIntegrator):
     # Data for integration
     self.x_next = np.matrix(np.zeros((nq + nv, 1)))
 
-  def __call__(self, model, data, q, v, tau, dt):
+  def __call__(self, system, data, q, v, tau, dt):
     """ Integrate the system dynamics using the forward Euler scheme.
 
-    :param model: system model
+    :param system: system model
     :param data: system data
     :param q: configuration point
     :param v: generalized velocity
@@ -122,9 +122,9 @@ class GeometricEulerIntegrator(GeometricIntegrator):
     :param dt: sampling period
     :returns: next state vector
     """
-    self.x_next[data.nq:] = v + model.g(data, q, v, tau) * dt
+    self.x_next[data.nq:] = v + system.g(data, q, v, tau) * dt
     self.x_next[:data.nq] = \
-      model.advanceConfiguration(q.copy(), self.x_next[data.nq:] * dt)
+      system.advanceConfiguration(q.copy(), self.x_next[data.nq:] * dt)
     return self.x_next
 
 
@@ -142,26 +142,26 @@ class RK4Integrator(Integrator):
     self.k4 = np.matrix(np.zeros((nv, 1)))
     self.sum_k = np.matrix(np.zeros((nv, 1)))
 
-  def __call__(self, model, data, x, u, dt):
+  def __call__(self, system, data, x, u, dt):
     """ Integrate the system dynamics using the fourth-order Runge-Kutta method.
 
-    :param model: system model
+    :param system: system model
     :param data: system data
     :para x: state vector
     :param u: control vector
     :param dt: sampling period
     :returns: next state vector
     """
-    np.copyto(self.k1, dt * model.f(data, x, u))
-    np.copyto(self.k2, dt * model.f(data, model.advanceConfiguration(x.copy(), 0.5 * self.k1), u))
-    np.copyto(self.k3, dt * model.f(data, model.advanceConfiguration(x.copy(), 0.5 * self.k2), u))
-    np.copyto(self.k4, dt * model.f(data, model.advanceConfiguration(x.copy(), self.k3), u))
+    np.copyto(self.k1, dt * system.f(data, x, u))
+    np.copyto(self.k2, dt * system.f(data, system.advanceConfiguration(x.copy(), 0.5 * self.k1), u))
+    np.copyto(self.k3, dt * system.f(data, system.advanceConfiguration(x.copy(), 0.5 * self.k2), u))
+    np.copyto(self.k4, dt * system.f(data, system.advanceConfiguration(x.copy(), self.k3), u))
     np.copyto(self.sum_k, 1. / 6 * (self.k1 + 2. * self.k2 + 2. * self.k3 + self.k4))
-    np.copyto(self.x_next, model.advanceConfiguration(x.copy(), self.sum_k))
+    np.copyto(self.x_next, system.advanceConfiguration(x.copy(), self.sum_k))
     return self.x_next
 
 
-def computeFlow(integrator, model, data, timeline, x, controls):
+def computeFlow(integrator, system, data, timeline, x, controls):
   N = len(timeline)
   x_flow = [None] * N
   x_flow[0] = x

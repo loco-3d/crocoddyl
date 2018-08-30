@@ -23,13 +23,13 @@ class Discretizer(object):
     pass
 
   @abc.abstractmethod
-  def __call__(self, model, data, x, u, dt):
+  def __call__(self, system, data, x, u, dt):
     """ Convert the continuos, and linearized, dynamic model into discrete one.
 
     This abstract method allows us to define a discretization rule for the 
     linearized dynamic (dv = fx*dx + fu*du) which is compatible with its 
     integration scheme. Note that we assume a first-order Taylor linearization.
-    :param model: system model
+    :param system: system model
     :param data: system data
     :para x: state vector
     :param u: control vector
@@ -62,14 +62,14 @@ class GeometricDiscretizer(object):
 
 
   @abc.abstractmethod
-  def __call__(self, model, data, q, v, tau, dt):
+  def __call__(self, system, data, q, v, tau, dt):
     """ Convert the continuos, and linearized, dynamic model into discrete one.
 
     This abstract method allows us to define a discretization rule for the 
     linearized dynamic ([dv,da] = fx*[dq,dv] + fu*du) which is compatible with
     its integration scheme. Note that we assume a first-order Taylor
     linearization.
-    :param model: system model
+    :param system: system model
     :param data: system data
     :param q: configuration point
     :param v: generalized velocity
@@ -89,19 +89,19 @@ class EulerDiscretizer(Discretizer):
     # Data for discretization
     self._I = np.eye(nv)
 
-  def __call__(self, model, data, x, u, dt):
+  def __call__(self, system, data, x, u, dt):
     """ Convert the time-continuos dynamics into discrete one using forward
     Euler rule.
 
-    :param model: system model
+    :param system: system model
     :param data: system data
     :param x: state vector
     :param u: control vector
     :param dt: sampling period
     :returns: discrete time state and control derivatives
     """
-    model.fx(data, x, u)
-    model.fu(data, x, u)
+    system.fx(data, x, u)
+    system.fu(data, x, u)
     np.copyto(data.fx, self._I + data.fx * dt)
     np.copyto(data.fu, data.fu * dt)
     return data.fx, data.fu
@@ -116,11 +116,11 @@ class GeometricEulerDiscretizer(GeometricDiscretizer):
     # Data for discretization
     self._I = np.eye(nv)
 
-  def __call__(self, model, data, q, v, tau, dt):
+  def __call__(self, system, data, q, v, tau, dt):
     """ Convert the time-continuos dynamics into discrete one using forward
     Euler rule.
 
-    :param model: system model
+    :param system: system model
     :param data: system data
     :param q: configuration point
     :param v: generalized velocity
@@ -128,10 +128,10 @@ class GeometricEulerDiscretizer(GeometricDiscretizer):
     :param dt: sampling period
     :returns: discrete time state and control derivatives
     """
-    model.g(data, q, v, tau)
-    model.gq(data, q, v, tau)
-    model.gv(data, q, v, tau)
-    model.gtau(data, q, v, tau)
+    system.g(data, q, v, tau)
+    system.gq(data, q, v, tau)
+    system.gv(data, q, v, tau)
+    system.gtau(data, q, v, tau)
     np.copyto(data.gq, data.gq * dt)
     np.copyto(data.gv, self._I + data.gv * dt)
     np.copyto(data.gtau, data.gtau * dt)
@@ -155,11 +155,11 @@ class RK4Discretizer(Discretizer):
     self.f4 = np.matrix(np.zeros((nv, nv)))
     self.sum_f = np.matrix(np.zeros((nv, nv)))
 
-  def __call__(self, model, data, x, u, dt):
+  def __call__(self, system, data, x, u, dt):
     """ Convert the time-continuos dynamics into discrete one using
     fourth-order Runge-Kutta method.
 
-    :param model: system model
+    :param system: system model
     :param data: system data
     :param x: state vector
     :param u: control vector
@@ -167,9 +167,9 @@ class RK4Discretizer(Discretizer):
     :returns: discrete time state and control derivatives
     """
     # Computing four stages of RK4
-    model.f(data, x, u)
-    model.fx(data, x, u)
-    model.fu(data, x, u)
+    system.f(data, x, u)
+    system.fx(data, x, u)
+    system.fu(data, x, u)
     np.copyto(self.f1, dt * self._I)
     np.copyto(self.f2, dt * (self._I + 0.5 * data.fx * dt))
     np.copyto(self.f3, dt * (self._I + 0.5 * data.fx * self.f2))
