@@ -12,7 +12,7 @@ class TerminalDDPData(object):
 
     # Nominal and new state on the interval
     self.x = np.matrix(np.zeros((self.system.nx, 1)))
-    self.x_new = np.matrix(np.zeros((self.system.ndx, 1)))
+    self.x_new = np.matrix(np.zeros((self.system.nx, 1)))
 
     # Time of the terminal interval
     self.t = np.matrix(np.zeros(1))
