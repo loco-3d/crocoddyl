@@ -35,11 +35,14 @@ class SpringMassNumDiffTest(unittest.TestCase):
 class ArmNumDiffTest(unittest.TestCase):
   def setUp(self):
     import rospkg
+    import pinocchio as se3
 
     # Creating the system model
     path = rospkg.RosPack().get_path('talos_data')
     urdf = path + '/robots/talos_left_arm.urdf'
-    self.system = cddp.NumDiffForwardDynamics(urdf, path)
+    robot = se3.robot_wrapper.RobotWrapper(urdf, path)
+    model = robot.model
+    self.system = cddp.NumDiffForwardDynamics(model)
 
     # Creating the system data
     self.data = self.system.createData()
