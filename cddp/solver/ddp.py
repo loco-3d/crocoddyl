@@ -60,6 +60,7 @@ class DDP(object):
     self._convergence = False
     self.tol = 1e-4
     self.max_iter = 20
+    self.sqrt_eps = np.sqrt(np.finfo(float).eps)
 
     # Regularization parameters (factor and increased rate)
     self.mu = 0.
