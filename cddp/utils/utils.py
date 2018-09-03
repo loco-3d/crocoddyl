@@ -70,7 +70,7 @@ def visualizePlan(robot, x0, T, X, frame_idx=None, path=False):
     t0 = T[k+1]
     it += 1
 
-def plotDDPSolution(model, X, U, V):
+def plotDDPSolution(model, X, U, V, gradU):
   import matplotlib.pyplot as plt
   # Getting the joint position and commands
   q = []
@@ -83,21 +83,27 @@ def plotDDPSolution(model, X, U, V):
   plt.figure(1)
 
   # Plotting the joint position
-  plt.subplot(311)
+  plt.subplot(411)
   [plt.plot(q[i], label='q'+str(i)) for i in range(model.nq)]
   plt.legend()
   plt.ylabel('rad')
 
   # Plotting the joint torques
-  plt.subplot(312)
+  plt.subplot(412)
   [plt.plot(tau[i], label='u'+str(i)) for i in range(model.nv)]
   plt.legend()
   plt.ylabel('Nm')
   plt.xlabel('knots')
 
   # Plotting the total cost sequence
-  plt.subplot(313)
+  plt.subplot(413)
+  plt.ylabel('cost')
   plt.plot(V)
+
+  # Plotting the gradient sequence
+  plt.subplot(414)
+  plt.plot(gradU)
+  plt.ylabel('gradient')
   plt.xlabel('iteration')
   # plt.subplots_adjust(hspace=0.5)
   plt.show()

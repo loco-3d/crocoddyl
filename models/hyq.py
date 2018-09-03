@@ -78,7 +78,8 @@ if plot:
   X = ddp.getStateTrajectory()
   U = ddp.getControlSequence()
   V = ddp.getTotalCostSequence()
-  cddp.plotDDPSolution(model, X, U, V)
+  gradU = ddp.getConvergenceSequence()
+  cddp.plotDDPSolution(model, X, U, V, gradU)
 
 if display:
   T = timeline

@@ -96,6 +96,7 @@ class DDP(object):
     self.alpha = 1.
 
     self.V_itr = []
+    self.gradU_itr = []
     self.n_iter = 0
     for i in range(self.max_iter):
       # Recording the number of iterations
@@ -137,9 +138,10 @@ class DDP(object):
       if self.alpha > 1.:
         self.alpha = 1.
 
-      # Recording the total cost for each iteration. This is useful for
-      # analysing the solver performance
+      # Recording the total cost and gradient for each iteration. This is
+      # useful for analysing the solver performance
       self.V_itr.append(self.V[0,0].copy())
+      self.gradU_itr.append(self.gradU[0,0].copy())
 
       # Checking convergence
       if self._convergence:
@@ -389,6 +391,9 @@ class DDP(object):
 
   def getTotalCostSequence(self):
     return np.asarray(self.V_itr)
+
+  def getConvergenceSequence(self):
+    return np.asarray(self.gradU_itr)
 
   def _recordSolution(self):
     for k in range(self.N):
