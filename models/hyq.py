@@ -44,9 +44,11 @@ system.g(data, q0, v0, u0)
 # Defining the SE3 task
 frame_name = 'base_link'
 M_des = cddp.se3.SE3(np.eye(3), np.array([ [0.1], [0.], [0.] ]))
-se3_cost = cddp.SE3RunningCost(model, frame_name, M_des)
+se3_rcost = cddp.SE3RunningCost(model, frame_name, M_des)
+se3_tcost = cddp.SE3TerminalCost(model, frame_name, M_des)
 w_se3 = 1000.*np.array([1., 1., 1., 1., 1., 1.])
-se3_cost.setWeights(w_se3)
+se3_rcost.setWeights(w_se3)
+se3_tcost.setWeights(w_se3)
 
 # Defining the velocity and control regularization
 xu_reg = cddp.StateControlQuadraticRegularization()
@@ -57,7 +59,8 @@ xu_reg.setWeights(wx, wu)
 # Adding the cost functions to the cost manager
 cost_manager = cddp.CostManager()
 cost_manager.addRunning(xu_reg)
-cost_manager.addRunning(se3_cost)
+cost_manager.addRunning(se3_rcost)
+cost_manager.addTerminal(se3_tcost)
 
 # Setting up the DDP problem
 timeline = np.arange(0.0, 0.25, 1e-3)  # np.linspace(0., 0.5, 51)

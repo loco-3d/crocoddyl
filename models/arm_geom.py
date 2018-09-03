@@ -27,10 +27,14 @@ x0 = np.vstack([q0, v0])
 
 # Defining the SE3 task
 frame_name = 'gripper_left_joint'
-M_des = cddp.se3.SE3(np.eye(3), np.array([ [0.], [0.], [0.5] ]))
-se3_cost = cddp.SE3RunningCost(model, frame_name, M_des)
-w_se3 = np.ones(6)
-se3_cost.setWeights(w_se3)
+t_des = np.array([ [0.], [0.], [0.4] ])
+R_des = np.eye(3)
+M_des = cddp.se3.SE3(R_des, t_des)
+se3_rcost = cddp.SE3RunningCost(model, frame_name, M_des)
+se3_tcost = cddp.SE3TerminalCost(model, frame_name, M_des)
+w_se3 = np.array([1., 1., 1., 1., 1., 1.])
+se3_rcost.setWeights(w_se3)
+se3_tcost.setWeights(w_se3)
 
 # Defining the velocity and control regularization
 xu_reg = cddp.StateControlQuadraticRegularization()
@@ -41,7 +45,8 @@ xu_reg.setWeights(wx, wu)
 # Adding the cost functions to the cost manager
 cost_manager = cddp.CostManager()
 cost_manager.addRunning(xu_reg)
-cost_manager.addRunning(se3_cost)
+cost_manager.addRunning(se3_rcost)
+cost_manager.addTerminal(se3_tcost)
 
 # Setting up the DDP problem
 timeline = np.arange(0.0, 0.25, 1e-3)  # np.linspace(0., 0.5, 51)
