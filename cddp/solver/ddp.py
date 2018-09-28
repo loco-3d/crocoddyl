@@ -33,19 +33,6 @@ class DDP(object):
         self.Uff_opt.append(np.matrix(np.zeros((sdata.m, 1))))
         self.Ufb_opt.append(np.matrix(np.zeros((sdata.m, sdata.ndx))))
 
-    # Global variables for the DDP algorithm
-    self.z = 0.
-    self.V_exp = np.matrix(np.zeros(1)) # Backward-pass Value function at t0
-    self.V = np.matrix(np.zeros(1)) # Forward-pass Value function at t0
-    self.dV_exp = np.matrix(np.zeros(1)) # Expected total cost reduction given alpha
-    self.dV = np.matrix(np.zeros(1)) # Total cost reduction
-    self.gradU = np.matrix(np.zeros(1)) # Gradient of the total cost
-    self.L = np.matrix(np.zeros((sdata.m, sdata.m))) # Cholesky decomposition of Quu
-    self.L_inv = np.matrix(np.zeros((sdata.m, sdata.m))) # Inverse of L
-    self.Quu_inv_minus = np.matrix(np.zeros((sdata.m, sdata.m))) # Inverse of -Quu
-    self.jt_Quu_j = np.matrix(np.zeros(1))
-    self.jt_Qu = np.matrix(np.zeros(1))
-
     # Setting the time values of the running intervals
     for k in range(self.N):
       it = self.intervals[k]
@@ -56,15 +43,36 @@ class DDP(object):
     self.terminal_interval = self.intervals[-1]
     self.initial_interval = self.intervals[0]
 
-    # Convergence tolerance and maximum number of iterations
+    # Global variables for the DDP algorithm
+    self.z = 0.
+    self.V_exp = np.matrix(np.zeros(1)) # Backward-pass Value function at t0
+    self.V = np.matrix(np.zeros(1)) # Forward-pass Value function at t0
+    self.dV_exp = np.matrix(np.zeros(1)) # Expected total cost reduction given alpha
+    self.dV = np.matrix(np.zeros(1)) # Total cost reduction
+    self.gamma = np.matrix(np.zeros(1)) # sqrt(||Qu^0|| + ... + ||Qu^N||) / N
+    self.theta = np.matrix(np.zeros(1)) # sum_{i=0}^N 0.5 * Qu^i * Quu_inv^i * Qu
+    self.L = np.matrix(np.zeros((sdata.m, sdata.m))) # Cholesky decomposition of Quu
+    self.L_inv = np.matrix(np.zeros((sdata.m, sdata.m))) # Inverse of L
+    self.Quu_inv_minus = np.matrix(np.zeros((sdata.m, sdata.m))) # Inverse of -Quu
+    self.jt_Quu_j = np.matrix(np.zeros(1))
+    self.jt_Qu = np.matrix(np.zeros(1))
+    self.n_iter = 0
     self._convergence = False
-    self.tol = 1e-4
-    self.max_iter = 20
     self.sqrt_eps = np.sqrt(np.finfo(float).eps)
+
+    # Setting up default solver properties
+    self.setProperties()
+
+  def setProperties(self):
+    """ Sets the properties of the DDP solver.
+    """
+    # Convergence tolerance and maximum number of iterations
+    self.tol = 1e-8
+    self.max_iter = 20
 
     # Regularization parameters (factor and increased rate)
     self.mu = 0.
-    self.mu0 = self.sqrt_eps # Full Newton direction as default
+    self.mu0 = 1e-8
     self.mu_inc = 10.
     self.mu_dec = 0.5
 
@@ -75,6 +83,12 @@ class DDP(object):
     self.alpha_dec = 0.5
     self.change_lb = 0.
     self.change_ub = 100.
+
+    # Global variables for analysing solver performance
+    self.J_itr = [0.] * self.max_iter
+    self.gamma_itr = [0.] * self.max_iter
+    self.theta_itr = [0.] * self.max_iter
+    self.alpha_itr = [0.] * self.max_iter
 
   def compute(self, x0, U=None):
     """ Computes the DDP algorithm.
@@ -96,8 +110,6 @@ class DDP(object):
     self.mu = self.mu0
     self.alpha = 1.
 
-    self.V_itr = []
-    self.gradU_itr = []
     self.n_iter = 0
     for i in range(self.max_iter):
       # Recording the number of iterations
@@ -127,6 +139,12 @@ class DDP(object):
         if self.alpha < self.sqrt_eps:
           self.alpha = 0.
 
+      # Recording the total cost, gradient, theta and alpha for each iteration.
+      # This is useful for analysing the solver performance
+      self.J_itr[i] = np.asscalar(self.V)
+      self.gamma_itr[i] = np.asscalar(self.gamma)
+      self.theta_itr[i] = np.asscalar(self.theta)
+      self.alpha_itr[i] = self.alpha
       # The quadratic model is accepted so for faster convergence it's better
       # to approach to Newton search direction. We can do it by decreasing the
       # Levenberg-Marquardt parameter
@@ -139,16 +157,12 @@ class DDP(object):
       if self.alpha > 1.:
         self.alpha = 1.
 
-      # Recording the total cost and gradient for each iteration. This is
-      # useful for analysing the solver performance
-      self.V_itr.append(self.V[0,0].copy())
-      self.gradU_itr.append(self.gradU[0,0].copy())
 
       # Checking convergence
       if self._convergence:
         # Final time
         end = time.time()
-        print ("Reached convergence", self.gradU[0,0], " in", end-start, "sec.")
+        print ("Reached convergence", self.gamma[0,0], " in", end-start, "sec.")
 
         # Recording the solution
         self._recordSolution()
@@ -156,7 +170,7 @@ class DDP(object):
 
     # Final time
     end = time.time()
-    print ("Reached allowed iterations", self.gradU[0,0], " in", end-start, "sec.")
+    print ("Reached allowed iterations", self.gamma[0,0], " in", end-start, "sec.")
 
     # Recording the solution
     self._recordSolution()
@@ -181,7 +195,8 @@ class DDP(object):
     self.dV_exp[0] = 0.
 
     # Running the backward sweep
-    self.gradU[0,0] = 0.
+    self.gamma[0,0] = 0.
+    self.theta[0,0] = 0.
     for k in range(self.N-1, -1, -1):
       it = self.intervals[k]
       it_next = self.intervals[k+1]
@@ -232,13 +247,13 @@ class DDP(object):
 
       # Computing the feedback and feedforward terms
       np.copyto(self.L_inv, np.linalg.inv(self.L))
-      np.copyto(self.Quu_inv_minus, -1. *self.L_inv.T * self.L_inv)
+      np.copyto(self.Quu_inv_minus, -1. * self.L_inv.T * self.L_inv)
       np.copyto(it.K, self.Quu_inv_minus * it.Qux_r)
       np.copyto(it.j, self.Quu_inv_minus * it.Qu)
 
       # Updating the gradient given the actual knot
-      self.gradU[0,0] += np.linalg.norm(it.Qu)
-      # self.gradU[0,0] += it.Qu.T * Quu_inv * it.Qu #TODO study this method
+      self.gamma[0,0] += np.linalg.norm(it.Qu)
+      self.theta[0,0] -= 0.5 * it.Qu.T * self.Quu_inv_minus * it.Qu
 
       # Computing the value function derivatives of this interval
       np.copyto(self.jt_Quu_j, 0.5 * it.j.T * it.Quu * it.j)
@@ -258,8 +273,7 @@ class DDP(object):
       self.dV_exp[0] += alpha * (alpha * self.jt_Quu_j + self.jt_Qu)
 
     # Computing the gradient w.r.t. U={u0, ..., uN}
-    self.gradU[0,0] = np.sqrt(self.gradU[0,0]) / self.N
-    # self.gradU[0,0] /= self.N #TODO study this method
+    self.gamma[0,0] = np.sqrt(self.gamma[0,0]) / self.N
     return True
 
   def forwardPass(self, alpha):
@@ -298,7 +312,7 @@ class DDP(object):
     self.V[0] += self.cost_manager.computeTerminalCost(self.system, it.cost, it.x_new)
 
     # Checking convergence of the previous iteration
-    if self.gradU[0,0] <= self.tol:
+    if np.abs(self.gamma[0,0]) <= self.tol:
       self._convergence = True
       return True
 
@@ -391,10 +405,24 @@ class DDP(object):
     return self.Uff_opt
 
   def getTotalCostSequence(self):
-    return np.asarray(self.V_itr)
+    return np.asarray(self.J_itr[:self.n_iter])
 
   def getConvergenceSequence(self):
-    return np.asarray(self.gradU_itr)
+    return np.asarray(self.gamma_itr[:self.n_iter]), \
+           np.asarray(self.theta_itr[:self.n_iter]), \
+           np.asarray(self.alpha_itr[:self.n_iter])
+
+  def saveToFile(self, filename):
+    import pickle
+    file = open(filename, 'w')
+    data = {'T': self.timeline,
+            'X': self.getStateTrajectory(),
+            'U': self.getControlSequence(),
+            'j': self.getFeedforwardSequence(),
+            'K': self.getFeedbackGainSequence(),
+            'J': self.getTotalCostSequence(),
+            'alpha': self.getConvergenceSequence()[2]}
+    pickle.dump(data, file)
 
   def _recordSolution(self):
     for k in range(self.N):
