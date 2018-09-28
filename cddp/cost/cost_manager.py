@@ -63,7 +63,7 @@ class CostManager(object):
 
     # Creating the running cost data, the residual data isn't needed
     data.total = XUCostData(n, m)
-    
+
     # Creating the running stack-of-cost data
     data.soc = [cost.createData(n, m) for cost in self.running]
     return data
@@ -79,21 +79,26 @@ class CostManager(object):
       l += cost.l(system, cost_data, x)
     return l
 
-  def computeRunningCost(self, system, data, x, u):
+  def computeRunningCost(self, system, data, x, u, dt):
     assert self.running > 0, "You didn't add the running costs"
     assertClass(data.total, 'XUCostData')
-    
+
+    # Computing the running cost
     l = data.total.l[0]
     l.fill(0.)
     for k, cost in enumerate(self.running):
       cost_data = data.soc[k]
       l += cost.l(system, cost_data, x, u)
+
+    # Numerical integration of the cost function
+    # TODO we need to use the quadrature class for this
+    l *= dt
     return l
 
   def computeTerminalTerms(self, system, data, x):
     assert self.terminal > 0, "You didn't add the terminal costs"
     assertClass(data.total, 'XCostData')
-    
+
     l = data.total.l[0]
     lx = data.total.lx
     lxx = data.total.lxx
@@ -107,10 +112,11 @@ class CostManager(object):
       lxx += cost.lxx(system, cost_data, x)
     return l, lx, lxx
 
-  def computeRunningTerms(self, system, data, x, u):
+  def computeRunningTerms(self, system, data, x, u, dt):
     assert self.running > 0, "You didn't add the running costs"
     assertClass(data.total, 'XUCostData')
-    
+
+    # Computing the cost and its derivatives
     l = data.total.l[0]
     lx = data.total.lx
     lu = data.total.lu
@@ -131,4 +137,14 @@ class CostManager(object):
       lxx += cost.lxx(system, cost_data, x, u)
       luu += cost.luu(system, cost_data, x, u)
       lux += cost.lux(system, cost_data, x, u)
+
+    # Numerical integration of the cost function and its derivatives
+    # TODO we need to use the quadrature class for this
+    l *= dt
+    lx *= dt
+    lu *= dt
+    lxx *= dt
+    luu *= dt
+    lux *= dt
+
     return l, lx, lu, lxx, luu, lux

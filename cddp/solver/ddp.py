@@ -208,20 +208,11 @@ class DDP(object):
       u = it.u
       dt = it.tf - it.t0
 
-      # Computing the cost and its derivatives
+      # Computing numerically the cost and its derivatives
       l, lx, lu, lxx, luu, lux = \
-        self.cost_manager.computeRunningTerms(self.system, cost_data, x, u)
+        self.cost_manager.computeRunningTerms(self.system, cost_data, x, u, dt)
 
-      # Integrating the derivatives of the cost function
-      # TODO we need to use the integrator class for this
-      l *= dt
-      lx *= dt
-      lu *= dt
-      lxx *= dt
-      luu *= dt
-      lux *= dt
-
-      # Computing the discrete time system derivatives
+      # Computing the discrete-time system derivatives
       fx, fu = self.system.computeDerivatives(system_data, x, u, dt)
 
       # Getting the value function values of the next interval (prime interval)
@@ -302,10 +293,10 @@ class DDP(object):
       np.copyto(it_next.x_new,
                 self.system.stepForward(it.system, it.x_new, it.u_new, dt))
 
-      # Integrating the cost and updating the new value function
-      # TODO we need to use the integrator class for this
+      # Updating the obtained Value function by numerically integrating the
+      # running cost function
       self.V[0] += \
-        self.cost_manager.computeRunningCost(self.system, it.cost, it.x_new, it.u_new) * dt
+        self.cost_manager.computeRunningCost(self.system, it.cost, it.x_new, it.u_new, dt)
 
     # Including the terminal cost
     it = self.terminal_interval
@@ -364,9 +355,10 @@ class DDP(object):
       np.copyto(it_next.x, x_next)
       np.copyto(it_next.x_new, x_next)
 
-      # Integrating the cost and updating the new value function
+      # Updating the expected Value function by numerically integrating the
+      # running cost function
       self.V_exp[0] += \
-        self.cost_manager.computeRunningCost(self.system, it.cost, it.x, it.u) * dt
+        self.cost_manager.computeRunningCost(self.system, it.cost, it.x, it.u, dt)
 
     # Including the terminal state and cost
     it = self.terminal_interval
