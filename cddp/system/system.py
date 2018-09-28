@@ -69,16 +69,6 @@ class DynamicalSystem(object):
     return data.fx, data.fu
 
   @abc.abstractmethod
-  def advanceConfiguration(self, x, dx):
-    """ Operator that advance the configuration state
-
-    :param x: configuration point
-    :param dx: displacement in tangent space of configuration manifold
-    :returns: next configuration point
-    """
-    pass
-
-  @abc.abstractmethod
   def f(self, data, x, u):
     """ Evaluate the evolution function and stores the result in data.
 
