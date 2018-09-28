@@ -53,7 +53,7 @@ class GeometricDynamicalSystem(DynamicalSystem):
     v = x[data.nq:]
     return self.integrator(self, data, q, v, u, dt)
 
-  def computeDerivatives(self, data, x, u, dt):
+  def computeLinearModel(self, data, x, u, dt):
     # Computing the time-continuos linearized system, i.e.
     # [dq,dv]^T = fqv*[q,v]^T + [0,fu]*du, and converting it into discrete one
     q = x[:data.nq]

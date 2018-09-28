@@ -212,8 +212,8 @@ class DDP(object):
       l, lx, lu, lxx, luu, lux = \
         self.cost_manager.computeRunningTerms(self.system, cost_data, x, u, dt)
 
-      # Computing the discrete-time system derivatives
-      fx, fu = self.system.computeDerivatives(system_data, x, u, dt)
+      # Computing the discrete-time linearized model
+      fx, fu = self.system.computeLinearModel(system_data, x, u, dt)
 
       # Getting the value function values of the next interval (prime interval)
       Vx_p = it_next.Vx

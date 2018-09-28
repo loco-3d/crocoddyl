@@ -15,7 +15,7 @@ class IntegratorTest(unittest.TestCase):
     u = np.random.rand(dynamics.getControlDimension(), 1)
 
     x_next = dynamics.stepForward(data, x, u, dt)
-    fx, fu = dynamics.computeDerivatives(data, x, u, dt)
+    fx, fu = dynamics.computeLinearModel(data, x, u, dt)
 
     self.assertEqual(x_next.all(), (fx * x + fu * u).all(), \
       "The forward Euler discretizer is wrong.")
@@ -31,7 +31,7 @@ class IntegratorTest(unittest.TestCase):
     u = np.random.rand(dynamics.getControlDimension(), 1)
 
     x_next = dynamics.stepForward(data, x, u, dt)
-    fx, fu = dynamics.computeDerivatives(data, x, u, dt)
+    fx, fu = dynamics.computeLinearModel(data, x, u, dt)
 
     self.assertEqual(x_next.all(), (fx * x + fu * u).all(), \
       "The RK4 discretizer is wrong.")

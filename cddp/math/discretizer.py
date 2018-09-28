@@ -4,7 +4,7 @@ import numpy as np
 
 class Discretizer(object):
   """ This abstract class declares the virtual method for any discretization
-  method.
+  method of system dynamics.
   """
   __metaclass__ = abc.ABCMeta
 
@@ -13,18 +13,19 @@ class Discretizer(object):
   
   @abc.abstractmethod
   def createData(self, nv):
-    """ Create the data for the numerical integrator and discretizer.
+    """ Create the data for the system discretization.
 
-    Due to the integrator data is needed internally, we create inside the
-    implementation class. It aims is to create data for the integrator and
-    sampler, and both depends on the dimension of the tangential space nv.
+    Due to the discretizer data is needed internally, we create inside the
+    implementation class. It aims is to create data for the discretizer which
+    depends on the dimension of the tangential space nv.
     :param nv: dimension of the tangent space of the configuration manifold
     """
     pass
 
   @abc.abstractmethod
   def __call__(self, system, data, x, u, dt):
-    """ Convert the continuos, and linearized, dynamic model into discrete one.
+    """ Convert the time-continuos, and linearized, dynamic model into 
+    time-discrete one.
 
     This abstract method allows us to define a discretization rule for the 
     linearized dynamic (dv = fx*dx + fu*du) which is compatible with its 
@@ -41,20 +42,20 @@ class Discretizer(object):
 
 class GeometricDiscretizer(object):
   """ This abstract class declares the virtual method for any discretization
-  method.
+  method of the system dynamics.
   """
   __metaclass__ = abc.ABCMeta
 
   def __init__(self):
     pass
-  
+
   @abc.abstractmethod
   def createData(self, nq, nv):
-    """ Create the data for the numerical integrator and discretizer.
+    """ Create the data for the system discretization.
 
-    Due to the integrator data is needed internally, we create inside the
-    implementation class. It aims is to create data for the integrator and
-    sampler, and both depends on the dimension of the tangential space nv.
+    Due to the discretizer data is needed internally, we create inside the
+    implementation class. It aims is to create data for the discretizer which
+    depends on the dimension of the configuration nq and tangential spaces nv.
     :param nq: dimension of the configuration space Q
     :param nv: dimension of the tangent space of the configuration manifold
     """
@@ -63,7 +64,8 @@ class GeometricDiscretizer(object):
 
   @abc.abstractmethod
   def __call__(self, system, data, q, v, tau, dt):
-    """ Convert the continuos, and linearized, dynamic model into discrete one.
+    """ Convert the time-continuos, and linearized, dynamic model into 
+    time-discrete one.
 
     This abstract method allows us to define a discretization rule for the 
     linearized dynamic ([dv,da] = fx*[dq,dv] + fu*du) which is compatible with
@@ -82,7 +84,8 @@ class GeometricDiscretizer(object):
 
 class EulerDiscretizer(Discretizer):
   def createData(self, nv):
-    """ Create the internal data of forward Euler discretizer.
+    """ Create the internal data of forward Euler discretization of the system
+    dynamics.
 
     :param nv: dimension of the tangent space of the configuration manifold
     """
@@ -90,8 +93,8 @@ class EulerDiscretizer(Discretizer):
     self._I = np.eye(nv)
 
   def __call__(self, system, data, x, u, dt):
-    """ Convert the time-continuos dynamics into discrete one using forward
-    Euler rule.
+    """ Convert the time-continuos dynamics into time-discrete one by using
+    forward Euler rule.
 
     :param system: system model
     :param data: system data
@@ -109,7 +112,8 @@ class EulerDiscretizer(Discretizer):
 
 class GeometricEulerDiscretizer(GeometricDiscretizer):
   def createData(self, nv):
-    """ Create the internal data of forward Euler discretizer.
+    """ Create the internal data of forward Euler discretization of the system
+    dynamics.
 
     :param nv: dimension of the tangent space of the configuration manifold
     """
@@ -117,8 +121,8 @@ class GeometricEulerDiscretizer(GeometricDiscretizer):
     self._I = np.eye(nv)
 
   def __call__(self, system, data, q, v, tau, dt):
-    """ Convert the time-continuos dynamics into discrete one using forward
-    Euler rule.
+    """ Convert the time-continuos dynamics into time-discrete one by using
+    forward Euler rule.
 
     :param system: system model
     :param data: system data
@@ -156,7 +160,7 @@ class RK4Discretizer(Discretizer):
     self.sum_f = np.matrix(np.zeros((nv, nv)))
 
   def __call__(self, system, data, x, u, dt):
-    """ Convert the time-continuos dynamics into discrete one using
+    """ Convert the time-continuos dynamics into time-discrete one by using
     fourth-order Runge-Kutta method.
 
     :param system: system model

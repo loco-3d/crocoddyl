@@ -54,9 +54,9 @@ class DynamicalSystem(object):
     # Integrate the time-continuos dynamics in order to get the next state
     # value
     return self.integrator(self, data, x, u, dt)
-  
-  def computeDerivatives(self, data, x, u, dt):
-    """ Compute the discrete-time derivatives of dynamics
+
+  def computeLinearModel(self, data, x, u, dt):
+    """ Compute the discrete-time linear model of the dynamics
 
     :param data: system data
     :param x: configuration point

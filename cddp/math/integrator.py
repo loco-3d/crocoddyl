@@ -3,7 +3,8 @@ import numpy as np
 
 
 class Integrator(object):
-  """ This abstract class declares the virtual method for any integrator.
+  """ This abstract class declares the virtual method for any integrator of the
+  system dynamics.
   """
   __metaclass__ = abc.ABCMeta
 
@@ -12,7 +13,7 @@ class Integrator(object):
 
   @abc.abstractmethod
   def createData(self, nq, nv):
-    """ Create the data for the numerical integrator and discretizer.
+    """ Create the data for the numerical integration of the system dynamics.
 
     Due to the integrator data is needed internally, we create inside the
     implementation class. It aims is to create data for the integrator.
@@ -23,7 +24,7 @@ class Integrator(object):
 
   @abc.abstractmethod
   def __call__(self, system, data, x, u, dt):
-    """ Integrate the system dynamics.
+    """ Integrate numerically the system dynamics.
 
     This abstract method allows us to define integration rules of our ODE. It
     uses the system and data classes which defines the evolution function and
@@ -40,7 +41,8 @@ class Integrator(object):
 
 
 class GeometricIntegrator(object):
-  """ This abstract class declares the virtual method for any integrator.
+  """ This abstract class declares the virtual method for any integrator of a
+  geometrical system.
   """
   __metaclass__ = abc.ABCMeta
 
@@ -49,7 +51,7 @@ class GeometricIntegrator(object):
 
   @abc.abstractmethod
   def createData(self, nq, nv):
-    """ Create the data for the numerical integrator and discretizer.
+    """ Create the data for the numerical integration of the system dynamics.
 
     Due to the integrator data is needed internally, we create inside the
     implementation class. It aims is to create data for the integrator.
@@ -60,7 +62,7 @@ class GeometricIntegrator(object):
 
   @abc.abstractmethod
   def __call__(self, system, data, q, v, tau, dt):
-    """ Integrate the system dynamics.
+    """ Integrate numerically the system dynamics.
 
     This abstract method allows us to define integration rules of our ODE. It
     uses the system and data classes which defines the evolution function and
@@ -79,7 +81,8 @@ class GeometricIntegrator(object):
 
 class EulerIntegrator(Integrator):
   def createData(self, nq, nv):
-    """ Create the internal data of forward Euler integrator.
+    """ Create the internal data of forward Euler integrator of the system
+    dynamics.
 
     :param nq: dimension of the configuration manifold
     :param nv: dimension of the tangent space of the configuration manifold
@@ -103,7 +106,8 @@ class EulerIntegrator(Integrator):
 
 class GeometricEulerIntegrator(GeometricIntegrator):
   def createData(self, nq, nv):
-    """ Create the internal data of forward Euler integrator.
+    """ Create the internal data of forward Euler integrator of the system
+    dynamics.
 
     :param nq: dimension of the configuration manifold
     :param nv: dimension of the tangent space of the configuration manifold
@@ -130,7 +134,8 @@ class GeometricEulerIntegrator(GeometricIntegrator):
 
 class RK4Integrator(Integrator):
   def createData(self, nq, nv):
-    """ Create the internal data of forward Euler integrator.
+    """ Create the internal data of forward Euler integrator of the system
+    dynamics.
 
     :param nq: dimension of the configuration manifold
     :param nv: dimension of the tangent space of the configuration manifold
