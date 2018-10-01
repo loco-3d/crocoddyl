@@ -7,7 +7,7 @@ np.set_printoptions(linewidth=400, suppress=True, threshold=np.nan)
 
 display = True
 plot = True
-constraint = True
+constraint = False
 
 
 # Creating the system model
