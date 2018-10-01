@@ -17,16 +17,16 @@ robot = se3.robot_wrapper.RobotWrapper(urdf, path, se3.JointModelFreeFlyer())
 model = robot.model
 system = cddp.NumDiffSparseConstrainedForwardDynamics(model)
 q0 = robot.q0
-q0[7] = -0.2
+q0[7] = -0.2*0.
 q0[7+1] = 0.75
 q0[7+2] = -1.5
-q0[7+3] = -0.2
+q0[7+3] = -0.2*0.
 q0[7+4] = -0.75
 q0[7+5] = 1.5
-q0[7+6] = -0.2
+q0[7+6] = -0.2*0.
 q0[7+7] = 0.75
 q0[7+8] = -1.5
-q0[7+9] = -0.2
+q0[7+9] = -0.2*0.
 q0[7+10] = -0.75
 q0[7+11] = 1.5
 
@@ -46,9 +46,16 @@ frame_name = 'base_link'
 M_des = cddp.se3.SE3(np.eye(3), np.array([ [0.1], [0.], [0.] ]))
 se3_rcost = cddp.SE3RunningCost(model, frame_name, M_des)
 se3_tcost = cddp.SE3TerminalCost(model, frame_name, M_des)
-w_se3 = 1000.*np.array([1., 1., 1., 1., 1., 1.])
-se3_rcost.setWeights(w_se3)
-se3_tcost.setWeights(w_se3)
+w_se3 = np.array([1., 1., 1., 1., 1., 1.])
+se3_rcost.setWeights(1000*w_se3)
+se3_tcost.setWeights(1000*w_se3)
+
+# Defining the CoM task
+com_des = np.matrix([ [0.1], [0.], [0.] ])
+com_cost = cddp.CoMRunningCost(model, com_des)
+w_com = 1000.*np.array([1., 1., 1.])
+com_cost.setWeights(w_com)
+
 
 # Defining the velocity and control regularization
 xu_reg = cddp.StateControlQuadraticRegularization()
@@ -61,6 +68,7 @@ cost_manager = cddp.CostManager()
 cost_manager.addRunning(xu_reg)
 cost_manager.addRunning(se3_rcost)
 cost_manager.addTerminal(se3_tcost)
+# cost_manager.addRunning(com_cost)
 
 # Setting up the DDP problem
 timeline = np.arange(0.0, 0.25, 1e-3)  # np.linspace(0., 0.5, 51)
@@ -73,7 +81,7 @@ ddp.compute(x0)
 # Printing the final goal
 frame_idx = model.getFrameId(frame_name)
 xf = ddp.intervals[-1].x
-qf = xf[:7]
+qf = xf[:19]
 print robot.framePosition(qf, frame_idx)
 
 
@@ -86,3 +94,5 @@ if display:
   T = timeline
   X = ddp.getStateTrajectory()
   cddp.visualizePlan(robot, T, x0, X)
+
+# ddp.saveToFile('mu_1e2.txt')

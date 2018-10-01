@@ -62,6 +62,8 @@ xf = ddp.intervals[-1].x
 qf = xf[:7]
 print robot.framePosition(qf, frame_idx)
 
+# ddp.computeGradientNumerically()
+
 
 if plot:
   J = ddp.getTotalCostSequence()
