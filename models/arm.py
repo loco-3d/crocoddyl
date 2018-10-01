@@ -51,7 +51,7 @@ cost_manager.addTerminal(se3_tcost)
 
 # Setting up the DDP problem
 timeline = np.arange(0.0, 0.25, 1e-3)  # np.linspace(0., 0.5, 51)
-ddp = cddp.DDP(system, cost_manager, timeline)
+ddp = cddp.DDP(system, cost_manager, timeline, cddp.DDPDebug(robot))
 
 # Solving the problem
 ddp.compute(x0)
@@ -71,7 +71,7 @@ if plot:
 if display:
   T = timeline
   X = ddp.getStateTrajectory()
-  cddp.visualizePlan(robot, x0, T, X, frame_idx)
+  cddp.visualizePlan(robot, T, x0, X, frame_idx)
 
 
 if constraint:
@@ -90,4 +90,4 @@ if constraint:
 
   if display:
     X = ddp.getStateTrajectory()
-    cddp.visualizePlan(robot, x0, T, X, frame_idx)
+    cddp.visualizePlan(robot, T, x0, X, frame_idx)
