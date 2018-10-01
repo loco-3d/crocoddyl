@@ -56,9 +56,11 @@ class DDP(object):
     self.Quu_inv_minus = np.matrix(np.zeros((sdata.m, sdata.m))) # Inverse of -Quu
     self.jt_Quu_j = np.matrix(np.zeros(1))
     self.jt_Qu = np.matrix(np.zeros(1))
+    self.muI = np.eye(self.system.m)
     self.n_iter = 0
     self._convergence = False
-    self.sqrt_eps = np.sqrt(np.finfo(float).eps)
+    self.eps = np.finfo(float).eps
+    self.sqrt_eps = np.sqrt(self.eps)
 
     # Setting up default solver properties
     self.setProperties()
@@ -71,16 +73,21 @@ class DDP(object):
     self.max_iter = 20
 
     # Regularization parameters (factor and increased rate)
-    self.mu = 0.
-    self.mu0 = 1e-8
-    self.mu_inc = 10.
-    self.mu_dec = 0.5
+    self.muV = 0.
+    self.muLM = 0.
+    self.mu0V = 0.
+    self.mu0LM = 1e-8
+    self.muV_inc = 10.
+    self.muV_dec = 0.5
+    self.muLM_inc = 10.
+    self.muLM_dec = 0.5
 
     # Line search parameters (step, lower and upper bound of iteration
     # acceptance and decreased rate)
     self.alpha = 1.
     self.alpha_inc = 2.
     self.alpha_dec = 0.5
+    self.alpha_min = 1e-3
     self.change_lb = 0.
     self.change_ub = 100.
 
@@ -107,37 +114,36 @@ class DDP(object):
     # quadratic model has some error respect to the true model. So we start
     # closer to steeppest descent by adjusting the initial Levenberg-Marquardt
     # parameter (i.e. mu)
-    self.mu = self.mu0
+    self.muLM = self.mu0LM
+    self.muV = self.mu0V
     self.alpha = 1.
 
     self.n_iter = 0
     for i in range(self.max_iter):
       # Recording the number of iterations
       self.n_iter = i
-      print ("Iteration", self.n_iter, 'mu_tassa', self.mu, 'alpha', self.alpha)
+      print ("Iteration", self.n_iter, "muV", self.muV,
+             "muLM", self.muLM, "alpha", self.alpha)
 
       # Running the backward sweep
-      while not self.backwardPass(self.mu, self.alpha):
+      while not self.backwardPass(self.muLM, self.muV, self.alpha):
         # Quu is not positive-definitive, so increasing the
         # regularization factor
-        if self.mu == 0.:
-          self.mu += self.mu0
+        if self.muLM == 0.:
+          self.muLM += self.mu0LM
         else:
-          self.mu *= self.mu_inc
-          print "\t", ("Quu isn't positive. Increasing mu_tassa to", self.mu)
-
+          self.muLM *= self.muLM_inc
+        print "\t", ("Quu isn't positive. Increasing muLM to", self.muLM)
       # Running the forward pass
       while not self.forwardPass(self.alpha):
         self.alpha *= self.alpha_dec
         print "\t", ("Rejected changes. Decreasing alpha to", self.alpha)
         print "\t","\t", "Reduction Ratio:", self.z
-        print "\t","\t", "Expected Reduction:", -self.dV_exp[0, 0]
-        print "\t","\t", "Actual Reduction:", -self.dV[0, 0]
-        if self.alpha == 0.:
+        print "\t","\t", "Expected Reduction:", -np.asscalar(self.dV_exp)
+        print "\t","\t", "Actual Reduction:", -np.asscalar(self.dV)
+        if self.alpha < self.alpha_min:
           print "\t", ('No found solution')
           break
-        if self.alpha < self.sqrt_eps:
-          self.alpha = 0.
 
       # Recording the total cost, gradient, theta and alpha for each iteration.
       # This is useful for analysing the solver performance
@@ -148,9 +154,9 @@ class DDP(object):
       # The quadratic model is accepted so for faster convergence it's better
       # to approach to Newton search direction. We can do it by decreasing the
       # Levenberg-Marquardt parameter
-      self.mu *= self.mu_dec
-      if self.mu < self.sqrt_eps: # this is full Newton direction
-        self.mu = self.sqrt_eps
+      self.muLM *= self.muLM_dec
+      if self.muLM < self.eps: # this is full Newton direction
+        self.muLM = self.eps
 
       # Increasing the stepsize for the next iteration
       self.alpha *= self.alpha_inc
@@ -176,7 +182,7 @@ class DDP(object):
     self._recordSolution()
     return False
 
-  def backwardPass(self, mu, alpha):
+  def backwardPass(self, muLM, muV, alpha):
     """ Runs the forward pass of the DDP algorithm.
 
     :param mu: regularization factor
@@ -195,8 +201,9 @@ class DDP(object):
     self.dV_exp[0] = 0.
 
     # Running the backward sweep
-    self.gamma[0,0] = 0.
-    self.theta[0,0] = 0.
+    self.gamma[0] = 0.
+    self.theta[0] = 0.
+    np.copyto(self.muI, muLM * np.eye(self.system.m)) # np.diag(np.diag(it.Quu.T * it.Quu))
     for k in range(self.N-1, -1, -1):
       it = self.intervals[k]
       it_next = self.intervals[k+1]
@@ -227,14 +234,21 @@ class DDP(object):
       np.copyto(it.Quu, luu + fu.T * Vxx_p * fu)
       np.copyto(it.Qux, lux + fu.T * Vxx_p * fx)
 
-      # We apply a regularization on the Quu and Qux as Tassa.
-      # This regularization is needed when the Hessian is not
-      # positive-definitive or when the minimum is far and the
-      # quadratic model is inaccurate
-      np.copyto(it.Quu_r, it.Quu + mu * fu.T * fu)
+      # We apply a two king of regularization called here as Levenberg-Marquat
+      # (LM) and Value (V). It's well know that the LM regularization allows us
+      # to change the search direction between Newton and steepest descent by
+      # increasing muLM. Note that steepest descent provides us guarantee to
+      # decrease our cost function but it's too slow especially in very bad
+      # scaled problems. Instead Newton direction moves faster towards the
+      # minimum but the Hessian cannot approximate well the problem in very
+      # nonlinear problems. On the other hand, the Value function regularization
+      # smooths the policy function updates; i.e. it reduces changes in the 
+      # policy and penalizes changes in the states instead of controls. In
+      # practice it reduces the number of iteration in badly posed problems.
+      np.copyto(it.Quu_r, it.Quu + self.muI + muV * fu.T * fu)
       if not isPositiveDefinitive(it.Quu_r, self.L):
         return False
-      np.copyto(it.Qux_r, it.Qux + mu * fu.T * fx)
+      np.copyto(it.Qux_r, it.Qux + muV * fu.T * fx)
 
       # Computing the feedback and feedforward terms
       np.copyto(self.L_inv, np.linalg.inv(self.L))
@@ -258,8 +272,8 @@ class DDP(object):
       np.copyto(it.Vxx, 0.5 * (it.Vxx + it.Vxx.T))
 
       # Updating the local cost and expected reduction. The total values are
-      # used to check the changes in the forward pass. This is method is
-      # explained in Tassa's PhD thesis
+      # used to check the changes in the forward pass. This method is explained
+      # in Tassa's PhD thesis
       self.V_exp[0] += l
       self.dV_exp[0] += alpha * (alpha * self.jt_Quu_j + self.jt_Qu)
 
