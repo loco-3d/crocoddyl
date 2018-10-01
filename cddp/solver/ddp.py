@@ -138,9 +138,9 @@ class DDP(object):
       while not self.forwardPass(self.alpha):
         self.alpha *= self.alpha_dec
         print "\t", ("Rejected changes. Decreasing alpha to", self.alpha)
-        print "\t","\t", "Reduction Ratio:", self.z
-        print "\t","\t", "Expected Reduction:", -np.asscalar(self.dV_exp)
-        print "\t","\t", "Actual Reduction:", -np.asscalar(self.dV)
+        print "\t", "\t", "Reduction Ratio:", self.z
+        print "\t", "\t", "Expected Reduction:", -np.asscalar(self.dV_exp)
+        print "\t", "\t", "Actual Reduction:", -np.asscalar(self.dV)
         if self.alpha < self.alpha_min:
           print "\t", ('No found solution')
           break
@@ -168,7 +168,7 @@ class DDP(object):
       if self._convergence:
         # Final time
         end = time.time()
-        print ("Reached convergence", self.gamma[0,0], " in", end-start, "sec.")
+        print ("Reached convergence", np.asscalar(self.gamma), " in", end-start, "sec.")
 
         # Recording the solution
         self._recordSolution()
@@ -176,7 +176,7 @@ class DDP(object):
 
     # Final time
     end = time.time()
-    print ("Reached allowed iterations", self.gamma[0,0], " in", end-start, "sec.")
+    print ("Reached allowed iterations", np.asscalar(self.gamma), " in", end-start, "sec.")
 
     # Recording the solution
     self._recordSolution()
@@ -317,13 +317,13 @@ class DDP(object):
     self.V[0] += self.cost_manager.computeTerminalCost(self.system, it.cost, it.x_new)
 
     # Checking convergence of the previous iteration
-    if np.abs(self.gamma[0,0]) <= self.tol:
+    if np.abs(self.gamma[0]) <= self.tol:
       self._convergence = True
       return True
 
     # Checking the changes
-    self.dV[0] = (self.V - self.V_exp).copy()
-    self.z = (self.dV[0, 0] / self.dV_exp[0, 0]).copy()
+    self.dV[0] = self.V - self.V_exp
+    self.z = np.asscalar(self.dV) / np.asscalar(self.dV_exp)
     if self.z > self.change_lb and self.z < self.change_ub:
       # Accepting the new trajectory and control, defining them as nominal ones
       for k in range(self.N):
