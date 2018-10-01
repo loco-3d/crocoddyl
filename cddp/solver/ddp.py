@@ -1,6 +1,6 @@
 import numpy as np
 from cddp.data import RunningDDPData, TerminalDDPData
-from cddp.utils import isPositiveDefinitive
+from cddp.utils import isPositiveDefinitive, visualizePlan
 import time
 
 
