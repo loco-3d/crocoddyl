@@ -142,7 +142,8 @@ class DDP(object):
         print "\t", "\t", "Expected Reduction:", -np.asscalar(self.dV_exp)
         print "\t", "\t", "Actual Reduction:", -np.asscalar(self.dV)
         if self.alpha < self.alpha_min:
-          print "\t", ('No found solution')
+          print "\t", ('It cannot be improved solution')
+          self._convergence = True
           break
 
       # Recording the total cost, gradient, theta and alpha for each iteration.
