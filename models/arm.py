@@ -7,6 +7,7 @@ np.set_printoptions(linewidth=400, suppress=True, threshold=np.nan)
 
 display = True
 plot = True
+constraint = True
 
 
 # Creating the system model
@@ -15,17 +16,26 @@ path = rospkg.RosPack().get_path('talos_data')
 urdf = path + '/robots/talos_left_arm.urdf'
 robot = se3.robot_wrapper.RobotWrapper(urdf, path)
 model = robot.model
-system = cddp.NumDiffForwardDynamics(model)
-x0 = np.zeros((system.getConfigurationDimension(), 1))
-x0[:model.nq] = np.matrix([ 0.173046, 1., -0.525366, 0., 0., 0.1,-0.005]).T
+# system = cddp.NumDiffForwardDynamics(model)
+# system = cddp.NumDiffSparseForwardDynamics(model)
+system = cddp.SparseForwardDynamics(model)
+# x0 = np.zeros((system.getConfigurationDimension(), 1))
+# x0[:system.robot.nq] = np.matrix([ 0.173046, 1., -0.525366, 0., 0., 0.1,-0.005]).T
+q0 = np.matrix([ 0.173046, 1., -0.525366, 0., 0., 0.1,-0.005]).T
+v0 = np.zeros((system.getTangentDimension(), 1))
+x0 = np.vstack([q0, v0])
 
 
 # Defining the SE3 task
 frame_name = 'gripper_left_joint'
-M_des = cddp.se3.SE3(np.eye(3), np.array([ [0.], [0.], [0.5] ]))
-se3_cost = cddp.SE3RunningCost(model, frame_name, M_des)
-w_se3 = np.ones(6)
-se3_cost.setWeights(w_se3)
+t_des = np.array([ [0.], [0.], [0.4] ])
+R_des = np.eye(3)
+M_des = cddp.se3.SE3(R_des, t_des)
+se3_rcost = cddp.SE3RunningCost(model, frame_name, M_des)
+se3_tcost = cddp.SE3TerminalCost(model, frame_name, M_des)
+w_se3 = np.array([1., 1., 1., 1., 1., 1.])
+se3_rcost.setWeights(w_se3)
+se3_tcost.setWeights(w_se3)
 
 # Defining the velocity and control regularization
 xu_reg = cddp.StateControlQuadraticRegularization()
@@ -36,7 +46,8 @@ xu_reg.setWeights(wx, wu)
 # Adding the cost functions to the cost manager
 cost_manager = cddp.CostManager()
 cost_manager.addRunning(xu_reg)
-cost_manager.addRunning(se3_cost)
+cost_manager.addRunning(se3_rcost)
+cost_manager.addTerminal(se3_tcost)
 
 # Setting up the DDP problem
 timeline = np.arange(0.0, 0.25, 1e-3)  # np.linspace(0., 0.5, 51)
@@ -59,8 +70,28 @@ if plot:
   gradU = ddp.getConvergenceSequence()
   cddp.plotDDPSolution(model, X, U, V, gradU)
 
-
 if display:
   T = timeline
   X = ddp.getStateTrajectory()
   cddp.visualizePlan(robot, x0, T, X, frame_idx)
+
+
+if constraint:
+  # Defining the joint limits as soft-constraint
+  jpos_lim = cddp.JointPositionBarrier(model)
+  cost_manager.addRunning(jpos_lim)
+  
+  # Solving the problem with constraints
+  ddp = cddp.DDP(system, cost_manager, timeline)
+  ddp.compute(x0, ddp.getControlSequence())
+
+  if plot:
+    X = ddp.getStateTrajectory()
+    U = ddp.getControlSequence()
+    V = ddp.getTotalCostSequence()
+    gradU = ddp.getConvergenceSequence()
+    cddp.plotDDPSolution(model, X, U, V, gradU)
+
+  if display:
+    X = ddp.getStateTrajectory()
+    cddp.visualizePlan(robot, x0, T, X, frame_idx)

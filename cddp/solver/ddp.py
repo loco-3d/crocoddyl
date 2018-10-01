@@ -4,12 +4,23 @@ from cddp.utils import isPositiveDefinitive
 import time
 
 
+class DDPDebug(object):
+  def __init__(self, robot):
+    self.robot = robot
+  
+  def display(self, t, x0, X):
+    visualizePlan(self.robot, t, x0, X)
+
+
 class DDP(object):
-  def __init__(self, system, cost_manager, timeline):
+  def __init__(self, system, cost_manager, timeline, debug=None):
     self.system = system
     self.cost_manager = cost_manager
     self.timeline = timeline
     self.N = len(timeline) - 1
+
+    # Debugging tools for the DDP solver
+    self.debug = debug
 
     # Allocation of data for all the DDP intervals and its solution
     self.intervals = []
@@ -174,6 +185,10 @@ class DDP(object):
         # Recording the solution
         self._recordSolution()
         return True
+
+      if self.debug != None:
+        self._recordSolution()
+        self.debug.display(self.timeline, self.intervals[0].x, self.X_opt)
 
     # Final time
     end = time.time()

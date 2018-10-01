@@ -34,7 +34,7 @@ def assertClass(derivated, abstract):
 def assertGreaterThan(a, b):
   assert (a >= b).all(), 'The first vector is not greater than the second one.'
 
-def visualizePlan(robot, x0, T, X, frame_idx=None, path=False):
+def visualizePlan(robot, T, x0, X, frame_idx=None, path=False):
   import gepetto.corbaserver
   cl = gepetto.corbaserver.Client()
   gui = cl.gui
