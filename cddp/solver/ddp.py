@@ -69,7 +69,7 @@ class DDP(object):
     """ Sets the properties of the DDP solver.
     """
     # Convergence tolerance and maximum number of iterations
-    self.tol = 1e-8
+    self.tol = 1e-5
     self.max_iter = 20
 
     # Regularization parameters (factor and increased rate)
