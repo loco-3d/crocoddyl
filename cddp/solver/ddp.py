@@ -163,6 +163,7 @@ class DDP(object):
       self.gamma_itr[i] = np.asscalar(self.gamma)
       self.theta_itr[i] = np.asscalar(self.theta)
       self.alpha_itr[i] = self.alpha
+
       # The quadratic model is accepted so for faster convergence it's better
       # to approach to Newton search direction. We can do it by decreasing the
       # Levenberg-Marquardt parameter
@@ -174,7 +175,6 @@ class DDP(object):
       self.alpha *= self.alpha_inc
       if self.alpha > 1.:
         self.alpha = 1.
-
 
       # Checking convergence
       if self._convergence:
@@ -430,9 +430,9 @@ class DDP(object):
     return np.asarray(self.J_itr[:self.n_iter])
 
   def getConvergenceSequence(self):
-    return np.asarray(self.gamma_itr[:self.n_iter]), \
-           np.asarray(self.theta_itr[:self.n_iter]), \
-           np.asarray(self.alpha_itr[:self.n_iter])
+    return np.asarray(self.gamma_itr[:self.n_iter+1]), \
+           np.asarray(self.theta_itr[:self.n_iter+1]), \
+           np.asarray(self.alpha_itr[:self.n_iter+1])
 
   def saveToFile(self, filename):
     import pickle
