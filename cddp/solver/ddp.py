@@ -256,10 +256,6 @@ class DDP(object):
       np.copyto(it.K, self.Quu_inv_minus * it.Qux_r)
       np.copyto(it.j, self.Quu_inv_minus * it.Qu)
 
-      # Updating the gradient given the actual knot
-      self.gamma[0,0] += np.linalg.norm(it.Qu)
-      self.theta[0,0] -= 0.5 * it.Qu.T * self.Quu_inv_minus * it.Qu
-
       # Computing the value function derivatives of this interval
       np.copyto(self.jt_Quu_j, 0.5 * it.j.T * it.Quu * it.j)
       np.copyto(self.jt_Qu, it.j.T * it.Qu)
@@ -277,8 +273,12 @@ class DDP(object):
       self.V_exp[0] += l
       self.dV_exp[0] += alpha * (alpha * self.jt_Quu_j + self.jt_Qu)
 
+      # Updating the theta and gamma given the actual knot
+      self.gamma[0] += it.Qu.T * it.Qu
+      self.theta[0] -= self.jt_Quu_j + self.jt_Qu
+
     # Computing the gradient w.r.t. U={u0, ..., uN}
-    self.gamma[0,0] = np.sqrt(self.gamma[0,0]) / self.N
+    self.gamma[0] = np.sqrt(self.gamma[0])
     return True
 
   def forwardPass(self, alpha):
