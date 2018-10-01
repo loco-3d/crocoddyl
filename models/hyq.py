@@ -78,11 +78,9 @@ print robot.framePosition(qf, frame_idx)
 
 
 if plot:
-  X = ddp.getStateTrajectory()
-  U = ddp.getControlSequence()
-  V = ddp.getTotalCostSequence()
-  gradU = ddp.getConvergenceSequence()
-  cddp.plotDDPSolution(model, X, U, V, gradU)
+  J = ddp.getTotalCostSequence()
+  gamma, theta, alpha = ddp.getConvergenceSequence()
+  cddp.plotDDPConvergence(J, gamma, 1e-3*theta, alpha)
 
 if display:
   T = timeline

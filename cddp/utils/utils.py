@@ -70,7 +70,31 @@ def visualizePlan(robot, T, x0, X, frame_idx=None, path=False):
     t0 = T[k+1]
     it += 1
 
-def plotDDPSolution(model, X, U, V, gradU):
+def plotDDPConvergence(J, gamma, theta, alpha):
+  import matplotlib.pyplot as plt
+
+  plt.figure(1)
+  # Plotting the total cost sequence
+  plt.subplot(311)
+  plt.ylabel('cost')
+  plt.plot(J)
+
+  # Plotting the gradient sequence
+  plt.subplot(312)
+  plt.plot(gamma, label='gamma')
+  plt.plot(theta, label='theta')
+  plt.legend()
+  plt.ylabel('gradient')
+
+  # Plotting the alpha sequence
+  plt.subplot(313)
+  plt.ylabel('alpha')
+  ind = np.arange(len(alpha))
+  plt.bar(ind, alpha)
+  plt.xlabel('iteration')
+  plt.show()
+
+def plotDDPSolution(model, X, U):
   import matplotlib.pyplot as plt
   # Getting the joint position and commands
   q = []
@@ -83,31 +107,20 @@ def plotDDPSolution(model, X, U, V, gradU):
   plt.figure(1)
 
   # Plotting the joint position
-  plt.subplot(411)
+  plt.subplot(211)
   [plt.plot(q[i], label='q'+str(i)) for i in range(model.nq)]
+  # [plt.plot(q[i], label='q'+str(i)) for i in range(0,3)]
   plt.legend()
   plt.ylabel('rad')
 
   # Plotting the joint torques
-  plt.subplot(412)
+  plt.subplot(212)
   [plt.plot(tau[i], label='u'+str(i)) for i in range(model.nv)]
+  # [plt.plot(tau[i], label='u'+str(i)) for i in range(6,9)]
   plt.legend()
   plt.ylabel('Nm')
   plt.xlabel('knots')
-
-  # Plotting the total cost sequence
-  plt.subplot(413)
-  plt.ylabel('cost')
-  plt.plot(V)
-
-  # Plotting the gradient sequence
-  plt.subplot(414)
-  plt.plot(gradU)
-  plt.ylabel('gradient')
-  plt.xlabel('iteration')
-  # plt.subplots_adjust(hspace=0.5)
   plt.show()
-
 
 def plot(x, y, yerr=None, color=None, alpha_fill=0.3, ax=None):
   import matplotlib.pyplot as plt
@@ -123,7 +136,6 @@ def plot(x, y, yerr=None, color=None, alpha_fill=0.3, ax=None):
       ymin, ymax = yerr
     ax.fill_between(x,
       ymax.reshape(-1), ymin.reshape(-1), color=color, alpha=alpha_fill)
-
 
 def show_plot():
   import matplotlib.pyplot as plt

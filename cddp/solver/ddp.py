@@ -293,7 +293,7 @@ class DDP(object):
       self.gamma[0] += it.Qu.T * it.Qu
       self.theta[0] -= self.jt_Quu_j + self.jt_Qu
 
-    # Computing the gradient w.r.t. U={u0, ..., uN}
+    # Computing the norm of the cost gradient w.r.t. U={u0, ..., uN}
     self.gamma[0] = np.sqrt(self.gamma[0])
     return True
 
