@@ -1,13 +1,14 @@
 import unittest
 import numpy as np
-from models.simple_cost import GoalQuadraticCost, GoalResidualQuadraticCost, StateRunningQuadraticCost
+import cddp
 
 
 class QuadraticCostTest(unittest.TestCase):
   def setUp(self):
     # Defined the state and control dimensions
-    self.n = 4
-    self.m = 2
+    self.system = cddp.SpringMass(cddp.EulerIntegrator(), cddp.EulerDiscretizer())
+    self.n = self.system.getConfigurationDimension()
+    self.m = self.system.getTangentDimension()
 
     # Create random state and control values
     self.x = np.random.rand(self.n, 1)
@@ -21,11 +22,11 @@ class QuadraticCostTest(unittest.TestCase):
     self.r = np.random.rand(self.m)
 
     # Create the different cost function and them data
-    self.t_cost = GoalQuadraticCost(x_des)
+    self.t_cost = cddp.StateTerminalQuadraticCost(x_des)
     self.t_data = self.t_cost.createData(self.n)
-    self.tr_cost = GoalResidualQuadraticCost(x_des)
+    self.tr_cost = cddp.StateResidualTerminalQuadraticCost(x_des)
     self.tr_data = self.tr_cost.createData(self.n)
-    self.r_cost = StateRunningQuadraticCost(x_des)
+    self.r_cost = cddp.StateRunningQuadraticCost(x_des)
     self.r_data = self.r_cost.createData(self.n, self.m)
 
     # Set the state or control weights
@@ -36,12 +37,12 @@ class QuadraticCostTest(unittest.TestCase):
   def test_terminal_quadratic_cost_terms(self):
     # Get the quadratic cost terms
     pointer = id(self.t_data)
-    l = self.t_cost.l(self.t_data, self.x)
-    lx = self.t_cost.lx(self.t_data, self.x)
-    lxx = self.t_cost.lxx(self.t_data, self.x)
+    l = self.t_cost.l(self.system, self.t_data, self.x)
+    lx = self.t_cost.lx(self.system, self.t_data, self.x)
+    lxx = self.t_cost.lxx(self.system, self.t_data, self.x)
 
     # Compute here the quadratic cost terms for comparison
-    x = self.t_cost.xr(self.t_data, self.x)
+    x = self.t_cost.xr(self.system, self.t_data, self.x)
     Q = np.diag(self.q.reshape(-1))
     m_l = 0.5 * x.T * Q * x
     m_lx = Q * x
@@ -63,13 +64,13 @@ class QuadraticCostTest(unittest.TestCase):
   def test_terminal_residual_quadratic_cost_terms(self):
     # Get the quadratic cost terms
     pointer = id(self.tr_data)
-    l = self.tr_cost.l(self.tr_data, self.x)
-    lx = self.tr_cost.lx(self.tr_data, self.x)
-    lxx = self.tr_cost.lxx(self.tr_data, self.x)
+    l = self.tr_cost.l(self.system, self.tr_data, self.x)
+    lx = self.tr_cost.lx(self.system, self.tr_data, self.x)
+    lxx = self.tr_cost.lxx(self.system, self.tr_data, self.x)
 
     # Compute here the quadratic cost terms for comparison
-    r = self.tr_cost.r(self.tr_data, self.x)
-    rx = self.tr_cost.rx(self.tr_data, self.x)
+    r = self.tr_cost.r(self.system, self.tr_data, self.x)
+    rx = self.tr_cost.rx(self.system, self.tr_data, self.x)
     Q = np.diag(self.q.reshape(-1))
     m_l = np.asscalar(0.5 * r.T * Q * r)
     m_lx = rx.T * Q * r
@@ -93,16 +94,16 @@ class QuadraticCostTest(unittest.TestCase):
     # for the cost value and state-related derivatives; the control-related derivatives
     # are zero
     pointer = id(self.r_data)
-    l = self.r_cost.l(self.r_data, self.x, self.u)
-    lx = self.r_cost.lx(self.r_data, self.x, self.u)
-    lu = self.r_cost.lu(self.r_data, self.x, self.u)
-    lxx = self.r_cost.lxx(self.r_data, self.x, self.u)
-    luu = self.r_cost.luu(self.r_data, self.x, self.u)
-    lux = self.r_cost.lux(self.r_data, self.x, self.u)
-    m_l = self.t_cost.l(self.t_data, self.x)
-    m_lx = self.t_cost.lx(self.t_data, self.x)
+    l = self.r_cost.l(self.system, self.r_data, self.x, self.u)
+    lx = self.r_cost.lx(self.system, self.r_data, self.x, self.u)
+    lu = self.r_cost.lu(self.system, self.r_data, self.x, self.u)
+    lxx = self.r_cost.lxx(self.system, self.r_data, self.x, self.u)
+    luu = self.r_cost.luu(self.system, self.r_data, self.x, self.u)
+    lux = self.r_cost.lux(self.system, self.r_data, self.x, self.u)
+    m_l = self.t_cost.l(self.system, self.t_data, self.x)
+    m_lx = self.t_cost.lx(self.system, self.t_data, self.x)
     m_lu = np.zeros((self.m, 1))
-    m_lxx = self.t_cost.lxx(self.t_data, self.x)
+    m_lxx = self.t_cost.lxx(self.system, self.t_data, self.x)
     m_luu = np.zeros((self.m, self.m))
     m_lux = np.matrix(np.zeros((self.m, self.n)))
 

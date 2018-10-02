@@ -18,9 +18,10 @@ class XCost(object):
     pass
 
   @abc.abstractmethod
-  def l(self, data, x):
+  def l(self, system, data, x):
     """ Evaluates the terminal cost function and stores the result in data.
 
+    :param system: system
     :param data: terminal cost data
     :param x: state vector
     :returns: terminal cost
@@ -28,10 +29,11 @@ class XCost(object):
     pass
 
   @abc.abstractmethod
-  def lx(self, data, x):
+  def lx(self, system, data, x):
     """ Evaluates the Jacobian of the terminal cost function and stores the
     result in data.
 
+    :param system: system
     :param data: terminal cost data
     :param x: state vector
     :returns: Jacobian of the terminal cost
@@ -39,10 +41,11 @@ class XCost(object):
     pass
 
   @abc.abstractmethod
-  def lxx(self, data, x):
+  def lxx(self, system, data, x):
     """ Evaluates the Hessian of the terminal cost function and stores the
     result in data.
 
+    :param system: system
     :param data: terminal cost data
     :param x: state vector
     :returns: Hessian of the terminal cost
@@ -69,9 +72,10 @@ class XUCost(object):
     pass
 
   @abc.abstractmethod
-  def l(self, data, x, u):
+  def l(self, system, data, x, u):
     """ Evaluates the running cost function and stores the result in data.
 
+    :param system: system
     :param data: running cost data
     :param x: state vector
     :param u: control vector
@@ -80,10 +84,11 @@ class XUCost(object):
     pass
 
   @abc.abstractmethod
-  def lx(self, data, x, u):
+  def lx(self, system, data, x, u):
     """ Evaluates the Jacobian of the running cost function w.r.t. the state
     and stores the result in data.
 
+    :param system: system
     :param data: running cost data
     :param x: state vector
     :param u: control vector
@@ -92,10 +97,11 @@ class XUCost(object):
     pass
 
   @abc.abstractmethod
-  def lu(self, data, x, u):
+  def lu(self, system, data, x, u):
     """ Evaluates the Jacobian of the running cost function w.r.t. the control
     and stores the result in data.
 
+    :param system: system
     :param data: running cost data
     :param x: state vector
     :param u: control vector
@@ -104,10 +110,11 @@ class XUCost(object):
     pass
 
   @abc.abstractmethod
-  def lxx(self, data, x, u):
+  def lxx(self, system, data, x, u):
     """ Evaluates the Hessian of the running cost w.r.t. the state function and
     stores the result in data.
 
+    :param system: system
     :param data: running cost data
     :param x: state vector
     :param u: control vector
@@ -116,10 +123,11 @@ class XUCost(object):
     pass
 
   @abc.abstractmethod
-  def luu(self, data, x, u):
+  def luu(self, system, data, x, u):
     """ Evaluates the Hessian of the running cost function w.r.t. the control
     and stores the result in data.
 
+    :param system: system
     :param data: running cost data
     :param x: state vector
     :param u: control vector
@@ -128,10 +136,11 @@ class XUCost(object):
     pass
 
   @abc.abstractmethod
-  def lux(self, data, x, u):
+  def lux(self, system, data, x, u):
     """ Evaluates the running cost derivatives w.r.t. the control and state and
     stores the result in data.
 
+    :param system: system
     :param data: running cost data
     :param x: state vector
     :param u: control vector
@@ -154,13 +163,14 @@ class TerminalCost(XCost):
 
     :param n: dimension of the state
     """
-    from data import TerminalCostData
+    from cddp.data import TerminalCostData
     return TerminalCostData(n)
 
   @abc.abstractmethod
-  def xr(self, data, x):
+  def xr(self, system, data, x):
     """ Evaluates the residual vector and stores the result in data.
 
+    :param system: system
     :param data: terminal cost data
     :param x: state vector
     :returns: state-residual vector
@@ -195,13 +205,14 @@ class TerminalResidualCost(XCost):
 
     :param n: dimension of the state
     """
-    from data import TerminalResidualCostData
+    from cddp.data import TerminalResidualCostData
     return TerminalResidualCostData(n, self.k)
 
   @abc.abstractmethod
-  def r(self, data, x):
+  def r(self, system, data, x):
     """ Evaluates the residual vector and stores the result in data.
 
+    :param system: system
     :param data: terminal cost data
     :param x: state vector
     :returns: residual vector
@@ -209,10 +220,11 @@ class TerminalResidualCost(XCost):
     pass
 
   @abc.abstractmethod
-  def rx(self, data, x):
+  def rx(self, system, data, x):
     """ Evaluates the Jacobian of the residual vector and stores the result in
     data.
 
+    :param system: system
     :param data: terminal cost data
     :param x: state vector
     :returns: Jacobian of the residual vector
@@ -234,13 +246,14 @@ class RunningCost(XUCost):
     :param n: dimension of the state
     :param m: dimensions of the control
     """
-    from data import RunningCostData
+    from cddp.data import RunningCostData
     return RunningCostData(n, m)
 
   @abc.abstractmethod
-  def xr(self, data, x, u):
+  def xr(self, system, data, x, u):
     """ Evaluates the residual state vector and stores the result in data.
 
+    :param system: system
     :param data: running cost data
     :param x: state vector
     :param u: control vector
@@ -249,9 +262,10 @@ class RunningCost(XUCost):
     pass
 
   @abc.abstractmethod
-  def ur(self, data, x, u):
+  def ur(self, system, data, x, u):
     """ Evaluates the residual control vector and stores the result in data.
 
+    :param system: system
     :param data: running cost data
     :param x: state vector
     :param u: control vector
@@ -289,13 +303,14 @@ class RunningResidualCost(XUCost):
     :param n: dimension of the state
     :param m: dimensions of the control
     """
-    from data import RunningResidualCostData
+    from cddp.data import RunningResidualCostData
     return RunningResidualCostData(n, m, self.k)
 
   @abc.abstractmethod
-  def r(self, data, x, u):
+  def r(self, system, data, x, u):
     """ Evaluates the residual vector and stores the result in data.
 
+    :param system: system
     :param data: running cost data
     :param x: state vector
     :param u: control vector
@@ -304,10 +319,11 @@ class RunningResidualCost(XUCost):
     pass
 
   @abc.abstractmethod
-  def rx(self, data, x, u):
+  def rx(self, system, data, x, u):
     """ Evaluates the Jacobian of the residual vector w.r.t. the state and 
     stores the result in data.
 
+    :param system: system
     :param data: running cost data
     :param x: state vector
     :param u: control vector
@@ -316,10 +332,11 @@ class RunningResidualCost(XUCost):
     pass
 
   @abc.abstractmethod
-  def ru(self, data, x, u):
+  def ru(self, system, data, x, u):
     """ Evaluates the Jacobian of the residual vector w.r.t. the control and
     stores the result in data.
 
+    :param system: system
     :param data: running cost data
     :param x: state vector
     :param u: control vector

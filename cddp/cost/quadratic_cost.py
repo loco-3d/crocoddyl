@@ -1,6 +1,6 @@
-from cost import TerminalCost, RunningCost, TerminalResidualCost, RunningResidualCost
-import numpy as np
 import abc
+import numpy as np
+from cddp.cost import TerminalCost, RunningCost, TerminalResidualCost, RunningResidualCost
 
 
 class TerminalQuadraticCost(TerminalCost):
@@ -29,29 +29,29 @@ class TerminalQuadraticCost(TerminalCost):
     """
     assert q.shape > 1, "The Q weights have to be described as an array. \
       We define it as diagonal matrix."
-    assert (q > 0).all(), "The Q weights have to be positive."
+    assert (q >= 0).all(), "The Q weights have to be positive."
 
     # Setting up the weight values
     self._q = q
     self._Q = np.diag(self._q.reshape(-1))
 
-  def l(self, data, x):
+  def l(self, system, data, x):
     # The quadratic term is as follows 0.5 * xr^T Q xr. We compute it
     # efficiently by exploiting the fact thar Q is a diagonal matrix
-    xr = self.xr(data, x)
+    xr = self.xr(system, data, x)
     assert xr.shape == (data.n, 1), "The residual should have dimension \
       equals (" + str(data.n) + ",1)."
     data.l[0] = 0.5 * np.asscalar(xr.T * np.multiply(self._q[:, None], xr))
     return data.l[0]
 
-  def lx(self, data, x):
+  def lx(self, system, data, x):
     # The 1st derivative of a quadratic term is Q xr. We compute it efficiently
     # by exploiting the fact that Q is a diagonal matrix
     xr = data.xr  # for efficiency we assume that you run l() first
     np.copyto(data.lx, np.multiply(self._q[:, None], xr))
     return data.lx
 
-  def lxx(self, data, x):
+  def lxx(self, system, data, x):
     # This derivatives has a constant value (i.e Q)
     np.copyto(data.lxx, self._Q)
     return data.lxx
@@ -89,31 +89,31 @@ class TerminalResidualQuadraticCost(TerminalResidualCost):
       We define it as diagonal matrix."
     assert len(q) == self.k, "Wrong dimension of the Q array, it should be "\
       + str(self.k) + "."
-    assert (q > 0).all(), "The Q weights have to be positive."
+    assert (q >= 0).all(), "The Q weights have to be positive."
 
     # Setting up the weight values
     self._q = q
 
-  def l(self, data, x):
+  def l(self, system, data, x):
     # The quadratic term is as follows 0.5 * r^T Q r. We compute it efficiently
     # by exploiting the fact that Q is a diagonal matrix
-    r = self.r(data, x)
+    r = self.r(system, data, x)
     assert r.shape == (data.k, 1), "The residual should have dimension equals \
       (" + str(data.k) + ",1)."
     data.l[0] = 0.5 * np.asscalar(r.T * np.multiply(self._q[:, None], r))
     return data.l[0]
 
-  def lx(self, data, x):
+  def lx(self, system, data, x):
     # The 1st derivative of a quadratic term is rx^T Q r. We compute it
     # efficiently by exploiting the fact that Q is a diagonal matrix
     r = data.r  # for efficiency we assume that you run l() first
-    rx = self.rx(data, x)
+    rx = self.rx(system, data, x)
     assert rx.shape == (data.k, data.n), "The residual Jacobian should have \
       dimension equals (" + str(data.k) + "," + str(data.n) + ")."
     np.copyto(data.lx, rx.T * np.multiply(self._q[:, None], r))
     return data.lx
 
-  def lxx(self, data, x):
+  def lxx(self, system, data, x):
     # The 2nd derivative of a quadratic term is rxx^T Q r + rx^T Q rx. Note that
     # we approximate it using Gauss (i.e. neglecting the residual Hessian).
     # Additionally, we compute it efficiently by exploiting the fact that Q is
@@ -148,14 +148,14 @@ class RunningQuadraticCost(RunningCost):
     """ Define the Q and R weighting matrices.
 
     :param q: array of n elements, where n is the number of state variables
-    :param r: array of m elements, where n is the number of control variables
+    :param r: array of m elements, where m is the number of control variables
     """
     assert q.shape > 1, "The Q weights have to be described as an array. We \
       define it as diagonal matrix."
     assert r.shape > 1, "The R weights have to be described as an array. We \
       define it as diagonal matrix."
-    assert (q > 0).all(), "The Q weights have to be positive."
-    assert (r > 0).all(), "The R weights have to be positive."
+    assert (q >= 0).all(), "The Q weights have to be positive."
+    assert (r >= 0).all(), "The R weights have to be positive."
 
     # Setting up the weight values
     self._q = q
@@ -163,11 +163,11 @@ class RunningQuadraticCost(RunningCost):
     self._Q = np.diag(self._q.reshape(-1))
     self._R = np.diag(self._r.reshape(-1))
 
-  def l(self, data, x, u):
+  def l(self, system, data, x, u):
     # The quadratic term is as follows 0.5 * (xr^T Q xr + ur^T R ur). We compute
     # it efficiently by exploiting the fact thar Q is a diagonal matrix
-    xr = self.xr(data, x, u)
-    ur = self.ur(data, x, u)
+    xr = self.xr(system, data, x, u)
+    ur = self.ur(system, data, x, u)
     assert xr.shape == (data.n, 1), "The state residual should have dimension \
       equals (" + str(data.n) + ",1)."
     assert ur.shape == (data.m, 1), "The residual should have dimension equals \
@@ -176,33 +176,33 @@ class RunningQuadraticCost(RunningCost):
                        np.asscalar(ur.T * np.multiply(self._r[:, None], ur)))
     return data.l[0]
 
-  def lx(self, data, x, u):
+  def lx(self, system, data, x, u):
     # The 1st derivative of a quadratic term is Q xr. We compute it efficiently
     # by exploiting the fact thar Q is a diagonal matrix
     xr = data.xr  # for efficiency we assume that you run l() first
     np.copyto(data.lx, np.multiply(self._q[:, None], xr))
     return data.lx
 
-  def lu(self, data, x, u):
+  def lu(self, system, data, x, u):
     # The 1st derivative of a quadratic term is ru^T Q r. We compute it
     # efficiently by exploiting the fact thar Q is a diagonal matrix
     ur = data.ur  # for efficiency we assume that you run l() first
     np.copyto(data.lu, np.multiply(self._r[:, None], ur))
     return data.lu
 
-  def lxx(self, data, x, u):
+  def lxx(self, system, data, x, u):
     # The 2nd derivative of a quadratic term is Q
     np.copyto(data.lxx, self._Q)
     return data.lxx
 
-  def luu(self, data, x, u):
+  def luu(self, system, data, x, u):
     # The 2nd derivative of a quadratic term is R
     np.copyto(data.luu, self._R)
     return data.luu
 
-  def lux(self, data, x, u):
+  def lux(self, system, data, x, u):
     # This derivative is zero, so we do anything.
-    return data.luu
+    return data.lux
 
 
 class RunningResidualQuadraticCost(RunningResidualCost):
@@ -237,41 +237,41 @@ class RunningResidualQuadraticCost(RunningResidualCost):
       define it as diagonal matrix."
     assert len(q) == self.k, "Wrong dimension of the Q array, it should be " \
       + str(self.k) + "."
-    assert (q > 0).all(), "The Q weights have to be positive."
+    assert (q >= 0).all(), "The Q weights have to be positive."
 
     # Setting up the weight values
     self._q = q
 
-  def l(self, data, x, u):
+  def l(self, system, data, x, u):
     # The quadratic term is as follows 0.5 * r^T Q r. We compute it efficiently
     # by exploiting the fact thar Q is a diagonal matrix
-    r = self.r(data, x, u)
+    r = self.r(system, data, x, u)
     assert r.shape == (data.k, 1), "The residual should have dimension equals \
       (" + str(data.k) + ",1)."
     data.l[0] = 0.5 * np.asscalar(r.T * np.multiply(self._q[:, None], r))
     return data.l[0]
 
-  def lx(self, data, x, u):
+  def lx(self, system, data, x, u):
     # The 1st derivative of a quadratic term is rx^T Q r. We compute it
     # efficiently by exploiting the fact thar Q is a diagonal matrix
     r = data.r  # for efficiency we assume that you run l() first
-    rx = self.rx(data, x, u)
+    rx = self.rx(system, data, x, u)
     assert rx.shape == (data.k, data.n), "The Jacobian residual w.r.t. the \
       state should have dimension equals (" + str(data.k) + "," + str(data.n) + ")."
     np.copyto(data.lx, rx.T * np.multiply(self._q[:, None], r))
     return data.lx
 
-  def lu(self, data, x, u):
+  def lu(self, system, data, x, u):
     # The 1st derivative of a quadratic term is ru^T Q r. We compute it
     # efficiently by exploiting the fact thar Q is a diagonal matrix
     r = data.r  # for efficiency we assume that you run l() first
-    ru = self.ru(data, x, u)
+    ru = self.ru(system, data, x, u)
     assert ru.shape == (data.k, data.m), "The Jacobian residual w.r.t. the \
       control should have dimension equals (" + str(data.k) + "," + str(data.m) + ")."
     np.copyto(data.lu, ru.T * np.multiply(self._q[:, None], r))
     return data.lu
 
-  def lxx(self, data, x, u):
+  def lxx(self, system, data, x, u):
     # The 2nd derivative of a quadratic term is rxx^T Q r + rx^T Q rx. We
     # approximate it using Gauss (i.e. neglecting the residual Hessian).
     # Additionally, we compute it efficiently by exploiting the fact thar Q is
@@ -280,7 +280,7 @@ class RunningResidualQuadraticCost(RunningResidualCost):
     np.copyto(data.lxx, rx.T * np.multiply(self._q[:, None], rx))
     return data.lxx
 
-  def luu(self, data, x, u):
+  def luu(self, system, data, x, u):
     # The 2nd derivative of a quadratic term is ruu^T Q r + ru^T Q ru. We
     # approximate it using Gauss (i.e. neglecting the residual Hessian).
     # Additionally, we compute it efficiently by exploiting the fact thar Q is
@@ -289,7 +289,7 @@ class RunningResidualQuadraticCost(RunningResidualCost):
     np.copyto(data.luu, ru.T * np.multiply(self._q[:, None], ru))
     return data.luu
 
-  def lux(self, data, x, u):
+  def lux(self, system, data, x, u):
     # The 2nd derivative of a quadratic term is rux^T Q r + ru^T Q rx. We
     # approximate it using Gauss (i.e. neglecting the residual Hessian).
     # Additionally, we compute it efficiently by exploiting the fact thar Q is

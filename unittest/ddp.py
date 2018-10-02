@@ -1,35 +1,29 @@
 import unittest
 import numpy as np
-from cddp.ddp import DDP
-from cddp.cost_manager import CostManager
-from cddp.integrator import EulerIntegrator, RK4Integrator
-from models.spring_mass import SpringMass
-from models.simple_cost import GoalResidualQuadraticCost, StateControlRunningQuadraticCost
-
-
+import cddp
 
 
 plot_enable = False
-
 class LinearDDPTest(unittest.TestCase):
   def setUp(self):
     # Creating the dynamic model of the system and its integrator
-    integrator = EulerIntegrator()
-    dynamics = SpringMass(integrator)
+    integrator = cddp.EulerIntegrator()
+    discretizer = cddp.EulerDiscretizer()
+    system = cddp.SpringMass(integrator, discretizer)
 
     # Create random initial and desired state
-    x0 = np.random.rand(dynamics.getConfigurationDimension(), 1)
-    x_des = np.random.rand(dynamics.getConfigurationDimension(), 1)
+    x0 = np.random.rand(system.getConfigurationDimension(), 1)
+    x_des = np.random.rand(system.getConfigurationDimension(), 1)
     x_des[1] = 0.
 
     # Creating the cost manager and its cost functions
-    cost_manager = CostManager()
-    goal_cost = GoalResidualQuadraticCost(x_des)
-    xu_cost = StateControlRunningQuadraticCost(x_des)
+    cost_manager = cddp.CostManager()
+    goal_cost = cddp.StateResidualTerminalQuadraticCost(x_des)
+    xu_cost = cddp.StateControlRunningQuadraticCost(x_des)
 
     # Setting up the weights of the quadratic terms
-    wx = np.array([100., 100.])
-    wu = np.array([0.001])
+    wx = 100.* np.ones(system.getConfigurationDimension())
+    wu = 0.001 * np.ones(system.getControlDimension())
     goal_cost.setWeights(0.5 * wx)
     xu_cost.setWeights(wx, wu)
 
@@ -38,8 +32,8 @@ class LinearDDPTest(unittest.TestCase):
     cost_manager.addRunning(xu_cost)
 
     # Creating the DDP solver
-    timeline = np.arange(0.0, 3., 0.01)  # np.linspace(0., 0.5, 51)
-    self.ddp = DDP(dynamics, cost_manager, timeline)
+    timeline = np.arange(0.0, 3., 0.001)  # np.linspace(0., 0.5, 51)
+    self.ddp = cddp.DDP(system, cost_manager, timeline)
 
     # Running the DDP solver
     self.ddp.compute(x0)
@@ -63,7 +57,7 @@ class LinearDDPTest(unittest.TestCase):
 
   def test_improvement_ratio_equals_one(self):
     self.assertAlmostEqual(
-      np.asscalar(self.ddp.dV) / np.asscalar(self.ddp.dV_exp), 1., 2, \
+      self.ddp.z, 1., 3, \
       "The improvement ration is not equals to 1.")
 
 

@@ -1,6 +1,6 @@
-import numpy as np
 import abc
-import inspect
+import numpy as np
+from cddp.utils import assertClass
 
 
 class CostManager(object):
@@ -25,9 +25,7 @@ class CostManager(object):
 
     Before adding it, it checks if this is a terminal cost objects.
     """
-    name = cost.__class__.__name__
-    assert inspect.getmro(cost.__class__)[-2].__name__ == 'XCost', "The " + \
-      name + " class has to derived from the XCost abstract class."
+    assertClass(cost, 'XCost')
     self.terminal.append(cost)
 
   def addRunning(self, cost):
@@ -35,9 +33,7 @@ class CostManager(object):
 
     Before adding it, it checks if this is a terminal cost objects.
     """
-    name = cost.__class__.__name__
-    assert inspect.getmro(cost.__class__)[-2].__name__ == 'XUCost', "The " + \
-      name + " class has to derived from the XCost abstract class."
+    assertClass(cost, 'XUCost')
     self.running.append(cost)
 
   def createTerminalData(self, n):
@@ -46,7 +42,7 @@ class CostManager(object):
     Before creating the data, it's needed to add all the terminal costs
     of your problem.
     """
-    from data import XCostData, CostManagerData
+    from cddp.data import XCostData, CostManagerData
     data = CostManagerData()
 
     # Creating the terminal cost data, the residual data isn't needed
@@ -62,48 +58,47 @@ class CostManager(object):
     Before creating the data, it's needed to add all the running costs of your
     problem.
     """
-    from data import XUCostData, CostManagerData
+    from cddp.data import XUCostData, CostManagerData
     data = CostManagerData()
 
     # Creating the running cost data, the residual data isn't needed
     data.total = XUCostData(n, m)
-    
+
     # Creating the running stack-of-cost data
     data.soc = [cost.createData(n, m) for cost in self.running]
     return data
 
-  def computeTerminalCost(self, data, x):
+  def computeTerminalCost(self, system, data, x):
     assert self.terminal > 0, "You didn't add the terminal costs"
-    name = data.total.__class__.__name__
-    assert inspect.getmro(data.total.__class__)[-2].__name__ == 'XCostData', \
-      "The " + name + " class has to derived from the XCostData abstract class."
+    assertClass(data.total, 'XCostData')
 
     l = data.total.l[0]
     l.fill(0.)
     for k, cost in enumerate(self.terminal):
       cost_data = data.soc[k]
-      l += cost.l(cost_data, x)
+      l += cost.l(system, cost_data, x)
     return l
 
-  def computeRunningCost(self, data, x, u):
+  def computeRunningCost(self, system, data, x, u, dt):
     assert self.running > 0, "You didn't add the running costs"
-    name = data.total.__class__.__name__
-    assert inspect.getmro(data.total.__class__)[-2].__name__ == 'XUCostData', \
-      "The " + name + " class has to derived from the XUCostData abstract class."
-    
+    assertClass(data.total, 'XUCostData')
+
+    # Computing the running cost
     l = data.total.l[0]
     l.fill(0.)
     for k, cost in enumerate(self.running):
       cost_data = data.soc[k]
-      l += cost.l(cost_data, x, u)
+      l += cost.l(system, cost_data, x, u)
+
+    # Numerical integration of the cost function
+    # TODO we need to use the quadrature class for this
+    l *= dt
     return l
 
-  def computeTerminalTerms(self, data, x):
+  def computeTerminalTerms(self, system, data, x):
     assert self.terminal > 0, "You didn't add the terminal costs"
-    name = data.total.__class__.__name__
-    assert inspect.getmro(data.total.__class__)[-2].__name__ == 'XCostData', \
-      "The " + name + " class has to derived from the XCostData abstract class."
-    
+    assertClass(data.total, 'XCostData')
+
     l = data.total.l[0]
     lx = data.total.lx
     lxx = data.total.lxx
@@ -112,17 +107,16 @@ class CostManager(object):
     lxx.fill(0.)
     for k, cost in enumerate(self.terminal):
       cost_data = data.soc[k]
-      l += cost.l(cost_data, x)
-      lx += cost.lx(cost_data, x)
-      lxx += cost.lxx(cost_data, x)
+      l += cost.l(system, cost_data, x)
+      lx += cost.lx(system, cost_data, x)
+      lxx += cost.lxx(system, cost_data, x)
     return l, lx, lxx
 
-  def computeRunningTerms(self, data, x, u):
+  def computeRunningTerms(self, system, data, x, u, dt):
     assert self.running > 0, "You didn't add the running costs"
-    name = data.total.__class__.__name__
-    assert inspect.getmro(data.total.__class__)[-2].__name__ == 'XUCostData', \
-      "The " + name + " class has to derived from the XUCostData abstract class."
-    
+    assertClass(data.total, 'XUCostData')
+
+    # Computing the cost and its derivatives
     l = data.total.l[0]
     lx = data.total.lx
     lu = data.total.lu
@@ -137,29 +131,20 @@ class CostManager(object):
     lux.fill(0.)
     for k, cost in enumerate(self.running):
       cost_data = data.soc[k]
-      l += cost.l(cost_data, x, u)
-      lx += cost.lx(cost_data, x, u)
-      lu += cost.lu(cost_data, x, u)
-      lxx += cost.lxx(cost_data, x, u)
-      luu += cost.luu(cost_data, x, u)
-      lux += cost.lux(cost_data, x, u)
+      l += cost.l(system, cost_data, x, u)
+      lx += cost.lx(system, cost_data, x, u)
+      lu += cost.lu(system, cost_data, x, u)
+      lxx += cost.lxx(system, cost_data, x, u)
+      luu += cost.luu(system, cost_data, x, u)
+      lux += cost.lux(system, cost_data, x, u)
+
+    # Numerical integration of the cost function and its derivatives
+    # TODO we need to use the quadrature class for this
+    l *= dt
+    lx *= dt
+    lu *= dt
+    lxx *= dt
+    luu *= dt
+    lux *= dt
+
     return l, lx, lu, lxx, luu, lux
-
-  # def lx(self, data, x):
-  #     lx = data.total.lx
-  #     lx.fill(0.)
-
-  #     for k, cost in enumerate(self.terminal):
-  #             cost_data = data.terminal[k]
-  #         cost_value += cost.l(cost_data, x)
-  #     data.total.l[0] = cost_value
-  #     return cost_value
-
-  # @abc.abstractmethod
-  # def computeFinalCost(self, t, x): pass
-
-  # @abc.abstractmethod
-  # def computeAllTerms(self, t, x, u): pass
-
-  # @abc.abstractmethod
-  # def computeFinalTerms(self, t, x): pass
