@@ -21,8 +21,8 @@ model = robot.model
 # system = cddp.NumDiffForwardDynamics(model)
 # system = cddp.NumDiffSparseForwardDynamics(model)
 system = cddp.SparseForwardDynamics(model)
-# x0 = np.zeros((system.getConfigurationDimension(), 1))
-# x0[:system.robot.nq] = np.matrix([ 0.173046, 1., -0.525366, 0., 0., 0.1,-0.005]).T
+
+# Initial state
 q0 = np.matrix([ 0.173046, 1., -0.525366, 0., 0., 0.1,-0.005]).T
 v0 = np.zeros((system.getTangentDimension(), 1))
 x0 = np.vstack([q0, v0])
@@ -60,6 +60,7 @@ ddp.setFromConfigFile(filename + "/arm_config.yaml")
 
 # Solving the problem
 ddp.compute(x0)
+
 
 # Printing the final goal
 frame_idx = model.getFrameId(frame_name)

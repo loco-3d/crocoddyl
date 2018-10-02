@@ -21,7 +21,11 @@ urdf = path + 'robots/hyq_no_sensors.urdf'
 # Getting the robot model from the URDF file
 robot = se3.robot_wrapper.RobotWrapper(urdf, path, se3.JointModelFreeFlyer())
 model = robot.model
+
+# Creating the system model
 system = cddp.NumDiffSparseConstrainedForwardDynamics(model)
+
+# Initial state
 q0 = robot.q0
 q0[7] = -0.2*0.
 q0[7+1] = 0.75
@@ -35,16 +39,9 @@ q0[7+8] = -1.5
 q0[7+9] = -0.2*0.
 q0[7+10] = -0.75
 q0[7+11] = 1.5
-
 v0 = np.zeros((system.getTangentDimension(), 1))
 u0 = np.zeros((system.getTangentDimension(), 1))
 x0 = np.vstack([q0, v0])
-
-data = system.createData()
-system.g(data, q0, v0, u0)
-
-
-
 
 
 # Defining the SE3 task
