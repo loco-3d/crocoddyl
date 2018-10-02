@@ -74,11 +74,6 @@ class DDP(object):
     self.sqrt_eps = np.sqrt(self.eps)
 
     # Setting up default solver properties
-    self.setProperties()
-
-  def setProperties(self):
-    """ Sets the properties of the DDP solver.
-    """
     # Convergence tolerance and maximum number of iterations
     self.tol = 1e-5
     self.max_iter = 20
@@ -107,6 +102,38 @@ class DDP(object):
     self.gamma_itr = [0.] * self.max_iter
     self.theta_itr = [0.] * self.max_iter
     self.alpha_itr = [0.] * self.max_iter
+
+  def setFromConfigFile(self, config_file):
+    """ Sets the properties of the DDP solver from a YAML file.
+
+    :param config_file: YAML configuration file
+    """
+    # Reading the YAML file
+    import yaml
+    with open(config_file, 'r') as stream:
+      data = yaml.load(stream)
+      # Setting up stop criteria
+      self.tol = float(data['ddp']['stop_criteria']['tol'])
+      self.max_iter = int(data['ddp']['stop_criteria']['max_iter'])
+      
+      # Resizing the global variables for analysing solver performance
+      self.J_itr = [0.] * self.max_iter
+      self.gamma_itr = [0.] * self.max_iter
+      self.theta_itr = [0.] * self.max_iter
+      self.alpha_itr = [0.] * self.max_iter
+
+      # Setting up regularization
+      self.mu0LM = float(data['ddp']['regularization']['levenberg_marquard']['mu0'])
+      self.muLM_inc = float(data['ddp']['regularization']['levenberg_marquard']['inc_rate'])
+      self.muLM_dec = float(data['ddp']['regularization']['levenberg_marquard']['dec_rate'])
+      self.mu0V = float(data['ddp']['regularization']['value_function']['mu0'])
+      self.muV_inc = float(data['ddp']['regularization']['value_function']['inc_rate'])
+      self.muV_dec = float(data['ddp']['regularization']['value_function']['dec_rate'])
+
+      # Setting up line search
+      self.alpha_min = float(data['ddp']['line_search']['min_stepsize'])
+      self.alpha_inc = float(data['ddp']['line_search']['inc_rate'])
+      self.alpha_dec = float(data['ddp']['line_search']['dec_rate'])
 
   def compute(self, x0, U=None):
     """ Computes the DDP algorithm.
@@ -145,6 +172,7 @@ class DDP(object):
         else:
           self.muLM *= self.muLM_inc
         print "\t", ("Quu isn't positive. Increasing muLM to", self.muLM)
+      print "\t","\t", "--------------------------------------------------Expected Reduction:", -np.asscalar(self.gamma)
       # Running the forward pass
       while not self.forwardPass(self.alpha):
         self.alpha *= self.alpha_dec
@@ -339,7 +367,9 @@ class DDP(object):
 
     # Checking the changes
     self.dV[0] = self.V - self.V_exp
+    # print "--------------------------------------cost reduction", self.V[0,0], self.dV[0,0]
     self.z = np.asscalar(self.dV) / np.asscalar(self.dV_exp)
+#    print "--------------------------------------------------------z", self.z
     if self.z > self.change_lb and self.z < self.change_ub:
       # Accepting the new trajectory and control, defining them as nominal ones
       for k in range(self.N):
@@ -452,3 +482,37 @@ class DDP(object):
       self.U_opt[k] = self.intervals[k].u_new
       self.Uff_opt[k] = self.intervals[k].j
       self.Ufb_opt[k] = self.intervals[k].K
+
+
+
+
+  # def computeGradientNumerically(self):
+  #   # pass
+  #   self.numdiff_gradU = []
+  #   m = self.system.getControlDimension()
+  #   dt = 1e-3 #TODO read from timeline
+
+  #   sdata = self.system.createData()
+  #   for k in range(self.N):
+  #     gradU = np.matrix(np.zeros((m,1)))
+  #     u = self.U_opt[k]
+  #     x = self.X_opt[k]
+  #     cdata = self.cost_manager.createRunningData(sdata.ndx, sdata.m)
+  #     cost = \
+  #       self.cost_manager.computeRunningCost(self.system, cdata, x, u).copy() * dt
+  #     for i in range(m):
+  #       u_pert = u.copy()
+  #       u_pert[i] += self.sqrt_eps
+  #       # print u_pert.T
+  #       x_pert = self.system.stepForward(sdata, x, u_pert, dt).copy()
+  #       # print (x_pert-x).T
+  #       cost_pert = \
+  #         self.cost_manager.computeRunningCost(self.system, cdata, x_pert.copy(), u_pert.copy()).copy() * dt
+  #       gradU[i] = (cost_pert.copy() - cost) / self.sqrt_eps
+  #       # print cost, cost_pert, self.intervals[k].cost.total.l * dt
+  #     print gradU.T
+  #     # print self.intervals[k].Qxx, self.intervals[k].Qux, self.intervals[k].Quu
+  #     print self.intervals[k].Qu.T
+  #     print
+  #     print
+  #     self.numdiff_gradU.append(gradU)

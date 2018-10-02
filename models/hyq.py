@@ -1,6 +1,7 @@
 import cddp
 import numpy as np
 import pinocchio as se3
+import os
 
 
 np.set_printoptions(linewidth=400, suppress=True, threshold=np.nan)
@@ -12,9 +13,9 @@ plot = True
 # Reading the URDF file from hyq-description inside our repository
 # Note that it redefines the ROS_PACKAGE_PATH in order to be able to find the
 # meshes for the Gepetto viewer
-import os
-os.environ['ROS_PACKAGE_PATH'] = str(os.path.dirname(os.path.abspath(__file__)))
-path = str(os.path.dirname(os.path.abspath(__file__))) + '/hyq_description/'
+filename = str(os.path.dirname(os.path.abspath(__file__)))
+os.environ['ROS_PACKAGE_PATH'] = filename
+path = filename + '/hyq_description/'
 urdf = path + 'robots/hyq_no_sensors.urdf'
 
 # Getting the robot model from the URDF file
@@ -78,6 +79,9 @@ cost_manager.addTerminal(se3_tcost)
 # Setting up the DDP problem
 timeline = np.arange(0.0, 0.25, 1e-3)  # np.linspace(0., 0.5, 51)
 ddp = cddp.DDP(system, cost_manager, timeline, cddp.DDPDebug(robot))
+
+# Configuration the solver from YAML file
+ddp.setFromConfigFile(filename + "/hyq_config.yaml")
 
 # Solving the problem
 ddp.compute(x0)

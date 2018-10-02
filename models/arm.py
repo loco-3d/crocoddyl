@@ -1,6 +1,7 @@
 import cddp
 import numpy as np
 import pinocchio as se3
+import os
 
 
 np.set_printoptions(linewidth=400, suppress=True, threshold=np.nan)
@@ -12,6 +13,7 @@ constraint = False
 
 # Creating the system model
 import rospkg
+filename = str(os.path.dirname(os.path.abspath(__file__)))
 path = rospkg.RosPack().get_path('talos_data')
 urdf = path + '/robots/talos_left_arm.urdf'
 robot = se3.robot_wrapper.RobotWrapper(urdf, path)
@@ -52,6 +54,9 @@ cost_manager.addTerminal(se3_tcost)
 # Setting up the DDP problem
 timeline = np.arange(0.0, 0.25, 1e-3)  # np.linspace(0., 0.5, 51)
 ddp = cddp.DDP(system, cost_manager, timeline, cddp.DDPDebug(robot))
+
+# Configuration the solver from YAML file
+ddp.setFromConfigFile(filename + "/arm_config.yaml")
 
 # Solving the problem
 ddp.compute(x0)
