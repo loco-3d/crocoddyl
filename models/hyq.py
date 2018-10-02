@@ -9,10 +9,15 @@ display = True
 plot = True
 
 
-# Creating the system model
-import rospkg
-path = rospkg.RosPack().get_path('hyq_description')
-urdf = path + '/robots/hyq.urdf'
+# Reading the URDF file from hyq-description inside our repository
+# Note that it redefines the ROS_PACKAGE_PATH in order to be able to find the
+# meshes for the Gepetto viewer
+import os
+os.environ['ROS_PACKAGE_PATH'] = str(os.path.dirname(os.path.abspath(__file__)))
+path = str(os.path.dirname(os.path.abspath(__file__))) + '/hyq_description/'
+urdf = path + 'robots/hyq_no_sensors.urdf'
+
+# Getting the robot model from the URDF file
 robot = se3.robot_wrapper.RobotWrapper(urdf, path, se3.JointModelFreeFlyer())
 model = robot.model
 system = cddp.NumDiffSparseConstrainedForwardDynamics(model)
