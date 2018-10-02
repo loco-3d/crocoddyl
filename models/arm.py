@@ -65,7 +65,7 @@ ddp.compute(x0)
 # Printing the final goal
 frame_idx = model.getFrameId(frame_name)
 xf = ddp.intervals[-1].x
-qf = xf[:7]
+qf = xf[:model.nq]
 print robot.framePosition(qf, frame_idx)
 
 # ddp.computeGradientNumerically()
