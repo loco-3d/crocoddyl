@@ -170,7 +170,8 @@ class RK4Discretizer(Discretizer):
     :param dt: sampling period
     :returns: discrete time state and control derivatives
     """
-    # Computing four stages of RK4
+    # Computing four stages of RK4. It assumes that an unique linear model for
+    # all the RK nodes (TODO: check if this is a good assumption)
     system.f(data, x, u)
     system.fx(data, x, u)
     system.fu(data, x, u)

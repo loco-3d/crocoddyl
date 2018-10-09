@@ -87,7 +87,7 @@ class EulerIntegrator(Integrator):
     :param nq: dimension of the configuration manifold
     :param nv: dimension of the tangent space of the configuration manifold
     """
-    self.x_next = np.matrix(np.zeros((nq, 1)))
+    # No extra data needs to be created
 
   def __call__(self, system, data, x, u, dt):
     """ Integrate the system dynamics using the forward Euler scheme.
@@ -99,9 +99,9 @@ class EulerIntegrator(Integrator):
     :param dt: sampling period
     :returns: next state vector
     """
-    np.copyto(self.x_next,
-             system.advanceConfiguration(x.copy(), dt * system.f(data, x, u)))
-    return self.x_next
+    np.copyto(data.f,
+             system.advanceConfiguration(x, dt * system.f(data, x, u)))
+    return data.f
 
 
 class GeometricEulerIntegrator(GeometricIntegrator):
@@ -112,8 +112,7 @@ class GeometricEulerIntegrator(GeometricIntegrator):
     :param nq: dimension of the configuration manifold
     :param nv: dimension of the tangent space of the configuration manifold
     """
-    # Data for integration
-    self.x_next = np.matrix(np.zeros((nq + nv, 1)))
+    # No extra data needs to be created
 
   def __call__(self, system, data, q, v, tau, dt):
     """ Integrate the system dynamics using the forward Euler scheme.
@@ -126,10 +125,10 @@ class GeometricEulerIntegrator(GeometricIntegrator):
     :param dt: sampling period
     :returns: next state vector
     """
-    self.x_next[data.nq:] = v + system.g(data, q, v, tau) * dt
-    self.x_next[:data.nq] = \
-      system.advanceConfiguration(q.copy(), self.x_next[data.nq:] * dt)
-    return self.x_next
+    data.f[data.nq:] = v + system.g(data, q, v, tau) * dt
+    data.f[:data.nq] = \
+      system.advanceConfiguration(q, data.f[data.nq:] * dt)
+    return data.f
 
 
 class RK4Integrator(Integrator):
@@ -140,7 +139,6 @@ class RK4Integrator(Integrator):
     :param nq: dimension of the configuration manifold
     :param nv: dimension of the tangent space of the configuration manifold
     """
-    self.x_next = np.matrix(np.zeros((nq, 1)))
     self.k1 = np.matrix(np.zeros((nv, 1)))
     self.k2 = np.matrix(np.zeros((nv, 1)))
     self.k3 = np.matrix(np.zeros((nv, 1)))
@@ -158,12 +156,12 @@ class RK4Integrator(Integrator):
     :returns: next state vector
     """
     np.copyto(self.k1, dt * system.f(data, x, u))
-    np.copyto(self.k2, dt * system.f(data, system.advanceConfiguration(x.copy(), 0.5 * self.k1), u))
-    np.copyto(self.k3, dt * system.f(data, system.advanceConfiguration(x.copy(), 0.5 * self.k2), u))
-    np.copyto(self.k4, dt * system.f(data, system.advanceConfiguration(x.copy(), self.k3), u))
+    np.copyto(self.k2, dt * system.f(data, system.advanceConfiguration(x, 0.5 * self.k1), u))
+    np.copyto(self.k3, dt * system.f(data, system.advanceConfiguration(x, 0.5 * self.k2), u))
+    np.copyto(self.k4, dt * system.f(data, system.advanceConfiguration(x, self.k3), u))
     np.copyto(self.sum_k, 1. / 6 * (self.k1 + 2. * self.k2 + 2. * self.k3 + self.k4))
-    np.copyto(self.x_next, system.advanceConfiguration(x.copy(), self.sum_k))
-    return self.x_next
+    np.copyto(data.f, system.advanceConfiguration(x, self.sum_k))
+    return data.f
 
 
 def computeFlow(integrator, system, data, timeline, x, controls):
@@ -174,6 +172,6 @@ def computeFlow(integrator, system, data, timeline, x, controls):
     dt = timeline[k+1] - timeline[k]
     t = timeline[k]
     control = controls[k]
-    x_flow[k+1] = integrator.integrate(model, data, t, x_flow[k], control, dt)
+    x_flow[k+1] = integrator.integrate(system, data, t, x_flow[k], control, dt)
 
   return x_flow
