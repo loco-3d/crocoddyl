@@ -32,6 +32,10 @@ class NumDiffForwardDynamics(NumDiffDynamicalSystem):
     discretizer = EulerDiscretizer()
     NumDiffDynamicalSystem.__init__(self, nq, nv, m, integrator, discretizer)
 
+    # Internal data for operators
+    self._x = np.matrix(np.zeros((nq,1)))
+    self._v = np.matrix(np.zeros((nv,1)))
+
   def f(self, data, x, u):
     """ Compute the forward dynamics through ABA and store it the result in
     data.
@@ -56,9 +60,9 @@ class NumDiffForwardDynamics(NumDiffDynamicalSystem):
     """
     q = x[:self._model.nq]
     dq = dx[:self._model.nv]
-    x[:self._model.nq] = se3.integrate(self._model, q, dq)
-    x[self._model.nq:] += dx[self._model.nv:]
-    return x
+    self._x[:self._model.nq] = se3.integrate(self._model, q, dq)
+    self._x[self._model.nq:] = x[self._model.nq:] + dx[self._model.nv:]
+    return self._x
 
   def differenceConfiguration(self, x_next, x_curr):
     """ Operator that differentiates the configuration state.
@@ -68,9 +72,9 @@ class NumDiffForwardDynamics(NumDiffDynamicalSystem):
     """
     q_next = x_next[:self._model.nq]
     q_curr = x_curr[:self._model.nq]
-    dq = se3.difference(self._model, q_curr, q_next)
-    dv = x_next[self._model.nq:] - x_curr[self._model.nq:]
-    return np.vstack([dq, dv])
+    self._v[:self._model.nv] = se3.difference(self._model, q_curr, q_next)
+    self._v[self._model.nv:] = x_next[self._model.nq:] - x_curr[self._model.nq:]
+    return self._v
 
 
 class NumDiffSparseForwardDynamics(NumDiffGeometricDynamicalSystem):
@@ -102,6 +106,10 @@ class NumDiffSparseForwardDynamics(NumDiffGeometricDynamicalSystem):
     discretizer = GeometricEulerDiscretizer()
     NumDiffGeometricDynamicalSystem.__init__(self, nq, nv, m, integrator, discretizer)
 
+    # Internal data for operators
+    self._q = np.matrix(np.zeros((self.nq,1)))
+    self._v = np.matrix(np.zeros((2*self.nv,1)))
+
   def g(self, data, q, v, tau):
     """ Compute the forward dynamics through ABA and store it the result in
     data.
@@ -122,7 +130,8 @@ class NumDiffSparseForwardDynamics(NumDiffGeometricDynamicalSystem):
     :param dq: joint configuration displacement
     :returns: the next configuration point
     """
-    return se3.integrate(self._model, q, dq)
+    np.copyto(self._q, se3.integrate(self._model, q, dq))
+    return self._q
 
   def differenceConfiguration(self, x_next, x_curr):
     """ Operator that differentiates the configuration state.
@@ -132,9 +141,9 @@ class NumDiffSparseForwardDynamics(NumDiffGeometricDynamicalSystem):
     """
     q_next = x_next[:self.nq]
     q_curr = x_curr[:self.nq]
-    dq = se3.difference(self._model, q_curr, q_next)
-    dv = x_next[self.nq:] - x_curr[self.nq:]
-    return np.vstack([dq, dv])
+    self._v[:self.nv] = se3.difference(self._model, q_curr, q_next)
+    self._v[self.nv:] = x_next[self.nq:] - x_curr[self.nq:]
+    return self._v
 
 
 class SparseForwardDynamics(GeometricDynamicalSystem):
@@ -164,6 +173,10 @@ class SparseForwardDynamics(GeometricDynamicalSystem):
     integrator = GeometricEulerIntegrator()
     discretizer = GeometricEulerDiscretizer()
     GeometricDynamicalSystem.__init__(self, nq, nv, m, integrator, discretizer)
+
+    # Internal data for operators
+    self._q = np.matrix(np.zeros((self.nq,1)))
+    self._v = np.matrix(np.zeros((2*self.nv,1)))
 
   def g(self, data, q, v, tau):
     """ Compute the ABA and its derivatives and store the ABA result in data.
@@ -220,7 +233,8 @@ class SparseForwardDynamics(GeometricDynamicalSystem):
     :param dq: joint configuration displacement
     :returns: the next configuration point
     """
-    return se3.integrate(self._model, q, dq)
+    np.copyto(self._q, se3.integrate(self._model, q, dq))
+    return self._q
 
   def differenceConfiguration(self, x_next, x_curr):
     """ Operator that differentiates the configuration state.
@@ -228,8 +242,8 @@ class SparseForwardDynamics(GeometricDynamicalSystem):
     :param x_next: next joint configuration and velocity [q_next, v_next]
     :param x_curr: current joint configuration and velocity [q_curr, v_curr]
     """
-    q_next = x_next[:self._model.nq]
-    q_curr = x_curr[:self._model.nq]
-    dq = se3.difference(self._model, q_curr, q_next)
-    dv = x_next[self._model.nq:] - x_curr[self._model.nq:]
-    return np.vstack([dq, dv])
+    q_next = x_next[:self.nq]
+    q_curr = x_curr[:self.nq]
+    self._v[:self.nv] = se3.difference(self._model, q_curr, q_next)
+    self._v[self.nv:] = x_next[self.nq:] - x_curr[self.nq:]
+    return self._v
