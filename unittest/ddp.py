@@ -131,7 +131,7 @@ class LinearDDPTest(unittest.TestCase):
 
   def test_improvement_ratio_equals_one(self):
     self.assertAlmostEqual(
-      self.ddp.z, 1., 3, \
+      self.ddp.z, 1., 2, \
       "The improvement ration is not equals to 1.")
 
 
