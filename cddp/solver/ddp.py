@@ -332,14 +332,6 @@ class DDP(object):
     :param alpha: scaling factor of open-loop control modification (line-search
     strategy)
     """
-    # Checking if the expected improvement is lower than the Armijo condition
-    if np.asscalar(-self.dV_exp) < self.armijo_condition:
-      # If the expected improvement is lower than Armijo condition, then 
-      # we assume that the convergence is reached. TODO: study if we can apply
-      # a regularization scheme here (is this usefull?)
-      self._convergence = True
-      return True
-
     # Initializing the forward pass with the initial state
     it = self.initial_interval
     it.x_new = it.x.copy()
