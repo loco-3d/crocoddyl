@@ -56,6 +56,7 @@ class DDP(object):
 
     # Global variables for the DDP algorithm
     self.z = 0.
+    self.z_new = 0.
     self.V_exp = np.matrix(np.zeros(1)) # Backward-pass Value function at t0
     self.V = np.matrix(np.zeros(1)) # Forward-pass Value function at t0
     self.dV_exp = np.matrix(np.zeros(1)) # Expected total cost reduction given alpha
@@ -368,10 +369,10 @@ class DDP(object):
 
     # Checking the changes
     self.dV[0] = self.V - self.V_exp
-    # print "--------------------------------------cost reduction", self.V[0,0], self.dV[0,0]
-    self.z = np.asscalar(self.dV) / np.asscalar(self.dV_exp)
-#    print "--------------------------------------------------------z", self.z
-    if self.z > self.armijo_condition and self.z < self.change_ub:
+    self.z_new = np.asscalar(self.dV) / np.asscalar(self.dV_exp)
+    if self.z_new > self.armijo_condition and self.z_new < self.change_ub:
+      self.z = self.z_new
+
       # Accepting the new trajectory and control, defining them as nominal ones
       for k in range(self.N):
         it = self.intervals[k]
