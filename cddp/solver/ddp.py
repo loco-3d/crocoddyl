@@ -82,7 +82,7 @@ class DDP(object):
     self.muV = 0.
     self.muLM = 0.
     self.mu0V = 0.
-    self.mu0LM = 1e-8
+    self.mu0LM = 0.
     self.muV_inc = 10.
     self.muV_dec = 0.5
     self.muLM_inc = 10.
