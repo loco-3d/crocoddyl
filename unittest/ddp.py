@@ -4,8 +4,6 @@ import cddp
 
 
 plot_enable = False
-
-plot_enable = True
 class LinearDDPTest(unittest.TestCase):
   def setUp(self):
     # Creating the dynamic model of the system and its integrator
