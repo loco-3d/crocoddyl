@@ -201,6 +201,12 @@ class DDP(object):
       if self.muLM < self.eps: # this is full Newton direction
         self.muLM = self.eps
 
+      # This regularization smooth the policy updates. Experimentally it helps
+      # to reduce the number of iteration whenever the problem isn't well posed
+      self.muV *= self.muV_dec
+      if self.muV < self.eps:
+        self.muV = self.eps
+
       # Increasing the stepsize for the next iteration
       self.alpha *= self.alpha_inc
       if self.alpha > 1.:
