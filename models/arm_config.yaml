@@ -15,3 +15,4 @@ ddp:
     min_stepsize: 1e-3
     inc_rate: 2.
     dec_rate: 0.5
+    armijo_condition: 1e-3

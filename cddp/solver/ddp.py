@@ -56,6 +56,7 @@ class DDP(object):
 
     # Global variables for the DDP algorithm
     self.z = 0.
+    self.z_new = 0.
     self.V_exp = np.matrix(np.zeros(1)) # Backward-pass Value function at t0
     self.V = np.matrix(np.zeros(1)) # Forward-pass Value function at t0
     self.dV_exp = np.matrix(np.zeros(1)) # Expected total cost reduction given alpha
@@ -82,7 +83,7 @@ class DDP(object):
     self.muV = 0.
     self.muLM = 0.
     self.mu0V = 0.
-    self.mu0LM = 1e-8
+    self.mu0LM = 0.
     self.muV_inc = 10.
     self.muV_dec = 0.5
     self.muLM_inc = 10.
@@ -94,7 +95,7 @@ class DDP(object):
     self.alpha_inc = 2.
     self.alpha_dec = 0.5
     self.alpha_min = 1e-3
-    self.change_lb = 0.
+    self.armijo_condition = 1e-3
     self.change_ub = 100.
 
     # Global variables for analysing solver performance
@@ -134,6 +135,7 @@ class DDP(object):
       self.alpha_min = float(data['ddp']['line_search']['min_stepsize'])
       self.alpha_inc = float(data['ddp']['line_search']['inc_rate'])
       self.alpha_dec = float(data['ddp']['line_search']['dec_rate'])
+      self.armijo_condition = float(data['ddp']['line_search']['armijo_condition'])
 
   def compute(self, x0, U=None):
     """ Computes the DDP algorithm.
@@ -198,6 +200,12 @@ class DDP(object):
       self.muLM *= self.muLM_dec
       if self.muLM < self.eps: # this is full Newton direction
         self.muLM = self.eps
+
+      # This regularization smooth the policy updates. Experimentally it helps
+      # to reduce the number of iteration whenever the problem isn't well posed
+      self.muV *= self.muV_dec
+      if self.muV < self.eps:
+        self.muV = self.eps
 
       # Increasing the stepsize for the next iteration
       self.alpha *= self.alpha_inc
@@ -367,10 +375,10 @@ class DDP(object):
 
     # Checking the changes
     self.dV[0] = self.V - self.V_exp
-    # print "--------------------------------------cost reduction", self.V[0,0], self.dV[0,0]
-    self.z = np.asscalar(self.dV) / np.asscalar(self.dV_exp)
-#    print "--------------------------------------------------------z", self.z
-    if self.z > self.change_lb and self.z < self.change_ub:
+    self.z_new = np.asscalar(self.dV) / np.asscalar(self.dV_exp)
+    if self.z_new > self.armijo_condition and self.z_new < self.change_ub:
+      self.z = self.z_new
+
       # Accepting the new trajectory and control, defining them as nominal ones
       for k in range(self.N):
         it = self.intervals[k]

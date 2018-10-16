@@ -41,6 +41,9 @@ class NumDiffSparseConstrainedForwardDynamics(NumDiffGeometricDynamicalSystem):
     self.J = np.matrix(np.zeros((self.nc * len(self.contact_set), self._model.nv)))
     self.gamma = np.matrix(np.zeros((self.nc * len(self.contact_set), 1)))
 
+    # Internal data for operators
+    self._q = np.matrix(np.zeros((self.nq,1)))
+    self._v = np.matrix(np.zeros((2*self.nv,1)))
 
   def g(self, data, q, v, tau):
     """ Compute the forward dynamics given a constrained contact set and store
@@ -93,7 +96,8 @@ class NumDiffSparseConstrainedForwardDynamics(NumDiffGeometricDynamicalSystem):
     :param dq: configuration point displacement
     :returns: the next configuration point
     """
-    return se3.integrate(self._model, q, dq)
+    np.copyto(self._q, se3.integrate(self._model, q, dq))
+    return self._q
 
   def differenceConfiguration(self, x_next, x_curr):
     """ Operator that differentiates the configuration state.
@@ -101,8 +105,8 @@ class NumDiffSparseConstrainedForwardDynamics(NumDiffGeometricDynamicalSystem):
     :param x_next: next joint configuration and velocity [q_next, v_next]
     :param x_curr: current joint configuration and velocity [q_curr, v_curr]
     """
-    q_next = x_next[:self._model.nq]
-    q_curr = x_curr[:self._model.nq]
-    dq = se3.difference(self._model, q_curr, q_next)
-    dv = x_next[self._model.nq:] - x_curr[self._model.nq:]
-    return np.vstack([dq, dv])
+    q_next = x_next[:self.nq]
+    q_curr = x_curr[:self.nq]
+    self._v[:self.nv] = se3.difference(self._model, q_curr, q_next)
+    self._v[self.nv:] = x_next[self.nq:] - x_curr[self.nq:]
+    return self._v
