@@ -56,18 +56,25 @@ x0 = np.vstack([q0, v0])
 
 # Defining the SE3 task
 frame_name = 'base_link'
-M_des = cddp.tasks.SE3(np.eye(3), np.array([ [0.1], [0.], [0.] ]))
-se3_rcost = cddp.SE3RunningCost(model, frame_name, M_des)
+M_des = se3.SE3(np.eye(3), np.array([ [0.1], [0.], [0.] ]))
+"""
+se3_rcost = cddp.tasks.multibody_tasks.SE3RunningCost(model, frame_name, M_des)
 se3_tcost = cddp.SE3TerminalCost(model, frame_name, M_des)
 w_se3 = np.array([1., 1., 1., 1., 1., 1.])
 se3_rcost.setWeights(1000*w_se3)
 se3_tcost.setWeights(1000*w_se3)
+"""
+w_se3 = np.array([1., 1., 1., 1., 1., 1.])
+se3_rcost = cddp.costs.multibody_dynamics.SE3Cost(M_des, 1000.*w_se3, frame_name)
+se3_tcost = cddp.costs.multibody_dynamics.SE3Cost(M_des, 1000.*w_se3, frame_name)
+#se3_rcost.setWeights(1000*w_se3)
+#se3_tcost.setWeights(1000*w_se3)
 
 # Defining the CoM task
 com_des = np.matrix([ [0.1], [0.], [0.] ])
-com_cost = cddp.CoMRunningCost(model, com_des)
 w_com = 1000.*np.array([1., 1., 1.])
-com_cost.setWeights(w_com)
+com_cost = cddp.costs.multibody_dynamics.CoMCost(com_des, w_com)
+#com_cost.setWeights(w_com)
 
 
 # Defining the velocity and control regularization
