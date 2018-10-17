@@ -128,6 +128,17 @@ class LinearDDPTest(unittest.TestCase):
       self.ddp.z, 1., 2, \
       "The improvement ration is not equals to 1.")
 
+  def test_regularization_in_backward_pass(self):
+    # Backward-pass without regularization
+    self.ddp.backwardPass(0., 0., 1.)
+    Vxx = self.ddp.intervals[-1].Vxx.copy()
+    # Backward-pass with regularization
+    mu = np.random.random_sample()
+    self.ddp.backwardPass(mu, 0., 1.)
+    Vxx_reg = self.ddp.intervals[-1].Vxx.copy()
+    self.assertTrue(np.allclose(Vxx, Vxx_reg),
+                        "Regularization doesn't affect the terminal Vxx.")
+
 
 if __name__ == '__main__':
   unittest.main()
