@@ -56,7 +56,7 @@ timeline = np.arange(0.0, 0.25, 1e-3)  # np.linspace(0., 0.5, 51)
 ddp = cddp.DDP(system, cost_manager, timeline, cddp.DDPDebug(robot))
 
 # Configuration the solver from YAML file
-ddp.setFromConfigFile(filename + "/arm_config.yaml")
+ddp.setFromConfigFile(filename + "/talos_arm_config.yaml")
 
 # Solving the problem
 ddp.compute(x0)
