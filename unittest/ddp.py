@@ -3,7 +3,6 @@ import numpy as np
 import cddp
 
 
-plot_enable = False
 class LinearDDPTest(unittest.TestCase):
   def setUp(self):
     # Creating the dynamic model of the system and its integrator
@@ -12,7 +11,7 @@ class LinearDDPTest(unittest.TestCase):
     system = cddp.SpringMass(integrator, discretizer)
 
     # Create random initial and desired state
-    x0 = np.random.rand(system.getConfigurationDimension(), 1)
+    self.x0 = np.random.rand(system.getConfigurationDimension(), 1)
     x_des = np.random.rand(system.getConfigurationDimension(), 1)
     x_des[1] = 0.
 
@@ -35,19 +34,10 @@ class LinearDDPTest(unittest.TestCase):
     timeline = np.arange(0.0, 0.5, 0.001)  # np.linspace(0., 0.5, 51)
     self.ddp = cddp.DDP(system, cost_manager, timeline)
 
-    # Running the DDP solver
-    self.ddp.compute(x0)
-
-    if plot_enable:
-      import cddp.utils as utils
-      t = timeline[1:-1]
-      x = np.asarray([np.asscalar(k.x[0]) for k in self.ddp.intervals[0:-2]])
-      u = np.asarray([np.asscalar(k.u[0]) for k in self.ddp.intervals[0:-2]])
-      utils.plot(t, x)
-      utils.plot(t, 0.001*u)
-      utils.show_plot()
-
   def test_against_kkt_solution(self):
+    # Running the DDP solver
+    self.ddp.compute(self.x0)
+
     # Creating the variables of the KKT problem
     n = self.ddp.intervals[0].system.ndx
     m = self.ddp.intervals[0].system.m
@@ -59,7 +49,7 @@ class LinearDDPTest(unittest.TestCase):
 
     # Running a backward-pass in order to update the derivatives of the
     # DDP solution (no regularization and full Newton step)
-    self.ddp.backwardPass(0.,0.,1.)
+    self.ddp.backwardPass(0., 0., 1.)
 
     # Building the KKT matrix and vector given the cost and dynamics derivatives
     # from the DDP backward-pass
@@ -85,14 +75,14 @@ class LinearDDPTest(unittest.TestCase):
       gradJ[k*(n+m):(k+1)*(n+m)] = np.block([ [lx],[lu] ])
       hessL[k*(n+m):(k+1)*(n+m),k*(n+m):(k+1)*(n+m)] = \
         np.block([ [lxx, lux.T],[lux, luu] ])
-    
+
     # Updating the terms given the terminal state
     G[N*n:(N+1)*n] = f
     gradG[N*(n+m):(N+1)*(n+m), N*n:(N+1)*n] = fx.T
     gradJ[N*(n+m):(N+1)*(n+m)] = lx
     hessL[N*(n+m):(N+1)*(n+m), N*(n+m):(N+1)*(n+m)] = \
       self.ddp.terminal_interval.cost.total.lxx
-    
+
     # Computing the KKT matrix and vector
     kkt_mat = np.block([ [hessL,gradG],[gradG.T, np.zeros((N*n+n,N*n+n))] ])
     kkt_vec = np.block([ [gradJ],[G] ])
@@ -120,14 +110,20 @@ class LinearDDPTest(unittest.TestCase):
       #   "Control KKT solution at " + str(i) + " is not the same.")
 
   def test_positive_expected_improvement(self):
+    # Running the DDP solver
+    self.ddp.compute(self.x0)
     self.assertGreater(-self.ddp.dV_exp, 0.,
                        "The expected improvement is not positive.")
 
   def test_positive_obtained_improvement(self):
+    # Running the DDP solver
+    self.ddp.compute(self.x0)
     self.assertGreater(-self.ddp.dV, 0.,
                        "The obtained improvement is not positive.")
 
   def test_improvement_ratio_equals_one(self):
+    # Running the DDP solver
+    self.ddp.compute(self.x0)
     self.assertAlmostEqual(
       self.ddp.z, 1., 2, \
       "The improvement ration is not equals to 1.")
