@@ -78,10 +78,11 @@ com_cost = cddp.costs.multibody_dynamics.CoMCost(com_des, w_com)
 
 
 # Defining the velocity and control regularization
-xu_reg = cddp.StateControlQuadraticRegularization()
 wx = 1e-4 * np.hstack([ np.zeros(model.nv), np.ones(model.nv) ])
-wu = 1e-4 * np.ones(system.getControlDimension())
-xu_reg.setWeights(wx, wu)
+wu = 1e-4 * np.ones(robot.nv)
+
+x_cost = cddp.costs.multibody_dynamics.StateCost(x0, wx)
+u_cost = cddp.costs.multibody_dynamics.ControlCost(u0, wu)
 
 # Adding the cost functions to the cost manager
 cost_manager = cddp.CostManager(ddpDynamics)
