@@ -1,3 +1,6 @@
 [submodule "models/hyq_description"]
 	path = models/hyq_description
 	url = git@github.com:robot-locomotion/hyq-description.git
+[submodule "models/talos_data"]
+	path = models/talos_data
+	url = git@gepgitlab.laas.fr:cmastall/talos_data.git
