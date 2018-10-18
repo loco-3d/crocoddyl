@@ -85,7 +85,7 @@ x_cost = cddp.costs.multibody_dynamics.StateCost(x0, wx)
 u_cost = cddp.costs.multibody_dynamics.ControlCost(u0, wu)
 
 # Adding the cost functions to the cost manager
-costManager = cddp.cost_manager.CostManager()
+costManager = cddp.cost_manager.FloatingBaseMultibodyDynamicsCostManager()
 costManager.addRunning(x_cost)
 costManager.addRunning(u_cost)
 costManager.addRunning(se3_rcost)
@@ -95,9 +95,9 @@ costManager.addRunning(com_cost)
 # Setting up the DDP problem
 timeline = np.arange(0.0, 0.25, 1e-3)  # np.linspace(0., 0.5, 51)
 
-ddpModel = cddp.solver.DDPModel(ddpDynamics, ddpIntegrator,
+ddpModel = cddp.ddp_model.DDPModel(ddpDynamics, ddpIntegrator,
                                 ddpDiscretizer, costManager)
-ddpData = ddpModel.createData()
+ddpData = cddp.ddp_model.DDPData(ddpModel, timeline)
 
 # Configuration the solver from YAML file
 solverParams = cddp.solver.SolverParams()
@@ -105,7 +105,8 @@ solverParams.setFromConfigFile(filename + "/hyq_config.yaml")
 
 # Solving the problem
 #ddp.compute(x0)
-ddpData.solve(ddpModel, ddpData, solverParams, initValue)
+cddp.Solver.setInitial(ddpModel, ddpData, xInit=x0, UInit=u0)
+cddp.Solver.solve(ddpModel, ddpData, solverParams)
 
 # Printing the final goal
 frame_idx = model.getFrameId(frame_name)
