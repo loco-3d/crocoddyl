@@ -26,13 +26,13 @@ contact_indices = [robot.model.getFrameId("lf_foot"),
                    robot.model.getFrameId("rf_foot"),
                    robot.model.getFrameId("rh_foot")]
 contactPhase0 = cddp.multiphase.Phase(contact_indices, 0.,np.inf)
-contactInfo = cddp.multiphase.Multiphase([contactPhase0])
+contactInfo = cddp.multiphase.Multiphase([contactPhase0], 3)
 
 # Create the ddp dynamics
 ddpDynamics = cddp.dynamics.FloatingBaseMultibodyDynamics(robot.model, contactInfo)
 
 # Create the integration and dynamics derivatives schemes.
-ddpIntegrator = cddp.system.integrator.EulerIntegrator(ddpDynamics)
+ddpIntegrator = cddp.system.integrator.FloatingBaseMultibodyEulerIntegrator()
 ddpDiscretizer = cddp.system.discretizer.EulerDiscretizer(ddpDynamics)
 
 # Initial state
@@ -50,7 +50,7 @@ q0[7+9] = -0.2*0.
 q0[7+10] = -0.75
 q0[7+11] = 1.5
 v0 = np.zeros((robot.model.nv, 1))
-u0 = np.zeros((robot.model.nv, 1))
+u0 = np.zeros((robot.model.nv-6, 1))
 x0 = np.vstack([q0, v0])
 
 
@@ -64,28 +64,28 @@ w_se3 = np.array([1., 1., 1., 1., 1., 1.])
 se3_rcost.setWeights(1000*w_se3)
 se3_tcost.setWeights(1000*w_se3)
 """
-w_se3 = np.array([1., 1., 1., 1., 1., 1.])
-se3_rcost = cddp.costs.multibody_dynamics.SE3Cost(M_des, 1000.*w_se3, frame_name)
-se3_tcost = cddp.costs.multibody_dynamics.SE3Cost(M_des, 1000.*w_se3, frame_name)
+w_se3 = np.ones((6,1))
+se3_rcost = cddp.costs.multibody_dynamics.SE3Cost(ddpDynamics, M_des, 1000.*w_se3, frame_name)
+se3_tcost = cddp.costs.multibody_dynamics.SE3Cost(ddpDynamics, M_des, 1000.*w_se3, frame_name)
 #se3_rcost.setWeights(1000*w_se3)
 #se3_tcost.setWeights(1000*w_se3)
 
 # Defining the CoM task
 com_des = np.matrix([ [0.1], [0.], [0.] ])
-w_com = 1000.*np.array([1., 1., 1.])
-com_cost = cddp.costs.multibody_dynamics.CoMCost(com_des, w_com)
+w_com = 1000.*np.ones((3,1))
+com_cost = cddp.costs.multibody_dynamics.CoMCost(ddpDynamics, com_des, w_com)
 #com_cost.setWeights(w_com)
 
 
 # Defining the velocity and control regularization
-wx = 1e-4 * np.hstack([ np.zeros(model.nv), np.ones(model.nv) ])
-wu = 1e-4 * np.ones(robot.nv)
+wx = 1e-4 * np.vstack([ np.zeros((model.nv,1)), np.ones((model.nv,1)) ])
+wu = 1e-4 * np.ones((robot.nv-6,1))
 
-x_cost = cddp.costs.multibody_dynamics.StateCost(x0, wx)
-u_cost = cddp.costs.multibody_dynamics.ControlCost(u0, wu)
+x_cost = cddp.costs.multibody_dynamics.StateCost(ddpDynamics, x0, wx)
+u_cost = cddp.costs.multibody_dynamics.ControlCost(ddpDynamics, u0, wu)
 
 # Adding the cost functions to the cost manager
-costManager = cddp.cost_manager.FloatingBaseMultibodyDynamicsCostManager()
+costManager = cddp.cost_manager.FloatingBaseMultibodyCostManager()
 costManager.addRunning(x_cost)
 costManager.addRunning(u_cost)
 costManager.addRunning(se3_rcost)
@@ -96,7 +96,7 @@ costManager.addRunning(com_cost)
 timeline = np.arange(0.0, 0.25, 1e-3)  # np.linspace(0., 0.5, 51)
 
 ddpModel = cddp.ddp_model.DDPModel(ddpDynamics, ddpIntegrator,
-                                ddpDiscretizer, costManager)
+                                   ddpDiscretizer, costManager)
 ddpData = cddp.ddp_model.DDPData(ddpModel, timeline)
 
 # Configuration the solver from YAML file

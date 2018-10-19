@@ -15,3 +15,7 @@ class AbstractCurve(object):
 
   def tmax(self):
     return self.t_max
+
+  @abc.abstractmethod
+  def dim(self):
+    pass 

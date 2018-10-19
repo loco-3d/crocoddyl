@@ -6,36 +6,31 @@ class DDPIntervalDataBase(object):
   __metaclass__=abc.ABCMeta
 
   def __init__(self, ddpModel):
-    self.dynamicsData = ddpModel.dynamicsModel.createIntervalData()
-    self.costData = ddpModel.costManager.createIntervalData()
-    #self.systemData = ddpModel.createIntervalData()
+    self.ddpModel = ddpModel
 
-    self.x = np.empty((ddpModel.dynamicsModel.nx(), 1))
-    self.u = np.empty((ddpModel.dynamicsModel.nu(), 1))
+  @abc.abstractmethod
+  def forwardCalc(self):
+    pass
 
-    self.t0 = -1.
-    self.tf = -1.
-
-  def dynamicsIntegration(self):
-    """Performes the dynamics integration to generate the state and control functions"""
-    self.dynamicsData.integrate();
-    self.costData.stepCost();
-  
 
 class TerminalDDPData(DDPIntervalDataBase):
   """ Data structure for the terminal interval of the DDP.
 
   We create data for the nominal and new state values.
   """
-  def __init__(self, ddp_model):
-    DDPIntervalDataBase.__init__(self, ddp_model)
+  def __init__(self, ddpModel, tFinal):
+    DDPIntervalDataBase.__init__(self, ddpModel)
+    self.tFinal = tFinal
+    
+    self.dynamicsData = ddpModel.dynamicsModel.createIntervalData(tFinal)
+    self.costData = ddpModel.costManager.createRunningIntervalData()
 
-    # Nominal and new state on the interval
-    #self.x = np.matrix(np.zeros((self.system.nx, 1)))
-    #self.x_new = np.matrix(np.zeros((self.system.nx, 1)))
 
-    # Time of the terminal interval
-    #self.t = np.matrix(np.zeros(1))
+  def forwardCalc(self):
+    """Performes the dynamics integration to generate the state and control functions"""
+    self.dynamicsData.forwardTerminalCalc()
+    self.costData.forwardTerminalCalc(self.ddpModel.dynamicsModel, self.dynamicsData);
+    pass
    
 class RunningDDPData(DDPIntervalDataBase):
   """ Data structure for the running interval of the DDP.
@@ -43,20 +38,22 @@ class RunningDDPData(DDPIntervalDataBase):
   We create data for the nominal and new state and control values. Additionally,
   this data structure contains regularized terms too (e.g. Quu_r).
   """
-  def __init__(self, ddp_model):
-    DDPIntervalDataBase.__init__(self, ddp_model)
+
+  def __init__(self, ddpModel, tInit, tFinal):
+    DDPIntervalDataBase.__init__(self, ddpModel)
+
+    self.tInit = tInit
+    self.tFinal = tFinal
+
+    self.dt = self.tFinal-self.tInit
+
+    self.dynamicsData = ddpModel.dynamicsModel.createIntervalData(tInit)
+    self.costData = ddpModel.costManager.createRunningIntervalData()
     
-    # Nominal and new state on the interval
-    #self.x = np.matrix(np.zeros((self.system.nx, 1)))
-    #self.x_new = np.matrix(np.zeros((self.system.nx, 1)))
-
-    # Nominal and new control command on the interval
-    #self.u = np.matrix(np.zeros((self.system.m, 1)))
-    #self.u_new = np.matrix(np.zeros((self.system.m, 1)))
-
-    # Starting and final time on the interval
-    #self.t0 = np.matrix(np.zeros(1))
-    #self.tf = np.matrix(np.zeros(1))
+  def forwardCalc(self):
+    """Performes the dynamics integration to generate the state and control functions"""
+    self.dynamicsData.forwardRunningCalc()
+    self.costData.forwardRunningCalc(self.ddpModel.dynamicsModel, self.dynamicsData);
 
     # Feedback and feedforward terms
     #self.K = np.matrix(np.zeros((self.system.m, self.system.ndx)))

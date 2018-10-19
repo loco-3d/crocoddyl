@@ -14,6 +14,11 @@ class DynamicsModelBase(object):
   @abc.abstractmethod
   def nx(self):
     pass
+
+  @abc.abstractmethod
+  def nxImpl(self):
+    pass
+  
   @abc.abstractmethod
   def nu(self):
     pass

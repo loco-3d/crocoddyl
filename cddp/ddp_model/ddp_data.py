@@ -12,5 +12,9 @@ class DDPData(object):
     self.timeline = timeline
     self.ddpModel = ddp_model
     self.N = len(timeline) - 1
-    self.intervals = [RunningDDPData(ddp_model) for i in xrange(self.N)]
-    self.intervals.append(TerminalDDPData(ddp_model))
+    self.intervalDataVector = [RunningDDPData(ddp_model, timeline[i], timeline[i+1])
+                               for i in xrange(self.N)]
+    self.intervalDataVector.append(TerminalDDPData(ddp_model, timeline[-1]))
+
+    #Run time variables
+    self._convergence = False

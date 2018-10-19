@@ -5,7 +5,7 @@ class DynamicsDataBase(object):
   __metaclass__=abc.ABCMeta
 
   @abc.abstractmethod  
-  def __init__(self, ddp_model):
+  def __init__(self, dynamicsmodel):
     pass
 
   @abc.abstractmethod

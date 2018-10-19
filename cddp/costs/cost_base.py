@@ -1,18 +1,26 @@
 import abc
+import numpy as np
 
 class CostBase(object):
-  """Base class for defining costs dependent on multibody dynamics"""
+  """Base class for defining costs."""
 
   __metaclass__=abc.ABCMeta
   
-  @abc.abstractmethod
-  def __init__(self, ref, weight):
+  def __init__(self, dynamicsModel, ref, weight):
+    self.dynamicsModel = dynamicsModel
     self.ref = ref
     self.weight = weight
+    self.dim = -1
+
+    self.l = 0.
+    pass
+
+  @abc.abstractmethod
+  def forwardRunningCalc(self, dynamicsData):
     pass
 
 class QuadraticCostBase(CostBase):
-  """This abstract class creates a quadratic terminal cost of the form:
+  """This abstract class creates a quadratic cost of the form:
   0.5 xr^T Q xr.
 
   An important remark here is that the state residual (i.e. xr) depends linearly
@@ -25,7 +33,13 @@ class QuadraticCostBase(CostBase):
   computation, we assume that compute first l (or lx) whenever you want
   to compute lx (or lxx)."""
 
-  @abc.abstractmethod
-  def __init__(self,ref,weight):
-    CostBase.__init__(self, ref,weight)
+  __metaclass__=abc.ABCMeta
+
+  def __init__(self,dynamicsModel, ref,weight):
+    CostBase.__init__(self, dynamicsModel, ref,weight)
     pass
+
+  def getl(self):
+    # The quadratic term is as follows 0.5 * xr^T Q xr. We compute it
+    # efficiently by exploiting the fact thar Q is a diagonal matrix
+    return 0.5 * np.asscalar(np.dot(self._r.T, np.multiply(self.weight, self._r)))

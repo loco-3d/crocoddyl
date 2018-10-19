@@ -6,7 +6,11 @@ class Phase(AbstractCurve):
     AbstractCurve.__init__(self,tmin, tmax)
 
     self.indices = indices
-
+    self._dim = len(indices)
+    
   def __call__(self, t):
-    assert(t>=self.tmin() and t<=tmax())
-    return indices
+    assert(t>=self.tmin() and t<=self.tmax())
+    return self.indices
+
+  def dim(self, t):
+    return self._dim

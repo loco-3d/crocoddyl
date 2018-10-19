@@ -2,15 +2,27 @@ import numpy as np
 from cost_manager_base import CostManagerBase
 from cost_manager_base import CostManagerIntervalDataBase
 
-class FloatingBaseMultibodyDynamicsCostManagerIntervalData(CostManagerIntervalDataBase):
+class FloatingBaseMultibodyCostManagerIntervalData(CostManagerIntervalDataBase):
   """ Calculates and stores the interval specific cost terms.
   Depends on integrator and dynamics.
   """
-  def __init__(self, costManager):
+  def __init__(self, costsVector):
+    self.costsVector = costsVector
+    self.l = 0.
     pass
 
+  def forwardRunningCalc(self, dynamicsModel, dynamicsData):
+    for cost in self.costsVector:
+      cost.forwardRunningCalc(dynamicsData)
+      self.l += cost.getl()
+
+  def forwardTerminalCalc(self, dynamicsModel, dynamicsData):
+    for cost in self.costsVector:
+      cost.forwardTerminalCalc(dynamicsData)
+      self.l += cost.getl()      
+    
   
-class FloatingBaseMultibodyDynamicsCostManager(CostManagerBase):
+class FloatingBaseMultibodyCostManager(CostManagerBase):
   """ It computes the total cost and its derivatives for a set of running and
   terminal costs.
 
@@ -22,12 +34,11 @@ class FloatingBaseMultibodyDynamicsCostManager(CostManagerBase):
   running and terminal cost functions of your problem.
   """
 
-  def __init__(self):
-    self.terminal = []
-    self.running = []
+  def createRunningIntervalData(self):
+    return FloatingBaseMultibodyCostManagerIntervalData(self.runningCosts)
 
-  def createIntervalData(self):
-    return FloatingBaseMultibodyDynamicsCostManagerIntervalData(self)
+  def createTerminalIntervalData(self):
+    return FloatingBaseMultibodyCostManagerIntervalData(self.terminalCosts)
 
   def addTerminal(self, cost):
     """ Add a terminal cost object to the cost manager.
@@ -35,7 +46,7 @@ class FloatingBaseMultibodyDynamicsCostManager(CostManagerBase):
     Before adding it, it checks if this is a terminal cost objects.
     """
     #assertClass(cost, 'XCost')
-    self.terminal.append(cost)
+    self.terminalCosts.append(cost)
 
   def addRunning(self, cost):
     """ Add a running cost object to the cost manager.
@@ -43,7 +54,7 @@ class FloatingBaseMultibodyDynamicsCostManager(CostManagerBase):
     Before adding it, it checks if this is a terminal cost objects.
     """
     #assertClass(cost, 'XUCost')
-    self.running.append(cost)
+    self.runningCosts.append(cost)
 
   def createTerminalData(self, n):
     """ Creates the data of the stack of terminal costs.
@@ -58,7 +69,7 @@ class FloatingBaseMultibodyDynamicsCostManager(CostManagerBase):
     data.total = XCostData(n)
 
     # Creating the terminal stack-of-cost data
-    data.soc = [cost.createData(n) for cost in self.terminal]
+    data.soc = [cost.createData(n) for cost in self.terminalCosts]
     return data
 
   def createRunningData(self, n, m):
@@ -74,28 +85,28 @@ class FloatingBaseMultibodyDynamicsCostManager(CostManagerBase):
     data.total = XUCostData(n, m)
 
     # Creating the running stack-of-cost data
-    data.soc = [cost.createData(n, m) for cost in self.running]
+    data.soc = [cost.createData(n, m) for cost in self.runningCosts]
     return data
 
   def computeTerminalCost(self, system, data, x):
-    assert self.terminal > 0, "You didn't add the terminal costs"
+    assert self.terminalCosts > 0, "You didn't add the terminal costs"
     #assertClass(data.total, 'XCostData')
 
     l = data.total.l[0]
     l.fill(0.)
-    for k, cost in enumerate(self.terminal):
+    for k, cost in enumerate(self.terminalCosts):
       cost_data = data.soc[k]
       l += cost.l(system, cost_data, x)
     return l
 
   def computeRunningCost(self, system, data, x, u, dt):
-    assert self.running > 0, "You didn't add the running costs"
+    assert self.runningCosts > 0, "You didn't add the runningCosts costs"
     #assertClass(data.total, 'XUCostData')
 
     # Computing the running cost
     l = data.total.l[0]
     l.fill(0.)
-    for k, cost in enumerate(self.running):
+    for k, cost in enumerate(self.runningCosts):
       cost_data = data.soc[k]
       l += cost.l(system, cost_data, x, u)
 
@@ -105,7 +116,7 @@ class FloatingBaseMultibodyDynamicsCostManager(CostManagerBase):
     return l
 
   def computeTerminalTerms(self, system, data, x):
-    assert self.terminal > 0, "You didn't add the terminal costs"
+    assert self.terminalCosts > 0, "You didn't add the terminal costs"
     #assertClass(data.total, 'XCostData')
 
     l = data.total.l[0]
@@ -114,7 +125,7 @@ class FloatingBaseMultibodyDynamicsCostManager(CostManagerBase):
     l.fill(0.)
     lx.fill(0.)
     lxx.fill(0.)
-    for k, cost in enumerate(self.terminal):
+    for k, cost in enumerate(self.terminalCosts):
       cost_data = data.soc[k]
       l += cost.l(system, cost_data, x)
       lx += cost.lx(system, cost_data, x)
@@ -122,7 +133,7 @@ class FloatingBaseMultibodyDynamicsCostManager(CostManagerBase):
     return l, lx, lxx
 
   def computeRunningTerms(self, system, data, x, u, dt):
-    assert self.running > 0, "You didn't add the running costs"
+    assert self.runningCosts > 0, "You didn't add the running costs"
     #assertClass(data.total, 'XUCostData')
 
     # Computing the cost and its derivatives
@@ -138,7 +149,7 @@ class FloatingBaseMultibodyDynamicsCostManager(CostManagerBase):
     lxx.fill(0.)
     luu.fill(0.)
     lux.fill(0.)
-    for k, cost in enumerate(self.running):
+    for k, cost in enumerate(self.runningCosts):
       cost_data = data.soc[k]
       l += cost.l(system, cost_data, x, u)
       lx += cost.lx(system, cost_data, x, u)
