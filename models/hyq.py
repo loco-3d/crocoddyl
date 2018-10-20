@@ -33,7 +33,7 @@ ddpDynamics = cddp.dynamics.FloatingBaseMultibodyDynamics(robot.model, contactIn
 
 # Create the integration and dynamics derivatives schemes.
 ddpIntegrator = cddp.system.integrator.FloatingBaseMultibodyEulerIntegrator()
-ddpDiscretizer = cddp.system.discretizer.EulerDiscretizer(ddpDynamics)
+ddpDiscretizer = cddp.system.discretizer.FloatingBaseMultibodyEulerDiscretizer()
 
 # Initial state
 q0 = robot.q0
@@ -85,7 +85,7 @@ x_cost = cddp.costs.multibody_dynamics.StateCost(ddpDynamics, x0, wx)
 u_cost = cddp.costs.multibody_dynamics.ControlCost(ddpDynamics, u0, wu)
 
 # Adding the cost functions to the cost manager
-costManager = cddp.cost_manager.FloatingBaseMultibodyCostManager()
+costManager = cddp.cost_manager.FloatingBaseMultibodyCostManager(ddpDynamics)
 costManager.addRunning(x_cost)
 costManager.addRunning(u_cost)
 costManager.addRunning(se3_rcost)

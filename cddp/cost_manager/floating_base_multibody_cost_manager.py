@@ -6,22 +6,53 @@ class FloatingBaseMultibodyCostManagerIntervalData(CostManagerIntervalDataBase):
   """ Calculates and stores the interval specific cost terms.
   Depends on integrator and dynamics.
   """
-  def __init__(self, costsVector):
+  def __init__(self, dynamicsModel, costsVector):
     self.costsVector = costsVector
     self.l = 0.
-    pass
+    self.lx = np.empty((dynamicsModel.nx(),1))
+    self.lu = np.empty((dynamicsModel.nu(),1))
+    self.lxx = np.empty((dynamicsModel.nx(),dynamicsModel.nx()))
+    self.lux = np.empty((dynamicsModel.nu(),dynamicsModel.nx()))
+    self.luu = np.empty((dynamicsModel.nu(),dynamicsModel.nu()))
+    return
 
   def forwardRunningCalc(self, dynamicsModel, dynamicsData):
+    self.l = 0.
     for cost in self.costsVector:
       cost.forwardRunningCalc(dynamicsData)
       self.l += cost.getl()
 
   def forwardTerminalCalc(self, dynamicsModel, dynamicsData):
+    self.l = 0.
     for cost in self.costsVector:
       cost.forwardTerminalCalc(dynamicsData)
-      self.l += cost.getl()      
-    
+      self.l += cost.getl()
+
+  def backwardRunningCalc(self, dynamicsModel, dynamicsData):
+    self.lx.fill(0.)
+    self.lu.fill(0.)
+    self.lxx.fill(0.)
+    self.lux.fill(0.)
+    self.luu.fill(0.)    
+    for cost in self.costsVector:
+      cost.backwardRunningCalc(dynamicsData)
+      self.lx += cost.getlx()
+      self.lu += cost.getlu()
+      self.lxx += cost.getlxx()
+      self.lux += cost.getlux()
+      self.luu += cost.getluu()
+    return
   
+  def backwardTerminalCalc(self,dynamicsModel, dynamicsData):
+    self.lx.fill(0.)
+    self.lxx.fill(0.)
+    for cost in self.costsVector:
+      cost.backwardTerminalCalc(dynamicsData)
+      self.lx += cost.getlx()
+      self.lxx += cost.getlxx()
+    return
+
+      
 class FloatingBaseMultibodyCostManager(CostManagerBase):
   """ It computes the total cost and its derivatives for a set of running and
   terminal costs.
@@ -35,10 +66,10 @@ class FloatingBaseMultibodyCostManager(CostManagerBase):
   """
 
   def createRunningIntervalData(self):
-    return FloatingBaseMultibodyCostManagerIntervalData(self.runningCosts)
+    return FloatingBaseMultibodyCostManagerIntervalData(self.dynamicsModel,self.runningCosts)
 
   def createTerminalIntervalData(self):
-    return FloatingBaseMultibodyCostManagerIntervalData(self.terminalCosts)
+    return FloatingBaseMultibodyCostManagerIntervalData(self.dynamicsModel,self.terminalCosts)
 
   def addTerminal(self, cost):
     """ Add a terminal cost object to the cost manager.

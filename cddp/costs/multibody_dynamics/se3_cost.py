@@ -22,3 +22,26 @@ class SE3Cost(QuadraticCostBase):
 
   def forwardTerminalCalc(self,dynamicsData):
     self.forwardRunningCalc(dynamicsData)
+
+  def backwardRunningCalc(self, dynamicsData):
+    self._rx = se3.getFrameJacobian(self.dynamicsModel.pinocchioModel,
+                                    self.dynamicsData.pinocchioData,
+                                    self._ee_index,se3.ReferenceFrame.WORLD)
+
+  def backwardTerminalCalc(self, dynamicsData):
+    self.backwardRunningCalc(dynamicsData)
+
+  def getlux(self):
+    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nx()))
+  
+  def getluu(self):
+    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nu()))
+
+  def getlgg(self):
+    return np.zeros((self.dynamicsModel.dimConstraint, self.dynamicsModel.dimConstraint))
+
+  def getlg(self):
+    return np.zeros((self.dynamicsModel.dimConstraint, 1))
+
+  def getlu(self):
+    return np.zeros((self.dynamicsModel.nu(),1))

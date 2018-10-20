@@ -20,7 +20,8 @@ class CostManagerBase(object):
 
   __metaclass__=abc.ABCMeta
 
-  def __init__(self):
+  def __init__(self,dynamicsModel):
+    self.dynamicsModel = dynamicsModel
     self.runningCosts = []
     self.terminalCosts = []
     pass

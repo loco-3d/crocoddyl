@@ -3,6 +3,7 @@ from cddp.dynamics.dynamics_data_base import DynamicsDataBase
 import pinocchio as se3
 import numpy as np
 
+
 class FloatingBaseMultibodyDynamicsData(DynamicsDataBase):
   def __init__(self, dynamicsModel, t):
     DynamicsDataBase.__init__(self, dynamicsModel)
@@ -12,11 +13,33 @@ class FloatingBaseMultibodyDynamicsData(DynamicsDataBase):
     self.dimConstraint = dynamicsModel.contactInfo.nc*dynamicsModel.contactInfo.dim(t)
     self.contactJ = np.empty((self.dimConstraint,dynamicsModel.nv()))
     self.gamma = np.empty((self.dimConstraint, 1))
+    self._contactFrameIndices = dynamicsModel.contactInfo(t)
 
+    self.MJtJc = np.zeros((dynamicsModel.nv()+self.dimConstraint,
+                           dynamicsModel.nv()+self.dimConstraint))
+    self.MJtJc_inv = np.zeros((dynamicsModel.nv()+self.dimConstraint,
+                               dynamicsModel.nv()+self.dimConstraint))
+    self.MJtJc_inv_L = np.empty((dynamicsModel.nv()+self.dimConstraint,
+                                 dynamicsModel.nv()+self.dimConstraint))
+    
     self.x = np.empty((dynamicsModel.nxImpl(), 1))
     self.u = np.empty((dynamicsModel.nu(), 1))
-    
-    self._contactFrameIndices = dynamicsModel.contactInfo(t)
+
+    self.aq = np.empty((dynamicsModel.nv(), dynamicsModel.nv())) #derivative of ddq wrt q
+    self.av = np.empty((dynamicsModel.nv(), dynamicsModel.nv())) #derivative of ddq wrt v
+
+    self.gq = np.empty((self.dimConstraint, dynamicsModel.nv())) #derivative of lambda wrt q
+    self.gv = np.empty((self.dimConstraint, dynamicsModel.nv())) #derivative of lambda wrt v
+
+    self.fx = np.empty((dynamicsModel.nx(), dynamicsModel.nx()))
+    self.fu = np.empty((dynamicsModel.nx(), dynamicsModel.nu()))
+
+    self.gx = np.empty((self.dimConstraint, dynamicsModel.nx()))
+    self.gu = np.empty((self.dimConstraint, dynamicsModel.nu()))
+
+    #TODO: remove these when replacing with analytical derivatives
+    self.q_pert = np.empty((dynamicsModel.nq(), 1))
+    self.v_pert = np.empty((dynamicsModel.nv(), 1))
 
   def computeAllTerms(self):
     self.pinocchioData.computeAllTerms(x, u)
@@ -49,6 +72,102 @@ class FloatingBaseMultibodyDynamicsData(DynamicsDataBase):
     se3.computeAllTerms(self.pinocchioModel, self.pinocchioData,
                         self.x[:self.dynamicsModel.nq()],self.x[self.dynamicsModel.nq():])
     se3.updateFramePlacements(self.pinocchioModel, self.pinocchioData)
+    return
+
+  def f(self, q, v, u):
+    se3.computeAllTerms(self.pinocchioModel, self.pinocchioData,q,v)
+    se3.updateFramePlacements(self.pinocchioModel, self.pinocchioData)
+
+    # Update the Joint jacobian and gamma
+    for k, cs in enumerate(self._contactFrameIndices):
+      self.contactJ[self.dynamicsModel.contactInfo.nc*k:
+                    self.dynamicsModel.contactInfo.nc*(k+1),:]=\
+        se3.getFrameJacobian(self.pinocchioModel,
+                             self.pinocchioData, cs,
+                             se3.ReferenceFrame.LOCAL)[:self.dynamicsModel.contactInfo.nc,:]
+    #TODO gamma
+    self.gamma.fill(0.)
+
+    se3.forwardDynamics(self.dynamicsModel.pinocchioModel,
+                        self.pinocchioData,q,v, np.vstack([np.zeros((6,1)),self.u]),
+                        self.contactJ, self.gamma, 1e-8, False)
+    return
+  
+  def backwardRunningCalc(self):
+    #TODO: Replace with analytical derivatives
+
+    for i in xrange(self.dynamicsModel.nv()):
+      self.aq[:,i] = -self.pinocchioData.ddq
+      self.av[:,i] = -self.pinocchioData.ddq
+      self.gq[:,i] = -self.pinocchioData.lambda_c
+      self.gv[:,i] = -self.pinocchioData.lambda_c
+
+    self.MJtJc[:self.dynamicsModel.nv(),:self.dynamicsModel.nv()] = self.pinocchioData.M
+    self.MJtJc[:self.dynamicsModel.nv(),self.dynamicsModel.nv():] = self.contactJ.T
+    self.MJtJc[self.dynamicsModel.nv():,:self.dynamicsModel.nv()] = self.contactJ
+
+    np.fill_diagonal(self.MJtJc, self.MJtJc.diagonal()+eps)
+    self.MJtJc_inv_L = np.linalg.inv(np.linalg.cholesky(self.MJtJc))
+    self.MJtJc_inv = np.dot(self.MJtJc_inv_L.T, self.MJtJc_inv_L)
+
+    self.au = self.MJtJc_inv[:self.dynamicsModel.nv(),6:self.dynamicsModel.nv()]
+    self.gu = self.MJtJc_inv[self.dynamicsModel.nv():,6:self.dynamicsModel.nv()]
+
+    # dadq #dgdq
+    for i in xrange(self.dynamicsModel.nv()):
+      self.v_pert.fill(0.)
+      self.v_pert[i] += eps
+      np.copyto(self.q_pert,
+                se3.integrate(self.pinocchioModel,self.x[:self.dynamicsModel.nq()],
+                              self.v_pert))
+      self.f(self.q_pert,self.x[self.dynamicsModel.nq():],self.u)
+      self.aq[:,i] += self.pinocchioData.ddq
+      self.gq[:,i] += self.pinocchioData.lambda_c      
+    self.aq /= eps
+    self.gq /= eps    
+
+    # dadv #dgdv
+    for i in xrange(self.dynamicsModel.nv()):
+      np.copyto(self.v_pert, self.x[self.dynamicsModel.nq():])
+      self.v_pert[i] += eps
+      self.f(self.x[:self.dynamicsModel.nq()],self.v_pert,self.u)
+      self.av[:,i] += self.pinocchioData.ddq
+      self.gv[:,i] += self.pinocchioData.lambda_c      
+    self.av /= eps
+    self.gv /= eps    
+    return
+
+  def backwardTerminalCalc(self):
+    #TODO: Replace with analytical derivatives
+
+    for i in xrange(self.dynamicsModel.nv()):
+      self.aq[:,i] = -self.pinocchioData.ddq
+      self.av[:,i] = -self.pinocchioData.ddq
+      self.gq[:,i] = -self.pinocchioData.lambda_c
+      self.gv[:,i] = -self.pinocchioData.lambda_c
+
+    # dadq #dgdq
+    for i in xrange(self.dynamicsModel.nv()):
+      self.v_pert.fill(0.)
+      self.v_pert[i] += eps
+      np.copyto(self.q_pert,
+                se3.integrate(self.pinocchioModel,self.x[:self.dynamicsModel.nq()],
+                              self.v_pert))
+      self.f(self.q_pert,self.x[self.dynamicsModel.nq():],self.u)
+      self.aq[:,i] += self.pinocchioData.ddq
+      self.gq[:,i] += self.pinocchioData.lambda_c      
+    self.aq /= eps
+    self.gq /= eps    
+
+    # dadv #dgdv
+    for i in xrange(self.dynamicsModel.nv()):
+      np.copyto(self.v_pert, self.x[self.dynamicsModel.nq():])
+      self.v_pert[i] += eps
+      self.f(self.x[:self.dynamicsModel.nq()],self.v_pert,self.u)
+      self.av[:,i] += self.pinocchioData.ddq
+      self.gv[:,i] += self.pinocchioData.lambda_c      
+    self.av /= eps
+    self.gv /= eps    
     return
   
 class FloatingBaseMultibodyDynamics(DynamicsModelBase):

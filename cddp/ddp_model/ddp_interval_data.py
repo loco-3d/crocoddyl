@@ -11,7 +11,10 @@ class DDPIntervalDataBase(object):
   @abc.abstractmethod
   def forwardCalc(self):
     pass
-
+  
+  @abc.abstractmethod
+  def backwardCalc(self):
+    pass
 
 class TerminalDDPData(DDPIntervalDataBase):
   """ Data structure for the terminal interval of the DDP.
@@ -31,6 +34,14 @@ class TerminalDDPData(DDPIntervalDataBase):
     self.dynamicsData.forwardTerminalCalc()
     self.costData.forwardTerminalCalc(self.ddpModel.dynamicsModel, self.dynamicsData);
     pass
+
+  def backwardCalc(self):
+    """Performs the calculations before the backward pass
+    Pinocchio Data has already been filled with the forward pass."""
+
+    #Do Not Change The Order
+    self.costData.backwardTerminalCalc(self.ddpModel.dynamicsModel, self.dynamicsData)
+    self.dynamicsData.backwardTerminalCalc()
    
 class RunningDDPData(DDPIntervalDataBase):
   """ Data structure for the running interval of the DDP.
@@ -49,12 +60,17 @@ class RunningDDPData(DDPIntervalDataBase):
 
     self.dynamicsData = ddpModel.dynamicsModel.createIntervalData(tInit)
     self.costData = ddpModel.costManager.createRunningIntervalData()
-    
+
   def forwardCalc(self):
     """Performes the dynamics integration to generate the state and control functions"""
     self.dynamicsData.forwardRunningCalc()
     self.costData.forwardRunningCalc(self.ddpModel.dynamicsModel, self.dynamicsData);
 
+  def backwardCalc(self):
+    """Performs the calculations before the backward pass"""
+    self.costData.backwardRunningCalc(self.ddpModel.dynamicsModel, self.dynamicsData)
+    self.dynamicsData.backwardRunningCalc()
+    
     # Feedback and feedforward terms
     #self.K = np.matrix(np.zeros((self.system.m, self.system.ndx)))
     #self.j = np.matrix(np.zeros((self.system.m, 1)))

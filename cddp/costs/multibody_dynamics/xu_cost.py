@@ -25,6 +25,20 @@ class StateCost(QuadraticCostBase):
   def forwardTerminalCalc(self,dynamicsData):
     self.forwardRunningCalc(dynamicsData)
 
+  def getlu(self):
+    return np.zeros((self.dynamicsModel.nu(),1))
+
+  def getlux(self):
+    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nx()))
+  
+  def getluu(self):
+    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nu()))
+
+  def getlgg(self):
+    return np.zeros((self.dynamicsModel.dimConstraint, self.dynamicsModel.dimConstraint))
+
+  def getlg(self):
+    return np.zeros((self.dynamicsModel.dimConstraint, 1))
     
 class ControlCost(QuadraticCostBase):
 
@@ -34,8 +48,9 @@ class ControlCost(QuadraticCostBase):
     self.dim = dynamicsModel.nu()
 
     self._r = np.empty((self.dim, 1))
-    self._rx = np.empty((self.dim, dynamicsModel.nx()))
-    self._ru = np.empty((self.dim, dynamicsModel.nu()))
+    self._rx = np.zeros((self.dim, dynamicsModel.nx()))
+    self._ru = np.identity(self.dim)
+    self._rg = np.identity(self.dim)
     return
 
   def forwardRunningCalc(self, dynamicsData):
@@ -43,3 +58,24 @@ class ControlCost(QuadraticCostBase):
 
   def forwardTerminalCalc(self,dynamicsData):
     self.forwardRunningCalc(dynamicsData)
+
+  def backwardRunningCalc(self, dynamicsData):
+    return
+
+  def backwardTerminalCalc(self, dynamicsData):
+    return
+    
+  def getlux(self):
+    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nx()))
+
+  def getlx(self):
+    return np.zeros((self.dynamicsModel.nx(),1))
+
+  def getlxx(self):
+    return np.zeros((self.dynamicsModel.nx(), self.dynamicsModel.nx()))
+
+  def getlgg(self):
+    return np.zeros((self.dynamicsModel.dimConstraint, self.dynamicsModel.dimConstraint))
+
+  def getlg(self):
+    return np.zeros((self.dynamicsModel.dimConstraint, 1))

@@ -17,3 +17,24 @@ class CoMCost(QuadraticCostBase):
     
   def forwardTerminalCalc(self,dynamicsData):
     self.forwardRunningCalc(dynamicsData)
+
+  def backwardRunningCalc(self, dynamicsData):
+    self._rx = np.hstack([dynamicsData.pinocchioData.Jcom, np.zeros((3, self.nv))])
+    
+  def backwardTerminalCalc(self, dynamicsData):
+    self.backwardRunningCalc(dynamicsData)
+    
+  def getlux(self):
+    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nx()))
+  
+  def getluu(self):
+    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nu()))
+
+  def getlgg(self):
+    return np.zeros((self.dynamicsModel.dimConstraint, self.dynamicsModel.dimConstraint))
+
+  def getlg(self):
+    return np.zeros((self.dynamicsModel.dimConstraint, 1))
+
+  def getlu(self):
+    return np.zeros((self.dynamicsModel.nu(),1))
