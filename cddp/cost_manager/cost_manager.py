@@ -15,16 +15,16 @@ class CostManagerIntervalData(object):
     return
 
   def forwardRunningCalc(self, dynamicsModel, dynamicsData):
-    self.l = 0.
+    self.l[0] = 0.
     for cost in self.costsVector:
       cost.forwardRunningCalc(dynamicsData)
-      self.l += cost.getl()
+      self.l[0] += cost.getl()
 
   def forwardTerminalCalc(self, dynamicsModel, dynamicsData):
-    self.l = 0.
+    self.l[0] = 0.
     for cost in self.costsVector:
       cost.forwardTerminalCalc(dynamicsData)
-      self.l += cost.getl()
+      self.l[0] += cost.getl()
 
   def backwardRunningCalc(self, dynamicsModel, dynamicsData):
     for cost in self.costsVector:
