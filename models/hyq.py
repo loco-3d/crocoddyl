@@ -93,8 +93,9 @@ print robot.framePosition(qf, frame_idx)
 
 if plot:
   J = ddp.getTotalCostSequence()
-  gamma, theta, alpha = ddp.getConvergenceSequence()
-  cddp.plotDDPConvergence(J, gamma, 1e-3*theta, alpha)
+  gamma, theta, alpha, muLM, muV = ddp.getConvergenceSequence()
+  cddp.plotDDPConvergence(J, muLM, muV, gamma, theta, alpha)
+
 
 if display:
   T = timeline

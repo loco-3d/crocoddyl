@@ -103,6 +103,8 @@ class DDP(object):
     self.gamma_itr = [0.] * self.max_iter
     self.theta_itr = [0.] * self.max_iter
     self.alpha_itr = [0.] * self.max_iter
+    self.muLM_itr = [0.] * self.max_iter
+    self.muV_itr = [0.] * self.max_iter
 
   def setFromConfigFile(self, config_file):
     """ Sets the properties of the DDP solver from a YAML file.
@@ -122,6 +124,8 @@ class DDP(object):
       self.gamma_itr = [0.] * self.max_iter
       self.theta_itr = [0.] * self.max_iter
       self.alpha_itr = [0.] * self.max_iter
+      self.muLM_itr = [0.] * self.max_iter
+      self.muV_itr = [0.] * self.max_iter
 
       # Setting up regularization
       self.mu0LM = float(data['ddp']['regularization']['levenberg_marquard']['mu0'])
@@ -160,10 +164,12 @@ class DDP(object):
 
     self.n_iter = 0
     for i in range(self.max_iter):
-      # Recording the number of iterations
+      # Recording the number of iterations and mu values
       self.n_iter = i
       print ("Iteration", self.n_iter, "muV", self.muV,
              "muLM", self.muLM, "alpha", self.alpha)
+      self.muLM_itr[i] = self.muLM
+      self.muV_itr[i] = self.muV
 
       # Running the backward sweep
       while not self.backwardPass(self.muLM, self.muV, self.alpha):
@@ -470,7 +476,9 @@ class DDP(object):
   def getConvergenceSequence(self):
     return np.asarray(self.gamma_itr[:self.n_iter+1]), \
            np.asarray(self.theta_itr[:self.n_iter+1]), \
-           np.asarray(self.alpha_itr[:self.n_iter+1])
+           np.asarray(self.alpha_itr[:self.n_iter+1]), \
+           np.asarray(self.muLM_itr[:self.n_iter+1]), \
+           np.asarray(self.muV_itr[:self.n_iter+1])
 
   def saveToFile(self, filename):
     import pickle
