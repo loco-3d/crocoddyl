@@ -6,12 +6,12 @@ class CostManagerIntervalData(object):
   """
   def __init__(self, dynamicsModel, costsVector):
     self.costsVector = costsVector
-    self.l = 0.
-    self.lx = np.empty((dynamicsModel.nx(),1))
-    self.lu = np.empty((dynamicsModel.nu(),1))
-    self.lxx = np.empty((dynamicsModel.nx(),dynamicsModel.nx()))
-    self.lux = np.empty((dynamicsModel.nu(),dynamicsModel.nx()))
-    self.luu = np.empty((dynamicsModel.nu(),dynamicsModel.nu()))
+    self.l = np.matrix(np.zeros(1))
+    self.lx = np.matrix(np.zeros((dynamicsModel.nx(),1)))
+    self.lu = np.matrix(np.zeros((dynamicsModel.nu(),1)))
+    self.lxx = np.matrix(np.zeros((dynamicsModel.nx(),dynamicsModel.nx())))
+    self.lux = np.matrix(np.zeros((dynamicsModel.nu(),dynamicsModel.nx())))
+    self.luu = np.matrix(np.zeros((dynamicsModel.nu(),dynamicsModel.nu())))
     return
 
   def forwardRunningCalc(self, dynamicsModel, dynamicsData):
