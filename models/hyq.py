@@ -3,7 +3,6 @@ import numpy as np
 import pinocchio as se3
 import os
 
-
 np.set_printoptions(linewidth=400, suppress=True, threshold=np.nan)
 
 display = True
@@ -20,6 +19,8 @@ urdf = path + 'robots/hyq_no_sensors.urdf'
 # Getting the robot model from the URDF file
 robot = se3.robot_wrapper.RobotWrapper(urdf, path, se3.JointModelFreeFlyer())
 model = robot.model
+
+timeline = np.arange(0.0, 0.25, 1e-3)  # np.linspace(0., 0.5, 51)
 
 # Create the contact information
 contact_indices = [robot.model.getFrameId("lf_foot"),
@@ -50,7 +51,7 @@ q0[7+9] = -0.2*0.
 q0[7+10] = -0.75
 q0[7+11] = 1.5
 v0 = np.zeros((robot.model.nv, 1))
-u0 = np.zeros((robot.model.nv-6, 1))
+U0 = [np.zeros((robot.model.nv-6, 1)) for i in xrange(len(timeline)-1)]
 x0 = np.vstack([q0, v0])
 
 
@@ -82,7 +83,8 @@ wx = 1e-4 * np.vstack([ np.zeros((model.nv,1)), np.ones((model.nv,1)) ])
 wu = 1e-4 * np.ones((robot.nv-6,1))
 
 x_cost = cddp.costs.multibody_dynamics.StateCost(ddpDynamics, x0, wx)
-u_cost = cddp.costs.multibody_dynamics.ControlCost(ddpDynamics, u0, wu)
+u_cost = cddp.costs.multibody_dynamics.ControlCost(ddpDynamics,
+                                                   np.zeros((robot.model.nv-6,1)), wu)
 
 # Adding the cost functions to the cost manager
 costManager = cddp.cost_manager.FloatingBaseMultibodyCostManager(ddpDynamics)
@@ -93,7 +95,6 @@ costManager.addTerminal(se3_tcost)
 costManager.addRunning(com_cost)
 
 # Setting up the DDP problem
-timeline = np.arange(0.0, 0.25, 1e-3)  # np.linspace(0., 0.5, 51)
 
 ddpModel = cddp.ddp_model.DDPModel(ddpDynamics, ddpIntegrator,
                                    ddpDiscretizer, costManager)
@@ -108,7 +109,7 @@ solverParams.setFromConfigFile(filename + "/hyq_config.yaml")
 
 # Solving the problem
 #ddp.compute(x0)
-cddp.Solver.setInitial(ddpModel, ddpData, xInit=x0, UInit=u0)
+cddp.Solver.setInitial(ddpModel, ddpData, xInit=x0, UInit=U0)
 cddp.Solver.solve(ddpModel, ddpData, solverParams)
 
 # Printing the final goal
