@@ -12,8 +12,8 @@ class SE3Cost(QuadraticCostBase):
     self._frame_idx = self.dynamicsModel.pinocchioModel.getFrameId(frame_name)
 
     self._r = np.empty((self.dim, 1))
-    self._rx = np.empty((self.dim, dynamicsModel.nx()))
-    self._ru = np.empty((self.dim, dynamicsModel.nu()))
+    self._rx = np.zeros((self.dim, dynamicsModel.nx()))
+    self._ru = np.zeros((self.dim, dynamicsModel.nu()))
     return
 
   def forwardRunningCalc(self,dynamicsData):
@@ -24,9 +24,10 @@ class SE3Cost(QuadraticCostBase):
     self.forwardRunningCalc(dynamicsData)
 
   def backwardRunningCalc(self, dynamicsData):
-    self._rx = se3.getFrameJacobian(self.dynamicsModel.pinocchioModel,
-                                    self.dynamicsData.pinocchioData,
-                                    self._ee_index,se3.ReferenceFrame.WORLD)
+    self._rx[:,:self.dynamicsModel.nv()] = \
+                                    se3.getFrameJacobian(self.dynamicsModel.pinocchioModel,
+                                    dynamicsData.pinocchioData,
+                                    self._frame_idx,se3.ReferenceFrame.WORLD)
 
   def backwardTerminalCalc(self, dynamicsData):
     self.backwardRunningCalc(dynamicsData)

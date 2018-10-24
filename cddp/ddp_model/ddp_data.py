@@ -18,3 +18,7 @@ class DDPData(object):
 
     #Run time variables
     self._convergence = False
+    self.muLM = -1.
+    self.muV = -1.
+    self.alpha = -1.
+    self.n_iter = -1.

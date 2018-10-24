@@ -31,6 +31,7 @@ class SolverParams(object):
       self.muV_dec = float(data['ddp']['regularization']['value_function']['dec_rate'])
 
       # Setting up line search
+      self.alpha0 = float(data['ddp']['line_search']['alpha0'])
       self.alpha_min = float(data['ddp']['line_search']['min_stepsize'])
       self.alpha_inc = float(data['ddp']['line_search']['inc_rate'])
       self.alpha_dec = float(data['ddp']['line_search']['dec_rate'])  

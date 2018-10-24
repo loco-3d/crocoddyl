@@ -27,10 +27,9 @@ class CostManagerBase(object):
     pass
 
   @abc.abstractmethod
-  def createRunningIntervalData(self):
+  def createRunningData(self, ddpModel):
     pass
 
   @abc.abstractmethod
-  def createTerminalIntervalData(self):
+  def createTerminalData(self, ddpModel):
     pass
-  

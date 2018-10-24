@@ -45,16 +45,16 @@ class QuadraticCostBase(CostBase):
     return 0.5 * np.asscalar(np.dot(self._r.T, np.multiply(self.weight, self._r)))
 
   def getlx(self):
-    return np.dot(data._rx.T, np.multiply(self.weight, self._r))
+    return np.dot(self._rx.T, np.multiply(self.weight, self._r))
 
   def getlu(self):
-    return np.dot(data._ru.T, np.multiply(self.weight, self._r))
+    return np.dot(self._ru.T, np.multiply(self.weight, self._r))
 
   def getlux(self):
-    return np.dot(data._ru.T, np.multiply(self.weight, self._rx))
+    return np.dot(self._ru.T, np.multiply(self.weight, self._rx))
 
   def getluu(self):
-    return np.dot(data._ru.T, np.multiply(self.weight, self._ru))
+    return np.dot(self._ru.T, np.multiply(self.weight, self._ru))
 
   def getlxx(self):
-    return np.dot(data._rx.T, np.multiply(self.weight, self._rx))
+    return np.dot(self._rx.T, np.multiply(self.weight, self._rx))

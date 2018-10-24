@@ -99,6 +99,9 @@ ddpModel = cddp.ddp_model.DDPModel(ddpDynamics, ddpIntegrator,
                                    ddpDiscretizer, costManager)
 ddpData = cddp.ddp_model.DDPData(ddpModel, timeline)
 
+#TODO: Move to proper location
+ddpModel.eps = 1e-8
+
 # Configuration the solver from YAML file
 solverParams = cddp.solver.SolverParams()
 solverParams.setFromConfigFile(filename + "/hyq_config.yaml")

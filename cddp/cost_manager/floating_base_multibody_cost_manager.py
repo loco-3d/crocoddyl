@@ -29,13 +29,15 @@ class FloatingBaseMultibodyCostManagerIntervalData(CostManagerIntervalDataBase):
       self.l += cost.getl()
 
   def backwardRunningCalc(self, dynamicsModel, dynamicsData):
+    for cost in self.costsVector:
+      cost.backwardRunningCalc(dynamicsData)
     self.lx.fill(0.)
     self.lu.fill(0.)
     self.lxx.fill(0.)
     self.lux.fill(0.)
-    self.luu.fill(0.)    
+    self.luu.fill(0.)
+
     for cost in self.costsVector:
-      cost.backwardRunningCalc(dynamicsData)
       self.lx += cost.getlx()
       self.lu += cost.getlu()
       self.lxx += cost.getlxx()
@@ -44,10 +46,11 @@ class FloatingBaseMultibodyCostManagerIntervalData(CostManagerIntervalDataBase):
     return
   
   def backwardTerminalCalc(self,dynamicsModel, dynamicsData):
+    for cost in self.costsVector:
+      cost.backwardTerminalCalc(dynamicsData)
     self.lx.fill(0.)
     self.lxx.fill(0.)
     for cost in self.costsVector:
-      cost.backwardTerminalCalc(dynamicsData)
       self.lx += cost.getlx()
       self.lxx += cost.getlxx()
     return
@@ -65,11 +68,13 @@ class FloatingBaseMultibodyCostManager(CostManagerBase):
   running and terminal cost functions of your problem.
   """
 
-  def createRunningIntervalData(self):
-    return FloatingBaseMultibodyCostManagerIntervalData(self.dynamicsModel,self.runningCosts)
+  def createRunningData(self, ddpModel):
+    return FloatingBaseMultibodyCostManagerIntervalData(ddpModel.dynamicsModel,
+                                                        self.runningCosts)
 
-  def createTerminalIntervalData(self):
-    return FloatingBaseMultibodyCostManagerIntervalData(self.dynamicsModel,self.terminalCosts)
+  def createTerminalData(self, ddpModel):
+    return FloatingBaseMultibodyCostManagerIntervalData(ddpModel.dynamicsModel,
+                                                        self.terminalCosts)
 
   def addTerminal(self, cost):
     """ Add a terminal cost object to the cost manager.
@@ -86,38 +91,6 @@ class FloatingBaseMultibodyCostManager(CostManagerBase):
     """
     #assertClass(cost, 'XUCost')
     self.runningCosts.append(cost)
-
-  def createTerminalData(self, n):
-    """ Creates the data of the stack of terminal costs.
-
-    Before creating the data, it's needed to add all the terminal costs
-    of your problem.
-    """
-    from cddp.data import XCostData, CostManagerData
-    data = CostManagerData()
-
-    # Creating the terminal cost data, the residual data isn't needed
-    data.total = XCostData(n)
-
-    # Creating the terminal stack-of-cost data
-    data.soc = [cost.createData(n) for cost in self.terminalCosts]
-    return data
-
-  def createRunningData(self, n, m):
-    """ Create the data of the stack of running costs.
-
-    Before creating the data, it's needed to add all the running costs of your
-    problem.
-    """
-    from cddp.data import XUCostData, CostManagerData
-    data = CostManagerData()
-
-    # Creating the running cost data, the residual data isn't needed
-    data.total = XUCostData(n, m)
-
-    # Creating the running stack-of-cost data
-    data.soc = [cost.createData(n, m) for cost in self.runningCosts]
-    return data
 
   def computeTerminalCost(self, system, data, x):
     assert self.terminalCosts > 0, "You didn't add the terminal costs"

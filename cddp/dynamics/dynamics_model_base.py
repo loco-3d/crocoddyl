@@ -8,7 +8,7 @@ class DynamicsModelBase(object):
     pass
   
   @abc.abstractmethod
-  def createIntervalData(self):
+  def createData(self):
     pass
   
   @abc.abstractmethod

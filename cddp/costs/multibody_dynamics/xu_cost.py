@@ -25,6 +25,12 @@ class StateCost(QuadraticCostBase):
   def forwardTerminalCalc(self,dynamicsData):
     self.forwardRunningCalc(dynamicsData)
 
+  def backwardRunningCalc(self, dynamicsData):
+    return
+
+  def backwardTerminalCalc(self, dynamicsData):
+    return
+  
   def getlu(self):
     return np.zeros((self.dynamicsModel.nu(),1))
 

@@ -35,26 +35,30 @@ class Solver(object):
     # Resetting convergence flag
     ddpData._convergence = False
 
-    # Running an initial forward simulation given the initial state and
-    # the control sequence
+    # Running an initial forward simulation
+    # and calculates the forward dynamics and
+    # total costs
     Solver.forwardSimulation(ddpModel, ddpData)
 
     # Resetting mu and alpha. As general rule of thumb we assume that the 
     # quadratic model has some error respect to the true model. So we start
     # closer to steeppest descent by adjusting the initial Levenberg-Marquardt
     # parameter (i.e. mu)
-    self.muLM = self.mu0LM
-    self.muV = self.mu0V
-    self.alpha = 1.
+    ddpData.muLM = solverParams.mu0LM
+    ddpData.muV = solverParams.mu0V
+    ddpData.alpha = solverParams.alpha0
 
-    self.n_iter = 0
-    for i in range(self.max_iter):
+    ddpData.n_iter = 0
+    for i in range(solverParams.max_iter):
       # Recording the number of iterations
-      self.n_iter = i
-      print ("Iteration", self.n_iter, "muV", self.muV,
-             "muLM", self.muLM, "alpha", self.alpha)
+      ddpData.n_iter = i
+      print ("Iteration", ddpData.n_iter, "muV", ddpData.muV,
+             "muLM", ddpData.muLM, "alpha", ddpData.alpha)
 
-      # Running the backward sweep
+      # Prepare for DDP Backward Pass. TODO: Parallelize.
+      for k in xrange(ddpData.N):
+        ddpData.intervalDataVector[k].backwardCalc()
+      
       while not self.backwardPass(self.muLM, self.muV, self.alpha):
         # Quu is not positive-definitive, so increasing the
         # regularization factor

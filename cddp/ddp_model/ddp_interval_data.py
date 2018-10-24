@@ -24,10 +24,9 @@ class TerminalDDPData(DDPIntervalDataBase):
   def __init__(self, ddpModel, tFinal):
     DDPIntervalDataBase.__init__(self, ddpModel)
     self.tFinal = tFinal
-    
-    self.dynamicsData = ddpModel.dynamicsModel.createIntervalData(tFinal)
-    self.costData = ddpModel.costManager.createRunningIntervalData()
 
+    self.dynamicsData = ddpModel.createTerminalDynamicsData(tFinal)
+    self.costData = ddpModel.createTerminalCostData()
 
   def forwardCalc(self):
     """Performes the dynamics integration to generate the state and control functions"""
@@ -40,6 +39,7 @@ class TerminalDDPData(DDPIntervalDataBase):
     Pinocchio Data has already been filled with the forward pass."""
 
     #Do Not Change The Order
+    #print self.tFinal, "Final Backward Pass"
     self.costData.backwardTerminalCalc(self.ddpModel.dynamicsModel, self.dynamicsData)
     self.dynamicsData.backwardTerminalCalc()
    
@@ -58,8 +58,8 @@ class RunningDDPData(DDPIntervalDataBase):
 
     self.dt = self.tFinal-self.tInit
 
-    self.dynamicsData = ddpModel.dynamicsModel.createIntervalData(tInit)
-    self.costData = ddpModel.costManager.createRunningIntervalData()
+    self.dynamicsData = ddpModel.createRunningDynamicsData(tInit)
+    self.costData = ddpModel.createRunningCostData()
 
   def forwardCalc(self):
     """Performes the dynamics integration to generate the state and control functions"""
@@ -68,22 +68,6 @@ class RunningDDPData(DDPIntervalDataBase):
 
   def backwardCalc(self):
     """Performs the calculations before the backward pass"""
+    #print self.tInit, "Initial Backward Pass"    
     self.costData.backwardRunningCalc(self.ddpModel.dynamicsModel, self.dynamicsData)
     self.dynamicsData.backwardRunningCalc()
-    
-    # Feedback and feedforward terms
-    #self.K = np.matrix(np.zeros((self.system.m, self.system.ndx)))
-    #self.j = np.matrix(np.zeros((self.system.m, 1)))
-
-    # Value function and its derivatives
-    #self.Vx = np.matrix(np.zeros((self.system.ndx, 1)))
-    #self.Vxx = np.matrix(np.zeros((self.system.ndx, self.system.ndx)))
-
-    # Quadratic approximation of the value function
-    # self.Qx = np.matrix(np.zeros((self.system.ndx, 1)))
-    # self.Qu = np.matrix(np.zeros((self.system.m, 1)))
-    # self.Qxx = np.matrix(np.zeros((self.system.ndx, self.system.ndx)))
-    # self.Qux = np.matrix(np.zeros((self.system.m, self.system.ndx)))
-    # self.Quu = np.matrix(np.zeros((self.system.m, self.system.m)))
-    # self.Qux_r = np.matrix(np.zeros((self.system.m, self.system.ndx)))
-    # self.Quu_r = np.matrix(np.zeros((self.system.m, self.system.m)))

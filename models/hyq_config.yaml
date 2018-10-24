@@ -12,6 +12,7 @@ ddp:
       inc_rate: 10.
       dec_rate: 0.5
   line_search:
+    alpha0: 1.
     min_stepsize: 1e-3
     inc_rate: 2.
     dec_rate: 0.5

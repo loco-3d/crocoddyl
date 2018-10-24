@@ -8,8 +8,8 @@ class CoMCost(QuadraticCostBase):
     self.dim = 3
 
     self._r = np.empty((self.dim, 1))
-    self._rx = np.empty((self.dim, dynamicsModel.nx()))
-    self._ru = np.empty((self.dim, dynamicsModel.nu()))
+    self._rx = np.zeros((self.dim, dynamicsModel.nx()))
+    self._ru = np.zeros((self.dim, dynamicsModel.nu()))
     return
 
   def forwardRunningCalc(self,dynamicsData):
@@ -19,7 +19,7 @@ class CoMCost(QuadraticCostBase):
     self.forwardRunningCalc(dynamicsData)
 
   def backwardRunningCalc(self, dynamicsData):
-    self._rx = np.hstack([dynamicsData.pinocchioData.Jcom, np.zeros((3, self.nv))])
+    self._rx[:,:self.dynamicsModel.nv()] = dynamicsData.pinocchioData.Jcom
     
   def backwardTerminalCalc(self, dynamicsData):
     self.backwardRunningCalc(dynamicsData)
