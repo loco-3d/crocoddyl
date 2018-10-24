@@ -87,7 +87,7 @@ u_cost = cddp.costs.multibody_dynamics.ControlCost(ddpDynamics,
                                                    np.zeros((robot.model.nv-6,1)), wu)
 
 # Adding the cost functions to the cost manager
-costManager = cddp.cost_manager.FloatingBaseMultibodyCostManager(ddpDynamics)
+costManager = cddp.cost_manager.CostManager(ddpDynamics)
 costManager.addRunning(x_cost)
 costManager.addRunning(u_cost)
 costManager.addRunning(se3_rcost)
