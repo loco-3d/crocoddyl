@@ -21,7 +21,8 @@ class DDPData(object):
     self.totalCost = 0.
     self.V_exp = 0.
     self.dV_exp = 0.
-
+    self.dV = 0.
+    
     #Run time variables
     self._convergence = False
     self.muLM = -1.
@@ -33,3 +34,5 @@ class DDPData(object):
     #Analysis Variables
     self.gamma = 0.
     self.theta = 0.
+    self.z_new = 0.
+    self.z = 0.
