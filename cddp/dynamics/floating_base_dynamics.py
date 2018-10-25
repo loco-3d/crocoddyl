@@ -27,6 +27,10 @@ class FloatingBaseMultibodyDynamicsData(DynamicsDataBase):
     self.x = np.zeros((self.dynamicsModel.nxImpl(), 1))
     self.u = np.zeros((self.dynamicsModel.nu(), 1))
 
+    # Saving the previous iteration state and control
+    self.x_prev = np.zeros((self.dynamicsModel.nxImpl(), 1))
+    self.u_prev = np.zeros((self.dynamicsModel.nu(), 1))
+
     self.fx = self.ddpModel.discretizer.fx(self.dynamicsModel.nv(),
                                                 self.dynamicsModel.nv(),
                                                 self.dynamicsModel.nx(),
@@ -45,6 +49,8 @@ class FloatingBaseMultibodyDynamicsData(DynamicsDataBase):
     #TODO: remove these when replacing with analytical derivatives
     self.q_pert = np.zeros((self.dynamicsModel.nq(), 1))
     self.v_pert = np.zeros((self.dynamicsModel.nv(), 1))
+
+    self.delta_x = np.zeros((self.dynamicsModel.nx(),1))
 
   def forwardRunningCalc(self):
     # Compute all terms
@@ -96,6 +102,10 @@ class FloatingBaseMultibodyDynamicsData(DynamicsDataBase):
     return
   
   def backwardRunningCalc(self):
+    #Save the state and control in the previous iteration. Prepare for next iteration.
+    np.copyto(self.x_prev,self.x)
+    np.copyto(self.u_prev,self.u)
+    
     #TODO: Replace with analytical derivatives
     for i in xrange(self.dynamicsModel.nv()):
       np.copyto(self.fx.aq, -self.pinocchioData.ddq)
@@ -142,8 +152,18 @@ class FloatingBaseMultibodyDynamicsData(DynamicsDataBase):
     return
 
   def backwardTerminalCalc(self):
+    #Save the state in the previous iteration values to prepare for next iteration.
+    np.copyto(self.x_prev,self.x)
     return
-  
+
+  def deltaX(self, x0, x1):
+    self.delta_x[:self.dynamicsModel.nv()] = \
+                      se3.difference(self.pinocchioModel, x0,x1)
+    self.delta_x[self.dynamicsModel.nv():] = \
+                              x1[self.dynamicsModel.nq():,:]- \
+                              x0[self.dynamicsModel.nq():,:]
+    return self.delta_x
+
 class FloatingBaseMultibodyDynamics(DynamicsModelBase):
 
   def __init__(self, pinocchioModel, contactInfo):
