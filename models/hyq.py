@@ -3,7 +3,7 @@ import numpy as np
 import pinocchio as se3
 import os
 
-np.set_printoptions(linewidth=400, suppress=True, threshold=np.nan)
+np.set_printoptions(linewidth=400, suppress=False, threshold=np.nan)
 
 display = True
 plot = True
@@ -20,7 +20,7 @@ urdf = path + 'robots/hyq_no_sensors.urdf'
 robot = se3.robot_wrapper.RobotWrapper(urdf, path, se3.JointModelFreeFlyer())
 model = robot.model
 
-timeline = np.arange(0.0, 0.25, 1e-3)  # np.linspace(0., 0.5, 51)
+timeline = np.arange(0.0, 5e-3, 1e-3)  # np.linspace(0., 0.5, 51)
 
 # Create the contact information
 contact_indices = [robot.model.getFrameId("lf_foot"),

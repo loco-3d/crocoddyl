@@ -32,14 +32,10 @@ class FloatingBaseMultibodyDynamicsData(DynamicsDataBase):
                                                 self.dynamicsModel.nx(),
                                                 self.dynamicsModel.nx())
     self.fu = self.ddpModel.discretizer.fu(self.dynamicsModel.nv(),
-                                                self.dynamicsModel.nu(),
-                                                self.dynamicsModel.nx())
+                                           self.dynamicsModel.nu(),
+                                           self.dynamicsModel.nx())
     self.gx = np.empty((self.dimConstraint, self.dynamicsModel.nx()))
     self.gu = np.empty((self.dimConstraint, self.dynamicsModel.nu()))
-
-    self.aq = self.fx.aq #derivative of ddq wrt q
-    self.av = self.fx.av #derivative of ddq wrt v
-    self.au = self.fu.au #derivative of ddq wrt u
 
     #derivative of lambda wrt q
     self.gq = np.empty((self.dimConstraint, self.dynamicsModel.nv()))
@@ -101,10 +97,9 @@ class FloatingBaseMultibodyDynamicsData(DynamicsDataBase):
   
   def backwardRunningCalc(self):
     #TODO: Replace with analytical derivatives
-
     for i in xrange(self.dynamicsModel.nv()):
-      np.copyto(self.aq, -self.pinocchioData.ddq)
-      np.copyto(self.av, -self.pinocchioData.ddq)
+      np.copyto(self.fx.aq, -self.pinocchioData.ddq)
+      np.copyto(self.fx.av, -self.pinocchioData.ddq)
       np.copyto(self.gq, -self.pinocchioData.lambda_c)
       np.copyto(self.gv, -self.pinocchioData.lambda_c)
 
@@ -119,7 +114,7 @@ class FloatingBaseMultibodyDynamicsData(DynamicsDataBase):
     #TODO: REMOVE PINV!!!! USE DAMPED CHOLESKY
     #print "x value", self.x.T
     self.MJtJc_inv = np.linalg.pinv(self.MJtJc)
-    self.au = self.MJtJc_inv[:self.dynamicsModel.nv(),6:self.dynamicsModel.nv()]
+    self.fu.au = self.MJtJc_inv[:self.dynamicsModel.nv(),6:self.dynamicsModel.nv()]
     self.gu = self.MJtJc_inv[self.dynamicsModel.nv():,6:self.dynamicsModel.nv()]
 
     # dadq #dgdq
@@ -130,9 +125,9 @@ class FloatingBaseMultibodyDynamicsData(DynamicsDataBase):
                 se3.integrate(self.pinocchioModel,self.x[:self.dynamicsModel.nq()],
                               self.v_pert))
       self.f(self.q_pert,self.x[self.dynamicsModel.nq():],self.u)
-      self.aq[:,i] += np.array(self.pinocchioData.ddq)[:,0]
+      self.fx.aq[:,i] += np.array(self.pinocchioData.ddq)[:,0]
       self.gq[:,i] += np.array(self.pinocchioData.lambda_c)[:,0]
-    self.aq /= self.eps
+    self.fx.aq /= self.eps
     self.gq /= self.eps
 
     # dadv #dgdv
@@ -140,43 +135,13 @@ class FloatingBaseMultibodyDynamicsData(DynamicsDataBase):
       np.copyto(self.v_pert, self.x[self.dynamicsModel.nq():])
       self.v_pert[i] += self.eps
       self.f(self.x[:self.dynamicsModel.nq()],self.v_pert,self.u)
-      self.av[:,i] += np.array(self.pinocchioData.ddq)[:,0]
+      self.fx.av[:,i] += np.array(self.pinocchioData.ddq)[:,0]
       self.gv[:,i] += np.array(self.pinocchioData.lambda_c)[:,0]
-    self.av /= self.eps
-    self.gv /= self.eps    
+    self.fx.av /= self.eps
+    self.gv /= self.eps
     return
 
   def backwardTerminalCalc(self):
-    #TODO: Replace with analytical derivatives
-
-    for i in xrange(self.dynamicsModel.nv()):
-      self.aq[:,i] = -self.pinocchioData.ddq
-      self.av[:,i] = -self.pinocchioData.ddq
-      self.gq[:,i] = -self.pinocchioData.lambda_c
-      self.gv[:,i] = -self.pinocchioData.lambda_c
-
-    # dadq #dgdq
-    for i in xrange(self.dynamicsModel.nv()):
-      self.v_pert.fill(0.)
-      self.v_pert[i] += self.eps
-      np.copyto(self.q_pert,
-                se3.integrate(self.pinocchioModel,self.x[:self.dynamicsModel.nq()],
-                              self.v_pert))
-      self.f(self.q_pert,self.x[self.dynamicsModel.nq():],self.u)
-      self.aq[:,i] += self.pinocchioData.ddq
-      self.gq[:,i] += self.pinocchioData.lambda_c      
-    self.aq /= self.eps
-    self.gq /= self.eps    
-
-    # dadv #dgdv
-    for i in xrange(self.dynamicsModel.nv()):
-      np.copyto(self.v_pert, self.x[self.dynamicsModel.nq():])
-      self.v_pert[i] += self.eps
-      self.f(self.x[:self.dynamicsModel.nq()],self.v_pert,self.u)
-      self.av[:,i] += self.pinocchioData.ddq
-      self.gv[:,i] += self.pinocchioData.lambda_c      
-    self.av /= self.eps
-    self.gv /= self.eps    
     return
   
 class FloatingBaseMultibodyDynamics(DynamicsModelBase):
