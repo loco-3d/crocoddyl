@@ -1,10 +1,10 @@
-from cddp.costs.cost_base import QuadraticCostBase
+from cddp.costs.cost_base import QuadraticCost
 import numpy as np
 
-class CoMCost(QuadraticCostBase):
+class CoMCost(QuadraticCost):
 
   def __init__(self, dynamicsModel, comDes, weights):
-    QuadraticCostBase.__init__(self, dynamicsModel, comDes, weights)
+    QuadraticCost.__init__(self, dynamicsModel, comDes, weights)
     self.dim = 3
 
     self._r = np.empty((self.dim, 1))

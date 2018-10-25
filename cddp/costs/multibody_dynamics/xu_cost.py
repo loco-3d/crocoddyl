@@ -1,11 +1,11 @@
-from cddp.costs.cost_base import QuadraticCostBase
+from cddp.costs.cost_base import QuadraticCost
 import pinocchio as se3
 import numpy as np
 
-class StateCost(QuadraticCostBase):
+class StateCost(QuadraticCost):
 
   def __init__(self, dynamicsModel, stateDes, weights):
-    QuadraticCostBase.__init__(self, dynamicsModel, stateDes, weights)
+    QuadraticCost.__init__(self, dynamicsModel, stateDes, weights)
     self.pinocchioModel = dynamicsModel.pinocchioModel
     self.dim = dynamicsModel.nx()
 
@@ -45,11 +45,11 @@ class StateCost(QuadraticCostBase):
 
   def getlg(self):
     return np.zeros((self.dynamicsModel.dimConstraint, 1))
-    
-class ControlCost(QuadraticCostBase):
 
+
+class ControlCost(QuadraticCost):
   def __init__(self, dynamicsModel, controlDes, weights):
-    QuadraticCostBase.__init__(self, dynamicsModel, controlDes, weights)
+    QuadraticCost.__init__(self, dynamicsModel, controlDes, weights)
     self.pinocchioModel = dynamicsModel.pinocchioModel
     self.dim = dynamicsModel.nu()
 

@@ -1,7 +1,7 @@
 import abc
 import numpy as np
 
-class CostBase(object):
+class Cost(object):
   """Base class for defining costs."""
 
   __metaclass__=abc.ABCMeta
@@ -19,7 +19,7 @@ class CostBase(object):
   def forwardRunningCalc(self, dynamicsData):
     pass
 
-class QuadraticCostBase(CostBase):
+class QuadraticCost(Cost):
   """This abstract class creates a quadratic cost of the form:
   0.5 xr^T Q xr.
 
@@ -36,7 +36,7 @@ class QuadraticCostBase(CostBase):
   __metaclass__=abc.ABCMeta
 
   def __init__(self,dynamicsModel, ref,weight):
-    CostBase.__init__(self, dynamicsModel, ref,weight)
+    Cost.__init__(self, dynamicsModel, ref,weight)
     pass
 
   def getl(self):
