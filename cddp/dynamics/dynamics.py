@@ -1,6 +1,6 @@
 import abc
 
-class DynamicsDataBase(object):
+class DynamicsData(object):
   "Base class to define interface for Dynamics"
   __metaclass__=abc.ABCMeta
 
@@ -26,4 +26,28 @@ class DynamicsDataBase(object):
   @abc.abstractmethod
   def backwardTerminalCalc(self):
     "implement compute all terms for backward pass"
+    pass
+
+
+class DynamicsModel(object):
+  "Base class to define the dynamics model"
+  __metaclass__=abc.ABCMeta
+  @abc.abstractmethod
+  def __init__(self):
+    pass
+  
+  @abc.abstractmethod
+  def createData(self):
+    pass
+  
+  @abc.abstractmethod
+  def nx(self):
+    pass
+
+  @abc.abstractmethod
+  def nxImpl(self):
+    pass
+  
+  @abc.abstractmethod
+  def nu(self):
     pass
