@@ -19,7 +19,7 @@ class DDPData(object):
 
     #Total Cost
     self.totalCost = 0.
-    self.V_exp = 0.
+    self.totalCost_prev = 0.
     self.dV_exp = 0.
     self.dV = 0.
     

@@ -11,6 +11,7 @@ class Solver(object):
     Performs data copying from init values to ddpData.
     """
     np.copyto(ddpData.intervalDataVector[0].dynamicsData.x, xInit)
+    #np.copyto(ddpData.intervalDataVector[0].dynamicsData.x_new, xInit)
     for u, intervalData in izip(UInit,ddpData.intervalDataVector[:-1]):
       np.copyto(intervalData.dynamicsData.u, u)
     return
@@ -31,6 +32,45 @@ class Solver(object):
     return
 
   @staticmethod
+  def forwardPass(ddpModel, ddpData, solverParams):
+    """ Runs the forward pass of the DDP algorithm.
+    """
+    ddpData.totalCost = 0.
+    # Integrate the system along the new trajectory
+    for k in xrange(ddpData.N):
+      # Getting the current DDP interval
+      it = ddpData.intervalDataVector[k]
+      itNext = ddpData.intervalDataVector[k]
+      # Computing the new control command
+      np.copyto(it.dynamicsData.u, it.dynamicsData.u_prev +\
+                ddpData.alpha * it.j +\
+                np.dot(it.K, it.dynamicsData.deltaX(it.dynamicsData.x_prev,
+                                                    it.dynamicsData.x)))
+
+      # Integrating the system dynamics and updating the new state value
+      ddpData.intervalDataVector[k].forwardCalc()
+      ddpModel.integrator(ddpModel, ddpData.intervalDataVector[k],
+                          ddpData.intervalDataVector[k+1].dynamicsData.x)
+      ddpData.totalCost += ddpData.intervalDataVector[k].costData.l
+    ddpData.intervalDataVector[-1].forwardCalc()
+    ddpData.totalCost += ddpData.intervalDataVector[-1].costData.l
+
+    # Checking convergence of the current iteration
+    if np.abs(ddpData.gamma) <= solverParams.tol:
+      ddpData._convergence = True
+      return True
+
+    # Checking the changes
+    ddpData.dV = ddpData.totalCost_prev - ddpData.totalCost
+    ddpData.z_new = ddpData.dV/ddpData.dV_exp
+    if ddpData.z_new > solverParams.armijo_condition \
+       and ddpData.z_new < solverParams.change_ub:
+      ddpData.z = ddpData.z_new
+      return True
+    else:
+      return False
+
+  @staticmethod
   def backwardPass(ddpModel, ddpData, solverParams):
     """ Runs the backward pass of the DDP algorithm.
     """
@@ -45,7 +85,7 @@ class Solver(object):
               ddpData.muLM * np.identity(ddpModel.dynamicsModel.nu()))
 
     np.copyto(ddpData.intervalDataVector[-1].Vx, ddpData.intervalDataVector[-1].costData.lx)
-    np.copyto(ddpData.intervalDataVector[-1].Vxx, ddpData.intervalDataVector[-1].costData.lxx)
+    np.copyto(ddpData.intervalDataVector[-1].Vxx,ddpData.intervalDataVector[-1].costData.lxx)
     for k in range(ddpData.N-1, -1, -1):
       it = ddpData.intervalDataVector[k]
       itNext = ddpData.intervalDataVector[k+1]
@@ -119,6 +159,7 @@ class Solver(object):
 
     # Computing the norm of the cost gradient w.r.t. U={u0, ..., uN}
     ddpData.gamma = np.sqrt(ddpData.gamma)
+    ddpData.totalCost_prev = ddpData.totalCost
     return True
   
   @staticmethod
@@ -164,15 +205,15 @@ class Solver(object):
         print "\t", ("Quu isn't positive. Increasing muLM to", ddpData.muLM)
       print "\t","\t", "--------------------------------------------------Expected Reduction:", -np.asscalar(ddpData.gamma)
       # Running the forward pass
-      while not self.forwardPass(self.alpha):
-        self.alpha *= self.alpha_dec
-        print "\t", ("Rejected changes. Decreasing alpha to", self.alpha)
-        print "\t", "\t", "Reduction Ratio:", self.z
-        print "\t", "\t", "Expected Reduction:", -np.asscalar(self.dV_exp)
-        print "\t", "\t", "Actual Reduction:", -np.asscalar(self.dV)
-        if self.alpha < self.alpha_min:
+      while not Solver.forwardPass(ddpModel, ddpData, solverParams):
+        ddpData.alpha *= solverParams.alpha_dec
+        print "\t", ("Rejected changes. Decreasing alpha to", ddpData.alpha)
+        print "\t", "\t", "Reduction Ratio:", ddpData.z
+        print "\t", "\t", "Expected Reduction:", ddpData.dV_exp
+        print "\t", "\t", "Actual Reduction:", ddpData.dV
+        if ddpData.alpha < solverParams.alpha_min:
           print "\t", ('It cannot be improved solution')
-          self._convergence = True
+          ddpData._convergence = True
           break
 
       # Recording the total cost, gradient, theta and alpha for each iteration.

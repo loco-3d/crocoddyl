@@ -2,6 +2,7 @@ ddp:
   stop_criteria:
     tol: 1e-5
     max_iter: 20
+    armijo_condition: 1e-3
   regularization:
     levenberg_marquard:
       mu0: 1e-8

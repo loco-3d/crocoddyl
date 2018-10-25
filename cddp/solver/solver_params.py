@@ -15,6 +15,7 @@ class SolverParams(object):
       # Setting up stop criteria
       self.tol = float(data['ddp']['stop_criteria']['tol'])
       self.max_iter = int(data['ddp']['stop_criteria']['max_iter'])
+      self.armijo_condition = float(data['ddp']['stop_criteria']['armijo_condition'])
       
       # Resizing the global variables for analysing solver performance
       self.J_itr = [0.] * self.max_iter
