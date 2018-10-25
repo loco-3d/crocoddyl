@@ -13,23 +13,19 @@ class FloatingBaseMultibodyDynamicsData(DynamicsDataBase):
     self.pinocchioData = self.dynamicsModel.pinocchioModel.createData()
     self.dimConstraint = self.dynamicsModel.contactInfo.nc*\
                          self.dynamicsModel.contactInfo.dim(t)
-    self.contactJ = np.matrix(
-      np.zeros((self.dimConstraint, self.dynamicsModel.nv())))
-    self.gamma = np.matrix(np.zeros((self.dimConstraint, 1)))
+    self.contactJ = np.empty((self.dimConstraint,self.dynamicsModel.nv()))
+    self.gamma = np.empty((self.dimConstraint, 1))
     self._contactFrameIndices = self.dynamicsModel.contactInfo(t)
 
-    self.MJtJc = np.matrix(
-      np.zeros((self.dynamicsModel.nv()+self.dimConstraint,
-                self.dynamicsModel.nv()+self.dimConstraint)))
-    self.MJtJc_inv = np.matrix(
-      np.zeros((self.dynamicsModel.nv()+self.dimConstraint,
-                self.dynamicsModel.nv()+self.dimConstraint)))
-    self.MJtJc_inv_L = np.matrix(
-      np.zeros((self.dynamicsModel.nv()+self.dimConstraint,
-                self.dynamicsModel.nv()+self.dimConstraint)))
-
-    self.x = np.matrix(np.zeros((self.dynamicsModel.nxImpl(), 1)))
-    self.u = np.matrix(np.zeros((self.dynamicsModel.nu(), 1)))
+    self.MJtJc = np.zeros((self.dynamicsModel.nv()+self.dimConstraint,
+                           self.dynamicsModel.nv()+self.dimConstraint))
+    self.MJtJc_inv = np.zeros((self.dynamicsModel.nv()+self.dimConstraint,
+                               self.dynamicsModel.nv()+self.dimConstraint))
+    self.MJtJc_inv_L = np.empty((self.dynamicsModel.nv()+self.dimConstraint,
+                                 self.dynamicsModel.nv()+self.dimConstraint))
+    
+    self.x = np.empty((self.dynamicsModel.nxImpl(), 1))
+    self.u = np.empty((self.dynamicsModel.nu(), 1))
 
     self.fx = self.ddpModel.discretizer.fx(self.dynamicsModel.nv(),
                                                 self.dynamicsModel.nv(),
@@ -38,21 +34,21 @@ class FloatingBaseMultibodyDynamicsData(DynamicsDataBase):
     self.fu = self.ddpModel.discretizer.fu(self.dynamicsModel.nv(),
                                                 self.dynamicsModel.nu(),
                                                 self.dynamicsModel.nx())
-    self.gx = np.matrix(np.zeros((self.dimConstraint, self.dynamicsModel.nx())))
-    self.gu = np.matrix(np.zeros((self.dimConstraint, self.dynamicsModel.nu())))
+    self.gx = np.empty((self.dimConstraint, self.dynamicsModel.nx()))
+    self.gu = np.empty((self.dimConstraint, self.dynamicsModel.nu()))
 
     self.aq = self.fx.aq #derivative of ddq wrt q
     self.av = self.fx.av #derivative of ddq wrt v
     self.au = self.fu.au #derivative of ddq wrt u
 
     #derivative of lambda wrt q
-    self.gq = np.matrix(np.zeros((self.dimConstraint, self.dynamicsModel.nv())))
+    self.gq = np.empty((self.dimConstraint, self.dynamicsModel.nv()))
     #derivative of lambda wrt v
-    self.gv = np.matrix(np.zeros((self.dimConstraint, self.dynamicsModel.nv())))
+    self.gv = np.empty((self.dimConstraint, self.dynamicsModel.nv()))
 
     #TODO: remove these when replacing with analytical derivatives
-    self.q_pert = np.matrix(np.zeros((self.dynamicsModel.nq(), 1)))
-    self.v_pert = np.matrix(np.zeros((self.dynamicsModel.nv(), 1)))
+    self.q_pert = np.empty((self.dynamicsModel.nq(), 1))
+    self.v_pert = np.empty((self.dynamicsModel.nv(), 1))
 
   def forwardRunningCalc(self):
     # Compute all terms
@@ -134,8 +130,8 @@ class FloatingBaseMultibodyDynamicsData(DynamicsDataBase):
                 se3.integrate(self.pinocchioModel,self.x[:self.dynamicsModel.nq()],
                               self.v_pert))
       self.f(self.q_pert,self.x[self.dynamicsModel.nq():],self.u)
-      self.aq[:,i] += self.pinocchioData.ddq[:,0]
-      self.gq[:,i] += self.pinocchioData.lambda_c[:,0]
+      self.aq[:,i] += np.array(self.pinocchioData.ddq)[:,0]
+      self.gq[:,i] += np.array(self.pinocchioData.lambda_c)[:,0]
     self.aq /= self.eps
     self.gq /= self.eps
 
@@ -144,8 +140,8 @@ class FloatingBaseMultibodyDynamicsData(DynamicsDataBase):
       np.copyto(self.v_pert, self.x[self.dynamicsModel.nq():])
       self.v_pert[i] += self.eps
       self.f(self.x[:self.dynamicsModel.nq()],self.v_pert,self.u)
-      self.av[:,i] += self.pinocchioData.ddq[:,0]
-      self.gv[:,i] += self.pinocchioData.lambda_c[:,0]
+      self.av[:,i] += np.array(self.pinocchioData.ddq)[:,0]
+      self.gv[:,i] += np.array(self.pinocchioData.lambda_c)[:,0]
     self.av /= self.eps
     self.gv /= self.eps    
     return

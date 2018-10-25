@@ -64,8 +64,8 @@ class FloatingBaseMultibodyEulerDiscretizer(DiscretizerBase):
   class fx(DiscretizerBase.fx):
 
     def __init__(self, dimq, dimv, dimf, dimx):
-      self.aq = np.matrix(np.zeros((dimv, dimq))) #derivative of ddq wrt q
-      self.av = np.matrix(np.zeros((dimv, dimv))) #derivative of ddq wrt v
+      self.aq = np.empty((dimv, dimq)) #derivative of ddq wrt q
+      self.av = np.empty((dimv, dimv)) #derivative of ddq wrt v
     """
     @abc.abstractmethod
     def multiply(dt, V, self):
@@ -76,9 +76,9 @@ class FloatingBaseMultibodyEulerDiscretizer(DiscretizerBase):
     pass
     """
   class fu(object):
-
+    
     def __init__(self, dimv, dimu, dimf):
-      self.au = np.matrix(np.zeros((dimv, dimu))) #derivative of ddq wrt u
+      self.au = np.empty((dimv, dimu)) #derivative of ddq wrt u
       return
     """
     @abc.abstractmethod

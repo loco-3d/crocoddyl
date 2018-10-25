@@ -9,9 +9,9 @@ class StateCost(QuadraticCost):
     self.pinocchioModel = dynamicsModel.pinocchioModel
     self.dim = dynamicsModel.nx()
 
-    self._r = np.matrix(np.zeros((self.dim, 1)))
-    self._rx = np.matrix(np.zeros((self.dim, dynamicsModel.nx())))
-    self._ru = np.matrix(np.zeros((self.dim, dynamicsModel.nu())))
+    self._r = np.empty((self.dim, 1))
+    self._rx = np.empty((self.dim, dynamicsModel.nx()))
+    self._ru = np.empty((self.dim, dynamicsModel.nu()))
     return
 
   def forwardRunningCalc(self,dynamicsData):
@@ -30,37 +30,33 @@ class StateCost(QuadraticCost):
 
   def backwardTerminalCalc(self, dynamicsData):
     return
-
+  
   def getlu(self):
-    return np.matrix(np.zeros((self.dynamicsModel.nu(),1)))
+    return np.zeros((self.dynamicsModel.nu(),1))
 
   def getlux(self):
-    return np.matrix(
-      np.zeros((self.dynamicsModel.nu(),self.dynamicsModel.nx())))
-
+    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nx()))
+  
   def getluu(self):
-    return np.matrix(
-      np.zeros((self.dynamicsModel.nu(),self.dynamicsModel.nu())))
+    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nu()))
 
   def getlgg(self):
-    return np.matrix(
-      np.zeros((self.dynamicsModel.dimConstraint,self.dynamicsModel.dimConstraint)))
+    return np.zeros((self.dynamicsModel.dimConstraint, self.dynamicsModel.dimConstraint))
 
   def getlg(self):
-    return np.matrix(np.zeros((self.dynamicsModel.dimConstraint, 1)))
+    return np.zeros((self.dynamicsModel.dimConstraint, 1))
 
 
 class ControlCost(QuadraticCost):
-
   def __init__(self, dynamicsModel, controlDes, weights):
     QuadraticCost.__init__(self, dynamicsModel, controlDes, weights)
     self.pinocchioModel = dynamicsModel.pinocchioModel
     self.dim = dynamicsModel.nu()
 
-    self._r = np.matrix(np.zeros((self.dim, 1)))
-    self._rx = np.matrix(np.zeros((self.dim, dynamicsModel.nx())))
-    self._ru = np.matrix(np.identity(self.dim))
-    self._rg = np.matrix(np.identity(self.dim))
+    self._r = np.empty((self.dim, 1))
+    self._rx = np.zeros((self.dim, dynamicsModel.nx()))
+    self._ru = np.identity(self.dim)
+    self._rg = np.identity(self.dim)
     return
 
   def forwardRunningCalc(self, dynamicsData):
@@ -74,20 +70,18 @@ class ControlCost(QuadraticCost):
 
   def backwardTerminalCalc(self, dynamicsData):
     return
-
+    
   def getlux(self):
-    return np.matrix(
-      np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nx())))
+    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nx()))
 
   def getlx(self):
-    return np.matrix(np.zeros((self.dynamicsModel.nx(),1)))
+    return np.zeros((self.dynamicsModel.nx(),1))
 
   def getlxx(self):
-    return np.matrix(np.zeros((self.dynamicsModel.nx(), self.dynamicsModel.nx())))
+    return np.zeros((self.dynamicsModel.nx(), self.dynamicsModel.nx()))
 
   def getlgg(self):
-    return np.matrix(
-      np.zeros((self.dynamicsModel.dimConstraint, self.dynamicsModel.dimConstraint)))
+    return np.zeros((self.dynamicsModel.dimConstraint, self.dynamicsModel.dimConstraint))
 
   def getlg(self):
-    return np.matrix(np.zeros((self.dynamicsModel.dimConstraint, 1)))
+    return np.zeros((self.dynamicsModel.dimConstraint, 1))

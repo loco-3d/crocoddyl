@@ -11,9 +11,9 @@ class SE3Cost(QuadraticCost):
     self.frame_name = frame_name
     self._frame_idx = self.dynamicsModel.pinocchioModel.getFrameId(frame_name)
 
-    self._r = np.matrix(np.zeros((self.dim, 1)))
-    self._rx = np.matrix(np.zeros((self.dim, dynamicsModel.nx())))
-    self._ru = np.matrix(np.zeros((self.dim, dynamicsModel.nu())))
+    self._r = np.empty((self.dim, 1))
+    self._rx = np.zeros((self.dim, dynamicsModel.nx()))
+    self._ru = np.zeros((self.dim, dynamicsModel.nu()))
     return
 
   def forwardRunningCalc(self,dynamicsData):
@@ -33,19 +33,16 @@ class SE3Cost(QuadraticCost):
     self.backwardRunningCalc(dynamicsData)
 
   def getlux(self):
-    return np.matrix(
-      np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nx())))
-
+    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nx()))
+  
   def getluu(self):
-    return np.matrix(
-      np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nu())))
+    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nu()))
 
   def getlgg(self):
-    return np.matrix(
-      np.zeros((self.dynamicsModel.dimConstraint, self.dynamicsModel.dimConstraint)))
+    return np.zeros((self.dynamicsModel.dimConstraint, self.dynamicsModel.dimConstraint))
 
   def getlg(self):
-    return np.matrix(np.zeros((self.dynamicsModel.dimConstraint, 1)))
+    return np.zeros((self.dynamicsModel.dimConstraint, 1))
 
   def getlu(self):
-    return np.matrix(np.zeros((self.dynamicsModel.nu(), 1)))
+    return np.zeros((self.dynamicsModel.nu(),1))
