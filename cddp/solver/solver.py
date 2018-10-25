@@ -47,7 +47,6 @@ class Solver(object):
     np.copyto(ddpData.intervalDataVector[-1].Vx, ddpData.intervalDataVector[-1].costData.lx)
     np.copyto(ddpData.intervalDataVector[-1].Vxx, ddpData.intervalDataVector[-1].costData.lxx)
     for k in range(ddpData.N-1, -1, -1):
-      raw_input("start backward pass"+str(k))
       it = ddpData.intervalDataVector[k]
       itNext = ddpData.intervalDataVector[k+1]
       costData = it.costData

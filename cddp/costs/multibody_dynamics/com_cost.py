@@ -7,7 +7,7 @@ class CoMCost(QuadraticCostBase):
     QuadraticCostBase.__init__(self, dynamicsModel, comDes, weights)
     self.dim = 3
 
-    self._r = np.empty((self.dim, 1))
+    self._r = np.zeros((self.dim, 1))
     self._rx = np.zeros((self.dim, dynamicsModel.nx()))
     self._ru = np.zeros((self.dim, dynamicsModel.nu()))
     return

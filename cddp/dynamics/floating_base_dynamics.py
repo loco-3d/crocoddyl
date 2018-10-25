@@ -13,19 +13,19 @@ class FloatingBaseMultibodyDynamicsData(DynamicsDataBase):
     self.pinocchioData = self.dynamicsModel.pinocchioModel.createData()
     self.dimConstraint = self.dynamicsModel.contactInfo.nc*\
                          self.dynamicsModel.contactInfo.dim(t)
-    self.contactJ = np.empty((self.dimConstraint,self.dynamicsModel.nv()))
-    self.gamma = np.empty((self.dimConstraint, 1))
+    self.contactJ = np.zeros((self.dimConstraint,self.dynamicsModel.nv()))
+    self.gamma = np.zeros((self.dimConstraint, 1))
     self._contactFrameIndices = self.dynamicsModel.contactInfo(t)
 
     self.MJtJc = np.zeros((self.dynamicsModel.nv()+self.dimConstraint,
                            self.dynamicsModel.nv()+self.dimConstraint))
     self.MJtJc_inv = np.zeros((self.dynamicsModel.nv()+self.dimConstraint,
                                self.dynamicsModel.nv()+self.dimConstraint))
-    self.MJtJc_inv_L = np.empty((self.dynamicsModel.nv()+self.dimConstraint,
+    self.MJtJc_inv_L = np.zeros((self.dynamicsModel.nv()+self.dimConstraint,
                                  self.dynamicsModel.nv()+self.dimConstraint))
     
-    self.x = np.empty((self.dynamicsModel.nxImpl(), 1))
-    self.u = np.empty((self.dynamicsModel.nu(), 1))
+    self.x = np.zeros((self.dynamicsModel.nxImpl(), 1))
+    self.u = np.zeros((self.dynamicsModel.nu(), 1))
 
     self.fx = self.ddpModel.discretizer.fx(self.dynamicsModel.nv(),
                                                 self.dynamicsModel.nv(),
@@ -34,17 +34,17 @@ class FloatingBaseMultibodyDynamicsData(DynamicsDataBase):
     self.fu = self.ddpModel.discretizer.fu(self.dynamicsModel.nv(),
                                            self.dynamicsModel.nu(),
                                            self.dynamicsModel.nx())
-    self.gx = np.empty((self.dimConstraint, self.dynamicsModel.nx()))
-    self.gu = np.empty((self.dimConstraint, self.dynamicsModel.nu()))
+    self.gx = np.zeros((self.dimConstraint, self.dynamicsModel.nx()))
+    self.gu = np.zeros((self.dimConstraint, self.dynamicsModel.nu()))
 
     #derivative of lambda wrt q
-    self.gq = np.empty((self.dimConstraint, self.dynamicsModel.nv()))
+    self.gq = np.zeros((self.dimConstraint, self.dynamicsModel.nv()))
     #derivative of lambda wrt v
-    self.gv = np.empty((self.dimConstraint, self.dynamicsModel.nv()))
+    self.gv = np.zeros((self.dimConstraint, self.dynamicsModel.nv()))
 
     #TODO: remove these when replacing with analytical derivatives
-    self.q_pert = np.empty((self.dynamicsModel.nq(), 1))
-    self.v_pert = np.empty((self.dynamicsModel.nv(), 1))
+    self.q_pert = np.zeros((self.dynamicsModel.nq(), 1))
+    self.v_pert = np.zeros((self.dynamicsModel.nv(), 1))
 
   def forwardRunningCalc(self):
     # Compute all terms

@@ -28,8 +28,8 @@ class TerminalDDPData(DDPIntervalDataBase):
     self.dynamicsData = ddpModel.createTerminalDynamicsData(tFinal)
     self.costData = ddpModel.createTerminalCostData()
 
-    self.Vx = np.empty((ddpModel.dynamicsModel.nx(), 1))
-    self.Vxx = np.empty((ddpModel.dynamicsModel.nx(),ddpModel.dynamicsModel.nx()))
+    self.Vx = np.zeros((ddpModel.dynamicsModel.nx(), 1))
+    self.Vxx = np.zeros((ddpModel.dynamicsModel.nx(),ddpModel.dynamicsModel.nx()))
 
   def forwardCalc(self):
     """Performes the dynamics integration to generate the state and control functions"""
@@ -42,7 +42,6 @@ class TerminalDDPData(DDPIntervalDataBase):
     Pinocchio Data has already been filled with the forward pass."""
 
     #Do Not Change The Order
-    #print self.tFinal, "Final Backward Pass"
     self.costData.backwardTerminalCalc(self.ddpModel.dynamicsModel, self.dynamicsData)
     self.dynamicsData.backwardTerminalCalc()
    
@@ -64,23 +63,23 @@ class RunningDDPData(DDPIntervalDataBase):
     self.dynamicsData = ddpModel.createRunningDynamicsData(tInit)
     self.costData = ddpModel.createRunningCostData()
 
-    self.Vx = np.empty((ddpModel.dynamicsModel.nx(), 1))
-    self.Vxx = np.empty((ddpModel.dynamicsModel.nx(),ddpModel.dynamicsModel.nx()))
+    self.Vx = np.zeros((ddpModel.dynamicsModel.nx(), 1))
+    self.Vxx = np.zeros((ddpModel.dynamicsModel.nx(),ddpModel.dynamicsModel.nx()))
 
-    self.Qx = np.empty((ddpModel.dynamicsModel.nx(), 1))
-    self.Qu = np.empty((ddpModel.dynamicsModel.nu(), 1))
-    self.Qxx = np.empty((ddpModel.dynamicsModel.nx(),ddpModel.dynamicsModel.nx()))
-    self.Qux = np.empty((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nx()))
-    self.Quu = np.empty((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
+    self.Qx = np.zeros((ddpModel.dynamicsModel.nx(), 1))
+    self.Qu = np.zeros((ddpModel.dynamicsModel.nu(), 1))
+    self.Qxx = np.zeros((ddpModel.dynamicsModel.nx(),ddpModel.dynamicsModel.nx()))
+    self.Qux = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nx()))
+    self.Quu = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
     
-    self.Quu_r = np.empty((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
-    self.Qux_r = np.empty((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nx()))
-    self.L = np.empty((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
-    self.L_inv = np.empty((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
-    self.Quu_inv_minus = np.empty((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
+    self.Quu_r = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
+    self.Qux_r = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nx()))
+    self.L = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
+    self.L_inv = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
+    self.Quu_inv_minus = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
 
-    self.K = np.empty((ddpModel.dynamicsModel.nu(), ddpModel.dynamicsModel.nx()))
-    self.j = np.empty((ddpModel.dynamicsModel.nu(), 1))
+    self.K = np.zeros((ddpModel.dynamicsModel.nu(), ddpModel.dynamicsModel.nx()))
+    self.j = np.zeros((ddpModel.dynamicsModel.nu(), 1))
 
     self.jt_Quu_j = 0.
     self.jt_Qu = 0.

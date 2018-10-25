@@ -69,9 +69,9 @@ class FloatingBaseMultibodyEulerDiscretizer(DiscretizerBase):
       self.dimf = dimf
       self.dimx = dimx
       self.dt = 1e-3
-      self.aq = np.empty((dimv, dimq)) #derivative of ddq wrt q
-      self.av = np.empty((dimv, dimv)) #derivative of ddq wrt v
-      self.val = np.empty((dimf, dimf))
+      self.aq = np.zeros((dimv, dimq)) #derivative of ddq wrt q
+      self.av = np.zeros((dimv, dimv)) #derivative of ddq wrt v
+      self.val = np.zeros((dimf, dimf))
 
     def __call__(self):
       self.val[:self.dimv, :self.dimv] = np.identity(self.dimv)+self.aq*self.dt*self.dt
@@ -81,8 +81,7 @@ class FloatingBaseMultibodyEulerDiscretizer(DiscretizerBase):
       return self.val
 
     def premultiply(self,V):
-      print "Premultiplying in fx", V
-      output = np.empty((V.shape[0], self.dimx))
+      output = np.zeros((V.shape[0], self.dimx))
       output[:,:self.dimv] = V[:, :self.dimv] +\
                              np.dot(V[:, :self.dimv], self.aq)*self.dt+\
                              np.dot(V[:,self.dimv:], self.aq)*self.dt
@@ -94,7 +93,7 @@ class FloatingBaseMultibodyEulerDiscretizer(DiscretizerBase):
 
 
     def transposemultiplymat(self, V):
-      output = np.empty((self.dimf, V.shape[1]))
+      output = np.zeros((self.dimf, V.shape[1]))
       output[:self.dimv, :self.dimv] = \
                               V[:self.dimv, :self.dimv] +\
                               np.dot(self.aq.T, V[:self.dimv, :self.dimv])*self.dt*self.dt +\
@@ -116,7 +115,7 @@ class FloatingBaseMultibodyEulerDiscretizer(DiscretizerBase):
       return output
 
     def transposemultiplyarr(self, V):
-      output = np.empty((self.dimf, 1))
+      output = np.zeros((self.dimf, 1))
       output[:self.dimv, 0] = V[:self.dimv, 0] +\
                               np.dot(self.aq.T, V[:self.dimv, 0])*self.dt*self.dt +\
                               np.dot(self.aq.T, V[self.dimv:, 0])*self.dt
@@ -133,8 +132,8 @@ class FloatingBaseMultibodyEulerDiscretizer(DiscretizerBase):
       self.dimf = dimf
       #TODO: Load from ddpData
       self.dt = 1e-3
-      self.au = np.empty((dimv, dimu)) #derivative of ddq wrt u
-      self.val = np.empty((dimf, dimu))
+      self.au = np.zeros((dimv, dimu)) #derivative of ddq wrt u
+      self.val = np.zeros((dimf, dimu))
       return
 
     def premultiply(self,V):

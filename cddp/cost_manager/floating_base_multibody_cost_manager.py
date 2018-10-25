@@ -9,11 +9,11 @@ class FloatingBaseMultibodyCostManagerIntervalData(CostManagerIntervalDataBase):
   def __init__(self, dynamicsModel, costsVector):
     self.costsVector = costsVector
     self.l = 0.
-    self.lx = np.empty((dynamicsModel.nx(),1))
-    self.lu = np.empty((dynamicsModel.nu(),1))
-    self.lxx = np.empty((dynamicsModel.nx(),dynamicsModel.nx()))
-    self.lux = np.empty((dynamicsModel.nu(),dynamicsModel.nx()))
-    self.luu = np.empty((dynamicsModel.nu(),dynamicsModel.nu()))
+    self.lx = np.zeros((dynamicsModel.nx(),1))
+    self.lu = np.zeros((dynamicsModel.nu(),1))
+    self.lxx = np.zeros((dynamicsModel.nx(),dynamicsModel.nx()))
+    self.lux = np.zeros((dynamicsModel.nu(),dynamicsModel.nx()))
+    self.luu = np.zeros((dynamicsModel.nu(),dynamicsModel.nu()))
     return
 
   def forwardRunningCalc(self, dynamicsModel, dynamicsData):
