@@ -44,7 +44,7 @@ class FloatingBaseMultibodyCostManagerIntervalData(CostManagerIntervalDataBase):
       self.lux += cost.getlux()
       self.luu += cost.getluu()
     return
-  
+
   def backwardTerminalCalc(self,dynamicsModel, dynamicsData):
     for cost in self.costsVector:
       cost.backwardTerminalCalc(dynamicsData)

@@ -9,9 +9,9 @@ class StateCost(QuadraticCostBase):
     self.pinocchioModel = dynamicsModel.pinocchioModel
     self.dim = dynamicsModel.nx()
 
-    self._r = np.empty((self.dim, 1))
-    self._rx = np.empty((self.dim, dynamicsModel.nx()))
-    self._ru = np.empty((self.dim, dynamicsModel.nu()))
+    self._r = np.zeros((self.dim, 1))
+    self._rx = np.identity(dynamicsModel.nx())
+    self._ru = np.zeros((self.dim, dynamicsModel.nu()))
     return
 
   def forwardRunningCalc(self,dynamicsData):
@@ -45,7 +45,10 @@ class StateCost(QuadraticCostBase):
 
   def getlg(self):
     return np.zeros((self.dynamicsModel.dimConstraint, 1))
-    
+
+  def getlxx(self):
+    return np.diag(self.weight)
+
 class ControlCost(QuadraticCostBase):
 
   def __init__(self, dynamicsModel, controlDes, weights):
@@ -53,7 +56,7 @@ class ControlCost(QuadraticCostBase):
     self.pinocchioModel = dynamicsModel.pinocchioModel
     self.dim = dynamicsModel.nu()
 
-    self._r = np.empty((self.dim, 1))
+    self._r = np.zeros((self.dim, 1))
     self._rx = np.zeros((self.dim, dynamicsModel.nx()))
     self._ru = np.identity(self.dim)
     self._rg = np.identity(self.dim)
@@ -85,3 +88,6 @@ class ControlCost(QuadraticCostBase):
 
   def getlg(self):
     return np.zeros((self.dynamicsModel.dimConstraint, 1))
+
+  def getluu(self):
+    return np.diag(self.weight)
