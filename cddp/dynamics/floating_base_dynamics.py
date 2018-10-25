@@ -158,7 +158,8 @@ class FloatingBaseMultibodyDynamicsData(DynamicsDataBase):
 
   def deltaX(self, x0, x1):
     self.delta_x[:self.dynamicsModel.nv()] = \
-                      se3.difference(self.pinocchioModel, x0,x1)
+                      se3.difference(self.pinocchioModel,x0[:self.dynamicsModel.nq()],
+                                     x1[:self.dynamicsModel.nq()])
     self.delta_x[self.dynamicsModel.nv():] = \
                               x1[self.dynamicsModel.nq():,:]- \
                               x0[self.dynamicsModel.nq():,:]

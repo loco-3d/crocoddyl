@@ -12,15 +12,11 @@ class StateCost(QuadraticCost):
     self._r = np.zeros((self.dim, 1))
     self._rx = np.identity(dynamicsModel.nx())
     self._ru = np.zeros((self.dim, dynamicsModel.nu()))
+    self._lxx = np.diag(np.array(self.weight).squeeze())
     return
 
   def forwardRunningCalc(self,dynamicsData):
-    self._r[:self.dynamicsModel.nv()] = \
-                  se3.difference(self.pinocchioModel,
-                                 self.ref[:self.dynamicsModel.nq(),:],
-                                 dynamicsData.x[:self.dynamicsModel.nq(),:])
-    self._r[self.dynamicsModel.nv():] = dynamicsData.x[self.dynamicsModel.nq():,:]- \
-                                        self.ref[self.dynamicsModel.nq():,:]
+    self._r = dynamicsData.deltaX(self.ref, dynamicsData.x)
 
   def forwardTerminalCalc(self,dynamicsData):
     self.forwardRunningCalc(dynamicsData)
@@ -47,7 +43,7 @@ class StateCost(QuadraticCost):
     return np.zeros((self.dynamicsModel.dimConstraint, 1))
 
   def getlxx(self):
-    return np.diag(self.weight)
+    return self._lxx
 
 class ControlCost(QuadraticCost):
   def __init__(self, dynamicsModel, controlDes, weights):
@@ -59,6 +55,7 @@ class ControlCost(QuadraticCost):
     self._rx = np.zeros((self.dim, dynamicsModel.nx()))
     self._ru = np.identity(self.dim)
     self._rg = np.identity(self.dim)
+    self._luu = np.diag(np.array(self.weight).squeeze())
     return
 
   def forwardRunningCalc(self, dynamicsData):
@@ -87,3 +84,6 @@ class ControlCost(QuadraticCost):
 
   def getlg(self):
     return np.zeros((self.dynamicsModel.dimConstraint, 1))
+
+  def getluu(self):
+    return self._luu
