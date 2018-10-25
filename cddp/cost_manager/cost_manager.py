@@ -66,6 +66,12 @@ class CostManager(object):
   running and terminal cost functions of your problem.
   """
 
+  def __init__(self,dynamicsModel):
+    self.dynamicsModel = dynamicsModel
+    self.runningCosts = []
+    self.terminalCosts = []
+    pass
+  
   def createRunningData(self, ddpModel):
     return CostManagerIntervalData(ddpModel.dynamicsModel, self.runningCosts)
 
@@ -87,84 +93,3 @@ class CostManager(object):
     """
     #assertClass(cost, 'XUCost')
     self.runningCosts.append(cost)
-
-  def computeTerminalCost(self, system, data, x):
-    assert self.terminalCosts > 0, "You didn't add the terminal costs"
-    #assertClass(data.total, 'XCostData')
-
-    l = data.total.l[0]
-    l.fill(0.)
-    for k, cost in enumerate(self.terminalCosts):
-      cost_data = data.soc[k]
-      l += cost.l(system, cost_data, x)
-    return l
-
-  def computeRunningCost(self, system, data, x, u, dt):
-    assert self.runningCosts > 0, "You didn't add the runningCosts costs"
-    #assertClass(data.total, 'XUCostData')
-
-    # Computing the running cost
-    l = data.total.l[0]
-    l.fill(0.)
-    for k, cost in enumerate(self.runningCosts):
-      cost_data = data.soc[k]
-      l += cost.l(system, cost_data, x, u)
-
-    # Numerical integration of the cost function
-    # TODO we need to use the quadrature class for this
-    l *= dt
-    return l
-
-  def computeTerminalTerms(self, system, data, x):
-    assert self.terminalCosts > 0, "You didn't add the terminal costs"
-    #assertClass(data.total, 'XCostData')
-
-    l = data.total.l[0]
-    lx = data.total.lx
-    lxx = data.total.lxx
-    l.fill(0.)
-    lx.fill(0.)
-    lxx.fill(0.)
-    for k, cost in enumerate(self.terminalCosts):
-      cost_data = data.soc[k]
-      l += cost.l(system, cost_data, x)
-      lx += cost.lx(system, cost_data, x)
-      lxx += cost.lxx(system, cost_data, x)
-    return l, lx, lxx
-
-  def computeRunningTerms(self, system, data, x, u, dt):
-    assert self.runningCosts > 0, "You didn't add the running costs"
-    #assertClass(data.total, 'XUCostData')
-
-    # Computing the cost and its derivatives
-    l = data.total.l[0]
-    lx = data.total.lx
-    lu = data.total.lu
-    lxx = data.total.lxx
-    luu = data.total.luu
-    lux = data.total.lux
-    l.fill(0.)
-    lx.fill(0.)
-    lu.fill(0.)
-    lxx.fill(0.)
-    luu.fill(0.)
-    lux.fill(0.)
-    for k, cost in enumerate(self.runningCosts):
-      cost_data = data.soc[k]
-      l += cost.l(system, cost_data, x, u)
-      lx += cost.lx(system, cost_data, x, u)
-      lu += cost.lu(system, cost_data, x, u)
-      lxx += cost.lxx(system, cost_data, x, u)
-      luu += cost.luu(system, cost_data, x, u)
-      lux += cost.lux(system, cost_data, x, u)
-
-    # Numerical integration of the cost function and its derivatives
-    # TODO we need to use the quadrature class for this
-    l *= dt
-    lx *= dt
-    lu *= dt
-    lxx *= dt
-    luu *= dt
-    lux *= dt
-
-    return l, lx, lu, lxx, luu, lux

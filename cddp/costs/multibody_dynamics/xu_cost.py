@@ -1,4 +1,4 @@
-from cddp.costs.cost_base import QuadraticCost
+from cddp.costs.cost import QuadraticCost
 import pinocchio as se3
 import numpy as np
 
