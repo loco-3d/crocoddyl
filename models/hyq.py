@@ -20,7 +20,7 @@ urdf = path + 'robots/hyq_no_sensors.urdf'
 robot = se3.robot_wrapper.RobotWrapper(urdf, path, se3.JointModelFreeFlyer())
 model = robot.model
 
-timeline = np.arange(0.0, 5e-3, 1e-3)  # np.linspace(0., 0.5, 51)
+timeline = np.arange(0.0, 0.25, 1e-3)  # np.linspace(0., 0.5, 51)
 
 # Create the contact information
 contact_indices = [robot.model.getFrameId("lf_foot"),
@@ -34,7 +34,7 @@ ddpDynamics = cddp.dynamics.FloatingBaseMultibodyDynamics(robot.model, contactIn
 
 # Create the integration and dynamics derivatives schemes.
 ddpIntegrator = cddp.system.integrator.FloatingBaseMultibodyEulerIntegrator()
-ddpDiscretizer = cddp.system.discretizer.FloatingBaseMultibodyEulerDiscretizer()
+ddpDiscretizer = cddp.system.discretizer.FloatingBaseMultibodyEulerExpDiscretizer()
 
 # Initial state
 q0 = robot.q0
@@ -66,23 +66,21 @@ se3_rcost.setWeights(1000*w_se3)
 se3_tcost.setWeights(1000*w_se3)
 """
 w_se3 = np.ones((6,1))
-se3_rcost = cddp.costs.multibody_dynamics.SE3Cost(ddpDynamics, M_des, 1000.*w_se3, frame_name)
-se3_tcost = cddp.costs.multibody_dynamics.SE3Cost(ddpDynamics, M_des, 1000.*w_se3, frame_name)
-#se3_rcost.setWeights(1000*w_se3)
-#se3_tcost.setWeights(1000*w_se3)
+se3_cost = cddp.costs.multibody_dynamics.SE3Cost(ddpDynamics, M_des, 1000.*w_se3, frame_name)
 
 # Defining the CoM task
 com_des = np.matrix([ [0.1], [0.], [0.] ])
 w_com = 1000.*np.ones((3,1))
 com_cost = cddp.costs.multibody_dynamics.CoMCost(ddpDynamics, com_des, w_com)
-#com_cost.setWeights(w_com)
 
 
 # Defining the velocity and control regularization
 wx = 1e-4 * np.vstack([ np.zeros((model.nv,1)), np.ones((model.nv,1)) ])
 wu = 1e-4 * np.ones((robot.nv-6,1))
 
-x_cost = cddp.costs.multibody_dynamics.StateCost(ddpDynamics, x0, wx)
+#TODO: Why are we regularizing to zero posture!
+x_cost = cddp.costs.multibody_dynamics.StateCost(ddpDynamics,
+                                                 x0, wx)
 u_cost = cddp.costs.multibody_dynamics.ControlCost(ddpDynamics,
                                                    np.zeros((robot.model.nv-6,1)), wu)
 
@@ -90,9 +88,9 @@ u_cost = cddp.costs.multibody_dynamics.ControlCost(ddpDynamics,
 costManager = cddp.cost_manager.CostManager(ddpDynamics)
 costManager.addRunning(x_cost)
 costManager.addRunning(u_cost)
-costManager.addRunning(se3_rcost)
-costManager.addTerminal(se3_tcost)
-costManager.addRunning(com_cost)
+costManager.addRunning(se3_cost)
+costManager.addTerminal(se3_cost)
+#costManager.addRunning(com_cost)
 
 # Setting up the DDP problem
 

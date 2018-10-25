@@ -1,13 +1,12 @@
 ddp:
   stop_criteria:
     tol: 1e-5
-    max_iter: 20
-    armijo_condition: 1e-3
+    max_iter: 2000
   regularization:
     levenberg_marquard:
       mu0: 1e-8
       inc_rate: 10.
-      dec_rate: 0.5
+      dec_rate: 0.1
     value_function:
       mu0: 0.
       inc_rate: 10.
@@ -17,3 +16,5 @@ ddp:
     min_stepsize: 1e-3
     inc_rate: 2.
     dec_rate: 0.5
+    armijo_condition: 1e-3
+    change_ub: 100.

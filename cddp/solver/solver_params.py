@@ -15,7 +15,6 @@ class SolverParams(object):
       # Setting up stop criteria
       self.tol = float(data['ddp']['stop_criteria']['tol'])
       self.max_iter = int(data['ddp']['stop_criteria']['max_iter'])
-      self.armijo_condition = float(data['ddp']['stop_criteria']['armijo_condition'])
       
       # Resizing the global variables for analysing solver performance
       self.J_itr = [0.] * self.max_iter
@@ -36,3 +35,5 @@ class SolverParams(object):
       self.alpha_min = float(data['ddp']['line_search']['min_stepsize'])
       self.alpha_inc = float(data['ddp']['line_search']['inc_rate'])
       self.alpha_dec = float(data['ddp']['line_search']['dec_rate'])  
+      self.armijo_condition = float(data['ddp']['line_search']['armijo_condition'])
+      self.change_ub = float(data['ddp']['line_search']['change_ub'])

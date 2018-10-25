@@ -88,7 +88,6 @@ class Solver(object):
     np.copyto(ddpData.intervalDataVector[-1].Vxx,ddpData.intervalDataVector[-1].costData.lxx)
     for k in range(ddpData.N-1, -1, -1):
       it = ddpData.intervalDataVector[k]
-      itNext = ddpData.intervalDataVector[k+1]
       costData = it.costData
       dynamicsData = it.dynamicsData
 
@@ -98,37 +97,43 @@ class Solver(object):
       dt = it.dt
 
       # Getting the value function values of the next interval (prime interval)
-      fx = it.dynamicsData.fx
-      fu = it.dynamicsData.fu
+      fx = it.dynamicsData.fx()
+      fu = it.dynamicsData.fu()
       # Updating the Q derivatives. Note that this is Gauss-Newton step because
       # we neglect the Hessian, it's also called iLQR.
-      np.copyto(it.Qu, it.costData.lu +\
-                fu.transposemultiply(ddpData.intervalDataVector[k+1].Vx))
+
+      #TODO: UNCOMMENT AFTER DEBUG
+      """
       np.copyto(it.Qx, it.costData.lx +\
                 fx.transposemultiplyarr(ddpData.intervalDataVector[k+1].Vx))
+      np.copyto(it.Qu, it.costData.lu +\
+                fu.transposemultiply(ddpData.intervalDataVector[k+1].Vx))
       np.copyto(it.Quu, it.costData.luu +\
                 fu.transposemultiply(fu.premultiply(ddpData.intervalDataVector[k+1].Vxx)))
       np.copyto(it.Qxx, it.costData.lxx +\
                 fx.transposemultiplymat(fx.premultiply(ddpData.intervalDataVector[k+1].Vxx)))
       np.copyto(it.Qux, it.costData.lux +\
                 fu.transposemultiply(fx.premultiply(ddpData.intervalDataVector[k+1].Vxx)))
-
-      # We apply a two king of regularization called here as Levenberg-Marquat
-      # (LM) and Value (V). It's well know that the LM regularization allows us
-      # to change the search direction between Newton and steepest descent by
-      # increasing muLM. Note that steepest descent provides us guarantee to
-      # decrease our cost function but it's too slow especially in very bad
-      # scaled problems. Instead Newton direction moves faster towards the
-      # minimum but the Hessian cannot approximate well the problem in very
-      # nonlinear problems. On the other hand, the Value function regularization
-      # smooths the policy function updates; i.e. it reduces changes in the 
-      # policy and penalizes changes in the states instead of controls. In
-      # practice it reduces the number of iteration in badly posed problems.
       np.copyto(it.Quu_r, it.Quu + ddpData.muI + np.dot(ddpData.muV, fu.square()))
       if not isPositiveDefinitive(it.Quu_r, it.L):
         return False
       np.copyto(it.Qux_r, it.Qux + ddpData.muV * fu.transposemultiply(fx()))
-
+      """
+      #TODO: REMOVE AFTER DEBUG
+      np.copyto(it.Qx, it.costData.lx + np.dot(fx.T, ddpData.intervalDataVector[k+1].Vx))
+      np.copyto(it.Qu, it.costData.lu + np.dot(fu.T, ddpData.intervalDataVector[k+1].Vx))
+      np.copyto(it.Quu, it.costData.luu +\
+                np.dot(fu.T, np.dot(ddpData.intervalDataVector[k+1].Vxx, fu)))
+      np.copyto(it.Qxx, it.costData.lxx +\
+                np.dot(fx.T, np.dot(ddpData.intervalDataVector[k+1].Vxx, fx)))
+      np.copyto(it.Qux, it.costData.lux +\
+                np.dot(fu.T, np.dot(ddpData.intervalDataVector[k+1].Vxx, fx)))
+      np.copyto(it.Quu_r, it.Quu + ddpData.muI + ddpData.muV*np.dot(fu.T, fu))
+      if not isPositiveDefinitive(it.Quu_r, it.L):
+        return False
+      np.copyto(it.Qux_r, it.Qux + ddpData.muV * np.dot(fu.T, fx))
+      ########################################################################
+      
       # Computing the feedback and feedforward terms
       np.copyto(it.L_inv, np.linalg.inv(it.L))
       np.copyto(it.Quu_inv_minus, -1. * np.dot(it.L_inv.T, it.L_inv))
@@ -136,8 +141,8 @@ class Solver(object):
       np.copyto(it.j, np.dot(it.Quu_inv_minus, it.Qu))
 
       # Computing the value function derivatives of this interval
-      it.jt_Quu_j = 0.5 * (np.dot(it.j.T, np.dot(it.Quu, it.j)))[0,0]
-      it.jt_Qu = np.dot(it.j.T, it.Qu)[0,0]
+      it.jt_Quu_j = 0.5 * np.asscalar(np.dot(it.j.T, np.dot(it.Quu, it.j)))
+      it.jt_Qu = np.asscalar(np.dot(it.j.T, it.Qu))
       np.copyto(it.Vx, \
                 it.Qx + np.dot(it.K.T, np.dot(it.Quu, it.j)) +\
                 np.dot(it.K.T, it.Qu) + np.dot(it.Qux.T ,it.j))
@@ -151,10 +156,10 @@ class Solver(object):
       # Updating the local cost and expected reduction. The total values are
       # used to check the changes in the forward pass. This method is explained
       # in Tassa's PhD thesis
-      ddpData.dV_exp += ddpData.alpha * (ddpData.alpha * it.jt_Quu_j + it.jt_Qu)
+      ddpData.dV_exp -= ddpData.alpha * (ddpData.alpha * it.jt_Quu_j + it.jt_Qu)
 
       # Updating the theta and gamma given the actual knot
-      ddpData.gamma += np.dot(it.Qu.T, it.Qu)
+      ddpData.gamma += np.asscalar(np.dot(it.Qu.T, it.Qu))
       ddpData.theta -= it.jt_Quu_j + it.jt_Qu
 
     # Computing the norm of the cost gradient w.r.t. U={u0, ..., uN}
@@ -171,15 +176,10 @@ class Solver(object):
     # Resetting convergence flag
     ddpData._convergence = False
 
-    # Running an initial forward simulation
-    # and calculates the forward dynamics and
+    # Running an initial forward simulation. calculates the forward dynamics and
     # total costs
     Solver.forwardSimulation(ddpModel, ddpData)
 
-    # Resetting mu and alpha. As general rule of thumb we assume that the 
-    # quadratic model has some error respect to the true model. So we start
-    # closer to steeppest descent by adjusting the initial Levenberg-Marquardt
-    # parameter (i.e. mu)
     ddpData.muLM = solverParams.mu0LM
     ddpData.muV = solverParams.mu0V
     ddpData.alpha = solverParams.alpha0
@@ -203,7 +203,7 @@ class Solver(object):
         else:
           ddpData.muLM *= solverParams.muLM_inc
         print "\t", ("Quu isn't positive. Increasing muLM to", ddpData.muLM)
-      print "\t","\t", "--------------------------------------------------Expected Reduction:", -np.asscalar(ddpData.gamma)
+      print "\t","\t", "--------------------------------------------------Gradient Norm:", ddpData.gamma
       # Running the forward pass
       while not Solver.forwardPass(ddpModel, ddpData, solverParams):
         ddpData.alpha *= solverParams.alpha_dec
@@ -218,51 +218,61 @@ class Solver(object):
 
       # Recording the total cost, gradient, theta and alpha for each iteration.
       # This is useful for analysing the solver performance
-      self.J_itr[i] = np.asscalar(self.V)
-      self.gamma_itr[i] = np.asscalar(self.gamma)
-      self.theta_itr[i] = np.asscalar(self.theta)
-      self.alpha_itr[i] = self.alpha
-
+      """
+      ddpData.J_itr[i] = ddpData.V
+      ddpData.gamma_itr[i] = np.asscalar(ddpData.gamma)
+      ddpData.theta_itr[i] = np.asscalar(ddpData.theta)
+      ddpData.alpha_itr[i] = ddpData.alpha
+      """
       # The quadratic model is accepted so for faster convergence it's better
       # to approach to Newton search direction. We can do it by decreasing the
       # Levenberg-Marquardt parameter
-      self.muLM *= self.muLM_dec
-      if self.muLM < self.eps: # this is full Newton direction
-        self.muLM = self.eps
+      ddpData.muLM *= solverParams.muLM_dec
+
+      eps = 1e-8
+      
+      #TODO: USE EPS. 
+      if ddpData.muLM < eps: # this is full Newton direction
+        ddpData.muLM = eps
 
       # This regularization smooth the policy updates. Experimentally it helps
       # to reduce the number of iteration whenever the problem isn't well posed
-      self.muV *= self.muV_dec
-      if self.muV < self.eps:
-        self.muV = self.eps
+      ddpData.muV *= solverParams.muV_dec
+      if ddpData.muV < eps:
+        ddpData.muV = eps
 
       # Increasing the stepsize for the next iteration
-      self.alpha *= self.alpha_inc
-      if self.alpha > 1.:
-        self.alpha = 1.
+      ddpData.alpha *= solverParams.alpha_inc
+      if ddpData.alpha > 1.:
+        ddpData.alpha = 1.
 
       # Checking convergence
-      if self._convergence:
+      if ddpData._convergence:
         # Final time
         end = time.time()
-        print ("Reached convergence", np.asscalar(self.gamma), " in", end-start, "sec.")
+        print ("Reached convergence", ddpData.gamma, " in", end-start, "sec.")
 
         # Recording the solution
+        #TODO: Log solution
+        """
         self._recordSolution()
+        """
         return True
 
+      #TODO: Log solution
+      """
       if self.debug != None:
         self._recordSolution()
         self.debug.display(self.timeline, self.intervals[0].x, self.X_opt)
-
+      """
     # Final time
     end = time.time()
-    print ("Reached allowed iterations", np.asscalar(self.gamma), " in", end-start, "sec.")
+    print ("Reached allowed iterations", ddpData.gamma, " in", end-start, "sec.")
 
     # Recording the solution
-    self._recordSolution()
+    #TODO
+    #self._recordSolution()
     return False
-    pass
 
   @staticmethod
   def calc():

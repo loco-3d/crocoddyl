@@ -25,6 +25,8 @@ class CostManagerIntervalData(object):
     for cost in self.costsVector:
       cost.forwardTerminalCalc(dynamicsData)
       self.l += cost.getl()
+    #TODO: THIS IS STUPID!!!
+    self.l *=1000.
 
   def backwardRunningCalc(self, dynamicsModel, dynamicsData):
     for cost in self.costsVector:
@@ -51,6 +53,9 @@ class CostManagerIntervalData(object):
     for cost in self.costsVector:
       self.lx += cost.getlx()
       self.lxx += cost.getlxx()
+    #TODO: THIS IS STUPID!!!
+    self.lx *= 1000.
+    self.lxx *= 1000.
     return
 
       
@@ -80,10 +85,8 @@ class CostManager(object):
 
   def addTerminal(self, cost):
     """ Add a terminal cost object to the cost manager.
-
     Before adding it, it checks if this is a terminal cost objects.
     """
-    #assertClass(cost, 'XCost')
     self.terminalCosts.append(cost)
 
   def addRunning(self, cost):
@@ -91,5 +94,4 @@ class CostManager(object):
 
     Before adding it, it checks if this is a terminal cost objects.
     """
-    #assertClass(cost, 'XUCost')
     self.runningCosts.append(cost)
