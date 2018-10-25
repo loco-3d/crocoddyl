@@ -1,8 +1,6 @@
 import numpy as np
-from cost_manager_base import CostManagerBase
-from cost_manager_base import CostManagerIntervalDataBase
 
-class FloatingBaseMultibodyCostManagerIntervalData(CostManagerIntervalDataBase):
+class CostManagerIntervalData(object):
   """ Calculates and stores the interval specific cost terms.
   Depends on integrator and dynamics.
   """
@@ -56,7 +54,7 @@ class FloatingBaseMultibodyCostManagerIntervalData(CostManagerIntervalDataBase):
     return
 
       
-class FloatingBaseMultibodyCostManager(CostManagerBase):
+class CostManager(object):
   """ It computes the total cost and its derivatives for a set of running and
   terminal costs.
 
@@ -69,12 +67,10 @@ class FloatingBaseMultibodyCostManager(CostManagerBase):
   """
 
   def createRunningData(self, ddpModel):
-    return FloatingBaseMultibodyCostManagerIntervalData(ddpModel.dynamicsModel,
-                                                        self.runningCosts)
+    return CostManagerIntervalData(ddpModel.dynamicsModel, self.runningCosts)
 
   def createTerminalData(self, ddpModel):
-    return FloatingBaseMultibodyCostManagerIntervalData(ddpModel.dynamicsModel,
-                                                        self.terminalCosts)
+    return CostManagerIntervalData(ddpModel.dynamicsModel, self.terminalCosts)
 
   def addTerminal(self, cost):
     """ Add a terminal cost object to the cost manager.

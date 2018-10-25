@@ -1,11 +1,11 @@
-from cddp.costs.cost_base import QuadraticCostBase
+from cddp.costs.cost_base import QuadraticCost
 import pinocchio as se3
 import numpy as np
 
-class SE3Cost(QuadraticCostBase):
+class SE3Cost(QuadraticCost):
 
   def __init__(self, dynamicsModel, Mdes, weight, frame_name):
-    QuadraticCostBase.__init__(self, dynamicsModel, Mdes, weight)
+    QuadraticCost.__init__(self, dynamicsModel, Mdes, weight)
     self.dim = 6
     self.Mdes_inverse = self.ref.inverse()
     self.frame_name = frame_name
