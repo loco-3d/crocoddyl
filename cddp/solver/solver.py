@@ -22,12 +22,12 @@ class Solver(object):
     This is one step of the forward pass of DDP.
     """
     for k in xrange(ddpData.N):
-      ddpData.intervalDataVector[k].forwardCalc()
+      ddpModel.forwardRunningCalc(ddpData.intervalDataVector[k])
       ddpData.totalCost += ddpData.intervalDataVector[k].costData.l
       ddpModel.integrator(ddpModel, ddpData.intervalDataVector[k],
                           ddpData.intervalDataVector[k+1].dynamicsData.x)
 
-    ddpData.intervalDataVector[-1].forwardCalc()
+    ddpModel.forwardTerminalCalc(ddpData.intervalDataVector[-1])
     ddpData.totalCost += ddpData.intervalDataVector[-1].costData.l
     return
 
@@ -48,11 +48,11 @@ class Solver(object):
                                                     it.dynamicsData.x)))
 
       # Integrating the system dynamics and updating the new state value
-      ddpData.intervalDataVector[k].forwardCalc()
+      ddpModel.forwardRunningCalc(ddpData.intervalDataVector[k])
       ddpModel.integrator(ddpModel, ddpData.intervalDataVector[k],
                           ddpData.intervalDataVector[k+1].dynamicsData.x)
       ddpData.totalCost += ddpData.intervalDataVector[k].costData.l
-    ddpData.intervalDataVector[-1].forwardCalc()
+    ddpModel.forwardTerminalCalc(ddpData.intervalDataVector[-1])
     ddpData.totalCost += ddpData.intervalDataVector[-1].costData.l
 
     # Checking convergence of the current iteration
@@ -192,8 +192,9 @@ class Solver(object):
              "muLM", ddpData.muLM, "alpha", ddpData.alpha)
 
       # Prepare for DDP Backward Pass. TODO: Parallelize.
-      for itData in ddpData.intervalDataVector:
-        itData.backwardCalc()
+      for k in xrange(ddpData.N):     
+        ddpModel.backwardRunningCalc(ddpData.intervalDataVector[k])
+      ddpModel.backwardTerminalCalc(ddpData.intervalDataVector[-1])
 
       while not Solver.backwardPass(ddpModel, ddpData, solverParams):
         # Quu is not positive-definitive, so increasing the

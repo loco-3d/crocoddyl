@@ -6,15 +6,9 @@ class DDPIntervalData(object):
   __metaclass__=abc.ABCMeta
 
   def __init__(self, ddpModel):
-    self.ddpModel = ddpModel
+    self.Vx = np.zeros((ddpModel.dynamicsModel.nx(), 1))
+    self.Vxx = np.zeros((ddpModel.dynamicsModel.nx(),ddpModel.dynamicsModel.nx()))
 
-  @abc.abstractmethod
-  def forwardCalc(self):
-    pass
-  
-  @abc.abstractmethod
-  def backwardCalc(self):
-    pass
 
 class TerminalDDPData(DDPIntervalData):
   """ Data structure for the terminal interval of the DDP.
@@ -28,23 +22,7 @@ class TerminalDDPData(DDPIntervalData):
     self.dynamicsData = ddpModel.createTerminalDynamicsData(tFinal)
     self.costData = ddpModel.createTerminalCostData()
 
-    self.Vx = np.zeros((ddpModel.dynamicsModel.nx(), 1))
-    self.Vxx = np.zeros((ddpModel.dynamicsModel.nx(),ddpModel.dynamicsModel.nx()))
 
-  def forwardCalc(self):
-    """Performes the dynamics integration to generate the state and control functions"""
-    self.dynamicsData.forwardTerminalCalc()
-    self.costData.forwardTerminalCalc(self.ddpModel.dynamicsModel, self.dynamicsData);
-    pass
-
-  def backwardCalc(self):
-    """Performs the calculations before the backward pass
-    Pinocchio Data has already been filled with the forward pass."""
-
-    #Do Not Change The Order
-    self.costData.backwardTerminalCalc(self.ddpModel.dynamicsModel, self.dynamicsData)
-    self.dynamicsData.backwardTerminalCalc()
-   
 class RunningDDPData(DDPIntervalData):
   """ Data structure for the running interval of the DDP.
 
@@ -57,14 +35,10 @@ class RunningDDPData(DDPIntervalData):
 
     self.tInit = tInit
     self.tFinal = tFinal
-
     self.dt = self.tFinal-self.tInit
 
     self.dynamicsData = ddpModel.createRunningDynamicsData(tInit)
     self.costData = ddpModel.createRunningCostData()
-
-    self.Vx = np.zeros((ddpModel.dynamicsModel.nx(), 1))
-    self.Vxx = np.zeros((ddpModel.dynamicsModel.nx(),ddpModel.dynamicsModel.nx()))
 
     self.Qx = np.zeros((ddpModel.dynamicsModel.nx(), 1))
     self.Qu = np.zeros((ddpModel.dynamicsModel.nu(), 1))
@@ -83,31 +57,22 @@ class RunningDDPData(DDPIntervalData):
 
     self.jt_Quu_j = 0.
     self.jt_Qu = 0.
-    
-  def forwardCalc(self):
-    """Performes the dynamics integration to generate the state and control functions"""
-    self.dynamicsData.forwardRunningCalc()
-    self.costData.forwardRunningCalc(self.ddpModel.dynamicsModel, self.dynamicsData);
 
-  def backwardCalc(self):
-    """Performs the calculations before the backward pass"""
-    self.costData.backwardRunningCalc(self.ddpModel.dynamicsModel, self.dynamicsData)
-    self.dynamicsData.backwardRunningCalc()
 
 class DDPData(object):
   """ Base class to define the structure for storing and accessing data elements at each 
   DDP interval
   """
 
-  def __init__(self, ddp_model, timeline):
+  def __init__(self, ddpModel, timeline):
     """Initializing the data elements"""
 
     self.timeline = timeline
-    self.ddpModel = ddp_model
+    self.ddpModel = ddpModel
     self.N = len(timeline) - 1
-    self.intervalDataVector = [RunningDDPData(ddp_model, timeline[i], timeline[i+1])
+    self.intervalDataVector = [RunningDDPData(ddpModel, timeline[i], timeline[i+1])
                                for i in xrange(self.N)]
-    self.intervalDataVector.append(TerminalDDPData(ddp_model, timeline[-1]))
+    self.intervalDataVector.append(TerminalDDPData(ddpModel, timeline[-1]))
 
     #Total Cost
     self.totalCost = 0.
@@ -129,6 +94,7 @@ class DDPData(object):
     self.z_new = 0.
     self.z = 0.
 
+
 class DDPModel(object):
   """ Class to save the model information for the system, cost and dynamics
   """
@@ -137,6 +103,27 @@ class DDPModel(object):
     self.integrator = integrator
     self.discretizer = discretizer
     self.costManager = costManager
+
+  def forwardTerminalCalc(self, ddpData):
+    """Performes the dynamics integration to generate the state and control functions"""
+    ddpData.dynamicsData.forwardTerminalCalc()
+    ddpData.costData.forwardTerminalCalc(self.dynamicsModel, ddpData.dynamicsData)
+
+  def forwardRunningCalc(self, ddpData):
+    """Performes the dynamics integration to generate the state and control functions"""
+    ddpData.dynamicsData.forwardRunningCalc()
+    ddpData.costData.forwardRunningCalc(self.dynamicsModel, ddpData.dynamicsData)
+
+  def backwardTerminalCalc(self, ddpData):
+    """Performs the calculations before the backward pass
+    Pinocchio Data has already been filled with the forward pass."""
+    ddpData.dynamicsData.backwardTerminalCalc()
+    ddpData.costData.backwardTerminalCalc(self.dynamicsModel, ddpData.dynamicsData)
+
+  def backwardRunningCalc(self, ddpData):
+    """Performs the calculations before the backward pass"""
+    ddpData.dynamicsData.backwardRunningCalc()
+    ddpData.costData.backwardRunningCalc(self.dynamicsModel, ddpData.dynamicsData)
 
   def createRunningDynamicsData(self, tInit):
     return self.dynamicsModel.createData(self, tInit)
