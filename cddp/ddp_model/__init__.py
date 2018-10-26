@@ -1,3 +1,1 @@
-from ddp_data import DDPData
-from ddp_model import DDPModel
-from ddp import solve
+from ddp import DDPData, DDPModel
