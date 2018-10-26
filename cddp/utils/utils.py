@@ -1,5 +1,6 @@
 import numpy as np
 
+EPS = np.finfo(float).eps
 
 class bcolors:
   HEADER = '\033[95m'

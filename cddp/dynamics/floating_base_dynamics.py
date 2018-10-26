@@ -1,5 +1,6 @@
 from cddp.dynamics.dynamics import DynamicsModel
 from cddp.dynamics.dynamics import DynamicsData
+from cddp.utils import EPS
 import pinocchio as se3
 import numpy as np
 
@@ -7,7 +8,7 @@ class FloatingBaseMultibodyDynamicsData(DynamicsData):
   def __init__(self, ddpModel, t):
     DynamicsData.__init__(self, ddpModel)
     self.ddpModel = ddpModel
-    self.eps = ddpModel.eps
+    self.h = np.sqrt(EPS)
     self.dynamicsModel = self.ddpModel.dynamicsModel
     self.pinocchioModel = self.dynamicsModel.pinocchioModel
     self.pinocchioData = self.dynamicsModel.pinocchioModel.createData()
@@ -130,25 +131,25 @@ class FloatingBaseMultibodyDynamicsData(DynamicsData):
     # dadq #dgdq
     for i in xrange(self.dynamicsModel.nv()):
       self.v_pert.fill(0.)
-      self.v_pert[i] += self.eps
+      self.v_pert[i] += self.h
       np.copyto(self.q_pert,
                 se3.integrate(self.pinocchioModel,self.x[:self.dynamicsModel.nq()],
                               self.v_pert))
       self.f(self.q_pert,self.x[self.dynamicsModel.nq():],self.u)
       self.fx.aq[:,i] += np.array(self.pinocchioData.ddq)[:,0]
       self.gq[:,i] += np.array(self.pinocchioData.lambda_c)[:,0]
-    self.fx.aq /= self.eps
-    self.gq /= self.eps
+    self.fx.aq /= self.h
+    self.gq /= self.h
 
     # dadv #dgdv
     for i in xrange(self.dynamicsModel.nv()):
       np.copyto(self.v_pert, self.x[self.dynamicsModel.nq():])
-      self.v_pert[i] += self.eps
+      self.v_pert[i] += self.h
       self.f(self.x[:self.dynamicsModel.nq()],self.v_pert,self.u)
       self.fx.av[:,i] += np.array(self.pinocchioData.ddq)[:,0]
       self.gv[:,i] += np.array(self.pinocchioData.lambda_c)[:,0]
-    self.fx.av /= self.eps
-    self.gv /= self.eps
+    self.fx.av /= self.h
+    self.gv /= self.h
     return
 
   def backwardTerminalCalc(self):

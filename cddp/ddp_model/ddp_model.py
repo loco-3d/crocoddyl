@@ -1,3 +1,5 @@
+import numpy as np
+
 class DDPModel(object):
   """ Class to save the model information for the system, cost and dynamics
   """
@@ -6,8 +8,6 @@ class DDPModel(object):
     self.integrator = integrator
     self.discretizer = discretizer
     self.costManager = costManager
-    #TODO: Move to proper location
-    self.eps = -1.
 
   def createRunningDynamicsData(self, tInit):
     return self.dynamicsModel.createData(self, tInit)

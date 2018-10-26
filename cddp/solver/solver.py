@@ -1,7 +1,7 @@
 import time
 from itertools import izip
 import numpy as np
-from cddp.utils import isPositiveDefinitive
+from cddp.utils import isPositiveDefinitive, EPS
 
 class Solver(object):
 
@@ -229,17 +229,14 @@ class Solver(object):
       # Levenberg-Marquardt parameter
       ddpData.muLM *= solverParams.muLM_dec
 
-      eps = 1e-8
-      
-      #TODO: USE EPS. 
-      if ddpData.muLM < eps: # this is full Newton direction
-        ddpData.muLM = eps
+      if ddpData.muLM < EPS: # this is full Newton direction
+        ddpData.muLM = EPS
 
       # This regularization smooth the policy updates. Experimentally it helps
       # to reduce the number of iteration whenever the problem isn't well posed
       ddpData.muV *= solverParams.muV_dec
-      if ddpData.muV < eps:
-        ddpData.muV = eps
+      if ddpData.muV < EPS:
+        ddpData.muV = EPS
 
       # Increasing the stepsize for the next iteration
       ddpData.alpha *= solverParams.alpha_inc
