@@ -1,11 +1,11 @@
-from cddp.dynamics.dynamics_model_base import DynamicsModelBase
-from cddp.dynamics.dynamics_data_base import DynamicsDataBase
+from cddp.dynamics.dynamics import DynamicsModel
+from cddp.dynamics.dynamics import DynamicsData
 import pinocchio as se3
 import numpy as np
 
-class FloatingBaseMultibodyDynamicsData(DynamicsDataBase):
+class FloatingBaseMultibodyDynamicsData(DynamicsData):
   def __init__(self, ddpModel, t):
-    DynamicsDataBase.__init__(self, ddpModel)
+    DynamicsData.__init__(self, ddpModel)
     self.ddpModel = ddpModel
     self.eps = ddpModel.eps
     self.dynamicsModel = self.ddpModel.dynamicsModel
@@ -165,7 +165,7 @@ class FloatingBaseMultibodyDynamicsData(DynamicsDataBase):
                               x0[self.dynamicsModel.nq():,:]
     return self.delta_x
 
-class FloatingBaseMultibodyDynamics(DynamicsModelBase):
+class FloatingBaseMultibodyDynamics(DynamicsModel):
 
   def __init__(self, pinocchioModel, contactInfo):
     self.pinocchioModel = pinocchioModel
