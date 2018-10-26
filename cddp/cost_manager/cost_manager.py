@@ -6,59 +6,24 @@ class CostManagerIntervalData(object):
   """
   def __init__(self, dynamicsModel, costsVector):
     self.costsVector = costsVector
+
+
+class CostManagerTerminalData(CostManagerIntervalData):
+  def __init__(self, dynamicsModel, costsVector):
+    CostManagerIntervalData.__init__(self, dynamicsModel, costsVector)
     self.l = 0.
     self.lx = np.zeros((dynamicsModel.nx(),1))
-    self.lu = np.zeros((dynamicsModel.nu(),1))
     self.lxx = np.zeros((dynamicsModel.nx(),dynamicsModel.nx()))
+
+
+class CostManagerRunningData(CostManagerTerminalData):
+  def __init__(self, dynamicsModel, costsVector):
+    CostManagerTerminalData.__init__(self, dynamicsModel, costsVector)
+    self.lu = np.zeros((dynamicsModel.nu(),1))
     self.lux = np.zeros((dynamicsModel.nu(),dynamicsModel.nx()))
     self.luu = np.zeros((dynamicsModel.nu(),dynamicsModel.nu()))
-    return
 
-  def forwardRunningCalc(self, dynamicsModel, dynamicsData):
-    self.l = 0.
-    for cost in self.costsVector:
-      cost.forwardRunningCalc(dynamicsData)
-      self.l += cost.getl()
 
-  def forwardTerminalCalc(self, dynamicsModel, dynamicsData):
-    self.l = 0.
-    for cost in self.costsVector:
-      cost.forwardTerminalCalc(dynamicsData)
-      self.l += cost.getl()
-    #TODO: THIS IS STUPID!!!
-    self.l *=1000.
-
-  def backwardRunningCalc(self, dynamicsModel, dynamicsData):
-    for cost in self.costsVector:
-      cost.backwardRunningCalc(dynamicsData)
-    self.lx.fill(0.)
-    self.lu.fill(0.)
-    self.lxx.fill(0.)
-    self.lux.fill(0.)
-    self.luu.fill(0.)
-
-    for cost in self.costsVector:
-      self.lx += cost.getlx()
-      self.lu += cost.getlu()
-      self.lxx += cost.getlxx()
-      self.lux += cost.getlux()
-      self.luu += cost.getluu()
-    return
-
-  def backwardTerminalCalc(self,dynamicsModel, dynamicsData):
-    for cost in self.costsVector:
-      cost.backwardTerminalCalc(dynamicsData)
-    self.lx.fill(0.)
-    self.lxx.fill(0.)
-    for cost in self.costsVector:
-      self.lx += cost.getlx()
-      self.lxx += cost.getlxx()
-    #TODO: THIS IS STUPID!!!
-    self.lx *= 1000.
-    self.lxx *= 1000.
-    return
-
-      
 class CostManager(object):
   """ It computes the total cost and its derivatives for a set of running and
   terminal costs.
@@ -73,15 +38,14 @@ class CostManager(object):
 
   def __init__(self,dynamicsModel):
     self.dynamicsModel = dynamicsModel
-    self.runningCosts = []
     self.terminalCosts = []
-    pass
-  
-  def createRunningData(self, ddpModel):
-    return CostManagerIntervalData(ddpModel.dynamicsModel, self.runningCosts)
+    self.runningCosts = []
 
   def createTerminalData(self, ddpModel):
-    return CostManagerIntervalData(ddpModel.dynamicsModel, self.terminalCosts)
+    return CostManagerTerminalData(ddpModel.dynamicsModel, self.terminalCosts)
+
+  def createRunningData(self, ddpModel):
+    return CostManagerRunningData(ddpModel.dynamicsModel, self.runningCosts)
 
   def addTerminal(self, cost):
     """ Add a terminal cost object to the cost manager.
@@ -95,3 +59,48 @@ class CostManager(object):
     Before adding it, it checks if this is a terminal cost objects.
     """
     self.runningCosts.append(cost)
+
+  def forwardRunningCalc(self, costData, dynamicsData):
+    costData.l = 0.
+    for cost in costData.costsVector:
+      cost.forwardRunningCalc(dynamicsData)
+      costData.l += cost.getl()
+
+  def forwardTerminalCalc(self, costData, dynamicsData):
+    costData.l = 0.
+    for cost in costData.costsVector:
+      cost.forwardTerminalCalc(dynamicsData)
+      costData.l += cost.getl()
+    #TODO: THIS IS STUPID!!!
+    costData.l *=1000.
+
+  def backwardRunningCalc(self, costData, dynamicsData):
+    for cost in costData.costsVector:
+      cost.backwardRunningCalc(dynamicsData)
+
+    costData.lx.fill(0.)
+    costData.lu.fill(0.)
+    costData.lxx.fill(0.)
+    costData.lux.fill(0.)
+    costData.luu.fill(0.)
+    for cost in costData.costsVector:
+      costData.lx += cost.getlx()
+      costData.lu += cost.getlu()
+      costData.lxx += cost.getlxx()
+      costData.lux += cost.getlux()
+      costData.luu += cost.getluu()
+    return
+
+  def backwardTerminalCalc(self, costData, dynamicsData):
+    for cost in costData.costsVector:
+      cost.backwardTerminalCalc(dynamicsData)
+
+    costData.lx.fill(0.)
+    costData.lxx.fill(0.)
+    for cost in costData.costsVector:
+      costData.lx += cost.getlx()
+      costData.lxx += cost.getlxx()
+    #TODO: THIS IS STUPID!!!
+    costData.lx *= 1000.
+    costData.lxx *= 1000.
+    return

@@ -192,7 +192,7 @@ class Solver(object):
              "muLM", ddpData.muLM, "alpha", ddpData.alpha)
 
       # Prepare for DDP Backward Pass. TODO: Parallelize.
-      for k in xrange(ddpData.N):     
+      for k in xrange(ddpData.N):
         ddpModel.backwardRunningCalc(ddpData.intervalDataVector[k])
       ddpModel.backwardTerminalCalc(ddpData.intervalDataVector[-1])
 
