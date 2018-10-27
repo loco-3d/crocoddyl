@@ -106,23 +106,23 @@ class DDPModel(object):
 
   def forwardTerminalCalc(self, ddpData):
     """Performes the dynamics integration to generate the state and control functions"""
-    ddpData.dynamicsData.forwardTerminalCalc()
+    self.dynamicsModel.forwardTerminalCalc(ddpData.dynamicsData)
     self.costManager.forwardTerminalCalc(ddpData.costData, ddpData.dynamicsData)
 
   def forwardRunningCalc(self, ddpData):
     """Performes the dynamics integration to generate the state and control functions"""
-    ddpData.dynamicsData.forwardRunningCalc()
+    self.dynamicsModel.forwardRunningCalc(ddpData.dynamicsData)
     self.costManager.forwardRunningCalc(ddpData.costData, ddpData.dynamicsData)
 
   def backwardTerminalCalc(self, ddpData):
     """Performs the calculations before the backward pass
     Pinocchio Data has already been filled with the forward pass."""
-    ddpData.dynamicsData.backwardTerminalCalc()
+    self.dynamicsModel.backwardTerminalCalc(ddpData.dynamicsData)
     self.costManager.backwardTerminalCalc(ddpData.costData, ddpData.dynamicsData)
 
   def backwardRunningCalc(self, ddpData):
     """Performs the calculations before the backward pass"""
-    ddpData.dynamicsData.backwardRunningCalc()
+    self.dynamicsModel.backwardRunningCalc(ddpData.dynamicsData)
     self.costManager.backwardRunningCalc(ddpData.costData, ddpData.dynamicsData)
 
   def createRunningDynamicsData(self, tInit):

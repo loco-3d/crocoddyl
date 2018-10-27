@@ -8,26 +8,6 @@ class DynamicsData(object):
   def __init__(self, ddpModel):
     pass
 
-  @abc.abstractmethod
-  def forwardRunningCalc(self):
-    "implement compute all terms for forward pass"
-    pass
-
-  @abc.abstractmethod
-  def forwardTerminalCalc(self):
-    "implement compute all terms for forward pass"
-    pass
-  
-  @abc.abstractmethod
-  def backwardRunningCalc(self):
-    "implement compute all terms for backward pass"
-    pass
-
-  @abc.abstractmethod
-  def backwardTerminalCalc(self):
-    "implement compute all terms for backward pass"
-    pass
-
 
 class DynamicsModel(object):
   "Base class to define the dynamics model"
@@ -39,7 +19,31 @@ class DynamicsModel(object):
   @abc.abstractmethod
   def createData(self):
     pass
+
+  @abc.abstractmethod
+  def forwardRunningCalc(self, dynamicsData):
+    "implement compute all terms for forward pass"
+    pass
+
+  @abc.abstractmethod
+  def forwardTerminalCalc(self, dynamicsData):
+    "implement compute all terms for forward pass"
+    pass
   
+  @abc.abstractmethod
+  def backwardRunningCalc(self, dynamicsData):
+    "implement compute all terms for backward pass"
+    pass
+
+  @abc.abstractmethod
+  def backwardTerminalCalc(self, dynamicsData):
+    "implement compute all terms for backward pass"
+    pass
+
+  @abc.abstractmethod
+  def deltaX(self, x0, x1):
+    pass
+
   @abc.abstractmethod
   def nx(self):
     pass
