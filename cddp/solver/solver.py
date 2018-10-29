@@ -3,6 +3,7 @@ from itertools import izip
 import numpy as np
 from cddp.utils import isPositiveDefinitive, EPS
 
+
 class Solver(object):
 
   @staticmethod

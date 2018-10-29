@@ -1,3 +1,3 @@
 from cost_manager import \
-  CostManager, \
-  CostManagerIntervalData
+  CostModel, \
+  CostManager
