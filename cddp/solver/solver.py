@@ -1,7 +1,8 @@
 import time
 from itertools import izip
 import numpy as np
-from cddp.utils import isPositiveDefinitive
+from cddp.utils import isPositiveDefinitive, EPS
+
 
 class Solver(object):
 
@@ -22,12 +23,12 @@ class Solver(object):
     This is one step of the forward pass of DDP.
     """
     for k in xrange(ddpData.N):
-      ddpData.intervalDataVector[k].forwardCalc()
+      ddpModel.forwardRunningCalc(ddpData.intervalDataVector[k])
       ddpData.totalCost += ddpData.intervalDataVector[k].costData.l
       ddpModel.integrator(ddpModel, ddpData.intervalDataVector[k],
                           ddpData.intervalDataVector[k+1].dynamicsData.x)
 
-    ddpData.intervalDataVector[-1].forwardCalc()
+    ddpModel.forwardTerminalCalc(ddpData.intervalDataVector[-1])
     ddpData.totalCost += ddpData.intervalDataVector[-1].costData.l
     return
 
@@ -44,15 +45,15 @@ class Solver(object):
       # Computing the new control command
       np.copyto(it.dynamicsData.u, it.dynamicsData.u_prev +\
                 ddpData.alpha * it.j +\
-                np.dot(it.K, it.dynamicsData.deltaX(it.dynamicsData.x_prev,
-                                                    it.dynamicsData.x)))
+                np.dot(it.K, ddpModel.dynamicsModel.deltaX(it.dynamicsData.x_prev,
+                                                           it.dynamicsData.x)))
 
       # Integrating the system dynamics and updating the new state value
-      ddpData.intervalDataVector[k].forwardCalc()
+      ddpModel.forwardRunningCalc(ddpData.intervalDataVector[k])
       ddpModel.integrator(ddpModel, ddpData.intervalDataVector[k],
                           ddpData.intervalDataVector[k+1].dynamicsData.x)
       ddpData.totalCost += ddpData.intervalDataVector[k].costData.l
-    ddpData.intervalDataVector[-1].forwardCalc()
+    ddpModel.forwardTerminalCalc(ddpData.intervalDataVector[-1])
     ddpData.totalCost += ddpData.intervalDataVector[-1].costData.l
 
     # Checking convergence of the current iteration
@@ -192,8 +193,9 @@ class Solver(object):
              "muLM", ddpData.muLM, "alpha", ddpData.alpha)
 
       # Prepare for DDP Backward Pass. TODO: Parallelize.
-      for itData in ddpData.intervalDataVector:
-        itData.backwardCalc()
+      for k in xrange(ddpData.N):
+        ddpModel.backwardRunningCalc(ddpData.intervalDataVector[k])
+      ddpModel.backwardTerminalCalc(ddpData.intervalDataVector[-1])
 
       while not Solver.backwardPass(ddpModel, ddpData, solverParams):
         # Quu is not positive-definitive, so increasing the
@@ -229,17 +231,14 @@ class Solver(object):
       # Levenberg-Marquardt parameter
       ddpData.muLM *= solverParams.muLM_dec
 
-      eps = 1e-8
-      
-      #TODO: USE EPS. 
-      if ddpData.muLM < eps: # this is full Newton direction
-        ddpData.muLM = eps
+      if ddpData.muLM < EPS: # this is full Newton direction
+        ddpData.muLM = EPS
 
       # This regularization smooth the policy updates. Experimentally it helps
       # to reduce the number of iteration whenever the problem isn't well posed
       ddpData.muV *= solverParams.muV_dec
-      if ddpData.muV < eps:
-        ddpData.muV = eps
+      if ddpData.muV < EPS:
+        ddpData.muV = EPS
 
       # Increasing the stepsize for the next iteration
       ddpData.alpha *= solverParams.alpha_inc

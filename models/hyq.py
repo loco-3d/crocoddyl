@@ -85,7 +85,7 @@ u_cost = cddp.costs.multibody_dynamics.ControlCost(ddpDynamics,
                                                    np.zeros((robot.model.nv-6,1)), wu)
 
 # Adding the cost functions to the cost manager
-costManager = cddp.cost_manager.CostManager(ddpDynamics)
+costManager = cddp.cost_manager.CostManager()
 costManager.addRunning(x_cost)
 costManager.addRunning(u_cost)
 costManager.addRunning(se3_cost)
@@ -97,9 +97,6 @@ costManager.addTerminal(se3_cost)
 ddpModel = cddp.ddp_model.DDPModel(ddpDynamics, ddpIntegrator,
                                    ddpDiscretizer, costManager)
 ddpData = cddp.ddp_model.DDPData(ddpModel, timeline)
-
-#TODO: Move to proper location
-ddpModel.eps = 1e-8
 
 # Configuration the solver from YAML file
 solverParams = cddp.solver.SolverParams()

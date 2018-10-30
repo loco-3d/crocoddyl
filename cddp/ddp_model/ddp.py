@@ -1,143 +1,154 @@
-def calc(ddpModel, ddpData):
-  """Computes all derivatives and stores them.
-  Before calling this function, the forward pass has been already run,
-  and the state and control trajectories are present in the ddpData.
+import numpy as np
+
+
+class DDPTerminalIntervalData(object):
+  """ Data structure for a terminal interval of the DDP data.
+
+  We create data for the nominal and new state values.
   """
-  self.dynamicsData.computeAllTerms();
-  self.systemData.getAllTerms(self.ddpModel.systemModel, self.dynamicsData);
-  self.costData.getAllTerms(self.ddpModel.costModel, self.dynamicsData);
+  def __init__(self, ddpModel, tFinal):
+    """ Constructs the data of the terminal interval
 
-  
-def forwardSimulation(ddpModel, ddpData, initValue):
-  """ Initial forward simulation for starting the DDP algorithm.
+    :param ddpModel: DDP model
+    :param tFinal: final time of the internal
+    """
+    # Final time of the terminal interval
+    self.tFinal = tFinal
 
-  It integrates the system dynamics given an initial state, and a control
-  sequence. This provides the initial nominal state trajectory.
+    #TODO Nominal and new state of the terminal interval
+
+    # Dynamic and cost data of the terminal interval
+    self.dynamicsData = ddpModel.createTerminalDynamicsData(tFinal)
+    self.costData = ddpModel.createTerminalCostData()
+
+    # Value function derivatives of the terminal interval
+    self.Vx = np.zeros((ddpModel.dynamicsModel.nx(), 1))
+    self.Vxx = np.zeros((ddpModel.dynamicsModel.nx(),ddpModel.dynamicsModel.nx()))
+
+
+class DDPRunningIntervalData(object):
+  """ Data structure for a running interval of the DDP data.
+
+  We create data for the nominal and new state and control values. Additionally,
+  this data structure contains regularized terms too (e.g. Quu_r).
   """
-  # Setting the initial state
-  self.setInitalState(x0)
+  def __init__(self, ddpModel, tInit, tFinal):
+    """ Constructs the data of the running interval
 
-  # Setting the initial control sequence
-  if U != None:
-    self.setInitialControlSequence(U)
+    :param ddpModel: DDP model
+    :param tInit: initial time of the internal
+    :param tFinal: final time of the internal
+    """
+    # Duration, initial and final time of the running interval
+    self.tInit = tInit
+    self.tFinal = tFinal
+    self.dt = self.tFinal - self.tInit
 
-  # Initializing the forward pass with the initial state
-  it = self.initial_interval
-  x0 = it.x
-  np.copyto(it.x, x0)
-  np.copyto(it.x_new, x0)
-  self.V_exp[0] = 0.
+    #TODO Nominal and new state of the running interval
 
-  # Integrate the system along the initial control sequences
-  for k in range(self.N):
-    # Getting the current DDP interval
-    it = self.intervals[k]
-    it_next = self.intervals[k+1]
+    # Dynamic and cost data of the running interval
+    self.dynamicsData = ddpModel.createRunningDynamicsData(tInit)
+    self.costData = ddpModel.createRunningCostData()
 
-    # Integrating the system dynamics and updating the new state value
-    dt = it.tf - it.t0
-    x_next = \
-      self.system.stepForward(it.system, it.x, it.u, dt)
-    np.copyto(it_next.x, x_next)
-    np.copyto(it_next.x_new, x_next)
+    # Value function derivatives of the running interval
+    self.Vx = np.zeros((ddpModel.dynamicsModel.nx(), 1))
+    self.Vxx = np.zeros((ddpModel.dynamicsModel.nx(),ddpModel.dynamicsModel.nx()))
 
-    # Updating the expected Value function by numerically integrating the
-    # running cost function
-    self.V_exp[0] += \
-      self.cost_manager.computeRunningCost(self.system, it.cost, it.x, it.u, dt)
+    # Quadratic approximation of the Value function
+    self.Qx = np.zeros((ddpModel.dynamicsModel.nx(), 1))
+    self.Qu = np.zeros((ddpModel.dynamicsModel.nu(), 1))
+    self.Qxx = np.zeros((ddpModel.dynamicsModel.nx(),ddpModel.dynamicsModel.nx()))
+    self.Qux = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nx()))
+    self.Quu = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
+    self.Quu_r = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
+    self.Qux_r = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nx()))
+    self.L = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
+    self.L_inv = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
+    self.Quu_inv_minus = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
 
-  # Including the terminal state and cost
-  it = self.terminal_interval
-  it.x = self.intervals[self.N-1].x
-  self.V_exp[0] += \
-    self.cost_manager.computeTerminalCost(self.system, it.cost, it.x)  
+    # Feedback and feed-forward terms
+    self.K = np.zeros((ddpModel.dynamicsModel.nu(), ddpModel.dynamicsModel.nx()))
+    self.j = np.zeros((ddpModel.dynamicsModel.nu(), 1))
+
+    # Extra DDP terms
+    self.jt_Quu_j = 0.
+    self.jt_Qu = 0.
 
 
-def solve(ddpModel, ddpData, solverParams, initValue):
-  # Starting time
-  start = time.time()
+class DDPData(object):
+  """ Data structure for all time intervals of the DDP.
+  """
+  def __init__(self, ddpModel, timeline):
+    """ Constructs the data for all DDP time intervals
 
-  # Resetting convergence flag
-  self._convergence = False
+    :param ddpModel: DDP model
+    :param timeline: time vector
+    """
+    self.timeline = timeline
+    self.N = len(timeline) - 1
+    self.intervalDataVector = [DDPRunningIntervalData(ddpModel, timeline[i], timeline[i+1])
+                               for i in xrange(self.N)]
+    self.intervalDataVector.append(DDPTerminalIntervalData(ddpModel, timeline[-1]))
 
-  # Running an initial forward simulation given the initial state and
-  # the control sequence
-  self.forwardSimulation(x0, U)
+    #Total Cost
+    self.totalCost = 0.
+    self.totalCost_prev = 0.
+    self.dV_exp = 0.
+    self.dV = 0.
+    
+    #Run time variables
+    self._convergence = False
+    self.muLM = -1.
+    self.muV = -1.
+    self.muI = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
+    self.alpha = -1.
+    self.n_iter = -1.
 
-  # Resetting mu and alpha. As general rule of thumb we assume that the 
-  # quadratic model has some error respect to the true model. So we start
-  # closer to steeppest descent by adjusting the initial Levenberg-Marquardt
-  # parameter (i.e. mu)
-  self.muLM = self.mu0LM
-  self.muV = self.mu0V
-  self.alpha = 1.
+    #Analysis Variables
+    self.gamma = 0.
+    self.theta = 0.
+    self.z_new = 0.
+    self.z = 0.
 
-  self.n_iter = 0
-  for i in range(self.max_iter):
-    # Recording the number of iterations
-    self.n_iter = i
-    print ("Iteration", self.n_iter, "muV", self.muV,
-           "muLM", self.muLM, "alpha", self.alpha)
 
-    # Running the backward sweep
-    while not self.backwardPass(self.muLM, self.muV, self.alpha):
-      # Quu is not positive-definitive, so increasing the
-      # regularization factor
-      if self.muLM == 0.:
-        self.muLM += self.mu0LM
-      else:
-        self.muLM *= self.muLM_inc
-      print "\t", ("Quu isn't positive. Increasing muLM to", self.muLM)
-    print "\t","\t", "--------------------------------------------------Expected Reduction:", -np.asscalar(self.gamma)
-    # Running the forward pass
-    while not self.forwardPass(self.alpha):
-      self.alpha *= self.alpha_dec
-      print "\t", ("Rejected changes. Decreasing alpha to", self.alpha)
-      print "\t", "\t", "Reduction Ratio:", self.z
-      print "\t", "\t", "Expected Reduction:", -np.asscalar(self.dV_exp)
-      print "\t", "\t", "Actual Reduction:", -np.asscalar(self.dV)
-      if self.alpha < self.alpha_min:
-        print "\t", ('It cannot be improved solution')
-        self._convergence = True
-        break
+class DDPModel(object):
+  """ Class to save the model information for the system, cost and dynamics
+  """
+  def __init__(self, dynamicsModel, integrator, discretizer, costManager):
+    self.dynamicsModel = dynamicsModel
+    self.integrator = integrator
+    self.discretizer = discretizer
+    self.costManager = costManager
 
-    # Recording the total cost, gradient, theta and alpha for each iteration.
-    # This is useful for analysing the solver performance
-    self.J_itr[i] = np.asscalar(self.V)
-    self.gamma_itr[i] = np.asscalar(self.gamma)
-    self.theta_itr[i] = np.asscalar(self.theta)
-    self.alpha_itr[i] = self.alpha
+  def forwardTerminalCalc(self, ddpData):
+    """Performes the dynamics integration to generate the state and control functions"""
+    self.dynamicsModel.forwardTerminalCalc(ddpData.dynamicsData)
+    self.costManager.forwardTerminalCalc(ddpData.costData, ddpData.dynamicsData)
 
-    # The quadratic model is accepted so for faster convergence it's better
-    # to approach to Newton search direction. We can do it by decreasing the
-    # Levenberg-Marquardt parameter
-    self.muLM *= self.muLM_dec
-    if self.muLM < self.eps: # this is full Newton direction
-      self.muLM = self.eps
+  def forwardRunningCalc(self, ddpData):
+    """Performes the dynamics integration to generate the state and control functions"""
+    self.dynamicsModel.forwardRunningCalc(ddpData.dynamicsData)
+    self.costManager.forwardRunningCalc(ddpData.costData, ddpData.dynamicsData)
 
-    # Increasing the stepsize for the next iteration
-    self.alpha *= self.alpha_inc
-    if self.alpha > 1.:
-      self.alpha = 1.
+  def backwardTerminalCalc(self, ddpData):
+    """Performs the calculations before the backward pass
+    Pinocchio Data has already been filled with the forward pass."""
+    self.dynamicsModel.backwardTerminalCalc(ddpData.dynamicsData)
+    self.costManager.backwardTerminalCalc(ddpData.costData, ddpData.dynamicsData)
 
-    # Checking convergence
-    if self._convergence:
-      # Final time
-      end = time.time()
-      print ("Reached convergence", np.asscalar(self.gamma), " in", end-start, "sec.")
+  def backwardRunningCalc(self, ddpData):
+    """Performs the calculations before the backward pass"""
+    self.dynamicsModel.backwardRunningCalc(ddpData.dynamicsData)
+    self.costManager.backwardRunningCalc(ddpData.costData, ddpData.dynamicsData)
 
-      # Recording the solution
-      self._recordSolution()
-      return True
+  def createRunningDynamicsData(self, tInit):
+    return self.dynamicsModel.createData(self, tInit)
 
-    if self.debug != None:
-      self._recordSolution()
-      self.debug.display(self.timeline, self.intervals[0].x, self.X_opt)
+  def createRunningCostData(self):
+    return self.costManager.createRunningData(self.dynamicsModel)
 
-  # Final time
-  end = time.time()
-  print ("Reached allowed iterations", np.asscalar(self.gamma), " in", end-start, "sec.")
+  def createTerminalDynamicsData(self, tFinal):
+    return self.dynamicsModel.createData(self, tFinal)
 
-  # Recording the solution
-  self._recordSolution()
-  return False
+  def createTerminalCostData(self):
+    return self.costManager.createTerminalData(self.dynamicsModel)
