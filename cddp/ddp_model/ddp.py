@@ -1,76 +1,94 @@
 import numpy as np
 
 
-class DDPIntervalData(object):
-  """ Define the base class for data element for an interval."""
-  def __init__(self, ddpModel):
-    self.Vx = np.zeros((ddpModel.dynamicsModel.nx(), 1))
-    self.Vxx = np.zeros((ddpModel.dynamicsModel.nx(),ddpModel.dynamicsModel.nx()))
-
-
-class TerminalDDPData(DDPIntervalData):
-  """ Data structure for the terminal interval of the DDP.
+class DDPTerminalIntervalData(object):
+  """ Data structure for a terminal interval of the DDP data.
 
   We create data for the nominal and new state values.
   """
   def __init__(self, ddpModel, tFinal):
-    DDPIntervalData.__init__(self, ddpModel)
+    """ Constructs the data of the terminal interval
+
+    :param ddpModel: DDP model
+    :param tFinal: final time of the internal
+    """
+    # Final time of the terminal interval
     self.tFinal = tFinal
 
+    #TODO Nominal and new state of the terminal interval
+
+    # Dynamic and cost data of the terminal interval
     self.dynamicsData = ddpModel.createTerminalDynamicsData(tFinal)
     self.costData = ddpModel.createTerminalCostData()
 
+    # Value function derivatives of the terminal interval
+    self.Vx = np.zeros((ddpModel.dynamicsModel.nx(), 1))
+    self.Vxx = np.zeros((ddpModel.dynamicsModel.nx(),ddpModel.dynamicsModel.nx()))
 
-class RunningDDPData(DDPIntervalData):
-  """ Data structure for the running interval of the DDP.
+
+class DDPRunningIntervalData(object):
+  """ Data structure for a running interval of the DDP data.
 
   We create data for the nominal and new state and control values. Additionally,
   this data structure contains regularized terms too (e.g. Quu_r).
   """
-
   def __init__(self, ddpModel, tInit, tFinal):
-    DDPIntervalData.__init__(self, ddpModel)
+    """ Constructs the data of the running interval
 
+    :param ddpModel: DDP model
+    :param tInit: initial time of the internal
+    :param tFinal: final time of the internal
+    """
+    # Duration, initial and final time of the running interval
     self.tInit = tInit
     self.tFinal = tFinal
-    self.dt = self.tFinal-self.tInit
+    self.dt = self.tFinal - self.tInit
 
+    #TODO Nominal and new state of the running interval
+
+    # Dynamic and cost data of the running interval
     self.dynamicsData = ddpModel.createRunningDynamicsData(tInit)
     self.costData = ddpModel.createRunningCostData()
 
+    # Value function derivatives of the running interval
+    self.Vx = np.zeros((ddpModel.dynamicsModel.nx(), 1))
+    self.Vxx = np.zeros((ddpModel.dynamicsModel.nx(),ddpModel.dynamicsModel.nx()))
+
+    # Quadratic approximation of the Value function
     self.Qx = np.zeros((ddpModel.dynamicsModel.nx(), 1))
     self.Qu = np.zeros((ddpModel.dynamicsModel.nu(), 1))
     self.Qxx = np.zeros((ddpModel.dynamicsModel.nx(),ddpModel.dynamicsModel.nx()))
     self.Qux = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nx()))
     self.Quu = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
-    
     self.Quu_r = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
     self.Qux_r = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nx()))
     self.L = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
     self.L_inv = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
     self.Quu_inv_minus = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
 
+    # Feedback and feed-forward terms
     self.K = np.zeros((ddpModel.dynamicsModel.nu(), ddpModel.dynamicsModel.nx()))
     self.j = np.zeros((ddpModel.dynamicsModel.nu(), 1))
 
+    # Extra DDP terms
     self.jt_Quu_j = 0.
     self.jt_Qu = 0.
 
 
 class DDPData(object):
-  """ Base class to define the structure for storing and accessing data elements at each 
-  DDP interval
+  """ Data structure for all time intervals of the DDP.
   """
-
   def __init__(self, ddpModel, timeline):
-    """Initializing the data elements"""
+    """ Constructs the data for all DDP time intervals
 
+    :param ddpModel: DDP model
+    :param timeline: time vector
+    """
     self.timeline = timeline
-    self.ddpModel = ddpModel
     self.N = len(timeline) - 1
-    self.intervalDataVector = [RunningDDPData(ddpModel, timeline[i], timeline[i+1])
+    self.intervalDataVector = [DDPRunningIntervalData(ddpModel, timeline[i], timeline[i+1])
                                for i in xrange(self.N)]
-    self.intervalDataVector.append(TerminalDDPData(ddpModel, timeline[-1]))
+    self.intervalDataVector.append(DDPTerminalIntervalData(ddpModel, timeline[-1]))
 
     #Total Cost
     self.totalCost = 0.
@@ -82,10 +100,10 @@ class DDPData(object):
     self._convergence = False
     self.muLM = -1.
     self.muV = -1.
-    self.muI = np.zeros((self.ddpModel.dynamicsModel.nu(),self.ddpModel.dynamicsModel.nu()))
+    self.muI = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
     self.alpha = -1.
     self.n_iter = -1.
-    
+
     #Analysis Variables
     self.gamma = 0.
     self.theta = 0.
