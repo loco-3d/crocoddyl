@@ -37,65 +37,6 @@ class RunningCostData(TerminalCostData):
     self.luu = np.zeros((dynamicsModel.nu(),dynamicsModel.nu()))
 
 
-class CostComputations:
-  """ Static functions for computing the total cost value and its derivatives
-  given a cost model.
-
-  Given a cost model (i.e. a cost manager), these routines compute the total
-  cost and its derivatives. The derivatives are Jacobian and Hessian with
-  respect to the state and control vectors. The results of each routine are
-  stored in cost data.
-  """
-  @staticmethod
-  def forwardRunningCalc(costManager, costData, dynamicsData):
-    costData.l = 0.
-    for cost in costManager.runningCosts:
-      cost.forwardRunningCalc(dynamicsData)
-      costData.l += cost.getl()
-
-  @staticmethod
-  def forwardTerminalCalc(costManager, costData, dynamicsData):
-    costData.l = 0.
-    for cost in costManager.terminalCosts:
-      cost.forwardTerminalCalc(dynamicsData)
-      costData.l += cost.getl()
-    #TODO: THIS IS STUPID!!!
-    costData.l *=1000.
-
-  @staticmethod
-  def backwardRunningCalc(costManager, costData, dynamicsData):
-    for cost in costManager.runningCosts:
-      cost.backwardRunningCalc(dynamicsData)
-
-    costData.lx.fill(0.)
-    costData.lu.fill(0.)
-    costData.lxx.fill(0.)
-    costData.lux.fill(0.)
-    costData.luu.fill(0.)
-    for cost in costManager.runningCosts:
-      costData.lx += cost.getlx()
-      costData.lu += cost.getlu()
-      costData.lxx += cost.getlxx()
-      costData.lux += cost.getlux()
-      costData.luu += cost.getluu()
-    return
-
-  @staticmethod
-  def backwardTerminalCalc(costManager, costData, dynamicsData):
-    for cost in costManager.terminalCosts:
-      cost.backwardTerminalCalc(dynamicsData)
-
-    costData.lx.fill(0.)
-    costData.lxx.fill(0.)
-    for cost in costManager.terminalCosts:
-      costData.lx += cost.getlx()
-      costData.lxx += cost.getlxx()
-    #TODO: THIS IS STUPID!!!
-    costData.lx *= 1000.
-    costData.lxx *= 1000.
-    return
-
-
 class CostManager(object):
   """ Stacks a set of terminal and running cost functions.
 
@@ -107,12 +48,6 @@ class CostManager(object):
   Static functions define the routines used for computing the cost value and
   its derivatives.
   """
-  # Static functions that defines all cost computations
-  forwardRunningCalc = CostComputations.forwardRunningCalc
-  forwardTerminalCalc = CostComputations.forwardTerminalCalc
-  backwardRunningCalc = CostComputations.backwardRunningCalc
-  backwardTerminalCalc = CostComputations.backwardTerminalCalc
-
   def __init__(self):
     """ Construct the internal vector of terminal and cost functions.
     """
@@ -146,3 +81,47 @@ class CostManager(object):
     Before adding it, it checks if this is a terminal cost objects.
     """
     self.runningCosts.append(cost)
+
+  # Static functions that defines all cost computations
+  def forwardRunningCalc(costManager, costData, dynamicsData):
+    costData.l = 0.
+    for cost in costManager.runningCosts:
+      cost.forwardRunningCalc(dynamicsData)
+      costData.l += cost.getl()
+
+  def forwardTerminalCalc(costManager, costData, dynamicsData):
+    costData.l = 0.
+    for cost in costManager.terminalCosts:
+      cost.forwardTerminalCalc(dynamicsData)
+      costData.l += cost.getl()
+    #TODO: THIS IS STUPID!!!
+    costData.l *=1000.
+
+  def backwardRunningCalc(costManager, costData, dynamicsData):
+    for cost in costManager.runningCosts:
+      cost.backwardRunningCalc(dynamicsData)
+
+    costData.lx.fill(0.)
+    costData.lu.fill(0.)
+    costData.lxx.fill(0.)
+    costData.lux.fill(0.)
+    costData.luu.fill(0.)
+    for cost in costManager.runningCosts:
+      costData.lx += cost.getlx()
+      costData.lu += cost.getlu()
+      costData.lxx += cost.getlxx()
+      costData.lux += cost.getlux()
+      costData.luu += cost.getluu()
+
+  def backwardTerminalCalc(costManager, costData, dynamicsData):
+    for cost in costManager.terminalCosts:
+      cost.backwardTerminalCalc(dynamicsData)
+
+    costData.lx.fill(0.)
+    costData.lxx.fill(0.)
+    for cost in costManager.terminalCosts:
+      costData.lx += cost.getlx()
+      costData.lxx += cost.getlxx()
+    #TODO: THIS IS STUPID!!!
+    costData.lx *= 1000.
+    costData.lxx *= 1000.
