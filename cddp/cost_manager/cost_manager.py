@@ -37,7 +37,66 @@ class RunningCostData(TerminalCostData):
     self.luu = np.zeros((dynamicsModel.nu(),dynamicsModel.nu()))
 
 
-class CostModel(object):
+class CostComputations:
+  """ Static functions for computing the total cost value and its derivatives
+  given a cost model.
+
+  Given a cost model (i.e. a cost manager), these routines compute the total
+  cost and its derivatives. The derivatives are Jacobian and Hessian with
+  respect to the state and control vectors. The results of each routine are
+  stored in cost data.
+  """
+  @staticmethod
+  def forwardRunningCalc(costManager, costData, dynamicsData):
+    costData.l = 0.
+    for cost in costManager.runningCosts:
+      cost.forwardRunningCalc(dynamicsData)
+      costData.l += cost.getl()
+
+  @staticmethod
+  def forwardTerminalCalc(costManager, costData, dynamicsData):
+    costData.l = 0.
+    for cost in costManager.terminalCosts:
+      cost.forwardTerminalCalc(dynamicsData)
+      costData.l += cost.getl()
+    #TODO: THIS IS STUPID!!!
+    costData.l *=1000.
+
+  @staticmethod
+  def backwardRunningCalc(costManager, costData, dynamicsData):
+    for cost in costManager.runningCosts:
+      cost.backwardRunningCalc(dynamicsData)
+
+    costData.lx.fill(0.)
+    costData.lu.fill(0.)
+    costData.lxx.fill(0.)
+    costData.lux.fill(0.)
+    costData.luu.fill(0.)
+    for cost in costManager.runningCosts:
+      costData.lx += cost.getlx()
+      costData.lu += cost.getlu()
+      costData.lxx += cost.getlxx()
+      costData.lux += cost.getlux()
+      costData.luu += cost.getluu()
+    return
+
+  @staticmethod
+  def backwardTerminalCalc(costManager, costData, dynamicsData):
+    for cost in costManager.terminalCosts:
+      cost.backwardTerminalCalc(dynamicsData)
+
+    costData.lx.fill(0.)
+    costData.lxx.fill(0.)
+    for cost in costManager.terminalCosts:
+      costData.lx += cost.getlx()
+      costData.lxx += cost.getlxx()
+    #TODO: THIS IS STUPID!!!
+    costData.lx *= 1000.
+    costData.lxx *= 1000.
+    return
+
+
+class CostManager(object):
   """ Stacks a set of terminal and running cost functions.
 
   It stacks a set of terminal and running cost used for computing the cost
@@ -45,7 +104,15 @@ class CostModel(object):
   costs requires its own data, which it is created by calling the
   createTerminalData or createRunningData functions. Note that before doing
   that, you have to add the running and terminal cost functions of your problem.
+  Static functions define the routines used for computing the cost value and
+  its derivatives.
   """
+  # Static functions that defines all cost computations
+  forwardRunningCalc = CostComputations.forwardRunningCalc
+  forwardTerminalCalc = CostComputations.forwardTerminalCalc
+  backwardRunningCalc = CostComputations.backwardRunningCalc
+  backwardTerminalCalc = CostComputations.backwardTerminalCalc
+
   def __init__(self):
     """ Construct the internal vector of terminal and cost functions.
     """
@@ -79,61 +146,3 @@ class CostModel(object):
     Before adding it, it checks if this is a terminal cost objects.
     """
     self.runningCosts.append(cost)
-
-
-class CostManager(object):
-  """ Computes the total cost value and its derivatives from a cost model.
-
-  Given a cost model, the cost manager computes the total cost and its
-  derivatives. The derivatives are Jacobian and Hessian with respect to the
-  state and control vectors. The results of each routine are stored in cost
-  data.
-  """
-  @staticmethod
-  def forwardRunningCalc(costModel, costData, dynamicsData):
-    costData.l = 0.
-    for cost in costModel.runningCosts:
-      cost.forwardRunningCalc(dynamicsData)
-      costData.l += cost.getl()
-
-  @staticmethod
-  def forwardTerminalCalc(costModel, costData, dynamicsData):
-    costData.l = 0.
-    for cost in costModel.terminalCosts:
-      cost.forwardTerminalCalc(dynamicsData)
-      costData.l += cost.getl()
-    #TODO: THIS IS STUPID!!!
-    costData.l *=1000.
-
-  @staticmethod
-  def backwardRunningCalc(costModel, costData, dynamicsData):
-    for cost in costModel.runningCosts:
-      cost.backwardRunningCalc(dynamicsData)
-
-    costData.lx.fill(0.)
-    costData.lu.fill(0.)
-    costData.lxx.fill(0.)
-    costData.lux.fill(0.)
-    costData.luu.fill(0.)
-    for cost in costModel.runningCosts:
-      costData.lx += cost.getlx()
-      costData.lu += cost.getlu()
-      costData.lxx += cost.getlxx()
-      costData.lux += cost.getlux()
-      costData.luu += cost.getluu()
-    return
-
-  @staticmethod
-  def backwardTerminalCalc(costModel, costData, dynamicsData):
-    for cost in costModel.terminalCosts:
-      cost.backwardTerminalCalc(dynamicsData)
-
-    costData.lx.fill(0.)
-    costData.lxx.fill(0.)
-    for cost in costModel.terminalCosts:
-      costData.lx += cost.getlx()
-      costData.lxx += cost.getlxx()
-    #TODO: THIS IS STUPID!!!
-    costData.lx *= 1000.
-    costData.lxx *= 1000.
-    return

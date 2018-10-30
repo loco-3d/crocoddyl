@@ -1,3 +1,1 @@
-from cost_manager import \
-  CostModel, \
-  CostManager
+from cost_manager import CostManager

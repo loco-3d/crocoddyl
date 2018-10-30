@@ -1,5 +1,4 @@
 import numpy as np
-from cddp.cost_manager import CostManager
 
 
 class DDPIntervalData(object):
@@ -97,41 +96,41 @@ class DDPData(object):
 class DDPModel(object):
   """ Class to save the model information for the system, cost and dynamics
   """
-  def __init__(self, dynamicsModel, integrator, discretizer, costModel):
+  def __init__(self, dynamicsModel, integrator, discretizer, costManager):
     self.dynamicsModel = dynamicsModel
     self.integrator = integrator
     self.discretizer = discretizer
-    self.costModel = costModel
+    self.costManager = costManager
 
   def forwardTerminalCalc(self, ddpData):
     """Performes the dynamics integration to generate the state and control functions"""
     self.dynamicsModel.forwardTerminalCalc(ddpData.dynamicsData)
-    CostManager.forwardTerminalCalc(self.costModel, ddpData.costData, ddpData.dynamicsData)
+    self.costManager.forwardTerminalCalc(ddpData.costData, ddpData.dynamicsData)
 
   def forwardRunningCalc(self, ddpData):
     """Performes the dynamics integration to generate the state and control functions"""
     self.dynamicsModel.forwardRunningCalc(ddpData.dynamicsData)
-    CostManager.forwardRunningCalc(self.costModel, ddpData.costData, ddpData.dynamicsData)
+    self.costManager.forwardRunningCalc(ddpData.costData, ddpData.dynamicsData)
 
   def backwardTerminalCalc(self, ddpData):
     """Performs the calculations before the backward pass
     Pinocchio Data has already been filled with the forward pass."""
     self.dynamicsModel.backwardTerminalCalc(ddpData.dynamicsData)
-    CostManager.backwardTerminalCalc(self.costModel, ddpData.costData, ddpData.dynamicsData)
+    self.costManager.backwardTerminalCalc(ddpData.costData, ddpData.dynamicsData)
 
   def backwardRunningCalc(self, ddpData):
     """Performs the calculations before the backward pass"""
     self.dynamicsModel.backwardRunningCalc(ddpData.dynamicsData)
-    CostManager.backwardRunningCalc(self.costModel, ddpData.costData, ddpData.dynamicsData)
+    self.costManager.backwardRunningCalc(ddpData.costData, ddpData.dynamicsData)
 
   def createRunningDynamicsData(self, tInit):
     return self.dynamicsModel.createData(self, tInit)
 
   def createRunningCostData(self):
-    return self.costModel.createRunningData(self.dynamicsModel)
+    return self.costManager.createRunningData(self.dynamicsModel)
 
   def createTerminalDynamicsData(self, tFinal):
     return self.dynamicsModel.createData(self, tFinal)
 
   def createTerminalCostData(self):
-    return self.costModel.createTerminalData(self.dynamicsModel)
+    return self.costManager.createTerminalData(self.dynamicsModel)
