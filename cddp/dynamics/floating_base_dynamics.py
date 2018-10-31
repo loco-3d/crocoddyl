@@ -60,10 +60,8 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     self.pinocchioModel = pinocchioModel
     self.contactInfo = contactInfo
 
-
     self._nq = self.pinocchioModel.nq
     self._nv = self.pinocchioModel.nv
-    self.delta_x = np.zeros((self._nx,1))
 
   def createData(self, ddpModel, tInit):
     return FloatingBaseMultibodyDynamicsData(ddpModel, tInit)
@@ -180,11 +178,10 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
   def nv(self):
     return self._nv
 
-  def deltaX(self, x0, x1):
-    self.delta_x[:self.nv()] = \
-                      se3.difference(self.pinocchioModel,
-                                     x0[:self.nq()], x1[:self.nq()])
-    self.delta_x[self.nv():] = \
-                              x1[self.nq():,:]- \
-                              x0[self.nq():,:]
-    return self.delta_x
+  def deltaX(dynamicsModel, dynamicsData, x0, x1):
+    dynamicsData.diff_x[:dynamicsModel.nv()] = \
+        se3.difference(dynamicsModel.pinocchioModel,
+                       x0[:dynamicsModel.nq()], x1[:dynamicsModel.nq()])
+    dynamicsData.diff_x[dynamicsModel.nv():] = \
+        x1[dynamicsModel.nq():,:] - x0[dynamicsModel.nq():,:]
+    return dynamicsData.diff_x

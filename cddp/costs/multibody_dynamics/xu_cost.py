@@ -16,7 +16,7 @@ class StateCost(QuadraticCost):
     return
 
   def forwardRunningCalc(self, dynamicsData):
-    self._r = self.dynamicsModel.deltaX(self.ref, dynamicsData.x)
+    self._r = self.dynamicsModel.deltaX(dynamicsData, self.ref, dynamicsData.x)
 
   def forwardTerminalCalc(self, dynamicsData):
     self.forwardRunningCalc(dynamicsData)

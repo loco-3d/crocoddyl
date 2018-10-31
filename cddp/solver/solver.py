@@ -45,7 +45,8 @@ class Solver(object):
       # Computing the new control command
       np.copyto(it.dynamicsData.u, it.dynamicsData.u_prev +\
                 ddpData.alpha * it.j +\
-                np.dot(it.K, ddpModel.dynamicsModel.deltaX(it.dynamicsData.x_prev,
+                np.dot(it.K, ddpModel.dynamicsModel.deltaX(it.dynamicsData,
+                                                           it.dynamicsData.x_prev,
                                                            it.dynamicsData.x)))
 
       # Integrating the system dynamics and updating the new state value

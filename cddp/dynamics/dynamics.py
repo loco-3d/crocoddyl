@@ -1,12 +1,14 @@
 import abc
+import numpy as np
+
 
 class DynamicsData(object):
   "Base class to define interface for Dynamics"
-  __metaclass__=abc.ABCMeta
+  __metaclass__ = abc.ABCMeta
 
   @abc.abstractmethod
   def __init__(self, ddpModel):
-    pass
+    self.diff_x = np.zeros((ddpModel.dynamicsModel.nx(), 1))
 
 
 class DynamicsModel(object):
@@ -42,8 +44,8 @@ class DynamicsModel(object):
   def createData(self):
     pass
 
-  @abc.abstractmethod
-  def deltaX(self, x0, x1):
+  @staticmethod
+  def deltaX(dynamicsModel, dynamicsData, x0, x1):
     pass
 
   def nxImpl(self):
