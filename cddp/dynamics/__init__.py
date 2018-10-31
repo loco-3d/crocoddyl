@@ -1,1 +1,1 @@
-from floating_base_dynamics import FloatingBaseMultibodyDynamics, FloatingBaseMultibodyDynamicsData
+from floating_base_dynamics import FloatingBaseMultibodyDynamics
