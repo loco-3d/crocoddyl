@@ -1,5 +1,6 @@
 import numpy as np
 
+EPS = np.finfo(float).eps
 
 class bcolors:
   HEADER = '\033[95m'
@@ -22,6 +23,8 @@ def isPositiveDefinitive(A, L):
   try:
     np.copyto(L, np.linalg.cholesky(A))
   except np.linalg.LinAlgError:
+    print A, np.linalg.norm(A)
+    raw_input("check quu")
     return False
   return True
 
