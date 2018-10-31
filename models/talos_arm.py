@@ -12,10 +12,10 @@ constraint = False
 
 
 # Creating the system model
-import rospkg
 filename = str(os.path.dirname(os.path.abspath(__file__)))
-path = rospkg.RosPack().get_path('talos_data')
-urdf = path + '/robots/talos_left_arm.urdf'
+os.environ['ROS_PACKAGE_PATH'] = filename
+path = filename + '/talos_data/'
+urdf = path + 'robots/talos_left_arm.urdf'
 robot = se3.robot_wrapper.RobotWrapper(urdf, path)
 model = robot.model
 # system = cddp.NumDiffForwardDynamics(model)
@@ -56,7 +56,7 @@ timeline = np.arange(0.0, 0.25, 1e-3)  # np.linspace(0., 0.5, 51)
 ddp = cddp.DDP(system, cost_manager, timeline, cddp.DDPDebug(robot))
 
 # Configuration the solver from YAML file
-ddp.setFromConfigFile(filename + "/arm_config.yaml")
+ddp.setFromConfigFile(filename + "/talos_arm_config.yaml")
 
 # Solving the problem
 ddp.compute(x0)
@@ -73,8 +73,9 @@ print robot.framePosition(qf, frame_idx)
 
 if plot:
   J = ddp.getTotalCostSequence()
-  gamma, theta, alpha = ddp.getConvergenceSequence()
-  cddp.plotDDPConvergence(J, gamma, theta, alpha)
+  gamma, theta, alpha, muLM, muV = ddp.getConvergenceSequence()
+  cddp.plotDDPConvergence(J, muLM, muV, gamma, theta, alpha)
+
 
 if display:
   T = timeline
@@ -93,8 +94,8 @@ if constraint:
 
   if plot:
     J = ddp.getTotalCostSequence()
-    gamma, theta, alpha = ddp.getConvergenceSequence()
-    cddp.plotDDPConvergence(J, gamma, theta, alpha)
+    gamma, theta, alpha, muLM, muV = ddp.getConvergenceSequence()
+    cddp.plotDDPConvergence(J, muLM, muV, gamma, theta, alpha)
 
   if display:
     X = ddp.getStateTrajectory()

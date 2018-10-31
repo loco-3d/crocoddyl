@@ -70,24 +70,32 @@ def visualizePlan(robot, T, x0, X, frame_idx=None, path=False):
     t0 = T[k+1]
     it += 1
 
-def plotDDPConvergence(J, gamma, theta, alpha):
+def plotDDPConvergence(J, muLM, muV, gamma, theta, alpha):
   import matplotlib.pyplot as plt
 
-  plt.figure(1)
+  plt.figure(1,figsize=(6.4, 8))
   # Plotting the total cost sequence
-  plt.subplot(311)
+  plt.subplot(511)
   plt.ylabel('cost')
   plt.plot(J)
 
-  # Plotting the gradient sequence
-  plt.subplot(312)
-  plt.plot(gamma, label='gamma')
-  plt.plot(theta, label='theta')
+  # Ploting mu sequences
+  plt.subplot(512)
+  plt.ylabel('mu')
+  plt.plot(muLM, label='LM')
+  plt.plot(muV, label='V')
   plt.legend()
-  plt.ylabel('gradient')
+
+  # Plotting the gradient sequence (gamma and theta)
+  plt.subplot(513)
+  plt.ylabel('gamma')
+  plt.plot(gamma)
+  plt.subplot(514)
+  plt.ylabel('theta')
+  plt.plot(theta)
 
   # Plotting the alpha sequence
-  plt.subplot(313)
+  plt.subplot(515)
   plt.ylabel('alpha')
   ind = np.arange(len(alpha))
   plt.bar(ind, alpha)
