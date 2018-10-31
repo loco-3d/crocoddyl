@@ -15,10 +15,10 @@ class StateCost(QuadraticCost):
     self._lxx = np.diag(np.array(self.weight).squeeze())
     return
 
-  def forwardRunningCalc(self,dynamicsData):
+  def forwardRunningCalc(self, dynamicsData):
     self._r = self.dynamicsModel.deltaX(self.ref, dynamicsData.x)
 
-  def forwardTerminalCalc(self,dynamicsData):
+  def forwardTerminalCalc(self, dynamicsData):
     self.forwardRunningCalc(dynamicsData)
 
   def backwardRunningCalc(self, dynamicsData):
@@ -26,24 +26,19 @@ class StateCost(QuadraticCost):
 
   def backwardTerminalCalc(self, dynamicsData):
     return
-  
+
   def getlu(self):
     return np.zeros((self.dynamicsModel.nu(),1))
 
-  def getlux(self):
-    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nx()))
+  def getlxx(self):
+    return self._lxx
   
   def getluu(self):
     return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nu()))
 
-  def getlgg(self):
-    return np.zeros((self.dynamicsModel.dimConstraint, self.dynamicsModel.dimConstraint))
+  def getlux(self):
+    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nx()))
 
-  def getlg(self):
-    return np.zeros((self.dynamicsModel.dimConstraint, 1))
-
-  def getlxx(self):
-    return self._lxx
 
 class ControlCost(QuadraticCost):
   def __init__(self, dynamicsModel, controlDes, weights):
@@ -61,7 +56,7 @@ class ControlCost(QuadraticCost):
   def forwardRunningCalc(self, dynamicsData):
     np.copyto(self._r, dynamicsData.u-self.ref)
 
-  def forwardTerminalCalc(self,dynamicsData):
+  def forwardTerminalCalc(self, dynamicsData):
     self.forwardRunningCalc(dynamicsData)
 
   def backwardRunningCalc(self, dynamicsData):
@@ -69,9 +64,6 @@ class ControlCost(QuadraticCost):
 
   def backwardTerminalCalc(self, dynamicsData):
     return
-    
-  def getlux(self):
-    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nx()))
 
   def getlx(self):
     return np.zeros((self.dynamicsModel.nx(),1))
@@ -79,11 +71,8 @@ class ControlCost(QuadraticCost):
   def getlxx(self):
     return np.zeros((self.dynamicsModel.nx(), self.dynamicsModel.nx()))
 
-  def getlgg(self):
-    return np.zeros((self.dynamicsModel.dimConstraint, self.dynamicsModel.dimConstraint))
-
-  def getlg(self):
-    return np.zeros((self.dynamicsModel.dimConstraint, 1))
-
   def getluu(self):
     return self._luu
+
+  def getlux(self):
+    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nx()))

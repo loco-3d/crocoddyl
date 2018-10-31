@@ -50,11 +50,11 @@ class QuadraticCost(Cost):
   def getlu(self):
     return np.dot(self._ru.T, np.multiply(self.weight, self._r))
 
-  def getlux(self):
-    return np.dot(self._ru.T, np.multiply(self.weight, self._rx))
+  def getlxx(self):
+    return np.dot(self._rx.T, np.multiply(self.weight, self._rx))
 
   def getluu(self):
     return np.dot(self._ru.T, np.multiply(self.weight, self._ru))
 
-  def getlxx(self):
-    return np.dot(self._rx.T, np.multiply(self.weight, self._rx))
+  def getlux(self):
+    return np.dot(self._ru.T, np.multiply(self.weight, self._rx))
