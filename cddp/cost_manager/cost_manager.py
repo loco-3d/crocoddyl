@@ -94,8 +94,6 @@ class CostManager(object):
     for cost in costManager.terminalCosts:
       cost.forwardTerminalCalc(dynamicsData)
       costData.l += cost.getl()
-    #TODO: THIS IS STUPID!!!
-    costData.l *=1000.
 
   def backwardRunningCalc(costManager, costData, dynamicsData):
     for cost in costManager.runningCosts:
@@ -122,6 +120,3 @@ class CostManager(object):
     for cost in costManager.terminalCosts:
       costData.lx += cost.getlx()
       costData.lxx += cost.getlxx()
-    #TODO: THIS IS STUPID!!!
-    costData.lx *= 1000.
-    costData.lxx *= 1000.
