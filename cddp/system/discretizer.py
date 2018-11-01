@@ -159,11 +159,6 @@ class FloatingBaseMultibodyEulerExpDiscretizer(DiscretizerBase):
   def __init__(self):
     return
 
-  @staticmethod
-  def __multiply__(fx, ):
-    ddpIData.dynamicsData.fx
-    return
-
   class fx(DiscretizerBase.fx):
 
     def __init__(self, dimq, dimv, dimf, dimx):
@@ -175,7 +170,8 @@ class FloatingBaseMultibodyEulerExpDiscretizer(DiscretizerBase):
       self.aq = np.zeros((dimv, dimq)) #derivative of ddq wrt q
       self.av = np.zeros((dimv, dimv)) #derivative of ddq wrt v
       self.val = np.zeros((dimf, dimf))
-
+      self.outputarr = np.zeros((self.dimf, 1))
+      self.outputmat = np.zeros((self.dimf, self.dimf))
     def __call__(self):
       self.val[:self.dimv, :self.dimv] = np.identity(self.dimv)
       self.val[:self.dimv, self.dimv:] = np.identity(self.dimv)*self.dt
@@ -184,49 +180,34 @@ class FloatingBaseMultibodyEulerExpDiscretizer(DiscretizerBase):
       return self.val
 
     def premultiply(self,V):
-      output = np.zeros((V.shape[0], self.dimx))
-      output[:,:self.dimv] = V[:, :self.dimv] +\
-                             np.dot(V[:, :self.dimv], self.aq)*self.dt+\
-                             np.dot(V[:,self.dimv:], self.aq)*self.dt
-      output[:,self.dimv:] = V[:, :self.dimv]*self.dt +\
-                             np.dot(V[:, :self.dimv], self.av)*self.dt*self.dt +\
-                             V[:, self.dimv:] +\
-                             np.dot(V[:, self.dimv:], self.av)*self.dt
-      return output
-
+      outputmat = self.transposemultiplymat(V.T)
+      return outputmat.T
 
     def transposemultiplymat(self, V):
-      output = np.zeros((self.dimf, V.shape[1]))
-      output[:self.dimv, :self.dimv] = \
+      outputmat = np.zeros((self.dimf, self.dimf))
+      outputmat[:self.dimv, :self.dimv] = \
                               V[:self.dimv, :self.dimv] +\
-                              np.dot(self.aq.T, V[:self.dimv, :self.dimv])*self.dt*self.dt +\
                               np.dot(self.aq.T, V[self.dimv:, :self.dimv])*self.dt
-      output[:self.dimv, self.dimv:] = \
+      outputmat[:self.dimv, self.dimv:] = \
                               V[:self.dimv, self.dimv:] +\
-                              np.dot(self.aq.T, V[:self.dimv, self.dimv:])*self.dt*self.dt +\
                               np.dot(self.aq.T, V[self.dimv:, self.dimv:])*self.dt
-      output[self.dimv:, :self.dimv] = \
+      outputmat[self.dimv:, :self.dimv] = \
                               V[:self.dimv, :self.dimv]*self.dt +\
-                              np.dot(self.av.T, V[:self.dimv, :self.dimv])*self.dt*self.dt +\
                               V[self.dimv:,:self.dimv] +\
                               np.dot(self.av.T, V[self.dimv:,:self.dimv])*self.dt
-      output[self.dimv:,self.dimv:] = \
+      outputmat[self.dimv:,self.dimv:] = \
                               V[:self.dimv, self.dimv:]*self.dt +\
-                              np.dot(self.av.T, V[:self.dimv, self.dimv:])*self.dt*self.dt +\
                               V[self.dimv:, self.dimv:] +\
                               np.dot(self.av.T, V[self.dimv:,self.dimv:])*self.dt
-      return output
+      return outputmat
 
     def transposemultiplyarr(self, V):
-      output = np.zeros((self.dimf, 1))
-      output[:self.dimv, 0] = V[:self.dimv, 0] +\
-                              np.dot(self.aq.T, V[:self.dimv, 0])*self.dt*self.dt +\
+      self.outputarr[:self.dimv, 0] = V[:self.dimv, 0] +\
                               np.dot(self.aq.T, V[self.dimv:, 0])*self.dt
-      output[self.dimv:, 0] = V[:self.dimv, 0]*self.dt +\
-                              np.dot(self.av.T, V[:self.dimv, 0])*self.dt*self.dt +\
+      self.outputarr[self.dimv:, 0] = V[:self.dimv, 0]*self.dt +\
                               V[self.dimv:,0] +\
                               np.dot(self.av.T, V[self.dimv:,0])*self.dt
-      return output
+      return self.outputarr
 
   class fu(object):
     def __init__(self, dimv, dimu, dimf):
@@ -240,18 +221,15 @@ class FloatingBaseMultibodyEulerExpDiscretizer(DiscretizerBase):
       return
 
     def premultiply(self,V):
-      return np.dot(V[:,:self.dimv], self.au)*self.dt*self.dt+\
-        np.dot(V[:,self.dimv:],self.au)*self.dt
+      return self.transposemultiply(V.T).T
 
     def transposemultiply(self, V_p):
-      return np.dot(self.au.T, V_p[:self.dimv,:])*self.dt*self.dt+\
-        np.dot(self.au.T, V_p[self.dimv:,:])*self.dt
+      return np.dot(self.au.T, V_p[self.dimv:,:])*self.dt
 
     def __call__(self):
-      self.val[:self.dimv, :].fill(0.)
       self.val[self.dimv:, :] = self.au*self.dt
       return self.val
 
     def square(self):
-      au_sq = np.matmul(self.au.T, self.au)
-      return au_sq*self.dt*self.dt*(1.+self.dt*self.dt)
+      au_sq = np.dot(self.au.T, self.au)
+      return au_sq*self.dt*self.dt
