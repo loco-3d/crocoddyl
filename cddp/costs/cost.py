@@ -1,11 +1,97 @@
 import abc
 import numpy as np
 
-class XCost(object):
-  """ This abstract class declares virtual methods for computing the terminal
-  cost value and its derivatives.
 
-  The running cost depends on the state vectors, which it has n values.
+class RunningCost(object):
+  """ This abstract class declares virtual methods for computing the running
+  cost value and its quadratic approximation.
+
+  We consider a general cost function of the form: l(x), where x is the system's
+  state which is defined by a vector that represent a point (R^{nx}) in the
+  state space (a geometrical manifold). Instead the quadratic approximation has
+  the form: lx*dx + dx^T*lxx*dx, where dx lies in the tangent space (R^{nv})
+  around a nominal point in the geometrical manifold. Note that lx and lxx
+  belong to R^{nv} and R^{nv\times nv}, respectively. Furthermore, a point x 
+  can be describe more than nx tuples, e.g. SE(3) is a 6-dimensional manifold
+  described with 12 tuples.
+  """
+  def __init__(self, dynamicsModel, ref, weight):
+    self.dynamicsModel = dynamicsModel
+    self.ref = ref
+    self.weight = weight
+
+    # Creating the data structure of the cost and its quadratic approximantion.
+    # Note that this approximation as the form:
+    # [dx^T du^T]*[lx; lu] + [dx^T du^T]*[lxx lxu; lux luu]*[dx; du] where dx
+    # lies in the tangent space (R^{nx}) around a nominal point in the
+    # geometrical manifold, and du is point near to the nominal control (R^{nu})
+    self._l = 0.
+    self._lx = np.zeros((dynamicsModel.nx(), 1))
+    self._lu = np.zeros((dynamicsModel.nu(), 1))
+    self._lxx = np.zeros((dynamicsModel.nx(), dynamicsModel.nx()))
+    self._luu = np.zeros((dynamicsModel.nu(), dynamicsModel.nu()))
+    self._lux = np.zeros((dynamicsModel.nu(), dynamicsModel.nx()))
+
+  @abc.abstractmethod
+  def updateCost(self, dynamicsData):
+    """ Update the cost value according an user-define function.
+
+    The new cost value overwrites the internal data l.
+    """
+    pass
+
+  @abc.abstractmethod
+  def updateQuadraticAppr(self, dynamicsData):
+    """ Update the quadratic approximation of the user-define cost function.
+
+    The new quadratic approximation of the cost function overwrites the
+    following internal data lx and lxx.
+    """
+    pass
+
+  def getl(self):
+    """ Return the current cost value.
+    """
+    return self._l
+
+  def getlx(self):
+    """ Return the current gradient of cost w.r.t. the state
+    """
+    return self._lx
+
+  def getlu(self):
+    """ Return the current gradient of cost w.r.t. the control
+    """
+    return self._lu
+
+  def getlxx(self):
+    """ Return the current Hessian of cost w.r.t. the state
+    """
+    return self._lxx
+
+  def getluu(self):
+    """ Return the current Hessian of cost w.r.t. the control
+    """
+    return self._luu
+
+  def getlux(self):
+    """ Return the current Hessian of cost w.r.t. the control and state
+    """
+    return self._lux
+
+
+class TerminalCost(object):
+  """ This abstract class declares virtual methods for computing the terminal
+  cost value and its quadratic approximation.
+
+  We consider a general cost function of the form: l(x), where x is the system's
+  state which is defined by a vector that represent a point (R^{nx}) in the
+  state space (a geometrical manifold). Instead the quadratic approximation has
+  the form: lx*dx + dx^T*lxx*dx, where dx lies in the tangent space (R^{nx})
+  around a nominal point in the geometrical manifold. Note that lx and lxx
+  belong to R^{nx} and R^{nx\times nx}, respectively. Furthermore, a point x 
+  can be describe more than nx tuples, e.g. SE(3) is a 6-dimensional manifold
+  described with 12 tuples.
   """
   __metaclass__ = abc.ABCMeta
   
@@ -14,105 +100,97 @@ class XCost(object):
     self.ref = ref
     self.weight = weight
 
-    # Creating the data structure of the cost and its derivatives w.r.t. the 
-    # state
+    # Creating the data structure of the cost and its quadratic approximantion.
+    # Note that this approximation as the form: dx^T*lx + dx^T*lxx*dx, where dx
+    # lies in the tangent space (R^{nx}) around a nominal point in the
+    # geometrical manifold
     self._l = 0.
-    self._lx = np.zeros((2*dynamicsModel.nv(), 1))
-    self._lxx = np.zeros((2*self.dynamicsModel.nv(), 2*self.dynamicsModel.nv()))
+    self._lx = np.zeros((dynamicsModel.nx(), 1))
+    self._lxx = np.zeros((dynamicsModel.nx(), dynamicsModel.nx()))
 
   @abc.abstractmethod
-  def forwardTerminalCalc(self, dynamicsData):
+  def updateCost(self, dynamicsData):
+    """ Update the cost value according an user-define function.
+
+    The new cost value overwrites the internal data l.
+    """
     pass
 
   @abc.abstractmethod
-  def backwardTerminalCalc(self, dynamicsData):
+  def updateQuadraticAppr(self, dynamicsData):
+    """ Update the quadratic approximantion of the user-define cost function.
+
+    The new quadratic approximation of the cost function overwrites the
+    following internal data lx and lxx.
+    """
     pass
 
   def getl(self):
+    """ Return the current cost value.
+    """
     return self._l
 
   def getlx(self):
+    """ Return the current gradient of cost w.r.t. the state
+    """
     return self._lx
 
   def getlxx(self):
+    """ Return the current Hessian of cost w.r.t. the state
+    """
     return self._lxx
 
 
-class XUCost(XCost):
-  def __init__(self, dynamicsModel, ref, weight):
-    XCost.__init__(self, dynamicsModel, ref, weight)
-
-    # Creating the data structure of the cost derivatives w.r.t. the control
-    self._lu = np.zeros((dynamicsModel.nu(), 1))
-    self._luu = np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nu()))
-    self._lux = np.zeros((self.dynamicsModel.nu(), 2*self.dynamicsModel.nv()))
-
-  @abc.abstractmethod
-  def forwardRunningCalc(self, dynamicsData):
-    pass
-
-  @abc.abstractmethod
-  def backwardRunningCalc(self, dynamicsData):
-    pass
-
-  def getlu(self):
-    return self._lu
-
-  def getluu(self):
-    return self._luu
-
-  def getlux(self):
-    return self._lux
-
-
-class QuadraticCost(XUCost):
-  """This abstract class creates a quadratic cost of the form:
-  0.5 xr^T Q xr.
-
-  An important remark here is that the state residual (i.e. xr) depends linearly
-  on the state. This cost function can be used to define a goal state penalty.
-  This residual has to be implemented in a derived class (i.e. xr function).
-
-  Before computing the cost values, it is needed to set up the Q matrix. We
-  define it as diagonal matrix because: 1) it is easy to tune and 2) we can
-  exploit an efficient computation of it. Additionally, for efficiency
-  computation, we assume that compute first l (or lx) whenever you want
-  to compute lx (or lxx)."""
-
-  __metaclass__=abc.ABCMeta
+class RunningQuadraticCost(RunningCost):
+  """ This abstract class creates a running quadratic cost of the form:
+  0.5 r(x,u)^T Q r(x,u).
+  
+  It declares virtual methods for updating the residual function r(x,u) and its
+  linear approximation. Both are needed for computing the cost function or its
+  quadratic approximation.
+  """
+  __metaclass__ = abc.ABCMeta
 
   def __init__(self, dynamicsModel, ref, weight, dim):
-    XUCost.__init__(self, dynamicsModel, ref, weight)
+    RunningCost.__init__(self, dynamicsModel, ref, weight)
 
     # Residual dimension
     self.nr = dim
 
     # Creating the data structure of the residual and its derivatives
     self._r = np.zeros((self.nr, 1))
-    self._rx = np.zeros((self.nr, 2*self.dynamicsModel.nv()))
-    self._ru = np.zeros((self.nr, self.dynamicsModel.nu()))
+    self._rx = np.zeros((self.nr, dynamicsModel.nx()))
+    self._ru = np.zeros((self.nr, dynamicsModel.nu()))
 
   @abc.abstractmethod
   def updateResidual(self, dynamicsData):
+    """ Update the residual value according an user-define function.
+
+    The new residual value overwrites the internal data r.
+    """
     pass
 
   @abc.abstractmethod
-  def updateLineaResidualModel(self, dynamicsData):
+  def updateResidualLinearAppr(self, dynamicsData):
+    """ Update the linear approximantion of the user-define residual function.
+
+    The new linear approximation of the residual function overwrites the
+    internal data rx. We neglect the Hessian of the residual (i.e. rxx = 0).
+    """
     pass
 
-  def forwardRunningCalc(self, dynamicsData):
+  def updateCost(self, dynamicsData):
+    # Updating the residual function value
     self.updateResidual(dynamicsData)
 
-    # Computing the cost value
+    # Updating the cost value
     self._l = 0.5 * np.asscalar(np.dot(self._r.T, np.multiply(self.weight, self._r)))
 
-  def forwardTerminalCalc(self, dynamicsData):
-    self.forwardRunningCalc(dynamicsData)
+  def updateQuadraticAppr(self, dynamicsData):
+    # Updating the linear approximation of the residual function
+    self.updateResidualLinearAppr(dynamicsData)
 
-  def backwardRunningCalc(self, dynamicsData):
-    self.updateLineaResidualModel(dynamicsData)
-
-    # Computing the quadratic model of the cost function
+    # Updating the quadratic approximation of the cost function
     W_r = np.multiply(self.weight, self._r)
     W_rx = np.multiply(self.weight, self._rx)
     np.copyto(self._lx, np.dot(self._rx.T, W_r))
@@ -121,11 +199,54 @@ class QuadraticCost(XUCost):
     np.copyto(self._luu, np.dot(self._ru.T, np.multiply(self.weight, self._ru)))
     np.copyto(self._lux, np.dot(self._ru.T, W_rx))
 
-  def backwardTerminalCalc(self, dynamicsData):
-    self.updateLineaResidualModel(dynamicsData)
 
-    # Computing the quadratic model of the cost function
+class TerminalQuadraticCost(TerminalCost):
+  """ This abstract class creates a running quadratic cost of the form:
+  0.5 r(x)^T Q r(x).
+  
+  It declares virtual methods for updating the residual function r(x) and its
+  linear approximation. Both are needed for computing the cost function or its
+  quadratic approximation.
+  """
+  def __init__(self, dynamicsModel, ref, weight, dim):
+    TerminalCost.__init__(self, dynamicsModel, ref, weight)
+
+    # Residual dimension
+    self.nr = dim
+
+    # Creating the data structure of the residual and its derivatives
+    self._r = np.zeros((self.nr, 1))
+    self._rx = np.zeros((self.nr, dynamicsModel.nx()))
+
+  @abc.abstractmethod
+  def updateResidual(self, dynamicsData):
+    """ Update the residual value according an user-define function.
+
+    The new residual value overwrites the internal data r.
+    """
+    pass
+
+  @abc.abstractmethod
+  def updateResidualLinearAppr(self, dynamicsData):
+    """ Update the linear approximantion of the user-define residual function.
+
+    The new linear approximation of the residual function overwrites the
+    internal data rx. We neglect the Hessian of the residual (i.e. rxx = 0).
+    """
+    pass
+
+  def updateCost(self, dynamicsData):
+    # Updating the residual function value
+    self.updateResidual(dynamicsData)
+
+    # Updating the cost value
+    self._l = 0.5 * np.asscalar(np.dot(self._r.T, np.multiply(self.weight, self._r)))
+
+  def updateQuadraticAppr(self, dynamicsData):
+    # Updating the linear approximation of the residual function
+    self.updateResidualLinearAppr(dynamicsData)
+
+    # Updating the quadratic approximation of the cost function
     W_r = np.multiply(self.weight, self._r)
     np.copyto(self._lx, np.dot(self._rx.T, W_r))
-    np.copyto(self._lu, np.dot(self._ru.T, W_r))
     np.copyto(self._lxx, np.dot(self._rx.T, np.multiply(self.weight, self._rx)))

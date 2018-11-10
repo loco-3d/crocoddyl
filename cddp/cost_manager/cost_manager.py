@@ -86,18 +86,18 @@ class CostManager(object):
   def forwardRunningCalc(costManager, costData, dynamicsData):
     costData.l = 0.
     for cost in costManager.runningCosts:
-      cost.forwardRunningCalc(dynamicsData)
+      cost.updateCost(dynamicsData)
       costData.l += cost.getl()
 
   def forwardTerminalCalc(costManager, costData, dynamicsData):
     costData.l = 0.
     for cost in costManager.terminalCosts:
-      cost.forwardTerminalCalc(dynamicsData)
+      cost.updateCost(dynamicsData)
       costData.l += cost.getl()
 
   def backwardRunningCalc(costManager, costData, dynamicsData):
     for cost in costManager.runningCosts:
-      cost.backwardRunningCalc(dynamicsData)
+      cost.updateQuadraticAppr(dynamicsData)
 
     costData.lx.fill(0.)
     costData.lu.fill(0.)
@@ -113,7 +113,7 @@ class CostManager(object):
 
   def backwardTerminalCalc(costManager, costData, dynamicsData):
     for cost in costManager.terminalCosts:
-      cost.backwardTerminalCalc(dynamicsData)
+      cost.updateQuadraticAppr(dynamicsData)
 
     costData.lx.fill(0.)
     costData.lxx.fill(0.)
