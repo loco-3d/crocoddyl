@@ -2,6 +2,43 @@ import abc
 import numpy as np
 
 
+class TerminalCostData(object):
+  """ Data structure for the terminal cost of a specific time interval.
+
+  The terminal cost terms are the cost value and its derivates with respect to
+  the state. The dimensions of these vector or matrices depends on the dynamic
+  model.
+  """
+  def __init__(self, nx):
+    """ Creates the terminal cost data.
+
+    :param nx: state dimension
+    """
+    self.l = 0.
+    self.lx = np.zeros((nx,1))
+    self.lxx = np.zeros((nx,nx))
+
+
+class RunningCostData(TerminalCostData):
+  """ Data structure for the running cost of a specific time interval.
+
+  The running cost terms includes the terminal ones plus its derivates
+  with respect to the control. The dimensions of these vector or matrices
+  depends on the dynamic
+  model.
+  """
+  def __init__(self, nx, nu):
+    """ Creates the running cost data.
+
+    :param nx: state dimension
+    :param nu: control dimension
+    """
+    TerminalCostData.__init__(self, nx)
+    self.lu = np.zeros((nu,1))
+    self.lux = np.zeros((nu,nx))
+    self.luu = np.zeros((nu,nu))
+
+
 class RunningCost(object):
   """ This abstract class declares virtual methods for computing the running
   cost value and its quadratic approximation.
