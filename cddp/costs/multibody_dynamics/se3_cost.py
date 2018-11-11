@@ -13,6 +13,9 @@ class SE3Cost(RunningQuadraticCost):
   """
   def __init__(self, dynamicsModel, Mdes, weight, frame_name):
     RunningQuadraticCost.__init__(self, dynamicsModel, Mdes, weight, 6)
+    RunningQuadraticCost.__init__(self,
+      dynamicsModel.nx(), dynamicsModel.nu(), 6, weight)
+    self.dynamicsModel = dynamicsModel
     self.Mdes_inv = Mdes.inverse()
     self._frame_idx = self.dynamicsModel.pinocchioModel.getFrameId(frame_name)
 
@@ -30,12 +33,12 @@ class SE3Cost(RunningQuadraticCost):
     # We overwrite this function since this residual function only depends on
     # state. So, the gradient and Hession of the cost w.r.t. the control remains
     # zero.
-   
+
     # Updating the linear approximation of the residual function
     self.updateResidualLinearAppr(dynamicsData)
 
-    # Updating the quadratic approximation of the cost function. 
-    W_r = np.multiply(self.weight, self._r)
-    W_rx = np.multiply(self.weight, self._rx)
-    np.copyto(self._lx, np.dot(self._rx.T, W_r))
-    np.copyto(self._lxx, np.dot(self._rx.T, W_rx))
+    # Updating the quadratic approximation of the cost function
+    np.copyto(self._Q_r, np.multiply(self.weight, self._r))
+    np.copyto(self._Q_rx, np.multiply(self.weight, self._rx))
+    np.copyto(self._data.lx, np.dot(self._rx.T, self._Q_r))
+    np.copyto(self._data.lxx, np.dot(self._rx.T, self._Q_rx))

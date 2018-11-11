@@ -12,6 +12,8 @@ class CoMCost(RunningQuadraticCost):
   """
   def __init__(self, dynamicsModel, comDes, weights):
     RunningQuadraticCost.__init__(self, dynamicsModel, comDes, weights, 3)
+    RunningQuadraticCost.__init__(self,
+      dynamicsModel.nx(), dynamicsModel.nu(), 3, weights)
 
   def updateResidual(self, dynamicsData):
     np.copyto(self._r, dynamicsData.pinocchioData.com[0] - self.ref)
@@ -27,8 +29,8 @@ class CoMCost(RunningQuadraticCost):
     # Updating the linear approximation of the residual function
     self.updateResidualLinearAppr(dynamicsData)
 
-    # Updating the quadratic approximation of the cost function. 
-    W_r = np.multiply(self.weight, self._r)
-    W_rx = np.multiply(self.weight, self._rx)
+    # Updating the quadratic approximation of the cost function
+    np.copyto(self._Q_r, np.multiply(self.weight, self._r))
+    np.copyto(self._Q_rx, np.multiply(self.weight, self._rx))
     np.copyto(self._lx, np.dot(self._rx.T, W_r))
     np.copyto(self._lxx, np.dot(self._rx.T, W_rx))

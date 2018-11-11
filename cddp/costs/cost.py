@@ -52,22 +52,18 @@ class RunningCost(object):
   can be describe more than nx tuples, e.g. SE(3) is a 6-dimensional manifold
   described with 12 tuples.
   """
-  def __init__(self, dynamicsModel, ref, weight):
-    self.dynamicsModel = dynamicsModel
-    self.ref = ref
-    self.weight = weight
+  def __init__(self, nx, nu):
+    """ Creates the running cost data.
 
+    :param nx: state dimension
+    :param nu: control dimension
+    """
     # Creating the data structure of the cost and its quadratic approximantion.
     # Note that this approximation as the form:
     # [dx^T du^T]*[lx; lu] + [dx^T du^T]*[lxx lxu; lux luu]*[dx; du] where dx
     # lies in the tangent space (R^{nx}) around a nominal point in the
     # geometrical manifold, and du is point near to the nominal control (R^{nu})
-    self._l = 0.
-    self._lx = np.zeros((dynamicsModel.nx(), 1))
-    self._lu = np.zeros((dynamicsModel.nu(), 1))
-    self._lxx = np.zeros((dynamicsModel.nx(), dynamicsModel.nx()))
-    self._luu = np.zeros((dynamicsModel.nu(), dynamicsModel.nu()))
-    self._lux = np.zeros((dynamicsModel.nu(), dynamicsModel.nx()))
+    self._data = RunningCostData(nx, nu)
 
   @abc.abstractmethod
   def updateCost(self, dynamicsData):
@@ -89,32 +85,32 @@ class RunningCost(object):
   def getl(self):
     """ Return the current cost value.
     """
-    return self._l
+    return self._data.l
 
   def getlx(self):
     """ Return the current gradient of cost w.r.t. the state
     """
-    return self._lx
+    return self._data.lx
 
   def getlu(self):
     """ Return the current gradient of cost w.r.t. the control
     """
-    return self._lu
+    return self._data.lu
 
   def getlxx(self):
     """ Return the current Hessian of cost w.r.t. the state
     """
-    return self._lxx
+    return self._data.lxx
 
   def getluu(self):
     """ Return the current Hessian of cost w.r.t. the control
     """
-    return self._luu
+    return self._data.luu
 
   def getlux(self):
     """ Return the current Hessian of cost w.r.t. the control and state
     """
-    return self._lux
+    return self._data.lux
 
 
 class TerminalCost(object):
@@ -131,19 +127,17 @@ class TerminalCost(object):
   described with 12 tuples.
   """
   __metaclass__ = abc.ABCMeta
-  
-  def __init__(self, dynamicsModel, ref, weight):
-    self.dynamicsModel = dynamicsModel
-    self.ref = ref
-    self.weight = weight
 
+  def __init__(self, nx):
+    """ Creates the terminal cost data.
+
+    :param nx: state dimension
+    """
     # Creating the data structure of the cost and its quadratic approximantion.
     # Note that this approximation as the form: dx^T*lx + dx^T*lxx*dx, where dx
     # lies in the tangent space (R^{nx}) around a nominal point in the
     # geometrical manifold
-    self._l = 0.
-    self._lx = np.zeros((dynamicsModel.nx(), 1))
-    self._lxx = np.zeros((dynamicsModel.nx(), dynamicsModel.nx()))
+    self._data = TerminalCostData(nx)
 
   @abc.abstractmethod
   def updateCost(self, dynamicsData):
@@ -165,17 +159,17 @@ class TerminalCost(object):
   def getl(self):
     """ Return the current cost value.
     """
-    return self._l
+    return self._data.l
 
   def getlx(self):
     """ Return the current gradient of cost w.r.t. the state
     """
-    return self._lx
+    return self._data.lx
 
   def getlxx(self):
     """ Return the current Hessian of cost w.r.t. the state
     """
-    return self._lxx
+    return self._data.lxx
 
 
 class RunningQuadraticCost(RunningCost):
@@ -188,16 +182,19 @@ class RunningQuadraticCost(RunningCost):
   """
   __metaclass__ = abc.ABCMeta
 
-  def __init__(self, dynamicsModel, ref, weight, dim):
-    RunningCost.__init__(self, dynamicsModel, ref, weight)
+  def __init__(self, nx, nu, nr, weight):
+    RunningCost.__init__(self, nx, nu)
 
-    # Residual dimension
-    self.nr = dim
+    # Reference state and weight of the quadratic cost
+    self.weight = weight
 
     # Creating the data structure of the residual and its derivatives
-    self._r = np.zeros((self.nr, 1))
-    self._rx = np.zeros((self.nr, dynamicsModel.nx()))
-    self._ru = np.zeros((self.nr, dynamicsModel.nu()))
+    self._r = np.zeros((nr,1))
+    self._rx = np.zeros((nr,nx))
+    self._ru = np.zeros((nr,nu))
+    self._Q_r = np.zeros((nr,1))
+    self._Q_rx = np.zeros((nr,nx))
+    self._Q_ru = np.zeros((nr,nu))
 
   @abc.abstractmethod
   def updateResidual(self, dynamicsData):
@@ -221,20 +218,22 @@ class RunningQuadraticCost(RunningCost):
     self.updateResidual(dynamicsData)
 
     # Updating the cost value
-    self._l = 0.5 * np.asscalar(np.dot(self._r.T, np.multiply(self.weight, self._r)))
+    self._data.l = \
+      0.5 * np.asscalar(np.dot(self._r.T, np.multiply(self.weight, self._r)))
 
   def updateQuadraticAppr(self, dynamicsData):
     # Updating the linear approximation of the residual function
     self.updateResidualLinearAppr(dynamicsData)
 
     # Updating the quadratic approximation of the cost function
-    W_r = np.multiply(self.weight, self._r)
-    W_rx = np.multiply(self.weight, self._rx)
-    np.copyto(self._lx, np.dot(self._rx.T, W_r))
-    np.copyto(self._lu, np.dot(self._ru.T, W_r))
-    np.copyto(self._lxx, np.dot(self._rx.T, W_rx))
-    np.copyto(self._luu, np.dot(self._ru.T, np.multiply(self.weight, self._ru)))
-    np.copyto(self._lux, np.dot(self._ru.T, W_rx))
+    np.copyto(self._Q_r, np.multiply(self.weight, self._r))
+    np.copyto(self._Q_rx, np.multiply(self.weight, self._rx))
+    np.copyto(self._Q_ru, np.multiply(self.weight, self._ru))
+    np.copyto(self._data.lx, np.dot(self._rx.T, self._Q_r))
+    np.copyto(self._data.lu, np.dot(self._ru.T, self._Q_r))
+    np.copyto(self._data.lxx, np.dot(self._rx.T, self._Q_rx))
+    np.copyto(self._data.luu, np.dot(self._ru.T, self._Q_ru))
+    np.copyto(self._data.lux, np.dot(self._ru.T, self._Q_rx))
 
 
 class TerminalQuadraticCost(TerminalCost):
@@ -245,15 +244,17 @@ class TerminalQuadraticCost(TerminalCost):
   linear approximation. Both are needed for computing the cost function or its
   quadratic approximation.
   """
-  def __init__(self, dynamicsModel, ref, weight, dim):
-    TerminalCost.__init__(self, dynamicsModel, ref, weight)
+  def __init__(self, nx, nr, weight):
+    TerminalCost.__init__(self, nx)
 
-    # Residual dimension
-    self.nr = dim
+    # Weight of the quadratic cost
+    self.weight = weight
 
     # Creating the data structure of the residual and its derivatives
-    self._r = np.zeros((self.nr, 1))
-    self._rx = np.zeros((self.nr, dynamicsModel.nx()))
+    self._r = np.zeros((nr,1))
+    self._rx = np.zeros((nr,nx))
+    self._Q_r = np.zeros((nr,1))
+    self._Q_rx = np.zeros((nr,nx))
 
   @abc.abstractmethod
   def updateResidual(self, dynamicsData):
@@ -277,13 +278,15 @@ class TerminalQuadraticCost(TerminalCost):
     self.updateResidual(dynamicsData)
 
     # Updating the cost value
-    self._l = 0.5 * np.asscalar(np.dot(self._r.T, np.multiply(self.weight, self._r)))
+    self._data.l = \
+      0.5 * np.asscalar(np.dot(self._r.T, np.multiply(self.weight, self._r)))
 
   def updateQuadraticAppr(self, dynamicsData):
     # Updating the linear approximation of the residual function
     self.updateResidualLinearAppr(dynamicsData)
 
     # Updating the quadratic approximation of the cost function
-    W_r = np.multiply(self.weight, self._r)
-    np.copyto(self._lx, np.dot(self._rx.T, W_r))
-    np.copyto(self._lxx, np.dot(self._rx.T, np.multiply(self.weight, self._rx)))
+    np.copyto(self._Q_r, np.multiply(self.weight, self._r))
+    np.copyto(self._Q_rx, np.multiply(self.weight, self._rx))
+    np.copyto(self._data.lx, np.dot(self._rx.T, self._Q_r)) 
+    np.copyto(self._data.lxx, np.dot(self._rx.T, self._Q_rx))

@@ -14,9 +14,12 @@ class StateCost(RunningQuadraticCost):
   """
   def __init__(self, dynamicsModel, stateDes, weights):
     RunningQuadraticCost.__init__(self, dynamicsModel, stateDes, weights, dynamicsModel.nx())
+    RunningQuadraticCost.__init__(self,
+      dynamicsModel.nx(), dynamicsModel.nu(), dynamicsModel.nx(), weights)
+    self.dynamicsModel = dynamicsModel
 
     np.copyto(self._rx, np.identity(self.dynamicsModel.nx()))
-    np.copyto(self._lxx, np.diag(np.array(self.weight).squeeze()))
+    np.copyto(self._data.lxx, np.diag(np.array(self.weight).squeeze()))
 
   def updateResidual(self, dynamicsData):
     np.copyto(self._r,
@@ -38,7 +41,7 @@ class StateCost(RunningQuadraticCost):
     # overwrite again the lxx since is constant. This value is defined during 
     # the construction. Additionally the gradient and Hession of the cost w.r.t.
     # the control remains zero.
-    np.copyto(self._lx, np.multiply(self.weight, self._r))
+    np.copyto(self._data.lx, np.multiply(self.weight, self._r))
 
 
 class ControlCost(RunningQuadraticCost):
@@ -52,9 +55,11 @@ class ControlCost(RunningQuadraticCost):
   """
   def __init__(self, dynamicsModel, controlDes, weights):
     RunningQuadraticCost.__init__(self, dynamicsModel, controlDes, weights, dynamicsModel.nu())
+    RunningQuadraticCost.__init__(self,
+      dynamicsModel.nx(), dynamicsModel.nu(), dynamicsModel.nu(), weights)
 
-    np.copyto(self._ru, np.identity(self.dynamicsModel.nu()))
-    np.copyto(self._luu, np.diag(np.array(self.weight).squeeze()))
+    np.copyto(self._ru, np.identity(dynamicsModel.nu()))
+    np.copyto(self._data.luu, np.diag(np.array(self.weight).squeeze()))
 
   def updateResidual(self, dynamicsData):
     np.copyto(self._r, dynamicsData.u-self.ref)
@@ -75,4 +80,4 @@ class ControlCost(RunningQuadraticCost):
     # overwrite again the luu since is constant. This value is defined during 
     # the construction. Additionally the gradient and Hession of the cost w.r.t.
     # the state remains zero.
-    np.copyto(self._lu, np.multiply(self.weight, self._r))
+    np.copyto(self._data.lu, np.multiply(self.weight, self._r))
