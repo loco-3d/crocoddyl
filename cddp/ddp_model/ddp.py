@@ -145,10 +145,11 @@ class DDPModel(object):
     return self.dynamicsModel.createData(self, tInit)
 
   def createRunningCostData(self):
-    return self.costManager.createRunningData(self.dynamicsModel)
+    return self.costManager.createRunningData(self.dynamicsModel.nx(),
+                                              self.dynamicsModel.nu())
 
   def createTerminalDynamicsData(self, tFinal):
     return self.dynamicsModel.createData(self, tFinal)
 
   def createTerminalCostData(self):
-    return self.costManager.createTerminalData(self.dynamicsModel)
+    return self.costManager.createTerminalData(self.dynamicsModel.nx())

@@ -8,14 +8,14 @@ class TerminalCostData(object):
   the state. The dimensions of these vector or matrices depends on the dynamic
   model.
   """
-  def __init__(self, dynamicsModel):
+  def __init__(self, nx):
     """ Creates the terminal cost data.
 
-    :param dynamicsModel: dynanic model
+    :param nx: state dimension
     """
     self.l = 0.
-    self.lx = np.zeros((dynamicsModel.nx(),1))
-    self.lxx = np.zeros((dynamicsModel.nx(),dynamicsModel.nx()))
+    self.lx = np.zeros((nx,1))
+    self.lxx = np.zeros((nx,nx))
 
 
 class RunningCostData(TerminalCostData):
@@ -26,15 +26,16 @@ class RunningCostData(TerminalCostData):
   depends on the dynamic
   model.
   """
-  def __init__(self, dynamicsModel):
+  def __init__(self, nx, nu):
     """ Creates the running cost data.
 
-    :param dynamicsModel: dynanic model
+    :param nx: state dimension
+    :param nu: control dimension
     """
-    TerminalCostData.__init__(self, dynamicsModel)
-    self.lu = np.zeros((dynamicsModel.nu(),1))
-    self.lux = np.zeros((dynamicsModel.nu(),dynamicsModel.nx()))
-    self.luu = np.zeros((dynamicsModel.nu(),dynamicsModel.nu()))
+    TerminalCostData.__init__(self, nx)
+    self.lu = np.zeros((nu,1))
+    self.lux = np.zeros((nu,nx))
+    self.luu = np.zeros((nu,nu))
 
 
 class CostManager(object):
@@ -55,20 +56,21 @@ class CostManager(object):
     self.runningCosts = []
 
   @staticmethod
-  def createTerminalData(dynamicsModel):
-    """ Creates the terminal cost data for a given dynamic model
+  def createTerminalData(nx):
+    """ Creates the terminal cost data for a given state dimension
 
-    :param dynamicsModel: dynamic model
+    :param nx: state dimension
     """
-    return TerminalCostData(dynamicsModel)
+    return TerminalCostData(nx)
 
   @staticmethod
-  def createRunningData(dynamicsModel):
-    """ Creates the running cost data for a given dynamic model
+  def createRunningData(nx, nu):
+    """ Creates the running cost data for a given state and control dimension
 
-    :param dynamicsModel: dynamic model
+    :param nx: state dimension
+    :param nu: control dimension
     """
-    return RunningCostData(dynamicsModel)
+    return RunningCostData(nx, nu)
 
   def addTerminal(self, cost):
     """ Adds a terminal cost function to the cost model.
