@@ -14,7 +14,6 @@ class StateCost(RunningQuadraticCost):
   """
   def __init__(self, dynamicsModel, stateDes, weights):
     RunningQuadraticCost.__init__(self, dynamicsModel, stateDes, weights, dynamicsModel.nx())
-    self.pinocchioModel = dynamicsModel.pinocchioModel
 
     np.copyto(self._rx, np.identity(self.dynamicsModel.nx()))
     np.copyto(self._lxx, np.diag(np.array(self.weight).squeeze()))
@@ -53,7 +52,6 @@ class ControlCost(RunningQuadraticCost):
   """
   def __init__(self, dynamicsModel, controlDes, weights):
     RunningQuadraticCost.__init__(self, dynamicsModel, controlDes, weights, dynamicsModel.nu())
-    self.pinocchioModel = dynamicsModel.pinocchioModel
 
     np.copyto(self._ru, np.identity(self.dynamicsModel.nu()))
     np.copyto(self._luu, np.diag(np.array(self.weight).squeeze()))
