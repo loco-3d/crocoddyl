@@ -12,7 +12,6 @@ class SE3Cost(RunningQuadraticCost):
   need to update the terms related to the control.
   """
   def __init__(self, dynamicsModel, Mdes, weight, frame_name):
-    RunningQuadraticCost.__init__(self, dynamicsModel, Mdes, weight, 6)
     RunningQuadraticCost.__init__(self,
       dynamicsModel.nx(), dynamicsModel.nu(), 6, weight)
     self.dynamicsModel = dynamicsModel

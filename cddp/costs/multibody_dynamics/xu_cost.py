@@ -13,7 +13,6 @@ class StateCost(RunningQuadraticCost):
   the state (constant value).
   """
   def __init__(self, dynamicsModel, stateDes, weights):
-    RunningQuadraticCost.__init__(self, dynamicsModel, stateDes, weights, dynamicsModel.nx())
     RunningQuadraticCost.__init__(self,
       dynamicsModel.nx(), dynamicsModel.nu(), dynamicsModel.nx(), weights)
     self.dynamicsModel = dynamicsModel
@@ -54,7 +53,6 @@ class ControlCost(RunningQuadraticCost):
   the control (constant value).
   """
   def __init__(self, dynamicsModel, controlDes, weights):
-    RunningQuadraticCost.__init__(self, dynamicsModel, controlDes, weights, dynamicsModel.nu())
     RunningQuadraticCost.__init__(self,
       dynamicsModel.nx(), dynamicsModel.nu(), dynamicsModel.nu(), weights)
 

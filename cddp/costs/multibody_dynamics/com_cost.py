@@ -11,7 +11,6 @@ class CoMCost(RunningQuadraticCost):
   need to update the terms related to the control.
   """
   def __init__(self, dynamicsModel, comDes, weights):
-    RunningQuadraticCost.__init__(self, dynamicsModel, comDes, weights, 3)
     RunningQuadraticCost.__init__(self,
       dynamicsModel.nx(), dynamicsModel.nu(), 3, weights)
 
