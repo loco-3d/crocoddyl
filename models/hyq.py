@@ -51,8 +51,9 @@ q0[7+9] = -0.2*0.
 q0[7+10] = -0.75
 q0[7+11] = 1.5
 v0 = np.zeros((robot.model.nv, 1))
-U0 = [np.zeros((robot.model.nv-6, 1)) for i in xrange(len(timeline)-1)]
 x0 = np.vstack([q0, v0])
+u0 = np.zeros((robot.model.nv-6, 1))
+U0 = [u0 for i in xrange(len(timeline)-1)]
 
 
 # Defining the SE3 task
@@ -66,13 +67,13 @@ se3_rcost.setWeights(1000*w_se3)
 se3_tcost.setWeights(1000*w_se3)
 """
 w_se3 = np.ones((6,1))
-se3_rcost = cddp.costs.multibody_dynamics.SE3Cost(ddpDynamics, M_des, 1.*w_se3, frame_name)
-se3_tcost = cddp.costs.multibody_dynamics.SE3Cost(ddpDynamics, M_des, 1e3*w_se3, frame_name)
+se3_rcost = cddp.costs.multibody_dynamics.SE3Cost(ddpDynamics, 1.*w_se3, M_des, frame_name)
+se3_tcost = cddp.costs.multibody_dynamics.SE3Cost(ddpDynamics, 1e3*w_se3, M_des, frame_name)
 
 # Defining the CoM task
 com_des = np.matrix([ [0.1], [0.], [0.] ])
 w_com = 1000.*np.ones((3,1))
-com_cost = cddp.costs.multibody_dynamics.CoMCost(ddpDynamics, com_des, w_com)
+com_cost = cddp.costs.multibody_dynamics.CoMCost(ddpDynamics, w_com, com_des)
 
 
 # Defining the velocity and control regularization
@@ -80,10 +81,8 @@ wx = 1e-7 * np.vstack([ np.zeros((model.nv,1)), np.ones((model.nv,1)) ])
 wu = 1e-7 * np.ones((robot.nv-6,1))
 
 #TODO: Why are we regularizing to zero posture!
-x_cost = cddp.costs.multibody_dynamics.StateCost(ddpDynamics,
-                                                 x0, wx)
-u_cost = cddp.costs.multibody_dynamics.ControlCost(ddpDynamics,
-                                                   np.zeros((robot.model.nv-6,1)), wu)
+x_cost = cddp.costs.multibody_dynamics.StateCost(ddpDynamics, wx, x0)
+u_cost = cddp.costs.multibody_dynamics.ControlCost(ddpDynamics, wu, u0)
 
 # Adding the cost functions to the cost manager
 costManager = cddp.cost_manager.CostManager()

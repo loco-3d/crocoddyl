@@ -12,17 +12,18 @@ class StateCost(RunningQuadraticCost):
   update the terms related to the control, and 3) to update the Hessian w.r.t
   the state (constant value).
   """
-  def __init__(self, dynamicsModel, stateDes, weights):
+  def __init__(self, dynamicsModel, weights, x_des):
     RunningQuadraticCost.__init__(self,
       dynamicsModel.nx(), dynamicsModel.nu(), dynamicsModel.nx(), weights)
     self.dynamicsModel = dynamicsModel
+    self._x_des = x_des
 
     np.copyto(self._rx, np.identity(self.dynamicsModel.nx()))
     np.copyto(self._data.lxx, np.diag(np.array(self.weight).squeeze()))
 
   def updateResidual(self, dynamicsData):
     np.copyto(self._r,
-      self.dynamicsModel.deltaX(dynamicsData, self.ref, dynamicsData.x))
+      self.dynamicsModel.deltaX(dynamicsData, self._x_des, dynamicsData.x))
 
   def updateResidualLinearAppr(self, dynamicsData):
     # Due to the residual is equals to x, we don't need to linearize each time.
@@ -52,15 +53,16 @@ class ControlCost(RunningQuadraticCost):
   update the terms related to the state, and 3) to update the Hessian w.r.t
   the control (constant value).
   """
-  def __init__(self, dynamicsModel, controlDes, weights):
+  def __init__(self, dynamicsModel, weights, u_des):
     RunningQuadraticCost.__init__(self,
       dynamicsModel.nx(), dynamicsModel.nu(), dynamicsModel.nu(), weights)
+    self._u_des = u_des
 
     np.copyto(self._ru, np.identity(dynamicsModel.nu()))
     np.copyto(self._data.luu, np.diag(np.array(self.weight).squeeze()))
 
   def updateResidual(self, dynamicsData):
-    np.copyto(self._r, dynamicsData.u-self.ref)
+    np.copyto(self._r, dynamicsData.u - self._u_des)
 
   def updateResidualLinearAppr(self, dynamicsData):
     # Due to the residual is equals to u, we don't need to linearize each time.

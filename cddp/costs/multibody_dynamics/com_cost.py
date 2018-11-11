@@ -10,12 +10,13 @@ class CoMCost(RunningQuadraticCost):
   efficiency, we overwrite the updateQuadraticAppr function because we don't
   need to update the terms related to the control.
   """
-  def __init__(self, dynamicsModel, comDes, weights):
+  def __init__(self, dynamicsModel, weights, com_des):
     RunningQuadraticCost.__init__(self,
       dynamicsModel.nx(), dynamicsModel.nu(), 3, weights)
+    self._com_des = com_des
 
   def updateResidual(self, dynamicsData):
-    np.copyto(self._r, dynamicsData.pinocchioData.com[0] - self.ref)
+    np.copyto(self._r, dynamicsData.pinocchioData.com[0] - self._com_des)
 
   def updateResidualLinearAppr(self, dynamicsData):
     self._rx[:,:self.dynamicsModel.nv()] = dynamicsData.pinocchioData.Jcom
