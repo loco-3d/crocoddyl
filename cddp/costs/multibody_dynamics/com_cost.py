@@ -13,6 +13,7 @@ class CoMCost(RunningQuadraticCost):
   def __init__(self, dynamicsModel, weights, com_des):
     RunningQuadraticCost.__init__(self,
       dynamicsModel.nx(), dynamicsModel.nu(), 3, weights)
+    self.dynamicsModel = dynamicsModel
     self._com_des = com_des
 
   def updateResidual(self, dynamicsData):
