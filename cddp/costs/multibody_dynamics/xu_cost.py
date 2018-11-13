@@ -31,16 +31,14 @@ class StateCost(RunningQuadraticCost):
   update the terms related to the control, and 3) to update the Hessian w.r.t
   the state (constant value).
   """
-  def __init__(self, dynamicsModel, weights, x_des):
+  def __init__(self, dynamicsModel, weights):
     RunningQuadraticCost.__init__(self, dynamicsModel.nx(), weights)
     self.dynamicsModel = dynamicsModel
-    self.x_des = x_des
 
   def createData(self, nx, nu):
     data = StateRunningData(nx, nu, self.nr)
     np.copyto(data.rx, np.identity(nx))
     np.copyto(data.lxx, np.diag(np.array(self.weight).squeeze()))
-    np.copyto(data.x_des, self.x_des) #TODO set the externally the desired state
     return data
 
   def updateResidual(self, costData, dynamicsData):
@@ -65,6 +63,9 @@ class StateCost(RunningQuadraticCost):
     # the control remains zero.
     np.copyto(costData.lx, np.multiply(self.weight, costData.r))
 
+  @staticmethod
+  def setReference(costData, x_des):
+    np.copyto(costData.x_des, x_des)
 
 
 class ControlCost(RunningQuadraticCost):
@@ -76,15 +77,13 @@ class ControlCost(RunningQuadraticCost):
   update the terms related to the state, and 3) to update the Hessian w.r.t
   the control (constant value).
   """
-  def __init__(self, dynamicsModel, weights, u_des):
+  def __init__(self, dynamicsModel, weights):
     RunningQuadraticCost.__init__(self, dynamicsModel.nu(), weights)
-    self.u_des = u_des
 
   def createData(self, nx, nu):
     data = ControlRunningData(nx, nu, self.nr)
     np.copyto(data.ru, np.identity(nu))
     np.copyto(data.luu, np.diag(np.array(self.weight).squeeze()))
-    np.copyto(data.u_des, self.u_des) #TODO set the externally the desired state
     return data
 
   def updateResidual(self, costData, dynamicsData):
@@ -107,3 +106,7 @@ class ControlCost(RunningQuadraticCost):
     # the construction. Additionally the gradient and Hession of the cost w.r.t.
     # the state remains zero.
     np.copyto(costData.lu, np.multiply(self.weight, costData.r))
+
+  @staticmethod
+  def setReference(costData, u_des):
+    np.copyto(costData.u_des, u_des)

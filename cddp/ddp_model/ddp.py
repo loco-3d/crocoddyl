@@ -153,3 +153,13 @@ class DDPModel(object):
 
   def createTerminalCostData(self):
     return self.costManager.createTerminalData(self.dynamicsModel.nx())
+
+  def setRunningReference(self, ddpData, Xref, name):
+    index = self.costManager.getRunningCostIndex(name)
+    for k, data in enumerate(ddpData.intervalDataVector[:-1]):
+      self.costManager.runningCosts[index].setReference(data.costData.costVector[index], Xref[k])
+
+  def setTerminalReference(self, ddpData, xref, name):
+    index = self.costManager.getTerminalCostIndex(name)
+    self.costManager.terminalCosts[index].setReference(
+      ddpData.intervalDataVector[-1].costData.costVector[index], xref)

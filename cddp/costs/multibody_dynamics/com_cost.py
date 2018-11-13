@@ -20,16 +20,12 @@ class CoMCost(RunningQuadraticCost):
   efficiency, we overwrite the updateQuadraticAppr function because we don't
   need to update the terms related to the control.
   """
-  def __init__(self, dynamicsModel, weights, com_des):
+  def __init__(self, dynamicsModel, weights):
     RunningQuadraticCost.__init__(self, 3, weights)
     self.dynamicsModel = dynamicsModel
-    self.com_des = com_des
 
   def createData(self, nx, nu):
-    # return CoMRunningData(nx, nu)
-    data = CoMRunningData(nx, nu, self.nr)
-    np.copyto(data.com_des, self.com_des) #TODO set the externally the desired state
-    return data
+    return CoMRunningData(nx, nu, self.nr)
 
   def updateResidual(self, costData, dynamicsData):
     np.copyto(costData.r, dynamicsData.pinocchioData.com[0] - costData.com_des)
@@ -50,3 +46,7 @@ class CoMCost(RunningQuadraticCost):
     np.copyto(costData.Q_rx, np.multiply(self.weight, costData.rx))
     np.copyto(costData.lx, np.dot(costData.rx.T, costData.Q_r))
     np.copyto(costData.lxx, np.dot(costData.rx.T, costData.Q_rx))
+
+  @staticmethod
+  def setReference(costData, com_des):
+    np.copyto(costData.com_des, com_des)

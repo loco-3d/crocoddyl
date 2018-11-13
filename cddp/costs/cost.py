@@ -90,6 +90,14 @@ class RunningCost(object):
     """
     return NotImplementedError
 
+  @abc.abstractmethod
+  def setReference(costData, ref):
+    """ Set the reference of the user-defined cost function
+
+    :param ref: reference of the cost function
+    """
+    return NotImplementedError
+
   @staticmethod
   def getl(costData):
     """ Return the current cost value.
@@ -167,6 +175,14 @@ class TerminalCost(object):
 
     The new quadratic approximation of the cost function overwrites the
     following internal data lx and lxx.
+    """
+    return NotImplementedError
+
+  @abc.abstractmethod
+  def setReference(costData, ref):
+    """ Set the reference of the user-defined cost function
+
+    :param ref: reference of the cost function
     """
     return NotImplementedError
 

@@ -4,6 +4,12 @@ import pinocchio as se3
 import numpy as np
 
 
+class SE3Task(object):
+  def __init__(self, M, idx):
+    self.SE3 = M
+    self.idx = idx
+
+
 class SE3RunningData(RunningQuadraticCostData):
   def __init__(self, nx, nu, nr):
     # Creating the data structure for a running quadratic cost
@@ -22,20 +28,15 @@ class SE3Cost(RunningQuadraticCost):
   efficiency, we overwrite the updateQuadraticAppr function because we don't
   need to update the terms related to the control.
   """
-  def __init__(self, dynamicsModel, weight, Mdes, frame_name):
+  def __init__(self, dynamicsModel, weight, frameRef):
     RunningQuadraticCost.__init__(self, 6, weight)
     self.dynamicsModel = dynamicsModel
-    self.Mdes_inv = Mdes.inverse()
-    self.frame_idx = self.dynamicsModel.pinocchioModel.getFrameId(frame_name)
+    self.Mdes_inv = frameRef.SE3.inverse()
+    self.frame_idx = frameRef.idx
 
   def createData(self, nx, nu = 0):
     # A default value of nu allows us to use this class as terminal one
-    # return SE3RunningData(nx, nu)
-    data = SE3RunningData(nx, nu, self.nr)
-    #TODO set the externally the desired state
-    data.Mdes_inv = self.Mdes_inv
-    data.frame_idx =self.frame_idx
-    return data
+    return SE3RunningData(nx, nu, self.nr)
 
   def updateResidual(self, costData, dynamicsData):
     np.copyto(costData.r,
@@ -60,3 +61,8 @@ class SE3Cost(RunningQuadraticCost):
     np.copyto(costData.Q_rx, np.multiply(self.weight, costData.rx))
     np.copyto(costData.lx, np.dot(costData.rx.T, costData.Q_r))
     np.copyto(costData.lxx, np.dot(costData.rx.T, costData.Q_rx))
+
+  @staticmethod
+  def setReference(costData, frameRef):
+    costData.Mdes_inv = frameRef.SE3.inverse()
+    costData.frame_idx = frameRef.idx

@@ -40,6 +40,8 @@ class CostManager(object):
     """
     self.terminalCosts = []
     self.runningCosts = []
+    self.terminalCostDict = {}
+    self.runningCostDict = {}
 
   def createTerminalData(self, nx):
     """ Creates the terminal cost data for a given state dimension
@@ -56,16 +58,20 @@ class CostManager(object):
     """
     return RunningCostManagerData(nx, nu, self.runningCosts)
 
-  def addTerminal(self, cost):
+  def addTerminal(self, cost, name):
     """ Adds a terminal cost function to the cost model.
     Before adding it, it checks if this is a terminal cost objects.
     """
+    index = len(self.terminalCosts)
+    self.terminalCostDict[name] = index
     self.terminalCosts.append(cost)
 
-  def addRunning(self, cost):
+  def addRunning(self, cost, name):
     """ Adds a running cost function to the cost model.
     Before adding it, it checks if this is a terminal cost objects.
     """
+    index = len(self.runningCosts)
+    self.runningCostDict[name] = index
     self.runningCosts.append(cost)
 
   # Static functions that defines all cost computations
@@ -106,3 +112,19 @@ class CostManager(object):
     for k, cost in enumerate(costManager.terminalCosts):
       costData.lx += cost.getlx(costData.costVector[k])
       costData.lxx += cost.getlxx(costData.costVector[k])
+
+  def getTerminalCostIndex(costManager, name):
+    """ Get the index of a given terminal cost name
+
+    :param name: cost function name
+    """
+    # Returning the index of the cost
+    return costManager.terminalCostDict[name]
+
+  def getRunningCostIndex(costManager, name):
+    """ Get the index of a given terminal cost name
+
+    :param name: cost function name
+    """
+    # Returning the index of the cost
+    return costManager.runningCostDict[name]

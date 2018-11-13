@@ -53,12 +53,13 @@ q0[7+11] = 1.5
 v0 = np.zeros((robot.model.nv, 1))
 x0 = np.vstack([q0, v0])
 u0 = np.zeros((robot.model.nv-6, 1))
-U0 = [u0 for i in xrange(len(timeline)-1)]
 
 
 # Defining the SE3 task
-frame_name = 'base_link'
-M_des = se3.SE3(np.eye(3), np.array([ [0.1], [0.], [0.] ]))
+frameRef = \
+  cddp.costs.multibody_dynamics.SE3Task(se3.SE3(np.eye(3),
+                                                np.array([[0.1],[0.],[0.]])),
+                                        model.getFrameId('base_link'))
 """
 se3_rcost = cddp.tasks.multibody_tasks.SE3RunningCost(model, frame_name, M_des)
 se3_tcost = cddp.SE3TerminalCost(model, frame_name, M_des)
@@ -67,13 +68,14 @@ se3_rcost.setWeights(1000*w_se3)
 se3_tcost.setWeights(1000*w_se3)
 """
 w_se3 = np.ones((6,1))
-se3_rcost = cddp.costs.multibody_dynamics.SE3Cost(ddpDynamics, 1.*w_se3, M_des, frame_name)
-se3_tcost = cddp.costs.multibody_dynamics.SE3Cost(ddpDynamics, 1e3*w_se3, M_des, frame_name)
+se3_rcost = cddp.costs.multibody_dynamics.SE3Cost(ddpDynamics, 1.*w_se3, frameRef)
+se3_tcost = cddp.costs.multibody_dynamics.SE3Cost(ddpDynamics, 1e3*w_se3, frameRef)
 
 # Defining the CoM task
 com_des = np.matrix([ [0.1], [0.], [0.] ])
+Cref = [com_des for i in xrange(len(timeline)-1)]
 w_com = 1000.*np.ones((3,1))
-com_cost = cddp.costs.multibody_dynamics.CoMCost(ddpDynamics, w_com, com_des)
+com_cost = cddp.costs.multibody_dynamics.CoMCost(ddpDynamics, w_com)
 
 
 # Defining the velocity and control regularization
@@ -81,30 +83,39 @@ wx = 1e-7 * np.vstack([ np.zeros((model.nv,1)), np.ones((model.nv,1)) ])
 wu = 1e-7 * np.ones((robot.nv-6,1))
 
 #TODO: Why are we regularizing to zero posture!
-x_cost = cddp.costs.multibody_dynamics.StateCost(ddpDynamics, wx, x0)
-u_cost = cddp.costs.multibody_dynamics.ControlCost(ddpDynamics, wu, u0)
+x_cost = cddp.costs.multibody_dynamics.StateCost(ddpDynamics, wx)
+u_cost = cddp.costs.multibody_dynamics.ControlCost(ddpDynamics, wu)
 
 # Adding the cost functions to the cost manager
 costManager = cddp.cost_manager.CostManager()
-costManager.addRunning(x_cost)
-costManager.addRunning(u_cost)
-costManager.addRunning(se3_rcost)
-costManager.addTerminal(se3_tcost)
+costManager.addRunning(x_cost, "x_cost")
+costManager.addRunning(u_cost, "u_cost")
+costManager.addRunning(se3_rcost, "se3_cost")
+costManager.addTerminal(se3_tcost, "se3_cost")
 #costManager.addRunning(com_cost)
 
 # Setting up the DDP problem
-
 ddpModel = cddp.ddp_model.DDPModel(ddpDynamics, ddpIntegrator,
                                    ddpDiscretizer, costManager)
 ddpData = cddp.ddp_model.DDPData(ddpModel, timeline)
+
+# Setting the initial conditions
+U0 = [u0 for i in xrange(len(timeline)-1)]
+cddp.Solver.setInitial(ddpModel, ddpData, xInit=x0, UInit=U0)
+
+# Setting the desired reference for each single cost function
+Xref = [x0 for i in xrange(len(timeline))]
+Uref = [u0 for i in xrange(len(timeline))]
+Mref = [frameRef for i in xrange(len(timeline))]
+ddpModel.setRunningReference(ddpData, Xref[:-1], "x_cost")
+ddpModel.setRunningReference(ddpData, Mref[:-1], "se3_cost")
+ddpModel.setTerminalReference(ddpData, Mref[-1], "se3_cost")
 
 # Configuration the solver from YAML file
 solverParams = cddp.solver.SolverParams()
 solverParams.setFromConfigFile(filename + "/hyq_config.yaml")
 
 # Solving the problem
-#ddp.compute(x0)
-cddp.Solver.setInitial(ddpModel, ddpData, xInit=x0, UInit=U0)
 cddp.Solver.solve(ddpModel, ddpData, solverParams)
 
 # Printing the final goal
