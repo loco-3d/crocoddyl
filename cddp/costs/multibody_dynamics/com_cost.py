@@ -1,5 +1,15 @@
+from cddp.costs.cost import RunningQuadraticCostData
 from cddp.costs.cost import RunningQuadraticCost
 import numpy as np
+
+
+class CoMRunningData(RunningQuadraticCostData):
+  def __init__(self, nx, nu, nr):
+    # Creating the data structure for a running quadratic cost
+    RunningQuadraticCostData.__init__(self, nx, nu, nr)
+
+    # Creating the data for the desired CoM position
+    self.com_des = np.zeros((3,1))
 
 
 class CoMCost(RunningQuadraticCost):
@@ -11,27 +21,32 @@ class CoMCost(RunningQuadraticCost):
   need to update the terms related to the control.
   """
   def __init__(self, dynamicsModel, weights, com_des):
-    RunningQuadraticCost.__init__(self,
-      dynamicsModel.nx(), dynamicsModel.nu(), 3, weights)
+    RunningQuadraticCost.__init__(self, 3, weights)
     self.dynamicsModel = dynamicsModel
-    self._com_des = com_des
+    self.com_des = com_des
 
-  def updateResidual(self, dynamicsData):
-    np.copyto(self._r, dynamicsData.pinocchioData.com[0] - self._com_des)
+  def createData(self, nx, nu):
+    # return CoMRunningData(nx, nu)
+    data = CoMRunningData(nx, nu, self.nr)
+    np.copyto(data.com_des, self.com_des) #TODO set the externally the desired state
+    return data
 
-  def updateResidualLinearAppr(self, dynamicsData):
-    self._rx[:,:self.dynamicsModel.nv()] = dynamicsData.pinocchioData.Jcom
+  def updateResidual(self, costData, dynamicsData):
+    np.copyto(costData.r, dynamicsData.pinocchioData.com[0] - costData.com_des)
 
-  def updateQuadraticAppr(self, dynamicsData):
+  def updateResidualLinearAppr(self, costData, dynamicsData):
+    costData.rx[:,:self.dynamicsModel.nv()] = dynamicsData.pinocchioData.Jcom
+
+  def updateQuadraticAppr(self, costData, dynamicsData):
     # We overwrite this function since this residual function only depends on
     # state. So, the gradient and Hession of the cost w.r.t. the control remains
     # zero.
-   
+
     # Updating the linear approximation of the residual function
-    self.updateResidualLinearAppr(dynamicsData)
+    self.updateResidualLinearAppr(costData, dynamicsData)
 
     # Updating the quadratic approximation of the cost function
-    np.copyto(self._Q_r, np.multiply(self.weight, self._r))
-    np.copyto(self._Q_rx, np.multiply(self.weight, self._rx))
-    np.copyto(self._lx, np.dot(self._rx.T, W_r))
-    np.copyto(self._lxx, np.dot(self._rx.T, W_rx))
+    np.copyto(costData.Q_r, np.multiply(self.weight, costData.r))
+    np.copyto(costData.Q_rx, np.multiply(self.weight, costData.rx))
+    np.copyto(costData.lx, np.dot(costData.rx.T, costData.Q_r))
+    np.copyto(costData.lxx, np.dot(costData.rx.T, costData.Q_rx))
