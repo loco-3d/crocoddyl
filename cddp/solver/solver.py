@@ -1,21 +1,9 @@
 import time
-from itertools import izip
 import numpy as np
 from cddp.utils import isPositiveDefinitive, EPS
 
 
 class Solver(object):
-
-  @staticmethod
-  def setInitial(ddpModel, ddpData, xInit, UInit):
-    """
-    Performs data copying from init values to ddpData.
-    """
-    np.copyto(ddpData.intervalDataVector[0].dynamicsData.x, xInit)
-    #np.copyto(ddpData.intervalDataVector[0].dynamicsData.x_new, xInit)
-    for u, intervalData in izip(UInit,ddpData.intervalDataVector[:-1]):
-      np.copyto(intervalData.dynamicsData.u, u)
-    return
 
   @staticmethod
   def forwardSimulation(ddpModel, ddpData):

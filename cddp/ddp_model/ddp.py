@@ -1,4 +1,5 @@
 import numpy as np
+from itertools import izip
 
 
 class DDPTerminalIntervalData(object):
@@ -153,6 +154,16 @@ class DDPModel(object):
 
   def createTerminalCostData(self):
     return self.costManager.createTerminalData(self.dynamicsModel.nx())
+
+  def setInitial(self, ddpData, xInit, UInit):
+    """
+    Performs data copying from init values to ddpData.
+    """
+    np.copyto(ddpData.intervalDataVector[0].dynamicsData.x, xInit)
+    #np.copyto(ddpData.intervalDataVector[0].dynamicsData.x_new, xInit)
+    for u, intervalData in izip(UInit,ddpData.intervalDataVector[:-1]):
+      np.copyto(intervalData.dynamicsData.u, u)
+    return
 
   def setRunningReference(self, ddpData, Xref, name):
     index = self.costManager.getRunningCostIndex(name)
