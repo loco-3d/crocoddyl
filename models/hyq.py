@@ -101,7 +101,7 @@ ddpData = cddp.ddp_model.DDPData(ddpModel, timeline)
 
 # Setting the initial conditions
 U0 = [u0 for i in xrange(len(timeline)-1)]
-cddp.Solver.setInitial(ddpModel, ddpData, xInit=x0, UInit=U0)
+ddpModel.setInitial(ddpData, xInit=x0, UInit=U0)
 
 # Setting the desired reference for each single cost function
 Xref = [x0 for i in xrange(len(timeline))]
