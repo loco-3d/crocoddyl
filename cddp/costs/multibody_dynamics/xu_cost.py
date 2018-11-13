@@ -5,12 +5,12 @@ import numpy as np
 
 
 class StateRunningData(RunningQuadraticCostData):
-  def __init__(self, nx, nu, nr):
+  def __init__(self, nxImpl, nx, nu, nr):
     # Creating the data structure for a running quadratic cost
     RunningQuadraticCostData.__init__(self, nx, nu, nr)
 
     # Creating the data for the desired state
-    self.x_des = np.zeros((37,1))
+    self.x_des = np.zeros((nxImpl,1))
 
 
 class ControlRunningData(RunningQuadraticCostData):
@@ -36,7 +36,7 @@ class StateCost(RunningQuadraticCost):
     self.dynamicsModel = dynamicsModel
 
   def createData(self, nx, nu):
-    data = StateRunningData(nx, nu, self.nr)
+    data = StateRunningData(self.dynamicsModel.nxImpl(), nx, nu, self.nr)
     np.copyto(data.rx, np.identity(nx))
     np.copyto(data.lxx, np.diag(np.array(self.weight).squeeze()))
     return data
