@@ -1,34 +1,52 @@
-from cddp.costs.cost import QuadraticCost
+from cddp.costs.cost import RunningQuadraticCostData
+from cddp.costs.cost import RunningQuadraticCost
 import numpy as np
 
-class CoMCost(QuadraticCost):
 
-  def __init__(self, dynamicsModel, comDes, weights):
-    QuadraticCost.__init__(self, dynamicsModel, comDes, weights)
-    self.dim = 3
+class CoMRunningData(RunningQuadraticCostData):
+  def __init__(self, nx, nu, nr):
+    # Creating the data structure for a running quadratic cost
+    RunningQuadraticCostData.__init__(self, nx, nu, nr)
 
-    self._r = np.zeros((self.dim, 1))
-    self._rx = np.zeros((self.dim, dynamicsModel.nx()))
-    self._ru = np.zeros((self.dim, dynamicsModel.nu()))
-    return
+    # Creating the data for the desired CoM position
+    self.com_des = np.zeros((3,1))
 
-  def forwardRunningCalc(self, dynamicsData):
-    self._r = dynamicsData.pinocchioData.com[0] - self.ref
-    
-  def forwardTerminalCalc(self, dynamicsData):
-    self.forwardRunningCalc(dynamicsData)
 
-  def backwardRunningCalc(self, dynamicsData):
-    self._rx[:,:self.dynamicsModel.nv()] = dynamicsData.pinocchioData.Jcom
-    
-  def backwardTerminalCalc(self, dynamicsData):
-    self.backwardRunningCalc(dynamicsData)
+class CoMCost(RunningQuadraticCost):
+  """ CoM tracking cost.
 
-  def getlu(self):
-    return np.zeros((self.dynamicsModel.nu(),1))
-  
-  def getluu(self):
-    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nu()))
+  An important remark here is that the residual only depends on the state.
+  The gradient and Hession of the cost w.r.t. the control remains zero. So, for
+  efficiency, we overwrite the updateQuadraticAppr function because we don't
+  need to update the terms related to the control.
+  """
+  def __init__(self, dynamicsModel, weights):
+    RunningQuadraticCost.__init__(self, 3, weights)
+    self.dynamicsModel = dynamicsModel
 
-  def getlux(self):
-    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nx()))
+  def createData(self, nx, nu):
+    return CoMRunningData(nx, nu, self.nr)
+
+  def updateResidual(self, costData, dynamicsData):
+    np.copyto(costData.r, dynamicsData.pinocchioData.com[0] - costData.com_des)
+
+  def updateResidualLinearAppr(self, costData, dynamicsData):
+    costData.rx[:,:self.dynamicsModel.nv()] = dynamicsData.pinocchioData.Jcom
+
+  def updateQuadraticAppr(self, costData, dynamicsData):
+    # We overwrite this function since this residual function only depends on
+    # state. So, the gradient and Hession of the cost w.r.t. the control remains
+    # zero.
+
+    # Updating the linear approximation of the residual function
+    self.updateResidualLinearAppr(costData, dynamicsData)
+
+    # Updating the quadratic approximation of the cost function
+    np.copyto(costData.Q_r, np.multiply(self.weight, costData.r))
+    np.copyto(costData.Q_rx, np.multiply(self.weight, costData.rx))
+    np.copyto(costData.lx, np.dot(costData.rx.T, costData.Q_r))
+    np.copyto(costData.lxx, np.dot(costData.rx.T, costData.Q_rx))
+
+  @staticmethod
+  def setReference(costData, com_des):
+    np.copyto(costData.com_des, com_des)

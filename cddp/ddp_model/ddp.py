@@ -1,4 +1,5 @@
 import numpy as np
+from itertools import izip
 
 
 class DDPTerminalIntervalData(object):
@@ -145,10 +146,31 @@ class DDPModel(object):
     return self.dynamicsModel.createData(self, tInit)
 
   def createRunningCostData(self):
-    return self.costManager.createRunningData(self.dynamicsModel)
+    return self.costManager.createRunningData(self.dynamicsModel.nx(),
+                                              self.dynamicsModel.nu())
 
   def createTerminalDynamicsData(self, tFinal):
     return self.dynamicsModel.createData(self, tFinal)
 
   def createTerminalCostData(self):
-    return self.costManager.createTerminalData(self.dynamicsModel)
+    return self.costManager.createTerminalData(self.dynamicsModel.nx())
+
+  def setInitial(self, ddpData, xInit, UInit):
+    """
+    Performs data copying from init values to ddpData.
+    """
+    np.copyto(ddpData.intervalDataVector[0].dynamicsData.x, xInit)
+    #np.copyto(ddpData.intervalDataVector[0].dynamicsData.x_new, xInit)
+    for u, intervalData in izip(UInit,ddpData.intervalDataVector[:-1]):
+      np.copyto(intervalData.dynamicsData.u, u)
+    return
+
+  def setRunningReference(self, ddpData, Xref, name):
+    index = self.costManager.getRunningCostIndex(name)
+    for k, data in enumerate(ddpData.intervalDataVector[:-1]):
+      self.costManager.runningCosts[index].setReference(data.costData.costVector[index], Xref[k])
+
+  def setTerminalReference(self, ddpData, xref, name):
+    index = self.costManager.getTerminalCostIndex(name)
+    self.costManager.terminalCosts[index].setReference(
+      ddpData.intervalDataVector[-1].costData.costVector[index], xref)

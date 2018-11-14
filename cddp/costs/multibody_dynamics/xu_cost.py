@@ -1,78 +1,112 @@
-from cddp.costs.cost import QuadraticCost
+from cddp.costs.cost import RunningQuadraticCostData
+from cddp.costs.cost import RunningQuadraticCost
 import pinocchio as se3
 import numpy as np
 
-class StateCost(QuadraticCost):
 
-  def __init__(self, dynamicsModel, stateDes, weights):
-    QuadraticCost.__init__(self, dynamicsModel, stateDes, weights)
-    self.pinocchioModel = dynamicsModel.pinocchioModel
-    self.dim = dynamicsModel.nx()
+class StateRunningData(RunningQuadraticCostData):
+  def __init__(self, nxImpl, nx, nu, nr):
+    # Creating the data structure for a running quadratic cost
+    RunningQuadraticCostData.__init__(self, nx, nu, nr)
 
-    self._r = np.zeros((self.dim, 1))
-    self._rx = np.identity(dynamicsModel.nx())
-    self._ru = np.zeros((self.dim, dynamicsModel.nu()))
-    self._lxx = np.diag(np.array(self.weight).squeeze())
+    # Creating the data for the desired state
+    self.x_des = np.zeros((nxImpl,1))
+
+
+class ControlRunningData(RunningQuadraticCostData):
+  def __init__(self, nx, nu, nr):
+    # Creating the data structure for a running quadratic cost
+    RunningQuadraticCostData.__init__(self, nx, nu, nr)
+
+    # Creating the data for the desired control
+    self.u_des = np.zeros((nr,1))
+
+
+class StateCost(RunningQuadraticCost):
+  """ State tracking cost.
+
+  An important remark here is that the residual depends linearly on the state.
+  So, for efficiency, we overwrite the updateQuadraticAppr function because we
+  don't need 1) to find a linear approximation of the residual function, 2) to
+  update the terms related to the control, and 3) to update the Hessian w.r.t
+  the state (constant value).
+  """
+  def __init__(self, dynamicsModel, weights):
+    RunningQuadraticCost.__init__(self, dynamicsModel.nx(), weights)
+    self.dynamicsModel = dynamicsModel
+
+  def createData(self, nx, nu):
+    data = StateRunningData(self.dynamicsModel.nxImpl(), nx, nu, self.nr)
+    np.copyto(data.rx, np.identity(nx))
+    np.copyto(data.lxx, np.diag(np.array(self.weight).squeeze()))
+    return data
+
+  def updateResidual(self, costData, dynamicsData):
+    np.copyto(costData.r,
+      self.dynamicsModel.deltaX(dynamicsData, costData.x_des, dynamicsData.x))
+
+  def updateResidualLinearAppr(self, costData, dynamicsData):
+    # Due to the residual is equals to x, we don't need to linearize each time.
+    # So, rx is defined during the construction.
     return
 
-  def forwardRunningCalc(self, dynamicsData):
-    self._r = self.dynamicsModel.deltaX(dynamicsData, self.ref, dynamicsData.x)
+  def updateQuadraticAppr(self, costData, dynamicsData):
+    # We overwrite this function since this residual is equals to x. So, rx is
+    # a vector of 1s, and it's not needed to multiple them.
 
-  def forwardTerminalCalc(self, dynamicsData):
-    self.forwardRunningCalc(dynamicsData)
+    # Updating the linear approximation of the residual function
+    self.updateResidualLinearAppr(costData, dynamicsData)
 
-  def backwardRunningCalc(self, dynamicsData):
+    # Updating the quadratic approximation of the cost function. We don't
+    # overwrite again the lxx since is constant. This value is defined during
+    # the construction. Additionally the gradient and Hession of the cost w.r.t.
+    # the control remains zero.
+    np.copyto(costData.lx, np.multiply(self.weight, costData.r))
+
+  @staticmethod
+  def setReference(costData, x_des):
+    np.copyto(costData.x_des, x_des)
+
+
+class ControlCost(RunningQuadraticCost):
+  """ Control tracking cost.
+
+  An important remark here is that the residual depends linearly on the control.
+  So, for efficiency, we overwrite the updateQuadraticAppr function because we
+  don't need 1) to find a linear approximation of the residual function, 2) to
+  update the terms related to the state, and 3) to update the Hessian w.r.t
+  the control (constant value).
+  """
+  def __init__(self, dynamicsModel, weights):
+    RunningQuadraticCost.__init__(self, dynamicsModel.nu(), weights)
+
+  def createData(self, nx, nu):
+    data = ControlRunningData(nx, nu, self.nr)
+    np.copyto(data.ru, np.identity(nu))
+    np.copyto(data.luu, np.diag(np.array(self.weight).squeeze()))
+    return data
+
+  def updateResidual(self, costData, dynamicsData):
+    np.copyto(costData.r, dynamicsData.u - costData.u_des)
+
+  def updateResidualLinearAppr(self, costData, dynamicsData):
+    # Due to the residual is equals to u, we don't need to linearize each time.
+    # So, ru is defined during the construction.
     return
 
-  def backwardTerminalCalc(self, dynamicsData):
-    return
+  def updateQuadraticAppr(self, costData, dynamicsData):
+    # We overwrite this function since this residual is equals to u. So, ru is
+    # a vector of 1s, and it's not needed to multiple them.
 
-  def getlu(self):
-    return np.zeros((self.dynamicsModel.nu(),1))
+    # Updating the linear approximation of the residual function
+    self.updateResidualLinearAppr(costData, dynamicsData)
 
-  def getlxx(self):
-    return self._lxx
-  
-  def getluu(self):
-    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nu()))
+    # Updating the quadratic approximation of the cost function. We don't
+    # overwrite again the luu since is constant. This value is defined during
+    # the construction. Additionally the gradient and Hession of the cost w.r.t.
+    # the state remains zero.
+    np.copyto(costData.lu, np.multiply(self.weight, costData.r))
 
-  def getlux(self):
-    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nx()))
-
-
-class ControlCost(QuadraticCost):
-  def __init__(self, dynamicsModel, controlDes, weights):
-    QuadraticCost.__init__(self, dynamicsModel, controlDes, weights)
-    self.pinocchioModel = dynamicsModel.pinocchioModel
-    self.dim = dynamicsModel.nu()
-
-    self._r = np.zeros((self.dim, 1))
-    self._rx = np.zeros((self.dim, dynamicsModel.nx()))
-    self._ru = np.identity(self.dim)
-    self._rg = np.identity(self.dim)
-    self._luu = np.diag(np.array(self.weight).squeeze())
-    return
-
-  def forwardRunningCalc(self, dynamicsData):
-    np.copyto(self._r, dynamicsData.u-self.ref)
-
-  def forwardTerminalCalc(self, dynamicsData):
-    self.forwardRunningCalc(dynamicsData)
-
-  def backwardRunningCalc(self, dynamicsData):
-    return
-
-  def backwardTerminalCalc(self, dynamicsData):
-    return
-
-  def getlx(self):
-    return np.zeros((self.dynamicsModel.nx(),1))
-
-  def getlxx(self):
-    return np.zeros((self.dynamicsModel.nx(), self.dynamicsModel.nx()))
-
-  def getluu(self):
-    return self._luu
-
-  def getlux(self):
-    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nx()))
+  @staticmethod
+  def setReference(costData, u_des):
+    np.copyto(costData.u_des, u_des)

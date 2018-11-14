@@ -1,40 +1,27 @@
+from cddp.costs.cost import TerminalCostData, RunningCostData
 import numpy as np
 
 
-class TerminalCostData(object):
-  """ Data structure for the terminal cost of a specific time interval.
+class TerminalCostManagerData(TerminalCostData):
+  def __init__(self, nx, costVector):
+    # Including the data structure of the terminal cost
+    TerminalCostData.__init__(self, nx)
 
-  The terminal cost terms are the cost value and its derivates with respect to
-  the state. The dimensions of these vector or matrices depends on the dynamic
-  model.
-  """
-  def __init__(self, dynamicsModel):
-    """ Creates the terminal cost data.
-
-    :param dynamicsModel: dynanic model
-    """
-    self.l = 0.
-    self.lx = np.zeros((dynamicsModel.nx(),1))
-    self.lxx = np.zeros((dynamicsModel.nx(),dynamicsModel.nx()))
+    # Including the data structure for each individual terminal cost functions
+    self.costVector = []
+    for cost in costVector:
+      self.costVector.append(cost.createData(nx))
 
 
-class RunningCostData(TerminalCostData):
-  """ Data structure for the running cost of a specific time interval.
+class RunningCostManagerData(RunningCostData):
+  def __init__(self, nx, nu, costVector):
+    # Including the data structure of the running cost
+    RunningCostData.__init__(self, nx, nu)
 
-  The running cost terms includes the terminal ones plus its derivates
-  with respect to the control. The dimensions of these vector or matrices
-  depends on the dynamic
-  model.
-  """
-  def __init__(self, dynamicsModel):
-    """ Creates the running cost data.
-
-    :param dynamicsModel: dynanic model
-    """
-    TerminalCostData.__init__(self, dynamicsModel)
-    self.lu = np.zeros((dynamicsModel.nu(),1))
-    self.lux = np.zeros((dynamicsModel.nu(),dynamicsModel.nx()))
-    self.luu = np.zeros((dynamicsModel.nu(),dynamicsModel.nu()))
+    # Including the data structure for each individual terminal cost functions
+    self.costVector = []
+    for cost in costVector:
+      self.costVector.append(cost.createData(nx, nu))
 
 
 class CostManager(object):
@@ -53,75 +40,91 @@ class CostManager(object):
     """
     self.terminalCosts = []
     self.runningCosts = []
+    self.terminalCostDict = {}
+    self.runningCostDict = {}
 
-  @staticmethod
-  def createTerminalData(dynamicsModel):
-    """ Creates the terminal cost data for a given dynamic model
+  def createTerminalData(self, nx):
+    """ Creates the terminal cost data for a given state dimension
 
-    :param dynamicsModel: dynamic model
+    :param nx: state dimension
     """
-    return TerminalCostData(dynamicsModel)
+    return TerminalCostManagerData(nx, self.terminalCosts)
 
-  @staticmethod
-  def createRunningData(dynamicsModel):
-    """ Creates the running cost data for a given dynamic model
+  def createRunningData(self, nx, nu):
+    """ Creates the running cost data for a given state and control dimension
 
-    :param dynamicsModel: dynamic model
+    :param nx: state dimension
+    :param nu: control dimension
     """
-    return RunningCostData(dynamicsModel)
+    return RunningCostManagerData(nx, nu, self.runningCosts)
 
-  def addTerminal(self, cost):
+  def addTerminal(self, cost, name):
     """ Adds a terminal cost function to the cost model.
     Before adding it, it checks if this is a terminal cost objects.
     """
+    index = len(self.terminalCosts)
+    self.terminalCostDict[name] = index
     self.terminalCosts.append(cost)
 
-  def addRunning(self, cost):
+  def addRunning(self, cost, name):
     """ Adds a running cost function to the cost model.
     Before adding it, it checks if this is a terminal cost objects.
     """
+    index = len(self.runningCosts)
+    self.runningCostDict[name] = index
     self.runningCosts.append(cost)
 
   # Static functions that defines all cost computations
   def forwardRunningCalc(costManager, costData, dynamicsData):
     costData.l = 0.
-    for cost in costManager.runningCosts:
-      cost.forwardRunningCalc(dynamicsData)
-      costData.l += cost.getl()
+    for k, cost in enumerate(costManager.runningCosts):
+      cost.updateCost(costData.costVector[k], dynamicsData)
+      costData.l += cost.getl(costData.costVector[k])
 
   def forwardTerminalCalc(costManager, costData, dynamicsData):
     costData.l = 0.
-    for cost in costManager.terminalCosts:
-      cost.forwardTerminalCalc(dynamicsData)
-      costData.l += cost.getl()
-    #TODO: THIS IS STUPID!!!
-    costData.l *=1000.
+    for k, cost in enumerate(costManager.terminalCosts):
+      cost.updateCost(costData.costVector[k], dynamicsData)
+      costData.l += cost.getl(costData.costVector[k])
 
   def backwardRunningCalc(costManager, costData, dynamicsData):
-    for cost in costManager.runningCosts:
-      cost.backwardRunningCalc(dynamicsData)
+    for k, cost in enumerate(costManager.runningCosts):
+      cost.updateQuadraticAppr(costData.costVector[k], dynamicsData)
 
     costData.lx.fill(0.)
     costData.lu.fill(0.)
     costData.lxx.fill(0.)
     costData.lux.fill(0.)
     costData.luu.fill(0.)
-    for cost in costManager.runningCosts:
-      costData.lx += cost.getlx()
-      costData.lu += cost.getlu()
-      costData.lxx += cost.getlxx()
-      costData.lux += cost.getlux()
-      costData.luu += cost.getluu()
+    for k, cost in enumerate(costManager.runningCosts):
+      costData.lx += cost.getlx(costData.costVector[k])
+      costData.lu += cost.getlu(costData.costVector[k])
+      costData.lxx += cost.getlxx(costData.costVector[k])
+      costData.lux += cost.getlux(costData.costVector[k])
+      costData.luu += cost.getluu(costData.costVector[k])
 
   def backwardTerminalCalc(costManager, costData, dynamicsData):
-    for cost in costManager.terminalCosts:
-      cost.backwardTerminalCalc(dynamicsData)
+    for k, cost in enumerate(costManager.terminalCosts):
+      cost.updateQuadraticAppr(costData.costVector[k], dynamicsData)
 
     costData.lx.fill(0.)
     costData.lxx.fill(0.)
-    for cost in costManager.terminalCosts:
-      costData.lx += cost.getlx()
-      costData.lxx += cost.getlxx()
-    #TODO: THIS IS STUPID!!!
-    costData.lx *= 1000.
-    costData.lxx *= 1000.
+    for k, cost in enumerate(costManager.terminalCosts):
+      costData.lx += cost.getlx(costData.costVector[k])
+      costData.lxx += cost.getlxx(costData.costVector[k])
+
+  def getTerminalCostIndex(costManager, name):
+    """ Get the index of a given terminal cost name
+
+    :param name: cost function name
+    """
+    # Returning the index of the cost
+    return costManager.terminalCostDict[name]
+
+  def getRunningCostIndex(costManager, name):
+    """ Get the index of a given terminal cost name
+
+    :param name: cost function name
+    """
+    # Returning the index of the cost
+    return costManager.runningCostDict[name]

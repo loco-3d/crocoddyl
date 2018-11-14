@@ -1,42 +1,68 @@
-from cddp.costs.cost import QuadraticCost
+from cddp.costs.cost import RunningQuadraticCostData
+from cddp.costs.cost import RunningQuadraticCost
 import pinocchio as se3
 import numpy as np
 
-class SE3Cost(QuadraticCost):
 
-  def __init__(self, dynamicsModel, Mdes, weight, frame_name):
-    QuadraticCost.__init__(self, dynamicsModel, Mdes, weight)
-    self.dim = 6
-    self.Mdes_inverse = self.ref.inverse()
-    self.frame_name = frame_name
-    self._frame_idx = self.dynamicsModel.pinocchioModel.getFrameId(frame_name)
+class SE3Task(object):
+  def __init__(self, M, idx):
+    self.SE3 = M
+    self.idx = idx
 
-    self._r = np.zeros((self.dim, 1))
-    self._rx = np.zeros((self.dim, dynamicsModel.nx()))
-    self._ru = np.zeros((self.dim, dynamicsModel.nu()))
-    return
 
-  def forwardRunningCalc(self, dynamicsData):
-    self._r = \
-        se3.log(self.Mdes_inverse*dynamicsData.pinocchioData.oMf[self._frame_idx]).vector
+class SE3RunningData(RunningQuadraticCostData):
+  def __init__(self, nx, nu, nr):
+    # Creating the data structure for a running quadratic cost
+    RunningQuadraticCostData.__init__(self, nx, nu, nr)
 
-  def forwardTerminalCalc(self, dynamicsData):
-    self.forwardRunningCalc(dynamicsData)
+    # Creating the data for the desired SE3 point
+    self.Mdes_inv = se3.SE3()
+    self.frame_idx = 0
 
-  def backwardRunningCalc(self, dynamicsData):
-    self._rx[:,:self.dynamicsModel.nv()] = \
-                                    se3.getFrameJacobian(self.dynamicsModel.pinocchioModel,
-                                    dynamicsData.pinocchioData,
-                                    self._frame_idx,se3.ReferenceFrame.WORLD)
 
-  def backwardTerminalCalc(self, dynamicsData):
-    self.backwardRunningCalc(dynamicsData)
+class SE3Cost(RunningQuadraticCost):
+  """ CoM tracking cost.
 
-  def getlu(self):
-    return np.zeros((self.dynamicsModel.nu(),1))
+  An important remark here is that the residual only depends on the state.
+  The gradient and Hession of the cost w.r.t. the control remains zero. So, for
+  efficiency, we overwrite the updateQuadraticAppr function because we don't
+  need to update the terms related to the control.
+  """
+  def __init__(self, dynamicsModel, weight, frameRef):
+    RunningQuadraticCost.__init__(self, 6, weight)
+    self.dynamicsModel = dynamicsModel
+    self.Mdes_inv = frameRef.SE3.inverse()
+    self.frame_idx = frameRef.idx
 
-  def getluu(self):
-    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nu()))
+  def createData(self, nx, nu = 0):
+    # A default value of nu allows us to use this class as terminal one
+    return SE3RunningData(nx, nu, self.nr)
 
-  def getlux(self):
-    return np.zeros((self.dynamicsModel.nu(), self.dynamicsModel.nx()))
+  def updateResidual(self, costData, dynamicsData):
+    np.copyto(costData.r,
+        se3.log(costData.Mdes_inv * dynamicsData.pinocchioData.oMf[costData.frame_idx]).vector)
+
+  def updateResidualLinearAppr(self, costData, dynamicsData):
+    costData.rx[:,:self.dynamicsModel.nv()] = \
+        se3.getFrameJacobian(self.dynamicsModel.pinocchioModel,
+                             dynamicsData.pinocchioData,
+                             costData.frame_idx, se3.ReferenceFrame.WORLD)
+
+  def updateQuadraticAppr(self, costData, dynamicsData):
+    # We overwrite this function since this residual function only depends on
+    # state. So, the gradient and Hession of the cost w.r.t. the control remains
+    # zero.
+
+    # Updating the linear approximation of the residual function
+    self.updateResidualLinearAppr(costData, dynamicsData)
+
+    # Updating the quadratic approximation of the cost function
+    np.copyto(costData.Q_r, np.multiply(self.weight, costData.r))
+    np.copyto(costData.Q_rx, np.multiply(self.weight, costData.rx))
+    np.copyto(costData.lx, np.dot(costData.rx.T, costData.Q_r))
+    np.copyto(costData.lxx, np.dot(costData.rx.T, costData.Q_rx))
+
+  @staticmethod
+  def setReference(costData, frameRef):
+    costData.Mdes_inv = frameRef.SE3.inverse()
+    costData.frame_idx = frameRef.idx
