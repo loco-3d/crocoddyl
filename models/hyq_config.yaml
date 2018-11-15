@@ -18,3 +18,4 @@ ddp:
     dec_rate: 0.5
     armijo_condition: 1e-3
     change_ub: 100.
+  record: True
