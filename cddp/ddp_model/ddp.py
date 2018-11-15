@@ -85,27 +85,31 @@ class DDPData(object):
     :param ddpModel: DDP model
     :param timeline: time vector
     """
+    # Time, horizon and number of iterations
     self.timeline = timeline
     self.N = len(timeline) - 1
+    self.n_iter = -1.    
+
+    # Interval data for the cost and dynamics, and their quadratic and linear
+    # approximation, respectively
     self.intervalDataVector = [DDPRunningIntervalData(ddpModel, timeline[i], timeline[i+1])
                                for i in xrange(self.N)]
     self.intervalDataVector.append(DDPTerminalIntervalData(ddpModel, timeline[-1]))
 
-    #Total Cost
+    # Cost-related data
     self.totalCost = 0.
     self.totalCost_prev = 0.
     self.dV_exp = 0.
     self.dV = 0.
-    
-    #Run time variables
-    self._convergence = False
+
+    # Line search and regularization data
+    self.alpha = -1.
     self.muLM = -1.
     self.muV = -1.
     self.muI = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
-    self.alpha = -1.
-    self.n_iter = -1.
 
-    #Analysis Variables
+    # Convergence and stopping criteria data
+    self._convergence = False
     self.gamma = 0.
     self.theta = 0.
     self.z_new = 0.
