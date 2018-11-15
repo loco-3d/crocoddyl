@@ -207,14 +207,20 @@ class Solver(object):
           ddpData._convergence = True
           break
 
-      # Recording the total cost, gradient, theta and alpha for each iteration.
-      # This is useful for analysing the solver performance
-      """
-      ddpData.J_itr[i] = ddpData.V
-      ddpData.gamma_itr[i] = np.asscalar(ddpData.gamma)
-      ddpData.theta_itr[i] = np.asscalar(ddpData.theta)
-      ddpData.alpha_itr[i] = ddpData.alpha
-      """
+      # Recording the regularization values, gradient, and theta for each
+      # iteration. This is useful for analysing the solver performance
+
+      # Recording the total cost, gradient, weighted gradient (gamme),
+      # regularization values and alpha for each iteration. This is useful for
+      # analysing the solver performance
+      if solverParams.record:
+        solverParams.cost_itr[i] = ddpData.totalCost
+        solverParams.gamma_itr[i] = ddpData.gamma
+        solverParams.theta_itr[i] = ddpData.theta
+        solverParams.muLM_itr[i] = ddpData.muLM
+        solverParams.muV_itr[i] = ddpData.muV
+        solverParams.alpha_itr[i] = ddpData.alpha
+
       # The quadratic model is accepted so for faster convergence it's better
       # to approach to Newton search direction. We can do it by decreasing the
       # Levenberg-Marquardt parameter

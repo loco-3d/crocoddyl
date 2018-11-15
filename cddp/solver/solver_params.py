@@ -33,6 +33,9 @@ class SolverParams(object):
     self.alpha_dec = 0.5
     self.armijo_condition = 1e-3
     self.change_ub = 100.
+
+    # Recording data for solver performance
+    self.record = False
     return
 
   def setFromConfigFile(self, config_file):
@@ -70,3 +73,6 @@ class SolverParams(object):
       self.alpha_dec = float(data['ddp']['line_search']['dec_rate'])
       self.armijo_condition = float(data['ddp']['line_search']['armijo_condition'])
       self.change_ub = float(data['ddp']['line_search']['change_ub'])
+
+      # Recording data for solver performance
+      self.record = bool(data['ddp']['record'])
