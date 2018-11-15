@@ -1,7 +1,30 @@
 import yaml
-class SolverParams(object):
 
+class SolverParams(object):
   def __init__(self):
+    """ Define the default values of the DDP parameters
+    """
+    # Defining the default values of the DDP parameters
+    # Convergence tolerance and maximum number of iterations
+    self.tol = 1e-5
+    self.max_iter = 20
+
+    # Regularization parameters (factor and increased rate)
+    self.mu0LM = 0.
+    self.muLM_inc = 10.
+    self.muLM_dec = 0.5
+    self.mu0V = 0.
+    self.muV_inc = 10.
+    self.muV_dec = 0.5
+    
+    # Line search parameters (step, lower and upper bound of iteration
+    # acceptance and decreased rate)
+    self.alpha0 = 1.
+    self.alpha_min = 1e-3
+    self.alpha_inc = 2.
+    self.alpha_dec = 0.5
+    self.armijo_condition = 1e-3
+    self.change_ub = 100.
     return
 
   def setFromConfigFile(self, config_file):
