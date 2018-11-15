@@ -9,6 +9,14 @@ class SolverParams(object):
     self.tol = 1e-5
     self.max_iter = 20
 
+    # Resizing the global variables for analysing solver performance
+    self.cost_itr = [0.] * self.max_iter
+    self.muLM_itr = [0.] * self.max_iter
+    self.muV_itr = [0.] * self.max_iter
+    self.gamma_itr = [0.] * self.max_iter
+    self.theta_itr = [0.] * self.max_iter
+    self.alpha_itr = [0.] * self.max_iter
+
     # Regularization parameters (factor and increased rate)
     self.mu0LM = 0.
     self.muLM_inc = 10.
@@ -16,7 +24,7 @@ class SolverParams(object):
     self.mu0V = 0.
     self.muV_inc = 10.
     self.muV_dec = 0.5
-    
+
     # Line search parameters (step, lower and upper bound of iteration
     # acceptance and decreased rate)
     self.alpha0 = 1.
@@ -38,9 +46,11 @@ class SolverParams(object):
       # Setting up stop criteria
       self.tol = float(data['ddp']['stop_criteria']['tol'])
       self.max_iter = int(data['ddp']['stop_criteria']['max_iter'])
-      
+
       # Resizing the global variables for analysing solver performance
-      self.J_itr = [0.] * self.max_iter
+      self.cost_itr = [0.] * self.max_iter
+      self.muLM_itr = [0.] * self.max_iter
+      self.muV_itr = [0.] * self.max_iter
       self.gamma_itr = [0.] * self.max_iter
       self.theta_itr = [0.] * self.max_iter
       self.alpha_itr = [0.] * self.max_iter
@@ -57,6 +67,6 @@ class SolverParams(object):
       self.alpha0 = float(data['ddp']['line_search']['alpha0'])
       self.alpha_min = float(data['ddp']['line_search']['min_stepsize'])
       self.alpha_inc = float(data['ddp']['line_search']['inc_rate'])
-      self.alpha_dec = float(data['ddp']['line_search']['dec_rate'])  
+      self.alpha_dec = float(data['ddp']['line_search']['dec_rate'])
       self.armijo_condition = float(data['ddp']['line_search']['armijo_condition'])
       self.change_ub = float(data['ddp']['line_search']['change_ub'])
