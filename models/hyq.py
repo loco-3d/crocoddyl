@@ -118,17 +118,15 @@ solverParams.setFromConfigFile(filename + "/hyq_config.yaml")
 # Solving the problem
 cddp.Solver.solve(ddpModel, ddpData, solverParams)
 
-# Printing the final goal
-frame_idx = model.getFrameId(frame_name)
-xf = ddp.intervals[-1].x
-qf = xf[:model.nq]
-print robot.framePosition(qf, frame_idx)
 
 
 if plot:
-  J = ddp.getTotalCostSequence()
-  gamma, theta, alpha, muLM, muV = ddp.getConvergenceSequence()
-  cddp.plotDDPConvergence(J, muLM, muV, gamma, theta, alpha)
+  cddp.utils.plotDDPConvergence(solverParams.cost_itr,
+                                solverParams.muLM_itr,
+                                solverParams.muV_itr, 
+                                solverParams.gamma_itr,
+                                solverParams.theta_itr,
+                                solverParams.alpha_itr)
 
 
 if display:
@@ -137,3 +135,9 @@ if display:
   cddp.visualizePlan(robot, T, x0, X)
 
 # ddp.saveToFile('mu_1e2.txt')
+
+# Printing the final goal
+frame_idx = model.getFrameId(frame_name)
+xf = ddp.intervals[-1].x
+qf = xf[:model.nq]
+print robot.framePosition(qf, frame_idx)
