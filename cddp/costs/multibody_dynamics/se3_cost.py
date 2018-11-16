@@ -15,8 +15,9 @@ class SE3RunningData(RunningQuadraticCostData):
     # Creating the data structure for a running quadratic cost
     RunningQuadraticCostData.__init__(self, nx, nu, nr)
 
-    # Creating the data for the desired SE3 point
-    self.Mdes_inv = se3.SE3()
+    # Creating the data for the desired SE3 point and its error
+    self.oMr_inv = se3.SE3()
+    self.rMf = se3.SE3()
     self.frame_idx = 0
 
 
@@ -31,22 +32,28 @@ class SE3Cost(RunningQuadraticCost):
   def __init__(self, dynamicsModel, weight, frameRef):
     RunningQuadraticCost.__init__(self, 6, weight)
     self.dynamicsModel = dynamicsModel
-    self.Mdes_inv = frameRef.SE3.inverse()
+    self.oMr_inv = frameRef.SE3.inverse()
     self.frame_idx = frameRef.idx
 
   def createData(self, nx, nu = 0):
     # A default value of nu allows us to use this class as terminal one
     return SE3RunningData(nx, nu, self.nr)
 
+  def updateSE3error(self, costData, dynamicsData): 
+    costData.rMf = costData.oMr_inv * dynamicsData.pinocchioData.oMf[costData.frame_idx]
+
   def updateResidual(self, costData, dynamicsData):
+    self.updateSE3error(costData, dynamicsData)
     np.copyto(costData.r,
-        se3.log(costData.Mdes_inv * dynamicsData.pinocchioData.oMf[costData.frame_idx]).vector)
+        se3.log(costData.rMf).vector)
 
   def updateResidualLinearAppr(self, costData, dynamicsData):
+    self.updateSE3error(costData, dynamicsData)
     costData.rx[:,:self.dynamicsModel.nv()] = \
+        costData.rMf.action * \
         se3.getFrameJacobian(self.dynamicsModel.pinocchioModel,
                              dynamicsData.pinocchioData,
-                             costData.frame_idx, se3.ReferenceFrame.WORLD)
+                             costData.frame_idx, se3.ReferenceFrame.LOCAL)
 
   def updateQuadraticAppr(self, costData, dynamicsData):
     # We overwrite this function since this residual function only depends on
@@ -64,5 +71,5 @@ class SE3Cost(RunningQuadraticCost):
 
   @staticmethod
   def setReference(costData, frameRef):
-    costData.Mdes_inv = frameRef.SE3.inverse()
+    costData.oMr_inv = frameRef.SE3.inverse()
     costData.frame_idx = frameRef.idx
