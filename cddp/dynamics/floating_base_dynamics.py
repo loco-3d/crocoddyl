@@ -22,13 +22,6 @@ class FloatingBaseMultibodyDynamicsData(DynamicsData):
                                ddpModel.dynamicsModel.nv() + self.dimConstraint))
     self.MJtJc_inv_L = np.zeros((ddpModel.dynamicsModel.nv() + self.dimConstraint,
                                  ddpModel.dynamicsModel.nv() + self.dimConstraint))
-    
-    self.x = np.zeros((ddpModel.dynamicsModel.nxImpl(), 1))
-    self.u = np.zeros((ddpModel.dynamicsModel.nu(), 1))
-
-    # Saving the previous iteration state and control
-    self.x_prev = np.zeros((ddpModel.dynamicsModel.nxImpl(), 1))
-    self.u_prev = np.zeros((ddpModel.dynamicsModel.nu(), 1))
 
     self.fx = ddpModel.discretizer.fx(ddpModel.dynamicsModel.nv(),
                                       ddpModel.dynamicsModel.nv(),
@@ -105,11 +98,6 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     return
 
   def backwardRunningCalc(dynamicsModel, dynamicsData):
-    #Save the state and control in the previous iteration. Prepare for next iteration.
-    # TODO move to the DDP solver
-    np.copyto(dynamicsData.x_prev, dynamicsData.x)
-    np.copyto(dynamicsData.u_prev, dynamicsData.u)
-    
     #TODO: Replace with analytical derivatives
     for i in xrange(dynamicsModel.nv()):
       np.copyto(dynamicsData.fx.aq, -dynamicsData.pinocchioData.ddq)
@@ -154,7 +142,7 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     for i in xrange(dynamicsModel.nv()):
       np.copyto(dynamicsData.v_pert, dynamicsData.x[dynamicsModel.nq():])
       dynamicsData.v_pert[i] += dynamicsData.h
-      
+
       dynamicsModel.computeDynamics(dynamicsData,
                                     dynamicsData.x[:dynamicsModel.nq()],
                                     dynamicsData.v_pert,
@@ -167,9 +155,6 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     return
 
   def backwardTerminalCalc(dynamicsModel, dynamicsData):
-    #Save the state in the previous iteration values to prepare for next iteration.
-    # TODO move to the solver
-    np.copyto(dynamicsData.x_prev, dynamicsData.x)
     return
 
   def nq(self):

@@ -10,6 +10,11 @@ class DynamicsData(object):
   def __init__(self, ddpModel):
     self.diff_x = np.zeros((ddpModel.dynamicsModel.nx(), 1))
 
+    # Current and previous state and control
+    self.x = np.zeros((ddpModel.dynamicsModel.nxImpl(), 1))
+    self.u = np.zeros((ddpModel.dynamicsModel.nu(), 1))
+    self.x_prev = np.zeros((ddpModel.dynamicsModel.nxImpl(), 1))
+    self.u_prev = np.zeros((ddpModel.dynamicsModel.nu(), 1))
 
 class DynamicsModel(object):
   "Base class to define the dynamics model"
