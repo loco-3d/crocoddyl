@@ -16,8 +16,6 @@ class DDPTerminalIntervalData(object):
     # Final time of the terminal interval
     self.tFinal = tFinal
 
-    #TODO Nominal and new state of the terminal interval
-
     # Dynamic and cost data of the terminal interval
     self.dynamicsData = ddpModel.createTerminalDynamicsData(tFinal)
     self.costData = ddpModel.createTerminalCostData()
@@ -44,8 +42,6 @@ class DDPRunningIntervalData(object):
     self.tInit = tInit
     self.tFinal = tFinal
     self.dt = self.tFinal - self.tInit
-
-    #TODO Nominal and new state of the running interval
 
     # Dynamic and cost data of the running interval
     self.dynamicsData = ddpModel.createRunningDynamicsData(tInit)
@@ -138,11 +134,16 @@ class DDPModel(object):
   def backwardTerminalCalc(self, ddpData):
     """Performs the calculations before the backward pass
     Pinocchio Data has already been filled with the forward pass."""
+    # Copying the current state into the previous one
+    np.copyto(ddpData.dynamicsData.x_prev, ddpData.dynamicsData.x)
     self.dynamicsModel.backwardTerminalCalc(ddpData.dynamicsData)
     self.costManager.backwardTerminalCalc(ddpData.costData, ddpData.dynamicsData)
 
   def backwardRunningCalc(self, ddpData):
     """Performs the calculations before the backward pass"""
+    # Copying the current state and control into the previous ones
+    np.copyto(ddpData.dynamicsData.x_prev, ddpData.dynamicsData.x)
+    np.copyto(ddpData.dynamicsData.u_prev, ddpData.dynamicsData.u)
     self.dynamicsModel.backwardRunningCalc(ddpData.dynamicsData)
     self.costManager.backwardRunningCalc(ddpData.costData, ddpData.dynamicsData)
 
