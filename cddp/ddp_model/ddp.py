@@ -16,8 +16,6 @@ class DDPTerminalIntervalData(object):
     # Final time of the terminal interval
     self.tFinal = tFinal
 
-    #TODO Nominal and new state of the terminal interval
-
     # Dynamic and cost data of the terminal interval
     self.dynamicsData = ddpModel.createTerminalDynamicsData(tFinal)
     self.costData = ddpModel.createTerminalCostData()
@@ -44,8 +42,6 @@ class DDPRunningIntervalData(object):
     self.tInit = tInit
     self.tFinal = tFinal
     self.dt = self.tFinal - self.tInit
-
-    #TODO Nominal and new state of the running interval
 
     # Dynamic and cost data of the running interval
     self.dynamicsData = ddpModel.createRunningDynamicsData(tInit)
