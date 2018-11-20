@@ -8,14 +8,20 @@ import numpy as np
 class FloatingBaseMultibodyDynamicsData(DynamicsData):
   def __init__(self, dynamicsModel, t, dt):
     DynamicsData.__init__(self, dynamicsModel, dt)
-    self.h = np.sqrt(EPS)
+    
+    # Pinocchio data
     self.pinocchio = dynamicsModel.pinocchio.createData()
-    self.dimConstraint = dynamicsModel.contactInfo.nc*\
-                         dynamicsModel.contactInfo.dim(t)
+
+    # Constrained dynamics data (holonomic contacts)
+    self.dimConstraint = \
+      dynamicsModel.contactInfo.nc * dynamicsModel.contactInfo.dim(t)
+    self.gq = np.zeros((self.dimConstraint, dynamicsModel.nv()))
+    self.gv = np.zeros((self.dimConstraint, dynamicsModel.nv()))
+    self.gu = np.zeros((self.dimConstraint, dynamicsModel.nu()))
+
     self.contactJ = np.zeros((self.dimConstraint, dynamicsModel.nv()))
     self.gamma = np.zeros((self.dimConstraint, 1))
     self._contactFrameIndices = dynamicsModel.contactInfo(t)
-
     self.MJtJc = np.zeros((dynamicsModel.nv() + self.dimConstraint,
                            dynamicsModel.nv() + self.dimConstraint))
     self.MJtJc_inv = np.zeros((dynamicsModel.nv() + self.dimConstraint,
@@ -23,14 +29,11 @@ class FloatingBaseMultibodyDynamicsData(DynamicsData):
     self.MJtJc_inv_L = np.zeros((dynamicsModel.nv() + self.dimConstraint,
                                  dynamicsModel.nv() + self.dimConstraint))
 
-    self.gq = np.zeros((self.dimConstraint, dynamicsModel.nv()))
-    self.gv = np.zeros((self.dimConstraint, dynamicsModel.nv()))
-    self.gu = np.zeros((self.dimConstraint, dynamicsModel.nu()))
-
+    # NumDiff data
     #TODO: remove these when replacing with analytical derivatives
+    self.h = np.sqrt(EPS)
     self.q_pert = np.zeros((dynamicsModel.nq(), 1))
     self.v_pert = np.zeros((dynamicsModel.nv(), 1))
-
 
 
 class FloatingBaseMultibodyDynamics(DynamicsModel):
