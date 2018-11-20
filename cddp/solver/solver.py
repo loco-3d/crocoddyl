@@ -87,29 +87,24 @@ class Solver(object):
       dt = it.dt
 
       # Getting the value function values of the next interval (prime interval)
-      fx = it.dynamicsData.fx
-      fu = it.dynamicsData.fu
+      fx = it.dynamicsData.fx()
+      fu = it.dynamicsData.fu()
       # Updating the Q derivatives. Note that this is Gauss-Newton step because
       # we neglect the Hessian, it's also called iLQR.
 
-      #TODO: UNCOMMENT AFTER DEBUG
-      np.copyto(it.Qx, it.costData.lx +\
-                fx.transposemultiplyarr(ddpData.intervalDataVector[k+1].Vx))
-      np.copyto(it.Qu, it.costData.lu +\
-                fu.transposemultiply(ddpData.intervalDataVector[k+1].Vx))
+      np.copyto(it.Qx, it.costData.lx + np.dot(fx.T, ddpData.intervalDataVector[k+1].Vx))
+      np.copyto(it.Qu, it.costData.lu + np.dot(fu.T, ddpData.intervalDataVector[k+1].Vx))
       np.copyto(it.Quu, it.costData.luu +\
-                fu.transposemultiply(fu.premultiply(ddpData.intervalDataVector[k+1].Vxx)))
+                np.dot(fu.T, np.dot(ddpData.intervalDataVector[k+1].Vxx, fu)))
       np.copyto(it.Qxx, it.costData.lxx +\
-                fx.transposemultiplymat(fx.premultiply(ddpData.intervalDataVector[k+1].Vxx)))
+                np.dot(fx.T, np.dot(ddpData.intervalDataVector[k+1].Vxx, fx)))
       np.copyto(it.Qux, it.costData.lux +\
-                fu.transposemultiply(fx.premultiply(ddpData.intervalDataVector[k+1].Vxx)))
-      np.copyto(it.Quu_r, it.Quu + ddpData.muI + np.dot(ddpData.muV, fu.square()))
+                np.dot(fu.T, np.dot(ddpData.intervalDataVector[k+1].Vxx, fx)))
+      np.copyto(it.Quu_r, it.Quu + ddpData.muI + ddpData.muV*np.dot(fu.T, fu))
       if not isPositiveDefinitive(it.Quu_r, it.L):
         return False
-      np.copyto(it.Qux_r, it.Qux + ddpData.muV * fu.transposemultiply(fx()))
+      np.copyto(it.Qux_r, it.Qux + ddpData.muV * np.dot(fu.T, fx))
 
-      ########################################################################
-      
       # Computing the feedback and feedforward terms
       np.copyto(it.L_inv, np.linalg.inv(it.L))
       np.copyto(it.Quu_inv_minus, -1. * np.dot(it.L_inv.T, it.L_inv))
