@@ -6,7 +6,7 @@ import numpy as np
 
 
 class FloatingBaseMultibodyDynamicsData(DynamicsData):
-  def __init__(self, ddpModel, t):
+  def __init__(self, ddpModel, t, dt):
     DynamicsData.__init__(self, ddpModel)
     self.h = np.sqrt(EPS)
     self.pinocchio = ddpModel.dynamicsModel.pinocchio.createData()
@@ -23,20 +23,16 @@ class FloatingBaseMultibodyDynamicsData(DynamicsData):
     self.MJtJc_inv_L = np.zeros((ddpModel.dynamicsModel.nv() + self.dimConstraint,
                                  ddpModel.dynamicsModel.nv() + self.dimConstraint))
 
-    self.fx = ddpModel.discretizer.fx(ddpModel.dynamicsModel.nv(),
-                                      ddpModel.dynamicsModel.nv(),
-                                      ddpModel.dynamicsModel.nx(),
-                                      ddpModel.dynamicsModel.nx())
-    self.fu = ddpModel.discretizer.fu(ddpModel.dynamicsModel.nv(),
-                                      ddpModel.dynamicsModel.nu(),
-                                      ddpModel.dynamicsModel.nx())
-    self.gx = np.zeros((self.dimConstraint, ddpModel.dynamicsModel.nx()))
-    self.gu = np.zeros((self.dimConstraint, ddpModel.dynamicsModel.nu()))
+    if dt != 0.:
+      self.discretizer = ddpModel.dynamicsModel.discretizer.createData(ddpModel.dynamicsModel, dt)
 
-    #derivative of lambda wrt q
+    self.aq = np.zeros((ddpModel.dynamicsModel.nv(), ddpModel.dynamicsModel.nv()))
+    self.av = np.zeros((ddpModel.dynamicsModel.nv(), ddpModel.dynamicsModel.nv()))
+    self.au = np.zeros((ddpModel.dynamicsModel.nv(), ddpModel.dynamicsModel.nu()))
+
     self.gq = np.zeros((self.dimConstraint, ddpModel.dynamicsModel.nv()))
-    #derivative of lambda wrt v
     self.gv = np.zeros((self.dimConstraint, ddpModel.dynamicsModel.nv()))
+    self.gu = np.zeros((self.dimConstraint, ddpModel.dynamicsModel.nu()))
 
     #TODO: remove these when replacing with analytical derivatives
     self.q_pert = np.zeros((ddpModel.dynamicsModel.nq(), 1))
@@ -46,18 +42,19 @@ class FloatingBaseMultibodyDynamicsData(DynamicsData):
 
 class FloatingBaseMultibodyDynamics(DynamicsModel):
 
-  def __init__(self, pinocchioModel, contactInfo):
+  def __init__(self, pinocchioModel, discretizer, contactInfo):
     DynamicsModel.__init__(self, pinocchioModel.nq + pinocchioModel.nv,
                            2 * pinocchioModel.nv,
                            pinocchioModel.nv - 6)
     self.pinocchio = pinocchioModel
+    self.discretizer = discretizer
     self.contactInfo = contactInfo
 
     self._nq = self.pinocchio.nq
     self._nv = self.pinocchio.nv
 
-  def createData(self, ddpModel, tInit):
-    return FloatingBaseMultibodyDynamicsData(ddpModel, tInit)
+  def createData(self, ddpModel, tInit, dt):
+    return FloatingBaseMultibodyDynamicsData(ddpModel, tInit, dt)
 
   def updateDynamics(dynamicsModel, dynamicsData, q, v):
     # Compute all terms
@@ -99,8 +96,8 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
 
   def backwardRunningCalc(dynamicsModel, dynamicsData):
     #TODO: Replace with analytical derivatives
-    np.copyto(dynamicsData.fx.aq, -dynamicsData.pinocchio.ddq)
-    np.copyto(dynamicsData.fx.av, -dynamicsData.pinocchio.ddq)
+    np.copyto(dynamicsData.aq, -dynamicsData.pinocchio.ddq)
+    np.copyto(dynamicsData.av, -dynamicsData.pinocchio.ddq)
     np.copyto(dynamicsData.gq, -dynamicsData.pinocchio.lambda_c)
     np.copyto(dynamicsData.gv, -dynamicsData.pinocchio.lambda_c)
 
@@ -115,7 +112,7 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     #TODO: REMOVE PINV!!!! USE DAMPED CHOLESKY
     #print "x value", self.x.T
     dynamicsData.MJtJc_inv = np.linalg.pinv(dynamicsData.MJtJc)
-    dynamicsData.fu.au = dynamicsData.MJtJc_inv[:dynamicsModel.nv(),6:dynamicsModel.nv()]
+    dynamicsData.au = dynamicsData.MJtJc_inv[:dynamicsModel.nv(),6:dynamicsModel.nv()]
     dynamicsData.gu = dynamicsData.MJtJc_inv[dynamicsModel.nv():,6:dynamicsModel.nv()]
 
     # dadq #dgdq
@@ -132,9 +129,9 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
                                     dynamicsData.x[dynamicsModel.nq():],
                                     np.vstack([np.zeros((6,1)), dynamicsData.u]))
 
-      dynamicsData.fx.aq[:,i] += np.array(dynamicsData.pinocchio.ddq)[:,0]
+      dynamicsData.aq[:,i] += np.array(dynamicsData.pinocchio.ddq)[:,0]
       dynamicsData.gq[:,i] += np.array(dynamicsData.pinocchio.lambda_c)[:,0]
-    dynamicsData.fx.aq /= dynamicsData.h
+    dynamicsData.aq /= dynamicsData.h
     dynamicsData.gq /= dynamicsData.h
 
     # dadv #dgdv
@@ -147,10 +144,13 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
                                     dynamicsData.v_pert,
                                     np.vstack([np.zeros((6,1)), dynamicsData.u]))
 
-      dynamicsData.fx.av[:,i] += np.array(dynamicsData.pinocchio.ddq)[:,0]
+      dynamicsData.av[:,i] += np.array(dynamicsData.pinocchio.ddq)[:,0]
       dynamicsData.gv[:,i] += np.array(dynamicsData.pinocchio.lambda_c)[:,0]
-    dynamicsData.fx.av /= dynamicsData.h
+    dynamicsData.av /= dynamicsData.h
     dynamicsData.gv /= dynamicsData.h
+
+    # Discretizing the dynamics
+    dynamicsModel.discretizer.backwardRunningCalc(dynamicsModel, dynamicsData)
     return
 
   def backwardTerminalCalc(dynamicsModel, dynamicsData):

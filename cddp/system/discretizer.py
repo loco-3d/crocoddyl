@@ -1,157 +1,89 @@
 import abc
 import numpy as np
 
+
+class DiscretizerDataBase(object):
+  __metaclass__ = abc.ABCMeta
+  @abc.abstractmethod
+  def __init__(dynamicsModel, dt):
+    pass
+
+
 class DiscretizerBase(object):
   """ This abstract class declares the virtual method for any discretization
   method of system dynamics.
   """
   __metaclass__=abc.ABCMeta
-  
   @abc.abstractmethod
-  def __init__(self):
+  def __init__(self, dynamicsModel):
     return
-  """
+
   @abc.abstractmethod
-  def __call__(ddpModel, ddpIData):
+  def createData(self, dynamicsModel, dt):
     pass
-  """
-  class fx(object):
-    """ Abstract Class for the derivative for the function wrt x """
-    
-    __metaclass__=abc.ABCMeta
 
-    @abc.abstractmethod
-    def __init__(self, dimf, dimx):
-      pass
-    """
-    @abc.abstractmethod
-    def multiply(Vxx, self):
-      pass
+  @abc.abstractmethod
+  def backwardRunningCalc(dynamicsModel, dynamicsData):
+    pass
 
-    @abc.abstractmethod
-    def transposemultiply(self, Vxx):
-      pass
-    """
+  # class fx(object):
+  #   """ Abstract Class for the derivative for the function wrt x """    
+  #   __metaclass__=abc.ABCMeta
+  #   @abc.abstractmethod
+  #   def __init__(self, dimx, dt):
+  #     pass
+  #   @abc.abstractmethod
+  #   def backwardRunningCalc(self, dynamicsModel, dynamicsData):
+  #     pass
+  #   @abc.abstractmethod
+  #   def __call__(self):
+  #     pass
+  #   @abc.abstractmethod
+  #   def premultiply(self,V, output):
+  #     pass
+  #   @abc.abstractmethod
+  #   def transposemultiplymat(self, V):
+  #     pass
+  #   @abc.abstractmethod
+  #   def transposemultiplyarr(self, V):
+  #     pass
 
-  class fu(object):
-    """ Abstract Class for the derivative for the function wrt u """
-    
-    __metaclass__=abc.ABCMeta
-
-    @abc.abstractmethod
-    def __init__(self, dimf, dimx):
-      pass
-    """
-    @abc.abstractmethod
-    def multiply(Vxx, self):
-      pass
-
-    @abc.abstractmethod
-    def transposemultiply(self, Vxx):
-      pass
-    """
-class FloatingBaseMultibodyEulerDiscretizer(DiscretizerBase):
-  """ Convert the time-continuos dynamics into time-discrete one by using
-    forward Euler rule."""
-  def __init__(self):
-    return
-
-  @staticmethod
-  def __multiply__(fx, ):
-    ddpIData.dynamicsData.fx
-    return
-
-  class fx(DiscretizerBase.fx):
-
-    def __init__(self, dimq, dimv, dimf, dimx):
-      self.dimq = dimq
-      self.dimv = dimv
-      self.dimf = dimf
-      self.dimx = dimx
-      self.dt = 1e-3
-      self.aq = np.zeros((dimv, dimq)) #derivative of ddq wrt q
-      self.av = np.zeros((dimv, dimv)) #derivative of ddq wrt v
-      self.val = np.zeros((dimf, dimf))
-
-    def __call__(self):
-      self.val[:self.dimv, :self.dimv] = np.identity(self.dimv)+self.aq*self.dt*self.dt
-      self.val[:self.dimv, self.dimv:] = np.identity(self.dimv)*self.dt+self.av*self.dt*self.dt
-      self.val[self.dimv:, :self.dimv] = self.aq*self.dt
-      self.val[self.dimv:, self.dimv:] = np.identity(self.dimv) + self.av*self.dt
-      return self.val
-
-    def premultiply(self,V):
-      output = np.zeros((V.shape[0], self.dimx))
-      output[:,:self.dimv] = V[:, :self.dimv] +\
-                             np.dot(V[:, :self.dimv], self.aq)*self.dt+\
-                             np.dot(V[:,self.dimv:], self.aq)*self.dt
-      output[:,self.dimv:] = V[:, :self.dimv]*self.dt +\
-                             np.dot(V[:, :self.dimv], self.av)*self.dt*self.dt +\
-                             V[:, self.dimv:] +\
-                             np.dot(V[:, self.dimv:], self.av)*self.dt
-      return output
+  # class fu(object):
+  #   """ Abstract Class for the derivative for the function wrt u """
+  #   __metaclass__=abc.ABCMeta
+  #   @abc.abstractmethod
+  #   def __init__(self, dimx, dimu, dt):
+  #     pass
+  #   @abc.abstractmethod
+  #   def backwardRunningCalc(self, dynamicsModel, dynamicsData):
+  #     pass
+  #   @abc.abstractmethod
+  #   def __call__(self):
+  #     pass
+  #   @abc.abstractmethod
+  #   def premultiply(self,V, output):
+  #     pass
+  #   @abc.abstractmethod
+  #   def transposemultiplyarr(self, V):
+  #     pass
+  #   @abc.abstractmethod
+  #   def transposemultiplymat(self, V):
+  #     pass
+  #   @abc.abstractmethod
+  #   def square(self):
+  #     pass
 
 
-    def transposemultiplymat(self, V):
-      output = np.zeros((self.dimf, V.shape[1]))
-      output[:self.dimv, :self.dimv] = \
-                              V[:self.dimv, :self.dimv] +\
-                              np.dot(self.aq.T, V[:self.dimv, :self.dimv])*self.dt*self.dt +\
-                              np.dot(self.aq.T, V[self.dimv:, :self.dimv])*self.dt
-      output[:self.dimv, self.dimv:] = \
-                              V[:self.dimv, self.dimv:] +\
-                              np.dot(self.aq.T, V[:self.dimv, self.dimv:])*self.dt*self.dt +\
-                              np.dot(self.aq.T, V[self.dimv:, self.dimv:])*self.dt
-      output[self.dimv:, :self.dimv] = \
-                              V[:self.dimv, :self.dimv]*self.dt +\
-                              np.dot(self.av.T, V[:self.dimv, :self.dimv])*self.dt*self.dt +\
-                              V[self.dimv:,:self.dimv] +\
-                              np.dot(self.av.T, V[self.dimv:,:self.dimv])*self.dt
-      output[self.dimv:,self.dimv:] = \
-                              V[:self.dimv, self.dimv:]*self.dt +\
-                              np.dot(self.av.T, V[:self.dimv, self.dimv:])*self.dt*self.dt +\
-                              V[self.dimv:, self.dimv:] +\
-                              np.dot(self.av.T, V[self.dimv:,self.dimv:])*self.dt
-      return output
+class FloatingBaseMultibodyEulerExpDiscretizerData(DiscretizerDataBase):
+  def __init__(self, dynamicsModel, dt):
+    self.dt = dt
+    self.fx = np.zeros((dynamicsModel.nx(), dynamicsModel.nx()))
+    self.fu = np.zeros((dynamicsModel.nx(), dynamicsModel.nu()))
+    self.I = np.identity(dynamicsModel.nv())
 
-    def transposemultiplyarr(self, V):
-      output = np.zeros((self.dimf, 1))
-      output[:self.dimv, 0] = V[:self.dimv, 0] +\
-                              np.dot(self.aq.T, V[:self.dimv, 0])*self.dt*self.dt +\
-                              np.dot(self.aq.T, V[self.dimv:, 0])*self.dt
-      output[self.dimv:, 0] = V[:self.dimv, 0]*self.dt +\
-                              np.dot(self.av.T, V[:self.dimv, 0])*self.dt*self.dt +\
-                              V[self.dimv:,0] +\
-                              np.dot(self.av.T, V[self.dimv:,0])*self.dt
-      return output
+    self.fx[:dynamicsModel.nv(),:dynamicsModel.nv()] = self.I
+    self.fx[:dynamicsModel.nv(),dynamicsModel.nv():] = self.dt * self.I
 
-  class fu(object):
-    def __init__(self, dimv, dimu, dimf):
-      self.dimv = dimv
-      self.dimu = dimu
-      self.dimf = dimf
-      #TODO: Load from ddpData
-      self.dt = 1e-3
-      self.au = np.zeros((dimv, dimu)) #derivative of ddq wrt u
-      self.val = np.zeros((dimf, dimu))
-      return
-
-    def premultiply(self,V):
-      return np.dot(V[:,:self.dimv], self.au)*self.dt*self.dt+\
-        np.dot(V[:,self.dimv:],self.au)*self.dt
-
-    def transposemultiply(self, V_p):
-      return np.dot(self.au.T, V_p[:self.dimv,:])*self.dt*self.dt+\
-        np.dot(self.au.T, V_p[self.dimv:,:])*self.dt
-
-    def __call__(self):
-      self.val[:self.dimv, :] = self.au*self.dt*self.dt
-      self.val[self.dimv:, :] = self.au*self.dt
-      return self.val
-
-    def square(self):
-      au_sq = np.matmul(self.au.T, self.au)
-      return au_sq*self.dt*self.dt*(1.+self.dt*self.dt)
 
 class FloatingBaseMultibodyEulerExpDiscretizer(DiscretizerBase):
   """ Convert the time-continuos dynamics into time-discrete one by using
@@ -159,77 +91,112 @@ class FloatingBaseMultibodyEulerExpDiscretizer(DiscretizerBase):
   def __init__(self):
     return
 
-  class fx(DiscretizerBase.fx):
+  def createData(self, dynamicsModel, dt):
+    return FloatingBaseMultibodyEulerExpDiscretizerData(dynamicsModel, dt)
 
-    def __init__(self, dimq, dimv, dimf, dimx):
-      self.dimq = dimq
-      self.dimv = dimv
-      self.dimf = dimf
-      self.dimx = dimx
-      self.dt = 1e-3
-      self.aq = np.zeros((dimv, dimq)) #derivative of ddq wrt q
-      self.av = np.zeros((dimv, dimv)) #derivative of ddq wrt v
-      self.val = np.zeros((dimf, dimf))
-      self.outputarr = np.zeros((self.dimf, 1))
-      self.outputmat = np.zeros((self.dimf, self.dimf))
-    def __call__(self):
-      self.val[:self.dimv, :self.dimv] = np.identity(self.dimv)
-      self.val[:self.dimv, self.dimv:] = np.identity(self.dimv)*self.dt
-      self.val[self.dimv:, :self.dimv] = self.aq*self.dt
-      self.val[self.dimv:, self.dimv:] = np.identity(self.dimv) + self.av*self.dt
-      return self.val
+  @staticmethod
+  def backwardRunningCalc(dynamicsModel, dynamicsData):
+    dynamicsData.discretizer.fx[dynamicsModel.nv():,:dynamicsModel.nv()] = \
+      dynamicsData.discretizer.dt * dynamicsData.aq
+    dynamicsData.discretizer.fx[dynamicsModel.nv():,dynamicsModel.nv():] = \
+      dynamicsData.discretizer.I + dynamicsData.discretizer.dt * dynamicsData.av
+    dynamicsData.discretizer.fu[dynamicsModel.nv():,:] = \
+      dynamicsData.discretizer.dt * dynamicsData.au
 
-    def premultiply(self,V):
-      outputmat = self.transposemultiplymat(V.T)
-      return outputmat.T
+  # class fx(DiscretizerBase.fx):
+  #   def __init__(self, dimx, dt):
+  #     self.dimv = dimx/2
+  #     self.dimx = dimx
+  #     self.dt = dt
+  #     #Const ref to dynamicsData aq
+  #     self.aq = None #derivative of ddq wrt q
+  #     #Const ref to dynamicsData av
+  #     self.av = None #np.zeros((dimv, dimv)) #derivative of ddq wrt v
 
-    def transposemultiplymat(self, V):
-      outputmat = np.zeros((self.dimf, self.dimf))
-      outputmat[:self.dimv, :self.dimv] = \
-                              V[:self.dimv, :self.dimv] +\
-                              np.dot(self.aq.T, V[self.dimv:, :self.dimv])*self.dt
-      outputmat[:self.dimv, self.dimv:] = \
-                              V[:self.dimv, self.dimv:] +\
-                              np.dot(self.aq.T, V[self.dimv:, self.dimv:])*self.dt
-      outputmat[self.dimv:, :self.dimv] = \
-                              V[:self.dimv, :self.dimv]*self.dt +\
-                              V[self.dimv:,:self.dimv] +\
-                              np.dot(self.av.T, V[self.dimv:,:self.dimv])*self.dt
-      outputmat[self.dimv:,self.dimv:] = \
-                              V[:self.dimv, self.dimv:]*self.dt +\
-                              V[self.dimv:, self.dimv:] +\
-                              np.dot(self.av.T, V[self.dimv:,self.dimv:])*self.dt
-      return outputmat
+  #     self.val = np.zeros((dimx, dimx))
 
-    def transposemultiplyarr(self, V):
-      self.outputarr[:self.dimv, 0] = V[:self.dimv, 0] +\
-                              np.dot(self.aq.T, V[self.dimv:, 0])*self.dt
-      self.outputarr[self.dimv:, 0] = V[:self.dimv, 0]*self.dt +\
-                              V[self.dimv:,0] +\
-                              np.dot(self.av.T, V[self.dimv:,0])*self.dt
-      return self.outputarr
+  #     #Runtime Values
+  #     self.outputarr = np.zeros((dimx, 1))
+  #     self.outputmat = np.zeros((dimx, dimx))
 
-  class fu(object):
-    def __init__(self, dimv, dimu, dimf):
-      self.dimv = dimv
-      self.dimu = dimu
-      self.dimf = dimf
-      #TODO: Load from ddpData
-      self.dt = 1e-3
-      self.au = np.zeros((dimv, dimu)) #derivative of ddq wrt u
-      self.val = np.zeros((dimf, dimu))
-      return
+  #   def backwardRunningCalc(self, dynamicsModel, dynamicsData):
+  #     self.aq = dynamicsData.aq
+  #     self.av = dynamicsData.av
+  #     self.val[:self.dimv, :self.dimv] = np.identity(self.dimv)
+  #     self.val[:self.dimv, self.dimv:] = np.identity(self.dimv)*self.dt
+  #     self.val[self.dimv:, :self.dimv] = self.aq*self.dt
+  #     self.val[self.dimv:, self.dimv:] = np.identity(self.dimv) + self.av*self.dt
+  #     return
 
-    def premultiply(self,V):
-      return self.transposemultiply(V.T).T
+  #   def __call__(self):
+  #     return self.val
 
-    def transposemultiply(self, V_p):
-      return np.dot(self.au.T, V_p[self.dimv:,:])*self.dt
+  #   def premultiply(self,V, output):
+  #     np.copyto(output, self.transposemultiplymat(V.T).T)
+  #     return
 
-    def __call__(self):
-      self.val[self.dimv:, :] = self.au*self.dt
-      return self.val
+  #   def transposemultiplymat(self, V):
+  #     self.outputmat[:self.dimv, :self.dimv] = \
+  #                             V[:self.dimv, :self.dimv] +\
+  #                             np.dot(self.aq.T, V[self.dimv:, :self.dimv])*self.dt
+  #     self.outputmat[:self.dimv, self.dimv:] = \
+  #                             V[:self.dimv, self.dimv:] +\
+  #                             np.dot(self.aq.T, V[self.dimv:, self.dimv:])*self.dt
+  #     self.outputmat[self.dimv:, :self.dimv] = \
+  #                             V[:self.dimv, :self.dimv]*self.dt +\
+  #                             V[self.dimv:,:self.dimv] +\
+  #                             np.dot(self.av.T, V[self.dimv:,:self.dimv])*self.dt
+  #     self.outputmat[self.dimv:,self.dimv:] = \
+  #                             V[:self.dimv, self.dimv:]*self.dt +\
+  #                             V[self.dimv:, self.dimv:] +\
+  #                             np.dot(self.av.T, V[self.dimv:,self.dimv:])*self.dt
+  #     return self.outputmat
 
-    def square(self):
-      au_sq = np.dot(self.au.T, self.au)
-      return au_sq*self.dt*self.dt
+  #   def transposemultiplyarr(self, V):
+  #     self.outputarr[:self.dimv, 0] = V[:self.dimv, 0] +\
+  #                             np.dot(self.aq.T, V[self.dimv:, 0])*self.dt
+  #     self.outputarr[self.dimv:, 0] = V[:self.dimv, 0]*self.dt +\
+  #                             V[self.dimv:,0] +\
+  #                             np.dot(self.av.T, V[self.dimv:,0])*self.dt
+  #     return self.outputarr
+
+  # class fu(object):
+  #   def __init__(self, dimx, dimu, dt):
+  #     self.dimv = dimx/2
+  #     self.dimu = dimu
+  #     self.dimx = dimx
+  #     #TODO: Load from ddpData
+  #     self.dt = dt
+  #     #Const ref to dynamicsmodel
+  #     self.au = None # np.zeros((dimv, dimu)) #derivative of ddq wrt 
+
+  #     self.val = np.zeros((dimx, dimu))
+  #     self.fu_sq = np.zeros((dimu, dimu))
+
+  #     #Runtime Variables
+  #     self.outputmat = np.zeros((dimu, dimx))
+  #     self.outputarr = np.zeros((dimu, 1))
+  #     return
+
+  #   def __call__(self):
+  #     return self.val
+
+  #   def premultiply(self,V, output):
+  #     np.copyto(output, self.transposemultiplymat(V.T).T)
+
+  #   def transposemultiplyarr(self, V_p):
+  #     self.outputarr = np.dot(self.au.T, V_p[self.dimv:,:])*self.dt
+  #     return self.outputarr
+    
+  #   def transposemultiplymat(self, V_p):
+  #     self.outputmat = np.dot(self.au.T, V_p[self.dimv:,:])*self.dt
+  #     return self.outputmat
+
+  #   def backwardRunningCalc(self, dynamicsModel, dynamicsData):
+  #     self.au = dynamicsData.au
+  #     self.val[self.dimv:, :] = self.au*self.dt
+  #     self.fu_sq = np.dot(self.au.T, self.au)*self.dt*self.dt
+  #     return
+
+  #   def square(self):
+  #     return self.fu_sq

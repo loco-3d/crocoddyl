@@ -87,11 +87,11 @@ class Solver(object):
       dt = it.dt
 
       # Getting the value function values of the next interval (prime interval)
-      fx = it.dynamicsData.fx()
-      fu = it.dynamicsData.fu()
+      fx = it.dynamicsData.discretizer.fx
+      fu = it.dynamicsData.discretizer.fu
+
       # Updating the Q derivatives. Note that this is Gauss-Newton step because
       # we neglect the Hessian, it's also called iLQR.
-
       np.copyto(it.Qx, it.costData.lx + np.dot(fx.T, ddpData.intervalDataVector[k+1].Vx))
       np.copyto(it.Qu, it.costData.lu + np.dot(fu.T, ddpData.intervalDataVector[k+1].Vx))
       np.copyto(it.Quu, it.costData.luu +\

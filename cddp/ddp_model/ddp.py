@@ -44,7 +44,7 @@ class DDPRunningIntervalData(object):
     self.dt = self.tFinal - self.tInit
 
     # Dynamic and cost data of the running interval
-    self.dynamicsData = ddpModel.createRunningDynamicsData(tInit)
+    self.dynamicsData = ddpModel.createRunningDynamicsData(tInit, self.dt)
     self.costData = ddpModel.createRunningCostData()
 
     # Value function derivatives of the running interval
@@ -115,10 +115,9 @@ class DDPData(object):
 class DDPModel(object):
   """ Class to save the model information for the system, cost and dynamics
   """
-  def __init__(self, dynamicsModel, integrator, discretizer, costManager):
+  def __init__(self, dynamicsModel, integrator, costManager):
     self.dynamicsModel = dynamicsModel
     self.integrator = integrator
-    self.discretizer = discretizer
     self.costManager = costManager
 
   def forwardTerminalCalc(self, ddpData):
@@ -147,15 +146,15 @@ class DDPModel(object):
     self.dynamicsModel.backwardRunningCalc(ddpData.dynamicsData)
     self.costManager.backwardRunningCalc(ddpData.costData, ddpData.dynamicsData)
 
-  def createRunningDynamicsData(self, tInit):
-    return self.dynamicsModel.createData(self, tInit)
+  def createRunningDynamicsData(self, tInit, dt):
+    return self.dynamicsModel.createData(self, tInit, dt)
 
   def createRunningCostData(self):
     return self.costManager.createRunningData(self.dynamicsModel.nx(),
                                               self.dynamicsModel.nu())
 
   def createTerminalDynamicsData(self, tFinal):
-    return self.dynamicsModel.createData(self, tFinal)
+    return self.dynamicsModel.createData(self, tFinal, 0.)
 
   def createTerminalCostData(self):
     return self.costManager.createTerminalData(self.dynamicsModel.nx())
