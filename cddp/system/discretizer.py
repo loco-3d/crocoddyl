@@ -2,14 +2,15 @@ import abc
 import numpy as np
 
 
-class DiscretizerDataBase(object):
+class DiscretizerData(object):
   __metaclass__ = abc.ABCMeta
-  @abc.abstractmethod
-  def __init__(dynamicsModel, dt):
-    pass
+  def __init__(self, dynamicsModel, dt):
+    self.dt = dt
+    self.fx = np.zeros((dynamicsModel.nx(), dynamicsModel.nx()))
+    self.fu = np.zeros((dynamicsModel.nx(), dynamicsModel.nu()))
 
 
-class DiscretizerBase(object):
+class Discretizer(object):
   """ This abstract class declares the virtual method for any discretization
   method of system dynamics.
   """
@@ -74,18 +75,16 @@ class DiscretizerBase(object):
   #     pass
 
 
-class FloatingBaseMultibodyEulerExpDiscretizerData(DiscretizerDataBase):
+class FloatingBaseMultibodyEulerExpDiscretizerData(DiscretizerData):
   def __init__(self, dynamicsModel, dt):
-    self.dt = dt
-    self.fx = np.zeros((dynamicsModel.nx(), dynamicsModel.nx()))
-    self.fu = np.zeros((dynamicsModel.nx(), dynamicsModel.nu()))
+    DiscretizerData.__init__(self, dynamicsModel, dt)
+    # Update once the upper-block
     self.I = np.identity(dynamicsModel.nv())
-
     self.fx[:dynamicsModel.nv(),:dynamicsModel.nv()] = self.I
     self.fx[:dynamicsModel.nv(),dynamicsModel.nv():] = self.dt * self.I
 
 
-class FloatingBaseMultibodyEulerExpDiscretizer(DiscretizerBase):
+class FloatingBaseMultibodyEulerExpDiscretizer(Discretizer):
   """ Convert the time-continuos dynamics into time-discrete one by using
     forward Euler rule."""
   def __init__(self):
