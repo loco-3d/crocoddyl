@@ -35,15 +35,12 @@ class FloatingBaseMultibodyDynamicsData(DynamicsData):
 
 class FloatingBaseMultibodyDynamics(DynamicsModel):
   def __init__(self, pinocchioModel, discretizer, contactInfo):
-    DynamicsModel.__init__(self, pinocchioModel.nq + pinocchioModel.nv,
-                           2 * pinocchioModel.nv,
+    DynamicsModel.__init__(self, pinocchioModel.nq,
+                           pinocchioModel.nv,
                            pinocchioModel.nv - 6)
     self.pinocchio = pinocchioModel
     self.discretizer = discretizer
     self.contactInfo = contactInfo
-
-    self._nq = self.pinocchio.nq
-    self._nv = self.pinocchio.nv
 
   def createData(dynamicsModel, tInit, dt):
     return FloatingBaseMultibodyDynamicsData(dynamicsModel, tInit, dt)
@@ -147,12 +144,6 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
 
   def backwardTerminalCalc(dynamicsModel, dynamicsData):
     return
-
-  def nq(self):
-    return self._nq
-
-  def nv(self):
-    return self._nv
 
   def deltaX(dynamicsModel, dynamicsData, x0, x1):
     dynamicsData.diff_x[:dynamicsModel.nv()] = \
