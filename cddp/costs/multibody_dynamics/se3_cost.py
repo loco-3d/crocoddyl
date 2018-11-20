@@ -39,8 +39,8 @@ class SE3Cost(RunningQuadraticCost):
     # A default value of nu allows us to use this class as terminal one
     return SE3RunningData(nx, nu, self.nr)
 
-  def updateSE3error(self, costData, dynamicsData): 
-    costData.rMf = costData.oMr_inv * dynamicsData.pinocchioData.oMf[costData.frame_idx]
+  def updateSE3error(self, costData, dynamicsData):
+    costData.rMf = costData.oMr_inv * dynamicsData.pinocchio.oMf[costData.frame_idx]
 
   def updateResidual(self, costData, dynamicsData):
     self.updateSE3error(costData, dynamicsData)
@@ -51,8 +51,8 @@ class SE3Cost(RunningQuadraticCost):
     self.updateSE3error(costData, dynamicsData)
     costData.rx[:,:self.dynamicsModel.nv()] = \
         costData.rMf.action * \
-        se3.getFrameJacobian(self.dynamicsModel.pinocchioModel,
-                             dynamicsData.pinocchioData,
+        se3.getFrameJacobian(self.dynamicsModel.pinocchio,
+                             dynamicsData.pinocchio,
                              costData.frame_idx, se3.ReferenceFrame.LOCAL)
 
   def updateQuadraticAppr(self, costData, dynamicsData):

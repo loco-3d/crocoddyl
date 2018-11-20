@@ -28,10 +28,10 @@ class CoMCost(RunningQuadraticCost):
     return CoMRunningData(nx, nu, self.nr)
 
   def updateResidual(self, costData, dynamicsData):
-    np.copyto(costData.r, dynamicsData.pinocchioData.com[0] - costData.com_des)
+    np.copyto(costData.r, dynamicsData.pinocchio.com[0] - costData.com_des)
 
   def updateResidualLinearAppr(self, costData, dynamicsData):
-    costData.rx[:,:self.dynamicsModel.nv()] = dynamicsData.pinocchioData.Jcom
+    costData.rx[:,:self.dynamicsModel.nv()] = dynamicsData.pinocchio.Jcom
 
   def updateQuadraticAppr(self, costData, dynamicsData):
     # We overwrite this function since this residual function only depends on
