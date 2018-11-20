@@ -99,11 +99,10 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
 
   def backwardRunningCalc(dynamicsModel, dynamicsData):
     #TODO: Replace with analytical derivatives
-    for i in xrange(dynamicsModel.nv()):
-      np.copyto(dynamicsData.fx.aq, -dynamicsData.pinocchioData.ddq)
-      np.copyto(dynamicsData.fx.av, -dynamicsData.pinocchioData.ddq)
-      np.copyto(dynamicsData.gq, -dynamicsData.pinocchioData.lambda_c)
-      np.copyto(dynamicsData.gv, -dynamicsData.pinocchioData.lambda_c)
+    np.copyto(dynamicsData.fx.aq, -dynamicsData.pinocchioData.ddq)
+    np.copyto(dynamicsData.fx.av, -dynamicsData.pinocchioData.ddq)
+    np.copyto(dynamicsData.gq, -dynamicsData.pinocchioData.lambda_c)
+    np.copyto(dynamicsData.gv, -dynamicsData.pinocchioData.lambda_c)
 
     dynamicsData.MJtJc[:dynamicsModel.nv(),:dynamicsModel.nv()] = dynamicsData.pinocchioData.M
     dynamicsData.MJtJc[:dynamicsModel.nv(),dynamicsModel.nv():] = dynamicsData.contactJ.T
