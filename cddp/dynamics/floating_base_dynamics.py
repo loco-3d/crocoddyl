@@ -6,30 +6,30 @@ import numpy as np
 
 
 class FloatingBaseMultibodyDynamicsData(DynamicsData):
-  def __init__(self, ddpModel, t, dt):
-    DynamicsData.__init__(self, ddpModel, dt)
+  def __init__(self, dynamicsModel, t, dt):
+    DynamicsData.__init__(self, dynamicsModel, dt)
     self.h = np.sqrt(EPS)
-    self.pinocchio = ddpModel.dynamicsModel.pinocchio.createData()
-    self.dimConstraint = ddpModel.dynamicsModel.contactInfo.nc*\
-                         ddpModel.dynamicsModel.contactInfo.dim(t)
-    self.contactJ = np.zeros((self.dimConstraint, ddpModel.dynamicsModel.nv()))
+    self.pinocchio = dynamicsModel.pinocchio.createData()
+    self.dimConstraint = dynamicsModel.contactInfo.nc*\
+                         dynamicsModel.contactInfo.dim(t)
+    self.contactJ = np.zeros((self.dimConstraint, dynamicsModel.nv()))
     self.gamma = np.zeros((self.dimConstraint, 1))
-    self._contactFrameIndices = ddpModel.dynamicsModel.contactInfo(t)
+    self._contactFrameIndices = dynamicsModel.contactInfo(t)
 
-    self.MJtJc = np.zeros((ddpModel.dynamicsModel.nv() + self.dimConstraint,
-                           ddpModel.dynamicsModel.nv() + self.dimConstraint))
-    self.MJtJc_inv = np.zeros((ddpModel.dynamicsModel.nv() + self.dimConstraint,
-                               ddpModel.dynamicsModel.nv() + self.dimConstraint))
-    self.MJtJc_inv_L = np.zeros((ddpModel.dynamicsModel.nv() + self.dimConstraint,
-                                 ddpModel.dynamicsModel.nv() + self.dimConstraint))
+    self.MJtJc = np.zeros((dynamicsModel.nv() + self.dimConstraint,
+                           dynamicsModel.nv() + self.dimConstraint))
+    self.MJtJc_inv = np.zeros((dynamicsModel.nv() + self.dimConstraint,
+                               dynamicsModel.nv() + self.dimConstraint))
+    self.MJtJc_inv_L = np.zeros((dynamicsModel.nv() + self.dimConstraint,
+                                 dynamicsModel.nv() + self.dimConstraint))
 
-    self.gq = np.zeros((self.dimConstraint, ddpModel.dynamicsModel.nv()))
-    self.gv = np.zeros((self.dimConstraint, ddpModel.dynamicsModel.nv()))
-    self.gu = np.zeros((self.dimConstraint, ddpModel.dynamicsModel.nu()))
+    self.gq = np.zeros((self.dimConstraint, dynamicsModel.nv()))
+    self.gv = np.zeros((self.dimConstraint, dynamicsModel.nv()))
+    self.gu = np.zeros((self.dimConstraint, dynamicsModel.nu()))
 
     #TODO: remove these when replacing with analytical derivatives
-    self.q_pert = np.zeros((ddpModel.dynamicsModel.nq(), 1))
-    self.v_pert = np.zeros((ddpModel.dynamicsModel.nv(), 1))
+    self.q_pert = np.zeros((dynamicsModel.nq(), 1))
+    self.v_pert = np.zeros((dynamicsModel.nv(), 1))
 
 
 
@@ -45,8 +45,8 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     self._nq = self.pinocchio.nq
     self._nv = self.pinocchio.nv
 
-  def createData(self, ddpModel, tInit, dt):
-    return FloatingBaseMultibodyDynamicsData(ddpModel, tInit, dt)
+  def createData(dynamicsModel, tInit, dt):
+    return FloatingBaseMultibodyDynamicsData(dynamicsModel, tInit, dt)
 
   def updateDynamics(dynamicsModel, dynamicsData, q, v):
     # Compute all terms

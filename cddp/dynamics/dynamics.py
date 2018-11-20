@@ -17,24 +17,25 @@ class DynamicsData(object):
   __metaclass__ = abc.ABCMeta
 
   @abc.abstractmethod
-  def __init__(self, ddpModel, dt):
+  def __init__(self, dynamicsModel, dt):
     # Current and previous state and control
-    self.x = np.zeros((ddpModel.dynamicsModel.nxImpl(), 1))
-    self.u = np.zeros((ddpModel.dynamicsModel.nu(), 1))
-    self.x_prev = np.zeros((ddpModel.dynamicsModel.nxImpl(), 1))
-    self.u_prev = np.zeros((ddpModel.dynamicsModel.nu(), 1))
+    self.x = np.zeros((dynamicsModel.nxImpl(), 1))
+    self.u = np.zeros((dynamicsModel.nu(), 1))
+    self.x_prev = np.zeros((dynamicsModel.nxImpl(), 1))
+    self.u_prev = np.zeros((dynamicsModel.nu(), 1))
 
     # Terms for linear approximantion, which has the form:
     #   d/dt([q; v]) = [0, I; aq, av]*[q; v] + [0; au]*u
-    self.aq = np.zeros((ddpModel.dynamicsModel.nv(), ddpModel.dynamicsModel.nv()))
-    self.av = np.zeros((ddpModel.dynamicsModel.nv(), ddpModel.dynamicsModel.nv()))
-    self.au = np.zeros((ddpModel.dynamicsModel.nv(), ddpModel.dynamicsModel.nu()))
+    self.aq = np.zeros((dynamicsModel.nv(), dynamicsModel.nv()))
+    self.av = np.zeros((dynamicsModel.nv(), dynamicsModel.nv()))
+    self.au = np.zeros((dynamicsModel.nv(), dynamicsModel.nu()))
 
     # Creating the discretizer data
     if dt != 0.:
-      self.discretizer = ddpModel.dynamicsModel.discretizer.createData(ddpModel.dynamicsModel, dt)
+      self.discretizer = dynamicsModel.discretizer.createData(dynamicsModel, dt)
 
-    self.diff_x = np.zeros((ddpModel.dynamicsModel.nx(), 1))
+    self.diff_x = np.zeros((dynamicsModel.nx(), 1))
+
 
 class DynamicsModel(object):
   "Base class to define the dynamics model"
@@ -66,7 +67,7 @@ class DynamicsModel(object):
     pass
 
   @abc.abstractmethod
-  def createData(self):
+  def createData(dynamicsModel, tInit, dt):
     pass
 
   @staticmethod

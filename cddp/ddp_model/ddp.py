@@ -147,14 +147,14 @@ class DDPModel(object):
     self.costManager.backwardRunningCalc(ddpData.costData, ddpData.dynamicsData)
 
   def createRunningDynamicsData(self, tInit, dt):
-    return self.dynamicsModel.createData(self, tInit, dt)
+    return self.dynamicsModel.createData(tInit, dt)
 
   def createRunningCostData(self):
     return self.costManager.createRunningData(self.dynamicsModel.nx(),
                                               self.dynamicsModel.nu())
 
   def createTerminalDynamicsData(self, tFinal):
-    return self.dynamicsModel.createData(self, tFinal, 0.)
+    return self.dynamicsModel.createData(tFinal, 0.)
 
   def createTerminalCostData(self):
     return self.costManager.createTerminalData(self.dynamicsModel.nx())
