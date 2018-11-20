@@ -3,18 +3,38 @@ import numpy as np
 
 
 class DynamicsData(object):
-  "Base class to define interface for Dynamics"
+  """ This abstract class declares virtual methods for updating the dynamics
+  and its linear approximation.
+
+  We consider a general dynamic function of the form: d/dt([q; v]) = [v; a(q,v,u)]
+  where q is the configuration point (R^{nq}), v is its tangent velocity (R^nv),
+  u is the control vector (R^{nu}) and the system's state is x = [q; v]. The 
+  a() describes the acceleration evolution of the system. Note that in general
+  q could be described with a number of tuples higher than nv (i.e. nq >= nv).
+  For instance, if q is a point in a SE(3) manifold then we need 12 tuples (or 7
+  tuples for quaternion-based description) to describe it.
+  """
   __metaclass__ = abc.ABCMeta
 
   @abc.abstractmethod
-  def __init__(self, ddpModel):
-    self.diff_x = np.zeros((ddpModel.dynamicsModel.nx(), 1))
-
+  def __init__(self, ddpModel, dt):
     # Current and previous state and control
     self.x = np.zeros((ddpModel.dynamicsModel.nxImpl(), 1))
     self.u = np.zeros((ddpModel.dynamicsModel.nu(), 1))
     self.x_prev = np.zeros((ddpModel.dynamicsModel.nxImpl(), 1))
     self.u_prev = np.zeros((ddpModel.dynamicsModel.nu(), 1))
+
+    # Terms for linear approximantion, which has the form:
+    #   d/dt([q; v]) = [0, I; aq, av]*[q; v] + [0; au]*u
+    self.aq = np.zeros((ddpModel.dynamicsModel.nv(), ddpModel.dynamicsModel.nv()))
+    self.av = np.zeros((ddpModel.dynamicsModel.nv(), ddpModel.dynamicsModel.nv()))
+    self.au = np.zeros((ddpModel.dynamicsModel.nv(), ddpModel.dynamicsModel.nu()))
+
+    # Creating the discretizer data
+    if dt != 0.:
+      self.discretizer = ddpModel.dynamicsModel.discretizer.createData(ddpModel.dynamicsModel, dt)
+
+    self.diff_x = np.zeros((ddpModel.dynamicsModel.nx(), 1))
 
 class DynamicsModel(object):
   "Base class to define the dynamics model"

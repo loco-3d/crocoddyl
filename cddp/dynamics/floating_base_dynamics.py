@@ -7,7 +7,7 @@ import numpy as np
 
 class FloatingBaseMultibodyDynamicsData(DynamicsData):
   def __init__(self, ddpModel, t, dt):
-    DynamicsData.__init__(self, ddpModel)
+    DynamicsData.__init__(self, ddpModel, dt)
     self.h = np.sqrt(EPS)
     self.pinocchio = ddpModel.dynamicsModel.pinocchio.createData()
     self.dimConstraint = ddpModel.dynamicsModel.contactInfo.nc*\
@@ -23,13 +23,6 @@ class FloatingBaseMultibodyDynamicsData(DynamicsData):
     self.MJtJc_inv_L = np.zeros((ddpModel.dynamicsModel.nv() + self.dimConstraint,
                                  ddpModel.dynamicsModel.nv() + self.dimConstraint))
 
-    if dt != 0.:
-      self.discretizer = ddpModel.dynamicsModel.discretizer.createData(ddpModel.dynamicsModel, dt)
-
-    self.aq = np.zeros((ddpModel.dynamicsModel.nv(), ddpModel.dynamicsModel.nv()))
-    self.av = np.zeros((ddpModel.dynamicsModel.nv(), ddpModel.dynamicsModel.nv()))
-    self.au = np.zeros((ddpModel.dynamicsModel.nv(), ddpModel.dynamicsModel.nu()))
-
     self.gq = np.zeros((self.dimConstraint, ddpModel.dynamicsModel.nv()))
     self.gv = np.zeros((self.dimConstraint, ddpModel.dynamicsModel.nv()))
     self.gu = np.zeros((self.dimConstraint, ddpModel.dynamicsModel.nu()))
@@ -41,7 +34,6 @@ class FloatingBaseMultibodyDynamicsData(DynamicsData):
 
 
 class FloatingBaseMultibodyDynamics(DynamicsModel):
-
   def __init__(self, pinocchioModel, discretizer, contactInfo):
     DynamicsModel.__init__(self, pinocchioModel.nq + pinocchioModel.nv,
                            2 * pinocchioModel.nv,
