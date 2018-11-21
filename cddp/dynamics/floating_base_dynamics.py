@@ -117,7 +117,10 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     dynamicsData.av /= dynamicsData.h
     dynamicsData.gv /= dynamicsData.h
 
-  def deltaX(dynamicsModel, dynamicsData, x0, x1):
+  def integrateState(dynamicsModel, dynamicsData, x, dx):
+    return se3.integrate(dynamicsModel.pinocchio, x, dx)
+
+  def differenceState(dynamicsModel, dynamicsData, x0, x1):
     dynamicsData.diff_x[:dynamicsModel.nv()] = \
         se3.difference(dynamicsModel.pinocchio,
                        x0[:dynamicsModel.nq()], x1[:dynamicsModel.nq()])

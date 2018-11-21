@@ -32,10 +32,10 @@ class Solver(object):
       itNext = ddpData.intervalDataVector[k]
       # Computing the new control command
       np.copyto(it.dynamicsData.u, it.dynamicsData.u_prev +\
-                ddpData.alpha * it.j +\
-                np.dot(it.K, ddpModel.dynamicsModel.deltaX(it.dynamicsData,
-                                                           it.dynamicsData.x_prev,
-                                                           it.dynamicsData.x)))
+        ddpData.alpha * it.j + \
+        np.dot(it.K, ddpModel.dynamicsModel.differenceState(it.dynamicsData,
+                                                            it.dynamicsData.x_prev,
+                                                            it.dynamicsData.x)))
 
       # Integrating the system dynamics and updating the new state value
       ddpModel.forwardRunningCalc(ddpData.intervalDataVector[k])

@@ -103,7 +103,21 @@ class DynamicsModel(object):
     pass
 
   @staticmethod
-  def deltaX(dynamicsModel, dynamicsData, x0, x1):
+  def integrateState(dynamicsModel, dynamicsData, x, dx):
+    """ Operator that integrates the state.
+
+    :param x: current state
+    :param dx: displacement of the state
+    """
+    pass
+
+  @staticmethod
+  def differenceState(dynamicsModel, dynamicsData, x0, x1):
+    """ Operator that differentiates the state.
+
+    :param x0: current state
+    :param x1: next state
+    """
     pass
 
   def forwardRunningCalc(dynamicsModel, dynamicsData):
