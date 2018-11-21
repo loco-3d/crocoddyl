@@ -64,33 +64,64 @@ class DynamicsModel(object):
     self._nx_impl = nq + nv
     self._nx = 2 * nv
 
-  @staticmethod
-  def forwardRunningCalc(dynamicsModel, dynamicsData):
-    "implement compute all terms for forward pass"
-    pass
-
-  @staticmethod
-  def forwardTerminalCalc(dynamicsModel, dynamicsData):
-    "implement compute all terms for forward pass"
-    pass
-
-  @staticmethod
-  def backwardRunningCalc(dynamicsModel, dynamicsData):
-    "implement compute all terms for backward pass"
-    pass
-
-  @staticmethod
-  def backwardTerminalCalc(dynamicsModel, dynamicsData):
-    "implement compute all terms for backward pass"
-    pass
-
   @abc.abstractmethod
   def createData(dynamicsModel, tInit, dt):
+    """ Create the dynamics data.
+
+    :param dynamicsModel: dynamics model
+    :param tInit: starting time
+    :param dt: step integration
+    """
+    pass
+
+  @staticmethod
+  def updateTerms(dynamicsModel, dynamicsData):
+    """ Update the terms needed for an user-defined dynamics.
+
+    :param dynamicsModel: dynamics model
+    :param dynamicsData: dynamics data
+    """
+    pass
+
+  @staticmethod
+  def updateDynamics(dynamicsModel, dynamicsData):
+    """ Update the an user-defined dynamics.
+
+    :param dynamicsModel: dynamics model
+    :param dynamicsData: dynamics data
+    """
+    pass
+
+  @staticmethod
+  def updateLinearAppr(dynamicsModel, dynamicsData):
+    """ Update the an user-defined dynamics.
+
+    :param dynamicsModel: dynamics model
+    :param dynamicsData: dynamics data
+    """
     pass
 
   @staticmethod
   def deltaX(dynamicsModel, dynamicsData, x0, x1):
     pass
+
+  def forwardRunningCalc(dynamicsModel, dynamicsData):
+    # Updating the dynamics
+    dynamicsModel.updateDynamics(dynamicsData)
+
+  def forwardTerminalCalc(dynamicsModel, dynamicsData):
+    # Updating the dynamic terms
+    dynamicsModel.updateTerms(dynamicsData)
+
+  def backwardRunningCalc(dynamicsModel, dynamicsData):
+    # Updating the continuous-time linear approximation
+    dynamicsModel.updateLinearAppr(dynamicsData)
+    # Discretizing this linear approximation
+    dynamicsModel.discretizer.backwardRunningCalc(dynamicsModel, dynamicsData)
+
+  def backwardTerminalCalc(dynamicsModel, dynamicsData):
+    # Updating the dynamic terms
+    dynamicsModel.updateTerms(dynamicsData)
 
   def nq(self):
     """ Return the number of tuples used to describe the configuration point.
