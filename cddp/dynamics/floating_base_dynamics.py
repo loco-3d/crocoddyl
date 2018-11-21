@@ -40,9 +40,9 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
   def __init__(self, pinocchioModel, discretizer, contactInfo):
     DynamicsModel.__init__(self, pinocchioModel.nq,
                            pinocchioModel.nv,
-                           pinocchioModel.nv - 6)
+                           pinocchioModel.nv - 6,
+                           discretizer)
     self.pinocchio = pinocchioModel
-    self.discretizer = discretizer
     self.contactInfo = contactInfo
 
   def createData(dynamicsModel, tInit, dt):

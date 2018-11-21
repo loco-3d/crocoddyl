@@ -50,7 +50,7 @@ class DynamicsModel(object):
   """
   __metaclass__ = abc.ABCMeta
 
-  def __init__(self, nq, nv, nu):
+  def __init__(self, nq, nv, nu, discretizer):
     """ Create the dynamic model.
 
     :param nq: number of tuples that describe the configuration point
@@ -60,6 +60,7 @@ class DynamicsModel(object):
     self._nq = nq
     self._nv = nv
     self._nu = nu
+    self.discretizer = discretizer
     # Computing the dimension of the state space
     self._nx_impl = nq + nv
     self._nx = 2 * nv
