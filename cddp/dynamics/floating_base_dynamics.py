@@ -48,45 +48,23 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
   def createData(dynamicsModel, tInit, dt):
     return FloatingBaseMultibodyDynamicsData(dynamicsModel, tInit, dt)
 
-  def updateDynamics(dynamicsModel, dynamicsData, q, v):
+  def updateTerms(dynamicsModel, dynamicsData):
     # Compute all terms
     #TODO: Try to reduce calculations in forward pass, and move them to backward pass
     se3.computeAllTerms(dynamicsModel.pinocchio,
-                        dynamicsData.pinocchio, q, v)
+                        dynamicsData.pinocchio,
+                        dynamicsData.x[:dynamicsModel.nq()],
+                        dynamicsData.x[dynamicsModel.nq():])
     se3.updateFramePlacements(dynamicsModel.pinocchio,
                               dynamicsData.pinocchio)
 
-  def computeDynamics(dynamicsModel, dynamicsData, q, v, tau):
-    # Update the dynamics
-    dynamicsModel.updateDynamics(dynamicsData, q, v)
-
-    # Update the Joint jacobian and gamma
-    for k, cs in enumerate(dynamicsData._contactFrameIndices):
-      dynamicsData.contactJ[dynamicsModel.contactInfo.nc*k:
-                            dynamicsModel.contactInfo.nc*(k+1),:] = \
-        se3.getFrameJacobian(dynamicsModel.pinocchio, dynamicsData.pinocchio, cs,
-                             se3.ReferenceFrame.LOCAL)[:dynamicsModel.contactInfo.nc,:]
-    #TODO gamma
-    dynamicsData.gamma.fill(0.)
-    se3.forwardDynamics(dynamicsModel.pinocchio,
-                        dynamicsData.pinocchio,
-                        q, v, tau,
-                        dynamicsData.contactJ, dynamicsData.gamma, 1e-8, False)
-
-  def forwardRunningCalc(dynamicsModel, dynamicsData):
+  def updateDynamics(dynamicsModel, dynamicsData):
     dynamicsModel.computeDynamics(dynamicsData,
                                   dynamicsData.x[:dynamicsModel.nq()],
                                   dynamicsData.x[dynamicsModel.nq():],
                                   np.vstack([np.zeros((6,1)), dynamicsData.u]))
-    return
 
-  def forwardTerminalCalc(dynamicsModel, dynamicsData):
-    dynamicsModel.updateDynamics(dynamicsData,
-                                 dynamicsData.x[:dynamicsModel.nq()],
-                                 dynamicsData.x[dynamicsModel.nq():])
-    return
-
-  def backwardRunningCalc(dynamicsModel, dynamicsData):
+  def updateLinearAppr(dynamicsModel, dynamicsData):
     #TODO: Replace with analytical derivatives
     np.copyto(dynamicsData.aq, -dynamicsData.pinocchio.ddq)
     np.copyto(dynamicsData.av, -dynamicsData.pinocchio.ddq)
@@ -97,12 +75,10 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     dynamicsData.MJtJc[:dynamicsModel.nv(),dynamicsModel.nv():] = dynamicsData.contactJ.T
     dynamicsData.MJtJc[dynamicsModel.nv():,:dynamicsModel.nv()] = dynamicsData.contactJ
 
+    #TODO: REMOVE PINV!!!! USE DAMPED CHOLESKY
     #np.fill_diagonal(self.MJtJc, self.MJtJc.diagonal()+self.eps)
     #self.MJtJc_inv_L = np.linalg.inv(np.linalg.cholesky(dynamicsModel.MJtJc))
     #self.MJtJc_inv = np.dot(self.MJtJc_inv_L.T, self.MJtJc_inv_L)
-
-    #TODO: REMOVE PINV!!!! USE DAMPED CHOLESKY
-    #print "x value", self.x.T
     dynamicsData.MJtJc_inv = np.linalg.pinv(dynamicsData.MJtJc)
     dynamicsData.au = dynamicsData.MJtJc_inv[:dynamicsModel.nv(),6:dynamicsModel.nv()]
     dynamicsData.gu = dynamicsData.MJtJc_inv[dynamicsModel.nv():,6:dynamicsModel.nv()]
@@ -141,13 +117,6 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     dynamicsData.av /= dynamicsData.h
     dynamicsData.gv /= dynamicsData.h
 
-    # Discretizing the dynamics
-    dynamicsModel.discretizer.backwardRunningCalc(dynamicsModel, dynamicsData)
-    return
-
-  def backwardTerminalCalc(dynamicsModel, dynamicsData):
-    return
-
   def deltaX(dynamicsModel, dynamicsData, x0, x1):
     dynamicsData.diff_x[:dynamicsModel.nv()] = \
         se3.difference(dynamicsModel.pinocchio,
@@ -155,3 +124,24 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     dynamicsData.diff_x[dynamicsModel.nv():] = \
         x1[dynamicsModel.nq():,:] - x0[dynamicsModel.nq():,:]
     return dynamicsData.diff_x
+
+  def computeDynamics(dynamicsModel, dynamicsData, q, v, tau):
+    # Update all terms
+    #TODO: Try to reduce calculations in forward pass, and move them to backward pass
+    se3.computeAllTerms(dynamicsModel.pinocchio,
+                        dynamicsData.pinocchio, q, v)
+    se3.updateFramePlacements(dynamicsModel.pinocchio,
+                              dynamicsData.pinocchio)
+
+    # Update the Joint jacobian and gamma
+    for k, cs in enumerate(dynamicsData._contactFrameIndices):
+      dynamicsData.contactJ[dynamicsModel.contactInfo.nc*k:
+                            dynamicsModel.contactInfo.nc*(k+1),:] = \
+        se3.getFrameJacobian(dynamicsModel.pinocchio, dynamicsData.pinocchio, cs,
+                            se3.ReferenceFrame.LOCAL)[:dynamicsModel.contactInfo.nc,:]
+    #TODO gamma
+    dynamicsData.gamma.fill(0.)
+    se3.forwardDynamics(dynamicsModel.pinocchio,
+                        dynamicsData.pinocchio,
+                        q, v, tau,
+                        dynamicsData.contactJ, dynamicsData.gamma, 1e-8, False)
