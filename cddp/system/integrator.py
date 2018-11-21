@@ -26,8 +26,8 @@ class FloatingBaseMultibodyEulerIntegrator(IntegratorBase):
   def __call__(ddpModel, ddpIData, xNext):
     xNext[ddpModel.dynamicsModel.nq():] = \
               ddpIData.dynamicsData.x[ddpModel.dynamicsModel.nq():] \
-              + ddpIData.dynamicsData.pinocchioData.ddq * ddpIData.dt
+              + ddpIData.dynamicsData.pinocchio.ddq * ddpIData.dt
     xNext[:ddpModel.dynamicsModel.nq()] = \
-              se3.integrate(ddpModel.dynamicsModel.pinocchioModel,
+              se3.integrate(ddpModel.dynamicsModel.pinocchio,
                             ddpIData.dynamicsData.x[:ddpModel.dynamicsModel.nq()],
                             xNext[ddpModel.dynamicsModel.nq():] * ddpIData.dt )

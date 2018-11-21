@@ -29,12 +29,13 @@ contact_indices = [robot.model.getFrameId("lf_foot"),
 contactPhase0 = cddp.multiphase.Phase(contact_indices, 0.,np.inf)
 contactInfo = cddp.multiphase.Multiphase([contactPhase0], 3)
 
-# Create the ddp dynamics
-ddpDynamics = cddp.dynamics.FloatingBaseMultibodyDynamics(robot.model, contactInfo)
-
 # Create the integration and dynamics derivatives schemes.
 ddpIntegrator = cddp.system.integrator.FloatingBaseMultibodyEulerIntegrator()
-ddpDiscretizer = cddp.system.discretizer.FloatingBaseMultibodyEulerExpDiscretizer()
+discretizer = cddp.system.discretizer.FloatingBaseMultibodyEulerExpDiscretizer()
+
+# Create the ddp dynamics
+ddpDynamics = cddp.dynamics.FloatingBaseMultibodyDynamics(robot.model, discretizer, contactInfo)
+
 
 # Initial state
 q0 = robot.q0
@@ -96,7 +97,7 @@ costManager.addTerminal(se3_tcost, "se3_cost")
 
 # Setting up the DDP problem
 ddpModel = cddp.ddp_model.DDPModel(ddpDynamics, ddpIntegrator,
-                                   ddpDiscretizer, costManager)
+                                   costManager)
 ddpData = cddp.ddp_model.DDPData(ddpModel, timeline)
 
 # Setting the initial conditions
