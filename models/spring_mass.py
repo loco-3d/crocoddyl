@@ -21,8 +21,8 @@ ddpDynamics = cddp.dynamics.SpringMass(discretizer)
 
 
 # Initial state
-x0 = np.zeros((2,1))
-u0 = np.zeros((1,1))
+x0 = np.zeros((ddpDynamics.nx(),1))
+u0 = np.zeros((ddpDynamics.nu(),1))
 
 
 # Defining the velocity and control regularization
@@ -31,12 +31,14 @@ wu = 1e-7 * np.ones((ddpDynamics.nu(),1))
 
 #TODO: Why are we regularizing to zero posture!
 x_cost = cddp.costs.multibody_dynamics.StateCost(ddpDynamics, wx)
+xt_cost = cddp.costs.multibody_dynamics.StateCost(ddpDynamics, np.ones((2*ddpDynamics.nv(),1)))
 u_cost = cddp.costs.multibody_dynamics.ControlCost(ddpDynamics, wu)
 
 # Adding the cost functions to the cost manager
 costManager = cddp.cost_manager.CostManager()
 costManager.addRunning(x_cost, "x_cost")
 costManager.addRunning(u_cost, "u_cost")
+costManager.addTerminal(xt_cost, "xt_cost")
 
 # Setting up the DDP problem
 ddpModel = cddp.ddp_model.DDPModel(ddpDynamics, ddpIntegrator,
@@ -52,6 +54,7 @@ xref = np.array([ [1.],[0.] ])
 Xref = [xref for i in xrange(len(timeline))]
 Uref = [u0 for i in xrange(len(timeline))]
 ddpModel.setRunningReference(ddpData, Xref[:-1], "x_cost")
+ddpModel.setTerminalReference(ddpData, Xref[-1], "xt_cost")
 
 # Configuration the solver from YAML file
 solverParams = cddp.solver.SolverParams()
@@ -63,6 +66,10 @@ cddp.Solver.solve(ddpModel, ddpData, solverParams)
 
 
 if plot:
+  X = cddp.Solver.getStateTrajectory(ddpData)
+  U = cddp.Solver.getControlSequence(ddpData)
+  cddp.utils.plotDDPSolution(ddpDynamics.nx(), ddpDynamics.nu(), X, U)
+
   cddp.utils.plotDDPConvergence(solverParams.cost_itr,
                                 solverParams.muLM_itr,
                                 solverParams.muV_itr, 
