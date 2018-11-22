@@ -43,7 +43,9 @@ class StateCost(RunningQuadraticCost):
 
   def updateResidual(self, costData, dynamicsData):
     np.copyto(costData.r,
-      self.dynamicsModel.deltaX(dynamicsData, costData.x_des, dynamicsData.x))
+      self.dynamicsModel.differenceState(dynamicsData,
+                                         costData.x_des,
+                                         dynamicsData.x))
 
   def updateResidualLinearAppr(self, costData, dynamicsData):
     # Due to the residual is equals to x, we don't need to linearize each time.

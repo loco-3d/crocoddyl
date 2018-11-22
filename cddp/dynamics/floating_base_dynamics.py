@@ -40,9 +40,9 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
   def __init__(self, pinocchioModel, discretizer, contactInfo):
     DynamicsModel.__init__(self, pinocchioModel.nq,
                            pinocchioModel.nv,
-                           pinocchioModel.nv - 6)
+                           pinocchioModel.nv - 6,
+                           discretizer)
     self.pinocchio = pinocchioModel
-    self.discretizer = discretizer
     self.contactInfo = contactInfo
 
   def createData(dynamicsModel, tInit, dt):
@@ -117,7 +117,10 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     dynamicsData.av /= dynamicsData.h
     dynamicsData.gv /= dynamicsData.h
 
-  def deltaX(dynamicsModel, dynamicsData, x0, x1):
+  def integrateState(dynamicsModel, dynamicsData, x, dx):
+    return se3.integrate(dynamicsModel.pinocchio, x, dx)
+
+  def differenceState(dynamicsModel, dynamicsData, x0, x1):
     dynamicsData.diff_x[:dynamicsModel.nv()] = \
         se3.difference(dynamicsModel.pinocchio,
                        x0[:dynamicsModel.nq()], x1[:dynamicsModel.nq()])
