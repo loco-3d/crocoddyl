@@ -105,28 +105,28 @@ def plotDDPConvergence(J, muLM, muV, gamma, theta, alpha):
   plt.xlabel('iteration')
   plt.show()
 
-def plotDDPSolution(model, X, U):
+def plotDDPSolution(nq, nv, X, U):
   import matplotlib.pyplot as plt
   # Getting the joint position and commands
   q = []
   tau = []
-  for i in range(model.nq):
+  for i in range(nq):
     q.append([np.asscalar(k[i]) for k in X])
-  for i in range(model.nv):
+  for i in range(nv):
     tau.append([np.asscalar(k[i]) for k in U])
 
   plt.figure(1)
 
   # Plotting the joint position
   plt.subplot(211)
-  [plt.plot(q[i], label='q'+str(i)) for i in range(model.nq)]
+  [plt.plot(q[i], label='q'+str(i)) for i in range(nq)]
   # [plt.plot(q[i], label='q'+str(i)) for i in range(0,3)]
   plt.legend()
   plt.ylabel('rad')
 
   # Plotting the joint torques
   plt.subplot(212)
-  [plt.plot(tau[i], label='u'+str(i)) for i in range(model.nv)]
+  [plt.plot(tau[i], label='u'+str(i)) for i in range(nv)]
   # [plt.plot(tau[i], label='u'+str(i)) for i in range(6,9)]
   plt.legend()
   plt.ylabel('Nm')
