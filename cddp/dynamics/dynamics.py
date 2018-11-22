@@ -103,20 +103,20 @@ class DynamicsModel(object):
     pass
 
   @staticmethod
-  def integrateState(dynamicsModel, dynamicsData, x, dx):
-    """ Operator that integrates the state.
+  def integrateConfiguration(dynamicsModel, dynamicsData, q, dq):
+    """ Operator that integrates the configuration.
 
-    :param x: current state
-    :param dx: displacement of the state
+    :param q: current configuration point
+    :param dq: displacement of the configuration
     """
     pass
 
   @staticmethod
-  def differenceState(dynamicsModel, dynamicsData, x0, x1):
-    """ Operator that differentiates the state.
+  def differenceConfiguration(dynamicsModel, dynamicsData, q0, q1):
+    """ Operator that differentiates the configuration.
 
-    :param x0: current state
-    :param x1: next state
+    :param x0: current configuration point
+    :param x1: next configurtion point
     """
     pass
 
@@ -137,6 +137,15 @@ class DynamicsModel(object):
   def backwardTerminalCalc(dynamicsModel, dynamicsData):
     # Updating the dynamic terms
     dynamicsModel.updateTerms(dynamicsData)
+
+  def differenceState(dynamicsModel, dynamicsData, x0, x1):
+    dynamicsData.diff_x[dynamicsModel.nv():] = \
+        x1[dynamicsModel.nq():,:] - x0[dynamicsModel.nq():,:]
+    dynamicsData.diff_x[:dynamicsModel.nv()] = \
+        dynamicsModel.differenceConfiguration(dynamicsData,
+                                              x0[:dynamicsModel.nq()],
+                                              x1[:dynamicsModel.nq()])
+    return dynamicsData.diff_x
 
   def nq(self):
     """ Return the number of tuples used to describe the configuration point.
