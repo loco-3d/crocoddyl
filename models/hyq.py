@@ -31,7 +31,7 @@ contactInfo = cddp.multiphase.Multiphase([contactPhase0], 3)
 
 # Create the integration and dynamics derivatives schemes.
 ddpIntegrator = cddp.system.integrator.EulerIntegrator()
-discretizer = cddp.system.discretizer.FloatingBaseMultibodyEulerExpDiscretizer()
+discretizer = cddp.system.discretizer.EulerDiscretizer()
 
 # Create the ddp dynamics
 ddpDynamics = cddp.dynamics.FloatingBaseMultibodyDynamics(robot.model, discretizer, contactInfo)

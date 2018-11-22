@@ -75,7 +75,7 @@ class Discretizer(object):
   #     pass
 
 
-class FloatingBaseMultibodyEulerExpDiscretizerData(DiscretizerData):
+class EulerDiscretizerData(DiscretizerData):
   def __init__(self, dynamicsModel, dt):
     DiscretizerData.__init__(self, dynamicsModel, dt)
     # Update once the upper-block
@@ -84,14 +84,14 @@ class FloatingBaseMultibodyEulerExpDiscretizerData(DiscretizerData):
     self.fx[:dynamicsModel.nv(),dynamicsModel.nv():] = self.dt * self.I
 
 
-class FloatingBaseMultibodyEulerExpDiscretizer(Discretizer):
+class EulerDiscretizer(Discretizer):
   """ Convert the time-continuos dynamics into time-discrete one by using
     forward Euler rule."""
   def __init__(self):
     return
 
   def createData(self, dynamicsModel, dt):
-    return FloatingBaseMultibodyEulerExpDiscretizerData(dynamicsModel, dt)
+    return EulerDiscretizerData(dynamicsModel, dt)
 
   @staticmethod
   def backwardRunningCalc(dynamicsModel, dynamicsData):
