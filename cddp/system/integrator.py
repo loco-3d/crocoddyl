@@ -2,32 +2,28 @@ import abc
 import pinocchio as se3
 
 class IntegratorBase(object):
-  """ Class to integrate the dynamics. Does not store data.
+  """ This abstract class allows us to define different integration rules.
   """
   __metaclass__=abc.ABCMeta
 
   @abc.abstractmethod
-  def __init__(self):
-    pass
-
-  @abc.abstractmethod
   def __call__(ddpModel, ddpIData, xNext):
+    """ Integrate the system dynamics given an user-defined integration scheme.
+    """
     return NotImplementedError
 
-class FloatingBaseMultibodyEulerIntegrator(IntegratorBase):
-  """ Create the internal data of forward Euler integrator of the system
-  dynamics.
+class EulerIntegrator(IntegratorBase):
+  """ Define a forward Euler integrator.
   """
-
-  def __init__(self):
-    return
-  
   @staticmethod
   def __call__(ddpModel, ddpIData, xNext):
+    """ Integrate the system dynamics using the forward Euler scheme.
+    """
     xNext[ddpModel.dynamicsModel.nq():] = \
-              ddpIData.dynamicsData.x[ddpModel.dynamicsModel.nq():] \
-              + ddpIData.dynamicsData.pinocchio.ddq * ddpIData.dt
+      ddpIData.dynamicsData.x[ddpModel.dynamicsModel.nq():] +\
+      ddpIData.dt * ddpIData.dynamicsData.a
     xNext[:ddpModel.dynamicsModel.nq()] = \
-              se3.integrate(ddpModel.dynamicsModel.pinocchio,
-                            ddpIData.dynamicsData.x[:ddpModel.dynamicsModel.nq()],
-                            xNext[ddpModel.dynamicsModel.nq():] * ddpIData.dt )
+      ddpModel.dynamicsModel.integrateConfiguration(
+        ddpModel.dynamicsModel,
+        ddpIData.dynamicsData.x[:ddpModel.dynamicsModel.nq()],
+        ddpIData.dt * xNext[ddpModel.dynamicsModel.nq():])
