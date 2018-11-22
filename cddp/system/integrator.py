@@ -1,7 +1,7 @@
 import abc
 import pinocchio as se3
 
-class IntegratorBase(object):
+class Integrator(object):
   """ This abstract class allows us to define different integration rules.
   """
   __metaclass__=abc.ABCMeta
@@ -12,7 +12,7 @@ class IntegratorBase(object):
     """
     return NotImplementedError
 
-class EulerIntegrator(IntegratorBase):
+class EulerIntegrator(Integrator):
   """ Define a forward Euler integrator.
   """
   @staticmethod
