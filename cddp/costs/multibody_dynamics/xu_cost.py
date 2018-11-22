@@ -35,7 +35,7 @@ class StateCost(RunningQuadraticCost):
     RunningQuadraticCost.__init__(self, dynamicsModel.nx(), weights)
     self.dynamicsModel = dynamicsModel
 
-  def createData(self, nx, nu):
+  def createData(self, nx, nu = 0):
     data = StateRunningData(self.dynamicsModel.nxImpl(), nx, nu, self.nr)
     np.copyto(data.rx, np.identity(nx))
     np.copyto(data.lxx, np.diag(self.weight.reshape(-1)))
