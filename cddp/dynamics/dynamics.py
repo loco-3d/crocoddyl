@@ -23,7 +23,10 @@ class DynamicsData(object):
     self.x_prev = np.zeros((dynamicsModel.nxImpl(), 1))
     self.u_prev = np.zeros((dynamicsModel.nu(), 1))
 
-    # Terms for linear approximantion, which has the form:
+    # System acceleration
+    self.a = np.zeros((dynamicsModel.nv(), 1))
+
+    # Terms for linear approximation, which has the form:
     #   d/dt([q; v]) = [0, I; aq, av]*[q; v] + [0; au]*u
     self.aq = np.zeros((dynamicsModel.nv(), dynamicsModel.nv()))
     self.av = np.zeros((dynamicsModel.nv(), dynamicsModel.nv()))

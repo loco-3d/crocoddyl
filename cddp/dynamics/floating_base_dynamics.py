@@ -59,10 +59,14 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
                               dynamicsData.pinocchio)
 
   def updateDynamics(dynamicsModel, dynamicsData):
+    # Computing the constrained forward dynamics
     dynamicsModel.computeDynamics(dynamicsData,
                                   dynamicsData.x[:dynamicsModel.nq()],
                                   dynamicsData.x[dynamicsModel.nq():],
                                   np.vstack([np.zeros((6,1)), dynamicsData.u]))
+
+    # Updating the system acceleration
+    np.copyto(dynamicsData.a, dynamicsData.pinocchio.ddq)
 
   def updateLinearAppr(dynamicsModel, dynamicsData):
     #TODO: Replace with analytical derivatives
