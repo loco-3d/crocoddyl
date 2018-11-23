@@ -6,7 +6,7 @@ class SolverParams(object):
     """
     # Defining the default values of the DDP parameters
     # Convergence tolerance and maximum number of iterations
-    self.tol = 1e-5
+    self.tol = 1e-4
     self.max_iter = 20
 
     # Resizing the global variables for analysing solver performance
