@@ -165,10 +165,8 @@ class Solver(object):
       print ("Iteration", ddpData.n_iter, "muV", ddpData.muV,
              "muLM", ddpData.muLM, "alpha", ddpData.alpha)
 
-      # Prepare for DDP Backward Pass. TODO: Parallelize.
-      for k in xrange(ddpData.N):
-        ddpModel.backwardRunningCalc(ddpData.intervalDataVector[k])
-      ddpModel.backwardTerminalCalc(ddpData.intervalDataVector[-1])
+      # Update the quadratic approximation
+      Solver.updateQuadraticAppr(ddpModel, ddpData)
 
       while not Solver.backwardPass(ddpModel, ddpData, solverParams):
         # Quu is not positive-definitive, so increasing the
@@ -190,9 +188,6 @@ class Solver(object):
           print "\t", ('It cannot be improved solution')
           ddpData._convergence = True
           break
-
-      # Recording the regularization values, gradient, and theta for each
-      # iteration. This is useful for analysing the solver performance
 
       # Recording the total cost, gradient, weighted gradient (gamme),
       # regularization values and alpha for each iteration. This is useful for
@@ -251,6 +246,13 @@ class Solver(object):
     #TODO
     #self._recordSolution()
     return False
+
+  @staticmethod
+  def updateQuadraticAppr(ddpModel, ddpData):
+    # Updating along the horizon. TODO: Parallelize.
+    for k in xrange(ddpData.N):
+      ddpModel.backwardRunningCalc(ddpData.intervalDataVector[k])
+    ddpModel.backwardTerminalCalc(ddpData.intervalDataVector[-1])
 
   @staticmethod
   def getStateTrajectory(ddpData):

@@ -58,86 +58,91 @@ class LinearDDPTest(unittest.TestCase):
 
     # Running the DDP solver
     cddp.Solver.solve(self.ddpModel, self.ddpData, solverParams)
-    print  self.ddpData.z
     self.assertAlmostEqual(
       self.ddpData.z, 1., 1, \
       "This is a LQR problem the improvement ration should be equals to 1.")
 
 
-  # def test_against_kkt_solution(self):
-  #   # Running the DDP solver
-  #   self.ddp.compute(self.x0)
+  def test_against_kkt_solution(self):
+    # Using the default solver parameters
+    solverParams = cddp.SolverParams()
 
-  #   # Creating the variables of the KKT problem
-  #   n = self.ddp.intervals[0].system.ndx
-  #   m = self.ddp.intervals[0].system.m
-  #   N = self.ddp.N
-  #   G = np.matrix(np.zeros((N*n+n, 1)))
-  #   gradJ = np.matrix(np.zeros((N*(n+m)+n, 1)))
-  #   gradG = np.matrix(np.zeros((N*(n+m)+n, N*n+n)))
-  #   hessL = np.matrix(np.zeros((N*(n+m)+n, N*(n+m)+n)))
+    # Running the DDP solver
+    cddp.Solver.solve(self.ddpModel, self.ddpData, solverParams)
 
-  #   # Running a backward-pass in order to update the derivatives of the
-  #   # DDP solution (no regularization and full Newton step)
-  #   self.ddp.backwardPass(0., 0., 1.)
+    # Creating the variables of the KKT problem
+    n = self.ddpModel.dynamicsModel.nx()
+    m = self.ddpModel.dynamicsModel.nu()
+    N = self.ddpData.N
+    G = np.matrix(np.zeros((N*n+n, 1)))
+    gradJ = np.matrix(np.zeros((N*(n+m)+n, 1)))
+    gradG = np.matrix(np.zeros((N*(n+m)+n, N*n+n)))
+    hessL = np.matrix(np.zeros((N*(n+m)+n, N*(n+m)+n)))
 
-  #   # Building the KKT matrix and vector given the cost and dynamics derivatives
-  #   # from the DDP backward-pass
-  #   for k in range(N):
-  #     data = self.ddp.intervals[k]
+    # Running a backward-pass in order to update the derivatives of the
+    # DDP solution (no regularization and full Newton step)
+    self.ddpData.alpha = 1.
+    cddp.Solver.updateQuadraticAppr(self.ddpModel, self.ddpData)
+    cddp.Solver.backwardPass(self.ddpModel, self.ddpData, solverParams)
 
-  #     # Running cost and its derivatives
-  #     lx = data.cost.total.lx
-  #     lu = data.cost.total.lu
-  #     lxx = data.cost.total.lxx
-  #     luu = data.cost.total.luu
-  #     lux = data.cost.total.lux
+    # Building the KKT matrix and vector given the cost and dynamics derivatives
+    # from the DDP backward-pass
+    for k in range(N):
+      data = self.ddpData.intervalDataVector[k]
 
-  #     # Dynamics and its derivatives
-  #     f = data.system.f
-  #     fx = data.system.fx
-  #     fu = data.system.fu
+      # Running cost and its derivatives
+      lx = data.costData.lx
+      lu = data.costData.lu
+      lxx = data.costData.lxx
+      luu = data.costData.luu
+      lux = data.costData.lux
 
-  #     # Updating the constraint and cost functions and them gradient, and the
-  #     # Hessian of this problem
-  #     G[k*n:(k+1)*n] = f
-  #     gradG[k*(n+m):(k+1)*(n+m), k*n:(k+1)*n] = np.block([ [fx.T],[fu.T] ])
-  #     gradJ[k*(n+m):(k+1)*(n+m)] = np.block([ [lx],[lu] ])
-  #     hessL[k*(n+m):(k+1)*(n+m),k*(n+m):(k+1)*(n+m)] = \
-  #       np.block([ [lxx, lux.T],[lux, luu] ])
+      # Dynamics and its derivatives
+      f = self.ddpData.intervalDataVector[k+1].dynamicsData.x
+  #     f = data.system.f #TODO check
+      fx = data.dynamicsData.discretizer.fx
+      fu = data.dynamicsData.discretizer.fu
 
-  #   # Updating the terms given the terminal state
-  #   G[N*n:(N+1)*n] = f
-  #   gradG[N*(n+m):(N+1)*(n+m), N*n:(N+1)*n] = fx.T
-  #   gradJ[N*(n+m):(N+1)*(n+m)] = lx
-  #   hessL[N*(n+m):(N+1)*(n+m), N*(n+m):(N+1)*(n+m)] = \
-  #     self.ddp.terminal_interval.cost.total.lxx
+      # Updating the constraint and cost functions and them gradient, and the
+      # Hessian of this problem
+      G[k*n:(k+1)*n] = f
+      gradG[k*(n+m):(k+1)*(n+m), k*n:(k+1)*n] = np.block([ [fx.T],[fu.T] ])
+      gradJ[k*(n+m):(k+1)*(n+m)] = np.block([ [lx],[lu] ])
+      hessL[k*(n+m):(k+1)*(n+m),k*(n+m):(k+1)*(n+m)] = \
+        np.block([ [lxx, lux.T],[lux, luu] ])
 
-  #   # Computing the KKT matrix and vector
-  #   kkt_mat = np.block([ [hessL,gradG],[gradG.T, np.zeros((N*n+n,N*n+n))] ])
-  #   kkt_vec = np.block([ [gradJ],[G] ])
+    # Updating the terms given the terminal state
+    G[N*n:(N+1)*n] = f
+    gradG[N*(n+m):(N+1)*(n+m), N*n:(N+1)*n] = fx.T
+    gradJ[N*(n+m):(N+1)*(n+m)] = lx
+    hessL[N*(n+m):(N+1)*(n+m), N*(n+m):(N+1)*(n+m)] = \
+      self.ddpData.intervalDataVector[-1].costData.lxx
 
-  #   # Solving the KKT problem
-  #   sol = np.linalg.solve(kkt_mat, kkt_vec)
+    # Computing the KKT matrix and vector
+    kkt_mat = np.block([ [hessL,gradG],[gradG.T, np.zeros((N*n+n,N*n+n))] ])
+    kkt_vec = np.block([ [gradJ],[G] ])
 
-  #   # Recording the KKT solution into a list
-  #   X_kkt = []
-  #   U_kkt = []
-  #   for k in range(N):
-  #     w = sol[k*(n+m):(k+1)*(n+m)]
-  #     X_kkt.append(w[:n])
-  #     U_kkt.append(w[-m])
+    # Solving the KKT problem
+    sol = np.linalg.solve(kkt_mat, kkt_vec)
 
-  #   # Getting the DDP solution
-  #   X_opt = self.ddp.getStateTrajectory()
-  #   U_opt = self.ddp.getControlSequence()
+    # Recording the KKT solution into a list
+    X_kkt = []
+    U_kkt = []
+    for k in range(N):
+      w = sol[k*(n+m):(k+1)*(n+m)]
+      X_kkt.append(w[:n])
+      U_kkt.append(w[-m])
 
-  #   for i in range(N-1):
-  #     # Checking the DDP solution is almost equals to KKT solution
-  #     self.assertTrue(np.allclose(X_kkt[i], X_opt[i], atol=1e-3),
-  #                            "State KKT solution at " + str(i) + " is not the same.")
-  #     # self.assertTrue(np.allclose(U_kkt[i], U_opt[i], atol=1e-2),
-  #     #   "Control KKT solution at " + str(i) + " is not the same.")
+    # Getting the DDP solution
+    X_opt = cddp.Solver.getStateTrajectory(self.ddpData)
+    U_opt = cddp.Solver.getControlSequence(self.ddpData)
+
+    for i in range(N-1):
+      # Checking the DDP solution is almost equals to KKT solution
+      self.assertTrue(np.allclose(X_kkt[i], X_opt[i], atol=1e-3),
+                             "State KKT solution at " + str(i) + " is not the same.")
+      self.assertTrue(np.allclose(U_kkt[i], U_opt[i], atol=1e-2),
+        "Control KKT solution at " + str(i) + " is not the same.")
 
   # def test_positive_expected_improvement(self):
   #   # Running the DDP solver
