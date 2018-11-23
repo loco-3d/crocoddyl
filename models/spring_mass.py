@@ -13,26 +13,26 @@ filename = str(os.path.dirname(os.path.abspath(__file__)))
 timeline = np.arange(0.0, 0.25, 1e-3)  # np.linspace(0., 0.5, 51)
 
 # Create the integration and dynamics derivatives schemes. #TODO
-ddpIntegrator = cddp.system.integrator.EulerIntegrator()
+integrator = cddp.system.integrator.EulerIntegrator()
 discretizer = cddp.system.discretizer.EulerDiscretizer()
 
-# Create the ddp dynamics
-ddpDynamics = cddp.dynamics.SpringMass(discretizer)
+# Create the dynamics
+dynamics = cddp.dynamics.SpringMass(integrator, discretizer)
 
 
 # Initial state
-x0 = np.zeros((ddpDynamics.nx(),1))
-u0 = np.zeros((ddpDynamics.nu(),1))
+x0 = np.zeros((dynamics.nx(),1))
+u0 = np.zeros((dynamics.nu(),1))
 
 
 # Defining the velocity and control regularization
-wx = 1e-7 * np.vstack([ np.zeros((ddpDynamics.nv(),1)), np.ones((ddpDynamics.nv(),1)) ])
-wu = 1e-7 * np.ones((ddpDynamics.nu(),1))
+wx = 1e-7 * np.vstack([ np.zeros((dynamics.nv(),1)), np.ones((dynamics.nv(),1)) ])
+wu = 1e-7 * np.ones((dynamics.nu(),1))
 
 #TODO: Why are we regularizing to zero posture!
-x_cost = cddp.costs.multibody_dynamics.StateCost(ddpDynamics, wx)
-xt_cost = cddp.costs.multibody_dynamics.StateCost(ddpDynamics, np.ones((2*ddpDynamics.nv(),1)))
-u_cost = cddp.costs.multibody_dynamics.ControlCost(ddpDynamics, wu)
+x_cost = cddp.costs.multibody_dynamics.StateCost(dynamics, wx)
+xt_cost = cddp.costs.multibody_dynamics.StateCost(dynamics, np.ones((2*dynamics.nv(),1)))
+u_cost = cddp.costs.multibody_dynamics.ControlCost(dynamics, wu)
 
 # Adding the cost functions to the cost manager
 costManager = cddp.cost_manager.CostManager()
@@ -41,8 +41,7 @@ costManager.addRunning(u_cost, "u_cost")
 costManager.addTerminal(xt_cost, "xt_cost")
 
 # Setting up the DDP problem
-ddpModel = cddp.ddp_model.DDPModel(ddpDynamics, ddpIntegrator,
-                                   costManager)
+ddpModel = cddp.ddp_model.DDPModel(dynamics, costManager)
 ddpData = cddp.ddp_model.DDPData(ddpModel, timeline)
 
 # Setting the initial conditions

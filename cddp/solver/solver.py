@@ -12,9 +12,9 @@ class Solver(object):
     """
     for k in xrange(ddpData.N):
       ddpModel.forwardRunningCalc(ddpData.intervalDataVector[k])
-      ddpData.totalCost += ddpData.intervalDataVector[k].costData.l
-      ddpModel.integrator(ddpModel, ddpData.intervalDataVector[k],
+      ddpModel.dynamicsModel.integrator(ddpModel, ddpData.intervalDataVector[k],
                           ddpData.intervalDataVector[k+1].dynamicsData.x)
+      ddpData.totalCost += ddpData.intervalDataVector[k].costData.l
 
     ddpModel.forwardTerminalCalc(ddpData.intervalDataVector[-1])
     ddpData.totalCost += ddpData.intervalDataVector[-1].costData.l
@@ -39,7 +39,7 @@ class Solver(object):
 
       # Integrating the system dynamics and updating the new state value
       ddpModel.forwardRunningCalc(ddpData.intervalDataVector[k])
-      ddpModel.integrator(ddpModel, ddpData.intervalDataVector[k],
+      ddpModel.dynamicsModel.integrator(ddpModel, ddpData.intervalDataVector[k],
                           ddpData.intervalDataVector[k+1].dynamicsData.x)
       ddpData.totalCost += ddpData.intervalDataVector[k].costData.l
     ddpModel.forwardTerminalCalc(ddpData.intervalDataVector[-1])

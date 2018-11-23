@@ -53,17 +53,20 @@ class DynamicsModel(object):
   """
   __metaclass__ = abc.ABCMeta
 
-  def __init__(self, nq, nv, nu, discretizer):
+  def __init__(self, integrator, discretizer, nq, nv, nu):
     """ Create the dynamic model.
 
+    :param integrator: system integrator
+    :param discretizer: system discretizer
     :param nq: number of tuples that describe the configuration point
     :param nv: dimension of the configuration space
     :param nu: dimension of control vector
     """
+    self.integrator = integrator
+    self.discretizer = discretizer
     self._nq = nq
     self._nv = nv
     self._nu = nu
-    self.discretizer = discretizer
     # Computing the dimension of the state space
     self._nx_impl = nq + nv
     self._nx = 2 * nv

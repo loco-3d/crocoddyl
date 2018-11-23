@@ -20,8 +20,8 @@ class SpringMassData(DynamicsData):
 
 
 class SpringMass(DynamicsModel):
-  def __init__(self, discretizer):
-    DynamicsModel.__init__(self, 1, 1, 1, discretizer)
+  def __init__(self, integrator, discretizer):
+    DynamicsModel.__init__(self, integrator, discretizer, 1, 1, 1)
 
   def createData(dynamicsModel, tInit, dt):
     return SpringMassData(dynamicsModel, dt)

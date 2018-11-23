@@ -37,11 +37,11 @@ class FloatingBaseMultibodyDynamicsData(DynamicsData):
 
 
 class FloatingBaseMultibodyDynamics(DynamicsModel):
-  def __init__(self, pinocchioModel, discretizer, contactInfo):
-    DynamicsModel.__init__(self, pinocchioModel.nq,
+  def __init__(self, integrator, discretizer, pinocchioModel, contactInfo):
+    DynamicsModel.__init__(self, integrator, discretizer,
+                           pinocchioModel.nq,
                            pinocchioModel.nv,
-                           pinocchioModel.nv - 6,
-                           discretizer)
+                           pinocchioModel.nv - 6)
     self.pinocchio = pinocchioModel
     self.contactInfo = contactInfo
 
