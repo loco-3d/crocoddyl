@@ -7,8 +7,8 @@ import numpy as np
 
 class FloatingBaseMultibodyDynamicsData(DynamicsData):
   def __init__(self, dynamicsModel, t, dt):
-    DynamicsData.__init__(self, dynamicsModel, dt)
-    
+    DynamicsData.__init__(self, dynamicsModel, t, dt)
+
     # Pinocchio data
     self.pinocchio = dynamicsModel.pinocchio.createData()
 
@@ -37,16 +37,16 @@ class FloatingBaseMultibodyDynamicsData(DynamicsData):
 
 
 class FloatingBaseMultibodyDynamics(DynamicsModel):
-  def __init__(self, pinocchioModel, discretizer, contactInfo):
-    DynamicsModel.__init__(self, pinocchioModel.nq,
+  def __init__(self, integrator, discretizer, pinocchioModel, contactInfo):
+    DynamicsModel.__init__(self, integrator, discretizer,
+                           pinocchioModel.nq,
                            pinocchioModel.nv,
-                           pinocchioModel.nv - 6,
-                           discretizer)
+                           pinocchioModel.nv - 6)
     self.pinocchio = pinocchioModel
     self.contactInfo = contactInfo
 
-  def createData(dynamicsModel, tInit, dt):
-    return FloatingBaseMultibodyDynamicsData(dynamicsModel, tInit, dt)
+  def createData(dynamicsModel, t, dt):
+    return FloatingBaseMultibodyDynamicsData(dynamicsModel, t, dt)
 
   def updateTerms(dynamicsModel, dynamicsData):
     # Compute all terms
@@ -59,10 +59,14 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
                               dynamicsData.pinocchio)
 
   def updateDynamics(dynamicsModel, dynamicsData):
+    # Computing the constrained forward dynamics
     dynamicsModel.computeDynamics(dynamicsData,
                                   dynamicsData.x[:dynamicsModel.nq()],
                                   dynamicsData.x[dynamicsModel.nq():],
                                   np.vstack([np.zeros((6,1)), dynamicsData.u]))
+
+    # Updating the system acceleration
+    np.copyto(dynamicsData.a, dynamicsData.pinocchio.ddq)
 
   def updateLinearAppr(dynamicsModel, dynamicsData):
     #TODO: Replace with analytical derivatives
@@ -117,16 +121,11 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     dynamicsData.av /= dynamicsData.h
     dynamicsData.gv /= dynamicsData.h
 
-  def integrateState(dynamicsModel, dynamicsData, x, dx):
-    return se3.integrate(dynamicsModel.pinocchio, x, dx)
+  def integrateConfiguration(dynamicsModel, dynamicsData, q, dq):
+    return se3.integrate(dynamicsModel.pinocchio, q, dq)
 
-  def differenceState(dynamicsModel, dynamicsData, x0, x1):
-    dynamicsData.diff_x[:dynamicsModel.nv()] = \
-        se3.difference(dynamicsModel.pinocchio,
-                       x0[:dynamicsModel.nq()], x1[:dynamicsModel.nq()])
-    dynamicsData.diff_x[dynamicsModel.nv():] = \
-        x1[dynamicsModel.nq():,:] - x0[dynamicsModel.nq():,:]
-    return dynamicsData.diff_x
+  def differenceConfiguration(dynamicsModel, dynamicsData, q0, q1):
+    return se3.difference(dynamicsModel.pinocchio, q0, q1)
 
   def computeDynamics(dynamicsModel, dynamicsData, q, v, tau):
     # Update all terms

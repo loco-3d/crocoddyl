@@ -1,1 +1,2 @@
 from floating_base_dynamics import FloatingBaseMultibodyDynamics
+from spring_mass import SpringMass

@@ -35,10 +35,10 @@ class StateCost(RunningQuadraticCost):
     RunningQuadraticCost.__init__(self, dynamicsModel.nx(), weights)
     self.dynamicsModel = dynamicsModel
 
-  def createData(self, nx, nu):
+  def createData(self, nx, nu = 0):
     data = StateRunningData(self.dynamicsModel.nxImpl(), nx, nu, self.nr)
     np.copyto(data.rx, np.identity(nx))
-    np.copyto(data.lxx, np.diag(np.array(self.weight).squeeze()))
+    np.copyto(data.lxx, np.diag(self.weight.reshape(-1)))
     return data
 
   def updateResidual(self, costData, dynamicsData):
@@ -85,7 +85,7 @@ class ControlCost(RunningQuadraticCost):
   def createData(self, nx, nu):
     data = ControlRunningData(nx, nu, self.nr)
     np.copyto(data.ru, np.identity(nu))
-    np.copyto(data.luu, np.diag(np.array(self.weight).squeeze()))
+    np.copyto(data.luu, np.diag(self.weight.reshape(-1)))
     return data
 
   def updateResidual(self, costData, dynamicsData):

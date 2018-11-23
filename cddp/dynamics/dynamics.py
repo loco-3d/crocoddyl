@@ -16,14 +16,27 @@ class DynamicsData(object):
   __metaclass__ = abc.ABCMeta
 
   @abc.abstractmethod
-  def __init__(self, dynamicsModel, dt):
+  def __init__(self, dynamicsModel, t, dt):
+    """ Create the common dynamics data.
+
+    :param dynamicsModel: dynamics model
+    :param t: initial time of the interval
+    :param dt: step time of the interval
+    """
+    # Duration and initial time of the interval
+    self.t = t
+    self.dt = dt
+
     # Current and previous state and control
     self.x = np.zeros((dynamicsModel.nxImpl(), 1))
     self.u = np.zeros((dynamicsModel.nu(), 1))
     self.x_prev = np.zeros((dynamicsModel.nxImpl(), 1))
     self.u_prev = np.zeros((dynamicsModel.nu(), 1))
 
-    # Terms for linear approximantion, which has the form:
+    # System acceleration
+    self.a = np.zeros((dynamicsModel.nv(), 1))
+
+    # Terms for linear approximation, which has the form:
     #   d/dt([q; v]) = [0, I; aq, av]*[q; v] + [0; au]*u
     self.aq = np.zeros((dynamicsModel.nv(), dynamicsModel.nv()))
     self.av = np.zeros((dynamicsModel.nv(), dynamicsModel.nv()))
@@ -50,27 +63,30 @@ class DynamicsModel(object):
   """
   __metaclass__ = abc.ABCMeta
 
-  def __init__(self, nq, nv, nu, discretizer):
+  def __init__(self, integrator, discretizer, nq, nv, nu):
     """ Create the dynamic model.
 
+    :param integrator: system integrator
+    :param discretizer: system discretizer
     :param nq: number of tuples that describe the configuration point
     :param nv: dimension of the configuration space
     :param nu: dimension of control vector
     """
+    self.integrator = integrator
+    self.discretizer = discretizer
     self._nq = nq
     self._nv = nv
     self._nu = nu
-    self.discretizer = discretizer
     # Computing the dimension of the state space
     self._nx_impl = nq + nv
     self._nx = 2 * nv
 
   @abc.abstractmethod
-  def createData(dynamicsModel, tInit, dt):
+  def createData(dynamicsModel, t, dt):
     """ Create the dynamics data.
 
     :param dynamicsModel: dynamics model
-    :param tInit: starting time
+    :param t: starting time
     :param dt: step integration
     """
     pass
@@ -103,20 +119,20 @@ class DynamicsModel(object):
     pass
 
   @staticmethod
-  def integrateState(dynamicsModel, dynamicsData, x, dx):
-    """ Operator that integrates the state.
+  def integrateConfiguration(dynamicsModel, dynamicsData, q, dq):
+    """ Operator that integrates the configuration.
 
-    :param x: current state
-    :param dx: displacement of the state
+    :param q: current configuration point
+    :param dq: displacement of the configuration
     """
     pass
 
   @staticmethod
-  def differenceState(dynamicsModel, dynamicsData, x0, x1):
-    """ Operator that differentiates the state.
+  def differenceConfiguration(dynamicsModel, dynamicsData, q0, q1):
+    """ Operator that differentiates the configuration.
 
-    :param x0: current state
-    :param x1: next state
+    :param x0: current configuration point
+    :param x1: next configurtion point
     """
     pass
 
@@ -137,6 +153,15 @@ class DynamicsModel(object):
   def backwardTerminalCalc(dynamicsModel, dynamicsData):
     # Updating the dynamic terms
     dynamicsModel.updateTerms(dynamicsData)
+
+  def differenceState(dynamicsModel, dynamicsData, x0, x1):
+    dynamicsData.diff_x[dynamicsModel.nv():] = \
+        x1[dynamicsModel.nq():,:] - x0[dynamicsModel.nq():,:]
+    dynamicsData.diff_x[:dynamicsModel.nv()] = \
+        dynamicsModel.differenceConfiguration(dynamicsData,
+                                              x0[:dynamicsModel.nq()],
+                                              x1[:dynamicsModel.nq()])
+    return dynamicsData.diff_x
 
   def nq(self):
     """ Return the number of tuples used to describe the configuration point.

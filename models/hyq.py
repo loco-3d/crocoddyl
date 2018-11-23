@@ -30,11 +30,11 @@ contactPhase0 = cddp.multiphase.Phase(contact_indices, 0.,np.inf)
 contactInfo = cddp.multiphase.Multiphase([contactPhase0], 3)
 
 # Create the integration and dynamics derivatives schemes.
-ddpIntegrator = cddp.system.integrator.FloatingBaseMultibodyEulerIntegrator()
-discretizer = cddp.system.discretizer.FloatingBaseMultibodyEulerExpDiscretizer()
+integrator = cddp.system.integrator.EulerIntegrator()
+discretizer = cddp.system.discretizer.EulerDiscretizer()
 
 # Create the ddp dynamics
-ddpDynamics = cddp.dynamics.FloatingBaseMultibodyDynamics(robot.model, discretizer, contactInfo)
+dynamics = cddp.dynamics.FloatingBaseMultibodyDynamics(integrator, discretizer, robot.model, contactInfo)
 
 
 # Initial state
@@ -69,14 +69,14 @@ se3_rcost.setWeights(1000*w_se3)
 se3_tcost.setWeights(1000*w_se3)
 """
 w_se3 = np.ones((6,1))
-se3_rcost = cddp.costs.multibody_dynamics.SE3Cost(ddpDynamics, 1.*w_se3, frameRef)
-se3_tcost = cddp.costs.multibody_dynamics.SE3Cost(ddpDynamics, 1e3*w_se3, frameRef)
+se3_rcost = cddp.costs.multibody_dynamics.SE3Cost(dynamics, 1.*w_se3, frameRef)
+se3_tcost = cddp.costs.multibody_dynamics.SE3Cost(dynamics, 1e3*w_se3, frameRef)
 
 # Defining the CoM task
 com_des = np.matrix([ [0.1], [0.], [0.] ])
 Cref = [com_des for i in xrange(len(timeline)-1)]
 w_com = 1000.*np.ones((3,1))
-com_cost = cddp.costs.multibody_dynamics.CoMCost(ddpDynamics, w_com)
+com_cost = cddp.costs.multibody_dynamics.CoMCost(dynamics, w_com)
 
 
 # Defining the velocity and control regularization
@@ -84,8 +84,8 @@ wx = 1e-7 * np.vstack([ np.zeros((model.nv,1)), np.ones((model.nv,1)) ])
 wu = 1e-7 * np.ones((robot.nv-6,1))
 
 #TODO: Why are we regularizing to zero posture!
-x_cost = cddp.costs.multibody_dynamics.StateCost(ddpDynamics, wx)
-u_cost = cddp.costs.multibody_dynamics.ControlCost(ddpDynamics, wu)
+x_cost = cddp.costs.multibody_dynamics.StateCost(dynamics, wx)
+u_cost = cddp.costs.multibody_dynamics.ControlCost(dynamics, wu)
 
 # Adding the cost functions to the cost manager
 costManager = cddp.cost_manager.CostManager()
@@ -96,8 +96,7 @@ costManager.addTerminal(se3_tcost, "se3_cost")
 #costManager.addRunning(com_cost)
 
 # Setting up the DDP problem
-ddpModel = cddp.ddp_model.DDPModel(ddpDynamics, ddpIntegrator,
-                                   costManager)
+ddpModel = cddp.ddp_model.DDPModel(dynamics, costManager)
 ddpData = cddp.ddp_model.DDPData(ddpModel, timeline)
 
 # Setting the initial conditions

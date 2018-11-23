@@ -13,9 +13,6 @@ class DDPTerminalIntervalData(object):
     :param ddpModel: DDP model
     :param tFinal: final time of the internal
     """
-    # Final time of the terminal interval
-    self.tFinal = tFinal
-
     # Dynamic and cost data of the terminal interval
     self.dynamicsData = ddpModel.createTerminalDynamicsData(tFinal)
     self.costData = ddpModel.createTerminalCostData()
@@ -38,13 +35,8 @@ class DDPRunningIntervalData(object):
     :param tInit: initial time of the internal
     :param tFinal: final time of the internal
     """
-    # Duration, initial and final time of the running interval
-    self.tInit = tInit
-    self.tFinal = tFinal
-    self.dt = self.tFinal - self.tInit
-
     # Dynamic and cost data of the running interval
-    self.dynamicsData = ddpModel.createRunningDynamicsData(tInit, self.dt)
+    self.dynamicsData = ddpModel.createRunningDynamicsData(tInit, tFinal - tInit)
     self.costData = ddpModel.createRunningCostData()
 
     # Value function derivatives of the running interval
@@ -115,9 +107,8 @@ class DDPData(object):
 class DDPModel(object):
   """ Class to save the model information for the system, cost and dynamics
   """
-  def __init__(self, dynamicsModel, integrator, costManager):
+  def __init__(self, dynamicsModel, costManager):
     self.dynamicsModel = dynamicsModel
-    self.integrator = integrator
     self.costManager = costManager
 
   def forwardTerminalCalc(self, ddpData):

@@ -12,9 +12,11 @@ class Solver(object):
     """
     for k in xrange(ddpData.N):
       ddpModel.forwardRunningCalc(ddpData.intervalDataVector[k])
+      ddpModel.dynamicsModel.integrator(
+        ddpModel.dynamicsModel,
+        ddpData.intervalDataVector[k].dynamicsData,
+        ddpData.intervalDataVector[k+1].dynamicsData.x)
       ddpData.totalCost += ddpData.intervalDataVector[k].costData.l
-      ddpModel.integrator(ddpModel, ddpData.intervalDataVector[k],
-                          ddpData.intervalDataVector[k+1].dynamicsData.x)
 
     ddpModel.forwardTerminalCalc(ddpData.intervalDataVector[-1])
     ddpData.totalCost += ddpData.intervalDataVector[-1].costData.l
@@ -39,8 +41,10 @@ class Solver(object):
 
       # Integrating the system dynamics and updating the new state value
       ddpModel.forwardRunningCalc(ddpData.intervalDataVector[k])
-      ddpModel.integrator(ddpModel, ddpData.intervalDataVector[k],
-                          ddpData.intervalDataVector[k+1].dynamicsData.x)
+      ddpModel.dynamicsModel.integrator(
+        ddpModel.dynamicsModel,
+        ddpData.intervalDataVector[k].dynamicsData,
+        ddpData.intervalDataVector[k+1].dynamicsData.x)
       ddpData.totalCost += ddpData.intervalDataVector[k].costData.l
     ddpModel.forwardTerminalCalc(ddpData.intervalDataVector[-1])
     ddpData.totalCost += ddpData.intervalDataVector[-1].costData.l
@@ -84,7 +88,6 @@ class Solver(object):
       # Getting the state, control and step time of the interval
       x = dynamicsData.x
       u = dynamicsData.u
-      dt = it.dt
 
       # Getting the value function values of the next interval (prime interval)
       fx = it.dynamicsData.discretizer.fx
@@ -250,5 +253,29 @@ class Solver(object):
     return False
 
   @staticmethod
-  def calc():
-    pass
+  def getStateTrajectory(ddpData):
+    X = []
+    for i in range(ddpData.N):
+      X.append(ddpData.intervalDataVector[i].dynamicsData.x)
+    return X
+
+  @staticmethod
+  def getControlSequence(ddpData):
+    U = []
+    for i in range(ddpData.N):
+      U.append(ddpData.intervalDataVector[i].dynamicsData.u)
+    return U
+
+  @staticmethod
+  def getFeedbackGainSequence(ddpData):
+    K = []
+    for i in range(ddpData.N):
+      K.append(ddpData.intervalDataVector[i].K)
+    return K
+
+  @staticmethod
+  def getFeedforwardSequence(ddpData):
+    j = []
+    for i in range(ddpData.N):
+      j.append(ddpData.intervalDataVector[i].j)
+    return j
