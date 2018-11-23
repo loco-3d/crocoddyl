@@ -47,7 +47,7 @@ ddpModel.setTerminalReference(ddpData, Xref[-1], "xT_goal")
 # Configuration the solver from YAML file
 filename = str(os.path.dirname(os.path.abspath(__file__)))
 solverParams = cddp.solver.SolverParams()
-solverParams.setFromConfigFile(filename + "/hyq_config.yaml")
+solverParams.setFromConfigFile(filename + "/spring_mass_config.yaml")
 
 
 # Solving the problem
