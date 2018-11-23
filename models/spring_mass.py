@@ -68,7 +68,7 @@ cddp.Solver.solve(ddpModel, ddpData, solverParams)
 if plot:
   X = cddp.Solver.getStateTrajectory(ddpData)
   U = cddp.Solver.getControlSequence(ddpData)
-  cddp.utils.plotDDPSolution(ddpDynamics.nx(), ddpDynamics.nu(), X, U)
+  cddp.utils.plotDDPSolution(X, U)
 
   cddp.utils.plotDDPConvergence(solverParams.cost_itr,
                                 solverParams.muLM_itr,
