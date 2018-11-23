@@ -3,10 +3,10 @@ from cddp.dynamics.dynamics import DynamicsData
 import numpy as np
 
 
-  
+
 class SpringMassData(DynamicsData):
-  def __init__(self, dynamicsModel, dt):
-    DynamicsData.__init__(self, dynamicsModel, dt)
+  def __init__(self, dynamicsModel, t, dt):
+    DynamicsData.__init__(self, dynamicsModel, t, dt)
 
     # Mass, spring and damper values
     self._mass = 10.
@@ -23,8 +23,8 @@ class SpringMass(DynamicsModel):
   def __init__(self, integrator, discretizer):
     DynamicsModel.__init__(self, integrator, discretizer, 1, 1, 1)
 
-  def createData(dynamicsModel, tInit, dt):
-    return SpringMassData(dynamicsModel, dt)
+  def createData(dynamicsModel, t, dt):
+    return SpringMassData(dynamicsModel, t, dt)
 
   def updateTerms(dynamicsModel, dynamicsData):
     # We don't need to update the dynamics terms since it's a LTI system

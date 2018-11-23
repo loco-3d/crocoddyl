@@ -7,8 +7,8 @@ import numpy as np
 
 class FloatingBaseMultibodyDynamicsData(DynamicsData):
   def __init__(self, dynamicsModel, t, dt):
-    DynamicsData.__init__(self, dynamicsModel, dt)
-    
+    DynamicsData.__init__(self, dynamicsModel, t, dt)
+
     # Pinocchio data
     self.pinocchio = dynamicsModel.pinocchio.createData()
 
@@ -45,8 +45,8 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     self.pinocchio = pinocchioModel
     self.contactInfo = contactInfo
 
-  def createData(dynamicsModel, tInit, dt):
-    return FloatingBaseMultibodyDynamicsData(dynamicsModel, tInit, dt)
+  def createData(dynamicsModel, t, dt):
+    return FloatingBaseMultibodyDynamicsData(dynamicsModel, t, dt)
 
   def updateTerms(dynamicsModel, dynamicsData):
     # Compute all terms

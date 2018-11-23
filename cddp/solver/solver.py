@@ -12,8 +12,10 @@ class Solver(object):
     """
     for k in xrange(ddpData.N):
       ddpModel.forwardRunningCalc(ddpData.intervalDataVector[k])
-      ddpModel.dynamicsModel.integrator(ddpModel, ddpData.intervalDataVector[k],
-                          ddpData.intervalDataVector[k+1].dynamicsData.x)
+      ddpModel.dynamicsModel.integrator(
+        ddpModel.dynamicsModel,
+        ddpData.intervalDataVector[k].dynamicsData,
+        ddpData.intervalDataVector[k+1].dynamicsData.x)
       ddpData.totalCost += ddpData.intervalDataVector[k].costData.l
 
     ddpModel.forwardTerminalCalc(ddpData.intervalDataVector[-1])
@@ -39,8 +41,10 @@ class Solver(object):
 
       # Integrating the system dynamics and updating the new state value
       ddpModel.forwardRunningCalc(ddpData.intervalDataVector[k])
-      ddpModel.dynamicsModel.integrator(ddpModel, ddpData.intervalDataVector[k],
-                          ddpData.intervalDataVector[k+1].dynamicsData.x)
+      ddpModel.dynamicsModel.integrator(
+        ddpModel.dynamicsModel,
+        ddpData.intervalDataVector[k].dynamicsData,
+        ddpData.intervalDataVector[k+1].dynamicsData.x)
       ddpData.totalCost += ddpData.intervalDataVector[k].costData.l
     ddpModel.forwardTerminalCalc(ddpData.intervalDataVector[-1])
     ddpData.totalCost += ddpData.intervalDataVector[-1].costData.l
@@ -84,7 +88,6 @@ class Solver(object):
       # Getting the state, control and step time of the interval
       x = dynamicsData.x
       u = dynamicsData.u
-      dt = it.dt
 
       # Getting the value function values of the next interval (prime interval)
       fx = it.dynamicsData.discretizer.fx

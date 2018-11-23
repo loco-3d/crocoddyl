@@ -4,8 +4,7 @@ import numpy as np
 
 class DiscretizerData(object):
   __metaclass__ = abc.ABCMeta
-  def __init__(self, dynamicsModel, dt):
-    self.dt = dt
+  def __init__(self, dynamicsModel):
     self.fx = np.zeros((dynamicsModel.nx(), dynamicsModel.nx()))
     self.fu = np.zeros((dynamicsModel.nx(), dynamicsModel.nu()))
 
@@ -77,11 +76,11 @@ class Discretizer(object):
 
 class EulerDiscretizerData(DiscretizerData):
   def __init__(self, dynamicsModel, dt):
-    DiscretizerData.__init__(self, dynamicsModel, dt)
+    DiscretizerData.__init__(self, dynamicsModel)
     # Update once the upper-block
     self.I = np.identity(dynamicsModel.nv())
     self.fx[:dynamicsModel.nv(),:dynamicsModel.nv()] = self.I
-    self.fx[:dynamicsModel.nv(),dynamicsModel.nv():] = self.dt * self.I
+    self.fx[:dynamicsModel.nv(),dynamicsModel.nv():] = dt * self.I
 
 
 class EulerDiscretizer(Discretizer):
@@ -96,11 +95,11 @@ class EulerDiscretizer(Discretizer):
   @staticmethod
   def backwardRunningCalc(dynamicsModel, dynamicsData):
     dynamicsData.discretizer.fx[dynamicsModel.nv():,:dynamicsModel.nv()] = \
-      dynamicsData.discretizer.dt * dynamicsData.aq
+      dynamicsData.dt * dynamicsData.aq
     dynamicsData.discretizer.fx[dynamicsModel.nv():,dynamicsModel.nv():] = \
-      dynamicsData.discretizer.I + dynamicsData.discretizer.dt * dynamicsData.av
+      dynamicsData.discretizer.I + dynamicsData.dt * dynamicsData.av
     dynamicsData.discretizer.fu[dynamicsModel.nv():,:] = \
-      dynamicsData.discretizer.dt * dynamicsData.au
+      dynamicsData.dt * dynamicsData.au
 
   # class fx(DiscretizerBase.fx):
   #   def __init__(self, dimx, dt):

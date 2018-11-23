@@ -16,7 +16,17 @@ class DynamicsData(object):
   __metaclass__ = abc.ABCMeta
 
   @abc.abstractmethod
-  def __init__(self, dynamicsModel, dt):
+  def __init__(self, dynamicsModel, t, dt):
+    """ Create the common dynamics data.
+
+    :param dynamicsModel: dynamics model
+    :param t: initial time of the interval
+    :param dt: step time of the interval
+    """
+    # Duration and initial time of the interval
+    self.t = t
+    self.dt = dt
+
     # Current and previous state and control
     self.x = np.zeros((dynamicsModel.nxImpl(), 1))
     self.u = np.zeros((dynamicsModel.nu(), 1))
@@ -72,11 +82,11 @@ class DynamicsModel(object):
     self._nx = 2 * nv
 
   @abc.abstractmethod
-  def createData(dynamicsModel, tInit, dt):
+  def createData(dynamicsModel, t, dt):
     """ Create the dynamics data.
 
     :param dynamicsModel: dynamics model
-    :param tInit: starting time
+    :param t: starting time
     :param dt: step integration
     """
     pass
