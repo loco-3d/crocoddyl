@@ -8,8 +8,12 @@ class Integrator(object):
   __metaclass__ = abc.ABCMeta
 
   @abc.abstractmethod
-  def __call__(ddpModel, ddpIData, xNext):
+  def __call__(dynamicsModel, dynamicsData, xNext):
     """ Integrate the system dynamics given an user-defined integration scheme.
+
+    :param dynamicsModel: dynamics model
+    :param dynamicsData: dynamics data
+    :param xNext: next state after the integration
     """
     return NotImplementedError
 
@@ -19,6 +23,10 @@ class EulerIntegrator(Integrator):
   @staticmethod
   def __call__(dynamicsModel, dynamicsData, xNext):
     """ Integrate the system dynamics using the forward Euler scheme.
+
+    :param dynamicsModel: dynamics model
+    :param dynamicsData: dynamics data
+    :param xNext: next state after the integration
     """
     xNext[dynamicsModel.nq():] = \
       dynamicsData.x[dynamicsModel.nq():] +\
