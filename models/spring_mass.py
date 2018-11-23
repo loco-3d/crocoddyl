@@ -3,67 +3,58 @@ import numpy as np
 import pinocchio as se3
 import os
 
-np.set_printoptions(linewidth=400, suppress=False, threshold=np.nan)
 
-display = True
 plot = True
 
-filename = str(os.path.dirname(os.path.abspath(__file__)))
-
-timeline = np.arange(0.0, 0.25, 1e-3)  # np.linspace(0., 0.5, 51)
-
-# Create the integration and dynamics derivatives schemes. #TODO
+# Create the dynamics and its integrator and discretizer
 integrator = cddp.system.integrator.EulerIntegrator()
 discretizer = cddp.system.discretizer.EulerDiscretizer()
-
-# Create the dynamics
 dynamics = cddp.dynamics.SpringMass(integrator, discretizer)
 
-
-# Initial state
-x0 = np.zeros((dynamics.nx(),1))
-u0 = np.zeros((dynamics.nu(),1))
-
-
-# Defining the velocity and control regularization
-wx = 1e-7 * np.vstack([ np.zeros((dynamics.nv(),1)), np.ones((dynamics.nv(),1)) ])
-wu = 1e-7 * np.ones((dynamics.nu(),1))
-
-#TODO: Why are we regularizing to zero posture!
-x_cost = cddp.costs.multibody_dynamics.StateCost(dynamics, wx)
-xt_cost = cddp.costs.multibody_dynamics.StateCost(dynamics, np.ones((2*dynamics.nv(),1)))
-u_cost = cddp.costs.multibody_dynamics.ControlCost(dynamics, wu)
+# Defining the cost functions for goal state, state tracking, and control
+# regularization
+wx_term = 1e3 * np.ones((2 * dynamics.nv(),1))
+wx_track = 10. * np.ones((2 * dynamics.nv(),1))
+wu_reg = 1e-2 * np.ones((dynamics.nu(),1))
+x_track = cddp.costs.multibody_dynamics.StateCost(dynamics, wx_track)
+xT_goal = cddp.costs.multibody_dynamics.StateCost(dynamics, wx_term)
+u_reg = cddp.costs.multibody_dynamics.ControlCost(dynamics, wu_reg)
 
 # Adding the cost functions to the cost manager
 costManager = cddp.cost_manager.CostManager()
-costManager.addRunning(x_cost, "x_cost")
-costManager.addRunning(u_cost, "u_cost")
-costManager.addTerminal(xt_cost, "xt_cost")
+costManager.addTerminal(xT_goal, "xT_goal")
+costManager.addRunning(x_track, "x_track")
+costManager.addRunning(u_reg, "u_reg")
+
 
 # Setting up the DDP problem
+timeline = np.arange(0.0, 0.25, 1e-3)
 ddpModel = cddp.ddp_model.DDPModel(dynamics, costManager)
 ddpData = cddp.ddp_model.DDPData(ddpModel, timeline)
 
-# Setting the initial conditions
+# Setting up the initial conditions
+x0 = np.zeros((dynamics.nx(),1))
+u0 = np.zeros((dynamics.nu(),1))
 U0 = [u0 for i in xrange(len(timeline)-1)]
 ddpModel.setInitial(ddpData, xInit=x0, UInit=U0)
 
-# Setting the desired reference for each single cost function
+# Setting up the desired reference for each single cost function
 xref = np.array([ [1.],[0.] ])
 Xref = [xref for i in xrange(len(timeline))]
-Uref = [u0 for i in xrange(len(timeline))]
-ddpModel.setRunningReference(ddpData, Xref[:-1], "x_cost")
-ddpModel.setTerminalReference(ddpData, Xref[-1], "xt_cost")
+ddpModel.setRunningReference(ddpData, Xref[:-1], "x_track")
+ddpModel.setTerminalReference(ddpData, Xref[-1], "xT_goal")
 
 # Configuration the solver from YAML file
+filename = str(os.path.dirname(os.path.abspath(__file__)))
 solverParams = cddp.solver.SolverParams()
 solverParams.setFromConfigFile(filename + "/hyq_config.yaml")
+
 
 # Solving the problem
 cddp.Solver.solve(ddpModel, ddpData, solverParams)
 
 
-
+# Plotting the results
 if plot:
   X = cddp.Solver.getStateTrajectory(ddpData)
   U = cddp.Solver.getControlSequence(ddpData)
@@ -75,17 +66,3 @@ if plot:
                                 solverParams.gamma_itr,
                                 solverParams.theta_itr,
                                 solverParams.alpha_itr)
-
-
-if display:
-  T = timeline
-  X = ddp.getStateTrajectory()
-  cddp.visualizePlan(robot, T, x0, X)
-
-# ddp.saveToFile('mu_1e2.txt')
-
-# Printing the final goal
-frame_idx = model.getFrameId(frame_name)
-xf = ddp.intervals[-1].x
-qf = xf[:model.nq]
-print robot.framePosition(qf, frame_idx)
