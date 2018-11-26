@@ -44,6 +44,9 @@ class ForwardDynamics(DynamicsModel):
                               dynamicsData.pinocchio)
 
   def updateDynamics(dynamicsModel, dynamicsData):
+    # Update all terms
+    dynamicsModel.updateTerms(dynamicsModel, dynamicsData)
+
     # Running ABA algorithm
     se3.aba(dynamicsModel.pinocchio,
             dynamicsData.pinocchio,
@@ -53,7 +56,6 @@ class ForwardDynamics(DynamicsModel):
 
     # Updating the system acceleration
     np.copyto(dynamicsData.a, dynamicsData.pinocchio.ddq)
-    pass
 
   def updateLinearAppr(dynamicsModel, dynamicsData):
     se3.computeABADerivatives(dynamicsModel.pinocchio,
@@ -61,10 +63,11 @@ class ForwardDynamics(DynamicsModel):
                               dynamicsData.x[:dynamicsModel.nq()],
                               dynamicsData.x[dynamicsModel.nq():],
                               dynamicsData.u)
+
+    # Updating the system derivatives
     np.copyto(dynamicsData.aq, dynamicsData.pinocchio.ddq_dq)
     np.copyto(dynamicsData.av, dynamicsData.pinocchio.ddq_dv)
     np.copyto(dynamicsData.au, dynamicsData.pinocchio.Minv)
-    pass
 
   def integrateConfiguration(dynamicsModel, dynamicsData, q, dq):
     return se3.integrate(dynamicsModel.pinocchio, q, dq)
