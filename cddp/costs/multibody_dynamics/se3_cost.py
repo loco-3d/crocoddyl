@@ -25,7 +25,7 @@ class SE3Cost(RunningQuadraticCost):
   """ CoM tracking cost.
 
   An important remark here is that the residual only depends on the state.
-  The gradient and Hession of the cost w.r.t. the control remains zero. So, for
+  The gradient and Hessian of the cost w.r.t. the control remains zero. So, for
   efficiency, we overwrite the updateQuadraticAppr function because we don't
   need to update the terms related to the control.
   """
@@ -38,14 +38,37 @@ class SE3Cost(RunningQuadraticCost):
     return SE3RunningData(nx, nu, self.nr)
 
   def updateSE3error(self, costData, dynamicsData):
+    """ Update the SE3 error.
+
+    :param costData: cost data
+    :param dynamicsData: dynamics data
+    """
     costData.rMf = costData.oMr_inv * dynamicsData.pinocchio.oMf[costData.frame_idx]
 
   def updateResidual(self, costData, dynamicsData):
+    """ Update the residual vector.
+
+    The SE3 error is mapped from the manifold to the algebra through the log
+    function. The residual vector represents the local velocity of the frame
+    expressed in the reference frame, i.e. d^V^f where d is the reference frame
+    and f the local frame.
+    :param costData: cost data
+    :param dynamicsData: dynamics data
+    """
+    # Updating the SE3 error
     self.updateSE3error(costData, dynamicsData)
+    # Maping the element from the manifold to the algebra
     np.copyto(costData.r,
         se3.log(costData.rMf).vector)
 
   def updateResidualLinearAppr(self, costData, dynamicsData):
+    """ Update the linear approximation of the residual.
+
+    This correspondence to the local Jacobian expressed in the reference frame
+    d^J^f = d^X^f * f^J^f. So we need to get the frame Jacobian in the local
+    frame and them map it through d^X^f. Note that we can compute it as 
+    d^X^f = inv(0^X^d) * 0^X^f.
+    """
     self.updateSE3error(costData, dynamicsData)
     costData.rx[:,:self.dynamicsModel.nv()] = \
         costData.rMf.action * \
