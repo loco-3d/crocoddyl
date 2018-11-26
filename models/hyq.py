@@ -69,8 +69,8 @@ se3_rcost.setWeights(1000*w_se3)
 se3_tcost.setWeights(1000*w_se3)
 """
 w_se3 = np.ones((6,1))
-se3_rcost = cddp.SE3Cost(dynamics, 1.*w_se3, frameRef)
-se3_tcost = cddp.SE3Cost(dynamics, 1e3*w_se3, frameRef)
+se3_rcost = cddp.SE3Cost(dynamics, 1.*w_se3)
+se3_tcost = cddp.SE3Cost(dynamics, 1e3*w_se3)
 
 # Defining the CoM task
 com_des = np.matrix([ [0.1], [0.], [0.] ])

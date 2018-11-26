@@ -29,11 +29,9 @@ class SE3Cost(RunningQuadraticCost):
   efficiency, we overwrite the updateQuadraticAppr function because we don't
   need to update the terms related to the control.
   """
-  def __init__(self, dynamicsModel, weight, frameRef):
+  def __init__(self, dynamicsModel, weight):
     RunningQuadraticCost.__init__(self, 6, weight)
     self.dynamicsModel = dynamicsModel
-    self.oMr_inv = frameRef.SE3.inverse()
-    self.frame_idx = frameRef.idx
 
   def createData(self, nx, nu = 0):
     # A default value of nu allows us to use this class as terminal one
