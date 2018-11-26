@@ -33,6 +33,6 @@ class EulerIntegrator(Integrator):
       dynamicsData.dt * dynamicsData.a
     xNext[:dynamicsModel.nq()] = \
       dynamicsModel.integrateConfiguration(
-        dynamicsModel,
+        dynamicsModel, dynamicsData,
         dynamicsData.x[:dynamicsModel.nq()],
         dynamicsData.dt * xNext[dynamicsModel.nq():])

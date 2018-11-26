@@ -138,27 +138,27 @@ class DynamicsModel(object):
 
   def forwardRunningCalc(dynamicsModel, dynamicsData):
     # Updating the dynamics
-    dynamicsModel.updateDynamics(dynamicsData)
+    dynamicsModel.updateDynamics(dynamicsModel, dynamicsData)
 
   def forwardTerminalCalc(dynamicsModel, dynamicsData):
     # Updating the dynamic terms
-    dynamicsModel.updateTerms(dynamicsData)
+    dynamicsModel.updateTerms(dynamicsModel, dynamicsData)
 
   def backwardRunningCalc(dynamicsModel, dynamicsData):
     # Updating the continuous-time linear approximation
-    dynamicsModel.updateLinearAppr(dynamicsData)
+    dynamicsModel.updateLinearAppr(dynamicsModel, dynamicsData)
     # Discretizing this linear approximation
     dynamicsModel.discretizer.backwardRunningCalc(dynamicsModel, dynamicsData)
 
   def backwardTerminalCalc(dynamicsModel, dynamicsData):
     # Updating the dynamic terms
-    dynamicsModel.updateTerms(dynamicsData)
+    dynamicsModel.updateTerms(dynamicsModel, dynamicsData)
 
   def differenceState(dynamicsModel, dynamicsData, x0, x1):
     dynamicsData.diff_x[dynamicsModel.nv():] = \
         x1[dynamicsModel.nq():,:] - x0[dynamicsModel.nq():,:]
     dynamicsData.diff_x[:dynamicsModel.nv()] = \
-        dynamicsModel.differenceConfiguration(dynamicsData,
+        dynamicsModel.differenceConfiguration(dynamicsModel, dynamicsData,
                                               x0[:dynamicsModel.nq()],
                                               x1[:dynamicsModel.nq()])
     return dynamicsData.diff_x

@@ -33,6 +33,7 @@ class ForwardDynamics(DynamicsModel):
   def createData(dynamicsModel, t, dt):
     return ForwardDynamicsData(dynamicsModel, t, dt)
 
+  @staticmethod
   def updateTerms(dynamicsModel, dynamicsData):
     # Compute all terms
     #TODO: Try to reduce calculations in forward pass, and move them to backward pass
@@ -43,6 +44,7 @@ class ForwardDynamics(DynamicsModel):
     se3.updateFramePlacements(dynamicsModel.pinocchio,
                               dynamicsData.pinocchio)
 
+  @staticmethod
   def updateDynamics(dynamicsModel, dynamicsData):
     # Update all terms
     dynamicsModel.updateTerms(dynamicsModel, dynamicsData)
@@ -57,6 +59,7 @@ class ForwardDynamics(DynamicsModel):
     # Updating the system acceleration
     np.copyto(dynamicsData.a, dynamicsData.pinocchio.ddq)
 
+  @staticmethod
   def updateLinearAppr(dynamicsModel, dynamicsData):
     se3.computeABADerivatives(dynamicsModel.pinocchio,
                               dynamicsData.pinocchio,
@@ -69,8 +72,10 @@ class ForwardDynamics(DynamicsModel):
     np.copyto(dynamicsData.av, dynamicsData.pinocchio.ddq_dv)
     np.copyto(dynamicsData.au, dynamicsData.pinocchio.Minv)
 
+  @staticmethod
   def integrateConfiguration(dynamicsModel, dynamicsData, q, dq):
     return se3.integrate(dynamicsModel.pinocchio, q, dq)
 
+  @staticmethod
   def differenceConfiguration(dynamicsModel, dynamicsData, q0, q1):
     return se3.difference(dynamicsModel.pinocchio, q0, q1)
