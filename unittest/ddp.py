@@ -62,7 +62,6 @@ class LinearDDPTest(unittest.TestCase):
       self.ddpData.z, 1., 1, \
       "This is a LQR problem the improvement ration should be equals to 1.")
 
-
   def test_against_kkt_solution(self):
     # Using the default solver parameters
     solverParams = cddp.SolverParams()
@@ -99,7 +98,6 @@ class LinearDDPTest(unittest.TestCase):
 
       # Dynamics and its derivatives
       f = self.ddpData.intervalDataVector[k+1].dynamicsData.x
-  #     f = data.system.f #TODO check
       fx = data.dynamicsData.discretizer.fx
       fu = data.dynamicsData.discretizer.fu
 
@@ -144,22 +142,27 @@ class LinearDDPTest(unittest.TestCase):
       self.assertTrue(np.allclose(U_kkt[i], U_opt[i], atol=1e-2),
         "Control KKT solution at " + str(i) + " is not the same.")
 
-  # def test_positive_expected_improvement(self):
-  #   # Running the DDP solver
-  #   self.ddp.compute(self.x0)
-  #   self.assertGreater(-self.ddp.dV_exp, 0.,
-  #                      "The expected improvement is not positive.")
+  def test_regularization_in_backward_pass(self):
+    # Using the default solver parameters
+    solverParams = cddp.SolverParams()
 
-  # def test_regularization_in_backward_pass(self):
-  #   # Backward-pass without regularization
-  #   self.ddp.backwardPass(0., 0., 1.)
-  #   Vxx = self.ddp.intervals[-1].Vxx.copy()
-  #   # Backward-pass with regularization
-  #   mu = np.random.random_sample()
-  #   self.ddp.backwardPass(mu, 0., 1.)
-  #   Vxx_reg = self.ddp.intervals[-1].Vxx.copy()
-  #   self.assertTrue(np.allclose(Vxx, Vxx_reg),
-  #                       "Regularization doesn't affect the terminal Vxx.")
+    # Running a backward-pass without regularization
+    self.ddpData.muV = 0.
+    self.ddpData.muLM = 0.
+    self.ddpData.alpha = 1.
+    cddp.Solver.updateQuadraticAppr(self.ddpModel, self.ddpData)
+    cddp.Solver.backwardPass(self.ddpModel, self.ddpData, solverParams)
+    Vxx = self.ddpData.intervalDataVector[-1].Vxx.copy()
+
+    # Backward-pass with regularization
+    self.ddpData.muLM = np.random.random_sample()
+    cddp.Solver.updateQuadraticAppr(self.ddpModel, self.ddpData)
+    cddp.Solver.backwardPass(self.ddpModel, self.ddpData, solverParams)
+    Vxx_reg = self.ddpData.intervalDataVector[-1].Vxx.copy()
+
+    # Checking both values of the Value-function Hessian
+    self.assertTrue(np.allclose(Vxx, Vxx_reg),
+                        "Regularization doesn't affect the terminal Vxx.")
 
 
 if __name__ == '__main__':
