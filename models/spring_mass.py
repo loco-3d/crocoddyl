@@ -44,13 +44,11 @@ Xref = [xref for i in xrange(len(timeline))]
 ddpModel.setRunningReference(ddpData, Xref[:-1], "x_track")
 ddpModel.setTerminalReference(ddpData, Xref[-1], "xT_goal")
 
-# Configuration the solver from YAML file
+
+# Configuration the solver from YAML file and solving it
 filename = str(os.path.dirname(os.path.abspath(__file__)))
 solverParams = cddp.SolverParams()
 solverParams.setFromConfigFile(filename + "/spring_mass_config.yaml")
-
-
-# Solving the problem
 cddp.Solver.solve(ddpModel, ddpData, solverParams)
 
 
