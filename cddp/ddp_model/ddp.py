@@ -143,14 +143,13 @@ class DDPModel(object):
     return self.dynamicsModel.createData(tInit, dt)
 
   def createRunningCostData(self):
-    return self.costManager.createRunningData(self.dynamicsModel.nx(),
-                                              self.dynamicsModel.nu())
+    return self.costManager.createRunningData(self.dynamicsModel)
 
   def createTerminalDynamicsData(self, tFinal):
     return self.dynamicsModel.createData(tFinal, 0.)
 
   def createTerminalCostData(self):
-    return self.costManager.createTerminalData(self.dynamicsModel.nx())
+    return self.costManager.createTerminalData(self.dynamicsModel)
 
   def setInitial(self, ddpData, xInit, UInit):
     """

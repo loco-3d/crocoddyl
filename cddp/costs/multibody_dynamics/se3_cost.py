@@ -11,9 +11,9 @@ class SE3Task(object):
 
 
 class SE3RunningData(RunningQuadraticCostData):
-  def __init__(self, nx, nu, nr):
+  def __init__(self, dynamicsModel, nr):
     # Creating the data structure for a running quadratic cost
-    RunningQuadraticCostData.__init__(self, nx, nu, nr)
+    RunningQuadraticCostData.__init__(self, dynamicsModel, nr)
 
     # Creating the data for the desired SE3 point and its error
     self.oMr_inv = se3.SE3()
@@ -33,9 +33,8 @@ class SE3Cost(RunningQuadraticCost):
     RunningQuadraticCost.__init__(self, 6, weight)
     self.dynamicsModel = dynamicsModel
 
-  def createData(self, nx, nu = 0):
-    # A default value of nu allows us to use this class as terminal one
-    return SE3RunningData(nx, nu, self.nr)
+  def createData(self, dynamicsModel):
+    return SE3RunningData(dynamicsModel, self.nr)
 
   def updateSE3error(self, costData, dynamicsData):
     """ Update the SE3 error.

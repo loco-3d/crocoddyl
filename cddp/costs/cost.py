@@ -9,18 +9,18 @@ class TerminalCostData(object):
   the state. The dimensions of these vector or matrices depends on the dynamic
   model.
   """
-  def __init__(self, nx):
+  def __init__(self, dynamicsModel):
     """ Creates the terminal cost data.
 
-    :param nx: state dimension
+    :param dynamicsModel: dynamics model
     """
     # Creating the data structure of the cost and its quadratic approximantion.
     # Note that this approximation as the form: dx^T*lx + dx^T*lxx*dx, where dx
     # lies in the tangent space (R^{nx}) around a nominal point in the
     # geometrical manifold
     self.l = 0.
-    self.lx = np.zeros((nx,1))
-    self.lxx = np.zeros((nx,nx))
+    self.lx = np.zeros((dynamicsModel.nx(),1))
+    self.lxx = np.zeros((dynamicsModel.nx(),dynamicsModel.nx()))
 
 
 class RunningCostData(TerminalCostData):
@@ -31,21 +31,20 @@ class RunningCostData(TerminalCostData):
   depends on the dynamic
   model.
   """
-  def __init__(self, nx, nu):
+  def __init__(self, dynamicsModel):
     """ Creates the running cost data.
 
-    :param nx: state dimension
-    :param nu: control dimension
+    :param dynamicsModel: dynamics model
     """
     # Creating the data structure of the cost and its quadratic approximantion.
     # Note that this approximation as the form:
     # [dx^T du^T]*[lx; lu] + [dx^T du^T]*[lxx lxu; lux luu]*[dx; du] where dx
     # lies in the tangent space (R^{nx}) around a nominal point in the
     # geometrical manifold, and du is point near to the nominal control (R^{nu})
-    TerminalCostData.__init__(self, nx)
-    self.lu = np.zeros((nu,1))
-    self.lux = np.zeros((nu,nx))
-    self.luu = np.zeros((nu,nu))
+    TerminalCostData.__init__(self, dynamicsModel)
+    self.lu = np.zeros((dynamicsModel.nu(),1))
+    self.lux = np.zeros((dynamicsModel.nu(),dynamicsModel.nx()))
+    self.luu = np.zeros((dynamicsModel.nu(),dynamicsModel.nu()))
 
 
 class RunningCost(object):
@@ -65,11 +64,10 @@ class RunningCost(object):
     pass
 
   @abc.abstractmethod
-  def createData(self, nx, nu):
+  def createData(self, dynamicsModel):
     """ Create the running cost data.
 
-    :param nx: state dimension
-    :param nu: control dimension
+    :param dynamicsModel: dynamics model
     """
     return NotImplementedError
 
@@ -154,10 +152,10 @@ class TerminalCost(object):
     pass
 
   @abc.abstractmethod
-  def createData(self, nx):
+  def createData(self, dynamicsModel):
     """ Create the terminal cost data.
 
-    :param nx: state dimension
+    :param dynamicsModel: dynamics model
     """
     return NotImplementedError
 
@@ -206,29 +204,29 @@ class TerminalCost(object):
 
 
 class RunningQuadraticCostData(RunningCostData):
-  def __init__(self, nx, nu, nr):
+  def __init__(self, dynamicsModel, nr):
     # Creating the standard data structure of running cost
-    RunningCostData.__init__(self, nx, nu)
+    RunningCostData.__init__(self, dynamicsModel)
 
     # Creating the data structure of the residual and its derivatives
     self.r = np.zeros((nr,1))
-    self.rx = np.zeros((nr,nx))
-    self.ru = np.zeros((nr,nu))
+    self.rx = np.zeros((nr,dynamicsModel.nx()))
+    self.ru = np.zeros((nr,dynamicsModel.nu()))
     self.Q_r = np.zeros((nr,1))
-    self.Q_rx = np.zeros((nr,nx))
-    self.Q_ru = np.zeros((nr,nu))
+    self.Q_rx = np.zeros((nr,dynamicsModel.nx()))
+    self.Q_ru = np.zeros((nr,dynamicsModel.nu()))
 
 
 class TerminalQuadraticCostData(TerminalCostData):
-  def __init__(self, nx, nr):
+  def __init__(self, dynamicsModel, nr):
     # Creating the standard data structure of terminal cost
-    TerminalCostData.__init__(self, nx)
+    TerminalCostData.__init__(self, dynamicsModel)
 
     # Creating the data structure of the residual and its derivatives
     self.r = np.zeros((nr,1))
-    self.rx = np.zeros((nr,nx))
+    self.rx = np.zeros((nr,dynamicsModel.nx()))
     self.Q_r = np.zeros((nr,1))
-    self.Q_rx = np.zeros((nr,nx))
+    self.Q_rx = np.zeros((nr,dynamicsModel.nx()))
 
 
 class RunningQuadraticCost(RunningCost):
