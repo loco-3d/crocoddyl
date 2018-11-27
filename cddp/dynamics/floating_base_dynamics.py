@@ -1,5 +1,5 @@
-from cddp.dynamics.dynamics import DynamicsModel
 from cddp.dynamics.dynamics import DynamicsData
+from cddp.dynamics.dynamics import DynamicsModel
 from cddp.utils import EPS
 import pinocchio as se3
 import numpy as np
@@ -48,6 +48,7 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
   def createData(dynamicsModel, t, dt):
     return FloatingBaseMultibodyDynamicsData(dynamicsModel, t, dt)
 
+  @staticmethod
   def updateTerms(dynamicsModel, dynamicsData):
     # Compute all terms
     #TODO: Try to reduce calculations in forward pass, and move them to backward pass
@@ -58,9 +59,10 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     se3.updateFramePlacements(dynamicsModel.pinocchio,
                               dynamicsData.pinocchio)
 
+  @staticmethod
   def updateDynamics(dynamicsModel, dynamicsData):
     # Computing the constrained forward dynamics
-    dynamicsModel.computeDynamics(dynamicsData,
+    dynamicsModel.computeDynamics(dynamicsModel, dynamicsData,
                                   dynamicsData.x[:dynamicsModel.nq()],
                                   dynamicsData.x[dynamicsModel.nq():],
                                   np.vstack([np.zeros((6,1)), dynamicsData.u]))
@@ -68,6 +70,7 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     # Updating the system acceleration
     np.copyto(dynamicsData.a, dynamicsData.pinocchio.ddq)
 
+  @staticmethod
   def updateLinearAppr(dynamicsModel, dynamicsData):
     #TODO: Replace with analytical derivatives
     np.copyto(dynamicsData.aq, -dynamicsData.pinocchio.ddq)
@@ -96,7 +99,7 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
                               dynamicsData.x[:dynamicsModel.nq()],
                               dynamicsData.v_pert))
 
-      dynamicsModel.computeDynamics(dynamicsData,
+      dynamicsModel.computeDynamics(dynamicsModel, dynamicsData,
                                     dynamicsData.q_pert,
                                     dynamicsData.x[dynamicsModel.nq():],
                                     np.vstack([np.zeros((6,1)), dynamicsData.u]))
@@ -111,7 +114,7 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
       np.copyto(dynamicsData.v_pert, dynamicsData.x[dynamicsModel.nq():])
       dynamicsData.v_pert[i] += dynamicsData.h
 
-      dynamicsModel.computeDynamics(dynamicsData,
+      dynamicsModel.computeDynamics(dynamicsModel, dynamicsData,
                                     dynamicsData.x[:dynamicsModel.nq()],
                                     dynamicsData.v_pert,
                                     np.vstack([np.zeros((6,1)), dynamicsData.u]))
@@ -121,12 +124,15 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     dynamicsData.av /= dynamicsData.h
     dynamicsData.gv /= dynamicsData.h
 
+  @staticmethod
   def integrateConfiguration(dynamicsModel, dynamicsData, q, dq):
     return se3.integrate(dynamicsModel.pinocchio, q, dq)
 
+  @staticmethod
   def differenceConfiguration(dynamicsModel, dynamicsData, q0, q1):
     return se3.difference(dynamicsModel.pinocchio, q0, q1)
 
+  @staticmethod
   def computeDynamics(dynamicsModel, dynamicsData, q, v, tau):
     # Update all terms
     #TODO: Try to reduce calculations in forward pass, and move them to backward pass

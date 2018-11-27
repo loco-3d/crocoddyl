@@ -26,10 +26,12 @@ class SpringMass(DynamicsModel):
   def createData(dynamicsModel, t, dt):
     return SpringMassData(dynamicsModel, t, dt)
 
+  @staticmethod
   def updateTerms(dynamicsModel, dynamicsData):
     # We don't need to update the dynamics terms since it's a LTI system
     return
 
+  @staticmethod
   def updateDynamics(dynamicsModel, dynamicsData):
     # We don't need to update the dynamics since it's a LTI system
     q = dynamicsData.x[:dynamicsModel.nq()]
@@ -39,12 +41,15 @@ class SpringMass(DynamicsModel):
       dynamicsData.au * dynamicsData.u)
     return
 
+  @staticmethod
   def updateLinearAppr(dynamicsModel, dynamicsData):
     # We don't need to update the linear approximation since it's a LTI system
     return
 
+  @staticmethod
   def integrateConfiguration(dynamicsModel, dynamicsData, q, dq):
     return q + dq
 
+  @staticmethod
   def differenceConfiguration(dynamicsModel, dynamicsData, q0, q1):
     return q1 - q0
