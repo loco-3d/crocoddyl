@@ -161,7 +161,7 @@ class TerminalCost(object):
 
   @abc.abstractmethod
   def updateCost(self, costData, dynamicsData):
-    """ Update the cost value according an user-define function.
+    """ Update the cost value according an user-defined cost function.
 
     The new cost value overwrites the internal data l.
     """
@@ -169,7 +169,7 @@ class TerminalCost(object):
 
   @abc.abstractmethod
   def updateQuadraticAppr(self, costData, dynamicsData):
-    """ Update the quadratic approximantion of the user-define cost function.
+    """ Update the quadratic approximation of the user-defined cost function.
 
     The new quadratic approximation of the cost function overwrites the
     following internal data lx and lxx.
