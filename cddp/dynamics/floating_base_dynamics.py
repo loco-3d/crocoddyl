@@ -78,17 +78,22 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     np.copyto(dynamicsData.gq, -dynamicsData.pinocchio.lambda_c)
     np.copyto(dynamicsData.gv, -dynamicsData.pinocchio.lambda_c)
 
-    dynamicsData.MJtJc[:dynamicsModel.nv(),:dynamicsModel.nv()] = dynamicsData.pinocchio.M
-    dynamicsData.MJtJc[:dynamicsModel.nv(),dynamicsModel.nv():] = dynamicsData.contactJ.T
-    dynamicsData.MJtJc[dynamicsModel.nv():,:dynamicsModel.nv()] = dynamicsData.contactJ
+    dynamicsData.MJtJc[:dynamicsModel.nv(),:dynamicsModel.nv()] = \
+      dynamicsData.pinocchio.M
+    dynamicsData.MJtJc[:dynamicsModel.nv(),dynamicsModel.nv():] = \
+      dynamicsData.contactJ.T
+    dynamicsData.MJtJc[dynamicsModel.nv():,:dynamicsModel.nv()] = \
+      dynamicsData.contactJ
 
     #TODO: REMOVE PINV!!!! USE DAMPED CHOLESKY
     #np.fill_diagonal(self.MJtJc, self.MJtJc.diagonal()+self.eps)
     #self.MJtJc_inv_L = np.linalg.inv(np.linalg.cholesky(dynamicsModel.MJtJc))
     #self.MJtJc_inv = np.dot(self.MJtJc_inv_L.T, self.MJtJc_inv_L)
     np.copyto(dynamicsData.MJtJc_inv, np.linalg.pinv(dynamicsData.MJtJc))
-    np.copyto(dynamicsData.au, dynamicsData.MJtJc_inv[:dynamicsModel.nv(),6:dynamicsModel.nv()])
-    np.copyto(dynamicsData.gu, dynamicsData.MJtJc_inv[dynamicsModel.nv():,6:dynamicsModel.nv()])
+    np.copyto(dynamicsData.au, \
+      dynamicsData.MJtJc_inv[:dynamicsModel.nv(),6:dynamicsModel.nv()])
+    np.copyto(dynamicsData.gu, \
+      dynamicsData.MJtJc_inv[dynamicsModel.nv():,6:dynamicsModel.nv()])
 
     # dadq #dgdq
     for i in xrange(dynamicsModel.nv()):
@@ -145,8 +150,9 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     for k, cs in enumerate(dynamicsData._contactFrameIndices):
       dynamicsData.contactJ[dynamicsModel.contactInfo.nc*k:
                             dynamicsModel.contactInfo.nc*(k+1),:] = \
-        se3.getFrameJacobian(dynamicsModel.pinocchio, dynamicsData.pinocchio, cs,
-                            se3.ReferenceFrame.LOCAL)[:dynamicsModel.contactInfo.nc,:]
+        se3.getFrameJacobian(
+          dynamicsModel.pinocchio, dynamicsData.pinocchio, cs,
+          se3.ReferenceFrame.LOCAL)[:dynamicsModel.contactInfo.nc,:]
     #TODO gamma
     dynamicsData.gamma.fill(0.)
     se3.forwardDynamics(dynamicsModel.pinocchio,
