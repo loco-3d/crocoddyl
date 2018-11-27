@@ -13,23 +13,23 @@ class FloatingBaseMultibodyDynamicsData(DynamicsData):
     self.pinocchio = dynamicsModel.pinocchio.createData()
 
     # Constrained dynamics data (holonomic contacts)
-    self.dimConstraint = \
-      dynamicsModel.contactInfo.nc * dynamicsModel.contactInfo.dim(t)
-    self.gq = np.zeros((self.dimConstraint, dynamicsModel.nv()))
-    self.gv = np.zeros((self.dimConstraint, dynamicsModel.nv()))
-    self.gu = np.zeros((self.dimConstraint, dynamicsModel.nu()))
+    nc = dynamicsModel.contactInfo.nc * dynamicsModel.contactInfo.dim(t)
+    self.gq = np.zeros((nc, dynamicsModel.nv()))
+    self.gv = np.zeros((nc, dynamicsModel.nv()))
+    self.gu = np.zeros((nc, dynamicsModel.nu()))
 
-    self.contactJ = np.zeros((self.dimConstraint, dynamicsModel.nv()))
-    self.gamma = np.zeros((self.dimConstraint, 1))
+    # Terms required for updatng the dynamics
+    self.contactJ = np.zeros((nc, dynamicsModel.nv()))
+    self.gamma = np.zeros((nc, 1))
     self._contactFrameIndices = dynamicsModel.contactInfo(t)
-    self.MJtJc = np.zeros((dynamicsModel.nv() + self.dimConstraint,
-                           dynamicsModel.nv() + self.dimConstraint))
-    self.MJtJc_inv = np.zeros((dynamicsModel.nv() + self.dimConstraint,
-                               dynamicsModel.nv() + self.dimConstraint))
-    self.MJtJc_inv_L = np.zeros((dynamicsModel.nv() + self.dimConstraint,
-                                 dynamicsModel.nv() + self.dimConstraint))
 
-    # NumDiff data
+    # Terms required for updating the linear approximation
+    self.MJtJc = np.zeros((dynamicsModel.nv() + nc,
+                           dynamicsModel.nv() + nc))
+    self.MJtJc_inv = np.zeros((dynamicsModel.nv() + nc,
+                               dynamicsModel.nv() + nc))
+    self.MJtJc_inv_L = np.zeros((dynamicsModel.nv() + nc,
+                                 dynamicsModel.nv() + nc))
     #TODO: remove these when replacing with analytical derivatives
     self.h = np.sqrt(EPS)
     self.q_pert = np.zeros((dynamicsModel.nq(), 1))
