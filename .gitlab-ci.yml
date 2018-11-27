@@ -1,0 +1,8 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: "recursive"
+
+image: gepgitlab.laas.fr:4567/loco-3d/cddp
+
+test:
+  script:
+    - cd unittest && python all.py
