@@ -85,10 +85,6 @@ class Solver(object):
       costData = it.costData
       dynamicsData = it.dynamicsData
 
-      # Getting the state, control and step time of the interval
-      x = dynamicsData.x
-      u = dynamicsData.u
-
       # Getting the value function values of the next interval (prime interval)
       fx = it.dynamicsData.discretizer.fx
       fu = it.dynamicsData.discretizer.fu
