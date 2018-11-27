@@ -62,6 +62,8 @@ class DDPRunningIntervalData(object):
     # Extra DDP terms
     self.jt_Quu_j = 0.
     self.jt_Qu = 0.
+    self.Vpxx_fx = np.zeros((ddpModel.dynamicsModel.nx(), ddpModel.dynamicsModel.nx()))
+    self.Vpxx_fu = np.zeros((ddpModel.dynamicsModel.nx(), ddpModel.dynamicsModel.nu()))
 
 
 class DDPData(object):
