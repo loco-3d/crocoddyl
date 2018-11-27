@@ -86,9 +86,9 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     #np.fill_diagonal(self.MJtJc, self.MJtJc.diagonal()+self.eps)
     #self.MJtJc_inv_L = np.linalg.inv(np.linalg.cholesky(dynamicsModel.MJtJc))
     #self.MJtJc_inv = np.dot(self.MJtJc_inv_L.T, self.MJtJc_inv_L)
-    dynamicsData.MJtJc_inv = np.linalg.pinv(dynamicsData.MJtJc)
-    dynamicsData.au = dynamicsData.MJtJc_inv[:dynamicsModel.nv(),6:dynamicsModel.nv()]
-    dynamicsData.gu = dynamicsData.MJtJc_inv[dynamicsModel.nv():,6:dynamicsModel.nv()]
+    np.copyto(dynamicsData.MJtJc_inv, np.linalg.pinv(dynamicsData.MJtJc))
+    np.copyto(dynamicsData.au, dynamicsData.MJtJc_inv[:dynamicsModel.nv(),6:dynamicsModel.nv()])
+    np.copyto(dynamicsData.gu, dynamicsData.MJtJc_inv[dynamicsModel.nv():,6:dynamicsModel.nv()])
 
     # dadq #dgdq
     for i in xrange(dynamicsModel.nv()):
