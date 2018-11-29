@@ -177,7 +177,6 @@ class LinearDDPTest(unittest.TestCase):
       ddpData.intervalDataVector[-1].costData.lx
     hessL[N*(n+m):(N+1)*(n+m), N*(n+m):(N+1)*(n+m)] = \
       ddpData.intervalDataVector[-1].costData.lxx
-    
     return hessL, gradG, gradJ, G
 
   def computeKKTPoint(self, ddpModel, ddpData, hessL, gradG, gradJ, G):
