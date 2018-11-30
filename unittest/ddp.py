@@ -91,7 +91,7 @@ class LinearDDPTest(unittest.TestCase):
     for i in range(N-1):
       # Checking the DDP solution is almost equals to KKT solution
       self.assertTrue(np.allclose(X_kkt[i], X_opt[i], atol=1e-3),
-                             "State KKT solution at " + str(i) + " is not the same.")
+        "State KKT solution at " + str(i) + " is not the same.")
       self.assertTrue(np.allclose(U_kkt[i], U_opt[i], atol=1e-2),
         "Control KKT solution at " + str(i) + " is not the same.")
 
@@ -140,10 +140,12 @@ class LinearDDPTest(unittest.TestCase):
     n = ddpModel.dynamicsModel.nx()
     m = ddpModel.dynamicsModel.nu()
     N = ddpData.N
-    G = np.matrix(np.zeros((N*n+n, 1)))
-    gradJ = np.matrix(np.zeros((N*(n+m)+n, 1)))
-    gradG = np.matrix(np.zeros((N*(n+m)+n, N*n+n)))
-    hessL = np.matrix(np.zeros((N*(n+m)+n, N*(n+m)+n)))
+    nvar = N*(n+m)+n
+    ncon = N*n+n
+    G = np.matrix(np.zeros((ncon, 1)))
+    gradJ = np.matrix(np.zeros((nvar, 1)))
+    gradG = np.matrix(np.zeros((nvar, ncon)))
+    hessL = np.matrix(np.zeros((nvar,nvar)))
 
     # Building the KKT matrix and vector given the cost and dynamics derivatives
     # from the DDP backward-pass
@@ -167,7 +169,7 @@ class LinearDDPTest(unittest.TestCase):
       G[k*n:(k+1)*n] = f
       gradG[k*(n+m):(k+1)*(n+m), k*n:(k+1)*n] = np.block([ [fx.T],[fu.T] ])
       gradJ[k*(n+m):(k+1)*(n+m)] = np.block([ [lx],[lu] ])
-      hessL[k*(n+m):(k+1)*(n+m),k*(n+m):(k+1)*(n+m)] = \
+      hessL[k*(n+m):(k+1)*(n+m), k*(n+m):(k+1)*(n+m)] = \
         np.block([ [lxx, lux.T],[lux, luu] ])
 
     # Updating the terms given the terminal state
@@ -190,8 +192,8 @@ class LinearDDPTest(unittest.TestCase):
 
     # Solving the KKT problem
     sol = np.linalg.solve(kkt_mat, kkt_vec)
-    w = sol[:(N+1)*(n+m)-1]
-    lag = sol[(N+1)*(n+m)-1:]
+    w = sol[:(N+1)*(n+m)-m]
+    lag = sol[(N+1)*(n+m)-m:]
     return w, lag
 
 if __name__ == '__main__':
