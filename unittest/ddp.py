@@ -88,7 +88,7 @@ class LinearDDPTest(unittest.TestCase):
     X_opt = cddp.Solver.getStateTrajectory(self.ddpData)
     U_opt = cddp.Solver.getControlSequence(self.ddpData)
 
-    for i in range(N-1):
+    for i in range(N):
       # Checking the DDP solution is almost equals to KKT solution
       self.assertTrue(np.allclose(X_kkt[i], X_opt[i], atol=1e-3),
         "State KKT solution at " + str(i) + " is not the same.")
@@ -142,9 +142,9 @@ class LinearDDPTest(unittest.TestCase):
     N = ddpData.N
     nvar = N*(n+m)+n
     ncon = N*n+n
-    G = np.matrix(np.zeros((ncon, 1)))
-    gradJ = np.matrix(np.zeros((nvar, 1)))
-    gradG = np.matrix(np.zeros((nvar, ncon)))
+    G = np.matrix(np.zeros((ncon,1)))
+    gradJ = np.matrix(np.zeros((nvar,1)))
+    gradG = np.matrix(np.zeros((nvar,ncon)))
     hessL = np.matrix(np.zeros((nvar,nvar)))
 
     # Building the KKT matrix and vector given the cost and dynamics derivatives
