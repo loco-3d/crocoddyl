@@ -23,7 +23,7 @@ class Discretizer(object):
     pass
 
   @abc.abstractmethod
-  def backwardRunningCalc(dynamicsModel, dynamicsData):
+  def __call__(dynamicsModel, dynamicsData):
     pass
 
   # class fx(object):
@@ -93,7 +93,7 @@ class EulerDiscretizer(Discretizer):
     return EulerDiscretizerData(dynamicsModel, dt)
 
   @staticmethod
-  def backwardRunningCalc(dynamicsModel, dynamicsData):
+  def __call__(dynamicsModel, dynamicsData):
     dynamicsData.discretizer.fx[dynamicsModel.nv():,:dynamicsModel.nv()] = \
       dynamicsData.dt * dynamicsData.aq
     dynamicsData.discretizer.fx[dynamicsModel.nv():,dynamicsModel.nv():] = \

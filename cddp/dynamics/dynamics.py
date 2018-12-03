@@ -148,7 +148,7 @@ class DynamicsModel(object):
     # Updating the continuous-time linear approximation
     dynamicsModel.updateLinearAppr(dynamicsModel, dynamicsData)
     # Discretizing this linear approximation
-    dynamicsModel.discretizer.backwardRunningCalc(dynamicsModel, dynamicsData)
+    dynamicsModel.discretizer(dynamicsModel, dynamicsData)
 
   def backwardTerminalCalc(dynamicsModel, dynamicsData):
     # Updating the dynamic terms
