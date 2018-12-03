@@ -3,25 +3,25 @@ import numpy as np
 
 
 class TerminalCostManagerData(TerminalCostData):
-  def __init__(self, nx, costVector):
+  def __init__(self, dynamicsModel, costVector):
     # Including the data structure of the terminal cost
-    TerminalCostData.__init__(self, nx)
+    TerminalCostData.__init__(self, dynamicsModel)
 
     # Including the data structure for each individual terminal cost functions
     self.costVector = []
     for cost in costVector:
-      self.costVector.append(cost.createData(nx))
+      self.costVector.append(cost.createData(dynamicsModel))
 
 
 class RunningCostManagerData(RunningCostData):
-  def __init__(self, nx, nu, costVector):
+  def __init__(self, dynamicsModel, costVector):
     # Including the data structure of the running cost
-    RunningCostData.__init__(self, nx, nu)
+    RunningCostData.__init__(self, dynamicsModel)
 
     # Including the data structure for each individual terminal cost functions
     self.costVector = []
     for cost in costVector:
-      self.costVector.append(cost.createData(nx, nu))
+      self.costVector.append(cost.createData(dynamicsModel))
 
 
 class CostManager(object):
@@ -43,20 +43,19 @@ class CostManager(object):
     self.terminalCostDict = {}
     self.runningCostDict = {}
 
-  def createTerminalData(self, nx):
+  def createTerminalData(self, dynamicsModel):
     """ Creates the terminal cost data for a given state dimension
 
-    :param nx: state dimension
+    :param dynamicsModel: dynamics model
     """
-    return TerminalCostManagerData(nx, self.terminalCosts)
+    return TerminalCostManagerData(dynamicsModel, self.terminalCosts)
 
-  def createRunningData(self, nx, nu):
+  def createRunningData(self, dynamicsModel):
     """ Creates the running cost data for a given state and control dimension
 
-    :param nx: state dimension
-    :param nu: control dimension
+    :param dynamicsModel: dynamics model
     """
-    return RunningCostManagerData(nx, nu, self.runningCosts)
+    return RunningCostManagerData(dynamicsModel, self.runningCosts)
 
   def addTerminal(self, cost, name):
     """ Adds a terminal cost function to the cost model.

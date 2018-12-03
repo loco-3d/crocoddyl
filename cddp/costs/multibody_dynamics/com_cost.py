@@ -4,12 +4,12 @@ import numpy as np
 
 
 class CoMRunningData(RunningQuadraticCostData):
-  def __init__(self, nx, nu, nr):
+  def __init__(self, dynamicsModel, nr):
     # Creating the data structure for a running quadratic cost
-    RunningQuadraticCostData.__init__(self, nx, nu, nr)
+    RunningQuadraticCostData.__init__(self, dynamicsModel, nr)
 
     # Creating the data for the desired CoM position
-    self.com_des = np.zeros((3,1))
+    self.com_des = np.zeros((nr,1))
 
 
 class CoMCost(RunningQuadraticCost):
@@ -24,8 +24,8 @@ class CoMCost(RunningQuadraticCost):
     RunningQuadraticCost.__init__(self, 3, weights)
     self.dynamicsModel = dynamicsModel
 
-  def createData(self, nx, nu):
-    return CoMRunningData(nx, nu, self.nr)
+  def createData(self, dynamicsModel):
+    return CoMRunningData(dynamicsModel, self.nr)
 
   def updateResidual(self, costData, dynamicsData):
     np.copyto(costData.r, dynamicsData.pinocchio.com[0] - costData.com_des)

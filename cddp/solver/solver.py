@@ -85,25 +85,23 @@ class Solver(object):
       costData = it.costData
       dynamicsData = it.dynamicsData
 
-      # Getting the state, control and step time of the interval
-      x = dynamicsData.x
-      u = dynamicsData.u
-
       # Getting the value function values of the next interval (prime interval)
       fx = it.dynamicsData.discretizer.fx
       fu = it.dynamicsData.discretizer.fu
 
       # Updating the Q derivatives. Note that this is Gauss-Newton step because
       # we neglect the Hessian, it's also called iLQR.
+      np.copyto(it.Vpxx_fx, np.dot(ddpData.intervalDataVector[k+1].Vxx, fx))
+      np.copyto(it.Vpxx_fu, np.dot(ddpData.intervalDataVector[k+1].Vxx, fu))
       np.copyto(it.Qx, it.costData.lx + np.dot(fx.T, ddpData.intervalDataVector[k+1].Vx))
       np.copyto(it.Qu, it.costData.lu + np.dot(fu.T, ddpData.intervalDataVector[k+1].Vx))
       np.copyto(it.Quu, it.costData.luu +\
-                np.dot(fu.T, np.dot(ddpData.intervalDataVector[k+1].Vxx, fu)))
+                np.dot(fu.T, it.Vpxx_fu))
       np.copyto(it.Qxx, it.costData.lxx +\
-                np.dot(fx.T, np.dot(ddpData.intervalDataVector[k+1].Vxx, fx)))
+                np.dot(fx.T, it.Vpxx_fx))
       np.copyto(it.Qux, it.costData.lux +\
-                np.dot(fu.T, np.dot(ddpData.intervalDataVector[k+1].Vxx, fx)))
-      np.copyto(it.Quu_r, it.Quu + ddpData.muI + ddpData.muV*np.dot(fu.T, fu))
+                np.dot(fu.T, it.Vpxx_fx))
+      np.copyto(it.Quu_r, it.Quu + ddpData.muI + ddpData.muV * np.dot(fu.T, fu))
       if not isPositiveDefinitive(it.Quu_r, it.L):
         return False
       np.copyto(it.Qux_r, it.Qux + ddpData.muV * np.dot(fu.T, fx))

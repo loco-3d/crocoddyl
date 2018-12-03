@@ -62,6 +62,8 @@ class DDPRunningIntervalData(object):
     # Extra DDP terms
     self.jt_Quu_j = 0.
     self.jt_Qu = 0.
+    self.Vpxx_fx = np.zeros((ddpModel.dynamicsModel.nx(), ddpModel.dynamicsModel.nx()))
+    self.Vpxx_fu = np.zeros((ddpModel.dynamicsModel.nx(), ddpModel.dynamicsModel.nu()))
 
 
 class DDPData(object):
@@ -141,14 +143,13 @@ class DDPModel(object):
     return self.dynamicsModel.createData(tInit, dt)
 
   def createRunningCostData(self):
-    return self.costManager.createRunningData(self.dynamicsModel.nx(),
-                                              self.dynamicsModel.nu())
+    return self.costManager.createRunningData(self.dynamicsModel)
 
   def createTerminalDynamicsData(self, tFinal):
     return self.dynamicsModel.createData(tFinal, 0.)
 
   def createTerminalCostData(self):
-    return self.costManager.createTerminalData(self.dynamicsModel.nx())
+    return self.costManager.createTerminalData(self.dynamicsModel)
 
   def setInitial(self, ddpData, xInit, UInit):
     """

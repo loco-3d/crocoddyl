@@ -131,8 +131,8 @@ class DynamicsModel(object):
   def differenceConfiguration(dynamicsModel, dynamicsData, q0, q1):
     """ Operator that differentiates the configuration.
 
-    :param x0: current configuration point
-    :param x1: next configurtion point
+    :param q0: current configuration point
+    :param q1: next configurtion point
     """
     pass
 

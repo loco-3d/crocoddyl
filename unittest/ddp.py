@@ -69,59 +69,12 @@ class LinearDDPTest(unittest.TestCase):
     # Running the DDP solver
     cddp.Solver.solve(self.ddpModel, self.ddpData, solverParams)
 
-    # Creating the variables of the KKT problem
     n = self.ddpModel.dynamicsModel.nx()
     m = self.ddpModel.dynamicsModel.nu()
     N = self.ddpData.N
-    G = np.matrix(np.zeros((N*n+n, 1)))
-    gradJ = np.matrix(np.zeros((N*(n+m)+n, 1)))
-    gradG = np.matrix(np.zeros((N*(n+m)+n, N*n+n)))
-    hessL = np.matrix(np.zeros((N*(n+m)+n, N*(n+m)+n)))
-
-    # Running a backward-pass in order to update the derivatives of the
-    # DDP solution (no regularization and full Newton step)
-    self.ddpData.alpha = 1.
-    cddp.Solver.updateQuadraticAppr(self.ddpModel, self.ddpData)
-    cddp.Solver.backwardPass(self.ddpModel, self.ddpData, solverParams)
-
-    # Building the KKT matrix and vector given the cost and dynamics derivatives
-    # from the DDP backward-pass
-    for k in range(N):
-      data = self.ddpData.intervalDataVector[k]
-
-      # Running cost and its derivatives
-      lx = data.costData.lx
-      lu = data.costData.lu
-      lxx = data.costData.lxx
-      luu = data.costData.luu
-      lux = data.costData.lux
-
-      # Dynamics and its derivatives
-      f = self.ddpData.intervalDataVector[k+1].dynamicsData.x
-      fx = data.dynamicsData.discretizer.fx
-      fu = data.dynamicsData.discretizer.fu
-
-      # Updating the constraint and cost functions and them gradient, and the
-      # Hessian of this problem
-      G[k*n:(k+1)*n] = f
-      gradG[k*(n+m):(k+1)*(n+m), k*n:(k+1)*n] = np.block([ [fx.T],[fu.T] ])
-      gradJ[k*(n+m):(k+1)*(n+m)] = np.block([ [lx],[lu] ])
-      hessL[k*(n+m):(k+1)*(n+m),k*(n+m):(k+1)*(n+m)] = \
-        np.block([ [lxx, lux.T],[lux, luu] ])
-
-    # Updating the terms given the terminal state
-    G[N*n:(N+1)*n] = f
-    gradG[N*(n+m):(N+1)*(n+m), N*n:(N+1)*n] = fx.T
-    gradJ[N*(n+m):(N+1)*(n+m)] = lx
-    hessL[N*(n+m):(N+1)*(n+m), N*(n+m):(N+1)*(n+m)] = \
-      self.ddpData.intervalDataVector[-1].costData.lxx
-
-    # Computing the KKT matrix and vector
-    kkt_mat = np.block([ [hessL,gradG],[gradG.T, np.zeros((N*n+n,N*n+n))] ])
-    kkt_vec = np.block([ [gradJ],[G] ])
-
-    # Solving the KKT problem
-    sol = np.linalg.solve(kkt_mat, kkt_vec)
+    hessL, gradG, gradJ, G = self.buildKKTProblem(self.ddpModel, self.ddpData)
+    sol, lag = \
+      self.computeKKTPoint(self.ddpModel, self.ddpData, hessL, gradG, gradJ, G)
 
     # Recording the KKT solution into a list
     X_kkt = []
@@ -135,12 +88,30 @@ class LinearDDPTest(unittest.TestCase):
     X_opt = cddp.Solver.getStateTrajectory(self.ddpData)
     U_opt = cddp.Solver.getControlSequence(self.ddpData)
 
-    for i in range(N-1):
+    for i in range(N):
       # Checking the DDP solution is almost equals to KKT solution
       self.assertTrue(np.allclose(X_kkt[i], X_opt[i], atol=1e-3),
-                             "State KKT solution at " + str(i) + " is not the same.")
+        "State KKT solution at " + str(i) + " is not the same.")
       self.assertTrue(np.allclose(U_kkt[i], U_opt[i], atol=1e-2),
         "Control KKT solution at " + str(i) + " is not the same.")
+
+  def test_stopping_criteria_against_kkt(self):
+    # Using the default solver parameters
+    solverParams = cddp.SolverParams()
+
+    # Running the DDP solver
+    cddp.Solver.solve(self.ddpModel, self.ddpData, solverParams)
+
+    n = self.ddpModel.dynamicsModel.nx()
+    m = self.ddpModel.dynamicsModel.nu()
+    N = self.ddpData.N
+    hessL, gradG, gradJ, G = self.buildKKTProblem(self.ddpModel, self.ddpData)
+    sol, lag = \
+      self.computeKKTPoint(self.ddpModel, self.ddpData, hessL, gradG, gradJ, G)
+
+    self.assertAlmostEqual(
+      np.linalg.norm(hessL * sol + gradG * lag - gradJ), 0., 7, \
+      "The Lagrangian gradient computed from the KKT solution is not equals zero.")
 
   def test_regularization_in_backward_pass(self):
     # Using the default solver parameters
@@ -164,6 +135,66 @@ class LinearDDPTest(unittest.TestCase):
     self.assertTrue(np.allclose(Vxx, Vxx_reg),
                         "Regularization doesn't affect the terminal Vxx.")
 
+  def buildKKTProblem(self, ddpModel, ddpData):
+    # Creating the variables of the KKT problem
+    n = ddpModel.dynamicsModel.nx()
+    m = ddpModel.dynamicsModel.nu()
+    N = ddpData.N
+    nvar = N*(n+m)+n
+    ncon = N*n+n
+    G = np.matrix(np.zeros((ncon,1)))
+    gradJ = np.matrix(np.zeros((nvar,1)))
+    gradG = np.matrix(np.zeros((nvar,ncon)))
+    hessL = np.matrix(np.zeros((nvar,nvar)))
+
+    # Building the KKT matrix and vector given the cost and dynamics derivatives
+    # from the DDP backward-pass
+    for k in range(N):
+      data = ddpData.intervalDataVector[k]
+
+      # Running cost and its derivatives
+      lx = data.costData.lx
+      lu = data.costData.lu
+      lxx = data.costData.lxx
+      luu = data.costData.luu
+      lux = data.costData.lux
+
+      # Dynamics and its derivatives
+      f = ddpData.intervalDataVector[k+1].dynamicsData.x
+      fx = data.dynamicsData.discretizer.fx
+      fu = data.dynamicsData.discretizer.fu
+
+      # Updating the constraint and cost functions and them gradient, and the
+      # Hessian of this problem
+      G[k*n:(k+1)*n] = f
+      gradG[k*(n+m):(k+1)*(n+m), k*n:(k+1)*n] = np.block([ [fx.T],[fu.T] ])
+      gradJ[k*(n+m):(k+1)*(n+m)] = np.block([ [lx],[lu] ])
+      hessL[k*(n+m):(k+1)*(n+m), k*(n+m):(k+1)*(n+m)] = \
+        np.block([ [lxx, lux.T],[lux, luu] ])
+
+    # Updating the terms given the terminal state
+    G[N*n:(N+1)*n] = f
+    gradG[N*(n+m):(N+1)*(n+m), N*n:(N+1)*n] = np.eye(n)
+    gradJ[N*(n+m):(N+1)*(n+m)] = \
+      ddpData.intervalDataVector[-1].costData.lx
+    hessL[N*(n+m):(N+1)*(n+m), N*(n+m):(N+1)*(n+m)] = \
+      ddpData.intervalDataVector[-1].costData.lxx
+    return hessL, gradG, gradJ, G
+
+  def computeKKTPoint(self, ddpModel, ddpData, hessL, gradG, gradJ, G):
+    n = ddpModel.dynamicsModel.nx()
+    m = ddpModel.dynamicsModel.nu()
+    N = ddpData.N
+
+    # Computing the KKT matrix and vector
+    kkt_mat = np.block([ [hessL,gradG],[gradG.T, np.zeros((N*n+n,N*n+n))] ])
+    kkt_vec = np.block([ [gradJ],[G] ])
+
+    # Solving the KKT problem
+    sol = np.linalg.solve(kkt_mat, kkt_vec)
+    w = sol[:(N+1)*(n+m)-m]
+    lag = sol[(N+1)*(n+m)-m:]
+    return w, lag
 
 if __name__ == '__main__':
   unittest.main()

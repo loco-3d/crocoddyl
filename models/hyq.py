@@ -20,7 +20,7 @@ robot = se3.robot_wrapper.RobotWrapper(urdf, path, se3.JointModelFreeFlyer())
 contact_indices = [robot.model.getFrameId("lf_foot"),
                    robot.model.getFrameId("rf_foot"),
                    robot.model.getFrameId("rh_foot")]
-contactPhase0 = cddp.Phase(contact_indices, 0.,np.inf)
+contactPhase0 = cddp.Phase(contact_indices, 0., np.inf)
 contactInfo = cddp.Multiphase([contactPhase0], 3)
 
 # Create the dynamics and its integrator and discretizer
