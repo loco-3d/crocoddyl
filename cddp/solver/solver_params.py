@@ -1,5 +1,3 @@
-import yaml
-
 class SolverParams(object):
   def __init__(self):
     """ Define the default values of the DDP parameters
@@ -44,6 +42,7 @@ class SolverParams(object):
     :param config_file: YAML configuration file
     """
     # Reading the YAML file
+    import yaml
     with open(config_file, 'r') as stream:
       data = yaml.load(stream)
       # Setting up stop criteria
