@@ -77,10 +77,11 @@ class Discretizer(object):
 class EulerDiscretizerData(DiscretizerData):
   def __init__(self, dynamicsModel, dt):
     DiscretizerData.__init__(self, dynamicsModel)
-    # Update once the upper-block
+
+    # Extra terms for the simpletic Euler discretizer
+    self.dt2 = dt * dt
     self.I = np.identity(dynamicsModel.nv())
-    self.fx[:dynamicsModel.nv(),:dynamicsModel.nv()] = self.I
-    self.fx[:dynamicsModel.nv(),dynamicsModel.nv():] = dt * self.I
+    self.dt_I = dt * np.identity(dynamicsModel.nv())
 
 
 class EulerDiscretizer(Discretizer):
@@ -94,10 +95,19 @@ class EulerDiscretizer(Discretizer):
 
   @staticmethod
   def __call__(dynamicsModel, dynamicsData):
+    # Discretizing fx
+    dynamicsData.discretizer.fx[:dynamicsModel.nv(),:dynamicsModel.nv()] = \
+      dynamicsData.discretizer.I + dynamicsData.discretizer.dt2 * dynamicsData.aq
+    dynamicsData.discretizer.fx[:dynamicsModel.nv(),dynamicsModel.nv():] = \
+      dynamicsData.discretizer.dt_I + dynamicsData.discretizer.dt2 * dynamicsData.av
     dynamicsData.discretizer.fx[dynamicsModel.nv():,:dynamicsModel.nv()] = \
       dynamicsData.dt * dynamicsData.aq
     dynamicsData.discretizer.fx[dynamicsModel.nv():,dynamicsModel.nv():] = \
       dynamicsData.discretizer.I + dynamicsData.dt * dynamicsData.av
+
+    # Discretizing fu
+    dynamicsData.discretizer.fu[:dynamicsModel.nv(),:] = \
+      dynamicsData.discretizer.dt2 * dynamicsData.au
     dynamicsData.discretizer.fu[dynamicsModel.nv():,:] = \
       dynamicsData.dt * dynamicsData.au
 
