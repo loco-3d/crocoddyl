@@ -32,7 +32,7 @@ class IntegratorTest(unittest.TestCase):
     fx = data.discretizer.fx
     fu = data.discretizer.fu
 
-    self.assertEqual(x_next.all(), (fx * x + fu * u).all(), \
+    self.assertEqual(x_next.all(), (np.dot(fx, x) + np.dot(fu, u)).all(), \
       "The forward Euler integrator produces an unexpected x_next vector.")
 
   # def test_RK4_integrator(self):
