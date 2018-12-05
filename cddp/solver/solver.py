@@ -257,6 +257,7 @@ class Solver(object):
     X = []
     for i in range(ddpData.N):
       X.append(ddpData.intervalDataVector[i].dynamicsData.x)
+    X.append(ddpData.intervalDataVector[-1].dynamicsData.x)
     return X
 
   @staticmethod
