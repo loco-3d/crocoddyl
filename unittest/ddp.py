@@ -153,6 +153,10 @@ class LinearDDPTest(unittest.TestCase):
     Oxx = np.zeros((nx,nx))
     Oxu = np.zeros((nx,nu))
     g[:nx] = ddpData.intervalDataVector[0].dynamicsData.x
+    w_i = np.zeros((nw,1))
+    q_i = np.zeros((nw,1))
+    Q_i = np.zeros((nw,nw))
+    f_i = np.zeros((2*nx,nw))
     for k in range(N):
       # Interval data
       data = ddpData.intervalDataVector[k]
@@ -160,7 +164,8 @@ class LinearDDPTest(unittest.TestCase):
       # State, control and decision vector
       x_i = data.dynamicsData.x
       u_i = data.dynamicsData.u
-      w_i = np.block([ [x_i],[u_i] ])
+      w_i[:nx] = x_i
+      w_i[nx:] = u_i
 
       # Running cost and its derivatives
       lx_i = data.costData.lx
@@ -168,20 +173,26 @@ class LinearDDPTest(unittest.TestCase):
       lxx_i = data.costData.lxx
       luu_i = data.costData.luu
       lux_i = data.costData.lux
-      q_i = np.block([ [lx_i],[lu_i] ])
-      Q_i = np.block([ [lxx_i, lux_i.T],[lux_i, luu_i] ])
+      q_i[:nx] = lx_i
+      q_i[nx:] = lu_i
+      Q_i[:nx,:nx] = lxx_i
+      Q_i[:nx,nx:] = lux_i.T
+      Q_i[nx:,:nx] = lux_i
+      Q_i[nx:,nx:] = luu_i
 
-      # Dynamics and its derivatives  
+      # Dynamics and its derivatives
       fx_i = data.dynamicsData.discretizer.fx
       fu_i = data.dynamicsData.discretizer.fu
-      f_i = np.block([fx_i, fu_i])
+      f_i[:nx,:nx] = -Ixx
+      f_i[nx:,:nx] = fx_i
+      f_i[nx:,nx:] = fu_i
 
       # Updating the constraint and cost functions and their gradient, and the
       # Hessian of this problem
       hess[k*nw:(k+1)*nw, k*nw:(k+1)*nw] = Q_i
-      jac[k*nx:(k+2)*nx, k*nw:(k+1)*nw] = np.block([ [-Ixx, Oxu],[f_i] ])
+      jac[k*nx:(k+2)*nx, k*nw:(k+1)*nw] = f_i
       grad[k*nw:(k+1)*nw] = q_i
-      g[k*nx:(k+2)*nx] += np.dot(np.block([ [-Ixx, Oxu],[ f_i] ]), w_i)
+      g[k*nx:(k+2)*nx] += np.dot(f_i, w_i)
 
     # Terminal state and cost derivatives
     x_T = ddpData.intervalDataVector[-1].dynamicsData.x
@@ -195,8 +206,13 @@ class LinearDDPTest(unittest.TestCase):
     g[N*nx:(N+2)*nx] += -x_T
 
     # Computing the KKT matrix and its vector
-    kkt_mat = np.block([ [hess, jac.T],[jac, np.zeros((ncon,ncon))] ])
-    kkt_vec = np.block([ [grad],[g] ])
+    kkt_mat = np.zeros((nvar+ncon,nvar+ncon))
+    kkt_vec = np.zeros((nvar+ncon,1))
+    kkt_mat[:nvar,:nvar] = hess
+    kkt_mat[:nvar,nvar:] = jac.T
+    kkt_mat[nvar:,:nvar] = jac
+    kkt_vec[:nvar] = grad
+    kkt_vec[nvar:] = g
 
     # Solving the KKT problem
     sol = np.linalg.solve(kkt_mat, -kkt_vec)
