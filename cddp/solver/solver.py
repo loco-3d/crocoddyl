@@ -6,32 +6,15 @@ from cddp.utils import isPositiveDefinitive, EPS
 class Solver(object):
 
   @staticmethod
-  def forwardSimulation(ddpModel, ddpData):
-    """ Initial dynamics calculations, and cost calculations for one interval.
-    This is one step of the forward pass of DDP.
-    """
-    for k in xrange(ddpData.N):
-      ddpModel.forwardRunningCalc(ddpData.intervalDataVector[k])
-      ddpModel.dynamicsModel.integrator(
-        ddpModel.dynamicsModel,
-        ddpData.intervalDataVector[k].dynamicsData,
-        ddpData.intervalDataVector[k+1].dynamicsData.x)
-      ddpData.totalCost += ddpData.intervalDataVector[k].costData.l
-
-    ddpModel.forwardTerminalCalc(ddpData.intervalDataVector[-1])
-    ddpData.totalCost += ddpData.intervalDataVector[-1].costData.l
-    return
-
-  @staticmethod
   def forwardPass(ddpModel, ddpData, solverParams):
     """ Runs the forward pass of the DDP algorithm.
     """
+    # Integrate the system along the new trajectory and compute its cost
     ddpData.totalCost = 0.
-    # Integrate the system along the new trajectory
     for k in xrange(ddpData.N):
       # Getting the current DDP interval
       it = ddpData.intervalDataVector[k]
-      itNext = ddpData.intervalDataVector[k]
+
       # Computing the new control command
       np.copyto(it.dynamicsData.u, it.dynamicsData.u_prev +\
         ddpData.alpha * it.j + \
@@ -246,7 +229,29 @@ class Solver(object):
     return False
 
   @staticmethod
+  def forwardSimulation(ddpModel, ddpData):
+    """ Integrate the dynamics and compute its cost given an initial condition
+    and a sequence of control commands.
+    """
+    # Integrate the system along the new trajectory and compute its cost
+    ddpData.totalCost = 0.
+    for k in xrange(ddpData.N):
+      # Integrating the system dynamics and updating the new state value
+      ddpModel.forwardRunningCalc(ddpData.intervalDataVector[k])
+      ddpModel.dynamicsModel.integrator(
+        ddpModel.dynamicsModel,
+        ddpData.intervalDataVector[k].dynamicsData,
+        ddpData.intervalDataVector[k+1].dynamicsData.x)
+      ddpData.totalCost += ddpData.intervalDataVector[k].costData.l
+
+    ddpModel.forwardTerminalCalc(ddpData.intervalDataVector[-1])
+    ddpData.totalCost += ddpData.intervalDataVector[-1].costData.l
+    return
+
+  @staticmethod
   def updateQuadraticAppr(ddpModel, ddpData):
+    """ Update the quadratic approximation of the problem.
+    """
     # Updating along the horizon. TODO: Parallelize.
     for k in xrange(ddpData.N):
       ddpModel.backwardRunningCalc(ddpData.intervalDataVector[k])
