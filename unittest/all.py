@@ -2,9 +2,9 @@ import unittest
 import sys
 
 testmodules = [
-  'cost',
-  'soft_constraint',
-  'derivatives',
+  # 'cost',
+  # 'soft_constraint',
+  # 'derivatives',
   'integrator',
   'ddp',
 ]
