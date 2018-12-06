@@ -112,18 +112,32 @@ class CostManager(object):
       costData.lx += cost.getlx(costData.costVector[k])
       costData.lxx += cost.getlxx(costData.costVector[k])
 
-  def getTerminalCostIndex(costManager, name):
+  def getTerminalCost(self, name):
+    """ Return the running cost model given its name
+
+    :param name: cost function name
+    """
+    return self.terminalCosts[self.getTerminalCostIndex(name)]
+
+  def getRunningCost(self, name):
+    """ Return the running cost model given its name
+
+    :param name: cost function name
+    """
+    return self.runningCosts[self.getRunningCostIndex(name)]
+
+  def getTerminalCostIndex(self, name):
     """ Get the index of a given terminal cost name
 
     :param name: cost function name
     """
     # Returning the index of the cost
-    return costManager.terminalCostDict[name]
+    return self.terminalCostDict[name]
 
-  def getRunningCostIndex(costManager, name):
+  def getRunningCostIndex(self, name):
     """ Get the index of a given terminal cost name
 
     :param name: cost function name
     """
     # Returning the index of the cost
-    return costManager.runningCostDict[name]
+    return self.runningCostDict[name]
