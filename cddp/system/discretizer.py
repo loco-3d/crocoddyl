@@ -3,6 +3,8 @@ import numpy as np
 
 
 class DiscretizerData(object):
+  """ This class describes the common data for each discretization rule.
+  """
   __metaclass__ = abc.ABCMeta
   def __init__(self, dynamicsModel):
     self.fx = np.zeros((dynamicsModel.nx(), dynamicsModel.nx()))
@@ -10,8 +12,9 @@ class DiscretizerData(object):
 
 
 class Discretizer(object):
-  """ This abstract class declares the virtual method for any discretization
-  method of system dynamics.
+  """ This abstract class allows us to define different discretization rules.
+
+  A discretizer converts the time-continuos dynamics into time-discrete one.
   """
   __metaclass__=abc.ABCMeta
   @abc.abstractmethod
@@ -20,10 +23,20 @@ class Discretizer(object):
 
   @abc.abstractmethod
   def createData(self, dynamicsModel, dt):
+    """ Create the discretizer data.
+
+    :param dynamicsModel: dynamics model
+    :param dt: step integration
+    """
     pass
 
   @abc.abstractmethod
-  def backwardRunningCalc(dynamicsModel, dynamicsData):
+  def __call__(dynamicsModel, dynamicsData):
+    """ Discretize the system dynamics given an user-defined discretization scheme.
+
+    :param dynamicsModel: dynamics model
+    :param dynamicsData: dynamics data
+    """
     pass
 
   # class fx(object):
@@ -77,27 +90,47 @@ class Discretizer(object):
 class EulerDiscretizerData(DiscretizerData):
   def __init__(self, dynamicsModel, dt):
     DiscretizerData.__init__(self, dynamicsModel)
-    # Update once the upper-block
+
+    # Extra terms for the simpletic Euler discretizer
+    self.dt2 = dt * dt
     self.I = np.identity(dynamicsModel.nv())
-    self.fx[:dynamicsModel.nv(),:dynamicsModel.nv()] = self.I
-    self.fx[:dynamicsModel.nv(),dynamicsModel.nv():] = dt * self.I
+    self.dt_I = dt * np.identity(dynamicsModel.nv())
 
 
 class EulerDiscretizer(Discretizer):
-  """ Convert the time-continuos dynamics into time-discrete one by using
-    forward Euler rule."""
+  """ Define a forward Euler discretizer.
+  """
   def __init__(self):
     return
 
   def createData(self, dynamicsModel, dt):
+    """ Create the Euler discretizer data.
+
+    :param dynamicsModel: dynamics model
+    :param dt: step integration
+    """
     return EulerDiscretizerData(dynamicsModel, dt)
 
   @staticmethod
-  def backwardRunningCalc(dynamicsModel, dynamicsData):
+  def __call__(dynamicsModel, dynamicsData):
+    """ Discretize the system dynamics using the forward Euler scheme.
+
+    :param dynamicsModel: dynamics model
+    :param dynamicsData: dynamics data
+    """
+    # Discretizing fx
+    dynamicsData.discretizer.fx[:dynamicsModel.nv(),:dynamicsModel.nv()] = \
+      dynamicsData.discretizer.I + dynamicsData.discretizer.dt2 * dynamicsData.aq
+    dynamicsData.discretizer.fx[:dynamicsModel.nv(),dynamicsModel.nv():] = \
+      dynamicsData.discretizer.dt_I + dynamicsData.discretizer.dt2 * dynamicsData.av
     dynamicsData.discretizer.fx[dynamicsModel.nv():,:dynamicsModel.nv()] = \
       dynamicsData.dt * dynamicsData.aq
     dynamicsData.discretizer.fx[dynamicsModel.nv():,dynamicsModel.nv():] = \
       dynamicsData.discretizer.I + dynamicsData.dt * dynamicsData.av
+
+    # Discretizing fu
+    dynamicsData.discretizer.fu[:dynamicsModel.nv(),:] = \
+      dynamicsData.discretizer.dt2 * dynamicsData.au
     dynamicsData.discretizer.fu[dynamicsModel.nv():,:] = \
       dynamicsData.dt * dynamicsData.au
 
