@@ -76,13 +76,13 @@ class LinearDDPTest(unittest.TestCase):
     # Recording the KKT solution into a list
     X_kkt = []
     U_kkt = []
-    for k in range(N):
+    for k in xrange(N):
       w = sol[k*(nx+nu):(k+1)*(nx+nu)]
       X_kkt.append(w[:nx])
       U_kkt.append(w[-nu])
     X_kkt.append(sol[-nx:])
 
-    for i in range(N):
+    for i in xrange(N):
       # Checking that the KKT solution is equals to the DDP solution. Since we
       # passed the DDP solution to the KKT solver, then we expected that the
       # KKT solution is equals to zero
@@ -94,7 +94,7 @@ class LinearDDPTest(unittest.TestCase):
         "Delta state from KKT solution should be equals zero.")
 
     # Checking that the Vx is equals to the KKT Lagrangian multipliers
-    for i in range(N+1):
+    for i in xrange(N+1):
       Vx = self.ddpData.intervalDataVector[i].Vx
       self.assertTrue(np.allclose(Vx, lag[i*nx:(i+1)*nx]),
       "Vx should be equals to the Lagrangian multiplier.")
@@ -157,7 +157,7 @@ class LinearDDPTest(unittest.TestCase):
     q_i = np.zeros((nw,1))
     Q_i = np.zeros((nw,nw))
     f_i = np.zeros((2*nx,nw))
-    for k in range(N):
+    for k in xrange(N):
       # Interval data
       data = ddpData.intervalDataVector[k]
 

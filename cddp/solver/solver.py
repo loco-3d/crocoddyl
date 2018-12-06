@@ -63,7 +63,7 @@ class Solver(object):
 
     np.copyto(ddpData.intervalDataVector[-1].Vx, ddpData.intervalDataVector[-1].costData.lx)
     np.copyto(ddpData.intervalDataVector[-1].Vxx,ddpData.intervalDataVector[-1].costData.lxx)
-    for k in range(ddpData.N-1, -1, -1):
+    for k in xrange(ddpData.N-1, -1, -1):
       it = ddpData.intervalDataVector[k]
       costData = it.costData
       dynamicsData = it.dynamicsData
@@ -140,7 +140,7 @@ class Solver(object):
     ddpData.alpha = solverParams.alpha0
 
     ddpData.n_iter = 0
-    for i in range(solverParams.max_iter):
+    for i in xrange(solverParams.max_iter):
       # Recording the number of iterations
       ddpData.n_iter = i
       print ("Iteration", ddpData.n_iter, "muV", ddpData.muV,
@@ -260,7 +260,7 @@ class Solver(object):
   @staticmethod
   def getStateTrajectory(ddpData):
     X = []
-    for i in range(ddpData.N):
+    for i in xrange(ddpData.N):
       X.append(ddpData.intervalDataVector[i].dynamicsData.x)
     X.append(ddpData.intervalDataVector[-1].dynamicsData.x)
     return X
@@ -268,20 +268,20 @@ class Solver(object):
   @staticmethod
   def getControlSequence(ddpData):
     U = []
-    for i in range(ddpData.N):
+    for i in xrange(ddpData.N):
       U.append(ddpData.intervalDataVector[i].dynamicsData.u)
     return U
 
   @staticmethod
   def getFeedbackGainSequence(ddpData):
     K = []
-    for i in range(ddpData.N):
+    for i in xrange(ddpData.N):
       K.append(ddpData.intervalDataVector[i].K)
     return K
 
   @staticmethod
   def getFeedforwardSequence(ddpData):
     j = []
-    for i in range(ddpData.N):
+    for i in xrange(ddpData.N):
       j.append(ddpData.intervalDataVector[i].j)
     return j
