@@ -93,10 +93,15 @@ class LinearDDPTest(unittest.TestCase):
     self.assertTrue(np.allclose(X_kkt[N], 0.),
         "Delta state from KKT solution should be equals zero.")
 
-    # Computing the norm of the Lagrangian
-    lagrangian = grad + np.dot(jac.T, lag)
+    # Checking that the Vx is equals to the KKT Lagrangian multipliers
+    for i in range(N+1):
+      Vx = self.ddpData.intervalDataVector[i].Vx
+      self.assertTrue(np.allclose(Vx, lag[i*nx:(i+1)*nx]),
+      "Vx should be equals to the Lagrangian multiplier.")
 
-    # Checking that the Lagrangian norm is equals to zero
+    # Checking that the KKT Lagrangian norm is equals to zero. This checks the
+    # DDP stopping criteria
+    lagrangian = grad + np.dot(jac.T, lag)
     self.assertAlmostEqual(
       np.linalg.norm(lagrangian), 0., 7, \
       "The Lagrangian gradient computed from the KKT solution is not equals zero.")
