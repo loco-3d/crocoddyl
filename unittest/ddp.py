@@ -33,12 +33,12 @@ class LinearDDPTest(unittest.TestCase):
     # Create random initial
     x0 = np.random.rand(dynamics.nx(), 1)
     u0 = np.zeros((dynamics.nu(),1))
-    U0 = [u0 for i in xrange(len(timeline)-1)]
+    U0 = [u0 for i in xrange(self.ddpData.N)]
     self.ddpModel.setInitial(self.ddpData, xInit=x0, UInit=U0)
 
     # Setting up the desired reference for each single cost function
     xref = np.array([ [1.],[0.] ])
-    Xref = [xref for i in xrange(len(timeline))]
+    Xref = [xref for i in xrange(self.ddpData.N+1)]
     self.ddpModel.setRunningReference(self.ddpData, Xref[:-1], "x_track")
     self.ddpModel.setTerminalReference(self.ddpData, Xref[-1], "xT_goal")
 
@@ -125,8 +125,9 @@ class LinearDDPTest(unittest.TestCase):
     Vxx_reg = self.ddpData.intervalDataVector[-1].Vxx.copy()
 
     # Checking both values of the Value-function Hessian
-    self.assertTrue(np.allclose(Vxx, Vxx_reg),
-                        "Regularization doesn't affect the terminal Vxx.")
+    self.assertTrue(
+      np.allclose(Vxx, Vxx_reg),
+      "Regularization doesn't affect the terminal Vxx.")
 
   def KKTSolver(self, ddpModel, ddpData):
     # Generate a warm-point trajectory from an initial condition
