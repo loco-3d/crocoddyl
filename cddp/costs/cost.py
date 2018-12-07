@@ -10,7 +10,7 @@ class TerminalCostData(object):
   model.
   """
   def __init__(self, dynamicsModel):
-    """ Creates the terminal cost data.
+    """ Create the terminal cost data.
 
     :param dynamicsModel: dynamics model
     """
@@ -69,7 +69,7 @@ class RunningCost(object):
 
     :param dynamicsModel: dynamics model
     """
-    return NotImplementedError
+    raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
   def updateCost(self, costData, dynamicsData):
@@ -77,7 +77,7 @@ class RunningCost(object):
 
     The new cost value overwrites the internal data l.
     """
-    return NotImplementedError
+    raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
   def updateQuadraticAppr(self, costData, dynamicsData):
@@ -86,7 +86,7 @@ class RunningCost(object):
     The new quadratic approximation of the cost function overwrites the
     following internal data lx and lxx.
     """
-    return NotImplementedError
+    raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
   def setReference(costData, ref):
@@ -94,7 +94,7 @@ class RunningCost(object):
 
     :param ref: reference of the cost function
     """
-    return NotImplementedError
+    raise NotImplementedError("Not implemented yet.")
 
   @staticmethod
   def getl(costData):
@@ -157,7 +157,7 @@ class TerminalCost(object):
 
     :param dynamicsModel: dynamics model
     """
-    return NotImplementedError
+    raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
   def updateCost(self, costData, dynamicsData):
@@ -165,7 +165,7 @@ class TerminalCost(object):
 
     The new cost value overwrites the internal data l.
     """
-    return NotImplementedError
+    raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
   def updateQuadraticAppr(self, costData, dynamicsData):
@@ -174,7 +174,7 @@ class TerminalCost(object):
     The new quadratic approximation of the cost function overwrites the
     following internal data lx and lxx.
     """
-    return NotImplementedError
+    raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
   def setReference(costData, ref):
@@ -182,7 +182,7 @@ class TerminalCost(object):
 
     :param ref: reference of the cost function
     """
-    return NotImplementedError
+    raise NotImplementedError("Not implemented yet.")
 
   @staticmethod
   def getl(costData):
@@ -254,7 +254,7 @@ class RunningQuadraticCost(RunningCost):
 
     The new residual value overwrites the internal data r.
     """
-    pass
+    raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
   def updateResidualLinearAppr(self, costData, dynamicsData):
@@ -263,7 +263,7 @@ class RunningQuadraticCost(RunningCost):
     The new linear approximation of the residual function overwrites the
     internal data rx. We neglect the Hessian of the residual (i.e. rxx = 0).
     """
-    pass
+    raise NotImplementedError("Not implemented yet.")
 
   def updateCost(self, costData, dynamicsData):
     # Updating the residual function value
@@ -311,7 +311,7 @@ class TerminalQuadraticCost(TerminalCost):
 
     The new residual value overwrites the internal data r.
     """
-    return NotImplementedError
+    raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
   def updateResidualLinearAppr(self, costData, dynamicsData):
@@ -320,7 +320,7 @@ class TerminalQuadraticCost(TerminalCost):
     The new linear approximation of the residual function overwrites the
     internal data rx. We neglect the Hessian of the residual (i.e. rxx = 0).
     """
-    return NotImplementedError
+    raise NotImplementedError("Not implemented yet.")
 
   def updateCost(self, costData, dynamicsData):
     # Updating the residual function value
