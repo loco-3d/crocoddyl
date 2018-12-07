@@ -51,8 +51,7 @@ class SpringMassDerivativesTest(unittest.TestCase):
 class ForwardDynamicsDerivativesTest(unittest.TestCase):
   def setUp(self):
     # Getting the robot model from the URDF file. Note that we use the URDF file
-    # inside our repository. By redefining the ROS_PACKAGE_PATH, Gepetto viewer
-    # is able to find the meshes
+    # installed by binary (through sudo-apt install robotpkg-talos-data)
     import pinocchio as se3
     path = '/opt/openrobots/share/talos_data/'
     urdf = path + 'robots/talos_left_arm.urdf'
