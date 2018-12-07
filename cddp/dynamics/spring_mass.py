@@ -17,6 +17,10 @@ class SpringMassData(DynamicsData):
     self.av[0,0] = -self._damping / self._mass
     self.au[0,0] = 1 / self._mass
 
+    # Using state and control matrices constants
+    self.Aq = -self._stiff / self._mass
+    self.Av = -self._damping / self._mass
+    self.Bu = 1 / self._mass
 
 class SpringMass(DynamicsModel):
   def __init__(self, integrator, discretizer):
@@ -34,8 +38,8 @@ class SpringMass(DynamicsModel):
     q = x[:self.nq()]
     v = x[self.nq():]
     np.copyto(dynamicsData.a,
-      dynamicsData.aq * q + dynamicsData.av * v +\
-      dynamicsData.au * u)
+      dynamicsData.Aq * q + dynamicsData.Av * v +\
+      dynamicsData.Bu * u)
     return
 
   def updateLinearAppr(self, dynamicsData, x, u):
