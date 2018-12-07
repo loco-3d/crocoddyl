@@ -45,69 +45,59 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     self.pinocchio = pinocchioModel
     self.contactInfo = contactInfo
 
-  def createData(dynamicsModel, t, dt):
-    return FloatingBaseMultibodyDynamicsData(dynamicsModel, t, dt)
+  def createData(self, t, dt):
+    return FloatingBaseMultibodyDynamicsData(self, t, dt)
 
-  @staticmethod
-  def updateTerms(dynamicsModel, dynamicsData):
+  def updateTerms(self, dynamicsData, x):
     # Compute all terms
     #TODO: Try to reduce calculations in forward pass, and move them to backward pass
-    se3.computeAllTerms(dynamicsModel.pinocchio,
-                        dynamicsData.pinocchio,
-                        dynamicsData.x[:dynamicsModel.nq()],
-                        dynamicsData.x[dynamicsModel.nq():])
-    se3.updateFramePlacements(dynamicsModel.pinocchio,
+    se3.computeAllTerms(self.pinocchio, dynamicsData.pinocchio,
+                        x[:self.nq()], x[self.nq():])
+    se3.updateFramePlacements(self.pinocchio,
                               dynamicsData.pinocchio)
 
-  @staticmethod
-  def updateDynamics(dynamicsModel, dynamicsData):
+  def updateDynamics(self, dynamicsData, x, u):
     # Computing the constrained forward dynamics
-    dynamicsModel.computeDynamics(dynamicsModel, dynamicsData,
-                                  dynamicsData.x[:dynamicsModel.nq()],
-                                  dynamicsData.x[dynamicsModel.nq():],
-                                  np.vstack([np.zeros((6,1)), dynamicsData.u]))
+    self.computeDynamics(dynamicsData,
+                         x[:self.nq()], x[self.nq():],
+                         np.vstack([np.zeros((6,1)), u]))
 
     # Updating the system acceleration
     np.copyto(dynamicsData.a, dynamicsData.pinocchio.ddq)
 
-  @staticmethod
-  def updateLinearAppr(dynamicsModel, dynamicsData):
+  def updateLinearAppr(self, dynamicsData, x, u):
     #TODO: Replace with analytical derivatives
     np.copyto(dynamicsData.aq, -dynamicsData.pinocchio.ddq)
     np.copyto(dynamicsData.av, -dynamicsData.pinocchio.ddq)
     np.copyto(dynamicsData.gq, -dynamicsData.pinocchio.lambda_c)
     np.copyto(dynamicsData.gv, -dynamicsData.pinocchio.lambda_c)
 
-    dynamicsData.MJtJc[:dynamicsModel.nv(),:dynamicsModel.nv()] = \
+    dynamicsData.MJtJc[:self.nv(),:self.nv()] = \
       dynamicsData.pinocchio.M
-    dynamicsData.MJtJc[:dynamicsModel.nv(),dynamicsModel.nv():] = \
+    dynamicsData.MJtJc[:self.nv(),self.nv():] = \
       dynamicsData.contactJ.T
-    dynamicsData.MJtJc[dynamicsModel.nv():,:dynamicsModel.nv()] = \
+    dynamicsData.MJtJc[self.nv():,:self.nv()] = \
       dynamicsData.contactJ
 
     #TODO: REMOVE PINV!!!! USE DAMPED CHOLESKY
     #np.fill_diagonal(self.MJtJc, self.MJtJc.diagonal()+self.eps)
-    #self.MJtJc_inv_L = np.linalg.inv(np.linalg.cholesky(dynamicsModel.MJtJc))
+    #self.MJtJc_inv_L = np.linalg.inv(np.linalg.cholesky(self.MJtJc))
     #self.MJtJc_inv = np.dot(self.MJtJc_inv_L.T, self.MJtJc_inv_L)
     np.copyto(dynamicsData.MJtJc_inv, np.linalg.pinv(dynamicsData.MJtJc))
-    np.copyto(dynamicsData.au, \
-      dynamicsData.MJtJc_inv[:dynamicsModel.nv(),6:dynamicsModel.nv()])
-    np.copyto(dynamicsData.gu, \
-      dynamicsData.MJtJc_inv[dynamicsModel.nv():,6:dynamicsModel.nv()])
+    np.copyto(dynamicsData.au, dynamicsData.MJtJc_inv[:self.nv(),6:self.nv()])
+    np.copyto(dynamicsData.gu, dynamicsData.MJtJc_inv[self.nv():,6:self.nv()])
 
     # dadq #dgdq
-    for i in xrange(dynamicsModel.nv()):
+    for i in xrange(self.nv()):
       dynamicsData.v_pert.fill(0.)
       dynamicsData.v_pert[i] += dynamicsData.h
       np.copyto(dynamicsData.q_pert,
-                se3.integrate(dynamicsModel.pinocchio,
-                              dynamicsData.x[:dynamicsModel.nq()],
-                              dynamicsData.v_pert))
+        se3.integrate(self.pinocchio, x[:self.nq()], dynamicsData.v_pert))
 
-      dynamicsModel.computeDynamics(dynamicsModel, dynamicsData,
-                                    dynamicsData.q_pert,
-                                    dynamicsData.x[dynamicsModel.nq():],
-                                    np.vstack([np.zeros((6,1)), dynamicsData.u]))
+      self.computeDynamics(dynamicsData,
+                           dynamicsData.q_pert,
+                           x[self.nq():],
+                           np.vstack([np.zeros((6,1)), u]))
 
       dynamicsData.aq[:,i] += np.array(dynamicsData.pinocchio.ddq)[:,0]
       dynamicsData.gq[:,i] += np.array(dynamicsData.pinocchio.lambda_c)[:,0]
@@ -115,47 +105,44 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     dynamicsData.gq /= dynamicsData.h
 
     # dadv #dgdv
-    for i in xrange(dynamicsModel.nv()):
-      np.copyto(dynamicsData.v_pert, dynamicsData.x[dynamicsModel.nq():])
+    for i in xrange(self.nv()):
+      np.copyto(dynamicsData.v_pert, x[self.nq():])
       dynamicsData.v_pert[i] += dynamicsData.h
 
-      dynamicsModel.computeDynamics(dynamicsModel, dynamicsData,
-                                    dynamicsData.x[:dynamicsModel.nq()],
-                                    dynamicsData.v_pert,
-                                    np.vstack([np.zeros((6,1)), dynamicsData.u]))
+      self.computeDynamics(dynamicsData,
+                           x[:self.nq()],
+                           dynamicsData.v_pert,
+                           np.vstack([np.zeros((6,1)), u]))
 
       dynamicsData.av[:,i] += np.array(dynamicsData.pinocchio.ddq)[:,0]
       dynamicsData.gv[:,i] += np.array(dynamicsData.pinocchio.lambda_c)[:,0]
     dynamicsData.av /= dynamicsData.h
     dynamicsData.gv /= dynamicsData.h
 
-  @staticmethod
-  def integrateConfiguration(dynamicsModel, dynamicsData, q, dq):
-    return se3.integrate(dynamicsModel.pinocchio, q, dq)
+  def integrateConfiguration(self, q, dq):
+    return se3.integrate(self.pinocchio, q, dq)
 
-  @staticmethod
-  def differenceConfiguration(dynamicsModel, dynamicsData, q0, q1):
-    return se3.difference(dynamicsModel.pinocchio, q0, q1)
+  def differenceConfiguration(self, q0, q1):
+    return se3.difference(self.pinocchio, q0, q1)
 
-  @staticmethod
-  def computeDynamics(dynamicsModel, dynamicsData, q, v, tau):
+  def computeDynamics(self, dynamicsData, q, v, tau):
     # Update all terms
     #TODO: Try to reduce calculations in forward pass, and move them to backward pass
-    se3.computeAllTerms(dynamicsModel.pinocchio,
+    se3.computeAllTerms(self.pinocchio,
                         dynamicsData.pinocchio, q, v)
-    se3.updateFramePlacements(dynamicsModel.pinocchio,
+    se3.updateFramePlacements(self.pinocchio,
                               dynamicsData.pinocchio)
 
     # Update the Joint jacobian and gamma
     for k, cs in enumerate(dynamicsData._contactFrameIndices):
-      dynamicsData.contactJ[dynamicsModel.contactInfo.nc*k:
-                            dynamicsModel.contactInfo.nc*(k+1),:] = \
+      dynamicsData.contactJ[self.contactInfo.nc*k:
+                            self.contactInfo.nc*(k+1),:] = \
         se3.getFrameJacobian(
-          dynamicsModel.pinocchio, dynamicsData.pinocchio, cs,
-          se3.ReferenceFrame.LOCAL)[:dynamicsModel.contactInfo.nc,:]
+          self.pinocchio, dynamicsData.pinocchio, cs,
+          se3.ReferenceFrame.LOCAL)[:self.contactInfo.nc,:]
     #TODO gamma
     dynamicsData.gamma.fill(0.)
-    se3.forwardDynamics(dynamicsModel.pinocchio,
+    se3.forwardDynamics(self.pinocchio,
                         dynamicsData.pinocchio,
                         q, v, tau,
                         dynamicsData.contactJ, dynamicsData.gamma, 1e-8, False)

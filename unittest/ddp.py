@@ -33,12 +33,12 @@ class LinearDDPTest(unittest.TestCase):
     # Create random initial
     x0 = np.random.rand(dynamics.nx(), 1)
     u0 = np.zeros((dynamics.nu(),1))
-    U0 = [u0 for i in xrange(len(timeline)-1)]
+    U0 = [u0 for i in xrange(self.ddpData.N)]
     self.ddpModel.setInitial(self.ddpData, xInit=x0, UInit=U0)
 
     # Setting up the desired reference for each single cost function
     xref = np.array([ [1.],[0.] ])
-    Xref = [xref for i in xrange(len(timeline))]
+    Xref = [xref for i in xrange(self.ddpData.N+1)]
     self.ddpModel.setRunningReference(self.ddpData, Xref[:-1], "x_track")
     self.ddpModel.setTerminalReference(self.ddpData, Xref[-1], "xT_goal")
 
@@ -76,13 +76,13 @@ class LinearDDPTest(unittest.TestCase):
     # Recording the KKT solution into a list
     X_kkt = []
     U_kkt = []
-    for k in range(N):
+    for k in xrange(N):
       w = sol[k*(nx+nu):(k+1)*(nx+nu)]
       X_kkt.append(w[:nx])
       U_kkt.append(w[-nu])
     X_kkt.append(sol[-nx:])
 
-    for i in range(N):
+    for i in xrange(N):
       # Checking that the KKT solution is equals to the DDP solution. Since we
       # passed the DDP solution to the KKT solver, then we expected that the
       # KKT solution is equals to zero
@@ -94,7 +94,7 @@ class LinearDDPTest(unittest.TestCase):
         "Delta state from KKT solution should be equals zero.")
 
     # Checking that the Vx is equals to the KKT Lagrangian multipliers
-    for i in range(N+1):
+    for i in xrange(N+1):
       Vx = self.ddpData.intervalDataVector[i].Vx
       self.assertTrue(np.allclose(Vx, lag[i*nx:(i+1)*nx]),
       "Vx should be equals to the Lagrangian multiplier.")
@@ -125,8 +125,9 @@ class LinearDDPTest(unittest.TestCase):
     Vxx_reg = self.ddpData.intervalDataVector[-1].Vxx.copy()
 
     # Checking both values of the Value-function Hessian
-    self.assertTrue(np.allclose(Vxx, Vxx_reg),
-                        "Regularization doesn't affect the terminal Vxx.")
+    self.assertTrue(
+      np.allclose(Vxx, Vxx_reg),
+      "Regularization doesn't affect the terminal Vxx.")
 
   def KKTSolver(self, ddpModel, ddpData):
     # Generate a warm-point trajectory from an initial condition
@@ -152,18 +153,18 @@ class LinearDDPTest(unittest.TestCase):
     Ixx = np.eye(nx)
     Oxx = np.zeros((nx,nx))
     Oxu = np.zeros((nx,nu))
-    g[:nx] = ddpData.intervalDataVector[0].dynamicsData.x
+    g[:nx] = ddpData.intervalDataVector[0].x
     w_i = np.zeros((nw,1))
     q_i = np.zeros((nw,1))
     Q_i = np.zeros((nw,nw))
     f_i = np.zeros((2*nx,nw))
-    for k in range(N):
+    for k in xrange(N):
       # Interval data
       data = ddpData.intervalDataVector[k]
 
       # State, control and decision vector
-      x_i = data.dynamicsData.x
-      u_i = data.dynamicsData.u
+      x_i = data.x
+      u_i = data.u
       w_i[:nx] = x_i
       w_i[nx:] = u_i
 
@@ -195,7 +196,7 @@ class LinearDDPTest(unittest.TestCase):
       g[k*nx:(k+2)*nx] += np.dot(f_i, w_i)
 
     # Terminal state and cost derivatives
-    x_T = ddpData.intervalDataVector[-1].dynamicsData.x
+    x_T = ddpData.intervalDataVector[-1].x
     lx_T = ddpData.intervalDataVector[-1].costData.lx
     lxx_T = ddpData.intervalDataVector[-1].costData.lxx
 

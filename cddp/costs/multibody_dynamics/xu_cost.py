@@ -41,23 +41,21 @@ class StateCost(RunningQuadraticCost):
     np.copyto(data.lxx, np.diag(self.weight.reshape(-1)))
     return data
 
-  def updateResidual(self, costData, dynamicsData):
+  def updateResidual(self, costData, dynamicsData, x, u):
     np.copyto(costData.r,
-      self.dynamicsModel.differenceState(dynamicsData,
-                                         costData.x_des,
-                                         dynamicsData.x))
+      self.dynamicsModel.differenceState(dynamicsData, costData.x_des, x))
 
-  def updateResidualLinearAppr(self, costData, dynamicsData):
+  def updateResidualLinearAppr(self, costData, dynamicsData, x, u):
     # Due to the residual is equals to x, we don't need to linearize each time.
     # So, rx is defined during the construction.
     return
 
-  def updateQuadraticAppr(self, costData, dynamicsData):
+  def updateQuadraticAppr(self, costData, dynamicsData, x, u):
     # We overwrite this function since this residual is equals to x. So, rx is
     # a vector of 1s, and it's not needed to multiple them.
 
     # Updating the linear approximation of the residual function
-    self.updateResidualLinearAppr(costData, dynamicsData)
+    self.updateResidualLinearAppr(costData, dynamicsData, x, u)
 
     # Updating the quadratic approximation of the cost function. We don't
     # overwrite again the lxx since is constant. This value is defined during
@@ -88,20 +86,20 @@ class ControlCost(RunningQuadraticCost):
     np.copyto(data.luu, np.diag(self.weight.reshape(-1)))
     return data
 
-  def updateResidual(self, costData, dynamicsData):
-    np.copyto(costData.r, dynamicsData.u - costData.u_des)
+  def updateResidual(self, costData, dynamicsData, x, u):
+    np.copyto(costData.r, u - costData.u_des)
 
-  def updateResidualLinearAppr(self, costData, dynamicsData):
+  def updateResidualLinearAppr(self, costData, dynamicsData, x, u):
     # Due to the residual is equals to u, we don't need to linearize each time.
     # So, ru is defined during the construction.
     return
 
-  def updateQuadraticAppr(self, costData, dynamicsData):
+  def updateQuadraticAppr(self, costData, dynamicsData, x, u):
     # We overwrite this function since this residual is equals to u. So, ru is
     # a vector of 1s, and it's not needed to multiple them.
 
     # Updating the linear approximation of the residual function
-    self.updateResidualLinearAppr(costData, dynamicsData)
+    self.updateResidualLinearAppr(costData, dynamicsData, x, u)
 
     # Updating the quadratic approximation of the cost function. We don't
     # overwrite again the luu since is constant. This value is defined during

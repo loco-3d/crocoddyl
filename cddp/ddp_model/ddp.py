@@ -13,6 +13,10 @@ class DDPTerminalIntervalData(object):
     :param ddpModel: DDP model
     :param tFinal: final time of the internal
     """
+    # Current and previous state
+    self.x = np.zeros((ddpModel.dynamicsModel.nxImpl(), 1))
+    self.x_prev = np.zeros((ddpModel.dynamicsModel.nxImpl(), 1))
+
     # Dynamic and cost data of the terminal interval
     self.dynamicsData = ddpModel.createTerminalDynamicsData(tFinal)
     self.costData = ddpModel.createTerminalCostData()
@@ -35,6 +39,12 @@ class DDPRunningIntervalData(object):
     :param tInit: initial time of the internal
     :param tFinal: final time of the internal
     """
+    # Current and previous state and control
+    self.x = np.zeros((ddpModel.dynamicsModel.nxImpl(), 1))
+    self.u = np.zeros((ddpModel.dynamicsModel.nu(), 1))
+    self.x_prev = np.zeros((ddpModel.dynamicsModel.nxImpl(), 1))
+    self.u_prev = np.zeros((ddpModel.dynamicsModel.nu(), 1))
+
     # Dynamic and cost data of the running interval
     self.dynamicsData = ddpModel.createRunningDynamicsData(tInit, tFinal - tInit)
     self.costData = ddpModel.createRunningCostData()
@@ -78,7 +88,7 @@ class DDPData(object):
     # Time, horizon and number of iterations
     self.timeline = timeline
     self.N = len(timeline) - 1
-    self.n_iter = -1.    
+    self.n_iter = -1
 
     # Interval data for the cost and dynamics, and their quadratic and linear
     # approximation, respectively
@@ -113,31 +123,26 @@ class DDPModel(object):
     self.dynamicsModel = dynamicsModel
     self.costManager = costManager
 
-  def forwardTerminalCalc(self, ddpData):
+  def forwardTerminalCalc(self, dynamicsData, costData, x):
     """Performes the dynamics integration to generate the state and control functions"""
-    self.dynamicsModel.forwardTerminalCalc(ddpData.dynamicsData)
-    self.costManager.forwardTerminalCalc(ddpData.costData, ddpData.dynamicsData)
+    self.dynamicsModel.forwardTerminalCalc(dynamicsData, x)
+    self.costManager.forwardTerminalCalc(costData, dynamicsData, x)
 
-  def forwardRunningCalc(self, ddpData):
+  def forwardRunningCalc(self, dynamicsData, costData, x, u, xNext):
     """Performes the dynamics integration to generate the state and control functions"""
-    self.dynamicsModel.forwardRunningCalc(ddpData.dynamicsData)
-    self.costManager.forwardRunningCalc(ddpData.costData, ddpData.dynamicsData)
+    self.dynamicsModel.forwardRunningCalc(dynamicsData, x, u, xNext)
+    self.costManager.forwardRunningCalc(costData, dynamicsData, x, u)
 
-  def backwardTerminalCalc(self, ddpData):
+  def backwardTerminalCalc(self, dynamicsData, costData, x):
     """Performs the calculations before the backward pass
     Pinocchio Data has already been filled with the forward pass."""
-    # Copying the current state into the previous one
-    np.copyto(ddpData.dynamicsData.x_prev, ddpData.dynamicsData.x)
-    self.dynamicsModel.backwardTerminalCalc(ddpData.dynamicsData)
-    self.costManager.backwardTerminalCalc(ddpData.costData, ddpData.dynamicsData)
+    self.dynamicsModel.backwardTerminalCalc(dynamicsData, x)
+    self.costManager.backwardTerminalCalc(costData, dynamicsData, x)
 
-  def backwardRunningCalc(self, ddpData):
+  def backwardRunningCalc(self, dynamicsData, costData, x, u):
     """Performs the calculations before the backward pass"""
-    # Copying the current state and control into the previous ones
-    np.copyto(ddpData.dynamicsData.x_prev, ddpData.dynamicsData.x)
-    np.copyto(ddpData.dynamicsData.u_prev, ddpData.dynamicsData.u)
-    self.dynamicsModel.backwardRunningCalc(ddpData.dynamicsData)
-    self.costManager.backwardRunningCalc(ddpData.costData, ddpData.dynamicsData)
+    self.dynamicsModel.backwardRunningCalc(dynamicsData, x, u)
+    self.costManager.backwardRunningCalc(costData, dynamicsData, x, u)
 
   def createRunningDynamicsData(self, tInit, dt):
     return self.dynamicsModel.createData(tInit, dt)
@@ -152,19 +157,19 @@ class DDPModel(object):
     return self.costManager.createTerminalData(self.dynamicsModel)
 
   def setInitial(self, ddpData, xInit, UInit):
+    """ Set the initial conditions to the ddpData.
     """
-    Performs data copying from init values to ddpData.
-    """
-    np.copyto(ddpData.intervalDataVector[0].dynamicsData.x, xInit)
-    #np.copyto(ddpData.intervalDataVector[0].dynamicsData.x_new, xInit)
+    np.copyto(ddpData.intervalDataVector[0].x, xInit)
+    np.copyto(ddpData.intervalDataVector[0].x_prev, xInit)
     for u, intervalData in izip(UInit,ddpData.intervalDataVector[:-1]):
-      np.copyto(intervalData.dynamicsData.u, u)
+      np.copyto(intervalData.u, u)
     return
 
   def setRunningReference(self, ddpData, Xref, name):
     index = self.costManager.getRunningCostIndex(name)
     for k, data in enumerate(ddpData.intervalDataVector[:-1]):
-      self.costManager.runningCosts[index].setReference(data.costData.costVector[index], Xref[k])
+      cost_data = data.costData.costVector[index]
+      self.costManager.runningCosts[index].setReference(cost_data, Xref[k])
 
   def setTerminalReference(self, ddpData, xref, name):
     index = self.costManager.getTerminalCostIndex(name)

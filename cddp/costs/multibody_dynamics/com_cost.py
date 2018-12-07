@@ -27,19 +27,19 @@ class CoMCost(RunningQuadraticCost):
   def createData(self, dynamicsModel):
     return CoMRunningData(dynamicsModel, self.nr)
 
-  def updateResidual(self, costData, dynamicsData):
+  def updateResidual(self, costData, dynamicsData, x, u):
     np.copyto(costData.r, dynamicsData.pinocchio.com[0] - costData.com_des)
 
-  def updateResidualLinearAppr(self, costData, dynamicsData):
+  def updateResidualLinearAppr(self, costData, dynamicsData, x, u):
     costData.rx[:,:self.dynamicsModel.nv()] = dynamicsData.pinocchio.Jcom
 
-  def updateQuadraticAppr(self, costData, dynamicsData):
+  def updateQuadraticAppr(self, costData, dynamicsData, x, u):
     # We overwrite this function since this residual function only depends on
     # state. So, the gradient and Hession of the cost w.r.t. the control remains
     # zero.
 
     # Updating the linear approximation of the residual function
-    self.updateResidualLinearAppr(costData, dynamicsData)
+    self.updateResidualLinearAppr(costData, dynamicsData, x, u)
 
     # Updating the quadratic approximation of the cost function
     np.copyto(costData.Q_r, np.multiply(self.weight, costData.r))

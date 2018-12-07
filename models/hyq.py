@@ -107,6 +107,6 @@ if display:
 
 # Printing the final goal
 frame_idx = robot.model.getFrameId("base_link")
-xf = ddpData.intervalDataVector[-1].dynamicsData.x
+xf = ddpData.intervalDataVector[-1].x
 qf = xf[:dynamics.nq()]
 print robot.framePlacement(qf, frame_idx)

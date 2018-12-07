@@ -59,7 +59,7 @@ def visualizePlan(robot, T, x0, X, frame_idx=None, path=False):
   robot.initDisplay(loadModel=True)
   it = 0
   t0 = 0.
-  for k in range(len(X)):
+  for k in range(len(X)-1):
     qk = X[k][:robot.nq]
     robot.display(qk)
     if frame_idx != None and path:

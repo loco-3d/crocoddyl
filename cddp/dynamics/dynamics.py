@@ -1,5 +1,6 @@
 import abc
 import numpy as np
+from cddp.utils import EPS
 
 
 class DynamicsData(object):
@@ -27,12 +28,6 @@ class DynamicsData(object):
     self.t = t
     self.dt = dt
 
-    # Current and previous state and control
-    self.x = np.zeros((dynamicsModel.nxImpl(), 1))
-    self.u = np.zeros((dynamicsModel.nu(), 1))
-    self.x_prev = np.zeros((dynamicsModel.nxImpl(), 1))
-    self.u_prev = np.zeros((dynamicsModel.nu(), 1))
-
     # System acceleration
     self.a = np.zeros((dynamicsModel.nv(), 1))
 
@@ -47,6 +42,13 @@ class DynamicsData(object):
       self.discretizer = dynamicsModel.discretizer.createData(dynamicsModel, dt)
 
     self.diff_x = np.zeros((dynamicsModel.nx(), 1))
+
+    # TODO: think if we need to create NumDiff data
+    self.h = np.sqrt(EPS)
+    self.x_pert = np.zeros((dynamicsModel.nx(), 1))
+    self.q_pert = np.zeros((dynamicsModel.nq(), 1))
+    self.v_pert = np.zeros((dynamicsModel.nv(), 1))
+    self.u_pert = np.zeros((dynamicsModel.nu(), 1))
 
 
 class DynamicsModel(object):
@@ -82,85 +84,141 @@ class DynamicsModel(object):
     self._nx = 2 * nv
 
   @abc.abstractmethod
-  def createData(dynamicsModel, t, dt):
+  def createData(self, t, dt):
     """ Create the dynamics data.
 
-    :param dynamicsModel: dynamics model
     :param t: starting time
     :param dt: step integration
     """
-    pass
+    raise NotImplementedError("Not implemented yet.")
 
-  @staticmethod
-  def updateTerms(dynamicsModel, dynamicsData):
+  @abc.abstractmethod
+  def updateTerms(self, dynamicsData, x):
     """ Update the terms needed for an user-defined dynamics.
 
-    :param dynamicsModel: dynamics model
     :param dynamicsData: dynamics data
+    :param x: state
+    :param u: control
     """
-    pass
+    raise NotImplementedError("Not implemented yet.")
 
-  @staticmethod
-  def updateDynamics(dynamicsModel, dynamicsData):
-    """ Update the an user-defined dynamics.
+  @abc.abstractmethod
+  def updateDynamics(self, dynamicsData, x, u):
+    """ Update the user-defined dynamics.
 
-    :param dynamicsModel: dynamics model
     :param dynamicsData: dynamics data
+    :param x: state
+    :param u: control
     """
-    pass
+    raise NotImplementedError("Not implemented yet.")
 
-  @staticmethod
-  def updateLinearAppr(dynamicsModel, dynamicsData):
-    """ Update the an user-defined dynamics.
+  @abc.abstractmethod
+  def updateLinearAppr(self, dynamicsData, x, u):
+    """ Update the user-defined dynamics.
 
-    :param dynamicsModel: dynamics model
     :param dynamicsData: dynamics data
+    :param x: state
+    :param u: control
     """
-    pass
+    # Resetting the acceleration derivatives
+    dynamicsData.aq.fill(0.)
+    dynamicsData.av.fill(0.)
+    dynamicsData.au.fill(0.)
 
-  @staticmethod
-  def integrateConfiguration(dynamicsModel, dynamicsData, q, dq):
+    # Computing the dynamics by a perturbation in the configuration
+    dynamicsData.x_pert[self.nq():] = x[self.nq():]
+    for i in xrange(self.nv()):
+      # Compute the pertubation in the configuration
+      dynamicsData.v_pert.fill(0.)
+      dynamicsData.v_pert[i] += dynamicsData.h
+      np.copyto(dynamicsData.q_pert,
+        self.integrateConfiguration(x[:self.nq()], dynamicsData.v_pert))
+      dynamicsData.x_pert[:self.nq()] = dynamicsData.q_pert
+
+      # Update the dynamics given a perturbation in the configuration and sum up
+      self.updateDynamics(dynamicsData, dynamicsData.x_pert, u)
+
+      # Summing up this perturbation
+      dynamicsData.aq[:,i] += np.array(dynamicsData.a)[:,0]
+
+
+    # Computing the dynamics by a perturbation in the velocity
+    np.copyto(dynamicsData.x_pert, x)
+    for i in xrange(self.nv()):
+      # Compute the pertubation in the velocity
+      dynamicsData.x_pert[self.nq():] = x[self.nq():]
+      dynamicsData.x_pert[i+self.nv()] += dynamicsData.h
+
+      # Update the dynamics given a perturbation in the velocity and sum up
+      self.updateDynamics(dynamicsData, dynamicsData.x_pert, u)
+      dynamicsData.av[:,i] += np.array(dynamicsData.a)[:,0]
+
+    # Computing the dynamics by a perturbation in the control
+    for i in xrange(self.nu()):
+      # Compute the pertubation in the control
+      np.copyto(dynamicsData.u_pert, u)
+      dynamicsData.u_pert[i] += dynamicsData.h
+
+      # Update the dynamics given a perturbation in the control and sum up
+      self.updateDynamics(dynamicsData, x, dynamicsData.u_pert)
+      dynamicsData.au[:,i] += np.array(dynamicsData.a)[:,0]
+
+    # Adding the nominal acceleration
+    self.updateDynamics(dynamicsData, x, u)
+    dynamicsData.aq -= dynamicsData.a
+    dynamicsData.av -= dynamicsData.a
+    dynamicsData.au -= dynamicsData.a
+
+    # Getting the final derivatives (i.e. da/dq, da/dv, da/du). For that we
+    # divide by delta_t
+    dynamicsData.av /= dynamicsData.h
+    dynamicsData.aq /= dynamicsData.h
+    dynamicsData.au /= dynamicsData.h
+
+  @abc.abstractmethod
+  def integrateConfiguration(self, q, dq):
     """ Operator that integrates the configuration.
 
     :param q: current configuration point
     :param dq: displacement of the configuration
     """
-    pass
+    raise NotImplementedError("Not implemented yet.")
 
-  @staticmethod
-  def differenceConfiguration(dynamicsModel, dynamicsData, q0, q1):
+  @abc.abstractmethod
+  def differenceConfiguration(self, q0, q1):
     """ Operator that differentiates the configuration.
 
     :param q0: current configuration point
     :param q1: next configurtion point
     """
-    pass
+    raise NotImplementedError("Not implemented yet.")
 
-  def forwardRunningCalc(dynamicsModel, dynamicsData):
+  def forwardRunningCalc(self, dynamicsData, x, u, xNext):
     # Updating the dynamics
-    dynamicsModel.updateDynamics(dynamicsModel, dynamicsData)
+    self.updateDynamics(dynamicsData, x, u)
 
-  def forwardTerminalCalc(dynamicsModel, dynamicsData):
+    # Integrating the dynanics
+    self.integrator(self, dynamicsData, x, u, xNext)
+
+  def forwardTerminalCalc(self, dynamicsData, x):
     # Updating the dynamic terms
-    dynamicsModel.updateTerms(dynamicsModel, dynamicsData)
+    self.updateTerms(dynamicsData, x)
 
-  def backwardRunningCalc(dynamicsModel, dynamicsData):
+  def backwardRunningCalc(self, dynamicsData, x, u):
     # Updating the continuous-time linear approximation
-    dynamicsModel.updateLinearAppr(dynamicsModel, dynamicsData)
+    self.updateLinearAppr(dynamicsData, x, u)
     # Discretizing this linear approximation
-    dynamicsModel.discretizer(dynamicsModel, dynamicsData)
+    self.discretizer(self, dynamicsData)
 
-  def backwardTerminalCalc(dynamicsModel, dynamicsData):
+  def backwardTerminalCalc(self, dynamicsData, x):
     # Updating the dynamic terms
-    dynamicsModel.updateTerms(dynamicsModel, dynamicsData)
+    self.updateTerms(dynamicsData, x)
 
-  def differenceState(dynamicsModel, dynamicsData, x0, x1):
-    dynamicsData.diff_x[dynamicsModel.nv():] = \
-        x1[dynamicsModel.nq():,:] - x0[dynamicsModel.nq():,:]
-    dynamicsData.diff_x[:dynamicsModel.nv()] = \
-        dynamicsModel.differenceConfiguration(dynamicsModel, dynamicsData,
-                                              x0[:dynamicsModel.nq()],
-                                              x1[:dynamicsModel.nq()])
+  def differenceState(self, dynamicsData, x0, x1):
+    dynamicsData.diff_x[self.nv():] = \
+        x1[self.nq():,:] - x0[self.nq():,:]
+    dynamicsData.diff_x[:self.nv()] = \
+        self.differenceConfiguration(x0[:self.nq()], x1[:self.nq()])
     return dynamicsData.diff_x
 
   def nq(self):
