@@ -3,87 +3,100 @@ import numpy as np
 import cddp
 
 
-class SpringMassNumDiffTest(unittest.TestCase):
+class NumDiffSpringMass(cddp.SpringMass):
+  def updateLinearAppr(self, dynamicsData, x, u):
+      cddp.DynamicsModel.updateLinearAppr(self, dynamicsData, x, u)
+
+class NumDiffForwardDynamics(cddp.ForwardDynamics):
+  def updateLinearAppr(self, dynamicsData, x, u):
+      cddp.DynamicsModel.updateLinearAppr(self, dynamicsData, x, u)
+
+
+class SpringMassDerivativesTest(unittest.TestCase):
   def setUp(self):
-    # Creating the dynamic model with analytical and numerical derivatives
+    # Creating the dynamic model of the system and its integrator
     integrator = cddp.EulerIntegrator()
     discretizer = cddp.EulerDiscretizer()
-    self.analytic_dyn = cddp.SpringMass(integrator, discretizer)
-    self.numdiff_dyn = cddp.NumDiffSpringMass(integrator, discretizer)
+    dynamics = cddp.SpringMass(integrator, discretizer)
+    numdiff_dynamics = NumDiffSpringMass(integrator, discretizer)
 
-    # Creating the data for both dynamic models
-    self.analytic_data = self.analytic_dyn.createData()
-    self.numdiff_data = self.numdiff_dyn.createData()
+    # Creating the data
+    self.data = dynamics.createData(0., 1e-3)
+    self.numdiff_data = numdiff_dynamics.createData(0., 1e-3)
 
     # Creating the random state and control
-    self.x0 = np.random.rand(self.analytic_dyn.getConfigurationDimension(), 1)
-    self.u0 = np.random.rand(self.analytic_dyn.getControlDimension(), 1)
+    x = np.random.rand(dynamics.nxImpl(), 1)
+    u = np.random.rand(dynamics.nu(), 1)
 
-  def test_numerical_state_derivative(self):
-    fx = self.analytic_dyn.fx(self.analytic_data, self.x0, self.u0)
-    fx_ndiff = self.numdiff_dyn.fx(self.numdiff_data, self.x0, self.u0)
-    self.assertTrue(np.allclose(fx, fx_ndiff), \
-      "The state derivative computation is wrong.")
+    # Computing the linear approximation by analytical derivatives
+    dynamics.updateLinearAppr(self.data, x, u)
 
-  def test_numerical_control_derivative(self):
-    fu = self.analytic_dyn.fu(self.analytic_data, self.x0, self.u0)
-    fu_ndiff = self.numdiff_dyn.fu(self.numdiff_data, self.x0, self.u0)
-    self.assertTrue(np.allclose(fu, fu_ndiff), \
-      "The control derivative computation is wrong.")
+    # Computing the linear approximation by NumDiff
+    numdiff_dynamics.updateLinearAppr(self.numdiff_data, x, u)
+
+  def test_numerical_linear_approximation(self):
+    # Checking da/dq
+    self.assertTrue(np.allclose(self.data.aq, self.numdiff_data.aq), \
+      "The analytical configuration derivative is wrong.")
+
+    # Checking da/dv
+    self.assertTrue(np.allclose(self.data.av, self.numdiff_data.av), \
+      "The analytical velocity derivative is wrong.")
+
+    # Checking da/dv
+    self.assertTrue(np.allclose(self.data.au, self.numdiff_data.au), \
+      "The analytical control derivative is wrong.")
 
 
-class ArmNumDiffTest(unittest.TestCase):
+class ForwardDynamicsDerivativesTest(unittest.TestCase):
   def setUp(self):
-    import rospkg
+    # Getting the robot model from the URDF file. Note that we use the URDF file
+    # inside our repository. By redefining the ROS_PACKAGE_PATH, Gepetto viewer
+    # is able to find the meshes
     import pinocchio as se3
-
-    # Creating the system model
-    path = rospkg.RosPack().get_path('talos_data')
-    urdf = path + '/robots/talos_left_arm.urdf'
+    import os
+    filename = str(os.path.dirname(os.path.abspath(__file__))) + '/../models'
+    os.environ['ROS_PACKAGE_PATH'] = filename
+    path = filename + '/talos_data/'
+    urdf = path + 'robots/talos_left_arm.urdf'
     robot = se3.robot_wrapper.RobotWrapper(urdf, path)
-    model = robot.model
-    self.system = cddp.NumDiffForwardDynamics(model)
 
-    # Creating the system data
-    self.data = self.system.createData()
+    # Create the dynamics and its integrator and discretizer
+    integrator = cddp.EulerIntegrator()
+    discretizer = cddp.EulerDiscretizer()
+    dynamics = cddp.ForwardDynamics(integrator, discretizer, robot.model)
+    numdiff_dynamics = NumDiffForwardDynamics(integrator, discretizer, robot.model)
 
-  def test_numerical_state_derivative(self):
-    x = np.random.rand(self.system.getConfigurationDimension(), 1)
-    u = np.zeros((self.system.getControlDimension(), 1))
-    
-    delta_x = 1e-4 * np.ones((self.system.getConfigurationDimension(), 1))
-    fx = self.system.fx(self.data, x, u).copy()
-    approx_df = fx * delta_x
-    df = self.system.f(self.data, x + delta_x, u).copy() -\
-         self.system.f(self.data, x, u).copy()
-    self.assertTrue(np.allclose(df, approx_df, atol=1e-5), \
-      "The state derivative computation is wrong.")
+    # Creating the data
+    self.data = dynamics.createData(0., 1e-3)
+    self.numdiff_data = numdiff_dynamics.createData(0., 1e-3)
 
-  def test_numerical_control_derivative(self):
-    x = np.zeros((self.system.getConfigurationDimension(), 1))
-    u = np.random.rand(self.system.getControlDimension(), 1)
-    
-    delta_u = 1e-4 * np.ones((self.system.getControlDimension(), 1))
-    fu = self.system.fu(self.data, x, u).copy()
-    approx_df = fu * delta_u
-    df = self.system.f(self.data, x, u + delta_u).copy() -\
-         self.system.f(self.data, x, u).copy()
-    self.assertTrue(np.allclose(df, approx_df, atol=1e-5), \
-      "The control derivative computation is wrong.")
+    # Creating the random state and control
+    x = np.random.rand(dynamics.nxImpl(), 1)
+    u = np.random.rand(dynamics.nu(), 1)
 
-  def test_numerical_linearized_system(self):
-    x = np.random.rand(self.system.getConfigurationDimension(), 1)
-    u = np.random.rand(self.system.getControlDimension(), 1)
+    # Computing the linear approximation by analytical derivatives
+    dynamics.updateDynamics(self.data, x, u)
+    dynamics.updateLinearAppr(self.data, x, u)
 
-    delta_x = 1e-4 * np.ones((self.system.getConfigurationDimension(), 1))
-    delta_u = 1e-4 * np.ones((self.system.getControlDimension(), 1))
-    fx = self.system.fx(self.data, x, u).copy()
-    fu = self.system.fu(self.data, x, u).copy()
-    approx_df = fx * delta_x + fu * delta_u
-    df = self.system.f(self.data, x + delta_x, u + delta_u).copy() -\
-         self.system.f(self.data, x, u).copy()
-    self.assertTrue(np.allclose(df, approx_df, atol=1e-5), \
-      "The system linearization around the nominal point is wrong.")
+    # Computing the linear approximation by NumDiff
+    numdiff_dynamics.updateLinearAppr(self.numdiff_data, x, u)
+
+  def test_numerical_linear_approximation(self):
+    # Checking da/dq
+    self.assertTrue(
+      np.allclose(self.data.aq, self.numdiff_data.aq, rtol=1e-3, atol=1e-5), \
+      "The analytical configuration derivative is wrong.")
+
+    # Checking da/dv
+    self.assertTrue(
+      np.allclose(self.data.av, self.numdiff_data.av, rtol=1e-3, atol=1e-5), \
+      "The analytical velocity derivative is wrong.")
+
+    # Checking da/dv
+    self.assertTrue(
+      np.allclose(self.data.au, self.numdiff_data.au, rtol=1e-3, atol=1e-5), \
+      "The analytical control derivative is wrong.")
 
 if __name__ == '__main__':
   unittest.main()

@@ -1,5 +1,6 @@
 import abc
 import numpy as np
+from cddp.utils import EPS
 
 
 class DynamicsData(object):
@@ -41,6 +42,13 @@ class DynamicsData(object):
       self.discretizer = dynamicsModel.discretizer.createData(dynamicsModel, dt)
 
     self.diff_x = np.zeros((dynamicsModel.nx(), 1))
+
+    # TODO: think if we need to create NumDiff data
+    self.h = np.sqrt(EPS)
+    self.x_pert = np.zeros((dynamicsModel.nx(), 1))
+    self.q_pert = np.zeros((dynamicsModel.nq(), 1))
+    self.v_pert = np.zeros((dynamicsModel.nv(), 1))
+    self.u_pert = np.zeros((dynamicsModel.nu(), 1))
 
 
 class DynamicsModel(object):
@@ -89,6 +97,8 @@ class DynamicsModel(object):
     """ Update the terms needed for an user-defined dynamics.
 
     :param dynamicsData: dynamics data
+    :param x: state
+    :param u: control
     """
     raise NotImplementedError("Not implemented yet.")
 
@@ -97,6 +107,8 @@ class DynamicsModel(object):
     """ Update the user-defined dynamics.
 
     :param dynamicsData: dynamics data
+    :param x: state
+    :param u: control
     """
     raise NotImplementedError("Not implemented yet.")
 
@@ -105,8 +117,63 @@ class DynamicsModel(object):
     """ Update the user-defined dynamics.
 
     :param dynamicsData: dynamics data
+    :param x: state
+    :param u: control
     """
-    raise NotImplementedError("Not implemented yet.")
+    # Resetting the acceleration derivatives
+    dynamicsData.aq.fill(0.)
+    dynamicsData.av.fill(0.)
+    dynamicsData.au.fill(0.)
+
+    # Computing the dynamics by a perturbation in the configuration
+    dynamicsData.x_pert[self.nq():] = x[self.nq():]
+    for i in xrange(self.nv()):
+      # Compute the pertubation in the configuration
+      dynamicsData.v_pert.fill(0.)
+      dynamicsData.v_pert[i] += dynamicsData.h
+      np.copyto(dynamicsData.q_pert,
+        self.integrateConfiguration(x[:self.nq()], dynamicsData.v_pert))
+      dynamicsData.x_pert[:self.nq()] = dynamicsData.q_pert
+
+      # Update the dynamics given a perturbation in the configuration and sum up
+      self.updateDynamics(dynamicsData, dynamicsData.x_pert, u)
+
+      # Summing up this perturbation
+      dynamicsData.aq[:,i] += np.array(dynamicsData.a)[:,0]
+
+
+    # Computing the dynamics by a perturbation in the velocity
+    np.copyto(dynamicsData.x_pert, x)
+    for i in xrange(self.nv()):
+      # Compute the pertubation in the velocity
+      dynamicsData.x_pert[self.nq():] = x[self.nq():]
+      dynamicsData.x_pert[i+self.nv()] += dynamicsData.h
+
+      # Update the dynamics given a perturbation in the velocity and sum up
+      self.updateDynamics(dynamicsData, dynamicsData.x_pert, u)
+      dynamicsData.av[:,i] += np.array(dynamicsData.a)[:,0]
+
+    # Computing the dynamics by a perturbation in the control
+    for i in xrange(self.nu()):
+      # Compute the pertubation in the control
+      np.copyto(dynamicsData.u_pert, u)
+      dynamicsData.u_pert[i] += dynamicsData.h
+
+      # Update the dynamics given a perturbation in the control and sum up
+      self.updateDynamics(dynamicsData, x, dynamicsData.u_pert)
+      dynamicsData.au[:,i] += np.array(dynamicsData.a)[:,0]
+
+    # Adding the nominal acceleration
+    self.updateDynamics(dynamicsData, x, u)
+    dynamicsData.aq -= dynamicsData.a
+    dynamicsData.av -= dynamicsData.a
+    dynamicsData.au -= dynamicsData.a
+
+    # Getting the final derivatives (i.e. da/dq, da/dv, da/du). For that we
+    # divide by delta_t
+    dynamicsData.av /= dynamicsData.h
+    dynamicsData.aq /= dynamicsData.h
+    dynamicsData.au /= dynamicsData.h
 
   @abc.abstractmethod
   def integrateConfiguration(self, q, dq):
