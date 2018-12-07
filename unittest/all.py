@@ -4,7 +4,7 @@ import sys
 testmodules = [
   # 'cost',
   # 'soft_constraint',
-  # 'derivatives',
+  'dynamics',
   'integrator',
   'ddp',
 ]
