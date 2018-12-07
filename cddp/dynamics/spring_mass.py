@@ -23,33 +23,28 @@ class SpringMass(DynamicsModel):
   def __init__(self, integrator, discretizer):
     DynamicsModel.__init__(self, integrator, discretizer, 1, 1, 1)
 
-  def createData(dynamicsModel, t, dt):
-    return SpringMassData(dynamicsModel, t, dt)
+  def createData(self, t, dt):
+    return SpringMassData(self, t, dt)
 
-  @staticmethod
-  def updateTerms(dynamicsModel, dynamicsData):
+  def updateTerms(self, dynamicsData):
     # We don't need to update the dynamics terms since it's a LTI system
     return
 
-  @staticmethod
-  def updateDynamics(dynamicsModel, dynamicsData):
+  def updateDynamics(self, dynamicsData):
     # We don't need to update the dynamics since it's a LTI system
-    q = dynamicsData.x[:dynamicsModel.nq()]
-    v = dynamicsData.x[dynamicsModel.nq():]
+    q = dynamicsData.x[:self.nq()]
+    v = dynamicsData.x[self.nq():]
     np.copyto(dynamicsData.a,
       dynamicsData.aq * q + dynamicsData.av * v +\
       dynamicsData.au * dynamicsData.u)
     return
 
-  @staticmethod
-  def updateLinearAppr(dynamicsModel, dynamicsData):
+  def updateLinearAppr(self, dynamicsData):
     # We don't need to update the linear approximation since it's a LTI system
     return
 
-  @staticmethod
-  def integrateConfiguration(dynamicsModel, dynamicsData, q, dq):
+  def integrateConfiguration(self, q, dq):
     return q + dq
 
-  @staticmethod
-  def differenceConfiguration(dynamicsModel, dynamicsData, q0, q1):
+  def differenceConfiguration(self, q0, q1):
     return q1 - q0

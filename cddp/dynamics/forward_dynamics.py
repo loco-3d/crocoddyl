@@ -30,41 +30,38 @@ class ForwardDynamics(DynamicsModel):
                            pinocchioModel.nv)
     self.pinocchio = pinocchioModel
 
-  def createData(dynamicsModel, t, dt):
-    return ForwardDynamicsData(dynamicsModel, t, dt)
+  def createData(self, t, dt):
+    return ForwardDynamicsData(self, t, dt)
 
-  @staticmethod
-  def updateTerms(dynamicsModel, dynamicsData):
+  def updateTerms(self, dynamicsData):
     # Compute all terms
     #TODO: Try to reduce calculations in forward pass, and move them to backward pass
-    se3.computeAllTerms(dynamicsModel.pinocchio,
+    se3.computeAllTerms(self.pinocchio,
                         dynamicsData.pinocchio,
-                        dynamicsData.x[:dynamicsModel.nq()],
-                        dynamicsData.x[dynamicsModel.nq():])
-    se3.updateFramePlacements(dynamicsModel.pinocchio,
+                        dynamicsData.x[:self.nq()],
+                        dynamicsData.x[self.nq():])
+    se3.updateFramePlacements(self.pinocchio,
                               dynamicsData.pinocchio)
 
-  @staticmethod
-  def updateDynamics(dynamicsModel, dynamicsData):
+  def updateDynamics(self, dynamicsData):
     # Update all terms
-    dynamicsModel.updateTerms(dynamicsModel, dynamicsData)
+    self.updateTerms(dynamicsData)
 
     # Running ABA algorithm
-    se3.aba(dynamicsModel.pinocchio,
+    se3.aba(self.pinocchio,
             dynamicsData.pinocchio,
-            dynamicsData.x[:dynamicsModel.nq()],
-            dynamicsData.x[dynamicsModel.nq():],
+            dynamicsData.x[:self.nq()],
+            dynamicsData.x[self.nq():],
             dynamicsData.u)
 
     # Updating the system acceleration
     np.copyto(dynamicsData.a, dynamicsData.pinocchio.ddq)
 
-  @staticmethod
-  def updateLinearAppr(dynamicsModel, dynamicsData):
-    se3.computeABADerivatives(dynamicsModel.pinocchio,
+  def updateLinearAppr(self, dynamicsData):
+    se3.computeABADerivatives(self.pinocchio,
                               dynamicsData.pinocchio,
-                              dynamicsData.x[:dynamicsModel.nq()],
-                              dynamicsData.x[dynamicsModel.nq():],
+                              dynamicsData.x[:self.nq()],
+                              dynamicsData.x[self.nq():],
                               dynamicsData.u)
 
     # Updating the system derivatives
@@ -72,10 +69,8 @@ class ForwardDynamics(DynamicsModel):
     np.copyto(dynamicsData.av, dynamicsData.pinocchio.ddq_dv)
     np.copyto(dynamicsData.au, dynamicsData.pinocchio.Minv)
 
-  @staticmethod
-  def integrateConfiguration(dynamicsModel, dynamicsData, q, dq):
-    return se3.integrate(dynamicsModel.pinocchio, q, dq)
+  def integrateConfiguration(self, q, dq):
+    return se3.integrate(self.pinocchio, q, dq)
 
-  @staticmethod
-  def differenceConfiguration(dynamicsModel, dynamicsData, q0, q1):
-    return se3.difference(dynamicsModel.pinocchio, q0, q1)
+  def differenceConfiguration(self, q0, q1):
+    return se3.difference(self.pinocchio, q0, q1)

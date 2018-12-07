@@ -82,85 +82,79 @@ class DynamicsModel(object):
     self._nx = 2 * nv
 
   @abc.abstractmethod
-  def createData(dynamicsModel, t, dt):
+  def createData(self, t, dt):
     """ Create the dynamics data.
 
-    :param dynamicsModel: dynamics model
     :param t: starting time
     :param dt: step integration
     """
-    pass
+    raise NotImplementedError("Not implemented yet.")
 
-  @staticmethod
-  def updateTerms(dynamicsModel, dynamicsData):
+  @abc.abstractmethod
+  def updateTerms(self, dynamicsData):
     """ Update the terms needed for an user-defined dynamics.
 
-    :param dynamicsModel: dynamics model
     :param dynamicsData: dynamics data
     """
-    pass
+    raise NotImplementedError("Not implemented yet.")
 
-  @staticmethod
-  def updateDynamics(dynamicsModel, dynamicsData):
-    """ Update the an user-defined dynamics.
+  @abc.abstractmethod
+  def updateDynamics(self, dynamicsData):
+    """ Update the user-defined dynamics.
 
-    :param dynamicsModel: dynamics model
     :param dynamicsData: dynamics data
     """
-    pass
+    raise NotImplementedError("Not implemented yet.")
 
-  @staticmethod
-  def updateLinearAppr(dynamicsModel, dynamicsData):
-    """ Update the an user-defined dynamics.
+  @abc.abstractmethod
+  def updateLinearAppr(self, dynamicsData):
+    """ Update the user-defined dynamics.
 
-    :param dynamicsModel: dynamics model
     :param dynamicsData: dynamics data
     """
-    pass
+    raise NotImplementedError("Not implemented yet.")
 
-  @staticmethod
-  def integrateConfiguration(dynamicsModel, dynamicsData, q, dq):
+  @abc.abstractmethod
+  def integrateConfiguration(self, q, dq):
     """ Operator that integrates the configuration.
 
     :param q: current configuration point
     :param dq: displacement of the configuration
     """
-    pass
+    raise NotImplementedError("Not implemented yet.")
 
-  @staticmethod
-  def differenceConfiguration(dynamicsModel, dynamicsData, q0, q1):
+  @abc.abstractmethod
+  def differenceConfiguration(self, q0, q1):
     """ Operator that differentiates the configuration.
 
     :param q0: current configuration point
     :param q1: next configurtion point
     """
-    pass
+    raise NotImplementedError("Not implemented yet.")
 
-  def forwardRunningCalc(dynamicsModel, dynamicsData):
+  def forwardRunningCalc(self, dynamicsData):
     # Updating the dynamics
-    dynamicsModel.updateDynamics(dynamicsModel, dynamicsData)
+    self.updateDynamics(dynamicsData)
 
-  def forwardTerminalCalc(dynamicsModel, dynamicsData):
+  def forwardTerminalCalc(self, dynamicsData):
     # Updating the dynamic terms
-    dynamicsModel.updateTerms(dynamicsModel, dynamicsData)
+    self.updateTerms(dynamicsData)
 
-  def backwardRunningCalc(dynamicsModel, dynamicsData):
+  def backwardRunningCalc(self, dynamicsData):
     # Updating the continuous-time linear approximation
-    dynamicsModel.updateLinearAppr(dynamicsModel, dynamicsData)
+    self.updateLinearAppr(dynamicsData)
     # Discretizing this linear approximation
-    dynamicsModel.discretizer(dynamicsModel, dynamicsData)
+    self.discretizer(self, dynamicsData)
 
-  def backwardTerminalCalc(dynamicsModel, dynamicsData):
+  def backwardTerminalCalc(self, dynamicsData):
     # Updating the dynamic terms
-    dynamicsModel.updateTerms(dynamicsModel, dynamicsData)
+    self.updateTerms(dynamicsData)
 
-  def differenceState(dynamicsModel, dynamicsData, x0, x1):
-    dynamicsData.diff_x[dynamicsModel.nv():] = \
-        x1[dynamicsModel.nq():,:] - x0[dynamicsModel.nq():,:]
-    dynamicsData.diff_x[:dynamicsModel.nv()] = \
-        dynamicsModel.differenceConfiguration(dynamicsModel, dynamicsData,
-                                              x0[:dynamicsModel.nq()],
-                                              x1[:dynamicsModel.nq()])
+  def differenceState(self, dynamicsData, x0, x1):
+    dynamicsData.diff_x[self.nv():] = \
+        x1[self.nq():,:] - x0[self.nq():,:]
+    dynamicsData.diff_x[:self.nv()] = \
+        self.differenceConfiguration(x0[:self.nq()], x1[:self.nq()])
     return dynamicsData.diff_x
 
   def nq(self):

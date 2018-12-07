@@ -23,11 +23,11 @@ class IntegratorTest(unittest.TestCase):
     x_next = np.zeros((dynamics.nx(),1))
 
     # Integrate the dynamics
-    dynamics.updateDynamics(dynamics, data)
+    dynamics.updateDynamics(data)
     dynamics.integrator(dynamics, data, x_next)
 
     # Updating the linear approximation and discretizing it
-    dynamics.updateLinearAppr(dynamics, data)
+    dynamics.updateLinearAppr(data)
     dynamics.discretizer(dynamics, data)
     fx = data.discretizer.fx
     fu = data.discretizer.fu
