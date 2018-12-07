@@ -54,10 +54,7 @@ class ForwardDynamicsDerivativesTest(unittest.TestCase):
     # inside our repository. By redefining the ROS_PACKAGE_PATH, Gepetto viewer
     # is able to find the meshes
     import pinocchio as se3
-    import os
-    filename = str(os.path.dirname(os.path.abspath(__file__))) + '/../models'
-    os.environ['ROS_PACKAGE_PATH'] = filename
-    path = filename + '/talos_data/'
+    path = '/opt/openrobots/share/talos_data/'
     urdf = path + 'robots/talos_left_arm.urdf'
     robot = se3.robot_wrapper.RobotWrapper(urdf, path)
 
