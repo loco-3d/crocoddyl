@@ -9,11 +9,9 @@ plot = True
 
 
 # Getting the robot model from the URDF file. Note that we use the URDF file
-# inside our repository. By redefining the ROS_PACKAGE_PATH, Gepetto viewer is
-# able to find the meshes
+# installed by binary (through sudo-apt install robotpkg-talos-data)
 filename = str(os.path.dirname(os.path.abspath(__file__)))
-os.environ['ROS_PACKAGE_PATH'] = filename
-path = filename + '/talos_data/'
+path = '/opt/openrobots/share/talos_data/'
 urdf = path + 'robots/talos_left_arm.urdf'
 robot = se3.robot_wrapper.RobotWrapper(urdf, path)
 model = robot.model
