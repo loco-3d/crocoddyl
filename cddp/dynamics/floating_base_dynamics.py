@@ -48,27 +48,24 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
   def createData(self, t, dt):
     return FloatingBaseMultibodyDynamicsData(self, t, dt)
 
-  def updateTerms(self, dynamicsData):
+  def updateTerms(self, dynamicsData, x):
     # Compute all terms
     #TODO: Try to reduce calculations in forward pass, and move them to backward pass
-    se3.computeAllTerms(self.pinocchio,
-                        dynamicsData.pinocchio,
-                        dynamicsData.x[:self.nq()],
-                        dynamicsData.x[self.nq():])
+    se3.computeAllTerms(self.pinocchio, dynamicsData.pinocchio,
+                        x[:self.nq()], x[self.nq():])
     se3.updateFramePlacements(self.pinocchio,
                               dynamicsData.pinocchio)
 
-  def updateDynamics(self, dynamicsData):
+  def updateDynamics(self, dynamicsData, x, u):
     # Computing the constrained forward dynamics
     self.computeDynamics(dynamicsData,
-                         dynamicsData.x[:self.nq()],
-                         dynamicsData.x[self.nq():],
-                         np.vstack([np.zeros((6,1)), dynamicsData.u]))
+                         x[:self.nq()], x[self.nq():],
+                         np.vstack([np.zeros((6,1)), u]))
 
     # Updating the system acceleration
     np.copyto(dynamicsData.a, dynamicsData.pinocchio.ddq)
 
-  def updateLinearAppr(self, dynamicsData):
+  def updateLinearAppr(self, dynamicsData, x, u):
     #TODO: Replace with analytical derivatives
     np.copyto(dynamicsData.aq, -dynamicsData.pinocchio.ddq)
     np.copyto(dynamicsData.av, -dynamicsData.pinocchio.ddq)
@@ -95,14 +92,12 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
       dynamicsData.v_pert.fill(0.)
       dynamicsData.v_pert[i] += dynamicsData.h
       np.copyto(dynamicsData.q_pert,
-                se3.integrate(self.pinocchio,
-                              dynamicsData.x[:self.nq()],
-                              dynamicsData.v_pert))
+        se3.integrate(self.pinocchio, x[:self.nq()], dynamicsData.v_pert))
 
       self.computeDynamics(dynamicsData,
                            dynamicsData.q_pert,
-                           dynamicsData.x[self.nq():],
-                           np.vstack([np.zeros((6,1)), dynamicsData.u]))
+                           x[self.nq():],
+                           np.vstack([np.zeros((6,1)), u]))
 
       dynamicsData.aq[:,i] += np.array(dynamicsData.pinocchio.ddq)[:,0]
       dynamicsData.gq[:,i] += np.array(dynamicsData.pinocchio.lambda_c)[:,0]
@@ -111,13 +106,13 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
 
     # dadv #dgdv
     for i in xrange(self.nv()):
-      np.copyto(dynamicsData.v_pert, dynamicsData.x[self.nq():])
+      np.copyto(dynamicsData.v_pert, x[self.nq():])
       dynamicsData.v_pert[i] += dynamicsData.h
 
       self.computeDynamics(dynamicsData,
-                           dynamicsData.x[:self.nq()],
+                           x[:self.nq()],
                            dynamicsData.v_pert,
-                           np.vstack([np.zeros((6,1)), dynamicsData.u]))
+                           np.vstack([np.zeros((6,1)), u]))
 
       dynamicsData.av[:,i] += np.array(dynamicsData.pinocchio.ddq)[:,0]
       dynamicsData.gv[:,i] += np.array(dynamicsData.pinocchio.lambda_c)[:,0]

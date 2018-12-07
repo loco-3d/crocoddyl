@@ -153,7 +153,7 @@ class LinearDDPTest(unittest.TestCase):
     Ixx = np.eye(nx)
     Oxx = np.zeros((nx,nx))
     Oxu = np.zeros((nx,nu))
-    g[:nx] = ddpData.intervalDataVector[0].dynamicsData.x
+    g[:nx] = ddpData.intervalDataVector[0].x
     w_i = np.zeros((nw,1))
     q_i = np.zeros((nw,1))
     Q_i = np.zeros((nw,nw))
@@ -163,8 +163,8 @@ class LinearDDPTest(unittest.TestCase):
       data = ddpData.intervalDataVector[k]
 
       # State, control and decision vector
-      x_i = data.dynamicsData.x
-      u_i = data.dynamicsData.u
+      x_i = data.x
+      u_i = data.u
       w_i[:nx] = x_i
       w_i[nx:] = u_i
 
@@ -196,7 +196,7 @@ class LinearDDPTest(unittest.TestCase):
       g[k*nx:(k+2)*nx] += np.dot(f_i, w_i)
 
     # Terminal state and cost derivatives
-    x_T = ddpData.intervalDataVector[-1].dynamicsData.x
+    x_T = ddpData.intervalDataVector[-1].x
     lx_T = ddpData.intervalDataVector[-1].costData.lx
     lxx_T = ddpData.intervalDataVector[-1].costData.lxx
 

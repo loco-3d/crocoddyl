@@ -18,16 +18,13 @@ class IntegratorTest(unittest.TestCase):
     # Copying the state and control values
     x = np.random.rand(dynamics.nx(),1)
     u = np.random.rand(dynamics.nu(),1)
-    np.copyto(data.x, x)
-    np.copyto(data.u, u)
     x_next = np.zeros((dynamics.nx(),1))
 
     # Integrate the dynamics
-    dynamics.updateDynamics(data)
-    dynamics.integrator(dynamics, data, x_next)
+    dynamics.integrator(dynamics, data, x, u, x_next)
 
     # Updating the linear approximation and discretizing it
-    dynamics.updateLinearAppr(data)
+    dynamics.updateLinearAppr(data, x, u)
     dynamics.discretizer(dynamics, data)
     fx = data.discretizer.fx
     fu = data.discretizer.fu

@@ -27,12 +27,6 @@ class DynamicsData(object):
     self.t = t
     self.dt = dt
 
-    # Current and previous state and control
-    self.x = np.zeros((dynamicsModel.nxImpl(), 1))
-    self.u = np.zeros((dynamicsModel.nu(), 1))
-    self.x_prev = np.zeros((dynamicsModel.nxImpl(), 1))
-    self.u_prev = np.zeros((dynamicsModel.nu(), 1))
-
     # System acceleration
     self.a = np.zeros((dynamicsModel.nv(), 1))
 
@@ -91,7 +85,7 @@ class DynamicsModel(object):
     raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
-  def updateTerms(self, dynamicsData):
+  def updateTerms(self, dynamicsData, x):
     """ Update the terms needed for an user-defined dynamics.
 
     :param dynamicsData: dynamics data
@@ -99,7 +93,7 @@ class DynamicsModel(object):
     raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
-  def updateDynamics(self, dynamicsData):
+  def updateDynamics(self, dynamicsData, x, u):
     """ Update the user-defined dynamics.
 
     :param dynamicsData: dynamics data
@@ -107,7 +101,7 @@ class DynamicsModel(object):
     raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
-  def updateLinearAppr(self, dynamicsData):
+  def updateLinearAppr(self, dynamicsData, x, u):
     """ Update the user-defined dynamics.
 
     :param dynamicsData: dynamics data
@@ -132,23 +126,26 @@ class DynamicsModel(object):
     """
     raise NotImplementedError("Not implemented yet.")
 
-  def forwardRunningCalc(self, dynamicsData):
+  def forwardRunningCalc(self, dynamicsData, x, u, xNext):
     # Updating the dynamics
-    self.updateDynamics(dynamicsData)
+    self.updateDynamics(dynamicsData, x, u)
 
-  def forwardTerminalCalc(self, dynamicsData):
+    # Integrating the dynanics
+    self.integrator(self, dynamicsData, x, u, xNext)
+
+  def forwardTerminalCalc(self, dynamicsData, x):
     # Updating the dynamic terms
-    self.updateTerms(dynamicsData)
+    self.updateTerms(dynamicsData, x)
 
-  def backwardRunningCalc(self, dynamicsData):
+  def backwardRunningCalc(self, dynamicsData, x, u):
     # Updating the continuous-time linear approximation
-    self.updateLinearAppr(dynamicsData)
+    self.updateLinearAppr(dynamicsData, x, u)
     # Discretizing this linear approximation
     self.discretizer(self, dynamicsData)
 
-  def backwardTerminalCalc(self, dynamicsData):
+  def backwardTerminalCalc(self, dynamicsData, x):
     # Updating the dynamic terms
-    self.updateTerms(dynamicsData)
+    self.updateTerms(dynamicsData, x)
 
   def differenceState(self, dynamicsData, x0, x1):
     dynamicsData.diff_x[self.nv():] = \

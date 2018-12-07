@@ -74,21 +74,21 @@ class CostManager(object):
     self.runningCosts.append(cost)
 
   # Static functions that defines all cost computations
-  def forwardRunningCalc(costManager, costData, dynamicsData):
+  def forwardRunningCalc(costManager, costData, dynamicsData, x, u):
     costData.l = 0.
     for k, cost in enumerate(costManager.runningCosts):
-      cost.updateCost(costData.costVector[k], dynamicsData)
+      cost.updateCost(costData.costVector[k], dynamicsData, x, u)
       costData.l += cost.getl(costData.costVector[k])
 
-  def forwardTerminalCalc(costManager, costData, dynamicsData):
+  def forwardTerminalCalc(costManager, costData, dynamicsData, x):
     costData.l = 0.
     for k, cost in enumerate(costManager.terminalCosts):
-      cost.updateCost(costData.costVector[k], dynamicsData)
+      cost.updateCost(costData.costVector[k], dynamicsData, x, u = None)
       costData.l += cost.getl(costData.costVector[k])
 
-  def backwardRunningCalc(costManager, costData, dynamicsData):
+  def backwardRunningCalc(costManager, costData, dynamicsData, x, u):
     for k, cost in enumerate(costManager.runningCosts):
-      cost.updateQuadraticAppr(costData.costVector[k], dynamicsData)
+      cost.updateQuadraticAppr(costData.costVector[k], dynamicsData, x, u)
 
     costData.lx.fill(0.)
     costData.lu.fill(0.)
@@ -102,9 +102,9 @@ class CostManager(object):
       costData.lux += cost.getlux(costData.costVector[k])
       costData.luu += cost.getluu(costData.costVector[k])
 
-  def backwardTerminalCalc(costManager, costData, dynamicsData):
+  def backwardTerminalCalc(costManager, costData, dynamicsData, x):
     for k, cost in enumerate(costManager.terminalCosts):
-      cost.updateQuadraticAppr(costData.costVector[k], dynamicsData)
+      cost.updateQuadraticAppr(costData.costVector[k], dynamicsData, x, u = None)
 
     costData.lx.fill(0.)
     costData.lxx.fill(0.)

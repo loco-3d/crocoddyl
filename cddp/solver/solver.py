@@ -16,20 +16,24 @@ class Solver(object):
       it = ddpData.intervalDataVector[k]
 
       # Computing the new control command
-      np.copyto(it.dynamicsData.u, it.dynamicsData.u_prev +\
+      np.copyto(it.u, it.u_prev +\
         ddpData.alpha * it.j + \
         np.dot(it.K, ddpModel.dynamicsModel.differenceState(it.dynamicsData,
-                                                            it.dynamicsData.x_prev,
-                                                            it.dynamicsData.x)))
+                                                            it.x_prev,
+                                                            it.x)))
 
       # Integrating the system dynamics and updating the new state value
-      ddpModel.forwardRunningCalc(ddpData.intervalDataVector[k])
-      ddpModel.dynamicsModel.integrator(
-        ddpModel.dynamicsModel,
+      ddpModel.forwardRunningCalc(
         ddpData.intervalDataVector[k].dynamicsData,
-        ddpData.intervalDataVector[k+1].dynamicsData.x)
+        ddpData.intervalDataVector[k].costData,
+        ddpData.intervalDataVector[k].x,
+        ddpData.intervalDataVector[k].u,
+        ddpData.intervalDataVector[k+1].x)
       ddpData.totalCost += ddpData.intervalDataVector[k].costData.l
-    ddpModel.forwardTerminalCalc(ddpData.intervalDataVector[-1])
+    ddpModel.forwardTerminalCalc(
+      ddpData.intervalDataVector[-1].dynamicsData,
+      ddpData.intervalDataVector[-1].costData,
+      ddpData.intervalDataVector[-1].x)
     ddpData.totalCost += ddpData.intervalDataVector[-1].costData.l
 
     # Checking convergence of the current iteration
@@ -237,14 +241,17 @@ class Solver(object):
     ddpData.totalCost = 0.
     for k in xrange(ddpData.N):
       # Integrating the system dynamics and updating the new state value
-      ddpModel.forwardRunningCalc(ddpData.intervalDataVector[k])
-      ddpModel.dynamicsModel.integrator(
-        ddpModel.dynamicsModel,
+      ddpModel.forwardRunningCalc(
         ddpData.intervalDataVector[k].dynamicsData,
-        ddpData.intervalDataVector[k+1].dynamicsData.x)
+        ddpData.intervalDataVector[k].costData,
+        ddpData.intervalDataVector[k].x,
+        ddpData.intervalDataVector[k].u,
+        ddpData.intervalDataVector[k+1].x)
       ddpData.totalCost += ddpData.intervalDataVector[k].costData.l
-
-    ddpModel.forwardTerminalCalc(ddpData.intervalDataVector[-1])
+    ddpModel.forwardTerminalCalc(
+      ddpData.intervalDataVector[-1].dynamicsData,
+      ddpData.intervalDataVector[-1].costData,
+      ddpData.intervalDataVector[-1].x)
     ddpData.totalCost += ddpData.intervalDataVector[-1].costData.l
     return
 
@@ -254,22 +261,37 @@ class Solver(object):
     """
     # Updating along the horizon. TODO: Parallelize.
     for k in xrange(ddpData.N):
-      ddpModel.backwardRunningCalc(ddpData.intervalDataVector[k])
-    ddpModel.backwardTerminalCalc(ddpData.intervalDataVector[-1])
+      # Copying the current state and control into the previous ones
+      np.copyto(ddpData.intervalDataVector[k].x_prev,
+                ddpData.intervalDataVector[k].x)
+      np.copyto(ddpData.intervalDataVector[k].u_prev,
+                ddpData.intervalDataVector[k].u)
+      ddpModel.backwardRunningCalc(
+        ddpData.intervalDataVector[k].dynamicsData,
+        ddpData.intervalDataVector[k].costData,
+        ddpData.intervalDataVector[k].x,
+        ddpData.intervalDataVector[k].u)
+    # Copying the current state into the previous one
+    np.copyto(ddpData.intervalDataVector[-1].x_prev,
+              ddpData.intervalDataVector[-1].x)
+    ddpModel.backwardTerminalCalc(
+      ddpData.intervalDataVector[-1].dynamicsData,
+      ddpData.intervalDataVector[-1].costData,
+      ddpData.intervalDataVector[-1].x)
 
   @staticmethod
   def getStateTrajectory(ddpData):
     X = []
     for i in xrange(ddpData.N):
-      X.append(ddpData.intervalDataVector[i].dynamicsData.x)
-    X.append(ddpData.intervalDataVector[-1].dynamicsData.x)
+      X.append(ddpData.intervalDataVector[i].x)
+    X.append(ddpData.intervalDataVector[-1].x)
     return X
 
   @staticmethod
   def getControlSequence(ddpData):
     U = []
     for i in xrange(ddpData.N):
-      U.append(ddpData.intervalDataVector[i].dynamicsData.u)
+      U.append(ddpData.intervalDataVector[i].u)
     return U
 
   @staticmethod

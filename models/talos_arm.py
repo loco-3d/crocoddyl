@@ -93,6 +93,6 @@ if display:
 
 # Printing the final goal
 frame_idx = robot.model.getFrameId("gripper_left_joint")
-xf = ddpData.intervalDataVector[-1].dynamicsData.x
+xf = ddpData.intervalDataVector[-1].x
 qf = xf[:dynamics.nq()]
 print robot.framePlacement(qf, frame_idx)

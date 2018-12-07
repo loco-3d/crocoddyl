@@ -3,7 +3,6 @@ from cddp.dynamics.dynamics import DynamicsData
 import numpy as np
 
 
-
 class SpringMassData(DynamicsData):
   def __init__(self, dynamicsModel, t, dt):
     DynamicsData.__init__(self, dynamicsModel, t, dt)
@@ -26,20 +25,20 @@ class SpringMass(DynamicsModel):
   def createData(self, t, dt):
     return SpringMassData(self, t, dt)
 
-  def updateTerms(self, dynamicsData):
+  def updateTerms(self, dynamicsData, x):
     # We don't need to update the dynamics terms since it's a LTI system
     return
 
-  def updateDynamics(self, dynamicsData):
+  def updateDynamics(self, dynamicsData, x, u):
     # We don't need to update the dynamics since it's a LTI system
-    q = dynamicsData.x[:self.nq()]
-    v = dynamicsData.x[self.nq():]
+    q = x[:self.nq()]
+    v = x[self.nq():]
     np.copyto(dynamicsData.a,
       dynamicsData.aq * q + dynamicsData.av * v +\
-      dynamicsData.au * dynamicsData.u)
+      dynamicsData.au * u)
     return
 
-  def updateLinearAppr(self, dynamicsData):
+  def updateLinearAppr(self, dynamicsData, x, u):
     # We don't need to update the linear approximation since it's a LTI system
     return
 

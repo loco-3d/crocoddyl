@@ -72,7 +72,7 @@ class RunningCost(object):
     raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
-  def updateCost(self, costData, dynamicsData):
+  def updateCost(self, costData, dynamicsData, x, u):
     """ Update the cost value according an user-defined cost function.
 
     The new cost value overwrites the internal data l.
@@ -80,7 +80,7 @@ class RunningCost(object):
     raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
-  def updateQuadraticAppr(self, costData, dynamicsData):
+  def updateQuadraticAppr(self, costData, dynamicsData, x, u):
     """ Update the quadratic approximation of the user-defined cost function.
 
     The new quadratic approximation of the cost function overwrites the
@@ -160,7 +160,7 @@ class TerminalCost(object):
     raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
-  def updateCost(self, costData, dynamicsData):
+  def updateCost(self, costData, dynamicsData, x):
     """ Update the cost value according an user-defined cost function.
 
     The new cost value overwrites the internal data l.
@@ -168,7 +168,7 @@ class TerminalCost(object):
     raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
-  def updateQuadraticAppr(self, costData, dynamicsData):
+  def updateQuadraticAppr(self, costData, dynamicsData, x):
     """ Update the quadratic approximation of the user-defined cost function.
 
     The new quadratic approximation of the cost function overwrites the
@@ -249,7 +249,7 @@ class RunningQuadraticCost(RunningCost):
     self.weight = weight
 
   @abc.abstractmethod
-  def updateResidual(self, costData, dynamicsData):
+  def updateResidual(self, costData, dynamicsData, x, u):
     """ Update the residual value according an user-define function.
 
     The new residual value overwrites the internal data r.
@@ -257,7 +257,7 @@ class RunningQuadraticCost(RunningCost):
     raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
-  def updateResidualLinearAppr(self, costData, dynamicsData):
+  def updateResidualLinearAppr(self, costData, dynamicsData, x, u):
     """ Update the linear approximantion of the user-define residual function.
 
     The new linear approximation of the residual function overwrites the
@@ -265,15 +265,15 @@ class RunningQuadraticCost(RunningCost):
     """
     raise NotImplementedError("Not implemented yet.")
 
-  def updateCost(self, costData, dynamicsData):
+  def updateCost(self, costData, dynamicsData, x, u):
     # Updating the residual function value
-    self.updateResidual(costData, dynamicsData)
+    self.updateResidual(costData, dynamicsData, x, u)
 
     # Updating the cost value
     costData.l = \
       0.5 * np.asscalar(np.dot(costData.r.T, np.multiply(self.weight, costData.r)))
 
-  def updateQuadraticAppr(self, costData, dynamicsData):
+  def updateQuadraticAppr(self, costData, dynamicsData, x, u):
     # Updating the linear approximation of the residual function
     self.updateResidualLinearAppr(costData, dynamicsData)
 
@@ -306,7 +306,7 @@ class TerminalQuadraticCost(TerminalCost):
     self.weight = weight
 
   @abc.abstractmethod
-  def updateResidual(self, costData, dynamicsData):
+  def updateResidual(self, costData, dynamicsData, x):
     """ Update the residual value according an user-define function.
 
     The new residual value overwrites the internal data r.
@@ -314,7 +314,7 @@ class TerminalQuadraticCost(TerminalCost):
     raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
-  def updateResidualLinearAppr(self, costData, dynamicsData):
+  def updateResidualLinearAppr(self, costData, dynamicsData, x):
     """ Update the linear approximantion of the user-define residual function.
 
     The new linear approximation of the residual function overwrites the
@@ -322,17 +322,17 @@ class TerminalQuadraticCost(TerminalCost):
     """
     raise NotImplementedError("Not implemented yet.")
 
-  def updateCost(self, costData, dynamicsData):
+  def updateCost(self, costData, dynamicsData, x):
     # Updating the residual function value
-    self.updateResidual(costData, dynamicsData)
+    self.updateResidual(costData, dynamicsData, x)
 
     # Updating the cost value
     costData.l = \
       0.5 * np.asscalar(np.dot(costData.r.T, np.multiply(self.weight, costData.r)))
 
-  def updateQuadraticAppr(self, costData, dynamicsData):
+  def updateQuadraticAppr(self, costData, dynamicsData, x):
     # Updating the linear approximation of the residual function
-    self.updateResidualLinearAppr(costData, dynamicsData)
+    self.updateResidualLinearAppr(costData, dynamicsData, x)
 
     # Updating the quadratic approximation of the cost function
     np.copyto(costData.Q_r, np.multiply(self.weight, costData.r))
