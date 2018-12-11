@@ -43,31 +43,35 @@ class CostManager(object):
     self.terminalCostDict = {}
     self.runningCostDict = {}
 
-  def createTerminalData(self, dynamicsModel):
-    """ Creates the terminal cost data for a given state dimension
+  def createTerminalData(self, dynamicModel):
+    """ Create the terminal cost data for a given dynamic model.
 
-    :param dynamicsModel: dynamics model
+    :param dynamicModel: dynamic model
     """
-    return TerminalCostManagerData(dynamicsModel, self.terminalCosts)
+    return TerminalCostManagerData(dynamicModel, self.terminalCosts)
 
-  def createRunningData(self, dynamicsModel):
-    """ Creates the running cost data for a given state and control dimension
+  def createRunningData(self, dynamicModel):
+    """ Create the running cost data for a given dynamic model.
 
-    :param dynamicsModel: dynamics model
+    :param dynamicModel: dynamic model
     """
-    return RunningCostManagerData(dynamicsModel, self.runningCosts)
+    return RunningCostManagerData(dynamicModel, self.runningCosts)
 
   def addTerminal(self, cost, name):
-    """ Adds a terminal cost function to the cost model.
-    Before adding it, it checks if this is a terminal cost objects.
+    """ Add a terminal cost function.
+
+    :param cost: cost function
+    :param name: cost function name
     """
     index = len(self.terminalCosts)
     self.terminalCostDict[name] = index
     self.terminalCosts.append(cost)
 
   def addRunning(self, cost, name):
-    """ Adds a running cost function to the cost model.
-    Before adding it, it checks if this is a terminal cost objects.
+    """ Add a running cost function.
+
+    :param cost: cost function
+    :param name: cost function name
     """
     index = len(self.runningCosts)
     self.runningCostDict[name] = index
@@ -133,21 +137,21 @@ class CostManager(object):
       costData.lxx += cost.getlxx(costData.costVector[k])
 
   def getTerminalCost(self, name):
-    """ Return the running cost model given its name
+    """ Return the running cost model given its name.
 
     :param name: cost function name
     """
     return self.terminalCosts[self.getTerminalCostIndex(name)]
 
   def getRunningCost(self, name):
-    """ Return the running cost model given its name
+    """ Return the running cost model given its name.
 
     :param name: cost function name
     """
     return self.runningCosts[self.getRunningCostIndex(name)]
 
   def getTerminalCostIndex(self, name):
-    """ Get the index of a given terminal cost name
+    """ Get the index of a given terminal cost name.
 
     :param name: cost function name
     """
@@ -155,7 +159,7 @@ class CostManager(object):
     return self.terminalCostDict[name]
 
   def getRunningCostIndex(self, name):
-    """ Get the index of a given terminal cost name
+    """ Get the index of a given terminal cost name.
 
     :param name: cost function name
     """
