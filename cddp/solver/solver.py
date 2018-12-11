@@ -202,28 +202,27 @@ class Solver(object):
               ddpData.intervalDataVector[-1].costData.lxx)
     for k in xrange(ddpData.N-1, -1, -1):
       it = ddpData.intervalDataVector[k]
-      costData = it.costData
-      dynamicsData = it.dynamicsData
 
       # Getting the value function values of the next interval (prime interval)
       fx = it.dynamicsData.discretizer.fx
       fu = it.dynamicsData.discretizer.fu
 
+      # Getting the Value function derivatives of the next interval
+      Vx = ddpData.intervalDataVector[k+1].Vx
+      Vxx = ddpData.intervalDataVector[k+1].Vxx
+
       # Updating the Q derivatives. Note that this is Gauss-Newton step because
       # we neglect the Hessian, it's also called iLQR.
-      np.copyto(it.Vpxx_fx, np.dot(ddpData.intervalDataVector[k+1].Vxx, fx))
-      np.copyto(it.Vpxx_fu, np.dot(ddpData.intervalDataVector[k+1].Vxx, fu))
-      np.copyto(it.Qx, it.costData.lx + np.dot(fx.T, ddpData.intervalDataVector[k+1].Vx))
-      np.copyto(it.Qu, it.costData.lu + np.dot(fu.T, ddpData.intervalDataVector[k+1].Vx))
-      np.copyto(it.Quu, it.costData.luu +\
-                np.dot(fu.T, it.Vpxx_fu))
-      np.copyto(it.Qxx, it.costData.lxx +\
-                np.dot(fx.T, it.Vpxx_fx))
-      np.copyto(it.Qux, it.costData.lux +\
-                np.dot(fu.T, it.Vpxx_fx))
+      np.copyto(it.Vpxx_fu, np.dot(Vxx, fu))
+      np.copyto(it.Quu, it.costData.luu + np.dot(fu.T, it.Vpxx_fu))
       np.copyto(it.Quu_r, it.Quu + ddpData.muI + ddpData.muV * np.dot(fu.T, fu))
       if not isPositiveDefinitive(it.Quu_r, it.L):
         return False
+      np.copyto(it.Vpxx_fx, np.dot(Vxx, fx))
+      np.copyto(it.Qx, it.costData.lx + np.dot(fx.T, Vx))
+      np.copyto(it.Qu, it.costData.lu + np.dot(fu.T, Vx))
+      np.copyto(it.Qxx, it.costData.lxx + np.dot(fx.T, it.Vpxx_fx))
+      np.copyto(it.Qux, it.costData.lux + np.dot(fu.T, it.Vpxx_fx))
       np.copyto(it.Qux_r, it.Qux + ddpData.muV * np.dot(fu.T, fx))
 
       # Computing the feedback and feedforward terms
