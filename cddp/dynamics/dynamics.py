@@ -3,7 +3,7 @@ import numpy as np
 from cddp.utils import EPS
 
 
-class DynamicsData(object):
+class DynamicData(object):
   """ Basic data structure for the system dynamics.
 
   We consider a general system dynamics as: d/dt([q; v]) = [v; a(q,v,u)]
@@ -51,7 +51,7 @@ class DynamicsData(object):
     self.u_pert = np.zeros((dynamicModel.nu(), 1))
 
 
-class DynamicsModel(object):
+class DynamicModel(object):
   """ This abstract class declares virtual methods for updating the dynamics
   and its linear approximation.
 

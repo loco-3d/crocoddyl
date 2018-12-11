@@ -1,4 +1,4 @@
-from dynamics import DynamicsData, DynamicsModel
+from dynamics import DynamicData, DynamicModel
 from dynamics import SpringMass
 from dynamics import ForwardDynamics
 from dynamics import FloatingBaseMultibodyDynamics

@@ -5,11 +5,11 @@ import cddp
 
 class NumDiffSpringMass(cddp.SpringMass):
   def updateLinearAppr(self, dynamicData, x, u):
-      cddp.DynamicsModel.updateLinearAppr(self, dynamicData, x, u)
+      cddp.DynamicModel.updateLinearAppr(self, dynamicData, x, u)
 
 class NumDiffForwardDynamics(cddp.ForwardDynamics):
   def updateLinearAppr(self, dynamicData, x, u):
-      cddp.DynamicsModel.updateLinearAppr(self, dynamicData, x, u)
+      cddp.DynamicModel.updateLinearAppr(self, dynamicData, x, u)
 
 
 class SpringMassDerivativesTest(unittest.TestCase):

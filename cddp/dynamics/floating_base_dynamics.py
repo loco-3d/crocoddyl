@@ -1,13 +1,13 @@
-from cddp.dynamics.dynamics import DynamicsData
-from cddp.dynamics.dynamics import DynamicsModel
+from cddp.dynamics.dynamics import DynamicData
+from cddp.dynamics.dynamics import DynamicModel
 from cddp.utils import EPS
 import pinocchio as se3
 import numpy as np
 
 
-class FloatingBaseMultibodyDynamicsData(DynamicsData):
+class FloatingBaseMultibodyDynamicData(DynamicData):
   def __init__(self, dynamicModel, t, dt):
-    DynamicsData.__init__(self, dynamicModel, t, dt)
+    DynamicData.__init__(self, dynamicModel, t, dt)
 
     # Pinocchio data
     self.pinocchio = dynamicModel.pinocchio.createData()
@@ -36,9 +36,9 @@ class FloatingBaseMultibodyDynamicsData(DynamicsData):
     self.v_pert = np.zeros((dynamicModel.nv(), 1))
 
 
-class FloatingBaseMultibodyDynamics(DynamicsModel):
+class FloatingBaseMultibodyDynamics(DynamicModel):
   def __init__(self, integrator, discretizer, pinocchioModel, contactInfo):
-    DynamicsModel.__init__(self, integrator, discretizer,
+    DynamicModel.__init__(self, integrator, discretizer,
                            pinocchioModel.nq,
                            pinocchioModel.nv,
                            pinocchioModel.nv - 6)
@@ -46,7 +46,7 @@ class FloatingBaseMultibodyDynamics(DynamicsModel):
     self.contactInfo = contactInfo
 
   def createData(self, t, dt):
-    return FloatingBaseMultibodyDynamicsData(self, t, dt)
+    return FloatingBaseMultibodyDynamicData(self, t, dt)
 
   def updateTerms(self, dynamicData, x):
     # Compute all terms

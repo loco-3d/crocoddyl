@@ -18,7 +18,7 @@ class DDPTerminalIntervalData(object):
     self.x_prev = np.zeros((ddpModel.dynamicModel.nxImpl(), 1))
 
     # Dynamic and cost data of the terminal interval
-    self.dynamicData = ddpModel.createTerminalDynamicsData(tFinal)
+    self.dynamicData = ddpModel.createTerminalDynamicData(tFinal)
     self.costData = ddpModel.createTerminalCostData()
 
     # Value function derivatives of the terminal interval
@@ -46,7 +46,7 @@ class DDPRunningIntervalData(object):
     self.u_prev = np.zeros((ddpModel.dynamicModel.nu(), 1))
 
     # Dynamic and cost data of the running interval
-    self.dynamicData = ddpModel.createRunningDynamicsData(tInit, tFinal - tInit)
+    self.dynamicData = ddpModel.createRunningDynamicData(tInit, tFinal - tInit)
     self.costData = ddpModel.createRunningCostData()
 
     # Value function derivatives of the running interval
@@ -144,13 +144,13 @@ class DDPModel(object):
     self.dynamicModel.backwardRunningCalc(dynamicData, x, u)
     self.costManager.backwardRunningCalc(costData, dynamicData, x, u)
 
-  def createRunningDynamicsData(self, tInit, dt):
+  def createRunningDynamicData(self, tInit, dt):
     return self.dynamicModel.createData(tInit, dt)
 
   def createRunningCostData(self):
     return self.costManager.createRunningData(self.dynamicModel)
 
-  def createTerminalDynamicsData(self, tFinal):
+  def createTerminalDynamicData(self, tFinal):
     return self.dynamicModel.createData(tFinal, 0.)
 
   def createTerminalCostData(self):

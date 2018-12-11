@@ -1,11 +1,11 @@
-from cddp.dynamics.dynamics import DynamicsModel
-from cddp.dynamics.dynamics import DynamicsData
+from cddp.dynamics.dynamics import DynamicModel
+from cddp.dynamics.dynamics import DynamicData
 import numpy as np
 
 
-class SpringMassData(DynamicsData):
+class SpringMassData(DynamicData):
   def __init__(self, dynamicModel, t, dt):
-    DynamicsData.__init__(self, dynamicModel, t, dt)
+    DynamicData.__init__(self, dynamicModel, t, dt)
 
     # Mass, spring and damper values
     self._mass = 10.
@@ -22,9 +22,9 @@ class SpringMassData(DynamicsData):
     self.Av = -self._damping / self._mass
     self.Bu = 1 / self._mass
 
-class SpringMass(DynamicsModel):
+class SpringMass(DynamicModel):
   def __init__(self, integrator, discretizer):
-    DynamicsModel.__init__(self, integrator, discretizer, 1, 1, 1)
+    DynamicModel.__init__(self, integrator, discretizer, 1, 1, 1)
 
   def createData(self, t, dt):
     return SpringMassData(self, t, dt)
