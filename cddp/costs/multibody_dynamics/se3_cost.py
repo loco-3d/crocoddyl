@@ -11,9 +11,9 @@ class SE3Task(object):
 
 
 class SE3RunningData(RunningQuadraticCostData):
-  def __init__(self, dynamicsModel, nr):
+  def __init__(self, dynamicModel, nr):
     # Creating the data structure for a running quadratic cost
-    RunningQuadraticCostData.__init__(self, dynamicsModel, nr)
+    RunningQuadraticCostData.__init__(self, dynamicModel, nr)
 
     # Creating the data for the desired SE3 point and its error
     self.oMr_inv = se3.SE3()
@@ -29,12 +29,12 @@ class SE3Cost(RunningQuadraticCost):
   efficiency, we overwrite the updateQuadraticAppr function because we don't
   need to update the terms related to the control.
   """
-  def __init__(self, dynamicsModel, weight):
+  def __init__(self, dynamicModel, weight):
     RunningQuadraticCost.__init__(self, 6, weight)
-    self.dynamicsModel = dynamicsModel
+    self.dynamicModel = dynamicModel
 
-  def createData(self, dynamicsModel):
-    return SE3RunningData(dynamicsModel, self.nr)
+  def createData(self, dynamicModel):
+    return SE3RunningData(dynamicModel, self.nr)
 
   def updateSE3error(self, costData, dynamicsData):
     """ Update the SE3 error.
@@ -69,9 +69,9 @@ class SE3Cost(RunningQuadraticCost):
     d^X^f = inv(0^X^d) * 0^X^f.
     """
     self.updateSE3error(costData, dynamicsData)
-    costData.rx[:,:self.dynamicsModel.nv()] = \
+    costData.rx[:,:self.dynamicModel.nv()] = \
         costData.rMf.action * \
-        se3.getFrameJacobian(self.dynamicsModel.pinocchio,
+        se3.getFrameJacobian(self.dynamicModel.pinocchio,
                              dynamicsData.pinocchio,
                              costData.frame_idx, se3.ReferenceFrame.LOCAL)
 

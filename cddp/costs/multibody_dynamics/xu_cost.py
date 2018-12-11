@@ -5,21 +5,21 @@ import numpy as np
 
 
 class StateRunningData(RunningQuadraticCostData):
-  def __init__(self, dynamicsModel):
+  def __init__(self, dynamicModel):
     # Creating the data structure for a running quadratic cost
-    RunningQuadraticCostData.__init__(self, dynamicsModel, dynamicsModel.nx())
+    RunningQuadraticCostData.__init__(self, dynamicModel, dynamicModel.nx())
 
     # Creating the data for the desired state
-    self.x_des = np.zeros((dynamicsModel.nxImpl(),1))
+    self.x_des = np.zeros((dynamicModel.nxImpl(),1))
 
 
 class ControlRunningData(RunningQuadraticCostData):
-  def __init__(self, dynamicsModel):
+  def __init__(self, dynamicModel):
     # Creating the data structure for a running quadratic cost
-    RunningQuadraticCostData.__init__(self, dynamicsModel, dynamicsModel.nu())
+    RunningQuadraticCostData.__init__(self, dynamicModel, dynamicModel.nu())
 
     # Creating the data for the desired control
-    self.u_des = np.zeros((dynamicsModel.nu(),1))
+    self.u_des = np.zeros((dynamicModel.nu(),1))
 
 
 class StateCost(RunningQuadraticCost):
@@ -31,19 +31,19 @@ class StateCost(RunningQuadraticCost):
   update the terms related to the control, and 3) to update the Hessian w.r.t
   the state (constant value).
   """
-  def __init__(self, dynamicsModel, weights):
-    RunningQuadraticCost.__init__(self, dynamicsModel.nx(), weights)
-    self.dynamicsModel = dynamicsModel
+  def __init__(self, dynamicModel, weights):
+    RunningQuadraticCost.__init__(self, dynamicModel.nx(), weights)
+    self.dynamicModel = dynamicModel
 
-  def createData(self, dynamicsModel):
-    data = StateRunningData(dynamicsModel)
-    np.copyto(data.rx, np.identity(dynamicsModel.nx()))
+  def createData(self, dynamicModel):
+    data = StateRunningData(dynamicModel)
+    np.copyto(data.rx, np.identity(dynamicModel.nx()))
     np.copyto(data.lxx, np.diag(self.weight.reshape(-1)))
     return data
 
   def updateResidual(self, costData, dynamicsData, x, u):
     np.copyto(costData.r,
-      self.dynamicsModel.differenceState(dynamicsData, costData.x_des, x))
+      self.dynamicModel.differenceState(dynamicsData, costData.x_des, x))
 
   def updateResidualLinearAppr(self, costData, dynamicsData, x, u):
     # Due to the residual is equals to x, we don't need to linearize each time.
@@ -77,12 +77,12 @@ class ControlCost(RunningQuadraticCost):
   update the terms related to the state, and 3) to update the Hessian w.r.t
   the control (constant value).
   """
-  def __init__(self, dynamicsModel, weights):
-    RunningQuadraticCost.__init__(self, dynamicsModel.nu(), weights)
+  def __init__(self, dynamicModel, weights):
+    RunningQuadraticCost.__init__(self, dynamicModel.nu(), weights)
 
-  def createData(self, dynamicsModel):
-    data = ControlRunningData(dynamicsModel)
-    np.copyto(data.ru, np.identity(dynamicsModel.nu()))
+  def createData(self, dynamicModel):
+    data = ControlRunningData(dynamicModel)
+    np.copyto(data.ru, np.identity(dynamicModel.nu()))
     np.copyto(data.luu, np.diag(self.weight.reshape(-1)))
     return data
 

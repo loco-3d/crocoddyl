@@ -68,8 +68,8 @@ class LinearDDPTest(unittest.TestCase):
     cddp.Solver.solve(self.ddpModel, self.ddpData, solverParams)
     cddp.Solver.updateQuadraticAppr(self.ddpModel, self.ddpData)
 
-    nx = self.ddpModel.dynamicsModel.nx()
-    nu = self.ddpModel.dynamicsModel.nu()
+    nx = self.ddpModel.dynamicModel.nx()
+    nu = self.ddpModel.dynamicModel.nu()
     N = self.ddpData.N
     sol, lag, hess, jac, grad, g = self.KKTSolver(self.ddpModel, self.ddpData)
 
@@ -148,8 +148,8 @@ class LinearDDPTest(unittest.TestCase):
     # cddp.Solver.updateQuadraticAppr(ddpModel, ddpData)
 
     # Creating the variables of the KKT problem
-    nx = ddpModel.dynamicsModel.nx()
-    nu = ddpModel.dynamicsModel.nu()
+    nx = ddpModel.dynamicModel.nx()
+    nu = ddpModel.dynamicModel.nu()
     N = ddpData.N
     nw = nx + nu
     nvar = N * nw + nx

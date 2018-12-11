@@ -140,7 +140,7 @@ class Solver(object):
       # Computing the new control command
       np.copyto(it.u, it.u_prev +\
         ddpData.alpha * it.j + \
-        np.dot(it.K, ddpModel.dynamicsModel.differenceState(it.dynamicsData,
+        np.dot(it.K, ddpModel.dynamicModel.differenceState(it.dynamicsData,
                                                             it.x_prev,
                                                             it.x)))
 
@@ -194,8 +194,7 @@ class Solver(object):
     ddpData.gamma = 0.
     ddpData.theta = 0.
     np.copyto(ddpData.muI,
-              ddpData.muLM * np.identity(ddpModel.dynamicsModel.nu()))
-
+              ddpData.muLM * np.identity(ddpModel.dynamicModel.nu()))
     np.copyto(ddpData.intervalDataVector[-1].Vx,
               ddpData.intervalDataVector[-1].costData.lx)
     np.copyto(ddpData.intervalDataVector[-1].Vxx,

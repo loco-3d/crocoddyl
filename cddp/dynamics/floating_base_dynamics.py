@@ -6,34 +6,34 @@ import numpy as np
 
 
 class FloatingBaseMultibodyDynamicsData(DynamicsData):
-  def __init__(self, dynamicsModel, t, dt):
-    DynamicsData.__init__(self, dynamicsModel, t, dt)
+  def __init__(self, dynamicModel, t, dt):
+    DynamicsData.__init__(self, dynamicModel, t, dt)
 
     # Pinocchio data
-    self.pinocchio = dynamicsModel.pinocchio.createData()
+    self.pinocchio = dynamicModel.pinocchio.createData()
 
     # Constrained dynamics data (holonomic contacts)
-    nc = dynamicsModel.contactInfo.nc * dynamicsModel.contactInfo.dim(t)
-    self.gq = np.zeros((nc, dynamicsModel.nv()))
-    self.gv = np.zeros((nc, dynamicsModel.nv()))
-    self.gu = np.zeros((nc, dynamicsModel.nu()))
+    nc = dynamicModel.contactInfo.nc * dynamicModel.contactInfo.dim(t)
+    self.gq = np.zeros((nc, dynamicModel.nv()))
+    self.gv = np.zeros((nc, dynamicModel.nv()))
+    self.gu = np.zeros((nc, dynamicModel.nu()))
 
     # Terms required for updatng the dynamics
-    self.contactJ = np.zeros((nc, dynamicsModel.nv()))
+    self.contactJ = np.zeros((nc, dynamicModel.nv()))
     self.gamma = np.zeros((nc, 1))
-    self._contactFrameIndices = dynamicsModel.contactInfo(t)
+    self._contactFrameIndices = dynamicModel.contactInfo(t)
 
     # Terms required for updating the linear approximation
-    self.MJtJc = np.zeros((dynamicsModel.nv() + nc,
-                           dynamicsModel.nv() + nc))
-    self.MJtJc_inv = np.zeros((dynamicsModel.nv() + nc,
-                               dynamicsModel.nv() + nc))
-    self.MJtJc_inv_L = np.zeros((dynamicsModel.nv() + nc,
-                                 dynamicsModel.nv() + nc))
+    self.MJtJc = np.zeros((dynamicModel.nv() + nc,
+                           dynamicModel.nv() + nc))
+    self.MJtJc_inv = np.zeros((dynamicModel.nv() + nc,
+                               dynamicModel.nv() + nc))
+    self.MJtJc_inv_L = np.zeros((dynamicModel.nv() + nc,
+                                 dynamicModel.nv() + nc))
     #TODO: remove these when replacing with analytical derivatives
     self.h = np.sqrt(EPS)
-    self.q_pert = np.zeros((dynamicsModel.nq(), 1))
-    self.v_pert = np.zeros((dynamicsModel.nv(), 1))
+    self.q_pert = np.zeros((dynamicModel.nq(), 1))
+    self.v_pert = np.zeros((dynamicModel.nv(), 1))
 
 
 class FloatingBaseMultibodyDynamics(DynamicsModel):

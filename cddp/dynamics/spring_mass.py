@@ -4,8 +4,8 @@ import numpy as np
 
 
 class SpringMassData(DynamicsData):
-  def __init__(self, dynamicsModel, t, dt):
-    DynamicsData.__init__(self, dynamicsModel, t, dt)
+  def __init__(self, dynamicModel, t, dt):
+    DynamicsData.__init__(self, dynamicModel, t, dt)
 
     # Mass, spring and damper values
     self._mass = 10.

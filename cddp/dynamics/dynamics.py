@@ -17,10 +17,10 @@ class DynamicsData(object):
   __metaclass__ = abc.ABCMeta
 
   @abc.abstractmethod
-  def __init__(self, dynamicsModel, t, dt):
+  def __init__(self, dynamicModel, t, dt):
     """ Create the common dynamics data.
 
-    :param dynamicsModel: dynamics model
+    :param dynamicModel: dynamics model
     :param t: initial time of the interval
     :param dt: step time of the interval
     """
@@ -29,26 +29,26 @@ class DynamicsData(object):
     self.dt = dt
 
     # System acceleration
-    self.a = np.zeros((dynamicsModel.nv(), 1))
+    self.a = np.zeros((dynamicModel.nv(), 1))
 
     # Terms for linear approximation, which has the form:
     #   d/dt([q; v]) = [0, I; aq, av]*[q; v] + [0; au]*u
-    self.aq = np.zeros((dynamicsModel.nv(), dynamicsModel.nv()))
-    self.av = np.zeros((dynamicsModel.nv(), dynamicsModel.nv()))
-    self.au = np.zeros((dynamicsModel.nv(), dynamicsModel.nu()))
+    self.aq = np.zeros((dynamicModel.nv(), dynamicModel.nv()))
+    self.av = np.zeros((dynamicModel.nv(), dynamicModel.nv()))
+    self.au = np.zeros((dynamicModel.nv(), dynamicModel.nu()))
 
     # Creating the discretizer data
     if dt != 0.:
-      self.discretizer = dynamicsModel.discretizer.createData(dynamicsModel, dt)
+      self.discretizer = dynamicModel.discretizer.createData(dynamicModel, dt)
 
-    self.diff_x = np.zeros((dynamicsModel.nx(), 1))
+    self.diff_x = np.zeros((dynamicModel.nx(), 1))
 
     # TODO: think if we need to create NumDiff data
     self.h = np.sqrt(EPS)
-    self.x_pert = np.zeros((dynamicsModel.nx(), 1))
-    self.q_pert = np.zeros((dynamicsModel.nq(), 1))
-    self.v_pert = np.zeros((dynamicsModel.nv(), 1))
-    self.u_pert = np.zeros((dynamicsModel.nu(), 1))
+    self.x_pert = np.zeros((dynamicModel.nx(), 1))
+    self.q_pert = np.zeros((dynamicModel.nq(), 1))
+    self.v_pert = np.zeros((dynamicModel.nv(), 1))
+    self.u_pert = np.zeros((dynamicModel.nu(), 1))
 
 
 class DynamicsModel(object):

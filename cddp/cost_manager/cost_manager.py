@@ -3,25 +3,25 @@ import numpy as np
 
 
 class TerminalCostManagerData(TerminalCostData):
-  def __init__(self, dynamicsModel, costVector):
+  def __init__(self, dynamicModel, costVector):
     # Including the data structure of the terminal cost
-    TerminalCostData.__init__(self, dynamicsModel)
+    TerminalCostData.__init__(self, dynamicModel)
 
     # Including the data structure for each individual terminal cost functions
     self.costVector = []
     for cost in costVector:
-      self.costVector.append(cost.createData(dynamicsModel))
+      self.costVector.append(cost.createData(dynamicModel))
 
 
 class RunningCostManagerData(RunningCostData):
-  def __init__(self, dynamicsModel, costVector):
+  def __init__(self, dynamicModel, costVector):
     # Including the data structure of the running cost
-    RunningCostData.__init__(self, dynamicsModel)
+    RunningCostData.__init__(self, dynamicModel)
 
     # Including the data structure for each individual terminal cost functions
     self.costVector = []
     for cost in costVector:
-      self.costVector.append(cost.createData(dynamicsModel))
+      self.costVector.append(cost.createData(dynamicModel))
 
 
 class CostManager(object):

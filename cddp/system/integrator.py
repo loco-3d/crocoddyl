@@ -8,10 +8,10 @@ class Integrator(object):
   __metaclass__ = abc.ABCMeta
 
   @abc.abstractmethod
-  def __call__(dynamicsModel, dynamicsData, x, u, xNext):
+  def __call__(dynamicModel, dynamicsData, x, u, xNext):
     """ Integrate the system dynamics given an user-defined integration scheme.
 
-    :param dynamicsModel: dynamics model
+    :param dynamicModel: dynamics model
     :param dynamicsData: dynamics data
     :param x: current state
     :param u: current control
@@ -23,22 +23,22 @@ class EulerIntegrator(Integrator):
   """ Define a forward Euler integrator.
   """
   @staticmethod
-  def __call__(dynamicsModel, dynamicsData, x, u, xNext):
+  def __call__(dynamicModel, dynamicsData, x, u, xNext):
     """ Integrate the system dynamics using the forward Euler scheme.
 
-    :param dynamicsModel: dynamics model
+    :param dynamicModel: dynamics model
     :param dynamicsData: dynamics data
     :param x: current state
     :param u: current control
     :param xNext: next state after the integration
     """
     # Updating the dynamics
-    dynamicsModel.updateDynamics(dynamicsData, x, u)
+    dynamicModel.updateDynamics(dynamicsData, x, u)
 
-    xNext[dynamicsModel.nq():] = \
-      x[dynamicsModel.nq():] +\
+    xNext[dynamicModel.nq():] = \
+      x[dynamicModel.nq():] +\
       dynamicsData.dt * dynamicsData.a
-    xNext[:dynamicsModel.nq()] = \
-      dynamicsModel.integrateConfiguration(
-        x[:dynamicsModel.nq()],
-        dynamicsData.dt * xNext[dynamicsModel.nq():])
+    xNext[:dynamicModel.nq()] = \
+      dynamicModel.integrateConfiguration(
+        x[:dynamicModel.nq()],
+        dynamicsData.dt * xNext[dynamicModel.nq():])

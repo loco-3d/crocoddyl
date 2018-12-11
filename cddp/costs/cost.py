@@ -9,18 +9,18 @@ class TerminalCostData(object):
   the state. The dimensions of these vector or matrices depends on the dynamic
   model.
   """
-  def __init__(self, dynamicsModel):
+  def __init__(self, dynamicModel):
     """ Create the terminal cost data.
 
-    :param dynamicsModel: dynamics model
+    :param dynamicModel: dynamics model
     """
     # Creating the data structure of the cost and its quadratic approximantion.
     # Note that this approximation as the form: dx^T*lx + dx^T*lxx*dx, where dx
     # lies in the tangent space (R^{nx}) around a nominal point in the
     # geometrical manifold
     self.l = 0.
-    self.lx = np.zeros((dynamicsModel.nx(),1))
-    self.lxx = np.zeros((dynamicsModel.nx(),dynamicsModel.nx()))
+    self.lx = np.zeros((dynamicModel.nx(),1))
+    self.lxx = np.zeros((dynamicModel.nx(),dynamicModel.nx()))
 
 
 class RunningCostData(TerminalCostData):
@@ -31,20 +31,20 @@ class RunningCostData(TerminalCostData):
   depends on the dynamic
   model.
   """
-  def __init__(self, dynamicsModel):
+  def __init__(self, dynamicModel):
     """ Creates the running cost data.
 
-    :param dynamicsModel: dynamics model
+    :param dynamicModel: dynamics model
     """
     # Creating the data structure of the cost and its quadratic approximantion.
     # Note that this approximation as the form:
     # [dx^T du^T]*[lx; lu] + [dx^T du^T]*[lxx lxu; lux luu]*[dx; du] where dx
     # lies in the tangent space (R^{nx}) around a nominal point in the
     # geometrical manifold, and du is point near to the nominal control (R^{nu})
-    TerminalCostData.__init__(self, dynamicsModel)
-    self.lu = np.zeros((dynamicsModel.nu(),1))
-    self.lux = np.zeros((dynamicsModel.nu(),dynamicsModel.nx()))
-    self.luu = np.zeros((dynamicsModel.nu(),dynamicsModel.nu()))
+    TerminalCostData.__init__(self, dynamicModel)
+    self.lu = np.zeros((dynamicModel.nu(),1))
+    self.lux = np.zeros((dynamicModel.nu(),dynamicModel.nx()))
+    self.luu = np.zeros((dynamicModel.nu(),dynamicModel.nu()))
 
 
 class RunningCost(object):
@@ -64,10 +64,10 @@ class RunningCost(object):
     pass
 
   @abc.abstractmethod
-  def createData(self, dynamicsModel):
+  def createData(self, dynamicModel):
     """ Create the running cost data.
 
-    :param dynamicsModel: dynamics model
+    :param dynamicModel: dynamics model
     """
     raise NotImplementedError("Not implemented yet.")
 
@@ -152,10 +152,10 @@ class TerminalCost(object):
     pass
 
   @abc.abstractmethod
-  def createData(self, dynamicsModel):
+  def createData(self, dynamicModel):
     """ Create the terminal cost data.
 
-    :param dynamicsModel: dynamics model
+    :param dynamicModel: dynamics model
     """
     raise NotImplementedError("Not implemented yet.")
 
@@ -204,29 +204,29 @@ class TerminalCost(object):
 
 
 class RunningQuadraticCostData(RunningCostData):
-  def __init__(self, dynamicsModel, nr):
+  def __init__(self, dynamicModel, nr):
     # Creating the standard data structure of running cost
-    RunningCostData.__init__(self, dynamicsModel)
+    RunningCostData.__init__(self, dynamicModel)
 
     # Creating the data structure of the residual and its derivatives
     self.r = np.zeros((nr,1))
-    self.rx = np.zeros((nr,dynamicsModel.nx()))
-    self.ru = np.zeros((nr,dynamicsModel.nu()))
+    self.rx = np.zeros((nr,dynamicModel.nx()))
+    self.ru = np.zeros((nr,dynamicModel.nu()))
     self.Q_r = np.zeros((nr,1))
-    self.Q_rx = np.zeros((nr,dynamicsModel.nx()))
-    self.Q_ru = np.zeros((nr,dynamicsModel.nu()))
+    self.Q_rx = np.zeros((nr,dynamicModel.nx()))
+    self.Q_ru = np.zeros((nr,dynamicModel.nu()))
 
 
 class TerminalQuadraticCostData(TerminalCostData):
-  def __init__(self, dynamicsModel, nr):
+  def __init__(self, dynamicModel, nr):
     # Creating the standard data structure of terminal cost
-    TerminalCostData.__init__(self, dynamicsModel)
+    TerminalCostData.__init__(self, dynamicModel)
 
     # Creating the data structure of the residual and its derivatives
     self.r = np.zeros((nr,1))
-    self.rx = np.zeros((nr,dynamicsModel.nx()))
+    self.rx = np.zeros((nr,dynamicModel.nx()))
     self.Q_r = np.zeros((nr,1))
-    self.Q_rx = np.zeros((nr,dynamicsModel.nx()))
+    self.Q_rx = np.zeros((nr,dynamicModel.nx()))
 
 
 class RunningQuadraticCost(RunningCost):
