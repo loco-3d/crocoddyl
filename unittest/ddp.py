@@ -180,11 +180,11 @@ class LinearDDPTest(unittest.TestCase):
       w_i[nx:] = u_i
 
       # Running cost and its derivatives
-      lx_i = data.costData.lx
-      lu_i = data.costData.lu
-      lxx_i = data.costData.lxx
-      luu_i = data.costData.luu
-      lux_i = data.costData.lux
+      lx_i = data.cost.lx
+      lu_i = data.cost.lu
+      lxx_i = data.cost.lxx
+      luu_i = data.cost.luu
+      lux_i = data.cost.lux
       q_i[:nx] = lx_i
       q_i[nx:] = lu_i
       Q_i[:nx,:nx] = lxx_i
@@ -193,8 +193,8 @@ class LinearDDPTest(unittest.TestCase):
       Q_i[nx:,nx:] = luu_i
 
       # Dynamics and its derivatives
-      fx_i = data.dynamicData.discretizer.fx
-      fu_i = data.dynamicData.discretizer.fu
+      fx_i = data.dynamic.discretizer.fx
+      fu_i = data.dynamic.discretizer.fu
       f_i[:nx,:nx] = -Ixx
       f_i[nx:,:nx] = fx_i
       f_i[nx:,nx:] = fu_i
@@ -208,8 +208,8 @@ class LinearDDPTest(unittest.TestCase):
 
     # Terminal state and cost derivatives
     x_T = ddpData.interval[-1].x
-    lx_T = ddpData.interval[-1].costData.lx
-    lxx_T = ddpData.interval[-1].costData.lxx
+    lx_T = ddpData.interval[-1].cost.lx
+    lxx_T = ddpData.interval[-1].cost.lxx
 
     # Updating the terms regarding the terminal condition
     hess[N*nw:N*nw+nx, N*nw:N*nw+nx] = lxx_T

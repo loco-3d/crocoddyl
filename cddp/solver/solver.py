@@ -140,23 +140,23 @@ class Solver(object):
       # Computing the new control command
       np.copyto(it.u, it.u_prev +\
         ddpData.alpha * it.j + \
-        np.dot(it.K, ddpModel.dynamicModel.differenceState(it.dynamicData,
-                                                            it.x_prev,
-                                                            it.x)))
+        np.dot(it.K, ddpModel.dynamicModel.differenceState(it.dynamic,
+                                                           it.x_prev,
+                                                           it.x)))
 
       # Integrating the system dynamics and updating the new state value
       ddpModel.forwardRunningCalc(
-        ddpData.interval[k].dynamicData,
-        ddpData.interval[k].costData,
+        ddpData.interval[k].dynamic,
+        ddpData.interval[k].cost,
         ddpData.interval[k].x,
         ddpData.interval[k].u,
         ddpData.interval[k+1].x)
-      ddpData.totalCost += ddpData.interval[k].costData.l
+      ddpData.totalCost += ddpData.interval[k].cost.l
     ddpModel.forwardTerminalCalc(
-      ddpData.interval[-1].dynamicData,
-      ddpData.interval[-1].costData,
+      ddpData.interval[-1].dynamic,
+      ddpData.interval[-1].cost,
       ddpData.interval[-1].x)
-    ddpData.totalCost += ddpData.interval[-1].costData.l
+    ddpData.totalCost += ddpData.interval[-1].cost.l
 
     # Checking convergence of the current iteration
     if np.abs(ddpData.gamma) <= solverParams.tol:
@@ -196,15 +196,15 @@ class Solver(object):
     np.copyto(ddpData.muI,
               ddpData.muLM * np.identity(ddpModel.dynamicModel.nu()))
     np.copyto(ddpData.interval[-1].Vx,
-              ddpData.interval[-1].costData.lx)
+              ddpData.interval[-1].cost.lx)
     np.copyto(ddpData.interval[-1].Vxx,
-              ddpData.interval[-1].costData.lxx)
+              ddpData.interval[-1].cost.lxx)
     for k in xrange(ddpData.N-1, -1, -1):
       it = ddpData.interval[k]
 
       # Getting the value function values of the next interval (prime interval)
-      fx = it.dynamicData.discretizer.fx
-      fu = it.dynamicData.discretizer.fu
+      fx = it.dynamic.discretizer.fx
+      fu = it.dynamic.discretizer.fu
 
       # Getting the Value function derivatives of the next interval
       Vx = ddpData.interval[k+1].Vx
@@ -213,15 +213,15 @@ class Solver(object):
       # Updating the Q derivatives. Note that this is Gauss-Newton step because
       # we neglect the Hessian, it's also called iLQR.
       np.copyto(it.Vpxx_fu, np.dot(Vxx, fu))
-      np.copyto(it.Quu, it.costData.luu + np.dot(fu.T, it.Vpxx_fu))
+      np.copyto(it.Quu, it.cost.luu + np.dot(fu.T, it.Vpxx_fu))
       np.copyto(it.Quu_r, it.Quu + ddpData.muI + ddpData.muV * np.dot(fu.T, fu))
       if not isPositiveDefinitive(it.Quu_r, it.L):
         return False
       np.copyto(it.Vpxx_fx, np.dot(Vxx, fx))
-      np.copyto(it.Qx, it.costData.lx + np.dot(fx.T, Vx))
-      np.copyto(it.Qu, it.costData.lu + np.dot(fu.T, Vx))
-      np.copyto(it.Qxx, it.costData.lxx + np.dot(fx.T, it.Vpxx_fx))
-      np.copyto(it.Qux, it.costData.lux + np.dot(fu.T, it.Vpxx_fx))
+      np.copyto(it.Qx, it.cost.lx + np.dot(fx.T, Vx))
+      np.copyto(it.Qu, it.cost.lu + np.dot(fu.T, Vx))
+      np.copyto(it.Qxx, it.cost.lxx + np.dot(fx.T, it.Vpxx_fx))
+      np.copyto(it.Qux, it.cost.lux + np.dot(fu.T, it.Vpxx_fx))
       np.copyto(it.Qux_r, it.Qux + ddpData.muV * np.dot(fu.T, fx))
 
       # Computing the feedback and feedforward terms
@@ -272,17 +272,17 @@ class Solver(object):
     for k in xrange(ddpData.N):
       # Integrating the system dynamics and updating the new state value
       ddpModel.forwardRunningCalc(
-        ddpData.interval[k].dynamicData,
-        ddpData.interval[k].costData,
+        ddpData.interval[k].dynamic,
+        ddpData.interval[k].cost,
         ddpData.interval[k].x,
         ddpData.interval[k].u,
         ddpData.interval[k+1].x)
-      ddpData.totalCost += ddpData.interval[k].costData.l
+      ddpData.totalCost += ddpData.interval[k].cost.l
     ddpModel.forwardTerminalCalc(
-      ddpData.interval[-1].dynamicData,
-      ddpData.interval[-1].costData,
+      ddpData.interval[-1].dynamic,
+      ddpData.interval[-1].cost,
       ddpData.interval[-1].x)
-    ddpData.totalCost += ddpData.interval[-1].costData.l
+    ddpData.totalCost += ddpData.interval[-1].cost.l
     return
 
   @staticmethod
@@ -300,16 +300,16 @@ class Solver(object):
       np.copyto(ddpData.interval[k].u_prev,
                 ddpData.interval[k].u)
       ddpModel.backwardRunningCalc(
-        ddpData.interval[k].dynamicData,
-        ddpData.interval[k].costData,
+        ddpData.interval[k].dynamic,
+        ddpData.interval[k].cost,
         ddpData.interval[k].x,
         ddpData.interval[k].u)
     # Copying the current state into the previous one
     np.copyto(ddpData.interval[-1].x_prev,
               ddpData.interval[-1].x)
     ddpModel.backwardTerminalCalc(
-      ddpData.interval[-1].dynamicData,
-      ddpData.interval[-1].costData,
+      ddpData.interval[-1].dynamic,
+      ddpData.interval[-1].cost,
       ddpData.interval[-1].x)
 
   @staticmethod

@@ -18,8 +18,8 @@ class DDPTerminalIntervalData(object):
     self.x_prev = np.zeros((ddpModel.dynamicModel.nxImpl(), 1))
 
     # Dynamic and cost data of the terminal interval
-    self.dynamicData = ddpModel.createTerminalDynamicData(tFinal)
-    self.costData = ddpModel.createTerminalCostData()
+    self.dynamic = ddpModel.createTerminalDynamicData(tFinal)
+    self.cost = ddpModel.createTerminalCostData()
 
     # Value function derivatives of the terminal interval
     self.Vx = np.zeros((ddpModel.dynamicModel.nx(), 1))
@@ -46,8 +46,8 @@ class DDPRunningIntervalData(object):
     self.u_prev = np.zeros((ddpModel.dynamicModel.nu(), 1))
 
     # Dynamic and cost data of the running interval
-    self.dynamicData = ddpModel.createRunningDynamicData(tInit, tFinal - tInit)
-    self.costData = ddpModel.createRunningCostData()
+    self.dynamic = ddpModel.createRunningDynamicData(tInit, tFinal - tInit)
+    self.cost = ddpModel.createRunningCostData()
 
     # Value function derivatives of the running interval
     self.Vx = np.zeros((ddpModel.dynamicModel.nx(), 1))
@@ -168,10 +168,10 @@ class DDPModel(object):
   def setRunningReference(self, ddpData, Xref, name):
     index = self.costManager.getRunningCostIndex(name)
     for k, data in enumerate(ddpData.interval[:-1]):
-      cost_data = data.costData.costVector[index]
+      cost_data = data.cost.costVector[index]
       self.costManager.runningCosts[index].setReference(cost_data, Xref[k])
 
   def setTerminalReference(self, ddpData, xref, name):
     index = self.costManager.getTerminalCostIndex(name)
     self.costManager.terminalCosts[index].setReference(
-      ddpData.interval[-1].costData.costVector[index], xref)
+      ddpData.interval[-1].cost.costVector[index], xref)
