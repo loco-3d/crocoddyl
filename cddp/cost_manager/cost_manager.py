@@ -73,6 +73,26 @@ class CostManager(object):
     self.runningCostDict[name] = index
     self.runningCosts.append(cost)
 
+  def removeTerminal(self, name):
+    """ Remove a terminal cost function given its name.
+
+    :param name: cost function name
+    """
+    if name in self.terminalCostDict:
+      index = self.getTerminalCostIndex(name)
+      del self.terminalCostDict[name]
+      del self.terminalCosts[index]
+
+  def removeRunning(self, name):
+    """ Remove a running cost function given its name.
+
+    :param name: cost function name
+    """
+    if name in self.runningCostDict:
+      index = self.getRunningCostIndex(name)
+      del self.runningCostDict[name]
+      del self.runningCosts[index]
+
   # Static functions that defines all cost computations
   def forwardRunningCalc(costManager, costData, dynamicsData, x, u):
     costData.l = 0.
