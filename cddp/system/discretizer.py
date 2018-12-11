@@ -6,9 +6,9 @@ class DiscretizerData(object):
   """ This class describes the common data for each discretization rule.
   """
   __metaclass__ = abc.ABCMeta
-  def __init__(self, dynamicsModel):
-    self.fx = np.zeros((dynamicsModel.nx(), dynamicsModel.nx()))
-    self.fu = np.zeros((dynamicsModel.nx(), dynamicsModel.nu()))
+  def __init__(self, dynamicModel):
+    self.fx = np.zeros((dynamicModel.nx(), dynamicModel.nx()))
+    self.fu = np.zeros((dynamicModel.nx(), dynamicModel.nu()))
 
 
 class Discretizer(object):
@@ -18,24 +18,24 @@ class Discretizer(object):
   """
   __metaclass__=abc.ABCMeta
   @abc.abstractmethod
-  def __init__(self, dynamicsModel):
+  def __init__(self, dynamicModel):
     return
 
   @abc.abstractmethod
-  def createData(self, dynamicsModel, dt):
+  def createData(self, dynamicModel, dt):
     """ Create the discretizer data.
 
-    :param dynamicsModel: dynamics model
+    :param dynamicModel: dynamics model
     :param dt: step integration
     """
     pass
 
   @abc.abstractmethod
-  def __call__(dynamicsModel, dynamicsData):
+  def __call__(dynamicModel, dynamicData):
     """ Discretize the system dynamics given an user-defined discretization scheme.
 
-    :param dynamicsModel: dynamics model
-    :param dynamicsData: dynamics data
+    :param dynamicModel: dynamics model
+    :param dynamicData: dynamics data
     """
     pass
 
@@ -46,7 +46,7 @@ class Discretizer(object):
   #   def __init__(self, dimx, dt):
   #     pass
   #   @abc.abstractmethod
-  #   def backwardRunningCalc(self, dynamicsModel, dynamicsData):
+  #   def backwardRunningCalc(self, dynamicModel, dynamicData):
   #     pass
   #   @abc.abstractmethod
   #   def __call__(self):
@@ -68,7 +68,7 @@ class Discretizer(object):
   #   def __init__(self, dimx, dimu, dt):
   #     pass
   #   @abc.abstractmethod
-  #   def backwardRunningCalc(self, dynamicsModel, dynamicsData):
+  #   def backwardRunningCalc(self, dynamicModel, dynamicData):
   #     pass
   #   @abc.abstractmethod
   #   def __call__(self):
@@ -88,13 +88,13 @@ class Discretizer(object):
 
 
 class EulerDiscretizerData(DiscretizerData):
-  def __init__(self, dynamicsModel, dt):
-    DiscretizerData.__init__(self, dynamicsModel)
+  def __init__(self, dynamicModel, dt):
+    DiscretizerData.__init__(self, dynamicModel)
 
     # Extra terms for the simpletic Euler discretizer
     self.dt2 = dt * dt
-    self.I = np.identity(dynamicsModel.nv())
-    self.dt_I = dt * np.identity(dynamicsModel.nv())
+    self.I = np.identity(dynamicModel.nv())
+    self.dt_I = dt * np.identity(dynamicModel.nv())
 
 
 class EulerDiscretizer(Discretizer):
@@ -103,45 +103,45 @@ class EulerDiscretizer(Discretizer):
   def __init__(self):
     return
 
-  def createData(self, dynamicsModel, dt):
+  def createData(self, dynamicModel, dt):
     """ Create the Euler discretizer data.
 
-    :param dynamicsModel: dynamics model
+    :param dynamicModel: dynamics model
     :param dt: step integration
     """
-    return EulerDiscretizerData(dynamicsModel, dt)
+    return EulerDiscretizerData(dynamicModel, dt)
 
   @staticmethod
-  def __call__(dynamicsModel, dynamicsData):
+  def __call__(dynamicModel, dynamicData):
     """ Discretize the system dynamics using the forward Euler scheme.
 
-    :param dynamicsModel: dynamics model
-    :param dynamicsData: dynamics data
+    :param dynamicModel: dynamics model
+    :param dynamicData: dynamics data
     """
     # Discretizing fx
-    dynamicsData.discretizer.fx[:dynamicsModel.nv(),:dynamicsModel.nv()] = \
-      dynamicsData.discretizer.I + dynamicsData.discretizer.dt2 * dynamicsData.aq
-    dynamicsData.discretizer.fx[:dynamicsModel.nv(),dynamicsModel.nv():] = \
-      dynamicsData.discretizer.dt_I + dynamicsData.discretizer.dt2 * dynamicsData.av
-    dynamicsData.discretizer.fx[dynamicsModel.nv():,:dynamicsModel.nv()] = \
-      dynamicsData.dt * dynamicsData.aq
-    dynamicsData.discretizer.fx[dynamicsModel.nv():,dynamicsModel.nv():] = \
-      dynamicsData.discretizer.I + dynamicsData.dt * dynamicsData.av
+    dynamicData.discretizer.fx[:dynamicModel.nv(),:dynamicModel.nv()] = \
+      dynamicData.discretizer.I + dynamicData.discretizer.dt2 * dynamicData.aq
+    dynamicData.discretizer.fx[:dynamicModel.nv(),dynamicModel.nv():] = \
+      dynamicData.discretizer.dt_I + dynamicData.discretizer.dt2 * dynamicData.av
+    dynamicData.discretizer.fx[dynamicModel.nv():,:dynamicModel.nv()] = \
+      dynamicData.dt * dynamicData.aq
+    dynamicData.discretizer.fx[dynamicModel.nv():,dynamicModel.nv():] = \
+      dynamicData.discretizer.I + dynamicData.dt * dynamicData.av
 
     # Discretizing fu
-    dynamicsData.discretizer.fu[:dynamicsModel.nv(),:] = \
-      dynamicsData.discretizer.dt2 * dynamicsData.au
-    dynamicsData.discretizer.fu[dynamicsModel.nv():,:] = \
-      dynamicsData.dt * dynamicsData.au
+    dynamicData.discretizer.fu[:dynamicModel.nv(),:] = \
+      dynamicData.discretizer.dt2 * dynamicData.au
+    dynamicData.discretizer.fu[dynamicModel.nv():,:] = \
+      dynamicData.dt * dynamicData.au
 
   # class fx(DiscretizerBase.fx):
   #   def __init__(self, dimx, dt):
   #     self.dimv = dimx/2
   #     self.dimx = dimx
   #     self.dt = dt
-  #     #Const ref to dynamicsData aq
+  #     #Const ref to dynamicData aq
   #     self.aq = None #derivative of ddq wrt q
-  #     #Const ref to dynamicsData av
+  #     #Const ref to dynamicData av
   #     self.av = None #np.zeros((dimv, dimv)) #derivative of ddq wrt v
 
   #     self.val = np.zeros((dimx, dimx))
@@ -150,9 +150,9 @@ class EulerDiscretizer(Discretizer):
   #     self.outputarr = np.zeros((dimx, 1))
   #     self.outputmat = np.zeros((dimx, dimx))
 
-  #   def backwardRunningCalc(self, dynamicsModel, dynamicsData):
-  #     self.aq = dynamicsData.aq
-  #     self.av = dynamicsData.av
+  #   def backwardRunningCalc(self, dynamicModel, dynamicData):
+  #     self.aq = dynamicData.aq
+  #     self.av = dynamicData.av
   #     self.val[:self.dimv, :self.dimv] = np.identity(self.dimv)
   #     self.val[:self.dimv, self.dimv:] = np.identity(self.dimv)*self.dt
   #     self.val[self.dimv:, :self.dimv] = self.aq*self.dt
@@ -223,8 +223,8 @@ class EulerDiscretizer(Discretizer):
   #     self.outputmat = np.dot(self.au.T, V_p[self.dimv:,:])*self.dt
   #     return self.outputmat
 
-  #   def backwardRunningCalc(self, dynamicsModel, dynamicsData):
-  #     self.au = dynamicsData.au
+  #   def backwardRunningCalc(self, dynamicModel, dynamicData):
+  #     self.au = dynamicData.au
   #     self.val[self.dimv:, :] = self.au*self.dt
   #     self.fu_sq = np.dot(self.au.T, self.au)*self.dt*self.dt
   #     return

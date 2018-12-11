@@ -9,18 +9,18 @@ class TerminalCostData(object):
   the state. The dimensions of these vector or matrices depends on the dynamic
   model.
   """
-  def __init__(self, dynamicsModel):
+  def __init__(self, dynamicModel):
     """ Create the terminal cost data.
 
-    :param dynamicsModel: dynamics model
+    :param dynamicModel: dynamics model
     """
     # Creating the data structure of the cost and its quadratic approximantion.
     # Note that this approximation as the form: dx^T*lx + dx^T*lxx*dx, where dx
     # lies in the tangent space (R^{nx}) around a nominal point in the
     # geometrical manifold
     self.l = 0.
-    self.lx = np.zeros((dynamicsModel.nx(),1))
-    self.lxx = np.zeros((dynamicsModel.nx(),dynamicsModel.nx()))
+    self.lx = np.zeros((dynamicModel.nx(),1))
+    self.lxx = np.zeros((dynamicModel.nx(),dynamicModel.nx()))
 
 
 class RunningCostData(TerminalCostData):
@@ -31,20 +31,20 @@ class RunningCostData(TerminalCostData):
   depends on the dynamic
   model.
   """
-  def __init__(self, dynamicsModel):
+  def __init__(self, dynamicModel):
     """ Creates the running cost data.
 
-    :param dynamicsModel: dynamics model
+    :param dynamicModel: dynamics model
     """
     # Creating the data structure of the cost and its quadratic approximantion.
     # Note that this approximation as the form:
     # [dx^T du^T]*[lx; lu] + [dx^T du^T]*[lxx lxu; lux luu]*[dx; du] where dx
     # lies in the tangent space (R^{nx}) around a nominal point in the
     # geometrical manifold, and du is point near to the nominal control (R^{nu})
-    TerminalCostData.__init__(self, dynamicsModel)
-    self.lu = np.zeros((dynamicsModel.nu(),1))
-    self.lux = np.zeros((dynamicsModel.nu(),dynamicsModel.nx()))
-    self.luu = np.zeros((dynamicsModel.nu(),dynamicsModel.nu()))
+    TerminalCostData.__init__(self, dynamicModel)
+    self.lu = np.zeros((dynamicModel.nu(),1))
+    self.lux = np.zeros((dynamicModel.nu(),dynamicModel.nx()))
+    self.luu = np.zeros((dynamicModel.nu(),dynamicModel.nu()))
 
 
 class RunningCost(object):
@@ -64,15 +64,15 @@ class RunningCost(object):
     pass
 
   @abc.abstractmethod
-  def createData(self, dynamicsModel):
+  def createData(self, dynamicModel):
     """ Create the running cost data.
 
-    :param dynamicsModel: dynamics model
+    :param dynamicModel: dynamics model
     """
     raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
-  def updateCost(self, costData, dynamicsData, x, u):
+  def updateCost(self, costData, dynamicData, x, u):
     """ Update the cost value according an user-defined cost function.
 
     The new cost value overwrites the internal data l.
@@ -80,7 +80,7 @@ class RunningCost(object):
     raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
-  def updateQuadraticAppr(self, costData, dynamicsData, x, u):
+  def updateQuadraticAppr(self, costData, dynamicData, x, u):
     """ Update the quadratic approximation of the user-defined cost function.
 
     The new quadratic approximation of the cost function overwrites the
@@ -152,15 +152,15 @@ class TerminalCost(object):
     pass
 
   @abc.abstractmethod
-  def createData(self, dynamicsModel):
+  def createData(self, dynamicModel):
     """ Create the terminal cost data.
 
-    :param dynamicsModel: dynamics model
+    :param dynamicModel: dynamics model
     """
     raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
-  def updateCost(self, costData, dynamicsData, x):
+  def updateCost(self, costData, dynamicData, x):
     """ Update the cost value according an user-defined cost function.
 
     The new cost value overwrites the internal data l.
@@ -168,7 +168,7 @@ class TerminalCost(object):
     raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
-  def updateQuadraticAppr(self, costData, dynamicsData, x):
+  def updateQuadraticAppr(self, costData, dynamicData, x):
     """ Update the quadratic approximation of the user-defined cost function.
 
     The new quadratic approximation of the cost function overwrites the
@@ -204,29 +204,29 @@ class TerminalCost(object):
 
 
 class RunningQuadraticCostData(RunningCostData):
-  def __init__(self, dynamicsModel, nr):
+  def __init__(self, dynamicModel, nr):
     # Creating the standard data structure of running cost
-    RunningCostData.__init__(self, dynamicsModel)
+    RunningCostData.__init__(self, dynamicModel)
 
     # Creating the data structure of the residual and its derivatives
     self.r = np.zeros((nr,1))
-    self.rx = np.zeros((nr,dynamicsModel.nx()))
-    self.ru = np.zeros((nr,dynamicsModel.nu()))
+    self.rx = np.zeros((nr,dynamicModel.nx()))
+    self.ru = np.zeros((nr,dynamicModel.nu()))
     self.Q_r = np.zeros((nr,1))
-    self.Q_rx = np.zeros((nr,dynamicsModel.nx()))
-    self.Q_ru = np.zeros((nr,dynamicsModel.nu()))
+    self.Q_rx = np.zeros((nr,dynamicModel.nx()))
+    self.Q_ru = np.zeros((nr,dynamicModel.nu()))
 
 
 class TerminalQuadraticCostData(TerminalCostData):
-  def __init__(self, dynamicsModel, nr):
+  def __init__(self, dynamicModel, nr):
     # Creating the standard data structure of terminal cost
-    TerminalCostData.__init__(self, dynamicsModel)
+    TerminalCostData.__init__(self, dynamicModel)
 
     # Creating the data structure of the residual and its derivatives
     self.r = np.zeros((nr,1))
-    self.rx = np.zeros((nr,dynamicsModel.nx()))
+    self.rx = np.zeros((nr,dynamicModel.nx()))
     self.Q_r = np.zeros((nr,1))
-    self.Q_rx = np.zeros((nr,dynamicsModel.nx()))
+    self.Q_rx = np.zeros((nr,dynamicModel.nx()))
 
 
 class RunningQuadraticCost(RunningCost):
@@ -249,7 +249,7 @@ class RunningQuadraticCost(RunningCost):
     self.weight = weight
 
   @abc.abstractmethod
-  def updateResidual(self, costData, dynamicsData, x, u):
+  def updateResidual(self, costData, dynamicData, x, u):
     """ Update the residual value according an user-define function.
 
     The new residual value overwrites the internal data r.
@@ -257,7 +257,7 @@ class RunningQuadraticCost(RunningCost):
     raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
-  def updateResidualLinearAppr(self, costData, dynamicsData, x, u):
+  def updateResidualLinearAppr(self, costData, dynamicData, x, u):
     """ Update the linear approximantion of the user-define residual function.
 
     The new linear approximation of the residual function overwrites the
@@ -265,17 +265,17 @@ class RunningQuadraticCost(RunningCost):
     """
     raise NotImplementedError("Not implemented yet.")
 
-  def updateCost(self, costData, dynamicsData, x, u):
+  def updateCost(self, costData, dynamicData, x, u):
     # Updating the residual function value
-    self.updateResidual(costData, dynamicsData, x, u)
+    self.updateResidual(costData, dynamicData, x, u)
 
     # Updating the cost value
     costData.l = \
       0.5 * np.asscalar(np.dot(costData.r.T, np.multiply(self.weight, costData.r)))
 
-  def updateQuadraticAppr(self, costData, dynamicsData, x, u):
+  def updateQuadraticAppr(self, costData, dynamicData, x, u):
     # Updating the linear approximation of the residual function
-    self.updateResidualLinearAppr(costData, dynamicsData)
+    self.updateResidualLinearAppr(costData, dynamicData)
 
     # Updating the quadratic approximation of the cost function
     np.copyto(costData.Q_r, np.multiply(self.weight, costData.r))
@@ -306,7 +306,7 @@ class TerminalQuadraticCost(TerminalCost):
     self.weight = weight
 
   @abc.abstractmethod
-  def updateResidual(self, costData, dynamicsData, x):
+  def updateResidual(self, costData, dynamicData, x):
     """ Update the residual value according an user-define function.
 
     The new residual value overwrites the internal data r.
@@ -314,7 +314,7 @@ class TerminalQuadraticCost(TerminalCost):
     raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
-  def updateResidualLinearAppr(self, costData, dynamicsData, x):
+  def updateResidualLinearAppr(self, costData, dynamicData, x):
     """ Update the linear approximantion of the user-define residual function.
 
     The new linear approximation of the residual function overwrites the
@@ -322,17 +322,17 @@ class TerminalQuadraticCost(TerminalCost):
     """
     raise NotImplementedError("Not implemented yet.")
 
-  def updateCost(self, costData, dynamicsData, x):
+  def updateCost(self, costData, dynamicData, x):
     # Updating the residual function value
-    self.updateResidual(costData, dynamicsData, x)
+    self.updateResidual(costData, dynamicData, x)
 
     # Updating the cost value
     costData.l = \
       0.5 * np.asscalar(np.dot(costData.r.T, np.multiply(self.weight, costData.r)))
 
-  def updateQuadraticAppr(self, costData, dynamicsData, x):
+  def updateQuadraticAppr(self, costData, dynamicData, x):
     # Updating the linear approximation of the residual function
-    self.updateResidualLinearAppr(costData, dynamicsData, x)
+    self.updateResidualLinearAppr(costData, dynamicData, x)
 
     # Updating the quadratic approximation of the cost function
     np.copyto(costData.Q_r, np.multiply(self.weight, costData.r))

@@ -1,18 +1,18 @@
-from cddp.dynamics.dynamics import DynamicsData
-from cddp.dynamics.dynamics import DynamicsModel
+from cddp.dynamics.dynamics import DynamicData
+from cddp.dynamics.dynamics import DynamicModel
 import pinocchio as se3
 import numpy as np
 
 
-class ForwardDynamicsData(DynamicsData):
+class ForwardDynamicData(DynamicData):
   def __init__(self, dynamicModel, t, dt):
-    DynamicsData.__init__(self, dynamicModel, t, dt)
+    DynamicData.__init__(self, dynamicModel, t, dt)
 
     # Pinocchio data
     self.pinocchio = dynamicModel.pinocchio.createData()
 
 
-class ForwardDynamics(DynamicsModel):
+class ForwardDynamics(DynamicModel):
   """ Forward dynamics computed by the Articulated Body Algorithm (ABA).
 
   The ABA algorithm computes the forward dynamics for unconstrained rigid body
@@ -24,42 +24,42 @@ class ForwardDynamics(DynamicsModel):
   thanks to a sympletic integration rule.
   """
   def __init__(self, integrator, discretizer, pinocchioModel):
-    DynamicsModel.__init__(self, integrator, discretizer,
+    DynamicModel.__init__(self, integrator, discretizer,
                            pinocchioModel.nq,
                            pinocchioModel.nv,
                            pinocchioModel.nv)
     self.pinocchio = pinocchioModel
 
   def createData(self, t, dt):
-    return ForwardDynamicsData(self, t, dt)
+    return ForwardDynamicData(self, t, dt)
 
-  def updateTerms(self, dynamicsData, x):
+  def updateTerms(self, dynamicData, x):
     # Compute all terms
     #TODO: Try to reduce calculations in forward pass, and move them to backward pass
-    se3.computeAllTerms(self.pinocchio, dynamicsData.pinocchio,
+    se3.computeAllTerms(self.pinocchio, dynamicData.pinocchio,
                         x[:self.nq()], x[self.nq():])
     se3.updateFramePlacements(self.pinocchio,
-                              dynamicsData.pinocchio)
+                              dynamicData.pinocchio)
 
-  def updateDynamics(self, dynamicsData, x, u):
+  def updateDynamics(self, dynamicData, x, u):
     # Update all terms
-    self.updateTerms(dynamicsData, x)
+    self.updateTerms(dynamicData, x)
 
     # Running ABA algorithm
-    se3.aba(self.pinocchio, dynamicsData.pinocchio,
+    se3.aba(self.pinocchio, dynamicData.pinocchio,
             x[:self.nq()], x[self.nq():], u)
 
     # Updating the system acceleration
-    np.copyto(dynamicsData.a, dynamicsData.pinocchio.ddq)
+    np.copyto(dynamicData.a, dynamicData.pinocchio.ddq)
 
-  def updateLinearAppr(self, dynamicsData, x, u):
-    se3.computeABADerivatives(self.pinocchio, dynamicsData.pinocchio,
+  def updateLinearAppr(self, dynamicData, x, u):
+    se3.computeABADerivatives(self.pinocchio, dynamicData.pinocchio,
                               x[:self.nq()], x[self.nq():], u)
 
     # Updating the system derivatives
-    np.copyto(dynamicsData.aq, dynamicsData.pinocchio.ddq_dq)
-    np.copyto(dynamicsData.av, dynamicsData.pinocchio.ddq_dv)
-    np.copyto(dynamicsData.au, dynamicsData.pinocchio.Minv)
+    np.copyto(dynamicData.aq, dynamicData.pinocchio.ddq_dq)
+    np.copyto(dynamicData.av, dynamicData.pinocchio.ddq_dv)
+    np.copyto(dynamicData.au, dynamicData.pinocchio.Minv)
 
   def integrateConfiguration(self, q, dq):
     return se3.integrate(self.pinocchio, q, dq)

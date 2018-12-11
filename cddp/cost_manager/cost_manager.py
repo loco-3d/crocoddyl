@@ -3,25 +3,25 @@ import numpy as np
 
 
 class TerminalCostManagerData(TerminalCostData):
-  def __init__(self, dynamicsModel, costVector):
+  def __init__(self, dynamicModel, costVector):
     # Including the data structure of the terminal cost
-    TerminalCostData.__init__(self, dynamicsModel)
+    TerminalCostData.__init__(self, dynamicModel)
 
     # Including the data structure for each individual terminal cost functions
     self.costVector = []
     for cost in costVector:
-      self.costVector.append(cost.createData(dynamicsModel))
+      self.costVector.append(cost.createData(dynamicModel))
 
 
 class RunningCostManagerData(RunningCostData):
-  def __init__(self, dynamicsModel, costVector):
+  def __init__(self, dynamicModel, costVector):
     # Including the data structure of the running cost
-    RunningCostData.__init__(self, dynamicsModel)
+    RunningCostData.__init__(self, dynamicModel)
 
     # Including the data structure for each individual terminal cost functions
     self.costVector = []
     for cost in costVector:
-      self.costVector.append(cost.createData(dynamicsModel))
+      self.costVector.append(cost.createData(dynamicModel))
 
 
 class CostManager(object):
@@ -43,52 +43,76 @@ class CostManager(object):
     self.terminalCostDict = {}
     self.runningCostDict = {}
 
-  def createTerminalData(self, dynamicsModel):
-    """ Creates the terminal cost data for a given state dimension
+  def createTerminalData(self, dynamicModel):
+    """ Create the terminal cost data for a given dynamic model.
 
-    :param dynamicsModel: dynamics model
+    :param dynamicModel: dynamic model
     """
-    return TerminalCostManagerData(dynamicsModel, self.terminalCosts)
+    return TerminalCostManagerData(dynamicModel, self.terminalCosts)
 
-  def createRunningData(self, dynamicsModel):
-    """ Creates the running cost data for a given state and control dimension
+  def createRunningData(self, dynamicModel):
+    """ Create the running cost data for a given dynamic model.
 
-    :param dynamicsModel: dynamics model
+    :param dynamicModel: dynamic model
     """
-    return RunningCostManagerData(dynamicsModel, self.runningCosts)
+    return RunningCostManagerData(dynamicModel, self.runningCosts)
 
   def addTerminal(self, cost, name):
-    """ Adds a terminal cost function to the cost model.
-    Before adding it, it checks if this is a terminal cost objects.
+    """ Add a terminal cost function.
+
+    :param cost: cost function
+    :param name: cost function name
     """
     index = len(self.terminalCosts)
     self.terminalCostDict[name] = index
     self.terminalCosts.append(cost)
 
   def addRunning(self, cost, name):
-    """ Adds a running cost function to the cost model.
-    Before adding it, it checks if this is a terminal cost objects.
+    """ Add a running cost function.
+
+    :param cost: cost function
+    :param name: cost function name
     """
     index = len(self.runningCosts)
     self.runningCostDict[name] = index
     self.runningCosts.append(cost)
 
+  def removeTerminal(self, name):
+    """ Remove a terminal cost function given its name.
+
+    :param name: cost function name
+    """
+    if name in self.terminalCostDict:
+      index = self.getTerminalCostIndex(name)
+      del self.terminalCostDict[name]
+      del self.terminalCosts[index]
+
+  def removeRunning(self, name):
+    """ Remove a running cost function given its name.
+
+    :param name: cost function name
+    """
+    if name in self.runningCostDict:
+      index = self.getRunningCostIndex(name)
+      del self.runningCostDict[name]
+      del self.runningCosts[index]
+
   # Static functions that defines all cost computations
-  def forwardRunningCalc(costManager, costData, dynamicsData, x, u):
+  def forwardRunningCalc(costManager, costData, dynamicData, x, u):
     costData.l = 0.
     for k, cost in enumerate(costManager.runningCosts):
-      cost.updateCost(costData.costVector[k], dynamicsData, x, u)
+      cost.updateCost(costData.costVector[k], dynamicData, x, u)
       costData.l += cost.getl(costData.costVector[k])
 
-  def forwardTerminalCalc(costManager, costData, dynamicsData, x):
+  def forwardTerminalCalc(costManager, costData, dynamicData, x):
     costData.l = 0.
     for k, cost in enumerate(costManager.terminalCosts):
-      cost.updateCost(costData.costVector[k], dynamicsData, x, u = None)
+      cost.updateCost(costData.costVector[k], dynamicData, x, u = None)
       costData.l += cost.getl(costData.costVector[k])
 
-  def backwardRunningCalc(costManager, costData, dynamicsData, x, u):
+  def backwardRunningCalc(costManager, costData, dynamicData, x, u):
     for k, cost in enumerate(costManager.runningCosts):
-      cost.updateQuadraticAppr(costData.costVector[k], dynamicsData, x, u)
+      cost.updateQuadraticAppr(costData.costVector[k], dynamicData, x, u)
 
     costData.lx.fill(0.)
     costData.lu.fill(0.)
@@ -102,9 +126,9 @@ class CostManager(object):
       costData.lux += cost.getlux(costData.costVector[k])
       costData.luu += cost.getluu(costData.costVector[k])
 
-  def backwardTerminalCalc(costManager, costData, dynamicsData, x):
+  def backwardTerminalCalc(costManager, costData, dynamicData, x):
     for k, cost in enumerate(costManager.terminalCosts):
-      cost.updateQuadraticAppr(costData.costVector[k], dynamicsData, x, u = None)
+      cost.updateQuadraticAppr(costData.costVector[k], dynamicData, x, u = None)
 
     costData.lx.fill(0.)
     costData.lxx.fill(0.)
@@ -113,21 +137,21 @@ class CostManager(object):
       costData.lxx += cost.getlxx(costData.costVector[k])
 
   def getTerminalCost(self, name):
-    """ Return the running cost model given its name
+    """ Return the running cost model given its name.
 
     :param name: cost function name
     """
     return self.terminalCosts[self.getTerminalCostIndex(name)]
 
   def getRunningCost(self, name):
-    """ Return the running cost model given its name
+    """ Return the running cost model given its name.
 
     :param name: cost function name
     """
     return self.runningCosts[self.getRunningCostIndex(name)]
 
   def getTerminalCostIndex(self, name):
-    """ Get the index of a given terminal cost name
+    """ Get the index of a given terminal cost name.
 
     :param name: cost function name
     """
@@ -135,7 +159,7 @@ class CostManager(object):
     return self.terminalCostDict[name]
 
   def getRunningCostIndex(self, name):
-    """ Get the index of a given terminal cost name
+    """ Get the index of a given terminal cost name.
 
     :param name: cost function name
     """

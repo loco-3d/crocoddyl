@@ -14,16 +14,16 @@ class DDPTerminalIntervalData(object):
     :param tFinal: final time of the internal
     """
     # Current and previous state
-    self.x = np.zeros((ddpModel.dynamicsModel.nxImpl(), 1))
-    self.x_prev = np.zeros((ddpModel.dynamicsModel.nxImpl(), 1))
+    self.x = np.zeros((ddpModel.dynamicModel.nxImpl(), 1))
+    self.x_prev = np.zeros((ddpModel.dynamicModel.nxImpl(), 1))
 
     # Dynamic and cost data of the terminal interval
-    self.dynamicsData = ddpModel.createTerminalDynamicsData(tFinal)
-    self.costData = ddpModel.createTerminalCostData()
+    self.dynamic = ddpModel.createTerminalDynamicData(tFinal)
+    self.cost = ddpModel.createTerminalCostData()
 
     # Value function derivatives of the terminal interval
-    self.Vx = np.zeros((ddpModel.dynamicsModel.nx(), 1))
-    self.Vxx = np.zeros((ddpModel.dynamicsModel.nx(),ddpModel.dynamicsModel.nx()))
+    self.Vx = np.zeros((ddpModel.dynamicModel.nx(), 1))
+    self.Vxx = np.zeros((ddpModel.dynamicModel.nx(),ddpModel.dynamicModel.nx()))
 
 
 class DDPRunningIntervalData(object):
@@ -40,40 +40,40 @@ class DDPRunningIntervalData(object):
     :param tFinal: final time of the internal
     """
     # Current and previous state and control
-    self.x = np.zeros((ddpModel.dynamicsModel.nxImpl(), 1))
-    self.u = np.zeros((ddpModel.dynamicsModel.nu(), 1))
-    self.x_prev = np.zeros((ddpModel.dynamicsModel.nxImpl(), 1))
-    self.u_prev = np.zeros((ddpModel.dynamicsModel.nu(), 1))
+    self.x = np.zeros((ddpModel.dynamicModel.nxImpl(), 1))
+    self.u = np.zeros((ddpModel.dynamicModel.nu(), 1))
+    self.x_prev = np.zeros((ddpModel.dynamicModel.nxImpl(), 1))
+    self.u_prev = np.zeros((ddpModel.dynamicModel.nu(), 1))
 
     # Dynamic and cost data of the running interval
-    self.dynamicsData = ddpModel.createRunningDynamicsData(tInit, tFinal - tInit)
-    self.costData = ddpModel.createRunningCostData()
+    self.dynamic = ddpModel.createRunningDynamicData(tInit, tFinal - tInit)
+    self.cost = ddpModel.createRunningCostData()
 
     # Value function derivatives of the running interval
-    self.Vx = np.zeros((ddpModel.dynamicsModel.nx(), 1))
-    self.Vxx = np.zeros((ddpModel.dynamicsModel.nx(),ddpModel.dynamicsModel.nx()))
+    self.Vx = np.zeros((ddpModel.dynamicModel.nx(), 1))
+    self.Vxx = np.zeros((ddpModel.dynamicModel.nx(),ddpModel.dynamicModel.nx()))
 
     # Quadratic approximation of the Value function
-    self.Qx = np.zeros((ddpModel.dynamicsModel.nx(), 1))
-    self.Qu = np.zeros((ddpModel.dynamicsModel.nu(), 1))
-    self.Qxx = np.zeros((ddpModel.dynamicsModel.nx(),ddpModel.dynamicsModel.nx()))
-    self.Qux = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nx()))
-    self.Quu = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
-    self.Quu_r = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
-    self.Qux_r = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nx()))
-    self.L = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
-    self.L_inv = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
-    self.Quu_inv_minus = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
+    self.Qx = np.zeros((ddpModel.dynamicModel.nx(), 1))
+    self.Qu = np.zeros((ddpModel.dynamicModel.nu(), 1))
+    self.Qxx = np.zeros((ddpModel.dynamicModel.nx(),ddpModel.dynamicModel.nx()))
+    self.Qux = np.zeros((ddpModel.dynamicModel.nu(),ddpModel.dynamicModel.nx()))
+    self.Quu = np.zeros((ddpModel.dynamicModel.nu(),ddpModel.dynamicModel.nu()))
+    self.Quu_r = np.zeros((ddpModel.dynamicModel.nu(),ddpModel.dynamicModel.nu()))
+    self.Qux_r = np.zeros((ddpModel.dynamicModel.nu(),ddpModel.dynamicModel.nx()))
+    self.L = np.zeros((ddpModel.dynamicModel.nu(),ddpModel.dynamicModel.nu()))
+    self.L_inv = np.zeros((ddpModel.dynamicModel.nu(),ddpModel.dynamicModel.nu()))
+    self.Quu_inv_minus = np.zeros((ddpModel.dynamicModel.nu(),ddpModel.dynamicModel.nu()))
 
     # Feedback and feed-forward terms
-    self.K = np.zeros((ddpModel.dynamicsModel.nu(), ddpModel.dynamicsModel.nx()))
-    self.j = np.zeros((ddpModel.dynamicsModel.nu(), 1))
+    self.K = np.zeros((ddpModel.dynamicModel.nu(), ddpModel.dynamicModel.nx()))
+    self.j = np.zeros((ddpModel.dynamicModel.nu(), 1))
 
     # Extra DDP terms
     self.jt_Quu_j = 0.
     self.jt_Qu = 0.
-    self.Vpxx_fx = np.zeros((ddpModel.dynamicsModel.nx(), ddpModel.dynamicsModel.nx()))
-    self.Vpxx_fu = np.zeros((ddpModel.dynamicsModel.nx(), ddpModel.dynamicsModel.nu()))
+    self.Vpxx_fx = np.zeros((ddpModel.dynamicModel.nx(), ddpModel.dynamicModel.nx()))
+    self.Vpxx_fu = np.zeros((ddpModel.dynamicModel.nx(), ddpModel.dynamicModel.nu()))
 
 
 class DDPData(object):
@@ -92,9 +92,9 @@ class DDPData(object):
 
     # Interval data for the cost and dynamics, and their quadratic and linear
     # approximation, respectively
-    self.intervalDataVector = [DDPRunningIntervalData(ddpModel, timeline[i], timeline[i+1])
-                               for i in xrange(self.N)]
-    self.intervalDataVector.append(DDPTerminalIntervalData(ddpModel, timeline[-1]))
+    self.interval = [DDPRunningIntervalData(ddpModel, timeline[i], timeline[i+1])
+                     for i in xrange(self.N)]
+    self.interval.append(DDPTerminalIntervalData(ddpModel, timeline[-1]))
 
     # Cost-related data
     self.totalCost = 0.
@@ -106,7 +106,7 @@ class DDPData(object):
     self.alpha = -1.
     self.muLM = -1.
     self.muV = -1.
-    self.muI = np.zeros((ddpModel.dynamicsModel.nu(),ddpModel.dynamicsModel.nu()))
+    self.muI = np.zeros((ddpModel.dynamicModel.nu(),ddpModel.dynamicModel.nu()))
 
     # Convergence and stopping criteria data
     self._convergence = False
@@ -119,59 +119,59 @@ class DDPData(object):
 class DDPModel(object):
   """ Class to save the model information for the system, cost and dynamics
   """
-  def __init__(self, dynamicsModel, costManager):
-    self.dynamicsModel = dynamicsModel
+  def __init__(self, dynamicModel, costManager):
+    self.dynamicModel = dynamicModel
     self.costManager = costManager
 
-  def forwardTerminalCalc(self, dynamicsData, costData, x):
+  def forwardTerminalCalc(self, dynamicData, costData, x):
     """Performes the dynamics integration to generate the state and control functions"""
-    self.dynamicsModel.forwardTerminalCalc(dynamicsData, x)
-    self.costManager.forwardTerminalCalc(costData, dynamicsData, x)
+    self.dynamicModel.forwardTerminalCalc(dynamicData, x)
+    self.costManager.forwardTerminalCalc(costData, dynamicData, x)
 
-  def forwardRunningCalc(self, dynamicsData, costData, x, u, xNext):
+  def forwardRunningCalc(self, dynamicData, costData, x, u, xNext):
     """Performes the dynamics integration to generate the state and control functions"""
-    self.dynamicsModel.forwardRunningCalc(dynamicsData, x, u, xNext)
-    self.costManager.forwardRunningCalc(costData, dynamicsData, x, u)
+    self.dynamicModel.forwardRunningCalc(dynamicData, x, u, xNext)
+    self.costManager.forwardRunningCalc(costData, dynamicData, x, u)
 
-  def backwardTerminalCalc(self, dynamicsData, costData, x):
+  def backwardTerminalCalc(self, dynamicData, costData, x):
     """Performs the calculations before the backward pass
     Pinocchio Data has already been filled with the forward pass."""
-    self.dynamicsModel.backwardTerminalCalc(dynamicsData, x)
-    self.costManager.backwardTerminalCalc(costData, dynamicsData, x)
+    self.dynamicModel.backwardTerminalCalc(dynamicData, x)
+    self.costManager.backwardTerminalCalc(costData, dynamicData, x)
 
-  def backwardRunningCalc(self, dynamicsData, costData, x, u):
+  def backwardRunningCalc(self, dynamicData, costData, x, u):
     """Performs the calculations before the backward pass"""
-    self.dynamicsModel.backwardRunningCalc(dynamicsData, x, u)
-    self.costManager.backwardRunningCalc(costData, dynamicsData, x, u)
+    self.dynamicModel.backwardRunningCalc(dynamicData, x, u)
+    self.costManager.backwardRunningCalc(costData, dynamicData, x, u)
 
-  def createRunningDynamicsData(self, tInit, dt):
-    return self.dynamicsModel.createData(tInit, dt)
+  def createRunningDynamicData(self, tInit, dt):
+    return self.dynamicModel.createData(tInit, dt)
 
   def createRunningCostData(self):
-    return self.costManager.createRunningData(self.dynamicsModel)
+    return self.costManager.createRunningData(self.dynamicModel)
 
-  def createTerminalDynamicsData(self, tFinal):
-    return self.dynamicsModel.createData(tFinal, 0.)
+  def createTerminalDynamicData(self, tFinal):
+    return self.dynamicModel.createData(tFinal, 0.)
 
   def createTerminalCostData(self):
-    return self.costManager.createTerminalData(self.dynamicsModel)
+    return self.costManager.createTerminalData(self.dynamicModel)
 
   def setInitial(self, ddpData, xInit, UInit):
     """ Set the initial conditions to the ddpData.
     """
-    np.copyto(ddpData.intervalDataVector[0].x, xInit)
-    np.copyto(ddpData.intervalDataVector[0].x_prev, xInit)
-    for u, intervalData in izip(UInit,ddpData.intervalDataVector[:-1]):
+    np.copyto(ddpData.interval[0].x, xInit)
+    np.copyto(ddpData.interval[0].x_prev, xInit)
+    for u, intervalData in izip(UInit,ddpData.interval[:-1]):
       np.copyto(intervalData.u, u)
     return
 
   def setRunningReference(self, ddpData, Xref, name):
     index = self.costManager.getRunningCostIndex(name)
-    for k, data in enumerate(ddpData.intervalDataVector[:-1]):
-      cost_data = data.costData.costVector[index]
+    for k, data in enumerate(ddpData.interval[:-1]):
+      cost_data = data.cost.costVector[index]
       self.costManager.runningCosts[index].setReference(cost_data, Xref[k])
 
   def setTerminalReference(self, ddpData, xref, name):
     index = self.costManager.getTerminalCostIndex(name)
     self.costManager.terminalCosts[index].setReference(
-      ddpData.intervalDataVector[-1].costData.costVector[index], xref)
+      ddpData.interval[-1].cost.costVector[index], xref)

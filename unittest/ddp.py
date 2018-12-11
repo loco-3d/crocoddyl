@@ -68,8 +68,8 @@ class LinearDDPTest(unittest.TestCase):
     cddp.Solver.solve(self.ddpModel, self.ddpData, solverParams)
     cddp.Solver.updateQuadraticAppr(self.ddpModel, self.ddpData)
 
-    nx = self.ddpModel.dynamicsModel.nx()
-    nu = self.ddpModel.dynamicsModel.nu()
+    nx = self.ddpModel.dynamicModel.nx()
+    nu = self.ddpModel.dynamicModel.nu()
     N = self.ddpData.N
     sol, lag, hess, jac, grad, g = self.KKTSolver(self.ddpModel, self.ddpData)
 
@@ -95,7 +95,7 @@ class LinearDDPTest(unittest.TestCase):
 
     # Checking that the Vx is equals to the KKT Lagrangian multipliers
     for i in xrange(N+1):
-      Vx = self.ddpData.intervalDataVector[i].Vx
+      Vx = self.ddpData.interval[i].Vx
       self.assertTrue(np.allclose(Vx, lag[i*nx:(i+1)*nx]),
       "Vx should be equals to the Lagrangian multiplier.")
 
@@ -110,24 +110,35 @@ class LinearDDPTest(unittest.TestCase):
     # Using the default solver parameters
     solverParams = cddp.SolverParams()
 
-    # Running a backward-pass without regularization
-    self.ddpData.muV = 0.
+    # Running a backward-pass with control regularization
     self.ddpData.muLM = 0.
+    self.ddpData.muV = 0.
     self.ddpData.alpha = 1.
+    cddp.Solver.forwardSimulation(self.ddpModel, self.ddpData)
     cddp.Solver.updateQuadraticAppr(self.ddpModel, self.ddpData)
     cddp.Solver.backwardPass(self.ddpModel, self.ddpData, solverParams)
-    Vxx = self.ddpData.intervalDataVector[-1].Vxx.copy()
 
-    # Backward-pass with regularization
-    self.ddpData.muLM = np.random.random_sample()
+    # Recording the Vx values for the control regularization case
+    Vx_ctrl = []
+    for i in xrange(self.ddpData.N + 1):
+      Vx_ctrl.append(self.ddpData.interval[i].Vx.copy())
+
+    # Running a backward-pass with an equivalente LM regularization
+    self.ddpData.muLM = 1e-2
+    self.ddpModel.costManager.removeRunning('u_reg')
+    cddp.Solver.forwardSimulation(self.ddpModel, self.ddpData)
     cddp.Solver.updateQuadraticAppr(self.ddpModel, self.ddpData)
     cddp.Solver.backwardPass(self.ddpModel, self.ddpData, solverParams)
-    Vxx_reg = self.ddpData.intervalDataVector[-1].Vxx.copy()
 
-    # Checking both values of the Value-function Hessian
-    self.assertTrue(
-      np.allclose(Vxx, Vxx_reg),
-      "Regularization doesn't affect the terminal Vxx.")
+    # Recording the Vx values for the control regularization case
+    Vx_reg = []
+    for i in xrange(self.ddpData.N + 1):
+      Vx_reg.append(self.ddpData.interval[i].Vx.copy())
+
+    # Checking
+    for i in xrange(self.ddpData.N + 1):
+      self.assertTrue(np.allclose(Vx_ctrl[i], Vx_reg[i]),
+        "The control cost regularization isn't equal to the LM regularization.")
 
   def KKTSolver(self, ddpModel, ddpData):
     # Generate a warm-point trajectory from an initial condition
@@ -137,8 +148,8 @@ class LinearDDPTest(unittest.TestCase):
     # cddp.Solver.updateQuadraticAppr(ddpModel, ddpData)
 
     # Creating the variables of the KKT problem
-    nx = ddpModel.dynamicsModel.nx()
-    nu = ddpModel.dynamicsModel.nu()
+    nx = ddpModel.dynamicModel.nx()
+    nu = ddpModel.dynamicModel.nu()
     N = ddpData.N
     nw = nx + nu
     nvar = N * nw + nx
@@ -153,14 +164,14 @@ class LinearDDPTest(unittest.TestCase):
     Ixx = np.eye(nx)
     Oxx = np.zeros((nx,nx))
     Oxu = np.zeros((nx,nu))
-    g[:nx] = ddpData.intervalDataVector[0].x
+    g[:nx] = ddpData.interval[0].x
     w_i = np.zeros((nw,1))
     q_i = np.zeros((nw,1))
     Q_i = np.zeros((nw,nw))
     f_i = np.zeros((2*nx,nw))
     for k in xrange(N):
       # Interval data
-      data = ddpData.intervalDataVector[k]
+      data = ddpData.interval[k]
 
       # State, control and decision vector
       x_i = data.x
@@ -169,11 +180,11 @@ class LinearDDPTest(unittest.TestCase):
       w_i[nx:] = u_i
 
       # Running cost and its derivatives
-      lx_i = data.costData.lx
-      lu_i = data.costData.lu
-      lxx_i = data.costData.lxx
-      luu_i = data.costData.luu
-      lux_i = data.costData.lux
+      lx_i = data.cost.lx
+      lu_i = data.cost.lu
+      lxx_i = data.cost.lxx
+      luu_i = data.cost.luu
+      lux_i = data.cost.lux
       q_i[:nx] = lx_i
       q_i[nx:] = lu_i
       Q_i[:nx,:nx] = lxx_i
@@ -182,8 +193,8 @@ class LinearDDPTest(unittest.TestCase):
       Q_i[nx:,nx:] = luu_i
 
       # Dynamics and its derivatives
-      fx_i = data.dynamicsData.discretizer.fx
-      fu_i = data.dynamicsData.discretizer.fu
+      fx_i = data.dynamic.discretizer.fx
+      fu_i = data.dynamic.discretizer.fu
       f_i[:nx,:nx] = -Ixx
       f_i[nx:,:nx] = fx_i
       f_i[nx:,nx:] = fu_i
@@ -196,9 +207,9 @@ class LinearDDPTest(unittest.TestCase):
       g[k*nx:(k+2)*nx] += np.dot(f_i, w_i)
 
     # Terminal state and cost derivatives
-    x_T = ddpData.intervalDataVector[-1].x
-    lx_T = ddpData.intervalDataVector[-1].costData.lx
-    lxx_T = ddpData.intervalDataVector[-1].costData.lxx
+    x_T = ddpData.interval[-1].x
+    lx_T = ddpData.interval[-1].cost.lx
+    lxx_T = ddpData.interval[-1].cost.lxx
 
     # Updating the terms regarding the terminal condition
     hess[N*nw:N*nw+nx, N*nw:N*nw+nx] = lxx_T
