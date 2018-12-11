@@ -110,24 +110,35 @@ class LinearDDPTest(unittest.TestCase):
     # Using the default solver parameters
     solverParams = cddp.SolverParams()
 
-    # Running a backward-pass without regularization
-    self.ddpData.muV = 0.
+    # Running a backward-pass with control regularization
     self.ddpData.muLM = 0.
+    self.ddpData.muV = 0.
     self.ddpData.alpha = 1.
+    cddp.Solver.forwardSimulation(self.ddpModel, self.ddpData)
     cddp.Solver.updateQuadraticAppr(self.ddpModel, self.ddpData)
     cddp.Solver.backwardPass(self.ddpModel, self.ddpData, solverParams)
-    Vxx = self.ddpData.intervalDataVector[-1].Vxx.copy()
 
-    # Backward-pass with regularization
-    self.ddpData.muLM = np.random.random_sample()
+    # Recording the Vx values for the control regularization case
+    Vx_ctrl = []
+    for i in xrange(self.ddpData.N + 1):
+      Vx_ctrl.append(self.ddpData.intervalDataVector[i].Vx.copy())
+
+    # Running a backward-pass with an equivalente LM regularization
+    self.ddpData.muLM = 1e-2
+    self.ddpModel.costManager.removeRunning('u_reg')
+    cddp.Solver.forwardSimulation(self.ddpModel, self.ddpData)
     cddp.Solver.updateQuadraticAppr(self.ddpModel, self.ddpData)
     cddp.Solver.backwardPass(self.ddpModel, self.ddpData, solverParams)
-    Vxx_reg = self.ddpData.intervalDataVector[-1].Vxx.copy()
 
-    # Checking both values of the Value-function Hessian
-    self.assertTrue(
-      np.allclose(Vxx, Vxx_reg),
-      "Regularization doesn't affect the terminal Vxx.")
+    # Recording the Vx values for the control regularization case
+    Vx_reg = []
+    for i in xrange(self.ddpData.N + 1):
+      Vx_reg.append(self.ddpData.intervalDataVector[i].Vx.copy())
+
+    # Checking
+    for i in xrange(self.ddpData.N + 1):
+      self.assertTrue(np.allclose(Vx_ctrl[i], Vx_reg[i]),
+        "The control cost regularization isn't equal to the LM regularization.")
 
   def KKTSolver(self, ddpModel, ddpData):
     # Generate a warm-point trajectory from an initial condition
