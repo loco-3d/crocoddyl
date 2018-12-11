@@ -92,9 +92,9 @@ class DDPData(object):
 
     # Interval data for the cost and dynamics, and their quadratic and linear
     # approximation, respectively
-    self.intervalDataVector = [DDPRunningIntervalData(ddpModel, timeline[i], timeline[i+1])
-                               for i in xrange(self.N)]
-    self.intervalDataVector.append(DDPTerminalIntervalData(ddpModel, timeline[-1]))
+    self.interval = [DDPRunningIntervalData(ddpModel, timeline[i], timeline[i+1])
+                     for i in xrange(self.N)]
+    self.interval.append(DDPTerminalIntervalData(ddpModel, timeline[-1]))
 
     # Cost-related data
     self.totalCost = 0.
@@ -159,19 +159,19 @@ class DDPModel(object):
   def setInitial(self, ddpData, xInit, UInit):
     """ Set the initial conditions to the ddpData.
     """
-    np.copyto(ddpData.intervalDataVector[0].x, xInit)
-    np.copyto(ddpData.intervalDataVector[0].x_prev, xInit)
-    for u, intervalData in izip(UInit,ddpData.intervalDataVector[:-1]):
+    np.copyto(ddpData.interval[0].x, xInit)
+    np.copyto(ddpData.interval[0].x_prev, xInit)
+    for u, intervalData in izip(UInit,ddpData.interval[:-1]):
       np.copyto(intervalData.u, u)
     return
 
   def setRunningReference(self, ddpData, Xref, name):
     index = self.costManager.getRunningCostIndex(name)
-    for k, data in enumerate(ddpData.intervalDataVector[:-1]):
+    for k, data in enumerate(ddpData.interval[:-1]):
       cost_data = data.costData.costVector[index]
       self.costManager.runningCosts[index].setReference(cost_data, Xref[k])
 
   def setTerminalReference(self, ddpData, xref, name):
     index = self.costManager.getTerminalCostIndex(name)
     self.costManager.terminalCosts[index].setReference(
-      ddpData.intervalDataVector[-1].costData.costVector[index], xref)
+      ddpData.interval[-1].costData.costVector[index], xref)

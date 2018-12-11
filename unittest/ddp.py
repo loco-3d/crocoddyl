@@ -95,7 +95,7 @@ class LinearDDPTest(unittest.TestCase):
 
     # Checking that the Vx is equals to the KKT Lagrangian multipliers
     for i in xrange(N+1):
-      Vx = self.ddpData.intervalDataVector[i].Vx
+      Vx = self.ddpData.interval[i].Vx
       self.assertTrue(np.allclose(Vx, lag[i*nx:(i+1)*nx]),
       "Vx should be equals to the Lagrangian multiplier.")
 
@@ -121,7 +121,7 @@ class LinearDDPTest(unittest.TestCase):
     # Recording the Vx values for the control regularization case
     Vx_ctrl = []
     for i in xrange(self.ddpData.N + 1):
-      Vx_ctrl.append(self.ddpData.intervalDataVector[i].Vx.copy())
+      Vx_ctrl.append(self.ddpData.interval[i].Vx.copy())
 
     # Running a backward-pass with an equivalente LM regularization
     self.ddpData.muLM = 1e-2
@@ -133,7 +133,7 @@ class LinearDDPTest(unittest.TestCase):
     # Recording the Vx values for the control regularization case
     Vx_reg = []
     for i in xrange(self.ddpData.N + 1):
-      Vx_reg.append(self.ddpData.intervalDataVector[i].Vx.copy())
+      Vx_reg.append(self.ddpData.interval[i].Vx.copy())
 
     # Checking
     for i in xrange(self.ddpData.N + 1):
@@ -164,14 +164,14 @@ class LinearDDPTest(unittest.TestCase):
     Ixx = np.eye(nx)
     Oxx = np.zeros((nx,nx))
     Oxu = np.zeros((nx,nu))
-    g[:nx] = ddpData.intervalDataVector[0].x
+    g[:nx] = ddpData.interval[0].x
     w_i = np.zeros((nw,1))
     q_i = np.zeros((nw,1))
     Q_i = np.zeros((nw,nw))
     f_i = np.zeros((2*nx,nw))
     for k in xrange(N):
       # Interval data
-      data = ddpData.intervalDataVector[k]
+      data = ddpData.interval[k]
 
       # State, control and decision vector
       x_i = data.x
@@ -207,9 +207,9 @@ class LinearDDPTest(unittest.TestCase):
       g[k*nx:(k+2)*nx] += np.dot(f_i, w_i)
 
     # Terminal state and cost derivatives
-    x_T = ddpData.intervalDataVector[-1].x
-    lx_T = ddpData.intervalDataVector[-1].costData.lx
-    lxx_T = ddpData.intervalDataVector[-1].costData.lxx
+    x_T = ddpData.interval[-1].x
+    lx_T = ddpData.interval[-1].costData.lx
+    lxx_T = ddpData.interval[-1].costData.lxx
 
     # Updating the terms regarding the terminal condition
     hess[N*nw:N*nw+nx, N*nw:N*nw+nx] = lxx_T
