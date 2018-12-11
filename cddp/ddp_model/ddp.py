@@ -18,7 +18,7 @@ class DDPTerminalIntervalData(object):
     self.x_prev = np.zeros((ddpModel.dynamicModel.nxImpl(), 1))
 
     # Dynamic and cost data of the terminal interval
-    self.dynamicsData = ddpModel.createTerminalDynamicsData(tFinal)
+    self.dynamicData = ddpModel.createTerminalDynamicsData(tFinal)
     self.costData = ddpModel.createTerminalCostData()
 
     # Value function derivatives of the terminal interval
@@ -46,7 +46,7 @@ class DDPRunningIntervalData(object):
     self.u_prev = np.zeros((ddpModel.dynamicModel.nu(), 1))
 
     # Dynamic and cost data of the running interval
-    self.dynamicsData = ddpModel.createRunningDynamicsData(tInit, tFinal - tInit)
+    self.dynamicData = ddpModel.createRunningDynamicsData(tInit, tFinal - tInit)
     self.costData = ddpModel.createRunningCostData()
 
     # Value function derivatives of the running interval
@@ -123,26 +123,26 @@ class DDPModel(object):
     self.dynamicModel = dynamicModel
     self.costManager = costManager
 
-  def forwardTerminalCalc(self, dynamicsData, costData, x):
+  def forwardTerminalCalc(self, dynamicData, costData, x):
     """Performes the dynamics integration to generate the state and control functions"""
-    self.dynamicModel.forwardTerminalCalc(dynamicsData, x)
-    self.costManager.forwardTerminalCalc(costData, dynamicsData, x)
+    self.dynamicModel.forwardTerminalCalc(dynamicData, x)
+    self.costManager.forwardTerminalCalc(costData, dynamicData, x)
 
-  def forwardRunningCalc(self, dynamicsData, costData, x, u, xNext):
+  def forwardRunningCalc(self, dynamicData, costData, x, u, xNext):
     """Performes the dynamics integration to generate the state and control functions"""
-    self.dynamicModel.forwardRunningCalc(dynamicsData, x, u, xNext)
-    self.costManager.forwardRunningCalc(costData, dynamicsData, x, u)
+    self.dynamicModel.forwardRunningCalc(dynamicData, x, u, xNext)
+    self.costManager.forwardRunningCalc(costData, dynamicData, x, u)
 
-  def backwardTerminalCalc(self, dynamicsData, costData, x):
+  def backwardTerminalCalc(self, dynamicData, costData, x):
     """Performs the calculations before the backward pass
     Pinocchio Data has already been filled with the forward pass."""
-    self.dynamicModel.backwardTerminalCalc(dynamicsData, x)
-    self.costManager.backwardTerminalCalc(costData, dynamicsData, x)
+    self.dynamicModel.backwardTerminalCalc(dynamicData, x)
+    self.costManager.backwardTerminalCalc(costData, dynamicData, x)
 
-  def backwardRunningCalc(self, dynamicsData, costData, x, u):
+  def backwardRunningCalc(self, dynamicData, costData, x, u):
     """Performs the calculations before the backward pass"""
-    self.dynamicModel.backwardRunningCalc(dynamicsData, x, u)
-    self.costManager.backwardRunningCalc(costData, dynamicsData, x, u)
+    self.dynamicModel.backwardRunningCalc(dynamicData, x, u)
+    self.costManager.backwardRunningCalc(costData, dynamicData, x, u)
 
   def createRunningDynamicsData(self, tInit, dt):
     return self.dynamicModel.createData(tInit, dt)

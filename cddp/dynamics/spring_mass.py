@@ -29,20 +29,20 @@ class SpringMass(DynamicsModel):
   def createData(self, t, dt):
     return SpringMassData(self, t, dt)
 
-  def updateTerms(self, dynamicsData, x):
+  def updateTerms(self, dynamicData, x):
     # We don't need to update the dynamics terms since it's a LTI system
     return
 
-  def updateDynamics(self, dynamicsData, x, u):
+  def updateDynamics(self, dynamicData, x, u):
     # We don't need to update the dynamics since it's a LTI system
     q = x[:self.nq()]
     v = x[self.nq():]
-    np.copyto(dynamicsData.a,
-      dynamicsData.Aq * q + dynamicsData.Av * v +\
-      dynamicsData.Bu * u)
+    np.copyto(dynamicData.a,
+      dynamicData.Aq * q + dynamicData.Av * v +\
+      dynamicData.Bu * u)
     return
 
-  def updateLinearAppr(self, dynamicsData, x, u):
+  def updateLinearAppr(self, dynamicData, x, u):
     # We don't need to update the linear approximation since it's a LTI system
     return
 

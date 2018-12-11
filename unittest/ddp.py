@@ -193,8 +193,8 @@ class LinearDDPTest(unittest.TestCase):
       Q_i[nx:,nx:] = luu_i
 
       # Dynamics and its derivatives
-      fx_i = data.dynamicsData.discretizer.fx
-      fu_i = data.dynamicsData.discretizer.fu
+      fx_i = data.dynamicData.discretizer.fx
+      fu_i = data.dynamicData.discretizer.fu
       f_i[:nx,:nx] = -Ixx
       f_i[nx:,:nx] = fx_i
       f_i[nx:,nx:] = fu_i

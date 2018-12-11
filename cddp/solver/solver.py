@@ -140,20 +140,20 @@ class Solver(object):
       # Computing the new control command
       np.copyto(it.u, it.u_prev +\
         ddpData.alpha * it.j + \
-        np.dot(it.K, ddpModel.dynamicModel.differenceState(it.dynamicsData,
+        np.dot(it.K, ddpModel.dynamicModel.differenceState(it.dynamicData,
                                                             it.x_prev,
                                                             it.x)))
 
       # Integrating the system dynamics and updating the new state value
       ddpModel.forwardRunningCalc(
-        ddpData.intervalDataVector[k].dynamicsData,
+        ddpData.intervalDataVector[k].dynamicData,
         ddpData.intervalDataVector[k].costData,
         ddpData.intervalDataVector[k].x,
         ddpData.intervalDataVector[k].u,
         ddpData.intervalDataVector[k+1].x)
       ddpData.totalCost += ddpData.intervalDataVector[k].costData.l
     ddpModel.forwardTerminalCalc(
-      ddpData.intervalDataVector[-1].dynamicsData,
+      ddpData.intervalDataVector[-1].dynamicData,
       ddpData.intervalDataVector[-1].costData,
       ddpData.intervalDataVector[-1].x)
     ddpData.totalCost += ddpData.intervalDataVector[-1].costData.l
@@ -203,8 +203,8 @@ class Solver(object):
       it = ddpData.intervalDataVector[k]
 
       # Getting the value function values of the next interval (prime interval)
-      fx = it.dynamicsData.discretizer.fx
-      fu = it.dynamicsData.discretizer.fu
+      fx = it.dynamicData.discretizer.fx
+      fu = it.dynamicData.discretizer.fu
 
       # Getting the Value function derivatives of the next interval
       Vx = ddpData.intervalDataVector[k+1].Vx
@@ -272,14 +272,14 @@ class Solver(object):
     for k in xrange(ddpData.N):
       # Integrating the system dynamics and updating the new state value
       ddpModel.forwardRunningCalc(
-        ddpData.intervalDataVector[k].dynamicsData,
+        ddpData.intervalDataVector[k].dynamicData,
         ddpData.intervalDataVector[k].costData,
         ddpData.intervalDataVector[k].x,
         ddpData.intervalDataVector[k].u,
         ddpData.intervalDataVector[k+1].x)
       ddpData.totalCost += ddpData.intervalDataVector[k].costData.l
     ddpModel.forwardTerminalCalc(
-      ddpData.intervalDataVector[-1].dynamicsData,
+      ddpData.intervalDataVector[-1].dynamicData,
       ddpData.intervalDataVector[-1].costData,
       ddpData.intervalDataVector[-1].x)
     ddpData.totalCost += ddpData.intervalDataVector[-1].costData.l
@@ -300,7 +300,7 @@ class Solver(object):
       np.copyto(ddpData.intervalDataVector[k].u_prev,
                 ddpData.intervalDataVector[k].u)
       ddpModel.backwardRunningCalc(
-        ddpData.intervalDataVector[k].dynamicsData,
+        ddpData.intervalDataVector[k].dynamicData,
         ddpData.intervalDataVector[k].costData,
         ddpData.intervalDataVector[k].x,
         ddpData.intervalDataVector[k].u)
@@ -308,7 +308,7 @@ class Solver(object):
     np.copyto(ddpData.intervalDataVector[-1].x_prev,
               ddpData.intervalDataVector[-1].x)
     ddpModel.backwardTerminalCalc(
-      ddpData.intervalDataVector[-1].dynamicsData,
+      ddpData.intervalDataVector[-1].dynamicData,
       ddpData.intervalDataVector[-1].costData,
       ddpData.intervalDataVector[-1].x)
 

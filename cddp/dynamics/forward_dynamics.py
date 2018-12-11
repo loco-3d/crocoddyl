@@ -33,33 +33,33 @@ class ForwardDynamics(DynamicsModel):
   def createData(self, t, dt):
     return ForwardDynamicsData(self, t, dt)
 
-  def updateTerms(self, dynamicsData, x):
+  def updateTerms(self, dynamicData, x):
     # Compute all terms
     #TODO: Try to reduce calculations in forward pass, and move them to backward pass
-    se3.computeAllTerms(self.pinocchio, dynamicsData.pinocchio,
+    se3.computeAllTerms(self.pinocchio, dynamicData.pinocchio,
                         x[:self.nq()], x[self.nq():])
     se3.updateFramePlacements(self.pinocchio,
-                              dynamicsData.pinocchio)
+                              dynamicData.pinocchio)
 
-  def updateDynamics(self, dynamicsData, x, u):
+  def updateDynamics(self, dynamicData, x, u):
     # Update all terms
-    self.updateTerms(dynamicsData, x)
+    self.updateTerms(dynamicData, x)
 
     # Running ABA algorithm
-    se3.aba(self.pinocchio, dynamicsData.pinocchio,
+    se3.aba(self.pinocchio, dynamicData.pinocchio,
             x[:self.nq()], x[self.nq():], u)
 
     # Updating the system acceleration
-    np.copyto(dynamicsData.a, dynamicsData.pinocchio.ddq)
+    np.copyto(dynamicData.a, dynamicData.pinocchio.ddq)
 
-  def updateLinearAppr(self, dynamicsData, x, u):
-    se3.computeABADerivatives(self.pinocchio, dynamicsData.pinocchio,
+  def updateLinearAppr(self, dynamicData, x, u):
+    se3.computeABADerivatives(self.pinocchio, dynamicData.pinocchio,
                               x[:self.nq()], x[self.nq():], u)
 
     # Updating the system derivatives
-    np.copyto(dynamicsData.aq, dynamicsData.pinocchio.ddq_dq)
-    np.copyto(dynamicsData.av, dynamicsData.pinocchio.ddq_dv)
-    np.copyto(dynamicsData.au, dynamicsData.pinocchio.Minv)
+    np.copyto(dynamicData.aq, dynamicData.pinocchio.ddq_dq)
+    np.copyto(dynamicData.av, dynamicData.pinocchio.ddq_dv)
+    np.copyto(dynamicData.au, dynamicData.pinocchio.Minv)
 
   def integrateConfiguration(self, q, dq):
     return se3.integrate(self.pinocchio, q, dq)

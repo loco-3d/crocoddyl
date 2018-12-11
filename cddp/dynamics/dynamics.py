@@ -93,87 +93,87 @@ class DynamicsModel(object):
     raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
-  def updateTerms(self, dynamicsData, x):
+  def updateTerms(self, dynamicData, x):
     """ Update the terms needed for an user-defined dynamics.
 
-    :param dynamicsData: dynamics data
+    :param dynamicData: dynamics data
     :param x: state
     :param u: control
     """
     raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
-  def updateDynamics(self, dynamicsData, x, u):
+  def updateDynamics(self, dynamicData, x, u):
     """ Update the user-defined dynamics.
 
-    :param dynamicsData: dynamics data
+    :param dynamicData: dynamics data
     :param x: state
     :param u: control
     """
     raise NotImplementedError("Not implemented yet.")
 
   @abc.abstractmethod
-  def updateLinearAppr(self, dynamicsData, x, u):
+  def updateLinearAppr(self, dynamicData, x, u):
     """ Update the user-defined dynamics.
 
-    :param dynamicsData: dynamics data
+    :param dynamicData: dynamics data
     :param x: state
     :param u: control
     """
     # Resetting the acceleration derivatives
-    dynamicsData.aq.fill(0.)
-    dynamicsData.av.fill(0.)
-    dynamicsData.au.fill(0.)
+    dynamicData.aq.fill(0.)
+    dynamicData.av.fill(0.)
+    dynamicData.au.fill(0.)
 
     # Computing the dynamics by a perturbation in the configuration
-    dynamicsData.x_pert[self.nq():] = x[self.nq():]
+    dynamicData.x_pert[self.nq():] = x[self.nq():]
     for i in xrange(self.nv()):
       # Compute the pertubation in the configuration
-      dynamicsData.v_pert.fill(0.)
-      dynamicsData.v_pert[i] += dynamicsData.h
-      np.copyto(dynamicsData.q_pert,
-        self.integrateConfiguration(x[:self.nq()], dynamicsData.v_pert))
-      dynamicsData.x_pert[:self.nq()] = dynamicsData.q_pert
+      dynamicData.v_pert.fill(0.)
+      dynamicData.v_pert[i] += dynamicData.h
+      np.copyto(dynamicData.q_pert,
+        self.integrateConfiguration(x[:self.nq()], dynamicData.v_pert))
+      dynamicData.x_pert[:self.nq()] = dynamicData.q_pert
 
       # Update the dynamics given a perturbation in the configuration and sum up
-      self.updateDynamics(dynamicsData, dynamicsData.x_pert, u)
+      self.updateDynamics(dynamicData, dynamicData.x_pert, u)
 
       # Summing up this perturbation
-      dynamicsData.aq[:,i] += np.array(dynamicsData.a)[:,0]
+      dynamicData.aq[:,i] += np.array(dynamicData.a)[:,0]
 
 
     # Computing the dynamics by a perturbation in the velocity
-    np.copyto(dynamicsData.x_pert, x)
+    np.copyto(dynamicData.x_pert, x)
     for i in xrange(self.nv()):
       # Compute the pertubation in the velocity
-      dynamicsData.x_pert[self.nq():] = x[self.nq():]
-      dynamicsData.x_pert[i+self.nv()] += dynamicsData.h
+      dynamicData.x_pert[self.nq():] = x[self.nq():]
+      dynamicData.x_pert[i+self.nv()] += dynamicData.h
 
       # Update the dynamics given a perturbation in the velocity and sum up
-      self.updateDynamics(dynamicsData, dynamicsData.x_pert, u)
-      dynamicsData.av[:,i] += np.array(dynamicsData.a)[:,0]
+      self.updateDynamics(dynamicData, dynamicData.x_pert, u)
+      dynamicData.av[:,i] += np.array(dynamicData.a)[:,0]
 
     # Computing the dynamics by a perturbation in the control
     for i in xrange(self.nu()):
       # Compute the pertubation in the control
-      np.copyto(dynamicsData.u_pert, u)
-      dynamicsData.u_pert[i] += dynamicsData.h
+      np.copyto(dynamicData.u_pert, u)
+      dynamicData.u_pert[i] += dynamicData.h
 
       # Update the dynamics given a perturbation in the control and sum up
-      self.updateDynamics(dynamicsData, x, dynamicsData.u_pert)
-      dynamicsData.au[:,i] += np.array(dynamicsData.a)[:,0]
+      self.updateDynamics(dynamicData, x, dynamicData.u_pert)
+      dynamicData.au[:,i] += np.array(dynamicData.a)[:,0]
 
     # Adding the nominal acceleration
-    self.updateDynamics(dynamicsData, x, u)
-    dynamicsData.aq -= dynamicsData.a
-    dynamicsData.av -= dynamicsData.a
-    dynamicsData.au -= dynamicsData.a
+    self.updateDynamics(dynamicData, x, u)
+    dynamicData.aq -= dynamicData.a
+    dynamicData.av -= dynamicData.a
+    dynamicData.au -= dynamicData.a
 
     # Getting the final derivatives (i.e. da/dq, da/dv, da/du). For that we
     # divide by delta_t
-    dynamicsData.av /= dynamicsData.h
-    dynamicsData.aq /= dynamicsData.h
-    dynamicsData.au /= dynamicsData.h
+    dynamicData.av /= dynamicData.h
+    dynamicData.aq /= dynamicData.h
+    dynamicData.au /= dynamicData.h
 
   @abc.abstractmethod
   def integrateConfiguration(self, q, dq):
@@ -193,33 +193,33 @@ class DynamicsModel(object):
     """
     raise NotImplementedError("Not implemented yet.")
 
-  def forwardRunningCalc(self, dynamicsData, x, u, xNext):
+  def forwardRunningCalc(self, dynamicData, x, u, xNext):
     # Updating the dynamics
-    self.updateDynamics(dynamicsData, x, u)
+    self.updateDynamics(dynamicData, x, u)
 
     # Integrating the dynanics
-    self.integrator(self, dynamicsData, x, u, xNext)
+    self.integrator(self, dynamicData, x, u, xNext)
 
-  def forwardTerminalCalc(self, dynamicsData, x):
+  def forwardTerminalCalc(self, dynamicData, x):
     # Updating the dynamic terms
-    self.updateTerms(dynamicsData, x)
+    self.updateTerms(dynamicData, x)
 
-  def backwardRunningCalc(self, dynamicsData, x, u):
+  def backwardRunningCalc(self, dynamicData, x, u):
     # Updating the continuous-time linear approximation
-    self.updateLinearAppr(dynamicsData, x, u)
+    self.updateLinearAppr(dynamicData, x, u)
     # Discretizing this linear approximation
-    self.discretizer(self, dynamicsData)
+    self.discretizer(self, dynamicData)
 
-  def backwardTerminalCalc(self, dynamicsData, x):
+  def backwardTerminalCalc(self, dynamicData, x):
     # Updating the dynamic terms
-    self.updateTerms(dynamicsData, x)
+    self.updateTerms(dynamicData, x)
 
-  def differenceState(self, dynamicsData, x0, x1):
-    dynamicsData.diff_x[self.nv():] = \
+  def differenceState(self, dynamicData, x0, x1):
+    dynamicData.diff_x[self.nv():] = \
         x1[self.nq():,:] - x0[self.nq():,:]
-    dynamicsData.diff_x[:self.nv()] = \
+    dynamicData.diff_x[:self.nv()] = \
         self.differenceConfiguration(x0[:self.nq()], x1[:self.nq()])
-    return dynamicsData.diff_x
+    return dynamicData.diff_x
 
   def nq(self):
     """ Return the number of tuples used to describe the configuration point.
