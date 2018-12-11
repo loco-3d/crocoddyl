@@ -1,4 +1,4 @@
-from cddp.costs.cost import TerminalCostData, RunningCostData
+from crocoddyL.costs.cost import TerminalCostData, RunningCostData
 import numpy as np
 
 

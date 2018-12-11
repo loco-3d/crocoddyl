@@ -1,5 +1,5 @@
-from cddp.costs.cost import RunningQuadraticCostData
-from cddp.costs.cost import RunningQuadraticCost
+from crocoddyL.costs.cost import RunningQuadraticCostData
+from crocoddyL.costs.cost import RunningQuadraticCost
 import pinocchio as se3
 import numpy as np
 
