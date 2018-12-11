@@ -231,15 +231,15 @@ class Solver(object):
       np.copyto(it.K, np.dot(it.Quu_inv_minus, it.Qux_r))
       np.copyto(it.j, np.dot(it.Quu_inv_minus, it.Qu))
 
-      # Computing the value function derivatives of this interval
-      it.jt_Quu_j = 0.5 * np.asscalar(np.dot(it.j.T, np.dot(it.Quu, it.j)))
+      # Computing the Value function derivatives of this interval
+      it.jt_Quu_j = 0.5 * np.asscalar(np.dot(it.j.T, np.dot(it.Quu_r, it.j)))
       it.jt_Qu = np.asscalar(np.dot(it.j.T, it.Qu))
       np.copyto(it.Vx, \
-                it.Qx + np.dot(it.K.T, np.dot(it.Quu, it.j)) +\
-                np.dot(it.K.T, it.Qu) + np.dot(it.Qux.T ,it.j))
+                it.Qx + np.dot(it.K.T, np.dot(it.Quu_r, it.j)) +\
+                np.dot(it.K.T, it.Qu) + np.dot(it.Qux_r.T ,it.j))
       np.copyto(it.Vxx, \
-                it.Qxx + np.dot(it.K.T, np.dot(it.Quu, it.K)) +\
-                np.dot(it.K.T, it.Qux) + np.dot(it.Qux.T, it.K))
+                it.Qxx + np.dot(it.K.T, np.dot(it.Quu_r, it.K)) +\
+                np.dot(it.K.T, it.Qux_r) + np.dot(it.Qux_r.T, it.K))
 
       # Symmetric can be lost due to round-off error. This ensures the symmetric
       np.copyto(it.Vxx, 0.5 * (it.Vxx + it.Vxx.T))
