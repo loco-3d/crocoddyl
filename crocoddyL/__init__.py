@@ -2,7 +2,7 @@ from dynamics import DynamicData, DynamicModel
 from dynamics import SpringMass
 from dynamics import ForwardDynamics
 from dynamics import FloatingBaseMultibodyDynamics
-from system import EulerIntegrator, EulerDiscretizer
+from dynamics import EulerIntegrator, EulerDiscretizer
 from cost_manager import CostManager
 from costs import TerminalCostData, TerminalCost
 from costs import RunningCostData, RunningCost
