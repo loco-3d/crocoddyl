@@ -110,6 +110,8 @@ class DDPData(object):
 
     # Convergence and stopping criteria data
     self._convergence = False
+    self.backward_status = " "
+    self.forward_status = " "
     self.gamma = 0.
     self.theta = 0.
     self.z_new = 0.
