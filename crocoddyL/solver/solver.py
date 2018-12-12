@@ -32,10 +32,12 @@ class Solver(object):
 
     ddpData.n_iter = 0
     for i in xrange(solverParams.max_iter):
+      # Resetting flags
+      ddpData.backward_status = " "
+      ddpData.forward_status = " "
+
       # Recording the number of iterations
       ddpData.n_iter = i
-      print ("Iteration", ddpData.n_iter, "muV", ddpData.muV,
-             "muLM", ddpData.muLM, "alpha", ddpData.alpha)
 
       # Update the quadratic approximation
       Solver.updateQuadraticAppr(ddpModel, ddpData)
@@ -47,19 +49,26 @@ class Solver(object):
           ddpData.muLM = solverParams.mu0LM
         else:
           ddpData.muLM *= solverParams.muLM_inc
-        print "\t", ("Quu isn't positive. Increasing muLM to", ddpData.muLM)
-      print "\t","\t", "--------------------------------------------------Gradient Norm:", ddpData.gamma
+        ddpData.backward_status = "r" # Regularization of the search direction
+
       # Running the forward pass
       while not Solver.forwardPass(ddpModel, ddpData, solverParams):
         ddpData.alpha *= solverParams.alpha_dec
-        print "\t", ("Rejected changes. Decreasing alpha to", ddpData.alpha)
-        print "\t", "\t", "Reduction Ratio:", ddpData.z
-        print "\t", "\t", "Expected Reduction:", ddpData.dV_exp
-        print "\t", "\t", "Actual Reduction:", ddpData.dV
+        ddpData.forward_status = "s" # Reduction of the step-length
         if ddpData.alpha < solverParams.alpha_min:
           print "\t", ('It cannot be improved solution')
           ddpData._convergence = True
           break
+
+      # Printing message
+      if solverParams.print_level:
+        if i % 10 == 0:
+          print "iter \t cost \t       theta \t   gamma \t muV \t     muLM \talpha"
+        print "%4i  %0.5e  %0.5e  %0.5e  %10.5e  %0.5e%c  %0.4f%c" % \
+          (ddpData.n_iter, ddpData.totalCost,
+          ddpData.theta, ddpData.gamma,
+          ddpData.muV, ddpData.muLM, ddpData.backward_status,
+          ddpData.alpha, ddpData.forward_status)
 
       # Recording the total cost, gradient, weighted gradient (gamme),
       # regularization values and alpha for each iteration. This is useful for
@@ -93,9 +102,11 @@ class Solver(object):
 
       # Checking convergence
       if ddpData._convergence:
-        # Final time
-        end = time.time()
-        print ("Reached convergence", ddpData.gamma, " in", end-start, "sec.")
+        if solverParams.print_level:
+          # Final time
+          end = time.time()
+          print
+          print "EXIT: Optimal Solution Found in %0.4f sec." % (end-start)
 
         # Recording the solution
         #TODO: Log solution

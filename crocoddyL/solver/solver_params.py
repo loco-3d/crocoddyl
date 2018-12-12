@@ -34,7 +34,9 @@ class SolverParams(object):
 
     # Recording data for solver performance
     self.record = False
-    return
+
+    # Printing option
+    self.print_level = False
 
   def setFromConfigFile(self, config_file):
     """ Sets the properties of the DDP solver from a YAML file.
@@ -75,3 +77,6 @@ class SolverParams(object):
 
       # Recording data for solver performance
       self.record = bool(data['ddp']['record'])
+
+      # Printing options
+      self.print_level = bool(data['ddp']['print'])
