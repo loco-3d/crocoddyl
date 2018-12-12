@@ -1,6 +1,6 @@
-from cddp.dynamics.dynamics import DynamicData
-from cddp.dynamics.dynamics import DynamicModel
-from cddp.utils import EPS
+from crocoddyL.dynamics.dynamics import DynamicData
+from crocoddyL.dynamics.dynamics import DynamicModel
+from crocoddyL.utils import EPS
 import pinocchio as se3
 import numpy as np
 

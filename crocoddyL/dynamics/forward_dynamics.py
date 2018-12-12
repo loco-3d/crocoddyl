@@ -1,5 +1,5 @@
-from cddp.dynamics.dynamics import DynamicData
-from cddp.dynamics.dynamics import DynamicModel
+from crocoddyL.dynamics.dynamics import DynamicData
+from crocoddyL.dynamics.dynamics import DynamicModel
 import pinocchio as se3
 import numpy as np
 

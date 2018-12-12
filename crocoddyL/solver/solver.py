@@ -1,6 +1,6 @@
 import time
 import numpy as np
-from cddp.utils import isPositiveDefinitive, EPS
+from crocoddyL.utils import isPositiveDefinitive, EPS
 
 
 class Solver(object):

@@ -1,23 +1,23 @@
 import unittest
 import numpy as np
-import cddp
+import crocoddyL
 
 
 class LinearDDPTest(unittest.TestCase):
   def setUp(self):
     # Creating the dynamic model of the system and its integrator
-    integrator = cddp.EulerIntegrator()
-    discretizer = cddp.EulerDiscretizer()
-    dynamics = cddp.SpringMass(integrator, discretizer)
+    integrator = crocoddyL.EulerIntegrator()
+    discretizer = crocoddyL.EulerDiscretizer()
+    dynamics = crocoddyL.SpringMass(integrator, discretizer)
 
     # Creating the cost manager and its cost functions
-    costManager = cddp.CostManager()
+    costManager = crocoddyL.CostManager()
     wx_term = 1e3 * np.ones((2 * dynamics.nv(),1))
     wx_track = 10. * np.ones((2 * dynamics.nv(),1))
     wu_reg = 1e-2 * np.ones((dynamics.nu(),1))
-    xT_goal = cddp.StateCost(dynamics, wx_term)
-    x_track = cddp.StateCost(dynamics, wx_track)
-    u_reg = cddp.ControlCost(dynamics, wu_reg)
+    xT_goal = crocoddyL.StateCost(dynamics, wx_term)
+    x_track = crocoddyL.StateCost(dynamics, wx_track)
+    u_reg = crocoddyL.ControlCost(dynamics, wu_reg)
 
     # Adding the cost functions to the manager
     costManager.addTerminal(xT_goal, "xT_goal")
@@ -26,8 +26,8 @@ class LinearDDPTest(unittest.TestCase):
 
     # Setting up the DDP problem
     timeline = np.arange(0.0, 0.25, 1e-3)
-    self.ddpModel = cddp.DDPModel(dynamics, costManager)
-    self.ddpData = cddp.DDPData(self.ddpModel, timeline)
+    self.ddpModel = crocoddyL.DDPModel(dynamics, costManager)
+    self.ddpData = crocoddyL.DDPData(self.ddpModel, timeline)
 
     # Setting up the initial conditions
     # Create random initial
@@ -44,29 +44,29 @@ class LinearDDPTest(unittest.TestCase):
 
   def test_problem_solved_in_one_iteration(self):
     # Using the default solver parameters
-    solverParams = cddp.SolverParams()
+    solverParams = crocoddyL.SolverParams()
 
     # Running the DDP solver
-    cddp.Solver.solve(self.ddpModel, self.ddpData, solverParams)
+    crocoddyL.Solver.solve(self.ddpModel, self.ddpData, solverParams)
     self.assertEqual(
       self.ddpData.n_iter, 1, \
       "This is equivalent to a LQR problem which it solves in 1 iteration.")
 
   def test_improvement_ratio_equals_one(self):
     # Using the default solver parameters
-    solverParams = cddp.SolverParams()
+    solverParams = crocoddyL.SolverParams()
 
     # Running the DDP solver
-    cddp.Solver.solve(self.ddpModel, self.ddpData, solverParams)
+    crocoddyL.Solver.solve(self.ddpModel, self.ddpData, solverParams)
     self.assertAlmostEqual(
       self.ddpData.z, 1., 1, \
       "This is a LQR problem the improvement ration should be equals to 1.")
 
   def test_against_kkt_solution(self):
     # Running the DDP solver and updating its derivatives
-    solverParams = cddp.SolverParams()
-    cddp.Solver.solve(self.ddpModel, self.ddpData, solverParams)
-    cddp.Solver.updateQuadraticAppr(self.ddpModel, self.ddpData)
+    solverParams = crocoddyL.SolverParams()
+    crocoddyL.Solver.solve(self.ddpModel, self.ddpData, solverParams)
+    crocoddyL.Solver.updateQuadraticAppr(self.ddpModel, self.ddpData)
 
     nx = self.ddpModel.dynamicModel.nx()
     nu = self.ddpModel.dynamicModel.nu()
@@ -108,15 +108,15 @@ class LinearDDPTest(unittest.TestCase):
 
   def test_regularization_in_backward_pass(self):
     # Using the default solver parameters
-    solverParams = cddp.SolverParams()
+    solverParams = crocoddyL.SolverParams()
 
     # Running a backward-pass with control regularization
     self.ddpData.muLM = 0.
     self.ddpData.muV = 0.
     self.ddpData.alpha = 1.
-    cddp.Solver.forwardSimulation(self.ddpModel, self.ddpData)
-    cddp.Solver.updateQuadraticAppr(self.ddpModel, self.ddpData)
-    cddp.Solver.backwardPass(self.ddpModel, self.ddpData, solverParams)
+    crocoddyL.Solver.forwardSimulation(self.ddpModel, self.ddpData)
+    crocoddyL.Solver.updateQuadraticAppr(self.ddpModel, self.ddpData)
+    crocoddyL.Solver.backwardPass(self.ddpModel, self.ddpData, solverParams)
 
     # Recording the Vx values for the control regularization case
     Vx_ctrl = []
@@ -126,9 +126,9 @@ class LinearDDPTest(unittest.TestCase):
     # Running a backward-pass with an equivalente LM regularization
     self.ddpData.muLM = 1e-2
     self.ddpModel.costManager.removeRunning('u_reg')
-    cddp.Solver.forwardSimulation(self.ddpModel, self.ddpData)
-    cddp.Solver.updateQuadraticAppr(self.ddpModel, self.ddpData)
-    cddp.Solver.backwardPass(self.ddpModel, self.ddpData, solverParams)
+    crocoddyL.Solver.forwardSimulation(self.ddpModel, self.ddpData)
+    crocoddyL.Solver.updateQuadraticAppr(self.ddpModel, self.ddpData)
+    crocoddyL.Solver.backwardPass(self.ddpModel, self.ddpData, solverParams)
 
     # Recording the Vx values for the control regularization case
     Vx_reg = []
@@ -142,10 +142,10 @@ class LinearDDPTest(unittest.TestCase):
 
   def KKTSolver(self, ddpModel, ddpData):
     # Generate a warm-point trajectory from an initial condition
-    # cddp.Solver.forwardSimulation(ddpModel, ddpData)
+    # crocoddyL.Solver.forwardSimulation(ddpModel, ddpData)
 
     # Compute the derivatives along a warm-point trajectory
-    # cddp.Solver.updateQuadraticAppr(ddpModel, ddpData)
+    # crocoddyL.Solver.updateQuadraticAppr(ddpModel, ddpData)
 
     # Creating the variables of the KKT problem
     nx = ddpModel.dynamicModel.nx()

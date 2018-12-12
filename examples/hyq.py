@@ -1,4 +1,4 @@
-import cddp
+import crocoddyL
 import numpy as np
 import pinocchio as se3
 import os
@@ -20,13 +20,13 @@ robot = se3.robot_wrapper.RobotWrapper(urdf, path, se3.JointModelFreeFlyer())
 contact_indices = [robot.model.getFrameId("lf_foot"),
                    robot.model.getFrameId("rf_foot"),
                    robot.model.getFrameId("rh_foot")]
-contactPhase0 = cddp.Phase(contact_indices, 0., np.inf)
-contactInfo = cddp.Multiphase([contactPhase0], 3)
+contactPhase0 = crocoddyL.Phase(contact_indices, 0., np.inf)
+contactInfo = crocoddyL.Multiphase([contactPhase0], 3)
 
 # Create the dynamics and its integrator and discretizer
-integrator = cddp.EulerIntegrator()
-discretizer = cddp.EulerDiscretizer()
-dynamics = cddp.FloatingBaseMultibodyDynamics(integrator, discretizer,
+integrator = crocoddyL.EulerIntegrator()
+discretizer = crocoddyL.EulerDiscretizer()
+dynamics = crocoddyL.FloatingBaseMultibodyDynamics(integrator, discretizer,
                                               robot.model, contactInfo)
 
 # Defining the SE3 task, the joint velocity and control regularizations
@@ -35,15 +35,15 @@ wSE3_track = np.ones((6,1))
 wv_reg = 1e-7 * np.vstack([ np.zeros((dynamics.nv(),1)),
                             np.ones((dynamics.nv(),1)) ])
 wu_reg = 1e-7 * np.ones((dynamics.nu(),1))
-se3_track = cddp.SE3Cost(dynamics, wSE3_track)
-se3_goal = cddp.SE3Cost(dynamics, wSE3_term)
-v_reg = cddp.StateCost(dynamics, wv_reg)
-u_reg = cddp.ControlCost(dynamics, wu_reg)
+se3_track = crocoddyL.SE3Cost(dynamics, wSE3_track)
+se3_goal = crocoddyL.SE3Cost(dynamics, wSE3_term)
+v_reg = crocoddyL.StateCost(dynamics, wv_reg)
+u_reg = crocoddyL.ControlCost(dynamics, wu_reg)
 # w_com = 1e3 * np.ones((3,1))
-# com_cost = cddp.CoMCost(dynamics, w_com)
+# com_cost = crocoddyL.CoMCost(dynamics, w_com)
 
 # Adding the cost functions to the cost manager
-costManager = cddp.cost_manager.CostManager()
+costManager = crocoddyL.cost_manager.CostManager()
 costManager.addTerminal(se3_goal, "se3_goal")
 costManager.addRunning(se3_track, "se3_track")
 costManager.addRunning(v_reg, "v_reg")
@@ -53,8 +53,8 @@ costManager.addRunning(u_reg, "u_reg")
 
 # Setting up the DDP problem
 timeline = np.arange(0.0, 0.25, 1e-3)  # np.linspace(0., 0.5, 51)
-ddpModel = cddp.DDPModel(dynamics, costManager)
-ddpData = cddp.DDPData(ddpModel, timeline)
+ddpModel = crocoddyL.DDPModel(dynamics, costManager)
+ddpData = crocoddyL.DDPData(ddpModel, timeline)
 
 # Setting up the initial conditions
 q0 = robot.q0
@@ -70,7 +70,7 @@ ddpModel.setInitial(ddpData, xInit=x0, UInit=U0)
 # Setting up the desired reference for each single cost function
 # com_des = np.matrix([ [0.1], [0.], [0.] ])
 frameRef = \
-  cddp.costs.SE3Task(se3.SE3(np.eye(3),
+  crocoddyL.costs.SE3Task(se3.SE3(np.eye(3),
                      np.array([[0.1],[0.],[0.]])),
                      robot.model.getFrameId('base_link'))
 Xref = [x0 for i in xrange(len(timeline))]
@@ -83,16 +83,16 @@ ddpModel.setRunningReference(ddpData, Xref[:-1], "v_reg")
 
 
 # Configuration the solver from YAML file and solving it
-solverParams = cddp.SolverParams()
+solverParams = crocoddyL.SolverParams()
 solverParams.setFromConfigFile(filename + "/hyq_config.yaml")
-cddp.Solver.solve(ddpModel, ddpData, solverParams)
+crocoddyL.Solver.solve(ddpModel, ddpData, solverParams)
 
 
 # Plotting the results
 if plot:
-  cddp.plotDDPConvergence(solverParams.cost_itr,
+  crocoddyL.plotDDPConvergence(solverParams.cost_itr,
                           solverParams.muLM_itr,
-                          solverParams.muV_itr, 
+                          solverParams.muV_itr,
                           solverParams.gamma_itr,
                           solverParams.theta_itr,
                           solverParams.alpha_itr)
@@ -100,8 +100,8 @@ if plot:
 
 if display:
   T = timeline
-  X = cddp.Solver.getStateTrajectory(ddpData)
-  cddp.visualizePlan(robot, T, x0, X)
+  X = crocoddyL.Solver.getStateTrajectory(ddpData)
+  crocoddyL.visualizePlan(robot, T, x0, X)
 
 # ddp.saveToFile('mu_1e2.txt')
 
