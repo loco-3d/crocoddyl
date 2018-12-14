@@ -2,3 +2,4 @@
 *.pyd
 *.pyo
 *~
+*.orig

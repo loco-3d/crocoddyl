@@ -1,12 +1,12 @@
 import unittest
 import numpy as np
-import cddp
+import crocoddyL
 
 
 class StateLogBarrierTest(unittest.TestCase):
   def setUp(self):
     # Dimension of our custom problem
-    self.system = cddp.SpringMass(cddp.EulerIntegrator(), cddp.EulerDiscretizer())
+    self.system = crocoddyL.SpringMass(crocoddyL.EulerIntegrator(), crocoddyL.EulerDiscretizer())
     self.n = self.system.getConfigurationDimension()
     self.m = self.system.getTangentDimension()
 
@@ -14,7 +14,7 @@ class StateLogBarrierTest(unittest.TestCase):
     # Defining the state barrier with bounds equals 1 and -1
     ub = np.ones((self.n, 1))
     lb = -1. * ub
-    logb = cddp.StateBarrier(ub, lb)
+    logb = crocoddyL.StateBarrier(ub, lb)
     data = logb.createData(self.n, self.m)
 
     # Computing the barrier value in the origing
@@ -27,7 +27,7 @@ class StateLogBarrierTest(unittest.TestCase):
     # Defining the state barrier with bounds equals 1 and -1
     ub = np.ones((self.n, 1))
     lb = -1. * ub
-    logb = cddp.StateBarrier(ub, lb)
+    logb = crocoddyL.StateBarrier(ub, lb)
     data = logb.createData(self.n, self.m)
 
     # Computing the barrier value in the infeasible region
@@ -40,7 +40,7 @@ class StateLogBarrierTest(unittest.TestCase):
     # Defining the state barrier with bounds equals 1 and -1
     ub = np.ones((self.n, 1))
     lb = -1. * ub
-    logb = cddp.StateBarrier(ub, lb)
+    logb = crocoddyL.StateBarrier(ub, lb)
     data = logb.createData(self.n, self.m)
 
     # Computing the state Jacobian in the lowe bound
@@ -54,7 +54,7 @@ class StateLogBarrierTest(unittest.TestCase):
     # Defining the state barrier with bounds equals 1 and -1
     ub = np.ones((self.n, 1))
     lb = -1. * ub
-    logb = cddp.StateBarrier(ub, lb)
+    logb = crocoddyL.StateBarrier(ub, lb)
     data = logb.createData(self.n, self.m)
 
     # Computing the state Jacobian in the upper bound
@@ -68,7 +68,7 @@ class StateLogBarrierTest(unittest.TestCase):
     # Defining the state barrier with bounds equals 1 and -1
     ub = np.random.rand(self.n, 1)
     lb = -1. * ub
-    logb = cddp.StateBarrier(ub, lb)
+    logb = crocoddyL.StateBarrier(ub, lb)
     data = logb.createData(self.n, self.m)
 
     # Computing the state Hessian of the barrier function
@@ -84,7 +84,7 @@ class StateLogBarrierTest(unittest.TestCase):
     # Defining the control barrier with bounds equals 1 and -1
     ub = np.ones((self.m, 1))
     lb = -1. * ub
-    logb = cddp.ControlBarrier(ub, lb)
+    logb = crocoddyL.ControlBarrier(ub, lb)
     data = logb.createData(self.n, self.m)
 
     # Computing the barrier value in the origin
@@ -97,7 +97,7 @@ class StateLogBarrierTest(unittest.TestCase):
     # Defining the control barrier with bounds equals 1 and -1
     ub = np.ones((self.m, 1))
     lb = -1. * ub
-    logb = cddp.ControlBarrier(ub, lb)
+    logb = crocoddyL.ControlBarrier(ub, lb)
     data = logb.createData(self.n, self.m)
 
     # Computing the barrier value in the infeasible region
@@ -110,7 +110,7 @@ class StateLogBarrierTest(unittest.TestCase):
     # Defining the control barrier with bounds equals 1 and -1
     ub = np.ones((self.m, 1))
     lb = -1. * ub
-    logb = cddp.ControlBarrier(ub, lb)
+    logb = crocoddyL.ControlBarrier(ub, lb)
     data = logb.createData(self.n, self.m)
 
     # Computing the control Jacobian in the lower bound
@@ -124,7 +124,7 @@ class StateLogBarrierTest(unittest.TestCase):
     # Defining the control barrier with bounds equals 1 and -1
     ub = np.ones((self.m, 1))
     lb = -1. * ub
-    logb = cddp.ControlBarrier(ub, lb)
+    logb = crocoddyL.ControlBarrier(ub, lb)
     data = logb.createData(self.n, self.m)
 
     # Computing the control Jacobian in the upper bound
@@ -138,7 +138,7 @@ class StateLogBarrierTest(unittest.TestCase):
     # Defining the control barrier with bounds equals 1 and -1
     ub = np.random.rand(self.m, 1)
     lb = -1. * ub
-    logb = cddp.ControlBarrier(ub, lb)
+    logb = crocoddyL.ControlBarrier(ub, lb)
     data = logb.createData(self.n, self.m)
 
     # Computing the control Hessian of the barrier function
