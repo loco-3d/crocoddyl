@@ -43,7 +43,7 @@ u_reg = crocoddyL.ControlCost(dynamics, wu_reg)
 # com_cost = crocoddyL.CoMCost(dynamics, w_com)
 
 # Adding the cost functions to the cost manager
-costManager = crocoddyL.cost_manager.CostManager()
+costManager = crocoddyL.CostManager()
 costManager.addTerminal(se3_goal, "se3_goal")
 costManager.addRunning(se3_track, "se3_track")
 costManager.addRunning(v_reg, "v_reg")
