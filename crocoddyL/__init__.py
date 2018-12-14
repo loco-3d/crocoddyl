@@ -13,7 +13,7 @@ from costs import CoMCost
 from costs import StateCost, ControlCost
 from multiphase import Phase
 from multiphase import Multiphase
-from ddp_model import DDPData, DDPModel
+from optcon import DDPData, DDPModel
 from solver import DDPSolver
 from solver import DDPParams
 from utils import *
