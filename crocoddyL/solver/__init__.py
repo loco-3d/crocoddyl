@@ -1,2 +1,2 @@
-from solver import Solver
-from solver_params import SolverParams
+from ddp import DDPSolver
+from ddp_params import DDPParams

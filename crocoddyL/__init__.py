@@ -14,6 +14,6 @@ from costs import StateCost, ControlCost
 from multiphase import Phase
 from multiphase import Multiphase
 from ddp_model import DDPData, DDPModel
-from solver import Solver
-from solver import SolverParams
+from solver import DDPSolver
+from solver import DDPParams
 from utils import *

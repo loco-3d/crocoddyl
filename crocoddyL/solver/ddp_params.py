@@ -1,4 +1,4 @@
-class SolverParams(object):
+class DDPParams(object):
   def __init__(self):
     """ Define the default values of the DDP parameters
     """

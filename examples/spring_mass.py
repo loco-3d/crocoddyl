@@ -47,20 +47,20 @@ ddpModel.setTerminalReference(ddpData, Xref[-1], "xT_goal")
 
 # Configuration the solver from YAML file and solving it
 filename = str(os.path.dirname(os.path.abspath(__file__)))
-solverParams = crocoddyL.SolverParams()
-solverParams.setFromConfigFile(filename + "/spring_mass_config.yaml")
-crocoddyL.Solver.solve(ddpModel, ddpData, solverParams)
+ddpParams = crocoddyL.DDPParams()
+ddpParams.setFromConfigFile(filename + "/spring_mass_config.yaml")
+crocoddyL.DDPSolver.solve(ddpModel, ddpData, ddpParams)
 
 
 # Plotting the results
 if plot:
-  X = crocoddyL.Solver.getStateTrajectory(ddpData)
-  U = crocoddyL.Solver.getControlSequence(ddpData)
+  X = crocoddyL.DDPSolver.getStateTrajectory(ddpData)
+  U = crocoddyL.DDPSolver.getControlSequence(ddpData)
   crocoddyL.plotDDPSolution(X, U)
 
-  crocoddyL.plotDDPConvergence(solverParams.cost_itr,
-                          solverParams.muLM_itr,
-                          solverParams.muV_itr, 
-                          solverParams.gamma_itr,
-                          solverParams.theta_itr,
-                          solverParams.alpha_itr)
+  crocoddyL.plotDDPConvergence(ddpParams.cost_itr,
+                               ddpParams.muLM_itr,
+                               ddpParams.muV_itr, 
+                               ddpParams.gamma_itr,
+                               ddpParams.theta_itr,
+                               ddpParams.alpha_itr)

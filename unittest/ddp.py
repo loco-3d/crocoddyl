@@ -44,29 +44,29 @@ class LinearDDPTest(unittest.TestCase):
 
   def test_problem_solved_in_one_iteration(self):
     # Using the default solver parameters
-    solverParams = crocoddyL.SolverParams()
+    ddpParams = crocoddyL.DDPParams()
 
     # Running the DDP solver
-    crocoddyL.Solver.solve(self.ddpModel, self.ddpData, solverParams)
+    crocoddyL.DDPSolver.solve(self.ddpModel, self.ddpData, ddpParams)
     self.assertEqual(
       self.ddpData.n_iter, 1, \
       "This is equivalent to a LQR problem which it solves in 1 iteration.")
 
   def test_improvement_ratio_equals_one(self):
     # Using the default solver parameters
-    solverParams = crocoddyL.SolverParams()
+    ddpParams = crocoddyL.DDPParams()
 
     # Running the DDP solver
-    crocoddyL.Solver.solve(self.ddpModel, self.ddpData, solverParams)
+    crocoddyL.DDPSolver.solve(self.ddpModel, self.ddpData, ddpParams)
     self.assertAlmostEqual(
       self.ddpData.z, 1., 1, \
       "This is a LQR problem the improvement ration should be equals to 1.")
 
   def test_against_kkt_solution(self):
     # Running the DDP solver and updating its derivatives
-    solverParams = crocoddyL.SolverParams()
-    crocoddyL.Solver.solve(self.ddpModel, self.ddpData, solverParams)
-    crocoddyL.Solver.updateQuadraticAppr(self.ddpModel, self.ddpData)
+    ddpParams = crocoddyL.DDPParams()
+    crocoddyL.DDPSolver.solve(self.ddpModel, self.ddpData, ddpParams)
+    crocoddyL.DDPSolver.updateQuadraticAppr(self.ddpModel, self.ddpData)
 
     nx = self.ddpModel.dynamicModel.nx()
     nu = self.ddpModel.dynamicModel.nu()
@@ -108,15 +108,15 @@ class LinearDDPTest(unittest.TestCase):
 
   def test_regularization_in_backward_pass(self):
     # Using the default solver parameters
-    solverParams = crocoddyL.SolverParams()
+    ddpParams = crocoddyL.DDPParams()
 
     # Running a backward-pass with control regularization
     self.ddpData.muLM = 0.
     self.ddpData.muV = 0.
     self.ddpData.alpha = 1.
-    crocoddyL.Solver.forwardSimulation(self.ddpModel, self.ddpData)
-    crocoddyL.Solver.updateQuadraticAppr(self.ddpModel, self.ddpData)
-    crocoddyL.Solver.backwardPass(self.ddpModel, self.ddpData, solverParams)
+    crocoddyL.DDPSolver.forwardSimulation(self.ddpModel, self.ddpData)
+    crocoddyL.DDPSolver.updateQuadraticAppr(self.ddpModel, self.ddpData)
+    crocoddyL.DDPSolver.backwardPass(self.ddpModel, self.ddpData, ddpParams)
 
     # Recording the Vx values for the control regularization case
     Vx_ctrl = []
@@ -126,9 +126,9 @@ class LinearDDPTest(unittest.TestCase):
     # Running a backward-pass with an equivalente LM regularization
     self.ddpData.muLM = 1e-2
     self.ddpModel.costManager.removeRunning('u_reg')
-    crocoddyL.Solver.forwardSimulation(self.ddpModel, self.ddpData)
-    crocoddyL.Solver.updateQuadraticAppr(self.ddpModel, self.ddpData)
-    crocoddyL.Solver.backwardPass(self.ddpModel, self.ddpData, solverParams)
+    crocoddyL.DDPSolver.forwardSimulation(self.ddpModel, self.ddpData)
+    crocoddyL.DDPSolver.updateQuadraticAppr(self.ddpModel, self.ddpData)
+    crocoddyL.DDPSolver.backwardPass(self.ddpModel, self.ddpData, ddpParams)
 
     # Recording the Vx values for the control regularization case
     Vx_reg = []
@@ -141,12 +141,6 @@ class LinearDDPTest(unittest.TestCase):
         "The control cost regularization isn't equal to the LM regularization.")
 
   def KKTSolver(self, ddpModel, ddpData):
-    # Generate a warm-point trajectory from an initial condition
-    # crocoddyL.Solver.forwardSimulation(ddpModel, ddpData)
-
-    # Compute the derivatives along a warm-point trajectory
-    # crocoddyL.Solver.updateQuadraticAppr(ddpModel, ddpData)
-
     # Creating the variables of the KKT problem
     nx = ddpModel.dynamicModel.nx()
     nu = ddpModel.dynamicModel.nu()

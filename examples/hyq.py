@@ -83,24 +83,24 @@ ddpModel.setRunningReference(ddpData, Xref[:-1], "v_reg")
 
 
 # Configuration the solver from YAML file and solving it
-solverParams = crocoddyL.SolverParams()
-solverParams.setFromConfigFile(filename + "/hyq_config.yaml")
-crocoddyL.Solver.solve(ddpModel, ddpData, solverParams)
+ddpParams = crocoddyL.DDPParams()
+ddpParams.setFromConfigFile(filename + "/hyq_config.yaml")
+crocoddyL.DDPSolver.solve(ddpModel, ddpData, ddpParams)
 
 
 # Plotting the results
 if plot:
-  crocoddyL.plotDDPConvergence(solverParams.cost_itr,
-                          solverParams.muLM_itr,
-                          solverParams.muV_itr,
-                          solverParams.gamma_itr,
-                          solverParams.theta_itr,
-                          solverParams.alpha_itr)
+  crocoddyL.plotDDPConvergence(ddpParams.cost_itr,
+                               ddpParams.muLM_itr,
+                               ddpParams.muV_itr,
+                               ddpParams.gamma_itr,
+                               ddpParams.theta_itr,
+                               ddpParams.alpha_itr)
 
 
 if display:
   T = timeline
-  X = crocoddyL.Solver.getStateTrajectory(ddpData)
+  X = crocoddyL.DDPSolver.getStateTrajectory(ddpData)
   crocoddyL.visualizePlan(robot, T, x0, X)
 
 # ddp.saveToFile('mu_1e2.txt')
