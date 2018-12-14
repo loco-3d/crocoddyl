@@ -3,9 +3,9 @@ import numpy as np
 from crocoddyL.utils import isPositiveDefinitive, EPS
 
 
-class Solver(object):
+class DDPSolver(object):
   @staticmethod
-  def solve(ddpModel, ddpData, solverParams):
+  def solve(ddpModel, ddpData, ddpParams):
     """ Run the DDP solver.
 
     The solver computes a optimal trajectory and control commmands by iteratives
@@ -15,7 +15,7 @@ class Solver(object):
     commands U.
     :param ddpModel: DDP model
     :param ddpData: entired DDP data
-    :param solverParams: DDP solver parameters
+    :param ddpParams: DDP solver parameters
     """
     start = time.time()
 
@@ -24,14 +24,14 @@ class Solver(object):
 
     # Running an initial forward simulation. calculates the forward dynamics and
     # total costs
-    Solver.forwardSimulation(ddpModel, ddpData)
+    DDPSolver.forwardSimulation(ddpModel, ddpData)
 
-    ddpData.muLM = solverParams.mu0LM
-    ddpData.muV = solverParams.mu0V
-    ddpData.alpha = solverParams.alpha0
+    ddpData.muLM = ddpParams.mu0LM
+    ddpData.muV = ddpParams.mu0V
+    ddpData.alpha = ddpParams.alpha0
 
     ddpData.n_iter = 0
-    for i in xrange(solverParams.max_iter):
+    for i in xrange(ddpParams.max_iter):
       # Resetting flags
       ddpData.backward_status = " "
       ddpData.forward_status = " "
@@ -40,28 +40,28 @@ class Solver(object):
       ddpData.n_iter = i
 
       # Update the quadratic approximation
-      Solver.updateQuadraticAppr(ddpModel, ddpData)
+      DDPSolver.updateQuadraticAppr(ddpModel, ddpData)
 
-      while not Solver.backwardPass(ddpModel, ddpData, solverParams):
+      while not DDPSolver.backwardPass(ddpModel, ddpData, ddpParams):
         # Quu is not positive-definitive, so increasing the
         # regularization factor
         if ddpData.muLM == 0.:
-          ddpData.muLM = solverParams.mu0LM
+          ddpData.muLM = ddpParams.mu0LM
         else:
-          ddpData.muLM *= solverParams.muLM_inc
+          ddpData.muLM *= ddpParams.muLM_inc
         ddpData.backward_status = "r" # Regularization of the search direction
 
       # Running the forward pass
-      while not Solver.forwardPass(ddpModel, ddpData, solverParams):
-        ddpData.alpha *= solverParams.alpha_dec
+      while not DDPSolver.forwardPass(ddpModel, ddpData, ddpParams):
+        ddpData.alpha *= ddpParams.alpha_dec
         ddpData.forward_status = "s" # Reduction of the step-length
-        if ddpData.alpha < solverParams.alpha_min:
+        if ddpData.alpha < ddpParams.alpha_min:
           print "\t", ('It cannot be improved solution')
           ddpData._convergence = True
           break
 
       # Printing message
-      if solverParams.print_level:
+      if ddpParams.print_level:
         if i % 10 == 0:
           print "iter \t cost \t       theta \t   gamma \t muV \t     muLM \talpha"
         print "%4i  %0.5e  %0.5e  %0.5e  %10.5e  %0.5e%c  %0.4f%c" % \
@@ -73,36 +73,36 @@ class Solver(object):
       # Recording the total cost, gradient, weighted gradient (gamme),
       # regularization values and alpha for each iteration. This is useful for
       # analysing the solver performance
-      if solverParams.record:
-        solverParams.cost_itr[i] = ddpData.totalCost
-        solverParams.gamma_itr[i] = ddpData.gamma
-        solverParams.theta_itr[i] = ddpData.theta
-        solverParams.muLM_itr[i] = ddpData.muLM
-        solverParams.muV_itr[i] = ddpData.muV
-        solverParams.alpha_itr[i] = ddpData.alpha
+      if ddpParams.record:
+        ddpParams.cost_itr[i] = ddpData.totalCost
+        ddpParams.gamma_itr[i] = ddpData.gamma
+        ddpParams.theta_itr[i] = ddpData.theta
+        ddpParams.muLM_itr[i] = ddpData.muLM
+        ddpParams.muV_itr[i] = ddpData.muV
+        ddpParams.alpha_itr[i] = ddpData.alpha
 
       # The quadratic model is accepted so for faster convergence it's better
       # to approach to Newton search direction. We can do it by decreasing the
       # Levenberg-Marquardt parameter
-      ddpData.muLM *= solverParams.muLM_dec
+      ddpData.muLM *= ddpParams.muLM_dec
 
       if ddpData.muLM < EPS: # this is full Newton direction
         ddpData.muLM = EPS
 
       # This regularization smooth the policy updates. Experimentally it helps
       # to reduce the number of iteration whenever the problem isn't well posed
-      ddpData.muV *= solverParams.muV_dec
+      ddpData.muV *= ddpParams.muV_dec
       if ddpData.muV < EPS:
         ddpData.muV = EPS
 
       # Increasing the stepsize for the next iteration
-      ddpData.alpha *= solverParams.alpha_inc
+      ddpData.alpha *= ddpParams.alpha_inc
       if ddpData.alpha > 1.:
         ddpData.alpha = 1.
 
       # Checking convergence
       if ddpData._convergence:
-        if solverParams.print_level:
+        if ddpParams.print_level:
           # Final time
           end = time.time()
           print
@@ -131,7 +131,7 @@ class Solver(object):
     return False
 
   @staticmethod
-  def forwardPass(ddpModel, ddpData, solverParams):
+  def forwardPass(ddpModel, ddpData, ddpParams):
     """ Run the forward-pass of the DDP algorithm.
 
     The forward-pass basically applies a new policy and then rollout the
@@ -140,7 +140,7 @@ class Solver(object):
     choosen step length.
     :param ddpModel: DDP model
     :param ddpData: entired DDP data
-    :param solverParams: DDP solver parameters
+    :param ddpParams: DDP solver parameters
     """
     # Integrate the system along the new trajectory and compute its cost
     ddpData.totalCost = 0.
@@ -170,22 +170,26 @@ class Solver(object):
     ddpData.totalCost += ddpData.interval[-1].cost.l
 
     # Checking convergence of the current iteration
-    if np.abs(ddpData.gamma) <= solverParams.tol:
+    if np.abs(ddpData.gamma) <= ddpParams.tol:
       ddpData._convergence = True
       return True
 
+    # Updating the actual and expected Value functions
+    ddpData.dV_exp = \
+      ddpData.alpha * (ddpData.alpha * ddpData.total_jt_Quu_j + ddpData.total_jt_Qu)
+    ddpData.dV = ddpData.totalCost - ddpData.totalCost_prev
+
     # Checking the changes
-    ddpData.dV = ddpData.totalCost_prev - ddpData.totalCost
-    ddpData.z_new = ddpData.dV/ddpData.dV_exp
-    if ddpData.z_new > solverParams.armijo_condition \
-       and ddpData.z_new < solverParams.change_ub:
+    ddpData.z_new = ddpData.dV / ddpData.dV_exp
+    if ddpData.z_new > ddpParams.armijo_condition \
+       and ddpData.z_new < ddpParams.change_ub:
       ddpData.z = ddpData.z_new
       return True
     else:
       return False
 
   @staticmethod
-  def backwardPass(ddpModel, ddpData, solverParams):
+  def backwardPass(ddpModel, ddpData, ddpParams):
     """ Run the backward-pass of the DDP algorithm.
 
     The backward-pass is equivalent to a Riccati recursion. It updates the
@@ -196,10 +200,11 @@ class Solver(object):
     a the directional derivatives are computed.
     :param ddpModel: DDP model
     :param ddpData: entired DDP data
-    :param solverParams: DDP solver parameters
+    :param ddpParams: DDP solver parameters
     """
-    # Setting up the initial cost value, and the expected reduction equals zero
-    ddpData.dV_exp = 0.
+    # Setting up the initial values
+    ddpData.total_jt_Quu_j = 0.
+    ddpData.total_jt_Qu = 0.
 
     # Running the backward sweep
     ddpData.gamma = 0.
@@ -254,10 +259,9 @@ class Solver(object):
       # Symmetric can be lost due to round-off error. This ensures the symmetric
       np.copyto(it.Vxx, 0.5 * (it.Vxx + it.Vxx.T))
 
-      # Updating the local cost and expected reduction. The total values are
-      # used to check the changes in the forward pass. This method is explained
-      # in Tassa's PhD thesis
-      ddpData.dV_exp -= ddpData.alpha * (ddpData.alpha * it.jt_Quu_j + it.jt_Qu)
+      # Updating terms for computing the expected reduction in the Value function
+      ddpData.total_jt_Quu_j += it.jt_Quu_j
+      ddpData.total_jt_Qu += it.jt_Qu
 
       # Updating the theta and gamma given the actual knot
       ddpData.gamma += np.asscalar(np.dot(it.Qu.T, it.Qu))

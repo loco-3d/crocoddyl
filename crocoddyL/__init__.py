@@ -3,7 +3,7 @@ from dynamics import SpringMass
 from dynamics import ForwardDynamics
 from dynamics import FloatingBaseMultibodyDynamics
 from dynamics import EulerIntegrator, EulerDiscretizer
-from cost_manager import CostManager
+from costs import CostManager
 from costs import TerminalCostData, TerminalCost
 from costs import RunningCostData, RunningCost
 from costs import TerminalQuadraticCostData, TerminalQuadraticCost
@@ -13,7 +13,7 @@ from costs import CoMCost
 from costs import StateCost, ControlCost
 from multiphase import Phase
 from multiphase import Multiphase
-from ddp_model import DDPData, DDPModel
-from solver import Solver
-from solver import SolverParams
+from optcon import DDPData, DDPModel
+from solver import DDPSolver
+from solver import DDPParams
 from utils import *

@@ -1,3 +1,4 @@
+from cost_manager import CostManager
 from cost import TerminalCostData, TerminalCost
 from cost import RunningCostData, RunningCost
 from cost import TerminalQuadraticCostData, TerminalQuadraticCost

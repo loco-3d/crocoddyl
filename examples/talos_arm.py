@@ -26,7 +26,7 @@ wSE3_goal = np.ones((6,1))
 wSE3_track = 1e-3 * np.ones((6,1))
 wv_reg = 1e-7 * np.vstack([ np.zeros((dynamics.nv(),1)),
                             np.ones((dynamics.nv(),1)) ])
-wu_reg = 1e-7 * np.ones((dynamics.nu(),1))
+wu_reg = 0.*1e-7 * np.ones((dynamics.nu(),1))
 se3_goal = crocoddyL.SE3Cost(dynamics, wSE3_goal)
 se3_track = crocoddyL.SE3Cost(dynamics, wSE3_track)
 v_reg = crocoddyL.StateCost(dynamics, wv_reg)
@@ -68,24 +68,24 @@ ddpModel.setRunningReference(ddpData, Xref[:-1], "v_reg")
 
 
 # Configuration the solver from YAML file and solving it
-solverParams = crocoddyL.SolverParams()
-solverParams.setFromConfigFile(filename + "/talos_arm_config.yaml")
-crocoddyL.Solver.solve(ddpModel, ddpData, solverParams)
+ddpParams = crocoddyL.DDPParams()
+ddpParams.setFromConfigFile(filename + "/talos_arm_config.yaml")
+crocoddyL.DDPSolver.solve(ddpModel, ddpData, ddpParams)
 
 
 # Plotting the results
 if plot:
-  crocoddyL.plotDDPConvergence(solverParams.cost_itr,
-                          solverParams.muLM_itr,
-                          solverParams.muV_itr,
-                          solverParams.gamma_itr,
-                          solverParams.theta_itr,
-                          solverParams.alpha_itr)
+  crocoddyL.plotDDPConvergence(ddpParams.cost_itr,
+                               ddpParams.muLM_itr,
+                               ddpParams.muV_itr,
+                               ddpParams.gamma_itr,
+                               ddpParams.theta_itr,
+                               ddpParams.alpha_itr)
 
 
 if display:
   T = timeline
-  X = crocoddyL.Solver.getStateTrajectory(ddpData)
+  X = crocoddyL.DDPSolver.getStateTrajectory(ddpData)
   crocoddyL.visualizePlan(robot, T, x0, X)
 
 
