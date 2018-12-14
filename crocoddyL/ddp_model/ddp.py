@@ -101,6 +101,8 @@ class DDPData(object):
     self.totalCost_prev = 0.
     self.dV_exp = 0.
     self.dV = 0.
+    self.total_jt_Quu_j = 0.
+    self.total_jt_Qu = 0.
 
     # Line search and regularization data
     self.alpha = -1.

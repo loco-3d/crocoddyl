@@ -174,9 +174,13 @@ class Solver(object):
       ddpData._convergence = True
       return True
 
+    # Updating the actual and expected Value functions
+    ddpData.dV_exp = \
+      ddpData.alpha * (ddpData.alpha * ddpData.total_jt_Quu_j + ddpData.total_jt_Qu)
+    ddpData.dV = ddpData.totalCost - ddpData.totalCost_prev
+
     # Checking the changes
-    ddpData.dV = ddpData.totalCost_prev - ddpData.totalCost
-    ddpData.z_new = ddpData.dV/ddpData.dV_exp
+    ddpData.z_new = ddpData.dV / ddpData.dV_exp
     if ddpData.z_new > solverParams.armijo_condition \
        and ddpData.z_new < solverParams.change_ub:
       ddpData.z = ddpData.z_new
@@ -198,8 +202,9 @@ class Solver(object):
     :param ddpData: entired DDP data
     :param solverParams: DDP solver parameters
     """
-    # Setting up the initial cost value, and the expected reduction equals zero
-    ddpData.dV_exp = 0.
+    # Setting up the initial values
+    ddpData.total_jt_Quu_j = 0.
+    ddpData.total_jt_Qu = 0.
 
     # Running the backward sweep
     ddpData.gamma = 0.
@@ -254,10 +259,9 @@ class Solver(object):
       # Symmetric can be lost due to round-off error. This ensures the symmetric
       np.copyto(it.Vxx, 0.5 * (it.Vxx + it.Vxx.T))
 
-      # Updating the local cost and expected reduction. The total values are
-      # used to check the changes in the forward pass. This method is explained
-      # in Tassa's PhD thesis
-      ddpData.dV_exp -= ddpData.alpha * (ddpData.alpha * it.jt_Quu_j + it.jt_Qu)
+      # Updating terms for computing the expected reduction in the Value function
+      ddpData.total_jt_Quu_j += it.jt_Quu_j
+      ddpData.total_jt_Qu += it.jt_Qu
 
       # Updating the theta and gamma given the actual knot
       ddpData.gamma += np.asscalar(np.dot(it.Qu.T, it.Qu))
