@@ -14,7 +14,6 @@ filename = str(os.path.dirname(os.path.abspath(__file__)))
 path = '/opt/openrobots/share/talos_data/'
 urdf = path + 'robots/talos_left_arm.urdf'
 robot = se3.robot_wrapper.RobotWrapper(urdf, path)
-model = robot.model
 
 # Create the dynamics and its integrator and discretizer
 integrator = crocoddyL.EulerIntegrator()
@@ -57,7 +56,7 @@ ddpModel.setInitial(ddpData, xInit=x0, UInit=U0)
 frameRef = \
   crocoddyL.costs.SE3Task(se3.SE3(np.eye(3),
                      np.array([[0.],[0.],[0.4]])),
-                     model.getFrameId('gripper_left_joint'))
+                     robot.model.getFrameId('gripper_left_joint'))
 Xref = [x0 for i in xrange(len(timeline))]
 Uref = [u0 for i in xrange(len(timeline))]
 Mref = [frameRef for i in xrange(len(timeline))]
@@ -75,12 +74,13 @@ crocoddyL.DDPSolver.solve(ddpModel, ddpData, ddpParams)
 
 # Plotting the results
 if plot:
-  crocoddyL.plotDDPConvergence(ddpParams.cost_itr,
-                               ddpParams.muLM_itr,
-                               ddpParams.muV_itr,
-                               ddpParams.gamma_itr,
-                               ddpParams.theta_itr,
-                               ddpParams.alpha_itr)
+  crocoddyL.plotDDPConvergence(
+    crocoddyL.DDPSolver.getCostSequence(ddpData),
+    crocoddyL.DDPSolver.getLMRegularizationSequence(ddpData),
+    crocoddyL.DDPSolver.getVRegularizationSequence(ddpData),
+    crocoddyL.DDPSolver.getGammaSequence(ddpData),
+    crocoddyL.DDPSolver.getThetaSequence(ddpData),
+    crocoddyL.DDPSolver.getAlphaSequence(ddpData))
 
 
 if display:

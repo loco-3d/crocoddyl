@@ -27,7 +27,7 @@ contactInfo = crocoddyL.Multiphase([contactPhase0], 3)
 integrator = crocoddyL.EulerIntegrator()
 discretizer = crocoddyL.EulerDiscretizer()
 dynamics = crocoddyL.FloatingBaseMultibodyDynamics(integrator, discretizer,
-                                              robot.model, contactInfo)
+                                                   robot.model, contactInfo)
 
 # Defining the SE3 task, the joint velocity and control regularizations
 wSE3_term = 1e3 * np.ones((6,1))
@@ -90,12 +90,13 @@ crocoddyL.DDPSolver.solve(ddpModel, ddpData, ddpParams)
 
 # Plotting the results
 if plot:
-  crocoddyL.plotDDPConvergence(ddpParams.cost_itr,
-                               ddpParams.muLM_itr,
-                               ddpParams.muV_itr,
-                               ddpParams.gamma_itr,
-                               ddpParams.theta_itr,
-                               ddpParams.alpha_itr)
+  crocoddyL.plotDDPConvergence(
+    crocoddyL.DDPSolver.getCostSequence(ddpData),
+    crocoddyL.DDPSolver.getLMRegularizationSequence(ddpData),
+    crocoddyL.DDPSolver.getVRegularizationSequence(ddpData),
+    crocoddyL.DDPSolver.getGammaSequence(ddpData),
+    crocoddyL.DDPSolver.getThetaSequence(ddpData),
+    crocoddyL.DDPSolver.getAlphaSequence(ddpData))
 
 
 if display:

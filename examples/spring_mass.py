@@ -58,9 +58,10 @@ if plot:
   U = crocoddyL.DDPSolver.getControlSequence(ddpData)
   crocoddyL.plotDDPSolution(X, U)
 
-  crocoddyL.plotDDPConvergence(ddpParams.cost_itr,
-                               ddpParams.muLM_itr,
-                               ddpParams.muV_itr, 
-                               ddpParams.gamma_itr,
-                               ddpParams.theta_itr,
-                               ddpParams.alpha_itr)
+  crocoddyL.plotDDPConvergence(
+    crocoddyL.DDPSolver.getCostSequence(ddpData),
+    crocoddyL.DDPSolver.getLMRegularizationSequence(ddpData),
+    crocoddyL.DDPSolver.getVRegularizationSequence(ddpData),
+    crocoddyL.DDPSolver.getGammaSequence(ddpData),
+    crocoddyL.DDPSolver.getThetaSequence(ddpData),
+    crocoddyL.DDPSolver.getAlphaSequence(ddpData))

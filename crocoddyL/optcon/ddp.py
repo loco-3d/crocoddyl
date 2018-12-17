@@ -119,6 +119,14 @@ class DDPData(object):
     self.z_new = 0.
     self.z = 0.
 
+    # Variables for analysing the solver performance
+    self.cost_itr = []
+    self.muLM_itr = []
+    self.muV_itr = []
+    self.gamma_itr = []
+    self.theta_itr = []
+    self.alpha_itr = []
+
 
 class DDPModel(object):
   """ Class to save the model information for the system, cost and dynamics
