@@ -22,6 +22,15 @@ class DDPSolver(object):
     # Resetting convergence flag
     ddpData._convergence = False
 
+    # Resizing the global variables for analysing solver performance
+    if ddpParams.record:
+      ddpData.cost_itr = [0.] * ddpParams.max_iter
+      ddpData.muLM_itr = [0.] * ddpParams.max_iter
+      ddpData.muV_itr = [0.] * ddpParams.max_iter
+      ddpData.gamma_itr = [0.] * ddpParams.max_iter
+      ddpData.theta_itr = [0.] * ddpParams.max_iter
+      ddpData.alpha_itr = [0.] * ddpParams.max_iter
+
     # Running an initial forward simulation. calculates the forward dynamics and
     # total costs
     DDPSolver.forwardSimulation(ddpModel, ddpData)
@@ -74,12 +83,12 @@ class DDPSolver(object):
       # regularization values and alpha for each iteration. This is useful for
       # analysing the solver performance
       if ddpParams.record:
-        ddpParams.cost_itr[i] = ddpData.totalCost
-        ddpParams.gamma_itr[i] = ddpData.gamma
-        ddpParams.theta_itr[i] = ddpData.theta
-        ddpParams.muLM_itr[i] = ddpData.muLM
-        ddpParams.muV_itr[i] = ddpData.muV
-        ddpParams.alpha_itr[i] = ddpData.alpha
+        ddpData.cost_itr[i] = ddpData.totalCost
+        ddpData.gamma_itr[i] = ddpData.gamma
+        ddpData.theta_itr[i] = ddpData.theta
+        ddpData.muLM_itr[i] = ddpData.muLM
+        ddpData.muV_itr[i] = ddpData.muV
+        ddpData.alpha_itr[i] = ddpData.alpha
 
       # The quadratic model is accepted so for faster convergence it's better
       # to approach to Newton search direction. We can do it by decreasing the
@@ -371,3 +380,27 @@ class DDPSolver(object):
     for i in xrange(ddpData.N):
       j.append(ddpData.interval[i].j)
     return j
+
+  @staticmethod
+  def getCostSequence(ddpData):
+    return ddpData.cost_itr[:ddpData.n_iter+1]
+
+  @staticmethod
+  def getLMRegularizationSequence(ddpData):
+    return ddpData.muLM_itr[:ddpData.n_iter+1]
+
+  @staticmethod
+  def getVRegularizationSequence(ddpData):
+    return ddpData.muV_itr[:ddpData.n_iter+1]
+
+  @staticmethod
+  def getGammaSequence(ddpData):
+    return ddpData.gamma_itr[:ddpData.n_iter+1]
+
+  @staticmethod
+  def getThetaSequence(ddpData):
+    return ddpData.theta_itr[:ddpData.n_iter+1]
+
+  @staticmethod
+  def getAlphaSequence(ddpData):
+    return ddpData.alpha_itr[:ddpData.n_iter+1]
