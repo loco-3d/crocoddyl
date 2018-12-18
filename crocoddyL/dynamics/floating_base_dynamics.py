@@ -20,7 +20,7 @@ class FloatingBaseMultibodyDynamicData(DynamicData):
 
     # Terms required for updatng the dynamics
     self.contactJ = np.zeros((nc, dynamicModel.nv()))
-    self.gamma = np.zeros((nc, 1))
+    self.a_ref = np.zeros((nc, 1))
     self._contactFrameIndices = dynamicModel.contactInfo(t)
 
     # Terms required for updating the linear approximation
@@ -133,16 +133,25 @@ class FloatingBaseMultibodyDynamics(DynamicModel):
     se3.updateFramePlacements(self.pinocchio,
                               dynamicData.pinocchio)
 
-    # Update the Joint jacobian and gamma
-    for k, cs in enumerate(dynamicData._contactFrameIndices):
+    # Update the Joint jacobian and the reference acceleration
+    zero_motion = se3.Motion(np.zeros((3,1)), np.zeros((3,1)))
+    for k, frame_id in enumerate(dynamicData._contactFrameIndices):
+      # Getting the frame ID
+      frame = self.pinocchio.frames[frame_id]
+
+      # Computing the frame Jacobian in the local frame
       dynamicData.contactJ[self.contactInfo.nc*k:
-                            self.contactInfo.nc*(k+1),:] = \
+                           self.contactInfo.nc*(k+1),:] = \
         se3.getFrameJacobian(
-          self.pinocchio, dynamicData.pinocchio, cs,
+          self.pinocchio, dynamicData.pinocchio, frame_id,
           se3.ReferenceFrame.LOCAL)[:self.contactInfo.nc,:]
-    #TODO gamma
-    dynamicData.gamma.fill(0.)
+
+      # Mapping the reference acceleration into the local frame
+      dynamicData.a_ref[self.contactInfo.nc*k:
+                        self.contactInfo.nc*(k+1)] = \
+        se3.getFrameAcceleration(self.pinocchio, dynamicData.pinocchio, frame_id).linear#vector
+
     se3.forwardDynamics(self.pinocchio,
                         dynamicData.pinocchio,
                         q, v, tau,
-                        dynamicData.contactJ, dynamicData.gamma, 1e-8, False)
+                        dynamicData.contactJ, dynamicData.a_ref, 1e-8, False)
