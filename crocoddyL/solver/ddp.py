@@ -372,7 +372,7 @@ class DDPSolver(object):
 
   @staticmethod
   def getFeedforwardSequence(ddpData):
-    """ Return the feedforward control sequence contained in the ddpData.
+    """ Return the feed-forward control sequence contained in the ddpData.
 
     :param ddpData: entired DDP data
     """
@@ -383,24 +383,49 @@ class DDPSolver(object):
 
   @staticmethod
   def getCostSequence(ddpData):
+    """ Return the cost values along the DDP iterates.
+
+    :param ddpData: entired DDP data
+    """
     return ddpData.cost_itr[:ddpData.n_iter+1]
 
   @staticmethod
   def getLMRegularizationSequence(ddpData):
+    """ Return the Levenberg-Marquardt regularization values along the DDP
+    iterates.
+
+    :param ddpData: entired DDP data
+    """
     return ddpData.muLM_itr[:ddpData.n_iter+1]
 
   @staticmethod
   def getVRegularizationSequence(ddpData):
+    """ Return the Value-function regularization values along the DDP iterates.
+
+    :param ddpData: entired DDP data
+    """
     return ddpData.muV_itr[:ddpData.n_iter+1]
 
   @staticmethod
   def getGammaSequence(ddpData):
+    """ Return the gamma values (||Qu||) along the DDP iterates.
+
+    :param ddpData: entired DDP data
+    """
     return ddpData.gamma_itr[:ddpData.n_iter+1]
 
   @staticmethod
   def getThetaSequence(ddpData):
+    """ Return the theta values (||Qu||_Quu^-1) along the DDP iterates.
+
+    :param ddpData: entired DDP data
+    """
     return ddpData.theta_itr[:ddpData.n_iter+1]
 
   @staticmethod
   def getAlphaSequence(ddpData):
+    """ Return the alpha values (step-length) along the DDP iterates.
+
+    :param ddpData: entired DDP data
+    """
     return ddpData.alpha_itr[:ddpData.n_iter+1]
