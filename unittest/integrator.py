@@ -1,14 +1,14 @@
 import unittest
 import numpy as np
-import crocoddyL
+import crocoddyl
 
 
 class IntegratorTest(unittest.TestCase):
   def test_forward_Euler_integrator(self):
     # Creating the dynamic model of the system and its integrator
-    integrator = crocoddyL.EulerIntegrator()
-    discretizer = crocoddyL.EulerDiscretizer()
-    dynamics = crocoddyL.SpringMass(integrator, discretizer)
+    integrator = crocoddyl.EulerIntegrator()
+    discretizer = crocoddyl.EulerDiscretizer()
+    dynamics = crocoddyl.SpringMass(integrator, discretizer)
 
     # Creating the dynamics data
     t = 0.
@@ -34,9 +34,9 @@ class IntegratorTest(unittest.TestCase):
 
   # def test_RK4_integrator(self):
   #   # Creating the dynamic model of the system and its integrator
-  #   integrator = crocoddyL.RK4Integrator()
-  #   discretizer = crocoddyL.EulerDiscretizer()
-  #   dynamics = crocoddyL.SpringMass(integrator, discretizer)
+  #   integrator = crocoddyl.RK4Integrator()
+  #   discretizer = crocoddyl.EulerDiscretizer()
+  #   dynamics = crocoddyl.SpringMass(integrator, discretizer)
 
   #   # Creating the dynamics data
   #   t = 0.
