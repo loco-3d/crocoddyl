@@ -1,6 +1,6 @@
 import abc
 import numpy as np
-from crocoddyL.utils import EPS
+from crocoddyl.utils import EPS
 
 
 class DynamicData(object):

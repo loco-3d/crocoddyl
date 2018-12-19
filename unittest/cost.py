@@ -1,12 +1,12 @@
 import unittest
 import numpy as np
-import crocoddyL
+import crocoddyl
 
 
 class QuadraticCostTest(unittest.TestCase):
   def setUp(self):
     # Defined the state and control dimensions
-    self.system = crocoddyL.SpringMass(crocoddyL.EulerIntegrator(), crocoddyL.EulerDiscretizer())
+    self.system = crocoddyl.SpringMass(crocoddyl.EulerIntegrator(), crocoddyl.EulerDiscretizer())
     self.n = self.system.getConfigurationDimension()
     self.m = self.system.getTangentDimension()
 
@@ -22,11 +22,11 @@ class QuadraticCostTest(unittest.TestCase):
     self.r = np.random.rand(self.m)
 
     # Create the different cost function and them data
-    self.t_cost = crocoddyL.StateTerminalQuadraticCost(x_des)
+    self.t_cost = crocoddyl.StateTerminalQuadraticCost(x_des)
     self.t_data = self.t_cost.createData(self.n)
-    self.tr_cost = crocoddyL.StateResidualTerminalQuadraticCost(x_des)
+    self.tr_cost = crocoddyl.StateResidualTerminalQuadraticCost(x_des)
     self.tr_data = self.tr_cost.createData(self.n)
-    self.r_cost = crocoddyL.StateRunningQuadraticCost(x_des)
+    self.r_cost = crocoddyl.StateRunningQuadraticCost(x_des)
     self.r_data = self.r_cost.createData(self.n, self.m)
 
     # Set the state or control weights

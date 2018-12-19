@@ -1,23 +1,23 @@
 import unittest
 import numpy as np
-import crocoddyL
+import crocoddyl
 
 
-class NumDiffSpringMass(crocoddyL.SpringMass):
+class NumDiffSpringMass(crocoddyl.SpringMass):
   def updateLinearAppr(self, dynamicData, x, u):
-      crocoddyL.DynamicModel.updateLinearAppr(self, dynamicData, x, u)
+      crocoddyl.DynamicModel.updateLinearAppr(self, dynamicData, x, u)
 
-class NumDiffForwardDynamics(crocoddyL.ForwardDynamics):
+class NumDiffForwardDynamics(crocoddyl.ForwardDynamics):
   def updateLinearAppr(self, dynamicData, x, u):
-      crocoddyL.DynamicModel.updateLinearAppr(self, dynamicData, x, u)
+      crocoddyl.DynamicModel.updateLinearAppr(self, dynamicData, x, u)
 
 
 class SpringMassDerivativesTest(unittest.TestCase):
   def setUp(self):
     # Creating the dynamic model of the system and its integrator
-    integrator = crocoddyL.EulerIntegrator()
-    discretizer = crocoddyL.EulerDiscretizer()
-    dynamics = crocoddyL.SpringMass(integrator, discretizer)
+    integrator = crocoddyl.EulerIntegrator()
+    discretizer = crocoddyl.EulerDiscretizer()
+    dynamics = crocoddyl.SpringMass(integrator, discretizer)
     numdiff_dynamics = NumDiffSpringMass(integrator, discretizer)
 
     # Creating the data
@@ -58,9 +58,9 @@ class ForwardDynamicsDerivativesTest(unittest.TestCase):
     robot = se3.robot_wrapper.RobotWrapper(urdf, path)
 
     # Create the dynamics and its integrator and discretizer
-    integrator = crocoddyL.EulerIntegrator()
-    discretizer = crocoddyL.EulerDiscretizer()
-    dynamics = crocoddyL.ForwardDynamics(integrator, discretizer, robot.model)
+    integrator = crocoddyl.EulerIntegrator()
+    discretizer = crocoddyl.EulerDiscretizer()
+    dynamics = crocoddyl.ForwardDynamics(integrator, discretizer, robot.model)
     numdiff_dynamics = NumDiffForwardDynamics(integrator, discretizer, robot.model)
 
     # Creating the data
