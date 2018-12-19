@@ -18,10 +18,10 @@ class FloatingBaseMultibodyDynamicData(DynamicData):
     self.gv = np.zeros((nc, dynamicModel.nv()))
     self.gu = np.zeros((nc, dynamicModel.nu()))
 
-    # Terms required for updatng the dynamics
-    self.contactJ = np.zeros((nc, dynamicModel.nv()))
+    # Terms required for updating the dynamics
+    self.Jc = np.zeros((nc, dynamicModel.nv()))
     self.a_ref = np.zeros((nc, 1))
-    self._contactFrameIndices = dynamicModel.contactInfo(t)
+    self.contactFrames = dynamicModel.contactInfo(t)
 
     # Terms required for updating the linear approximation
     self.MJtJc = np.zeros((dynamicModel.nv() + nc,
@@ -75,9 +75,9 @@ class FloatingBaseMultibodyDynamics(DynamicModel):
     dynamicData.MJtJc[:self.nv(),:self.nv()] = \
       dynamicData.pinocchio.M
     dynamicData.MJtJc[:self.nv(),self.nv():] = \
-      dynamicData.contactJ.T
+      dynamicData.Jc.T
     dynamicData.MJtJc[self.nv():,:self.nv()] = \
-      dynamicData.contactJ
+      dynamicData.Jc
 
     #TODO: REMOVE PINV!!!! USE DAMPED CHOLESKY
     #np.fill_diagonal(self.MJtJc, self.MJtJc.diagonal()+self.eps)
@@ -133,14 +133,10 @@ class FloatingBaseMultibodyDynamics(DynamicModel):
     se3.updateFramePlacements(self.pinocchio,
                               dynamicData.pinocchio)
 
-    # Update the Joint jacobian and the reference acceleration
-    zero_motion = se3.Motion(np.zeros((3,1)), np.zeros((3,1)))
-    for k, frame_id in enumerate(dynamicData._contactFrameIndices):
-      # Getting the frame ID
-      frame = self.pinocchio.frames[frame_id]
-
+    # Update the Joint Jacobian and the reference acceleration
+    for k, frame_id in enumerate(dynamicData.contactFrames):
       # Computing the frame Jacobian in the local frame
-      dynamicData.contactJ[self.contactInfo.nc*k:
+      dynamicData.Jc[self.contactInfo.nc*k:
                            self.contactInfo.nc*(k+1),:] = \
         se3.getFrameJacobian(
           self.pinocchio, dynamicData.pinocchio, frame_id,
@@ -154,4 +150,4 @@ class FloatingBaseMultibodyDynamics(DynamicModel):
     se3.forwardDynamics(self.pinocchio,
                         dynamicData.pinocchio,
                         q, v, tau,
-                        dynamicData.contactJ, dynamicData.a_ref, 1e-8, False)
+                        dynamicData.Jc, dynamicData.a_ref, 1e-8, False)
