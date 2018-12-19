@@ -1,5 +1,6 @@
 import crocoddyL
 import numpy as np
+import math
 import pinocchio as se3
 import os
 
@@ -31,7 +32,7 @@ dynamics = crocoddyL.FloatingBaseMultibodyDynamics(integrator, discretizer,
 
 # Defining the SE3 task, the joint velocity and control regularizations
 wSE3_term = 1e3 * np.ones((6,1))
-wSE3_track = np.ones((6,1))
+wSE3_track = 50 * np.ones((6,1))
 wv_reg = 1e-7 * np.vstack([ np.zeros((dynamics.nv(),1)),
                             np.ones((dynamics.nv(),1)) ])
 wu_reg = 1e-7 * np.ones((dynamics.nu(),1))
@@ -75,7 +76,16 @@ frameRef = \
                      robot.model.getFrameId('base_link'))
 Xref = [x0 for i in xrange(len(timeline))]
 Uref = [u0 for i in xrange(len(timeline))]
-Mref = [frameRef for i in xrange(len(timeline))]
+Mref = []
+t = 0.
+for i in xrange(len(timeline)):
+  t += 1e-3
+  M = crocoddyL.costs.SE3Task(
+    se3.SE3(np.eye(3),
+            np.array([ [0.2 * math.sin(2 * math.pi * t * 4)],[0.],[0.] ])),
+            robot.model.getFrameId('base_link'))
+  Mref.append(M)
+# Mref = [frameRef for i in xrange(len(timeline))]
 # Cref = [com_des for i in xrange(len(timeline)-1)]
 ddpModel.setTerminalReference(ddpData, Mref[-1], "se3_goal")
 ddpModel.setRunningReference(ddpData, Mref[:-1], "se3_track")
