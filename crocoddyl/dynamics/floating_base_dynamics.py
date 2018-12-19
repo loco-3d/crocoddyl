@@ -143,9 +143,18 @@ class FloatingBaseMultibodyDynamics(DynamicModel):
           se3.ReferenceFrame.LOCAL)[:self.contactInfo.nc,:]
 
       # Mapping the reference acceleration into the local frame
-      dynamicData.a_ref[self.contactInfo.nc*k:
-                        self.contactInfo.nc*(k+1)] = \
-        se3.getFrameAcceleration(self.pinocchio, dynamicData.pinocchio, frame_id).linear#vector
+      # TODO define a good interface for contact phase and then remove this hard
+      # coded if-rule
+      if self.contactInfo.nc == 3:
+        dynamicData.a_ref[self.contactInfo.nc*k:
+                          self.contactInfo.nc*(k+1)] = \
+          se3.getFrameAcceleration(self.pinocchio, dynamicData.pinocchio, frame_id).linear
+      elif nc == 6:
+        dynamicData.a_ref[self.contactInfo.nc*k:
+                          self.contactInfo.nc*(k+1)] = \
+          se3.getFrameAcceleration(self.pinocchio, dynamicData.pinocchio, frame_id).vector
+      else:
+        print "nc has to be equals to 3 or 6"
 
     se3.forwardDynamics(self.pinocchio,
                         dynamicData.pinocchio,
