@@ -70,22 +70,21 @@ ddpModel.setInitial(ddpData, xInit=x0, UInit=U0)
 
 # Setting up the desired reference for each single cost function
 # com_des = np.matrix([ [0.1], [0.], [0.] ])
-frameRef = \
-  crocoddyl.costs.SE3Task(se3.SE3(np.eye(3),
-                     np.array([[0.1],[0.],[0.]])),
-                     robot.model.getFrameId('base_link'))
+baseRef = crocoddyl.costs.SE3Task(
+    se3.SE3(np.eye(3), np.array([[0.1],[0.],[0.]])),
+    robot.model.getFrameId('base_link'))
 Xref = [x0 for i in xrange(len(timeline))]
 Uref = [u0 for i in xrange(len(timeline))]
 Mref = []
 t = 0.
 for i in xrange(len(timeline)):
   t += 1e-3
+  p = np.array([ [0.2 * math.sin(2 * math.pi * t * 4)],[0.],[0.] ])
   M = crocoddyl.costs.SE3Task(
-    se3.SE3(np.eye(3),
-            np.array([ [0.2 * math.sin(2 * math.pi * t * 4)],[0.],[0.] ])),
-            robot.model.getFrameId('base_link'))
+    se3.SE3(np.eye(3), p),
+    robot.model.getFrameId('base_link'))
   Mref.append(M)
-# Mref = [frameRef for i in xrange(len(timeline))]
+# Mref = [baseRef for i in xrange(len(timeline))]
 # Cref = [com_des for i in xrange(len(timeline)-1)]
 ddpModel.setTerminalReference(ddpData, Mref[-1], "se3_goal")
 ddpModel.setRunningReference(ddpData, Mref[:-1], "se3_track")
