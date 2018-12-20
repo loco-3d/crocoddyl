@@ -1,6 +1,7 @@
 import crocoddyl
 import numpy as np
 import pinocchio as se3
+import math
 import os
 
 
@@ -29,12 +30,21 @@ dynamics = crocoddyl.FloatingBaseMultibodyDynamics(integrator, discretizer,
 
 # Defining the SE3 task, the joint velocity and control regularizations
 wSE3_term = 1e3 * np.ones((6,1))
-wSE3_track = np.ones((6,1))
-wv_reg = 1e-7 * np.vstack([ np.zeros((dynamics.nv(),1)),
-                            np.ones((dynamics.nv(),1)) ])
+wSE3_track = 50. * np.ones((6,1))
+wSO3_reg = 0.*1e-3 * np.ones((3,1))
+q_ref = 1e-2 * np.array([0., 0., 0., 0., 0., 0.,                  # ff
+                         1., 1., 1., 1., 1., 1.,                  # leg left
+                         1., 1., 1., 1., 1., 1.,                  # leg right,
+                         100., 100.,                              # torso
+                         100., 100., 100., 5., 10., 10., 10., 1., # arm left
+                         100., 100., 100., 5., 10., 10., 10., 1., # arm right
+                         100., 100.,                              # head
+                        ]).reshape((dynamics.nv(),1))
+wv_reg = np.vstack([ q_ref, 1e-7 * np.ones((dynamics.nv(),1)) ])
 wu_reg = 1e-7 * np.ones((dynamics.nu(),1))
 se3_track = crocoddyl.SE3Cost(dynamics, wSE3_track)
 se3_goal = crocoddyl.SE3Cost(dynamics, wSE3_term)
+# so3_reg = crocoddyl.SO3Cost(dynamics, wSO3_reg)
 v_reg = crocoddyl.StateCost(dynamics, wv_reg)
 u_reg = crocoddyl.ControlCost(dynamics, wu_reg)
 # w_com = 1e3 * np.ones((3,1))
@@ -44,22 +54,19 @@ u_reg = crocoddyl.ControlCost(dynamics, wu_reg)
 costManager = crocoddyl.CostManager()
 costManager.addTerminal(se3_goal, "se3_goal")
 costManager.addRunning(se3_track, "se3_track")
+# costManager.addRunning(so3_reg, "so3_reg")
 costManager.addRunning(v_reg, "v_reg")
 costManager.addRunning(u_reg, "u_reg")
 #costManager.addRunning(com_cost)
 
 
 # Setting up the DDP problem
-timeline = np.arange(0.0, 0.25, 1e-3)  # np.linspace(0., 0.5, 51)
+timeline = np.arange(0.0, 0.25, 1e-3)
 ddpModel = crocoddyl.DDPModel(dynamics, costManager)
 ddpData = crocoddyl.DDPData(ddpModel, timeline)
 
 # Setting up the initial conditions
 q0 = robot.q0
-# q0[7:] = np.matrix([0., 0.75, -1.5,
-#                     0., -0.75, 1.5,
-#                     0., 0.75, -1.5,
-#                     0., -0.75, 1.5]).transpose()
 x0 = np.vstack([q0, np.zeros((dynamics.nv(), 1))])
 u0 = np.zeros((dynamics.nu(), 1))
 U0 = [u0 for i in xrange(len(timeline)-1)]
@@ -67,16 +74,28 @@ ddpModel.setInitial(ddpData, xInit=x0, UInit=U0)
 
 # Setting up the desired reference for each single cost function
 # com_des = np.matrix([ [0.1], [0.], [0.] ])
-frameRef = \
-  crocoddyl.costs.SE3Task(se3.SE3(np.eye(3),
-                     np.array([[0.],[0.05],[0.]])),
-                     robot.model.getFrameId('base_link'))
+baseRef = crocoddyl.costs.SE3Task(
+    se3.SE3(np.eye(3), np.array([[0.],[0.1],[0.]])),
+    robot.model.getFrameId('base_link'))
+# bodyRef = \
+#   crocoddyl.costs.SO3Task(np.eye(3), robot.model.getFrameId('torso_1_link'))
 Xref = [x0 for i in xrange(len(timeline))]
 Uref = [u0 for i in xrange(len(timeline))]
-Mref = [frameRef for i in xrange(len(timeline))]
+oMb_ref = []
+t = 0.
+for i in xrange(len(timeline)):
+  t += 1e-3
+  p = np.array([ [0.],[0.1 * math.sin(2 * math.pi * t * 4)],[0.] ])
+  M = crocoddyl.costs.SE3Task(
+    se3.SE3(np.eye(3), p),
+    robot.model.getFrameId('base_link'))
+  oMb_ref.append(M)
+# oMb_ref = [baseRef for i in xrange(len(timeline))]
+# oMt_ref = [bodyRef for i in xrange(len(timeline))]
 # Cref = [com_des for i in xrange(len(timeline)-1)]
-ddpModel.setTerminalReference(ddpData, Mref[-1], "se3_goal")
-ddpModel.setRunningReference(ddpData, Mref[:-1], "se3_track")
+ddpModel.setTerminalReference(ddpData, oMb_ref[-1], "se3_goal")
+ddpModel.setRunningReference(ddpData, oMb_ref[:-1], "se3_track")
+# ddpModel.setRunningReference(ddpData, oMt_ref[:-1], "so3_reg")
 ddpModel.setRunningReference(ddpData, Xref[:-1], "v_reg")
 
 
