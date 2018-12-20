@@ -149,7 +149,7 @@ class FloatingBaseMultibodyDynamics(DynamicModel):
         dynamicData.a_ref[self.contactInfo.nc*k:
                           self.contactInfo.nc*(k+1)] = \
           se3.getFrameAcceleration(self.pinocchio, dynamicData.pinocchio, frame_id).linear
-      elif nc == 6:
+      elif self.contactInfo.nc == 6:
         dynamicData.a_ref[self.contactInfo.nc*k:
                           self.contactInfo.nc*(k+1)] = \
           se3.getFrameAcceleration(self.pinocchio, dynamicData.pinocchio, frame_id).vector
