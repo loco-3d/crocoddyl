@@ -22,7 +22,7 @@ class SE3RunningData(RunningQuadraticCostData):
 
 
 class SE3Cost(RunningQuadraticCost):
-  """ CoM tracking cost.
+  """ SE3 tracking cost.
 
   An important remark here is that the residual only depends on the state.
   The gradient and Hessian of the cost w.r.t. the control remains zero. So, for
@@ -44,7 +44,7 @@ class SE3Cost(RunningQuadraticCost):
     """
     costData.rMf = costData.oMr_inv * dynamicData.pinocchio.oMf[costData.frame_idx]
 
-  def updateResidual(self, costData, dynamicData, x, u):
+  def updateResidual(self, costData, dynamicData, x=None, u=None):
     """ Update the residual vector.
 
     The SE3 error is mapped from the manifold to the algebra through the log
@@ -58,9 +58,9 @@ class SE3Cost(RunningQuadraticCost):
     self.updateSE3error(costData, dynamicData)
     # Maping the element from the manifold to the algebra
     np.copyto(costData.r,
-        se3.log(costData.rMf).vector)
+      se3.log(costData.rMf).vector)
 
-  def updateResidualLinearAppr(self, costData, dynamicData, x, u):
+  def updateResidualLinearAppr(self, costData, dynamicData, x=None, u=None):
     """ Update the linear approximation of the residual.
 
     This correspondence to the local Jacobian expressed in the reference frame
@@ -70,10 +70,10 @@ class SE3Cost(RunningQuadraticCost):
     """
     self.updateSE3error(costData, dynamicData)
     costData.rx[:,:self.dynamicModel.nv()] = \
-        costData.rMf.action * \
-        se3.getFrameJacobian(self.dynamicModel.pinocchio,
-                             dynamicData.pinocchio,
-                             costData.frame_idx, se3.ReferenceFrame.LOCAL)
+      costData.rMf.action * \
+      se3.getFrameJacobian(self.dynamicModel.pinocchio,
+                           dynamicData.pinocchio,
+                           costData.frame_idx, se3.ReferenceFrame.LOCAL)
 
   def updateQuadraticAppr(self, costData, dynamicData, x, u):
     # We overwrite this function since this residual function only depends on
