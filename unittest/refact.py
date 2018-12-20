@@ -219,11 +219,11 @@ class StateUnicycle:
         '''
         # x1 = oM1 , x2 = oM2
         # dx = 1M2 = oM1^-1 oM2 = (R(th2-th1)  R(-th1) (p2-p1))
-        #    = (c1 da - s1 db, s1 da + c1 db, th2-th1)
+        #    = (c1 da + s1 db, -s1 da + c1 db, th2-th1)
         c1,s1 = x1[2:]
         c2,s2 = x2[2:]
         da,db = x2[:2] - x1[:2] 
-        return np.array([ da*c1-db*s1, da*s1+db*c1, arctan2(c1*s2-s1*c2 ,c1*c2+s1*s2 ) ])
+        return np.array([ da*c1+db*s1, -da*s1+db*c1, arctan2(-s1*c2+c1*s2 ,c1*c2+s1*s2 ) ])
     def integrate(self,x,dx):
         '''
         x2 = oM1(x) 1M2(dx) =  oM1 exp(^1 v_dx) = oM_{x+dx}.
@@ -234,7 +234,7 @@ class StateUnicycle:
         c2,s2 = cos(dx[2]),sin(dx[2])
         a,b = x[:2]
         da,db  = dx[:2]
-        return np.array([ a+c1*da+s1*db, b-s1*da+c1*db, c1*c2-s1*s2, c1*s2+s1*c2 ])
+        return np.array([ a+c1*da-s1*db, b+s1*da+c1*db, c1*c2-s1*s2, c1*s2+s1*c2 ])
     def Jdiff(self,x1,x2,firstsecond='both'):
         '''
         Return the "jacobian" i.e. the tangent map of diff with respect to the 
@@ -243,18 +243,18 @@ class StateUnicycle:
         Jdiff1 = (diff(x1+dx,x2) - diff(x1,x2)) / dx.
         
         diff2(x) = diff(y,x) = log(y^-1x) = log(yx) with yx = y^-1 x = x in y frame.
-        diff2(x+dx) = log(yx dx) = ( a + c da + s db, b - s da + c db, th+dth )
+        diff2(x+dx) = log(yx dx) = ( a + c da - s db, b + s da + c db, th+dth )
         with yx = a,b,th and dx = da,db,dth
-        Jdiff2 = d(diff2)/d(dx) = [ c s 0 ; -s c 0 ; 0 0 1 ].
+        Jdiff2 = d(diff2)/d(dx) = [ c -s 0 ; s c 0 ; 0 0 1 ].
         '''
         assert(firstsecond in ['first', 'second', 'both' ])
         if firstsecond == 'both': return [ self.Jdiff(x1,x2,'first'),
                                            self.Jdiff(x1,x2,'second') ]
         a,b,th = self.diff(x1,x2); c,s = cos(th),sin(th)
         if firstsecond == 'second':
-            return np.array([ [ c,s,0 ],[ -s,c,0 ],[ 0,0,1 ] ])
+            return np.array([ [ c,-s,0 ],[ +s,c,0 ],[ 0,0,1 ] ])
         elif firstsecond == 'first': 
-            return np.array([ [ -1,0,-b ],[ 0,-1,a ],[ 0,0,-1 ] ])
+            return np.array([ [ -1,0,b ],[ 0,-1,-a ],[ 0,0,-1 ] ])
     def Jintegrate(self,x,v,firstsecond='both'):
         '''
         Return the "jacobian" i.e. the tangent map of diff with respect to the 
@@ -267,32 +267,32 @@ class StateUnicycle:
                                            self.Jintegrate(x,v,'second') ]
         a,b,th = v; c,s = cos(th),sin(th)
         if firstsecond == 'second':
-            return np.array([ [ c,-s,0 ],[ s,c,0 ],[ 0,0,1 ] ])
+            return np.array([ [ c,s,0 ],[ -s,c,0 ],[ 0,0,1 ] ])
         elif firstsecond == 'first': 
-            return np.array([ [ c,-s,c*b+s*a ],[ s,c,s*b-c*a ],[ 0,0,1 ] ])
+            return np.array([ [ c,s,-c*b+s*a ],[ -s,c,s*b+c*a ],[ 0,0,1 ] ])
     
     #for debug
     @staticmethod
     def x2m(x):
         a,b,c,s = x
         return np.array([
-            [ c,s,a ],
-            [-s,c,b ],
-            [ 0,0,1 ] ])
+            [ c,-s,a ],
+            [ s, c,b ],
+            [ 0, 0,1 ] ])
     @staticmethod
     def dx2m(x):
         a,b,th = x
         c,s = cos(th),sin(th)
         return np.array([
-            [ c,s,a ],
-            [-s,c,b ],
-            [ 0,0,1 ] ])
+            [ c,-s,a ],
+            [ s, c,b ],
+            [ 0, 0,1 ] ])
     @staticmethod
     def m2x(m):
-        return np.array([ m[0,2],m[1,2],m[0,0],m[0,1] ])
+        return np.array([ m[0,2],m[1,2],m[0,0],m[1,0] ])
     @staticmethod
     def m2dx(m):
-        return np.array([ m[0,2],m[1,2],arctan2(m[0,1],m[0,0]) ])
+        return np.array([ m[0,2],m[1,2],arctan2(m[1,0],m[0,0]) ])
 
 X = StateUnicycle()
 x1 = X.rand()
@@ -378,27 +378,6 @@ Jnum1,Jnum2 = Xnum.Jintegrate(x,vx)
 assert(norm(J1-Jnum1)<10*Xnum.disturbance)
 assert(norm(J2-Jnum2)<10*Xnum.disturbance)
 
-
-
-
-from sympy import Matrix,Symbol
-a = Symbol('a')
-b = Symbol('b')
-c = Symbol('c')
-s = Symbol('s')
-da = Symbol('da')
-db = Symbol('db')
-dc = Symbol('dc')
-ds = Symbol('ds')
-DR = Matrix([ [dc,ds],[-ds,dc] ])
-DP = Matrix([ da,db ])
-Di = DR.T.row_join(-DR.T*DP).col_join(Matrix([[0,0,1]]))
-XY = Matrix([ [c,s,a],[-s,c,b],[0,0,1] ])
-
-
-dot = np.dot; inv=np.linalg.inv
-stophere
-
 class ActionModelUnicycleVar:
     def __init__(self):
         '''
@@ -423,12 +402,14 @@ class ActionModelUnicycleVar:
         assert(x.shape == (model.nx,) and u.shape == (model.nu,) )
         assert(data.xnext.shape == (model.nx,))
         assert(data.costResiduals.shape == (model.ncost,))
-        v,w = u
-        c,s = x[2:]
-        dx = np.array([ v*c, v*s, w ])
-        c2,s2 = cos(w*model.dt),sin(w*model.dt)
-        data.xnext[:] = [ x[0]+c*v*model.dt, x[1]-s*v*model.dt, c*c2-s*s2, c*s2+s*c2 ]
-        data.costResiduals[:3]  = model.costWeights[0]*model.State.diff(x,model.xref)
+        #v,w = u
+        #c,s = x[2:]
+        #dx = np.array([ v*c, v*s, w ])
+        #c2,s2 = cos(w*model.dt),sin(w*model.dt)
+        #data.xnext[:] = [ x[0]+c*v*model.dt, x[1]-s*v*model.dt, c*c2-s*s2, c*s2+s*c2 ]
+        dx = np.array([u[0],0,u[1]])*model.dt
+        data.xnext[:] = model.State.integrate(x,dx)
+        data.costResiduals[:3]  = model.costWeights[0]*model.State.diff(model.xref,x)
         data.costResiduals[3:5] = model.costWeights[1]*u
         data.cost = .5* sum(data.costResiduals**2)
         return data.xnext,data.cost
@@ -436,23 +417,21 @@ class ActionModelUnicycleVar:
     def calcDiff(model,data,x,u=None):
         if u is None: u=model.unone
         xnext,cost = model.calc(data,x,u)
-
+        nx,ndx,nu = model.nx,model.ndx,model.nu
+        
         ### Cost derivatives
-        data.L[:] = np.diag( [model.costWeights[0]]*model.ndx + [model.costWeights[1]]*model.nu )
-        data.Lx[:] = x * ([model.costWeights[0]**2]*model.ndx )
-        data.Lu[:] = u * ([model.costWeights[1]**2]*model.nu )
-        np.fill_diagonal(data.Lxx,model.costWeights[0]**2)
-        np.fill_diagonal(data.Luu,model.costWeights[1]**2)
+        data.R[:ndx,:ndx] = model.costWeights[0] * model.State.Jdiff(model.xref,x,'second')
+        data.R[ndx:,ndx:] = np.diag([ model.costWeights[1] ]*nu ) 
+        data.g[:] = np.dot(data.R.T,data.costResiduals)
+        data.L[:,:] = np.dot(data.R.T,data.R)
 
         ### Dynamic derivatives
-        c,s,dt = x[2:],model.dt
-        v,w = u
-        data.Fx[:] = [ [ 1, 0, -s*v*dt ],
-                       [ 0, 1,  c*v*dt ],
-                       [ 0, 0,  1      ] ]
-        data.Fu[:] = [ [ c*model.dt,       0  ],
-                       [ s*model.dt,       0  ],
-                       [          0, model.dt ] ]
+        dx = np.array([u[0],0,u[1]])*model.dt
+        Jx,Ju = model.State.Jintegrate(x,dx)
+        data.Fx[:] = Jx
+        data.Fu[:,0] = Ju[:,0]*model.dt
+        data.Fu[:,1] = Ju[:,2]*model.dt
+
         return xnext,cost
         
 class ActionDataUnicycleVar:
@@ -461,11 +440,14 @@ class ActionDataUnicycleVar:
         self. L = np.zeros([ ndx+nu, ndx+nu ])
         self. g = np.zeros([ ndx+nu ])
         self. F = np.zeros([ ndx,ndx+nu ])
-
+        self. R = np.zeros([ ncost,ndx+nu ]) # Residual jacobian
+        
         self. cost  = np.nan
         self. xnext = np.zeros([ nx ])
         self. costResiduals = np.zeros([ ncost ])  # Might be use for numdiff (Gauss-Newton appox)
-        
+
+        self.Rx = self.R[:,:ndx]
+        self.Ru = self.R[:,ndx:]
         self.Lxx = self.L[:ndx,:ndx]
         self.Lxu = self.L[:ndx,ndx:]
         self.Lux = self.L[ndx:,:ndx]
@@ -476,17 +458,6 @@ class ActionDataUnicycleVar:
         self.Fu = self.F[:,ndx:]
 
 
-model = ActionModelUnicycleVar()
-data = model.createData()
-
-x0 = model.State.rand()
-u0 = np.random.rand(model.nu)
-x1 = model.calc(data,x0,u0)[0]
-
-x1bis = X.m2x(np.dot(X.x2m(x0),X.dx2m([u0[0]*model.dt,0,u0[1]*model.dt])))
-assert(norm(x1bis-x1)<1e-9)
-stophere
-        
 # ---------------------------------------------------
 # ---------------------------------------------------
 # ---------------------------------------------------
@@ -495,6 +466,7 @@ class ActionModelNumDiff:
     def __init__(self,model,withGaussApprox=False):
         self.model0 = model
         self.nx = model.nx
+        self.ndx = model.ndx
         self.nu = model.nu
         self.State = model.State
         self.disturbance = 1e-5
@@ -509,14 +481,16 @@ class ActionModelNumDiff:
         xn0,c0 = model.calc(data,x,u)
         h = model.disturbance
         dist = lambda i,n,h: np.array([ h if ii==i else 0 for ii in range(n) ])
-        for ix in range(model.nx):
-            xn,c = model.model0.calc(data.datax[ix],x+dist(ix,model.nx,h),u)
-            data.Fx[:,ix] = (model.State.diff(xn0,xn))/h
+        Xint  = lambda x,dx: model.State.integrate(x,dx)
+        Xdiff = lambda x1,x2: model.State.diff(x1,x2)
+        for ix in range(model.ndx):
+            xn,c = model.model0.calc(data.datax[ix],Xint(x,dist(ix,model.ndx,h)),u)
+            data.Fx[:,ix] = Xdiff(xn0,xn)/h
             data.Lx[  ix] = (c-c0)/h
             if model.ncost>1: data.Rx[:,ix] = (data.datax[ix].costResiduals-data.data0.costResiduals)/h
         for iu in range(model.nu):
             xn,c = model.model0.calc(data.datau[iu],x,u+dist(iu,model.nu,h))
-            data.Fu[:,iu] = model.State.diff(xn0,xn)/h
+            data.Fu[:,iu] = Xdiff(xn0,xn)/h
             data.Lu[  iu] = (c-c0)/h
             if model.ncost>1: data.Ru[:,iu] = (data.datau[iu].costResiduals-data.data0.costResiduals)/h
         if model.withGaussApprox:
@@ -528,23 +502,23 @@ class ActionModelNumDiff:
             
 class ActionDataNumDiff:
     def __init__(self,model):
-        nx,nu,ncost = model.nx,model.nu,model.ncost
+        nx,ndx,nu,ncost = model.nx,model.ndx,model.nu,model.ncost
         self.data0 = model.model0.createData()
-        self.datax = [ model.model0.createData() for i in range(model.nx) ]
-        self.datau = [ model.model0.createData() for i in range(model.nu) ]
-        self.Lx = np.zeros([ model.nx ])
+        self.datax = [ model.model0.createData() for i in range(model.ndx) ]
+        self.datau = [ model.model0.createData() for i in range(model.nu ) ]
+        self.Lx = np.zeros([ model.ndx ])
         self.Lu = np.zeros([ model.nu ])
-        self.Fx = np.zeros([ model.nx,model.nx ])
-        self.Fu = np.zeros([ model.nx,model.nu ])
+        self.Fx = np.zeros([ model.ndx,model.ndx ])
+        self.Fu = np.zeros([ model.ndx,model.nu  ])
         if model.ncost >1 :
-            self.Rx = np.zeros([model.ncost,model.nx])
-            self.Ru = np.zeros([model.ncost,model.nu])
+            self.Rx = np.zeros([model.ncost,model.ndx])
+            self.Ru = np.zeros([model.ncost,model.nu ])
         if model.withGaussApprox:
-            self. L = np.zeros([ nx+nu, nx+nu ])
-            self.Lxx = self.L[:nx,:nx]
-            self.Lxu = self.L[:nx,nx:]
-            self.Lux = self.L[nx:,:nx]
-            self.Luu = self.L[nx:,nx:]
+            self. L = np.zeros([ ndx+nu, ndx+nu ])
+            self.Lxx = self.L[:ndx,:ndx]
+            self.Lxu = self.L[:ndx,ndx:]
+            self.Lux = self.L[ndx:,:ndx]
+            self.Luu = self.L[ndx:,ndx:]
             
 if __name__ == '__main__':
     X=StateVector(3)
@@ -573,6 +547,49 @@ if __name__ == '__main__':
     assert( norm(dnum.Lxx-data.Lxx) < 10*mnum.disturbance )
     assert( norm(dnum.Lxu-data.Lxu) < 10*mnum.disturbance )
     assert( norm(dnum.Luu-data.Luu) < 10*mnum.disturbance )
+
+
+if __name__ == '__main__':
+    # Numdiff unittest of unicycle manifold
+    model = ActionModelUnicycleVar()
+    data = model.createData()
+    X = model.State
+
+    x0 = model.State.rand()
+    u0 = np.random.rand(model.nu)
+    x1 = model.calc(data,x0,u0)[0]
+
+    x1bis = X.m2x(np.dot(X.x2m(x0),X.dx2m([u0[0]*model.dt,0,u0[1]*model.dt])))
+    assert(norm(x1bis-x1)<1e-9)
+
+    model3 = ActionModelUnicycle()
+    data3 = model3.createData()
+
+    x = X.rand()
+    u = np.random.rand(model.nu)
+    x3 = X.diff(X.zero(),x)
+
+    xnext ,cost  = model .calc(data ,x ,u)
+    xnext3,cost3 = model3.calc(data3,x3,u)
+    assert( norm( X.integrate(X.zero(),xnext3) - xnext) <1e-9)
+    assert( abs(cost-cost3) <1e-9)
+
+    model.calcDiff(data,x0,u0)
+
+    mnum = ActionModelNumDiff(model,withGaussApprox=True)
+    dnum = mnum.createData()
+
+    model.calcDiff(data,x,u)
+    mnum .calcDiff(dnum,x,u)
+
+    dx = np.array([u[0],0,u[1]])
+
+    def diff(m,d,x,u): m.calcDiff(d,x,u); return d.Fu
+    da = lambda x,v,w: diff(model,data,x,np.array([v,w]))
+    dn = lambda x,v,w: diff(mnum, dnum,x,np.array([v,w]))
+    
+    for k in ['Ru', 'Lxu', 'Fu', 'Fx', 'Rx', 'L', 'Lxx', 'Lux', 'Lu', 'Lx', 'Luu']:
+        assert( norm( data.__dict__[k] - dnum.__dict__[k] ) < mnum.disturbance*10 )
 
 # ---------------------------------------------------
 # ---------------------------------------------------
