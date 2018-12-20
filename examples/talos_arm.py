@@ -25,7 +25,7 @@ wSE3_goal = np.ones((6,1))
 wSE3_track = 1e-3 * np.ones((6,1))
 wv_reg = 1e-7 * np.vstack([ np.zeros((dynamics.nv(),1)),
                             np.ones((dynamics.nv(),1)) ])
-wu_reg = 0.*1e-7 * np.ones((dynamics.nu(),1))
+wu_reg = 1e-7 * np.ones((dynamics.nu(),1))
 se3_goal = crocoddyl.SE3Cost(dynamics, wSE3_goal)
 se3_track = crocoddyl.SE3Cost(dynamics, wSE3_track)
 v_reg = crocoddyl.StateCost(dynamics, wv_reg)
