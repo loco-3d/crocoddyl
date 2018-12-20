@@ -633,26 +633,27 @@ class SolverKKT:
     def __init__(self,shootingProblem):
         self.problem = shootingProblem
     
-        self.nx = sum([ m.nx for m in problem.runningModels + [ problem.terminalModel ] ])
-        self.nu = sum([ m.nu for m in problem.runningModels  ])
+        self.nx  = sum([ m.nx  for m in problem.runningModels + [ problem.terminalModel ] ])
+        self.ndx = sum([ m.ndx for m in problem.runningModels + [ problem.terminalModel ] ])
+        self.nu  = sum([ m.nu  for m in problem.runningModels  ])
 
-        self.kkt    = np.zeros([ 2*self.nx+self.nu, 2*self.nx+self.nu ])
-        self.kktref = np.zeros( 2*self.nx+self.nu )
+        self.kkt    = np.zeros([ 2*self.ndx+self.nu, 2*self.ndx+self.nu ])
+        self.kktref = np.zeros(  2*self.ndx+self.nu )
 
-        self.hess   = self.kkt[:self.nx+self.nu,:self.nx+self.nu]
-        self.jac    = self.kkt[self.nx+self.nu:,:self.nx+self.nu]
-        self.jacT   = self.kkt[:self.nx+self.nu,self.nx+self.nu:]
-        self.grad   = self.kktref[:self.nx+self.nu]
-        self.cval   = self.kktref[self.nx+self.nu:]
+        self.hess   = self.kkt[:self.ndx+self.nu,:self.ndx+self.nu]
+        self.jac    = self.kkt[self.ndx+self.nu:,:self.ndx+self.nu]
+        self.jacT   = self.kkt[:self.ndx+self.nu,self.ndx+self.nu:]
+        self.grad   = self.kktref[:self.ndx+self.nu]
+        self.cval   = self.kktref[self.ndx+self.nu:]
 
-        self.Lxx    = self.hess[:self.nx,:self.nx]
-        self.Lxu    = self.hess[:self.nx,self.nx:]
-        self.Lux    = self.hess[self.nx:,:self.nx]
-        self.Luu    = self.hess[self.nx:,self.nx:]
-        self.Lx     = self.grad[:self.nx]
-        self.Lu     = self.grad[self.nx:]
-        self.Fx     = self.jac[:,:self.nx]
-        self.Fu     = self.jac[:,self.nx:]
+        self.Lxx    = self.hess[:self.ndx,:self.ndx]
+        self.Lxu    = self.hess[:self.ndx,self.ndx:]
+        self.Lux    = self.hess[self.ndx:,:self.ndx]
+        self.Luu    = self.hess[self.ndx:,self.ndx:]
+        self.Lx     = self.grad[:self.ndx]
+        self.Lu     = self.grad[self.ndx:]
+        self.Fx     = self.jac[:,:self.ndx]
+        self.Fu     = self.jac[:,self.ndx:]
 
         self.alphas = [ 10**(-n) for n in range(7) ]
         self.th_acceptStep = .1
@@ -689,30 +690,30 @@ class SolverKKT:
         problem = self.problem
         self.cost = problem.calcDiff(xs,us)
         ix = 0; iu = 0
-        cx0 = problem.runningModels[0].nx  # offset on constraint xnext = f(x,u) due to x0 = ref.
-        #for i in range(self.nx): self.Fx[i,i] = 1
+        cx0 = problem.runningModels[0].ndx  # offset on constraint xnext = f(x,u) due to x0 = ref.
+
         np.fill_diagonal(self.Fx,1)
         for model,data,xguess in zip(problem.runningModels,problem.runningDatas,xs[1:]):
-            nx = model.nx; nu = model.nu
-            self.Lxx[ix:ix+nx,ix:ix+nx] = data.Lxx
-            self.Lxu[ix:ix+nx,iu:iu+nu] = data.Lxu
-            self.Lux[iu:iu+nu,ix:ix+nx] = data.Lxu.T
-            self.Luu[iu:iu+nu,iu:iu+nu] = data.Luu
+            ndx = model.ndx; nu = model.nu
+            self.Lxx[ix:ix+ndx,ix:ix+ndx] = data.Lxx
+            self.Lxu[ix:ix+ndx,iu:iu+nu ] = data.Lxu
+            self.Lux[iu:iu+nu ,ix:ix+ndx] = data.Lxu.T
+            self.Luu[iu:iu+nu ,iu:iu+nu ] = data.Luu
 
-            self.Lx[ix:ix+nx]           = data.Lx
-            self.Lu[iu:iu+nu]           = data.Lu
+            self.Lx[ix:ix+ndx]           = data.Lx
+            self.Lu[iu:iu+nu ]           = data.Lu
             
-            self.Fx[cx0+ix:cx0+ix+nx,ix:ix+nx] = - data.Fx
-            self.Fu[cx0+ix:cx0+ix+nx,iu:iu+nu] = - data.Fu
+            self.Fx[cx0+ix:cx0+ix+ndx,ix:ix+ndx] = - data.Fx
+            self.Fu[cx0+ix:cx0+ix+ndx,iu:iu+nu ] = - data.Fu
 
             # constraint value = xnext_guess - f(x_guess,u_guess) = diff(f,xnext_guesss)
-            self.cval[cx0+ix:cx0+ix+nx] = model.State.diff(data.xnext,xguess) #data.F
-            ix += nx; iu += nu
+            self.cval[cx0+ix:cx0+ix+ndx] = model.State.diff(data.xnext,xguess) #data.F
+            ix += ndx; iu += nu
             
         model,data = problem.terminalModel,problem.terminalData
-        nx = model.nx; nu = model.nu
-        self.Lxx[ix:ix+nx,ix:ix+nx] = data.Lxx
-        self.Lx[ix:ix+nx]           = data.Lx
+        ndx = model.ndx; nu = model.nu
+        self.Lxx[ix:ix+ndx,ix:ix+ndx] = data.Lxx
+        self.Lx [ix:ix+ndx]           = data.Lx
 
         # constraint value = x_guess - x_ref = diff(x_ref,x_guess)
         self.cval[:cx0] = problem.runningModels[0].State.diff(problem.initialState,xs[0])
@@ -728,20 +729,20 @@ class SolverKKT:
         '''
         if recalc: self.calc()
         self.primaldual = np.linalg.solve(self.kkt,-self.kktref)
-        self.primal = self.primaldual[:self.nx+self.nu]
-        p_x  = self.primaldual[:self.nx]
-        p_u  = self.primaldual[self.nx:self.nx+self.nu]
-        self.dual = self.primaldual[-self.nx:]
+        self.primal = self.primaldual[:self.ndx+self.nu]
+        p_x  = self.primaldual[:self.ndx]
+        p_u  = self.primaldual[self.ndx:self.ndx+self.nu]
+        self.dual = self.primaldual[-self.ndx:]
         ix = 0; iu = 0
         dxs = []; dus = []; lambdas = []
         for model,data in zip(problem.runningModels,problem.runningDatas):
-            nx = model.nx; nu = model.nu
-            dxs.append( p_x[ix:ix+nx] )
+            ndx = model.ndx; nu = model.nu
+            dxs.append( p_x[ix:ix+ndx] )
             dus.append( p_u[iu:iu+nu] )
-            lambdas.append( self.dual[ix:ix+nx] )
-            ix+=nx; iu+=nu
-        dxs.append( p_x[-problem.terminalModel.nx:] )
-        lambdas.append( self.dual[-problem.terminalModel.nx:] )
+            lambdas.append( self.dual[ix:ix+ndx] )
+            ix+=ndx; iu+=nu
+        dxs.append( p_x[-problem.terminalModel.ndx:] )
+        lambdas.append( self.dual[-problem.terminalModel.ndx:] )
         self.dxs = dxs ; self.dus = dus ; self.lambdas = lambdas
         return dxs,dus,lambdas
 
@@ -1436,4 +1437,57 @@ assert(norm(xddp[0]-problem.initialState)<1e-9)
 for t in range(problem.T):
     assert(norm(ukkt[t]-uddp[t])<1e-6)
     assert(norm(xkkt[t+1]-xddp[t+1])<1e-6)
-    
+
+# --- Test with manifold dynamics
+model = ActionModelUnicycleVar()
+data  = model.createData()
+
+nx  = model.nx
+ndx = model.ndx
+nu  = model.nu
+T = 10
+
+x0ref = np.array([ -1,-1,1,0 ])
+problem = ShootingProblem(x0ref, [ model ]*T, model)
+xs = [ m.State.rand()   for m in problem.runningModels + [problem.terminalModel] ]
+us = [ np.random.rand(nu)     for m in problem.runningModels ]
+
+kkt = SolverKKT(problem)
+kkt.setCandidate(xs,us)
+kkt.computeDirection()
+
+xTOx3 = lambda x : model.State.diff     (model.State.zero(),x)
+x3TOx = lambda x3: model.State.integrate(model.State.zero(),x3)
+
+xs = problem.rollout(us)
+
+model3 = ActionModelUnicycle()
+data3  = model3.createData()
+
+x0ref3 = xTOx3(x0ref)
+problem3 = ShootingProblem(x0ref3, [ model3 ]*T, model3)
+xs3 = [ xTOx3(x) for x in xs ]
+us3 = [ u.copy() for u in us ]
+
+kkt3 = SolverKKT(problem3)
+kkt3.setCandidate(xs3,us3)
+kkt3.computeDirection()
+
+kkt.setCandidate(xs,us)
+kkt.computeDirection()
+
+assert( norm(kkt3.primal[:3]-kkt.primal[:3]) <1e-9 )
+
+kkt.th_stop = 1e-18
+kkt3.th_stop = 1e-18
+x3,u3,d3 = kkt3.solve(maxiter=100,init_xs=xs3,init_us=us3,verbose=False)
+x4,u4,d4 = kkt .solve(maxiter=100,init_xs=xs ,init_us=us,verbose=False)
+assert( d3 and d4 )
+
+assert( norm( X.diff(x4[0],x0ref) ) < 1e-9 )
+assert( norm( x3[0]-x0ref3 ) < 1e-9 )
+for t in range(T):
+    assert( norm( u4[t]-u3[t] ) < 1e-9 )
+    assert( norm( x4[t+1]-x3TOx(x3[t+1]) ) < 1e-9 )
+assert( norm(kkt.primal - kkt3.primal) <1e-9 )
+# Duals are not equals as the jacobians are not the same.
