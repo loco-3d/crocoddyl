@@ -126,7 +126,7 @@ import crocoddyl
 #     # Check the address of the cost data
 #     self.assertEqual(pointer, id(self.r_data), "It has been changed the data address")
 
-class SE3CostTest(unittest.TestCase):
+class SO3CostTest(unittest.TestCase):
   def setUp(self):
     # Getting the robot model from the URDF file. Note that we use the URDF file
     # installed by binary (through sudo-apt install robotpkg-talos-data)
