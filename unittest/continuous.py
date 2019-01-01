@@ -212,12 +212,12 @@ class DifferentialActionModel:
         data.costResiduals[:3] = model.costWeights[0]*(m2a(data.pinocchio.oMf[model.frameIdx].translation) - model.pref)
         data.costResiduals[3:3+model.ndx] = model.costWeights[1]*model.State.diff(model.xref,x)
         data.costResiduals[3+model.ndx:] = model.costWeights[2]*u
-        data.cost = .5*norm(data.costResiduals)
+        data.cost = .5*sum(data.costResiduals**2)
         return data.xout,data.cost
 
-    def calcDiff(model,data,x,u=None):
+    def calcDiff(model,data,x,u=None,recalc=True):
         if u is None: u=model.unone
-        xout,cost = model.calc(data,x,u)
+        if recalc: xout,cost = model.calc(data,x,u)
         nx,ndx,nu,nq,nv,nout = model.nx,model.State.ndx,model.nu,model.nq,model.nv,model.nout
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
@@ -236,8 +236,9 @@ class DifferentialActionModel:
         data.Rx[3:3+ndx,:ndx] = model.costWeights[1]*model.State.Jdiff(model.xref,x,'second')
         data.Ru[3+ndx:,:] = model.costWeights[2]*eye(nu)
         data.L[:,:] = np.dot(data.R.T,data.R)
-        data.grad[:] = np.dot(data.R.T,data.costResiduals)
-            
+        data.g[:] = np.dot(data.R.T,data.costResiduals)
+        return data.xout,data.cost
+
 class DifferentialActionData:
     def __init__(self,model):
         self.pinocchio = model.pinocchio.createData()
@@ -253,9 +254,9 @@ class DifferentialActionData:
         self.Lxu = self.L[:ndx,ndx:]
         self.Lux = self.L[ndx:,:ndx]
         self.Luu = self.L[ndx:,ndx:]
-        self.grad = np.zeros( ndx+nu )
-        self.Lx = self.grad[:nx]
-        self.Lu = self.grad[-nu:]
+        self.g   = np.zeros( ndx+nu )
+        self.Lx = self.g[:nx]
+        self.Lu = self.g[-nu:]
         self.R = np.zeros([ model.ncost,ndx+nu ])
         self.Rx = self.R[:,:ndx]
         self.Ru = self.R[:,-nu:]
@@ -288,7 +289,7 @@ class DifferentialActionModelNumDiff:
     def createData(self):
         return DifferentialActionDataNumDiff(self)
     def calc(model,data,x,u): return model.model0.calc(data.data0,x,u)
-    def calcDiff(model,data,x,u):
+    def calcDiff(model,data,x,u,recalc=True):
         xn0,c0 = model.calc(data,x,u)
         h = model.disturbance
         dist = lambda i,n,h: np.array([ h if ii==i else 0 for ii in range(n) ])
@@ -308,6 +309,7 @@ class DifferentialActionModelNumDiff:
             data.Lxu[:,:] = np.dot(data.Rx.T,data.Ru)
             data.Lux[:,:] = data.Lxu.T
             data.Luu[:,:] = np.dot(data.Ru.T,data.Ru)
+        
             
 class DifferentialActionDataNumDiff:
     def __init__(self,model):
@@ -354,18 +356,41 @@ class IntegratedActionModelEuler:
         self.nv    = self.differential.nv
         self.timeStep = 1e-3
     def createData(self): return IntegratedActionDataEuler(self)
-    def calc(model,data,x,u):
+    def calc(model,data,x,u=None):
         nx,ndx,nu,ncost,nq,nv,dt = model.nx,model.ndx,model.nu,model.ncost,model.nq,model.nv,model.timeStep
         acc,cost = model.differential.calc(data.differential,x,u)
-        data.costResiduals[:] = data.differential.costResiduals[:]*dt
-        data.cost = cost*dt
-        data.xnext[nq:] = x[nq:] + acc*dt
-        data.xnext[:nq] = pinocchio.integrate(model.differential.pinocchio,
-                                              a2m(x[:nq]),a2m(data.xnext[nq:]*dt)).flat
+        data.costResiduals[:] = data.differential.costResiduals[:]
+        data.cost = cost
+        # data.xnext[nq:] = x[nq:] + acc*dt
+        # data.xnext[:nq] = pinocchio.integrate(model.differential.pinocchio,
+        #                                       a2m(x[:nq]),a2m(data.xnext[nq:]*dt)).flat
+        data.dx = np.concatenate([ x[nq:]*dt+acc*dt**2, acc*dt ])
+        data.xnext[:] = model.differential.State.integrate(x,data.dx)
+
         return data.xnext,data.cost
-    def calcDiff(model,data,x,u):
+    def calcDiff(model,data,x,u=None,recalc=True):
         nx,ndx,nu,ncost,nq,nv,dt = model.nx,model.ndx,model.nu,model.ncost,model.nq,model.nv,model.timeStep
+        if recalc: model.calc(data,x,u)
+        model.differential.calcDiff(data.differential,x,u,recalc=False)
+        dxnext_dx,dxnext_ddx = model.State.Jintegrate(x,data.dx)
+        da_dx,da_du = data.differential.Fx,data.differential.Fu
+        '''
+        xnext = x [+] [ v*h + a*h*h; a*h ]
+        dx    =       [ v*h + a*h*h; a*h ]
+        dxnext_dx = d(int(x,dx))_dx + d(int(x,dx))_ddx ddx_dx
+                  = dint_dx  + h*dint_ddx d[v + a*h; a]_dx + h*dint_ddx d[v + ah ; a]_da da_dx
+                  = dint_dx  + h*dint_ddx (   [ 0 I ; 0 0 ] + [ da_dx*h ; da_dx ] )
+        dxnext_du =          h*dint_ddx* [ da_du*h ; da_du ]
+        '''
+        ddx_dx = np.vstack([ da_dx*dt, da_dx ]); ddx_dx[range(nv),range(nv,2*nv)] += 1
+        data.Fx[:,:] = dxnext_dx + dt*np.dot(dxnext_ddx,ddx_dx)
+        ddx_du = np.vstack([ da_du*dt, da_du ])
+        data.Fu[:,:] = dt*np.dot(dxnext_ddx,ddx_du)
+        '''
         
+        '''
+        data.g[:] = data.differential.g
+        data.L[:] = data.differential.L
         
 class IntegratedActionDataEuler:
     def __init__(self,model):
@@ -400,11 +425,59 @@ x = model.State.zero()
 u = np.zeros( model.nu )
 xn,c = model.calc(data,x,u)
 
-stophere
+model.timeStep = 1
+model.differential.costWeights = [1,1,1]
+
+model.calcDiff(data,x,u)
+
+from refact import ActionModelNumDiff
+mnum = ActionModelNumDiff(model,withGaussApprox=True)
+dnum = mnum.createData()
+
+mnum.calcDiff(dnum,x,u)
+assert( norm(data.Fx-dnum.Fx) < np.sqrt(mnum.disturbance)*10 )
+assert( norm(data.Fu-dnum.Fu) < np.sqrt(mnum.disturbance)*10 )
+assert( norm(data.Lx-dnum.Lx) < 10*np.sqrt(mnum.disturbance) )
+assert( norm(data.Lu-dnum.Lu) < 10*np.sqrt(mnum.disturbance) )
+assert( norm(dnum.Lxx-data.Lxx) < 10*np.sqrt(mnum.disturbance) )
+assert( norm(dnum.Lxu-data.Lxu) < 10*np.sqrt(mnum.disturbance) )
+assert( norm(dnum.Luu-data.Luu) < 10*mnum.disturbance )
+
 
 # --- DDP FOR THE ARM ---
+dmodel = DifferentialActionModel(rmodel)
+model  = IntegratedActionModelEuler(dmodel)
+
 from refact import ShootingProblem,SolverKKT,SolverDDP
-problem = ShootingProblem(model.State.zero()+1, [ model, model ], model)
+problem = ShootingProblem(model.State.zero()+1, [ model ], model)
 kkt = SolverKKT(problem)
+kkt.th_stop = 1e-18
+xkkt,ukkt,dkkt = kkt.solve()
+
+ddp = SolverDDP(problem)
+ddp.th_stop = 1e-18
+xddp,uddp,dddp = ddp.solve()
+
+assert( norm(uddp[0]-ukkt[0]) < 1e-6 )
+
+
+# --- DDP INTEGRATIVE TEST
+T = 20
+model.timeStep = 1e-2
+termmodel  = IntegratedActionModelEuler(DifferentialActionModel(rmodel))
+termmodel.differential.costWeights[0] = 1
+termmodel.differential.costWeights[1] = 0.1
+
+x0 = np.concatenate( [m2a(rmodel.neutralConfiguration),np.zeros(rmodel.nv)] )
+model.differential.xref = x0.copy()
+problem = ShootingProblem(x0, [ model ]*T, termmodel)
+ddp = SolverDDP(problem)
+ugrav = m2a(pinocchio.rnea(rmodel,rdata,a2m(problem.initialState[:rmodel.nq]),
+                           a2m(np.zeros(rmodel.nv)),a2m(np.zeros(rmodel.nv))  ))
+
+xddp,uddp,dddp = ddp.solve(verbose=True)
+
+#termmodel.differential.costWeights[0] = 10
+#xddp,uddp,dddp = ddp.solve(verbose=True)
 
 
