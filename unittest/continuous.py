@@ -12,7 +12,7 @@ path = '/home/nmansard/src/cddp/examples/'
 
 urdf = path + 'talos_data/robots/talos_left_arm.urdf'
 robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(urdf, [path] \
-                                                           ,pinocchio.JointModelFreeFlyer() \
+#                                                           ,pinocchio.JointModelFreeFlyer() \
 )
 
 #urdf = path + 'hyq_description/robots/hyq_no_sensors.urdf'
@@ -197,9 +197,11 @@ class DifferentialActionModel:
         self.vref = np.zeros(self.nv)
         self.xref = np.concatenate([ self.qref,self.vref ])
         self.costWeights = [1,.1,.001]
+        self.unone = np.zeros(self.nu)
     def createData(self): return DifferentialActionData(self)
     
-    def calc(model,data,x,u):
+    def calc(model,data,x,u=None):
+        if u is None: u=model.unone
         nx,nu,nq,nv,nout = model.nx,model.nu,model.nq,model.nv,model.nout
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
@@ -213,7 +215,8 @@ class DifferentialActionModel:
         data.cost = .5*norm(data.costResiduals)
         return data.xout,data.cost
 
-    def calcDiff(model,data,x,u):
+    def calcDiff(model,data,x,u=None):
+        if u is None: u=model.unone
         xout,cost = model.calc(data,x,u)
         nx,ndx,nu,nq,nv,nout = model.nx,model.State.ndx,model.nu,model.nq,model.nv,model.nout
         q = a2m(x[:nq])
@@ -336,3 +339,72 @@ assert( norm(data.Fx-dnum.Fx) < thr )
 assert( norm(data.Fu-dnum.Fu) < thr )
 assert( norm(data.Rx-dnum.Rx) < thr )
 assert( norm(data.Ru-dnum.Ru) < thr )
+
+
+# --- INTEGRATION ---
+class IntegratedActionModelEuler:
+    def __init__(self,diffModel):
+        self.differential = diffModel
+        self.State = self.differential.State
+        self.nx    = self.differential.nx
+        self.ndx   = self.differential.ndx
+        self.nu    = self.differential.nu
+        self.ncost = self.differential.ncost
+        self.nq    = self.differential.nq
+        self.nv    = self.differential.nv
+        self.timeStep = 1e-3
+    def createData(self): return IntegratedActionDataEuler(self)
+    def calc(model,data,x,u):
+        nx,ndx,nu,ncost,nq,nv,dt = model.nx,model.ndx,model.nu,model.ncost,model.nq,model.nv,model.timeStep
+        acc,cost = model.differential.calc(data.differential,x,u)
+        data.costResiduals[:] = data.differential.costResiduals[:]*dt
+        data.cost = cost*dt
+        data.xnext[nq:] = x[nq:] + acc*dt
+        data.xnext[:nq] = pinocchio.integrate(model.differential.pinocchio,
+                                              a2m(x[:nq]),a2m(data.xnext[nq:]*dt)).flat
+        return data.xnext,data.cost
+    def calcDiff(model,data,x,u):
+        nx,ndx,nu,ncost,nq,nv,dt = model.nx,model.ndx,model.nu,model.ncost,model.nq,model.nv,model.timeStep
+        
+        
+class IntegratedActionDataEuler:
+    def __init__(self,model):
+        nx,ndx,nu,ncost = model.nx,model.ndx,model.nu,model.ncost
+        self.differential = model.differential.createData()
+
+        self.g = np.zeros([ ndx+nu ])
+        self.R = np.zeros([ ncost ,ndx+nu ])
+        self.L = np.zeros([ ndx+nu,ndx+nu ])
+        self.F = np.zeros([ ndx   ,ndx+nu ])
+        self.xnext = np.zeros([ nx ])
+        self.cost = np.nan
+        self.costResiduals = np.zeros([ ncost ])
+        
+        self.Lxx = self.L[:ndx,:ndx]
+        self.Lxu = self.L[:ndx,ndx:]
+        self.Lux = self.L[ndx:,:ndx]
+        self.Luu = self.L[ndx:,ndx:]
+        self.Lx  = self.g[:ndx]
+        self.Lu  = self.g[ndx:]
+        self.Fx = self.F[:,:ndx]
+        self.Fu = self.F[:,ndx:]
+        self.Rx = self.R[:,:ndx]
+        self.Ru = self.R[:,ndx:]
+
+dmodel = DifferentialActionModel(rmodel)
+ddata  = dmodel.createData()
+model  = IntegratedActionModelEuler(dmodel)
+data   = model.createData()
+
+x = model.State.zero()
+u = np.zeros( model.nu )
+xn,c = model.calc(data,x,u)
+
+stophere
+
+# --- DDP FOR THE ARM ---
+from refact import ShootingProblem,SolverKKT,SolverDDP
+problem = ShootingProblem(model.State.zero()+1, [ model, model ], model)
+kkt = SolverKKT(problem)
+
+
