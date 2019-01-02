@@ -633,10 +633,10 @@ class SolverKKT:
     def __init__(self,shootingProblem):
         self.problem = shootingProblem
     
-        self.nx  = sum([ m.nx  for m in problem.runningModels + [ problem.terminalModel ] ])
-        self.ndx = sum([ m.ndx for m in problem.runningModels + [ problem.terminalModel ] ])
-        self.nu  = sum([ m.nu  for m in problem.runningModels  ])
-
+        self.nx  = sum([ m.nx  for m in self.models() ])
+        self.ndx = sum([ m.ndx for m in self.models() ])
+        self.nu  = sum([ m.nu  for m in self.problem.runningModels ])
+        
         self.kkt    = np.zeros([ 2*self.ndx+self.nu, 2*self.ndx+self.nu ])
         self.kktref = np.zeros(  2*self.ndx+self.nu )
 
@@ -735,14 +735,14 @@ class SolverKKT:
         self.dual = self.primaldual[-self.ndx:]
         ix = 0; iu = 0
         dxs = []; dus = []; lambdas = []
-        for model,data in zip(problem.runningModels,problem.runningDatas):
+        for model,data in zip(self.problem.runningModels,self.problem.runningDatas):
             ndx = model.ndx; nu = model.nu
             dxs.append( p_x[ix:ix+ndx] )
             dus.append( p_u[iu:iu+nu] )
             lambdas.append( self.dual[ix:ix+ndx] )
             ix+=ndx; iu+=nu
-        dxs.append( p_x[-problem.terminalModel.ndx:] )
-        lambdas.append( self.dual[-problem.terminalModel.ndx:] )
+        dxs.append( p_x[-self.problem.terminalModel.ndx:] )
+        lambdas.append( self.dual[-self.problem.terminalModel.ndx:] )
         self.dxs = dxs ; self.dus = dus ; self.lambdas = lambdas
         return dxs,dus,lambdas
 
@@ -1491,3 +1491,6 @@ for t in range(T):
     assert( norm( x4[t+1]-x3TOx(x3[t+1]) ) < 1e-9 )
 assert( norm(kkt.primal - kkt3.primal) <1e-9 )
 # Duals are not equals as the jacobians are not the same.
+
+
+del problem
