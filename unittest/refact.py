@@ -659,6 +659,9 @@ class SolverKKT:
         self.th_acceptStep = .1
         self.th_stop = 1e-9
         self.th_grad = 1e-12
+
+        self.x_reg = 0
+        self.u_reg = 0
         
     def models(self) : return self.problem.runningModels + [self.problem.terminalModel]
     def datas(self) : return self.problem.runningDatas + [self.problem.terminalData]
@@ -719,6 +722,13 @@ class SolverKKT:
         self.cval[:cx0] = problem.runningModels[0].State.diff(problem.initialState,xs[0])
 
         self.jacT[:] = self.jac.T
+
+        # Regularization
+        ndx = sum([ m.ndx for m in self.models() ])
+        nu  = sum([ m.nu  for m in self.problem.runningModels ])
+        if self.x_reg != 0: self.kkt[range(ndx),       range(ndx)       ] += self.x_reg
+        if self.u_reg != 0: self.kkt[range(ndx,ndx+nu),range(ndx,ndx+nu)] += self.u_reg
+                
         return self.cost
     
     def computeDirection(self,recalc=True):
@@ -1025,6 +1035,9 @@ class SolverDDP:
         self.th_acceptStep = .1
         self.th_stop = 1e-9
         self.th_grad = 1e-12
+
+        self.x_reg = 0
+        self.u_reg = 0
         
     def models(self) : return self.problem.runningModels + [self.problem.terminalModel]
     def datas(self) : return self.problem.runningDatas + [self.problem.terminalData]
@@ -1139,6 +1152,9 @@ class SolverDDP:
         xs,us = self.xs,self.us
         self.Vx [-1][:]   = self.problem.terminalData.Lx
         self.Vxx[-1][:,:] = self.problem.terminalData.Lxx
+        if self.x_reg != 0:
+            ndx = self.problem.terminalModel.ndx
+            self.Vxx[-1][range(ndx),range(ndx)] += self.x_reg
         
         for t,(model,data) in rev_enumerate(zip(self.problem.runningModels,self.problem.runningDatas)):
             self.Qxx[t][:,:] = data.Lxx + np.dot(data.Fx.T,np.dot(self.Vxx[t+1],data.Fx))
@@ -1152,12 +1168,24 @@ class SolverDDP:
                 self.Qx [t][:] += np.dot(data.Fx.T,relinearization)
                 self.Qu [t][:] += np.dot(data.Fu.T,relinearization)
 
+            if self.u_reg != 0: self.Quu[t][range(model.nu),range(model.nu)] += self.u_reg
+                
             self.K[t][:,:]   = np.dot(np.linalg.inv(self.Quu[t]),self.Qux[t])
             self.k[t][:]     = np.dot(np.linalg.inv(self.Quu[t]),self.Qu [t])
-            
-            self.Vx [t][:]   = self.Qx [t] - np.dot(self.Qu [t],self.K[t])
+
+            # Vx = Qx - Qu K + .5(- Qxu k - k Qux + k Quu K + K Quu k)
+            # Qxu k = Qxu Quu^+ Qu
+            # Qu  K = Qu Quu^+ Qux = Qxu k
+            # k Quu K = Qu Quu^+ Quu Quu^+ Qux = Qu Quu^+ Qux if Quu^+ = Quu^-1
+            if self.u_reg == 0:
+                self.Vx[t][:] = self.Qx [t] - np.dot(self.Qu [t],self.K[t])
+            else:
+                self.Vx[t][:] = self.Qx [t] - 2*np.dot(self.Qu [t],self.K[t]) \
+                                + np.dot(np.dot(self.k[t],self.Quu[t]),self.K[t])
             self.Vxx[t][:,:] = self.Qxx[t] - np.dot(self.Qxu[t],self.K[t])
-            
+
+            if self.x_reg != 0: self.Vxx[t][range(model.ndx),range(model.ndx)] += self.x_reg
+                
     def forwardPass(self,stepLength,b=None):
         if b is None: b=1
         xs,us = self.xs,self.us
@@ -1494,3 +1522,128 @@ assert( norm(kkt.primal - kkt3.primal) <1e-9 )
 
 
 del problem
+# -------------------------------------------------------------------
+# --- REG -----------------------------------------------------------
+# -------------------------------------------------------------------
+model = ActionModelLQR(1,1); model.setUpRandom()
+action = model.createData()
+nx = model.nx
+nu = model.nu
+T = 1
+
+problem = ShootingProblem(model.State.zero()+1, [model]*T,model)
+xs = [ m.State.rand()       for m in problem.runningModels + [problem.terminalModel] ]
+us = [ np.random.rand(nu)   for m in problem.runningModels ]
+x0ref = problem.initialState
+
+kkt = SolverKKT(problem)
+xkkt,ukkt,dkkt = kkt.solve(maxiter=2)
+assert(dkkt)
+
+kkt.setCandidate(xs,us)
+dxs,dus,ls = kkt.computeDirection()
+
+xs = [ m.State.zero()   for m in problem.runningModels + [problem.terminalModel] ]
+us = [ np.zeros(nu)     for m in problem.runningModels ]
+kkt.setCandidate(xs,us)
+kkt.x_reg = .1
+kkt.u_reg = 1
+dxs_reg,dus_reg,ls_reg = kkt.computeDirection()
+
+import copy
+modeldmp = copy.copy(model)
+modeldmp.L[range(nx),      range(nx)      ] += kkt.x_reg
+modeldmp.L[range(nx,nx+nu),range(nx,nx+nu)] += kkt.u_reg
+problemdmp = ShootingProblem(model.State.zero()+1, [modeldmp]*T,modeldmp)
+kktdmp = SolverKKT(problem)
+
+kktdmp.setCandidate(kkt.xs,kkt.us)
+dxs_dmp,dus_dmp,ls_dmp = kktdmp.computeDirection()
+for t in range(T):
+    assert(norm( dus_dmp[t  ]-dus_reg[t  ] ) <1e-9 )
+    assert(norm( dxs_dmp[t+1]-dxs_reg[t+1] ) <1e-9 )
+
+    
+# --- REG UNICYCLE ---
+model = ActionModelUnicycleVar()
+data  = model.createData()
+
+nx  = model.nx
+ndx = model.ndx
+nu  = model.nu
+T = 10
+
+x0ref = np.array([ -1,-1,1,0 ])
+problem = ShootingProblem(x0ref, [ model ]*T, model)
+xs = [ m.State.zero()   for m in problem.runningModels + [problem.terminalModel] ]
+us = [ np.zeros(nu)     for m in problem.runningModels ]
+
+kkt = SolverKKT(problem)
+kkt.setCandidate(xs,us)
+kkt.x_reg = 1
+kkt.u_reg = 1
+model.costWeights[0] = 0
+model.costWeights[1] = 0
+dxs,dus,ls = kkt.computeDirection()
+
+modeldmp = copy.copy(model)
+problemdmp = ShootingProblem(x0ref, [ modeldmp ]*T, modeldmp)
+kktdmp = SolverKKT(problem)
+kktdmp.setCandidate(xs,us)
+modeldmp.costWeights[0] = kkt.x_reg 
+modeldmp.costWeights[1] = kkt.u_reg 
+dxs_dmp,dus_dmp,ls_dmp = kktdmp.computeDirection()
+
+for t in range(T):
+    assert(norm( dus_dmp[t  ]-dus[t  ] ) <1e-9 )
+    assert(norm( dxs_dmp[t+1]-dxs[t+1] ) <1e-9 )
+
+# --- DDP --- 
+model = ActionModelLQR(3,3); model.setUpRandom()
+action = model.createData()
+nx = model.nx
+nu = model.nu
+T = 5
+
+problem = ShootingProblem(model.State.zero()+1, [model]*T,model)
+xs = [ m.State.rand()       for m in problem.runningModels + [problem.terminalModel] ]
+us = [ np.random.rand(nu)   for m in problem.runningModels ]
+x0ref = problem.initialState
+
+kkt = SolverKKT(problem)
+ddp = SolverDDP(problem)
+
+kkt.setCandidate(xs,us)
+ddp.setCandidate(xs,us)
+def deltaddp(solv):
+    solv.computeDirection()
+    xs_d,us_d,cost_d = solv.forwardPass(stepLength=1)
+    dxs_d = [ m.State.diff(x0,x) for m,x0,x in zip(solv.models(),xs,xs_d) ]
+    dus_d = [ u-u0 for u0,u in zip(us,us_d) ]
+    return dxs_d,dus_d
+
+dxs_k,dus_k,ls_k = kkt.computeDirection()
+dxs_d,dus_d = deltaddp(ddp)
+for t in range(T):
+    assert(norm( dus_d[t  ]-dus_k[t  ] ) <1e-9 )
+    assert(norm( dxs_d[t+1]-dxs_k[t+1] ) <1e-9 )
+
+kkt.u_reg = 1
+ddp.u_reg = 1
+
+dxs_k,dus_k,ls_k = kkt.computeDirection()
+dxs_d,dus_d = deltaddp(ddp)
+for t in range(T):
+    assert(norm( dus_d[t  ]-dus_k[t  ] ) <1e-9 )
+    assert(norm( dxs_d[t+1]-dxs_k[t+1] ) <1e-9 )
+
+kkt.x_reg = 1
+ddp.x_reg = 1
+
+dxs_k,dus_k,ls_k = kkt.computeDirection()
+dxs_d,dus_d = deltaddp(ddp)
+for t in range(T):
+    assert(norm( dus_d[t  ]-dus_k[t  ] ) <1e-9 )
+    assert(norm( dxs_d[t+1]-dxs_k[t+1] ) <1e-9 )
+
+# --- REG INTEGRATIVE TEST ---
