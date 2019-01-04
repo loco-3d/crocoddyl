@@ -2,6 +2,7 @@ import numpy as np
 from numpy import matrix
 from numpy.linalg import norm, inv, pinv, eig
 from pinocchio.utils import *
+import scipy.linalg as scl
 xnew=[0,'debug only']
 np .random.seed     (220)
 
@@ -9,7 +10,11 @@ np .random.seed     (220)
 Numpy convention.
 Let's store vector as 1-d array and matrices as 2-d arrays. Multiplication is done by np.dot.
 '''
-
+def raiseIfNan(A,error=None):
+    if error is None: error = scl.LinAlgError("NaN in array")
+    if np.any(np.isnan(A)) or np.any(np.isinf(A)) or np.any(abs(np.asarray(A))>1e30):
+        raise error
+    
 # ---------------------------------------------------
 # ---------------------------------------------------
 # ---------------------------------------------------
@@ -1031,13 +1036,17 @@ class SolverDDP:
         self.allocate()
 
         self.isFeasible = False  # Change it to true if you know that datas[t].xnext = xs[t+1]
-        self.alphas = [ 10**(-n) for n in range(7) ]
+        self.alphas = [ 4**(-n) for n in range(10) ]
         self.th_acceptStep = .1
         self.th_stop = 1e-9
         self.th_grad = 1e-12
 
         self.x_reg = 0
         self.u_reg = 0
+        self.regFactor = 10
+        self.regMax = 1e9
+        self.regMin = 1e-9
+        self.th_step = .5
         
     def models(self) : return self.problem.runningModels + [self.problem.terminalModel]
     def datas(self) : return self.problem.runningDatas + [self.problem.terminalData]
@@ -1096,27 +1105,40 @@ class SolverDDP:
         self.forwardPass(stepLength)
         return self.cost - self.cost_try
     
-    def solve(self,maxiter=100,init_xs=None,init_us=None,isFeasible=False,verbose=False):
+    def solve(self,maxiter=100,init_xs=None,init_us=None,isFeasible=False,verbose=False,regInit=None):
         '''
         Nonlinear solver iterating over the solveQP.
         Return the optimum xopt,uopt as lists of T+1 and T terms, and a boolean
         describing the success.
         '''
         self.setCandidate(init_xs,init_us,isFeasible=isFeasible,copy=True)
+        self.x_reg = regInit if regInit is not None else self.regMin
+        self.u_reg = regInit if regInit is not None else self.regMin
+        
         for i in range(maxiter):
-            self.computeDirection()
+            try:
+                self.computeDirection()
+            except ArithmeticError:
+                if verbose: print ('Backward pass failed')
+                self.increaseRegularization()
             d1,d2 = self.expectedImprovement()
 
             for a in self.alphas:
-                dV = self.tryStep(a)
+                try:
+                    if verbose: print ('Forward pass failed')
+                    dV = self.tryStep(a)
+                except ArithmeticError:
+                    continue
                 dV_exp = a*(d1+.5*d2*a)
                 if verbose: print('\t\tAccept? %f %f' % (dV, d1*a+.5*d2*a**2) )
-                if d1<self.th_grad or not isFeasible or dV > self.th_acceptStep*dV_exp:
+                if d1<self.th_grad or not self.isFeasible or dV > self.th_acceptStep*dV_exp:
                     # Accept step
                     self.setCandidate(self.xs_try,self.us_try,isFeasible=True,copy=False)
+                    self.cost = self.cost_try
                     break
             if verbose: print( 'Accept a=%f, cost=%.8f' % (a,self.problem.calc(self.xs,self.us)))
- 
+            if a>self.th_step: self.decreaseRegularization()
+            
             self.stop = sum(self.stoppingCriteria())
             if self.stop<self.th_stop:
                 return self.xs,self.us,True
@@ -1126,7 +1148,16 @@ class SolverDDP:
         # Warning: no convergence in max iterations
         return self.xs,self.us,False
 
-        
+    def increaseRegularization(self):
+        self.x_reg *= self.regFactor
+        if self.x_reg > self.regMax: self.x_reg = self.regMax
+        self.u_reg = self.x_reg
+    def decreaseRegularization(self):
+        self.x_reg /= self.regFactor
+        if self.x_reg < self.regMin: self.x_reg = self.regMin
+        self.u_reg = self.x_reg
+
+    
     #### DDP Specific
     def allocate(self):
         '''
@@ -1169,10 +1200,14 @@ class SolverDDP:
                 self.Qu [t][:] += np.dot(data.Fu.T,relinearization)
 
             if self.u_reg != 0: self.Quu[t][range(model.nu),range(model.nu)] += self.u_reg
-                
-            self.K[t][:,:]   = np.dot(np.linalg.inv(self.Quu[t]),self.Qux[t])
-            self.k[t][:]     = np.dot(np.linalg.inv(self.Quu[t]),self.Qu [t])
 
+            try:
+                Lb = scl.cho_factor(self.Quu[t])
+                self.K[t][:,:]   = scl.cho_solve(Lb,self.Qux[t])
+                self.k[t][:]     = scl.cho_solve(Lb,self.Qu [t])
+            except scl.LinAlgError:
+                raise ArithmeticError('backward error')
+                
             # Vx = Qx - Qu K + .5(- Qxu k - k Qux + k Quu K + K Quu k)
             # Qxu k = Qxu Quu^+ Qu
             # Qu  K = Qu Quu^+ Qux = Qxu k
@@ -1185,8 +1220,13 @@ class SolverDDP:
             self.Vxx[t][:,:] = self.Qxx[t] - np.dot(self.Qxu[t],self.K[t])
 
             if self.x_reg != 0: self.Vxx[t][range(model.ndx),range(model.ndx)] += self.x_reg
-                
-    def forwardPass(self,stepLength,b=None):
+            raiseIfNan(self.Vxx[t],ArithmeticError('backward error'))
+            raiseIfNan(self.Vx[t],ArithmeticError('backward error'))
+            
+    def forwardPass(self,stepLength,b=None,warning='ignore'):
+        # Argument b is introduce for debug purpose.
+        # Argument warning is also introduce for debug: by default, it masks the numpy warnings
+        #    that can be reactivated during debug.
         if b is None: b=1
         xs,us = self.xs,self.us
         xtry = [ self.problem.initialState ] + [ np.nan ]*self.problem.T
@@ -1195,10 +1235,17 @@ class SolverDDP:
         for t,(m,d) in enumerate(zip(self.problem.runningModels,self.problem.runningDatas)):
             utry[t] = us[t] - self.k[t]*stepLength  \
                       - np.dot(self.K[t],m.State.diff(xs[t],xtry[t]))*b
-            xnext,cost = m.calc(d, xtry[t],utry[t] )
+            with np.warnings.catch_warnings():
+                np.warnings.simplefilter(warning)
+                xnext,cost = m.calc(d, xtry[t],utry[t] )
             xtry[t+1] = xnext.copy()  # not sure copy helpful here.
             ctry += cost
-        ctry += self.problem.terminalModel.calc(self.problem.terminalData,xtry[-1])[1]
+            raiseIfNan([ctry,cost],ArithmeticError('forward error'))
+            raiseIfNan(xtry[t+1],ArithmeticError('forward error'))
+        with np.warnings.catch_warnings() as npwarn:
+            np.warnings.simplefilter(warning)
+            ctry += self.problem.terminalModel.calc(self.problem.terminalData,xtry[-1])[1]
+        raiseIfNan(ctry,ArithmeticError('forward error'))
         self.xs_try = xtry ; self.us_try = utry; self.cost_try = ctry
         return xtry,utry,ctry
             
@@ -1429,7 +1476,7 @@ kkt = SolverKKT(problem)
 
 
 xkkt,ukkt,donekkt=kkt.solve(maxiter=2,init_xs=xs,init_us=us)
-xddp,uddp,doneddp=ddp.solve(maxiter=2,init_xs=xs,init_us=us)
+xddp,uddp,doneddp=ddp.solve(maxiter=2,init_xs=xs,init_us=us,regInit=0)
 assert(donekkt)
 assert(doneddp)
 assert(norm(xkkt[0]-problem.initialState)<1e-9)
@@ -1457,7 +1504,7 @@ ddp.th_stop = 1e-18
 kkt.th_stop = 1e-18
 
 xkkt,ukkt,donekkt=kkt.solve(maxiter=200,init_xs=xs,init_us=us)
-xddp,uddp,doneddp=ddp.solve(maxiter=200,init_xs=xs,init_us=us)
+xddp,uddp,doneddp=ddp.solve(maxiter=200,init_xs=xs,init_us=us,regInit=0)
 assert(donekkt)
 assert(doneddp)
 assert(norm(xkkt[0]-problem.initialState)<1e-9)

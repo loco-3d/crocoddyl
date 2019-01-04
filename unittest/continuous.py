@@ -475,9 +475,30 @@ ddp = SolverDDP(problem)
 ugrav = m2a(pinocchio.rnea(rmodel,rdata,a2m(problem.initialState[:rmodel.nq]),
                            a2m(np.zeros(rmodel.nv)),a2m(np.zeros(rmodel.nv))  ))
 
-xddp,uddp,dddp = ddp.solve(verbose=True)
-
-#termmodel.differential.costWeights[0] = 10
 #xddp,uddp,dddp = ddp.solve(verbose=True)
 
 
+termmodel.differential.costWeights[0] = 10
+ddp.setCandidate()
+#xddp,uddp,dddp = ddp.solve(verbose=True)
+ddp.computeDirection()
+try:
+    ddp.tryStep(1)
+except ArithmeticError as err:
+    assert(err.args[0] == 'forward error')
+
+
+termmodel.differential.costWeights[0] = 100
+xs,us,done = ddp.solve()
+assert(done)
+    
+def disp(xs,dt=0.1):
+    import time
+    for x in xs:
+        robot.display(a2m(x[:robot.nq]))
+        time.sleep(dt)
+
+robot.initDisplay()
+
+
+    
