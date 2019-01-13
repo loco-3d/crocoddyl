@@ -7,7 +7,7 @@ path = '/home/nmansard/src/cddp/examples/'
 
 urdf = path + 'talos_data/robots/talos_left_arm.urdf'
 robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(urdf, [path] \
-                                                           # ,pinocchio.JointModelFreeFlyer() \
+                                                           ,pinocchio.JointModelFreeFlyer() \
 )
 model = robot.model
 data = model.createData()
@@ -283,6 +283,7 @@ assert(absmax(daa_dq-daa_dqn)<1e-3)
 # ------------------------------------------------------------------------
 from pinocchio import aba,rnea,crba
 
+# ------------------------------------------------------------------------
 ### Check contact dynamics 3D contact
 del vq,aq
 q = pinocchio.randomConfiguration(model)
@@ -315,17 +316,10 @@ assert(absmax(rnea(model,data,q,v,a,  fs)-(M*a+b+J.T*f))<1e-6)
 assert(absmax(aba (model,data,q,v,tau,fs)-(inv(M)*(tau-b-J.T*f)))<1e-6)
 
 ### Check contact-dyninv deriv
-# af = K^-1 r     with K = MJ';J0  and r  = tau-b;gamma
-# af'= -Ki K' Ki r + Ki r'
-#    = -Ki (K' af - r') = -Ki ( M'a + J'f  + b' ; gamma')
-
-
-
 # af  = Ki r  = [ MJt; J0 ] [ tau-b;-gamma ]
 # af' = -Ki K' Ki r + Ki r'
 #     = -Ki ( K'  af - r' )
 #     = -Ki [ M'a + Jt'f + b' ; J' a + gamma' ] 
-
 
 ##### Check M'a + J'f + b'
 dtau_dqn = df_dq(model,lambda _q: rnea(model,data,_q,v,a,fs),q)
@@ -361,10 +355,58 @@ def cid(q_,v_,tau_):
 dcid_dqn = df_dq(model,lambda _q: cid(_q,v,tau),q)
 KJn = K*dcid_dqn
 KJ  = -np.vstack([dtau_dq,dgamma_dq])
-assert(absmax(KJ-KJn)<1e-4)
+assert(absmax(KJ-KJn)/model.nv<1e-3)
 
 dcid_dq  = -inv(K)*np.vstack([ dtau_dq, dgamma_dq ])
-assert(absmax(dcid_dqn-dcid_dq)<1e-2)
+assert(absmax(dcid_dqn-dcid_dq)/model.nv<1e-3)
+
+# ------------------------------------------
+### Check 6d contact
+
+q = pinocchio.randomConfiguration(model)
+v = rand(model.nv)*2-1
+tau = rand(model.nv)*2-1
+for i,f in enumerate(fs): fs[i] = f*0
+
+def Kid(q_,J_=None):
+    pinocchio.computeJointJacobians(model,data,q_)
+    J = pinocchio.getJointJacobian(model,data,model.joints[-1].id,pinocchio.ReferenceFrame.LOCAL).copy()
+    if J_ is not None: J_[:,:] = J
+    M = pinocchio.crba(model,data,q_).copy()
+    return np.block([[M,J.T],[J,zero([6,6])]])
+
+def cid(q_,v_,tau_):
+    pinocchio.computeJointJacobians(model,data,q_)
+    K = Kid(q_)
+    b = pinocchio.rnea(model,data,q_,v_,zero(model.nv)).copy()
+    pinocchio.forwardKinematics(model,data,q_,v_,zero(model.nv))
+    gamma = data.a[-1].vector
+    r = np.concatenate([ tau_-b,-gamma ])
+    return inv(K)*r
+
+J = zero([6,model.nv])
+K = Kid(q,J)
+v -= pinv(J)*J*v
+
+af = cid(q,v,tau)
+a = af[:model.nv]; f = af[model.nv:]
+fs[-1] = -pinocchio.Force(f)
+
+pinocchio.computeRNEADerivatives(model,data,q,v,a,fs)
+dtau_dq = data.dtau_dq.copy()
+
+pinocchio.computeForwardKinematicsDerivatives(model,data,q,v,a)
+dv_dq,da_dq,da_dv,da_da=pinocchio.getJointAccelerationDerivatives(model,data,model.joints[-1].id,pinocchio.ReferenceFrame.LOCAL)
+dgamma_dq = da_dq.copy()
+
+dcid_dqn = df_dq(model,lambda _q: cid(_q,v,tau),q)
+KJn = K*dcid_dqn
+KJ  = -np.vstack([dtau_dq,dgamma_dq])
+assert(absmax(KJ-KJn)/model.nv<1e-3)
+
+dcid_dq  = -inv(K)*np.vstack([ dtau_dq, dgamma_dq ])
+assert(absmax(dcid_dqn-dcid_dq)/model.nv<1e-3)
+
 
 '''
 
