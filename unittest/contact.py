@@ -196,21 +196,18 @@ class ContactModel6D:
         data.a0[:] = pinocchio.getFrameAcceleration(model.pinocchio,data.pinocchio,model.frame).vector.flat
     def calcDiff(model,data,x,recalc=True):
         if recalc: model.calc(data,x)
-        jid = model.pinocchio.frames[model.frame].parent
         dv_dq,da_dq,da_dv,da_da = pinocchio.getJointAccelerationDerivatives\
-                                  (model.pinocchio,data.pinocchio,jid,pinocchio.ReferenceFrame.LOCAL)
-        data.Aq[:,:] = da_dq
-        data.Av[:,:] = da_dv
+                                  (model.pinocchio,data.pinocchio,data.joint,
+                                   pinocchio.ReferenceFrame.LOCAL)
+        data.Aq[:,:] = data.fXj*da_dq
+        data.Av[:,:] = data.fXj*da_dv
     def forces(model,data,forcesArr):
         '''
         Convert a numpy array of forces into a stdVector of spatial forces.
         '''
-        frame = model.pinocchio.frames[model.frame]
-        jid = frame.parent
-        iMf = frame.placement
         # In the dynamic equation, we wrote M*a + J.T*fdyn, while in the ABA it would be
         # M*a + b = tau + J.T faba, so faba = -fdyn (note the minus operator before a2m).
-        data.fs[jid] = iMf*pinocchio.Force(-a2m(forcesArr))
+        data.fs[data.joint] = data.jMf*pinocchio.Force(-a2m(forcesArr))
         return data.fs
     
 class ContactData6D:
@@ -224,7 +221,10 @@ class ContactData6D:
         self.Av = self.Ax[:,nv:]
         self.fs = pinocchio.StdVect_Force()
         for i in range(model.pinocchio.njoints): self.fs.append(pinocchio.Force.Zero())
-
+        frame = model.pinocchio.frames[model.frame]
+        self.joint = frame.parent       
+        self.jMf = frame.placement
+        self.fXj = self.jMf.inverse().action
         
 contactModel = ContactModel6D(rmodel,rmodel.getFrameId('gripper_left_fingertip_2_link'),ref=None)
 contactData  = contactModel.createData(rdata)
@@ -377,6 +377,8 @@ u = np.random.rand(rmodel.nv-6)*2-1
 
 actModel = ActuationModelFreeFloating(rmodel)
 contactModel = ContactModel6D(rmodel,rmodel.getFrameId('arm_left_7_joint'),ref=None)
+contactModel = ContactModel6D(rmodel,rmodel.getFrameId('gripper_left_fingertip_2_link'),ref=None)
+rmodel.frames[contactModel.frame].placement = pinocchio.SE3.Random()
 
 model = DifferentialActionModelFloatingInContact(rmodel,actModel,contactModel)
 data  = model.createData()
