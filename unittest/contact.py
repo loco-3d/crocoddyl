@@ -194,8 +194,13 @@ class ContactModel6D:
         data.J[:,:] = pinocchio.getFrameJacobian(model.pinocchio,data.pinocchio,
                                                  model.frame,pinocchio.ReferenceFrame.LOCAL)
         data.a0[:] = pinocchio.getFrameAcceleration(model.pinocchio,data.pinocchio,model.frame).vector.flat
-    def calcDiff(model,data,x,u,recalc=True):
-        pass
+    def calcDiff(model,data,x,recalc=True):
+        if recalc: model.calc(data,x)
+        jid = model.pinocchio.frames[model.frame].parent
+        dv_dq,da_dq,da_dv,da_da = pinocchio.getJointAccelerationDerivatives\
+                                  (model.pinocchio,data.pinocchio,jid,pinocchio.ReferenceFrame.LOCAL)
+        data.Aq[:,:] = da_dq
+        data.Av[:,:] = da_dv
     def forces(model,data,forcesArr):
         '''
         Convert a numpy array of forces into a stdVector of spatial forces.
@@ -294,32 +299,42 @@ class DifferentialActionModelFloatingInContact:
         v = a2m(x[-nv:])
         a = a2m(data.a)
         fs = data.contact.fs
-        
+
         pinocchio.computeRNEADerivatives(model.pinocchio,data.pinocchio,q,v,a,fs)
+        pinocchio.computeForwardKinematicsDerivatives(model.pinocchio,data.pinocchio,q,v,a)
+        pinocchio.updateFramePlacements(model.pinocchio,data.pinocchio)
+
+        # [a;f] = K^-1 [ tau - b, -gamma ]
+        # [a';f'] = -K^-1 [ K'a + b' ; J'a + gamma' ]  = -K^-1 [ rnea'(q,v,a,fs) ; acc'(q,v,a) ]
+
+        # dtau_dq and dtau_dv are the rnea derivatives rnea'
         dtau_dq = data.pinocchio.dtau_dq
         dtau_dv = data.pinocchio.dtau_dv
 
-        jid = model.pinocchio.frames[model.contact.frame].parent
-        pinocchio.computeForwardKinematicsDerivatives(model.pinocchio,data.pinocchio,q,v,a)
-        dv_dq,da_dq,da_dv,da_da = pinocchio.getJointAccelerationDerivatives\
-                                  (model.pinocchio,data.pinocchio,jid,pinocchio.ReferenceFrame.LOCAL)
-        da0_dq = da_dq
-        da0_dv = da_dv
+        # da0_dq and da0_dv are the acceleration derivatives acc'
+        model.contact.calcDiff(data.contact,x,recalc=False)
+        da0_dq = data.contact.Aq
+        da0_dv = data.contact.Av
 
+        # We separate the Kinv into the a and f rows, and the actuation and acceleration columns
         daf_dact = inv(data.K)
-        daf_dq = -daf_dact*np.vstack([ dtau_dq, da0_dq ])
-        daf_dv = -daf_dact*np.vstack([ dtau_dv, da0_dv ])
+        da_dact = daf_dact[:nv,:nv]
+        df_dact = daf_dact[nv:,:nv]
+        da_da0  = daf_dact[:nv,nv:]
+        df_da0  = daf_dact[nv:,nv:]
+        
+        da_dq = -np.dot(da_dact,dtau_dq) -np.dot(da_da0,da0_dq)
+        da_dv = -np.dot(da_dact,dtau_dv) -np.dot(da_da0,da0_dv)
 
+        # tau is a function of x and u (typically trivial in x), whose derivatives are Ax and Au
         dact_dx = data.actuation.Ax
         dact_du = data.actuation.Au
         
-        data.Fx[:,:nv] = daf_dq[:nv,:]
-        data.Fx[:,nv:] = daf_dv[:nv,:]
-        data.Fx += np.dot(daf_dact[:nv,:nv],dact_dx)
-        data.Fu[:,:]   = np.dot(daf_dact[:nv,:nv],dact_du)
+        data.Fx[:,:nv] = da_dq
+        data.Fx[:,nv:] = da_dv
+        data.Fx       += np.dot(da_dact,dact_dx)
+        data.Fu[:,:]   = np.dot(da_dact,dact_du)
 
-        pinocchio.computeJointJacobians(model.pinocchio,data.pinocchio,q)
-        pinocchio.updateFramePlacements(model.pinocchio,data.pinocchio)
         model.costs.calcDiff(data.costs,x,u,recalc=False)
         
         return data.xout,data.cost
@@ -380,3 +395,4 @@ dnum = mnum.createData()
 mnum.calcDiff(dnum,x,u)
 assert(absmax(data.Fx-dnum.Fx)/model.nx<1e-3)
 assert(absmax(data.Fu-dnum.Fu)/model.nu<1e-3)
+
