@@ -7,12 +7,14 @@ from scipy.linalg import block_diag
 
 m2a = lambda m: np.array(m.flat)
 a2m = lambda a: np.matrix(a).T
+absmax = lambda A: np.max(abs(A))
+absmin = lambda A: np.min(abs(A))
 
 path = '/home/nmansard/src/cddp/examples/'
 
 urdf = path + 'talos_data/robots/talos_left_arm.urdf'
 robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(urdf, [path] \
-#                                                           ,pinocchio.JointModelFreeFlyer() \
+                                                           ,pinocchio.JointModelFreeFlyer() \
 )
 
 #urdf = path + 'hyq_description/robots/hyq_no_sensors.urdf'
@@ -188,103 +190,268 @@ class CostModelPinocchio:
     can be evaluated from pinocchio data only (no need to recompute anything
     in particular to be given the variables x,u).
     '''
-    def __init__(self,pinocchioModel,ncost):
+    def __init__(self,pinocchioModel,ncost,withResiduals=True,nu=None):
         self.ncost = ncost
-        self.nq = pinocchioModel.nq
-        self.nv = pinocchioModel.nv
-        self.nx = self.nq+self.nv
+        self.nq  = pinocchioModel.nq
+        self.nv  = pinocchioModel.nv
+        self.nx  = self.nq+self.nv
+        self.ndx = self.nv+self.nv
+        self.nu  = nu if nu is not None else pinocchioModel.nv
         self.pinocchio = pinocchioModel
+        self.withResiduals=withResiduals
 
     def createData(self,pinocchioData):
         return self.CostDataType(self,pinocchioData)
-    def calc(model,data):
+    def calc(model,data,x,u,recalc=True):
         assert(False and "This should be defined in the derivative class.")
-    def calcDiff(model,data):
+    def calcDiff(model,data,x,u):
         assert(False and "This should be defined in the derivative class.")
+
+
 
 class CostDataPinocchio:
     '''
     Abstract data class corresponding to the abstract model class
     CostModelPinocchio.
     '''
-    def __init__(self,model,pinocchioData,withResiduals=True):
-        ncost,nq,nv,nx,nu = model.ncost,model.nq,model.nv,model.nx
+    def __init__(self,model,pinocchioData):
+        ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
         self.pinocchio = pinocchioData
         self.cost = np.nan
-        self.g = np.zeros(nx+nu)
-        self.L = np.zeros(nx+nu,nx+nu)
+        self.g = np.zeros( ndx+nu)
+        self.L = np.zeros([ndx+nu,ndx+nu])
 
-        self.Lx = self.g[:nx]
-        self.Lu = self.g[nx:]
+        self.Lx = self.g[:ndx]
+        self.Lu = self.g[ndx:]
         
-        self.Lxx = self.L[:nx,:nx]
-        self.Lxu = self.L[:nx,:nu]
-        self.Luu = self.L[:nu,:nu]
+        self.Lxx = self.L[:ndx,:ndx]
+        self.Lxu = self.L[:ndx,ndx:]
+        self.Luu = self.L[ndx:,ndx:]
 
         self.Lq  = self.Lx [:nv]
         self.Lqq = self.Lxx[:nv,:nv]
         self.Lv  = self.Lx [nv:]
         self.Lvv = self.Lxx[nv:,nv:]
 
-        if withResiduals:
+        if model.withResiduals:
             self.residuals = np.zeros(ncost)
-            self.R  = np.zeros(ncost,nx+nu)
-            self.Rx = self.R[:,:nx]
-            self.Ru = self.R[:,nx:]
+            self.R  = np.zeros([ncost,ndx+nu])
+            self.Rx = self.R[:,:ndx]
+            self.Ru = self.R[:,ndx:]
             self.Rq  = self.Rx [:,  :nv]
             self.Rv  = self.Rx [:,  nv:]
 
+class CostModelNumDiff(CostModelPinocchio):
+    def __init__(self,costModel,State,withGaussApprox=False,reevals=[]):
+        '''
+        reevals is a list of lambdas of (pinocchiomodel,pinocchiodata,x,u) to be
+        reevaluated at each num diff.
+        '''
+        self.CostDataType = CostDataNumDiff
+        CostModelPinocchio.__init__(self,costModel.pinocchio,ncost=costModel.ncost,nu=costModel.nu)
+        self.State = State
+        self.model0 = costModel
+        self.disturbance = 1e-6
+        self.withGaussApprox = withGaussApprox
+        if withGaussApprox: assert(costModel.withResiduals)
+        self.reevals = reevals
+    def calc(model,data,x,u):
+        data.cost = model.model0.calc(data.data0,x,u)
+        if model.withGaussApprox: data.residuals = data.data0.residuals
+    def calcDiff(model,data,x,u,recalc=True):
+        if recalc: model.calc(data,x,u)
+        ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
+        h = model.disturbance
+        dist = lambda i,n,h: np.array([ h if ii==i else 0 for ii in range(n) ])
+        Xint  = lambda x,dx: model.State.integrate(x,dx)
+        for ix in range(ndx):
+            xi = Xint(x,dist(ix,ndx,h))
+            [ r(model.model0.pinocchio,data.datax[ix].pinocchio,xi,u) for r in model.reevals ]
+            c = model.model0.calc(data.datax[ix],xi,u)
+            data.Lx[ix] = (c-data.data0.cost)/h
+            if model.withGaussApprox:
+                data.Rx[:,ix] = (data.datax[ix].residuals-data.data0.residuals)/h
+        for iu in range(nu):
+            ui = u + dist(iu,nu,h)
+            [ r(model.model0.pinocchio,data.datau[iu].pinocchio,x,ui) for r in model.reevals ]
+            c = model.model0.calc(data.datau[iu],x,ui)
+            data.Lu[iu] = (c-data.data0.cost)/h
+            if model.withGaussApprox:
+                data.Ru[:,iu] = (data.datau[iu].residuals-data.data0.residuals)/h
+        if model.withGaussApprox:
+            data.L[:,:] = np.dot(data.R.T,data.R)
+                
+class CostDataNumDiff(CostDataPinocchio):
+    def __init__(self,model,pinocchioData):
+        CostDataPinocchio.__init__(self,model,pinocchioData)
+        ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
+        self.pinocchio = pinocchioData
+        self.data0 = model.model0.createData(pinocchioData)
+        self.datax = [ model.model0.createData(model.model0.pinocchio.createData()) for i in range(nx) ]
+        self.datau = [ model.model0.createData(model.model0.pinocchio.createData()) for i in range(nu) ]
+
+# --------------------------------------------------------------
         
-class CostModelPosition:
+class CostModelPosition(CostModelPinocchio):
     '''
     The class proposes a model of a cost function positioning (3d) 
     a frame of the robot. Paramterize it with the frame index frameIdx and
     the effector desired position ref.
     '''
     def __init__(self,pinocchioModel,frame,ref):
-        self.ncost = 3
-        self.nq = pinocchioModel.nq
-        self.nv = pinocchioModel.nv
-        self.nx = self.nq+self.nv
-        self.pinocchio = pinocchioModel
+        self.CostDataType = CostDataPosition
+        CostModelPinocchio.__init__(self,pinocchioModel,ncost=3)
         self.ref = ref
         self.frame = frame
-    def createData(self,pinocchioData):
-        return CostDataPosition(self,pinocchioData)
-    def calc(model,data):
-        data.residuals = m2a(data.pinocchio.oMf[self.frame].translation) -data.ref
+    def calc(model,data,x,u):
+        data.residuals = m2a(data.pinocchio.oMf[model.frame].translation) - model.ref
         data.cost = .5*sum(data.residuals**2)
-    def calcDiff(model,data):
-        ncost,nq,nv,nx,nu = model.ncost,model.nq,model.nv,model.nx
+        return data.cost
+    def calcDiff(model,data,x,u,recalc=True):
+        if recalc: model.calc(data,x,u)
+        ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
         pinocchio.updateFramePlacements(model.pinocchio,data.pinocchio)
-        J = pinocchio.getFrameJacobian(model.pinocchio,data.pinocchio,model.frameIdx,
-                                       pinocchio.ReferenceFrame.LOCAL)
+        R = data.pinocchio.oMf[model.frame].rotation
+        J = R*pinocchio.getFrameJacobian(model.pinocchio,data.pinocchio,model.frame,
+                                         pinocchio.ReferenceFrame.LOCAL)[:3,:]
         data.Rq[:,:nq] = J
-        data.Lq[:]     = J.T*data.residuals
-        data.Lqq[:,:]  = J.T*J
+        data.Lq[:]     = np.dot(J.T,data.residuals)
+        data.Lqq[:,:]  = np.dot(J.T,J)
+        return data.cost
     
-class CostDataPosition:
+class CostDataPosition(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
-        ncost,nq,nv,nx,nu = model.ncost,model.nq,model.nv,model.nx
-        self.pinocchio = pinocchioData
-        self.cost = np.nan
-        self.Lx = np.zeros(nx)
+        CostDataPinocchio.__init__(self,model,pinocchioData)
         self.Lu = 0
-        self.Lxx = np.zeros([ nx,nx ])
+        self.Lv = 0
         self.Lxu = 0
         self.Luu = 0
-
-        self.residuals = np.zeros(ncost)
-        self.Rx = np.zeros([ ncost, nx ])
+        self.Lvv = 0
         self.Ru = 0
+        self.Rv = 0
 
-        self.Lq  = self.Lx [:nv]
-        self.Lqq = self.Lxx[:nv,:nv]
-        self.Rq  = self.Rx [:,  :nv]
+        
+q = pinocchio.randomConfiguration(rmodel)
+v = rand(rmodel.nv)
+x = m2a(np.concatenate([q,v]))
+u = m2a(rand(rmodel.nv))
 
 costModel = CostModelPosition(rmodel,
                               rmodel.getFrameId('gripper_left_fingertip_2_link'),
                               np.array([.5,.4,.3]))
+
+costData = costModel.createData(rdata)
+
+
+pinocchio.forwardKinematics(rmodel,rdata,q,v)
+pinocchio.computeJointJacobians(rmodel,rdata,q)
+pinocchio.updateFramePlacements(rmodel,rdata)
+
+costModel.calcDiff(costData,x,u)
+
+costModelND = CostModelNumDiff(costModel,StatePinocchio(rmodel),withGaussApprox=True,
+                               reevals = [ lambda m,d,x,u: pinocchio.forwardKinematics(m,d,a2m(x[:rmodel.nq]),a2m(x[rmodel.nq:])),
+                                           lambda m,d,x,u: pinocchio.computeJointJacobians(m,d,a2m(x[:rmodel.nq])),
+                                           lambda m,d,x,u: pinocchio.updateFramePlacements(m,d) ])
+costDataND  = costModelND.createData(rdata)
+
+costModelND.calcDiff(costDataND,x,u)
+
+assert( absmax(costData.g-costDataND.g) < 1e-3 )
+assert( absmax(costData.L-costDataND.L) < 1e-3 )
+
+# --------------------------------------------------------------
+
+class CostModelState(CostModelPinocchio):
+    def __init__(self,pinocchioModel,State,ref):
+        self.CostDataType = CostDataState
+        CostModelPinocchio.__init__(self,pinocchioModel,ncost=State.ndx)
+        self.State = State
+        self.ref = ref
+    def calc(model,data,x,u):
+        data.residuals[:] = model.State.diff(model.ref,x)
+        data.cost = .5*sum(data.residuals**2)
+        return data.cost
+    def calcDiff(model,data,x,u,recalc=True):
+        if recalc: model.calc(data,x,u)
+        data.Rx[:,:] = model.State.Jdiff(model.ref,x,'second')
+        data.Lx[:] = np.dot(data.Rx.T,data.residuals)
+        data.Lxx[:,:] = np.dot(data.Rx.T,data.Rx)
+        
+class CostDataState(CostDataPinocchio):
+    def __init__(self,model,pinocchioData):
+        CostDataPinocchio.__init__(self,model,pinocchioData)
+        self.Lu = 0
+        self.Lxu = 0
+        self.Luu = 0
+        self.Ru = 0
+
+X = StatePinocchio(rmodel)        
+q = pinocchio.randomConfiguration(rmodel)
+v = rand(rmodel.nv)
+x = m2a(np.concatenate([q,v]))
+u = m2a(rand(rmodel.nv))
+
+costModel = CostModelState(rmodel,X,X.rand())
+costData = costModel.createData(rdata)
+costModel.calcDiff(costData,x,u)
+
+costModelND = CostModelNumDiff(costModel,X,withGaussApprox=True,
+                               reevals = [])
+costDataND  = costModelND.createData(rdata)
+costModelND.calcDiff(costDataND,x,u)
+
+assert( absmax(costData.g-costDataND.g) < 1e-3 )
+assert( absmax(costData.L-costDataND.L) < 1e-3 )
+    
+# --------------------------------------------------------------
+
+class CostModelControl(CostModelPinocchio):
+    def __init__(self,pinocchioModel,nu=None,ref=None):
+        self.CostDataType = CostDataControl
+        nu = nu if nu is not None else pinocchioModel.nv
+        if ref is not None: assert( ref.shape == (nu,) )
+        CostModelPinocchio.__init__(self,pinocchioModel,nu=nu,ncost=nu)
+        self.ref = ref
+    def calc(model,data,x,u):
+        data.residuals[:] = u if model.ref is None else u-model.ref
+        data.cost = .5*sum(data.residuals**2)
+        return data.cost
+    def calcDiff(model,data,x,u,recalc=True):
+        if recalc: model.calc(data,x,u)
+        #data.Ru[:,:] = np.eye(nu)
+        data.Lu[:] = data.residuals
+        #data.Luu[:,:] = data.Ru
+        assert( data.Luu[0,0] == 1 and data.Luu[1,0] == 0 )
+        
+class CostDataControl(CostDataPinocchio):
+    def __init__(self,model,pinocchioData):
+        CostDataPinocchio.__init__(self,model,pinocchioData)
+        ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
+        self.Lx = 0
+        self.Lxx = 0
+        self.Lxu = 0
+        self.Rx = 0
+        self.Luu[:,:] = np.eye(nu)
+        self.Ru [:,:] = self.Luu
+  
+X = StatePinocchio(rmodel)
+q = pinocchio.randomConfiguration(rmodel)
+v = rand(rmodel.nv)
+x = m2a(np.concatenate([q,v]))
+u = m2a(rand(rmodel.nv))
+
+costModel = CostModelControl(rmodel)
+costData = costModel.createData(rdata)
+costModel.calcDiff(costData,x,u)
+
+costModelND = CostModelNumDiff(costModel,StatePinocchio(rmodel),withGaussApprox=True)
+costDataND  = costModelND.createData(rdata)
+costModelND.calcDiff(costDataND,x,u)
+
+assert( absmax(costData.g-costDataND.g) < 1e-3 )
+assert( absmax(costData.L-costDataND.L) < 1e-3 )
+    
 
 stophere
 # --------------------------------------------------------------
