@@ -214,7 +214,7 @@ class StateUnicycle:
     def zero(self):   return np.array([0.,0.,1.,0.]) # a,b,c,s
     def rand(self):
         a,b,th = np.random.rand(3)
-        return np.array([a,b,cos(a),sin(a)])
+        return np.array([a,b,cos(th),sin(th)])
     def diff(self,x1,x2):
         '''
         Return log(x1^-1 x2) = log(1M2).
@@ -820,7 +820,8 @@ class SolverKKT:
                     # Accept step
                     self.setCandidate(self.xs_try,self.us_try,isFeasible=True,copy=False)
                     break
-            if verbose: print( 'Accept a=%f, cost=%.8f' % (a,self.problem.calc(self.xs,self.us)))
+            if verbose: print( 'Accept iter=%d, a=%f, cost=%.8f'
+                               % (i,a,self.problem.calc(self.xs,self.us)))
                 
             self.stop = sum(self.stoppingCriteria())
             if self.stop<self.th_stop:
@@ -1047,6 +1048,8 @@ class SolverDDP:
         self.regMax = 1e9
         self.regMin = 1e-9
         self.th_step = .5
+
+        self.callback = None
         
     def models(self) : return self.problem.runningModels + [self.problem.terminalModel]
     def datas(self) : return self.problem.runningDatas + [self.problem.terminalData]
@@ -1125,7 +1128,7 @@ class SolverDDP:
 
             for a in self.alphas:
                 try:
-                    if verbose: print ('Forward pass failed')
+                    if verbose: print ('\t\t\tForward pass failed')
                     dV = self.tryStep(a)
                 except ArithmeticError:
                     continue
@@ -1136,8 +1139,11 @@ class SolverDDP:
                     self.setCandidate(self.xs_try,self.us_try,isFeasible=True,copy=False)
                     self.cost = self.cost_try
                     break
-            if verbose: print( 'Accept a=%f, cost=%.8f' % (a,self.problem.calc(self.xs,self.us)))
             if a>self.th_step: self.decreaseRegularization()
+            if verbose: print( 'Accept iter=%d, a=%f, cost=%.8f'
+                               % (i,a,self.problem.calc(self.xs,self.us)))
+            self.stepLength = a; self.iter = i
+            if self.callback is not None: self.callback(self)
             
             self.stop = sum(self.stoppingCriteria())
             if self.stop<self.th_stop:
