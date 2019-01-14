@@ -453,6 +453,8 @@ assert( absmax(costData.g-costDataND.g) < 1e-3 )
 assert( absmax(costData.L-costDataND.L) < 1e-3 )
     
 # --------------------------------------------------------------
+from collections import OrderedDict
+
 class CostModelSum(CostModelPinocchio):
     # This could be done with a namedtuple but I don't like the read-only labels.
     class CostItem:
@@ -465,22 +467,24 @@ class CostModelSum(CostModelPinocchio):
     def __init__(self,pinocchioModel,nu=None,withResiduals=True):
         self.CostDataType = CostDataSum
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=0)
-        self.costs = {}
+        # Preserve task order in evaluation, which is a nicer behavior when debuging.
+        self.costs = OrderedDict()
     def addCost(self,name,cost,weight):
         assert( cost.withResiduals and \
                 '''The cost-of-sums class has not been designed nor tested for non sum of squares
                 cost functions. It should not be a big deal to modify it, but this is not done
                 yet. ''' )
-        self.costs[name] = self.CostItem(cost=cost,name=name,weight=weight)
+        self.costs.update([[name,self.CostItem(cost=cost,name=name,weight=weight)]])
         self.ncost += cost.ncost
     def __getitem__(self,key):
         if isinstance(key,str):
-            assert(key in self.costs)
             return self.costs[key]
         elif isinstance(key,CostModelPinocchio):
             filter = [ v for k,v in self.costs.items() if v.cost==key ]
             assert(len(filter) == 1 and "The given key is not or not unique in the costs dict. ")
             return filter[0]
+        else:
+            raise(KeyError("The key should be string or costmodel."))
     def calc(model,data,x,u):
         data.cost = 0
         nr = 0
@@ -512,15 +516,17 @@ class CostDataSum(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
         self.model = model
-        self.costs = { i.name: i.cost.createData(pinocchioData) for i in model.costs.values() }
+        self.costs = OrderedDict([ [i.name, i.cost.createData(pinocchioData)] \
+                                   for i in model.costs.values() ])
     def __getitem__(self,key):
         if isinstance(key,str):
-            assert(key in self.costs)
             return self.costs[key]
         elif isinstance(key,CostModelPinocchio):
             filter = [ k for k,v in self.model.costs.items() if v.cost==key ]
             assert(len(filter) == 1 and "The given key is not or not unique in the costs dict. ")
             return self.costs[filter[0]]
+        else:
+            raise(KeyError("The key should be string or costmodel."))
 
 X = StatePinocchio(rmodel)
 q = pinocchio.randomConfiguration(rmodel)
@@ -536,8 +542,8 @@ cost3 = CostModelControl(rmodel)
 
 costModel = CostModelSum(rmodel)
 costModel.addCost("pos",cost1,10)
-#costModel.addCost("regx",cost2,.1)
-#costModel.addCost("regu",cost3,.01)
+costModel.addCost("regx",cost2,.1)
+costModel.addCost("regu",cost3,.01)
 costData = costModel.createData(rdata)
 
 pinocchio.forwardKinematics(rmodel,rdata,q,v)
@@ -565,24 +571,16 @@ class DifferentialActionModel:
     def __init__(self,pinocchioModel):
         self.pinocchio = pinocchioModel
         self.State = StatePinocchio(self.pinocchio)
+        self.costs = CostModelSum(self.pinocchio)
         self.nq,self.nv = self.pinocchio.nq, self.pinocchio.nv
         self.nx = self.State.nx
         self.ndx = self.State.ndx
         self.nout = self.nv
         self.nu = self.nv
-        self.ncost = self.State.ndx + 3 + self.nu
-        self.frameIdx = self.pinocchio.getFrameId('gripper_left_fingertip_2_link')
-        self.pref = np.array([.5,.4,.3])
-        self.qref = np.zeros(self.nq) + .3
-        if self.pinocchio.joints[1].shortname()=='JointModelFreeFlyer':
-            self.qref[6]+=1
-            self.qref[3:7] /= norm(self.qref[3:7])
-        self.vref = np.zeros(self.nv)
-        self.xref = np.concatenate([ self.qref,self.vref ])
-        self.costWeights = [1,.1,.001]
         self.unone = np.zeros(self.nu)
+    @property
+    def ncost(self): return self.costs.ncost
     def createData(self): return DifferentialActionData(self)
-    
     def calc(model,data,x,u=None):
         if u is None: u=model.unone
         nx,nu,nq,nv,nout = model.nx,model.nu,model.nq,model.nv,model.nout
@@ -592,10 +590,7 @@ class DifferentialActionModel:
         data.xout[:] = pinocchio.aba(model.pinocchio,data.pinocchio,q,v,tauq).flat
         pinocchio.forwardKinematics(model.pinocchio,data.pinocchio,q,v)
         pinocchio.updateFramePlacements(model.pinocchio,data.pinocchio)
-        data.costResiduals[:3] = model.costWeights[0]*(m2a(data.pinocchio.oMf[model.frameIdx].translation) - model.pref)
-        data.costResiduals[3:3+model.ndx] = model.costWeights[1]*model.State.diff(model.xref,x)
-        data.costResiduals[3+model.ndx:] = model.costWeights[2]*u
-        data.cost = .5*sum(data.costResiduals**2)
+        data.cost = model.costs.calc(data.costs,x,u)
         return data.xout,data.cost
 
     def calcDiff(model,data,x,u=None,recalc=True):
@@ -609,48 +604,54 @@ class DifferentialActionModel:
         data.Fx[:,:nv] = data.pinocchio.ddq_dq
         data.Fx[:,nv:] = data.pinocchio.ddq_dv
         data.Fu[:,:]   = pinocchio.computeMinverse(model.pinocchio,data.pinocchio,q)
-        
-        R = data.pinocchio.oMf[model.frameIdx].rotation
+
         pinocchio.computeJointJacobians(model.pinocchio,data.pinocchio,q)
         pinocchio.updateFramePlacements(model.pinocchio,data.pinocchio)
-        J = pinocchio.getFrameJacobian(model.pinocchio,data.pinocchio,model.frameIdx,
-                                       pinocchio.ReferenceFrame.LOCAL)
-        data.Rx[:3,:nv] = model.costWeights[0]*R*J[:3,:]
-        data.Rx[3:3+ndx,:ndx] = model.costWeights[1]*model.State.Jdiff(model.xref,x,'second')
-        data.Ru[3+ndx:,:] = model.costWeights[2]*eye(nu)
-        data.L[:,:] = np.dot(data.R.T,data.R)
-        data.g[:] = np.dot(data.R.T,data.costResiduals)
+        model.costs.calcDiff(data.costs,x,u,recalc=False)
+        
         return data.xout,data.cost
 
 class DifferentialActionData:
     def __init__(self,model):
         self.pinocchio = model.pinocchio.createData()
+        self.costs = model.costs.createData(self.pinocchio)
         self.cost = np.nan
-        self.costResiduals = np.zeros(model.ncost)
         self.xout = np.zeros(model.nout)
         nx,nu,ndx,nq,nv,nout = model.nx,model.nu,model.State.ndx,model.nq,model.nv,model.nout
         self.F = np.zeros([ nout,ndx+nu ])
+        self.costResiduals = self.costs.residuals
         self.Fx = self.F[:,:ndx]
         self.Fu = self.F[:,-nu:]
-        self. L = np.zeros([ ndx+nu, ndx+nu ])
-        self.Lxx = self.L[:ndx,:ndx]
-        self.Lxu = self.L[:ndx,ndx:]
-        self.Lux = self.L[ndx:,:ndx]
-        self.Luu = self.L[ndx:,ndx:]
-        self.g   = np.zeros( ndx+nu )
-        self.Lx = self.g[:nx]
-        self.Lu = self.g[-nu:]
-        self.R = np.zeros([ model.ncost,ndx+nu ])
-        self.Rx = self.R[:,:ndx]
-        self.Ru = self.R[:,-nu:]
-        
+        self.g   = self.costs.g
+        self.L   = self.costs.L
+        self.Lx  = self.costs.Lx
+        self.Lu  = self.costs.Lu
+        self.Lxx = self.costs.Lxx
+        self.Lxu = self.costs.Lxu
+        self.Luu = self.costs.Luu
+        self.Rx  = self.costs.Rx
+        self.Ru  = self.costs.Ru
 
-model = DifferentialActionModel(rmodel)
-data = model.createData()
+class DifferentialActionModelPositioning(DifferentialActionModel):
+    def __init__(self,pinocchioModel,frameName='gripper_left_fingertip_2_link'):
+        DifferentialActionModel.__init__(self,pinocchioModel)
+        self.costs.addCost( name="pos", weight = 10,
+                            cost = CostModelPosition(pinocchioModel,
+                                                     pinocchioModel.getFrameId(frameName),
+                                                     np.array([.5,.4,.3])))
+        self.costs.addCost( name="regx", weight = 0.1,
+                            cost = CostModelState(pinocchioModel,self.State,
+                                                  self.State.zero()) )
+        self.costs.addCost( name="regu", weight = 0.01,
+                            cost = CostModelControl(pinocchioModel) )
+        
 q = m2a(pinocchio.randomConfiguration(rmodel))
 v = np.random.rand(rmodel.nv)*2-1
 x = np.concatenate([q,v])
 u = np.random.rand(rmodel.nv)*2-1
+
+model = DifferentialActionModelPositioning(rmodel)
+data = model.createData()
 
 a,l = model.calc(data,x,u)
 model.calcDiff(data,x,u)
@@ -665,7 +666,10 @@ class DifferentialActionModelNumDiff:
         self.nu = model.nu
         self.State = model.State
         self.disturbance = 1e-5
-        self.ncost = model.ncost if 'ncost' in model.__dict__ else 1
+        try:
+            self.ncost = model.ncost
+        except:
+            self.ncost = 1
         self.withGaussApprox = withGaussApprox
         assert( not self.withGaussApprox or self.ncost>1 )
         
@@ -734,10 +738,11 @@ class IntegratedActionModelEuler:
         self.nx    = self.differential.nx
         self.ndx   = self.differential.ndx
         self.nu    = self.differential.nu
-        self.ncost = self.differential.ncost
         self.nq    = self.differential.nq
         self.nv    = self.differential.nv
         self.timeStep = 1e-3
+    @property
+    def ncost(self): return self.differential.ncost
     def createData(self): return IntegratedActionDataEuler(self)
     def calc(model,data,x,u=None):
         nx,ndx,nu,ncost,nq,nv,dt = model.nx,model.ndx,model.nu,model.ncost,model.nq,model.nv,model.timeStep
@@ -757,21 +762,10 @@ class IntegratedActionModelEuler:
         model.differential.calcDiff(data.differential,x,u,recalc=False)
         dxnext_dx,dxnext_ddx = model.State.Jintegrate(x,data.dx)
         da_dx,da_du = data.differential.Fx,data.differential.Fu
-        '''
-        xnext = x [+] [ v*h + a*h*h; a*h ]
-        dx    =       [ v*h + a*h*h; a*h ]
-        dxnext_dx = d(int(x,dx))_dx + d(int(x,dx))_ddx ddx_dx
-                  = dint_dx  + h*dint_ddx d[v + a*h; a]_dx + h*dint_ddx d[v + ah ; a]_da da_dx
-                  = dint_dx  + h*dint_ddx (   [ 0 I ; 0 0 ] + [ da_dx*h ; da_dx ] )
-        dxnext_du =          h*dint_ddx* [ da_du*h ; da_du ]
-        '''
         ddx_dx = np.vstack([ da_dx*dt, da_dx ]); ddx_dx[range(nv),range(nv,2*nv)] += 1
         data.Fx[:,:] = dxnext_dx + dt*np.dot(dxnext_ddx,ddx_dx)
         ddx_du = np.vstack([ da_du*dt, da_du ])
         data.Fu[:,:] = dt*np.dot(dxnext_ddx,ddx_du)
-        '''
-        
-        '''
         data.g[:] = data.differential.g
         data.L[:] = data.differential.L
         
@@ -799,7 +793,7 @@ class IntegratedActionDataEuler:
         self.Rx = self.R[:,:ndx]
         self.Ru = self.R[:,ndx:]
 
-dmodel = DifferentialActionModel(rmodel)
+dmodel = DifferentialActionModelPositioning(rmodel)
 ddata  = dmodel.createData()
 model  = IntegratedActionModelEuler(dmodel)
 data   = model.createData()
@@ -809,7 +803,8 @@ u = np.zeros( model.nu )
 xn,c = model.calc(data,x,u)
 
 model.timeStep = 1
-model.differential.costWeights = [1,1,1]
+model.differential.costs
+for k in model.differential.costs.costs.keys(): model.differential.costs[k].weight = 1
 
 model.calcDiff(data,x,u)
 
@@ -826,8 +821,11 @@ assert( norm(dnum.Lxx-data.Lxx) < 10*np.sqrt(mnum.disturbance) )
 assert( norm(dnum.Lxu-data.Lxu) < 10*np.sqrt(mnum.disturbance) )
 assert( norm(dnum.Luu-data.Luu) < 10*mnum.disturbance )
 
+# -------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # --- DDP FOR THE ARM ---
-dmodel = DifferentialActionModel(rmodel)
+dmodel = DifferentialActionModelPositioning(rmodel)
 model  = IntegratedActionModelEuler(dmodel)
 
 from refact import ShootingProblem,SolverKKT,SolverDDP
@@ -843,67 +841,3 @@ xddp,uddp,dddp = ddp.solve()
 assert( norm(uddp[0]-ukkt[0]) < 1e-6 )
 
 
-# --- DDP INTEGRATIVE TEST
-T = 20
-model.timeStep = 1e-2
-termmodel  = IntegratedActionModelEuler(DifferentialActionModel(rmodel))
-termmodel.differential.costWeights[0] = 1
-termmodel.differential.costWeights[1] = 0.1
-
-x0 = np.concatenate( [m2a(rmodel.neutralConfiguration),np.zeros(rmodel.nv)] )
-model.differential.xref = x0.copy()
-problem = ShootingProblem(x0, [ model ]*T, termmodel)
-ddp = SolverDDP(problem)
-ugrav = m2a(pinocchio.rnea(rmodel,rdata,a2m(problem.initialState[:rmodel.nq]),
-                           a2m(np.zeros(rmodel.nv)),a2m(np.zeros(rmodel.nv))  ))
-
-#xddp,uddp,dddp = ddp.solve(verbose=True)
-
-
-termmodel.differential.costWeights[0] = 10
-ddp.setCandidate()
-#xddp,uddp,dddp = ddp.solve(verbose=True)
-ddp.computeDirection()
-try:
-    ddp.tryStep(1)
-except ArithmeticError as err:
-    assert(err.args[0] == 'forward error')
-
-'''
-termmodel.differential.costWeights[0] = 100
-xs,us,done = ddp.solve(verbose=True)
-assert(done)
-'''
-
-def disp(xs,dt=0.1):
-    import time
-    for x in xs:
-        robot.display(a2m(x[:robot.nq]))
-        time.sleep(dt)
-
-#robot.initDisplay()
-
-class SolverLogger:
-    def __init__(self):
-        self.steps = []
-        self.iters = []
-        self.costs = []
-        self.regularizations = []
-    def __call__(self,solver):
-        self.steps.append( solver.stepLength )
-        self.iters.append( solver.iter )
-        self.costs.append( [ d.cost for d in solver.datas() ] )
-        self.regularizations.append( solver.x_reg )
-        
-ddp.callback = SolverLogger()
-
-'''
-termmodel.differential.costWeights[0] = 1
-ddp.solve(verbose=True)
-for i in range(1,5):
-    termmodel.differential.costWeights[0] = 10**i
-    ddp.solve(maxiter=5,init_xs=ddp.xs,init_us=ddp.us,verbose=True,isFeasible=True,regInit=1e-3)
-    print '\n',problem.terminalData.differential.pinocchio.oMf[model.differential.frameIdx].translation.T,'\n'
-'''
-
-import matplotlib.pylab as plt
