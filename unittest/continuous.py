@@ -178,6 +178,121 @@ assert(norm(J2 -J2_num )<1e-2)
 assert(norm(J1 -J1_num )<1e-2)
 
 
+# --------------------------------------------------------------
+# --------------------------------------------------------------
+# --------------------------------------------------------------
+
+class CostModelPinocchio:
+    '''
+    This class defines a template of cost model whose function and derivatives
+    can be evaluated from pinocchio data only (no need to recompute anything
+    in particular to be given the variables x,u).
+    '''
+    def __init__(self,pinocchioModel,ncost):
+        self.ncost = ncost
+        self.nq = pinocchioModel.nq
+        self.nv = pinocchioModel.nv
+        self.nx = self.nq+self.nv
+        self.pinocchio = pinocchioModel
+
+    def createData(self,pinocchioData):
+        return self.CostDataType(self,pinocchioData)
+    def calc(model,data):
+        assert(False and "This should be defined in the derivative class.")
+    def calcDiff(model,data):
+        assert(False and "This should be defined in the derivative class.")
+
+class CostDataPinocchio:
+    '''
+    Abstract data class corresponding to the abstract model class
+    CostModelPinocchio.
+    '''
+    def __init__(self,model,pinocchioData,withResiduals=True):
+        ncost,nq,nv,nx,nu = model.ncost,model.nq,model.nv,model.nx
+        self.pinocchio = pinocchioData
+        self.cost = np.nan
+        self.g = np.zeros(nx+nu)
+        self.L = np.zeros(nx+nu,nx+nu)
+
+        self.Lx = self.g[:nx]
+        self.Lu = self.g[nx:]
+        
+        self.Lxx = self.L[:nx,:nx]
+        self.Lxu = self.L[:nx,:nu]
+        self.Luu = self.L[:nu,:nu]
+
+        self.Lq  = self.Lx [:nv]
+        self.Lqq = self.Lxx[:nv,:nv]
+        self.Lv  = self.Lx [nv:]
+        self.Lvv = self.Lxx[nv:,nv:]
+
+        if withResiduals:
+            self.residuals = np.zeros(ncost)
+            self.R  = np.zeros(ncost,nx+nu)
+            self.Rx = self.R[:,:nx]
+            self.Ru = self.R[:,nx:]
+            self.Rq  = self.Rx [:,  :nv]
+            self.Rv  = self.Rx [:,  nv:]
+
+        
+class CostModelPosition:
+    '''
+    The class proposes a model of a cost function positioning (3d) 
+    a frame of the robot. Paramterize it with the frame index frameIdx and
+    the effector desired position ref.
+    '''
+    def __init__(self,pinocchioModel,frame,ref):
+        self.ncost = 3
+        self.nq = pinocchioModel.nq
+        self.nv = pinocchioModel.nv
+        self.nx = self.nq+self.nv
+        self.pinocchio = pinocchioModel
+        self.ref = ref
+        self.frame = frame
+    def createData(self,pinocchioData):
+        return CostDataPosition(self,pinocchioData)
+    def calc(model,data):
+        data.residuals = m2a(data.pinocchio.oMf[self.frame].translation) -data.ref
+        data.cost = .5*sum(data.residuals**2)
+    def calcDiff(model,data):
+        ncost,nq,nv,nx,nu = model.ncost,model.nq,model.nv,model.nx
+        pinocchio.updateFramePlacements(model.pinocchio,data.pinocchio)
+        J = pinocchio.getFrameJacobian(model.pinocchio,data.pinocchio,model.frameIdx,
+                                       pinocchio.ReferenceFrame.LOCAL)
+        data.Rq[:,:nq] = J
+        data.Lq[:]     = J.T*data.residuals
+        data.Lqq[:,:]  = J.T*J
+    
+class CostDataPosition:
+    def __init__(self,model,pinocchioData):
+        ncost,nq,nv,nx,nu = model.ncost,model.nq,model.nv,model.nx
+        self.pinocchio = pinocchioData
+        self.cost = np.nan
+        self.Lx = np.zeros(nx)
+        self.Lu = 0
+        self.Lxx = np.zeros([ nx,nx ])
+        self.Lxu = 0
+        self.Luu = 0
+
+        self.residuals = np.zeros(ncost)
+        self.Rx = np.zeros([ ncost, nx ])
+        self.Ru = 0
+
+        self.Lq  = self.Lx [:nv]
+        self.Lqq = self.Lxx[:nv,:nv]
+        self.Rq  = self.Rx [:,  :nv]
+
+costModel = CostModelPosition(rmodel,
+                              rmodel.getFrameId('gripper_left_fingertip_2_link'),
+                              np.array([.5,.4,.3]))
+
+stophere
+# --------------------------------------------------------------
+# --------------------------------------------------------------
+# --------------------------------------------------------------
+
+
+
 class DifferentialActionModel:
     def __init__(self,pinocchioModel):
         self.pinocchio = pinocchioModel
@@ -443,7 +558,6 @@ assert( norm(dnum.Lxx-data.Lxx) < 10*np.sqrt(mnum.disturbance) )
 assert( norm(dnum.Lxu-data.Lxu) < 10*np.sqrt(mnum.disturbance) )
 assert( norm(dnum.Luu-data.Luu) < 10*mnum.disturbance )
 
-
 # --- DDP FOR THE ARM ---
 dmodel = DifferentialActionModel(rmodel)
 model  = IntegratedActionModelEuler(dmodel)
@@ -487,18 +601,41 @@ try:
 except ArithmeticError as err:
     assert(err.args[0] == 'forward error')
 
-
+'''
 termmodel.differential.costWeights[0] = 100
-xs,us,done = ddp.solve()
+xs,us,done = ddp.solve(verbose=True)
 assert(done)
-    
+'''
+
 def disp(xs,dt=0.1):
     import time
     for x in xs:
         robot.display(a2m(x[:robot.nq]))
         time.sleep(dt)
 
-robot.initDisplay()
+#robot.initDisplay()
 
+class SolverLogger:
+    def __init__(self):
+        self.steps = []
+        self.iters = []
+        self.costs = []
+        self.regularizations = []
+    def __call__(self,solver):
+        self.steps.append( solver.stepLength )
+        self.iters.append( solver.iter )
+        self.costs.append( [ d.cost for d in solver.datas() ] )
+        self.regularizations.append( solver.x_reg )
+        
+ddp.callback = SolverLogger()
 
-    
+'''
+termmodel.differential.costWeights[0] = 1
+ddp.solve(verbose=True)
+for i in range(1,5):
+    termmodel.differential.costWeights[0] = 10**i
+    ddp.solve(maxiter=5,init_xs=ddp.xs,init_us=ddp.us,verbose=True,isFeasible=True,regInit=1e-3)
+    print '\n',problem.terminalData.differential.pinocchio.oMf[model.differential.frameIdx].translation.T,'\n'
+'''
+
+import matplotlib.pylab as plt
