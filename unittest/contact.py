@@ -175,15 +175,39 @@ assert(absmax(data.Fu-dnum.Fu)/model.nu < 1e-3 )
 
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
+class ContactModelPinocchio:
+    def __init__(self,pinocchioModel,ncontact):
+        self.pinocchio = pinocchioModel
+        self.nq,self.nv = pinocchioModel.nq,pinocchioModel.nv
+        self.nx = self.nq+self.nv
+        self.ndx = 2*self.nv
+        self.ncontact = ncontact
+    def createData(self,pinocchioData):
+        return ContactDataType(self,pinocchioData)
+    def calc(model,data,x):
+        assert(False and "This should be defined in the derivative class.")
+    def calcDiff(model,data,x,recalc=True):
+        assert(False and "This should be defined in the derivative class.")
+    def forces(model,data,forcesArr):
+        ''' Convert a numpy array of forces into a stdVector of spatial forces.'''
+        assert(False and "This should be defined in the derivative class.")
+
+class ContactDataPinocchio:
+    def __init__(self,model,pinocchioData):
+        nc,nq,nv,nx,ndx = model.ncontact,model.nq,model.nv,model.nx,model.ndx
+        self.pinocchio = pinocchioData
+        self.J = np.zeros([ nc,nv ])
+        self.a0 = np.zeros(nc)
+        self.Ax = np.zeros([ nc, ndx ])
+        self.Aq = self.Ax[:,:nv]
+        self.Av = self.Ax[:,nv:]
+        self.fs = pinocchio.StdVect_Force()
+        for i in range(model.pinocchio.njoints): self.fs.append(pinocchio.Force.Zero())
 # -----------------------------------------------------------------------------
 
-class ContactModel6D:
+class ContactModel6D(ContactModelPinocchio):
     def __init__(self,pinocchioModel,frame,ref):
-        self.pinocchio = pinocchioModel
-        self.nq,self.nv = self.pinocchio.nq, self.pinocchio.nv
-        self.nx = self.nv+self.nq
-        self.ndx = self.nv*2
-        self.nc  = 6
+        ContactModelPinocchio.__init__(self,pinocchioModel,ncontact=6)
         self.frame = frame
         self.ref = ref # not used yet ... later
     def createData(self,pinocchioData):
@@ -210,17 +234,9 @@ class ContactModel6D:
         data.fs[data.joint] = data.jMf*pinocchio.Force(-a2m(forcesArr))
         return data.fs
     
-class ContactData6D:
+class ContactData6D(ContactDataPinocchio):
     def __init__(self,model,pinocchioData):
-        nc,nq,nv,nx,ndx = model.nc,model.nq,model.nv,model.nx,model.ndx
-        self.pinocchio = pinocchioData
-        self.J = np.zeros([ nc,nv ])
-        self.a0 = np.zeros(nc)
-        self.Ax = np.zeros([ nc, ndx ])
-        self.Aq = self.Ax[:,:nv]
-        self.Av = self.Ax[:,nv:]
-        self.fs = pinocchio.StdVect_Force()
-        for i in range(model.pinocchio.njoints): self.fs.append(pinocchio.Force.Zero())
+        ContactDataPinocchio.__init__(self,model,pinocchioData)
         frame = model.pinocchio.frames[model.frame]
         self.joint = frame.parent       
         self.jMf = frame.placement
@@ -247,6 +263,13 @@ contactModel.calc(contactData2,x)
 assert(norm(contactData.a0-contactData2.a0)<1e-9)
 assert(norm(contactData.J -contactData2.J )<1e-9)
 
+# ----------------------------------------------------------------------------
+# Many contact model
+
+# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 class DifferentialActionModelFloatingInContact:
     def __init__(self,pinocchioModel,actuationModel,contactModel):
         self.pinocchio = pinocchioModel
@@ -263,7 +286,7 @@ class DifferentialActionModelFloatingInContact:
     @property
     def ncost(self): return self.costs.ncost
     @property
-    def ncontact(self): return self.contact.nc
+    def ncontact(self): return self.contact.ncontact
     def createData(self): return DifferentialActionDataFloatingInContact(self)
     def calc(model,data,x,u=None):
         if u is None: u=model.unone
