@@ -14,7 +14,7 @@ path = '/home/nmansard/src/cddp/examples/'
 
 urdf = path + 'talos_data/robots/talos_left_arm.urdf'
 robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(urdf, [path] \
-                                                           ,pinocchio.JointModelFreeFlyer() \
+#                                                           ,pinocchio.JointModelFreeFlyer() \
 )
 
 #urdf = path + 'hyq_description/robots/hyq_no_sensors.urdf'
@@ -452,8 +452,109 @@ costModelND.calcDiff(costDataND,x,u)
 assert( absmax(costData.g-costDataND.g) < 1e-3 )
 assert( absmax(costData.L-costDataND.L) < 1e-3 )
     
+# --------------------------------------------------------------
+class CostModelSum(CostModelPinocchio):
+    # This could be done with a namedtuple but I don't like the read-only labels.
+    class CostItem:
+        def __init__(self,name,cost,weight):
+            self.name = name; self.cost = cost; self.weight = weight
+        def __str__(self):
+            return "CostItem(name=%s, cost=%s, weight=%s)" \
+                % ( str(self.name),str(self.cost.__class__),str(self.weight) )
+        __repr__=__str__
+    def __init__(self,pinocchioModel,nu=None,withResiduals=True):
+        self.CostDataType = CostDataSum
+        CostModelPinocchio.__init__(self,pinocchioModel,ncost=0)
+        self.costs = {}
+    def addCost(self,name,cost,weight):
+        assert( cost.withResiduals and \
+                '''The cost-of-sums class has not been designed nor tested for non sum of squares
+                cost functions. It should not be a big deal to modify it, but this is not done
+                yet. ''' )
+        self.costs[name] = self.CostItem(cost=cost,name=name,weight=weight)
+        self.ncost += cost.ncost
+    def __getitem__(self,key):
+        if isinstance(key,str):
+            assert(key in self.costs)
+            return self.costs[key]
+        elif isinstance(key,CostModelPinocchio):
+            filter = [ v for k,v in self.costs.items() if v.cost==key ]
+            assert(len(filter) == 1 and "The given key is not or not unique in the costs dict. ")
+            return filter[0]
+    def calc(model,data,x,u):
+        data.cost = 0
+        nr = 0
+        for m,d in zip(model.costs.values(),data.costs.values()):
+            data.cost += m.weight*m.cost.calc(d,x,u)
+            if model.withResiduals:
+                data.residuals[nr:nr+m.cost.ncost] = np.sqrt(m.weight)*d.residuals
+                nr += m.cost.ncost
+        return data.cost
+    def calcDiff(model,data,x,u,recalc=True):
+        if recalc: model.calc(data,x,u)
+        data.g.fill(0)
+        data.L.fill(0)
+        nr = 0
+        for m,d in zip(model.costs.values(),data.costs.values()):
+            m.cost.calcDiff(d,x,u,recalc=False)
+            data.Lx [:] += m.weight*d.Lx
+            data.Lu [:] += m.weight*d.Lu
+            data.Lxx[:] += m.weight*d.Lxx
+            data.Lxu[:] += m.weight*d.Lxu
+            data.Luu[:] += m.weight*d.Luu
+            if model.withResiduals:
+                data.Rx[nr:nr+m.cost.ncost] = np.sqrt(m.weight)*d.Rx
+                data.Ru[nr:nr+m.cost.ncost] = np.sqrt(m.weight)*d.Ru
+                nr += m.cost.ncost
+        return data.cost
+    
+class CostDataSum(CostDataPinocchio):
+    def __init__(self,model,pinocchioData):
+        CostDataPinocchio.__init__(self,model,pinocchioData)
+        self.model = model
+        self.costs = { i.name: i.cost.createData(pinocchioData) for i in model.costs.values() }
+    def __getitem__(self,key):
+        if isinstance(key,str):
+            assert(key in self.costs)
+            return self.costs[key]
+        elif isinstance(key,CostModelPinocchio):
+            filter = [ k for k,v in self.model.costs.items() if v.cost==key ]
+            assert(len(filter) == 1 and "The given key is not or not unique in the costs dict. ")
+            return self.costs[filter[0]]
 
-stophere
+X = StatePinocchio(rmodel)
+q = pinocchio.randomConfiguration(rmodel)
+v = rand(rmodel.nv)
+x = m2a(np.concatenate([q,v]))
+u = m2a(rand(rmodel.nv))
+
+cost1 = CostModelPosition(rmodel,
+                              rmodel.getFrameId('gripper_left_fingertip_2_link'),
+                              np.array([.5,.4,.3]))
+cost2 = CostModelState(rmodel,X,X.rand())
+cost3 = CostModelControl(rmodel)
+
+costModel = CostModelSum(rmodel)
+costModel.addCost("pos",cost1,10)
+#costModel.addCost("regx",cost2,.1)
+#costModel.addCost("regu",cost3,.01)
+costData = costModel.createData(rdata)
+
+pinocchio.forwardKinematics(rmodel,rdata,q,v)
+pinocchio.computeJointJacobians(rmodel,rdata,q)
+pinocchio.updateFramePlacements(rmodel,rdata)
+costModel.calcDiff(costData,x,u)
+
+costModelND = CostModelNumDiff(costModel,StatePinocchio(rmodel),withGaussApprox=True,
+                               reevals = [ lambda m,d,x,u: pinocchio.forwardKinematics(m,d,a2m(x[:rmodel.nq]),a2m(x[rmodel.nq:])),
+                                           lambda m,d,x,u: pinocchio.computeJointJacobians(m,d,a2m(x[:rmodel.nq])),
+                                           lambda m,d,x,u: pinocchio.updateFramePlacements(m,d) ])
+costDataND  = costModelND.createData(rdata)
+costModelND.calcDiff(costDataND,x,u)
+
+assert( absmax(costData.g-costDataND.g) < 1e-3 )
+assert( absmax(costData.L-costDataND.L) < 1e-3 )
+
 # --------------------------------------------------------------
 # --------------------------------------------------------------
 # --------------------------------------------------------------
