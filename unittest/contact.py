@@ -177,19 +177,24 @@ assert(absmax(data.Fu-dnum.Fu)/model.nu < 1e-3 )
 # -----------------------------------------------------------------------------
 class ContactModelPinocchio:
     def __init__(self,pinocchioModel,ncontact):
+        assert(hasattr(self,'ContactDataType'))
         self.pinocchio = pinocchioModel
         self.nq,self.nv = pinocchioModel.nq,pinocchioModel.nv
         self.nx = self.nq+self.nv
         self.ndx = 2*self.nv
         self.ncontact = ncontact
     def createData(self,pinocchioData):
-        return ContactDataType(self,pinocchioData)
+        return self.ContactDataType(self,pinocchioData)
     def calc(model,data,x):
         assert(False and "This should be defined in the derivative class.")
     def calcDiff(model,data,x,recalc=True):
         assert(False and "This should be defined in the derivative class.")
-    def forces(model,data,forcesArr):
-        ''' Convert a numpy array of forces into a stdVector of spatial forces.'''
+    def forces(model,data,forcesArr,forcesVec = None):
+        '''
+        Convert a numpy array of forces into a stdVector of spatial forces.
+        If forcesVec is not none, sum the result in it. Otherwise, reset self.fs
+        and put the result there.
+        '''
         assert(False and "This should be defined in the derivative class.")
 
 class ContactDataPinocchio:
@@ -207,11 +212,10 @@ class ContactDataPinocchio:
 
 class ContactModel6D(ContactModelPinocchio):
     def __init__(self,pinocchioModel,frame,ref):
+        self.ContactDataType = ContactData6D
         ContactModelPinocchio.__init__(self,pinocchioModel,ncontact=6)
         self.frame = frame
         self.ref = ref # not used yet ... later
-    def createData(self,pinocchioData):
-        return ContactData6D(self,pinocchioData)
     def calc(model,data,x):
         # We suppose forwardKinematics(q,v,a), computeJointJacobian and updateFramePlacement already
         # computed.
@@ -225,13 +229,16 @@ class ContactModel6D(ContactModelPinocchio):
                                    pinocchio.ReferenceFrame.LOCAL)
         data.Aq[:,:] = data.fXj*da_dq
         data.Av[:,:] = data.fXj*da_dv
-    def forces(model,data,forcesArr):
+    def forces(model,data,forcesArr,forcesVec=None):
         '''
         Convert a numpy array of forces into a stdVector of spatial forces.
         '''
         # In the dynamic equation, we wrote M*a + J.T*fdyn, while in the ABA it would be
         # M*a + b = tau + J.T faba, so faba = -fdyn (note the minus operator before a2m).
-        data.fs[data.joint] = data.jMf*pinocchio.Force(-a2m(forcesArr))
+        if forcesVec is None:
+            forcesVec = data.fs
+            data.fs[data.joint] *= 0
+        forcesVec[data.joint] += data.jMf*pinocchio.Force(-a2m(forcesArr))
         return data.fs
     
 class ContactData6D(ContactDataPinocchio):
@@ -264,7 +271,54 @@ assert(norm(contactData.a0-contactData2.a0)<1e-9)
 assert(norm(contactData.J -contactData2.J )<1e-9)
 
 # ----------------------------------------------------------------------------
+from collections import OrderedDict
+
 # Many contact model
+class ContactModelMultiple(ContactModelPinocchio):
+    def __init__(self,pinocchioModel):
+        self.ContactDataType = ContactDataMultiple
+        ContactModelPinocchio.__init__(self,pinocchioModel,ncontact=0)
+        self.contacts = OrderedDict()
+    def addContact(self,name,contact):
+        self.contacts.update([[name,contact]])
+        self.ncontact += contact.ncontact
+    def calc(model,data,x):
+        npast = 0
+        for m,d in zip(model.contacts.values(),data.contacts.values()):
+            m.calc(d,x)
+            data.a0[npast:npast+m.ncontact]   = d.a0
+            data.J [npast:npast+m.ncontact,:] = d.J
+            npast += m.ncontact
+    def calcDiff(model,data,x,recalc=True):
+        if recalc: model.calc(data,x)
+        npast = 0
+        for m,d in zip(model.contacts.values(),data.contacts.values()):
+            m.calcDiff(d,x,recalc=False)
+            data.Ax[npast:npast+m.ncontact,:]   = d.Ax
+            npast += m.ncontact
+    def forces(model,data,fsArr):
+        npast = 0 
+        for i,f in enumerate(data.fs): data.fs[i] *= 0
+        for m,d in zip(model.contacts.values(),data.contacts.values()):
+            m.forces(d,fsArr[npast:npast+m.ncontact],data.fs)
+            npast += m.ncontact
+            
+class ContactDataMultiple(ContactDataPinocchio):
+    def __init__(self,model,pinocchioData):
+        ContactDataPinocchio.__init__(self,model,pinocchioData)
+        nc,nq,nv,nx,ndx = model.ncontact,model.nq,model.nv,model.nx,model.ndx
+        self.contacts = OrderedDict([ [k,m.createData(pinocchioData)] for k,m in model.contacts.items() ])
+       
+contactModel = ContactModelMultiple(rmodel)
+contactModel.addContact('1',ContactModel6D(rmodel,rmodel.getFrameId('gripper_left_fingertip_2_link'),ref=None))
+
+contactData = contactModel.createData(rdata)
+
+q = pinocchio.randomConfiguration(rmodel)
+v = rand(rmodel.nv)*2-1
+x = np.concatenate([ m2a(q),m2a(v) ])
+contactModel.calc(contactData,x)
+contactModel.calcDiff(contactData,x)
 
 # ----------------------------------------------------------------------------
 # ----------------------------------------------------------------------------
@@ -402,6 +456,9 @@ actModel = ActuationModelFreeFloating(rmodel)
 contactModel = ContactModel6D(rmodel,rmodel.getFrameId('arm_left_7_joint'),ref=None)
 contactModel = ContactModel6D(rmodel,rmodel.getFrameId('gripper_left_fingertip_2_link'),ref=None)
 rmodel.frames[contactModel.frame].placement = pinocchio.SE3.Random()
+contactModel6 = contactModel
+contactModel = ContactModelMultiple(rmodel)
+contactModel.addContact(name='fingertip',contact=contactModel6)
 
 model = DifferentialActionModelFloatingInContact(rmodel,actModel,contactModel)
 data  = model.createData()
