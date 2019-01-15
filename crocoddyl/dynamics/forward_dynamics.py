@@ -1,5 +1,5 @@
-from crocoddyL.dynamics.dynamics import DynamicData
-from crocoddyL.dynamics.dynamics import DynamicModel
+from crocoddyl.dynamics.dynamics import DynamicData
+from crocoddyl.dynamics.dynamics import DynamicModel
 import pinocchio as se3
 import numpy as np
 

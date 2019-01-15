@@ -1,4 +1,4 @@
-Contact RObot COntrol by Differential DYnamic programming Library (crocoddyL)
+Contact RObot COntrol by Differential DYnamic programming library (crocoddyl)
 ===============================================
 
 ## <img align="center" height="20" src="https://i.imgur.com/vAYeCzC.png"/> Introduction

@@ -1,6 +1,6 @@
-from crocoddyL.dynamics.dynamics import DynamicData
-from crocoddyL.dynamics.dynamics import DynamicModel
-from crocoddyL.utils import EPS
+from crocoddyl.dynamics.dynamics import DynamicData
+from crocoddyl.dynamics.dynamics import DynamicModel
+from crocoddyl.utils import EPS
 import pinocchio as se3
 import numpy as np
 
@@ -18,10 +18,10 @@ class FloatingBaseMultibodyDynamicData(DynamicData):
     self.gv = np.zeros((nc, dynamicModel.nv()))
     self.gu = np.zeros((nc, dynamicModel.nu()))
 
-    # Terms required for updatng the dynamics
-    self.contactJ = np.zeros((nc, dynamicModel.nv()))
-    self.gamma = np.zeros((nc, 1))
-    self._contactFrameIndices = dynamicModel.contactInfo(t)
+    # Terms required for updating the dynamics
+    self.Jc = np.zeros((nc, dynamicModel.nv()))
+    self.a_ref = np.zeros((nc, 1))
+    self.contactFrames = dynamicModel.contactInfo(t)
 
     # Terms required for updating the linear approximation
     self.MJtJc = np.zeros((dynamicModel.nv() + nc,
@@ -75,9 +75,9 @@ class FloatingBaseMultibodyDynamics(DynamicModel):
     dynamicData.MJtJc[:self.nv(),:self.nv()] = \
       dynamicData.pinocchio.M
     dynamicData.MJtJc[:self.nv(),self.nv():] = \
-      dynamicData.contactJ.T
+      dynamicData.Jc.T
     dynamicData.MJtJc[self.nv():,:self.nv()] = \
-      dynamicData.contactJ
+      dynamicData.Jc
 
     #TODO: REMOVE PINV!!!! USE DAMPED CHOLESKY
     #np.fill_diagonal(self.MJtJc, self.MJtJc.diagonal()+self.eps)
@@ -133,16 +133,30 @@ class FloatingBaseMultibodyDynamics(DynamicModel):
     se3.updateFramePlacements(self.pinocchio,
                               dynamicData.pinocchio)
 
-    # Update the Joint jacobian and gamma
-    for k, cs in enumerate(dynamicData._contactFrameIndices):
-      dynamicData.contactJ[self.contactInfo.nc*k:
-                            self.contactInfo.nc*(k+1),:] = \
+    # Update the Joint Jacobian and the reference acceleration
+    for k, frame_id in enumerate(dynamicData.contactFrames):
+      # Computing the frame Jacobian in the local frame
+      dynamicData.Jc[self.contactInfo.nc*k:
+                           self.contactInfo.nc*(k+1),:] = \
         se3.getFrameJacobian(
-          self.pinocchio, dynamicData.pinocchio, cs,
+          self.pinocchio, dynamicData.pinocchio, frame_id,
           se3.ReferenceFrame.LOCAL)[:self.contactInfo.nc,:]
-    #TODO gamma
-    dynamicData.gamma.fill(0.)
+
+      # Mapping the reference acceleration into the local frame
+      # TODO define a good interface for contact phase and then remove this hard
+      # coded if-rule
+      if self.contactInfo.nc == 3:
+        dynamicData.a_ref[self.contactInfo.nc*k:
+                          self.contactInfo.nc*(k+1)] = \
+          se3.getFrameAcceleration(self.pinocchio, dynamicData.pinocchio, frame_id).linear
+      elif self.contactInfo.nc == 6:
+        dynamicData.a_ref[self.contactInfo.nc*k:
+                          self.contactInfo.nc*(k+1)] = \
+          se3.getFrameAcceleration(self.pinocchio, dynamicData.pinocchio, frame_id).vector
+      else:
+        print "nc has to be equals to 3 or 6"
+
     se3.forwardDynamics(self.pinocchio,
                         dynamicData.pinocchio,
                         q, v, tau,
-                        dynamicData.contactJ, dynamicData.gamma, 1e-8, False)
+                        dynamicData.Jc, dynamicData.a_ref, 1e-8, False)

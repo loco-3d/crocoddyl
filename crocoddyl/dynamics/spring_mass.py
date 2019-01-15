@@ -1,5 +1,5 @@
-from crocoddyL.dynamics.dynamics import DynamicModel
-from crocoddyL.dynamics.dynamics import DynamicData
+from crocoddyl.dynamics.dynamics import DynamicModel
+from crocoddyl.dynamics.dynamics import DynamicData
 import numpy as np
 
 
