@@ -475,7 +475,8 @@ class ActionModelNumDiff:
         self.nu = model.nu
         self.State = model.State
         self.disturbance = 1e-5
-        self.ncost = model.ncost if 'ncost' in model.__dict__ else 1
+        try:            self.ncost = model.ncost
+        except:         self.ncost = 1
         self.withGaussApprox = withGaussApprox
         assert( not self.withGaussApprox or self.ncost>1 )
         
