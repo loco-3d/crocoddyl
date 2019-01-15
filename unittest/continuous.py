@@ -14,10 +14,11 @@ absmin = lambda A: np.min(abs(A))
 
 rospack = rospkg.RosPack()
 MODEL_PATH = rospack.get_path('talos_data')
+#MODEL_PATH = '/home/nmansard/src/cddp/examples'
 MESH_DIR = MODEL_PATH
 URDF_FILENAME = "talos_left_arm.urdf"
+#URDF_MODEL_PATH = MODEL_PATH + "/talos_data/robots/" + URDF_FILENAME
 URDF_MODEL_PATH = MODEL_PATH + "/robots/" + URDF_FILENAME
-
 
 robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(URDF_MODEL_PATH, [MESH_DIR])
 
@@ -211,8 +212,6 @@ class CostModelPinocchio:
     def calcDiff(model,data,x,u,recalc=True):
         assert(False and "This should be defined in the derivative class.")
 
-
-
 class CostDataPinocchio:
     '''
     Abstract data class corresponding to the abstract model class
@@ -302,9 +301,9 @@ class CostModelPosition(CostModelPinocchio):
     a frame of the robot. Paramterize it with the frame index frameIdx and
     the effector desired position ref.
     '''
-    def __init__(self,pinocchioModel,frame,ref):
+    def __init__(self,pinocchioModel,frame,ref,nu=None):
         self.CostDataType = CostDataPosition
-        CostModelPinocchio.__init__(self,pinocchioModel,ncost=3)
+        CostModelPinocchio.__init__(self,pinocchioModel,ncost=3,nu=nu)
         self.ref = ref
         self.frame = frame
     def calc(model,data,x,u):
@@ -428,9 +427,9 @@ assert( absmax(costData.L-costDataND.L) < 1e-4 )
 # --------------------------------------------------------------
 
 class CostModelState(CostModelPinocchio):
-    def __init__(self,pinocchioModel,State,ref):
+    def __init__(self,pinocchioModel,State,ref,nu=None):
         self.CostDataType = CostDataState
-        CostModelPinocchio.__init__(self,pinocchioModel,ncost=State.ndx)
+        CostModelPinocchio.__init__(self,pinocchioModel,ncost=State.ndx,nu=nu)
         self.State = State
         self.ref = ref
     def calc(model,data,x,u):
@@ -531,7 +530,7 @@ class CostModelSum(CostModelPinocchio):
         __repr__=__str__
     def __init__(self,pinocchioModel,nu=None,withResiduals=True):
         self.CostDataType = CostDataSum
-        CostModelPinocchio.__init__(self,pinocchioModel,ncost=0)
+        CostModelPinocchio.__init__(self,pinocchioModel,ncost=0,nu=nu)
         # Preserve task order in evaluation, which is a nicer behavior when debuging.
         self.costs = OrderedDict()
     def addCost(self,name,cost,weight):
