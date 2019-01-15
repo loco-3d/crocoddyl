@@ -27,6 +27,8 @@ rdata = rmodel.createData()
 
 
 # ---- FLOATING MODEL
+# Actuation model is maybe better named transmission model.
+# It would be good to write a trivial ActuationModelFull for fully actuated robot, with tau=u.
 
 class ActuationModelFreeFloating:
     '''
@@ -80,6 +82,7 @@ actModel.calcDiff(actData,x,u)
 
 
 class DifferentialActionModelActuated:
+    '''Unperfect class written to validate the actuation model. Do not use except for tests. '''
     def __init__(self,pinocchioModel,actuationModel):
         self.pinocchio = pinocchioModel
         self.actuation = actuationModel
@@ -325,12 +328,12 @@ contactModel.calcDiff(contactData,x)
 # ----------------------------------------------------------------------------
 
 class DifferentialActionModelFloatingInContact:
-    def __init__(self,pinocchioModel,actuationModel,contactModel):
+    def __init__(self,pinocchioModel,actuationModel,contactModel,costModel):
         self.pinocchio = pinocchioModel
+        self.State = StatePinocchio(self.pinocchio)
         self.actuation = actuationModel
         self.contact = contactModel
-        self.State = StatePinocchio(self.pinocchio)
-        self.costs = CostModelSum(self.pinocchio)
+        self.costs = costModel
         self.nq,self.nv = self.pinocchio.nq, self.pinocchio.nv
         self.nx = self.State.nx
         self.ndx = self.State.ndx
@@ -460,7 +463,7 @@ contactModel6 = contactModel
 contactModel = ContactModelMultiple(rmodel)
 contactModel.addContact(name='fingertip',contact=contactModel6)
 
-model = DifferentialActionModelFloatingInContact(rmodel,actModel,contactModel)
+model = DifferentialActionModelFloatingInContact(rmodel,actModel,contactModel,CostModelSum(rmodel))
 data  = model.createData()
 
 model.calc(data,x,u)
@@ -477,4 +480,48 @@ dnum = mnum.createData()
 mnum.calcDiff(dnum,x,u)
 assert(absmax(data.Fx-dnum.Fx)/model.nx<1e-3)
 assert(absmax(data.Fu-dnum.Fu)/model.nu<1e-3)
+
+
+
+# --- COMPLETE MODEL WITH COST ----
+State = StatePinocchio(rmodel)
+
+actModel = ActuationModelFreeFloating(rmodel)
+contactModel = ContactModelMultiple(rmodel)
+contactModel.addContact(name='fingertip',contact=contactModel6)
+
+costModel = CostModelSum(rmodel,nu=actModel.nu)
+costModel.addCost( name="pos", weight = 10,
+                   cost = CostModelPosition(rmodel,nu=actModel.nu,
+                                            frame=rmodel.getFrameId('gripper_left_fingertip_2_link'),
+                                            ref=np.array([.5,.4,.3])))
+costModel.addCost( name="regx", weight = 0.1,
+                   cost = CostModelState(rmodel,State,ref=State.zero(),nu=actModel.nu) )
+costModel.addCost( name="regu", weight = 0.01,
+                   cost = CostModelControl(rmodel,nu=actModel.nu) )
+
+c1 = costModel.costs['pos'].cost
+c2 = costModel.costs['regx'].cost
+c3 = costModel.costs['regu'].cost
+
+dmodel = DifferentialActionModelFloatingInContact(rmodel,actModel,contactModel,costModel)
+model  = IntegratedActionModelEuler(dmodel)
+data = model.createData()
+
+d1 = data.differential.costs .costs['pos']
+d2 = data.differential.costs .costs['regx']
+d3 = data.differential.costs .costs['regu']
+
+mnum = refact.ActionModelNumDiff(model,withGaussApprox=True)
+dnum = mnum.createData()
+
+model.calc(data,x,u)
+model.calcDiff(data,x,u)
+
+mnum.calcDiff(dnum,x,u)
+assert( norm(data.Lx-dnum.Lx) < 1e-3 )
+assert( norm(data.Lu-dnum.Lu) < 1e-3 )
+assert( norm(dnum.Lxx-data.Lxx) < 1e-3)
+assert( norm(dnum.Lxu-data.Lxu) < 1e-3)
+assert( norm(dnum.Luu-data.Luu) < 1e-3)
 
