@@ -1,3 +1,4 @@
+import rospkg
 import refact
 import pinocchio
 from pinocchio.utils import *
@@ -5,17 +6,20 @@ from numpy.linalg import inv,norm,pinv
 from numpy import dot,asarray
 from scipy.linalg import block_diag
 
+
 m2a = lambda m: np.array(m.flat)
 a2m = lambda a: np.matrix(a).T
 absmax = lambda A: np.max(abs(A))
 absmin = lambda A: np.min(abs(A))
 
-path = '/home/nmansard/src/cddp/examples/'
+rospack = rospkg.RosPack()
+MODEL_PATH = rospack.get_path('talos_data')
+MESH_DIR = MODEL_PATH
+URDF_FILENAME = "talos_left_arm.urdf"
+URDF_MODEL_PATH = MODEL_PATH + "/robots/" + URDF_FILENAME
 
-urdf = path + 'talos_data/robots/talos_left_arm.urdf'
-robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(urdf, [path] \
-#                                                           ,pinocchio.JointModelFreeFlyer() \
-)
+
+robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(URDF_MODEL_PATH, [MESH_DIR])
 
 #urdf = path + 'hyq_description/robots/hyq_no_sensors.urdf'
 #robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(urdf, [path], pinocchio.JointModelFreeFlyer())
@@ -202,9 +206,9 @@ class CostModelPinocchio:
 
     def createData(self,pinocchioData):
         return self.CostDataType(self,pinocchioData)
-    def calc(model,data,x,u,recalc=True):
+    def calc(model,data,x,u):
         assert(False and "This should be defined in the derivative class.")
-    def calcDiff(model,data,x,u):
+    def calcDiff(model,data,x,u,recalc=True):
         assert(False and "This should be defined in the derivative class.")
 
 
@@ -359,6 +363,67 @@ costModelND.calcDiff(costDataND,x,u)
 
 assert( absmax(costData.g-costDataND.g) < 1e-3 )
 assert( absmax(costData.L-costDataND.L) < 1e-3 )
+
+# --------------------------------------------------------------
+
+class CostModelCoM(CostModelPinocchio):
+    '''
+    The class proposes a model of a cost function CoM. 
+    Paramterize it with the desired CoM ref
+    '''
+    def __init__(self,pinocchioModel,ref):
+        self.CostDataType = CostDataCoM
+        CostModelPinocchio.__init__(self,pinocchioModel,ncost=3)
+        self.ref = ref
+    def calc(model,data,x,u):
+        data.residuals = m2a(data.pinocchio.com[0]) - model.ref
+        data.cost = .5*sum(data.residuals**2)
+        return data.cost
+    def calcDiff(model,data,x,u,recalc=True):
+        if recalc: model.calc(data,x,u)
+        ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
+
+        J = data.pinocchio.Jcom
+        data.Rq[:,:nq] = J
+        data.Lq[:]     = np.dot(J.T,data.residuals)
+        data.Lqq[:,:]  = np.dot(J.T,J)
+        return data.cost
+    
+class CostDataCoM(CostDataPinocchio):
+    def __init__(self,model,pinocchioData):
+        CostDataPinocchio.__init__(self,model,pinocchioData)
+        self.Lu = 0
+        self.Lv = 0
+        self.Lxu = 0
+        self.Luu = 0
+        self.Lvv = 0
+        self.Ru = 0
+        self.Rv = 0
+
+
+q = pinocchio.randomConfiguration(rmodel)
+v = rand(rmodel.nv)
+x = m2a(np.concatenate([q,v]))
+u = m2a(rand(rmodel.nv))
+
+costModel = CostModelCoM(rmodel,
+                         np.array([.5,.4,.3]))
+
+costData = costModel.createData(rdata)
+
+
+pinocchio.jacobianCenterOfMass(rmodel, rdata, q, False)
+
+costModel.calcDiff(costData,x,u)
+
+costModelND = CostModelNumDiff(costModel,StatePinocchio(rmodel),withGaussApprox=True,
+                               reevals = [ lambda m,d,x,u: pinocchio.jacobianCenterOfMass(m,d,a2m(x[:rmodel.nq]),False)])
+costDataND  = costModelND.createData(rdata)
+
+costModelND.calcDiff(costDataND,x,u)
+
+assert( absmax(costData.g-costDataND.g) < 1e-4 )
+assert( absmax(costData.L-costDataND.L) < 1e-4 )
 
 # --------------------------------------------------------------
 
