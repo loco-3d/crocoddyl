@@ -376,8 +376,6 @@ class CostModelPosition6D(CostModelPinocchio):
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=6)
         self.ref = ref
         self.ref_inv = ref.inverse()
-        self.ref_action_inv = self.ref_inv.action
-        self.fMr = None
         self.frame = frame
     def calc(model,data,x,u):
         data.rMf = model.ref_inv*data.pinocchio.oMf[model.frame]
@@ -401,6 +399,7 @@ class CostModelPosition6D(CostModelPinocchio):
 class CostDataPosition6D(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
+        self.rMf = None
         self.Lu = 0
         self.Lv = 0
         self.Lxu = 0
