@@ -295,14 +295,14 @@ class CostDataNumDiff(CostDataPinocchio):
 
 # --------------------------------------------------------------
         
-class CostModelPosition(CostModelPinocchio):
+class CostModelPosition3D(CostModelPinocchio):
     '''
     The class proposes a model of a cost function positioning (3d) 
     a frame of the robot. Paramterize it with the frame index frameIdx and
     the effector desired position ref.
     '''
     def __init__(self,pinocchioModel,frame,ref,nu=None):
-        self.CostDataType = CostDataPosition
+        self.CostDataType = CostDataPosition3D
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=3,nu=nu)
         self.ref = ref
         self.frame = frame
@@ -322,7 +322,7 @@ class CostModelPosition(CostModelPinocchio):
         data.Lqq[:,:]  = np.dot(J.T,J)
         return data.cost
     
-class CostDataPosition(CostDataPinocchio):
+class CostDataPosition3D(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
         self.Lu = 0
@@ -339,7 +339,7 @@ v = rand(rmodel.nv)
 x = m2a(np.concatenate([q,v]))
 u = m2a(rand(rmodel.nv))
 
-costModel = CostModelPosition(rmodel,
+costModel = CostModelPosition3D(rmodel,
                               rmodel.getFrameId('gripper_left_fingertip_2_link'),
                               np.array([.5,.4,.3]))
 
@@ -745,7 +745,7 @@ v = rand(rmodel.nv)
 x = m2a(np.concatenate([q,v]))
 u = m2a(rand(rmodel.nv))
 
-cost1 = CostModelPosition(rmodel,
+cost1 = CostModelPosition3D(rmodel,
                               rmodel.getFrameId('gripper_left_fingertip_2_link'),
                               np.array([.5,.4,.3]))
 cost2 = CostModelState(rmodel,X,X.rand())
@@ -847,7 +847,7 @@ class DifferentialActionModelPositioning(DifferentialActionModel):
     def __init__(self,pinocchioModel,frameName='gripper_left_fingertip_2_link'):
         DifferentialActionModel.__init__(self,pinocchioModel)
         self.costs.addCost( name="pos", weight = 10,
-                            cost = CostModelPosition(pinocchioModel,
+                            cost = CostModelPosition3D(pinocchioModel,
                                                      pinocchioModel.getFrameId(frameName),
                                                      np.array([.5,.4,.3])))
         self.costs.addCost( name="regx", weight = 0.1,
