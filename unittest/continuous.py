@@ -365,6 +365,82 @@ assert( absmax(costData.L-costDataND.L) < 1e-3 )
 
 # --------------------------------------------------------------
 
+class CostModelPosition6D(CostModelPinocchio):
+    '''
+    The class proposes a model of a cost function position and orientation (6d) 
+    for a frame of the robot. Paramterize it with the frame index frameIdx and
+    the effector desired pinocchio::SE3 ref.
+    '''
+    def __init__(self,pinocchioModel,frame,ref):
+        self.CostDataType = CostDataPosition6D
+        CostModelPinocchio.__init__(self,pinocchioModel,ncost=6)
+        self.ref = ref
+        self.ref_inv = ref.inverse()
+        self.ref_action_inv = self.ref_inv.action
+        self.fMr = None
+        self.frame = frame
+    def calc(model,data,x,u):
+        data.rMf = model.ref_inv*data.pinocchio.oMf[model.frame]
+        data.residuals = m2a(pinocchio.log(data.rMf).vector)
+        data.cost = .5*sum(data.residuals**2)
+        return data.cost
+    def calcDiff(model,data,x,u,recalc=True):
+        if recalc: model.calc(data,x,u)
+        ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
+        pinocchio.updateFramePlacements(model.pinocchio,data.pinocchio)
+        J = np.matmul(pinocchio.Jlog6(data.rMf),
+                      pinocchio.getFrameJacobian(model.pinocchio,
+                                                 data.pinocchio,
+                                                 model.frame,
+                                                 pinocchio.ReferenceFrame.LOCAL))
+        data.Rq[:,:nq] = J
+        data.Lq[:]     = np.dot(J.T,data.residuals)
+        data.Lqq[:,:]  = np.dot(J.T,J)
+        return data.cost
+    
+class CostDataPosition6D(CostDataPinocchio):
+    def __init__(self,model,pinocchioData):
+        CostDataPinocchio.__init__(self,model,pinocchioData)
+        self.Lu = 0
+        self.Lv = 0
+        self.Lxu = 0
+        self.Luu = 0
+        self.Lvv = 0
+        self.Ru = 0
+        self.Rv = 0
+
+        
+q = pinocchio.randomConfiguration(rmodel)
+v = rand(rmodel.nv)
+x = m2a(np.concatenate([q,v]))
+u = m2a(rand(rmodel.nv))
+
+costModel = CostModelPosition6D(rmodel,
+                                rmodel.getFrameId('gripper_left_fingertip_2_link'),
+                                pinocchio.SE3(pinocchio.SE3.Random().rotation,
+                                              np.matrix([.5,.4,.3]).T))
+
+costData = costModel.createData(rdata)
+
+pinocchio.forwardKinematics(rmodel,rdata,q,v)
+pinocchio.computeJointJacobians(rmodel,rdata,q)
+pinocchio.updateFramePlacements(rmodel,rdata)
+
+costModel.calcDiff(costData,x,u)
+
+costModelND = CostModelNumDiff(costModel,StatePinocchio(rmodel),withGaussApprox=True,
+                               reevals = [ lambda m,d,x,u: pinocchio.forwardKinematics(m,d,a2m(x[:rmodel.nq]),a2m(x[rmodel.nq:])),
+                                           lambda m,d,x,u: pinocchio.computeJointJacobians(m,d,a2m(x[:rmodel.nq])),
+                                           lambda m,d,x,u: pinocchio.updateFramePlacements(m,d) ])
+costDataND  = costModelND.createData(rdata)
+
+costModelND.calcDiff(costDataND,x,u)
+
+assert( absmax(costData.g-costDataND.g) < 1e-4 )
+assert( absmax(costData.L-costDataND.L) < 1e-4 )
+
+# --------------------------------------------------------------
+
 class CostModelCoM(CostModelPinocchio):
     '''
     The class proposes a model of a cost function CoM. 
