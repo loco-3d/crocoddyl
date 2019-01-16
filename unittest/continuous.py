@@ -378,7 +378,7 @@ class CostModelPosition6D(CostModelPinocchio):
         self.frame = frame
     def calc(model,data,x,u):
         data.rMf = model.ref.inverse()*data.pinocchio.oMf[model.frame]
-        data.residuals = m2a(pinocchio.log(data.rMf).vector)
+        data.residuals[:] = m2a(pinocchio.log(data.rMf).vector)
         data.cost = .5*sum(data.residuals**2)
         return data.cost
     def calcDiff(model,data,x,u,recalc=True):
