@@ -37,7 +37,7 @@ def dresidualLocal(q):
   pinocchio.forwardKinematics(rmodel,rdata,q)
   pinocchio.computeJointJacobians(rmodel,rdata,q)
   rMi = Mref.inverse()*rdata.oMi[jid]
-  return np.matmul(pinocchio.Jlog6(rMi),
+  return np.dot(pinocchio.Jlog6(rMi),
                    pinocchio.getJointJacobian(rmodel, rdata, jid,
                                               pinocchio.ReferenceFrame.LOCAL))
 
@@ -45,7 +45,7 @@ def dresidualWorld(q):
   pinocchio.forwardKinematics(rmodel,rdata,q)
   pinocchio.computeJointJacobians(rmodel,rdata,q)
   rMi = Mref.inverse()*rdata.oMi[jid]
-  return np.matmul(pinocchio.Jlog6(rMi),
+  return np.dot(pinocchio.Jlog6(rMi),
                    pinocchio.getJointJacobian(rmodel, rdata, jid,
                                            pinocchio.ReferenceFrame.WORLD))
 
