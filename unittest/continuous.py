@@ -386,7 +386,7 @@ class CostModelPosition6D(CostModelPinocchio):
         if recalc: model.calc(data,x,u)
         ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
         pinocchio.updateFramePlacements(model.pinocchio,data.pinocchio)
-        J = np.matmul(pinocchio.Jlog6(data.rMf),
+        J = np.dot(pinocchio.Jlog6(data.rMf),
                       pinocchio.getFrameJacobian(model.pinocchio,
                                                  data.pinocchio,
                                                  model.frame,
