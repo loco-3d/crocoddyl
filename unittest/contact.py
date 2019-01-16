@@ -179,12 +179,13 @@ assert(absmax(data.Fu-dnum.Fu)/model.nu < 1e-3 )
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 class ContactModelPinocchio:
-    def __init__(self,pinocchioModel,ncontact):
+    def __init__(self,pinocchioModel,ncontact,nu=None):
         assert(hasattr(self,'ContactDataType'))
         self.pinocchio = pinocchioModel
         self.nq,self.nv = pinocchioModel.nq,pinocchioModel.nv
         self.nx = self.nq+self.nv
         self.ndx = 2*self.nv
+        self.nu  = nu
         self.ncontact = ncontact
     def createData(self,pinocchioData):
         return self.ContactDataType(self,pinocchioData)
@@ -192,14 +193,23 @@ class ContactModelPinocchio:
         assert(False and "This should be defined in the derivative class.")
     def calcDiff(model,data,x,recalc=True):
         assert(False and "This should be defined in the derivative class.")
-    def forces(model,data,forcesArr,forcesVec = None):
+    def setForces(model,data,forcesArr,forcesVec = None):
         '''
         Convert a numpy array of forces into a stdVector of spatial forces.
         If forcesVec is not none, sum the result in it. Otherwise, reset self.fs
         and put the result there.
         '''
         assert(False and "This should be defined in the derivative class.")
-
+        return self.forces
+    def setForcesDiff(model,data,df_dx,df_du):
+        '''
+        Feed back the derivative model from the action model. 
+        '''
+        data.df_dx = df_dx
+        data.df_du = df_du
+        if model.nu is None: model.nu = df_du.shape[1]
+        else: assert( df_du.shape[1] == model.nu )
+        
 class ContactDataPinocchio:
     def __init__(self,model,pinocchioData):
         nc,nq,nv,nx,ndx = model.ncontact,model.nq,model.nv,model.nx,model.ndx
@@ -209,8 +219,9 @@ class ContactDataPinocchio:
         self.Ax = np.zeros([ nc, ndx ])
         self.Aq = self.Ax[:,:nv]
         self.Av = self.Ax[:,nv:]
-        self.fs = pinocchio.StdVect_Force()
-        for i in range(model.pinocchio.njoints): self.fs.append(pinocchio.Force.Zero())
+        self.f  = np.nan # not set at construction type
+        self.forces = pinocchio.StdVect_Force()
+        for i in range(model.pinocchio.njoints): self.forces.append(pinocchio.Force.Zero())
 # -----------------------------------------------------------------------------
 
 class ContactModel6D(ContactModelPinocchio):
@@ -232,18 +243,20 @@ class ContactModel6D(ContactModelPinocchio):
                                    pinocchio.ReferenceFrame.LOCAL)
         data.Aq[:,:] = data.fXj*da_dq
         data.Av[:,:] = data.fXj*da_dv
-    def forces(model,data,forcesArr,forcesVec=None):
+    def setForces(model,data,forcesArr,forcesVec=None):
         '''
         Convert a numpy array of forces into a stdVector of spatial forces.
+        Side effect: keep the force values in data.
         '''
         # In the dynamic equation, we wrote M*a + J.T*fdyn, while in the ABA it would be
         # M*a + b = tau + J.T faba, so faba = -fdyn (note the minus operator before a2m).
+        data.f = forcesArr
         if forcesVec is None:
-            forcesVec = data.fs
-            data.fs[data.joint] *= 0
+            forcesVec = data.forces
+            data.forces[data.joint] *= 0
         forcesVec[data.joint] += data.jMf*pinocchio.Force(-a2m(forcesArr))
-        return data.fs
-    
+        return forcesVec
+        
 class ContactData6D(ContactDataPinocchio):
     def __init__(self,model,pinocchioData):
         ContactDataPinocchio.__init__(self,model,pinocchioData)
@@ -285,6 +298,15 @@ class ContactModelMultiple(ContactModelPinocchio):
     def addContact(self,name,contact):
         self.contacts.update([[name,contact]])
         self.ncontact += contact.ncontact
+    def __getitem__(self,key):
+        if isinstance(key,str):
+            return self.contacts[key]
+        elif isinstance(key,ContactModelPinocchio):
+            filter = [ v for k,v in self.contacts.items() if v.contact==key ]
+            assert(len(filter) == 1 and "The given key is not or not unique in the contact dict. ")
+            return filter[0]
+        else:
+            raise(KeyError("The key should be string or contactmodel."))
     def calc(model,data,x):
         npast = 0
         for m,d in zip(model.contacts.values(),data.contacts.values()):
@@ -299,18 +321,39 @@ class ContactModelMultiple(ContactModelPinocchio):
             m.calcDiff(d,x,recalc=False)
             data.Ax[npast:npast+m.ncontact,:]   = d.Ax
             npast += m.ncontact
-    def forces(model,data,fsArr):
+    def setForces(model,data,fsArr):
         npast = 0 
-        for i,f in enumerate(data.fs): data.fs[i] *= 0
+        for i,f in enumerate(data.forces): data.forces[i] *= 0
         for m,d in zip(model.contacts.values(),data.contacts.values()):
-            m.forces(d,fsArr[npast:npast+m.ncontact],data.fs)
+            m.setForces(d,fsArr[npast:npast+m.ncontact],data.forces)
             npast += m.ncontact
-            
+        return data.forces
+    def setForcesDiff(model,data,df_dx,df_du):
+        '''
+        Feed back the derivative model from the action model. 
+        '''
+        if model.nu is None: model.nu = df_du.shape[1]
+        else: assert( df_du.shape[1] == model.nu )
+        npast = 0 
+        for m,d in zip(model.contacts.values(),data.contacts.values()):
+            m.setForcesDiff(d,df_dx[npast:npast+m.ncontact,:],df_du[npast:npast+m.ncontact,:])
+            npast += m.ncontact
+        
 class ContactDataMultiple(ContactDataPinocchio):
     def __init__(self,model,pinocchioData):
         ContactDataPinocchio.__init__(self,model,pinocchioData)
         nc,nq,nv,nx,ndx = model.ncontact,model.nq,model.nv,model.nx,model.ndx
+        self.model = model
         self.contacts = OrderedDict([ [k,m.createData(pinocchioData)] for k,m in model.contacts.items() ])
+    def __getitem__(self,key):
+        if isinstance(key,str):
+            return self.contacts[key]
+        elif isinstance(key,ContactModelPinocchio):
+            filter = [ k for k,v in self.model.contacts.items() if v==key ]
+            assert(len(filter) == 1 and "The given key is not or not unique in the contact dict. ")
+            return self.contacts[filter[0]]
+        else:
+            raise(KeyError("The key should be string or contactmodel."))
        
 contactModel = ContactModelMultiple(rmodel)
 contactModel.addContact('1',ContactModel6D(rmodel,rmodel.getFrameId('gripper_left_fingertip_2_link'),ref=None))
@@ -366,7 +409,7 @@ class DifferentialActionModelFloatingInContact:
 
         data.af[:] = np.dot(inv(data.K),data.r)
         # Convert force array to vector of spatial forces.
-        fs = model.contact.forces(data.contact,data.f)
+        fs = model.contact.setForces(data.contact,data.f)
 
         data.cost = model.costs.calc(data.costs,x,u)
         return data.xout,data.cost
@@ -378,7 +421,7 @@ class DifferentialActionModelFloatingInContact:
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
         a = a2m(data.a)
-        fs = data.contact.fs
+        fs = data.contact.forces
 
         pinocchio.computeRNEADerivatives(model.pinocchio,data.pinocchio,q,v,a,fs)
         pinocchio.computeForwardKinematicsDerivatives(model.pinocchio,data.pinocchio,q,v,a)
@@ -386,39 +429,51 @@ class DifferentialActionModelFloatingInContact:
 
         # [a;f] = K^-1 [ tau - b, -gamma ]
         # [a';f'] = -K^-1 [ K'a + b' ; J'a + gamma' ]  = -K^-1 [ rnea'(q,v,a,fs) ; acc'(q,v,a) ]
-
+        
+        # Derivative of the actuation model tau = tau(q,u)
         # dtau_dq and dtau_dv are the rnea derivatives rnea'
-        dtau_dq = data.pinocchio.dtau_dq
-        dtau_dv = data.pinocchio.dtau_dv
+        did_dq = data.pinocchio.dtau_dq
+        did_dv = data.pinocchio.dtau_dv
 
+        # Derivative of the contact constraint
         # da0_dq and da0_dv are the acceleration derivatives acc'
         model.contact.calcDiff(data.contact,x,recalc=False)
-        da0_dq = data.contact.Aq
-        da0_dv = data.contact.Av
+        dacc_dq = data.contact.Aq
+        dacc_dv = data.contact.Av
+
+        data.Kinv = inv(data.K)
 
         # We separate the Kinv into the a and f rows, and the actuation and acceleration columns
-        daf_dact = inv(data.K)
-        da_dact = daf_dact[:nv,:nv]
-        df_dact = daf_dact[nv:,:nv]
-        da_da0  = daf_dact[:nv,nv:]
-        df_da0  = daf_dact[nv:,nv:]
+        da_did  = -data.Kinv[:nv,:nv]
+        df_did  = -data.Kinv[nv:,:nv]
+        da_dacc = -data.Kinv[:nv,nv:]
+        df_dacc = -data.Kinv[nv:,nv:]
         
-        da_dq = -np.dot(da_dact,dtau_dq) -np.dot(da_da0,da0_dq)
-        da_dv = -np.dot(da_dact,dtau_dv) -np.dot(da_da0,da0_dv)
-
+        da_dq   =  np.dot(da_did,did_dq) + np.dot(da_dacc,dacc_dq)
+        da_dv   =  np.dot(da_did,did_dv) + np.dot(da_dacc,dacc_dv)
+        da_dtau =  data.Kinv[:nv,:nv]  # Add this alias just to make the code clearer
+        df_dtau =  data.Kinv[nv:,:nv]  # Add this alias just to make the code clearer
+        
         # tau is a function of x and u (typically trivial in x), whose derivatives are Ax and Au
-        dact_dx = data.actuation.Ax
-        dact_du = data.actuation.Au
+        dtau_dx = data.actuation.Ax
+        dtau_du = data.actuation.Au
         
         data.Fx[:,:nv] = da_dq
         data.Fx[:,nv:] = da_dv
-        data.Fx       += np.dot(da_dact,dact_dx)
-        data.Fu[:,:]   = np.dot(da_dact,dact_du)
+        data.Fx       += np.dot(da_dtau,dtau_dx)
+        data.Fu[:,:]   = np.dot(da_dtau,dtau_du)
 
+        data.df_dq[:,:] = np.dot(df_did,did_dq) + np.dot(df_dacc,dacc_dq)
+        data.df_dv[:,:] = np.dot(df_did,did_dv) + np.dot(df_dacc,dacc_dv)
+        data.df_dx     += np.dot(df_dtau,dtau_dx)
+        data.df_du[:,:] = np.dot(df_dtau,dtau_du)
+
+        model.contact.setForcesDiff(data.contact,data.df_dx,data.df_du)
+        
         model.costs.calcDiff(data.costs,x,u,recalc=False)
         
         return data.xout,data.cost
-
+    
 class DifferentialActionDataFloatingInContact:
     def __init__(self,model):
         self.pinocchio = model.pinocchio.createData()
@@ -448,6 +503,12 @@ class DifferentialActionDataFloatingInContact:
         self.a  = self.af[:nv]
         self.f  = self.af[nv:]
 
+        self.df   = np.zeros([nc,ndx+nu])
+        self.df_dx = self.df   [:,:ndx]
+        self.df_dq = self.df_dx[:,:nv]
+        self.df_dv = self.df_dx[:,nv:]
+        self.df_du = self.df   [:,ndx:]
+        
         self.xout = self.a
 
 q = pinocchio.randomConfiguration(rmodel)
@@ -469,7 +530,7 @@ data  = model.createData()
 model.calc(data,x,u)
 assert( len(filter(lambda x:x>0,eig(data.K)[0])) == model.nv )
 assert( len(filter(lambda x:x<0,eig(data.K)[0])) == model.ncontact )
-_taucheck = pinocchio.rnea(rmodel,rdata,q,v,a2m(data.a),data.contact.fs)
+_taucheck = pinocchio.rnea(rmodel,rdata,q,v,a2m(data.a),data.contact.forces)
 assert( absmax(_taucheck[:6])<1e-6 )
 assert( absmax(m2a(_taucheck[6:])-u)<1e-6 )
 
@@ -481,8 +542,119 @@ mnum.calcDiff(dnum,x,u)
 assert(absmax(data.Fx-dnum.Fx)/model.nx<1e-3)
 assert(absmax(data.Fu-dnum.Fu)/model.nu<1e-3)
 
+### Check force derivatives
+def df_dq(model,func,q,h=1e-9):
+    dq = zero(model.nv)
+    f0 = func(q)
+    res = zero([len(f0),model.nv])
+    for iq in range(model.nv):
+        dq[iq] = h
+        res[:,iq] = (func(pinocchio.integrate(model,q,dq)) - f0)/h
+        dq[iq] = 0
+    return res
 
+def df_dv(model,func,v,h=1e-9):
+    dv = zero(model.nv)
+    f0 = func(v)
+    res = zero([len(f0),model.nv])
+    for iv in range(model.nv):
+        dv[iv] = h
+        res[:,iv] = (func(v+dv) - f0)/h
+        dv[iv] = 0
+    return res
 
+def df_dz(model,func,z,h=1e-9):
+    dz = zero(len(z))
+    f0 = func(z)
+    res = zero([len(f0),len(z)])
+    for iz in range(len(z)):
+        dz[iz] = h
+        res[:,iz] = (func(z+dz) - f0)/h
+        dz[iz] = 0
+    return res
+
+def calcForces(q_,v_,u_):
+    model.calc(data,np.concatenate([m2a(q_),m2a(v_)]),m2a(u_))
+    return a2m(data.f)
+
+Fq = df_dq(rmodel,lambda _q: calcForces(_q,v,u), q)
+Fv = df_dv(rmodel,lambda _v: calcForces(q,_v,u), v)
+Fu = df_dz(rmodel,lambda _u: calcForces(q,v,_u), a2m(u))
+assert( absmax(Fq-data.df_dq) < 1e-3 )
+assert( absmax(Fv-data.df_dv) < 1e-3 )
+assert( absmax(Fu-data.df_du) < 1e-3 )
+
+# -------------------------------------------------------------------------------
+# Cost force model
+class CostModelForce6D(CostModelPinocchio):
+    '''
+    The class proposes a model of a cost function for tracking a reference
+    value of a 6D force, being given the contact model and its derivatives.
+    '''
+    def __init__(self,pinocchioModel,contactModel,ref=None,nu=None):
+        self.CostDataType = CostDataForce6D
+        CostModelPinocchio.__init__(self,pinocchioModel,ncost=6,nu=nu)
+        self.ref = ref if ref is not None else np.zeros(6)
+        self.contact = contactModel
+    def calc(model,data,x,u):
+        if data.contact is None:
+            raise RunTimeError('''The CostForce data should be specifically initialized from the
+            contact data ... no automatic way of doing that yet ...''')
+        data.f = data.contact.f
+        data.residuals = data.f-model.ref
+        data.cost = .5*sum(data.residuals**2)
+        return data.cost
+    def calcDiff(model,data,x,u,recalc=True):
+        if recalc: model.calc(data,x,u)
+        assert(model.nu==len(u) and model.contact.nu == model.nu)
+        ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
+        df_dx,df_du = data.contact.df_dx,data.contact.df_du
+
+        data.Rx [:,:] = df_dx   # This is useless.
+        data.Ru [:,:] = df_du   # This is useless
+
+        data.Lx [:]     = np.dot(df_dx.T,data.residuals)
+        data.Lu [:]     = np.dot(df_du.T,data.residuals)
+
+        data.Lxx[:,:]   = np.dot(df_dx.T,df_dx)
+        data.Lxu[:,:]   = np.dot(df_dx.T,df_du)
+        data.Luu[:,:]   = np.dot(df_du.T,df_du)
+
+        return data.cost
+    
+from continuous import CostDataPinocchio
+class CostDataForce6D(CostDataPinocchio):
+    def __init__(self,model,pinocchioData,contactData=None):
+        CostDataPinocchio.__init__(self,model,pinocchioData)
+        self.contact = contactData
+
+model.costs = CostModelSum(rmodel,nu=actModel.nu)
+model.costs.addCost( name='force', weight = 1,
+                    cost = CostModelForce6D(rmodel,model.contact.contacts['fingertip'],
+                                            nu=actModel.nu) )
+
+data = model.createData()
+data.costs['force'].contact = data.contact[model.costs['force'].cost.contact]
+
+cmodel = model.costs['force'].cost
+cdata  = data .costs['force'] 
+
+model.calcDiff(data,x,u)
+
+mnum = DifferentialActionModelNumDiff(model,withGaussApprox=False)
+dnum = mnum.createData()
+for d in dnum.datax:    d.costs['force'].contact = d.contact[model.costs['force'].cost.contact]
+for d in dnum.datau:    d.costs['force'].contact = d.contact[model.costs['force'].cost.contact]
+dnum.data0.costs['force'].contact = dnum.data0.contact[model.costs['force'].cost.contact]
+    
+
+mnum.calcDiff(dnum,x,u)
+assert(absmax(data.Fx-dnum.Fx)/model.nx<1e-3)
+assert(absmax(data.Fu-dnum.Fu)/model.nu<1e-3)
+
+# -------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # --- COMPLETE MODEL WITH COST ----
 State = StatePinocchio(rmodel)
 
@@ -524,4 +696,22 @@ assert( norm(data.Lu-dnum.Lu) < 1e-3 )
 assert( norm(dnum.Lxx-data.Lxx) < 1e-3)
 assert( norm(dnum.Lxu-data.Lxu) < 1e-3)
 assert( norm(dnum.Luu-data.Luu) < 1e-3)
+
+
+# -------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+
+from refact import ShootingProblem, SolverDDP,SolverKKT
+from continuous import IntegratedActionModelEuler, DifferentialActionModelPositioning
+
+problem = ShootingProblem(model.State.zero()+1, [ model ], model)
+kkt = SolverKKT(problem)
+kkt.th_stop = 1e-18
+xkkt,ukkt,dkkt = kkt.solve()
+
+ddp = SolverDDP(problem)
+ddp.th_stop = 1e-18
+# DDP is yet not working for manifold problems (!!!)
+#xddp,uddp,dddp = ddp.solve()
 
