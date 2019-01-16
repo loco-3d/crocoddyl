@@ -375,10 +375,9 @@ class CostModelPosition6D(CostModelPinocchio):
         self.CostDataType = CostDataPosition6D
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=6)
         self.ref = ref
-        self.ref_inv = ref.inverse()
         self.frame = frame
     def calc(model,data,x,u):
-        data.rMf = model.ref_inv*data.pinocchio.oMf[model.frame]
+        data.rMf = model.ref.inverse()*data.pinocchio.oMf[model.frame]
         data.residuals = m2a(pinocchio.log(data.rMf).vector)
         data.cost = .5*sum(data.residuals**2)
         return data.cost
@@ -395,7 +394,7 @@ class CostModelPosition6D(CostModelPinocchio):
         data.Lq[:]     = np.dot(J.T,data.residuals)
         data.Lqq[:,:]  = np.dot(J.T,J)
         return data.cost
-    
+      
 class CostDataPosition6D(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
