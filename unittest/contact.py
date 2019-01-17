@@ -705,13 +705,21 @@ assert( norm(dnum.Luu-data.Luu) < 1e-3)
 from refact import ShootingProblem, SolverDDP,SolverKKT
 from continuous import IntegratedActionModelEuler, DifferentialActionModelPositioning
 
-problem = ShootingProblem(model.State.zero()+1, [ model ], model)
+problem = ShootingProblem(model.State.zero(), [ model ], model)
 kkt = SolverKKT(problem)
 kkt.th_stop = 1e-18
-xkkt,ukkt,dkkt = kkt.solve()
+xkkt,ukkt,donekkt = kkt.solve()
 
 ddp = SolverDDP(problem)
 ddp.th_stop = 1e-18
 # DDP is yet not working for manifold problems (!!!)
-#xddp,uddp,dddp = ddp.solve()
+xddp,uddp,doneddp = ddp.solve()
+
+assert(donekkt)
+assert(doneddp)
+assert(norm(xkkt[0]-problem.initialState)<1e-9)
+assert(norm(xddp[0]-problem.initialState)<1e-9)
+for t in range(problem.T):
+    assert(norm(ukkt[t]-uddp[t])<1e-6)
+    assert(norm(xkkt[t+1]-xddp[t+1])<1e-6)
 
