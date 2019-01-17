@@ -345,12 +345,11 @@ class ContactModel3D(ContactModelPinocchio):
         data.v = pinocchio.getFrameVelocity(model.pinocchio,
                                              data.pinocchio,model.frame).copy()
         vw = data.v.angular; vv = data.v.linear
-        data.J[:,:] = pinocchio.getFrameJacobian(model.pinocchio, data.pinocchio,
-                                                 model.frame,
-                                                 pinocchio.ReferenceFrame.LOCAL)[:3,:]
-        data.Jw[:,:] = pinocchio.getFrameJacobian(model.pinocchio, data.pinocchio,
-                                                 model.frame,
-                                                 pinocchio.ReferenceFrame.LOCAL)[3:,:]
+        J6 = pinocchio.getFrameJacobian(model.pinocchio, data.pinocchio,
+                                        model.frame,
+                                        pinocchio.ReferenceFrame.LOCAL)
+        data.J[:,:] = J6[:3,:]
+        data.Jw[:,:] = J6[3:,:]
 
         data.a0[:] = (pinocchio.getFrameAcceleration(model.pinocchio,
                                                     data.pinocchio,model.frame).linear +\
