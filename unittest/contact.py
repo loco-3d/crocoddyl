@@ -363,19 +363,21 @@ class ContactModel3D(ContactModelPinocchio):
                                   (model.pinocchio,data.pinocchio,data.joint,
                                    pinocchio.ReferenceFrame.LOCAL)
         data.Aq[:,:] = (data.fXj*da_dq)[:3,:] + \
-                       skew(data.vw)*dv_dq[:3,:]-skew(data.vv)*dv_dq[3:,:]
+                       skew(data.vw)*(data.fXj*dv_dq)[:3,:]-\
+                       skew(data.vv)*(data.fXj*dv_dq)[3:,:]
         data.Av[:,:] = (data.fXj*da_dv)[:3,:] + skew(data.vw)*data.J-skew(data.vv)*data.Jw
-    def forces(model,data,forcesArr,forcesVec=None):
+    def setForces(model,data,forcesArr,forcesVec=None):
         '''
         Convert a numpy array of forces into a stdVector of spatial forces.
         '''
         # In the dynamic equation, we wrote M*a + J.T*fdyn, while in the ABA it would be
         # M*a + b = tau + J.T faba, so faba = -fdyn (note the minus operator before a2m).
+        data.f = forcesArr
         if forcesVec is None:
-            forcesVec = data.fs
-            data.fs[data.joint] *= 0
-        forcesVec[data.joint] += data.jMf*pinocchio.Force(-a2m(forcesArr))
-        return data.fs
+            forcesVec = data.forces
+            data.forces[data.joint] *= 0
+        forcesVec[data.joint] += data.jMf*pinocchio.Force(-a2m(forcesArr), np.zeros((3,1)))
+        return forcesVec
     
 class ContactData3D(ContactDataPinocchio):
     def __init__(self,model,pinocchioData):
@@ -640,16 +642,56 @@ class DifferentialActionDataFloatingInContact:
         
         self.xout = self.a
 
+#-------------------------------------------------------------
+
+q = pinocchio.randomConfiguration(rmodel)
+v = rand(rmodel.nv)*2-1
+
+pinocchio.computeJointJacobians(rmodel,rdata,q)
+J6 = pinocchio.getJointJacobian(rmodel,rdata,rmodel.joints[-1].id,
+                                pinocchio.ReferenceFrame.LOCAL).copy()
+J = J6[:3,:]
+v -= pinv(J)*J*v
+
+x = np.concatenate([ m2a(q),m2a(v) ])
+u = np.random.rand(rmodel.nv-6)*2-1
+
+actModel = ActuationModelFreeFloating(rmodel)
+contactModel3 = ContactModel3D(rmodel,rmodel.getFrameId('gripper_left_fingertip_2_link'),
+                               ref=None)
+rmodel.frames[contactModel3.frame].placement = pinocchio.SE3.Random()
+contactModel = ContactModelMultiple(rmodel)
+contactModel.addContact(name='fingertip',contact=contactModel3)
+
+model = DifferentialActionModelFloatingInContact(rmodel,actModel,
+                                                 contactModel,CostModelSum(rmodel))
+data  = model.createData()
+
+model.calc(data,x,u)
+assert( len(filter(lambda x:x>0,eig(data.K)[0])) == model.nv )
+assert( len(filter(lambda x:x<0,eig(data.K)[0])) == model.ncontact )
+_taucheck = pinocchio.rnea(rmodel,rdata,q,v,a2m(data.a),data.contact.forces)
+assert( absmax(_taucheck[:6])<1e-6 )
+assert( absmax(m2a(_taucheck[6:])-u)<1e-6 )
+
+model.calcDiff(data,x,u)
+
+mnum = DifferentialActionModelNumDiff(model,withGaussApprox=False)
+dnum = mnum.createData()
+mnum.calcDiff(dnum,x,u)
+assert(absmax(data.Fx-dnum.Fx)/model.nx<1e-3)
+assert(absmax(data.Fu-dnum.Fu)/model.nu<1e-3)
+
+        
+#------------------------------------------------
 q = pinocchio.randomConfiguration(rmodel)
 v = rand(rmodel.nv)*2-1
 x = np.concatenate([ m2a(q),m2a(v) ])
 u = np.random.rand(rmodel.nv-6)*2-1
 
 actModel = ActuationModelFreeFloating(rmodel)
-contactModel = ContactModel6D(rmodel,rmodel.getFrameId('arm_left_7_joint'),ref=None)
-contactModel = ContactModel6D(rmodel,rmodel.getFrameId('gripper_left_fingertip_2_link'),ref=None)
-rmodel.frames[contactModel.frame].placement = pinocchio.SE3.Random()
-contactModel6 = contactModel
+contactModel6 = ContactModel6D(rmodel,rmodel.getFrameId('gripper_left_fingertip_2_link'),ref=None)
+rmodel.frames[contactModel6.frame].placement = pinocchio.SE3.Random()
 contactModel = ContactModelMultiple(rmodel)
 contactModel.addContact(name='fingertip',contact=contactModel6)
 
@@ -671,6 +713,8 @@ dnum = mnum.createData()
 mnum.calcDiff(dnum,x,u)
 assert(absmax(data.Fx-dnum.Fx)/model.nx<1e-3)
 assert(absmax(data.Fu-dnum.Fu)/model.nu<1e-3)
+
+#----------------------------------------------------------
 
 ### Check force derivatives
 def df_dq(model,func,q,h=1e-9):
@@ -826,6 +870,7 @@ assert( norm(data.Lu-dnum.Lu) < 1e-3 )
 assert( norm(dnum.Lxx-data.Lxx) < 1e-3)
 assert( norm(dnum.Lxu-data.Lxu) < 1e-3)
 assert( norm(dnum.Luu-data.Luu) < 1e-3)
+
 
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
