@@ -342,10 +342,9 @@ class ContactModel3D(ContactModelPinocchio):
     def calc(model,data,x):
         # We suppose forwardKinematics(q,v,np.zero), computeJointJacobian and updateFramePlacement already
         # computed.
-        data.vw[:] = pinocchio.getFrameVelocity(model.pinocchio,
-                                             data.pinocchio,model.frame).angular
-        data.vv[:] = pinocchio.getFrameVelocity(model.pinocchio,
-                                             data.pinocchio,model.frame).linear
+        data.v = pinocchio.getFrameVelocity(model.pinocchio,
+                                             data.pinocchio,model.frame).copy()
+        vw = data.v.angular; vv = data.v.linear
         data.J[:,:] = pinocchio.getFrameJacobian(model.pinocchio, data.pinocchio,
                                                  model.frame,
                                                  pinocchio.ReferenceFrame.LOCAL)[:3,:]
@@ -355,17 +354,19 @@ class ContactModel3D(ContactModelPinocchio):
 
         data.a0[:] = (pinocchio.getFrameAcceleration(model.pinocchio,
                                                     data.pinocchio,model.frame).linear +\
-                                                    cross(data.vw,data.vv)).flat
+                                                    cross(vw,vv)).flat
         
     def calcDiff(model,data,x,recalc=True):
         if recalc: model.calc(data,x)
         dv_dq,da_dq,da_dv,da_da = pinocchio.getJointAccelerationDerivatives\
                                   (model.pinocchio,data.pinocchio,data.joint,
                                    pinocchio.ReferenceFrame.LOCAL)
+        vw = data.v.angular; vv = data.v.linear        
+
         data.Aq[:,:] = (data.fXj*da_dq)[:3,:] + \
-                       skew(data.vw)*(data.fXj*dv_dq)[:3,:]-\
-                       skew(data.vv)*(data.fXj*dv_dq)[3:,:]
-        data.Av[:,:] = (data.fXj*da_dv)[:3,:] + skew(data.vw)*data.J-skew(data.vv)*data.Jw
+                       skew(vw)*(data.fXj*dv_dq)[:3,:]-\
+                       skew(vv)*(data.fXj*dv_dq)[3:,:]
+        data.Av[:,:] = (data.fXj*da_dv)[:3,:] + skew(vw)*data.J-skew(vv)*data.Jw
     def setForces(model,data,forcesArr,forcesVec=None):
         '''
         Convert a numpy array of forces into a stdVector of spatial forces.
@@ -386,6 +387,7 @@ class ContactData3D(ContactDataPinocchio):
         self.joint = frame.parent       
         self.jMf = frame.placement
         self.fXj = self.jMf.inverse().action
+        self.v = None
         self.vv = np.zeros([ 3,1 ])
         self.vw = np.zeros([ 3,1 ])
         self.Jw = np.zeros([ 3, model.nv ])
