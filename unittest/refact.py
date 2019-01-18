@@ -1129,9 +1129,9 @@ class SolverDDP:
 
             for a in self.alphas:
                 try:
-                    if verbose: print ('\t\t\tForward pass failed')
                     dV = self.tryStep(a)
                 except ArithmeticError:
+                    if verbose: print ('\t\t\tForward pass failed')
                     continue
                 dV_exp = a*(d1+.5*d2*a)
                 if verbose: print('\t\tAccept? %f %f' % (dV, d1*a+.5*d2*a**2) )
@@ -1140,8 +1140,13 @@ class SolverDDP:
                     self.setCandidate(self.xs_try,self.us_try,isFeasible=True,copy=False)
                     self.cost = self.cost_try
                     break
-            if a>self.th_step: self.decreaseRegularization()
-            if verbose: print( 'Accept iter=%d, a=%f, cost=%.8f'
+            if a>self.th_step:
+                self.decreaseRegularization()
+                if verbose and self.x_reg>self.regMin: print "\t\t\tDecrease reg"
+            if a==self.alphas[-1]:
+                self.increaseRegularization()
+                if verbose: print "\t\t\tIncrease reg"
+            elif verbose: print( 'Accept iter=%d, a=%f, cost=%.8f'
                                % (i,a,self.problem.calc(self.xs,self.us)))
             self.stepLength = a; self.iter = i
             if self.callback is not None: self.callback(self)
