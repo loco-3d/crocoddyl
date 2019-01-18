@@ -63,7 +63,7 @@ class ActuationDataFreeFloating:
         self.Ax = self.A[:,:ndx]
         self.Au = self.A[:,ndx:]
         np.fill_diagonal(self.Au[6:,:],1)
-        
+
 actModel = ActuationModelFreeFloating(rmodel)
 actData  = actModel.createData(rdata)
 
@@ -74,7 +74,45 @@ u = m2a(rand(rmodel.nv-6))
 
 actModel.calcDiff(actData,x,u)
 
+# --- Fully actuated (trivial) actuation
+class ActuationModelFull:
+    '''
+    This model transforms an actuation u into a joint torque tau.
+    We implement here the trivial model: tau = u
+    '''
+
+    def __init__(self,pinocchioModel):
+        self.pinocchio = pinocchioModel
+        self.nq  = pinocchioModel.nq
+        self.nv  = pinocchioModel.nv
+        self.nx  = self.nq+self.nv
+        self.ndx = self.nv*2
+        self.nu  = self.nv
+    def calc(model,data,x,u):
+        data.a[:] = u
+        return data.a
+    def calcDiff(model,data,x,u,recalc=True):
+        if recalc: model.calc(data,x,u)
+        return data.a
+    def createData(self,pinocchioData):
+        return ActuationDataFull(self,pinocchioData)
         
+class ActuationDataFull:
+    def __init__(self,model,pinocchioData):
+        self.pinocchio = pinocchioData
+        nx,ndx,nq,nv,nu = model.nx,model.ndx,model.nq,model.nv,model.nu
+        self.a = np.zeros(nv)                 # result of calc
+        self.A = np.zeros([nv,ndx+nu])        # result of calcDiff
+        self.Ax = self.A[:,:ndx]
+        self.Au = self.A[:,ndx:]
+        np.fill_diagonal(self.Au[:,:],1)
+
+actModel = ActuationModelFull(rmodel)
+actData  = actModel.createData(rdata)
+
+#u = m2a(rand(rmodel.nv))
+#actModel.calcDiff(actData,x,u)
+
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
@@ -660,12 +698,12 @@ State = StatePinocchio(rmodel)
 
 actModel = ActuationModelFreeFloating(rmodel)
 contactModel = ContactModelMultiple(rmodel)
-contactModel.addContact(name='fingertip',contact=contactModel6)
+contactModel.addContact(name='root_joint',contact=contactModel6)
 
 costModel = CostModelSum(rmodel,nu=actModel.nu)
 costModel.addCost( name="pos", weight = 10,
                    cost = CostModelPosition(rmodel,nu=actModel.nu,
-                                            frame=rmodel.getFrameId('gripper_left_fingertip_2_link'),
+                                            frame=rmodel.getFrameId('gripper_left_inner_single_link'),
                                             ref=np.array([.5,.4,.3])))
 costModel.addCost( name="regx", weight = 0.1,
                    cost = CostModelState(rmodel,State,ref=State.zero(),nu=actModel.nu) )
@@ -697,29 +735,80 @@ assert( norm(dnum.Lxx-data.Lxx) < 1e-3)
 assert( norm(dnum.Lxu-data.Lxu) < 1e-3)
 assert( norm(dnum.Luu-data.Luu) < 1e-3)
 
-
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
+# integrative test: checking 1-step DDP versus KKT
 
 from refact import ShootingProblem, SolverDDP,SolverKKT
 from continuous import IntegratedActionModelEuler, DifferentialActionModelPositioning
 
-problem = ShootingProblem(model.State.zero(), [ model ], model)
-kkt = SolverKKT(problem)
-kkt.th_stop = 1e-18
-xkkt,ukkt,donekkt = kkt.solve()
+
+def disp(xs,dt=0.1):
+    if not hasattr(robot,'viewer'): robot.initDisplay(loadModel=True)
+    import time
+    for x in xs:
+        robot.display(a2m(x[:robot.nq]))
+        time.sleep(dt)
+
+import copy
+class SolverLogger:
+    def __init__(self):
+        self.steps = []
+        self.iters = []
+        self.costs = []
+        self.regularizations = []
+        self.xs = []
+        self.us = []
+    def __call__(self,solver):
+        self.xs.append(copy.copy(solver.xs))
+        self.steps.append( solver.stepLength )
+        self.iters.append( solver.iter )
+        self.costs.append( [ d.cost for d in solver.datas() ] )
+        self.regularizations.append( solver.x_reg )
+
+model.timeStep = 1e-1
+dmodel.costs['pos'].weight = 1
+dmodel.costs['regx'].weight = 0
+dmodel.costs['regu'].weight = 0
+
+# Choose a cost that is reachable.
+x0 = model.State.rand()
+xref = model.State.rand()
+xref[:7] = x0[:7]
+pinocchio.forwardKinematics(rmodel,rdata,a2m(xref))
+pinocchio.updateFramePlacements(rmodel,rdata)
+c1.ref[:] = m2a(rdata.oMf[c1.frame].translation.copy())
+
+problem = ShootingProblem(x0, [ model ], model)
 
 ddp = SolverDDP(problem)
+ddp.callback = SolverLogger()
 ddp.th_stop = 1e-18
-# DDP is yet not working for manifold problems (!!!)
-xddp,uddp,doneddp = ddp.solve()
+xddp,uddp,doneddp = ddp.solve(verbose=False,maxiter=30)
+
+assert(doneddp)
+assert( norm(ddp.datas()[-1].differential.costs['pos'].residuals)<1e-3 )
+assert( norm(m2a(ddp.datas()[-1].differential.costs['pos'].pinocchio.oMf[c1.frame].translation)\
+             -c1.ref)<1e-3 )
+
+u0 = np.zeros(model.nu)
+x1 = model.calc(data,problem.initialState,u0)[0]
+x0s = [ problem.initialState.copy(), x1 ]
+u0s = [ u0.copy() ]
+
+dmodel.costs['regu'].weight = 1e-3
+
+kkt = SolverKKT(problem)
+kkt.th_stop = 1e-18
+xkkt,ukkt,donekkt = kkt.solve(init_xs=x0s,init_us=u0s,isFeasible=True,maxiter=20,verbose=False)
+xddp,uddp,doneddp = ddp.solve(init_xs=x0s,init_us=u0s,isFeasible=True,maxiter=20,verbose=False)
 
 assert(donekkt)
-assert(doneddp)
 assert(norm(xkkt[0]-problem.initialState)<1e-9)
 assert(norm(xddp[0]-problem.initialState)<1e-9)
 for t in range(problem.T):
     assert(norm(ukkt[t]-uddp[t])<1e-6)
     assert(norm(xkkt[t+1]-xddp[t+1])<1e-6)
 
+ 
