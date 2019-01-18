@@ -13,12 +13,12 @@ absmax = lambda A: np.max(abs(A))
 absmin = lambda A: np.min(abs(A))
 
 rospack = rospkg.RosPack()
-#MODEL_PATH = rospack.get_path('talos_data')
-MODEL_PATH = '/home/nmansard/src/cddp/examples'
+MODEL_PATH = rospack.get_path('talos_data')
+#MODEL_PATH = '/home/nmansard/src/cddp/examples'
 MESH_DIR = MODEL_PATH
 URDF_FILENAME = "talos_left_arm.urdf"
-URDF_MODEL_PATH = MODEL_PATH + "/talos_data/robots/" + URDF_FILENAME
-#URDF_MODEL_PATH = MODEL_PATH + "/robots/" + URDF_FILENAME
+#URDF_MODEL_PATH = MODEL_PATH + "/talos_data/robots/" + URDF_FILENAME
+URDF_MODEL_PATH = MODEL_PATH + "/robots/" + URDF_FILENAME
 
 robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(URDF_MODEL_PATH, [MESH_DIR])
 
@@ -506,13 +506,16 @@ class CostModelState(CostModelPinocchio):
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=State.ndx,nu=nu)
         self.State = State
         self.ref = ref
+        self.weights = None
     def calc(model,data,x,u):
-        data.residuals[:] = model.State.diff(model.ref,x)
+        w = (1 if model.weights is None else model.weights)
+        data.residuals[:] = w*model.State.diff(model.ref,x)
         data.cost = .5*sum(data.residuals**2)
         return data.cost
     def calcDiff(model,data,x,u,recalc=True):
         if recalc: model.calc(data,x,u)
-        data.Rx[:,:] = model.State.Jdiff(model.ref,x,'second')
+        w = (1 if model.weights is None else model.weights)
+        data.Rx[:,:] = (w*model.State.Jdiff(model.ref,x,'second').T).T
         data.Lx[:] = np.dot(data.Rx.T,data.residuals)
         data.Lxx[:,:] = np.dot(data.Rx.T,data.Rx)
         
@@ -531,6 +534,7 @@ x = m2a(np.concatenate([q,v]))
 u = m2a(rand(rmodel.nv))
 
 costModel = CostModelState(rmodel,X,X.rand())
+costModel.weight = np.array([2]*rmodel.nv + [.5]*rmodel.nv)
 costData = costModel.createData(rdata)
 costModel.calcDiff(costData,x,u)
 
