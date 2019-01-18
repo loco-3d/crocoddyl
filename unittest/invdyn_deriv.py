@@ -7,7 +7,7 @@ path = '/home/nmansard/src/cddp/examples/'
 
 urdf = path + 'talos_data/robots/talos_left_arm.urdf'
 robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(urdf, [path] \
-                                                           ,pinocchio.JointModelFreeFlyer() \
+#                                                           ,pinocchio.JointModelFreeFlyer() \
 )
 model = robot.model
 data = model.createData()
@@ -358,7 +358,7 @@ KJ  = -np.vstack([dtau_dq,dgamma_dq])
 assert(absmax(KJ-KJn)/model.nv<1e-3)
 
 dcid_dq  = -inv(K)*np.vstack([ dtau_dq, dgamma_dq ])
-assert(absmax(dcid_dqn-dcid_dq)/model.nv<1e-3)
+assert(absmax(dcid_dqn-dcid_dq)/model.nv<1e-2)
 
 # ------------------------------------------
 ### Check 6d contact
@@ -406,6 +406,13 @@ assert(absmax(KJ-KJn)/model.nv<1e-3)
 
 dcid_dq  = -inv(K)*np.vstack([ dtau_dq, dgamma_dq ])
 assert(absmax(dcid_dqn-dcid_dq)/model.nv<1e-3)
+
+
+dcid_dun = df_dv(model, lambda _u: cid(q,v,_u),tau)
+# K*D = [ I_nv; O_ncxnv ]
+# D = Kinv * [ I_nv ; 0_ncxnv ] = Kinv[:nv,:]
+dcid_du = inv(K)[:,:model.nv]
+assert( absmax( dcid_du-dcid_dun )/model.nv < 1e-5 )
 
 
 '''
