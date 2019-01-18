@@ -18,6 +18,10 @@ urdf = path + 'talos_data/robots/talos_left_arm.urdf'
 robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(urdf, [path] \
                                                            ,pinocchio.JointModelFreeFlyer() \
 )
+robot.model.armature = np.matrix([ 0 ]*robot.model.nv).T
+for j in robot.model.joints[1:]:
+    if j.shortname()!='JointModelFreeFlyer':
+        robot.model.armature[j.idx_v:j.idx_v+j.nv]=1
 
 qmin = robot.model.lowerPositionLimit; qmin[:7]=-1; robot.model.lowerPositionLimit = qmin
 qmax = robot.model.upperPositionLimit; qmax[:7]= 1; robot.model.upperPositionLimit = qmax
@@ -439,6 +443,8 @@ class DifferentialActionModelFloatingInContact:
         model.contact.calc(data.contact,x)
 
         data.K[:nv,:nv] = data.pinocchio.M
+        if hasattr(model.pinocchio,'armature'):
+            data.K[range(nv),range(nv)] += model.pinocchio.armature.flat
         data.K[nv:,:nv] = data.contact.J
         data.K.T[nv:,:nv] = data.contact.J
 
@@ -569,6 +575,7 @@ model.calc(data,x,u)
 assert( len(filter(lambda x:x>0,eig(data.K)[0])) == model.nv )
 assert( len(filter(lambda x:x<0,eig(data.K)[0])) == model.ncontact )
 _taucheck = pinocchio.rnea(rmodel,rdata,q,v,a2m(data.a),data.contact.forces)
+if hasattr(rmodel,'armature'): _taucheck.flat += rmodel.armature.flat*data.a
 assert( absmax(_taucheck[:6])<1e-6 )
 assert( absmax(m2a(_taucheck[6:])-u)<1e-6 )
 
