@@ -16,7 +16,12 @@ absmin = lambda A: np.min(abs(A))
 path = '/home/nmansard/src/cddp/examples/'
 
 urdf = path + 'talos_data/robots/talos_left_arm.urdf'
+
 opPointName = 'gripper_left_fingertip_2_link'
+contactName = 'root_joint'
+
+opPointName,contactName = contactName,opPointName
+
 
 class FF:
     def __init__(self):
@@ -29,8 +34,8 @@ class FF:
         State = self.State = StatePinocchio(rmodel)
         actModel = self.actModel = ActuationModelFreeFloating(rmodel)
         contactModel = self.contactModel = ContactModelMultiple(rmodel)
-        contact6 = ContactModel6D(rmodel,rmodel.getFrameId('root_joint'),ref=None)
-        contactModel.addContact(name='root_joint',contact=contact6)
+        contact6 = ContactModel6D(rmodel,rmodel.getFrameId(contactName),ref=None)
+        contactModel.addContact(name='contact',contact=contact6)
         costModel = self.costModel = CostModelSum(rmodel,nu=actModel.nu)
         self.cost1 = CostModelPosition(rmodel,nu=actModel.nu,
                                      frame=rmodel.getFrameId(opPointName),
@@ -110,26 +115,19 @@ ff.model.timeStep = fix.model.timeStep = 5e-3
 
 xfix,cfix = fix.model.calc(fix.data,fix.x,fix.u)
 xff, cff  = ff.model.calc(ff.data,ff.x,ff.u)
-assert(norm(cff-cfix)<1e-6)
-assert(norm(xff[7:ff.rmodel.nq]-xfix[:fix.rmodel.nq])<1e-6)
-assert(norm(xff[ff.rmodel.nq+6:]-xfix[fix.rmodel.nq:])<1e-6)
+
+if ff.contactModel['contact'].frame == 1:
+    assert(norm(cff-cfix)<1e-6)
+    assert(norm(xff[7:ff.rmodel.nq]-xfix[:fix.rmodel.nq])<1e-6)
+    assert(norm(xff[ff.rmodel.nq+6:]-xfix[fix.rmodel.nq:])<1e-6)
 
 # --- DDP 
 # --- DDP 
 # --- DDP 
 from refact import ShootingProblem, SolverDDP,SolverKKT
 
-def disp(xs,dt=0.1,N=3):
-    if not hasattr(f.robot,'viewer'): f.robot.initDisplay(loadModel=True)
-    import time
-    S = max(len(xs)/N,1)
-    for i,x in enumerate(xs):
-        if not i % S:
-            f.robot.display(a2m(x[:f.robot.nq]))
-            time.sleep(dt)
-
 ff.model.timeStep = fix.model.timeStep = 1e-2
-T = 50
+T = 20
 
 xref = fix.State.rand(); xref[fix.rmodel.nq:] = 0
 fix.calc(xref)
@@ -148,17 +146,20 @@ f.model.differential.costs['regx'].weight = 0.01
 f.model.differential.costs['regu'].weight = 0.0001
 
 fterm = f.__class__()
-fterm.model.differential.costs['pos' ].weight = 100
-fterm.model.differential.costs['regx'].weight = 0.01
+fterm.model.differential.costs['pos' ].weight = 1000
+fterm.model.differential.costs['regx'].weight = 1
 fterm.model.differential.costs['regu'].weight = 0.01
 fterm.cost1.ref[:] = ref
+fterm.model.differential.costs['regx'].cost.weights = np.array([0]*6+[0.01]*(f.rmodel.nv-6)+[10]*f.rmodel.nv)
 
 
 problem = ShootingProblem(f.x, [ f.model ]*T, fterm.model)
 u0s = [ f.u ]*T
 x0s = problem.rollout(u0s)
 
+from logger import *
+disp = lambda xs: disptraj(f.robot,xs)
 ddp = SolverDDP(problem)
-ddp.callback = lambda s: disp(s.xs,N=5,dt=1e-3)
+ddp.callback = SolverLogger(f.robot)
 #ddp.th_stop = 1e-18
-ddp.solve(verbose=True)
+ddp.solve(verbose=True,maxiter=1000)
