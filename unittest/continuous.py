@@ -365,9 +365,78 @@ assert( absmax(costData.L-costDataND.L) < 1e-3 )
 
 # --------------------------------------------------------------
 
+class CostModelPlacementVelocity(CostModelPinocchio):
+    '''
+    The class proposes a model of a cost function that penalize the velocity of a given 
+    effector.
+    Assumes updateFramePlacement and computeForwardKinematicsDerivatives.
+    '''
+    def __init__(self,pinocchioModel,frame,ref = None):
+        self.CostDataType = CostDataPlacementVelocity
+        CostModelPinocchio.__init__(self,pinocchioModel,ncost=6)
+        self.ref = ref if ref is not None else np.zeros(6) 
+        self.frame = frame
+    def calc(model,data,x,u):
+        data.residuals[:] = m2a(pinocchio.getFrameVelocity(model.pinocchio,data.pinocchio,
+                                                           model.frame).vector) - model.ref
+        data.cost = .5*sum(data.residuals**2)
+        return data.cost
+    def calcDiff(model,data,x,u,recalc=True):
+        if recalc: model.calc(data,x,u)
+        ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
+        dv_dq,dv_dvq = pinocchio.getJointVelocityDerivatives\
+                                  (model.pinocchio,data.pinocchio,data.joint,
+                                   pinocchio.ReferenceFrame.LOCAL)
+        data.Rq[:,:] = data.fXj*dv_dq
+        data.Rv[:,:] = data.fXj*dv_dvq
+        data.Lx[:]     = np.dot(data.Rx.T,data.residuals)
+        data.Lxx[:,:]  = np.dot(data.Rx.T,data.Rx)
+        return data.cost
+      
+class CostDataPlacementVelocity(CostDataPinocchio):
+    def __init__(self,model,pinocchioData):
+        CostDataPinocchio.__init__(self,model,pinocchioData)
+        frame = model.pinocchio.frames[model.frame]
+        self.joint = frame.parent       
+        self.jMf = frame.placement
+        self.fXj = self.jMf.inverse().action
+        self.Lu = 0
+        self.Lxu = 0
+        self.Luu = 0
+        self.Ru = 0
+
+        
+q = pinocchio.randomConfiguration(rmodel)
+v = rand(rmodel.nv)
+x = m2a(np.concatenate([q,v]))
+u = m2a(rand(rmodel.nv))
+
+costModel = CostModelPlacementVelocity(rmodel,
+                                       rmodel.getFrameId('gripper_left_fingertip_2_link'))
+costData = costModel.createData(rdata)
+
+pinocchio.forwardKinematics(rmodel,rdata,q,v)
+pinocchio.computeForwardKinematicsDerivatives(rmodel,rdata,q,v,zero(rmodel.nv))
+pinocchio.updateFramePlacements(rmodel,rdata)
+
+
+costModel.calcDiff(costData,x,u)
+
+costModelND = CostModelNumDiff(costModel,StatePinocchio(rmodel),withGaussApprox=True,
+                               reevals = [ lambda m,d,x,u: pinocchio.forwardKinematics(m,d,a2m(x[:rmodel.nq]),a2m(x[rmodel.nq:])),
+                                           lambda m,d,x,u: pinocchio.computeForwardKinematicsDerivatives(m,d,a2m(x[:rmodel.nq]),a2m(x[rmodel.nq:]),zero(rmodel.nv)),
+                                           lambda m,d,x,u: pinocchio.updateFramePlacements(m,d) ])
+costDataND  = costModelND.createData(rdata)
+
+costModelND.calcDiff(costDataND,x,u)
+
+assert( absmax(costData.g-costDataND.g) < 1e-4 )
+assert( absmax(costData.L-costDataND.L) < 1e-4 )
+
+# --------------------------------------------------------------
 class CostModelPosition6D(CostModelPinocchio):
     '''
-    The class proposes a model of a cost function position and orientation (6d) 
+   The class proposes a model of a cost function position and orientation (6d) 
     for a frame of the robot. Paramterize it with the frame index frameIdx and
     the effector desired pinocchio::SE3 ref.
     '''
