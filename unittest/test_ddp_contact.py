@@ -29,6 +29,11 @@ class FF:
                      pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(urdf, [path] \
                                                                         ,pinocchio.JointModelFreeFlyer())
         rmodel = self.rmodel = robot.model
+        rmodel.armature = np.matrix([ 0 ]*robot.model.nv).T
+        for j in robot.model.joints[1:]:
+            if j.shortname()!='JointModelFreeFlyer':
+                rmodel.armature[j.idx_v:j.idx_v+j.nv]=1
+                
         qmin = rmodel.lowerPositionLimit; qmin[:7]=-1; rmodel.lowerPositionLimit = qmin
         qmax = rmodel.upperPositionLimit; qmax[:7]= 1; rmodel.upperPositionLimit = qmax
         State = self.State = StatePinocchio(rmodel)
@@ -69,6 +74,10 @@ class Fix:
         robot = self.robot = \
                      pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(urdf, [path])
         rmodel = self.rmodel = robot.model
+        rmodel.armature = np.matrix([ 0 ]*robot.model.nv).T
+        for j in robot.model.joints[1:]:
+            if j.shortname()!='JointModelFreeFlyer':
+                rmodel.armature[j.idx_v:j.idx_v+j.nv]=1
         State = self.State = StatePinocchio(rmodel)
         self.cost1 = CostModelPosition(rmodel,nu=rmodel.nv,
                                        frame=rmodel.getFrameId(opPointName),
@@ -161,5 +170,5 @@ from logger import *
 disp = lambda xs: disptraj(f.robot,xs)
 ddp = SolverDDP(problem)
 ddp.callback = SolverLogger(f.robot)
-#ddp.th_stop = 1e-18
+ddp.th_stop = 1e-18
 ddp.solve(verbose=True,maxiter=1000)
