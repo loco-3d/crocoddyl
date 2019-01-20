@@ -506,13 +506,16 @@ class CostModelState(CostModelPinocchio):
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=State.ndx,nu=nu)
         self.State = State
         self.ref = ref
+        self.weights = None
     def calc(model,data,x,u):
-        data.residuals[:] = model.State.diff(model.ref,x)
+        w = (1 if model.weights is None else model.weights)
+        data.residuals[:] = w*model.State.diff(model.ref,x)
         data.cost = .5*sum(data.residuals**2)
         return data.cost
     def calcDiff(model,data,x,u,recalc=True):
         if recalc: model.calc(data,x,u)
-        data.Rx[:,:] = model.State.Jdiff(model.ref,x,'second')
+        w = (1 if model.weights is None else model.weights)
+        data.Rx[:,:] = (w*model.State.Jdiff(model.ref,x,'second').T).T
         data.Lx[:] = np.dot(data.Rx.T,data.residuals)
         data.Lxx[:,:] = np.dot(data.Rx.T,data.Rx)
         
@@ -531,6 +534,7 @@ x = m2a(np.concatenate([q,v]))
 u = m2a(rand(rmodel.nv))
 
 costModel = CostModelState(rmodel,X,X.rand())
+costModel.weight = np.array([2]*rmodel.nv + [.5]*rmodel.nv)
 costData = costModel.createData(rdata)
 costModel.calcDiff(costData,x,u)
 

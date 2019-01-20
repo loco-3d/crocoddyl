@@ -1051,7 +1051,7 @@ class SolverDDP:
         self.th_step = .5
 
         self.callback = None
-        
+
     def models(self) : return self.problem.runningModels + [self.problem.terminalModel]
     def datas(self) : return self.problem.runningDatas + [self.problem.terminalData]
 
@@ -1129,9 +1129,9 @@ class SolverDDP:
 
             for a in self.alphas:
                 try:
-                    if verbose: print ('\t\t\tForward pass failed')
                     dV = self.tryStep(a)
                 except ArithmeticError:
+                    if verbose: print ('\t\t\tForward pass failed')
                     continue
                 dV_exp = a*(d1+.5*d2*a)
                 if verbose: print('\t\tAccept? %f %f' % (dV, d1*a+.5*d2*a**2) )
@@ -1140,8 +1140,13 @@ class SolverDDP:
                     self.setCandidate(self.xs_try,self.us_try,isFeasible=True,copy=False)
                     self.cost = self.cost_try
                     break
-            if a>self.th_step: self.decreaseRegularization()
-            if verbose: print( 'Accept iter=%d, a=%f, cost=%.8f'
+            if a>self.th_step:
+                self.decreaseRegularization()
+                if verbose and self.x_reg>self.regMin: print "\t\t\tDecrease reg"
+            if a==self.alphas[-1]:
+                self.increaseRegularization()
+                if verbose: print "\t\t\tIncrease reg"
+            elif verbose: print( 'Accept iter=%d, a=%f, cost=%.8f'
                                % (i,a,self.problem.calc(self.xs,self.us)))
             self.stepLength = a; self.iter = i
             if self.callback is not None: self.callback(self)
@@ -1171,20 +1176,20 @@ class SolverDDP:
         Allocate matrix space of Q,V and K. 
         Done at init time (redo if problem change).
         '''
-        self.Vxx = [ np.zeros([m.nx     ,m.nx     ]) for m in self.models() ]
-        self.Vx  = [ np.zeros([m.nx])                for m in self.models() ]
+        self.Vxx = [ np.zeros([m.ndx    ,m.ndx      ]) for m in self.models() ]
+        self.Vx  = [ np.zeros([m.ndx])                 for m in self.models() ]
 
-        self.Q   = [ np.zeros([m.nx+m.nu,m.nx+m.nu]) for m in self.problem.runningModels ]
-        self.q   = [ np.zeros([m.nx+m.nu          ]) for m in self.problem.runningModels ]
-        self.Qxx = [ Q[:m.nx,:m.nx] for m,Q in zip(self.problem.runningModels,self.Q) ]
-        self.Qxu = [ Q[:m.nx,m.nx:] for m,Q in zip(self.problem.runningModels,self.Q) ]
-        self.Qux = [ Qxu.T          for m,Qxu in zip(self.problem.runningModels,self.Qxu) ]
-        self.Quu = [ Q[m.nx:,m.nx:] for m,Q in zip(self.problem.runningModels,self.Q) ]
-        self.Qx  = [ q[:m.nx]       for m,q in zip(self.problem.runningModels,self.q) ]
-        self.Qu  = [ q[m.nx:]       for m,q in zip(self.problem.runningModels,self.q) ]
+        self.Q   = [ np.zeros([m.ndx+m.nu,m.ndx+m.nu]) for m in self.problem.runningModels ]
+        self.q   = [ np.zeros([m.ndx+m.nu           ]) for m in self.problem.runningModels ]
+        self.Qxx = [ Q[:m.ndx,:m.ndx] for m,Q in zip(self.problem.runningModels,self.Q) ]
+        self.Qxu = [ Q[:m.ndx,m.ndx:] for m,Q in zip(self.problem.runningModels,self.Q) ]
+        self.Qux = [ Qxu.T            for m,Qxu in zip(self.problem.runningModels,self.Qxu) ]
+        self.Quu = [ Q[m.ndx:,m.ndx:] for m,Q in zip(self.problem.runningModels,self.Q) ]
+        self.Qx  = [ q[:m.ndx]        for m,q in zip(self.problem.runningModels,self.q) ]
+        self.Qu  = [ q[m.ndx:]        for m,q in zip(self.problem.runningModels,self.q) ]
 
-        self.K   = [ np.zeros([ m.nu,m.nx ]) for m in self.problem.runningModels ]
-        self.k   = [ np.zeros([ m.nu      ]) for m in self.problem.runningModels ]
+        self.K   = [ np.zeros([ m.nu,m.ndx ]) for m in self.problem.runningModels ]
+        self.k   = [ np.zeros([ m.nu       ]) for m in self.problem.runningModels ]
         
     def backwardPass(self):
         xs,us = self.xs,self.us
@@ -1574,6 +1579,52 @@ for t in range(T):
 assert( norm(kkt.primal - kkt3.primal) <1e-9 )
 # Duals are not equals as the jacobians are not the same.
 
+
+### DDP test with manifold
+T = 1
+
+x0ref = np.array([ -1,-1,1,0 ])
+problem = ShootingProblem(x0ref, [ model ]*T, model)
+xs = [ m.State.rand()   for m in problem.runningModels + [problem.terminalModel] ]
+us = [ np.random.rand(nu)     for m in problem.runningModels ]
+
+kkt = SolverKKT(problem)
+ddp = SolverDDP(problem)
+ddp.solve()
+
+xkkt,ukkt,donekkt=kkt.solve(maxiter=200,init_xs=xs,init_us=us)
+xddp,uddp,doneddp=ddp.solve(maxiter=200,init_xs=xs,init_us=us,regInit=0)
+assert(donekkt)
+assert(doneddp)
+assert(norm(xkkt[0]-problem.initialState)<1e-9)
+assert(norm(xddp[0]-problem.initialState)<1e-9)
+for t in range(problem.T):
+    assert(norm(ukkt[t]-uddp[t])<1e-6)
+    assert(norm(xkkt[t+1]-xddp[t+1])<1e-6)
+
+T = 10
+
+x0ref = np.array([ -1,-1,1,0 ])
+problem = ShootingProblem(x0ref, [ model ]*T, model)
+xs = [ m.State.rand()   for m in problem.runningModels + [problem.terminalModel] ]
+us = [ np.random.rand(nu)     for m in problem.runningModels ]
+
+kkt = SolverKKT(problem)
+ddp = SolverDDP(problem)
+ddp.solve()
+
+kkt.th_stop = 1e-18
+ddp.th_stop = 1e-18
+
+xkkt,ukkt,donekkt=kkt.solve(maxiter=200,init_xs=xs,init_us=us)
+xddp,uddp,doneddp=ddp.solve(maxiter=200,init_xs=xs,init_us=us,regInit=0)
+assert(donekkt)
+assert(doneddp)
+assert(norm(xkkt[0]-problem.initialState)<1e-9)
+assert(norm(xddp[0]-problem.initialState)<1e-9)
+for t in range(problem.T):
+    assert(norm(ukkt[t]-uddp[t])<1e-6)
+    assert(norm(xkkt[t+1]-xddp[t+1])<1e-6)
 
 del problem
 # -------------------------------------------------------------------
