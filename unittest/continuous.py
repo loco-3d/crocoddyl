@@ -1,4 +1,3 @@
-import rospkg
 import refact
 import pinocchio
 from pinocchio.utils import *
@@ -12,13 +11,8 @@ a2m = lambda a: np.matrix(a).T
 absmax = lambda A: np.max(abs(A))
 absmin = lambda A: np.min(abs(A))
 
-rospack = rospkg.RosPack()
-MODEL_PATH = rospack.get_path('talos_data')
-MESH_DIR = MODEL_PATH+'/../'
-URDF_FILENAME = "talos_left_arm.urdf"
-URDF_MODEL_PATH = MODEL_PATH + "/robots/" + URDF_FILENAME
-
-robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(URDF_MODEL_PATH, [MESH_DIR])
+from robots import loadTalosArm
+robot = loadTalosArm()
 
 #urdf = path + 'hyq_description/robots/hyq_no_sensors.urdf'
 #robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(urdf, [path], pinocchio.JointModelFreeFlyer())
