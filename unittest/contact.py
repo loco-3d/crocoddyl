@@ -7,24 +7,14 @@ from numpy import dot,asarray
 from continuous import DifferentialActionModelPositioning, DifferentialActionModel, IntegratedActionModelEuler, DifferentialActionModelNumDiff,StatePinocchio,CostModelSum,CostModelPinocchio,CostModelPosition,CostModelState,CostModelControl
 import warnings
 from numpy.linalg import inv,pinv,norm,svd,eig
+from robots import loadTalosArm
 
 m2a = lambda m: np.array(m.flat)
 a2m = lambda a: np.matrix(a).T
 absmax = lambda A: np.max(abs(A))
 absmin = lambda A: np.min(abs(A))
 
-path = '/home/nmansard/src/cddp/examples/'
-
-rospack = rospkg.RosPack()
-MODEL_PATH = rospack.get_path('talos_data')
-#MODEL_PATH = '/home/nmansard/src/cddp/examples'
-MESH_DIR = MODEL_PATH
-URDF_FILENAME = "talos_left_arm.urdf"
-#URDF_MODEL_PATH = MODEL_PATH + "/talos_data/robots/" + URDF_FILENAME
-URDF_MODEL_PATH = MODEL_PATH + "/robots/" + URDF_FILENAME
-
-robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(URDF_MODEL_PATH, [MESH_DIR], pinocchio.JointModelFreeFlyer())
-
+robot = loadTalosArm(freeFloating=True)
 qmin = robot.model.lowerPositionLimit; qmin[:7]=-1; robot.model.lowerPositionLimit = qmin
 qmax = robot.model.upperPositionLimit; qmax[:7]= 1; robot.model.upperPositionLimit = qmax
 
