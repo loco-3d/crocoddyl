@@ -59,6 +59,11 @@ def loadTalosLegs(modelPath='/opt/openrobots/share'):
     robot.q0=q2
     robot.visual_data = pinocchio.GeometryData(g2)
 
+    robot.model.armature = np.matrix([ 0 ]*robot.model.nv).T
+    for j in robot.model.joints[1:]:
+        if j.shortname()!='JointModelFreeFlyer':
+            robot.model.armature[j.idx_v:j.idx_v+j.nv]=1
+
     return robot
 
 if __name__ == "__main__":
