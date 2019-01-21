@@ -1146,6 +1146,7 @@ class SolverDDP:
             if a==self.alphas[-1]:
                 self.increaseRegularization()
                 if verbose: print "\t\t\tIncrease reg"
+                if verbose and self.x_reg>=self.regMax: print '\t\tReg max reached ... bad news'
             elif verbose: print( 'Accept iter=%d, a=%f, cost=%.8f'
                                % (i,a,self.problem.calc(self.xs,self.us)))
             self.stepLength = a; self.iter = i
