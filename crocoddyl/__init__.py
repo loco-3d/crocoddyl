@@ -10,6 +10,9 @@ from cost import CostDataCoM, CostModelCoM
 from cost import CostDataState, CostModelState
 from cost import CostDataControl, CostModelControl
 from cost import CostDataForce6D, CostModelForce6D
+from activation import ActivationDataQuad, ActivationModelQuad
+from activation import ActivationDataWeightedQuad, ActivationModelWeightedQuad
+from activation import ActivationDataSmoothAbs, ActivationModelSmoothAbs
 from action import ActionDataLQR, ActionModelLQR
 from action import ActionDataNumDiff, ActionModelNumDiff
 from integrated_action import IntegratedActionDataEuler, IntegratedActionModelEuler
