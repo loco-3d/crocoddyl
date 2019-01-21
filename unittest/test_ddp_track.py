@@ -40,7 +40,7 @@ costModel = CostModelSum(rmodel,nu=actModel.nu)
 cost1 = CostModelPosition(rmodel,nu=actModel.nu,
                           frame=rmodel.getFrameId(opPointName),
                           ref=np.array([.5,.4,.3]),
-                          activation=ActivationModelWeightedQuad(np.array([0,0,1])))
+                          activation=ActivationModelWeightedQuad(np.array([1,0,1])))
 cost2 = CostModelState(rmodel,State,ref=State.zero(),nu=actModel.nu)
 cost3 = CostModelControl(rmodel,nu=actModel.nu)
 costModel.addCost( name="pos", weight = 10, cost = cost1)
@@ -58,17 +58,11 @@ cd3 = data.differential.costs .costs['regu']
 ddata = data.differential
 rdata = data.differential.pinocchio
 
-for i in range(10) :x = State.rand()
-q = a2m(x[:rmodel.nq])
-v = a2m(x[rmodel.nq:])
-u = np.random.rand(model.nu)
 
-x[7:14] = [ 0.14157772, -0.24871934, -0.93188611,  1.05232249, 0.8073672 ,   -0.03645088, -0.1411819 ]
-model.calc(data,x,None)
-oMc = rdata.oMf[contact6.frame]
-oMff = rdata.oMi[1]
-x[:7] = se3ToXYZQUAT( oMc.inverse()*oMff )
-x[14:]=0
+q = robot.q0.copy()
+v = zero(rmodel.nv)
+x = m2a(np.concatenate([q,v]))
+
 
 # --- DDP 
 # --- DDP 
@@ -77,12 +71,13 @@ from refact import ShootingProblem, SolverDDP,SolverKKT
 from logger import *
 disp = lambda xs: disptraj(robot,xs)
 
-model.timeStep = 1e-2
+DT = 1.0 
 T = 50
+model.timeStep = DT/T
 
 model.differential.costs['pos' ].weight = 10
 model.differential.costs['regx'].weight = 0.01
-model.differential.costs['regu'].weight = 0.0001
+model.differential.costs['regu'].weight = 1
 cost1.ref[:] = [ .1, .1, 0.0 ]
 
 import copy
@@ -95,7 +90,7 @@ termmodel.differential.costs['pos' ]   .weight = 300000
 termmodel.differential.costs['regx']   .weight = 1
 termmodel.differential.costs['regu']   .weight = 0.01
 termmodel.differential.costs['regx'].cost.weights = np.array([0]*6+[0.01]*(rmodel.nv-6)+[10]*rmodel.nv)
-
+termmodel.differential.costs['pos'].cost.ref[:] = [ .2, .2, 0 ]
     
 # --- SOLVER
 
