@@ -1,28 +1,7 @@
 from state import StateVector
 from action import ActionDataLQR, ActionModelLQR
 import numpy as np
-# from numpy import cos,sin,arctan2
 
-
-class ActionDataUnicycle:
-    def __init__(self,model):
-        nx,nu,ncost = model.nx,model.nu,model.ncost
-        self. L = np.zeros([ nx+nu, nx+nu ])
-        self. g = np.zeros([ nx+nu ])
-        self. F = np.zeros([ nx,nx+nu ])
-
-        self. cost  = np.nan
-        self. xnext = np.zeros([ nx ])
-        self. costResiduals = np.zeros([ ncost ])  # Might be use for numdiff (Gauss-Newton appox)
-        
-        self.Lxx = self.L[:nx,:nx]
-        self.Lxu = self.L[:nx,nx:]
-        self.Lux = self.L[nx:,:nx]
-        self.Luu = self.L[nx:,nx:]
-        self.Lx  = self.g[:nx]
-        self.Lu  = self.g[nx:]
-        self.Fx = self.F[:,:nx]
-        self.Fu = self.F[:,nx:]
 
 
 class ActionModelUnicycle:
@@ -36,11 +15,11 @@ class ActionModelUnicycle:
         self.ndx  = self.State.ndx
         self.nu   = 2
         self.ncost = 5
-        
+
         self.dt   = .1
         self.costWeights = [ 1,.03 ]
         self.unone = np.zeros(self.nu)
-        
+
     def createData(self):
         return ActionDataUnicycle(self)
     def calc(model,data,x,u=None):
@@ -56,7 +35,7 @@ class ActionModelUnicycle:
         data.costResiduals[3:5] = model.costWeights[1]*u
         data.cost = .5* sum(data.costResiduals**2)
         return data.xnext,data.cost
-    
+
     def calcDiff(model,data,x,u=None):
         if u is None: u=model.unone
         xnext,cost = model.calc(data,x,u)
@@ -79,11 +58,30 @@ class ActionModelUnicycle:
                        [          0, model.dt ] ]
         return xnext,cost
 
+class ActionDataUnicycle:
+    def __init__(self,model):
+        nx,nu,ncost = model.nx,model.nu,model.ncost
+        self. L = np.zeros([ nx+nu, nx+nu ])
+        self. g = np.zeros([ nx+nu ])
+        self. F = np.zeros([ nx,nx+nu ])
+
+        self. cost  = np.nan
+        self. xnext = np.zeros([ nx ])
+        self. costResiduals = np.zeros([ ncost ])  # Might be use for numdiff (Gauss-Newton appox)
+
+        self.Lxx = self.L[:nx,:nx]
+        self.Lxu = self.L[:nx,nx:]
+        self.Lux = self.L[nx:,:nx]
+        self.Luu = self.L[nx:,nx:]
+        self.Lx  = self.g[:nx]
+        self.Lu  = self.g[nx:]
+        self.Fx = self.F[:,:nx]
+        self.Fu = self.F[:,nx:]
+
 
 
 
 from numpy import cos,sin,arctan2
-
 class StateUnicycle:
     nx = 4
     ndx = 3
@@ -152,9 +150,9 @@ class StateUnicycle:
         a,b,th = v; c,s = cos(th),sin(th)
         if firstsecond == 'second':
             return np.array([ [ c,s,0 ],[ -s,c,0 ],[ 0,0,1 ] ])
-        elif firstsecond == 'first': 
+        elif firstsecond == 'first':
             return np.array([ [ c,s,-c*b+s*a ],[ -s,c,s*b+c*a ],[ 0,0,1 ] ])
-    
+
     #for debug
     @staticmethod
     def x2m(x):
@@ -179,29 +177,6 @@ class StateUnicycle:
         return np.array([ m[0,2],m[1,2],arctan2(m[1,0],m[0,0]) ])
 
 
-class ActionDataUnicycleVar:
-    def __init__(self,model):
-        nx,ndx,nu,ncost = model.nx,model.ndx,model.nu,model.ncost
-        self. L = np.zeros([ ndx+nu, ndx+nu ])
-        self. g = np.zeros([ ndx+nu ])
-        self. F = np.zeros([ ndx,ndx+nu ])
-        self. R = np.zeros([ ncost,ndx+nu ]) # Residual jacobian
-        
-        self. cost  = np.nan
-        self. xnext = np.zeros([ nx ])
-        self. costResiduals = np.zeros([ ncost ])  # Might be use for numdiff (Gauss-Newton appox)
-
-        self.Rx = self.R[:,:ndx]
-        self.Ru = self.R[:,ndx:]
-        self.Lxx = self.L[:ndx,:ndx]
-        self.Lxu = self.L[:ndx,ndx:]
-        self.Lux = self.L[ndx:,:ndx]
-        self.Luu = self.L[ndx:,ndx:]
-        self.Lx  = self.g[:ndx]
-        self.Lu  = self.g[ndx:]
-        self.Fx = self.F[:,:ndx]
-        self.Fu = self.F[:,ndx:]
-
 
 class ActionModelUnicycleVar:
     def __init__(self):
@@ -214,12 +189,12 @@ class ActionModelUnicycleVar:
         self.ndx  = self.State.ndx
         self.nu   = 2
         self.ncost = 5
-        
+
         self.dt   = .1
         self.costWeights = [ 1,.03 ]
         self.unone = np.zeros(self.nu)
         self.xref = self.State.zero()
-        
+
     def createData(self):
         return ActionDataUnicycleVar(self)
     def calc(model,data,x,u=None):
@@ -243,10 +218,10 @@ class ActionModelUnicycleVar:
         if u is None: u=model.unone
         xnext,cost = model.calc(data,x,u)
         nx,ndx,nu = model.nx,model.ndx,model.nu
-        
+
         ### Cost derivatives
         data.R[:ndx,:ndx] = model.costWeights[0] * model.State.Jdiff(model.xref,x,'second')
-        data.R[ndx:,ndx:] = np.diag([ model.costWeights[1] ]*nu ) 
+        data.R[ndx:,ndx:] = np.diag([ model.costWeights[1] ]*nu )
         data.g[:] = np.dot(data.R.T,data.costResiduals)
         data.L[:,:] = np.dot(data.R.T,data.R)
 
@@ -258,3 +233,26 @@ class ActionModelUnicycleVar:
         data.Fu[:,1] = Ju[:,2]*model.dt
 
         return xnext,cost
+
+class ActionDataUnicycleVar:
+    def __init__(self,model):
+        nx,ndx,nu,ncost = model.nx,model.ndx,model.nu,model.ncost
+        self. L = np.zeros([ ndx+nu, ndx+nu ])
+        self. g = np.zeros([ ndx+nu ])
+        self. F = np.zeros([ ndx,ndx+nu ])
+        self. R = np.zeros([ ncost,ndx+nu ]) # Residual jacobian
+
+        self. cost  = np.nan
+        self. xnext = np.zeros([ nx ])
+        self. costResiduals = np.zeros([ ncost ])  # Might be use for numdiff (Gauss-Newton appox)
+
+        self.Rx = self.R[:,:ndx]
+        self.Ru = self.R[:,ndx:]
+        self.Lxx = self.L[:ndx,:ndx]
+        self.Lxu = self.L[:ndx,ndx:]
+        self.Lux = self.L[ndx:,:ndx]
+        self.Luu = self.L[ndx:,ndx:]
+        self.Lx  = self.g[:ndx]
+        self.Lu  = self.g[ndx:]
+        self.Fx = self.F[:,:ndx]
+        self.Fu = self.F[:,ndx:]

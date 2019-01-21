@@ -2,30 +2,6 @@ import numpy as np
 
 
 
-class IntegratedActionDataEuler:
-    def __init__(self,model):
-        nx,ndx,nu,ncost = model.nx,model.ndx,model.nu,model.ncost
-        self.differential = model.differential.createData()
-
-        self.g = np.zeros([ ndx+nu ])
-        self.R = np.zeros([ ncost ,ndx+nu ])
-        self.L = np.zeros([ ndx+nu,ndx+nu ])
-        self.F = np.zeros([ ndx   ,ndx+nu ])
-        self.xnext = np.zeros([ nx ])
-        self.cost = np.nan
-        self.costResiduals = np.zeros([ ncost ])
-        
-        self.Lxx = self.L[:ndx,:ndx]
-        self.Lxu = self.L[:ndx,ndx:]
-        self.Lux = self.L[ndx:,:ndx]
-        self.Luu = self.L[ndx:,ndx:]
-        self.Lx  = self.g[:ndx]
-        self.Lu  = self.g[ndx:]
-        self.Fx = self.F[:,:ndx]
-        self.Fu = self.F[:,ndx:]
-        self.Rx = self.R[:,:ndx]
-        self.Ru = self.R[:,ndx:]
-
 class IntegratedActionModelEuler:
     def __init__(self,diffModel):
         self.differential = diffModel
@@ -63,3 +39,27 @@ class IntegratedActionModelEuler:
         data.Fu[:,:] = dt*np.dot(dxnext_ddx,ddx_du)
         data.g[:] = data.differential.g
         data.L[:] = data.differential.L
+
+class IntegratedActionDataEuler:
+    def __init__(self,model):
+        nx,ndx,nu,ncost = model.nx,model.ndx,model.nu,model.ncost
+        self.differential = model.differential.createData()
+
+        self.g = np.zeros([ ndx+nu ])
+        self.R = np.zeros([ ncost ,ndx+nu ])
+        self.L = np.zeros([ ndx+nu,ndx+nu ])
+        self.F = np.zeros([ ndx   ,ndx+nu ])
+        self.xnext = np.zeros([ nx ])
+        self.cost = np.nan
+        self.costResiduals = np.zeros([ ncost ])
+
+        self.Lxx = self.L[:ndx,:ndx]
+        self.Lxu = self.L[:ndx,ndx:]
+        self.Lux = self.L[ndx:,:ndx]
+        self.Luu = self.L[ndx:,ndx:]
+        self.Lx  = self.g[:ndx]
+        self.Lu  = self.g[ndx:]
+        self.Fx = self.F[:,:ndx]
+        self.Fu = self.F[:,ndx:]
+        self.Rx = self.R[:,:ndx]
+        self.Ru = self.R[:,ndx:]

@@ -6,27 +6,6 @@ import pinocchio
 
 
 
-class DifferentialActionData:
-    def __init__(self,model):
-        self.pinocchio = model.pinocchio.createData()
-        self.costs = model.costs.createData(self.pinocchio)
-        self.cost = np.nan
-        self.xout = np.zeros(model.nout)
-        nx,nu,ndx,nq,nv,nout = model.nx,model.nu,model.State.ndx,model.nq,model.nv,model.nout
-        self.F = np.zeros([ nout,ndx+nu ])
-        self.costResiduals = self.costs.residuals
-        self.Fx = self.F[:,:ndx]
-        self.Fu = self.F[:,-nu:]
-        self.g   = self.costs.g
-        self.L   = self.costs.L
-        self.Lx  = self.costs.Lx
-        self.Lu  = self.costs.Lu
-        self.Lxx = self.costs.Lxx
-        self.Lxu = self.costs.Lxu
-        self.Luu = self.costs.Luu
-        self.Rx  = self.costs.Rx
-        self.Ru  = self.costs.Ru
-
 class DifferentialActionModel:
     def __init__(self,pinocchioModel):
         self.pinocchio = pinocchioModel
@@ -68,29 +47,31 @@ class DifferentialActionModel:
         pinocchio.computeJointJacobians(model.pinocchio,data.pinocchio,q)
         pinocchio.updateFramePlacements(model.pinocchio,data.pinocchio)
         model.costs.calcDiff(data.costs,x,u,recalc=False)
-        
+
         return data.xout,data.cost
 
-
-class DifferentialActionDataNumDiff:
+class DifferentialActionData:
     def __init__(self,model):
-        nx,ndx,nu,ncost = model.nx,model.ndx,model.nu,model.ncost
-        self.data0 = model.model0.createData()
-        self.datax = [ model.model0.createData() for i in range(model.ndx) ]
-        self.datau = [ model.model0.createData() for i in range(model.nu ) ]
-        self.Lx = np.zeros([ model.ndx ])
-        self.Lu = np.zeros([ model.nu ])
-        self.Fx = np.zeros([ model.nout,model.ndx ])
-        self.Fu = np.zeros([ model.nout,model.nu  ])
-        if model.ncost >1 :
-            self.Rx = np.zeros([model.ncost,model.ndx])
-            self.Ru = np.zeros([model.ncost,model.nu ])
-        if model.withGaussApprox:
-            self. L = np.zeros([ ndx+nu, ndx+nu ])
-            self.Lxx = self.L[:ndx,:ndx]
-            self.Lxu = self.L[:ndx,ndx:]
-            self.Lux = self.L[ndx:,:ndx]
-            self.Luu = self.L[ndx:,ndx:]
+        self.pinocchio = model.pinocchio.createData()
+        self.costs = model.costs.createData(self.pinocchio)
+        self.cost = np.nan
+        self.xout = np.zeros(model.nout)
+        nx,nu,ndx,nq,nv,nout = model.nx,model.nu,model.State.ndx,model.nq,model.nv,model.nout
+        self.F = np.zeros([ nout,ndx+nu ])
+        self.costResiduals = self.costs.residuals
+        self.Fx = self.F[:,:ndx]
+        self.Fu = self.F[:,-nu:]
+        self.g   = self.costs.g
+        self.L   = self.costs.L
+        self.Lx  = self.costs.Lx
+        self.Lu  = self.costs.Lu
+        self.Lxx = self.costs.Lxx
+        self.Lxu = self.costs.Lxu
+        self.Luu = self.costs.Luu
+        self.Rx  = self.costs.Rx
+        self.Ru  = self.costs.Ru
+
+
 
 class DifferentialActionModelNumDiff:
     def __init__(self,model,withGaussApprox=False):
@@ -107,7 +88,7 @@ class DifferentialActionModelNumDiff:
             self.ncost = 1
         self.withGaussApprox = withGaussApprox
         assert( not self.withGaussApprox or self.ncost>1 )
-        
+
     def createData(self):
         return DifferentialActionDataNumDiff(self)
     def calc(model,data,x,u): return model.model0.calc(data.data0,x,u)
@@ -131,3 +112,23 @@ class DifferentialActionModelNumDiff:
             data.Lxu[:,:] = np.dot(data.Rx.T,data.Ru)
             data.Lux[:,:] = data.Lxu.T
             data.Luu[:,:] = np.dot(data.Ru.T,data.Ru)
+
+class DifferentialActionDataNumDiff:
+    def __init__(self,model):
+        nx,ndx,nu,ncost = model.nx,model.ndx,model.nu,model.ncost
+        self.data0 = model.model0.createData()
+        self.datax = [ model.model0.createData() for i in range(model.ndx) ]
+        self.datau = [ model.model0.createData() for i in range(model.nu ) ]
+        self.Lx = np.zeros([ model.ndx ])
+        self.Lu = np.zeros([ model.nu ])
+        self.Fx = np.zeros([ model.nout,model.ndx ])
+        self.Fu = np.zeros([ model.nout,model.nu  ])
+        if model.ncost >1 :
+            self.Rx = np.zeros([model.ncost,model.ndx])
+            self.Ru = np.zeros([model.ncost,model.nu ])
+        if model.withGaussApprox:
+            self. L = np.zeros([ ndx+nu, ndx+nu ])
+            self.Lxx = self.L[:ndx,:ndx]
+            self.Lxu = self.L[:ndx,ndx:]
+            self.Lux = self.L[ndx:,:ndx]
+            self.Luu = self.L[ndx:,ndx:]

@@ -3,21 +3,6 @@ import numpy as np
 
 
 
-class ActionDataLQR:
-    def __init__(self,actionModel):
-        assert( isinstance(actionModel,ActionModelLQR) )
-        self.model = actionModel
-
-        self.xnext = np.zeros([ self.model.nx ])
-        self.cost  = np.nan
-        self.Lx  = np.zeros([ self.model.ndx ])
-        self.Lu  = np.zeros([ self.model.nu  ])
-        self.Lxx = self.model.Lxx
-        self.Lxu = self.model.Lxu
-        self.Luu = self.model.Luu
-        self.Fx  = self.model.Fx
-        self.Fu  = self.model.Fu
-
 class ActionModelLQR:
     def __init__(self,nx,nu):
         '''
@@ -38,7 +23,7 @@ class ActionModelLQR:
         self.Fu  = None
 
         self.unone = np.zeros(self.nu)
-        
+
     def setUpRandom(self):
         self.Lx  = np.random.rand( self.ndx )
         self.Lu  = np.random.rand( self.nu  )
@@ -62,7 +47,7 @@ class ActionModelLQR:
         data.cost  = quad(x,model.Lxx,x) + 2*quad(x,model.Lxu,u) + quad(u,model.Luu,u) \
                      + np.dot(model.Lx,x) + np.dot(model.Lu,u)
         return data.xnext,data.cost
-        
+
     def calcDiff(model,data,x,u=None):
         if u is None: u=model.unone
         xnext,cost = model.calc(data,x,u)
@@ -75,27 +60,22 @@ class ActionModelLQR:
         data.Fu  = model.Fu
         return xnext,cost
 
+class ActionDataLQR:
+    def __init__(self,actionModel):
+        assert( isinstance(actionModel,ActionModelLQR) )
+        self.model = actionModel
+
+        self.xnext = np.zeros([ self.model.nx ])
+        self.cost  = np.nan
+        self.Lx  = np.zeros([ self.model.ndx ])
+        self.Lu  = np.zeros([ self.model.nu  ])
+        self.Lxx = self.model.Lxx
+        self.Lxu = self.model.Lxu
+        self.Luu = self.model.Luu
+        self.Fx  = self.model.Fx
+        self.Fu  = self.model.Fu
 
 
-class ActionDataNumDiff:
-    def __init__(self,model):
-        nx,ndx,nu,ncost = model.nx,model.ndx,model.nu,model.ncost
-        self.data0 = model.model0.createData()
-        self.datax = [ model.model0.createData() for i in range(model.ndx) ]
-        self.datau = [ model.model0.createData() for i in range(model.nu ) ]
-        self.Lx = np.zeros([ model.ndx ])
-        self.Lu = np.zeros([ model.nu ])
-        self.Fx = np.zeros([ model.ndx,model.ndx ])
-        self.Fu = np.zeros([ model.ndx,model.nu  ])
-        if model.ncost >1 :
-            self.Rx = np.zeros([model.ncost,model.ndx])
-            self.Ru = np.zeros([model.ncost,model.nu ])
-        if model.withGaussApprox:
-            self. L = np.zeros([ ndx+nu, ndx+nu ])
-            self.Lxx = self.L[:ndx,:ndx]
-            self.Lxu = self.L[:ndx,ndx:]
-            self.Lux = self.L[ndx:,:ndx]
-            self.Luu = self.L[ndx:,ndx:]
 
 class ActionModelNumDiff:
     def __init__(self,model,withGaussApprox=False):
@@ -134,3 +114,23 @@ class ActionModelNumDiff:
             data.Lxu[:,:] = np.dot(data.Rx.T,data.Ru)
             data.Lux[:,:] = data.Lxu.T
             data.Luu[:,:] = np.dot(data.Ru.T,data.Ru)
+
+class ActionDataNumDiff:
+    def __init__(self,model):
+        nx,ndx,nu,ncost = model.nx,model.ndx,model.nu,model.ncost
+        self.data0 = model.model0.createData()
+        self.datax = [ model.model0.createData() for i in range(model.ndx) ]
+        self.datau = [ model.model0.createData() for i in range(model.nu ) ]
+        self.Lx = np.zeros([ model.ndx ])
+        self.Lu = np.zeros([ model.nu ])
+        self.Fx = np.zeros([ model.ndx,model.ndx ])
+        self.Fu = np.zeros([ model.ndx,model.nu  ])
+        if model.ncost >1 :
+            self.Rx = np.zeros([model.ncost,model.ndx])
+            self.Ru = np.zeros([model.ncost,model.nu ])
+        if model.withGaussApprox:
+            self. L = np.zeros([ ndx+nu, ndx+nu ])
+            self.Lxx = self.L[:ndx,:ndx]
+            self.Lxu = self.L[:ndx,ndx:]
+            self.Lux = self.L[ndx:,:ndx]
+            self.Luu = self.L[ndx:,ndx:]

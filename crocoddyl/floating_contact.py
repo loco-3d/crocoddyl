@@ -4,42 +4,6 @@ import numpy as np
 import pinocchio
 
 
-class DifferentialActionDataFloatingInContact:
-    def __init__(self,model):
-        self.pinocchio = model.pinocchio.createData()
-        self.actuation = model.actuation.createData(self.pinocchio)
-        self.contact = model.contact.createData(self.pinocchio)
-        self.costs = model.costs.createData(self.pinocchio)
-        self.cost = np.nan
-        nx,nu,ndx,nq,nv,nout,nc = model.nx,model.nu,model.State.ndx,model.nq,model.nv,model.nout,model.ncontact
-        self.F = np.zeros([ nout,ndx+nu ])
-        self.costResiduals = self.costs.residuals
-        self.Fx = self.F[:,:ndx]
-        self.Fu = self.F[:,-nu:]
-        self.g   = self.costs.g
-        self.L   = self.costs.L
-        self.Lx  = self.costs.Lx
-        self.Lu  = self.costs.Lu
-        self.Lxx = self.costs.Lxx
-        self.Lxu = self.costs.Lxu
-        self.Luu = self.costs.Luu
-        self.Rx  = self.costs.Rx
-        self.Ru  = self.costs.Ru
-
-        self.tauq = np.zeros(nv)
-        self.K  = np.zeros([nv+nc, nv+nc])  # KKT matrix = [ MJ.T ; J0 ]
-        self.r  = np.zeros( nv+nc )         # NLE effects =  [ tau-b ; -gamma ]
-        self.af = np.zeros( nv+nc )         # acceleration&forces = [ a ; f ]
-        self.a  = self.af[:nv]
-        self.f  = self.af[nv:]
-
-        self.df   = np.zeros([nc,ndx+nu])
-        self.df_dx = self.df   [:,:ndx]
-        self.df_dq = self.df_dx[:,:nv]
-        self.df_dv = self.df_dx[:,nv:]
-        self.df_du = self.df   [:,ndx:]
-        
-        self.xout = self.a
 
 class DifferentialActionModelFloatingInContact:
     def __init__(self,pinocchioModel,actuationModel,contactModel,costModel):
@@ -102,7 +66,7 @@ class DifferentialActionModelFloatingInContact:
 
         # [a;f] = K^-1 [ tau - b, -gamma ]
         # [a';f'] = -K^-1 [ K'a + b' ; J'a + gamma' ]  = -K^-1 [ rnea'(q,v,a,fs) ; acc'(q,v,a) ]
-        
+
         # Derivative of the actuation model tau = tau(q,u)
         # dtau_dq and dtau_dv are the rnea derivatives rnea'
         did_dq = data.pinocchio.dtau_dq
@@ -121,16 +85,16 @@ class DifferentialActionModelFloatingInContact:
         df_did  = -data.Kinv[nv:,:nv]
         da_dacc = -data.Kinv[:nv,nv:]
         df_dacc = -data.Kinv[nv:,nv:]
-        
+
         da_dq   =  np.dot(da_did,did_dq) + np.dot(da_dacc,dacc_dq)
         da_dv   =  np.dot(da_did,did_dv) + np.dot(da_dacc,dacc_dv)
         da_dtau =  data.Kinv[:nv,:nv]  # Add this alias just to make the code clearer
         df_dtau =  data.Kinv[nv:,:nv]  # Add this alias just to make the code clearer
-        
+
         # tau is a function of x and u (typically trivial in x), whose derivatives are Ax and Au
         dtau_dx = data.actuation.Ax
         dtau_du = data.actuation.Au
-        
+
         data.Fx[:,:nv] = da_dq
         data.Fx[:,nv:] = da_dv
         data.Fx       += np.dot(da_dtau,dtau_dx)
@@ -142,7 +106,44 @@ class DifferentialActionModelFloatingInContact:
         data.df_du[:,:] = np.dot(df_dtau,dtau_du)
 
         model.contact.setForcesDiff(data.contact,data.df_dx,data.df_du)
-        
+
         model.costs.calcDiff(data.costs,x,u,recalc=False)
-        
+
         return data.xout,data.cost
+
+class DifferentialActionDataFloatingInContact:
+    def __init__(self,model):
+        self.pinocchio = model.pinocchio.createData()
+        self.actuation = model.actuation.createData(self.pinocchio)
+        self.contact = model.contact.createData(self.pinocchio)
+        self.costs = model.costs.createData(self.pinocchio)
+        self.cost = np.nan
+        nx,nu,ndx,nq,nv,nout,nc = model.nx,model.nu,model.State.ndx,model.nq,model.nv,model.nout,model.ncontact
+        self.F = np.zeros([ nout,ndx+nu ])
+        self.costResiduals = self.costs.residuals
+        self.Fx = self.F[:,:ndx]
+        self.Fu = self.F[:,-nu:]
+        self.g   = self.costs.g
+        self.L   = self.costs.L
+        self.Lx  = self.costs.Lx
+        self.Lu  = self.costs.Lu
+        self.Lxx = self.costs.Lxx
+        self.Lxu = self.costs.Lxu
+        self.Luu = self.costs.Luu
+        self.Rx  = self.costs.Rx
+        self.Ru  = self.costs.Ru
+
+        self.tauq = np.zeros(nv)
+        self.K  = np.zeros([nv+nc, nv+nc])  # KKT matrix = [ MJ.T ; J0 ]
+        self.r  = np.zeros( nv+nc )         # NLE effects =  [ tau-b ; -gamma ]
+        self.af = np.zeros( nv+nc )         # acceleration&forces = [ a ; f ]
+        self.a  = self.af[:nv]
+        self.f  = self.af[nv:]
+
+        self.df   = np.zeros([nc,ndx+nu])
+        self.df_dx = self.df   [:,:ndx]
+        self.df_dq = self.df_dx[:,:nv]
+        self.df_dv = self.df_dx[:,nv:]
+        self.df_du = self.df   [:,ndx:]
+
+        self.xout = self.a

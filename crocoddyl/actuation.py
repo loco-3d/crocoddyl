@@ -6,16 +6,6 @@ import pinocchio
 
 
 
-class ActuationDataFreeFloating:
-    def __init__(self,model,pinocchioData):
-        self.pinocchio = pinocchioData
-        nx,ndx,nq,nv,nu = model.nx,model.ndx,model.nq,model.nv,model.nu
-        self.a = np.zeros(nv)                 # result of calc
-        self.A = np.zeros([nv,ndx+nu])        # result of calcDiff
-        self.Ax = self.A[:,:ndx]
-        self.Au = self.A[:,ndx:]
-        np.fill_diagonal(self.Au[6:,:],1)
-
 class ActuationModelFreeFloating:
     '''
     This model transforms an actuation u into a joint torque tau.
@@ -39,9 +29,7 @@ class ActuationModelFreeFloating:
     def createData(self,pinocchioData):
         return ActuationDataFreeFloating(self,pinocchioData)
 
-
-
-class ActuationDataFull:
+class ActuationDataFreeFloating:
     def __init__(self,model,pinocchioData):
         self.pinocchio = pinocchioData
         nx,ndx,nq,nv,nu = model.nx,model.ndx,model.nq,model.nv,model.nu
@@ -49,7 +37,9 @@ class ActuationDataFull:
         self.A = np.zeros([nv,ndx+nu])        # result of calcDiff
         self.Ax = self.A[:,:ndx]
         self.Au = self.A[:,ndx:]
-        np.fill_diagonal(self.Au[:,:],1)
+        np.fill_diagonal(self.Au[6:,:],1)
+
+
 
 class ActuationModelFull:
     '''
@@ -73,29 +63,17 @@ class ActuationModelFull:
     def createData(self,pinocchioData):
         return ActuationDataFull(self,pinocchioData)
 
+class ActuationDataFull:
+    def __init__(self,model,pinocchioData):
+        self.pinocchio = pinocchioData
+        nx,ndx,nq,nv,nu = model.nx,model.ndx,model.nq,model.nv,model.nu
+        self.a = np.zeros(nv)                 # result of calc
+        self.A = np.zeros([nv,ndx+nu])        # result of calcDiff
+        self.Ax = self.A[:,:ndx]
+        self.Au = self.A[:,ndx:]
+        np.fill_diagonal(self.Au[:,:],1)
 
 
-class DifferentialActionDataActuated:
-    def __init__(self,model):
-        self.pinocchio = model.pinocchio.createData()
-        self.actuation = model.actuation.createData(self.pinocchio)
-        self.costs = model.costs.createData(self.pinocchio)
-        self.cost = np.nan
-        self.xout = np.zeros(model.nout)
-        nx,nu,ndx,nq,nv,nout = model.nx,model.nu,model.State.ndx,model.nq,model.nv,model.nout
-        self.F = np.zeros([ nout,ndx+nu ])
-        self.costResiduals = self.costs.residuals
-        self.Fx = self.F[:,:ndx]
-        self.Fu = self.F[:,-nu:]
-        self.g   = self.costs.g
-        self.L   = self.costs.L
-        self.Lx  = self.costs.Lx
-        self.Lu  = self.costs.Lu
-        self.Lxx = self.costs.Lxx
-        self.Lxu = self.costs.Lxu
-        self.Luu = self.costs.Luu
-        self.Rx  = self.costs.Rx
-        self.Ru  = self.costs.Ru
 
 class DifferentialActionModelActuated:
     '''Unperfect class written to validate the actuation model. Do not use except for tests. '''
@@ -148,5 +126,27 @@ class DifferentialActionModelActuated:
         pinocchio.computeJointJacobians(model.pinocchio,data.pinocchio,q)
         pinocchio.updateFramePlacements(model.pinocchio,data.pinocchio)
         model.costs.calcDiff(data.costs,x,u,recalc=False)
-        
+
         return data.xout,data.cost
+
+class DifferentialActionDataActuated:
+    def __init__(self,model):
+        self.pinocchio = model.pinocchio.createData()
+        self.actuation = model.actuation.createData(self.pinocchio)
+        self.costs = model.costs.createData(self.pinocchio)
+        self.cost = np.nan
+        self.xout = np.zeros(model.nout)
+        nx,nu,ndx,nq,nv,nout = model.nx,model.nu,model.State.ndx,model.nq,model.nv,model.nout
+        self.F = np.zeros([ nout,ndx+nu ])
+        self.costResiduals = self.costs.residuals
+        self.Fx = self.F[:,:ndx]
+        self.Fu = self.F[:,-nu:]
+        self.g   = self.costs.g
+        self.L   = self.costs.L
+        self.Lx  = self.costs.Lx
+        self.Lu  = self.costs.Lu
+        self.Lxx = self.costs.Lxx
+        self.Lxu = self.costs.Lxu
+        self.Luu = self.costs.Luu
+        self.Rx  = self.costs.Rx
+        self.Ru  = self.costs.Ru

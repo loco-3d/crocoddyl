@@ -6,6 +6,29 @@ from collections import OrderedDict
 
 
 
+class CostModelPinocchio:
+    '''
+    This class defines a template of cost model whose function and derivatives
+    can be evaluated from pinocchio data only (no need to recompute anything
+    in particular to be given the variables x,u).
+    '''
+    def __init__(self,pinocchioModel,ncost,withResiduals=True,nu=None):
+        self.ncost = ncost
+        self.nq  = pinocchioModel.nq
+        self.nv  = pinocchioModel.nv
+        self.nx  = self.nq+self.nv
+        self.ndx = self.nv+self.nv
+        self.nu  = nu if nu is not None else pinocchioModel.nv
+        self.pinocchio = pinocchioModel
+        self.withResiduals=withResiduals
+
+    def createData(self,pinocchioData):
+        return self.CostDataType(self,pinocchioData)
+    def calc(model,data,x,u):
+        assert(False and "This should be defined in the derivative class.")
+    def calcDiff(model,data,x,u,recalc=True):
+        assert(False and "This should be defined in the derivative class.")
+
 class CostDataPinocchio:
     '''
     Abstract data class corresponding to the abstract model class
@@ -38,39 +61,7 @@ class CostDataPinocchio:
             self.Rq  = self.Rx [:,  :nv]
             self.Rv  = self.Rx [:,  nv:]
 
-class CostModelPinocchio:
-    '''
-    This class defines a template of cost model whose function and derivatives
-    can be evaluated from pinocchio data only (no need to recompute anything
-    in particular to be given the variables x,u).
-    '''
-    def __init__(self,pinocchioModel,ncost,withResiduals=True,nu=None):
-        self.ncost = ncost
-        self.nq  = pinocchioModel.nq
-        self.nv  = pinocchioModel.nv
-        self.nx  = self.nq+self.nv
-        self.ndx = self.nv+self.nv
-        self.nu  = nu if nu is not None else pinocchioModel.nv
-        self.pinocchio = pinocchioModel
-        self.withResiduals=withResiduals
 
-    def createData(self,pinocchioData):
-        return self.CostDataType(self,pinocchioData)
-    def calc(model,data,x,u):
-        assert(False and "This should be defined in the derivative class.")
-    def calcDiff(model,data,x,u,recalc=True):
-        assert(False and "This should be defined in the derivative class.")
-
-
-
-class CostDataNumDiff(CostDataPinocchio):
-    def __init__(self,model,pinocchioData):
-        CostDataPinocchio.__init__(self,model,pinocchioData)
-        ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
-        self.pinocchio = pinocchioData
-        self.data0 = model.model0.createData(pinocchioData)
-        self.datax = [ model.model0.createData(model.model0.pinocchio.createData()) for i in range(nx) ]
-        self.datau = [ model.model0.createData(model.model0.pinocchio.createData()) for i in range(nu) ]
 
 class CostModelNumDiff(CostModelPinocchio):
     def __init__(self,costModel,State,withGaussApprox=False,reevals=[]):
@@ -112,23 +103,16 @@ class CostModelNumDiff(CostModelPinocchio):
         if model.withGaussApprox:
             data.L[:,:] = np.dot(data.R.T,data.R)
 
-
-
-class CostDataSum(CostDataPinocchio):
+class CostDataNumDiff(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
-        self.model = model
-        self.costs = OrderedDict([ [i.name, i.cost.createData(pinocchioData)] \
-                                   for i in model.costs.values() ])
-    def __getitem__(self,key):
-        if isinstance(key,str):
-            return self.costs[key]
-        elif isinstance(key,CostModelPinocchio):
-            filter = [ k for k,v in self.model.costs.items() if v.cost==key ]
-            assert(len(filter) == 1 and "The given key is not or not unique in the costs dict. ")
-            return self.costs[filter[0]]
-        else:
-            raise(KeyError("The key should be string or costmodel."))
+        ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
+        self.pinocchio = pinocchioData
+        self.data0 = model.model0.createData(pinocchioData)
+        self.datax = [ model.model0.createData(model.model0.pinocchio.createData()) for i in range(nx) ]
+        self.datau = [ model.model0.createData(model.model0.pinocchio.createData()) for i in range(nu) ]
+
+
 
 class CostModelSum(CostModelPinocchio):
     # This could be done with a namedtuple but I don't like the read-only labels.
@@ -187,19 +171,23 @@ class CostModelSum(CostModelPinocchio):
                 nr += m.cost.ncost
         return data.cost
 
-
-
-class CostDataPosition(CostDataPinocchio):
+class CostDataSum(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
-        self.activation = model.activation.createData()
-        self.Lu = 0
-        self.Lv = 0
-        self.Lxu = 0
-        self.Luu = 0
-        self.Lvv = 0
-        self.Ru = 0
-        self.Rv = 0
+        self.model = model
+        self.costs = OrderedDict([ [i.name, i.cost.createData(pinocchioData)] \
+                                   for i in model.costs.values() ])
+    def __getitem__(self,key):
+        if isinstance(key,str):
+            return self.costs[key]
+        elif isinstance(key,CostModelPinocchio):
+            filter = [ k for k,v in self.model.costs.items() if v.cost==key ]
+            assert(len(filter) == 1 and "The given key is not or not unique in the costs dict. ")
+            return self.costs[filter[0]]
+        else:
+            raise(KeyError("The key should be string or costmodel."))
+
+
 
 class CostModelPosition(CostModelPinocchio):
     '''
@@ -230,19 +218,19 @@ class CostModelPosition(CostModelPinocchio):
         data.Lqq[:,:]  = np.dot(data.Rq.T,Axx*data.Rq) # J is a matrix, use Rq instead.
         return data.cost
 
-
-
-class CostDataPlacementVelocity(CostDataPinocchio):
+class CostDataPosition(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
-        frame = model.pinocchio.frames[model.frame]
-        self.joint = frame.parent       
-        self.jMf = frame.placement
-        self.fXj = self.jMf.inverse().action
+        self.activation = model.activation.createData()
         self.Lu = 0
+        self.Lv = 0
         self.Lxu = 0
         self.Luu = 0
+        self.Lvv = 0
         self.Ru = 0
+        self.Rv = 0
+
+
 
 class CostModelPlacementVelocity(CostModelPinocchio):
     '''
@@ -272,19 +260,19 @@ class CostModelPlacementVelocity(CostModelPinocchio):
         data.Lxx[:,:]  = np.dot(data.Rx.T,data.Rx)
         return data.cost
 
-
-
-class CostDataPosition6D(CostDataPinocchio):
+class CostDataPlacementVelocity(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
-        self.rMf = None
+        frame = model.pinocchio.frames[model.frame]
+        self.joint = frame.parent       
+        self.jMf = frame.placement
+        self.fXj = self.jMf.inverse().action
         self.Lu = 0
-        self.Lv = 0
         self.Lxu = 0
         self.Luu = 0
-        self.Lvv = 0
         self.Ru = 0
-        self.Rv = 0
+
+
 
 class CostModelPosition6D(CostModelPinocchio):
     '''
@@ -316,11 +304,10 @@ class CostModelPosition6D(CostModelPinocchio):
         data.Lqq[:,:]  = np.dot(J.T,J)
         return data.cost
 
-
-
-class CostDataCoM(CostDataPinocchio):
+class CostDataPosition6D(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
+        self.rMf = None
         self.Lu = 0
         self.Lv = 0
         self.Lxu = 0
@@ -329,9 +316,11 @@ class CostDataCoM(CostDataPinocchio):
         self.Ru = 0
         self.Rv = 0
 
+
+
 class CostModelCoM(CostModelPinocchio):
     '''
-    The class proposes a model of a cost function CoM. 
+    The class proposes a model of a cost function CoM.
     Paramterize it with the desired CoM ref
     '''
     def __init__(self,pinocchioModel,ref):
@@ -352,15 +341,18 @@ class CostModelCoM(CostModelPinocchio):
         data.Lqq[:,:]  = np.dot(J.T,J)
         return data.cost
 
-
-
-class CostDataState(CostDataPinocchio):
+class CostDataCoM(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
         self.Lu = 0
+        self.Lv = 0
         self.Lxu = 0
         self.Luu = 0
+        self.Lvv = 0
         self.Ru = 0
+        self.Rv = 0
+
+
 
 class CostModelState(CostModelPinocchio):
     def __init__(self,pinocchioModel,State,ref,nu=None):
@@ -381,18 +373,15 @@ class CostModelState(CostModelPinocchio):
         data.Lx[:] = np.dot(data.Rx.T,data.residuals)
         data.Lxx[:,:] = np.dot(data.Rx.T,data.Rx)
 
-
-
-class CostDataControl(CostDataPinocchio):
+class CostDataState(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
-        ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
-        self.Lx = 0
-        self.Lxx = 0
+        self.Lu = 0
         self.Lxu = 0
-        self.Rx = 0
-        self.Luu[:,:] = np.eye(nu)
-        self.Ru [:,:] = self.Luu
+        self.Luu = 0
+        self.Ru = 0
+
+
 
 class CostModelControl(CostModelPinocchio):
     def __init__(self,pinocchioModel,nu=None,ref=None):
@@ -412,12 +401,18 @@ class CostModelControl(CostModelPinocchio):
         #data.Luu[:,:] = data.Ru
         assert( data.Luu[0,0] == 1 and data.Luu[1,0] == 0 )
 
-
-
-class CostDataForce6D(CostDataPinocchio):
-    def __init__(self,model,pinocchioData,contactData=None):
+class CostDataControl(CostDataPinocchio):
+    def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
-        self.contact = contactData
+        ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
+        self.Lx = 0
+        self.Lxx = 0
+        self.Lxu = 0
+        self.Rx = 0
+        self.Luu[:,:] = np.eye(nu)
+        self.Ru [:,:] = self.Luu
+
+
 
 class CostModelForce6D(CostModelPinocchio):
     '''
@@ -454,3 +449,8 @@ class CostModelForce6D(CostModelPinocchio):
         data.Luu[:,:]   = np.dot(df_du.T,df_du)
 
         return data.cost
+
+class CostDataForce6D(CostDataPinocchio):
+    def __init__(self,model,pinocchioData,contactData=None):
+        CostDataPinocchio.__init__(self,model,pinocchioData)
+        self.contact = contactData
