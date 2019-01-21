@@ -1,3 +1,4 @@
+import rospkg
 import refact
 import pinocchio
 from pinocchio.utils import *
@@ -14,14 +15,15 @@ absmin = lambda A: np.min(abs(A))
 
 path = '/home/nmansard/src/cddp/examples/'
 
-urdf = path + 'talos_data/robots/talos_left_arm.urdf'
-robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(urdf, [path] \
-                                                           ,pinocchio.JointModelFreeFlyer() \
-)
-robot.model.armature = np.matrix([ 0 ]*robot.model.nv).T
-for j in robot.model.joints[1:]:
-    if j.shortname()!='JointModelFreeFlyer':
-        robot.model.armature[j.idx_v:j.idx_v+j.nv]=1
+rospack = rospkg.RosPack()
+MODEL_PATH = rospack.get_path('talos_data')
+#MODEL_PATH = '/home/nmansard/src/cddp/examples'
+MESH_DIR = MODEL_PATH
+URDF_FILENAME = "talos_left_arm.urdf"
+#URDF_MODEL_PATH = MODEL_PATH + "/talos_data/robots/" + URDF_FILENAME
+URDF_MODEL_PATH = MODEL_PATH + "/robots/" + URDF_FILENAME
+
+robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(URDF_MODEL_PATH, [MESH_DIR], pinocchio.JointModelFreeFlyer())
 
 qmin = robot.model.lowerPositionLimit; qmin[:7]=-1; robot.model.lowerPositionLimit = qmin
 qmax = robot.model.upperPositionLimit; qmax[:7]= 1; robot.model.upperPositionLimit = qmax
@@ -277,7 +279,8 @@ class ContactModel6D(ContactModelPinocchio):
         # computed.
         data.J[:,:] = pinocchio.getFrameJacobian(model.pinocchio,data.pinocchio,
                                                  model.frame,pinocchio.ReferenceFrame.LOCAL)
-        data.a0[:] = pinocchio.getFrameAcceleration(model.pinocchio,data.pinocchio,model.frame).vector.flat
+        data.a0[:] = pinocchio.getFrameAcceleration(model.pinocchio,
+                                                    data.pinocchio,model.frame).vector.flat
     def calcDiff(model,data,x,recalc=True):
         if recalc: model.calc(data,x)
         dv_dq,da_dq,da_dv,da_da = pinocchio.getJointAccelerationDerivatives\
@@ -329,6 +332,91 @@ assert(norm(contactData.a0-contactData2.a0)<1e-9)
 assert(norm(contactData.J -contactData2.J )<1e-9)
 
 # ----------------------------------------------------------------------------
+
+class ContactModel3D(ContactModelPinocchio):
+    def __init__(self,pinocchioModel,frame,ref):
+        self.ContactDataType = ContactData3D
+        ContactModelPinocchio.__init__(self,pinocchioModel,ncontact=3)
+        self.frame = frame
+        self.ref = ref # not used yet ... later
+    def calc(model,data,x):
+        # We suppose forwardKinematics(q,v,np.zero), computeJointJacobian and updateFramePlacement already
+        # computed.
+        data.v = pinocchio.getFrameVelocity(model.pinocchio,
+                                             data.pinocchio,model.frame).copy()
+        vw = data.v.angular; vv = data.v.linear
+        J6 = pinocchio.getFrameJacobian(model.pinocchio, data.pinocchio,
+                                        model.frame,
+                                        pinocchio.ReferenceFrame.LOCAL)
+        data.J[:,:] = J6[:3,:]
+        data.Jw[:,:] = J6[3:,:]
+
+        data.a0[:] = (pinocchio.getFrameAcceleration(model.pinocchio,
+                                                    data.pinocchio,model.frame).linear +\
+                                                    cross(vw,vv)).flat
+        
+    def calcDiff(model,data,x,recalc=True):
+        if recalc: model.calc(data,x)
+        dv_dq,da_dq,da_dv,da_da = pinocchio.getJointAccelerationDerivatives\
+                                  (model.pinocchio,data.pinocchio,data.joint,
+                                   pinocchio.ReferenceFrame.LOCAL)
+        vw = data.v.angular; vv = data.v.linear        
+
+        data.Aq[:,:] = (data.fXj*da_dq)[:3,:] + \
+                       skew(vw)*(data.fXj*dv_dq)[:3,:]-\
+                       skew(vv)*(data.fXj*dv_dq)[3:,:]
+        data.Av[:,:] = (data.fXj*da_dv)[:3,:] + skew(vw)*data.J-skew(vv)*data.Jw
+    def setForces(model,data,forcesArr,forcesVec=None):
+        '''
+        Convert a numpy array of forces into a stdVector of spatial forces.
+        '''
+        # In the dynamic equation, we wrote M*a + J.T*fdyn, while in the ABA it would be
+        # M*a + b = tau + J.T faba, so faba = -fdyn (note the minus operator before a2m).
+        data.f = forcesArr
+        if forcesVec is None:
+            forcesVec = data.forces
+            data.forces[data.joint] *= 0
+        forcesVec[data.joint] += data.jMf*pinocchio.Force(-a2m(forcesArr), np.zeros((3,1)))
+        return forcesVec
+    
+class ContactData3D(ContactDataPinocchio):
+    def __init__(self,model,pinocchioData):
+        ContactDataPinocchio.__init__(self,model,pinocchioData)
+        frame = model.pinocchio.frames[model.frame]
+        self.joint = frame.parent       
+        self.jMf = frame.placement
+        self.fXj = self.jMf.inverse().action
+        self.v = None
+        self.vv = np.zeros([ 3,1 ])
+        self.vw = np.zeros([ 3,1 ])
+        self.Jw = np.zeros([ 3, model.nv ])
+
+
+contactModel = ContactModel3D(rmodel,
+                              rmodel.getFrameId('gripper_left_fingertip_2_link'),ref=None)
+contactData  = contactModel.createData(rdata)
+
+q = pinocchio.randomConfiguration(rmodel)
+v = rand(rmodel.nv)
+x = m2a(np.concatenate([q,v]))
+u = m2a(rand(rmodel.nv-6))
+
+pinocchio.forwardKinematics(rmodel,rdata,q,v,zero(rmodel.nv))
+pinocchio.computeJointJacobians(rmodel,rdata)
+pinocchio.updateFramePlacements(rmodel,rdata)
+contactModel.calc(contactData,x)
+
+rdata2 = rmodel.createData()
+pinocchio.computeAllTerms(rmodel,rdata2,q,v)
+pinocchio.updateFramePlacements(rmodel,rdata2)
+contactData2  = contactModel.createData(rdata2)
+contactModel.calc(contactData2,x)
+assert(norm(contactData.a0-contactData2.a0)<1e-9)
+assert(norm(contactData.J -contactData2.J )<1e-9)
+
+#---------------------------------------------------------------------
+
+
 from collections import OrderedDict
 
 # Many contact model
@@ -555,16 +643,56 @@ class DifferentialActionDataFloatingInContact:
         
         self.xout = self.a
 
+#-------------------------------------------------------------
+
+q = pinocchio.randomConfiguration(rmodel)
+v = rand(rmodel.nv)*2-1
+
+pinocchio.computeJointJacobians(rmodel,rdata,q)
+J6 = pinocchio.getJointJacobian(rmodel,rdata,rmodel.joints[-1].id,
+                                pinocchio.ReferenceFrame.LOCAL).copy()
+J = J6[:3,:]
+v -= pinv(J)*J*v
+
+x = np.concatenate([ m2a(q),m2a(v) ])
+u = np.random.rand(rmodel.nv-6)*2-1
+
+actModel = ActuationModelFreeFloating(rmodel)
+contactModel3 = ContactModel3D(rmodel,rmodel.getFrameId('gripper_left_fingertip_2_link'),
+                               ref=None)
+rmodel.frames[contactModel3.frame].placement = pinocchio.SE3.Random()
+contactModel = ContactModelMultiple(rmodel)
+contactModel.addContact(name='fingertip',contact=contactModel3)
+
+model = DifferentialActionModelFloatingInContact(rmodel,actModel,
+                                                 contactModel,CostModelSum(rmodel))
+data  = model.createData()
+
+model.calc(data,x,u)
+assert( len(filter(lambda x:x>0,eig(data.K)[0])) == model.nv )
+assert( len(filter(lambda x:x<0,eig(data.K)[0])) == model.ncontact )
+_taucheck = pinocchio.rnea(rmodel,rdata,q,v,a2m(data.a),data.contact.forces)
+assert( absmax(_taucheck[:6])<1e-6 )
+assert( absmax(m2a(_taucheck[6:])-u)<1e-6 )
+
+model.calcDiff(data,x,u)
+
+mnum = DifferentialActionModelNumDiff(model,withGaussApprox=False)
+dnum = mnum.createData()
+mnum.calcDiff(dnum,x,u)
+assert(absmax(data.Fx-dnum.Fx)/model.nx<1e-3)
+assert(absmax(data.Fu-dnum.Fu)/model.nu<1e-3)
+
+        
+#------------------------------------------------
 q = pinocchio.randomConfiguration(rmodel)
 v = rand(rmodel.nv)*2-1
 x = np.concatenate([ m2a(q),m2a(v) ])
 u = np.random.rand(rmodel.nv-6)*2-1
 
 actModel = ActuationModelFreeFloating(rmodel)
-contactModel = ContactModel6D(rmodel,rmodel.getFrameId('arm_left_7_joint'),ref=None)
-contactModel = ContactModel6D(rmodel,rmodel.getFrameId('gripper_left_fingertip_2_link'),ref=None)
-rmodel.frames[contactModel.frame].placement = pinocchio.SE3.Random()
-contactModel6 = contactModel
+contactModel6 = ContactModel6D(rmodel,rmodel.getFrameId('gripper_left_fingertip_2_link'),ref=None)
+rmodel.frames[contactModel6.frame].placement = pinocchio.SE3.Random()
 contactModel = ContactModelMultiple(rmodel)
 contactModel.addContact(name='fingertip',contact=contactModel6)
 
@@ -586,6 +714,8 @@ dnum = mnum.createData()
 mnum.calcDiff(dnum,x,u)
 assert(absmax(data.Fx-dnum.Fx)/model.nx<1e-3)
 assert(absmax(data.Fu-dnum.Fu)/model.nu<1e-3)
+
+#----------------------------------------------------------
 
 ### Check force derivatives
 def df_dq(model,func,q,h=1e-9):
@@ -741,6 +871,7 @@ assert( norm(data.Lu-dnum.Lu) < 1e-3 )
 assert( norm(dnum.Lxx-data.Lxx) < 1e-3)
 assert( norm(dnum.Lxu-data.Lxu) < 1e-3)
 assert( norm(dnum.Luu-data.Luu) < 1e-3)
+
 
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------

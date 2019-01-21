@@ -1,3 +1,4 @@
+import rospkg
 from pinocchio import SE3
 import pinocchio
 from pinocchio.utils import *
@@ -5,10 +6,16 @@ from numpy.linalg import inv,pinv,norm,svd,eig
 
 path = '/home/nmansard/src/cddp/examples/'
 
-urdf = path + 'talos_data/robots/talos_left_arm.urdf'
-robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(urdf, [path] \
-#                                                           ,pinocchio.JointModelFreeFlyer() \
-)
+rospack = rospkg.RosPack()
+MODEL_PATH = rospack.get_path('talos_data')
+#MODEL_PATH = '/home/nmansard/src/cddp/examples'
+MESH_DIR = MODEL_PATH
+URDF_FILENAME = "talos_left_arm.urdf"
+#URDF_MODEL_PATH = MODEL_PATH + "/talos_data/robots/" + URDF_FILENAME
+URDF_MODEL_PATH = MODEL_PATH + "/robots/" + URDF_FILENAME
+
+robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(URDF_MODEL_PATH, [MESH_DIR])
+
 model = robot.model
 data = model.createData()
 
@@ -306,7 +313,7 @@ gamma = data.a[-1].linear + cross(data.v[-1].angular,data.v[-1].linear)
 # M a + b = tau + J'f
 # J a     = -gamma
 
-K = np.block([[M,J.T],[J,zero([3,3])]])
+K = np.bmat([[M,J.T],[J,zero([3,3])]])
 r = np.concatenate([ tau-b,-gamma ])
 af = inv(K)*r
 a = af[:model.nv]
@@ -323,21 +330,37 @@ assert(absmax(aba (model,data,q,v,tau,fs)-(inv(M)*(tau-b-J.T*f)))<1e-6)
 
 ##### Check M'a + J'f + b'
 dtau_dqn = df_dq(model,lambda _q: rnea(model,data,_q,v,a,fs),q)
+dtau_dvn = df_dq(model,lambda _v: rnea(model,data,q,_v,a,fs),v)
+
 pinocchio.computeRNEADerivatives(model,data,q,v,a,fs)
 dtau_dq = data.dtau_dq.copy()
+dtau_dv = data.dtau_dv.copy()
 assert(absmax( dtau_dq-dtau_dqn ) <1e-3)
+assert(absmax( dtau_dv-dtau_dvn ) <1e-3)
 
 ##### Check gamma'
 def fgamma(q_,v_,a_):
     pinocchio.forwardKinematics(model,data,q_,v_,a_)
     return data.a[-1].linear + cross(data.v[-1].angular,data.v[-1].linear)
+
+
 dgamma_dqn = df_dq(model,lambda _q: fgamma(_q,v,a),q)
+dgamma_dvn = df_dq(model,lambda _v: fgamma(q,_v,a),v)
+
 
 pinocchio.computeForwardKinematicsDerivatives(model,data,q,v,a)
 dv_dq,da_dq,da_dv,da_da=pinocchio.getJointAccelerationDerivatives(model,data,model.joints[-1].id,pinocchio.ReferenceFrame.LOCAL)
+
+pinocchio.computeJointJacobians(model, data, q)
+J = pinocchio.getJointJacobian(model,
+                               data, model.joints[-1].id,
+                               pinocchio.ReferenceFrame.LOCAL)
 vv,vw = data.v[-1].linear,data.v[-1].angular
 dgamma_dq = da_dq[:3,:] + skew(vw)*dv_dq[:3,:] - skew(vv)*dv_dq[3:,:]
+dgamma_dv = da_dv[:3,:] + skew(vw)*J[:3,:] - skew(vv)*J[3:,:]
+
 assert(absmax( dgamma_dq-dgamma_dqn )<1e-3 )
+assert(absmax( dgamma_dv-dgamma_dvn )<1e-3 )
 
 ###### Check (Ki r)'
 def cid(q_,v_,tau_):
@@ -348,7 +371,7 @@ def cid(q_,v_,tau_):
     M = pinocchio.crba(model,data,q_).copy()
     pinocchio.forwardKinematics(model,data,q_,v_,zero(model.nv))
     gamma = data.a[-1].linear + cross(data.v[-1].angular,data.v[-1].linear)
-    K = np.block([[M,J.T],[J,zero([3,3])]])
+    K = np.bmat([[M,J.T],[J,zero([3,3])]])
     r = np.concatenate([ tau_-b,-gamma ])
     return inv(K)*r
 
@@ -358,7 +381,13 @@ KJ  = -np.vstack([dtau_dq,dgamma_dq])
 assert(absmax(KJ-KJn)/model.nv<1e-3)
 
 dcid_dq  = -inv(K)*np.vstack([ dtau_dq, dgamma_dq ])
-assert(absmax(dcid_dqn-dcid_dq)/model.nv<1e-2)
+assert(absmax(dcid_dqn-dcid_dq)/model.nv<1e-3)
+
+dcid_dvn = df_dv(model, lambda _v: cid(q,_v,tau),v)
+
+dcid_dv = -inv(K)*np.vstack([dtau_dv, dgamma_dv])
+
+assert(absmax(dcid_dvn-dcid_dv)/model.nv<1e-3)
 
 # ------------------------------------------
 ### Check 6d contact
@@ -373,7 +402,7 @@ def Kid(q_,J_=None):
     J = pinocchio.getJointJacobian(model,data,model.joints[-1].id,pinocchio.ReferenceFrame.LOCAL).copy()
     if J_ is not None: J_[:,:] = J
     M = pinocchio.crba(model,data,q_).copy()
-    return np.block([[M,J.T],[J,zero([6,6])]])
+    return np.bmat([[M,J.T],[J,zero([6,6])]])
 
 def cid(q_,v_,tau_):
     pinocchio.computeJointJacobians(model,data,q_)
