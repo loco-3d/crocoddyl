@@ -7,7 +7,7 @@ from continuous import IntegratedActionModelEuler, DifferentialActionModelNumDif
 from contact import ContactModel6D,ActuationModelFreeFloating,DifferentialActionModelFloatingInContact,ContactModelMultiple
 import warnings
 from numpy.linalg import inv,pinv,norm,svd,eig
-from activation import ActivationModelWeightedQuad
+from crocoddyl import ActivationModelWeightedQuad
 from robots import loadTalosLegs
 
 m2a = lambda m: np.array(m.flat)
