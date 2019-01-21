@@ -14,10 +14,8 @@ absmin = lambda A: np.min(abs(A))
 
 rospack = rospkg.RosPack()
 MODEL_PATH = rospack.get_path('talos_data')
-#MODEL_PATH = '/home/nmansard/src/cddp/examples'
-MESH_DIR = MODEL_PATH
+MESH_DIR = MODEL_PATH+'/../'
 URDF_FILENAME = "talos_left_arm.urdf"
-#URDF_MODEL_PATH = MODEL_PATH + "/talos_data/robots/" + URDF_FILENAME
 URDF_MODEL_PATH = MODEL_PATH + "/robots/" + URDF_FILENAME
 
 robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(URDF_MODEL_PATH, [MESH_DIR])
@@ -294,21 +292,23 @@ class CostDataNumDiff(CostDataPinocchio):
         self.datau = [ model.model0.createData(model.model0.pinocchio.createData()) for i in range(nu) ]
 
 # --------------------------------------------------------------
-        
+from activation import ActivationModelQuad
+
 class CostModelPosition(CostModelPinocchio):
     '''
     The class proposes a model of a cost function positioning (3d) 
     a frame of the robot. Paramterize it with the frame index frameIdx and
     the effector desired position ref.
     '''
-    def __init__(self,pinocchioModel,frame,ref,nu=None):
+    def __init__(self,pinocchioModel,frame,ref,nu=None,activation=None):
         self.CostDataType = CostDataPosition
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=3,nu=nu)
         self.ref = ref
         self.frame = frame
+        self.activation = activation if activation is not None else ActivationModelQuad()
     def calc(model,data,x,u):
         data.residuals = m2a(data.pinocchio.oMf[model.frame].translation) - model.ref
-        data.cost = .5*sum(data.residuals**2)
+        data.cost = sum(model.activation.calc(data.activation,data.residuals))
         return data.cost
     def calcDiff(model,data,x,u,recalc=True):
         if recalc: model.calc(data,x,u)
@@ -317,14 +317,16 @@ class CostModelPosition(CostModelPinocchio):
         R = data.pinocchio.oMf[model.frame].rotation
         J = R*pinocchio.getFrameJacobian(model.pinocchio,data.pinocchio,model.frame,
                                          pinocchio.ReferenceFrame.LOCAL)[:3,:]
+        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
         data.Rq[:,:nq] = J
-        data.Lq[:]     = np.dot(J.T,data.residuals)
-        data.Lqq[:,:]  = np.dot(J.T,J)
+        data.Lq[:]     = np.dot(J.T,Ax)
+        data.Lqq[:,:]  = np.dot(data.Rq.T,Axx*data.Rq) # J is a matrix, use Rq instead.
         return data.cost
     
 class CostDataPosition(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
+        self.activation = model.activation.createData()
         self.Lu = 0
         self.Lv = 0
         self.Lxu = 0
