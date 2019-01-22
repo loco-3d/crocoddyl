@@ -191,9 +191,12 @@ class SolverDDP:
             if self.u_reg != 0: self.Quu[t][range(model.nu),range(model.nu)] += self.u_reg
 
             try:
-                Lb = scl.cho_factor(self.Quu[t])
-                self.K[t][:,:]   = scl.cho_solve(Lb,self.Qux[t])
-                self.k[t][:]     = scl.cho_solve(Lb,self.Qu [t])
+                if self.Quu[t].shape[0]>0:
+                    Lb = scl.cho_factor(self.Quu[t])
+                    self.K[t][:,:]   = scl.cho_solve(Lb,self.Qux[t])
+                    self.k[t][:]     = scl.cho_solve(Lb,self.Qu [t])
+                else:
+                    pass
             except scl.LinAlgError:
                 raise ArithmeticError('backward error')
                 
