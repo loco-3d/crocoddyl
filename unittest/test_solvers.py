@@ -68,7 +68,6 @@ x0,x1,x2 = dxs
 u0,u1 = dus
 l0,l1,l2 = ls
 assert(np.linalg.norm(dxs[0]-problem.initialState)<1e-9 )
-if LQR: assert(np.linalg.norm(model.calc(data,x0,u0)[0]-x1)<1e-9)
 for i,_ in enumerate(dus):
     h = 1 if LQR else 1e-6
     assert(np.linalg.norm(model.calc(data,dxs[i]*h,dus[i]*h)[0]/h-dxs[i+1])<10*h)
