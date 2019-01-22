@@ -63,9 +63,9 @@ from refact import ShootingProblem, SolverDDP,SolverKKT
 from logger import *
 disp = lambda xs: disptraj(robot,xs)
 
-DT = 1.0 
+DT = 1.
 T = 20
-timeStep = DT/T
+timeStep = float(DT)/T
 
 models1 = [ createModel(timeStep=timeStep,
                         footRef = [ (.2*k)/T, FOOTGAP, 0.0 ],
@@ -85,29 +85,28 @@ from crocoddyl.impact import ActionModelImpact,ImpulseModel6D
 impulseModel1 = ImpulseModel6D(rmodel,LEFTFRAME)
 impact1  = ActionModelImpact(rmodel,impulseModel1)
 
+impulseModel2 = ImpulseModel6D(rmodel,RIGHTFRAME)
+impact2  = ActionModelImpact(rmodel,impulseModel2)
+
 
 # --- SOLVER
-models = models1 + [ termmodel1 ] + models2
-termmodel = termmodel2
 
+'''
 termmodel1.timeStep=0
 problem1 = ShootingProblem(x, models1, termmodel1 )
 ddp1 = SolverDDP(problem1)
-ddp1.callback = SolverLogger(robot)
+#ddp1.callback = SolverLogger(robot)
 ddp1.th_stop = 1e-9
 ddp1.solve(verbose=True,maxiter=3,regInit=.1)
 
 
 problemi = ShootingProblem(x, models1, impact1 )
 ddpi = SolverDDP(problemi)
-ddpi.callback = SolverLogger(robot)
+#ddpi.callback = SolverLogger(robot)
 ddpi.th_stop = 1e-9
-ddpi.solve(verbose=True,maxiter=1000,regInit=.1,
+ddpi.solve(verbose=True,maxiter=50,regInit=.1,
            init_xs=ddp1.xs,
            init_us=ddp1.us)
-stophere
-
-'''
 
 problem2 = ShootingProblem(ddp1.xs[-1], models2, termmodel2 )
 ddp2 = SolverDDP(problem2)
@@ -116,23 +115,32 @@ ddp2.th_stop = 1e-9
 ddp2.solve(verbose=True,maxiter=1000,regInit=.1)
 '''
 
+# --- WITH DT=0 at the terminal of the phase
 termmodel1.timeStep=0
+termmodel2.timeStep=0
+
+models = models1 + [ termmodel1 ] + models2
+termmodel = termmodel2
+
 problem = ShootingProblem(x, models, termmodel )
 ddp = SolverDDP(problem)
 ddp.callback = SolverLogger(robot)
 ddp.th_stop = 1e-9
 ddp.solve(verbose=True,maxiter=1000,regInit=.1)
-#          init_xs = ddp1.xs+ddp2.xs,
-#          init_us = ddp1.us+[ddp2.us[0]]+ddp2.us)
-
-
 
 assert( norm(ddp.datas()[T].differential.costs['pos'].residuals) < 1e-2 )
 assert( norm(ddp.datas()[T].differential.costs['veleff'].residuals) < 5e-3 )
 assert( norm(ddp.datas()[-1].differential.costs['pos'].residuals) < 1e-2 )
 assert( norm(ddp.datas()[-1].differential.costs['veleff'].residuals) < 5e-3 )
 
-
+# --- WITH IMPACT MODEL
+# Currently, the model is physically incorrect ... but numerically works.
+# We should have contacts in addition to impulse ... let's think about it.
+problem = ShootingProblem(x, models1 + [impact1] + models2, impact2 )
+ddp = SolverDDP(problem)
+ddp.callback = SolverLogger(robot)
+ddp.th_stop = 1e-9
+ddp.solve(verbose=True,maxiter=1000,regInit=.1)
 
 # --- Contact velocity
 # cost = || v ||
