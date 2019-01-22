@@ -2,6 +2,8 @@ import unittest
 import sys
 
 testmodules = [
+  'test_state',
+  'test_unicycle',
 #  'cost',
   # 'soft_constraint',
 #  'dynamics',

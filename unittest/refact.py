@@ -4,159 +4,15 @@ xnew=[0,'debug only']
 np .random.seed     (220)
 
 
-# ---------------------------------------------------
-# ---------------------------------------------------
-# ---------------------------------------------------
+
 from crocoddyl import StateVector
-from crocoddyl import ActionModelLQR  
-    
-
-
-# ---------------------------------------------------
-# ---------------------------------------------------
-# ---------------------------------------------------
+from crocoddyl import ActionModelLQR
 from crocoddyl import ActionModelUnicycle
-
-
-
-# ---------------------------------------------------
-# ---------------------------------------------------
-# ---------------------------------------------------
-from crocoddyl import StateUnicycle
-
-X = StateUnicycle()
-x1 = X.rand()
-x2 = X.rand()
-dx = X.diff(x1,x2)
-x  = X.integrate(x1,dx)
-assert(norm(x-x2)<1e-9)
-
-
-from crocoddyl import StateNumDiff
-
-x1 = X.zero()
-x1 = X.rand()
-x2 = X.zero()
-h = 1e-6
-dx = np.zeros(3); dx[1] = h
-J = X.Jdiff(x1,x2,'second')
-dd = (X.diff(x1,X.integrate(x2,dx)) - X.diff(x1,x2))/h
-
-Xnum = StateNumDiff(StateUnicycle())
-x1 = X.rand()
-x2 = X.rand()
-J1   ,J2    = X   .Jdiff(x1,x2)
-Jnum1,Jnum2 = Xnum.Jdiff(x1,x2)
-assert(norm(J1-Jnum1)<10*Xnum.disturbance)
-assert(norm(J2-Jnum2)<10*Xnum.disturbance)
-
-x  = X.rand()
-vx = np.random.rand(X.ndx)
-J1   ,J2    = X   .Jintegrate(x,vx)
-Jnum1,Jnum2 = Xnum.Jintegrate(x,vx)
-assert(norm(J1-Jnum1)<10*Xnum.disturbance)
-assert(norm(J2-Jnum2)<10*Xnum.disturbance)
-
 from crocoddyl import ActionModelUnicycleVar
-
-# ---------------------------------------------------
-# ---------------------------------------------------
-# ---------------------------------------------------
-
 from crocoddyl import ActionModelNumDiff
-            
-if __name__ == '__main__':
-    X=StateVector(3)
-    for i in range(100):
-        x1=X.rand(); x2=X.rand()
-        dx= X.diff(x1,x2)
-        assert( norm(X.integrate(x1,X.diff(x1,x2)) - x2 )<1e-6 )
-    
-    model = ActionModelUnicycle()
-    data = model.createData()
-    x = model.State.rand()
-    u = np.random.rand(model.nu)
-
-    #x[:] = [0,0,0]
-    #u[:] = [1,2]
-    model.calcDiff(data,x,u)
-    
-    mnum = ActionModelNumDiff(model,withGaussApprox=True)
-    dnum = mnum.createData()
-    mnum.calc(dnum,x,u)
-    mnum.calcDiff(dnum,x,u)
-    assert( norm(data.Fx-dnum.Fx) < 10*mnum.disturbance )
-    assert( norm(data.Fu-dnum.Fu) < 10*mnum.disturbance )
-    assert( norm(data.Lx-dnum.Lx) < 10*mnum.disturbance )
-    assert( norm(data.Lu-dnum.Lu) < 10*mnum.disturbance )
-    assert( norm(dnum.Lxx-data.Lxx) < 10*mnum.disturbance )
-    assert( norm(dnum.Lxu-data.Lxu) < 10*mnum.disturbance )
-    assert( norm(dnum.Luu-data.Luu) < 10*mnum.disturbance )
-
-
-if __name__ == '__main__':
-    # Numdiff unittest of unicycle manifold
-    model = ActionModelUnicycleVar()
-    data = model.createData()
-    X = model.State
-
-    x0 = model.State.rand()
-    u0 = np.random.rand(model.nu)
-    x1 = model.calc(data,x0,u0)[0]
-
-    x1bis = X.m2x(np.dot(X.x2m(x0),X.dx2m([u0[0]*model.dt,0,u0[1]*model.dt])))
-    assert(norm(x1bis-x1)<1e-9)
-
-    model3 = ActionModelUnicycle()
-    data3 = model3.createData()
-
-    x = X.rand()
-    u = np.random.rand(model.nu)
-    x3 = X.diff(X.zero(),x)
-
-    xnext ,cost  = model .calc(data ,x ,u)
-    xnext3,cost3 = model3.calc(data3,x3,u)
-    assert( norm( X.integrate(X.zero(),xnext3) - xnext) <1e-9)
-    assert( abs(cost-cost3) <1e-9)
-
-    model.calcDiff(data,x0,u0)
-
-    mnum = ActionModelNumDiff(model,withGaussApprox=True)
-    dnum = mnum.createData()
-
-    model.calcDiff(data,x,u)
-    mnum .calcDiff(dnum,x,u)
-
-    dx = np.array([u[0],0,u[1]])
-
-    def diff(m,d,x,u): m.calcDiff(d,x,u); return d.Fu
-    da = lambda x,v,w: diff(model,data,x,np.array([v,w]))
-    dn = lambda x,v,w: diff(mnum, dnum,x,np.array([v,w]))
-    
-    for k in ['Ru', 'Lxu', 'Fu', 'Fx', 'Rx', 'L', 'Lxx', 'Lux', 'Lu', 'Lx', 'Luu']:
-        assert( norm( data.__dict__[k] - dnum.__dict__[k] ) < mnum.disturbance*10 )
-
-# ---------------------------------------------------
-# ---------------------------------------------------
-# ---------------------------------------------------
-
 from crocoddyl import ShootingProblem
+from crocoddyl import SolverKKT   
 
-from crocoddyl import SolverKKT        
-                
-# ---------------------------------------------------
-# --- TEST ------------------------------------------
-# ---------------------------------------------------
-
-NX = 1
-NU = 1
-X = StateVector(NX)
-assert(X.zero().shape == (NX,))
-assert(X.rand().shape == (NX,))
-
-x1 = X.rand()
-x2 = X.rand()
-assert( np.linalg.norm(x2-X.integrate( x1,X.diff(x1,x2) )) < 1e-9 )
 
 # ---------------------------------------------------
 model = ActionModelUnicycle()
@@ -166,11 +22,6 @@ LQR = isinstance(model,ActionModelLQR)
 
 x = model.State.rand()
 u = np.zeros([model.nu])
-
-# Check dimensions of calc and calcdiff
-assert( model.calc(data,x,u)[0].shape == (model.nx,) )
-assert( isinstance(model.calc(data,x,u)[1],float) )
-assert( model.calcDiff(data,x,u)[0].shape == (model.nx,) )
 
 # Check dimension of KKT.
 problem = ShootingProblem(model.State.zero()+1, [ model, model ], model)
