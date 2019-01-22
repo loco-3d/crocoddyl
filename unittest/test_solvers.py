@@ -37,10 +37,80 @@ class ShootingProblemTest(unittest.TestCase):
         # Checking the control dimension
         self.assertTrue(us_dim == u_dim, "Control dimension is wrong.")
 
+
+
+class SolverKKTTest(unittest.TestCase):
+    MODEL = ActionModelUnicycle()
+
+    def setUp(self):
+        # Creating the model
+        self.model = self.MODEL
+        self.data = self.model.createData()
+
+        # Defining the shooting problem
+        self.problem = ShootingProblem(self.model.State.zero(),
+                                       [ self.model, self.model ],
+                                       self.model)
+
+        # Creating the KKT solver
+        self.kkt = SolverKKT(self.problem)
+
+        # Setting up a warm-point
+        xs = [ m.State.zero() for m in self.problem.runningModels + [self.problem.terminalModel] ]
+        us = [ np.zeros(m.nu) for m in self.problem.runningModels ]
+        self.kkt.setCandidate(xs,us)
+
+    def test_dimension_of_kkt_problem(self):
+        # Compute the KKT matrix
+        self.kkt.calc()
+
+        # Getting the dimension of the KKT problem
+        nxu = len(filter(lambda x:x>0,eig(self.kkt.kkt)[0]))
+        nx = len(filter(lambda x:x<0,eig(self.kkt.kkt)[0]))
+
+        # Checking the dimension of the KKT problem
+        self.assertTrue(nxu==self.kkt.nx+self.kkt.nu, \
+            "Dimension of decision variables is wrong.")
+        self.assertTrue(nx==self.kkt.nx, "Dimension of state variables is wrong.")
+
+    def test_hessian_is_symmetric(self):
+        # Computing the KKT matrix
+        self.kkt.calc()
+
+        # Checking the symmetricity of the Hessian
+        self.assertTrue(np.linalg.norm(self.kkt.hess-self.kkt.hess.T) < 1e-9, \
+            "The Hessian isn't symmetric.")
+
+    def test_search_direction(self):
+        dxs,dus,ls = self.kkt.computeDirection()
+
+        # Checking that the first primal variable ensures initial constraint
+        self.assertTrue(np.linalg.norm(dxs[0]-self.problem.initialState)<1e-9, \
+            "Initial constraint isn't guaranteed.")
+        
+        # Checking that primal variables ensures dynamic constraint (or its
+        # linear approximation)
+        LQR = isinstance(self.model,ActionModelLQR)
+        h = 1 if LQR else 1e-6
+        for i,_ in enumerate(dus):
+            # Computing the next state
+            xnext = self.model.calc(self.data,dxs[i]*h,dus[i]*h)[0] / h
+
+            # Checking that the next primal variable is consistant with the
+            # dynamics
+            self.assertTrue(np.allclose(xnext, dxs, atol=10*h), \
+                "Primal variables doesn't ensure dynamic constraints.")
+
+
+if __name__ == '__main__':
+    unittest.main()
+
+
 # --- TEST KKT ---
 # ---------------------------------------------------
 # ---------------------------------------------------
 # ---------------------------------------------------
+NX = 1; NU = 1
 model = ActionModelUnicycle()
 #model = ActionModelLQR(NX,NU); model.setUpRandom()
 data  = model.createData()
@@ -57,20 +127,12 @@ us = [ np.zeros(m.nu)       for m in problem.runningModels ]
 
 # Test dimensions of KKT calc.
 kkt.setCandidate(xs,us)
-kkt.calc()
-assert( np.linalg.norm(kkt.hess-kkt.hess.T)<1e-9)
-assert(len(filter(lambda x:x>0,eig(kkt.kkt)[0]))==kkt.nx+kkt.nu)
-assert(len(filter(lambda x:x<0,eig(kkt.kkt)[0]))==kkt.nx)
 
 # Test that the solution respect the dynamics (or linear approx of it).
 dxs,dus,ls = kkt.computeDirection()
 x0,x1,x2 = dxs
 u0,u1 = dus
 l0,l1,l2 = ls
-assert(np.linalg.norm(dxs[0]-problem.initialState)<1e-9 )
-for i,_ in enumerate(dus):
-    h = 1 if LQR else 1e-6
-    assert(np.linalg.norm(model.calc(data,dxs[i]*h,dus[i]*h)[0]/h-dxs[i+1])<10*h)
 
 # If LQR. test that a random solution respect the dynamics
 xs = [ m.State.rand()       for m in problem.runningModels + [problem.terminalModel] ]
