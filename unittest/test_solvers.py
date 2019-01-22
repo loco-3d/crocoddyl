@@ -1,3 +1,4 @@
+import unittest
 from crocoddyl import ActionModelLQR
 from crocoddyl import ShootingProblem
 from crocoddyl import SolverKKT
@@ -6,6 +7,35 @@ import numpy as np
 from numpy.linalg import norm, inv, pinv, eig
 
 
+class ShootingProblemTest(unittest.TestCase):
+    MODEL = ActionModelUnicycle()
+    def setUp(self):
+        # Creating the model data
+        self.model = self.MODEL
+        self.data = self.model.createData()
+
+        # Creating shooting problem
+        self.problem = ShootingProblem(self.model.State.zero(),
+                                       [ self.model,self.model ],
+                                       self.model)
+
+    def test_trajectory_dimension(self):
+        # Getting the trajectory dimension of the shooting problem
+        xs = [ m.State.zero() for m in self.problem.runningModels + [self.problem.terminalModel] ]
+        xs_dim = len(np.concatenate(xs[:-1]))
+        x_dim = sum([ m.nx for m in self.problem.runningModels])
+
+        # Checking the trajectory dimension
+        self.assertTrue(xs_dim == x_dim, "Trajectory dimension is wrong.")
+
+    def test_control_dimension(self):
+        # Getting the control dimension of the shooting problem
+        us = [ np.zeros(m.nu) for m in self.problem.runningModels ]
+        us_dim = len(np.concatenate(us))
+        u_dim = sum([ m.nu for m in self.problem.runningModels])
+
+        # Checking the control dimension
+        self.assertTrue(us_dim == u_dim, "Control dimension is wrong.")
 
 # --- TEST KKT ---
 # ---------------------------------------------------
@@ -19,13 +49,11 @@ LQR = isinstance(model,ActionModelLQR)
 x = model.State.rand()
 u = np.zeros([model.nu])
 
-# Check dimension of KKT.
-problem = ShootingProblem(model.State.zero()+1, [ model, model ], model)
+
+problem = ShootingProblem(model.State.zero(), [ model, model ], model)
 kkt = SolverKKT(problem)
 xs = [ m.State.zero()       for m in problem.runningModels + [problem.terminalModel] ]
 us = [ np.zeros(m.nu)       for m in problem.runningModels ]
-assert(len(np.concatenate(xs[:-1])) == sum([ m.nx for m in problem.runningModels]) )
-assert(len(np.concatenate(us))      == sum([ m.nu for m in problem.runningModels]) )
 
 # Test dimensions of KKT calc.
 kkt.setCandidate(xs,us)
