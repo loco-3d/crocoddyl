@@ -99,6 +99,16 @@ class ActionModelImpact:
     def ncontact(self): return self.contact.ncontact
     def createData(self): return ActionDataImpact(self)
     def calc(model,data,x,u=None):
+        '''
+        M(vnext-v) + J^T f = 0
+        M vnext =0
+
+        [MJ^T][vnext] = [Mv]
+        [J   ][ f   ]   [0 ]
+
+        [vnext] = K^-1[Mv], with K = [MJ^T;J0]
+        [ f   ]       [0 ]
+        '''
         nx,nu,nq,nv,nout,nc = model.nx,model.nu,model.nq,model.nv,model.nout,model.ncontact
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
@@ -114,7 +124,7 @@ class ActionModelImpact:
         data.K[nv:,:nv] = data.contact.J
         data.K.T[nv:,:nv] = data.contact.J
 
-        data.r[:nv] = (data.pinocchio.M*v).flat
+        data.r[:nv] = (data.K[:nv,:nv]*v).flat
         data.r[nv:] = 0
 
         data.af[:] = np.dot(inv(data.K),data.r)
@@ -130,6 +140,11 @@ class ActionModelImpact:
         return data.xnext,data.cost
 
     def calcDiff(model,data,x,u=None,recalc=True):
+        '''
+        s = [vnext;f] = K^-1 [Mv;0] = K^-1 r
+        ds/dv = K^-1 [M;0]
+        
+        '''
         if u is None: u=model.unone
         if recalc: xout,cost = model.calc(data,x,u)
         nx,ndx,nu,nq,nv,nout,nc = model.nx,model.State.ndx,model.nu,model.nq,model.nv,model.nout,model.ncontact
@@ -154,8 +169,8 @@ class ActionModelImpact:
 
         data.Kinv = inv(data.K)
 
-        np.fill_diagonal(data.Fx[:nv,:nv],1)
-        data.Fx[:nv,nv:] = 0
+        np.fill_diagonal(data.Fx[:nv,:nv],1)  # dq/dq
+        data.Fx[:nv,nv:] = 0                  # dq/dv
         data.Fx[nv:,nv:] = np.dot(data.Kinv[:nv,:nv],data.K[:nv,:nv])
         data.Fx[nv:,:nv] = -np.dot(data.Kinv[:nv,:],np.vstack([data.did_dq, data.dv_dq]))
 
