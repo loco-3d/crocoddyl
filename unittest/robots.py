@@ -17,7 +17,10 @@ def loadTalosArm(modelPath='/opt/openrobots/share',freeFloating=False):
     URDF_SUBPATH = "/talos_data/robots/" + URDF_FILENAME
     robot = RobotWrapper.BuildFromURDF(modelPath+URDF_SUBPATH, [modelPath],
                                        pinocchio.JointModelFreeFlyer() if freeFloating else None)
-
+    if freeFloating:
+        u = robot.model.upperPositionLimit; u[:7] =  1;  robot.model.upperPositionLimit = u
+        l = robot.model.lowerPositionLimit; l[:7] = -1;  robot.model.lowerPositionLimit = l
+        
     return robot
 
 def loadTalos(modelPath='/opt/openrobots/share'):
