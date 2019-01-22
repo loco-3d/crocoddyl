@@ -80,19 +80,34 @@ models2 = [ createModel(timeStep=timeStep,
 termmodel2 = createTermModel(timeStep=timeStep,footRef = [ .2, -FOOTGAP, 0.0 ],
                              contactName = leftFrame,opPointName = rightFrame)
 
+from crocoddyl.impact import ActionModelImpact,ImpulseModel6D
+
+impulseModel1 = ImpulseModel6D(rmodel,LEFTFRAME)
+impact1  = ActionModelImpact(rmodel,impulseModel1)
 
 
 # --- SOLVER
 models = models1 + [ termmodel1 ] + models2
 termmodel = termmodel2
 
-'''
+termmodel1.timeStep=0
 problem1 = ShootingProblem(x, models1, termmodel1 )
 ddp1 = SolverDDP(problem1)
 ddp1.callback = SolverLogger(robot)
 ddp1.th_stop = 1e-9
-ddp1.solve(verbose=True,maxiter=1000,regInit=.1)
+ddp1.solve(verbose=True,maxiter=3,regInit=.1)
 
+
+problemi = ShootingProblem(x, models1, impact1 )
+ddpi = SolverDDP(problemi)
+ddpi.callback = SolverLogger(robot)
+ddpi.th_stop = 1e-9
+ddpi.solve(verbose=True,maxiter=1000,regInit=.1,
+           init_xs=ddp1.xs,
+           init_us=ddp1.us)
+stophere
+
+'''
 
 problem2 = ShootingProblem(ddp1.xs[-1], models2, termmodel2 )
 ddp2 = SolverDDP(problem2)
