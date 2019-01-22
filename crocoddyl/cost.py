@@ -280,9 +280,9 @@ class CostModelPosition6D(CostModelPinocchio):
     for a frame of the robot. Paramterize it with the frame index frameIdx and
     the effector desired pinocchio::SE3 ref.
     '''
-    def __init__(self,pinocchioModel,frame,ref):
+    def __init__(self,pinocchioModel,frame,ref,nu=None):
         self.CostDataType = CostDataPosition6D
-        CostModelPinocchio.__init__(self,pinocchioModel,ncost=6)
+        CostModelPinocchio.__init__(self,pinocchioModel,ncost=6,nu=nu)
         self.ref = ref
         self.frame = frame
     def calc(model,data,x,u):
@@ -323,9 +323,9 @@ class CostModelCoM(CostModelPinocchio):
     The class proposes a model of a cost function CoM.
     Paramterize it with the desired CoM ref
     '''
-    def __init__(self,pinocchioModel,ref):
+    def __init__(self,pinocchioModel,ref,nu=None):
         self.CostDataType = CostDataCoM
-        CostModelPinocchio.__init__(self,pinocchioModel,ncost=3)
+        CostModelPinocchio.__init__(self,pinocchioModel,ncost=3,nu=nu)
         self.ref = ref
     def calc(model,data,x,u):
         data.residuals = m2a(data.pinocchio.com[0]) - model.ref
