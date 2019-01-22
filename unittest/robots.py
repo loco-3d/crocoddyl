@@ -25,6 +25,7 @@ def loadTalos(modelPath='/opt/openrobots/share'):
     URDF_SUBPATH = "/talos_data/urdf/" + URDF_FILENAME
     robot = RobotWrapper.BuildFromURDF(modelPath+URDF_SUBPATH, [modelPath],
                                                                pinocchio.JointModelFreeFlyer())
+    robot.q0.flat[:] =  [0,0,1.0192720229567027,0,0,0,1,0.0,0.0,-0.411354,0.859395,-0.448041,-0.001708,0.0,0.0,-0.411354,0.859395,-0.448041,-0.001708,0,0.006761,0.25847,0.173046,-0.0002,-0.525366,0,0,0.1,0.5,-0.25847,-0.173046,0.0002,-0.525366,0,0,0.1,0.5,0,0]
     return robot
 
 
@@ -42,7 +43,7 @@ def loadTalosLegs(modelPath='/opt/openrobots/share'):
             m2.appendBodyToJoint(jid,Y,pinocchio.SE3.Identity())
     m2.upperPositionLimit=np.matrix([1.]*19).T
     m2.lowerPositionLimit=np.matrix([-1.]*19).T
-    q2 = pinocchio.randomConfiguration(m2)
+    q2 = robot.q0[:19]
 
     for f in m1.frames:
         if f.parent<legMaxId: m2.addFrame(f)
@@ -57,6 +58,11 @@ def loadTalosLegs(modelPath='/opt/openrobots/share'):
     robot.visual_model = g2
     robot.q0=q2
     robot.visual_data = pinocchio.GeometryData(g2)
+
+    robot.model.armature = np.matrix([ 0 ]*robot.model.nv).T
+    for j in robot.model.joints[1:]:
+        if j.shortname()!='JointModelFreeFlyer':
+            robot.model.armature[j.idx_v:j.idx_v+j.nv]=1
 
     return robot
 
