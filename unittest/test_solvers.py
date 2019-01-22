@@ -1,19 +1,15 @@
+from crocoddyl import ActionModelLQR
+from crocoddyl import ShootingProblem
+from crocoddyl import SolverKKT
+from crocoddyl import ActionModelUnicycle, ActionModelUnicycleVar
 import numpy as np
 from numpy.linalg import norm, inv, pinv, eig
-xnew=[0,'debug only']
-np .random.seed     (220)
 
 
 
-from crocoddyl import StateVector
-from crocoddyl import ActionModelLQR
-from crocoddyl import ActionModelUnicycle
-from crocoddyl import ActionModelUnicycleVar
-from crocoddyl import ActionModelNumDiff
-from crocoddyl import ShootingProblem
-from crocoddyl import SolverKKT   
-
-
+# --- TEST KKT ---
+# ---------------------------------------------------
+# ---------------------------------------------------
 # ---------------------------------------------------
 model = ActionModelUnicycle()
 #model = ActionModelLQR(NX,NU); model.setUpRandom()
@@ -124,13 +120,14 @@ if WITH_PLOT:
     plt.show()
 
 
-# ---------------------------------------------------
-# ---------------------------------------------------
-# ---------------------------------------------------
 
-from crocoddyl import SolverDDP
             
 # --- TEST DDP ---
+# ---------------------------------------------------
+# ---------------------------------------------------
+# ---------------------------------------------------
+from crocoddyl import SolverDDP
+
 model = ActionModelLQR(1,1); model.setUpRandom()
 #model = ActionModelUnicycle()
 nx,nu = model.nx,model.nu
@@ -198,7 +195,11 @@ l1xx = v1xx
 
 
 
+
 # --- TEST DDP vs KKT LQR ---
+# ---------------------------------------------------
+# ---------------------------------------------------
+# ---------------------------------------------------
 np .random.seed     (220)
 model = ActionModelLQR(3,3); model.setUpRandom();
 #model = ActionModelUnicycle()
@@ -338,7 +339,6 @@ for t in range(T):
     assert(norm(ulin[t]-ukkt[t])<1e-9)
     assert(norm(xlin[t+1]-xkkt[t+1])<1e-9)
 
-
 # --- DDP NLP solver ---
 
 np .random.seed     (220)
@@ -418,6 +418,7 @@ x3TOx = lambda x3: model.State.integrate(model.State.zero(),x3)
 xs = problem.rollout(us)
 
 model3 = ActionModelUnicycle()
+X = model3.State
 data3  = model3.createData()
 
 x0ref3 = xTOx3(x0ref)

@@ -4,6 +4,7 @@ import sys
 testmodules = [
   'test_state',
   'test_unicycle',
+  'test_solvers',
 #  'cost',
   # 'soft_constraint',
 #  'dynamics',
