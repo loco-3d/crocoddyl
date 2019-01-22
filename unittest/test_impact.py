@@ -24,10 +24,13 @@ v = a2m(x[model.nq:])
 model.calc(data,x)
 model.calcDiff(data,x)
 
-mnum = ActionModelNumDiff(model)
+mnum = ActionModelNumDiff(model,withGaussApprox=True)
 dnum = mnum.createData()
 
-nx,ndx,nq,nv = model.nx,model.ndx,model.nq,model.nv
+nx,ndx,nq,nv,nu = model.nx,model.ndx,model.nq,model.nv,model.nu
 
 mnum.calcDiff(dnum,x,None)
-assert( absmax(dnum.Fx[nv:,:nv]-data.Fx[nv:,:nv]) < 1e-3 )
+assert( absmax(dnum.Fx-data.Fx) < 1e-3 )
+assert( absmax(dnum.Rx-data.Rx) < 1e-3 )
+assert( absmax(dnum.Lx-data.Lx) < 1e-3 )
+assert( data.Fu.shape[1]==0 and data.Lu.shape == (0,))

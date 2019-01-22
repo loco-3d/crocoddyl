@@ -94,6 +94,7 @@ class ActionModelImpact:
         self.nout = self.nx
         self.nu = 0
         self.unone = np.zeros(self.nu)
+        self.ncost = self.nv
     @property
     def ncontact(self): return self.contact.ncontact
     def createData(self): return ActionDataImpact(self)
@@ -122,8 +123,10 @@ class ActionModelImpact:
 
         data.xnext[:nq] = q.flat
         data.xnext[nq:] = data.vnext
+
+        data.costResiduals[:] = data.vnext-v.flat
+        data.cost = .5*sum( data.costResiduals**2 )
         
-        data.cost = 0
         return data.xnext,data.cost
 
     def calcDiff(model,data,x,u=None,recalc=True):
@@ -156,6 +159,11 @@ class ActionModelImpact:
         data.Fx[nv:,nv:] = np.dot(data.Kinv[:nv,:nv],data.K[:nv,:nv])
         data.Fx[nv:,:nv] = -np.dot(data.Kinv[:nv,:],np.vstack([data.did_dq, data.dv_dq]))
 
+        data.Rx[:,:] = 0
+        np.fill_diagonal(data.Rv,-1)
+        data.Rx[:,:] += data.Fx[nv:,:]
+        data.Lx [:]   = np.dot(data.Rx.T,data.costResiduals)
+        data.Lxx[:,:] = np.dot(data.Rx.T,data.Rx)
         return data.xnext,data.cost
     
 class ActionDataImpact:
@@ -166,10 +174,23 @@ class ActionDataImpact:
         nx,nu,ndx,nq,nv,nout,nc = model.nx,model.nu,model.State.ndx,model.nq,model.nv,model.nout,model.ncontact
         self.F = np.zeros([ ndx,ndx+nu ])
         self.Fx = self.F[:,:ndx]
-        self.Fu = self.F[:,-nu:]
+        self.Fu = self.F[:,ndx:]
         self.Fq = self.Fx[:,:nv]
         self.Fv = self.Fx[:,nv:]
         self.Fq[:,:] = 0; np.fill_diagonal(self.Fq,1)
+
+        self.costResiduals = np.zeros(nv)
+        self.Rx = np.zeros([ nv,ndx ])
+        self.Rq = self.Rx[:,:nv]
+        self.Rv = self.Rx[:,nv:]
+
+        self.g = np.zeros(ndx+nu)
+        self.L = np.zeros([ndx+nu,ndx+nu])
+        self.Lx  = self.g[:ndx]
+        self.Lu  = self.g[ndx:]
+        self.Lxx = self.L[:ndx,:ndx]
+        self.Lxu = self.L[:ndx,ndx:]
+        self.Luu = self.L[ndx:,ndx:]
 
         self.K  = np.zeros([nv+nc, nv+nc])  # KKT matrix = [ MJ.T ; J0 ]
         self.r  = np.zeros( nv+nc )         # NLE effects =  [ tau-b ; -gamma ]
