@@ -1,17 +1,7 @@
-import refact
-import pinocchio
-from pinocchio.utils import *
-from numpy.linalg import inv,norm,pinv
-from numpy import dot,asarray
-from numpy.linalg import inv,pinv,norm,svd,eig
 from robots import loadTalosArm
-from impact import ActionModelImpact,ImpulseModel6D
-from continuous import ActionModelNumDiff
-
-m2a = lambda m: np.array(m.flat)
-a2m = lambda a: np.matrix(a).T
-absmax = lambda A: np.max(abs(A))
-absmin = lambda A: np.min(abs(A))
+from crocoddyl import ActionModelImpact,ImpulseModel6D
+from crocoddyl import ActionModelNumDiff
+from crocoddyl import m2a, a2m, absmax, absmin
 
 robot = loadTalosArm(freeFloating=True)
 rmodel = robot.model

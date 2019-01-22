@@ -1,13 +1,12 @@
+from state import StatePinocchio
+from utils import m2a, a2m
 import pinocchio
 from pinocchio.utils import *
 import numpy as np
-from numpy.linalg import inv,norm,pinv
-from continuous import StatePinocchio
+from numpy.linalg import inv
 
-m2a = lambda m: np.array(m.flat)
-a2m = lambda a: np.matrix(a).T
 
-# -----------------------------------------------------------------------------
+
 class ImpulseModelPinocchio:
     def __init__(self,pinocchioModel,ncontact):
         assert(hasattr(self,'ImpulseDataType'))
@@ -41,8 +40,9 @@ class ImpulseDataPinocchio:
         self.forces = pinocchio.StdVect_Force()
         for i in range(model.pinocchio.njoints): self.forces.append(pinocchio.Force.Zero())
         self.Vq = np.zeros([ nc,nv ])
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
+
+
+
 class ImpulseModel6D(ImpulseModelPinocchio):
     def __init__(self,pinocchioModel,frame):
         self.ImpulseDataType = ImpulseData6D
@@ -81,9 +81,8 @@ class ImpulseData6D(ImpulseDataPinocchio):
         self.jMf = frame.placement
         self.fXj = self.jMf.inverse().action
 
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
+
+
 class ActionModelImpact:
     def __init__(self,pinocchioModel,contactModel):
         self.pinocchio = pinocchioModel
@@ -171,15 +170,12 @@ class ActionDataImpact:
         self.Fq = self.Fx[:,:nv]
         self.Fv = self.Fx[:,nv:]
         self.Fq[:,:] = 0; np.fill_diagonal(self.Fq,1)
-        
+
         self.K  = np.zeros([nv+nc, nv+nc])  # KKT matrix = [ MJ.T ; J0 ]
         self.r  = np.zeros( nv+nc )         # NLE effects =  [ tau-b ; -gamma ]
         self.af = np.zeros( nv+nc )         # acceleration&forces = [ a ; f ]
         self.vnext = self.af[:nv]
         self.f  = self.af[nv:]
         self.did_dq = np.zeros([nv,nv])
-        
+
         self.xnext = np.zeros(nx)
-
-
-
