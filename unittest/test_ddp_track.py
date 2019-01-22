@@ -1,19 +1,10 @@
-import refact
 import pinocchio
 from pinocchio.utils import *
-from numpy.linalg import inv,norm,pinv
-from numpy import dot,asarray
-from continuous import IntegratedActionModelEuler, DifferentialActionModelNumDiff,StatePinocchio,CostModelSum,CostModelPinocchio,CostModelPosition,CostModelState,CostModelControl,DifferentialActionModel,CostModelPlacementVelocity
-from contact import ContactModel6D,ActuationModelFreeFloating,DifferentialActionModelFloatingInContact,ContactModelMultiple
-import warnings
 from numpy.linalg import inv,pinv,norm,svd,eig
-from crocoddyl import ActivationModelWeightedQuad
+from numpy import dot,asarray
+import warnings
+from crocoddyl import CostModelSum,CostModelPosition,CostModelState,CostModelControl,DifferentialActionModelFloatingInContact,IntegratedActionModelEuler,ActuationModelFreeFloating,StatePinocchio,ContactModel6D,ContactModelMultiple,ActivationModelWeightedQuad,m2a,a2m,CostModelPlacementVelocity
 from robots import loadTalosLegs
-
-m2a = lambda m: np.array(m.flat)
-a2m = lambda a: np.matrix(a).T
-absmax = lambda A: np.max(abs(A))
-absmin = lambda A: np.min(abs(A))
 
 robot = loadTalosLegs()
 rmodel = robot.model
@@ -67,19 +58,23 @@ models = [ createModel() for _ in range(T+1) ]
 for k,model in enumerate(models[:-1]):
     t = k*timeStep
     model.timeStep = timeStep
-    model.differential.costs['pos' ].weight = 1
+    model.differential.costs.addCost(name='veleff',
+                                     cost=CostModelPlacementVelocity(rmodel,OPPOINTFRAME),
+                                     weight=10000)
+    model.differential.costs['veleff' ].weight = 100
+    model.differential.costs['pos' ].weight =    1
     model.differential.costs['regx'].weight = .1
     model.differential.costs['regx'].cost.weights = np.array([0]*6+[0.01]*(rmodel.nv-6)+[10]*rmodel.nv)
     model.differential.costs['regu'].weight = 0.001
-    model.differential.costs['pos' ].cost.ref[:] = [ .2*t/DT, .2*t/DT, 0.0 ]
+    model.differential.costs['pos' ].cost.ref[:] = [ .2, .2, 0.0 ]
 
 termmodel = models[-1]
 termmodel.differential.costs.addCost(name='veleff',
                                      cost=CostModelPlacementVelocity(rmodel,OPPOINTFRAME),
                                      weight=10000)
 
-termmodel.differential.costs['veleff' ].weight = 100
-termmodel.differential.costs['pos' ]   .weight = 3000000
+termmodel.differential.costs['veleff' ].weight = 1000
+termmodel.differential.costs['pos' ]   .weight = 300000
 termmodel.differential.costs['regx']   .weight = 1
 termmodel.differential.costs['regu']   .weight = 0.01
 termmodel.differential.costs['regx'].cost.weights = np.array([0]*6+[0.01]*(rmodel.nv-6)+[10]*rmodel.nv)
@@ -91,7 +86,7 @@ problem = ShootingProblem(x, models[:-1], models[-1] )
 
 ddp = SolverDDP(problem)
 ddp.callback = SolverLogger(robot)
-ddp.th_stop = 1e-19
+ddp.th_stop = 1e-9
 ddp.solve(verbose=True,maxiter=1000,regInit=.1)
 
 
