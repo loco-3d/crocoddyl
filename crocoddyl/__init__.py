@@ -35,4 +35,5 @@ from shooting import ShootingProblem
 from solver import SolverAbstract
 from ddp import SolverDDP
 from kkt import SolverKKT
+from utils import plotDDPConvergence, plotOCSolution
 from utils import m2a, a2m, absmax, absmin
