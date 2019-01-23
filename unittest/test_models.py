@@ -1,6 +1,6 @@
 import unittest
+from crocoddyl import ActionModelNumDiff
 from crocoddyl import ActionModelUnicycle, ActionModelUnicycleVar
-from crocoddyl import StateNumDiff, ActionModelNumDiff
 import numpy as np
 
 
@@ -10,10 +10,10 @@ class ModelTestCase(unittest.TestCase):
     MODEL_NUMDIFF = None
 
     def setUp(self):
-        # Creating Unicycle action model with NumDiff
+        # Creating NumDiff action model
         self.MODEL_NUMDIFF = ActionModelNumDiff(self.MODEL, withGaussApprox=True)
 
-        # Creating the Unicycle data
+        # Creating the action data
         self.DATA = self.MODEL.createData()
         self.DATA_NUMDIFF = self.MODEL_NUMDIFF.createData()
 
@@ -92,6 +92,10 @@ class UnicycleVarTest(ModelTestCase):
             np.allclose(X.integrate(X.zero(),xnext0), xnext, atol=1e-9), \
             "Dynamics simulation is wrong.")
         self.assertAlmostEqual(cost0, cost, "Cost computation is wrong.")
+
+# TODO create testcases for a general cost function and specific model
+# for this is needed a sort of DifferentialActionModelPositioning
+# Later test_costs might merged inside this code.
 
 
 
