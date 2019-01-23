@@ -1,5 +1,5 @@
 from robots import loadTalosArm,loadTalosLegs
-from crocoddyl import ActionModelImpact,ImpulseModel6D
+from crocoddyl import ActionModelImpact,ImpulseModel6D,ImpulseModelMultiple
 from crocoddyl import ActionModelNumDiff
 from crocoddyl import m2a, a2m, absmax, absmin
 
@@ -42,9 +42,10 @@ rmodel = robot.model
 
 conactName = 'left_sole_link'
 
-impulseModel = ImpulseModel6D(rmodel,rmodel.getFrameId(contactName))
-model  = ActionModelImpact(rmodel,impulseModel)
-data = model.createData()
+impulse6     = ImpulseModel6D(rmodel,rmodel.getFrameId(contactName))
+impulseModel = ImpulseModelMultiple(rmodel,{ "6d": impulse6 })
+model        = ActionModelImpact(rmodel,impulseModel)
+data         = model.createData()
 
 x = model.State.rand()
 q = a2m(x[:model.nq])
