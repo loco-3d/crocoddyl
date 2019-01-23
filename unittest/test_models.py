@@ -5,7 +5,7 @@ import numpy as np
 
 
 
-class ActionTestCase(unittest.TestCase):
+class ModelTestCase(unittest.TestCase):
     MODEL = None
     MODEL_NUMDIFF = None
 
@@ -66,11 +66,11 @@ class ActionTestCase(unittest.TestCase):
             "Fx is wrong.")
 
 
-class ActionUnicycleTest(ActionTestCase):
-    ActionTestCase.MODEL = ActionModelUnicycle()
+class UnicycleTest(ModelTestCase):
+    ModelTestCase.MODEL = ActionModelUnicycle()
 
-class ActionUnicycleVarTest(ActionUnicycleTest):
-    ActionTestCase.MODEL = ActionModelUnicycleVar()
+class UnicycleVarTest(ModelTestCase):
+    ModelTestCase.MODEL = ActionModelUnicycleVar()
 
     def test_rollout_against_unicycle(self):
         # Creating the Unycicle action model

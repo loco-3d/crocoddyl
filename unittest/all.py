@@ -3,7 +3,7 @@ import sys
 
 testmodules = [
   'test_state',
-  'test_unicycle',
+  'test_models',
   'test_costs',
   'test_solvers',
 #  'cost',
