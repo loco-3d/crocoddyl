@@ -35,7 +35,6 @@ x0 = X.zero()
 x0 = X.rand()
 dx = np.random.rand(rmodel.nv*2)
 x1 = X.integrate(x0,dx)
-assert(norm(X.diff(x0,x1)-dx)<1e-9)
 
 # Check integrate and dIntegrate of pinocchio
 q = pinocchio.randomConfiguration(rmodel)

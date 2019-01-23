@@ -1,5 +1,5 @@
 import unittest
-from crocoddyl import StateVector
+from crocoddyl import StateVector, StatePinocchio
 from random import randint
 import numpy as np
 
@@ -45,5 +45,16 @@ class StateTestCase(unittest.TestCase):
 class StateVectorTest(StateTestCase):
     StateTestCase.NX = randint(1,101)
     StateTestCase.STATE = StateVector(StateTestCase.NX)
+
+class StatePinocchioTest(StateTestCase):
+    # Loading Talos arm
+    from robots import loadTalosArm
+    model = loadTalosArm().model
+
+    StateTestCase.NX = model.nq + model.nv
+    StateTestCase.STATE = StatePinocchio(model)
+
+
+
 if __name__ == '__main__':
     unittest.main()
