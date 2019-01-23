@@ -2,13 +2,13 @@ import unittest
 import sys
 
 testmodules = [
-  'test_state',
-  'test_costs',
-  # 'test_dynamics', TODO first create dynamics abstraction
-  'test_actuation',
-  'test_contacts',
-  'test_actions',
-  'test_solvers',
+  # 'test_state',
+  # 'test_costs',
+  # # 'test_dynamics', TODO first create dynamics abstraction
+  # 'test_actuation',
+  # 'test_contacts',
+  # 'test_actions',
+  # 'test_solvers',
 ]
 
 suite = unittest.TestSuite()
