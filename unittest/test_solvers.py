@@ -102,9 +102,6 @@ class SolverKKTTest(unittest.TestCase):
                 "Primal variables doesn't ensure dynamic constraints.")
 
 
-if __name__ == '__main__':
-    unittest.main()
-
 
 # --- TEST KKT ---
 # ---------------------------------------------------
@@ -711,3 +708,8 @@ for t in range(T):
     assert(norm( dxs_d[t+1]-dxs_k[t+1] ) <1e-9 )
 
 # --- REG INTEGRATIVE TEST ---
+
+
+
+if __name__ == '__main__':
+    unittest.main()
