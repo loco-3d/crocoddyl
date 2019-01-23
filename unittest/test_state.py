@@ -5,26 +5,24 @@ import numpy as np
 
 
 
-class StateVectorTest(unittest.TestCase):
-    def setUp(self):
-        # Creating a random state
-        self.NX = randint(1,101)
-        self.X = StateVector(self.NX)
+class StateTestCase(unittest.TestCase):
+    STATE = None
+    NX = None
 
     def test_state_dimension(self):
         # Checking the dimension of zero and random states
-        self.assertEqual(self.X.zero().shape, (self.NX,), \
+        self.assertEqual(self.STATE.zero().shape, (self.NX,), \
             "Wrong dimension of zero state.")
-        self.assertEqual(self.X.rand().shape, (self.NX,), \
+        self.assertEqual(self.STATE.rand().shape, (self.NX,), \
             "Wrong dimension of random state.")
 
     def test_integrate_against_difference(self):
         # Generating random states
-        x1 = self.X.rand()
-        x2 = self.X.rand()
+        x1 = self.STATE.rand()
+        x2 = self.STATE.rand()
 
         # Computing x2 by integrating its difference
-        x2i = self.X.integrate(x1,self.X.diff(x1,x2))
+        x2i = self.STATE.integrate(x1,self.STATE.diff(x1,x2))
 
         # Checking that both states agree
         self.assertTrue(np.allclose(x2i, x2, atol=1e-9), \
@@ -32,16 +30,20 @@ class StateVectorTest(unittest.TestCase):
 
     def test_difference_against_integrate(self):
         # Generating random states
-        x1 = self.X.rand()
-        dx = np.random.rand(self.X.ndx)
+        x1 = self.STATE.rand()
+        dx = np.random.rand(self.STATE.ndx)
 
         # Computing dx by differentiation its integrate
-        dxd = self.X.diff(x1,self.X.integrate(x1,dx))
+        dxd = self.STATE.diff(x1,self.STATE.integrate(x1,dx))
 
         # Checking that both states agree
         self.assertTrue(np.allclose(dxd, dx, atol=1e-9), \
             "Difference function doesn't agree with integrate rule.")
 
 
+
+class StateVectorTest(StateTestCase):
+    StateTestCase.NX = randint(1,101)
+    StateTestCase.STATE = StateVector(StateTestCase.NX)
 if __name__ == '__main__':
     unittest.main()
