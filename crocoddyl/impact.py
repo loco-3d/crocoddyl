@@ -189,7 +189,7 @@ class ImpulseDataMultiple(ImpulseDataPinocchio):
 
 
 class ActionModelImpact:
-    def __init__(self,pinocchioModel,impulseModel):
+    def __init__(self,pinocchioModel,impulseModel,costModel=None):
         self.pinocchio = pinocchioModel
         self.State = StatePinocchio(self.pinocchio)
         self.impulse = impulseModel
@@ -200,6 +200,7 @@ class ActionModelImpact:
         self.nu = 0
         self.unone = np.zeros(self.nu)
         self.ncost = self.nv
+        self.costs = costModel
     @property
     def nimpulse(self): return self.impulse.nimpulse
     def createData(self): return ActionDataImpact(self)
@@ -239,9 +240,11 @@ class ActionModelImpact:
         data.xnext[:nq] = q.flat
         data.xnext[nq:] = data.vnext
 
-        data.costResiduals[:] = data.vnext-v.flat
+        data.costResiduals[:] = 100*(data.vnext-v.flat)
         data.cost = .5*sum( data.costResiduals**2 )
-        
+
+        if model.costs is not None:
+            data.cost += model.costs.calc(data.costs,x,u=None)
         return data.xnext,data.cost
 
     def calcDiff(model,data,x,u=None,recalc=True):
@@ -282,14 +285,23 @@ class ActionModelImpact:
         data.Rx[:,:] = 0
         np.fill_diagonal(data.Rv,-1)
         data.Rx[:,:] += data.Fx[nv:,:]
+        data.Rx *= 100
         data.Lx [:]   = np.dot(data.Rx.T,data.costResiduals)
         data.Lxx[:,:] = np.dot(data.Rx.T,data.Rx)
+
+        if model.costs is not None:
+            model.costs.calcDiff(data.costs,x,u=None)
+            data.Lx[:] += data.costs.Lx
+            data.Lxx[:,:] += data.costs.Lxx
+            
         return data.xnext,data.cost
     
 class ActionDataImpact:
     def __init__(self,model):
         self.pinocchio = model.pinocchio.createData()
         self.impulse = model.impulse.createData(self.pinocchio)
+        if model.costs is not None:
+            self.costs = model.costs.createData(self.pinocchio)
         self.cost = np.nan
         nx,nu,ndx,nq,nv,nout,nc = model.nx,model.nu,model.State.ndx,model.nq,model.nv,model.nout,model.nimpulse
         self.F = np.zeros([ ndx,ndx+nu ])
