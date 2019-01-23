@@ -4,7 +4,7 @@ import sys
 testmodules = [
   'test_state',
   'test_costs',
-  'test_models',
+  'test_actions',
   'test_solvers',
 #  'cost',
   # 'soft_constraint',
