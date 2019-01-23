@@ -23,12 +23,24 @@ class StateVectorTest(unittest.TestCase):
         x1 = self.X.rand()
         x2 = self.X.rand()
 
-        # Computing the x2 by integrating its difference
+        # Computing x2 by integrating its difference
         x2i = self.X.integrate(x1,self.X.diff(x1,x2))
 
         # Checking that both states agree
         self.assertTrue(np.allclose(x2i, x2, atol=1e-9), \
             "Integrate function doesn't agree with difference rule.")
+
+    def test_difference_against_integrate(self):
+        # Generating random states
+        x1 = self.X.rand()
+        dx = np.random.rand(self.X.ndx)
+
+        # Computing dx by differentiation its integrate
+        dxd = self.X.diff(x1,self.X.integrate(x1,dx))
+
+        # Checking that both states agree
+        self.assertTrue(np.allclose(dxd, dx, atol=1e-9), \
+            "Difference function doesn't agree with integrate rule.")
 
 
 if __name__ == '__main__':
