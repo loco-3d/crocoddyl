@@ -59,8 +59,8 @@ x = m2a(np.concatenate([q,v]))
 # --- DDP 
 # --- DDP 
 # --- DDP 
-from refact import ShootingProblem, SolverDDP,SolverKKT
-from logger import *
+from crocoddyl import ShootingProblem, SolverDDP,SolverKKT
+from crocoddyl import SolverLogger
 disp = lambda xs: disptraj(robot,xs)
 
 DT = 1.
@@ -115,7 +115,7 @@ termmodel = termmodel2
 
 problem = ShootingProblem(x, models, termmodel )
 ddp = SolverDDP(problem)
-ddp.callback = SolverLogger(robot)
+ddp.callback = SolverLogger()
 ddp.th_stop = 1e-9
 ddp.solve(verbose=True,maxiter=1000,regInit=.1)
 

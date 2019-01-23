@@ -1,10 +1,9 @@
-import refact
 import pinocchio
 from pinocchio.utils import *
 from numpy.linalg import inv,norm,pinv
 from numpy import dot,asarray
-from continuous import IntegratedActionModelEuler, DifferentialActionModelNumDiff,StatePinocchio,CostModelSum,CostModelPinocchio,CostModelPosition,CostModelState,CostModelControl,DifferentialActionModel
-from contact import ContactModel6D,ActuationModelFreeFloating,DifferentialActionModelFloatingInContact,ContactModelMultiple
+from crocoddyl import IntegratedActionModelEuler, DifferentialActionModelNumDiff,StatePinocchio,CostModelSum,CostModelPinocchio,CostModelPosition,CostModelState,CostModelControl,DifferentialActionModel
+from crocoddyl import ContactModel6D,ActuationModelFreeFloating,DifferentialActionModelFloatingInContact,ContactModelMultiple
 import warnings
 from numpy.linalg import inv,pinv,norm,svd,eig
 
@@ -13,10 +12,7 @@ a2m = lambda a: np.matrix(a).T
 absmax = lambda A: np.max(abs(A))
 absmin = lambda A: np.min(abs(A))
 
-path = '/home/nmansard/src/cddp/examples/'
-
-urdf = path + 'talos_data/robots/talos_left_arm.urdf'
-
+from robots import loadTalosArm
 opPointName = 'gripper_left_fingertip_2_link'
 contactName = 'root_joint'
 
@@ -25,9 +21,7 @@ opPointName,contactName = contactName,opPointName
 
 class FF:
     def __init__(self):
-        robot = self.robot = \
-                     pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(urdf, [path] \
-                                                                        ,pinocchio.JointModelFreeFlyer())
+        robot = self.robot = loadTalosArm(freeFloating=True)
         rmodel = self.rmodel = robot.model
         rmodel.armature = np.matrix([ 0 ]*robot.model.nv).T
         for j in robot.model.joints[1:]:
@@ -71,8 +65,7 @@ class FF:
        
 class Fix:
     def __init__(self):
-        robot = self.robot = \
-                     pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(urdf, [path])
+        robot = self.robot = loadTalosArm()
         rmodel = self.rmodel = robot.model
         rmodel.armature = np.matrix([ 0 ]*robot.model.nv).T
         for j in robot.model.joints[1:]:
@@ -133,7 +126,7 @@ if ff.contactModel['contact'].frame == 1:
 # --- DDP 
 # --- DDP 
 # --- DDP 
-from refact import ShootingProblem, SolverDDP,SolverKKT
+from crocoddyl import ShootingProblem, SolverDDP,SolverKKT
 
 ff.model.timeStep = fix.model.timeStep = 1e-2
 T = 20
@@ -166,9 +159,9 @@ problem = ShootingProblem(f.x, [ f.model ]*T, fterm.model)
 u0s = [ f.u ]*T
 x0s = problem.rollout(u0s)
 
-from logger import *
+from crocoddyl import SolverLogger
 disp = lambda xs: disptraj(f.robot,xs)
 ddp = SolverDDP(problem)
-ddp.callback = SolverLogger(f.robot)
+ddp.callback = SolverLogger()
 ddp.th_stop = 1e-18
 ddp.solve(verbose=True,maxiter=1000)
