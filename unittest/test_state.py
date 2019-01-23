@@ -76,6 +76,23 @@ class StateTestCase(unittest.TestCase):
         self.assertTrue(np.allclose(J2,Jnum2, atol=tol), \
             "The partial derivatives of integrate function with respect to second argument is wrong.")
 
+    def test_Jdiff_and_Jintegrate_are_inverses(self):
+        x1 = self.STATE.rand()
+        dx = np.random.rand(self.STATE.ndx)
+        x2 = self.STATE.integrate(x1,dx)
+        
+
+        # Computing the partial derivatives of the integrate and difference function
+        Jx,Jdx = self.STATE.Jintegrate(x1,dx)
+        J1,J2 = self.STATE.Jdiff(x1,x2)
+        
+        # Checking that Jdiff and Jintegrate are inverses
+        dX_dDX = Jdx
+        dDX_dX = J2
+        self.assertTrue(np.allclose(dX_dDX, np.linalg.inv(dDX_dX), atol=1e-9), \
+            "Jdiff and Jintegrate aren't inverses.")
+
+
 
 class StateVectorTest(StateTestCase):
     StateTestCase.NX = randint(1,101)
