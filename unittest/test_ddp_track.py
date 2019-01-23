@@ -3,7 +3,7 @@ from pinocchio.utils import *
 from numpy.linalg import inv,pinv,norm,svd,eig
 from numpy import dot,asarray
 import warnings
-from crocoddyl import CostModelSum,CostModelPosition,CostModelState,CostModelControl,DifferentialActionModelFloatingInContact,IntegratedActionModelEuler,ActuationModelFreeFloating,StatePinocchio,ContactModel6D,ContactModelMultiple,ActivationModelWeightedQuad,m2a,a2m,CostModelPlacementVelocity,CostModelPosition6D
+from crocoddyl import CostModelSum,CostModelPosition,CostModelState,CostModelControl,DifferentialActionModelFloatingInContact,IntegratedActionModelEuler,ActuationModelFreeFloating,StatePinocchio,ContactModel6D,ContactModelMultiple,ActivationModelWeightedQuad,m2a,a2m,CostModelPlacementVelocity,CostModelPosition6D,ImpulseModelMultiple
 from robots import loadTalosLegs
 
 robot = loadTalosLegs()
@@ -82,11 +82,12 @@ termmodel2 = createTermModel(timeStep=timeStep,footRef = [ .2, -FOOTGAP, 0.0 ],
 
 from crocoddyl.impact import ActionModelImpact,ImpulseModel6D
 
-impulseModel1 = ImpulseModel6D(rmodel,LEFTFRAME)
-impact1  = ActionModelImpact(rmodel,impulseModel1)
+impulseModelL = ImpulseModel6D(rmodel,LEFTFRAME)
+impulseModelR = ImpulseModel6D(rmodel,RIGHTFRAME)
+impulseModel = ImpulseModelMultiple(rmodel,{ 'right': impulseModelR, 'left': impulseModelL })
 
-impulseModel2 = ImpulseModel6D(rmodel,RIGHTFRAME)
-impact2  = ActionModelImpact(rmodel,impulseModel2)
+impact1  = ActionModelImpact(rmodel,impulseModel)
+impact2  = ActionModelImpact(rmodel,impulseModel)
 
 
 # --- SOLVER
@@ -134,13 +135,17 @@ assert( norm(ddp.datas()[-1].differential.costs['pos'].residuals) < 1e-2 )
 assert( norm(ddp.datas()[-1].differential.costs['veleff'].residuals) < 5e-3 )
 
 # --- WITH IMPACT MODEL
-# Currently, the model is physically incorrect ... but numerically works.
-# We should have contacts in addition to impulse ... let's think about it.
+ddp0 = ddp
+
+for m in models1: m.differential.costs['pos'].weight = 10000
+for m in models2: m.differential.costs['pos'].weight = 10000
+
 problem = ShootingProblem(x, models1 + [impact1] + models2, impact2 )
 ddp = SolverDDP(problem)
 ddp.callback = SolverLogger(robot)
 ddp.th_stop = 1e-9
-ddp.solve(verbose=True,maxiter=1000,regInit=.1)
+ddp.solve(verbose=True,maxiter=1000,regInit=.1,
+          init_xs = ddp0.xs)
 
 # --- Contact velocity
 # cost = || v ||
