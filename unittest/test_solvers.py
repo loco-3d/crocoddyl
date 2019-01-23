@@ -1,164 +1,113 @@
+import unittest
+from crocoddyl import ActionModelLQR
+from crocoddyl import ShootingProblem
+from crocoddyl import SolverKKT
+from crocoddyl import ActionModelUnicycle, ActionModelUnicycleVar
 import numpy as np
 from numpy.linalg import norm, inv, pinv, eig
-xnew=[0,'debug only']
-np .random.seed     (220)
 
 
+class ShootingProblemTest(unittest.TestCase):
+    MODEL = ActionModelUnicycle()
+    def setUp(self):
+        # Creating the model data
+        self.model = self.MODEL
+        self.data = self.model.createData()
+
+        # Creating shooting problem
+        self.problem = ShootingProblem(self.model.State.zero(),
+                                       [ self.model,self.model ],
+                                       self.model)
+
+    def test_trajectory_dimension(self):
+        # Getting the trajectory dimension of the shooting problem
+        xs = [ m.State.zero() for m in self.problem.runningModels + [self.problem.terminalModel] ]
+        xs_dim = len(np.concatenate(xs[:-1]))
+        x_dim = sum([ m.nx for m in self.problem.runningModels])
+
+        # Checking the trajectory dimension
+        self.assertTrue(xs_dim == x_dim, "Trajectory dimension is wrong.")
+
+    def test_control_dimension(self):
+        # Getting the control dimension of the shooting problem
+        us = [ np.zeros(m.nu) for m in self.problem.runningModels ]
+        us_dim = len(np.concatenate(us))
+        u_dim = sum([ m.nu for m in self.problem.runningModels])
+
+        # Checking the control dimension
+        self.assertTrue(us_dim == u_dim, "Control dimension is wrong.")
+
+
+
+class SolverKKTTest(unittest.TestCase):
+    MODEL = ActionModelUnicycle()
+
+    def setUp(self):
+        # Creating the model
+        self.model = self.MODEL
+        self.data = self.model.createData()
+
+        # Defining the shooting problem
+        self.problem = ShootingProblem(self.model.State.zero(),
+                                       [ self.model, self.model ],
+                                       self.model)
+
+        # Creating the KKT solver
+        self.kkt = SolverKKT(self.problem)
+
+        # Setting up a warm-point
+        xs = [ m.State.zero() for m in self.problem.runningModels + [self.problem.terminalModel] ]
+        us = [ np.zeros(m.nu) for m in self.problem.runningModels ]
+        self.kkt.setCandidate(xs,us)
+
+    def test_dimension_of_kkt_problem(self):
+        # Compute the KKT matrix
+        self.kkt.calc()
+
+        # Getting the dimension of the KKT problem
+        nxu = len(filter(lambda x:x>0,eig(self.kkt.kkt)[0]))
+        nx = len(filter(lambda x:x<0,eig(self.kkt.kkt)[0]))
+
+        # Checking the dimension of the KKT problem
+        self.assertTrue(nxu==self.kkt.nx+self.kkt.nu, \
+            "Dimension of decision variables is wrong.")
+        self.assertTrue(nx==self.kkt.nx, "Dimension of state variables is wrong.")
+
+    def test_hessian_is_symmetric(self):
+        # Computing the KKT matrix
+        self.kkt.calc()
+
+        # Checking the symmetricity of the Hessian
+        self.assertTrue(np.linalg.norm(self.kkt.hess-self.kkt.hess.T) < 1e-9, \
+            "The Hessian isn't symmetric.")
+
+    def test_search_direction(self):
+        dxs,dus,ls = self.kkt.computeDirection()
+
+        # Checking that the first primal variable ensures initial constraint
+        self.assertTrue(np.linalg.norm(dxs[0]-self.problem.initialState)<1e-9, \
+            "Initial constraint isn't guaranteed.")
+        
+        # Checking that primal variables ensures dynamic constraint (or its
+        # linear approximation)
+        LQR = isinstance(self.model,ActionModelLQR)
+        h = 1 if LQR else 1e-6
+        for i,_ in enumerate(dus):
+            # Computing the next state
+            xnext = self.model.calc(self.data,dxs[i]*h,dus[i]*h)[0] / h
+
+            # Checking that the next primal variable is consistant with the
+            # dynamics
+            self.assertTrue(np.allclose(xnext, dxs, atol=10*h), \
+                "Primal variables doesn't ensure dynamic constraints.")
+
+
+
+# --- TEST KKT ---
 # ---------------------------------------------------
 # ---------------------------------------------------
 # ---------------------------------------------------
-from crocoddyl import StateVector
-from crocoddyl import ActionModelLQR  
-    
-
-
-# ---------------------------------------------------
-# ---------------------------------------------------
-# ---------------------------------------------------
-from crocoddyl import ActionModelUnicycle
-
-
-
-# ---------------------------------------------------
-# ---------------------------------------------------
-# ---------------------------------------------------
-from crocoddyl import StateUnicycle
-
-X = StateUnicycle()
-x1 = X.rand()
-x2 = X.rand()
-dx = X.diff(x1,x2)
-x  = X.integrate(x1,dx)
-assert(norm(x-x2)<1e-9)
-
-
-from crocoddyl import StateNumDiff
-
-x1 = X.zero()
-x1 = X.rand()
-x2 = X.zero()
-h = 1e-6
-dx = np.zeros(3); dx[1] = h
-J = X.Jdiff(x1,x2,'second')
-dd = (X.diff(x1,X.integrate(x2,dx)) - X.diff(x1,x2))/h
-
-Xnum = StateNumDiff(StateUnicycle())
-x1 = X.rand()
-x2 = X.rand()
-J1   ,J2    = X   .Jdiff(x1,x2)
-Jnum1,Jnum2 = Xnum.Jdiff(x1,x2)
-assert(norm(J1-Jnum1)<10*Xnum.disturbance)
-assert(norm(J2-Jnum2)<10*Xnum.disturbance)
-
-x  = X.rand()
-vx = np.random.rand(X.ndx)
-J1   ,J2    = X   .Jintegrate(x,vx)
-Jnum1,Jnum2 = Xnum.Jintegrate(x,vx)
-assert(norm(J1-Jnum1)<10*Xnum.disturbance)
-assert(norm(J2-Jnum2)<10*Xnum.disturbance)
-
-from crocoddyl import ActionModelUnicycleVar
-
-# ---------------------------------------------------
-# ---------------------------------------------------
-# ---------------------------------------------------
-
-from crocoddyl import ActionModelNumDiff
-            
-if __name__ == '__main__':
-    X=StateVector(3)
-    for i in range(100):
-        x1=X.rand(); x2=X.rand()
-        dx= X.diff(x1,x2)
-        assert( norm(X.integrate(x1,X.diff(x1,x2)) - x2 )<1e-6 )
-    
-    model = ActionModelUnicycle()
-    data = model.createData()
-    x = model.State.rand()
-    u = np.random.rand(model.nu)
-
-    #x[:] = [0,0,0]
-    #u[:] = [1,2]
-    model.calcDiff(data,x,u)
-    
-    mnum = ActionModelNumDiff(model,withGaussApprox=True)
-    dnum = mnum.createData()
-    mnum.calc(dnum,x,u)
-    mnum.calcDiff(dnum,x,u)
-    assert( norm(data.Fx-dnum.Fx) < 10*mnum.disturbance )
-    assert( norm(data.Fu-dnum.Fu) < 10*mnum.disturbance )
-    assert( norm(data.Lx-dnum.Lx) < 10*mnum.disturbance )
-    assert( norm(data.Lu-dnum.Lu) < 10*mnum.disturbance )
-    assert( norm(dnum.Lxx-data.Lxx) < 10*mnum.disturbance )
-    assert( norm(dnum.Lxu-data.Lxu) < 10*mnum.disturbance )
-    assert( norm(dnum.Luu-data.Luu) < 10*mnum.disturbance )
-
-
-if __name__ == '__main__':
-    # Numdiff unittest of unicycle manifold
-    model = ActionModelUnicycleVar()
-    data = model.createData()
-    X = model.State
-
-    x0 = model.State.rand()
-    u0 = np.random.rand(model.nu)
-    x1 = model.calc(data,x0,u0)[0]
-
-    x1bis = X.m2x(np.dot(X.x2m(x0),X.dx2m([u0[0]*model.dt,0,u0[1]*model.dt])))
-    assert(norm(x1bis-x1)<1e-9)
-
-    model3 = ActionModelUnicycle()
-    data3 = model3.createData()
-
-    x = X.rand()
-    u = np.random.rand(model.nu)
-    x3 = X.diff(X.zero(),x)
-
-    xnext ,cost  = model .calc(data ,x ,u)
-    xnext3,cost3 = model3.calc(data3,x3,u)
-    assert( norm( X.integrate(X.zero(),xnext3) - xnext) <1e-9)
-    assert( abs(cost-cost3) <1e-9)
-
-    model.calcDiff(data,x0,u0)
-
-    mnum = ActionModelNumDiff(model,withGaussApprox=True)
-    dnum = mnum.createData()
-
-    model.calcDiff(data,x,u)
-    mnum .calcDiff(dnum,x,u)
-
-    dx = np.array([u[0],0,u[1]])
-
-    def diff(m,d,x,u): m.calcDiff(d,x,u); return d.Fu
-    da = lambda x,v,w: diff(model,data,x,np.array([v,w]))
-    dn = lambda x,v,w: diff(mnum, dnum,x,np.array([v,w]))
-    
-    for k in ['Ru', 'Lxu', 'Fu', 'Fx', 'Rx', 'L', 'Lxx', 'Lux', 'Lu', 'Lx', 'Luu']:
-        assert( norm( data.__dict__[k] - dnum.__dict__[k] ) < mnum.disturbance*10 )
-
-# ---------------------------------------------------
-# ---------------------------------------------------
-# ---------------------------------------------------
-
-from crocoddyl import ShootingProblem
-
-from crocoddyl import SolverKKT        
-                
-# ---------------------------------------------------
-# --- TEST ------------------------------------------
-# ---------------------------------------------------
-
-NX = 1
-NU = 1
-X = StateVector(NX)
-assert(X.zero().shape == (NX,))
-assert(X.rand().shape == (NX,))
-
-x1 = X.rand()
-x2 = X.rand()
-assert( np.linalg.norm(x2-X.integrate( x1,X.diff(x1,x2) )) < 1e-9 )
-
-# ---------------------------------------------------
+NX = 1; NU = 1
 model = ActionModelUnicycle()
 #model = ActionModelLQR(NX,NU); model.setUpRandom()
 data  = model.createData()
@@ -167,36 +116,20 @@ LQR = isinstance(model,ActionModelLQR)
 x = model.State.rand()
 u = np.zeros([model.nu])
 
-# Check dimensions of calc and calcdiff
-assert( model.calc(data,x,u)[0].shape == (model.nx,) )
-assert( isinstance(model.calc(data,x,u)[1],float) )
-assert( model.calcDiff(data,x,u)[0].shape == (model.nx,) )
 
-# Check dimension of KKT.
-problem = ShootingProblem(model.State.zero()+1, [ model, model ], model)
+problem = ShootingProblem(model.State.zero(), [ model, model ], model)
 kkt = SolverKKT(problem)
 xs = [ m.State.zero()       for m in problem.runningModels + [problem.terminalModel] ]
 us = [ np.zeros(m.nu)       for m in problem.runningModels ]
-assert(len(np.concatenate(xs[:-1])) == sum([ m.nx for m in problem.runningModels]) )
-assert(len(np.concatenate(us))      == sum([ m.nu for m in problem.runningModels]) )
 
 # Test dimensions of KKT calc.
 kkt.setCandidate(xs,us)
-kkt.calc()
-assert( np.linalg.norm(kkt.hess-kkt.hess.T)<1e-9)
-assert(len(filter(lambda x:x>0,eig(kkt.kkt)[0]))==kkt.nx+kkt.nu)
-assert(len(filter(lambda x:x<0,eig(kkt.kkt)[0]))==kkt.nx)
 
 # Test that the solution respect the dynamics (or linear approx of it).
 dxs,dus,ls = kkt.computeDirection()
 x0,x1,x2 = dxs
 u0,u1 = dus
 l0,l1,l2 = ls
-assert(np.linalg.norm(dxs[0]-problem.initialState)<1e-9 )
-if LQR: assert(np.linalg.norm(model.calc(data,x0,u0)[0]-x1)<1e-9)
-for i,_ in enumerate(dus):
-    h = 1 if LQR else 1e-6
-    assert(np.linalg.norm(model.calc(data,dxs[i]*h,dus[i]*h)[0]/h-dxs[i+1])<10*h)
 
 # If LQR. test that a random solution respect the dynamics
 xs = [ m.State.rand()       for m in problem.runningModels + [problem.terminalModel] ]
@@ -273,13 +206,14 @@ if WITH_PLOT:
     plt.show()
 
 
-# ---------------------------------------------------
-# ---------------------------------------------------
-# ---------------------------------------------------
 
-from crocoddyl import SolverDDP
             
 # --- TEST DDP ---
+# ---------------------------------------------------
+# ---------------------------------------------------
+# ---------------------------------------------------
+from crocoddyl import SolverDDP
+
 model = ActionModelLQR(1,1); model.setUpRandom()
 #model = ActionModelUnicycle()
 nx,nu = model.nx,model.nu
@@ -347,7 +281,11 @@ l1xx = v1xx
 
 
 
+
 # --- TEST DDP vs KKT LQR ---
+# ---------------------------------------------------
+# ---------------------------------------------------
+# ---------------------------------------------------
 np .random.seed     (220)
 model = ActionModelLQR(3,3); model.setUpRandom();
 #model = ActionModelUnicycle()
@@ -487,7 +425,6 @@ for t in range(T):
     assert(norm(ulin[t]-ukkt[t])<1e-9)
     assert(norm(xlin[t+1]-xkkt[t+1])<1e-9)
 
-
 # --- DDP NLP solver ---
 
 np .random.seed     (220)
@@ -567,6 +504,7 @@ x3TOx = lambda x3: model.State.integrate(model.State.zero(),x3)
 xs = problem.rollout(us)
 
 model3 = ActionModelUnicycle()
+X = model3.State
 data3  = model3.createData()
 
 x0ref3 = xTOx3(x0ref)
@@ -770,3 +708,8 @@ for t in range(T):
     assert(norm( dxs_d[t+1]-dxs_k[t+1] ) <1e-9 )
 
 # --- REG INTEGRATIVE TEST ---
+
+
+
+if __name__ == '__main__':
+    unittest.main()

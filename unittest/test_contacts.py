@@ -1,9 +1,11 @@
-import rospkg
+from crocoddyl import m2a, a2m, absmax, absmin
 import pinocchio
 from pinocchio.utils import *
 from numpy.linalg import inv,pinv,norm,svd,eig
-from crocoddyl import DifferentialActionModel, IntegratedActionModelEuler, DifferentialActionModelNumDiff,StatePinocchio,CostModelSum,CostModelPinocchio,CostModelPosition,CostModelState,CostModelControl
-from crocoddyl import m2a, a2m, absmax, absmin
+
+
+## Loading Talos arm with FF TODO use a bided or quadruped
+# -----------------------------------------------------------------------------
 from robots import loadTalosArm
 
 robot = loadTalosArm(freeFloating=True)
@@ -18,62 +20,7 @@ rmodel = robot.model
 rdata = rmodel.createData()
 
 
-# ---- FLOATING MODEL
-# Actuation model is maybe better named transmission model.
-# It would be good to write a trivial ActuationModelFull for fully actuated robot, with tau=u.
-from crocoddyl import ActuationDataFreeFloating, ActuationModelFreeFloating      
-actModel = ActuationModelFreeFloating(rmodel)
-actData  = actModel.createData(rdata)
 
-q = pinocchio.randomConfiguration(rmodel)
-v = rand(rmodel.nv)
-x = m2a(np.concatenate([q,v]))
-u = m2a(rand(rmodel.nv-6))
-
-actModel.calcDiff(actData,x,u)
-
-
-# --- Fully actuated (trivial) actuation
-from crocoddyl import ActuationDataFull, ActuationModelFull
-
-actModel = ActuationModelFull(rmodel)
-actData  = actModel.createData(rdata)
-
-#u = m2a(rand(rmodel.nv))
-#actModel.calcDiff(actData,x,u)
-
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
-
-
-from crocoddyl import DifferentialActionDataActuated, DifferentialActionModelActuated
-
-
-   
-actModel = ActuationModelFreeFloating(rmodel)
-model = DifferentialActionModelActuated(rmodel,actModel)
-data  = model.createData()
-
-q = pinocchio.randomConfiguration(rmodel)
-v = rand(rmodel.nv)
-x = m2a(np.concatenate([q,v]))
-u = m2a(rand(rmodel.nv-6))
-model.calcDiff(data,x,u)
-
-mnum = DifferentialActionModelNumDiff(model)
-dnum = mnum.createData()
-mnum.calcDiff(dnum,x,u)
-
-assert(absmax(data.Fx-dnum.Fx)/model.nx < 1e-3 )
-assert(absmax(data.Fu-dnum.Fu)/model.nu < 1e-3 )
-
-
-
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
-from crocoddyl import ContactDataPinocchio, ContactModelPinocchio
-        
 # -----------------------------------------------------------------------------
 from crocoddyl import ContactData6D, ContactModel6D
         
@@ -97,6 +44,8 @@ contactData2  = contactModel.createData(rdata2)
 contactModel.calc(contactData2,x)
 assert(norm(contactData.a0-contactData2.a0)<1e-9)
 assert(norm(contactData.J -contactData2.J )<1e-9)
+
+
 
 # ----------------------------------------------------------------------------
 from crocoddyl import ContactData3D, ContactModel3D
@@ -123,30 +72,17 @@ contactModel.calc(contactData2,x)
 assert(norm(contactData.a0-contactData2.a0)<1e-9)
 assert(norm(contactData.J -contactData2.J )<1e-9)
 
+
+
 #---------------------------------------------------------------------
-
-
 # Many contact model
-from crocoddyl import ContactDataMultiple, ContactModelMultiple
-       
-contactModel = ContactModelMultiple(rmodel)
-contactModel.addContact('1',ContactModel6D(rmodel,rmodel.getFrameId('gripper_left_fingertip_2_link'),ref=None))
+from crocoddyl import CostModelSum
+from crocoddyl import ContactModelMultiple
+from crocoddyl import DifferentialActionModelFloatingInContact
+from crocoddyl import DifferentialActionModelNumDiff
+from crocoddyl import ActuationModelFreeFloating
 
-contactData = contactModel.createData(rdata)
 
-q = pinocchio.randomConfiguration(rmodel)
-v = rand(rmodel.nv)*2-1
-x = np.concatenate([ m2a(q),m2a(v) ])
-contactModel.calc(contactData,x)
-contactModel.calcDiff(contactData,x)
-
-# ----------------------------------------------------------------------------
-# ----------------------------------------------------------------------------
-# ----------------------------------------------------------------------------
-
-from crocoddyl import DifferentialActionDataFloatingInContact, DifferentialActionModelFloatingInContact
-
-#-------------------------------------------------------------
 
 q = pinocchio.randomConfiguration(rmodel)
 v = rand(rmodel.nv)*2-1
@@ -187,7 +123,7 @@ mnum.calcDiff(dnum,x,u)
 assert(absmax(data.Fx-dnum.Fx)/model.nx<1e-3)
 assert(absmax(data.Fu-dnum.Fu)/model.nu<1e-3)
 
-        
+
 #------------------------------------------------
 q = pinocchio.randomConfiguration(rmodel)
 v = rand(rmodel.nv)*2-1
@@ -219,8 +155,9 @@ mnum.calcDiff(dnum,x,u)
 assert(absmax(data.Fx-dnum.Fx)/model.nx<1e-3)
 assert(absmax(data.Fu-dnum.Fu)/model.nu<1e-3)
 
-#----------------------------------------------------------
 
+
+#----------------------------------------------------------
 ### Check force derivatives
 def df_dq(model,func,q,h=1e-9):
     dq = zero(model.nv)
@@ -263,6 +200,7 @@ assert( absmax(Fq-data.df_dq) < 1e-3 )
 assert( absmax(Fv-data.df_dv) < 1e-3 )
 assert( absmax(Fu-data.df_du) < 1e-3 )
 
+
 # -------------------------------------------------------------------------------
 # Cost force model
 from crocoddyl import CostDataForce6D, CostModelForce6D
@@ -291,10 +229,17 @@ mnum.calcDiff(dnum,x,u)
 assert(absmax(data.Fx-dnum.Fx)/model.nx<1e-3)
 assert(absmax(data.Fu-dnum.Fu)/model.nu<1e-3)
 
+
+
+
+# TODO Check if we need this unit-test here. Note that is an ction test
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
 # --- COMPLETE MODEL WITH COST ----
+from crocoddyl import StatePinocchio
+from crocoddyl import CostModelPosition, CostModelState, CostModelControl
+from crocoddyl import IntegratedActionModelEuler
 State = StatePinocchio(rmodel)
 
 actModel = ActuationModelFreeFloating(rmodel)
@@ -338,6 +283,14 @@ assert( norm(dnum.Lxu-data.Lxu) < 1e-3)
 assert( norm(dnum.Luu-data.Luu) < 1e-3)
 
 
+
+
+
+
+
+
+
+# TODO move to an integrative test
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
