@@ -3,8 +3,8 @@ import sys
 
 testmodules = [
   'test_state',
-  'test_models',
   'test_costs',
+  'test_models',
   'test_solvers',
 #  'cost',
   # 'soft_constraint',
