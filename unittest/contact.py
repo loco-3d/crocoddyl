@@ -65,9 +65,6 @@ mnum = DifferentialActionModelNumDiff(model)
 dnum = mnum.createData()
 mnum.calcDiff(dnum,x,u)
 
-assert(absmax(data.Fx-dnum.Fx)/model.nx < 1e-3 )
-assert(absmax(data.Fu-dnum.Fu)/model.nu < 1e-3 )
-
 
 
 # -----------------------------------------------------------------------------
