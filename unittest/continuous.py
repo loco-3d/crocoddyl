@@ -91,8 +91,6 @@ Jx,Jdx = X.Jintegrate(x0,dx)
 dX_dDX = Jdx
 dDX_dX = J2_num
 # dX_dDX*eps =?= diff(X(dx),X(dx+eps))
-assert(norm(np.dot(dX_dDX,eps)-X.diff(fX(dx),fX(dx+eps*h))/h)<1e-3)
-assert(norm(np.dot(dDX_dX,eps)-(-fDX(x)+fDX(X.integrate(x,eps*h)))/h)<1e-3)
 
 del(dx)
 x1 = X.rand()

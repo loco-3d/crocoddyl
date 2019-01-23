@@ -92,7 +92,33 @@ class StateTestCase(unittest.TestCase):
         self.assertTrue(np.allclose(dX_dDX, np.linalg.inv(dDX_dX), atol=1e-9), \
             "Jdiff and Jintegrate aren't inverses.")
 
+    def test_velocity_from_Jintegrate_Jdiff(self):
+        # Generating random states
+        x1 = self.STATE.rand()
+        dx = np.random.rand(self.STATE.ndx)
+        x2 = self.STATE.integrate(x1,dx)
+        eps = np.random.rand(self.STATE.ndx)
+        h = 1e-12
 
+        # Computing the partial derivatives of the integrate and difference function
+        Jx,Jdx = self.STATE.Jintegrate(x1,dx)
+        J1,J2 = self.STATE.Jdiff(x1,x2)
+
+        # Checking that computed velocity from Jintegrate
+        dX_dDX = Jdx
+        dDX_dX = J2
+        x2eps = self.STATE.integrate(x1,dx+eps*h)
+        from numpy.linalg import norm
+        self.assertTrue(np.allclose(np.dot(dX_dDX,eps), self.STATE.diff(x2,x2eps)/h, atol=1e-3), \
+            "Velocity computed from Jintegrate is wrong.")
+
+        # Checking the velocity computed from Jdiff
+        x = self.STATE.rand()
+        dx = self.STATE.diff(x1,x)
+        x2i = self.STATE.integrate(x,eps*h)
+        dxi = self.STATE.diff(x1,x2i)
+        self.assertTrue(np.allclose(np.dot(dDX_dX,eps), (-dx+dxi)/h, atol=1e-3), \
+            "Velocity computed from Jdiff is wrong.")
 
 class StateVectorTest(StateTestCase):
     StateTestCase.NX = randint(1,101)
