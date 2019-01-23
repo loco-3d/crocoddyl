@@ -13,6 +13,9 @@ class StateTestCase(unittest.TestCase):
     STATE = None
     STATE_NUMDIFF = None
 
+    def setUp(self):
+        self.STATE_NUMDIFF = StateNumDiff(self.STATE)
+
     def test_state_dimension(self):
         # Checking the dimension of zero and random states
         self.assertEqual(self.STATE.zero().shape, (self.NX,), \
@@ -123,12 +126,10 @@ class StateTestCase(unittest.TestCase):
 class StateVectorTest(StateTestCase):
     StateTestCase.NX = randint(1,101)
     StateTestCase.STATE = StateVector(StateTestCase.NX)
-    StateTestCase.STATE_NUMDIFF = StateNumDiff(StateTestCase.STATE)
 
 class StateUnicycleTest(StateTestCase):
     StateTestCase.NX = 3
     StateTestCase.STATE = StateUnicycle()
-    StateTestCase.STATE_NUMDIFF = StateNumDiff(StateTestCase.STATE)
 
 class StatePinocchioTest(StateTestCase):
     # Loading Talos arm
@@ -137,7 +138,7 @@ class StatePinocchioTest(StateTestCase):
 
     StateTestCase.NX = model.nq + model.nv
     StateTestCase.STATE = StatePinocchio(model)
-    StateTestCase.STATE_NUMDIFF = StateNumDiff(StateTestCase.STATE)
+
 
 
 if __name__ == '__main__':
