@@ -1,64 +1,7 @@
 import unittest
-from crocoddyl import StateUnicycle
 from crocoddyl import ActionModelUnicycle, ActionModelUnicycleVar
 from crocoddyl import StateNumDiff, ActionModelNumDiff
 import numpy as np
-
-
-
-class StateUnicycleTest(unittest.TestCase):
-    def setUp(self):
-        # Creating Unicyle state and its NumDiff version
-        self.X = StateUnicycle()
-        self.Xnum = StateNumDiff(StateUnicycle())
-
-    def test_integrate_against_difference(self):
-        # Generating random values for the initial and terminal states
-        x1 = self.X.rand()
-        x2 = self.X.rand()
-
-        # First, finding the tangent vector between the initial and terminal
-        # states. Then, computing the terminal value by integrating along the 
-        # tangent state
-        dx = self.X.diff(x1,x2)
-        x2i = self.X.integrate(x1,dx)
-
-        # Checking that both terminal states agree
-        self.assertTrue(np.allclose(x2i,x2), \
-            "The integrate or difference function is wrong.")
-
-    def test_Jdiff_against_numdiff(self):
-        # Generating random values for the initial and terminal states
-        x1 = self.X.rand()
-        x2 = self.X.rand()
-
-        # Computing the partial derivatives of the difference function
-        J1,J2 = self.X.Jdiff(x1,x2)
-        Jnum1,Jnum2 = self.Xnum.Jdiff(x1,x2)
-
-        # Checking the partial derivatives against NumDiff
-        tol = 10*self.Xnum.disturbance
-        self.assertTrue(np.allclose(J1,Jnum1, atol=tol), \
-            "The partial derivatives of difference function with respect to first argument is wrong.")
-        self.assertTrue(np.allclose(J2,Jnum2, atol=tol), \
-            "The partial derivatives of difference function with respect to second argument is wrong.")
-
-    def test_Jintegrate_against_numdiff(self):
-        # Generating random values for the initial state and its rate of change
-        x = self.X.rand()
-        vx = np.random.rand(self.X.ndx)
-
-        # Computing the partial derivatives of the integrate function
-        J1,J2 = self.X.Jintegrate(x,vx)
-        Jnum1,Jnum2 = self.Xnum.Jintegrate(x,vx)
-
-        # Checking the partial derivatives against NumDiff
-        tol = 10*self.Xnum.disturbance
-        self.assertTrue(np.allclose(J1,Jnum1, atol=tol), \
-            "The partial derivatives of integrate function with respect to first argument is wrong.")
-        self.assertTrue(np.allclose(J2,Jnum2, atol=tol), \
-            "The partial derivatives of integrate function with respect to second argument is wrong.")
-
 
 
 class ActionUnicycleTest(unittest.TestCase):
