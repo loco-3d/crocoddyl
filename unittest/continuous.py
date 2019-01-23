@@ -77,8 +77,6 @@ fX = lambda _dx: X.integrate(x0,_dx)
 fDX = lambda _x: X.diff(x0,_x)
 x = X.rand()
 dx = np.random.rand(X.ndx)*2-1
-assert(norm(X.diff(fX(fDX(x)),x))<1e-9) 
-assert(norm(fDX(fX(dx))-dx)<1e-9)
 
 # Validate that Jdiff and Jintegrate are inverses.
 #x = X.rand()
@@ -86,7 +84,6 @@ assert(norm(fDX(fX(dx))-dx)<1e-9)
 #assert(norm(x-X.integrate(x0,dx))<1e-9 or abs(norm(x-X.integrate(x0,dx))-2)<1e-9)
 dx = np.random.rand(X.ndx)*2-1
 x = X.integrate(x0,dx)
-assert(norm( dx-X.diff(x0,x) )<1e-9)
 eps = np.random.rand(X.ndx)
 eps*=0; eps[0]=1
 J1_num,J2_num = Xnum.Jdiff(x0,x)
@@ -106,8 +103,6 @@ x2 = X.rand()
 
 J1,J2 = X.Jdiff(x1,x2)
 J1_num,J2_num = Xnum.Jdiff(x1,x2)
-assert(norm(J2 -J2_num )<1e-2)
-assert(norm(J1 -J1_num )<1e-2)
 
 
 # --------------------------------------------------------------
