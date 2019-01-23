@@ -80,16 +80,6 @@ models2 = [ createModel(timeStep=timeStep,
 termmodel2 = createTermModel(timeStep=timeStep,footRef = [ .2, -FOOTGAP, 0.0 ],
                              contactName = leftFrame,opPointName = rightFrame)
 
-from crocoddyl.impact import ActionModelImpact,ImpulseModel6D
-
-impulseModelL = ImpulseModel6D(rmodel,LEFTFRAME)
-impulseModelR = ImpulseModel6D(rmodel,RIGHTFRAME)
-impulseModel = ImpulseModelMultiple(rmodel,{ 'right': impulseModelR, 'left': impulseModelL })
-
-impact1  = ActionModelImpact(rmodel,impulseModel)
-impact2  = ActionModelImpact(rmodel,impulseModel)
-
-
 # --- SOLVER
 
 '''
@@ -134,19 +124,4 @@ assert( norm(ddp.datas()[T].differential.costs['veleff'].residuals) < 5e-3 )
 assert( norm(ddp.datas()[-1].differential.costs['pos'].residuals) < 1e-2 )
 assert( norm(ddp.datas()[-1].differential.costs['veleff'].residuals) < 5e-3 )
 
-# --- WITH IMPACT MODEL
-ddp0 = ddp
-
-for m in models1: m.differential.costs['pos'].weight = 10000
-for m in models2: m.differential.costs['pos'].weight = 10000
-
-problem = ShootingProblem(x, models1 + [impact1] + models2, impact2 )
-ddp = SolverDDP(problem)
-ddp.callback = SolverLogger(robot)
-ddp.th_stop = 1e-9
-ddp.solve(verbose=True,maxiter=1000,regInit=.1,
-          init_xs = ddp0.xs)
-
-# --- Contact velocity
-# cost = || v ||
 
