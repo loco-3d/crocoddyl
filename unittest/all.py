@@ -6,13 +6,9 @@ testmodules = [
   'test_costs',
   # 'test_dynamics', TODO first create dynamics abstraction
   'test_actuation',
+  'test_contacts',
   'test_actions',
   'test_solvers',
-#  'cost',
-  # 'soft_constraint',
-#  'dynamics',
-#  'integrator',
-#  'ddp',
 ]
 
 suite = unittest.TestSuite()
