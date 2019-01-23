@@ -4,35 +4,36 @@ from crocoddyl import StateNumDiff, ActionModelNumDiff
 import numpy as np
 
 
-class ActionUnicycleTest(unittest.TestCase):
-    MODEL = ActionModelUnicycle()
+
+class ActionTestCase(unittest.TestCase):
+    MODEL = None
+    MODEL_NUMDIFF = None
 
     def setUp(self):
-        # Creating Unicycle action model
-        self.model = self.MODEL
-        self.mnum = ActionModelNumDiff(self.model, withGaussApprox=True)
+        # Creating Unicycle action model with NumDiff
+        self.MODEL_NUMDIFF = ActionModelNumDiff(self.MODEL, withGaussApprox=True)
 
         # Creating the Unicycle data
-        self.data = self.model.createData()
-        self.dnum = self.mnum.createData()
+        self.DATA = self.MODEL.createData()
+        self.DATA_NUMDIFF = self.MODEL_NUMDIFF.createData()
 
     def test_calc_retunrs_state(self):
         # Generating random state and control vectors
-        x = self.model.State.rand()
-        u = np.random.rand(self.model.nu)
+        x = self.MODEL.State.rand()
+        u = np.random.rand(self.MODEL.nu)
 
         # Getting the state dimension from calc() call
-        nx = self.model.calc(self.data, x, u)[0].shape
+        nx = self.MODEL.calc(self.DATA, x, u)[0].shape
 
         # Checking the dimension for the state and its tangent
-        self.assertEqual(nx, (self.model.nx,), \
+        self.assertEqual(nx, (self.MODEL.nx,), \
             "Dimension of state vector is wrong.")
 
     def test_calc_returns_a_cost(self):
         # Getting the cost value computed by calc()
-        x = self.model.State.rand()
-        u = np.random.rand(self.model.nu)
-        cost = self.model.calc(self.data, x, u)[1]
+        x = self.MODEL.State.rand()
+        u = np.random.rand(self.MODEL.nu)
+        cost = self.MODEL.calc(self.DATA, x, u)[1]
 
         # Checking that calc returns a cost value
         self.assertTrue(isinstance(cost,float), \
@@ -40,48 +41,50 @@ class ActionUnicycleTest(unittest.TestCase):
 
     def test_partial_derivatives_against_numdiff(self):
         # Generating random values for the state and control
-        x = self.model.State.rand()
-        u = np.random.rand(self.model.nu)
+        x = self.MODEL.State.rand()
+        u = np.random.rand(self.MODEL.nu)
 
         # Computing the action derivatives
-        self.model.calcDiff(self.data,x,u)
-        self.mnum.calcDiff(self.dnum,x,u)
+        self.MODEL.calcDiff(self.DATA,x,u)
+        self.MODEL_NUMDIFF.calcDiff(self.DATA_NUMDIFF,x,u)
 
         # Checking the partial derivatives against NumDiff
-        tol = 10*self.mnum.disturbance
-        self.assertTrue(np.allclose(self.data.Fx,self.dnum.Fx, atol=tol), \
+        tol = 10*self.MODEL_NUMDIFF.disturbance
+        self.assertTrue(np.allclose(self.DATA.Fx,self.DATA_NUMDIFF.Fx, atol=tol), \
             "Fx is wrong.")
-        self.assertTrue(np.allclose(self.data.Fu,self.dnum.Fu, atol=tol), \
+        self.assertTrue(np.allclose(self.DATA.Fu,self.DATA_NUMDIFF.Fu, atol=tol), \
             "Fu is wrong.")
-        self.assertTrue(np.allclose(self.data.Lx,self.dnum.Lx, atol=tol), \
+        self.assertTrue(np.allclose(self.DATA.Lx,self.DATA_NUMDIFF.Lx, atol=tol), \
             "Fx is wrong.")
-        self.assertTrue(np.allclose(self.data.Lu,self.dnum.Lu, atol=tol), \
+        self.assertTrue(np.allclose(self.DATA.Lu,self.DATA_NUMDIFF.Lu, atol=tol), \
             "Fx is wrong.")
-        self.assertTrue(np.allclose(self.data.Lxx,self.dnum.Lxx, atol=tol), \
+        self.assertTrue(np.allclose(self.DATA.Lxx,self.DATA_NUMDIFF.Lxx, atol=tol), \
             "Fx is wrong.")
-        self.assertTrue(np.allclose(self.data.Lxu,self.dnum.Lxu, atol=tol), \
+        self.assertTrue(np.allclose(self.DATA.Lxu,self.DATA_NUMDIFF.Lxu, atol=tol), \
             "Fx is wrong.")
-        self.assertTrue(np.allclose(self.data.Luu,self.dnum.Luu, atol=tol), \
+        self.assertTrue(np.allclose(self.DATA.Luu,self.DATA_NUMDIFF.Luu, atol=tol), \
             "Fx is wrong.")
 
 
+class ActionUnicycleTest(ActionTestCase):
+    ActionTestCase.MODEL = ActionModelUnicycle()
 
 class ActionUnicycleVarTest(ActionUnicycleTest):
-    MODEL = ActionModelUnicycleVar()
+    ActionTestCase.MODEL = ActionModelUnicycleVar()
 
     def test_rollout_against_unicycle(self):
         # Creating the Unycicle action model
-        X = self.model.State
+        X = self.MODEL.State
         model0 = ActionModelUnicycle()
         data0 = model0.createData()
 
         # Generating random values for the state and control vectors
         x = X.rand()
         x0 = X.diff(X.zero(),x)
-        u = np.random.rand(self.model.nu)
+        u = np.random.rand(self.MODEL.nu)
 
         # Making the rollout
-        xnext,cost = self.model.calc(self.data,x,u)
+        xnext,cost = self.MODEL.calc(self.DATA,x,u)
         xnext0,cost0 = model0.calc(data0,x0,u)
 
         # Checking the rollout (next state) and cost values
