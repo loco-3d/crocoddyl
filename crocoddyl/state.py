@@ -33,6 +33,24 @@ class StateVector:
         set dx = v dt .
         '''
         return x1 + dx
+    def Jdiff(self,x1,x2,firstsecond='both'):
+        assert(firstsecond in ['first', 'second', 'both' ])
+        if firstsecond == 'both': return [ self.Jdiff(x1,x2,'first'),
+                                           self.Jdiff(x1,x2,'second') ]
+
+        J = np.zeros([self.ndx,self.ndx])
+        if firstsecond=='first':
+            J[:,:] = -np.eye(self.ndx)
+        elif firstsecond=='second':
+            J[:,:] = np.eye(self.ndx)
+        return J
+    def Jintegrate(self,x,vx,firstsecond='both'):
+        assert(firstsecond in ['first', 'second', 'both' ])
+        if firstsecond == 'both': return [ self.Jintegrate(x,vx,'first'),
+                                           self.Jintegrate(x,vx,'second') ]
+        return np.eye(self.ndx)
+
+
 
 class StateNumDiff:
     '''
