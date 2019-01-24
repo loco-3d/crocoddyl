@@ -32,7 +32,9 @@ from impact import ActionDataImpact, ActionModelImpact
 from unicycle import ActionDataUnicycle, ActionModelUnicycle
 from unicycle import StateUnicycle, ActionDataUnicycleVar, ActionModelUnicycleVar
 from shooting import ShootingProblem
-from solver import SolverAbstract
+from logger import SolverLogger
 from ddp import SolverDDP
 from kkt import SolverKKT
+from robots import getTalosPathFromRos, loadTalosArm, loadTalos, loadTalosLegs
 from utils import m2a, a2m, absmax, absmin
+from diagnostic import plotDDPConvergence, plotOCSolution

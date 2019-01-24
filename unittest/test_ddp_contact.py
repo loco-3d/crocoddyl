@@ -12,7 +12,7 @@ a2m = lambda a: np.matrix(a).T
 absmax = lambda A: np.max(abs(A))
 absmin = lambda A: np.min(abs(A))
 
-from robots import loadTalosArm
+from crocoddyl import loadTalosArm
 opPointName = 'gripper_left_fingertip_2_link'
 contactName = 'root_joint'
 

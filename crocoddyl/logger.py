@@ -31,8 +31,8 @@ class SolverLogger:
         self.xs = []
         self.us = []
     def __call__(self,solver):
-        self.xs.append(copy.copy(solver.xs))
-        self.us.append(solver.us)
+        self.xs = copy.copy(solver.xs)
+        self.us = copy.copy(solver.us)
         self.steps.append( solver.stepLength )
         self.iters.append( solver.iter )
         self.costs.append( [ d.cost for d in solver.datas() ] )

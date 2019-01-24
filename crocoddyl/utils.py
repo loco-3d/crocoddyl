@@ -9,7 +9,14 @@ def raiseIfNan(A,error=None):
     if np.any(np.isnan(A)) or np.any(np.isinf(A)) or np.any(abs(np.asarray(A))>1e30):
         raise error
 
-m2a = lambda m: np.array(m.flat)
-a2m = lambda a: np.matrix(a).T
-absmax = lambda A: np.max(abs(A))
-absmin = lambda A: np.min(abs(A))
+
+def m2a(m): return np.array(m.flat)
+
+
+def a2m(a): return np.matrix(a).T
+
+
+def absmax(A): return np.max(abs(A))
+
+
+def absmin(A): return np.min(abs(A))
