@@ -63,20 +63,3 @@ class SolverAbstract:
         Return the optimum xopt,uopt as lists of T+1 and T terms, and a boolean
         describing the success.
         '''
-
-
-import copy
-class SolverLogger:
-    def __init__(self):
-        self.steps = []
-        self.iters = []
-        self.costs = []
-        self.regularizations = []
-        self.xs = []
-        self.us = []
-    def __call__(self,solver):
-        self.xs.append(copy.copy(solver.xs))
-        self.steps.append( solver.stepLength )
-        self.iters.append( solver.iter )
-        self.costs.append( [ d.cost for d in solver.datas() ] )
-        self.regularizations.append( solver.x_reg )
