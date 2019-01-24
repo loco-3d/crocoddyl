@@ -102,6 +102,7 @@ class SolverDDP:
                 if verbose: print ('Backward pass failed')
                 self.increaseRegularization()
             d1,d2 = self.expectedImprovement()
+            self.gamma = -d2
 
             for a in self.alphas:
                 try:
@@ -126,9 +127,9 @@ class SolverDDP:
             elif verbose: print( 'Accept iter=%d, a=%f, cost=%.8f'
                                % (i,a,self.problem.calc(self.xs,self.us)))
             self.stepLength = a; self.iter = i
-            if self.callback is not None: self.callback(self)
-            
             self.stop = sum(self.stoppingCriteria())
+            if self.callback is not None: self.callback(self)
+
             if self.stop<self.th_stop:
                 return self.xs,self.us,True
             # if d1<self.th_grad:

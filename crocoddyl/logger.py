@@ -26,7 +26,10 @@ class SolverLogger:
         self.steps = []
         self.iters = []
         self.costs = []
-        self.regularizations = []
+        self.control_regs = []
+        self.state_regs = []
+        self.th_stops = []
+        self.gm_stops = []
         self.robotwrapper = robotwrapper
         self.xs = []
         self.us = []
@@ -35,7 +38,10 @@ class SolverLogger:
         self.us = copy.copy(solver.us)
         self.steps.append( solver.stepLength )
         self.iters.append( solver.iter )
-        self.costs.append( [ d.cost for d in solver.datas() ] )
-        self.regularizations.append( solver.x_reg )
+        self.costs.append(copy.copy([ d.cost for d in solver.datas() ]))
+        self.control_regs.append( solver.u_reg )
+        self.state_regs.append( solver.x_reg )
+        self.th_stops.append(solver.stop)
+        self.gm_stops.append(solver.gamma)
         if self.robotwrapper is not None:
             disptraj(self.robotwrapper,solver.xs,dt=1e-3,N=3)
