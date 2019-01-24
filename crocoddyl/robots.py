@@ -86,13 +86,3 @@ def loadTalosLegs(modelPath='/opt/openrobots/share'):
     assert((m2.armature[:6]==0.).all())
     robot.q0 = m2.neutralConfiguration.copy()
     return robot
-
-if __name__ == "__main__":
-    print("*** TALOS ARM ***")
-    print(loadTalosArm().model)
-    print("*** TALOS ARM floating ***")
-    print(loadTalosArm(freeFloating=True).model)
-    print("*** TALOS (floating) ***")
-    print(loadTalos().model)
-    print("*** TALOS LEGS (floating) ***")
-    print(loadTalosLegs().model)
