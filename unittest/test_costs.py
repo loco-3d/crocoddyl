@@ -169,7 +169,69 @@ costModelND.calcDiff(costDataND,x,u)
 assert( absmax(costData.g-costDataND.g) < 1e-3 )
 assert( absmax(costData.L-costDataND.L) < 1e-3 )
 
+# --------------------------------------------------------------
+from crocoddyl import CostModelSoftStateLimits, CostDataSoftStateLimits
 
+X = StatePinocchio(rmodel)
+q = pinocchio.randomConfiguration(rmodel)
+u = m2a(rand(rmodel.nv))
+
+#------------Check Value at lower limit-----------
+v = -abs(rand(rmodel.nv))
+x = m2a(np.concatenate([q,v]))
+
+rmodel.lowerPositionLimit = q
+rmodel.upperPositionLimit = q+1.
+rmodel.velocityLimit = abs(v)
+
+costModel = CostModelSoftStateLimits(rmodel)
+costModel.weight = np.array([2]*rmodel.nv + [.5]*rmodel.nv)
+costData = costModel.createData(rdata)
+costModel.calc(costData, x, u)
+assert((costData.residuals == 1.).all())
+
+costModel.calcDiff(costData,x,u)
+
+costModelND = CostModelNumDiff(costModel,X,withGaussApprox=True,
+                               reevals = [])
+costDataND  = costModelND.createData(rdata)
+costModelND.calcDiff(costDataND,x,u)
+
+
+assert( absmax(costData.g-costDataND.g) < 1e-2 )
+assert( absmax(costData.L-costDataND.L) < 1e-2 )
+
+
+
+#------------Check Value at upper limit-----------
+v = abs(rand(rmodel.nv))
+x = m2a(np.concatenate([q,v]))
+
+rmodel.lowerPositionLimit = q-1
+rmodel.upperPositionLimit = q
+rmodel.velocityLimit = abs(v)
+
+costModel = CostModelSoftStateLimits(rmodel)
+costModel.weight = np.array([2]*rmodel.nv + [.5]*rmodel.nv)
+costData = costModel.createData(rdata)
+costModel.calc(costData, x, u)
+assert((costData.residuals == 1.).all())
+
+#------------Check Value at in the middle-----------
+v = abs(rand(rmodel.nv))
+x = m2a(np.concatenate([q,v]))
+
+rmodel.lowerPositionLimit = q-1.
+rmodel.upperPositionLimit = q+1.
+rmodel.velocityLimit = abs(v)+1.
+
+costModel = CostModelSoftStateLimits(rmodel)
+costModel.weight = np.array([2]*rmodel.nv + [.5]*rmodel.nv)
+costData = costModel.createData(rdata)
+costModel.calc(costData, x, u)
+assert((costData.residuals == 0.).all())
+
+#-----------------------------------------
 
 # --------------------------------------------------------------
 from crocoddyl import CostDataControl, CostModelControl
