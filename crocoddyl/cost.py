@@ -415,7 +415,7 @@ class CostDataControl(CostDataPinocchio):
 class CostModelSoftStateLimits(CostModelPinocchio):
     '''
     The class assumes:
-    1) Freeflyer joint
+    1) NFreeflyer joint
     2) Only rotational joints
 
     These assumptions are hardcoded in the implementation.
@@ -455,12 +455,12 @@ class CostModelSoftStateLimits(CostModelPinocchio):
         w = (1 if model.weights is None else model.weights)
         data.lower_residuals = \
                          np.maximum(model.x0-x, 0.)/(model.x0-model.lowerLimit)
-        data.lower_residuals[range(7)+range(model.nq+6)] = 0.
+        #data.lower_residuals[range(7)+range(model.nq+6)] = 0.
 
         data.upper_residuals = \
                          np.maximum(x-model.x1, 0.)/(model.upperLimit-model.x1)
         
-        data.upper_residuals[range(7)+range(model.nq+6)] = 0.
+        #data.upper_residuals[range(7)+range(model.nq+6)] = 0.
 
         data.residuals[:] = w*(data.lower_residuals+data.upper_residuals)
 
@@ -472,10 +472,10 @@ class CostModelSoftStateLimits(CostModelPinocchio):
         w = (1 if model.weights is None else model.weights)
 
         data.Rx_lower = -1./(model.x0-model.lowerLimit)
-        data.Rx_lower[(model.x0-x)<0.] = 0. ; data.Rx_lower[range(6)+range(model.nv+6)] = 0.
+        data.Rx_lower[(model.x0-x)<0.] = 0.# ; data.Rx_lower[range(6)+range(model.nv+6)] = 0.
 
         data.Rx_upper = 1./(model.upperLimit-model.x1)
-        data.Rx_upper[(x-model.x1)<0.] = 0.;  data.Rx_upper[range(6)+range(model.nv+6)] = 0.
+        data.Rx_upper[(x-model.x1)<0.] = 0.#;  data.Rx_upper[range(6)+range(model.nv+6)] = 0.
         
         data.Rx[:,:] = w*np.diag(data.Rx_upper + data.Rx_lower)
 
