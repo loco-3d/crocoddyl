@@ -79,8 +79,8 @@ def loadTalosLegs(modelPath='/opt/openrobots/share'):
 
     # Load SRDF file
     rmodel = robot.model
-    pinocchio.getNeutralConfiguration(rmodel, modelPath+SRDF_SUBPATH, True)
-    pinocchio.loadRotorParameters(rmodel, modelPath+SRDF_SUBPATH, True)
+    pinocchio.getNeutralConfiguration(rmodel, modelPath+SRDF_SUBPATH, False)
+    pinocchio.loadRotorParameters(rmodel, modelPath+SRDF_SUBPATH, False)
     rmodel.armature = \
               np.multiply(rmodel.rotorInertia.flat, np.square(rmodel.rotorGearRatio.flat))
     
