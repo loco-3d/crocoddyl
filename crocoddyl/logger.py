@@ -7,7 +7,7 @@ object in argument if you want to use the display functionalities.
 '''
 
 import copy
-def disptraj(robot,xs,dt=0.1,N=-1):
+def displayTrajectory(robot,xs,timeline,rate=-1):
     '''
     Display a robot trajectory xs using Gepetto-viewer gui.
     '''
@@ -15,14 +15,15 @@ def disptraj(robot,xs,dt=0.1,N=-1):
     import numpy as np
     a2m = lambda a: np.matrix(a).T
     import time
-    S = 1 if N<=0 else max(len(xs)/N,1)
+    S = 1 if rate<=0 else max(len(xs)/rate,1)
     for i,x in enumerate(xs):
+        dt = timeline[i]
         if not i % S:
             robot.display(a2m(x[:robot.nq]))
-            time.sleep(dt)
+        time.sleep(dt)
 
 class SolverLogger:
-    def __init__(self,robotwrapper=None):
+    def __init__(self):
         self.steps = []
         self.iters = []
         self.costs = []
@@ -30,7 +31,6 @@ class SolverLogger:
         self.state_regs = []
         self.th_stops = []
         self.gm_stops = []
-        self.robotwrapper = robotwrapper
         self.xs = []
         self.us = []
     def __call__(self,solver):
@@ -43,5 +43,11 @@ class SolverLogger:
         self.state_regs.append( solver.x_reg )
         self.th_stops.append(solver.stop)
         self.gm_stops.append(solver.gamma)
-        if self.robotwrapper is not None:
-            disptraj(self.robotwrapper,solver.xs,dt=1e-3,N=3)
+
+class SolverDisplay:
+    def __init__(self,robotwrapper,rate=-1):
+        self.robotwrapper = robotwrapper
+        self.rate = rate
+    def __call__(self,solver):
+        timeline = copy.copy([ m.timeStep for m in solver.models() ])
+        displayTrajectory(self.robotwrapper,solver.xs,timeline,self.rate)

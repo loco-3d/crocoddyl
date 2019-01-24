@@ -128,7 +128,7 @@ class SolverDDP:
                                % (i,a,self.problem.calc(self.xs,self.us)))
             self.stepLength = a; self.iter = i
             self.stop = sum(self.stoppingCriteria())
-            if self.callback is not None: self.callback(self)
+            if self.callback is not None: [c(self) for c in self.callback]
 
             if self.stop<self.th_stop:
                 return self.xs,self.us,True
