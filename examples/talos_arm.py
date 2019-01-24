@@ -80,12 +80,12 @@ ddp.solve()
 
 # Plotting the solution
 # plotOCSolution(ddp.callback.xs, ddp.callback.us)
-# plotDDPConvergence(ddp.callback.costs,
-#                    ddp.callback.regularizations,
-#                    ddp.callback.regularizations,
-#                    ddp.callback.stopping,
-#                    ddp.callback.stopping,
-#                    ddp.callback.steps)
+plotDDPConvergence(ddp.callback.costs,
+                   ddp.callback.control_regs,
+                   ddp.callback.state_regs,
+                   ddp.callback.gm_stops,
+                   ddp.callback.th_stops,
+                   ddp.callback.steps)
 
 # def plotDDPConvergence(J, muLM, muV, gamma, theta, alpha)
 
