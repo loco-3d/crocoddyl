@@ -1,10 +1,12 @@
-def plotDDPConvergence(J, muLM, muV, gamma, theta, alpha):
+def plotDDPConvergence(costs, muLM, muV, gamma, theta, alpha):
     import matplotlib.pyplot as plt
+    import numpy as np
 
     plt.figure(1, figsize=(6.4, 8))
     # Plotting the total cost sequence
     plt.subplot(511)
     plt.ylabel('cost')
+    J = [ sum(cost) for cost in costs ]
     plt.plot(J)
 
     # Ploting mu sequences
