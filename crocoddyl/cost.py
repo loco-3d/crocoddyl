@@ -412,6 +412,84 @@ class CostDataControl(CostDataPinocchio):
         self.Luu[:,:] = np.eye(nu)
         self.Ru [:,:] = self.Luu
 
+class CostModelSoftStateLimits(CostModelPinocchio):
+    '''
+    The class assumes:
+    1) NFreeflyer joint
+    2) Only rotational joints
+
+    These assumptions are hardcoded in the implementation.
+
+    The class proposes a soft quadratic barrier on joint limits and velocity limits
+    The joint upper and lower limits, and the joint velocity limits are taken from
+    pinocchioModel.(upper)(lower)PositionLimit and pinocchioModel.velocityLimit
+
+    x_mrange = (upper-lower)/2
+    xm = lower+ x_range
+    x0 = xm - beta*x_mrange
+    x1 = xm + beta*x_mrange
+
+    data.cost = 0   x0<=x<=x1
+    data.cost = 1.*(x0-x)**2/(x0-lower)**2      x <= x0
+    data.cost = 1.*(x-x1)**2/(upper-x1)**2      x >= x1
+    '''
+
+    def __init__(self,pinocchioModel,beta=0.9, nu=None):
+        self.CostDataType = CostDataSoftStateLimits
+        CostModelPinocchio.__init__(self,pinocchioModel,
+                                    ncost=pinocchioModel.nq+pinocchioModel.nv,nu=nu)
+        assert(beta<1.0)
+        self.beta = beta
+        self.lowerLimit = np.array(np.vstack([pinocchioModel.lowerPositionLimit,
+                                              -pinocchioModel.velocityLimit])).squeeze()
+        self.upperLimit = np.array(np.vstack([pinocchioModel.upperPositionLimit,
+                                              pinocchioModel.velocityLimit])).squeeze()
+
+        self.x_mrange = (self.upperLimit-self.lowerLimit)/2
+        self.xm = self.lowerLimit + self.x_mrange
+        self.x0 = self.xm - self.beta*self.x_mrange
+        self.x1 = self.xm + self.beta*self.x_mrange
+        self.weights = None
+        
+    def calc(model,data,x,u):
+        w = (1 if model.weights is None else model.weights)
+        data.lower_residuals = \
+                         np.maximum(model.x0-x, 0.)/(model.x0-model.lowerLimit)
+        #data.lower_residuals[range(7)+range(model.nq+6)] = 0.
+
+        data.upper_residuals = \
+                         np.maximum(x-model.x1, 0.)/(model.upperLimit-model.x1)
+        
+        #data.upper_residuals[range(7)+range(model.nq+6)] = 0.
+
+        data.residuals[:] = w*(data.lower_residuals+data.upper_residuals)
+
+        data.cost = .5*sum(data.residuals**2)
+        return data.cost
+
+    def calcDiff(model,data,x,u,recalc=True):
+        if recalc: model.calc(data,x,u)
+        w = (1 if model.weights is None else model.weights)
+
+        data.Rx_lower = -1./(model.x0-model.lowerLimit)
+        data.Rx_lower[(model.x0-x)<0.] = 0.# ; data.Rx_lower[range(6)+range(model.nv+6)] = 0.
+
+        data.Rx_upper = 1./(model.upperLimit-model.x1)
+        data.Rx_upper[(x-model.x1)<0.] = 0.#;  data.Rx_upper[range(6)+range(model.nv+6)] = 0.
+        
+        data.Rx[:,:] = w*np.diag(data.Rx_upper + data.Rx_lower)
+
+        data.Lx[:] = np.dot(data.Rx.T,data.residuals)
+        data.Lxx[:,:] = np.dot(data.Rx.T,data.Rx)
+
+class CostDataSoftStateLimits(CostDataPinocchio):
+    def __init__(self,model,pinocchioData):
+        CostDataPinocchio.__init__(self,model,pinocchioData)
+        self.Lu = 0
+        self.Lxu = 0
+        self.Luu = 0
+        self.Ru = 0
+
 
 
 class CostModelForce6D(CostModelPinocchio):

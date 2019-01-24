@@ -9,10 +9,6 @@ from numpy.linalg import inv,pinv,norm,svd,eig
 from crocoddyl import loadTalosArm
 
 robot = loadTalosArm(freeFloating=True)
-robot.model.armature = np.matrix([ 0 ]*robot.model.nv).T
-for j in robot.model.joints[1:]:
-    if j.shortname()!='JointModelFreeFlyer':
-        robot.model.armature[j.idx_v:j.idx_v+j.nv]=1
 qmin = robot.model.lowerPositionLimit; qmin[:7]=-1; robot.model.lowerPositionLimit = qmin
 qmax = robot.model.upperPositionLimit; qmax[:7]= 1; robot.model.upperPositionLimit = qmax
 

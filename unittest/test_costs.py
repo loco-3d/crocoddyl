@@ -169,7 +169,94 @@ costModelND.calcDiff(costDataND,x,u)
 assert( absmax(costData.g-costDataND.g) < 1e-3 )
 assert( absmax(costData.L-costDataND.L) < 1e-3 )
 
+# --------------------------------------------------------------
+from crocoddyl import CostModelSoftStateLimits, CostDataSoftStateLimits
+from crocoddyl import StateVector
 
+X = StateVector(rmodel)
+q = a2m(np.random.rand(rmodel.nq)+1.)
+u = m2a(np.random.rand(rmodel.nv))
+
+#------------Check Value at lower limit-----------
+v = -abs(a2m(np.random.rand(rmodel.nv)+1.))
+x = m2a(np.concatenate([q,v]))
+
+rmodel.lowerPositionLimit = q
+rmodel.upperPositionLimit = q+1.
+rmodel.velocityLimit = abs(v)
+
+costModel = CostModelSoftStateLimits(rmodel)
+costModel.weight = np.array([2]*rmodel.nv + [.5]*rmodel.nv)
+costData = costModel.createData(rdata)
+costModel.calc(costData, x, u)
+assert((costData.residuals == 1.).all())
+
+costModel.calcDiff(costData,x,u)
+
+costModelND = CostModelNumDiff(costModel,X,withGaussApprox=True,
+                               reevals = [])
+costDataND  = costModelND.createData(rdata)
+costModelND.calcDiff(costDataND,x,u)
+
+
+assert( absmax(costData.g-costDataND.g) < 1e-3 )
+assert( absmax(costData.L-costDataND.L) < 1e-3 )
+
+
+
+#------------Check Value at upper limit-----------
+v = abs(a2m(np.random.rand(rmodel.nv)+1.))
+x = m2a(np.concatenate([q,v]))
+
+rmodel.lowerPositionLimit = q-1
+rmodel.upperPositionLimit = q
+rmodel.velocityLimit = abs(v)
+
+costModel = CostModelSoftStateLimits(rmodel)
+costModel.weight = np.array([2]*rmodel.nv + [.5]*rmodel.nv)
+costData = costModel.createData(rdata)
+costModel.calc(costData, x, u)
+assert((costData.residuals == 1.).all())
+
+costModel.calcDiff(costData,x,u)
+
+costModelND = CostModelNumDiff(costModel,X,withGaussApprox=True,
+                               reevals = [])
+costDataND  = costModelND.createData(rdata)
+costModelND.calcDiff(costDataND,x,u)
+
+
+assert( absmax(costData.g-costDataND.g) < 1e-3 )
+assert( absmax(costData.L-costDataND.L) < 1e-3 )
+
+
+#------------Check Value at in the middle-----------
+v = abs(a2m(np.random.rand(rmodel.nv)+1.))
+
+x = m2a(np.concatenate([q,v]))
+
+rmodel.lowerPositionLimit = q-1.
+rmodel.upperPositionLimit = q+1.
+rmodel.velocityLimit = abs(v)+1.
+
+costModel = CostModelSoftStateLimits(rmodel)
+costModel.weight = np.array([2]*rmodel.nv + [.5]*rmodel.nv)
+costData = costModel.createData(rdata)
+costModel.calc(costData, x, u)
+assert((costData.residuals == 0.).all())
+
+costModel.calcDiff(costData,x,u)
+
+costModelND = CostModelNumDiff(costModel,X,withGaussApprox=True,
+                               reevals = [])
+costDataND  = costModelND.createData(rdata)
+costModelND.calcDiff(costDataND,x,u)
+
+
+assert( absmax(costData.g-costDataND.g) < 1e-3 )
+assert( absmax(costData.L-costDataND.L) < 1e-3 )
+
+#-----------------------------------------
 
 # --------------------------------------------------------------
 from crocoddyl import CostDataControl, CostModelControl
