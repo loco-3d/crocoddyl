@@ -82,8 +82,8 @@ def loadTalosLegs(modelPath='/opt/openrobots/share'):
     pinocchio.getNeutralConfiguration(rmodel, modelPath+SRDF_SUBPATH, False)
     pinocchio.loadRotorParameters(rmodel, modelPath+SRDF_SUBPATH, False)
     rmodel.armature = \
-              np.multiply(rmodel.rotorInertia.flat, np.square(rmodel.rotorGearRatio.flat))
-    
+            np.multiply(rmodel.rotorInertia.flat, np.square(rmodel.rotorGearRatio.flat))
+    robot.q0.flat[:] = rmodel.neutralConfiguration
     return robot
 
 if __name__ == "__main__":
