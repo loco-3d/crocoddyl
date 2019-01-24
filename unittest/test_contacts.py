@@ -6,7 +6,7 @@ from numpy.linalg import inv,pinv,norm,svd,eig
 
 ## Loading Talos arm with FF TODO use a bided or quadruped
 # -----------------------------------------------------------------------------
-from robots import loadTalosArm
+from crocoddyl import loadTalosArm
 
 robot = loadTalosArm(freeFloating=True)
 robot.model.armature = np.matrix([ 0 ]*robot.model.nv).T

@@ -4,7 +4,7 @@ from numpy.linalg import inv,pinv,norm,svd,eig
 from numpy import dot,asarray
 import warnings
 from crocoddyl import CostModelSum,CostModelPosition,CostModelState,CostModelControl,DifferentialActionModelFloatingInContact,IntegratedActionModelEuler,ActuationModelFreeFloating,StatePinocchio,ContactModel6D,ContactModelMultiple,ActivationModelWeightedQuad,m2a,a2m,CostModelPlacementVelocity,CostModelPosition6D,ImpulseModelMultiple
-from robots import loadTalosLegs
+from crocoddyl import loadTalosLegs
 
 robot = loadTalosLegs()
 rmodel = robot.model

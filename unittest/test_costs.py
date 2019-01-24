@@ -3,7 +3,7 @@ from crocoddyl import CostDataNumDiff, CostModelNumDiff
 from crocoddyl import m2a, a2m, absmax, absmin
 import pinocchio
 from pinocchio.utils import *
-from robots import loadTalosArm
+from crocoddyl import loadTalosArm
 from numpy.linalg import inv,norm,pinv
 
 

@@ -1,4 +1,4 @@
-from robots import getTalosPathFromRos
+from crocoddyl import getTalosPathFromRos
 import pinocchio
 import pickle
 import os

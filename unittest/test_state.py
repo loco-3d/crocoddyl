@@ -133,7 +133,7 @@ class StateUnicycleTest(StateTestCase):
 
 class StatePinocchioTest(StateTestCase):
     # Loading Talos arm
-    from robots import loadTalosArm
+    from crocoddyl import loadTalosArm
     model = loadTalosArm().model
 
     StateTestCase.NX = model.nq + model.nv
