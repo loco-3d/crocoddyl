@@ -171,13 +171,14 @@ assert( absmax(costData.L-costDataND.L) < 1e-3 )
 
 # --------------------------------------------------------------
 from crocoddyl import CostModelSoftStateLimits, CostDataSoftStateLimits
+from crocoddyl import StateVector
 
-X = StatePinocchio(rmodel)
-q = pinocchio.randomConfiguration(rmodel)
-u = m2a(rand(rmodel.nv))
+X = StateVector(rmodel)
+q = a2m(np.random.rand(rmodel.nq)+1.)
+u = m2a(np.random.rand(rmodel.nv))
 
 #------------Check Value at lower limit-----------
-v = -abs(rand(rmodel.nv))
+v = -abs(a2m(np.random.rand(rmodel.nv)+1.))
 x = m2a(np.concatenate([q,v]))
 
 rmodel.lowerPositionLimit = q
@@ -198,13 +199,13 @@ costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
 
-assert( absmax(costData.g-costDataND.g) < 1e-2 )
-assert( absmax(costData.L-costDataND.L) < 1e-2 )
+assert( absmax(costData.g-costDataND.g) < 1e-3 )
+assert( absmax(costData.L-costDataND.L) < 1e-3 )
 
 
 
 #------------Check Value at upper limit-----------
-v = abs(rand(rmodel.nv))
+v = abs(a2m(np.random.rand(rmodel.nv)+1.))
 x = m2a(np.concatenate([q,v]))
 
 rmodel.lowerPositionLimit = q-1
@@ -225,12 +226,13 @@ costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
 
-assert( absmax(costData.g-costDataND.g) < 1e-2 )
-assert( absmax(costData.L-costDataND.L) < 1e-2 )
+assert( absmax(costData.g-costDataND.g) < 1e-3 )
+assert( absmax(costData.L-costDataND.L) < 1e-3 )
 
 
 #------------Check Value at in the middle-----------
-v = abs(rand(rmodel.nv))
+v = abs(a2m(np.random.rand(rmodel.nv)+1.))
+
 x = m2a(np.concatenate([q,v]))
 
 rmodel.lowerPositionLimit = q-1.
@@ -251,8 +253,8 @@ costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
 
-assert( absmax(costData.g-costDataND.g) < 1e-2 )
-assert( absmax(costData.L-costDataND.L) < 1e-2 )
+assert( absmax(costData.g-costDataND.g) < 1e-3 )
+assert( absmax(costData.L-costDataND.L) < 1e-3 )
 
 #-----------------------------------------
 
