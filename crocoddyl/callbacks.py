@@ -1,26 +1,15 @@
+from diagnostic import displayTrajectory
+
+
 '''
-This class creates an object logger with a callback operator logger(solver)
+These classes create an object logger with a callback operator callback(solver)
 that the solver can call at every iteration end to store some data and display the robot motion
 in gepetto-gui.
-In the solver, set up the logger with solver.callback = SolverLogger(), and add the robot-wrapper
+In the solver, set up the logger with solver.callback = [CallbackName()], and add the robot-wrapper
 object in argument if you want to use the display functionalities.
 '''
 
 import copy
-def displayTrajectory(robot,xs,dt=0.1,rate=-1):
-    '''
-    Display a robot trajectory xs using Gepetto-viewer gui.
-    '''
-    if not hasattr(robot,'viewer'): robot.initDisplay(loadModel=True)
-    import numpy as np
-    a2m = lambda a: np.matrix(a).T
-    import time
-    S = 1 if rate<=0 else max(len(xs)/rate,1)
-    for i,x in enumerate(xs):
-        if not i % S:
-            robot.display(a2m(x[:robot.nq]))
-            time.sleep(dt)
-
 class CallbackDDPLogger:
     def __init__(self):
         self.steps = []

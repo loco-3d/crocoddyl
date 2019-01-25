@@ -33,10 +33,9 @@ from impact import ActionDataImpact, ActionModelImpact
 from unicycle import ActionDataUnicycle, ActionModelUnicycle
 from unicycle import StateUnicycle, ActionDataUnicycleVar, ActionModelUnicycleVar
 from shooting import ShootingProblem
-from logger import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay
-from logger import displayTrajectory
+from callbacks import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay
 from ddp import SolverDDP
 from kkt import SolverKKT
 from robots import getTalosPathFromRos, loadTalosArm, loadTalos, loadTalosLegs
 from utils import m2a, a2m, absmax, absmin
-from diagnostic import plotDDPConvergence, plotOCSolution
+from diagnostic import plotDDPConvergence, plotOCSolution, displayTrajectory

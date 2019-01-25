@@ -58,3 +58,18 @@ def plotOCSolution(xs, us):
     plt.legend()
     plt.xlabel('knots')
     plt.show()
+
+
+def displayTrajectory(robot,xs,dt=0.1,rate=-1):
+    '''
+    Display a robot trajectory xs using Gepetto-viewer gui.
+    '''
+    if not hasattr(robot,'viewer'): robot.initDisplay(loadModel=True)
+    import numpy as np
+    a2m = lambda a: np.matrix(a).T
+    import time
+    S = 1 if rate<=0 else max(len(xs)/rate,1)
+    for i,x in enumerate(xs):
+        if not i % S:
+            robot.display(a2m(x[:robot.nq]))
+            time.sleep(dt)
