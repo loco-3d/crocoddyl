@@ -33,8 +33,8 @@ from impact import ActionDataImpact, ActionModelImpact
 from unicycle import ActionDataUnicycle, ActionModelUnicycle
 from unicycle import StateUnicycle, ActionDataUnicycleVar, ActionModelUnicycleVar
 from shooting import ShootingProblem
-from logger import SolverLogger
-from logger import displayTrajectory, SolverDisplay
+from logger import SolverLogger, SolverPrinter, SolverDisplay
+from logger import displayTrajectory
 from ddp import SolverDDP
 from kkt import SolverKKT
 from robots import getTalosPathFromRos, loadTalosArm, loadTalos, loadTalosLegs
