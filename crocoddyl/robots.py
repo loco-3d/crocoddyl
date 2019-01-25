@@ -24,7 +24,7 @@ def loadTalosArm(modelPath='/opt/openrobots/share',freeFloating=False):
     return robot
 
 def loadTalos(modelPath='/opt/openrobots/share'):
-    URDF_FILENAME = "talos_reduced_v2.urdf"
+    URDF_FILENAME = "talos_reduced.urdf"
     SRDF_FILENAME = "talos.srdf"
     SRDF_SUBPATH = "/talos_data/srdf/" + SRDF_FILENAME
     URDF_SUBPATH = "/talos_data/urdf/" + URDF_FILENAME
