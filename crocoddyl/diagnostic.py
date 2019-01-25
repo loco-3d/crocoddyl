@@ -6,8 +6,8 @@ def plotDDPConvergence(costs, muLM, muV, gamma, theta, alpha):
     # Plotting the total cost sequence
     plt.subplot(511)
     plt.ylabel('cost')
-    J = [ sum(cost) for cost in costs ]
-    plt.plot(J)
+    totalCost = [ sum(cost) for cost in costs ]
+    plt.plot(totalCost)
 
     # Ploting mu sequences
     plt.subplot(512)
