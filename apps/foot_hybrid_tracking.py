@@ -8,6 +8,7 @@ from crocoddyl import CallbackDDPVerbose, CallbackSolverDisplay
 from crocoddyl import loadTalosLegs
 
 robot = loadTalosLegs()
+robot.model.armature[6:] = 1.
 rmodel = robot.model
 
 rightFrame = 'right_sole_link'
@@ -57,6 +58,8 @@ v = zero(rmodel.nv)
 x = m2a(np.concatenate([q,v]))
 
 
+print robot.framePlacement(q, robot.model.getFrameId(leftFrame))
+print robot.framePlacement(q, robot.model.getFrameId(rightFrame))
 # --- DDP 
 # --- DDP 
 # --- DDP 
@@ -69,16 +72,16 @@ T = 20
 timeStep = float(DT)/T
 
 models1 = [ createModel(timeStep=timeStep,
-                        footRef = [ (.2*k)/T, FOOTGAP, 0.0 ],
+                        footRef = [ (.2*k)/T, FOOTGAP, -1.01927 ],
                         contactName = rightFrame,
                         opPointName = leftFrame) for k in range(T) ]
-termmodel1 = createTermModel(timeStep=timeStep,footRef = [ .2, FOOTGAP, 0.0 ],
+termmodel1 = createTermModel(timeStep=timeStep,footRef = [ .2, FOOTGAP, -1.01927 ],
                              contactName = rightFrame,opPointName = leftFrame)
 models2 = [ createModel(timeStep=timeStep,
-                        footRef = [ (.2*k)/T, -FOOTGAP, 0.0 ],
+                        footRef = [ (.2*k)/T, -FOOTGAP, -1.01927 ],
                         contactName = leftFrame,
                         opPointName = rightFrame) for k in range(T) ]
-termmodel2 = createTermModel(timeStep=timeStep,footRef = [ .2, -FOOTGAP, 0.0 ],
+termmodel2 = createTermModel(timeStep=timeStep,footRef = [ .2, -FOOTGAP, -1.01927 ],
                              contactName = leftFrame,opPointName = rightFrame)
 
 # --- SOLVER
@@ -126,3 +129,4 @@ assert( norm(ddp.datas()[-1].differential.costs['pos'].residuals) < 1e-2 )
 assert( norm(ddp.datas()[-1].differential.costs['veleff'].residuals) < 5e-3 )
 
 
+CallbackSolverDisplay(robot)(ddp)
