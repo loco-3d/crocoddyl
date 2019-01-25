@@ -111,14 +111,12 @@ class SolverDDP:
 
             for a in self.alphas:
                 try:
-                    dV = self.tryStep(a)
+                    self.dV = self.tryStep(a)
                 except ArithmeticError:
                     self.forward_status = "f"
                     continue
-                dV_exp = a*(d1+.5*d2*a)
-                self.dV = dV
-                self.dV_exp = dV_exp
-                if d1<self.th_grad or not self.isFeasible or dV > self.th_acceptStep*dV_exp:
+                self.dV_exp = a*(d1+.5*d2*a)
+                if d1<self.th_grad or not self.isFeasible or self.dV > self.th_acceptStep*self.dV_exp:
                     # Accept step
                     self.setCandidate(self.xs_try,self.us_try,isFeasible=True,copy=False)
                     self.cost = self.cost_try
