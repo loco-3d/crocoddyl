@@ -7,7 +7,7 @@ object in argument if you want to use the display functionalities.
 '''
 
 import copy
-def displayTrajectory(robot,xs,timeline,rate=-1):
+def displayTrajectory(robot,xs,dt=0.1,rate=-1):
     '''
     Display a robot trajectory xs using Gepetto-viewer gui.
     '''
@@ -17,10 +17,9 @@ def displayTrajectory(robot,xs,timeline,rate=-1):
     import time
     S = 1 if rate<=0 else max(len(xs)/rate,1)
     for i,x in enumerate(xs):
-        dt = timeline[i]
         if not i % S:
             robot.display(a2m(x[:robot.nq]))
-        time.sleep(dt)
+            time.sleep(dt)
 
 class SolverLogger:
     def __init__(self):
@@ -71,5 +70,5 @@ class SolverDisplay:
         self.robotwrapper = robotwrapper
         self.rate = rate
     def __call__(self,solver):
-        timeline = copy.copy([ m.timeStep for m in solver.models() ])
-        displayTrajectory(self.robotwrapper,solver.xs,timeline,self.rate)
+        dt = solver.models()[0].timeStep
+        displayTrajectory(self.robotwrapper,solver.xs,dt,self.rate)
