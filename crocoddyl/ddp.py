@@ -97,11 +97,11 @@ class SolverDDP:
         self.dV_exp = 0.
         self.dV = 0.
         for i in range(maxiter):
+            self.backward_status = " "
+            self.forward_status = " "
             if self.callback is not None:
                 import time
                 start = time.time()
-                self.backward_status = " "
-                self.forward_status = " "
             try:
                 self.computeDirection()
             except ArithmeticError:
@@ -126,8 +126,7 @@ class SolverDDP:
                 self.decreaseRegularization()
             if a==self.alphas[-1]:
                 self.increaseRegularization()
-                if self.callback is not None:
-                    self.backward_status = "f"
+                self.backward_status = "f"
             self.stepLength = a; self.iter = i
             self.stop = sum(self.stoppingCriteria())
             if self.callback is not None: [c(self) for c in self.callback]
@@ -148,8 +147,7 @@ class SolverDDP:
         self.x_reg *= self.regFactor
         if self.x_reg > self.regMax: self.x_reg = self.regMax
         self.u_reg = self.x_reg
-        if self.callback is not None:
-            self.backward_status = "r"
+        self.backward_status = "r"
     def decreaseRegularization(self):
         self.x_reg /= self.regFactor
         if self.x_reg < self.regMin: self.x_reg = self.regMin
