@@ -41,7 +41,7 @@ class CallbackDDPLogger:
         self.control_regs.append( solver.u_reg )
         self.state_regs.append( solver.x_reg )
         self.th_stops.append(solver.stop)
-        self.gm_stops.append(solver.gamma)
+        self.gm_stops.append(-solver.expectedImprovement()[1])
 
 class CallbackDDPVerbose:
     def __init__(self,level=0):
@@ -55,13 +55,13 @@ class CallbackDDPVerbose:
         if self.level == 0:
             print "%4i  %0.5e  %0.5e  %0.5e  %10.5e  %0.5e  %0.4f" % \
                 (solver.iter, sum(copy.copy([ d.cost for d in solver.datas() ])),
-                solver.stop, solver.gamma,
+                solver.stop, -solver.expectedImprovement()[1],
                 solver.x_reg, solver.u_reg,
                 solver.stepLength)
         elif self.level == 1:
             print "%4i  %0.5e  %0.5e  %0.5e  %10.5e  %0.5e  %0.4f  %0.5e  %0.5e" % \
                 (solver.iter, sum(copy.copy([ d.cost for d in solver.datas() ])),
-                solver.stop, solver.gamma,
+                solver.stop, -solver.expectedImprovement()[1],
                 solver.x_reg, solver.u_reg,
                 solver.stepLength, solver.dV_exp, solver.dV)
 

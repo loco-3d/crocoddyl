@@ -105,7 +105,6 @@ class SolverDDP:
             except ArithmeticError:
                 self.increaseRegularization()
             d1,d2 = self.expectedImprovement()
-            self.gamma = -d2
 
             for a in self.alphas:
                 try:
