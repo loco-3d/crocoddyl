@@ -94,12 +94,7 @@ class SolverDDP:
         self.setCandidate(init_xs,init_us,isFeasible=isFeasible,copy=True)
         self.x_reg = regInit if regInit is not None else self.regMin
         self.u_reg = regInit if regInit is not None else self.regMin
-        self.dV_exp = 0.
-        self.dV = 0.
         for i in range(maxiter):
-            if self.callback is not None:
-                import time
-                start = time.time()
             try:
                 self.computeDirection()
             except ArithmeticError:
@@ -126,10 +121,6 @@ class SolverDDP:
             if self.callback is not None: [c(self) for c in self.callback]
 
             if self.stop<self.th_stop:
-                if self.callback is not None:
-                    end = time.time()
-                    print
-                    print "EXIT: Optimal Solution Found in %0.4f sec." % (end-start)
                 return self.xs,self.us,True
             # if d1<self.th_grad:
             #     return self.xs,self.us,False

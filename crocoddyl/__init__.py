@@ -33,7 +33,7 @@ from impact import ActionDataImpact, ActionModelImpact
 from unicycle import ActionDataUnicycle, ActionModelUnicycle
 from unicycle import StateUnicycle, ActionDataUnicycleVar, ActionModelUnicycleVar
 from shooting import ShootingProblem
-from callbacks import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay
+from callbacks import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay, CallbackSolverTimer
 from ddp import SolverDDP
 from kkt import SolverKKT
 from robots import getTalosPathFromRos, loadTalosArm, loadTalos, loadTalosLegs

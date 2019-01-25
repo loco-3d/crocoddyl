@@ -61,3 +61,10 @@ class CallbackSolverDisplay:
     def __call__(self,solver):
         dt = solver.models()[0].timeStep
         displayTrajectory(self.robotwrapper,solver.xs,dt,self.rate)
+
+import time
+class CallbackSolverTimer:
+    def __init__(self):
+        self.timings = [ time.time() ]
+    def __call__(self,solver):
+        self.timings.append( time.time() - self.timings[-1] )
