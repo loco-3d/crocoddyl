@@ -98,6 +98,8 @@ class SolverDDP:
         self.dV = 0.
         for i in range(maxiter):
             if self.callback is not None:
+                import time
+                start = time.time()
                 self.backward_status = " "
                 self.forward_status = " "
             try:
@@ -133,6 +135,10 @@ class SolverDDP:
             if self.callback is not None: [c(self) for c in self.callback]
 
             if self.stop<self.th_stop:
+                if self.callback is not None:
+                    end = time.time()
+                    print
+                    print "EXIT: Optimal Solution Found in %0.4f sec." % (end-start)
                 return self.xs,self.us,True
             # if d1<self.th_grad:
             #     return self.xs,self.us,False
