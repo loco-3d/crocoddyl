@@ -4,6 +4,7 @@ from numpy.linalg import inv,pinv,norm,svd,eig
 from numpy import dot,asarray
 import warnings
 from crocoddyl import CostModelSum,CostModelPosition,CostModelState,CostModelControl,DifferentialActionModelFloatingInContact,IntegratedActionModelEuler,ActuationModelFreeFloating,StatePinocchio,ContactModel6D,ContactModelMultiple,ActivationModelWeightedQuad,m2a,a2m,CostModelPlacementVelocity,CostModelPosition6D,ImpulseModelMultiple
+from crocoddyl import CallbackDDPVerbose, CallbackSolverDisplay
 from crocoddyl import loadTalosLegs
 
 robot = loadTalosLegs()
@@ -60,7 +61,7 @@ x = m2a(np.concatenate([q,v]))
 # --- DDP 
 # --- DDP 
 from crocoddyl import ShootingProblem, SolverDDP,SolverKKT
-from crocoddyl import SolverLogger
+from crocoddyl import CallbackDDPLogger
 disp = lambda xs: disptraj(robot,xs)
 
 DT = 1.
@@ -86,14 +87,14 @@ termmodel2 = createTermModel(timeStep=timeStep,footRef = [ .2, -FOOTGAP, 0.0 ],
 termmodel1.timeStep=0
 problem1 = ShootingProblem(x, models1, termmodel1 )
 ddp1 = SolverDDP(problem1)
-#ddp1.callback = SolverLogger(robot)
+#ddp1.callback = [CallbackDDPLogger()]
 ddp1.th_stop = 1e-9
 ddp1.solve(verbose=True,maxiter=3,regInit=.1)
 
 
 problemi = ShootingProblem(x, models1, impact1 )
 ddpi = SolverDDP(problemi)
-#ddpi.callback = SolverLogger(robot)
+#ddpi.callback = [CallbackDDPLogger()]
 ddpi.th_stop = 1e-9
 ddpi.solve(verbose=True,maxiter=50,regInit=.1,
            init_xs=ddp1.xs,
@@ -101,7 +102,7 @@ ddpi.solve(verbose=True,maxiter=50,regInit=.1,
 
 problem2 = ShootingProblem(ddp1.xs[-1], models2, termmodel2 )
 ddp2 = SolverDDP(problem2)
-ddp2.callback = SolverLogger(robot)
+ddp2.callback = [CallbackDDPLogger()]
 ddp2.th_stop = 1e-9
 ddp2.solve(verbose=True,maxiter=1000,regInit=.1)
 '''
@@ -115,9 +116,9 @@ termmodel = termmodel2
 
 problem = ShootingProblem(x, models, termmodel )
 ddp = SolverDDP(problem)
-ddp.callback = SolverLogger()
+ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose(), CallbackSolverDisplay(robot,4)]
 ddp.th_stop = 1e-9
-ddp.solve(verbose=True,maxiter=1000,regInit=.1)
+ddp.solve(maxiter=1000,regInit=.1)
 
 assert( norm(ddp.datas()[T].differential.costs['pos'].residuals) < 1e-2 )
 assert( norm(ddp.datas()[T].differential.costs['veleff'].residuals) < 5e-3 )

@@ -1,11 +1,13 @@
-def plotDDPConvergence(J, muLM, muV, gamma, theta, alpha):
+def plotDDPConvergence(costs, muLM, muV, gamma, theta, alpha):
     import matplotlib.pyplot as plt
+    import numpy as np
 
     plt.figure(1, figsize=(6.4, 8))
     # Plotting the total cost sequence
     plt.subplot(511)
     plt.ylabel('cost')
-    plt.plot(J)
+    totalCost = [ sum(cost) for cost in costs ]
+    plt.plot(totalCost)
 
     # Ploting mu sequences
     plt.subplot(512)
@@ -56,3 +58,18 @@ def plotOCSolution(xs, us):
     plt.legend()
     plt.xlabel('knots')
     plt.show()
+
+
+def displayTrajectory(robot,xs,dt=0.1,rate=-1):
+    '''
+    Display a robot trajectory xs using Gepetto-viewer gui.
+    '''
+    if not hasattr(robot,'viewer'): robot.initDisplay(loadModel=True)
+    import numpy as np
+    a2m = lambda a: np.matrix(a).T
+    import time
+    S = 1 if rate<=0 else max(len(xs)/rate,1)
+    for i,x in enumerate(xs):
+        if not i % S:
+            robot.display(a2m(x[:robot.nq]))
+            time.sleep(dt)

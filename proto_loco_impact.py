@@ -105,7 +105,7 @@ for m in models2: m.differential.costs['pos'].weight = 1
 
 problem = ShootingProblem(x, models1, impact1 )
 ddp = SolverDDP(problem)
-#ddp.callback = SolverLogger(robot)
+#ddp.callback = [CallbackDDPLogger()]
 ddp.th_stop = 1e-9
 ddp.solve(verbose=True,maxiter=20,regInit=.1)
 

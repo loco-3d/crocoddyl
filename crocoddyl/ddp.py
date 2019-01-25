@@ -84,8 +84,8 @@ class SolverDDP:
     def tryStep(self,stepLength):
         self.forwardPass(stepLength)
         return self.cost - self.cost_try
-    
-    def solve(self,maxiter=100,init_xs=None,init_us=None,isFeasible=False,verbose=False,regInit=None):
+
+    def solve(self,maxiter=100,init_xs=None,init_us=None,isFeasible=False,regInit=None):
         '''
         Nonlinear solver iterating over the solveQP.
         Return the optimum xopt,uopt as lists of T+1 and T terms, and a boolean
@@ -94,41 +94,32 @@ class SolverDDP:
         self.setCandidate(init_xs,init_us,isFeasible=isFeasible,copy=True)
         self.x_reg = regInit if regInit is not None else self.regMin
         self.u_reg = regInit if regInit is not None else self.regMin
-        
         for i in range(maxiter):
             try:
                 self.computeDirection()
             except ArithmeticError:
-                if verbose: print ('Backward pass failed')
                 self.increaseRegularization()
             d1,d2 = self.expectedImprovement()
 
             for a in self.alphas:
                 try:
-                    dV = self.tryStep(a)
+                    self.dV = self.tryStep(a)
                 except ArithmeticError:
-                    if verbose: print ('\t\t\tForward pass failed')
                     continue
-                dV_exp = a*(d1+.5*d2*a)
-                if verbose: print('\t\tAccept? %f %f' % (dV, d1*a+.5*d2*a**2) )
-                if d1<self.th_grad or not self.isFeasible or dV > self.th_acceptStep*dV_exp:
+                self.dV_exp = a*(d1+.5*d2*a)
+                if d1<self.th_grad or not self.isFeasible or self.dV > self.th_acceptStep*self.dV_exp:
                     # Accept step
                     self.setCandidate(self.xs_try,self.us_try,isFeasible=True,copy=False)
                     self.cost = self.cost_try
                     break
             if a>self.th_step:
                 self.decreaseRegularization()
-                if verbose and self.x_reg>self.regMin: print "\t\t\tDecrease reg"
             if a==self.alphas[-1]:
                 self.increaseRegularization()
-                if verbose: print "\t\t\tIncrease reg"
-                if verbose and self.x_reg>=self.regMax: print '\t\tReg max reached ... bad news'
-            elif verbose: print( 'Accept iter=%d, a=%f, cost=%.8f'
-                               % (i,a,self.problem.calc(self.xs,self.us)))
             self.stepLength = a; self.iter = i
-            if self.callback is not None: self.callback(self)
-            
             self.stop = sum(self.stoppingCriteria())
+            if self.callback is not None: [c(self) for c in self.callback]
+
             if self.stop<self.th_stop:
                 return self.xs,self.us,True
             # if d1<self.th_grad:
