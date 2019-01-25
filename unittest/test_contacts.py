@@ -322,9 +322,9 @@ c1.ref[:] = m2a(rdata.oMf[c1.frame].translation.copy())
 problem = ShootingProblem(x0, [ model ], model)
 
 ddp = SolverDDP(problem)
-ddp.callback = SolverLogger()
+ddp.callback = [SolverLogger()]
 ddp.th_stop = 1e-18
-xddp,uddp,doneddp = ddp.solve(verbose=False,maxiter=30)
+xddp,uddp,doneddp = ddp.solve(maxiter=30)
 
 assert(doneddp)
 assert( norm(ddp.datas()[-1].differential.costs['pos'].residuals)<1e-3 )
@@ -340,8 +340,8 @@ dmodel.costs['regu'].weight = 1e-3
 
 kkt = SolverKKT(problem)
 kkt.th_stop = 1e-18
-xkkt,ukkt,donekkt = kkt.solve(init_xs=x0s,init_us=u0s,isFeasible=True,maxiter=20,verbose=False)
-xddp,uddp,doneddp = ddp.solve(init_xs=x0s,init_us=u0s,isFeasible=True,maxiter=20,verbose=False)
+xkkt,ukkt,donekkt = kkt.solve(init_xs=x0s,init_us=u0s,isFeasible=True,maxiter=20)
+xddp,uddp,doneddp = ddp.solve(init_xs=x0s,init_us=u0s,isFeasible=True,maxiter=20)
 
 assert(donekkt)
 assert(norm(xkkt[0]-problem.initialState)<1e-9)
