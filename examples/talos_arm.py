@@ -3,7 +3,7 @@ from crocoddyl import DifferentialActionModel, IntegratedActionModelEuler
 from crocoddyl import CostModelPosition, CostModelPosition6D
 from crocoddyl import CostModelState, CostModelControl
 from crocoddyl import ShootingProblem, SolverDDP
-from crocoddyl import SolverLogger, SolverPrinter, SolverDisplay
+from crocoddyl import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay
 from crocoddyl import loadTalosArm
 from crocoddyl import plotOCSolution, plotDDPConvergence
 import pinocchio
@@ -68,7 +68,7 @@ problem = ShootingProblem(x0, [ runningModel ]*T, terminalModel)
 
 # Creating the DDP solver for this OC problem, defining a logger
 ddp = SolverDDP(problem)
-ddp.callback = [SolverLogger(), SolverPrinter(1), SolverDisplay(robot,4)]
+ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose(1), CallbackSolverDisplay(robot,4)]
 
 # Solving it with the DDP algorithm
 ddp.solve()
@@ -83,7 +83,7 @@ plotDDPConvergence(log.costs,log.control_regs,
 
 
 # Visualizing the solution in gepetto-viewer
-SolverDisplay(robot)(ddp)
+CallbackSolverDisplay(robot)(ddp)
 
 # Printing the reached position
 frame_idx = robot.model.getFrameId(frameName)
