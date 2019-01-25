@@ -97,8 +97,6 @@ class SolverDDP:
         self.dV_exp = 0.
         self.dV = 0.
         for i in range(maxiter):
-            self.backward_status = " "
-            self.forward_status = " "
             if self.callback is not None:
                 import time
                 start = time.time()
@@ -113,7 +111,6 @@ class SolverDDP:
                 try:
                     self.dV = self.tryStep(a)
                 except ArithmeticError:
-                    self.forward_status = "f"
                     continue
                 self.dV_exp = a*(d1+.5*d2*a)
                 if d1<self.th_grad or not self.isFeasible or self.dV > self.th_acceptStep*self.dV_exp:
@@ -121,12 +118,10 @@ class SolverDDP:
                     self.setCandidate(self.xs_try,self.us_try,isFeasible=True,copy=False)
                     self.cost = self.cost_try
                     break
-                self.forward_status = "s"
             if a>self.th_step:
                 self.decreaseRegularization()
             if a==self.alphas[-1]:
                 self.increaseRegularization()
-                self.backward_status = "f"
             self.stepLength = a; self.iter = i
             self.stop = sum(self.stoppingCriteria())
             if self.callback is not None: [c(self) for c in self.callback]
@@ -147,7 +142,6 @@ class SolverDDP:
         self.x_reg *= self.regFactor
         if self.x_reg > self.regMax: self.x_reg = self.regMax
         self.u_reg = self.x_reg
-        self.backward_status = "r"
     def decreaseRegularization(self):
         self.x_reg /= self.regFactor
         if self.x_reg < self.regMin: self.x_reg = self.regMin

@@ -50,21 +50,21 @@ class SolverPrinter:
     def __call__(self,solver):
         if solver.iter % 10 == 0:
             if self.level == 0:
-                print "iter \t cost \t       theta \t   gamma \t muV \t     muLM \talpha"
+                print "iter \t cost \t      theta \t    gamma \t  muV \t      muLM \t alpha"
             elif self.level == 1:
-                print "iter \t cost \t       theta \t   gamma \t muV \t     muLM \talpha \t   dV-exp \t  dV"
+                print "iter \t cost \t      theta \t    gamma \t  muV \t      muLM \t alpha \t   dV-exp \t  dV"
         if self.level == 0:
-            print "%4i  %0.5e  %0.5e  %0.5e  %10.5e  %0.5e%c  %0.4f%c" % \
+            print "%4i  %0.5e  %0.5e  %0.5e  %10.5e  %0.5e  %0.4f" % \
                 (solver.iter, sum(copy.copy([ d.cost for d in solver.datas() ])),
                 solver.stop, solver.gamma,
-                solver.x_reg, solver.u_reg, solver.backward_status,
-                solver.stepLength, solver.forward_status)
+                solver.x_reg, solver.u_reg,
+                solver.stepLength)
         elif self.level == 1:
-            print "%4i  %0.5e  %0.5e  %0.5e  %10.5e  %0.5e%c  %0.4f%c  %0.5e  %0.5e" % \
+            print "%4i  %0.5e  %0.5e  %0.5e  %10.5e  %0.5e  %0.4f  %0.5e  %0.5e" % \
                 (solver.iter, sum(copy.copy([ d.cost for d in solver.datas() ])),
                 solver.stop, solver.gamma,
-                solver.x_reg, solver.u_reg, solver.backward_status,
-                solver.stepLength, solver.forward_status, solver.dV_exp, solver.dV)
+                solver.x_reg, solver.u_reg,
+                solver.stepLength, solver.dV_exp, solver.dV)
 
 class SolverDisplay:
     def __init__(self,robotwrapper,rate=-1):
