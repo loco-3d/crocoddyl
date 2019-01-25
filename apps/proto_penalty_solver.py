@@ -71,19 +71,7 @@ def disp(xs,dt=0.1):
 
 #robot.initDisplay()
 
-class SolverLogger:
-    def __init__(self):
-        self.steps = []
-        self.iters = []
-        self.costs = []
-        self.regularizations = []
-    def __call__(self,solver):
-        self.steps.append( solver.stepLength )
-        self.iters.append( solver.iter )
-        self.costs.append( [ d.cost for d in solver.datas() ] )
-        self.regularizations.append( solver.x_reg )
-        
-ddp.callback = SolverLogger()
+ddp.callback = [CallbackDDPLogger()]
 
 termmodel.differential.costs['pos'].weight = 1
 ddp.solve(verbose=True)

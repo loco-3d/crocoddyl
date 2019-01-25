@@ -1,5 +1,5 @@
 
-from crocoddyl import SolverDDP, SolverLogger
+from crocoddyl import SolverDDP, CallbackDDPLogger, CallbackDDPVerbose
 from crocoddyl import ShootingProblem
 from crocoddyl import ActionModelUnicycleVar
 from crocoddyl import plotOCSolution
@@ -18,11 +18,12 @@ problem = ShootingProblem(x0, [ model ]*T, model )
 
 # Creating the DDP solver for this OC problem, defining a logger
 ddp = SolverDDP(problem)
-ddp.callback = SolverLogger()
+ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose(1)]
 
 # Solving it with the DDP algorithm
 ddp.solve()
 
 
 # Plotting the solution
-plotOCSolution(ddp.callback.xs, ddp.callback.us)
+log = ddp.callback[0]
+plotOCSolution(log.xs, log.us)

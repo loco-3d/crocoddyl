@@ -155,9 +155,9 @@ problem = ShootingProblem(f.x, [ f.model ]*T, fterm.model)
 u0s = [ f.u ]*T
 x0s = problem.rollout(u0s)
 
-from crocoddyl import SolverLogger
+from crocoddyl import CallbackDDPLogger
 disp = lambda xs: disptraj(f.robot,xs)
 ddp = SolverDDP(problem)
-ddp.callback = SolverLogger()
+ddp.callback = [CallbackDDPLogger()]
 ddp.th_stop = 1e-18
 ddp.solve(verbose=True,maxiter=1000)

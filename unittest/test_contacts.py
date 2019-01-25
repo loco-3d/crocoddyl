@@ -304,7 +304,7 @@ def disp(xs,dt=0.1):
         time.sleep(dt)
 
 import copy
-from crocoddyl import SolverLogger
+from crocoddyl import CallbackDDPLogger
 
 model.timeStep = 1e-1
 dmodel.costs['pos'].weight = 1
@@ -322,7 +322,7 @@ c1.ref[:] = m2a(rdata.oMf[c1.frame].translation.copy())
 problem = ShootingProblem(x0, [ model ], model)
 
 ddp = SolverDDP(problem)
-ddp.callback = [SolverLogger()]
+ddp.callback = [CallbackDDPLogger()]
 ddp.th_stop = 1e-18
 xddp,uddp,doneddp = ddp.solve(maxiter=30)
 

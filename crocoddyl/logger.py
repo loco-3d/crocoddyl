@@ -21,7 +21,7 @@ def displayTrajectory(robot,xs,dt=0.1,rate=-1):
             robot.display(a2m(x[:robot.nq]))
             time.sleep(dt)
 
-class SolverLogger:
+class CallbackDDPLogger:
     def __init__(self):
         self.steps = []
         self.iters = []
@@ -43,7 +43,7 @@ class SolverLogger:
         self.th_stops.append(solver.stop)
         self.gm_stops.append(solver.gamma)
 
-class SolverPrinter:
+class CallbackDDPVerbose:
     def __init__(self,level=0):
         self.level = level
     def __call__(self,solver):
@@ -65,7 +65,7 @@ class SolverPrinter:
                 solver.x_reg, solver.u_reg,
                 solver.stepLength, solver.dV_exp, solver.dV)
 
-class SolverDisplay:
+class CallbackSolverDisplay:
     def __init__(self,robotwrapper,rate=-1):
         self.robotwrapper = robotwrapper
         self.rate = rate
