@@ -1,0 +1,159 @@
+from crocoddyl import StatePinocchio
+from crocoddyl import DifferentialActionModelFloatingInContact
+from crocoddyl import IntegratedActionModelEuler
+from crocoddyl import CostModelSum
+from crocoddyl import CostModelPosition6D, CostModelPlacementVelocity
+from crocoddyl import CostModelState, CostModelControl
+from crocoddyl import ActuationModelFreeFloating
+from crocoddyl import ContactModel6D, ContactModelMultiple
+from crocoddyl import ShootingProblem, SolverDDP
+from crocoddyl import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay
+from crocoddyl import plotOCSolution, plotDDPConvergence
+from crocoddyl import m2a, a2m
+from crocoddyl import loadTalosLegs
+import numpy as np
+from numpy.linalg import norm
+import pinocchio
+from pinocchio.utils import *
+
+
+
+class SimpleBipedWalkingProblem:
+    """ Defines a simple 3d locomotion problem
+    """
+    def __init__(self, robot, rightFoot, leftFoot):
+        self.robot = robot
+        self.state = StatePinocchio(self.robot.model)
+        self.rightFoot = rightFoot
+        self.leftFoot = leftFoot
+    
+    def createProblem(self, x, stepLength, stepDuration):
+        # Computing the time step per each contact phase given the step duration.
+        # Here we assume a constant number of knots per phase
+        numKnots = 20
+        timeStep = float(stepDuration)/numKnots
+
+        # Getting the frame id for the right and left foot
+        rightFootId = self.robot.model.getFrameId(self.rightFoot)
+        leftFootId = self.robot.model.getFrameId(self.leftFoot)
+
+        # Compute the current foot positions
+        q0 = a2m(x[:self.robot.nq])
+        rightFootPos0 = robot.framePlacement(q0, rightFootId).translation
+        leftFootPos0 = robot.framePlacement(q0, leftFootId).translation
+
+        # Defining the action models along the time instances
+        leftSwingModel = \
+            [ self.createContactPhaseModel(
+                timeStep,
+                a2m([ [(stepLength*k)/numKnots, 0., 0.] ]) + leftFootPos0,
+                rightFootId, leftFootId) for k in range(numKnots) ]
+        doubleSupportModel = \
+            self.createContactSwitchModel(
+                a2m([ stepLength, 0., 0. ]) + leftFootPos0,
+                rightFootId, leftFootId)
+        rightSwingModel = \
+            [ self.createContactPhaseModel(
+                timeStep,
+                a2m([ (stepLength*k)/numKnots, 0., 0. ]) + rightFootPos0,
+                leftFootId, rightFootId) for k in range(numKnots) ]
+        finalSupport = \
+            self.createContactSwitchModel(
+                a2m([ stepLength, 0., 0. ]) + rightFootPos0,
+                leftFootId, rightFootId)
+
+        loco3dModel = leftSwingModel + [ doubleSupportModel ] + rightSwingModel
+        problem = ShootingProblem(x, loco3dModel, finalSupport)
+        return problem
+
+    def createContactPhaseModel(self, timeStep, footRef, contactFootId, swingFootId):
+        # Getting the desired SE3 pose of the swing foot
+        fXo_ref = pinocchio.SE3(np.eye(3),np.asmatrix(footRef))
+
+        # Creating the action model for floating-base systems. A walker system 
+        # is by default a floating-base system
+        actModel = ActuationModelFreeFloating(self.robot.model)
+
+        # Creating a 6D multi-contact model, and then including the supporting
+        # foot
+        contactModel = ContactModelMultiple(self.robot.model)
+        contactFootModel = \
+            ContactModel6D(self.robot.model, contactFootId, ref=None)
+        contactModel.addContact('contact', contactFootModel)
+
+        # Creating the cost model for a contact phase
+        costModel = CostModelSum(self.robot.model, actModel.nu)
+        footTrack = CostModelPosition6D(self.robot.model,
+                                        swingFootId,
+                                        fXo_ref, 
+                                        actModel.nu)
+        stateReg = CostModelState(self.robot.model,
+                                  self.state,
+                                  self.state.zero(),
+                                  actModel.nu)
+        stateReg.weights = \
+            np.array([0]*6 + [0.01]*(self.robot.model.nv-6) + [10]*self.robot.model.nv)
+        ctrlReg = CostModelControl(self.robot.model, actModel.nu)
+        costModel.addCost("footTrack", footTrack, 100.)
+        costModel.addCost("stateReg", stateReg, 0.1)
+        costModel.addCost("ctrlReg", ctrlReg, 0.001)
+
+        # Creating the action model for the KKT dynamics with simpletic Euler
+        # integration scheme
+        dmodel = \
+            DifferentialActionModelFloatingInContact(self.robot.model,
+                                                     actModel,
+                                                     contactModel,
+                                                     costModel)
+        model = IntegratedActionModelEuler(dmodel)
+        model.timeStep = timeStep
+        return model
+
+    def createContactSwitchModel(self, footRef, contactFootId, swingFootId):
+        model = self.createContactPhaseModel(0., footRef, contactFootId, swingFootId)
+
+        impactFootVelCost = \
+            CostModelPlacementVelocity(self.robot.model, swingFootId)
+        model.differential.costs.addCost('impactVel', impactFootVelCost, 10000.)
+        # model.differential.costs['impactVel' ].weight = 100000
+        model.differential.costs['footTrack' ].weight = 100000
+        model.differential.costs['stateReg'].weight = 1
+        model.differential.costs['ctrlReg'].weight = 0.01
+        return model
+
+
+
+
+# Creating the lower-body part of Talos and remove any armature
+robot = loadTalosLegs()
+robot.model.armature[6:] = 1.
+
+
+q = robot.q0.copy()
+v = zero(robot.model.nv)
+x = m2a(np.concatenate([q,v]))
+
+# Setting up the 3d walking problem
+rightFoot = 'right_sole_link'
+leftFoot = 'left_sole_link'
+walk = SimpleBipedWalkingProblem(robot, rightFoot, leftFoot)
+
+# Solving the 3d walking problem using DDP
+stepLength = 0.2
+stepDuration = 1.
+ddp = SolverDDP(walk.createProblem(x, stepLength, stepDuration))
+ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose(), CallbackSolverDisplay(robot,4)]
+ddp.th_stop = 1e-9
+ddp.solve(maxiter=1000,regInit=.1)
+
+
+# Plotting the solution and the DDP convergence
+log = ddp.callback[0]
+plotOCSolution(log.xs, log.us)
+plotDDPConvergence(log.costs,log.control_regs,
+                   log.state_regs,log.gm_stops,
+                   log.th_stops,log.steps)
+
+
+# Visualization of the DDP solution in gepetto-viewer
+CallbackSolverDisplay(robot)(ddp)
