@@ -17,6 +17,7 @@ from activation import ActivationDataSmoothAbs, ActivationModelSmoothAbs
 from action import ActionDataLQR, ActionModelLQR
 from action import ActionDataNumDiff, ActionModelNumDiff
 from integrated_action import IntegratedActionDataEuler, IntegratedActionModelEuler
+from integrated_action import IntegratedActionDataRK4, IntegratedActionModelRK4
 from differential_action import DifferentialActionData, DifferentialActionModel
 from differential_action import DifferentialActionDataNumDiff, DifferentialActionModelNumDiff
 from floating_contact import DifferentialActionDataFloatingInContact, DifferentialActionModelFloatingInContact
