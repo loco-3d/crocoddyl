@@ -274,14 +274,14 @@ class CostDataPlacementVelocity(CostDataPinocchio):
 
 
 
-class CostModelPosition6D(CostModelPinocchio):
+class CostModelFramePlacement(CostModelPinocchio):
     '''
    The class proposes a model of a cost function position and orientation (6d) 
     for a frame of the robot. Paramterize it with the frame index frameIdx and
     the effector desired pinocchio::SE3 ref.
     '''
     def __init__(self,pinocchioModel,frame,ref,nu=None):
-        self.CostDataType = CostDataPosition6D
+        self.CostDataType = CostDataFramePlacement
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=6,nu=nu)
         self.ref = ref
         self.frame = frame
@@ -304,7 +304,7 @@ class CostModelPosition6D(CostModelPinocchio):
         data.Lqq[:,:]  = np.dot(J.T,J)
         return data.cost
 
-class CostDataPosition6D(CostDataPinocchio):
+class CostDataFramePlacement(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
         self.rMf = None

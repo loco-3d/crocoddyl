@@ -83,7 +83,7 @@ assert( absmax(costData.L-costDataND.L) < 1e-4 )
 
 
 # --------------------------------------------------------------
-from crocoddyl import CostDataPosition6D, CostModelPosition6D
+from crocoddyl import CostDataPosition6D, CostModelFramePlacement
 
         
 q = pinocchio.randomConfiguration(rmodel)
@@ -91,7 +91,7 @@ v = rand(rmodel.nv)
 x = m2a(np.concatenate([q,v]))
 u = m2a(rand(rmodel.nv))
 
-costModel = CostModelPosition6D(rmodel,
+costModel = CostModelFramePlacement(rmodel,
                                 rmodel.getFrameId('gripper_left_fingertip_2_link'),
                                 pinocchio.SE3(pinocchio.SE3.Random().rotation,
                                               np.matrix([.5,.4,.3]).T))

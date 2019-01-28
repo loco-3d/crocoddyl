@@ -5,7 +5,7 @@ from cost import CostDataSum, CostModelSum
 from cost import CostDataNumDiff, CostModelNumDiff
 from cost import CostDataPosition, CostModelPosition
 from cost import CostDataPlacementVelocity, CostModelPlacementVelocity
-from cost import CostDataPosition6D, CostModelPosition6D
+from cost import CostDataFramePlacement, CostModelFramePlacement
 from cost import CostDataCoM, CostModelCoM
 from cost import CostDataState, CostModelState
 from cost import CostDataSoftStateLimits, CostModelSoftStateLimits
