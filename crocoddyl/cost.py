@@ -189,14 +189,14 @@ class CostDataSum(CostDataPinocchio):
 
 
 
-class CostModelPosition(CostModelPinocchio):
+class CostModelFrameTranslation(CostModelPinocchio):
     '''
     The class proposes a model of a cost function positioning (3d) 
     a frame of the robot. Paramterize it with the frame index frameIdx and
     the effector desired position ref.
     '''
     def __init__(self,pinocchioModel,frame,ref,nu=None,activation=None):
-        self.CostDataType = CostDataPosition
+        self.CostDataType = CostDataFrameTranslation
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=3,nu=nu)
         self.ref = ref
         self.frame = frame
@@ -218,7 +218,7 @@ class CostModelPosition(CostModelPinocchio):
         data.Lqq[:,:]  = np.dot(data.Rq.T,Axx*data.Rq) # J is a matrix, use Rq instead.
         return data.cost
 
-class CostDataPosition(CostDataPinocchio):
+class CostDataFrameTranslation(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
         self.activation = model.activation.createData()

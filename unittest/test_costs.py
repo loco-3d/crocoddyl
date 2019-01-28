@@ -18,13 +18,13 @@ rdata = rmodel.createData()
 
 # --------------------------------------------------------------
 from crocoddyl import StatePinocchio
-from crocoddyl import CostModelPosition
+from crocoddyl import CostModelFrameTranslation
 q = pinocchio.randomConfiguration(rmodel)
 v = rand(rmodel.nv)
 x = m2a(np.concatenate([q,v]))
 u = m2a(rand(rmodel.nv))
 
-costModel = CostModelPosition(rmodel,
+costModel = CostModelFrameTranslation(rmodel,
                               rmodel.getFrameId('gripper_left_fingertip_2_link'),
                               np.array([.5,.4,.3]))
 
@@ -83,7 +83,7 @@ assert( absmax(costData.L-costDataND.L) < 1e-4 )
 
 
 # --------------------------------------------------------------
-from crocoddyl import CostDataPosition6D, CostModelFramePlacement
+from crocoddyl import CostDataFramePlacement, CostModelFramePlacement
 
         
 q = pinocchio.randomConfiguration(rmodel)
@@ -291,7 +291,7 @@ v = rand(rmodel.nv)
 x = m2a(np.concatenate([q,v]))
 u = m2a(rand(rmodel.nv))
 
-cost1 = CostModelPosition(rmodel,
+cost1 = CostModelFrameTranslation(rmodel,
                               rmodel.getFrameId('gripper_left_fingertip_2_link'),
                               np.array([.5,.4,.3]))
 cost2 = CostModelState(rmodel,X,X.rand())
@@ -323,12 +323,12 @@ assert( absmax(costData.L-costDataND.L) < 1e-3 )
 # --------------------------------------------------------------
 from crocoddyl import DifferentialActionData, DifferentialActionModel
 
-from crocoddyl import CostModelPosition, CostModelState, CostModelControl
+from crocoddyl import CostModelFrameTranslation, CostModelState, CostModelControl
 class DifferentialActionModelPositioning(DifferentialActionModel):
     def __init__(self,pinocchioModel,frameName='gripper_left_fingertip_2_link'):
         DifferentialActionModel.__init__(self,pinocchioModel)
         self.costs.addCost( name="pos", weight = 10,
-                            cost = CostModelPosition(pinocchioModel,
+                            cost = CostModelFrameTranslation(pinocchioModel,
                                                      pinocchioModel.getFrameId(frameName),
                                                      np.array([.5,.4,.3])))
         self.costs.addCost( name="regx", weight = 0.1,

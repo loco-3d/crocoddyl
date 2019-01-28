@@ -1,6 +1,6 @@
 from crocoddyl import StatePinocchio
 from crocoddyl import DifferentialActionModel, IntegratedActionModelEuler
-from crocoddyl import CostModelPosition, CostModelFramePlacement
+from crocoddyl import CostModelFrameTranslation, CostModelFramePlacement
 from crocoddyl import CostModelState, CostModelControl
 from crocoddyl import ShootingProblem, SolverDDP
 from crocoddyl import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay
@@ -40,7 +40,7 @@ goalTrackingCost = CostModelFramePlacement(robot.model,
                                        nu=robot.model.nv,
                                        frame=robot.model.getFrameId(frameName),
                                        ref=SE3ref)
-# goalTrackingCost = CostModelPosition(robot.model,
+# goalTrackingCost = CostModelFrameTranslation(robot.model,
 #                                      nu=robot.model.nv,
 #                                      frame=robot.model.getFrameId(frameName),
 #                                      ref=np.array([.0,.0,.4]))

@@ -3,7 +3,7 @@ from state import StatePinocchio
 from cost import CostDataPinocchio, CostModelPinocchio
 from cost import CostDataSum, CostModelSum
 from cost import CostDataNumDiff, CostModelNumDiff
-from cost import CostDataPosition, CostModelPosition
+from cost import CostDataFrameTranslation, CostModelFrameTranslation
 from cost import CostDataFrameVelocity, CostModelFrameVelocity
 from cost import CostDataFramePlacement, CostModelFramePlacement
 from cost import CostDataCoM, CostModelCoM
