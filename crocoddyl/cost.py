@@ -232,14 +232,14 @@ class CostDataPosition(CostDataPinocchio):
 
 
 
-class CostModelPlacementVelocity(CostModelPinocchio):
+class CostModelFrameVelocity(CostModelPinocchio):
     '''
     The class proposes a model of a cost function that penalize the velocity of a given 
     effector.
     Assumes updateFramePlacement and computeForwardKinematicsDerivatives.
     '''
     def __init__(self,pinocchioModel,frame,ref = None):
-        self.CostDataType = CostDataPlacementVelocity
+        self.CostDataType = CostDataFrameVelocity
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=6)
         self.ref = ref if ref is not None else np.zeros(6) 
         self.frame = frame
@@ -260,7 +260,7 @@ class CostModelPlacementVelocity(CostModelPinocchio):
         data.Lxx[:,:]  = np.dot(data.Rx.T,data.Rx)
         return data.cost
 
-class CostDataPlacementVelocity(CostDataPinocchio):
+class CostDataFrameVelocity(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
         frame = model.pinocchio.frames[model.frame]

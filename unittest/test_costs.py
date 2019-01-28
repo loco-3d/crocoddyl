@@ -51,14 +51,14 @@ assert( absmax(costData.L-costDataND.L) < 1e-3 )
 
 
 # --------------------------------------------------------------
-from crocoddyl import CostDataPlacementVelocity, CostModelPlacementVelocity
+from crocoddyl import CostDataFrameVelocity, CostModelFrameVelocity
         
 q = pinocchio.randomConfiguration(rmodel)
 v = rand(rmodel.nv)
 x = m2a(np.concatenate([q,v]))
 u = m2a(rand(rmodel.nv))
 
-costModel = CostModelPlacementVelocity(rmodel,
+costModel = CostModelFrameVelocity(rmodel,
                                        rmodel.getFrameId('gripper_left_fingertip_2_link'))
 costData = costModel.createData(rdata)
 

@@ -94,6 +94,7 @@ class SimpleBipedWalkingProblem:
             leftFootPos0 += np.asmatrix(a2m([ stepLength, 0., 0. ]))
             loco3dModel += leftSwingModel + [ doubleSupportModel ] + rightSwingModel + [ finalSupport ]
 
+        loco3dModel = leftSwingModel + [ doubleSupportModel ] + rightSwingModel
         problem = ShootingProblem(x, loco3dModel, finalSupport)
         return problem
 

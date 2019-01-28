@@ -3,7 +3,7 @@ from pinocchio.utils import *
 from numpy.linalg import inv,pinv,norm,svd,eig
 from numpy import dot,asarray
 import warnings
-from crocoddyl import CostModelSum,CostModelPosition,CostModelState,CostModelControl,DifferentialActionModelFloatingInContact,IntegratedActionModelEuler,ActuationModelFreeFloating,StatePinocchio,ContactModel6D,ContactModelMultiple,ActivationModelWeightedQuad,m2a,a2m,CostModelPlacementVelocity,CostModelFramePlacement,ImpulseModelMultiple
+from crocoddyl import CostModelSum,CostModelPosition,CostModelState,CostModelControl,DifferentialActionModelFloatingInContact,IntegratedActionModelEuler,ActuationModelFreeFloating,StatePinocchio,ContactModel6D,ContactModelMultiple,ActivationModelWeightedQuad,m2a,a2m,CostModelFrameVelocity,CostModelFramePlacement,ImpulseModelMultiple
 from crocoddyl import CallbackDDPVerbose, CallbackSolverDisplay
 from crocoddyl import loadTalosLegs
 
@@ -44,7 +44,7 @@ def createModel(timeStep,footRef,contactName,opPointName):
 def createTermModel(timeStep,footRef,contactName,opPointName):
     termmodel = createModel(timeStep,footRef,contactName,opPointName)
     termmodel.differential.costs.addCost(name='veleff',
-                                         cost=CostModelPlacementVelocity(rmodel,
+                                         cost=CostModelFrameVelocity(rmodel,
                                                                          rmodel.getFrameId(opPointName)),
                                          weight=10000)
     termmodel.differential.costs['veleff' ].weight = 100000
