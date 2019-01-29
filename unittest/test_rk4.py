@@ -105,7 +105,7 @@ class DifferentialActionModelLQR:
     self.ndx = self.State.ndx
     self.nu = nu
     self.unone = np.zeros(self.nu)
-    act = ActivationModelWeightedQuad(weights=np.array([2]*rmodel.nv + [.5]*rmodel.nv))
+    act = ActivationModelWeightedQuad(weights=np.array([2]*nv + [.5]*nv))
     self.costs = CostModelStateVector(self.State, np.zeros(self.nx), activation = act)
 
     v1 = rvs(self.nq); v2 = rvs(self.nq); v3 = rvs(self.nq)
@@ -156,28 +156,10 @@ class DifferentialActionDataLQR:
     self.Rx  = self.costs.Rx
     self.Ru  = self.costs.Ru
 
-class VectorModel:
-  def __init__(self, nq, nu):
-    self.nq = nq
-    self.nv = nq
-    self.nu = nu
-    self.nx = 2*nq
-    self.ndx = self.nx
-    
 #-------------------------------------------------------------------------------
 
 
-def df_dq(rmodel,func,q,h=1e-9):
-  dq = zero(rmodel.nv)
-  f0 = func(q)
-  res = np.zeros([len(f0),rmodel.nv])
-  for iq in range(rmodel.nv):
-    dq[iq] = h
-    res[:,iq] = (func(q+dq) - f0)/h
-    dq[iq] = 0
-  return res
-
-def df_dv(rmodel,func,v,h=1e-9):
+def df_dx(func,v,h=1e-9):
   dv = zero(v.size)
   f0 = func(v)
   res = np.zeros([len(f0),v.size])
@@ -189,13 +171,12 @@ def df_dv(rmodel,func,v,h=1e-9):
 
 
 nq = 10; nu = 10
+nv = nq
 
-rmodel = VectorModel(nq,nu)
 
+act = ActivationModelWeightedQuad(weights=np.array([2]*nv + [.5]*nv))
 
-act = ActivationModelWeightedQuad(weights=np.array([2]*rmodel.nv + [.5]*rmodel.nv))
-
-dmodel = DifferentialActionModelLQR(rmodel.nq, rmodel.nu)
+dmodel = DifferentialActionModelLQR(nq, nu)
 ddata  = dmodel.createData()
 model  = IntegratedActionModelRK4(dmodel)
 data   = model.createData()
@@ -240,24 +221,24 @@ def get_y(q,v):
   return data.y
 
 
-dxn_du = df_dv(rmodel,lambda _u: get_xn(_u), a2m(u))
+dxn_du = df_dx(lambda _u: get_xn(_u), a2m(u))
 
-dk_du = lambda i: df_dv(rmodel,lambda _u: get_ku(_u)[i],
+dk_du = lambda i: df_dx(lambda _u: get_ku(_u)[i],
                         a2m(u))
 
-dk_dq = lambda i: df_dq(rmodel,lambda _q: get_k(_q,a2m(x[rmodel.nq:]))[i],
-                        a2m(x[:rmodel.nq]))
+dk_dq = lambda i: df_dx(lambda _q: get_k(_q,a2m(x[nq:]))[i],
+                        a2m(x[:nq]))
 
-dk_dv = lambda i: df_dq(rmodel,lambda _v: get_k(a2m(x[:rmodel.nq]), _v)[i],
-                        a2m(x[rmodel.nq:]))
+dk_dv = lambda i: df_dx(lambda _v: get_k(a2m(x[:nq]), _v)[i],
+                        a2m(x[nq:]))
 
-dy_dq = lambda i: df_dq(rmodel,lambda _q: get_y(_q, a2m(x[rmodel.nq:]))[i],
-                        a2m(x[:rmodel.nq]))
+dy_dq = lambda i: df_dx(lambda _q: get_y(_q, a2m(x[nq:]))[i],
+                        a2m(x[:nq]))
 
-dy_dv = lambda i: df_dq(rmodel,lambda _v: get_y(a2m(x[:rmodel.nq]), _v)[i],
-                        a2m(x[rmodel.nq:]))
+dy_dv = lambda i: df_dx(lambda _v: get_y(a2m(x[:nq]), _v)[i],
+                        a2m(x[nq:]))
 
-e_k = lambda i: data.dki_dx[i][:,:rmodel.nv]- dk_dq(i)
+e_k = lambda i: data.dki_dx[i][:,:nv]- dk_dq(i)
 
 
 tolerance = 1e-4
@@ -267,12 +248,12 @@ for i in xrange(4):
   assert(np.isclose(data.dki_du[i], dk_du(i), atol=tolerance).all())
 
 for i in xrange(4):
-  assert(np.isclose(data.dki_dx[i][:,:rmodel.nv], dk_dq(i), atol=tolerance).all())
-  assert(np.isclose(data.dki_dx[i][:,rmodel.nv:], dk_dv(i), atol=tolerance).all())
+  assert(np.isclose(data.dki_dx[i][:,:nv], dk_dq(i), atol=tolerance).all())
+  assert(np.isclose(data.dki_dx[i][:,nv:], dk_dv(i), atol=tolerance).all())
 
 for i in xrange(4):
-  assert(np.isclose(data.dy_dx[i][:,:rmodel.nv], dy_dq(i), atol=tolerance).all())
-  assert(np.isclose(data.dy_dx[i][:,rmodel.nv:], dy_dv(i), atol=tolerance).all())
+  assert(np.isclose(data.dy_dx[i][:,:nv], dy_dq(i), atol=tolerance).all())
+  assert(np.isclose(data.dy_dx[i][:,nv:], dy_dv(i), atol=tolerance).all())
 
 
 mnum.calcDiff(dnum,x,u)
@@ -288,11 +269,11 @@ def get_attr_analytical(x,u,attr):
   model.calcDiff(data,_x,_u)
   return getattr(data, attr).copy()
 
-Lxx0 = df_dv(rmodel,lambda _x: get_attr_analytical(_x,u, "Lx"), a2m(x))
+Lxx0 = df_dx(lambda _x: get_attr_analytical(_x,u, "Lx"), a2m(x))
 
-Lxu0 = df_dv(rmodel,lambda _u: get_attr_analytical(x,_u, "Lx"), a2m(u))
+Lxu0 = df_dx(lambda _u: get_attr_analytical(x,_u, "Lx"), a2m(u))
 
-Luu0 = df_dv(rmodel,lambda _u: get_attr_analytical(x,_u, "Lu"), a2m(u))
+Luu0 = df_dx(lambda _u: get_attr_analytical(x,_u, "Lu"), a2m(u))
 
 
 assert( norm(Lxx0-data.Lxx) < 1e-5)#*np.sqrt(mnum.disturbance) )
