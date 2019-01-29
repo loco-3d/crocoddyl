@@ -80,6 +80,8 @@ class DifferentialActionModelNumDiff:
         self.ndx = model.ndx
         self.nout = model.nout
         self.nu = model.nu
+        self.nq = model.nq
+        self.nv = model.nv
         self.State = model.State
         self.disturbance = 1e-5
         try:
@@ -102,11 +104,12 @@ class DifferentialActionModelNumDiff:
             data.Fx[:,ix] = (xn-xn0)/h
             data.Lx[  ix] = (c-c0)/h
             if model.ncost>1: data.Rx[:,ix] = (data.datax[ix].costResiduals-data.data0.costResiduals)/h
-        for iu in range(model.nu):
-            xn,c = model.model0.calc(data.datau[iu],x,u+dist(iu,model.nu,h))
-            data.Fu[:,iu] = (xn-xn0)/h
-            data.Lu[  iu] = (c-c0)/h
-            if model.ncost>1: data.Ru[:,iu] = (data.datau[iu].costResiduals-data.data0.costResiduals)/h
+        if u is not None:
+            for iu in range(model.nu):
+                xn,c = model.model0.calc(data.datau[iu],x,u+dist(iu,model.nu,h))
+                data.Fu[:,iu] = (xn-xn0)/h
+                data.Lu[  iu] = (c-c0)/h
+                if model.ncost>1: data.Ru[:,iu] = (data.datau[iu].costResiduals-data.data0.costResiduals)/h
         if model.withGaussApprox:
             data.Lxx[:,:] = np.dot(data.Rx.T,data.Rx)
             data.Lxu[:,:] = np.dot(data.Rx.T,data.Ru)
@@ -119,13 +122,20 @@ class DifferentialActionDataNumDiff:
         self.data0 = model.model0.createData()
         self.datax = [ model.model0.createData() for i in range(model.ndx) ]
         self.datau = [ model.model0.createData() for i in range(model.nu ) ]
-        self.Lx = np.zeros([ model.ndx ])
-        self.Lu = np.zeros([ model.nu ])
-        self.Fx = np.zeros([ model.nout,model.ndx ])
-        self.Fu = np.zeros([ model.nout,model.nu  ])
+
+        ndx,nu,nout = model.ndx,model.nu,model.nout
+
+        self.g  = np.zeros([ ndx+nu ])
+        self.F  = np.zeros([ nout,ndx+nu ])
+        self.Lx = self.g[:ndx]
+        self.Lu = self.g[ndx:]
+        self.Fx = self.F[:,:ndx]
+        self.Fu = self.F[:,ndx:]
         if model.ncost >1 :
-            self.Rx = np.zeros([model.ncost,model.ndx])
-            self.Ru = np.zeros([model.ncost,model.nu ])
+            self.costResiduals = self.data0.costResiduals
+            self.R  = np.zeros([model.ncost,ndx+nu])
+            self.Rx = self.R[:,:ndx]
+            self.Ru = self.R[:,ndx:]
         if model.withGaussApprox:
             self. L = np.zeros([ ndx+nu, ndx+nu ])
             self.Lxx = self.L[:ndx,:ndx]

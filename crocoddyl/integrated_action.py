@@ -3,7 +3,7 @@ import numpy as np
 
 
 class IntegratedActionModelEuler:
-    def __init__(self,diffModel):
+    def __init__(self,diffModel,withCostResiduals = True):
         self.differential = diffModel
         self.State = self.differential.State
         self.nx    = self.differential.nx
@@ -11,6 +11,7 @@ class IntegratedActionModelEuler:
         self.nu    = self.differential.nu
         self.nq    = self.differential.nq
         self.nv    = self.differential.nv
+        self.withCostResiduals = withCostResiduals
         self.timeStep = 1e-3
     @property
     def ncost(self): return self.differential.ncost
@@ -18,7 +19,8 @@ class IntegratedActionModelEuler:
     def calc(model,data,x,u=None):
         nx,ndx,nu,ncost,nq,nv,dt = model.nx,model.ndx,model.nu,model.ncost,model.nq,model.nv,model.timeStep
         acc,cost = model.differential.calc(data.differential,x,u)
-        data.costResiduals[:] = data.differential.costResiduals[:]
+        if model.withCostResiduals:
+            data.costResiduals[:] = data.differential.costResiduals[:]
         data.cost = cost
         # data.xnext[nq:] = x[nq:] + acc*dt
         # data.xnext[:nq] = pinocchio.integrate(model.differential.pinocchio,
