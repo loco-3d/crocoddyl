@@ -116,6 +116,7 @@ class SolverDDP:
         self.setCandidate(init_xs,init_us,isFeasible=isFeasible,copy=True)
         self.x_reg = regInit if regInit is not None else self.regMin
         self.u_reg = regInit if regInit is not None else self.regMin
+        self.wasFeasible = False
         for i in range(maxiter):
             try:
                 self.computeDirection()
