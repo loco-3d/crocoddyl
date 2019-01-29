@@ -13,10 +13,10 @@ class SolverDDP:
 
     The solver computes an optimal trajectory and control commmands by iteratives
     running backward and forward passes. The backward-pass updates locally the
-    quadratic approximation of the problem, and the forward-pass rollout this
-    new policy by integrating the system dynamics along a tuple of control
-    commands U.
-    :param shootingProblem: shooting problem (action models along trajectory)
+    quadratic approximation of the problem and computes descent direction,
+    and the forward-pass rollouts this new policy by integrating the system dynamics
+    along a tuple of optimized control commands U*.
+    :param shootingProblem: shooting problem (list of action models along trajectory)
     """
     def __init__(self,shootingProblem):
         self.problem = shootingProblem
@@ -73,7 +73,8 @@ class SolverDDP:
     
     def computeDirection(self,recalc=True):
         """ Compute the descent direction dx,dx.
-        
+
+        :params recalc: True for recalculating the derivatives at current state and control.
         :returns the descent direction dx,du and the dual lambdas as lists of
         T+1, T and T+1 lengths. 
         """
