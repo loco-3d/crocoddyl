@@ -61,9 +61,14 @@ def plotOCSolution(xs, us):
 
 
 def displayTrajectory(robot,xs,dt=0.1,rate=-1,cameraTF=None):
-    '''
-    Display a robot trajectory xs using Gepetto-viewer gui.
-    '''
+    """  Display a robot trajectory xs using Gepetto-viewer gui.
+
+    :param robot: Robot wrapper
+    :param xs: state trajectory
+    :param dt: step duration
+    :param rate: visualization rate
+    :param cameraTF: camera transform
+    """
     if not hasattr(robot,'viewer'): robot.initDisplay(loadModel=True)
     if cameraTF is not None:
         robot.viewer.gui.setCameraTransform(0,cameraTF)
