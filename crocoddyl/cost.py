@@ -492,13 +492,13 @@ class CostDataSoftStateLimits(CostDataPinocchio):
 
 
 
-class CostModelForce6D(CostModelPinocchio):
+class CostModelForce(CostModelPinocchio):
     '''
     The class proposes a model of a cost function for tracking a reference
     value of a 6D force, being given the contact model and its derivatives.
     '''
     def __init__(self,pinocchioModel,contactModel,ref=None,nu=None):
-        self.CostDataType = CostDataForce6D
+        self.CostDataType = CostDataForce
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=6,nu=nu)
         self.ref = ref if ref is not None else np.zeros(6)
         self.contact = contactModel
@@ -528,7 +528,7 @@ class CostModelForce6D(CostModelPinocchio):
 
         return data.cost
 
-class CostDataForce6D(CostDataPinocchio):
+class CostDataForce(CostDataPinocchio):
     def __init__(self,model,pinocchioData,contactData=None):
         CostDataPinocchio.__init__(self,model,pinocchioData)
         self.contact = contactData
