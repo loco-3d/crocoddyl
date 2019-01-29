@@ -85,4 +85,5 @@ def loadTalosLegs(modelPath='/opt/openrobots/share'):
             np.multiply(m2.rotorInertia.flat, np.square(m2.rotorGearRatio.flat))
     assert((m2.armature[:6]==0.).all())
     robot.q0 = m2.neutralConfiguration.copy()
+    robot.q0[2] = 1.019
     return robot

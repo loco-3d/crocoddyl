@@ -68,7 +68,8 @@ problem = ShootingProblem(x0, [ runningModel ]*T, terminalModel)
 
 # Creating the DDP solver for this OC problem, defining a logger
 ddp = SolverDDP(problem)
-ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose(1), CallbackSolverDisplay(robot,4)]
+cameraTF = [2., 2.68, 0.54, 0.2, 0.62, 0.72, 0.22]
+ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose(1), CallbackSolverDisplay(robot,4,cameraTF)]
 
 # Solving it with the DDP algorithm
 ddp.solve()
