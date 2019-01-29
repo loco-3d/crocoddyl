@@ -12,7 +12,7 @@ np.set_printoptions(linewidth=np.nan, suppress=True)
 #--------------frcom scipy.stats.ortho_group----------
 
 # Create a random orthonormal matrix using np.random.rand
-def rvs(dim=3):
+def randomOrthonormalMatrix(dim=3):
      random_state = np.random
      H = np.eye(dim)
      D = np.ones((dim,))
@@ -32,51 +32,6 @@ def rvs(dim=3):
      return H
 
 
-class CostModelStateVector:
-    def __init__(self,State,ref,nu=None, activation=None):
-        self.CostDataType = CostDataStateVector
-        self.State = State
-        self.ref = ref
-        self.activation = activation if activation is not None \
-                          else ActivationModelWeightedQuad(weights=None)
-        self.ncost = self.State.nx
-
-    def createData(self):
-        return self.CostDataType(self)
-
-    def calc(model,data,x,u):
-        data.residuals[:] = model.State.diff(model.ref,x)
-        data.cost = sum(model.activation.calc(data.activation,data.residuals))
-        return data.cost
-
-    def calcDiff(model,data,x,u,recalc=True):
-        if recalc: model.calc(data,x,u)
-        data.Rx[:,:] = (model.State.Jdiff(model.ref,x,'second').T).T
-
-        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
-        data.Lx[:]     = np.dot(data.Rx.T,Ax)
-        data.Lxx[:,:]  = np.dot(data.Rx.T, Axx*data.Rx)
-
-class CostDataStateVector:
-    def __init__(self,model):
-        self.activation = model.activation.createData()
-        self.residuals = np.zeros(model.ncost)
-        self.cost = np.nan
-        self.g = np.zeros( model.State.ndx+nu)
-        self.L = np.zeros([model.State.ndx+nu,model.State.ndx+nu])
-
-        self.Lu = 0
-        self.Lxu = np.zeros([model.State.ndx,nu])
-        self.Luu = 0
-        self.Ru = 0
-        self.R  = np.zeros([model.ncost,model.State.ndx+nu])
-        self.Lx = np.zeros(model.State.ndx)
-        self.Lxx = np.zeros([model.State.ndx,model.State.ndx])
-        self.Rx = self.R[:,:model.State.ndx]
-        self.Ru = self.R[:,model.State.ndx:]
-
-
-
 class DifferentialActionModelLQR:
   """
   This class implements a linear dynamics, and quadratic costs.
@@ -90,7 +45,10 @@ class DifferentialActionModelLQR:
   Full dynamics:
   [dq] = [0  1][q]  +  [0]
   [ddq]  [B  A][dq] +  [C]u
+
+  The cost function is given by l(x,u) = x^T*Q*x + u^T*U*u
   """
+
   def __init__(self,nq,nu):
 
     self.nq,self.nv = nq, nq
@@ -106,25 +64,25 @@ class DifferentialActionModelLQR:
     self.nu = nu
     self.unone = np.zeros(self.nu)
     act = ActivationModelWeightedQuad(weights=np.array([2]*nv + [.5]*nv))
-    self.costs = CostModelStateVector(self.State, np.zeros(self.nx), activation = act)
 
-    v1 = rvs(self.nq); v2 = rvs(self.nq); v3 = rvs(self.nq)
+    v1 = randomOrthonormalMatrix(self.nq);
+    v2 = randomOrthonormalMatrix(self.nq);
+    v3 = randomOrthonormalMatrix(self.nq)
     e1 = rand(self.nq); e2 = rand(self.nq); e3 = rand(self.nq)
 
+    self.Q = randomOrthonormalMatrix(self.nx);
+    self.U = randomOrthonormalMatrix(self.nu)
+    
     self.B = v1; self.A = v2; self.C = v3
-
-    #self.B = np.dot(v1.T, np.dot(np.diag(e1), v1))
-    #self.A = np.dot(v2.T, np.dot(np.diag(e2), v2))
-    #self.C = np.dot(v3.T, np.dot(np.diag(e3), v3))
 
     
   @property
-  def ncost(self): return self.costs.ncost
+  def ncost(self): return self.nx+self.nu
   def createData(self): return DifferentialActionDataLQR(self)
   def calc(model,data,x,u=None):
     q = x[:model.nq]; dq = x[model.nq:]
     data.xout[:] = (np.dot(model.A, dq) + np.dot(model.B, q) + np.dot(model.C, u)).flat
-    data.cost = model.costs.calc(data.costs,x,u)
+    data.cost = np.dot(x, np.dot(model.Q, x)) + np.dot(u, np.dot(model.U, u))
     return data.xout, data.cost
   
   def calcDiff(model,data,x,u=None,recalc=True):
@@ -133,28 +91,29 @@ class DifferentialActionModelLQR:
     
     data.Fx[:,:] = np.hstack([model.B, model.A])
     data.Fu[:,:]   = model.C
-    model.costs.calcDiff(data.costs,x,u,recalc=False)
+    data.Lx[:] = np.dot(x.T, data.Lxx)
+    data.Lu[:] = np.dot(u.T, data.Luu)
     return data.xout,data.cost
 
 class DifferentialActionDataLQR:
   def __init__(self,model):
-    self.costs = model.costs.createData()
-    #self.cost = np.nan
+    self.cost = np.nan
     self.xout = np.zeros(model.nout)
     nx,nu,ndx,nq,nv,nout = model.nx,model.nu,model.State.ndx,model.nq,model.nv,model.nout
     self.F = np.zeros([ nout,ndx+nu ])
-    self.costResiduals = self.costs.residuals
     self.Fx = self.F[:,:ndx]
     self.Fu = self.F[:,-nu:]
-    self.g   = self.costs.g
-    self.L   = self.costs.L
-    self.Lx  = self.costs.Lx
-    self.Lu  = self.costs.Lu
-    self.Lxx = self.costs.Lxx
-    self.Lxu = self.costs.Lxu
-    self.Luu = self.costs.Luu
-    self.Rx  = self.costs.Rx
-    self.Ru  = self.costs.Ru
+    self.g = np.zeros( ndx+nu)
+    self.L = np.zeros([ndx+nu,ndx+nu])
+    self.Lx = self.g[:ndx]
+    self.Lu = self.g[ndx:]
+    self.Lxx = self.L[:ndx,:ndx]
+    self.Lxu = self.L[:ndx,ndx:]
+    self.Luu = self.L[ndx:,ndx:]
+
+    self.Lxx = model.Q+model.Q.T
+    self.Lxu = np.zeros((nx, nu))
+    self.Luu = model.U+model.U.T
 
 #-------------------------------------------------------------------------------
 
@@ -174,8 +133,6 @@ nq = 10; nu = 10
 nv = nq
 
 
-act = ActivationModelWeightedQuad(weights=np.array([2]*nv + [.5]*nv))
-
 dmodel = DifferentialActionModelLQR(nq, nu)
 ddata  = dmodel.createData()
 model  = IntegratedActionModelRK4(dmodel)
@@ -188,8 +145,6 @@ u = rand(model.nu)
 xn,c = model.calc(data,x,u)
 
 model.timeStep = 1
-model.differential.costs
-#for k in model.differential.costs.costs.keys(): model.differential.costs[k].weight = 1
 
 from crocoddyl import ActionModelNumDiff
 mnum = ActionModelNumDiff(model,withGaussApprox=True)
