@@ -130,6 +130,7 @@ class SolverDDP:
                 self.dV_exp = a*(d1+.5*d2*a)
                 if d1<self.th_grad or not self.isFeasible or self.dV > self.th_acceptStep*self.dV_exp:
                     # Accept step
+                    self.wasFeasible = self.isFeasible
                     self.setCandidate(self.xs_try,self.us_try,isFeasible=True,copy=False)
                     self.cost = self.cost_try
                     break
@@ -141,7 +142,7 @@ class SolverDDP:
             self.stop = sum(self.stoppingCriteria())
             if self.callback is not None: [c(self) for c in self.callback]
 
-            if self.stop<self.th_stop:
+            if self.wasFeasible and self.stop<self.th_stop:
                 return self.xs,self.us,True
             # if d1<self.th_grad:
             #     return self.xs,self.us,False
