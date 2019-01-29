@@ -2,7 +2,7 @@ import pinocchio
 from pinocchio.utils import *
 from numpy.linalg import inv,norm,pinv
 from numpy import dot,asarray
-from crocoddyl import IntegratedActionModelEuler, DifferentialActionModelNumDiff,StatePinocchio,CostModelSum,CostModelPinocchio,CostModelPosition,CostModelState,CostModelControl,DifferentialActionModel
+from crocoddyl import IntegratedActionModelEuler, DifferentialActionModelNumDiff,StatePinocchio,CostModelSum,CostModelPinocchio,CostModelFrameTranslation,CostModelState,CostModelControl,DifferentialActionModel
 from crocoddyl import ContactModel6D,ActuationModelFreeFloating,DifferentialActionModelFloatingInContact,ContactModelMultiple
 import warnings
 from numpy.linalg import inv,pinv,norm,svd,eig
@@ -32,7 +32,7 @@ class FF:
         contact6 = ContactModel6D(rmodel,rmodel.getFrameId(contactName),ref=None)
         contactModel.addContact(name='contact',contact=contact6)
         costModel = self.costModel = CostModelSum(rmodel,nu=actModel.nu)
-        self.cost1 = CostModelPosition(rmodel,nu=actModel.nu,
+        self.cost1 = CostModelFrameTranslation(rmodel,nu=actModel.nu,
                                      frame=rmodel.getFrameId(opPointName),
                                      ref=np.array([.5,.4,.3]))
         self.cost2 = CostModelState(rmodel,State,ref=State.zero(),nu=actModel.nu)
@@ -68,7 +68,7 @@ class Fix:
             if j.shortname()!='JointModelFreeFlyer':
                 rmodel.armature[j.idx_v:j.idx_v+j.nv]=1
         State = self.State = StatePinocchio(rmodel)
-        self.cost1 = CostModelPosition(rmodel,nu=rmodel.nv,
+        self.cost1 = CostModelFrameTranslation(rmodel,nu=rmodel.nv,
                                        frame=rmodel.getFrameId(opPointName),
                                        ref=np.array([.5,.4,.3]))
         self.cost2 = CostModelState(rmodel,State,ref=State.zero(),nu=rmodel.nv)

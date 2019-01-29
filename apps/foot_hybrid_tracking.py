@@ -3,7 +3,7 @@ from pinocchio.utils import *
 from numpy.linalg import inv,pinv,norm,svd,eig
 from numpy import dot,asarray
 import warnings
-from crocoddyl import CostModelSum,CostModelPosition,CostModelState,CostModelControl,DifferentialActionModelFloatingInContact,IntegratedActionModelEuler,ActuationModelFreeFloating,StatePinocchio,ContactModel6D,ContactModelMultiple,ActivationModelWeightedQuad,m2a,a2m,CostModelPlacementVelocity,CostModelPosition6D,ImpulseModelMultiple
+from crocoddyl import CostModelSum,CostModelFrameTranslation,CostModelState,CostModelControl,DifferentialActionModelFloatingInContact,IntegratedActionModelEuler,ActuationModelFreeFloating,StatePinocchio,ContactModel6D,ContactModelMultiple,ActivationModelWeightedQuad,m2a,a2m,CostModelFrameVelocity,CostModelFramePlacement,ImpulseModelMultiple
 from crocoddyl import CallbackDDPVerbose, CallbackSolverDisplay
 from crocoddyl import loadTalosLegs
 
@@ -26,7 +26,7 @@ def createModel(timeStep,footRef,contactName,opPointName):
     contact6 = ContactModel6D(rmodel,rmodel.getFrameId(contactName),ref=None)
     contactModel.addContact(name='contact',contact=contact6)
     costModel = CostModelSum(rmodel,nu=actModel.nu)
-    cost1 = CostModelPosition6D(rmodel,nu=actModel.nu,
+    cost1 = CostModelFramePlacement(rmodel,nu=actModel.nu,
                                 frame=rmodel.getFrameId(opPointName),
                                 ref=pinocchio.SE3(eye(3),np.matrix(footRef).T))
     cost2 = CostModelState(rmodel,State,ref=State.zero(),nu=actModel.nu)
@@ -44,7 +44,7 @@ def createModel(timeStep,footRef,contactName,opPointName):
 def createTermModel(timeStep,footRef,contactName,opPointName):
     termmodel = createModel(timeStep,footRef,contactName,opPointName)
     termmodel.differential.costs.addCost(name='veleff',
-                                         cost=CostModelPlacementVelocity(rmodel,
+                                         cost=CostModelFrameVelocity(rmodel,
                                                                          rmodel.getFrameId(opPointName)),
                                          weight=10000)
     termmodel.differential.costs['veleff' ].weight = 100000
