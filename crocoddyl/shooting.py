@@ -20,7 +20,7 @@ class ShootingProblem:
                      for m,d,x,u in zip(self.runningModels,self.runningDatas,xs[:-1],us)]) \
             + self.terminalModel.calc(self.terminalData,xs[-1])[1]
     def calcDiff(self,xs,us):
-        """ Compute the cost-and-dynamics functions their derivatives.
+        """ Compute the cost-and-dynamics derivatives.
 
         These quantities are computed along a given pair of trajectories xs
         (states) and us (controls).
