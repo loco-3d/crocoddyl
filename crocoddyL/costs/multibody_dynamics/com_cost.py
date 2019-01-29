@@ -1,5 +1,5 @@
-from crocoddyl.costs.cost import RunningQuadraticCostData
-from crocoddyl.costs.cost import RunningQuadraticCost
+from crocoddyL.costs.cost import RunningQuadraticCostData
+from crocoddyL.costs.cost import RunningQuadraticCost
 import numpy as np
 
 

@@ -1,6 +1,6 @@
 import abc
 import numpy as np
-from crocoddyl.utils import EPS
+from crocoddyL.utils import EPS
 
 
 class DynamicData(object):
@@ -194,6 +194,9 @@ class DynamicModel(object):
     raise NotImplementedError("Not implemented yet.")
 
   def forwardRunningCalc(self, dynamicData, x, u, xNext):
+    # Updating the dynamics
+    self.updateDynamics(dynamicData, x, u)
+
     # Integrating the dynanics
     self.integrator(self, dynamicData, x, u, xNext)
 

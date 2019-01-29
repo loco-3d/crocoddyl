@@ -8,8 +8,7 @@ from costs import TerminalCostData, TerminalCost
 from costs import RunningCostData, RunningCost
 from costs import TerminalQuadraticCostData, TerminalQuadraticCost
 from costs import RunningQuadraticCostData, RunningQuadraticCost
-from costs import SO3Task, SO3Cost
-from costs import SE3Task, SE3Cost
+from costs import SE3Cost, SE3Task
 from costs import CoMCost
 from costs import StateCost, ControlCost
 from multiphase import Phase

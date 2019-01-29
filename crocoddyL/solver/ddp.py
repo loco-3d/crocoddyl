@@ -1,6 +1,6 @@
 import time
 import numpy as np
-from crocoddyl.utils import isPositiveDefinitive, EPS
+from crocoddyL.utils import isPositiveDefinitive, EPS
 
 
 class DDPSolver(object):
@@ -21,15 +21,6 @@ class DDPSolver(object):
 
     # Resetting convergence flag
     ddpData._convergence = False
-
-    # Resizing the global variables for analysing solver performance
-    if ddpParams.record:
-      ddpData.cost_itr = [0.] * ddpParams.max_iter
-      ddpData.muLM_itr = [0.] * ddpParams.max_iter
-      ddpData.muV_itr = [0.] * ddpParams.max_iter
-      ddpData.gamma_itr = [0.] * ddpParams.max_iter
-      ddpData.theta_itr = [0.] * ddpParams.max_iter
-      ddpData.alpha_itr = [0.] * ddpParams.max_iter
 
     # Running an initial forward simulation. calculates the forward dynamics and
     # total costs
@@ -83,12 +74,12 @@ class DDPSolver(object):
       # regularization values and alpha for each iteration. This is useful for
       # analysing the solver performance
       if ddpParams.record:
-        ddpData.cost_itr[i] = ddpData.totalCost
-        ddpData.gamma_itr[i] = ddpData.gamma
-        ddpData.theta_itr[i] = ddpData.theta
-        ddpData.muLM_itr[i] = ddpData.muLM
-        ddpData.muV_itr[i] = ddpData.muV
-        ddpData.alpha_itr[i] = ddpData.alpha
+        ddpParams.cost_itr[i] = ddpData.totalCost
+        ddpParams.gamma_itr[i] = ddpData.gamma
+        ddpParams.theta_itr[i] = ddpData.theta
+        ddpParams.muLM_itr[i] = ddpData.muLM
+        ddpParams.muV_itr[i] = ddpData.muV
+        ddpParams.alpha_itr[i] = ddpData.alpha
 
       # The quadratic model is accepted so for faster convergence it's better
       # to approach to Newton search direction. We can do it by decreasing the
@@ -372,7 +363,7 @@ class DDPSolver(object):
 
   @staticmethod
   def getFeedforwardSequence(ddpData):
-    """ Return the feed-forward control sequence contained in the ddpData.
+    """ Return the feedforward control sequence contained in the ddpData.
 
     :param ddpData: entired DDP data
     """
@@ -380,52 +371,3 @@ class DDPSolver(object):
     for i in xrange(ddpData.N):
       j.append(ddpData.interval[i].j)
     return j
-
-  @staticmethod
-  def getCostSequence(ddpData):
-    """ Return the cost values along the DDP iterates.
-
-    :param ddpData: entired DDP data
-    """
-    return ddpData.cost_itr[:ddpData.n_iter+1]
-
-  @staticmethod
-  def getLMRegularizationSequence(ddpData):
-    """ Return the Levenberg-Marquardt regularization values along the DDP
-    iterates.
-
-    :param ddpData: entired DDP data
-    """
-    return ddpData.muLM_itr[:ddpData.n_iter+1]
-
-  @staticmethod
-  def getVRegularizationSequence(ddpData):
-    """ Return the Value-function regularization values along the DDP iterates.
-
-    :param ddpData: entired DDP data
-    """
-    return ddpData.muV_itr[:ddpData.n_iter+1]
-
-  @staticmethod
-  def getGammaSequence(ddpData):
-    """ Return the gamma values (||Qu||) along the DDP iterates.
-
-    :param ddpData: entired DDP data
-    """
-    return ddpData.gamma_itr[:ddpData.n_iter+1]
-
-  @staticmethod
-  def getThetaSequence(ddpData):
-    """ Return the theta values (||Qu||_Quu^-1) along the DDP iterates.
-
-    :param ddpData: entired DDP data
-    """
-    return ddpData.theta_itr[:ddpData.n_iter+1]
-
-  @staticmethod
-  def getAlphaSequence(ddpData):
-    """ Return the alpha values (step-length) along the DDP iterates.
-
-    :param ddpData: entired DDP data
-    """
-    return ddpData.alpha_itr[:ddpData.n_iter+1]
