@@ -5,10 +5,12 @@ import numpy as np
 
 class ActionModelLQR:
     def __init__(self,nx,nu):
-        '''
-        Transition model is xnext(x,u) = Fx*x + Fu*x.
-        Cost model is cost(x,u) = 1/2 [x,u].T [Lxx Lxu ; Lxu.T Luu ] [x,u] + [Lx,Lu].T [x,u].
-        '''
+        """ Define an action model for a LQR problem.
+
+        A Linear-Quadratic Regulator problem has a transition model of the form
+        xnext(x,u) = Fx*x + Fu*x. Its cost function is quadratic of the form:
+        cost(x,u) = 1/2 [x,u].T [Lxx Lxu ; Lxu.T Luu ] [x,u] + [Lx,Lu].T [x,u]
+        """
         self.State = StateVector(nx)
         self.nx   = self.State.nx
         self.ndx  = self.State.ndx
@@ -35,12 +37,20 @@ class ActionModelLQR:
         self.Fx  = np.random.rand( self.ndx,self.ndx )*2-1
         self.Fu  = np.random.rand( self.ndx,self.nu  )*2-1
         self.F   = np.random.rand( self.nx ) # Affine (nonautom) part of the dynamics
-        
+
     def createData(self):
+        """ Create the LQR action data
+        """
         return ActionDataLQR(self)
 
     def calc(model,data,x,u=None):
-        '''Return xnext,cost for current state,control pair data.x,data.u. '''
+        """ Update the next state and the cost function.
+
+        :params data: action data
+        :params x: state
+        :params u: control
+        :returns xnext,cost for current state,control pair data.x,data.u.
+        """
         if u is None: u=model.unone
         quad = lambda a,Q,b: .5*np.dot(np.dot(Q,b).T,a)
         data.xnext = np.dot(model.Fx,x) + np.dot(model.Fu,u) + model.F
@@ -49,6 +59,13 @@ class ActionModelLQR:
         return data.xnext,data.cost
 
     def calcDiff(model,data,x,u=None):
+        """ Update the derivatives of the dynamics and cost.
+
+        :params data: action data
+        :params x: state
+        :params u: control
+        :returns xnext,cost for current state,control pair data.x,data.u.
+        """
         if u is None: u=model.unone
         xnext,cost = model.calc(data,x,u)
         data.Lx  = model.Lx + np.dot(model.Lxx  ,x) + np.dot(model.Lxu,u)
@@ -78,6 +95,8 @@ class ActionDataLQR:
 
 
 class ActionModelNumDiff:
+    """ Abstract action model that uses NumDiff for derivative computation.
+    """
     def __init__(self,model,withGaussApprox=False):
         self.model0 = model
         self.nx = model.nx

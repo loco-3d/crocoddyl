@@ -9,6 +9,15 @@ rev_enumerate = lambda l: izip(xrange(len(l)-1, -1, -1), reversed(l))
 
 
 class SolverDDP:
+    """ Run the DDP solver.
+
+    The solver computes an optimal trajectory and control commmands by iteratives
+    running backward and forward passes. The backward-pass updates locally the
+    quadratic approximation of the problem, and the forward-pass rollout this
+    new policy by integrating the system dynamics along a tuple of control
+    commands U.
+    :param shootingProblem: shooting problem (action models along trajectory)
+    """
     def __init__(self,shootingProblem):
         self.problem = shootingProblem
         self.allocate()
@@ -28,16 +37,23 @@ class SolverDDP:
 
         self.callback = None
 
-    def models(self) : return self.problem.runningModels + [self.problem.terminalModel]
-    def datas(self) : return self.problem.runningDatas + [self.problem.terminalData]
+    def models(self):
+        """ Return all action models
+        """
+        return self.problem.runningModels + [self.problem.terminalModel]
+    def datas(self):
+        """ Return the data for all action models.
+        """
+        return self.problem.runningDatas + [self.problem.terminalData]
 
     def setCandidate(self,xs=None,us=None,isFeasible=False,copy=True):
-        '''
-        Set the solver candidate value for the decision variables, as a trajectory xs,us
-        of T+1 and T elements. isFeasible should be set to True if the xs are 
-        obtained from integrating the us (roll-out).
-        If copy is True, make a copy of the data.
-        '''
+        """ Set the warm-point.
+
+        Set the solver candidate value for the decision variables, as a 
+        trajectory xs,us of T+1 and T elements.
+        :params isFeasible: True for xs are obtained from integrating the us (roll-out).
+        :params copy: True for making a copy of the data
+        """
         if xs is None: xs = [ m.State.zero() for m in self.models() ]
         elif copy:     xs = [ x.copy() for x in xs ]
         if us is None: us = [ np.zeros(m.nu) for m in self.problem.runningModels ]
@@ -50,47 +66,52 @@ class SolverDDP:
         self.isFeasible = isFeasible
 
     def calc(self):
-        '''
-        Compute the tangent (LQR) model.
-        Returns nothing.
-        '''
+        """ Compute the tangent (LQR) model.
+        """
         self.cost = self.problem.calcDiff(self.xs,self.us)
         return self.cost
     
     def computeDirection(self,recalc=True):
-        '''
-        Compute the descent direction dx,dx.
-        Returns the descent direction dx,du and the dual lambdas as lists of T+1, T and T+1 lengths. 
-        '''
+        """ Compute the descent direction dx,dx.
+        
+        :returns the descent direction dx,du and the dual lambdas as lists of
+        T+1, T and T+1 lengths. 
+        """
         if recalc: self.calc()
         self.backwardPass()
         return [ np.nan ]*(self.problem.T+1), self.k, self.Vx
         
     def stoppingCriteria(self):
-        '''
-        Return a sum of positive parameters whose sum quantifies the algorithm termination.
-        '''
+        """ Return a sum of positive parameters whose sum quantifies the
+        algorithm termination.
+        """
         return  [ sum(q**2) for q in self.Qu ]
     
     def expectedImprovement(self):
-        '''
-        Return two scalars denoting the quadratic improvement model
+        """ Return two scalars denoting the quadratic improvement model
         (i.e. dV = f_0 - f_+ = d1*a + d2*a**2/2)
-        '''
+        """
         d1 = sum([  np.dot(q,k)           for q,k in zip(self.Qu,self.k) ])
         d2 = sum([ -np.dot(k,np.dot(q,k)) for q,k in zip(self.Quu,self.k) ])
         return [ d1, d2 ]
 
     def tryStep(self,stepLength):
+        """ Rollout the system with a predefined step length.
+
+        :param stepLength: step length
+        """
         self.forwardPass(stepLength)
         return self.cost - self.cost_try
 
     def solve(self,maxiter=100,init_xs=None,init_us=None,isFeasible=False,regInit=None):
-        '''
-        Nonlinear solver iterating over the solveQP.
-        Return the optimum xopt,uopt as lists of T+1 and T terms, and a boolean
-        describing the success.
-        '''
+        """ Nonlinear solver iterating over the solveQP.
+
+        Compute the optimal xopt,uopt trajectory as lists of T+1 and T terms.
+        And a boolean describing the success.
+        :param maxiter: Maximum allowed number of iterations
+        :param init_xs: Initial state
+        :param init_us: Initial control
+        """
         self.setCandidate(init_xs,init_us,isFeasible=isFeasible,copy=True)
         self.x_reg = regInit if regInit is not None else self.regMin
         self.u_reg = regInit if regInit is not None else self.regMin
@@ -140,10 +161,9 @@ class SolverDDP:
     
     #### DDP Specific
     def allocate(self):
-        '''
-        Allocate matrix space of Q,V and K. 
+        """  Allocate matrix space of Q,V and K. 
         Done at init time (redo if problem change).
-        '''
+        """
         self.Vxx = [ np.zeros([m.ndx    ,m.ndx      ]) for m in self.models() ]
         self.Vx  = [ np.zeros([m.ndx])                 for m in self.models() ]
 
@@ -160,6 +180,15 @@ class SolverDDP:
         self.k   = [ np.zeros([ m.nu       ]) for m in self.problem.runningModels ]
         
     def backwardPass(self):
+        """ Run the backward-pass of the DDP algorithm.
+
+        The backward-pass is equivalent to a Riccati recursion. It updates the
+        quadratic terms of the optimal control problem, and the gradient and
+        Hessian of the value function. Additionally, it computes the new
+        feedforward and feedback commands (i.e. control policy). A regularization
+        scheme is used to ensure a good search direction. The norm of the gradient,
+        a the directional derivatives are computed.
+        """
         xs,us = self.xs,self.us
         self.Vx [-1][:]   = self.problem.terminalData.Lx
         self.Vxx[-1][:,:] = self.problem.terminalData.Lxx
@@ -207,6 +236,14 @@ class SolverDDP:
             raiseIfNan(self.Vx[t],ArithmeticError('backward error'))
             
     def forwardPass(self,stepLength,b=None,warning='ignore'):
+        """ Run the forward-pass of the DDP algorithm.
+
+        The forward-pass basically applies a new policy and then rollout the
+        system. After this rollouts, it's checked if this policy provides a
+        reasonable improvement. For that we use Armijo condition to evaluated the
+        choosen step length.
+        :param stepLenght: step length
+        """
         # Argument b is introduce for debug purpose.
         # Argument warning is also introduce for debug: by default, it masks the numpy warnings
         #    that can be reactivated during debug.
