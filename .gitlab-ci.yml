@@ -1,4 +1,4 @@
-image: gepgitlab.laas.fr:4567/loco-3d/cddp
+image: gepgitlab.laas.fr:4567/loco-3d/crocoddyl
 
 test:
   script:
