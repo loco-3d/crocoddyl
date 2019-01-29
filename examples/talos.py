@@ -17,7 +17,7 @@ import pinocchio
 from pinocchio.utils import *
 
 
-class SE3Task:
+class TaskSE3:
     def __init__(self, oXf, frameId):
         self.oXf = oXf
         self.frameId = frameId
@@ -56,7 +56,7 @@ class SimpleBipedWalkingProblem:
                 [ self.createContactPhaseModel(
                     timeStep,
                     rightFootId,
-                    SE3Task(
+                    TaskSE3(
                         pinocchio.SE3(np.eye(3),
                                       np.asmatrix(a2m([ [(stepLength*k)/numKnots, 0., 0.] ]) +
                                       leftFootPos0)),
@@ -65,7 +65,7 @@ class SimpleBipedWalkingProblem:
             doubleSupportModel = \
                 self.createContactSwitchModel(
                     rightFootId,
-                    SE3Task(
+                    TaskSE3(
                         pinocchio.SE3(np.eye(3),
                                       np.asmatrix(a2m([ stepLength, 0., 0. ]) +
                                       leftFootPos0)),
@@ -75,7 +75,7 @@ class SimpleBipedWalkingProblem:
                 [ self.createContactPhaseModel(
                     timeStep,
                     leftFootId,
-                    SE3Task(
+                    TaskSE3(
                         pinocchio.SE3(np.eye(3),
                                       np.asmatrix(a2m([ 2*(stepLength*k)/numKnots, 0., 0. ]) +
                                       rightFootPos0)),
@@ -84,7 +84,7 @@ class SimpleBipedWalkingProblem:
             finalSupport = \
                 self.createContactSwitchModel(
                     leftFootId,
-                    SE3Task(
+                    TaskSE3(
                         pinocchio.SE3(np.eye(3),
                                       np.asmatrix(a2m([ 2*stepLength, 0., 0. ]) +
                                       rightFootPos0)),
