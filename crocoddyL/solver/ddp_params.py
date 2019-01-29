@@ -51,6 +51,14 @@ class DDPParams(object):
       self.tol = float(data['ddp']['stop_criteria']['tol'])
       self.max_iter = int(data['ddp']['stop_criteria']['max_iter'])
 
+      # Resizing the global variables for analysing solver performance
+      self.cost_itr = [0.] * self.max_iter
+      self.muLM_itr = [0.] * self.max_iter
+      self.muV_itr = [0.] * self.max_iter
+      self.gamma_itr = [0.] * self.max_iter
+      self.theta_itr = [0.] * self.max_iter
+      self.alpha_itr = [0.] * self.max_iter
+
       # Setting up regularization
       self.mu0LM = float(data['ddp']['regularization']['levenberg_marquard']['mu0'])
       self.muLM_inc = float(data['ddp']['regularization']['levenberg_marquard']['inc_rate'])

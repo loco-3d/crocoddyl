@@ -2,7 +2,7 @@ import unittest
 import sys
 
 testmodules = [
-  'cost',
+  # 'cost',
   # 'soft_constraint',
   'dynamics',
   'integrator',
