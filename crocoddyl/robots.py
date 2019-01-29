@@ -15,8 +15,17 @@ def getTalosPathFromRos():
 def loadTalosArm(modelPath='/opt/openrobots/share',freeFloating=False):
     URDF_FILENAME = "talos_left_arm.urdf"
     URDF_SUBPATH = "/talos_data/robots/" + URDF_FILENAME
+    SRDF_FILENAME = "talos.srdf"
+    SRDF_SUBPATH = "/talos_data/srdf/" + SRDF_FILENAME
     robot = RobotWrapper.BuildFromURDF(modelPath+URDF_SUBPATH, [modelPath],
                                        pinocchio.JointModelFreeFlyer() if freeFloating else None)
+    rmodel = robot.model
+    pinocchio.getNeutralConfiguration(rmodel, modelPath+SRDF_SUBPATH, False)
+    pinocchio.loadRotorParameters(rmodel, modelPath+SRDF_SUBPATH, False)
+    rmodel.armature = \
+              np.multiply(rmodel.rotorInertia.flat, np.square(rmodel.rotorGearRatio.flat))
+    if freeFloating: assert((rmodel.armature[:6]==0.).all())
+    
     if freeFloating:
         u = robot.model.upperPositionLimit; u[:7] =  1;  robot.model.upperPositionLimit = u
         l = robot.model.lowerPositionLimit; l[:7] = -1;  robot.model.lowerPositionLimit = l
