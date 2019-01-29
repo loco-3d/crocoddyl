@@ -1,119 +1,14 @@
 from crocoddyl import StateVector
-from crocoddyl import ActivationModelWeightedQuad
 import numpy as np
 from numpy.random import rand
 from crocoddyl import IntegratedActionDataRK4, IntegratedActionModelRK4
-import scipy as sp
+from crocoddyl import DifferentialActionModelLQR, DifferentialActionDataLQR
 from crocoddyl import a2m, m2a
 from pinocchio.utils import zero
 from numpy.linalg import norm
 
 np.set_printoptions(linewidth=np.nan, suppress=True)
 #--------------frcom scipy.stats.ortho_group----------
-
-# Create a random orthonormal matrix using np.random.rand
-def randomOrthonormalMatrix(dim=3):
-     random_state = np.random
-     H = np.eye(dim)
-     D = np.ones((dim,))
-     for n in range(1, dim):
-         x = random_state.normal(size=(dim-n+1,))
-         D[n-1] = np.sign(x[0])
-         x[0] -= D[n-1]*np.sqrt((x*x).sum())
-         # Householder transformation
-         Hx = (np.eye(dim-n+1) - 2.*np.outer(x, x)/(x*x).sum())
-         mat = np.eye(dim)
-         mat[n-1:, n-1:] = Hx
-         H = np.dot(H, mat)
-         # Fix the last sign such that the determinant is 1
-     D[-1] = (-1)**(1-(dim % 2))*D.prod()
-     # Equivalent to np.dot(np.diag(D), H) but faster, apparently
-     H = (D*H.T).T
-     return H
-
-
-class DifferentialActionModelLQR:
-  """
-  This class implements a linear dynamics, and quadratic costs.
-  Since the DAM is a second order system, and the integratedactionmodels are implemented
-  as being second order integrators, This class implements a second order linear system
-  given by
-  x = [q, dq]
-  
-  ddq = A dq + B q + C u  ......A, B, C are constant
-  
-  Full dynamics:
-  [dq] = [0  1][q]  +  [0]
-  [ddq]  [B  A][dq] +  [C]u
-
-  The cost function is given by l(x,u) = x^T*Q*x + u^T*U*u
-  """
-
-  def __init__(self,nq,nu):
-
-    self.nq,self.nv = nq, nq
-   
-    self.nx = 2*self.nq
-    self.ndx = self.nx
-    self.nout = self.nv
-    self.nu = nu
-    self.unone = np.zeros(self.nu)
-    self.State = StateVector(self.nx)
-    self.nx = self.State.nx
-    self.ndx = self.State.ndx
-    self.nu = nu
-    self.unone = np.zeros(self.nu)
-    act = ActivationModelWeightedQuad(weights=np.array([2]*nv + [.5]*nv))
-
-    v1 = randomOrthonormalMatrix(self.nq);
-    v2 = randomOrthonormalMatrix(self.nq);
-    v3 = randomOrthonormalMatrix(self.nq)
-    e1 = rand(self.nq); e2 = rand(self.nq); e3 = rand(self.nq)
-
-    self.Q = randomOrthonormalMatrix(self.nx);
-    self.U = randomOrthonormalMatrix(self.nu)
-    
-    self.B = v1; self.A = v2; self.C = v3
-
-    
-  @property
-  def ncost(self): return self.nx+self.nu
-  def createData(self): return DifferentialActionDataLQR(self)
-  def calc(model,data,x,u=None):
-    q = x[:model.nq]; dq = x[model.nq:]
-    data.xout[:] = (np.dot(model.A, dq) + np.dot(model.B, q) + np.dot(model.C, u)).flat
-    data.cost = np.dot(x, np.dot(model.Q, x)) + np.dot(u, np.dot(model.U, u))
-    return data.xout, data.cost
-  
-  def calcDiff(model,data,x,u=None,recalc=True):
-    if u is None: u=model.unone
-    if recalc: xout,cost = model.calc(data,x,u)
-    
-    data.Fx[:,:] = np.hstack([model.B, model.A])
-    data.Fu[:,:]   = model.C
-    data.Lx[:] = np.dot(x.T, data.Lxx)
-    data.Lu[:] = np.dot(u.T, data.Luu)
-    return data.xout,data.cost
-
-class DifferentialActionDataLQR:
-  def __init__(self,model):
-    self.cost = np.nan
-    self.xout = np.zeros(model.nout)
-    nx,nu,ndx,nq,nv,nout = model.nx,model.nu,model.State.ndx,model.nq,model.nv,model.nout
-    self.F = np.zeros([ nout,ndx+nu ])
-    self.Fx = self.F[:,:ndx]
-    self.Fu = self.F[:,-nu:]
-    self.g = np.zeros( ndx+nu)
-    self.L = np.zeros([ndx+nu,ndx+nu])
-    self.Lx = self.g[:ndx]
-    self.Lu = self.g[ndx:]
-    self.Lxx = self.L[:ndx,:ndx]
-    self.Lxu = self.L[:ndx,ndx:]
-    self.Luu = self.L[ndx:,ndx:]
-
-    self.Lxx = model.Q+model.Q.T
-    self.Lxu = np.zeros((nx, nu))
-    self.Luu = model.U+model.U.T
 
 #-------------------------------------------------------------------------------
 
