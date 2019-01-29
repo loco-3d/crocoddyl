@@ -55,12 +55,14 @@ class CallbackDDPVerbose:
                 solver.stepLength, solver.dV_exp, solver.dV)
 
 class CallbackSolverDisplay:
-    def __init__(self,robotwrapper,rate=-1):
+    def __init__(self,robotwrapper,rate=-1,cameraTF = None):
         self.robotwrapper = robotwrapper
         self.rate = rate
+        self.cameraTF = cameraTF
+
     def __call__(self,solver):
         dt = solver.models()[0].timeStep
-        displayTrajectory(self.robotwrapper,solver.xs,dt,self.rate)
+        displayTrajectory(self.robotwrapper,solver.xs,dt,self.rate,self.cameraTF)
 
 import time
 class CallbackSolverTimer:

@@ -60,11 +60,13 @@ def plotOCSolution(xs, us):
     plt.show()
 
 
-def displayTrajectory(robot,xs,dt=0.1,rate=-1):
+def displayTrajectory(robot,xs,dt=0.1,rate=-1,cameraTF=None):
     '''
     Display a robot trajectory xs using Gepetto-viewer gui.
     '''
     if not hasattr(robot,'viewer'): robot.initDisplay(loadModel=True)
+    if cameraTF is not None:
+        robot.viewer.gui.setCameraTransform(0,cameraTF)
     import numpy as np
     a2m = lambda a: np.matrix(a).T
     import time
