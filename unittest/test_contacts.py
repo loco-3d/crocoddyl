@@ -199,11 +199,11 @@ assert( absmax(Fu-data.df_du) < 1e-3 )
 
 # -------------------------------------------------------------------------------
 # Cost force model
-from crocoddyl import CostDataForce6D, CostModelForce6D
+from crocoddyl import CostDataForce, CostModelForce
 
 model.costs = CostModelSum(rmodel,nu=actModel.nu)
 model.costs.addCost( name='force', weight = 1,
-                    cost = CostModelForce6D(rmodel,model.contact.contacts['fingertip'],
+                    cost = CostModelForce(rmodel,model.contact.contacts['fingertip'],
                                             nu=actModel.nu) )
 
 data = model.createData()
@@ -234,7 +234,7 @@ assert(absmax(data.Fu-dnum.Fu)/model.nu<1e-3)
 # -------------------------------------------------------------------------------
 # --- COMPLETE MODEL WITH COST ----
 from crocoddyl import StatePinocchio
-from crocoddyl import CostModelPosition, CostModelState, CostModelControl
+from crocoddyl import CostModelFrameTranslation, CostModelState, CostModelControl
 from crocoddyl import IntegratedActionModelEuler
 State = StatePinocchio(rmodel)
 
@@ -244,7 +244,7 @@ contactModel.addContact(name='root_joint',contact=contactModel6)
 
 costModel = CostModelSum(rmodel,nu=actModel.nu)
 costModel.addCost( name="pos", weight = 10,
-                   cost = CostModelPosition(rmodel,nu=actModel.nu,
+                   cost = CostModelFrameTranslation(rmodel,nu=actModel.nu,
                                             frame=rmodel.getFrameId('gripper_left_inner_single_link'),
                                             ref=np.array([.5,.4,.3])))
 costModel.addCost( name="regx", weight = 0.1,

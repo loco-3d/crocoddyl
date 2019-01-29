@@ -189,14 +189,14 @@ class CostDataSum(CostDataPinocchio):
 
 
 
-class CostModelPosition(CostModelPinocchio):
+class CostModelFrameTranslation(CostModelPinocchio):
     '''
     The class proposes a model of a cost function positioning (3d) 
     a frame of the robot. Paramterize it with the frame index frameIdx and
     the effector desired position ref.
     '''
     def __init__(self,pinocchioModel,frame,ref,nu=None,activation=None):
-        self.CostDataType = CostDataPosition
+        self.CostDataType = CostDataFrameTranslation
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=3,nu=nu)
         self.ref = ref
         self.frame = frame
@@ -218,7 +218,7 @@ class CostModelPosition(CostModelPinocchio):
         data.Lqq[:,:]  = np.dot(data.Rq.T,Axx*data.Rq) # J is a matrix, use Rq instead.
         return data.cost
 
-class CostDataPosition(CostDataPinocchio):
+class CostDataFrameTranslation(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
         self.activation = model.activation.createData()
@@ -232,14 +232,14 @@ class CostDataPosition(CostDataPinocchio):
 
 
 
-class CostModelPlacementVelocity(CostModelPinocchio):
+class CostModelFrameVelocity(CostModelPinocchio):
     '''
     The class proposes a model of a cost function that penalize the velocity of a given 
     effector.
     Assumes updateFramePlacement and computeForwardKinematicsDerivatives.
     '''
     def __init__(self,pinocchioModel,frame,ref = None):
-        self.CostDataType = CostDataPlacementVelocity
+        self.CostDataType = CostDataFrameVelocity
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=6)
         self.ref = ref if ref is not None else np.zeros(6) 
         self.frame = frame
@@ -260,7 +260,7 @@ class CostModelPlacementVelocity(CostModelPinocchio):
         data.Lxx[:,:]  = np.dot(data.Rx.T,data.Rx)
         return data.cost
 
-class CostDataPlacementVelocity(CostDataPinocchio):
+class CostDataFrameVelocity(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
         frame = model.pinocchio.frames[model.frame]
@@ -274,14 +274,14 @@ class CostDataPlacementVelocity(CostDataPinocchio):
 
 
 
-class CostModelPosition6D(CostModelPinocchio):
+class CostModelFramePlacement(CostModelPinocchio):
     '''
    The class proposes a model of a cost function position and orientation (6d) 
     for a frame of the robot. Paramterize it with the frame index frameIdx and
     the effector desired pinocchio::SE3 ref.
     '''
     def __init__(self,pinocchioModel,frame,ref,nu=None):
-        self.CostDataType = CostDataPosition6D
+        self.CostDataType = CostDataFramePlacement
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=6,nu=nu)
         self.ref = ref
         self.frame = frame
@@ -304,7 +304,7 @@ class CostModelPosition6D(CostModelPinocchio):
         data.Lqq[:,:]  = np.dot(J.T,J)
         return data.cost
 
-class CostDataPosition6D(CostDataPinocchio):
+class CostDataFramePlacement(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
         self.rMf = None
@@ -492,13 +492,13 @@ class CostDataSoftStateLimits(CostDataPinocchio):
 
 
 
-class CostModelForce6D(CostModelPinocchio):
+class CostModelForce(CostModelPinocchio):
     '''
     The class proposes a model of a cost function for tracking a reference
     value of a 6D force, being given the contact model and its derivatives.
     '''
     def __init__(self,pinocchioModel,contactModel,ref=None,nu=None):
-        self.CostDataType = CostDataForce6D
+        self.CostDataType = CostDataForce
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=6,nu=nu)
         self.ref = ref if ref is not None else np.zeros(6)
         self.contact = contactModel
@@ -528,7 +528,7 @@ class CostModelForce6D(CostModelPinocchio):
 
         return data.cost
 
-class CostDataForce6D(CostDataPinocchio):
+class CostDataForce(CostDataPinocchio):
     def __init__(self,model,pinocchioData,contactData=None):
         CostDataPinocchio.__init__(self,model,pinocchioData)
         self.contact = contactData

@@ -1,6 +1,6 @@
 from crocoddyl import StatePinocchio
 from crocoddyl import DifferentialActionModel, IntegratedActionModelEuler
-from crocoddyl import CostModelPosition, CostModelPosition6D
+from crocoddyl import CostModelFrameTranslation, CostModelFramePlacement
 from crocoddyl import CostModelState, CostModelControl
 from crocoddyl import ShootingProblem, SolverDDP
 from crocoddyl import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay
@@ -36,11 +36,11 @@ runningModel.timeStep = dt
 frameName = 'gripper_left_joint' #gripper_left_fingertip_2_link'
 state = StatePinocchio(robot.model)
 SE3ref = pinocchio.SE3(np.eye(3), np.array([ [.0],[.0],[.4] ]))
-goalTrackingCost = CostModelPosition6D(robot.model,
+goalTrackingCost = CostModelFramePlacement(robot.model,
                                        nu=robot.model.nv,
                                        frame=robot.model.getFrameId(frameName),
                                        ref=SE3ref)
-# goalTrackingCost = CostModelPosition(robot.model,
+# goalTrackingCost = CostModelFrameTranslation(robot.model,
 #                                      nu=robot.model.nv,
 #                                      frame=robot.model.getFrameId(frameName),
 #                                      ref=np.array([.0,.0,.4]))

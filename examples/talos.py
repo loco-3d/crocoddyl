@@ -2,7 +2,7 @@ from crocoddyl import StatePinocchio
 from crocoddyl import DifferentialActionModelFloatingInContact
 from crocoddyl import IntegratedActionModelEuler
 from crocoddyl import CostModelSum
-from crocoddyl import CostModelPosition6D, CostModelPlacementVelocity
+from crocoddyl import CostModelFramePlacement, CostModelFrameVelocity
 from crocoddyl import CostModelState, CostModelControl
 from crocoddyl import ActuationModelFreeFloating
 from crocoddyl import ContactModel6D, ContactModelMultiple
@@ -31,7 +31,7 @@ class SimpleBipedWalkingProblem:
         self.state = StatePinocchio(self.robot.model)
         self.rightFoot = rightFoot
         self.leftFoot = leftFoot
-
+    
     def createProblem(self, x, stepLength, stepDuration):
         # Computing the time step per each contact phase given the step duration.
         # Here we assume a constant number of knots per phase
@@ -94,6 +94,7 @@ class SimpleBipedWalkingProblem:
             leftFootPos0 += np.asmatrix(a2m([ stepLength, 0., 0. ]))
             loco3dModel += leftSwingModel + [ doubleSupportModel ] + rightSwingModel + [ finalSupport ]
 
+        loco3dModel = leftSwingModel + [ doubleSupportModel ] + rightSwingModel
         problem = ShootingProblem(x, loco3dModel, finalSupport)
         return problem
 
@@ -111,7 +112,7 @@ class SimpleBipedWalkingProblem:
 
         # Creating the cost model for a contact phase
         costModel = CostModelSum(self.robot.model, actModel.nu)
-        footTrack = CostModelPosition6D(self.robot.model,
+        footTrack = CostModelFramePlacement(self.robot.model,
                                         footSwingTask.frameId,
                                         footSwingTask.oXf,
                                         actModel.nu)
@@ -141,7 +142,7 @@ class SimpleBipedWalkingProblem:
         model = self.createContactPhaseModel(0., contactFootId, swingFootTask)
 
         impactFootVelCost = \
-            CostModelPlacementVelocity(self.robot.model, swingFootTask.frameId)
+            CostModelFrameVelocity(self.robot.model, swingFootTask.frameId)
         model.differential.costs.addCost('impactVel', impactFootVelCost, 10000.)
         model.differential.costs['impactVel' ].weight = 100000
         model.differential.costs['footTrack' ].weight = 100000
