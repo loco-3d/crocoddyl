@@ -39,8 +39,7 @@ termmodels = [ DifferentialActionModel(robot.model) for p in ps]
 
 costTrack = [ CostModelFrameTranslation(robot.model,frame=frameId,ref=p) for p in ps ]
 costXReg = CostModelState(robot.model,
-                          StatePinocchio(robot.model),
-                          ref=np.zeros(robot.model.nq+robot.model.nv))
+                          StatePinocchio(robot.model))
 costUReg = CostModelControl(robot.model,nu=robot.model.nv)
 
 # Then let's added the running and terminal cost functions
