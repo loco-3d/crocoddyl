@@ -1,4 +1,3 @@
-import solver
 from utils import raiseIfNan
 import numpy as np
 import scipy.linalg as scl
