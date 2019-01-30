@@ -21,7 +21,51 @@ class ActivationDataQuad:
     def __init__(self,model):
         pass
 
+class ActivationModelInequalityHigh:
+    """
+    a(r) = (r**2)/2 for r>0.
+    a(r) = 0. for r<=0
+    """
+    def __init__(self):
+        pass
+    def calc(model,data,r):
+        '''Return [ a(r_1) ... a(r_n) ] '''
+        return np.maximum(r, 0.)**2/2
+    def calcDiff(model,data,r,recalc=True):
+        if recalc: model.calc(data,r)
+        ''' 
+        Return [ a'(r_1) ... a'(r_n) ], diag([ a''(r_1) ... a''(r_n) ])
+        '''
+        return np.maximum(r, 0.), ((r>0.).astype(int))[:,None]
 
+    def createData(self): return ActivationDataInequalityHigh(self)
+
+class ActivationDataInequalityHigh:
+    def __init__(self,model):
+        pass
+
+class ActivationModelInequalityLow:
+    """
+    a(r) = (r**2)/2 for r<0.
+    a(r) = 0. for r>=0
+    """
+    def __init__(self):
+        pass
+    def calc(model,data,r):
+        '''Return [ a(r_1) ... a(r_n) ] '''
+        return np.minimum(r, 0.)**2/2
+    def calcDiff(model,data,r,recalc=True):
+        if recalc: model.calc(data,r)
+        ''' 
+        Return [ a'(r_1) ... a'(r_n) ], diag([ a''(r_1) ... a''(r_n) ])
+        '''
+        return np.minimum(r, 0.), ((r<0.).astype(int))[:,None]
+
+    def createData(self): return ActivationDataInequalityLow(self)
+
+class ActivationDataInequalityLow:
+    def __init__(self,model):
+        pass
 
 class ActivationModelWeightedQuad:
     def __init__(self,weights):
