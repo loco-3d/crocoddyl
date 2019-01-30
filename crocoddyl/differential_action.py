@@ -17,6 +17,9 @@ class DifferentialActionModel:
         self.nout = self.nv
         self.nu = self.nv
         self.unone = np.zeros(self.nu)
+        # Use this to force the computation with ABA
+        # Side effect is that armature is not used.
+        self.forceAba = False
     @property
     def ncost(self): return self.costs.ncost
     def createData(self): return DifferentialActionData(self)
@@ -26,7 +29,17 @@ class DifferentialActionModel:
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
         tauq = a2m(u)
-        data.xout[:] = pinocchio.aba(model.pinocchio,data.pinocchio,q,v,tauq).flat
+        # --- Dynamics
+        if model.forceAba:
+            data.xout[:] = pinocchio.aba(model.pinocchio,data.pinocchio,q,v,tauq).flat
+        else:
+            pinocchio.computeAllTerms(model.pinocchio,data.pinocchio,q,v)
+            data.M = data.pinocchio.M
+            if hasattr(model.pinocchio,'armature'):
+                data.M[range(nv),range(nv)] += model.pinocchio.armature.flat
+            data.Minv = np.linalg.inv(data.M)
+            data.xout[:] = data.Minv*(tauq-data.pinocchio.nle).flat
+        # --- Cost
         pinocchio.forwardKinematics(model.pinocchio,data.pinocchio,q,v)
         pinocchio.updateFramePlacements(model.pinocchio,data.pinocchio)
         data.cost = model.costs.calc(data.costs,x,u)
@@ -39,11 +52,19 @@ class DifferentialActionModel:
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
         tauq = a2m(u)
-        pinocchio.computeABADerivatives(model.pinocchio,data.pinocchio,q,v,tauq)
-        data.Fx[:,:nv] = data.pinocchio.ddq_dq
-        data.Fx[:,nv:] = data.pinocchio.ddq_dv
-        data.Fu[:,:]   = pinocchio.computeMinverse(model.pinocchio,data.pinocchio,q)
-
+        a = a2m(data.xout)
+        # --- Dynamics
+        if model.forceAba:
+            pinocchio.computeABADerivatives(model.pinocchio,data.pinocchio,q,v,tauq)
+            data.Fx[:,:nv] = data.pinocchio.ddq_dq
+            data.Fx[:,nv:] = data.pinocchio.ddq_dv
+            data.Fu[:,:]   = pinocchio.computeMinverse(model.pinocchio,data.pinocchio,q)
+        else:
+            pinocchio.computeRNEADerivatives(model.pinocchio,data.pinocchio,q,v,a)
+            data.Fx[:,:nv] = -np.dot(data.Minv,data.pinocchio.dtau_dq)
+            data.Fx[:,nv:] = -np.dot(data.Minv,data.pinocchio.dtau_dv)
+            data.Fu[:,:] = data.Minv
+        # --- Cost
         pinocchio.computeJointJacobians(model.pinocchio,data.pinocchio,q)
         pinocchio.updateFramePlacements(model.pinocchio,data.pinocchio)
         model.costs.calcDiff(data.costs,x,u,recalc=False)
