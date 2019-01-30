@@ -70,7 +70,7 @@ class IntegratedActionDataEuler:
 
 
 class IntegratedActionModelRK4:
-    def __init__(self,diffModel):
+    def __init__(self,diffModel, timestep=1e-3):
         self.differential = diffModel
         self.State = self.differential.State
         self.nx    = self.differential.nx
@@ -78,7 +78,7 @@ class IntegratedActionModelRK4:
         self.nu    = self.differential.nu
         self.nq    = self.differential.nq
         self.nv    = self.differential.nv
-        self.timeStep = 1e-3
+        self.timeStep = timeStep
         self.rk4_inc =[0.5,0.5,1.]
     @property
     def ncost(self): return self.differential.ncost
