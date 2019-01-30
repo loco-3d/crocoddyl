@@ -172,7 +172,8 @@ stepLength = 0.2
 stepDuration = 0.75
 ddp = SolverDDP(walk.createProblem(x, stepLength, stepDuration))
 cameraTF = [3., 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
-ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose(), CallbackSolverDisplay(robot,4,cameraTF)]
+ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose(),
+                CallbackSolverDisplay(robot,4,cameraTF)]
 ddp.th_stop = 1e-9
 ddp.solve(maxiter=1000,regInit=.1)
 
@@ -184,6 +185,6 @@ plotDDPConvergence(log.costs,log.control_regs,
                    log.state_regs,log.gm_stops,
                    log.th_stops,log.steps)
 
-
 # Visualization of the DDP solution in gepetto-viewer
-CallbackSolverDisplay(robot)(ddp,cameraTF)
+ddp.callback[2](ddp)
+#CallbackSolverDisplay(robot)(ddp,cameraTF)
