@@ -3,7 +3,7 @@ import numpy as np
 
 
 class IntegratedActionModelEuler:
-    def __init__(self,diffModel,withCostResiduals = True):
+    def __init__(self,diffModel,timeStep=1e-3,withCostResiduals = True):
         self.differential = diffModel
         self.State = self.differential.State
         self.nx    = self.differential.nx
@@ -12,7 +12,7 @@ class IntegratedActionModelEuler:
         self.nq    = self.differential.nq
         self.nv    = self.differential.nv
         self.withCostResiduals = withCostResiduals
-        self.timeStep = 1e-3
+        self.timeStep = timeStep
     @property
     def ncost(self): return self.differential.ncost
     def createData(self): return IntegratedActionDataEuler(self)
