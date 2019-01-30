@@ -359,7 +359,7 @@ class CostModelState(CostModelPinocchio):
         self.CostDataType = CostDataState
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=State.ndx,nu=nu)
         self.State = State
-        self.ref = ref or State.zero()
+        self.ref = ref if ref is not None else State.zero()
         self.weights = None
     def calc(model,data,x,u):
         w = (1 if model.weights is None else model.weights)
