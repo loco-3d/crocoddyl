@@ -1,81 +1,78 @@
-from crocoddyl import StatePinocchio
-from crocoddyl import DifferentialActionModel, IntegratedActionModelEuler
-from crocoddyl import CostModelFrameTranslation, CostModelFramePlacement
-from crocoddyl import CostModelState, CostModelControl
-from crocoddyl import ShootingProblem, SolverDDP
-from crocoddyl import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay
-from crocoddyl import loadTalosArm
-from crocoddyl import plotOCSolution, plotDDPConvergence
+from crocoddyl import *
 import pinocchio
 import numpy as np
 
 
 robot = loadTalosArm()
-robot.q0.flat[:] = [  1,1.5,-2,0,0,0,0 ]
+robot.q0.flat[:] = [  2,1.5,-2,0,0,0,0 ]
 robot.model.armature[:] = .2
 frameId = robot.model.getFrameId('gripper_left_joint')
-DT = 5e-3
-T  = 50
+DT = 1e-2
+T  = 15
+
+State = StatePinocchio(robot.model)
 
 ps = [
-    np.array([ 0,0,.4 ]),
+    np.array([ 0.4,0  ,.4 ]),
+    np.array([ 0.4,0.4,.4 ]),
+    np.array([ 0.4,0.4, 0 ]),
+    np.array([ 0.4,0,   0 ]),
     ]
+
+colors = [
+    [ 1,0,0, 1],
+    [ 0,1,0, 1],
+    [ 0,0,1, 1],
+    [ 1,0,1, 1],
+    ]
+
+robot.initDisplay(loadModel=True)
+gv = robot.viewer.gui
+for i,p in enumerate(ps):
+    gv.addSphere('world/point%d'%i,.1,colors[i])
+    gv.applyConfiguration('world/point%d'%i, p.tolist()+[0,0,0,1] )
+gv.refresh()
+
 
 models     = [ DifferentialActionModel(robot.model) for p in ps]
 termmodels = [ DifferentialActionModel(robot.model) for p in ps]
 
-
-runningModel = IntegratedActionModelEuler(DifferentialActionModel(robot.model),timeStep=DT)
-terminalModel = IntegratedActionModelEuler(DifferentialActionModel(robot.model),timeStep=DT)
-
-state = StatePinocchio(robot.model)
-SE3ref = pinocchio.SE3(np.eye(3), np.array([ [.0],[.0],[.4] ]))
-goalTrackingCost6 = CostModelFramePlacement(robot.model,
-                                           frame=frameId,
-                                           ref=SE3ref)
-goalTrackingCost3 = CostModelFrameTranslation(robot.model,
-                                        nu=robot.model.nv,
-                                              frame=frameId,
-                                              ref=np.array([0,0,.4]))
-xRegCost = CostModelState(robot.model,
-                          state,
-                          ref=state.zero(),
-                          nu=robot.model.nv)
-uRegCost = CostModelControl(robot.model,nu=robot.model.nv)
+costTrack = [ CostModelFrameTranslation(robot.model,frame=frameId,ref=p) for p in ps ]
+costXReg = CostModelState(robot.model,
+                          StatePinocchio(robot.model),
+                          ref=np.zeros(robot.model.nq+robot.model.nv))
+costUReg = CostModelControl(robot.model,nu=robot.model.nv)
 
 # Then let's added the running and terminal cost functions
-runningCostModel = runningModel.differential.costs
-runningCostModel.addCost( name="pos", weight = 1, cost = goalTrackingCost3)
-runningCostModel.addCost( name="regx", weight = 1e-4, cost = xRegCost) 
-runningCostModel.addCost( name="regu", weight = 1e-7, cost = uRegCost)
-terminalCostModel = terminalModel.differential.costs
-terminalCostModel.addCost( name="pos", weight = 10, cost = goalTrackingCost3)
+for model,cost in zip(models,costTrack):
+    model.costs.addCost( name="pos", weight = 1, cost = cost)
+    model.costs.addCost( name="xreg", weight = 1e-4, cost = costXReg)
+    model.costs.addCost( name="ureg", weight = 1e-7, cost = costUReg)
+for model,cost in zip(termmodels,costTrack):
+    model.costs.addCost( name="pos", weight = 1000, cost = cost)
+    model.costs.addCost( name="xreg", weight = 1e-4, cost = costXReg)
+    model.costs.addCost( name="ureg", weight = 1e-7, cost = costUReg)
 
-
-q0 = [  1,1.5,-2,0,0,0,0 ]
-x0 = np.hstack([q0, np.zeros(robot.model.nv)])
-problem = ShootingProblem(x0, [ runningModel ]*T, terminalModel)
+x0 = np.concatenate([ m2a(robot.q0), np.zeros(robot.model.nv)])
+seqs = [  [ IntegratedActionModelEuler(model) ]*T+[IntegratedActionModelEuler(termmodel)]
+          for model,termmodel in zip(models,termmodels) ]
+problem = ShootingProblem(x0, sum(seqs,[])[:-1], seqs[-1][-1])
 
 # Creating the DDP solver for this OC problem, defining a logger
 ddp = SolverDDP(problem)
 cameraTF = [2., 2.68, 0.54, 0.2, 0.62, 0.72, 0.22]
-ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose(), CallbackSolverDisplay(robot,4,cameraTF)]
+ddp.callback = [CallbackDDPVerbose() ]
 
 # Solving it with the DDP algorithm
 ddp.solve()
 
+# Penalty if you want.
+for i in range(4,6):
+    for m in termmodels: m.costs['pos'].weight = 10**i
+    ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=10)
+
 # Visualizing the solution in gepetto-viewer
 CallbackSolverDisplay(robot)(ddp)
 
-
-for i in range(1,8):
-    terminalCostModel['pos'].weight = 10*i
-    ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=10)
-
-
-# Printing the reached position
-xT = ddp.xs[-1]
-qT = np.asmatrix(xT[:robot.model.nq]).T
-print
-print "The reached pose by the wrist is"
-print robot.framePlacement(qT, frameId)
+for i,s in enumerate(seqs+[1]):
+    print ddp.datas()[i*T].differential.costs['pos'].pinocchio.oMf[frameId].translation.T
