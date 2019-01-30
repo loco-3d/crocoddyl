@@ -85,8 +85,7 @@ class IntegratedActionModelRK4:
         self.nv    = self.differential.nv
         self.timeStep = timeStep
         self.rk4_inc =[0.5,0.5,1.]
-    @property
-    def ncost(self): return self.differential.ncost
+
     def createData(self):
       return IntegratedActionDataRK4(self)
     '''
@@ -107,7 +106,7 @@ class IntegratedActionModelRK4:
 
     '''
     def calc(model,data,x,u=None):
-      nx,ndx,nu,ncost,nq,nv,dt = model.nx,model.ndx,model.nu,model.ncost,\
+      nx,ndx,nu,nq,nv,dt = model.nx,model.ndx,model.nu,\
                                  model.nq,model.nv,model.timeStep
 
       data.y[0] = x
@@ -166,7 +165,7 @@ class IntegratedActionModelRK4:
     '''
 
     def calcDiff(model,data,x,u=None,recalc=True):
-        nx,ndx,nu,ncost,nq,nv,dt = model.nx,model.ndx,model.nu,model.ncost,\
+        nx,ndx,nu,nq,nv,dt = model.nx,model.ndx,model.nu,\
                                    model.nq,model.nv,model.timeStep
         if recalc: model.calc(data,x,u)
         for i in xrange(4):
@@ -241,7 +240,7 @@ class IntegratedActionModelRK4:
                 
 class IntegratedActionDataRK4:
     def __init__(self,model):
-        nx,ndx,nu,ncost = model.nx,model.ndx,model.nu,model.ncost
+        nx,ndx,nu = model.nx,model.ndx,model.nu
         self.differential = [None,]*4
 
         for i in xrange(4):
@@ -250,12 +249,10 @@ class IntegratedActionDataRK4:
         self.ki = [np.zeros([ndx]),]*4
     
         self.g = np.zeros([ ndx+nu ])
-        self.R = np.zeros([ ncost ,ndx+nu ])
         self.L = np.zeros([ ndx+nu,ndx+nu ])
         self.F = np.zeros([ ndx   ,ndx+nu ])
         self.xnext = np.zeros([ nx ])
         self.cost = np.nan
-        self.costResiduals = np.zeros([ ncost ])
 
         self.Lxx = self.L[:ndx,:ndx]
         self.Lxu = self.L[:ndx,ndx:]
@@ -265,8 +262,6 @@ class IntegratedActionDataRK4:
         self.Lu  = self.g[ndx:]
         self.Fx = self.F[:,:ndx]
         self.Fu = self.F[:,ndx:]
-        self.Rx = self.R[:,:ndx]
-        self.Ru = self.R[:,ndx:]
 
         #Quantities for derivatives
         self.dx = [np.zeros([ndx]),]*4

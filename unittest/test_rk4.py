@@ -42,7 +42,7 @@ xn,c = model.calc(data,x,u)
 model.timeStep = 1
 
 from crocoddyl import ActionModelNumDiff
-mnum = ActionModelNumDiff(model,withGaussApprox=True)
+mnum = ActionModelNumDiff(model,withGaussApprox=False)
 dnum = mnum.createData()
 
 model.calcDiff(data,x,u)

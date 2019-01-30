@@ -138,8 +138,7 @@ class DifferentialActionModelLQR:
     self.B = v1; self.A = v2; self.C = v3
 
     
-  @property
-  def ncost(self): return self.nx+self.nu
+
   def createData(self): return DifferentialActionDataLQR(self)
   def calc(model,data,x,u=None):
     q = x[:model.nq]; v = x[model.nq:]
