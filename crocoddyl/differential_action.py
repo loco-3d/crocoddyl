@@ -2,6 +2,7 @@ from state import StatePinocchio, StateVector
 from cost import CostModelSum
 from utils import a2m, randomOrthonormalMatrix
 import numpy as np
+from numpy.random import rand
 import pinocchio
 
 
@@ -99,13 +100,13 @@ class DifferentialActionModelLQR:
   Since the DAM is a second order system, and the integratedactionmodels are implemented
   as being second order integrators, This class implements a second order linear system
   given by
-  x = [q, dq]
+  x = [q, v]
   
-  ddq = A dq + B q + C u  ......A, B, C are constant
+  dv = A v + B q + C u + d  ......A, B, C are constant
   
   Full dynamics:
   [dq] = [0  1][q]  +  [0]
-  [ddq]  [B  A][dq] +  [C]u
+  [ddq]  [B  A][v] +  [C]u + d
 
   The cost function is given by l(x,u) = x^T*Q*x + u^T*U*u
   """
@@ -131,6 +132,8 @@ class DifferentialActionModelLQR:
 
     self.Q = randomOrthonormalMatrix(self.nx);
     self.U = randomOrthonormalMatrix(self.nu)
+
+    self.d = rand(self.nv)
     
     self.B = v1; self.A = v2; self.C = v3
 
@@ -139,17 +142,14 @@ class DifferentialActionModelLQR:
   def ncost(self): return self.nx+self.nu
   def createData(self): return DifferentialActionDataLQR(self)
   def calc(model,data,x,u=None):
-    q = x[:model.nq]; dq = x[model.nq:]
-    data.xout[:] = (np.dot(model.A, dq) + np.dot(model.B, q) + np.dot(model.C, u)).flat
+    q = x[:model.nq]; v = x[model.nq:]
+    data.xout[:] = (np.dot(model.A, v) + np.dot(model.B, q) + np.dot(model.C, u)).flat + model.d
     data.cost = np.dot(x, np.dot(model.Q, x)) + np.dot(u, np.dot(model.U, u))
     return data.xout, data.cost
   
   def calcDiff(model,data,x,u=None,recalc=True):
     if u is None: u=model.unone
     if recalc: xout,cost = model.calc(data,x,u)
-    
-    data.Fx[:,:] = np.hstack([model.B, model.A])
-    data.Fu[:,:]   = model.C
     data.Lx[:] = np.dot(x.T, data.Lxx)
     data.Lu[:] = np.dot(u.T, data.Luu)
     return data.xout,data.cost
@@ -162,6 +162,11 @@ class DifferentialActionDataLQR:
     self.F = np.zeros([ nout,ndx+nu ])
     self.Fx = self.F[:,:ndx]
     self.Fu = self.F[:,-nu:]
+    
+    self.Fx[:,:model.nv] = model.B
+    self.Fx[:,model.nv:] = model.A
+    self.Fu[:,:] = model.C
+    
     self.g = np.zeros( ndx+nu)
     self.L = np.zeros([ndx+nu,ndx+nu])
     self.Lx = self.g[:ndx]
