@@ -360,7 +360,7 @@ class CostModelState(CostModelPinocchio):
         self.State = State
         self.ref = ref if ref is not None else State.zero()
         self.activation = activation if activation is not None else\
-                          ActivationModelWeightedQuad(weights=None)
+                          ActivationModelQuad()
     def calc(model,data,x,u):
         data.residuals[:] = model.State.diff(model.ref,x)
         data.cost = sum(model.activation.calc(data.activation,data.residuals))
