@@ -355,11 +355,11 @@ class CostDataCoM(CostDataPinocchio):
 
 
 class CostModelState(CostModelPinocchio):
-    def __init__(self,pinocchioModel,State,ref,nu=None):
+    def __init__(self,pinocchioModel,State,ref=None,nu=None):
         self.CostDataType = CostDataState
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=State.ndx,nu=nu)
         self.State = State
-        self.ref = ref
+        self.ref = ref or State.zero()
         self.weights = None
     def calc(model,data,x,u):
         w = (1 if model.weights is None else model.weights)
