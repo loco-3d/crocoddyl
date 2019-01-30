@@ -21,9 +21,9 @@ def absmax(A): return np.max(abs(A))
 
 def absmin(A): return np.min(abs(A))
 
-# Create a random orthonormal matrix using np.random.rand
-#--------------frcom scipy.stats.ortho_group----------
 def randomOrthonormalMatrix(dim=3):
+     """ Create a random orthonormal matrix using np.random.rand
+     """
      random_state = np.random
      H = np.eye(dim)
      D = np.ones((dim,))

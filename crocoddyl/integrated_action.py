@@ -43,6 +43,11 @@ class IntegratedActionModelEuler:
         data.L[:] = data.differential.L
 
 class IntegratedActionDataEuler:
+    """ Implement the RK4 integration scheme and its derivatives.
+    The effect on performance of the dense matrix multiplications in
+    the calcDiff function needs to be taken into account when considering
+    this integration scheme.
+    """
     def __init__(self,model):
         nx,ndx,nu,ncost = model.nx,model.ndx,model.nu,model.ncost
         self.differential = model.differential.createData()
