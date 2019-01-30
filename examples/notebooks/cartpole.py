@@ -16,8 +16,8 @@ class DifferentialActionModelCartPole:
         self.m2 = .1
         self.l  = .5
         self.g  = 9.81
-        self.costWeights = [ 1., 1., 0.1, 0.001, .001, 1. ]  # sin,cos, x,xdot,thdot,f
-        
+        self.costWeights = [ 1., 1., 0.1, 0.001, .001, 1. ]  # sin, cos, x, xdot, thdot, f
+
     def createData(self): return DifferentialActionDataCartPole(self)
     def calc(model,data,x,u=None):
         if u is None: u=model.unone
@@ -116,7 +116,4 @@ for i in range(1,5):
     xs,us,done = ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=10)
     print xs[-1]
 
-
-
-
-
+import cartpole_utils
