@@ -19,7 +19,7 @@ If you want to follow the current developments, you can directly refer to the [d
 
 
 ## <img align="center" height="20" src="https://i.imgur.com/x1morBF.png"/> Installation
-**Crocodddyl** has the following dependecies:
+**Crocoddyl** has the following dependecies:
 
 * boost (unit_test_framework)
 * eigen3
