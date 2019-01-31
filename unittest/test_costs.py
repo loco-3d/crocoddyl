@@ -169,8 +169,7 @@ assert( absmax(costData.g-costDataND.g) < 1e-3 )
 #assert( absmax(costData.L-costDataND.L) < 1e-3 )
 
 # --------------------------------------------------------------
-#from crocoddyl import CostModelSoftStateLimits, CostDataSoftStateLimits
-from crocoddyl import ActivationModelInequalityLow, ActivationModelInequalityHigh
+from crocoddyl import ActivationModelInequality, ActivationModelInequality
 
 X = StatePinocchio(rmodel)
 q = a2m(np.random.rand(rmodel.nq)) #random value between 0 and 1
@@ -179,13 +178,12 @@ v = a2m(np.random.rand(rmodel.nv))
 
 x = m2a(np.concatenate([q,v]))
 
-positionLimit = np.array([0.5,]*rmodel.nq)
-velocityLimit = np.array([0.5,]*rmodel.nv)
+lowerLimit = np.array([0.3,]*(rmodel.nq+rmodel.nv))
+upperLimit = np.array([0.7,]*(rmodel.nq+rmodel.nv))
+act_ineq = ActivationModelInequality(lowerLimit = lowerLimit, upperLimit=upperLimit, beta=1.0)
+costModel = CostModelState(rmodel, X, ref=X.zero(),
+                           activation=act_ineq)
 
-stateLimit = np.hstack([positionLimit, velocityLimit])
-
-costModel = CostModelState(rmodel, X, ref=stateLimit,
-                           activation=ActivationModelInequalityLow()) #Lower Limit Barrier
 costData = costModel.createData(rdata)
 costModel.calc(costData, x, u)
 
@@ -198,30 +196,12 @@ costModelND.calcDiff(costDataND,x,u)
 
 
 assert( absmax(costData.g-costDataND.g) < 1e-3 )
-#Check that the cost derivative is zero if q>=0.5 and that cost is positive if q<0.5
-assert((costData.Lx[m2a(x)>=0.5]==0.).all())
-assert((costData.Lx[m2a(x)<=0.5]!=0.).all())
+#Check that the cost derivative is zero if q>=lower and q<=upper
+#and that cost is positive if q<lower or q>upper
+lowersafe = m2a(x)>=lowerLimit; uppersafe = m2a(x)<=upperLimit
 
-#assert( absmax(costData.L-costDataND.L) < 1e-3 )
-
-#------------Check Value at upper limit-----------
-
-costModel = CostModelState(rmodel, X, ref=stateLimit,
-                           activation=ActivationModelInequalityHigh()) #Upper Limit Barrier
-costData = costModel.createData(rdata)
-costModel.calc(costData, x, u)
-
-costModel.calcDiff(costData,x,u)
-
-costModelND = CostModelNumDiff(costModel,X,withGaussApprox=True,
-                               reevals = [])
-costDataND  = costModelND.createData(rdata)
-costModelND.calcDiff(costDataND,x,u)
-
-assert( absmax(costData.g-costDataND.g) < 1e-3 )
-#Check that the cost derivative is zero if q<=0.5 and that cost is positive if q>0.5
-assert((costData.Lx[m2a(x)<=0.5]==0.).all())
-assert((costData.Lx[m2a(x)>=0.5]!=0.).all())
+assert(( costData.Lx[lowersafe & uppersafe] ==0.).all())
+assert(( costData.Lx[~lowersafe & ~uppersafe] !=0.).all())
 
 #assert( absmax(costData.L-costDataND.L) < 1e-3 )
 

@@ -21,49 +21,38 @@ class ActivationDataQuad:
     def __init__(self,model):
         pass
 
-class ActivationModelInequalityHigh:
+class ActivationModelInequality:
     """
-    a(r) = (r**2)/2 for r>0.
-    a(r) = 0. for r<=0
+    The activation starts from zero when r approaches bl or bu.
+    The activation is zero when r is between bl and bu
+    beta determines how much of the total acceptable range is not activated (default 90%)
+    
+    a(r) = (r**2)/2 for r>bu.
+    a(r) = (r**2)/2 for r<bl.
+    a(r) = 0. for bl<=r<=bu
     """
-    def __init__(self):
+    def __init__(self, lowerLimit, upperLimit, beta=0.9):
+        assert((lowerLimit<=upperLimit).all())
+        self.l = lowerLimit;   self.u = upperLimit;  self.beta=beta
+        self.m = (self.l+self.u)/2;  self.d = self.u-self.l
+        self.bl = self.m-self.beta*self.d
+        self.bu = self.m+self.beta*self.d
+        
         pass
     def calc(model,data,r):
         '''Return [ a(r_1) ... a(r_n) ] '''
-        return np.maximum(r, 0.)**2/2
+        return np.minimum(r-model.bl, 0)**2/2 + np.maximum(r-model.bu, 0)**2/2
     def calcDiff(model,data,r,recalc=True):
         if recalc: model.calc(data,r)
         ''' 
         Return [ a'(r_1) ... a'(r_n) ], diag([ a''(r_1) ... a''(r_n) ])
         '''
-        return np.maximum(r, 0.), ((r>0.).astype(int))[:,None]
+        return np.minimum(r-model.bl, 0.) + np.maximum(r-model.bu, 0),\
+          ((r-model.bu>=0.) + (r-model.bl<=0.)).astype(float)
 
-    def createData(self): return ActivationDataInequalityHigh(self)
+    def createData(self): return ActivationDataInequality(self)
 
-class ActivationDataInequalityHigh:
-    def __init__(self,model):
-        pass
-
-class ActivationModelInequalityLow:
-    """
-    a(r) = (r**2)/2 for r<0.
-    a(r) = 0. for r>=0
-    """
-    def __init__(self):
-        pass
-    def calc(model,data,r):
-        '''Return [ a(r_1) ... a(r_n) ] '''
-        return np.minimum(r, 0.)**2/2
-    def calcDiff(model,data,r,recalc=True):
-        if recalc: model.calc(data,r)
-        ''' 
-        Return [ a'(r_1) ... a'(r_n) ], diag([ a''(r_1) ... a''(r_n) ])
-        '''
-        return np.minimum(r, 0.), ((r<0.).astype(int))[:,None]
-
-    def createData(self): return ActivationDataInequalityLow(self)
-
-class ActivationDataInequalityLow:
+class ActivationDataInequality:
     def __init__(self,model):
         pass
 
