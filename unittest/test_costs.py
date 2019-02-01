@@ -204,6 +204,34 @@ assert(( costData.Lx[lowersafe & uppersafe] ==0.).all())
 assert(( costData.Lx[~lowersafe & ~uppersafe] !=0.).all())
 
 #assert( absmax(costData.L-costDataND.L) < 1e-3 )
+#--------------------------Check Inf joint limits
+
+lowerLimit[:rmodel.nq] = -np.inf  # inf position lower limit
+upperLimit[-rmodel.nv:] = np.inf  # inf velocity upper limit
+act_ineq = ActivationModelInequality(lowerLimit = lowerLimit, upperLimit=upperLimit, beta=1.0)
+
+costModel = CostModelState(rmodel, X, ref=X.zero(),
+                           activation=act_ineq)
+
+costData = costModel.createData(rdata)
+costModel.calc(costData, x, u)
+
+costModel.calcDiff(costData,x,u)
+
+costModelND = CostModelNumDiff(costModel,X,withGaussApprox=True,
+                               reevals = [])
+costDataND  = costModelND.createData(rdata)
+costModelND.calcDiff(costDataND,x,u)
+
+
+assert( absmax(costData.g-costDataND.g) < 1e-3 )
+#Check that the cost derivative is zero if q>=lower and q<=upper
+#and that cost is positive if q<lower or q>upper
+lowersafe = m2a(x)>=lowerLimit; uppersafe = m2a(x)<=upperLimit
+
+assert(( costData.Lx[lowersafe & uppersafe] ==0.).all())
+assert(( costData.Lx[~lowersafe & ~uppersafe] !=0.).all())
+
 
 # --------------------------------------------------------------
 from crocoddyl import CostDataControl, CostModelControl
