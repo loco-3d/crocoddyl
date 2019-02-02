@@ -114,7 +114,7 @@ class StatePinocchio:
         self.nx = self.model.nq + self.model.nv
         self.ndx = 2*self.model.nv
     def zero(self):
-        q = self.model.neutralConfiguration
+        q = pinocchio.neutral(self.model)
         v = np.zeros(self.model.nv)
         return np.concatenate([q.flat,v])
     def rand(self):

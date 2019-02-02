@@ -12,6 +12,7 @@ from cost import CostDataSoftStateLimits, CostModelSoftStateLimits
 from cost import CostDataControl, CostModelControl
 from cost import CostDataForce, CostModelForce
 from activation import ActivationDataQuad, ActivationModelQuad
+from activation import ActivationDataInequality, ActivationModelInequality
 from activation import ActivationDataWeightedQuad, ActivationModelWeightedQuad
 from activation import ActivationDataSmoothAbs, ActivationModelSmoothAbs
 from action import ActionDataLQR, ActionModelLQR

@@ -1,4 +1,4 @@
-from activation import ActivationModelQuad
+from activation import ActivationModelQuad, ActivationModelWeightedQuad
 from utils import m2a
 import numpy as np
 import pinocchio
@@ -353,29 +353,29 @@ class CostDataCoM(CostDataPinocchio):
         self.Rv = 0
 
 
-
 class CostModelState(CostModelPinocchio):
-    def __init__(self,pinocchioModel,State,ref=None,nu=None):
+    def __init__(self,pinocchioModel,State,ref=None,nu=None, activation=None):
         self.CostDataType = CostDataState
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=State.ndx,nu=nu)
         self.State = State
         self.ref = ref if ref is not None else State.zero()
-        self.weights = None
+        self.activation = activation if activation is not None else\
+                          ActivationModelQuad()
     def calc(model,data,x,u):
-        w = (1 if model.weights is None else model.weights)
-        data.residuals[:] = w*model.State.diff(model.ref,x)
-        data.cost = .5*sum(data.residuals**2)
+        data.residuals[:] = model.State.diff(model.ref,x)
+        data.cost = sum(model.activation.calc(data.activation,data.residuals))
         return data.cost
     def calcDiff(model,data,x,u,recalc=True):
         if recalc: model.calc(data,x,u)
-        w = (1 if model.weights is None else model.weights)
-        data.Rx[:,:] = (w*model.State.Jdiff(model.ref,x,'second').T).T
-        data.Lx[:] = np.dot(data.Rx.T,data.residuals)
-        data.Lxx[:,:] = np.dot(data.Rx.T,data.Rx)
+        data.Rx[:,:] = (model.State.Jdiff(model.ref,x,'second').T).T
+        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
+        data.Lx[:] = np.dot(data.Rx.T, Ax)
+        data.Lxx[:,:] = np.dot(data.Rx.T, Axx*data.Rx)
 
 class CostDataState(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
+        self.activation = model.activation.createData()
         self.Lu = 0
         self.Lxu = 0
         self.Luu = 0

@@ -21,7 +21,50 @@ class ActivationDataQuad:
     def __init__(self,model):
         pass
 
+class ActivationModelInequality:
+    """
+    The activation starts from zero when r approaches bl or bu.
+    The activation is zero when r is between bl and bu
+    beta determines how much of the total acceptable range is not activated (default 90%)
+    
+    a(r) = (r**2)/2 for r>bu.
+    a(r) = (r**2)/2 for r<bl.
+    a(r) = 0. for bl<=r<=bu
+    """
+    def __init__(self, lowerLimit, upperLimit, beta=0.9):
+        assert((lowerLimit<=upperLimit).all())
+        self.l = lowerLimit;   self.u = upperLimit;  self.beta=beta
+        self.m = (self.l+self.u)/2;  self.d = (self.u-self.l)/2
+        self.bl = self.m-self.beta*self.d
+        self.bu = self.m+self.beta*self.d
+        self._adapt2inf();
+        pass
+      
+    def calc(model,data,r):
+        '''Return [ a(r_1) ... a(r_n) ] '''
+        return np.minimum(r-model.bl, 0)**2/2 + np.maximum(r-model.bu, 0)**2/2
+    def calcDiff(model,data,r,recalc=True):
+        if recalc: model.calc(data,r)
+        ''' 
+        Return [ a'(r_1) ... a'(r_n) ], diag([ a''(r_1) ... a''(r_n) ])
+        '''
+        return np.minimum(r-model.bl, 0.) + np.maximum(r-model.bu, 0),\
+          ((r-model.bu>=0.) + (r-model.bl<=0.)).astype(float)
 
+    def createData(self): return ActivationDataInequality(self)
+
+    def _adapt2inf(self):
+      '''In case loweLimit or upperLimit is inf, reset bl and bu to lowerLimit and upperLimit
+      '''
+      isinf_l = np.isinf(self.l); isinf_u = np.isinf(self.u)
+      if isinf_l.any() or isinf_u.any():
+        self.bl[isinf_l] = -np.inf; self.bu[isinf_l] = self.u[isinf_l]
+        self.bu[isinf_u] = np.inf;  self.bl[isinf_u] = self.l[isinf_l]
+      return
+
+class ActivationDataInequality:
+    def __init__(self,model):
+        pass
 
 class ActivationModelWeightedQuad:
     def __init__(self,weights):
