@@ -238,15 +238,16 @@ class CostModelFrameVelocity(CostModelPinocchio):
     effector.
     Assumes updateFramePlacement and computeForwardKinematicsDerivatives.
     '''
-    def __init__(self,pinocchioModel,frame,ref = None):
+    def __init__(self,pinocchioModel,frame,ref = None ,nu=None,activation=None):
         self.CostDataType = CostDataFrameVelocity
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=6)
         self.ref = ref if ref is not None else np.zeros(6) 
         self.frame = frame
+        self.activation = activation if activation is not None else ActivationModelQuad()
     def calc(model,data,x,u):
         data.residuals[:] = m2a(pinocchio.getFrameVelocity(model.pinocchio,data.pinocchio,
                                                            model.frame).vector) - model.ref
-        data.cost = .5*sum(data.residuals**2)
+        data.cost = sum(model.activation.calc(data.activation,data.residuals))
         return data.cost
     def calcDiff(model,data,x,u,recalc=True):
         if recalc: model.calc(data,x,u)
@@ -254,15 +255,18 @@ class CostModelFrameVelocity(CostModelPinocchio):
         dv_dq,dv_dvq = pinocchio.getJointVelocityDerivatives\
                                   (model.pinocchio,data.pinocchio,data.joint,
                                    pinocchio.ReferenceFrame.LOCAL)
+
+        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
         data.Rq[:,:] = data.fXj*dv_dq
         data.Rv[:,:] = data.fXj*dv_dvq
-        data.Lx[:]     = np.dot(data.Rx.T,data.residuals)
-        data.Lxx[:,:]  = np.dot(data.Rx.T,data.Rx)
+        data.Lx[:]     = np.dot(data.Rx.T,Ax)
+        data.Lxx[:,:]  = np.dot(data.Rx.T, Axx*data.Rx)
         return data.cost
 
 class CostDataFrameVelocity(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
+        self.activation = model.activation.createData()
         frame = model.pinocchio.frames[model.frame]
         self.joint = frame.parent       
         self.jMf = frame.placement
@@ -280,15 +284,16 @@ class CostModelFramePlacement(CostModelPinocchio):
     for a frame of the robot. Paramterize it with the frame index frameIdx and
     the effector desired pinocchio::SE3 ref.
     '''
-    def __init__(self,pinocchioModel,frame,ref,nu=None):
+    def __init__(self,pinocchioModel,frame,ref,nu=None,activation=None):
         self.CostDataType = CostDataFramePlacement
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=6,nu=nu)
         self.ref = ref
         self.frame = frame
+        self.activation = activation if activation is not None else ActivationModelQuad()
     def calc(model,data,x,u):
         data.rMf = model.ref.inverse()*data.pinocchio.oMf[model.frame]
         data.residuals[:] = m2a(pinocchio.log(data.rMf).vector)
-        data.cost = .5*sum(data.residuals**2)
+        data.cost = sum(model.activation.calc(data.activation,data.residuals))
         return data.cost
     def calcDiff(model,data,x,u,recalc=True):
         if recalc: model.calc(data,x,u)
@@ -299,14 +304,16 @@ class CostModelFramePlacement(CostModelPinocchio):
                                                  data.pinocchio,
                                                  model.frame,
                                                  pinocchio.ReferenceFrame.LOCAL))
+        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
         data.Rq[:,:nq] = J
-        data.Lq[:]     = np.dot(J.T,data.residuals)
-        data.Lqq[:,:]  = np.dot(J.T,J)
+        data.Lq[:]     = np.dot(J.T,Ax)
+        data.Lqq[:,:]  = np.dot(data.Rq.T,Axx*data.Rq) # J is a matrix, use Rq instead.
         return data.cost
 
 class CostDataFramePlacement(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
+        self.activation = model.activation.createData()
         self.rMf = None
         self.Lu = 0
         self.Lv = 0
@@ -323,27 +330,29 @@ class CostModelCoM(CostModelPinocchio):
     The class proposes a model of a cost function CoM.
     Paramterize it with the desired CoM ref
     '''
-    def __init__(self,pinocchioModel,ref,nu=None):
+    def __init__(self,pinocchioModel,ref,nu=None,activation=None):
         self.CostDataType = CostDataCoM
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=3,nu=nu)
         self.ref = ref
+        self.activation = activation if activation is not None else ActivationModelQuad()
     def calc(model,data,x,u):
         data.residuals = m2a(data.pinocchio.com[0]) - model.ref
-        data.cost = .5*sum(data.residuals**2)
+        data.cost = sum(model.activation.calc(data.activation,data.residuals))
         return data.cost
     def calcDiff(model,data,x,u,recalc=True):
         if recalc: model.calc(data,x,u)
         ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
-
+        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
         J = data.pinocchio.Jcom
         data.Rq[:,:nq] = J
-        data.Lq[:]     = np.dot(J.T,data.residuals)
-        data.Lqq[:,:]  = np.dot(J.T,J)
+        data.Lq[:]     = np.dot(J.T,Ax)
+        data.Lqq[:,:]  = np.dot(data.Rq.T,Axx*data.Rq) # J is a matrix, use Rq instead.
         return data.cost
 
 class CostDataCoM(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
+        self.activation = model.activation.createData()
         self.Lu = 0
         self.Lv = 0
         self.Lxu = 0
@@ -384,27 +393,30 @@ class CostDataState(CostDataPinocchio):
 
 
 class CostModelControl(CostModelPinocchio):
-    def __init__(self,pinocchioModel,nu=None,ref=None):
+    def __init__(self,pinocchioModel,nu=None,ref=None,activation=None):
         self.CostDataType = CostDataControl
         nu = nu if nu is not None else pinocchioModel.nv
         if ref is not None: assert( ref.shape == (nu,) )
         CostModelPinocchio.__init__(self,pinocchioModel,nu=nu,ncost=nu)
         self.ref = ref
+        self.activation = activation if activation is not None else ActivationModelQuad()
     def calc(model,data,x,u):
         data.residuals[:] = u if model.ref is None else u-model.ref
-        data.cost = .5*sum(data.residuals**2)
+        data.cost = sum(model.activation.calc(data.activation,data.residuals))
         return data.cost
     def calcDiff(model,data,x,u,recalc=True):
         if recalc: model.calc(data,x,u)
         #data.Ru[:,:] = np.eye(nu)
-        data.Lu[:] = data.residuals
-        #data.Luu[:,:] = data.Ru
+        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
+        data.Lu[:] = Ax
+        data.Luu[:,:] = np.diag(m2a(Axx))
         assert( data.Luu[0,0] == 1 and data.Luu[1,0] == 0 )
 
 class CostDataControl(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
         CostDataPinocchio.__init__(self,model,pinocchioData)
         ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
+        self.activation = model.activation.createData()
         self.Lx = 0
         self.Lxx = 0
         self.Lxu = 0
@@ -497,34 +509,35 @@ class CostModelForce(CostModelPinocchio):
     The class proposes a model of a cost function for tracking a reference
     value of a 6D force, being given the contact model and its derivatives.
     '''
-    def __init__(self,pinocchioModel,contactModel,ref=None,nu=None):
+    def __init__(self,pinocchioModel,contactModel,ref=None,nu=None, activation=None):
         self.CostDataType = CostDataForce
         CostModelPinocchio.__init__(self,pinocchioModel,ncost=6,nu=nu)
         self.ref = ref if ref is not None else np.zeros(6)
         self.contact = contactModel
+        self.activation = activation if activation is not None else ActivationModelQuad()
     def calc(model,data,x,u):
         if data.contact is None:
             raise RunTimeError('''The CostForce data should be specifically initialized from the
             contact data ... no automatic way of doing that yet ...''')
         data.f = data.contact.f
         data.residuals = data.f-model.ref
-        data.cost = .5*sum(data.residuals**2)
+        data.cost = sum(model.activation.calc(data.activation,data.residuals))
         return data.cost
     def calcDiff(model,data,x,u,recalc=True):
         if recalc: model.calc(data,x,u)
         assert(model.nu==len(u) and model.contact.nu == model.nu)
         ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
         df_dx,df_du = data.contact.df_dx,data.contact.df_du
-
+        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
         data.Rx [:,:] = df_dx   # This is useless.
         data.Ru [:,:] = df_du   # This is useless
 
-        data.Lx [:]     = np.dot(df_dx.T,data.residuals)
-        data.Lu [:]     = np.dot(df_du.T,data.residuals)
+        data.Lx [:]     = np.dot(df_dx.T,Ax)
+        data.Lu [:]     = np.dot(df_du.T,Ax)
 
-        data.Lxx[:,:]   = np.dot(df_dx.T,df_dx)
-        data.Lxu[:,:]   = np.dot(df_dx.T,df_du)
-        data.Luu[:,:]   = np.dot(df_du.T,df_du)
+        data.Lxx[:,:]   = np.dot(df_dx.T,Axx*df_dx)
+        data.Lxu[:,:]   = np.dot(df_dx.T,Axx*df_du)
+        data.Luu[:,:]   = np.dot(df_du.T,Axx*df_du)
 
         return data.cost
 
@@ -532,3 +545,4 @@ class CostDataForce(CostDataPinocchio):
     def __init__(self,model,pinocchioData,contactData=None):
         CostDataPinocchio.__init__(self,model,pinocchioData)
         self.contact = contactData
+        self.activation = model.activation.createData()
