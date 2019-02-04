@@ -1,19 +1,16 @@
-from crocoddyl import getTalosPathFromRos
+from crocoddyl import getTalosPathFromRos, loadTalos
 import pinocchio
 import pickle
 import os
 #---------------------------------------------------------
-MODEL_PATH = getTalosPathFromRos()
-MESH_DIR = MODEL_PATH+'/../'
-URDF_FILENAME = "talos_reduced.urdf"
-URDF_MODEL_PATH = MODEL_PATH + "/robots/" + URDF_FILENAME
-robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(URDF_MODEL_PATH, [MESH_DIR],
-                                                           pinocchio.JointModelFreeFlyer())
+robot = loadTalos()
 #---------------------------------------------------------
 
-DISPLAY = True
+DISPLAY = False
+DT= 0.005
 
-#-------------------------INITIAL TRAJECTORY----------
+#-------------------------INITIAL TRAJECTORY--------------
+DT_INIT = 0.005
 TRAJ_DIR = os.getcwd()+"/traj_1step/"
 
 X_init = pickle.load( open(TRAJ_DIR+"X_init.out","rb")) #loads the state x
@@ -23,3 +20,8 @@ U_init = pickle.load( open(TRAJ_DIR+"U_init.out","rb")) # loads the control u
 #where lf: 'leg_left_6_joint', 'rf' : 'leg_right_6_joint'
 f_init = pickle.load( open(TRAJ_DIR+"f_init.out","rb")) 
 ddq_init = pickle.load( open(TRAJ_DIR+"ddq_init.out","rb")) #loads the acceleration
+
+#-----------------------Contact Sequence-----------------
+
+MUSCOD_CS_OUTPUT_FILENAME=TRAJ_DIR+"contact_sequence_trajectory.xml"
+CONTACT_SEQUENCE_XML_TAG = "contact_sequence"
