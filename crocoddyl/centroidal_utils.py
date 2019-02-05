@@ -58,6 +58,7 @@ def createPhiFromContactSequence(rmodel, rdata, cs):
   cc.hg = np.zeros((N, 6));      cc.dhg = np.zeros((N, 6));
 
   n = 0;
+  f_rearrange = range(6,12)+range(0,6)
   for i,spl in enumerate(cs.ms_interval_data[:-1]):
     x = m2a(spl.state_trajectory)
     dx = m2a(spl.dot_state_trajectory)
@@ -72,8 +73,10 @@ def createPhiFromContactSequence(rmodel, rdata, cs):
     #--Control output of MUSCOD is a discretized piecewise polynomial.
     #------Convert the one piece to Points and Derivatives.
     poly_u, dpoly_u = polyfitND(tt, u, deg=3, full=True, eps=1e-5)
-    f_poly = lambda t: np.array([p(t) for p in poly_u])
-    f_dpoly = lambda t: np.array([dp(t) for dp in dpoly_u])
+    #Note that centroidal plannar returns the forces in the sequence RF,LF,RH,LH.
+    #The wholebody solver follows the urdf parsing given by LF,RF,LH,RH
+    f_poly = lambda t: np.array([poly_u[i](t) for i in f_rearrange])
+    f_dpoly = lambda t: np.array([dpoly_u[i](t) for i in f_rearrange])
     cc.f[n:n+nt,:] = np.array([f_poly(t) for t in tt])
     cc.df[n:n+nt,:] = np.array([f_dpoly(t) for t in tt])
     
