@@ -74,13 +74,13 @@ class Fix:
         self.cost2 = CostModelState(rmodel,State,ref=State.zero(),nu=rmodel.nv)
         self.cost3 = CostModelControl(rmodel,nu=rmodel.nv)
 
-        self.dmodel = DifferentialActionModelManipulator(rmodel)
-        self.model  = IntegratedActionModelEuler(self.dmodel)
-
-        self.costModel = costModel = self.dmodel.costs
+        costModel = CostModelSum(rmodel)
         costModel.addCost( name="pos", weight = 10, cost = self.cost1)
         costModel.addCost( name="regx", weight = 0.1, cost = self.cost2) 
         costModel.addCost( name="regu", weight = 0.01, cost = self.cost3)
+
+        self.dmodel = DifferentialActionModelManipulator(rmodel, costModel)
+        self.model  = IntegratedActionModelEuler(self.dmodel)
 
         self.data = self.model.createData()
         
