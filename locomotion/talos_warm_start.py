@@ -1,8 +1,8 @@
 import pinocchio
-import conf_talos_1step as conf
+import conf_talos_warm_start as conf
 from time import sleep
 from locomote import ContactSequenceHumanoid
-from crocoddyl import createPhiFromContactSequence
+from centroidal_utils import createPhiFromContactSequence
 robot = conf.robot
 rmodel = robot.model
 rdata = robot.data
