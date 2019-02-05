@@ -8,7 +8,6 @@ from cost import CostDataFrameVelocity, CostModelFrameVelocity
 from cost import CostDataFramePlacement, CostModelFramePlacement
 from cost import CostDataCoM, CostModelCoM
 from cost import CostDataState, CostModelState
-from cost import CostDataSoftStateLimits, CostModelSoftStateLimits
 from cost import CostDataControl, CostModelControl
 from cost import CostDataForce, CostModelForce
 from activation import ActivationDataQuad, ActivationModelQuad
