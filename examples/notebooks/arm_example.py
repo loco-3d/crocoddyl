@@ -23,8 +23,8 @@ costXReg  = CostModelState(robot.model,StatePinocchio(robot.model))
 costUReg  = CostModelControl(robot.model)
 
 # Create the action model with empty costs
-model     = DifferentialActionModel(robot.model)
-termmodel = DifferentialActionModel(robot.model)
+model     = DifferentialActionModelManipulator(robot.model)
+termmodel = DifferentialActionModelManipulator(robot.model)
 
 # Then let's added the running and terminal cost functions
 model.costs.addCost( name="pos", weight = 1, cost = costTrack)

@@ -34,8 +34,8 @@ for i,p in enumerate(ps):
 gv.refresh()
 
 
-models     = [ DifferentialActionModel(robot.model) for p in ps]
-termmodels = [ DifferentialActionModel(robot.model) for p in ps]
+models     = [ DifferentialActionModelManipulator(robot.model) for p in ps]
+termmodels = [ DifferentialActionModelManipulator(robot.model) for p in ps]
 
 costTrack = [ CostModelFrameTranslation(robot.model,frame=frameId,ref=p) for p in ps ]
 costXReg = CostModelState(robot.model,

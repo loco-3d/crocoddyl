@@ -7,7 +7,7 @@ import pinocchio
 
 
 
-class DifferentialActionModel:
+class DifferentialActionModelManipulator:
     def __init__(self,pinocchioModel):
         self.pinocchio = pinocchioModel
         self.State = StatePinocchio(self.pinocchio)
@@ -23,7 +23,7 @@ class DifferentialActionModel:
         self.forceAba = False
     @property
     def ncost(self): return self.costs.ncost
-    def createData(self): return DifferentialActionData(self)
+    def createData(self): return DifferentialActionDataManipulator(self)
     def calc(model,data,x,u=None):
         if u is None: u=model.unone
         nx,nu,nq,nv,nout = model.nx,model.nu,model.nq,model.nv,model.nout
@@ -72,7 +72,7 @@ class DifferentialActionModel:
 
         return data.xout,data.cost
 
-class DifferentialActionData:
+class DifferentialActionDataManipulator:
     def __init__(self,model):
         self.pinocchio = model.pinocchio.createData()
         self.costs = model.costs.createData(self.pinocchio)

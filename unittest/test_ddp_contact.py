@@ -2,7 +2,7 @@ import pinocchio
 from pinocchio.utils import *
 from numpy.linalg import inv,norm,pinv
 from numpy import dot,asarray
-from crocoddyl import IntegratedActionModelEuler, DifferentialActionModelNumDiff,StatePinocchio,CostModelSum,CostModelPinocchio,CostModelFrameTranslation,CostModelState,CostModelControl,DifferentialActionModel
+from crocoddyl import IntegratedActionModelEuler, DifferentialActionModelNumDiff,StatePinocchio,CostModelSum,CostModelPinocchio,CostModelFrameTranslation,CostModelState,CostModelControl,DifferentialActionModelManipulator
 from crocoddyl import ContactModel6D,ActuationModelFreeFloating,DifferentialActionModelFloatingInContact,ContactModelMultiple
 import warnings
 from numpy.linalg import inv,pinv,norm,svd,eig
@@ -74,7 +74,7 @@ class Fix:
         self.cost2 = CostModelState(rmodel,State,ref=State.zero(),nu=rmodel.nv)
         self.cost3 = CostModelControl(rmodel,nu=rmodel.nv)
 
-        self.dmodel = DifferentialActionModel(rmodel)
+        self.dmodel = DifferentialActionModelManipulator(rmodel)
         self.model  = IntegratedActionModelEuler(self.dmodel)
 
         self.costModel = costModel = self.dmodel.costs
@@ -160,4 +160,4 @@ disp = lambda xs: disptraj(f.robot,xs)
 ddp = SolverDDP(problem)
 ddp.callback = [CallbackDDPLogger()]
 ddp.th_stop = 1e-18
-ddp.solve(verbose=True,maxiter=1000)
+ddp.solve(maxiter=1000)
