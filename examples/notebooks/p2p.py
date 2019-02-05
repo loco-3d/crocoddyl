@@ -34,23 +34,33 @@ for i,p in enumerate(ps):
 gv.refresh()
 
 
-models     = [ DifferentialActionModelManipulator(robot.model) for p in ps]
-termmodels = [ DifferentialActionModelManipulator(robot.model) for p in ps]
-
-costTrack = [ CostModelFrameTranslation(robot.model,frame=frameId,ref=p) for p in ps ]
+# State and control regularization costs
 costXReg = CostModelState(robot.model,
                           StatePinocchio(robot.model))
 costUReg = CostModelControl(robot.model,nu=robot.model.nv)
 
-# Then let's added the running and terminal cost functions
-for model,cost in zip(models,costTrack):
-    model.costs.addCost( name="pos", weight = 1, cost = cost)
-    model.costs.addCost( name="xreg", weight = 1e-4, cost = costXReg)
-    model.costs.addCost( name="ureg", weight = 1e-7, cost = costUReg)
-for model,cost in zip(termmodels,costTrack):
-    model.costs.addCost( name="pos", weight = 1000, cost = cost)
-    model.costs.addCost( name="xreg", weight = 1e-4, cost = costXReg)
-    model.costs.addCost( name="ureg", weight = 1e-7, cost = costUReg)
+# Then let's added the running and terminal cost functions per each action
+# model
+models = []
+termmodels = []
+for p in ps:
+    # Create the tracking cost
+    costTrack = CostModelFrameTranslation(robot.model,frame=frameId,ref=p)
+
+    # Create the running action model
+    runningCostModel = CostModelSum(robot.model)
+    runningCostModel.addCost( name="pos", weight = 1, cost = costTrack)
+    runningCostModel.addCost( name="xreg", weight = 1e-4, cost = costXReg)
+    runningCostModel.addCost( name="ureg", weight = 1e-7, cost = costUReg)
+    models += [ DifferentialActionModelManipulator(robot.model,runningCostModel) ]
+
+    # Create the terminal action model
+    terminalCostModel = CostModelSum(robot.model)
+    terminalCostModel.addCost( name="pos", weight = 1000, cost = costTrack)
+    terminalCostModel.addCost( name="xreg", weight = 1e-4, cost = costXReg)
+    terminalCostModel.addCost( name="ureg", weight = 1e-7, cost = costUReg)
+    termmodels += [ DifferentialActionModelManipulator(robot.model,terminalCostModel) ]
+
 
 x0 = np.concatenate([ m2a(robot.q0), np.zeros(robot.model.nv)])
 seqs = [  [ IntegratedActionModelEuler(model) ]*T+[IntegratedActionModelEuler(termmodel)]

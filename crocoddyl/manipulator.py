@@ -1,15 +1,14 @@
 from state import StatePinocchio
-from cost import CostModelSum
 from utils import a2m
 import numpy as np
 import pinocchio
 
 
 class DifferentialActionModelManipulator:
-    def __init__(self,pinocchioModel):
+    def __init__(self,pinocchioModel, costModel):
         self.pinocchio = pinocchioModel
         self.State = StatePinocchio(self.pinocchio)
-        self.costs = CostModelSum(self.pinocchio)
+        self.costs = costModel
         self.nq,self.nv = self.pinocchio.nq, self.pinocchio.nv
         self.nx = self.State.nx
         self.ndx = self.State.ndx
