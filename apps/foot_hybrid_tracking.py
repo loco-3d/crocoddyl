@@ -9,7 +9,9 @@ from crocoddyl import loadTalosLegs
 
 robot = loadTalosLegs()
 robot.model.armature[6:] = 1.
+robot.q0[2]=0
 rmodel = robot.model
+rmodel.defaultState = np.concatenate([m2a(rmodel.neutralConfiguration),np.zeros(rmodel.nv)])
 
 rightFrame = 'right_sole_link'
 leftFrame = 'left_sole_link'
@@ -29,8 +31,9 @@ def createModel(timeStep,footRef,contactName,opPointName):
     cost1 = CostModelFramePlacement(rmodel,nu=actModel.nu,
                                 frame=rmodel.getFrameId(opPointName),
                                 ref=pinocchio.SE3(eye(3),np.matrix(footRef).T))
-    cost2 = CostModelState(rmodel,State,ref=State.zero(),nu=actModel.nu)
-    cost2.weights = np.array([0]*6+[0.01]*(rmodel.nv-6)+[10]*rmodel.nv)
+    xweight = np.array([0]*6+[0.01]*(rmodel.nv-6)+[10]*rmodel.nv)
+    cost2 = CostModelState(rmodel,State,ref=rmodel.defaultState,nu=actModel.nu,
+                           activation=ActivationModelWeightedQuad(xweight**2))
     cost3 = CostModelControl(rmodel,nu=actModel.nu)
     costModel.addCost( name="pos", weight = 100, cost = cost1)
     costModel.addCost( name="regx", weight = 0.1, cost = cost2) 
@@ -121,7 +124,7 @@ problem = ShootingProblem(x, models, termmodel )
 ddp = SolverDDP(problem)
 ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose(), CallbackSolverDisplay(robot,4)]
 ddp.th_stop = 1e-9
-ddp.solve(maxiter=1000,regInit=.1)
+ddp.solve(maxiter=1000,regInit=.1,init_xs=[rmodel.defaultState]*len(ddp.models())  )
 
 assert( norm(ddp.datas()[T].differential.costs['pos'].residuals) < 1e-2 )
 assert( norm(ddp.datas()[T].differential.costs['veleff'].residuals) < 5e-3 )
