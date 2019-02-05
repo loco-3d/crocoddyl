@@ -96,3 +96,14 @@ def loadTalosLegs(modelPath='/opt/openrobots/share'):
     robot.q0 = m2.neutralConfiguration.copy()
     robot.q0[2] = 1.019
     return robot
+
+def loadHyQ(modelPath='examples/hyq_description'):
+    from pinocchio import JointModelFreeFlyer
+    import os
+    FILENAME = str(os.path.dirname(os.path.abspath(__file__))) + "/../"
+    URDF_FILENAME = "hyq_no_sensors.urdf"
+    URDF_SUBPATH = "/robots/" + URDF_FILENAME
+    robot = RobotWrapper.BuildFromURDF(FILENAME+modelPath+URDF_SUBPATH, [modelPath],
+                                       pinocchio.JointModelFreeFlyer())
+    # TODO define default position inside srdf
+    return robot

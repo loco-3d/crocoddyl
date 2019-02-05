@@ -38,7 +38,7 @@ from shooting import ShootingProblem
 from callbacks import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay, CallbackSolverTimer
 from ddp import SolverDDP
 from kkt import SolverKKT
-from robots import getTalosPathFromRos, loadTalosArm, loadTalos, loadTalosLegs
+from robots import getTalosPathFromRos, loadTalosArm, loadTalos, loadTalosLegs, loadHyQ
 from utils import m2a, a2m, absmax, absmin
 from centroidal_utils import CentroidalPhi, createPhiFromContactSequence
 from diagnostic import plotDDPConvergence, plotOCSolution, displayTrajectory
