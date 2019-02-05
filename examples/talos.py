@@ -1,7 +1,7 @@
 from crocoddyl import StatePinocchio
 from crocoddyl import DifferentialActionModelFloatingInContact
 from crocoddyl import IntegratedActionModelEuler
-from crocoddyl import CostModelSum
+from crocoddyl import CostModelSum, ActivationModelWeightedQuad
 from crocoddyl import CostModelFramePlacement, CostModelFrameVelocity
 from crocoddyl import CostModelState, CostModelControl
 from crocoddyl import ActuationModelFreeFloating
@@ -116,12 +116,13 @@ class SimpleBipedWalkingProblem:
                                         footSwingTask.frameId,
                                         footSwingTask.oXf,
                                         actModel.nu)
+        stateWeights = \
+            np.array([0]*6 + [0.01]*(self.robot.model.nv-6) + [10]*self.robot.model.nv)
         stateReg = CostModelState(self.robot.model,
                                   self.state,
-                                  self.state.zero(),
-                                  actModel.nu)
-        stateReg.weights = \
-            np.array([0]*6 + [0.01]*(self.robot.model.nv-6) + [10]*self.robot.model.nv)
+                                  self.robot.model.defaultState,
+                                  actModel.nu,
+                                  activation=ActivationModelWeightedQuad(stateWeights**2))
         ctrlReg = CostModelControl(self.robot.model, actModel.nu)
         costModel.addCost("footTrack", footTrack, 100.)
         costModel.addCost("stateReg", stateReg, 0.1)
@@ -156,11 +157,14 @@ class SimpleBipedWalkingProblem:
 # Creating the lower-body part of Talos and remove any armature
 robot = loadTalosLegs()
 robot.model.armature[6:] = 1.
-
+robot.model.defaultState = \
+    np.concatenate([m2a(robot.model.neutralConfiguration),
+                    np.zeros(robot.model.nv)])
 
 q = robot.q0.copy()
 v = zero(robot.model.nv)
 x = m2a(np.concatenate([q,v]))
+
 
 # Setting up the 3d walking problem
 rightFoot = 'right_sole_link'
