@@ -324,7 +324,7 @@ problem = ShootingProblem(x0, [ model ], model)
 ddp = SolverDDP(problem)
 ddp.callback = [CallbackDDPLogger()]
 ddp.th_stop = 1e-18
-xddp,uddp,doneddp = ddp.solve(maxiter=30)
+xddp,uddp,doneddp = ddp.solve(maxiter=200)
 
 assert(doneddp)
 assert( norm(ddp.datas()[-1].differential.costs['pos'].residuals)<1e-3 )
@@ -340,14 +340,14 @@ dmodel.costs['regu'].weight = 1e-3
 
 kkt = SolverKKT(problem)
 kkt.th_stop = 1e-18
-xkkt,ukkt,donekkt = kkt.solve(init_xs=x0s,init_us=u0s,isFeasible=True,maxiter=20)
-xddp,uddp,doneddp = ddp.solve(init_xs=x0s,init_us=u0s,isFeasible=True,maxiter=20)
+xkkt,ukkt,donekkt = kkt.solve(init_xs=x0s,init_us=u0s,isFeasible=True,maxiter=200)
+xddp,uddp,doneddp = ddp.solve(init_xs=x0s,init_us=u0s,isFeasible=True,maxiter=200)
 
 assert(donekkt)
 assert(norm(xkkt[0]-problem.initialState)<1e-9)
 assert(norm(xddp[0]-problem.initialState)<1e-9)
 for t in range(problem.T):
-    assert(norm(ukkt[t]-uddp[t])<1e-6)
-    assert(norm(xkkt[t+1]-xddp[t+1])<1e-6)
+    assert(norm(ukkt[t]-uddp[t])<1e-5) #is enough 1e-5?
+    assert(norm(xkkt[t+1]-xddp[t+1])<1e-5) #is enough 1e-5?
 
  
