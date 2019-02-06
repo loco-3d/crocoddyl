@@ -34,6 +34,7 @@ leftId  = rmodel.getFrameId(leftFoot)
 q0 = robot.q0.copy()
 v0 = zero(rmodel.nv)
 x0 = m2a(np.concatenate([q0,v0]))
+rmodel.defaultState = x0.copy()
 
 # Solving the 3d walking problem using DDP
 stepLength = 0.2
@@ -59,10 +60,10 @@ def runningModel(contactIds, effectors, integrationStep = 1e-2):
 
     # Creating the cost model for a contact phase
     costModel = CostModelSum(rmodel, actModel.nu)
-    wx = np.array([0]*6 + [10.]*(rmodel.nv-6) + [50]*rmodel.nv)
-    xneutral = np.concatenate([m2a(rmodel.neutralConfiguration),np.zeros(rmodel.nv)])
+    wx = np.array([0]*6 + [.1]*(rmodel.nv-6) + [10]*rmodel.nv)
+    #xneutral = np.concatenate([m2a(rmodel.neutralConfiguration),np.zeros(rmodel.nv)])
     costModel.addCost('xreg',weight=1e-1,
-                      cost=CostModelState(rmodel,State,ref=xneutral,nu=actModel.nu,
+                      cost=CostModelState(rmodel,State,ref=rmodel.defaultState,nu=actModel.nu,
                                           activation=ActivationModelWeightedQuad(wx)))
     costModel.addCost('ureg',weight=1e-4,
                       cost=CostModelControl(rmodel, nu=actModel.nu))
@@ -98,23 +99,23 @@ def pseudoImpactModel(contactIds,effectors):
 SE3 = pinocchio.SE3
 pinocchio.forwardKinematics(rmodel,rdata,q0)
 pinocchio.updateFramePlacements(rmodel,rdata)
-right0 = rdata.oMf[leftId].translation
+right0 = rdata.oMf[rightId].translation
 
 
 models =\
-         [    runningModel([ rightId, leftId ],{}, integrationStep=2e-1),]*10 \
-         +  [ runningModel([ leftId ],{ rightId: SE3(eye(3), right0+np.matrix([-.0088,-.085,0.]).T)},
-                           integrationStep=2e-1) ]*20 \
+         [    runningModel([ rightId, leftId ],{}, integrationStep=5e-2),]*10 \
+         +  [ runningModel([ leftId ],{ rightId: SE3(eye(3), right0+np.matrix([0,0,0.1]).T)},
+                           integrationStep=5e-2) ]*20 \
          +  [ runningModel([ leftId ],{ rightId: SE3(eye(3), right0+np.matrix([0,0,.0]).T)  },
-                           integrationStep=2e-1) ]*20 \
+                           integrationStep=5e-2) ]*20 \
          +  [ pseudoImpactModel([ leftId ],{ rightId: SE3(eye(3), right0+np.matrix([0,0,.0]).T)  }) ] \
          +  [ runningModel([ rightId, leftId ],{}) ]
                   
-problem = ShootingProblem(initialState=x0,runningModels=models[:16],terminalModel=models[16])
+problem = ShootingProblem(initialState=x0,runningModels=models[:50],terminalModel=models[50])
 ddp = SolverDDP(problem)
 ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
 ddp.th_stop = 1e-9
-ddp.solve(maxiter=1000,regInit=.1)
+ddp.solve(maxiter=1000,regInit=.1,init_xs=[rmodel.defaultState]*len(ddp.models()))
 
 
 '''
