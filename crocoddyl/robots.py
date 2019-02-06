@@ -98,6 +98,10 @@ def loadTalosLegs(modelPath='/opt/openrobots/share'):
     return robot
 
 def loadHyQ(modelPath='examples/hyq_description'):
+    # Loading the URDF model from the internal submodule (located at
+    # example/hyq_description)
+    # TODO remove the submodule and load from hyq-data bynary. Note that this
+    # task requires the creation of hyq-data binary.
     from pinocchio import JointModelFreeFlyer
     import os
     FILENAME = str(os.path.dirname(os.path.abspath(__file__))) + "/../"
