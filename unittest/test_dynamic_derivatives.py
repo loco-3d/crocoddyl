@@ -4,18 +4,8 @@ import pinocchio
 from pinocchio.utils import *
 from numpy.linalg import inv,pinv,norm,svd,eig
 
-path = '/home/nmansard/src/cddp/examples/'
-
-rospack = rospkg.RosPack()
-MODEL_PATH = rospack.get_path('talos_data')
-#MODEL_PATH = '/home/nmansard/src/cddp/examples'
-MESH_DIR = MODEL_PATH
-URDF_FILENAME = "talos_left_arm.urdf"
-#URDF_MODEL_PATH = MODEL_PATH + "/talos_data/robots/" + URDF_FILENAME
-URDF_MODEL_PATH = MODEL_PATH + "/robots/" + URDF_FILENAME
-
-robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(URDF_MODEL_PATH, [MESH_DIR])
-
+from crocoddyl import loadTalosArm
+robot = loadTalosArm()
 model = robot.model
 data = model.createData()
 

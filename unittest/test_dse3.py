@@ -2,15 +2,9 @@ import pinocchio
 import rospkg
 import numpy as np
 
-rospack = rospkg.RosPack()
-MODEL_PATH = rospack.get_path('talos_data')
-MESH_DIR = MODEL_PATH
-URDF_FILENAME = "talos_left_arm.urdf"
-URDF_MODEL_PATH = MODEL_PATH + "/robots/" + URDF_FILENAME
 
-
-robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(URDF_MODEL_PATH, [MESH_DIR])
-
+from crocoddyl import loadTalosArm
+robot = loadTalosArm()
 rmodel = robot.model
 rdata = rmodel.createData()
 jid = rmodel.getJointId('gripper_left_joint')
