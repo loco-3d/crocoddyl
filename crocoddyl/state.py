@@ -96,38 +96,57 @@ class StateAbstract:
         raise NotImplementedError("Not implemented yet.")
 
 
+
 class StateVector(StateAbstract):
-    '''
-    Basic state class in cartesian space, represented by a vector.
-    Tangent, integration and difference are straightforward.
-    '''
+    """ Euclidean state vector.
+
+    For this kind of states, the difference and integrate operators are
+    described by substraction and addition operations. Due to the Euclide space
+    point and its velocity lie in the same space, all Jacobians are described
+    throught the identity matrix.
+    """
     def __init__(self,nx):
+        # Euclidean point and its velocity lie in the same space dimension.
         StateAbstract.__init__(self, nx, nx)
 
     def zero(self):
-        '''Return a zero reference configuration. '''
+        """ Return a null state vector.
+        """
         return np.zeros([self.nx])
 
     def rand(self):
-        '''Return a random configuration. '''
+        """ Return a random state vector.
+        """
         return np.random.rand(self.nx)
 
     def diff(self,x1,x2):
-        '''
-        Return the tangent vector representing the difference between x1 and x2,
-        i.e. dx such that x1 [+] dx = x2.
-        '''
+        """ Difference between x2 and x1.
+
+        :param x1: current state
+        :param x2: next state
+        :return x2 - x1 value
+        """
         return x2-x1
 
     def integrate(self,x1,dx):
-        '''
-        Return x2 = x1 [+] dx.
-        Warning: no timestep here, if integrating a velocity v during an interval dt, 
-        set dx = v dt .
-        '''
+        """ Integration of x + dx.
+
+        Note that there is no timestep here. Set dx = v dt if you're integrating
+        a velocity v during an interval dt.
+        :param x: current state
+        :param dx: displacement of the state
+        :return x [+] dx value
+        """
         return x1 + dx
 
     def Jdiff(self,x1,x2,firstsecond='both'):
+        """ Jacobians for the x2 - x1.
+
+        :param x1: current state
+        :param x2: next state
+        :param firstsecond: desired partial derivative
+        :return the partial derivative(s) of the diff(x1,x2) function
+        """
         assert(firstsecond in ['first', 'second', 'both' ])
         if firstsecond == 'both': return [ self.Jdiff(x1,x2,'first'),
                                            self.Jdiff(x1,x2,'second') ]
@@ -139,7 +158,14 @@ class StateVector(StateAbstract):
             J[:,:] = np.eye(self.ndx)
         return J
 
-    def Jintegrate(self,x,vx,firstsecond='both'):
+    def Jintegrate(self,x,dx,firstsecond='both'):
+        """ Jacobians of x + dx.
+
+        :param x: current state
+        :param dx: displacement of the state
+        :param firstsecond: desired partial derivative
+        :return the partial derivative(s) of the integrate(x,dx) function
+        """
         assert(firstsecond in ['first', 'second', 'both' ])
         if firstsecond == 'both': return [ self.Jintegrate(x,vx,'first'),
                                            self.Jintegrate(x,vx,'second') ]
