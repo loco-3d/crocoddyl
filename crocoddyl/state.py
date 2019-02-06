@@ -174,27 +174,54 @@ class StateVector(StateAbstract):
 
 
 class StateNumDiff(StateAbstract):
-    '''
-    From a norm state class, returns a class able to num diff. 
-    '''
+    """ State class with NumDiff for Jacobian computation.
+
+    This class allows us to avoid the definition of analytical Jacobians, which
+    is error prone. Additionally it can be used to debug the Jacobian
+    computation of a custom State. For doing so, we need to construct this class
+    by passing as an argument our State object.
+    """
     def __init__(self,State):
         StateAbstract.__init__(self, State.nx, State.ndx)
         self.State = State
         self.disturbance = 1e-6
 
     def zero(self):
+        """ Return a zero reference state defined in State.
+        """
         return self.State.zero()
 
     def rand(self):
+        """ Return a random reference state defined in State.
+        """
         return self.State.rand()
 
     def diff(self,x1,x2):
+        """ Run the differentiate operator defined in State.
+
+        :param x1: current state
+        :param x2: next state
+        :return x2 [-] x1 value
+        """
         return self.State.diff(x1,x2)
 
     def integrate(self,x,dx):
+        """ Run the integrate operator defined in State.
+
+        :param x: current state
+        :param dx: displacement of the state
+        :return x [+] dx value
+        """
         return self.State.integrate(x,dx)
 
     def Jdiff(self,x1,x2,firstsecond='both'):
+        """ Compute the partial derivatives for diff operator using NumDiff.
+
+        :param x1: current state
+        :param x2: next state
+        :param firstsecond: desired partial derivative
+        :return the partial derivative(s) of the diff(x1,x2) function
+        """
         assert(firstsecond in ['first', 'second', 'both' ])
         if firstsecond == 'both': return [ self.Jdiff(x1,x2,'first'),
                                            self.Jdiff(x1,x2,'second') ]
@@ -216,6 +243,13 @@ class StateNumDiff(StateAbstract):
         return J
 
     def Jintegrate(self,x,vx,firstsecond='both'):
+        """ Compute the partial derivatives for integrate operator using NumDiff.
+
+        :param x: current state
+        :param dx: displacement of the state
+        :param firstsecond: desired partial derivative
+        :return the partial derivative(s) of the integrate(x,dx) function
+        """
         assert(firstsecond in ['first', 'second', 'both' ])
         if firstsecond == 'both': return [ self.Jintegrate(x,vx,'first'),
                                            self.Jintegrate(x,vx,'second') ]
