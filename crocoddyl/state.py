@@ -242,7 +242,7 @@ class StateNumDiff(StateAbstract):
         J /= h
         return J
 
-    def Jintegrate(self,x,vx,firstsecond='both'):
+    def Jintegrate(self,x,dx,firstsecond='both'):
         """ Compute the partial derivatives for integrate operator using NumDiff.
 
         :param x: current state
@@ -251,22 +251,22 @@ class StateNumDiff(StateAbstract):
         :return the partial derivative(s) of the integrate(x,dx) function
         """
         assert(firstsecond in ['first', 'second', 'both' ])
-        if firstsecond == 'both': return [ self.Jintegrate(x,vx,'first'),
-                                           self.Jintegrate(x,vx,'second') ]
-        dx = np.zeros(self.ndx)
+        if firstsecond == 'both': return [ self.Jintegrate(x,dx,'first'),
+                                           self.Jintegrate(x,dx,'second') ]
+        Dx = np.zeros(self.ndx)
         h  = self.disturbance
         J  = np.zeros([self.ndx,self.ndx])
-        d0 = self.integrate(x,vx)
+        d0 = self.integrate(x,dx)
         if firstsecond=='first':
             for k in range(self.ndx):
-                dx[k]  = h
-                J[:,k] = self.diff(d0,self.integrate(self.integrate(x,dx),vx))
-                dx[k]  = 0
+                Dx[k]  = h
+                J[:,k] = self.diff(d0,self.integrate(self.integrate(x,Dx),dx))
+                Dx[k]  = 0
         elif firstsecond=='second':
             for k in range(self.ndx):
-                dx[k]  = h
-                J[:,k] = self.diff(d0,self.integrate(x,vx+dx))
-                dx[k]  = 0
+                Dx[k]  = h
+                J[:,k] = self.diff(d0,self.integrate(x,dx+Dx))
+                Dx[k]  = 0
         J /= h
         return J
 
