@@ -9,6 +9,7 @@ from numpy.linalg import inv,pinv,norm,svd,eig
 from crocoddyl import loadTalosArm
 
 robot = loadTalosArm(freeFloating=True)
+robot.model.armature[6:] = 1.
 qmin = robot.model.lowerPositionLimit; qmin[:7]=-1; robot.model.lowerPositionLimit = qmin
 qmax = robot.model.upperPositionLimit; qmax[:7]= 1; robot.model.upperPositionLimit = qmax
 
@@ -324,7 +325,7 @@ problem = ShootingProblem(x0, [ model ], model)
 ddp = SolverDDP(problem)
 ddp.callback = [CallbackDDPLogger()]
 ddp.th_stop = 1e-18
-xddp,uddp,doneddp = ddp.solve(maxiter=200)
+xddp,uddp,doneddp = ddp.solve(maxiter=30)
 
 assert(doneddp)
 assert( norm(ddp.datas()[-1].differential.costs['pos'].residuals)<1e-3 )
@@ -340,14 +341,12 @@ dmodel.costs['regu'].weight = 1e-3
 
 kkt = SolverKKT(problem)
 kkt.th_stop = 1e-18
-xkkt,ukkt,donekkt = kkt.solve(init_xs=x0s,init_us=u0s,isFeasible=True,maxiter=200)
-xddp,uddp,doneddp = ddp.solve(init_xs=x0s,init_us=u0s,isFeasible=True,maxiter=200)
+xkkt,ukkt,donekkt = kkt.solve(init_xs=x0s,init_us=u0s,isFeasible=True,maxiter=20)
+xddp,uddp,doneddp = ddp.solve(init_xs=x0s,init_us=u0s,isFeasible=True,maxiter=20)
 
 assert(donekkt)
 assert(norm(xkkt[0]-problem.initialState)<1e-9)
 assert(norm(xddp[0]-problem.initialState)<1e-9)
 for t in range(problem.T):
-    assert(norm(ukkt[t]-uddp[t])<1e-5) #is enough 1e-5?
-    assert(norm(xkkt[t+1]-xddp[t+1])<1e-5) #is enough 1e-5?
-
- 
+    assert(norm(ukkt[t]-uddp[t])<1e-6)
+    assert(norm(xkkt[t+1]-xddp[t+1])<1e-6)
