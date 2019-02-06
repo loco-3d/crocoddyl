@@ -167,8 +167,8 @@ class StateVector(StateAbstract):
         :return the partial derivative(s) of the integrate(x,dx) function
         """
         assert(firstsecond in ['first', 'second', 'both' ])
-        if firstsecond == 'both': return [ self.Jintegrate(x,vx,'first'),
-                                           self.Jintegrate(x,vx,'second') ]
+        if firstsecond == 'both': return [ self.Jintegrate(x,dx,'first'),
+                                           self.Jintegrate(x,dx,'second') ]
         return np.eye(self.ndx)
 
 
