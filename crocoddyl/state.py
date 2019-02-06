@@ -44,7 +44,7 @@ class StateAbstract:
         in the tangent-space of M.
         :param x1: current state
         :param x2: next state
-        :return x1 [-] x2 value
+        :return x2 [-] x1 value
         """
         raise NotImplementedError("Not implemented yet.")
 
