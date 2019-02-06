@@ -175,7 +175,7 @@ cameraTF = [3., 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose(),
                 CallbackSolverDisplay(robot,4,cameraTF)]
 ddp.th_stop = 1e-9
-ddp.solve(maxiter=1000,regInit=.1)
+ddp.solve(maxiter=1000,regInit=.1,init_xs=[robot.model.defaultState]*len(ddp.models()))
 
 
 # Plotting the solution and the DDP convergence
