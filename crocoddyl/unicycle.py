@@ -1,4 +1,4 @@
-from state import StateVector
+from state import StateAbstract, StateVector
 from action import ActionDataLQR, ActionModelLQR
 import numpy as np
 
@@ -82,10 +82,9 @@ class ActionDataUnicycle:
 
 
 from numpy import cos,sin,arctan2
-class StateUnicycle:
-    nx = 4
-    ndx = 3
+class StateUnicycle(StateAbstract):
     def __init__(self):
+        StateAbstract.__init__(self,4,3)
         pass
 
     def zero(self):   return np.array([0.,0.,1.,0.]) # a,b,c,s

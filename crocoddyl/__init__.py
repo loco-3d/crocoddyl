@@ -1,3 +1,4 @@
+from state import StateAbstract
 from state import StateVector, StateNumDiff
 from state import StatePinocchio
 from cost import CostDataPinocchio, CostModelPinocchio
