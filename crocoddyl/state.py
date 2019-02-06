@@ -273,22 +273,42 @@ class StateNumDiff(StateAbstract):
 
 
 class StatePinocchio(StateAbstract):
+    """ State definition based on Pinocchio model.
+
+    Pinocchio defines operators for integrating or differentiating the robot's
+    configuration space. And here we assume that the state is defined by the
+    robot's configuration and its joint velocities (x=[q,v]). Generally speaking,
+    q lies on the manifold configuration manifold (M) and v in its tangent space 
+    (Tx M). Additionally the Pinocchio allows us to compute analytically the
+    Jacobians for the differentiate and integrate operators. Note that this code
+    can be reused in any robot that is described through its Pinocchio model.
+    """
     def __init__(self,pinocchioModel):
         StateAbstract.__init__(
             self, pinocchioModel.nq + pinocchioModel.nv, 2*pinocchioModel.nv)
         self.model = pinocchioModel
 
     def zero(self):
+        """ Return the neutral robot configuration with zero velocity.
+        """
         q = pinocchio.neutral(self.model)
         v = np.zeros(self.model.nv)
         return np.concatenate([q.flat,v])
 
     def rand(self):
+        """ Return a random state.
+        """
         q = pinocchio.randomConfiguration(self.model)
         v = np.random.rand(self.model.nv)*2-1
         return np.concatenate([q.flat,v])
 
     def diff(self,x0,x1):
+        """ Difference between the robot's states x2 and x1.
+
+        :param x1: current state
+        :param x2: next state
+        :return x2 [-] x1 value
+        """
         nq,nv,nx,ndx = self.model.nq,self.model.nv,self.nx,self.ndx
         assert( x0.shape == ( nx, ) and x1.shape == ( nx, ))
         q0 = x0[:nq]; q1 = x1[:nq]; v0 = x0[-nv:]; v1 = x1[-nv:]
@@ -296,6 +316,12 @@ class StatePinocchio(StateAbstract):
         return np.concatenate([dq.flat,v1-v0])
 
     def integrate(self,x,dx):
+        """ Integrate the current robot's state.
+
+        :param x: current state
+        :param dx: displacement of the state
+        :return x [+] dx value
+        """
         nq,nv,nx,ndx = self.model.nq,self.model.nv,self.nx,self.ndx
         assert( x.shape == ( nx, ) and dx.shape == ( ndx, ))
         q = x[:nq]; v = x[-nv:]; dq = dx[:nv]; dv = dx[-nv:]
@@ -303,6 +329,13 @@ class StatePinocchio(StateAbstract):
         return np.concatenate([ qn.flat, v+dv] )
 
     def Jdiff(self,x1,x2,firstsecond='both'):
+        """ Compute the partial derivatives for diff operator using Pinocchio.
+
+        :param x1: current state
+        :param x2: next state
+        :param firstsecond: desired partial derivative
+        :return the partial derivative(s) of the diff(x1,x2) function
+        """
         assert(firstsecond in ['first', 'second', 'both' ])
         if firstsecond == 'both': return [ self.Jdiff(x1,x2,'first'),
                                            self.Jdiff(x1,x2,'second') ]
@@ -320,6 +353,13 @@ class StatePinocchio(StateAbstract):
             return -block_diag( np.asarray(np.linalg.inv(Jdq)), np.eye(self.model.nv) )
 
     def Jintegrate(self,x,dx,firstsecond='both'):
+        """ Compute the partial derivatives for integrate operator using Pinocchio.
+
+        :param x: current state
+        :param dx: displacement of the state
+        :param firstsecond: desired partial derivative
+        :return the partial derivative(s) of the integrate(x,dx) function
+        """
         assert(firstsecond in ['first', 'second', 'both' ])
         assert(x.shape == ( self.nx, ) and dx.shape == (self.ndx,) )
         if firstsecond == 'both': return [ self.Jintegrate(x,dx,'first'),
