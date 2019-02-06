@@ -3,7 +3,7 @@ from crocoddyl import DifferentialActionModelFloatingInContact
 from crocoddyl import IntegratedActionModelEuler
 from crocoddyl import CostModelSum
 from crocoddyl import CostModelFramePlacement, CostModelFrameVelocity
-from crocoddyl import CostModelState, CostModelControl
+from crocoddyl import CostModelState, CostModelControl,CostModelCoM
 from crocoddyl import ActivationModelWeightedQuad
 from crocoddyl import ActuationModelFreeFloating
 from crocoddyl import ContactModel6D, ContactModelMultiple
@@ -42,7 +42,7 @@ swingDuration = 0.75
 stanceDurantion = 0.1
 
 
-def runningModel(contactIds, effectors, integrationStep = 1e-2):
+def runningModel(contactIds, effectors, com=None, integrationStep = 1e-2):
     '''
     Creating the action model for floating-base systems. A walker system 
     is by default a floating-base system.
@@ -61,7 +61,6 @@ def runningModel(contactIds, effectors, integrationStep = 1e-2):
     # Creating the cost model for a contact phase
     costModel = CostModelSum(rmodel, actModel.nu)
     wx = np.array([0]*6 + [.1]*(rmodel.nv-6) + [10]*rmodel.nv)
-    #xneutral = np.concatenate([m2a(rmodel.neutralConfiguration),np.zeros(rmodel.nv)])
     costModel.addCost('xreg',weight=1e-1,
                       cost=CostModelState(rmodel,State,ref=rmodel.defaultState,nu=actModel.nu,
                                           activation=ActivationModelWeightedQuad(wx)))
@@ -70,7 +69,11 @@ def runningModel(contactIds, effectors, integrationStep = 1e-2):
     for fid,ref in effectors.items():
         costModel.addCost("track%d"%fid, weight=100.,
                           cost = CostModelFramePlacement(rmodel,fid,ref,actModel.nu))
-    
+
+    if com is not None:
+        costModel.addCost("com", weight=10000.,
+                          cost = CostModelCoM(rmodel,ref=com,nu=actModel.nu))
+        
     # Creating the action model for the KKT dynamics with simpletic Euler
     # integration scheme
     dmodel = \
@@ -83,14 +86,28 @@ def runningModel(contactIds, effectors, integrationStep = 1e-2):
     return model
 
 def pseudoImpactModel(contactIds,effectors):
-    assert(len(effectors)==1)
+    #assert(len(effectors)==1)
     model = runningModel(contactIds,effectors,integrationStep=0)
 
     costModel = model.differential.costs
     for fid,ref in effectors.items():
-        costModel.addCost('impactVel',weight = 10000.,
+        costModel.addCost('impactVel%d' % fid,weight = 100.,
                           cost=CostModelFrameVelocity(rmodel,fid))
-        costModel.costs['track%d'%fid ].weight = 100000
+        costModel.costs['track%d'%fid ].weight = 100
+    costModel.costs['xreg'].weight = 1
+    costModel.costs['ureg'].weight = 0.01
+
+    return model
+
+def impactModel(contactIds,effectors):
+    #assert(len(effectors)==1)
+    model = runningModel(contactIds,effectors,integrationStep=0)
+
+    costModel = model.differential.costs
+    for fid,ref in effectors.items():
+        costModel.addCost('impactVel%d' % fid,weight = 10.,
+                          cost=CostModelFrameVelocity(rmodel,fid))
+        costModel.costs['track%d'%fid ].weight = 1000
     costModel.costs['xreg'].weight = 1
     costModel.costs['ureg'].weight = 0.01
 
@@ -100,22 +117,42 @@ SE3 = pinocchio.SE3
 pinocchio.forwardKinematics(rmodel,rdata,q0)
 pinocchio.updateFramePlacements(rmodel,rdata)
 right0 = rdata.oMf[rightId].translation
+left0  = rdata.oMf[leftId].translation
+com0 = m2a(pinocchio.centerOfMass(rmodel,rdata,q0))
 
+# + [ runningModel([ rightId, leftId ],{},com=com0-[0,0,.1], integrationStep=5e-2) ] \
+# + [ runningModel([ rightId, leftId ],{},integrationStep=5e-2)] *6\
+# + [ runningModel([ rightId, leftId ],{},com=com0-[0,0,0], integrationStep=5e-2) ] \
 
 models =\
-         [    runningModel([ rightId, leftId ],{}, integrationStep=5e-2),]*10 \
-         +  [ runningModel([ leftId ],{ rightId: SE3(eye(3), right0+np.matrix([0,0,0.1]).T)},
-                           integrationStep=5e-2) ]*20 \
-         +  [ runningModel([ leftId ],{ rightId: SE3(eye(3), right0+np.matrix([0,0,.0]).T)  },
-                           integrationStep=5e-2) ]*20 \
-         +  [ pseudoImpactModel([ leftId ],{ rightId: SE3(eye(3), right0+np.matrix([0,0,.0]).T)  }) ] \
-         +  [ runningModel([ rightId, leftId ],{}) ]
+         [ runningModel([ rightId, leftId ],{}, integrationStep=5e-2)] *10\
+         +  [ runningModel([ ],{},integrationStep=5e-2) ]*5 \
+         +  [ runningModel([ ],{}, com=com0+[0,0,0.1],integrationStep=5e-2) ] \
+         +  [ runningModel([ ],{},integrationStep=5e-2) ]*4 \
+         +  [ pseudoImpactModel([ leftId,rightId ],
+                                { rightId: SE3(eye(3), right0),
+                                  leftId: SE3(eye(3), left0) }) ] \
+         +  [ runningModel([ rightId, leftId ],{},integrationStep=9e-2) ]*5
                   
-problem = ShootingProblem(initialState=x0,runningModels=models[:50],terminalModel=models[50])
+problem = ShootingProblem(initialState=x0,runningModels=models[:-1],terminalModel=models[-1])
 ddp = SolverDDP(problem)
 ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
-ddp.th_stop = 1e-9
+ddp.th_stop = 1e-5
 ddp.solve(maxiter=1000,regInit=.1,init_xs=[rmodel.defaultState]*len(ddp.models()))
+
+[ d.differential.pinocchio.com[0] for d in ddp.datas() ]
+
+from crocoddyl.diagnostic import displayTrajectory
+disp = lambda xs: displayTrajectory(robot,ddp.xs,models[0].timeStep/5)
+
+for pen in range(2,8):
+    disp(ddp.xs)
+    models[20].differential.costs.costs['track30'].weight=10**pen
+    models[20].differential.costs.costs['track16'].weight=10**pen
+    models[20].differential.costs.costs['impactVel30'].weight=10**pen
+    models[20].differential.costs.costs['impactVel16'].weight=10**pen
+    ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=100)
+
 
 
 '''
