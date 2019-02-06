@@ -1,4 +1,4 @@
-from crocoddyl import loadTalosArm, loadTalos, loadTalosLegs
+from crocoddyl import loadTalosArm, loadTalos, loadTalosLegs, loadHyQ
 import unittest
 
 
@@ -33,6 +33,11 @@ class TalosTest(RobotTestCase):
 
 class TalosLegsTest(RobotTestCase):
     RobotTestCase.ROBOT = loadTalosLegs()
+    RobotTestCase.NQ = 19
+    RobotTestCase.NV = 18
+
+class HyQTest(RobotTestCase):
+    RobotTestCase.ROBOT = loadHyQ()
     RobotTestCase.NQ = 19
     RobotTestCase.NV = 18
 
