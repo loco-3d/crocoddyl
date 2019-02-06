@@ -1,4 +1,3 @@
-import abc
 from utils import a2m
 import numpy as np
 import pinocchio
@@ -17,25 +16,22 @@ class StateAbstract:
     the points x, x1 and x2 belongs to the manifold M; and dx or x1 [-] x2 lie
     on its tangential space.
     """
-    __metaclass__ = abc.ABCMeta
     def __init__(self,nx,ndx):
         # Setting up the dimension of the state vector and its tangent vector
         self.nx = nx
         self.ndx = ndx
 
-    @abc.abstractmethod
     def zero(self):
         """ Return a zero reference state.
         """
         raise NotImplementedError("Not implemented yet.")
 
-    @abc.abstractmethod
+
     def rand(self):
         """ Return a random state.
         """
         raise NotImplementedError("Not implemented yet.")
 
-    @abc.abstractmethod
     def diff(self,x1,x2):
         """ Operator that differentiates the two state points.
 
@@ -48,7 +44,6 @@ class StateAbstract:
         """
         raise NotImplementedError("Not implemented yet.")
 
-    @abc.abstractmethod
     def integrate(self,x,dx):
         """ Operator that integrates the current state.
 
@@ -61,7 +56,6 @@ class StateAbstract:
         """
         raise NotImplementedError("Not implemented yet.")
 
-    @abc.abstractmethod
     def Jdiff(self,x1,x2,firstsecond='both'):
         """ Compute the partial derivatives of difference operator.
 
@@ -78,7 +72,6 @@ class StateAbstract:
         """
         raise NotImplementedError("Not implemented yet.")
 
-    @abc.abstractmethod
     def Jintegrate(self,x,dx,firstsecond='both'):
         """ Compute the partial derivatives of integrate operator.
 
