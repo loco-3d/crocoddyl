@@ -7,6 +7,16 @@ from scipy.linalg import block_diag
 
 
 class StateAbstract:
+    """ Abstract class for the state representation.
+
+    A state is represented by its operators: difference, integrates and their
+    derivatives. The difference operator returns the value of x1 [-] x2
+    operation. Instead the integrate operator returns the value of x [+] dx.
+    These operators are used to compared two points on the state manifold M or
+    to advance the state given a tangential velocity (\in Tx M). Therefore
+    the points x, x1 and x2 belongs to the manifold M; and dx or x1 [-] x2 lie
+    on its tangential space.
+    """
     __metaclass__ = abc.ABCMeta
     def __init__(self,nx,ndx):
         # Setting up the dimension of the state vector and its tangent vector
