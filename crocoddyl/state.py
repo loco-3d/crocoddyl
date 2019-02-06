@@ -309,11 +309,9 @@ class StatePinocchio(StateAbstract):
         :param x2: next state
         :return x2 [-] x1 value
         """
-        assert( x0.shape == ( self.nx, ) and x1.shape == ( self.nx, ))
-        q0 = x0[:self.model.nq]
-        q1 = x1[:self.model.nq]
-        v0 = x0[-self.model.nv:]
-        v1 = x1[-self.model.nv:]
+        nq,nv,nx,ndx = self.model.nq,self.model.nv,self.nx,self.ndx
+        assert( x0.shape == ( nx, ) and x1.shape == ( nx, ))
+        q0 = x0[:nq]; q1 = x1[:nq]; v0 = x0[-nv:]; v1 = x1[-nv:]
         dq = pinocchio.difference(self.model,a2m(q0),a2m(q1))
         return np.concatenate([dq.flat,v1-v0])
 
@@ -324,11 +322,9 @@ class StatePinocchio(StateAbstract):
         :param dx: displacement of the state
         :return x [+] dx value
         """
-        assert( x.shape == ( self.nx, ) and dx.shape == ( self.ndx, ))
-        q = x[:self.model.nq]
-        v = x[-self.model.nv:]
-        dq = dx[:self.model.nv]
-        dv = dx[-self.model.nv:]
+        nq,nv,nx,ndx = self.model.nq,self.model.nv,self.nx,self.ndx
+        assert( x.shape == ( nx, ) and dx.shape == ( ndx, ))
+        q = x[:nq]; v = x[-nv:]; dq = dx[:nv]; dv = dx[-nv:]
         qn = pinocchio.integrate(self.model,a2m(q),a2m(dq))
         return np.concatenate([ qn.flat, v+dv] )
 
