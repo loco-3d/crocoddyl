@@ -4,6 +4,7 @@ from numpy.linalg import inv,norm,pinv
 from numpy import dot,asarray
 from crocoddyl import IntegratedActionModelEuler, DifferentialActionModelNumDiff,StatePinocchio,CostModelSum,CostModelPinocchio,CostModelFrameTranslation,CostModelState,CostModelControl,DifferentialActionModel
 from crocoddyl import ContactModel6D,ActuationModelFreeFloating,DifferentialActionModelFloatingInContact,ContactModelMultiple
+from crocoddyl import ActivationModelWeightedQuad
 import warnings
 from numpy.linalg import inv,pinv,norm,svd,eig
 
@@ -35,7 +36,9 @@ class FF:
         self.cost1 = CostModelFrameTranslation(rmodel,nu=actModel.nu,
                                      frame=rmodel.getFrameId(opPointName),
                                      ref=np.array([.5,.4,.3]))
-        self.cost2 = CostModelState(rmodel,State,ref=State.zero(),nu=actModel.nu)
+        stateWeights = np.array([0]*6+[0.01]*(rmodel.nv-6)+[10]*rmodel.nv)
+        self.cost2 = CostModelState(rmodel,State,ref=State.zero(),nu=actModel.nu,
+                                    activation=ActivationModelWeightedQuad(stateWeights**2))
         self.cost3 = CostModelControl(rmodel,nu=actModel.nu)
         costModel.addCost( name="pos", weight = 10, cost = self.cost1)
         costModel.addCost( name="regx", weight = 0.1, cost = self.cost2) 
@@ -129,14 +132,11 @@ T = 20
 
 xref = fix.State.rand(); xref[fix.rmodel.nq:] = 0
 fix.calc(xref)
-#ref = fix.rdata.oMf[fix.cost1.frame].translation.flat
-ref = [0.5, 0.4, 0.3]
 
 f = ff
 f.u[:] = (0*pinocchio.rnea(fix.rmodel,fix.rdata,fix.q,fix.v*0,fix.v*0)).flat
 f.v[:] = 0
 f.x[f.rmodel.nq:] = f.v.flat
-f.cost1.ref[:] = ref
 
 #f.u[:] = np.zeros(f.model.nu)
 f.model.differential.costs['pos' ].weight = 1
@@ -147,17 +147,15 @@ fterm = f.__class__()
 fterm.model.differential.costs['pos' ].weight = 1000
 fterm.model.differential.costs['regx'].weight = 1
 fterm.model.differential.costs['regu'].weight = 0.01
-fterm.cost1.ref[:] = ref
-fterm.model.differential.costs['regx'].cost.weights = np.array([0]*6+[0.01]*(f.rmodel.nv-6)+[10]*f.rmodel.nv)
 
 
 problem = ShootingProblem(f.x, [ f.model ]*T, fterm.model)
 u0s = [ f.u ]*T
 x0s = problem.rollout(u0s)
 
-from crocoddyl import CallbackDDPLogger
+from crocoddyl import CallbackDDPLogger, CallbackDDPVerbose
 disp = lambda xs: disptraj(f.robot,xs)
 ddp = SolverDDP(problem)
-ddp.callback = [CallbackDDPLogger()]
+ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
 ddp.th_stop = 1e-18
-ddp.solve(verbose=True,maxiter=1000)
+ddp.solve(maxiter=1000)

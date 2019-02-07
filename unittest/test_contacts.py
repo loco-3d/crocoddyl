@@ -9,6 +9,7 @@ from numpy.linalg import inv,pinv,norm,svd,eig
 from crocoddyl import loadTalosArm
 
 robot = loadTalosArm(freeFloating=True)
+robot.model.armature[6:] = 1.
 qmin = robot.model.lowerPositionLimit; qmin[:7]=-1; robot.model.lowerPositionLimit = qmin
 qmax = robot.model.upperPositionLimit; qmax[:7]= 1; robot.model.upperPositionLimit = qmax
 
@@ -349,5 +350,3 @@ assert(norm(xddp[0]-problem.initialState)<1e-9)
 for t in range(problem.T):
     assert(norm(ukkt[t]-uddp[t])<1e-6)
     assert(norm(xkkt[t+1]-xddp[t+1])<1e-6)
-
- 
