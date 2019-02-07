@@ -3,7 +3,7 @@ from crocoddyl import DifferentialActionModelFloatingInContact
 from crocoddyl import IntegratedActionModelEuler
 from crocoddyl import CostModelSum
 from crocoddyl import CostModelFramePlacement, CostModelFrameVelocity
-from crocoddyl import CostModelState, CostModelControl
+from crocoddyl import CostModelState, CostModelControl, ActivationModelWeightedQuad
 from crocoddyl import ActuationModelFreeFloating
 from crocoddyl import ContactModel6D, ContactModelMultiple
 from crocoddyl import ShootingProblem, SolverDDP
