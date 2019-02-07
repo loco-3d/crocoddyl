@@ -21,7 +21,8 @@ rdata = rmodel.createData()
 # -----------------------------------------------------------------------------
 from crocoddyl import ContactData6D, ContactModel6D
         
-contactModel = ContactModel6D(rmodel,rmodel.getFrameId('gripper_left_fingertip_2_link'),ref=None)
+contactModel = ContactModel6D(rmodel,rmodel.getFrameId('gripper_left_fingertip_2_link'),
+                              ref=pinocchio.SE3.Random(), gains=[4.,4.])
 contactData  = contactModel.createData(rdata)
 
 q = pinocchio.randomConfiguration(rmodel)
@@ -128,7 +129,8 @@ x = np.concatenate([ m2a(q),m2a(v) ])
 u = np.random.rand(rmodel.nv-6)*2-1
 
 actModel = ActuationModelFreeFloating(rmodel)
-contactModel6 = ContactModel6D(rmodel,rmodel.getFrameId('gripper_left_fingertip_2_link'),ref=None)
+contactModel6 = ContactModel6D(rmodel,rmodel.getFrameId('gripper_left_fingertip_2_link'),
+                               ref=pinocchio.SE3.Random(), gains=[4.,4.])
 rmodel.frames[contactModel6.frame].placement = pinocchio.SE3.Random()
 contactModel = ContactModelMultiple(rmodel)
 contactModel.addContact(name='fingertip',contact=contactModel6)
