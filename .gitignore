@@ -3,3 +3,4 @@
 *.pyo
 *~
 *.orig
+*.ipynb_checkpoints
