@@ -32,6 +32,12 @@ class SimpleBipedWalkingProblem:
         self.state = StatePinocchio(self.rmodel)
         self.rightFoot = rightFoot
         self.leftFoot = leftFoot
+        # Defining default state
+        self.rmodel.defaultState = \
+            np.concatenate([m2a(self.rmodel.neutralConfiguration),
+                            np.zeros(self.rmodel.nv)])
+        # Remove the armature
+        self.rmodel.armature[6:] = 1.
     
     def createProblem(self, x, stepLength, stepDuration):
         # Computing the time step per each contact phase given the step duration.
@@ -157,15 +163,9 @@ class SimpleBipedWalkingProblem:
 
 
 
-# Creating the lower-body part of Talos and remove any armature
+# Creating the lower-body part of Talos
 robot = loadTalosLegs()
-robot.model.armature[6:] = 1.
-
 rmodel = robot.model
-rdata = rmodel.createData()
-rmodel.defaultState = \
-    np.concatenate([m2a(rmodel.neutralConfiguration),
-                    np.zeros(rmodel.nv)])
 
 q = robot.q0.copy()
 v = zero(robot.model.nv)
