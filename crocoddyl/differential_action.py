@@ -1,5 +1,4 @@
 from state import StatePinocchio, StateVector
-from cost import CostModelSum
 from utils import a2m, randomOrthonormalMatrix
 import numpy as np
 from numpy.random import rand
@@ -7,11 +6,11 @@ import pinocchio
 
 
 
-class DifferentialActionModel:
-    def __init__(self,pinocchioModel):
+class DifferentialActionModelFullyActuated:
+    def __init__(self, pinocchioModel, costModel):
         self.pinocchio = pinocchioModel
         self.State = StatePinocchio(self.pinocchio)
-        self.costs = CostModelSum(self.pinocchio)
+        self.costs = costModel
         self.nq,self.nv = self.pinocchio.nq, self.pinocchio.nv
         self.nx = self.State.nx
         self.ndx = self.State.ndx
@@ -23,7 +22,7 @@ class DifferentialActionModel:
         self.forceAba = False
     @property
     def ncost(self): return self.costs.ncost
-    def createData(self): return DifferentialActionData(self)
+    def createData(self): return DifferentialActionDataFullyActuated(self)
     def calc(model,data,x,u=None):
         if u is None: u=model.unone
         nx,nu,nq,nv,nout = model.nx,model.nu,model.nq,model.nv,model.nout
@@ -72,7 +71,7 @@ class DifferentialActionModel:
 
         return data.xout,data.cost
 
-class DifferentialActionData:
+class DifferentialActionDataFullyActuated:
     def __init__(self,model):
         self.pinocchio = model.pinocchio.createData()
         self.costs = model.costs.createData(self.pinocchio)

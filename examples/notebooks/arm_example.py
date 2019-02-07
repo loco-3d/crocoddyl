@@ -17,28 +17,31 @@ robot.viewer.gui.addSphere('world/point',.1,[1,0,0,1])  # radius = .1, RGBA=1001
 robot.viewer.gui.applyConfiguration('world/point', target.tolist()+[0,0,0,1] )  # xyz+quaternion
 robot.viewer.gui.refresh()
 
-# Create the cost model
+# Create the cost functions
 costTrack = CostModelFrameTranslation(robot.model,frame=frameId,ref=target)
 costXReg  = CostModelState(robot.model,StatePinocchio(robot.model))
 costUReg  = CostModelControl(robot.model)
 
-# Create the action model with empty costs
-model     = DifferentialActionModel(robot.model)
-termmodel = DifferentialActionModel(robot.model)
+# Create cost model per each action model
+runningCostModel = CostModelSum(robot.model)
+terminalCostModel = CostModelSum(robot.model)
 
 # Then let's added the running and terminal cost functions
-model.costs.addCost( name="pos", weight = 1, cost = costTrack)
-model.costs.addCost( name="xreg", weight = 1e-4, cost = costXReg)
-model.costs.addCost( name="ureg", weight = 1e-7, cost = costUReg)
+runningCostModel.addCost( name="pos", weight = 1, cost = costTrack)
+runningCostModel.addCost( name="xreg", weight = 1e-4, cost = costXReg)
+runningCostModel.addCost( name="ureg", weight = 1e-7, cost = costUReg)
+terminalCostModel.addCost( name="pos", weight = 1000, cost = costTrack)
+terminalCostModel.addCost( name="xreg", weight = 1e-4, cost = costXReg)
+terminalCostModel.addCost( name="ureg", weight = 1e-7, cost = costUReg)
 
-termmodel.costs.addCost( name="pos", weight = 1000, cost = costTrack)
-termmodel.costs.addCost( name="xreg", weight = 1e-4, cost = costXReg)
-termmodel.costs.addCost( name="ureg", weight = 1e-7, cost = costUReg)
+# Create the action model
+runningModel     = DifferentialActionModelFullyActuated(robot.model, runningCostModel)
+terminalModel = DifferentialActionModelFullyActuated(robot.model, terminalCostModel)
 
 # Create the problem
 x0 = np.concatenate([ m2a(robot.q0), np.zeros(robot.model.nv)])
-problem = ShootingProblem(x0, [ IntegratedActionModelEuler(model) ]*T,
-                          IntegratedActionModelEuler(termmodel))
+problem = ShootingProblem(x0, [ IntegratedActionModelEuler(runningModel) ]*T,
+                          IntegratedActionModelEuler(terminalModel))
 
 # Creating the DDP solver for this OC problem, defining a logger
 ddp = SolverDDP(problem)

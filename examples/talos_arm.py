@@ -1,5 +1,6 @@
 from crocoddyl import StatePinocchio
-from crocoddyl import DifferentialActionModel, IntegratedActionModelEuler
+from crocoddyl import DifferentialActionModelFullyActuated, IntegratedActionModelEuler
+from crocoddyl import CostModelSum
 from crocoddyl import CostModelFrameTranslation, CostModelFramePlacement
 from crocoddyl import CostModelState, CostModelControl
 from crocoddyl import ShootingProblem, SolverDDP
@@ -13,37 +14,28 @@ import numpy as np
 
 # In this example test, we will solve the reaching-goal task with the Talos arm.
 # For that, we use the forward dynamics (with its analytical derivatives)
-# developed inside crocoddyl; it describes inside DifferentialActionModel class.
+# developed inside crocoddyl; it describes inside DifferentialActionModelFullyActuated class.
 # Finally, we use an Euler sympletic integration scheme.
 
 
 # First, let's load the Pinocchio model for the Talos arm. And then, let's
-# create an action model for running and terminal knots. The forward dynamics
-# (computed using ABA) are implemented inside DifferentialActionModel.
+# create a cost model per the running and terminal action model.
 robot = loadTalosArm()
-runningModel = IntegratedActionModelEuler(DifferentialActionModel(robot.model))
-terminalModel = IntegratedActionModelEuler(DifferentialActionModel(robot.model))
-
-# Defining the time duration for running action models and the terminal one
-dt = 1e-3
-runningModel.timeStep = dt
+runningCostModel = CostModelSum(robot.model)
+terminalCostModel = CostModelSum(robot.model)
 
 # Note that we need to include a cost model (i.e. set of cost functions) in
 # order to fully define the action model for our optimal control problem.
 # For this particular example, we formulate three running-cost functions: 
 # goal-tracking cost, state and control regularization; and one terminal-cost:
 # goal cost. First, let's create the common cost functions.
-frameName = 'gripper_left_joint' #gripper_left_fingertip_2_link'
+frameName = 'gripper_left_joint'
 state = StatePinocchio(robot.model)
 SE3ref = pinocchio.SE3(np.eye(3), np.array([ [.0],[.0],[.4] ]))
 goalTrackingCost = CostModelFramePlacement(robot.model,
                                        nu=robot.model.nv,
                                        frame=robot.model.getFrameId(frameName),
                                        ref=SE3ref)
-# goalTrackingCost = CostModelFrameTranslation(robot.model,
-#                                      nu=robot.model.nv,
-#                                      frame=robot.model.getFrameId(frameName),
-#                                      ref=np.array([.0,.0,.4]))
 xRegCost = CostModelState(robot.model,
                           state,
                           ref=state.zero(),
@@ -51,12 +43,23 @@ xRegCost = CostModelState(robot.model,
 uRegCost = CostModelControl(robot.model,nu=robot.model.nv)
 
 # Then let's added the running and terminal cost functions
-runningCostModel = runningModel.differential.costs
 runningCostModel.addCost( name="pos", weight = 1e-3, cost = goalTrackingCost)
 runningCostModel.addCost( name="regx", weight = 1e-7, cost = xRegCost) 
 runningCostModel.addCost( name="regu", weight = 1e-7, cost = uRegCost)
-terminalCostModel = terminalModel.differential.costs
 terminalCostModel.addCost( name="pos", weight = 1, cost = goalTrackingCost)
+
+
+# Next, we need to create an action model for running and terminal knots. The
+# forward dynamics (computed using ABA) are implemented
+# inside DifferentialActionModelFullyActuated.
+runningModel = IntegratedActionModelEuler(
+    DifferentialActionModelFullyActuated(robot.model, runningCostModel))
+terminalModel = IntegratedActionModelEuler(
+    DifferentialActionModelFullyActuated(robot.model, terminalCostModel))
+
+# Defining the time duration for running action models and the terminal one
+dt = 1e-3
+runningModel.timeStep = dt
 
 
 # For this optimal control problem, we define 250 knots (or running action
