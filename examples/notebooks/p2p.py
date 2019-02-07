@@ -52,14 +52,14 @@ for p in ps:
     runningCostModel.addCost( name="pos", weight = 1, cost = costTrack)
     runningCostModel.addCost( name="xreg", weight = 1e-4, cost = costXReg)
     runningCostModel.addCost( name="ureg", weight = 1e-7, cost = costUReg)
-    runningModels += [ DifferentialActionModelManipulator(robot.model,runningCostModel) ]
+    runningModels += [ DifferentialActionModelFullyActuated(robot.model,runningCostModel) ]
 
     # Create the terminal action model
     terminalCostModel = CostModelSum(robot.model)
     terminalCostModel.addCost( name="pos", weight = 1000, cost = costTrack)
     terminalCostModel.addCost( name="xreg", weight = 1e-4, cost = costXReg)
     terminalCostModel.addCost( name="ureg", weight = 1e-7, cost = costUReg)
-    terminalModels += [ DifferentialActionModelManipulator(robot.model,terminalCostModel) ]
+    terminalModels += [ DifferentialActionModelFullyActuated(robot.model,terminalCostModel) ]
 
 
 x0 = np.concatenate([ m2a(robot.q0), np.zeros(robot.model.nv)])

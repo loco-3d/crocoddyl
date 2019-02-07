@@ -2,7 +2,7 @@ import pinocchio
 from pinocchio.utils import *
 from numpy.linalg import inv,norm,pinv
 from numpy import dot,asarray
-from crocoddyl import IntegratedActionModelEuler, DifferentialActionModelNumDiff,StatePinocchio,CostModelSum,CostModelPinocchio,CostModelFrameTranslation,CostModelState,CostModelControl,DifferentialActionModelManipulator
+from crocoddyl import IntegratedActionModelEuler, DifferentialActionModelNumDiff,StatePinocchio,CostModelSum,CostModelPinocchio,CostModelFrameTranslation,CostModelState,CostModelControl,DifferentialActionModelFullyActuated
 from crocoddyl import ContactModel6D,ActuationModelFreeFloating,DifferentialActionModelFloatingInContact,ContactModelMultiple
 import warnings
 from numpy.linalg import inv,pinv,norm,svd,eig
@@ -79,7 +79,7 @@ class Fix:
         costModel.addCost( name="regx", weight = 0.1, cost = self.cost2) 
         costModel.addCost( name="regu", weight = 0.01, cost = self.cost3)
 
-        self.dmodel = DifferentialActionModelManipulator(rmodel, costModel)
+        self.dmodel = DifferentialActionModelFullyActuated(rmodel, costModel)
         self.model  = IntegratedActionModelEuler(self.dmodel)
 
         self.data = self.model.createData()

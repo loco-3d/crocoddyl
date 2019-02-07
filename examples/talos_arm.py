@@ -1,5 +1,5 @@
 from crocoddyl import StatePinocchio
-from crocoddyl import DifferentialActionModelManipulator, IntegratedActionModelEuler
+from crocoddyl import DifferentialActionModelFullyActuated, IntegratedActionModelEuler
 from crocoddyl import CostModelSum
 from crocoddyl import CostModelFrameTranslation, CostModelFramePlacement
 from crocoddyl import CostModelState, CostModelControl
@@ -14,7 +14,7 @@ import numpy as np
 
 # In this example test, we will solve the reaching-goal task with the Talos arm.
 # For that, we use the forward dynamics (with its analytical derivatives)
-# developed inside crocoddyl; it describes inside DifferentialActionModelManipulator class.
+# developed inside crocoddyl; it describes inside DifferentialActionModelFullyActuated class.
 # Finally, we use an Euler sympletic integration scheme.
 
 
@@ -51,11 +51,11 @@ terminalCostModel.addCost( name="pos", weight = 1, cost = goalTrackingCost)
 
 # Next, we need to create an action model for running and terminal knots. The
 # forward dynamics (computed using ABA) are implemented
-# inside DifferentialActionModelManipulator.
+# inside DifferentialActionModelFullyActuated.
 runningModel = IntegratedActionModelEuler(
-    DifferentialActionModelManipulator(robot.model, runningCostModel))
+    DifferentialActionModelFullyActuated(robot.model, runningCostModel))
 terminalModel = IntegratedActionModelEuler(
-    DifferentialActionModelManipulator(robot.model, terminalCostModel))
+    DifferentialActionModelFullyActuated(robot.model, terminalCostModel))
 
 # Defining the time duration for running action models and the terminal one
 dt = 1e-3

@@ -35,8 +35,8 @@ terminalCostModel.addCost( name="xreg", weight = 1e-4, cost = costXReg)
 terminalCostModel.addCost( name="ureg", weight = 1e-7, cost = costUReg)
 
 # Create the action model
-runningModel     = DifferentialActionModelManipulator(robot.model, runningCostModel)
-terminalModel = DifferentialActionModelManipulator(robot.model, terminalCostModel)
+runningModel     = DifferentialActionModelFullyActuated(robot.model, runningCostModel)
+terminalModel = DifferentialActionModelFullyActuated(robot.model, terminalCostModel)
 
 # Create the problem
 x0 = np.concatenate([ m2a(robot.q0), np.zeros(robot.model.nv)])

@@ -297,13 +297,13 @@ assert( absmax(costData.L-costDataND.L) < 1e-3 )
 
 
 # --------------------------------------------------------------
-from crocoddyl import DifferentialActionModelManipulator
+from crocoddyl import DifferentialActionModelFullyActuated
 from crocoddyl import CostModelFrameTranslation, CostModelState, CostModelControl
 
-class DifferentialActionModelPositioning(DifferentialActionModelManipulator):
+class DifferentialActionModelPositioning(DifferentialActionModelFullyActuated):
     def __init__(self,pinocchioModel,frameName='gripper_left_fingertip_2_link'):
         costModel = CostModelSum(pinocchioModel)
-        DifferentialActionModelManipulator.__init__(self,pinocchioModel,costModel)
+        DifferentialActionModelFullyActuated.__init__(self,pinocchioModel,costModel)
         self.costs.addCost( name="pos", weight = 10,
                             cost = CostModelFrameTranslation(pinocchioModel,
                                                      pinocchioModel.getFrameId(frameName),
