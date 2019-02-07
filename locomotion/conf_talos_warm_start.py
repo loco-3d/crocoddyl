@@ -7,7 +7,7 @@ robot = loadTalos()
 
 #---------------------------------------------------------
 
-DISPLAY = False
+DISPLAY = True
 DT= 0.005
 
 #-------------------------INITIAL TRAJECTORY--------------

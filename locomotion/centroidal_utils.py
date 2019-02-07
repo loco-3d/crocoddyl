@@ -54,8 +54,8 @@ def createSwingTrajectories(rmodel, rdata, x, contact_patches, dt):
   for patch in contact_patches.keys():
     p = np.zeros((3,N));  m = np.zeros((3,N))
     for i in xrange(N):
-      q = x[i][:rmodel.nq]
-      v = x[i][-rmodel.nv:]
+      q = a2m(x[i][:rmodel.nq])
+      v = a2m(x[i][-rmodel.nv:])
       pinocchio.forwardKinematics(rmodel, rdata, q, v)
       p[:,i] = m2a(pinocchio.updateFramePlacement(rmodel, rdata,
                                   rmodel.getFrameId(contact_patches[patch])).translation)
@@ -81,8 +81,9 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, sw
 
   #Define Cost weights
   w = EmptyClass()
-  w.com = 100.;    w.state = 0.1;    w.control = 0.001;
-  w.swing_patch = 100.; w.forces = 0.01;
+  w.com = 1e2;    w.state = 1e-1;    w.control = 1e-3;
+  w.swing_patch = 1e4; w.forces = 1e-4;
+  w.swingv = 1e4
 
   #Define state cost vector for WeightedActivation
   w.xweight = np.array([0]*6+[0.01]*(rmodel.nv-6)+[10.]*rmodel.nv)
@@ -141,11 +142,47 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, sw
       #Control Regularization
       cost_regu = CostModelControl(rmodel, nu = actuationff.nu)
       cost_model.addCost("regu", cost_regu, w.control)
-      
+
       dmodel = DifferentialActionModelFloatingInContact(rmodel, actuationff,
                                                         contact_model, cost_model)
       imodel = IntegratedActionModelEuler(dmodel)
       problem_models.append(imodel)
+
+    #for the last model of the phase, add velocity cost on swing limbs.
+    for patch in swing_patch:
+      cost_vswing = CostModelFrameVelocity(rmodel,
+                                           frame=rmodel.getFrameId(patch_name_map[patch]),
+                                           ref=m2a(pinocchio.Motion.Zero().vector),
+                                           nu=actuationff.nu)
+      problem_models[-1].differential.costs.addCost("swingv_"+patch, cost_swing, w.swingv)
+      
+  #Create Terminal Model.
+  contact_model = ContactModelMultiple(rmodel)
+  # Add contact constraints for the active contact patches.
+  swing_patch = [];  t=t1;
+  for patch in patch_name_map.keys():
+    if getattr(phase, patch).active:
+      active_contact = ContactModel6D(rmodel,
+                                      frame=rmodel.getFrameId(patch_name_map[patch]),
+                                      ref = getattr(phase,patch).placement)
+      contact_model.addContact(patch, active_contact)
+  cost_model = CostModelSum(rmodel, actuationff.nu);
+  #CoM Cost
+  cost_com = CostModelCoM(rmodel, ref=m2a(phi_c.com_vcom.eval(t)[0][:3,:]),
+                          nu = actuationff.nu);
+  cost_model.addCost("CoM",cost_com, w.com)
+
+  #State Regularization
+  cost_regx = CostModelState(rmodel, State, ref=rmodel.defaultState,
+                             nu = actuationff.nu,
+                             activation=ActivationModelWeightedQuad(w.xweight**2))
+  cost_model.addCost("regx", cost_regx, w.state)
+
+  dmodel = DifferentialActionModelFloatingInContact(rmodel, actuationff,
+                                                    contact_model, cost_model)
+  imodel = IntegratedActionModelEuler(dmodel)
+  problem_models.append(imodel)  
+  problem_models.append
   return problem_models
 
 def createPhiFromContactSequence(rmodel, rdata, cs, patch_names):
