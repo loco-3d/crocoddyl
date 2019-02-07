@@ -3,7 +3,7 @@ from utils import m2a
 import numpy as np
 import pinocchio
 from collections import OrderedDict
-
+from exceptions import RuntimeError
 
 
 class CostModelPinocchio:
@@ -438,7 +438,7 @@ class CostModelForce(CostModelPinocchio):
         self.activation = activation if activation is not None else ActivationModelQuad()
     def calc(model,data,x,u):
         if data.contact is None:
-            raise RunTimeError('''The CostForce data should be specifically initialized from the
+            raise RuntimeError('''The CostForce data should be specifically initialized from the
             contact data ... no automatic way of doing that yet ...''')
         data.f = data.contact.f
         data.residuals = data.f-model.ref
