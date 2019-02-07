@@ -41,8 +41,8 @@ costUReg = CostModelControl(robot.model,nu=robot.model.nv)
 
 # Then let's added the running and terminal cost functions per each action
 # model
-models = []
-termmodels = []
+runningModels = []
+terminalModels = []
 for p in ps:
     # Create the tracking cost
     costTrack = CostModelFrameTranslation(robot.model,frame=frameId,ref=p)
@@ -52,19 +52,20 @@ for p in ps:
     runningCostModel.addCost( name="pos", weight = 1, cost = costTrack)
     runningCostModel.addCost( name="xreg", weight = 1e-4, cost = costXReg)
     runningCostModel.addCost( name="ureg", weight = 1e-7, cost = costUReg)
-    models += [ DifferentialActionModelManipulator(robot.model,runningCostModel) ]
+    runningModels += [ DifferentialActionModelManipulator(robot.model,runningCostModel) ]
 
     # Create the terminal action model
     terminalCostModel = CostModelSum(robot.model)
     terminalCostModel.addCost( name="pos", weight = 1000, cost = costTrack)
     terminalCostModel.addCost( name="xreg", weight = 1e-4, cost = costXReg)
     terminalCostModel.addCost( name="ureg", weight = 1e-7, cost = costUReg)
-    termmodels += [ DifferentialActionModelManipulator(robot.model,terminalCostModel) ]
+    terminalModels += [ DifferentialActionModelManipulator(robot.model,terminalCostModel) ]
 
 
 x0 = np.concatenate([ m2a(robot.q0), np.zeros(robot.model.nv)])
-seqs = [  [ IntegratedActionModelEuler(model) ]*T+[IntegratedActionModelEuler(termmodel)]
-          for model,termmodel in zip(models,termmodels) ]
+seqs = [  [ IntegratedActionModelEuler(runningModel) ]*T +
+            [IntegratedActionModelEuler(terminalModel)]
+               for runningModel,terminalModel in zip(runningModels,terminalModels) ]
 problem = ShootingProblem(x0, sum(seqs,[])[:-1], seqs[-1][-1])
 
 # Creating the DDP solver for this OC problem, defining a logger
@@ -77,7 +78,7 @@ ddp.solve()
 
 # Penalty if you want.
 for i in range(4,6):
-    for m in termmodels: m.costs['pos'].weight = 10**i
+    for m in terminalModels: m.costs['pos'].weight = 10**i
     ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=10)
 
 # Visualizing the solution in gepetto-viewer

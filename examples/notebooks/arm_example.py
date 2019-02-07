@@ -35,13 +35,13 @@ terminalCostModel.addCost( name="xreg", weight = 1e-4, cost = costXReg)
 terminalCostModel.addCost( name="ureg", weight = 1e-7, cost = costUReg)
 
 # Create the action model
-model     = DifferentialActionModelManipulator(robot.model, runningCostModel)
-termmodel = DifferentialActionModelManipulator(robot.model, terminalCostModel)
+runningModel     = DifferentialActionModelManipulator(robot.model, runningCostModel)
+terminalModel = DifferentialActionModelManipulator(robot.model, terminalCostModel)
 
 # Create the problem
 x0 = np.concatenate([ m2a(robot.q0), np.zeros(robot.model.nv)])
-problem = ShootingProblem(x0, [ IntegratedActionModelEuler(model) ]*T,
-                          IntegratedActionModelEuler(termmodel))
+problem = ShootingProblem(x0, [ IntegratedActionModelEuler(runningModel) ]*T,
+                          IntegratedActionModelEuler(terminalModel))
 
 # Creating the DDP solver for this OC problem, defining a logger
 ddp = SolverDDP(problem)
