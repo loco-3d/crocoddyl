@@ -3,7 +3,7 @@ from crocoddyl import DifferentialActionModelFloatingInContact
 from crocoddyl import IntegratedActionModelEuler
 from crocoddyl import CostModelSum
 from crocoddyl import CostModelFramePlacement, CostModelFrameVelocity
-from crocoddyl import CostModelState, CostModelControl
+from crocoddyl import CostModelState, CostModelControl, ActivationModelWeightedQuad
 from crocoddyl import ActuationModelFreeFloating
 from crocoddyl import ContactModel6D, ContactModelMultiple
 from crocoddyl import ShootingProblem, SolverDDP
@@ -26,11 +26,18 @@ class TaskSE3:
 class SimpleBipedWalkingProblem:
     """ Defines a simple 3d locomotion problem
     """
-    def __init__(self, robot, rightFoot, leftFoot):
-        self.robot = robot
-        self.state = StatePinocchio(self.robot.model)
+    def __init__(self, rmodel, rightFoot, leftFoot):
+        self.rmodel = rmodel
+        self.rdata = rmodel.createData()
+        self.state = StatePinocchio(self.rmodel)
         self.rightFoot = rightFoot
         self.leftFoot = leftFoot
+        # Defining default state
+        self.rmodel.defaultState = \
+            np.concatenate([m2a(self.rmodel.neutralConfiguration),
+                            np.zeros(self.rmodel.nv)])
+        # Remove the armature
+        self.rmodel.armature[6:] = 1.
     
     def createProblem(self, x, stepLength, stepDuration):
         # Computing the time step per each contact phase given the step duration.
@@ -39,13 +46,15 @@ class SimpleBipedWalkingProblem:
         timeStep = float(stepDuration)/numKnots
 
         # Getting the frame id for the right and left foot
-        rightFootId = self.robot.model.getFrameId(self.rightFoot)
-        leftFootId = self.robot.model.getFrameId(self.leftFoot)
+        rightFootId = self.rmodel.getFrameId(self.rightFoot)
+        leftFootId = self.rmodel.getFrameId(self.leftFoot)
 
         # Compute the current foot positions
-        q0 = a2m(x[:self.robot.nq])
-        rightFootPos0 = robot.framePlacement(q0, rightFootId).translation
-        leftFootPos0 = robot.framePlacement(q0, leftFootId).translation
+        q0 = a2m(x[:self.rmodel.nq])
+        pinocchio.forwardKinematics(self.rmodel,self.rdata,q0)
+        pinocchio.updateFramePlacements(self.rmodel,self.rdata)
+        rightFootPos0 = self.rdata.oMf[rightFootId].translation
+        leftFootPos0 = self.rdata.oMf[leftFootId].translation
 
         # Defining the action models along the time instances
         n_cycles = 2
@@ -101,28 +110,29 @@ class SimpleBipedWalkingProblem:
     def createContactPhaseModel(self, timeStep, contactFootId, footSwingTask):
         # Creating the action model for floating-base systems. A walker system 
         # is by default a floating-base system
-        actModel = ActuationModelFreeFloating(self.robot.model)
+        actModel = ActuationModelFreeFloating(self.rmodel)
 
         # Creating a 6D multi-contact model, and then including the supporting
         # foot
-        contactModel = ContactModelMultiple(self.robot.model)
+        contactModel = ContactModelMultiple(self.rmodel)
         contactFootModel = \
-            ContactModel6D(self.robot.model, contactFootId, ref=None)
+            ContactModel6D(self.rmodel, contactFootId, ref=None)
         contactModel.addContact('contact', contactFootModel)
 
         # Creating the cost model for a contact phase
-        costModel = CostModelSum(self.robot.model, actModel.nu)
-        footTrack = CostModelFramePlacement(self.robot.model,
+        costModel = CostModelSum(self.rmodel, actModel.nu)
+        footTrack = CostModelFramePlacement(self.rmodel,
                                         footSwingTask.frameId,
                                         footSwingTask.oXf,
                                         actModel.nu)
-        stateReg = CostModelState(self.robot.model,
+        stateWeights = \
+            np.array([0]*6 + [0.01]*(self.rmodel.nv-6) + [10]*self.rmodel.nv)
+        stateReg = CostModelState(self.rmodel,
                                   self.state,
-                                  self.state.zero(),
-                                  actModel.nu)
-        stateReg.weights = \
-            np.array([0]*6 + [0.01]*(self.robot.model.nv-6) + [10]*self.robot.model.nv)
-        ctrlReg = CostModelControl(self.robot.model, actModel.nu)
+                                  self.rmodel.defaultState,
+                                  actModel.nu,
+                                  activation=ActivationModelWeightedQuad(stateWeights**2))
+        ctrlReg = CostModelControl(self.rmodel, actModel.nu)
         costModel.addCost("footTrack", footTrack, 100.)
         costModel.addCost("stateReg", stateReg, 0.1)
         costModel.addCost("ctrlReg", ctrlReg, 0.001)
@@ -130,7 +140,7 @@ class SimpleBipedWalkingProblem:
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
         dmodel = \
-            DifferentialActionModelFloatingInContact(self.robot.model,
+            DifferentialActionModelFloatingInContact(self.rmodel,
                                                      actModel,
                                                      contactModel,
                                                      costModel)
@@ -142,7 +152,7 @@ class SimpleBipedWalkingProblem:
         model = self.createContactPhaseModel(0., contactFootId, swingFootTask)
 
         impactFootVelCost = \
-            CostModelFrameVelocity(self.robot.model, swingFootTask.frameId)
+            CostModelFrameVelocity(self.rmodel, swingFootTask.frameId)
         model.differential.costs.addCost('impactVel', impactFootVelCost, 10000.)
         model.differential.costs['impactVel' ].weight = 100000
         model.differential.costs['footTrack' ].weight = 100000
@@ -153,29 +163,29 @@ class SimpleBipedWalkingProblem:
 
 
 
-# Creating the lower-body part of Talos and remove any armature
+# Creating the lower-body part of Talos
 robot = loadTalosLegs()
-robot.model.armature[6:] = 1.
-
+rmodel = robot.model
 
 q = robot.q0.copy()
 v = zero(robot.model.nv)
-x = m2a(np.concatenate([q,v]))
+x0 = m2a(np.concatenate([q,v]))
+x0[2] = 1.019
 
 # Setting up the 3d walking problem
 rightFoot = 'right_sole_link'
 leftFoot = 'left_sole_link'
-walk = SimpleBipedWalkingProblem(robot, rightFoot, leftFoot)
+walk = SimpleBipedWalkingProblem(rmodel, rightFoot, leftFoot)
 
 # Solving the 3d walking problem using DDP
 stepLength = 0.2
 stepDuration = 0.75
-ddp = SolverDDP(walk.createProblem(x, stepLength, stepDuration))
+ddp = SolverDDP(walk.createProblem(x0, stepLength, stepDuration))
 cameraTF = [3., 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose(),
                 CallbackSolverDisplay(robot,4,cameraTF)]
 ddp.th_stop = 1e-9
-ddp.solve(maxiter=1000,regInit=.1)
+ddp.solve(maxiter=1000,regInit=.1,init_xs=[rmodel.defaultState]*len(ddp.models()))
 
 
 # Plotting the solution and the DDP convergence
