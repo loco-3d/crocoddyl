@@ -12,7 +12,7 @@ from crocoddyl import SolverDDP
 from crocoddyl import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay
 from crocoddyl import plotOCSolution, plotDDPConvergence
 from crocoddyl import loadTalosLegs
-from crocoddyl import m2a, a2m
+from crocoddyl import m2a, a2m, ImpulseModelMultiple, ImpulseModel6D, ActionModelImpact
 import pinocchio
 from pinocchio.utils import *
 
@@ -41,6 +41,8 @@ stepLength = 0.2
 swingDuration = 0.75
 stanceDurantion = 0.1
 
+from crocoddyl.diagnostic import displayTrajectory
+disp = lambda xs: displayTrajectory(robot,ddp.xs,models[0].timeStep/5)
 
 def runningModel(contactIds, effectors, com=None, integrationStep = 1e-2):
     '''
@@ -100,17 +102,26 @@ def pseudoImpactModel(contactIds,effectors):
     return model
 
 def impactModel(contactIds,effectors):
-    #assert(len(effectors)==1)
-    model = runningModel(contactIds,effectors,integrationStep=0)
+    State = StatePinocchio(rmodel)
 
-    costModel = model.differential.costs
+    # Creating a 6D multi-contact model, and then including the supporting foot
+    impulseModel = ImpulseModelMultiple(rmodel,{ "impulse%d"%cid: ImpulseModel6D(rmodel,cid)
+                                                 for cid in contactIds })
+
+    # Creating the cost model for a contact phase
+    costModel = CostModelSum(rmodel,nu=0)
+    wx = np.array([0]*6 + [.1]*(rmodel.nv-6) + [10]*rmodel.nv)
+    costModel.addCost('xreg',weight=1.,
+                      cost=CostModelState(rmodel,State,ref=rmodel.defaultState,nu=0,
+                                          activation=ActivationModelWeightedQuad(wx)))
     for fid,ref in effectors.items():
-        costModel.addCost('impactVel%d' % fid,weight = 10.,
-                          cost=CostModelFrameVelocity(rmodel,fid))
-        costModel.costs['track%d'%fid ].weight = 1000
-    costModel.costs['xreg'].weight = 1
-    costModel.costs['ureg'].weight = 0.01
-
+        costModel.addCost("track%d"%fid, weight=100.,
+                          cost = CostModelFramePlacement(rmodel,fid,ref,nu=0))
+        
+    # Creating the action model for the KKT dynamics with simpletic Euler
+    # integration scheme
+    model = \
+             ActionModelImpact(rmodel,impulseModel,costModel)
     return model
 
 SE3 = pinocchio.SE3
@@ -128,13 +139,14 @@ models =\
          [ runningModel([ rightId, leftId ],{}, integrationStep=5e-2)] *10\
          +  [ runningModel([ ],{},integrationStep=5e-2) ]*5 \
          +  [ runningModel([ ],{}, com=com0+[0,0,0.1],integrationStep=5e-2) ] \
-         +  [ runningModel([ ],{},integrationStep=5e-2) ]*4 \
-         +  [ pseudoImpactModel([ leftId,rightId ],
-                                { rightId: SE3(eye(3), right0),
-                                  leftId: SE3(eye(3), left0) }) ] \
-         +  [ runningModel([ rightId, leftId ],{},integrationStep=9e-2) ]*5
-                  
-problem = ShootingProblem(initialState=x0,runningModels=models[:-1],terminalModel=models[-1])
+         +  [ runningModel([ ],{},integrationStep=5e-2) ]*4
+         # +  [ pseudoImpactModel([ leftId,rightId ],
+         #                        { rightId: SE3(eye(3), right0),
+         #                          leftId: SE3(eye(3), left0) }) ] \
+         # +  [ runningModel([ rightId, leftId ],{},integrationStep=9e-2) ]*5
+impact = impactModel([ rightId, leftId ],{})
+         
+problem = ShootingProblem(initialState=x0,runningModels=models,terminalModel=impact)
 ddp = SolverDDP(problem)
 ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
 ddp.th_stop = 1e-5
@@ -142,8 +154,6 @@ ddp.solve(maxiter=1000,regInit=.1,init_xs=[rmodel.defaultState]*len(ddp.models()
 
 [ d.differential.pinocchio.com[0] for d in ddp.datas() ]
 
-from crocoddyl.diagnostic import displayTrajectory
-disp = lambda xs: displayTrajectory(robot,ddp.xs,models[0].timeStep/5)
 
 for pen in range(2,8):
     disp(ddp.xs)
