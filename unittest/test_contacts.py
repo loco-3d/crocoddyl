@@ -4,6 +4,27 @@ from pinocchio.utils import *
 from numpy.linalg import inv,pinv,norm,svd,eig
 
 
+def df_dq(model,func,q,h=1e-9):
+    dq = zero(model.nv)
+    f0 = func(q)
+    res = zero([len(f0),model.nv])
+    for iq in range(model.nv):
+        dq[iq] = h
+        res[:,iq] = a2m((func(pinocchio.integrate(model,q,dq)) - f0))/h
+        dq[iq] = 0
+    return res
+
+def df_dv(model,func,v,h=1e-9):
+    dv = zero(model.nv)
+    f0 = func(v)
+    res = zero([len(f0),model.nv])
+    for iv in range(model.nv):
+        dv[iv] = h
+        res[:,iv] = a2m(func(v+dv) - f0)/h
+        dv[iv] = 0
+    return res
+
+
 ## Loading Talos arm with FF TODO use a bided or quadruped
 # -----------------------------------------------------------------------------
 from crocoddyl import loadTalosArm
@@ -17,7 +38,7 @@ rmodel = robot.model
 rdata = rmodel.createData()
 
 
-
+np.set_printoptions(linewidth=400, suppress=True)
 # -----------------------------------------------------------------------------
 from crocoddyl import ContactData6D, ContactModel6D
         
@@ -33,7 +54,9 @@ u = m2a(rand(rmodel.nv-6))
 pinocchio.forwardKinematics(rmodel,rdata,q,v,zero(rmodel.nv))
 pinocchio.computeJointJacobians(rmodel,rdata)
 pinocchio.updateFramePlacements(rmodel,rdata)
+pinocchio.computeForwardKinematicsDerivatives(rmodel,rdata,q,v,zero(rmodel.nv));
 contactModel.calc(contactData,x)
+contactModel.calcDiff(contactData, x)
 
 rdata2 = rmodel.createData()
 pinocchio.computeAllTerms(rmodel,rdata2,q,v)
@@ -43,13 +66,28 @@ contactModel.calc(contactData2,x)
 assert(norm(contactData.a0-contactData2.a0)<1e-9)
 assert(norm(contactData.J -contactData2.J )<1e-9)
 
+def returna_at0(q,v):
+  x = np.vstack([q,v]).flat
+  pinocchio.computeAllTerms(rmodel,rdata2,q,v)
+  pinocchio.updateFramePlacements(rmodel,rdata2)  
+  contactModel.calc(contactData2,x)
+  
+  return contactData2.a0.copy()
 
+eps = 1e-8
+Aq_numdiff = df_dq(rmodel, lambda _q: returna_at0(_q,v), q,h=eps)
+Av_numdiff = df_dv(rmodel, lambda _v: returna_at0(q,_v), v,h=eps)
+
+
+assert(np.isclose(contactData.Aq, Aq_numdiff, atol=np.sqrt(eps)).all())
+assert(np.isclose(contactData.Av, Av_numdiff, atol=np.sqrt(eps)).all())
 
 # ----------------------------------------------------------------------------
 from crocoddyl import ContactData3D, ContactModel3D
 
 contactModel = ContactModel3D(rmodel,
-                              rmodel.getFrameId('gripper_left_fingertip_2_link'),ref=None)
+                              rmodel.getFrameId('gripper_left_fingertip_2_link'),
+                              ref=np.random.rand(3), gains=[4.,4.])
 contactData  = contactModel.createData(rdata)
 
 q = pinocchio.randomConfiguration(rmodel)
@@ -60,7 +98,9 @@ u = m2a(rand(rmodel.nv-6))
 pinocchio.forwardKinematics(rmodel,rdata,q,v,zero(rmodel.nv))
 pinocchio.computeJointJacobians(rmodel,rdata)
 pinocchio.updateFramePlacements(rmodel,rdata)
+pinocchio.computeForwardKinematicsDerivatives(rmodel,rdata,q,v,zero(rmodel.nv))
 contactModel.calc(contactData,x)
+contactModel.calcDiff(contactData, x)
 
 rdata2 = rmodel.createData()
 pinocchio.computeAllTerms(rmodel,rdata2,q,v)
@@ -71,6 +111,19 @@ assert(norm(contactData.a0-contactData2.a0)<1e-9)
 assert(norm(contactData.J -contactData2.J )<1e-9)
 
 
+def returna0(q,v):
+  x = np.vstack([q,v]).flat
+  pinocchio.computeAllTerms(rmodel,rdata2,q,v)
+  pinocchio.updateFramePlacements(rmodel,rdata2)  
+  contactModel.calc(contactData2,x)
+  return contactData2.a0.copy()
+
+Aq_numdiff = df_dq(rmodel, lambda _q: returna0(_q,v), q, h=eps)
+Av_numdiff = df_dv(rmodel, lambda _v: returna0(q,_v), v, h=eps)
+
+
+assert(np.isclose(contactData.Aq, Aq_numdiff, atol=np.sqrt(eps)).all())
+assert(np.isclose(contactData.Av, Av_numdiff, atol=np.sqrt(eps)).all())
 
 #---------------------------------------------------------------------
 # Many contact model
@@ -96,7 +149,7 @@ u = np.random.rand(rmodel.nv-6)*2-1
 
 actModel = ActuationModelFreeFloating(rmodel)
 contactModel3 = ContactModel3D(rmodel,rmodel.getFrameId('gripper_left_fingertip_2_link'),
-                               ref=None)
+                               ref=np.random.rand(3),gains=[4.,4.])
 rmodel.frames[contactModel3.frame].placement = pinocchio.SE3.Random()
 contactModel = ContactModelMultiple(rmodel)
 contactModel.addContact(name='fingertip',contact=contactModel3)
