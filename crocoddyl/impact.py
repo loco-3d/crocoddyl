@@ -201,13 +201,14 @@ class ActionModelImpact:
         self.unone = np.zeros(self.nu)
         self.ncost = self.nv
         self.costs = costModel
+        self.impulseWeight = 1.
     @property
     def nimpulse(self): return self.impulse.nimpulse
     def createData(self): return ActionDataImpact(self)
     def calc(model,data,x,u=None):
         '''
         M(vnext-v) + J^T f = 0
-        M vnext =0
+        J vnext = 0
 
         [MJ^T][vnext] = [Mv]
         [J   ][ f   ]   [0 ]
@@ -232,7 +233,7 @@ class ActionModelImpact:
 
         data.r[:nv] = (data.K[:nv,:nv]*v).flat
         data.r[nv:] = 0
-
+ 
         data.af[:] = np.dot(inv(data.K),data.r)
         # Convert force array to vector of spatial forces.
         fs = model.impulse.setForces(data.impulse,data.f)
@@ -240,7 +241,7 @@ class ActionModelImpact:
         data.xnext[:nq] = q.flat
         data.xnext[nq:] = data.vnext
 
-        data.costResiduals[:] = 100*(data.vnext-v.flat)
+        data.costResiduals[:] = model.impulseWeight*(data.vnext-v.flat)
         data.cost = .5*sum( data.costResiduals**2 )
 
         if model.costs is not None:
@@ -249,43 +250,47 @@ class ActionModelImpact:
 
     def calcDiff(model,data,x,u=None,recalc=True):
         '''
-        s = [vnext;f] = K^-1 [Mv;0] = K^-1 r
-        ds/dv = K^-1 [M;0]
-        
+        k = [Mv;0]; K = [MJ^T;J0]
+        r = [vnext;f] = K^-1 k
+        dr/dv = K^-1 [M;0]
+        dr/dq = -K^-1 K'K^-1 k + K^-1 k' = -K^-1 (K'r-k')
+              = -K^-1 [ M'vnext + J'^T f- M'v ]
+                      [ J'vnext               ]
+              = -K^-1 [ M'(vnext-v) + J'^T f ]
+                      [ J' vnext             ]
         '''
-        if u is None: u=model.unone
         if recalc: xout,cost = model.calc(data,x,u)
-        nx,ndx,nu,nq,nv,nout,nc = model.nx,model.State.ndx,model.nu,model.nq,model.nv,model.nout,model.nimpulse
+        nx,ndx,nq,nv,nc = model.nx,model.State.ndx,model.nq,model.nv,model.nimpulse
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
         vnext = a2m(data.vnext)
         fs = data.impulse.forces
 
         # Derivative M' dv + J'f + b'
-        pinocchio.computeRNEADerivatives(model.pinocchio,data.pinocchio,q,v,vnext-v,fs)
+        g6bak = model.pinocchio.gravity
+        model.pinocchio.gravity = pinocchio.Motion.Zero()
+        pinocchio.computeRNEADerivatives(model.pinocchio,data.pinocchio,q,zero(nv),vnext-v,fs)
+        model.pinocchio.gravity = g6bak
         data.did_dq[:,:] = data.pinocchio.dtau_dq
-        # Derivative of b'
-        pinocchio.computeRNEADerivatives(model.pinocchio,data.pinocchio,q,v,zero(nv))
-        data.did_dq[:,:] -= data.pinocchio.dtau_dq
-
-        pinocchio.computeForwardKinematicsDerivatives(model.pinocchio,data.pinocchio,q,v,vnext*0)
-        pinocchio.updateFramePlacements(model.pinocchio,data.pinocchio)
 
         # Derivative of the impulse constraint
+        pinocchio.computeForwardKinematicsDerivatives(model.pinocchio,data.pinocchio,q,vnext,zero(nv))
+        #pinocchio.updateFramePlacements(model.pinocchio,data.pinocchio)
         model.impulse.calcDiff(data.impulse,x,recalc=False)
         data.dv_dq = data.impulse.Vq
 
         data.Kinv = inv(data.K)
 
-        np.fill_diagonal(data.Fx[:nv,:nv],1)  # dq/dq
-        data.Fx[:nv,nv:] = 0                  # dq/dv
-        data.Fx[nv:,nv:] = np.dot(data.Kinv[:nv,:nv],data.K[:nv,:nv])
-        data.Fx[nv:,:nv] = -np.dot(data.Kinv[:nv,:],np.vstack([data.did_dq, data.dv_dq]))
+        data.Fq[:nv,:] = 0
+        np.fill_diagonal(data.Fq[:nv,:],1)  # dq/dq
+        data.Fv[:nv,:] = 0                  # dq/dv
+        data.Fx[nv:,:nv] = -np.dot(data.Kinv[:nv,:],np.vstack([data.did_dq, data.dv_dq]))  # dvnext/dq
+        data.Fx[nv:,nv:] = np.dot(data.Kinv[:nv,:nv],data.K[:nv,:nv])                      # dvnext/dv
 
         data.Rx[:,:] = 0
         np.fill_diagonal(data.Rv,-1)
         data.Rx[:,:] += data.Fx[nv:,:]
-        data.Rx *= 100
+        data.Rx *= model.impulseWeight
         data.Lx [:]   = np.dot(data.Rx.T,data.costResiduals)
         data.Lxx[:,:] = np.dot(data.Rx.T,data.Rx)
 
