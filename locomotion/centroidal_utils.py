@@ -2,7 +2,7 @@ import pinocchio
 import numpy as np
 from collections import OrderedDict
 from locomote import CubicHermiteSpline
-from crocoddyl import m2a, a2m, EmptyClass
+from crocoddyl import m2a, a2m
 from crocoddyl import CostModelSum,CostModelState,CostModelControl,CostModelForce,\
   CostModelFrameVelocity,CostModelFramePlacement,CostModelCoM,\
   ImpulseModelMultiple,DifferentialActionModelFloatingInContact,IntegratedActionModelEuler,\
@@ -80,7 +80,7 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, sw
   """
 
   #Define Cost weights
-  w = EmptyClass()
+  w = lambda t: 0
   w.com = 1e2;    w.state = 1e-1;    w.control = 1e-3;
   w.swing_patch = 1e4; w.forces = 1e-4;
   w.swingv = 1e4
@@ -207,7 +207,7 @@ def createPhiFromContactSequence(rmodel, rdata, cs, patch_names):
   N = len(t_traj)
 
   #------Get values of state and control--------------
-  phi_c = EmptyClass()
+  phi_c = lambda t: 0
   phi_c.f = OrderedDict(); phi_c.df = OrderedDict();
   for patch in patch_names:
     phi_c.f.update([[patch, np.zeros((N,6))]])

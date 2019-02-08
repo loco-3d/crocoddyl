@@ -3,7 +3,7 @@ import conf_talos_warm_start as conf
 from time import sleep
 from locomote import ContactSequenceHumanoid
 from centroidal_utils import createPhiFromContactSequence, createMultiphaseShootingProblem, createSwingTrajectories
-from crocoddyl import EmptyClass, m2a, a2m
+from crocoddyl import m2a, a2m
 from crocoddyl import ShootingProblem, SolverDDP
 from crocoddyl import CallbackDDPVerbose, CallbackSolverDisplay, CallbackDDPLogger
 import numpy as np
@@ -25,11 +25,8 @@ cs = ContactSequenceHumanoid(0)
 cs.loadFromXML(conf.MUSCOD_CS_OUTPUT_FILENAME, conf.CONTACT_SEQUENCE_XML_TAG)
 
 #----------------Define References-------------------------
-init = EmptyClass()
-init.x = conf.X_init
-init.u = conf.U_init
 
-swing_ref = createSwingTrajectories(rmodel, rdata, init.x, conf.contact_patches, conf.DT)
+swing_ref = createSwingTrajectories(rmodel, rdata, conf.X_init, conf.contact_patches, conf.DT)
 phi_c = createPhiFromContactSequence(rmodel, rdata, cs, conf.contact_patches.keys())
 
 #----------------Define Problem----------------------------
@@ -38,7 +35,7 @@ models = createMultiphaseShootingProblem(rmodel, rdata, conf.contact_patches,
 
 disp = lambda xs: disptraj(robot,xs)
 
-problem = ShootingProblem(m2a(init.x[0]), models[:-1], models[-1])
+problem = ShootingProblem(m2a(conf.X_init[0]), models[:-1], models[-1])
 
 #Set contacts in the data elements. Ugly.
 #This is defined for IAMEuler. If using IAMRK4, differential is a list. so we need to change.
@@ -50,4 +47,4 @@ for d in problem.runningDatas:
 ddp = SolverDDP(problem)
 ddp.callback = [CallbackDDPVerbose()]#, CallbackSolverDisplay(robot,4)]
 ddp.th_stop = 1e-9
-ddp.solve(maxiter=1000,regInit=0.1,init_xs=init.x)
+ddp.solve(maxiter=1000,regInit=0.1,init_xs=conf.X_init,init_us=conf.U_init)
