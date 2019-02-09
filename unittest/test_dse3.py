@@ -1,7 +1,7 @@
 import pinocchio
 import rospkg
 import numpy as np
-
+from testutils import df_dq
 
 from crocoddyl import loadTalosArm
 robot = loadTalosArm()
@@ -12,16 +12,6 @@ jid = rmodel.getJointId('gripper_left_joint')
 q0 = pinocchio.randomConfiguration(rmodel)
 
 Mref = pinocchio.SE3.Random()
-
-def df_dq(model,func,q,h=1e-8):
-    dq = np.zeros((model.nv,1))
-    f0 = func(q)
-    res = np.zeros([len(f0),model.nv])
-    for iq in range(model.nv):
-        dq[iq] = h
-        res[:,iq] = np.array((func(pinocchio.integrate(model,q,dq)) - f0)/h).squeeze()
-        dq[iq] = 0
-    return res
 
 def residualrMi(q):
   pinocchio.forwardKinematics(rmodel,rdata,q)
@@ -43,12 +33,13 @@ def dresidualWorld(q):
                    pinocchio.getJointJacobian(rmodel, rdata, jid,
                                            pinocchio.ReferenceFrame.WORLD))
 
+eps = 1e-9
 d1 = dresidualLocal(q0)
 d2 = dresidualWorld(q0)
-d3 = df_dq(rmodel, residualrMi, q0)
+d3 = df_dq(rmodel, residualrMi, q0, h=eps)
 
 pinocchio.forwardKinematics(rmodel,rdata,q0)
 oMi = rdata.oMi[jid]
 
-assert(np.isclose(d1,d3,atol=1e-8).all())
+assert(np.isclose(d1,d3,atol=np.sqrt(eps)).all())
 #assert(np.isclose(d2, oMi.action.dot(d3), atol=1e-8).all())

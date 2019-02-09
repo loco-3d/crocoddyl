@@ -2,28 +2,7 @@ from crocoddyl import m2a, a2m, absmax, absmin
 import pinocchio
 from pinocchio.utils import *
 from numpy.linalg import inv,pinv,norm,svd,eig
-
-
-def df_dq(model,func,q,h=1e-9):
-    dq = zero(model.nv)
-    f0 = func(q)
-    res = zero([len(f0),model.nv])
-    for iq in range(model.nv):
-        dq[iq] = h
-        res[:,iq] = a2m((func(pinocchio.integrate(model,q,dq)) - f0))/h
-        dq[iq] = 0
-    return res
-
-def df_dv(model,func,v,h=1e-9):
-    dv = zero(model.nv)
-    f0 = func(v)
-    res = zero([len(f0),model.nv])
-    for iv in range(model.nv):
-        dv[iv] = h
-        res[:,iv] = a2m(func(v+dv) - f0)/h
-        dv[iv] = 0
-    return res
-
+from testutils import df_dx, df_dq
 
 ## Loading Talos arm with FF TODO use a bided or quadruped
 # -----------------------------------------------------------------------------
@@ -72,11 +51,11 @@ def returna_at0(q,v):
   pinocchio.updateFramePlacements(rmodel,rdata2)  
   contactModel.calc(contactData2,x)
   
-  return contactData2.a0.copy()
+  return a2m(contactData2.a0)#.copy()
 
 eps = 1e-8
 Aq_numdiff = df_dq(rmodel, lambda _q: returna_at0(_q,v), q,h=eps)
-Av_numdiff = df_dv(rmodel, lambda _v: returna_at0(q,_v), v,h=eps)
+Av_numdiff = df_dx(lambda _v: returna_at0(q,_v), v,h=eps)
 
 
 assert(np.isclose(contactData.Aq, Aq_numdiff, atol=np.sqrt(eps)).all())
@@ -116,10 +95,10 @@ def returna0(q,v):
   pinocchio.computeAllTerms(rmodel,rdata2,q,v)
   pinocchio.updateFramePlacements(rmodel,rdata2)  
   contactModel.calc(contactData2,x)
-  return contactData2.a0.copy()
+  return a2m(contactData2.a0)#.copy()
 
 Aq_numdiff = df_dq(rmodel, lambda _q: returna0(_q,v), q, h=eps)
-Av_numdiff = df_dv(rmodel, lambda _v: returna0(q,_v), v, h=eps)
+Av_numdiff = df_dx(lambda _v: returna0(q,_v), v, h=eps)
 
 
 assert(np.isclose(contactData.Aq, Aq_numdiff, atol=np.sqrt(eps)).all())
@@ -211,43 +190,13 @@ assert(absmax(data.Fu-dnum.Fu)/model.nu<1e-3)
 
 #----------------------------------------------------------
 ### Check force derivatives
-def df_dq(model,func,q,h=1e-9):
-    dq = zero(model.nv)
-    f0 = func(q)
-    res = zero([len(f0),model.nv])
-    for iq in range(model.nv):
-        dq[iq] = h
-        res[:,iq] = (func(pinocchio.integrate(model,q,dq)) - f0)/h
-        dq[iq] = 0
-    return res
-
-def df_dv(model,func,v,h=1e-9):
-    dv = zero(model.nv)
-    f0 = func(v)
-    res = zero([len(f0),model.nv])
-    for iv in range(model.nv):
-        dv[iv] = h
-        res[:,iv] = (func(v+dv) - f0)/h
-        dv[iv] = 0
-    return res
-
-def df_dz(model,func,z,h=1e-9):
-    dz = zero(len(z))
-    f0 = func(z)
-    res = zero([len(f0),len(z)])
-    for iz in range(len(z)):
-        dz[iz] = h
-        res[:,iz] = (func(z+dz) - f0)/h
-        dz[iz] = 0
-    return res
-
 def calcForces(q_,v_,u_):
     model.calc(data,np.concatenate([m2a(q_),m2a(v_)]),m2a(u_))
     return a2m(data.f)
 
 Fq = df_dq(rmodel,lambda _q: calcForces(_q,v,u), q)
-Fv = df_dv(rmodel,lambda _v: calcForces(q,_v,u), v)
-Fu = df_dz(rmodel,lambda _u: calcForces(q,v,_u), a2m(u))
+Fv = df_dx(lambda _v: calcForces(q,_v,u), v)
+Fu = df_dx(lambda _u: calcForces(q,v,_u), a2m(u))
 assert( absmax(Fq-data.df_dq) < 1e-3 )
 assert( absmax(Fv-data.df_dv) < 1e-3 )
 assert( absmax(Fu-data.df_du) < 1e-3 )

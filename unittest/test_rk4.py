@@ -6,22 +6,12 @@ from crocoddyl import DifferentialActionModelLQR, DifferentialActionDataLQR
 from crocoddyl import a2m, m2a
 from pinocchio.utils import zero
 from numpy.linalg import norm
+from testutils import df_dx
 
 np.set_printoptions(linewidth=np.nan, suppress=True)
 #--------------frcom scipy.stats.ortho_group----------
 
 #-------------------------------------------------------------------------------
-
-
-def df_dx(func,v,h=1e-9):
-  dv = zero(v.size)
-  f0 = func(v)
-  res = np.zeros([len(f0),v.size])
-  for iv in range(v.size):
-    dv[iv] = h
-    res[:,iv] = (func(v+dv) - f0)/h
-    dv[iv] = 0
-  return res
 
 
 nq = 10; nu = 10
@@ -51,24 +41,24 @@ model.calcDiff(data,x,u)
 def get_k(q,v):
   x_ = np.vstack([q,v])
   model.calc(data,m2a(x_),u)
-  return data.ki
+  return [a2m(ki) for ki in data.ki]
 
 def get_ku(u):
   model.calc(data,x,m2a(u))
-  return data.ki
+  return [a2m(ki) for ki in data.ki]
 
 def get_xn(u):
   model.calc(data,x,m2a(u))
-  return data.xnext.copy()
+  return a2m(data.xnext)#.copy()
 
 def get_au(u):
   a, l = model.differential.calc(data.differential[0],x,m2a(u))
-  return a
+  return a2m(a)
 
 def get_y(q,v):
   x_ = np.vstack([q,v])
   model.calc(data,m2a(x_),u)
-  return data.y
+  return [a2m(y) for y in data.y]
 
 
 dxn_du = df_dx(lambda _u: get_xn(_u), a2m(u))
@@ -117,7 +107,7 @@ def get_attr_analytical(x,u,attr):
   _u = m2a(u)
   _x = m2a(x)
   model.calcDiff(data,_x,_u)
-  return getattr(data, attr).copy()
+  return a2m(getattr(data, attr))#.copy()
 
 Lxx0 = df_dx(lambda _x: get_attr_analytical(_x,u, "Lx"), a2m(x))
 
