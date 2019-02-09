@@ -42,7 +42,8 @@ swingDuration = 0.75
 stanceDurantion = 0.1
 
 from crocoddyl.diagnostic import displayTrajectory
-disp = lambda xs: displayTrajectory(robot,ddp.xs,models[0].timeStep/5)
+disp = lambda xs,dt: displayTrajectory(robot,xs,dt)
+disp.__defaults__ = ( .1, )
 
 def runningModel(contactIds, effectors, com=None, integrationStep = 1e-2):
     '''
@@ -138,32 +139,63 @@ com0 = m2a(pinocchio.centerOfMass(rmodel,rdata,q0))
 models =\
          [ runningModel([ rightId, leftId ],{}, integrationStep=5e-2)] *10\
          +  [ runningModel([ ],{},integrationStep=5e-2) ]*5 \
-         +  [ runningModel([ ],{}, com=com0+[0,0,0.1],integrationStep=5e-2) ] \
-         +  [ runningModel([ ],{},integrationStep=5e-2) ]*4
-         # +  [ pseudoImpactModel([ leftId,rightId ],
-         #                        { rightId: SE3(eye(3), right0),
-         #                          leftId: SE3(eye(3), left0) }) ] \
-         # +  [ runningModel([ rightId, leftId ],{},integrationStep=9e-2) ]*5
-impact = impactModel([ rightId, leftId ],{})
-         
-problem = ShootingProblem(initialState=x0,runningModels=models,terminalModel=impact)
+         +  [ runningModel([ ],{}, com=com0+[0,0,0.5],integrationStep=5e-2) ] \
+         +  [ runningModel([ ],{},integrationStep=5e-2) ]*4 \
+         +  [ impactModel([ leftId,rightId ], 
+                          { rightId: SE3(eye(3), right0),
+                            leftId: SE3(eye(3), left0) }) ] \
+        +  [ runningModel([ rightId, leftId ],{},integrationStep=5e-2) ]*5 \
+        +  [ runningModel([ ],{}, integrationStep=5e-2) ]
+
+models[-1].differential.costs['xreg'].cost.activation.weights[3:6] = 10
+models[20].costs['track30'].weight=0
+models[20].costs['track16'].weight=0
+# for m in models[21:]:
+#     m.differential.costs['ureg'].weight = 0.01
+
+impact = models[20]
+impact.impulseWeight = 1
+
+problem = ShootingProblem(initialState=x0,runningModels=models[:-1],terminalModel=models[-1])
 ddp = SolverDDP(problem)
 ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
-ddp.th_stop = 1e-5
+ddp.th_stop = 1e-6
 ddp.solve(maxiter=1000,regInit=.1,init_xs=[rmodel.defaultState]*len(ddp.models()))
 
-[ d.differential.pinocchio.com[0] for d in ddp.datas() ]
+np.set_printoptions(precision=4, linewidth=200, suppress=True)
+nq = rmodel.nq
+for m,d,x in zip(ddp.models(),ddp.datas(),ddp.xs):
+    if isinstance(m,IntegratedActionModelEuler):
+        pinocchio.forwardKinematics(rmodel,d.differential.pinocchio,a2m(x[:nq]),a2m(x[nq:]))
+        pinocchio.updateFramePlacements(rmodel,d.differential.pinocchio)
+        print pinocchio.getFrameVelocity(rmodel,d.differential.pinocchio,rightId).vector.T
+
+import matplotlib.pylab as plt
+from crocoddyl.integrated_action import IntegratedActionDataEuler
+plt.ion()
+plt.plot([ d.differential.pinocchio.oMf[rightId].translation[2,0] \
+           for d in ddp.datas() if isinstance(d,IntegratedActionDataEuler) ])
 
 
-for pen in range(2,8):
+for i in range(1,8):
     disp(ddp.xs)
-    models[20].differential.costs.costs['track30'].weight=10**pen
-    models[20].differential.costs.costs['track16'].weight=10**pen
-    models[20].differential.costs.costs['impactVel30'].weight=10**pen
-    models[20].differential.costs.costs['impactVel16'].weight=10**pen
-    ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=100)
+    models[21].differential.costs['ureg'].weight = 0.1*10**i
+    models[-1].differential.costs['xreg'].cost.activation.weights[3:6] = 10**i
+    models[-1].differential.costs['xreg'].cost.activation.weights[6:] = 10**i
+    models[20].costs['track30'].weight=10**i
+    models[20].costs['track16'].weight=10**i
+    if i>5:
+        impact.impulseWeight = 10**(i-4)
+    ddp.solve(maxiter=1000,regInit=.1,init_xs=ddp.xs,init_us=ddp.us)
+    for m,d,x in zip(ddp.models(),ddp.datas(),ddp.xs):
+      if isinstance(m,IntegratedActionModelEuler):
+        pinocchio.forwardKinematics(rmodel,d.differential.pinocchio,a2m(x[:nq]),a2m(x[nq:]))
+        pinocchio.updateFramePlacements(rmodel,d.differential.pinocchio)
+        print pinocchio.getFrameVelocity(rmodel,d.differential.pinocchio,rightId).vector.T
+    plt.plot([ d.differential.pinocchio.oMf[rightId].translation[2,0] \
+           for d in ddp.datas() if isinstance(d,IntegratedActionDataEuler) ])
 
-
+        
 
 '''
     # Computing the time step per each contact phase given the step duration.
