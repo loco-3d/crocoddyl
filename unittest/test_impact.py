@@ -18,6 +18,7 @@ OPPOINTFRAME = rmodel.getFrameId(opPointName)
 
 impulseModel = ImpulseModel6D(rmodel,rmodel.getFrameId(contactName))
 model  = ActionModelImpact(rmodel,impulseModel)
+model.impulseWeight = 1.
 data = model.createData()
 
 x = model.State.rand()
@@ -137,6 +138,7 @@ impulse6     = ImpulseModel6D(rmodel,rmodel.getFrameId(contactName))
 impulseModel = ImpulseModelMultiple(rmodel,{ "6d": impulse6 })
 model        = ActionModelImpact(rmodel,impulse6)
 data         = model.createData()
+model.impulseWeight = 1.
 
 x = model.State.rand()
 q = a2m(x[:model.nq])

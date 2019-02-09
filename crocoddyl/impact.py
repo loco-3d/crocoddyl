@@ -201,7 +201,7 @@ class ActionModelImpact:
         self.unone = np.zeros(self.nu)
         self.ncost = self.nv
         self.costs = costModel
-        self.impulseWeight = 1.
+        self.impulseWeight =100.
     @property
     def nimpulse(self): return self.impulse.nimpulse
     def createData(self): return ActionDataImpact(self)
@@ -267,7 +267,7 @@ class ActionModelImpact:
         fs = data.impulse.forces
 
         # Derivative M' dv + J'f + b'
-        g6bak = model.pinocchio.gravity
+        g6bak = model.pinocchio.gravity.copy()
         model.pinocchio.gravity = pinocchio.Motion.Zero()
         pinocchio.computeRNEADerivatives(model.pinocchio,data.pinocchio,q,zero(nv),vnext-v,fs)
         model.pinocchio.gravity = g6bak
