@@ -186,7 +186,59 @@ class ImpulseDataMultiple(ImpulseDataPinocchio):
 # --------------------------------------------------------------------------
 # --------------------------------------------------------------------------
 # --------------------------------------------------------------------------
+from crocoddyl.cost import CostModelPinocchio,CostDataPinocchio
+# class CostModelImpactBase(CostModelPinocchio):
+#     def __init__(self,pinocchioModel,ncost):
+#         CostModelPinocchio.__init__(self,pinocchioModel,ncost=3,nu=nu)
 
+class CostModelImpactWholeBody(CostModelPinocchio):
+    '''
+    Penalize the impact on the whole body, i.e. the sum-of-square of ||vnext-v||
+    with vnext the velocity after impact and v the velocity before impact.
+    '''
+    def __init__(self,pinocchioModel,activation=None):
+        self.CostDataType = CostDataImpactWholeBody
+        CostModelPinocchio.__init__(self,pinocchioModel,ncost=pinocchioModel.nv,nu=0)
+        self.activation = activation if activation is not None else ActivationModelQuad()
+    def calc(model,data,x,u=None):
+        assert(data.vnext is not None \
+               and "vnext should be copied first from impact-data. Call setImpactData first")
+        nv = model.pinocchio.nv
+        data.costResiduals[:] = data.vnext-x[-nv:]
+        data.cost = sum(model.activation.calc(data.activation,model.residuals))
+        return data.cost
+    def calcDiff(model,data,x,u=None,recalc=True):
+        assert(data.dvnext_dq is not None \
+               and "dvnext_dq should be copied first from impact-data. Call setImpactData first")
+        if recalc: model.calc(data,x,u)
+
+        nv = model.pinocchio.nv
+        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
+        data.Rx[:,:] = data.dvnext_dq
+        data.Rx[range(nv),range(nv)] -= 1
+        data.Lx [:]   = np.dot(data.Rx.T,Ax)
+        data.Lxx[:,:] = np.dot(data.Rx.T,Axx*data.Rx)
+        
+    def setImpactData(self,data,vnext):
+        data.vnext = vnext
+    def setImpactDiffData(self,data,dvnext_dq):
+        data.dvnext_dq = dvnext_dq
+        
+class CostDataImpactWholeBody(CostDataPinocchio):
+    def __init__(self,model,pinocchioData):
+        CostDataPinocchio.__init__(self,model,pinocchioData)
+        self.activation = model.activation.createData()
+        self.Lu = 0
+        self.Lxu = 0
+        self.Luu = 0
+        self.Ru = 0
+        # These two fields must be informed by ImpactData.
+        data.vnext = None
+        data.dvnext_dx = None
+
+# --------------------------------------------------------------------------
+# --------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 
 class ActionModelImpact:
     def __init__(self,pinocchioModel,impulseModel,costModel=None):
