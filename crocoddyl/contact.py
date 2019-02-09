@@ -52,7 +52,7 @@ class ContactDataPinocchio:
 
 from pinocchio.utils import *
 class ContactModel3D(ContactModelPinocchio):
-    def __init__(self,pinocchioModel,frame,ref, gains):
+    def __init__(self,pinocchioModel,frame,ref=None, gains=[0.,0.]):
         self.ContactDataType = ContactData3D
         ContactModelPinocchio.__init__(self,pinocchioModel,ncontact=3)
         self.frame = frame
@@ -74,9 +74,9 @@ class ContactModel3D(ContactModelPinocchio):
         data.a0[:] = (pinocchio.getFrameAcceleration(model.pinocchio,
                                                     data.pinocchio,model.frame).linear +\
                                                     cross(vw,vv)).flat
-        if model.gains[0]!=0.:
+        if model.gains[0]!=0. and (model.ref is not None):
           data.a0[:] +=model.gains[0]*(m2a(data.pinocchio.oMf[model.frame].translation) - model.ref)
-        if model.gains[1]!=0.:
+        if model.gains[1]!=0. and (model.ref is not None):
           data.a0[:] +=model.gains[1]*m2a(vv)          
 
     def calcDiff(model,data,x,recalc=True):
@@ -96,12 +96,12 @@ class ContactModel3D(ContactModelPinocchio):
         data.Av[:,:] = (data.fXj*da_dv)[:3,:] + skew(vw)*data.J-skew(vv)*data.Jw
         R = data.pinocchio.oMf[model.frame].rotation
 
-        if model.gains[0]!=0.:
+        if model.gains[0]!=0. and (model.ref is not None):
           data.Aq[:,:] += model.gains[0]*R*pinocchio.getFrameJacobian(model.pinocchio,
                                                        data.pinocchio,
                                                        model.frame,
                                                        pinocchio.ReferenceFrame.LOCAL)[:3,:]
-        if model.gains[1]!=0.:
+        if model.gains[1]!=0. and (model.ref is not None):
           data.Aq[:,:] += model.gains[1]*(data.fXj[:3,:]*dv_dq)
           data.Av[:,:] += model.gains[1]*(data.fXj[:3,:]*dv_dvq)
           
