@@ -66,6 +66,42 @@ class DifferentialActionModelAbstract:
         raise NotImplementedError("Not implemented yet.")
 
 
+class DifferentialActionDataAbstract:
+    def __init__(self, model, costData = None):
+        nx,nu,ndx,nv,nout = model.nx,model.nu,model.ndx,model.nv,model.nout
+        # State evolution and cost data
+        self.cost = np.nan
+        self.xout = np.zeros(nout)
+
+        # Dynamics data
+        self.F = np.zeros([ nout,ndx+nu ])
+        self.Fx = self.F[:,:ndx]
+        self.Fu = self.F[:,-nu:]
+
+        # Cost data
+        if costData == None:
+            self.g = np.zeros( ndx+nu)
+            self.L = np.zeros([ndx+nu,ndx+nu])
+            self.Lx = self.g[:ndx]
+            self.Lu = self.g[ndx:]
+            self.Lxx = self.L[:ndx,:ndx]
+            self.Lxu = self.L[:ndx,ndx:]
+            self.Luu = self.L[ndx:,ndx:]
+        else:
+            self.costs = costData
+            self.costResiduals = self.costs.residuals
+            self.g   = self.costs.g
+            self.L   = self.costs.L
+            self.Lx  = self.costs.Lx
+            self.Lu  = self.costs.Lu
+            self.Lxx = self.costs.Lxx
+            self.Lxu = self.costs.Lxu
+            self.Luu = self.costs.Luu
+            self.Rx  = self.costs.Rx
+            self.Ru  = self.costs.Ru
+
+
+
 class DifferentialActionModelFullyActuated(DifferentialActionModelAbstract):
     def __init__(self, pinocchioModel, costModel):
         DifferentialActionModelAbstract.__init__(
@@ -126,26 +162,11 @@ class DifferentialActionModelFullyActuated(DifferentialActionModelAbstract):
         model.costs.calcDiff(data.costs,x,u,recalc=False)
         return data.xout,data.cost
 
-class DifferentialActionDataFullyActuated:
-    def __init__(self,model):
+class DifferentialActionDataFullyActuated(DifferentialActionDataAbstract):
+    def __init__(self, model):
         self.pinocchio = model.pinocchio.createData()
-        self.costs = model.costs.createData(self.pinocchio)
-        self.cost = np.nan
-        nu,ndx,nout = model.nu,model.State.ndx,model.nout
-        self.xout = np.zeros(nout)
-        self.F = np.zeros([ nout,ndx+nu ])
-        self.costResiduals = self.costs.residuals
-        self.Fx = self.F[:,:ndx]
-        self.Fu = self.F[:,-nu:]
-        self.g   = self.costs.g
-        self.L   = self.costs.L
-        self.Lx  = self.costs.Lx
-        self.Lu  = self.costs.Lu
-        self.Lxx = self.costs.Lxx
-        self.Lxu = self.costs.Lxu
-        self.Luu = self.costs.Luu
-        self.Rx  = self.costs.Rx
-        self.Ru  = self.costs.Ru
+        costData = model.costs.createData(self.pinocchio)
+        DifferentialActionDataAbstract.__init__(self, model, costData)
 
 
 class DifferentialActionModelLQR(DifferentialActionModelAbstract):
@@ -195,34 +216,17 @@ class DifferentialActionModelLQR(DifferentialActionModelAbstract):
     return data.xout,data.cost
 
 
-class DifferentialActionDataLQR:
-  def __init__(self,model):
-    nx,nu,ndx,nv,nout = model.nx,model.nu,model.State.ndx,model.nv,model.nout
-    # State evolution and cost data
-    self.cost = np.nan
-    self.xout = np.zeros(nout)
+class DifferentialActionDataLQR(DifferentialActionDataAbstract):
+    def __init__(self,model):
+        DifferentialActionDataAbstract.__init__(self, model)
 
-    # Dynamics data
-    self.F = np.zeros([ nout,ndx+nu ])
-    self.Fx = self.F[:,:ndx]
-    self.Fu = self.F[:,-nu:]
-
-    # Cost data
-    self.g = np.zeros( ndx+nu)
-    self.L = np.zeros([ndx+nu,ndx+nu])
-    self.Lx = self.g[:ndx]
-    self.Lu = self.g[ndx:]
-    self.Lxx = self.L[:ndx,:ndx]
-    self.Lxu = self.L[:ndx,ndx:]
-    self.Luu = self.L[ndx:,ndx:]
-
-    # Setting the linear model and quadratic cost here because they are constant
-    self.Fx[:,:model.nv] = model.B
-    self.Fx[:,model.nv:] = model.A
-    self.Fu[:,:] = model.C
-    np.copyto(self.Lxx, model.Q+model.Q.T)
-    np.copyto(self.Lxu, np.zeros((nx, nu)))
-    np.copyto(self.Luu, model.U+model.U.T)
+        # Setting the linear model and quadratic cost here because they are constant
+        self.Fx[:,:model.nv] = model.B
+        self.Fx[:,model.nv:] = model.A
+        self.Fu[:,:] = model.C
+        np.copyto(self.Lxx, model.Q+model.Q.T)
+        np.copyto(self.Lxu, np.zeros((model.nx, model.nu)))
+        np.copyto(self.Luu, model.U+model.U.T)
 
 
 class DifferentialActionModelNumDiff(DifferentialActionModelAbstract):
