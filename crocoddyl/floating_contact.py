@@ -1,3 +1,4 @@
+from differential_action import DifferentialActionModelAbstract
 from state import StatePinocchio
 from utils import a2m, m2a
 import numpy as np
@@ -5,7 +6,7 @@ import pinocchio
 
 
 
-class DifferentialActionModelFloatingInContact:
+class DifferentialActionModelFloatingInContact(DifferentialActionModelAbstract):
     def __init__(self,pinocchioModel,actuationModel,contactModel,costModel):
         self.pinocchio = pinocchioModel
         self.State = StatePinocchio(self.pinocchio)

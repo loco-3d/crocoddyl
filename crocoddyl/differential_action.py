@@ -6,7 +6,57 @@ import pinocchio
 
 
 
-class DifferentialActionModelFullyActuated:
+class DifferentialActionModelAbstract:
+    """ Abstract class for the differential action model.
+
+    In crocoddyl, an action model combines dynamics and cost data. Each node, in
+    our optimal control problem, is described through an action model. Every
+    time that we want describe a problem, we need to provide ways of computing
+    the dynamics, cost functions and their derivatives. These computations are
+    mainly carry on inside calc() and calcDiff(), respectively.
+    """
+    def createData(self):
+        """ Created the differential action data.
+
+        Each differential action model has its own data that needs to be
+        allocated. This function returns the allocated data for a predefined
+        DAM.
+        :return DAM data.
+        """
+        raise NotImplementedError("Not implemented yet.")
+    def calc(model, data, x, u=None):
+        """ Compute the state evolution and cost value.
+
+        First, it describes the time-continuous evolution of our dynamical system
+        in which along predefined integrated action model we might obtain the
+        next discrete state. Indeed it computes the time derivatives of the
+        state from a predefined dynamical system. Additionally it computes the
+        cost value associated to this state and control pair.
+        :param model: differential action model
+        :param data: differential action data
+        :param x: state vector
+        :param u: control input
+        """
+        raise NotImplementedError("Not implemented yet.")
+    def calcDiff(model, data, x, u=None, recalc=True):
+        """ Compute the derivatives of the dynamics and cost functions.
+
+        It computes the partial derivatives of the dynamical system and the cost
+        function. If recalc == True, it first updates the state evolution and
+        cost value. This function builds a quadratic approximation of the
+        time-continuous action model (i.e. dynamical system and cost function).
+        :param model: differential action model
+        :param data: differential action data
+        :param x: state vector
+        :param u: control input
+        :param recalc: If true, it updates the state evolution and the cost
+        value.
+        """
+        raise NotImplementedError("Not implemented yet.")
+
+
+
+class DifferentialActionModelFullyActuated(DifferentialActionModelAbstract):
     def __init__(self, pinocchioModel, costModel):
         self.pinocchio = pinocchioModel
         self.State = StatePinocchio(self.pinocchio)
@@ -93,7 +143,7 @@ class DifferentialActionDataFullyActuated:
         self.Ru  = self.costs.Ru
 
 
-class DifferentialActionModelLQR:
+class DifferentialActionModelLQR(DifferentialActionModelAbstract):
   """
   This class implements a linear dynamics, and quadratic costs.
   Since the DAM is a second order system, and the integratedactionmodels are implemented
@@ -178,7 +228,7 @@ class DifferentialActionDataLQR:
     self.Luu = model.U+model.U.T
         
 
-class DifferentialActionModelNumDiff:
+class DifferentialActionModelNumDiff(DifferentialActionModelAbstract):
     def __init__(self,model,withGaussApprox=False):
         self.model0 = model
         self.nx = model.nx
