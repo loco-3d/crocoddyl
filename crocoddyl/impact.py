@@ -186,62 +186,130 @@ class ImpulseDataMultiple(ImpulseDataPinocchio):
 # --------------------------------------------------------------------------
 # --------------------------------------------------------------------------
 # --------------------------------------------------------------------------
-from crocoddyl.cost import CostModelPinocchio,CostDataPinocchio
-# class CostModelImpactBase(CostModelPinocchio):
-#     def __init__(self,pinocchioModel,ncost):
-#         CostModelPinocchio.__init__(self,pinocchioModel,ncost=3,nu=nu)
+from crocoddyl.cost import CostModelPinocchio,CostDataPinocchio,CostModelSum
+from crocoddyl.activation import ActivationModelQuad
 
-class CostModelImpactWholeBody(CostModelPinocchio):
+
+class CostModelImpactBase(CostModelPinocchio):
+    def __init__(self,pinocchioModel,ncost):
+        CostModelPinocchio.__init__(self,pinocchioModel,ncost=ncost,nu=0)
+    def setImpactData(self,data,vnext):
+        data.vnext = vnext
+    def setImpactDiffData(self,data,dvnext_dx):
+        data.dvnext_dx = dvnext_dx
+    def assertImpactDataSet(self,data):
+        assert(data.vnext is not None \
+               and "vnext should be copied first from impact-data. Call setImpactData first")
+    def assertImpactDiffDataSet(self,data):
+        assert(data.dvnext_dx is not None \
+               and "dvnext_dx should be copied first from impact-data. Call setImpactData first")
+
+class CostDataImpactBase(CostDataPinocchio):
+    def __init__(self,model,pinocchioData):
+        CostDataPinocchio.__init__(self,model,pinocchioData)
+        # These two fields must be informed by ImpactData.
+        self.vnext = None
+        self.dvnext_dx = None
+    
+# --------------------------------------------------------------------------
+class CostModelImpactWholeBody(CostModelImpactBase):
     '''
     Penalize the impact on the whole body, i.e. the sum-of-square of ||vnext-v||
     with vnext the velocity after impact and v the velocity before impact.
     '''
     def __init__(self,pinocchioModel,activation=None):
         self.CostDataType = CostDataImpactWholeBody
-        CostModelPinocchio.__init__(self,pinocchioModel,ncost=pinocchioModel.nv,nu=0)
+        CostModelImpactBase.__init__(self,pinocchioModel,ncost=pinocchioModel.nv)
         self.activation = activation if activation is not None else ActivationModelQuad()
     def calc(model,data,x,u=None):
-        assert(data.vnext is not None \
-               and "vnext should be copied first from impact-data. Call setImpactData first")
+        model.assertImpactDataSet(data)
         nv = model.pinocchio.nv
-        data.costResiduals[:] = data.vnext-x[-nv:]
-        data.cost = sum(model.activation.calc(data.activation,model.residuals))
+        data.residuals[:] = data.vnext-x[-nv:]
+        data.cost = sum(model.activation.calc(data.activation,data.residuals))
         return data.cost
     def calcDiff(model,data,x,u=None,recalc=True):
-        assert(data.dvnext_dq is not None \
-               and "dvnext_dq should be copied first from impact-data. Call setImpactData first")
         if recalc: model.calc(data,x,u)
-
+        model.assertImpactDiffDataSet(data)
         nv = model.pinocchio.nv
         Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
-        data.Rx[:,:] = data.dvnext_dq
-        data.Rx[range(nv),range(nv)] -= 1
+        data.Rx[:,:] = data.dvnext_dx
+        data.Rx[range(nv),range(nv,2*nv)] -= 1
         data.Lx [:]   = np.dot(data.Rx.T,Ax)
         data.Lxx[:,:] = np.dot(data.Rx.T,Axx*data.Rx)
         
-    def setImpactData(self,data,vnext):
-        data.vnext = vnext
-    def setImpactDiffData(self,data,dvnext_dq):
-        data.dvnext_dq = dvnext_dq
-        
-class CostDataImpactWholeBody(CostDataPinocchio):
+class CostDataImpactWholeBody(CostDataImpactBase):
     def __init__(self,model,pinocchioData):
-        CostDataPinocchio.__init__(self,model,pinocchioData)
+        CostDataImpactBase.__init__(self,model,pinocchioData)
         self.activation = model.activation.createData()
         self.Lu = 0
         self.Lxu = 0
         self.Luu = 0
         self.Ru = 0
-        # These two fields must be informed by ImpactData.
-        data.vnext = None
-        data.dvnext_dx = None
+
+# --------------------------------------------------------------------------
+class CostModelImpactCoM(CostModelImpactBase):
+    '''
+    Penalize the impact on the com, i.e. the sum-of-square of ||Jcom*(vnext-v)||
+    with vnext the velocity after impact and v the velocity before impact.
+    '''
+    def __init__(self,pinocchioModel,activation=None):
+        self.CostDataType = CostDataImpactCoM
+        CostModelImpactBase.__init__(self,pinocchioModel,ncost=3)
+        self.activation = activation if activation is not None else ActivationModelQuad()
+    def calc(model,data,x,u=None):
+        model.assertImpactDataSet(data)
+        nq,nv = model.pinocchio.nq,model.pinocchio.nv
+        pinocchio.centerOfMass(model.pinocchio,data.pinocchio_dv,a2m(x[:nq]),a2m(data.vnext-x[-nv:]))
+        data.residuals[:] = data.pinocchio_dv.vcom[0].flat
+        data.cost = sum(model.activation.calc(data.activation,data.residuals))
+        return data.cost
+    def calcDiff(model,data,x,u=None,recalc=True):
+        if recalc: model.calc(data,x,u)
+        model.assertImpactDiffDataSet(data)
+        nq,nv = model.pinocchio.nq,model.pinocchio.nv
+        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
+
+        ### TODO ???
+        # r = Jcom(vnext-v)
+        # dr/dv = Jcom*(dvnext/dv - I)
+        # dr/dq = dJcom_dq*(vnext-v)   + Jcom*dvnext_dq
+        #       = dvcom_dq(vq=vnext-v) + Jcom*dvnext_dq
+        # Jcom*v = M[:3,:]/mass * v = RNEA(q,0,v)[:3]/mass
+        # => dvcom/dq = dRNEA_dq(q,0,v)[:3,:]/mass
+       
+        dvc_dq = pinocchio.getCenterOfMassVelocityDerivatives(model.pinocchio,data.pinocchio_dv)
+        dvc_dv = pinocchio.jacobianCenterOfMass(model.pinocchio,data.pinocchio_dv)
+
+        # res = vcom(q,vnext-v)
+        # dres/dq = dvcom_dq + dvcom_dv*dvnext_dq
+        data.Rx[:,:nv] = dvc_dq + np.dot(dvc_dv,data.dvnext_dx[:,:nv])
+
+        # dres/dv = dvcom_dv*(dvnext_dv-I)
+        ddv_dv = data.dvnext_dx[:,nv:].copy()
+        ddv_dv[range(nv),range(nv)] -= 1
+        data.Rx[:,nv:] = np.dot(dvc_dv,ddv_dv)
+
+        data.Lx [:]   = np.dot(data.Rx.T,Ax)
+        data.Lxx[:,:] = np.dot(data.Rx.T,Axx*data.Rx)
+        
+class CostDataImpactCoM(CostDataImpactBase):
+    def __init__(self,model,pinocchioData):
+        CostDataImpactBase.__init__(self,model,pinocchioData)
+        self.activation = model.activation.createData()
+        # Those data are ment to be evaluated at v=vnext-v
+        self.pinocchio_dv = model.pinocchio.createData()
+        self.Lu = 0
+        self.Lxu = 0
+        self.Luu = 0
+        self.Ru = 0
+
 
 # --------------------------------------------------------------------------
 # --------------------------------------------------------------------------
 # --------------------------------------------------------------------------
 
 class ActionModelImpact:
-    def __init__(self,pinocchioModel,impulseModel,costModel=None):
+    def __init__(self,pinocchioModel,impulseModel,costModel):
         self.pinocchio = pinocchioModel
         self.State = StatePinocchio(self.pinocchio)
         self.impulse = impulseModel
@@ -251,11 +319,12 @@ class ActionModelImpact:
         self.nout = self.nx
         self.nu = 0
         self.unone = np.zeros(self.nu)
-        self.ncost = self.nv
         self.costs = costModel
         self.impulseWeight =100.
     @property
     def nimpulse(self): return self.impulse.nimpulse
+    @property
+    def ncost(self): return self.costs.ncost
     def createData(self): return ActionDataImpact(self)
     def calc(model,data,x,u=None):
         '''
@@ -293,11 +362,14 @@ class ActionModelImpact:
         data.xnext[:nq] = q.flat
         data.xnext[nq:] = data.vnext
 
-        data.costResiduals[:] = model.impulseWeight*(data.vnext-v.flat)
-        data.cost = .5*sum( data.costResiduals**2 )
-
-        if model.costs is not None:
-            data.cost += model.costs.calc(data.costs,x,u=None)
+        if isinstance(model.costs,CostModelImpactBase):
+            model.costs.setImpactData(data.costs,data.vnext)
+        if isinstance(model.costs,CostModelSum):
+            for cmodel,cdata in zip(model.costs.costs.values(),data.costs.costs.values()):
+                if isinstance(cmodel.cost,CostModelImpactBase):
+                    cmodel.cost.setImpactData(cdata,data.vnext)
+            
+        data.cost = model.costs.calc(data.costs,x,u=None)
         return data.xnext,data.cost
 
     def calcDiff(model,data,x,u=None,recalc=True):
@@ -339,18 +411,22 @@ class ActionModelImpact:
         data.Fx[nv:,:nv] = -np.dot(data.Kinv[:nv,:],np.vstack([data.did_dq, data.dv_dq]))  # dvnext/dq
         data.Fx[nv:,nv:] = np.dot(data.Kinv[:nv,:nv],data.K[:nv,:nv])                      # dvnext/dv
 
-        data.Rx[:,:] = 0
-        np.fill_diagonal(data.Rv,-1)
-        data.Rx[:,:] += data.Fx[nv:,:]
-        data.Rx *= model.impulseWeight
-        data.Lx [:]   = np.dot(data.Rx.T,data.costResiduals)
-        data.Lxx[:,:] = np.dot(data.Rx.T,data.Rx)
+        # data.Rx[:,:] = 0
+        # np.fill_diagonal(data.Rv,-1)
+        # data.Rx[:,:] += data.Fx[nv:,:]
+        # data.Rx *= model.impulseWeight
+        # data.Lx [:]   = np.dot(data.Rx.T,data.costResiduals)
+        # data.Lxx[:,:] = np.dot(data.Rx.T,data.Rx)
 
-        if model.costs is not None:
-            model.costs.calcDiff(data.costs,x,u=None)
-            data.Lx[:] += data.costs.Lx
-            data.Lxx[:,:] += data.costs.Lxx
+        if isinstance(model.costs,CostModelImpactBase):
+            model.costs.setImpactDiffData(data.costs,data.Fx[nv:,:])
+        if isinstance(model.costs,CostModelSum):
+            for cmodel,cdata in zip(model.costs.costs.values(),data.costs.costs.values()):
+                if isinstance(cmodel.cost,CostModelImpactBase):
+                    cmodel.cost.setImpactDiffData(cdata,data.Fx[nv:,:])
             
+        model.costs.calcDiff(data.costs,x,u=None,recalc=recalc)
+        
         return data.xnext,data.cost
     
 class ActionDataImpact:
@@ -373,13 +449,16 @@ class ActionDataImpact:
         self.Rq = self.Rx[:,:nv]
         self.Rv = self.Rx[:,nv:]
 
-        self.g = np.zeros(ndx+nu)
-        self.L = np.zeros([ndx+nu,ndx+nu])
-        self.Lx  = self.g[:ndx]
-        self.Lu  = self.g[ndx:]
-        self.Lxx = self.L[:ndx,:ndx]
-        self.Lxu = self.L[:ndx,ndx:]
-        self.Luu = self.L[ndx:,ndx:]
+        self.costResiduals = self.costs.residuals
+        self.g   = self.costs.g
+        self.L   = self.costs.L
+        self.Lx  = self.costs.Lx
+        self.Lu  = self.costs.Lu
+        self.Lxx = self.costs.Lxx
+        self.Lxu = self.costs.Lxu
+        self.Luu = self.costs.Luu
+        self.Rx  = self.costs.Rx
+        self.Ru  = self.costs.Ru
 
         self.K  = np.zeros([nv+nc, nv+nc])  # KKT matrix = [ MJ.T ; J0 ]
         self.r  = np.zeros( nv+nc )         # NLE effects =  [ tau-b ; -gamma ]
