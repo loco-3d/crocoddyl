@@ -61,6 +61,7 @@ class ContactModel3D(ContactModelPinocchio):
     def calc(model,data,x):
         # We suppose forwardKinematics(q,v,np.zero), computeJointJacobian and updateFramePlacement already
         # computed.
+        assert(model.ref is not None or model.gains[0]==0.)
         data.v = pinocchio.getFrameVelocity(model.pinocchio,
                                              data.pinocchio,model.frame).copy()
         vw = data.v.angular; vv = data.v.linear
@@ -74,9 +75,9 @@ class ContactModel3D(ContactModelPinocchio):
         data.a0[:] = (pinocchio.getFrameAcceleration(model.pinocchio,
                                                     data.pinocchio,model.frame).linear +\
                                                     cross(vw,vv)).flat
-        if model.gains[0]!=0. and (model.ref is not None):
+        if model.gains[0]!=0.:
           data.a0[:] +=model.gains[0]*(m2a(data.pinocchio.oMf[model.frame].translation) - model.ref)
-        if model.gains[1]!=0. and (model.ref is not None):
+        if model.gains[1]!=0.:
           data.a0[:] +=model.gains[1]*m2a(vv)          
 
     def calcDiff(model,data,x,recalc=True):
@@ -96,12 +97,12 @@ class ContactModel3D(ContactModelPinocchio):
         data.Av[:,:] = (data.fXj*da_dv)[:3,:] + skew(vw)*data.J-skew(vv)*data.Jw
         R = data.pinocchio.oMf[model.frame].rotation
 
-        if model.gains[0]!=0. and (model.ref is not None):
+        if model.gains[0]!=0.:
           data.Aq[:,:] += model.gains[0]*R*pinocchio.getFrameJacobian(model.pinocchio,
                                                        data.pinocchio,
                                                        model.frame,
                                                        pinocchio.ReferenceFrame.LOCAL)[:3,:]
-        if model.gains[1]!=0. and (model.ref is not None):
+        if model.gains[1]!=0.:
           data.Aq[:,:] += model.gains[1]*(data.fXj[:3,:]*dv_dq)
           data.Av[:,:] += model.gains[1]*(data.fXj[:3,:]*dv_dvq)
           
@@ -143,6 +144,7 @@ class ContactModel6D(ContactModelPinocchio):
     def calc(model,data,x):
         # We suppose forwardKinematics(q,v,a), computeJointJacobian and updateFramePlacement already
         # computed.
+        assert(model.ref is not None or model.gains[0]==0.)
         data.rMf = model.ref.inverse()*data.pinocchio.oMf[model.frame]
         data.J[:,:] = pinocchio.getFrameJacobian(model.pinocchio,data.pinocchio,
                                                  model.frame,pinocchio.ReferenceFrame.LOCAL)
