@@ -22,7 +22,7 @@ class DifferentialActionModelFloatingInContact(DifferentialActionModelAbstract):
     def createData(self): return DifferentialActionDataFloatingInContact(self)
     def calc(model,data,x,u=None):
         if u is None: u=model.unone
-        nx,nu,nq,nv,nout,nc = model.nx,model.nu,model.nq,model.nv,model.nout,model.ncontact
+        nq,nv = model.nq,model.nv
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
 
@@ -51,7 +51,7 @@ class DifferentialActionModelFloatingInContact(DifferentialActionModelAbstract):
     def calcDiff(model,data,x,u=None,recalc=True):
         if u is None: u=model.unone
         if recalc: xout,cost = model.calc(data,x,u)
-        nx,ndx,nu,nq,nv,nout,nc = model.nx,model.State.ndx,model.nu,model.nq,model.nv,model.nout,model.ncontact
+        nq,nv = model.nq,model.nv
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
         a = a2m(data.a)
@@ -103,9 +103,7 @@ class DifferentialActionModelFloatingInContact(DifferentialActionModelAbstract):
         data.df_du[:,:] = np.dot(df_dtau,dtau_du)
 
         model.contact.setForcesDiff(data.contact,data.df_dx,data.df_du)
-
         model.costs.calcDiff(data.costs,x,u,recalc=False)
-
         return data.xout,data.cost
 
     def quasiStatic(self,data,x):
@@ -124,7 +122,7 @@ class DifferentialActionDataFloatingInContact:
         self.contact = model.contact.createData(self.pinocchio)
         self.costs = model.costs.createData(self.pinocchio)
         self.cost = np.nan
-        nx,nu,ndx,nq,nv,nout,nc = model.nx,model.nu,model.State.ndx,model.nq,model.nv,model.nout,model.ncontact
+        nu,ndx,nv,nout,nc = model.nu,model.State.ndx,model.nv,model.nout,model.ncontact
         self.F = np.zeros([ nout,ndx+nu ])
         self.costResiduals = self.costs.residuals
         self.Fx = self.F[:,:ndx]

@@ -17,7 +17,7 @@ class IntegratedActionModelEuler:
     def ncost(self): return self.differential.ncost
     def createData(self): return IntegratedActionDataEuler(self)
     def calc(model,data,x,u=None):
-        nx,ndx,nu,ncost,nq,nv,dt = model.nx,model.ndx,model.nu,model.ncost,model.nq,model.nv,model.timeStep
+        nq,dt = model.nq,model.timeStep
         acc,cost = model.differential.calc(data.differential,x,u)
         if model.withCostResiduals:
             data.costResiduals[:] = data.differential.costResiduals[:]
@@ -30,7 +30,7 @@ class IntegratedActionModelEuler:
 
         return data.xnext,data.cost
     def calcDiff(model,data,x,u=None,recalc=True):
-        nx,ndx,nu,ncost,nq,nv,dt = model.nx,model.ndx,model.nu,model.ncost,model.nq,model.nv,model.timeStep
+        nv,dt = model.nv,model.timeStep
         if recalc: model.calc(data,x,u)
         model.differential.calcDiff(data.differential,x,u,recalc=False)
         dxnext_dx,dxnext_ddx = model.State.Jintegrate(x,data.dx)
@@ -106,8 +106,7 @@ class IntegratedActionModelRK4:
 
     '''
     def calc(model,data,x,u=None):
-      nx,ndx,nu,nq,nv,dt = model.nx,model.ndx,model.nu,\
-                                 model.nq,model.nv,model.timeStep
+      nq,dt = model.nq,model.timeStep
 
       data.y[0] = x
       for i in xrange(3):
@@ -165,8 +164,7 @@ class IntegratedActionModelRK4:
     '''
 
     def calcDiff(model,data,x,u=None,recalc=True):
-        nx,ndx,nu,nq,nv,dt = model.nx,model.ndx,model.nu,\
-                                   model.nq,model.nv,model.timeStep
+        ndx,nu,nv,dt = model.ndx,model.nu,model.nv,model.timeStep
         if recalc: model.calc(data,x,u)
         for i in xrange(4):
           model.differential.calcDiff(data.differential[i],data.y[i],

@@ -81,7 +81,7 @@ class DifferentialActionModelFullyActuated(DifferentialActionModelAbstract):
     def createData(self): return DifferentialActionDataFullyActuated(self)
     def calc(model,data,x,u=None):
         if u is None: u=model.unone
-        nx,nu,nq,nv,nout = model.nx,model.nu,model.nq,model.nv,model.nout
+        nq,nv = model.nq,model.nv
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
         tauq = a2m(u)
@@ -104,7 +104,7 @@ class DifferentialActionModelFullyActuated(DifferentialActionModelAbstract):
     def calcDiff(model,data,x,u=None,recalc=True):
         if u is None: u=model.unone
         if recalc: xout,cost = model.calc(data,x,u)
-        nx,ndx,nu,nq,nv,nout = model.nx,model.State.ndx,model.nu,model.nq,model.nv,model.nout
+        nq,nv = model.nq,model.nv
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
         tauq = a2m(u)
@@ -124,7 +124,6 @@ class DifferentialActionModelFullyActuated(DifferentialActionModelAbstract):
         pinocchio.computeJointJacobians(model.pinocchio,data.pinocchio,q)
         pinocchio.updateFramePlacements(model.pinocchio,data.pinocchio)
         model.costs.calcDiff(data.costs,x,u,recalc=False)
-
         return data.xout,data.cost
 
 class DifferentialActionDataFullyActuated:
@@ -132,8 +131,8 @@ class DifferentialActionDataFullyActuated:
         self.pinocchio = model.pinocchio.createData()
         self.costs = model.costs.createData(self.pinocchio)
         self.cost = np.nan
-        self.xout = np.zeros(model.nout)
-        nx,nu,ndx,nq,nv,nout = model.nx,model.nu,model.State.ndx,model.nq,model.nv,model.nout
+        nu,ndx,nout = model.nu,model.State.ndx,model.nout
+        self.xout = np.zeros(nout)
         self.F = np.zeros([ nout,ndx+nu ])
         self.costResiduals = self.costs.residuals
         self.Fx = self.F[:,:ndx]
@@ -198,9 +197,9 @@ class DifferentialActionModelLQR(DifferentialActionModelAbstract):
 
 class DifferentialActionDataLQR:
   def __init__(self,model):
+    nx,nu,ndx,nv,nout = model.nx,model.nu,model.State.ndx,model.nv,model.nout
     self.cost = np.nan
-    self.xout = np.zeros(model.nout)
-    nx,nu,ndx,nq,nv,nout = model.nx,model.nu,model.State.ndx,model.nq,model.nv,model.nout
+    self.xout = np.zeros(nout)
     self.F = np.zeros([ nout,ndx+nu ])
     self.Fx = self.F[:,:ndx]
     self.Fu = self.F[:,-nu:]
@@ -267,12 +266,10 @@ class DifferentialActionModelNumDiff(DifferentialActionModelAbstract):
 
 class DifferentialActionDataNumDiff:
     def __init__(self,model):
-        nx,ndx,nu,ncost = model.nx,model.ndx,model.nu,model.ncost
+        ndx,nu,nout,ncost = model.ndx,model.nu,model.nout,model.ncost
         self.data0 = model.model0.createData()
         self.datax = [ model.model0.createData() for i in range(model.ndx) ]
         self.datau = [ model.model0.createData() for i in range(model.nu ) ]
-
-        ndx,nu,nout = model.ndx,model.nu,model.nout
 
         self.g  = np.zeros([ ndx+nu ])
         self.F  = np.zeros([ nout,ndx+nu ])
