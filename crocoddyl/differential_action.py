@@ -198,16 +198,16 @@ class DifferentialActionModelLQR(DifferentialActionModelAbstract):
 class DifferentialActionDataLQR:
   def __init__(self,model):
     nx,nu,ndx,nv,nout = model.nx,model.nu,model.State.ndx,model.nv,model.nout
+    # State evolution and cost data
     self.cost = np.nan
     self.xout = np.zeros(nout)
+
+    # Dynamics data
     self.F = np.zeros([ nout,ndx+nu ])
     self.Fx = self.F[:,:ndx]
     self.Fu = self.F[:,-nu:]
-    
-    self.Fx[:,:model.nv] = model.B
-    self.Fx[:,model.nv:] = model.A
-    self.Fu[:,:] = model.C
-    
+
+    # Cost data
     self.g = np.zeros( ndx+nu)
     self.L = np.zeros([ndx+nu,ndx+nu])
     self.Lx = self.g[:ndx]
@@ -216,6 +216,10 @@ class DifferentialActionDataLQR:
     self.Lxu = self.L[:ndx,ndx:]
     self.Luu = self.L[ndx:,ndx:]
 
+    # Setting the linear model and quadratic cost here because they are constant
+    self.Fx[:,:model.nv] = model.B
+    self.Fx[:,model.nv:] = model.A
+    self.Fu[:,:] = model.C
     np.copyto(self.Lxx, model.Q+model.Q.T)
     np.copyto(self.Lxu, np.zeros((nx, nu)))
     np.copyto(self.Luu, model.U+model.U.T)
