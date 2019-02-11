@@ -15,6 +15,15 @@ class DifferentialActionModelAbstract:
     the dynamics, cost functions and their derivatives. These computations are
     mainly carry on inside calc() and calcDiff(), respectively.
     """
+    def __init__(self, nq, nv, nu):
+        self.nq = nq
+        self.nv = nv
+        self.nu = nu
+        self.nx = nq + nv
+        self.ndx = 2 * nv
+        self.nout = nv
+        self.unone = np.zeros(self.nu)
+
     def createData(self):
         """ Created the differential action data.
 
@@ -24,6 +33,7 @@ class DifferentialActionModelAbstract:
         :return DAM data.
         """
         raise NotImplementedError("Not implemented yet.")
+
     def calc(model, data, x, u=None):
         """ Compute the state evolution and cost value.
 
@@ -38,6 +48,7 @@ class DifferentialActionModelAbstract:
         :param u: control input
         """
         raise NotImplementedError("Not implemented yet.")
+
     def calcDiff(model, data, x, u=None, recalc=True):
         """ Compute the derivatives of the dynamics and cost functions.
 
@@ -55,18 +66,13 @@ class DifferentialActionModelAbstract:
         raise NotImplementedError("Not implemented yet.")
 
 
-
 class DifferentialActionModelFullyActuated(DifferentialActionModelAbstract):
     def __init__(self, pinocchioModel, costModel):
+        DifferentialActionModelAbstract.__init__(
+            self, pinocchioModel.nq, pinocchioModel.nv, pinocchioModel.nv)
         self.pinocchio = pinocchioModel
         self.State = StatePinocchio(self.pinocchio)
         self.costs = costModel
-        self.nq,self.nv = self.pinocchio.nq, self.pinocchio.nv
-        self.nx = self.State.nx
-        self.ndx = self.State.ndx
-        self.nout = self.nv
-        self.nu = self.nv
-        self.unone = np.zeros(self.nu)
         # Use this to force the computation with ABA
         # Side effect is that armature is not used.
         self.forceAba = False
@@ -157,18 +163,9 @@ class DifferentialActionModelLQR(DifferentialActionModelAbstract):
   On the other hand the cost function is given by
     l(x,u) = x^T*Q*x + u^T*U*u
   """
-  def __init__(self,nq,nu):
-    self.nq,self.nv = nq, nq
-    self.nx = 2*self.nq
-    self.ndx = self.nx
-    self.nout = self.nv
-    self.nu = nu
-    self.unone = np.zeros(self.nu)
+  def __init__(self, nq, nu):
+    DifferentialActionModelAbstract.__init__(self, nq, nq, nu)
     self.State = StateVector(self.nx)
-    self.nx = self.State.nx
-    self.ndx = self.State.ndx
-    self.nu = nu
-    self.unone = np.zeros(self.nu)
 
     v1 = randomOrthonormalMatrix(self.nq)
     v2 = randomOrthonormalMatrix(self.nq)

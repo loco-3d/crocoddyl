@@ -8,17 +8,13 @@ import pinocchio
 
 class DifferentialActionModelFloatingInContact(DifferentialActionModelAbstract):
     def __init__(self,pinocchioModel,actuationModel,contactModel,costModel):
+        DifferentialActionModelAbstract.__init__(
+            self, pinocchioModel.nq, pinocchioModel.nv, actuationModel.nu)
         self.pinocchio = pinocchioModel
         self.State = StatePinocchio(self.pinocchio)
         self.actuation = actuationModel
         self.contact = contactModel
         self.costs = costModel
-        self.nq,self.nv = self.pinocchio.nq, self.pinocchio.nv
-        self.nx = self.State.nx
-        self.ndx = self.State.ndx
-        self.nout = self.nv
-        self.nu = self.actuation.nu
-        self.unone = np.zeros(self.nu)
     @property
     def ncost(self): return self.costs.ncost
     @property
