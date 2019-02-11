@@ -216,10 +216,10 @@ class DifferentialActionDataLQR:
     self.Lxu = self.L[:ndx,ndx:]
     self.Luu = self.L[ndx:,ndx:]
 
-    self.Lxx = model.Q+model.Q.T
-    self.Lxu = np.zeros((nx, nu))
-    self.Luu = model.U+model.U.T
-        
+    np.copyto(self.Lxx, model.Q+model.Q.T)
+    np.copyto(self.Lxu, np.zeros((nx, nu)))
+    np.copyto(self.Luu, model.U+model.U.T)
+
 
 class DifferentialActionModelNumDiff(DifferentialActionModelAbstract):
     def __init__(self,model,withGaussApprox=False):
