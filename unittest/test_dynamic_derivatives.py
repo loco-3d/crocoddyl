@@ -3,6 +3,7 @@ from pinocchio import SE3
 import pinocchio
 from pinocchio.utils import *
 from numpy.linalg import inv,pinv,norm,svd,eig
+from testutils import df_dx, df_dq
 
 from crocoddyl import loadTalosArm
 robot = loadTalosArm()
@@ -62,30 +63,10 @@ avec K = [ M J* ; J 0 ]
 
 ### Define finite-diff routines.
 
-def df_dq(model,func,q,h=1e-9):
-    dq = zero(model.nv)
-    f0 = func(q)
-    res = zero([len(f0),model.nv])
-    for iq in range(model.nv):
-        dq[iq] = h
-        res[:,iq] = (func(pinocchio.integrate(model,q,dq)) - f0)/h
-        dq[iq] = 0
-    return res
-
-def df_dv(model,func,v,h=1e-9):
-    dv = zero(model.nv)
-    f0 = func(v)
-    res = zero([len(f0),model.nv])
-    for iv in range(model.nv):
-        dv[iv] = h
-        res[:,iv] = (func(v+dv) - f0)/h
-        dv[iv] = 0
-    return res
-
 ### Check ABA derivatives (without forces)
 
 da_dq = df_dq(model,lambda q_: pinocchio.aba(model,data,q_,v,tau),q)
-da_dv = df_dv(model,lambda v_: pinocchio.aba(model,data,q,v_,tau),v)
+da_dv = df_dx(lambda v_: pinocchio.aba(model,data,q,v_,tau),v)
 pinocchio.computeABADerivatives(model,data,q,v,tau)
 
 assert( absmax(da_dq-data.ddq_dq) < 1e-2 )
@@ -373,7 +354,7 @@ assert(absmax(KJ-KJn)/model.nv<1e-3)
 dcid_dq  = -inv(K)*np.vstack([ dtau_dq, dgamma_dq ])
 assert(absmax(dcid_dqn-dcid_dq)/model.nv<1e-3)
 
-dcid_dvn = df_dv(model, lambda _v: cid(q,_v,tau),v)
+dcid_dvn = df_dx(lambda _v: cid(q,_v,tau),v)
 
 dcid_dv = -inv(K)*np.vstack([dtau_dv, dgamma_dv])
 
@@ -427,7 +408,7 @@ dcid_dq  = -inv(K)*np.vstack([ dtau_dq, dgamma_dq ])
 assert(absmax(dcid_dqn-dcid_dq)/model.nv<1e-3)
 
 
-dcid_dun = df_dv(model, lambda _u: cid(q,v,_u),tau)
+dcid_dun = df_dx(lambda _u: cid(q,v,_u),tau)
 # K*D = [ I_nv; O_ncxnv ]
 # D = Kinv * [ I_nv ; 0_ncxnv ] = Kinv[:nv,:]
 dcid_du = inv(K)[:,:model.nv]

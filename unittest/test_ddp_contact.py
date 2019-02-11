@@ -30,7 +30,7 @@ class FF:
         State = self.State = StatePinocchio(rmodel)
         actModel = self.actModel = ActuationModelFreeFloating(rmodel)
         contactModel = self.contactModel = ContactModelMultiple(rmodel)
-        contact6 = ContactModel6D(rmodel,rmodel.getFrameId(contactName),ref=None)
+        contact6 = ContactModel6D(rmodel,rmodel.getFrameId(contactName),ref=pinocchio.SE3.Zero(), gains=[0.,0.])
         contactModel.addContact(name='contact',contact=contact6)
         costModel = self.costModel = CostModelSum(rmodel,nu=actModel.nu)
         self.cost1 = CostModelFrameTranslation(rmodel,nu=actModel.nu,

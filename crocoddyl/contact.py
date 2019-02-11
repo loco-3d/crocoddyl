@@ -1,6 +1,6 @@
 import pinocchio
 import numpy as np
-
+from utils import m2a
 
 
 class ContactModelPinocchio:
@@ -52,17 +52,20 @@ class ContactDataPinocchio:
 
 from pinocchio.utils import *
 class ContactModel3D(ContactModelPinocchio):
-    def __init__(self,pinocchioModel,frame,ref):
+    def __init__(self,pinocchioModel,frame,ref=None, gains=[0.,0.]):
         self.ContactDataType = ContactData3D
         ContactModelPinocchio.__init__(self,pinocchioModel,ncontact=3)
         self.frame = frame
-        self.ref = ref # not used yet ... later
+        self.ref = ref
+        self.gains = gains
     def calc(model,data,x):
         # We suppose forwardKinematics(q,v,np.zero), computeJointJacobian and updateFramePlacement already
         # computed.
+        assert(model.ref is not None or model.gains[0]==0.)
         data.v = pinocchio.getFrameVelocity(model.pinocchio,
                                              data.pinocchio,model.frame).copy()
         vw = data.v.angular; vv = data.v.linear
+                 
         J6 = pinocchio.getFrameJacobian(model.pinocchio, data.pinocchio,
                                         model.frame,
                                         pinocchio.ReferenceFrame.LOCAL)
@@ -72,18 +75,37 @@ class ContactModel3D(ContactModelPinocchio):
         data.a0[:] = (pinocchio.getFrameAcceleration(model.pinocchio,
                                                     data.pinocchio,model.frame).linear +\
                                                     cross(vw,vv)).flat
+        if model.gains[0]!=0.:
+          data.a0[:] +=model.gains[0]*(m2a(data.pinocchio.oMf[model.frame].translation) - model.ref)
+        if model.gains[1]!=0.:
+          data.a0[:] +=model.gains[1]*m2a(vv)          
 
     def calcDiff(model,data,x,recalc=True):
         if recalc: model.calc(data,x)
         dv_dq,da_dq,da_dv,da_da = pinocchio.getJointAccelerationDerivatives\
                                   (model.pinocchio,data.pinocchio,data.joint,
                                    pinocchio.ReferenceFrame.LOCAL)
-        vw = data.v.angular; vv = data.v.linear        
+        dv_dq,dv_dvq = pinocchio.getJointVelocityDerivatives\
+                       (model.pinocchio,data.pinocchio,data.joint,
+                        pinocchio.ReferenceFrame.LOCAL)
+        
+        vw = data.v.angular; vv = data.v.linear
 
         data.Aq[:,:] = (data.fXj*da_dq)[:3,:] + \
                        skew(vw)*(data.fXj*dv_dq)[:3,:]-\
                        skew(vv)*(data.fXj*dv_dq)[3:,:]
         data.Av[:,:] = (data.fXj*da_dv)[:3,:] + skew(vw)*data.J-skew(vv)*data.Jw
+        R = data.pinocchio.oMf[model.frame].rotation
+
+        if model.gains[0]!=0.:
+          data.Aq[:,:] += model.gains[0]*R*pinocchio.getFrameJacobian(model.pinocchio,
+                                                       data.pinocchio,
+                                                       model.frame,
+                                                       pinocchio.ReferenceFrame.LOCAL)[:3,:]
+        if model.gains[1]!=0.:
+          data.Aq[:,:] += model.gains[1]*(data.fXj[:3,:]*dv_dq)
+          data.Av[:,:] += model.gains[1]*(data.fXj[:3,:]*dv_dvq)
+          
     def setForces(model,data,forcesArr,forcesVec=None):
         '''
         Convert a numpy array of forces into a stdVector of spatial forces.
@@ -113,25 +135,50 @@ class ContactData3D(ContactDataPinocchio):
 
 from utils import a2m
 class ContactModel6D(ContactModelPinocchio):
-    def __init__(self,pinocchioModel,frame,ref):
+    def __init__(self,pinocchioModel,frame,ref, gains):
         self.ContactDataType = ContactData6D
         ContactModelPinocchio.__init__(self,pinocchioModel,ncontact=6)
         self.frame = frame
-        self.ref = ref # not used yet ... later
+        self.ref = ref
+        self.gains = gains
     def calc(model,data,x):
         # We suppose forwardKinematics(q,v,a), computeJointJacobian and updateFramePlacement already
         # computed.
+        assert(model.ref is not None or model.gains[0]==0.)
+        data.rMf = model.ref.inverse()*data.pinocchio.oMf[model.frame]
         data.J[:,:] = pinocchio.getFrameJacobian(model.pinocchio,data.pinocchio,
                                                  model.frame,pinocchio.ReferenceFrame.LOCAL)
         data.a0[:] = pinocchio.getFrameAcceleration(model.pinocchio,
                                                     data.pinocchio,model.frame).vector.flat
+        if model.gains[0]!=0.:
+          data.a0[:] +=model.gains[0]*m2a(pinocchio.log(data.rMf).vector)
+        if model.gains[1]!=0.:
+          data.a0[:] +=model.gains[1]*m2a(pinocchio.getFrameVelocity(model.pinocchio,
+                                                                     data.pinocchio,
+                                                                     model.frame).vector)
     def calcDiff(model,data,x,recalc=True):
         if recalc: model.calc(data,x)
+
         dv_dq,da_dq,da_dv,da_da = pinocchio.getJointAccelerationDerivatives\
                                   (model.pinocchio,data.pinocchio,data.joint,
                                    pinocchio.ReferenceFrame.LOCAL)
+        dv_dq,dv_dvq = pinocchio.getJointVelocityDerivatives\
+                       (model.pinocchio,data.pinocchio,data.joint,
+                        pinocchio.ReferenceFrame.LOCAL)
+
         data.Aq[:,:] = data.fXj*da_dq
         data.Av[:,:] = data.fXj*da_dv
+
+        if model.gains[0]!=0.:
+          data.Aq[:,:] +=model.gains[0]* np.dot(pinocchio.Jlog6(data.rMf),
+                                                pinocchio.getFrameJacobian(model.pinocchio,
+                                                                           data.pinocchio,
+                                                                           model.frame,
+                                                                           pinocchio.ReferenceFrame.LOCAL))
+        if model.gains[1]!=0.:
+          data.Aq[:,:] +=model.gains[1]*data.fXj*dv_dq
+          data.Av[:,:] +=model.gains[1]*data.fXj*dv_dvq
+
     def setForces(model,data,forcesArr,forcesVec=None):
         '''
         Convert a numpy array of forces into a stdVector of spatial forces.
@@ -153,7 +200,7 @@ class ContactData6D(ContactDataPinocchio):
         self.joint = frame.parent       
         self.jMf = frame.placement
         self.fXj = self.jMf.inverse().action
-
+        self.rMf = None
 
 
 from collections import OrderedDict

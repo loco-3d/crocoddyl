@@ -21,12 +21,12 @@ def createModel(timeStep,footRef,contactName,opPointName):
     State = StatePinocchio(rmodel)
     actModel = ActuationModelFreeFloating(rmodel)
     contactModel = ContactModelMultiple(rmodel)
-    contact6 = ContactModel6D(rmodel,rmodel.getFrameId(contactName),ref=None)
+    contact6 = ContactModel6D(rmodel,rmodel.getFrameId(contactName),ref=pinocchio.SE3.Zero(), gains=[0.,0.])
     contactModel.addContact(name='contact',contact=contact6)
     costModel = CostModelSum(rmodel,nu=actModel.nu)
     cost1 = CostModelPosition6D(rmodel,nu=actModel.nu,
                                 frame=rmodel.getFrameId(opPointName),
-                                ref=pinocchio.SE3(eye(3),np.matrix(footRef).T))
+                                ref=pinocchio.SE3(eye(3),np.matrix(footRef).T),gains=[0.,0.])
     cost2 = CostModelState(rmodel,State,ref=State.zero(),nu=actModel.nu)
     cost2.weights = np.array([0]*6+[0.01]*(rmodel.nv-6)+[10]*rmodel.nv)
     cost3 = CostModelControl(rmodel,nu=actModel.nu)
