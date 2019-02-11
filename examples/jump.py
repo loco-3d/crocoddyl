@@ -13,8 +13,11 @@ from crocoddyl import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDispl
 from crocoddyl import plotOCSolution, plotDDPConvergence
 from crocoddyl import loadTalosLegs
 from crocoddyl import m2a, a2m, ImpulseModelMultiple, ImpulseModel6D, ActionModelImpact
+from crocoddyl.impact import CostModelImpactCoM, CostModelImpactWholeBody
+
 import pinocchio
 from pinocchio.utils import *
+from numpy.linalg import norm,inv,pinv,eig,svd
 
 robot = loadTalosLegs()
 robot.model.armature[6:] = 1.
@@ -112,12 +115,17 @@ def impactModel(contactIds,effectors):
     # Creating the cost model for a contact phase
     costModel = CostModelSum(rmodel,nu=0)
     wx = np.array([0]*6 + [.1]*(rmodel.nv-6) + [10]*rmodel.nv)
-    costModel.addCost('xreg',weight=1.,
+    costModel.addCost('xreg',weight=.1,
                       cost=CostModelState(rmodel,State,ref=rmodel.defaultState,nu=0,
                                           activation=ActivationModelWeightedQuad(wx)))
+    costModel.addCost('com',weight=1.,
+                      cost=CostModelImpactCoM(rmodel,
+                                              activation=ActivationModelWeightedQuad(m2a([.1,.1,3.]))))
     for fid,ref in effectors.items():
         costModel.addCost("track%d"%fid, weight=100.,
                           cost = CostModelFramePlacement(rmodel,fid,ref,nu=0))
+        # costModel.addCost("vel%d"%fid, weight=0.,
+        #                   cost = CostModelFrameVelocity(rmodel,fid,nu=0))
         
     # Creating the action model for the KKT dynamics with simpletic Euler
     # integration scheme
@@ -156,6 +164,7 @@ models[20].costs['track16'].weight=0
 impact = models[20]
 impact.impulseWeight = 1
 
+'''
 problem = ShootingProblem(initialState=x0,runningModels=models[:-1],terminalModel=models[-1])
 ddp = SolverDDP(problem)
 ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
@@ -173,7 +182,10 @@ for m,d,x in zip(ddp.models(),ddp.datas(),ddp.xs):
 import matplotlib.pylab as plt
 from crocoddyl.integrated_action import IntegratedActionDataEuler
 plt.ion()
-plt.plot([ d.differential.pinocchio.oMf[rightId].translation[2,0] \
+#plt.plot([ d.differential.pinocchio.oMf[rightId].translation[2,0] \
+#           for d in ddp.datas() if isinstance(d,IntegratedActionDataEuler) ])
+
+plt.plot([ d.differential.pinocchio.com[0][2,0] \
            for d in ddp.datas() if isinstance(d,IntegratedActionDataEuler) ])
 
 
@@ -184,6 +196,7 @@ for i in range(1,8):
     models[-1].differential.costs['xreg'].cost.activation.weights[6:] = 10**i
     models[20].costs['track30'].weight=10**i
     models[20].costs['track16'].weight=10**i
+    models[20].costs['com'].weight=0.1*10**i
     if i>5:
         impact.impulseWeight = 10**(i-4)
     ddp.solve(maxiter=1000,regInit=.1,init_xs=ddp.xs,init_us=ddp.us)
@@ -192,101 +205,65 @@ for i in range(1,8):
         pinocchio.forwardKinematics(rmodel,d.differential.pinocchio,a2m(x[:nq]),a2m(x[nq:]))
         pinocchio.updateFramePlacements(rmodel,d.differential.pinocchio)
         print pinocchio.getFrameVelocity(rmodel,d.differential.pinocchio,rightId).vector.T
-    plt.plot([ d.differential.pinocchio.oMf[rightId].translation[2,0] \
+    #plt.plot([ d.differential.pinocchio.oMf[rightId].translation[2,0] \
+    #       for d in ddp.datas() if isinstance(d,IntegratedActionDataEuler) ])
+
+    plt.plot([ d.differential.pinocchio.com[0][2,0] \
            for d in ddp.datas() if isinstance(d,IntegratedActionDataEuler) ])
-
-        
-
-'''
-    # Computing the time step per each contact phase given the step duration.
-    # Here we assume a constant number of knots per phase
-    numKnots = 20
-    timeStep = float(stepDuration)/numKnots
-
-        # Getting the frame id for the right and left foot
-        rightFootId = self.robot.model.getFrameId(self.rightFoot)
-        leftFootId = self.robot.model.getFrameId(self.leftFoot)
-
-        # Compute the current foot positions
-        q0 = a2m(x[:self.robot.nq])
-        rightFootPos0 = self.robot.framePlacement(q0, rightFootId).translation
-        leftFootPos0 = self.robot.framePlacement(q0, leftFootId).translation
-
-        # Defining the action models along the time instances
-        n_cycles = 2
-        loco3dModel = []
-        import copy
-        for i in range(n_cycles):
-            # swing LF phase
-            leftSwingModel = \
-                [ self.createContactPhaseModel(
-                    timeStep,
-                    rightFootId,
-                    TaskSE3(
-                        pinocchio.SE3(np.eye(3),
-                                      np.asmatrix(a2m([ [(stepLength*k)/numKnots, 0., 0.] ]) +
-                                      leftFootPos0)),
-                        leftFootId)
-                    ) for k in range(numKnots) ]
-            
-            # Double support phase
-            doubleSupportModel = \
-                self.createContactSwitchModel(
-                    rightFootId,
-                    TaskSE3(
-                        pinocchio.SE3(np.eye(3),
-                                      np.asmatrix(a2m([ stepLength, 0., 0. ]) +
-                                      leftFootPos0)),
-                        leftFootId)
-                    )
-            
-            # swing RF phase
-            rightSwingModel = \
-                [ self.createContactPhaseModel(
-                    timeStep,
-                    leftFootId,
-                    TaskSE3(
-                        pinocchio.SE3(np.eye(3),
-                                      np.asmatrix(a2m([ 2*(stepLength*k)/numKnots, 0., 0. ]) +
-                                      rightFootPos0)),
-                        rightFootId)
-                    ) for k in range(numKnots) ]
-            
-            # Final support phase
-            finalSupport = \
-                self.createContactSwitchModel(
-                    leftFootId,
-                    TaskSE3(
-                        pinocchio.SE3(np.eye(3),
-                                      np.asmatrix(a2m([ 2*stepLength, 0., 0. ]) +
-                                      rightFootPos0)),
-                        rightFootId),
-                    )
-            rightFootPos0 += np.asmatrix(a2m([ stepLength, 0., 0. ]))
-            leftFootPos0 += np.asmatrix(a2m([ stepLength, 0., 0. ]))
-            loco3dModel += leftSwingModel + [ doubleSupportModel ] + rightSwingModel + [ finalSupport ]
-
-        problem = ShootingProblem(x, loco3dModel, finalSupport)
-        return problem
-
-    def createContactSwitchModel(self, contactFootId, swingFootTask):
-        model = self.createContactPhaseModel(0., contactFootId, swingFootTask)
-
-        impactFootVelCost = \
-            CostModelFrameVelocity(self.robot.model, swingFootTask.frameId)
-        model.differential.costs.addCost('impactVel', impactFootVelCost, 10000.)
-        model.differential.costs['impactVel' ].weight = 100000
-        model.differential.costs['footTrack' ].weight = 100000
-        model.differential.costs['stateReg'].weight = 1
-        model.differential.costs['ctrlReg'].weight = 0.01
-        return model
-
-
-
-
-
-
-
-
+    
 
 '''
+
+
+nq,nv = rmodel.nq,rmodel.nv
+
+#[ runningModel([ ],{},integrationStep=5e-2) ]*4 \
+models =\
+        [ impactModel([ leftId,rightId ], 
+                      { rightId: SE3(eye(3), right0*0),
+                        leftId: SE3(eye(3), left0*0) }) ] \
+        +  [ runningModel([ rightId, leftId ],{},integrationStep=5e-2) ]*19
+
+imp = 0
+impact = models[imp]
+impact.costs['track30'].weight=0
+impact.costs['track16'].weight=0
+
+for m in models[1:]:
+    m.differential.costs['ureg'].weight = 0.01
+    m.differential.costs['xreg'].weight = 0.01
+    m.differential.costs['xreg'].cost.activation.weights[:nv] = 0
+models[-1].differential.costs['xreg'].weight = .05
+models[-1].differential.costs['xreg'].cost.activation.weights[:nv] = 0
+
+x0fall = x0.copy()
+#x0fall[2] += .1
+x0fall[nq+2] = -3
+
+problem = ShootingProblem(initialState=x0fall,runningModels=models[:-1],terminalModel=models[-1])
+ddp = SolverDDP(problem)
+ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
+ddp.th_stop = 1e-6
+ddp.solve(maxiter=1000,regInit=.1,init_xs=[rmodel.defaultState]*len(ddp.models()))
+
+#di = impact.createData()
+di = ddp.datas()[imp]
+xi = ddp.xs[imp]
+vi = xi[-nv:]
+vn = di.vnext
+
+'''
+xi[-nv:] = 0
+xi[nv+3] = -1
+impact.calc(di,xi)
+
+q = a2m(xi[:nq])
+vq = a2m(di.vnext)
+
+import time
+for i in range(100):
+    q = pinocchio.integrate(rmodel,q,vq*1e-2)
+    robot.display(q)
+    time.sleep(1e-3)
+'''
+
