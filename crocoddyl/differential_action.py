@@ -144,26 +144,21 @@ class DifferentialActionDataFullyActuated:
 
 
 class DifferentialActionModelLQR(DifferentialActionModelAbstract):
-  """
-  This class implements a linear dynamics, and quadratic costs.
-  Since the DAM is a second order system, and the integratedactionmodels are implemented
-  as being second order integrators, This class implements a second order linear system
-  given by
-  x = [q, v]
+  """ Differential action model for linear dynamics and quadracti cost.
   
-  dv = A v + B q + C u + d  ......A, B, C are constant
+  This class implements a linear dynamics, and quadratic costs (i.e. LQR action).
+  Since the DAM is a second order system, and the integratedactionmodels are
+  implemented as being second order integrators, This class implements a second
+  order linear system given by
+    x = [q, v]
+    dv = A v + B q + C u + d
+  where  A, B, C and d are constant terms.
   
-  Full dynamics:
-  [dq] = [0  1][q]  +  [0]
-  [ddq]  [B  A][v] +  [C]u + d
-
-  The cost function is given by l(x,u) = x^T*Q*x + u^T*U*u
+  On the other hand the cost function is given by
+    l(x,u) = x^T*Q*x + u^T*U*u
   """
-
   def __init__(self,nq,nu):
-
     self.nq,self.nv = nq, nq
-   
     self.nx = 2*self.nq
     self.ndx = self.nx
     self.nout = self.nv
@@ -175,20 +170,21 @@ class DifferentialActionModelLQR(DifferentialActionModelAbstract):
     self.nu = nu
     self.unone = np.zeros(self.nu)
 
-    v1 = randomOrthonormalMatrix(self.nq);
-    v2 = randomOrthonormalMatrix(self.nq);
+    v1 = randomOrthonormalMatrix(self.nq)
+    v2 = randomOrthonormalMatrix(self.nq)
     v3 = randomOrthonormalMatrix(self.nq)
 
-    self.Q = randomOrthonormalMatrix(self.nx);
+    # linear dynamics and quadratic cost terms
+    self.A = v2
+    self.B = v1
+    self.C = v3
+    self.d = rand(self.nv)
+    self.Q = randomOrthonormalMatrix(self.nx)
     self.U = randomOrthonormalMatrix(self.nu)
 
-    self.d = rand(self.nv)
-    
-    self.B = v1; self.A = v2; self.C = v3
+  def createData(self):
+      return DifferentialActionDataLQR(self)
 
-    
-
-  def createData(self): return DifferentialActionDataLQR(self)
   def calc(model,data,x,u=None):
     q = x[:model.nq]; v = x[model.nq:]
     data.xout[:] = (np.dot(model.A, v) + np.dot(model.B, q) + np.dot(model.C, u)).flat + model.d
@@ -201,6 +197,7 @@ class DifferentialActionModelLQR(DifferentialActionModelAbstract):
     data.Lx[:] = np.dot(x.T, data.Lxx)
     data.Lu[:] = np.dot(u.T, data.Luu)
     return data.xout,data.cost
+
 
 class DifferentialActionDataLQR:
   def __init__(self,model):
