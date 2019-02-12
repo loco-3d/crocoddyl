@@ -135,7 +135,7 @@ class ContactData3D(ContactDataPinocchio):
 
 from utils import a2m
 class ContactModel6D(ContactModelPinocchio):
-    def __init__(self,pinocchioModel,frame,ref, gains):
+    def __init__(self,pinocchioModel,frame,ref=None, gains=[0.,0.]):
         self.ContactDataType = ContactData6D
         ContactModelPinocchio.__init__(self,pinocchioModel,ncontact=6)
         self.frame = frame
@@ -145,12 +145,12 @@ class ContactModel6D(ContactModelPinocchio):
         # We suppose forwardKinematics(q,v,a), computeJointJacobian and updateFramePlacement already
         # computed.
         assert(model.ref is not None or model.gains[0]==0.)
-        data.rMf = model.ref.inverse()*data.pinocchio.oMf[model.frame]
         data.J[:,:] = pinocchio.getFrameJacobian(model.pinocchio,data.pinocchio,
                                                  model.frame,pinocchio.ReferenceFrame.LOCAL)
         data.a0[:] = pinocchio.getFrameAcceleration(model.pinocchio,
                                                     data.pinocchio,model.frame).vector.flat
         if model.gains[0]!=0.:
+          data.rMf = model.ref.inverse()*data.pinocchio.oMf[model.frame]
           data.a0[:] +=model.gains[0]*m2a(pinocchio.log(data.rMf).vector)
         if model.gains[1]!=0.:
           data.a0[:] +=model.gains[1]*m2a(pinocchio.getFrameVelocity(model.pinocchio,
