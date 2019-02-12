@@ -75,10 +75,10 @@ T = 20
 timeStep = float(DT)/T
 
 models1 = [ createModel(timeStep=timeStep,
-                        footRef = [ (.2*k)/T, FOOTGAP, -1.01927 ],
+                        footRef = [ 0*(.2*k)/T, FOOTGAP, -1.01927 ],
                         contactName = rightFrame,
                         opPointName = leftFrame) for k in range(T) ]
-termmodel1 = createTermModel(timeStep=timeStep,footRef = [ .2, FOOTGAP, -1.01927 ],
+termmodel1 = createTermModel(timeStep=timeStep,footRef = [ .0, FOOTGAP, -1.01927 ],
                              contactName = rightFrame,opPointName = leftFrame)
 models2 = [ createModel(timeStep=timeStep,
                         footRef = [ (.2*k)/T, -FOOTGAP, -1.01927 ],
@@ -117,12 +117,12 @@ ddp2.solve(verbose=True,maxiter=1000,regInit=.1)
 termmodel1.timeStep=0
 termmodel2.timeStep=0
 
-models = models1 + [ termmodel1 ] + models2
-termmodel = termmodel2
+models = models1 #+ [ termmodel1 ] + models2
+termmodel = termmodel1
 
-problem = ShootingProblem(x, models, termmodel )
+problem = ShootingProblem(x, models, models[-1])
 ddp = SolverDDP(problem)
-ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose(), CallbackSolverDisplay(robot,4)]
+ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose() ]#, CallbackSolverDisplay(robot,4)]
 ddp.th_stop = 1e-9
 ddp.solve(maxiter=1000,regInit=.1,init_xs=[rmodel.defaultState]*len(ddp.models())  )
 
