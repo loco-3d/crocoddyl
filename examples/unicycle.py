@@ -1,18 +1,25 @@
 
 from crocoddyl import SolverDDP, CallbackDDPLogger, CallbackDDPVerbose
 from crocoddyl import ShootingProblem
-from crocoddyl import ActionModelUnicycleVar
-from crocoddyl import plotOCSolution
+from crocoddyl import ActionModelUnicycle
+from crocoddyl import plotOCSolution, plotDDPConvergence
+from notebooks import plotUnicycleSolution
 import numpy as np
 
 
 # Creating an action model for the unicycle system
-model = ActionModelUnicycleVar()
+model = ActionModelUnicycle()
+
+# Setting up the cost weights
+model.costWeights = [
+    10.,   # state weight
+    1.  # control weight
+]
 
 
 # Formulating the optimal control problem
-T = 10 # number of knots
-x0 = np.array([ -1, -2, 1, 2 ]) # initial state
+T = 20 # number of knots
+x0 = np.array([ -1., -1., 1. ]) #x,y,theta
 problem = ShootingProblem(x0, [ model ]*T, model )
 
 
@@ -24,6 +31,10 @@ ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose(1)]
 ddp.solve()
 
 
-# Plotting the solution
+# Plotting the solution, solver convergence and unycicle motion
 log = ddp.callback[0]
 plotOCSolution(log.xs, log.us)
+plotDDPConvergence(log.costs,log.control_regs,
+                   log.state_regs,log.gm_stops,
+                   log.th_stops,log.steps)
+plotUnicycleSolution(log.xs)
