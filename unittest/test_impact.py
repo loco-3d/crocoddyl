@@ -3,6 +3,7 @@ from crocoddyl import ActionModelImpact,ImpulseModel6D,ImpulseModelMultiple
 from crocoddyl import ActionModelNumDiff
 from crocoddyl import m2a, a2m, absmax, absmin
 from numpy.linalg import norm
+from testutils import df_dq
 
 # --- TALOS ARM
 robot = loadTalosArm(freeFloating=False)
@@ -47,16 +48,6 @@ rdata = rmodel.createData()
 #                      [ J' vnext             ]
 
 # Check M'(vnext-v)
-def df_dq(model,func,q,h=1e-9):
-    dq = zero(model.nv)
-    f0 = func(q)
-    res = zero([len(f0),model.nv])
-    for iq in range(model.nv):
-        dq[iq] = h
-        res[:,iq] = (func(pinocchio.integrate(model,q,dq)) - f0)/h
-        dq[iq] = 0
-    return res
-
 ### Check M(vnext-v)
 def Mdv(q,vnext,v):
     M = pinocchio.crba(rmodel,rdata,q)
