@@ -22,7 +22,7 @@ disp = lambda xs,dt: displayTrajectory(robot,xs,dt)
 disp.__defaults__ = ( .1, )
 
 robot = loadTalosLegs()
-robot.model.armature[6:] = 1.
+robot.model.armature[6:] = .01
 robot.initDisplay(loadModel=True)
 
 rmodel = robot.model
@@ -66,6 +66,8 @@ def runningModel(contactIds, effectors, com=None, integrationStep = 1e-2):
     costModel.addCost('ureg',weight=1e-4,
                       cost=CostModelControl(rmodel, nu=actModel.nu))
     for fid,ref in effectors.items():
+        if not isinstance(ref,SE3):
+            ref = SE3(eye(3),a2m(ref))
         costModel.addCost("track%d"%fid, weight=100.,
                           cost = CostModelFramePlacement(rmodel,fid,ref,actModel.nu))
 
@@ -95,44 +97,52 @@ x = m2a(np.concatenate([q,v]))
 SE3 = pinocchio.SE3
 pinocchio.forwardKinematics(rmodel,rdata,q0)
 pinocchio.updateFramePlacements(rmodel,rdata)
-right0 = rdata.oMf[rightId].translation
-left0  = rdata.oMf[leftId].translation
+right0 = m2a(rdata.oMf[rightId].translation)
+left0  = m2a(rdata.oMf[leftId].translation)
 com0 = m2a(pinocchio.centerOfMass(rmodel,rdata,q0))
 
 models = []\
          +[ runningModel([ rightId, leftId ],{}, integrationStep=5e-2)] *10                     \
          +[ runningModel([ rightId, leftId ],{},com=com0+[ 0.1,0,0], integrationStep=5e-2)]       \
-         +[ runningModel([ rightId, leftId ],{}, integrationStep=5e-2)] *10                     \
-         +[ runningModel([ rightId, leftId ],{},com=com0+[-0.1,0,0], integrationStep=5e-2)]
+         +[ runningModel([ rightId ],{}, integrationStep=5e-2)] *10                     \
+         +[ runningModel([ rightId ],{ leftId: left0+[0,0,0.1] },com=com0+[-0.1,0,0], integrationStep=5e-2)]
 
 pass1 = models[10]
 pass2 = models[21]
 
-pass1.differential.costs['com'].weight = 1000
-pass2.differential.costs['com'].weight = 1000
+pass1.differential.costs['com'].weight = 100000
+pass2.differential.costs['com'].weight = 100000
+pass2.differential.costs['track16'].weight = 100000
 
 # --- DDP
 problem = ShootingProblem(initialState=x0,runningModels=models[:-1],terminalModel=models[-1])
 ddp = SolverDDP(problem)
-ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
+#ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
 ddp.th_stop = 1e-6
 
 ddp.setCandidate()
 m=models[0]
 d=m.createData()
 
-m=m.differential.contact['contact30']
-d=d.differential.contact['contact30']
-#m.calc(d,ddp.xs[0],ddp.us[0])
-m.calc(d,ddp.xs[0])
+m=m.differential
+d=d.differential
+
+#m=m.differential.contact['contact30']
+#d=d.differential.contact['contact30']
+m.calcDiff(d,ddp.xs[0],ddp.us[0])
+#m.calc(d,ddp.xs[0])
 
 
-ddp.solve(maxiter=1000,regInit=.1,init_xs=[rmodel.defaultState]*len(ddp.models()))
+ddp.solve(maxiter=1,regInit=.1,init_xs=[rmodel.defaultState]*len(ddp.models()),
+          init_us = [ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
+                      for m,d in zip(ddp.models(),ddp.datas())[:-1] ])
 
-np.set_printoptions(precision=4, linewidth=200, suppress=True)
+assert(ddp.cost<1e5)
 
+'''
 # --- PLOT
+np.set_printoptions(precision=4, linewidth=200, suppress=True)
 import matplotlib.pylab as plt
 plt.ion()
-plt.plot([ d.differential.pinocchio.com[0][0,0] \
-           for d in ddp.datas() ])
+plt.plot([ d.differential.pinocchio.com[0][0,0] for d in ddp.datas() ])
+'''
