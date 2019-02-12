@@ -53,19 +53,19 @@ class SimpleBipedWalkingProblem:
         # Defining the action models along the time instances
         loco3dModel = []
         # Creating the action models for three steps
-        firstStep = self.footStep(rightFootId, leftFootId,
-                                  0.5*stepLength, leftFootPos0,
-                                  stepKnots)
-        secondStep = self.footStep(leftFootId, rightFootId,
-                                   stepLength, rightFootPos0,
-                                   stepKnots)
-        thirdStep = self.footStep(rightFootId, leftFootId,
-                                  stepLength, leftFootPos0,
-                                  stepKnots)
+        firstStep = self.createFootstepModels(rightFootId, leftFootId,
+                                              0.5*stepLength, leftFootPos0,
+                                              stepKnots)
+        secondStep = self.createFootstepModels(leftFootId, rightFootId,
+                                               stepLength, rightFootPos0,
+                                               stepKnots)
+        thirdStep = self.createFootstepModels(rightFootId, leftFootId,
+                                              stepLength, leftFootPos0,
+                                              stepKnots)
 
         # Creating the action model for the double support phase
         doubleSupport = \
-            [ self.createContactPhaseModel(
+            [ self.createSwingFootModel(
                 timeStep,
                 [ rightFootId, leftFootId ]
                 ) for k in range(supportKnots) ]
@@ -79,10 +79,10 @@ class SimpleBipedWalkingProblem:
         problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
 
-    def footStep(self, supportFootId, swingFootId, stepLength, footPos0, numKnots):
+    def createFootstepModels(self, supportFootId, swingFootId, stepLength, footPos0, numKnots):
         # Action models for the foot swing
         footSwingModel = \
-            [ self.createContactPhaseModel(
+            [ self.createSwingFootModel(
                 timeStep,
                 [ supportFootId ],
                 TaskSE3(
@@ -93,7 +93,7 @@ class SimpleBipedWalkingProblem:
                 ) for k in range(numKnots) ]
         # Action model for the foot switch
         footSwitchModel = \
-            self.createContactSwitchModel(
+            self.createFootSwitchModel(
                 [ supportFootId ],
                 TaskSE3(
                     pinocchio.SE3(np.eye(3),
@@ -105,7 +105,7 @@ class SimpleBipedWalkingProblem:
         footPos0 += np.asmatrix(a2m([ stepLength, 0., 0. ]))
         return footSwingModel + [ footSwitchModel ]
 
-    def createContactPhaseModel(self, timeStep, supportContactIds, footSwingTask = None):
+    def createSwingFootModel(self, timeStep, supportFootIds, swingFootTask = None):
         # Creating the action model for floating-base systems. A walker system 
         # is by default a floating-base system
         actModel = ActuationModelFreeFloating(self.rmodel)
@@ -113,17 +113,17 @@ class SimpleBipedWalkingProblem:
         # Creating a 6D multi-contact model, and then including the supporting
         # foot
         contactModel = ContactModelMultiple(self.rmodel)
-        for i in supportContactIds:
+        for i in supportFootIds:
             supportContactModel = \
                 ContactModel6D(self.rmodel, contactFootId, ref=pinocchio.SE3.Zero(), gains=[0.,0.])
             contactModel.addContact('contact_'+str(i), supportContactModel)
 
         # Creating the cost model for a contact phase
         costModel = CostModelSum(self.rmodel, actModel.nu)
-        if footSwingTask != None:
+        if swingFootTask != None:
             footTrack = CostModelFramePlacement(self.rmodel,
-                                                footSwingTask.frameId,
-                                                footSwingTask.oXf,
+                                                swingFootTask.frameId,
+                                                swingFootTask.oXf,
                                                 actModel.nu)
             costModel.addCost("footTrack", footTrack, 100.)
 
@@ -149,8 +149,8 @@ class SimpleBipedWalkingProblem:
         model.timeStep = timeStep
         return model
 
-    def createContactSwitchModel(self, contactFootId, swingFootTask):
         model = self.createContactPhaseModel(0., contactFootId, swingFootTask)
+    def createFootSwitchModel(self, supportFootId, swingFootTask):
 
         impactFootVelCost = \
             CostModelFrameVelocity(self.rmodel, swingFootTask.frameId)
@@ -165,19 +165,18 @@ class SimpleBipedWalkingProblem:
 
 
 # Creating the lower-body part of Talos
-robot = loadTalosLegs()
-rmodel = robot.model
+talos_legs = loadTalosLegs()
 
 # Defining the initial state of the robot
-q = robot.q0.copy()
-v = zero(robot.model.nv)
+q = talos_legs.q0.copy()
+v = zero(talos_legs.model.nv)
 x0 = m2a(np.concatenate([q,v]))
 
 
 # Setting up the 3d walking problem
 rightFoot = 'right_sole_link'
 leftFoot = 'left_sole_link'
-walk = SimpleBipedWalkingProblem(rmodel, rightFoot, leftFoot)
+walk = SimpleBipedWalkingProblem(talos_legs.model, rightFoot, leftFoot)
 
 # Creating the walking problem
 stepLength = 0.6
@@ -191,9 +190,9 @@ walkProblem = walk.createProblem(x0, stepLength, timeStep, stepKnots, supportKno
 ddp = SolverDDP(walkProblem)
 cameraTF = [3., 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose(),
-                CallbackSolverDisplay(robot,4,cameraTF)]
+                CallbackSolverDisplay(talos_legs,4,cameraTF)]
 ddp.th_stop = 1e-9
-ddp.solve(maxiter=1000,regInit=.1,init_xs=[rmodel.defaultState]*len(ddp.models()))
+ddp.solve(maxiter=1000,regInit=.1,init_xs=[talos_legs.model.defaultState]*len(ddp.models()))
 
 
 # Plotting the solution and the DDP convergence
@@ -205,4 +204,4 @@ plotDDPConvergence(log.costs,log.control_regs,
 
 # Visualization of the DDP solution in gepetto-viewer
 ddp.callback[2](ddp)
-CallbackSolverDisplay(robot)(ddp)
+CallbackSolverDisplay(talos_legs)(ddp)
