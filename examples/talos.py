@@ -189,8 +189,8 @@ class SimpleBipedWalkingProblem:
         model.differential.costs.addCost('impactVel', impactFootVelCost, 10000.)
         model.differential.costs['impactVel' ].weight = 100000
         model.differential.costs['footTrack' ].weight = 100000
-        model.differential.costs['stateReg'].weight = 1
-        model.differential.costs['ctrlReg'].weight = 0.01
+        model.differential.costs['stateReg'].weight = 10
+        model.differential.costs['ctrlReg'].weight = 0.001
         return model
 
 
