@@ -1,7 +1,7 @@
-from crocoddyl import IntegratedActionModelEuler,StateVector
+from crocoddyl import StateVector
 import numpy as np
 
-class DifferentialActionModelCartPole:
+class DifferentialActionModelCartpole:
     def __init__(self):
         self.State = StateVector(4)
         self.nq,self.nv = 2,2
@@ -16,40 +16,44 @@ class DifferentialActionModelCartPole:
         self.m2 = .1
         self.l  = .5
         self.g  = 9.81
-        self.costWeights = [ 1., 1., 0.1, 0.001, .001, 1. ]  # sin, cos, x, xdot, thdot, f
+        self.costWeights = [ 1., 1., 0.1, 0.001, 0.001, 1. ]  # sin,1-cos,x,xdot,thdot,f
 
-    def createData(self): return DifferentialActionDataCartPole(self)
+    def createData(self):
+        return DifferentialActionDataCartpole(self)
+
     def calc(model,data,x,u=None):
         if u is None: u=model.unone
-
-        nx,nu,nq,nv,nout = model.nx,model.nu,model.nq,model.nv,model.nout
+        # Getting the state and control variables
         x,th,xdot,thdot = x
         f, = u
 
+        # Shortname for system parameters
         m1,m2,l,g = model.m1,model.m2,model.l,model.g
         s,c = np.sin(th),np.cos(th)
+
+        # Defining the equation of motions
         m = m1+m2
-        
         mu = m1+m2*s**2
         xddot  = (f     + m2*c*s*g - m2*l*s*thdot**2 )/mu
         thddot = (c*f/l + m*g*s/l  - m2*c*s*thdot**2 )/mu
-
         data.xout[:] = [ xddot,thddot ]
-        data.costResiduals[:] =  [ s,c, x, xdot, thdot, f ]
+
+        # Computing the cost residual and value
+        data.costResiduals[:] = [ s, 1-c, x, xdot, thdot, f ]
         data.costResiduals[:] *= model.costWeights
         data.cost = .5*sum( data.costResiduals**2 )
-        
         return data.xout,data.cost
 
     def calcDiff(model,data,x,u=None,recalc=True):
+        # Advance user might implement the derivatives
         pass
     
-class DifferentialActionDataCartPole:
+class DifferentialActionDataCartpole:
     def __init__(self,model):
         self.cost = np.nan
         self.xout = np.zeros(model.nout)
 
-        nx,nu,ndx,nq,nv,nout = model.nx,model.nu,model.State.ndx,model.nq,model.nv,model.nout
+        nx,nu,ndx,nout = model.nx,model.nu,model.ndx,model.nout
         self.costResiduals = np.zeros([ model.ncost ])
         self.g   = np.zeros([ ndx+nu ])
         self.L   = np.zeros([ ndx+nu,ndx+nu ])
@@ -64,56 +68,50 @@ class DifferentialActionDataCartPole:
         self.Fu  = self.F[:,ndx:]
 
 
-cartpole = model = DifferentialActionModelCartPole()
-data  = model.createData()
-
-x = model.State.rand()
-u = np.zeros(1)
-model.calc(data,x,u)
-
-
 from crocoddyl import DifferentialActionModelNumDiff
-
-model = DifferentialActionModelNumDiff(model,withGaussApprox=True)
-data  = model.createData()
-
-model.calcDiff(data,x,u)
-
-
 from crocoddyl import IntegratedActionModelEuler
+from crocoddyl import ShootingProblem, SolverDDP, CallbackDDPVerbose
 
-model = IntegratedActionModelEuler(model)
-data  = model.createData()
-
-model.timeStep = 5e-2
-
-model.calc(data,x,u)
-model.calcDiff(data,x,u)
-
-termCartpole = DifferentialActionModelCartPole()
-termModel = IntegratedActionModelEuler(DifferentialActionModelNumDiff(termCartpole,withGaussApprox=True))
-cartpole.costWeights[1] = 10
-termCartpole.costWeights[0] = 10000
-termCartpole.costWeights[1] = 10000
-termCartpole.costWeights[3] = 1
-termCartpole.costWeights[4] = 10
+# Creating the DAM for the cartpole
+cartpoleDAM = DifferentialActionModelCartpole()
+cartpoleData = cartpoleDAM.createData()
+cartpoleDAM = model = DifferentialActionModelCartpole()
 
 
-from crocoddyl import ShootingProblem,SolverDDP,CallbackDDPVerbose
-x0 = np.array([ 0., 3.15, 0., 0. ])
+# Using NumDiff for computing the derivatives
+cartpoleND = DifferentialActionModelNumDiff(cartpoleDAM,
+                                            withGaussApprox=True)
+
+
+# Getting the IAM using the simpletic Euler rule
+timeStep = 5e-2
+cartpoleIAM = IntegratedActionModelEuler(cartpoleND,timeStep)
+
+
+
+# Creating the shooting problem
+x0 = np.array([ 0., 3.14, 0., 0. ])
 T  = 50
-problem = ShootingProblem(x0, [ model ]*T, termModel)
+
+terminalCartpole = DifferentialActionModelCartpole()
+terminalCartpoleDAM = DifferentialActionModelNumDiff(terminalCartpole,withGaussApprox=True)
+terminalCartpoleIAM = IntegratedActionModelEuler(terminalCartpoleDAM)
+
+terminalCartpole.costWeights[0] = 100
+terminalCartpole.costWeights[1] = 100
+terminalCartpole.costWeights[2] = 1.
+terminalCartpole.costWeights[3] = 0.1
+terminalCartpole.costWeights[4] = 0.01
+terminalCartpole.costWeights[5] = 0.0001
+problem = ShootingProblem(x0, [ cartpoleIAM ]*T, terminalCartpoleIAM)
 
 
-
+# Solving it using DDP
 ddp = SolverDDP(problem)
-#ddp.callback = [ CallbackDDPVerbose() ]
-xs,us,done = ddp.solve()
+ddp.callback = [ CallbackDDPVerbose() ]
+xs,us,done = ddp.solve(maxiter=300)
 
-for i in range(1,5):
-    termCartpole.costWeights[4] = 100*i
-    termCartpole.costWeights[3] = 10*i
-    xs,us,done = ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=10)
-    print xs[-1]
-
-import cartpole_utils
+# Display the solution
+from IPython.display import HTML
+from cartpole_utils import animateCartpole
+HTML(animateCartpole(xs).to_html5_video())
