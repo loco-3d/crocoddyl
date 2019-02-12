@@ -230,18 +230,15 @@ impact.costs['track30'].weight=0
 impact.costs['track16'].weight=0
 
 for m in models[imp+1:]:
-    m.differential.costs['ureg'].weight = 1e-4
     m.differential.costs['xreg'].weight = 0.0
-    m.differential.costs['xreg'].cost.activation.weights[:nv] = 0
-    m.differential.costs['xreg'].cost.activation.weights[nv:] = 1
     m.differential.contact['contact16'].gains[1] = 30
     m.differential.contact['contact30'].gains[1] = 30
-
     
-models[-1].differential.costs['xreg'].weight = 1
-models[-1].differential.costs['xreg'].cost.activation.weights[:6] = 1
-models[-1].differential.costs['xreg'].cost.activation.weights[6:nv] = 0
-models[-1].differential.costs['xreg'].cost.activation.weights[nv:] = 0
+models[-1].differential.costs['xreg'].weight = 1000
+models[-1].differential.costs['xreg'].cost.activation.weights[:] = 1
+impact.costs['com'].weight=100
+impact.costs['track16'].weight=1000
+impact.costs['track30'].weight=1000
 
 x0fall = x0.copy()
 x0fall[2] += .1
@@ -257,23 +254,6 @@ ddp.solve(maxiter=1000,regInit=.1,
                     for m,d in zip(ddp.models(),ddp.datas())[:imp] ] \
                   +[np.zeros(0)]+[ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
                                    for m,d in zip(ddp.models(),ddp.datas())[imp+1:-1] ])
-
-models[-1].differential.costs['xreg'].cost.activation.weights[:6] = 0
-models[-1].differential.costs['xreg'].cost.activation.weights[6:nv] = 10
-models[-1].differential.costs['xreg'].cost.activation.weights[nv:] = 0
-models[-1].differential.costs['xreg'].weight = 100
-impact.costs['xreg'].weight = 1
-impact.costs['com'].weight=100
-impact.costs['track16'].weight=1000
-impact.costs['track30'].weight=1000
-ddp.solve(init_xs=ddp.xs,init_us=ddp.us,isFeasible=True)
-          
-
-#di = impact.createData()
-di = ddp.datas()[imp]
-xi = ddp.xs[imp]
-vi = xi[-nv:]
-vn = di.vnext
 
 '''
 xi[-nv:] = 0
