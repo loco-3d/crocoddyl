@@ -32,6 +32,7 @@ from contact import ContactData6D, ContactModel6D
 from contact import ContactDataMultiple, ContactModelMultiple
 from impact import ImpulseData6D, ImpulseModel6D, ImpulseModel3D, ImpulseModelMultiple
 from impact import ImpulseDataPinocchio, ImpulseModelPinocchio
+from impact import CostModelImpactCoM,CostModelImpactWholeBody
 from impact import ActionDataImpact, ActionModelImpact
 from unicycle import ActionDataUnicycle, ActionModelUnicycle
 from unicycle import StateUnicycle, ActionDataUnicycleVar, ActionModelUnicycleVar
