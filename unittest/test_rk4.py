@@ -109,13 +109,14 @@ def get_attr_analytical(x,u,attr):
   model.calcDiff(data,_x,_u)
   return a2m(getattr(data, attr))#.copy()
 
-Lxx0 = df_dx(lambda _x: get_attr_analytical(_x,u, "Lx"), a2m(x))
+eps = 1e-9
+Lxx0 = df_dx(lambda _x: get_attr_analytical(_x,u, "Lx"), a2m(x), h=eps)
 
-Lxu0 = df_dx(lambda _u: get_attr_analytical(x,_u, "Lx"), a2m(u))
+Lxu0 = df_dx(lambda _u: get_attr_analytical(x,_u, "Lx"), a2m(u), h=eps)
 
-Luu0 = df_dx(lambda _u: get_attr_analytical(x,_u, "Lu"), a2m(u))
+Luu0 = df_dx(lambda _u: get_attr_analytical(x,_u, "Lu"), a2m(u), h=eps)
 
 
-assert( norm(Lxx0-data.Lxx) < 1e-5)#*np.sqrt(mnum.disturbance) )
-assert( norm(Lxu0-data.Lxu) < 1e-5)#10*np.sqrt(mnum.disturbance) )
-assert( norm(Luu0-data.Luu) < 1e-5)#10*mnum.disturbance )
+assert( norm(Lxx0-data.Lxx) < np.sqrt(eps))#*np.sqrt(mnum.disturbance) )
+assert( norm(Lxu0-data.Lxu) < np.sqrt(eps))#10*np.sqrt(mnum.disturbance) )
+assert( norm(Luu0-data.Luu) < np.sqrt(eps))#10*mnum.disturbance )
