@@ -22,7 +22,6 @@ class TaskSE3:
         self.oXf = oXf
         self.frameId = frameId
 
-
 class SimpleBipedWalkingProblem:
     """ Defines a simple 3d locomotion problem
     """
@@ -39,75 +38,74 @@ class SimpleBipedWalkingProblem:
         # Remove the armature
         self.rmodel.armature[6:] = 1.
     
-    def createProblem(self, x, stepLength, stepDuration):
-        # Computing the time step per each contact phase given the step duration.
-        # Here we assume a constant number of knots per phase
-        numKnots = 20
-        timeStep = float(stepDuration)/numKnots
-
+    def createProblem(self, x0, stepLength, timeStep, stepKnots, supportKnots):
         # Getting the frame id for the right and left foot
         rightFootId = self.rmodel.getFrameId(self.rightFoot)
         leftFootId = self.rmodel.getFrameId(self.leftFoot)
 
         # Compute the current foot positions
-        q0 = a2m(x[:self.rmodel.nq])
+        q0 = a2m(x0[:self.rmodel.nq])
         pinocchio.forwardKinematics(self.rmodel,self.rdata,q0)
         pinocchio.updateFramePlacements(self.rmodel,self.rdata)
         rightFootPos0 = self.rdata.oMf[rightFootId].translation
         leftFootPos0 = self.rdata.oMf[leftFootId].translation
 
         # Defining the action models along the time instances
-        n_cycles = 2
         loco3dModel = []
-        import copy
-        for i in range(n_cycles):
-            leftSwingModel = \
-                [ self.createContactPhaseModel(
-                    timeStep,
-                    rightFootId,
-                    TaskSE3(
-                        pinocchio.SE3(np.eye(3),
-                                      np.asmatrix(a2m([ [(stepLength*k)/numKnots, 0., 0.] ]) +
-                                      leftFootPos0)),
-                        leftFootId)
-                    ) for k in range(numKnots) ]
-            doubleSupportModel = \
-                self.createContactSwitchModel(
-                    rightFootId,
-                    TaskSE3(
-                        pinocchio.SE3(np.eye(3),
-                                      np.asmatrix(a2m([ stepLength, 0., 0. ]) +
-                                      leftFootPos0)),
-                        leftFootId)
-                    )
-            rightSwingModel = \
-                [ self.createContactPhaseModel(
-                    timeStep,
-                    leftFootId,
-                    TaskSE3(
-                        pinocchio.SE3(np.eye(3),
-                                      np.asmatrix(a2m([ 2*(stepLength*k)/numKnots, 0., 0. ]) +
-                                      rightFootPos0)),
-                        rightFootId)
-                    ) for k in range(numKnots) ]
-            finalSupport = \
-                self.createContactSwitchModel(
-                    leftFootId,
-                    TaskSE3(
-                        pinocchio.SE3(np.eye(3),
-                                      np.asmatrix(a2m([ 2*stepLength, 0., 0. ]) +
-                                      rightFootPos0)),
-                        rightFootId),
-                    )
-            rightFootPos0 += np.asmatrix(a2m([ stepLength, 0., 0. ]))
-            leftFootPos0 += np.asmatrix(a2m([ stepLength, 0., 0. ]))
-            loco3dModel += leftSwingModel + [ doubleSupportModel ] + rightSwingModel + [ finalSupport ]
+        # Creating the action models for three steps
+        firstStep = self.footStep(rightFootId, leftFootId,
+                                  0.5*stepLength, leftFootPos0,
+                                  stepKnots)
+        secondStep = self.footStep(leftFootId, rightFootId,
+                                   stepLength, rightFootPos0,
+                                   stepKnots)
+        thirdStep = self.footStep(rightFootId, leftFootId,
+                                  stepLength, leftFootPos0,
+                                  stepKnots)
 
-        loco3dModel = leftSwingModel + [ doubleSupportModel ] + rightSwingModel
-        problem = ShootingProblem(x, loco3dModel, finalSupport)
+        # Creating the action model for the double support phase
+        doubleSupport = \
+            [ self.createContactPhaseModel(
+                timeStep,
+                [ rightFootId, leftFootId ]
+                ) for k in range(supportKnots) ]
+
+        # We defined the problem as:
+        #  STEP 1 - DS - STEP 2 - DS - STEP 3 - DS
+        loco3dModel += firstStep + doubleSupport
+        loco3dModel += secondStep + doubleSupport
+        loco3dModel += thirdStep + doubleSupport
+
+        problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
 
-    def createContactPhaseModel(self, timeStep, contactFootId, footSwingTask):
+    def footStep(self, supportFootId, swingFootId, stepLength, footPos0, numKnots):
+        # Action models for the foot swing
+        footSwingModel = \
+            [ self.createContactPhaseModel(
+                timeStep,
+                [ supportFootId ],
+                TaskSE3(
+                    pinocchio.SE3(np.eye(3),
+                                  np.asmatrix(a2m([ [(stepLength*k)/numKnots, 0., 0.] ]) +
+                                  footPos0)),
+                    swingFootId)
+                ) for k in range(numKnots) ]
+        # Action model for the foot switch
+        footSwitchModel = \
+            self.createContactSwitchModel(
+                [ supportFootId ],
+                TaskSE3(
+                    pinocchio.SE3(np.eye(3),
+                                  np.asmatrix(a2m([ stepLength, 0., 0. ]) +
+                                  footPos0)),
+                    swingFootId)
+                )
+        # Updating the current foot position for next step
+        footPos0 += np.asmatrix(a2m([ stepLength, 0., 0. ]))
+        return footSwingModel + [ footSwitchModel ]
+
+    def createContactPhaseModel(self, timeStep, supportContactIds, footSwingTask = None):
         # Creating the action model for floating-base systems. A walker system 
         # is by default a floating-base system
         actModel = ActuationModelFreeFloating(self.rmodel)
@@ -115,16 +113,20 @@ class SimpleBipedWalkingProblem:
         # Creating a 6D multi-contact model, and then including the supporting
         # foot
         contactModel = ContactModelMultiple(self.rmodel)
-        contactFootModel = \
-            ContactModel6D(self.rmodel, contactFootId, ref=pinocchio.SE3.Zero(), gains=[0.,0.])
-        contactModel.addContact('contact', contactFootModel)
+        for i in supportContactIds:
+            supportContactModel = \
+                ContactModel6D(self.rmodel, contactFootId, ref=pinocchio.SE3.Zero(), gains=[0.,0.])
+            contactModel.addContact('contact_'+str(i), supportContactModel)
 
         # Creating the cost model for a contact phase
         costModel = CostModelSum(self.rmodel, actModel.nu)
-        footTrack = CostModelFramePlacement(self.rmodel,
-                                        footSwingTask.frameId,
-                                        footSwingTask.oXf,
-                                        actModel.nu)
+        if footSwingTask != None:
+            footTrack = CostModelFramePlacement(self.rmodel,
+                                                footSwingTask.frameId,
+                                                footSwingTask.oXf,
+                                                actModel.nu)
+            costModel.addCost("footTrack", footTrack, 100.)
+
         stateWeights = \
             np.array([0]*6 + [0.01]*(self.rmodel.nv-6) + [10]*self.rmodel.nv)
         stateReg = CostModelState(self.rmodel,
@@ -133,7 +135,6 @@ class SimpleBipedWalkingProblem:
                                   actModel.nu,
                                   activation=ActivationModelWeightedQuad(stateWeights**2))
         ctrlReg = CostModelControl(self.rmodel, actModel.nu)
-        costModel.addCost("footTrack", footTrack, 100.)
         costModel.addCost("stateReg", stateReg, 0.1)
         costModel.addCost("ctrlReg", ctrlReg, 0.001)
 
@@ -167,20 +168,27 @@ class SimpleBipedWalkingProblem:
 robot = loadTalosLegs()
 rmodel = robot.model
 
+# Defining the initial state of the robot
 q = robot.q0.copy()
 v = zero(robot.model.nv)
 x0 = m2a(np.concatenate([q,v]))
-x0[2] = 1.019
+
 
 # Setting up the 3d walking problem
 rightFoot = 'right_sole_link'
 leftFoot = 'left_sole_link'
 walk = SimpleBipedWalkingProblem(rmodel, rightFoot, leftFoot)
 
+# Creating the walking problem
+stepLength = 0.6
+timeStep = 0.0375 # seconds
+stepKnots = 20
+supportKnots = 10
+walkProblem = walk.createProblem(x0, stepLength, timeStep, stepKnots, supportKnots)
+
+
 # Solving the 3d walking problem using DDP
-stepLength = 0.2
-stepDuration = 0.75
-ddp = SolverDDP(walk.createProblem(x0, stepLength, stepDuration))
+ddp = SolverDDP(walkProblem)
 cameraTF = [3., 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose(),
                 CallbackSolverDisplay(robot,4,cameraTF)]
@@ -197,4 +205,4 @@ plotDDPConvergence(log.costs,log.control_regs,
 
 # Visualization of the DDP solution in gepetto-viewer
 ddp.callback[2](ddp)
-#CallbackSolverDisplay(robot)(ddp,cameraTF)
+CallbackSolverDisplay(robot)(ddp)
