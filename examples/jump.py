@@ -20,7 +20,7 @@ from pinocchio.utils import *
 from numpy.linalg import norm,inv,pinv,eig,svd
 
 robot = loadTalosLegs()
-robot.model.armature[6:] = 1.
+robot.model.armature[6:] = .3
 robot.initDisplay(loadModel=True)
 
 rmodel = robot.model
@@ -145,14 +145,14 @@ com0 = m2a(pinocchio.centerOfMass(rmodel,rdata,q0))
 # + [ runningModel([ rightId, leftId ],{},com=com0-[0,0,0], integrationStep=5e-2) ] \
 
 models =\
-         [ runningModel([ rightId, leftId ],{}, integrationStep=5e-2)] *10\
-         +  [ runningModel([ ],{},integrationStep=5e-2) ]*5 \
+         [ runningModel([ rightId, leftId ],{}, integrationStep=5e-2) for i in range(10) ] \
+         +  [ runningModel([ ],{},integrationStep=5e-2) for i in range(5)] \
          +  [ runningModel([ ],{}, com=com0+[0,0,0.5],integrationStep=5e-2) ] \
-         +  [ runningModel([ ],{},integrationStep=5e-2) ]*4 \
+         +  [ runningModel([ ],{},integrationStep=5e-2) for i in range(4) ] \
          +  [ impactModel([ leftId,rightId ], 
                           { rightId: SE3(eye(3), right0),
                             leftId: SE3(eye(3), left0) }) ] \
-        +  [ runningModel([ rightId, leftId ],{},integrationStep=5e-2) ]*5 \
+        +  [ runningModel([ rightId, leftId ],{},integrationStep=5e-2) for i in range(5)] \
         +  [ runningModel([ ],{}, integrationStep=5e-2) ]
 
 models[-1].differential.costs['xreg'].cost.activation.weights[3:6] = 10
@@ -217,34 +217,57 @@ for i in range(1,8):
 
 nq,nv = rmodel.nq,rmodel.nv
 
-#[ runningModel([ ],{},integrationStep=5e-2) ]*4 \
-models =\
-        [ impactModel([ leftId,rightId ], 
-                      { rightId: SE3(eye(3), right0*0),
-                        leftId: SE3(eye(3), left0*0) }) ] \
-        +  [ runningModel([ rightId, leftId ],{},integrationStep=5e-2) ]*19
+models = [] \
+        + [ runningModel([ ],{},integrationStep=5e-2) for i in range(4) ] \
+        + [ impactModel([ leftId,rightId ], 
+                      { rightId: SE3(eye(3), right0),
+                        leftId: SE3(eye(3), left0) }) ] \
+        +  [ runningModel([ rightId, leftId ],{},integrationStep=2e-2) for i in range(9) ]
 
-imp = 0
+imp = 4
 impact = models[imp]
 impact.costs['track30'].weight=0
 impact.costs['track16'].weight=0
 
-for m in models[1:]:
-    m.differential.costs['ureg'].weight = 0.01
-    m.differential.costs['xreg'].weight = 0.01
+for m in models[imp+1:]:
+    m.differential.costs['ureg'].weight = 1e-4
+    m.differential.costs['xreg'].weight = 0.0
     m.differential.costs['xreg'].cost.activation.weights[:nv] = 0
-models[-1].differential.costs['xreg'].weight = .05
-models[-1].differential.costs['xreg'].cost.activation.weights[:nv] = 0
+    m.differential.costs['xreg'].cost.activation.weights[nv:] = 1
+    m.differential.contact['contact16'].gains[1] = 30
+    m.differential.contact['contact30'].gains[1] = 30
+
+    
+models[-1].differential.costs['xreg'].weight = 1
+models[-1].differential.costs['xreg'].cost.activation.weights[:6] = 1
+models[-1].differential.costs['xreg'].cost.activation.weights[6:nv] = 0
+models[-1].differential.costs['xreg'].cost.activation.weights[nv:] = 0
 
 x0fall = x0.copy()
-#x0fall[2] += .1
-x0fall[nq+2] = -3
+x0fall[2] += .1
+#x0fall[nq+2] = -3
 
 problem = ShootingProblem(initialState=x0fall,runningModels=models[:-1],terminalModel=models[-1])
 ddp = SolverDDP(problem)
 ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
 ddp.th_stop = 1e-6
-ddp.solve(maxiter=1000,regInit=.1,init_xs=[rmodel.defaultState]*len(ddp.models()))
+ddp.solve(maxiter=1000,regInit=.1,
+          init_xs=[rmodel.defaultState]*len(ddp.models()),
+          init_us=[ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
+                    for m,d in zip(ddp.models(),ddp.datas())[:imp] ] \
+                  +[np.zeros(0)]+[ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
+                                   for m,d in zip(ddp.models(),ddp.datas())[imp+1:-1] ])
+
+models[-1].differential.costs['xreg'].cost.activation.weights[:6] = 0
+models[-1].differential.costs['xreg'].cost.activation.weights[6:nv] = 10
+models[-1].differential.costs['xreg'].cost.activation.weights[nv:] = 0
+models[-1].differential.costs['xreg'].weight = 100
+impact.costs['xreg'].weight = 1
+impact.costs['com'].weight=100
+impact.costs['track16'].weight=1000
+impact.costs['track30'].weight=1000
+ddp.solve(init_xs=ddp.xs,init_us=ddp.us,isFeasible=True)
+          
 
 #di = impact.createData()
 di = ddp.datas()[imp]
