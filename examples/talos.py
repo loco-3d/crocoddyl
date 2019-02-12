@@ -39,6 +39,15 @@ class SimpleBipedWalkingProblem:
         self.rmodel.armature[6:] = 1.
     
     def createProblem(self, x0, stepLength, timeStep, stepKnots, supportKnots):
+        """ Create a shooting problem for a simple walking.
+
+        :param x0: initial state
+        :param stepLength: step lenght
+        :param timeStep: step time for each knot
+        :param stepKnots: number of knots for step phases
+        :param supportKnots: number of knots for double support phases
+        :return shooting problem
+        """
         # Getting the frame id for the right and left foot
         rightFootId = self.rmodel.getFrameId(self.rightFoot)
         leftFootId = self.rmodel.getFrameId(self.leftFoot)
@@ -80,6 +89,15 @@ class SimpleBipedWalkingProblem:
         return problem
 
     def createFootstepModels(self, supportFootId, swingFootId, stepLength, footPos0, numKnots):
+        """ Action models for a footstep phase.
+
+        :param supportFootId: Id of the supporting foot
+        :param swingFootId: Id of the swinging foot
+        :param stepLength: step length
+        :param footPos0: initial position of the swinging foot
+        :param numKnots: number of knots for the footstep phase
+        :return footstep action models
+        """
         # Action models for the foot swing
         footSwingModel = \
             [ self.createSwingFootModel(
@@ -106,6 +124,13 @@ class SimpleBipedWalkingProblem:
         return footSwingModel + [ footSwitchModel ]
 
     def createSwingFootModel(self, timeStep, supportFootIds, swingFootTask = None):
+        """ Action model for a swing foot phase.
+
+        :param timeStep: step duration of the action model
+        :param supportFootIds: Ids of the constrained feet
+        :param swingFootTask: swinging foot task
+        :return action model for a swing foot phase
+        """
         # Creating the action model for floating-base systems. A walker system 
         # is by default a floating-base system
         actModel = ActuationModelFreeFloating(self.rmodel)
@@ -149,8 +174,15 @@ class SimpleBipedWalkingProblem:
         model.timeStep = timeStep
         return model
 
-        model = self.createContactPhaseModel(0., contactFootId, swingFootTask)
     def createFootSwitchModel(self, supportFootId, swingFootTask):
+        """ Action model for a foot switch phase.
+
+        :param timeStep: step duration of the action model
+        :param supportFootIds: Ids of the constrained feet
+        :param swingFootTask: swinging foot task
+        :return action model for a foot switch phase
+        """
+        model = self.createSwingFootModel(0., supportFootId, swingFootTask)
 
         impactFootVelCost = \
             CostModelFrameVelocity(self.rmodel, swingFootTask.frameId)
@@ -179,7 +211,7 @@ leftFoot = 'left_sole_link'
 walk = SimpleBipedWalkingProblem(talos_legs.model, rightFoot, leftFoot)
 
 # Creating the walking problem
-stepLength = 0.6
+stepLength = 0.6 # meters
 timeStep = 0.0375 # seconds
 stepKnots = 20
 supportKnots = 10
