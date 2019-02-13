@@ -140,7 +140,7 @@ class SimpleBipedWalkingProblem:
         contactModel = ContactModelMultiple(self.rmodel)
         for i in supportFootIds:
             supportContactModel = \
-                ContactModel6D(self.rmodel, contactFootId, ref=pinocchio.SE3.Zero(), gains=[0.,0.])
+                ContactModel6D(self.rmodel, i, ref=pinocchio.SE3.Identity(), gains=[0.,0.])
             contactModel.addContact('contact_'+str(i), supportContactModel)
 
         # Creating the cost model for a contact phase
