@@ -2,58 +2,40 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import animation
 from math import sin, cos
-from IPython.display import HTML
 
-def plotCartpole(x,patch=None):
-    x_cart = xs[i][0]
-    y_cart = 0.
-    theta = xs[i][1]
-    if patch is not None: patch.center = (x_cart, y_cart)
 
-    x_pole = np.cumsum([x_cart,
-                   -10 * 0.5 * sin(theta)])
-    y_pole = np.cumsum([y_cart,
-                   10 * 0.5 * cos(theta)])
-    line.set_data(x_pole,y_pole)
-
-def animateCartpole(xs,sleep=30):
-
+def animateCartpole(xs,sleep=50):
     print("processing the animation ... ")
+    cart_size = 1.
+    pole_length = 5.
     fig = plt.figure()
-    fig.set_dpi(100)
-    fig.set_size_inches(7, 6.5)
-
-    ax = plt.axes(xlim=(-9, 9), ylim=(-6, 6))
-    patch = plt.Circle((5, -5), 0.25, fc='b')
-    line, = ax.plot([], [], 'o-', lw=2)
-
+    ax = plt.axes(xlim=(-8, 8), ylim=(-6, 6))
+    patch = plt.Rectangle((0., 0.), cart_size, cart_size, fc='b')
+    line, = ax.plot([], [], 'k-', lw=2)
+    time_text = ax.text(0.02, 0.95, '', transform=ax.transAxes)
     def init():
-        patch.center = (0, 0)
-        line.set_data([], [])
         ax.add_patch(patch)
-        return patch,
-
+        line.set_data([], [])
+        time_text.set_text('')
+        return patch, line, time_text
     def animate(i):
         x_cart = xs[i][0]
         y_cart = 0.
         theta = xs[i][1]
-        patch.center = (x_cart, y_cart)
-        
+        patch.set_xy([x_cart-cart_size/2, y_cart-cart_size/2])
         x_pole = np.cumsum([x_cart,
-                            -10 * 0.5 * sin(theta)])
+                            -pole_length * sin(theta)])
         y_pole = np.cumsum([y_cart,
-                            10 * 0.5 * cos(theta)])
+                            pole_length * cos(theta)])
         line.set_data(x_pole,y_pole)
-    
-        return patch, 
-
+        time = i*sleep/1000.
+        time_text.set_text('time = %.1f sec' % time)
+        return patch, line, time_text
     anim = animation.FuncAnimation(fig, animate, 
                                    init_func=init,
                                    frames=len(xs), 
                                    interval=sleep,
                                    blit=True)
-
-
-    #HTML(anim.to_html5_video())
     print("... processing done")
+    plt.show()
     return anim

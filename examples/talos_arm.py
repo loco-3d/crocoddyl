@@ -1,12 +1,4 @@
-from crocoddyl import StatePinocchio
-from crocoddyl import DifferentialActionModelFullyActuated, IntegratedActionModelEuler
-from crocoddyl import CostModelSum
-from crocoddyl import CostModelFrameTranslation, CostModelFramePlacement
-from crocoddyl import CostModelState, CostModelControl
-from crocoddyl import ShootingProblem, SolverDDP
-from crocoddyl import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay
-from crocoddyl import loadTalosArm
-from crocoddyl import plotOCSolution, plotDDPConvergence
+from crocoddyl import *
 import pinocchio
 import numpy as np
 

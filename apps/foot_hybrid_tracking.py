@@ -25,7 +25,7 @@ def createModel(timeStep,footRef,contactName,opPointName):
     State = StatePinocchio(rmodel)
     actModel = ActuationModelFreeFloating(rmodel)
     contactModel = ContactModelMultiple(rmodel)
-    contact6 = ContactModel6D(rmodel,rmodel.getFrameId(contactName),ref=pinocchio.SE3.Zero(), gains=[0.,0.])
+    contact6 = ContactModel6D(rmodel,rmodel.getFrameId(contactName),ref=pinocchio.SE3.Identity(), gains=[0.,0.])
     contactModel.addContact(name='contact',contact=contact6)
     costModel = CostModelSum(rmodel,nu=actModel.nu)
     cost1 = CostModelFramePlacement(rmodel,nu=actModel.nu,
