@@ -78,7 +78,9 @@ cartpoleData = cartpoleDAM.createData()
 cartpoleDAM = model = DifferentialActionModelCartpole()
 
 
-# Using NumDiff for computing the derivatives
+# Using NumDiff for computing the derivatives. We specify the
+# withGaussApprox=True to have approximation of the Hessian based on the
+# Jacobian of the cost residuals.
 cartpoleND = DifferentialActionModelNumDiff(cartpoleDAM,
                                             withGaussApprox=True)
 
