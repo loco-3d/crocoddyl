@@ -284,12 +284,14 @@ assert( norm(dnum.Lxu-data.Lxu) < 1e-3)
 assert( norm(dnum.Luu-data.Luu) < 1e-3)
 
 
+# --- test quasi static guess
+x0 = x.copy()
+x0[dmodel.nq:] = 0
+for c in dmodel.contact.contacts.values(): c.gains = [0.,0.]
+u0 = dmodel.quasiStatic(data.differential,x0)
+a0,_ = dmodel.calc(data.differential,x0,u0)
 
-
-
-
-
-
+assert(norm(a0)<1e-6)
 
 # TODO move to an integrative test
 # -------------------------------------------------------------------------------
@@ -329,7 +331,7 @@ problem = ShootingProblem(x0, [ model ], model)
 ddp = SolverDDP(problem)
 ddp.callback = [CallbackDDPLogger()]
 ddp.th_stop = 1e-18
-xddp,uddp,doneddp = ddp.solve(maxiter=30)
+xddp,uddp,doneddp = ddp.solve(maxiter=100)
 
 assert(doneddp)
 assert( norm(ddp.datas()[-1].differential.costs['pos'].residuals)<1e-3 )

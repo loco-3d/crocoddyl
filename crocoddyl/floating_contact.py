@@ -111,6 +111,15 @@ class DifferentialActionModelFloatingInContact:
 
         return data.xout,data.cost
 
+    def quasiStatic(self,data,x):
+        nx,ndx,nu,nq,nv,nc = self.nx,self.State.ndx,self.nu,self.nq,self.nv,self.ncontact
+        if len(x)==self.nq: x = np.concatenate([x,np.zero(nv)])
+        else:               x[nq:] = 0
+        self.calcDiff(data,x,np.zeros(nu))
+        return np.dot(
+            np.linalg.pinv(np.hstack([data.actuation.Au,data.contact.J.T])),
+            -data.r[:nv])[:nu]
+
 class DifferentialActionDataFloatingInContact:
     def __init__(self,model):
         self.pinocchio = model.pinocchio.createData()
