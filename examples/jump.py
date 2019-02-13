@@ -4,7 +4,7 @@ from crocoddyl import IntegratedActionModelEuler
 from crocoddyl import CostModelSum
 from crocoddyl import CostModelFramePlacement, CostModelFrameVelocity
 from crocoddyl import CostModelState, CostModelControl,CostModelCoM
-from crocoddyl import ActivationModelWeightedQuad
+from crocoddyl import ActivationModelWeightedQuad,ActivationModelInequality
 from crocoddyl import ActuationModelFreeFloating
 from crocoddyl import ContactModel6D, ContactModelMultiple
 from crocoddyl import ShootingProblem
@@ -155,11 +155,20 @@ models =\
         +  [ runningModel([ rightId, leftId ],{},integrationStep=2e-2) for i in range(9)] \
         +  [ runningModel([ rightId, leftId ],{}, integrationStep=0) ]
 
+
+high = 15
+#!models[high].differential.costs['com'].activation = ActivationModelInequality(com0+[-.1,-.1,0.5],com0+[ .1, .1,1.0])
+
 imp = 20
 impact = models[imp]
 impact.costs['track30'].weight=0
 impact.costs['track16'].weight=0
 impact.costs['com'].weight=100
+#!impact.costs['xreg'].weight = 10
+#!impact.costs['xreg'].cost.activation.weights[rmodel.nv:] = 0
+
+#!impact.costs['track16'].cost.activation = ActivationModelWeightedQuad(np.array([1.,1,0,1,1,1]))
+#!impact.costs['track30'].cost.activation = ActivationModelWeightedQuad(np.array([1.,1,0,1,1,1]))
 
 for m in models[imp+1:]:
     m.differential.costs['xreg'].weight = 0.0
@@ -169,143 +178,45 @@ for m in models[imp+1:]:
 models[-1].differential.costs['xreg'].weight = 1000
 models[-1].differential.costs['xreg'].cost.activation.weights[:] = 1
 
-
+# Solve the initial phase (take-off).
 problem = ShootingProblem(initialState=x0,runningModels=models[:20],terminalModel=models[20])
 ddp = SolverDDP(problem)
-ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
-ddp.th_stop = 1e-6
+ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]#, CallbackSolverDisplay(robot,rate=5) ]
+ddp.th_stop = 1e-4
 us0 = [ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
         for m,d in zip(ddp.models(),ddp.datas())[:imp] ] \
             +[np.zeros(0)]+[ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
                              for m,d in zip(ddp.models(),ddp.datas())[imp+1:-1] ]
 
-ddp.solve(maxiter=1000,regInit=.1,
+ddp.solve(maxiter=20,regInit=.1,
           init_xs=[rmodel.defaultState]*len(ddp.models()),
           init_us=us0[:20])
+disp(ddp.xs)
 
-
-# for i in range(21,len(models)):
-#     disp(ddp.xs)
-#     xs = ddp.xs + [ ddp.xs[-1] ]
-#     us = ddp.us + [ np.zeros(problem.terminalModel.nu) ]
-#     problem = ShootingProblem(initialState=x0,runningModels=models[:i],terminalModel=models[i])
-#     ddp = SolverDDP(problem)
-#     ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
-#     ddp.th_stop = 1e-6
-#     ddp.solve(init_xs=xs,init_us=us)
-
+# Solve both take-off and landing.
 xsddp = ddp.xs
 usddp = ddp.us
 
+#!impact.costs['xreg'].weight = .1
+#!impact.costs['xreg'].cost.activation.weights[rmodel.nv:] = 1
+
 problem = ShootingProblem(initialState=x0,runningModels=models[:-1],terminalModel=models[-1])
 ddp = SolverDDP(problem)
+ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose(), CallbackSolverDisplay(robot,rate=5,freq=10) ]
+ddp.th_stop = 1e-9
 
 xs = xsddp + [rmodel.defaultState]*(len(models)-len(xsddp))
 us = usddp + [np.zeros(0)] + [ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
                                for m,d in zip(ddp.models(),ddp.datas())[21:-1] ]
 
-ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
-ddp.th_stop = 1e-6
 ddp.solve(init_xs=xs,init_us=us)
 
 
-
-
-'''
-np.set_printoptions(precision=4, linewidth=200, suppress=True)
-nq = rmodel.nq
-for m,d,x in zip(ddp.models(),ddp.datas(),ddp.xs):
-    if isinstance(m,IntegratedActionModelEuler):
-        pinocchio.forwardKinematics(rmodel,d.differential.pinocchio,a2m(x[:nq]),a2m(x[nq:]))
-        pinocchio.updateFramePlacements(rmodel,d.differential.pinocchio)
-        print pinocchio.getFrameVelocity(rmodel,d.differential.pinocchio,rightId).vector.T
-
-import matplotlib.pylab as plt
-from crocoddyl.integrated_action import IntegratedActionDataEuler
-plt.ion()
-#plt.plot([ d.differential.pinocchio.oMf[rightId].translation[2,0] \
-#           for d in ddp.datas() if isinstance(d,IntegratedActionDataEuler) ])
-
-plt.plot([ d.differential.pinocchio.com[0][2,0] \
-           for d in ddp.datas() if isinstance(d,IntegratedActionDataEuler) ])
-
-
-for i in range(1,8):
+for i in range(6):
     disp(ddp.xs)
-    models[21].differential.costs['ureg'].weight = 0.1*10**i
-    models[-1].differential.costs['xreg'].cost.activation.weights[3:6] = 10**i
-    models[-1].differential.costs['xreg'].cost.activation.weights[6:] = 10**i
-    models[20].costs['track30'].weight=10**i
-    models[20].costs['track16'].weight=10**i
-    models[20].costs['com'].weight=0.1*10**i
-    if i>5:
-        impact.impulseWeight = 10**(i-4)
-    ddp.solve(maxiter=1000,regInit=.1,init_xs=ddp.xs,init_us=ddp.us)
-    for m,d,x in zip(ddp.models(),ddp.datas(),ddp.xs):
-      if isinstance(m,IntegratedActionModelEuler):
-        pinocchio.forwardKinematics(rmodel,d.differential.pinocchio,a2m(x[:nq]),a2m(x[nq:]))
-        pinocchio.updateFramePlacements(rmodel,d.differential.pinocchio)
-        print pinocchio.getFrameVelocity(rmodel,d.differential.pinocchio,rightId).vector.T
-    #plt.plot([ d.differential.pinocchio.oMf[rightId].translation[2,0] \
-    #       for d in ddp.datas() if isinstance(d,IntegratedActionDataEuler) ])
+    impact.costs['track30'].weight = 10**i
+    impact.costs['track16'].weight = 10**i
+    ddp.solve(init_xs=xs,init_us=us,maxiter=100,isFeasible=False)
 
-    plt.plot([ d.differential.pinocchio.com[0][2,0] \
-           for d in ddp.datas() if isinstance(d,IntegratedActionDataEuler) ])
-    
 
-'''
-stophere
-
-nq,nv = rmodel.nq,rmodel.nv
-
-models = [] \
-        + [ runningModel([ ],{},integrationStep=5e-2) for i in range(4) ] \
-        + [ impactModel([ leftId,rightId ], 
-                      { rightId: SE3(eye(3), right0),
-                        leftId: SE3(eye(3), left0) }) ] \
-        +  [ runningModel([ rightId, leftId ],{},integrationStep=2e-2) for i in range(9) ]
-
-imp = 4
-impact = models[imp]
-
-for m in models[imp+1:]:
-    m.differential.costs['xreg'].weight = 0.0
-    m.differential.contact['contact16'].gains[1] = 30
-    m.differential.contact['contact30'].gains[1] = 30
-    
-models[-1].differential.costs['xreg'].weight = 1000
-models[-1].differential.costs['xreg'].cost.activation.weights[:] = 1
-impact.costs['com'].weight=100
-impact.costs['track16'].weight=1000
-impact.costs['track30'].weight=1000
-
-x0fall = x0.copy()
-x0fall[2] += .1
-#x0fall[nq+2] = -3
-
-problem = ShootingProblem(initialState=x0fall,runningModels=models[:-1],terminalModel=models[-1])
-ddp = SolverDDP(problem)
-ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
-ddp.th_stop = 1e-6
-ddp.solve(maxiter=1000,regInit=.1,
-          init_xs=[rmodel.defaultState]*len(ddp.models()),
-          init_us=[ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
-                    for m,d in zip(ddp.models(),ddp.datas())[:imp] ] \
-                  +[np.zeros(0)]+[ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
-                                   for m,d in zip(ddp.models(),ddp.datas())[imp+1:-1] ])
-
-'''
-xi[-nv:] = 0
-xi[nv+3] = -1
-impact.calc(di,xi)
-
-q = a2m(xi[:nq])
-vq = a2m(di.vnext)
-
-import time
-for i in range(100):
-    q = pinocchio.integrate(rmodel,q,vq*1e-2)
-    robot.display(q)
-    time.sleep(1e-3)
-'''
 
