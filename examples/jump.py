@@ -152,25 +152,66 @@ models =\
          +  [ impactModel([ leftId,rightId ], 
                           { rightId: SE3(eye(3), right0),
                             leftId: SE3(eye(3), left0) }) ] \
-        +  [ runningModel([ rightId, leftId ],{},integrationStep=5e-2) for i in range(5)] \
-        +  [ runningModel([ ],{}, integrationStep=5e-2) ]
+        +  [ runningModel([ rightId, leftId ],{},integrationStep=2e-2) for i in range(9)] \
+        +  [ runningModel([ rightId, leftId ],{}, integrationStep=0) ]
 
-models[-1].differential.costs['xreg'].cost.activation.weights[3:6] = 10
-models[20].costs['track30'].weight=0
-models[20].costs['track16'].weight=0
-# for m in models[21:]:
-#     m.differential.costs['ureg'].weight = 0.01
+imp = 20
+impact = models[imp]
+impact.costs['track30'].weight=0
+impact.costs['track16'].weight=0
+impact.costs['com'].weight=100
 
-impact = models[20]
-impact.impulseWeight = 1
+for m in models[imp+1:]:
+    m.differential.costs['xreg'].weight = 0.0
+    m.differential.contact['contact16'].gains[1] = 30
+    m.differential.contact['contact30'].gains[1] = 30
 
-'''
-problem = ShootingProblem(initialState=x0,runningModels=models[:-1],terminalModel=models[-1])
+models[-1].differential.costs['xreg'].weight = 1000
+models[-1].differential.costs['xreg'].cost.activation.weights[:] = 1
+
+
+problem = ShootingProblem(initialState=x0,runningModels=models[:20],terminalModel=models[20])
 ddp = SolverDDP(problem)
 ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
 ddp.th_stop = 1e-6
-ddp.solve(maxiter=1000,regInit=.1,init_xs=[rmodel.defaultState]*len(ddp.models()))
+us0 = [ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
+        for m,d in zip(ddp.models(),ddp.datas())[:imp] ] \
+            +[np.zeros(0)]+[ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
+                             for m,d in zip(ddp.models(),ddp.datas())[imp+1:-1] ]
 
+ddp.solve(maxiter=1000,regInit=.1,
+          init_xs=[rmodel.defaultState]*len(ddp.models()),
+          init_us=us0[:20])
+
+
+# for i in range(21,len(models)):
+#     disp(ddp.xs)
+#     xs = ddp.xs + [ ddp.xs[-1] ]
+#     us = ddp.us + [ np.zeros(problem.terminalModel.nu) ]
+#     problem = ShootingProblem(initialState=x0,runningModels=models[:i],terminalModel=models[i])
+#     ddp = SolverDDP(problem)
+#     ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
+#     ddp.th_stop = 1e-6
+#     ddp.solve(init_xs=xs,init_us=us)
+
+xsddp = ddp.xs
+usddp = ddp.us
+
+problem = ShootingProblem(initialState=x0,runningModels=models[:-1],terminalModel=models[-1])
+ddp = SolverDDP(problem)
+
+xs = xsddp + [rmodel.defaultState]*(len(models)-len(xsddp))
+us = usddp + [np.zeros(0)] + [ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
+                               for m,d in zip(ddp.models(),ddp.datas())[21:-1] ]
+
+ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
+ddp.th_stop = 1e-6
+ddp.solve(init_xs=xs,init_us=us)
+
+
+
+
+'''
 np.set_printoptions(precision=4, linewidth=200, suppress=True)
 nq = rmodel.nq
 for m,d,x in zip(ddp.models(),ddp.datas(),ddp.xs):
@@ -213,7 +254,7 @@ for i in range(1,8):
     
 
 '''
-
+stophere
 
 nq,nv = rmodel.nq,rmodel.nv
 
@@ -226,8 +267,6 @@ models = [] \
 
 imp = 4
 impact = models[imp]
-impact.costs['track30'].weight=0
-impact.costs['track16'].weight=0
 
 for m in models[imp+1:]:
     m.differential.costs['xreg'].weight = 0.0
