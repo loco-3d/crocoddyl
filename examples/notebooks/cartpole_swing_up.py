@@ -111,5 +111,5 @@ xs,us,done = ddp.solve(maxiter=300)
 
 # Display the solution
 from IPython.display import HTML
-from notebooks import animateCartpole
+from cartpole_utils import animateCartpole
 HTML(animateCartpole(xs).to_html5_video())
