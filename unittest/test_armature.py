@@ -1,3 +1,15 @@
+'''
+This is an integrative test that is validating the feasibility part of the ddp solver
+when armature is low.
+In the test, we are setting up a DDP problem for the biped with DAMFIC models, imposing a 
+low (0.01) armature and running one step of the solver. The test is validated if the cost is
+reasonible after the end of the search.
+
+This test is not super strong. The low-armature model was already validated in the unittest of 
+DAMManipulator and DAMFIC, so we already knew that the model and its derivatives were correct.
+The only "new" functionality to be tested here is the use of low-armature in the solver. 
+Any stronger test here is welcome.
+'''
 from crocoddyl import StatePinocchio
 from crocoddyl import DifferentialActionModelFloatingInContact
 from crocoddyl import IntegratedActionModelEuler
