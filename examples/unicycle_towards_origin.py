@@ -1,9 +1,4 @@
-
-from crocoddyl import SolverDDP, CallbackDDPLogger, CallbackDDPVerbose
-from crocoddyl import ShootingProblem
-from crocoddyl import ActionModelUnicycle
-from crocoddyl import plotOCSolution, plotDDPConvergence
-from notebooks import plotUnicycleSolution
+from crocoddyl import *
 import numpy as np
 
 

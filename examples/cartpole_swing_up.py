@@ -1,4 +1,4 @@
-from crocoddyl import StateVector
+from crocoddyl import *
 import numpy as np
 
 class DifferentialActionModelCartpole:
@@ -67,10 +67,6 @@ class DifferentialActionDataCartpole:
         self.Fx  = self.F[:,:ndx]
         self.Fu  = self.F[:,ndx:]
 
-
-from crocoddyl import DifferentialActionModelNumDiff
-from crocoddyl import IntegratedActionModelEuler
-from crocoddyl import ShootingProblem, SolverDDP, CallbackDDPVerbose
 
 # Creating the DAM for the cartpole
 cartpoleDAM = DifferentialActionModelCartpole()

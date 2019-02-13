@@ -1,16 +1,4 @@
-from crocoddyl import StatePinocchio
-from crocoddyl import DifferentialActionModelFloatingInContact
-from crocoddyl import IntegratedActionModelEuler
-from crocoddyl import CostModelSum
-from crocoddyl import CostModelFramePlacement, CostModelFrameVelocity
-from crocoddyl import CostModelState, CostModelControl, ActivationModelWeightedQuad
-from crocoddyl import ActuationModelFreeFloating
-from crocoddyl import ContactModel6D, ContactModelMultiple
-from crocoddyl import ShootingProblem, SolverDDP
-from crocoddyl import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay
-from crocoddyl import plotOCSolution, plotDDPConvergence
-from crocoddyl import m2a, a2m
-from crocoddyl import loadTalosLegs
+from crocoddyl import *
 import numpy as np
 from numpy.linalg import norm
 import pinocchio
