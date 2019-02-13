@@ -4,18 +4,6 @@ from matplotlib import animation
 from math import sin, cos
 
 
-def plotCartpole(x,patch=None):
-    x_cart = xs[i][0]
-    y_cart = 0.
-    theta = xs[i][1]
-    if patch is not None: patch.center = (x_cart, y_cart)
-
-    x_pole = np.cumsum([x_cart,
-                   -10 * 0.5 * sin(theta)])
-    y_pole = np.cumsum([y_cart,
-                   10 * 0.5 * cos(theta)])
-    line.set_data(x_pole,y_pole)
-
 def animateCartpole(xs,sleep=50):
     print("processing the animation ... ")
     cart_size = 1.
