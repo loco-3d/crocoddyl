@@ -119,4 +119,5 @@ def loadHyQ(modelPath='examples/hyq_description'):
     robot = RobotWrapper.BuildFromURDF(FILENAME+modelPath+URDF_SUBPATH, [modelPath],
                                        pinocchio.JointModelFreeFlyer())
     # TODO define default position inside srdf
+    robot.q0.flat[7:] = [0., 0.75, -1.5, 0., -0.75, 1.5, 0., 0.75, -1.5, 0., -0.75, 1.5]
     return robot
