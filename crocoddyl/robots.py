@@ -106,17 +106,17 @@ def loadTalosLegs(modelPath='/opt/openrobots/share'):
     assert((m2.armature[:6]==0.).all())
     return robot
 
-def loadHyQ(modelPath='examples/hyq_description'):
+def loadHyQ():
     # Loading the URDF model from the internal submodule (located at
-    # example/hyq_description)
-    # TODO remove the submodule and load from hyq-data bynary. Note that this
+    # examples/hyq_description)
+    # TODO remove the submodule and load from hyq-data binary. Note that this
     # task requires the creation of hyq-data binary.
     from pinocchio import JointModelFreeFlyer
     import os
-    FILENAME = str(os.path.dirname(os.path.abspath(__file__))) + "/../"
+    modelPath = str(os.path.dirname(os.path.abspath(__file__))) + "/../examples"
     URDF_FILENAME = "hyq_no_sensors.urdf"
-    URDF_SUBPATH = "/robots/" + URDF_FILENAME
-    robot = RobotWrapper.BuildFromURDF(FILENAME+modelPath+URDF_SUBPATH, [modelPath],
+    URDF_SUBPATH = "/hyq_description/robots/" + URDF_FILENAME
+    robot = RobotWrapper.BuildFromURDF(modelPath+URDF_SUBPATH, [modelPath],
                                        pinocchio.JointModelFreeFlyer())
     # TODO define default position inside srdf
     robot.q0.flat[7:] = [-0.2, 0.75, -1.5, -0.2, -0.75, 1.5, -0.2, 0.75, -1.5, -0.2, -0.75, 1.5]
