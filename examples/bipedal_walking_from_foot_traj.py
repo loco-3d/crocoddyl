@@ -229,5 +229,4 @@ if WITHPLOT:
 
 # Visualization of the DDP solution in gepetto-viewer
 if WITHDISPLAY:
-    ddp.callback[2](ddp)
     CallbackSolverDisplay(talos_legs)(ddp)
