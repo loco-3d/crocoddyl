@@ -33,7 +33,7 @@ class SimpleBipedWalkingProblem:
         """ Create a shooting problem for a simple walking.
 
         :param x0: initial state
-        :param stepLength: step lenght
+        :param stepLength: step length
         :param timeStep: step time for each knot
         :param stepKnots: number of knots for step phases
         :param supportKnots: number of knots for double support phases
