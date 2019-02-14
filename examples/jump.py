@@ -145,10 +145,10 @@ com0 = m2a(pinocchio.centerOfMass(rmodel,rdata,q0))
 # + [ runningModel([ rightId, leftId ],{},com=com0-[0,0,0], integrationStep=5e-2) ] \
 
 models =\
-         [ runningModel([ rightId, leftId ],{}, integrationStep=5e-2) for i in range(8) ] \
+         [ runningModel([ rightId, leftId ],{}, integrationStep=4e-2) for i in range(10) ] \
          +  [ runningModel([ ],{},integrationStep=5e-2) for i in range(3)] \
-         +  [ runningModel([ ],{}, com=com0+[0,0,0.2],integrationStep=5e-2) ] \
-         +  [ runningModel([ ],{},integrationStep=5e-2) for i in range(3) ] \
+         +  [ runningModel([ ],{}, com=com0+[0,0,0.5],integrationStep=5e-2) ] \
+         +  [ runningModel([ ],{},integrationStep=5e-2) for i in range(4) ] \
          +  [ impactModel([ leftId,rightId ], 
                           { rightId: SE3(eye(3), right0),
                             leftId: SE3(eye(3), left0) }) ] \
@@ -172,9 +172,9 @@ impact.costs['com'].weight=100
 #!impact.costs['xreg'].cost.activation.weights[rmodel.nv:] = 0
 
 #!
-impact.costs['track16'].cost.activation = ActivationModelWeightedQuad(np.array([1.,1,.1,1,1,1]))
+impact.costs['track16'].cost.activation = ActivationModelWeightedQuad(np.array([.2,1,.1,1,1,1]))
 #!
-impact.costs['track30'].cost.activation = ActivationModelWeightedQuad(np.array([1.,1,.1,1,1,1]))
+impact.costs['track30'].cost.activation = ActivationModelWeightedQuad(np.array([.2,1,.1,1,1,1]))
 impact.costs.addCost(name='xycom',cost=CostModelCoM(rmodel,ref=com0,activation=ActivationModelWeightedQuad(np.array([1.,.2,0]))),weight=10)
 
 for m in models[imp+1:]:
@@ -222,24 +222,24 @@ problem = ShootingProblem(initialState=x0,runningModels=models[:-1],terminalMode
 ddp = SolverDDP(problem)
 ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]#, CallbackSolverDisplay(robot,rate=5,freq=10) ]
 
-xs = xsddp + [rmodel.defaultState]*(len(models)-len(xsddp))
-us = usddp + [np.zeros(0)] + [ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
-                               for m,d in zip(ddp.models(),ddp.datas())[imp+1:-1] ]
+ddp.xs = xsddp + [rmodel.defaultState]*(len(models)-len(xsddp))
+ddp.us = usddp + [ np.zeros(0) if isinstance(m,ActionModelImpact) else \
+               m.differential.quasiStatic(d.differential,rmodel.defaultState) \
+                               for m,d in zip(ddp.models(),ddp.datas())[len(usddp):-1] ]
 #'''
 #xs=xsddp
 #us=usddp
-#ddp.th_stop = 1e-1
-#ddp.solve(init_xs=xs,init_us=us)d
+ddp.th_stop = 1e-1
+ddp.solve(init_xs=ddp.xs,init_us=ddp.us)
 #disp(ddp.xs)
 
 ddp.th_stop = 5e-4
 
-for i in range(5,6):
-    impact.costs['xycom'].weight = 10**i
-    impact.costs['track30'].weight = 10**i
-    impact.costs['track16'].weight = 10**i
-    ddp.solve(init_xs=xs,init_us=us,maxiter=100,isFeasible=True)
-    disp(ddp.xs)
+#impact.costs['xycom'].weight = 1e5
+impact.costs['track30'].weight = 1e6
+impact.costs['track16'].weight = 1e6
+ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=100,isFeasible=True)
+disp(ddp.xs)
 
 
 
