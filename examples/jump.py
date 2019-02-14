@@ -1,3 +1,19 @@
+'''
+Example of Crocoddyl sequence for computing a whole-body jump. 
+The sequence is composed of a double-support phase, a flight phase, a double impact and a 
+double-support landing phase. The main cost are an elevation of the COM at the middle of the flight
+phase, a minimization of the COM energy loss at impact, and a terminal stabilization cost
+in the configuration space. Additional terms are added for regularization.
+
+The tricky part comes from the search which is done in two parts: in a first part, we look for 
+a feasible solution for jumping, without considering landing constraints. Once a jump is
+accepted, we put the second part of the sequence (landing) and add constraints on the landing.
+
+Baseline: the first part of the search takes 20 iteration, the second part takes 40 iterations, the
+com elevation is 20cm. It seems difficult to increase the time of the jump because it makes
+the trajectory optimization too unstable.
+'''
+
 from crocoddyl import StatePinocchio
 from crocoddyl import DifferentialActionModelFloatingInContact
 from crocoddyl import IntegratedActionModelEuler
@@ -133,16 +149,16 @@ def impactModel(contactIds,effectors):
              ActionModelImpact(rmodel,impulseModel,costModel)
     return model
 
+
+### --- MODEL SEQUENCE 
+### --- MODEL SEQUENCE 
+### --- MODEL SEQUENCE 
 SE3 = pinocchio.SE3
 pinocchio.forwardKinematics(rmodel,rdata,q0)
 pinocchio.updateFramePlacements(rmodel,rdata)
 right0 = rdata.oMf[rightId].translation
 left0  = rdata.oMf[leftId].translation
 com0 = m2a(pinocchio.centerOfMass(rmodel,rdata,q0))
-
-# + [ runningModel([ rightId, leftId ],{},com=com0-[0,0,.1], integrationStep=5e-2) ] \
-# + [ runningModel([ rightId, leftId ],{},integrationStep=5e-2)] *6\
-# + [ runningModel([ rightId, leftId ],{},com=com0-[0,0,0], integrationStep=5e-2) ] \
 
 models =\
          [ runningModel([ rightId, leftId ],{}, integrationStep=4e-2) for i in range(10) ] \
@@ -156,24 +172,14 @@ models =\
         +  [ runningModel([ rightId, leftId ],{}, integrationStep=0) ]
 
 high = [ isinstance(m,IntegratedActionModelEuler) and 'com' in m.differential.costs.costs for m in models ].index(True)
-#!
-#amw = models[high].differential.costs['com'].cost.activation = ActivationModelWeightedQuad(np.array([0,0,1.]))
-ami = models[high].differential.costs['com'].cost.activation = ActivationModelInequality(np.array([-.01,-.01,-0.01]),np.array([ .01, .01,0.1]))
-#adw=amw.createData()
-#adi=ami.createData()
-
+models[high].differential.costs['com'].cost.activation = ActivationModelInequality(np.array([-.01,-.01,-0.01]),np.array([ .01, .01,0.1]))
 
 imp = [ isinstance(m,ActionModelImpact) for m in models ].index(True)
 impact = models[imp]
 impact.costs['track30'].weight=0
 impact.costs['track16'].weight=0
 impact.costs['com'].weight=100
-#!impact.costs['xreg'].weight = 10
-#!impact.costs['xreg'].cost.activation.weights[rmodel.nv:] = 0
-
-#!
 impact.costs['track16'].cost.activation = ActivationModelWeightedQuad(np.array([.2,1,.1,1,1,1]))
-#!
 impact.costs['track30'].cost.activation = ActivationModelWeightedQuad(np.array([.2,1,.1,1,1,1]))
 impact.costs.addCost(name='xycom',cost=CostModelCoM(rmodel,ref=com0,activation=ActivationModelWeightedQuad(np.array([1.,.2,0]))),weight=10)
 
@@ -203,21 +209,11 @@ ddp.solve(maxiter=20,regInit=.1,
           init_us=us0[:imp])
 disp(ddp.xs)
 
-
-# am=models[high].differential.costs['com'].cost.activation
-# ad=ddp.datas()[high].differential.costs['com'].activation
-# cm=models[high].differential.costs['com'].cost
-# dm=ddp.datas()[high].differential.costs['com']
-# stophere
-
 # ---------------------------------------------------------------------------------------------
 # Solve both take-off and landing.
 xsddp = ddp.xs
 usddp = ddp.us
 
-#!impact.costs['xreg'].weight = .1
-#!impact.costs['xreg'].cost.activation.weights[rmodel.nv:] = 1
-#'''
 problem = ShootingProblem(initialState=x0,runningModels=models[:-1],terminalModel=models[-1])
 ddp = SolverDDP(problem)
 ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]#, CallbackSolverDisplay(robot,rate=5,freq=10) ]
@@ -226,20 +222,14 @@ ddp.xs = xsddp + [rmodel.defaultState]*(len(models)-len(xsddp))
 ddp.us = usddp + [ np.zeros(0) if isinstance(m,ActionModelImpact) else \
                m.differential.quasiStatic(d.differential,rmodel.defaultState) \
                                for m,d in zip(ddp.models(),ddp.datas())[len(usddp):-1] ]
-#'''
-#xs=xsddp
-#us=usddp
+
 ddp.th_stop = 1e-1
 ddp.solve(init_xs=ddp.xs,init_us=ddp.us)
-#disp(ddp.xs)
+
 
 ddp.th_stop = 5e-4
-
-#impact.costs['xycom'].weight = 1e5
 impact.costs['track30'].weight = 1e6
 impact.costs['track16'].weight = 1e6
 ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=100,isFeasible=True)
 disp(ddp.xs)
-
-
 
