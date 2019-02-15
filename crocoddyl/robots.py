@@ -23,6 +23,7 @@ def readParamsFromSrdf(robot, SRDF_PATH, verbose):
     pinocchio.loadReferenceConfigurations(rmodel, SRDF_PATH, verbose)
     robot.q0.flat[:] = rmodel.referenceConfigurations["half_sitting"].copy()
   except:
+    print "loadReferenceConfigurations did not work. Please check your Pinocchio Version"
     try:
       pinocchio.getNeutralConfiguration(rmodel, SRDF_PATH, verbose)
       robot.q0.flat[:] = rmodel.neutralConfiguration.copy()
