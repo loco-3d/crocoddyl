@@ -12,7 +12,7 @@ np.set_printoptions(linewidth=400, suppress=True)
 robot = conf.robot
 rmodel = robot.model
 rdata = robot.data
-rmodel.defaultState = np.concatenate([m2a(rmodel.neutralConfiguration),np.zeros(rmodel.nv)])
+rmodel.defaultState = np.concatenate([m2a(robot.q0),np.zeros(rmodel.nv)])
 
 #----------------Load Contact Phases-----------------------
 cs = ContactSequenceHumanoid(0)
