@@ -37,7 +37,7 @@ class ActivationModelInequality:
         if beta is None:
             self.lower = lowerLimit;   self.upper = upperLimit
         else:
-            assert(beta>0 and beta<1)
+            assert(beta>0 and beta<=1)
             self.beta=beta
             m = (lowerLimit+upperLimit)/2
             d = (upperLimit-lowerLimit)/2
