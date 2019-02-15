@@ -1,17 +1,13 @@
 '''
-Example of Crocoddyl sequence for computing a whole-body jump. 
-The sequence is composed of a double-support phase, a flight phase, a double impact and a 
-double-support landing phase. The main cost are an elevation of the COM at the middle of the flight
-phase, a minimization of the COM energy loss at impact, and a terminal stabilization cost
-in the configuration space. Additional terms are added for regularization.
+Example of Crocoddyl sequence for computing a whole-body (biped) salto. 
+The training is difficult and hand-tuned. We first work with only the jump phase (first 
+half of the sequence) and search for a simple jumps, then for a serie of jumps with
+increasing terminal angle, to discover the salto. When a 2PI rotation is discovered,
+we had the landing phase and converge.
 
-The tricky part comes from the search which is done in two parts: in a first part, we look for 
-a feasible solution for jumping, without considering landing constraints. Once a jump is
-accepted, we put the second part of the sequence (landing) and add constraints on the landing.
-
-Baseline: the first part of the search takes 20 iteration, the second part takes 40 iterations, the
-com elevation is 20cm. It seems difficult to increase the time of the jump because it makes
-the trajectory optimization too unstable.
+The initial jump is a litteral copy of jump.py
+Each increase of the angle takes ~50 iterations to converge. The landing phase takes about ~20 
+iterations to converge.
 '''
 
 from crocoddyl import StatePinocchio
@@ -34,6 +30,18 @@ from crocoddyl.impact import CostModelImpactCoM, CostModelImpactWholeBody
 import pinocchio
 from pinocchio.utils import *
 from numpy.linalg import norm,inv,pinv,eig,svd
+
+# Number of iterations in each phase. If 0, try to load.
+PHASE_ITERATIONS = { \
+                     "initial": 0,
+                     "angle":  0,
+                     "landing": 100
+                     }
+PHASE_BACKUP = { "initial": True,
+                 "angle":   True,
+                 "landing": True }
+BACKUP_PATH = "npydata/salto."
+
 
 robot = loadTalosLegs()
 robot.model.armature[6:] = .3
@@ -192,8 +200,11 @@ models[-1].differential.costs['xreg'].weight = 1000
 models[-1].differential.costs['xreg'].cost.activation.weights[:] = 1
 
 # ---------------------------------------------------------------------------------------------
-# Solve both take-off and landing.
+# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------
+# Solve only the take-off for an initial vanilla-flavor jump
 # Solve the initial phase (take-off).
+PHASE_NAME = "initial"
 problem = ShootingProblem(initialState=x0,runningModels=models[:imp],terminalModel=models[imp])
 ddp = SolverDDP(problem)
 ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]#, CallbackSolverDisplay(robot,rate=5) ]
@@ -203,78 +214,21 @@ us0 = [ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
             +[np.zeros(0)]+[ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
                              for m,d in zip(ddp.models(),ddp.datas())[imp+1:-1] ]
 
-ddp.solve(maxiter=4000,regInit=.1, #! 400
+ddp.solve(maxiter=PHASE_ITERATIONS[PHASE_NAME],regInit=.1,
           init_xs=[rmodel.defaultState]*len(ddp.models()),
           init_us=us0[:imp])
 #disp(ddp.xs)
 
-#np.save('jump0.xs',ddp.xs);np.save('jump0.us',ddp.us)
-#ddp.xs = np.load('jump0.xs.npy'); ddp.us = np.load('jump0.us.npy')
+if PHASE_ITERATIONS[PHASE_NAME] == 0:
+    ddp.xs = [ x for x in np.load(BACKUP_PATH+'%s.xs.npy' % PHASE_NAME)]
+    ddp.us = [ u for u in np.load(BACKUP_PATH+'%s.us.npy' % PHASE_NAME)]
+elif PHASE_BACKUP["initial"]:
+    np.save(BACKUP_PATH+'%s.xs.npy' % PHASE_NAME,ddp.xs)
+    np.save(BACKUP_PATH+'%s.us.npy' % PHASE_NAME,ddp.us)
 
-# ---
-'''
-from pinocchio.utils import se3ToXYZQUAT
-D = 2*np.pi/(imp-9)
-for i,x in enumerate(ddp.xs[9:imp]):
-    """
-    oM1 1_p
-    p st [ R p ] 0^c = c = R c + p   => p = c-Rc
-    """
-    q = a2m(x)[:rmodel.nq]
-    pinocchio.centerOfMass(rmodel,rdata,q)
-    R = rotate('y',D*i)
-    c = rdata.com[0].copy()
-    p = c-R*c
-    M = SE3(R,p)
-    x[:7] = se3ToXYZQUAT(M*rdata.oMi[1])
-    
-
-models[high] = runningModel([],
-                             { rightId: SE3(eye(3), right0),
-                               leftId: SE3(eye(3), left0) },integrationStep=3e-2)
-
-models[high].differential.costs['xreg'].cost.ref = ddp.xs[high].copy()
-models[high].differential.costs['xreg'].cost.activation.weights[:6] = 100
-
-models[high].differential.costs['track16'].cost.activation = ActivationModelInequality(np.array([-.05,-.05,0,-np.inf,-np.inf,-np.inf]),np.array([ .05, .05,np.inf,np.inf,np.inf,np.inf]))
-models[high].differential.costs['track16'].cost.ref.translation += np.matrix([0.,0,1]).T
-models[high].differential.costs['track30'].cost.activation = ActivationModelInequality(np.array([-.05,-.05,0,-np.inf,-np.inf,-np.inf]),np.array([ .05, .05,np.inf,np.inf,np.inf,np.inf]))
-models[high].differential.costs['track30'].cost.ref.translation += np.matrix([0,0,1]).T
-
-
-problem.runningModels[high] = models[high]
-problem.runningDatas[high] = models[high].createData()
-
-trajs = {}
-for i in range(6):
-    models[high].differential.costs['xreg'].weight=10**i
-    models[high].differential.costs['track16'].weight=10**i
-    models[high].differential.costs['track30'].weight=10**i
-    ddp.solve(maxiter=2000,regInit=.1,
-              init_xs=ddp.xs,
-              init_us=ddp.us, isFeasible=False)
-    trajs[i] = [ x.copy() for x in ddp.xs ]
-'''
-
-
-
-from pinocchio.utils import se3ToXYZQUAT
-D = 2*np.pi/(imp-9)
-refs = []
-for i,x in enumerate(ddp.xs[9:imp]):
-    '''
-    oM1 1_p
-    p st [ R p ] 0^c = c = R c + p   => p = c-Rc
-    '''
-    q = a2m(x)[:rmodel.nq]
-    pinocchio.centerOfMass(rmodel,rdata,q)
-    R = rotate('y',D*i)
-    c = rdata.com[0].copy()
-    p = c-R*c
-    M = SE3(R,p)
-    refs.append( x.copy() )
-    refs[-1][:7] = se3ToXYZQUAT(M*rdata.oMi[1])
-
+# ---------------------------------------------------------------------------------------------
+# Second phase of the search: optimize for increasing terminal angle of the waist.
+PHASE_NAME = "angle"
 
 #for i,m in enumerate(models[9:imp]):
 #    m.differential.costs['xreg'].weight = 10
@@ -290,7 +244,7 @@ ddp.callback.append(CallbackSolverDisplay(robot,rate=5,freq=10))
 for i in range(1,7):
     #for k in range(9,imp):
     impact.costs['xreg'].cost.activation.weights[3:rmodel.nv] = 10**i
-    ddp.solve(maxiter=2000,regInit=.1, #!2000
+    ddp.solve(maxiter=PHASE_ITERATIONS[PHASE_NAME],regInit=.1, #!2000
               init_xs=ddp.xs,
               init_us=ddp.us, isFeasible=False)
 
@@ -300,53 +254,48 @@ for i in range(1,7):
 # models[high].differential.costs['xreg'].cost.activation.weights[7] = 100
 # models[high].differential.costs['xreg'].cost.activation.weights[13] = 100
     
-jumps = []
 for ANG in np.arange(.5,3.2,.3):
     models[imp].costs['xreg'].cost.ref[3:7] = [ 0,sin(ANG),0,cos(ANG) ]
-    ddp.solve(maxiter=2000,regInit=.1, #!2000
+    ddp.solve(maxiter=PHASE_ITERATIONS[PHASE_NAME],regInit=.1, #!2000
               init_xs=ddp.xs,
               init_us=ddp.us, isFeasible=True)
-    #!disp(ddp.xs)
-    jumps.append({ 'x': [x.copy() for x in ddp.xs ],'u': [u.copy() for u in ddp.us ] })
+    if PHASE_ITERATIONS[PHASE_NAME] > 0 and PHASE_BACKUP[PHASE_NAME]:
+        np.save(BACKUP_PATH+'%s.%02d.xs.npy' % (PHASE_NAME,int(ANG*10)),ddp.xs)
+        np.save(BACKUP_PATH+'%s.%02d.us.npy' % (PHASE_NAME,int(ANG*10)),ddp.us)
     
-#ddp.xs = np.load('salto.xs.npy')
-#ddp.us = np.load('salto.us.npy')
-
-ddp.th_stop = 5e-4
-impact.costs['track30'].weight = 1e6
-impact.costs['track16'].weight = 1e6
-# for i in range(9,imp):
-#      models[i].costs['xreg'].cost.activation.weights[7:rmodel.nv] = .5
- 
-#
-ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=1,isFeasible=True)
-disp(ddp.xs)
-
-#models[high].differential.costs['xreg'].cost.activation.weights[6:rmodel.nv] = 100000 ## obtain an fliped-axel
+if PHASE_ITERATIONS[PHASE_NAME] == 0:
+    ddp.xs = [x for x in np.load(BACKUP_PATH+'%s.xs.npy' % PHASE_NAME)]
+    ddp.us = [u for u in np.load(BACKUP_PATH+'%s.us.npy' % PHASE_NAME)]
+elif PHASE_BACKUP[PHASE_NAME]:
+    np.save(BACKUP_PATH+'%s.xs.npy' % PHASE_NAME,ddp.xs)
+    np.save(BACKUP_PATH+'%s.us.npy' % PHASE_NAME,ddp.us)
 
 
 # ---------------------------------------------------------------------------------------------
-# Solve both take-off and landing.
+# Third phase of the search: Solve both take-off and landing.
+PHASE_NAME = "landing"
 xsddp = ddp.xs
 usddp = ddp.us
 
 problem = ShootingProblem(initialState=x0,runningModels=models[:-1],terminalModel=models[-1])
 ddp = SolverDDP(problem)
 ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]#, CallbackSolverDisplay(robot,rate=5,freq=10) ]
+ddp.th_stop = 1e-4
 
 ddp.xs = xsddp + [rmodel.defaultState]*(len(models)-len(xsddp))
 ddp.us = usddp + [ np.zeros(0) if isinstance(m,ActionModelImpact) else \
                m.differential.quasiStatic(d.differential,rmodel.defaultState) \
                                for m,d in zip(ddp.models(),ddp.datas())[len(usddp):-1] ]
 
-ddp.th_stop = 1e-1
-ddp.solve(init_xs=ddp.xs,init_us=ddp.us)
-
-
-ddp.th_stop = 5e-4
 impact.costs['track30'].weight = 1e6
 impact.costs['track16'].weight = 1e6
-ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=100,isFeasible=True)
+ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=PHASE_ITERATIONS[PHASE_NAME])
+
+if PHASE_ITERATIONS[PHASE_NAME] == 0:
+    ddp.xs = [x for x in np.load(BACKUP_PATH+'%s.xs.npy' % PHASE_NAME)]
+    ddp.us = [u for u in np.load(BACKUP_PATH+'%s.us.npy' % PHASE_NAME)]
+elif PHASE_BACKUP[PHASE_NAME]:
+    np.save(BACKUP_PATH+'%s.xs.npy' % PHASE_NAME,ddp.xs)
+    np.save(BACKUP_PATH+'%s.us.npy' % PHASE_NAME,ddp.us)
+
 disp(ddp.xs)
-
-
