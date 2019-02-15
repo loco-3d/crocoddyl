@@ -23,44 +23,39 @@ class ActivationDataQuad:
 
 class ActivationModelInequality:
     """
-    The activation starts from zero when r approaches bl or bu.
-    The activation is zero when r is between bl and bu
+    The activation starts from zero when r approaches b_l=lower or b_u=upper.
+    The activation is zero when r is between b_l and b_u
     beta determines how much of the total acceptable range is not activated (default 90%)
     
-    a(r) = (r**2)/2 for r>bu.
-    a(r) = (r**2)/2 for r<bl.
-    a(r) = 0. for bl<=r<=bu
+    a(r) = (r**2)/2 for r>b_u.
+    a(r) = (r**2)/2 for r<b_l.
+    a(r) = 0. for b_l<=r<=b_u
     """
-    def __init__(self, lowerLimit, upperLimit, beta=0.9):
+    def __init__(self, lowerLimit, upperLimit, beta=None):
         assert((lowerLimit<=upperLimit).all())
-        self.l = lowerLimit;   self.u = upperLimit;  self.beta=beta
-        self.m = (self.l+self.u)/2;  self.d = (self.u-self.l)/2
-        self.bl = self.m-self.beta*self.d
-        self.bu = self.m+self.beta*self.d
-        self._adapt2inf();
-        pass
+        assert(not np.any(np.isinf(lowerLimit)) and not np.any(np.isinf(upperLimit)) or beta==None)
+        if beta is None:
+            self.lower = lowerLimit;   self.upper = upperLimit
+        else:
+            assert(beta>0 and beta<=1)
+            self.beta=beta
+            m = (lowerLimit+upperLimit)/2
+            d = (upperLimit-lowerLimit)/2
+            self.lower = m-beta*d
+            self.upper = m+beta*d
       
     def calc(model,data,r):
         '''Return [ a(r_1) ... a(r_n) ] '''
-        return np.minimum(r-model.bl, 0)**2/2 + np.maximum(r-model.bu, 0)**2/2
+        return np.minimum(r-model.lower, 0)**2/2 + np.maximum(r-model.upper, 0)**2/2
     def calcDiff(model,data,r,recalc=True):
         if recalc: model.calc(data,r)
         ''' 
         Return [ a'(r_1) ... a'(r_n) ], diag([ a''(r_1) ... a''(r_n) ])
         '''
-        return np.minimum(r-model.bl, 0.) + np.maximum(r-model.bu, 0),\
-          ((r-model.bu>=0.) + (r-model.bl<=0.)).astype(float)
+        return np.minimum(r-model.lower, 0.) + np.maximum(r-model.upper, 0),\
+          ((r-model.upper>=0.) + (r-model.lower<=0.)).astype(float)[:,None]
 
     def createData(self): return ActivationDataInequality(self)
-
-    def _adapt2inf(self):
-      '''In case loweLimit or upperLimit is inf, reset bl and bu to lowerLimit and upperLimit
-      '''
-      isinf_l = np.isinf(self.l); isinf_u = np.isinf(self.u)
-      if isinf_l.any() or isinf_u.any():
-        self.bl[isinf_l] = -np.inf; self.bu[isinf_l] = self.u[isinf_l]
-        self.bu[isinf_u] = np.inf;  self.bl[isinf_u] = self.l[isinf_l]
-      return
 
 class ActivationDataInequality:
     def __init__(self,model):
