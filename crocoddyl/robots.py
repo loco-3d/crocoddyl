@@ -100,7 +100,7 @@ def loadTalosLegs(modelPath='/opt/openrobots/share'):
 
 
     # Load SRDF file
-    robot.q0=np.matrix(np.resize(robot.q0, robot.model.nv)).T
+    robot.q0=np.matrix(np.resize(robot.q0, robot.model.nq)).T
     readParamsFromSrdf(robot, modelPath+SRDF_SUBPATH, False)
 
     assert((m2.armature[:6]==0.).all())
