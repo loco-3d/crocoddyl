@@ -52,7 +52,7 @@ def createSwingTrajectories(rmodel, rdata, x, contact_patches, dt):
   p = OrderedDict(); m = OrderedDict()
   N = len(x)
   abscissa = a2m(np.linspace(0.,dt*(N-1), N))
-  swing_ref = EESplines()
+  ee_ref = EESplines()
   for patch in contact_patches.keys():
     p = np.zeros((3,N));  m = np.zeros((3,N))
     for i in xrange(N):
@@ -63,10 +63,10 @@ def createSwingTrajectories(rmodel, rdata, x, contact_patches, dt):
                                   rmodel.getFrameId(contact_patches[patch])).translation)
       m[:,i] = m2a(pinocchio.getFrameVelocity(rmodel, rdata,
                                   rmodel.getFrameId(contact_patches[patch])).linear)
-    swing_ref.update([[patch, CubicHermiteSpline(abscissa, p, m)]])
-  return swing_ref
+    ee_ref.update([[patch, CubicHermiteSpline(abscissa, p, m)]])
+  return ee_ref
 
-def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, swing_ref, dt):
+def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee_ref, dt):
   """
   Create a Multiphase Shooting problem from the output of the centroidal solver.
   
@@ -75,7 +75,7 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, sw
   :params patch_name_map: dictionary mapping of contact_patch->robot_framename. e.g. "LF_Patch":leg_6_joint
   :params cs: contact sequence of type locomote::ContactSequenceHumanoid
   :params phi_c: centroidal reference of type CentroidalPhi
-  :params swing_ref: end-effector trajectories of type EESplines
+  :params ee_ref: end-effector trajectories of type EESplines
   :params dt: Scalar timestep between nodes.
 
   :returns list of IntegratedActionModels
@@ -83,15 +83,19 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, sw
   #-----------------------
   #Define Cost weights
   w = lambda t: 0
-  w.com = 1e2;    w.state = 1e-1;    w.control = 1e-3;
-  w.swing_patch = 1e4; w.forces = 1e-4;
-  w.swingv = 1e4
+  w.com = 1e-1;    w.regx = 1e-3;    w.regu = 1e-5;
+  w.swing_patch = 1e6; w.forces = 1e-4;
+  w.swingv = 1e2
   #Define state cost vector for WeightedActivation
   w.xweight = np.array([0]*6+[0.01]*(rmodel.nv-6)+[10.]*rmodel.nv)**2
   #for patch in swing_patch:  w.swing_patch.append(100.);
   #Define weights for the impact costs.
-  w.imp_state = w.state;    w.imp_com = w.com;   w.imp_swing_patch = w.swing_patch;
+  w.imp_state = 1e2;    w.imp_com = 1e2;   w.imp_contact_patch = 1e5;
   w.imp_act_com = m2a([0.1,0.1,3.0])
+
+  #Define weights for the terminal costs
+  w.term_com = 1e6;
+  w.term_regx = 1e4
   #------------------------
   
   problem_models = []
@@ -138,13 +142,13 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, sw
                                     activation=ActivationModelWeightedQuad(w.imp_act_com))
       cost_model.addCost("imp_CoM", cost_com, w.imp_com)
       #Contact Frameplacement
-      for patch in swing_patch:
-        cost_swing = CostModelFramePlacement(rmodel,
+      for patch in new_contacts:
+        cost_contact = CostModelFramePlacement(rmodel,
                                              frame=rmodel.getFrameId(patch_name_map[patch]),
                                              ref=pinocchio.SE3(np.identity(3),
-                                                               swing_ref[patch].eval(t0)[0]),
+                                                               ee_ref[patch].eval(t0)[0]),
                                              nu=actuationff.nu)
-        cost_model.addCost("imp_swing_"+patch, cost_swing, w.imp_swing_patch)
+        cost_model.addCost("imp_contact_"+patch, cost_contact, w.imp_contact_patch)
 
       imp_action_model = ActionModelImpact(rmodel, imp_model, cost_model)
       problem_models.append(imp_action_model)
@@ -171,7 +175,7 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, sw
         cost_swing = CostModelFramePlacement(rmodel,
                                              frame=rmodel.getFrameId(patch_name_map[patch]),
                                              ref=pinocchio.SE3(np.identity(3),
-                                                               swing_ref[patch].eval(t)[0]),
+                                                               ee_ref[patch].eval(t)[0]),
                                              nu=actuationff.nu)
         cost_model.addCost("swing_"+patch, cost_swing, w.swing_patch)
 
@@ -179,10 +183,10 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, sw
       cost_regx = CostModelState(rmodel, State, ref=rmodel.defaultState,
                                  nu = actuationff.nu,
                                  activation=ActivationModelWeightedQuad(w.xweight**2))
-      cost_model.addCost("regx", cost_regx, w.state)
+      cost_model.addCost("regx", cost_regx, w.regx)
       #Control Regularization
       cost_regu = CostModelControl(rmodel, nu = actuationff.nu)
-      cost_model.addCost("regu", cost_regu, w.control)
+      cost_model.addCost("regu", cost_regu, w.regu)
 
       dmodel = DifferentialActionModelFloatingInContact(rmodel, actuationff,
                                                         contact_model, cost_model)
@@ -211,13 +215,13 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, sw
   #CoM Cost
   cost_com = CostModelCoM(rmodel, ref=m2a(phi_c.com_vcom.eval(t)[0][:3,:]),
                           nu = actuationff.nu);
-  cost_model.addCost("CoM",cost_com, w.com)
+  cost_model.addCost("CoM",cost_com, w.term_com)
 
   #State Regularization
   cost_regx = CostModelState(rmodel, State, ref=rmodel.defaultState,
                              nu = actuationff.nu,
                              activation=ActivationModelWeightedQuad(w.xweight))
-  cost_model.addCost("regx", cost_regx, w.state)
+  cost_model.addCost("regx", cost_regx, w.term_regx)
 
   dmodel = DifferentialActionModelFloatingInContact(rmodel, actuationff,
                                                     contact_model, cost_model)
