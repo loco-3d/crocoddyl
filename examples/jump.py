@@ -162,9 +162,9 @@ com0 = m2a(pinocchio.centerOfMass(rmodel,rdata,q0))
 
 models =\
          [ runningModel([ rightId, leftId ],{}, integrationStep=4e-2) for i in range(10) ] \
-         +  [ runningModel([ ],{},integrationStep=5e-2) for i in range(3)] \
+         +  [ runningModel([ ],{},integrationStep=3e-2) for i in range(5)] \
          +  [ runningModel([ ],{}, com=com0+[0,0,0.5],integrationStep=5e-2) ] \
-         +  [ runningModel([ ],{},integrationStep=5e-2) for i in range(4) ] \
+         +  [ runningModel([ ],{},integrationStep=3e-2) for i in range(7) ] \
          +  [ impactModel([ leftId,rightId ], 
                           { rightId: SE3(eye(3), right0),
                             leftId: SE3(eye(3), left0) }) ] \
@@ -233,3 +233,133 @@ impact.costs['track16'].weight = 1e6
 ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=100,isFeasible=True)
 disp(ddp.xs)
 
+
+xjump0 = [ x.copy() for x in ddp.xs ]
+ujump0 = [ u.copy() for u in ddp.us ]
+
+'''
+### Jump with frontal scissors.
+fig = high+2
+x = x0.copy()
+x[9 ] =  1.
+x[15] = -1.
+models[fig].differential.costs.costs['xreg'].cost.ref=x.copy()
+models[fig].differential.costs.costs['xreg'].cost.activation.weights[rmodel.nv:] = 0
+
+for i in range(6,9):
+    impact.costs['track30'].weight = 10**i
+    impact.costs['track16'].weight = 10**i
+    models[fig].differential.costs.costs['xreg'].weight  = 10**i
+    ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=100,isFeasible=True)
+    disp(ddp.xs)
+
+xjump1 = [ x.copy() for x in ddp.xs ]
+ujump1 = [ u.copy() for u in ddp.us ]
+ddp.xs = xjump0
+ddp.us = ujump0
+
+### Jump with lateral scissors.
+fig = high+2
+x = x0.copy()
+x[8 ] =  .8
+x[14] = -.8
+models[fig].differential.costs.costs['xreg'].cost.ref=x.copy()
+models[fig].differential.costs.costs['xreg'].cost.activation.weights[rmodel.nv:] = 0
+
+for i in range(6,9):
+    impact.costs['track30'].weight = 10**i
+    impact.costs['track16'].weight = 10**i
+    models[fig].differential.costs.costs['xreg'].weight  = 10**i
+    ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=100,isFeasible=True)
+    disp(ddp.xs)
+    
+xjump2 = [ x.copy() for x in ddp.xs ]
+ujump2 = [ u.copy() for u in ddp.us ]
+ddp.xs = xjump0
+ddp.us = ujump0
+
+models[fig].differential.costs.costs['xreg'].weight  = 100
+models[fig].differential.costs.costs['xreg'].cost.ref=x0.copy()
+models[fig].differential.costs.costs['xreg'].cost.activation.weights[rmodel.nv:] = 10
+'''
+
+'''
+### Jump with twist PI/2
+impact.costs['track16'].cost.ref = SE3(rotate('z',1.5),zero(3))*impact.costs['track16'].cost.ref
+impact.costs['track30'].cost.ref = SE3(rotate('z',1.5),zero(3))*impact.costs['track30'].cost.ref
+models[-1].differential.costs.costs['xreg'].cost.activation.weights[5] = 0
+
+for i in range(4,9):
+    impact.costs['track30'].weight = 10**i
+    impact.costs['track16'].weight = 10**i
+    ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=100,isFeasible=True)
+    disp(ddp.xs)
+    
+xjump3 = [ x.copy() for x in ddp.xs ]
+ujump3 = [ u.copy() for u in ddp.us ]
+#ddp.xs = xjump0
+#ddp.us = ujump0
+
+### Jump with twist PI
+impact.costs['track16'].cost.ref = SE3(rotate('z',3.15),zero(3))*impact.costs['track16'].cost.ref
+impact.costs['track30'].cost.ref = SE3(rotate('z',3.15),zero(3))*impact.costs['track30'].cost.ref
+models[-1].differential.costs.costs['xreg'].cost.activation.weights[5] = 0
+
+for i in range(4,9):
+    impact.costs['track30'].weight = 10**i
+    impact.costs['track16'].weight = 10**i
+    ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=100,isFeasible=True)
+    disp(ddp.xs)
+    
+xjump4 = [ x.copy() for x in ddp.xs ]
+ujump4 = [ u.copy() for u in ddp.us ]
+ddp.xs = xjump0
+ddp.us = ujump0
+
+'''
+
+### Salto!
+impact.costs['track16'].cost.ref = SE3(eye(3),left0)
+impact.costs['track30'].cost.ref = SE3(eye(3),right0)
+models[-1].differential.costs.costs['xreg'].cost.activation.weights[5] = 1
+
+xsalto = models[high].differential.costs.costs['xreg'].cost.ref.copy()
+xsalto[3]=1
+xsalto[6]=0
+models[high].differential.costs.costs['xreg'].cost.ref = xsalto
+models[high].differential.costs.costs['xreg'].cost.activation.weights[3:5] = 100
+
+impact.costs['track30'].weight = 0.1
+impact.costs['track16'].weight = 0.1
+ddp.xs = [x.copy() for x in xjump0]
+ddp.us = [u.copy() for u in ujump0]
+
+# from pinocchio.utils import se3ToXYZQUAT
+# D = 2*np.pi/(imp-9)
+# for i,x in enumerate(ddp.xs[9:imp]):
+#     '''
+#     oM1 1_p
+#     p st [ R p ] 0^c = c = R c + p   => p = c-Rc
+#     '''
+#     q = a2m(x)[:rmodel.nq]
+#     pinocchio.centerOfMass(rmodel,rdata,q)
+#     R = rotate('y',D*i)
+#     c = rdata.com[0].copy()
+#     p = c-R*c
+#     M = SE3(R,p)
+#     x[:7] = se3ToXYZQUAT(M*rdata.oMi[1])
+    
+    
+
+
+for i in range(1,9):
+    # impact.costs['track30'].weight = 10**i
+    # impact.costs['track16'].weight = 10**i
+    models[high].differential.costs.costs['xreg'].weight = 10**i
+    ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=100,isFeasible=False)
+    disp(ddp.xs)
+    
+xjump5 = [ x.copy() for x in ddp.xs ]
+ujump5 = [ u.copy() for u in ddp.us ]
+ddp.xs = xjump0
+ddp.us = ujump0
