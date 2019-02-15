@@ -35,6 +35,25 @@ import pinocchio
 from pinocchio.utils import *
 from numpy.linalg import norm,inv,pinv,eig,svd
 
+# Number of iterations in each phase. If 0, try to load.
+PHASE_ITERATIONS = { \
+                     "initial": 100,
+                     "landing": 100,
+                     "frontal": 100,
+                     "lateral": 100,
+                     "twist"  : 100
+                     }
+PHASE_ITERATIONS = { k: 0 for k in PHASE_ITERATIONS }
+PHASE_BACKUP = { \
+                     "initial": True,
+                     "landing": True,
+                     "frontal": True,
+                     "lateral": True,
+                     "twist"  : True
+               }
+BACKUP_PATH = "npydata/jump."
+DISPLAY = True
+
 robot = loadTalosLegs()
 robot.model.armature[6:] = .3
 robot.initDisplay(loadModel=True)
@@ -195,6 +214,8 @@ models[-1].differential.costs['xreg'].cost.activation.weights[:] = 1
 # ---------------------------------------------------------------------------------------------
 # Solve both take-off and landing.
 # Solve the initial phase (take-off).
+PHASE_NAME = "initial"
+
 problem = ShootingProblem(initialState=x0,runningModels=models[:imp],terminalModel=models[imp])
 ddp = SolverDDP(problem)
 ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]#, CallbackSolverDisplay(robot,rate=5) ]
@@ -204,13 +225,20 @@ us0 = [ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
             +[np.zeros(0)]+[ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
                              for m,d in zip(ddp.models(),ddp.datas())[imp+1:-1] ]
 
-ddp.solve(maxiter=20,regInit=.1,
+ddp.solve(maxiter=PHASE_ITERATIONS[PHASE_NAME],regInit=.1,
           init_xs=[rmodel.defaultState]*len(ddp.models()),
           init_us=us0[:imp])
-disp(ddp.xs)
+
+if PHASE_ITERATIONS[PHASE_NAME] == 0:
+    ddp.xs = [ x for x in np.load(BACKUP_PATH+'%s.xs.npy' % PHASE_NAME)]
+    ddp.us = [ u for u in np.load(BACKUP_PATH+'%s.us.npy' % PHASE_NAME)]
+elif PHASE_BACKUP[PHASE_NAME]:
+    np.save(BACKUP_PATH+'%s.xs.npy' % PHASE_NAME,ddp.xs)
+    np.save(BACKUP_PATH+'%s.us.npy' % PHASE_NAME,ddp.us)
 
 # ---------------------------------------------------------------------------------------------
 # Solve both take-off and landing.
+PHASE_NAME = "landing"
 xsddp = ddp.xs
 usddp = ddp.us
 
@@ -223,22 +251,31 @@ ddp.us = usddp + [ np.zeros(0) if isinstance(m,ActionModelImpact) else \
                m.differential.quasiStatic(d.differential,rmodel.defaultState) \
                                for m,d in zip(ddp.models(),ddp.datas())[len(usddp):-1] ]
 
-ddp.th_stop = 1e-1
-ddp.solve(init_xs=ddp.xs,init_us=ddp.us)
-
+#ddp.th_stop = 1e-1
+#ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=)
 
 ddp.th_stop = 5e-4
 impact.costs['track30'].weight = 1e6
 impact.costs['track16'].weight = 1e6
-ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=100,isFeasible=True)
-disp(ddp.xs)
+ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=PHASE_ITERATIONS[PHASE_NAME],isFeasible=True)
 
+if PHASE_ITERATIONS[PHASE_NAME] == 0:
+    ddp.xs = [ x for x in np.load(BACKUP_PATH+'%s.xs.npy' % PHASE_NAME)]
+    ddp.us = [ u for u in np.load(BACKUP_PATH+'%s.us.npy' % PHASE_NAME)]
+elif PHASE_BACKUP[PHASE_NAME]:
+    np.save(BACKUP_PATH+'%s.xs.npy' % PHASE_NAME,ddp.xs)
+    np.save(BACKUP_PATH+'%s.us.npy' % PHASE_NAME,ddp.us)
 
+if DISPLAY: disp(ddp.xs)
+
+# Save for future use in initialization of advanced jumps
 xjump0 = [ x.copy() for x in ddp.xs ]
 ujump0 = [ u.copy() for u in ddp.us ]
 
-'''
+# ---------------------------------------------------------------------------------------------
 ### Jump with frontal scissors.
+PHASE_NAME = "frontal"
+
 fig = high+2
 x = x0.copy()
 x[9 ] =  1.
@@ -250,15 +287,24 @@ for i in range(6,9):
     impact.costs['track30'].weight = 10**i
     impact.costs['track16'].weight = 10**i
     models[fig].differential.costs.costs['xreg'].weight  = 10**i
-    ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=100,isFeasible=True)
-    disp(ddp.xs)
+    ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=PHASE_ITERATIONS[PHASE_NAME],isFeasible=True)
 
-xjump1 = [ x.copy() for x in ddp.xs ]
-ujump1 = [ u.copy() for u in ddp.us ]
+if PHASE_ITERATIONS[PHASE_NAME] == 0:
+    ddp.xs = [ x for x in np.load(BACKUP_PATH+'%s.xs.npy' % PHASE_NAME)]
+    ddp.us = [ u for u in np.load(BACKUP_PATH+'%s.us.npy' % PHASE_NAME)]
+elif PHASE_BACKUP[PHASE_NAME]:
+    np.save(BACKUP_PATH+'%s.xs.npy' % PHASE_NAME,ddp.xs)
+    np.save(BACKUP_PATH+'%s.us.npy' % PHASE_NAME,ddp.us)
+
+if DISPLAY: disp(ddp.xs)
+
+# ---------------------------------------------------------------------------------------------
+### Jump with lateral scissors.
+PHASE_NAME = "lateral"
+
 ddp.xs = xjump0
 ddp.us = ujump0
 
-### Jump with lateral scissors.
 fig = high+2
 x = x0.copy()
 x[8 ] =  .8
@@ -266,100 +312,44 @@ x[14] = -.8
 models[fig].differential.costs.costs['xreg'].cost.ref=x.copy()
 models[fig].differential.costs.costs['xreg'].cost.activation.weights[rmodel.nv:] = 0
 
-for i in range(6,9):
-    impact.costs['track30'].weight = 10**i
-    impact.costs['track16'].weight = 10**i
-    models[fig].differential.costs.costs['xreg'].weight  = 10**i
-    ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=100,isFeasible=True)
-    disp(ddp.xs)
-    
-xjump2 = [ x.copy() for x in ddp.xs ]
-ujump2 = [ u.copy() for u in ddp.us ]
+impact.costs['track30'].weight = 10**6
+impact.costs['track16'].weight = 10**6
+models[fig].differential.costs.costs['xreg'].weight  = 10**6
+ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=PHASE_ITERATIONS[PHASE_NAME],isFeasible=True)
+
+if PHASE_ITERATIONS[PHASE_NAME] == 0:
+    ddp.xs = [ x for x in np.load(BACKUP_PATH+'%s.xs.npy' % PHASE_NAME)]
+    ddp.us = [ u for u in np.load(BACKUP_PATH+'%s.us.npy' % PHASE_NAME)]
+elif PHASE_BACKUP[PHASE_NAME]:
+    np.save(BACKUP_PATH+'%s.xs.npy' % PHASE_NAME,ddp.xs)
+    np.save(BACKUP_PATH+'%s.us.npy' % PHASE_NAME,ddp.us)
+if DISPLAY: disp(ddp.xs)
+
+models[fig].differential.costs.costs['xreg'].weight  = 0.1
+models[fig].differential.costs.costs['xreg'].cost.ref=x0.copy()
+models[fig].differential.costs.costs['xreg'].cost.activation.weights[rmodel.nv:] = 10
+
+# ---------------------------------------------------------------------------------------------
+### Jump with twist PI/2
+PHASE_NAME = "twist"
+
 ddp.xs = xjump0
 ddp.us = ujump0
 
-models[fig].differential.costs.costs['xreg'].weight  = 100
-models[fig].differential.costs.costs['xreg'].cost.ref=x0.copy()
-models[fig].differential.costs.costs['xreg'].cost.activation.weights[rmodel.nv:] = 10
-'''
-
-'''
-### Jump with twist PI/2
 impact.costs['track16'].cost.ref = SE3(rotate('z',1.5),zero(3))*impact.costs['track16'].cost.ref
 impact.costs['track30'].cost.ref = SE3(rotate('z',1.5),zero(3))*impact.costs['track30'].cost.ref
 models[-1].differential.costs.costs['xreg'].cost.activation.weights[5] = 0
 
-for i in range(4,9):
+for i in range(6,7):
     impact.costs['track30'].weight = 10**i
     impact.costs['track16'].weight = 10**i
-    ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=100,isFeasible=True)
-    disp(ddp.xs)
-    
-xjump3 = [ x.copy() for x in ddp.xs ]
-ujump3 = [ u.copy() for u in ddp.us ]
-#ddp.xs = xjump0
-#ddp.us = ujump0
+    ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=PHASE_ITERATIONS[PHASE_NAME],isFeasible=True)
 
-### Jump with twist PI
-impact.costs['track16'].cost.ref = SE3(rotate('z',3.15),zero(3))*impact.costs['track16'].cost.ref
-impact.costs['track30'].cost.ref = SE3(rotate('z',3.15),zero(3))*impact.costs['track30'].cost.ref
-models[-1].differential.costs.costs['xreg'].cost.activation.weights[5] = 0
+if PHASE_ITERATIONS[PHASE_NAME] == 0:
+    ddp.xs = [ x for x in np.load(BACKUP_PATH+'%s.xs.npy' % PHASE_NAME)]
+    ddp.us = [ u for u in np.load(BACKUP_PATH+'%s.us.npy' % PHASE_NAME)]
+elif PHASE_BACKUP[PHASE_NAME]:
+    np.save(BACKUP_PATH+'%s.xs.npy' % PHASE_NAME,ddp.xs)
+    np.save(BACKUP_PATH+'%s.us.npy' % PHASE_NAME,ddp.us)
+if DISPLAY: disp(ddp.xs)
 
-for i in range(4,9):
-    impact.costs['track30'].weight = 10**i
-    impact.costs['track16'].weight = 10**i
-    ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=100,isFeasible=True)
-    disp(ddp.xs)
-    
-xjump4 = [ x.copy() for x in ddp.xs ]
-ujump4 = [ u.copy() for u in ddp.us ]
-ddp.xs = xjump0
-ddp.us = ujump0
-
-'''
-
-### Salto!
-impact.costs['track16'].cost.ref = SE3(eye(3),left0)
-impact.costs['track30'].cost.ref = SE3(eye(3),right0)
-models[-1].differential.costs.costs['xreg'].cost.activation.weights[5] = 1
-
-xsalto = models[high].differential.costs.costs['xreg'].cost.ref.copy()
-xsalto[3]=1
-xsalto[6]=0
-models[high].differential.costs.costs['xreg'].cost.ref = xsalto
-models[high].differential.costs.costs['xreg'].cost.activation.weights[3:5] = 100
-
-impact.costs['track30'].weight = 0.1
-impact.costs['track16'].weight = 0.1
-ddp.xs = [x.copy() for x in xjump0]
-ddp.us = [u.copy() for u in ujump0]
-
-# from pinocchio.utils import se3ToXYZQUAT
-# D = 2*np.pi/(imp-9)
-# for i,x in enumerate(ddp.xs[9:imp]):
-#     '''
-#     oM1 1_p
-#     p st [ R p ] 0^c = c = R c + p   => p = c-Rc
-#     '''
-#     q = a2m(x)[:rmodel.nq]
-#     pinocchio.centerOfMass(rmodel,rdata,q)
-#     R = rotate('y',D*i)
-#     c = rdata.com[0].copy()
-#     p = c-R*c
-#     M = SE3(R,p)
-#     x[:7] = se3ToXYZQUAT(M*rdata.oMi[1])
-    
-    
-
-
-for i in range(1,9):
-    # impact.costs['track30'].weight = 10**i
-    # impact.costs['track16'].weight = 10**i
-    models[high].differential.costs.costs['xreg'].weight = 10**i
-    ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=100,isFeasible=False)
-    disp(ddp.xs)
-    
-xjump5 = [ x.copy() for x in ddp.xs ]
-ujump5 = [ u.copy() for u in ddp.us ]
-ddp.xs = xjump0
-ddp.us = ujump0

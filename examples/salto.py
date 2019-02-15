@@ -35,7 +35,7 @@ from numpy.linalg import norm,inv,pinv,eig,svd
 PHASE_ITERATIONS = { \
                      "initial": 0,
                      "angle":  0,
-                     "landing": 100
+                     "landing": 0
                      }
 PHASE_BACKUP = { "initial": True,
                  "angle":   True,
@@ -222,7 +222,7 @@ ddp.solve(maxiter=PHASE_ITERATIONS[PHASE_NAME],regInit=.1,
 if PHASE_ITERATIONS[PHASE_NAME] == 0:
     ddp.xs = [ x for x in np.load(BACKUP_PATH+'%s.xs.npy' % PHASE_NAME)]
     ddp.us = [ u for u in np.load(BACKUP_PATH+'%s.us.npy' % PHASE_NAME)]
-elif PHASE_BACKUP["initial"]:
+elif PHASE_BACKUP[PHASE_NAME]:
     np.save(BACKUP_PATH+'%s.xs.npy' % PHASE_NAME,ddp.xs)
     np.save(BACKUP_PATH+'%s.us.npy' % PHASE_NAME,ddp.us)
 
