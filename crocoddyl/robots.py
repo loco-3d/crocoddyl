@@ -12,6 +12,25 @@ def getTalosPathFromRos():
     MODEL_PATH = rospack.get_path('talos_data')+'/../'
     return MODEL_PATH
 
+
+def readParamsFromSrdf(robot, SRDF_PATH, verbose):
+  rmodel = robot.model
+  
+  pinocchio.loadRotorParameters(rmodel, SRDF_PATH, verbose)
+  rmodel.armature = \
+                    np.multiply(rmodel.rotorInertia.flat, np.square(rmodel.rotorGearRatio.flat))
+  try:
+    pinocchio.loadReferenceConfigurations(rmodel, SRDF_PATH, verbose)
+    robot.q0.flat[:] = rmodel.referenceConfigurations["half_sitting"].copy()
+  except:
+    print "loadReferenceConfigurations did not work. Please check your Pinocchio Version"
+    try:
+      pinocchio.getNeutralConfiguration(rmodel, SRDF_PATH, verbose)
+      robot.q0.flat[:] = rmodel.neutralConfiguration.copy()
+    except:
+      robot.q0.flat[:] = pinocchio.neutral(rmodel)
+  return
+  
 def loadTalosArm(modelPath='/opt/openrobots/share',freeFloating=False):
     URDF_FILENAME = "talos_left_arm.urdf"
     URDF_SUBPATH = "/talos_data/robots/" + URDF_FILENAME
@@ -20,10 +39,8 @@ def loadTalosArm(modelPath='/opt/openrobots/share',freeFloating=False):
     robot = RobotWrapper.BuildFromURDF(modelPath+URDF_SUBPATH, [modelPath],
                                        pinocchio.JointModelFreeFlyer() if freeFloating else None)
     rmodel = robot.model
-    pinocchio.getNeutralConfiguration(rmodel, modelPath+SRDF_SUBPATH, False)
-    pinocchio.loadRotorParameters(rmodel, modelPath+SRDF_SUBPATH, False)
-    rmodel.armature = \
-              np.multiply(rmodel.rotorInertia.flat, np.square(rmodel.rotorGearRatio.flat))
+
+    readParamsFromSrdf(robot, modelPath+SRDF_SUBPATH, False)
     if freeFloating: assert((rmodel.armature[:6]==0.).all())
     
     if freeFloating:
@@ -40,14 +57,9 @@ def loadTalos(modelPath='/opt/openrobots/share'):
     robot = RobotWrapper.BuildFromURDF(modelPath+URDF_SUBPATH, [modelPath],
                                                                pinocchio.JointModelFreeFlyer())
     # Load SRDF file
+    readParamsFromSrdf(robot, modelPath+SRDF_SUBPATH, False)
     rmodel = robot.model
-    pinocchio.getNeutralConfiguration(rmodel, modelPath+SRDF_SUBPATH, False)
-    pinocchio.loadRotorParameters(rmodel, modelPath+SRDF_SUBPATH, False)
-    rmodel.armature = \
-              np.multiply(rmodel.rotorInertia.flat, np.square(rmodel.rotorGearRatio.flat))
     assert((rmodel.armature[:6]==0.).all())
-
-    robot.q0.flat[:] = rmodel.neutralConfiguration
     
     """
     robot.q0.flat[:] =  [0,0,1.0192720229567027,0,0,0,1,0.0,0.0,-0.411354,0.859395,-0.448041,-0.001708,0.0,0.0,-0.411354,0.859395,-0.448041,-0.001708,0,0.006761,0.25847,0.173046,-0.0002,-0.525366,0,0,0.1,0.5,-0.25847,-0.173046,0.0002,-0.525366,0,0,0.1,0.5,0,0]
@@ -88,13 +100,9 @@ def loadTalosLegs(modelPath='/opt/openrobots/share'):
 
 
     # Load SRDF file
-    pinocchio.getNeutralConfiguration(m2, modelPath+SRDF_SUBPATH, False)
-    pinocchio.loadRotorParameters(m2, modelPath+SRDF_SUBPATH, False)
-    m2.armature = \
-            np.multiply(m2.rotorInertia.flat, np.square(m2.rotorGearRatio.flat))
+    readParamsFromSrdf(robot, modelPath+SRDF_SUBPATH, False)
+
     assert((m2.armature[:6]==0.).all())
-    robot.q0 = m2.neutralConfiguration.copy()
-    robot.q0[2] = 1.019
     return robot
 
 def loadHyQ(modelPath='examples/hyq_description'):
