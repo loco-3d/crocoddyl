@@ -21,7 +21,7 @@ class SimpleBipedWalkingProblem:
         self.leftFoot = leftFoot
         # Defining default state
         self.rmodel.defaultState = \
-            np.concatenate([m2a(self.rmodel.neutralConfiguration),
+            np.concatenate([m2a(self.rmodel.referenceConfigurations["half_sitting"].copy()),
                             np.zeros(self.rmodel.nv)])
         # Remove the armature
         self.rmodel.armature[6:] = 1.
