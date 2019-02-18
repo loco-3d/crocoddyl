@@ -210,7 +210,7 @@ walkProblem = walk.createProblem(x0, stepLength, timeStep, stepKnots, supportKno
 ddp = SolverDDP(walkProblem)
 cameraTF = [3., 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose(),
-                CallbackSolverDisplay(talos_legs,4,cameraTF)]
+                CallbackSolverDisplay(talos_legs,4,1,cameraTF)]
 ddp.th_stop = 1e-9
 ddp.solve(maxiter=1000,regInit=.1,init_xs=[talos_legs.model.defaultState]*len(ddp.models()))
 
