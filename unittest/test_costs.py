@@ -208,7 +208,7 @@ assert(( costData.Lx[~lowersafe & ~uppersafe] !=0.).all())
 
 lowerLimit[:rmodel.nq] = -np.inf  # inf position lower limit
 upperLimit[-rmodel.nv:] = np.inf  # inf velocity upper limit
-act_ineq = ActivationModelInequality(lowerLimit = lowerLimit, upperLimit=upperLimit, beta=1.0)
+act_ineq = ActivationModelInequality(lowerLimit = lowerLimit, upperLimit=upperLimit, beta=None)
 
 costModel = CostModelState(rmodel, X, ref=X.zero(),
                            activation=act_ineq)
