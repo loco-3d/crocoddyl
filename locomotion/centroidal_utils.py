@@ -190,7 +190,7 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee
 
       dmodel = DifferentialActionModelFloatingInContact(rmodel, actuationff,
                                                         contact_model, cost_model)
-      imodel = IntegratedActionModelEuler(dmodel)
+      imodel = IntegratedActionModelEuler(dmodel, timeStep=dt)
       problem_models.append(imodel)
 
     #for the last model of the phase, add velocity cost on swing limbs.
