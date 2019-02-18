@@ -303,7 +303,7 @@ ddp1 = SolverDDP(
     walk.createFirstHalfWalkingProblem(
         x0, stepLength, timeStep, stepKnots, supportKnots))
 ddp1.callback = [CallbackDDPLogger(), CallbackDDPVerbose(),
-                 CallbackSolverDisplay(hyq,4,cameraTF)]
+                 CallbackSolverDisplay(hyq,4,1,cameraTF)]
 ddp1.th_stop = 1e-9
 ddp1.solve(maxiter=1000, regInit=.1,
            init_xs = [ hyq.model.defaultState ]*len(ddp1.models()))
@@ -314,7 +314,7 @@ ddp2 = SolverDDP(
     walk.createSecondHalfWalkingProblem(
         x0, stepLength, timeStep, stepKnots, supportKnots))
 ddp2.callback = [CallbackDDPLogger(), CallbackDDPVerbose(),
-                 CallbackSolverDisplay(hyq,4,cameraTF)]
+                 CallbackSolverDisplay(hyq,4,1,cameraTF)]
 ddp2.th_stop = 1e-9
 ddp2.solve(maxiter=1000, regInit=.1,
            init_xs = [ x0 ]*len(ddp1.models()))
@@ -328,7 +328,7 @@ ddp3 = SolverDDP(
     walk.createCoMProblem(
         x0, comGoTo, timeStep, supportKnots))
 ddp3.callback = [CallbackDDPLogger(), CallbackDDPVerbose(),
-                 CallbackSolverDisplay(hyq,4,cameraTF)]
+                 CallbackSolverDisplay(hyq,4,1,cameraTF)]
 ddp3.th_stop = 1e-9
 ddp3.solve(maxiter=1000, regInit=.1,
            init_xs = [ x0 ]*len(ddp3.models()))
