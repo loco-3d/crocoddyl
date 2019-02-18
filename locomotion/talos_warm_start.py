@@ -6,7 +6,7 @@ from centroidal_utils import createPhiFromContactSequence, createMultiphaseShoot
 from crocoddyl import m2a, a2m
 from crocoddyl import ShootingProblem, SolverDDP
 from crocoddyl import ActionModelImpact
-from crocoddyl import CallbackDDPVerbose, CallbackSolverDisplay, CallbackDDPLogger
+from crocoddyl import CallbackDDPVerbose, CallbackSolverDisplay, CallbackDDPLogger, CallbackSolverTimer
 import numpy as np
 np.set_printoptions(linewidth=400, suppress=True)
 robot = conf.robot
@@ -61,14 +61,23 @@ assert(i==len(conf.U_init))
 assert(i==len(conf.X_init)-1)
 init.X.append(conf.X_init[-1])
 #---------------Display Initial Trajectory--------------
-if conf.DISPLAY and False:
+if conf.DISPLAY:
   robot.initDisplay(loadModel=True)
+if conf.DISPLAY and False:
   for x in init.X:  
     robot.display(a2m(x[:robot.nq]))
     #sleep(0.005)
 #----------------------
 
 ddp = SolverDDP(problem)
-ddp.callback = [CallbackDDPVerbose(), CallbackSolverDisplay(robot,4)]
+ddp.callback = [CallbackDDPVerbose(), CallbackSolverTimer()]
+if conf.DISPLAY:
+  ddp.callback.append(CallbackSolverDisplay(robot,4))
 ddp.th_stop = 1e-9
 ddp.solve(maxiter=1000,regInit=0.1,init_xs=init.X,init_us=init.U)
+#---------------Display Final Trajectory--------------
+if conf.DISPLAY:
+  for x in init.X:  
+    robot.display(a2m(x[:robot.nq]))
+    #sleep(0.005)
+#----------------------
