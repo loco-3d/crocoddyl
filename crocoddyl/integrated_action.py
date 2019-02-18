@@ -39,8 +39,11 @@ class IntegratedActionModelEuler:
         data.Fx[:,:] = dxnext_dx + dt*np.dot(dxnext_ddx,ddx_dx)
         ddx_du = np.vstack([ da_du*dt, da_du ])
         data.Fu[:,:] = dt*np.dot(dxnext_ddx,ddx_du)
-        data.g[:] = data.differential.g
-        data.L[:] = data.differential.L
+        data.Lx[:] = data.differential.Lx
+        data.Lu[:] = data.differential.Lu
+        data.Lxx[:] = data.differential.Lxx
+        data.Lxu[:] = data.differential.Lxu
+        data.Luu[:] = data.differential.Luu
 
 class IntegratedActionDataEuler:
     """ Implement the RK4 integration scheme and its derivatives.
@@ -60,12 +63,11 @@ class IntegratedActionDataEuler:
         self.cost = np.nan
         self.costResiduals = np.zeros([ ncost ])
 
-        self.Lxx = self.L[:ndx,:ndx]
-        self.Lxu = self.L[:ndx,ndx:]
-        self.Lux = self.L[ndx:,:ndx]
-        self.Luu = self.L[ndx:,ndx:]
-        self.Lx  = self.g[:ndx]
-        self.Lu  = self.g[ndx:]
+        self.Lx = np.zeros(ndx)
+        self.Lu = np.zeros(nu)
+        self.Lxx = np.zeros([ndx,ndx])
+        self.Lxu = np.zeros([ndx,nu])
+        self.Luu = np.zeros([nu,nu])
         self.Fx = self.F[:,:ndx]
         self.Fu = self.F[:,ndx:]
         self.Rx = self.R[:,:ndx]
@@ -246,18 +248,15 @@ class IntegratedActionDataRK4:
         self.l = [np.nan,]*4
         self.ki = [np.zeros([ndx]),]*4
     
-        self.g = np.zeros([ ndx+nu ])
-        self.L = np.zeros([ ndx+nu,ndx+nu ])
         self.F = np.zeros([ ndx   ,ndx+nu ])
         self.xnext = np.zeros([ nx ])
         self.cost = np.nan
 
-        self.Lxx = self.L[:ndx,:ndx]
-        self.Lxu = self.L[:ndx,ndx:]
-        self.Lux = self.L[ndx:,:ndx]
-        self.Luu = self.L[ndx:,ndx:]
-        self.Lx  = self.g[:ndx]
-        self.Lu  = self.g[ndx:]
+        self.Lx = np.zeros(ndx)
+        self.Lu = np.zeros(nu)
+        self.Lxx = np.zeros([ndx,ndx])
+        self.Lxu = np.zeros([ndx,nu])
+        self.Luu = np.zeros([nu,nu])
         self.Fx = self.F[:,:ndx]
         self.Fu = self.F[:,ndx:]
 

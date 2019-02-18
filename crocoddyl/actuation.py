@@ -141,8 +141,6 @@ class DifferentialActionDataActuated:
         self.costResiduals = self.costs.residuals
         self.Fx = self.F[:,:ndx]
         self.Fu = self.F[:,-nu:]
-        self.g   = self.costs.g
-        self.L   = self.costs.L
         self.Lx  = self.costs.Lx
         self.Lu  = self.costs.Lu
         self.Lxx = self.costs.Lxx

@@ -38,15 +38,11 @@ class CostDataPinocchio:
         ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
         self.pinocchio = pinocchioData
         self.cost = np.nan
-        self.g = np.zeros( ndx+nu)
-        self.L = np.zeros([ndx+nu,ndx+nu])
-
-        self.Lx = self.g[:ndx]
-        self.Lu = self.g[ndx:]
-        
-        self.Lxx = self.L[:ndx,:ndx]
-        self.Lxu = self.L[:ndx,ndx:]
-        self.Luu = self.L[ndx:,ndx:]
+        self.Lx = np.zeros(ndx)
+        self.Lu = np.zeros(nu)
+        self.Lxx = np.zeros([ndx,ndx])
+        self.Lxu = np.zeros([ndx,nu])
+        self.Luu = np.zeros([nu,nu])
 
         self.Lq  = self.Lx [:nv]
         self.Lqq = self.Lxx[:nv,:nv]
@@ -101,7 +97,10 @@ class CostModelNumDiff(CostModelPinocchio):
             if model.withGaussApprox:
                 data.Ru[:,iu] = (data.datau[iu].residuals-data.data0.residuals)/h
         if model.withGaussApprox:
-            data.L[:,:] = np.dot(data.R.T,data.R)
+            L = np.dot(data.R.T,data.R)
+            data.Lxx[:] = L[:ndx,:ndx]
+            data.Lxu[:] = L[:ndx,ndx:]
+            data.Luu[:] = L[ndx:,ndx:]
 
 class CostDataNumDiff(CostDataPinocchio):
     def __init__(self,model,pinocchioData):
@@ -155,8 +154,11 @@ class CostModelSum(CostModelPinocchio):
         return data.cost
     def calcDiff(model,data,x,u,recalc=True):
         if recalc: model.calc(data,x,u)
-        data.g.fill(0)
-        data.L.fill(0)
+        data.Lx.fill(0)
+        data.Lu.fill(0)
+        data.Lxx.fill(0)
+        data.Lxu.fill(0)
+        data.Luu.fill(0)
         nr = 0
         for m,d in zip(model.costs.values(),data.costs.values()):
             m.cost.calcDiff(d,x,u,recalc=False)

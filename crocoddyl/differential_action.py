@@ -80,18 +80,14 @@ class DifferentialActionDataAbstract:
 
         # Cost data
         if costData == None:
-            self.g = np.zeros( ndx+nu)
-            self.L = np.zeros([ndx+nu,ndx+nu])
-            self.Lx = self.g[:ndx]
-            self.Lu = self.g[ndx:]
-            self.Lxx = self.L[:ndx,:ndx]
-            self.Lxu = self.L[:ndx,ndx:]
-            self.Luu = self.L[ndx:,ndx:]
+            self.Lx = np.zeros(ndx)
+            self.Lu = np.zeros(nu)
+            self.Lxx = np.zeros([ndx,ndx])
+            self.Lxu = np.zeros([ndx,nu])
+            self.Luu = np.zeros([nu,nu])
         else:
             self.costs = costData
             self.costResiduals = self.costs.residuals
-            self.g   = self.costs.g
-            self.L   = self.costs.L
             self.Lx  = self.costs.Lx
             self.Lu  = self.costs.Lu
             self.Lxx = self.costs.Lxx
