@@ -31,11 +31,11 @@ def readParamsFromSrdf(robot, SRDF_PATH, verbose):
       robot.q0.flat[:] = pinocchio.neutral(rmodel)
   return
   
-def loadTalosArm(modelPath='/opt/openrobots/share',freeFloating=False):
+def loadTalosArm(modelPath='/opt/openrobots/share/example-robot-data',freeFloating=False):
     URDF_FILENAME = "talos_left_arm.urdf"
-    URDF_SUBPATH = "/talos_data/robots/" + URDF_FILENAME
+    URDF_SUBPATH = "/talos/" + URDF_FILENAME
     SRDF_FILENAME = "talos.srdf"
-    SRDF_SUBPATH = "/talos_data/srdf/" + SRDF_FILENAME
+    SRDF_SUBPATH = "/talos/" + SRDF_FILENAME
     robot = RobotWrapper.BuildFromURDF(modelPath+URDF_SUBPATH, [modelPath],
                                        pinocchio.JointModelFreeFlyer() if freeFloating else None)
     rmodel = robot.model
@@ -48,11 +48,11 @@ def loadTalosArm(modelPath='/opt/openrobots/share',freeFloating=False):
         l = robot.model.lowerPositionLimit; l[:7] = -1;  robot.model.lowerPositionLimit = l
     return robot
 
-def loadTalos(modelPath='/opt/openrobots/share'):
+def loadTalos(modelPath='/opt/openrobots/share/example-robot-data'):
     URDF_FILENAME = "talos_reduced.urdf"
     SRDF_FILENAME = "talos.srdf"
-    SRDF_SUBPATH = "/talos_data/srdf/" + SRDF_FILENAME
-    URDF_SUBPATH = "/talos_data/urdf/" + URDF_FILENAME
+    SRDF_SUBPATH = "/talos/" + SRDF_FILENAME
+    URDF_SUBPATH = "/talos/" + URDF_FILENAME
     robot = RobotWrapper.BuildFromURDF(modelPath+URDF_SUBPATH, [modelPath],
                                                                pinocchio.JointModelFreeFlyer())
     # Load SRDF file
@@ -65,11 +65,11 @@ def loadTalos(modelPath='/opt/openrobots/share'):
     return robot
 
 
-def loadTalosLegs(modelPath='/opt/openrobots/share'):
+def loadTalosLegs(modelPath='/opt/openrobots/share/example-robot-data'):
     from pinocchio import JointModelFreeFlyer,JointModelRX,JointModelRY,JointModelRZ
     robot = loadTalos(modelPath=modelPath)
     SRDF_FILENAME = "talos.srdf"
-    SRDF_SUBPATH = "/talos_data/srdf/" + SRDF_FILENAME
+    SRDF_SUBPATH = "/talos/" + SRDF_FILENAME
     legMaxId = 14
 
     m1 = robot.model
