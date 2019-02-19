@@ -69,6 +69,14 @@ class DifferentialActionModelAbstract:
 
 class DifferentialActionDataAbstract:
     def __init__(self, model, costData = None):
+        """ Create common data shared between DAMs.
+
+        In crocoddyl, a DAD might use an externally defined cost data. If so,
+        you need to pass your own cost data using costData. Otherwise it will
+        be allocated here.
+        :param model: differential action model
+        :param costData: external cost data (optional)
+        """
         nx,nu,ndx,nv,nout = model.nx,model.nu,model.ndx,model.nv,model.nout
         # State evolution and cost data
         self.cost = np.nan
