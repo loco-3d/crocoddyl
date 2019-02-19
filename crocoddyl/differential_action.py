@@ -281,8 +281,9 @@ class DifferentialActionDataNumDiff:
         self.datau = [ model.model0.createData() for i in range(model.nu ) ]
 
         # Dynamics data
-        self.Fx = np.zeros([nout,ndx])
-        self.Fu = np.zeros([nout,nu])
+        self.F  = np.zeros([ nout,ndx+nu ])
+        self.Fx = self.F[:,:ndx]
+        self.Fu = self.F[:,ndx:]
 
         # Cost data
         self.Lx = np.zeros(ndx)
