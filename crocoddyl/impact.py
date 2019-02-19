@@ -450,8 +450,6 @@ class ActionDataImpact:
         self.Rv = self.Rx[:,nv:]
 
         self.costResiduals = self.costs.residuals
-        self.g   = self.costs.g
-        self.L   = self.costs.L
         self.Lx  = self.costs.Lx
         self.Lu  = self.costs.Lu
         self.Lxx = self.costs.Lxx

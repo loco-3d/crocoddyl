@@ -45,8 +45,11 @@ costDataND  = costModelND.createData(rdata)
 
 costModelND.calcDiff(costDataND,x,u)
 
-assert( absmax(costData.g-costDataND.g) < 1e-3 )
-assert( absmax(costData.L-costDataND.L) < 1e-3 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
+assert( absmax(costData.Lxx-costDataND.Lxx) < 1e-4 )
+assert( absmax(costData.Lxu-costDataND.Lxu) < 1e-4 )
+assert( absmax(costData.Luu-costDataND.Luu) < 1e-4 )
 
 
 
@@ -77,8 +80,11 @@ costDataND  = costModelND.createData(rdata)
 
 costModelND.calcDiff(costDataND,x,u)
 
-assert( absmax(costData.g-costDataND.g) < 1e-4 )
-assert( absmax(costData.L-costDataND.L) < 1e-4 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
+assert( absmax(costData.Lxx-costDataND.Lxx) < 1e-4 )
+assert( absmax(costData.Lxu-costDataND.Lxu) < 1e-4 )
+assert( absmax(costData.Luu-costDataND.Luu) < 1e-4 )
 
 
 
@@ -112,8 +118,11 @@ costDataND  = costModelND.createData(rdata)
 
 costModelND.calcDiff(costDataND,x,u)
 
-assert( absmax(costData.g-costDataND.g) < 1e-4 )
-assert( absmax(costData.L-costDataND.L) < 1e-4 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
+assert( absmax(costData.Lxx-costDataND.Lxx) < 1e-4 )
+assert( absmax(costData.Lxu-costDataND.Lxu) < 1e-4 )
+assert( absmax(costData.Luu-costDataND.Luu) < 1e-4 )
 
 
 
@@ -142,8 +151,11 @@ costDataND  = costModelND.createData(rdata)
 
 costModelND.calcDiff(costDataND,x,u)
 
-assert( absmax(costData.g-costDataND.g) < 1e-4 )
-assert( absmax(costData.L-costDataND.L) < 1e-4 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
+assert( absmax(costData.Lxx-costDataND.Lxx) < 1e-4 )
+assert( absmax(costData.Lxu-costDataND.Lxu) < 1e-4 )
+assert( absmax(costData.Luu-costDataND.Luu) < 1e-4 )
 
 
 
@@ -165,8 +177,11 @@ costModelND = CostModelNumDiff(costModel,X,withGaussApprox=True,
 costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
-assert( absmax(costData.g-costDataND.g) < 1e-3 )
-#assert( absmax(costData.L-costDataND.L) < 1e-3 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e-3 )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e-3 )
+# assert( absmax(costData.Lxx-costDataND.Lxx) < 1e-3 )
+# assert( absmax(costData.Lxu-costDataND.Lxu) < 1e-3 )
+# assert( absmax(costData.Luu-costDataND.Luu) < 1e-3 )
 
 # --------------------------------------------------------------
 from crocoddyl import ActivationModelInequality, ActivationModelInequality
@@ -195,7 +210,8 @@ costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
 
-assert( absmax(costData.g-costDataND.g) < 1e-3 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
 #Check that the cost derivative is zero if q>=lower and q<=upper
 #and that cost is positive if q<lower or q>upper
 lowersafe = m2a(x)>=lowerLimit; uppersafe = m2a(x)<=upperLimit
@@ -224,7 +240,8 @@ costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
 
-assert( absmax(costData.g-costDataND.g) < 1e-3 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
 #Check that the cost derivative is zero if q>=lower and q<=upper
 #and that cost is positive if q<lower or q>upper
 lowersafe = m2a(x)>=lowerLimit; uppersafe = m2a(x)<=upperLimit
@@ -251,8 +268,11 @@ costModelND = CostModelNumDiff(costModel,StatePinocchio(rmodel),withGaussApprox=
 costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
-assert( absmax(costData.g-costDataND.g) < 1e-3 )
-assert( absmax(costData.L-costDataND.L) < 1e-3 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
+assert( absmax(costData.Lxx-costDataND.Lxx) < 1e-4 )
+assert( absmax(costData.Lxu-costDataND.Lxu) < 1e-4 )
+assert( absmax(costData.Luu-costDataND.Luu) < 1e-4 )
 
 
 
@@ -291,8 +311,11 @@ costModelND = CostModelNumDiff(costModel,StatePinocchio(rmodel),withGaussApprox=
 costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
-assert( absmax(costData.g-costDataND.g) < 1e-3 )
-assert( absmax(costData.L-costDataND.L) < 1e-3 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
+assert( absmax(costData.Lxx-costDataND.Lxx) < 1e-4 )
+assert( absmax(costData.Lxu-costDataND.Lxu) < 1e-4 )
+assert( absmax(costData.Luu-costDataND.Luu) < 1e-4 )
 
 
 

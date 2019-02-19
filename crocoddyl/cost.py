@@ -43,7 +43,6 @@ class CostDataPinocchio:
 
         self.Lx = self.g[:ndx]
         self.Lu = self.g[ndx:]
-        
         self.Lxx = self.L[:ndx,:ndx]
         self.Lxu = self.L[:ndx,ndx:]
         self.Luu = self.L[ndx:,ndx:]

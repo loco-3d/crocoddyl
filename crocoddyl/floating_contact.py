@@ -1,3 +1,4 @@
+from differential_action import DifferentialActionDataAbstract, DifferentialActionModelAbstract
 from state import StatePinocchio
 from utils import a2m, m2a
 import numpy as np
@@ -5,27 +6,23 @@ import pinocchio
 
 
 
-class DifferentialActionModelFloatingInContact:
+class DifferentialActionModelFloatingInContact(DifferentialActionModelAbstract):
     def __init__(self,pinocchioModel,actuationModel,contactModel,costModel):
+        DifferentialActionModelAbstract.__init__(
+            self, pinocchioModel.nq, pinocchioModel.nv, actuationModel.nu)
+        self.DifferentialActionDataType = DifferentialActionDataFloatingInContact
         self.pinocchio = pinocchioModel
         self.State = StatePinocchio(self.pinocchio)
         self.actuation = actuationModel
         self.contact = contactModel
         self.costs = costModel
-        self.nq,self.nv = self.pinocchio.nq, self.pinocchio.nv
-        self.nx = self.State.nx
-        self.ndx = self.State.ndx
-        self.nout = self.nv
-        self.nu = self.actuation.nu
-        self.unone = np.zeros(self.nu)
     @property
     def ncost(self): return self.costs.ncost
     @property
     def ncontact(self): return self.contact.ncontact
-    def createData(self): return DifferentialActionDataFloatingInContact(self)
     def calc(model,data,x,u=None):
         if u is None: u=model.unone
-        nx,nu,nq,nv,nout,nc = model.nx,model.nu,model.nq,model.nv,model.nout,model.ncontact
+        nq,nv = model.nq,model.nv
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
 
@@ -54,7 +51,7 @@ class DifferentialActionModelFloatingInContact:
     def calcDiff(model,data,x,u=None,recalc=True):
         if u is None: u=model.unone
         if recalc: xout,cost = model.calc(data,x,u)
-        nx,ndx,nu,nq,nv,nout,nc = model.nx,model.State.ndx,model.nu,model.nq,model.nv,model.nout,model.ncontact
+        nq,nv = model.nq,model.nv
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
         a = a2m(data.a)
@@ -106,42 +103,28 @@ class DifferentialActionModelFloatingInContact:
         data.df_du[:,:] = np.dot(df_dtau,dtau_du)
 
         model.contact.setForcesDiff(data.contact,data.df_dx,data.df_du)
-
         model.costs.calcDiff(data.costs,x,u,recalc=False)
-
         return data.xout,data.cost
 
     def quasiStatic(self,data,x):
-        nx,ndx,nu,nq,nv,nc = self.nx,self.State.ndx,self.nu,self.nq,self.nv,self.ncontact
-        if len(x)==self.nq: x = np.concatenate([x,np.zero(nv)])
+        nu,nq,nv = self.nx,self.nu,self.nq,self.nv
+        if len(x)==nq: x = np.concatenate([x,np.zero(nv)])
         else:               x[nq:] = 0
         self.calcDiff(data,x,np.zeros(nu))
         return np.dot(
             np.linalg.pinv(np.hstack([data.actuation.Au,data.contact.J.T])),
             -data.r[:nv])[:nu]
 
-class DifferentialActionDataFloatingInContact:
+
+class DifferentialActionDataFloatingInContact(DifferentialActionDataAbstract):
     def __init__(self,model):
         self.pinocchio = model.pinocchio.createData()
         self.actuation = model.actuation.createData(self.pinocchio)
         self.contact = model.contact.createData(self.pinocchio)
-        self.costs = model.costs.createData(self.pinocchio)
-        self.cost = np.nan
-        nx,nu,ndx,nq,nv,nout,nc = model.nx,model.nu,model.State.ndx,model.nq,model.nv,model.nout,model.ncontact
-        self.F = np.zeros([ nout,ndx+nu ])
-        self.costResiduals = self.costs.residuals
-        self.Fx = self.F[:,:ndx]
-        self.Fu = self.F[:,-nu:]
-        self.g   = self.costs.g
-        self.L   = self.costs.L
-        self.Lx  = self.costs.Lx
-        self.Lu  = self.costs.Lu
-        self.Lxx = self.costs.Lxx
-        self.Lxu = self.costs.Lxu
-        self.Luu = self.costs.Luu
-        self.Rx  = self.costs.Rx
-        self.Ru  = self.costs.Ru
+        costData = model.costs.createData(self.pinocchio)
+        DifferentialActionDataAbstract.__init__(self, model, costData)
 
+        nu,ndx,nv,nc = model.nu,model.ndx,model.nv,model.ncontact
         self.tauq = np.zeros(nv)
         self.K  = np.zeros([nv+nc, nv+nc])  # KKT matrix = [ MJ.T ; J0 ]
         self.r  = np.zeros( nv+nc )         # NLE effects =  [ tau-b ; -gamma ]
