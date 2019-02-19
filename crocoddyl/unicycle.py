@@ -221,13 +221,8 @@ class ActionModelUnicycleVar:
         ### Cost derivatives
         data.R[:ndx,:ndx] = model.costWeights[0] * model.State.Jdiff(model.xref,x,'second')
         data.R[ndx:,ndx:] = np.diag([ model.costWeights[1] ]*nu )
-        g = np.dot(data.R.T,data.costResiduals)
-        L = np.dot(data.R.T,data.R)
-        data.Lx[:] = g[:ndx]
-        data.Lu[:] = g[ndx:]
-        data.Lxx[:] = L[:ndx,:ndx]
-        data.Lxu[:] = L[:ndx,ndx:]
-        data.Luu[:] = L[ndx:,ndx:]
+        data.g[:] = np.dot(data.R.T,data.costResiduals)
+        data.L[:,:] = np.dot(data.R.T,data.R)
 
         ### Dynamic derivatives
         dx = np.array([u[0],0,u[1]])*model.dt
