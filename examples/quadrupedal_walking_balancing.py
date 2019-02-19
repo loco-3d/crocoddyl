@@ -11,8 +11,6 @@ class TaskSE3:
         self.frameId = frameId
 
 class SimpleQuadrupedalWalkingProblem:
-    """ Defines a simple 3d locomotion problem
-    """
     def __init__(self, rmodel, lfFoot, rfFoot, lhFoot, rhFoot):
         self.rmodel = rmodel
         self.rdata = rmodel.createData()
@@ -205,6 +203,7 @@ class SimpleQuadrupedalWalkingProblem:
 
         :param timeStep: step duration of the action model
         :param supportFootIds: Ids of the constrained feet
+        :param comTask: CoM task
         :param swingFootTask: swinging foot task
         :return action model for a swing foot phase
         """
@@ -257,7 +256,6 @@ class SimpleQuadrupedalWalkingProblem:
     def createFootSwitchModel(self, supportFootId, swingFootTask):
         """ Action model for a foot switch phase.
 
-        :param timeStep: step duration of the action model
         :param supportFootIds: Ids of the constrained feet
         :param swingFootTask: swinging foot task
         :return action model for a foot switch phase
