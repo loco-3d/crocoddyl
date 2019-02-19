@@ -16,8 +16,7 @@ class RobotTestCase(unittest.TestCase):
         self.assertEqual(model.nv, self.NV, "Wrong nv value.")
 
     def test_q0(self):
-      model = self.ROBOT.model
-      self.assertEqual(hasattr(self.ROBOT, "q0"))
+      self.assertTrue(hasattr(self.ROBOT, "q0"), "It doesn't have q0")
 
 class TalosArmTest(RobotTestCase):
     RobotTestCase.ROBOT = loadTalosArm()
