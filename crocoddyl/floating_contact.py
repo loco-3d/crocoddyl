@@ -37,11 +37,13 @@ class DifferentialActionModelFloatingInContact(DifferentialActionModelAbstract):
             data.K[range(nv),range(nv)] += model.pinocchio.armature.flat
         data.K[nv:,:nv] = data.contact.J
         data.K.T[nv:,:nv] = data.contact.J
+        data.Kinv = np.linalg.inv(data.K)
 
         data.r[:nv] = data.tauq - m2a(data.pinocchio.nle)
         data.r[nv:] = -data.contact.a0
-
-        data.af[:] = np.dot(np.linalg.inv(data.K),data.r)
+        data.af[:] = np.dot(data.Kinv,data.r)
+        data.f[:] *= -1.
+        
         # Convert force array to vector of spatial forces.
         fs = model.contact.setForces(data.contact,data.f)
 
@@ -61,8 +63,8 @@ class DifferentialActionModelFloatingInContact(DifferentialActionModelAbstract):
         pinocchio.computeForwardKinematicsDerivatives(model.pinocchio,data.pinocchio,q,v,a)
         pinocchio.updateFramePlacements(model.pinocchio,data.pinocchio)
 
-        # [a;f] = K^-1 [ tau - b, -gamma ]
-        # [a';f'] = -K^-1 [ K'a + b' ; J'a + gamma' ]  = -K^-1 [ rnea'(q,v,a,fs) ; acc'(q,v,a) ]
+        # [a;-f] = K^-1 [ tau - b, -gamma ]
+        # [a';-f'] = -K^-1 [ K'a + b' ; J'a + gamma' ]  = -K^-1 [ rnea'(q,v,a,fs) ; acc'(q,v,a) ]
 
         # Derivative of the actuation model tau = tau(q,u)
         # dtau_dq and dtau_dv are the rnea derivatives rnea'
@@ -79,14 +81,14 @@ class DifferentialActionModelFloatingInContact(DifferentialActionModelAbstract):
 
         # We separate the Kinv into the a and f rows, and the actuation and acceleration columns
         da_did  = -data.Kinv[:nv,:nv]
-        df_did  = -data.Kinv[nv:,:nv]
+        df_did  = data.Kinv[nv:,:nv]
         da_dacc = -data.Kinv[:nv,nv:]
-        df_dacc = -data.Kinv[nv:,nv:]
+        df_dacc = data.Kinv[nv:,nv:]
 
         da_dq   =  np.dot(da_did,did_dq) + np.dot(da_dacc,dacc_dq)
         da_dv   =  np.dot(da_did,did_dv) + np.dot(da_dacc,dacc_dv)
         da_dtau =  data.Kinv[:nv,:nv]  # Add this alias just to make the code clearer
-        df_dtau =  data.Kinv[nv:,:nv]  # Add this alias just to make the code clearer
+        df_dtau =  -data.Kinv[nv:,:nv]  # Add this alias just to make the code clearer
 
         # tau is a function of x and u (typically trivial in x), whose derivatives are Ax and Au
         dtau_dx = data.actuation.Ax
