@@ -264,7 +264,6 @@ class DifferentialActionModelNumDiff(DifferentialActionModelAbstract):
         if model.withGaussApprox:
             data.Lxx[:,:] = np.dot(data.Rx.T,data.Rx)
             data.Lxu[:,:] = np.dot(data.Rx.T,data.Ru)
-            data.Lux[:,:] = data.Lxu.T
             data.Luu[:,:] = np.dot(data.Ru.T,data.Ru)
 
 class DifferentialActionDataNumDiff:
