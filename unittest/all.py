@@ -16,6 +16,7 @@ testmodules = [
   # # 'test_impact', # TODO investigate why doesn't work
   # 'test_robots',
   # 'test_rk4',
+  # 'test_quadruped',
 ]
 
 suite = unittest.TestSuite()
