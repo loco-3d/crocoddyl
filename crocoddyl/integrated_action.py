@@ -54,22 +54,24 @@ class IntegratedActionDataEuler:
     def __init__(self,model):
         nx,ndx,nu,ncost = model.nx,model.ndx,model.nu,model.ncost
         self.differential = model.differential.createData()
-
-        self.g = np.zeros([ ndx+nu ])
-        self.R = np.zeros([ ncost ,ndx+nu ])
-        self.L = np.zeros([ ndx+nu,ndx+nu ])
-        self.F = np.zeros([ ndx   ,ndx+nu ])
         self.xnext = np.zeros([ nx ])
         self.cost = np.nan
-        self.costResiduals = np.zeros([ ncost ])
 
-        self.Lx = np.zeros(ndx)
-        self.Lu = np.zeros(nu)
-        self.Lxx = np.zeros([ndx,ndx])
-        self.Lxu = np.zeros([ndx,nu])
-        self.Luu = np.zeros([nu,nu])
+        # Dynamics data
+        self.F = np.zeros([ ndx,ndx+nu ])
         self.Fx = self.F[:,:ndx]
         self.Fu = self.F[:,ndx:]
+
+        # Cost data
+        self.costResiduals = np.zeros([ ncost ])
+        self.g = np.zeros([ ndx+nu ])
+        self.L = np.zeros([ ndx+nu,ndx+nu ])
+        self.R = np.zeros([ ncost,ndx+nu ])
+        self.Lx = self.g[:ndx]
+        self.Lu = self.g[ndx:]
+        self.Lxx = self.L[:ndx,:ndx]
+        self.Lxu = self.L[:ndx,ndx:]
+        self.Luu = self.L[ndx:,ndx:]
         self.Rx = self.R[:,:ndx]
         self.Ru = self.R[:,ndx:]
 
