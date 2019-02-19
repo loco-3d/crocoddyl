@@ -22,7 +22,7 @@ class SimpleQuadrupedalWalkingProblem:
         self.rhFootId = self.rmodel.getFrameId(rhFoot)
         # Defining default state
         self.rmodel.defaultState = \
-            np.concatenate([m2a(self.rmodel.neutralConfiguration),
+            np.concatenate([m2a(self.rmodel.referenceConfigurations["half_sitting"]),
                             np.zeros(self.rmodel.nv)])
 
     def createCoMProblem(self, x0, comGoTo, timeStep, numKnots):
