@@ -86,7 +86,8 @@ class DifferentialActionDataAbstract:
             self.Luu = np.zeros([nu,nu])
         else:
             self.costs = costData
-            self.costResiduals = self.costs.residuals
+            if model.ncost > 1:
+                self.costResiduals = self.costs.residuals
             self.Lx  = self.costs.Lx
             self.Lu  = self.costs.Lu
             self.Lxx = self.costs.Lxx
