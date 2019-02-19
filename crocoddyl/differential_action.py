@@ -286,14 +286,16 @@ class DifferentialActionDataNumDiff:
         self.Fu = self.F[:,ndx:]
 
         # Cost data
-        self.Lx = np.zeros(ndx)
-        self.Lu = np.zeros(nu)
+        self.g = np.zeros(ndx+nu)
+        self.L = np.zeros([ndx+nu,ndx+nu])
+        self.Lx = self.g[:ndx]
+        self.Lu = self.g[ndx:]
         if model.ncost >1 :
             self.costResiduals = self.data0.costResiduals
             self.R  = np.zeros([model.ncost,ndx+nu])
             self.Rx = self.R[:,:ndx]
             self.Ru = self.R[:,ndx:]
         if model.withGaussApprox:
-            self.Lxx = np.zeros([ndx,ndx])
-            self.Lxu = np.zeros([ndx,nu])
-            self.Luu = np.zeros([nu,nu])
+            self.Lxx = self.L[:ndx,:ndx]
+            self.Lxu = self.L[:ndx,ndx:]
+            self.Luu = self.L[ndx:,ndx:]
