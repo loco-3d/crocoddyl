@@ -107,9 +107,11 @@ class DifferentialActionModelFloatingInContact(DifferentialActionModelAbstract):
         return data.xout,data.cost
 
     def quasiStatic(self,data,x):
-        nu,nq,nv = self.nx,self.nu,self.nq,self.nv
-        if len(x)==nq: x = np.concatenate([x,np.zero(nv)])
-        else:               x[nq:] = 0
+        nu,nq,nv = self.nu,self.nq,self.nv
+        if len(x)==nq:
+            x = np.concatenate([x,np.zero(nv)])
+        else:
+            x[nq:] = 0
         self.calcDiff(data,x,np.zeros(nu))
         return np.dot(
             np.linalg.pinv(np.hstack([data.actuation.Au,data.contact.J.T])),
