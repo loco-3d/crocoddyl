@@ -10,6 +10,7 @@ class DifferentialActionModelFloatingInContact(DifferentialActionModelAbstract):
     def __init__(self,pinocchioModel,actuationModel,contactModel,costModel):
         DifferentialActionModelAbstract.__init__(
             self, pinocchioModel.nq, pinocchioModel.nv, actuationModel.nu)
+        self.DifferentialActionDataType = DifferentialActionDataFloatingInContact
         self.pinocchio = pinocchioModel
         self.State = StatePinocchio(self.pinocchio)
         self.actuation = actuationModel
@@ -19,7 +20,6 @@ class DifferentialActionModelFloatingInContact(DifferentialActionModelAbstract):
     def ncost(self): return self.costs.ncost
     @property
     def ncontact(self): return self.contact.ncontact
-    def createData(self): return DifferentialActionDataFloatingInContact(self)
     def calc(model,data,x,u=None):
         if u is None: u=model.unone
         nq,nv = model.nq,model.nv

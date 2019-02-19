@@ -25,14 +25,15 @@ class DifferentialActionModelAbstract:
         self.unone = np.zeros(self.nu)
 
     def createData(self):
-        """ Created the differential action data.
+        """ Create the differential action data.
 
         Each differential action model has its own data that needs to be
         allocated. This function returns the allocated data for a predefined
-        DAM.
+        DAM. Note that you need to defined the DifferentialActionDataType inside
+        your DAM.
         :return DAM data.
         """
-        raise NotImplementedError("Not implemented yet.")
+        return self.DifferentialActionDataType(self)
 
     def calc(model, data, x, u=None):
         """ Compute the state evolution and cost value.
@@ -102,6 +103,7 @@ class DifferentialActionModelFullyActuated(DifferentialActionModelAbstract):
     def __init__(self, pinocchioModel, costModel):
         DifferentialActionModelAbstract.__init__(
             self, pinocchioModel.nq, pinocchioModel.nv, pinocchioModel.nv)
+        self.DifferentialActionDataType = DifferentialActionDataFullyActuated
         self.pinocchio = pinocchioModel
         self.State = StatePinocchio(self.pinocchio)
         self.costs = costModel
@@ -110,7 +112,6 @@ class DifferentialActionModelFullyActuated(DifferentialActionModelAbstract):
         self.forceAba = False
     @property
     def ncost(self): return self.costs.ncost
-    def createData(self): return DifferentialActionDataFullyActuated(self)
     def calc(model,data,x,u=None):
         if u is None: u=model.unone
         nq,nv = model.nq,model.nv
@@ -181,6 +182,7 @@ class DifferentialActionModelLQR(DifferentialActionModelAbstract):
   """
   def __init__(self, nq, nu):
     DifferentialActionModelAbstract.__init__(self, nq, nq, nu)
+    self.DifferentialActionDataType = DifferentialActionDataLQR
     self.State = StateVector(self.nx)
 
     v1 = randomOrthonormalMatrix(self.nq)
@@ -194,9 +196,6 @@ class DifferentialActionModelLQR(DifferentialActionModelAbstract):
     self.d = rand(self.nv)
     self.Q = randomOrthonormalMatrix(self.nx)
     self.U = randomOrthonormalMatrix(self.nu)
-
-  def createData(self):
-      return DifferentialActionDataLQR(self)
 
   def calc(model,data,x,u=None):
     q = x[:model.nq]; v = x[model.nq:]
@@ -227,6 +226,7 @@ class DifferentialActionDataLQR(DifferentialActionDataAbstract):
 
 class DifferentialActionModelNumDiff(DifferentialActionModelAbstract):
     def __init__(self,model,withGaussApprox=False):
+        self.DifferentialActionDataType = DifferentialActionDataNumDiff
         self.model0 = model
         self.nx = model.nx
         self.ndx = model.ndx
@@ -243,8 +243,6 @@ class DifferentialActionModelNumDiff(DifferentialActionModelAbstract):
         self.withGaussApprox = withGaussApprox
         assert( not self.withGaussApprox or self.ncost>1 )
 
-    def createData(self):
-        return DifferentialActionDataNumDiff(self)
     def calc(model,data,x,u): return model.model0.calc(data.data0,x,u)
     def calcDiff(model,data,x,u,recalc=True):
         xn0,c0 = model.calc(data,x,u)
