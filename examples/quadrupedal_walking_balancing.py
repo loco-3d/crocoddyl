@@ -83,7 +83,7 @@ class SimpleQuadrupedalWalkingProblem:
         return problem
 
 
-    def createFirstHalfWalkingProblem(self, x0, stepLength, timeStep, stepKnots, supportKnots):
+    def createWalkingProblem(self, x0, stepLength, timeStep, stepKnots, supportKnots):
         """ Create a shooting problem for a simple walking.
 
         :param x0: initial state
@@ -100,6 +100,8 @@ class SimpleQuadrupedalWalkingProblem:
         com0 = m2a(pinocchio.centerOfMass(self.rmodel,self.rdata,q0))
         rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
         rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
+        lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
+        lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
 
         # Defining the action models along the time instances
         loco3dModel = []
@@ -112,42 +114,12 @@ class SimpleQuadrupedalWalkingProblem:
             self.createFootstepModels(
                 [ self.lfFootId, self.rfFootId, self.lhFootId ],
                 self.rhFootId,
-                stepLength, rhFootPos0, stepKnots)
+                0.5*stepLength, rhFootPos0, stepKnots)
         rfStep = \
             self.createFootstepModels(
                 [ self.lfFootId, self.lhFootId, self.rhFootId ],
                 self.rfFootId,
-                stepLength, rfFootPos0, stepKnots)
-
-        loco3dModel += doubleSupport + rhStep + rfStep
-        problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
-        return problem
-
-    def createSecondHalfWalkingProblem(self, x0, stepLength, timeStep, stepKnots, supportKnots):
-        """ Create a shooting problem for a simple walking.
-
-        :param x0: initial state
-        :param stepLength: step length
-        :param timeStep: step time for each knot
-        :param stepKnots: number of knots for step phases
-        :param supportKnots: number of knots for double support phases
-        :return shooting problem
-        """
-        # Compute the current foot positions
-        q0 = a2m(x0[:self.rmodel.nq])
-        pinocchio.forwardKinematics(self.rmodel,self.rdata,q0)
-        pinocchio.updateFramePlacements(self.rmodel,self.rdata)
-        com0 = m2a(pinocchio.centerOfMass(self.rmodel,self.rdata,q0))
-        lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
-        lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
-
-        # Defining the action models along the time instances
-        loco3dModel = []
-        doubleSupport = \
-            [ self.createSwingFootModel(
-                timeStep,
-                [ self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId ],
-                ) for k in range(supportKnots) ]
+                0.5*stepLength, rfFootPos0, stepKnots)
         lhStep = \
             self.createFootstepModels(
                 [ self.lfFootId, self.rfFootId, self.rhFootId ],
@@ -159,7 +131,9 @@ class SimpleQuadrupedalWalkingProblem:
                 self.lfFootId,
                 stepLength, lfFootPos0, stepKnots)
 
+        loco3dModel += doubleSupport + rhStep + rfStep
         loco3dModel += doubleSupport + lhStep + lfStep
+
         problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
 
@@ -289,54 +263,41 @@ rhFoot = 'rh_foot'
 walk = SimpleQuadrupedalWalkingProblem(hyq.model, lfFoot, rfFoot, lhFoot, rhFoot)
 
 # Setting up the walking variables
-stepLength = 0.2 # meters
+stepLength = 0.35 # meters
 timeStep = 5e-2 # seconds
 stepKnots = 5
 supportKnots = 2
 cameraTF = [2., 2.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 
 
-# Creating the first half of walking problem and solver
+# Creating the walking problem and solver
 ddp1 = SolverDDP(
-    walk.createFirstHalfWalkingProblem(
+    walk.createWalkingProblem(
         x0, stepLength, timeStep, stepKnots, supportKnots))
 ddp1.callback = [CallbackDDPLogger(), CallbackDDPVerbose(),
                  CallbackSolverDisplay(hyq,4,1,cameraTF)]
 ddp1.th_stop = 1e-9
 ddp1.solve(maxiter=1000, regInit=.1,
-           init_xs = [ hyq.model.defaultState ]*len(ddp1.models()))
+           init_xs = [ hyq.model.defaultState ]*len(ddp1.models()),
+           init_us = [ m.differential.quasiStatic(d.differential,hyq.model.defaultState) \
+                      for m,d in zip(ddp1.models(),ddp1.datas())[:-1] ])
 
-# Creating the second half of walking problem and solver
+# Creating the CoM forward/backward task
+comGoTo = 0.1 # meters
 x0 = ddp1.xs[-1]
+supportKnots = 5
 ddp2 = SolverDDP(
-    walk.createSecondHalfWalkingProblem(
-        x0, stepLength, timeStep, stepKnots, supportKnots))
+    walk.createCoMProblem(
+        x0, comGoTo, timeStep, supportKnots))
 ddp2.callback = [CallbackDDPLogger(), CallbackDDPVerbose(),
                  CallbackSolverDisplay(hyq,4,1,cameraTF)]
 ddp2.th_stop = 1e-9
 ddp2.solve(maxiter=1000, regInit=.1,
-           init_xs = [ x0 ]*len(ddp1.models()))
-
-
-# Creating the CoM forward/backward task
-comGoTo = 0.1 # meters
-x0 = ddp2.xs[-1]
-supportKnots = 5
-ddp3 = SolverDDP(
-    walk.createCoMProblem(
-        x0, comGoTo, timeStep, supportKnots))
-ddp3.callback = [CallbackDDPLogger(), CallbackDDPVerbose(),
-                 CallbackSolverDisplay(hyq,4,1,cameraTF)]
-ddp3.th_stop = 1e-9
-ddp3.solve(maxiter=1000, regInit=.1,
-           init_xs = [ x0 ]*len(ddp3.models()))
+           init_xs = [ x0 ]*len(ddp2.models()),
+           init_us = [ m.differential.quasiStatic(d.differential,x0) \
+                      for m,d in zip(ddp2.models(),ddp2.datas())[:-1] ])
 
 
 # Display the entire motion
 CallbackSolverDisplay(hyq)(ddp1)
 CallbackSolverDisplay(hyq)(ddp2)
-CallbackSolverDisplay(hyq)(ddp3)
-
-comT = pinocchio.centerOfMass(walk.rmodel,walk.rdata,a2m(ddp3.callback[0].xs[-1][:walk.rmodel.nq]))
-com0 = pinocchio.centerOfMass(walk.rmodel,walk.rdata,a2m(x0[:hyq.model.nq]))
-print 'CoM displacement:', (comT - com0).T
