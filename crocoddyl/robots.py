@@ -15,7 +15,7 @@ def getTalosPathFromRos():
 
 def readParamsFromSrdf(robot, SRDF_PATH, verbose):
   rmodel = robot.model
-  
+
   pinocchio.loadRotorParameters(rmodel, SRDF_PATH, verbose)
   rmodel.armature = \
                     np.multiply(rmodel.rotorInertia.flat, np.square(rmodel.rotorGearRatio.flat))
@@ -42,11 +42,10 @@ def loadTalosArm(modelPath='/opt/openrobots/share',freeFloating=False):
 
     readParamsFromSrdf(robot, modelPath+SRDF_SUBPATH, False)
     if freeFloating: assert((rmodel.armature[:6]==0.).all())
-    
+
     if freeFloating:
         u = robot.model.upperPositionLimit; u[:7] =  1;  robot.model.upperPositionLimit = u
         l = robot.model.lowerPositionLimit; l[:7] = -1;  robot.model.lowerPositionLimit = l
-        
     return robot
 
 def loadTalos(modelPath='/opt/openrobots/share'):
@@ -60,7 +59,6 @@ def loadTalos(modelPath='/opt/openrobots/share'):
     readParamsFromSrdf(robot, modelPath+SRDF_SUBPATH, False)
     rmodel = robot.model
     assert((rmodel.armature[:6]==0.).all())
-    
     """
     robot.q0.flat[:] =  [0,0,1.0192720229567027,0,0,0,1,0.0,0.0,-0.411354,0.859395,-0.448041,-0.001708,0.0,0.0,-0.411354,0.859395,-0.448041,-0.001708,0,0.006761,0.25847,0.173046,-0.0002,-0.525366,0,0,0.1,0.5,-0.25847,-0.173046,0.0002,-0.525366,0,0,0.1,0.5,0,0]
     """
@@ -86,7 +84,7 @@ def loadTalosLegs(modelPath='/opt/openrobots/share'):
     #q2 = robot.q0[:19]
     for f in m1.frames:
         if f.parent<legMaxId: m2.addFrame(f)
-            
+
     g2 = pinocchio.GeometryModel()
     for g in robot.visual_model.geometryObjects:
         if g.parentJoint<14:
