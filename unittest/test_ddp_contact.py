@@ -156,6 +156,6 @@ x0s = problem.rollout(u0s)
 from crocoddyl import CallbackDDPLogger, CallbackDDPVerbose
 disp = lambda xs: disptraj(f.robot,xs)
 ddp = SolverDDP(problem)
-ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
+# ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
 ddp.th_stop = 1e-18
 ddp.solve(maxiter=1000)
