@@ -1,10 +1,9 @@
 from crocoddyl import StateVector
 import numpy as np
 from numpy.random import rand
-from crocoddyl import IntegratedActionDataRK4, IntegratedActionModelRK4
-from crocoddyl import DifferentialActionModelLQR, DifferentialActionDataLQR
+from crocoddyl import IntegratedActionModelRK4
+from crocoddyl import DifferentialActionModelLQR
 from crocoddyl import a2m, m2a
-from pinocchio.utils import zero
 from numpy.linalg import norm
 from testutils import df_dx
 

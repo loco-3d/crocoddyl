@@ -1,9 +1,10 @@
+from crocoddyl import ActivationDataSmoothAbs, ActivationModelSmoothAbs
+from crocoddyl import ActivationModelQuad
+from crocoddyl import ActivationModelWeightedQuad
+from crocoddyl import EPS
 import numpy as np
 from numpy.linalg import norm,inv
 
-from crocoddyl import ActivationDataQuad, ActivationModelQuad
-from crocoddyl import ActivationDataWeightedQuad, ActivationModelWeightedQuad
-from crocoddyl import EPS
 '''
 c = sum( a(ri) )
 c' = sum( [a(ri)]' ) = sum( ri' a'(ri) ) = R' [ a'(ri) ]_i
@@ -20,7 +21,6 @@ sum(ri' a''(ri) ri') = R' r
 c'' = R'R
 '''
 
-from crocoddyl import ActivationDataSmoothAbs, ActivationModelSmoothAbs
 
 # - ------------------------------
 # --- Dim 1 ----------------------
@@ -90,4 +90,3 @@ am = ActivationModelSmoothAbs()
 ad = am.createData()
 assert( norm(df(am,ad,x).diagonal()-am.calcDiff(ad,x)[0]) < 1e2*h )
 assert( norm(ddf(am,ad,x).diagonal()-am.calcDiff(ad,x)[1][:,0]) < 1e2*h )
-

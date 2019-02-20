@@ -1,15 +1,14 @@
 from crocoddyl import DifferentialActionModelNumDiff
 from crocoddyl import m2a, a2m, absmax, absmin
+from crocoddyl import loadTalosArm
 import numpy as np
 import pinocchio
-from pinocchio.utils import *
+from pinocchio.utils import rand
 
 
 
 ## Loading Talos arm with FF TODO use a bided or quadruped
 # -----------------------------------------------------------------------------
-from crocoddyl import loadTalosArm
-
 robot = loadTalosArm(freeFloating=True)
 
 qmin = robot.model.lowerPositionLimit; qmin[:7]=-1; robot.model.lowerPositionLimit = qmin

@@ -435,21 +435,21 @@ rddot = (ia + iv.cross(Motion(rdot,O3))).linear
 vxrd = data.v[-1].cross(Motion(data.v[-1].linear,O3)).linear
 
 qp = pinocchio.integrate(model,q,vq*dt)
-vqp = vq + aq*dt
-aqp = aq + jq*dt
-pinocchio.forwardKinematics(model,data,qp,vqp,aqp)
-Rp = data.oMi[-1].rotation
-dR = R.T*Rp
-rdotp  = dR*data.v[-1].linear
-rddotp = dR*data.a[-1].linear + dR*cross(data.v[-1].angular,data.v[-1].linear)
-vxrdp = dR*data.v[-1].cross(Motion(data.v[-1].linear,O3)).linear
-
-rdddot = (rddotp-rddot)/dt
-vxrd_dot = (vxrdp-vxrd)/dt
-
-d = iv.cross(iv.cross(Motion(rdot,O3))).linear \
-    + ia.cross(Motion(rdot,O3)).linear \
-    + iv.cross(Motion(rddot,O3)).linear
+vqp = vq loadTalosArm+ aq*dt
+aqp = aq loadTalosArm+ jq*dt
+pinocchioloadTalosArm.forwardKinematics(model,data,qp,vqp,aqp)
+Rp = dataloadTalosArm.oMi[-1].rotation
+dR = R.T*loadTalosArmRp
+rdotp  = loadTalosArmdR*data.v[-1].linear
+rddotp = loadTalosArmdR*data.a[-1].linear + dR*cross(data.v[-1].angular,data.v[-1].linear)
+vxrdp = dloadTalosArmR*data.v[-1].cross(Motion(data.v[-1].linear,O3)).linear
+loadTalosArm
+rdddot = loadTalosArm(rddotp-rddot)/dt
+vxrd_dot loadTalosArm= (vxrdp-vxrd)/dt
+loadTalosArm
+d = iv.crloadTalosArmoss(iv.cross(Motion(rdot,O3))).linear \
+    + ia.loadTalosArmcross(Motion(rdot,O3)).linear \
+    + iv.loadTalosArmcross(Motion(rddot,O3)).linear
 
 iv.cross
 

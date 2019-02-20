@@ -1,5 +1,5 @@
-from crocoddyl import loadTalosArm,loadTalosLegs
-from crocoddyl import ActionModelImpact,ImpulseModel6D,ImpulseModelMultiple
+from crocoddyl import loadTalosArm, loadTalosLegs
+from crocoddyl import ActionModelImpact, ImpulseModel6D, ImpulseModelMultiple
 from crocoddyl import ActionModelNumDiff
 from crocoddyl import m2a, a2m, absmax, absmin
 from crocoddyl.impact import CostModelImpactWholeBody

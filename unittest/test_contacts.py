@@ -1,13 +1,12 @@
-from crocoddyl import m2a, a2m, absmax, absmin
+from crocoddyl import loadTalosArm
+from crocoddyl import m2a, a2m, absmax
 import pinocchio
 from pinocchio.utils import *
-from numpy.linalg import inv,pinv,norm,svd,eig
+from numpy.linalg import pinv,norm,eig
 from testutils import df_dx, df_dq
 
 ## Loading Talos arm with FF TODO use a bided or quadruped
 # -----------------------------------------------------------------------------
-from crocoddyl import loadTalosArm
-
 robot = loadTalosArm(freeFloating=True)
 robot.model.armature[6:] = 1.
 qmin = robot.model.lowerPositionLimit; qmin[:7]=-1; robot.model.lowerPositionLimit = qmin
@@ -16,11 +15,11 @@ qmax = robot.model.upperPositionLimit; qmax[:7]= 1; robot.model.upperPositionLim
 rmodel = robot.model
 rdata = rmodel.createData()
 
-
 np.set_printoptions(linewidth=400, suppress=True)
+
 # -----------------------------------------------------------------------------
-from crocoddyl import ContactData6D, ContactModel6D
-        
+from crocoddyl import ContactModel6D
+
 contactModel = ContactModel6D(rmodel,rmodel.getFrameId('gripper_left_fingertip_2_link'),
                               ref=pinocchio.SE3.Random(), gains=[4.,4.])
 contactData  = contactModel.createData(rdata)
@@ -62,7 +61,7 @@ assert(np.isclose(contactData.Aq, Aq_numdiff, atol=np.sqrt(eps)).all())
 assert(np.isclose(contactData.Av, Av_numdiff, atol=np.sqrt(eps)).all())
 
 # ----------------------------------------------------------------------------
-from crocoddyl import ContactData3D, ContactModel3D
+from crocoddyl import ContactModel3D
 
 contactModel = ContactModel3D(rmodel,
                               rmodel.getFrameId('gripper_left_fingertip_2_link'),
@@ -204,7 +203,7 @@ assert( absmax(Fu-data.df_du) < 1e-3 )
 
 # -------------------------------------------------------------------------------
 # Cost force model
-from crocoddyl import CostDataForce, CostModelForce
+from crocoddyl import CostModelForce
 
 model.costs = CostModelSum(rmodel,nu=actModel.nu)
 model.costs.addCost( name='force', weight = 1,
@@ -299,12 +298,10 @@ assert(norm(a0)<1e-6)
 # -------------------------------------------------------------------------------
 # integrative test: checking 1-step DDP versus KKT
 
-from crocoddyl import ShootingProblem, SolverDDP,SolverKKT
-from crocoddyl import IntegratedActionModelEuler
-
-
-import copy
+from crocoddyl import ShootingProblem, SolverDDP, SolverKKT
 from crocoddyl import CallbackDDPLogger
+import copy
+
 
 model.timeStep = 1e-1
 dmodel.costs['pos'].weight = 1

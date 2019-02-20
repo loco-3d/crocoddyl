@@ -1,10 +1,9 @@
-from crocoddyl import CostDataPinocchio, CostModelPinocchio
-from crocoddyl import CostDataNumDiff, CostModelNumDiff
-from crocoddyl import m2a, a2m, absmax, absmin
+from crocoddyl import CostModelNumDiff
+from crocoddyl import m2a, a2m, absmax
 import pinocchio
 from pinocchio.utils import *
 from crocoddyl import loadTalosArm
-from numpy.linalg import inv,norm,pinv
+from numpy.linalg import norm
 
 
 
@@ -54,7 +53,7 @@ assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 
 # --------------------------------------------------------------
-from crocoddyl import CostDataFrameVelocity, CostModelFrameVelocity
+from crocoddyl import CostModelFrameVelocity
         
 q = pinocchio.randomConfiguration(rmodel)
 v = rand(rmodel.nv)
@@ -89,7 +88,7 @@ assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 
 # --------------------------------------------------------------
-from crocoddyl import CostDataFramePlacement, CostModelFramePlacement
+from crocoddyl import CostModelFramePlacement
 
         
 q = pinocchio.randomConfiguration(rmodel)
@@ -127,7 +126,7 @@ assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 
 # --------------------------------------------------------------
-from crocoddyl import CostDataCoM, CostModelCoM
+from crocoddyl import CostModelCoM
 
 
 q = pinocchio.randomConfiguration(rmodel)
@@ -160,7 +159,7 @@ assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 
 # --------------------------------------------------------------
-from crocoddyl import CostDataState, CostModelState
+from crocoddyl import CostModelState
 from crocoddyl import ActivationModelWeightedQuad
 X = StatePinocchio(rmodel)        
 q = pinocchio.randomConfiguration(rmodel)
@@ -184,7 +183,7 @@ assert( absmax(costData.Lu-costDataND.Lu) < 1e2*costModelND.disturbance )
 # assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 # --------------------------------------------------------------
-from crocoddyl import ActivationModelInequality, ActivationModelInequality
+from crocoddyl import ActivationModelInequality
 
 X = StatePinocchio(rmodel)
 q = a2m(np.random.rand(rmodel.nq)) #random value between 0 and 1
@@ -251,7 +250,7 @@ assert(( costData.Lx[~lowersafe & ~uppersafe] !=0.).all())
 
 
 # --------------------------------------------------------------
-from crocoddyl import CostDataControl, CostModelControl
+from crocoddyl import CostModelControl
         
   
 X = StatePinocchio(rmodel)
@@ -277,7 +276,7 @@ assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 
 # --------------------------------------------------------------
-from crocoddyl import CostDataSum, CostModelSum
+from crocoddyl import CostModelSum
     
 
 X = StatePinocchio(rmodel)
@@ -349,7 +348,7 @@ a,l = model.calc(data,x,u)
 model.calcDiff(data,x,u)
 
 
-from crocoddyl import DifferentialActionDataNumDiff, DifferentialActionModelNumDiff
+from crocoddyl import DifferentialActionModelNumDiff
 
 mnum = DifferentialActionModelNumDiff(model,withGaussApprox=True)
 dnum = mnum.createData()
@@ -403,7 +402,7 @@ assert( norm(dnum.Luu-data.Luu) < 1e2*mnum.disturbance )
 dmodel = DifferentialActionModelPositioning(rmodel)
 model  = IntegratedActionModelEuler(dmodel)
 
-from crocoddyl import ShootingProblem,SolverKKT,SolverDDP
+from crocoddyl import ShootingProblem, SolverKKT, SolverDDP
 problem = ShootingProblem(model.State.zero()+1, [ model ], model)
 kkt = SolverKKT(problem)
 kkt.th_stop = 1e-18
