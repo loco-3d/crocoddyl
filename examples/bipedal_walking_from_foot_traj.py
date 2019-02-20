@@ -3,7 +3,10 @@ import numpy as np
 from numpy.linalg import norm
 import pinocchio
 from pinocchio.utils import *
+import sys
 
+WITHDISPLAY =  'disp' in sys.argv
+WITHPLOT = 'plot' in sys.argv
 
 class TaskSE3:
     def __init__(self, oXf, frameId):
@@ -209,19 +212,22 @@ walkProblem = walk.createProblem(x0, stepLength, timeStep, stepKnots, supportKno
 # Solving the 3d walking problem using DDP
 ddp = SolverDDP(walkProblem)
 cameraTF = [3., 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
-ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose(),
-                CallbackSolverDisplay(talos_legs,4,1,cameraTF)]
+ddp.callback = [ CallbackDDPVerbose() ]
+if WITHPLOT:       ddp.callback.append(CallbackDDPLogger())
+if WITHDISPLAY:    ddp.callback.append(CallbackSolverDisplay(talos_legs,4,1,cameraTF))
 ddp.th_stop = 1e-9
 ddp.solve(maxiter=1000,regInit=.1,init_xs=[talos_legs.model.defaultState]*len(ddp.models()))
 
 
 # Plotting the solution and the DDP convergence
-log = ddp.callback[0]
-plotOCSolution(log.xs, log.us)
-plotDDPConvergence(log.costs,log.control_regs,
-                   log.state_regs,log.gm_stops,
-                   log.th_stops,log.steps)
+if WITHPLOT:
+    log = ddp.callback[0]
+    plotOCSolution(log.xs, log.us)
+    plotDDPConvergence(log.costs,log.control_regs,
+                       log.state_regs,log.gm_stops,
+                       log.th_stops,log.steps)
 
 # Visualization of the DDP solution in gepetto-viewer
-ddp.callback[2](ddp)
-CallbackSolverDisplay(talos_legs)(ddp)
+if WITHDISPLAY:
+    ddp.callback[2](ddp)
+    CallbackSolverDisplay(talos_legs)(ddp)

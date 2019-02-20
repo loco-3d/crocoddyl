@@ -1,8 +1,10 @@
 from crocoddyl import *
 import pinocchio
 import numpy as np
+import sys
 
-
+WITHDISPLAY =  'disp' in sys.argv
+WITHPLOT = 'plot' in sys.argv
 
 # In this example test, we will solve the reaching-goal task with the Talos arm.
 # For that, we use the forward dynamics (with its analytical derivatives)
@@ -64,27 +66,27 @@ problem = ShootingProblem(x0, [ runningModel ]*T, terminalModel)
 # Creating the DDP solver for this OC problem, defining a logger
 ddp = SolverDDP(problem)
 cameraTF = [2., 2.68, 0.54, 0.2, 0.62, 0.72, 0.22]
-ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose(1), CallbackSolverDisplay(robot,4,1,cameraTF)]
+ddp.callback = [ CallbackDDPVerbose() ]
+if WITHPLOT:       ddp.callback.append(CallbackDDPLogger())
+if WITHDISPLAY:    ddp.callback.append(CallbackSolverDisplay(talos_legs,4,1,cameraTF))
 
 # Solving it with the DDP algorithm
 ddp.solve()
 
-
 # Plotting the solution and the DDP convergence
-log = ddp.callback[0]
-plotOCSolution(log.xs, log.us)
-plotDDPConvergence(log.costs,log.control_regs,
-                   log.state_regs,log.gm_stops,
-                   log.th_stops,log.steps)
-
+if WITHPLOT:
+    log = ddp.callback[0]
+    plotOCSolution(log.xs, log.us)
+    plotDDPConvergence(log.costs,log.control_regs,
+                       log.state_regs,log.gm_stops,
+                       log.th_stops,log.steps)
 
 # Visualizing the solution in gepetto-viewer
-CallbackSolverDisplay(robot)(ddp)
+if WITHDISPLAY: CallbackSolverDisplay(robot)(ddp)
 
 # Printing the reached position
 frame_idx = robot.model.getFrameId(frameName)
-xT = log.xs[-1]
-qT = np.asmatrix(xT[:robot.model.nq]).T
 print
 print "The reached pose by the wrist is"
-print robot.framePlacement(qT, frame_idx)
+print ddp.datas()[-1].differential.pinocchio.oMf[frame_idx]
+

@@ -30,22 +30,26 @@ from crocoddyl.impact import CostModelImpactCoM, CostModelImpactWholeBody
 import pinocchio
 from pinocchio.utils import *
 from numpy.linalg import norm,inv,pinv,eig,svd
+import sys
 
 # Number of iterations in each phase. If 0, try to load.
 PHASE_ITERATIONS = { \
-                     "initial": 0,
-                     "angle":  0,
-                     "landing": 0
+                     "initial": 200,
+                     "angle":   200,
+                     "landing": 200
                      }
-PHASE_BACKUP = { "initial": True,
-                 "angle":   True,
-                 "landing": True }
+PHASE_BACKUP = { "initial": False,
+                 "angle":   False,
+                 "landing": False }
 BACKUP_PATH = "npydata/salto."
 
+if 'load' in sys.argv:    PHASE_ITERATIONS = { k: 0 for k in PHASE_ITERATIONS }
+if 'save' in sys.argv:    PHASE_BACKUP = { k: True for k in PHASE_ITERATIONS }
+WITHDISPLAY =  'disp' in sys.argv
 
 robot = loadTalosLegs()
 robot.model.armature[6:] = .3
-robot.initDisplay(loadModel=True)
+if WITHDISPLAY: robot.initDisplay(loadModel=True)
 
 rmodel = robot.model
 rdata  = rmodel.createData()
@@ -69,7 +73,8 @@ swingDuration = 0.75
 stanceDurantion = 0.1
 
 from crocoddyl.diagnostic import displayTrajectory
-disp = lambda xs,dt: displayTrajectory(robot,xs,dt)
+dodisp = lambda xs,dt: displayTrajectory(robot,xs,dt)
+disp =  dodisp if WITHDISPLAY else lambda xs,dt: 0
 disp.__defaults__ = ( .1, )
 
 def runningModel(contactIds, effectors, com=None, integrationStep = 1e-2):
@@ -207,17 +212,17 @@ models[-1].differential.costs['xreg'].cost.activation.weights[:] = 1
 PHASE_NAME = "initial"
 problem = ShootingProblem(initialState=x0,runningModels=models[:imp],terminalModel=models[imp])
 ddp = SolverDDP(problem)
-ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]#, CallbackSolverDisplay(robot,rate=5) ]
+ddp.callback = [ CallbackDDPVerbose() ]
 ddp.th_stop = 1e-4
 us0 = [ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
         for m,d in zip(ddp.models(),ddp.datas())[:imp] ] \
             +[np.zeros(0)]+[ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
                              for m,d in zip(ddp.models(),ddp.datas())[imp+1:-1] ]
 
+if PHASE_ITERATIONS[PHASE_NAME]>0: print("*** SOLVE %s ***" % PHASE_NAME)
 ddp.solve(maxiter=PHASE_ITERATIONS[PHASE_NAME],regInit=.1,
           init_xs=[rmodel.defaultState]*len(ddp.models()),
           init_us=us0[:imp])
-#disp(ddp.xs)
 
 if PHASE_ITERATIONS[PHASE_NAME] == 0:
     ddp.xs = [ x for x in np.load(BACKUP_PATH+'%s.xs.npy' % PHASE_NAME)]
@@ -230,33 +235,14 @@ elif PHASE_BACKUP[PHASE_NAME]:
 # Second phase of the search: optimize for increasing terminal angle of the waist.
 PHASE_NAME = "angle"
 
-#for i,m in enumerate(models[9:imp]):
-#    m.differential.costs['xreg'].weight = 10
-#    m.differential.costs['xreg'].cost.ref = refs[i]
-#    m.differential.costs['xreg'].cost.activation.weights[3:6] = 10
 models[imp].costs['xreg'].cost.activation.weights[3:6] = 100
+impact.costs['xreg'].cost.activation.weights[3:rmodel.nv] = 10**6
+ddp.th_stop = 5e-3
 
-ANG = .5
-cos,sin = np.cos,np.sin
-models[imp].costs['xreg'].cost.ref[3:7] = [ 0,sin(ANG),0,cos(ANG) ]
-
-ddp.callback.append(CallbackSolverDisplay(robot,rate=5,freq=10))
-for i in range(1,7):
-    #for k in range(9,imp):
-    impact.costs['xreg'].cost.activation.weights[3:rmodel.nv] = 10**i
-    ddp.solve(maxiter=PHASE_ITERATIONS[PHASE_NAME],regInit=.1, #!2000
-              init_xs=ddp.xs,
-              init_us=ddp.us, isFeasible=False)
-
-# for i,m in enumerate(models[9:imp]):
-#     m.differential.costs['xreg'].cost.activation.weights[7] = 10
-#     m.differential.costs['xreg'].cost.activation.weights[13] = 10
-# models[high].differential.costs['xreg'].cost.activation.weights[7] = 100
-# models[high].differential.costs['xreg'].cost.activation.weights[13] = 100
-    
 for ANG in np.arange(.5,3.2,.3):
-    models[imp].costs['xreg'].cost.ref[3:7] = [ 0,sin(ANG),0,cos(ANG) ]
-    ddp.solve(maxiter=PHASE_ITERATIONS[PHASE_NAME],regInit=.1, #!2000
+    models[imp].costs['xreg'].cost.ref[3:7] = [ 0,np.sin(ANG),0,np.cos(ANG) ]
+    if PHASE_ITERATIONS[PHASE_NAME]>0: print("*** SOLVE %s ang=%.1f ***" % (PHASE_NAME,ANG))
+    ddp.solve(maxiter=PHASE_ITERATIONS[PHASE_NAME],regInit=.1,
               init_xs=ddp.xs,
               init_us=ddp.us, isFeasible=True)
     if PHASE_ITERATIONS[PHASE_NAME] > 0 and PHASE_BACKUP[PHASE_NAME]:
@@ -279,16 +265,17 @@ usddp = ddp.us
 
 problem = ShootingProblem(initialState=x0,runningModels=models[:-1],terminalModel=models[-1])
 ddp = SolverDDP(problem)
-ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]#, CallbackSolverDisplay(robot,rate=5,freq=10) ]
+ddp.callback = [ CallbackDDPVerbose() ]
 ddp.th_stop = 1e-4
 
 ddp.xs = xsddp + [rmodel.defaultState]*(len(models)-len(xsddp))
 ddp.us = usddp + [ np.zeros(0) if isinstance(m,ActionModelImpact) else \
                m.differential.quasiStatic(d.differential,rmodel.defaultState) \
                                for m,d in zip(ddp.models(),ddp.datas())[len(usddp):-1] ]
-
 impact.costs['track30'].weight = 1e6
 impact.costs['track16'].weight = 1e6
+
+if PHASE_ITERATIONS[PHASE_NAME]>0: print("*** SOLVE %s ***" % PHASE_NAME)
 ddp.solve(init_xs=ddp.xs,init_us=ddp.us,maxiter=PHASE_ITERATIONS[PHASE_NAME])
 
 if PHASE_ITERATIONS[PHASE_NAME] == 0:
