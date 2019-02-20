@@ -1,5 +1,6 @@
 from state import StatePinocchio, StateVector
 from utils import a2m, randomOrthonormalMatrix
+from utils import EPS
 import numpy as np
 from numpy.random import rand
 import pinocchio
@@ -243,7 +244,7 @@ class DifferentialActionModelNumDiff(DifferentialActionModelAbstract):
         self.nq = model.nq
         self.nv = model.nv
         self.State = model.State
-        self.disturbance = 1e-5
+        self.disturbance = np.sqrt(2*EPS)
         try:
             self.ncost = model.ncost
         except:

@@ -1,5 +1,7 @@
 import numpy as np
 
+EPS = np.finfo(float).eps
+
 '''
 Numpy convention.
 Let's store vector as 1-d array and matrices as 2-d arrays. Multiplication is done by np.dot.

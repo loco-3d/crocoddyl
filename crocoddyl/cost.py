@@ -1,5 +1,5 @@
 from activation import ActivationModelQuad, ActivationModelWeightedQuad
-from utils import m2a
+from utils import m2a, EPS
 import numpy as np
 import pinocchio
 from collections import OrderedDict
@@ -72,7 +72,7 @@ class CostModelNumDiff(CostModelPinocchio):
         CostModelPinocchio.__init__(self,costModel.pinocchio,ncost=costModel.ncost,nu=costModel.nu)
         self.State = State
         self.model0 = costModel
-        self.disturbance = 1e-6
+        self.disturbance = np.sqrt(2*EPS)
         self.withGaussApprox = withGaussApprox
         if withGaussApprox: assert(costModel.withResiduals)
         self.reevals = reevals
