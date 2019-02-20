@@ -45,11 +45,11 @@ costDataND  = costModelND.createData(rdata)
 
 costModelND.calcDiff(costDataND,x,u)
 
-assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
-assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
-assert( absmax(costData.Lxx-costDataND.Lxx) < 1e-4 )
-assert( absmax(costData.Lxu-costDataND.Lxu) < 1e-4 )
-assert( absmax(costData.Luu-costDataND.Luu) < 1e-4 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxx-costDataND.Lxx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxu-costDataND.Lxu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 
 
@@ -80,11 +80,11 @@ costDataND  = costModelND.createData(rdata)
 
 costModelND.calcDiff(costDataND,x,u)
 
-assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
-assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
-assert( absmax(costData.Lxx-costDataND.Lxx) < 1e-4 )
-assert( absmax(costData.Lxu-costDataND.Lxu) < 1e-4 )
-assert( absmax(costData.Luu-costDataND.Luu) < 1e-4 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxx-costDataND.Lxx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxu-costDataND.Lxu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 
 
@@ -118,11 +118,11 @@ costDataND  = costModelND.createData(rdata)
 
 costModelND.calcDiff(costDataND,x,u)
 
-assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
-assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
-assert( absmax(costData.Lxx-costDataND.Lxx) < 1e-4 )
-assert( absmax(costData.Lxu-costDataND.Lxu) < 1e-4 )
-assert( absmax(costData.Luu-costDataND.Luu) < 1e-4 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxx-costDataND.Lxx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxu-costDataND.Lxu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 
 
@@ -151,11 +151,11 @@ costDataND  = costModelND.createData(rdata)
 
 costModelND.calcDiff(costDataND,x,u)
 
-assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
-assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
-assert( absmax(costData.Lxx-costDataND.Lxx) < 1e-4 )
-assert( absmax(costData.Lxu-costDataND.Lxu) < 1e-4 )
-assert( absmax(costData.Luu-costDataND.Luu) < 1e-4 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxx-costDataND.Lxx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxu-costDataND.Lxu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 
 
@@ -177,11 +177,11 @@ costModelND = CostModelNumDiff(costModel,X,withGaussApprox=True,
 costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
-assert( absmax(costData.Lx-costDataND.Lx) < 1e-3 )
-assert( absmax(costData.Lu-costDataND.Lu) < 1e-3 )
-# assert( absmax(costData.Lxx-costDataND.Lxx) < 1e-3 )
-# assert( absmax(costData.Lxu-costDataND.Lxu) < 1e-3 )
-# assert( absmax(costData.Luu-costDataND.Luu) < 1e-3 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e2*costModelND.disturbance )
+# assert( absmax(costData.Lxx-costDataND.Lxx) < 1e2*costModelND.disturbance )
+# assert( absmax(costData.Lxu-costDataND.Lxu) < 1e2*costModelND.disturbance )
+# assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 # --------------------------------------------------------------
 from crocoddyl import ActivationModelInequality, ActivationModelInequality
@@ -210,8 +210,8 @@ costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
 
-assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
-assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e2*costModelND.disturbance )
 #Check that the cost derivative is zero if q>=lower and q<=upper
 #and that cost is positive if q<lower or q>upper
 lowersafe = m2a(x)>=lowerLimit; uppersafe = m2a(x)<=upperLimit
@@ -240,8 +240,8 @@ costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
 
-assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
-assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e2*costModelND.disturbance )
 #Check that the cost derivative is zero if q>=lower and q<=upper
 #and that cost is positive if q<lower or q>upper
 lowersafe = m2a(x)>=lowerLimit; uppersafe = m2a(x)<=upperLimit
@@ -268,11 +268,11 @@ costModelND = CostModelNumDiff(costModel,StatePinocchio(rmodel),withGaussApprox=
 costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
-assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
-assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
-assert( absmax(costData.Lxx-costDataND.Lxx) < 1e-4 )
-assert( absmax(costData.Lxu-costDataND.Lxu) < 1e-4 )
-assert( absmax(costData.Luu-costDataND.Luu) < 1e-4 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxx-costDataND.Lxx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxu-costDataND.Lxu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 
 
@@ -311,11 +311,11 @@ costModelND = CostModelNumDiff(costModel,StatePinocchio(rmodel),withGaussApprox=
 costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
-assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
-assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
-assert( absmax(costData.Lxx-costDataND.Lxx) < 1e-4 )
-assert( absmax(costData.Lxu-costDataND.Lxu) < 1e-4 )
-assert( absmax(costData.Luu-costDataND.Luu) < 1e-4 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxx-costDataND.Lxx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxu-costDataND.Lxu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 
 
@@ -386,13 +386,13 @@ mnum = ActionModelNumDiff(model,withGaussApprox=True)
 dnum = mnum.createData()
 
 mnum.calcDiff(dnum,x,u)
-assert( norm(data.Fx-dnum.Fx) < np.sqrt(mnum.disturbance)*10 )
-assert( norm(data.Fu-dnum.Fu) < np.sqrt(mnum.disturbance)*10 )
-assert( norm(data.Lx-dnum.Lx) < 10*np.sqrt(mnum.disturbance) )
-assert( norm(data.Lu-dnum.Lu) < 10*np.sqrt(mnum.disturbance) )
-assert( norm(dnum.Lxx-data.Lxx) < 10*np.sqrt(mnum.disturbance) )
-assert( norm(dnum.Lxu-data.Lxu) < 10*np.sqrt(mnum.disturbance) )
-assert( norm(dnum.Luu-data.Luu) < 10*mnum.disturbance )
+assert( norm(data.Fx-dnum.Fx) < 1e2*mnum.disturbance )
+assert( norm(data.Fu-dnum.Fu) < 1e2*mnum.disturbance )
+assert( norm(data.Lx-dnum.Lx) < 1e2*mnum.disturbance )
+assert( norm(data.Lu-dnum.Lu) < 1e2*mnum.disturbance )
+assert( norm(dnum.Lxx-data.Lxx) < 1e2*mnum.disturbance )
+assert( norm(dnum.Lxu-data.Lxu) < 1e2*mnum.disturbance )
+assert( norm(dnum.Luu-data.Luu) < 1e2*mnum.disturbance )
 
 
 

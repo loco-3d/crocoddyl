@@ -227,8 +227,8 @@ dnum.data0.costs['force'].contact = dnum.data0.contact[model.costs['force'].cost
     
 
 mnum.calcDiff(dnum,x,u)
-assert(absmax(data.Fx-dnum.Fx)/model.nx<1e-3)
-assert(absmax(data.Fu-dnum.Fu)/model.nu<1e-3)
+assert(absmax(data.Fx-dnum.Fx)/model.nx < 1e2*mnum.disturbance )
+assert(absmax(data.Fu-dnum.Fu)/model.nu < 1e2*mnum.disturbance )
 
 
 
@@ -277,11 +277,11 @@ model.calc(data,x,u)
 model.calcDiff(data,x,u)
 
 mnum.calcDiff(dnum,x,u)
-assert( norm(data.Lx-dnum.Lx) < 1e-3 )
-assert( norm(data.Lu-dnum.Lu) < 1e-3 )
-assert( norm(dnum.Lxx-data.Lxx) < 1e-3)
-assert( norm(dnum.Lxu-data.Lxu) < 1e-3)
-assert( norm(dnum.Luu-data.Luu) < 1e-3)
+assert( norm(data.Lx-dnum.Lx) < 1e2*mnum.disturbance )
+assert( norm(data.Lu-dnum.Lu) < 1e2*mnum.disturbance )
+assert( norm(dnum.Lxx-data.Lxx) < 1e2*mnum.disturbance )
+assert( norm(dnum.Lxu-data.Lxu) < 1e2*mnum.disturbance )
+assert( norm(dnum.Luu-data.Luu) < 1e2*mnum.disturbance )
 
 
 # --- test quasi static guess
