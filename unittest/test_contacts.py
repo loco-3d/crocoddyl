@@ -303,13 +303,6 @@ from crocoddyl import ShootingProblem, SolverDDP,SolverKKT
 from crocoddyl import IntegratedActionModelEuler
 
 
-def disp(xs,dt=0.1):
-    if not hasattr(robot,'viewer'): robot.initDisplay(loadModel=True)
-    import time
-    for x in xs:
-        robot.display(a2m(x[:robot.nq]))
-        time.sleep(dt)
-
 import copy
 from crocoddyl import CallbackDDPLogger
 

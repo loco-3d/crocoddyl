@@ -21,7 +21,7 @@ from crocoddyl import ActuationModelFreeFloating
 from crocoddyl import ContactModel6D, ContactModelMultiple
 from crocoddyl import ShootingProblem
 from crocoddyl import SolverDDP
-from crocoddyl import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay
+from crocoddyl import CallbackDDPLogger, CallbackDDPVerbose
 from crocoddyl import plotOCSolution, plotDDPConvergence
 from crocoddyl import loadTalosLegs
 from crocoddyl import m2a, a2m, ImpulseModelMultiple, ImpulseModel6D, ActionModelImpact
@@ -35,7 +35,6 @@ disp.__defaults__ = ( .1, )
 
 robot = loadTalosLegs()
 robot.model.armature[6:] = .01
-robot.initDisplay(loadModel=True)
 
 rmodel = robot.model
 rdata  = rmodel.createData()
