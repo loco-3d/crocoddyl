@@ -80,7 +80,7 @@ rmodel.gravity = pinocchio.Motion.Zero()
 pinocchio.computeRNEADerivatives(rmodel,rdata,q,zero(rmodel.nv),zero(rmodel.nv),data.impulse.forces)
 d = rdata.dtau_dq.copy()
 rmodel.gravity = g
-assert(norm(d-dn)<1e-5)
+assert(norm(d+dn)<1e-5)
 
 ### Check J.T f + M(vnext-v)
 np.set_printoptions(precision=4, linewidth=200, suppress=True)
@@ -91,7 +91,7 @@ def MvJtf(q,vnext,v,f):
     pinocchio.forwardKinematics(rmodel,rdata,q)
     pinocchio.updateFramePlacements(rmodel,rdata)
     J = pinocchio.getFrameJacobian(rmodel,rdata,CONTACTFRAME,pinocchio.ReferenceFrame.LOCAL)
-    return M*(vnext-v)+J.T*f
+    return M*(vnext-v)-J.T*f
 
 dn = df_dq(rmodel,lambda _q:MvJtf(_q,a2m(data.vnext),v,a2m(data.f)),q)
 g = rmodel.gravity
@@ -171,7 +171,7 @@ dn = df_dq(rmodel,lambda _q:Jtf(_q,a2m(data.f)),q)
 g = rmodel.gravity
 rmodel.gravity = pinocchio.Motion.Zero()
 pinocchio.computeRNEADerivatives(rmodel,rdata,q,zero(rmodel.nv),zero(rmodel.nv),data.impulse.forces)
-d = rdata.dtau_dq.copy()
+d = -rdata.dtau_dq.copy()
 rmodel.gravity = g
 assert(norm(d-dn)<1e-4)
 
@@ -184,7 +184,7 @@ def MvJtf(q,vnext,v,f):
     pinocchio.forwardKinematics(rmodel,rdata,q)
     pinocchio.updateFramePlacements(rmodel,rdata)
     J = pinocchio.getFrameJacobian(rmodel,rdata,CONTACTFRAME,pinocchio.ReferenceFrame.LOCAL)
-    return M*(vnext-v)+J.T*f
+    return M*(vnext-v)-J.T*f
 
 dn = df_dq(rmodel,lambda _q:MvJtf(_q,a2m(data.vnext),v,a2m(data.f)),q)
 g = rmodel.gravity
@@ -204,7 +204,7 @@ def Krk(q,vnext,v,f):
     pinocchio.updateFramePlacements(rmodel,rdata)
     J = pinocchio.getFrameJacobian(rmodel,rdata,CONTACTFRAME,pinocchio.ReferenceFrame.LOCAL)
     
-    return np.vstack([ M*(vnext-v)+J.T*f, J*vnext ])
+    return np.vstack([ M*(vnext-v)-J.T*f, J*vnext ])
 
 dn = df_dq(rmodel,lambda _q:Krk(_q,a2m(data.vnext),v,a2m(data.f)),q)
 d = np.vstack([data.did_dq, data.dv_dq])

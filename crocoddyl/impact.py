@@ -73,7 +73,7 @@ class ImpulseModel6D(ImpulseModelPinocchio):
         if forcesVec is None:
             forcesVec = data.forces
             data.forces[data.joint] *= 0
-        forcesVec[data.joint] += data.jMf*pinocchio.Force(-a2m(forcesArr))
+        forcesVec[data.joint] += data.jMf*pinocchio.Force(a2m(forcesArr))
         return forcesVec
         
 class ImpulseData6D(ImpulseDataPinocchio):
@@ -114,7 +114,7 @@ class ImpulseModel3D(ImpulseModelPinocchio):
         if forcesVec is None:
             forcesVec = data.forces
             data.forces[data.joint] *= 0
-        forcesVec[data.joint] += data.jMf*pinocchio.Force(-a2m(forcesArr), np.zeros((3,1)))
+        forcesVec[data.joint] += data.jMf*pinocchio.Force(a2m(forcesArr), np.zeros((3,1)))
         return forcesVec
         
 class ImpulseData3D(ImpulseDataPinocchio):
@@ -328,14 +328,14 @@ class ActionModelImpact:
     def createData(self): return ActionDataImpact(self)
     def calc(model,data,x,u=None):
         '''
-        M(vnext-v) + J^T f = 0
+        M(vnext-v) - J^T f = 0
         J vnext = 0
 
         [MJ^T][vnext] = [Mv]
-        [J   ][ f   ]   [0 ]
+        [J   ][ -f   ]   [0 ]
 
         [vnext] = K^-1[Mv], with K = [MJ^T;J0]
-        [ f   ]       [0 ]
+        [ -f   ]       [0 ]
         '''
         nx,nu,nq,nv,nout,nc = model.nx,model.nu,model.nq,model.nv,model.nout,model.nimpulse
         q = a2m(x[:nq])
@@ -351,11 +351,12 @@ class ActionModelImpact:
             data.K[range(nv),range(nv)] += model.pinocchio.armature.flat
         data.K[nv:,:nv] = data.impulse.J
         data.K.T[nv:,:nv] = data.impulse.J
-
+        data.Kinv = inv(data.K)
         data.r[:nv] = (data.K[:nv,:nv]*v).flat
         data.r[nv:] = 0
  
-        data.af[:] = np.dot(inv(data.K),data.r)
+        data.af[:] = np.dot(data.Kinv,data.r)
+        data.f[:] *= -1.
         # Convert force array to vector of spatial forces.
         fs = model.impulse.setForces(data.impulse,data.f)
 
@@ -402,8 +403,6 @@ class ActionModelImpact:
         #pinocchio.updateFramePlacements(model.pinocchio,data.pinocchio)
         model.impulse.calcDiff(data.impulse,x,recalc=False)
         data.dv_dq = data.impulse.Vq
-
-        data.Kinv = inv(data.K)
 
         data.Fq[:nv,:] = 0
         np.fill_diagonal(data.Fq[:nv,:],1)  # dq/dq

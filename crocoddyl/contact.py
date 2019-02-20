@@ -116,7 +116,7 @@ class ContactModel3D(ContactModelPinocchio):
         if forcesVec is None:
             forcesVec = data.forces
             data.forces[data.joint] *= 0
-        forcesVec[data.joint] += data.jMf*pinocchio.Force(-a2m(forcesArr), np.zeros((3,1)))
+        forcesVec[data.joint] += data.jMf*pinocchio.Force(a2m(forcesArr), np.zeros((3,1)))
         return forcesVec
 
 class ContactData3D(ContactDataPinocchio):
@@ -190,7 +190,7 @@ class ContactModel6D(ContactModelPinocchio):
         if forcesVec is None:
             forcesVec = data.forces
             data.forces[data.joint] *= 0
-        forcesVec[data.joint] += data.jMf*pinocchio.Force(-a2m(forcesArr))
+        forcesVec[data.joint] += data.jMf*pinocchio.Force(a2m(forcesArr))
         return forcesVec
 
 class ContactData6D(ContactDataPinocchio):
