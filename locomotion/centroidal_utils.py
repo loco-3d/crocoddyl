@@ -49,7 +49,6 @@ class CentroidalPhi:
                       self.forces-other.forces)
 
 def createSwingTrajectories(rmodel, rdata, x, contact_patches, dt):
-  p = OrderedDict(); m = OrderedDict()
   N = len(x)
   abscissa = a2m(np.linspace(0.,dt*(N-1), N))
   ee_ref = EESplines()
@@ -83,18 +82,20 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee
   #-----------------------
   #Define Cost weights
   w = lambda t: 0
-  w.com = 1e-1;    w.regx = 1e-3;    w.regu = 1e-5;
-  w.swing_patch = 1e6; w.forces = 1e-4;
-  w.swingv = 1e2
+  w.com = 1e1;    w.regx = 1e-3;    w.regu = 0.;
+  w.swing_patch = 1e6; w.forces = 0.;
+  w.contactv = 1e3
   #Define state cost vector for WeightedActivation
-  w.xweight = np.array([0]*6+[0.01]*(rmodel.nv-6)+[10.]*rmodel.nv)**2
+  w.ff_orientation = 1e1
+  w.xweight = np.array([0]*3+[w.ff_orientation]*3+[1.]*(rmodel.nv-6)+[1.]*rmodel.nv)
+  w.xweight[range(18,20)] = w.ff_orientation
   #for patch in swing_patch:  w.swing_patch.append(100.);
   #Define weights for the impact costs.
-  w.imp_state = 1e2;    w.imp_com = 1e2;   w.imp_contact_patch = 1e5;
+  w.imp_state = 1e2;    w.imp_com = 1e2;   w.imp_contact_patch = 1e6;
   w.imp_act_com = m2a([0.1,0.1,3.0])
 
   #Define weights for the terminal costs
-  w.term_com = 1e6;
+  w.term_com = 1e8;
   w.term_regx = 1e4
   #------------------------
   
@@ -102,7 +103,7 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee
   actuationff = ActuationModelFreeFloating(rmodel)
   State = StatePinocchio(rmodel)  
 
-  active_patch_set = set();    active_patch_set_prev = set();
+  active_contact_patch = set();    active_contact_patch_prev = set();
   for nphase, phase in enumerate(cs.contact_phases):
     t0 = phase.time_trajectory[0];    t1 = phase.time_trajectory[-1]
     N = int(round((t1-t0)/dt))+1
@@ -111,21 +112,23 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee
     # Add contact constraints for the active contact patches.
     # Add SE3 cost for the non-active contact patches.
     swing_patch = [];
-    active_patch_set_prev = active_patch_set.copy();   active_patch_set.clear();
+    active_contact_patch_prev = active_contact_patch.copy();   active_contact_patch.clear();
     for patch in patch_name_map.keys():
       if getattr(phase, patch).active:
-        active_patch_set.add(patch)
+        active_contact_patch.add(patch)
         active_contact = ContactModel6D(rmodel,
                                         frame=rmodel.getFrameId(patch_name_map[patch]),
                                         ref = getattr(phase,patch).placement)
         contact_model.addContact(patch, active_contact)
+        #print nphase, "Contact ",patch," added at ", getattr(phase,patch).placement.translation.T
       else:
         swing_patch.append(patch)
 
     # Check if contact has been added in this phase. If this phase is not zero,
     # add an impulse model to deal with this contact.
-    new_contacts = active_patch_set.difference(active_patch_set_prev)
+    new_contacts = active_contact_patch.difference(active_contact_patch_prev)
     if nphase!=0 and len(new_contacts)!=0:
+      #print nphase, "Impact ",[p for p in new_contacts]," added"
       imp_model = ImpulseModelMultiple(rmodel,
                                        {"Impulse_"+patch: ImpulseModel6D(rmodel,
                                         frame=rmodel.getFrameId(patch_name_map[patch]))
@@ -158,6 +161,16 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee
     #also included. e.g., instead of being [0.,0.5], time trajectory is [0,0.5,1.]
     for t in np.linspace(t0,t1,N)[:-1]:
       cost_model = CostModelSum(rmodel, actuationff.nu);
+
+      #For the first node of the phase, add cost v=0 for the contacting foot.
+      if t==0:
+        for patch in active_contact_patch:
+          cost_vcontact = CostModelFrameVelocity(rmodel,
+                                               frame=rmodel.getFrameId(patch_name_map[patch]),
+                                               ref=m2a(pinocchio.Motion.Zero().vector),
+                                               nu=actuationff.nu)
+          cost_model.addCost("contactv_"+patch, cost_vcontact, w.contactv)
+
       #CoM Cost
       cost_com = CostModelCoM(rmodel, ref=m2a(phi_c.com_vcom.eval(t)[0][:3,:]),
                               nu = actuationff.nu);
@@ -178,11 +191,12 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee
                                                                ee_ref[patch].eval(t)[0]),
                                              nu=actuationff.nu)
         cost_model.addCost("swing_"+patch, cost_swing, w.swing_patch)
+        #print t, "Swing cost ",patch," added at ", ee_ref[patch].eval(t)[0][:3].T
 
       #State Regularization
       cost_regx = CostModelState(rmodel, State, ref=rmodel.defaultState,
                                  nu = actuationff.nu,
-                                 activation=ActivationModelWeightedQuad(w.xweight**2))
+                                 activation=ActivationModelWeightedQuad(w.xweight))
       cost_model.addCost("regx", cost_regx, w.regx)
       #Control Regularization
       cost_regu = CostModelControl(rmodel, nu = actuationff.nu)
@@ -192,15 +206,7 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee
                                                         contact_model, cost_model)
       imodel = IntegratedActionModelEuler(dmodel, timeStep=dt)
       problem_models.append(imodel)
-
-    #for the last model of the phase, add velocity cost on swing limbs.
-    for patch in swing_patch:
-      cost_vswing = CostModelFrameVelocity(rmodel,
-                                           frame=rmodel.getFrameId(patch_name_map[patch]),
-                                           ref=m2a(pinocchio.Motion.Zero().vector),
-                                           nu=actuationff.nu)
-      problem_models[-1].differential.costs.addCost("swingv_"+patch, cost_swing, w.swingv)
-   
+  
   #Create Terminal Model.
   contact_model = ContactModelMultiple(rmodel)
   # Add contact constraints for the active contact patches.
