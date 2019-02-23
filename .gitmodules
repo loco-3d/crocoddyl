@@ -1,3 +1,0 @@
-[submodule "examples/hyq_description"]
-	path = examples/hyq_description
-	url = git@github.com:robot-locomotion/hyq-description.git
