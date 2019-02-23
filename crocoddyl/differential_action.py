@@ -155,7 +155,7 @@ class DifferentialActionModelFullyActuated(DifferentialActionModelAbstract):
             pinocchio.computeABADerivatives(model.pinocchio,data.pinocchio,q,v,tauq)
             data.Fx[:,:nv] = data.pinocchio.ddq_dq
             data.Fx[:,nv:] = data.pinocchio.ddq_dv
-            data.Fu[:,:]   = pinocchio.computeMinverse(model.pinocchio,data.pinocchio,q)
+            data.Fu[:,:]   = data.Minv
         else:
             pinocchio.computeRNEADerivatives(model.pinocchio,data.pinocchio,q,v,a)
             data.Fx[:,:nv] = -np.dot(data.Minv,data.pinocchio.dtau_dq)
