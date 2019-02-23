@@ -5,7 +5,8 @@ from pinocchio.utils import *
 from numpy.linalg import inv,pinv,norm,svd,eig
 from testutils import df_dx, df_dq
 
-from crocoddyl import loadTalosArm, EPS
+from crocoddyl import loadTalosArm
+from crocoddyl.utils import EPS
 robot = loadTalosArm()
 model = robot.model
 data = model.createData()

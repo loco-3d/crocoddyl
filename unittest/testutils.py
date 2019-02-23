@@ -1,4 +1,4 @@
-from crocoddyl import EPS
+from crocoddyl.utils import EPS
 import pinocchio
 import numpy as np
 from pinocchio.utils import zero

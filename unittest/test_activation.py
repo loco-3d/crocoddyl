@@ -1,7 +1,7 @@
 from crocoddyl import ActivationDataSmoothAbs, ActivationModelSmoothAbs
 from crocoddyl import ActivationModelQuad
 from crocoddyl import ActivationModelWeightedQuad
-from crocoddyl import EPS
+from crocoddyl.utils import EPS
 import numpy as np
 from numpy.linalg import norm,inv
 
