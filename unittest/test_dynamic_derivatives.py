@@ -1,4 +1,3 @@
-import rospkg
 from pinocchio import SE3
 import pinocchio
 from pinocchio.utils import *
