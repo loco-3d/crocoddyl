@@ -115,23 +115,23 @@ class SimpleQuadrupedalWalkingProblem:
         rhStep = \
             self.createFootstepModels(
                 [self.lfFootId, self.rfFootId, self.lhFootId],
-                self.rhFootId,
-                0.5*stepLength, rhFootPos0, stepKnots)
+                [self.rhFootId],
+                0.5*stepLength, [rhFootPos0], stepKnots)
         rfStep = \
             self.createFootstepModels(
                 [self.lfFootId, self.lhFootId, self.rhFootId],
-                self.rfFootId,
-                0.5*stepLength, rfFootPos0, stepKnots)
+                [self.rfFootId],
+                0.5*stepLength, [rfFootPos0], stepKnots)
         lhStep = \
             self.createFootstepModels(
                 [self.lfFootId, self.rfFootId, self.rhFootId],
-                self.lhFootId,
-                stepLength, lhFootPos0, stepKnots)
+                [self.lhFootId],
+                stepLength, [lhFootPos0], stepKnots)
         lfStep = \
             self.createFootstepModels(
                 [self.rfFootId, self.lhFootId, self.rhFootId],
-                self.lfFootId,
-                stepLength, lfFootPos0, stepKnots)
+                [self.lfFootId],
+                stepLength, [lfFootPos0], stepKnots)
 
         loco3dModel += doubleSupport + rhStep + rfStep
         loco3dModel += doubleSupport + lhStep + lfStep
@@ -139,12 +139,12 @@ class SimpleQuadrupedalWalkingProblem:
         problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
 
-    def createFootstepModels(self, supportFootId, swingFootId, stepLength,
+    def createFootstepModels(self, supportFootId, swingFootIds, stepLength,
                              footPos0, numKnots):
         """ Action models for a footstep phase.
 
         :param supportFootId: Ids of the supporting feet
-        :param swingFootId: Id of the swinging foot
+        :param swingFootId: Ids of the swinging foot
         :param stepLength: step length
         :param footPos0: initial position of the swinging foot
         :param numKnots: number of knots for the footstep phase
@@ -152,12 +152,14 @@ class SimpleQuadrupedalWalkingProblem:
         """
         # Action models for the foot swing
         footSwingModel = []
+        swingFootTask = []
         for k in range(numKnots):
-            # Defining a foot swing task given the step length
-            tref = np.asmatrix(
-                a2m([[(stepLength*(k+1))/numKnots, 0., 0.]]) + footPos0)
-            swingFootTask = \
-                TaskSE3(pinocchio.SE3(np.eye(3), tref), swingFootId)
+            for i, p in zip(swingFootIds,footPos0):
+                # Defining a foot swing task given the step length
+                tref = np.asmatrix(
+                    a2m([[(stepLength*(k+1))/numKnots, 0., 0.]]) + p)
+                swingFootTask += \
+                    [TaskSE3(pinocchio.SE3(np.eye(3), tref), i)]
 
             # Adding an action model for this knot
             footSwingModel += \
@@ -200,12 +202,13 @@ class SimpleQuadrupedalWalkingProblem:
             comTrack = CostModelCoM(self.rmodel, comTask, actModel.nu)
             costModel.addCost("comTrack", comTrack, 1e2)
         if swingFootTask is not None:
-            footTrack = \
-                CostModelFrameTranslation(self.rmodel,
-                                          swingFootTask.frameId,
-                                          m2a(swingFootTask.oXf.translation),
-                                          actModel.nu)
-            costModel.addCost("footTrack", footTrack, 1e2)
+            for i in swingFootTask:
+                footTrack = \
+                    CostModelFrameTranslation(self.rmodel,
+                                              i.frameId,
+                                              m2a(i.oXf.translation),
+                                              actModel.nu)
+                costModel.addCost("footTrack_"+str(i), footTrack, 1e2)
 
         stateWeights = \
             np.array([0]*6 + [0.01]*(self.rmodel.nv-6) + [10]*self.rmodel.nv)
@@ -239,11 +242,12 @@ class SimpleQuadrupedalWalkingProblem:
         model = self.createSwingFootModel(
             0., supportFootId, swingFootTask=swingFootTask)
 
-        impactFootVelCost = \
-            CostModelFrameVelocity(self.rmodel, swingFootTask.frameId)
-        model.differential.costs.addCost('impactVel', impactFootVelCost, 1e4)
-        model.differential.costs['impactVel'].weight = 1e5
-        model.differential.costs['footTrack'].weight = 1e5
+        for i in swingFootTask:
+            impactFootVelCost = \
+                CostModelFrameVelocity(self.rmodel, i.frameId)
+            model.differential.costs.addCost('impactVel_'+str(i), impactFootVelCost, 1e4)
+            model.differential.costs['impactVel_'+str(i)].weight = 1e5
+            model.differential.costs['footTrack_'+str(i)].weight = 1e5
         model.differential.costs['stateReg'].weight = 1e1
         model.differential.costs['ctrlReg'].weight = 1e-3
         return model
