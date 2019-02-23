@@ -16,7 +16,7 @@ testmodules = [
   # 'test_solvers',
   # 'test_ddp_contact',
   # 'test_armature',
-  # 'test_quadrupe',
+  # 'test_quadruped',
 ]
 
 suite = unittest.TestSuite()
