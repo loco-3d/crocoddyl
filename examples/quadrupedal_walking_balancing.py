@@ -171,7 +171,7 @@ class SimpleQuadrupedalWalkingProblem:
             self.createFootstepModels(
                 [self.lfFootId, self.rhFootId],
                 [self.rfFootId, self.lhFootId],
-                0.5*stepLength, [rfFootPos0, lhFootPos0], stepKnots)
+                stepLength, [rfFootPos0, lhFootPos0], stepKnots)
         lfrhStep = \
             self.createFootstepModels(
                 [self.rfFootId, self.lhFootId],
@@ -270,7 +270,6 @@ class SimpleQuadrupedalWalkingProblem:
 
         loco3dModel += doubleSupport + frontSteps
         loco3dModel += doubleSupport + hindSteps
-        loco3dModel += doubleSupport + frontSteps
 
         problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
