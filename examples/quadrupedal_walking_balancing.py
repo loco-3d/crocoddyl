@@ -86,7 +86,7 @@ class SimpleQuadrupedalWalkingProblem:
 
     def createWalkingProblem(self, x0, stepLength, timeStep, stepKnots,
                              supportKnots):
-        """ Create a shooting problem for a simple walking.
+        """ Create a shooting problem for a simple walking gait.
 
         :param x0: initial state
         :param stepLength: step length
@@ -139,6 +139,142 @@ class SimpleQuadrupedalWalkingProblem:
         problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
 
+    def createTrottingProblem(self, x0, stepLength, timeStep, stepKnots,
+                              supportKnots):
+        """ Create a shooting problem for a simple trotting gait.
+
+        :param x0: initial state
+        :param stepLength: step length
+        :param timeStep: step time for each knot
+        :param stepKnots: number of knots for step phases
+        :param supportKnots: number of knots for double support phases
+        :return shooting problem
+        """
+        # Compute the current foot positions
+        q0 = a2m(x0[:self.rmodel.nq])
+        pinocchio.forwardKinematics(self.rmodel, self.rdata, q0)
+        pinocchio.updateFramePlacements(self.rmodel, self.rdata)
+        com0 = m2a(pinocchio.centerOfMass(self.rmodel, self.rdata, q0))
+        rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
+        rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
+        lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
+        lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
+
+        # Defining the action models along the time instances
+        loco3dModel = []
+        doubleSupport = \
+            [self.createSwingFootModel(
+                timeStep,
+                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+            ) for k in range(supportKnots)]
+        rflhStep = \
+            self.createFootstepModels(
+                [self.lfFootId, self.rhFootId],
+                [self.rfFootId, self.lhFootId],
+                0.5*stepLength, [rfFootPos0, lhFootPos0], stepKnots)
+        lfrhStep = \
+            self.createFootstepModels(
+                [self.rfFootId, self.lhFootId],
+                [self.lfFootId, self.rhFootId],
+                stepLength, [lfFootPos0, rhFootPos0], stepKnots)
+
+        loco3dModel += doubleSupport + rflhStep
+        loco3dModel += doubleSupport + lfrhStep
+
+        problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
+        return problem
+
+    def createPacingProblem(self, x0, stepLength, timeStep, stepKnots,
+                              supportKnots):
+        """ Create a shooting problem for a simple pacing gait.
+
+        :param x0: initial state
+        :param stepLength: step length
+        :param timeStep: step time for each knot
+        :param stepKnots: number of knots for step phases
+        :param supportKnots: number of knots for double support phases
+        :return shooting problem
+        """
+        # Compute the current foot positions
+        q0 = a2m(x0[:self.rmodel.nq])
+        pinocchio.forwardKinematics(self.rmodel, self.rdata, q0)
+        pinocchio.updateFramePlacements(self.rmodel, self.rdata)
+        com0 = m2a(pinocchio.centerOfMass(self.rmodel, self.rdata, q0))
+        rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
+        rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
+        lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
+        lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
+
+        # Defining the action models along the time instances
+        loco3dModel = []
+        doubleSupport = \
+            [self.createSwingFootModel(
+                timeStep,
+                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+            ) for k in range(supportKnots)]
+        rightSteps = \
+            self.createFootstepModels(
+                [self.lfFootId, self.lhFootId],
+                [self.rfFootId, self.rhFootId],
+                0.5*stepLength, [rfFootPos0, rhFootPos0], stepKnots)
+        leftSteps = \
+            self.createFootstepModels(
+                [self.rfFootId, self.rhFootId],
+                [self.lfFootId, self.lhFootId],
+                stepLength, [lfFootPos0, lhFootPos0], stepKnots)
+
+        loco3dModel += doubleSupport + rightSteps
+        loco3dModel += doubleSupport + leftSteps
+
+        problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
+        return problem
+
+    def createBoundingProblem(self, x0, stepLength, timeStep, stepKnots,
+                              supportKnots):
+        """ Create a shooting problem for a simple bounding gait.
+
+        :param x0: initial state
+        :param stepLength: step length
+        :param timeStep: step time for each knot
+        :param stepKnots: number of knots for step phases
+        :param supportKnots: number of knots for double support phases
+        :return shooting problem
+        """
+        # Compute the current foot positions
+        q0 = a2m(x0[:self.rmodel.nq])
+        pinocchio.forwardKinematics(self.rmodel, self.rdata, q0)
+        pinocchio.updateFramePlacements(self.rmodel, self.rdata)
+        com0 = m2a(pinocchio.centerOfMass(self.rmodel, self.rdata, q0))
+        rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
+        rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
+        lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
+        lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
+
+        # Defining the action models along the time instances
+        loco3dModel = []
+        doubleSupport = \
+            [self.createSwingFootModel(
+                timeStep,
+                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+            ) for k in range(supportKnots)]
+        frontSteps = \
+            self.createFootstepModels(
+                [self.lfFootId, self.rfFootId],
+                [self.lhFootId, self.rhFootId],
+                stepLength, [lhFootPos0, rhFootPos0], stepKnots)
+        hindSteps = \
+            self.createFootstepModels(
+                [self.lhFootId, self.rhFootId],
+                [self.lfFootId, self.rfFootId],
+                stepLength, [lfFootPos0, rfFootPos0], stepKnots)
+
+        loco3dModel += doubleSupport + frontSteps
+        loco3dModel += doubleSupport + hindSteps
+        loco3dModel += doubleSupport + frontSteps
+
+        problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
+        return problem
+
     def createFootstepModels(self, supportFootId, swingFootIds, stepLength,
                              footPos0, numKnots):
         """ Action models for a footstep phase.
@@ -154,7 +290,7 @@ class SimpleQuadrupedalWalkingProblem:
         footSwingModel = []
         swingFootTask = []
         for k in range(numKnots):
-            for i, p in zip(swingFootIds,footPos0):
+            for i, p in zip(swingFootIds, footPos0):
                 # Defining a foot swing task given the step length
                 tref = np.asmatrix(
                     a2m([[(stepLength*(k+1))/numKnots, 0., 0.]]) + p)
@@ -170,7 +306,8 @@ class SimpleQuadrupedalWalkingProblem:
             self.createFootSwitchModel(supportFootId, swingFootTask)
 
         # Updating the current foot position for next step
-        footPos0 = tref
+        for p in footPos0:
+            p += a2m([[stepLength, 0., 0.]])
         return footSwingModel + [footSwitchModel]
 
     def createSwingFootModel(self, timeStep, supportFootIds, comTask=None,
@@ -245,7 +382,8 @@ class SimpleQuadrupedalWalkingProblem:
         for i in swingFootTask:
             impactFootVelCost = \
                 CostModelFrameVelocity(self.rmodel, i.frameId)
-            model.differential.costs.addCost('impactVel_'+str(i), impactFootVelCost, 1e4)
+            model.differential.costs.addCost('impactVel_'+str(i),
+                                             impactFootVelCost, 1e4)
             model.differential.costs['impactVel_'+str(i)].weight = 1e5
             model.differential.costs['footTrack_'+str(i)].weight = 1e5
         model.differential.costs['stateReg'].weight = 1e1
@@ -284,13 +422,17 @@ cameraTF = [2., 2.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 # Creating the walking problem and solver
 ddp1 = SolverDDP(
     walk.createWalkingProblem(
+    # walk.createTrottingProblem(
+    # walk.createPacingProblem(
+    # walk.createBoundingProblem(
         x0, stepLength, timeStep, stepKnots, supportKnots))
 ddp1.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]
 if WITHDISPLAY:    ddp1.callback.append(CallbackSolverDisplay(hyq, 4, 1, cameraTF))
 ddp1.th_stop = 1e-9
 ddp1.solve(maxiter=1000, regInit=.1,
            init_xs=[rmodel.defaultState]*len(ddp1.models()),
-           init_us=[m.differential.quasiStatic(d.differential, rmodel.defaultState)
+           init_us=[m.differential.quasiStatic(d.differential,
+                                               rmodel.defaultState)
                     for m, d in zip(ddp1.models(), ddp1.datas())[:-1]])
 
 # Creating the CoM forward/backward task
