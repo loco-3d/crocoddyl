@@ -286,14 +286,25 @@ class SimpleQuadrupedalWalkingProblem:
         :param numKnots: number of knots for the footstep phase
         :return footstep action models
         """
+        stepHeight = 0.2
         # Action models for the foot swing
         footSwingModel = []
-        swingFootTask = []
         for k in range(numKnots):
+            swingFootTask = []
             for i, p in zip(swingFootIds, footPos0):
                 # Defining a foot swing task given the step length
-                tref = np.asmatrix(
-                    a2m([[(stepLength*(k+1))/numKnots, 0., 0.]]) + p)
+                resKnot = numKnots % 2
+                phKnots = numKnots / 2
+                if k < phKnots:
+                    dp = a2m([[stepLength * (k+1) / numKnots, 0.,
+                               stepHeight * k / phKnots]])
+                elif k == phKnots:
+                    dp = a2m([[stepLength * (k+1) / numKnots, 0., stepHeight]])
+                else:
+                    dp = a2m([[stepLength * (k+1) / numKnots, 0.,
+                             stepHeight * (1 - float(k-phKnots) / phKnots)]])
+                tref = np.asmatrix(p + dp)
+
                 swingFootTask += \
                     [TaskSE3(pinocchio.SE3(np.eye(3), tref), i)]
 
@@ -345,10 +356,11 @@ class SimpleQuadrupedalWalkingProblem:
                                               i.frameId,
                                               m2a(i.oXf.translation),
                                               actModel.nu)
-                costModel.addCost("footTrack_"+str(i), footTrack, 1e2)
+                costModel.addCost("footTrack_"+str(i), footTrack, 1e4)
 
         stateWeights = \
-            np.array([0]*6 + [0.01]*(self.rmodel.nv-6) + [10]*self.rmodel.nv)
+            np.array([0]*3 + [10.]*3 + [0.01]*(self.rmodel.nv-6) +
+                     [10]*self.rmodel.nv)
         stateReg = CostModelState(self.rmodel,
                                   self.state,
                                   self.rmodel.defaultState,
