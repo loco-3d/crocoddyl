@@ -87,15 +87,15 @@ assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 
 # --------------------------------------------------------------
-from crocoddyl import CostModelFrameVelocity
+from crocoddyl import CostModelFrameVelocityLinear
         
 q = pinocchio.randomConfiguration(rmodel)
 v = rand(rmodel.nv)
 x = m2a(np.concatenate([q,v]))
 u = m2a(rand(rmodel.nv))
 
-costModel = CostModelFrameVelocity(rmodel,
-                                       rmodel.getFrameId('gripper_left_fingertip_2_link'))
+costModel = CostModelFrameVelocityLinear(rmodel,
+                                         rmodel.getFrameId('gripper_left_fingertip_2_link'))
 costData = costModel.createData(rdata)
 
 pinocchio.forwardKinematics(rmodel,rdata,q,v)
