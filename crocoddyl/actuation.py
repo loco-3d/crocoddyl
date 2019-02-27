@@ -3,7 +3,7 @@ from cost import CostModelSum
 from utils import a2m
 import numpy as np
 import pinocchio
-
+import warnings
 
 
 class ActuationModelFreeFloating:
