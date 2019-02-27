@@ -275,6 +275,50 @@ class CostDataFrameVelocity(CostDataPinocchio):
         self.Luu = 0
         self.Ru = 0
 
+class CostModelFrameVelocity(CostModelPinocchio):
+    '''
+    The class proposes a model of a cost function that penalize the velocity of a given 
+    effector.
+    Assumes updateFramePlacement and computeForwardKinematicsDerivatives.
+    '''
+    def __init__(self,pinocchioModel,frame,ref = None ,nu=None,activation=None):
+        self.CostDataType = CostDataFrameVelocity
+        CostModelPinocchio.__init__(self,pinocchioModel,ncost=6)
+        self.ref = ref if ref is not None else np.zeros(6) 
+        self.frame = frame
+        self.activation = activation if activation is not None else ActivationModelQuad()
+    def calc(model,data,x,u):
+        data.residuals[:] = m2a(pinocchio.getFrameVelocity(model.pinocchio,data.pinocchio,
+                                                           model.frame).vector) - model.ref
+        data.cost = sum(model.activation.calc(data.activation,data.residuals))
+        return data.cost
+    def calcDiff(model,data,x,u,recalc=True):
+        if recalc: model.calc(data,x,u)
+        ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
+        dv_dq,dv_dvq = pinocchio.getJointVelocityDerivatives\
+                                  (model.pinocchio,data.pinocchio,data.joint,
+                                   pinocchio.ReferenceFrame.LOCAL)
+
+        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
+        data.Rq[:,:] = data.fXj*dv_dq
+        data.Rv[:,:] = data.fXj*dv_dvq
+        data.Lx[:]     = np.dot(data.Rx.T,Ax)
+        data.Lxx[:,:]  = np.dot(data.Rx.T, Axx*data.Rx)
+        return data.cost
+
+class CostDataFrameVelocity(CostDataPinocchio):
+    def __init__(self,model,pinocchioData):
+        CostDataPinocchio.__init__(self,model,pinocchioData)
+        self.activation = model.activation.createData()
+        frame = model.pinocchio.frames[model.frame]
+        self.joint = frame.parent       
+        self.jMf = frame.placement
+        self.fXj = self.jMf.inverse().action
+        self.Lu = 0
+        self.Lxu = 0
+        self.Luu = 0
+        self.Ru = 0
+
 
 
 class CostModelFramePlacement(CostModelPinocchio):
