@@ -1,4 +1,5 @@
 from state import StateVector
+from utils import EPS
 import numpy as np
 
 
@@ -103,7 +104,7 @@ class ActionModelNumDiff:
         self.ndx = model.ndx
         self.nu = model.nu
         self.State = model.State
-        self.disturbance = 1e-5
+        self.disturbance = np.sqrt(2*EPS)
         try:            self.ncost = model.ncost
         except:         self.ncost = 1
         self.withGaussApprox = withGaussApprox

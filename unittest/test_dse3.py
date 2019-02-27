@@ -1,5 +1,4 @@
 import pinocchio
-import rospkg
 import numpy as np
 from testutils import df_dq
 

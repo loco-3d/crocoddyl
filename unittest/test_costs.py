@@ -1,10 +1,9 @@
-from crocoddyl import CostDataPinocchio, CostModelPinocchio
-from crocoddyl import CostDataNumDiff, CostModelNumDiff
-from crocoddyl import m2a, a2m, absmax, absmin
+from crocoddyl import CostModelNumDiff
+from crocoddyl import m2a, a2m, absmax
 import pinocchio
 from pinocchio.utils import *
 from crocoddyl import loadTalosArm
-from numpy.linalg import inv,norm,pinv
+from numpy.linalg import norm
 
 
 
@@ -45,16 +44,16 @@ costDataND  = costModelND.createData(rdata)
 
 costModelND.calcDiff(costDataND,x,u)
 
-assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
-assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
-assert( absmax(costData.Lxx-costDataND.Lxx) < 1e-4 )
-assert( absmax(costData.Lxu-costDataND.Lxu) < 1e-4 )
-assert( absmax(costData.Luu-costDataND.Luu) < 1e-4 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxx-costDataND.Lxx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxu-costDataND.Lxu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 
 
 # --------------------------------------------------------------
-from crocoddyl import CostDataFrameVelocity, CostModelFrameVelocity
+from crocoddyl import CostModelFrameVelocity
         
 q = pinocchio.randomConfiguration(rmodel)
 v = rand(rmodel.nv)
@@ -80,16 +79,16 @@ costDataND  = costModelND.createData(rdata)
 
 costModelND.calcDiff(costDataND,x,u)
 
-assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
-assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
-assert( absmax(costData.Lxx-costDataND.Lxx) < 1e-4 )
-assert( absmax(costData.Lxu-costDataND.Lxu) < 1e-4 )
-assert( absmax(costData.Luu-costDataND.Luu) < 1e-4 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxx-costDataND.Lxx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxu-costDataND.Lxu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 
 
 # --------------------------------------------------------------
-from crocoddyl import CostDataFramePlacement, CostModelFramePlacement
+from crocoddyl import CostModelFramePlacement
 
         
 q = pinocchio.randomConfiguration(rmodel)
@@ -118,16 +117,16 @@ costDataND  = costModelND.createData(rdata)
 
 costModelND.calcDiff(costDataND,x,u)
 
-assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
-assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
-assert( absmax(costData.Lxx-costDataND.Lxx) < 1e-4 )
-assert( absmax(costData.Lxu-costDataND.Lxu) < 1e-4 )
-assert( absmax(costData.Luu-costDataND.Luu) < 1e-4 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxx-costDataND.Lxx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxu-costDataND.Lxu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 
 
 # --------------------------------------------------------------
-from crocoddyl import CostDataCoM, CostModelCoM
+from crocoddyl import CostModelCoM
 
 
 q = pinocchio.randomConfiguration(rmodel)
@@ -151,16 +150,16 @@ costDataND  = costModelND.createData(rdata)
 
 costModelND.calcDiff(costDataND,x,u)
 
-assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
-assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
-assert( absmax(costData.Lxx-costDataND.Lxx) < 1e-4 )
-assert( absmax(costData.Lxu-costDataND.Lxu) < 1e-4 )
-assert( absmax(costData.Luu-costDataND.Luu) < 1e-4 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxx-costDataND.Lxx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxu-costDataND.Lxu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 
 
 # --------------------------------------------------------------
-from crocoddyl import CostDataState, CostModelState
+from crocoddyl import CostModelState
 from crocoddyl import ActivationModelWeightedQuad
 X = StatePinocchio(rmodel)        
 q = pinocchio.randomConfiguration(rmodel)
@@ -177,14 +176,14 @@ costModelND = CostModelNumDiff(costModel,X,withGaussApprox=True,
 costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
-assert( absmax(costData.Lx-costDataND.Lx) < 1e-3 )
-assert( absmax(costData.Lu-costDataND.Lu) < 1e-3 )
-# assert( absmax(costData.Lxx-costDataND.Lxx) < 1e-3 )
-# assert( absmax(costData.Lxu-costDataND.Lxu) < 1e-3 )
-# assert( absmax(costData.Luu-costDataND.Luu) < 1e-3 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e2*costModelND.disturbance )
+# assert( absmax(costData.Lxx-costDataND.Lxx) < 1e2*costModelND.disturbance )
+# assert( absmax(costData.Lxu-costDataND.Lxu) < 1e2*costModelND.disturbance )
+# assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 # --------------------------------------------------------------
-from crocoddyl import ActivationModelInequality, ActivationModelInequality
+from crocoddyl import ActivationModelInequality
 
 X = StatePinocchio(rmodel)
 q = a2m(np.random.rand(rmodel.nq)) #random value between 0 and 1
@@ -210,8 +209,8 @@ costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
 
-assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
-assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e2*costModelND.disturbance )
 #Check that the cost derivative is zero if q>=lower and q<=upper
 #and that cost is positive if q<lower or q>upper
 lowersafe = m2a(x)>=lowerLimit; uppersafe = m2a(x)<=upperLimit
@@ -240,8 +239,8 @@ costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
 
-assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
-assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e2*costModelND.disturbance )
 #Check that the cost derivative is zero if q>=lower and q<=upper
 #and that cost is positive if q<lower or q>upper
 lowersafe = m2a(x)>=lowerLimit; uppersafe = m2a(x)<=upperLimit
@@ -251,7 +250,7 @@ assert(( costData.Lx[~lowersafe & ~uppersafe] !=0.).all())
 
 
 # --------------------------------------------------------------
-from crocoddyl import CostDataControl, CostModelControl
+from crocoddyl import CostModelControl
         
   
 X = StatePinocchio(rmodel)
@@ -268,16 +267,16 @@ costModelND = CostModelNumDiff(costModel,StatePinocchio(rmodel),withGaussApprox=
 costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
-assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
-assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
-assert( absmax(costData.Lxx-costDataND.Lxx) < 1e-4 )
-assert( absmax(costData.Lxu-costDataND.Lxu) < 1e-4 )
-assert( absmax(costData.Luu-costDataND.Luu) < 1e-4 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxx-costDataND.Lxx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxu-costDataND.Lxu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 
 
 # --------------------------------------------------------------
-from crocoddyl import CostDataSum, CostModelSum
+from crocoddyl import CostModelSum
     
 
 X = StatePinocchio(rmodel)
@@ -311,11 +310,11 @@ costModelND = CostModelNumDiff(costModel,StatePinocchio(rmodel),withGaussApprox=
 costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
-assert( absmax(costData.Lx-costDataND.Lx) < 1e-4 )
-assert( absmax(costData.Lu-costDataND.Lu) < 1e-4 )
-assert( absmax(costData.Lxx-costDataND.Lxx) < 1e-4 )
-assert( absmax(costData.Lxu-costDataND.Lxu) < 1e-4 )
-assert( absmax(costData.Luu-costDataND.Luu) < 1e-4 )
+assert( absmax(costData.Lx-costDataND.Lx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxx-costDataND.Lxx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxu-costDataND.Lxu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 
 
@@ -349,7 +348,7 @@ a,l = model.calc(data,x,u)
 model.calcDiff(data,x,u)
 
 
-from crocoddyl import DifferentialActionDataNumDiff, DifferentialActionModelNumDiff
+from crocoddyl import DifferentialActionModelNumDiff
 
 mnum = DifferentialActionModelNumDiff(model,withGaussApprox=True)
 dnum = mnum.createData()
@@ -386,13 +385,13 @@ mnum = ActionModelNumDiff(model,withGaussApprox=True)
 dnum = mnum.createData()
 
 mnum.calcDiff(dnum,x,u)
-assert( norm(data.Fx-dnum.Fx) < np.sqrt(mnum.disturbance)*10 )
-assert( norm(data.Fu-dnum.Fu) < np.sqrt(mnum.disturbance)*10 )
-assert( norm(data.Lx-dnum.Lx) < 10*np.sqrt(mnum.disturbance) )
-assert( norm(data.Lu-dnum.Lu) < 10*np.sqrt(mnum.disturbance) )
-assert( norm(dnum.Lxx-data.Lxx) < 10*np.sqrt(mnum.disturbance) )
-assert( norm(dnum.Lxu-data.Lxu) < 10*np.sqrt(mnum.disturbance) )
-assert( norm(dnum.Luu-data.Luu) < 10*mnum.disturbance )
+assert( norm(data.Fx-dnum.Fx) < 1e2*mnum.disturbance )
+assert( norm(data.Fu-dnum.Fu) < 1e2*mnum.disturbance )
+assert( norm(data.Lx-dnum.Lx) < 1e2*mnum.disturbance )
+assert( norm(data.Lu-dnum.Lu) < 1e2*mnum.disturbance )
+assert( norm(dnum.Lxx-data.Lxx) < 1e2*mnum.disturbance )
+assert( norm(dnum.Lxu-data.Lxu) < 1e2*mnum.disturbance )
+assert( norm(dnum.Luu-data.Luu) < 1e2*mnum.disturbance )
 
 
 
@@ -403,7 +402,7 @@ assert( norm(dnum.Luu-data.Luu) < 10*mnum.disturbance )
 dmodel = DifferentialActionModelPositioning(rmodel)
 model  = IntegratedActionModelEuler(dmodel)
 
-from crocoddyl import ShootingProblem,SolverKKT,SolverDDP
+from crocoddyl import ShootingProblem, SolverKKT, SolverDDP
 problem = ShootingProblem(model.State.zero()+1, [ model ], model)
 kkt = SolverKKT(problem)
 kkt.th_stop = 1e-18

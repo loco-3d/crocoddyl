@@ -1,12 +1,14 @@
+from crocoddyl import StatePinocchio
+from crocoddyl import DifferentialActionModelFullyActuated, DifferentialActionModelFloatingInContact
+from crocoddyl import IntegratedActionModelEuler
+from crocoddyl import CostModelSum, CostModelFrameTranslation, ContactModel6D
+from crocoddyl import CostModelState, CostModelControl
+from crocoddyl import ActuationModelFreeFloating, ContactModelMultiple
+from crocoddyl import ActivationModelWeightedQuad
 import pinocchio
 from pinocchio.utils import *
-from numpy.linalg import inv,norm,pinv
-from numpy import dot,asarray
-from crocoddyl import IntegratedActionModelEuler, DifferentialActionModelNumDiff,StatePinocchio,CostModelSum,CostModelPinocchio,CostModelFrameTranslation,CostModelState,CostModelControl,DifferentialActionModelFullyActuated
-from crocoddyl import ContactModel6D,ActuationModelFreeFloating,DifferentialActionModelFloatingInContact,ContactModelMultiple
-from crocoddyl import ActivationModelWeightedQuad
+from numpy.linalg import norm, eig
 import warnings
-from numpy.linalg import inv,pinv,norm,svd,eig
 
 m2a = lambda m: np.array(m.flat)
 a2m = lambda a: np.matrix(a).T
@@ -156,6 +158,6 @@ x0s = problem.rollout(u0s)
 from crocoddyl import CallbackDDPLogger, CallbackDDPVerbose
 disp = lambda xs: disptraj(f.robot,xs)
 ddp = SolverDDP(problem)
-ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
+# ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
 ddp.th_stop = 1e-18
 ddp.solve(maxiter=1000)

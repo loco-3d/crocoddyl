@@ -1,8 +1,9 @@
+from crocoddyl.utils import EPS
 import pinocchio
 import numpy as np
 from pinocchio.utils import zero
 
-def df_dx(func,x,h=1e-9):
+def df_dx(func,x,h=np.sqrt(2*EPS)):
   """ Perform df/dx by num_diff.
   :params func: function to differentiate f : np.matrix -> np.matrix
   :params x: value at which f is differentiated. type np.matrix
@@ -19,7 +20,7 @@ def df_dx(func,x,h=1e-9):
     dx[ix] = 0
   return res
 
-def df_dq(model,func,q,h=1e-9):
+def df_dq(model,func,q,h=np.sqrt(2*EPS)):
     """ Perform df/dq by num_diff. q is in the lie manifold.
     :params func: function to differentiate f : np.matrix -> np.matrix
     :params q: configuration value at which f is differentiated. type np.matrix

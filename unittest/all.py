@@ -2,20 +2,20 @@ import unittest
 import sys
 
 testmodules = [
-  # 'test_state',
-  # 'test_costs',
-  # # 'test_dynamics', TODO first create dynamics abstraction
-  # 'test_actuation',
-  # 'test_contacts', # TODO investigate why sometimes doesn't work
-  # 'test_actions',
-  # 'test_solvers',
-  # 'test_activation',
-  # 'test_ddp_contact',
-  # 'test_dse3',
-  # 'test_dynamic_derivatives',
-  # # 'test_impact', # TODO investigate why doesn't work
   # 'test_robots',
+  # 'test_state',
+  # 'test_activation',
+  # 'test_costs',
+  # 'test_dse3',
+  # 'test_actuation',
+  # 'test_contacts',
+  # 'test_actions',
+  # 'test_dynamic_derivatives',
+  # 'test_impact',
   # 'test_rk4',
+  # 'test_solvers',
+  # 'test_ddp_contact',
+  # 'test_armature',
   # 'test_quadruped',
 ]
 

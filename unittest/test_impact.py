@@ -1,5 +1,5 @@
-from crocoddyl import loadTalosArm,loadTalosLegs
-from crocoddyl import ActionModelImpact,ImpulseModel6D,ImpulseModelMultiple
+from crocoddyl import loadTalosArm, loadTalosLegs
+from crocoddyl import ActionModelImpact, ImpulseModel6D, ImpulseModelMultiple
 from crocoddyl import ActionModelNumDiff
 from crocoddyl import m2a, a2m, absmax, absmin
 from crocoddyl.impact import CostModelImpactWholeBody
@@ -217,14 +217,14 @@ dnum = mnum.createData()
 nx,ndx,nq,nv,nu = model.nx,model.ndx,model.nq,model.nv,model.nu
 
 mnum.calcDiff(dnum,x,None)
-assert( absmax(dnum.Fx[:nv,:nv]-data.Fx[:nv,:nv]) < 1e-3 )  # dq/dq
-assert( absmax(dnum.Fx[:nv,nv:]-data.Fx[:nv,nv:]) < 1e-3 )  # dq/dv
-assert( absmax(dnum.Fx[nv:,:nv]-data.Fx[nv:,:nv]) < 3e-3 )  # dv/dq
-assert( absmax(dnum.Fx[nv:,nv:]-data.Fx[nv:,nv:]) < 1e-3 )  # dv/dv
+assert( absmax(dnum.Fx[:nv,:nv]-data.Fx[:nv,:nv]) < 1e4*mnum.disturbance )  # dq/dq
+assert( absmax(dnum.Fx[:nv,nv:]-data.Fx[:nv,nv:]) < 1e4*mnum.disturbance )  # dq/dv
+assert( absmax(dnum.Fx[nv:,:nv]-data.Fx[nv:,:nv]) < 1e4*mnum.disturbance )  # dv/dq
+assert( absmax(dnum.Fx[nv:,nv:]-data.Fx[nv:,nv:]) < 1e4*mnum.disturbance )  # dv/dv
 
-assert( absmax(dnum.Fx-data.Fx) < 1e-3 )
-assert( absmax(dnum.Rx-data.Rx) < 1e-3 )
-assert( absmax(dnum.Lx-data.Lx) < 1e-3 )
+assert( absmax(dnum.Fx-data.Fx) < 1e4*mnum.disturbance )
+assert( absmax(dnum.Rx-data.Rx) < 1e3*mnum.disturbance )
+assert( absmax(dnum.Lx-data.Lx) < 1e3*mnum.disturbance )
 assert( data.Fu.shape[1]==0 and (data.Lu is 0 or data.Lu.shape == (0,)))
 
 ### ----------------------------------------------------------------------
@@ -245,14 +245,14 @@ dnum = mnum.createData()
 nx,ndx,nq,nv,nu = model.nx,model.ndx,model.nq,model.nv,model.nu
 
 mnum.calcDiff(dnum,x,None)
-assert( absmax(dnum.Fx[:nv,:nv]-data.Fx[:nv,:nv]) < 1e-3 )  # dq/dq
-assert( absmax(dnum.Fx[:nv,nv:]-data.Fx[:nv,nv:]) < 1e-3 )  # dq/dv
-assert( absmax(dnum.Fx[nv:,:nv]-data.Fx[nv:,:nv]) < 3e-3 )  # dv/dq
-assert( absmax(dnum.Fx[nv:,nv:]-data.Fx[nv:,nv:]) < 1e-3 )  # dv/dv
+assert( absmax(dnum.Fx[:nv,:nv]-data.Fx[:nv,:nv]) < 1e4*mnum.disturbance )  # dq/dq
+assert( absmax(dnum.Fx[:nv,nv:]-data.Fx[:nv,nv:]) < 1e4*mnum.disturbance )  # dq/dv
+assert( absmax(dnum.Fx[nv:,:nv]-data.Fx[nv:,:nv]) < 1e4*mnum.disturbance )  # dv/dq
+assert( absmax(dnum.Fx[nv:,nv:]-data.Fx[nv:,nv:]) < 1e4*mnum.disturbance )  # dv/dv
 
-assert( absmax(dnum.Fx-data.Fx) < 1e-3 )
-assert( absmax(dnum.Rx-data.Rx) < 1e-3 )
-assert( absmax(dnum.Lx-data.Lx) < 1e-3 )
+assert( absmax(dnum.Fx-data.Fx) < 1e4*mnum.disturbance )
+assert( absmax(dnum.Rx-data.Rx) < 1e3*mnum.disturbance )
+assert( absmax(dnum.Lx-data.Lx) < 1e3*mnum.disturbance )
 assert( data.Fu.shape[1]==0 and (data.Lu is 0 or data.Lu.shape == (0,)))
 
 ### ----------------------------------------------------------------------
@@ -272,12 +272,12 @@ dnum = mnum.createData()
 nx,ndx,nq,nv,nu = model.nx,model.ndx,model.nq,model.nv,model.nu
 
 mnum.calcDiff(dnum,x,None)
-assert( absmax(dnum.Fx[:nv,:nv]-data.Fx[:nv,:nv]) < 1e-3 )  # dq/dq
-assert( absmax(dnum.Fx[:nv,nv:]-data.Fx[:nv,nv:]) < 1e-3 )  # dq/dv
-assert( absmax(dnum.Fx[nv:,:nv]-data.Fx[nv:,:nv]) < 3e-3 )  # dv/dq
-assert( absmax(dnum.Fx[nv:,nv:]-data.Fx[nv:,nv:]) < 1e-3 )  # dv/dv
+assert( absmax(dnum.Fx[:nv,:nv]-data.Fx[:nv,:nv]) < 1e4*mnum.disturbance )  # dq/dq
+assert( absmax(dnum.Fx[:nv,nv:]-data.Fx[:nv,nv:]) < 1e4*mnum.disturbance )  # dq/dv
+assert( absmax(dnum.Fx[nv:,:nv]-data.Fx[nv:,:nv]) < 1e4*mnum.disturbance )  # dv/dq
+assert( absmax(dnum.Fx[nv:,nv:]-data.Fx[nv:,nv:]) < 1e4*mnum.disturbance )  # dv/dv
 
-assert( absmax(dnum.Fx-data.Fx) < 1e-3 )
-assert( absmax(dnum.Rx-data.Rx) < 1e-3 )
-assert( absmax(dnum.Lx-data.Lx) < 1e-3 )
+assert( absmax(dnum.Fx-data.Fx) < 1e4*mnum.disturbance )
+assert( absmax(dnum.Rx-data.Rx) < 1e3*mnum.disturbance )
+assert( absmax(dnum.Lx-data.Lx) < 1e3*mnum.disturbance )
 assert( data.Fu.shape[1]==0 and (data.Lu is 0 or data.Lu.shape == (0,)))

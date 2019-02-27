@@ -14,28 +14,26 @@ from crocoddyl import StatePinocchio
 from crocoddyl import DifferentialActionModelFloatingInContact
 from crocoddyl import IntegratedActionModelEuler
 from crocoddyl import CostModelSum
-from crocoddyl import CostModelFramePlacement, CostModelFrameVelocity
-from crocoddyl import CostModelState, CostModelControl,CostModelCoM
+from crocoddyl import CostModelFramePlacement
+from crocoddyl import CostModelState, CostModelControl, CostModelCoM
 from crocoddyl import ActivationModelWeightedQuad
 from crocoddyl import ActuationModelFreeFloating
 from crocoddyl import ContactModel6D, ContactModelMultiple
 from crocoddyl import ShootingProblem
 from crocoddyl import SolverDDP
-from crocoddyl import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay
-from crocoddyl import plotOCSolution, plotDDPConvergence
+from crocoddyl import CallbackDDPLogger, CallbackDDPVerbose
 from crocoddyl import loadTalosLegs
-from crocoddyl import m2a, a2m, ImpulseModelMultiple, ImpulseModel6D, ActionModelImpact
-from crocoddyl.impact import CostModelImpactCoM, CostModelImpactWholeBody
+from crocoddyl import m2a, a2m
 import pinocchio
-from pinocchio.utils import *
-from numpy.linalg import norm,inv,pinv,eig,svd
-from crocoddyl.diagnostic import displayTrajectory
+from pinocchio.utils import zero, eye
+import numpy as np
+from numpy.linalg import eig
+from crocoddyl import displayTrajectory
 disp = lambda xs,dt: displayTrajectory(robot,xs,dt)
 disp.__defaults__ = ( .1, )
 
 robot = loadTalosLegs()
 robot.model.armature[6:] = .01
-robot.initDisplay(loadModel=True)
 
 rmodel = robot.model
 rdata  = rmodel.createData()

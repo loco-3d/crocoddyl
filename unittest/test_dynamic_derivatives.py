@@ -1,4 +1,3 @@
-import rospkg
 from pinocchio import SE3
 import pinocchio
 from pinocchio.utils import *
@@ -6,6 +5,7 @@ from numpy.linalg import inv,pinv,norm,svd,eig
 from testutils import df_dx, df_dq
 
 from crocoddyl import loadTalosArm
+from crocoddyl.utils import EPS
 robot = loadTalosArm()
 model = robot.model
 data = model.createData()
@@ -69,8 +69,9 @@ da_dq = df_dq(model,lambda q_: pinocchio.aba(model,data,q_,v,tau),q)
 da_dv = df_dx(lambda v_: pinocchio.aba(model,data,q,v_,tau),v)
 pinocchio.computeABADerivatives(model,data,q,v,tau)
 
-assert( absmax(da_dq-data.ddq_dq) < 1e-2 )
-assert( absmax(da_dv-data.ddq_dv) < 1e-2 )
+h = np.sqrt(2*EPS)
+assert( absmax(da_dq-data.ddq_dq) < 1e4*h )
+assert( absmax(da_dv-data.ddq_dv) < 1e4*h )
 
 ### Check RNEA Derivatives (without forces)
 
@@ -78,7 +79,7 @@ a = pinocchio.aba(model,data,q,v,tau)
 dtau_dq = df_dq(model,lambda q_: pinocchio.rnea(model,data,q_,v,a),q)
 pinocchio.computeRNEADerivatives(model,data,q,v,a)
 
-assert( absmax(dtau_dq-data.dtau_dq) < 1e-3 )
+assert( absmax(dtau_dq-data.dtau_dq) < 1e4*h )
 
 ### Check RNEA versus ABA derivatives.
 
