@@ -22,7 +22,7 @@ class SolverDDP:
         self.allocate()
 
         self.isFeasible = False  # Change it to true if you know that datas[t].xnext = xs[t+1]
-        self.alphas = [ 4**(-n) for n in range(10) ]
+        self.alphas = [2**(-n) for n in range(10)]
         self.th_acceptStep = .1
         self.th_stop = 1e-9
         self.th_grad = 1e-12
