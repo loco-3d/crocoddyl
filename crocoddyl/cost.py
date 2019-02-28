@@ -211,7 +211,7 @@ class CostModelFrameTranslation(CostModelPinocchio):
         R = data.pinocchio.oMf[model.frame].rotation
         J = R*pinocchio.getFrameJacobian(model.pinocchio,data.pinocchio,model.frame,
                                          pinocchio.ReferenceFrame.LOCAL)[:3,:]
-        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
+        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals,recalc=recalc)
         data.Rq[:,:nq] = J
         data.Lq[:]     = np.dot(J.T,Ax)
         data.Lqq[:,:]  = np.dot(data.Rq.T,Axx*data.Rq) # J is a matrix, use Rq instead.
@@ -254,7 +254,7 @@ class CostModelFrameVelocity(CostModelPinocchio):
                                   (model.pinocchio,data.pinocchio,data.joint,
                                    pinocchio.ReferenceFrame.LOCAL)
 
-        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
+        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals,recalc=recalc)
         data.Rq[:,:] = data.fXj*dv_dq
         data.Rv[:,:] = data.fXj*dv_dvq
         data.Lx[:]     = np.dot(data.Rx.T,Ax)
@@ -300,7 +300,7 @@ class CostModelFrameVelocityLinear(CostModelPinocchio):
                                   (model.pinocchio,data.pinocchio,data.joint,
                                    pinocchio.ReferenceFrame.LOCAL)
 
-        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
+        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals,recalc=recalc)
         data.Rq[:,:] = (data.fXj*dv_dq)[:3,:]
         data.Rv[:,:] = (data.fXj*dv_dvq)[:3,:]
         data.Lx[:]     = np.dot(data.Rx.T,Ax)
@@ -347,7 +347,7 @@ class CostModelFramePlacement(CostModelPinocchio):
                                                  data.pinocchio,
                                                  model.frame,
                                                  pinocchio.ReferenceFrame.LOCAL))
-        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
+        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals,recalc=recalc)
         data.Rq[:,:nq] = J
         data.Lq[:]     = np.dot(J.T,Ax)
         data.Lqq[:,:]  = np.dot(data.Rq.T,Axx*data.Rq) # J is a matrix, use Rq instead.
@@ -385,7 +385,7 @@ class CostModelCoM(CostModelPinocchio):
     def calcDiff(model,data,x,u,recalc=True):
         if recalc: model.calc(data,x,u)
         ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
-        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
+        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals,recalc=recalc)
         J = data.pinocchio.Jcom
         data.Rq[:,:nq] = J
         data.Lq[:]     = np.dot(J.T,Ax)
@@ -420,7 +420,7 @@ class CostModelState(CostModelPinocchio):
     def calcDiff(model,data,x,u,recalc=True):
         if recalc: model.calc(data,x,u)
         data.Rx[:,:] = (model.State.Jdiff(model.ref,x,'second').T).T
-        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
+        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals,recalc=recalc)
         data.Lx[:] = np.dot(data.Rx.T, Ax)
         data.Lxx[:,:] = np.dot(data.Rx.T, Axx*data.Rx)
 
@@ -450,7 +450,7 @@ class CostModelControl(CostModelPinocchio):
     def calcDiff(model,data,x,u,recalc=True):
         if recalc: model.calc(data,x,u)
         #data.Ru[:,:] = np.eye(nu)
-        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
+        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals,recalc=recalc)
         data.Lu[:] = Ax
         data.Luu[:,:] = np.diag(m2a(Axx))
         assert( data.Luu[0,0] == 1 and data.Luu[1,0] == 0 )
@@ -492,7 +492,7 @@ class CostModelForce(CostModelPinocchio):
         assert(model.nu==len(u) and model.contact.nu == model.nu)
         ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
         df_dx,df_du = data.contact.df_dx,data.contact.df_du
-        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
+        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals,recalc=recalc)
         data.Rx [:,:] = df_dx   # This is useless.
         data.Ru [:,:] = df_du   # This is useless
 
