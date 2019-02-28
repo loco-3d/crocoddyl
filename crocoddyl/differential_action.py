@@ -78,7 +78,7 @@ class DifferentialActionDataAbstract:
         :param model: differential action model
         :param costData: external cost data (optional)
         """
-        nx,nu,ndx,nv,nout = model.nx,model.nu,model.ndx,model.nv,model.nout
+        nx,nu,ndx,nv,nout,ncost = model.nx,model.nu,model.ndx,model.nv,model.nout,model.ncost
         # State evolution and cost data
         self.cost = np.nan
         self.xout = np.zeros(nout)
@@ -94,17 +94,22 @@ class DifferentialActionDataAbstract:
             self.Lxx = np.zeros([ndx,ndx])
             self.Lxu = np.zeros([ndx,nu])
             self.Luu = np.zeros([nu,nu])
+            if model.ncost > 1:
+                self.costResiduals = np.zeros(ncost)
+                self.R   = np.zeros([ncost,ndx+nu])
+                self.Rx  = self.R[:,ndx:]
+                self.Ru  = self.R[:,ndx:]
         else:
             self.costs = costData
-            if model.ncost > 1:
-                self.costResiduals = self.costs.residuals
             self.Lx  = self.costs.Lx
             self.Lu  = self.costs.Lu
             self.Lxx = self.costs.Lxx
             self.Lxu = self.costs.Lxu
             self.Luu = self.costs.Luu
-            self.Rx  = self.costs.Rx
-            self.Ru  = self.costs.Ru
+            if model.ncost > 1:
+                self.costResiduals = self.costs.residuals
+                self.Rx  = self.costs.Rx
+                self.Ru  = self.costs.Ru
 
 
 
