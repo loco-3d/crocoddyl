@@ -12,11 +12,14 @@ WITHPLOT = 'plot' in sys.argv
 # Finally, we use an Euler sympletic integration scheme.
 
 
-# First, let's load the Pinocchio model for the Talos arm. And then, let's
-# create a cost model per the running and terminal action model.
+# First, let's load the Pinocchio model for the Talos arm.
 robot = loadTalosArm()
-runningCostModel = CostModelSum(robot.model)
-terminalCostModel = CostModelSum(robot.model)
+rmodel = robot.model
+rdata  = rmodel.createData()
+
+# Create a cost model per the running and terminal action model.
+runningCostModel = CostModelSum(rmodel)
+terminalCostModel = CostModelSum(rmodel)
 
 # Note that we need to include a cost model (i.e. set of cost functions) in
 # order to fully define the action model for our optimal control problem.
@@ -24,17 +27,17 @@ terminalCostModel = CostModelSum(robot.model)
 # goal-tracking cost, state and control regularization; and one terminal-cost:
 # goal cost. First, let's create the common cost functions.
 frameName = 'gripper_left_joint'
-state = StatePinocchio(robot.model)
+state = StatePinocchio(rmodel)
 SE3ref = pinocchio.SE3(np.eye(3), np.array([ [.0],[.0],[.4] ]))
-goalTrackingCost = CostModelFramePlacement(robot.model,
-                                       nu=robot.model.nv,
-                                       frame=robot.model.getFrameId(frameName),
+goalTrackingCost = CostModelFramePlacement(rmodel,
+                                       nu=rmodel.nv,
+                                       frame=rmodel.getFrameId(frameName),
                                        ref=SE3ref)
-xRegCost = CostModelState(robot.model,
+xRegCost = CostModelState(rmodel,
                           state,
                           ref=state.zero(),
-                          nu=robot.model.nv)
-uRegCost = CostModelControl(robot.model,nu=robot.model.nv)
+                          nu=rmodel.nv)
+uRegCost = CostModelControl(rmodel,nu=rmodel.nv)
 
 # Then let's added the running and terminal cost functions
 runningCostModel.addCost( name="pos", weight = 1e-3, cost = goalTrackingCost)
@@ -47,9 +50,9 @@ terminalCostModel.addCost( name="pos", weight = 1, cost = goalTrackingCost)
 # forward dynamics (computed using ABA) are implemented
 # inside DifferentialActionModelFullyActuated.
 runningModel = IntegratedActionModelEuler(
-    DifferentialActionModelFullyActuated(robot.model, runningCostModel))
+    DifferentialActionModelFullyActuated(rmodel, runningCostModel))
 terminalModel = IntegratedActionModelEuler(
-    DifferentialActionModelFullyActuated(robot.model, terminalCostModel))
+    DifferentialActionModelFullyActuated(rmodel, terminalCostModel))
 
 # Defining the time duration for running action models and the terminal one
 dt = 1e-3
@@ -60,7 +63,7 @@ runningModel.timeStep = dt
 # models) plus a terminal knot
 T = 250
 q0 = [0.173046, 1., -0.52366, 0., 0., 0.1, -0.005]
-x0 = np.hstack([q0, np.zeros(robot.model.nv)])
+x0 = np.hstack([q0, np.zeros(rmodel.nv)])
 problem = ShootingProblem(x0, [ runningModel ]*T, terminalModel)
 
 # Creating the DDP solver for this OC problem, defining a logger
@@ -82,10 +85,13 @@ if WITHPLOT:
                        log.th_stops,log.steps)
 
 # Visualizing the solution in gepetto-viewer
-if WITHDISPLAY: CallbackSolverDisplay(robot)(ddp)
+if WITHDISPLAY:
+    from crocoddyl.diagnostic import displayTrajectory
+    displayTrajectory(robot,ddp.xs,runningModel.timeStep)
+
 
 # Printing the reached position
-frame_idx = robot.model.getFrameId(frameName)
+frame_idx = rmodel.getFrameId(frameName)
 print
 print "The reached pose by the wrist is"
 print ddp.datas()[-1].differential.pinocchio.oMf[frame_idx]
