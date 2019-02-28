@@ -86,6 +86,40 @@ assert( absmax(costData.Lxu-costDataND.Lxu) < 1e2*costModelND.disturbance )
 assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 
+# --------------------------------------------------------------
+from crocoddyl import CostModelFrameVelocityLinear
+        
+q = pinocchio.randomConfiguration(rmodel)
+v = rand(rmodel.nv)
+x = m2a(np.concatenate([q,v]))
+u = m2a(rand(rmodel.nv))
+
+costModel = CostModelFrameVelocityLinear(rmodel,
+                                         rmodel.getFrameId('gripper_left_fingertip_2_link'))
+costData = costModel.createData(rdata)
+
+pinocchio.forwardKinematics(rmodel,rdata,q,v)
+pinocchio.computeForwardKinematicsDerivatives(rmodel,rdata,q,v,zero(rmodel.nv))
+pinocchio.updateFramePlacements(rmodel,rdata)
+
+
+costModel.calcDiff(costData,x,u)
+
+costModelND = CostModelNumDiff(costModel,StatePinocchio(rmodel),withGaussApprox=True,
+                               reevals = [ lambda m,d,x,u: pinocchio.forwardKinematics(m,d,a2m(x[:rmodel.nq]),a2m(x[rmodel.nq:])),
+                                           lambda m,d,x,u: pinocchio.computeForwardKinematicsDerivatives(m,d,a2m(x[:rmodel.nq]),a2m(x[rmodel.nq:]),zero(rmodel.nv)),
+                                           lambda m,d,x,u: pinocchio.updateFramePlacements(m,d) ])
+costDataND  = costModelND.createData(rdata)
+
+costModelND.calcDiff(costDataND,x,u)
+
+assert( absmax(costData.Lx-costDataND.Lx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lu-costDataND.Lu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxx-costDataND.Lxx) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Lxu-costDataND.Lxu) < 1e2*costModelND.disturbance )
+assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
+
+
 
 # --------------------------------------------------------------
 from crocoddyl import CostModelFramePlacement
