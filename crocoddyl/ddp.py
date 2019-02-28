@@ -68,6 +68,8 @@ class SolverDDP:
         """ Compute the tangent (LQR) model.
         """
         self.cost = self.problem.calcDiff(self.xs,self.us)
+        if not self.isFeasible:
+            self.gaps = [ d.xnext-x for d,x in zip(self.problem.runningDatas,self.xs[1:]) ]
         return self.cost
     
     def computeDirection(self,recalc=True):
@@ -132,7 +134,7 @@ class SolverDDP:
                 if d1<self.th_grad or not self.isFeasible or self.dV > self.th_acceptStep*self.dV_exp:
                     # Accept step
                     self.wasFeasible = self.isFeasible
-                    self.setCandidate(self.xs_try,self.us_try,isFeasible=True,copy=False)
+                    self.setCandidate(self.xs_try,self.us_try,isFeasible=(self.wasFeasible or a==1),copy=False)
                     self.cost = self.cost_try
                     break
             if a>self.th_step:
@@ -260,7 +262,7 @@ class SolverDDP:
             with np.warnings.catch_warnings():
                 np.warnings.simplefilter(warning)
                 xnext,cost = m.calc(d, xtry[t],utry[t] )
-            xtry[t+1] = xnext.copy()  # not sure copy helpful here.
+            xtry[t+1] = xnext + 0 if stepLength==1 else self.gaps[t]*(1-stepLength)
             ctry += cost
             raiseIfNan([ctry,cost],ArithmeticError('forward error'))
             raiseIfNan(xtry[t+1],ArithmeticError('forward error'))

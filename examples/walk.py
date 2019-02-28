@@ -57,7 +57,7 @@ def runningModel(contactIds, effectors, com=None, integrationStep = 1e-2):
     # Creating the cost model for a contact phase
     costModel = CostModelSum(rmodel, actModel.nu)
     wx = np.array([0]*6 + [.1]*(rmodel.nv-6) + [10]*rmodel.nv)
-    costModel.addCost('xreg',weight=1e-2,
+    costModel.addCost('xreg',weight=1e-1,
                       cost=CostModelState(rmodel,State,ref=rmodel.defaultState,nu=actModel.nu,
                                           activation=ActivationModelWeightedQuad(wx)))
     costModel.addCost('ureg',weight=1e-4,
@@ -97,7 +97,7 @@ def impactModel(contactIds,effectors):
     # Creating the cost model for a contact phase
     costModel = CostModelSum(rmodel,nu=0)
     wx = np.array([0]*6 + [.1]*(rmodel.nv-6) + [10]*rmodel.nv)
-    costModel.addCost('xreg',weight=1e-2,
+    costModel.addCost('xreg',weight=1e-1,
                       cost=CostModelState(rmodel,State,ref=rmodel.defaultState,nu=0,
                                           activation=ActivationModelWeightedQuad(wx)))
     # costModel.addCost('com',weight=1.,
@@ -126,38 +126,40 @@ right0 = m2a(rdata.oMf[rightId].translation)
 left0  = m2a(rdata.oMf[leftId ].translation)
 com0   = m2a(pinocchio.centerOfMass(rmodel,rdata,q0))
 
+KT = 5
+KS = 10
 models =\
-         [ runningModel([ rightId, leftId ],{}, integrationStep=stanceDurantion/5) for i in range(5) ] \
-        + [ runningModel([ rightId ],{},integrationStep=swingDuration/10) for i in range(10)] \
+         [ runningModel([ rightId, leftId ],{}, integrationStep=stanceDurantion/KT) for i in range(KT) ] \
+        + [ runningModel([ rightId ],{},integrationStep=swingDuration/KS) for i in range(KS)] \
         + [ impactModel([ leftId,rightId ], 
                         { leftId: SE3(eye(3), a2m(left0+[stepLength,0,0])) }) ] \
-        + [ runningModel([ rightId, leftId ],{}, integrationStep=stanceDurantion/5) for i in range(5) ] \
-        + [ runningModel([ leftId ],{},integrationStep=swingDuration/10) for i in range(10) ] \
+        + [ runningModel([ rightId, leftId ],{}, integrationStep=stanceDurantion/KT) for i in range(KT) ] \
+        + [ runningModel([ leftId ],{},integrationStep=swingDuration/KS) for i in range(KS) ] \
         + [ impactModel([ leftId,rightId ], 
                         { rightId: SE3(eye(3), a2m(right0+[stepLength,0,0])) }) ] \
-        + [ runningModel([ rightId, leftId ],{}, integrationStep=stanceDurantion/5) for i in range(5) ]
+        + [ runningModel([ rightId, leftId ],{}, integrationStep=stanceDurantion/KT) for i in range(KT) ]
 
-imp1 = 15
-imp2 = 31
+imp1 = KT+KS
+imp2 = 2*(KT+KS)+1
 mimp1 = models[imp1]
 mimp2 = models[imp2]
 
 # ---------------------------------------------------------------------------------------------
 problem = ShootingProblem(initialState=x0,runningModels=models[:-1],terminalModel=models[-1])
 ddp = SolverDDP(problem)
-ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]#, CallbackSolverDisplay(robot,rate=5) ]
+ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]#, CallbackSolverDisplay(robot,rate=-1) ]
 ddp.th_stop = 1e-6
 us0 = [ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
         if isinstance(m,IntegratedActionModelEuler) else np.zeros(0) \
         for m,d in zip(ddp.problem.runningModels,ddp.problem.runningDatas) ]
-
+xs0 = [rmodel.defaultState]*len(ddp.models())
 dimp1 = ddp.datas()[imp1]
 dimp2 = ddp.datas()[imp2]
 
 print("*** SOLVE ***")
-ddp.solve(maxiter=200,regInit=.1,
-          init_xs=[rmodel.defaultState]*len(ddp.models())),
-          init_us=us0)
+ddp.solve(maxiter=200)
+#          init_xs=xs0)
+#          init_us=us0)
 
 
 
