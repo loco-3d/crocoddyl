@@ -322,6 +322,35 @@ class SimpleQuadrupedalWalkingProblem:
         problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
 
+    def createJumpingProblem(self, x0, jumpHeight, timeStep):
+        comPos0 = m2a(pinocchio.centerOfMass(self.rmodel, self.rdata, q0))
+        rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
+        rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
+        lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
+        lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
+
+        takeOffKnots = 30
+        flyingKnots = 30
+
+        loco3dModel = []
+        takeOff = \
+            [self.createSwingFootModel(
+                timeStep,
+                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+            ) for k in range(takeOffKnots)]
+        flyingPhase = \
+            [self.createSwingFootModel(
+                timeStep,
+                [],
+                np.array([0., 0., jumpHeight * (k+1) / flyingKnots]) + comPos0
+            ) for k in range(flyingKnots)]
+
+        loco3dModel += takeOff
+        loco3dModel += flyingPhase
+
+        problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
+        return problem
+
     def createFootstepModels(self, comPos0, feetPos0, stepLength, stepHeight,
                              numKnots, supportFootIds, swingFootIds):
         """ Action models for a footstep phase.
@@ -479,9 +508,11 @@ rhFoot = 'rh_foot'
 walk = SimpleQuadrupedalWalkingProblem(
     rmodel, lfFoot, rfFoot, lhFoot, rhFoot)
 
-# Setting up the walking variables
+# Setting up all tasks
 stepLength = 0.15  # meters
 stepHeight = 0.2  # meters
+comGoTo = 0.1  # meters
+jumpHeight = 0.5  # meters
 timeStep = 1e-2  # seconds
 stepKnots = 25
 supportKnots = 5
@@ -505,7 +536,6 @@ ddp1.solve(maxiter=1000, regInit=.1,
                     for m, d in zip(ddp1.models(), ddp1.datas())[:-1]])
 
 # Creating the CoM forward/backward task
-comGoTo = 0.1  # meters
 x0 = ddp1.xs[-1]
 supportKnots = 5
 ddp2 = SolverDDP(
@@ -519,9 +549,23 @@ ddp2.solve(maxiter=1000, regInit=.1,
            init_us=[m.differential.quasiStatic(d.differential, x0)
                     for m, d in zip(ddp2.models(), ddp2.datas())[:-1]])
 
+# Creating the jumping task
+x0 = ddp2.xs[-1]
+ddp3 = SolverDDP(
+    walk.createJumpingProblem(
+        x0, jumpHeight, timeStep))
+ddp3.callback = [CallbackDDPLogger(), CallbackDDPVerbose(),
+                 CallbackSolverDisplay(hyq, 4, 1, cameraTF)]
+ddp3.th_stop = 1e-9
+ddp3.solve(maxiter=1000, regInit=.1,
+           init_xs=[hyq.model.defaultState]*len(ddp3.models()),
+           init_us=[m.differential.quasiStatic(d.differential,
+                                               hyq.model.defaultState)
+                    for m, d in zip(ddp3.models(), ddp3.datas())[:-1]])
+
 
 # Display the entire motion
 if WITHDISPLAY:
-    from crocoddyl.diagnostic import displayTrajectory
     displayTrajectory(hyq,ddp1.xs,ddp1.models()[0].timeStep)
-    displayTrajectory(hyq,ddp1.xs,ddp2.models()[0].timeStep)
+    displayTrajectory(hyq,ddp2.xs,ddp2.models()[0].timeStep)
+    displayTrajectory(hyq,ddp3.xs,ddp3.models()[0].timeStep)
