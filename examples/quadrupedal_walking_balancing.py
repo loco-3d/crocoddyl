@@ -85,12 +85,13 @@ class SimpleQuadrupedalWalkingProblem:
         problem = ShootingProblem(x0, comModels, comModels[-1])
         return problem
 
-    def createWalkingProblem(self, x0, stepLength, timeStep, stepKnots,
-                             supportKnots):
+    def createWalkingProblem(self, x0, stepLength, stepHeight,
+                             timeStep, stepKnots, supportKnots):
         """ Create a shooting problem for a simple walking gait.
 
         :param x0: initial state
         :param stepLength: step length
+        :param stepHeight: step height
         :param timeStep: step time for each knot
         :param stepKnots: number of knots for step phases
         :param supportKnots: number of knots for double support phases
@@ -116,34 +117,40 @@ class SimpleQuadrupedalWalkingProblem:
         if self.firstStep is True:
             rhStep = \
                 self.createFootstepModels(
-                    comPos0, [rhFootPos0], 0.5*stepLength, stepKnots,
+                    comPos0, [rhFootPos0],
+                    0.5*stepLength, stepHeight, stepKnots,
                     [self.lfFootId, self.rfFootId, self.lhFootId],
                     [self.rhFootId])
             rfStep = \
                 self.createFootstepModels(
-                    comPos0, [rfFootPos0], 0.5*stepLength, stepKnots,
+                    comPos0, [rfFootPos0],
+                    0.5*stepLength, stepHeight, stepKnots,
                     [self.lfFootId, self.lhFootId, self.rhFootId],
                     [self.rfFootId])
             self.firstStep = False
         else:
             rhStep = \
                 self.createFootstepModels(
-                    comPos0, [rhFootPos0], stepLength, stepKnots,
+                    comPos0, [rhFootPos0],
+                    stepLength, stepHeight, stepKnots,
                     [self.lfFootId, self.rfFootId, self.lhFootId],
                     [self.rhFootId])
             rfStep = \
                 self.createFootstepModels(
-                    comPos0, [rfFootPos0], stepLength, stepKnots,
+                    comPos0, [rfFootPos0],
+                    stepLength, stepHeight, stepKnots,
                     [self.lfFootId, self.lhFootId, self.rhFootId],
                     [self.rfFootId])
         lhStep = \
             self.createFootstepModels(
-                comPos0, [lhFootPos0], stepLength, stepKnots,
+                comPos0, [lhFootPos0],
+                stepLength, stepHeight, stepKnots,
                 [self.lfFootId, self.rfFootId, self.rhFootId],
                 [self.lhFootId])
         lfStep = \
             self.createFootstepModels(
-                comPos0, [lfFootPos0], stepLength, stepKnots,
+                comPos0, [lfFootPos0],
+                stepLength, stepHeight, stepKnots,
                 [self.rfFootId, self.lhFootId, self.rhFootId],
                 [self.lfFootId])
 
@@ -153,12 +160,13 @@ class SimpleQuadrupedalWalkingProblem:
         problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
 
-    def createTrottingProblem(self, x0, stepLength, timeStep, stepKnots,
-                              supportKnots):
+    def createTrottingProblem(self, x0, stepLength, stepHeight,
+                              timeStep, stepKnots, supportKnots):
         """ Create a shooting problem for a simple trotting gait.
 
         :param x0: initial state
         :param stepLength: step length
+        :param stepHeight: step height
         :param timeStep: step time for each knot
         :param stepKnots: number of knots for step phases
         :param supportKnots: number of knots for double support phases
@@ -185,23 +193,21 @@ class SimpleQuadrupedalWalkingProblem:
             rflhStep = \
                 self.createFootstepModels(
                     comPos0, [rfFootPos0, lhFootPos0],
-                    0.5*stepLength, stepKnots,
+                    0.5*stepLength, stepHeight, stepKnots,
                     [self.lfFootId, self.rhFootId],
                     [self.rfFootId, self.lhFootId])
             self.firstStep = False
-            print '---------------first'
         else:
-            print '---------------scond'
             rflhStep = \
                 self.createFootstepModels(
                     comPos0, [rfFootPos0, lhFootPos0],
-                    stepLength, stepKnots,
+                    stepLength, stepHeight, stepKnots,
                     [self.lfFootId, self.rhFootId],
                     [self.rfFootId, self.lhFootId])
         lfrhStep = \
             self.createFootstepModels(
                 comPos0, [lfFootPos0, rhFootPos0],
-                stepLength, stepKnots,
+                stepLength, stepHeight, stepKnots,
                 [self.rfFootId, self.lhFootId],
                 [self.lfFootId, self.rhFootId])
 
@@ -211,12 +217,13 @@ class SimpleQuadrupedalWalkingProblem:
         problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
 
-    def createPacingProblem(self, x0, stepLength, timeStep, stepKnots,
-                            supportKnots):
+    def createPacingProblem(self, x0, stepLength, stepHeight,
+                            timeStep, stepKnots, supportKnots):
         """ Create a shooting problem for a simple pacing gait.
 
         :param x0: initial state
         :param stepLength: step length
+        :param stepHeight: step height
         :param timeStep: step time for each knot
         :param stepKnots: number of knots for step phases
         :param supportKnots: number of knots for double support phases
@@ -243,7 +250,7 @@ class SimpleQuadrupedalWalkingProblem:
             rightSteps = \
                 self.createFootstepModels(
                     comPos0, [rfFootPos0, rhFootPos0],
-                    0.5*stepLength, stepKnots,
+                    0.5*stepLength, stepHeight, stepKnots,
                     [self.lfFootId, self.lhFootId],
                     [self.rfFootId, self.rhFootId])
             self.firstStep = False
@@ -251,13 +258,13 @@ class SimpleQuadrupedalWalkingProblem:
             rightSteps = \
                 self.createFootstepModels(
                     comPos0, [rfFootPos0, rhFootPos0],
-                    stepLength, stepKnots,
+                    stepLength, stepHeight, stepKnots,
                     [self.lfFootId, self.lhFootId],
                     [self.rfFootId, self.rhFootId])
         leftSteps = \
             self.createFootstepModels(
                 comPos0, [lfFootPos0, lhFootPos0],
-                stepLength, stepKnots,
+                stepLength, stepHeight, stepKnots,
                 [self.rfFootId, self.rhFootId],
                 [self.lfFootId, self.lhFootId])
 
@@ -267,12 +274,13 @@ class SimpleQuadrupedalWalkingProblem:
         problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
 
-    def createBoundingProblem(self, x0, stepLength, timeStep, stepKnots,
-                              supportKnots):
+    def createBoundingProblem(self, x0, stepLength, stepHeight,
+                              timeStep, stepKnots, supportKnots):
         """ Create a shooting problem for a simple bounding gait.
 
         :param x0: initial state
         :param stepLength: step length
+        :param stepHeight: step height
         :param timeStep: step time for each knot
         :param stepKnots: number of knots for step phases
         :param supportKnots: number of knots for double support phases
@@ -297,12 +305,14 @@ class SimpleQuadrupedalWalkingProblem:
             ) for k in range(supportKnots)]
         frontSteps = \
             self.createFootstepModels(
-                comPos0, [lhFootPos0, rhFootPos0], stepLength, stepKnots,
+                comPos0, [lhFootPos0, rhFootPos0],
+                stepLength, stepHeight, stepKnots,
                 [self.lfFootId, self.rfFootId],
                 [self.lhFootId, self.rhFootId])
         hindSteps = \
             self.createFootstepModels(
-                comPos0, [lfFootPos0, rfFootPos0], stepLength, stepKnots,
+                comPos0, [lfFootPos0, rfFootPos0],
+                stepLength, stepHeight, stepKnots,
                 [self.lhFootId, self.rhFootId],
                 [self.lfFootId, self.rfFootId])
 
@@ -312,19 +322,19 @@ class SimpleQuadrupedalWalkingProblem:
         problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
 
-    def createFootstepModels(self, comPos0, feetPos0, stepLength, numKnots,
-                             supportFootIds, swingFootIds):
+    def createFootstepModels(self, comPos0, feetPos0, stepLength, stepHeight,
+                             numKnots, supportFootIds, swingFootIds):
         """ Action models for a footstep phase.
 
         :param comPos0, initial CoM position
         :param feetPos0: initial position of the swinging feet
         :param stepLength: step length
+        :param stepHeight: step height
         :param numKnots: number of knots for the footstep phase
         :param supportFootIds: Ids of the supporting feet
         :param swingFootIds: Ids of the swinging foot
         :return footstep action models
         """
-        stepHeight = 0.2
         numLegs = len(supportFootIds) + len(swingFootIds)
         comPercentage = float(len(swingFootIds)) / numLegs
 
@@ -471,6 +481,7 @@ walk = SimpleQuadrupedalWalkingProblem(
 
 # Setting up the walking variables
 stepLength = 0.15  # meters
+stepHeight = 0.2  # meters
 timeStep = 1e-2  # seconds
 stepKnots = 25
 supportKnots = 5
@@ -483,7 +494,7 @@ ddp1 = SolverDDP(
     # walk.createTrottingProblem(
     # walk.createPacingProblem(
     # walk.createBoundingProblem(
-        x0, stepLength, timeStep, stepKnots, supportKnots))
+        x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots))
 ddp1.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]
 if WITHDISPLAY:    ddp1.callback.append(CallbackSolverDisplay(hyq, 4, 1, cameraTF))
 ddp1.th_stop = 1e-9
