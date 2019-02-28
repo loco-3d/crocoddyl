@@ -321,8 +321,11 @@ problem = ShootingProblem(x0, [ model ], model)
 ddp = SolverDDP(problem)
 ddp.callback = [CallbackDDPLogger()]
 ddp.th_stop = 1e-18
-xddp,uddp,doneddp = ddp.solve(maxiter=100)
+xddp,uddp,doneddp = ddp.solve(maxiter=200)
 
+if not doneddp:
+  ddp.callback = [ CallbackDDPVerbose() ]
+  ddp.solve(maxiter=200)
 assert(doneddp)
 assert( norm(ddp.datas()[-1].differential.costs['pos'].residuals)<1e-3 )
 assert( norm(m2a(ddp.datas()[-1].differential.costs['pos'].pinocchio.oMf[c1.frame].translation)\

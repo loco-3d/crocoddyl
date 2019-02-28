@@ -37,6 +37,8 @@ robot.model.armature[6:] = .01
 
 rmodel = robot.model
 rdata  = rmodel.createData()
+rmodel.q0 = rmodel.referenceConfigurations['half_sitting'].copy()
+
 
 # Setting up the 3d walking problem
 rightFoot = 'right_sole_link'
@@ -46,7 +48,7 @@ rightId = rmodel.getFrameId(rightFoot)
 leftId  = rmodel.getFrameId(leftFoot)
 
 # Create the initial state
-q0 = robot.q0.copy()
+q0 = rmodel.q0
 v0 = zero(rmodel.nv)
 x0 = m2a(np.concatenate([q0,v0]))
 rmodel.defaultState = x0.copy()
@@ -100,7 +102,7 @@ def runningModel(contactIds, effectors, com=None, integrationStep = 1e-2):
 # -------------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------------
 
-q = robot.q0.copy()
+q = rmodel.q0.copy()
 v = zero(rmodel.nv)
 x = m2a(np.concatenate([q,v]))
 

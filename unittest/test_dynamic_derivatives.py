@@ -14,8 +14,8 @@ absmax = lambda A: np.max(abs(A))
 absmin = lambda A: np.min(abs(A))
 
 if np.any(np.isinf(model.upperPositionLimit)):
-    qmin = robot.model.lowerPositionLimit; qmin[:7]=-1; robot.model.lowerPositionLimit = qmin
-    qmax = robot.model.upperPositionLimit; qmax[:7]= 1; robot.model.upperPositionLimit = qmax
+    qmin = rmodel.lowerPositionLimit; qmin[:7]=-1; rmodel.lowerPositionLimit = qmin
+    qmax = rmodel.upperPositionLimit; qmax[:7]= 1; rmodel.upperPositionLimit = qmax
 
 q = pinocchio.randomConfiguration(model)
 v = rand(model.nv)*2-1
