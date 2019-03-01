@@ -3,6 +3,7 @@ from crocoddyl import DifferentialActionModelNumDiff
 from crocoddyl import m2a, a2m, absmax, absmin
 from crocoddyl import loadTalosArm
 import numpy as np
+from numpy.linalg import norm
 import pinocchio
 from pinocchio.utils import rand
 
@@ -111,5 +112,5 @@ mnum = DifferentialActionModelNumDiff(model)
 dnum = mnum.createData()
 mnum.calcDiff(dnum,x,u)
 
-assert(absmax(data.Fx-dnum.Fx)/model.nx < 1e3*mnum.disturbance )
-assert(absmax(data.Fu-dnum.Fu)/model.nu < 1e2*mnum.disturbance )
+assert(np.allclose(data.Fx, dnum.Fx, atol=1e4*mnum.disturbance))
+assert(np.allclose(data.Fu, dnum.Fu, atol=1e4*mnum.disturbance))

@@ -1,7 +1,8 @@
 import pinocchio
 import numpy as np
+from numpy.linalg import norm
 from testutils import df_dq
-
+from crocoddyl.utils import EPS
 from crocoddyl import loadTalosArm
 robot = loadTalosArm()
 rmodel = robot.model
@@ -32,13 +33,13 @@ def dresidualWorld(q):
                    pinocchio.getJointJacobian(rmodel, rdata, jid,
                                            pinocchio.ReferenceFrame.WORLD))
 
-eps = 1e-8
 d1 = dresidualLocal(q0)
 d2 = dresidualWorld(q0)
-d3 = df_dq(rmodel, residualrMi, q0, h=eps)
+d3 = df_dq(rmodel, residualrMi, q0)
 
 pinocchio.forwardKinematics(rmodel,rdata,q0)
 oMi = rdata.oMi[jid]
 
-assert(np.isclose(d1,d3,atol=np.sqrt(eps)).all())
+h = np.sqrt(2*EPS)
+assert(np.allclose(d1, d3, atol=1e4*h))
 #assert(np.isclose(d2, oMi.action.dot(d3), atol=1e-8).all())

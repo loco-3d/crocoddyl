@@ -76,7 +76,7 @@ class StateTestCase(unittest.TestCase):
         Jnum1,Jnum2 = self.STATE_NUMDIFF.Jintegrate(x,vx)
 
         # Checking the partial derivatives against NumDiff
-        tol = 10*self.STATE_NUMDIFF.disturbance
+        tol = 1e4*self.STATE_NUMDIFF.disturbance
         self.assertTrue(np.allclose(J1,Jnum1, atol=tol), \
             "The partial derivatives of integrate function with respect to first argument is wrong.")
         self.assertTrue(np.allclose(J2,Jnum2, atol=tol), \

@@ -80,26 +80,25 @@ dy_dv = lambda i: df_dx(lambda _v: get_y(a2m(x[:nq]), _v)[i],
 e_k = lambda i: data.dki_dx[i][:,:nv]- dk_dq(i)
 
 
-tolerance = 1e-4
-assert(np.isclose(data.Fu, dxn_du, atol=tolerance).all())
+
+assert(np.allclose(data.Fu, dxn_du, atol=1e4*mnum.disturbance))
 
 for i in xrange(4):
-  assert(np.isclose(data.dki_du[i], dk_du(i), atol=tolerance).all())
+  assert(np.allclose(data.dki_du[i], dk_du(i), atol=1e4*mnum.disturbance))
 
 for i in xrange(4):
-  assert(np.isclose(data.dki_dx[i][:,:nv], dk_dq(i), atol=tolerance).all())
-  assert(np.isclose(data.dki_dx[i][:,nv:], dk_dv(i), atol=tolerance).all())
+  assert(np.allclose(data.dki_dx[i][:, :nv], dk_dq(i), atol=1e4*mnum.disturbance))
+  assert(np.allclose(data.dki_dx[i][:, nv:], dk_dv(i), atol=1e4*mnum.disturbance))
 
 for i in xrange(4):
-  assert(np.isclose(data.dy_dx[i][:,:nv], dy_dq(i), atol=tolerance).all())
-  assert(np.isclose(data.dy_dx[i][:,nv:], dy_dv(i), atol=tolerance).all())
+  assert(np.allclose(data.dy_dx[i][:, :nv], dy_dq(i), atol=1e4*mnum.disturbance))
+  assert(np.allclose(data.dy_dx[i][:, nv:], dy_dv(i), atol=1e4*mnum.disturbance))
 
 mnum.calcDiff(dnum,x,u)
-assert( norm(data.Fx-dnum.Fx) < 1e2*mnum.disturbance )
-assert( norm(data.Fu-dnum.Fu) < 1e2*mnum.disturbance )
-assert(norm(data.Lu-dnum.Lu) < np.sqrt(2*mnum.disturbance))
-assert(norm(data.Lx-dnum.Lx) < np.sqrt(2*mnum.disturbance))
-
+assert(np.allclose(data.Fx, dnum.Fx, atol=1e2*mnum.disturbance))
+assert(np.allclose(data.Fu, dnum.Fu, atol=1e2*mnum.disturbance))
+assert(np.allclose(data.Lu, dnum.Lu, atol=1e4*mnum.disturbance))
+assert(np.allclose(data.Lx, dnum.Lx, atol=1e4*mnum.disturbance))
 
 def get_attr_analytical(x,u,attr):
   _u = m2a(u)
@@ -114,6 +113,6 @@ Lxu0 = df_dx(lambda _u: get_attr_analytical(x,_u, "Lx"), a2m(u), h=eps)
 
 Luu0 = df_dx(lambda _u: get_attr_analytical(x,_u, "Lu"), a2m(u), h=eps)
 
-assert(norm(Lxx0-data.Lxx) < np.sqrt(mnum.disturbance))
-assert(norm(Lxu0-data.Lxu) < np.sqrt(mnum.disturbance))
-assert(norm(Luu0-data.Luu) < np.sqrt(mnum.disturbance))
+assert(np.allclose(Lxx0, data.Lxx, atol=1e4*mnum.disturbance))
+assert(np.allclose(Lxu0, data.Lxu, atol=1e4*mnum.disturbance))
+assert(np.allclose(Luu0, data.Luu, atol=1e4*mnum.disturbance))

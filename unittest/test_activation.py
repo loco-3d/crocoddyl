@@ -24,7 +24,7 @@ c'' = R'R
 
 # - ------------------------------
 # --- Dim 1 ----------------------
-h = np.sqrt(EPS)
+h = np.sqrt(2*EPS)
 def df(am,ad,x):
     return (am.calc(ad,x+h)-am.calc(ad,x))/h
 def ddf(am,ad,x):
@@ -35,19 +35,21 @@ ad = am.createData()
 x = np.random.rand(1)
 
 am.calc(ad,x)
-assert( norm(df(am,ad,x)-am.calcDiff(ad,x)[0]) < 1e2*h )
-assert( norm(ddf(am,ad,x)-am.calcDiff(ad,x)[1]) < 1e2*h )
+# The previous tolerances were 1e2*np.sqrt(EPS)
+assert(np.allclose(df(am, ad, x), am.calcDiff(ad, x)[0], atol=1e-6))
+assert(np.allclose(ddf(am, ad, x), am.calcDiff(ad, x)[1], atol=1e-6))
 
 am = ActivationModelWeightedQuad(np.random.rand(1))
 ad = am.createData()
-assert( norm(df(am,ad,x)-am.calcDiff(ad,x)[0]) < 1e2*h )
-assert( norm(ddf(am,ad,x)-am.calcDiff(ad,x)[1]) < 1e2*h )
+# The previous tolerances were 1e2*np.sqrt(EPS)
+assert(np.allclose(df(am, ad, x), am.calcDiff(ad, x)[0], atol=1e-6))
+assert(np.allclose(ddf(am, ad, x), am.calcDiff(ad, x)[1], atol=1e-6))
 
 am = ActivationModelSmoothAbs()
 ad = am.createData()
-
-assert( norm(df(am,ad,x)-am.calcDiff(ad,x)[0]) < 1e2*h )
-assert( norm(ddf(am,ad,x)-am.calcDiff(ad,x)[1]) < 1e2*h )
+# The previous tolerances were 1e2*np.sqrt(EPS)
+assert(np.allclose(df(am, ad, x), am.calcDiff(ad, x)[0], atol=1e-6))
+assert(np.allclose(ddf(am, ad, x), am.calcDiff(ad, x)[1], atol=1e-6))
 
 # - ------------------------------
 # --- Dim N ----------------------
@@ -76,17 +78,20 @@ am = ActivationModelQuad()
 ad = am.createData()
 J = df(am,ad,x)
 H = ddf(am,ad,x)
-assert( norm(np.diag(J.diagonal())-J) < 1e2*h )
-assert( norm(np.diag(H.diagonal())-H) < 1e2*h )
-assert( norm(df(am,ad,x).diagonal()-am.calcDiff(ad,x)[0]) < 1e2*h )
-assert( norm(ddf(am,ad,x).diagonal()-am.calcDiff(ad,x)[1][:,0]) < 1e2*h )
+# The previous tolerances were 1e2*np.sqrt(EPS)
+assert(np.allclose(np.diag(J.diagonal()), J, atol=1e-9))
+assert(np.allclose(np.diag(H.diagonal()), H, atol=1e-9))
+assert(np.allclose(df(am, ad, x).diagonal(), am.calcDiff(ad, x)[0], atol=1e-6))
+assert(np.allclose(ddf(am, ad, x).diagonal(), am.calcDiff(ad, x)[1][:, 0], atol=1e-6))
 
 am = ActivationModelWeightedQuad(np.random.rand(len(x)))
 ad = am.createData()
-assert( norm(df(am,ad,x).diagonal()-am.calcDiff(ad,x)[0]) < 1e2*h )
-assert( norm(ddf(am,ad,x).diagonal()-am.calcDiff(ad,x)[1][:,0]) < 1e2*h )
+# The previous tolerances were 1e2*np.sqrt(EPS)
+assert(np.allclose(df(am, ad, x).diagonal(), am.calcDiff(ad, x)[0], atol=1e-6))
+assert(np.allclose(ddf(am, ad, x).diagonal(), am.calcDiff(ad, x)[1][:, 0], atol=1e-6))
 
 am = ActivationModelSmoothAbs()
 ad = am.createData()
-assert( norm(df(am,ad,x).diagonal()-am.calcDiff(ad,x)[0]) < 1e2*h )
-assert( norm(ddf(am,ad,x).diagonal()-am.calcDiff(ad,x)[1][:,0]) < 1e2*h )
+# The previous tolerances were 1e2*np.sqrt(EPS)
+assert(np.allclose(df(am, ad, x).diagonal(), am.calcDiff(ad, x)[0], atol=1e-6))
+assert(np.allclose(ddf(am, ad, x).diagonal(), am.calcDiff(ad, x)[1][:, 0], atol=1e-6))
