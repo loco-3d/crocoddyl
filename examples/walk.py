@@ -4,6 +4,7 @@ import pinocchio
 from pinocchio.utils import *
 from numpy.linalg import norm,inv,pinv,eig,svd
 import sys
+from crocoddyl.fddp import SolverFDDP
 
 BACKUP_PATH = "npydata/jump."
 WITHDISPLAY =  'disp' in sys.argv
@@ -26,7 +27,7 @@ x0 = m2a(np.concatenate([q0,v0]))
 rmodel.defaultState = x0.copy()
 
 # Solving the 3d walking problem using DDP
-stepLength = 0.2
+stepLength = 0.4
 swingDuration = 0.75
 stanceDurantion = 0.1
 
@@ -126,8 +127,8 @@ right0 = m2a(rdata.oMf[rightId].translation)
 left0  = m2a(rdata.oMf[leftId ].translation)
 com0   = m2a(pinocchio.centerOfMass(rmodel,rdata,q0))
 
-KT = 5
-KS = 10
+KT = 3
+KS = 8
 models =\
          [ runningModel([ rightId, leftId ],{}, integrationStep=stanceDurantion/KT) for i in range(KT) ] \
         + [ runningModel([ rightId ],{},integrationStep=swingDuration/KS) for i in range(KS)] \
@@ -147,8 +148,15 @@ mimp2 = models[imp2]
 # ---------------------------------------------------------------------------------------------
 problem = ShootingProblem(initialState=x0,runningModels=models[:-1],terminalModel=models[-1])
 ddp = SolverDDP(problem)
-ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]#, CallbackSolverDisplay(robot,rate=-1) ]
+ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
+if 'cb' in sys.argv and WITHDISPLAY: ddp.callback.append(CallbackSolverDisplay(robot,rate=-1))
 ddp.th_stop = 1e-6
+
+fddp = SolverFDDP(problem)
+fddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
+if 'cb' in sys.argv and WITHDISPLAY: fddp.callback.append(CallbackSolverDisplay(robot,rate=-1))
+fddp.th_stop = 1e-6
+
 us0 = [ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
         if isinstance(m,IntegratedActionModelEuler) else np.zeros(0) \
         for m,d in zip(ddp.problem.runningModels,ddp.problem.runningDatas) ]
@@ -157,9 +165,28 @@ dimp1 = ddp.datas()[imp1]
 dimp2 = ddp.datas()[imp2]
 
 print("*** SOLVE ***")
-ddp.solve(maxiter=200)
+fddp.solve(maxiter=15)
 #          init_xs=xs0)
 #          init_us=us0)
 
+'''ddp.setCandidate()
+ddp.computeDirection()
+try:
+    ddp.tryStep(0)
+except ArithmeticError:
+    print 'step failed'
+    pass
+'''
 
+# xs=ddp.xs
+# xtry=ddp.xtry
+# us=ddp.us
+# utry=ddp.utry
+
+ddp.setCandidate(xs=fddp.xs,us=fddp.us,isFeasible=True)
+ddp.decreaseRegularization()
+ddp.computeDirection()
+fddp.computeDirection()
+
+ddp.tryStep(1)
 
