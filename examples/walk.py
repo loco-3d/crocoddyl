@@ -105,8 +105,10 @@ def impactModel(contactIds,effectors):
     #                   cost=CostModelImpactCoM(rmodel,
     #                                           activation=ActivationModelWeightedQuad(m2a([.1,.1,3.]))))
     for fid,ref in effectors.items():
+        wp = np.array([1.]*6)
         costModel.addCost("track%d"%fid, weight=1e5,
-                          cost = CostModelFramePlacement(rmodel,fid,ref,nu=0))
+                          cost = CostModelFramePlacement(rmodel,fid,ref,nu=0,
+                                                         activation=ActivationModelWeightedQuad(wp)))
         # costModel.addCost("vel%d"%fid, weight=0.,
         #                   cost = CostModelFrameVelocity(rmodel,fid,nu=0))
         
@@ -145,6 +147,27 @@ imp2 = 2*(KT+KS)+1
 mimp1 = models[imp1]
 mimp2 = models[imp2]
 
+# ---- SAMPLE INIT VEL
+if 'push' in sys.argv:
+    from pinocchio.utils import zero
+    vcom = np.matrix([3,0.,0]).T
+    pinocchio.computeAllTerms(rmodel,rdata,q0,v0)
+    Jr = pinocchio.getFrameJacobian(rmodel,rdata,rightId,pinocchio.ReferenceFrame.LOCAL)
+    Jl = pinocchio.getFrameJacobian(rmodel,rdata,leftId,pinocchio.ReferenceFrame.LOCAL)
+    Jcom = rdata.Jcom
+
+    v1 = pinv(np.vstack([Jr,Jl,Jcom]))*np.vstack([zero(12),vcom])
+    x0[rmodel.nq:] = v1.flat
+
+    mimp1.costs['track16'].cost.activation.weights[:2] = 0
+    mimp2.costs['track30'].cost.activation.weights[:2] = 0
+
+    for m in models:
+        try: m.differential.contact['contact16'].gains[1] = 10
+        except: pass
+        try: m.differential.contact['contact30'].gains[1] = 10
+        except: pass
+        
 # ---------------------------------------------------------------------------------------------
 problem = ShootingProblem(initialState=x0,runningModels=models[:-1],terminalModel=models[-1])
 ddp = SolverDDP(problem)
@@ -161,32 +184,13 @@ us0 = [ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
         if isinstance(m,IntegratedActionModelEuler) else np.zeros(0) \
         for m,d in zip(ddp.problem.runningModels,ddp.problem.runningDatas) ]
 xs0 = [rmodel.defaultState]*len(ddp.models())
+xs1 = [problem.initialState]*len(ddp.models())
 dimp1 = ddp.datas()[imp1]
 dimp2 = ddp.datas()[imp2]
 
 print("*** SOLVE ***")
-fddp.solve(maxiter=15)
-#          init_xs=xs0)
-#          init_us=us0)
-
-'''ddp.setCandidate()
-ddp.computeDirection()
-try:
-    ddp.tryStep(0)
-except ArithmeticError:
-    print 'step failed'
-    pass
-'''
-
-# xs=ddp.xs
-# xtry=ddp.xtry
-# us=ddp.us
-# utry=ddp.utry
-
-ddp.setCandidate(xs=fddp.xs,us=fddp.us,isFeasible=True)
-ddp.decreaseRegularization()
-ddp.computeDirection()
-fddp.computeDirection()
-
-ddp.tryStep(1)
-
+fddp.solve(maxiter=50,
+          # ,init_xs=xs0
+          # ,init_xs=xs1
+          # ,init_us=us0
+          )
