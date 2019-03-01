@@ -156,6 +156,8 @@ class SolverFDDP:
                 self.decreaseRegularization()
             if a==self.alphas[-1]:
                 self.increaseRegularization()
+                if self.x_reg==self.regMax:
+                    raise ValueError('Max regularization reached')
             self.stepLength = a; self.iter = i
             self.stop = sum(self.stoppingCriteria())
             if self.callback is not None: [c(self) for c in self.callback]
