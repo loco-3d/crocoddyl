@@ -114,11 +114,13 @@ class SimpleQuadrupedProblem:
 
 
 # Loading the HyQ model
-hyq = loadHyQ()
+robot = loadHyQ()
+rmodel = robot.model
+rdata  = rmodel.createData()
 
 # Defining the initial state of the robot
-q0 = hyq.q0.copy()
-v0 = pinocchio.utils.zero(hyq.model.nv)
+q0 = rmodel.referenceConfigurations['half_sitting'].copy()
+v0 = pinocchio.utils.zero(rmodel.nv)
 x0 = m2a(np.concatenate([q0,v0]))
 
 # Setting up the 3d walking problem
@@ -126,7 +128,7 @@ lfFoot = 'lf_foot'
 rfFoot = 'rf_foot'
 lhFoot = 'lh_foot'
 rhFoot = 'rh_foot'
-walk = SimpleQuadrupedProblem(hyq.model, lfFoot, rfFoot, lhFoot, rhFoot)
+walk = SimpleQuadrupedProblem(rmodel, lfFoot, rfFoot, lhFoot, rhFoot)
 
 # Setting up the walking variables
 comGoTo = 0.1 # meters
@@ -137,19 +139,19 @@ supportKnots = 2
 ddp = SolverDDP(
     walk.createProblem(
         x0, comGoTo, timeStep, supportKnots))
-ddp.callback = [ CallbackDDPVerbose() ]
+#ddp.callback = [ CallbackDDPVerbose() ]
 ddp.th_stop = 1e-9
 ddp.solve(maxiter=1000, regInit=.1,
-          init_xs = [ hyq.model.defaultState ]*len(ddp.models()))
+          init_xs = [ rmodel.defaultState ]*len(ddp.models()))
 
 
 # Checking the CoM displacement
 x0 = ddp.xs[0]
 xT = ddp.xs[-1]
-q0 = a2m(x0[:hyq.model.nq])
-qT = a2m(xT[:hyq.model.nq])
-data0 = hyq.model.createData()
-dataT = hyq.model.createData()
-comT = pinocchio.centerOfMass(hyq.model, dataT, qT)
-com0 = pinocchio.centerOfMass(hyq.model, data0, q0)
+q0 = a2m(x0[:rmodel.nq])
+qT = a2m(xT[:rmodel.nq])
+data0 = rmodel.createData()
+dataT = rmodel.createData()
+comT = pinocchio.centerOfMass(rmodel, dataT, qT)
+com0 = pinocchio.centerOfMass(rmodel, data0, q0)
 assert(norm(comT - com0 - np.matrix([ [comGoTo],[0.],[0.] ])) < 1e-3)

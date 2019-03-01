@@ -189,17 +189,19 @@ class SimpleBipedWalkingProblem:
 
 # Creating the lower-body part of Talos
 talos_legs = loadTalosLegs()
+rmodel = talos_legs.model
+rdata  = rmodel.createData()
 
 # Defining the initial state of the robot
 q = talos_legs.q0.copy()
-v = zero(talos_legs.model.nv)
+v = zero(rmodel.nv)
 x0 = m2a(np.concatenate([q,v]))
 
 
 # Setting up the 3d walking problem
 rightFoot = 'right_sole_link'
 leftFoot = 'left_sole_link'
-walk = SimpleBipedWalkingProblem(talos_legs.model, rightFoot, leftFoot)
+walk = SimpleBipedWalkingProblem(rmodel, rightFoot, leftFoot)
 
 # Creating the walking problem
 stepLength = 0.6 # meters
@@ -216,7 +218,7 @@ ddp.callback = [ CallbackDDPVerbose() ]
 if WITHPLOT:       ddp.callback.append(CallbackDDPLogger())
 if WITHDISPLAY:    ddp.callback.append(CallbackSolverDisplay(talos_legs,4,1,cameraTF))
 ddp.th_stop = 1e-9
-ddp.solve(maxiter=1000,regInit=.1,init_xs=[talos_legs.model.defaultState]*len(ddp.models()))
+ddp.solve(maxiter=1000,regInit=.1,init_xs=[rmodel.defaultState]*len(ddp.models()))
 
 
 # Plotting the solution and the DDP convergence
@@ -229,4 +231,5 @@ if WITHPLOT:
 
 # Visualization of the DDP solution in gepetto-viewer
 if WITHDISPLAY:
-    CallbackSolverDisplay(talos_legs)(ddp)
+    from crocoddyl.diagnostic import displayTrajectory
+    displayTrajectory(talos_legs,ddp.xs,runningModel.timeStep)

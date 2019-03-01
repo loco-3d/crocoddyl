@@ -62,7 +62,7 @@ rightId = rmodel.getFrameId(rightFoot)
 leftId  = rmodel.getFrameId(leftFoot)
 
 # Create the initial state
-q0 = robot.q0.copy()
+q0 = rmodel.referenceConfigurations['half_sitting'].copy()
 v0 = zero(rmodel.nv)
 x0 = m2a(np.concatenate([q0,v0]))
 rmodel.defaultState = x0.copy()

@@ -68,8 +68,8 @@ class Fix:
     def __init__(self):
         robot = self.robot = loadTalosArm()
         rmodel = self.rmodel = robot.model
-        rmodel.armature = np.matrix([ 0 ]*robot.model.nv).T
-        for j in robot.model.joints[1:]:
+        rmodel.armature = np.matrix([ 0 ]*rmodel.nv).T
+        for j in rmodel.joints[1:]:
             if j.shortname()!='JointModelFreeFlyer':
                 rmodel.armature[j.idx_v:j.idx_v+j.nv]=1
         State = self.State = StatePinocchio(rmodel)

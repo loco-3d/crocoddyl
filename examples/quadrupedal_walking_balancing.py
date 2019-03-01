@@ -2,7 +2,9 @@ from crocoddyl import *
 import numpy as np
 from numpy.linalg import norm
 import pinocchio
+import sys
 
+WITHDISPLAY =  'disp' in sys.argv
 
 class TaskSE3:
     def __init__(self, oXf, frameId):
@@ -249,10 +251,14 @@ class SimpleQuadrupedalWalkingProblem:
 
 # Loading the HyQ model
 hyq = loadHyQ()
+if WITHDISPLAY: hyq.initDisplay(loadModel=True)
+
+rmodel = hyq.model
+rdata  = rmodel.createData()
 
 # Defining the initial state of the robot
-q0 = hyq.q0.copy()
-v0 = pinocchio.utils.zero(hyq.model.nv)
+q0 = rmodel.referenceConfigurations['half_sitting'].copy()
+v0 = pinocchio.utils.zero(rmodel.nv)
 x0 = m2a(np.concatenate([q0, v0]))
 
 # Setting up the 3d walking problem
@@ -261,7 +267,7 @@ rfFoot = 'rf_foot'
 lhFoot = 'lh_foot'
 rhFoot = 'rh_foot'
 walk = SimpleQuadrupedalWalkingProblem(
-    hyq.model, lfFoot, rfFoot, lhFoot, rhFoot)
+    rmodel, lfFoot, rfFoot, lhFoot, rhFoot)
 
 # Setting up the walking variables
 stepLength = 0.35  # meters
@@ -275,12 +281,12 @@ cameraTF = [2., 2.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 ddp1 = SolverDDP(
     walk.createWalkingProblem(
         x0, stepLength, timeStep, stepKnots, supportKnots))
-ddp1.callback = [CallbackDDPLogger(), CallbackDDPVerbose(),
-                 CallbackSolverDisplay(hyq, 4, 1, cameraTF)]
+ddp1.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]
+if WITHDISPLAY:    ddp1.callback.append(CallbackSolverDisplay(hyq, 4, 1, cameraTF))
 ddp1.th_stop = 1e-9
 ddp1.solve(maxiter=1000, regInit=.1,
-           init_xs=[hyq.model.defaultState]*len(ddp1.models()),
-           init_us=[m.differential.quasiStatic(d.differential, hyq.model.defaultState)
+           init_xs=[rmodel.defaultState]*len(ddp1.models()),
+           init_us=[m.differential.quasiStatic(d.differential, rmodel.defaultState)
                     for m, d in zip(ddp1.models(), ddp1.datas())[:-1]])
 
 # Creating the CoM forward/backward task
@@ -290,8 +296,8 @@ supportKnots = 5
 ddp2 = SolverDDP(
     walk.createCoMProblem(
         x0, comGoTo, timeStep, supportKnots))
-ddp2.callback = [CallbackDDPLogger(), CallbackDDPVerbose(),
-                 CallbackSolverDisplay(hyq, 4, 1, cameraTF)]
+ddp2.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]
+if WITHDISPLAY:    ddp2.callback.append(CallbackSolverDisplay(hyq, 4, 1, cameraTF))
 ddp2.th_stop = 1e-9
 ddp2.solve(maxiter=1000, regInit=.1,
            init_xs=[x0]*len(ddp2.models()),
@@ -300,5 +306,7 @@ ddp2.solve(maxiter=1000, regInit=.1,
 
 
 # Display the entire motion
-CallbackSolverDisplay(hyq)(ddp1)
-CallbackSolverDisplay(hyq)(ddp2)
+if WITHDISPLAY:
+    from crocoddyl.diagnostic import displayTrajectory
+    displayTrajectory(hyq,ddp1.xs,ddp1.models()[0].timeStep)
+    displayTrajectory(hyq,ddp1.xs,ddp2.models()[0].timeStep)
