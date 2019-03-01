@@ -510,63 +510,74 @@ walk = SimpleQuadrupedalWalkingProblem(
     rmodel, lfFoot, rfFoot, lhFoot, rhFoot)
 
 # Setting up all tasks
-stepLength = 0.15  # meters
-stepHeight = 0.2  # meters
-comGoTo = 0.1  # meters
-jumpHeight = 0.5  # meters
-timeStep = 1e-2  # seconds
-stepKnots = 25
-supportKnots = 5
+GAITPHASES = \
+    [{'walking': {'stepLength': 0.15, 'stepHeight': 0.2,
+                  'timeStep': 1e-2, 'stepKnots': 25, 'supportKnots': 5}},
+     {'trotting': {'stepLength': 0.15, 'stepHeight': 0.2,
+                   'timeStep': 1e-2, 'stepKnots': 25, 'supportKnots': 5}},
+     {'pacing': {'stepLength': 0.15, 'stepHeight': 0.2,
+                 'timeStep': 1e-2, 'stepKnots': 25, 'supportKnots': 5}},
+     {'bounding': {'stepLength': 0.15, 'stepHeight': 0.2,
+                   'timeStep': 1e-2, 'stepKnots': 25, 'supportKnots': 5}},
+     {'jumping': {'jumpHeight': 0.5, 'timeStep': 1e-2}}]
 cameraTF = [2., 2.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 
+ddp = [None] * len(GAITPHASES)
+for i, phase in enumerate(GAITPHASES):
+    for key, value in phase.items():
+        if key is 'walking':
+            # Creating a walking problem
+            ddp[i] = SolverDDP(
+                walk.createWalkingProblem(
+                    x0, value['stepLength'], value['stepHeight'],
+                    value['timeStep'],
+                    value['stepKnots'], value['supportKnots']))
+        elif key is 'trotting':
+            # Creating a trotting problem
+            ddp[i] = SolverDDP(
+                walk.createTrottingProblem(
+                    x0, value['stepLength'], value['stepHeight'],
+                    value['timeStep'],
+                    value['stepKnots'], value['supportKnots']))
+        elif key is 'pacing':
+            # Creating a pacing problem
+            ddp[i] = SolverDDP(
+                walk.createPacingProblem(
+                    x0, value['stepLength'], value['stepHeight'],
+                    value['timeStep'],
+                    value['stepKnots'], value['supportKnots']))
+        elif key is 'bounding':
+            # Creating a bounding problem
+            ddp[i] = SolverDDP(
+                walk.createBoundingProblem(
+                    x0, value['stepLength'], value['stepHeight'],
+                    value['timeStep'],
+                    value['stepKnots'], value['supportKnots']))
+        elif key is 'jumping':
+            # Creating a jumping problem
+            ddp[i] = SolverDDP(
+                walk.createJumpingProblem(
+                    x0, value['jumpHeight'], value['timeStep']))
 
-# Creating the walking problem and solver
-ddp1 = SolverDDP(
-    walk.createWalkingProblem(
-    # walk.createTrottingProblem(
-    # walk.createPacingProblem(
-    # walk.createBoundingProblem(
-        x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots))
-ddp1.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]
-if WITHDISPLAY:    ddp1.callback.append(CallbackSolverDisplay(hyq, 4, 1, cameraTF))
-ddp1.th_stop = 1e-9
-ddp1.solve(maxiter=1000, regInit=.1,
-           init_xs=[rmodel.defaultState]*len(ddp1.models()),
-           init_us=[m.differential.quasiStatic(d.differential,
-                                               rmodel.defaultState)
-                    for m, d in zip(ddp1.models(), ddp1.datas())[:-1]])
+    # Added the callback functions
+    print
+    print 'Solving ' + key
+    ddp[i].callback = [CallbackDDPLogger(), CallbackDDPVerbose(),
+                       CallbackSolverDisplay(hyq, 4, 1, cameraTF)]
 
-# Creating the CoM forward/backward task
-x0 = ddp1.xs[-1]
-supportKnots = 5
-ddp2 = SolverDDP(
-    walk.createCoMProblem(
-        x0, comGoTo, timeStep, supportKnots))
-ddp2.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]
-if WITHDISPLAY:    ddp2.callback.append(CallbackSolverDisplay(hyq, 4, 1, cameraTF))
-ddp2.th_stop = 1e-9
-ddp2.solve(maxiter=1000, regInit=.1,
-           init_xs=[x0]*len(ddp2.models()),
-           init_us=[m.differential.quasiStatic(d.differential, x0)
-                    for m, d in zip(ddp2.models(), ddp2.datas())[:-1]])
+    # Solving the problem with the DDP solver
+    ddp[i].th_stop = 1e-9
+    ddp[i].solve(
+        maxiter=1000, regInit=.1,
+        init_xs=[hyq.model.defaultState]*len(ddp[i].models()),
+        init_us=[m.differential.quasiStatic(d.differential,
+                                            hyq.model.defaultState)
+                 for m, d in zip(ddp[i].models(), ddp[i].datas())[:-1]])
 
-# Creating the jumping task
-x0 = ddp2.xs[-1]
-ddp3 = SolverDDP(
-    walk.createJumpingProblem(
-        x0, jumpHeight, timeStep))
-ddp3.callback = [CallbackDDPLogger(), CallbackDDPVerbose(),
-                 CallbackSolverDisplay(hyq, 4, 1, cameraTF)]
-ddp3.th_stop = 1e-9
-ddp3.solve(maxiter=1000, regInit=.1,
-           init_xs=[hyq.model.defaultState]*len(ddp3.models()),
-           init_us=[m.differential.quasiStatic(d.differential,
-                                               hyq.model.defaultState)
-                    for m, d in zip(ddp3.models(), ddp3.datas())[:-1]])
+    # Defining the final state as initial one for the next phase
+    x0 = ddp[i].xs[-1]
 
 
 # Display the entire motion
-if WITHDISPLAY:
-    displayTrajectory(hyq,ddp1.xs,ddp1.models()[0].timeStep)
-    displayTrajectory(hyq,ddp2.xs,ddp2.models()[0].timeStep)
-    displayTrajectory(hyq,ddp3.xs,ddp3.models()[0].timeStep)
+for i, phase in enumerate(GAITPHASES):
+    CallbackSolverDisplay(hyq)(ddp[i])
