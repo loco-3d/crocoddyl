@@ -118,13 +118,13 @@ class SimpleQuadrupedalWalkingProblem:
             rhStep = \
                 self.createFootstepModels(
                     comPos0, [rhFootPos0],
-                    0.5*stepLength, stepHeight, stepKnots,
+                    0.5*stepLength, stepHeight, timeStep, stepKnots,
                     [self.lfFootId, self.rfFootId, self.lhFootId],
                     [self.rhFootId])
             rfStep = \
                 self.createFootstepModels(
                     comPos0, [rfFootPos0],
-                    0.5*stepLength, stepHeight, stepKnots,
+                    0.5*stepLength, stepHeight, timeStep, stepKnots,
                     [self.lfFootId, self.lhFootId, self.rhFootId],
                     [self.rfFootId])
             self.firstStep = False
@@ -132,25 +132,25 @@ class SimpleQuadrupedalWalkingProblem:
             rhStep = \
                 self.createFootstepModels(
                     comPos0, [rhFootPos0],
-                    stepLength, stepHeight, stepKnots,
+                    stepLength, stepHeight, timeStep, stepKnots,
                     [self.lfFootId, self.rfFootId, self.lhFootId],
                     [self.rhFootId])
             rfStep = \
                 self.createFootstepModels(
                     comPos0, [rfFootPos0],
-                    stepLength, stepHeight, stepKnots,
+                    stepLength, stepHeight, timeStep, stepKnots,
                     [self.lfFootId, self.lhFootId, self.rhFootId],
                     [self.rfFootId])
         lhStep = \
             self.createFootstepModels(
                 comPos0, [lhFootPos0],
-                stepLength, stepHeight, stepKnots,
+                stepLength, stepHeight, timeStep, stepKnots,
                 [self.lfFootId, self.rfFootId, self.rhFootId],
                 [self.lhFootId])
         lfStep = \
             self.createFootstepModels(
                 comPos0, [lfFootPos0],
-                stepLength, stepHeight, stepKnots,
+                stepLength, stepHeight, timeStep, stepKnots,
                 [self.rfFootId, self.lhFootId, self.rhFootId],
                 [self.lfFootId])
 
@@ -193,7 +193,7 @@ class SimpleQuadrupedalWalkingProblem:
             rflhStep = \
                 self.createFootstepModels(
                     comPos0, [rfFootPos0, lhFootPos0],
-                    0.5*stepLength, stepHeight, stepKnots,
+                    0.5*stepLength, stepHeight, timeStep, stepKnots,
                     [self.lfFootId, self.rhFootId],
                     [self.rfFootId, self.lhFootId])
             self.firstStep = False
@@ -201,13 +201,13 @@ class SimpleQuadrupedalWalkingProblem:
             rflhStep = \
                 self.createFootstepModels(
                     comPos0, [rfFootPos0, lhFootPos0],
-                    stepLength, stepHeight, stepKnots,
+                    stepLength, stepHeight, timeStep, stepKnots,
                     [self.lfFootId, self.rhFootId],
                     [self.rfFootId, self.lhFootId])
         lfrhStep = \
             self.createFootstepModels(
                 comPos0, [lfFootPos0, rhFootPos0],
-                stepLength, stepHeight, stepKnots,
+                stepLength, stepHeight, timeStep, stepKnots,
                 [self.rfFootId, self.lhFootId],
                 [self.lfFootId, self.rhFootId])
 
@@ -250,7 +250,7 @@ class SimpleQuadrupedalWalkingProblem:
             rightSteps = \
                 self.createFootstepModels(
                     comPos0, [rfFootPos0, rhFootPos0],
-                    0.5*stepLength, stepHeight, stepKnots,
+                    0.5*stepLength, stepHeight, timeStep, stepKnots,
                     [self.lfFootId, self.lhFootId],
                     [self.rfFootId, self.rhFootId])
             self.firstStep = False
@@ -258,13 +258,13 @@ class SimpleQuadrupedalWalkingProblem:
             rightSteps = \
                 self.createFootstepModels(
                     comPos0, [rfFootPos0, rhFootPos0],
-                    stepLength, stepHeight, stepKnots,
+                    stepLength, stepHeight, timeStep, stepKnots,
                     [self.lfFootId, self.lhFootId],
                     [self.rfFootId, self.rhFootId])
         leftSteps = \
             self.createFootstepModels(
                 comPos0, [lfFootPos0, lhFootPos0],
-                stepLength, stepHeight, stepKnots,
+                stepLength, stepHeight, timeStep, stepKnots,
                 [self.rfFootId, self.rhFootId],
                 [self.lfFootId, self.lhFootId])
 
@@ -301,23 +301,23 @@ class SimpleQuadrupedalWalkingProblem:
         doubleSupport = \
             [self.createSwingFootModel(
                 timeStep,
-                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
-            ) for k in range(supportKnots)]
-        frontSteps = \
-            self.createFootstepModels(
-                comPos0, [lhFootPos0, rhFootPos0],
-                stepLength, stepHeight, stepKnots,
-                [self.lfFootId, self.rfFootId],
-                [self.lhFootId, self.rhFootId])
+                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId])
+                for k in range(supportKnots)]
         hindSteps = \
             self.createFootstepModels(
                 comPos0, [lfFootPos0, rfFootPos0],
-                stepLength, stepHeight, stepKnots,
+                stepLength, stepHeight, timeStep, stepKnots,
                 [self.lhFootId, self.rhFootId],
                 [self.lfFootId, self.rfFootId])
+        frontSteps = \
+            self.createFootstepModels(
+                comPos0, [lhFootPos0, rhFootPos0],
+                stepLength, stepHeight, timeStep, stepKnots,
+                [self.lfFootId, self.rfFootId],
+                [self.lhFootId, self.rhFootId])
 
-        loco3dModel += doubleSupport + frontSteps
         loco3dModel += doubleSupport + hindSteps
+        loco3dModel += doubleSupport + frontSteps
 
         problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
@@ -352,13 +352,14 @@ class SimpleQuadrupedalWalkingProblem:
         return problem
 
     def createFootstepModels(self, comPos0, feetPos0, stepLength, stepHeight,
-                             numKnots, supportFootIds, swingFootIds):
+                             timeStep, numKnots, supportFootIds, swingFootIds):
         """ Action models for a footstep phase.
 
         :param comPos0, initial CoM position
         :param feetPos0: initial position of the swinging feet
         :param stepLength: step length
         :param stepHeight: step height
+        :param timeStep: time step
         :param numKnots: number of knots for the footstep phase
         :param supportFootIds: Ids of the supporting feet
         :param swingFootIds: Ids of the swinging foot
