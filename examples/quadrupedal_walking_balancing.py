@@ -580,4 +580,4 @@ for i, phase in enumerate(GAITPHASES):
 
 # Display the entire motion
 for i, phase in enumerate(GAITPHASES):
-    CallbackSolverDisplay(hyq)(ddp[i])
+    displayTrajectory(hyq, ddp[i].xs, ddp[i].models()[0].timeStep)
