@@ -562,8 +562,9 @@ for i, phase in enumerate(GAITPHASES):
     # Added the callback functions
     print
     print 'Solving ' + key
-    ddp[i].callback = [CallbackDDPLogger(), CallbackDDPVerbose(),
-                       CallbackSolverDisplay(hyq, 4, 1, cameraTF)]
+    ddp[i].callback = [CallbackDDPLogger(), CallbackDDPVerbose()]
+    if WITHDISPLAY:
+        ddp[i].callback.append(CallbackSolverDisplay(hyq, 4, 1, cameraTF))
 
     # Solving the problem with the DDP solver
     ddp[i].th_stop = 1e-9
@@ -579,5 +580,6 @@ for i, phase in enumerate(GAITPHASES):
 
 
 # Display the entire motion
-for i, phase in enumerate(GAITPHASES):
-    displayTrajectory(hyq, ddp[i].xs, ddp[i].models()[0].timeStep)
+if WITHDISPLAY:
+    for i, phase in enumerate(GAITPHASES):
+        displayTrajectory(hyq, ddp[i].xs, ddp[i].models()[0].timeStep)
