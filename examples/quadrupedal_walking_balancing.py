@@ -570,9 +570,9 @@ for i, phase in enumerate(GAITPHASES):
     ddp[i].th_stop = 1e-9
     ddp[i].solve(
         maxiter=1000, regInit=.1,
-        init_xs=[hyq.model.defaultState]*len(ddp[i].models()),
+        init_xs=[rmodel.defaultState]*len(ddp[i].models()),
         init_us=[m.differential.quasiStatic(d.differential,
-                                            hyq.model.defaultState)
+                                            rmodel.defaultState)
                  for m, d in zip(ddp[i].models(), ddp[i].datas())[:-1]])
 
     # Defining the final state as initial one for the next phase
