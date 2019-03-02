@@ -12,7 +12,7 @@ class TaskSE3:
         self.frameId = frameId
 
 
-class SimpleQuadrupedalWalkingProblem:
+class SimpleQuadrupedalGaitProblem:
     def __init__(self, rmodel, lfFoot, rfFoot, lhFoot, rhFoot):
         self.rmodel = rmodel
         self.rdata = rmodel.createData()
@@ -506,7 +506,7 @@ lfFoot = 'lf_foot'
 rfFoot = 'rf_foot'
 lhFoot = 'lh_foot'
 rhFoot = 'rh_foot'
-walk = SimpleQuadrupedalWalkingProblem(
+gait = SimpleQuadrupedalGaitProblem(
     rmodel, lfFoot, rfFoot, lhFoot, rhFoot)
 
 # Setting up all tasks
@@ -528,35 +528,35 @@ for i, phase in enumerate(GAITPHASES):
         if key is 'walking':
             # Creating a walking problem
             ddp[i] = SolverDDP(
-                walk.createWalkingProblem(
+                gait.createWalkingProblem(
                     x0, value['stepLength'], value['stepHeight'],
                     value['timeStep'],
                     value['stepKnots'], value['supportKnots']))
         elif key is 'trotting':
             # Creating a trotting problem
             ddp[i] = SolverDDP(
-                walk.createTrottingProblem(
+                gait.createTrottingProblem(
                     x0, value['stepLength'], value['stepHeight'],
                     value['timeStep'],
                     value['stepKnots'], value['supportKnots']))
         elif key is 'pacing':
             # Creating a pacing problem
             ddp[i] = SolverDDP(
-                walk.createPacingProblem(
+                gait.createPacingProblem(
                     x0, value['stepLength'], value['stepHeight'],
                     value['timeStep'],
                     value['stepKnots'], value['supportKnots']))
         elif key is 'bounding':
             # Creating a bounding problem
             ddp[i] = SolverDDP(
-                walk.createBoundingProblem(
+                gait.createBoundingProblem(
                     x0, value['stepLength'], value['stepHeight'],
                     value['timeStep'],
                     value['stepKnots'], value['supportKnots']))
         elif key is 'jumping':
             # Creating a jumping problem
             ddp[i] = SolverDDP(
-                walk.createJumpingProblem(
+                gait.createJumpingProblem(
                     x0, value['jumpHeight'], value['timeStep']))
 
     # Added the callback functions
