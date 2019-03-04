@@ -12,6 +12,7 @@ from cost import CostDataCoM, CostModelCoM
 from cost import CostDataState, CostModelState
 from cost import CostDataControl, CostModelControl
 from cost import CostDataForce, CostModelForce
+from cost import CostDataForce, CostModelForceLinearCone
 from activation import ActivationDataQuad, ActivationModelQuad
 from activation import ActivationDataInequality, ActivationModelInequality
 from activation import ActivationDataWeightedQuad, ActivationModelWeightedQuad

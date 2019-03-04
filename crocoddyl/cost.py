@@ -1,4 +1,4 @@
-from activation import ActivationModelQuad, ActivationModelWeightedQuad
+from activation import ActivationModelQuad, ActivationModelWeightedQuad, ActivationModelInequality
 from utils import m2a, EPS
 import numpy as np
 import pinocchio
@@ -506,6 +506,56 @@ class CostModelForce(CostModelPinocchio):
         return data.cost
 
 class CostDataForce(CostDataPinocchio):
+    def __init__(self,model,pinocchioData,contactData=None):
+        CostDataPinocchio.__init__(self,model,pinocchioData)
+        self.contact = contactData
+        self.activation = model.activation.createData()
+
+class CostModelForceLinearCone(CostModelPinocchio):
+    '''
+    The class proposes a model which implements Af-ref<=0 for the linear conic cost. (The inequality
+    is implemented by the activation function. By default ref is zero (Af<=0).
+    '''
+    def __init__(self,pinocchioModel,contactModel,A,ref=None,nu=None, activation=None):
+        self.CostDataType = CostDataForce
+        CostModelPinocchio.__init__(self,pinocchioModel,ncost=A.shape[0],nu=nu)
+        self.A = A
+        self.nfaces = A.shape[0]
+        self.ref = ref if ref is not None else np.zeros(self.nfaces)
+        self.contact = contactModel
+        self.activation = activation if activation is not None else\
+                          ActivationModelInequality(np.array([-np.inf]*self.nfaces),
+                                                    np.zeros(self.nfaces))
+    def calc(model,data,x,u):
+        if data.contact is None:
+            raise RuntimeError('''The CostForce data should be specifically initialized from the
+            contact data ... no automatic way of doing that yet ...''')
+        data.f = data.contact.f
+        data.residuals = np.dot(model.A, data.f)-model.ref
+        data.cost = sum(model.activation.calc(data.activation,data.residuals))
+        return data.cost
+    def calcDiff(model,data,x,u,recalc=True):
+        if recalc: model.calc(data,x,u)
+        assert(model.nu==len(u) and model.contact.nu == model.nu)
+        ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
+        df_dx,df_du = data.contact.df_dx,data.contact.df_du
+        Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
+        A = model.A
+        data.Rx [:,:] = np.dot(model.A,df_dx)   # This is useless.
+        data.Ru [:,:] = np.dot(model.A,df_du)   # This is useless
+
+        data.Lx [:]     = np.dot(df_dx.T,np.dot(model.A.T,Ax))
+        data.Lu [:]     = np.dot(df_du.T,np.dot(model.A.T,Ax))
+
+        A2 = np.dot((Axx*A).T, Axx*A)
+
+        data.Lxx[:,:]   = np.dot(df_dx.T,np.dot(A2, df_dx))
+        data.Lxu[:,:]   = np.dot(df_dx.T,np.dot(A2, df_du))
+        data.Luu[:,:]   = np.dot(df_du.T,np.dot(A2, df_du))
+
+        return data.cost
+
+class CostDataForceCone(CostDataPinocchio):
     def __init__(self,model,pinocchioData,contactData=None):
         CostDataPinocchio.__init__(self,model,pinocchioData)
         self.contact = contactData
