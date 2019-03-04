@@ -33,9 +33,9 @@ def readParamsFromSrdf(robot, SRDF_PATH, verbose):
   
 def loadTalosArm(modelPath='/opt/openrobots/share/example-robot-data',freeFloating=False):
     URDF_FILENAME = "talos_left_arm.urdf"
-    URDF_SUBPATH = "/talos/" + URDF_FILENAME
+    URDF_SUBPATH = "/talos_data/robots/" + URDF_FILENAME
     SRDF_FILENAME = "talos.srdf"
-    SRDF_SUBPATH = "/talos/" + SRDF_FILENAME
+    SRDF_SUBPATH = "/talos_data/srdf/" + SRDF_FILENAME
     robot = RobotWrapper.BuildFromURDF(modelPath+URDF_SUBPATH, [modelPath],
                                        pinocchio.JointModelFreeFlyer() if freeFloating else None)
     rmodel = robot.model
@@ -51,8 +51,8 @@ def loadTalosArm(modelPath='/opt/openrobots/share/example-robot-data',freeFloati
 def loadTalos(modelPath='/opt/openrobots/share/example-robot-data'):
     URDF_FILENAME = "talos_reduced.urdf"
     SRDF_FILENAME = "talos.srdf"
-    SRDF_SUBPATH = "/talos/" + SRDF_FILENAME
-    URDF_SUBPATH = "/talos/" + URDF_FILENAME
+    SRDF_SUBPATH = "/talos_data/srdf/" + SRDF_FILENAME
+    URDF_SUBPATH = "/talos_data/urdf/" + URDF_FILENAME
     robot = RobotWrapper.BuildFromURDF(modelPath+URDF_SUBPATH, [modelPath],
                                                                pinocchio.JointModelFreeFlyer())
     # Load SRDF file
@@ -69,7 +69,7 @@ def loadTalosLegs(modelPath='/opt/openrobots/share/example-robot-data'):
     from pinocchio import JointModelFreeFlyer,JointModelRX,JointModelRY,JointModelRZ
     robot = loadTalos(modelPath=modelPath)
     SRDF_FILENAME = "talos.srdf"
-    SRDF_SUBPATH = "/talos/" + SRDF_FILENAME
+    SRDF_SUBPATH = "/talos_data/srdf/" + SRDF_FILENAME
     legMaxId = 14
 
     m1 = robot.model
@@ -117,7 +117,7 @@ def loadHyQ(modelPath='/opt/openrobots/share/example-robot-data'):
     from pinocchio import JointModelFreeFlyer
     import os
     URDF_FILENAME = "hyq_no_sensors.urdf"
-    URDF_SUBPATH = "/hyq/" + URDF_FILENAME
+    URDF_SUBPATH = "/hyq_description/robots/" + URDF_FILENAME
     robot = RobotWrapper.BuildFromURDF(modelPath+URDF_SUBPATH, [modelPath],
                                        pinocchio.JointModelFreeFlyer())
     # TODO define default position inside srdf
