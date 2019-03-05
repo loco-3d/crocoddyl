@@ -5,6 +5,66 @@ import pinocchio
 import sys
 
 WITHDISPLAY =  'disp' in sys.argv
+WITHPLOT = 'plot' in sys.argv
+
+def plotSolution(xs, us):
+    import matplotlib.pyplot as plt
+    # Getting the state and control trajectories
+    nx = xs[0].shape[0]
+    nu = us[0].shape[0]
+    X = [0.] * nx
+    U = [0.] * nu
+    for i in range(nx):
+        X[i] = [x[i] for x in xs]
+    for i in range(nu):
+        U[i] = [u[i] for u in us]
+
+    plt.figure(1)
+
+    # Plotting the joint trajectories and torque
+    legJointNames = ['HAA', 'HFE', 'KFE']
+    # LF foot
+    plt.subplot(421)
+    [plt.plot(X[k], label=legJointNames[i]) for i,k in enumerate(range(7,10))]
+    plt.title('LF')
+    plt.legend()
+    plt.subplot(422)
+    [plt.plot(U[k], label=legJointNames[i]) for i,k in enumerate(range(0,3))]
+    plt.title('LF')
+    plt.legend()
+
+    # LH foot
+    plt.subplot(423)
+    [plt.plot(X[k], label=legJointNames[i]) for i,k in enumerate(range(10,13))]
+    plt.title('LH')
+    plt.legend()
+    plt.subplot(424)
+    [plt.plot(U[k], label=legJointNames[i]) for i,k in enumerate(range(3,6))]
+    plt.title('LH')
+    plt.legend()
+
+    # RF foot
+    plt.subplot(425)
+    [plt.plot(X[k], label=legJointNames[i]) for i,k in enumerate(range(13,16))]
+    plt.title('RF')
+    plt.legend()
+    plt.subplot(426)
+    [plt.plot(U[k], label=legJointNames[i]) for i,k in enumerate(range(6,9))]
+    plt.title('RF')
+    plt.legend()
+
+    # RH foot
+    plt.subplot(427)
+    [plt.plot(X[k], label=legJointNames[i]) for i,k in enumerate(range(16,19))]
+    plt.title('RH')
+    plt.legend()
+    plt.subplot(428)
+    [plt.plot(U[k], label=legJointNames[i]) for i,k in enumerate(range(9,12))]
+    plt.title('RH')
+    plt.legend()
+    plt.xlabel('knots')
+    plt.show()
+
 
 class TaskSE3:
     def __init__(self, oXf, frameId):
@@ -583,3 +643,13 @@ for i, phase in enumerate(GAITPHASES):
 if WITHDISPLAY:
     for i, phase in enumerate(GAITPHASES):
         displayTrajectory(hyq, ddp[i].xs, ddp[i].models()[0].timeStep)
+
+
+# Plotting the entire motion
+if WITHPLOT:
+    for i, phase in enumerate(GAITPHASES):
+        log = ddp[i].callback[0]
+        plotSolution(log.xs, log.us)
+        plotDDPConvergence(log.costs,log.control_regs,
+                           log.state_regs,log.gm_stops,
+                           log.th_stops,log.steps)
