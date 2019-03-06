@@ -523,12 +523,9 @@ class CostModelForceLinearCone(CostModelPinocchio):
         self.nfaces = A.shape[0]
         self.ref = ref if ref is not None else np.zeros(self.nfaces)
         self.contact = contactModel
-        if isinstance(activation, ActivationModelInequality) or activation is None:
-          self.activation = activation if activation is not None else\
-                            ActivationModelInequality(np.array([-np.inf]*self.nfaces),
-                                                      np.zeros(self.nfaces))
-        else:
-          assert(False and "This class only supports ActivationModelInequality.")
+        assert(activation is None and "defining your own activation model is not possible here.")
+        self.activation = ActivationModelInequality(np.array([-np.inf]*self.nfaces),
+                                                    np.zeros(self.nfaces))
     def calc(model,data,x,u):
         if data.contact is None:
             raise RuntimeError('''The CostForce data should be specifically initialized from the
@@ -543,15 +540,15 @@ class CostModelForceLinearCone(CostModelPinocchio):
         ncost,nq,nv,nx,ndx,nu = model.ncost,model.nq,model.nv,model.nx,model.ndx,model.nu
         df_dx,df_du = data.contact.df_dx,data.contact.df_du
         Ax,Axx = model.activation.calcDiff(data.activation,data.residuals)
-        A = model.A
-        data.Rx [:,:] = np.dot(model.A,df_dx)   # This is useless.
-        data.Ru [:,:] = np.dot(model.A,df_du)   # This is useless
-
-        data.Lx [:]     = np.dot(df_dx.T,np.dot(model.A.T,Ax))
-        data.Lu [:]     = np.dot(df_du.T,np.dot(model.A.T,Ax))
-
         sel = Axx.astype(bool)[:,0]
-        A2 = np.dot(A[sel,:].T, A[sel,:])
+        A = model.A[sel,:]
+        A2 = np.dot(A.T, A)
+
+        data.Rx [:,:] = np.dot(model.A,df_dx)
+        data.Ru [:,:] = np.dot(model.A,df_du)
+
+        data.Lx[:] = np.dot(data.Rx[sel,:].T,Ax[sel])
+        data.Lu[:] = np.dot(data.Ru[sel,:].T,Ax[sel])
 
         data.Lxx[:,:]   = np.dot(df_dx.T,np.dot(A2, df_dx))
         data.Lxu[:,:]   = np.dot(df_dx.T,np.dot(A2, df_du))
