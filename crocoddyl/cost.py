@@ -523,9 +523,12 @@ class CostModelForceLinearCone(CostModelPinocchio):
         self.nfaces = A.shape[0]
         self.ref = ref if ref is not None else np.zeros(self.nfaces)
         self.contact = contactModel
-        self.activation = activation if activation is not None else\
-                          ActivationModelInequality(np.array([-np.inf]*self.nfaces),
-                                                    np.zeros(self.nfaces))
+        if isinstance(activation, ActivationModelInequality) or activation is None:
+          self.activation = activation if activation is not None else\
+                            ActivationModelInequality(np.array([-np.inf]*self.nfaces),
+                                                      np.zeros(self.nfaces))
+        else:
+          assert(False and "This class only supports ActivationModelInequality.")
     def calc(model,data,x,u):
         if data.contact is None:
             raise RuntimeError('''The CostForce data should be specifically initialized from the
@@ -547,7 +550,7 @@ class CostModelForceLinearCone(CostModelPinocchio):
         data.Lx [:]     = np.dot(df_dx.T,np.dot(model.A.T,Ax))
         data.Lu [:]     = np.dot(df_du.T,np.dot(model.A.T,Ax))
 
-        A2 = np.dot((Axx*A).T, Axx*A)
+        A2 = np.dot(A.T, Axx*A)
 
         data.Lxx[:,:]   = np.dot(df_dx.T,np.dot(A2, df_dx))
         data.Lxu[:,:]   = np.dot(df_dx.T,np.dot(A2, df_du))
