@@ -97,6 +97,22 @@ def plotSolution(rmodel, xs, us):
     plt.xlabel('knots')
     plt.show()
 
+    plt.figure(2)
+    rdata = rmodel.createData()
+    Cx = []
+    Cy = []
+    for x in xs:
+        q = a2m(x[:rmodel.nq])
+        c = pinocchio.centerOfMass(rmodel, rdata, q)
+        Cx.append(np.asscalar(c[0]))
+        Cy.append(np.asscalar(c[1]))
+    plt.plot(Cx, Cy)
+    plt.title('CoM position')
+    plt.xlabel('x [m]')
+    plt.ylabel('y [m]')
+    plt.grid(True)
+    plt.show()
+
 
 class TaskSE3:
     def __init__(self, oXf, frameId):
