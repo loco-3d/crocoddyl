@@ -87,8 +87,9 @@ def loadTalosLegs(modelPath='/opt/openrobots/share'):
             assert( jid == j.id )
             m2.appendBodyToJoint(jid,Y,pinocchio.SE3.Identity())
             
-    #m2.upperPositionLimit=np.matrix([1.]*19).T
-    #m2.lowerPositionLimit=np.matrix([-1.]*19).T
+    u = m2.upperPositionLimit; u[:7] =  1; m2.upperPositionLimit = u
+    l = m2.lowerPositionLimit; l[:7] = -1; m2.lowerPositionLimit = l
+
     #q2 = robot.q0[:19]
     for f in m1.frames:
         if f.parent<legMaxId: m2.addFrame(f)

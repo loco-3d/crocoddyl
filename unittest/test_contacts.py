@@ -272,16 +272,18 @@ from crocoddyl import ActionModelNumDiff
 mnum = ActionModelNumDiff(model,withGaussApprox=True)
 dnum = mnum.createData()
 
+# This trigger an error x[3:7] = [1,0,0,0]
+x[3:7] = [0,0,0,1]
+
 model.calc(data,x,u)
 model.calcDiff(data,x,u)
-
 mnum.calcDiff(dnum,x,u)
+
 assert( norm(data.Lx-dnum.Lx) < 1e2*mnum.disturbance )
 assert( norm(data.Lu-dnum.Lu) < 1e2*mnum.disturbance )
 assert( norm(dnum.Lxx-data.Lxx) < 1e2*mnum.disturbance )
 assert( norm(dnum.Lxu-data.Lxu) < 1e2*mnum.disturbance )
 assert( norm(dnum.Luu-data.Luu) < 1e2*mnum.disturbance )
-
 
 # --- test quasi static guess
 x0 = x.copy()
