@@ -4,14 +4,14 @@ from numpy.linalg import norm
 import pinocchio
 import sys
 
-WITHDISPLAY =  'disp' in sys.argv
+WITHDISPLAY = 'disp' in sys.argv
 WITHPLOT = 'plot' in sys.argv
 
-def plotSolution(xs, us):
+
+def plotSolution(rmodel, xs, us):
     import matplotlib.pyplot as plt
     # Getting the state and control trajectories
-    nx = xs[0].shape[0]
-    nu = us[0].shape[0]
+    nx, nq, nu = rmodel.nx, rmodel.nq, rmodel.nu
     X = [0.] * nx
     U = [0.] * nu
     for i in range(nx):
@@ -19,48 +19,80 @@ def plotSolution(xs, us):
     for i in range(nu):
         U[i] = [u[i] for u in us]
 
+    # Plotting the joint positions, velocities and torques
     plt.figure(1)
-
-    # Plotting the joint trajectories and torque
     legJointNames = ['HAA', 'HFE', 'KFE']
     # LF foot
-    plt.subplot(421)
-    [plt.plot(X[k], label=legJointNames[i]) for i,k in enumerate(range(7,10))]
-    plt.title('LF')
+    plt.subplot(4, 3, 1)
+    plt.title('joint position [rad]')
+    [plt.plot(X[k], label=legJointNames[i])
+        for i, k in enumerate(range(7, 10))]
+    plt.ylabel('LF')
     plt.legend()
-    plt.subplot(422)
-    [plt.plot(U[k], label=legJointNames[i]) for i,k in enumerate(range(0,3))]
-    plt.title('LF')
+    plt.subplot(4, 3, 2)
+    plt.title('joint velocity [rad/s]')
+    [plt.plot(X[k], label=legJointNames[i])
+        for i, k in enumerate(range(nq+6, nq+9))]
+    plt.ylabel('LF')
+    plt.legend()
+    plt.subplot(4, 3, 3)
+    plt.title('joint torque [Nm]')
+    [plt.plot(U[k], label=legJointNames[i])
+        for i, k in enumerate(range(0, 3))]
+    plt.ylabel('LF')
     plt.legend()
 
     # LH foot
-    plt.subplot(423)
-    [plt.plot(X[k], label=legJointNames[i]) for i,k in enumerate(range(10,13))]
-    plt.title('LH')
+    plt.subplot(4, 3, 4)
+    [plt.plot(X[k], label=legJointNames[i])
+        for i, k in enumerate(range(10, 13))]
+    plt.ylabel('LH')
     plt.legend()
-    plt.subplot(424)
-    [plt.plot(U[k], label=legJointNames[i]) for i,k in enumerate(range(3,6))]
-    plt.title('LH')
+    plt.subplot(4, 3, 5)
+    [plt.plot(X[k], label=legJointNames[i])
+        for i, k in enumerate(range(nq+9, nq+12))]
+    plt.ylabel('LH')
+    plt.legend()
+    plt.subplot(4, 3, 6)
+    [plt.plot(U[k], label=legJointNames[i])
+        for i, k in enumerate(range(3, 6))]
+    plt.ylabel('LH')
     plt.legend()
 
     # RF foot
-    plt.subplot(425)
-    [plt.plot(X[k], label=legJointNames[i]) for i,k in enumerate(range(13,16))]
-    plt.title('RF')
+    plt.subplot(4, 3, 7)
+    [plt.plot(X[k], label=legJointNames[i])
+        for i, k in enumerate(range(13, 16))]
+    plt.ylabel('RF')
     plt.legend()
-    plt.subplot(426)
-    [plt.plot(U[k], label=legJointNames[i]) for i,k in enumerate(range(6,9))]
-    plt.title('RF')
+    plt.subplot(4, 3, 8)
+    [plt.plot(X[k], label=legJointNames[i])
+        for i, k in enumerate(range(nq+12, nq+15))]
+    plt.ylabel('RF')
+    plt.legend()
+    plt.subplot(4, 3, 9)
+    [plt.plot(U[k], label=legJointNames[i])
+        for i, k in enumerate(range(6, 9))]
+    plt.ylabel('RF')
     plt.legend()
 
     # RH foot
-    plt.subplot(427)
-    [plt.plot(X[k], label=legJointNames[i]) for i,k in enumerate(range(16,19))]
-    plt.title('RH')
+    plt.subplot(4, 3, 10)
+    [plt.plot(X[k], label=legJointNames[i])
+        for i, k in enumerate(range(16, 19))]
+    plt.ylabel('RH')
+    plt.xlabel('knots')
     plt.legend()
-    plt.subplot(428)
-    [plt.plot(U[k], label=legJointNames[i]) for i,k in enumerate(range(9,12))]
-    plt.title('RH')
+    plt.subplot(4, 3, 11)
+    [plt.plot(X[k], label=legJointNames[i])
+        for i, k in enumerate(range(nq+15, nq+18))]
+    plt.ylabel('RH')
+    plt.xlabel('knots')
+    plt.legend()
+    plt.subplot(4, 3, 12)
+    [plt.plot(U[k], label=legJointNames[i])
+        for i, k in enumerate(range(9, 12))]
+    plt.ylabel('RH')
     plt.legend()
     plt.xlabel('knots')
     plt.show()
