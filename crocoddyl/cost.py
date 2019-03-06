@@ -550,7 +550,8 @@ class CostModelForceLinearCone(CostModelPinocchio):
         data.Lx [:]     = np.dot(df_dx.T,np.dot(model.A.T,Ax))
         data.Lu [:]     = np.dot(df_du.T,np.dot(model.A.T,Ax))
 
-        A2 = np.dot(A.T, Axx*A)
+        sel = Axx.astype(bool)[:,0]
+        A2 = np.dot(A[sel,:].T, A[sel,:])
 
         data.Lxx[:,:]   = np.dot(df_dx.T,np.dot(A2, df_dx))
         data.Lxu[:,:]   = np.dot(df_dx.T,np.dot(A2, df_du))
