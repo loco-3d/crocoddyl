@@ -647,9 +647,9 @@ if WITHDISPLAY:
 
 # Plotting the entire motion
 if WITHPLOT:
+    xs = []
+    us = []
     for i, phase in enumerate(GAITPHASES):
-        log = ddp[i].callback[0]
-        plotSolution(log.xs, log.us)
-        plotDDPConvergence(log.costs,log.control_regs,
-                           log.state_regs,log.gm_stops,
-                           log.th_stops,log.steps)
+        xs.extend(ddp[i].xs)
+        us.extend(ddp[i].us)
+    plotSolution(rmodel, xs, us)
