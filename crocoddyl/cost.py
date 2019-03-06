@@ -473,10 +473,11 @@ class CostModelForce(CostModelPinocchio):
     The class proposes a model of a cost function for tracking a reference
     value of a 6D force, being given the contact model and its derivatives.
     '''
-    def __init__(self,pinocchioModel,contactModel,ref=None,nu=None, activation=None):
+    def __init__(self,pinocchioModel, contactModel, ncost=6, ref=None,
+                 nu=None, activation=None):
         self.CostDataType = CostDataForce
-        CostModelPinocchio.__init__(self,pinocchioModel,ncost=6,nu=nu)
-        self.ref = ref if ref is not None else np.zeros(6)
+        CostModelPinocchio.__init__(self,pinocchioModel,ncost=ncost,nu=nu)
+        self.ref = ref if ref is not None else np.zeros(ncost)
         self.contact = contactModel
         self.activation = activation if activation is not None else ActivationModelQuad()
     def calc(model,data,x,u):
