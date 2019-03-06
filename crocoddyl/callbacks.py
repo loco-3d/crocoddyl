@@ -38,21 +38,21 @@ class CallbackDDPVerbose:
     def __call__(self,solver):
         if solver.iter % 10 == 0:
             if self.level == 0:
-                print "iter \t cost \t      stop \t    grad \t  xreg \t      ureg \t alpha \t feas"
+                print "iter \t cost \t      stop \t    grad \t  xreg \t      ureg \t step \t feas"
             elif self.level == 1:
-                print "iter \t cost \t      stop \t    grad \t  xreg \t      ureg \t alpha \t feas \t  dV-exp \t  dV"
+                print "iter \t cost \t      stop \t    grad \t  xreg \t      ureg \t step \t feas \t  dV-exp \t  dV"
         if self.level == 0:
             print "%4i  %0.5e  %0.5e  %0.5e  %10.5e  %0.5e   %0.4f     %1d" % \
                 (solver.iter, sum(copy.copy([ d.cost for d in solver.datas() ])),
                 solver.stop, -solver.expectedImprovement()[1],
                 solver.x_reg, solver.u_reg,
-                 solver.stepLength,solver.isFeasible+0)
+                 solver.stepLength,solver.isFeasible)
         elif self.level == 1:
             print "%4i  %0.5e  %0.5e  %0.5e  %10.5e  %0.5e  %0.4f  %0.5e  %0.5e" % \
                 (solver.iter, sum(copy.copy([ d.cost for d in solver.datas() ])),
                 solver.stop, -solver.expectedImprovement()[1],
                 solver.x_reg, solver.u_reg,
-                 solver.stepLength, solve.isFeasible+0, solver.dV_exp, solver.dV)
+                 solver.stepLength, solver.isFeasible, solver.dV_exp, solver.dV)
 
 class CallbackSolverDisplay:
     def __init__(self,robotwrapper,rate=-1,freq=1,cameraTF = None):
