@@ -229,7 +229,40 @@ mnum.calcDiff(dnum,x,u)
 assert(absmax(data.Fx-dnum.Fx)/model.nx < 1e2*mnum.disturbance )
 assert(absmax(data.Fu-dnum.Fu)/model.nu < 1e2*mnum.disturbance )
 
+# -------------------------------------------------------------------------------
+# Cost force cone model
+from crocoddyl import CostModelForceLinearCone
+nfaces = 10; nc = model.contact.ncontact
+A = np.random.rand(nfaces, nc)
 
+model.costs = CostModelSum(rmodel,nu=actModel.nu)
+model.costs.addCost( name='force_cone', weight = 1,
+                     cost = CostModelForceLinearCone(rmodel,model.contact.contacts['fingertip'],A,
+                                               nu=actModel.nu))
+data = model.createData()
+data.costs['force_cone'].contact = data.contact[model.costs['force_cone'].cost.contact]
+
+cmodel = model.costs['force_cone'].cost
+cdata  = data .costs['force_cone']
+
+model.calcDiff(data,x,u)
+
+#Check derivative of the model.
+mnum = DifferentialActionModelNumDiff(model,withGaussApprox=False)
+dnum = mnum.createData()
+for d in dnum.datax:
+  d.costs['force_cone'].contact = d.contact[model.costs['force_cone'].cost.contact]
+for d in dnum.datau:
+  d.costs['force_cone'].contact = d.contact[model.costs['force_cone'].cost.contact]
+dnum.data0.costs['force_cone'].contact = dnum.data0.contact[model.costs['force_cone'].cost.contact]
+    
+
+mnum.calcDiff(dnum,x,u)
+assert(absmax(data.Fx-dnum.Fx)/model.nx < 1e2*mnum.disturbance )
+assert(absmax(data.Fu-dnum.Fu)/model.nu < 1e2*mnum.disturbance )
+
+assert(absmax(data.Lx-dnum.Lx)/model.nx < 1e-3 )
+assert(absmax(data.Lu-dnum.Lu)/model.nu < 1e-3 )
 
 
 # TODO Check if we need this unit-test here. Note that is an ction test
