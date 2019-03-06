@@ -8,13 +8,18 @@ rev_enumerate = lambda l: izip(xrange(len(l)-1, -1, -1), reversed(l))
 
 
 class SolverFDDP:
-    """ Run the DDP solver.
+    """ Run a modified version DDP solver, that is performing a more advanced
+    feasibility search.
 
     The solver computes an optimal trajectory and control commmands by iteratives
     running backward and forward passes. The backward-pass updates locally the
     quadratic approximation of the problem and computes descent direction,
     and the forward-pass rollouts this new policy by integrating the system dynamics
     along a tuple of optimized control commands U*.
+    The solver is particularly interesting when providing an unfeasible guess (ie x is not
+    the rollout of u). In that case the solver does not try to immediatly compute a
+    feasible candidate, but rather maintains the gap at the shooting nodes while it is
+    searching for a good optimization.
     :param shootingProblem: shooting problem (list of action models along trajectory)
     """
     def __init__(self,shootingProblem):
