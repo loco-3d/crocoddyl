@@ -596,7 +596,7 @@ class SimpleQuadrupedalGaitProblem:
             model.differential.costs.addCost('impactVel_'+str(i),
                                              impactFootVelCost, 1e4)
             model.differential.costs['impactVel_'+str(i)].weight = 1e6
-            model.differential.costs['footTrack_'+str(i)].weight = 1e6
+            model.differential.costs['footTrack_'+str(i)].weight = 1e7
         model.differential.costs['stateReg'].weight = 1e1
         model.differential.costs['ctrlReg'].weight = 1e-3
         return model
@@ -608,7 +608,7 @@ if WITHDISPLAY:
     hyq.initDisplay(loadModel=True)
 
 rmodel = hyq.model
-rdata  = rmodel.createData()
+rdata = rmodel.createData()
 
 # Defining the initial state of the robot
 q0 = rmodel.referenceConfigurations['half_sitting'].copy()
