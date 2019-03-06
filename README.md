@@ -21,15 +21,14 @@ If you want to follow the current developments, you can directly refer to the [d
 ## <img align="center" height="20" src="https://i.imgur.com/x1morBF.png"/> Installation
 **Crocoddyl** has the following dependecies:
 
-* boost (unit_test_framework)
-* eigen3
 * [pinocchio](https://github.com/stack-of-tasks/pinocchio)
+* SciPy
 
-To install eigen3 on Ubuntu you can use apt-get:
-  sudo apt-get install libeigen3-dev
+Crocoddyl is yet a pure Python library. You don't need to install it. You can run examples and tests from the root dir of the repository:
 
-To install [pinocchio](https://github.com/stack-of-tasks/pinocchio) follow the instructions on its [website](https://stack-of-tasks.github.io/pinocchio/download.html).
-
+cd PATH_TO_CROCODDYL
+python examples/talos_arm.py
+python unittest/all.py
 
 ## <img align="center" height="20" src="http://www.pvhc.net/img205/oohmbjfzlxapxqbpkawx.png"/> Publications
 - R. Budhiraja, J. Carpentier, C. Mastalli and N. Mansard. [Differential Dynamic Programming for Multi-Phase Rigid Contact Dynamics](https://hal.archives-ouvertes.fr/hal-01851596/document), International Conference on Humanoid Robots (ICHR), 2018
