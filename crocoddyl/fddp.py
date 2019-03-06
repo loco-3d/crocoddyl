@@ -274,8 +274,8 @@ class SolverFDDP:
         # Argument warning is also introduce for debug: by default, it masks the numpy warnings
         #    that can be reactivated during debug.
         xs,us = self.xs,self.us
-        self.xtry = xtry = [ np.nan ]*(self.problem.T+1)  # Remove self.xtry after debug
-        self.utry = utry = [ np.nan ]*self.problem.T      # Remove self.utry after debug
+        xtry = [ np.nan ]*(self.problem.T+1)  # Remove self.xtry after debug
+        utry = [ np.nan ]*self.problem.T      # Remove self.utry after debug
         ctry = 0
         xnext = self.problem.initialState
         for t,(m,d) in enumerate(zip(self.problem.runningModels,self.problem.runningDatas)):
