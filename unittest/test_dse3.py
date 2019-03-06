@@ -32,7 +32,7 @@ def dresidualWorld(q):
                    pinocchio.getJointJacobian(rmodel, rdata, jid,
                                            pinocchio.ReferenceFrame.WORLD))
 
-eps = 1e-9
+eps = 1e-8
 d1 = dresidualLocal(q0)
 d2 = dresidualWorld(q0)
 d3 = df_dq(rmodel, residualrMi, q0, h=eps)
