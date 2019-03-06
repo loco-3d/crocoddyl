@@ -7,14 +7,19 @@ from itertools import izip
 rev_enumerate = lambda l: izip(xrange(len(l)-1, -1, -1), reversed(l))
 
 
-class SolverDDP:
-    """ Run the DDP solver.
+class SolverFDDP:
+    """ Run a modified version DDP solver, that is performing a more advanced
+    feasibility search.
 
     The solver computes an optimal trajectory and control commmands by iteratives
     running backward and forward passes. The backward-pass updates locally the
     quadratic approximation of the problem and computes descent direction,
     and the forward-pass rollouts this new policy by integrating the system dynamics
     along a tuple of optimized control commands U*.
+    The solver is particularly interesting when providing an unfeasible guess (ie x is not
+    the rollout of u). In that case the solver does not try to immediatly compute a
+    feasible candidate, but rather maintains the gap at the shooting nodes while it is
+    searching for a good optimization.
     :param shootingProblem: shooting problem (list of action models along trajectory)
     """
     def __init__(self,shootingProblem):
@@ -68,6 +73,17 @@ class SolverDDP:
         """ Compute the tangent (LQR) model.
         """
         self.cost = self.problem.calcDiff(self.xs,self.us)
+        if self.isFeasible:
+            if hasattr(self,'gaps'): del self.gaps
+        else:
+            # Gap store the displacement to go from a feasible trajectory to the current xs.
+            # gap is so that    xconti [+] gap = xcand  ...
+            #              ...  gap = xcand [-] xconti = DIFF(xconti,xcand)
+            self.gaps = \
+            [ self.problem.runningModels[0].State.diff(self.problem.initialState,self.xs[0]) ] \
+            + [ m.State.diff(d.xnext,x) \
+                          for m,d,x in zip(self.problem.runningModels,
+                                           self.problem.runningDatas,self.xs[1:]) ]
         return self.cost
     
     def computeDirection(self,recalc=True):
@@ -117,6 +133,7 @@ class SolverDDP:
         self.u_reg = regInit if regInit is not None else self.regMin
         self.wasFeasible = False
         for i in range(maxiter):
+            #print 'i',i
             try:
                 self.computeDirection()
             except ArithmeticError:
@@ -124,15 +141,20 @@ class SolverDDP:
             d1,d2 = self.expectedImprovement()
 
             for a in self.alphas:
+                #print 'a',a
                 try:
                     self.dV = self.tryStep(a)
                 except ArithmeticError:
+                    #print 'a=%0.3f,   arithmerror .... reject' % a
                     continue
                 self.dV_exp = a*(d1+.5*d2*a)
-                if d1<self.th_grad or not self.isFeasible or self.dV > self.th_acceptStep*self.dV_exp:
+                #print 'a=%0.3f,   exp=%5.1e,   actual=%5.1e .... ' % (a,self.dV_exp,self.dV)
+                #or not self.isFeasible \
+                if d1<self.th_grad \
+                   or self.dV > self.th_acceptStep*self.dV_exp:
                     # Accept step
                     self.wasFeasible = self.isFeasible
-                    self.setCandidate(self.xs_try,self.us_try,isFeasible=True,copy=False)
+                    self.setCandidate(self.xs_try,self.us_try,isFeasible=(self.wasFeasible or a==1),copy=False)
                     self.cost = self.cost_try
                     break
             if a>self.th_step:
@@ -239,7 +261,7 @@ class SolverDDP:
             raiseIfNan(self.Vxx[t],ArithmeticError('backward error'))
             raiseIfNan(self.Vx[t],ArithmeticError('backward error'))
             
-    def forwardPass(self,stepLength,b=None,warning='ignore'):
+    def forwardPass(self,stepLength,warning='ignore'):
         """ Run the forward-pass of the DDP algorithm.
 
         The forward-pass basically applies a new policy and then rollout the
@@ -251,21 +273,28 @@ class SolverDDP:
         # Argument b is introduce for debug purpose.
         # Argument warning is also introduce for debug: by default, it masks the numpy warnings
         #    that can be reactivated during debug.
-        if b is None: b=1
         xs,us = self.xs,self.us
-        xtry = [ self.problem.initialState ] + [ np.nan ]*self.problem.T
-        utry = [ np.nan ]*self.problem.T
+        xtry = [ np.nan ]*(self.problem.T+1)  # Remove self.xtry after debug
+        utry = [ np.nan ]*self.problem.T      # Remove self.utry after debug
         ctry = 0
+        xnext = self.problem.initialState
         for t,(m,d) in enumerate(zip(self.problem.runningModels,self.problem.runningDatas)):
+            if self.isFeasible or stepLength == 1:
+                xtry[t] = xnext.copy()
+            else:
+                xtry[t] = m.State.integrate(xnext,self.gaps[t]*(1-stepLength))
             utry[t] = us[t] - self.k[t]*stepLength  \
-                      - np.dot(self.K[t],m.State.diff(xs[t],xtry[t]))*b
+                      - np.dot(self.K[t],m.State.diff(xs[t],xtry[t]))
             with np.warnings.catch_warnings():
                 np.warnings.simplefilter(warning)
                 xnext,cost = m.calc(d, xtry[t],utry[t] )
-            xtry[t+1] = xnext.copy()  # not sure copy helpful here.
             ctry += cost
             raiseIfNan([ctry,cost],ArithmeticError('forward error'))
-            raiseIfNan(xtry[t+1],ArithmeticError('forward error'))
+            raiseIfNan(xnext,ArithmeticError('forward error'))
+        if self.isFeasible or stepLength == 1:
+            xtry[-1] = xnext.copy()
+        else:
+            xtry[-1] = self.problem.terminalModel.State.integrate(xnext,self.gaps[-1]*(1-stepLength))
         with np.warnings.catch_warnings() as npwarn:
             np.warnings.simplefilter(warning)
             ctry += self.problem.terminalModel.calc(self.problem.terminalData,xtry[-1])[1]
