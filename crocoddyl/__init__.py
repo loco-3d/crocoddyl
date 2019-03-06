@@ -28,7 +28,6 @@ from differential_action import DifferentialActionDataNumDiff, DifferentialActio
 from floating_contact import DifferentialActionDataFloatingInContact, DifferentialActionModelFloatingInContact
 from actuation import ActuationDataFreeFloating, ActuationModelFreeFloating
 from actuation import ActuationDataFull, ActuationModelFull
-from actuation import DifferentialActionDataActuated, DifferentialActionModelActuated
 from contact import ContactDataPinocchio, ContactModelPinocchio
 from contact import ContactData3D, ContactModel3D
 from contact import ContactData6D, ContactModel6D
