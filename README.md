@@ -33,11 +33,11 @@ Crocoddyl is yet a pure Python library; you don't need to install it. You can ru
 		python unittest/all.py
 
 If you want to learn about Crocoddyl, take a look at the Jupyter notebooks. Start in the following order.
-- examples/notebooks/unicycle_towards_origin.ipynb
-- examples/notebooks/cartpole_swing_up.ipynb
-- examples/notebooks/manipulator.ipynb
-- examples/notebooks/bipedal_walking_from_foot_traj.ipynb
-- examples/notebooks/introduction_to_crocoddyl.ipynb
+- [examples/notebooks/unicycle_towards_origin.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/unicycle_towards_origin.ipynb)
+- [examples/notebooks/cartpole_swing_up.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/cartpole_swing_up.py)
+- [examples/notebooks/manipulator.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/manipulator.ipynb)
+- [examples/notebooks/bipedal_walking_from_foot_traj.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/bipedal_walking_from_foot_traj.ipynb)
+- [examples/notebooks/introduction_to_crocoddyl.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/introduction_to_crocoddyl.ipynb)
 
 ## <img align="center" height="20" src="http://www.pvhc.net/img205/oohmbjfzlxapxqbpkawx.png"/> Publications
 - R. Budhiraja, J. Carpentier, C. Mastalli and N. Mansard. [Differential Dynamic Programming for Multi-Phase Rigid Contact Dynamics](https://hal.archives-ouvertes.fr/hal-01851596/document), International Conference on Humanoid Robots (ICHR), 2018
