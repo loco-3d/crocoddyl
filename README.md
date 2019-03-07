@@ -22,9 +22,10 @@ If you want to follow the current developments, you can directly refer to the [d
 **Crocoddyl** has the following dependecies:
 
 * [pinocchio](https://github.com/stack-of-tasks/pinocchio)
-* [NumPy](http://www.numpy.org/)
 * [SciPy](https://www.scipy.org/)
+* [matplotlib](https://matplotlib.org/) (optional)
 * [example-robot-data](https://gepgitlab.laas.fr/gepetto/example-robot-data) (optional for running examples)
+* [jupyter](https://jupyter.org/) (optional for running notebooks)
 
 Crocoddyl is yet a pure Python library; you don't need to install it. You can run examples and tests from the root dir of the repository:
 
