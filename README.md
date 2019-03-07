@@ -24,7 +24,7 @@ If you want to follow the current developments, you can directly refer to the [d
 * [pinocchio](https://github.com/stack-of-tasks/pinocchio)
 * [NumPy](http://www.numpy.org/)
 * [SciPy](https://www.scipy.org/)
-* [example-robot-data](https://gepgitlab.laas.fr/gepetto/example-robot-data) (optional)
+* [example-robot-data](https://gepgitlab.laas.fr/gepetto/example-robot-data) (optional for running examples)
 
 Crocoddyl is yet a pure Python library; you don't need to install it. You can run examples and tests from the root dir of the repository:
 
