@@ -26,7 +26,7 @@ If you want to follow the current developments, you can directly refer to the [d
 * [SciPy](https://www.scipy.org/)
 * [example-robot-data](https://gepgitlab.laas.fr/gepetto/example-robot-data) (optional)
 
-Crocoddyl is yet a pure Python library. You don't need to install it. You can run examples and tests from the root dir of the repository:
+Crocoddyl is yet a pure Python library; you don't need to install it. You can run examples and tests from the root dir of the repository:
 
 		cd PATH_TO_CROCODDYL
 		python examples/talos_arm.py
