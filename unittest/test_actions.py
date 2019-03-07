@@ -45,11 +45,11 @@ class ActionModelTestCase(unittest.TestCase):
         u = np.random.rand(self.MODEL.nu)
 
         # Computing the action derivatives
-        self.MODEL.calcDiff(self.DATA,x,u)
-        self.MODEL_NUMDIFF.calcDiff(self.DATA_NUMDIFF,x,u)
+        self.MODEL.calcDiff(self.DATA, x, u)
+        self.MODEL_NUMDIFF.calcDiff(self.DATA_NUMDIFF, x, u)
 
         # Checking the partial derivatives against NumDiff
-        tol = 10*self.MODEL_NUMDIFF.disturbance
+        tol = 10 * self.MODEL_NUMDIFF.disturbance
         self.assertTrue(np.allclose(self.DATA.Fx,self.DATA_NUMDIFF.Fx, atol=tol), \
             "Fx is wrong.")
         self.assertTrue(np.allclose(self.DATA.Fu,self.DATA_NUMDIFF.Fu, atol=tol), \
@@ -69,6 +69,7 @@ class ActionModelTestCase(unittest.TestCase):
 class UnicycleTest(ActionModelTestCase):
     ActionModelTestCase.MODEL = ActionModelUnicycle()
 
+
 class UnicycleVarTest(ActionModelTestCase):
     ActionModelTestCase.MODEL = ActionModelUnicycleVar()
 
@@ -80,12 +81,12 @@ class UnicycleVarTest(ActionModelTestCase):
 
         # Generating random values for the state and control vectors
         x = X.rand()
-        x0 = X.diff(X.zero(),x)
+        x0 = X.diff(X.zero(), x)
         u = np.random.rand(self.MODEL.nu)
 
         # Making the rollout
-        xnext,cost = self.MODEL.calc(self.DATA,x,u)
-        xnext0,cost0 = model0.calc(data0,x0,u)
+        xnext, cost = self.MODEL.calc(self.DATA, x, u)
+        xnext0, cost0 = model0.calc(data0, x0, u)
 
         # Checking the rollout (next state) and cost values
         self.assertTrue(
@@ -93,11 +94,10 @@ class UnicycleVarTest(ActionModelTestCase):
             "Dynamics simulation is wrong.")
         self.assertAlmostEqual(cost0, cost, "Cost computation is wrong.")
 
+
 # TODO create testcases for a general cost function and specific model
 # for this is needed a sort of DifferentialActionModelPositioning
 # Later test_costs might merged inside this code.
-
-
 
 if __name__ == '__main__':
     unittest.main()

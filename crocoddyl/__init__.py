@@ -4,8 +4,8 @@ from activation import (ActivationDataInequality, ActivationDataQuad, Activation
                         ActivationModelSmoothAbs, ActivationModelWeightedQuad)
 from actuation import ActuationDataFreeFloating, ActuationDataFull, ActuationModelFreeFloating, ActuationModelFull
 from callbacks import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay, CallbackSolverTimer
-from contact import (ContactData3D, ContactData6D, ContactDataMultiple, ContactDataPinocchio,
-                     ContactModel3D, ContactModel6D, ContactModelMultiple, ContactModelPinocchio)
+from contact import (ContactData3D, ContactData6D, ContactDataMultiple, ContactDataPinocchio, ContactModel3D,
+                     ContactModel6D, ContactModelMultiple, ContactModelPinocchio)
 from cost import (CostDataCoM, CostDataControl, CostDataForce, CostDataFramePlacement, CostDataFrameTranslation,
                   CostDataFrameVelocity, CostDataFrameVelocityLinear, CostDataNumDiff, CostDataPinocchio,
                   CostDataState, CostDataSum, CostModelCoM, CostModelControl, CostModelForce, CostModelForceLinearCone,
@@ -20,12 +20,12 @@ from differential_action import (DifferentialActionDataAbstract, DifferentialAct
 from floating_contact import DifferentialActionDataFloatingInContact, DifferentialActionModelFloatingInContact
 from impact import (ActionDataImpact, ActionModelImpact, CostModelImpactCoM, CostModelImpactWholeBody, ImpulseData6D,
                     ImpulseDataPinocchio, ImpulseModel3D, ImpulseModel6D, ImpulseModelMultiple, ImpulseModelPinocchio)
-from integrated_action import (IntegratedActionDataEuler, IntegratedActionDataRK4,
-                               IntegratedActionModelEuler, IntegratedActionModelRK4)
+from integrated_action import (IntegratedActionDataEuler, IntegratedActionDataRK4, IntegratedActionModelEuler,
+                               IntegratedActionModelRK4)
 from kkt import SolverKKT
 from robots import getTalosPathFromRos, loadHyQ, loadTalos, loadTalosArm, loadTalosLegs
 from shooting import ShootingProblem
 from state import StateAbstract, StateNumDiff, StatePinocchio, StateVector
-from unicycle import (ActionDataUnicycle, ActionDataUnicycleVar,
-                      ActionModelUnicycle, ActionModelUnicycleVar, StateUnicycle)
+from unicycle import (ActionDataUnicycle, ActionDataUnicycleVar, ActionModelUnicycle, ActionModelUnicycleVar,
+                      StateUnicycle)
 from utils import a2m, absmax, absmin, m2a

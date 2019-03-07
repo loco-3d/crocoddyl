@@ -6,8 +6,9 @@ from numpy.linalg import norm
 import pinocchio
 from crocoddyl import *
 
-WITHDISPLAY =  'disp' in sys.argv
+WITHDISPLAY = 'disp' in sys.argv
 WITHPLOT = 'plot' in sys.argv
+
 
 def plotSolution(xs, us):
     import matplotlib.pyplot as plt
@@ -27,41 +28,41 @@ def plotSolution(xs, us):
     legJointNames = ['HAA', 'HFE', 'KFE']
     # LF foot
     plt.subplot(421)
-    [plt.plot(X[k], label=legJointNames[i]) for i,k in enumerate(range(7,10))]
+    [plt.plot(X[k], label=legJointNames[i]) for i, k in enumerate(range(7, 10))]
     plt.title('LF')
     plt.legend()
     plt.subplot(422)
-    [plt.plot(U[k], label=legJointNames[i]) for i,k in enumerate(range(0,3))]
+    [plt.plot(U[k], label=legJointNames[i]) for i, k in enumerate(range(0, 3))]
     plt.title('LF')
     plt.legend()
 
     # LH foot
     plt.subplot(423)
-    [plt.plot(X[k], label=legJointNames[i]) for i,k in enumerate(range(10,13))]
+    [plt.plot(X[k], label=legJointNames[i]) for i, k in enumerate(range(10, 13))]
     plt.title('LH')
     plt.legend()
     plt.subplot(424)
-    [plt.plot(U[k], label=legJointNames[i]) for i,k in enumerate(range(3,6))]
+    [plt.plot(U[k], label=legJointNames[i]) for i, k in enumerate(range(3, 6))]
     plt.title('LH')
     plt.legend()
 
     # RF foot
     plt.subplot(425)
-    [plt.plot(X[k], label=legJointNames[i]) for i,k in enumerate(range(13,16))]
+    [plt.plot(X[k], label=legJointNames[i]) for i, k in enumerate(range(13, 16))]
     plt.title('RF')
     plt.legend()
     plt.subplot(426)
-    [plt.plot(U[k], label=legJointNames[i]) for i,k in enumerate(range(6,9))]
+    [plt.plot(U[k], label=legJointNames[i]) for i, k in enumerate(range(6, 9))]
     plt.title('RF')
     plt.legend()
 
     # RH foot
     plt.subplot(427)
-    [plt.plot(X[k], label=legJointNames[i]) for i,k in enumerate(range(16,19))]
+    [plt.plot(X[k], label=legJointNames[i]) for i, k in enumerate(range(16, 19))]
     plt.title('RH')
     plt.legend()
     plt.subplot(428)
-    [plt.plot(U[k], label=legJointNames[i]) for i,k in enumerate(range(9,12))]
+    [plt.plot(U[k], label=legJointNames[i]) for i, k in enumerate(range(9, 12))]
     plt.title('RH')
     plt.legend()
     plt.xlabel('knots')
@@ -147,8 +148,7 @@ class SimpleQuadrupedalGaitProblem:
         problem = ShootingProblem(x0, comModels, comModels[-1])
         return problem
 
-    def createWalkingProblem(self, x0, stepLength, stepHeight,
-                             timeStep, stepKnots, supportKnots):
+    def createWalkingProblem(self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots):
         """ Create a shooting problem for a simple walking gait.
 
         :param x0: initial state
@@ -222,8 +222,7 @@ class SimpleQuadrupedalGaitProblem:
         problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
 
-    def createTrottingProblem(self, x0, stepLength, stepHeight,
-                              timeStep, stepKnots, supportKnots):
+    def createTrottingProblem(self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots):
         """ Create a shooting problem for a simple trotting gait.
 
         :param x0: initial state
@@ -279,8 +278,7 @@ class SimpleQuadrupedalGaitProblem:
         problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
 
-    def createPacingProblem(self, x0, stepLength, stepHeight,
-                            timeStep, stepKnots, supportKnots):
+    def createPacingProblem(self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots):
         """ Create a shooting problem for a simple pacing gait.
 
         :param x0: initial state
@@ -336,8 +334,7 @@ class SimpleQuadrupedalGaitProblem:
         problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
 
-    def createBoundingProblem(self, x0, stepLength, stepHeight,
-                              timeStep, stepKnots, supportKnots):
+    def createBoundingProblem(self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots):
         """ Create a shooting problem for a simple bounding gait.
 
         :param x0: initial state
@@ -413,8 +410,8 @@ class SimpleQuadrupedalGaitProblem:
         problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
 
-    def createFootstepModels(self, comPos0, feetPos0, stepLength, stepHeight,
-                             timeStep, numKnots, supportFootIds, swingFootIds):
+    def createFootstepModels(self, comPos0, feetPos0, stepLength, stepHeight, timeStep, numKnots, supportFootIds,
+                             swingFootIds):
         """ Action models for a footstep phase.
 
         :param comPos0, initial CoM position
@@ -439,13 +436,11 @@ class SimpleQuadrupedalGaitProblem:
                 resKnot = numKnots % 2
                 phKnots = numKnots / 2
                 if k < phKnots:
-                    dp = a2m([[stepLength * (k+1) / numKnots, 0.,
-                               stepHeight * k / phKnots]])
+                    dp = a2m([[stepLength * (k + 1) / numKnots, 0., stepHeight * k / phKnots]])
                 elif k == phKnots:
-                    dp = a2m([[stepLength * (k+1) / numKnots, 0., stepHeight]])
+                    dp = a2m([[stepLength * (k + 1) / numKnots, 0., stepHeight]])
                 else:
-                    dp = a2m([[stepLength * (k+1) / numKnots, 0.,
-                             stepHeight * (1 - float(k-phKnots) / phKnots)]])
+                    dp = a2m([[stepLength * (k + 1) / numKnots, 0., stepHeight * (1 - float(k - phKnots) / phKnots)]])
                 tref = np.asmatrix(p + dp)
 
                 swingFootTask += \
@@ -469,8 +464,7 @@ class SimpleQuadrupedalGaitProblem:
             p += a2m([[stepLength, 0., 0.]])
         return footSwingModel + [footSwitchModel]
 
-    def createSwingFootModel(self, timeStep, supportFootIds, comTask=None,
-                             swingFootTask=None):
+    def createSwingFootModel(self, timeStep, supportFootIds, comTask=None, swingFootTask=None):
         """ Action model for a swing foot phase.
 
         :param timeStep: step duration of the action model
@@ -490,7 +484,7 @@ class SimpleQuadrupedalGaitProblem:
             supportContactModel = \
                 ContactModel3D(self.rmodel, i, ref=[
                                0., 0., 0.], gains=[0., 0.])
-            contactModel.addContact('contact_'+str(i), supportContactModel)
+            contactModel.addContact('contact_' + str(i), supportContactModel)
 
         # Creating the cost model for a contact phase
         costModel = CostModelSum(self.rmodel, actModel.nu)
@@ -504,15 +498,12 @@ class SimpleQuadrupedalGaitProblem:
                                               i.frameId,
                                               m2a(i.oXf.translation),
                                               actModel.nu)
-                costModel.addCost("footTrack_"+str(i), footTrack, 1e4)
+                costModel.addCost("footTrack_" + str(i), footTrack, 1e4)
 
         stateWeights = \
             np.array([0]*3 + [500.]*3 + [0.01]*(self.rmodel.nv-6) +
                      [10]*self.rmodel.nv)
-        stateReg = CostModelState(self.rmodel,
-                                  self.state,
-                                  self.rmodel.defaultState,
-                                  actModel.nu,
+        stateReg = CostModelState(self.rmodel, self.state, self.rmodel.defaultState, actModel.nu,
                                   ActivationModelWeightedQuad(stateWeights**2))
         ctrlReg = CostModelControl(self.rmodel, actModel.nu)
         costModel.addCost("stateReg", stateReg, 1e-1)
@@ -536,16 +527,14 @@ class SimpleQuadrupedalGaitProblem:
         :param swingFootTask: swinging foot task
         :return action model for a foot switch phase
         """
-        model = self.createSwingFootModel(
-            0., supportFootId, swingFootTask=swingFootTask)
+        model = self.createSwingFootModel(0., supportFootId, swingFootTask=swingFootTask)
 
         for i in swingFootTask:
             impactFootVelCost = \
                 CostModelFrameVelocity(self.rmodel, i.frameId)
-            model.differential.costs.addCost('impactVel_'+str(i),
-                                             impactFootVelCost, 1e4)
-            model.differential.costs['impactVel_'+str(i)].weight = 1e6
-            model.differential.costs['footTrack_'+str(i)].weight = 1e6
+            model.differential.costs.addCost('impactVel_' + str(i), impactFootVelCost, 1e4)
+            model.differential.costs['impactVel_' + str(i)].weight = 1e6
+            model.differential.costs['footTrack_' + str(i)].weight = 1e6
         model.differential.costs['stateReg'].weight = 1e1
         model.differential.costs['ctrlReg'].weight = 1e-3
         return model
@@ -556,7 +545,7 @@ hyq = loadHyQ()
 if WITHDISPLAY: hyq.initDisplay(loadModel=True)
 
 rmodel = hyq.model
-rdata  = rmodel.createData()
+rdata = rmodel.createData()
 
 # Defining the initial state of the robot
 q0 = rmodel.referenceConfigurations['half_sitting'].copy()
@@ -568,8 +557,7 @@ lfFoot = 'lf_foot'
 rfFoot = 'rf_foot'
 lhFoot = 'lh_foot'
 rhFoot = 'rh_foot'
-gait = SimpleQuadrupedalGaitProblem(
-    rmodel, lfFoot, rfFoot, lhFoot, rhFoot)
+gait = SimpleQuadrupedalGaitProblem(rmodel, lfFoot, rfFoot, lhFoot, rhFoot)
 
 # Setting up all tasks
 GAITPHASES = \
@@ -590,36 +578,26 @@ for i, phase in enumerate(GAITPHASES):
         if key is 'walking':
             # Creating a walking problem
             ddp[i] = SolverDDP(
-                gait.createWalkingProblem(
-                    x0, value['stepLength'], value['stepHeight'],
-                    value['timeStep'],
-                    value['stepKnots'], value['supportKnots']))
+                gait.createWalkingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
+                                          value['stepKnots'], value['supportKnots']))
         elif key is 'trotting':
             # Creating a trotting problem
             ddp[i] = SolverDDP(
-                gait.createTrottingProblem(
-                    x0, value['stepLength'], value['stepHeight'],
-                    value['timeStep'],
-                    value['stepKnots'], value['supportKnots']))
+                gait.createTrottingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
+                                           value['stepKnots'], value['supportKnots']))
         elif key is 'pacing':
             # Creating a pacing problem
             ddp[i] = SolverDDP(
-                gait.createPacingProblem(
-                    x0, value['stepLength'], value['stepHeight'],
-                    value['timeStep'],
-                    value['stepKnots'], value['supportKnots']))
+                gait.createPacingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
+                                         value['stepKnots'], value['supportKnots']))
         elif key is 'bounding':
             # Creating a bounding problem
             ddp[i] = SolverDDP(
-                gait.createBoundingProblem(
-                    x0, value['stepLength'], value['stepHeight'],
-                    value['timeStep'],
-                    value['stepKnots'], value['supportKnots']))
+                gait.createBoundingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
+                                           value['stepKnots'], value['supportKnots']))
         elif key is 'jumping':
             # Creating a jumping problem
-            ddp[i] = SolverDDP(
-                gait.createJumpingProblem(
-                    x0, value['jumpHeight'], value['timeStep']))
+            ddp[i] = SolverDDP(gait.createJumpingProblem(x0, value['jumpHeight'], value['timeStep']))
 
     # Added the callback functions
     print
@@ -631,27 +609,25 @@ for i, phase in enumerate(GAITPHASES):
     # Solving the problem with the DDP solver
     ddp[i].th_stop = 1e-9
     ddp[i].solve(
-        maxiter=1000, regInit=.1,
-        init_xs=[rmodel.defaultState]*len(ddp[i].models()),
-        init_us=[m.differential.quasiStatic(d.differential,
-                                            rmodel.defaultState)
-                 for m, d in zip(ddp[i].models(), ddp[i].datas())[:-1]])
+        maxiter=1000,
+        regInit=.1,
+        init_xs=[rmodel.defaultState] * len(ddp[i].models()),
+        init_us=[
+            m.differential.quasiStatic(d.differential, rmodel.defaultState)
+            for m, d in zip(ddp[i].models(), ddp[i].datas())[:-1]
+        ])
 
     # Defining the final state as initial one for the next phase
     x0 = ddp[i].xs[-1]
-
 
 # Display the entire motion
 if WITHDISPLAY:
     for i, phase in enumerate(GAITPHASES):
         displayTrajectory(hyq, ddp[i].xs, ddp[i].models()[0].timeStep)
 
-
 # Plotting the entire motion
 if WITHPLOT:
     for i, phase in enumerate(GAITPHASES):
         log = ddp[i].callback[0]
         plotSolution(log.xs, log.us)
-        plotDDPConvergence(log.costs,log.control_regs,
-                           log.state_regs,log.gm_stops,
-                           log.th_stops,log.steps)
+        plotDDPConvergence(log.costs, log.control_regs, log.state_regs, log.gm_stops, log.th_stops, log.steps)

@@ -27,7 +27,7 @@ class StateTestCase(unittest.TestCase):
         x2 = self.STATE.rand()
 
         # Computing x2 by integrating its difference
-        x2i = self.STATE.integrate(x1,self.STATE.diff(x1,x2))
+        x2i = self.STATE.integrate(x1, self.STATE.diff(x1, x2))
 
         # Checking that both states agree
         self.assertTrue(np.allclose(x2i, x2, atol=1e-9), \
@@ -39,7 +39,7 @@ class StateTestCase(unittest.TestCase):
         dx = np.random.rand(self.STATE.ndx)
 
         # Computing dx by differentiation its integrate
-        dxd = self.STATE.diff(x1,self.STATE.integrate(x1,dx))
+        dxd = self.STATE.diff(x1, self.STATE.integrate(x1, dx))
 
         # Checking that both states agree
         self.assertTrue(np.allclose(dxd, dx, atol=1e-9), \
@@ -51,11 +51,11 @@ class StateTestCase(unittest.TestCase):
         x2 = self.STATE.rand()
 
         # Computing the partial derivatives of the difference function
-        J1,J2 = self.STATE.Jdiff(x1,x2)
-        Jnum1,Jnum2 = self.STATE_NUMDIFF.Jdiff(x1,x2)
+        J1, J2 = self.STATE.Jdiff(x1, x2)
+        Jnum1, Jnum2 = self.STATE_NUMDIFF.Jdiff(x1, x2)
 
         # Checking the partial derivatives against NumDiff
-        tol = 10*self.STATE_NUMDIFF.disturbance
+        tol = 10 * self.STATE_NUMDIFF.disturbance
         self.assertTrue(np.allclose(J1,Jnum1, atol=tol), \
             "The partial derivatives of difference function with respect to first argument is wrong.")
         self.assertTrue(np.allclose(J2,Jnum2, atol=tol), \
@@ -67,11 +67,11 @@ class StateTestCase(unittest.TestCase):
         vx = np.random.rand(self.STATE.ndx)
 
         # Computing the partial derivatives of the integrate function
-        J1,J2 = self.STATE.Jintegrate(x,vx)
-        Jnum1,Jnum2 = self.STATE_NUMDIFF.Jintegrate(x,vx)
+        J1, J2 = self.STATE.Jintegrate(x, vx)
+        Jnum1, Jnum2 = self.STATE_NUMDIFF.Jintegrate(x, vx)
 
         # Checking the partial derivatives against NumDiff
-        tol = 10*self.STATE_NUMDIFF.disturbance
+        tol = 10 * self.STATE_NUMDIFF.disturbance
         self.assertTrue(np.allclose(J1,Jnum1, atol=tol), \
             "The partial derivatives of integrate function with respect to first argument is wrong.")
         self.assertTrue(np.allclose(J2,Jnum2, atol=tol), \
@@ -81,11 +81,11 @@ class StateTestCase(unittest.TestCase):
         # Generating random states
         x1 = self.STATE.rand()
         dx = np.random.rand(self.STATE.ndx)
-        x2 = self.STATE.integrate(x1,dx)
+        x2 = self.STATE.integrate(x1, dx)
 
         # Computing the partial derivatives of the integrate and difference function
-        Jx,Jdx = self.STATE.Jintegrate(x1,dx)
-        J1,J2 = self.STATE.Jdiff(x1,x2)
+        Jx, Jdx = self.STATE.Jintegrate(x1, dx)
+        J1, J2 = self.STATE.Jdiff(x1, x2)
 
         # Checking that Jdiff and Jintegrate are inverses
         dX_dDX = Jdx
@@ -97,37 +97,40 @@ class StateTestCase(unittest.TestCase):
         # Generating random states
         x1 = self.STATE.rand()
         dx = np.random.rand(self.STATE.ndx)
-        x2 = self.STATE.integrate(x1,dx)
+        x2 = self.STATE.integrate(x1, dx)
         eps = np.random.rand(self.STATE.ndx)
         h = 1e-12
 
         # Computing the partial derivatives of the integrate and difference function
-        Jx,Jdx = self.STATE.Jintegrate(x1,dx)
-        J1,J2 = self.STATE.Jdiff(x1,x2)
+        Jx, Jdx = self.STATE.Jintegrate(x1, dx)
+        J1, J2 = self.STATE.Jdiff(x1, x2)
 
         # Checking that computed velocity from Jintegrate
         dX_dDX = Jdx
         dDX_dX = J2
-        x2eps = self.STATE.integrate(x1,dx+eps*h)
+        x2eps = self.STATE.integrate(x1, dx + eps * h)
         from numpy.linalg import norm
         self.assertTrue(np.allclose(np.dot(dX_dDX,eps), self.STATE.diff(x2,x2eps)/h, atol=1e-3), \
             "Velocity computed from Jintegrate is wrong.")
 
         # Checking the velocity computed from Jdiff
         x = self.STATE.rand()
-        dx = self.STATE.diff(x1,x)
-        x2i = self.STATE.integrate(x,eps*h)
-        dxi = self.STATE.diff(x1,x2i)
+        dx = self.STATE.diff(x1, x)
+        x2i = self.STATE.integrate(x, eps * h)
+        dxi = self.STATE.diff(x1, x2i)
         self.assertTrue(np.allclose(np.dot(dDX_dX,eps), (-dx+dxi)/h, atol=1e-3), \
             "Velocity computed from Jdiff is wrong.")
 
+
 class StateVectorTest(StateTestCase):
-    StateTestCase.NX = randint(1,101)
+    StateTestCase.NX = randint(1, 101)
     StateTestCase.STATE = StateVector(StateTestCase.NX)
+
 
 class StateUnicycleTest(StateTestCase):
     StateTestCase.NX = 3
     StateTestCase.STATE = StateUnicycle()
+
 
 class StatePinocchioTest(StateTestCase):
     # Loading Talos arm
@@ -136,7 +139,6 @@ class StatePinocchioTest(StateTestCase):
 
     StateTestCase.NX = rmodel.nq + rmodel.nv
     StateTestCase.STATE = StatePinocchio(rmodel)
-
 
 
 if __name__ == '__main__':

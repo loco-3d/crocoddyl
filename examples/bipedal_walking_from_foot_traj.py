@@ -7,17 +7,20 @@ import pinocchio
 from crocoddyl import *
 from pinocchio.utils import *
 
-WITHDISPLAY =  'disp' in sys.argv
+WITHDISPLAY = 'disp' in sys.argv
 WITHPLOT = 'plot' in sys.argv
+
 
 class TaskSE3:
     def __init__(self, oXf, frameId):
         self.oXf = oXf
         self.frameId = frameId
 
+
 class SimpleBipedWalkingProblem:
     """ Defines a simple 3d locomotion problem
     """
+
     def __init__(self, rmodel, rightFoot, leftFoot):
         self.rmodel = rmodel
         self.rdata = rmodel.createData()
@@ -30,7 +33,7 @@ class SimpleBipedWalkingProblem:
                             np.zeros(self.rmodel.nv)])
         # Remove the armature
         self.rmodel.armature[6:] = 1.
-    
+
     def createProblem(self, x0, stepLength, timeStep, stepKnots, supportKnots):
         """ Create a shooting problem for a simple walking.
 
@@ -47,23 +50,17 @@ class SimpleBipedWalkingProblem:
 
         # Compute the current foot positions
         q0 = a2m(x0[:self.rmodel.nq])
-        pinocchio.forwardKinematics(self.rmodel,self.rdata,q0)
-        pinocchio.updateFramePlacements(self.rmodel,self.rdata)
+        pinocchio.forwardKinematics(self.rmodel, self.rdata, q0)
+        pinocchio.updateFramePlacements(self.rmodel, self.rdata)
         rightFootPos0 = self.rdata.oMf[rightFootId].translation
         leftFootPos0 = self.rdata.oMf[leftFootId].translation
 
         # Defining the action models along the time instances
         loco3dModel = []
         # Creating the action models for three steps
-        firstStep = self.createFootstepModels(rightFootId, leftFootId,
-                                              0.5*stepLength, leftFootPos0,
-                                              stepKnots)
-        secondStep = self.createFootstepModels(leftFootId, rightFootId,
-                                               stepLength, rightFootPos0,
-                                               stepKnots)
-        thirdStep = self.createFootstepModels(rightFootId, leftFootId,
-                                              stepLength, leftFootPos0,
-                                              stepKnots)
+        firstStep = self.createFootstepModels(rightFootId, leftFootId, 0.5 * stepLength, leftFootPos0, stepKnots)
+        secondStep = self.createFootstepModels(leftFootId, rightFootId, stepLength, rightFootPos0, stepKnots)
+        thirdStep = self.createFootstepModels(rightFootId, leftFootId, stepLength, leftFootPos0, stepKnots)
 
         # Creating the action model for the double support phase
         doubleSupport = \
@@ -113,10 +110,10 @@ class SimpleBipedWalkingProblem:
                     swingFootId)
                 )
         # Updating the current foot position for next step
-        footPos0 += np.asmatrix(a2m([ stepLength, 0., 0. ]))
-        return footSwingModel + [ footSwitchModel ]
+        footPos0 += np.asmatrix(a2m([stepLength, 0., 0.]))
+        return footSwingModel + [footSwitchModel]
 
-    def createSwingFootModel(self, timeStep, supportFootIds, swingFootTask = None):
+    def createSwingFootModel(self, timeStep, supportFootIds, swingFootTask=None):
         """ Action model for a swing foot phase.
 
         :param timeStep: step duration of the action model
@@ -124,7 +121,7 @@ class SimpleBipedWalkingProblem:
         :param swingFootTask: swinging foot task
         :return action model for a swing foot phase
         """
-        # Creating the action model for floating-base systems. A walker system 
+        # Creating the action model for floating-base systems. A walker system
         # is by default a floating-base system
         actModel = ActuationModelFreeFloating(self.rmodel)
 
@@ -134,24 +131,22 @@ class SimpleBipedWalkingProblem:
         for i in supportFootIds:
             supportContactModel = \
                 ContactModel6D(self.rmodel, i, ref=pinocchio.SE3.Identity(), gains=[0.,0.])
-            contactModel.addContact('contact_'+str(i), supportContactModel)
+            contactModel.addContact('contact_' + str(i), supportContactModel)
 
         # Creating the cost model for a contact phase
         costModel = CostModelSum(self.rmodel, actModel.nu)
         if swingFootTask != None:
-            footTrack = CostModelFramePlacement(self.rmodel,
-                                                swingFootTask.frameId,
-                                                swingFootTask.oXf,
-                                                actModel.nu)
+            footTrack = CostModelFramePlacement(self.rmodel, swingFootTask.frameId, swingFootTask.oXf, actModel.nu)
             costModel.addCost("footTrack", footTrack, 100.)
 
         stateWeights = \
             np.array([0]*6 + [0.01]*(self.rmodel.nv-6) + [10]*self.rmodel.nv)
-        stateReg = CostModelState(self.rmodel,
-                                  self.state,
-                                  self.rmodel.defaultState,
-                                  actModel.nu,
-                                  activation=ActivationModelWeightedQuad(stateWeights**2))
+        stateReg = CostModelState(
+            self.rmodel,
+            self.state,
+            self.rmodel.defaultState,
+            actModel.nu,
+            activation=ActivationModelWeightedQuad(stateWeights**2))
         ctrlReg = CostModelControl(self.rmodel, actModel.nu)
         costModel.addCost("stateReg", stateReg, 0.1)
         costModel.addCost("ctrlReg", ctrlReg, 0.001)
@@ -180,25 +175,22 @@ class SimpleBipedWalkingProblem:
         impactFootVelCost = \
             CostModelFrameVelocity(self.rmodel, swingFootTask.frameId)
         model.differential.costs.addCost('impactVel', impactFootVelCost, 10000.)
-        model.differential.costs['impactVel' ].weight = 100000
-        model.differential.costs['footTrack' ].weight = 100000
+        model.differential.costs['impactVel'].weight = 100000
+        model.differential.costs['footTrack'].weight = 100000
         model.differential.costs['stateReg'].weight = 10
         model.differential.costs['ctrlReg'].weight = 0.001
         return model
 
 
-
-
 # Creating the lower-body part of Talos
 talos_legs = loadTalosLegs()
 rmodel = talos_legs.model
-rdata  = rmodel.createData()
+rdata = rmodel.createData()
 
 # Defining the initial state of the robot
 q = talos_legs.q0.copy()
 v = zero(rmodel.nv)
-x0 = m2a(np.concatenate([q,v]))
-
+x0 = m2a(np.concatenate([q, v]))
 
 # Setting up the 3d walking problem
 rightFoot = 'right_sole_link'
@@ -206,32 +198,28 @@ leftFoot = 'left_sole_link'
 walk = SimpleBipedWalkingProblem(rmodel, rightFoot, leftFoot)
 
 # Creating the walking problem
-stepLength = 0.6 # meters
-timeStep = 0.0375 # seconds
+stepLength = 0.6  # meters
+timeStep = 0.0375  # seconds
 stepKnots = 20
 supportKnots = 10
 walkProblem = walk.createProblem(x0, stepLength, timeStep, stepKnots, supportKnots)
 
-
 # Solving the 3d walking problem using DDP
 ddp = SolverDDP(walkProblem)
 cameraTF = [3., 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
-ddp.callback = [ CallbackDDPVerbose() ]
-if WITHPLOT:       ddp.callback.append(CallbackDDPLogger())
-if WITHDISPLAY:    ddp.callback.append(CallbackSolverDisplay(talos_legs,4,1,cameraTF))
+ddp.callback = [CallbackDDPVerbose()]
+if WITHPLOT: ddp.callback.append(CallbackDDPLogger())
+if WITHDISPLAY: ddp.callback.append(CallbackSolverDisplay(talos_legs, 4, 1, cameraTF))
 ddp.th_stop = 1e-9
-ddp.solve(maxiter=1000,regInit=.1,init_xs=[rmodel.defaultState]*len(ddp.models()))
-
+ddp.solve(maxiter=1000, regInit=.1, init_xs=[rmodel.defaultState] * len(ddp.models()))
 
 # Plotting the solution and the DDP convergence
 if WITHPLOT:
     log = ddp.callback[0]
     plotOCSolution(log.xs, log.us)
-    plotDDPConvergence(log.costs,log.control_regs,
-                       log.state_regs,log.gm_stops,
-                       log.th_stops,log.steps)
+    plotDDPConvergence(log.costs, log.control_regs, log.state_regs, log.gm_stops, log.th_stops, log.steps)
 
 # Visualization of the DDP solution in gepetto-viewer
 if WITHDISPLAY:
     from crocoddyl.diagnostic import displayTrajectory
-    displayTrajectory(talos_legs,ddp.xs,runningModel.timeStep)
+    displayTrajectory(talos_legs, ddp.xs, runningModel.timeStep)
