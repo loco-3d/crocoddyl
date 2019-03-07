@@ -1,10 +1,13 @@
-from crocoddyl import *
-from crocoddyl.impact import CostModelImpactCoM, CostModelImpactWholeBody
-import pinocchio
-from pinocchio.utils import *
-from numpy.linalg import norm,inv,pinv,eig,svd
 import sys
+
+from numpy.linalg import eig, inv, norm, pinv, svd
+
+import pinocchio
+from crocoddyl import *
+from crocoddyl.diagnostic import displayTrajectory
 from crocoddyl.fddp import SolverFDDP
+from crocoddyl.impact import CostModelImpactCoM, CostModelImpactWholeBody
+from pinocchio.utils import *
 
 BACKUP_PATH = "npydata/jump."
 WITHDISPLAY =  'disp' in sys.argv
@@ -31,7 +34,6 @@ stepLength = 0.4
 swingDuration = 0.75
 stanceDurantion = 0.1
 
-from crocoddyl.diagnostic import displayTrajectory
 dodisp = lambda xs,dt: displayTrajectory(robot,xs,dt)
 disp =  dodisp if WITHDISPLAY else lambda xs,dt: 0
 disp.__defaults__ = ( .1, )

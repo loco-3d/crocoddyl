@@ -1,6 +1,5 @@
 import numpy as np
-from numpy.linalg import norm,inv
-
+from numpy.linalg import inv, norm
 
 
 class ActivationModelQuad:

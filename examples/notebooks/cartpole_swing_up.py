@@ -1,5 +1,10 @@
-from crocoddyl import *
 import numpy as np
+# Display the solution
+from IPython.display import HTML
+
+from cartpole_utils import animateCartpole
+from crocoddyl import *
+
 
 class DifferentialActionModelCartpole:
     def __init__(self):
@@ -109,7 +114,4 @@ ddp = SolverDDP(problem)
 ddp.callback = [ CallbackDDPVerbose() ]
 xs,us,done = ddp.solve(maxiter=300)
 
-# Display the solution
-from IPython.display import HTML
-from cartpole_utils import animateCartpole
 HTML(animateCartpole(xs).to_html5_video())

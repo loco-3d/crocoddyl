@@ -1,15 +1,15 @@
-import pinocchio
-import numpy as np
 from collections import OrderedDict
+
+import numpy as np
+
+import pinocchio
+from crocoddyl import (ActionModelImpact, ActivationModelWeightedQuad, ActuationModelFreeFloating, ContactModel6D,
+                       ContactModelMultiple, CostModelCoM, CostModelControl, CostModelForce, CostModelFramePlacement,
+                       CostModelFrameVelocity, CostModelImpactCoM, CostModelImpactWholeBody, CostModelState,
+                       CostModelSum, DifferentialActionModelFloatingInContact, ImpulseModel6D, ImpulseModelMultiple,
+                       IntegratedActionModelEuler, StatePinocchio, a2m, m2a)
 from locomote import CubicHermiteSpline
-from crocoddyl import m2a, a2m
-from crocoddyl import CostModelSum,CostModelState,CostModelControl,CostModelForce,\
-  CostModelFrameVelocity,CostModelFramePlacement,CostModelCoM,\
-  ImpulseModelMultiple,DifferentialActionModelFloatingInContact,IntegratedActionModelEuler,\
-  StatePinocchio,ContactModel6D,ContactModelMultiple,\
-  ActuationModelFreeFloating, ActivationModelWeightedQuad,\
-  ImpulseModelMultiple, ImpulseModel6D, ActionModelImpact,\
-  CostModelImpactCoM, CostModelImpactWholeBody
+
 
 class EESplines(OrderedDict):
   def __add__(self,other):

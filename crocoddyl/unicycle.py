@@ -1,7 +1,8 @@
-from state import StateAbstract, StateVector
-from action import ActionDataLQR, ActionModelLQR
 import numpy as np
+from numpy import arctan2, cos, sin
 
+from action import ActionDataLQR, ActionModelLQR
+from state import StateAbstract, StateVector
 
 
 class ActionModelUnicycle:
@@ -81,7 +82,6 @@ class ActionDataUnicycle:
 
 
 
-from numpy import cos,sin,arctan2
 class StateUnicycle(StateAbstract):
     def __init__(self):
         StateAbstract.__init__(self,4,3)

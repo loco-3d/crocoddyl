@@ -1,10 +1,12 @@
-from crocoddyl import StatePinocchio, CostModelSum
-from crocoddyl import DifferentialActionModelNumDiff
-from crocoddyl import m2a, a2m, absmax, absmin
-from crocoddyl import loadTalosArm
 import numpy as np
+
 import pinocchio
+## Free floating actuation model
+# -----------------------------------------------------------------------------
+from crocoddyl import (ActuationModelFreeFloating, CostModelSum, DifferentialActionModelNumDiff,
+                       StatePinocchio, a2m, absmax, absmin, loadTalosArm, m2a)
 from pinocchio.utils import rand
+
 
 class DifferentialActionModelActuated:
     '''Unperfect class written to validate the actuation model. Do not use except for tests. '''
@@ -93,9 +95,6 @@ rdata = rmodel.createData()
 
 
 
-## Free floating actuation model
-# -----------------------------------------------------------------------------
-from crocoddyl import ActuationModelFreeFloating
 
 actModel = ActuationModelFreeFloating(rmodel)
 model = DifferentialActionModelActuated(rmodel,actModel)

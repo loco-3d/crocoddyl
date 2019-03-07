@@ -1,10 +1,11 @@
-from crocoddyl import loadTalosArm, loadTalosLegs
-from crocoddyl import ActionModelImpact, ImpulseModel6D, ImpulseModelMultiple
-from crocoddyl import ActionModelNumDiff
-from crocoddyl import m2a, a2m, absmax, absmin
-from crocoddyl.impact import CostModelImpactWholeBody
-
 from numpy.linalg import norm
+
+import pinocchio
+from crocoddyl import (ActionModelImpact, ActionModelNumDiff, CostModelSum, ImpulseModel6D,
+                       ImpulseModelMultiple, a2m, absmax, absmin, loadTalosArm, loadTalosLegs, m2a)
+### ----------------------------------------------------------------------
+from crocoddyl.impact import CostModelImpactCoM, CostModelImpactWholeBody
+from pinocchio.utils import *
 from testutils import df_dq
 
 # --- TALOS ARM
@@ -44,8 +45,6 @@ assert( absmax(dnum.Fx[:nv,:nv]-data.Fx[:nv,:nv]) < 1e-3 )  # dq/dq
 assert( absmax(dnum.Fx[:nv,nv:]-data.Fx[:nv,nv:]) < 1e-3 )  # dq/dv
 assert( absmax(dnum.Fx[nv:,nv:]-data.Fx[nv:,nv:]) < 1e-3 )  # dv/dv
 
-import pinocchio
-from pinocchio.utils import *
 rdata = rmodel.createData()
 #              = -K^-1 [ M'(vnext-v) + J'^T f ]
 #                      [ J' vnext             ]
@@ -231,7 +230,6 @@ assert( data.Fu.shape[1]==0 and (data.Lu is 0 or data.Lu.shape == (0,)))
 ### --- CHECK WITH SUM OF COSTS ------------------------------------------
 ### ----------------------------------------------------------------------
 
-from crocoddyl import CostModelSum
 model.costs = CostModelSum(rmodel,nu=0)
 model.costs.addCost( cost=costModel,weight=1,name="impactwb" )
 data = model.createData()
@@ -255,8 +253,6 @@ assert( absmax(dnum.Rx-data.Rx) < 1e3*mnum.disturbance )
 assert( absmax(dnum.Lx-data.Lx) < 1e3*mnum.disturbance )
 assert( data.Fu.shape[1]==0 and (data.Lu is 0 or data.Lu.shape == (0,)))
 
-### ----------------------------------------------------------------------
-from crocoddyl.impact import CostModelImpactCoM
 costCom = CostModelImpactCoM(rmodel)
 #model.costs.addCost( cost=costCom,weight=1,name="impactcom" )
 model.costs = costCom

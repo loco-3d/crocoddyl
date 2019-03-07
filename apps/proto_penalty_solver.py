@@ -3,10 +3,12 @@ Validation of the penalty solver for tackling a terminal constraint
 with some accuracies.
 '''
 
+import matplotlib.pylab as plt
+
 import pinocchio
+from continuous import DifferentialActionModelPositioning, IntegratedActionModelEuler
 from pinocchio.utils import *
 from refact import ShootingProblem, SolverDDP
-from continuous import IntegratedActionModelEuler, DifferentialActionModelPositioning
 
 m2a = lambda m: np.array(m.flat)
 a2m = lambda a: np.matrix(a).T
@@ -84,5 +86,4 @@ for i in range(1,10):
 ddp.solve(maxiter=500,init_xs=ddp.xs,init_us=ddp.us,verbose=True,isFeasible=True,regInit=1e-3)
 print '\n',endEff.translation.T,'\n'
 
-import matplotlib.pylab as plt
 plt.plot([ c[-1] for c in ddp.callback.costs ]); plt.show()

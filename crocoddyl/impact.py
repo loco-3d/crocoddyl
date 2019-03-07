@@ -1,9 +1,17 @@
-from state import StatePinocchio
-from utils import m2a, a2m
-import pinocchio
-from pinocchio.utils import *
+from collections import OrderedDict
+
 import numpy as np
 from numpy.linalg import inv
+
+import pinocchio
+from crocoddyl.activation import ActivationModelQuad
+# --------------------------------------------------------------------------
+# --------------------------------------------------------------------------
+# --------------------------------------------------------------------------
+from crocoddyl.cost import CostDataPinocchio, CostModelPinocchio, CostModelSum
+from pinocchio.utils import *
+from state import StatePinocchio
+from utils import a2m, m2a
 
 
 # --------------------------------------------------------------------------
@@ -127,7 +135,6 @@ class ImpulseData3D(ImpulseDataPinocchio):
 
 # --------------------------------------------------------------------------
 
-from collections import OrderedDict
 class ImpulseModelMultiple(ImpulseModelPinocchio):
     def __init__(self,pinocchioModel,impulses = {}):
         self.ImpulseDataType = ImpulseDataMultiple
@@ -183,11 +190,6 @@ class ImpulseDataMultiple(ImpulseDataPinocchio):
         else:
             raise(KeyError("The key should be string or impulsemodel."))
 
-# --------------------------------------------------------------------------
-# --------------------------------------------------------------------------
-# --------------------------------------------------------------------------
-from crocoddyl.cost import CostModelPinocchio,CostDataPinocchio,CostModelSum
-from crocoddyl.activation import ActivationModelQuad
 
 
 class CostModelImpactBase(CostModelPinocchio):

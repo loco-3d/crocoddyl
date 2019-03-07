@@ -1,3 +1,6 @@
+import copy
+import time
+
 from diagnostic import displayTrajectory
 
 
@@ -9,7 +12,6 @@ In the solver, set up the logger with solver.callback = [CallbackName()], and ad
 object in argument if you want to use the display functionalities.
 '''
 
-import copy
 class CallbackDDPLogger:
     def __init__(self):
         self.steps = []
@@ -66,7 +68,6 @@ class CallbackSolverDisplay:
         dt = solver.models()[0].timeStep
         displayTrajectory(self.robotwrapper,solver.xs,dt,self.rate,self.cameraTF)
 
-import time
 class CallbackSolverTimer:
     def __init__(self):
         self.timings = [ time.time() ]

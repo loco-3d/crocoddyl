@@ -1,6 +1,6 @@
 
 
-from sympy import Symbol, Matrix,zeros,nan
+from sympy import Matrix, Symbol, nan, zeros
 
 T = 2
 x0ref = Symbol('x0ref')

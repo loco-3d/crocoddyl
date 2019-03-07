@@ -1,9 +1,11 @@
-from activation import ActivationModelQuad, ActivationModelWeightedQuad, ActivationModelInequality
-from utils import m2a, EPS
-import numpy as np
-import pinocchio
 from collections import OrderedDict
 from exceptions import RuntimeError
+
+import numpy as np
+
+import pinocchio
+from activation import ActivationModelInequality, ActivationModelQuad, ActivationModelWeightedQuad
+from utils import EPS, m2a
 
 
 class CostModelPinocchio:

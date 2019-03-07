@@ -1,20 +1,11 @@
-from crocoddyl import SolverDDP, ShootingProblem
-from crocoddyl import ActuationModelFreeFloating
-from crocoddyl import DifferentialActionModelFloatingInContact
-from crocoddyl import IntegratedActionModelEuler
-from crocoddyl import StatePinocchio
-from crocoddyl import CostModelSum, ActivationModelWeightedQuad
-from crocoddyl import ContactModelMultiple, ContactModel3D
-from crocoddyl import CostModelCoM, CostModelFrameTranslation
-from crocoddyl import CostModelState, CostModelControl
-from crocoddyl import m2a, a2m
-from crocoddyl import loadHyQ
-from crocoddyl import CallbackDDPVerbose
 import numpy as np
 from numpy.linalg import norm
+
 import pinocchio
-
-
+from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, CallbackDDPVerbose, ContactModel3D,
+                       ContactModelMultiple, CostModelCoM, CostModelControl, CostModelFrameTranslation, CostModelState,
+                       CostModelSum, DifferentialActionModelFloatingInContact, IntegratedActionModelEuler,
+                       ShootingProblem, SolverDDP, StatePinocchio, a2m, loadHyQ, m2a)
 
 ## This is an integrative test where we checked that the DDP solver generates
 ## a CoM motion for the HyQ robot as requested.

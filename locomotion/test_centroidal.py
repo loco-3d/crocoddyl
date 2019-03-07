@@ -1,8 +1,10 @@
 import os
-from locomote import ContactSequenceHumanoid
-from crocoddyl import loadTalos
-from centroidal_utils import createPhiFromContactSequence
+
 import numpy as np
+
+from centroidal_utils import createPhiFromContactSequence
+from crocoddyl import loadTalos
+from locomote import ContactSequenceHumanoid
 
 TRAJ_DIR = os.getcwd()+"/traj_1step/"
 MUSCOD_CS_OUTPUT_FILENAME=TRAJ_DIR+"contact_sequence_trajectory.xml"

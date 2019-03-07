@@ -1,6 +1,7 @@
 import pinocchio
-from pinocchio.utils import *
 from pinocchio.robot_wrapper import RobotWrapper
+from pinocchio.utils import *
+
 
 def getTalosPathFromRos():
     '''

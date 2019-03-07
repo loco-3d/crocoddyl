@@ -1,11 +1,19 @@
-import pinocchio
-from pinocchio.utils import *
-from numpy.linalg import inv,pinv,norm,svd,eig
-from numpy import dot,asarray
 import warnings
-from crocoddyl import CostModelSum,CostModelFrameTranslation,CostModelState,CostModelControl,DifferentialActionModelFloatingInContact,IntegratedActionModelEuler,ActuationModelFreeFloating,StatePinocchio,ContactModel6D,ContactModelMultiple,ActivationModelWeightedQuad,m2a,a2m,CostModelFrameVelocity,CostModelFramePlacement,ImpulseModelMultiple
-from crocoddyl import CallbackDDPVerbose, CallbackSolverDisplay
-from crocoddyl import loadTalosLegs
+
+from numpy import asarray, dot
+from numpy.linalg import eig, inv, norm, pinv, svd
+
+import pinocchio
+# --- DDP 
+# --- DDP 
+# --- DDP 
+from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, CallbackDDPLogger,
+                       CallbackDDPVerbose, CallbackSolverDisplay, ContactModel6D, ContactModelMultiple,
+                       CostModelControl, CostModelFramePlacement, CostModelFrameTranslation, CostModelFrameVelocity,
+                       CostModelState, CostModelSum, DifferentialActionModelFloatingInContact, ImpulseModelMultiple,
+                       IntegratedActionModelEuler, ShootingProblem, SolverDDP, SolverKKT, StatePinocchio, a2m,
+                       loadTalosLegs, m2a)
+from pinocchio.utils import *
 
 robot = loadTalosLegs()
 robot.model.armature[6:] = 1.
@@ -63,11 +71,6 @@ x = m2a(np.concatenate([q,v]))
 
 print robot.framePlacement(q, robot.model.getFrameId(leftFrame))
 print robot.framePlacement(q, robot.model.getFrameId(rightFrame))
-# --- DDP 
-# --- DDP 
-# --- DDP 
-from crocoddyl import ShootingProblem, SolverDDP,SolverKKT
-from crocoddyl import CallbackDDPLogger
 disp = lambda xs: disptraj(robot,xs)
 
 DT = 1.

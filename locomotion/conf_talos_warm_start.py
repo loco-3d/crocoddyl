@@ -1,7 +1,9 @@
-from crocoddyl import getTalosPathFromRos, loadTalos
-import pinocchio
-import pickle
 import os
+import pickle
+
+import pinocchio
+from crocoddyl import getTalosPathFromRos, loadTalos
+
 #---------------------------------------------------------
 robot = loadTalos()
 robot.model.armature[6:] =1.

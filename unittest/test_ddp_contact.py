@@ -1,21 +1,23 @@
-from crocoddyl import StatePinocchio
-from crocoddyl import DifferentialActionModelFullyActuated, DifferentialActionModelFloatingInContact
-from crocoddyl import IntegratedActionModelEuler
-from crocoddyl import CostModelSum, CostModelFrameTranslation, ContactModel6D
-from crocoddyl import CostModelState, CostModelControl
-from crocoddyl import ActuationModelFreeFloating, ContactModelMultiple
-from crocoddyl import ActivationModelWeightedQuad
-import pinocchio
-from pinocchio.utils import *
-from numpy.linalg import norm, eig
 import warnings
+
+from numpy.linalg import eig, norm
+
+import pinocchio
+# --- DDP 
+# --- DDP 
+# --- DDP 
+from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, CallbackDDPLogger, CallbackDDPVerbose,
+                       ContactModel6D, ContactModelMultiple, CostModelControl, CostModelFrameTranslation,
+                       CostModelState, CostModelSum, DifferentialActionModelFloatingInContact,
+                       DifferentialActionModelFullyActuated, IntegratedActionModelEuler, ShootingProblem, SolverDDP,
+                       SolverKKT, StatePinocchio, loadTalosArm)
+from pinocchio.utils import *
 
 m2a = lambda m: np.array(m.flat)
 a2m = lambda a: np.matrix(a).T
 absmax = lambda A: np.max(abs(A))
 absmin = lambda A: np.min(abs(A))
 
-from crocoddyl import loadTalosArm
 opPointName = 'gripper_left_fingertip_2_link'
 contactName = 'root_joint'
 
@@ -124,10 +126,6 @@ if ff.contactModel['contact'].frame == 1:
     assert(norm(xff[7:ff.rmodel.nq]-xfix[:fix.rmodel.nq])<1e-6)
     assert(norm(xff[ff.rmodel.nq+6:]-xfix[fix.rmodel.nq:])<1e-6)
 
-# --- DDP 
-# --- DDP 
-# --- DDP 
-from crocoddyl import ShootingProblem, SolverDDP,SolverKKT
 
 ff.model.timeStep = fix.model.timeStep = 1e-2
 T = 20
@@ -155,7 +153,6 @@ problem = ShootingProblem(f.x, [ f.model ]*T, fterm.model)
 u0s = [ f.u ]*T
 x0s = problem.rollout(u0s)
 
-from crocoddyl import CallbackDDPLogger, CallbackDDPVerbose
 disp = lambda xs: disptraj(f.robot,xs)
 ddp = SolverDDP(problem)
 # ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]

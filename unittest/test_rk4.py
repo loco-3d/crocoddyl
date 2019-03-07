@@ -1,10 +1,8 @@
-from crocoddyl import StateVector
 import numpy as np
-from numpy.random import rand
-from crocoddyl import IntegratedActionModelRK4
-from crocoddyl import DifferentialActionModelLQR
-from crocoddyl import a2m, m2a
 from numpy.linalg import norm
+from numpy.random import rand
+
+from crocoddyl import ActionModelNumDiff, DifferentialActionModelLQR, IntegratedActionModelRK4, StateVector, a2m, m2a
 from testutils import df_dx
 
 np.set_printoptions(linewidth=np.nan, suppress=True)
@@ -30,7 +28,6 @@ xn,c = model.calc(data,x,u)
 
 model.timeStep = 1
 
-from crocoddyl import ActionModelNumDiff
 mnum = ActionModelNumDiff(model,withGaussApprox=False)
 dnum = mnum.createData()
 

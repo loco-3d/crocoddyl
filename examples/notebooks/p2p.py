@@ -1,7 +1,7 @@
-from crocoddyl import *
-import pinocchio
 import numpy as np
 
+import pinocchio
+from crocoddyl import *
 
 robot = loadTalosArm()
 robot.q0.flat[:] = [  2,1.5,-2,0,0,0,0 ]

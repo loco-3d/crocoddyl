@@ -1,9 +1,20 @@
-import pinocchio
-from pinocchio.utils import *
-from numpy.linalg import inv,pinv,norm,svd,eig
-from numpy import dot,asarray
 import warnings
-from crocoddyl import CostModelSum,CostModelPosition,CostModelState,CostModelControl,DifferentialActionModelFloatingInContact,IntegratedActionModelEuler,ActuationModelFreeFloating,StatePinocchio,ContactModel6D,ContactModelMultiple,ActivationModelWeightedQuad,m2a,a2m,CostModelPlacementVelocity,CostModelPosition6D,ImpulseModelMultiple
+
+from numpy import asarray, dot, matrix
+from numpy.linalg import eig, inv, norm, pinv, svd
+
+import pinocchio
+from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, ContactModel6D,
+                       ContactModelMultiple, CostModelControl, CostModelPlacementVelocity, CostModelPosition,
+                       CostModelPosition6D, CostModelState, CostModelSum, DifferentialActionModelFloatingInContact,
+                       ImpulseModelMultiple, IntegratedActionModelEuler, StatePinocchio, a2m, m2a)
+from crocoddyl.impact import ActionModelImpact, ImpulseModel6D
+from logger import *
+from pinocchio.utils import *
+# --- DDP 
+# --- DDP 
+# --- DDP 
+from refact import ShootingProblem, SolverDDP, SolverKKT
 from robots import loadTalosLegs
 
 robot = loadTalosLegs()
@@ -56,11 +67,6 @@ v = zero(rmodel.nv)
 x = m2a(np.concatenate([q,v]))
 
 
-# --- DDP 
-# --- DDP 
-# --- DDP 
-from refact import ShootingProblem, SolverDDP,SolverKKT
-from logger import *
 disp = lambda xs: disptraj(robot,xs)
 
 DT = 1.
@@ -80,7 +86,6 @@ models2 = [ createModel(timeStep=timeStep,
 termmodel2 = createTermModel(timeStep=timeStep,footRef = [ .2, -FOOTGAP, 0.0 ],
                              contactName = leftFrame,opPointName = rightFrame)
 
-from crocoddyl.impact import ActionModelImpact,ImpulseModel6D
 
 termcostModel = CostModelSum(rmodel,nu=0)
 termcost1 = CostModelPosition6D(rmodel,nu=0,
@@ -117,7 +122,6 @@ mi=ddp.models()[-1]
 mir=di.impulse['right'] 
 mil=di.impulse['left'] 
 
-from numpy import matrix,dot
 model = impact1
 nx,ndx,nu,nq,nv,nout,nc = model.nx,model.State.ndx,model.nu,model.nq,model.nv,model.nout,model.nimpulse
 q = a2m(x[:nq])

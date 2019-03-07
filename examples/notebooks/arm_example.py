@@ -1,6 +1,7 @@
-from crocoddyl import *
-import pinocchio
 import numpy as np
+
+import pinocchio
+from crocoddyl import *
 
 robot = loadTalosArm()
 robot.initDisplay(loadModel=True)

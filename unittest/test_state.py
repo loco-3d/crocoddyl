@@ -1,11 +1,9 @@
 import unittest
-from crocoddyl import StateNumDiff
-from crocoddyl import StateVector
-from crocoddyl import StateUnicycle
-from crocoddyl import StatePinocchio
 from random import randint
+
 import numpy as np
 
+from crocoddyl import StateNumDiff, StatePinocchio, StateUnicycle, StateVector
 
 
 class StateTestCase(unittest.TestCase):

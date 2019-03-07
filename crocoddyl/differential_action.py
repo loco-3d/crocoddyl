@@ -1,10 +1,9 @@
-from state import StatePinocchio, StateVector
-from utils import a2m, randomOrthonormalMatrix
-from utils import EPS
 import numpy as np
 from numpy.random import rand
-import pinocchio
 
+import pinocchio
+from state import StatePinocchio, StateVector
+from utils import EPS, a2m, randomOrthonormalMatrix
 
 
 class DifferentialActionModelAbstract:

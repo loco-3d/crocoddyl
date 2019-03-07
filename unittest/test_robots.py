@@ -1,5 +1,6 @@
-from crocoddyl import loadTalosArm, loadTalos, loadTalosLegs, loadHyQ
 import unittest
+
+from crocoddyl import loadHyQ, loadTalos, loadTalosArm, loadTalosLegs
 
 
 class RobotTestCase(unittest.TestCase):

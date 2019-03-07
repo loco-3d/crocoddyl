@@ -1,6 +1,10 @@
-import pinocchio
+from collections import OrderedDict
+
 import numpy as np
-from utils import m2a
+
+import pinocchio
+from pinocchio.utils import *
+from utils import a2m, m2a
 
 
 class ContactModelPinocchio:
@@ -50,7 +54,6 @@ class ContactDataPinocchio:
 
 
 
-from pinocchio.utils import *
 class ContactModel3D(ContactModelPinocchio):
     def __init__(self,pinocchioModel,frame,ref=None, gains=[0.,0.]):
         self.ContactDataType = ContactData3D
@@ -133,7 +136,6 @@ class ContactData3D(ContactDataPinocchio):
 
 
 
-from utils import a2m
 class ContactModel6D(ContactModelPinocchio):
     def __init__(self,pinocchioModel,frame,ref=None, gains=[0.,0.]):
         self.ContactDataType = ContactData6D
@@ -203,7 +205,6 @@ class ContactData6D(ContactDataPinocchio):
         self.rMf = None
 
 
-from collections import OrderedDict
 class ContactModelMultiple(ContactModelPinocchio):
     def __init__(self,pinocchioModel):
         self.ContactDataType = ContactDataMultiple

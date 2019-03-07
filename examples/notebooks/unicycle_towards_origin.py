@@ -1,7 +1,7 @@
-from crocoddyl import *
-from unicycle_utils import plotUnicycleSolution
 import numpy as np
 
+from crocoddyl import *
+from unicycle_utils import plotUnicycleSolution
 
 # Creating an action model for the unicycle system
 model = ActionModelUnicycle()

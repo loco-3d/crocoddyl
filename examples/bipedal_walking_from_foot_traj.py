@@ -1,9 +1,11 @@
-from crocoddyl import *
+import sys
+
 import numpy as np
 from numpy.linalg import norm
+
 import pinocchio
+from crocoddyl import *
 from pinocchio.utils import *
-import sys
 
 WITHDISPLAY =  'disp' in sys.argv
 WITHPLOT = 'plot' in sys.argv

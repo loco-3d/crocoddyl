@@ -1,7 +1,6 @@
 import numpy as np
 
 
-
 class IntegratedActionModelEuler:
     def __init__(self,diffModel,timeStep=1e-3,withCostResiduals = True):
         self.differential = diffModel

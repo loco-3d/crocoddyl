@@ -1,10 +1,15 @@
+import copy
 import unittest
-from crocoddyl import ActionModelLQR
-from crocoddyl import ShootingProblem
-from crocoddyl import SolverKKT
-from crocoddyl import ActionModelUnicycle, ActionModelUnicycleVar
+
 import numpy as np
-from numpy.linalg import norm, inv, pinv, eig
+from numpy.linalg import eig, inv, norm, pinv
+
+# --- TEST DDP ---
+# ---------------------------------------------------
+# ---------------------------------------------------
+# ---------------------------------------------------
+from crocoddyl import (ActionModelLQR, ActionModelUnicycle, ActionModelUnicycleVar,
+                       ShootingProblem, SolverDDP, SolverKKT)
 
 
 class ShootingProblemTest(unittest.TestCase):
@@ -208,11 +213,6 @@ if WITH_PLOT:
 
 
             
-# --- TEST DDP ---
-# ---------------------------------------------------
-# ---------------------------------------------------
-# ---------------------------------------------------
-from crocoddyl import SolverDDP
 
 model = ActionModelLQR(1,1); model.setUpRandom()
 #model = ActionModelUnicycle()
@@ -611,7 +611,6 @@ kkt.x_reg = .1
 kkt.u_reg = 1
 dxs_reg,dus_reg,ls_reg = kkt.computeDirection()
 
-import copy
 modeldmp = copy.copy(model)
 modeldmp.L[range(nx),      range(nx)      ] += kkt.x_reg
 modeldmp.L[range(nx,nx+nu),range(nx,nx+nu)] += kkt.u_reg

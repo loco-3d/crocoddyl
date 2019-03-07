@@ -1,7 +1,7 @@
-from state import StateVector
-from utils import EPS
 import numpy as np
 
+from state import StateVector
+from utils import EPS
 
 
 class ActionModelLQR:

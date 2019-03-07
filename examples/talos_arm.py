@@ -1,7 +1,9 @@
-from crocoddyl import *
-import pinocchio
-import numpy as np
 import sys
+
+import numpy as np
+
+import pinocchio
+from crocoddyl import *
 
 WITHDISPLAY =  'disp' in sys.argv
 WITHPLOT = 'plot' in sys.argv
@@ -95,4 +97,3 @@ frame_idx = rmodel.getFrameId(frameName)
 print
 print "The reached pose by the wrist is"
 print ddp.datas()[-1].differential.pinocchio.oMf[frame_idx]
-

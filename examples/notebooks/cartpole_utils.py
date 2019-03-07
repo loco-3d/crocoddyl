@@ -1,7 +1,8 @@
+from math import cos, sin
+
 import numpy as np
-from matplotlib import pyplot as plt
 from matplotlib import animation
-from math import sin, cos
+from matplotlib import pyplot as plt
 
 
 def animateCartpole(xs,sleep=50):

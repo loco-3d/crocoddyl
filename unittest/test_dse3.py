@@ -1,8 +1,9 @@
-import pinocchio
 import numpy as np
+
+import pinocchio
+from crocoddyl import loadTalosArm
 from testutils import df_dq
 
-from crocoddyl import loadTalosArm
 robot = loadTalosArm()
 rmodel = robot.model
 rdata = rmodel.createData()

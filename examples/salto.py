@@ -10,27 +10,20 @@ Each increase of the angle takes ~50 iterations to converge. The landing phase t
 iterations to converge.
 '''
 
-from crocoddyl import StatePinocchio
-from crocoddyl import DifferentialActionModelFloatingInContact
-from crocoddyl import IntegratedActionModelEuler
-from crocoddyl import CostModelSum
-from crocoddyl import CostModelFramePlacement, CostModelFrameVelocity
-from crocoddyl import CostModelState, CostModelControl,CostModelCoM
-from crocoddyl import ActivationModelWeightedQuad,ActivationModelInequality
-from crocoddyl import ActuationModelFreeFloating
-from crocoddyl import ContactModel6D, ContactModelMultiple
-from crocoddyl import ShootingProblem
-from crocoddyl import SolverDDP
-from crocoddyl import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay
-from crocoddyl import plotOCSolution, plotDDPConvergence
-from crocoddyl import loadTalosLegs
-from crocoddyl import m2a, a2m, ImpulseModelMultiple, ImpulseModel6D, ActionModelImpact
-from crocoddyl.impact import CostModelImpactCoM, CostModelImpactWholeBody
+import sys
+
+from numpy.linalg import eig, inv, norm, pinv, svd
 
 import pinocchio
+from crocoddyl import (ActionModelImpact, ActivationModelInequality, ActivationModelWeightedQuad,
+                       ActuationModelFreeFloating, CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay,
+                       ContactModel6D, ContactModelMultiple, CostModelCoM, CostModelControl, CostModelFramePlacement,
+                       CostModelFrameVelocity, CostModelState, CostModelSum, DifferentialActionModelFloatingInContact,
+                       ImpulseModel6D, ImpulseModelMultiple, IntegratedActionModelEuler, ShootingProblem, SolverDDP,
+                       StatePinocchio, a2m, loadTalosLegs, m2a, plotDDPConvergence, plotOCSolution)
+from crocoddyl.diagnostic import displayTrajectory
+from crocoddyl.impact import CostModelImpactCoM, CostModelImpactWholeBody
 from pinocchio.utils import *
-from numpy.linalg import norm,inv,pinv,eig,svd
-import sys
 
 # Number of iterations in each phase. If 0, try to load.
 PHASE_ITERATIONS = { \
@@ -72,7 +65,6 @@ stepLength = 0.2
 swingDuration = 0.75
 stanceDurantion = 0.1
 
-from crocoddyl.diagnostic import displayTrajectory
 dodisp = lambda xs,dt: displayTrajectory(robot,xs,dt)
 disp =  dodisp if WITHDISPLAY else lambda xs,dt: 0
 disp.__defaults__ = ( .1, )

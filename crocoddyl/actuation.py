@@ -1,9 +1,11 @@
-from state import StatePinocchio
-from cost import CostModelSum
-from utils import a2m
-import numpy as np
-import pinocchio
 import warnings
+
+import numpy as np
+
+import pinocchio
+from cost import CostModelSum
+from state import StatePinocchio
+from utils import a2m
 
 
 class ActuationModelFreeFloating:
@@ -72,5 +74,3 @@ class ActuationDataFull:
         self.Ax = self.A[:,:ndx]
         self.Au = self.A[:,ndx:]
         np.fill_diagonal(self.Au[:,:],1)
-
-

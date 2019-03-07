@@ -1,8 +1,8 @@
 import unittest
-from crocoddyl import ActionModelNumDiff
-from crocoddyl import ActionModelUnicycle, ActionModelUnicycleVar
+
 import numpy as np
 
+from crocoddyl import ActionModelNumDiff, ActionModelUnicycle, ActionModelUnicycleVar
 
 
 class ActionModelTestCase(unittest.TestCase):

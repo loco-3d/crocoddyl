@@ -16,4 +16,3 @@ def cartpole_dynamics(model,data,x,u):
     thddot = (c*f/l + m*g*s/l  - m2*c*s*thdot**2 )/mu
 
     return [ xddot,thddot ]
-

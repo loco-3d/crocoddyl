@@ -10,25 +10,17 @@ DAMManipulator and DAMFIC, so we already knew that the model and its derivatives
 The only "new" functionality to be tested here is the use of low-armature in the solver. 
 Any stronger test here is welcome.
 '''
-from crocoddyl import StatePinocchio
-from crocoddyl import DifferentialActionModelFloatingInContact
-from crocoddyl import IntegratedActionModelEuler
-from crocoddyl import CostModelSum
-from crocoddyl import CostModelFramePlacement
-from crocoddyl import CostModelState, CostModelControl, CostModelCoM
-from crocoddyl import ActivationModelWeightedQuad
-from crocoddyl import ActuationModelFreeFloating
-from crocoddyl import ContactModel6D, ContactModelMultiple
-from crocoddyl import ShootingProblem
-from crocoddyl import SolverDDP
-from crocoddyl import CallbackDDPLogger, CallbackDDPVerbose
-from crocoddyl import loadTalosLegs
-from crocoddyl import m2a, a2m
-import pinocchio
-from pinocchio.utils import zero, eye
 import numpy as np
 from numpy.linalg import eig
-from crocoddyl import displayTrajectory
+
+import pinocchio
+from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, CallbackDDPLogger,
+                       CallbackDDPVerbose, ContactModel6D, ContactModelMultiple, CostModelCoM,
+                       CostModelControl, CostModelFramePlacement, CostModelState, CostModelSum,
+                       DifferentialActionModelFloatingInContact, IntegratedActionModelEuler, ShootingProblem,
+                       SolverDDP, StatePinocchio, a2m, displayTrajectory, loadTalosLegs, m2a)
+from pinocchio.utils import eye, zero
+
 disp = lambda xs,dt: displayTrajectory(robot,xs,dt)
 disp.__defaults__ = ( .1, )
 

@@ -1,9 +1,9 @@
-from crocoddyl import ActivationDataSmoothAbs, ActivationModelSmoothAbs
-from crocoddyl import ActivationModelQuad
-from crocoddyl import ActivationModelWeightedQuad
-from crocoddyl.utils import EPS
 import numpy as np
-from numpy.linalg import norm,inv
+from numpy.linalg import inv, norm
+
+from crocoddyl import (ActivationDataSmoothAbs, ActivationModelQuad,
+                       ActivationModelSmoothAbs, ActivationModelWeightedQuad)
+from crocoddyl.utils import EPS
 
 '''
 c = sum( a(ri) )

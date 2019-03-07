@@ -1,5 +1,5 @@
-import unittest
 import sys
+import unittest
 
 testmodules = [
   # 'test_robots',

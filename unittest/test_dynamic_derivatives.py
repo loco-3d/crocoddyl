@@ -1,11 +1,15 @@
-from pinocchio import SE3
-import pinocchio
-from pinocchio.utils import *
-from numpy.linalg import inv,pinv,norm,svd,eig
-from testutils import df_dx, df_dq
+from numpy.linalg import eig, inv, norm, pinv, svd
 
+import pinocchio
 from crocoddyl import loadTalosArm
 from crocoddyl.utils import EPS
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
+from pinocchio import SE3, aba, crba, rnea
+from pinocchio.utils import *
+from testutils import df_dq, df_dx
+
 robot = loadTalosArm()
 model = robot.model
 data = model.createData()
@@ -257,10 +261,6 @@ assert(absmax(dv_dq[3:,:]-dw_dqn)<1e-3)
 daa_dq = da_dq[:3,:] + skew(vw)*dv_dq[:3,:] - skew(vv)*dv_dq[3:,:]
 assert(absmax(daa_dq-daa_dqn)<1e-3)
 
-# ------------------------------------------------------------------------
-# ------------------------------------------------------------------------
-# ------------------------------------------------------------------------
-from pinocchio import aba,rnea,crba
 
 # ------------------------------------------------------------------------
 ### Check contact dynamics 3D contact
@@ -506,5 +506,3 @@ vxrdp = dR*(data.v[-1].cross(Motion(data.v[-1].linear,O3)).linear)
 assert( absmax( (rdotp-rdot)/dt - rddot ) < 1e-5)
 
 '''
-
-

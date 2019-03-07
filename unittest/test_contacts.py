@@ -1,9 +1,29 @@
-from crocoddyl import loadTalosArm
-from crocoddyl import m2a, a2m, absmax
+import copy
+
+from numpy.linalg import eig, norm, pinv
+
 import pinocchio
+# TODO Check if we need this unit-test here. Note that is an ction test
+# -------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+# --- COMPLETE MODEL WITH COST ----
+# -------------------------------------------------------------------------------
+# Cost force cone model
+# -------------------------------------------------------------------------------
+# Cost force model
+#---------------------------------------------------------------------
+# Many contact model
+# ----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+from crocoddyl import (ActionModelNumDiff, ActuationModelFreeFloating, CallbackDDPLogger,
+                       ContactModel3D, ContactModel6D, ContactModelMultiple, CostModelControl,
+                       CostModelForce, CostModelForceLinearCone, CostModelFrameTranslation,
+                       CostModelState, CostModelSum, DifferentialActionModelFloatingInContact,
+                       DifferentialActionModelNumDiff, IntegratedActionModelEuler, ShootingProblem,
+                       SolverDDP, SolverKKT, StatePinocchio, a2m, absmax, loadTalosArm, m2a)
 from pinocchio.utils import *
-from numpy.linalg import pinv,norm,eig
-from testutils import df_dx, df_dq
+from testutils import df_dq, df_dx
 
 ## Loading Talos arm with FF TODO use a bided or quadruped
 # -----------------------------------------------------------------------------
@@ -17,8 +37,6 @@ rdata = rmodel.createData()
 
 np.set_printoptions(linewidth=400, suppress=True)
 
-# -----------------------------------------------------------------------------
-from crocoddyl import ContactModel6D
 
 contactModel = ContactModel6D(rmodel,rmodel.getFrameId('gripper_left_fingertip_2_link'),
                               ref=pinocchio.SE3.Random(), gains=[4.,4.])
@@ -60,8 +78,6 @@ Av_numdiff = df_dx(lambda _v: returna_at0(q,_v), v,h=eps)
 assert(np.isclose(contactData.Aq, Aq_numdiff, atol=np.sqrt(eps)).all())
 assert(np.isclose(contactData.Av, Av_numdiff, atol=np.sqrt(eps)).all())
 
-# ----------------------------------------------------------------------------
-from crocoddyl import ContactModel3D
 
 contactModel = ContactModel3D(rmodel,
                               rmodel.getFrameId('gripper_left_fingertip_2_link'),
@@ -103,13 +119,6 @@ Av_numdiff = df_dx(lambda _v: returna0(q,_v), v, h=eps)
 assert(np.isclose(contactData.Aq, Aq_numdiff, atol=np.sqrt(eps)).all())
 assert(np.isclose(contactData.Av, Av_numdiff, atol=np.sqrt(eps)).all())
 
-#---------------------------------------------------------------------
-# Many contact model
-from crocoddyl import CostModelSum
-from crocoddyl import ContactModelMultiple
-from crocoddyl import DifferentialActionModelFloatingInContact
-from crocoddyl import DifferentialActionModelNumDiff
-from crocoddyl import ActuationModelFreeFloating
 
 
 
@@ -201,9 +210,6 @@ assert( absmax(Fv-data.df_dv) < 1e-3 )
 assert( absmax(Fu-data.df_du) < 1e-3 )
 
 
-# -------------------------------------------------------------------------------
-# Cost force model
-from crocoddyl import CostModelForce
 
 model.costs = CostModelSum(rmodel,nu=actModel.nu)
 model.costs.addCost( name='force', weight = 1,
@@ -229,9 +235,6 @@ mnum.calcDiff(dnum,x,u)
 assert(absmax(data.Fx-dnum.Fx)/model.nx < 1e2*mnum.disturbance )
 assert(absmax(data.Fu-dnum.Fu)/model.nu < 1e2*mnum.disturbance )
 
-# -------------------------------------------------------------------------------
-# Cost force cone model
-from crocoddyl import CostModelForceLinearCone
 nfaces = 10; nc = model.contact.ncontact
 A = np.random.rand(nfaces, nc)
 
@@ -265,14 +268,6 @@ assert(absmax(data.Lx-dnum.Lx)/model.nx < 1e-3 )
 assert(absmax(data.Lu-dnum.Lu)/model.nu < 1e-3 )
 
 
-# TODO Check if we need this unit-test here. Note that is an ction test
-# -------------------------------------------------------------------------------
-# -------------------------------------------------------------------------------
-# -------------------------------------------------------------------------------
-# --- COMPLETE MODEL WITH COST ----
-from crocoddyl import StatePinocchio
-from crocoddyl import CostModelFrameTranslation, CostModelState, CostModelControl
-from crocoddyl import IntegratedActionModelEuler
 State = StatePinocchio(rmodel)
 
 actModel = ActuationModelFreeFloating(rmodel)
@@ -301,7 +296,6 @@ d1 = data.differential.costs .costs['pos']
 d2 = data.differential.costs .costs['regx']
 d3 = data.differential.costs .costs['regu']
 
-from crocoddyl import ActionModelNumDiff
 mnum = ActionModelNumDiff(model,withGaussApprox=True)
 dnum = mnum.createData()
 
@@ -333,9 +327,6 @@ assert(norm(a0)<1e-6)
 # -------------------------------------------------------------------------------
 # integrative test: checking 1-step DDP versus KKT
 
-from crocoddyl import ShootingProblem, SolverDDP, SolverKKT
-from crocoddyl import CallbackDDPLogger
-import copy
 
 
 model.timeStep = 1e-1

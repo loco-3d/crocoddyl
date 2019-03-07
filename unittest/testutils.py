@@ -1,7 +1,9 @@
-from crocoddyl.utils import EPS
-import pinocchio
 import numpy as np
+
+import pinocchio
+from crocoddyl.utils import EPS
 from pinocchio.utils import zero
+
 
 def df_dx(func,x,h=np.sqrt(2*EPS)):
   """ Perform df/dx by num_diff.

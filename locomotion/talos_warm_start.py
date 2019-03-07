@@ -1,14 +1,15 @@
-import pinocchio
-import conf_talos_warm_start as conf
 from time import sleep
-from locomote import ContactSequenceHumanoid
-from centroidal_utils import createPhiFromContactSequence, createMultiphaseShootingProblem, createSwingTrajectories
-from crocoddyl import m2a, a2m
-from crocoddyl import ShootingProblem, SolverDDP, StatePinocchio
-from crocoddyl import ActionModelImpact
-from crocoddyl import CallbackDDPVerbose, CallbackSolverDisplay, CallbackDDPLogger, CallbackSolverTimer
+
 import numpy as np
+
+import conf_talos_warm_start as conf
 import locomote
+import pinocchio
+from centroidal_utils import createMultiphaseShootingProblem, createPhiFromContactSequence, createSwingTrajectories
+from crocoddyl import (ActionModelImpact, CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay,
+                       CallbackSolverTimer, ShootingProblem, SolverDDP, StatePinocchio, a2m, m2a)
+from locomote import ContactSequenceHumanoid
+
 np.set_printoptions(linewidth=400, suppress=True)
 robot = conf.robot
 rmodel = robot.model
