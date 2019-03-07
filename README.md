@@ -28,9 +28,9 @@ If you want to follow the current developments, you can directly refer to the [d
 
 Crocoddyl is yet a pure Python library. You don't need to install it. You can run examples and tests from the root dir of the repository:
 
-cd PATH_TO_CROCODDYL
-python examples/talos_arm.py
-python unittest/all.py
+		cd PATH_TO_CROCODDYL
+		python examples/talos_arm.py
+		python unittest/all.py
 
 If you want to learn about Crocoddyl, take a look at the Jupyter notebooks. Start in the following order.
 - examples/notebooks/unicycle_towards_origin.ipynb
