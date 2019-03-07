@@ -31,7 +31,7 @@ def readParamsFromSrdf(robot, SRDF_PATH, verbose):
       robot.q0.flat[:] = pinocchio.neutral(rmodel)
   return
   
-def loadTalosArm(modelPath='/opt/openrobots/share',freeFloating=False):
+def loadTalosArm(modelPath='/opt/openrobots/share/example-robot-data',freeFloating=False):
     URDF_FILENAME = "talos_left_arm.urdf"
     URDF_SUBPATH = "/talos_data/robots/" + URDF_FILENAME
     SRDF_FILENAME = "talos.srdf"
@@ -48,7 +48,7 @@ def loadTalosArm(modelPath='/opt/openrobots/share',freeFloating=False):
         l = robot.model.lowerPositionLimit; l[:7] = -1;  robot.model.lowerPositionLimit = l
     return robot
 
-def loadTalos(modelPath='/opt/openrobots/share'):
+def loadTalos(modelPath='/opt/openrobots/share/example-robot-data'):
     URDF_FILENAME = "talos_reduced.urdf"
     SRDF_FILENAME = "talos.srdf"
     SRDF_SUBPATH = "/talos_data/srdf/" + SRDF_FILENAME
@@ -65,7 +65,7 @@ def loadTalos(modelPath='/opt/openrobots/share'):
     return robot
 
 
-def loadTalosLegs(modelPath='/opt/openrobots/share'):
+def loadTalosLegs(modelPath='/opt/openrobots/share/example-robot-data'):
     from pinocchio import JointModelFreeFlyer,JointModelRX,JointModelRY,JointModelRZ
     robot = loadTalos(modelPath=modelPath)
     SRDF_FILENAME = "talos.srdf"
@@ -113,14 +113,9 @@ def loadTalosLegs(modelPath='/opt/openrobots/share'):
     assert((m2.armature[:6]==0.).all())
     return robot
 
-def loadHyQ():
-    # Loading the URDF model from the internal submodule (located at
-    # examples/hyq_description)
-    # TODO remove the submodule and load from hyq-data binary. Note that this
-    # task requires the creation of hyq-data binary.
+def loadHyQ(modelPath='/opt/openrobots/share/example-robot-data'):
     from pinocchio import JointModelFreeFlyer
     import os
-    modelPath = str(os.path.dirname(os.path.abspath(__file__))) + "/../examples"
     URDF_FILENAME = "hyq_no_sensors.urdf"
     URDF_SUBPATH = "/hyq_description/robots/" + URDF_FILENAME
     robot = RobotWrapper.BuildFromURDF(modelPath+URDF_SUBPATH, [modelPath],
