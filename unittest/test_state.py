@@ -29,10 +29,13 @@ class StateTestCase(unittest.TestCase):
         x2 = self.STATE.rand()
 
         # Computing x2 by integrating its difference
-        x2i = self.STATE.integrate(x1,self.STATE.diff(x1,x2))
+        dx = self.STATE.diff(x1,x2)
+        x2i = self.STATE.integrate(x1,dx)
+
+        dxi = self.STATE.diff(x2i,x2)
 
         # Checking that both states agree
-        self.assertTrue(np.allclose(x2i, x2, atol=1e-9), \
+        self.assertTrue(np.allclose(dxi,np.zeros(self.STATE.ndx), atol=1e-9), \
             "Integrate function doesn't agree with difference rule.")
 
     def test_difference_against_integrate(self):
@@ -101,7 +104,7 @@ class StateTestCase(unittest.TestCase):
         dx = np.random.rand(self.STATE.ndx)
         x2 = self.STATE.integrate(x1,dx)
         eps = np.random.rand(self.STATE.ndx)
-        h = 1e-12
+        h = 1e-8
 
         # Computing the partial derivatives of the integrate and difference function
         Jx,Jdx = self.STATE.Jintegrate(x1,dx)
@@ -120,7 +123,8 @@ class StateTestCase(unittest.TestCase):
         dx = self.STATE.diff(x1,x)
         x2i = self.STATE.integrate(x,eps*h)
         dxi = self.STATE.diff(x1,x2i)
-        self.assertTrue(np.allclose(np.dot(dDX_dX,eps), (-dx+dxi)/h, atol=1e-3), \
+        J1,J2 = self.STATE.Jdiff(x1,x)        
+        self.assertTrue(np.allclose(np.dot(J2,eps), (-dx+dxi)/h, atol=1e-3), \
             "Velocity computed from Jdiff is wrong.")
 
 class StateVectorTest(StateTestCase):
@@ -139,7 +143,12 @@ class StatePinocchioTest(StateTestCase):
     StateTestCase.NX = rmodel.nq + rmodel.nv
     StateTestCase.STATE = StatePinocchio(rmodel)
 
-
+class StatePinocchioFFTest(StateTestCase):
+    # Loading Talos legs
+    from crocoddyl import loadTalosLegs
+    rmodel = loadTalosLegs().model
+    StateTestCase.NX = rmodel.nq + rmodel.nv
+    StateTestCase.STATE = StatePinocchio(rmodel)
 
 if __name__ == '__main__':
     unittest.main()
