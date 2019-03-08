@@ -674,8 +674,7 @@ for i, phase in enumerate(GAITPHASES):
                     x0, value['jumpHeight'], value['timeStep']))
 
     # Added the callback functions
-    print
-    print 'Solving ' + key
+    print '*** SOLVE ' + key + ' ***'
     ddp[i].callback = [CallbackDDPLogger(), CallbackDDPVerbose()]
     if WITHDISPLAY:
         ddp[i].callback.append(CallbackSolverDisplay(hyq, 4, 1, cameraTF))
