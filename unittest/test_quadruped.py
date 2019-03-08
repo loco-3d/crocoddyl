@@ -22,9 +22,9 @@ class SimpleQuadrupedProblem:
         self.lhFootId = self.rmodel.getFrameId(lhFoot)
         self.rhFootId = self.rmodel.getFrameId(rhFoot)
         # Defining default state
-        self.rmodel.defaultState = \
-            np.concatenate([m2a(self.rmodel.referenceConfigurations["half_sitting"]),
-                            np.zeros(self.rmodel.nv)])
+        self.rmodel.defaultState = np.concatenate(
+            [m2a(self.rmodel.referenceConfigurations["half_sitting"]),
+             np.zeros(self.rmodel.nv)])
 
     def createProblem(self, x0, comGoTo, timeStep, numKnots):
         # Compute the current foot positions
@@ -41,17 +41,14 @@ class SimpleQuadrupedProblem:
         comModels = []
 
         # Creating the action model for the CoM task
-        comForwardModels = \
-            [ self.createModels(
-                timeStep,
-                [ self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId ],
-                ) for k in range(numKnots) ]
-        comForwardTermModel =  \
+        comForwardModels = [
             self.createModels(
                 timeStep,
-                [ self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId ],
-                com0 + [comGoTo, 0., 0.]
-                )
+                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+            ) for k in range(numKnots)
+        ]
+        comForwardTermModel = self.createModels(timeStep, [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+                                                com0 + [comGoTo, 0., 0.])
         comForwardTermModel.differential.costs['comTrack'].weight = 1e6
 
         # Adding the CoM tasks
@@ -69,8 +66,7 @@ class SimpleQuadrupedProblem:
         # feet
         contactModel = ContactModelMultiple(self.rmodel)
         for i in supportFootIds:
-            supportContactModel = \
-                ContactModel3D(self.rmodel, i, ref=[0.,0.,0.], gains=[0.,0.])
+            supportContactModel = ContactModel3D(self.rmodel, i, ref=[0., 0., 0.], gains=[0., 0.])
             contactModel.addContact('contact_' + str(i), supportContactModel)
 
         # Creating the cost model for a contact phase
@@ -82,8 +78,7 @@ class SimpleQuadrupedProblem:
             costModel.addCost("comTrack", comTrack, 1e2)
 
         # State and control regularization
-        stateWeights = \
-            np.array([0]*6 + [0.01]*(self.rmodel.nv-6) + [10]*self.rmodel.nv)
+        stateWeights = np.array([0] * 6 + [0.01] * (self.rmodel.nv - 6) + [10] * self.rmodel.nv)
         stateReg = CostModelState(self.rmodel, self.state, self.rmodel.defaultState, actModel.nu,
                                   ActivationModelWeightedQuad(stateWeights**2))
         ctrlReg = CostModelControl(self.rmodel, actModel.nu)
@@ -92,11 +87,7 @@ class SimpleQuadrupedProblem:
 
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
-        dmodel = \
-            DifferentialActionModelFloatingInContact(self.rmodel,
-                                                     actModel,
-                                                     contactModel,
-                                                     costModel)
+        dmodel = DifferentialActionModelFloatingInContact(self.rmodel, actModel, contactModel, costModel)
         model = IntegratedActionModelEuler(dmodel)
         model.timeStep = timeStep
         return model

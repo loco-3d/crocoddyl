@@ -345,8 +345,7 @@ if not doneddp:
     ddp.solve(maxiter=200)
 assert (doneddp)
 assert (norm(ddp.datas()[-1].differential.costs['pos'].residuals) < 1e-3)
-assert( norm(m2a(ddp.datas()[-1].differential.costs['pos'].pinocchio.oMf[c1.frame].translation)\
-             -c1.ref)<1e-3 )
+assert (norm(m2a(ddp.datas()[-1].differential.costs['pos'].pinocchio.oMf[c1.frame].translation) - c1.ref) < 1e-3)
 
 u0 = np.zeros(model.nu)
 x1 = model.calc(data, problem.initialState, u0)[0]

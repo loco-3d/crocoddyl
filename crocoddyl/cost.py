@@ -130,8 +130,8 @@ class CostModelSum(CostModelPinocchio):
             self.weight = weight
 
         def __str__(self):
-            return "CostItem(name=%s, cost=%s, weight=%s)" \
-                % ( str(self.name),str(self.cost.__class__),str(self.weight) )
+            return "CostItem(name=%s, cost=%s, weight=%s)" % (str(self.name), str(self.cost.__class__), str(
+                self.weight))
 
         __repr__ = __str__
 
@@ -142,10 +142,10 @@ class CostModelSum(CostModelPinocchio):
         self.costs = OrderedDict()
 
     def addCost(self, name, cost, weight):
-        assert( cost.withResiduals and \
-                '''The cost-of-sums class has not been designed nor tested for non sum of squares
+        assert (cost.withResiduals
+                and '''The cost-of-sums class has not been designed nor tested for non sum of squares
                 cost functions. It should not be a big deal to modify it, but this is not done
-                yet. ''' )
+                yet. ''')
         self.costs.update([[name, self.CostItem(cost=cost, name=name, weight=weight)]])
         self.ncost += cost.ncost
 
@@ -192,8 +192,7 @@ class CostDataSum(CostDataPinocchio):
     def __init__(self, model, pinocchioData):
         CostDataPinocchio.__init__(self, model, pinocchioData)
         self.model = model
-        self.costs = OrderedDict([ [i.name, i.cost.createData(pinocchioData)] \
-                                   for i in model.costs.values() ])
+        self.costs = OrderedDict([[i.name, i.cost.createData(pinocchioData)] for i in model.costs.values()])
 
     def __getitem__(self, key):
         if isinstance(key, str):
@@ -275,9 +274,8 @@ class CostModelFrameVelocity(CostModelPinocchio):
     def calcDiff(model, data, x, u, recalc=True):
         if recalc: model.calc(data, x, u)
         ncost, nq, nv, nx, ndx, nu = model.ncost, model.nq, model.nv, model.nx, model.ndx, model.nu
-        dv_dq,dv_dvq = pinocchio.getJointVelocityDerivatives\
-                                  (model.pinocchio,data.pinocchio,data.joint,
-                                   pinocchio.ReferenceFrame.LOCAL)
+        dv_dq, dv_dvq = pinocchio.getJointVelocityDerivatives(model.pinocchio, data.pinocchio, data.joint,
+                                                              pinocchio.ReferenceFrame.LOCAL)
 
         Ax, Axx = model.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
         data.Rq[:, :] = data.fXj * dv_dq
@@ -324,9 +322,8 @@ class CostModelFrameVelocityLinear(CostModelPinocchio):
     def calcDiff(model, data, x, u, recalc=True):
         if recalc: model.calc(data, x, u)
         ncost, nq, nv, nx, ndx, nu = model.ncost, model.nq, model.nv, model.nx, model.ndx, model.nu
-        dv_dq,dv_dvq = pinocchio.getJointVelocityDerivatives\
-                                  (model.pinocchio,data.pinocchio,data.joint,
-                                   pinocchio.ReferenceFrame.LOCAL)
+        dv_dq, dv_dvq = pinocchio.getJointVelocityDerivatives(model.pinocchio, data.pinocchio, data.joint,
+                                                              pinocchio.ReferenceFrame.LOCAL)
 
         Ax, Axx = model.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
         data.Rq[:, :] = (data.fXj * dv_dq)[:3, :]
@@ -445,8 +442,7 @@ class CostModelState(CostModelPinocchio):
         CostModelPinocchio.__init__(self, pinocchioModel, ncost=State.ndx, nu=nu)
         self.State = State
         self.ref = ref if ref is not None else State.zero()
-        self.activation = activation if activation is not None else\
-                          ActivationModelQuad()
+        self.activation = activation if activation is not None else ActivationModelQuad()
 
     def calc(model, data, x, u):
         data.residuals[:] = model.State.diff(model.ref, x)

@@ -28,9 +28,9 @@ class SimpleBipedWalkingProblem:
         self.rightFoot = rightFoot
         self.leftFoot = leftFoot
         # Defining default state
-        self.rmodel.defaultState = \
-            np.concatenate([m2a(self.rmodel.referenceConfigurations["half_sitting"].copy()),
-                            np.zeros(self.rmodel.nv)])
+        self.rmodel.defaultState = np.concatenate(
+            [m2a(self.rmodel.referenceConfigurations["half_sitting"].copy()),
+             np.zeros(self.rmodel.nv)])
         # Remove the armature
         self.rmodel.armature[6:] = 1.
 
@@ -63,11 +63,7 @@ class SimpleBipedWalkingProblem:
         thirdStep = self.createFootstepModels(rightFootId, leftFootId, stepLength, leftFootPos0, stepKnots)
 
         # Creating the action model for the double support phase
-        doubleSupport = \
-            [ self.createSwingFootModel(
-                timeStep,
-                [ rightFootId, leftFootId ]
-                ) for k in range(supportKnots) ]
+        doubleSupport = [self.createSwingFootModel(timeStep, [rightFootId, leftFootId]) for k in range(supportKnots)]
 
         # We defined the problem as:
         #  STEP 1 - DS - STEP 2 - DS - STEP 3 - DS
@@ -89,26 +85,17 @@ class SimpleBipedWalkingProblem:
         :return footstep action models
         """
         # Action models for the foot swing
-        footSwingModel = \
-            [ self.createSwingFootModel(
-                timeStep,
-                [ supportFootId ],
+        footSwingModel = [
+            self.createSwingFootModel(
+                timeStep, [supportFootId],
                 TaskSE3(
-                    pinocchio.SE3(np.eye(3),
-                                  np.asmatrix(a2m([ [(stepLength*k)/numKnots, 0., 0.] ]) +
-                                  footPos0)),
-                    swingFootId)
-                ) for k in range(numKnots) ]
+                    pinocchio.SE3(np.eye(3), np.asmatrix(a2m([[(stepLength * k) / numKnots, 0., 0.]]) + footPos0)),
+                    swingFootId)) for k in range(numKnots)
+        ]
         # Action model for the foot switch
-        footSwitchModel = \
-            self.createFootSwitchModel(
-                [ supportFootId ],
-                TaskSE3(
-                    pinocchio.SE3(np.eye(3),
-                                  np.asmatrix(a2m([ stepLength, 0., 0. ]) +
-                                  footPos0)),
-                    swingFootId)
-                )
+        footSwitchModel = self.createFootSwitchModel(
+            [supportFootId],
+            TaskSE3(pinocchio.SE3(np.eye(3), np.asmatrix(a2m([stepLength, 0., 0.]) + footPos0)), swingFootId))
         # Updating the current foot position for next step
         footPos0 += np.asmatrix(a2m([stepLength, 0., 0.]))
         return footSwingModel + [footSwitchModel]
@@ -129,8 +116,7 @@ class SimpleBipedWalkingProblem:
         # foot
         contactModel = ContactModelMultiple(self.rmodel)
         for i in supportFootIds:
-            supportContactModel = \
-                ContactModel6D(self.rmodel, i, ref=pinocchio.SE3.Identity(), gains=[0.,0.])
+            supportContactModel = ContactModel6D(self.rmodel, i, ref=pinocchio.SE3.Identity(), gains=[0., 0.])
             contactModel.addContact('contact_' + str(i), supportContactModel)
 
         # Creating the cost model for a contact phase
@@ -139,8 +125,7 @@ class SimpleBipedWalkingProblem:
             footTrack = CostModelFramePlacement(self.rmodel, swingFootTask.frameId, swingFootTask.oXf, actModel.nu)
             costModel.addCost("footTrack", footTrack, 100.)
 
-        stateWeights = \
-            np.array([0]*6 + [0.01]*(self.rmodel.nv-6) + [10]*self.rmodel.nv)
+        stateWeights = np.array([0] * 6 + [0.01] * (self.rmodel.nv - 6) + [10] * self.rmodel.nv)
         stateReg = CostModelState(
             self.rmodel,
             self.state,
@@ -153,11 +138,7 @@ class SimpleBipedWalkingProblem:
 
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
-        dmodel = \
-            DifferentialActionModelFloatingInContact(self.rmodel,
-                                                     actModel,
-                                                     contactModel,
-                                                     costModel)
+        dmodel = DifferentialActionModelFloatingInContact(self.rmodel, actModel, contactModel, costModel)
         model = IntegratedActionModelEuler(dmodel)
         model.timeStep = timeStep
         return model
@@ -172,8 +153,7 @@ class SimpleBipedWalkingProblem:
         """
         model = self.createSwingFootModel(0., supportFootId, swingFootTask)
 
-        impactFootVelCost = \
-            CostModelFrameVelocity(self.rmodel, swingFootTask.frameId)
+        impactFootVelCost = CostModelFrameVelocity(self.rmodel, swingFootTask.frameId)
         model.differential.costs.addCost('impactVel', impactFootVelCost, 10000.)
         model.differential.costs['impactVel'].weight = 100000
         model.differential.costs['footTrack'].weight = 100000

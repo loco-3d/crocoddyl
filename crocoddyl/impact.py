@@ -75,9 +75,8 @@ class ImpulseModel6D(ImpulseModelPinocchio):
 
     def calcDiff(model, data, x, recalc=True):
         if recalc: model.calc(data, x)
-        dv_dq,dv_dv = pinocchio.getJointVelocityDerivatives\
-                      (model.pinocchio,data.pinocchio,data.joint,
-                       pinocchio.ReferenceFrame.LOCAL)
+        dv_dq, dv_dv = pinocchio.getJointVelocityDerivatives(model.pinocchio, data.pinocchio, data.joint,
+                                                             pinocchio.ReferenceFrame.LOCAL)
         data.Vq[:, :] = data.fXj * dv_dq
 
     def setForces(model, data, forcesArr, forcesVec=None):
@@ -121,9 +120,8 @@ class ImpulseModel3D(ImpulseModelPinocchio):
 
     def calcDiff(model, data, x, recalc=True):
         if recalc: model.calc(data, x)
-        dv_dq,dv_dv = pinocchio.getJointVelocityDerivatives\
-                      (model.pinocchio,data.pinocchio,data.joint,
-                       pinocchio.ReferenceFrame.LOCAL)
+        dv_dq, dv_dv = pinocchio.getJointVelocityDerivatives(model.pinocchio, data.pinocchio, data.joint,
+                                                             pinocchio.ReferenceFrame.LOCAL)
         data.Vq[:, :] = data.fXj[:3, :] * dv_dq
 
     def setForces(model, data, forcesArr, forcesVec=None):
@@ -229,12 +227,11 @@ class CostModelImpactBase(CostModelPinocchio):
         data.dvnext_dx = dvnext_dx
 
     def assertImpactDataSet(self, data):
-        assert(data.vnext is not None \
-               and "vnext should be copied first from impact-data. Call setImpactData first")
+        assert (data.vnext is not None and "vnext should be copied first from impact-data. Call setImpactData first")
 
     def assertImpactDiffDataSet(self, data):
-        assert(data.dvnext_dx is not None \
-               and "dvnext_dx should be copied first from impact-data. Call setImpactData first")
+        assert (data.dvnext_dx is not None
+                and "dvnext_dx should be copied first from impact-data. Call setImpactData first")
 
 
 class CostDataImpactBase(CostDataPinocchio):

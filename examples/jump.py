@@ -1,11 +1,11 @@
 '''
-Example of Crocoddyl sequence for computing a whole-body jump. 
-The sequence is composed of a double-support phase, a flight phase, a double impact and a 
+Example of Crocoddyl sequence for computing a whole-body jump.
+The sequence is composed of a double-support phase, a flight phase, a double impact and a
 double-support landing phase. The main cost are an elevation of the COM at the middle of the flight
 phase, a minimization of the COM energy loss at impact, and a terminal stabilization cost
 in the configuration space. Additional terms are added for regularization.
 
-The tricky part comes from the search which is done in two parts: in a first part, we look for 
+The tricky part comes from the search which is done in two parts: in a first part, we look for
 a feasible solution for jumping, without considering landing constraints. Once a jump is
 accepted, we put the second part of the sequence (landing) and add constraints on the landing.
 
@@ -30,20 +30,8 @@ from crocoddyl.impact import CostModelImpactCoM, CostModelImpactWholeBody
 from pinocchio.utils import *
 
 # Number of iterations in each phase. If 0, try to load.
-PHASE_ITERATIONS = { \
-                     "initial": 200,
-                     "landing": 200,
-                     "frontal": 200,
-                     "lateral": 200,
-                     "twist"  : 200
-                    }
-PHASE_BACKUP = { \
-                 "initial": False,
-                 "landing": False,
-                 "frontal": False,
-                 "lateral": False,
-                 "twist"  : False
-                }
+PHASE_ITERATIONS = {"initial": 200, "landing": 200, "frontal": 200, "lateral": 200, "twist": 200}
+PHASE_BACKUP = {"initial": False, "landing": False, "frontal": False, "lateral": False, "twist": False}
 BACKUP_PATH = "npydata/jump."
 
 if 'load' in sys.argv: PHASE_ITERATIONS = {k: 0 for k in PHASE_ITERATIONS}
@@ -82,7 +70,7 @@ disp.__defaults__ = (.1, )
 
 def runningModel(contactIds, effectors, com=None, integrationStep=1e-2):
     '''
-    Creating the action model for floating-base systems. A walker system 
+    Creating the action model for floating-base systems. A walker system
     is by default a floating-base system.
     contactIds is a list of frame Ids of points that should be in contact.
     effectors is a dict of key frame ids and SE3 values of effector references.
@@ -112,11 +100,7 @@ def runningModel(contactIds, effectors, com=None, integrationStep=1e-2):
 
     # Creating the action model for the KKT dynamics with simpletic Euler
     # integration scheme
-    dmodel = \
-             DifferentialActionModelFloatingInContact(rmodel,
-                                                      actModel,
-                                                      contactModel,
-                                                      costModel)
+    dmodel = DifferentialActionModelFloatingInContact(rmodel, actModel, contactModel, costModel)
     model = IntegratedActionModelEuler(dmodel)
     model.timeStep = integrationStep
     return model
@@ -144,8 +128,7 @@ def impactModel(contactIds, effectors):
 
     # Creating the action model for the KKT dynamics with simpletic Euler
     # integration scheme
-    model = \
-             ActionModelImpact(rmodel,impulseModel,costModel)
+    model = ActionModelImpact(rmodel, impulseModel, costModel)
     return model
 
 
@@ -159,16 +142,15 @@ right0 = rdata.oMf[rightId].translation
 left0 = rdata.oMf[leftId].translation
 com0 = m2a(pinocchio.centerOfMass(rmodel, rdata, q0))
 
-models =\
-         [ runningModel([ rightId, leftId ],{}, integrationStep=4e-2) for i in range(10) ] \
-         +  [ runningModel([ ],{},integrationStep=3e-2) for i in range(5)] \
-         +  [ runningModel([ ],{}, com=com0+[0,0,0.5],integrationStep=5e-2) ] \
-         +  [ runningModel([ ],{},integrationStep=3e-2) for i in range(7) ] \
-         +  [ impactModel([ leftId,rightId ],
-                          { rightId: SE3(eye(3), right0),
-                            leftId: SE3(eye(3), left0) }) ] \
-        +  [ runningModel([ rightId, leftId ],{},integrationStep=2e-2) for i in range(9)] \
-        +  [ runningModel([ rightId, leftId ],{}, integrationStep=0) ]
+models = [runningModel([rightId, leftId], {}, integrationStep=4e-2)
+          for i in range(10)] + [runningModel([], {}, integrationStep=3e-2) for i in range(5)] + [
+              runningModel([], {}, com=com0 + [0, 0, 0.5], integrationStep=5e-2)
+          ] + [runningModel([], {}, integrationStep=3e-2) for i in range(7)
+               ] + [impactModel([leftId, rightId], {
+                   rightId: SE3(eye(3), right0),
+                   leftId: SE3(eye(3), left0)
+               })] + [runningModel([rightId, leftId], {}, integrationStep=2e-2)
+                      for i in range(9)] + [runningModel([rightId, leftId], {}, integrationStep=0)]
 
 high = [isinstance(m, IntegratedActionModelEuler) and 'com' in m.differential.costs.costs for m in models].index(True)
 models[high].differential.costs['com'].cost.activation = ActivationModelInequality(
@@ -203,10 +185,12 @@ problem = ShootingProblem(initialState=x0, runningModels=models[:imp], terminalM
 ddp = SolverDDP(problem)
 ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]  #, CallbackSolverDisplay(robot,rate=5) ]
 ddp.th_stop = 1e-4
-us0 = [ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
-        for m,d in zip(ddp.models(),ddp.datas())[:imp] ] \
-            +[np.zeros(0)]+[ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
-                             for m,d in zip(ddp.models(),ddp.datas())[imp+1:-1] ]
+us0 = [
+    m.differential.quasiStatic(d.differential, rmodel.defaultState) for m, d in zip(ddp.models(), ddp.datas())[:imp]
+] + [np.zeros(0)] + [
+    m.differential.quasiStatic(d.differential, rmodel.defaultState)
+    for m, d in zip(ddp.models(), ddp.datas())[imp + 1:-1]
+]
 
 print("*** SOLVE %s ***" % PHASE_NAME)
 ddp.solve(
@@ -233,9 +217,10 @@ ddp = SolverDDP(problem)
 ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]  #, CallbackSolverDisplay(robot,rate=5,freq=10) ]
 
 ddp.xs = xsddp + [rmodel.defaultState] * (len(models) - len(xsddp))
-ddp.us = usddp + [ np.zeros(0) if isinstance(m,ActionModelImpact) else \
-               m.differential.quasiStatic(d.differential,rmodel.defaultState) \
-                               for m,d in zip(ddp.models(),ddp.datas())[len(usddp):-1] ]
+ddp.us = usddp + [
+    np.zeros(0) if isinstance(m, ActionModelImpact) else m.differential.quasiStatic(
+        d.differential, rmodel.defaultState) for m, d in zip(ddp.models(), ddp.datas())[len(usddp):-1]
+]
 ddp.th_stop = 5e-4
 impact.costs['track30'].weight = 1e6
 impact.costs['track16'].weight = 1e6

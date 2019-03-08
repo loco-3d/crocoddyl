@@ -82,11 +82,10 @@ class SolverFDDP:
             # Gap store the displacement to go from a feasible trajectory to the current xs.
             # gap is so that    xconti [+] gap = xcand  ...
             #              ...  gap = xcand [-] xconti = DIFF(xconti,xcand)
-            self.gaps = \
-            [ self.problem.runningModels[0].State.diff(self.problem.initialState,self.xs[0]) ] \
-            + [ m.State.diff(d.xnext,x) \
-                          for m,d,x in zip(self.problem.runningModels,
-                                           self.problem.runningDatas,self.xs[1:]) ]
+            self.gaps = [self.problem.runningModels[0].State.diff(self.problem.initialState, self.xs[0])] + [
+                m.State.diff(d.xnext, x)
+                for m, d, x in zip(self.problem.runningModels, self.problem.runningDatas, self.xs[1:])
+            ]
         return self.cost
 
     def computeDirection(self, recalc=True):
@@ -153,8 +152,7 @@ class SolverFDDP:
                 self.dV_exp = a * (d1 + .5 * d2 * a)
                 #print 'a=%0.3f,   exp=%5.1e,   actual=%5.1e .... ' % (a,self.dV_exp,self.dV)
                 #or not self.isFeasible
-                if d1<self.th_grad \
-                   or self.dV > self.th_acceptStep*self.dV_exp:
+                if d1 < self.th_grad or self.dV > self.th_acceptStep * self.dV_exp:
                     # Accept step
                     self.wasFeasible = self.isFeasible
                     self.setCandidate(self.xs_try, self.us_try, isFeasible=(self.wasFeasible or a == 1), copy=False)
@@ -257,8 +255,8 @@ class SolverFDDP:
             if self.u_reg == 0:
                 self.Vx[t][:] = self.Qx[t] - np.dot(self.Qu[t], self.K[t])
             else:
-                self.Vx[t][:] = self.Qx [t] - 2*np.dot(self.Qu [t],self.K[t]) \
-                                + np.dot(np.dot(self.k[t],self.Quu[t]),self.K[t])
+                self.Vx[t][:] = self.Qx[t] - 2 * np.dot(self.Qu[t], self.K[t]) + np.dot(
+                    np.dot(self.k[t], self.Quu[t]), self.K[t])
             self.Vxx[t][:, :] = self.Qxx[t] - np.dot(self.Qxu[t], self.K[t])
 
             if self.x_reg != 0: self.Vxx[t][range(model.ndx), range(model.ndx)] += self.x_reg
@@ -287,8 +285,7 @@ class SolverFDDP:
                 xtry[t] = xnext.copy()
             else:
                 xtry[t] = m.State.integrate(xnext, self.gaps[t] * (1 - stepLength))
-            utry[t] = us[t] - self.k[t]*stepLength  \
-                      - np.dot(self.K[t],m.State.diff(xs[t],xtry[t]))
+            utry[t] = us[t] - self.k[t] * stepLength - np.dot(self.K[t], m.State.diff(xs[t], xtry[t]))
             with np.warnings.catch_warnings():
                 np.warnings.simplefilter(warning)
                 xnext, cost = m.calc(d, xtry[t], utry[t])

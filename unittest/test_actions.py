@@ -26,8 +26,7 @@ class ActionModelTestCase(unittest.TestCase):
         nx = self.MODEL.calc(self.DATA, x, u)[0].shape
 
         # Checking the dimension for the state and its tangent
-        self.assertEqual(nx, (self.MODEL.nx,), \
-            "Dimension of state vector is wrong.")
+        self.assertEqual(nx, (self.MODEL.nx, ), "Dimension of state vector is wrong.")
 
     def test_calc_returns_a_cost(self):
         # Getting the cost value computed by calc()
@@ -36,8 +35,7 @@ class ActionModelTestCase(unittest.TestCase):
         cost = self.MODEL.calc(self.DATA, x, u)[1]
 
         # Checking that calc returns a cost value
-        self.assertTrue(isinstance(cost,float), \
-            "calc() doesn't return a cost value.")
+        self.assertTrue(isinstance(cost, float), "calc() doesn't return a cost value.")
 
     def test_partial_derivatives_against_numdiff(self):
         # Generating random values for the state and control
@@ -50,20 +48,13 @@ class ActionModelTestCase(unittest.TestCase):
 
         # Checking the partial derivatives against NumDiff
         tol = 10 * self.MODEL_NUMDIFF.disturbance
-        self.assertTrue(np.allclose(self.DATA.Fx,self.DATA_NUMDIFF.Fx, atol=tol), \
-            "Fx is wrong.")
-        self.assertTrue(np.allclose(self.DATA.Fu,self.DATA_NUMDIFF.Fu, atol=tol), \
-            "Fu is wrong.")
-        self.assertTrue(np.allclose(self.DATA.Lx,self.DATA_NUMDIFF.Lx, atol=tol), \
-            "Fx is wrong.")
-        self.assertTrue(np.allclose(self.DATA.Lu,self.DATA_NUMDIFF.Lu, atol=tol), \
-            "Fx is wrong.")
-        self.assertTrue(np.allclose(self.DATA.Lxx,self.DATA_NUMDIFF.Lxx, atol=tol), \
-            "Fx is wrong.")
-        self.assertTrue(np.allclose(self.DATA.Lxu,self.DATA_NUMDIFF.Lxu, atol=tol), \
-            "Fx is wrong.")
-        self.assertTrue(np.allclose(self.DATA.Luu,self.DATA_NUMDIFF.Luu, atol=tol), \
-            "Fx is wrong.")
+        self.assertTrue(np.allclose(self.DATA.Fx, self.DATA_NUMDIFF.Fx, atol=tol), "Fx is wrong.")
+        self.assertTrue(np.allclose(self.DATA.Fu, self.DATA_NUMDIFF.Fu, atol=tol), "Fu is wrong.")
+        self.assertTrue(np.allclose(self.DATA.Lx, self.DATA_NUMDIFF.Lx, atol=tol), "Fx is wrong.")
+        self.assertTrue(np.allclose(self.DATA.Lu, self.DATA_NUMDIFF.Lu, atol=tol), "Fx is wrong.")
+        self.assertTrue(np.allclose(self.DATA.Lxx, self.DATA_NUMDIFF.Lxx, atol=tol), "Fx is wrong.")
+        self.assertTrue(np.allclose(self.DATA.Lxu, self.DATA_NUMDIFF.Lxu, atol=tol), "Fx is wrong.")
+        self.assertTrue(np.allclose(self.DATA.Luu, self.DATA_NUMDIFF.Luu, atol=tol), "Fx is wrong.")
 
 
 class UnicycleTest(ActionModelTestCase):
@@ -89,9 +80,7 @@ class UnicycleVarTest(ActionModelTestCase):
         xnext0, cost0 = model0.calc(data0, x0, u)
 
         # Checking the rollout (next state) and cost values
-        self.assertTrue(
-            np.allclose(X.integrate(X.zero(),xnext0), xnext, atol=1e-9), \
-            "Dynamics simulation is wrong.")
+        self.assertTrue(np.allclose(X.integrate(X.zero(), xnext0), xnext, atol=1e-9), "Dynamics simulation is wrong.")
         self.assertAlmostEqual(cost0, cost, "Cost computation is wrong.")
 
 

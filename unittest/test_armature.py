@@ -79,11 +79,7 @@ def runningModel(contactIds, effectors, com=None, integrationStep=1e-2):
 
     # Creating the action model for the KKT dynamics with simpletic Euler
     # integration scheme
-    dmodel = \
-             DifferentialActionModelFloatingInContact(rmodel,
-                                                      actModel,
-                                                      contactModel,
-                                                      costModel)
+    dmodel = DifferentialActionModelFloatingInContact(rmodel, actModel, contactModel, costModel)
     model = IntegratedActionModelEuler(dmodel)
     model.timeStep = integrationStep
     return model
@@ -104,11 +100,11 @@ right0 = m2a(rdata.oMf[rightId].translation)
 left0 = m2a(rdata.oMf[leftId].translation)
 com0 = m2a(pinocchio.centerOfMass(rmodel, rdata, q0))
 
-models = []\
-         +[ runningModel([ rightId, leftId ],{}, integrationStep=5e-2)] *10                     \
-         +[ runningModel([ rightId, leftId ],{},com=com0+[ 0.1,0,0], integrationStep=5e-2)]       \
-         +[ runningModel([ rightId ],{}, integrationStep=5e-2)] *10                     \
-         +[ runningModel([ rightId ],{ leftId: left0+[0,0,0.1] },com=com0+[-0.1,0,0], integrationStep=5e-2)]
+models = [] + [runningModel([rightId, leftId], {}, integrationStep=5e-2)] * 10 + [
+    runningModel([rightId, leftId], {}, com=com0 + [0.1, 0, 0], integrationStep=5e-2)
+] + [runningModel([rightId], {}, integrationStep=5e-2)] * 10 + [
+    runningModel([rightId], {leftId: left0 + [0, 0, 0.1]}, com=com0 + [-0.1, 0, 0], integrationStep=5e-2)
+]
 
 pass1 = models[10]
 pass2 = models[21]
@@ -120,7 +116,7 @@ pass2.differential.costs['track16'].weight = 100000
 # --- DDP
 problem = ShootingProblem(initialState=x0, runningModels=models[:-1], terminalModel=models[-1])
 ddp = SolverDDP(problem)
-#ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
+# ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
 ddp.th_stop = 1e-6
 
 ddp.setCandidate()
@@ -130,15 +126,18 @@ d = m.createData()
 m = m.differential
 d = d.differential
 
-#m=m.differential.contact['contact30']
-#d=d.differential.contact['contact30']
+# m=m.differential.contact['contact30']
+# d=d.differential.contact['contact30']
 m.calcDiff(d, ddp.xs[0], ddp.us[0])
-#m.calc(d,ddp.xs[0])
+# m.calc(d,ddp.xs[0])
 
-
-ddp.solve(maxiter=1,regInit=.1,init_xs=[rmodel.defaultState]*len(ddp.models()),
-          init_us = [ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
-                      for m,d in zip(ddp.models(),ddp.datas())[:-1] ])
+ddp.solve(
+    maxiter=1,
+    regInit=.1,
+    init_xs=[rmodel.defaultState] * len(ddp.models()),
+    init_us=[
+        m.differential.quasiStatic(d.differential, rmodel.defaultState) for m, d in zip(ddp.models(), ddp.datas())[:-1]
+    ])
 
 assert (ddp.cost < 1e5)
 '''

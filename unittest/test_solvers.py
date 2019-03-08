@@ -70,8 +70,7 @@ class SolverKKTTest(unittest.TestCase):
         nx = len(filter(lambda x: x < 0, eig(self.kkt.kkt)[0]))
 
         # Checking the dimension of the KKT problem
-        self.assertTrue(nxu==self.kkt.nx+self.kkt.nu, \
-            "Dimension of decision variables is wrong.")
+        self.assertTrue(nxu == self.kkt.nx + self.kkt.nu, "Dimension of decision variables is wrong.")
         self.assertTrue(nx == self.kkt.nx, "Dimension of state variables is wrong.")
 
     def test_hessian_is_symmetric(self):
@@ -79,15 +78,14 @@ class SolverKKTTest(unittest.TestCase):
         self.kkt.calc()
 
         # Checking the symmetricity of the Hessian
-        self.assertTrue(np.linalg.norm(self.kkt.hess-self.kkt.hess.T) < 1e-9, \
-            "The Hessian isn't symmetric.")
+        self.assertTrue(np.linalg.norm(self.kkt.hess - self.kkt.hess.T) < 1e-9, "The Hessian isn't symmetric.")
 
     def test_search_direction(self):
         dxs, dus, ls = self.kkt.computeDirection()
 
         # Checking that the first primal variable ensures initial constraint
-        self.assertTrue(np.linalg.norm(dxs[0]-self.problem.initialState)<1e-9, \
-            "Initial constraint isn't guaranteed.")
+        self.assertTrue(
+            np.linalg.norm(dxs[0] - self.problem.initialState) < 1e-9, "Initial constraint isn't guaranteed.")
 
         # Checking that primal variables ensures dynamic constraint (or its
         # linear approximation)
@@ -99,8 +97,8 @@ class SolverKKTTest(unittest.TestCase):
 
             # Checking that the next primal variable is consistant with the
             # dynamics
-            self.assertTrue(np.allclose(xnext, dxs, atol=10*h), \
-                "Primal variables doesn't ensure dynamic constraints.")
+            self.assertTrue(
+                np.allclose(xnext, dxs, atol=10 * h), "Primal variables doesn't ensure dynamic constraints.")
 
 
 # --- TEST KKT ---
@@ -377,9 +375,8 @@ assert (norm(xddp[0] - xkkt[0]) < 1e-9)
 assert (norm(uddp[0] - ukkt[0]) < 1e-9)
 # Value predicted by the linearization of the transition model:
 #      xlin = xpred + Fx dx + Fu du = f(xguess,ugess) + Fx (xddp-xguess) + Fu (uddp-ugess).
-xddplin1 = model.calc(model.createData(),xs[0],us[0])[0]      \
-           + np.dot(problem.runningDatas[0].Fx,xddp[0]-xs[0]) \
-           + np.dot(problem.runningDatas[0].Fu,uddp[0]-us[0])
+xddplin1 = model.calc(model.createData(), xs[0], us[0])[0]
+xddplin1 += np.dot(problem.runningDatas[0].Fx, xddp[0] - xs[0]) + np.dot(problem.runningDatas[0].Fu, uddp[0] - us[0])
 assert (norm(xddplin1 - xkkt[1]) < 1e-9)
 
 # --- TEST DDP VS KKT NLP in T time---
@@ -419,9 +416,8 @@ for t in range(T):
     # Value predicted by the linearization of the transition model:
     #      xlin = xpred + Fx dx + Fu du = f(xguess,ugess) + Fx (xddp-xguess) + Fu (uddp-ugess).
     ulin[t] = us[t] - ddp.k[t] - np.dot(ddp.K[t], model.State.diff(xs[t], xlin[t]))
-    xlin[t+1] = model.calc(model.createData(),xs[t],us[t])[0]    \
-         + np.dot(problem.runningDatas[t].Fx,xlin[t]-xs[t])     \
-         + np.dot(problem.runningDatas[t].Fu,ulin[t]-us[t])
+    xlin[t + 1] = model.calc(model.createData(), xs[t], us[t])[0] + np.dot(
+        problem.runningDatas[t].Fx, xlin[t] - xs[t]) + np.dot(problem.runningDatas[t].Fu, ulin[t] - us[t])
     assert (norm(ulin[t] - ukkt[t]) < 1e-9)
     assert (norm(xlin[t + 1] - xkkt[t + 1]) < 1e-9)
 

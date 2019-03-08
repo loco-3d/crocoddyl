@@ -55,8 +55,8 @@ class ActionModelLQR:
         if u is None: u = model.unone
         quad = lambda a, Q, b: .5 * np.dot(np.dot(Q, b).T, a)
         data.xnext = np.dot(model.Fx, x) + np.dot(model.Fu, u) + model.F
-        data.cost  = quad(x,model.Lxx,x) + 2*quad(x,model.Lxu,u) + quad(u,model.Luu,u) \
-                     + np.dot(model.Lx,x) + np.dot(model.Lu,u)
+        data.cost = quad(x, model.Lxx, x) + 2 * quad(x, model.Lxu, u) + quad(u, model.Luu, u) + np.dot(
+            model.Lx, x) + np.dot(model.Lu, u)
         return data.xnext, data.cost
 
     def calcDiff(model, data, x, u=None):

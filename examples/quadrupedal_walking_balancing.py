@@ -87,8 +87,7 @@ class SimpleQuadrupedalGaitProblem:
         self.rhFootId = self.rmodel.getFrameId(rhFoot)
         # Defining default state
         q0 = self.rmodel.referenceConfigurations["half_sitting"]
-        self.rmodel.defaultState = \
-            np.concatenate([m2a(q0), np.zeros(self.rmodel.nv)])
+        self.rmodel.defaultState = np.concatenate([m2a(q0), np.zeros(self.rmodel.nv)])
         self.firstStep = True
 
     def createCoMProblem(self, x0, comGoTo, timeStep, numKnots):
@@ -114,30 +113,24 @@ class SimpleQuadrupedalGaitProblem:
         comModels = []
 
         # Creating the action model for the CoM task
-        comForwardModels = \
-            [self.createSwingFootModel(
-                timeStep,
-                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
-            ) for k in range(numKnots)]
-        comForwardTermModel =  \
+        comForwardModels = [
             self.createSwingFootModel(
                 timeStep,
                 [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
-                com0 + [comGoTo, 0., 0.]
-            )
+            ) for k in range(numKnots)
+        ]
+        comForwardTermModel = self.createSwingFootModel(
+            timeStep, [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId], com0 + [comGoTo, 0., 0.])
         comForwardTermModel.differential.costs['comTrack'].weight = 1e6
 
-        comBackwardModels = \
-            [self.createSwingFootModel(
-                timeStep,
-                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
-            ) for k in range(numKnots)]
-        comBackwardTermModel =  \
+        comBackwardModels = [
             self.createSwingFootModel(
                 timeStep,
                 [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
-                com0 + [-comGoTo, 0., 0.]
-            )
+            ) for k in range(numKnots)
+        ]
+        comBackwardTermModel = self.createSwingFootModel(
+            timeStep, [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId], com0 + [-comGoTo, 0., 0.])
         comBackwardTermModel.differential.costs['comTrack'].weight = 1e6
 
         # Adding the CoM tasks
@@ -171,50 +164,29 @@ class SimpleQuadrupedalGaitProblem:
 
         # Defining the action models along the time instances
         loco3dModel = []
-        doubleSupport = \
-            [self.createSwingFootModel(
+        doubleSupport = [
+            self.createSwingFootModel(
                 timeStep,
                 [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
-            ) for k in range(supportKnots)]
+            ) for k in range(supportKnots)
+        ]
         if self.firstStep is True:
-            rhStep = \
-                self.createFootstepModels(
-                    comPos0, [rhFootPos0],
-                    0.5*stepLength, stepHeight, timeStep, stepKnots,
-                    [self.lfFootId, self.rfFootId, self.lhFootId],
-                    [self.rhFootId])
-            rfStep = \
-                self.createFootstepModels(
-                    comPos0, [rfFootPos0],
-                    0.5*stepLength, stepHeight, timeStep, stepKnots,
-                    [self.lfFootId, self.lhFootId, self.rhFootId],
-                    [self.rfFootId])
+            rhStep = self.createFootstepModels(comPos0, [rhFootPos0], 0.5 * stepLength, stepHeight, timeStep,
+                                               stepKnots, [self.lfFootId, self.rfFootId, self.lhFootId],
+                                               [self.rhFootId])
+            rfStep = self.createFootstepModels(comPos0, [rfFootPos0], 0.5 * stepLength, stepHeight, timeStep,
+                                               stepKnots, [self.lfFootId, self.lhFootId, self.rhFootId],
+                                               [self.rfFootId])
             self.firstStep = False
         else:
-            rhStep = \
-                self.createFootstepModels(
-                    comPos0, [rhFootPos0],
-                    stepLength, stepHeight, timeStep, stepKnots,
-                    [self.lfFootId, self.rfFootId, self.lhFootId],
-                    [self.rhFootId])
-            rfStep = \
-                self.createFootstepModels(
-                    comPos0, [rfFootPos0],
-                    stepLength, stepHeight, timeStep, stepKnots,
-                    [self.lfFootId, self.lhFootId, self.rhFootId],
-                    [self.rfFootId])
-        lhStep = \
-            self.createFootstepModels(
-                comPos0, [lhFootPos0],
-                stepLength, stepHeight, timeStep, stepKnots,
-                [self.lfFootId, self.rfFootId, self.rhFootId],
-                [self.lhFootId])
-        lfStep = \
-            self.createFootstepModels(
-                comPos0, [lfFootPos0],
-                stepLength, stepHeight, timeStep, stepKnots,
-                [self.rfFootId, self.lhFootId, self.rhFootId],
-                [self.lfFootId])
+            rhStep = self.createFootstepModels(comPos0, [rhFootPos0], stepLength, stepHeight, timeStep, stepKnots,
+                                               [self.lfFootId, self.rfFootId, self.lhFootId], [self.rhFootId])
+            rfStep = self.createFootstepModels(comPos0, [rfFootPos0], stepLength, stepHeight, timeStep, stepKnots,
+                                               [self.lfFootId, self.lhFootId, self.rhFootId], [self.rfFootId])
+        lhStep = self.createFootstepModels(comPos0, [lhFootPos0], stepLength, stepHeight, timeStep, stepKnots,
+                                           [self.lfFootId, self.rfFootId, self.rhFootId], [self.lhFootId])
+        lfStep = self.createFootstepModels(comPos0, [lfFootPos0], stepLength, stepHeight, timeStep, stepKnots,
+                                           [self.rfFootId, self.lhFootId, self.rhFootId], [self.lfFootId])
 
         loco3dModel += doubleSupport + rhStep + rfStep
         loco3dModel += doubleSupport + lhStep + lfStep
@@ -245,32 +217,23 @@ class SimpleQuadrupedalGaitProblem:
 
         # Defining the action models along the time instances
         loco3dModel = []
-        doubleSupport = \
-            [self.createSwingFootModel(
+        doubleSupport = [
+            self.createSwingFootModel(
                 timeStep,
                 [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
-            ) for k in range(supportKnots)]
+            ) for k in range(supportKnots)
+        ]
         if self.firstStep is True:
-            rflhStep = \
-                self.createFootstepModels(
-                    comPos0, [rfFootPos0, lhFootPos0],
-                    0.5*stepLength, stepHeight, timeStep, stepKnots,
-                    [self.lfFootId, self.rhFootId],
-                    [self.rfFootId, self.lhFootId])
+            rflhStep = self.createFootstepModels(comPos0, [rfFootPos0, lhFootPos0], 0.5 * stepLength, stepHeight,
+                                                 timeStep, stepKnots, [self.lfFootId, self.rhFootId],
+                                                 [self.rfFootId, self.lhFootId])
             self.firstStep = False
         else:
-            rflhStep = \
-                self.createFootstepModels(
-                    comPos0, [rfFootPos0, lhFootPos0],
-                    stepLength, stepHeight, timeStep, stepKnots,
-                    [self.lfFootId, self.rhFootId],
-                    [self.rfFootId, self.lhFootId])
-        lfrhStep = \
-            self.createFootstepModels(
-                comPos0, [lfFootPos0, rhFootPos0],
-                stepLength, stepHeight, timeStep, stepKnots,
-                [self.rfFootId, self.lhFootId],
-                [self.lfFootId, self.rhFootId])
+            rflhStep = self.createFootstepModels(comPos0, [rfFootPos0, lhFootPos0], stepLength, stepHeight, timeStep,
+                                                 stepKnots, [self.lfFootId, self.rhFootId],
+                                                 [self.rfFootId, self.lhFootId])
+        lfrhStep = self.createFootstepModels(comPos0, [lfFootPos0, rhFootPos0], stepLength, stepHeight, timeStep,
+                                             stepKnots, [self.rfFootId, self.lhFootId], [self.lfFootId, self.rhFootId])
 
         loco3dModel += doubleSupport + rflhStep
         loco3dModel += doubleSupport + lfrhStep
@@ -301,32 +264,24 @@ class SimpleQuadrupedalGaitProblem:
 
         # Defining the action models along the time instances
         loco3dModel = []
-        doubleSupport = \
-            [self.createSwingFootModel(
+        doubleSupport = [
+            self.createSwingFootModel(
                 timeStep,
                 [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
-            ) for k in range(supportKnots)]
+            ) for k in range(supportKnots)
+        ]
         if self.firstStep is True:
-            rightSteps = \
-                self.createFootstepModels(
-                    comPos0, [rfFootPos0, rhFootPos0],
-                    0.5*stepLength, stepHeight, timeStep, stepKnots,
-                    [self.lfFootId, self.lhFootId],
-                    [self.rfFootId, self.rhFootId])
+            rightSteps = self.createFootstepModels(comPos0, [rfFootPos0, rhFootPos0], 0.5 * stepLength, stepHeight,
+                                                   timeStep, stepKnots, [self.lfFootId, self.lhFootId],
+                                                   [self.rfFootId, self.rhFootId])
             self.firstStep = False
         else:
-            rightSteps = \
-                self.createFootstepModels(
-                    comPos0, [rfFootPos0, rhFootPos0],
-                    stepLength, stepHeight, timeStep, stepKnots,
-                    [self.lfFootId, self.lhFootId],
-                    [self.rfFootId, self.rhFootId])
-        leftSteps = \
-            self.createFootstepModels(
-                comPos0, [lfFootPos0, lhFootPos0],
-                stepLength, stepHeight, timeStep, stepKnots,
-                [self.rfFootId, self.rhFootId],
-                [self.lfFootId, self.lhFootId])
+            rightSteps = self.createFootstepModels(comPos0, [rfFootPos0, rhFootPos0], stepLength, stepHeight, timeStep,
+                                                   stepKnots, [self.lfFootId, self.lhFootId],
+                                                   [self.rfFootId, self.rhFootId])
+        leftSteps = self.createFootstepModels(comPos0, [lfFootPos0, lhFootPos0], stepLength, stepHeight, timeStep,
+                                              stepKnots, [self.rfFootId, self.rhFootId],
+                                              [self.lfFootId, self.lhFootId])
 
         loco3dModel += doubleSupport + rightSteps
         loco3dModel += doubleSupport + leftSteps
@@ -357,23 +312,16 @@ class SimpleQuadrupedalGaitProblem:
 
         # Defining the action models along the time instances
         loco3dModel = []
-        doubleSupport = \
-            [self.createSwingFootModel(
-                timeStep,
-                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId])
-                for k in range(supportKnots)]
-        hindSteps = \
-            self.createFootstepModels(
-                comPos0, [lfFootPos0, rfFootPos0],
-                stepLength, stepHeight, timeStep, stepKnots,
-                [self.lhFootId, self.rhFootId],
-                [self.lfFootId, self.rfFootId])
-        frontSteps = \
-            self.createFootstepModels(
-                comPos0, [lhFootPos0, rhFootPos0],
-                stepLength, stepHeight, timeStep, stepKnots,
-                [self.lfFootId, self.rfFootId],
-                [self.lhFootId, self.rhFootId])
+        doubleSupport = [
+            self.createSwingFootModel(timeStep, [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId])
+            for k in range(supportKnots)
+        ]
+        hindSteps = self.createFootstepModels(comPos0, [lfFootPos0, rfFootPos0], stepLength, stepHeight, timeStep,
+                                              stepKnots, [self.lhFootId, self.rhFootId],
+                                              [self.lfFootId, self.rfFootId])
+        frontSteps = self.createFootstepModels(comPos0, [lhFootPos0, rhFootPos0], stepLength, stepHeight, timeStep,
+                                               stepKnots, [self.lfFootId, self.rfFootId],
+                                               [self.lhFootId, self.rhFootId])
 
         loco3dModel += doubleSupport + hindSteps
         loco3dModel += doubleSupport + frontSteps
@@ -392,17 +340,17 @@ class SimpleQuadrupedalGaitProblem:
         flyingKnots = 30
 
         loco3dModel = []
-        takeOff = \
-            [self.createSwingFootModel(
+        takeOff = [
+            self.createSwingFootModel(
                 timeStep,
                 [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
-            ) for k in range(takeOffKnots)]
-        flyingPhase = \
-            [self.createSwingFootModel(
-                timeStep,
-                [],
-                np.array([0., 0., jumpHeight * (k+1) / flyingKnots]) + comPos0
-            ) for k in range(flyingKnots)]
+            ) for k in range(takeOffKnots)
+        ]
+        flyingPhase = [
+            self.createSwingFootModel(timeStep, [],
+                                      np.array([0., 0., jumpHeight * (k + 1) / flyingKnots]) + comPos0)
+            for k in range(flyingKnots)
+        ]
 
         loco3dModel += takeOff
         loco3dModel += flyingPhase
@@ -443,20 +391,15 @@ class SimpleQuadrupedalGaitProblem:
                     dp = a2m([[stepLength * (k + 1) / numKnots, 0., stepHeight * (1 - float(k - phKnots) / phKnots)]])
                 tref = np.asmatrix(p + dp)
 
-                swingFootTask += \
-                    [TaskSE3(pinocchio.SE3(np.eye(3), tref), i)]
+                swingFootTask += [TaskSE3(pinocchio.SE3(np.eye(3), tref), i)]
 
             # Adding an action model for this knot
-            comTask = \
-                np.array([stepLength * (k+1) / numKnots, 0., 0.]) * \
-                comPercentage + comPos0
-            footSwingModel += \
-                [self.createSwingFootModel(timeStep, supportFootIds,
-                                           comTask=comTask,
-                                           swingFootTask=swingFootTask)]
+            comTask = np.array([stepLength * (k + 1) / numKnots, 0., 0.]) * comPercentage + comPos0
+            footSwingModel += [
+                self.createSwingFootModel(timeStep, supportFootIds, comTask=comTask, swingFootTask=swingFootTask)
+            ]
         # Action model for the foot switch
-        footSwitchModel = \
-            self.createFootSwitchModel(supportFootIds, swingFootTask)
+        footSwitchModel = self.createFootSwitchModel(supportFootIds, swingFootTask)
 
         # Updating the current foot position for next step
         comPos0 += np.array([stepLength * comPercentage, 0., 0.])
@@ -481,9 +424,7 @@ class SimpleQuadrupedalGaitProblem:
         # foot
         contactModel = ContactModelMultiple(self.rmodel)
         for i in supportFootIds:
-            supportContactModel = \
-                ContactModel3D(self.rmodel, i, ref=[
-                               0., 0., 0.], gains=[0., 0.])
+            supportContactModel = ContactModel3D(self.rmodel, i, ref=[0., 0., 0.], gains=[0., 0.])
             contactModel.addContact('contact_' + str(i), supportContactModel)
 
         # Creating the cost model for a contact phase
@@ -493,16 +434,10 @@ class SimpleQuadrupedalGaitProblem:
             costModel.addCost("comTrack", comTrack, 1e4)
         if swingFootTask is not None:
             for i in swingFootTask:
-                footTrack = \
-                    CostModelFrameTranslation(self.rmodel,
-                                              i.frameId,
-                                              m2a(i.oXf.translation),
-                                              actModel.nu)
+                footTrack = CostModelFrameTranslation(self.rmodel, i.frameId, m2a(i.oXf.translation), actModel.nu)
                 costModel.addCost("footTrack_" + str(i), footTrack, 1e4)
 
-        stateWeights = \
-            np.array([0]*3 + [500.]*3 + [0.01]*(self.rmodel.nv-6) +
-                     [10]*self.rmodel.nv)
+        stateWeights = np.array([0] * 3 + [500.] * 3 + [0.01] * (self.rmodel.nv - 6) + [10] * self.rmodel.nv)
         stateReg = CostModelState(self.rmodel, self.state, self.rmodel.defaultState, actModel.nu,
                                   ActivationModelWeightedQuad(stateWeights**2))
         ctrlReg = CostModelControl(self.rmodel, actModel.nu)
@@ -511,11 +446,7 @@ class SimpleQuadrupedalGaitProblem:
 
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
-        dmodel = \
-            DifferentialActionModelFloatingInContact(self.rmodel,
-                                                     actModel,
-                                                     contactModel,
-                                                     costModel)
+        dmodel = DifferentialActionModelFloatingInContact(self.rmodel, actModel, contactModel, costModel)
         model = IntegratedActionModelEuler(dmodel)
         model.timeStep = timeStep
         return model
@@ -530,8 +461,7 @@ class SimpleQuadrupedalGaitProblem:
         model = self.createSwingFootModel(0., supportFootId, swingFootTask=swingFootTask)
 
         for i in swingFootTask:
-            impactFootVelCost = \
-                CostModelFrameVelocity(self.rmodel, i.frameId)
+            impactFootVelCost = CostModelFrameVelocity(self.rmodel, i.frameId)
             model.differential.costs.addCost('impactVel_' + str(i), impactFootVelCost, 1e4)
             model.differential.costs['impactVel_' + str(i)].weight = 1e6
             model.differential.costs['footTrack_' + str(i)].weight = 1e6
@@ -560,16 +490,44 @@ rhFoot = 'rh_foot'
 gait = SimpleQuadrupedalGaitProblem(rmodel, lfFoot, rfFoot, lhFoot, rhFoot)
 
 # Setting up all tasks
-GAITPHASES = \
-    [{'walking': {'stepLength': 0.15, 'stepHeight': 0.2,
-                  'timeStep': 1e-2, 'stepKnots': 25, 'supportKnots': 5}},
-     {'trotting': {'stepLength': 0.15, 'stepHeight': 0.2,
-                   'timeStep': 1e-2, 'stepKnots': 25, 'supportKnots': 5}},
-     {'pacing': {'stepLength': 0.15, 'stepHeight': 0.2,
-                 'timeStep': 1e-2, 'stepKnots': 25, 'supportKnots': 5}},
-     {'bounding': {'stepLength': 0.15, 'stepHeight': 0.2,
-                   'timeStep': 1e-2, 'stepKnots': 25, 'supportKnots': 5}},
-     {'jumping': {'jumpHeight': 0.5, 'timeStep': 1e-2}}]
+GAITPHASES = [{
+    'walking': {
+        'stepLength': 0.15,
+        'stepHeight': 0.2,
+        'timeStep': 1e-2,
+        'stepKnots': 25,
+        'supportKnots': 5
+    }
+}, {
+    'trotting': {
+        'stepLength': 0.15,
+        'stepHeight': 0.2,
+        'timeStep': 1e-2,
+        'stepKnots': 25,
+        'supportKnots': 5
+    }
+}, {
+    'pacing': {
+        'stepLength': 0.15,
+        'stepHeight': 0.2,
+        'timeStep': 1e-2,
+        'stepKnots': 25,
+        'supportKnots': 5
+    }
+}, {
+    'bounding': {
+        'stepLength': 0.15,
+        'stepHeight': 0.2,
+        'timeStep': 1e-2,
+        'stepKnots': 25,
+        'supportKnots': 5
+    }
+}, {
+    'jumping': {
+        'jumpHeight': 0.5,
+        'timeStep': 1e-2
+    }
+}]
 cameraTF = [2., 2.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 
 ddp = [None] * len(GAITPHASES)

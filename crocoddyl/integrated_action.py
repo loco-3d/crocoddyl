@@ -203,17 +203,15 @@ class IntegratedActionModelRK4:
 
             #---------Finding the derivative wrt u--------------
             data.dy_du[i] = c * np.dot(dyi_ddx, data.dki_du[i - 1])
-            data.dki_du[i] = np.vstack([c*data.dki_du[i-1][nv:,:],
-                                        data.differential[i].Fu+\
-                                        np.dot(data.differential[i].Fx, data.dy_du[i])])
+            data.dki_du[i] = np.vstack([
+                c * data.dki_du[i - 1][nv:, :],
+                data.differential[i].Fu + np.dot(data.differential[i].Fx, data.dy_du[i])
+            ])
 
-            data.dli_du[i] = data.differential[i].Lu +\
-                             np.dot(data.differential[i].Lx, data.dy_du[i])
+            data.dli_du[i] = data.differential[i].Lu + np.dot(data.differential[i].Lx, data.dy_du[i])
 
-            data.ddli_ddu[i] = data.differential[i].Luu +\
-                               np.dot(data.dy_du[i].T, data.differential[i].Lxu) +\
-                               np.dot(data.dy_du[i].T,
-                                      np.dot(data.differential[i].Lxx, data.dy_du[i]))
+            data.ddli_ddu[i] = data.differential[i].Luu + np.dot(data.dy_du[i].T, data.differential[i].Lxu) + np.dot(
+                data.dy_du[i].T, np.dot(data.differential[i].Lxx, data.dy_du[i]))
 
             #---------Finding the derivative wrt x--------------
             data.dy_dx[i] = dyi_dx + c * np.dot(dyi_ddx, data.dki_dx[i - 1])
@@ -221,26 +219,21 @@ class IntegratedActionModelRK4:
 
             data.dli_dx[i] = np.dot(data.differential[i].Lx, data.dy_dx[i])
             data.ddli_ddx[i] = np.dot(data.dy_dx[i].T, np.dot(data.differential[i].Lxx, data.dy_dx[i]))
-            data.ddli_dxdu[i] = np.dot(data.dy_dx[i].T, data.differential[i].Lxu )+\
-                                np.dot(data.dy_dx[i].T, np.dot(data.differential[i].Lxx,
-                                                               data.dy_du[i]))
+            data.ddli_dxdu[i] = np.dot(data.dy_dx[i].T, data.differential[i].Lxu) + np.dot(
+                data.dy_dx[i].T, np.dot(data.differential[i].Lxx, data.dy_du[i]))
 
         dxnext_dx, dxnext_ddx = model.State.Jintegrate(x, data.dx)
         ddx_dx = (data.dki_dx[0] + 2. * data.dki_dx[1] + 2. * data.dki_dx[2] + data.dki_dx[3]) * dt / 6
-        data.ddx_du =\
-                  (data.dki_du[0]+2.*data.dki_du[1]+2.*data.dki_du[2]+data.dki_du[3])*dt/6
+        data.ddx_du = (data.dki_du[0] + 2. * data.dki_du[1] + 2. * data.dki_du[2] + data.dki_du[3]) * dt / 6
         data.Fx[:] = dxnext_dx + np.dot(dxnext_ddx, ddx_dx)
         data.Fu[:] = np.dot(dxnext_ddx, data.ddx_du)
 
         data.Lx[:] = (data.dli_dx[0] + 2. * data.dli_dx[1] + 2. * data.dli_dx[2] + data.dli_dx[3]) / 6
         data.Lu[:] = (data.dli_du[0] + 2. * data.dli_du[1] + 2. * data.dli_du[2] + data.dli_du[3]) / 6
 
-        data.Lxx[:] = (data.ddli_ddx[0]+2.*data.ddli_ddx[1]+\
-                       2.*data.ddli_ddx[2]+data.ddli_ddx[3])/6
-        data.Luu[:] = (data.ddli_ddu[0]+2.*data.ddli_ddu[1]+\
-                       2.*data.ddli_ddu[2]+data.ddli_ddu[3])/6
-        data.Lxu[:] = (data.ddli_dxdu[0]+2.*data.ddli_dxdu[1]+\
-                       2.*data.ddli_dxdu[2]+data.ddli_dxdu[3])/6
+        data.Lxx[:] = (data.ddli_ddx[0] + 2. * data.ddli_ddx[1] + 2. * data.ddli_ddx[2] + data.ddli_ddx[3]) / 6
+        data.Luu[:] = (data.ddli_ddu[0] + 2. * data.ddli_ddu[1] + 2. * data.ddli_ddu[2] + data.ddli_ddu[3]) / 6
+        data.Lxu[:] = (data.ddli_dxdu[0] + 2. * data.ddli_dxdu[1] + 2. * data.ddli_dxdu[2] + data.ddli_dxdu[3]) / 6
         data.Lux = data.Lxu.T
 
 

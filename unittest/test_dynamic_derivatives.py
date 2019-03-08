@@ -54,9 +54,10 @@ assert (absmax(da + Mi * dtau) < 1e-9)
 pinocchio.forwardKinematics(model, data, q, v, a)
 pinocchio.updateFramePlacements(model, data)
 
-assert( absmax( pinocchio.getFrameJacobian(model,data,10,pinocchio.ReferenceFrame.LOCAL)*a \
-              + pinocchio.getFrameJacobianTimeVariation(model,data,10,pinocchio.ReferenceFrame.LOCAL)*v
-              - pinocchio.getFrameAcceleration(model,data,10).vector ) <1e-9 )
+assert (absmax(
+    pinocchio.getFrameJacobian(model, data, 10, pinocchio.ReferenceFrame.LOCAL) * a +
+    pinocchio.getFrameJacobianTimeVariation(model, data, 10, pinocchio.ReferenceFrame.LOCAL) * v -
+    pinocchio.getFrameAcceleration(model, data, 10).vector) < 1e-9)
 '''
 (a,f) = K^-1 (tau-b,-gamma)
 avec K = [ M J* ; J 0 ]
@@ -462,9 +463,7 @@ vxrdp = dR*data.v[-1].cross(Motion(data.v[-1].linear,O3)).linear
 rdddot = (rddotp-rddot)/dt
 vxrd_dot = (vxrdp-vxrd)/dt
 
-d = iv.cross(iv.cross(Motion(rdot,O3))).linear \
-    + ia.cross(Motion(rdot,O3)).linear \
-    + iv.cross(Motion(rddot,O3)).linear
+d = iv.cross(iv.cross(Motion(rdot,O3))).linear + ia.cross(Motion(rdot,O3)).linear + iv.cross(Motion(rddot,O3)).linear
 
 iv.cross
 

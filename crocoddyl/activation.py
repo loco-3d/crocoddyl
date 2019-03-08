@@ -60,8 +60,8 @@ class ActivationModelInequality:
         '''
         Return [ a'(r_1) ... a'(r_n) ], diag([ a''(r_1) ... a''(r_n) ])
         '''
-        return np.minimum(r-model.lower, 0.) + np.maximum(r-model.upper, 0),\
-          ((r-model.upper>=0.) + (r-model.lower<=0.)).astype(float)[:,None]
+        return np.minimum(r - model.lower, 0.) + np.maximum(r - model.upper, 0), (
+            (r - model.upper >= 0.) + (r - model.lower <= 0.)).astype(float)[:, None]
 
     def createData(self):
         return ActivationDataInequality(self)

@@ -1,12 +1,12 @@
 '''
-Example of Crocoddyl sequence for computing a whole-body (biped) salto. 
-The training is difficult and hand-tuned. We first work with only the jump phase (first 
+Example of Crocoddyl sequence for computing a whole-body (biped) salto.
+The training is difficult and hand-tuned. We first work with only the jump phase (first
 half of the sequence) and search for a simple jumps, then for a serie of jumps with
 increasing terminal angle, to discover the salto. When a 2PI rotation is discovered,
 we had the landing phase and converge.
 
 The initial jump is a litteral copy of jump.py
-Each increase of the angle takes ~50 iterations to converge. The landing phase takes about ~20 
+Each increase of the angle takes ~50 iterations to converge. The landing phase takes about ~20
 iterations to converge.
 '''
 
@@ -26,8 +26,7 @@ from crocoddyl.impact import CostModelImpactCoM, CostModelImpactWholeBody
 from pinocchio.utils import *
 
 # Number of iterations in each phase. If 0, try to load.
-PHASE_ITERATIONS = { \
-                     "initial": 200,
+PHASE_ITERATIONS = { "initial": 200,
                      "angle":   200,
                      "landing": 200
                      }
@@ -70,7 +69,7 @@ disp.__defaults__ = (.1, )
 
 def runningModel(contactIds, effectors, com=None, integrationStep=1e-2):
     '''
-    Creating the action model for floating-base systems. A walker system 
+    Creating the action model for floating-base systems. A walker system
     is by default a floating-base system.
     contactIds is a list of frame Ids of points that should be in contact.
     effectors is a dict of key frame ids and SE3 values of effector references.
@@ -100,7 +99,7 @@ def runningModel(contactIds, effectors, com=None, integrationStep=1e-2):
 
     # Creating the action model for the KKT dynamics with simpletic Euler
     # integration scheme
-    dmodel = \
+    dmodel =
              DifferentialActionModelFloatingInContact(rmodel,
                                                       actModel,
                                                       contactModel,
@@ -146,8 +145,7 @@ def impactModel(contactIds, effectors):
 
     # Creating the action model for the KKT dynamics with simpletic Euler
     # integration scheme
-    model = \
-             ActionModelImpact(rmodel,impulseModel,costModel)
+    model = ActionModelImpact(rmodel,impulseModel,costModel)
     return model
 
 
@@ -161,16 +159,9 @@ right0 = rdata.oMf[rightId].translation
 left0 = rdata.oMf[leftId].translation
 com0 = m2a(pinocchio.centerOfMass(rmodel, rdata, q0))
 
-models =\
-         [ runningModel([ rightId, leftId ],{}, integrationStep=4e-2) for i in range(10) ] \
-         +  [ runningModel([ ],{},integrationStep=5e-2) for i in range(6)] \
-         +  [ runningModel([ ],{}, com=com0+[0,0,0.9],integrationStep=5e-2) ] \
-         +  [ runningModel([ ],{},integrationStep=5e-2) for i in range(8) ] \
-         +  [ impactModel([ leftId,rightId ],
+models = [ runningModel([ rightId, leftId ],{}, integrationStep=4e-2) for i in range(10) ] +  [ runningModel([ ],{},integrationStep=5e-2) for i in range(6)] +  [ runningModel([ ],{}, com=com0+[0,0,0.9],integrationStep=5e-2) ] +  [ runningModel([ ],{},integrationStep=5e-2) for i in range(8) ] +  [ impactModel([ leftId,rightId ],
                           { rightId: SE3(eye(3), right0),
-                            leftId: SE3(eye(3), left0) }) ] \
-        +  [ runningModel([ rightId, leftId ],{},integrationStep=2e-2) for i in range(9)] \
-        +  [ runningModel([ rightId, leftId ],{}, integrationStep=0) ]
+                            leftId: SE3(eye(3), left0) }) ] +  [ runningModel([ rightId, leftId ],{},integrationStep=2e-2) for i in range(9)] +  [ runningModel([ rightId, leftId ],{}, integrationStep=0) ]
 
 high = [isinstance(m, IntegratedActionModelEuler) and 'com' in m.differential.costs.costs for m in models].index(True)
 models[high].differential.costs['com'].cost.activation = ActivationModelInequality(
@@ -206,10 +197,7 @@ problem = ShootingProblem(initialState=x0, runningModels=models[:imp], terminalM
 ddp = SolverDDP(problem)
 ddp.callback = [CallbackDDPVerbose()]
 ddp.th_stop = 1e-4
-us0 = [ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
-        for m,d in zip(ddp.models(),ddp.datas())[:imp] ] \
-            +[np.zeros(0)]+[ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
-                             for m,d in zip(ddp.models(),ddp.datas())[imp+1:-1] ]
+us0 = [ m.differential.quasiStatic(d.differential,rmodel.defaultState) for m,d in zip(ddp.models(),ddp.datas())[:imp] ] +[np.zeros(0)]+[ m.differential.quasiStatic(d.differential,rmodel.defaultState) for m,d in zip(ddp.models(),ddp.datas())[imp+1:-1] ]
 
 if PHASE_ITERATIONS[PHASE_NAME] > 0: print("*** SOLVE %s ***" % PHASE_NAME)
 ddp.solve(
@@ -260,9 +248,9 @@ ddp.callback = [CallbackDDPVerbose()]
 ddp.th_stop = 1e-4
 
 ddp.xs = xsddp + [rmodel.defaultState] * (len(models) - len(xsddp))
-ddp.us = usddp + [ np.zeros(0) if isinstance(m,ActionModelImpact) else \
-               m.differential.quasiStatic(d.differential,rmodel.defaultState) \
-                               for m,d in zip(ddp.models(),ddp.datas())[len(usddp):-1] ]
+ddp.us = usddp + [ np.zeros(0) if isinstance(m,ActionModelImpact) else
+        m.differential.quasiStatic(d.differential,rmodel.defaultState) for m,d in
+        zip(ddp.models(),ddp.datas())[len(usddp):-1] ]
 impact.costs['track30'].weight = 1e6
 impact.costs['track16'].weight = 1e6
 

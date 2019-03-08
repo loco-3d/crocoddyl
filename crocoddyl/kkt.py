@@ -150,8 +150,7 @@ class SolverKKT:
         and m_k is the quadratic model of f at x_k, and delta is the descent direction.
         Then: dv_exp = - grad*delta - .5*hess*delta**2
         '''
-        return -np.dot(self.grad,self.primal), \
-            -np.dot(np.dot(self.hess,self.primal),self.primal)
+        return -np.dot(self.grad, self.primal), -np.dot(np.dot(self.hess, self.primal), self.primal)
 
     def stoppingCriteria(self):
         '''
@@ -161,15 +160,10 @@ class SolverKKT:
         '''
         lambdas = self.lambdas
         dL = self.grad
-        dF = np.concatenate([ lk - np.dot(lkp1,dk.Fx)
-                              for lk,dk,lkp1 in zip( lambdas[:-1],
-                                                     self.problem.runningDatas,
-                                                     lambdas[1:]) ] \
-                            + [ lambdas[-1] ] \
-                            + [ -np.dot(lkp1,dk.Fu)
-                                for lk,dk,lkp1 in zip( lambdas[:-1],
-                                                       self.problem.runningDatas,
-                                                       lambdas[1:]) ])
+        dF = np.concatenate(
+            [lk - np.dot(lkp1, dk.Fx)
+             for lk, dk, lkp1 in zip(lambdas[:-1], self.problem.runningDatas, lambdas[1:])] + [lambdas[-1]] +
+            [-np.dot(lkp1, dk.Fu) for lk, dk, lkp1 in zip(lambdas[:-1], self.problem.runningDatas, lambdas[1:])])
         return sum((dL + dF)**2), sum(self.cval**2)
 
     def tryStep(self, stepLength):

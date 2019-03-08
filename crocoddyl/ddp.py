@@ -235,8 +235,8 @@ class SolverDDP:
             if self.u_reg == 0:
                 self.Vx[t][:] = self.Qx[t] - np.dot(self.Qu[t], self.K[t])
             else:
-                self.Vx[t][:] = self.Qx [t] - 2*np.dot(self.Qu [t],self.K[t]) \
-                                + np.dot(np.dot(self.k[t],self.Quu[t]),self.K[t])
+                self.Vx[t][:] = self.Qx[t] - 2 * np.dot(self.Qu[t], self.K[t]) + np.dot(
+                    np.dot(self.k[t], self.Quu[t]), self.K[t])
             self.Vxx[t][:, :] = self.Qxx[t] - np.dot(self.Qxu[t], self.K[t])
 
             if self.x_reg != 0: self.Vxx[t][range(model.ndx), range(model.ndx)] += self.x_reg
@@ -261,8 +261,7 @@ class SolverDDP:
         utry = [np.nan] * self.problem.T
         ctry = 0
         for t, (m, d) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas)):
-            utry[t] = us[t] - self.k[t]*stepLength  \
-                      - np.dot(self.K[t],m.State.diff(xs[t],xtry[t]))*b
+            utry[t] = us[t] - self.k[t] * stepLength - np.dot(self.K[t], m.State.diff(xs[t], xtry[t])) * b
             with np.warnings.catch_warnings():
                 np.warnings.simplefilter(warning)
                 xnext, cost = m.calc(d, xtry[t], utry[t])

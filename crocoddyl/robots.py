@@ -84,10 +84,8 @@ def loadTalosLegs(modelPath='/opt/openrobots/share/example-robot-data'):
             jid = m2.addJoint(parent, locals()[j.shortname()](), M, name)
             up = m2.upperPositionLimit
             down = m2.lowerPositionLimit
-            up[m2.joints[jid].idx_q:m2.joints[jid].idx_q+j.nq] = \
-                              m1.upperPositionLimit[j.idx_q:j.idx_q+j.nq]
-            down[m2.joints[jid].idx_q:m2.joints[jid].idx_q+j.nq] = \
-                              m1.lowerPositionLimit[j.idx_q:j.idx_q+j.nq]
+            up[m2.joints[jid].idx_q:m2.joints[jid].idx_q + j.nq] = m1.upperPositionLimit[j.idx_q:j.idx_q + j.nq]
+            down[m2.joints[jid].idx_q:m2.joints[jid].idx_q + j.nq] = m1.lowerPositionLimit[j.idx_q:j.idx_q + j.nq]
             m2.upperPositionLimit = up
             m2.lowerPositionLimit = down
             assert (jid == j.id)

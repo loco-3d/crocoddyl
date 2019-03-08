@@ -18,12 +18,11 @@ absmin = lambda A: np.min(abs(A))
 path = '/home/nmansard/src/cddp/examples/'
 
 urdf = path + 'talos_data/robots/talos_left_arm.urdf'
-robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(urdf, [path] \
-#                                                           ,pinocchio.JointModelFreeFlyer() \
-)
+robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(urdf, [path])
+# ,pinocchio.JointModelFreeFlyer()
 
-#urdf = path + 'hyq_description/robots/hyq_no_sensors.urdf'
-#robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(urdf, [path], pinocchio.JointModelFreeFlyer())
+# urdf = path + 'hyq_description/robots/hyq_no_sensors.urdf'
+# robot = pinocchio.robot_wrapper.RobotWrapper.BuildFromURDF(urdf, [path], pinocchio.JointModelFreeFlyer())
 qmin = robot.model.lowerPositionLimit
 qmin[:7] = -1
 robot.model.lowerPositionLimit = qmin
@@ -52,11 +51,11 @@ ugrav = m2a(
     pinocchio.rnea(rmodel, rdata, a2m(problem.initialState[:rmodel.nq]), a2m(np.zeros(rmodel.nv)),
                    a2m(np.zeros(rmodel.nv))))
 
-#xddp,uddp,dddp = ddp.solve(verbose=True)
+# xddp,uddp,dddp = ddp.solve(verbose=True)
 
 termmodel.differential.costs['pos'].weight = 10
 ddp.setCandidate()
-#xddp,uddp,dddp = ddp.solve(verbose=True)
+# xddp,uddp,dddp = ddp.solve(verbose=True)
 ddp.computeDirection()
 try:
     ddp.tryStep(1)
@@ -76,7 +75,7 @@ def disp(xs, dt=0.1):
         time.sleep(dt)
 
 
-#robot.initDisplay()
+# robot.initDisplay()
 
 ddp.callback = [CallbackDDPLogger()]
 

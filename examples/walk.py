@@ -41,9 +41,9 @@ disp.__defaults__ = (.1, )
 
 def runningModel(contactIds, effectors, com=None, integrationStep=1e-2):
     '''
-    Creating the action model for floating-base systems. A walker system 
+    Creating the action model for floating-base systems. A walker system
     is by default a floating-base system.
-    
+
     :params contactIds: list of frame Ids of points that should be in contact.
     :params effectors:  dict of key frame ids and SE3 values of effector references.
     :params com: if not None, com should be a array of size 3 used as a target com value.
@@ -73,11 +73,7 @@ def runningModel(contactIds, effectors, com=None, integrationStep=1e-2):
 
     # Creating the action model for the KKT dynamics with simpletic Euler
     # integration scheme
-    dmodel = \
-             DifferentialActionModelFloatingInContact(rmodel,
-                                                      actModel,
-                                                      contactModel,
-                                                      costModel)
+    dmodel = DifferentialActionModelFloatingInContact(rmodel, actModel, contactModel, costModel)
     model = IntegratedActionModelEuler(dmodel)
     model.timeStep = integrationStep
     return model
@@ -86,7 +82,7 @@ def runningModel(contactIds, effectors, com=None, integrationStep=1e-2):
 def impactModel(contactIds, effectors):
     '''
     Creating the action model for floating-base systems during the impact phase.
-    
+
     :params contactIds: list of frame Ids of points that should be in contact.
     :params effectors:  dict of key frame ids and SE3 values of effector references. This
     value should typically be provided for effector landing.
@@ -117,8 +113,7 @@ def impactModel(contactIds, effectors):
 
     # Creating the action model for the KKT dynamics with simpletic Euler
     # integration scheme
-    model = \
-             ActionModelImpact(rmodel,impulseModel,costModel)
+    model = ActionModelImpact(rmodel, impulseModel, costModel)
     return model
 
 
@@ -134,16 +129,13 @@ com0 = m2a(pinocchio.centerOfMass(rmodel, rdata, q0))
 
 KT = 3
 KS = 8
-models =\
-         [ runningModel([ rightId, leftId ],{}, integrationStep=stanceDurantion/KT) for i in range(KT) ] \
-        + [ runningModel([ rightId ],{},integrationStep=swingDuration/KS) for i in range(KS)] \
-        + [ impactModel([ leftId,rightId ],
-                        { leftId: SE3(eye(3), a2m(left0+[stepLength,0,0])) }) ] \
-        + [ runningModel([ rightId, leftId ],{}, integrationStep=stanceDurantion/KT) for i in range(KT) ] \
-        + [ runningModel([ leftId ],{},integrationStep=swingDuration/KS) for i in range(KS) ] \
-        + [ impactModel([ leftId,rightId ],
-                        { rightId: SE3(eye(3), a2m(right0+[stepLength,0,0])) }) ] \
-        + [ runningModel([ rightId, leftId ],{}, integrationStep=stanceDurantion/KT) for i in range(KT) ]
+models = [runningModel([rightId, leftId], {}, integrationStep=stanceDurantion / KT) for i in range(KT)] + [
+    runningModel([rightId], {}, integrationStep=swingDuration / KS) for i in range(KS)
+] + [impactModel([leftId, rightId], {leftId: SE3(eye(3), a2m(left0 + [stepLength, 0, 0]))})
+     ] + [runningModel([rightId, leftId], {}, integrationStep=stanceDurantion / KT)
+          for i in range(KT)] + [runningModel([leftId], {}, integrationStep=swingDuration / KS) for i in range(KS)] + [
+              impactModel([leftId, rightId], {rightId: SE3(eye(3), a2m(right0 + [stepLength, 0, 0]))})
+          ] + [runningModel([rightId, leftId], {}, integrationStep=stanceDurantion / KT) for i in range(KT)]
 
 imp1 = KT + KS
 imp2 = 2 * (KT + KS) + 1
@@ -187,9 +179,11 @@ fddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]
 if 'cb' in sys.argv and WITHDISPLAY: fddp.callback.append(CallbackSolverDisplay(robot, rate=-1))
 fddp.th_stop = 1e-6
 
-us0 = [ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
-        if isinstance(m,IntegratedActionModelEuler) else np.zeros(0) \
-        for m,d in zip(ddp.problem.runningModels,ddp.problem.runningDatas) ]
+us0 = [
+    m.differential.quasiStatic(d.differential, rmodel.defaultState)
+    if isinstance(m, IntegratedActionModelEuler) else np.zeros(0)
+    for m, d in zip(ddp.problem.runningModels, ddp.problem.runningDatas)
+]
 xs0 = [rmodel.defaultState] * len(ddp.models())
 xs1 = [problem.initialState] * len(ddp.models())
 dimp1 = ddp.datas()[imp1]
