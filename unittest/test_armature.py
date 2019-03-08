@@ -11,14 +11,12 @@ The only "new" functionality to be tested here is the use of low-armature in the
 Any stronger test here is welcome.
 '''
 import numpy as np
-from numpy.linalg import eig
 
 import pinocchio
-from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, CallbackDDPLogger, CallbackDDPVerbose,
-                       ContactModel6D, ContactModelMultiple, CostModelCoM, CostModelControl, CostModelFramePlacement,
-                       CostModelState, CostModelSum, DifferentialActionModelFloatingInContact,
-                       IntegratedActionModelEuler, ShootingProblem, SolverDDP, StatePinocchio, a2m, displayTrajectory,
-                       loadTalosLegs, m2a)
+from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, ContactModel6D, ContactModelMultiple,
+                       CostModelCoM, CostModelControl, CostModelFramePlacement, CostModelState, CostModelSum,
+                       DifferentialActionModelFloatingInContact, IntegratedActionModelEuler, ShootingProblem,
+                       SolverDDP, StatePinocchio, a2m, displayTrajectory, loadTalosLegs, m2a)
 from pinocchio.utils import eye, zero
 
 disp = lambda xs, dt: displayTrajectory(robot, xs, dt)
@@ -136,7 +134,8 @@ ddp.solve(
     regInit=.1,
     init_xs=[rmodel.defaultState] * len(ddp.models()),
     init_us=[
-        m.differential.quasiStatic(d.differential, rmodel.defaultState) for m, d in zip(ddp.models(), ddp.datas())[:-1]
+        _m.differential.quasiStatic(d.differential, rmodel.defaultState)
+        for _m, _d in zip(ddp.models(), ddp.datas())[:-1]
     ])
 
 assert (ddp.cost < 1e5)

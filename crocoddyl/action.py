@@ -44,7 +44,7 @@ class ActionModelLQR:
         """
         return ActionDataLQR(self)
 
-    def calc(model, data, x, u=None):
+    def calc(self, data, x, u=None):
         """ Update the next state and the cost function.
 
         :params data: action data
@@ -52,14 +52,18 @@ class ActionModelLQR:
         :params u: control
         :returns xnext,cost for current state,control pair data.x,data.u.
         """
-        if u is None: u = model.unone
-        quad = lambda a, Q, b: .5 * np.dot(np.dot(Q, b).T, a)
-        data.xnext = np.dot(model.Fx, x) + np.dot(model.Fu, u) + model.F
-        data.cost = quad(x, model.Lxx, x) + 2 * quad(x, model.Lxu, u) + quad(u, model.Luu, u) + np.dot(
-            model.Lx, x) + np.dot(model.Lu, u)
+        if u is None:
+            u = self.unone
+
+        def quad(a, Q, b):
+            return .5 * np.dot(np.dot(Q, b).T, a)
+
+        data.xnext = np.dot(self.Fx, x) + np.dot(self.Fu, u) + self.F
+        data.cost = quad(x, self.Lxx, x) + 2 * quad(x, self.Lxu, u) + quad(u, self.Luu, u) + np.dot(
+            self.Lx, x) + np.dot(self.Lu, u)
         return data.xnext, data.cost
 
-    def calcDiff(model, data, x, u=None):
+    def calcDiff(self, data, x, u=None):
         """ Update the derivatives of the dynamics and cost.
 
         :params data: action data
@@ -67,15 +71,16 @@ class ActionModelLQR:
         :params u: control
         :returns xnext,cost for current state,control pair data.x,data.u.
         """
-        if u is None: u = model.unone
-        xnext, cost = model.calc(data, x, u)
-        data.Lx = model.Lx + np.dot(model.Lxx, x) + np.dot(model.Lxu, u)
-        data.Lu = model.Lu + np.dot(model.Lxu.T, x) + np.dot(model.Luu, u)
-        data.Lxx = model.Lxx
-        data.Lxu = model.Lxu
-        data.Luu = model.Luu
-        data.Fx = model.Fx
-        data.Fu = model.Fu
+        if u is None:
+            u = self.unone
+        xnext, cost = self.calc(data, x, u)
+        data.Lx = self.Lx + np.dot(self.Lxx, x) + np.dot(self.Lxu, u)
+        data.Lu = self.Lu + np.dot(self.Lxu.T, x) + np.dot(self.Luu, u)
+        data.Lxx = self.Lxx
+        data.Lxu = self.Lxu
+        data.Luu = self.Luu
+        data.Fx = self.Fx
+        data.Fu = self.Fu
         return xnext, cost
 
 
@@ -116,26 +121,28 @@ class ActionModelNumDiff:
     def createData(self):
         return ActionDataNumDiff(self)
 
-    def calc(model, data, x, u):
-        return model.model0.calc(data.data0, x, u)
+    def calc(self, data, x, u):
+        return self.model0.calc(data.data0, x, u)
 
-    def calcDiff(model, data, x, u):
-        xn0, c0 = model.calc(data, x, u)
-        h = model.disturbance
+    def calcDiff(self, data, x, u):
+        xn0, c0 = self.calc(data, x, u)
+        h = self.disturbance
         dist = lambda i, n, h: np.array([h if ii == i else 0 for ii in range(n)])
-        Xint = lambda x, dx: model.State.integrate(x, dx)
-        Xdiff = lambda x1, x2: model.State.diff(x1, x2)
-        for ix in range(model.ndx):
-            xn, c = model.model0.calc(data.datax[ix], Xint(x, dist(ix, model.ndx, h)), u)
+        Xint = lambda x, dx: self.State.integrate(x, dx)
+        Xdiff = lambda x1, x2: self.State.diff(x1, x2)
+        for ix in range(self.ndx):
+            xn, c = self.model0.calc(data.datax[ix], Xint(x, dist(ix, self.ndx, h)), u)
             data.Fx[:, ix] = Xdiff(xn0, xn) / h
             data.Lx[ix] = (c - c0) / h
-            if model.ncost > 1: data.Rx[:, ix] = (data.datax[ix].costResiduals - data.data0.costResiduals) / h
-        for iu in range(model.nu):
-            xn, c = model.model0.calc(data.datau[iu], x, u + dist(iu, model.nu, h))
+            if self.ncost > 1:
+                data.Rx[:, ix] = (data.datax[ix].costResiduals - data.data0.costResiduals) / h
+        for iu in range(self.nu):
+            xn, c = self.model0.calc(data.datau[iu], x, u + dist(iu, self.nu, h))
             data.Fu[:, iu] = Xdiff(xn0, xn) / h
             data.Lu[iu] = (c - c0) / h
-            if model.ncost > 1: data.Ru[:, iu] = (data.datau[iu].costResiduals - data.data0.costResiduals) / h
-        if model.withGaussApprox:
+            if self.ncost > 1:
+                data.Ru[:, iu] = (data.datau[iu].costResiduals - data.data0.costResiduals) / h
+        if self.withGaussApprox:
             data.Lxx[:, :] = np.dot(data.Rx.T, data.Rx)
             data.Lxu[:, :] = np.dot(data.Rx.T, data.Ru)
             data.Lux[:, :] = data.Lxu.T
@@ -144,7 +151,7 @@ class ActionModelNumDiff:
 
 class ActionDataNumDiff:
     def __init__(self, model):
-        nx, ndx, nu, ncost = model.nx, model.ndx, model.nu, model.ncost
+        ndx, nu = model.ndx, model.nu
         self.data0 = model.model0.createData()
         self.datax = [model.model0.createData() for i in range(model.ndx)]
         self.datau = [model.model0.createData() for i in range(model.nu)]

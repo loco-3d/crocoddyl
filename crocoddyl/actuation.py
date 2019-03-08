@@ -2,11 +2,6 @@ import warnings
 
 import numpy as np
 
-import pinocchio
-from cost import CostModelSum
-from state import StatePinocchio
-from utils import a2m
-
 
 class ActuationModelFreeFloating:
     '''
@@ -24,12 +19,13 @@ class ActuationModelFreeFloating:
         self.ndx = self.nv * 2
         self.nu = self.nv - 6
 
-    def calc(model, data, x, u):
+    def calc(self, data, x, u):
         data.a[6:] = u
         return data.a
 
-    def calcDiff(model, data, x, u, recalc=True):
-        if recalc: model.calc(data, x, u)
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
         return data.a
 
     def createData(self, pinocchioData):
@@ -39,7 +35,7 @@ class ActuationModelFreeFloating:
 class ActuationDataFreeFloating:
     def __init__(self, model, pinocchioData):
         self.pinocchio = pinocchioData
-        nx, ndx, nq, nv, nu = model.nx, model.ndx, model.nq, model.nv, model.nu
+        ndx, nv, nu = model.ndx, model.nv, model.nu
         self.a = np.zeros(nv)  # result of calc
         self.A = np.zeros([nv, ndx + nu])  # result of calcDiff
         self.Ax = self.A[:, :ndx]
@@ -61,12 +57,13 @@ class ActuationModelFull:
         self.ndx = self.nv * 2
         self.nu = self.nv
 
-    def calc(model, data, x, u):
+    def calc(self, data, x, u):
         data.a[:] = u
         return data.a
 
-    def calcDiff(model, data, x, u, recalc=True):
-        if recalc: model.calc(data, x, u)
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
         return data.a
 
     def createData(self, pinocchioData):
@@ -76,7 +73,7 @@ class ActuationModelFull:
 class ActuationDataFull:
     def __init__(self, model, pinocchioData):
         self.pinocchio = pinocchioData
-        nx, ndx, nq, nv, nu = model.nx, model.ndx, model.nq, model.nv, model.nu
+        ndx, nv, nu = model.ndx, model.nv, model.nu
         self.a = np.zeros(nv)  # result of calc
         self.A = np.zeros([nv, ndx + nu])  # result of calcDiff
         self.Ax = self.A[:, :ndx]

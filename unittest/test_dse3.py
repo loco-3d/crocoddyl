@@ -42,4 +42,4 @@ pinocchio.forwardKinematics(rmodel, rdata, q0)
 oMi = rdata.oMi[jid]
 
 assert (np.isclose(d1, d3, atol=np.sqrt(eps)).all())
-#assert(np.isclose(d2, oMi.action.dot(d3), atol=1e-8).all())
+# assert(np.isclose(d2, oMi.action.dot(d3), atol=1e-8).all())

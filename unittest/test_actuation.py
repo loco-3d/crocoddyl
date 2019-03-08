@@ -1,10 +1,10 @@
 import numpy as np
 
 import pinocchio
-## Free floating actuation model
+# Free floating actuation model
 # -----------------------------------------------------------------------------
 from crocoddyl import (ActuationModelFreeFloating, CostModelSum, DifferentialActionModelNumDiff, StatePinocchio, a2m,
-                       absmax, absmin, loadTalosArm, m2a)
+                       absmax, loadTalosArm, m2a)
 from pinocchio.utils import rand
 
 
@@ -30,26 +30,29 @@ class DifferentialActionModelActuated:
     def createData(self):
         return DifferentialActionDataActuated(self)
 
-    def calc(model, data, x, u=None):
-        if u is None: u = model.unone
-        nx, nu, nq, nv, nout = model.nx, model.nu, model.nq, model.nv, model.nout
+    def calc(self, data, x, u=None):
+        if u is None:
+            u = self.unone
+        nq, nv = self.nq, self.nv
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
-        tauq = a2m(model.actuation.calc(data.actuation, x, u))
-        data.xout[:] = pinocchio.aba(model.pinocchio, data.pinocchio, q, v, tauq).flat
-        pinocchio.forwardKinematics(model.pinocchio, data.pinocchio, q, v)
-        pinocchio.updateFramePlacements(model.pinocchio, data.pinocchio)
-        data.cost = model.costs.calc(data.costs, x, u)
+        tauq = a2m(self.actuation.calc(data.actuation, x, u))
+        data.xout[:] = pinocchio.aba(self.pinocchio, data.pinocchio, q, v, tauq).flat
+        pinocchio.forwardKinematics(self.pinocchio, data.pinocchio, q, v)
+        pinocchio.updateFramePlacements(self.pinocchio, data.pinocchio)
+        data.cost = self.costs.calc(data.costs, x, u)
         return data.xout, data.cost
 
-    def calcDiff(model, data, x, u=None, recalc=True):
-        if u is None: u = model.unone
-        if recalc: xout, cost = model.calc(data, x, u)
-        nx, ndx, nu, nq, nv, nout = model.nx, model.State.ndx, model.nu, model.nq, model.nv, model.nout
+    def calcDiff(self, data, x, u=None, recalc=True):
+        if u is None:
+            u = self.unone
+        if recalc:
+            xout, cost = self.calc(data, x, u)
+        nq, nv = self.nq, self.nv
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
         tauq = a2m(data.actuation.a)
-        pinocchio.computeABADerivatives(model.pinocchio, data.pinocchio, q, v, tauq)
+        pinocchio.computeABADerivatives(self.pinocchio, data.pinocchio, q, v, tauq)
         da_dq = data.pinocchio.ddq_dq
         da_dv = data.pinocchio.ddq_dv
         da_dact = data.pinocchio.Minv
@@ -62,9 +65,9 @@ class DifferentialActionModelActuated:
         data.Fx += np.dot(da_dact, dact_dx)
         data.Fu[:, :] = np.dot(da_dact, dact_du)
 
-        pinocchio.computeJointJacobians(model.pinocchio, data.pinocchio, q)
-        pinocchio.updateFramePlacements(model.pinocchio, data.pinocchio)
-        model.costs.calcDiff(data.costs, x, u, recalc=False)
+        pinocchio.computeJointJacobians(self.pinocchio, data.pinocchio, q)
+        pinocchio.updateFramePlacements(self.pinocchio, data.pinocchio)
+        self.costs.calcDiff(data.costs, x, u, recalc=False)
 
         return data.xout, data.cost
 
@@ -76,7 +79,7 @@ class DifferentialActionDataActuated:
         self.costs = model.costs.createData(self.pinocchio)
         self.cost = np.nan
         self.xout = np.zeros(model.nout)
-        nx, nu, ndx, nq, nv, nout = model.nx, model.nu, model.State.ndx, model.nq, model.nv, model.nout
+        nu, ndx, nout = model.nu, model.State.ndx, model.nout
         self.F = np.zeros([nout, ndx + nu])
         self.costResiduals = self.costs.residuals
         self.Fx = self.F[:, :ndx]
@@ -90,7 +93,7 @@ class DifferentialActionDataActuated:
         self.Ru = self.costs.Ru
 
 
-## Loading Talos arm with FF TODO use a bided or quadruped
+# Loading Talos arm with FF TODO use a bided or quadruped
 # -----------------------------------------------------------------------------
 robot = loadTalosArm(freeFloating=True)
 

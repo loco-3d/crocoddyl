@@ -1,4 +1,4 @@
-from sympy import Matrix, Symbol, nan, zeros
+from sympy import Symbol, nan, zeros
 
 T = 2
 x0ref = Symbol('x0ref')
@@ -143,8 +143,8 @@ simple = {
     lux[1]: 0,
     fx[0]: 1,
     fx[1]: 1,
-    #f[0]: 1,
-    #f[1]: 1
+    # f[0]: 1,
+    # f[1]: 1
 }
 print ukkt[0].subs(simple).simplify().factor() - uddp[0].subs(simple).simplify().factor()
 

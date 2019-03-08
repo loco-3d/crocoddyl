@@ -69,7 +69,8 @@ def displayTrajectory(robot, xs, dt=0.1, rate=-1, cameraTF=None):
     :param rate: visualization rate
     :param cameraTF: camera transform
     """
-    if not hasattr(robot, 'viewer'): robot.initDisplay(loadModel=True)
+    if not hasattr(robot, 'viewer'):
+        robot.initDisplay(loadModel=True)
     if cameraTF is not None:
         robot.viewer.gui.setCameraTransform(0, cameraTF)
     import numpy as np

@@ -2,13 +2,13 @@ import numpy as np
 from numpy.linalg import norm
 from numpy.random import rand
 
-from crocoddyl import ActionModelNumDiff, DifferentialActionModelLQR, IntegratedActionModelRK4, StateVector, a2m, m2a
+from crocoddyl import ActionModelNumDiff, DifferentialActionModelLQR, IntegratedActionModelRK4, a2m, m2a
 from testutils import df_dx
 
 np.set_printoptions(linewidth=np.nan, suppress=True)
-#--------------frcom scipy.stats.ortho_group----------
+# --------------frcom scipy.stats.ortho_group----------
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 nq = 10
 nu = 10
@@ -21,7 +21,7 @@ data = model.createData()
 
 x = model.State.rand()
 
-#u = np.random.rand( model.nu )
+# u = np.random.rand( model.nu )
 u = rand(model.nu)
 xn, c = model.calc(data, x, u)
 
@@ -46,7 +46,7 @@ def get_ku(u):
 
 def get_xn(u):
     model.calc(data, x, m2a(u))
-    return a2m(data.xnext)  #.copy()
+    return a2m(data.xnext)  # .copy()
 
 
 def get_au(u):
@@ -99,7 +99,7 @@ def get_attr_analytical(x, u, attr):
     _u = m2a(u)
     _x = m2a(x)
     model.calcDiff(data, _x, _u)
-    return a2m(getattr(data, attr))  #.copy()
+    return a2m(getattr(data, attr))  # .copy()
 
 
 eps = mnum.disturbance

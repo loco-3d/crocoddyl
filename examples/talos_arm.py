@@ -3,7 +3,10 @@ import sys
 import numpy as np
 
 import pinocchio
-from crocoddyl import *
+from crocoddyl import (CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay, CostModelControl,
+                       CostModelFramePlacement, CostModelState, CostModelSum, DifferentialActionModelFullyActuated,
+                       IntegratedActionModelEuler, ShootingProblem, SolverDDP, StatePinocchio, loadTalosArm,
+                       plotDDPConvergence, plotOCSolution)
 
 WITHDISPLAY = 'disp' in sys.argv
 WITHPLOT = 'plot' in sys.argv
@@ -61,8 +64,10 @@ problem = ShootingProblem(x0, [runningModel] * T, terminalModel)
 ddp = SolverDDP(problem)
 cameraTF = [2., 2.68, 0.54, 0.2, 0.62, 0.72, 0.22]
 ddp.callback = [CallbackDDPVerbose()]
-if WITHPLOT: ddp.callback.append(CallbackDDPLogger())
-if WITHDISPLAY: ddp.callback.append(CallbackSolverDisplay(robot, 4, 1, cameraTF))
+if WITHPLOT:
+    ddp.callback.append(CallbackDDPLogger())
+if WITHDISPLAY:
+    ddp.callback.append(CallbackSolverDisplay(robot, 4, 1, cameraTF))
 
 # Solving it with the DDP algorithm
 ddp.solve()

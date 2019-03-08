@@ -1,17 +1,17 @@
 import numpy as np
-from numpy.linalg import inv, norm
 
 
 class ActivationModelQuad:
     def __init__(self):
         pass
 
-    def calc(model, data, r):
+    def calc(self, data, r):
         '''Return [ a(r_1) ... a(r_n) ] '''
         return r**2 / 2
 
-    def calcDiff(model, data, r, recalc=True):
-        if recalc: model.calc(data, r)
+    def calcDiff(self, data, r, recalc=True):
+        if recalc:
+            self.calc(data, r)
         '''
         Return [ a'(r_1) ... a'(r_n) ], diag([ a''(r_1) ... a''(r_n) ])
         '''
@@ -39,7 +39,7 @@ class ActivationModelInequality:
 
     def __init__(self, lowerLimit, upperLimit, beta=None):
         assert ((lowerLimit <= upperLimit).all())
-        assert (not np.any(np.isinf(lowerLimit)) and not np.any(np.isinf(upperLimit)) or beta == None)
+        assert (not np.any(np.isinf(lowerLimit)) and not np.any(np.isinf(upperLimit)) or beta is None)
         if beta is None:
             self.lower = lowerLimit
             self.upper = upperLimit
@@ -51,17 +51,18 @@ class ActivationModelInequality:
             self.lower = m - beta * d
             self.upper = m + beta * d
 
-    def calc(model, data, r):
+    def calc(self, data, r):
         '''Return [ a(r_1) ... a(r_n) ] '''
-        return np.minimum(r - model.lower, 0)**2 / 2 + np.maximum(r - model.upper, 0)**2 / 2
+        return np.minimum(r - self.lower, 0)**2 / 2 + np.maximum(r - self.upper, 0)**2 / 2
 
-    def calcDiff(model, data, r, recalc=True):
-        if recalc: model.calc(data, r)
+    def calcDiff(self, data, r, recalc=True):
+        if recalc:
+            self.calc(data, r)
         '''
         Return [ a'(r_1) ... a'(r_n) ], diag([ a''(r_1) ... a''(r_n) ])
         '''
-        return np.minimum(r - model.lower, 0.) + np.maximum(r - model.upper, 0), (
-            (r - model.upper >= 0.) + (r - model.lower <= 0.)).astype(float)[:, None]
+        return np.minimum(r - self.lower, 0.) + np.maximum(r - self.upper, 0), (
+            (r - self.upper >= 0.) + (r - self.lower <= 0.)).astype(float)[:, None]
 
     def createData(self):
         return ActivationDataInequality(self)
@@ -76,13 +77,14 @@ class ActivationModelWeightedQuad:
     def __init__(self, weights):
         self.weights = weights
 
-    def calc(model, data, r):
-        return model.weights * r**2 / 2
+    def calc(self, data, r):
+        return self.weights * r**2 / 2
 
-    def calcDiff(model, data, r, recalc=True):
-        if recalc: model.calc(data, r)
-        assert (len(model.weights) == len(r))
-        return model.weights * r, model.weights[:, None]
+    def calcDiff(self, data, r, recalc=True):
+        if recalc:
+            self.calc(data, r)
+        assert (len(self.weights) == len(r))
+        return self.weights * r, self.weights[:, None]
 
     def createData(self):
         return ActivationDataWeightedQuad(self)
@@ -115,12 +117,13 @@ class ActivationModelSmoothAbs:
     def __init__(self):
         pass
 
-    def calc(model, data, r):
+    def calc(self, data, r):
         data.a = np.sqrt(1 + r**2)
         return data.a
 
-    def calcDiff(model, data, r, recalc=True):
-        if recalc: model.calc(data, r)
+    def calcDiff(self, data, r, recalc=True):
+        if recalc:
+            self.calc(data, r)
         return r / data.a, (1 / data.a**3)[:, None]
 
     def createData(self):

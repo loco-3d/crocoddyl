@@ -5,8 +5,8 @@ import numpy as np
 import pinocchio
 from crocoddyl import (ActionModelImpact, ActivationModelWeightedQuad, ActuationModelFreeFloating, ContactModel6D,
                        ContactModelMultiple, CostModelCoM, CostModelControl, CostModelForce, CostModelFramePlacement,
-                       CostModelFrameVelocity, CostModelImpactCoM, CostModelImpactWholeBody, CostModelState,
-                       CostModelSum, DifferentialActionModelFloatingInContact, ImpulseModel6D, ImpulseModelMultiple,
+                       CostModelFrameVelocity, CostModelImpactCoM, CostModelState, CostModelSum,
+                       DifferentialActionModelFloatingInContact, ImpulseModel6D, ImpulseModelMultiple,
                        IntegratedActionModelEuler, StatePinocchio, a2m, m2a)
 from locomote import CubicHermiteSpline
 
@@ -20,7 +20,7 @@ class EESplines(OrderedDict):
 
 
 class CentroidalPhi:
-    class zero():
+    class Zero():
         def __init__(self, dim):
             self.dim = dim
 
@@ -28,24 +28,30 @@ class CentroidalPhi:
             return (np.matrix(np.zeros((self.dim, 1))), np.matrix(np.zeros((self.dim, 1))))
 
     def __init__(self, patch_names, com_vcom=None, hg=None, forces=None):
-        if com_vcom is None: self.com_vcom = self.zero(6)
-        else: self.com_vcom = com_vcom
-        if hg is None: self.hg = self.zero(6)
-        else: self.hg = hg
-        if forces is None: self.forces = EESplines()
-        else: self.forces = forces
+        if com_vcom is None:
+            self.com_vcom = self.Zero(6)
+        else:
+            self.com_vcom = com_vcom
+        if hg is None:
+            self.hg = self.Zero(6)
+        else:
+            self.hg = hg
+        if forces is None:
+            self.forces = EESplines()
+        else:
+            self.forces = forces
 
     def __add__(self, other):
-        if isinstance(self.com_vcom, self.zero):
+        if isinstance(self.com_vcom, self.Zero):
             return CentroidalPhi(other.com_vcom, other.hg, other.forces)
-        if isinstance(other.com_vcom, other.zero):
+        if isinstance(other.com_vcom, other.Zero):
             return CentroidalPhi(self.com_vcom, self.hg, self.forces)
         return CentroidalPhi(self.com_vcom + other.com_vcom, self.hg + other.hg, self.forces + other.forces)
 
     def __sub__(self, other):
-        if isinstance(self.com_vcom, self.zero):
+        if isinstance(self.com_vcom, self.Zero):
             return NotImplementedError
-        if isinstance(other.com_vcom, other.zero):
+        if isinstance(other.com_vcom, other.Zero):
             return NotImplementedError
         return CentroidalPhi(self.com_vcom - other.com_vcom, self.hg - other.hg, self.forces - other.forces)
 
@@ -71,7 +77,7 @@ def createSwingTrajectories(rmodel, rdata, x, contact_patches, dt):
 def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee_ref, dt):
     """
   Create a Multiphase Shooting problem from the output of the centroidal solver.
-  
+
   :params rmodel: robot model of type pinocchio::model
   :params rdata: robot data of type pinocchio::data
   :params patch_name_map: dictionary mapping of contact_patch->robot_framename. e.g. "LF_Patch":leg_6_joint
@@ -82,8 +88,8 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee
 
   :returns list of IntegratedActionModels
   """
-    #-----------------------
-    #Define Cost weights
+    # -----------------------
+    # Define Cost weights
     w = lambda t: 0
     w.com = 1e1
     w.regx = 1e-3
@@ -91,21 +97,21 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee
     w.swing_patch = 1e6
     w.forces = 0.
     w.contactv = 1e3
-    #Define state cost vector for WeightedActivation
+    # Define state cost vector for WeightedActivation
     w.ff_orientation = 1e1
     w.xweight = np.array([0] * 3 + [w.ff_orientation] * 3 + [1.] * (rmodel.nv - 6) + [1.] * rmodel.nv)
     w.xweight[range(18, 20)] = w.ff_orientation
-    #for patch in swing_patch:  w.swing_patch.append(100.);
-    #Define weights for the impact costs.
+    # for patch in swing_patch:  w.swing_patch.append(100.);
+    # Define weights for the impact costs.
     w.imp_state = 1e2
     w.imp_com = 1e2
     w.imp_contact_patch = 1e6
     w.imp_act_com = m2a([0.1, 0.1, 3.0])
 
-    #Define weights for the terminal costs
+    # Define weights for the terminal costs
     w.term_com = 1e8
     w.term_regx = 1e4
-    #------------------------
+    # ------------------------
 
     problem_models = []
     actuationff = ActuationModelFreeFloating(rmodel)
@@ -130,7 +136,7 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee
                 active_contact = ContactModel6D(
                     rmodel, frame=rmodel.getFrameId(patch_name_map[patch]), ref=getattr(phase, patch).placement)
                 contact_model.addContact(patch, active_contact)
-                #print nphase, "Contact ",patch," added at ", getattr(phase,patch).placement.translation.T
+                # print nphase, "Contact ",patch," added at ", getattr(phase,patch).placement.translation.T
             else:
                 swing_patch.append(patch)
 
@@ -138,15 +144,15 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee
         # add an impulse model to deal with this contact.
         new_contacts = active_contact_patch.difference(active_contact_patch_prev)
         if nphase != 0 and len(new_contacts) != 0:
-            #print nphase, "Impact ",[p for p in new_contacts]," added"
+            # print nphase, "Impact ",[p for p in new_contacts]," added"
             imp_model = ImpulseModelMultiple(
                 rmodel, {
                     "Impulse_" + patch: ImpulseModel6D(rmodel, frame=rmodel.getFrameId(patch_name_map[patch]))
                     for patch in new_contacts
                 })
-            #Costs for the impulse of a new contact
+            # Costs for the impulse of a new contact
             cost_model = CostModelSum(rmodel, nu=0)
-            #State
+            # State
             cost_regx = CostModelState(
                 rmodel,
                 State,
@@ -154,10 +160,10 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee
                 nu=actuationff.nu,
                 activation=ActivationModelWeightedQuad(w.xweight))
             cost_model.addCost("imp_regx", cost_regx, w.imp_state)
-            #CoM
+            # CoM
             cost_com = CostModelImpactCoM(rmodel, activation=ActivationModelWeightedQuad(w.imp_act_com))
             cost_model.addCost("imp_CoM", cost_com, w.imp_com)
-            #Contact Frameplacement
+            # Contact Frameplacement
             for patch in new_contacts:
                 cost_contact = CostModelFramePlacement(
                     rmodel,
@@ -170,12 +176,12 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee
             problem_models.append(imp_action_model)
 
         # Define the cost and action models for each timestep in the contact phase.
-        #untill [:-1] because in contact sequence timetrajectory, the end-time is
-        #also included. e.g., instead of being [0.,0.5], time trajectory is [0,0.5,1.]
+        # untill [:-1] because in contact sequence timetrajectory, the end-time is
+        # also included. e.g., instead of being [0.,0.5], time trajectory is [0,0.5,1.]
         for t in np.linspace(t0, t1, N)[:-1]:
             cost_model = CostModelSum(rmodel, actuationff.nu)
 
-            #For the first node of the phase, add cost v=0 for the contacting foot.
+            # For the first node of the phase, add cost v=0 for the contacting foot.
             if t == 0:
                 for patch in active_contact_patch:
                     cost_vcontact = CostModelFrameVelocity(
@@ -185,12 +191,11 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee
                         nu=actuationff.nu)
                     cost_model.addCost("contactv_" + patch, cost_vcontact, w.contactv)
 
-            #CoM Cost
-            cost_com = CostModelCoM(
-                rmodel, ref=m2a(phi_c.com_vcom.eval(t)[0][:3, :]), nu=actuationff.nu)
+            # CoM Cost
+            cost_com = CostModelCoM(rmodel, ref=m2a(phi_c.com_vcom.eval(t)[0][:3, :]), nu=actuationff.nu)
             cost_model.addCost("CoM", cost_com, w.com)
 
-            #Forces Cost
+            # Forces Cost
             for patch in contact_model.contacts.keys():
                 cost_force = CostModelForce(
                     rmodel,
@@ -198,7 +203,7 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee
                     ref=m2a(phi_c.forces[patch].eval(t)[0]),
                     nu=actuationff.nu)
                 cost_model.addCost("forces_" + patch, cost_force, w.forces)
-            #Swing patch cost
+            # Swing patch cost
             for patch in swing_patch:
                 cost_swing = CostModelFramePlacement(
                     rmodel,
@@ -206,9 +211,9 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee
                     ref=pinocchio.SE3(np.identity(3), ee_ref[patch].eval(t)[0]),
                     nu=actuationff.nu)
                 cost_model.addCost("swing_" + patch, cost_swing, w.swing_patch)
-                #print t, "Swing cost ",patch," added at ", ee_ref[patch].eval(t)[0][:3].T
+                # print t, "Swing cost ",patch," added at ", ee_ref[patch].eval(t)[0][:3].T
 
-            #State Regularization
+            # State Regularization
             cost_regx = CostModelState(
                 rmodel,
                 State,
@@ -216,7 +221,7 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee
                 nu=actuationff.nu,
                 activation=ActivationModelWeightedQuad(w.xweight))
             cost_model.addCost("regx", cost_regx, w.regx)
-            #Control Regularization
+            # Control Regularization
             cost_regu = CostModelControl(rmodel, nu=actuationff.nu)
             cost_model.addCost("regu", cost_regu, w.regu)
 
@@ -224,7 +229,7 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee
             imodel = IntegratedActionModelEuler(dmodel, timeStep=dt)
             problem_models.append(imodel)
 
-    #Create Terminal Model.
+    # Create Terminal Model.
     contact_model = ContactModelMultiple(rmodel)
     # Add contact constraints for the active contact patches.
     swing_patch = []
@@ -235,12 +240,11 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee
                 rmodel, frame=rmodel.getFrameId(patch_name_map[patch]), ref=getattr(phase, patch).placement)
             contact_model.addContact(patch, active_contact)
     cost_model = CostModelSum(rmodel, actuationff.nu)
-    #CoM Cost
-    cost_com = CostModelCoM(
-        rmodel, ref=m2a(phi_c.com_vcom.eval(t)[0][:3, :]), nu=actuationff.nu)
+    # CoM Cost
+    cost_com = CostModelCoM(rmodel, ref=m2a(phi_c.com_vcom.eval(t)[0][:3, :]), nu=actuationff.nu)
     cost_model.addCost("CoM", cost_com, w.term_com)
 
-    #State Regularization
+    # State Regularization
     cost_regx = CostModelState(
         rmodel, State, ref=rmodel.defaultState, nu=actuationff.nu, activation=ActivationModelWeightedQuad(w.xweight))
     cost_model.addCost("regx", cost_regx, w.term_regx)
@@ -253,7 +257,7 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee
 
 
 def createPhiFromContactSequence(rmodel, rdata, cs, patch_names):
-    #Note that centroidal plannar returns the forces in the sequence RF,LF,RH,LH.
+    # Note that centroidal plannar returns the forces in the sequence RF,LF,RH,LH.
     range_def = OrderedDict()
     range_def.update([["RF_patch", range(0, 6)]])
     range_def.update([["LF_patch", range(6, 12)]])
@@ -262,18 +266,14 @@ def createPhiFromContactSequence(rmodel, rdata, cs, patch_names):
 
     mass = pinocchio.crba(rmodel, rdata, pinocchio.neutral(rmodel))[0, 0]
     t_traj = None
-    forces_traj = None
-    dforces_traj = None
-    x_traj = None
-    dx_traj = None
-    #-----Get Length of Timeline------------------------
+    # -----Get Length of Timeline------------------------
     t_traj = []
     for spl in cs.ms_interval_data[:-1]:
         t_traj += list(spl.time_trajectory)
     t_traj = np.array(t_traj)
     N = len(t_traj)
 
-    #------Get values of state and control--------------
+    # ------Get values of state and control--------------
     phi_c = lambda t: 0
     phi_c.f = OrderedDict()
     phi_c.df = OrderedDict()
@@ -301,8 +301,8 @@ def createPhiFromContactSequence(rmodel, rdata, cs, patch_names):
         phi_c.hg[n:n + nt, :3] = mass * x[:, 3:6]
         phi_c.dhg[n:n + nt, :3] = mass * dx[:, 3:6]
 
-        #--Control output of MUSCOD is a discretized piecewise polynomial.
-        #------Convert the one piece to Points and Derivatives.
+        # --Control output of MUSCOD is a discretized piecewise polynomial.
+        # ------Convert the one piece to Points and Derivatives.
         poly_u, dpoly_u = polyfitND(tt, u, deg=3, full=True, eps=1e-5)
 
         f_poly = lambda t, r: np.array([poly_u[i](t) for i in r])
@@ -326,7 +326,7 @@ def polyfitND(x, y, deg, eps, rcond=None, full=False, w=None, cov=False):
     """ Return the polynomial fitting (and its derivative)
   for a set of points x, y where y=p(x).
   This is a wrapper of np.polyfit for more than one dimensions.
-  
+
   :params x: Points where polynomial is being computed. e.g. on a timeline.
   :params y: value of the curve at x, y=p(x). each row corresponds to a point.
   :params deg: degree of the polynomial being computed.
@@ -339,7 +339,7 @@ def polyfitND(x, y, deg, eps, rcond=None, full=False, w=None, cov=False):
   :returns array p where each row corresponds to the coeffs of a dimension in format np.poly1d
   """
     assert len(x.shape) == 1
-    #x is an array.
+    # x is an array.
     p = np.array([
         None,
     ] * y.shape[1])
@@ -347,8 +347,7 @@ def polyfitND(x, y, deg, eps, rcond=None, full=False, w=None, cov=False):
         None,
     ] * y.shape[1])
     for i, y_a in enumerate(y.T):
-        p_a, residual, _, _, _ = np.polyfit(x,
-                                            np.asarray(y_a).squeeze(), deg, rcond, full, w, cov)
+        p_a, residual, _, _, _ = np.polyfit(x, np.asarray(y_a).squeeze(), deg, rcond, full, w, cov)
         p[i] = np.poly1d(p_a[:])
         dp[i] = np.poly1d(p_a[:]).deriv(1)
         assert (residual <= eps)

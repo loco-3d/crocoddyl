@@ -56,10 +56,14 @@ class SolverDDP:
         :params isFeasible: True for xs are obtained from integrating the us (roll-out).
         :params copy: True for making a copy of the data
         """
-        if xs is None: xs = [m.State.zero() for m in self.models()]
-        elif copy: xs = [x.copy() for x in xs]
-        if us is None: us = [np.zeros(m.nu) for m in self.problem.runningModels]
-        elif copy: us = [u.copy() for u in us]
+        if xs is None:
+            xs = [m.State.zero() for m in self.models()]
+        elif copy:
+            xs = [x.copy() for x in xs]
+        if us is None:
+            us = [np.zeros(m.nu) for m in self.problem.runningModels]
+        elif copy:
+            us = [u.copy() for u in us]
 
         assert (len(xs) == self.problem.T + 1)
         assert (len(us) == self.problem.T)
@@ -80,7 +84,8 @@ class SolverDDP:
         :returns the descent direction dx,du and the dual lambdas as lists of
         T+1, T and T+1 lengths.
         """
-        if recalc: self.calc()
+        if recalc:
+            self.calc()
         self.backwardPass()
         return [np.nan] * (self.problem.T + 1), self.k, self.Vx
 
@@ -147,7 +152,8 @@ class SolverDDP:
             self.stepLength = a
             self.iter = i
             self.stop = sum(self.stoppingCriteria())
-            if self.callback is not None: [c(self) for c in self.callback]
+            if self.callback is not None:
+                [c(self) for c in self.callback]
 
             if self.wasFeasible and self.stop < self.th_stop:
                 return self.xs, self.us, True
@@ -159,15 +165,17 @@ class SolverDDP:
 
     def increaseRegularization(self):
         self.x_reg *= self.regFactor
-        if self.x_reg > self.regMax: self.x_reg = self.regMax
+        if self.x_reg > self.regMax:
+            self.x_reg = self.regMax
         self.u_reg = self.x_reg
 
     def decreaseRegularization(self):
         self.x_reg /= self.regFactor
-        if self.x_reg < self.regMin: self.x_reg = self.regMin
+        if self.x_reg < self.regMin:
+            self.x_reg = self.regMin
         self.u_reg = self.x_reg
 
-    #### DDP Specific
+    # DDP Specific
     def allocate(self):
         """  Allocate matrix space of Q,V and K.
         Done at init time (redo if problem change).
@@ -197,7 +205,7 @@ class SolverDDP:
         scheme is used to ensure a good search direction. The norm of the gradient,
         a the directional derivatives are computed.
         """
-        xs, us = self.xs, self.us
+        xs = self.xs
         self.Vx[-1][:] = self.problem.terminalData.Lx
         self.Vxx[-1][:, :] = self.problem.terminalData.Lxx
         if self.x_reg != 0:
@@ -216,7 +224,8 @@ class SolverDDP:
                 self.Qx[t][:] += np.dot(data.Fx.T, relinearization)
                 self.Qu[t][:] += np.dot(data.Fu.T, relinearization)
 
-            if self.u_reg != 0: self.Quu[t][range(model.nu), range(model.nu)] += self.u_reg
+            if self.u_reg != 0:
+                self.Quu[t][range(model.nu), range(model.nu)] += self.u_reg
 
             try:
                 if self.Quu[t].shape[0] > 0:
@@ -239,7 +248,8 @@ class SolverDDP:
                     np.dot(self.k[t], self.Quu[t]), self.K[t])
             self.Vxx[t][:, :] = self.Qxx[t] - np.dot(self.Qxu[t], self.K[t])
 
-            if self.x_reg != 0: self.Vxx[t][range(model.ndx), range(model.ndx)] += self.x_reg
+            if self.x_reg != 0:
+                self.Vxx[t][range(model.ndx), range(model.ndx)] += self.x_reg
             raiseIfNan(self.Vxx[t], ArithmeticError('backward error'))
             raiseIfNan(self.Vx[t], ArithmeticError('backward error'))
 
@@ -255,7 +265,8 @@ class SolverDDP:
         # Argument b is introduce for debug purpose.
         # Argument warning is also introduce for debug: by default, it masks the numpy warnings
         #    that can be reactivated during debug.
-        if b is None: b = 1
+        if b is None:
+            b = 1
         xs, us = self.xs, self.us
         xtry = [self.problem.initialState] + [np.nan] * self.problem.T
         utry = [np.nan] * self.problem.T
@@ -269,7 +280,7 @@ class SolverDDP:
             ctry += cost
             raiseIfNan([ctry, cost], ArithmeticError('forward error'))
             raiseIfNan(xtry[t + 1], ArithmeticError('forward error'))
-        with np.warnings.catch_warnings() as npwarn:
+        with np.warnings.catch_warnings():
             np.warnings.simplefilter(warning)
             ctry += self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])[1]
         raiseIfNan(ctry, ArithmeticError('forward error'))

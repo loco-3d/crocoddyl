@@ -108,7 +108,6 @@ class StateTestCase(unittest.TestCase):
         dX_dDX = Jdx
         dDX_dX = J2
         x2eps = self.STATE.integrate(x1, dx + eps * h)
-        from numpy.linalg import norm
         self.assertTrue(
             np.allclose(np.dot(dX_dDX, eps), self.STATE.diff(x2, x2eps) / h, atol=1e-3),
             "Velocity computed from Jintegrate is wrong.")

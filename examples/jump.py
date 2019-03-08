@@ -16,31 +16,33 @@ the trajectory optimization too unstable.
 
 import sys
 
-from numpy.linalg import eig, inv, norm, pinv, svd
+import numpy as np
 
 import pinocchio
 from crocoddyl import (ActionModelImpact, ActivationModelInequality, ActivationModelWeightedQuad,
-                       ActuationModelFreeFloating, CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay,
-                       ContactModel6D, ContactModelMultiple, CostModelCoM, CostModelControl, CostModelFramePlacement,
-                       CostModelFrameVelocity, CostModelState, CostModelSum, DifferentialActionModelFloatingInContact,
-                       ImpulseModel6D, ImpulseModelMultiple, IntegratedActionModelEuler, ShootingProblem, SolverDDP,
-                       StatePinocchio, a2m, loadTalosLegs, m2a, plotDDPConvergence, plotOCSolution)
+                       ActuationModelFreeFloating, CallbackDDPLogger, CallbackDDPVerbose, ContactModel6D,
+                       ContactModelMultiple, CostModelCoM, CostModelControl, CostModelFramePlacement, CostModelState,
+                       CostModelSum, DifferentialActionModelFloatingInContact, ImpulseModel6D, ImpulseModelMultiple,
+                       IntegratedActionModelEuler, ShootingProblem, SolverDDP, StatePinocchio, loadTalosLegs, m2a)
 from crocoddyl.diagnostic import displayTrajectory
-from crocoddyl.impact import CostModelImpactCoM, CostModelImpactWholeBody
-from pinocchio.utils import *
+from crocoddyl.impact import CostModelImpactCoM
+from pinocchio.utils import eye, rotate, zero
 
 # Number of iterations in each phase. If 0, try to load.
 PHASE_ITERATIONS = {"initial": 200, "landing": 200, "frontal": 200, "lateral": 200, "twist": 200}
 PHASE_BACKUP = {"initial": False, "landing": False, "frontal": False, "lateral": False, "twist": False}
 BACKUP_PATH = "npydata/jump."
 
-if 'load' in sys.argv: PHASE_ITERATIONS = {k: 0 for k in PHASE_ITERATIONS}
-if 'save' in sys.argv: PHASE_BACKUP = {k: True for k in PHASE_ITERATIONS}
+if 'load' in sys.argv:
+    PHASE_ITERATIONS = {k: 0 for k in PHASE_ITERATIONS}
+if 'save' in sys.argv:
+    PHASE_BACKUP = {k: True for k in PHASE_ITERATIONS}
 WITHDISPLAY = 'disp' in sys.argv
 
 robot = loadTalosLegs()
 robot.model.armature[6:] = .3
-if WITHDISPLAY: robot.initDisplay(loadModel=True)
+if WITHDISPLAY:
+    robot.initDisplay(loadModel=True)
 
 rmodel = robot.model
 rdata = rmodel.createData()
@@ -132,9 +134,9 @@ def impactModel(contactIds, effectors):
     return model
 
 
-### --- MODEL SEQUENCE
-### --- MODEL SEQUENCE
-### --- MODEL SEQUENCE
+# --- MODEL SEQUENCE
+# --- MODEL SEQUENCE
+# --- MODEL SEQUENCE
 SE3 = pinocchio.SE3
 pinocchio.forwardKinematics(rmodel, rdata, q0)
 pinocchio.updateFramePlacements(rmodel, rdata)
@@ -142,15 +144,13 @@ right0 = rdata.oMf[rightId].translation
 left0 = rdata.oMf[leftId].translation
 com0 = m2a(pinocchio.centerOfMass(rmodel, rdata, q0))
 
-models = [runningModel([rightId, leftId], {}, integrationStep=4e-2)
-          for i in range(10)] + [runningModel([], {}, integrationStep=3e-2) for i in range(5)] + [
-              runningModel([], {}, com=com0 + [0, 0, 0.5], integrationStep=5e-2)
-          ] + [runningModel([], {}, integrationStep=3e-2) for i in range(7)
-               ] + [impactModel([leftId, rightId], {
-                   rightId: SE3(eye(3), right0),
-                   leftId: SE3(eye(3), left0)
-               })] + [runningModel([rightId, leftId], {}, integrationStep=2e-2)
-                      for i in range(9)] + [runningModel([rightId, leftId], {}, integrationStep=0)]
+models = [runningModel([rightId, leftId], {}, integrationStep=4e-2) for i in range(10)]
+models += [runningModel([], {}, integrationStep=3e-2) for i in range(5)]
+models += [runningModel([], {}, com=com0 + [0, 0, 0.5], integrationStep=5e-2)]
+models += [runningModel([], {}, integrationStep=3e-2) for i in range(7)]
+models += [impactModel([leftId, rightId], {rightId: SE3(eye(3), right0), leftId: SE3(eye(3), left0)})]
+models += [runningModel([rightId, leftId], {}, integrationStep=2e-2) for i in range(9)]
+models += [runningModel([rightId, leftId], {}, integrationStep=0)]
 
 high = [isinstance(m, IntegratedActionModelEuler) and 'com' in m.differential.costs.costs for m in models].index(True)
 models[high].differential.costs['com'].cost.activation = ActivationModelInequality(
@@ -183,7 +183,7 @@ PHASE_NAME = "initial"
 
 problem = ShootingProblem(initialState=x0, runningModels=models[:imp], terminalModel=models[imp])
 ddp = SolverDDP(problem)
-ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]  #, CallbackSolverDisplay(robot,rate=5) ]
+ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]  # CallbackSolverDisplay(robot,rate=5) ]
 ddp.th_stop = 1e-4
 us0 = [
     m.differential.quasiStatic(d.differential, rmodel.defaultState) for m, d in zip(ddp.models(), ddp.datas())[:imp]
@@ -214,7 +214,7 @@ usddp = ddp.us
 
 problem = ShootingProblem(initialState=x0, runningModels=models[:-1], terminalModel=models[-1])
 ddp = SolverDDP(problem)
-ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]  #, CallbackSolverDisplay(robot,rate=5,freq=10) ]
+ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]  # CallbackSolverDisplay(robot,rate=5,freq=10) ]
 
 ddp.xs = xsddp + [rmodel.defaultState] * (len(models) - len(xsddp))
 ddp.us = usddp + [
@@ -242,7 +242,7 @@ xjump0 = [x.copy() for x in ddp.xs]
 ujump0 = [u.copy() for u in ddp.us]
 
 # ---------------------------------------------------------------------------------------------
-### Jump with frontal scissors.
+# Jump with frontal scissors.
 PHASE_NAME = "frontal"
 
 fig = high + 2
@@ -259,8 +259,8 @@ models[fig].differential.costs.costs['xreg'].weight = 10**6
 ddp.solve(init_xs=ddp.xs, init_us=ddp.us, maxiter=PHASE_ITERATIONS[PHASE_NAME], isFeasible=True)
 
 if PHASE_ITERATIONS[PHASE_NAME] == 0:
-    ddp.xs = [x for x in np.load(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME)]
-    ddp.us = [u for u in np.load(BACKUP_PATH + '%s.us.npy' % PHASE_NAME)]
+    ddp.xs = [_x for _x in np.load(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME)]
+    ddp.us = [_u for _u in np.load(BACKUP_PATH + '%s.us.npy' % PHASE_NAME)]
 elif PHASE_BACKUP[PHASE_NAME]:
     np.save(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME, ddp.xs)
     np.save(BACKUP_PATH + '%s.us.npy' % PHASE_NAME, ddp.us)
@@ -268,7 +268,7 @@ elif PHASE_BACKUP[PHASE_NAME]:
 disp(ddp.xs)
 
 # ---------------------------------------------------------------------------------------------
-### Jump with lateral scissors.
+# Jump with lateral scissors.
 PHASE_NAME = "lateral"
 
 ddp.xs = xjump0
@@ -289,8 +289,8 @@ print("*** SOLVE %s ***" % PHASE_NAME)
 ddp.solve(init_xs=ddp.xs, init_us=ddp.us, maxiter=PHASE_ITERATIONS[PHASE_NAME], isFeasible=True)
 
 if PHASE_ITERATIONS[PHASE_NAME] == 0:
-    ddp.xs = [x for x in np.load(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME)]
-    ddp.us = [u for u in np.load(BACKUP_PATH + '%s.us.npy' % PHASE_NAME)]
+    ddp.xs = [_x for _x in np.load(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME)]
+    ddp.us = [_u for _u in np.load(BACKUP_PATH + '%s.us.npy' % PHASE_NAME)]
 elif PHASE_BACKUP[PHASE_NAME]:
     np.save(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME, ddp.xs)
     np.save(BACKUP_PATH + '%s.us.npy' % PHASE_NAME, ddp.us)
@@ -301,7 +301,7 @@ models[fig].differential.costs.costs['xreg'].cost.ref = x0.copy()
 models[fig].differential.costs.costs['xreg'].cost.activation.weights[rmodel.nv:] = 10
 
 # ---------------------------------------------------------------------------------------------
-### Jump with twist PI/2
+# Jump with twist PI/2
 PHASE_NAME = "twist"
 
 ddp.xs = xjump0
@@ -317,8 +317,8 @@ print("*** SOLVE %s ***" % PHASE_NAME)
 ddp.solve(init_xs=ddp.xs, init_us=ddp.us, maxiter=PHASE_ITERATIONS[PHASE_NAME], isFeasible=True)
 
 if PHASE_ITERATIONS[PHASE_NAME] == 0:
-    ddp.xs = [x for x in np.load(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME)]
-    ddp.us = [u for u in np.load(BACKUP_PATH + '%s.us.npy' % PHASE_NAME)]
+    ddp.xs = [_x for _x in np.load(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME)]
+    ddp.us = [_u for _u in np.load(BACKUP_PATH + '%s.us.npy' % PHASE_NAME)]
 elif PHASE_BACKUP[PHASE_NAME]:
     np.save(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME, ddp.xs)
     np.save(BACKUP_PATH + '%s.us.npy' % PHASE_NAME, ddp.us)

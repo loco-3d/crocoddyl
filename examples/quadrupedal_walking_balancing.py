@@ -1,10 +1,13 @@
 import sys
 
 import numpy as np
-from numpy.linalg import norm
 
 import pinocchio
-from crocoddyl import *
+from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, CallbackDDPLogger, CallbackDDPVerbose,
+                       CallbackSolverDisplay, ContactModel3D, ContactModelMultiple, CostModelCoM, CostModelControl,
+                       CostModelFrameTranslation, CostModelFrameVelocity, CostModelState, CostModelSum,
+                       DifferentialActionModelFloatingInContact, IntegratedActionModelEuler, ShootingProblem,
+                       SolverDDP, StatePinocchio, a2m, displayTrajectory, loadHyQ, m2a, plotDDPConvergence)
 
 WITHDISPLAY = 'disp' in sys.argv
 WITHPLOT = 'plot' in sys.argv
@@ -104,10 +107,10 @@ class SimpleQuadrupedalGaitProblem:
         pinocchio.forwardKinematics(self.rmodel, self.rdata, q0)
         pinocchio.updateFramePlacements(self.rmodel, self.rdata)
         com0 = m2a(pinocchio.centerOfMass(self.rmodel, self.rdata, q0))
-        lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
-        rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
-        lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
-        rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
+        # lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
+        # rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
+        # lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
+        # rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
 
         # Defining the action models along the time instances
         comModels = []
@@ -331,10 +334,10 @@ class SimpleQuadrupedalGaitProblem:
 
     def createJumpingProblem(self, x0, jumpHeight, timeStep):
         comPos0 = m2a(pinocchio.centerOfMass(self.rmodel, self.rdata, q0))
-        rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
-        rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
-        lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
-        lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
+        # rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
+        # rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
+        # lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
+        # lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
 
         takeOffKnots = 30
         flyingKnots = 30
@@ -381,7 +384,7 @@ class SimpleQuadrupedalGaitProblem:
             swingFootTask = []
             for i, p in zip(swingFootIds, feetPos0):
                 # Defining a foot swing task given the step length
-                resKnot = numKnots % 2
+                # resKnot = numKnots % 2
                 phKnots = numKnots / 2
                 if k < phKnots:
                     dp = a2m([[stepLength * (k + 1) / numKnots, 0., stepHeight * k / phKnots]])
@@ -472,7 +475,8 @@ class SimpleQuadrupedalGaitProblem:
 
 # Loading the HyQ model
 hyq = loadHyQ()
-if WITHDISPLAY: hyq.initDisplay(loadModel=True)
+if WITHDISPLAY:
+    hyq.initDisplay(loadModel=True)
 
 rmodel = hyq.model
 rdata = rmodel.createData()

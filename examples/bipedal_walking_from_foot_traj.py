@@ -1,11 +1,15 @@
 import sys
 
 import numpy as np
-from numpy.linalg import norm
 
 import pinocchio
-from crocoddyl import *
-from pinocchio.utils import *
+from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, CallbackDDPLogger, CallbackDDPVerbose,
+                       CallbackSolverDisplay, ContactModel6D, ContactModelMultiple, CostModelControl,
+                       CostModelFramePlacement, CostModelFrameVelocity, CostModelState, CostModelSum,
+                       DifferentialActionModelFloatingInContact, IntegratedActionModelEuler, ShootingProblem,
+                       SolverDDP, StatePinocchio, a2m, loadTalosLegs, m2a, plotDDPConvergence, plotOCSolution,
+                       runningModel)
+from pinocchio.utils import zero
 
 WITHDISPLAY = 'disp' in sys.argv
 WITHPLOT = 'plot' in sys.argv
@@ -121,7 +125,7 @@ class SimpleBipedWalkingProblem:
 
         # Creating the cost model for a contact phase
         costModel = CostModelSum(self.rmodel, actModel.nu)
-        if swingFootTask != None:
+        if swingFootTask is not None:
             footTrack = CostModelFramePlacement(self.rmodel, swingFootTask.frameId, swingFootTask.oXf, actModel.nu)
             costModel.addCost("footTrack", footTrack, 100.)
 
@@ -188,8 +192,10 @@ walkProblem = walk.createProblem(x0, stepLength, timeStep, stepKnots, supportKno
 ddp = SolverDDP(walkProblem)
 cameraTF = [3., 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 ddp.callback = [CallbackDDPVerbose()]
-if WITHPLOT: ddp.callback.append(CallbackDDPLogger())
-if WITHDISPLAY: ddp.callback.append(CallbackSolverDisplay(talos_legs, 4, 1, cameraTF))
+if WITHPLOT:
+    ddp.callback.append(CallbackDDPLogger())
+if WITHDISPLAY:
+    ddp.callback.append(CallbackSolverDisplay(talos_legs, 4, 1, cameraTF))
 ddp.th_stop = 1e-9
 ddp.solve(maxiter=1000, regInit=.1, init_xs=[rmodel.defaultState] * len(ddp.models()))
 

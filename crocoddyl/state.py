@@ -141,7 +141,8 @@ class StateVector(StateAbstract):
         :return the partial derivative(s) of the diff(x1,x2) function
         """
         assert (firstsecond in ['first', 'second', 'both'])
-        if firstsecond == 'both': return [self.Jdiff(x1, x2, 'first'), self.Jdiff(x1, x2, 'second')]
+        if firstsecond == 'both':
+            return [self.Jdiff(x1, x2, 'first'), self.Jdiff(x1, x2, 'second')]
 
         J = np.zeros([self.ndx, self.ndx])
         if firstsecond == 'first':
@@ -159,7 +160,8 @@ class StateVector(StateAbstract):
         :return the partial derivative(s) of the integrate(x,dx) function
         """
         assert (firstsecond in ['first', 'second', 'both'])
-        if firstsecond == 'both': return [self.Jintegrate(x, dx, 'first'), self.Jintegrate(x, dx, 'second')]
+        if firstsecond == 'both':
+            return [self.Jintegrate(x, dx, 'first'), self.Jintegrate(x, dx, 'second')]
         return np.eye(self.ndx)
 
 
@@ -214,7 +216,8 @@ class StateNumDiff(StateAbstract):
         :return the partial derivative(s) of the diff(x1,x2) function
         """
         assert (firstsecond in ['first', 'second', 'both'])
-        if firstsecond == 'both': return [self.Jdiff(x1, x2, 'first'), self.Jdiff(x1, x2, 'second')]
+        if firstsecond == 'both':
+            return [self.Jdiff(x1, x2, 'first'), self.Jdiff(x1, x2, 'second')]
         dx = np.zeros(self.ndx)
         h = self.disturbance
         J = np.zeros([self.ndx, self.ndx])
@@ -241,7 +244,8 @@ class StateNumDiff(StateAbstract):
         :return the partial derivative(s) of the integrate(x,dx) function
         """
         assert (firstsecond in ['first', 'second', 'both'])
-        if firstsecond == 'both': return [self.Jintegrate(x, dx, 'first'), self.Jintegrate(x, dx, 'second')]
+        if firstsecond == 'both':
+            return [self.Jintegrate(x, dx, 'first'), self.Jintegrate(x, dx, 'second')]
         Dx = np.zeros(self.ndx)
         h = self.disturbance
         J = np.zeros([self.ndx, self.ndx])
@@ -297,7 +301,7 @@ class StatePinocchio(StateAbstract):
         :param x2: next state
         :return x2 [-] x1 value
         """
-        nq, nv, nx, ndx = self.model.nq, self.model.nv, self.nx, self.ndx
+        nq, nv, nx = self.model.nq, self.model.nv, self.nx
         assert (x0.shape == (nx, ) and x1.shape == (nx, ))
         q0 = x0[:nq]
         q1 = x1[:nq]
@@ -331,7 +335,8 @@ class StatePinocchio(StateAbstract):
         :return the partial derivative(s) of the diff(x1,x2) function
         """
         assert (firstsecond in ['first', 'second', 'both'])
-        if firstsecond == 'both': return [self.Jdiff(x1, x2, 'first'), self.Jdiff(x1, x2, 'second')]
+        if firstsecond == 'both':
+            return [self.Jdiff(x1, x2, 'first'), self.Jdiff(x1, x2, 'second')]
         if firstsecond == 'second':
             dx = self.diff(x1, x2)
             q = a2m(x1[:self.model.nq])
@@ -355,7 +360,8 @@ class StatePinocchio(StateAbstract):
         """
         assert (firstsecond in ['first', 'second', 'both'])
         assert (x.shape == (self.nx, ) and dx.shape == (self.ndx, ))
-        if firstsecond == 'both': return [self.Jintegrate(x, dx, 'first'), self.Jintegrate(x, dx, 'second')]
+        if firstsecond == 'both':
+            return [self.Jintegrate(x, dx, 'first'), self.Jintegrate(x, dx, 'second')]
         q = a2m(x[:self.model.nq])
         dq = a2m(dx[:self.model.nv])
         Jq, Jdq = pinocchio.dIntegrate(self.model, q, dq)

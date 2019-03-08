@@ -1,20 +1,18 @@
-import warnings
-
-from numpy import asarray, dot, matrix
-from numpy.linalg import eig, inv, norm, pinv, svd
+import numpy as np
+from numpy import matrix
 
 import pinocchio
-from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, ContactModel6D, ContactModelMultiple,
-                       CostModelControl, CostModelPlacementVelocity, CostModelPosition, CostModelPosition6D,
-                       CostModelState, CostModelSum, DifferentialActionModelFloatingInContact, ImpulseModelMultiple,
-                       IntegratedActionModelEuler, StatePinocchio, a2m, m2a)
+from crocoddyl import (ActuationModelFreeFloating, ContactModel6D, ContactModelMultiple, CostModelControl,
+                       CostModelPlacementVelocity, CostModelPosition6D, CostModelState, CostModelSum,
+                       DifferentialActionModelFloatingInContact, ImpulseModelMultiple, IntegratedActionModelEuler,
+                       StatePinocchio, a2m, m2a)
 from crocoddyl.impact import ActionModelImpact, ImpulseModel6D
-from logger import *
-from pinocchio.utils import *
+# from logger import *
+from pinocchio.utils import eye, zero
 # --- DDP
 # --- DDP
 # --- DDP
-from refact import ShootingProblem, SolverDDP, SolverKKT
+from refact import ShootingProblem, SolverDDP
 from robots import loadTalosLegs
 
 robot = loadTalosLegs()
@@ -71,7 +69,7 @@ q = robot.q0.copy()
 v = zero(rmodel.nv)
 x = m2a(np.concatenate([q, v]))
 
-disp = lambda xs: disptraj(robot, xs)
+# disp = lambda xs: disptraj(robot, xs)
 
 DT = 1.
 T = 20
@@ -117,7 +115,7 @@ for m in models2:
 
 problem = ShootingProblem(x, models1, impact1)
 ddp = SolverDDP(problem)
-#ddp.callback = [CallbackDDPLogger()]
+# ddp.callback = [CallbackDDPLogger()]
 ddp.th_stop = 1e-9
 ddp.solve(verbose=True, maxiter=20, regInit=.1)
 

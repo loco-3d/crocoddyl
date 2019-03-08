@@ -64,7 +64,8 @@ class CallbackSolverDisplay:
         self.freq = freq
 
     def __call__(self, solver):
-        if (solver.iter + 1) % self.freq: return
+        if (solver.iter + 1) % self.freq:
+            return
         dt = solver.models()[0].timeStep
         displayTrajectory(self.robotwrapper, solver.xs, dt, self.rate, self.cameraTF)
 

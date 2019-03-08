@@ -1,17 +1,14 @@
-import warnings
-
-from numpy.linalg import eig, norm
+import numpy as np
+from numpy.linalg import norm
 
 import pinocchio
 # --- DDP
 # --- DDP
 # --- DDP
-from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, CallbackDDPLogger, CallbackDDPVerbose,
-                       ContactModel6D, ContactModelMultiple, CostModelControl, CostModelFrameTranslation,
-                       CostModelState, CostModelSum, DifferentialActionModelFloatingInContact,
-                       DifferentialActionModelFullyActuated, IntegratedActionModelEuler, ShootingProblem, SolverDDP,
-                       SolverKKT, StatePinocchio, loadTalosArm)
-from pinocchio.utils import *
+from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, ContactModel6D, ContactModelMultiple,
+                       CostModelControl, CostModelFrameTranslation, CostModelState, CostModelSum,
+                       DifferentialActionModelFloatingInContact, DifferentialActionModelFullyActuated,
+                       IntegratedActionModelEuler, ShootingProblem, SolverDDP, StatePinocchio, loadTalosArm)
 
 m2a = lambda m: np.array(m.flat)
 a2m = lambda a: np.matrix(a).T
@@ -144,7 +141,7 @@ f.u[:] = (0 * pinocchio.rnea(fix.rmodel, fix.rdata, fix.q, fix.v * 0, fix.v * 0)
 f.v[:] = 0
 f.x[f.rmodel.nq:] = f.v.flat
 
-#f.u[:] = np.zeros(f.model.nu)
+# f.u[:] = np.zeros(f.model.nu)
 f.model.differential.costs['pos'].weight = 1
 f.model.differential.costs['regx'].weight = 0.01
 f.model.differential.costs['regu'].weight = 0.0001
@@ -158,7 +155,7 @@ problem = ShootingProblem(f.x, [f.model] * T, fterm.model)
 u0s = [f.u] * T
 x0s = problem.rollout(u0s)
 
-disp = lambda xs: disptraj(f.robot, xs)
+# disp = lambda xs: disptraj(f.robot, xs)
 ddp = SolverDDP(problem)
 # ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]
 ddp.th_stop = 1e-18

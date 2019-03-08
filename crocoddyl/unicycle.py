@@ -1,7 +1,6 @@
 import numpy as np
 from numpy import arctan2, cos, sin
 
-from action import ActionDataLQR, ActionModelLQR
 from state import StateAbstract, StateVector
 
 
@@ -24,36 +23,37 @@ class ActionModelUnicycle:
     def createData(self):
         return ActionDataUnicycle(self)
 
-    def calc(model, data, x, u=None):
-        if u is None: u = model.unone
-        assert (x.shape == (model.nx, ) and u.shape == (model.nu, ))
-        assert (data.xnext.shape == (model.nx, ))
-        assert (data.costResiduals.shape == (model.ncost, ))
+    def calc(self, data, x, u=None):
+        if u is None:
+            u = self.unone
+        assert (x.shape == (self.nx, ) and u.shape == (self.nu, ))
+        assert (data.xnext.shape == (self.nx, ))
+        assert (data.costResiduals.shape == (self.ncost, ))
         v, w = u
         c, s = np.cos(x[2]), np.sin(x[2])
-        dx = np.array([v * c, v * s, w])
-        data.xnext[:] = [x[0] + c * v * model.dt, x[1] + s * v * model.dt, x[2] + w * model.dt]
-        data.costResiduals[:3] = model.costWeights[0] * x
-        data.costResiduals[3:5] = model.costWeights[1] * u
+        data.xnext[:] = [x[0] + c * v * self.dt, x[1] + s * v * self.dt, x[2] + w * self.dt]
+        data.costResiduals[:3] = self.costWeights[0] * x
+        data.costResiduals[3:5] = self.costWeights[1] * u
         data.cost = .5 * sum(data.costResiduals**2)
         return data.xnext, data.cost
 
-    def calcDiff(model, data, x, u=None):
-        if u is None: u = model.unone
-        xnext, cost = model.calc(data, x, u)
+    def calcDiff(self, data, x, u=None):
+        if u is None:
+            u = self.unone
+        xnext, cost = self.calc(data, x, u)
 
-        ### Cost derivatives
-        data.L[:] = np.diag([model.costWeights[0]] * model.nx + [model.costWeights[1]] * model.nu)
-        data.Lx[:] = x * ([model.costWeights[0]**2] * model.nx)
-        data.Lu[:] = u * ([model.costWeights[1]**2] * model.nu)
-        np.fill_diagonal(data.Lxx, model.costWeights[0]**2)
-        np.fill_diagonal(data.Luu, model.costWeights[1]**2)
+        # Cost derivatives
+        data.L[:] = np.diag([self.costWeights[0]] * self.nx + [self.costWeights[1]] * self.nu)
+        data.Lx[:] = x * ([self.costWeights[0]**2] * self.nx)
+        data.Lu[:] = u * ([self.costWeights[1]**2] * self.nu)
+        np.fill_diagonal(data.Lxx, self.costWeights[0]**2)
+        np.fill_diagonal(data.Luu, self.costWeights[1]**2)
 
-        ### Dynamic derivatives
-        c, s, dt = np.cos(x[2]), np.sin(x[2]), model.dt
+        # Dynamic derivatives
+        c, s, dt = np.cos(x[2]), np.sin(x[2]), self.dt
         v, w = u
         data.Fx[:] = [[1, 0, -s * v * dt], [0, 1, c * v * dt], [0, 0, 1]]
-        data.Fu[:] = [[c * model.dt, 0], [s * model.dt, 0], [0, model.dt]]
+        data.Fu[:] = [[c * self.dt, 0], [s * self.dt, 0], [0, self.dt]]
         return xnext, cost
 
 
@@ -130,7 +130,8 @@ class StateUnicycle(StateAbstract):
         Jdiff2 = d(diff2)/d(dx) = [ c -s 0 ; s c 0 ; 0 0 1 ].
         '''
         assert (firstsecond in ['first', 'second', 'both'])
-        if firstsecond == 'both': return [self.Jdiff(x1, x2, 'first'), self.Jdiff(x1, x2, 'second')]
+        if firstsecond == 'both':
+            return [self.Jdiff(x1, x2, 'first'), self.Jdiff(x1, x2, 'second')]
         a, b, th = self.diff(x1, x2)
         c, s = cos(th), sin(th)
         if firstsecond == 'second':
@@ -146,7 +147,8 @@ class StateUnicycle(StateAbstract):
         Ji1 = diff(int(x+dx,vx) - int(x,vx)) / dx.
         '''
         assert (firstsecond in ['first', 'second', 'both'])
-        if firstsecond == 'both': return [self.Jintegrate(x, v, 'first'), self.Jintegrate(x, v, 'second')]
+        if firstsecond == 'both':
+            return [self.Jintegrate(x, v, 'first'), self.Jintegrate(x, v, 'second')]
         a, b, th = v
         c, s = cos(th), sin(th)
         if firstsecond == 'second':
@@ -154,7 +156,7 @@ class StateUnicycle(StateAbstract):
         elif firstsecond == 'first':
             return np.array([[c, s, -c * b + s * a], [-s, c, s * b + c * a], [0, 0, 1]])
 
-    #for debug
+    # for debug
     @staticmethod
     def x2m(x):
         a, b, c, s = x
@@ -195,40 +197,42 @@ class ActionModelUnicycleVar:
     def createData(self):
         return ActionDataUnicycleVar(self)
 
-    def calc(model, data, x, u=None):
-        if u is None: u = model.unone
-        assert (x.shape == (model.nx, ) and u.shape == (model.nu, ))
-        assert (data.xnext.shape == (model.nx, ))
-        assert (data.costResiduals.shape == (model.ncost, ))
-        #v,w = u
-        #c,s = x[2:]
-        #dx = np.array([ v*c, v*s, w ])
-        #c2,s2 = cos(w*model.dt),sin(w*model.dt)
-        #data.xnext[:] = [ x[0]+c*v*model.dt, x[1]-s*v*model.dt, c*c2-s*s2, c*s2+s*c2 ]
-        dx = np.array([u[0], 0, u[1]]) * model.dt
-        data.xnext[:] = model.State.integrate(x, dx)
-        data.costResiduals[:3] = model.costWeights[0] * model.State.diff(model.xref, x)
-        data.costResiduals[3:5] = model.costWeights[1] * u
+    def calc(self, data, x, u=None):
+        if u is None:
+            u = self.unone
+        assert (x.shape == (self.nx, ) and u.shape == (self.nu, ))
+        assert (data.xnext.shape == (self.nx, ))
+        assert (data.costResiduals.shape == (self.ncost, ))
+        # v,w = u
+        # c,s = x[2:]
+        # dx = np.array([ v*c, v*s, w ])
+        # c2,s2 = cos(w*self.dt),sin(w*self.dt)
+        # data.xnext[:] = [ x[0]+c*v*self.dt, x[1]-s*v*self.dt, c*c2-s*s2, c*s2+s*c2 ]
+        dx = np.array([u[0], 0, u[1]]) * self.dt
+        data.xnext[:] = self.State.integrate(x, dx)
+        data.costResiduals[:3] = self.costWeights[0] * self.State.diff(self.xref, x)
+        data.costResiduals[3:5] = self.costWeights[1] * u
         data.cost = .5 * sum(data.costResiduals**2)
         return data.xnext, data.cost
 
-    def calcDiff(model, data, x, u=None):
-        if u is None: u = model.unone
-        xnext, cost = model.calc(data, x, u)
-        nx, ndx, nu = model.nx, model.ndx, model.nu
+    def calcDiff(self, data, x, u=None):
+        if u is None:
+            u = self.unone
+        xnext, cost = self.calc(data, x, u)
+        ndx, nu = self.ndx, self.nu
 
-        ### Cost derivatives
-        data.R[:ndx, :ndx] = model.costWeights[0] * model.State.Jdiff(model.xref, x, 'second')
-        data.R[ndx:, ndx:] = np.diag([model.costWeights[1]] * nu)
+        # Cost derivatives
+        data.R[:ndx, :ndx] = self.costWeights[0] * self.State.Jdiff(self.xref, x, 'second')
+        data.R[ndx:, ndx:] = np.diag([self.costWeights[1]] * nu)
         data.g[:] = np.dot(data.R.T, data.costResiduals)
         data.L[:, :] = np.dot(data.R.T, data.R)
 
-        ### Dynamic derivatives
-        dx = np.array([u[0], 0, u[1]]) * model.dt
-        Jx, Ju = model.State.Jintegrate(x, dx)
+        # Dynamic derivatives
+        dx = np.array([u[0], 0, u[1]]) * self.dt
+        Jx, Ju = self.State.Jintegrate(x, dx)
         data.Fx[:] = Jx
-        data.Fu[:, 0] = Ju[:, 0] * model.dt
-        data.Fu[:, 1] = Ju[:, 2] * model.dt
+        data.Fu[:, 0] = Ju[:, 0] * self.dt
+        data.Fu[:, 1] = Ju[:, 2] * self.dt
 
         return xnext, cost
 

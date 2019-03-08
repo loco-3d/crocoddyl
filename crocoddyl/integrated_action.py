@@ -20,25 +20,26 @@ class IntegratedActionModelEuler:
     def createData(self):
         return IntegratedActionDataEuler(self)
 
-    def calc(model, data, x, u=None):
-        nq, dt = model.nq, model.timeStep
-        acc, cost = model.differential.calc(data.differential, x, u)
-        if model.withCostResiduals:
+    def calc(self, data, x, u=None):
+        nq, dt = self.nq, self.timeStep
+        acc, cost = self.differential.calc(data.differential, x, u)
+        if self.withCostResiduals:
             data.costResiduals[:] = data.differential.costResiduals[:]
         data.cost = cost
         # data.xnext[nq:] = x[nq:] + acc*dt
-        # data.xnext[:nq] = pinocchio.integrate(model.differential.pinocchio,
+        # data.xnext[:nq] = pinocchio.integrate(self.differential.pinocchio,
         #                                       a2m(x[:nq]),a2m(data.xnext[nq:]*dt)).flat
         data.dx = np.concatenate([x[nq:] * dt + acc * dt**2, acc * dt])
-        data.xnext[:] = model.differential.State.integrate(x, data.dx)
+        data.xnext[:] = self.differential.State.integrate(x, data.dx)
 
         return data.xnext, data.cost
 
-    def calcDiff(model, data, x, u=None, recalc=True):
-        nv, dt = model.nv, model.timeStep
-        if recalc: model.calc(data, x, u)
-        model.differential.calcDiff(data.differential, x, u, recalc=False)
-        dxnext_dx, dxnext_ddx = model.State.Jintegrate(x, data.dx)
+    def calcDiff(self, data, x, u=None, recalc=True):
+        nv, dt = self.nv, self.timeStep
+        if recalc:
+            self.calc(data, x, u)
+        self.differential.calcDiff(data.differential, x, u, recalc=False)
+        dxnext_dx, dxnext_ddx = self.State.Jintegrate(x, data.dx)
         da_dx, da_du = data.differential.Fx, data.differential.Fu
         ddx_dx = np.vstack([da_dx * dt, da_dx])
         ddx_dx[range(nv), range(nv, 2 * nv)] += 1
@@ -117,19 +118,19 @@ class IntegratedActionModelRK4:
 
     '''
 
-    def calc(model, data, x, u=None):
-        nq, dt = model.nq, model.timeStep
+    def calc(self, data, x, u=None):
+        nq, dt = self.nq, self.timeStep
 
         data.y[0] = x
         for i in xrange(3):
-            data.acc[i], data.l[i] = model.differential.calc(data.differential[i], data.y[i], u)
+            data.acc[i], data.l[i] = self.differential.calc(data.differential[i], data.y[i], u)
             data.ki[i] = np.concatenate([data.y[i][nq:], data.acc[i]])
-            data.y[i + 1] = model.differential.State.integrate(x, data.ki[i] * model.rk4_inc[i] * dt)
+            data.y[i + 1] = self.differential.State.integrate(x, data.ki[i] * self.rk4_inc[i] * dt)
 
-        data.acc[3], data.l[3] = model.differential.calc(data.differential[3], data.y[3], u)
+        data.acc[3], data.l[3] = self.differential.calc(data.differential[3], data.y[3], u)
         data.ki[3] = np.concatenate([data.y[3][nq:], data.acc[3]])
         data.dx = (data.ki[0] + 2. * data.ki[1] + 2. * data.ki[2] + data.ki[3]) * dt / 6
-        data.xnext[:] = model.differential.State.integrate(x, data.dx)
+        data.xnext[:] = self.differential.State.integrate(x, data.dx)
 
         data.cost = (data.l[0] + 2 * data.l[1] + 2 * data.l[2] + data.l[3]) / 6
 
@@ -147,7 +148,7 @@ class IntegratedActionModelRK4:
     dk2_dx = dk2_dy2 * dy2_dx
     dk3_dx = dk3_dy3 * dy3_dx
 
-    dk1_dyi = model.differential.calcdiff(yi) for all i
+    dk1_dyi = self.differential.calcdiff(yi) for all i
 
     dy0_dx = Identity
     dy1_dx = d(integrate(x, (dt/2)k0))_dx = dintegrate_left + dt/2*dintegrate_right*dk0_dx
@@ -174,11 +175,12 @@ class IntegratedActionModelRK4:
     dy3_du = dintegrate_right*dt*dk2_du
     '''
 
-    def calcDiff(model, data, x, u=None, recalc=True):
-        ndx, nu, nv, dt = model.ndx, model.nu, model.nv, model.timeStep
-        if recalc: model.calc(data, x, u)
+    def calcDiff(self, data, x, u=None, recalc=True):
+        ndx, nu, nv, dt = self.ndx, self.nu, self.nv, self.timeStep
+        if recalc:
+            self.calc(data, x, u)
         for i in xrange(4):
-            model.differential.calcDiff(data.differential[i], data.y[i], u, recalc=False)
+            self.differential.calcDiff(data.differential[i], data.y[i], u, recalc=False)
             data.dki_dy[i] = np.bmat([[np.zeros([nv, nv]), np.identity(nv)], [data.differential[i].Fx]])
 
         data.dki_du[0] = np.vstack([np.zeros([nv, nu]), data.differential[0].Fu])
@@ -198,10 +200,10 @@ class IntegratedActionModelRK4:
         data.ddli_dxdu[0] = data.differential[0].Lxu
 
         for i in xrange(1, 4):
-            c = model.rk4_inc[i - 1] * dt
-            dyi_dx, dyi_ddx = model.State.Jintegrate(x, c * data.ki[i - 1])
+            c = self.rk4_inc[i - 1] * dt
+            dyi_dx, dyi_ddx = self.State.Jintegrate(x, c * data.ki[i - 1])
 
-            #---------Finding the derivative wrt u--------------
+            # ---------Finding the derivative wrt u--------------
             data.dy_du[i] = c * np.dot(dyi_ddx, data.dki_du[i - 1])
             data.dki_du[i] = np.vstack([
                 c * data.dki_du[i - 1][nv:, :],
@@ -213,7 +215,7 @@ class IntegratedActionModelRK4:
             data.ddli_ddu[i] = data.differential[i].Luu + np.dot(data.dy_du[i].T, data.differential[i].Lxu) + np.dot(
                 data.dy_du[i].T, np.dot(data.differential[i].Lxx, data.dy_du[i]))
 
-            #---------Finding the derivative wrt x--------------
+            # ---------Finding the derivative wrt x--------------
             data.dy_dx[i] = dyi_dx + c * np.dot(dyi_ddx, data.dki_dx[i - 1])
             data.dki_dx[i] = np.dot(data.dki_dy[i], data.dy_dx[i])
 
@@ -222,7 +224,7 @@ class IntegratedActionModelRK4:
             data.ddli_dxdu[i] = np.dot(data.dy_dx[i].T, data.differential[i].Lxu) + np.dot(
                 data.dy_dx[i].T, np.dot(data.differential[i].Lxx, data.dy_du[i]))
 
-        dxnext_dx, dxnext_ddx = model.State.Jintegrate(x, data.dx)
+        dxnext_dx, dxnext_ddx = self.State.Jintegrate(x, data.dx)
         ddx_dx = (data.dki_dx[0] + 2. * data.dki_dx[1] + 2. * data.dki_dx[2] + data.dki_dx[3]) * dt / 6
         data.ddx_du = (data.dki_du[0] + 2. * data.dki_du[1] + 2. * data.dki_du[2] + data.dki_du[3]) * dt / 6
         data.Fx[:] = dxnext_dx + np.dot(dxnext_ddx, ddx_dx)
@@ -246,12 +248,8 @@ class IntegratedActionDataRK4:
 
         for i in xrange(4):
             self.differential[i] = model.differential.createData()
-        self.l = [
-            np.nan,
-        ] * 4
-        self.ki = [
-            np.zeros([ndx]),
-        ] * 4
+        self.l = [np.nan] * 4
+        self.ki = [np.zeros([ndx])] * 4
 
         self.F = np.zeros([ndx, ndx + nu])
         self.xnext = np.zeros([nx])
@@ -265,7 +263,7 @@ class IntegratedActionDataRK4:
         self.Fx = self.F[:, :ndx]
         self.Fu = self.F[:, ndx:]
 
-        #Quantities for derivatives
+        # Quantities for derivatives
         self.dx = [
             np.zeros([ndx]),
         ] * 4

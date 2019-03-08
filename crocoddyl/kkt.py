@@ -48,10 +48,14 @@ class SolverKKT:
         obtained from integrating the us (roll-out).
         If copy is True, make a copy of the data.
         '''
-        if xs is None: xs = [m.State.zero() for m in self.models()]
-        elif copy: xs = [x.copy() for x in xs]
-        if us is None: us = [np.zeros(m.nu) for m in self.problem.runningModels]
-        elif copy: us = [u.copy() for u in us]
+        if xs is None:
+            xs = [m.State.zero() for m in self.models()]
+        elif copy:
+            xs = [x.copy() for x in xs]
+        if us is None:
+            us = [np.zeros(m.nu) for m in self.problem.runningModels]
+        elif copy:
+            us = [u.copy() for u in us]
 
         assert (len(xs) == self.problem.T + 1)
         assert (len(us) == self.problem.T)
@@ -88,7 +92,7 @@ class SolverKKT:
             self.Fu[cx0 + ix:cx0 + ix + ndx, iu:iu + nu] = -data.Fu
 
             # constraint value = xnext_guess - f(x_guess,u_guess) = diff(f,xnext_guesss)
-            self.cval[cx0 + ix:cx0 + ix + ndx] = model.State.diff(data.xnext, xguess)  #data.F
+            self.cval[cx0 + ix:cx0 + ix + ndx] = model.State.diff(data.xnext, xguess)  # data.F
             ix += ndx
             iu += nu
 
@@ -106,8 +110,10 @@ class SolverKKT:
         # Regularization
         ndx = sum([m.ndx for m in self.models()])
         nu = sum([m.nu for m in self.problem.runningModels])
-        if self.x_reg != 0: self.kkt[range(ndx), range(ndx)] += self.x_reg
-        if self.u_reg != 0: self.kkt[range(ndx, ndx + nu), range(ndx, ndx + nu)] += self.u_reg
+        if self.x_reg != 0:
+            self.kkt[range(ndx), range(ndx)] += self.x_reg
+        if self.u_reg != 0:
+            self.kkt[range(ndx, ndx + nu), range(ndx, ndx + nu)] += self.u_reg
 
         return self.cost
 
@@ -117,7 +123,8 @@ class SolverKKT:
         if recalc is True, run self.calc() before hand. self.setCandidate
         must have been called before.
         '''
-        if recalc: self.calc()
+        if recalc:
+            self.calc()
         self.primaldual = np.linalg.solve(self.kkt, -self.kktref)
         self.primal = self.primaldual[:self.ndx + self.nu]
         p_x = self.primaldual[:self.ndx]
@@ -190,12 +197,14 @@ class SolverKKT:
 
             for a in self.alphas:
                 dV = self.tryStep(a)
-                if verbose: print('\t\tAccept? %f %f' % (dV, d1 * a + .5 * d2 * a**2))
+                if verbose:
+                    print('\t\tAccept? %f %f' % (dV, d1 * a + .5 * d2 * a**2))
                 if d1 < 1e-9 or not isFeasible or dV > self.th_acceptStep * (d1 * a + .5 * d2 * a**2):
                     # Accept step
                     self.setCandidate(self.xs_try, self.us_try, isFeasible=True, copy=False)
                     break
-            if verbose: print('Accept iter=%d, a=%f, cost=%.8f' % (i, a, self.problem.calc(self.xs, self.us)))
+            if verbose:
+                print('Accept iter=%d, a=%f, cost=%.8f' % (i, a, self.problem.calc(self.xs, self.us)))
 
             self.stop = sum(self.stoppingCriteria())
             if self.stop < self.th_stop:

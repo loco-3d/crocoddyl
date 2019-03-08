@@ -2,13 +2,13 @@ import numpy as np
 from numpy.linalg import norm
 
 import pinocchio
-from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, CallbackDDPVerbose, ContactModel3D,
-                       ContactModelMultiple, CostModelCoM, CostModelControl, CostModelFrameTranslation, CostModelState,
-                       CostModelSum, DifferentialActionModelFloatingInContact, IntegratedActionModelEuler,
-                       ShootingProblem, SolverDDP, StatePinocchio, a2m, loadHyQ, m2a)
+from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, ContactModel3D, ContactModelMultiple,
+                       CostModelCoM, CostModelControl, CostModelState, CostModelSum,
+                       DifferentialActionModelFloatingInContact, IntegratedActionModelEuler, ShootingProblem,
+                       SolverDDP, StatePinocchio, a2m, loadHyQ, m2a)
 
-## This is an integrative test where we checked that the DDP solver generates
-## a CoM motion for the HyQ robot as requested.
+# This is an integrative test where we checked that the DDP solver generates
+# a CoM motion for the HyQ robot as requested.
 
 
 class SimpleQuadrupedProblem:
@@ -32,10 +32,6 @@ class SimpleQuadrupedProblem:
         pinocchio.forwardKinematics(self.rmodel, self.rdata, q0)
         pinocchio.updateFramePlacements(self.rmodel, self.rdata)
         com0 = m2a(pinocchio.centerOfMass(self.rmodel, self.rdata, q0))
-        lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
-        rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
-        lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
-        rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
 
         # Defining the action models along the time instances
         comModels = []
@@ -117,7 +113,7 @@ supportKnots = 2
 
 # Creating the CoM problem and solving it
 ddp = SolverDDP(walk.createProblem(x0, comGoTo, timeStep, supportKnots))
-#ddp.callback = [ CallbackDDPVerbose() ]
+# ddp.callback = [ CallbackDDPVerbose() ]
 ddp.th_stop = 1e-9
 ddp.solve(maxiter=1000, regInit=.1, init_xs=[rmodel.defaultState] * len(ddp.models()))
 

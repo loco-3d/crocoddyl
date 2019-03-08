@@ -2,21 +2,21 @@ import sys
 import unittest
 
 testmodules = [
-  # 'test_robots',
-  # 'test_state',
-  # 'test_activation',
-  # 'test_costs',
-  # 'test_dse3',
-  # 'test_actuation',
-  # 'test_contacts',
-  # 'test_actions',
-  # 'test_dynamic_derivatives',
-  # 'test_impact',
-  # 'test_rk4',
-  # 'test_solvers',
-  # 'test_ddp_contact',
-  # 'test_armature',
-  # 'test_quadruped',
+    # 'test_robots',
+    # 'test_state',
+    # 'test_activation',
+    # 'test_costs',
+    # 'test_dse3',
+    # 'test_actuation',
+    # 'test_contacts',
+    # 'test_actions',
+    # 'test_dynamic_derivatives',
+    # 'test_impact',
+    # 'test_rk4',
+    # 'test_solvers',
+    # 'test_ddp_contact',
+    # 'test_armature',
+    # 'test_quadruped',
 ]
 
 suite = unittest.TestSuite()

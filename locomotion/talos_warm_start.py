@@ -1,13 +1,11 @@
-from time import sleep
-
 import numpy as np
 
 import conf_talos_warm_start as conf
 import locomote
 import pinocchio
 from centroidal_utils import createMultiphaseShootingProblem, createPhiFromContactSequence, createSwingTrajectories
-from crocoddyl import (ActionModelImpact, CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay,
-                       CallbackSolverTimer, ShootingProblem, SolverDDP, StatePinocchio, a2m, m2a)
+from crocoddyl import (ActionModelImpact, CallbackDDPVerbose, CallbackSolverDisplay, ShootingProblem, SolverDDP,
+                       StatePinocchio, a2m, m2a)
 from locomote import ContactSequenceHumanoid
 
 np.set_printoptions(linewidth=400, suppress=True)
@@ -16,32 +14,32 @@ rmodel = robot.model
 rdata = robot.data
 rmodel.defaultState = np.concatenate([m2a(robot.q0), np.zeros(rmodel.nv)])
 
-#----------------Load Contact Phases-----------------------
+# ----------------Load Contact Phases-----------------------
 cs = ContactSequenceHumanoid(0)
 cs.loadFromXML(conf.MUSCOD_CS_OUTPUT_FILENAME, conf.CONTACT_SEQUENCE_XML_TAG)
 
-#----------------Define References-------------------------
+# ----------------Define References-------------------------
 
 swing_ref = createSwingTrajectories(rmodel, rdata, conf.X_init, conf.contact_patches, 0.005)
 phi_c = createPhiFromContactSequence(rmodel, rdata, cs, conf.contact_patches.keys())
 
-#----------------Define Problem----------------------------
+# ----------------Define Problem----------------------------
 models = createMultiphaseShootingProblem(rmodel, rdata, conf.contact_patches, cs, phi_c, swing_ref, conf.DT)
 
-disp = lambda xs: disptraj(robot, xs)
+# disp = lambda xs: disptraj(robot, xs)
 
 problem = ShootingProblem(m2a(conf.X_init[0]), models[:-1], models[-1])
 
-#Set contacts in the data elements. Ugly.
-#This is defined for IAMEuler. If using IAMRK4, differential is a list. so we need to change.
+# Set contacts in the data elements. Ugly.
+# This is defined for IAMEuler. If using IAMRK4, differential is a list. so we need to change.
 for d in problem.runningDatas:
-    if hasattr(d, "differential"):  #Because we also have the impact models without differntial.
+    if hasattr(d, "differential"):  # Because we also have the impact models without differntial.
         for (patchname, contactData) in d.differential.contact.contacts.iteritems():
             if "forces_" + patchname in d.differential.costs.costs:
                 d.differential.costs["forces_" + patchname].contact = contactData
-#---------Ugliness over------------------------
+# ---------Ugliness over------------------------
 
-#-----------Create inital trajectory---------------
+# -----------Create inital trajectory---------------
 init = lambda t: 0
 init.X = []
 init.U = []
@@ -56,12 +54,12 @@ dt = conf.DT
 
 x_eval = lambda t: m2a(x_spl.eval(t)[0])
 for i, (m, d) in enumerate(zip(problem.runningModels, problem.runningDatas)):
-    #Impact models have zero timestep, thus they are copying the same state as the beginning of the next action model
-    #State and control are defined at the beginning of the time step.
+    # Impact models have zero timestep, thus they are copying the same state as the beginning of the next action model
+    # State and control are defined at the beginning of the time step.
     if isinstance(m, ActionModelImpact):
         init.X.append(x_eval((i + 1) * dt))
         init.U.append(np.zeros(m.nu))
-        #print "impact at ",i
+        # print "impact at ",i
     else:
         xp = x_eval(i * dt)
         xn = x_eval((i + 1) * dt)
@@ -75,24 +73,24 @@ for i, (m, d) in enumerate(zip(problem.runningModels, problem.runningDatas)):
         u -= (np.dot(contactJ.transpose(), f))
         init.U.append(np.array(u[6:]).squeeze().copy())
 init.X.append(conf.X_init[-1])
-#---------------Display Initial Trajectory--------------
+# ---------------Display Initial Trajectory--------------
 if conf.DISPLAY:
     robot.initDisplay(loadModel=True)
 if conf.DISPLAY:
     for x in init.X:
         robot.display(a2m(x[:robot.nq]))
-        #sleep(0.005)
-#----------------------
+        # sleep(0.005)
+# ----------------------
 
 ddp = SolverDDP(problem)
-ddp.callback = [CallbackDDPVerbose()]  #, CallbackSolverTimer()]
+ddp.callback = [CallbackDDPVerbose()]  # CallbackSolverTimer()]
 if conf.RUNTIME_DISPLAY:
     ddp.callback.append(CallbackSolverDisplay(robot, 4))
 ddp.th_stop = 1e-9
 ddp.solve(maxiter=100, regInit=0.1, init_xs=init.X, init_us=init.U)
-#---------------Display Final Trajectory--------------
+# ---------------Display Final Trajectory--------------
 if conf.DISPLAY:
     for x in init.X:
         robot.display(a2m(x[:robot.nq]))
-        #sleep(0.005)
-#----------------------
+        # sleep(0.005)
+# ----------------------

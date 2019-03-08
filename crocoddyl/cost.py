@@ -4,7 +4,7 @@ from exceptions import RuntimeError
 import numpy as np
 
 import pinocchio
-from activation import ActivationModelInequality, ActivationModelQuad, ActivationModelWeightedQuad
+from activation import ActivationModelInequality, ActivationModelQuad
 from utils import EPS, m2a
 
 
@@ -28,10 +28,10 @@ class CostModelPinocchio:
     def createData(self, pinocchioData):
         return self.CostDataType(self, pinocchioData)
 
-    def calc(model, data, x, u):
+    def calc(self, data, x, u):
         assert (False and "This should be defined in the derivative class.")
 
-    def calcDiff(model, data, x, u, recalc=True):
+    def calcDiff(self, data, x, u, recalc=True):
         assert (False and "This should be defined in the derivative class.")
 
 
@@ -42,7 +42,7 @@ class CostDataPinocchio:
     '''
 
     def __init__(self, model, pinocchioData):
-        ncost, nq, nv, nx, ndx, nu = model.ncost, model.nq, model.nv, model.nx, model.ndx, model.nu
+        ncost, nv, ndx, nu = model.ncost, model.nv, model.ndx, model.nu
         self.pinocchio = pinocchioData
         self.cost = np.nan
         self.g = np.zeros(ndx + nu)
@@ -80,41 +80,44 @@ class CostModelNumDiff(CostModelPinocchio):
         self.model0 = costModel
         self.disturbance = np.sqrt(2 * EPS)
         self.withGaussApprox = withGaussApprox
-        if withGaussApprox: assert (costModel.withResiduals)
+        if withGaussApprox:
+            assert (costModel.withResiduals)
         self.reevals = reevals
 
-    def calc(model, data, x, u):
-        data.cost = model.model0.calc(data.data0, x, u)
-        if model.withGaussApprox: data.residuals = data.data0.residuals
+    def calc(self, data, x, u):
+        data.cost = self.model0.calc(data.data0, x, u)
+        if self.withGaussApprox:
+            data.residuals = data.data0.residuals
 
-    def calcDiff(model, data, x, u, recalc=True):
-        if recalc: model.calc(data, x, u)
-        ncost, nq, nv, nx, ndx, nu = model.ncost, model.nq, model.nv, model.nx, model.ndx, model.nu
-        h = model.disturbance
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        ndx, nu = self.ndx, self.nu
+        h = self.disturbance
         dist = lambda i, n, h: np.array([h if ii == i else 0 for ii in range(n)])
-        Xint = lambda x, dx: model.State.integrate(x, dx)
+        Xint = lambda x, dx: self.State.integrate(x, dx)
         for ix in range(ndx):
             xi = Xint(x, dist(ix, ndx, h))
-            [r(model.model0.pinocchio, data.datax[ix].pinocchio, xi, u) for r in model.reevals]
-            c = model.model0.calc(data.datax[ix], xi, u)
+            [r(self.model0.pinocchio, data.datax[ix].pinocchio, xi, u) for r in self.reevals]
+            c = self.model0.calc(data.datax[ix], xi, u)
             data.Lx[ix] = (c - data.data0.cost) / h
-            if model.withGaussApprox:
+            if self.withGaussApprox:
                 data.Rx[:, ix] = (data.datax[ix].residuals - data.data0.residuals) / h
         for iu in range(nu):
             ui = u + dist(iu, nu, h)
-            [r(model.model0.pinocchio, data.datau[iu].pinocchio, x, ui) for r in model.reevals]
-            c = model.model0.calc(data.datau[iu], x, ui)
+            [r(self.model0.pinocchio, data.datau[iu].pinocchio, x, ui) for r in self.reevals]
+            c = self.model0.calc(data.datau[iu], x, ui)
             data.Lu[iu] = (c - data.data0.cost) / h
-            if model.withGaussApprox:
+            if self.withGaussApprox:
                 data.Ru[:, iu] = (data.datau[iu].residuals - data.data0.residuals) / h
-        if model.withGaussApprox:
+        if self.withGaussApprox:
             data.L[:, :] = np.dot(data.R.T, data.R)
 
 
 class CostDataNumDiff(CostDataPinocchio):
     def __init__(self, model, pinocchioData):
         CostDataPinocchio.__init__(self, model, pinocchioData)
-        ncost, nq, nv, nx, ndx, nu = model.ncost, model.nq, model.nv, model.nx, model.ndx, model.nu
+        nx, nu = model.nx, model.nu
         self.pinocchio = pinocchioData
         self.data0 = model.model0.createData(pinocchioData)
         self.datax = [model.model0.createData(model.model0.pinocchio.createData()) for i in range(nx)]
@@ -142,8 +145,8 @@ class CostModelSum(CostModelPinocchio):
         self.costs = OrderedDict()
 
     def addCost(self, name, cost, weight):
-        assert (cost.withResiduals
-                and '''The cost-of-sums class has not been designed nor tested for non sum of squares
+        assert (cost.withResiduals and '''
+                The cost-of-sums class has not been designed nor tested for non sum of squares
                 cost functions. It should not be a big deal to modify it, but this is not done
                 yet. ''')
         self.costs.update([[name, self.CostItem(cost=cost, name=name, weight=weight)]])
@@ -159,29 +162,30 @@ class CostModelSum(CostModelPinocchio):
         else:
             raise (KeyError("The key should be string or costmodel."))
 
-    def calc(model, data, x, u):
+    def calc(self, data, x, u):
         data.cost = 0
         nr = 0
-        for m, d in zip(model.costs.values(), data.costs.values()):
+        for m, d in zip(self.costs.values(), data.costs.values()):
             data.cost += m.weight * m.cost.calc(d, x, u)
-            if model.withResiduals:
+            if self.withResiduals:
                 data.residuals[nr:nr + m.cost.ncost] = np.sqrt(m.weight) * d.residuals
                 nr += m.cost.ncost
         return data.cost
 
-    def calcDiff(model, data, x, u, recalc=True):
-        if recalc: model.calc(data, x, u)
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
         data.g.fill(0)
         data.L.fill(0)
         nr = 0
-        for m, d in zip(model.costs.values(), data.costs.values()):
+        for m, d in zip(self.costs.values(), data.costs.values()):
             m.cost.calcDiff(d, x, u, recalc=False)
             data.Lx[:] += m.weight * d.Lx
             data.Lu[:] += m.weight * d.Lu
             data.Lxx[:] += m.weight * d.Lxx
             data.Lxu[:] += m.weight * d.Lxu
             data.Luu[:] += m.weight * d.Luu
-            if model.withResiduals:
+            if self.withResiduals:
                 data.Rx[nr:nr + m.cost.ncost] = np.sqrt(m.weight) * d.Rx
                 data.Ru[nr:nr + m.cost.ncost] = np.sqrt(m.weight) * d.Ru
                 nr += m.cost.ncost
@@ -219,19 +223,20 @@ class CostModelFrameTranslation(CostModelPinocchio):
         self.frame = frame
         self.activation = activation if activation is not None else ActivationModelQuad()
 
-    def calc(model, data, x, u):
-        data.residuals = m2a(data.pinocchio.oMf[model.frame].translation) - model.ref
-        data.cost = sum(model.activation.calc(data.activation, data.residuals))
+    def calc(self, data, x, u):
+        data.residuals = m2a(data.pinocchio.oMf[self.frame].translation) - self.ref
+        data.cost = sum(self.activation.calc(data.activation, data.residuals))
         return data.cost
 
-    def calcDiff(model, data, x, u, recalc=True):
-        if recalc: model.calc(data, x, u)
-        ncost, nq, nv, nx, ndx, nu = model.ncost, model.nq, model.nv, model.nx, model.ndx, model.nu
-        pinocchio.updateFramePlacements(model.pinocchio, data.pinocchio)
-        R = data.pinocchio.oMf[model.frame].rotation
-        J = R * pinocchio.getFrameJacobian(model.pinocchio, data.pinocchio, model.frame,
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        nq = self.nq
+        pinocchio.updateFramePlacements(self.pinocchio, data.pinocchio)
+        R = data.pinocchio.oMf[self.frame].rotation
+        J = R * pinocchio.getFrameJacobian(self.pinocchio, data.pinocchio, self.frame,
                                            pinocchio.ReferenceFrame.LOCAL)[:3, :]
-        Ax, Axx = model.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
+        Ax, Axx = self.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
         data.Rq[:, :nq] = J
         data.Lq[:] = np.dot(J.T, Ax)
         data.Lqq[:, :] = np.dot(data.Rq.T, Axx * data.Rq)  # J is a matrix, use Rq instead.
@@ -265,19 +270,19 @@ class CostModelFrameVelocity(CostModelPinocchio):
         self.frame = frame
         self.activation = activation if activation is not None else ActivationModelQuad()
 
-    def calc(model, data, x, u):
-        data.residuals[:] = m2a(pinocchio.getFrameVelocity(model.pinocchio, data.pinocchio,
-                                                           model.frame).vector) - model.ref
-        data.cost = sum(model.activation.calc(data.activation, data.residuals))
+    def calc(self, data, x, u):
+        data.residuals[:] = m2a(pinocchio.getFrameVelocity(self.pinocchio, data.pinocchio,
+                                                           self.frame).vector) - self.ref
+        data.cost = sum(self.activation.calc(data.activation, data.residuals))
         return data.cost
 
-    def calcDiff(model, data, x, u, recalc=True):
-        if recalc: model.calc(data, x, u)
-        ncost, nq, nv, nx, ndx, nu = model.ncost, model.nq, model.nv, model.nx, model.ndx, model.nu
-        dv_dq, dv_dvq = pinocchio.getJointVelocityDerivatives(model.pinocchio, data.pinocchio, data.joint,
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        dv_dq, dv_dvq = pinocchio.getJointVelocityDerivatives(self.pinocchio, data.pinocchio, data.joint,
                                                               pinocchio.ReferenceFrame.LOCAL)
 
-        Ax, Axx = model.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
+        Ax, Axx = self.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
         data.Rq[:, :] = data.fXj * dv_dq
         data.Rv[:, :] = data.fXj * dv_dvq
         data.Lx[:] = np.dot(data.Rx.T, Ax)
@@ -313,19 +318,19 @@ class CostModelFrameVelocityLinear(CostModelPinocchio):
         self.frame = frame
         self.activation = activation if activation is not None else ActivationModelQuad()
 
-    def calc(model, data, x, u):
-        data.residuals[:] = m2a(pinocchio.getFrameVelocity(model.pinocchio, data.pinocchio,
-                                                           model.frame).linear) - model.ref
-        data.cost = sum(model.activation.calc(data.activation, data.residuals))
+    def calc(self, data, x, u):
+        data.residuals[:] = m2a(pinocchio.getFrameVelocity(self.pinocchio, data.pinocchio,
+                                                           self.frame).linear) - self.ref
+        data.cost = sum(self.activation.calc(data.activation, data.residuals))
         return data.cost
 
-    def calcDiff(model, data, x, u, recalc=True):
-        if recalc: model.calc(data, x, u)
-        ncost, nq, nv, nx, ndx, nu = model.ncost, model.nq, model.nv, model.nx, model.ndx, model.nu
-        dv_dq, dv_dvq = pinocchio.getJointVelocityDerivatives(model.pinocchio, data.pinocchio, data.joint,
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        dv_dq, dv_dvq = pinocchio.getJointVelocityDerivatives(self.pinocchio, data.pinocchio, data.joint,
                                                               pinocchio.ReferenceFrame.LOCAL)
 
-        Ax, Axx = model.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
+        Ax, Axx = self.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
         data.Rq[:, :] = (data.fXj * dv_dq)[:3, :]
         data.Rv[:, :] = (data.fXj * dv_dvq)[:3, :]
         data.Lx[:] = np.dot(data.Rx.T, Ax)
@@ -361,20 +366,21 @@ class CostModelFramePlacement(CostModelPinocchio):
         self.frame = frame
         self.activation = activation if activation is not None else ActivationModelQuad()
 
-    def calc(model, data, x, u):
-        data.rMf = model.ref.inverse() * data.pinocchio.oMf[model.frame]
+    def calc(self, data, x, u):
+        data.rMf = self.ref.inverse() * data.pinocchio.oMf[self.frame]
         data.residuals[:] = m2a(pinocchio.log(data.rMf).vector)
-        data.cost = sum(model.activation.calc(data.activation, data.residuals))
+        data.cost = sum(self.activation.calc(data.activation, data.residuals))
         return data.cost
 
-    def calcDiff(model, data, x, u, recalc=True):
-        if recalc: model.calc(data, x, u)
-        ncost, nq, nv, nx, ndx, nu = model.ncost, model.nq, model.nv, model.nx, model.ndx, model.nu
-        pinocchio.updateFramePlacements(model.pinocchio, data.pinocchio)
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        nq = self.nq
+        pinocchio.updateFramePlacements(self.pinocchio, data.pinocchio)
         J = np.dot(
             pinocchio.Jlog6(data.rMf),
-            pinocchio.getFrameJacobian(model.pinocchio, data.pinocchio, model.frame, pinocchio.ReferenceFrame.LOCAL))
-        Ax, Axx = model.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
+            pinocchio.getFrameJacobian(self.pinocchio, data.pinocchio, self.frame, pinocchio.ReferenceFrame.LOCAL))
+        Ax, Axx = self.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
         data.Rq[:, :nq] = J
         data.Lq[:] = np.dot(J.T, Ax)
         data.Lqq[:, :] = np.dot(data.Rq.T, Axx * data.Rq)  # J is a matrix, use Rq instead.
@@ -407,15 +413,16 @@ class CostModelCoM(CostModelPinocchio):
         self.ref = ref
         self.activation = activation if activation is not None else ActivationModelQuad()
 
-    def calc(model, data, x, u):
-        data.residuals = m2a(data.pinocchio.com[0]) - model.ref
-        data.cost = sum(model.activation.calc(data.activation, data.residuals))
+    def calc(self, data, x, u):
+        data.residuals = m2a(data.pinocchio.com[0]) - self.ref
+        data.cost = sum(self.activation.calc(data.activation, data.residuals))
         return data.cost
 
-    def calcDiff(model, data, x, u, recalc=True):
-        if recalc: model.calc(data, x, u)
-        ncost, nq, nv, nx, ndx, nu = model.ncost, model.nq, model.nv, model.nx, model.ndx, model.nu
-        Ax, Axx = model.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        nq = self.nq
+        Ax, Axx = self.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
         J = data.pinocchio.Jcom
         data.Rq[:, :nq] = J
         data.Lq[:] = np.dot(J.T, Ax)
@@ -444,15 +451,16 @@ class CostModelState(CostModelPinocchio):
         self.ref = ref if ref is not None else State.zero()
         self.activation = activation if activation is not None else ActivationModelQuad()
 
-    def calc(model, data, x, u):
-        data.residuals[:] = model.State.diff(model.ref, x)
-        data.cost = sum(model.activation.calc(data.activation, data.residuals))
+    def calc(self, data, x, u):
+        data.residuals[:] = self.State.diff(self.ref, x)
+        data.cost = sum(self.activation.calc(data.activation, data.residuals))
         return data.cost
 
-    def calcDiff(model, data, x, u, recalc=True):
-        if recalc: model.calc(data, x, u)
-        data.Rx[:, :] = (model.State.Jdiff(model.ref, x, 'second').T).T
-        Ax, Axx = model.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        data.Rx[:, :] = (self.State.Jdiff(self.ref, x, 'second').T).T
+        Ax, Axx = self.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
         data.Lx[:] = np.dot(data.Rx.T, Ax)
         data.Lxx[:, :] = np.dot(data.Rx.T, Axx * data.Rx)
 
@@ -471,20 +479,22 @@ class CostModelControl(CostModelPinocchio):
     def __init__(self, pinocchioModel, nu=None, ref=None, activation=None):
         self.CostDataType = CostDataControl
         nu = nu if nu is not None else pinocchioModel.nv
-        if ref is not None: assert (ref.shape == (nu, ))
+        if ref is not None:
+            assert (ref.shape == (nu, ))
         CostModelPinocchio.__init__(self, pinocchioModel, nu=nu, ncost=nu)
         self.ref = ref
         self.activation = activation if activation is not None else ActivationModelQuad()
 
-    def calc(model, data, x, u):
-        data.residuals[:] = u if model.ref is None else u - model.ref
-        data.cost = sum(model.activation.calc(data.activation, data.residuals))
+    def calc(self, data, x, u):
+        data.residuals[:] = u if self.ref is None else u - self.ref
+        data.cost = sum(self.activation.calc(data.activation, data.residuals))
         return data.cost
 
-    def calcDiff(model, data, x, u, recalc=True):
-        if recalc: model.calc(data, x, u)
-        #data.Ru[:,:] = np.eye(nu)
-        Ax, Axx = model.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        # data.Ru[:,:] = np.eye(nu)
+        Ax, Axx = self.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
         data.Lu[:] = Ax
         data.Luu[:, :] = np.diag(m2a(Axx))
         assert (data.Luu[0, 0] == 1 and data.Luu[1, 0] == 0)
@@ -493,7 +503,7 @@ class CostModelControl(CostModelPinocchio):
 class CostDataControl(CostDataPinocchio):
     def __init__(self, model, pinocchioData):
         CostDataPinocchio.__init__(self, model, pinocchioData)
-        ncost, nq, nv, nx, ndx, nu = model.ncost, model.nq, model.nv, model.nx, model.ndx, model.nu
+        nu = model.nu
         self.activation = model.activation.createData()
         self.Lx = 0
         self.Lxx = 0
@@ -516,21 +526,21 @@ class CostModelForce(CostModelPinocchio):
         self.contact = contactModel
         self.activation = activation if activation is not None else ActivationModelQuad()
 
-    def calc(model, data, x, u):
+    def calc(self, data, x, u):
         if data.contact is None:
             raise RuntimeError('''The CostForce data should be specifically initialized from the
             contact data ... no automatic way of doing that yet ...''')
         data.f = data.contact.f
-        data.residuals = data.f - model.ref
-        data.cost = sum(model.activation.calc(data.activation, data.residuals))
+        data.residuals = data.f - self.ref
+        data.cost = sum(self.activation.calc(data.activation, data.residuals))
         return data.cost
 
-    def calcDiff(model, data, x, u, recalc=True):
-        if recalc: model.calc(data, x, u)
-        assert (model.nu == len(u) and model.contact.nu == model.nu)
-        ncost, nq, nv, nx, ndx, nu = model.ncost, model.nq, model.nv, model.nx, model.ndx, model.nu
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        assert (self.nu == len(u) and self.contact.nu == self.nu)
         df_dx, df_du = data.contact.df_dx, data.contact.df_du
-        Ax, Axx = model.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
+        Ax, Axx = self.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
         data.Rx[:, :] = df_dx  # This is useless.
         data.Ru[:, :] = df_du  # This is useless
 
@@ -567,27 +577,27 @@ class CostModelForceLinearCone(CostModelPinocchio):
         assert (activation is None and "defining your own activation model is not possible here.")
         self.activation = ActivationModelInequality(np.array([-np.inf] * self.nfaces), np.zeros(self.nfaces))
 
-    def calc(model, data, x, u):
+    def calc(self, data, x, u):
         if data.contact is None:
             raise RuntimeError('''The CostForce data should be specifically initialized from the
             contact data ... no automatic way of doing that yet ...''')
         data.f = data.contact.f
-        data.residuals = np.dot(model.A, data.f) - model.ref
-        data.cost = sum(model.activation.calc(data.activation, data.residuals))
+        data.residuals = np.dot(self.A, data.f) - self.ref
+        data.cost = sum(self.activation.calc(data.activation, data.residuals))
         return data.cost
 
-    def calcDiff(model, data, x, u, recalc=True):
-        if recalc: model.calc(data, x, u)
-        assert (model.nu == len(u) and model.contact.nu == model.nu)
-        ncost, nq, nv, nx, ndx, nu = model.ncost, model.nq, model.nv, model.nx, model.ndx, model.nu
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        assert (self.nu == len(u) and self.contact.nu == self.nu)
         df_dx, df_du = data.contact.df_dx, data.contact.df_du
-        Ax, Axx = model.activation.calcDiff(data.activation, data.residuals)
+        Ax, Axx = self.activation.calcDiff(data.activation, data.residuals)
         sel = Axx.astype(bool)[:, 0]
-        A = model.A[sel, :]
+        A = self.A[sel, :]
         A2 = np.dot(A.T, A)
 
-        data.Rx[:, :] = np.dot(model.A, df_dx)
-        data.Ru[:, :] = np.dot(model.A, df_du)
+        data.Rx[:, :] = np.dot(self.A, df_dx)
+        data.Ru[:, :] = np.dot(self.A, df_du)
 
         data.Lx[:] = np.dot(data.Rx[sel, :].T, Ax[sel])
         data.Lu[:] = np.dot(data.Ru[sel, :].T, Ax[sel])

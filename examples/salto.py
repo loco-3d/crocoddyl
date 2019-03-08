@@ -12,34 +12,35 @@ iterations to converge.
 
 import sys
 
-from numpy.linalg import eig, inv, norm, pinv, svd
+import numpy as np
 
 import pinocchio
 from crocoddyl import (ActionModelImpact, ActivationModelInequality, ActivationModelWeightedQuad,
-                       ActuationModelFreeFloating, CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay,
-                       ContactModel6D, ContactModelMultiple, CostModelCoM, CostModelControl, CostModelFramePlacement,
-                       CostModelFrameVelocity, CostModelState, CostModelSum, DifferentialActionModelFloatingInContact,
-                       ImpulseModel6D, ImpulseModelMultiple, IntegratedActionModelEuler, ShootingProblem, SolverDDP,
-                       StatePinocchio, a2m, loadTalosLegs, m2a, plotDDPConvergence, plotOCSolution)
+                       ActuationModelFreeFloating, CallbackDDPVerbose, ContactModel6D, ContactModelMultiple,
+                       CostModelCoM, CostModelControl, CostModelFramePlacement, CostModelFrameVelocity, CostModelState,
+                       CostModelSum, DifferentialActionModelFloatingInContact, ImpulseModel6D, ImpulseModelMultiple,
+                       IntegratedActionModelEuler, ShootingProblem, SolverDDP, StatePinocchio, loadTalosLegs, m2a)
 from crocoddyl.diagnostic import displayTrajectory
-from crocoddyl.impact import CostModelImpactCoM, CostModelImpactWholeBody
-from pinocchio.utils import *
+from crocoddyl.impact import CostModelImpactCoM
+from pinocchio.utils import eye, zero
+
+# from pinocchio.utils import *
 
 # Number of iterations in each phase. If 0, try to load.
-PHASE_ITERATIONS = { "initial": 200,
-                     "angle":   200,
-                     "landing": 200
-                     }
+PHASE_ITERATIONS = {"initial": 200, "angle": 200, "landing": 200}
 PHASE_BACKUP = {"initial": False, "angle": False, "landing": False}
 BACKUP_PATH = "npydata/salto."
 
-if 'load' in sys.argv: PHASE_ITERATIONS = {k: 0 for k in PHASE_ITERATIONS}
-if 'save' in sys.argv: PHASE_BACKUP = {k: True for k in PHASE_ITERATIONS}
+if 'load' in sys.argv:
+    PHASE_ITERATIONS = {k: 0 for k in PHASE_ITERATIONS}
+if 'save' in sys.argv:
+    PHASE_BACKUP = {k: True for k in PHASE_ITERATIONS}
 WITHDISPLAY = 'disp' in sys.argv
 
 robot = loadTalosLegs()
 robot.model.armature[6:] = .3
-if WITHDISPLAY: robot.initDisplay(loadModel=True)
+if WITHDISPLAY:
+    robot.initDisplay(loadModel=True)
 
 rmodel = robot.model
 rdata = rmodel.createData()
@@ -99,18 +100,14 @@ def runningModel(contactIds, effectors, com=None, integrationStep=1e-2):
 
     # Creating the action model for the KKT dynamics with simpletic Euler
     # integration scheme
-    dmodel =
-             DifferentialActionModelFloatingInContact(rmodel,
-                                                      actModel,
-                                                      contactModel,
-                                                      costModel)
+    dmodel = DifferentialActionModelFloatingInContact(rmodel, actModel, contactModel, costModel)
     model = IntegratedActionModelEuler(dmodel)
     model.timeStep = integrationStep
     return model
 
 
 def pseudoImpactModel(contactIds, effectors):
-    #assert(len(effectors)==1)
+    # assert(len(effectors)==1)
     model = runningModel(contactIds, effectors, integrationStep=0)
 
     costModel = model.differential.costs
@@ -145,13 +142,13 @@ def impactModel(contactIds, effectors):
 
     # Creating the action model for the KKT dynamics with simpletic Euler
     # integration scheme
-    model = ActionModelImpact(rmodel,impulseModel,costModel)
+    model = ActionModelImpact(rmodel, impulseModel, costModel)
     return model
 
 
-### --- MODEL SEQUENCE
-### --- MODEL SEQUENCE
-### --- MODEL SEQUENCE
+# --- MODEL SEQUENCE
+# --- MODEL SEQUENCE
+# --- MODEL SEQUENCE
 SE3 = pinocchio.SE3
 pinocchio.forwardKinematics(rmodel, rdata, q0)
 pinocchio.updateFramePlacements(rmodel, rdata)
@@ -159,9 +156,13 @@ right0 = rdata.oMf[rightId].translation
 left0 = rdata.oMf[leftId].translation
 com0 = m2a(pinocchio.centerOfMass(rmodel, rdata, q0))
 
-models = [ runningModel([ rightId, leftId ],{}, integrationStep=4e-2) for i in range(10) ] +  [ runningModel([ ],{},integrationStep=5e-2) for i in range(6)] +  [ runningModel([ ],{}, com=com0+[0,0,0.9],integrationStep=5e-2) ] +  [ runningModel([ ],{},integrationStep=5e-2) for i in range(8) ] +  [ impactModel([ leftId,rightId ],
-                          { rightId: SE3(eye(3), right0),
-                            leftId: SE3(eye(3), left0) }) ] +  [ runningModel([ rightId, leftId ],{},integrationStep=2e-2) for i in range(9)] +  [ runningModel([ rightId, leftId ],{}, integrationStep=0) ]
+models = [runningModel([rightId, leftId], {}, integrationStep=4e-2) for i in range(10)]
+models += [runningModel([], {}, integrationStep=5e-2) for i in range(6)]
+models += [runningModel([], {}, com=com0 + [0, 0, 0.9], integrationStep=5e-2)]
+models += [runningModel([], {}, integrationStep=5e-2) for i in range(8)]
+models += [impactModel([leftId, rightId], {rightId: SE3(eye(3), right0), leftId: SE3(eye(3), left0)})]
+models += [runningModel([rightId, leftId], {}, integrationStep=2e-2) for i in range(9)]
+models += [runningModel([rightId, leftId], {}, integrationStep=0)]
 
 high = [isinstance(m, IntegratedActionModelEuler) and 'com' in m.differential.costs.costs for m in models].index(True)
 models[high].differential.costs['com'].cost.activation = ActivationModelInequality(
@@ -197,9 +198,15 @@ problem = ShootingProblem(initialState=x0, runningModels=models[:imp], terminalM
 ddp = SolverDDP(problem)
 ddp.callback = [CallbackDDPVerbose()]
 ddp.th_stop = 1e-4
-us0 = [ m.differential.quasiStatic(d.differential,rmodel.defaultState) for m,d in zip(ddp.models(),ddp.datas())[:imp] ] +[np.zeros(0)]+[ m.differential.quasiStatic(d.differential,rmodel.defaultState) for m,d in zip(ddp.models(),ddp.datas())[imp+1:-1] ]
+us0 = [
+    m.differential.quasiStatic(d.differential, rmodel.defaultState) for m, d in zip(ddp.models(), ddp.datas())[:imp]
+] + [np.zeros(0)] + [
+    m.differential.quasiStatic(d.differential, rmodel.defaultState)
+    for m, d in zip(ddp.models(), ddp.datas())[imp + 1:-1]
+]
 
-if PHASE_ITERATIONS[PHASE_NAME] > 0: print("*** SOLVE %s ***" % PHASE_NAME)
+if PHASE_ITERATIONS[PHASE_NAME] > 0:
+    print("*** SOLVE %s ***" % PHASE_NAME)
 ddp.solve(
     maxiter=PHASE_ITERATIONS[PHASE_NAME],
     regInit=.1,
@@ -248,9 +255,10 @@ ddp.callback = [CallbackDDPVerbose()]
 ddp.th_stop = 1e-4
 
 ddp.xs = xsddp + [rmodel.defaultState] * (len(models) - len(xsddp))
-ddp.us = usddp + [ np.zeros(0) if isinstance(m,ActionModelImpact) else
-        m.differential.quasiStatic(d.differential,rmodel.defaultState) for m,d in
-        zip(ddp.models(),ddp.datas())[len(usddp):-1] ]
+ddp.us = usddp + [
+    np.zeros(0) if isinstance(m, ActionModelImpact) else m.differential.quasiStatic(
+        d.differential, rmodel.defaultState) for m, d in zip(ddp.models(), ddp.datas())[len(usddp):-1]
+]
 impact.costs['track30'].weight = 1e6
 impact.costs['track16'].weight = 1e6
 

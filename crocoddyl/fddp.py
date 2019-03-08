@@ -61,10 +61,14 @@ class SolverFDDP:
         :params isFeasible: True for xs are obtained from integrating the us (roll-out).
         :params copy: True for making a copy of the data
         """
-        if xs is None: xs = [m.State.zero() for m in self.models()]
-        elif copy: xs = [x.copy() for x in xs]
-        if us is None: us = [np.zeros(m.nu) for m in self.problem.runningModels]
-        elif copy: us = [u.copy() for u in us]
+        if xs is None:
+            xs = [m.State.zero() for m in self.models()]
+        elif copy:
+            xs = [x.copy() for x in xs]
+        if us is None:
+            us = [np.zeros(m.nu) for m in self.problem.runningModels]
+        elif copy:
+            us = [u.copy() for u in us]
 
         assert (len(xs) == self.problem.T + 1)
         assert (len(us) == self.problem.T)
@@ -77,7 +81,8 @@ class SolverFDDP:
         """
         self.cost = self.problem.calcDiff(self.xs, self.us)
         if self.isFeasible:
-            if hasattr(self, 'gaps'): del self.gaps
+            if hasattr(self, 'gaps'):
+                del self.gaps
         else:
             # Gap store the displacement to go from a feasible trajectory to the current xs.
             # gap is so that    xconti [+] gap = xcand  ...
@@ -95,7 +100,8 @@ class SolverFDDP:
         :returns the descent direction dx,du and the dual lambdas as lists of
         T+1, T and T+1 lengths.
         """
-        if recalc: self.calc()
+        if recalc:
+            self.calc()
         self.backwardPass()
         return [np.nan] * (self.problem.T + 1), self.k, self.Vx
 
@@ -135,7 +141,7 @@ class SolverFDDP:
         self.u_reg = regInit if regInit is not None else self.regMin
         self.wasFeasible = False
         for i in range(maxiter):
-            #print 'i',i
+            # print 'i',i
             try:
                 self.computeDirection()
             except ArithmeticError:
@@ -143,15 +149,15 @@ class SolverFDDP:
             d1, d2 = self.expectedImprovement()
 
             for a in self.alphas:
-                #print 'a',a
+                # print 'a',a
                 try:
                     self.dV = self.tryStep(a)
                 except ArithmeticError:
-                    #print 'a=%0.3f,   arithmerror .... reject' % a
+                    # print 'a=%0.3f,   arithmerror .... reject' % a
                     continue
                 self.dV_exp = a * (d1 + .5 * d2 * a)
-                #print 'a=%0.3f,   exp=%5.1e,   actual=%5.1e .... ' % (a,self.dV_exp,self.dV)
-                #or not self.isFeasible
+                # print 'a=%0.3f,   exp=%5.1e,   actual=%5.1e .... ' % (a,self.dV_exp,self.dV)
+                # or not self.isFeasible
                 if d1 < self.th_grad or self.dV > self.th_acceptStep * self.dV_exp:
                     # Accept step
                     self.wasFeasible = self.isFeasible
@@ -167,7 +173,8 @@ class SolverFDDP:
             self.stepLength = a
             self.iter = i
             self.stop = sum(self.stoppingCriteria())
-            if self.callback is not None: [c(self) for c in self.callback]
+            if self.callback is not None:
+                [c(self) for c in self.callback]
 
             if self.wasFeasible and self.stop < self.th_stop:
                 return self.xs, self.us, True
@@ -179,15 +186,17 @@ class SolverFDDP:
 
     def increaseRegularization(self):
         self.x_reg *= self.regFactor
-        if self.x_reg > self.regMax: self.x_reg = self.regMax
+        if self.x_reg > self.regMax:
+            self.x_reg = self.regMax
         self.u_reg = self.x_reg
 
     def decreaseRegularization(self):
         self.x_reg /= self.regFactor
-        if self.x_reg < self.regMin: self.x_reg = self.regMin
+        if self.x_reg < self.regMin:
+            self.x_reg = self.regMin
         self.u_reg = self.x_reg
 
-    #### DDP Specific
+    # DDP Specific
     def allocate(self):
         """  Allocate matrix space of Q,V and K.
         Done at init time (redo if problem change).
@@ -217,7 +226,7 @@ class SolverFDDP:
         scheme is used to ensure a good search direction. The norm of the gradient,
         a the directional derivatives are computed.
         """
-        xs, us = self.xs, self.us
+        xs = self.xs
         self.Vx[-1][:] = self.problem.terminalData.Lx
         self.Vxx[-1][:, :] = self.problem.terminalData.Lxx
         if self.x_reg != 0:
@@ -236,7 +245,8 @@ class SolverFDDP:
                 self.Qx[t][:] += np.dot(data.Fx.T, relinearization)
                 self.Qu[t][:] += np.dot(data.Fu.T, relinearization)
 
-            if self.u_reg != 0: self.Quu[t][range(model.nu), range(model.nu)] += self.u_reg
+            if self.u_reg != 0:
+                self.Quu[t][range(model.nu), range(model.nu)] += self.u_reg
 
             try:
                 if self.Quu[t].shape[0] > 0:
@@ -259,7 +269,8 @@ class SolverFDDP:
                     np.dot(self.k[t], self.Quu[t]), self.K[t])
             self.Vxx[t][:, :] = self.Qxx[t] - np.dot(self.Qxu[t], self.K[t])
 
-            if self.x_reg != 0: self.Vxx[t][range(model.ndx), range(model.ndx)] += self.x_reg
+            if self.x_reg != 0:
+                self.Vxx[t][range(model.ndx), range(model.ndx)] += self.x_reg
             raiseIfNan(self.Vxx[t], ArithmeticError('backward error'))
             raiseIfNan(self.Vx[t], ArithmeticError('backward error'))
 
@@ -296,7 +307,7 @@ class SolverFDDP:
             xtry[-1] = xnext.copy()
         else:
             xtry[-1] = self.problem.terminalModel.State.integrate(xnext, self.gaps[-1] * (1 - stepLength))
-        with np.warnings.catch_warnings() as npwarn:
+        with np.warnings.catch_warnings():
             np.warnings.simplefilter(warning)
             ctry += self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])[1]
         raiseIfNan(ctry, ArithmeticError('forward error'))

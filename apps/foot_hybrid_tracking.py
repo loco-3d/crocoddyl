@@ -1,19 +1,13 @@
-import warnings
-
-from numpy import asarray, dot
-from numpy.linalg import eig, inv, norm, pinv, svd
+import numpy as np
+from numpy.linalg import norm
 
 import pinocchio
-# --- DDP
-# --- DDP
-# --- DDP
 from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, CallbackDDPLogger, CallbackDDPVerbose,
                        CallbackSolverDisplay, ContactModel6D, ContactModelMultiple, CostModelControl,
-                       CostModelFramePlacement, CostModelFrameTranslation, CostModelFrameVelocity, CostModelState,
-                       CostModelSum, DifferentialActionModelFloatingInContact, ImpulseModelMultiple,
-                       IntegratedActionModelEuler, ShootingProblem, SolverDDP, SolverKKT, StatePinocchio, a2m,
-                       loadTalosLegs, m2a)
-from pinocchio.utils import *
+                       CostModelFramePlacement, CostModelFrameVelocity, CostModelState, CostModelSum,
+                       DifferentialActionModelFloatingInContact, IntegratedActionModelEuler, ShootingProblem,
+                       SolverDDP, StatePinocchio, loadTalosLegs, m2a)
+from pinocchio.utils import eye, zero
 
 robot = loadTalosLegs()
 robot.model.armature[6:] = 1.
@@ -71,7 +65,7 @@ x = m2a(np.concatenate([q, v]))
 
 print robot.framePlacement(q, robot.model.getFrameId(leftFrame))
 print robot.framePlacement(q, robot.model.getFrameId(rightFrame))
-disp = lambda xs: disptraj(robot, xs)
+# disp = lambda xs: disptraj(robot, xs)
 
 DT = 1.
 T = 20
@@ -123,12 +117,12 @@ ddp2.solve(verbose=True,maxiter=1000,regInit=.1)
 termmodel1.timeStep = 0
 termmodel2.timeStep = 0
 
-models = models1  #+ [ termmodel1 ] + models2
+models = models1  # + [ termmodel1 ] + models2
 termmodel = termmodel1
 
 problem = ShootingProblem(x, models, models[-1])
 ddp = SolverDDP(problem)
-ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]  #, CallbackSolverDisplay(robot,4)]
+ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]  # CallbackSolverDisplay(robot,4)]
 ddp.th_stop = 1e-9
 ddp.solve(maxiter=1000, regInit=.1, init_xs=[rmodel.defaultState] * len(ddp.models()))
 

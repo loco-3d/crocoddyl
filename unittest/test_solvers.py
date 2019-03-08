@@ -2,7 +2,7 @@ import copy
 import unittest
 
 import numpy as np
-from numpy.linalg import eig, inv, norm, pinv
+from numpy.linalg import eig, inv, norm
 
 # --- TEST DDP ---
 # ---------------------------------------------------
@@ -108,7 +108,7 @@ class SolverKKTTest(unittest.TestCase):
 NX = 1
 NU = 1
 model = ActionModelUnicycle()
-#model = ActionModelLQR(NX,NU); model.setUpRandom()
+# model = ActionModelLQR(NX,NU); model.setUpRandom()
 data = model.createData()
 LQR = isinstance(model, ActionModelLQR)
 
@@ -154,14 +154,15 @@ x0s, u0s = kkt.xs, kkt.us
 kkt.setCandidate(x0s, u0s)
 dxs, dus, ls = kkt.computeDirection()
 dv = kkt.tryStep(1)
-x1s = [x + dx for x, dx in zip(x0s, dxs)]
-u1s = [u + du for u, du in zip(u0s, dus)]
+x1s = [_x + dx for _x, dx in zip(x0s, dxs)]
+u1s = [_u + du for _u, du in zip(u0s, dus)]
 for xt, x1 in zip(kkt.xs_try, x1s):
     assert (norm(xt - x1) < 1e-9)
 for ut, u1 in zip(kkt.us_try, u1s):
     assert (norm(ut - u1) < 1e-9)
 d1, d2 = kkt.expectedImprovement()
-if LQR: assert (d1 + d2 / 2 + problem.calc(x1s, u1s) < 1e-9)
+if LQR:
+    assert (d1 + d2 / 2 + problem.calc(x1s, u1s) < 1e-9)
 assert (d1 + d2 / 2 + np.dot(.5 * np.dot(kkt.hess, np.concatenate(dxs + dus)) + kkt.grad, np.concatenate(dxs + dus)) <
         1e-9)
 
@@ -169,7 +170,8 @@ assert (d1 + d2 / 2 + np.dot(.5 * np.dot(kkt.hess, np.concatenate(dxs + dus)) + 
 kkt.setCandidate(x1s, u1s)
 kkt.calc()
 dL, dF = kkt.stoppingCriteria()
-if LQR: assert (dL + dF < 1e-9)
+if LQR:
+    assert (dL + dF < 1e-9)
 assert (abs(kkt.stoppingCriteria()[0] - sum((kkt.grad + np.dot(kkt.jacT, kkt.dual))**2)) < 1e-9)
 
 xopt, uopt, done = kkt.solve(maxiter=200)
@@ -177,9 +179,9 @@ assert (done)
 for i, _ in enumerate(uopt):
     assert (np.linalg.norm(model.calc(data, xopt[i], uopt[i])[0] - xopt[i + 1]) < 1e-9)
 
-###  INTEGRATIVE TEST ###
-###  INTEGRATIVE TEST ###
-###  INTEGRATIVE TEST ###
+#  INTEGRATIVE TEST ###
+#  INTEGRATIVE TEST ###
+#  INTEGRATIVE TEST ###
 T = 10
 WITH_PLOT = not True
 
@@ -215,7 +217,7 @@ if WITH_PLOT:
 
 model = ActionModelLQR(1, 1)
 model.setUpRandom()
-#model = ActionModelUnicycle()
+# model = ActionModelUnicycle()
 nx, nu = model.nx, model.nu
 
 problem = ShootingProblem(model.State.zero() + 1, [model], model)
@@ -223,7 +225,7 @@ ddp = SolverDDP(problem)
 
 xs = [m.State.zero() for m in problem.runningModels + [problem.terminalModel]]
 us = [np.zeros(m.nu) for m in problem.runningModels]
-#xs[0][:] = problem.initialState
+# xs[0][:] = problem.initialState
 xs[0] = np.random.rand(nx)
 us[0] = np.random.rand(nu)
 xs[1] = np.random.rand(nx)
@@ -274,7 +276,7 @@ f0 = x1pred
 l1x = v1x
 l1xx = v1xx
 
-#for n in [ 'x0ref','l0x','l0u','l0xx','l0xu','l0uu','f0x','f0u','f0','l1x','l1xx' ]:
+# for n in [ 'x0ref','l0x','l0u','l0xx','l0xu','l0uu','f0x','f0u','f0','l1x','l1xx' ]:
 #    print(n[0]+n[2:]+'['+n[1]+'] : '+str(float(locals()[n])))
 
 # --- TEST DDP vs KKT LQR ---
@@ -284,7 +286,7 @@ l1xx = v1xx
 np.random.seed(220)
 model = ActionModelLQR(3, 3)
 model.setUpRandom()
-#model = ActionModelUnicycle()
+# model = ActionModelUnicycle()
 nx = model.nx
 nu = model.nu
 T = 1
@@ -296,7 +298,7 @@ x0ref = problem.initialState
 xs[0] = np.random.rand(nx)
 xs[1] = np.random.rand(nx)
 us[0] = np.random.rand(nu)
-#xs[1] = model.calc(data,xs[0],us[0])[0].copy()
+# xs[1] = model.calc(data,xs[0],us[0])[0].copy()
 
 ddp = SolverDDP(problem)
 kkt = SolverKKT(problem)
@@ -358,15 +360,15 @@ x0ref = problem.initialState
 xs[0] = np.random.rand(nx)
 us[0] = np.random.rand(nu)
 xs[1] = np.random.rand(nx)
-#xs[1] = model.calc(data,xs[0],us[0])[0].copy()
+# xs[1] = model.calc(data,xs[0],us[0])[0].copy()
 
 ddp = SolverDDP(problem)
 kkt = SolverKKT(problem)
 
 kkt.setCandidate(xs, us)
 dxkkt, dukkt, lkkt = kkt.computeDirection()
-xkkt = [x + dx for x, dx in zip(xs, dxkkt)]
-ukkt = [u + du for u, du in zip(us, dukkt)]
+xkkt = [_x + dx for _x, dx in zip(xs, dxkkt)]
+ukkt = [_u + du for _u, du in zip(us, dukkt)]
 
 ddp.setCandidate(xs, us)
 ddp.computeDirection()
@@ -398,8 +400,8 @@ kkt = SolverKKT(problem)
 
 kkt.setCandidate(xs, us)
 dxkkt, dukkt, lkkt = kkt.computeDirection()
-xkkt = [x + dx for x, dx in zip(xs, dxkkt)]
-ukkt = [u + du for u, du in zip(us, dukkt)]
+xkkt = [_x + dx for _x, dx in zip(xs, dxkkt)]
+ukkt = [_u + du for _u, du in zip(us, dukkt)]
 
 ddp.setCandidate(xs, us)
 ddp.computeDirection()
@@ -505,8 +507,8 @@ data3 = model3.createData()
 
 x0ref3 = xTOx3(x0ref)
 problem3 = ShootingProblem(x0ref3, [model3] * T, model3)
-xs3 = [xTOx3(x) for x in xs]
-us3 = [u.copy() for u in us]
+xs3 = [xTOx3(_x) for _x in xs]
+us3 = [_u.copy() for _u in us]
 
 kkt3 = SolverKKT(problem3)
 kkt3.setCandidate(xs3, us3)
@@ -531,7 +533,7 @@ for t in range(T):
 assert (norm(kkt.primal - kkt3.primal) < 1e-9)
 # Duals are not equals as the jacobians are not the same.
 
-### DDP test with manifold
+# DDP test with manifold
 T = 1
 
 x0ref = np.array([-1, -1, 1, 0])

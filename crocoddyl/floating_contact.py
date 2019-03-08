@@ -24,21 +24,22 @@ class DifferentialActionModelFloatingInContact(DifferentialActionModelAbstract):
     def ncontact(self):
         return self.contact.ncontact
 
-    def calc(model, data, x, u=None):
-        if u is None: u = model.unone
-        nq, nv = model.nq, model.nv
+    def calc(self, data, x, u=None):
+        if u is None:
+            u = self.unone
+        nq, nv = self.nq, self.nv
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
 
-        pinocchio.computeAllTerms(model.pinocchio, data.pinocchio, q, v)
-        pinocchio.updateFramePlacements(model.pinocchio, data.pinocchio)
+        pinocchio.computeAllTerms(self.pinocchio, data.pinocchio, q, v)
+        pinocchio.updateFramePlacements(self.pinocchio, data.pinocchio)
 
-        data.tauq[:] = model.actuation.calc(data.actuation, x, u)
-        model.contact.calc(data.contact, x)
+        data.tauq[:] = self.actuation.calc(data.actuation, x, u)
+        self.contact.calc(data.contact, x)
 
         data.K[:nv, :nv] = data.pinocchio.M
-        if hasattr(model.pinocchio, 'armature'):
-            data.K[range(nv), range(nv)] += model.pinocchio.armature.flat
+        if hasattr(self.pinocchio, 'armature'):
+            data.K[range(nv), range(nv)] += self.pinocchio.armature.flat
         data.K[nv:, :nv] = data.contact.J
         data.K.T[nv:, :nv] = data.contact.J
         data.Kinv = np.linalg.inv(data.K)
@@ -49,23 +50,25 @@ class DifferentialActionModelFloatingInContact(DifferentialActionModelAbstract):
         data.f[:] *= -1.
 
         # Convert force array to vector of spatial forces.
-        fs = model.contact.setForces(data.contact, data.f)
+        # fs = self.contact.setForces(data.contact, data.f)
 
-        data.cost = model.costs.calc(data.costs, x, u)
+        data.cost = self.costs.calc(data.costs, x, u)
         return data.xout, data.cost
 
-    def calcDiff(model, data, x, u=None, recalc=True):
-        if u is None: u = model.unone
-        if recalc: xout, cost = model.calc(data, x, u)
-        nq, nv = model.nq, model.nv
+    def calcDiff(self, data, x, u=None, recalc=True):
+        if u is None:
+            u = self.unone
+        if recalc:
+            xout, cost = self.calc(data, x, u)
+        nq, nv = self.nq, self.nv
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
         a = a2m(data.a)
         fs = data.contact.forces
 
-        pinocchio.computeRNEADerivatives(model.pinocchio, data.pinocchio, q, v, a, fs)
-        pinocchio.computeForwardKinematicsDerivatives(model.pinocchio, data.pinocchio, q, v, a)
-        pinocchio.updateFramePlacements(model.pinocchio, data.pinocchio)
+        pinocchio.computeRNEADerivatives(self.pinocchio, data.pinocchio, q, v, a, fs)
+        pinocchio.computeForwardKinematicsDerivatives(self.pinocchio, data.pinocchio, q, v, a)
+        pinocchio.updateFramePlacements(self.pinocchio, data.pinocchio)
 
         # [a;-f] = K^-1 [ tau - b, -gamma ]
         # [a';-f'] = -K^-1 [ K'a + b' ; J'a + gamma' ]  = -K^-1 [ rnea'(q,v,a,fs) ; acc'(q,v,a) ]
@@ -77,7 +80,7 @@ class DifferentialActionModelFloatingInContact(DifferentialActionModelAbstract):
 
         # Derivative of the contact constraint
         # da0_dq and da0_dv are the acceleration derivatives acc'
-        model.contact.calcDiff(data.contact, x, recalc=False)
+        self.contact.calcDiff(data.contact, x, recalc=False)
         dacc_dq = data.contact.Aq
         dacc_dv = data.contact.Av
 
@@ -108,8 +111,8 @@ class DifferentialActionModelFloatingInContact(DifferentialActionModelAbstract):
         data.df_dx += np.dot(df_dtau, dtau_dx)
         data.df_du[:, :] = np.dot(df_dtau, dtau_du)
 
-        model.contact.setForcesDiff(data.contact, data.df_dx, data.df_du)
-        model.costs.calcDiff(data.costs, x, u, recalc=False)
+        self.contact.setForcesDiff(data.contact, data.df_dx, data.df_du)
+        self.costs.calcDiff(data.costs, x, u, recalc=False)
         return data.xout, data.cost
 
     def quasiStatic(self, data, x):

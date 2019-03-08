@@ -1,5 +1,4 @@
-import copy
-
+import numpy as np
 from numpy.linalg import eig, norm, pinv
 
 import pinocchio
@@ -12,19 +11,20 @@ import pinocchio
 # Cost force cone model
 # -------------------------------------------------------------------------------
 # Cost force model
-#---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 # Many contact model
 # ----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
-from crocoddyl import (
-    ActionModelNumDiff, ActuationModelFreeFloating, CallbackDDPLogger, ContactModel3D, ContactModel6D,
-    ContactModelMultiple, CostModelControl, CostModelForce, CostModelForceLinearCone, CostModelFrameTranslation,
-    CostModelState, CostModelSum, DifferentialActionModelFloatingInContact, DifferentialActionModelNumDiff,
-    IntegratedActionModelEuler, ShootingProblem, SolverDDP, SolverKKT, StatePinocchio, a2m, absmax, loadTalosArm, m2a)
-from pinocchio.utils import *
+from crocoddyl import (ActionModelNumDiff, ActuationModelFreeFloating, CallbackDDPLogger, CallbackDDPVerbose,
+                       ContactModel3D, ContactModel6D, ContactModelMultiple, CostModelControl, CostModelForce,
+                       CostModelForceLinearCone, CostModelFrameTranslation, CostModelState, CostModelSum,
+                       DifferentialActionModelFloatingInContact, DifferentialActionModelNumDiff,
+                       IntegratedActionModelEuler, ShootingProblem, SolverDDP, SolverKKT, StatePinocchio, a2m, absmax,
+                       loadTalosArm, m2a)
+from pinocchio.utils import rand, zero
 from testutils import df_dq, df_dx
 
-## Loading Talos arm with FF TODO use a bided or quadruped
+# Loading Talos arm with FF TODO use a bided or quadruped
 # -----------------------------------------------------------------------------
 robot = loadTalosArm(freeFloating=True)
 robot.model.armature[6:] = 1.
@@ -71,7 +71,7 @@ def returna_at0(q, v):
     pinocchio.updateFramePlacements(rmodel, rdata2)
     contactModel.calc(contactData2, x)
 
-    return a2m(contactData2.a0)  #.copy()
+    return a2m(contactData2.a0)  # .copy()
 
 
 eps = 1e-8
@@ -111,7 +111,7 @@ def returna0(q, v):
     pinocchio.computeAllTerms(rmodel, rdata2, q, v)
     pinocchio.updateFramePlacements(rmodel, rdata2)
     contactModel.calc(contactData2, x)
-    return a2m(contactData2.a0)  #.copy()
+    return a2m(contactData2.a0)  # .copy()
 
 
 Aq_numdiff = df_dq(rmodel, lambda _q: returna0(_q, v), q, h=eps)
@@ -157,7 +157,7 @@ mnum.calcDiff(dnum, x, u)
 assert (absmax(data.Fx - dnum.Fx) / model.nx < 1e-3)
 assert (absmax(data.Fu - dnum.Fu) / model.nu < 1e-3)
 
-#------------------------------------------------
+# ------------------------------------------------
 q = pinocchio.randomConfiguration(rmodel)
 v = rand(rmodel.nv) * 2 - 1
 x = np.concatenate([m2a(q), m2a(v)])
@@ -177,7 +177,8 @@ model.calc(data, x, u)
 assert (len(filter(lambda x: x > 0, eig(data.K)[0])) == model.nv)
 assert (len(filter(lambda x: x < 0, eig(data.K)[0])) == model.ncontact)
 _taucheck = pinocchio.rnea(rmodel, rdata, q, v, a2m(data.a), data.contact.forces)
-if hasattr(rmodel, 'armature'): _taucheck.flat += rmodel.armature.flat * data.a
+if hasattr(rmodel, 'armature'):
+    _taucheck.flat += rmodel.armature.flat * data.a
 assert (absmax(_taucheck[:6]) < 1e-6)
 assert (absmax(m2a(_taucheck[6:]) - u) < 1e-6)
 
@@ -190,8 +191,8 @@ assert (absmax(data.Fx - dnum.Fx) / model.nx < 1e-3)
 assert (absmax(data.Fu - dnum.Fu) / model.nu < 1e-3)
 
 
-#----------------------------------------------------------
-### Check force derivatives
+# ----------------------------------------------------------
+# Check force derivatives
 def calcForces(q_, v_, u_):
     model.calc(data, np.concatenate([m2a(q_), m2a(v_)]), m2a(u_))
     return a2m(data.f)
@@ -245,7 +246,7 @@ cdata = data.costs['force_cone']
 
 model.calcDiff(data, x, u)
 
-#Check derivative of the model.
+# Check derivative of the model.
 mnum = DifferentialActionModelNumDiff(model, withGaussApprox=False)
 dnum = mnum.createData()
 for d in dnum.datax:

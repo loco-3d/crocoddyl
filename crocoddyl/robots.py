@@ -1,6 +1,7 @@
+import numpy as np
+
 import pinocchio
 from pinocchio.robot_wrapper import RobotWrapper
-from pinocchio.utils import *
 
 
 def getTalosPathFromRos():
@@ -42,7 +43,8 @@ def loadTalosArm(modelPath='/opt/openrobots/share/example-robot-data', freeFloat
     rmodel = robot.model
 
     readParamsFromSrdf(robot, modelPath + SRDF_SUBPATH, False)
-    if freeFloating: assert ((rmodel.armature[:6] == 0.).all())
+    if freeFloating:
+        assert ((rmodel.armature[:6] == 0.).all())
 
     if freeFloating:
         u = robot.model.upperPositionLimit
@@ -65,13 +67,14 @@ def loadTalos(modelPath='/opt/openrobots/share/example-robot-data'):
     rmodel = robot.model
     assert ((rmodel.armature[:6] == 0.).all())
     """
-    robot.q0.flat[:] =  [0,0,1.0192720229567027,0,0,0,1,0.0,0.0,-0.411354,0.859395,-0.448041,-0.001708,0.0,0.0,-0.411354,0.859395,-0.448041,-0.001708,0,0.006761,0.25847,0.173046,-0.0002,-0.525366,0,0,0.1,0.5,-0.25847,-0.173046,0.0002,-0.525366,0,0,0.1,0.5,0,0]
+    robot.q0.flat[:] =  [0,0,1.0192720229567027,0,0,0,1,0.0,0.0,-0.411354,0.859395,-0.448041,-0.001708,
+    0.0,0.0,-0.411354,0.859395,-0.448041,-0.001708,0,0.006761,0.25847,0.173046,-0.0002,-0.525366,0,0,
+    0.1,0.5,-0.25847,-0.173046,0.0002,-0.525366,0,0,0.1,0.5,0,0]
     """
     return robot
 
 
 def loadTalosLegs(modelPath='/opt/openrobots/share/example-robot-data'):
-    from pinocchio import JointModelFreeFlyer, JointModelRX, JointModelRY, JointModelRZ
     robot = loadTalos(modelPath=modelPath)
     SRDF_FILENAME = "talos.srdf"
     SRDF_SUBPATH = "/talos_data/srdf/" + SRDF_FILENAME
@@ -98,9 +101,10 @@ def loadTalosLegs(modelPath='/opt/openrobots/share/example-robot-data'):
     l[:7] = -1
     m2.lowerPositionLimit = l
 
-    #q2 = robot.q0[:19]
+    # q2 = robot.q0[:19]
     for f in m1.frames:
-        if f.parent < legMaxId: m2.addFrame(f)
+        if f.parent < legMaxId:
+            m2.addFrame(f)
 
     g2 = pinocchio.GeometryModel()
     for g in robot.visual_model.geometryObjects:
@@ -110,7 +114,7 @@ def loadTalosLegs(modelPath='/opt/openrobots/share/example-robot-data'):
     robot.model = m2
     robot.data = m2.createData()
     robot.visual_model = g2
-    #robot.q0=q2
+    # robot.q0=q2
     robot.visual_data = pinocchio.GeometryData(g2)
 
     # Load SRDF file
@@ -122,8 +126,6 @@ def loadTalosLegs(modelPath='/opt/openrobots/share/example-robot-data'):
 
 
 def loadHyQ(modelPath='/opt/openrobots/share/example-robot-data'):
-    from pinocchio import JointModelFreeFlyer
-    import os
     URDF_FILENAME = "hyq_no_sensors.urdf"
     URDF_SUBPATH = "/hyq_description/robots/" + URDF_FILENAME
     robot = RobotWrapper.BuildFromURDF(modelPath + URDF_SUBPATH, [modelPath], pinocchio.JointModelFreeFlyer())

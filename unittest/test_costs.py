@@ -1,24 +1,14 @@
+import numpy as np
 from numpy.linalg import norm
 
 import pinocchio
-# --- INTEGRATION ---
-# --------------------------------------------------------------
-# --------------------------------------------------------------
-# --------------------------------------------------------------
-# --------------------------------------------------------------
-# --------------------------------------------------------------
-# --------------------------------------------------------------
-# --------------------------------------------------------------
-# --------------------------------------------------------------
-# --------------------------------------------------------------
-# --------------------------------------------------------------
 from crocoddyl import (ActionModelNumDiff, ActivationModelInequality, ActivationModelWeightedQuad, CostModelCoM,
                        CostModelControl, CostModelFramePlacement, CostModelFrameTranslation, CostModelFrameVelocity,
                        CostModelFrameVelocityLinear, CostModelNumDiff, CostModelState, CostModelSum,
-                       DifferentialActionModelFullyActuated, DifferentialActionModelNumDiff, IntegratedActionDataEuler,
+                       DifferentialActionModelFullyActuated, DifferentialActionModelNumDiff,
                        IntegratedActionModelEuler, ShootingProblem, SolverDDP, SolverKKT, StatePinocchio, a2m, absmax,
                        loadTalosArm, m2a)
-from pinocchio.utils import *
+from pinocchio.utils import rand, zero
 
 robot = loadTalosArm()
 qmin = robot.model.lowerPositionLimit
@@ -79,10 +69,11 @@ pinocchio.updateFramePlacements(rmodel, rdata)
 
 costModel.calcDiff(costData, x, u)
 
-costModelND = CostModelNumDiff(costModel,StatePinocchio(rmodel),withGaussApprox=True,
-                               reevals = [ lambda m,d,x,u: pinocchio.forwardKinematics(m,d,a2m(x[:rmodel.nq]),a2m(x[rmodel.nq:])),
-                                           lambda m,d,x,u: pinocchio.computeForwardKinematicsDerivatives(m,d,a2m(x[:rmodel.nq]),a2m(x[rmodel.nq:]),zero(rmodel.nv)),
-                                           lambda m,d,x,u: pinocchio.updateFramePlacements(m,d) ])
+costModelND = CostModelNumDiff(costModel, StatePinocchio(rmodel), withGaussApprox=True, reevals=[
+    lambda m, d, x, u: pinocchio.forwardKinematics(m, d, a2m(x[:rmodel.nq]), a2m(x[rmodel.nq:])),
+    lambda m, d, x, u: pinocchio.computeForwardKinematicsDerivatives(m, d,
+        a2m(x[:rmodel.nq]), a2m(x[rmodel.nq:]), zero(rmodel.nv)),
+    lambda m, d, x, u: pinocchio.updateFramePlacements(m, d)])
 costDataND = costModelND.createData(rdata)
 
 costModelND.calcDiff(costDataND, x, u)
@@ -107,10 +98,10 @@ pinocchio.updateFramePlacements(rmodel, rdata)
 
 costModel.calcDiff(costData, x, u)
 
-costModelND = CostModelNumDiff(costModel,StatePinocchio(rmodel),withGaussApprox=True,
-                               reevals = [ lambda m,d,x,u: pinocchio.forwardKinematics(m,d,a2m(x[:rmodel.nq]),a2m(x[rmodel.nq:])),
-                                           lambda m,d,x,u: pinocchio.computeForwardKinematicsDerivatives(m,d,a2m(x[:rmodel.nq]),a2m(x[rmodel.nq:]),zero(rmodel.nv)),
-                                           lambda m,d,x,u: pinocchio.updateFramePlacements(m,d) ])
+costModelND = CostModelNumDiff(costModel, StatePinocchio(rmodel), withGaussApprox=True, reevals=[
+    lambda m, d, x, u: pinocchio.forwardKinematics(m, d, a2m(x[:rmodel.nq]), a2m(x[rmodel.nq:])), lambda m, d, x, u:
+    pinocchio.computeForwardKinematicsDerivatives(m, d, a2m(x[:rmodel.nq]), a2m(x[rmodel.nq:]), zero(rmodel.nv)),
+    lambda m, d, x, u: pinocchio.updateFramePlacements(m, d)])
 costDataND = costModelND.createData(rdata)
 
 costModelND.calcDiff(costDataND, x, u)
@@ -206,8 +197,8 @@ assert (absmax(costData.Lu - costDataND.Lu) < 1e2 * costModelND.disturbance)
 # assert( absmax(costData.Luu-costDataND.Luu) < 1e2*costModelND.disturbance )
 
 X = StatePinocchio(rmodel)
-q = a2m(np.random.rand(rmodel.nq))  #random value between 0 and 1
-u = m2a(np.random.rand(rmodel.nv))  #random value between 0 and 1
+q = a2m(np.random.rand(rmodel.nq))  # random value between 0 and 1
+u = m2a(np.random.rand(rmodel.nv))  # random value between 0 and 1
 v = a2m(np.random.rand(rmodel.nv))
 
 x = m2a(np.concatenate([q, v]))
@@ -232,16 +223,16 @@ costModelND.calcDiff(costDataND, x, u)
 
 assert (absmax(costData.Lx - costDataND.Lx) < 1e2 * costModelND.disturbance)
 assert (absmax(costData.Lu - costDataND.Lu) < 1e2 * costModelND.disturbance)
-#Check that the cost derivative is zero if q>=lower and q<=upper
-#and that cost is positive if q<lower or q>upper
+# Check that the cost derivative is zero if q>=lower and q<=upper
+# and that cost is positive if q<lower or q>upper
 lowersafe = m2a(x) >= lowerLimit
 uppersafe = m2a(x) <= upperLimit
 
 assert ((costData.Lx[lowersafe & uppersafe] == 0.).all())
 assert ((costData.Lx[~lowersafe & ~uppersafe] != 0.).all())
 
-#assert( absmax(costData.L-costDataND.L) < 1e-3 )
-#--------------------------Check Inf joint limits
+# assert( absmax(costData.L-costDataND.L) < 1e-3 )
+# --------------------------Check Inf joint limits
 
 lowerLimit[:rmodel.nq] = -np.inf  # inf position lower limit
 upperLimit[-rmodel.nv:] = np.inf  # inf velocity upper limit
@@ -260,8 +251,8 @@ costModelND.calcDiff(costDataND, x, u)
 
 assert (absmax(costData.Lx - costDataND.Lx) < 1e2 * costModelND.disturbance)
 assert (absmax(costData.Lu - costDataND.Lu) < 1e2 * costModelND.disturbance)
-#Check that the cost derivative is zero if q>=lower and q<=upper
-#and that cost is positive if q<lower or q>upper
+# Check that the cost derivative is zero if q>=lower and q<=upper
+# and that cost is positive if q<lower or q>upper
 lowersafe = m2a(x) >= lowerLimit
 uppersafe = m2a(x) <= upperLimit
 

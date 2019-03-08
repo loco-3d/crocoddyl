@@ -4,10 +4,11 @@ with some accuracies.
 '''
 
 import matplotlib.pylab as plt
+import numpy as np
 
 import pinocchio
 from continuous import DifferentialActionModelPositioning, IntegratedActionModelEuler
-from pinocchio.utils import *
+from crocoddyl import CallbackDDPLogger
 from refact import ShootingProblem, SolverDDP
 
 m2a = lambda m: np.array(m.flat)

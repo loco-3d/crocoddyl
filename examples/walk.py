@@ -1,20 +1,25 @@
 import sys
 
-from numpy.linalg import eig, inv, norm, pinv, svd
+import numpy as np
+from numpy.linalg import pinv
 
 import pinocchio
-from crocoddyl import *
+from crocoddyl import (ActionModelImpact, ActivationModelWeightedQuad, ActuationModelFreeFloating, CallbackDDPLogger,
+                       CallbackDDPVerbose, CallbackSolverDisplay, ContactModel6D, ContactModelMultiple, CostModelCoM,
+                       CostModelControl, CostModelFramePlacement, CostModelState, CostModelSum,
+                       DifferentialActionModelFloatingInContact, ImpulseModel6D, ImpulseModelMultiple,
+                       IntegratedActionModelEuler, ShootingProblem, SolverDDP, StatePinocchio, a2m, loadTalosLegs, m2a)
 from crocoddyl.diagnostic import displayTrajectory
 from crocoddyl.fddp import SolverFDDP
-from crocoddyl.impact import CostModelImpactCoM, CostModelImpactWholeBody
-from pinocchio.utils import *
+from pinocchio.utils import eye, zero
 
 BACKUP_PATH = "npydata/jump."
 WITHDISPLAY = 'disp' in sys.argv
 
 robot = loadTalosLegs()
 robot.model.armature[6:] = .3
-if WITHDISPLAY: robot.initDisplay(loadModel=True)
+if WITHDISPLAY:
+    robot.initDisplay(loadModel=True)
 
 rmodel = robot.model
 rdata = rmodel.createData()
@@ -117,9 +122,9 @@ def impactModel(contactIds, effectors):
     return model
 
 
-### --- MODEL SEQUENCE
-### --- MODEL SEQUENCE
-### --- MODEL SEQUENCE
+# --- MODEL SEQUENCE
+# --- MODEL SEQUENCE
+# --- MODEL SEQUENCE
 SE3 = pinocchio.SE3
 pinocchio.forwardKinematics(rmodel, rdata, q0)
 pinocchio.updateFramePlacements(rmodel, rdata)
@@ -171,12 +176,14 @@ if 'push' in sys.argv:
 problem = ShootingProblem(initialState=x0, runningModels=models[:-1], terminalModel=models[-1])
 ddp = SolverDDP(problem)
 ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]
-if 'cb' in sys.argv and WITHDISPLAY: ddp.callback.append(CallbackSolverDisplay(robot, rate=-1))
+if 'cb' in sys.argv and WITHDISPLAY:
+    ddp.callback.append(CallbackSolverDisplay(robot, rate=-1))
 ddp.th_stop = 1e-6
 
 fddp = SolverFDDP(problem)
 fddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]
-if 'cb' in sys.argv and WITHDISPLAY: fddp.callback.append(CallbackSolverDisplay(robot, rate=-1))
+if 'cb' in sys.argv and WITHDISPLAY:
+    fddp.callback.append(CallbackSolverDisplay(robot, rate=-1))
 fddp.th_stop = 1e-6
 
 us0 = [

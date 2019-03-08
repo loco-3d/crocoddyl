@@ -29,7 +29,7 @@ for spl in cs.ms_interval_data[:-1]:
         t = spl.time_trajectory[i]
 
         assert (np.isclose(cc.com_vcom.eval(t)[0], x[:6, :], atol=eps).all())
-        #assert(np.isclose(cc.vcom_acom.eval(t)[0], dx[:6,:]).all())
+        # assert(np.isclose(cc.vcom_acom.eval(t)[0], dx[:6,:]).all())
         assert (np.isclose(cc.hg.eval(t)[0][3:, :], x[6:, :], atol=eps).all())
-        assert (np.isclose(cc.forces["RF_patch"].eval(t)[0][:, :], u[:6, :], atol=eps).all())  #RF
-        assert (np.isclose(cc.forces["LF_patch"].eval(t)[0][:, :], u[6:12, :], atol=eps).all())  #LF
+        assert (np.isclose(cc.forces["RF_patch"].eval(t)[0][:, :], u[:6, :], atol=eps).all())  # RF
+        assert (np.isclose(cc.forces["LF_patch"].eval(t)[0][:, :], u[6:12, :], atol=eps).all())  # LF

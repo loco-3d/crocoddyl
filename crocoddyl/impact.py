@@ -9,9 +9,9 @@ from crocoddyl.activation import ActivationModelQuad
 # --------------------------------------------------------------------------
 # --------------------------------------------------------------------------
 from crocoddyl.cost import CostDataPinocchio, CostModelPinocchio, CostModelSum
-from pinocchio.utils import *
+from pinocchio.utils import zero
 from state import StatePinocchio
-from utils import a2m, m2a
+from utils import a2m
 
 
 # --------------------------------------------------------------------------
@@ -29,13 +29,13 @@ class ImpulseModelPinocchio:
     def createData(self, pinocchioData):
         return self.ImpulseDataType(self, pinocchioData)
 
-    def calc(model, data, x):
+    def calc(self, data, x):
         assert (False and "This should be defined in the derivative class.")
 
-    def calcDiff(model, data, x, recalc=True):
+    def calcDiff(self, data, x, recalc=True):
         assert (False and "This should be defined in the derivative class.")
 
-    def setForces(model, data, forcesArr, forcesVec=None):
+    def setForces(self, data, forcesArr, forcesVec=None):
         '''
         Convert a numpy array of forces into a stdVector of spatial forces.
         If forcesVec is not none, sum the result in it. Otherwise, reset self.fs
@@ -47,13 +47,13 @@ class ImpulseModelPinocchio:
 
 class ImpulseDataPinocchio:
     def __init__(self, model, pinocchioData):
-        nc, nq, nv, nx, ndx = model.nimpulse, model.nq, model.nv, model.nx, model.ndx
+        nc, nv = model.nimpulse, model.nv
         self.pinocchio = pinocchioData
         self.J = np.zeros([nc, nv])
         self.Jq = np.zeros([nc, nv])
         self.f = np.nan  # not set at construction type
         self.forces = pinocchio.StdVect_Force()
-        for i in range(model.pinocchio.njoints):
+        for i in range(self.pinocchio.njoints):
             self.forces.append(pinocchio.Force.Zero())
         self.Vq = np.zeros([nc, nv])
 
@@ -67,19 +67,20 @@ class ImpulseModel6D(ImpulseModelPinocchio):
         ImpulseModelPinocchio.__init__(self, pinocchioModel, nimpulse=6)
         self.frame = frame
 
-    def calc(model, data, x):
+    def calc(self, data, x):
         # We suppose forwardKinematics(q,v,a), computeJointJacobian and updateFramePlacement already
         # computed.
-        data.J[:, :] = pinocchio.getFrameJacobian(model.pinocchio, data.pinocchio, model.frame,
+        data.J[:, :] = pinocchio.getFrameJacobian(self.pinocchio, data.pinocchio, self.frame,
                                                   pinocchio.ReferenceFrame.LOCAL)
 
-    def calcDiff(model, data, x, recalc=True):
-        if recalc: model.calc(data, x)
-        dv_dq, dv_dv = pinocchio.getJointVelocityDerivatives(model.pinocchio, data.pinocchio, data.joint,
+    def calcDiff(self, data, x, recalc=True):
+        if recalc:
+            self.calc(data, x)
+        dv_dq, dv_dv = pinocchio.getJointVelocityDerivatives(self.pinocchio, data.pinocchio, data.joint,
                                                              pinocchio.ReferenceFrame.LOCAL)
         data.Vq[:, :] = data.fXj * dv_dq
 
-    def setForces(model, data, forcesArr, forcesVec=None):
+    def setForces(self, data, forcesArr, forcesVec=None):
         '''
         Convert a numpy array of forces into a stdVector of spatial forces.
         Side effect: keep the force values in data.
@@ -112,19 +113,20 @@ class ImpulseModel3D(ImpulseModelPinocchio):
         ImpulseModelPinocchio.__init__(self, pinocchioModel, nimpulse=3)
         self.frame = frame
 
-    def calc(model, data, x):
+    def calc(self, data, x):
         # We suppose forwardKinematics(q,v,a), computeJointJacobian and updateFramePlacement already
         # computed.
-        data.J[:, :] = pinocchio.getFrameJacobian(model.pinocchio, data.pinocchio, model.frame,
+        data.J[:, :] = pinocchio.getFrameJacobian(self.pinocchio, data.pinocchio, self.frame,
                                                   pinocchio.ReferenceFrame.LOCAL)[:3, :]
 
-    def calcDiff(model, data, x, recalc=True):
-        if recalc: model.calc(data, x)
-        dv_dq, dv_dv = pinocchio.getJointVelocityDerivatives(model.pinocchio, data.pinocchio, data.joint,
+    def calcDiff(self, data, x, recalc=True):
+        if recalc:
+            self.calc(data, x)
+        dv_dq, dv_dv = pinocchio.getJointVelocityDerivatives(self.pinocchio, data.pinocchio, data.joint,
                                                              pinocchio.ReferenceFrame.LOCAL)
         data.Vq[:, :] = data.fXj[:3, :] * dv_dq
 
-    def setForces(model, data, forcesArr, forcesVec=None):
+    def setForces(self, data, forcesArr, forcesVec=None):
         '''
         Convert a numpy array of forces into a stdVector of spatial forces.
         Side effect: keep the force values in data.
@@ -173,26 +175,27 @@ class ImpulseModelMultiple(ImpulseModelPinocchio):
         else:
             raise (KeyError("The key should be string or impulsemodel."))
 
-    def calc(model, data, x):
+    def calc(self, data, x):
         npast = 0
-        for m, d in zip(model.impulses.values(), data.impulses.values()):
+        for m, d in zip(self.impulses.values(), data.impulses.values()):
             m.calc(d, x)
             data.J[npast:npast + m.nimpulse, :] = d.J
             npast += m.nimpulse
 
-    def calcDiff(model, data, x, recalc=True):
-        if recalc: model.calc(data, x)
+    def calcDiff(self, data, x, recalc=True):
+        if recalc:
+            self.calc(data, x)
         npast = 0
-        for m, d in zip(model.impulses.values(), data.impulses.values()):
+        for m, d in zip(self.impulses.values(), data.impulses.values()):
             m.calcDiff(d, x, recalc=False)
             data.Vq[npast:npast + m.nimpulse, :] = d.Vq
             npast += m.nimpulse
 
-    def setForces(model, data, fsArr):
+    def setForces(self, data, fsArr):
         npast = 0
         for i, f in enumerate(data.forces):
             data.forces[i] *= 0
-        for m, d in zip(model.impulses.values(), data.impulses.values()):
+        for m, d in zip(self.impulses.values(), data.impulses.values()):
             m.setForces(d, fsArr[npast:npast + m.nimpulse], data.forces)
             npast += m.nimpulse
         return data.forces
@@ -201,7 +204,6 @@ class ImpulseModelMultiple(ImpulseModelPinocchio):
 class ImpulseDataMultiple(ImpulseDataPinocchio):
     def __init__(self, model, pinocchioData):
         ImpulseDataPinocchio.__init__(self, model, pinocchioData)
-        nc, nq, nv, nx, ndx = model.nimpulse, model.nq, model.nv, model.nx, model.ndx
         self.model = model
         self.impulses = OrderedDict([[k, m.createData(pinocchioData)] for k, m in model.impulses.items()])
 
@@ -230,8 +232,8 @@ class CostModelImpactBase(CostModelPinocchio):
         assert (data.vnext is not None and "vnext should be copied first from impact-data. Call setImpactData first")
 
     def assertImpactDiffDataSet(self, data):
-        assert (data.dvnext_dx is not None
-                and "dvnext_dx should be copied first from impact-data. Call setImpactData first")
+        assert (data.dvnext_dx is not None and """
+        dvnext_dx should be copied first from impact-data. Call setImpactData first""")
 
 
 class CostDataImpactBase(CostDataPinocchio):
@@ -254,18 +256,19 @@ class CostModelImpactWholeBody(CostModelImpactBase):
         CostModelImpactBase.__init__(self, pinocchioModel, ncost=pinocchioModel.nv)
         self.activation = activation if activation is not None else ActivationModelQuad()
 
-    def calc(model, data, x, u=None):
-        model.assertImpactDataSet(data)
-        nv = model.pinocchio.nv
+    def calc(self, data, x, u=None):
+        self.assertImpactDataSet(data)
+        nv = self.pinocchio.nv
         data.residuals[:] = data.vnext - x[-nv:]
-        data.cost = sum(model.activation.calc(data.activation, data.residuals))
+        data.cost = sum(self.activation.calc(data.activation, data.residuals))
         return data.cost
 
-    def calcDiff(model, data, x, u=None, recalc=True):
-        if recalc: model.calc(data, x, u)
-        model.assertImpactDiffDataSet(data)
-        nv = model.pinocchio.nv
-        Ax, Axx = model.activation.calcDiff(data.activation, data.residuals)
+    def calcDiff(self, data, x, u=None, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        self.assertImpactDiffDataSet(data)
+        nv = self.pinocchio.nv
+        Ax, Axx = self.activation.calcDiff(data.activation, data.residuals)
         data.Rx[:, :] = data.dvnext_dx
         data.Rx[range(nv), range(nv, 2 * nv)] -= 1
         data.Lx[:] = np.dot(data.Rx.T, Ax)
@@ -294,21 +297,22 @@ class CostModelImpactCoM(CostModelImpactBase):
         CostModelImpactBase.__init__(self, pinocchioModel, ncost=3)
         self.activation = activation if activation is not None else ActivationModelQuad()
 
-    def calc(model, data, x, u=None):
-        model.assertImpactDataSet(data)
-        nq, nv = model.pinocchio.nq, model.pinocchio.nv
-        pinocchio.centerOfMass(model.pinocchio, data.pinocchio_dv, a2m(x[:nq]), a2m(data.vnext - x[-nv:]))
+    def calc(self, data, x, u=None):
+        self.assertImpactDataSet(data)
+        nq, nv = self.pinocchio.nq, self.pinocchio.nv
+        pinocchio.centerOfMass(self.pinocchio, data.pinocchio_dv, a2m(x[:nq]), a2m(data.vnext - x[-nv:]))
         data.residuals[:] = data.pinocchio_dv.vcom[0].flat
-        data.cost = sum(model.activation.calc(data.activation, data.residuals))
+        data.cost = sum(self.activation.calc(data.activation, data.residuals))
         return data.cost
 
-    def calcDiff(model, data, x, u=None, recalc=True):
-        if recalc: model.calc(data, x, u)
-        model.assertImpactDiffDataSet(data)
-        nq, nv = model.pinocchio.nq, model.pinocchio.nv
-        Ax, Axx = model.activation.calcDiff(data.activation, data.residuals)
+    def calcDiff(self, data, x, u=None, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        self.assertImpactDiffDataSet(data)
+        nv = self.pinocchio.nv
+        Ax, Axx = self.activation.calcDiff(data.activation, data.residuals)
 
-        ### TODO ???
+        # TODO ???
         # r = Jcom(vnext-v)
         # dr/dv = Jcom*(dvnext/dv - I)
         # dr/dq = dJcom_dq*(vnext-v)   + Jcom*dvnext_dq
@@ -316,8 +320,8 @@ class CostModelImpactCoM(CostModelImpactBase):
         # Jcom*v = M[:3,:]/mass * v = RNEA(q,0,v)[:3]/mass
         # => dvcom/dq = dRNEA_dq(q,0,v)[:3,:]/mass
 
-        dvc_dq = pinocchio.getCenterOfMassVelocityDerivatives(model.pinocchio, data.pinocchio_dv)
-        dvc_dv = pinocchio.jacobianCenterOfMass(model.pinocchio, data.pinocchio_dv)
+        dvc_dq = pinocchio.getCenterOfMassVelocityDerivatives(self.pinocchio, data.pinocchio_dv)
+        dvc_dv = pinocchio.jacobianCenterOfMass(self.pinocchio, data.pinocchio_dv)
 
         # res = vcom(q,vnext-v)
         # dres/dq = dvcom_dq + dvcom_dv*dvnext_dq
@@ -374,7 +378,7 @@ class ActionModelImpact:
     def createData(self):
         return ActionDataImpact(self)
 
-    def calc(model, data, x, u=None):
+    def calc(self, data, x, u=None):
         '''
         M(vnext-v) - J^T f = 0
         J vnext = 0
@@ -385,18 +389,18 @@ class ActionModelImpact:
         [vnext] = K^-1[Mv], with K = [MJ^T;J0]
         [ -f   ]       [0 ]
         '''
-        nx, nu, nq, nv, nout, nc = model.nx, model.nu, model.nq, model.nv, model.nout, model.nimpulse
+        nq, nv = self.nq, self.nv
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
 
-        pinocchio.computeAllTerms(model.pinocchio, data.pinocchio, q, v)
-        pinocchio.updateFramePlacements(model.pinocchio, data.pinocchio)
+        pinocchio.computeAllTerms(self.pinocchio, data.pinocchio, q, v)
+        pinocchio.updateFramePlacements(self.pinocchio, data.pinocchio)
 
-        model.impulse.calc(data.impulse, x)
+        self.impulse.calc(data.impulse, x)
 
         data.K[:nv, :nv] = data.pinocchio.M
-        if hasattr(model.pinocchio, 'armature'):
-            data.K[range(nv), range(nv)] += model.pinocchio.armature.flat
+        if hasattr(self.pinocchio, 'armature'):
+            data.K[range(nv), range(nv)] += self.pinocchio.armature.flat
         data.K[nv:, :nv] = data.impulse.J
         data.K.T[nv:, :nv] = data.impulse.J
         data.Kinv = inv(data.K)
@@ -406,22 +410,22 @@ class ActionModelImpact:
         data.af[:] = np.dot(data.Kinv, data.r)
         data.f[:] *= -1.
         # Convert force array to vector of spatial forces.
-        fs = model.impulse.setForces(data.impulse, data.f)
+        # fs = self.impulse.setForces(data.impulse, data.f)
 
         data.xnext[:nq] = q.flat
         data.xnext[nq:] = data.vnext
 
-        if isinstance(model.costs, CostModelImpactBase):
-            model.costs.setImpactData(data.costs, data.vnext)
-        if isinstance(model.costs, CostModelSum):
-            for cmodel, cdata in zip(model.costs.costs.values(), data.costs.costs.values()):
+        if isinstance(self.costs, CostModelImpactBase):
+            self.costs.setImpactData(data.costs, data.vnext)
+        if isinstance(self.costs, CostModelSum):
+            for cmodel, cdata in zip(self.costs.costs.values(), data.costs.costs.values()):
                 if isinstance(cmodel.cost, CostModelImpactBase):
                     cmodel.cost.setImpactData(cdata, data.vnext)
 
-        data.cost = model.costs.calc(data.costs, x, u=None)
+        data.cost = self.costs.calc(data.costs, x, u=None)
         return data.xnext, data.cost
 
-    def calcDiff(model, data, x, u=None, recalc=True):
+    def calcDiff(self, data, x, u=None, recalc=True):
         '''
         k = [Mv;0]; K = [MJ^T;J0]
         r = [vnext;f] = K^-1 k
@@ -432,24 +436,25 @@ class ActionModelImpact:
               = -K^-1 [ M'(vnext-v) + J'^T f ]
                       [ J' vnext             ]
         '''
-        if recalc: xout, cost = model.calc(data, x, u)
-        nx, ndx, nq, nv, nc = model.nx, model.State.ndx, model.nq, model.nv, model.nimpulse
+        if recalc:
+            xout, cost = self.calc(data, x, u)
+        nq, nv = self.nq, self.nv
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
         vnext = a2m(data.vnext)
         fs = data.impulse.forces
 
         # Derivative M' dv + J'f + b'
-        g6bak = model.pinocchio.gravity.copy()
-        model.pinocchio.gravity = pinocchio.Motion.Zero()
-        pinocchio.computeRNEADerivatives(model.pinocchio, data.pinocchio, q, zero(nv), vnext - v, fs)
-        model.pinocchio.gravity = g6bak
+        g6bak = self.pinocchio.gravity.copy()
+        self.pinocchio.gravity = pinocchio.Motion.Zero()
+        pinocchio.computeRNEADerivatives(self.pinocchio, data.pinocchio, q, zero(nv), vnext - v, fs)
+        self.pinocchio.gravity = g6bak
         data.did_dq[:, :] = data.pinocchio.dtau_dq
 
         # Derivative of the impulse constraint
-        pinocchio.computeForwardKinematicsDerivatives(model.pinocchio, data.pinocchio, q, vnext, zero(nv))
-        #pinocchio.updateFramePlacements(model.pinocchio,data.pinocchio)
-        model.impulse.calcDiff(data.impulse, x, recalc=False)
+        pinocchio.computeForwardKinematicsDerivatives(self.pinocchio, data.pinocchio, q, vnext, zero(nv))
+        # pinocchio.updateFramePlacements(self.pinocchio,data.pinocchio)
+        self.impulse.calcDiff(data.impulse, x, recalc=False)
         data.dv_dq = data.impulse.Vq
 
         data.Fq[:nv, :] = 0
@@ -461,18 +466,18 @@ class ActionModelImpact:
         # data.Rx[:,:] = 0
         # np.fill_diagonal(data.Rv,-1)
         # data.Rx[:,:] += data.Fx[nv:,:]
-        # data.Rx *= model.impulseWeight
+        # data.Rx *= self.impulseWeight
         # data.Lx [:]   = np.dot(data.Rx.T,data.costResiduals)
         # data.Lxx[:,:] = np.dot(data.Rx.T,data.Rx)
 
-        if isinstance(model.costs, CostModelImpactBase):
-            model.costs.setImpactDiffData(data.costs, data.Fx[nv:, :])
-        if isinstance(model.costs, CostModelSum):
-            for cmodel, cdata in zip(model.costs.costs.values(), data.costs.costs.values()):
+        if isinstance(self.costs, CostModelImpactBase):
+            self.costs.setImpactDiffData(data.costs, data.Fx[nv:, :])
+        if isinstance(self.costs, CostModelSum):
+            for cmodel, cdata in zip(self.costs.costs.values(), data.costs.costs.values()):
                 if isinstance(cmodel.cost, CostModelImpactBase):
                     cmodel.cost.setImpactDiffData(cdata, data.Fx[nv:, :])
 
-        model.costs.calcDiff(data.costs, x, u=None, recalc=recalc)
+        self.costs.calcDiff(data.costs, x, u=None, recalc=recalc)
 
         return data.xnext, data.cost
 
@@ -484,7 +489,7 @@ class ActionDataImpact:
         if model.costs is not None:
             self.costs = model.costs.createData(self.pinocchio)
         self.cost = np.nan
-        nx, nu, ndx, nq, nv, nout, nc = model.nx, model.nu, model.State.ndx, model.nq, model.nv, model.nout, model.nimpulse
+        nx, nu, ndx, nv, nc = model.nx, model.nu, model.State.ndx, model.nv, model.nimpulse
         self.F = np.zeros([ndx, ndx + nu])
         self.Fx = self.F[:, :ndx]
         self.Fu = self.F[:, ndx:]

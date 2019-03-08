@@ -1,4 +1,5 @@
-from numpy.linalg import eig, inv, norm, pinv, svd
+import numpy as np
+from numpy.linalg import inv, norm, pinv
 
 import pinocchio
 from crocoddyl import loadTalosArm
@@ -6,8 +7,7 @@ from crocoddyl.utils import EPS
 # ------------------------------------------------------------------------
 # ------------------------------------------------------------------------
 # ------------------------------------------------------------------------
-from pinocchio import SE3, aba, crba, rnea
-from pinocchio.utils import *
+from pinocchio.utils import cross, rand, skew, zero
 from testutils import df_dq, df_dx
 
 robot = loadTalosArm()
@@ -17,20 +17,20 @@ data = model.createData()
 absmax = lambda A: np.max(abs(A))
 absmin = lambda A: np.min(abs(A))
 
-if np.any(np.isinf(model.upperPositionLimit)):
-    qmin = rmodel.lowerPositionLimit
-    qmin[:7] = -1
-    rmodel.lowerPositionLimit = qmin
-    qmax = rmodel.upperPositionLimit
-    qmax[:7] = 1
-    rmodel.upperPositionLimit = qmax
+# if np.any(np.isinf(model.upperPositionLimit)):
+# qmin = rmodel.lowerPositionLimit
+# qmin[:7] = -1
+# rmodel.lowerPositionLimit = qmin
+# qmax = rmodel.upperPositionLimit
+# qmax[:7] = 1
+# rmodel.upperPositionLimit = qmax
 
 q = pinocchio.randomConfiguration(model)
 v = rand(model.nv) * 2 - 1
 a = rand(model.nv) * 2 - 1
 tau = pinocchio.rnea(model, data, q, v, a)
 
-### Basic check of calling the derivatives.
+# Basic check of calling the derivatives.
 pinocchio.computeABADerivatives(model, data, q, v, tau)
 pinocchio.computeRNEADerivatives(model, data, q, v, a)
 '''
@@ -41,7 +41,7 @@ a'  =  -M^-1 M' M^-1 (tau-b) - M^-1 b'
     =  -M^-1 tau'
 '''
 
-### Check that a = J aq + Jdot vq
+# Check that a = J aq + Jdot vq
 
 M = data.M
 Mi = pinocchio.computeMinverse(model, data, q)
@@ -68,9 +68,9 @@ avec K = [ M J* ; J 0 ]
 
 '''
 
-### Define finite-diff routines.
+# Define finite-diff routines.
 
-### Check ABA derivatives (without forces)
+# Check ABA derivatives (without forces)
 
 da_dq = df_dq(model, lambda q_: pinocchio.aba(model, data, q_, v, tau), q)
 da_dv = df_dx(lambda v_: pinocchio.aba(model, data, q, v_, tau), v)
@@ -80,7 +80,7 @@ h = np.sqrt(2 * EPS)
 assert (absmax(da_dq - data.ddq_dq) < 1e4 * h)
 assert (absmax(da_dv - data.ddq_dv) < 1e4 * h)
 
-### Check RNEA Derivatives (without forces)
+# Check RNEA Derivatives (without forces)
 
 a = pinocchio.aba(model, data, q, v, tau)
 dtau_dq = df_dq(model, lambda q_: pinocchio.rnea(model, data, q_, v, a), q)
@@ -88,7 +88,7 @@ pinocchio.computeRNEADerivatives(model, data, q, v, a)
 
 assert (absmax(dtau_dq - data.dtau_dq) < 1e4 * h)
 
-### Check RNEA versus ABA derivatives.
+# Check RNEA versus ABA derivatives.
 
 Mi = pinocchio.computeMinverse(model, data, q)
 assert (absmax(Mi - inv(data.M)) < 1e-6)
@@ -103,23 +103,23 @@ fs = pinocchio.StdVect_Force()
 for i in range(model.njoints):
     fs.append(pinocchio.Force.Random())
 
-### Check RNEA derivatives versus finite-diff (with forces)
+# Check RNEA derivatives versus finite-diff (with forces)
 a = pinocchio.aba(model, data, q, v, tau, fs)
 dtau_dqn = df_dq(model, lambda q_: pinocchio.rnea(model, data, q_, v, a, fs), q)
 pinocchio.computeRNEADerivatives(model, data, q, v, a, fs)
 dtau_dq = data.dtau_dq.copy()
 assert (absmax(dtau_dqn - dtau_dq) < 1e-3)
 
-### Check ABA derivatives versus finite diff (with forces)
+# Check ABA derivatives versus finite diff (with forces)
 da_dqn = df_dq(model, lambda q_: pinocchio.aba(model, data, q_, v, tau, fs), q)
 pinocchio.computeABADerivatives(model, data, q, v, tau, fs)
 da_dq = data.ddq_dq.copy()
 assert (absmax(da_dq - da_dqn) < 3e-3)
 
-### Check ABA versus RNEA derivatives (with forces)
+# Check ABA versus RNEA derivatives (with forces)
 assert (absmax(inv(data.M) * dtau_dq + da_dq) < 1e-3)
 
-### Check ABA versus RNEA + forces (no derivatives)
+# Check ABA versus RNEA + forces (no derivatives)
 del a
 for i, f in enumerate(fs[:-1]):
     fs[i] = f * 0
@@ -138,7 +138,7 @@ assert (absmax(tau - (M * a + b - J.T * f)) < 1e-6)
 # ------------------------------------------------
 # ------------------------------------------------
 
-### Checking linear acceleration (i.e. ahat = a.linear + w x v = [a + v x (vlinear,0)].linear )
+# Checking linear acceleration (i.e. ahat = a.linear + w x v = [a + v x (vlinear,0)].linear )
 
 a = rand(model.nv) * 2 - 1
 dt = 1e-6
@@ -207,7 +207,7 @@ assert (absmax(ia.linear - (rddot - cross(w, rdot))) < 10 * dt)
 assert (absmax(rddot - (ia.linear + cross(w, rdot))) < 10 * dt)
 assert (absmax(rddot - (ia + iv.cross(Motion(rdot, O3))).linear) < 10 * dt)
 
-### Check q derivatives of linear acceleration
+# Check q derivatives of linear acceleration
 q = pinocchio.randomConfiguration(model)
 vq = rand(model.nv) * 2 - 1
 aq = rand(model.nv) * 2 - 1
@@ -249,7 +249,7 @@ Jv = J[:3, :]
 Jw = J[3:, :]
 # a + wxv
 pinocchio.computeForwardKinematicsDerivatives(model, data, q, vq, aq)
-#da_dq = data.ddq_dq
+# da_dq = data.ddq_dq
 dv_dq, da_dq, da_dv, da_da = pinocchio.getJointAccelerationDerivatives(model, data, model.joints[-1].id,
                                                                        pinocchio.ReferenceFrame.LOCAL)
 assert (absmax(da_dq - da_dqn) < 1e-3)
@@ -271,10 +271,10 @@ assert (absmax(dv_dq[:3, :] - dv_dqn) < 1e-3)
 assert (absmax(dv_dq[3:, :] - dw_dqn) < 1e-3)
 
 daa_dq = da_dq[:3, :] + skew(vw) * dv_dq[:3, :] - skew(vv) * dv_dq[3:, :]
-assert (absmax(daa_dq - daa_dqn) < 1e-3)
+assert (absmax(daa_dq - daa_dq) < 1e-3)
 
 # ------------------------------------------------------------------------
-### Check contact dynamics 3D contact
+# Check contact dynamics 3D contact
 del vq, aq
 q = pinocchio.randomConfiguration(model)
 v = rand(model.nv) * 2 - 1
@@ -303,18 +303,18 @@ af = inv(K) * r
 a = af[:model.nv]
 f = af[model.nv:]
 fs[-1] = pinocchio.Force(-f, zero(3))
-assert (absmax(rnea(model, data, q, v, a, fs) - (M * a + b + J.T * f)) < 1e-6)
-assert (absmax(aba(model, data, q, v, tau, fs) - (inv(M) * (tau - b - J.T * f))) < 1e-6)
+assert (absmax(pinocchio.rnea(model, data, q, v, a, fs) - (M * a + b + J.T * f)) < 1e-6)
+assert (absmax(pinocchio.aba(model, data, q, v, tau, fs) - (inv(M) * (tau - b - J.T * f))) < 1e-6)
 
-### Check contact-dyninv deriv
+# Check contact-dyninv deriv
 # af  = Ki r  = [ MJt; J0 ] [ tau-b;-gamma ]
 # af' = -Ki K' Ki r + Ki r'
 #     = -Ki ( K'  af - r' )
 #     = -Ki [ M'a + Jt'f + b' ; J' a + gamma' ]
 
-##### Check M'a + J'f + b'
-dtau_dqn = df_dq(model, lambda _q: rnea(model, data, _q, v, a, fs), q)
-dtau_dvn = df_dq(model, lambda _v: rnea(model, data, q, _v, a, fs), v)
+# Check M'a + J'f + b'
+dtau_dqn = df_dq(model, lambda _q: pinocchio.rnea(model, data, _q, v, a, fs), q)
+dtau_dvn = df_dq(model, lambda _v: pinocchio.rnea(model, data, q, _v, a, fs), v)
 
 pinocchio.computeRNEADerivatives(model, data, q, v, a, fs)
 dtau_dq = data.dtau_dq.copy()
@@ -323,7 +323,7 @@ assert (absmax(dtau_dq - dtau_dqn) < 1e-3)
 assert (absmax(dtau_dv - dtau_dvn) < 1e-3)
 
 
-##### Check gamma'
+# Check gamma'
 def fgamma(q_, v_, a_):
     pinocchio.forwardKinematics(model, data, q_, v_, a_)
     return data.a[-1].linear + cross(data.v[-1].angular, data.v[-1].linear)
@@ -346,7 +346,7 @@ assert (absmax(dgamma_dq - dgamma_dqn) < 1e-3)
 assert (absmax(dgamma_dv - dgamma_dvn) < 1e-3)
 
 
-###### Check (Ki r)'
+# Check (Ki r)'
 def cid(q_, v_, tau_):
     pinocchio.computeJointJacobians(model, data, q_)
     J6 = pinocchio.getJointJacobian(model, data, model.joints[-1].id, pinocchio.ReferenceFrame.LOCAL).copy()
@@ -375,7 +375,7 @@ dcid_dv = -inv(K) * np.vstack([dtau_dv, dgamma_dv])
 assert (absmax(dcid_dvn - dcid_dv) / model.nv < 1e-3)
 
 # ------------------------------------------
-### Check 6d contact
+# Check 6d contact
 
 q = pinocchio.randomConfiguration(model)
 v = rand(model.nv) * 2 - 1
@@ -387,7 +387,8 @@ for i, f in enumerate(fs):
 def Kid(q_, J_=None):
     pinocchio.computeJointJacobians(model, data, q_)
     J = pinocchio.getJointJacobian(model, data, model.joints[-1].id, pinocchio.ReferenceFrame.LOCAL).copy()
-    if J_ is not None: J_[:, :] = J
+    if J_ is not None:
+        J_[:, :] = J
     M = pinocchio.crba(model, data, q_).copy()
     return np.bmat([[M, J.T], [J, zero([6, 6])]])
 
