@@ -4,14 +4,14 @@ from numpy.linalg import norm
 import pinocchio
 import sys
 
-WITHDISPLAY =  'disp' in sys.argv
+WITHDISPLAY = 'disp' in sys.argv
 WITHPLOT = 'plot' in sys.argv
 
-def plotSolution(xs, us):
+
+def plotSolution(rmodel, xs, us):
     import matplotlib.pyplot as plt
     # Getting the state and control trajectories
-    nx = xs[0].shape[0]
-    nu = us[0].shape[0]
+    nx, nq, nu = xs[0].shape[0], rmodel.nq, us[0].shape[0]
     X = [0.] * nx
     U = [0.] * nu
     for i in range(nx):
@@ -19,50 +19,98 @@ def plotSolution(xs, us):
     for i in range(nu):
         U[i] = [u[i] for u in us]
 
+    # Plotting the joint positions, velocities and torques
     plt.figure(1)
-
-    # Plotting the joint trajectories and torque
     legJointNames = ['HAA', 'HFE', 'KFE']
     # LF foot
-    plt.subplot(421)
-    [plt.plot(X[k], label=legJointNames[i]) for i,k in enumerate(range(7,10))]
-    plt.title('LF')
+    plt.subplot(4, 3, 1)
+    plt.title('joint position [rad]')
+    [plt.plot(X[k], label=legJointNames[i])
+        for i, k in enumerate(range(7, 10))]
+    plt.ylabel('LF')
     plt.legend()
-    plt.subplot(422)
-    [plt.plot(U[k], label=legJointNames[i]) for i,k in enumerate(range(0,3))]
-    plt.title('LF')
+    plt.subplot(4, 3, 2)
+    plt.title('joint velocity [rad/s]')
+    [plt.plot(X[k], label=legJointNames[i])
+        for i, k in enumerate(range(nq+6, nq+9))]
+    plt.ylabel('LF')
+    plt.legend()
+    plt.subplot(4, 3, 3)
+    plt.title('joint torque [Nm]')
+    [plt.plot(U[k], label=legJointNames[i])
+        for i, k in enumerate(range(0, 3))]
+    plt.ylabel('LF')
     plt.legend()
 
     # LH foot
-    plt.subplot(423)
-    [plt.plot(X[k], label=legJointNames[i]) for i,k in enumerate(range(10,13))]
-    plt.title('LH')
+    plt.subplot(4, 3, 4)
+    [plt.plot(X[k], label=legJointNames[i])
+        for i, k in enumerate(range(10, 13))]
+    plt.ylabel('LH')
     plt.legend()
-    plt.subplot(424)
-    [plt.plot(U[k], label=legJointNames[i]) for i,k in enumerate(range(3,6))]
-    plt.title('LH')
+    plt.subplot(4, 3, 5)
+    [plt.plot(X[k], label=legJointNames[i])
+        for i, k in enumerate(range(nq+9, nq+12))]
+    plt.ylabel('LH')
+    plt.legend()
+    plt.subplot(4, 3, 6)
+    [plt.plot(U[k], label=legJointNames[i])
+        for i, k in enumerate(range(3, 6))]
+    plt.ylabel('LH')
     plt.legend()
 
     # RF foot
-    plt.subplot(425)
-    [plt.plot(X[k], label=legJointNames[i]) for i,k in enumerate(range(13,16))]
-    plt.title('RF')
+    plt.subplot(4, 3, 7)
+    [plt.plot(X[k], label=legJointNames[i])
+        for i, k in enumerate(range(13, 16))]
+    plt.ylabel('RF')
     plt.legend()
-    plt.subplot(426)
-    [plt.plot(U[k], label=legJointNames[i]) for i,k in enumerate(range(6,9))]
-    plt.title('RF')
+    plt.subplot(4, 3, 8)
+    [plt.plot(X[k], label=legJointNames[i])
+        for i, k in enumerate(range(nq+12, nq+15))]
+    plt.ylabel('RF')
+    plt.legend()
+    plt.subplot(4, 3, 9)
+    [plt.plot(U[k], label=legJointNames[i])
+        for i, k in enumerate(range(6, 9))]
+    plt.ylabel('RF')
     plt.legend()
 
     # RH foot
-    plt.subplot(427)
-    [plt.plot(X[k], label=legJointNames[i]) for i,k in enumerate(range(16,19))]
-    plt.title('RH')
+    plt.subplot(4, 3, 10)
+    [plt.plot(X[k], label=legJointNames[i])
+        for i, k in enumerate(range(16, 19))]
+    plt.ylabel('RH')
+    plt.xlabel('knots')
     plt.legend()
-    plt.subplot(428)
-    [plt.plot(U[k], label=legJointNames[i]) for i,k in enumerate(range(9,12))]
-    plt.title('RH')
+    plt.subplot(4, 3, 11)
+    [plt.plot(X[k], label=legJointNames[i])
+        for i, k in enumerate(range(nq+15, nq+18))]
+    plt.ylabel('RH')
+    plt.xlabel('knots')
+    plt.legend()
+    plt.subplot(4, 3, 12)
+    [plt.plot(U[k], label=legJointNames[i])
+        for i, k in enumerate(range(9, 12))]
+    plt.ylabel('RH')
     plt.legend()
     plt.xlabel('knots')
+    plt.show()
+
+    plt.figure(2)
+    rdata = rmodel.createData()
+    Cx = []
+    Cy = []
+    for x in xs:
+        q = a2m(x[:rmodel.nq])
+        c = pinocchio.centerOfMass(rmodel, rdata, q)
+        Cx.append(np.asscalar(c[0]))
+        Cy.append(np.asscalar(c[1]))
+    plt.plot(Cx, Cy)
+    plt.title('CoM position')
+    plt.xlabel('x [m]')
+    plt.ylabel('y [m]')
+    plt.grid(True)
     plt.show()
 
 
@@ -161,11 +209,12 @@ class SimpleQuadrupedalGaitProblem:
         q0 = a2m(x0[:self.rmodel.nq])
         pinocchio.forwardKinematics(self.rmodel, self.rdata, q0)
         pinocchio.updateFramePlacements(self.rmodel, self.rdata)
-        comPos0 = m2a(pinocchio.centerOfMass(self.rmodel, self.rdata, q0))
         rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
         rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
         lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
         lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
+        comRef = m2a(rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
+        comRef[2] = 0.5325
 
         # Defining the action models along the time instances
         loco3dModel = []
@@ -177,13 +226,13 @@ class SimpleQuadrupedalGaitProblem:
         if self.firstStep is True:
             rhStep = \
                 self.createFootstepModels(
-                    comPos0, [rhFootPos0],
+                    comRef, [rhFootPos0],
                     0.5*stepLength, stepHeight, timeStep, stepKnots,
                     [self.lfFootId, self.rfFootId, self.lhFootId],
                     [self.rhFootId])
             rfStep = \
                 self.createFootstepModels(
-                    comPos0, [rfFootPos0],
+                    comRef, [rfFootPos0],
                     0.5*stepLength, stepHeight, timeStep, stepKnots,
                     [self.lfFootId, self.lhFootId, self.rhFootId],
                     [self.rfFootId])
@@ -191,25 +240,25 @@ class SimpleQuadrupedalGaitProblem:
         else:
             rhStep = \
                 self.createFootstepModels(
-                    comPos0, [rhFootPos0],
+                    comRef, [rhFootPos0],
                     stepLength, stepHeight, timeStep, stepKnots,
                     [self.lfFootId, self.rfFootId, self.lhFootId],
                     [self.rhFootId])
             rfStep = \
                 self.createFootstepModels(
-                    comPos0, [rfFootPos0],
+                    comRef, [rfFootPos0],
                     stepLength, stepHeight, timeStep, stepKnots,
                     [self.lfFootId, self.lhFootId, self.rhFootId],
                     [self.rfFootId])
         lhStep = \
             self.createFootstepModels(
-                comPos0, [lhFootPos0],
+                comRef, [lhFootPos0],
                 stepLength, stepHeight, timeStep, stepKnots,
                 [self.lfFootId, self.rfFootId, self.rhFootId],
                 [self.lhFootId])
         lfStep = \
             self.createFootstepModels(
-                comPos0, [lfFootPos0],
+                comRef, [lfFootPos0],
                 stepLength, stepHeight, timeStep, stepKnots,
                 [self.rfFootId, self.lhFootId, self.rhFootId],
                 [self.lfFootId])
@@ -236,11 +285,12 @@ class SimpleQuadrupedalGaitProblem:
         q0 = a2m(x0[:self.rmodel.nq])
         pinocchio.forwardKinematics(self.rmodel, self.rdata, q0)
         pinocchio.updateFramePlacements(self.rmodel, self.rdata)
-        comPos0 = m2a(pinocchio.centerOfMass(self.rmodel, self.rdata, q0))
         rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
         rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
         lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
         lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
+        comRef = m2a(rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
+        comRef[2] = 0.5325
 
         # Defining the action models along the time instances
         loco3dModel = []
@@ -252,7 +302,7 @@ class SimpleQuadrupedalGaitProblem:
         if self.firstStep is True:
             rflhStep = \
                 self.createFootstepModels(
-                    comPos0, [rfFootPos0, lhFootPos0],
+                    comRef, [rfFootPos0, lhFootPos0],
                     0.5*stepLength, stepHeight, timeStep, stepKnots,
                     [self.lfFootId, self.rhFootId],
                     [self.rfFootId, self.lhFootId])
@@ -260,13 +310,13 @@ class SimpleQuadrupedalGaitProblem:
         else:
             rflhStep = \
                 self.createFootstepModels(
-                    comPos0, [rfFootPos0, lhFootPos0],
+                    comRef, [rfFootPos0, lhFootPos0],
                     stepLength, stepHeight, timeStep, stepKnots,
                     [self.lfFootId, self.rhFootId],
                     [self.rfFootId, self.lhFootId])
         lfrhStep = \
             self.createFootstepModels(
-                comPos0, [lfFootPos0, rhFootPos0],
+                comRef, [lfFootPos0, rhFootPos0],
                 stepLength, stepHeight, timeStep, stepKnots,
                 [self.rfFootId, self.lhFootId],
                 [self.lfFootId, self.rhFootId])
@@ -293,11 +343,12 @@ class SimpleQuadrupedalGaitProblem:
         q0 = a2m(x0[:self.rmodel.nq])
         pinocchio.forwardKinematics(self.rmodel, self.rdata, q0)
         pinocchio.updateFramePlacements(self.rmodel, self.rdata)
-        comPos0 = m2a(pinocchio.centerOfMass(self.rmodel, self.rdata, q0))
         rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
         rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
         lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
         lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
+        comRef = m2a(rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
+        comRef[2] = 0.5325
 
         # Defining the action models along the time instances
         loco3dModel = []
@@ -309,7 +360,7 @@ class SimpleQuadrupedalGaitProblem:
         if self.firstStep is True:
             rightSteps = \
                 self.createFootstepModels(
-                    comPos0, [rfFootPos0, rhFootPos0],
+                    comRef, [rfFootPos0, rhFootPos0],
                     0.5*stepLength, stepHeight, timeStep, stepKnots,
                     [self.lfFootId, self.lhFootId],
                     [self.rfFootId, self.rhFootId])
@@ -317,13 +368,13 @@ class SimpleQuadrupedalGaitProblem:
         else:
             rightSteps = \
                 self.createFootstepModels(
-                    comPos0, [rfFootPos0, rhFootPos0],
+                    comRef, [rfFootPos0, rhFootPos0],
                     stepLength, stepHeight, timeStep, stepKnots,
                     [self.lfFootId, self.lhFootId],
                     [self.rfFootId, self.rhFootId])
         leftSteps = \
             self.createFootstepModels(
-                comPos0, [lfFootPos0, lhFootPos0],
+                comRef, [lfFootPos0, lhFootPos0],
                 stepLength, stepHeight, timeStep, stepKnots,
                 [self.rfFootId, self.rhFootId],
                 [self.lfFootId, self.lhFootId])
@@ -350,11 +401,12 @@ class SimpleQuadrupedalGaitProblem:
         q0 = a2m(x0[:self.rmodel.nq])
         pinocchio.forwardKinematics(self.rmodel, self.rdata, q0)
         pinocchio.updateFramePlacements(self.rmodel, self.rdata)
-        comPos0 = m2a(pinocchio.centerOfMass(self.rmodel, self.rdata, q0))
         rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
         rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
         lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
         lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
+        comRef = m2a(rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
+        comRef[2] = 0.5325
 
         # Defining the action models along the time instances
         loco3dModel = []
@@ -365,13 +417,13 @@ class SimpleQuadrupedalGaitProblem:
                 for k in range(supportKnots)]
         hindSteps = \
             self.createFootstepModels(
-                comPos0, [lfFootPos0, rfFootPos0],
+                comRef, [lfFootPos0, rfFootPos0],
                 stepLength, stepHeight, timeStep, stepKnots,
                 [self.lhFootId, self.rhFootId],
                 [self.lfFootId, self.rfFootId])
         frontSteps = \
             self.createFootstepModels(
-                comPos0, [lhFootPos0, rhFootPos0],
+                comRef, [lhFootPos0, rhFootPos0],
                 stepLength, stepHeight, timeStep, stepKnots,
                 [self.lfFootId, self.rfFootId],
                 [self.lhFootId, self.rhFootId])
@@ -383,11 +435,12 @@ class SimpleQuadrupedalGaitProblem:
         return problem
 
     def createJumpingProblem(self, x0, jumpHeight, timeStep):
-        comPos0 = m2a(pinocchio.centerOfMass(self.rmodel, self.rdata, q0))
         rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
         rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
         lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
         lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
+        comRef = m2a(rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
+        comRef[2] = 0.5325
 
         takeOffKnots = 30
         flyingKnots = 30
@@ -402,7 +455,7 @@ class SimpleQuadrupedalGaitProblem:
             [self.createSwingFootModel(
                 timeStep,
                 [],
-                np.array([0., 0., jumpHeight * (k+1) / flyingKnots]) + comPos0
+                np.array([0., 0., jumpHeight * (k+1) / flyingKnots]) + comRef
             ) for k in range(flyingKnots)]
 
         loco3dModel += takeOff
@@ -543,7 +596,7 @@ class SimpleQuadrupedalGaitProblem:
             model.differential.costs.addCost('impactVel_'+str(i),
                                              impactFootVelCost, 1e4)
             model.differential.costs['impactVel_'+str(i)].weight = 1e6
-            model.differential.costs['footTrack_'+str(i)].weight = 1e6
+            model.differential.costs['footTrack_'+str(i)].weight = 1e7
         model.differential.costs['stateReg'].weight = 1e1
         model.differential.costs['ctrlReg'].weight = 1e-3
         return model
@@ -551,10 +604,11 @@ class SimpleQuadrupedalGaitProblem:
 
 # Loading the HyQ model
 hyq = loadHyQ()
-if WITHDISPLAY: hyq.initDisplay(loadModel=True)
+if WITHDISPLAY:
+    hyq.initDisplay(loadModel=True)
 
 rmodel = hyq.model
-rdata  = rmodel.createData()
+rdata = rmodel.createData()
 
 # Defining the initial state of the robot
 q0 = rmodel.referenceConfigurations['half_sitting'].copy()
@@ -620,8 +674,7 @@ for i, phase in enumerate(GAITPHASES):
                     x0, value['jumpHeight'], value['timeStep']))
 
     # Added the callback functions
-    print
-    print 'Solving ' + key
+    print '*** SOLVE ' + key + ' ***'
     ddp[i].callback = [CallbackDDPLogger(), CallbackDDPVerbose()]
     if WITHDISPLAY:
         ddp[i].callback.append(CallbackSolverDisplay(hyq, 4, 1, cameraTF))
@@ -647,9 +700,9 @@ if WITHDISPLAY:
 
 # Plotting the entire motion
 if WITHPLOT:
+    xs = []
+    us = []
     for i, phase in enumerate(GAITPHASES):
-        log = ddp[i].callback[0]
-        plotSolution(log.xs, log.us)
-        plotDDPConvergence(log.costs,log.control_regs,
-                           log.state_regs,log.gm_stops,
-                           log.th_stops,log.steps)
+        xs.extend(ddp[i].xs)
+        us.extend(ddp[i].us)
+    plotSolution(rmodel, xs, us)
