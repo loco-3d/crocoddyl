@@ -14,8 +14,14 @@ robot = loadTalosArm()
 model = robot.model
 data = model.createData()
 
-absmax = lambda A: np.max(abs(A))
-absmin = lambda A: np.min(abs(A))
+
+def absmax(A):
+    return np.max(abs(A))
+
+
+def absmin(A):
+    return np.min(abs(A))
+
 
 # if np.any(np.isinf(model.upperPositionLimit)):
 # qmin = rmodel.lowerPositionLimit
@@ -238,7 +244,10 @@ def calcwxv(q, vq, aq):
     return cross(data.v[-1].angular, data.v[-1].linear)
 
 
-f = lambda _q: calcaa(_q, vq, aq)
+def f(_q):
+    return calcaa(_q, vq, aq)
+
+
 daa_dqn = df_dq(model, lambda _q: calcaa(_q, vq, aq), q)
 da_dqn = df_dq(model, lambda _q: calca(_q, vq, aq), q)
 dwxv_dqn = df_dq(model, lambda _q: calcwxv(_q, vq, aq), q)

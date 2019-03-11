@@ -1,6 +1,7 @@
 from collections import OrderedDict
 
 import numpy as np
+
 import pinocchio
 from crocoddyl import (ActionModelImpact, ActivationModelWeightedQuad, ActuationModelFreeFloating, ContactModel6D,
                        ContactModelMultiple, CostModelCoM, CostModelControl, CostModelForce, CostModelFramePlacement,
@@ -87,30 +88,34 @@ def createMultiphaseShootingProblem(rmodel, rdata, patch_name_map, cs, phi_c, ee
 
   :returns list of IntegratedActionModels
   """
-    # -----------------------
-    # Define Cost weights
-    w = lambda t: 0
-    w.com = 1e1
-    w.regx = 1e-3
-    w.regu = 0.
-    w.swing_patch = 1e6
-    w.forces = 0.
-    w.contactv = 1e3
-    # Define state cost vector for WeightedActivation
-    w.ff_orientation = 1e1
-    w.xweight = np.array([0] * 3 + [w.ff_orientation] * 3 + [1.] * (rmodel.nv - 6) + [1.] * rmodel.nv)
-    w.xweight[range(18, 20)] = w.ff_orientation
-    # for patch in swing_patch:  w.swing_patch.append(100.);
-    # Define weights for the impact costs.
-    w.imp_state = 1e2
-    w.imp_com = 1e2
-    w.imp_contact_patch = 1e6
-    w.imp_act_com = m2a([0.1, 0.1, 3.0])
 
-    # Define weights for the terminal costs
-    w.term_com = 1e8
-    w.term_regx = 1e4
-    # ------------------------
+    class Weights:
+        """ Define Cost weights """
+
+        def __init__(self, *args, **kwargs):
+            self.t = 0
+            self.com = 1e1
+            self.regx = 1e-3
+            self.regu = 0.
+            self.swing_patch = 1e6
+            self.forces = 0.
+            self.contactv = 1e3
+            # Define state cost vector for WeightedActivation
+            self.ff_orientation = 1e1
+            self.xweight = np.array([0] * 3 + [self.ff_orientation] * 3 + [1.] * (rmodel.nv - 6) + [1.] * rmodel.nv)
+            self.xweight[range(18, 20)] = self.ff_orientation
+            # for patch in swing_patch:  self.swing_patch.append(100.);
+            # Define weights for the impact costs.
+            self.imp_state = 1e2
+            self.imp_com = 1e2
+            self.imp_contact_patch = 1e6
+            self.imp_act_com = m2a([0.1, 0.1, 3.0])
+
+            # Define weights for the terminal costs
+            self.term_com = 1e8
+            self.term_regx = 1e4
+
+    w = Weights()
 
     problem_models = []
     actuationff = ActuationModelFreeFloating(rmodel)
@@ -273,44 +278,52 @@ def createPhiFromContactSequence(rmodel, rdata, cs, patch_names):
     N = len(t_traj)
 
     # ------Get values of state and control--------------
-    phi_c = lambda t: 0
-    phi_c.f = OrderedDict()
-    phi_c.df = OrderedDict()
-    for patch in patch_names:
-        phi_c.f.update([[patch, np.zeros((N, 6))]])
-        phi_c.df.update([[patch, np.zeros((N, 6))]])
+    class PhiC:
+        def __init__(self, *args, **kwargs):
+            self.t = 0
+            self.f = OrderedDict()
+            self.df = OrderedDict()
+            for patch in patch_names:
+                self.f.update([[patch, np.zeros((N, 6))]])
+                self.df.update([[patch, np.zeros((N, 6))]])
 
-    phi_c.com_vcom = np.zeros((N, 6))
-    phi_c.vcom_acom = np.zeros((N, 6))
-    phi_c.hg = np.zeros((N, 6))
-    phi_c.dhg = np.zeros((N, 6))
+            self.com_vcom = np.zeros((N, 6))
+            self.vcom_acom = np.zeros((N, 6))
+            self.hg = np.zeros((N, 6))
+            self.dhg = np.zeros((N, 6))
 
-    n = 0
-    for i, spl in enumerate(cs.ms_interval_data[:-1]):
-        x = m2a(spl.state_trajectory)
-        dx = m2a(spl.dot_state_trajectory)
-        u = m2a(spl.control_trajectory)
-        nt = len(x)
+            n = 0
+            for i, spl in enumerate(cs.ms_interval_data[:-1]):
+                x = m2a(spl.state_trajectory)
+                dx = m2a(spl.dot_state_trajectory)
+                u = m2a(spl.control_trajectory)
+                nt = len(x)
 
-        tt = t_traj[n:n + nt]
-        phi_c.com_vcom[n:n + nt, :] = x[:, :6]
-        phi_c.vcom_acom[n:n + nt, :] = dx[:, :6]
-        phi_c.hg[n:n + nt, 3:] = x[:, -3:]
-        phi_c.dhg[n:n + nt, 3:] = dx[:, -3:]
-        phi_c.hg[n:n + nt, :3] = mass * x[:, 3:6]
-        phi_c.dhg[n:n + nt, :3] = mass * dx[:, 3:6]
+                tt = t_traj[n:n + nt]
+                self.com_vcom[n:n + nt, :] = x[:, :6]
+                self.vcom_acom[n:n + nt, :] = dx[:, :6]
+                self.hg[n:n + nt, 3:] = x[:, -3:]
+                self.dhg[n:n + nt, 3:] = dx[:, -3:]
+                self.hg[n:n + nt, :3] = mass * x[:, 3:6]
+                self.dhg[n:n + nt, :3] = mass * dx[:, 3:6]
 
-        # --Control output of MUSCOD is a discretized piecewise polynomial.
-        # ------Convert the one piece to Points and Derivatives.
-        poly_u, dpoly_u = polyfitND(tt, u, deg=3, full=True, eps=1e-5)
+                # --Control output of MUSCOD is a discretized piecewise polynomial.
+                # ------Convert the one piece to Points and Derivatives.
+                poly_u, dpoly_u = polyfitND(tt, u, deg=3, full=True, eps=1e-5)
 
-        f_poly = lambda t, r: np.array([poly_u[i](t) for i in r])
-        f_dpoly = lambda t, r: np.array([dpoly_u[i](t) for i in r])
-        for patch in patch_names:
-            phi_c.f[patch][n:n + nt, :] = np.array([f_poly(t, range_def[patch]) for t in tt])
-            phi_c.df[patch][n:n + nt, :] = np.array([f_dpoly(t, range_def[patch]) for t in tt])
+                def f_poly(t, r):
+                    return np.array([poly_u[i](t) for i in r])
 
-        n += nt
+                def f_dpoly(t, r):
+                    return np.array([dpoly_u[i](t) for i in r])
+
+                for patch in patch_names:
+                    self.f[patch][n:n + nt, :] = np.array([f_poly(t, range_def[patch]) for t in tt])
+                    self.df[patch][n:n + nt, :] = np.array([f_dpoly(t, range_def[patch]) for t in tt])
+
+                n += nt
+
+    phi_c = PhiC()
 
     centroidal = CentroidalPhi(patch_names)
     centroidal.com_vcom = CubicHermiteSpline(a2m(t_traj), a2m(phi_c.com_vcom), a2m(phi_c.vcom_acom))

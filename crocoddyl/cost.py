@@ -2,6 +2,7 @@ from collections import OrderedDict
 from exceptions import RuntimeError
 
 import numpy as np
+
 import pinocchio
 from activation import ActivationModelInequality, ActivationModelQuad
 from utils import EPS, m2a
@@ -93,8 +94,13 @@ class CostModelNumDiff(CostModelPinocchio):
             self.calc(data, x, u)
         ndx, nu = self.ndx, self.nu
         h = self.disturbance
-        dist = lambda i, n, h: np.array([h if ii == i else 0 for ii in range(n)])
-        Xint = lambda x, dx: self.State.integrate(x, dx)
+
+        def dist(i, n, h):
+            return np.array([h if ii == i else 0 for ii in range(n)])
+
+        def Xint(x, dx):
+            return self.State.integrate(x, dx)
+
         for ix in range(ndx):
             xi = Xint(x, dist(ix, ndx, h))
             [r(self.model0.pinocchio, data.datax[ix].pinocchio, xi, u) for r in self.reevals]

@@ -1,4 +1,6 @@
 import numpy as np
+from numpy.linalg import norm
+
 import pinocchio
 # --- DDP
 # --- DDP
@@ -6,13 +8,16 @@ import pinocchio
 from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, ContactModel6D, ContactModelMultiple,
                        CostModelControl, CostModelFrameTranslation, CostModelState, CostModelSum,
                        DifferentialActionModelFloatingInContact, DifferentialActionModelFullyActuated,
-                       IntegratedActionModelEuler, ShootingProblem, SolverDDP, StatePinocchio, loadTalosArm)
-from numpy.linalg import norm
+                       IntegratedActionModelEuler, ShootingProblem, SolverDDP, StatePinocchio, a2m, loadTalosArm)
 
-m2a = lambda m: np.array(m.flat)
-a2m = lambda a: np.matrix(a).T
-absmax = lambda A: np.max(abs(A))
-absmin = lambda A: np.min(abs(A))
+
+def absmax(A):
+    return np.max(abs(A))
+
+
+def absmin(A):
+    return np.min(abs(A))
+
 
 opPointName = 'gripper_left_fingertip_2_link'
 contactName = 'root_joint'

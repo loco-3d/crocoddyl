@@ -1,6 +1,7 @@
+import numpy as np
+
 import conf_talos_warm_start as conf
 import locomote
-import numpy as np
 import pinocchio
 from centroidal_utils import createMultiphaseShootingProblem, createPhiFromContactSequence, createSwingTrajectories
 from crocoddyl import (ActionModelImpact, CallbackDDPVerbose, CallbackSolverDisplay, ShootingProblem, SolverDDP,
@@ -39,39 +40,49 @@ for d in problem.runningDatas:
 # ---------Ugliness over------------------------
 
 # -----------Create inital trajectory---------------
-init = lambda t: 0
-init.X = []
-init.U = []
-x_tsid = np.matrix(conf.X_init).T
-conf.ddq_init.append(np.zeros(rmodel.nv))
-dx_tsid = np.vstack([x_tsid[rmodel.nv:, :], np.matrix(conf.ddq_init).T])
-t_tsid = np.linspace(0., cs.contact_phases[-1].time_trajectory[-1], len(conf.ddq_init) + 1)
-x_spl = locomote.CubicHermiteSpline(a2m(t_tsid), x_tsid, dx_tsid)
 
-state = StatePinocchio(rmodel)
-dt = conf.DT
 
-x_eval = lambda t: m2a(x_spl.eval(t)[0])
-for i, (m, d) in enumerate(zip(problem.runningModels, problem.runningDatas)):
-    # Impact models have zero timestep, thus they are copying the same state as the beginning of the next action model
-    # State and control are defined at the beginning of the time step.
-    if isinstance(m, ActionModelImpact):
-        init.X.append(x_eval((i + 1) * dt))
-        init.U.append(np.zeros(m.nu))
-        # print "impact at ",i
-    else:
-        xp = x_eval(i * dt)
-        xn = x_eval((i + 1) * dt)
-        init.X.append(xp)
-        dx = state.diff(xp, xn)
-        acc = dx[rmodel.nv:] / dt
-        u = pinocchio.rnea(rmodel, rdata, a2m(xp[:rmodel.nq]), a2m(xp[rmodel.nq:]), a2m(acc))
-        m.differential.calc(d.differential, init.X[-1])
-        contactJ = d.differential.contact.J
-        f = np.dot(np.linalg.pinv(contactJ.T[:6, :]), u[:6])
-        u -= (np.dot(contactJ.transpose(), f))
-        init.U.append(np.array(u[6:]).squeeze().copy())
-init.X.append(conf.X_init[-1])
+class Init:
+    def __init__(self, *args, **kwargs):
+        self = 0
+        self.X = []
+        self.U = []
+        x_tsid = np.matrix(conf.X_init).T
+        conf.ddq_init.append(np.zeros(rmodel.nv))
+        dx_tsid = np.vstack([x_tsid[rmodel.nv:, :], np.matrix(conf.ddq_init).T])
+        t_tsid = np.linspace(0., cs.contact_phases[-1].time_trajectory[-1], len(conf.ddq_init) + 1)
+        x_spl = locomote.CubicHermiteSpline(a2m(t_tsid), x_tsid, dx_tsid)
+
+        state = StatePinocchio(rmodel)
+        dt = conf.DT
+
+        def x_eval(t):
+            return m2a(x_spl.eval(t)[0])
+
+        for i, (m, d) in enumerate(zip(problem.runningModels, problem.runningDatas)):
+            # Impact models have zero timestep,
+            # thus they are copying the same state as the beginning of the next action model.
+            # State and control are defined at the beginning of the time step.
+            if isinstance(m, ActionModelImpact):
+                self.X.append(x_eval((i + 1) * dt))
+                self.U.append(np.zeros(m.nu))
+                # print("impact at ",i)
+            else:
+                xp = x_eval(i * dt)
+                xn = x_eval((i + 1) * dt)
+                self.X.append(xp)
+                dx = state.diff(xp, xn)
+                acc = dx[rmodel.nv:] / dt
+                u = pinocchio.rnea(rmodel, rdata, a2m(xp[:rmodel.nq]), a2m(xp[rmodel.nq:]), a2m(acc))
+                m.differential.calc(d.differential, self.X[-1])
+                contactJ = d.differential.contact.J
+                f = np.dot(np.linalg.pinv(contactJ.T[:6, :]), u[:6])
+                u -= (np.dot(contactJ.transpose(), f))
+                self.U.append(np.array(u[6:]).squeeze().copy())
+        self.X.append(conf.X_init[-1])
+
+
+init = Init()
 # ---------------Display Initial Trajectory--------------
 if conf.DISPLAY:
     robot.initDisplay(loadModel=True)

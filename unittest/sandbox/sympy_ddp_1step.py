@@ -77,8 +77,11 @@ for t in range(T):
 dxkkt.append(primaldual[T].simplify())
 xkkt.append((xg[T] + dxkkt[T]).simplify())
 
+
 # --- ddp ---
-inv = lambda a: 1 / a
+def inv(a):
+    return 1 / a
+
 
 vx = [nan] * T + [lx[-1]]
 vxx = [nan] * T + [lxx[-1]]

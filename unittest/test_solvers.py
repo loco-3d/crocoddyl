@@ -2,13 +2,14 @@ import copy
 import unittest
 
 import numpy as np
+from numpy.linalg import eig, inv, norm
+
 # --- TEST DDP ---
 # ---------------------------------------------------
 # ---------------------------------------------------
 # ---------------------------------------------------
 from crocoddyl import (ActionModelLQR, ActionModelUnicycle, ActionModelUnicycleVar, ShootingProblem, SolverDDP,
                        SolverKKT)
-from numpy.linalg import eig, inv, norm
 
 
 class ShootingProblemTest(unittest.TestCase):
@@ -138,8 +139,12 @@ for i, _ in enumerate(dus):
     if LQR:
         assert (np.linalg.norm(model.calc(data, xs[i] + dxs[i], us[i] + dus[i])[0] - (xs[i + 1] + dxs[i + 1])) < 1e-9)
 
+
 # Test the optimality of the QP solution (underlying KKT).
-quad = lambda a, Q, b: .5 * np.dot(np.dot(Q, b).T, a)
+def quad(a, Q, b):
+    return .5 * np.dot(np.dot(Q, b).T, a)
+
+
 cost = np.dot(.5 * np.dot(kkt.hess, kkt.primal) + kkt.grad, kkt.primal)
 for i in range(1000):
     eps = 1e-1 * np.random.rand(*kkt.primal.shape)
@@ -495,8 +500,14 @@ kkt = SolverKKT(problem)
 kkt.setCandidate(xs, us)
 kkt.computeDirection()
 
-xTOx3 = lambda x: model.State.diff(model.State.zero(), x)
-x3TOx = lambda x3: model.State.integrate(model.State.zero(), x3)
+
+def xTOx3(x):
+    return model.State.diff(model.State.zero(), x)
+
+
+def x3TOx(x3):
+    return model.State.integrate(model.State.zero(), x3)
+
 
 xs = problem.rollout(us)
 

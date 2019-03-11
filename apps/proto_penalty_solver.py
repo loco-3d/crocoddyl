@@ -5,15 +5,20 @@ with some accuracies.
 
 import matplotlib.pylab as plt
 import numpy as np
+
 import pinocchio
 from continuous import DifferentialActionModelPositioning, IntegratedActionModelEuler
-from crocoddyl import CallbackDDPLogger
+from crocoddyl import CallbackDDPLogger, a2m, m2a
 from refact import ShootingProblem, SolverDDP
 
-m2a = lambda m: np.array(m.flat)
-a2m = lambda a: np.matrix(a).T
-absmax = lambda A: np.max(abs(A))
-absmin = lambda A: np.min(abs(A))
+
+def absmax(A):
+    return np.max(abs(A))
+
+
+def absmin(A):
+    return np.min(abs(A))
+
 
 path = '/home/nmansard/src/cddp/examples/'
 

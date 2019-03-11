@@ -1,10 +1,11 @@
-from itertools import izip
-
 import numpy as np
+
 import scipy.linalg as scl
 from utils import raiseIfNan
 
-rev_enumerate = lambda l: izip(range(len(l) - 1, -1, -1), reversed(l))
+
+def rev_enumerate(l):
+    return reversed(list(enumerate(l)))
 
 
 class SolverDDP:

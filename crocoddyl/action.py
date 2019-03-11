@@ -1,4 +1,5 @@
 import numpy as np
+
 from state import StateVector
 from utils import EPS
 
@@ -123,9 +124,16 @@ class ActionModelNumDiff:
     def calcDiff(self, data, x, u):
         xn0, c0 = self.calc(data, x, u)
         h = self.disturbance
-        dist = lambda i, n, h: np.array([h if ii == i else 0 for ii in range(n)])
-        Xint = lambda x, dx: self.State.integrate(x, dx)
-        Xdiff = lambda x1, x2: self.State.diff(x1, x2)
+
+        def dist(i, n, h):
+            return np.array([h if ii == i else 0 for ii in range(n)])
+
+        def Xint(x, dx):
+            return self.State.integrate(x, dx)
+
+        def Xdiff(x1, x2):
+            return self.State.diff(x1, x2)
+
         for ix in range(self.ndx):
             xn, c = self.model0.calc(data.datax[ix], Xint(x, dist(ix, self.ndx, h)), u)
             data.Fx[:, ix] = Xdiff(xn0, xn) / h

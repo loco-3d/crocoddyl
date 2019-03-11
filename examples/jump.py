@@ -17,6 +17,7 @@ the trajectory optimization too unstable.
 import sys
 
 import numpy as np
+
 import pinocchio
 from crocoddyl import (ActionModelImpact, ActivationModelInequality, ActivationModelWeightedQuad,
                        ActuationModelFreeFloating, CallbackDDPLogger, CallbackDDPVerbose, ContactModel6D,
@@ -64,7 +65,11 @@ stepLength = 0.2
 swingDuration = 0.75
 stanceDurantion = 0.1
 
-dodisp = lambda xs, dt: displayTrajectory(robot, xs, dt)
+
+def dodisp(xs, dt):
+    return displayTrajectory(robot, xs, dt)
+
+
 disp = dodisp if WITHDISPLAY else lambda xs, dt: 0
 disp.__defaults__ = (.1, )
 

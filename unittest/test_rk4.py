@@ -62,17 +62,30 @@ def get_y(q, v):
 
 dxn_du = df_dx(lambda _u: get_xn(_u), a2m(u))
 
-dk_du = lambda i: df_dx(lambda _u: get_ku(_u)[i], a2m(u))
 
-dk_dq = lambda i: df_dx(lambda _q: get_k(_q, a2m(x[nq:]))[i], a2m(x[:nq]))
+def dk_du(i):
+    return df_dx(lambda _u: get_ku(_u)[i], a2m(u))
 
-dk_dv = lambda i: df_dx(lambda _v: get_k(a2m(x[:nq]), _v)[i], a2m(x[nq:]))
 
-dy_dq = lambda i: df_dx(lambda _q: get_y(_q, a2m(x[nq:]))[i], a2m(x[:nq]))
+def dk_dq(i):
+    return df_dx(lambda _q: get_k(_q, a2m(x[nq:]))[i], a2m(x[:nq]))
 
-dy_dv = lambda i: df_dx(lambda _v: get_y(a2m(x[:nq]), _v)[i], a2m(x[nq:]))
 
-e_k = lambda i: data.dki_dx[i][:, :nv] - dk_dq(i)
+def dk_dv(i):
+    return df_dx(lambda _v: get_k(a2m(x[:nq]), _v)[i], a2m(x[nq:]))
+
+
+def dy_dq(i):
+    return df_dx(lambda _q: get_y(_q, a2m(x[nq:]))[i], a2m(x[:nq]))
+
+
+def dy_dv(i):
+    return df_dx(lambda _v: get_y(a2m(x[:nq]), _v)[i], a2m(x[nq:]))
+
+
+def e_k(i):
+    return data.dki_dx[i][:, :nv] - dk_dq(i)
+
 
 tolerance = 1e-4
 assert (np.isclose(data.Fu, dxn_du, atol=tolerance).all())

@@ -74,7 +74,10 @@ def displayTrajectory(robot, xs, dt=0.1, rate=-1, cameraTF=None):
     if cameraTF is not None:
         robot.viewer.gui.setCameraTransform(0, cameraTF)
     import numpy as np
-    a2m = lambda a: np.matrix(a).T
+
+    def a2m(a):
+        return np.matrix(a).T
+
     import time
     S = 1 if rate <= 0 else max(len(xs) / rate, 1)
     for i, x in enumerate(xs):

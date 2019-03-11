@@ -1,6 +1,7 @@
 import numpy as np
-import pinocchio
 from numpy.random import rand
+
+import pinocchio
 from state import StatePinocchio, StateVector
 from utils import EPS, a2m, randomOrthonormalMatrix
 
@@ -269,8 +270,13 @@ class DifferentialActionModelNumDiff(DifferentialActionModelAbstract):
     def calcDiff(self, data, x, u, recalc=True):
         xn0, c0 = self.calc(data, x, u)
         h = self.disturbance
-        dist = lambda i, n, h: np.array([h if ii == i else 0 for ii in range(n)])
-        Xint = lambda x, dx: self.State.integrate(x, dx)
+
+        def dist(i, n, h):
+            return np.array([h if ii == i else 0 for ii in range(n)])
+
+        def Xint(x, dx):
+            return self.State.integrate(x, dx)
+
         for ix in range(self.ndx):
             xn, c = self.model0.calc(data.datax[ix], Xint(x, dist(ix, self.ndx, h)), u)
             data.Fx[:, ix] = (xn - xn0) / h
