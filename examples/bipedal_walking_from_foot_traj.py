@@ -8,6 +8,78 @@ import sys
 WITHDISPLAY =  'disp' in sys.argv
 WITHPLOT = 'plot' in sys.argv
 
+
+def plotSolution(rmodel, xs, us):
+    import matplotlib.pyplot as plt
+    # Getting the state and control trajectories
+    nx, nq, nu = xs[0].shape[0], rmodel.nq, us[0].shape[0]
+    X = [0.] * nx
+    U = [0.] * nu
+    for i in range(nx):
+        X[i] = [x[i] for x in xs]
+    for i in range(nu):
+        U[i] = [u[i] for u in us]
+
+    # Plotting the joint positions, velocities and torques
+    plt.figure(1)
+    legJointNames = ['1', '2', '3', '4', '5', '6']
+    # left foot
+    plt.subplot(2, 3, 1)
+    plt.title('joint position [rad]')
+    [plt.plot(X[k], label=legJointNames[i])
+        for i, k in enumerate(range(7, 13))]
+    plt.ylabel('LF')
+    plt.legend()
+    plt.subplot(2, 3, 2)
+    plt.title('joint velocity [rad/s]')
+    [plt.plot(X[k], label=legJointNames[i])
+        for i, k in enumerate(range(nq+6, nq+12))]
+    plt.ylabel('LF')
+    plt.legend()
+    plt.subplot(2, 3, 3)
+    plt.title('joint torque [Nm]')
+    [plt.plot(U[k], label=legJointNames[i])
+        for i, k in enumerate(range(0, 6))]
+    plt.ylabel('LF')
+    plt.legend()
+
+    # right foot
+    plt.subplot(2, 3, 4)
+    [plt.plot(X[k], label=legJointNames[i])
+        for i, k in enumerate(range(13, 19))]
+    plt.ylabel('RF')
+    plt.xlabel('knots')
+    plt.legend()
+    plt.subplot(2, 3, 5)
+    [plt.plot(X[k], label=legJointNames[i])
+        for i, k in enumerate(range(nq+12, nq+18))]
+    plt.ylabel('RF')
+    plt.xlabel('knots')
+    plt.legend()
+    plt.subplot(2, 3, 6)
+    [plt.plot(U[k], label=legJointNames[i])
+        for i, k in enumerate(range(6, 12))]
+    plt.ylabel('RF')
+    plt.xlabel('knots')
+    plt.legend()
+
+    plt.figure(2)
+    rdata = rmodel.createData()
+    Cx = []
+    Cy = []
+    for x in xs:
+        q = a2m(x[:rmodel.nq])
+        c = pinocchio.centerOfMass(rmodel, rdata, q)
+        Cx.append(np.asscalar(c[0]))
+        Cy.append(np.asscalar(c[1]))
+    plt.plot(Cx, Cy)
+    plt.title('CoM position')
+    plt.xlabel('x [m]')
+    plt.ylabel('y [m]')
+    plt.grid(True)
+    plt.show()
+
+
 class TaskSE3:
     def __init__(self, oXf, frameId):
         self.oXf = oXf
@@ -83,7 +155,6 @@ class SimpleBipedGaitProblem:
         # We defined the problem as:
         loco3dModel += doubleSupport + rStep
         loco3dModel += doubleSupport + lStep
-
 
         problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
