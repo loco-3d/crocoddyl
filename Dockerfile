@@ -5,6 +5,8 @@ RUN apt-get update -qqy \
     flake8 \
     isort \
     python-pip \
+    python-scipy \
+    robotpkg-example-robot-data \
     robotpkg-py27-pinocchio \
     robotpkg-talos-data \
  && rm -rf /var/lib/apt/lists/* \

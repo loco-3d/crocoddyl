@@ -1,8 +1,14 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: "recursive"
+  CTEST_PARALLEL_LEVEL: 4
+
 image: gepgitlab.laas.fr:4567/loco-3d/crocoddyl
 
 test:
   script:
-    - python unittest/all.py
+    - cmake .
+    - make
+    - make test || ctest -VV
 
 format:
   script:
