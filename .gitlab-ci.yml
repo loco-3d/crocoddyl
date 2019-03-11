@@ -1,14 +1,11 @@
+image: gepgitlab.laas.fr:4567/loco-3d/crocoddyl
+
 test:
-  image: gepgitlab.laas.fr:4567/loco-3d/crocoddyl
   script:
     - python unittest/all.py
 
 format:
-  image: python:2-alpine
-  before_script:
-    - pip install flake8 yapf safety isort
   script:
     - isort -c
     - flake8 .
     - yapf -dr .
-    - safety check
