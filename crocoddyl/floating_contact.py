@@ -50,7 +50,7 @@ class DifferentialActionModelFloatingInContact(DifferentialActionModelAbstract):
         data.f[:] *= -1.
 
         # Convert force array to vector of spatial forces.
-        # fs = self.contact.setForces(data.contact, data.f)
+        self.contact.setForces(data.contact, data.f)
 
         data.cost = self.costs.calc(data.costs, x, u)
         return data.xout, data.cost

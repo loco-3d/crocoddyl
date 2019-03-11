@@ -84,7 +84,7 @@ def loadTalosLegs(modelPath='/opt/openrobots/share/example-robot-data'):
     m2 = pinocchio.Model()
     for j, M, name, parent, Y in zip(m1.joints, m1.jointPlacements, m1.names, m1.parents, m1.inertias):
         if j.id < legMaxId:
-            jid = m2.addJoint(parent, locals()[j.shortname()](), M, name)
+            jid = m2.addJoint(parent, getattr(pinocchio, j.shortname())(), M, name)
             up = m2.upperPositionLimit
             down = m2.lowerPositionLimit
             up[m2.joints[jid].idx_q:m2.joints[jid].idx_q + j.nq] = m1.upperPositionLimit[j.idx_q:j.idx_q + j.nq]

@@ -53,7 +53,7 @@ class ImpulseDataPinocchio:
         self.Jq = np.zeros([nc, nv])
         self.f = np.nan  # not set at construction type
         self.forces = pinocchio.StdVect_Force()
-        for i in range(self.pinocchio.njoints):
+        for i in range(model.pinocchio.njoints):
             self.forces.append(pinocchio.Force.Zero())
         self.Vq = np.zeros([nc, nv])
 
@@ -410,7 +410,7 @@ class ActionModelImpact:
         data.af[:] = np.dot(data.Kinv, data.r)
         data.f[:] *= -1.
         # Convert force array to vector of spatial forces.
-        # fs = self.impulse.setForces(data.impulse, data.f)
+        self.impulse.setForces(data.impulse, data.f)
 
         data.xnext[:nq] = q.flat
         data.xnext[nq:] = data.vnext

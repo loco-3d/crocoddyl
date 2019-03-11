@@ -3,7 +3,7 @@ This is an integrative test that is validating the feasibility part of the ddp s
 when armature is low.
 In the test, we are setting up a DDP problem for the biped with DAMFIC models, imposing a
 low (0.01) armature and running one step of the solver. The test is validated if the cost is
-reasonible after the end of the search.
+reasonable after the end of the search.
 
 This test is not super strong. The low-armature model was already validated in the unittest of
 DAMManipulator and DAMFIC, so we already knew that the model and its derivatives were correct.
@@ -98,11 +98,11 @@ right0 = m2a(rdata.oMf[rightId].translation)
 left0 = m2a(rdata.oMf[leftId].translation)
 com0 = m2a(pinocchio.centerOfMass(rmodel, rdata, q0))
 
-models = [] + [runningModel([rightId, leftId], {}, integrationStep=5e-2)] * 10 + [
-    runningModel([rightId, leftId], {}, com=com0 + [0.1, 0, 0], integrationStep=5e-2)
-] + [runningModel([rightId], {}, integrationStep=5e-2)] * 10 + [
-    runningModel([rightId], {leftId: left0 + [0, 0, 0.1]}, com=com0 + [-0.1, 0, 0], integrationStep=5e-2)
-]
+models = []
+models += [runningModel([rightId, leftId], {}, integrationStep=5e-2)] * 10
+models += [runningModel([rightId, leftId], {}, com=com0 + [0.1, 0, 0], integrationStep=5e-2)]
+models += [runningModel([rightId], {}, integrationStep=5e-2)] * 10
+models += [runningModel([rightId], {leftId: left0 + [0, 0, 0.1]}, com=com0 + [-0.1, 0, 0], integrationStep=5e-2)]
 
 pass1 = models[10]
 pass2 = models[21]
@@ -134,7 +134,7 @@ ddp.solve(
     regInit=.1,
     init_xs=[rmodel.defaultState] * len(ddp.models()),
     init_us=[
-        _m.differential.quasiStatic(d.differential, rmodel.defaultState)
+        _m.differential.quasiStatic(_d.differential, rmodel.defaultState)
         for _m, _d in zip(ddp.models(), ddp.datas())[:-1]
     ])
 
