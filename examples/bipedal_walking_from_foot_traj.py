@@ -193,10 +193,9 @@ rmodel = talos_legs.model
 rdata  = rmodel.createData()
 
 # Defining the initial state of the robot
-q = talos_legs.q0.copy()
-v = zero(rmodel.nv)
-x0 = m2a(np.concatenate([q,v]))
-
+q0 = rmodel.referenceConfigurations['half_sitting'].copy()
+v0 = zero(rmodel.nv)
+x0 = m2a(np.concatenate([q0, v0]))
 
 # Setting up the 3d walking problem
 rightFoot = 'right_sole_link'
