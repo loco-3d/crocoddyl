@@ -1,7 +1,6 @@
 import os
 
 import numpy as np
-
 from centroidal_utils import createPhiFromContactSequence
 from crocoddyl import loadTalos
 from locomote import ContactSequenceHumanoid

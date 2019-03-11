@@ -1,6 +1,5 @@
 import numpy as np
 from numpy import arctan2, cos, sin
-
 from state import StateAbstract, StateVector
 
 

@@ -1,7 +1,6 @@
 import sys
 
 import numpy as np
-
 import pinocchio
 from crocoddyl import (CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay, CostModelControl,
                        CostModelFramePlacement, CostModelState, CostModelSum, DifferentialActionModelFullyActuated,

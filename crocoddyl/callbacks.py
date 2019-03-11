@@ -1,7 +1,3 @@
-import copy
-import time
-
-from diagnostic import displayTrajectory
 '''
 These classes create an object logger with a callback operator callback(solver)
 that the solver can call at every iteration end to store some data and display the robot motion
@@ -9,6 +5,11 @@ in gepetto-gui.
 In the solver, set up the logger with solver.callback = [CallbackName()], and add the robot-wrapper
 object in argument if you want to use the display functionalities.
 '''
+
+import copy
+import time
+
+from diagnostic import displayTrajectory
 
 
 class CallbackDDPLogger:

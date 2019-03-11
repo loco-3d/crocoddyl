@@ -1,7 +1,6 @@
 import numpy as np
-from numpy.random import rand
-
 import pinocchio
+from numpy.random import rand
 from state import StatePinocchio, StateVector
 from utils import EPS, a2m, randomOrthonormalMatrix
 

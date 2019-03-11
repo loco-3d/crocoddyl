@@ -1,6 +1,4 @@
 import numpy as np
-from numpy.linalg import norm
-
 import pinocchio
 # --- DDP
 # --- DDP
@@ -9,6 +7,7 @@ from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, 
                        CostModelControl, CostModelFrameTranslation, CostModelState, CostModelSum,
                        DifferentialActionModelFloatingInContact, DifferentialActionModelFullyActuated,
                        IntegratedActionModelEuler, ShootingProblem, SolverDDP, StatePinocchio, loadTalosArm)
+from numpy.linalg import norm
 
 m2a = lambda m: np.array(m.flat)
 a2m = lambda a: np.matrix(a).T

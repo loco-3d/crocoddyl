@@ -1,11 +1,10 @@
 import numpy as np
-from numpy.linalg import norm
-
 import pinocchio
 from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, ContactModel3D, ContactModelMultiple,
                        CostModelCoM, CostModelControl, CostModelState, CostModelSum,
                        DifferentialActionModelFloatingInContact, IntegratedActionModelEuler, ShootingProblem,
                        SolverDDP, StatePinocchio, a2m, loadHyQ, m2a)
+from numpy.linalg import norm
 
 # This is an integrative test where we checked that the DDP solver generates
 # a CoM motion for the HyQ robot as requested.

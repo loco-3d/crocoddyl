@@ -2,7 +2,6 @@ from itertools import izip
 
 import numpy as np
 import scipy.linalg as scl
-
 from utils import raiseIfNan
 
 rev_enumerate = lambda l: izip(xrange(len(l) - 1, -1, -1), reversed(l))

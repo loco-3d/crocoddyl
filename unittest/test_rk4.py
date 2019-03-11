@@ -1,8 +1,7 @@
 import numpy as np
+from crocoddyl import ActionModelNumDiff, DifferentialActionModelLQR, IntegratedActionModelRK4, a2m, m2a
 from numpy.linalg import norm
 from numpy.random import rand
-
-from crocoddyl import ActionModelNumDiff, DifferentialActionModelLQR, IntegratedActionModelRK4, a2m, m2a
 from testutils import df_dx
 
 np.set_printoptions(linewidth=np.nan, suppress=True)

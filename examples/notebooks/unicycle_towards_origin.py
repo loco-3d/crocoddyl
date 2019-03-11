@@ -1,5 +1,4 @@
 import numpy as np
-
 from crocoddyl import *
 from unicycle_utils import plotUnicycleSolution
 

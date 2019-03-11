@@ -5,7 +5,6 @@ with some accuracies.
 
 import matplotlib.pylab as plt
 import numpy as np
-
 import pinocchio
 from continuous import DifferentialActionModelPositioning, IntegratedActionModelEuler
 from crocoddyl import CallbackDDPLogger

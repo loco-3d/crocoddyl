@@ -1,9 +1,8 @@
 import numpy as np
-from numpy.linalg import inv, norm, pinv
-
 import pinocchio
 from crocoddyl import loadTalosArm
 from crocoddyl.utils import EPS
+from numpy.linalg import inv, norm, pinv
 # ------------------------------------------------------------------------
 # ------------------------------------------------------------------------
 # ------------------------------------------------------------------------
@@ -275,7 +274,7 @@ assert (absmax(daa_dq - daa_dq) < 1e-3)
 
 # ------------------------------------------------------------------------
 # Check contact dynamics 3D contact
-del vq, aq
+# del vq, aq
 q = pinocchio.randomConfiguration(model)
 v = rand(model.nv) * 2 - 1
 tau = rand(model.nv) * 2 - 1
@@ -393,7 +392,7 @@ def Kid(q_, J_=None):
     return np.bmat([[M, J.T], [J, zero([6, 6])]])
 
 
-def cid(q_, v_, tau_):
+def cid2(q_, v_, tau_):
     pinocchio.computeJointJacobians(model, data, q_)
     K = Kid(q_)
     b = pinocchio.rnea(model, data, q_, v_, zero(model.nv)).copy()
@@ -407,7 +406,7 @@ J = zero([6, model.nv])
 K = Kid(q, J)
 v -= pinv(J) * J * v
 
-af = cid(q, v, tau)
+af = cid2(q, v, tau)
 a = af[:model.nv]
 f = af[model.nv:]
 fs[-1] = -pinocchio.Force(f)
@@ -420,7 +419,7 @@ dv_dq, da_dq, da_dv, da_da = pinocchio.getJointAccelerationDerivatives(model, da
                                                                        pinocchio.ReferenceFrame.LOCAL)
 dgamma_dq = da_dq.copy()
 
-dcid_dqn = df_dq(model, lambda _q: cid(_q, v, tau), q)
+dcid_dqn = df_dq(model, lambda _q: cid2(_q, v, tau), q)
 KJn = K * dcid_dqn
 KJ = -np.vstack([dtau_dq, dgamma_dq])
 assert (absmax(KJ - KJn) / model.nv < 1e-3)
@@ -428,7 +427,7 @@ assert (absmax(KJ - KJn) / model.nv < 1e-3)
 dcid_dq = -inv(K) * np.vstack([dtau_dq, dgamma_dq])
 assert (absmax(dcid_dqn - dcid_dq) / model.nv < 1e-3)
 
-dcid_dun = df_dx(lambda _u: cid(q, v, _u), tau)
+dcid_dun = df_dx(lambda _u: cid2(q, v, _u), tau)
 # K*D = [ I_nv; O_ncxnv ]
 # D = Kinv * [ I_nv ; 0_ncxnv ] = Kinv[:nv,:]
 dcid_du = inv(K)[:, :model.nv]

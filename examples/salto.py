@@ -13,7 +13,6 @@ iterations to converge.
 import sys
 
 import numpy as np
-
 import pinocchio
 from crocoddyl import (ActionModelImpact, ActivationModelInequality, ActivationModelWeightedQuad,
                        ActuationModelFreeFloating, CallbackDDPVerbose, ContactModel6D, ContactModelMultiple,
@@ -230,7 +229,8 @@ ddp.th_stop = 5e-3
 
 for ANG in np.arange(.5, 3.2, .3):
     models[imp].costs['xreg'].cost.ref[3:7] = [0, np.sin(ANG), 0, np.cos(ANG)]
-    if PHASE_ITERATIONS[PHASE_NAME] > 0: print("*** SOLVE %s ang=%.1f ***" % (PHASE_NAME, ANG))
+    if PHASE_ITERATIONS[PHASE_NAME] > 0:
+        print("*** SOLVE %s ang=%.1f ***" % (PHASE_NAME, ANG))
     ddp.solve(maxiter=PHASE_ITERATIONS[PHASE_NAME], regInit=.1, init_xs=ddp.xs, init_us=ddp.us, isFeasible=True)
     if PHASE_ITERATIONS[PHASE_NAME] > 0 and PHASE_BACKUP[PHASE_NAME]:
         np.save(BACKUP_PATH + '%s.%02d.xs.npy' % (PHASE_NAME, int(ANG * 10)), ddp.xs)
@@ -262,7 +262,8 @@ ddp.us = usddp + [
 impact.costs['track30'].weight = 1e6
 impact.costs['track16'].weight = 1e6
 
-if PHASE_ITERATIONS[PHASE_NAME] > 0: print("*** SOLVE %s ***" % PHASE_NAME)
+if PHASE_ITERATIONS[PHASE_NAME] > 0:
+    print("*** SOLVE %s ***" % PHASE_NAME)
 ddp.solve(init_xs=ddp.xs, init_us=ddp.us, maxiter=PHASE_ITERATIONS[PHASE_NAME])
 
 if PHASE_ITERATIONS[PHASE_NAME] == 0:

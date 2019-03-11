@@ -1,7 +1,6 @@
 import numpy as np
-from scipy.linalg import block_diag
-
 import pinocchio
+from scipy.linalg import block_diag
 from utils import a2m
 
 

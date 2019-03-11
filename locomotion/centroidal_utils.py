@@ -1,7 +1,6 @@
 from collections import OrderedDict
 
 import numpy as np
-
 import pinocchio
 from crocoddyl import (ActionModelImpact, ActivationModelWeightedQuad, ActuationModelFreeFloating, ContactModel6D,
                        ContactModelMultiple, CostModelCoM, CostModelControl, CostModelForce, CostModelFramePlacement,

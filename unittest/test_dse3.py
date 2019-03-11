@@ -1,5 +1,4 @@
 import numpy as np
-
 import pinocchio
 from crocoddyl import loadTalosArm
 from testutils import df_dq

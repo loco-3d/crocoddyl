@@ -1,5 +1,4 @@
 import numpy as np
-
 import pinocchio
 from differential_action import DifferentialActionDataAbstract, DifferentialActionModelAbstract
 from state import StatePinocchio

@@ -1,8 +1,6 @@
 import sys
 
 import numpy as np
-from numpy.linalg import pinv
-
 import pinocchio
 from crocoddyl import (ActionModelImpact, ActivationModelWeightedQuad, ActuationModelFreeFloating, CallbackDDPLogger,
                        CallbackDDPVerbose, CallbackSolverDisplay, ContactModel6D, ContactModelMultiple, CostModelCoM,
@@ -11,6 +9,7 @@ from crocoddyl import (ActionModelImpact, ActivationModelWeightedQuad, Actuation
                        IntegratedActionModelEuler, ShootingProblem, SolverDDP, StatePinocchio, a2m, loadTalosLegs, m2a)
 from crocoddyl.diagnostic import displayTrajectory
 from crocoddyl.fddp import SolverFDDP
+from numpy.linalg import pinv
 from pinocchio.utils import eye, zero
 
 BACKUP_PATH = "npydata/jump."
@@ -134,13 +133,13 @@ com0 = m2a(pinocchio.centerOfMass(rmodel, rdata, q0))
 
 KT = 3
 KS = 8
-models = [runningModel([rightId, leftId], {}, integrationStep=stanceDurantion / KT) for i in range(KT)] + [
-    runningModel([rightId], {}, integrationStep=swingDuration / KS) for i in range(KS)
-] + [impactModel([leftId, rightId], {leftId: SE3(eye(3), a2m(left0 + [stepLength, 0, 0]))})
-     ] + [runningModel([rightId, leftId], {}, integrationStep=stanceDurantion / KT)
-          for i in range(KT)] + [runningModel([leftId], {}, integrationStep=swingDuration / KS) for i in range(KS)] + [
-              impactModel([leftId, rightId], {rightId: SE3(eye(3), a2m(right0 + [stepLength, 0, 0]))})
-          ] + [runningModel([rightId, leftId], {}, integrationStep=stanceDurantion / KT) for i in range(KT)]
+models = [runningModel([rightId, leftId], {}, integrationStep=stanceDurantion / KT) for i in range(KT)]
+models += [runningModel([rightId], {}, integrationStep=swingDuration / KS) for i in range(KS)]
+models += [impactModel([leftId, rightId], {leftId: SE3(eye(3), a2m(left0 + [stepLength, 0, 0]))})]
+models += [runningModel([rightId, leftId], {}, integrationStep=stanceDurantion / KT) for i in range(KT)]
+models += [runningModel([leftId], {}, integrationStep=swingDuration / KS) for i in range(KS)]
+models += [impactModel([leftId, rightId], {rightId: SE3(eye(3), a2m(right0 + [stepLength, 0, 0]))})]
+models += [runningModel([rightId, leftId], {}, integrationStep=stanceDurantion / KT) for i in range(KT)]
 
 imp1 = KT + KS
 imp2 = 2 * (KT + KS) + 1

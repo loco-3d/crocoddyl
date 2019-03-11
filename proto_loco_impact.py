@@ -1,12 +1,11 @@
 import numpy as np
-from numpy import matrix
-
 import pinocchio
 from crocoddyl import (ActuationModelFreeFloating, ContactModel6D, ContactModelMultiple, CostModelControl,
                        CostModelPlacementVelocity, CostModelPosition6D, CostModelState, CostModelSum,
                        DifferentialActionModelFloatingInContact, ImpulseModelMultiple, IntegratedActionModelEuler,
                        StatePinocchio, a2m, m2a)
 from crocoddyl.impact import ActionModelImpact, ImpulseModel6D
+from numpy import matrix
 # from logger import *
 from pinocchio.utils import eye, zero
 # --- DDP

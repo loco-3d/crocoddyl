@@ -2,7 +2,6 @@ import unittest
 from random import randint
 
 import numpy as np
-
 from crocoddyl import StateNumDiff, StatePinocchio, StateUnicycle, StateVector
 
 

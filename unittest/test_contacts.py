@@ -1,6 +1,4 @@
 import numpy as np
-from numpy.linalg import eig, norm, pinv
-
 import pinocchio
 # TODO Check if we need this unit-test here. Note that is an ction test
 # -------------------------------------------------------------------------------
@@ -21,6 +19,7 @@ from crocoddyl import (ActionModelNumDiff, ActuationModelFreeFloating, CallbackD
                        DifferentialActionModelFloatingInContact, DifferentialActionModelNumDiff,
                        IntegratedActionModelEuler, ShootingProblem, SolverDDP, SolverKKT, StatePinocchio, a2m, absmax,
                        loadTalosArm, m2a)
+from numpy.linalg import eig, norm, pinv
 from pinocchio.utils import rand, zero
 from testutils import df_dq, df_dx
 

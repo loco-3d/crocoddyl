@@ -1,8 +1,9 @@
 import numpy as np
-from numpy.linalg import norm
-
 from crocoddyl import ActivationModelQuad, ActivationModelSmoothAbs, ActivationModelWeightedQuad
 from crocoddyl.utils import EPS
+from numpy.linalg import norm
+
+# Comment:
 '''
 c = sum( a(ri) )
 c' = sum( [a(ri)]' ) = sum( ri' a'(ri) ) = R' [ a'(ri) ]_i

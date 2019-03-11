@@ -1,11 +1,10 @@
 import numpy as np
-from numpy.linalg import norm
-
 import pinocchio
 from crocoddyl import (ActionModelImpact, ActionModelNumDiff, CostModelSum, ImpulseModel6D, ImpulseModelMultiple, a2m,
                        absmax, loadTalosArm, loadTalosLegs)
 # ----------------------------------------------------------------------
 from crocoddyl.impact import CostModelImpactCoM, CostModelImpactWholeBody
+from numpy.linalg import norm
 from pinocchio.utils import zero
 from testutils import df_dq
 

@@ -1,12 +1,11 @@
 import numpy as np
-from numpy.linalg import norm
-
 import pinocchio
 from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, CallbackDDPLogger, CallbackDDPVerbose,
                        CallbackSolverDisplay, ContactModel6D, ContactModelMultiple, CostModelControl,
                        CostModelFramePlacement, CostModelFrameVelocity, CostModelState, CostModelSum,
                        DifferentialActionModelFloatingInContact, IntegratedActionModelEuler, ShootingProblem,
                        SolverDDP, StatePinocchio, loadTalosLegs, m2a)
+from numpy.linalg import norm
 from pinocchio.utils import eye, zero
 
 robot = loadTalosLegs()
