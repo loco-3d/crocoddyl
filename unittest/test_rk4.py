@@ -1,7 +1,8 @@
 import numpy as np
-from crocoddyl import ActionModelNumDiff, DifferentialActionModelLQR, IntegratedActionModelRK4, a2m, m2a
 from numpy.linalg import norm
 from numpy.random import rand
+
+from crocoddyl import ActionModelNumDiff, DifferentialActionModelLQR, IntegratedActionModelRK4, a2m, m2a
 from testutils import df_dx
 
 np.set_printoptions(linewidth=np.nan, suppress=True)
@@ -49,7 +50,7 @@ def get_xn(u):
 
 
 def get_au(u):
-    a, l = model.differential.calc(data.differential[0], x, m2a(u))
+    a, _ = model.differential.calc(data.differential[0], x, m2a(u))
     return a2m(a)
 
 

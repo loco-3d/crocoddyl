@@ -1,4 +1,6 @@
 import numpy as np
+from numpy.linalg import norm
+
 import pinocchio
 from crocoddyl import (ActionModelNumDiff, ActivationModelInequality, ActivationModelWeightedQuad, CostModelCoM,
                        CostModelControl, CostModelFramePlacement, CostModelFrameTranslation, CostModelFrameVelocity,
@@ -6,7 +8,6 @@ from crocoddyl import (ActionModelNumDiff, ActivationModelInequality, Activation
                        DifferentialActionModelFullyActuated, DifferentialActionModelNumDiff,
                        IntegratedActionModelEuler, ShootingProblem, SolverDDP, SolverKKT, StatePinocchio, a2m, absmax,
                        loadTalosArm, m2a)
-from numpy.linalg import norm
 from pinocchio.utils import rand, zero
 
 robot = loadTalosArm()
@@ -353,7 +354,7 @@ u = np.random.rand(rmodel.nv) * 2 - 1
 model = DifferentialActionModelPositioning(rmodel)
 data = model.createData()
 
-a, l = model.calc(data, x, u)
+a, _ = model.calc(data, x, u)
 model.calcDiff(data, x, u)
 
 mnum = DifferentialActionModelNumDiff(model, withGaussApprox=True)

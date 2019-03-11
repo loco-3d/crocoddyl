@@ -1,4 +1,5 @@
 import numpy as np
+
 import pinocchio
 from pinocchio.robot_wrapper import RobotWrapper
 
@@ -49,9 +50,9 @@ def loadTalosArm(modelPath='/opt/openrobots/share/example-robot-data', freeFloat
         u = robot.model.upperPositionLimit
         u[:7] = 1
         robot.model.upperPositionLimit = u
-        l = robot.model.lowerPositionLimit
-        l[:7] = -1
-        robot.model.lowerPositionLimit = l
+        limit = robot.model.lowerPositionLimit
+        limit[:7] = -1
+        robot.model.lowerPositionLimit = limit
     return robot
 
 
@@ -96,9 +97,9 @@ def loadTalosLegs(modelPath='/opt/openrobots/share/example-robot-data'):
     u = m2.upperPositionLimit
     u[:7] = 1
     m2.upperPositionLimit = u
-    l = m2.lowerPositionLimit
-    l[:7] = -1
-    m2.lowerPositionLimit = l
+    limit = m2.lowerPositionLimit
+    limit[:7] = -1
+    m2.lowerPositionLimit = limit
 
     # q2 = robot.q0[:19]
     for f in m1.frames:

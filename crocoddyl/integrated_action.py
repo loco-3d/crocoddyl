@@ -123,16 +123,16 @@ class IntegratedActionModelRK4:
 
         data.y[0] = x
         for i in range(3):
-            data.acc[i], data.l[i] = self.differential.calc(data.differential[i], data.y[i], u)
+            data.acc[i], data.int[i] = self.differential.calc(data.differential[i], data.y[i], u)
             data.ki[i] = np.concatenate([data.y[i][nq:], data.acc[i]])
             data.y[i + 1] = self.differential.State.integrate(x, data.ki[i] * self.rk4_inc[i] * dt)
 
-        data.acc[3], data.l[3] = self.differential.calc(data.differential[3], data.y[3], u)
+        data.acc[3], data.int[3] = self.differential.calc(data.differential[3], data.y[3], u)
         data.ki[3] = np.concatenate([data.y[3][nq:], data.acc[3]])
         data.dx = (data.ki[0] + 2. * data.ki[1] + 2. * data.ki[2] + data.ki[3]) * dt / 6
         data.xnext[:] = self.differential.State.integrate(x, data.dx)
 
-        data.cost = (data.l[0] + 2 * data.l[1] + 2 * data.l[2] + data.l[3]) / 6
+        data.cost = (data.int[0] + 2 * data.int[1] + 2 * data.int[2] + data.int[3]) / 6
 
         return data.xnext, data.cost
 
@@ -242,13 +242,11 @@ class IntegratedActionModelRK4:
 class IntegratedActionDataRK4:
     def __init__(self, model):
         nx, ndx, nu = model.nx, model.ndx, model.nu
-        self.differential = [
-            None,
-        ] * 4
+        self.differential = [None] * 4
 
         for i in range(4):
             self.differential[i] = model.differential.createData()
-        self.l = [np.nan] * 4
+        self.int = [np.nan] * 4
         self.ki = [np.zeros([ndx])] * 4
 
         self.F = np.zeros([ndx, ndx + nu])
