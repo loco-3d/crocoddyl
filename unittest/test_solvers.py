@@ -162,8 +162,8 @@ for ut, u1 in zip(kkt.us_try, u1s):
 d1, d2 = kkt.expectedImprovement()
 if LQR:
     assert (d1 + d2 / 2 + problem.calc(x1s, u1s) < 1e-9)
-assert (d1 + d2 / 2 + np.dot(.5 * np.dot(kkt.hess, np.concatenate(dxs + dus)) + kkt.grad, np.concatenate(dxs + dus)) <
-        1e-9)
+d3 = np.dot(.5 * np.dot(kkt.hess, np.concatenate(dxs + dus)) + kkt.grad, np.concatenate(dxs + dus))
+assert (d1 + d2 / 2 + d3 < 1e-9)
 
 # Check stoping criteria
 kkt.setCandidate(x1s, u1s)

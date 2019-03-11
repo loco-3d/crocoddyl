@@ -1,8 +1,9 @@
 import numpy as np
+from numpy.linalg import inv, norm, pinv
+
 import pinocchio
 from crocoddyl import loadTalosArm
 from crocoddyl.utils import EPS
-from numpy.linalg import inv, norm, pinv
 # ------------------------------------------------------------------------
 # ------------------------------------------------------------------------
 # ------------------------------------------------------------------------
@@ -53,10 +54,10 @@ assert (absmax(da + Mi * dtau) < 1e-9)
 pinocchio.forwardKinematics(model, data, q, v, a)
 pinocchio.updateFramePlacements(model, data)
 
-assert (absmax(
-    pinocchio.getFrameJacobian(model, data, 10, pinocchio.ReferenceFrame.LOCAL) * a +
-    pinocchio.getFrameJacobianTimeVariation(model, data, 10, pinocchio.ReferenceFrame.LOCAL) * v -
-    pinocchio.getFrameAcceleration(model, data, 10).vector) < 1e-9)
+frameJacobian = pinocchio.getFrameJacobian(model, data, 10, pinocchio.ReferenceFrame.LOCAL)
+frameJacobianTimeVariation = pinocchio.getFrameJacobianTimeVariation(model, data, 10, pinocchio.ReferenceFrame.LOCAL)
+frameAcceleration = pinocchio.getFrameAcceleration(model, data, 10)
+assert (absmax(frameJacobian * a + frameJacobianTimeVariation * v - frameAcceleration.vector) < 1e-9)
 '''
 (a,f) = K^-1 (tau-b,-gamma)
 avec K = [ M J* ; J 0 ]

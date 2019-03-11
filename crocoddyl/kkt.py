@@ -167,10 +167,9 @@ class SolverKKT:
         '''
         lambdas = self.lambdas
         dL = self.grad
-        dF = np.concatenate(
-            [lk - np.dot(lkp1, dk.Fx)
-             for lk, dk, lkp1 in zip(lambdas[:-1], self.problem.runningDatas, lambdas[1:])] + [lambdas[-1]] +
-            [-np.dot(lkp1, dk.Fu) for lk, dk, lkp1 in zip(lambdas[:-1], self.problem.runningDatas, lambdas[1:])])
+        dF1 = [lk - np.dot(lkp1, dk.Fx) for lk, dk, lkp1 in zip(lambdas[:-1], self.problem.runningDatas, lambdas[1:])]
+        dF3 = [-np.dot(lkp1, dk.Fu) for lk, dk, lkp1 in zip(lambdas[:-1], self.problem.runningDatas, lambdas[1:])]
+        dF = np.concatenate(dF1 + [lambdas[-1]] + dF3)
         return sum((dL + dF)**2), sum(self.cval**2)
 
     def tryStep(self, stepLength):
