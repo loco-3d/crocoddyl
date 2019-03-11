@@ -1,9 +1,8 @@
 import numpy as np
-from numpy.linalg import inv, norm, pinv
-
 import pinocchio
 from crocoddyl import loadTalosArm
 from crocoddyl.utils import EPS
+from numpy.linalg import inv, norm, pinv
 # ------------------------------------------------------------------------
 # ------------------------------------------------------------------------
 # ------------------------------------------------------------------------

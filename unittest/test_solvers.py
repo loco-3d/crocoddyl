@@ -2,14 +2,13 @@ import copy
 import unittest
 
 import numpy as np
-from numpy.linalg import eig, inv, norm
-
 # --- TEST DDP ---
 # ---------------------------------------------------
 # ---------------------------------------------------
 # ---------------------------------------------------
 from crocoddyl import (ActionModelLQR, ActionModelUnicycle, ActionModelUnicycleVar, ShootingProblem, SolverDDP,
                        SolverKKT)
+from numpy.linalg import eig, inv, norm
 
 
 class ShootingProblemTest(unittest.TestCase):

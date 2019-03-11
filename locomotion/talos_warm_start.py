@@ -1,7 +1,6 @@
-import numpy as np
-
 import conf_talos_warm_start as conf
 import locomote
+import numpy as np
 import pinocchio
 from centroidal_utils import createMultiphaseShootingProblem, createPhiFromContactSequence, createSwingTrajectories
 from crocoddyl import (ActionModelImpact, CallbackDDPVerbose, CallbackSolverDisplay, ShootingProblem, SolverDDP,

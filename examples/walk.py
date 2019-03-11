@@ -1,8 +1,6 @@
 import sys
 
 import numpy as np
-from numpy.linalg import pinv
-
 import pinocchio
 from crocoddyl import (ActionModelImpact, ActivationModelWeightedQuad, ActuationModelFreeFloating, CallbackDDPLogger,
                        CallbackDDPVerbose, CallbackSolverDisplay, ContactModel6D, ContactModelMultiple, CostModelCoM,
@@ -11,6 +9,7 @@ from crocoddyl import (ActionModelImpact, ActivationModelWeightedQuad, Actuation
                        IntegratedActionModelEuler, ShootingProblem, SolverDDP, StatePinocchio, a2m, loadTalosLegs, m2a)
 from crocoddyl.diagnostic import displayTrajectory
 from crocoddyl.fddp import SolverFDDP
+from numpy.linalg import pinv
 from pinocchio.utils import eye, zero
 
 BACKUP_PATH = "npydata/jump."

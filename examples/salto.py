@@ -13,7 +13,6 @@ iterations to converge.
 import sys
 
 import numpy as np
-
 import pinocchio
 from crocoddyl import (ActionModelImpact, ActivationModelInequality, ActivationModelWeightedQuad,
                        ActuationModelFreeFloating, CallbackDDPVerbose, ContactModel6D, ContactModelMultiple,

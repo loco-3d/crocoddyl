@@ -1,5 +1,4 @@
 import numpy as np
-
 from state import StateVector
 from utils import EPS
 
