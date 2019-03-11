@@ -146,7 +146,7 @@ simple = {
     # f[0]: 1,
     # f[1]: 1
 }
-print ukkt[0].subs(simple).simplify().factor() - uddp[0].subs(simple).simplify().factor()
+print(ukkt[0].subs(simple).simplify().factor() - uddp[0].subs(simple).simplify().factor())
 
 guess = {
     xg[0]: 3,

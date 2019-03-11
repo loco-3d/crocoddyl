@@ -85,10 +85,10 @@ endEff = problem.terminalData.differential.pinocchio.oMf[model.differential.cost
 for i in range(1, 10):
     termmodel.differential.costs['pos'].weight = 10**i
     ddp.solve(maxiter=5, init_xs=ddp.xs, init_us=ddp.us, verbose=True, isFeasible=True, regInit=1e-3)
-    print '\n', endEff.translation.T, '\n'
+    print('\n', endEff.translation.T, '\n')
 
 ddp.solve(maxiter=500, init_xs=ddp.xs, init_us=ddp.us, verbose=True, isFeasible=True, regInit=1e-3)
-print '\n', endEff.translation.T, '\n'
+print('\n', endEff.translation.T, '\n')
 
 plt.plot([c[-1] for c in ddp.callback.costs])
 plt.show()

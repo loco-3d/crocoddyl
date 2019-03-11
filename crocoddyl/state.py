@@ -5,7 +5,7 @@ from utils import a2m
 
 
 class StateAbstract:
-    """ Abstract class for the state representation.
+    r""" Abstract class for the state representation.
 
     A state is represented by its operators: difference, integrates and their
     derivatives. The difference operator returns the value of x1 [-] x2
@@ -32,7 +32,7 @@ class StateAbstract:
         raise NotImplementedError("Not implemented yet.")
 
     def diff(self, x1, x2):
-        """ Operator that differentiates the two state points.
+        r""" Operator that differentiates the two state points.
 
         It returns the value of x1 [-] x2 operation. Note tha x1 and x2 are
         points in the state manifold (\in M). Instead the operator result lies
@@ -44,7 +44,7 @@ class StateAbstract:
         raise NotImplementedError("Not implemented yet.")
 
     def integrate(self, x, dx):
-        """ Operator that integrates the current state.
+        r""" Operator that integrates the current state.
 
         It returns the value of x [+] dx operation. Note tha x and dx are
         points in the state manifold (\in M) and its tangent, respectively.
@@ -56,7 +56,7 @@ class StateAbstract:
         raise NotImplementedError("Not implemented yet.")
 
     def Jdiff(self, x1, x2, firstsecond='both'):
-        """ Compute the partial derivatives of difference operator.
+        r""" Compute the partial derivatives of difference operator.
 
         For a given state, the difference operator (x1 [-] x2) is defined by
         diff(x1,x2). Instead here it is described its partial derivatives, i.e.
@@ -72,7 +72,7 @@ class StateAbstract:
         raise NotImplementedError("Not implemented yet.")
 
     def Jintegrate(self, x, dx, firstsecond='both'):
-        """ Compute the partial derivatives of integrate operator.
+        r""" Compute the partial derivatives of integrate operator.
 
         For a given state, the integrate operator (x [+] dx) is defined by
         integrate(x,dx). Instead here it is described its partial derivatives,

@@ -123,7 +123,7 @@ assert (absmax(dnum.Fx[nv:, :nv] - data.Fx[nv:, :nv]) < 1e-3)  # dv/dq
 assert (absmax(dnum.Fx - data.Fx) < 1e-3)
 assert (absmax(dnum.Rx - data.Rx) < 1e-3)
 assert (absmax(dnum.Lx - data.Lx) < 1e-3)
-assert (data.Fu.shape[1] == 0 and (data.Lu is 0 or data.Lu.shape == (0, )))
+assert (data.Fu.shape[1] == 0 and (data.Lu == 0 or data.Lu.shape == (0, )))
 
 # --- TALOS LEGS
 robot = loadTalosLegs()
@@ -212,7 +212,7 @@ assert (absmax(dnum.Fx[nv:, nv:] - data.Fx[nv:, nv:]) < 1e4 * mnum.disturbance) 
 assert (absmax(dnum.Fx - data.Fx) < 1e4 * mnum.disturbance)
 assert (absmax(dnum.Rx - data.Rx) < 1e3 * mnum.disturbance)
 assert (absmax(dnum.Lx - data.Lx) < 1e3 * mnum.disturbance)
-assert (data.Fu.shape[1] == 0 and (data.Lu is 0 or data.Lu.shape == (0, )))
+assert (data.Fu.shape[1] == 0 and (data.Lu == 0 or data.Lu.shape == (0, )))
 
 # ----------------------------------------------------------------------
 # --- CHECK WITH SUM OF COSTS ------------------------------------------
@@ -239,7 +239,7 @@ assert (absmax(dnum.Fx[nv:, nv:] - data.Fx[nv:, nv:]) < 1e4 * mnum.disturbance) 
 assert (absmax(dnum.Fx - data.Fx) < 1e4 * mnum.disturbance)
 assert (absmax(dnum.Rx - data.Rx) < 1e3 * mnum.disturbance)
 assert (absmax(dnum.Lx - data.Lx) < 1e3 * mnum.disturbance)
-assert (data.Fu.shape[1] == 0 and (data.Lu is 0 or data.Lu.shape == (0, )))
+assert (data.Fu.shape[1] == 0 and (data.Lu == 0 or data.Lu.shape == (0, )))
 
 costCom = CostModelImpactCoM(rmodel)
 # model.costs.addCost( cost=costCom,weight=1,name="impactcom" )
@@ -264,4 +264,4 @@ assert (absmax(dnum.Fx[nv:, nv:] - data.Fx[nv:, nv:]) < 1e4 * mnum.disturbance) 
 assert (absmax(dnum.Fx - data.Fx) < 1e4 * mnum.disturbance)
 assert (absmax(dnum.Rx - data.Rx) < 1e3 * mnum.disturbance)
 assert (absmax(dnum.Lx - data.Lx) < 1e3 * mnum.disturbance)
-assert (data.Fu.shape[1] == 0 and (data.Lu is 0 or data.Lu.shape == (0, )))
+assert (data.Fu.shape[1] == 0 and (data.Lu == 0 or data.Lu.shape == (0, )))

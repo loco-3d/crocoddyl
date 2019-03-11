@@ -76,14 +76,14 @@ e_k = lambda i: data.dki_dx[i][:, :nv] - dk_dq(i)
 tolerance = 1e-4
 assert (np.isclose(data.Fu, dxn_du, atol=tolerance).all())
 
-for i in xrange(4):
+for i in range(4):
     assert (np.isclose(data.dki_du[i], dk_du(i), atol=tolerance).all())
 
-for i in xrange(4):
+for i in range(4):
     assert (np.isclose(data.dki_dx[i][:, :nv], dk_dq(i), atol=tolerance).all())
     assert (np.isclose(data.dki_dx[i][:, nv:], dk_dv(i), atol=tolerance).all())
 
-for i in xrange(4):
+for i in range(4):
     assert (np.isclose(data.dy_dx[i][:, :nv], dy_dq(i), atol=tolerance).all())
     assert (np.isclose(data.dy_dx[i][:, nv:], dy_dv(i), atol=tolerance).all())
 

@@ -62,8 +62,8 @@ q = robot.q0.copy()
 v = zero(rmodel.nv)
 x = m2a(np.concatenate([q, v]))
 
-print robot.framePlacement(q, robot.model.getFrameId(leftFrame))
-print robot.framePlacement(q, robot.model.getFrameId(rightFrame))
+print(robot.framePlacement(q, robot.model.getFrameId(leftFrame)))
+print(robot.framePlacement(q, robot.model.getFrameId(rightFrame)))
 # disp = lambda xs: disptraj(robot, xs)
 
 DT = 1.

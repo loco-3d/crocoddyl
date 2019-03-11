@@ -84,6 +84,6 @@ if WITHDISPLAY:
 
 # Printing the reached position
 frame_idx = rmodel.getFrameId(frameName)
-print
-print "The reached pose by the wrist is"
-print ddp.datas()[-1].differential.pinocchio.oMf[frame_idx]
+print()
+print("The reached pose by the wrist is")
+print(ddp.datas()[-1].differential.pinocchio.oMf[frame_idx])

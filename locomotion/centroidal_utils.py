@@ -62,7 +62,7 @@ def createSwingTrajectories(rmodel, rdata, x, contact_patches, dt):
     for patch in contact_patches.keys():
         p = np.zeros((3, N))
         m = np.zeros((3, N))
-        for i in xrange(N):
+        for i in range(N):
             q = a2m(x[i][:rmodel.nq])
             v = a2m(x[i][-rmodel.nv:])
             pinocchio.forwardKinematics(rmodel, rdata, q, v)

@@ -122,7 +122,7 @@ class IntegratedActionModelRK4:
         nq, dt = self.nq, self.timeStep
 
         data.y[0] = x
-        for i in xrange(3):
+        for i in range(3):
             data.acc[i], data.l[i] = self.differential.calc(data.differential[i], data.y[i], u)
             data.ki[i] = np.concatenate([data.y[i][nq:], data.acc[i]])
             data.y[i + 1] = self.differential.State.integrate(x, data.ki[i] * self.rk4_inc[i] * dt)
@@ -179,7 +179,7 @@ class IntegratedActionModelRK4:
         ndx, nu, nv, dt = self.ndx, self.nu, self.nv, self.timeStep
         if recalc:
             self.calc(data, x, u)
-        for i in xrange(4):
+        for i in range(4):
             self.differential.calcDiff(data.differential[i], data.y[i], u, recalc=False)
             data.dki_dy[i] = np.bmat([[np.zeros([nv, nv]), np.identity(nv)], [data.differential[i].Fx]])
 
@@ -199,7 +199,7 @@ class IntegratedActionModelRK4:
         data.ddli_ddu[0] = data.differential[0].Luu
         data.ddli_dxdu[0] = data.differential[0].Lxu
 
-        for i in xrange(1, 4):
+        for i in range(1, 4):
             c = self.rk4_inc[i - 1] * dt
             dyi_dx, dyi_ddx = self.State.Jintegrate(x, c * data.ki[i - 1])
 
@@ -246,7 +246,7 @@ class IntegratedActionDataRK4:
             None,
         ] * 4
 
-        for i in xrange(4):
+        for i in range(4):
             self.differential[i] = model.differential.createData()
         self.l = [np.nan] * 4
         self.ki = [np.zeros([ndx])] * 4

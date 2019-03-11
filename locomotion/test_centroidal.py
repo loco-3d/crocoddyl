@@ -21,7 +21,7 @@ patch_names = ["LF_patch", "RF_patch"]
 cc = createPhiFromContactSequence(rmodel, rdata, cs, patch_names)
 eps = 1e-4
 for spl in cs.ms_interval_data[:-1]:
-    for i in xrange(len(spl.time_trajectory)):
+    for i in range(len(spl.time_trajectory)):
         x = spl.state_trajectory[i]
         dx = spl.dot_state_trajectory[i]
         u = spl.control_trajectory[i]

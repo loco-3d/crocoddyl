@@ -536,33 +536,32 @@ cameraTF = [2., 2.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 ddp = [None] * len(GAITPHASES)
 for i, phase in enumerate(GAITPHASES):
     for key, value in phase.items():
-        if key is 'walking':
+        if key == 'walking':
             # Creating a walking problem
             ddp[i] = SolverDDP(
                 gait.createWalkingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                           value['stepKnots'], value['supportKnots']))
-        elif key is 'trotting':
+        elif key == 'trotting':
             # Creating a trotting problem
             ddp[i] = SolverDDP(
                 gait.createTrottingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                            value['stepKnots'], value['supportKnots']))
-        elif key is 'pacing':
+        elif key == 'pacing':
             # Creating a pacing problem
             ddp[i] = SolverDDP(
                 gait.createPacingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                          value['stepKnots'], value['supportKnots']))
-        elif key is 'bounding':
+        elif key == 'bounding':
             # Creating a bounding problem
             ddp[i] = SolverDDP(
                 gait.createBoundingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                            value['stepKnots'], value['supportKnots']))
-        elif key is 'jumping':
+        elif key == 'jumping':
             # Creating a jumping problem
             ddp[i] = SolverDDP(gait.createJumpingProblem(x0, value['jumpHeight'], value['timeStep']))
 
     # Added the callback functions
-    print
-    print 'Solving ' + key
+    print('*** SOLVE ' + key + ' ***')
     ddp[i].callback = [CallbackDDPLogger(), CallbackDDPVerbose()]
     if WITHDISPLAY:
         ddp[i].callback.append(CallbackSolverDisplay(hyq, 4, 1, cameraTF))
