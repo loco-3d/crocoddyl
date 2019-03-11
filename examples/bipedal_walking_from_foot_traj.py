@@ -81,8 +81,9 @@ class SimpleBipedGaitProblem:
                 [self.rfId], [self.lfId])
 
         # We defined the problem as:
-        loco3dModel += rStep + doubleSupport
-        loco3dModel += lStep + doubleSupport
+        loco3dModel += doubleSupport + rStep
+        loco3dModel += doubleSupport + lStep
+
 
         problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
@@ -181,7 +182,8 @@ class SimpleBipedGaitProblem:
                 costModel.addCost("footTrack_"+str(i), footTrack, 1e4)
 
         stateWeights = \
-            np.array([0]*6 + [0.01]*(self.rmodel.nv-6) + [10]*self.rmodel.nv)
+            np.array([0]*3 + [500.]*3  + [0.01]*(self.rmodel.nv-6) +
+                     [10]*self.rmodel.nv)
         stateReg = CostModelState(self.rmodel,
                                   self.state,
                                   self.rmodel.defaultState,
