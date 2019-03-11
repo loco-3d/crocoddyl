@@ -1,3 +1,7 @@
+"""
+This is an integrative test where we checked that the DDP solver generates a CoM motion for the HyQ robot as requested.
+"""
+
 import numpy as np
 import pinocchio
 from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, ContactModel3D, ContactModelMultiple,
@@ -5,10 +9,6 @@ from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, 
                        DifferentialActionModelFloatingInContact, IntegratedActionModelEuler, ShootingProblem,
                        SolverDDP, StatePinocchio, a2m, loadHyQ, m2a)
 from numpy.linalg import norm
-
-
-# This is an integrative test where we checked that the DDP solver generates
-# a CoM motion for the HyQ robot as requested.
 
 
 class SimpleQuadrupedProblem:
