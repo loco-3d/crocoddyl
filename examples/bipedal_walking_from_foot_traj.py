@@ -13,7 +13,7 @@ class TaskSE3:
         self.oXf = oXf
         self.frameId = frameId
 
-class SimpleBipedWalkingProblem:
+class SimpleBipedGaitProblem:
     """ Defines a simple 3d locomotion problem
     """
     def __init__(self, rmodel, rightFoot, leftFoot):
@@ -237,35 +237,63 @@ x0 = m2a(np.concatenate([q0, v0]))
 # Setting up the 3d walking problem
 rightFoot = 'right_sole_link'
 leftFoot = 'left_sole_link'
-walk = SimpleBipedWalkingProblem(rmodel, rightFoot, leftFoot)
-
-# Creating the walking problem
-stepLength = 0.6 # meters
-stepHeight = 0.1
-timeStep = 0.0375 # seconds
-stepKnots = 20
-supportKnots = 3
-walkProblem = walk.createWalkingProblem(x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots)
+gait = SimpleBipedGaitProblem(rmodel, rightFoot, leftFoot)
 
 
-# Solving the 3d walking problem using DDP
-ddp = SolverDDP(walkProblem)
+# Setting up all tasks
+GAITPHASES = \
+    [{'walking': {'stepLength': 0.6, 'stepHeight': 0.1,
+                  'timeStep': 0.0375, 'stepKnots': 25, 'supportKnots': 1}},
+     {'walking': {'stepLength': 0.6, 'stepHeight': 0.1,
+                  'timeStep': 0.0375, 'stepKnots': 25, 'supportKnots': 1}},
+     {'walking': {'stepLength': 0.6, 'stepHeight': 0.1,
+                  'timeStep': 0.0375, 'stepKnots': 25, 'supportKnots': 1}},
+     {'walking': {'stepLength': 0.6, 'stepHeight': 0.1,
+                  'timeStep': 0.0375, 'stepKnots': 25, 'supportKnots': 1}}]
 cameraTF = [3., 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
-ddp.callback = [ CallbackDDPVerbose() ]
-if WITHPLOT:       ddp.callback.append(CallbackDDPLogger())
-if WITHDISPLAY:    ddp.callback.append(CallbackSolverDisplay(talos_legs,4,1,cameraTF))
-ddp.th_stop = 1e-9
-ddp.solve(maxiter=1000,regInit=.1,init_xs=[rmodel.defaultState]*len(ddp.models()))
 
 
-# Plotting the solution and the DDP convergence
-if WITHPLOT:
-    log = ddp.callback[0]
-    plotOCSolution(log.xs, log.us)
-    plotDDPConvergence(log.costs,log.control_regs,
-                       log.state_regs,log.gm_stops,
-                       log.th_stops,log.steps)
+ddp = [None] * len(GAITPHASES)
+for i, phase in enumerate(GAITPHASES):
+    for key, value in phase.items():
+        if key is 'walking':
+            # Creating a walking problem
+            ddp[i] = SolverDDP(
+                gait.createWalkingProblem(
+                    x0, value['stepLength'], value['stepHeight'],
+                    value['timeStep'],
+                    value['stepKnots'], value['supportKnots']))
 
-# Visualization of the DDP solution in gepetto-viewer
+    # Added the callback functions
+    print '*** SOLVE ' + key + ' ***'
+    ddp[i].callback = [CallbackDDPLogger(), CallbackDDPVerbose()]
+    if WITHDISPLAY:
+        ddp[i].callback.append(CallbackSolverDisplay(talos_legs, 4, 1, cameraTF))
+
+    # Solving the problem with the DDP solver
+    ddp[i].th_stop = 1e-9
+    ddp[i].solve(
+        maxiter=1000, regInit=.1,
+        init_xs=[rmodel.defaultState]*len(ddp[i].models()),
+        init_us=[m.differential.quasiStatic(d.differential,
+                                            rmodel.defaultState)
+                 for m, d in zip(ddp[i].models(), ddp[i].datas())[:-1]])
+
+    # Defining the final state as initial one for the next phase
+    x0 = ddp[i].xs[-1]
+
+
+# Display the entire motion
 if WITHDISPLAY:
-    displayTrajectory(talos_legs,ddp.xs, ddp.models()[0].timeStep)
+    for i, phase in enumerate(GAITPHASES):
+        displayTrajectory(talos_legs, ddp[i].xs, ddp[i].models()[0].timeStep)
+
+
+# Plotting the entire motion
+if WITHPLOT:
+    xs = []
+    us = []
+    for i, phase in enumerate(GAITPHASES):
+        xs.extend(ddp[i].xs)
+        us.extend(ddp[i].us)
+    plotSolution(rmodel, xs, us)
