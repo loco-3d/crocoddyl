@@ -1,6 +1,8 @@
 import sys
 
 import numpy as np
+from numpy.linalg import pinv
+
 import pinocchio
 from crocoddyl import (ActionModelImpact, ActivationModelWeightedQuad, ActuationModelFreeFloating, CallbackDDPLogger,
                        CallbackDDPVerbose, CallbackSolverDisplay, ContactModel6D, ContactModelMultiple, CostModelCoM,
@@ -9,7 +11,6 @@ from crocoddyl import (ActionModelImpact, ActivationModelWeightedQuad, Actuation
                        IntegratedActionModelEuler, ShootingProblem, SolverDDP, StatePinocchio, a2m, loadTalosLegs, m2a)
 from crocoddyl.diagnostic import displayTrajectory
 from crocoddyl.fddp import SolverFDDP
-from numpy.linalg import pinv
 from pinocchio.utils import eye, zero
 
 BACKUP_PATH = "npydata/jump."
@@ -162,14 +163,8 @@ if 'push' in sys.argv:
     mimp2.costs['track30'].cost.activation.weights[:2] = 0
 
     for m in models:
-        try:
-            m.differential.contact['contact16'].gains[1] = 10
-        except:
-            pass
-        try:
-            m.differential.contact['contact30'].gains[1] = 10
-        except:
-            pass
+        m.differential.contact['contact16'].gains[1] = 10
+        m.differential.contact['contact30'].gains[1] = 10
 
 # ---------------------------------------------------------------------------------------------
 problem = ShootingProblem(initialState=x0, runningModels=models[:-1], terminalModel=models[-1])

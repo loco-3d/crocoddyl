@@ -259,10 +259,7 @@ class DifferentialActionModelNumDiff(DifferentialActionModelAbstract):
         self.nv = model.nv
         self.State = model.State
         self.disturbance = np.sqrt(2 * EPS)
-        try:
-            self.ncost = model.ncost
-        except:
-            self.ncost = 1
+        self.ncost = model.ncost if hasattr(model, 'ncost') else 1
         self.withGaussApprox = withGaussApprox
         assert (not self.withGaussApprox or self.ncost > 1)
 
