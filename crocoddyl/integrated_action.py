@@ -208,8 +208,9 @@ class IntegratedActionModelRK4:
           data.dli_du[i] = data.differential[i].Lu +\
                            np.dot(data.differential[i].Lx, data.dy_du[i])
 
+          data.Luu_partialx[i] = np.dot(data.differential[i].Lxu.T, data.dy_du[i])
           data.ddli_ddu[i] = data.differential[i].Luu +\
-                             np.dot(data.dy_du[i].T, data.differential[i].Lxu) +\
+                             data.Luu_partialx[i].T + data.Luu_partialx[i] +\
                              np.dot(data.dy_du[i].T,
                                     np.dot(data.differential[i].Lxx, data.dy_du[i]))
 
@@ -283,3 +284,4 @@ class IntegratedActionDataRK4:
         self.ddli_ddx = [np.zeros([ ndx,ndx ]),]*4
         self.ddli_ddu = [np.zeros([ nu,nu ]),]*4
         self.ddli_dxdu = [np.zeros([ ndx,nu ]),]*4
+        self.Luu_partialx = [np.zeros([ nu,nu ]),]*4
