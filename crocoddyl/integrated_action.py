@@ -52,7 +52,7 @@ class IntegratedActionDataEuler:
     this integration scheme.
     """
     def __init__(self,model):
-        nx,ndx,nu,ncost = model.nx,model.ndx,model.nu,model.ncost
+        nx,ndx,nu = model.nx,model.ndx,model.nu
         self.differential = model.differential.createData()
         self.xnext = np.zeros([ nx ])
         self.cost = np.nan
@@ -63,17 +63,19 @@ class IntegratedActionDataEuler:
         self.Fu = self.F[:,ndx:]
 
         # Cost data
-        self.costResiduals = np.zeros([ ncost ])
+        if model.withCostResiduals:
+            ncost = model.ncost
+            self.costResiduals = np.zeros([ ncost ])
+            self.R = np.zeros([ ncost,ndx+nu ])
+            self.Rx = self.R[:,:ndx]
+            self.Ru = self.R[:,ndx:]
         self.g = np.zeros([ ndx+nu ])
         self.L = np.zeros([ ndx+nu,ndx+nu ])
-        self.R = np.zeros([ ncost,ndx+nu ])
         self.Lx = self.g[:ndx]
         self.Lu = self.g[ndx:]
         self.Lxx = self.L[:ndx,:ndx]
         self.Lxu = self.L[:ndx,ndx:]
         self.Luu = self.L[ndx:,ndx:]
-        self.Rx = self.R[:,:ndx]
-        self.Ru = self.R[:,ndx:]
 
 
 
