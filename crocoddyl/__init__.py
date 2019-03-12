@@ -17,6 +17,7 @@ from activation import ActivationDataQuad, ActivationModelQuad
 from activation import ActivationDataInequality, ActivationModelInequality
 from activation import ActivationDataWeightedQuad, ActivationModelWeightedQuad
 from activation import ActivationDataSmoothAbs, ActivationModelSmoothAbs
+from action import ActionDataAbstract, ActionModelAbstract
 from action import ActionDataLQR, ActionModelLQR
 from action import ActionDataNumDiff, ActionModelNumDiff
 from integrated_action import IntegratedActionDataEuler, IntegratedActionModelEuler
@@ -36,8 +37,8 @@ from impact import ImpulseData6D, ImpulseModel6D, ImpulseModel3D, ImpulseModelMu
 from impact import ImpulseDataPinocchio, ImpulseModelPinocchio
 from impact import CostModelImpactCoM,CostModelImpactWholeBody
 from impact import ActionDataImpact, ActionModelImpact
-from unicycle import ActionDataUnicycle, ActionModelUnicycle
-from unicycle import StateUnicycle, ActionDataUnicycleVar, ActionModelUnicycleVar
+from unicycle import ActionModelUnicycle
+from unicycle import StateUnicycle, ActionModelUnicycleVar
 from shooting import ShootingProblem
 from callbacks import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay, CallbackSolverTimer
 from ddp import SolverDDP
