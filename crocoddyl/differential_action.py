@@ -77,7 +77,7 @@ class DifferentialActionDataAbstract:
         :param model: differential action model
         :param costData: external cost data (optional)
         """
-        nx,nu,ndx,nv,nout = model.nx,model.nu,model.ndx,model.nv,model.nout
+        nx, ndx, nu, nout = model.nx, model.ndx, model.nu, model.nout
         # State evolution and cost data
         self.cost = np.nan
         self.xout = np.zeros(nout)
@@ -87,12 +87,14 @@ class DifferentialActionDataAbstract:
         self.Fu = np.zeros([nout,nu])
 
         # Cost data
-        if costData == None:
-            self.Lx = np.zeros(ndx)
-            self.Lu = np.zeros(nu)
-            self.Lxx = np.zeros([ndx,ndx])
-            self.Lxu = np.zeros([ndx,nu])
-            self.Luu = np.zeros([nu,nu])
+        if costData is None:
+            self.g = np.zeros([ndx+nu])
+            self.L = np.zeros([ndx+nu, ndx+nu])
+            self.Lx = self.g[:ndx]
+            self.Lu = self.g[ndx:]
+            self.Lxx = self.L[:ndx, :ndx]
+            self.Lxu = self.L[:ndx, ndx:]
+            self.Luu = self.L[ndx:, ndx:]
             if hasattr(model,'ncost') and model.ncost > 1:
                 ncost = model.ncost
                 self.costResiduals = np.zeros(ncost)
@@ -250,14 +252,10 @@ class DifferentialActionDataLQR(DifferentialActionDataAbstract):
 
 class DifferentialActionModelNumDiff(DifferentialActionModelAbstract):
     def __init__(self,model,withGaussApprox=False):
+        DifferentialActionModelAbstract.__init__(self,
+            model.nq, model.nv, model.nu)
         self.DifferentialActionDataType = DifferentialActionDataNumDiff
         self.model0 = model
-        self.nx = model.nx
-        self.ndx = model.ndx
-        self.nout = model.nout
-        self.nu = model.nu
-        self.nq = model.nq
-        self.nv = model.nv
         self.State = model.State
         self.disturbance = np.sqrt(2*EPS)
         try:

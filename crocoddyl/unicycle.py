@@ -1,27 +1,27 @@
 from state import StateAbstract, StateVector
-from action import ActionDataLQR, ActionModelLQR
+from action import ActionDataAbstract, ActionModelAbstract
 import numpy as np
 
 
-
-class ActionModelUnicycle:
+class ActionModelUnicycle(ActionModelAbstract):
     def __init__(self):
-        '''
-        Transition model is xnext(x,u) = Fx*x + Fu*x.
-        Cost model is cost(x,u) = 1/2 [x,u].T [Lxx Lxu ; Lxu.T Luu ] [x,u] + [Lx,Lu].T [x,u].
-        '''
-        self.State = StateVector(3)
-        self.nx   = self.State.nx
-        self.ndx  = self.State.ndx
-        self.nu   = 2
+        """ Action model for the Unicycle system.
+
+        The transition model of an unicycle system is described as
+            xnext = [v*cos(theta); v*sin(theta); w],
+        where the position is defined by (x, y, theta) and the control input
+        by (v,w). Note that the state is defined only with the position. On the
+        other hand, we define the quadratic cost functions for the state and
+        control.
+        """
+        ActionModelAbstract.__init__(self, StateVector(3), 2)
+        self.ActionDataType = ActionDataAbstract
         self.ncost = 5
 
-        self.dt   = .1
-        self.costWeights = [ 1,.03 ]
+        self.dt = .1
+        self.costWeights = [1, .03]
         self.unone = np.zeros(self.nu)
 
-    def createData(self):
-        return ActionDataUnicycle(self)
     def calc(model,data,x,u=None):
         if u is None: u=model.unone
         assert(x.shape == (model.nx,) and u.shape == (model.nu,) )
@@ -41,7 +41,6 @@ class ActionModelUnicycle:
         xnext,cost = model.calc(data,x,u)
 
         ### Cost derivatives
-        data.L[:] = np.diag( [model.costWeights[0]]*model.nx + [model.costWeights[1]]*model.nu )
         data.Lx[:] = x * ([model.costWeights[0]**2]*model.nx )
         data.Lu[:] = u * ([model.costWeights[1]**2]*model.nu )
         np.fill_diagonal(data.Lxx,model.costWeights[0]**2)
@@ -57,28 +56,6 @@ class ActionModelUnicycle:
                        [ s*model.dt,       0  ],
                        [          0, model.dt ] ]
         return xnext,cost
-
-class ActionDataUnicycle:
-    def __init__(self,model):
-        nx,nu,ncost = model.nx,model.nu,model.ncost
-        self. L = np.zeros([ nx+nu, nx+nu ])
-        self. g = np.zeros([ nx+nu ])
-        self. F = np.zeros([ nx,nx+nu ])
-
-        self. cost  = np.nan
-        self. xnext = np.zeros([ nx ])
-        self. costResiduals = np.zeros([ ncost ])  # Might be use for numdiff (Gauss-Newton appox)
-
-        self.Lxx = self.L[:nx,:nx]
-        self.Lxu = self.L[:nx,nx:]
-        self.Lux = self.L[nx:,:nx]
-        self.Luu = self.L[nx:,nx:]
-        self.Lx  = self.g[:nx]
-        self.Lu  = self.g[nx:]
-        self.Fx = self.F[:,:nx]
-        self.Fu = self.F[:,nx:]
-
-
 
 
 from numpy import cos,sin,arctan2
@@ -177,16 +154,19 @@ class StateUnicycle(StateAbstract):
 
 
 
-class ActionModelUnicycleVar:
+class ActionModelUnicycleVar(ActionModelAbstract):
     def __init__(self):
-        '''
-        Transition model is xnext(x,u) = Fx*x + Fu*x.
-        Cost model is cost(x,u) = 1/2 [x,u].T [Lxx Lxu ; Lxu.T Luu ] [x,u] + [Lx,Lu].T [x,u].
-        '''
-        self.State = StateUnicycle()
-        self.nx   = self.State.nx
-        self.ndx  = self.State.ndx
-        self.nu   = 2
+        """ Action model for the Unicycle system.
+
+        The transition model of an unicycle system is described as
+            xnext = StateUnicycle.integrate(x,dx),
+        where the state is represented by SE(2) space (i.e. 4 elements) and its
+        the control input lies in the tangential space of this state point. On
+        the other hand, we define the quadratic cost functions for the state
+        and control.
+        """
+        ActionModelAbstract.__init__(self, StateUnicycle(), 2)
+        self.ActionDataType = ActionDataAbstract
         self.ncost = 5
 
         self.dt   = .1
@@ -194,8 +174,6 @@ class ActionModelUnicycleVar:
         self.unone = np.zeros(self.nu)
         self.xref = self.State.zero()
 
-    def createData(self):
-        return ActionDataUnicycleVar(self)
     def calc(model,data,x,u=None):
         if u is None: u=model.unone
         assert(x.shape == (model.nx,) and u.shape == (model.nu,) )
@@ -232,26 +210,3 @@ class ActionModelUnicycleVar:
         data.Fu[:,1] = Ju[:,2]*model.dt
 
         return xnext,cost
-
-class ActionDataUnicycleVar:
-    def __init__(self,model):
-        nx,ndx,nu,ncost = model.nx,model.ndx,model.nu,model.ncost
-        self. L = np.zeros([ ndx+nu, ndx+nu ])
-        self. g = np.zeros([ ndx+nu ])
-        self. F = np.zeros([ ndx,ndx+nu ])
-        self. R = np.zeros([ ncost,ndx+nu ]) # Residual jacobian
-
-        self. cost  = np.nan
-        self. xnext = np.zeros([ nx ])
-        self. costResiduals = np.zeros([ ncost ])  # Might be use for numdiff (Gauss-Newton appox)
-
-        self.Rx = self.R[:,:ndx]
-        self.Ru = self.R[:,ndx:]
-        self.Lxx = self.L[:ndx,:ndx]
-        self.Lxu = self.L[:ndx,ndx:]
-        self.Lux = self.L[ndx:,:ndx]
-        self.Luu = self.L[ndx:,ndx:]
-        self.Lx  = self.g[:ndx]
-        self.Lu  = self.g[ndx:]
-        self.Fx = self.F[:,:ndx]
-        self.Fu = self.F[:,ndx:]
