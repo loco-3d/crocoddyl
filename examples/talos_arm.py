@@ -68,6 +68,8 @@ problem = ShootingProblem(x0, [ runningModel ]*T, terminalModel)
 
 # Creating the DDP solver for this OC problem, defining a logger
 ddp = SolverDDP(problem)
+rmodel.armature *= 0.
+ddp.alphas = [4**(-n) for n in range(10)]
 cameraTF = [2., 2.68, 0.54, 0.2, 0.62, 0.72, 0.22]
 ddp.callback = [ CallbackDDPVerbose() ]
 if WITHPLOT:       ddp.callback.append(CallbackDDPLogger())

@@ -207,6 +207,7 @@ PHASE_NAME = "initial"
 
 problem = ShootingProblem(initialState=x0,runningModels=models[:imp],terminalModel=models[imp])
 ddp = SolverDDP(problem)
+ddp.alphas = [4**(-n) for n in range(10)]
 ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]#, CallbackSolverDisplay(robot,rate=5) ]
 ddp.th_stop = 1e-4
 us0 = [ m.differential.quasiStatic(d.differential,rmodel.defaultState) \
@@ -234,6 +235,7 @@ usddp = ddp.us
 
 problem = ShootingProblem(initialState=x0,runningModels=models[:-1],terminalModel=models[-1])
 ddp = SolverDDP(problem)
+ddp.alphas = [4**(-n) for n in range(10)]
 ddp.callback = [ CallbackDDPLogger(), CallbackDDPVerbose() ]#, CallbackSolverDisplay(robot,rate=5,freq=10) ]
 
 ddp.xs = xsddp + [rmodel.defaultState]*(len(models)-len(xsddp))

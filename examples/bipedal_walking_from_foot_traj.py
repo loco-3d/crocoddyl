@@ -26,6 +26,7 @@ class SimpleBipedWalkingProblem:
         self.rmodel.defaultState = \
             np.concatenate([m2a(self.rmodel.referenceConfigurations["half_sitting"].copy()),
                             np.zeros(self.rmodel.nv)])
+        self.rmodel.defaultState[7:] = 0
         # Remove the armature
         self.rmodel.armature[6:] = 1.
     
@@ -213,6 +214,7 @@ walkProblem = walk.createProblem(x0, stepLength, timeStep, stepKnots, supportKno
 
 # Solving the 3d walking problem using DDP
 ddp = SolverDDP(walkProblem)
+ddp.alphas = [4**(-n) for n in range(10)]
 cameraTF = [3., 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 ddp.callback = [ CallbackDDPVerbose() ]
 if WITHPLOT:       ddp.callback.append(CallbackDDPLogger())
