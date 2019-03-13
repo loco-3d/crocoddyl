@@ -1,80 +1,59 @@
 import numpy as np
+from action import ActionDataAbstract, ActionModelAbstract
 from numpy import arctan2, cos, sin
 from state import StateAbstract, StateVector
 
 
-class ActionModelUnicycle:
+class ActionModelUnicycle(ActionModelAbstract):
     def __init__(self):
-        '''
-        Transition model is xnext(x,u) = Fx*x + Fu*x.
-        Cost model is cost(x,u) = 1/2 [x,u].T [Lxx Lxu ; Lxu.T Luu ] [x,u] + [Lx,Lu].T [x,u].
-        '''
-        self.State = StateVector(3)
-        self.nx = self.State.nx
-        self.ndx = self.State.ndx
-        self.nu = 2
+        """ Action model for the Unicycle system.
+
+        The transition model of an unicycle system is described as
+            xnext = [v*cos(theta); v*sin(theta); w],
+        where the position is defined by (x, y, theta) and the control input
+        by (v,w). Note that the state is defined only with the position. On the
+        other hand, we define the quadratic cost functions for the state and
+        control.
+        """
+        ActionModelAbstract.__init__(self, StateVector(3), 2)
+        self.ActionDataType = ActionDataAbstract
         self.ncost = 5
 
         self.dt = .1
         self.costWeights = [1, .03]
         self.unone = np.zeros(self.nu)
 
-    def createData(self):
-        return ActionDataUnicycle(self)
-
-    def calc(self, data, x, u=None):
+    def calc(model, data, x, u=None):
         if u is None:
-            u = self.unone
-        assert (x.shape == (self.nx, ) and u.shape == (self.nu, ))
-        assert (data.xnext.shape == (self.nx, ))
-        assert (data.costResiduals.shape == (self.ncost, ))
+            u = model.unone
+        assert (x.shape == (model.nx, ) and u.shape == (model.nu, ))
+        assert (data.xnext.shape == (model.nx, ))
+        assert (data.costResiduals.shape == (model.ncost, ))
         v, w = u
         c, s = np.cos(x[2]), np.sin(x[2])
-        data.xnext[:] = [x[0] + c * v * self.dt, x[1] + s * v * self.dt, x[2] + w * self.dt]
-        data.costResiduals[:3] = self.costWeights[0] * x
-        data.costResiduals[3:5] = self.costWeights[1] * u
+        data.xnext[:] = [x[0] + c * v * model.dt, x[1] + s * v * model.dt, x[2] + w * model.dt]
+        data.costResiduals[:3] = model.costWeights[0] * x
+        data.costResiduals[3:5] = model.costWeights[1] * u
         data.cost = .5 * sum(data.costResiduals**2)
         return data.xnext, data.cost
 
-    def calcDiff(self, data, x, u=None):
+    def calcDiff(model, data, x, u=None):
         if u is None:
-            u = self.unone
-        xnext, cost = self.calc(data, x, u)
+            u = model.unone
+        xnext, cost = model.calc(data, x, u)
 
         # Cost derivatives
-        data.L[:] = np.diag([self.costWeights[0]] * self.nx + [self.costWeights[1]] * self.nu)
-        data.Lx[:] = x * ([self.costWeights[0]**2] * self.nx)
-        data.Lu[:] = u * ([self.costWeights[1]**2] * self.nu)
-        np.fill_diagonal(data.Lxx, self.costWeights[0]**2)
-        np.fill_diagonal(data.Luu, self.costWeights[1]**2)
+        data.Lx[:] = x * ([model.costWeights[0]**2] * model.nx)
+        data.Lu[:] = u * ([model.costWeights[1]**2] * model.nu)
+        np.fill_diagonal(data.Lxx, model.costWeights[0]**2)
+        np.fill_diagonal(data.Luu, model.costWeights[1]**2)
 
         # Dynamic derivatives
-        c, s, dt = np.cos(x[2]), np.sin(x[2]), self.dt
+        c, s, dt = np.cos(x[2]), np.sin(x[2]), model.dt
         v, w = u
         data.Fx[:] = [[1, 0, -s * v * dt], [0, 1, c * v * dt], [0, 0, 1]]
-        data.Fu[:] = [[c * self.dt, 0], [s * self.dt, 0], [0, self.dt]]
+        data.Fu[:] = [[c * model.dt, 0], [s * model.dt, 0], [0, model.dt]]
         return xnext, cost
-
-
-class ActionDataUnicycle:
-    def __init__(self, model):
-        nx, nu, ncost = model.nx, model.nu, model.ncost
-        self.L = np.zeros([nx + nu, nx + nu])
-        self.g = np.zeros([nx + nu])
-        self.F = np.zeros([nx, nx + nu])
-
-        self.cost = np.nan
-        self.xnext = np.zeros([nx])
-        self.costResiduals = np.zeros([ncost])  # Might be use for numdiff (Gauss-Newton appox)
-
-        self.Lxx = self.L[:nx, :nx]
-        self.Lxu = self.L[:nx, nx:]
-        self.Lux = self.L[nx:, :nx]
-        self.Luu = self.L[nx:, nx:]
-        self.Lx = self.g[:nx]
-        self.Lu = self.g[nx:]
-        self.Fx = self.F[:, :nx]
-        self.Fu = self.F[:, nx:]
 
 
 class StateUnicycle(StateAbstract):
@@ -176,25 +155,25 @@ class StateUnicycle(StateAbstract):
         return np.array([m[0, 2], m[1, 2], arctan2(m[1, 0], m[0, 0])])
 
 
-class ActionModelUnicycleVar:
+class ActionModelUnicycleVar(ActionModelAbstract):
     def __init__(self):
-        '''
-        Transition model is xnext(x,u) = Fx*x + Fu*x.
-        Cost model is cost(x,u) = 1/2 [x,u].T [Lxx Lxu ; Lxu.T Luu ] [x,u] + [Lx,Lu].T [x,u].
-        '''
-        self.State = StateUnicycle()
-        self.nx = self.State.nx
-        self.ndx = self.State.ndx
-        self.nu = 2
+        """ Action model for the Unicycle system.
+
+        The transition model of an unicycle system is described as
+            xnext = StateUnicycle.integrate(x,dx),
+        where the state is represented by SE(2) space (i.e. 4 elements) and its
+        the control input lies in the tangential space of this state point. On
+        the other hand, we define the quadratic cost functions for the state
+        and control.
+        """
+        ActionModelAbstract.__init__(self, StateUnicycle(), 2)
+        self.ActionDataType = ActionDataAbstract
         self.ncost = 5
 
         self.dt = .1
         self.costWeights = [1, .03]
         self.unone = np.zeros(self.nu)
         self.xref = self.State.zero()
-
-    def createData(self):
-        return ActionDataUnicycleVar(self)
 
     def calc(self, data, x, u=None):
         if u is None:
@@ -234,27 +213,3 @@ class ActionModelUnicycleVar:
         data.Fu[:, 1] = Ju[:, 2] * self.dt
 
         return xnext, cost
-
-
-class ActionDataUnicycleVar:
-    def __init__(self, model):
-        nx, ndx, nu, ncost = model.nx, model.ndx, model.nu, model.ncost
-        self.L = np.zeros([ndx + nu, ndx + nu])
-        self.g = np.zeros([ndx + nu])
-        self.F = np.zeros([ndx, ndx + nu])
-        self.R = np.zeros([ncost, ndx + nu])  # Residual jacobian
-
-        self.cost = np.nan
-        self.xnext = np.zeros([nx])
-        self.costResiduals = np.zeros([ncost])  # Might be use for numdiff (Gauss-Newton appox)
-
-        self.Rx = self.R[:, :ndx]
-        self.Ru = self.R[:, ndx:]
-        self.Lxx = self.L[:ndx, :ndx]
-        self.Lxu = self.L[:ndx, ndx:]
-        self.Lux = self.L[ndx:, :ndx]
-        self.Luu = self.L[ndx:, ndx:]
-        self.Lx = self.g[:ndx]
-        self.Lu = self.g[ndx:]
-        self.Fx = self.F[:, :ndx]
-        self.Fu = self.F[:, ndx:]

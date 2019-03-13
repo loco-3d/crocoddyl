@@ -1,4 +1,5 @@
-from action import ActionDataLQR, ActionDataNumDiff, ActionModelLQR, ActionModelNumDiff
+from action import (ActionDataAbstract, ActionDataLQR, ActionDataNumDiff, ActionModelAbstract, ActionModelLQR,
+                    ActionModelNumDiff)
 from activation import (ActivationDataInequality, ActivationDataQuad, ActivationDataSmoothAbs,
                         ActivationDataWeightedQuad, ActivationModelInequality, ActivationModelQuad,
                         ActivationModelSmoothAbs, ActivationModelWeightedQuad)
@@ -26,6 +27,5 @@ from kkt import SolverKKT
 from robots import getTalosPathFromRos, loadHyQ, loadTalos, loadTalosArm, loadTalosLegs
 from shooting import ShootingProblem
 from state import StateAbstract, StateNumDiff, StatePinocchio, StateVector
-from unicycle import (ActionDataUnicycle, ActionDataUnicycleVar, ActionModelUnicycle, ActionModelUnicycleVar,
-                      StateUnicycle)
+from unicycle import ActionModelUnicycle, ActionModelUnicycleVar, StateUnicycle
 from utils import a2m, absmax, absmin, m2a

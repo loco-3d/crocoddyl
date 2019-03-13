@@ -107,7 +107,6 @@ class SolverKKTTest(unittest.TestCase):
 NX = 1
 NU = 1
 model = ActionModelUnicycle()
-# model = ActionModelLQR(NX,NU); model.setUpRandom()
 data = model.createData()
 LQR = isinstance(model, ActionModelLQR)
 
@@ -219,7 +218,7 @@ if WITH_PLOT:
     plt.show()
 
 model = ActionModelLQR(1, 1)
-model.setUpRandom()
+data = model.createData()
 # model = ActionModelUnicycle()
 nx, nu = model.nx, model.nu
 
@@ -288,7 +287,6 @@ l1xx = v1xx
 # ---------------------------------------------------
 np.random.seed(220)
 model = ActionModelLQR(3, 3)
-model.setUpRandom()
 # model = ActionModelUnicycle()
 nx = model.nx
 nu = model.nu
@@ -430,7 +428,6 @@ for t in range(T):
 
 np.random.seed(220)
 model = ActionModelLQR(1, 1)
-model.setUpRandom()
 nx = model.nx
 nu = model.nu
 T = 1
@@ -483,7 +480,6 @@ for t in range(problem.T):
 
 # --- Test with manifold dynamics
 model = ActionModelUnicycleVar()
-data = model.createData()
 
 nx = model.nx
 ndx = model.ndx
@@ -593,9 +589,7 @@ del problem
 # --- REG -----------------------------------------------------------
 # -------------------------------------------------------------------
 model = ActionModelLQR(1, 1)
-model.setUpRandom()
-action = model.createData()
-nx = model.nx
+ndx = model.ndx
 nu = model.nu
 T = 1
 
@@ -619,13 +613,14 @@ kkt.u_reg = 1
 dxs_reg, dus_reg, ls_reg = kkt.computeDirection()
 
 modeldmp = copy.copy(model)
-modeldmp.L[range(nx), range(nx)] += kkt.x_reg
-modeldmp.L[range(nx, nx + nu), range(nx, nx + nu)] += kkt.u_reg
+modeldmp.Q[range(ndx), range(ndx)] += kkt.x_reg
+modeldmp.R += kkt.u_reg
 problemdmp = ShootingProblem(model.State.zero() + 1, [modeldmp] * T, modeldmp)
 kktdmp = SolverKKT(problem)
 
 kktdmp.setCandidate(kkt.xs, kkt.us)
 dxs_dmp, dus_dmp, ls_dmp = kktdmp.computeDirection()
+
 for t in range(T):
     assert (norm(dus_dmp[t] - dus_reg[t]) < 1e-9)
     assert (norm(dxs_dmp[t + 1] - dxs_reg[t + 1]) < 1e-9)
@@ -666,8 +661,6 @@ for t in range(T):
 
 # --- DDP ---
 model = ActionModelLQR(3, 3)
-model.setUpRandom()
-action = model.createData()
 nx = model.nx
 nu = model.nu
 T = 5

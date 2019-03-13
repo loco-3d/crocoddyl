@@ -1,6 +1,5 @@
 import numpy as np
 import pinocchio
-from numpy.random import rand
 from state import StatePinocchio, StateVector
 from utils import EPS, a2m, randomOrthonormalMatrix
 
@@ -77,7 +76,7 @@ class DifferentialActionDataAbstract:
         :param model: differential action model
         :param costData: external cost data (optional)
         """
-        nu, ndx, nout = model.nu, model.ndx, model.nout
+        ndx, nu, nout = model.ndx, model.nu, model.nout
         # State evolution and cost data
         self.cost = np.nan
         self.xout = np.zeros(nout)
@@ -88,11 +87,13 @@ class DifferentialActionDataAbstract:
 
         # Cost data
         if costData is None:
-            self.Lx = np.zeros(ndx)
-            self.Lu = np.zeros(nu)
-            self.Lxx = np.zeros([ndx, ndx])
-            self.Lxu = np.zeros([ndx, nu])
-            self.Luu = np.zeros([nu, nu])
+            self.g = np.zeros([ndx + nu])
+            self.L = np.zeros([ndx + nu, ndx + nu])
+            self.Lx = self.g[:ndx]
+            self.Lu = self.g[ndx:]
+            self.Lxx = self.L[:ndx, :ndx]
+            self.Lxu = self.L[:ndx, ndx:]
+            self.Luu = self.L[ndx:, ndx:]
             if hasattr(model, 'ncost') and model.ncost > 1:
                 ncost = model.ncost
                 self.costResiduals = np.zeros(ncost)
@@ -186,51 +187,56 @@ class DifferentialActionDataFullyActuated(DifferentialActionDataAbstract):
 
 
 class DifferentialActionModelLQR(DifferentialActionModelAbstract):
-    """ Differential action model for linear dynamics and quadracti cost.
+    """ Differential action model for linear dynamics and quadratic cost.
 
-  This class implements a linear dynamics, and quadratic costs (i.e. LQR action).
-  Since the DAM is a second order system, and the integratedactionmodels are
-  implemented as being second order integrators, This class implements a second
-  order linear system given by
-    x = [q, v]
-    dv = A v + B q + C u + d
-  where  A, B, C and d are constant terms.
-
-  On the other hand the cost function is given by
-    l(x,u) = x^T*Q*x + u^T*U*u
-  """
+    This class implements a linear dynamics, and quadratic costs (i.e. LQR
+    action). Since the DAM is a second order system, and the integrated action
+    models are implemented as being second order integrators. This class
+    implements a second order linear system given by
+      x = [q, v]
+      dv = Fq q + Fv v + Fu u + f0
+    where A, B, and C are constant terms. On the other hand the cost function
+    is given by
+      l(x,u) = 1/2 [x,u].T [Lxx Lxu; Lxu.T Luu] [x,u] + [lx,lu].T [x,u]
+    """
 
     def __init__(self, nq, nu):
         DifferentialActionModelAbstract.__init__(self, nq, nq, nu)
         self.DifferentialActionDataType = DifferentialActionDataLQR
         self.State = StateVector(self.nx)
 
-        v1 = randomOrthonormalMatrix(self.nq)
-        v2 = randomOrthonormalMatrix(self.nq)
-        v3 = randomOrthonormalMatrix(self.nq)
-
         # linear dynamics and quadratic cost terms
-        self.A = v2
-        self.B = v1
-        self.C = v3
-        self.d = rand(self.nv)
-        self.Q = randomOrthonormalMatrix(self.nx)
-        self.U = randomOrthonormalMatrix(self.nu)
+        self.Fq = randomOrthonormalMatrix(self.nq)
+        self.Fv = randomOrthonormalMatrix(self.nv)
+        self.Fu = randomOrthonormalMatrix(self.nq)[:, :self.nu]
+        self.f0 = np.random.rand(self.nv)
 
-    def calc(self, data, x, u=None):
-        q = x[:self.nq]
-        v = x[self.nq:]
-        data.xout[:] = (np.dot(self.A, v) + np.dot(self.B, q) + np.dot(self.C, u)).flat + self.d
-        data.cost = np.dot(x, np.dot(self.Q, x)) + np.dot(u, np.dot(self.U, u))
+        L = randomOrthonormalMatrix(self.nx + self.nu)
+        L = L.T + L  # ensure symmetric
+        self.Lxx = L[:self.nx, :self.nx]
+        # TODO non-zero Lxu and Lux matrices triggers an error
+        L[:self.nx, self.nx:] *= 0.
+        L[self.nx:, :self.nx] *= 0.
+        self.Lxu = L[:self.nx, self.nx:]
+        self.Luu = L[self.nx:, self.nx:]
+        self.lx = np.random.rand(self.nx)
+        self.lu = np.random.rand(self.nu)
+
+    def calc(model, data, x, u=None):
+        q = x[:model.nq]
+        v = x[model.nq:]
+        data.xout[:] = np.dot(model.Fq, q) + np.dot(model.Fv, v) + np.dot(model.Fu, u) + model.f0
+        data.cost = 0.5 * np.dot(x, np.dot(model.Lxx, x)) + 0.5 * np.dot(u, np.dot(model.Luu, u)) + np.dot(
+            x, np.dot(model.Lxu, u)) + np.dot(model.lx, x) + np.dot(model.lu, u)
         return data.xout, data.cost
 
-    def calcDiff(self, data, x, u=None, recalc=True):
+    def calcDiff(model, data, x, u=None, recalc=True):
         if u is None:
-            u = self.unone
+            u = model.unone
         if recalc:
-            xout, cost = self.calc(data, x, u)
-        data.Lx[:] = np.dot(x.T, data.Lxx)
-        data.Lu[:] = np.dot(u.T, data.Luu)
+            xout, cost = model.calc(data, x, u)
+        data.Lx[:] = model.lx + np.dot(model.Lxx, x) + np.dot(model.Lxu, u)
+        data.Lu[:] = model.lu + np.dot(model.Lxu.T, x) + np.dot(model.Luu, u)
         return data.xout, data.cost
 
 
@@ -239,24 +245,19 @@ class DifferentialActionDataLQR(DifferentialActionDataAbstract):
         DifferentialActionDataAbstract.__init__(self, model)
 
         # Setting the linear model and quadratic cost here because they are constant
-        self.Fx[:, :model.nv] = model.B
-        self.Fx[:, model.nv:] = model.A
-        self.Fu[:, :] = model.C
-        np.copyto(self.Lxx, model.Q + model.Q.T)
-        np.copyto(self.Lxu, np.zeros((model.nx, model.nu)))
-        np.copyto(self.Luu, model.U + model.U.T)
+        self.Fx[:, :model.nv] = model.Fq
+        self.Fx[:, model.nv:] = model.Fv
+        self.Fu[:, :] = model.Fu
+        self.Lxx[:, :] = model.Lxx
+        self.Luu[:, :] = model.Luu
+        self.Lxu[:, :] = model.Lxu
 
 
 class DifferentialActionModelNumDiff(DifferentialActionModelAbstract):
     def __init__(self, model, withGaussApprox=False):
+        DifferentialActionModelAbstract.__init__(self, model.nq, model.nv, model.nu)
         self.DifferentialActionDataType = DifferentialActionDataNumDiff
         self.model0 = model
-        self.nx = model.nx
-        self.ndx = model.ndx
-        self.nout = model.nout
-        self.nu = model.nu
-        self.nq = model.nq
-        self.nv = model.nv
         self.State = model.State
         self.disturbance = np.sqrt(2 * EPS)
         self.ncost = model.ncost if hasattr(model, 'ncost') else 1
