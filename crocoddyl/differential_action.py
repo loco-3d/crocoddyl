@@ -214,9 +214,6 @@ class DifferentialActionModelLQR(DifferentialActionModelAbstract):
         L = randomOrthonormalMatrix(self.nx + self.nu)
         L = L.T + L  # ensure symmetric
         self.Lxx = L[:self.nx, :self.nx]
-        # TODO non-zero Lxu and Lux matrices triggers an error
-        L[:self.nx, self.nx:] *= 0.
-        L[self.nx:, :self.nx] *= 0.
         self.Lxu = L[:self.nx, self.nx:]
         self.Luu = L[self.nx:, self.nx:]
         self.lx = np.random.rand(self.nx)

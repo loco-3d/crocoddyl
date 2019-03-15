@@ -199,6 +199,7 @@ models[-1].differential.costs['xreg'].cost.activation.weights[:] = 1
 PHASE_NAME = "initial"
 problem = ShootingProblem(initialState=x0, runningModels=models[:imp], terminalModel=models[imp])
 ddp = SolverDDP(problem)
+ddp.alphas = [4**(-n) for n in range(10)]
 ddp.callback = [CallbackDDPVerbose()]
 ddp.th_stop = 1e-4
 us0 = [
@@ -255,6 +256,7 @@ usddp = ddp.us
 
 problem = ShootingProblem(initialState=x0, runningModels=models[:-1], terminalModel=models[-1])
 ddp = SolverDDP(problem)
+ddp.alphas = [4**(-n) for n in range(10)]
 ddp.callback = [CallbackDDPVerbose()]
 ddp.th_stop = 1e-4
 
