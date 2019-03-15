@@ -18,7 +18,7 @@ problem = ShootingProblem(x0, [model] * T, model)
 
 # Creating the DDP solver for this OC problem, defining a logger
 ddp = SolverDDP(problem)
-ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose(1)]
+ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]
 
 # Solving it with the DDP algorithm
 ddp.solve()
