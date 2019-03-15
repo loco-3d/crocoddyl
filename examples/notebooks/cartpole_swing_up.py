@@ -1,8 +1,9 @@
 # Display the solution
 import numpy as np
+from IPython.display import HTML
+
 from cartpole_utils import animateCartpole
 from crocoddyl import *
-from IPython.display import HTML
 
 
 class DifferentialActionModelCartpole:
