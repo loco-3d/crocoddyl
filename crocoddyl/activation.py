@@ -2,10 +2,54 @@ import numpy as np
 from numpy.linalg import norm,inv
 
 
+class ActivationModelAbstract:
+    """ Abstract class for activation models.
 
-class ActivationModelQuad:
+    In crocoddyl, an activation model takes the residual vector and computes
+    the activation value and its derivatives from it. Activation value and
+    its derivatives are computed by calc() and calcDiff(), respectively.
+    """
     def __init__(self):
+        self.ActivationDataType = ActivationDataAbstract
+
+    def createData(self):
+        """ Create the activation data
+
+        :param model: activation model
+        :param data: activation data
+        :param r: residual vector
+        """
+        return self.ActivationDataType(self)
+
+    def calc(model, data, r):
+        """ Compute and return the activation value.
+
+        :param model: activation model
+        :param data: activation data
+        :param r: residual vector
+        :return the activation value
+        """
+        raise NotImplementedError("Not implemented yet.")
+
+    def calcDiff(model, data, r):
+        """ Compute the Jacobian of the activation model.
+
+        :param model: activation model
+        :param data: activation data
+        :param r: residual vector
+        :return residual vector and the Jacobian of the activation model
+        """
+        raise NotImplementedError("Not implemented yet.")
+
+
+class ActivationDataAbstract:
+    def __init(self, model):
         pass
+
+
+class ActivationModelQuad(ActivationModelAbstract):
+    def __init__(self):
+        self.ActivationDataType = ActivationDataQuad
     def calc(model,data,r):
         '''Return [ a(r_1) ... a(r_n) ] '''
         return r**2/2
@@ -15,13 +59,12 @@ class ActivationModelQuad:
         Return [ a'(r_1) ... a'(r_n) ], diag([ a''(r_1) ... a''(r_n) ])
         '''
         return r,np.array([1.]*len(r))[:,None]
-    def createData(self): return ActivationDataQuad(self)
 
-class ActivationDataQuad:
+class ActivationDataQuad(ActivationDataAbstract):
     def __init__(self,model):
         pass
 
-class ActivationModelInequality:
+class ActivationModelInequality(ActivationModelAbstract):
     """
     The activation starts from zero when r approaches b_l=lower or b_u=upper.
     The activation is zero when r is between b_l and b_u
@@ -34,6 +77,7 @@ class ActivationModelInequality:
     def __init__(self, lowerLimit, upperLimit, beta=None):
         assert((lowerLimit<=upperLimit).all())
         assert(not np.any(np.isinf(lowerLimit)) and not np.any(np.isinf(upperLimit)) or beta==None)
+        self.ActivationDataType = ActivationDataInequality
         if beta is None:
             self.lower = lowerLimit;   self.upper = upperLimit
         else:
@@ -55,30 +99,30 @@ class ActivationModelInequality:
         return np.minimum(r-model.lower, 0.) + np.maximum(r-model.upper, 0),\
           ((r-model.upper>=0.) + (r-model.lower<=0.)).astype(float)[:,None]
 
-    def createData(self): return ActivationDataInequality(self)
 
-class ActivationDataInequality:
+class ActivationDataInequality(ActivationDataAbstract):
     def __init__(self,model):
         pass
 
-class ActivationModelWeightedQuad:
+class ActivationModelWeightedQuad(ActivationModelAbstract):
     def __init__(self,weights):
         self.weights=weights
+        self.ActivationDataType = ActivationDataWeightedQuad
     def calc(model,data,r):
         return model.weights*r**2/2
     def calcDiff(model,data,r,recalc=True):
         if recalc: model.calc(data,r)
         assert(len(model.weights)==len(r))
         return model.weights*r,model.weights[:,None]
-    def createData(self): return ActivationDataWeightedQuad(self)
 
-class ActivationDataWeightedQuad:
+
+class ActivationDataWeightedQuad(ActivationDataAbstract):
     def __init__(self,model):
         pass
 
 
 
-class ActivationModelSmoothAbs:
+class ActivationModelSmoothAbs(ActivationModelAbstract):
     '''
     f(x) = s(1+x**2) ; f' = x/s ; f'' = (u'v-uv')/vv = (s-xx/s)/ss = (ss-xx)/sss
     c = sqrt(1+r**2) 
@@ -97,6 +141,7 @@ class ActivationModelSmoothAbs:
         = R' [ 1/a**3 ] R
     '''
     def __init__(self):
+        self.ActivationDataType = ActivationDataSmoothAbs
         pass
     def calc(model,data,r):
         data.a = np.sqrt(1+r**2)
@@ -104,8 +149,8 @@ class ActivationModelSmoothAbs:
     def calcDiff(model,data,r,recalc=True):
         if recalc: model.calc(data,r)
         return r/data.a,(1/data.a**3)[:,None]
-    def createData(self): return ActivationDataSmoothAbs(self)
 
-class ActivationDataSmoothAbs:
+
+class ActivationDataSmoothAbs(ActivationDataAbstract):
     def __init__(self,model):
         pass
