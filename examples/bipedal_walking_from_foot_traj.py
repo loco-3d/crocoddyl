@@ -182,8 +182,11 @@ class SimpleBipedGaitProblem:
         for k in range(numKnots):
             swingFootTask = []
             for i, p in zip(swingFootIds, feetPos0):
-                # Defining a foot swing task given the step length
-                resKnot = numKnots % 2
+                # Defining a foot swing task given the step length. The swing task
+                # is decomposed on two phases: swing-up and swing-down. We decide
+                # deliveratively to allocated the same number of nodes (i.e. phKnots)
+                # in each phase. With this, we define a proper z-component for the
+                # swing-leg motion.
                 phKnots = numKnots / 2
                 if k < phKnots:
                     dp = a2m([[stepLength * (k+1) / numKnots, 0.,
