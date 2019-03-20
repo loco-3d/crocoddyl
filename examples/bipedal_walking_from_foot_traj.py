@@ -9,7 +9,7 @@ WITHDISPLAY =  'disp' in sys.argv
 WITHPLOT = 'plot' in sys.argv
 
 
-def plotSolution(rmodel, xs, us):
+def plotSolution(rmodel, xs, us, figIndex=1, show=True):
     import matplotlib.pyplot as plt
     # Getting the state and control trajectories
     nx, nq, nu = xs[0].shape[0], rmodel.nq, us[0].shape[0]
@@ -21,7 +21,7 @@ def plotSolution(rmodel, xs, us):
         U[i] = [u[i] for u in us]
 
     # Plotting the joint positions, velocities and torques
-    plt.figure(1)
+    plt.figure(figIndex)
     legJointNames = ['1', '2', '3', '4', '5', '6']
     # left foot
     plt.subplot(2, 3, 1)
@@ -63,7 +63,7 @@ def plotSolution(rmodel, xs, us):
     plt.xlabel('knots')
     plt.legend()
 
-    plt.figure(2)
+    plt.figure(figIndex+1)
     rdata = rmodel.createData()
     Cx = []
     Cy = []
@@ -77,7 +77,8 @@ def plotSolution(rmodel, xs, us):
     plt.xlabel('x [m]')
     plt.ylabel('y [m]')
     plt.grid(True)
-    plt.show()
+    if show:
+        plt.show()
 
 
 class TaskSE3:
