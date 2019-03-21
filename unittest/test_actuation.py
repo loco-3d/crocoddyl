@@ -2,7 +2,7 @@ from crocoddyl import StatePinocchio, CostModelSum
 from crocoddyl import DifferentialActionModelNumDiff
 from crocoddyl import m2a, a2m, absmax, absmin
 from crocoddyl import loadTalosArm
-from testutils import NUMDIFF_MODIFIER
+from testutils import assertNumDiff, NUMDIFF_MODIFIER
 import numpy as np
 from numpy.linalg import norm
 import pinocchio
@@ -113,5 +113,5 @@ model.calcDiff(data,x,u)
 mnum = DifferentialActionModelNumDiff(model)
 dnum = mnum.createData()
 mnum.calcDiff(dnum,x,u)
-assert(np.allclose(data.Fx, dnum.Fx, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
-assert(np.allclose(data.Fu, dnum.Fu, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
+assertNumDiff(data.Fx, dnum.Fx, NUMDIFF_MODIFIER*mnum.disturbance) # Previous threshold was 1e4*disturbance
+assertNumDiff(data.Fu, dnum.Fu, NUMDIFF_MODIFIER*mnum.disturbance) # Previous threshold was 1e4*disturbance

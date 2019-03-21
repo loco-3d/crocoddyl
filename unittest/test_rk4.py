@@ -4,6 +4,7 @@ from numpy.random import rand
 from crocoddyl import IntegratedActionModelRK4
 from crocoddyl import DifferentialActionModelLQR
 from crocoddyl import a2m, m2a
+from testutils import assertNumDiff
 from numpy.linalg import norm
 from testutils import df_dx
 
@@ -95,10 +96,11 @@ for i in xrange(4):
   assert(np.allclose(data.dy_dx[i][:, nv:], dy_dv(i), atol=1e4*mnum.disturbance))
 
 mnum.calcDiff(dnum,x,u)
-assert(np.allclose(data.Fx, dnum.Fx, atol=1e2*mnum.disturbance))
-assert(np.allclose(data.Fu, dnum.Fu, atol=1e2*mnum.disturbance))
-assert(np.allclose(data.Lu, dnum.Lu, atol=1e4*mnum.disturbance))
-assert(np.allclose(data.Lx, dnum.Lx, atol=1e4*mnum.disturbance))
+assertNumDiff(data.Fx, dnum.Fx, 1e2*mnum.disturbance)
+assertNumDiff(data.Fu, dnum.Fu, 1e2*mnum.disturbance)
+assertNumDiff(data.Lu, dnum.Lu, 1e4*mnum.disturbance)
+assertNumDiff(data.Lx, dnum.Lx, 1e4*mnum.disturbance)
+
 
 def get_attr_analytical(x,u,attr):
   _u = m2a(u)
@@ -113,6 +115,7 @@ Lxu0 = df_dx(lambda _u: get_attr_analytical(x,_u, "Lx"), a2m(u), h=eps)
 
 Luu0 = df_dx(lambda _u: get_attr_analytical(x,_u, "Lu"), a2m(u), h=eps)
 
-assert(np.allclose(Lxx0, data.Lxx, atol=1e4*mnum.disturbance))
-assert(np.allclose(Lxu0, data.Lxu, atol=1e4*mnum.disturbance))
-assert(np.allclose(Luu0, data.Luu, atol=1e4*mnum.disturbance))
+
+assertNumDiff(Lxx0, data.Lxx, 1e4*mnum.disturbance)
+assertNumDiff(Lxu0, data.Lxu, 1e4*mnum.disturbance)
+assertNumDiff(Luu0, data.Luu, 1e4*mnum.disturbance)

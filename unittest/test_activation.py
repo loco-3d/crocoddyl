@@ -2,6 +2,7 @@ from crocoddyl import ActivationDataSmoothAbs, ActivationModelSmoothAbs
 from crocoddyl import ActivationModelQuad
 from crocoddyl import ActivationModelWeightedQuad
 from crocoddyl.utils import EPS
+from testutils import assertNumDiff
 import numpy as np
 from numpy.linalg import norm,inv
 
@@ -35,21 +36,18 @@ ad = am.createData()
 x = np.random.rand(1)
 
 am.calc(ad,x)
-# The previous tolerances were 1e2*np.sqrt(EPS)
-assert(np.allclose(df(am, ad, x), am.calcDiff(ad, x)[0], atol=1e-6))
-assert(np.allclose(ddf(am, ad, x), am.calcDiff(ad, x)[1], atol=1e-6))
+assertNumDiff(df(am, ad, x), am.calcDiff(ad, x)[0], 1e-6)
+assertNumDiff(ddf(am, ad, x), am.calcDiff(ad, x)[1], 1e-6)
 
 am = ActivationModelWeightedQuad(np.random.rand(1))
 ad = am.createData()
-# The previous tolerances were 1e2*np.sqrt(EPS)
-assert(np.allclose(df(am, ad, x), am.calcDiff(ad, x)[0], atol=1e-6))
-assert(np.allclose(ddf(am, ad, x), am.calcDiff(ad, x)[1], atol=1e-6))
+assertNumDiff(df(am, ad, x), am.calcDiff(ad, x)[0], 1e-6)
+assertNumDiff(ddf(am, ad, x), am.calcDiff(ad, x)[1], 1e-6)
 
 am = ActivationModelSmoothAbs()
 ad = am.createData()
-# The previous tolerances were 1e2*np.sqrt(EPS)
-assert(np.allclose(df(am, ad, x), am.calcDiff(ad, x)[0], atol=1e-6))
-assert(np.allclose(ddf(am, ad, x), am.calcDiff(ad, x)[1], atol=1e-6))
+assertNumDiff(df(am, ad, x), am.calcDiff(ad, x)[0], 1e-6)
+assertNumDiff(ddf(am, ad, x), am.calcDiff(ad, x)[1], 1e-6)
 
 # - ------------------------------
 # --- Dim N ----------------------
@@ -78,20 +76,18 @@ am = ActivationModelQuad()
 ad = am.createData()
 J = df(am,ad,x)
 H = ddf(am,ad,x)
-# The previous tolerances were 1e2*np.sqrt(EPS)
-assert(np.allclose(np.diag(J.diagonal()), J, atol=1e-9))
-assert(np.allclose(np.diag(H.diagonal()), H, atol=1e-9))
-assert(np.allclose(df(am, ad, x).diagonal(), am.calcDiff(ad, x)[0], atol=1e-6))
-assert(np.allclose(ddf(am, ad, x).diagonal(), am.calcDiff(ad, x)[1][:, 0], atol=1e-6))
+assertNumDiff(np.diag(J.diagonal()), J, 1e-9)
+assertNumDiff(np.diag(H.diagonal()), H, 1e-9)
+assertNumDiff(df(am, ad, x).diagonal(), am.calcDiff(ad, x)[0], 1e-6)
+assertNumDiff(ddf(am, ad, x).diagonal(), am.calcDiff(ad, x)[1][:, 0], 1e-6)
 
 am = ActivationModelWeightedQuad(np.random.rand(len(x)))
 ad = am.createData()
-# The previous tolerances were 1e2*np.sqrt(EPS)
-assert(np.allclose(df(am, ad, x).diagonal(), am.calcDiff(ad, x)[0], atol=1e-6))
-assert(np.allclose(ddf(am, ad, x).diagonal(), am.calcDiff(ad, x)[1][:, 0], atol=1e-6))
+assertNumDiff(df(am, ad, x).diagonal(), am.calcDiff(ad, x)[0], 1e-6)
+assertNumDiff(ddf(am, ad, x).diagonal(), am.calcDiff(ad, x)[1][:, 0], 1e-6)
+
 
 am = ActivationModelSmoothAbs()
 ad = am.createData()
-# The previous tolerances were 1e2*np.sqrt(EPS)
-assert(np.allclose(df(am, ad, x).diagonal(), am.calcDiff(ad, x)[0], atol=1e-6))
-assert(np.allclose(ddf(am, ad, x).diagonal(), am.calcDiff(ad, x)[1][:, 0], atol=1e-6))
+assertNumDiff(df(am, ad, x).diagonal(), am.calcDiff(ad, x)[0], 1e-6)
+assertNumDiff(ddf(am, ad, x).diagonal(), am.calcDiff(ad, x)[1][:, 0], 1e-6)
