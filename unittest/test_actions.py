@@ -1,6 +1,7 @@
 import unittest
 from crocoddyl import ActionModelNumDiff
 from crocoddyl import ActionModelUnicycle, ActionModelUnicycleVar
+from testutils import NUMDIFF_MODIFIER
 import numpy as np
 
 
@@ -8,6 +9,7 @@ import numpy as np
 class ActionModelTestCase(unittest.TestCase):
     MODEL = None
     MODEL_NUMDIFF = None
+    NUMDIFF_MOD = NUMDIFF_MODIFIER
 
     def setUp(self):
         # Creating NumDiff action model
@@ -49,7 +51,7 @@ class ActionModelTestCase(unittest.TestCase):
         self.MODEL_NUMDIFF.calcDiff(self.DATA_NUMDIFF,x,u)
 
         # Checking the partial derivatives against NumDiff
-        tol = 10*self.MODEL_NUMDIFF.disturbance
+        tol = self.NUMDIFF_MOD*self.MODEL_NUMDIFF.disturbance
         self.assertTrue(np.allclose(self.DATA.Fx,self.DATA_NUMDIFF.Fx, atol=tol), \
             "Fx is wrong.")
         self.assertTrue(np.allclose(self.DATA.Fu,self.DATA_NUMDIFF.Fu, atol=tol), \
@@ -67,9 +69,11 @@ class ActionModelTestCase(unittest.TestCase):
 
 
 class UnicycleTest(ActionModelTestCase):
+    NUMDIFF_MOD = 10.
     ActionModelTestCase.MODEL = ActionModelUnicycle()
 
 class UnicycleVarTest(ActionModelTestCase):
+    NUMDIFF_MOD = 10.
     ActionModelTestCase.MODEL = ActionModelUnicycleVar()
 
     def test_rollout_against_unicycle(self):

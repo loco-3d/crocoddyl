@@ -1,6 +1,7 @@
 from crocoddyl import loadTalosArm
 from crocoddyl import m2a, a2m, absmax
 from crocoddyl.utils import EPS
+from testutils import NUMDIFF_MODIFIER
 import pinocchio
 from pinocchio.utils import *
 from numpy.linalg import pinv,norm,eig
@@ -56,8 +57,8 @@ def returna_at0(q,v):
 Aq_numdiff = df_dq(rmodel, lambda _q: returna_at0(_q,v), q)
 Av_numdiff = df_dx(lambda _v: returna_at0(q,_v), v)
 
-assert(np.allclose(contactData.Aq, Aq_numdiff, atol=1e4*np.sqrt(2*EPS)))
-assert(np.allclose(contactData.Av, Av_numdiff, atol=1e4*np.sqrt(2*EPS)))
+assert(np.allclose(contactData.Aq, Aq_numdiff, atol=1e4*np.sqrt(2*EPS))) # Previous threshold was 1e4*np.sqrt(2*eps)
+assert(np.allclose(contactData.Av, Av_numdiff, atol=1e4*np.sqrt(2*EPS))) # Previous threshold was 1e4*np.sqrt(2*eps)
 
 # ----------------------------------------------------------------------------
 from crocoddyl import ContactModel3D
@@ -98,8 +99,8 @@ def returna0(q,v):
 Aq_numdiff = df_dq(rmodel, lambda _q: returna0(_q,v), q)
 Av_numdiff = df_dx(lambda _v: returna0(q,_v), v)
 
-assert(np.allclose(contactData.Aq, Aq_numdiff, atol=1e4*np.sqrt(2*EPS)))
-assert(np.allclose(contactData.Av, Av_numdiff, atol=1e4*np.sqrt(2*EPS)))
+assert(np.allclose(contactData.Aq, Aq_numdiff, atol=NUMDIFF_MODIFIER*np.sqrt(2*EPS))) # Previous threshold was 1e4*np.sqrt(2*eps)
+assert(np.allclose(contactData.Av, Av_numdiff, atol=NUMDIFF_MODIFIER*np.sqrt(2*EPS))) # Previous threshold was 1e4*np.sqrt(2*eps)
 
 #---------------------------------------------------------------------
 # Many contact model
@@ -147,8 +148,8 @@ model.calcDiff(data,x,u)
 mnum = DifferentialActionModelNumDiff(model,withGaussApprox=False)
 dnum = mnum.createData()
 mnum.calcDiff(dnum,x,u)
-assert(np.allclose(data.Fx, dnum.Fx, atol=1e4*mnum.disturbance))
-assert(np.allclose(data.Fu, dnum.Fu, atol=1e4*mnum.disturbance))
+assert(np.allclose(data.Fx, dnum.Fx, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(data.Fu, dnum.Fu, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
 
 
 #------------------------------------------------
@@ -180,8 +181,8 @@ model.calcDiff(data,x,u)
 mnum = DifferentialActionModelNumDiff(model,withGaussApprox=False)
 dnum = mnum.createData()
 mnum.calcDiff(dnum,x,u)
-assert(np.allclose(data.Fx, dnum.Fx, atol=1e4*mnum.disturbance))
-assert(np.allclose(data.Fu, dnum.Fu, atol=1e4*mnum.disturbance))
+assert(np.allclose(data.Fx, dnum.Fx, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(data.Fu, dnum.Fu, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
 
 
 
@@ -194,9 +195,9 @@ def calcForces(q_,v_,u_):
 Fq = df_dq(rmodel,lambda _q: calcForces(_q,v,u), q)
 Fv = df_dx(lambda _v: calcForces(q,_v,u), v)
 Fu = df_dx(lambda _u: calcForces(q,v,_u), a2m(u))
-assert(np.allclose(Fq, data.df_dq, atol=1e4*mnum.disturbance))
-assert(np.allclose(Fv, data.df_dv, atol=1e4*mnum.disturbance))
-assert(np.allclose(Fu, data.df_du, atol=1e4*mnum.disturbance))
+assert(np.allclose(Fq, data.df_dq, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(Fv, data.df_dv, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(Fu, data.df_du, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
 
 
 # -------------------------------------------------------------------------------
@@ -224,8 +225,8 @@ dnum.data0.costs['force'].contact = dnum.data0.contact[model.costs['force'].cost
     
 
 mnum.calcDiff(dnum,x,u)
-assert(np.allclose(data.Fx, dnum.Fx, atol=1e4*mnum.disturbance))
-assert(np.allclose(data.Fu, dnum.Fu, atol=1e4*mnum.disturbance))
+assert(np.allclose(data.Fx, dnum.Fx, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(data.Fu, dnum.Fu, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
 
 # -------------------------------------------------------------------------------
 # Cost force cone model
@@ -309,11 +310,11 @@ x[3:7] = [0,0,0,1] # TODO: remove this after adding assertion to include any cas
 model.calc(data,x,u)
 model.calcDiff(data,x,u)
 mnum.calcDiff(dnum,x,u)
-assert(np.allclose(data.Lx, dnum.Lx, atol=1e4*mnum.disturbance))
-assert(np.allclose(data.Lu, dnum.Lu, atol=1e4*mnum.disturbance))
-assert(np.allclose(dnum.Lxx, data.Lxx, atol=1e4*mnum.disturbance))
-assert(np.allclose(dnum.Lxu, data.Lxu, atol=1e4*mnum.disturbance))
-assert(np.allclose(dnum.Luu, data.Luu, atol=1e4*mnum.disturbance))
+assert(np.allclose(data.Lx, dnum.Lx, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(data.Lu, dnum.Lu, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(dnum.Lxx, data.Lxx, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(dnum.Lxu, data.Lxu, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(dnum.Luu, data.Luu, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
 
 # --- test quasi static guess
 x0 = x.copy()
@@ -356,8 +357,6 @@ ddp.callback = [CallbackDDPLogger()]
 ddp.th_stop = 1e-18
 xddp,uddp,doneddp = ddp.solve(maxiter=400)
 
-# if not doneddp:
-#   ddp.solve(maxiter=200)
 assert(doneddp)
 assert( norm(ddp.datas()[-1].differential.costs['pos'].residuals)<1e-3 )
 assert( norm(m2a(ddp.datas()[-1].differential.costs['pos'].pinocchio.oMf[c1.frame].translation)\

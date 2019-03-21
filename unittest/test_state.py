@@ -3,6 +3,7 @@ from crocoddyl import StateNumDiff
 from crocoddyl import StateVector
 from crocoddyl import StateUnicycle
 from crocoddyl import StatePinocchio
+from testutils import NUMDIFF_MODIFIER
 from random import randint
 import numpy as np
 
@@ -60,7 +61,8 @@ class StateTestCase(unittest.TestCase):
         Jnum1,Jnum2 = self.STATE_NUMDIFF.Jdiff(x1,x2)
 
         # Checking the partial derivatives against NumDiff
-        tol = 10*self.STATE_NUMDIFF.disturbance
+        # The previous tolerance was 10*disturbance
+        tol = NUMDIFF_MODIFIER*self.STATE_NUMDIFF.disturbance
         self.assertTrue(np.allclose(J1,Jnum1, atol=tol), \
             "The partial derivatives of difference function with respect to first argument is wrong.")
         self.assertTrue(np.allclose(J2,Jnum2, atol=tol), \
@@ -76,7 +78,8 @@ class StateTestCase(unittest.TestCase):
         Jnum1,Jnum2 = self.STATE_NUMDIFF.Jintegrate(x,vx)
 
         # Checking the partial derivatives against NumDiff
-        tol = 1e4*self.STATE_NUMDIFF.disturbance
+        # The previous tolerance was 10*disturbance
+        tol = NUMDIFF_MODIFIER*self.STATE_NUMDIFF.disturbance
         self.assertTrue(np.allclose(J1,Jnum1, atol=tol), \
             "The partial derivatives of integrate function with respect to first argument is wrong.")
         self.assertTrue(np.allclose(J2,Jnum2, atol=tol), \

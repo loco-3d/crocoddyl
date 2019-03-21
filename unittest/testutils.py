@@ -3,6 +3,9 @@ import pinocchio
 import numpy as np
 from pinocchio.utils import zero
 
+
+NUMDIFF_MODIFIER = 1e4
+
 def df_dx(func,x,h=np.sqrt(2*EPS)):
   """ Perform df/dx by num_diff.
   :params func: function to differentiate f : np.matrix -> np.matrix

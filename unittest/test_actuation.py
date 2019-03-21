@@ -2,10 +2,12 @@ from crocoddyl import StatePinocchio, CostModelSum
 from crocoddyl import DifferentialActionModelNumDiff
 from crocoddyl import m2a, a2m, absmax, absmin
 from crocoddyl import loadTalosArm
+from testutils import NUMDIFF_MODIFIER
 import numpy as np
 from numpy.linalg import norm
 import pinocchio
 from pinocchio.utils import rand
+
 
 class DifferentialActionModelActuated:
     '''Unperfect class written to validate the actuation model. Do not use except for tests. '''
@@ -111,6 +113,5 @@ model.calcDiff(data,x,u)
 mnum = DifferentialActionModelNumDiff(model)
 dnum = mnum.createData()
 mnum.calcDiff(dnum,x,u)
-
-assert(np.allclose(data.Fx, dnum.Fx, atol=1e4*mnum.disturbance))
-assert(np.allclose(data.Fu, dnum.Fu, atol=1e4*mnum.disturbance))
+assert(np.allclose(data.Fx, dnum.Fx, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(data.Fu, dnum.Fu, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance

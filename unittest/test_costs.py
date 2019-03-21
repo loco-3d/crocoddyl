@@ -1,5 +1,6 @@
 from crocoddyl import CostModelNumDiff
 from crocoddyl import m2a, a2m, absmax
+from testutils import NUMDIFF_MODIFIER
 import pinocchio
 from pinocchio.utils import *
 from crocoddyl import loadTalosArm
@@ -44,11 +45,11 @@ costDataND  = costModelND.createData(rdata)
 
 costModelND.calcDiff(costDataND,x,u)
 
-assert(np.allclose(costData.Lx, costDataND.Lx, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lu, costDataND.Lu, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lxx, costDataND.Lxx, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lxu, costDataND.Lxu, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Luu, costDataND.Luu, atol=1e4*costModelND.disturbance))
+assert(np.allclose(costData.Lx, costDataND.Lx, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lu, costDataND.Lu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lxx, costDataND.Lxx, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lxu, costDataND.Lxu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Luu, costDataND.Luu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
 
 
 
@@ -79,11 +80,11 @@ costDataND  = costModelND.createData(rdata)
 
 costModelND.calcDiff(costDataND,x,u)
 
-assert(np.allclose(costData.Lx, costDataND.Lx, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lu, costDataND.Lu, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lxx, costDataND.Lxx, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lxu, costDataND.Lxu, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Luu, costDataND.Luu, atol=1e4*costModelND.disturbance))
+assert(np.allclose(costData.Lx, costDataND.Lx, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lu, costDataND.Lu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lxx, costDataND.Lxx, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lxu, costDataND.Lxu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Luu, costDataND.Luu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
 
 
 # --------------------------------------------------------------
@@ -113,11 +114,11 @@ costDataND  = costModelND.createData(rdata)
 
 costModelND.calcDiff(costDataND,x,u)
 
-assert(np.allclose(costData.Lx, costDataND.Lx, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lu, costDataND.Lu, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lxx, costDataND.Lxx, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lxu, costDataND.Lxu, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Luu, costDataND.Luu, atol=1e4*costModelND.disturbance))
+assert(np.allclose(costData.Lx, costDataND.Lx, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lu, costDataND.Lu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lxx, costDataND.Lxx, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lxu, costDataND.Lxu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Luu, costDataND.Luu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
 
 
 
@@ -151,11 +152,11 @@ costDataND  = costModelND.createData(rdata)
 
 costModelND.calcDiff(costDataND,x,u)
 
-assert(np.allclose(costData.Lx,costDataND.Lx, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lu,costDataND.Lu, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lxx,costDataND.Lxx, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lxu,costDataND.Lxu, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Luu,costDataND.Luu, atol=1e4*costModelND.disturbance))
+assert(np.allclose(costData.Lx,costDataND.Lx, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lu,costDataND.Lu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lxx,costDataND.Lxx, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lxu,costDataND.Lxu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Luu,costDataND.Luu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
 
 
 
@@ -184,11 +185,11 @@ costDataND  = costModelND.createData(rdata)
 
 costModelND.calcDiff(costDataND,x,u)
 
-assert(np.allclose(costData.Lx, costDataND.Lx, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lu, costDataND.Lu, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lxx, costDataND.Lxx, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lxu, costDataND.Lxu, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Luu, costDataND.Luu, atol=1e4*costModelND.disturbance))
+assert(np.allclose(costData.Lx, costDataND.Lx, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lu, costDataND.Lu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lxx, costDataND.Lxx, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lxu, costDataND.Lxu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Luu, costDataND.Luu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
 
 
 
@@ -210,11 +211,11 @@ costModelND = CostModelNumDiff(costModel,X,withGaussApprox=True,
 costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
-assert(np.allclose(costData.Lx, costDataND.Lx, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lu, costDataND.Lu, atol=1e4*costModelND.disturbance))
-# assert(np.allclose(costData.Lxx, costDataND.Lxx, atol=1e4*costModelND.disturbance))
-# assert(np.allclose(costData.Lxu, costDataND.Lxu, atol=1e4*costModelND.disturbance))
-# assert(np.allclose(costData.Luu, costDataND.Luu, atol=1e4*costModelND.disturbance))
+assert(np.allclose(costData.Lx, costDataND.Lx, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lu, costDataND.Lu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+# assert(np.allclose(costData.Lxx, costDataND.Lxx, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+# assert(np.allclose(costData.Lxu, costDataND.Lxu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+# assert(np.allclose(costData.Luu, costDataND.Luu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
 
 # --------------------------------------------------------------
 from crocoddyl import ActivationModelInequality
@@ -243,8 +244,8 @@ costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
 
-assert(np.allclose(costData.Lx, costDataND.Lx, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lu, costDataND.Lu, atol=1e4*costModelND.disturbance))
+assert(np.allclose(costData.Lx, costDataND.Lx, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lu, costDataND.Lu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
 #Check that the cost derivative is zero if q>=lower and q<=upper
 #and that cost is positive if q<lower or q>upper
 lowersafe = m2a(x)>=lowerLimit; uppersafe = m2a(x)<=upperLimit
@@ -273,8 +274,8 @@ costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
 
-assert(np.allclose(costData.Lx, costDataND.Lx, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lu, costDataND.Lu, atol=1e4*costModelND.disturbance))
+assert(np.allclose(costData.Lx, costDataND.Lx, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lu, costDataND.Lu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
 #Check that the cost derivative is zero if q>=lower and q<=upper
 #and that cost is positive if q<lower or q>upper
 lowersafe = m2a(x)>=lowerLimit; uppersafe = m2a(x)<=upperLimit
@@ -301,11 +302,11 @@ costModelND = CostModelNumDiff(costModel,StatePinocchio(rmodel),withGaussApprox=
 costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
-assert(np.allclose(costData.Lx, costDataND.Lx, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lu, costDataND.Lu, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lxx, costDataND.Lxx, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lxu, costDataND.Lxu, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Luu, costDataND.Luu, atol=1e4*costModelND.disturbance))
+assert(np.allclose(costData.Lx, costDataND.Lx, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lu, costDataND.Lu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lxx, costDataND.Lxx, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lxu, costDataND.Lxu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Luu, costDataND.Luu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
 
 
 
@@ -344,11 +345,11 @@ costModelND = CostModelNumDiff(costModel,StatePinocchio(rmodel),withGaussApprox=
 costDataND  = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND,x,u)
 
-assert(np.allclose(costData.Lx, costDataND.Lx, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lu, costDataND.Lu, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lxx, costDataND.Lxx, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Lxu, costDataND.Lxu, atol=1e4*costModelND.disturbance))
-assert(np.allclose(costData.Luu, costDataND.Luu, atol=1e4*costModelND.disturbance))
+assert(np.allclose(costData.Lx, costDataND.Lx, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lu, costDataND.Lu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lxx, costDataND.Lxx, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Lxu, costDataND.Lxu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(costData.Luu, costDataND.Luu, atol=NUMDIFF_MODIFIER*costModelND.disturbance)) # Previous threshold was 1e4*disturbance
 
 
 
@@ -389,10 +390,10 @@ dnum = mnum.createData()
 
 model.calcDiff(data,x,u)
 mnum.calcDiff(dnum,x,u)
-assert(np.allclose(data.Fx, dnum.Fx, atol=1000*mnum.disturbance))
-assert(np.allclose(data.Fu, dnum.Fu, atol=1000*mnum.disturbance))
-assert(np.allclose(data.Rx, dnum.Rx, atol=1000*mnum.disturbance))
-assert(np.allclose(data.Ru, dnum.Ru, atol=1000*mnum.disturbance))
+assert(np.allclose(data.Fx, dnum.Fx, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(data.Fu, dnum.Fu, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(data.Rx, dnum.Rx, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(data.Ru, dnum.Ru, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
 
 
 # --- INTEGRATION ---
@@ -418,13 +419,13 @@ mnum = ActionModelNumDiff(model,withGaussApprox=True)
 dnum = mnum.createData()
 
 mnum.calcDiff(dnum,x,u)
-assert(np.allclose(data.Fx, dnum.Fx, atol=1e4*mnum.disturbance))
-assert(np.allclose(data.Fu, dnum.Fu, atol=1e4*mnum.disturbance))
-assert(np.allclose(data.Lx, dnum.Lx, atol=1e4*mnum.disturbance))
-assert(np.allclose(data.Lu, dnum.Lu, atol=1e4*mnum.disturbance))
-assert(np.allclose(dnum.Lxx, data.Lxx, atol=1e4*mnum.disturbance))
-assert(np.allclose(dnum.Lxu, data.Lxu, atol=1e4*mnum.disturbance))
-assert(np.allclose(dnum.Luu, data.Luu, atol=1e4*mnum.disturbance))
+assert(np.allclose(data.Fx, dnum.Fx, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(data.Fu, dnum.Fu, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(data.Lx, dnum.Lx, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(data.Lu, dnum.Lu, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(dnum.Lxx, data.Lxx, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(dnum.Lxu, data.Lxu, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
+assert(np.allclose(dnum.Luu, data.Luu, atol=NUMDIFF_MODIFIER*mnum.disturbance)) # Previous threshold was 1e4*disturbance
 
 
 
