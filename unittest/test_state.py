@@ -3,7 +3,7 @@ from crocoddyl import StateNumDiff
 from crocoddyl import StateVector
 from crocoddyl import StateUnicycle
 from crocoddyl import StatePinocchio
-from testutils import NUMDIFF_MODIFIER
+from testutils import assertNumDiff, NUMDIFF_MODIFIER
 from random import randint
 import numpy as np
 
@@ -63,10 +63,8 @@ class StateTestCase(unittest.TestCase):
         # Checking the partial derivatives against NumDiff
         # The previous tolerance was 10*disturbance
         tol = NUMDIFF_MODIFIER*self.STATE_NUMDIFF.disturbance
-        self.assertTrue(np.allclose(J1,Jnum1, atol=tol), \
-            "The partial derivatives of difference function with respect to first argument is wrong.")
-        self.assertTrue(np.allclose(J2,Jnum2, atol=tol), \
-            "The partial derivatives of difference function with respect to second argument is wrong.")
+        assertNumDiff(J1, Jnum1, tol)
+        assertNumDiff(J2, Jnum2, tol)
 
     def test_Jintegrate_against_numdiff(self):
         # Generating random values for the initial state and its rate of change
@@ -80,10 +78,8 @@ class StateTestCase(unittest.TestCase):
         # Checking the partial derivatives against NumDiff
         # The previous tolerance was 10*disturbance
         tol = NUMDIFF_MODIFIER*self.STATE_NUMDIFF.disturbance
-        self.assertTrue(np.allclose(J1,Jnum1, atol=tol), \
-            "The partial derivatives of integrate function with respect to first argument is wrong.")
-        self.assertTrue(np.allclose(J2,Jnum2, atol=tol), \
-            "The partial derivatives of integrate function with respect to second argument is wrong.")
+        assertNumDiff(J1, Jnum1, tol)
+        assertNumDiff(J2, Jnum2, tol)
 
     def test_Jdiff_and_Jintegrate_are_inverses(self):
         # Generating random states
@@ -98,8 +94,7 @@ class StateTestCase(unittest.TestCase):
         # Checking that Jdiff and Jintegrate are inverses
         dX_dDX = Jdx
         dDX_dX = J2
-        self.assertTrue(np.allclose(dX_dDX, np.linalg.inv(dDX_dX), atol=1e-9), \
-            "Jdiff and Jintegrate aren't inverses.")
+        assertNumDiff(dX_dDX, np.linalg.inv(dDX_dX), 1e-9)
 
     def test_velocity_from_Jintegrate_Jdiff(self):
         # Generating random states

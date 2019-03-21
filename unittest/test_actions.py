@@ -1,7 +1,7 @@
 import unittest
 from crocoddyl import ActionModelNumDiff
 from crocoddyl import ActionModelUnicycle, ActionModelUnicycleVar
-from testutils import NUMDIFF_MODIFIER
+from testutils import assertNumDiff, NUMDIFF_MODIFIER
 import numpy as np
 
 
@@ -52,20 +52,13 @@ class ActionModelTestCase(unittest.TestCase):
 
         # Checking the partial derivatives against NumDiff
         tol = self.NUMDIFF_MOD*self.MODEL_NUMDIFF.disturbance
-        self.assertTrue(np.allclose(self.DATA.Fx,self.DATA_NUMDIFF.Fx, atol=tol), \
-            "Fx is wrong.")
-        self.assertTrue(np.allclose(self.DATA.Fu,self.DATA_NUMDIFF.Fu, atol=tol), \
-            "Fu is wrong.")
-        self.assertTrue(np.allclose(self.DATA.Lx,self.DATA_NUMDIFF.Lx, atol=tol), \
-            "Fx is wrong.")
-        self.assertTrue(np.allclose(self.DATA.Lu,self.DATA_NUMDIFF.Lu, atol=tol), \
-            "Fx is wrong.")
-        self.assertTrue(np.allclose(self.DATA.Lxx,self.DATA_NUMDIFF.Lxx, atol=tol), \
-            "Fx is wrong.")
-        self.assertTrue(np.allclose(self.DATA.Lxu,self.DATA_NUMDIFF.Lxu, atol=tol), \
-            "Fx is wrong.")
-        self.assertTrue(np.allclose(self.DATA.Luu,self.DATA_NUMDIFF.Luu, atol=tol), \
-            "Fx is wrong.")
+        assertNumDiff(self.DATA.Fx, self.DATA_NUMDIFF.Fx, tol)
+        assertNumDiff(self.DATA.Fu, self.DATA_NUMDIFF.Fu, tol)
+        assertNumDiff(self.DATA.Lx, self.DATA_NUMDIFF.Lx, tol)
+        assertNumDiff(self.DATA.Lu, self.DATA_NUMDIFF.Lu, tol)
+        assertNumDiff(self.DATA.Lxx, self.DATA_NUMDIFF.Lxx, tol)
+        assertNumDiff(self.DATA.Lxu, self.DATA_NUMDIFF.Lxu, tol)
+        assertNumDiff(self.DATA.Luu, self.DATA_NUMDIFF.Luu, tol)
 
 
 class UnicycleTest(ActionModelTestCase):
