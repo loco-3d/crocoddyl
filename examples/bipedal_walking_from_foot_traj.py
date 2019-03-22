@@ -1,13 +1,13 @@
 import sys
 
 import numpy as np
+
 import pinocchio
 from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, CallbackDDPLogger, CallbackDDPVerbose,
                        CallbackSolverDisplay, ContactModel6D, ContactModelMultiple, CostModelControl,
                        CostModelFramePlacement, CostModelFrameVelocity, CostModelState, CostModelSum,
                        DifferentialActionModelFloatingInContact, IntegratedActionModelEuler, ShootingProblem,
-                       SolverDDP, StatePinocchio, a2m, loadTalosLegs, m2a, plotDDPConvergence, plotOCSolution,
-                       runningModel)
+                       SolverDDP, StatePinocchio, a2m, loadTalosLegs, m2a, plotDDPConvergence, plotOCSolution)
 from pinocchio.utils import zero
 
 WITHDISPLAY = 'disp' in sys.argv
@@ -207,4 +207,4 @@ if WITHPLOT:
 # Visualization of the DDP solution in gepetto-viewer
 if WITHDISPLAY:
     from crocoddyl.diagnostic import displayTrajectory
-    displayTrajectory(talos_legs, ddp.xs, runningModel.timeStep)
+    displayTrajectory(talos_legs,ddp.xs, ddp.models()[0].timeStep)
