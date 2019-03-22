@@ -6,6 +6,10 @@ import numpy as np
 # ---------------------------------------------------
 # ---------------------------------------------------
 # ---------------------------------------------------
+# --- TEST DDP ---
+# ---------------------------------------------------
+# ---------------------------------------------------
+# ---------------------------------------------------
 from crocoddyl import (ActionModelLQR, ActionModelUnicycle, ActionModelUnicycleVar, ShootingProblem, SolverDDP,
                        SolverKKT)
 from numpy.linalg import eig, inv, norm
@@ -222,6 +226,11 @@ data = model.createData()
 # model = ActionModelUnicycle()
 nx, nu = model.nx, model.nu
 
+model = ActionModelLQR(1, 1, driftFree=False)
+data = model.createData()
+# model = ActionModelUnicycle()
+nx, nu = model.nx, model.nu
+
 problem = ShootingProblem(model.State.zero() + 1, [model], model)
 ddp = SolverDDP(problem)
 
@@ -286,7 +295,7 @@ l1xx = v1xx
 # ---------------------------------------------------
 # ---------------------------------------------------
 np.random.seed(220)
-model = ActionModelLQR(3, 3)
+model = ActionModelLQR(3, 2, driftFree=False)
 # model = ActionModelUnicycle()
 nx = model.nx
 nu = model.nu
@@ -427,7 +436,7 @@ for t in range(T):
 # --- DDP NLP solver ---
 
 np.random.seed(220)
-model = ActionModelLQR(1, 1)
+model = ActionModelLQR(1, 1, driftFree=False)
 nx = model.nx
 nu = model.nu
 T = 1
@@ -588,7 +597,7 @@ del problem
 # -------------------------------------------------------------------
 # --- REG -----------------------------------------------------------
 # -------------------------------------------------------------------
-model = ActionModelLQR(1, 1)
+model = ActionModelLQR(1, 1, driftFree=False)
 ndx = model.ndx
 nu = model.nu
 T = 1
@@ -613,8 +622,8 @@ kkt.u_reg = 1
 dxs_reg, dus_reg, ls_reg = kkt.computeDirection()
 
 modeldmp = copy.copy(model)
-modeldmp.Q[range(ndx), range(ndx)] += kkt.x_reg
-modeldmp.R += kkt.u_reg
+modeldmp.Lxx[range(ndx), range(ndx)] += kkt.x_reg
+modeldmp.Luu += kkt.u_reg
 problemdmp = ShootingProblem(model.State.zero() + 1, [modeldmp] * T, modeldmp)
 kktdmp = SolverKKT(problem)
 
@@ -660,7 +669,7 @@ for t in range(T):
     assert (norm(dxs_dmp[t + 1] - dxs[t + 1]) < 1e-9)
 
 # --- DDP ---
-model = ActionModelLQR(3, 3)
+model = ActionModelLQR(3, 3, driftFree=False)
 nx = model.nx
 nu = model.nu
 T = 5

@@ -115,26 +115,27 @@ class ActionDataAbstract:
 
 
 class ActionModelLQR(ActionModelAbstract):
-    def __init__(self, nx, nu):
+    def __init__(self, nx, nu, driftFree=True):
         """ Define an action model for a LQR problem.
 
         A Linear-Quadratic Regulator problem has a transition model of the form
-        xnext(x,u) = A*x + B*x. Its cost function is quadratic of the form:
-        cost(x,u) = 1/2 [x,u].T [Q N; N.T R] [x,u] + [F,G].T [x,u]
+        xnext(x,u) = Fx*x + Fu*u + f0. Its cost function is quadratic of the
+        form: 1/2 [x,u].T [Lxx Lxu; Lxu.T Luu] [x,u] + [lx,lu].T [x,u]
         """
         ActionModelAbstract.__init__(self, StateVector(nx), nu)
         self.ActionDataType = ActionDataLQR
 
         from utils import randomOrthonormalMatrix
-        self.A = randomOrthonormalMatrix(self.ndx)
-        self.B = randomOrthonormalMatrix(self.ndx)
-        L = randomOrthonormalMatrix(self.ndx + self.nu)
-        L = np.dot(L.T, L)  # ensure symmetric
-        self.Q = L[:self.ndx, :self.ndx]
-        self.N = L[:self.ndx, self.ndx:]
-        self.R = L[self.ndx:, self.ndx:]
-        self.F = np.random.rand(self.ndx)
-        self.G = np.random.rand(self.nu)
+        self.Fx = randomOrthonormalMatrix(self.ndx)
+        self.Fu = randomOrthonormalMatrix(self.ndx)[:, :self.nu]
+        self.f0 = np.zeros(self.ndx) if driftFree else np.random.rand(self.ndx)
+        A = np.random.rand(self.ndx + self.nu, self.ndx + self.nu)
+        L = np.dot(A.T, A)
+        self.Lxx = L[:self.ndx, :self.ndx]
+        self.Lxu = L[:self.ndx, self.ndx:]
+        self.Luu = L[self.ndx:, self.ndx:]
+        self.lx = np.random.rand(self.ndx)
+        self.lu = np.random.rand(self.nu)
 
     def calc(model, data, x, u=None):
         """ Update the next state and the cost function.
@@ -147,9 +148,9 @@ class ActionModelLQR(ActionModelAbstract):
         """
         if u is None:
             u = model.unone
-        data.xnext[:] = np.dot(model.A, x) + np.dot(model.B, u)
-        data.cost = 0.5 * np.dot(x, np.dot(model.Q, x)) + 0.5 * np.dot(u, np.dot(model.R, u)) + np.dot(
-            x, np.dot(model.N, u)) + np.dot(model.F, x) + np.dot(model.G, u)
+        data.xnext[:] = np.dot(model.Fx, x) + np.dot(model.Fu, u) + model.f0
+        data.cost = 0.5 * np.dot(x, np.dot(model.Lxx, x)) + 0.5 * np.dot(u, np.dot(model.Luu, u))
+        data.cost += np.dot(x, np.dot(model.Lxu, u)) + np.dot(model.lx, x) + np.dot(model.lu, u)
         return data.xnext, data.cost
 
     def calcDiff(model, data, x, u=None, recalc=True):
@@ -165,13 +166,13 @@ class ActionModelLQR(ActionModelAbstract):
             u = model.unone
         if recalc:
             xnext, cost = model.calc(data, x, u)
-        data.Lx[:] = model.F + np.dot(model.Q, x) + np.dot(model.N, u)
-        data.Lu[:] = model.G + np.dot(model.N.T, x) + np.dot(model.R, u)
-        data.Fx[:, :] = model.A
-        data.Fu[:, :] = model.B
-        data.Lxx[:, :] = model.Q
-        data.Luu[:, :] = model.R
-        data.Lxu[:, :] = model.N
+        data.Lx[:] = model.lx + np.dot(model.Lxx, x) + np.dot(model.Lxu, u)
+        data.Lu[:] = model.lu + np.dot(model.Lxu.T, x) + np.dot(model.Luu, u)
+        data.Fx[:, :] = model.Fx
+        data.Fu[:, :] = model.Fu
+        data.Lxx[:, :] = model.Lxx
+        data.Luu[:, :] = model.Luu
+        data.Lxu[:, :] = model.Lxu
         return xnext, cost
 
 
@@ -181,11 +182,11 @@ class ActionDataLQR(ActionDataAbstract):
 
         # Setting the linear model and quadratic cost here because they are
         # constant
-        self.Fx[:, :] = model.A
-        self.Fu[:, :] = model.B
-        self.Lxx[:, :] = model.Q
-        self.Luu[:, :] = model.R
-        self.Lxu[:, :] = model.N
+        self.Fx[:, :] = model.Fx
+        self.Fu[:, :] = model.Fu
+        self.Lxx[:, :] = model.Lxx
+        self.Luu[:, :] = model.Luu
+        self.Lxu[:, :] = model.Lxu
 
 
 class ActionModelNumDiff(ActionModelAbstract):

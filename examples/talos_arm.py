@@ -73,9 +73,9 @@ ddp.solve()
 
 # Plotting the solution and the DDP convergence
 if WITHPLOT:
-    log = ddp.callback[0]
-    plotOCSolution(log.xs, log.us)
-    plotDDPConvergence(log.costs, log.control_regs, log.state_regs, log.gm_stops, log.th_stops, log.steps)
+    log = ddp.callback[1]
+    plotOCSolution(log.xs, log.us, figIndex=1, show=False)
+    plotDDPConvergence(log.costs, log.control_regs, log.state_regs, log.gm_stops, log.th_stops, log.steps, figIndex=2)
 
 # Visualizing the solution in gepetto-viewer
 if WITHDISPLAY:

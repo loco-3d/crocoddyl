@@ -1,8 +1,8 @@
-def plotDDPConvergence(costs, muLM, muV, gamma, theta, alpha):
+def plotDDPConvergence(costs, muLM, muV, gamma, theta, alpha, figIndex=1, show=True):
     import matplotlib.pyplot as plt
     import numpy as np
 
-    plt.figure(1, figsize=(6.4, 8))
+    plt.figure(figIndex, figsize=(6.4, 8))
     # Plotting the total cost sequence
     plt.subplot(511)
     plt.ylabel('cost')
@@ -30,10 +30,11 @@ def plotDDPConvergence(costs, muLM, muV, gamma, theta, alpha):
     ind = np.arange(len(alpha))
     plt.bar(ind, alpha)
     plt.xlabel('iteration')
-    plt.show()
+    if show:
+        plt.show()
 
 
-def plotOCSolution(xs, us):
+def plotOCSolution(xs, us, figIndex=1, show=True):
     import matplotlib.pyplot as plt
     # Getting the state and control trajectories
     nx = xs[0].shape[0]
@@ -45,7 +46,7 @@ def plotOCSolution(xs, us):
     for i in range(nu):
         U[i] = [u[i] for u in us]
 
-    plt.figure(1)
+    plt.figure(figIndex)
 
     # Plotting the state trajectories
     plt.subplot(211)
@@ -57,7 +58,8 @@ def plotOCSolution(xs, us):
     [plt.plot(U[i], label='u' + str(i)) for i in range(nu)]
     plt.legend()
     plt.xlabel('knots')
-    plt.show()
+    if show:
+        plt.show()
 
 
 def displayTrajectory(robot, xs, dt=0.1, rate=-1, cameraTF=None):

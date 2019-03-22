@@ -195,12 +195,12 @@ class DifferentialActionModelLQR(DifferentialActionModelAbstract):
     implements a second order linear system given by
       x = [q, v]
       dv = Fq q + Fv v + Fu u + f0
-    where A, B, and C are constant terms. On the other hand the cost function
+    where Fq, Fv, Fu and f0 are randomly chosen constant terms. On the other hand the cost function
     is given by
       l(x,u) = 1/2 [x,u].T [Lxx Lxu; Lxu.T Luu] [x,u] + [lx,lu].T [x,u]
     """
 
-    def __init__(self, nq, nu):
+    def __init__(self, nq, nu, driftFree=True):
         DifferentialActionModelAbstract.__init__(self, nq, nq, nu)
         self.DifferentialActionDataType = DifferentialActionDataLQR
         self.State = StateVector(self.nx)
@@ -209,10 +209,9 @@ class DifferentialActionModelLQR(DifferentialActionModelAbstract):
         self.Fq = randomOrthonormalMatrix(self.nq)
         self.Fv = randomOrthonormalMatrix(self.nv)
         self.Fu = randomOrthonormalMatrix(self.nq)[:, :self.nu]
-        self.f0 = np.random.rand(self.nv)
-
-        L = randomOrthonormalMatrix(self.nx + self.nu)
-        L = L.T + L  # ensure symmetric
+        self.f0 = np.zeros(self.nv) if driftFree else np.random.rand(self.nv)
+        A = np.random.rand(self.ndx + self.nu, self.ndx + self.nu)
+        L = np.dot(A.T, A)
         self.Lxx = L[:self.nx, :self.nx]
         self.Lxu = L[:self.nx, self.nx:]
         self.Luu = L[self.nx:, self.nx:]
@@ -220,11 +219,15 @@ class DifferentialActionModelLQR(DifferentialActionModelAbstract):
         self.lu = np.random.rand(self.nu)
 
     def calc(model, data, x, u=None):
+        if u is None:
+            u = model.unone
         q = x[:model.nq]
         v = x[model.nq:]
-        data.xout[:] = np.dot(model.Fq, q) + np.dot(model.Fv, v) + np.dot(model.Fu, u) + model.f0
-        data.cost = 0.5 * np.dot(x, np.dot(model.Lxx, x)) + 0.5 * np.dot(u, np.dot(model.Luu, u)) + np.dot(
-            x, np.dot(model.Lxu, u)) + np.dot(model.lx, x) + np.dot(model.lu, u)
+        data.xout[:] = \
+            np.dot(model.Fq, q) + np.dot(model.Fv, v) + np.dot(model.Fu, u) + \
+            model.f0
+        data.cost = 0.5 * np.dot(x, np.dot(model.Lxx, x)) + 0.5 * np.dot(u, np.dot(model.Luu, u))
+        data.cost += np.dot(x, np.dot(model.Lxu, u)) + np.dot(model.lx, x) + np.dot(model.lu, u)
         return data.xout, data.cost
 
     def calcDiff(model, data, x, u=None, recalc=True):
