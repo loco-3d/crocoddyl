@@ -2,7 +2,7 @@ import pinocchio
 import conf_talos_warm_start as conf
 from time import sleep
 from locomote import ContactSequenceHumanoid
-from centroidal_utils import createPhiFromContactSequence, createMultiphaseShootingProblem, createSwingTrajectories
+from crocoddyl.locomotion import createPhiFromContactSequence, createMultiphaseShootingProblem, createSwingTrajectories
 from crocoddyl import m2a, a2m
 from crocoddyl import ShootingProblem, SolverDDP, StatePinocchio
 from crocoddyl import ActionModelImpact
@@ -90,10 +90,10 @@ ddp.callback = [CallbackDDPVerbose()]#, CallbackSolverTimer()]
 if conf.RUNTIME_DISPLAY:
   ddp.callback.append(CallbackSolverDisplay(robot,4))
 ddp.th_stop = 1e-9
-ddp.solve(maxiter=100,regInit=0.1,init_xs=init.X,init_us=init.U)
+ddp.solve(maxiter=20,regInit=0.1,init_xs=init.X,init_us=init.U)
 #---------------Display Final Trajectory--------------
 if conf.DISPLAY:
-  for x in init.X:  
+  for x in ddp.xs:  
     robot.display(a2m(x[:robot.nq]))
     #sleep(0.005)
 #----------------------
