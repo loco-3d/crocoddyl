@@ -230,7 +230,9 @@ class SolverFDDP:
             self.Qu [t][:]   = data.Lu  + np.dot(self.Vx[t+1],data.Fu)
             if not self.isFeasible:
                 # In case the xt+1 are not f(xt,ut) i.e warm start not obtained from roll-out.
-                relinearization = np.dot(self.Vxx[t+1],model.State.diff(xs[t+1],data.xnext))
+                assert( np.allclose(model.State.diff(xs[t+1],data.xnext),-self.gaps[t+1]) )
+                relinearization = np.dot(self.Vxx[t+1],-self.gaps[t+1])
+                #relinearization = np.dot(self.Vxx[t+1],model.State.diff(xs[t+1],data.xnext))
                 self.Qx [t][:] += np.dot(data.Fx.T,relinearization)
                 self.Qu [t][:] += np.dot(data.Fu.T,relinearization)
 
@@ -243,6 +245,7 @@ class SolverFDDP:
                     self.k[t][:]     = scl.cho_solve(Lb,self.Qu [t])
                 else:
                     pass
+                print Lb
             except scl.LinAlgError:
                 raise ArithmeticError('backward error')
                 
