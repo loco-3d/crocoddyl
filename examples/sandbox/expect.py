@@ -76,11 +76,59 @@ if T==1:
                        + dot(Lx[1].T,-f[1]), 
                        -kkt.expectedImprovement()[0] ))
 
-alpha = Lx[-1]
-expect = alpha.T*f[-1]
+alpha = [np.nan]*T + [Lx[-1]]
+expect = alpha[T].T*f[-1]
 for t in range(T-1,-1,-1):
-    expect += (Lu[t] + Fu[t].T*alpha).T*k[t]
-    alpha = -K[t].T*Lu[t] + Lx[t] + (-K[t].T*Fu[t].T+Fx[t].T)*alpha
-    expect += alpha.T*f[t]
+    expect += (Lu[t] + Fu[t].T*alpha[t+1]).T*k[t]
+    alpha[t] = -K[t].T*Lu[t] + Lx[t] + (-K[t].T*Fu[t].T+Fx[t].T)*alpha[t+1]
+    expect += alpha[t].T*f[t]
 
+# e1 = (Lu+Fu.T a)k
+# e2 = (Lu+Fu.T a)Kf + (Lx+Fx a)f
+    
 assert( np.isclose( expect,kkt.expectedImprovement()[0]) )
+
+
+### vx = qx - qxu k = qx - K qu = qx - qxu quu^-1 qu
+###    = lx + Fx.T vx0 - K lu - K Fu.T vx0 = lx - K lu + (Fx-FuK.T).T vx0
+###    = lx - K lu + (Fx-FuK).T (vx' - Vxx f')
+###    = alpha'  +  CVxx f'
+### alpha = lx - Klu + C alpha'
+### Sq alpha' = vx' + d'
+### alpha = lx - Klu + C alpha' = lx - Klu + C vx' + C d' = lx - Klu + C (vx'-Vxx f') + CVxxf'+ C d'
+###       = vx + C(d'+Vxxf')
+### => d = C(d'+Vxxf')   with C = (Fx-FuK)
+
+d = [np.nan]*T + [ np.zeros([NX,1]) ]
+for t in range(T-1,-1,-1):
+    d[t] = (Fx[t]-Fu[t]*K[t]).T * (d[t+1]+Vxx[t+1]*f[t+1])
+    assert( np.allclose( Vx[t]+d[t],alpha[t] ) )
+    # Qu = Lu + Fu.T (Vx'-Vxx f') = Lu + Fu.T alpha' - Fu.T d' - Fu.T Vxx f'
+    assert( np.allclose(Lu[t] + Fu[t].T*alpha[t+1],
+                        Qu[t] + Fu[t].T*d[t+1] + Fu[t].T*Vxx[t+1]*f[t+1]))
+    
+
+### d = CVxxf' + Cd' = CVxxf' + CCVxxf'' + CCd'' = ... = CVxxf' + CCVxxf'' + ... + C^(T-t)Vxx f[T]
+### cost = sum_t qu[t].T*k[t] + (Fu[t].T*d[t+1]+Fu[t].T*Vxx[t+1]*f[t+1]).T*k[t]
+###               + vx[t].T*f[t] + d[t].T*f[t]
+###       = sum_t  qu[t]*k[t] + vx[t]*f[t]
+###                + d'.T Fuk + f'.T Vxx Fuk + d.T f
+### d'.T Fuk + f'.T Vxx Fuk + d.T f = d'.T Fuk + f'.T Vxx Fuk + (d'+Vxxf').T C.T f
+###    = d'.T Fuk + f'.T Vxx Fuk + f.T C d' + f.T C Vxx f'
+expect0 = Vx[-1].T*f[-1]
+expect0 = alpha[T].T*f[-1]
+dexp = 0
+for t in range(T):
+    # expect0 += (Qu[t]+Fu[t].T*d[t+1]+Fu[t].T*Vxx[t+1]*f[t+1]).T*k[t] \
+    #             + (Vx[t]+d[t]).T*f[t]
+    expect0 += Qu[t].T*k[t] + Vx[t].T*f[t]
+    #expect0 += (Lu[t] + Fu[t].T*alpha[t+1]).T*k[t] + alpha[t].T*f[t]
+    dexp += d[t+1].T*Fu[t]*k[t] + f[t+1].T*Vxx[t+1]*Fu[t]*k[t] + d[t].T*f[t]
+    
+assert(np.isclose(expect,expect0+dexp))
+
+
+
+
+
+    
