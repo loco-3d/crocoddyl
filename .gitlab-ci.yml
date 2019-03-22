@@ -2,16 +2,16 @@ variables:
   GIT_SUBMODULE_STRATEGY: "recursive"
   CTEST_PARALLEL_LEVEL: 4
 
-image: eur0c.laas.fr:5000/loco-3d/crocoddyl
-
 test:
+  image: eur0c.laas.fr:5000/loco-3d/crocoddyl
   script:
     - cmake .
     - make
     - make test || ctest -VV
 
 format:
+  image: gepetto/linters
   script:
-    - isort -c
     - flake8 .
     - yapf -dr .
+    - check-clang-format.sh
