@@ -306,7 +306,7 @@ mnum = ActionModelNumDiff(model,withGaussApprox=True)
 dnum = mnum.createData()
 
 # This trigger an error x[3:7] = [1,0,0,0]
-x[3:7] = [0,0,0,1]
+x[3:7] = [0,0,0,1] # TODO: remove this after adding assertion to include any case
 
 model.calc(data,x,u)
 model.calcDiff(data,x,u)
@@ -347,6 +347,7 @@ dmodel.costs['regu'].weight = 0
 x0 = model.State.rand()
 xref = model.State.rand()
 xref[:7] = x0[:7]
+xref[3:7] = [0,0,0,1] # TODO: remove this after adding assertion to include any case
 pinocchio.forwardKinematics(rmodel,rdata,a2m(xref))
 pinocchio.updateFramePlacements(rmodel,rdata)
 c1.ref[:] = m2a(rdata.oMf[c1.frame].translation.copy())
@@ -356,11 +357,10 @@ problem = ShootingProblem(x0, [ model ], model)
 ddp = SolverDDP(problem)
 ddp.callback = [CallbackDDPLogger()]
 ddp.th_stop = 1e-18
-xddp,uddp,doneddp = ddp.solve(maxiter=200)
+xddp,uddp,doneddp = ddp.solve(maxiter=400)
 
-if not doneddp:
-  ddp.callback = [ CallbackDDPVerbose() ]
-  ddp.solve(maxiter=200)
+# if not doneddp:
+#   ddp.solve(maxiter=200)
 assert(doneddp)
 assert( norm(ddp.datas()[-1].differential.costs['pos'].residuals)<1e-3 )
 assert( norm(m2a(ddp.datas()[-1].differential.costs['pos'].pinocchio.oMf[c1.frame].translation)\
