@@ -13,6 +13,9 @@ RUNTIME_DISPLAY = False
 DT = 0.01
 
 # -------------------------INITIAL TRAJECTORY--------------
+TRAJ_DIR = "examples/locomotion/traj_1step/"
+
+# -------------------------INITIAL TRAJECTORY--------------
 TRAJ_DIR = os.getcwd() + "/traj_1step/"
 
 X_init = pickle.load(open(TRAJ_DIR + "X_init.out", "rb"))  # loads the state x

@@ -1,12 +1,9 @@
-import os
-
 import numpy as np
 from centroidal_utils import createPhiFromContactSequence
 from crocoddyl import loadTalos
 from locomote import ContactSequenceHumanoid
 
-TRAJ_DIR = os.getcwd() + "/traj_1step/"
-MUSCOD_CS_OUTPUT_FILENAME = TRAJ_DIR + "contact_sequence_trajectory.xml"
+MUSCOD_CS_OUTPUT_FILENAME = TRAJ_DIR = "unittest/data/test_locomotion.xml"
 CONTACT_SEQUENCE_XML_TAG = "contact_sequence"
 
 robot = loadTalos()
@@ -20,6 +17,8 @@ patch_names = ["LF_patch", "RF_patch"]
 
 cc = createPhiFromContactSequence(rmodel, rdata, cs, patch_names)
 eps = 1e-4
+assert (len(cs.ms_interval_data[:-1]) > 0)
+
 for spl in cs.ms_interval_data[:-1]:
     for i in range(len(spl.time_trajectory)):
         x = spl.state_trajectory[i]
