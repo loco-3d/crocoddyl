@@ -245,7 +245,6 @@ class SolverFDDP:
                     self.k[t][:]     = scl.cho_solve(Lb,self.Qu [t])
                 else:
                     pass
-                print Lb
             except scl.LinAlgError:
                 raise ArithmeticError('backward error')
                 
