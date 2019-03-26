@@ -12,6 +12,12 @@ class NumDiffException(Exception):
 
 
 def assertNumDiff(A, B, threshold):
+    """ Assert analytical derivatives against NumDiff using the error norm.
+
+    :param A: analytical derivatives
+    :param B: NumDiff derivatives
+    :param threshold: absolute tolerance
+    """
     if not np.allclose(A, B, atol=threshold):
         value = np.linalg.norm(A-B)
         raise NumDiffException(
