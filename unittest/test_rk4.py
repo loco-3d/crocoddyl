@@ -13,7 +13,7 @@ np.set_printoptions(linewidth=np.nan, suppress=True)
 #-------------------------------------------------------------------------------
 
 
-nq = 10; nu = 10
+nq = 10; nu = 5
 nv = nq
 
 
