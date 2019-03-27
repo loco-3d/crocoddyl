@@ -13,7 +13,7 @@ np.set_printoptions(linewidth=np.nan, suppress=True)
 #-------------------------------------------------------------------------------
 
 
-nq = 10; nu = 10
+nq = 10; nu = 5
 nv = nq
 
 
@@ -95,7 +95,6 @@ for i in xrange(4):
   assert(np.isclose(data.dy_dx[i][:,nv:], dy_dv(i), atol=tolerance).all())
 
 mnum.calcDiff(dnum,x,u)
-print norm(data.Lx-dnum.Lx), norm(data.Lu-dnum.Lu)
 assert( norm(data.Fx-dnum.Fx) < 1e2*mnum.disturbance )
 assert( norm(data.Fu-dnum.Fu) < 1e2*mnum.disturbance )
 assert(norm(data.Lu-dnum.Lu) < np.sqrt(2*mnum.disturbance))
