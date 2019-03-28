@@ -182,11 +182,11 @@ $$Q_{xx} = L_{xx} + F_x^T V_{xx} F_x$$
 $$Q_{xu} = L_{xu} + F_x^T V_{xx} F_u$$
 $$Q_{ux} = L_{ux} + F_u^T V_{xx} F_x$$
 $$Q_{uu} = L_{uu} + F_u^T V_{xx} F_u$$
-$$Q_{x}  = F_x^T V_x^+$$
-$$Q_{u}  = F_u^T V_x^+$$
+$$Q_{x}  = L_x + F_x^T V_x^+$$
+$$Q_{u}  = L_u + F_u^T V_x^+$$
 The Value function is then obtained by solving the minimum of $Q(.,\du)$
 $$\text{arg}\min_{\du} Q(\dx,\du) = -k - K \dx$$
-with $k=Q_{xu}^{-1} Q_u$ and $K = Q_{xu}^{-1} Q_{uu}$. The Value is then:
+with $k=Q_{uu}^{-1} Q_u$ and $K = Q_{uu}^{-1} Q_{ux}$. The Value is then:
 $$V_{xx} = Q_{xx} - Q_{xu} K$$
 $$V_x = Q_x - Q_{xu} k + V_{xx} f$$
 where the gradient $V_x$ is computed at the end of the previous interval $x^+$ and not at the shooting state $x_t$.
