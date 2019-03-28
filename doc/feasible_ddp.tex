@@ -6,6 +6,7 @@
 \usepackage{amssymb}
 \usepackage{a4wide}
 \usepackage[table]{xcolor}
+\usepackage[numbers]{natbib}
 
 \begin{document}
 \title{Feasibility-prone Differential Dynamic Programming \\
@@ -66,7 +67,7 @@ We also denote $f_t$ by the drift of $f$ (i.e. change in $x$ when $u$ is zero), 
 $$\min_{\dxtraj,\dutraj} \Big( \sum_{t=0}^{T-1}  \frac{1}{2} \bmat \dx^T,\du^T \emat \bmat L_{xx} & L_{xu} \\ L_{ux} & L_{uu} \emat \bmat \dx \\ \du \emat + \bmat L_x & L_u \emat \bmat \dx \\ \du \emat $$
 $$ + \frac{1}{2} \dx_T L_{xx} \dx_T + L_x \dx_T \Big)$$
 $$s.t. \quad \dx_0 = f_0 $$
-$$\quad \forall t=0..T-1, \quad \dx_{t+1} = F_x \dx_t + F_u \du_t + f_t $$
+$$\quad \forall t=0\cdots T-1, \quad \dx_{t+1} = F_x \dx_t + F_u \du_t + f_t $$
 
 This problem is a quadratic program (under linear equality constraints -- QP).
 Various solutions can be chosen to solve the QP.
@@ -143,7 +144,7 @@ Solving the LQR QP by searching the zeros of the Lagrangian indeed corresponds t
 \subsubsection{Intuition of the results}
 Solving the QP provides at the same time the satisfaction of the constraints (i.e. the resulting $\xtraj$ is a continuous state trajectory that corresponds to the continuous control trajectory $\utraj$, following the underlying linear integrator); and the resulting trajectory pair is of minimal (quadratic) cost.
 
-Indeed, solving the QP can be seen as computing a step to modify an initial-guess $\dxtrajguess$, $\dutrajguess$. Such an observation is somehow trivial, as for a QP, any initial guess will find in a single step the exact same optimum.
+Indeed, solving the QP can be seen as computing a step to modify an initial-guess $\dxtrajguess$, $\dutrajguess$. Such an observation is somehow trivial, as for a QP, any initial guess will lead to the exact same optimum in a single step.
 However, understanding this observation is important before going to the more complex SQP case.
 As any initial guess works the same, we typically consider $\dxtrajguess=0$ and $\dutrajguess=0$.
 Then this initial guess is not feasible, i.e. it does not satisfy the constraints (except in the particular case where $f_0 = \cdots = f_{T-1} = 0$). These $f_t$ can then be seen as the gaps in the state trajectory, i.e. the state trajectory is piece-wise feasible inside each shooting interval, but is discontinuous at each shooting node $t$ with a gap between the previous piece of trajectory $t$ and the next one $t+1$ of $f_t$ ($f_0$ being a gap with respect to the initial guess state $\Delta \bar x_0= 0$).
@@ -171,7 +172,7 @@ In particular, the trajectory does not have to be optimal, feasible, or even con
 When computing backward the optimal flow, we only compute the $V$ values at the shooting times.
 However, the flow exists at any time and it is implicitly handled by the recursion through the integrated dynamics $F_x,F_u$.
 Then care has to be taken for discontinuous trajectories.
-In such a case the flow $V_t$ would be typically computed at $\dx_t$, while the Jacobians $F_x$, $F_u$ are computed at the next state, i.e. $\dx_{t-1}^+ = F_x \dx + F_u \du + f_{t-1}$.
+In such a case the flow $V_t$ would be typically computed at $\dx_t$, while the Jacobians $F_x$, $F_u$ are computed at the state reached at the end of interval $t-1$, i.e. $\dx_{t-1}^+ = F_x \dx + F_u \du + f_{t-1}$.
 In particular, when $\dxtrajguess =0$ and $\dutrajguess=0$, then $\dx_{t-1}^+ = f_{t-1}$.
 The gradient of $V$ in $\dx_{t-1}^+$ is obtained from the gradient of $V$ at $\dx_t=0$ with:
 $$V_x^+ = V_x + V_{xx} f_t$$
@@ -204,7 +205,9 @@ The optimal flow is evaluated along the candidate trajectory $\dxtrajguess,\dutr
 As the problem is LQR, any initial guess produces the same backward pass, the same $V$ and the same solution.
 For this reason, choosing $\dxtrajguess=0, \dutrajguess=0$ is very relevant.
 In that case, if $f_t$ is nonzero, then the initial guess is not feasible and the term $V_{xx} f$ in the Value gradient back-propagation is important.
-This term is never mentioned in DDP equations as far as we know.
+This term is a direct application of LQR equation with drift, but it is rarely mentioned in DDP works \cite{GiftthalerCoRR2017,LaineCoRR2018}
+
+never mentioned in DDP equations as far as we know.
 Its role will become very important in the following.
 
 The solution of the LQR has once more two effects: it generates a feasible trajectory where the gap between $x_{t-1}^+$ and $x_t$ is zero; and this trajectory is optimal.
@@ -291,7 +294,7 @@ Once more, it is important to recall that the descent direction is the same for 
 However, the DDP is typically associated with a particular line search variant.
 First, recall that the exact classical line search can be implemented with the DDP: for that, the rollout should be performed on the linear model, and a merit function should be considered.
 
-Yet, the DDP classically observes that a feasible solution can ne directly obtained by integrating the nonlinear dynamics around a candidate solution $\utraj$ from the initial state $x_0$.
+Yet, the DDP classically observes that a feasible solution is directly obtained by integrating the nonlinear dynamics around a candidate solution $\utraj$ from the initial state $x_0$.
 As the nonlinear dynamics $f(x,u)$ is not exactly the same as the linear dynamics $F_x,F_u$, the feedback term $K$ must be used during the integration to avoid the divergence.
 With such a rollout, the resulting candidate decision variable is a feasible trajectory, where all the gaps are zero.
 
@@ -340,5 +343,11 @@ We can observe that the behavior is nearly the same as a multiple-shooting solve
 Indeed, it is exactly the same if the classical line search is implemented.
 We did not demonstrate that the feasibility-prone DDP or the multiple shooting is better: the performance where equivalent on all the problems we have considered.
 We discussed that the DDP might be easier to implement and make efficient, and we advice to choose it.
+
+\bibliographystyle{plainnat}
+{
+\small
+\bibliography{references}
+}
 
 \end{document}
