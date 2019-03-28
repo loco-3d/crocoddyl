@@ -6,6 +6,7 @@
 \usepackage{amssymb}
 \usepackage{a4wide}
 \usepackage[table]{xcolor}
+\usepackage[numbers]{natbib}
 
 \begin{document}
 \title{Feasibility-prone Differential Dynamic Programming \\
@@ -42,31 +43,31 @@ $$\quad \forall t \in [0,\Treal], \quad \dot{x}(t) = f(x(t),u(t),t))$$
 where $\xtraj: t \rightarrow x(t)$ is the state trajectory, $\utraj: t \rightarrow u(t)$ is the control trajectory, $\ell$ is the integral --running-- cost, $\ell_T$ is the terminal cost, $f_0$ is the initial state value, $f$ is the robot dynamics and $T$, the time interval, is fixed.
 
 The decision variables are $\xtraj,\utraj$, both of infinite dimension. 
-We approximate this problem by a discrete version of it, following the so-called direct --discretize first, solve second-- approach.
+We approximate this problem using a discrete version of it, by following the so-called direct --discretize first, solve second -- approach.
 
 \subsection{Discretize first}
-The time interval $[0,\Treal]$ is divided in $T$ subintervals (evenly distributed or not).
-On each subinterval $t$, the control trajectory $\utraj_t$ is constrained to be in the span of a given trajectory finite basis, and we represent the trajectory by its coefficient in the function basis (i.e as a vector of finite dimension). We typically write $\utraj_t$ as a polynomial, and in practice often take it constant on the interval.
+The time interval $[0,\Treal]$ is divided into $T$ sub-intervals (evenly distributed or not).
+In each sub-interval $t$, the control trajectory $\utraj_t$ is constrained to be in the span of a given trajectory finite basis, and we represent the trajectory by its coefficient in the function basis (i.e as a vector of finite dimension). We typically write $\utraj_t$ as a polynomial, and it is often taken in practice constant on the interval.
 
-The values of $\xtraj_t$ on the interval $t$ are obtained by integrating the dynamics from the value $x_t$ at the begining of the subinterval.
+The values of $\xtraj_t$ on the interval $t$ are obtained by integrating the dynamics from the value $x_t$ at the beginning of the sub-interval.
 As closed-form integrals of $f$ are often not available, $\xtraj_t$ is approximated by any numerical integration scheme, e.g. Runge-Kutta-4. We then represent $\xtraj$ by its values at each interval ends, i.e. as a list of $T+1$ elements.
 
 In summary, the control variable $\utraj$ is represented by $T$ basis coefficients of the chosen trajectory basis --which often boils to $T$ constant controls-- and $\xtraj$ is represented by $T+1$ states.
-In the following, we will often abusivelly use the same symbols for the true object (e.g. the trajectory) and its representation (e.g. the coefficients of its discretization), in the aim of keeping the notaions simple. With this choice, the discretized problem now writes:
+In the following, we will often abusively use the same symbols for the true object (e.g. the trajectory) and its representation (e.g. the coefficients of its discretization), in the aim of keeping the notations simple. With this choice, the discretized problem can be written as:
 $$\min_{\xtraj,\utraj} \sum_{t=0}^{T-1} \ell(x_t,u_t) + \ell_T(x_T)$$
 $$s.t. \quad x_0 = f_0$$
 $$\quad \forall t=0..T-1, \quad x_{t+1} = f(x_t,u_t)$$
-As announce, both $\ell$ and $f$ now represent the discretization of their respective objects in the original problem. They both typically depends of the time, i.e. $\ell_t,f_t$, but we ommit this dependency from the notations for readibility.
+As announce, both $\ell$ and $f$ now represent the discretization of their respective objects in the original problem. They both typically depend on time (i.e. $\ell_t,f_t$) but we omit this dependency in the notation for readability.
 
 \subsection{Solve second}
-This new problem is now a static optimization problem under constraints, typically nonlinear and nonconvex (NLP). We will solve it with a sequential-quadratic-programming (SQP) strategy, i.e. by iterativelly solving the linear-quadratic-regulator (LQR) problem obtained by computing the linearization of the dynamics $f$ and the quadratic model of the cost $\ell$ at the current candidate values of $\xtraj,\utraj$.
+This new problem is now a static optimization problem under constraints, typically nonlinear and non-convex (NLP). We will solve it with a sequential-quadratic-programming (SQP) strategy, i.e. by iteratively solving the linear-quadratic-regulator (LQR) problem obtained by computing the linearization of the dynamics $f$ and the quadratic model of the cost $\ell$ at the current candidate values of $\xtraj,\utraj$.
 
-We denote by $F_x,F_u$ the derivatives of $f$ with respect to $x$ and $u$, $L_x,L_u$ the gradient of $\ell$ with respect to $x,u$ and $L_{xx},L_{xu},L_{ux},L_{uu}$ the hessian of $\ell$. When possible, we will omit the time indexes for all these quatities. For the LQR, because we consider a finite-horizon problem, we can consider without loss of generality that the $F$ and $L$ matrices are all equal (for the advanced reader: just add the evident indices $_t$ to each quantity to get it in the general case).
-We also denote by $f_t$ the drift of $f$ (i.e. change in $x$ when $u$ is zero), whose role is clear for the LQR and whose role will become clear later for solving the NLP. The LQR is then:
+We denote the derivatives of $f$ by $F_x, F_u$, and the gradient and the Hessian of $\ell$ by $(L_x, L_u$) and $(L_{xx}, L_{xu}, L_{ux}, L_{uu})$, respectively. When possible, we will omit the time indexes for all these quantities. For the LQR case, due to it is a finite-horizon problem, we can consider without loss of generality that the $F$ and $L$ are constant matrices (for general case, you just need to add the evident indices $_t$ into each quantity).
+We also denote $f_t$ by the drift of $f$ (i.e. change in $x$ when $u$ is zero), whose role is clear for the LQR and whose role will become clear later for solving the NLP. The LQR is then formulated as:
 $$\min_{\dxtraj,\dutraj} \Big( \sum_{t=0}^{T-1}  \frac{1}{2} \bmat \dx^T,\du^T \emat \bmat L_{xx} & L_{xu} \\ L_{ux} & L_{uu} \emat \bmat \dx \\ \du \emat + \bmat L_x & L_u \emat \bmat \dx \\ \du \emat $$
 $$ + \frac{1}{2} \dx_T L_{xx} \dx_T + L_x \dx_T \Big)$$
 $$s.t. \quad \dx_0 = f_0 $$
-$$\quad \forall t=0..T-1, \quad \dx_{t+1} = F_x \dx_t + F_u \du_t + f_t $$
+$$\quad \forall t=0\cdots T-1, \quad \dx_{t+1} = F_x \dx_t + F_u \du_t + f_t $$
 
 This problem is a quadratic program (under linear equality constraints -- QP).
 Various solutions can be chosen to solve the QP.
@@ -138,55 +139,55 @@ $$
 
 Solving this linear equation (by inverting the full-rank KKT matrix) provides both the optimal state and control trajectories $\dxtraj$, $\dutraj$ and the Lagrange multipliers corresponding to the robot dynamics.
 These multipliers indeed represent the trajectory of the co-state at the shooting points.
-Solving the LQR QP by searching the zeros of the Lagrangian indeed corresponds to applying the Pontryagine Minimum Principle (PMP) on the discretize LQR system.
+Solving the LQR QP by searching the zeros of the Lagrangian indeed corresponds to applying the Pontryagin's Minimum Principle (PMP) on the discretize LQR system.
 
 \subsubsection{Intuition of the results}
-Solving the QP provides at the same time the satisfaction of the constraints (i.e. the resulting $\xtraj$ is a continuous state trajectory that corresponds to the continuous control trajectory $\utraj$, following the underlying linear integrator) ; and the resulting trajectory pair is of minimal (quadratic) cost.
+Solving the QP provides at the same time the satisfaction of the constraints (i.e. the resulting $\xtraj$ is a continuous state trajectory that corresponds to the continuous control trajectory $\utraj$, following the underlying linear integrator); and the resulting trajectory pair is of minimal (quadratic) cost.
 
-Indeed, solving the QP can be seen as computing a step to modify an initial-guess $\dxtrajguess$, $\dutrajguess$. Such an observation is somehow trivial, as, for a QP, any initial guess would like to the exact same optimum in a single step.
+Indeed, solving the QP can be seen as computing a step to modify an initial-guess $\dxtrajguess$, $\dutrajguess$. Such an observation is somehow trivial, as for a QP, any initial guess will lead to the exact same optimum in a single step.
 However, understanding this observation is important before going to the more complex SQP case.
 As any initial guess works the same, we typically consider $\dxtrajguess=0$ and $\dutrajguess=0$.
-Then this initial guess is not feasible, i.e. it does not satisfy the constraints (except in the particular case where $f_0 = ... = f_{T-1} = 0$). These $f_t$ can then be seen as the gaps in the state trajectory, i.e. the state trajectory is piece-wise feasible inside each shooting interval, but is discontinuous at each shooting node $t$ with a gap between the previous piece of trajectory $t$ and the next one $t+1$ of $f_t$ ($f_0$ being a gap with respect to the intial guess state $\Delta \bar x_0= 0$).
+Then this initial guess is not feasible, i.e. it does not satisfy the constraints (except in the particular case where $f_0 = \cdots = f_{T-1} = 0$). These $f_t$ can then be seen as the gaps in the state trajectory, i.e. the state trajectory is piece-wise feasible inside each shooting interval, but is discontinuous at each shooting node $t$ with a gap between the previous piece of trajectory $t$ and the next one $t+1$ of $f_t$ ($f_0$ being a gap with respect to the initial guess state $\Delta \bar x_0= 0$).
 
-Then solving the QP corresponds to both making a step that nullifies the gaps $f_t$ and a step that optimize the trajectory cost.
+Then solving the QP corresponds to both making a step that nullifies the gaps $f_t$ and a step that optimizes the trajectory cost.
 
 
 \subsection{The American way: computing the optimal flow}
 
 \subsubsection{Optimality principle}
 DDP is generally not associated with the KKT matrix but with the backward Riccati recursion.
-We denote by $V_t: \dx \rightarrow \mathbb{R}$ the Value function (running cost) at time $t$ i.e. the minimal cost we can obtained with the state being $\dx$ at time $t$.
-We denote by $Q_t: \dx,\du \rightarrow Q_t(\dx,\du) = \ell_t(\dx,\du) + V \circ \Delta f(\dx,\du)$ the Hamiltonian of the system (Q-value), where the linear dynamics is denoted by $\Delta f(\dx,\du) = F_x \dx + F_u \du + f_t$.
+We denote the Value function (running cost) at time $t$ by $V_t: \dx \rightarrow \mathbb{R}$, and it represents the minimal cost we can obtained with the state being $\dx$ at time $t$.
+We denote the Hamiltonian of the system (Q-value) by $Q_t: \dx,\du \rightarrow Q_t(\dx,\du) = \ell_t(\dx,\du) + V \circ \Delta f(\dx,\du)$, where the linear dynamics is denoted by $\Delta f(\dx,\du) = F_x \dx + F_u \du + f_t$.
 
-As the system is LQR, we know the the Value and Hamiltonian functions are quadratic, i.e. can be represented by their gradient and their Hessian.
-It is important to note that the gradient of a quadratic function is not constant but varies with respect to the point where it is computed, but that the gradient at any point can be computed easily using the gradient at any point plus the Hessian times the difference between the two points $\nabla (a) = \nabla(b) + \nabla^2.(a-b)$. In that sense, a quadratic function can be represented by its Hessian and its gradient computed at any point ; we often conveniently use the gradient computed at 0.
+As the problem is LQR, the Value and Hamiltonian functions have quadratic form; they can be represented by their gradient and their Hessian.
+It is important to note that the gradient of a quadratic function is not constant but varies according to the point where it is computed. However, the gradient at any point can be easily computed using the gradient at a given point plus the Hessian times the difference between the two points $\nabla (a) = \nabla(b) + \nabla^2\cdot(a-b)$. And often, we conveniently compute the gradient at the origin.
 
 \subsubsection{Solving the backward recursion}
-From the Belman principle, we know that $V_t(\dx) = \min_{\du} Q_t(\dx,\du)$.
+From the Bellman principle, we know that $V_t(\dx) = \min_{\du} Q_t(\dx,\du)$.
 A backward recursion can then be set up, starting from the final observation that $V_t = \ell_T$.
 The backward recursion can be computed along any given guess trajectory $\dxtrajguess, \dutrajguess$, to compute $Q_t$ at each shooting node $t$ from $V_{t+1}$, and then $V_t$ by optimizing $Q_t(.,\du)$.
 It is important to remember that any trajectory can be chosen, as the problem is LQR, hence the optimal flow $V$ can  be equivalently recovered from any trajectory $\dxtrajguess$.
 In particular, the trajectory does not have to be optimal, feasible, or even continuous.
 
 When computing backward the optimal flow, we only compute the $V$ values at the shooting times.
-However, the flow exists at any time point, it is just implicitely handled by the recursion through the integrated dynamics $F_x,F_u$.
-Then care has to be taken if using a discontinuous trajectory.
-In such a case, the flow $V_t$ would typically be computed at $\dx_t$, while the jacobians $F_x$, $F_u$ are computed at the state reached at the end of the interval $t-1$, i.e. $\dx_{t-1}^+ = F_x \dx + F_u \du + f_{t-1}$.
+However, the flow exists at any time and it is implicitly handled by the recursion through the integrated dynamics $F_x,F_u$.
+Then care has to be taken for discontinuous trajectories.
+In such a case the flow $V_t$ would be typically computed at $\dx_t$, while the Jacobians $F_x$, $F_u$ are computed at the state reached at the end of interval $t-1$, i.e. $\dx_{t-1}^+ = F_x \dx + F_u \du + f_{t-1}$.
 In particular, when $\dxtrajguess =0$ and $\dutrajguess=0$, then $\dx_{t-1}^+ = f_{t-1}$.
 The gradient of $V$ in $\dx_{t-1}^+$ is obtained from the gradient of $V$ at $\dx_t=0$ with:
 $$V_x^+ = V_x + V_{xx} f_t$$
-Off course, if $f_t=0$, then both are equal.
+and, off course, if $f_t=0$, then they are both equals.
 
-The backward recursion is then twofold. First propagate the Q function from $Q=\ell+V\circ \Delta f$:
+The backward recursion is then twofold. First it propagates the Q function from $Q=\ell+V\circ \Delta f$:
 $$Q_{xx} = L_{xx} + F_x^T V_{xx} F_x$$
 $$Q_{xu} = L_{xu} + F_x^T V_{xx} F_u$$
 $$Q_{ux} = L_{ux} + F_u^T V_{xx} F_x$$
 $$Q_{uu} = L_{uu} + F_u^T V_{xx} F_u$$
-$$Q_{x}  = F_x^T V_x^+$$
-$$Q_{u}  = F_u^T V_x^+$$
+$$Q_{x}  = L_x + F_x^T V_x^+$$
+$$Q_{u}  = L_u + F_u^T V_x^+$$
 The Value function is then obtained by solving the minimum of $Q(.,\du)$
 $$\text{arg}\min_{\du} Q(\dx,\du) = -k - K \dx$$
-with $k=Q_{xu}^{-1} Q_u$ and $K = Q_{xu}^{-1} Q_{uu}$. The Value is then:
+with $k=Q_{uu}^{-1} Q_u$ and $K = Q_{uu}^{-1} Q_{ux}$. The Value is then:
 $$V_{xx} = Q_{xx} - Q_{xu} K$$
 $$V_x = Q_x - Q_{xu} k + V_{xx} f$$
 where the gradient $V_x$ is computed at the end of the previous interval $x^+$ and not at the shooting state $x_t$.
@@ -201,13 +202,15 @@ $\lambda$ presents the co-state trajectory, while $V$ is the value functions.
 Both are connected, as the PMP principle writes the optimal control in term of the co-state, while HJB express the optimal policy in term of the Value space gradient.
 
 The optimal flow is evaluated along the candidate trajectory $\dxtrajguess,\dutrajguess$.
-As the system is LQR, any initial guess produces the same backward pass, the same $V$ and finally the same solution.
+As the problem is LQR, any initial guess produces the same backward pass, the same $V$ and the same solution.
 For this reason, choosing $\dxtrajguess=0, \dutrajguess=0$ is very relevant.
-In that case, if $f_t$ is nonzero, then the initial guess is not feasible and the term $V_{xx} f$ in the Value gradient backpropagation is important.
-This term is never mentionned in DDP equations as far as we know.
-It role will become very important in the following.
+In that case, if $f_t$ is nonzero, then the initial guess is not feasible and the term $V_{xx} f$ in the Value gradient back-propagation is important.
+This term is a direct application of LQR equation with drift, but it is rarely mentioned in DDP works \cite{GiftthalerCoRR2017,LaineCoRR2018}
 
-The solution of the LQR has once more two effects: it generates a feasible trajectory where the gap between $x_{t-1}^+$ and $x_t$ are zero ; and this trajectory is optimal.
+never mentioned in DDP equations as far as we know.
+Its role will become very important in the following.
+
+The solution of the LQR has once more two effects: it generates a feasible trajectory where the gap between $x_{t-1}^+$ and $x_t$ is zero; and this trajectory is optimal.
 
 \subsection{Equivalence}
 
@@ -220,12 +223,12 @@ Proof: the KKT solution is obtained by applying PMP on the LQR system. The Ricca
 In many algorithm, the QP step is only partly integrated, i.e. the initial guess is only modified by $\alpha \Delta$ where $\alpha \in [0,1[$ and $\Delta = \Delta \dxtraj,\Delta \dutraj$ the solution to the QP (for example if considering inequality constraints inside an active-set algorithm, or using the QP as the inner solver inside a SQP).
 What is the effect of taking a partial step?
 
-For the KKT formulation, the effect is pretty clear. As $\Delta \dxtraj$ was a step from a zero initial guess $\dxtrajguess = 0$, making a partial step $\alpha \Delta$ will bridge only a part of the gap. Denoting by $\dxtraj^\alpha$ the solution obtained after making a step of lenfth $\alpha<1$, we have:
+For the KKT formulation, the effect is pretty clear. As $\Delta \dxtraj$ was a step from a zero initial guess $\dxtrajguess = 0$, making a partial step $\alpha \Delta$ will bridge only a part of the gap. Denoting by $\dxtraj^\alpha$ the solution obtained after making a step of length $\alpha<1$, we have:
 $$\dx_0^\alpha = \alpha f_0$$
 $$\dx_{t+1}^\alpha - F_x \dx_t^\alpha - Fu \du_t^\alpha = \alpha f_t$$ 
-The new solution  $\dxtraj^\alpha,\dutraj^\alpha$ is then not feasible and the gaps at each shooting points have only be reduced of $(1-\alpha)$.
+The new solution  $\dxtraj^\alpha,\dutraj^\alpha$ is then infeasible and the gaps at each shooting points have only be reduced of $(1-\alpha)$.
 
-For the DDP formulation, this is less clear as it is not described in the litterature.
+For the DDP formulation, this is less clear as it is not described in the literature.
 As we started to explain, the complete solution should be obtained by rolling out the quadratic policy $k,K$ from the initial state $f_0$.
 But this is only when making a full step.
 When making a partial step, the KKT partial solution can be obtained if (i) applying only a part of $k$ and (ii) keeping a part of the gap at each shooting node.
@@ -247,7 +250,7 @@ Now, assuming the $\dx_t = \alpha \dx_t^*$, we have:
 \qed
 
 
-\section{A feasibility-prone ocp solver using differential dynamic programming}
+\section{A feasibility-prone OCP solver using DDP}
 
 So far we have detailed a method to solve a LQR program. Let's now look at the more generic case where cost and dynamics are any smooth functions.
 The transcription of the OCP is a NLP with nonlinear equality constraints representing the robot dynamics.
@@ -255,17 +258,17 @@ We solve it with a SQP approach, i.e. at each iteration we compute the LQR corre
 
 \subsection{LQR and descent direction}
 The LQR is uniquely defined by the gradients of $f$ and $\ell$ and the Hessian of $\ell$ at the current guess $\xtraj,\utraj$.
-The solution of the LQR is also uniquely defined and can be computed by any adequate method, in particular by inverting the KKT or solving the backward-forward Riccati recursions (at least if not considering the numerical and complexity issues).
-Both methods will give exactly the same descent directions (neglecting the roundings errors).
+The solution of the LQR is also uniquely defined and can be computed by any adequate method, in particular by inverting the KKT or by solving the backward-forward Riccati recursions (at least if not considering the numerical and complexity issues).
+Both methods will give exactly the same descent directions (neglecting the rounding errors).
 
 \subsection{Line search and integration}
 Once the direction has been computed, any line search algorithm can be implemented.
-Basically, the idea is to try several directions and take the bigger one where the step gives a reward that correspond to what the LQR model predicts.
+Basically, the idea is to try several directions and to take the longer step which gives a reward that corresponds to what the LQR model predicts.
 When considering a SQP, two contradictory objectives have to be considered: (i) the cost should decrease similarly to what the quadratic model predicts and (ii) the constraints residual should not increase.
 The trade-off between these two objectives is typically decided following a merit function, chosen by the user.
 
 It is important to better understand why the constraint residual may increase.
-First, the current guess may, or may not, be feasible, i.e the state at the end of each shooting interval may, or may not correspond to the value of the state at the begining of the next interval.
+First, the current guess may, or may not, be feasible, i.e the state at the end of each shooting interval may, or may not correspond to the value of the state at the beginning of the next interval.
 Following the names chosen in the LQR case, we name gap the discontinuity at the shooting nodes: the current guess is feasible if and only if all the $T$ gaps are zero.
 
 If all the gaps are zero, the descent direction may make them nonzero because the descent direction is only computed from a linear model of the dynamics $F_x,F_u$.
@@ -273,16 +276,16 @@ The longer the step, the more incorrect the linear model, and the larger the gap
 The merit function then adjust the step length to all some gap growth (it is impossible with the linear model to prevent some growth) but forbid to large gaps to appear.
 
 If some gaps are nonzero, then the corresponding $f_t$ in the LQR corresponds to these gaps.
-In that case, the LQR direction will bridge the gap thanks to the linear prediction $f_t$, but will simultenaously increase the gap because the linear prediction is unperfect.
+In that case, the LQR direction will bridge the gap thanks to the linear prediction $f_t$, but it will simultaneously increase the gap because the linear prediction is inaccurate.
 More precisely, the gap at time $t$ after a step $\dx,\du$ will be:
 $$
 f(x_t+\dx_t,u_t+\du_t) - (x_{t+1}+\dx_{t+1})= f(x_t,u_t)-x_{t+1} + F_x \dx_t + F_u \du_t  -  \dx_{t+1} + \circ(\alpha^2)
 $$
-where $\dx_{t+1} - F_x \dx_t - F_u \du_t = \alpha f_t $ by construction of the LQR, and $\alpha$, the step length, is the magnitude of the step $\dxtraj,\dutraj$ leads to quadratic $\circ(\alpha^2)$ errors of the linear model.
+where $\dx_{t+1} - F_x \dx_t - F_u \du_t = \alpha f_t $ by construction of the LQR, and the step length $\alpha$ is the magnitude of the step $\dxtraj,\dutraj$ that leads to quadratic $\circ(\alpha^2)$ errors of the linear model.
 $$
 f(x_t+\dx_t,u_t+\du_t) - (x_{t+1}+\dx_{t+1}) = (1-\alpha) (f(x_t,u_t) - x_{t+1}) + \circ(\alpha^2)
 $$
-The gap evolution is composed of two terms: the first one decreases when $\alpha$ growth, and collapse for full step $\alpha=1$ ; the second one growth with $\alpha$, and vanishes with $\alpha$ small.
+The gap evolution is composed of two terms: the first one decreases when $\alpha$ growth, and collapses for full step $\alpha=1$; the second one growths with $\alpha$, and vanishes with $\alpha$ small.
 Only the second one exists when the gap of the current guess is null.
 
 \subsection{Nonlinear rollout}
@@ -291,7 +294,7 @@ Once more, it is important to recall that the descent direction is the same for 
 However, the DDP is typically associated with a particular line search variant.
 First, recall that the exact classical line search can be implemented with the DDP: for that, the rollout should be performed on the linear model, and a merit function should be considered.
 
-Yet, the DDP classically observes that a feasible solution is directly obtained by integrating the dynamics around a candidate solution $\utraj$ from the imposed xinitial state $x_0$.
+Yet, the DDP classically observes that a feasible solution is directly obtained by integrating the nonlinear dynamics around a candidate solution $\utraj$ from the initial state $x_0$.
 As the nonlinear dynamics $f(x,u)$ is not exactly the same as the linear dynamics $F_x,F_u$, the feedback term $K$ must be used during the integration to avoid the divergence.
 With such a rollout, the resulting candidate decision variable is a feasible trajectory, where all the gaps are zero.
 
@@ -306,15 +309,15 @@ No need here to consider the second-order disturbance term $\circ(\alpha^2)$ as 
 \subsection{Discussion}
 
 \subsubsection{Bridging the gap}
-It has been observed in multiple shooting that maintening the gaps closed during the entiere search might be counterproductive as it makes the NLP search very sensitive to the unstability of the dynamics.
-We agree with this observation, which is correlated to the fact that the DDP tends to be an algorithm with poor exploration (globalization) capabilities.
-We have demonstrated in our experiment that the DDP is much more prone to face feasibility problem, and discover good solutions despite poor initial guesses, when th gaps are kept during the first part of the search.
+It has been observed in multiple shooting that keeping the gaps closed during the entire search might be counterproductive as it makes the NLP search very sensitive to the instabilities of the dynamics.
+We agree with this observation, which it is correlated to the fact that the DDP tends to be an algorithm with poor exploration (globalization) capabilities.
+We have demonstrated in our experiment that the DDP is much more prone to face feasibility problem, and discover good solutions despite poor initial guesses, when the gaps are kept during the first part of the search.
 
 \subsubsection{Using the true dynamics or its approximation}
 Using the nonlinear dynamics as some advantages.
-First, despite intuition, the nonlinear dynamics might be faster to compute, as in robotics $F_x$ and $F_u$ are large matrices with little structure (sparsity) while very efficent nonlinear routines exists to compute $f(x,u)$.
+First, despite intuition, the nonlinear dynamics might be faster to compute, as in robotics $F_x$ and $F_u$ are large matrices with little structure (sparsity) while very efficient nonlinear routines exists to compute $f(x,u)$.
 
-On the other hand, taking a linear step provides an exact Newton step, with strong convergence guarantees ... at least when the NLP is convex (it often is not).
+On the other hand, taking a linear step provides an exact Newton step with strong convergence guarantees, at least when the NLP is convex (and often this is not the case).
 
 We claim that the choice should be taken by considering the effect on the gaps.
 With the nonlinear step, the gaps strictly decreases with nonzero step.
@@ -331,14 +334,20 @@ If it is desirable to effectively relax the continuity constraints, we then advi
 
 \section{Conclusion}
 
-We have proposed two modifications to the classical DDP algorithm to solve OCP writen as NLP problems.
-First, we modified the backward pass to accept nonfeasible trajectories, i.e. trajectories were a discontinuity exists at each shooting interval.
+We have proposed two modifications to the classical DDP algorithm to solve OCP written as NLP problems.
+First, we modified the backward pass to accept infeasible trajectories, i.e. trajectories were a discontinuity exists at each shooting interval.
 Second, we modified the line search algorithm to avoid bridging the gap after the first step is taken.
 
-In consequence, the DDP algorithm accepts any intial guess and has a much better globalization capability.
+In consequence, the DDP algorithm accepts any initial guess and has a much better globalization capability.
 We can observe that the behavior is nearly the same as a multiple-shooting solver.
 Indeed, it is exactly the same if the classical line search is implemented.
 We did not demonstrate that the feasibility-prone DDP or the multiple shooting is better: the performance where equivalent on all the problems we have considered.
-We discussed that the DDP might be easier to implement and make efficient, and advice to choose it.
+We discussed that the DDP might be easier to implement and make efficient, and we advice to choose it.
+
+\bibliographystyle{plainnat}
+{
+\small
+\bibliography{references}
+}
 
 \end{document}
