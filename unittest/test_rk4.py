@@ -10,7 +10,7 @@ np.set_printoptions(linewidth=np.nan, suppress=True)
 # -------------------------------------------------------------------------------
 
 nq = 10
-nu = 10
+nu = 5
 nv = nq
 
 dmodel = DifferentialActionModelLQR(nq, nu, driftFree=False)
@@ -101,7 +101,6 @@ for i in range(4):
     assert (np.isclose(data.dy_dx[i][:, nv:], dy_dv(i), atol=tolerance).all())
 
 mnum.calcDiff(dnum, x, u)
-print(norm(data.Lx - dnum.Lx), norm(data.Lu - dnum.Lu))
 assert (norm(data.Fx - dnum.Fx) < 1e2 * mnum.disturbance)
 assert (norm(data.Fu - dnum.Fu) < 1e2 * mnum.disturbance)
 assert (norm(data.Lu - dnum.Lu) < np.sqrt(2 * mnum.disturbance))
@@ -120,6 +119,8 @@ Lxx0 = df_dx(lambda _x: get_attr_analytical(_x, u, "Lx"), a2m(x), h=eps)
 
 Lxu0 = df_dx(lambda _u: get_attr_analytical(x, _u, "Lx"), a2m(u), h=eps)
 
+Luu0 = df_dx(lambda _u: get_attr_analytical(x, _u, "Lu"), a2m(u), h=eps)
+
 assert (norm(Lxx0 - data.Lxx) < np.sqrt(mnum.disturbance))
 assert (norm(Lxu0 - data.Lxu) < np.sqrt(mnum.disturbance))
-# assert (norm(Luu0 - data.Luu) < np.sqrt(mnum.disturbance)) TODO: What is this Luu0 ?
+assert (norm(Luu0 - data.Luu) < np.sqrt(mnum.disturbance))
