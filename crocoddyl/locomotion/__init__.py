@@ -1,1 +1,4 @@
-from centroidal_utils import createPhiFromContactSequence, createMultiphaseShootingProblem, createSwingTrajectories
+from centroidal_phi import EESplines, CentroidalPhi
+from contact_sequence_wrapper import ContactSequenceWrapper
+from spline_utils import polyfitND
+from problem_definition import createMultiphaseShootingProblem
