@@ -42,5 +42,5 @@ pinocchio.forwardKinematics(rmodel,rdata,q0)
 oMi = rdata.oMi[jid]
 
 h = np.sqrt(2*EPS)
-assertNumDiff(d1, d3, NUMDIFF_MODIFIER*h) # Previous threshold was 1e4*h
+assertNumDiff(d1, d3, NUMDIFF_MODIFIER*h) # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
 #assert(np.isclose(d2, oMi.action.dot(d3), atol=1e-8).all())
