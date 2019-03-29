@@ -113,5 +113,5 @@ model.calcDiff(data,x,u)
 mnum = DifferentialActionModelNumDiff(model)
 dnum = mnum.createData()
 mnum.calcDiff(dnum,x,u)
-assertNumDiff(data.Fx, dnum.Fx, NUMDIFF_MODIFIER*mnum.disturbance) # Previous threshold was 1e4*disturbance
-assertNumDiff(data.Fu, dnum.Fu, NUMDIFF_MODIFIER*mnum.disturbance) # Previous threshold was 1e4*disturbance
+assertNumDiff(data.Fx, dnum.Fx, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 2.7e-2, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(data.Fu, dnum.Fu, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 7e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
