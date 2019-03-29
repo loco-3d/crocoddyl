@@ -127,16 +127,17 @@ class StateTestCase(unittest.TestCase):
             "Velocity computed from Jdiff is wrong.")
 
 class StateVectorTest(StateTestCase):
-    NUMDIFF_MODIFIER = 10.
+    NUMDIFF_MODIFIER = 10. # threshold was 2.11e-7, is now 2.11e-7 (see assertNumDiff.__doc__)
     StateTestCase.NX = randint(1,101)
     StateTestCase.STATE = StateVector(StateTestCase.NX)
 
 class StateUnicycleTest(StateTestCase):
-    NUMDIFF_MODIFIER = 10.
+    NUMDIFF_MODIFIER = 10. # threshold was 2.11e-7, is now 2.11e-7 (see assertNumDiff.__doc__)
     StateTestCase.NX = 3
     StateTestCase.STATE = StateUnicycle()
 
 class StatePinocchioTest(StateTestCase):
+    # NUMDIFF_MODIFIER: threshold was 2.11e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
     # Loading Talos arm
     from crocoddyl import loadTalosArm
     rmodel = loadTalosArm().model
@@ -145,6 +146,7 @@ class StatePinocchioTest(StateTestCase):
     StateTestCase.STATE = StatePinocchio(rmodel)
 
 class StatePinocchioFFTest(StateTestCase):
+    # NUMDIFF_MODIFIER: threshold was 2.11e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
     # Loading Talos legs
     from crocoddyl import loadTalosLegs
     rmodel = loadTalosLegs().model
