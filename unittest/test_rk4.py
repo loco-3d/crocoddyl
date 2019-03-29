@@ -82,25 +82,23 @@ e_k = lambda i: data.dki_dx[i][:,:nv]- dk_dq(i)
 
 
 
-assert(np.allclose(data.Fu, dxn_du, atol=1e4*mnum.disturbance))
+assertNumDiff(data.Fu, dxn_du, 1e4*mnum.disturbance) # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+for i in xrange(4):
+    assertNumDiff(data.dki_du[i], dk_du(i), 1e4*mnum.disturbance) # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
 
 for i in xrange(4):
-  assert(np.allclose(data.dki_du[i], dk_du(i), atol=1e4*mnum.disturbance))
+    assertNumDiff(data.dki_dx[i][:, :nv], dk_dq(i), 1e4*mnum.disturbance) # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+    assertNumDiff(data.dki_dx[i][:, nv:], dk_dv(i), 1e4*mnum.disturbance) # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
 
 for i in xrange(4):
-  assert(np.allclose(data.dki_dx[i][:, :nv], dk_dq(i), atol=1e4*mnum.disturbance))
-  assert(np.allclose(data.dki_dx[i][:, nv:], dk_dv(i), atol=1e4*mnum.disturbance))
-
-for i in xrange(4):
-  assert(np.allclose(data.dy_dx[i][:, :nv], dy_dq(i), atol=1e4*mnum.disturbance))
-  assert(np.allclose(data.dy_dx[i][:, nv:], dy_dv(i), atol=1e4*mnum.disturbance))
+    assertNumDiff(data.dy_dx[i][:, :nv], dy_dq(i), 1e4*mnum.disturbance) # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+    assertNumDiff(data.dy_dx[i][:, nv:], dy_dv(i), 1e4*mnum.disturbance) # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
 
 mnum.calcDiff(dnum,x,u)
-assertNumDiff(data.Fx, dnum.Fx, 1e2*mnum.disturbance)
-assertNumDiff(data.Fu, dnum.Fu, 1e2*mnum.disturbance)
-assertNumDiff(data.Lu, dnum.Lu, 1e4*mnum.disturbance)
-assertNumDiff(data.Lx, dnum.Lx, 1e4*mnum.disturbance)
-
+assertNumDiff(data.Fx, dnum.Fx, 1e2*mnum.disturbance) # threshold was 2.11e-6, is now 2.11e-6 (see assertNumDiff.__doc__)
+assertNumDiff(data.Fu, dnum.Fu, 1e2*mnum.disturbance) # threshold was 2.11e-6, is now 2.11e-6 (see assertNumDiff.__doc__)
+assertNumDiff(data.Lu, dnum.Lu, 1e4*mnum.disturbance) # threshold was 2.05e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(data.Lx, dnum.Lx, 1e4*mnum.disturbance) # threshold was 2.05e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
 
 def get_attr_analytical(x,u,attr):
   _u = m2a(u)
@@ -116,6 +114,6 @@ Lxu0 = df_dx(lambda _u: get_attr_analytical(x,_u, "Lx"), a2m(u), h=eps)
 Luu0 = df_dx(lambda _u: get_attr_analytical(x,_u, "Lu"), a2m(u), h=eps)
 
 
-assertNumDiff(Lxx0, data.Lxx, 1e4*mnum.disturbance)
-assertNumDiff(Lxu0, data.Lxu, 1e4*mnum.disturbance)
-assertNumDiff(Luu0, data.Luu, 1e4*mnum.disturbance)
+assertNumDiff(Lxx0, data.Lxx, 1e4*mnum.disturbance) # threshold was 1.45e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(Lxu0, data.Lxu, 1e4*mnum.disturbance) # threshold was 1.45e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(Luu0, data.Luu, 1e4*mnum.disturbance) # threshold was 1.45e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
