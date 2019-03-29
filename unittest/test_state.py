@@ -13,6 +13,7 @@ class StateTestCase(unittest.TestCase):
     NX = None
     STATE = None
     STATE_NUMDIFF = None
+    NUMDIFF_MODIFIER = NUMDIFF_MODIFIER
 
     def setUp(self):
         self.STATE_NUMDIFF = StateNumDiff(self.STATE)
@@ -77,7 +78,7 @@ class StateTestCase(unittest.TestCase):
 
         # Checking the partial derivatives against NumDiff
         # The previous tolerance was 10*disturbance
-        tol = NUMDIFF_MODIFIER*self.STATE_NUMDIFF.disturbance
+        tol = self.NUMDIFF_MODIFIER*self.STATE_NUMDIFF.disturbance
         assertNumDiff(J1, Jnum1, tol)
         assertNumDiff(J2, Jnum2, tol)
 
@@ -126,10 +127,12 @@ class StateTestCase(unittest.TestCase):
             "Velocity computed from Jdiff is wrong.")
 
 class StateVectorTest(StateTestCase):
+    NUMDIFF_MODIFIER = 10.
     StateTestCase.NX = randint(1,101)
     StateTestCase.STATE = StateVector(StateTestCase.NX)
 
 class StateUnicycleTest(StateTestCase):
+    NUMDIFF_MODIFIER = 10.
     StateTestCase.NX = 3
     StateTestCase.STATE = StateUnicycle()
 
