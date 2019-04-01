@@ -234,6 +234,7 @@ class SolverDDP:
                 self.Vx[t][:] = self.Qx [t] - 2*np.dot(self.Qu [t],self.K[t]) \
                                 + np.dot(np.dot(self.k[t],self.Quu[t]),self.K[t])
             self.Vxx[t][:,:] = self.Qxx[t] - np.dot(self.Qxu[t],self.K[t])
+            self.Vxx[t][:,:] = 0.5 * (self.Vxx[t][:,:] + self.Vxx[t][:,:].T) # ensure symmetric
 
             if self.x_reg != 0: self.Vxx[t][range(model.ndx),range(model.ndx)] += self.x_reg
             raiseIfNan(self.Vxx[t],ArithmeticError('backward error'))
