@@ -213,17 +213,7 @@ class SolverDDP:
                 self.Qu [t][:] += np.dot(data.Fu.T,relinearization)
 
             if self.u_reg != 0: self.Quu[t][range(model.nu),range(model.nu)] += self.u_reg
-
-            try:
-                if self.Quu[t].shape[0]>0:
-                    Lb = scl.cho_factor(self.Quu[t])
-                    self.K[t][:,:]   = scl.cho_solve(Lb,self.Qux[t])
-                    self.k[t][:]     = scl.cho_solve(Lb,self.Qu [t])
-                else:
-                    pass
-            except scl.LinAlgError:
-                raise ArithmeticError('backward error')
-                
+            self.computeGains(t)
             # Vx = Qx - Qu K + .5(- Qxu k - k Qux + k Quu K + K Quu k)
             # Qxu k = Qxu Quu^+ Qu
             # Qu  K = Qu Quu^+ Qux = Qxu k
@@ -239,6 +229,18 @@ class SolverDDP:
             if self.x_reg != 0: self.Vxx[t][range(model.ndx),range(model.ndx)] += self.x_reg
             raiseIfNan(self.Vxx[t],ArithmeticError('backward error'))
             raiseIfNan(self.Vx[t],ArithmeticError('backward error'))
+
+    def computeGains(self, t):
+        try:
+            if self.Quu[t].shape[0]>0:
+                Lb = scl.cho_factor(self.Quu[t])
+                self.K[t][:,:]   = scl.cho_solve(Lb,self.Qux[t])
+                self.k[t][:]     = scl.cho_solve(Lb,self.Qu [t])
+            else:
+                pass
+        except scl.LinAlgError:
+            raise ArithmeticError('backward error')
+      
             
     def forwardPass(self,stepLength,b=None,warning='ignore'):
         """ Run the forward-pass of the DDP algorithm.
