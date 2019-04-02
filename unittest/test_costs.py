@@ -254,7 +254,9 @@ lowersafe = m2a(x)>=lowerLimit; uppersafe = m2a(x)<=upperLimit
 assert(( costData.Lx[lowersafe & uppersafe] ==0.).all())
 assert(( costData.Lx[~lowersafe & ~uppersafe] !=0.).all())
 
-#assert( absmax(costData.L-costDataND.L) < 1e-3 )
+assert((costData.Lxx.diagonal()[~lowersafe]==1.).all())
+assert((costData.Lxx.diagonal()[~uppersafe]==1.).all())
+assert((costData.Lxx.diagonal()[uppersafe & lowersafe]==0.).all())
 #--------------------------Check Inf joint limits
 
 lowerLimit[:rmodel.nq] = -np.inf  # inf position lower limit
