@@ -6,6 +6,7 @@ SET(${PROJECT_NAME}_PYTHON_FILES
   contact.py
   cost.py
   ddp.py
+  box_ddp.py
   diagnostic.py
   differential_action.py
   fddp.py
@@ -14,6 +15,7 @@ SET(${PROJECT_NAME}_PYTHON_FILES
   __init__.py
   integrated_action.py
   kkt.py
+  box_kkt.py
   robots.py
   shooting.py
   state.py

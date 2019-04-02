@@ -84,7 +84,7 @@ class SolverKKT:
             # constraint value = xnext_guess - f(x_guess,u_guess) = diff(f,xnext_guesss)
             self.cval[cx0+ix:cx0+ix+ndx] = model.State.diff(data.xnext,xguess) #data.F
             ix += ndx; iu += nu
-            
+
         model,data = problem.terminalModel,problem.terminalData
         ndx = model.ndx; nu = model.nu
         self.Lxx[ix:ix+ndx,ix:ix+ndx] = data.Lxx
@@ -102,7 +102,12 @@ class SolverKKT:
         if self.u_reg != 0: self.kkt[range(ndx,ndx+nu),range(ndx,ndx+nu)] += self.u_reg
                 
         return self.cost
-    
+
+    def computePrimalDual(self):
+        self.primaldual = np.linalg.solve(self.kkt,-self.kktref)
+        self.primal = self.primaldual[:self.ndx+self.nu]
+        self.dual = self.primaldual[-self.ndx:]
+        
     def computeDirection(self,recalc=True):
         '''
         Compute the direction of descent for the current guess xs,us. 
@@ -110,11 +115,10 @@ class SolverKKT:
         must have been called before.
         '''
         if recalc: self.calc()
-        self.primaldual = np.linalg.solve(self.kkt,-self.kktref)
-        self.primal = self.primaldual[:self.ndx+self.nu]
+        self.computePrimalDual()
+
         p_x  = self.primaldual[:self.ndx]
         p_u  = self.primaldual[self.ndx:self.ndx+self.nu]
-        self.dual = self.primaldual[-self.ndx:]
         ix = 0; iu = 0
         dxs = []; dus = []; lambdas = []
         for model,data in zip(self.problem.runningModels,self.problem.runningDatas):
