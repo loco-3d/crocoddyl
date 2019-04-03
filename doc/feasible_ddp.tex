@@ -205,9 +205,7 @@ The optimal flow is evaluated along the candidate trajectory $\dxtrajguess,\dutr
 As the problem is LQR, any initial guess produces the same backward pass, the same $V$ and the same solution.
 For this reason, choosing $\dxtrajguess=0, \dutrajguess=0$ is very relevant.
 In that case, if $f_t$ is nonzero, then the initial guess is not feasible and the term $V_{xx} f$ in the Value gradient back-propagation is important.
-This term is a direct application of LQR equation with drift, but it is rarely mentioned in DDP works \cite{GiftthalerCoRR2017,LaineCoRR2018}
-
-never mentioned in DDP equations as far as we know.
+This term is a direct application of LQR equation with drift, but it is rarely mentioned in DDP works \cite{GiftthalerCoRR2017,LaineCoRR2018}.
 Its role will become very important in the following.
 
 The solution of the LQR has once more two effects: it generates a feasible trajectory where the gap between $x_{t-1}^+$ and $x_t$ is zero; and this trajectory is optimal.
