@@ -26,3 +26,37 @@ def polyfitND(x, y, deg, eps, rcond=None, full=False, w=None, cov=False):
     dp[i] = np.poly1d(p_a[:]).deriv(1)
     assert(residual <=eps)
   return p, dp
+
+
+def findDuplicates(arr, tol=1e-8):
+    """ Takes a sorted array and returns the index of duplicated valuesinside the array
+    
+    :params arr: np.array. e.g., a timeline
+    :params tol. optional. criterion to know if values are being duplicated.
+    :returns list of duplicated indices
+    """
+    duplicates = []
+    for i, a in enumerate(arr):
+        if i==0:
+            pass
+        else:
+            if abs(a-arr[i-1])< tol:
+                duplicates.append(i)
+    return duplicates
+
+def removeDuplicates(arr, indices):
+    """ Takes an arr and a sorted list of indices.
+    Removes arr[i] for i in indices and returns a new array.
+    if arr is 2D, removes the i^{th} row for i in indices.
+
+    :params arr: np.array. e.g., a timeline
+    :params indices: sorted list of indices to remove.
+    :returns new_arr: np.array
+    """
+
+    for i in indices[::-1]:
+        if len(arr.shape)==1:
+            arr = np.delete(arr,i)
+        elif len(arr.shape)==2:
+            arr = np.delete(arr, i, axis=0)
+    return arr
