@@ -315,9 +315,7 @@ We have demonstrated in our experiment that the DDP is much more prone to face f
 
 \subsubsection{Using the true dynamics or its approximation}
 Using the nonlinear dynamics has some advantages.
-First, despite intuition, the nonlinear dynamics might be faster to compute, as in robotics $F_x$ and $F_u$ are large matrices with little structure (sparsity) while very efficient nonlinear routines exists to compute $f(x,u)$.
-
-On the other hand, taking a linear step provides an exact Newton step with strong convergence guarantees, at least when the NLP is convex (and often this is not the case).
+First, despite intuition, the nonlinear dynamics might be faster to compute, as in robotics $F_x$ and $F_u$ are large matrices with little structure (sparsity) while very efficient nonlinear routines exists to compute $f(x,u)$. On the other hand, taking a linear step provides an exact Newton step with strong convergence guarantees, at least when the NLP is convex (and often this is not the case).
 
 We claim that the choice should be taken by considering the effect on the gaps.
 With the nonlinear step, the gaps strictly decreases with nonzero step.
