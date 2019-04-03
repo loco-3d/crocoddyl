@@ -92,15 +92,13 @@ class SolverKKT:
             self.Fu[cx0 + ix:cx0 + ix + ndx, iu:iu + nu] = -data.Fu
 
             # constraint value = xnext_guess - f(x_guess,u_guess) = diff(f,xnext_guesss)
-            self.cval[cx0 + ix:cx0 + ix + ndx] = model.State.diff(data.xnext, xguess)  # data.F
-            ix += ndx
-            iu += nu
+            self.cval[cx0+ix:cx0+ix+ndx] = model.State.diff(data.xnext,xguess) #data.F
+            ix += ndx; iu += nu
 
-        model, data = problem.terminalModel, problem.terminalData
-        ndx = model.ndx
-        nu = model.nu
-        self.Lxx[ix:ix + ndx, ix:ix + ndx] = data.Lxx
-        self.Lx[ix:ix + ndx] = data.Lx
+        model,data = problem.terminalModel,problem.terminalData
+        ndx = model.ndx; nu = model.nu
+        self.Lxx[ix:ix+ndx,ix:ix+ndx] = data.Lxx
+        self.Lx [ix:ix+ndx]           = data.Lx
 
         # constraint value = x_guess - x_ref = diff(x_ref,x_guess)
         self.cval[:cx0] = problem.runningModels[0].State.diff(problem.initialState, xs[0])
@@ -117,38 +115,34 @@ class SolverKKT:
 
         return self.cost
 
-    def computeDirection(self, recalc=True):
+    def computePrimalDual(self):
+        self.primaldual = np.linalg.solve(self.kkt,-self.kktref)
+        self.primal = self.primaldual[:self.ndx+self.nu]
+        self.dual = self.primaldual[-self.ndx:]
+        
+    def computeDirection(self,recalc=True):
         '''
         Compute the direction of descent for the current guess xs,us.
         if recalc is True, run self.calc() before hand. self.setCandidate
         must have been called before.
         '''
-        if recalc:
-            self.calc()
-        self.primaldual = np.linalg.solve(self.kkt, -self.kktref)
-        self.primal = self.primaldual[:self.ndx + self.nu]
-        p_x = self.primaldual[:self.ndx]
-        p_u = self.primaldual[self.ndx:self.ndx + self.nu]
-        self.dual = self.primaldual[-self.ndx:]
-        ix = 0
-        iu = 0
-        dxs = []
-        dus = []
-        lambdas = []
-        for model, data in zip(self.problem.runningModels, self.problem.runningDatas):
-            ndx = model.ndx
-            nu = model.nu
-            dxs.append(p_x[ix:ix + ndx])
-            dus.append(p_u[iu:iu + nu])
-            lambdas.append(self.dual[ix:ix + ndx])
-            ix += ndx
-            iu += nu
-        dxs.append(p_x[-self.problem.terminalModel.ndx:])
-        lambdas.append(self.dual[-self.problem.terminalModel.ndx:])
-        self.dxs = dxs
-        self.dus = dus
-        self.lambdas = lambdas
-        return dxs, dus, lambdas
+        if recalc: self.calc()
+        self.computePrimalDual()
+
+        p_x  = self.primaldual[:self.ndx]
+        p_u  = self.primaldual[self.ndx:self.ndx+self.nu]
+        ix = 0; iu = 0
+        dxs = []; dus = []; lambdas = []
+        for model,data in zip(self.problem.runningModels,self.problem.runningDatas):
+            ndx = model.ndx; nu = model.nu
+            dxs.append( p_x[ix:ix+ndx] )
+            dus.append( p_u[iu:iu+nu] )
+            lambdas.append( self.dual[ix:ix+ndx] )
+            ix+=ndx; iu+=nu
+        dxs.append( p_x[-self.problem.terminalModel.ndx:] )
+        lambdas.append( self.dual[-self.problem.terminalModel.ndx:] )
+        self.dxs = dxs ; self.dus = dus ; self.lambdas = lambdas
+        return dxs,dus,lambdas
 
     def expectedImprovement(self):
         '''

@@ -1,4 +1,5 @@
-import numpy as np
+from floating_contact import DifferentialActionModelFloatingInContact
+from cost import CostModelState, CostModelSum
 from state import StateVector
 from utils import EPS
 
@@ -208,16 +209,10 @@ class ActionModelNumDiff(ActionModelAbstract):
     def calcDiff(model, data, x, u):
         xn0, c0 = model.calc(data, x, u)
         h = model.disturbance
-
-        def dist(i, n, h):
-            return np.array([h if ii == i else 0 for ii in range(n)])
-
-        def Xint(x, dx):
-            return model.State.integrate(x, dx)
-
-        def Xdiff(x1, x2):
-            return model.State.diff(x1, x2)
-
+        dist = lambda i,n,h: np.array([ h if ii==i else 0 for ii in range(n) ])
+        Xint  = lambda x,dx: model.State.integrate(x,dx)
+        Xdiff = lambda x1,x2: model.State.diff(x1,x2)
+        model._assertStableStateFD(x)
         for ix in range(model.ndx):
             xn, c = model.model0.calc(data.datax[ix], Xint(x, dist(ix, model.ndx, h)), u)
             data.Fx[:, ix] = Xdiff(xn0, xn) / h
@@ -231,11 +226,40 @@ class ActionModelNumDiff(ActionModelAbstract):
             if model.ncost > 1:
                 data.Ru[:, iu] = (data.datau[iu].costResiduals - data.data0.costResiduals) / h
         if model.withGaussApprox:
-            data.Lxx[:, :] = np.dot(data.Rx.T, data.Rx)
-            data.Lxu[:, :] = np.dot(data.Rx.T, data.Ru)
-            data.Lux[:, :] = data.Lxu.T
-            data.Luu[:, :] = np.dot(data.Ru.T, data.Ru)
+            data.Lxx[:,:] = np.dot(data.Rx.T,data.Rx)
+            data.Lxu[:,:] = np.dot(data.Rx.T,data.Ru)
+            data.Lux[:,:] = data.Lxu.T
+            data.Luu[:,:] = np.dot(data.Ru.T,data.Ru)
+            
+    def _assertStableStateFD(model,x):
+        """ Make sure that when we finite difference the Action Model, the user does
+        not face unknown behaviour because of the finite differencing of a quaternion around pi.
+        This behaviour might occur if CostModelState and FloatingInContact differential model are used
+        together.
 
+        For full discussions see issue https://gepgitlab.laas.fr/loco-3d/crocoddyl/issues/139
+        """
+        if hasattr(model.model0, "differential"):
+            md = model.model0.differential
+            if isinstance(md, DifferentialActionModelFloatingInContact):
+                if hasattr(md, "costs"):
+                    mc = md.costs
+                    if isinstance(mc, CostModelState):
+                        assert(~np.isclose(model.State.diff(mc.ref,x)[3:6],
+                                           np.ones(3)*np.pi,
+                                           atol=1e-6).any())
+                        assert(~np.isclose(model.State.diff(mc.ref,x)[3:6],
+                                           -np.ones(3)*np.pi,
+                                           atol=1e-6).any())
+                    elif isinstance(mc, CostModelSum):
+                        for (key,cost) in mc.costs.iteritems():
+                            if isinstance(cost.cost, CostModelState):
+                                assert(~np.isclose(model.State.diff(cost.cost.ref,x)[3:6],
+                                                   np.ones(3)*np.pi,
+                                                   atol=1e-6).any())
+                                assert(~np.isclose(model.State.diff(cost.cost.ref,x)[3:6],
+                                                   -np.ones(3)*np.pi,
+                                                   atol=1e-6).any())
 
 class ActionDataNumDiff:
     def __init__(self, model):

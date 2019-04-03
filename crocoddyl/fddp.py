@@ -266,16 +266,16 @@ class SolverFDDP:
             if self.u_reg == 0:
                 self.Vx[t][:] = self.Qx[t] - np.dot(self.Qu[t], self.K[t])
             else:
-                self.Vx[t][:] = self.Qx[t] - 2 * np.dot(self.Qu[t], self.K[t]) + np.dot(
-                    np.dot(self.k[t], self.Quu[t]), self.K[t])
-            self.Vxx[t][:, :] = self.Qxx[t] - np.dot(self.Qxu[t], self.K[t])
+                self.Vx[t][:] = self.Qx [t] - 2*np.dot(self.Qu [t],self.K[t]) \
+                                + np.dot(np.dot(self.k[t],self.Quu[t]),self.K[t])
+            self.Vxx[t][:,:] = self.Qxx[t] - np.dot(self.Qxu[t],self.K[t])
+            self.Vxx[t][:,:] = 0.5 * (self.Vxx[t][:,:] + self.Vxx[t][:,:].T) # ensure symmetric
 
-            if self.x_reg != 0:
-                self.Vxx[t][range(model.ndx), range(model.ndx)] += self.x_reg
-            raiseIfNan(self.Vxx[t], ArithmeticError('backward error'))
-            raiseIfNan(self.Vx[t], ArithmeticError('backward error'))
-
-    def forwardPass(self, stepLength, warning='ignore'):
+            if self.x_reg != 0: self.Vxx[t][range(model.ndx),range(model.ndx)] += self.x_reg
+            raiseIfNan(self.Vxx[t],ArithmeticError('backward error'))
+            raiseIfNan(self.Vx[t],ArithmeticError('backward error'))
+            
+    def forwardPass(self,stepLength,warning='ignore'):
         """ Run the forward-pass of the DDP algorithm.
 
         The forward-pass basically applies a new policy and then rollout the
