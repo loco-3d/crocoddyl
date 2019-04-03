@@ -77,7 +77,7 @@ For understanding the nature of the problem, we will write the solution to this 
 \subsection{The Russian way: using the Karush-Kuhn-Tucker matrix}
 
 \subsubsection{Optimality principle}
-The Lagragian of the LQR QP is:
+The Lagrangian of the LQR QP is:
 $$\mathcal{L}(\dxtraj,\dutraj,\lambdatraj) = \sum_{t=0}^{T-1} \Big( \frac{1}{2} \bmat \dx_t^T,\du_t^T \emat \bmat L_{xx} & L_{xu} \\ L_{ux} & L_{uu} \emat \bmat \dx_t \\ \du_t \emat + \bmat L_x & L_u \emat \bmat \dx_t \\ \du_t \emat $$
 $$+ \lambda_t (\dx_{t+1} - F_x \dx_t - F_u \du_t - f_t ) \Big)
 %$$ $$
@@ -197,7 +197,7 @@ We discuss it later.
 
 \subsubsection{Intuition of the result}
 
-While the KKT approach computes the solution using the dual $\lambda$ variable, the DDP approach computes it using the $V, Q$ auxilary variables.
+While the KKT approach computes the solution using the dual $\lambda$ variable, the DDP approach computes it using the $V, Q$ auxiliary variables.
 $\lambda$ presents the co-state trajectory, while $V$ is the value functions.
 Both are connected, as the PMP principle writes the optimal control in term of the co-state, while HJB express the optimal policy in term of the Value space gradient.
 
@@ -288,18 +288,18 @@ $$
 The gap evolution is composed of two terms: the first one decreases when $\alpha$ growth, and collapses for full step $\alpha=1$; the second one growths with $\alpha$, and vanishes with $\alpha$ small.
 Only the second one exists when the gap of the current guess is null.
 
-\subsection{Nonlinear rollout}
+\subsection{Nonlinear roll-out}
 
 Once more, it is important to recall that the descent direction is the same for KKT and DDP.
 However, the DDP is typically associated with a particular line search variant.
-First, recall that the exact classical line search can be implemented with the DDP: for that, the rollout should be performed on the linear model, and a merit function should be considered.
+First, recall that the exact classical line search can be implemented with the DDP: for that, the roll-out should be performed on the linear model, and a merit function should be considered.
 
 Yet, the DDP classically observes that a feasible solution is directly obtained by integrating the nonlinear dynamics around a candidate solution $\utraj$ from the initial state $x_0$.
 As the nonlinear dynamics $f(x,u)$ is not exactly the same as the linear dynamics $F_x,F_u$, the feedback term $K$ must be used during the integration to avoid the divergence.
-With such a rollout, the resulting candidate decision variable is a feasible trajectory, where all the gaps are zero.
+With such a roll-out, the resulting candidate decision variable is a feasible trajectory, where all the gaps are zero.
 
 This behavior is very different from the one observed with classical line search.
-We rather suggest that the same gaps than for the linear line search should be used for the nonlinear rollout.
+We rather suggest that the same gaps than for the linear line search should be used for the nonlinear roll-out.
 We then impose the gaps at the next candidate solution to be:
 $$
 f(x_t+\dx_t,u_t+\du_t) - (x_{t+1}+\dx_{t+1}) = (1-\alpha) (f(x_t,u_t) - x_{t+1})
@@ -314,7 +314,7 @@ We agree with this observation, which it is correlated to the fact that the DDP 
 We have demonstrated in our experiment that the DDP is much more prone to face feasibility problem, and discover good solutions despite poor initial guesses, when the gaps are kept during the first part of the search.
 
 \subsubsection{Using the true dynamics or its approximation}
-Using the nonlinear dynamics as some advantages.
+Using the nonlinear dynamics has some advantages.
 First, despite intuition, the nonlinear dynamics might be faster to compute, as in robotics $F_x$ and $F_u$ are large matrices with little structure (sparsity) while very efficient nonlinear routines exists to compute $f(x,u)$.
 
 On the other hand, taking a linear step provides an exact Newton step with strong convergence guarantees, at least when the NLP is convex (and often this is not the case).
@@ -326,7 +326,7 @@ While we agree that maintaining the gaps open during the search is interesting, 
 Indeed, this term corresponds to some growth direction that are not predicted in the linear model.
 The LQR is then not informed to choose an interesting value for that perturbation.
 
-We have tried to experiment gap growth coming from the linear prediction error versus other perturbation terms, in particular random, and of course zero (with the nonlinear rollout).
+We have tried to experiment gap growth coming from the linear prediction error versus other perturbation terms, in particular random, and of course zero (with the nonlinear roll-out).
 While it seems clear that the term $(1-\alpha)(f-x)$ is interesting, the interest or noxiousness of $\circ(\alpha^2)$ has not been observed.
 
 In conclusion, we advice to take a nonlinear step while maintaining the gaps open.
