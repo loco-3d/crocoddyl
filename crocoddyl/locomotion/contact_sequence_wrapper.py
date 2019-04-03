@@ -1,8 +1,8 @@
 from crocoddyl import m2a, a2m
-from locomote import CubicHermiteSpline
+from multicontact_api import CubicHermiteSpline
 import pinocchio
 from collections import OrderedDict
-from spline_utils import polyfitND
+from spline_utils import polyfitND, findDuplicates, removeDuplicates
 from centroidal_phi import CentroidalPhi, EESplines
 import numpy as np
 
@@ -94,11 +94,26 @@ class ContactSequenceWrapper:
 
           n += nt
 
-        self.phi_c.com_vcom = CubicHermiteSpline(a2m(t_traj), a2m(phi_c_.com_vcom),
-                                                 a2m(phi_c_.vcom_acom))
-        self.phi_c.hg = CubicHermiteSpline(a2m(t_traj), a2m(phi_c_.hg), a2m(phi_c_.dhg))
+
+        duplicates = findDuplicates(t_traj)
+
+        phi_c_2 = lambda t: 0
+        phi_c_2.f = OrderedDict(); phi_c_2.df = OrderedDict();
+        for patch in patch_names:
+          phi_c_2.f.update([[patch, removeDuplicates(phi_c_.f[patch], duplicates)]])
+          phi_c_2.df.update([[patch, removeDuplicates(phi_c_.df[patch], duplicates)]])
+
+        phi_c_2.com_vcom  =removeDuplicates(phi_c_.com_vcom,  duplicates)
+        phi_c_2.vcom_acom =removeDuplicates(phi_c_.vcom_acom, duplicates)
+        phi_c_2.hg        =removeDuplicates(phi_c_.hg,        duplicates)
+        phi_c_2.dhg       =removeDuplicates(phi_c_.dhg,       duplicates)        
+        t_traj            =removeDuplicates(t_traj,           duplicates)
+        
+        self.phi_c.com_vcom = CubicHermiteSpline(a2m(t_traj), a2m(phi_c_2.com_vcom),
+                                                 a2m(phi_c_2.vcom_acom))
+        self.phi_c.hg = CubicHermiteSpline(a2m(t_traj), a2m(phi_c_2.hg), a2m(phi_c_2.dhg))
 
         for patch in patch_names:
-          self.phi_c.forces[patch] = CubicHermiteSpline(a2m(t_traj), a2m(phi_c_.f[patch]),
-                                                        a2m(phi_c_.df[patch]))
+          self.phi_c.forces[patch] = CubicHermiteSpline(a2m(t_traj), a2m(phi_c_2.f[patch]),
+                                                        a2m(phi_c_2.df[patch]))
         return
