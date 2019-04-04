@@ -2,6 +2,7 @@ from crocoddyl import ActivationDataSmoothAbs, ActivationModelSmoothAbs
 from crocoddyl import ActivationModelQuad
 from crocoddyl import ActivationModelWeightedQuad
 from crocoddyl.utils import EPS
+from testutils import assertNumDiff
 import numpy as np
 from numpy.linalg import norm,inv
 
@@ -24,7 +25,7 @@ c'' = R'R
 
 # - ------------------------------
 # --- Dim 1 ----------------------
-h = np.sqrt(EPS)
+h = np.sqrt(2*EPS)
 def df(am,ad,x):
     return (am.calc(ad,x+h)-am.calc(ad,x))/h
 def ddf(am,ad,x):
@@ -35,19 +36,18 @@ ad = am.createData()
 x = np.random.rand(1)
 
 am.calc(ad,x)
-assert( norm(df(am,ad,x)-am.calcDiff(ad,x)[0]) < 1e2*h )
-assert( norm(ddf(am,ad,x)-am.calcDiff(ad,x)[1]) < 1e2*h )
+assertNumDiff(df(am, ad, x), am.calcDiff(ad, x)[0], 1e-6) # threshold was 1e-6, is now 1e-6 (see assertNumDiff.__doc__)
+assertNumDiff(ddf(am, ad, x), am.calcDiff(ad, x)[1], 1e-6) # threshold was 1e-6, is now 1e-6 (see assertNumDiff.__doc__)
 
 am = ActivationModelWeightedQuad(np.random.rand(1))
 ad = am.createData()
-assert( norm(df(am,ad,x)-am.calcDiff(ad,x)[0]) < 1e2*h )
-assert( norm(ddf(am,ad,x)-am.calcDiff(ad,x)[1]) < 1e2*h )
+assertNumDiff(df(am, ad, x), am.calcDiff(ad, x)[0], 1e-6) # threshold was 1e-6, is now 1e-6 (see assertNumDiff.__doc__)
+assertNumDiff(ddf(am, ad, x), am.calcDiff(ad, x)[1], 1e-6) # threshold was 1e-6, is now 1e-6 (see assertNumDiff.__doc__)
 
 am = ActivationModelSmoothAbs()
 ad = am.createData()
-
-assert( norm(df(am,ad,x)-am.calcDiff(ad,x)[0]) < 1e2*h )
-assert( norm(ddf(am,ad,x)-am.calcDiff(ad,x)[1]) < 1e2*h )
+assertNumDiff(df(am, ad, x), am.calcDiff(ad, x)[0], 1e-6) # threshold was 1e-6, is now 1e-6 (see assertNumDiff.__doc__)
+assertNumDiff(ddf(am, ad, x), am.calcDiff(ad, x)[1], 1e-6) # threshold was 1e-6, is now 1e-6 (see assertNumDiff.__doc__)
 
 # - ------------------------------
 # --- Dim N ----------------------
@@ -76,17 +76,18 @@ am = ActivationModelQuad()
 ad = am.createData()
 J = df(am,ad,x)
 H = ddf(am,ad,x)
-assert( norm(np.diag(J.diagonal())-J) < 1e2*h )
-assert( norm(np.diag(H.diagonal())-H) < 1e2*h )
-assert( norm(df(am,ad,x).diagonal()-am.calcDiff(ad,x)[0]) < 1e2*h )
-assert( norm(ddf(am,ad,x).diagonal()-am.calcDiff(ad,x)[1][:,0]) < 1e2*h )
+assertNumDiff(np.diag(J.diagonal()), J, 5e-8) # threshold was 1e-9, is now 5e-8 (see assertNumDiff.__doc__)
+assertNumDiff(np.diag(H.diagonal()), H, 5e-8) # threshold was 1e-9, is now 5e-8 (see assertNumDiff.__doc__)
+assertNumDiff(df(am, ad, x).diagonal(), am.calcDiff(ad, x)[0], np.sqrt(2*EPS)) # threshold was 1e-6, is now 2.11e-8 (see assertNumDiff.__doc__)
+assertNumDiff(ddf(am, ad, x).diagonal(), am.calcDiff(ad, x)[1][:, 0], np.sqrt(2*EPS)) # threshold was 1e-6, is now 2.11e-8 (see assertNumDiff.__doc__)
 
 am = ActivationModelWeightedQuad(np.random.rand(len(x)))
 ad = am.createData()
-assert( norm(df(am,ad,x).diagonal()-am.calcDiff(ad,x)[0]) < 1e2*h )
-assert( norm(ddf(am,ad,x).diagonal()-am.calcDiff(ad,x)[1][:,0]) < 1e2*h )
+assertNumDiff(df(am, ad, x).diagonal(), am.calcDiff(ad, x)[0], np.sqrt(2*EPS)) # threshold was 1e-6, is now 2.11e-8 (see assertNumDiff.__doc__)
+assertNumDiff(ddf(am, ad, x).diagonal(), am.calcDiff(ad, x)[1][:, 0], np.sqrt(2*EPS)) # threshold was 1e-6, is now 2.11e-8 (see assertNumDiff.__doc__)
+
 
 am = ActivationModelSmoothAbs()
 ad = am.createData()
-assert( norm(df(am,ad,x).diagonal()-am.calcDiff(ad,x)[0]) < 1e2*h )
-assert( norm(ddf(am,ad,x).diagonal()-am.calcDiff(ad,x)[1][:,0]) < 1e2*h )
+assertNumDiff(df(am, ad, x).diagonal(), am.calcDiff(ad, x)[0], np.sqrt(2*EPS)) # threshold was 1e-6, is now 2.11e-8 (see assertNumDiff.__doc__)
+assertNumDiff(ddf(am, ad, x).diagonal(), am.calcDiff(ad, x)[1][:, 0], np.sqrt(2*EPS)) # threshold was 1e-6, is now 2.11e-8 (see assertNumDiff.__doc__)
