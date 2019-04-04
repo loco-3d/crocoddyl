@@ -5,13 +5,7 @@ from activation import (ActivationDataInequality, ActivationDataQuad, Activation
                         ActivationModelSmoothAbs, ActivationModelWeightedQuad)
 from actuation import ActuationDataFreeFloating, ActuationDataFull, ActuationModelFreeFloating, ActuationModelFull
 from callbacks import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay, CallbackSolverTimer
-from contact import (ContactData3D, ContactData6D, ContactDataMultiple, ContactDataPinocchio, ContactModel3D,
-                     ContactModel6D, ContactModelMultiple, ContactModelPinocchio)
-from cost import (CostDataCoM, CostDataControl, CostDataForce, CostDataFramePlacement, CostDataFrameTranslation,
-                  CostDataFrameVelocity, CostDataFrameVelocityLinear, CostDataNumDiff, CostDataPinocchio,
-                  CostDataState, CostDataSum, CostModelCoM, CostModelControl, CostModelForce, CostModelForceLinearCone,
-                  CostModelFramePlacement, CostModelFrameTranslation, CostModelFrameVelocity,
-                  CostModelFrameVelocityLinear, CostModelNumDiff, CostModelPinocchio, CostModelState, CostModelSum)
+from solver import SolverAbstract
 from ddp import SolverDDP
 from box_ddp import SolverBoxDDP
 from box_kkt import SolverBoxKKT

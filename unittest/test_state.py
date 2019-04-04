@@ -1,4 +1,9 @@
 import unittest
+from crocoddyl import StateNumDiff
+from crocoddyl import StateVector
+from crocoddyl import StateUnicycle
+from crocoddyl import StatePinocchio
+from testutils import assertNumDiff, NUMDIFF_MODIFIER
 from random import randint
 
 import numpy as np
@@ -9,6 +14,7 @@ class StateTestCase(unittest.TestCase):
     NX = None
     STATE = None
     STATE_NUMDIFF = None
+    NUMDIFF_MOD = NUMDIFF_MODIFIER
 
     def setUp(self):
         self.STATE_NUMDIFF = StateNumDiff(self.STATE)
@@ -55,13 +61,10 @@ class StateTestCase(unittest.TestCase):
         Jnum1, Jnum2 = self.STATE_NUMDIFF.Jdiff(x1, x2)
 
         # Checking the partial derivatives against NumDiff
-        tol = 10 * self.STATE_NUMDIFF.disturbance
-        self.assertTrue(
-            np.allclose(J1, Jnum1, atol=tol),
-            "The partial derivatives of difference function with respect to first argument is wrong.")
-        self.assertTrue(
-            np.allclose(J2, Jnum2, atol=tol),
-            "The partial derivatives of difference function with respect to second argument is wrong.")
+        # The previous tolerance was 10*disturbance
+        tol = self.NUMDIFF_MOD * self.STATE_NUMDIFF.disturbance
+        assertNumDiff(J1, Jnum1, tol)
+        assertNumDiff(J2, Jnum2, tol)
 
     def test_Jintegrate_against_numdiff(self):
         # Generating random values for the initial state and its rate of change
@@ -73,13 +76,10 @@ class StateTestCase(unittest.TestCase):
         Jnum1, Jnum2 = self.STATE_NUMDIFF.Jintegrate(x, vx)
 
         # Checking the partial derivatives against NumDiff
-        tol = 10 * self.STATE_NUMDIFF.disturbance
-        self.assertTrue(
-            np.allclose(J1, Jnum1, atol=tol),
-            "The partial derivatives of integrate function with respect to first argument is wrong.")
-        self.assertTrue(
-            np.allclose(J2, Jnum2, atol=tol),
-            "The partial derivatives of integrate function with respect to second argument is wrong.")
+        # The previous tolerance was 10*disturbance
+        tol = self.NUMDIFF_MOD * self.STATE_NUMDIFF.disturbance
+        assertNumDiff(J1, Jnum1, tol)
+        assertNumDiff(J2, Jnum2, tol)
 
     def test_Jdiff_and_Jintegrate_are_inverses(self):
         # Generating random states
@@ -94,7 +94,7 @@ class StateTestCase(unittest.TestCase):
         # Checking that Jdiff and Jintegrate are inverses
         dX_dDX = Jdx
         dDX_dX = J2
-        self.assertTrue(np.allclose(dX_dDX, np.linalg.inv(dDX_dX), atol=1e-9), "Jdiff and Jintegrate aren't inverses.")
+        assertNumDiff(dX_dDX, np.linalg.inv(dDX_dX), 1e-9)
 
     def test_velocity_from_Jintegrate_Jdiff(self):
         # Generating random states
@@ -126,16 +126,19 @@ class StateTestCase(unittest.TestCase):
 
 
 class StateVectorTest(StateTestCase):
-    StateTestCase.NX = randint(1, 101)
+    # NUMDIFF_MODIFIER: threshold was 2.11e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+    StateTestCase.NX = randint(1,101)
     StateTestCase.STATE = StateVector(StateTestCase.NX)
 
 
 class StateUnicycleTest(StateTestCase):
+    # NUMDIFF_MODIFIER: threshold was 2.11e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
     StateTestCase.NX = 3
     StateTestCase.STATE = StateUnicycle()
 
 
 class StatePinocchioTest(StateTestCase):
+    # NUMDIFF_MODIFIER: threshold was 2.11e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
     # Loading Talos arm
     from crocoddyl import loadTalosArm
     rmodel = loadTalosArm().model
@@ -143,6 +146,13 @@ class StatePinocchioTest(StateTestCase):
     StateTestCase.NX = rmodel.nq + rmodel.nv
     StateTestCase.STATE = StatePinocchio(rmodel)
 
+class StatePinocchioFFTest(StateTestCase):
+    # NUMDIFF_MODIFIER: threshold was 2.11e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+    # Loading Talos legs
+    from crocoddyl import loadTalosLegs
+    rmodel = loadTalosLegs().model
+    StateTestCase.NX = rmodel.nq + rmodel.nv
+    StateTestCase.STATE = StatePinocchio(rmodel)
 
 if __name__ == '__main__':
     unittest.main()

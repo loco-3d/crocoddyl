@@ -8,20 +8,21 @@ robot = loadTalos()
 robot.model.armature[6:] = 1.
 # ---------------------------------------------------------
 
-DISPLAY = False
+DISPLAY = True
 RUNTIME_DISPLAY = False
 DT = 0.01
 
-# -------------------------INITIAL TRAJECTORY--------------
-TRAJ_DIR = "examples/locomotion/traj_1step/"
+#-------------------------INITIAL TRAJECTORY--------------
+TRAJ_DIR = "traj_1step/"
 
-# -------------------------INITIAL TRAJECTORY--------------
-TRAJ_DIR = os.getcwd() + "/traj_1step/"
+X_init = pickle.load( open(TRAJ_DIR+"X_init.out","rb")) #loads the state x
+U_init = pickle.load( open(TRAJ_DIR+"U_init.out","rb")) # loads the control u
 
-X_init = pickle.load(open(TRAJ_DIR + "X_init.out", "rb"))  # loads the state x
-ddq_init = pickle.load(open(TRAJ_DIR + "ddq_init.out", "rb"))
-# U_init = pickle.load( open(TRAJ_DIR+"U_init.out","rb")) # loads the control u
-# f_init = pickle.load( open(TRAJ_DIR+"f_init.out","rb")) # loads the control u
+#loads the forces ("lambda") in the local frame in order [LF, RF, LH, RH]
+#where lf: 'leg_left_6_joint', 'rf' : 'leg_right_6_joint'
+#Note: Hands are optional. Hands are not loaded for biped walking
+f_init = pickle.load( open(TRAJ_DIR+"f_init.out","rb")) 
+ddq_init = pickle.load( open(TRAJ_DIR+"ddq_init.out","rb")) #loads the acceleration
 
 # -----------------------Contact Sequence-----------------
 

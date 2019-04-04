@@ -1,9 +1,10 @@
+from crocoddyl import loadTalosArm, loadTalosLegs
+from crocoddyl import ActionModelImpact, ImpulseModel6D, ImpulseModelMultiple
+from crocoddyl import ActionModelNumDiff
+from crocoddyl import m2a, a2m, absmax, absmin
+from crocoddyl.impact import CostModelImpactWholeBody
+from testutils import assertNumDiff, NUMDIFF_MODIFIER
 import numpy as np
-import pinocchio
-from crocoddyl import (ActionModelImpact, ActionModelNumDiff, CostModelSum, ImpulseModel6D, ImpulseModelMultiple, a2m,
-                       absmax, loadTalosArm, loadTalosLegs)
-# ----------------------------------------------------------------------
-from crocoddyl.impact import CostModelImpactCoM, CostModelImpactWholeBody
 from numpy.linalg import norm
 from pinocchio.utils import zero
 from testutils import df_dq
@@ -39,10 +40,10 @@ dnum = mnum.createData()
 
 nx, ndx, nq, nv, nu = model.nx, model.ndx, model.nq, model.nv, model.nu
 
-mnum.calcDiff(dnum, x, None)
-assert (absmax(dnum.Fx[:nv, :nv] - data.Fx[:nv, :nv]) < 1e-3)  # dq/dq
-assert (absmax(dnum.Fx[:nv, nv:] - data.Fx[:nv, nv:]) < 1e-3)  # dq/dv
-assert (absmax(dnum.Fx[nv:, nv:] - data.Fx[nv:, nv:]) < 1e-3)  # dv/dv
+mnum.calcDiff(dnum,x,None)
+assertNumDiff(dnum.Fx[:nv, :nv], data.Fx[:nv, :nv], NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Fx[:nv, nv:], data.Fx[:nv, nv:], NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Fx[nv:, nv:], data.Fx[nv:, nv:], NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
 
 rdata = rmodel.createData()
 
@@ -63,7 +64,7 @@ rmodel.gravity = pinocchio.Motion.Zero()
 pinocchio.computeRNEADerivatives(rmodel, rdata, q, zero(rmodel.nv), a2m(data.vnext) - v)
 d = rdata.dtau_dq.copy()
 rmodel.gravity = g
-assert (norm(d - dn) < 1e-5)
+assertNumDiff(d, dn, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-5, is now 2.11e-4 (see assertNumDiff.__doc__)
 
 # Check J.T f
 np.set_printoptions(precision=4, linewidth=200, suppress=True)
@@ -83,7 +84,7 @@ rmodel.gravity = pinocchio.Motion.Zero()
 pinocchio.computeRNEADerivatives(rmodel, rdata, q, zero(rmodel.nv), zero(rmodel.nv), data.impulse.forces)
 d = rdata.dtau_dq.copy()
 rmodel.gravity = g
-assert (norm(d + dn) < 1e-5)
+assertNumDiff(d, -dn, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-5, is now 2.11e-4 (see assertNumDiff.__doc__)
 
 # Check J.T f + M(vnext-v)
 np.set_printoptions(precision=4, linewidth=200, suppress=True)
@@ -104,7 +105,7 @@ rmodel.gravity = pinocchio.Motion.Zero()
 pinocchio.computeRNEADerivatives(rmodel, rdata, q, zero(rmodel.nv), a2m(data.vnext) - v, data.impulse.forces)
 d = rdata.dtau_dq.copy()
 rmodel.gravity = g
-assert (norm(d - dn) < 1e-5)
+assertNumDiff(d, dn, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-5, is now 2.11e-4 (see assertNumDiff.__doc__)
 
 
 # Check J vnext
@@ -115,15 +116,12 @@ def Jv(q, vnext):
     J = pinocchio.getFrameJacobian(rmodel, rdata, CONTACTFRAME, pinocchio.ReferenceFrame.LOCAL)
     return J * vnext
 
+assertNumDiff(dnum.Fx[nv:,:nv], data.Fx[nv:,:nv], NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
 
-dn = df_dq(rmodel, lambda _q: Jv(_q, a2m(data.vnext)), q)
-
-assert (absmax(dnum.Fx[nv:, :nv] - data.Fx[nv:, :nv]) < 1e-3)  # dv/dq
-
-assert (absmax(dnum.Fx - data.Fx) < 1e-3)
-assert (absmax(dnum.Rx - data.Rx) < 1e-3)
-assert (absmax(dnum.Lx - data.Lx) < 1e-3)
-assert (data.Fu.shape[1] == 0 and (data.Lu == 0 or data.Lu.shape == (0, )))
+assertNumDiff(dnum.Fx, data.Fx, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Rx, data.Rx, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Lx, data.Lx, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assert( data.Fu.shape[1]==0 and (data.Lu is 0 or data.Lu.shape == (0,)))
 
 # --- TALOS LEGS
 robot = loadTalosLegs()
@@ -157,7 +155,7 @@ rmodel.gravity = pinocchio.Motion.Zero()
 pinocchio.computeRNEADerivatives(rmodel, rdata, q, zero(rmodel.nv), a2m(data.vnext) - v)
 d = rdata.dtau_dq.copy()
 rmodel.gravity = g
-assert (norm(d - dn) < 1e-4)
+assertNumDiff(d, dn, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
 
 # Check J.T f
 np.set_printoptions(precision=4, linewidth=200, suppress=True)
@@ -168,7 +166,7 @@ rmodel.gravity = pinocchio.Motion.Zero()
 pinocchio.computeRNEADerivatives(rmodel, rdata, q, zero(rmodel.nv), zero(rmodel.nv), data.impulse.forces)
 d = -rdata.dtau_dq.copy()
 rmodel.gravity = g
-assert (norm(d - dn) < 1e-4)
+assertNumDiff(d, dn, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
 
 # Check J.T f + M(vnext-v)
 np.set_printoptions(precision=4, linewidth=200, suppress=True)
@@ -179,19 +177,22 @@ rmodel.gravity = pinocchio.Motion.Zero()
 pinocchio.computeRNEADerivatives(rmodel, rdata, q, zero(rmodel.nv), a2m(data.vnext) - v, data.impulse.forces)
 d = rdata.dtau_dq.copy()
 rmodel.gravity = g
-assert (norm(d - dn) < 1e-4)
-
+assertNumDiff(d, dn, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
 
 # Check K'r-k' = [ M' (vnext-v) + J'f - M'v ]
 #                [ J' vnext
-def Krk(q, vnext, v, f):
-    M = pinocchio.crba(rmodel, rdata, q)
-    pinocchio.computeJointJacobians(rmodel, rdata, q)
-    pinocchio.forwardKinematics(rmodel, rdata, q)
-    pinocchio.updateFramePlacements(rmodel, rdata)
-    J = pinocchio.getFrameJacobian(rmodel, rdata, CONTACTFRAME, pinocchio.ReferenceFrame.LOCAL)
+def Krk(q,vnext,v,f):
+    M = pinocchio.crba(rmodel,rdata,q)
+    pinocchio.computeJointJacobians(rmodel,rdata,q)
+    pinocchio.forwardKinematics(rmodel,rdata,q)
+    pinocchio.updateFramePlacements(rmodel,rdata)
+    J = pinocchio.getFrameJacobian(rmodel,rdata,CONTACTFRAME,pinocchio.ReferenceFrame.LOCAL)
 
-    return np.vstack([M * (vnext - v) - J.T * f, J * vnext])
+    return np.vstack([ M*(vnext-v)-J.T*f, J*vnext ])
+
+dn = df_dq(rmodel,lambda _q:Krk(_q,a2m(data.vnext),v,a2m(data.f)),q)
+d = np.vstack([data.did_dq, data.dv_dq])
+assertNumDiff(d, dn, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
 
 
 dn = df_dq(rmodel, lambda _q: Krk(_q, a2m(data.vnext), v, a2m(data.f)), q)
@@ -203,16 +204,16 @@ dnum = mnum.createData()
 
 nx, ndx, nq, nv, nu = model.nx, model.ndx, model.nq, model.nv, model.nu
 
-mnum.calcDiff(dnum, x, None)
-assert (absmax(dnum.Fx[:nv, :nv] - data.Fx[:nv, :nv]) < 1e4 * mnum.disturbance)  # dq/dq
-assert (absmax(dnum.Fx[:nv, nv:] - data.Fx[:nv, nv:]) < 1e4 * mnum.disturbance)  # dq/dv
-assert (absmax(dnum.Fx[nv:, :nv] - data.Fx[nv:, :nv]) < 1e4 * mnum.disturbance)  # dv/dq
-assert (absmax(dnum.Fx[nv:, nv:] - data.Fx[nv:, nv:]) < 1e4 * mnum.disturbance)  # dv/dv
+mnum.calcDiff(dnum,x,None)
+assertNumDiff(dnum.Fx[:nv,:nv], data.Fx[:nv,:nv], NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Fx[:nv,nv:], data.Fx[:nv,nv:], NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Fx[nv:,:nv], data.Fx[nv:,:nv], NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 3e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Fx[nv:,nv:], data.Fx[nv:,nv:], NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
 
-assert (absmax(dnum.Fx - data.Fx) < 1e4 * mnum.disturbance)
-assert (absmax(dnum.Rx - data.Rx) < 1e3 * mnum.disturbance)
-assert (absmax(dnum.Lx - data.Lx) < 1e3 * mnum.disturbance)
-assert (data.Fu.shape[1] == 0 and (data.Lu == 0 or data.Lu.shape == (0, )))
+assertNumDiff(dnum.Fx, data.Fx, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Rx, data.Rx, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Lx, data.Lx, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assert( data.Fu.shape[1]==0 and (data.Lu is 0 or data.Lu.shape == (0,)))
 
 # ----------------------------------------------------------------------
 # --- CHECK WITH SUM OF COSTS ------------------------------------------
@@ -230,16 +231,16 @@ dnum = mnum.createData()
 
 nx, ndx, nq, nv, nu = model.nx, model.ndx, model.nq, model.nv, model.nu
 
-mnum.calcDiff(dnum, x, None)
-assert (absmax(dnum.Fx[:nv, :nv] - data.Fx[:nv, :nv]) < 1e4 * mnum.disturbance)  # dq/dq
-assert (absmax(dnum.Fx[:nv, nv:] - data.Fx[:nv, nv:]) < 1e4 * mnum.disturbance)  # dq/dv
-assert (absmax(dnum.Fx[nv:, :nv] - data.Fx[nv:, :nv]) < 1e4 * mnum.disturbance)  # dv/dq
-assert (absmax(dnum.Fx[nv:, nv:] - data.Fx[nv:, nv:]) < 1e4 * mnum.disturbance)  # dv/dv
+mnum.calcDiff(dnum,x,None)
+assertNumDiff(dnum.Fx[:nv,:nv], data.Fx[:nv,:nv], NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Fx[:nv,nv:], data.Fx[:nv,nv:], NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Fx[nv:,:nv], data.Fx[nv:,:nv], NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 3e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Fx[nv:,nv:], data.Fx[nv:,nv:], NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
 
-assert (absmax(dnum.Fx - data.Fx) < 1e4 * mnum.disturbance)
-assert (absmax(dnum.Rx - data.Rx) < 1e3 * mnum.disturbance)
-assert (absmax(dnum.Lx - data.Lx) < 1e3 * mnum.disturbance)
-assert (data.Fu.shape[1] == 0 and (data.Lu == 0 or data.Lu.shape == (0, )))
+assertNumDiff(dnum.Fx, data.Fx, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Rx, data.Rx, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Lx, data.Lx, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assert( data.Fu.shape[1]==0 and (data.Lu is 0 or data.Lu.shape == (0,)))
 
 costCom = CostModelImpactCoM(rmodel)
 # model.costs.addCost( cost=costCom,weight=1,name="impactcom" )
@@ -255,13 +256,13 @@ dnum = mnum.createData()
 
 nx, ndx, nq, nv, nu = model.nx, model.ndx, model.nq, model.nv, model.nu
 
-mnum.calcDiff(dnum, x, None)
-assert (absmax(dnum.Fx[:nv, :nv] - data.Fx[:nv, :nv]) < 1e4 * mnum.disturbance)  # dq/dq
-assert (absmax(dnum.Fx[:nv, nv:] - data.Fx[:nv, nv:]) < 1e4 * mnum.disturbance)  # dq/dv
-assert (absmax(dnum.Fx[nv:, :nv] - data.Fx[nv:, :nv]) < 1e4 * mnum.disturbance)  # dv/dq
-assert (absmax(dnum.Fx[nv:, nv:] - data.Fx[nv:, nv:]) < 1e4 * mnum.disturbance)  # dv/dv
+mnum.calcDiff(dnum,x,None)
+assertNumDiff(dnum.Fx[:nv,:nv], data.Fx[:nv,:nv], NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Fx[:nv,nv:], data.Fx[:nv,nv:], NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Fx[nv:,:nv], data.Fx[nv:,:nv], NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 3e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Fx[nv:,nv:], data.Fx[nv:,nv:], NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
 
-assert (absmax(dnum.Fx - data.Fx) < 1e4 * mnum.disturbance)
-assert (absmax(dnum.Rx - data.Rx) < 1e3 * mnum.disturbance)
-assert (absmax(dnum.Lx - data.Lx) < 1e3 * mnum.disturbance)
-assert (data.Fu.shape[1] == 0 and (data.Lu == 0 or data.Lu.shape == (0, )))
+assertNumDiff(dnum.Fx, data.Fx, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Rx, data.Rx, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Lx, data.Lx, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assert( data.Fu.shape[1]==0 and (data.Lu is 0 or data.Lu.shape == (0,)))

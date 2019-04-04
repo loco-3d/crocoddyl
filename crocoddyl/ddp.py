@@ -1,3 +1,5 @@
+from crocoddyl import SolverAbstract
+from utils import raiseIfNan
 import numpy as np
 import scipy.linalg as scl
 from utils import raiseIfNan
@@ -7,7 +9,7 @@ def rev_enumerate(l):
     return reversed(list(enumerate(l)))
 
 
-class SolverDDP:
+class SolverDDP(SolverAbstract):
     """ Run the DDP solver.
 
     The solver computes an optimal trajectory and control commmands by iteratives
@@ -17,15 +19,11 @@ class SolverDDP:
     along a tuple of optimized control commands U*.
     :param shootingProblem: shooting problem (list of action models along trajectory)
     """
-
     def __init__(self, shootingProblem):
-        self.problem = shootingProblem
-        self.allocate()
+        SolverAbstract.__init__(self, shootingProblem)
 
         self.isFeasible = False  # Change it to true if you know that datas[t].xnext = xs[t+1]
         self.alphas = [2**(-n) for n in range(10)]
-        self.th_acceptStep = .1
-        self.th_stop = 1e-9
         self.th_grad = 1e-12
 
         self.x_reg = 0
@@ -34,41 +32,6 @@ class SolverDDP:
         self.regMax = 1e9
         self.regMin = 1e-9
         self.th_step = .5
-
-        self.callback = None
-
-    def models(self):
-        """ Return all action models
-        """
-        return self.problem.runningModels + [self.problem.terminalModel]
-
-    def datas(self):
-        """ Return the data for all action models.
-        """
-        return self.problem.runningDatas + [self.problem.terminalData]
-
-    def setCandidate(self, xs=None, us=None, isFeasible=False, copy=True):
-        """ Set the warm-point.
-
-        Set the solver candidate value for the decision variables, as a
-        trajectory xs,us of T+1 and T elements.
-        :params isFeasible: True for xs are obtained from integrating the us (roll-out).
-        :params copy: True for making a copy of the data
-        """
-        if xs is None:
-            xs = [m.State.zero() for m in self.models()]
-        elif copy:
-            xs = [x.copy() for x in xs]
-        if us is None:
-            us = [np.zeros(m.nu) for m in self.problem.runningModels]
-        elif copy:
-            us = [u.copy() for u in us]
-
-        assert (len(xs) == self.problem.T + 1)
-        assert (len(us) == self.problem.T)
-        self.xs = xs
-        self.us = us
-        self.isFeasible = isFeasible
 
     def calc(self):
         """ Compute the tangent (LQR) model.
@@ -174,9 +137,10 @@ class SolverDDP:
             self.x_reg = self.regMin
         self.u_reg = self.x_reg
 
-    # DDP Specific
-    def allocate(self):
-        """  Allocate matrix space of Q,V and K.
+    
+    #### DDP Specific
+    def allocateData(self):
+        """  Allocate matrix space of Q,V and K. 
         Done at init time (redo if problem change).
         """
         self.Vxx = [np.zeros([m.ndx, m.ndx]) for m in self.models()]
@@ -253,27 +217,26 @@ class SolverDDP:
                 pass
         except scl.LinAlgError:
             raise ArithmeticError('backward error')
-
-    def forwardPass(self, stepLength, b=None, warning='ignore'):
+      
+            
+    def forwardPass(self, stepLength, warning='ignore'):
         """ Run the forward-pass of the DDP algorithm.
 
         The forward-pass basically applies a new policy and then rollout the
         system. After this rollouts, it's checked if this policy provides a
         reasonable improvement. For that we use Armijo condition to evaluated the
-        choosen step length.
-        :param stepLenght: step length
+        chosen step length.
+        :param stepLength: step length
         """
-        # Argument b is introduce for debug purpose.
         # Argument warning is also introduce for debug: by default, it masks the numpy warnings
         #    that can be reactivated during debug.
-        if b is None:
-            b = 1
-        xs, us = self.xs, self.us
-        xtry = [self.problem.initialState] + [np.nan] * self.problem.T
-        utry = [np.nan] * self.problem.T
+        xs,us = self.xs,self.us
+        xtry = [ self.problem.initialState ] + [ np.nan ]*self.problem.T
+        utry = [ np.nan ]*self.problem.T
         ctry = 0
-        for t, (m, d) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas)):
-            utry[t] = us[t] - self.k[t] * stepLength - np.dot(self.K[t], m.State.diff(xs[t], xtry[t])) * b
+        for t,(m,d) in enumerate(zip(self.problem.runningModels,self.problem.runningDatas)):
+            utry[t] = us[t] - self.k[t]*stepLength  \
+                      - np.dot(self.K[t],m.State.diff(xs[t],xtry[t]))
             with np.warnings.catch_warnings():
                 np.warnings.simplefilter(warning)
                 xnext, cost = m.calc(d, xtry[t], utry[t])
