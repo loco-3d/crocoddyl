@@ -9,6 +9,7 @@ RUN apt-get update -qqy \
     python-scipy \
     robotpkg-example-robot-data \
     robotpkg-py27-pinocchio \
+    robotpkg-py27-multicontact-api \
  && rm -rf /var/lib/apt/lists/* \
  && pip install \
     quadprog \
