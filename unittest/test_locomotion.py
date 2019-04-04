@@ -1,9 +1,11 @@
+from os.path import dirname, join
+
 import numpy as np
 from crocoddyl import loadTalos
 from crocoddyl.locomotion import ContactSequenceWrapper
-from locomote import ContactSequenceHumanoid
+from multicontact_api import ContactSequenceHumanoid
 
-MUSCOD_CS_OUTPUT_FILENAME = TRAJ_DIR = "data/test_locomotion.xml"
+MUSCOD_CS_OUTPUT_FILENAME = join(dirname(__file__), "data/test_locomotion.xml")
 CONTACT_SEQUENCE_XML_TAG = "contact_sequence"
 
 robot = loadTalos()
