@@ -47,27 +47,26 @@ class SolverBoxDDP(SolverDDP):
         except scl.LinAlgError:
             raise ArithmeticError('backward error')
 
-    def forwardPass(self,stepLength,b=None,warning='ignore'):
+    def forwardPass(self,stepLength,warning='ignore'):
         """ Run the forward-pass of the DDP algorithm.
 
         The forward-pass basically applies a new policy and then rollout the
         system. After this rollouts, it's checked if this policy provides a
         reasonable improvement. For that we use Armijo condition to evaluated the
-        choosen step length.
-        :param stepLenght: step length
+        chosen step length.
+        :param stepLength: step length
         """
         # Argument b is introduce for debug purpose.
         # Argument warning is also introduce for debug: by default, it masks the numpy warnings
         #    that can be reactivated during debug.
         uu = self.uu; ul = self.ul
-        if b is None: b=1
         xs,us = self.xs,self.us
         xtry = [ self.problem.initialState ] + [ np.nan ]*self.problem.T
         utry = [ np.nan ]*self.problem.T
         ctry = 0
         for t,(m,d) in enumerate(zip(self.problem.runningModels,self.problem.runningDatas)):
             utry[t] = us[t] - self.k[t]*stepLength  \
-                      - np.dot(self.K[t],m.State.diff(xs[t],xtry[t]))*b
+                      - np.dot(self.K[t],m.State.diff(xs[t],xtry[t]))
 
             #Clamp the utry within the lower and upper limits.
             utry[t] = np.minimum(np.maximum(utry[t],ul), uu)
