@@ -1,32 +1,31 @@
 import pinocchio
 import conf_talos_warm_start as conf
 from time import sleep
-from locomote import ContactSequenceHumanoid
-from crocoddyl.locomotion import createPhiFromContactSequence, createMultiphaseShootingProblem, createSwingTrajectories
+from multicontact_api import ContactSequenceHumanoid
+from multicontact_api import ContactSequenceHumanoid, CubicHermiteSpline
+from crocoddyl.locomotion import createMultiphaseShootingProblem, ContactSequenceWrapper
+
 from crocoddyl import m2a, a2m
 from crocoddyl import ShootingProblem, SolverDDP, StatePinocchio
 from crocoddyl import ActionModelImpact
 from crocoddyl import CallbackDDPVerbose, CallbackSolverDisplay, CallbackDDPLogger, CallbackSolverTimer
 import numpy as np
-import locomote
+
 np.set_printoptions(linewidth=400, suppress=True)
 robot = conf.robot
 rmodel = robot.model
 rdata = robot.data
 rmodel.defaultState = np.concatenate([m2a(robot.q0),np.zeros(rmodel.nv)])
 
-#----------------Load Contact Phases-----------------------
+#----------------Load Contact Phases and PostProcess-----------------------
 cs = ContactSequenceHumanoid(0)
 cs.loadFromXML(conf.MUSCOD_CS_OUTPUT_FILENAME, conf.CONTACT_SEQUENCE_XML_TAG)
-
-#----------------Define References-------------------------
-
-swing_ref = createSwingTrajectories(rmodel, rdata, conf.X_init, conf.contact_patches, 0.005)
-phi_c = createPhiFromContactSequence(rmodel, rdata, cs, conf.contact_patches.keys())
+csw = ContactSequenceWrapper(cs, conf.contact_patches)
+csw.createCentroidalPhi(rmodel,rdata)
+csw.createEESplines(rmodel, rdata, conf.X_init, 0.005)
 
 #----------------Define Problem----------------------------
-models = createMultiphaseShootingProblem(rmodel, rdata, conf.contact_patches,
-                                         cs, phi_c, swing_ref, conf.DT)
+models = createMultiphaseShootingProblem(rmodel, rdata, csw, conf.DT)
 
 disp = lambda xs: disptraj(robot,xs)
 
@@ -41,6 +40,7 @@ for d in problem.runningDatas:
         d.differential.costs["forces_"+patchname].contact = contactData
 #---------Ugliness over------------------------
 
+
 #-----------Create inital trajectory---------------
 init = lambda t:0
 init.X = []
@@ -49,7 +49,7 @@ x_tsid = np.matrix(conf.X_init).T
 conf.ddq_init.append(np.zeros(rmodel.nv))
 dx_tsid = np.vstack([x_tsid[rmodel.nv:,:], np.matrix(conf.ddq_init).T])
 t_tsid = np.linspace(0.,cs.contact_phases[-1].time_trajectory[-1], len(conf.ddq_init)+1)
-x_spl = locomote.CubicHermiteSpline(a2m(t_tsid), x_tsid, dx_tsid)
+x_spl = CubicHermiteSpline(a2m(t_tsid), x_tsid, dx_tsid)
 
 state = StatePinocchio(rmodel)
 dt = conf.DT
@@ -83,17 +83,15 @@ if conf.DISPLAY:
     #sleep(0.005)
 #----------------------
 
-
-
 ddp = SolverDDP(problem)
 ddp.callback = [CallbackDDPVerbose()]#, CallbackSolverTimer()]
 if conf.RUNTIME_DISPLAY:
   ddp.callback.append(CallbackSolverDisplay(robot,4))
 ddp.th_stop = 1e-9
-ddp.solve(maxiter=20,regInit=0.1,init_xs=init.X,init_us=init.U)
+ddp.solve(maxiter=1000,regInit=0.1,init_xs=init.X,init_us=init.U)
 #---------------Display Final Trajectory--------------
 if conf.DISPLAY:
-  for x in ddp.xs:  
+  for x in init.X:  
     robot.display(a2m(x[:robot.nq]))
     #sleep(0.005)
 #----------------------
