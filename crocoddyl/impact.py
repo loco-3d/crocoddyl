@@ -2,15 +2,13 @@ from collections import OrderedDict
 
 import numpy as np
 import pinocchio
-from crocoddyl.activation import ActivationModelQuad
-# --------------------------------------------------------------------------
-# --------------------------------------------------------------------------
-# --------------------------------------------------------------------------
-from crocoddyl.cost import CostDataPinocchio, CostModelPinocchio, CostModelSum
 from numpy.linalg import inv
 from pinocchio.utils import zero
-from state import StatePinocchio
-from utils import a2m
+
+from .activation import ActivationModelQuad
+from .cost import CostDataPinocchio, CostModelPinocchio, CostModelSum
+from .state import StatePinocchio
+from .utils import a2m
 
 
 # --------------------------------------------------------------------------

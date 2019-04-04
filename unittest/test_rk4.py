@@ -1,6 +1,5 @@
 import numpy as np
-from crocoddyl import (ActionModelNumDiff, DifferentialActionModelLQR, IntegratedActionModelRK4, a2m,
-                       get_attr_analytical, m2a)
+from crocoddyl import ActionModelNumDiff, DifferentialActionModelLQR, IntegratedActionModelRK4, a2m, m2a
 from numpy.random import rand
 from testutils import assertNumDiff, df_dx
 
@@ -113,6 +112,14 @@ assertNumDiff(data.Lu, dnum.Lu,
               1e4 * mnum.disturbance)  # threshold was 2.05e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
 assertNumDiff(data.Lx, dnum.Lx,
               1e4 * mnum.disturbance)  # threshold was 2.05e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+
+
+def get_attr_analytical(x, u, attr):
+    _u = m2a(u)
+    _x = m2a(x)
+    model.calcDiff(data, _x, _u)
+    return a2m(getattr(data, attr))  # .copy()
+
 
 eps = mnum.disturbance
 Lxx0 = df_dx(lambda _x: get_attr_analytical(_x, u, "Lx"), a2m(x), h=eps)

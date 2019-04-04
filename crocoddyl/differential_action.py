@@ -1,7 +1,8 @@
 import numpy as np
 import pinocchio
-from state import StatePinocchio, StateVector
-from utils import EPS, a2m, randomOrthonormalMatrix
+
+from .state import StatePinocchio, StateVector
+from .utils import EPS, a2m, randomOrthonormalMatrix
 
 
 class DifferentialActionModelAbstract:

@@ -1,8 +1,9 @@
 import numpy as np
-from cost import CostModelState, CostModelSum
-from floating_contact import DifferentialActionModelFloatingInContact
-from state import StateVector
-from utils import EPS
+
+from .cost import CostModelState, CostModelSum
+from .floating_contact import DifferentialActionModelFloatingInContact
+from .state import StateVector
+from .utils import EPS
 
 
 class ActionModelAbstract:

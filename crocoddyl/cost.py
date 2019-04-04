@@ -3,8 +3,9 @@ from exceptions import RuntimeError
 
 import numpy as np
 import pinocchio
-from activation import ActivationModelInequality, ActivationModelQuad
-from utils import EPS, m2a
+
+from .activation import ActivationModelInequality, ActivationModelQuad
+from .utils import EPS, m2a
 
 
 class CostModelPinocchio:

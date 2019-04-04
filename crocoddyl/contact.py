@@ -3,7 +3,8 @@ from collections import OrderedDict
 import numpy as np
 import pinocchio
 from pinocchio.utils import cross, skew
-from utils import a2m, m2a
+
+from .utils import a2m, m2a
 
 
 class ContactModelPinocchio:

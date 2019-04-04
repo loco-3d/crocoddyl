@@ -1,6 +1,7 @@
 import numpy as np
-from kkt import SolverKKT
-from qpsolvers import quadprogWrapper
+
+from .kkt import SolverKKT
+from .qpsolvers import quadprogWrapper
 
 
 class SolverBoxKKT(SolverKKT):

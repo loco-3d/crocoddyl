@@ -9,7 +9,7 @@ object in argument if you want to use the display functionalities.
 import copy
 import time
 
-from diagnostic import displayTrajectory
+from .diagnostic import displayTrajectory
 
 
 class CallbackDDPLogger:

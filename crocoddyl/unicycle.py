@@ -1,7 +1,8 @@
 import numpy as np
-from action import ActionDataAbstract, ActionModelAbstract
 from numpy import arctan2, cos, sin
-from state import StateAbstract, StateVector
+
+from .action import ActionDataAbstract, ActionModelAbstract
+from .state import StateAbstract, StateVector
 
 
 class ActionModelUnicycle(ActionModelAbstract):

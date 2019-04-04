@@ -2,10 +2,11 @@ from collections import OrderedDict
 
 import numpy as np
 import pinocchio
-from centroidal_phi import CentroidalPhi, EESplines
 from crocoddyl import a2m, m2a
 from multicontact_api import CubicHermiteSpline
-from spline_utils import findDuplicates, polyfitND, removeDuplicates
+
+from .centroidal_phi import CentroidalPhi, EESplines
+from .spline_utils import findDuplicates, polyfitND, removeDuplicates
 
 
 class ContactSequenceWrapper:

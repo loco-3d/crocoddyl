@@ -1,5 +1,6 @@
 import numpy as np
-from crocoddyl import SolverAbstract
+
+from .solver import SolverAbstract
 
 
 class SolverKKT(SolverAbstract):

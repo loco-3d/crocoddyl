@@ -1,7 +1,8 @@
 import numpy as np
 import scipy.linalg as scl
-from crocoddyl import SolverAbstract
-from utils import raiseIfNan
+
+from .solver import SolverAbstract
+from .utils import raiseIfNan
 
 
 def rev_enumerate(l):

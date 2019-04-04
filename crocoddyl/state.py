@@ -1,7 +1,8 @@
 import numpy as np
 import pinocchio
 from scipy.linalg import block_diag
-from utils import a2m
+
+from .utils import a2m
 
 
 class StateAbstract:

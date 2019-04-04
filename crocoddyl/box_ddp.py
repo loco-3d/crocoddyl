@@ -1,8 +1,9 @@
 import numpy as np
 import scipy.linalg as scl
-from ddp import SolverDDP
-from qpsolvers import quadprogWrapper
-from utils import raiseIfNan
+
+from .ddp import SolverDDP
+from .qpsolvers import quadprogWrapper
+from .utils import raiseIfNan
 
 
 class SolverBoxDDP(SolverDDP):
