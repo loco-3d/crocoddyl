@@ -1,17 +1,17 @@
-from crocoddyl import SolverAbstract
 import numpy as np
+from crocoddyl import SolverAbstract
 
 
 class SolverKKT(SolverAbstract):
     def __init__(self, shootingProblem):
         SolverAbstract.__init__(self, shootingProblem)
 
-        self.alphas = [ 10**(-n) for n in range(7) ]
+        self.alphas = [10**(-n) for n in range(7)]
         self.th_grad = 1e-12
 
         self.x_reg = 0
         self.u_reg = 0
-        
+
     def calc(self):
         '''
         For a given pair of candidate state and control trajectories,
@@ -165,27 +165,27 @@ class SolverKKT(SolverAbstract):
             #     return self.xs,self.us,False
 
         # Warning: no convergence in max iterations
-        return self.xs,self.us,False
+        return self.xs, self.us, False
 
     def allocateData(self):
-        self.nx  = sum([ m.nx  for m in self.models() ])
-        self.ndx = sum([ m.ndx for m in self.models() ])
-        self.nu  = sum([ m.nu  for m in self.problem.runningModels ])
+        self.nx = sum([m.nx for m in self.models()])
+        self.ndx = sum([m.ndx for m in self.models()])
+        self.nu = sum([m.nu for m in self.problem.runningModels])
 
-        self.kkt    = np.zeros([ 2*self.ndx+self.nu, 2*self.ndx+self.nu ])
-        self.kktref = np.zeros(  2*self.ndx+self.nu )
+        self.kkt = np.zeros([2 * self.ndx + self.nu, 2 * self.ndx + self.nu])
+        self.kktref = np.zeros(2 * self.ndx + self.nu)
 
-        self.hess   = self.kkt[:self.ndx+self.nu,:self.ndx+self.nu]
-        self.jac    = self.kkt[self.ndx+self.nu:,:self.ndx+self.nu]
-        self.jacT   = self.kkt[:self.ndx+self.nu,self.ndx+self.nu:]
-        self.grad   = self.kktref[:self.ndx+self.nu]
-        self.cval   = self.kktref[self.ndx+self.nu:]
+        self.hess = self.kkt[:self.ndx + self.nu, :self.ndx + self.nu]
+        self.jac = self.kkt[self.ndx + self.nu:, :self.ndx + self.nu]
+        self.jacT = self.kkt[:self.ndx + self.nu, self.ndx + self.nu:]
+        self.grad = self.kktref[:self.ndx + self.nu]
+        self.cval = self.kktref[self.ndx + self.nu:]
 
-        self.Lxx    = self.hess[:self.ndx,:self.ndx]
-        self.Lxu    = self.hess[:self.ndx,self.ndx:]
-        self.Lux    = self.hess[self.ndx:,:self.ndx]
-        self.Luu    = self.hess[self.ndx:,self.ndx:]
-        self.Lx     = self.grad[:self.ndx]
-        self.Lu     = self.grad[self.ndx:]
-        self.Fx     = self.jac[:,:self.ndx]
-        self.Fu     = self.jac[:,self.ndx:]
+        self.Lxx = self.hess[:self.ndx, :self.ndx]
+        self.Lxu = self.hess[:self.ndx, self.ndx:]
+        self.Lux = self.hess[self.ndx:, :self.ndx]
+        self.Luu = self.hess[self.ndx:, self.ndx:]
+        self.Lx = self.grad[:self.ndx]
+        self.Lu = self.grad[self.ndx:]
+        self.Fx = self.jac[:, :self.ndx]
+        self.Fu = self.jac[:, self.ndx:]

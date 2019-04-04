@@ -1,29 +1,14 @@
-from crocoddyl import loadTalosArm
-from crocoddyl import m2a, a2m, absmax
-from crocoddyl.utils import EPS
-from testutils import assertNumDiff, NUMDIFF_MODIFIER
+import numpy as np
 import pinocchio
-# TODO Check if we need this unit-test here. Note that is an ction test
-# -------------------------------------------------------------------------------
-# -------------------------------------------------------------------------------
-# -------------------------------------------------------------------------------
-# --- COMPLETE MODEL WITH COST ----
-# -------------------------------------------------------------------------------
-# Cost force cone model
-# -------------------------------------------------------------------------------
-# Cost force model
-# ---------------------------------------------------------------------
-# Many contact model
-# ----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
 from crocoddyl import (
     ActionModelNumDiff, ActuationModelFreeFloating, CallbackDDPLogger, ContactModel3D, ContactModel6D,
     ContactModelMultiple, CostModelControl, CostModelForce, CostModelForceLinearCone, CostModelFrameTranslation,
     CostModelState, CostModelSum, DifferentialActionModelFloatingInContact, DifferentialActionModelNumDiff,
     IntegratedActionModelEuler, ShootingProblem, SolverDDP, SolverKKT, StatePinocchio, a2m, absmax, loadTalosArm, m2a)
+from crocoddyl.utils import EPS
 from numpy.linalg import eig, norm, pinv
 from pinocchio.utils import rand, zero
-from testutils import df_dq, df_dx
+from testutils import NUMDIFF_MODIFIER, assertNumDiff, df_dq, df_dx
 
 # Loading Talos arm with FF TODO use a bided or quadruped
 # -----------------------------------------------------------------------------
@@ -65,12 +50,22 @@ contactModel.calc(contactData2, x)
 assert (norm(contactData.a0 - contactData2.a0) < 1e-9)
 assert (norm(contactData.J - contactData2.J) < 1e-9)
 
-Aq_numdiff = df_dq(rmodel, lambda _q: returna_at0(_q,v), q)
-Av_numdiff = df_dx(lambda _v: returna_at0(q,_v), v)
 
-assertNumDiff(contactData.Aq, Aq_numdiff, NUMDIFF_MODIFIER*np.sqrt(2*EPS)) # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
-assertNumDiff(contactData.Av, Av_numdiff, NUMDIFF_MODIFIER*np.sqrt(2*EPS)) # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+def returna_at0(q, v):
+    x = np.vstack([q, v]).flat
+    pinocchio.computeAllTerms(rmodel, rdata2, q, v)
+    pinocchio.updateFramePlacements(rmodel, rdata2)
+    contactModel.calc(contactData2, x)
+    return a2m(contactData2.a0)  # .copy()
 
+
+Aq_numdiff = df_dq(rmodel, lambda _q: returna_at0(_q, v), q)
+Av_numdiff = df_dx(lambda _v: returna_at0(q, _v), v)
+
+assertNumDiff(contactData.Aq, Aq_numdiff,
+              NUMDIFF_MODIFIER * np.sqrt(2 * EPS))  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(contactData.Av, Av_numdiff,
+              NUMDIFF_MODIFIER * np.sqrt(2 * EPS))  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
 
 eps = 1e-8
 Aq_numdiff = df_dq(rmodel, lambda _q: returna_at0(_q, v), q, h=eps)
@@ -103,19 +98,22 @@ contactModel.calc(contactData2, x)
 assert (norm(contactData.a0 - contactData2.a0) < 1e-9)
 assert (norm(contactData.J - contactData2.J) < 1e-9)
 
-Aq_numdiff = df_dq(rmodel, lambda _q: returna0(_q,v), q)
-Av_numdiff = df_dx(lambda _v: returna0(q,_v), v)
 
-assertNumDiff(contactData.Aq, Aq_numdiff, NUMDIFF_MODIFIER*np.sqrt(2*EPS)) # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
-assertNumDiff(contactData.Av, Av_numdiff, NUMDIFF_MODIFIER*np.sqrt(2*EPS)) # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+def returna0(q, v):
+    x = np.vstack([q, v]).flat
+    pinocchio.computeAllTerms(rmodel, rdata2, q, v)
+    pinocchio.updateFramePlacements(rmodel, rdata2)
+    contactModel.calc(contactData2, x)
+    return a2m(contactData2.a0)  # .copy()
 
-#---------------------------------------------------------------------
-# Many contact model
-from crocoddyl import CostModelSum
-from crocoddyl import ContactModelMultiple
-from crocoddyl import DifferentialActionModelFloatingInContact
-from crocoddyl import DifferentialActionModelNumDiff
-from crocoddyl import ActuationModelFreeFloating
+
+Aq_numdiff = df_dq(rmodel, lambda _q: returna0(_q, v), q)
+Av_numdiff = df_dx(lambda _v: returna0(q, _v), v)
+
+assertNumDiff(contactData.Aq, Aq_numdiff,
+              NUMDIFF_MODIFIER * np.sqrt(2 * EPS))  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(contactData.Av, Av_numdiff,
+              NUMDIFF_MODIFIER * np.sqrt(2 * EPS))  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
 
 Aq_numdiff = df_dq(rmodel, lambda _q: returna0(_q, v), q, h=eps)
 Av_numdiff = df_dx(lambda _v: returna0(q, _v), v, h=eps)
@@ -156,9 +154,11 @@ model.calcDiff(data, x, u)
 
 mnum = DifferentialActionModelNumDiff(model, withGaussApprox=False)
 dnum = mnum.createData()
-mnum.calcDiff(dnum,x,u)
-assertNumDiff(data.Fx, dnum.Fx, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 2.7e-2, is now 2.11e-4 (see assertNumDiff.__doc__)
-assertNumDiff(data.Fu, dnum.Fu, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 7e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+mnum.calcDiff(dnum, x, u)
+assertNumDiff(data.Fx, dnum.Fx,
+              NUMDIFF_MODIFIER * mnum.disturbance)  # threshold was 2.7e-2, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(data.Fu, dnum.Fu,
+              NUMDIFF_MODIFIER * mnum.disturbance)  # threshold was 7e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
 
 # ------------------------------------------------
 q = pinocchio.randomConfiguration(rmodel)
@@ -189,10 +189,11 @@ model.calcDiff(data, x, u)
 
 mnum = DifferentialActionModelNumDiff(model, withGaussApprox=False)
 dnum = mnum.createData()
-mnum.calcDiff(dnum,x,u)
-assertNumDiff(data.Fx, dnum.Fx, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 2.7e-2, is now 2.11e-4 (see assertNumDiff.__doc__)
-assertNumDiff(data.Fu, dnum.Fu, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 7e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
-
+mnum.calcDiff(dnum, x, u)
+assertNumDiff(data.Fx, dnum.Fx,
+              NUMDIFF_MODIFIER * mnum.disturbance)  # threshold was 2.7e-2, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(data.Fu, dnum.Fu,
+              NUMDIFF_MODIFIER * mnum.disturbance)  # threshold was 7e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
 
 
 # ----------------------------------------------------------
@@ -201,12 +202,16 @@ def calcForces(q_, v_, u_):
     model.calc(data, np.concatenate([m2a(q_), m2a(v_)]), m2a(u_))
     return a2m(data.f)
 
-Fq = df_dq(rmodel,lambda _q: calcForces(_q,v,u), q)
-Fv = df_dx(lambda _v: calcForces(q,_v,u), v)
-Fu = df_dx(lambda _u: calcForces(q,v,_u), a2m(u))
-assertNumDiff(Fq, data.df_dq, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
-assertNumDiff(Fv, data.df_dv, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
-assertNumDiff(Fu, data.df_du, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+
+Fq = df_dq(rmodel, lambda _q: calcForces(_q, v, u), q)
+Fv = df_dx(lambda _v: calcForces(q, _v, u), v)
+Fu = df_dx(lambda _u: calcForces(q, v, _u), a2m(u))
+assertNumDiff(Fq, data.df_dq,
+              NUMDIFF_MODIFIER * mnum.disturbance)  # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(Fv, data.df_dv,
+              NUMDIFF_MODIFIER * mnum.disturbance)  # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(Fu, data.df_du,
+              NUMDIFF_MODIFIER * mnum.disturbance)  # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
 
 Fq = df_dq(rmodel, lambda _q: calcForces(_q, v, u), q)
 Fv = df_dx(lambda _v: calcForces(q, _v, u), v)
@@ -235,9 +240,11 @@ for d in dnum.datau:
     d.costs['force'].contact = d.contact[model.costs['force'].cost.contact]
 dnum.data0.costs['force'].contact = dnum.data0.contact[model.costs['force'].cost.contact]
 
-mnum.calcDiff(dnum,x,u)
-assertNumDiff(data.Fx, dnum.Fx, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 2.7e-2, is now 2.11e-4 (see assertNumDiff.__doc__)
-assertNumDiff(data.Fu, dnum.Fu, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 7e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+mnum.calcDiff(dnum, x, u)
+assertNumDiff(data.Fx, dnum.Fx,
+              NUMDIFF_MODIFIER * mnum.disturbance)  # threshold was 2.7e-2, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(data.Fu, dnum.Fu,
+              NUMDIFF_MODIFIER * mnum.disturbance)  # threshold was 7e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
 
 nfaces = 10
 nc = model.contact.ncontact
@@ -264,13 +271,16 @@ for d in dnum.datax:
 for d in dnum.datau:
     d.costs['force_cone'].contact = d.contact[model.costs['force_cone'].cost.contact]
 dnum.data0.costs['force_cone'].contact = dnum.data0.contact[model.costs['force_cone'].cost.contact]
-    
 
-mnum.calcDiff(dnum,x,u)
-assertNumDiff(data.Fx, dnum.Fx, 1e4*mnum.disturbance) # threshold was 2.7e-2, is now 2.11e-4 (see assertNumDiff.__doc__)
-assertNumDiff(data.Fu, dnum.Fu, 1e4*mnum.disturbance) # threshold was 7e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
-assertNumDiff(data.Lx, dnum.Lx, 1e6*mnum.disturbance) # threshold was 2.7e-2, is now 2.11e-2 (see assertNumDiff.__doc__)
-assertNumDiff(data.Lu, dnum.Lu, 1e6*mnum.disturbance) # threshold was 7e-3, is now 2.11e-2 (see assertNumDiff.__doc__)
+mnum.calcDiff(dnum, x, u)
+assertNumDiff(data.Fx, dnum.Fx,
+              1e4 * mnum.disturbance)  # threshold was 2.7e-2, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(data.Fu, dnum.Fu,
+              1e4 * mnum.disturbance)  # threshold was 7e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(data.Lx, dnum.Lx,
+              1e6 * mnum.disturbance)  # threshold was 2.7e-2, is now 2.11e-2 (see assertNumDiff.__doc__)
+assertNumDiff(data.Lu, dnum.Lu,
+              1e6 * mnum.disturbance)  # threshold was 7e-3, is now 2.11e-2 (see assertNumDiff.__doc__)
 
 assert (absmax(data.Lx - dnum.Lx) / model.nx < 1e-3)
 assert (absmax(data.Lu - dnum.Lu) / model.nu < 1e-3)
@@ -308,14 +318,19 @@ dnum = mnum.createData()
 # This trigger an error x[3:7] = [1,0,0,0]
 x[3:7] = [0, 0, 0, 1]  # TODO: remove this after adding assertion to include any case
 
-model.calc(data,x,u)
-model.calcDiff(data,x,u)
-mnum.calcDiff(dnum,x,u)
-assertNumDiff(data.Lx, dnum.Lx, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
-assertNumDiff(data.Lu, dnum.Lu, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
-assertNumDiff(dnum.Lxx, data.Lxx, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
-assertNumDiff(dnum.Lxu, data.Lxu, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
-assertNumDiff(dnum.Luu, data.Luu, NUMDIFF_MODIFIER*mnum.disturbance) # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+model.calc(data, x, u)
+model.calcDiff(data, x, u)
+mnum.calcDiff(dnum, x, u)
+assertNumDiff(data.Lx, dnum.Lx,
+              NUMDIFF_MODIFIER * mnum.disturbance)  # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(data.Lu, dnum.Lu,
+              NUMDIFF_MODIFIER * mnum.disturbance)  # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Lxx, data.Lxx,
+              NUMDIFF_MODIFIER * mnum.disturbance)  # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Lxu, data.Lxu,
+              NUMDIFF_MODIFIER * mnum.disturbance)  # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(dnum.Luu, data.Luu,
+              NUMDIFF_MODIFIER * mnum.disturbance)  # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
 
 # --- test quasi static guess
 x0 = x.copy()
@@ -354,10 +369,9 @@ ddp.callback = [CallbackDDPLogger()]
 ddp.th_stop = 1e-18
 xddp, uddp, doneddp = ddp.solve(maxiter=400)
 
-assert(doneddp)
-assert( norm(ddp.datas()[-1].differential.costs['pos'].residuals)<1e-3 )
-assert( norm(m2a(ddp.datas()[-1].differential.costs['pos'].pinocchio.oMf[c1.frame].translation)\
-             -c1.ref)<1e-3 )
+assert (doneddp)
+assert (norm(ddp.datas()[-1].differential.costs['pos'].residuals) < 1e-3)
+assert (norm(m2a(ddp.datas()[-1].differential.costs['pos'].pinocchio.oMf[c1.frame].translation) - c1.ref) < 1e-3)
 
 u0 = np.zeros(model.nu)
 x1 = model.calc(data, problem.initialState, u0)[0]

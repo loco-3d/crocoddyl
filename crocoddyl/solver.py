@@ -11,6 +11,7 @@ class SolverAbstract:
     function is used to define when the search direction and length are computed in each iterate. It also describes
     the globalization strategy (i.e. regularization) of the numerical optimization.
     """
+
     def __init__(self, problem):
         # Setting up the problem and allocating the required solver data
         self.problem = problem
@@ -100,8 +101,8 @@ class SolverAbstract:
         elif copy:
             us = [u.copy() for u in us]
 
-        assert(len(xs) == self.problem.T + 1)
-        assert(len(us) == self.problem.T)
+        assert (len(xs) == self.problem.T + 1)
+        assert (len(us) == self.problem.T)
         self.xs = xs
         self.us = us
         self.isFeasible = isFeasible

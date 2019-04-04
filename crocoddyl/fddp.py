@@ -1,7 +1,6 @@
-from crocoddyl import SolverAbstract
-from utils import raiseIfNan
 import numpy as np
 import scipy.linalg as scl
+from crocoddyl import SolverAbstract
 from utils import raiseIfNan
 
 
@@ -24,6 +23,7 @@ class SolverFDDP(SolverAbstract):
     searching for a good optimization.
     :param shootingProblem: shooting problem (list of action models along trajectory)
     """
+
     def __init__(self, shootingProblem):
         SolverAbstract.__init__(self, shootingProblem)
 
@@ -158,10 +158,9 @@ class SolverFDDP(SolverAbstract):
             self.x_reg = self.regMin
         self.u_reg = self.x_reg
 
-    
-    #### DDP Specific
+    # DDP Specific
     def allocateData(self):
-        """  Allocate matrix space of Q,V and K. 
+        """  Allocate matrix space of Q,V and K.
         Done at init time (redo if problem change).
         """
         self.Vxx = [np.zeros([m.ndx, m.ndx]) for m in self.models()]

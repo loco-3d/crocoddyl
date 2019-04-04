@@ -3,8 +3,8 @@ import pinocchio
 from crocoddyl.utils import EPS
 from pinocchio.utils import zero
 
-
 NUMDIFF_MODIFIER = 1e4
+
 
 class NumDiffException(Exception):
     """Raised when the NumDiff values are too hight"""
@@ -19,19 +19,18 @@ def assertNumDiff(A, B, threshold):
     :param threshold: absolute tolerance
     """
     if not np.allclose(A, B, atol=threshold):
-        value = np.linalg.norm(A-B)
-        raise NumDiffException(
-            "NumDiff exception, with residual of %.4g, above threshold %.4g"%(value, threshold))
+        value = np.linalg.norm(A - B)
+        raise NumDiffException("NumDiff exception, with residual of %.4g, above threshold %.4g" % (value, threshold))
 
 
-def df_dx(func,x,h=np.sqrt(2*EPS)):
-  """ Perform df/dx by num_diff.
-  :params func: function to differentiate f : np.matrix -> np.matrix
-  :params x: value at which f is differentiated. type np.matrix
-  :params h: eps
+def df_dx(func, x, h=np.sqrt(2 * EPS)):
+    """ Perform df/dx by num_diff.
+    :params func: function to differentiate f : np.matrix -> np.matrix
+    :params x: value at which f is differentiated. type np.matrix
+    :params h: eps
 
-  :returns df/dx
-  """
+    :returns df/dx
+    """
     dx = zero(x.size)
     f0 = func(x)
     res = zero([len(f0), x.size])

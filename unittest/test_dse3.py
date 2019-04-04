@@ -1,9 +1,9 @@
 import numpy as np
-from numpy.linalg import norm
-from testutils import df_dq
-from crocoddyl.utils import EPS
+import pinocchio
 from crocoddyl import loadTalosArm
-from testutils import assertNumDiff, NUMDIFF_MODIFIER
+from crocoddyl.utils import EPS
+from testutils import NUMDIFF_MODIFIER, assertNumDiff, df_dq
+
 robot = loadTalosArm()
 rmodel = robot.model
 rdata = rmodel.createData()
@@ -40,5 +40,5 @@ d3 = df_dq(rmodel, residualrMi, q0)
 pinocchio.forwardKinematics(rmodel, rdata, q0)
 oMi = rdata.oMi[jid]
 
-h = np.sqrt(2*EPS)
-assertNumDiff(d1, d3, NUMDIFF_MODIFIER*h) # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+h = np.sqrt(2 * EPS)
+assertNumDiff(d1, d3, NUMDIFF_MODIFIER * h)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)

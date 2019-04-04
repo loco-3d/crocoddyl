@@ -1,13 +1,9 @@
 import unittest
-from crocoddyl import StateNumDiff
-from crocoddyl import StateVector
-from crocoddyl import StateUnicycle
-from crocoddyl import StatePinocchio
-from testutils import assertNumDiff, NUMDIFF_MODIFIER
 from random import randint
 
 import numpy as np
 from crocoddyl import StateNumDiff, StatePinocchio, StateUnicycle, StateVector
+from testutils import NUMDIFF_MODIFIER, assertNumDiff
 
 
 class StateTestCase(unittest.TestCase):
@@ -127,7 +123,7 @@ class StateTestCase(unittest.TestCase):
 
 class StateVectorTest(StateTestCase):
     # NUMDIFF_MODIFIER: threshold was 2.11e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
-    StateTestCase.NX = randint(1,101)
+    StateTestCase.NX = randint(1, 101)
     StateTestCase.STATE = StateVector(StateTestCase.NX)
 
 
@@ -146,6 +142,7 @@ class StatePinocchioTest(StateTestCase):
     StateTestCase.NX = rmodel.nq + rmodel.nv
     StateTestCase.STATE = StatePinocchio(rmodel)
 
+
 class StatePinocchioFFTest(StateTestCase):
     # NUMDIFF_MODIFIER: threshold was 2.11e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
     # Loading Talos legs
@@ -153,6 +150,7 @@ class StatePinocchioFFTest(StateTestCase):
     rmodel = loadTalosLegs().model
     StateTestCase.NX = rmodel.nq + rmodel.nv
     StateTestCase.STATE = StatePinocchio(rmodel)
+
 
 if __name__ == '__main__':
     unittest.main()

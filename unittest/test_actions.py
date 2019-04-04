@@ -1,11 +1,8 @@
 import unittest
-from crocoddyl import ActionModelNumDiff
-from crocoddyl import ActionModelUnicycle, ActionModelUnicycleVar
-from testutils import assertNumDiff, NUMDIFF_MODIFIER
-import numpy as np
 
 import numpy as np
 from crocoddyl import ActionModelNumDiff, ActionModelUnicycle, ActionModelUnicycleVar
+from testutils import NUMDIFF_MODIFIER, assertNumDiff
 
 
 class ActionModelTestCase(unittest.TestCase):
@@ -51,7 +48,7 @@ class ActionModelTestCase(unittest.TestCase):
         self.MODEL_NUMDIFF.calcDiff(self.DATA_NUMDIFF, x, u)
 
         # Checking the partial derivatives against NumDiff
-        tol = self.NUMDIFF_MOD*self.MODEL_NUMDIFF.disturbance
+        tol = self.NUMDIFF_MOD * self.MODEL_NUMDIFF.disturbance
         assertNumDiff(self.DATA.Fx, self.DATA_NUMDIFF.Fx, tol)
         assertNumDiff(self.DATA.Fu, self.DATA_NUMDIFF.Fu, tol)
         assertNumDiff(self.DATA.Lx, self.DATA_NUMDIFF.Lx, tol)

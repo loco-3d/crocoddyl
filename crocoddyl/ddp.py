@@ -1,7 +1,6 @@
-from crocoddyl import SolverAbstract
-from utils import raiseIfNan
 import numpy as np
 import scipy.linalg as scl
+from crocoddyl import SolverAbstract
 from utils import raiseIfNan
 
 
@@ -19,6 +18,7 @@ class SolverDDP(SolverAbstract):
     along a tuple of optimized control commands U*.
     :param shootingProblem: shooting problem (list of action models along trajectory)
     """
+
     def __init__(self, shootingProblem):
         SolverAbstract.__init__(self, shootingProblem)
 
@@ -137,10 +137,9 @@ class SolverDDP(SolverAbstract):
             self.x_reg = self.regMin
         self.u_reg = self.x_reg
 
-    
-    #### DDP Specific
+    # DDP Specific
     def allocateData(self):
-        """  Allocate matrix space of Q,V and K. 
+        """  Allocate matrix space of Q,V and K.
         Done at init time (redo if problem change).
         """
         self.Vxx = [np.zeros([m.ndx, m.ndx]) for m in self.models()]
@@ -217,8 +216,7 @@ class SolverDDP(SolverAbstract):
                 pass
         except scl.LinAlgError:
             raise ArithmeticError('backward error')
-      
-            
+
     def forwardPass(self, stepLength, warning='ignore'):
         """ Run the forward-pass of the DDP algorithm.
 
@@ -230,13 +228,12 @@ class SolverDDP(SolverAbstract):
         """
         # Argument warning is also introduce for debug: by default, it masks the numpy warnings
         #    that can be reactivated during debug.
-        xs,us = self.xs,self.us
-        xtry = [ self.problem.initialState ] + [ np.nan ]*self.problem.T
-        utry = [ np.nan ]*self.problem.T
+        xs, us = self.xs, self.us
+        xtry = [self.problem.initialState] + [np.nan] * self.problem.T
+        utry = [np.nan] * self.problem.T
         ctry = 0
-        for t,(m,d) in enumerate(zip(self.problem.runningModels,self.problem.runningDatas)):
-            utry[t] = us[t] - self.k[t]*stepLength  \
-                      - np.dot(self.K[t],m.State.diff(xs[t],xtry[t]))
+        for t, (m, d) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas)):
+            utry[t] = us[t] - self.k[t] * stepLength - np.dot(self.K[t], m.State.diff(xs[t], xtry[t]))
             with np.warnings.catch_warnings():
                 np.warnings.simplefilter(warning)
                 xnext, cost = m.calc(d, xtry[t], utry[t])

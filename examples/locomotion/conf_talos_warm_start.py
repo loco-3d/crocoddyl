@@ -1,4 +1,3 @@
-import os
 import pickle
 
 from crocoddyl import loadTalos
@@ -12,17 +11,17 @@ DISPLAY = True
 RUNTIME_DISPLAY = False
 DT = 0.01
 
-#-------------------------INITIAL TRAJECTORY--------------
+# -------------------------INITIAL TRAJECTORY--------------
 TRAJ_DIR = "traj_1step/"
 
-X_init = pickle.load( open(TRAJ_DIR+"X_init.out","rb")) #loads the state x
-U_init = pickle.load( open(TRAJ_DIR+"U_init.out","rb")) # loads the control u
+X_init = pickle.load(open(TRAJ_DIR + "X_init.out", "rb"))  # loads the state x
+U_init = pickle.load(open(TRAJ_DIR + "U_init.out", "rb"))  # loads the control u
 
-#loads the forces ("lambda") in the local frame in order [LF, RF, LH, RH]
-#where lf: 'leg_left_6_joint', 'rf' : 'leg_right_6_joint'
-#Note: Hands are optional. Hands are not loaded for biped walking
-f_init = pickle.load( open(TRAJ_DIR+"f_init.out","rb")) 
-ddq_init = pickle.load( open(TRAJ_DIR+"ddq_init.out","rb")) #loads the acceleration
+# loads the forces ("lambda") in the local frame in order [LF, RF, LH, RH]
+# where lf: 'leg_left_6_joint', 'rf' : 'leg_right_6_joint'
+# Note: Hands are optional. Hands are not loaded for biped walking
+f_init = pickle.load(open(TRAJ_DIR + "f_init.out", "rb"))
+ddq_init = pickle.load(open(TRAJ_DIR + "ddq_init.out", "rb"))  # loads the acceleration
 
 # -----------------------Contact Sequence-----------------
 
