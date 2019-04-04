@@ -92,11 +92,9 @@ class SolverBoxDDP(SolverDDP):
             ctry += cost
             raiseIfNan([ctry, cost], ArithmeticError('forward error'))
             raiseIfNan(xtry[t + 1], ArithmeticError('forward error'))
-        with np.warnings.catch_warnings() as npwarn:
+        with np.warnings.catch_warnings():
             np.warnings.simplefilter(warning)
             ctry += self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])[1]
-            for warning in npwarn:
-                pass
         raiseIfNan(ctry, ArithmeticError('forward error'))
         self.xs_try = xtry
         self.us_try = utry
