@@ -1,60 +1,17 @@
+from crocoddyl import SolverAbstract
 import numpy as np
 
 
-class SolverKKT:
-    def __init__(self,shootingProblem):
-        self.problem = shootingProblem
-    
-        self.nx  = sum([ m.nx  for m in self.models() ])
-        self.ndx = sum([ m.ndx for m in self.models() ])
-        self.nu  = sum([ m.nu  for m in self.problem.runningModels ])
-        
-        self.kkt    = np.zeros([ 2*self.ndx+self.nu, 2*self.ndx+self.nu ])
-        self.kktref = np.zeros(  2*self.ndx+self.nu )
-
-        self.hess   = self.kkt[:self.ndx+self.nu,:self.ndx+self.nu]
-        self.jac    = self.kkt[self.ndx+self.nu:,:self.ndx+self.nu]
-        self.jacT   = self.kkt[:self.ndx+self.nu,self.ndx+self.nu:]
-        self.grad   = self.kktref[:self.ndx+self.nu]
-        self.cval   = self.kktref[self.ndx+self.nu:]
-
-        self.Lxx    = self.hess[:self.ndx,:self.ndx]
-        self.Lxu    = self.hess[:self.ndx,self.ndx:]
-        self.Lux    = self.hess[self.ndx:,:self.ndx]
-        self.Luu    = self.hess[self.ndx:,self.ndx:]
-        self.Lx     = self.grad[:self.ndx]
-        self.Lu     = self.grad[self.ndx:]
-        self.Fx     = self.jac[:,:self.ndx]
-        self.Fu     = self.jac[:,self.ndx:]
+class SolverKKT(SolverAbstract):
+    def __init__(self, shootingProblem):
+        SolverAbstract.__init__(self, shootingProblem)
 
         self.alphas = [ 10**(-n) for n in range(7) ]
-        self.th_acceptStep = .1
-        self.th_stop = 1e-9
         self.th_grad = 1e-12
 
         self.x_reg = 0
         self.u_reg = 0
         
-    def models(self) : return self.problem.runningModels + [self.problem.terminalModel]
-    def datas(self) : return self.problem.runningDatas + [self.problem.terminalData]
-    def setCandidate(self,xs=None,us=None,isFeasible=False,copy=True):
-        '''
-        Set the solver candidate value for the decision variables, as a trajectory xs,us
-        of T+1 and T elements. isFeasible should be set to True if the xs are 
-        obtained from integrating the us (roll-out).
-        If copy is True, make a copy of the data.
-        '''
-        if xs is None: xs = [ m.State.zero() for m in self.models() ]
-        elif copy:     xs = [ x.copy() for x in xs ]
-        if us is None: us = [ np.zeros(m.nu) for m in self.problem.runningModels ]
-        elif copy:     us = [ u.copy() for u in us ]
-
-        assert( len(xs) == self.problem.T+1 )
-        assert( len(us) == self.problem.T )
-        self.xs = xs
-        self.us = us
-        self.isFeasible = isFeasible
-
     def calc(self):
         '''
         For a given pair of candidate state and control trajectories,
@@ -202,3 +159,26 @@ class SolverKKT:
 
         # Warning: no convergence in max iterations
         return self.xs,self.us,False
+
+    def allocateData(self):
+        self.nx  = sum([ m.nx  for m in self.models() ])
+        self.ndx = sum([ m.ndx for m in self.models() ])
+        self.nu  = sum([ m.nu  for m in self.problem.runningModels ])
+
+        self.kkt    = np.zeros([ 2*self.ndx+self.nu, 2*self.ndx+self.nu ])
+        self.kktref = np.zeros(  2*self.ndx+self.nu )
+
+        self.hess   = self.kkt[:self.ndx+self.nu,:self.ndx+self.nu]
+        self.jac    = self.kkt[self.ndx+self.nu:,:self.ndx+self.nu]
+        self.jacT   = self.kkt[:self.ndx+self.nu,self.ndx+self.nu:]
+        self.grad   = self.kktref[:self.ndx+self.nu]
+        self.cval   = self.kktref[self.ndx+self.nu:]
+
+        self.Lxx    = self.hess[:self.ndx,:self.ndx]
+        self.Lxu    = self.hess[:self.ndx,self.ndx:]
+        self.Lux    = self.hess[self.ndx:,:self.ndx]
+        self.Luu    = self.hess[self.ndx:,self.ndx:]
+        self.Lx     = self.grad[:self.ndx]
+        self.Lu     = self.grad[self.ndx:]
+        self.Fx     = self.jac[:,:self.ndx]
+        self.Fu     = self.jac[:,self.ndx:]

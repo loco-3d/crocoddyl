@@ -41,6 +41,7 @@ from unicycle import ActionModelUnicycle
 from unicycle import StateUnicycle, ActionModelUnicycleVar
 from shooting import ShootingProblem
 from callbacks import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay, CallbackSolverTimer
+from solver import SolverAbstract
 from ddp import SolverDDP
 from box_ddp import SolverBoxDDP
 from box_kkt import SolverBoxKKT
