@@ -340,6 +340,108 @@ Indeed, it is exactly the same if the classical line search is implemented.
 We did not demonstrate that the feasibility-prone DDP or the multiple shooting is better: the performance where equivalent on all the problems we have considered.
 We discussed that the DDP might be easier to implement and make efficient, and we advice to choose it.
 
+\section{Expectation model of the FDDP}
+
+At each Newton step of a NLP solver, a line-search is performed.
+One of the simple conditions of acceptance of the step is that the actual improvement of the cost should be similar to the expected improvement provided by the quadratic model.
+For example, if considering a function $f$ and its model $m$ with $f(x+\Delta x) = f(x) + m(\delta x) + o(\Delta x)$, then a step $\delta x$ would be accepted if $f(x+\Delta x)-f(x)$ and $m(x)$ are close enough (in practice, the ratio between the two quantities is close to 1).
+
+When considering the DDP solver, computing the expected improvement is more difficult, as the $\xtraj,\utraj$ of the LQR are never explicitly computed: the backward pass only provides $k$, from which the actual $\xtraj,\utraj$ are obtained using a nonlinear rollout.
+This section provides efficient evaluation of the expectation model.
+
+\subsection{Expectation model in $\xtraj,\utraj$}
+Let's first write the expectation model in term of the increments $\xtraj,\utraj$ (let's recall that, to keep the notations concise, we use $x$ and $u$ for the LQR variables, while they should be intepreted as ``deltas'' in the nonlinear optimization algorithm).
+If making a step of length $\alpha$ (typically in $]0,1]$) in the direction $\xtraj,\utraj$, then the improvement of the cost should have the following form:
+$$\Delta = \Delta_1 \alpha + \frac{1}{2} \Delta_2 \alpha^2$$
+$\Delta_1$ is the sum at each shooting node of the cost gradient times the change in $x$ and $u$:
+\begin{equation}
+  \label{eq:d1}
+  \Delta_1 = \sum_{t=0}^T L_{xt}^T x_t + L_{ut}^T u_t
+\end{equation}
+(to keep the sum simpler, we treat $T$ similarly to the other nodes, by introducing $L_{uT} = 0$).
+
+\subsubsection{Linear rollout}
+The states and controls are obtained from a linear roll-out as:
+$$ x_{t+1} = F_{xt} x_t + F_{ut} u_t + f_{t+1}$$
+$$ u_{t} = K_t x_t + k_t$$
+Propagating these two equations, we get:
+$$ x_{t+1} = (F_{xt} + F_{ut} K_t) x_t + F_{ut} k_t + f_{t+1} =  F_{t-1} x_{t-1} + c_{t+1}$$
+with $F_{t} = F_{xt} + F_{ut} K_t$ and $c_{t+1} = F_{ut} k_{t} + f_{t+1}$ (with $c_0 = f_0$).
+And finally:
+\begin{align}
+  x_t &= F_{t-1} ... F_0 c_0 + F_{t-1} ... F_1 c_1 + ... + F_{t-1} c_{t-1} + c_t \\
+  &= \sum_{i=0}^t F_{t-1} ... F_i c_i \label{eq:lroll}
+\end{align}
+
+\subsubsection{First-order model $\Delta_1$}
+Replacing $u_t$ by $k_t + K_t x_t$, the first-order term is:
+\begin{equation}
+  \label{eq:d1}
+  \Delta_1 = \sum_{t=0}^T (L_{xt} + K_t^T L_{ut}) ^T x_t + \sum_{t=0}^T L_{ut}^T k_t
+\end{equation}
+where we denote $l_t = L_{xt} + K_t^T L_{ut}$ to simplify the notation.
+Putting \eqref{eq:lroll} in \eqref{eq:d1}, we get:
+\begin{align}
+  \Delta_1 &= \sum_{t=0}^{T} l_t \sum_{i=0}^{t} F_{t-1} ... F_i c_i + L_{ut}^T k_t \\
+  & =  \sum_{i=0}^{T} c_i^T  \sum_{t=i}^{T} F_t^T ... F_T^T l_t + k_i^T L_{ui}
+\end{align}
+Each term of the sum is composed of a product of $f_i$ and a product of $k_i$, and can then be evaluated from the result of the backward pass.
+Let's exhibit these 2 terms.
+The term in $f_i$ is:
+$$\Delta_{ft} = F_i^T ... F_T^T l_i = L_{xi} + F_{xi}^T \Delta_{fi+1} + K_i^T (L_{ui} + F_{ui} \Delta_{fi+1})$$
+The term in $k_i$ is:
+$$\Delta_{ft} = l_{ui} + F_{ui}^T ... F_T^T l_i = L_{ui} + F_{ui}^T \Delta_{fi+1}$$
+In the case $f_i$ are all zeros, we can recognize that $\Delta_f$ is the value gradient and $\Delta_k$ is the Hamiltonian control gradient:
+$\Delta_f = V_x$ and $\Delta_k = Q_u$.
+In that case, we simply have:
+$$\Delta_1 = \sum_{t=0}^{T} Q_{ut}^T k_t$$
+
+In the general case where the LQR is not drift-free, then $\Delta_f$ and $\Delta_k$ must be collected during the backward pass while propagating $V_x$ and $Q_u$.
+The cost is similar, and an order of magnitude less than propagating the Value Hessians.
+
+\subsubsection{Second-order term $\Delta_2$}
+
+This section is empty, work remains to be done here.
+
+\subsubsection{The simple case where $T=1$}
+It is disapointing that the expectation model is so simple in the drift-free case and only depends on backward-computed quantities, while it is so complex and requires to compute additional quantities in the general case.
+Let's investigate that.
+The intuition is that the expectation model should only depends on the gradient and hessians of the Value and Hamiltonian functions.
+
+In the case where we only consider one control $u_0$, the expectation model is:
+\begin{align*}
+  \Delta_1 &= L_{x0}^T x_0 + L_{u0}^T u_0 + L_{x1}^T x1 \\
+  &= L_{0}^T f_0 + L_{u0} k_0 + L_{x1} F_{0} f_0  + L_{x1} F_{u0} k_0  + L_{x1} f_1 \\
+  &= (L_0 + F_0^T L_{x1})^T f_0 + (L_{u0} + F_{u0}^T L_{x1})^T k_0 + L_{x1} f_1
+\end{align*}
+We nearly recognize the gradients $V_{x0}, Q_{u0}, V_{x1}$ respectively in factor of $f_0,k_0,f_1$, but some terms are missing:
+$$V_{x0} = L_0 + F_0^T (L_{x1} + L_{xx1} f_1) + L_{xx0} f_0$$
+$$Q_{u0} = L_{u0} + F_{u0}^T (L_{x1} + L_{xx1} f_1)$$
+$$V_{x1} = L_{x1} + L_{xx1} f_1$$
+Basically, the missing terms correspond to the re-linearization of the gradient at the $f_t$ points at the end of the intervals.
+Then, we get:
+$$\Delta_1 = V_{x0}^T f_0 + Q_{u0}^T k_0 + V_{x1}^T f_1 - \left( f_0^T V_{x0} f_0  + f_0^T F_0^T L_{xx1} f_1 + k_0^T F_{u0} L_{xx1} f_1 + f_1^T V_{xx1} f_1\right)$$
+
+The second-order term is:
+$$\Delta_2 = f_0^T V_{xx0} f_0 + k_0^T Q_{uu0} k_0 + f_1^T V_{xx1} f_1 + 2*(f_0^T F_0^T L_{xx1} f_1 + k_0^T F_{u0} L_{xx1} f_1)$$
+We can recognize in the additional terms (the 2 last ones) the same terms as in $\Delta_1$.
+Nicely, they will cancel out in the case we make a full step $\alpha=1$:
+$$\Delta(\alpha) = \alpha( \Delta_1+\frac{\alpha}{2} \Delta_2)$$
+$$\Delta(1)= V_{x0}^T f_0 + Q_{u0}^T k_0 + V_{x1}^T f_1 
+- \frac{1}{2} f_0^T V_{xx0} f_0 + \frac{1}{2} k_0^T Q_{uu0}^T k_0 - \frac{1}{2} f_1^T V_{xx1} f_1 $$
+
+But they do not cancel out in the general case:
+\begin{align*}
+  \Delta(\alpha) = \alpha \Big( V_{x0}^T f_0 + Q_{u0}^T k_0 + V_{x1}^T f_1 
++ (\frac{\alpha}{2}-1)( \frac{1}{2} f_0^T V_{xx0} f_0 + f_1^T V_{xx1} f_1 )\\
++ \frac{\alpha}{2} k_0^T Q_{uu0}^T k_0
++ (\alpha-1) ( f_0^T F_0^T L_{xx1} f_1 + k_0^T F_{u0}^T L_{xx1} f_1 ) \Big)
+\end{align*}
+
+We can finally recognize that:
+$$( f_0^T F_0^T L_{xx1} f_1 + k_0^T F_{u0}^T L_{xx1} f_1 ) = f_1^T (x_1-f_1)$$
+
+
 \bibliographystyle{plainnat}
 {
 \small
