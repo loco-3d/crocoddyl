@@ -1,19 +1,21 @@
 SET(${PROJECT_NAME}_PYTHON_TESTS
-  robots
-  state
-  activation
-  costs
-  dse3
-  actuation
-  contacts
   actions
+  activation
+  actuation
+  armature
+  boxsolvers
+  contacts
+  costs
+  ddp_contact
+  dse3
   dynamic_derivatives
   impact
-  rk4
-  solvers
-  ddp_contact
-  armature
+  locomotion
   quadruped
+  rk4
+  robots
+  solvers
+  state
   )
 
 FOREACH(TEST ${${PROJECT_NAME}_PYTHON_TESTS})
