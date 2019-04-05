@@ -4,7 +4,7 @@ from crocoddyl import (ActionModelNumDiff, ActivationModelInequality, Activation
                        CostModelControl, CostModelFramePlacement, CostModelFrameTranslation, CostModelFrameVelocity,
                        CostModelFrameVelocityLinear, CostModelNumDiff, CostModelState, CostModelSum,
                        DifferentialActionModelFullyActuated, DifferentialActionModelNumDiff,
-                       IntegratedActionModelEuler, ShootingProblem, SolverDDP, SolverKKT, StatePinocchio, a2m, absmax,
+                       IntegratedActionModelEuler, ShootingProblem, SolverDDP, SolverKKT, StatePinocchio, a2m,
                        loadTalosArm, m2a)
 from numpy.linalg import norm
 from pinocchio.utils import rand, zero

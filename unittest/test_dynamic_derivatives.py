@@ -1,3 +1,5 @@
+from functools import partial
+
 import numpy as np
 import pinocchio
 from crocoddyl import loadTalosArm
@@ -246,13 +248,9 @@ def calcwxv(q, vq, aq):
     return cross(data.v[-1].angular, data.v[-1].linear)
 
 
-def f(_q):
-    return calcaa(_q, vq, aq)
-
-
-daa_dqn = df_dq(model, lambda _q: calcaa(_q, vq, aq), q)
-da_dqn = df_dq(model, lambda _q: calca(_q, vq, aq), q)
-dwxv_dqn = df_dq(model, lambda _q: calcwxv(_q, vq, aq), q)
+daa_dqn = df_dq(model, partial(calcaa, vq=vq, aq=aq), q)
+da_dqn = df_dq(model, partial(calca, vq=vq, aq=aq), q)
+dwxv_dqn = df_dq(model, partial(calcwxv, vq=vq, aq=aq), q)
 
 pinocchio.computeJointJacobians(model, data, q)
 J = pinocchio.getJointJacobian(model, data, model.joints[-1].id, pinocchio.ReferenceFrame.LOCAL)
@@ -276,8 +274,8 @@ def calcw(q, vq, aq):
     return data.v[-1].angular
 
 
-dv_dqn = df_dq(model, lambda _q: calcv(_q, vq, aq), q)
-dw_dqn = df_dq(model, lambda _q: calcw(_q, vq, aq), q)
+dv_dqn = df_dq(model, partial(calcv, vq=vq, aq=aq), q)
+dw_dqn = df_dq(model, partial(calcw, vq=vq, aq=aq), q)
 assertNumDiff(dv_dq[:3, :], dv_dqn,
               NUMDIFF_MODIFIER * h)  # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
 assertNumDiff(dv_dq[3:, :], dw_dqn,
