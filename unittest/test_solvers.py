@@ -1,7 +1,7 @@
 import unittest
 from crocoddyl import ActionModelLQR
 from crocoddyl import ShootingProblem
-from crocoddyl import SolverKKT
+from crocoddyl import SolverKKT, SolverDDP, SolverFDDP
 from crocoddyl import ActionModelUnicycle, ActionModelUnicycleVar
 import numpy as np
 from numpy.linalg import norm, inv, pinv, eig
@@ -211,8 +211,6 @@ if WITH_PLOT:
 # ---------------------------------------------------
 # ---------------------------------------------------
 # ---------------------------------------------------
-from crocoddyl import SolverDDP
-
 model = ActionModelLQR(1, 1, driftFree=False)
 data  = model.createData()
 #model = ActionModelUnicycle()
@@ -708,6 +706,31 @@ for t in range(T):
 # --- REG INTEGRATIVE TEST ---
 
 
+# -------------------------------------------------------------------
+# --- test invalid direction computed in backward pass --------------
+# -------------------------------------------------------------------
+model = ActionModelLQR(3, 3, driftFree=False)
+nx = model.nx
+nu = model.nu
+T = 5
+
+runningModels = [model]*T
+problem = ShootingProblem(model.State.zero()+1, runningModels, model)
+
+# Make artificially Quu=0 at T-1
+Vxx_T = problem.terminalModel.Lxx
+Fu_T_1 = problem.runningModels[T-1].Fu
+problem.runningModels[T-2].Luu = -np.dot(np.dot(Fu_T_1.T, Vxx_T), Fu_T_1)
+
+ddp = SolverDDP(problem)
+fddp = SolverFDDP(problem)
+
+# Do not allowed to regularize the problem and solve it, so we can trigger an invalid direction computations
+ddp.regMax = 1e-5
+fddp.regMax = 1e-5
+
+assert(not ddp.solve()[2])
+assert(not fddp.solve()[2])
 
 if __name__ == '__main__':
     unittest.main()
