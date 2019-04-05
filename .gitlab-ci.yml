@@ -1,5 +1,17 @@
-image: gepgitlab.laas.fr:4567/loco-3d/crocoddyl
+variables:
+  GIT_SUBMODULE_STRATEGY: "recursive"
+  CTEST_PARALLEL_LEVEL: 4
 
 test:
+  image: eur0c.laas.fr:5000/loco-3d/crocoddyl
   script:
-    - cd unittest && python all.py
+    - cmake .
+    - make
+    - make test || ctest -VV
+
+format:
+  image: gepetto/linters
+  script:
+    - flake8 .
+    - yapf -dr .
+    - check-clang-format.sh

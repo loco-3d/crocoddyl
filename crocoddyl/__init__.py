@@ -1,52 +1,36 @@
-from state import StateAbstract
-from state import StateVector, StateNumDiff
-from state import StatePinocchio
-from cost import CostDataPinocchio, CostModelPinocchio
-from cost import CostDataSum, CostModelSum
-from cost import CostDataNumDiff, CostModelNumDiff
-from cost import CostDataFrameTranslation, CostModelFrameTranslation
-from cost import CostDataFrameVelocity, CostModelFrameVelocity
-from cost import CostDataFrameVelocityLinear, CostModelFrameVelocityLinear
-from cost import CostDataFramePlacement, CostModelFramePlacement
-from cost import CostDataCoM, CostModelCoM
-from cost import CostDataState, CostModelState
-from cost import CostDataControl, CostModelControl
-from cost import CostDataForce, CostModelForce
-from cost import CostDataForce, CostModelForceLinearCone
-from activation import ActivationDataQuad, ActivationModelQuad
-from activation import ActivationDataInequality, ActivationModelInequality
-from activation import ActivationDataWeightedQuad, ActivationModelWeightedQuad
-from activation import ActivationDataSmoothAbs, ActivationModelSmoothAbs
-from action import ActionDataAbstract, ActionModelAbstract
-from action import ActionDataLQR, ActionModelLQR
-from action import ActionDataNumDiff, ActionModelNumDiff
-from integrated_action import IntegratedActionDataEuler, IntegratedActionModelEuler
-from integrated_action import IntegratedActionDataRK4, IntegratedActionModelRK4
-from differential_action import DifferentialActionDataAbstract, DifferentialActionModelAbstract
-from differential_action import DifferentialActionDataFullyActuated, DifferentialActionModelFullyActuated
-from differential_action import DifferentialActionDataLQR, DifferentialActionModelLQR
-from differential_action import DifferentialActionDataNumDiff, DifferentialActionModelNumDiff
-from floating_contact import DifferentialActionDataFloatingInContact, DifferentialActionModelFloatingInContact
-from actuation import ActuationDataFreeFloating, ActuationModelFreeFloating
-from actuation import ActuationDataFull, ActuationModelFull
-from contact import ContactDataPinocchio, ContactModelPinocchio
-from contact import ContactData3D, ContactModel3D
-from contact import ContactData6D, ContactModel6D
-from contact import ContactDataMultiple, ContactModelMultiple
-from impact import ImpulseData6D, ImpulseModel6D, ImpulseModel3D, ImpulseModelMultiple
-from impact import ImpulseDataPinocchio, ImpulseModelPinocchio
-from impact import CostModelImpactCoM,CostModelImpactWholeBody
-from impact import ActionDataImpact, ActionModelImpact
-from unicycle import ActionModelUnicycle
-from unicycle import StateUnicycle, ActionModelUnicycleVar
-from shooting import ShootingProblem
-from callbacks import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay, CallbackSolverTimer
-from solver import SolverAbstract
-from fddp import SolverFDDP
-from ddp import SolverDDP
-from box_ddp import SolverBoxDDP
-from box_kkt import SolverBoxKKT
-from kkt import SolverKKT
-from robots import getTalosPathFromRos, loadTalosArm, loadTalos, loadTalosLegs, loadHyQ
-from utils import m2a, a2m, absmax, absmin
-from diagnostic import plotDDPConvergence, plotOCSolution, displayTrajectory
+from .action import (ActionDataAbstract, ActionDataLQR, ActionDataNumDiff, ActionModelAbstract, ActionModelLQR,
+                     ActionModelNumDiff)
+from .activation import (ActivationDataInequality, ActivationDataQuad, ActivationDataSmoothAbs,
+                         ActivationDataWeightedQuad, ActivationModelInequality, ActivationModelQuad,
+                         ActivationModelSmoothAbs, ActivationModelWeightedQuad)
+from .actuation import ActuationDataFreeFloating, ActuationDataFull, ActuationModelFreeFloating, ActuationModelFull
+from .box_ddp import SolverBoxDDP
+from .box_kkt import SolverBoxKKT
+from .callbacks import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay, CallbackSolverTimer
+from .contact import (ContactData3D, ContactData6D, ContactDataMultiple, ContactDataPinocchio, ContactModel3D,
+                      ContactModel6D, ContactModelMultiple, ContactModelPinocchio)
+from .cost import (CostDataCoM, CostDataControl, CostDataForce, CostDataFramePlacement, CostDataFrameTranslation,
+                   CostDataFrameVelocity, CostDataFrameVelocityLinear, CostDataNumDiff, CostDataPinocchio,
+                   CostDataState, CostDataSum, CostModelCoM, CostModelControl, CostModelForce,
+                   CostModelForceLinearCone, CostModelFramePlacement, CostModelFrameTranslation,
+                   CostModelFrameVelocity, CostModelFrameVelocityLinear, CostModelNumDiff, CostModelPinocchio,
+                   CostModelState, CostModelSum)
+from .ddp import SolverDDP
+from .diagnostic import displayTrajectory, plotDDPConvergence, plotOCSolution
+from .differential_action import (DifferentialActionDataAbstract, DifferentialActionDataFullyActuated,
+                                  DifferentialActionDataLQR, DifferentialActionDataNumDiff,
+                                  DifferentialActionModelAbstract, DifferentialActionModelFullyActuated,
+                                  DifferentialActionModelLQR, DifferentialActionModelNumDiff)
+from .fddp import SolverFDDP
+from .floating_contact import DifferentialActionDataFloatingInContact, DifferentialActionModelFloatingInContact
+from .impact import (ActionDataImpact, ActionModelImpact, CostModelImpactCoM, CostModelImpactWholeBody, ImpulseData6D,
+                     ImpulseDataPinocchio, ImpulseModel3D, ImpulseModel6D, ImpulseModelMultiple, ImpulseModelPinocchio)
+from .integrated_action import (IntegratedActionDataEuler, IntegratedActionDataRK4, IntegratedActionModelEuler,
+                                IntegratedActionModelRK4)
+from .kkt import SolverKKT
+from .robots import getTalosPathFromRos, loadHyQ, loadTalos, loadTalosArm, loadTalosLegs
+from .shooting import ShootingProblem
+from .solver import SolverAbstract
+from .state import StateAbstract, StateNumDiff, StatePinocchio, StateVector
+from .unicycle import ActionModelUnicycle, ActionModelUnicycleVar, StateUnicycle
+from .utils import a2m, absmax, absmin, m2a

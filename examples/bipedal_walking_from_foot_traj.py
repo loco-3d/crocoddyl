@@ -1,11 +1,15 @@
-from crocoddyl import *
-import numpy as np
-from numpy.linalg import norm
-import pinocchio
-from pinocchio.utils import *
 import sys
 
-WITHDISPLAY =  'disp' in sys.argv
+import numpy as np
+import pinocchio
+from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, CallbackDDPLogger, CallbackDDPVerbose,
+                       CallbackSolverDisplay, ContactModel6D, ContactModelMultiple, CostModelCoM, CostModelControl,
+                       CostModelFramePlacement, CostModelFrameVelocity, CostModelState, CostModelSum,
+                       DifferentialActionModelFloatingInContact, IntegratedActionModelEuler, ShootingProblem,
+                       SolverDDP, StatePinocchio, a2m, displayTrajectory, loadTalosLegs, m2a)
+from pinocchio.utils import zero
+
+WITHDISPLAY = 'disp' in sys.argv
 WITHPLOT = 'plot' in sys.argv
 
 
@@ -26,44 +30,38 @@ def plotSolution(rmodel, xs, us, figIndex=1, show=True):
     # left foot
     plt.subplot(2, 3, 1)
     plt.title('joint position [rad]')
-    [plt.plot(X[k], label=legJointNames[i])
-        for i, k in enumerate(range(7, 13))]
+    [plt.plot(X[k], label=legJointNames[i]) for i, k in enumerate(range(7, 13))]
     plt.ylabel('LF')
     plt.legend()
     plt.subplot(2, 3, 2)
     plt.title('joint velocity [rad/s]')
-    [plt.plot(X[k], label=legJointNames[i])
-        for i, k in enumerate(range(nq+6, nq+12))]
+    [plt.plot(X[k], label=legJointNames[i]) for i, k in enumerate(range(nq + 6, nq + 12))]
     plt.ylabel('LF')
     plt.legend()
     plt.subplot(2, 3, 3)
     plt.title('joint torque [Nm]')
-    [plt.plot(U[k], label=legJointNames[i])
-        for i, k in enumerate(range(0, 6))]
+    [plt.plot(U[k], label=legJointNames[i]) for i, k in enumerate(range(0, 6))]
     plt.ylabel('LF')
     plt.legend()
 
     # right foot
     plt.subplot(2, 3, 4)
-    [plt.plot(X[k], label=legJointNames[i])
-        for i, k in enumerate(range(13, 19))]
+    [plt.plot(X[k], label=legJointNames[i]) for i, k in enumerate(range(13, 19))]
     plt.ylabel('RF')
     plt.xlabel('knots')
     plt.legend()
     plt.subplot(2, 3, 5)
-    [plt.plot(X[k], label=legJointNames[i])
-        for i, k in enumerate(range(nq+12, nq+18))]
+    [plt.plot(X[k], label=legJointNames[i]) for i, k in enumerate(range(nq + 12, nq + 18))]
     plt.ylabel('RF')
     plt.xlabel('knots')
     plt.legend()
     plt.subplot(2, 3, 6)
-    [plt.plot(U[k], label=legJointNames[i])
-        for i, k in enumerate(range(6, 12))]
+    [plt.plot(U[k], label=legJointNames[i]) for i, k in enumerate(range(6, 12))]
     plt.ylabel('RF')
     plt.xlabel('knots')
     plt.legend()
 
-    plt.figure(figIndex+1)
+    plt.figure(figIndex + 1)
     rdata = rmodel.createData()
     Cx = []
     Cy = []
@@ -86,9 +84,11 @@ class TaskSE3:
         self.oXf = oXf
         self.frameId = frameId
 
+
 class SimpleBipedGaitProblem:
     """ Defines a simple 3d locomotion problem
     """
+
     def __init__(self, rmodel, rightFoot, leftFoot):
         self.rmodel = rmodel
         self.rdata = rmodel.createData()
@@ -104,8 +104,7 @@ class SimpleBipedGaitProblem:
         # Remove the armature
         self.rmodel.armature[6:] = 1.
 
-    def createWalkingProblem(self, x0, stepLength, stepHeight,
-                             timeStep, stepKnots, supportKnots):
+    def createWalkingProblem(self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots):
         """ Create a shooting problem for a simple walking gait.
 
         :param x0: initial state
@@ -127,31 +126,18 @@ class SimpleBipedGaitProblem:
 
         # Defining the action models along the time instances
         loco3dModel = []
-        doubleSupport = \
-            [self.createSwingFootModel(
-                timeStep,
-                [self.rfId, self.lfId]
-                ) for k in range(supportKnots)]
+        doubleSupport = [self.createSwingFootModel(timeStep, [self.rfId, self.lfId]) for k in range(supportKnots)]
 
         # Creating the action models for three steps
         if self.firstStep is True:
-            rStep = \
-                self.createFootstepModels(
-                    comRef, [rfPos0],
-                    0.5*stepLength, stepHeight, timeStep, stepKnots,
-                    [self.lfId], [self.rfId])
+            rStep = self.createFootstepModels(comRef, [rfPos0], 0.5 * stepLength, stepHeight, timeStep, stepKnots,
+                                              [self.lfId], [self.rfId])
             self.firstStep = False
         else:
-            rStep = \
-                self.createFootstepModels(
-                    comRef, [rfPos0],
-                    stepLength, stepHeight, timeStep, stepKnots,
-                    [self.lfId], [self.rfId])
-        lStep = \
-            self.createFootstepModels(
-                comRef, [lfPos0],
-                stepLength, stepHeight, timeStep, stepKnots,
-                [self.rfId], [self.lfId])
+            rStep = self.createFootstepModels(comRef, [rfPos0], stepLength, stepHeight, timeStep, stepKnots,
+                                              [self.lfId], [self.rfId])
+        lStep = self.createFootstepModels(comRef, [lfPos0], stepLength, stepHeight, timeStep, stepKnots, [self.rfId],
+                                          [self.lfId])
 
         # We defined the problem as:
         loco3dModel += doubleSupport + rStep
@@ -160,8 +146,8 @@ class SimpleBipedGaitProblem:
         problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
 
-    def createFootstepModels(self, comPos0, feetPos0, stepLength, stepHeight,
-                             timeStep, numKnots, supportFootIds, swingFootIds):
+    def createFootstepModels(self, comPos0, feetPos0, stepLength, stepHeight, timeStep, numKnots, supportFootIds,
+                             swingFootIds):
         """ Action models for a footstep phase.
 
         :param comPos0, initial CoM position
@@ -189,25 +175,19 @@ class SimpleBipedGaitProblem:
                 # swing-leg motion.
                 phKnots = numKnots / 2
                 if k < phKnots:
-                    dp = a2m([[stepLength * (k+1) / numKnots, 0.,
-                               stepHeight * k / phKnots]])
+                    dp = a2m([[stepLength * (k + 1) / numKnots, 0., stepHeight * k / phKnots]])
                 elif k == phKnots:
-                    dp = a2m([[stepLength * (k+1) / numKnots, 0., stepHeight]])
+                    dp = a2m([[stepLength * (k + 1) / numKnots, 0., stepHeight]])
                 else:
-                    dp = a2m([[stepLength * (k+1) / numKnots, 0.,
-                             stepHeight * (1 - float(k-phKnots) / phKnots)]])
+                    dp = a2m([[stepLength * (k + 1) / numKnots, 0., stepHeight * (1 - float(k - phKnots) / phKnots)]])
                 tref = np.asmatrix(p + dp)
 
-                swingFootTask += \
-                    [TaskSE3(pinocchio.SE3(np.eye(3), tref), i)]
+                swingFootTask += [TaskSE3(pinocchio.SE3(np.eye(3), tref), i)]
 
-            comTask = \
-                np.array([stepLength * (k+1) / numKnots, 0., 0.]) * \
-                comPercentage + comPos0
-            footSwingModel += \
-                [self.createSwingFootModel(timeStep, supportFootIds,
-                                           comTask=comTask,
-                                           swingFootTask=swingFootTask)]
+            comTask = np.array([stepLength * (k + 1) / numKnots, 0., 0.]) * comPercentage + comPos0
+            footSwingModel += [
+                self.createSwingFootModel(timeStep, supportFootIds, comTask=comTask, swingFootTask=swingFootTask)
+            ]
 
         # Action model for the foot switch
         footSwitchModel = \
@@ -219,8 +199,7 @@ class SimpleBipedGaitProblem:
             p += a2m([[stepLength, 0., 0.]])
         return footSwingModel + [footSwitchModel]
 
-    def createSwingFootModel(self, timeStep, supportFootIds, comTask=None,
-                             swingFootTask=None):
+    def createSwingFootModel(self, timeStep, supportFootIds, comTask=None, swingFootTask=None):
         """ Action model for a swing foot phase.
 
         :param timeStep: step duration of the action model
@@ -229,7 +208,7 @@ class SimpleBipedGaitProblem:
         :param swingFootTask: swinging foot task
         :return action model for a swing foot phase
         """
-        # Creating the action model for floating-base systems. A walker system 
+        # Creating the action model for floating-base systems. A walker system
         # is by default a floating-base system
         actModel = ActuationModelFreeFloating(self.rmodel)
 
@@ -240,7 +219,7 @@ class SimpleBipedGaitProblem:
             supportContactModel = \
                 ContactModel6D(self.rmodel, i, ref=pinocchio.SE3.Identity(),
                                gains=[0., 0.])
-            contactModel.addContact('contact_'+str(i), supportContactModel)
+            contactModel.addContact('contact_' + str(i), supportContactModel)
 
         # Creating the cost model for a contact phase
         costModel = CostModelSum(self.rmodel, actModel.nu)
@@ -254,27 +233,22 @@ class SimpleBipedGaitProblem:
                                             i.frameId,
                                             i.oXf,
                                             actModel.nu)
-                costModel.addCost("footTrack_"+str(i), footTrack, 1e4)
+                costModel.addCost("footTrack_" + str(i), footTrack, 1e4)
 
-        stateWeights = \
-            np.array([0]*3 + [500.]*3  + [0.01]*(self.rmodel.nv-6) +
-                     [10]*self.rmodel.nv)
-        stateReg = CostModelState(self.rmodel,
-                                  self.state,
-                                  self.rmodel.defaultState,
-                                  actModel.nu,
-                                  activation=ActivationModelWeightedQuad(stateWeights**2))
+        stateWeights = np.array([0] * 3 + [500.] * 3 + [0.01] * (self.rmodel.nv - 6) + [10] * self.rmodel.nv)
+        stateReg = CostModelState(
+            self.rmodel,
+            self.state,
+            self.rmodel.defaultState,
+            actModel.nu,
+            activation=ActivationModelWeightedQuad(stateWeights**2))
         ctrlReg = CostModelControl(self.rmodel, actModel.nu)
         costModel.addCost("stateReg", stateReg, 1e-1)
         costModel.addCost("ctrlReg", ctrlReg, 1e-3)
 
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
-        dmodel = \
-            DifferentialActionModelFloatingInContact(self.rmodel,
-                                                     actModel,
-                                                     contactModel,
-                                                     costModel)
+        dmodel = DifferentialActionModelFloatingInContact(self.rmodel, actModel, contactModel, costModel)
         model = IntegratedActionModelEuler(dmodel)
         model.timeStep = timeStep
         return model
@@ -286,16 +260,14 @@ class SimpleBipedGaitProblem:
         :param swingFootTask: swinging foot task
         :return action model for a foot switch phase
         """
-        model = self.createSwingFootModel(
-            0., supportFootId, swingFootTask=swingFootTask)
+        model = self.createSwingFootModel(0., supportFootId, swingFootTask=swingFootTask)
 
         for i in swingFootTask:
             impactFootVelCost = \
                 CostModelFrameVelocity(self.rmodel, i.frameId)
-            model.differential.costs.addCost('impactVel_'+str(i),
-                                             impactFootVelCost, 1e4)
-            model.differential.costs['impactVel_'+str(i)].weight = 1e6
-            model.differential.costs['footTrack_'+str(i)].weight = 1e8
+            model.differential.costs.addCost('impactVel_' + str(i), impactFootVelCost, 1e4)
+            model.differential.costs['impactVel_' + str(i)].weight = 1e6
+            model.differential.costs['footTrack_' + str(i)].weight = 1e8
         model.differential.costs['stateReg'].weight = 1e1
         model.differential.costs['ctrlReg'].weight = 1e-3
         return model
@@ -304,7 +276,7 @@ class SimpleBipedGaitProblem:
 # Creating the lower-body part of Talos
 talos_legs = loadTalosLegs()
 rmodel = talos_legs.model
-rdata  = rmodel.createData()
+rdata = rmodel.createData()
 
 # Defining the initial state of the robot
 q0 = rmodel.referenceConfigurations['half_sitting'].copy()
@@ -315,7 +287,6 @@ x0 = m2a(np.concatenate([q0, v0]))
 rightFoot = 'right_sole_link'
 leftFoot = 'left_sole_link'
 gait = SimpleBipedGaitProblem(rmodel, rightFoot, leftFoot)
-
 
 # Setting up all tasks
 GAITPHASES = \
@@ -329,20 +300,17 @@ GAITPHASES = \
                   'timeStep': 0.0375, 'stepKnots': 25, 'supportKnots': 1}}]
 cameraTF = [3., 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 
-
 ddp = [None] * len(GAITPHASES)
 for i, phase in enumerate(GAITPHASES):
     for key, value in phase.items():
-        if key is 'walking':
+        if key == 'walking':
             # Creating a walking problem
             ddp[i] = SolverDDP(
-                gait.createWalkingProblem(
-                    x0, value['stepLength'], value['stepHeight'],
-                    value['timeStep'],
-                    value['stepKnots'], value['supportKnots']))
+                gait.createWalkingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
+                                          value['stepKnots'], value['supportKnots']))
 
     # Added the callback functions
-    print '*** SOLVE ' + key + ' ***'
+    print('*** SOLVE ' + key + ' ***')
     ddp[i].callback = [CallbackDDPLogger(), CallbackDDPVerbose()]
     if WITHDISPLAY:
         ddp[i].callback.append(CallbackSolverDisplay(talos_legs, 4, 1, cameraTF))
@@ -350,21 +318,21 @@ for i, phase in enumerate(GAITPHASES):
     # Solving the problem with the DDP solver
     ddp[i].th_stop = 1e-9
     ddp[i].solve(
-        maxiter=1000, regInit=.1,
-        init_xs=[rmodel.defaultState]*len(ddp[i].models()),
-        init_us=[m.differential.quasiStatic(d.differential,
-                                            rmodel.defaultState)
-                 for m, d in zip(ddp[i].models(), ddp[i].datas())[:-1]])
+        maxiter=1000,
+        regInit=.1,
+        init_xs=[rmodel.defaultState] * len(ddp[i].models()),
+        init_us=[
+            m.differential.quasiStatic(d.differential, rmodel.defaultState)
+            for m, d in zip(ddp[i].models(), ddp[i].datas())[:-1]
+        ])
 
     # Defining the final state as initial one for the next phase
     x0 = ddp[i].xs[-1]
-
 
 # Display the entire motion
 if WITHDISPLAY:
     for i, phase in enumerate(GAITPHASES):
         displayTrajectory(talos_legs, ddp[i].xs, ddp[i].models()[0].timeStep)
-
 
 # Plotting the entire motion
 if WITHPLOT:
