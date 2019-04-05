@@ -475,13 +475,68 @@ First, let us note that if all the gaps $f_t$ are null, it is simply:
 \end{align*}
 This is always negative.
 
+\subsubsection{Merit function ... or not}
 However, $\Delta$ can be positive (i.e. corresponds to an increase of the cost function) when some gap $f_t$ are nonzero.
 This corresponds to the expected behavior of an SQP algorithm: a step is used to reduce the error in the constraints, which can makes the cost function increases.
-The point is to monitor both the decrease or the increase of the cost function.
-As explain in the first part, no need to monitor the decrease in the constraint error, as the nonlinear rollout makes sure that it does decrease.
+The point is to monitor both the decrease or the increase of the cost function when reducing the gaps in the trajectory.
+One objective is to find a line-search strategy that holds (at least is consistent) whether the gaps are nonzero or zero.
+Let us first consider the case where some of the gaps are nonzero.
 
+We introduce the following merit function:
+$$\phi(\xtraj,\utraj) = \ell(\xtraj,\utraj) + \mu \sum_{t=0}^T \| c_t(\xtraj,\utraj) \|_1$$
+where $\ell$ is the total cost function (integral plus terminal) and the constraints $c_t$ are:
+$$ c_{t+1} = x_{t+1} - f(x_t,u_t) = f_{f+1} $$
+$$ c_0 = x_0 - x_0^* = f_0$$
+where the $f_t$ have already been introduced as the trajectory gaps (defects).
+We consider how $\phi$ changes when changing $\xtraj,\utraj$ in the direction $\dxtraj,\dutraj$:
+$$\xtraj'=\xtraj + \alpha \dxtraj$$
+$$\utraj'= \utraj + \alpha \dutraj$$
+We abusively denote by $\phi$ the merit changes along the line search:
+$$\phi(\alpha) := \phi(\xtraj + \alpha \dxtraj,\utraj + \alpha \dutraj) - \phi(\xtraj,\utraj)$$
+We have:
+$$\phi(\alpha) = \ell'-\ell - \alpha \mu \sum_{t=0}^T  \| f_t \|_1$$
+As the $f_t$ does not depend on $\alpha$ (thanks to the nonlinear rollout used in the forward pass, as explained in the first part of this document), we can always find a penalization $\mu$ that makes this function decreases.
+This means that, if $\mu$ is large enough, any step from an infeasible guess would be accepted.
+The drawback is that the step might induces very large increase of the cost function.
+In particular, the cost increase might be much larger than predicted by the LQR model, in particular when the initial guess is far from being feasible (for unstable dynamics system, when the initial control guess is very far from stabilizing the initial state trajectory).
 
+As we now that $\sum \| f_t \|_1$ will decrease with nonzero $\alpha$, we rather suggest to only consider the first term $\ell'-\ell$.
+This term exactly corresponds to the expectation model that we described above.
+$$\ell'-\ell = \Delta(\alpha) + \mathcal O(\alpha^3)$$
 
+\subsubsection{Goldstein condition}
+We cannot use it a second order version of the Wolfe (Armijo) conditions, first because $\Delta$ might be positive (not a descent direction), and second because strong Wolfe conditions uses the gradient at the next candidate point, which are very expensive to compute in our case.
+We rather suggest to take a second-order version of the Goldstein conditions, i.e. accept a step if the actual cost change is similar to the expected cost change:
+$$ b_1 \le \frac{\ell'-\ell}{\Delta(\alpha)} \le b_2$$
+with $b_1,b_2$ are two adjustable parameters.
+More precisely, if $\Delta$ is negative (the direction is descending), this imposes that:
+$$\ell'-\ell \le b_1 \Delta(\alpha)$$
+i.e. that the cost decrease at least a fraction of the expectation model.
+A contrario, if $\Delta$ is positive (the direction is ascending), this imposes that:
+$$\ell'-\ell \le b_2 \Delta(\alpha)$$
+i.e. the cost does not increase more than a multiple of the expectation model.
+In practice, we suggest to use $b_1=0.1$ and $b_2=2$.
+This might be better replaced by a switch to avoid the quotient.
+The condition finally is to accept the step if:
+$$\ell'-\ell \le
+\begin{cases}
+  b_1 \Delta(\alpha) & \textrm{if }\Delta(\alpha)\le 0 \\
+  b_2 \Delta(\alpha) & \textrm{otherwise}
+\end{cases}
+$$
+
+\subsubsection{Approximating $\Delta$ with a nonlinear rollout}
+
+The expectation model exhibited above implies the explicit values of the changes in the state trajectory in the term $f_t^T V_{xx} \dx_t$.
+However, the DDP algorithm never explicitly computes the $\dx_t$, but rather directly computes the next $x_t'$ in the rollout, using the nonlinear dynamics.
+We do not have the linear direction $\dx_t$, however, we can easily computes the change in the state trajectory by $x_t'(\alpha)-x_t$ where $x_t'(\alpha)$ is the state reached at time $t$ when applying the changes in the control trajectory and at the trajectory gaps.
+We then set:
+$$\dx_t = x_t'-x_t$$
+And we modify the expectation model accordingly:
+$$\Delta(\alpha) = \alpha \sum_{t=0}^T V_{xt}^T f_t + Q_{ut}^T k_t 
++ \frac{\alpha}{2} \Big( k_t^T Q_{uut}^T k_t-f_t^T V_{xxt} f_t \Big)
++ (\alpha-1) f_t^T V_{xxt} (x_t'(\alpha) - x_t)$$
+Again, this boils down to the sum of the $Q.k$ when the gaps are all zero.
 
 
 
