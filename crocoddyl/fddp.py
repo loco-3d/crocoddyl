@@ -102,10 +102,18 @@ class SolverFDDP(SolverAbstract):
         self.wasFeasible = False
         for i in range(maxiter):
             #print 'i',i
-            try:
-                self.computeDirection()
-            except ArithmeticError:
-                self.increaseRegularization()
+            recalc = True
+            while True:
+                try:
+                    self.computeDirection(recalc=recalc)
+                except ArithmeticError:
+                    recalc = False
+                    self.increaseRegularization()
+                    if self.x_reg == self.regMax:
+                        return self.xs, self.us, False
+                    else:
+                        continue
+                break
             d1,d2 = self.expectedImprovement()
 
             for a in self.alphas:
@@ -130,7 +138,7 @@ class SolverFDDP(SolverAbstract):
             if a==self.alphas[-1]:
                 self.increaseRegularization()
                 if self.x_reg==self.regMax:
-                    raise ValueError('Max regularization reached')
+                    return self.xs, self.us, False
             self.stepLength = a; self.iter = i
             self.stop = sum(self.stoppingCriteria())
             if self.callback is not None: [c(self) for c in self.callback]
