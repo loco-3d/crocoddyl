@@ -2,16 +2,8 @@ import copy
 import unittest
 
 import numpy as np
-# --- TEST DDP ---
-# ---------------------------------------------------
-# ---------------------------------------------------
-# ---------------------------------------------------
-# --- TEST DDP ---
-# ---------------------------------------------------
-# ---------------------------------------------------
-# ---------------------------------------------------
 from crocoddyl import (ActionModelLQR, ActionModelUnicycle, ActionModelUnicycleVar, ShootingProblem, SolverDDP,
-                       SolverKKT)
+                       SolverFDDP, SolverKKT)
 from numpy.linalg import eig, inv, norm
 
 
@@ -220,11 +212,6 @@ if WITH_PLOT:
     ax = max(np.concatenate([(abs(x[0]), abs(x[1])) for x in xs])) * 1.2
     plt.axis([-ax, ax, -ax, ax])
     plt.show()
-
-model = ActionModelLQR(1, 1)
-data = model.createData()
-# model = ActionModelUnicycle()
-nx, nu = model.nx, model.nu
 
 model = ActionModelLQR(1, 1, driftFree=False)
 data = model.createData()
@@ -719,6 +706,32 @@ for t in range(T):
     assert (norm(dxs_d[t + 1] - dxs_k[t + 1]) < 1e-9)
 
 # --- REG INTEGRATIVE TEST ---
+
+# -------------------------------------------------------------------
+# --- test invalid direction computed in backward pass --------------
+# -------------------------------------------------------------------
+model = ActionModelLQR(3, 3, driftFree=False)
+nx = model.nx
+nu = model.nu
+T = 5
+
+runningModels = [model] * T
+problem = ShootingProblem(model.State.zero() + 1, runningModels, model)
+
+# Make artificially Quu=0 at T-1
+Vxx_T = problem.terminalModel.Lxx
+Fu_T_1 = problem.runningModels[T - 1].Fu
+problem.runningModels[T - 2].Luu = -np.dot(np.dot(Fu_T_1.T, Vxx_T), Fu_T_1)
+
+ddp = SolverDDP(problem)
+fddp = SolverFDDP(problem)
+
+# Do not allowed to regularize the problem and solve it, so we can trigger an invalid direction computations
+ddp.regMax = 1e-5
+fddp.regMax = 1e-5
+
+assert (not ddp.solve()[2])
+assert (not fddp.solve()[2])
 
 if __name__ == '__main__':
     unittest.main()

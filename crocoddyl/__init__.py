@@ -7,16 +7,26 @@ from .actuation import ActuationDataFreeFloating, ActuationDataFull, ActuationMo
 from .box_ddp import SolverBoxDDP
 from .box_kkt import SolverBoxKKT
 from .callbacks import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay, CallbackSolverTimer
-from .contact import ContactModel3D, ContactModel6D, ContactModelMultiple
-from .cost import (CostModelCoM, CostModelControl, CostModelForce, CostModelForceLinearCone, CostModelFramePlacement,
-                   CostModelFrameTranslation, CostModelFrameVelocity, CostModelFrameVelocityLinear, CostModelNumDiff,
+from .contact import (ContactData3D, ContactData6D, ContactDataMultiple, ContactDataPinocchio, ContactModel3D,
+                      ContactModel6D, ContactModelMultiple, ContactModelPinocchio)
+from .cost import (CostDataCoM, CostDataControl, CostDataForce, CostDataFramePlacement, CostDataFrameTranslation,
+                   CostDataFrameVelocity, CostDataFrameVelocityLinear, CostDataNumDiff, CostDataPinocchio,
+                   CostDataState, CostDataSum, CostModelCoM, CostModelControl, CostModelForce,
+                   CostModelForceLinearCone, CostModelFramePlacement, CostModelFrameTranslation,
+                   CostModelFrameVelocity, CostModelFrameVelocityLinear, CostModelNumDiff, CostModelPinocchio,
                    CostModelState, CostModelSum)
 from .ddp import SolverDDP
-from .differential_action import (DifferentialActionModelFullyActuated, DifferentialActionModelLQR,
-                                  DifferentialActionModelNumDiff)
-from .floating_contact import DifferentialActionModelFloatingInContact
-from .impact import ActionModelImpact, CostModelImpactCoM, ImpulseModel6D, ImpulseModelMultiple
-from .integrated_action import IntegratedActionModelEuler, IntegratedActionModelRK4
+from .diagnostic import displayTrajectory, plotDDPConvergence, plotOCSolution
+from .differential_action import (DifferentialActionDataAbstract, DifferentialActionDataFullyActuated,
+                                  DifferentialActionDataLQR, DifferentialActionDataNumDiff,
+                                  DifferentialActionModelAbstract, DifferentialActionModelFullyActuated,
+                                  DifferentialActionModelLQR, DifferentialActionModelNumDiff)
+from .fddp import SolverFDDP
+from .floating_contact import DifferentialActionDataFloatingInContact, DifferentialActionModelFloatingInContact
+from .impact import (ActionDataImpact, ActionModelImpact, CostModelImpactCoM, CostModelImpactWholeBody, ImpulseData6D,
+                     ImpulseDataPinocchio, ImpulseModel3D, ImpulseModel6D, ImpulseModelMultiple, ImpulseModelPinocchio)
+from .integrated_action import (IntegratedActionDataEuler, IntegratedActionDataRK4, IntegratedActionModelEuler,
+                                IntegratedActionModelRK4)
 from .kkt import SolverKKT
 from .robots import getTalosPathFromRos, loadHyQ, loadTalos, loadTalosArm, loadTalosLegs
 from .shooting import ShootingProblem

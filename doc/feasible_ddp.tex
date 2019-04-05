@@ -340,6 +340,206 @@ Indeed, it is exactly the same if the classical line search is implemented.
 We did not demonstrate that the feasibility-prone DDP or the multiple shooting is better: the performance where equivalent on all the problems we have considered.
 We discussed that the DDP might be easier to implement and make efficient, and we advice to choose it.
 
+\section{Expectation model of the FDDP}
+
+At each Newton step of a NLP solver, a line-search is performed.
+One of the simple conditions of acceptance of the step is that the actual improvement of the cost should be similar to the expected improvement provided by the quadratic model.
+For example, if considering a function $f$ and its model $m$ with $f(x+\Delta x) = f(x) + m(\delta x) + o(\Delta x)$, then a step $\delta x$ would be accepted if $f(x+\Delta x)-f(x)$ and $m(x)$ are close enough (in practice, the ratio between the two quantities is close to 1).
+
+When considering the DDP solver, computing the expected improvement is more difficult, as the $\xtraj,\utraj$ of the LQR are never explicitly computed: the backward pass only provides $k$, from which the actual $\xtraj,\utraj$ are obtained using a nonlinear rollout.
+This section provides efficient evaluation of the expectation model.
+
+\subsection{Expectation model in $\xtraj,\utraj$}
+Let's first write the expectation model in term of the increments $\xtraj,\utraj$ (let's recall that, to keep the notations concise, we use $x$ and $u$ for the LQR variables, while they should be intepreted as ``deltas'' in the nonlinear optimization algorithm).
+If making a step of length $\alpha$ (typically in $]0,1]$) in the direction $\xtraj,\utraj$, then the improvement of the cost should have the following form:
+$$\Delta = \Delta_1 \alpha + \frac{1}{2} \Delta_2 \alpha^2$$
+$\Delta_1$ is the sum at each shooting node of the cost gradient times the change in $x$ and $u$:
+\begin{equation}
+  \label{eq:d1}
+  \Delta_1 = \sum_{t=0}^T L_{xt}^T x_t + L_{ut}^T u_t
+\end{equation}
+(to keep the sum simpler, we treat $T$ similarly to the other nodes, by introducing $L_{uT} = 0$).
+
+\subsubsection{Linear rollout}
+The states and controls are obtained from a linear roll-out as:
+$$ x_{t+1} = F_{xt} x_t + F_{ut} u_t + f_{t+1}$$
+$$ u_{t} = K_t x_t + k_t$$
+Propagating these two equations, we get:
+$$ x_{t+1} = (F_{xt} + F_{ut} K_t) x_t + F_{ut} k_t + f_{t+1} =  F_{t-1} x_{t-1} + c_{t+1}$$
+with $F_{t} = F_{xt} + F_{ut} K_t$ and $c_{t+1} = F_{ut} k_{t} + f_{t+1}$ (with $c_0 = f_0$).
+And finally:
+\begin{align}
+  x_t &= F_{t-1} ... F_0 c_0 + F_{t-1} ... F_1 c_1 + ... + F_{t-1} c_{t-1} + c_t \\
+  &= \sum_{i=0}^t F_{t-1} ... F_i c_i \label{eq:lroll}
+\end{align}
+
+\subsubsection{First-order model $\Delta_1$}
+Replacing $u_t$ by $k_t + K_t x_t$, the first-order term is:
+\begin{equation}
+  \label{eq:d1}
+  \Delta_1 = \sum_{t=0}^T (L_{xt} + K_t^T L_{ut}) ^T x_t + \sum_{t=0}^T L_{ut}^T k_t
+\end{equation}
+where we denote $l_t = L_{xt} + K_t^T L_{ut}$ to simplify the notation.
+Putting \eqref{eq:lroll} in \eqref{eq:d1}, we get:
+\begin{align}
+  \Delta_1 &= \sum_{t=0}^{T} l_t \sum_{i=0}^{t} F_{t-1} ... F_i c_i + L_{ut}^T k_t \\
+  & =  \sum_{i=0}^{T} c_i^T  \sum_{t=i}^{T} F_t^T ... F_T^T l_t + k_i^T L_{ui}
+\end{align}
+Each term of the sum is composed of a product of $f_i$ and a product of $k_i$, and can then be evaluated from the result of the backward pass.
+Let's exhibit these 2 terms.
+The term in $f_i$ is:
+$$\Delta_{ft} = F_i^T ... F_T^T l_i = L_{xi} + F_{xi}^T \Delta_{fi+1} + K_i^T (L_{ui} + F_{ui} \Delta_{fi+1})$$
+The term in $k_i$ is:
+$$\Delta_{ft} = l_{ui} + F_{ui}^T ... F_T^T l_i = L_{ui} + F_{ui}^T \Delta_{fi+1}$$
+In the case $f_i$ are all zeros, we can recognize that $\Delta_f$ is the value gradient and $\Delta_k$ is the Hamiltonian control gradient:
+$\Delta_f = V_x$ and $\Delta_k = Q_u$.
+In that case, we simply have:
+$$\Delta_1 = \sum_{t=0}^{T} Q_{ut}^T k_t$$
+
+In the general case where the LQR is not drift-free, then $\Delta_f$ and $\Delta_k$ must be collected during the backward pass while propagating $V_x$ and $Q_u$.
+The cost is similar, and an order of magnitude less than propagating the Value Hessians.
+
+\subsubsection{Second-order term $\Delta_2$}
+
+This section is empty, work remains to be done here.
+
+\subsubsection{The simple case where $T=1$}
+It is disapointing that the expectation model is so simple in the drift-free case and only depends on backward-computed quantities, while it is so complex and requires to compute additional quantities in the general case.
+Let's investigate that.
+The intuition is that the expectation model should only depends on the gradient and hessians of the Value and Hamiltonian functions.
+
+In the case where we only consider one control $u_0$, the expectation model is:
+\begin{align*}
+  \Delta_1 &= L_{x0}^T x_0 + L_{u0}^T u_0 + L_{x1}^T x1 \\
+  &= L_{0}^T f_0 + L_{u0} k_0 + L_{x1} F_{0} f_0  + L_{x1} F_{u0} k_0  + L_{x1} f_1 \\
+  &= (L_0 + F_0^T L_{x1})^T f_0 + (L_{u0} + F_{u0}^T L_{x1})^T k_0 + L_{x1} f_1
+\end{align*}
+We nearly recognize the gradients $V_{x0}, Q_{u0}, V_{x1}$ respectively in factor of $f_0,k_0,f_1$, but some terms are missing:
+$$V_{x0} = L_0 + F_0^T (L_{x1} + L_{xx1} f_1) + L_{xx0} f_0$$
+$$Q_{u0} = L_{u0} + F_{u0}^T (L_{x1} + L_{xx1} f_1)$$
+$$V_{x1} = L_{x1} + L_{xx1} f_1$$
+Basically, the missing terms correspond to the re-linearization of the gradient at the $f_t$ points at the end of the intervals.
+Then, we get:
+\begin{align*}
+  \Delta_1 &= V_{x0}^T f_0 + Q_{u0}^T k_0 + V_{x1}^T f_1 - \left( f_0^T V_{xx0} f_0  + f_0^T F_0^T L_{xx1} f_1 + k_0^T F_{u0} L_{xx1} f_1 + f_1^T V_{xx1} f_1\right) \\
+  &= V_{x0}^T f_0 + Q_{u0}^T k_0 + V_{x1}^T f_1 - \left( f_0^T V_{xx0} x_0 + f_1^T V_{xx1} x_1 \right)
+\end{align*}
+
+The second-order term is:
+\begin{align*}
+  \Delta_2 &= f_0^T V_{xx0} f_0 + k_0^T Q_{uu0} k_0 + f_1^T V_{xx1} f_1 + 2(f_0^T F_0^T L_{xx1} f_1 + k_0^T F_{u0} L_{xx1} f_1) \\
+  &= f_0^T V_{xx0} f_0 + k_0^T Q_{uu0} k_0 + f_1^T V_{xx1} f_1 + 2\big(f_1^T V_{xx1} (x_1-f_1) \big) \\
+  &= -f_0^T V_{xx0} f_0 + k_0^T Q_{uu0} k_0 - f_1^T V_{xx1} f_1 + 2\big(f_0^T V_{xx0} x_0 + f_1^T V_{xx1} x_1 \big)
+\end{align*}
+We can recognize in the additional terms (the 2 last ones) the same terms as in $\Delta_1$.
+Nicely, they will cancel out in the case we make a full step $\alpha=1$:
+$$\Delta(\alpha) = \alpha( \Delta_1+\frac{\alpha}{2} \Delta_2)$$
+$$\Delta(1)= V_{x0}^T f_0 + Q_{u0}^T k_0 + V_{x1}^T f_1 
+- \frac{1}{2} f_0^T V_{xx0} f_0 + \frac{1}{2} k_0^T Q_{uu0}^T k_0 - \frac{1}{2} f_1^T V_{xx1} f_1 $$
+
+But they do not cancel out in the general case:
+\begin{align*}
+  \Delta(\alpha) = \alpha \Big( V_{x0}^T f_0 + Q_{u0}^T k_0 + V_{x1}^T f_1 
++ \frac{\alpha}{2} ( - f_0^T V_{xx0} f_0 - f_1^T V_{xx1} f_1 + k_0^T Q_{uu0}^T k_0 ) \\
++ (\alpha-1) ( f_0^T V_{xx0} x_0 + f_1^T V_{xx1} x_1 ) \Big)
+\end{align*}
+
+\subsection{Extending to $T>1$ by recurence}
+We can now work by recurence to extend the exact same shape to $T>1$.
+
+On the first order term, addind a new time step will add two terms in $k_1$ and $f_2$ where respectively $L_{x2}$ and $(L_{u1} + F_{u1}^T L_{x2})$ are in factor, and also extends the previous factors.
+The new factors have the same form as the previous ones and can be handled similarly.
+The extension of the previous factors simply corresponds to the extension of the preview horizon when writing $V_x$ and $Q_u$.
+As previously, we are missing the $L_{xx} f$ terms (corresponding to the relinearization), that can be collected.
+Each of this additional term is a product term involving two $f$ or one $f$ and one $k$.
+Regrouping them by decreasing order of the $f$ index, this finally boils to the sum of the $f^T V_{xx} x$:
+$$\Delta_1 = \sum_{t=0}^T V_{xt}^T f_t + Q_{ut}^T k_t - f_t^T V_{xxt} x_t $$
+(with again the simplification of treating symmetrically the last time step with $k_T=0$).
+
+Similar observations can be made on the second-order term, and lead to:
+$$\Delta_2 = \sum_{t=0}^T k_t^T Q_{uut}^T k_t-f_t^T V_{xxt} f_t +2 f_t^T V_{xxt} x_t $$
+
+
+The expectation model is finally:
+$$\Delta(\alpha) = \alpha \sum_{t=0}^T V_{xt}^T f_t + Q_{ut}^T k_t 
++ \frac{\alpha}{2} \Big( k_t^T Q_{uut}^T k_t-f_t^T V_{xxt} f_t \Big)
++ (\alpha-1) f_t^T V_{xxt} x_t$$
+
+
+\subsection{Line-search algorithm}
+
+First, let us note that if all the gaps $f_t$ are null, it is simply:
+\begin{align*}
+  \Delta(\alpha) &= \alpha \big( \sum Q_u^T k + \frac{\alpha}{2} k^T Q_{uu} k \big) \\
+  &= \alpha(\frac{\alpha}{2} - 1) \sum  \ Q_u^T\ Q_{uu}^{-1} \ Q_u
+\end{align*}
+This is always negative.
+
+\subsubsection{Merit function ... or not}
+However, $\Delta$ can be positive (i.e. corresponds to an increase of the cost function) when some gap $f_t$ are nonzero.
+This corresponds to the expected behavior of an SQP algorithm: a step is used to reduce the error in the constraints, which can makes the cost function increases.
+The point is to monitor both the decrease or the increase of the cost function when reducing the gaps in the trajectory.
+One objective is to find a line-search strategy that holds (at least is consistent) whether the gaps are nonzero or zero.
+Let us first consider the case where some of the gaps are nonzero.
+
+We introduce the following merit function:
+$$\phi(\xtraj,\utraj) = \ell(\xtraj,\utraj) + \mu \sum_{t=0}^T \| c_t(\xtraj,\utraj) \|_1$$
+where $\ell$ is the total cost function (integral plus terminal) and the constraints $c_t$ are:
+$$ c_{t+1} = x_{t+1} - f(x_t,u_t) = f_{f+1} $$
+$$ c_0 = x_0 - x_0^* = f_0$$
+where the $f_t$ have already been introduced as the trajectory gaps (defects).
+We consider how $\phi$ changes when changing $\xtraj,\utraj$ in the direction $\dxtraj,\dutraj$:
+$$\xtraj'=\xtraj + \alpha \dxtraj$$
+$$\utraj'= \utraj + \alpha \dutraj$$
+We abusively denote by $\phi$ the merit changes along the line search:
+$$\phi(\alpha) := \phi(\xtraj + \alpha \dxtraj,\utraj + \alpha \dutraj) - \phi(\xtraj,\utraj)$$
+We have:
+$$\phi(\alpha) = \ell'-\ell - \alpha \mu \sum_{t=0}^T  \| f_t \|_1$$
+As the $f_t$ does not depend on $\alpha$ (thanks to the nonlinear rollout used in the forward pass, as explained in the first part of this document), we can always find a penalization $\mu$ that makes this function decreases.
+This means that, if $\mu$ is large enough, any step from an infeasible guess would be accepted.
+The drawback is that the step might induces very large increase of the cost function.
+In particular, the cost increase might be much larger than predicted by the LQR model, in particular when the initial guess is far from being feasible (for unstable dynamics system, when the initial control guess is very far from stabilizing the initial state trajectory).
+
+As we now that $\sum \| f_t \|_1$ will decrease with nonzero $\alpha$, we rather suggest to only consider the first term $\ell'-\ell$.
+This term exactly corresponds to the expectation model that we described above.
+$$\ell'-\ell = \Delta(\alpha) + \mathcal O(\alpha^3)$$
+
+\subsubsection{Goldstein condition}
+We cannot use it a second order version of the Wolfe (Armijo) conditions, first because $\Delta$ might be positive (not a descent direction), and second because strong Wolfe conditions uses the gradient at the next candidate point, which are very expensive to compute in our case.
+We rather suggest to take a second-order version of the Goldstein conditions, i.e. accept a step if the actual cost change is similar to the expected cost change:
+$$ b_1 \le \frac{\ell'-\ell}{\Delta(\alpha)} \le b_2$$
+with $b_1,b_2$ are two adjustable parameters.
+More precisely, if $\Delta$ is negative (the direction is descending), this imposes that:
+$$\ell'-\ell \le b_1 \Delta(\alpha)$$
+i.e. that the cost decrease at least a fraction of the expectation model.
+A contrario, if $\Delta$ is positive (the direction is ascending), this imposes that:
+$$\ell'-\ell \le b_2 \Delta(\alpha)$$
+i.e. the cost does not increase more than a multiple of the expectation model.
+In practice, we suggest to use $b_1=0.1$ and $b_2=2$.
+This might be better replaced by a switch to avoid the quotient.
+The condition finally is to accept the step if:
+$$\ell'-\ell \le
+\begin{cases}
+  b_1 \Delta(\alpha) & \textrm{if }\Delta(\alpha)\le 0 \\
+  b_2 \Delta(\alpha) & \textrm{otherwise}
+\end{cases}
+$$
+
+\subsubsection{Approximating $\Delta$ with a nonlinear rollout}
+
+The expectation model exhibited above implies the explicit values of the changes in the state trajectory in the term $f_t^T V_{xx} \dx_t$.
+However, the DDP algorithm never explicitly computes the $\dx_t$, but rather directly computes the next $x_t'$ in the rollout, using the nonlinear dynamics.
+We do not have the linear direction $\dx_t$, however, we can easily computes the change in the state trajectory by $x_t'(\alpha)-x_t$ where $x_t'(\alpha)$ is the state reached at time $t$ when applying the changes in the control trajectory and at the trajectory gaps.
+We then set:
+$$\dx_t = x_t'-x_t$$
+And we modify the expectation model accordingly:
+$$\Delta(\alpha) = \alpha \sum_{t=0}^T V_{xt}^T f_t + Q_{ut}^T k_t 
++ \frac{\alpha}{2} \Big( k_t^T Q_{uut}^T k_t-f_t^T V_{xxt} f_t \Big)
++ (\alpha-1) f_t^T V_{xxt} (x_t'(\alpha) - x_t)$$
+Again, this boils down to the sum of the $Q.k$ when the gaps are all zero.
+
+
+
 \bibliographystyle{plainnat}
 {
 \small
