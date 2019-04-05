@@ -420,10 +420,17 @@ $$Q_{u0} = L_{u0} + F_{u0}^T (L_{x1} + L_{xx1} f_1)$$
 $$V_{x1} = L_{x1} + L_{xx1} f_1$$
 Basically, the missing terms correspond to the re-linearization of the gradient at the $f_t$ points at the end of the intervals.
 Then, we get:
-$$\Delta_1 = V_{x0}^T f_0 + Q_{u0}^T k_0 + V_{x1}^T f_1 - \left( f_0^T V_{x0} f_0  + f_0^T F_0^T L_{xx1} f_1 + k_0^T F_{u0} L_{xx1} f_1 + f_1^T V_{xx1} f_1\right)$$
+\begin{align*}
+  \Delta_1 &= V_{x0}^T f_0 + Q_{u0}^T k_0 + V_{x1}^T f_1 - \left( f_0^T V_{xx0} f_0  + f_0^T F_0^T L_{xx1} f_1 + k_0^T F_{u0} L_{xx1} f_1 + f_1^T V_{xx1} f_1\right) \\
+  &= V_{x0}^T f_0 + Q_{u0}^T k_0 + V_{x1}^T f_1 - \left( f_0^T V_{xx0} x_0 + f_1^T V_{xx1} x_1 \right)
+\end{align*}
 
 The second-order term is:
-$$\Delta_2 = f_0^T V_{xx0} f_0 + k_0^T Q_{uu0} k_0 + f_1^T V_{xx1} f_1 + 2*(f_0^T F_0^T L_{xx1} f_1 + k_0^T F_{u0} L_{xx1} f_1)$$
+\begin{align*}
+  \Delta_2 &= f_0^T V_{xx0} f_0 + k_0^T Q_{uu0} k_0 + f_1^T V_{xx1} f_1 + 2(f_0^T F_0^T L_{xx1} f_1 + k_0^T F_{u0} L_{xx1} f_1) \\
+  &= f_0^T V_{xx0} f_0 + k_0^T Q_{uu0} k_0 + f_1^T V_{xx1} f_1 + 2\big(f_1^T V_{xx1} (x_1-f_1) \big) \\
+  &= -f_0^T V_{xx0} f_0 + k_0^T Q_{uu0} k_0 - f_1^T V_{xx1} f_1 + 2\big(f_0^T V_{xx0} x_0 + f_1^T V_{xx1} x_1 \big)
+\end{align*}
 We can recognize in the additional terms (the 2 last ones) the same terms as in $\Delta_1$.
 Nicely, they will cancel out in the case we make a full step $\alpha=1$:
 $$\Delta(\alpha) = \alpha( \Delta_1+\frac{\alpha}{2} \Delta_2)$$
@@ -433,13 +440,49 @@ $$\Delta(1)= V_{x0}^T f_0 + Q_{u0}^T k_0 + V_{x1}^T f_1
 But they do not cancel out in the general case:
 \begin{align*}
   \Delta(\alpha) = \alpha \Big( V_{x0}^T f_0 + Q_{u0}^T k_0 + V_{x1}^T f_1 
-+ (\frac{\alpha}{2}-1)( \frac{1}{2} f_0^T V_{xx0} f_0 + f_1^T V_{xx1} f_1 )\\
-+ \frac{\alpha}{2} k_0^T Q_{uu0}^T k_0
-+ (\alpha-1) ( f_0^T F_0^T L_{xx1} f_1 + k_0^T F_{u0}^T L_{xx1} f_1 ) \Big)
++ \frac{\alpha}{2} ( - f_0^T V_{xx0} f_0 - f_1^T V_{xx1} f_1 + k_0^T Q_{uu0}^T k_0 ) \\
++ (\alpha-1) ( f_0^T V_{xx0} x_0 + f_1^T V_{xx1} x_1 ) \Big)
 \end{align*}
 
-We can finally recognize that:
-$$( f_0^T F_0^T L_{xx1} f_1 + k_0^T F_{u0}^T L_{xx1} f_1 ) = f_1^T (x_1-f_1)$$
+\subsection{Extending to $T>1$ by recurence}
+We can now work by recurence to extend the exact same shape to $T>1$.
+
+On the first order term, addind a new time step will add two terms in $k_1$ and $f_2$ where respectively $L_{x2}$ and $(L_{u1} + F_{u1}^T L_{x2})$ are in factor, and also extends the previous factors.
+The new factors have the same form as the previous ones and can be handled similarly.
+The extension of the previous factors simply corresponds to the extension of the preview horizon when writing $V_x$ and $Q_u$.
+As previously, we are missing the $L_{xx} f$ terms (corresponding to the relinearization), that can be collected.
+Each of this additional term is a product term involving two $f$ or one $f$ and one $k$.
+Regrouping them by decreasing order of the $f$ index, this finally boils to the sum of the $f^T V_{xx} x$:
+$$\Delta_1 = \sum_{t=0}^T V_{xt}^T f_t + Q_{ut}^T k_t - f_t^T V_{xxt} x_t $$
+(with again the simplification of treating symmetrically the last time step with $k_T=0$).
+
+Similar observations can be made on the second-order term, and lead to:
+$$\Delta_2 = \sum_{t=0}^T k_t^T Q_{uut}^T k_t-f_t^T V_{xxt} f_t +2 f_t^T V_{xxt} x_t $$
+
+
+The expectation model is finally:
+$$\Delta(\alpha) = \alpha \sum_{t=0}^T V_{xt}^T f_t + Q_{ut}^T k_t 
++ \frac{\alpha}{2} \Big( k_t^T Q_{uut}^T k_t-f_t^T V_{xxt} f_t \Big)
++ (\alpha-1) f_t^T V_{xxt} x_t$$
+
+
+\subsection{Line-search algorithm}
+
+First, let us note that if all the gaps $f_t$ are null, it is simply:
+\begin{align*}
+  \Delta(\alpha) &= \alpha \big( \sum Q_u^T k + \frac{\alpha}{2} k^T Q_{uu} k \big) \\
+  &= \alpha(\frac{\alpha}{2} - 1) \sum  \ Q_u^T\ Q_{uu}^{-1} \ Q_u
+\end{align*}
+This is always negative.
+
+However, $\Delta$ can be positive (i.e. corresponds to an increase of the cost function) when some gap $f_t$ are nonzero.
+This corresponds to the expected behavior of an SQP algorithm: a step is used to reduce the error in the constraints, which can makes the cost function increases.
+The point is to monitor both the decrease or the increase of the cost function.
+As explain in the first part, no need to monitor the decrease in the constraint error, as the nonlinear rollout makes sure that it does decrease.
+
+
+
+
 
 
 \bibliographystyle{plainnat}

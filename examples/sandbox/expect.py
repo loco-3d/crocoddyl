@@ -10,14 +10,15 @@ np.random.seed(0)
 NX,NU = 2,1
 T = 10
 models = [ ActionModelLQR(NX,NU,driftFree= False) for t in range(T+1) ]
+x0 = np.array([ 1. ]*NX)
+problem = ShootingProblem(x0, models[:-1],models[-1])
 
 #models[1].Lx[:] = 0
 #models[0].Lx[:] = 0
 #models[0].Fx[:,:] = 0
 #models[0].Fu[:,:] = 0
-
-x0 = np.array([ 1. ]*NX)
-problem = ShootingProblem(x0, models[:-1],models[-1])
+#x0[:] =0
+#models[0].f0[:] = 0
 
 ddp = SolverFDDP(problem)
 ddp.regMin=0
@@ -45,6 +46,7 @@ Fx  = [ np.matrix(d.Fx)  for d in datas ]
 Lu  = [ a2m(d.Lu)  for d in datas ]
 Lx  = [ a2m(d.Lx)  for d in datas ]
 Lxx = [ np.matrix(d.Lxx) for d in datas ]
+Quu = [ np.matrix(Q) for Q in ddp.Quu ]
 Vx =  [ a2m(v) for v in ddp.Vx ]
 Qx =  [ a2m(q) for q in ddp.Qx ]
 Qu =  [ a2m(q) for q in ddp.Qu ]
@@ -127,8 +129,23 @@ for t in range(T):
     
 assert(np.isclose(expect,expect0+dexp))
 
+k = [-ki for ki in k]
+f = [-fi for fi in f]
+K = [-Ki for Ki in K]
+Vx = [ v+V*ft for v,V,ft in zip(Vx,Vxx,f) ]
 
+d1,d2=[-d for d in kkt.expectedImprovement()]
+dg = Vx[-1].T*f[-1]
+dq =-f[-1].T*Vxx[-1]*f[-1]
+dv = f[-1].T*Vxx[-1]*x[-1]
+for t in range(T):
+    dg += Vx[t].T*f[t]+Qu[t].T*k[t]
+    dq += k[t].T*Quu[t]*k[t]-f[t].T*Vxx[t]*f[t]
+    dv += f[t].T*Vxx[t]*x[t]
 
+assert(np.isclose(d1,dg-dv))    
+assert(np.isclose(d2,dq+2*dv))    
 
-
-    
+d1b = Vx[0].T*f[0] + Qu[0].T*k[0] + Vx[1].T*f[1] - f[0].T*Vxx[0]*x[0] - f[1].T*Vxx[1]*x[1]
+d2b = -f[0].T*Vxx[0]*f[0] -f[1].T*Vxx[1]*f[1] + k[0].T*Quu[0]*k[0] \
+      + 2*(f[0].T*Vxx[0]*x[0] + f[1].T*Vxx[1]*x[1])
