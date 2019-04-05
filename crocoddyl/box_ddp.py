@@ -78,12 +78,17 @@ class SolverBoxDDP(SolverDDP):
         # Argument b is introduce for debug purpose.
         # Argument warning is also introduce for debug: by default, it masks the numpy warnings
         #    that can be reactivated during debug.
+        uu = self.uu
+        ul = self.ul
         xs, us = self.xs, self.us
         xtry = [self.problem.initialState] + [np.nan] * self.problem.T
         utry = [np.nan] * self.problem.T
         ctry = 0
         for t, (m, d) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas)):
             utry[t] = us[t] - self.k[t] * stepLength - np.dot(self.K[t], m.State.diff(xs[t], xtry[t]))
+
+            # Clamp the utry within the lower and upper limits.
+            utry[t] = np.minimum(np.maximum(utry[t], ul), uu)
 
             with np.warnings.catch_warnings():
                 np.warnings.simplefilter(warning)

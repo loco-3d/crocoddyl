@@ -168,6 +168,19 @@ pinocchio.updateFramePlacements(rmodel, rdata)
 
 costModel.calcDiff(costData, x, u)
 
+costModelND = CostModelNumDiff(
+    costModel,
+    StatePinocchio(rmodel),
+    withGaussApprox=True,
+    reevals=[
+        lambda m, d, x, u: pinocchio.forwardKinematics(m, d, a2m(
+            x[:rmodel.nq]), a2m(x[rmodel.nq:])), lambda m, d, x, u: pinocchio.computeJointJacobians(
+                m, d, a2m(x[:rmodel.nq])), lambda m, d, x, u: pinocchio.updateFramePlacements(m, d)
+    ])
+costDataND = costModelND.createData(rdata)
+
+costModelND.calcDiff(costDataND, x, u)
+
 assertNumDiff(
     costData.Lx, costDataND.Lx,
     NUMDIFF_MODIFIER * costModelND.disturbance)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
@@ -183,14 +196,6 @@ assertNumDiff(
 assertNumDiff(
     costData.Luu, costDataND.Luu,
     NUMDIFF_MODIFIER * costModelND.disturbance)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
-
-costModelND.calcDiff(costDataND, x, u)
-
-assert (absmax(costData.Lx - costDataND.Lx) < 1e2 * costModelND.disturbance)
-assert (absmax(costData.Lu - costDataND.Lu) < 1e2 * costModelND.disturbance)
-assert (absmax(costData.Lxx - costDataND.Lxx) < 1e2 * costModelND.disturbance)
-assert (absmax(costData.Lxu - costDataND.Lxu) < 1e2 * costModelND.disturbance)
-assert (absmax(costData.Luu - costDataND.Luu) < 1e2 * costModelND.disturbance)
 
 q = pinocchio.randomConfiguration(rmodel)
 v = rand(rmodel.nv)
@@ -205,6 +210,15 @@ pinocchio.jacobianCenterOfMass(rmodel, rdata, q, False)
 
 costModel.calcDiff(costData, x, u)
 
+costModelND = CostModelNumDiff(
+    costModel,
+    StatePinocchio(rmodel),
+    withGaussApprox=True,
+    reevals=[lambda m, d, x, u: pinocchio.jacobianCenterOfMass(m, d, a2m(x[:rmodel.nq]), False)])
+costDataND = costModelND.createData(rdata)
+
+costModelND.calcDiff(costDataND, x, u)
+
 assertNumDiff(
     costData.Lx, costDataND.Lx,
     NUMDIFF_MODIFIER * costModelND.disturbance)  # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
@@ -220,14 +234,6 @@ assertNumDiff(
 assertNumDiff(
     costData.Luu, costDataND.Luu,
     NUMDIFF_MODIFIER * costModelND.disturbance)  # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
-
-costModelND.calcDiff(costDataND, x, u)
-
-assert (absmax(costData.Lx - costDataND.Lx) < 1e2 * costModelND.disturbance)
-assert (absmax(costData.Lu - costDataND.Lu) < 1e2 * costModelND.disturbance)
-assert (absmax(costData.Lxx - costDataND.Lxx) < 1e2 * costModelND.disturbance)
-assert (absmax(costData.Lxu - costDataND.Lxu) < 1e2 * costModelND.disturbance)
-assert (absmax(costData.Luu - costDataND.Luu) < 1e2 * costModelND.disturbance)
 
 X = StatePinocchio(rmodel)
 q = pinocchio.randomConfiguration(rmodel)
@@ -314,19 +320,16 @@ costModel.calc(costData, x, u)
 
 costModel.calcDiff(costData, x, u)
 
+costModelND = CostModelNumDiff(costModel, X, withGaussApprox=True, reevals=[])
+costDataND = costModelND.createData(rdata)
+costModelND.calcDiff(costDataND, x, u)
+
 assertNumDiff(
     costData.Lx, costDataND.Lx,
     NUMDIFF_MODIFIER * costModelND.disturbance)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
 assertNumDiff(
     costData.Lu, costDataND.Lu,
     NUMDIFF_MODIFIER * costModelND.disturbance)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
-# Check that the cost derivative is zero if q>=lower and q<=upper
-# and that cost is positive if q<lower or q>upper
-lowersafe = m2a(x) >= lowerLimit
-uppersafe = m2a(x) <= upperLimit
-
-assert (absmax(costData.Lx - costDataND.Lx) < 1e2 * costModelND.disturbance)
-assert (absmax(costData.Lu - costDataND.Lu) < 1e2 * costModelND.disturbance)
 # Check that the cost derivative is zero if q>=lower and q<=upper
 # and that cost is positive if q<lower or q>upper
 lowersafe = m2a(x) >= lowerLimit
