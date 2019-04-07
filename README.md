@@ -12,8 +12,8 @@ The source code is released under the [BSD 3-Clause license](LICENSE).
 **With additional support from the Gepetto team at LAAS-CNRS.**
 
 [![License BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg?style=flat)](https://tldrlegal.com/license/bsd-3-clause-license-%28revised%29#fulltext)
-[![pipeline status](https://gepgitlab.laas.fr/loco-3d/cddp/badges/master/pipeline.svg)](https://gepgitlab.laas.fr/loco-3d/cddp/commits/master)
-[![coverage report](https://gepgitlab.laas.fr/loco-3d/cddp/badges/master/coverage.svg)](https://gepgitlab.laas.fr/loco-3d/cddp/commits/master)
+[![pipeline status](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/pipeline.svg)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/pipelines?ref=devel)
+[![coverage report](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/coverage.svg)](https://gepgitlab.laas.fr/loco-3d/cddp/commits/devel)
 
 If you want to follow the current developments, you can directly refer to the [devel branch](https://gepgitlab.laas.fr/loco-3d/cddp/tree/devel).
 
