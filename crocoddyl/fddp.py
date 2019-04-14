@@ -39,6 +39,7 @@ class SolverFDDP(SolverAbstract):
         self.regMax = 1e9
         self.regMin = 1e-9
         self.th_step = .5
+        self.th_acceptNegStep = 2.
 
         # Quadratic model of the expected improvement
         self.d1 = 0.
@@ -153,12 +154,20 @@ class SolverFDDP(SolverAbstract):
                 firstCalc = False
                 self.dV_exp = a * (d1 + .5 * d2 * a)
                 # or not self.isFeasible
-                if d1 < self.th_grad or self.dV > self.th_acceptStep * self.dV_exp:
-                    # Accept step
-                    self.wasFeasible = self.isFeasible
-                    self.setCandidate(self.xs_try, self.us_try, isFeasible=(self.wasFeasible or a == 1))
-                    self.cost = self.cost_try
-                    break
+                if self.dV_exp > 0.: # descend direction
+                    if d1 < self.th_grad or self.dV > self.th_acceptStep * self.dV_exp:
+                        # Accept step
+                        self.wasFeasible = self.isFeasible
+                        self.setCandidate(self.xs_try, self.us_try, isFeasible=(self.wasFeasible or a == 1))
+                        self.cost = self.cost_try
+                        break
+                else: # reducing the gaps by allowing a small increament in the cost value
+                    if d1 < self.th_grad or self.dV < self.th_acceptNegStep * self.dV_exp:
+                        # Accept step
+                        self.wasFeasible = self.isFeasible
+                        self.setCandidate(self.xs_try, self.us_try, isFeasible=(self.wasFeasible or a == 1))
+                        self.cost = self.cost_try
+                        break
             if a > self.th_step:
                 self.decreaseRegularization()
             if a == self.alphas[-1]:
