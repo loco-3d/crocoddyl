@@ -13,6 +13,10 @@ class SolverKKT(SolverAbstract):
         self.x_reg = 0
         self.u_reg = 0
 
+        # Quadratic model of the expected improvement
+        self.d1 = 0.
+        self.d2 = 0.
+
     def calc(self):
         '''
         For a given pair of candidate state and control trajectories,
@@ -111,7 +115,9 @@ class SolverKKT(SolverAbstract):
         and m_k is the quadratic model of f at x_k, and delta is the descent direction.
         Then: dv_exp = - grad*delta - .5*hess*delta**2
         '''
-        return -np.dot(self.grad, self.primal), -np.dot(np.dot(self.hess, self.primal), self.primal)
+        self.d1 = -np.dot(self.grad, self.primal)
+        self.d2 = -np.dot(np.dot(self.hess, self.primal), self.primal)
+        return self.d1, self.d2
 
     def stoppingCriteria(self):
         '''

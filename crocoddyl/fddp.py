@@ -91,15 +91,17 @@ class SolverFDDP(SolverAbstract):
             if firstCalc:
                 self.dg = -np.dot(self.Vx[-1].T, self.gaps[-1])
                 self.dq = -np.dot(self.gaps[-1].T, np.dot(self.Vxx[-1], self.gaps[-1]))
-            self.dv = -np.dot(self.gaps[-1].T, np.dot(self.Vxx[-1],
-                self.problem.runningModels[-1].State.diff(self.xs_try[-1], self.xs[-1])))
+            self.dv = -np.dot(
+                self.gaps[-1].T,
+                np.dot(self.Vxx[-1], self.problem.runningModels[-1].State.diff(self.xs_try[-1], self.xs[-1])))
             for t in range(self.problem.T):
                 if firstCalc:
                     self.dg += -np.dot(self.Vx[t].T, self.gaps[t]) + np.dot(self.Qu[t].T, self.k[t])
-                    self.dq += -np.dot(self.k[t].T, np.dot(self.Quu[t], self.k[t])) - np.dot(self.gaps[t].T,
-                        np.dot(self.Vxx[t], self.gaps[t]))
-                self.dv += -np.dot(self.gaps[t].T, np.dot(self.Vxx[t],
-                    self.problem.runningModels[t].State.diff(self.xs_try[t], self.xs[t])))
+                    self.dq += -np.dot(self.k[t].T, np.dot(self.Quu[t], self.k[t])) - np.dot(
+                        self.gaps[t].T, np.dot(self.Vxx[t], self.gaps[t]))
+                self.dv += -np.dot(
+                    self.gaps[t].T,
+                    np.dot(self.Vxx[t], self.problem.runningModels[t].State.diff(self.xs_try[t], self.xs[t])))
             self.d1 = self.dg - self.dv
             self.d2 = self.dq + 2 * self.dv
         return [self.d1, self.d2]
