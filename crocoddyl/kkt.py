@@ -117,7 +117,7 @@ class SolverKKT(SolverAbstract):
         '''
         self.d1 = -np.dot(self.grad, self.primal)
         self.d2 = -np.dot(np.dot(self.hess, self.primal), self.primal)
-        return self.d1, self.d2
+        return [self.d1, self.d2]
 
     def stoppingCriteria(self):
         '''
