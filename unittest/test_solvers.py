@@ -757,8 +757,7 @@ for t in range(T):
 # Checks the expecte improvement against the KKT solver
 d1, d2 = fddp.expectedImprovement()
 d1kkt, d2kkt = kkt.expectedImprovement()
-assert (np.linalg.norm(d1 + d1kkt) < 1e-14)
-assert (np.linalg.norm(d2 + d2kkt) < 1e-14)
+assert (abs(d1 - d1kkt) < 1e-14 and abs(d2 - d2kkt) < 1e-14)
 
 
 # -------------------------------------------------------------------
@@ -784,8 +783,7 @@ for t in range(T):
 # Checks the expecte improvement against the KKT solver
 d1, d2 = fddp.expectedImprovement()
 d1kkt, d2kkt = kkt.expectedImprovement()
-assert (np.linalg.norm(d1 + d1kkt) < 1e-14)
-assert (np.linalg.norm(d2 + d2kkt) < 1e-14)
+assert (abs(d1 - d1kkt) < 1e-14 and abs(d2 - d2kkt) < 1e-14)
 
 if __name__ == '__main__':
     unittest.main()

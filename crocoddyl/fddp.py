@@ -103,8 +103,8 @@ class SolverFDDP(SolverAbstract):
                 self.dv += -np.dot(
                     self.gaps[t].T,
                     np.dot(self.Vxx[t], self.problem.runningModels[t].State.diff(self.xs_try[t], self.xs[t])))
-            self.d1 = -self.dg - self.dv
-            self.d2 = -self.dq + 2 * self.dv
+            self.d1 = self.dg + self.dv
+            self.d2 = self.dq - 2 * self.dv
         return [self.d1, self.d2]
 
     def tryStep(self, stepLength):
@@ -154,14 +154,14 @@ class SolverFDDP(SolverAbstract):
                 firstCalc = False
                 self.dV_exp = a * (d1 + .5 * d2 * a)
                 # or not self.isFeasible
-                if self.dV_exp > 0.: # descend direction
+                if self.dV_exp > 0.:  # descend direction
                     if d1 < self.th_grad or self.dV > self.th_acceptStep * self.dV_exp:
                         # Accept step
                         self.wasFeasible = self.isFeasible
                         self.setCandidate(self.xs_try, self.us_try, isFeasible=(self.wasFeasible or a == 1))
                         self.cost = self.cost_try
                         break
-                else: # reducing the gaps by allowing a small increament in the cost value
+                else:  # reducing the gaps by allowing a small increment in the cost value
                     if d1 < self.th_grad or self.dV < self.th_acceptNegStep * self.dV_exp:
                         # Accept step
                         self.wasFeasible = self.isFeasible
