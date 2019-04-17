@@ -733,7 +733,6 @@ fddp.regMax = 1e-5
 assert (not ddp.solve()[2])
 assert (not fddp.solve()[2])
 
-
 # -------------------------------------------------------------------
 # ------------- test expected improvement without gaps --------------
 # -------------------------------------------------------------------
@@ -758,7 +757,6 @@ for t in range(T):
 d1, d2 = fddp.expectedImprovement()
 d1kkt, d2kkt = kkt.expectedImprovement()
 assert (abs(d1 - d1kkt) < 1e-14 and abs(d2 - d2kkt) < 1e-14)
-
 
 # -------------------------------------------------------------------
 # ------------- test expected improvement against gaps --------------
