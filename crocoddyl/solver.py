@@ -17,6 +17,10 @@ class SolverAbstract:
         self.problem = problem
         self.allocateData()
 
+        # Allocate common data
+        self.xs = [m.State.zero() for m in self.models()]
+        self.us = [np.zeros(m.nu) for m in self.problem.runningModels]
+
         # Default solver parameters
         self.th_acceptStep = 0.1
         self.th_stop = 1e-9
@@ -81,7 +85,7 @@ class SolverAbstract:
         """
         raise NotImplementedError("Not implemented yet.")
 
-    def setCandidate(self, xs=None, us=None, isFeasible=False, copy=True):
+    def setCandidate(self, xs=None, us=None, isFeasible=False):
         """ Set the solver candidate warm-point values (xs, us).
 
         The solver candidates are defined as a state and control trajectory (xs, us) of T+1 and T elements,
@@ -90,21 +94,17 @@ class SolverAbstract:
         :param xs: state trajectory of T+1 elements.
         :param us: control trajectory of T elements.
         :param isFeasible: true if the xs are obtained from integrating the us (rollout).
-        :param copy: it make a copy of the data if it's true.
         """
         if xs is None:
-            xs = [m.State.zero() for m in self.models()]
-        elif copy:
-            xs = [x.copy() for x in xs]
+            self.xs[:] = [m.State.zero() for m in self.models()]
+        else:
+            assert (len(xs) == self.problem.T + 1)
+            self.xs[:] = [x.copy() for x in xs]
         if us is None:
-            us = [np.zeros(m.nu) for m in self.problem.runningModels]
-        elif copy:
-            us = [u.copy() for u in us]
-
-        assert (len(xs) == self.problem.T + 1)
-        assert (len(us) == self.problem.T)
-        self.xs = xs
-        self.us = us
+            self.us[:] = [np.zeros(m.nu) for m in self.problem.runningModels]
+        else:
+            assert (len(us) == self.problem.T)
+            self.us[:] = [u.copy() for u in us]
         self.isFeasible = isFeasible
 
     def models(self):

@@ -12,7 +12,7 @@ def rev_enumerate(l):
 class SolverDDP(SolverAbstract):
     """ Run the DDP solver.
 
-    The solver computes an optimal trajectory and control commmands by iteratives
+    The solver computes an optimal trajectory and control commands by iteratives
     running backward and forward passes. The backward-pass updates locally the
     quadratic approximation of the problem and computes descent direction,
     and the forward-pass rollouts this new policy by integrating the system dynamics
@@ -38,6 +38,13 @@ class SolverDDP(SolverAbstract):
         """ Compute the tangent (LQR) model.
         """
         self.cost = self.problem.calcDiff(self.xs, self.us)
+        if not self.isFeasible:
+            # Gap store the state defect from the guess to feasible (rollout) trajectory, i.e.
+            #   gap = x_rollout [-] x_guess = DIFF(x_guess, x_rollout)
+            self.gaps[0] = self.problem.runningModels[0].State.diff(self.xs[0], self.problem.initialState)
+            for i, (m, d, x) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas, self.xs[1:])):
+                self.gaps[i + 1] = m.State.diff(x, d.xnext)
+
         return self.cost
 
     def computeDirection(self, recalc=True):
@@ -83,7 +90,7 @@ class SolverDDP(SolverAbstract):
         :param init_xs: Initial state
         :param init_us: Initial control
         """
-        self.setCandidate(init_xs, init_us, isFeasible=isFeasible, copy=True)
+        self.setCandidate(init_xs, init_us, isFeasible=isFeasible)
         self.x_reg = regInit if regInit is not None else self.regMin
         self.u_reg = regInit if regInit is not None else self.regMin
         self.wasFeasible = False
@@ -111,7 +118,7 @@ class SolverDDP(SolverAbstract):
                 if d1 < self.th_grad or not self.isFeasible or self.dV > self.th_acceptStep * self.dV_exp:
                     # Accept step
                     self.wasFeasible = self.isFeasible
-                    self.setCandidate(self.xs_try, self.us_try, isFeasible=True, copy=False)
+                    self.setCandidate(self.xs_try, self.us_try, isFeasible=True)
                     self.cost = self.cost_try
                     break
             if a > self.th_step:
@@ -166,6 +173,11 @@ class SolverDDP(SolverAbstract):
         self.K = [np.zeros([m.nu, m.ndx]) for m in self.problem.runningModels]
         self.k = [np.zeros([m.nu]) for m in self.problem.runningModels]
 
+        self.xs_try = [self.problem.initialState] + [np.nan] * self.problem.T
+        self.us_try = [np.nan] * self.problem.T
+        self.gaps = [np.zeros(self.problem.runningModels[0].ndx)
+                     ] + [np.zeros(m.ndx) for m in self.problem.runningModels]
+
     def backwardPass(self):
         """ Run the backward-pass of the DDP algorithm.
 
@@ -176,9 +188,9 @@ class SolverDDP(SolverAbstract):
         scheme is used to ensure a good search direction. The norm of the gradient,
         a the directional derivatives are computed.
         """
-        xs = self.xs
         self.Vx[-1][:] = self.problem.terminalData.Lx
         self.Vxx[-1][:, :] = self.problem.terminalData.Lxx
+
         if self.x_reg != 0:
             ndx = self.problem.terminalModel.ndx
             self.Vxx[-1][range(ndx), range(ndx)] += self.x_reg
@@ -187,17 +199,19 @@ class SolverDDP(SolverAbstract):
             self.Qxx[t][:, :] = data.Lxx + np.dot(data.Fx.T, np.dot(self.Vxx[t + 1], data.Fx))
             self.Qxu[t][:, :] = data.Lxu + np.dot(data.Fx.T, np.dot(self.Vxx[t + 1], data.Fu))
             self.Quu[t][:, :] = data.Luu + np.dot(data.Fu.T, np.dot(self.Vxx[t + 1], data.Fu))
-            self.Qx[t][:] = data.Lx + np.dot(self.Vx[t + 1], data.Fx)
-            self.Qu[t][:] = data.Lu + np.dot(self.Vx[t + 1], data.Fu)
+            self.Qx[t][:] = data.Lx + np.dot(data.Fx.T, self.Vx[t + 1])
+            self.Qu[t][:] = data.Lu + np.dot(data.Fu.T, self.Vx[t + 1])
             if not self.isFeasible:
                 # In case the xt+1 are not f(xt,ut) i.e warm start not obtained from roll-out.
-                relinearization = np.dot(self.Vxx[t + 1], model.State.diff(xs[t + 1], data.xnext))
+                relinearization = np.dot(self.Vxx[t + 1], self.gaps[t + 1])
                 self.Qx[t][:] += np.dot(data.Fx.T, relinearization)
                 self.Qu[t][:] += np.dot(data.Fu.T, relinearization)
 
             if self.u_reg != 0:
                 self.Quu[t][range(model.nu), range(model.nu)] += self.u_reg
+
             self.computeGains(t)
+
             # Vx = Qx - Qu K + .5(- Qxu k - k Qux + k Quu K + K Quu k)
             # Qxu k = Qxu Quu^+ Qu
             # Qu  K = Qu Quu^+ Qux = Qxu k
@@ -238,8 +252,7 @@ class SolverDDP(SolverAbstract):
         # Argument warning is also introduce for debug: by default, it masks the numpy warnings
         #    that can be reactivated during debug.
         xs, us = self.xs, self.us
-        xtry = [self.problem.initialState] + [np.nan] * self.problem.T
-        utry = [np.nan] * self.problem.T
+        xtry, utry = self.xs_try, self.us_try
         ctry = 0
         for t, (m, d) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas)):
             utry[t] = us[t] - self.k[t] * stepLength - np.dot(self.K[t], m.State.diff(xs[t], xtry[t]))
@@ -254,7 +267,5 @@ class SolverDDP(SolverAbstract):
             np.warnings.simplefilter(warning)
             ctry += self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])[1]
         raiseIfNan(ctry, ArithmeticError('forward error'))
-        self.xs_try = xtry
-        self.us_try = utry
         self.cost_try = ctry
         return xtry, utry, ctry

@@ -13,13 +13,13 @@ class SolverFDDP(SolverAbstract):
     """ Run a modified version DDP solver, that is performing a more advanced
     feasibility search.
 
-    The solver computes an optimal trajectory and control commmands by iteratives
+    The solver computes an optimal trajectory and control commands by iteratives
     running backward and forward passes. The backward-pass updates locally the
     quadratic approximation of the problem and computes descent direction,
     and the forward-pass rollouts this new policy by integrating the system dynamics
     along a tuple of optimized control commands U*.
     The solver is particularly interesting when providing an unfeasible guess (ie x is not
-    the rollout of u). In that case the solver does not try to immediatly compute a
+    the rollout of u). In that case the solver does not try to immediately compute a
     feasible candidate, but rather maintains the gap at the shooting nodes while it is
     searching for a good optimization.
     :param shootingProblem: shooting problem (list of action models along trajectory)
@@ -43,17 +43,13 @@ class SolverFDDP(SolverAbstract):
         """ Compute the tangent (LQR) model.
         """
         self.cost = self.problem.calcDiff(self.xs, self.us)
-        if self.isFeasible:
-            if hasattr(self, 'gaps'):
-                del self.gaps
-        else:
-            # Gap store the displacement to go from a feasible trajectory to the current xs.
-            # gap is so that    xconti [+] gap = xcand  ...
-            #              ...  gap = xcand [-] xconti = DIFF(xconti,xcand)
-            self.gaps = [self.problem.runningModels[0].State.diff(self.problem.initialState, self.xs[0])] + [
-                m.State.diff(d.xnext, x)
-                for m, d, x in zip(self.problem.runningModels, self.problem.runningDatas, self.xs[1:])
-            ]
+        if not self.isFeasible:
+            # Gap store the state defect from the guess to feasible (rollout) trajectory, i.e.
+            #   gap = x_rollout [-] x_guess = DIFF(x_guess, x_rollout)
+            self.gaps[0] = self.problem.runningModels[0].State.diff(self.xs[0], self.problem.initialState)
+            for i, (m, d, x) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas, self.xs[1:])):
+                self.gaps[i + 1] = m.State.diff(x, d.xnext)
+
         return self.cost
 
     def computeDirection(self, recalc=True):
@@ -99,12 +95,11 @@ class SolverFDDP(SolverAbstract):
         :param init_xs: Initial state
         :param init_us: Initial control
         """
-        self.setCandidate(init_xs, init_us, isFeasible=isFeasible, copy=True)
+        self.setCandidate(init_xs, init_us, isFeasible=isFeasible)
         self.x_reg = regInit if regInit is not None else self.regMin
         self.u_reg = regInit if regInit is not None else self.regMin
         self.wasFeasible = False
         for i in range(maxiter):
-            # print 'i',i
             recalc = True
             while True:
                 try:
@@ -120,19 +115,16 @@ class SolverFDDP(SolverAbstract):
             d1, d2 = self.expectedImprovement()
 
             for a in self.alphas:
-                # print 'a',a
                 try:
                     self.dV = self.tryStep(a)
                 except ArithmeticError:
-                    # print 'a=%0.3f,   arithmerror .... reject' % a
                     continue
                 self.dV_exp = a * (d1 + .5 * d2 * a)
-                # print 'a=%0.3f,   exp=%5.1e,   actual=%5.1e .... ' % (a,self.dV_exp,self.dV)
                 # or not self.isFeasible
                 if d1 < self.th_grad or self.dV > self.th_acceptStep * self.dV_exp:
                     # Accept step
                     self.wasFeasible = self.isFeasible
-                    self.setCandidate(self.xs_try, self.us_try, isFeasible=(self.wasFeasible or a == 1), copy=False)
+                    self.setCandidate(self.xs_try, self.us_try, isFeasible=(self.wasFeasible or a == 1))
                     self.cost = self.cost_try
                     break
             if a > self.th_step:
@@ -187,6 +179,11 @@ class SolverFDDP(SolverAbstract):
         self.K = [np.zeros([m.nu, m.ndx]) for m in self.problem.runningModels]
         self.k = [np.zeros([m.nu]) for m in self.problem.runningModels]
 
+        self.xs_try = [np.nan] * (self.problem.T + 1)
+        self.us_try = [np.nan] * self.problem.T
+        self.gaps = [np.zeros(self.problem.runningModels[0].ndx)
+                     ] + [np.zeros(m.ndx) for m in self.problem.runningModels]
+
     def backwardPass(self):
         """ Run the backward-pass of the DDP algorithm.
 
@@ -197,39 +194,28 @@ class SolverFDDP(SolverAbstract):
         scheme is used to ensure a good search direction. The norm of the gradient,
         a the directional derivatives are computed.
         """
-        xs = self.xs
         self.Vx[-1][:] = self.problem.terminalData.Lx
         self.Vxx[-1][:, :] = self.problem.terminalData.Lxx
+
         if self.x_reg != 0:
             ndx = self.problem.terminalModel.ndx
             self.Vxx[-1][range(ndx), range(ndx)] += self.x_reg
+
+        # Compute and store the Vx gradient at end of the interval (rollout state)
+        if not self.isFeasible:
+            self.Vx[-1] += np.dot(self.Vxx[-1], self.gaps[-1])
 
         for t, (model, data) in rev_enumerate(zip(self.problem.runningModels, self.problem.runningDatas)):
             self.Qxx[t][:, :] = data.Lxx + np.dot(data.Fx.T, np.dot(self.Vxx[t + 1], data.Fx))
             self.Qxu[t][:, :] = data.Lxu + np.dot(data.Fx.T, np.dot(self.Vxx[t + 1], data.Fu))
             self.Quu[t][:, :] = data.Luu + np.dot(data.Fu.T, np.dot(self.Vxx[t + 1], data.Fu))
-            self.Qx[t][:] = data.Lx + np.dot(self.Vx[t + 1], data.Fx)
-            self.Qu[t][:] = data.Lu + np.dot(self.Vx[t + 1], data.Fu)
-            if not self.isFeasible:
-                # In case the xt+1 are not f(xt,ut) i.e warm start not obtained from roll-out.
-                assert (np.allclose(model.State.diff(xs[t + 1], data.xnext), -self.gaps[t + 1]))
-                relinearization = np.dot(self.Vxx[t + 1], -self.gaps[t + 1])
-                # relinearization = np.dot(self.Vxx[t+1],model.State.diff(xs[t+1],data.xnext))
-                self.Qx[t][:] += np.dot(data.Fx.T, relinearization)
-                self.Qu[t][:] += np.dot(data.Fu.T, relinearization)
+            self.Qx[t][:] = data.Lx + np.dot(data.Fx.T, self.Vx[t + 1])
+            self.Qu[t][:] = data.Lu + np.dot(data.Fu.T, self.Vx[t + 1])
 
             if self.u_reg != 0:
                 self.Quu[t][range(model.nu), range(model.nu)] += self.u_reg
 
-            try:
-                if self.Quu[t].shape[0] > 0:
-                    Lb = scl.cho_factor(self.Quu[t])
-                    self.K[t][:, :] = scl.cho_solve(Lb, self.Qux[t])
-                    self.k[t][:] = scl.cho_solve(Lb, self.Qu[t])
-                else:
-                    pass
-            except scl.LinAlgError:
-                raise ArithmeticError('backward error')
+            self.computeGains(t)
 
             # Vx = Qx - Qu K + .5(- Qxu k - k Qux + k Quu K + K Quu k)
             # Qxu k = Qxu Quu^+ Qu
@@ -245,8 +231,24 @@ class SolverFDDP(SolverAbstract):
 
             if self.x_reg != 0:
                 self.Vxx[t][range(model.ndx), range(model.ndx)] += self.x_reg
+
+            # Compute and store the Vx gradient at end of the interval (rollout state)
+            if not self.isFeasible:
+                self.Vx[t] += np.dot(self.Vxx[t], self.gaps[t])
+
             raiseIfNan(self.Vxx[t], ArithmeticError('backward error'))
             raiseIfNan(self.Vx[t], ArithmeticError('backward error'))
+
+    def computeGains(self, t):
+        try:
+            if self.Quu[t].shape[0] > 0:
+                Lb = scl.cho_factor(self.Quu[t])
+                self.K[t][:, :] = scl.cho_solve(Lb, self.Qux[t])
+                self.k[t][:] = scl.cho_solve(Lb, self.Qu[t])
+            else:
+                pass
+        except scl.LinAlgError:
+            raise ArithmeticError('backward error')
 
     def forwardPass(self, stepLength, warning='ignore'):
         """ Run the forward-pass of the DDP algorithm.
@@ -257,19 +259,17 @@ class SolverFDDP(SolverAbstract):
         chosen step length.
         :param stepLength: step length
         """
-        # Argument b is introduce for debug purpose.
         # Argument warning is also introduce for debug: by default, it masks the numpy warnings
         #    that can be reactivated during debug.
         xs, us = self.xs, self.us
-        xtry = [np.nan] * (self.problem.T + 1)  # Remove self.xtry after debug
-        utry = [np.nan] * self.problem.T  # Remove self.utry after debug
+        xtry, utry = self.xs_try, self.us_try
         ctry = 0
         xnext = self.problem.initialState
         for t, (m, d) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas)):
             if self.isFeasible or stepLength == 1:
                 xtry[t] = xnext.copy()
             else:
-                xtry[t] = m.State.integrate(xnext, self.gaps[t] * (1 - stepLength))
+                xtry[t] = m.State.integrate(xnext, self.gaps[t] * (stepLength - 1))
             utry[t] = us[t] - self.k[t] * stepLength - np.dot(self.K[t], m.State.diff(xs[t], xtry[t]))
             with np.warnings.catch_warnings():
                 np.warnings.simplefilter(warning)
@@ -280,12 +280,10 @@ class SolverFDDP(SolverAbstract):
         if self.isFeasible or stepLength == 1:
             xtry[-1] = xnext.copy()
         else:
-            xtry[-1] = self.problem.terminalModel.State.integrate(xnext, self.gaps[-1] * (1 - stepLength))
+            xtry[-1] = self.problem.terminalModel.State.integrate(xnext, self.gaps[-1] * (stepLength - 1))
         with np.warnings.catch_warnings():
             np.warnings.simplefilter(warning)
             ctry += self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])[1]
         raiseIfNan(ctry, ArithmeticError('forward error'))
-        self.xs_try = xtry
-        self.us_try = utry
         self.cost_try = ctry
         return xtry, utry, ctry

@@ -143,7 +143,7 @@ class SolverKKT(SolverAbstract):
         From an initial guess init_xs,init_us (feasible or not),
         iterate over computeDirection and tryStep until stoppingCriteria is below threshold.
         '''
-        self.setCandidate(init_xs, init_us, isFeasible, copy=True)
+        self.setCandidate(init_xs, init_us, isFeasible)
         for i in range(maxiter):
             self.computeDirection()
             d1, d2 = self.expectedImprovement()
@@ -154,7 +154,7 @@ class SolverKKT(SolverAbstract):
                     print('\t\tAccept? %f %f' % (dV, d1 * a + .5 * d2 * a**2))
                 if d1 < 1e-9 or not isFeasible or dV > self.th_acceptStep * (d1 * a + .5 * d2 * a**2):
                     # Accept step
-                    self.setCandidate(self.xs_try, self.us_try, isFeasible=True, copy=False)
+                    self.setCandidate(self.xs_try, self.us_try, isFeasible=True)
                     break
             if verbose:
                 print('Accept iter=%d, a=%f, cost=%.8f' % (i, a, self.problem.calc(self.xs, self.us)))
