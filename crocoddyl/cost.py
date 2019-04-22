@@ -2,6 +2,7 @@ from collections import OrderedDict
 from exceptions import RuntimeError
 
 import numpy as np
+
 import pinocchio
 
 from .activation import ActivationModelInequality, ActivationModelQuad
@@ -397,6 +398,55 @@ class CostDataFramePlacement(CostDataPinocchio):
         CostDataPinocchio.__init__(self, model, pinocchioData)
         self.activation = model.activation.createData()
         self.rMf = None
+        self.Lu = 0
+        self.Lv = 0
+        self.Lxu = 0
+        self.Luu = 0
+        self.Lvv = 0
+        self.Ru = 0
+        self.Rv = 0
+
+
+class CostModelFrameRotation(CostModelPinocchio):
+    '''
+    The class proposes a model of a cost function orientation (3d) for a frame of the robot.
+    Paramterize it with the frame index frameIdx and the effector desired rotation matrix.
+    '''
+
+    def __init__(self, pinocchioModel, frame, ref, nu=None, activation=None):
+        self.CostDataType = CostDataFrameRotation
+        CostModelPinocchio.__init__(self, pinocchioModel, ncost=3, nu=nu)
+        self.ref = ref
+        self.frame = frame
+        self.activation = activation if activation is not None else ActivationModelQuad()
+
+    def calc(self, data, x, u):
+        data.rRf = self.ref.transpose() * data.pinocchio.oMf[self.frame].rotation
+        data.residuals[:] = m2a(pinocchio.log3(data.rRf))
+        data.cost = sum(self.activation.calc(data.activation, data.residuals))
+        return data.cost
+
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        nq = self.nq
+        pinocchio.updateFramePlacements(self.pinocchio, data.pinocchio)
+        J = np.dot(
+            pinocchio.Jlog3(data.rRf),
+            pinocchio.getFrameJacobian(self.pinocchio, data.pinocchio, self.frame,
+                                       pinocchio.ReferenceFrame.LOCAL)[3:, :])
+        Ax, Axx = self.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
+        data.Rq[:, :nq] = J
+        data.Lq[:] = np.dot(J.T, Ax)
+        data.Lqq[:, :] = np.dot(data.Rq.T, Axx * data.Rq)  # J is a matrix, use Rq instead.
+        return data.cost
+
+
+class CostDataFrameRotation(CostDataPinocchio):
+    def __init__(self, model, pinocchioData):
+        CostDataPinocchio.__init__(self, model, pinocchioData)
+        self.activation = model.activation.createData()
+        self.rRf = None
         self.Lu = 0
         self.Lv = 0
         self.Lxu = 0
