@@ -502,7 +502,6 @@ class CostModelControl(CostModelPinocchio):
         Ax, Axx = self.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
         data.Lu[:] = Ax
         data.Luu[:, :] = np.diag(m2a(Axx))
-        assert (data.Luu[0, 0] == 1 and data.Luu[1, 0] == 0)
 
 
 class CostDataControl(CostDataPinocchio):
