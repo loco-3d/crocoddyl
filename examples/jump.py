@@ -224,11 +224,11 @@ problem = ShootingProblem(initialState=x0, runningModels=models[:-1], terminalMo
 ddp = SolverDDP(problem)
 ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]  # CallbackSolverDisplay(robot,rate=5,freq=10) ]
 
-ddp.setCandidate(xs=xsddp + [rmodel.defaultState] * (len(models) - len(xsddp)),
-                 us=usddp + [
-                     np.zeros(0) if isinstance(m, ActionModelImpact) else m.differential.quasiStatic(
-                         d.differential, rmodel.defaultState) for m, d in zip(ddp.models(), ddp.datas())[len(usddp):-1]
-                 ])
+us = usddp + [
+    np.zeros(0) if isinstance(m, ActionModelImpact) else m.differential.quasiStatic(
+        d.differential, rmodel.defaultState) for m, d in zip(ddp.models(), ddp.datas())[len(usddp):-1]
+]
+ddp.setCandidate(xs=xsddp + [rmodel.defaultState] * (len(models) - len(xsddp)), us=us)
 ddp.th_stop = 5e-4
 impact.costs['track30'].weight = 1e6
 impact.costs['track16'].weight = 1e6
