@@ -156,8 +156,9 @@ class SimpleQuadrupedalGaitProblem:
                 [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
             ) for k in range(numKnots)
         ]
-        comForwardTermModel = self.createSwingFootModel(
-            timeStep, [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId], com0 + [comGoTo, 0., 0.])
+        comForwardTermModel = self.createSwingFootModel(timeStep,
+                                                        [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+                                                        com0 + [comGoTo, 0., 0.])
         comForwardTermModel.differential.costs['comTrack'].weight = 1e6
 
         comBackwardModels = [
@@ -166,8 +167,9 @@ class SimpleQuadrupedalGaitProblem:
                 [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
             ) for k in range(numKnots)
         ]
-        comBackwardTermModel = self.createSwingFootModel(
-            timeStep, [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId], com0 + [-comGoTo, 0., 0.])
+        comBackwardTermModel = self.createSwingFootModel(timeStep,
+                                                         [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+                                                         com0 + [-comGoTo, 0., 0.])
         comBackwardTermModel.differential.costs['comTrack'].weight = 1e6
 
         # Adding the CoM tasks
@@ -606,14 +608,13 @@ for i, phase in enumerate(GAITPHASES):
 
     # Solving the problem with the DDP solver
     ddp[i].th_stop = 1e-9
-    ddp[i].solve(
-        maxiter=1000,
-        regInit=.1,
-        init_xs=[rmodel.defaultState] * len(ddp[i].models()),
-        init_us=[
-            m.differential.quasiStatic(d.differential, rmodel.defaultState)
-            for m, d in zip(ddp[i].models(), ddp[i].datas())[:-1]
-        ])
+    ddp[i].solve(maxiter=1000,
+                 regInit=.1,
+                 init_xs=[rmodel.defaultState] * len(ddp[i].models()),
+                 init_us=[
+                     m.differential.quasiStatic(d.differential, rmodel.defaultState)
+                     for m, d in zip(ddp[i].models(), ddp[i].datas())[:-1]
+                 ])
 
     # Defining the final state as initial one for the next phase
     x0 = ddp[i].xs[-1]

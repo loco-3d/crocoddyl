@@ -1,10 +1,11 @@
 import numpy as np
 import pinocchio
-from crocoddyl import (
-    ActionModelNumDiff, ActuationModelFreeFloating, CallbackDDPLogger, ContactModel3D, ContactModel6D,
-    ContactModelMultiple, CostModelControl, CostModelForce, CostModelForceLinearCone, CostModelFrameTranslation,
-    CostModelState, CostModelSum, DifferentialActionModelFloatingInContact, DifferentialActionModelNumDiff,
-    IntegratedActionModelEuler, ShootingProblem, SolverDDP, SolverKKT, StatePinocchio, a2m, absmax, loadTalosArm, m2a)
+from crocoddyl import (ActionModelNumDiff, ActuationModelFreeFloating, CallbackDDPLogger, ContactModel3D,
+                       ContactModel6D, ContactModelMultiple, CostModelControl, CostModelForce,
+                       CostModelForceLinearCone, CostModelFrameTranslation, CostModelState, CostModelSum,
+                       DifferentialActionModelFloatingInContact, DifferentialActionModelNumDiff,
+                       IntegratedActionModelEuler, ShootingProblem, SolverDDP, SolverKKT, StatePinocchio, a2m, absmax,
+                       loadTalosArm, m2a)
 from crocoddyl.utils import EPS
 from numpy.linalg import eig, norm, pinv
 from pinocchio.utils import rand, zero
@@ -26,8 +27,10 @@ rdata = rmodel.createData()
 
 np.set_printoptions(linewidth=400, suppress=True)
 
-contactModel = ContactModel6D(
-    rmodel, rmodel.getFrameId('gripper_left_fingertip_2_link'), ref=pinocchio.SE3.Random(), gains=[4., 4.])
+contactModel = ContactModel6D(rmodel,
+                              rmodel.getFrameId('gripper_left_fingertip_2_link'),
+                              ref=pinocchio.SE3.Random(),
+                              gains=[4., 4.])
 contactData = contactModel.createData(rdata)
 
 q = pinocchio.randomConfiguration(rmodel)
@@ -74,8 +77,10 @@ Av_numdiff = df_dx(lambda _v: returna_at0(q, _v), v, h=eps)
 assert (np.isclose(contactData.Aq, Aq_numdiff, atol=np.sqrt(eps)).all())
 assert (np.isclose(contactData.Av, Av_numdiff, atol=np.sqrt(eps)).all())
 
-contactModel = ContactModel3D(
-    rmodel, rmodel.getFrameId('gripper_left_fingertip_2_link'), ref=np.random.rand(3), gains=[4., 4.])
+contactModel = ContactModel3D(rmodel,
+                              rmodel.getFrameId('gripper_left_fingertip_2_link'),
+                              ref=np.random.rand(3),
+                              gains=[4., 4.])
 contactData = contactModel.createData(rdata)
 
 q = pinocchio.randomConfiguration(rmodel)
@@ -133,8 +138,10 @@ x = np.concatenate([m2a(q), m2a(v)])
 u = np.random.rand(rmodel.nv - 6) * 2 - 1
 
 actModel = ActuationModelFreeFloating(rmodel)
-contactModel3 = ContactModel3D(
-    rmodel, rmodel.getFrameId('gripper_left_fingertip_2_link'), ref=np.random.rand(3), gains=[4., 4.])
+contactModel3 = ContactModel3D(rmodel,
+                               rmodel.getFrameId('gripper_left_fingertip_2_link'),
+                               ref=np.random.rand(3),
+                               gains=[4., 4.])
 rmodel.frames[contactModel3.frame].placement = pinocchio.SE3.Random()
 contactModel = ContactModelMultiple(rmodel)
 contactModel.addContact(name='fingertip', contact=contactModel3)
@@ -167,8 +174,10 @@ x = np.concatenate([m2a(q), m2a(v)])
 u = np.random.rand(rmodel.nv - 6) * 2 - 1
 
 actModel = ActuationModelFreeFloating(rmodel)
-contactModel6 = ContactModel6D(
-    rmodel, rmodel.getFrameId('gripper_left_fingertip_2_link'), ref=pinocchio.SE3.Random(), gains=[4., 4.])
+contactModel6 = ContactModel6D(rmodel,
+                               rmodel.getFrameId('gripper_left_fingertip_2_link'),
+                               ref=pinocchio.SE3.Random(),
+                               gains=[4., 4.])
 rmodel.frames[contactModel6.frame].placement = pinocchio.SE3.Random()
 contactModel = ContactModelMultiple(rmodel)
 contactModel.addContact(name='fingertip', contact=contactModel6)
@@ -221,8 +230,9 @@ assert (absmax(Fv - data.df_dv) < 1e-3)
 assert (absmax(Fu - data.df_du) < 1e-3)
 
 model.costs = CostModelSum(rmodel, nu=actModel.nu)
-model.costs.addCost(
-    name='force', weight=1, cost=CostModelForce(rmodel, model.contact.contacts['fingertip'], nu=actModel.nu))
+model.costs.addCost(name='force',
+                    weight=1,
+                    cost=CostModelForce(rmodel, model.contact.contacts['fingertip'], nu=actModel.nu))
 
 data = model.createData()
 data.costs['force'].contact = data.contact[model.costs['force'].cost.contact]
@@ -251,10 +261,9 @@ nc = model.contact.ncontact
 A = np.random.rand(nfaces, nc)
 
 model.costs = CostModelSum(rmodel, nu=actModel.nu)
-model.costs.addCost(
-    name='force_cone',
-    weight=1,
-    cost=CostModelForceLinearCone(rmodel, model.contact.contacts['fingertip'], A, nu=actModel.nu))
+model.costs.addCost(name='force_cone',
+                    weight=1,
+                    cost=CostModelForceLinearCone(rmodel, model.contact.contacts['fingertip'], A, nu=actModel.nu))
 data = model.createData()
 data.costs['force_cone'].contact = data.contact[model.costs['force_cone'].cost.contact]
 
@@ -292,11 +301,12 @@ contactModel = ContactModelMultiple(rmodel)
 contactModel.addContact(name='root_joint', contact=contactModel6)
 
 costModel = CostModelSum(rmodel, nu=actModel.nu)
-costModel.addCost(
-    name="pos",
-    weight=10,
-    cost=CostModelFrameTranslation(
-        rmodel, nu=actModel.nu, frame=rmodel.getFrameId('gripper_left_inner_single_link'), ref=np.array([.5, .4, .3])))
+costModel.addCost(name="pos",
+                  weight=10,
+                  cost=CostModelFrameTranslation(rmodel,
+                                                 nu=actModel.nu,
+                                                 frame=rmodel.getFrameId('gripper_left_inner_single_link'),
+                                                 ref=np.array([.5, .4, .3])))
 costModel.addCost(name="regx", weight=0.1, cost=CostModelState(rmodel, State, ref=State.zero(), nu=actModel.nu))
 costModel.addCost(name="regu", weight=0.01, cost=CostModelControl(rmodel, nu=actModel.nu))
 

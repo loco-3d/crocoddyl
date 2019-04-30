@@ -91,11 +91,13 @@ def runningModel(contactIds, effectors, com=None, integrationStep=1e-2):
     # Creating the cost model for a contact phase
     costModel = CostModelSum(rmodel, actModel.nu)
     wx = np.array([0] * 6 + [.1] * (rmodel.nv - 6) + [10] * rmodel.nv)
-    costModel.addCost(
-        'xreg',
-        weight=1e-1,
-        cost=CostModelState(
-            rmodel, State, ref=rmodel.defaultState, nu=actModel.nu, activation=ActivationModelWeightedQuad(wx)))
+    costModel.addCost('xreg',
+                      weight=1e-1,
+                      cost=CostModelState(rmodel,
+                                          State,
+                                          ref=rmodel.defaultState,
+                                          nu=actModel.nu,
+                                          activation=ActivationModelWeightedQuad(wx)))
     costModel.addCost('ureg', weight=1e-4, cost=CostModelControl(rmodel, nu=actModel.nu))
     for fid, ref in effectors.items():
         costModel.addCost("track%d" % fid, weight=100., cost=CostModelFramePlacement(rmodel, fid, ref, actModel.nu))
@@ -120,12 +122,16 @@ def impactModel(contactIds, effectors):
     # Creating the cost model for a contact phase
     costModel = CostModelSum(rmodel, nu=0)
     wx = np.array([0] * 6 + [.1] * (rmodel.nv - 6) + [10] * rmodel.nv)
-    costModel.addCost(
-        'xreg',
-        weight=.1,
-        cost=CostModelState(rmodel, State, ref=rmodel.defaultState, nu=0, activation=ActivationModelWeightedQuad(wx)))
-    costModel.addCost(
-        'com', weight=1., cost=CostModelImpactCoM(rmodel, activation=ActivationModelWeightedQuad(m2a([.1, .1, 3.]))))
+    costModel.addCost('xreg',
+                      weight=.1,
+                      cost=CostModelState(rmodel,
+                                          State,
+                                          ref=rmodel.defaultState,
+                                          nu=0,
+                                          activation=ActivationModelWeightedQuad(wx)))
+    costModel.addCost('com',
+                      weight=1.,
+                      cost=CostModelImpactCoM(rmodel, activation=ActivationModelWeightedQuad(m2a([.1, .1, 3.]))))
     for fid, ref in effectors.items():
         costModel.addCost("track%d" % fid, weight=100., cost=CostModelFramePlacement(rmodel, fid, ref, nu=0))
         # costModel.addCost("vel%d"%fid, weight=0.,
@@ -156,8 +162,8 @@ models += [runningModel([rightId, leftId], {}, integrationStep=2e-2) for i in ra
 models += [runningModel([rightId, leftId], {}, integrationStep=0)]
 
 high = [isinstance(m, IntegratedActionModelEuler) and 'com' in m.differential.costs.costs for m in models].index(True)
-models[high].differential.costs['com'].cost.activation = ActivationModelInequality(
-    np.array([-.01, -.01, -0.01]), np.array([.01, .01, 0.1]))
+models[high].differential.costs['com'].cost.activation = ActivationModelInequality(np.array([-.01, -.01, -0.01]),
+                                                                                   np.array([.01, .01, 0.1]))
 
 imp = [isinstance(m, ActionModelImpact) for m in models].index(True)
 impact = models[imp]
@@ -166,10 +172,10 @@ impact.costs['track16'].weight = 0
 impact.costs['com'].weight = 100
 impact.costs['track16'].cost.activation = ActivationModelWeightedQuad(np.array([.2, 1, .1, 1, 1, 1]))
 impact.costs['track30'].cost.activation = ActivationModelWeightedQuad(np.array([.2, 1, .1, 1, 1, 1]))
-impact.costs.addCost(
-    name='xycom',
-    cost=CostModelCoM(rmodel, ref=com0, activation=ActivationModelWeightedQuad(np.array([1., .2, 0]))),
-    weight=10)
+impact.costs.addCost(name='xycom',
+                     cost=CostModelCoM(rmodel, ref=com0, activation=ActivationModelWeightedQuad(np.array([1., .2,
+                                                                                                          0]))),
+                     weight=10)
 
 for m in models[imp + 1:]:
     m.differential.costs['xreg'].weight = 0.0
@@ -196,16 +202,14 @@ us0 = [
 ]
 
 print("*** SOLVE %s ***" % PHASE_NAME)
-ddp.solve(
-    maxiter=PHASE_ITERATIONS[PHASE_NAME],
-    regInit=.1,
-    init_xs=[rmodel.defaultState] * len(ddp.models()),
-    init_us=us0[:imp])
+ddp.solve(maxiter=PHASE_ITERATIONS[PHASE_NAME],
+          regInit=.1,
+          init_xs=[rmodel.defaultState] * len(ddp.models()),
+          init_us=us0[:imp])
 
 if PHASE_ITERATIONS[PHASE_NAME] == 0:
-    ddp.setCandidate(
-        xs=[x for x in np.load(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME)],
-        us=[u for u in np.load(BACKUP_PATH + '%s.us.npy' % PHASE_NAME)])
+    ddp.setCandidate(xs=[x for x in np.load(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME)],
+                     us=[u for u in np.load(BACKUP_PATH + '%s.us.npy' % PHASE_NAME)])
 elif PHASE_BACKUP[PHASE_NAME]:
     np.save(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME, ddp.xs)
     np.save(BACKUP_PATH + '%s.us.npy' % PHASE_NAME, ddp.us)
@@ -220,12 +224,11 @@ problem = ShootingProblem(initialState=x0, runningModels=models[:-1], terminalMo
 ddp = SolverDDP(problem)
 ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]  # CallbackSolverDisplay(robot,rate=5,freq=10) ]
 
-ddp.setCandidate(
-    xs=xsddp + [rmodel.defaultState] * (len(models) - len(xsddp)),
-    us=usddp + [
-        np.zeros(0) if isinstance(m, ActionModelImpact) else m.differential.quasiStatic(
-            d.differential, rmodel.defaultState) for m, d in zip(ddp.models(), ddp.datas())[len(usddp):-1]
-    ])
+ddp.setCandidate(xs=xsddp + [rmodel.defaultState] * (len(models) - len(xsddp)),
+                 us=usddp + [
+                     np.zeros(0) if isinstance(m, ActionModelImpact) else m.differential.quasiStatic(
+                         d.differential, rmodel.defaultState) for m, d in zip(ddp.models(), ddp.datas())[len(usddp):-1]
+                 ])
 ddp.th_stop = 5e-4
 impact.costs['track30'].weight = 1e6
 impact.costs['track16'].weight = 1e6
@@ -234,9 +237,8 @@ print("*** SOLVE %s ***" % PHASE_NAME)
 ddp.solve(init_xs=ddp.xs, init_us=ddp.us, maxiter=PHASE_ITERATIONS[PHASE_NAME], isFeasible=True)
 
 if PHASE_ITERATIONS[PHASE_NAME] == 0:
-    ddp.setCandidate(
-        xs=[x for x in np.load(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME)],
-        us=[u for u in np.load(BACKUP_PATH + '%s.us.npy' % PHASE_NAME)])
+    ddp.setCandidate(xs=[x for x in np.load(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME)],
+                     us=[u for u in np.load(BACKUP_PATH + '%s.us.npy' % PHASE_NAME)])
 elif PHASE_BACKUP[PHASE_NAME]:
     np.save(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME, ddp.xs)
     np.save(BACKUP_PATH + '%s.us.npy' % PHASE_NAME, ddp.us)
@@ -265,9 +267,8 @@ models[fig].differential.costs.costs['xreg'].weight = 10**6
 ddp.solve(init_xs=ddp.xs, init_us=ddp.us, maxiter=PHASE_ITERATIONS[PHASE_NAME], isFeasible=True)
 
 if PHASE_ITERATIONS[PHASE_NAME] == 0:
-    ddp.setCandidate(
-        xs=[x.copy() for x in np.load(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME)],
-        us=[u.copy() for u in np.load(BACKUP_PATH + '%s.us.npy' % PHASE_NAME)])
+    ddp.setCandidate(xs=[x.copy() for x in np.load(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME)],
+                     us=[u.copy() for u in np.load(BACKUP_PATH + '%s.us.npy' % PHASE_NAME)])
 elif PHASE_BACKUP[PHASE_NAME]:
     np.save(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME, ddp.xs)
     np.save(BACKUP_PATH + '%s.us.npy' % PHASE_NAME, ddp.us)
@@ -295,9 +296,8 @@ print("*** SOLVE %s ***" % PHASE_NAME)
 ddp.solve(init_xs=ddp.xs, init_us=ddp.us, maxiter=PHASE_ITERATIONS[PHASE_NAME], isFeasible=True)
 
 if PHASE_ITERATIONS[PHASE_NAME] == 0:
-    ddp.setCandidate(
-        xs=[x.copy() for x in np.load(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME)],
-        us=[u.copy() for u in np.load(BACKUP_PATH + '%s.us.npy' % PHASE_NAME)])
+    ddp.setCandidate(xs=[x.copy() for x in np.load(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME)],
+                     us=[u.copy() for u in np.load(BACKUP_PATH + '%s.us.npy' % PHASE_NAME)])
 elif PHASE_BACKUP[PHASE_NAME]:
     np.save(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME, ddp.xs)
     np.save(BACKUP_PATH + '%s.us.npy' % PHASE_NAME, ddp.us)
@@ -323,9 +323,8 @@ print("*** SOLVE %s ***" % PHASE_NAME)
 ddp.solve(init_xs=ddp.xs, init_us=ddp.us, maxiter=PHASE_ITERATIONS[PHASE_NAME], isFeasible=True)
 
 if PHASE_ITERATIONS[PHASE_NAME] == 0:
-    ddp.setCandidate(
-        xs=[x.copy() for x in np.load(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME)],
-        us=[u.copy() for u in np.load(BACKUP_PATH + '%s.us.npy' % PHASE_NAME)])
+    ddp.setCandidate(xs=[x.copy() for x in np.load(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME)],
+                     us=[u.copy() for u in np.load(BACKUP_PATH + '%s.us.npy' % PHASE_NAME)])
 elif PHASE_BACKUP[PHASE_NAME]:
     np.save(BACKUP_PATH + '%s.xs.npy' % PHASE_NAME, ddp.xs)
     np.save(BACKUP_PATH + '%s.us.npy' % PHASE_NAME, ddp.us)

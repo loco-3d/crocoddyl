@@ -140,5 +140,5 @@ assert (np.isclose(d1, dg - dv))
 assert (np.isclose(d2, dq + 2 * dv))
 
 d1b = Vx[0].T * f[0] + Qu[0].T * k[0] + Vx[1].T * f[1] - f[0].T * Vxx[0] * x[0] - f[1].T * Vxx[1] * x[1]
-d2b = -f[0].T * Vxx[0] * f[0] - f[1].T * Vxx[1] * f[1] + k[0].T * Quu[0] * k[0] + 2 * (
-    f[0].T * Vxx[0] * x[0] + f[1].T * Vxx[1] * x[1])
+d2b = -f[0].T * Vxx[0] * f[0] - f[1].T * Vxx[1] * f[1] + k[0].T * Quu[0] * k[0] + 2 * (f[0].T * Vxx[0] * x[0] +
+                                                                                       f[1].T * Vxx[1] * x[1])
