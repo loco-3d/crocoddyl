@@ -3,7 +3,7 @@ import numpy as np
 from .cost import CostModelState, CostModelSum
 from .floating_contact import DifferentialActionModelFloatingInContact
 from .state import StateVector
-from .utils import EPS
+from .utils import EPS, randomOrthonormalMatrix
 
 
 class ActionModelAbstract:
@@ -128,7 +128,6 @@ class ActionModelLQR(ActionModelAbstract):
         ActionModelAbstract.__init__(self, StateVector(nx), nu)
         self.ActionDataType = ActionDataLQR
 
-        from utils import randomOrthonormalMatrix
         self.Fx = randomOrthonormalMatrix(self.ndx)
         self.Fu = randomOrthonormalMatrix(self.ndx)[:, :self.nu]
         self.f0 = np.zeros(self.ndx) if driftFree else np.random.rand(self.ndx)
@@ -257,7 +256,7 @@ class ActionModelNumDiff(ActionModelAbstract):
                         assert (~np.isclose(model.State.diff(mc.ref, x)[3:6], np.ones(3) * np.pi, atol=1e-6).any())
                         assert (~np.isclose(model.State.diff(mc.ref, x)[3:6], -np.ones(3) * np.pi, atol=1e-6).any())
                     elif isinstance(mc, CostModelSum):
-                        for (key, cost) in mc.costs.iteritems():
+                        for (key, cost) in mc.costs.items():
                             if isinstance(cost.cost, CostModelState):
                                 assert (~np.isclose(
                                     model.State.diff(cost.cost.ref, x)[3:6], np.ones(3) * np.pi, atol=1e-6).any())

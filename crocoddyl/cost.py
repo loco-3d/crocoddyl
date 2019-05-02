@@ -1,5 +1,4 @@
 from collections import OrderedDict
-from exceptions import RuntimeError
 
 import numpy as np
 import pinocchio
