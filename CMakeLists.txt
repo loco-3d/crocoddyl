@@ -13,7 +13,7 @@ SET(PROJECT_URL https://gepgitlab.laas.fr/${PROJECT_NAMESPACE}/${PROJECT_NAME})
 SETUP_PROJECT()
 
 ADD_REQUIRED_DEPENDENCY("pinocchio >= 2.1.0")
-ADD_OPTIONAL_DEPENDENCY("multicontact-api >= 1.0.0")
+ADD_OPTIONAL_DEPENDENCY("multicontact-api >= 1.1.0")
 ADD_OPTIONAL_DEPENDENCY("quadprog")
 ADD_OPTIONAL_DEPENDENCY("scipy")
 
