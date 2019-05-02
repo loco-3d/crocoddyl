@@ -66,8 +66,9 @@ def createMultiphaseShootingProblem(rmodel, rdata, csw, timeStep):
         for patch in csw.ee_map.keys():
             if getattr(phase, patch).active:
                 active_contact_patch.add(patch)
-                active_contact = ContactModel6D(
-                    rmodel, frame=rmodel.getFrameId(csw.ee_map[patch]), ref=getattr(phase, patch).placement)
+                active_contact = ContactModel6D(rmodel,
+                                                frame=rmodel.getFrameId(csw.ee_map[patch]),
+                                                ref=getattr(phase, patch).placement)
                 contact_model.addContact(patch, active_contact)
                 # print nphase, "Contact ",patch," added at ", getattr(phase,patch).placement.translation.T
             else:
@@ -86,23 +87,21 @@ def createMultiphaseShootingProblem(rmodel, rdata, csw, timeStep):
             # Costs for the impulse of a new contact
             cost_model = CostModelSum(rmodel, nu=0)
             # State
-            cost_regx = CostModelState(
-                rmodel,
-                State,
-                ref=rmodel.defaultState,
-                nu=actuationff.nu,
-                activation=ActivationModelWeightedQuad(w.xweight))
+            cost_regx = CostModelState(rmodel,
+                                       State,
+                                       ref=rmodel.defaultState,
+                                       nu=actuationff.nu,
+                                       activation=ActivationModelWeightedQuad(w.xweight))
             cost_model.addCost("imp_regx", cost_regx, w.imp_state)
             # CoM
             cost_com = CostModelImpactCoM(rmodel, activation=ActivationModelWeightedQuad(w.imp_act_com))
             cost_model.addCost("imp_CoM", cost_com, w.imp_com)
             # Contact Frameplacement
             for patch in new_contacts:
-                cost_contact = CostModelFramePlacement(
-                    rmodel,
-                    frame=rmodel.getFrameId(csw.ee_map[patch]),
-                    ref=SE3(np.identity(3), csw.ee_splines[patch].eval(t0)[0]),
-                    nu=actuationff.nu)
+                cost_contact = CostModelFramePlacement(rmodel,
+                                                       frame=rmodel.getFrameId(csw.ee_map[patch]),
+                                                       ref=SE3(np.identity(3), csw.ee_splines[patch].eval(t0)[0]),
+                                                       nu=actuationff.nu)
                 cost_model.addCost("imp_contact_" + patch, cost_contact, w.imp_contact_patch)
 
             imp_action_model = ActionModelImpact(rmodel, imp_model, cost_model)
@@ -117,11 +116,10 @@ def createMultiphaseShootingProblem(rmodel, rdata, csw, timeStep):
             # For the first node of the phase, add cost v=0 for the contacting foot.
             if t == 0:
                 for patch in active_contact_patch:
-                    cost_vcontact = CostModelFrameVelocity(
-                        rmodel,
-                        frame=rmodel.getFrameId(csw.ee_map[patch]),
-                        ref=m2a(Motion.Zero().vector),
-                        nu=actuationff.nu)
+                    cost_vcontact = CostModelFrameVelocity(rmodel,
+                                                           frame=rmodel.getFrameId(csw.ee_map[patch]),
+                                                           ref=m2a(Motion.Zero().vector),
+                                                           nu=actuationff.nu)
                     cost_model.addCost("contactv_" + patch, cost_vcontact, w.contactv)
 
             # CoM Cost
@@ -130,29 +128,26 @@ def createMultiphaseShootingProblem(rmodel, rdata, csw, timeStep):
 
             # Forces Cost
             for patch in contact_model.contacts.keys():
-                cost_force = CostModelForce(
-                    rmodel,
-                    contactModel=contact_model.contacts[patch],
-                    ref=m2a(csw.phi_c.forces[patch].eval(t)[0]),
-                    nu=actuationff.nu)
+                cost_force = CostModelForce(rmodel,
+                                            contactModel=contact_model.contacts[patch],
+                                            ref=m2a(csw.phi_c.forces[patch].eval(t)[0]),
+                                            nu=actuationff.nu)
                 cost_model.addCost("forces_" + patch, cost_force, w.forces)
             # Swing patch cost
             for patch in swing_patch:
-                cost_swing = CostModelFramePlacement(
-                    rmodel,
-                    frame=rmodel.getFrameId(csw.ee_map[patch]),
-                    ref=SE3(np.identity(3), csw.ee_splines[patch].eval(t)[0]),
-                    nu=actuationff.nu)
+                cost_swing = CostModelFramePlacement(rmodel,
+                                                     frame=rmodel.getFrameId(csw.ee_map[patch]),
+                                                     ref=SE3(np.identity(3), csw.ee_splines[patch].eval(t)[0]),
+                                                     nu=actuationff.nu)
                 cost_model.addCost("swing_" + patch, cost_swing, w.swing_patch)
                 # print t, "Swing cost ",patch," added at ", csw.ee_splines[patch].eval(t)[0][:3].T
 
             # State Regularization
-            cost_regx = CostModelState(
-                rmodel,
-                State,
-                ref=rmodel.defaultState,
-                nu=actuationff.nu,
-                activation=ActivationModelWeightedQuad(w.xweight))
+            cost_regx = CostModelState(rmodel,
+                                       State,
+                                       ref=rmodel.defaultState,
+                                       nu=actuationff.nu,
+                                       activation=ActivationModelWeightedQuad(w.xweight))
             cost_model.addCost("regx", cost_regx, w.regx)
             # Control Regularization
             cost_regu = CostModelControl(rmodel, nu=actuationff.nu)
@@ -169,8 +164,9 @@ def createMultiphaseShootingProblem(rmodel, rdata, csw, timeStep):
     t = t1
     for patch in csw.ee_map.keys():
         if getattr(phase, patch).active:
-            active_contact = ContactModel6D(
-                rmodel, frame=rmodel.getFrameId(csw.ee_map[patch]), ref=getattr(phase, patch).placement)
+            active_contact = ContactModel6D(rmodel,
+                                            frame=rmodel.getFrameId(csw.ee_map[patch]),
+                                            ref=getattr(phase, patch).placement)
             contact_model.addContact(patch, active_contact)
     cost_model = CostModelSum(rmodel, actuationff.nu)
     # CoM Cost
@@ -178,8 +174,11 @@ def createMultiphaseShootingProblem(rmodel, rdata, csw, timeStep):
     cost_model.addCost("CoM", cost_com, w.term_com)
 
     # State Regularization
-    cost_regx = CostModelState(
-        rmodel, State, ref=rmodel.defaultState, nu=actuationff.nu, activation=ActivationModelWeightedQuad(w.xweight))
+    cost_regx = CostModelState(rmodel,
+                               State,
+                               ref=rmodel.defaultState,
+                               nu=actuationff.nu,
+                               activation=ActivationModelWeightedQuad(w.xweight))
     cost_model.addCost("regx", cost_regx, w.term_regx)
 
     dmodel = DifferentialActionModelFloatingInContact(rmodel, actuationff, contact_model, cost_model)

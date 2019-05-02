@@ -82,8 +82,8 @@ class ContactModel3D(ContactModelPinocchio):
         data.J[:, :] = J6[:3, :]
         data.Jw[:, :] = J6[3:, :]
 
-        data.a0[:] = (
-            pinocchio.getFrameAcceleration(self.pinocchio, data.pinocchio, self.frame).linear + cross(vw, vv)).flat
+        data.a0[:] = (pinocchio.getFrameAcceleration(self.pinocchio, data.pinocchio, self.frame).linear +
+                      cross(vw, vv)).flat
         if self.gains[0] != 0.:
             data.a0[:] += self.gains[0] * (m2a(data.pinocchio.oMf[self.frame].translation) - self.ref)
         if self.gains[1] != 0.:
@@ -92,16 +92,17 @@ class ContactModel3D(ContactModelPinocchio):
     def calcDiff(self, data, x, recalc=True):
         if recalc:
             self.calc(data, x)
-        dv_dq, da_dq, da_dv, da_da = pinocchio.getJointAccelerationDerivatives(
-            self.pinocchio, data.pinocchio, data.joint, pinocchio.ReferenceFrame.LOCAL)
+        dv_dq, da_dq, da_dv, da_da = pinocchio.getJointAccelerationDerivatives(self.pinocchio, data.pinocchio,
+                                                                               data.joint,
+                                                                               pinocchio.ReferenceFrame.LOCAL)
         dv_dq, dv_dvq = pinocchio.getJointVelocityDerivatives(self.pinocchio, data.pinocchio, data.joint,
                                                               pinocchio.ReferenceFrame.LOCAL)
 
         vw = data.v.angular
         vv = data.v.linear
 
-        data.Aq[:, :] = (
-            data.fXj * da_dq)[:3, :] + skew(vw) * (data.fXj * dv_dq)[:3, :] - skew(vv) * (data.fXj * dv_dq)[3:, :]
+        data.Aq[:, :] = (data.fXj *
+                         da_dq)[:3, :] + skew(vw) * (data.fXj * dv_dq)[:3, :] - skew(vv) * (data.fXj * dv_dq)[3:, :]
         data.Av[:, :] = (data.fXj * da_dv)[:3, :] + skew(vw) * data.J - skew(vv) * data.Jw
         R = data.pinocchio.oMf[self.frame].rotation
 
@@ -165,8 +166,9 @@ class ContactModel6D(ContactModelPinocchio):
         if recalc:
             self.calc(data, x)
 
-        dv_dq, da_dq, da_dv, da_da = pinocchio.getJointAccelerationDerivatives(
-            self.pinocchio, data.pinocchio, data.joint, pinocchio.ReferenceFrame.LOCAL)
+        dv_dq, da_dq, da_dv, da_da = pinocchio.getJointAccelerationDerivatives(self.pinocchio, data.pinocchio,
+                                                                               data.joint,
+                                                                               pinocchio.ReferenceFrame.LOCAL)
         dv_dq, dv_dvq = pinocchio.getJointVelocityDerivatives(self.pinocchio, data.pinocchio, data.joint,
                                                               pinocchio.ReferenceFrame.LOCAL)
 
