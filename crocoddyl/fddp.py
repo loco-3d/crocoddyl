@@ -80,31 +80,40 @@ class SolverFDDP(SolverAbstract):
         """
         return [sum(q**2) for q in self.Qu]
 
-    def expectedImprovement(self, firstCalc=True):
+    def updateExpectedImprovement(self):
+        """ Update the expected improvement model.
+
+        The terms computed here doesn't depend on the step length, only
+        on the step direction. So you don't need to run for each new
+        step length trial.
+        """
+        self.dg = 0.
+        self.dq = 0.
+        if not self.isFeasible:
+            self.dg -= np.dot(self.Vx[-1].T, self.gaps[-1])
+            self.dq += np.dot(self.gaps[-1].T, np.dot(self.Vxx[-1], self.gaps[-1]))
+        for t in range(self.problem.T):
+            self.dg += np.dot(self.Qu[t].T, self.k[t])
+            self.dq -= np.dot(self.k[t].T, np.dot(self.Quu[t], self.k[t]))
+            if not self.isFeasible:
+                self.dg -= np.dot(self.Vx[t].T, self.gaps[t])
+                self.dq += np.dot(self.gaps[t].T, np.dot(self.Vxx[t], self.gaps[t]))
+
+    def expectedImprovement(self):
         """ Return two scalars denoting the quadratic improvement model
         (i.e. dV = f_0 - f_+ = d1*a + d2*a**2/2)
         """
-        if self.isFeasible:
-            if firstCalc:
-                self.d1 = sum([np.dot(q, k) for q, k in zip(self.Qu, self.k)])
-                self.d2 = sum([-np.dot(k, np.dot(q, k)) for q, k in zip(self.Quu, self.k)])
-        else:
-            if firstCalc:
-                self.dg = -np.dot(self.Vx[-1].T, self.gaps[-1])
-                self.dq = np.dot(self.gaps[-1].T, np.dot(self.Vxx[-1], self.gaps[-1]))
-            self.dv = -np.dot(
+        self.dv = 0.
+        if not self.isFeasible:
+            self.dv -= np.dot(
                 self.gaps[-1].T,
                 np.dot(self.Vxx[-1], self.problem.runningModels[-1].State.diff(self.xs_try[-1], self.xs[-1])))
             for t in range(self.problem.T):
-                if firstCalc:
-                    self.dg += -np.dot(self.Vx[t].T, self.gaps[t]) + np.dot(self.Qu[t].T, self.k[t])
-                    self.dq += -np.dot(self.k[t].T, np.dot(self.Quu[t], self.k[t])) + np.dot(
-                        self.gaps[t].T, np.dot(self.Vxx[t], self.gaps[t]))
-                self.dv += -np.dot(
+                self.dv -= np.dot(
                     self.gaps[t].T,
                     np.dot(self.Vxx[t], self.problem.runningModels[t].State.diff(self.xs_try[t], self.xs[t])))
-            self.d1 = self.dg + self.dv
-            self.d2 = self.dq - 2 * self.dv
+        self.d1 = self.dg + self.dv
+        self.d2 = self.dq - 2 * self.dv
         return [self.d1, self.d2]
 
     def tryStep(self, stepLength):
@@ -141,8 +150,8 @@ class SolverFDDP(SolverAbstract):
                     else:
                         continue
                 break
+            self.updateExpectedImprovement()
 
-            firstCalc = True
             for a in self.alphas:
                 try:
                     self.dV = self.tryStep(a)
@@ -150,8 +159,8 @@ class SolverFDDP(SolverAbstract):
                     continue
                 # During the first calc we need to compute all terms, later we only need to update the terms that
                 # depend on xs_try
-                d1, d2 = self.expectedImprovement(firstCalc=firstCalc)
-                firstCalc = False
+                d1, d2 = self.expectedImprovement()
+
                 self.dV_exp = a * (d1 + .5 * d2 * a)
                 # or not self.isFeasible
                 if self.dV_exp > 0.:  # descend direction

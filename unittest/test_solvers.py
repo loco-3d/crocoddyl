@@ -754,6 +754,7 @@ for t in range(T):
     assert (np.allclose(fddp.xs_try[t + 1], kkt.xs[t + 1]))
 
 # Checks the expecte improvement against the KKT solver
+fddp.updateExpectedImprovement()
 d1, d2 = fddp.expectedImprovement()
 d1kkt, d2kkt = kkt.expectedImprovement()
 assert (abs(d1 - d1kkt) < 1e-14 and abs(d2 - d2kkt) < 1e-14)
@@ -779,6 +780,7 @@ for t in range(T):
     assert (np.allclose(fddp.xs_try[t + 1], kkt.xs[t + 1]))
 
 # Checks the expecte improvement against the KKT solver
+fddp.updateExpectedImprovement()
 d1, d2 = fddp.expectedImprovement()
 d1kkt, d2kkt = kkt.expectedImprovement()
 assert (abs(d1 - d1kkt) < 1e-14 and abs(d2 - d2kkt) < 1e-14)
