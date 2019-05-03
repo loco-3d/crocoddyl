@@ -89,21 +89,16 @@ costDataND = costModelND.createData(rdata)
 
 costModelND.calcDiff(costDataND, x, u)
 
-assertNumDiff(
-    costData.Lx, costDataND.Lx,
-    NUMDIFF_MODIFIER * costModelND.disturbance)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
-assertNumDiff(
-    costData.Lu, costDataND.Lu,
-    NUMDIFF_MODIFIER * costModelND.disturbance)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
-assertNumDiff(
-    costData.Lxx, costDataND.Lxx,
-    NUMDIFF_MODIFIER * costModelND.disturbance)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
-assertNumDiff(
-    costData.Lxu, costDataND.Lxu,
-    NUMDIFF_MODIFIER * costModelND.disturbance)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
-assertNumDiff(
-    costData.Luu, costDataND.Luu,
-    NUMDIFF_MODIFIER * costModelND.disturbance)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(costData.Lx, costDataND.Lx, NUMDIFF_MODIFIER *
+              costModelND.disturbance)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(costData.Lu, costDataND.Lu, NUMDIFF_MODIFIER *
+              costModelND.disturbance)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(costData.Lxx, costDataND.Lxx, NUMDIFF_MODIFIER *
+              costModelND.disturbance)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(costData.Lxu, costDataND.Lxu, NUMDIFF_MODIFIER *
+              costModelND.disturbance)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(costData.Luu, costDataND.Luu, NUMDIFF_MODIFIER *
+              costModelND.disturbance)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
 
 q = pinocchio.randomConfiguration(rmodel)
 v = rand(rmodel.nv)
