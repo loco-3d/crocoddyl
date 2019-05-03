@@ -1,12 +1,13 @@
 import numpy as np
+from numpy.linalg import norm
+
 import pinocchio
 from crocoddyl import (ActionModelNumDiff, ActivationModelInequality, ActivationModelWeightedQuad, CostModelCoM,
-                       CostModelControl, CostModelFramePlacement, CostModelFrameTranslation, CostModelFrameVelocity,
-                       CostModelFrameVelocityLinear, CostModelNumDiff, CostModelState, CostModelSum,
-                       DifferentialActionModelFullyActuated, DifferentialActionModelNumDiff,
+                       CostModelControl, CostModelFramePlacement, CostModelFrameRotation, CostModelFrameTranslation,
+                       CostModelFrameVelocity, CostModelFrameVelocityLinear, CostModelNumDiff, CostModelState,
+                       CostModelSum, DifferentialActionModelFullyActuated, DifferentialActionModelNumDiff,
                        IntegratedActionModelEuler, ShootingProblem, SolverDDP, SolverKKT, StatePinocchio, a2m,
                        loadTalosArm, m2a)
-from numpy.linalg import norm
 from pinocchio.utils import rand, zero
 from testutils import NUMDIFF_MODIFIER, assertNumDiff
 
@@ -59,6 +60,50 @@ assertNumDiff(costData.Lxu, costDataND.Lxu, NUMDIFF_MODIFIER *
               costModelND.disturbance)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
 assertNumDiff(costData.Luu, costDataND.Luu, NUMDIFF_MODIFIER *
               costModelND.disturbance)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+
+q = pinocchio.randomConfiguration(rmodel)
+v = rand(rmodel.nv)
+x = m2a(np.concatenate([q, v]))
+u = m2a(rand(rmodel.nv))
+
+costModel = CostModelFrameRotation(rmodel, rmodel.getFrameId('gripper_left_fingertip_2_link'), np.eye(3))
+
+costData = costModel.createData(rdata)
+
+pinocchio.forwardKinematics(rmodel, rdata, q, v)
+pinocchio.computeJointJacobians(rmodel, rdata, q)
+pinocchio.updateFramePlacements(rmodel, rdata)
+
+costModel.calcDiff(costData, x, u)
+
+costModelND = CostModelNumDiff(
+    costModel,
+    StatePinocchio(rmodel),
+    withGaussApprox=True,
+    reevals=[
+        lambda m, d, x, u: pinocchio.forwardKinematics(m, d, a2m(
+            x[:rmodel.nq]), a2m(x[rmodel.nq:])), lambda m, d, x, u: pinocchio.computeJointJacobians(
+                m, d, a2m(x[:rmodel.nq])), lambda m, d, x, u: pinocchio.updateFramePlacements(m, d)
+    ])
+costDataND = costModelND.createData(rdata)
+
+costModelND.calcDiff(costDataND, x, u)
+
+assertNumDiff(
+    costData.Lx, costDataND.Lx,
+    NUMDIFF_MODIFIER * costModelND.disturbance)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(
+    costData.Lu, costDataND.Lu,
+    NUMDIFF_MODIFIER * costModelND.disturbance)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(
+    costData.Lxx, costDataND.Lxx,
+    NUMDIFF_MODIFIER * costModelND.disturbance)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(
+    costData.Lxu, costDataND.Lxu,
+    NUMDIFF_MODIFIER * costModelND.disturbance)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(
+    costData.Luu, costDataND.Luu,
+    NUMDIFF_MODIFIER * costModelND.disturbance)  # threshold was 1e-4, is now 2.11e-4 (see assertNumDiff.__doc__)
 
 q = pinocchio.randomConfiguration(rmodel)
 v = rand(rmodel.nv)
