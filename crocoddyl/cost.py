@@ -12,10 +12,8 @@ from .utils import EPS, m2a
 class CostModelPinocchio:
     """ Abstract for Pinocchio-based cost models.
 
-    It defines a template of cost model whose function and derivatives
-    can be evaluated from Pinocchio data only (no need to recompute anything
-    in particular to be given the variables x,u). Computation of the cost
-    values and its derivatives are carried on in calc() and calcDiff()
+    It defines a template of cost model whose residual and derivatives
+    can be retrieved from Pinocchio data, through the calc and calcDiff
     functions, respectively.
     """
 
@@ -225,7 +223,7 @@ class CostModelFrameTranslation(CostModelPinocchio):
     """ Cost model for frame 3d positioning.
 
     The class proposes a model of a cost function positioning (3d)
-    a frame of the robot. Paramterize it with the frame index frameIdx and
+    a frame of the robot. Parametrize it with the frame index frameIdx and
     the effector desired position ref.
     """
 
@@ -371,7 +369,7 @@ class CostModelFramePlacement(CostModelPinocchio):
     """ Cost model for SE(3) frame positioning.
 
     The class proposes a model of a cost function position and orientation (6d)
-    for a frame of the robot. Paramterize it with the frame index frameIdx and
+    for a frame of the robot. Parametrize it with the frame index frameIdx and
     the effector desired pinocchio::SE3 ref.
     """
 
@@ -421,7 +419,7 @@ class CostModelFrameRotation(CostModelPinocchio):
     """ Cost model for frame rotation.
 
     The class proposes a model of a cost function orientation (3d) for a frame of the robot.
-    Paramterize it with the frame index frameIdx and the effector desired rotation matrix.
+    Parametrize it with the frame index frameIdx and the effector desired rotation matrix.
     """
 
     def __init__(self, pinocchioModel, frame, ref, nu=None, activation=None):
