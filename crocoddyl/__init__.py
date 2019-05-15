@@ -12,9 +12,9 @@ from .contact import (ContactData3D, ContactData6D, ContactDataMultiple, Contact
 from .cost import (CostDataCoM, CostDataControl, CostDataForce, CostDataFramePlacement, CostDataFrameTranslation,
                    CostDataFrameVelocity, CostDataFrameVelocityLinear, CostDataNumDiff, CostDataPinocchio,
                    CostDataState, CostDataSum, CostModelCoM, CostModelControl, CostModelForce,
-                   CostModelForceLinearCone, CostModelFramePlacement, CostModelFrameTranslation,
-                   CostModelFrameVelocity, CostModelFrameVelocityLinear, CostModelNumDiff, CostModelPinocchio,
-                   CostModelState, CostModelSum)
+                   CostModelForceLinearCone, CostModelFramePlacement, CostModelFrameRotation,
+                   CostModelFrameTranslation, CostModelFrameVelocity, CostModelFrameVelocityLinear, CostModelNumDiff,
+                   CostModelPinocchio, CostModelState, CostModelSum)
 from .ddp import SolverDDP
 from .diagnostic import displayTrajectory, plotDDPConvergence, plotOCSolution
 from .differential_action import (DifferentialActionDataAbstract, DifferentialActionDataFullyActuated,

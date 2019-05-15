@@ -2,6 +2,7 @@ from collections import OrderedDict
 from exceptions import RuntimeError
 
 import numpy as np
+
 import pinocchio
 
 from .activation import ActivationModelInequality, ActivationModelQuad
@@ -9,11 +10,12 @@ from .utils import EPS, m2a
 
 
 class CostModelPinocchio:
-    '''
-    This class defines a template of cost model whose function and derivatives
-    can be evaluated from pinocchio data only (no need to recompute anything
-    in particular to be given the variables x,u).
-    '''
+    """ Abstract for Pinocchio-based cost models.
+
+    It defines a template of cost model whose residual and derivatives
+    can be retrieved from Pinocchio data, through the calc and calcDiff
+    functions, respectively.
+    """
 
     def __init__(self, pinocchioModel, ncost, withResiduals=True, nu=None):
         self.ncost = ncost
@@ -36,10 +38,10 @@ class CostModelPinocchio:
 
 
 class CostDataPinocchio:
-    '''
-    Abstract data class corresponding to the abstract model class
-    CostModelPinocchio.
-    '''
+    """ Abstract for Pinocchio-based cost datas.
+
+    It stores the data corresponting to the CostModelPinocchio class.
+    """
 
     def __init__(self, model, pinocchioData):
         ncost, nv, ndx, nu = model.ncost, model.nv, model.ndx, model.nu
@@ -69,6 +71,9 @@ class CostDataPinocchio:
 
 
 class CostModelNumDiff(CostModelPinocchio):
+    """ Abstract cost model that uses NumDiff for derivative computation.
+    """
+
     def __init__(self, costModel, State, withGaussApprox=False, reevals=[]):
         '''
         reevals is a list of lambdas of (pinocchiomodel,pinocchiodata,x,u) to be
@@ -215,11 +220,12 @@ class CostDataSum(CostDataPinocchio):
 
 
 class CostModelFrameTranslation(CostModelPinocchio):
-    '''
+    """ Cost model for frame 3d positioning.
+
     The class proposes a model of a cost function positioning (3d)
-    a frame of the robot. Paramterize it with the frame index frameIdx and
+    a frame of the robot. Parametrize it with the frame index frameIdx and
     the effector desired position ref.
-    '''
+    """
 
     def __init__(self, pinocchioModel, frame, ref, nu=None, activation=None):
         self.CostDataType = CostDataFrameTranslation
@@ -262,11 +268,12 @@ class CostDataFrameTranslation(CostDataPinocchio):
 
 
 class CostModelFrameVelocity(CostModelPinocchio):
-    '''
+    """ Cost model for frame velocity.
+
     The class proposes a model of a cost function that penalize the velocity of a given
-    effector.
-    Assumes updateFramePlacement and computeForwardKinematicsDerivatives.
-    '''
+    end-effector. It assumes that updateFramePlacement and computeForwardKinematicsDerivatives
+    have been runned.
+    """
 
     def __init__(self, pinocchioModel, frame, ref=None, nu=None, activation=None):
         self.CostDataType = CostDataFrameVelocity
@@ -310,11 +317,12 @@ class CostDataFrameVelocity(CostDataPinocchio):
 
 
 class CostModelFrameVelocityLinear(CostModelPinocchio):
-    '''
+    """ Cost model for linear frame velocities.
+
     The class proposes a model of a cost function that penalize the linear velocity of a given
-    effector.
-    Assumes updateFramePlacement and computeForwardKinematicsDerivatives.
-    '''
+    end-effector. It assumes that updateFramePlacement and computeForwardKinematicsDerivatives
+    have been runned.
+    """
 
     def __init__(self, pinocchioModel, frame, ref=None, nu=None, activation=None):
         self.CostDataType = CostDataFrameVelocityLinear
@@ -358,11 +366,12 @@ class CostDataFrameVelocityLinear(CostDataPinocchio):
 
 
 class CostModelFramePlacement(CostModelPinocchio):
-    '''
-   The class proposes a model of a cost function position and orientation (6d)
-    for a frame of the robot. Paramterize it with the frame index frameIdx and
+    """ Cost model for SE(3) frame positioning.
+
+    The class proposes a model of a cost function position and orientation (6d)
+    for a frame of the robot. Parametrize it with the frame index frameIdx and
     the effector desired pinocchio::SE3 ref.
-    '''
+    """
 
     def __init__(self, pinocchioModel, frame, ref, nu=None, activation=None):
         self.CostDataType = CostDataFramePlacement
@@ -406,11 +415,62 @@ class CostDataFramePlacement(CostDataPinocchio):
         self.Rv = 0
 
 
+class CostModelFrameRotation(CostModelPinocchio):
+    """ Cost model for frame rotation.
+
+    The class proposes a model of a cost function orientation (3d) for a frame of the robot.
+    Parametrize it with the frame index frameIdx and the effector desired rotation matrix.
+    """
+
+    def __init__(self, pinocchioModel, frame, ref, nu=None, activation=None):
+        self.CostDataType = CostDataFrameRotation
+        CostModelPinocchio.__init__(self, pinocchioModel, ncost=3, nu=nu)
+        self.ref = ref
+        self.frame = frame
+        self.activation = activation if activation is not None else ActivationModelQuad()
+
+    def calc(self, data, x, u):
+        data.rRf = self.ref.transpose() * data.pinocchio.oMf[self.frame].rotation
+        data.residuals[:] = m2a(pinocchio.log3(data.rRf))
+        data.cost = sum(self.activation.calc(data.activation, data.residuals))
+        return data.cost
+
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        nq = self.nq
+        pinocchio.updateFramePlacements(self.pinocchio, data.pinocchio)
+        J = np.dot(
+            pinocchio.Jlog3(data.rRf),
+            pinocchio.getFrameJacobian(self.pinocchio, data.pinocchio, self.frame,
+                                       pinocchio.ReferenceFrame.LOCAL)[3:, :])
+        Ax, Axx = self.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
+        data.Rq[:, :nq] = J
+        data.Lq[:] = np.dot(J.T, Ax)
+        data.Lqq[:, :] = np.dot(data.Rq.T, Axx * data.Rq)  # J is a matrix, use Rq instead.
+        return data.cost
+
+
+class CostDataFrameRotation(CostDataPinocchio):
+    def __init__(self, model, pinocchioData):
+        CostDataPinocchio.__init__(self, model, pinocchioData)
+        self.activation = model.activation.createData()
+        self.rRf = None
+        self.Lu = 0
+        self.Lv = 0
+        self.Lxu = 0
+        self.Luu = 0
+        self.Lvv = 0
+        self.Ru = 0
+        self.Rv = 0
+
+
 class CostModelCoM(CostModelPinocchio):
-    '''
-    The class proposes a model of a cost function CoM.
-    Paramterize it with the desired CoM ref
-    '''
+    """ Cost model for CoM positioning.
+
+    The class proposes a model of a cost function CoM. It is parametrized with the
+    desired CoM position.
+    """
 
     def __init__(self, pinocchioModel, ref, nu=None, activation=None):
         self.CostDataType = CostDataCoM
@@ -449,6 +509,12 @@ class CostDataCoM(CostDataPinocchio):
 
 
 class CostModelState(CostModelPinocchio):
+    """ Cost model for state.
+
+    It tracks a reference state vector. Generally speaking, the state error lie in the
+    tangent-space of the state manifold (or more precisely the configuration manifold).
+    """
+
     def __init__(self, pinocchioModel, State, ref=None, nu=None, activation=None):
         self.CostDataType = CostDataState
         CostModelPinocchio.__init__(self, pinocchioModel, ncost=State.ndx, nu=nu)
@@ -481,6 +547,11 @@ class CostDataState(CostDataPinocchio):
 
 
 class CostModelControl(CostModelPinocchio):
+    """ Cost model for control.
+
+    It tracks a reference control vector.
+    """
+
     def __init__(self, pinocchioModel, nu=None, ref=None, activation=None):
         self.CostDataType = CostDataControl
         nu = nu if nu is not None else pinocchioModel.nv
@@ -518,10 +589,11 @@ class CostDataControl(CostDataPinocchio):
 
 
 class CostModelForce(CostModelPinocchio):
-    '''
+    """ Cost model for 6D forces (wrench).
+
     The class proposes a model of a cost function for tracking a reference
     value of a 6D force, being given the contact model and its derivatives.
-    '''
+    """
 
     def __init__(self, pinocchioModel, contactModel, ncost=6, ref=None, nu=None, activation=None):
         self.CostDataType = CostDataForce
@@ -566,10 +638,10 @@ class CostDataForce(CostDataPinocchio):
 
 
 class CostModelForceLinearCone(CostModelPinocchio):
-    '''
+    """
     The class proposes a model which implements Af-ref<=0 for the linear conic cost. (The inequality
     is implemented by the activation function. By default ref is zero (Af<=0).
-    '''
+    """
 
     def __init__(self, pinocchioModel, contactModel, A, ref=None, nu=None, activation=None):
         self.CostDataType = CostDataForce
