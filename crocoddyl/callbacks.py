@@ -51,7 +51,7 @@ class CallbackDDPVerbose:
                   (solver.iter, sum(copy.copy([d.cost for d in solver.datas()])), solver.stop, -solver.d2,
                    solver.x_reg, solver.u_reg, solver.stepLength, solver.isFeasible))
         elif self.level == 1:
-            print("%4i  %0.5e  %0.5e  %0.5e  %10.5e  %0.5e  %0.4f     %1d  %0.5e  %0.5e" %
+            print("%4i  %0.5e  %0.5e  %0.5e  %10.5e  %0.5e   %0.4f     %1d  %0.5e  %0.5e" %
                   (solver.iter, sum(copy.copy([d.cost for d in solver.datas()])), solver.stop, -solver.d2,
                    solver.x_reg, solver.u_reg, solver.stepLength, solver.isFeasible, solver.dV_exp, solver.dV))
 
