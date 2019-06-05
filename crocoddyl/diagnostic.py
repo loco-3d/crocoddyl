@@ -1,12 +1,12 @@
-def plotDDPConvergence(costs, muLM, muV, gamma, theta, alpha):
+def plotDDPConvergence(costs, muLM, muV, gamma, theta, alpha, figIndex=1, show=True):
     import matplotlib.pyplot as plt
     import numpy as np
 
-    plt.figure(1, figsize=(6.4, 8))
+    plt.figure(figIndex, figsize=(6.4, 8))
     # Plotting the total cost sequence
     plt.subplot(511)
     plt.ylabel('cost')
-    totalCost = [ sum(cost) for cost in costs ]
+    totalCost = [sum(cost) for cost in costs]
     plt.plot(totalCost)
 
     # Ploting mu sequences
@@ -30,10 +30,11 @@ def plotDDPConvergence(costs, muLM, muV, gamma, theta, alpha):
     ind = np.arange(len(alpha))
     plt.bar(ind, alpha)
     plt.xlabel('iteration')
-    plt.show()
+    if show:
+        plt.show()
 
 
-def plotOCSolution(xs, us):
+def plotOCSolution(xs, us, figIndex=1, show=True):
     import matplotlib.pyplot as plt
     # Getting the state and control trajectories
     nx = xs[0].shape[0]
@@ -41,26 +42,27 @@ def plotOCSolution(xs, us):
     X = [0.] * nx
     U = [0.] * nu
     for i in range(nx):
-        X[i] = [ x[i] for x in xs]
+        X[i] = [x[i] for x in xs]
     for i in range(nu):
-        U[i] = [ u[i] for u in us]
+        U[i] = [u[i] for u in us]
 
-    plt.figure(1)
+    plt.figure(figIndex)
 
     # Plotting the state trajectories
     plt.subplot(211)
-    [plt.plot(X[i], label='x'+str(i)) for i in range(nx)]
+    [plt.plot(X[i], label='x' + str(i)) for i in range(nx)]
     plt.legend()
 
     # Plotting the control commands
     plt.subplot(212)
-    [plt.plot(U[i], label='u'+str(i)) for i in range(nu)]
+    [plt.plot(U[i], label='u' + str(i)) for i in range(nu)]
     plt.legend()
     plt.xlabel('knots')
-    plt.show()
+    if show:
+        plt.show()
 
 
-def displayTrajectory(robot,xs,dt=0.1,rate=-1,cameraTF=None):
+def displayTrajectory(robot, xs, dt=0.1, rate=-1, cameraTF=None):
     """  Display a robot trajectory xs using Gepetto-viewer gui.
 
     :param robot: Robot wrapper
@@ -69,14 +71,18 @@ def displayTrajectory(robot,xs,dt=0.1,rate=-1,cameraTF=None):
     :param rate: visualization rate
     :param cameraTF: camera transform
     """
-    if not hasattr(robot,'viewer'): robot.initDisplay(loadModel=True)
+    if not hasattr(robot, 'viewer'):
+        robot.initDisplay(loadModel=True)
     if cameraTF is not None:
-        robot.viewer.gui.setCameraTransform(0,cameraTF)
+        robot.viewer.gui.setCameraTransform(0, cameraTF)
     import numpy as np
-    a2m = lambda a: np.matrix(a).T
+
+    def a2m(a):
+        return np.matrix(a).T
+
     import time
-    S = 1 if rate<=0 else max(len(xs)/rate,1)
-    for i,x in enumerate(xs):
+    S = 1 if rate <= 0 else max(len(xs) / rate, 1)
+    for i, x in enumerate(xs):
         if not i % S:
             robot.display(a2m(x[:robot.nq]))
             time.sleep(dt)

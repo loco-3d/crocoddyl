@@ -1,0 +1,25 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+
+INCLUDE(cmake/base.cmake)
+INCLUDE(cmake/test.cmake)
+INCLUDE(cmake/python.cmake)
+
+SET(PROJECT_NAMESPACE loco-3d)
+SET(PROJECT_NAME crocoddyl)
+SET(PROJECT_DESCRIPTION "Contact RObot COntrol by Differential DYnamic programming Library")
+
+SET(PROJECT_URL https://gepgitlab.laas.fr/${PROJECT_NAMESPACE}/${PROJECT_NAME})
+
+SETUP_PROJECT()
+
+ADD_REQUIRED_DEPENDENCY("pinocchio >= 2.1.0")
+ADD_OPTIONAL_DEPENDENCY("multicontact-api >= 1.1.0")
+ADD_OPTIONAL_DEPENDENCY("quadprog")
+ADD_OPTIONAL_DEPENDENCY("scipy")
+
+FINDPYTHON()
+
+ADD_SUBDIRECTORY(${PROJECT_NAME})
+ADD_SUBDIRECTORY(unittest)
+
+SETUP_PROJECT_FINALIZE()

@@ -1,9 +1,8 @@
-from state import StatePinocchio, StateVector
-from utils import a2m, randomOrthonormalMatrix
 import numpy as np
-from numpy.random import rand
 import pinocchio
 
+from .state import StatePinocchio, StateVector
+from .utils import EPS, a2m, randomOrthonormalMatrix
 
 
 class DifferentialActionModelAbstract:
@@ -15,6 +14,7 @@ class DifferentialActionModelAbstract:
     the dynamics, cost functions and their derivatives. These computations are
     mainly carry on inside calc() and calcDiff(), respectively.
     """
+
     def __init__(self, nq, nv, nu):
         self.nq = nq
         self.nv = nv
@@ -35,22 +35,22 @@ class DifferentialActionModelAbstract:
         """
         return self.DifferentialActionDataType(self)
 
-    def calc(model, data, x, u=None):
+    def calc(self, data, x, u=None):
         """ Compute the state evolution and cost value.
 
         First, it describes the time-continuous evolution of our dynamical system
-        in which along predefined integrated action model we might obtain the
+        in which along predefined integrated action self we might obtain the
         next discrete state. Indeed it computes the time derivatives of the
         state from a predefined dynamical system. Additionally it computes the
         cost value associated to this state and control pair.
-        :param model: differential action model
+        :param self: differential action model
         :param data: differential action data
         :param x: state vector
         :param u: control input
         """
         raise NotImplementedError("Not implemented yet.")
 
-    def calcDiff(model, data, x, u=None, recalc=True):
+    def calcDiff(self, data, x, u=None, recalc=True):
         """ Compute the derivatives of the dynamics and cost functions.
 
         It computes the partial derivatives of the dynamical system and the cost
@@ -68,7 +68,7 @@ class DifferentialActionModelAbstract:
 
 
 class DifferentialActionDataAbstract:
-    def __init__(self, model, costData = None):
+    def __init__(self, model, costData=None):
         """ Create common data shared between DAMs.
 
         In crocoddyl, a DAD might use an externally defined cost data. If so,
@@ -77,40 +77,46 @@ class DifferentialActionDataAbstract:
         :param model: differential action model
         :param costData: external cost data (optional)
         """
-        nx,nu,ndx,nv,nout = model.nx,model.nu,model.ndx,model.nv,model.nout
+        ndx, nu, nout = model.ndx, model.nu, model.nout
         # State evolution and cost data
         self.cost = np.nan
         self.xout = np.zeros(nout)
 
         # Dynamics data
-        self.Fx = np.zeros([nout,ndx])
-        self.Fu = np.zeros([nout,nu])
+        self.Fx = np.zeros([nout, ndx])
+        self.Fu = np.zeros([nout, nu])
 
         # Cost data
-        if costData == None:
-            self.Lx = np.zeros(ndx)
-            self.Lu = np.zeros(nu)
-            self.Lxx = np.zeros([ndx,ndx])
-            self.Lxu = np.zeros([ndx,nu])
-            self.Luu = np.zeros([nu,nu])
+        if costData is None:
+            self.g = np.zeros([ndx + nu])
+            self.L = np.zeros([ndx + nu, ndx + nu])
+            self.Lx = self.g[:ndx]
+            self.Lu = self.g[ndx:]
+            self.Lxx = self.L[:ndx, :ndx]
+            self.Lxu = self.L[:ndx, ndx:]
+            self.Luu = self.L[ndx:, ndx:]
+            if hasattr(model, 'ncost') and model.ncost > 1:
+                ncost = model.ncost
+                self.costResiduals = np.zeros(ncost)
+                self.R = np.zeros([ncost, ndx + nu])
+                self.Rx = self.R[:, ndx:]
+                self.Ru = self.R[:, ndx:]
         else:
             self.costs = costData
-            if model.ncost > 1:
-                self.costResiduals = self.costs.residuals
-            self.Lx  = self.costs.Lx
-            self.Lu  = self.costs.Lu
+            self.Lx = self.costs.Lx
+            self.Lu = self.costs.Lu
             self.Lxx = self.costs.Lxx
             self.Lxu = self.costs.Lxu
             self.Luu = self.costs.Luu
-            self.Rx  = self.costs.Rx
-            self.Ru  = self.costs.Ru
-
+            if model.ncost > 1:
+                self.costResiduals = self.costs.residuals
+                self.Rx = self.costs.Rx
+                self.Ru = self.costs.Ru
 
 
 class DifferentialActionModelFullyActuated(DifferentialActionModelAbstract):
     def __init__(self, pinocchioModel, costModel):
-        DifferentialActionModelAbstract.__init__(
-            self, pinocchioModel.nq, pinocchioModel.nv, pinocchioModel.nv)
+        DifferentialActionModelAbstract.__init__(self, pinocchioModel.nq, pinocchioModel.nv, pinocchioModel.nv)
         self.DifferentialActionDataType = DifferentialActionDataFullyActuated
         self.pinocchio = pinocchioModel
         self.State = StatePinocchio(self.pinocchio)
@@ -118,54 +124,61 @@ class DifferentialActionModelFullyActuated(DifferentialActionModelAbstract):
         # Use this to force the computation with ABA
         # Side effect is that armature is not used.
         self.forceAba = False
+
     @property
-    def ncost(self): return self.costs.ncost
-    def calc(model,data,x,u=None):
-        if u is None: u=model.unone
-        nq,nv = model.nq,model.nv
+    def ncost(self):
+        return self.costs.ncost
+
+    def calc(self, data, x, u=None):
+        if u is None:
+            u = self.unone
+        nq, nv = self.nq, self.nv
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
         tauq = a2m(u)
         # --- Dynamics
-        if model.forceAba:
-            data.xout[:] = pinocchio.aba(model.pinocchio,data.pinocchio,q,v,tauq).flat
+        if self.forceAba:
+            data.xout[:] = pinocchio.aba(self.pinocchio, data.pinocchio, q, v, tauq).flat
         else:
-            pinocchio.computeAllTerms(model.pinocchio,data.pinocchio,q,v)
+            pinocchio.computeAllTerms(self.pinocchio, data.pinocchio, q, v)
             data.M = data.pinocchio.M
-            if hasattr(model.pinocchio,'armature'):
-                data.M[range(nv),range(nv)] += model.pinocchio.armature.flat
+            if hasattr(self.pinocchio, 'armature'):
+                data.M[range(nv), range(nv)] += self.pinocchio.armature.flat
             data.Minv = np.linalg.inv(data.M)
-            data.xout[:] = data.Minv*(tauq-data.pinocchio.nle).flat
+            data.xout[:] = data.Minv * (tauq - data.pinocchio.nle).flat
         # --- Cost
-        pinocchio.forwardKinematics(model.pinocchio,data.pinocchio,q,v)
-        pinocchio.updateFramePlacements(model.pinocchio,data.pinocchio)
-        data.cost = model.costs.calc(data.costs,x,u)
-        return data.xout,data.cost
+        pinocchio.forwardKinematics(self.pinocchio, data.pinocchio, q, v)
+        pinocchio.updateFramePlacements(self.pinocchio, data.pinocchio)
+        data.cost = self.costs.calc(data.costs, x, u)
+        return data.xout, data.cost
 
-    def calcDiff(model,data,x,u=None,recalc=True):
-        if u is None: u=model.unone
-        if recalc: xout,cost = model.calc(data,x,u)
-        nq,nv = model.nq,model.nv
+    def calcDiff(self, data, x, u=None, recalc=True):
+        if u is None:
+            u = self.unone
+        if recalc:
+            xout, cost = self.calc(data, x, u)
+        nq, nv = self.nq, self.nv
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
         tauq = a2m(u)
         a = a2m(data.xout)
         # --- Dynamics
-        if model.forceAba:
-            pinocchio.computeABADerivatives(model.pinocchio,data.pinocchio,q,v,tauq)
-            data.Fx[:,:nv] = data.pinocchio.ddq_dq
-            data.Fx[:,nv:] = data.pinocchio.ddq_dv
-            data.Fu[:,:]   = pinocchio.computeMinverse(model.pinocchio,data.pinocchio,q)
+        if self.forceAba:
+            pinocchio.computeABADerivatives(self.pinocchio, data.pinocchio, q, v, tauq)
+            data.Fx[:, :nv] = data.pinocchio.ddq_dq
+            data.Fx[:, nv:] = data.pinocchio.ddq_dv
+            data.Fu[:, :] = data.Minv
         else:
-            pinocchio.computeRNEADerivatives(model.pinocchio,data.pinocchio,q,v,a)
-            data.Fx[:,:nv] = -np.dot(data.Minv,data.pinocchio.dtau_dq)
-            data.Fx[:,nv:] = -np.dot(data.Minv,data.pinocchio.dtau_dv)
-            data.Fu[:,:] = data.Minv
+            pinocchio.computeRNEADerivatives(self.pinocchio, data.pinocchio, q, v, a)
+            data.Fx[:, :nv] = -np.dot(data.Minv, data.pinocchio.dtau_dq)
+            data.Fx[:, nv:] = -np.dot(data.Minv, data.pinocchio.dtau_dv)
+            data.Fu[:, :] = data.Minv
         # --- Cost
-        pinocchio.computeJointJacobians(model.pinocchio,data.pinocchio,q)
-        pinocchio.updateFramePlacements(model.pinocchio,data.pinocchio)
-        model.costs.calcDiff(data.costs,x,u,recalc=False)
-        return data.xout,data.cost
+        pinocchio.computeJointJacobians(self.pinocchio, data.pinocchio, q)
+        pinocchio.updateFramePlacements(self.pinocchio, data.pinocchio)
+        self.costs.calcDiff(data.costs, x, u, recalc=False)
+        return data.xout, data.cost
+
 
 class DifferentialActionDataFullyActuated(DifferentialActionDataAbstract):
     def __init__(self, model):
@@ -175,127 +188,138 @@ class DifferentialActionDataFullyActuated(DifferentialActionDataAbstract):
 
 
 class DifferentialActionModelLQR(DifferentialActionModelAbstract):
-  """ Differential action model for linear dynamics and quadracti cost.
-  
-  This class implements a linear dynamics, and quadratic costs (i.e. LQR action).
-  Since the DAM is a second order system, and the integratedactionmodels are
-  implemented as being second order integrators, This class implements a second
-  order linear system given by
-    x = [q, v]
-    dv = A v + B q + C u + d
-  where  A, B, C and d are constant terms.
-  
-  On the other hand the cost function is given by
-    l(x,u) = x^T*Q*x + u^T*U*u
-  """
-  def __init__(self, nq, nu):
-    DifferentialActionModelAbstract.__init__(self, nq, nq, nu)
-    self.DifferentialActionDataType = DifferentialActionDataLQR
-    self.State = StateVector(self.nx)
+    """ Differential action model for linear dynamics and quadratic cost.
 
-    v1 = randomOrthonormalMatrix(self.nq)
-    v2 = randomOrthonormalMatrix(self.nq)
-    v3 = randomOrthonormalMatrix(self.nq)
+    This class implements a linear dynamics, and quadratic costs (i.e. LQR
+    action). Since the DAM is a second order system, and the integrated action
+    models are implemented as being second order integrators. This class
+    implements a second order linear system given by
+      x = [q, v]
+      dv = Fq q + Fv v + Fu u + f0
+    where Fq, Fv, Fu and f0 are randomly chosen constant terms. On the other hand the cost function
+    is given by
+      l(x,u) = 1/2 [x,u].T [Lxx Lxu; Lxu.T Luu] [x,u] + [lx,lu].T [x,u]
+    """
 
-    # linear dynamics and quadratic cost terms
-    self.A = v2
-    self.B = v1
-    self.C = v3
-    self.d = rand(self.nv)
-    self.Q = randomOrthonormalMatrix(self.nx)
-    self.U = randomOrthonormalMatrix(self.nu)
+    def __init__(self, nq, nu, driftFree=True):
+        DifferentialActionModelAbstract.__init__(self, nq, nq, nu)
+        self.DifferentialActionDataType = DifferentialActionDataLQR
+        self.State = StateVector(self.nx)
 
-  def calc(model,data,x,u=None):
-    q = x[:model.nq]; v = x[model.nq:]
-    data.xout[:] = (np.dot(model.A, v) + np.dot(model.B, q) + np.dot(model.C, u)).flat + model.d
-    data.cost = np.dot(x, np.dot(model.Q, x)) + np.dot(u, np.dot(model.U, u))
-    return data.xout, data.cost
-  
-  def calcDiff(model,data,x,u=None,recalc=True):
-    if u is None: u=model.unone
-    if recalc: xout,cost = model.calc(data,x,u)
-    data.Lx[:] = np.dot(x.T, data.Lxx)
-    data.Lu[:] = np.dot(u.T, data.Luu)
-    return data.xout,data.cost
+        # linear dynamics and quadratic cost terms
+        self.Fq = randomOrthonormalMatrix(self.nq)
+        self.Fv = randomOrthonormalMatrix(self.nv)
+        self.Fu = randomOrthonormalMatrix(self.nq)[:, :self.nu]
+        self.f0 = np.zeros(self.nv) if driftFree else np.random.rand(self.nv)
+        A = np.random.rand(self.ndx + self.nu, self.ndx + self.nu)
+        L = np.dot(A.T, A)
+        self.Lxx = L[:self.nx, :self.nx]
+        self.Lxu = L[:self.nx, self.nx:]
+        self.Luu = L[self.nx:, self.nx:]
+        self.lx = np.random.rand(self.nx)
+        self.lu = np.random.rand(self.nu)
+
+    def calc(model, data, x, u=None):
+        if u is None:
+            u = model.unone
+        q = x[:model.nq]
+        v = x[model.nq:]
+        data.xout[:] = \
+            np.dot(model.Fq, q) + np.dot(model.Fv, v) + np.dot(model.Fu, u) + \
+            model.f0
+        data.cost = 0.5 * np.dot(x, np.dot(model.Lxx, x)) + 0.5 * np.dot(u, np.dot(model.Luu, u))
+        data.cost += np.dot(x, np.dot(model.Lxu, u)) + np.dot(model.lx, x) + np.dot(model.lu, u)
+        return data.xout, data.cost
+
+    def calcDiff(model, data, x, u=None, recalc=True):
+        if u is None:
+            u = model.unone
+        if recalc:
+            xout, cost = model.calc(data, x, u)
+        data.Lx[:] = model.lx + np.dot(model.Lxx, x) + np.dot(model.Lxu, u)
+        data.Lu[:] = model.lu + np.dot(model.Lxu.T, x) + np.dot(model.Luu, u)
+        return data.xout, data.cost
 
 
 class DifferentialActionDataLQR(DifferentialActionDataAbstract):
-    def __init__(self,model):
+    def __init__(self, model):
         DifferentialActionDataAbstract.__init__(self, model)
 
         # Setting the linear model and quadratic cost here because they are constant
-        self.Fx[:,:model.nv] = model.B
-        self.Fx[:,model.nv:] = model.A
-        self.Fu[:,:] = model.C
-        np.copyto(self.Lxx, model.Q+model.Q.T)
-        np.copyto(self.Lxu, np.zeros((model.nx, model.nu)))
-        np.copyto(self.Luu, model.U+model.U.T)
+        self.Fx[:, :model.nv] = model.Fq
+        self.Fx[:, model.nv:] = model.Fv
+        self.Fu[:, :] = model.Fu
+        self.Lxx[:, :] = model.Lxx
+        self.Luu[:, :] = model.Luu
+        self.Lxu[:, :] = model.Lxu
 
 
 class DifferentialActionModelNumDiff(DifferentialActionModelAbstract):
-    def __init__(self,model,withGaussApprox=False):
+    def __init__(self, model, withGaussApprox=False):
+        DifferentialActionModelAbstract.__init__(self, model.nq, model.nv, model.nu)
         self.DifferentialActionDataType = DifferentialActionDataNumDiff
         self.model0 = model
-        self.nx = model.nx
-        self.ndx = model.ndx
-        self.nout = model.nout
-        self.nu = model.nu
-        self.nq = model.nq
-        self.nv = model.nv
         self.State = model.State
-        self.disturbance = 1e-5
-        try:
-            self.ncost = model.ncost
-        except:
-            self.ncost = 1
+        self.disturbance = np.sqrt(2 * EPS)
+        self.ncost = model.ncost if hasattr(model, 'ncost') else 1
         self.withGaussApprox = withGaussApprox
-        assert( not self.withGaussApprox or self.ncost>1 )
+        assert (not self.withGaussApprox or self.ncost > 1)
 
-    def calc(model,data,x,u): return model.model0.calc(data.data0,x,u)
-    def calcDiff(model,data,x,u,recalc=True):
-        xn0,c0 = model.calc(data,x,u)
-        h = model.disturbance
-        dist = lambda i,n,h: np.array([ h if ii==i else 0 for ii in range(n) ])
-        Xint  = lambda x,dx: model.State.integrate(x,dx)
-        for ix in range(model.ndx):
-            xn,c = model.model0.calc(data.datax[ix],Xint(x,dist(ix,model.ndx,h)),u)
-            data.Fx[:,ix] = (xn-xn0)/h
-            data.Lx[  ix] = (c-c0)/h
-            if model.ncost>1: data.Rx[:,ix] = (data.datax[ix].costResiduals-data.data0.costResiduals)/h
+    def calc(self, data, x, u):
+        return self.model0.calc(data.data0, x, u)
+
+    def calcDiff(self, data, x, u, recalc=True):
+        xn0, c0 = self.calc(data, x, u)
+        h = self.disturbance
+
+        def dist(i, n, h):
+            return np.array([h if ii == i else 0 for ii in range(n)])
+
+        def Xint(x, dx):
+            return self.State.integrate(x, dx)
+
+        for ix in range(self.ndx):
+            xn, c = self.model0.calc(data.datax[ix], Xint(x, dist(ix, self.ndx, h)), u)
+            data.Fx[:, ix] = (xn - xn0) / h
+            data.Lx[ix] = (c - c0) / h
+            if self.ncost > 1:
+                data.Rx[:, ix] = (data.datax[ix].costResiduals - data.data0.costResiduals) / h
         if u is not None:
-            for iu in range(model.nu):
-                xn,c = model.model0.calc(data.datau[iu],x,u+dist(iu,model.nu,h))
-                data.Fu[:,iu] = (xn-xn0)/h
-                data.Lu[  iu] = (c-c0)/h
-                if model.ncost>1: data.Ru[:,iu] = (data.datau[iu].costResiduals-data.data0.costResiduals)/h
-        if model.withGaussApprox:
-            data.Lxx[:,:] = np.dot(data.Rx.T,data.Rx)
-            data.Lxu[:,:] = np.dot(data.Rx.T,data.Ru)
-            data.Luu[:,:] = np.dot(data.Ru.T,data.Ru)
+            for iu in range(self.nu):
+                xn, c = self.model0.calc(data.datau[iu], x, u + dist(iu, self.nu, h))
+                data.Fu[:, iu] = (xn - xn0) / h
+                data.Lu[iu] = (c - c0) / h
+                if self.ncost > 1:
+                    data.Ru[:, iu] = (data.datau[iu].costResiduals - data.data0.costResiduals) / h
+        if self.withGaussApprox:
+            data.Lxx[:, :] = np.dot(data.Rx.T, data.Rx)
+            data.Lxu[:, :] = np.dot(data.Rx.T, data.Ru)
+            data.Luu[:, :] = np.dot(data.Ru.T, data.Ru)
+
 
 class DifferentialActionDataNumDiff:
-    def __init__(self,model):
-        ndx,nu,nout,ncost = model.ndx,model.nu,model.nout,model.ncost
+    def __init__(self, model):
+        ndx, nu, nout = model.ndx, model.nu, model.nout
         self.data0 = model.model0.createData()
-        self.datax = [ model.model0.createData() for i in range(model.ndx) ]
-        self.datau = [ model.model0.createData() for i in range(model.nu ) ]
+        self.datax = [model.model0.createData() for i in range(model.ndx)]
+        self.datau = [model.model0.createData() for i in range(model.nu)]
 
         # Dynamics data
-        self.F  = np.zeros([ nout,ndx+nu ])
-        self.Fx = self.F[:,:ndx]
-        self.Fu = self.F[:,ndx:]
+        self.F = np.zeros([nout, ndx + nu])
+        self.Fx = self.F[:, :ndx]
+        self.Fu = self.F[:, ndx:]
 
         # Cost data
-        self.g = np.zeros(ndx+nu)
-        self.L = np.zeros([ndx+nu,ndx+nu])
+        self.g = np.zeros(ndx + nu)
+        self.L = np.zeros([ndx + nu, ndx + nu])
         self.Lx = self.g[:ndx]
         self.Lu = self.g[ndx:]
-        if model.ncost >1 :
+        if model.ncost > 1:
             self.costResiduals = self.data0.costResiduals
-            self.R  = np.zeros([model.ncost,ndx+nu])
-            self.Rx = self.R[:,:ndx]
-            self.Ru = self.R[:,ndx:]
+            self.R = np.zeros([model.ncost, ndx + nu])
+            self.Rx = self.R[:, :ndx]
+            self.Ru = self.R[:, ndx:]
         if model.withGaussApprox:
-            self.Lxx = self.L[:ndx,:ndx]
-            self.Lxu = self.L[:ndx,ndx:]
-            self.Luu = self.L[ndx:,ndx:]
+            self.Lxx = self.L[:ndx, :ndx]
+            self.Lxu = self.L[:ndx, ndx:]
+            self.Luu = self.L[ndx:, ndx:]

@@ -1,5 +1,1 @@
-image: gepgitlab.laas.fr:4567/loco-3d/crocoddyl
-
-test:
-  script:
-    - cd unittest && python all.py
+include: http://rainboard.laas.fr/project/crocoddyl/.gitlab-ci.yml

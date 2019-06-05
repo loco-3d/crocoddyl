@@ -12,25 +12,74 @@ The source code is released under the [BSD 3-Clause license](LICENSE).
 **With additional support from the Gepetto team at LAAS-CNRS.**
 
 [![License BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg?style=flat)](https://tldrlegal.com/license/bsd-3-clause-license-%28revised%29#fulltext)
-[![pipeline status](https://gepgitlab.laas.fr/loco-3d/cddp/badges/master/pipeline.svg)](https://gepgitlab.laas.fr/loco-3d/cddp/commits/master)
-[![coverage report](https://gepgitlab.laas.fr/loco-3d/cddp/badges/master/coverage.svg)](https://gepgitlab.laas.fr/loco-3d/cddp/commits/master)
+[![pipeline status](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/pipeline.svg)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/pipelines?ref=devel)
+[![coverage report](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/coverage.svg)](https://gepgitlab.laas.fr/loco-3d/cddp/commits/devel)
 
 If you want to follow the current developments, you can directly refer to the [devel branch](https://gepgitlab.laas.fr/loco-3d/cddp/tree/devel).
 
 
 ## <img align="center" height="20" src="https://i.imgur.com/x1morBF.png"/> Installation
-**Crocoddyl** has the following dependecies:
+**Crocoddyl** can be easily installed on various Linux (Ubuntu, Fedora, etc.) and Unix distributions (Mac OS X, BSD, etc.). Please refer to 
 
-* boost (unit_test_framework)
-* eigen3
+### Installation through robotpkg
+
+You can install this package throught robotpkg. robotpkg is a package manager tailored for robotics softwares. It greatly simplifies the release of new versions along with the management of their dependencies. You just need to add the robotpkg apt repository to your sources.list and then use `sudo apt install robotpkg-py27-crocoddyl`:
+
+If you have never added robotpkg as a softwares repository, please follow first the instructions from 1 to 3. Otherwise, go directly to instruction 4. Those instructions are similar to the installation procedures presented in [http://robotpkg.openrobots.org/debian.html](http://robotpkg.openrobots.org/debian.html).
+
+1. Add robotpkg as source repository to apt:
+
+		sudo tee /etc/apt/sources.list.d/robotpkg.list <<EOF
+		deb [arch=amd64] http://robotpkg.openrobots.org/wip/packages/debian/pub $(lsb_release -sc) robotpkg
+		deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -sc) robotpkg
+		EOF
+
+2. Register the authentication certificate of robotpkg:
+
+		curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | sudo apt-key add -
+
+3. You need to run at least once apt update to fetch the package descriptions:
+
+		sudo apt-get update
+
+4. The installation of Crocoddyl:
+
+		sudo apt install robotpkg-crocoddyl
+
+Finally you will need to configure your environment variables, e.g.:
+
+		export PATH=/opt/openrobots/bin:$PATH
+		export PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH
+		export LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH
+		export PYTHONPATH=/opt/openrobots/lib/python2.7/site-packages:$PYTHONPATH
+
+
+### Building from source
+
+**Crocoddyl** is yet a pure Python library; you don't need to build it, however, you need to add it inside PYTHONPATH. It has the following dependecies:
+
 * [pinocchio](https://github.com/stack-of-tasks/pinocchio)
+* [SciPy](https://www.scipy.org/)
+* [quadprog](https://pypi.org/project/quadprog/)
+* [multicontact-api](https://gepgitlab.laas.fr/loco-3d/multicontact-api)
+* [matplotlib](https://matplotlib.org/) (optional)
+* [example-robot-data](https://gepgitlab.laas.fr/gepetto/example-robot-data) (optional for running examples)
+* [jupyter](https://jupyter.org/) (optional for running notebooks)
 
-To install eigen3 on Ubuntu you can use apt-get:
-  sudo apt-get install libeigen3-dev
+You can run examples and tests from the root dir of the repository:
 
-To install [pinocchio](https://github.com/stack-of-tasks/pinocchio) follow the instructions on its [website](https://stack-of-tasks.github.io/pinocchio/download.html).
+		cd PATH_TO_CROCODDYL
+		python examples/talos_arm.py
+		python unittest/all.py
 
+If you want to learn about Crocoddyl, take a look at the Jupyter notebooks. Start in the following order.
+- [examples/notebooks/unicycle_towards_origin.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/unicycle_towards_origin.ipynb)
+- [examples/notebooks/cartpole_swing_up.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/cartpole_swing_up.py)
+- [examples/notebooks/manipulator.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/manipulator.ipynb)
+- [examples/notebooks/bipedal_walking_from_foot_traj.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/bipedal_walking_from_foot_traj.ipynb)
+- [examples/notebooks/introduction_to_crocoddyl.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/introduction_to_crocoddyl.ipynb)
 
 ## <img align="center" height="20" src="http://www.pvhc.net/img205/oohmbjfzlxapxqbpkawx.png"/> Publications
-- R. Budhiraja, J. Carpentier, C. Mastalli and N. Mansard. [Differential Dynamic Programming for Multi-Phase Rigid Contact Dynamics](https://hal.archives-ouvertes.fr/hal-01851596/document), International Conference on Humanoid Robots (ICHR), 2018
-- R. Budhiraja, J. Carpentier and N. Mansard. [Dynamics Consensus between Centroidal and Whole-Body Models for Locomotion of Legged Robots](https://hal.laas.fr/hal-01875031/document), Submitted to the International Conference on Automation and Robotics (ICRA), 2019
+- R. Budhiraja, J. Carpentier, C. Mastalli and N. Mansard. [Differential Dynamic Programming for Multi-Phase Rigid Contact Dynamics](https://hal.archives-ouvertes.fr/hal-01851596/document), IEEE RAS International Conference on Humanoid Robots (ICHR), 2018
+- Y. Tassa, N. Mansard, E. Todorov. [Control-Limited Differential Dynamic Programming](https://homes.cs.washington.edu/~todorov/papers/TassaICRA14.pdf), IEEE International Conference on Automation and Robotics (ICRA), 2014
+- R. Budhiraja, J. Carpentier and N. Mansard. [Dynamics Consensus between Centroidal and Whole-Body Models for Locomotion of Legged Robots](https://hal.laas.fr/hal-01875031/document), IEEE International Conference on Automation and Robotics (ICRA), 2019
