@@ -1,4 +1,6 @@
 import numpy as np
+from numpy.linalg import eig, norm, pinv
+
 import pinocchio
 from crocoddyl import (ActionModelNumDiff, ActuationModelFreeFloating, CallbackDDPLogger, ContactModel3D,
                        ContactModel6D, ContactModelMultiple, CostModelControl, CostModelForce,
@@ -7,7 +9,6 @@ from crocoddyl import (ActionModelNumDiff, ActuationModelFreeFloating, CallbackD
                        IntegratedActionModelEuler, ShootingProblem, SolverDDP, SolverKKT, StatePinocchio, a2m, absmax,
                        loadTalosArm, m2a)
 from crocoddyl.utils import EPS
-from numpy.linalg import eig, norm, pinv
 from pinocchio.utils import rand, zero
 from testutils import NUMDIFF_MODIFIER, assertNumDiff, df_dq, df_dx
 
@@ -150,8 +151,8 @@ model = DifferentialActionModelFloatingInContact(rmodel, actModel, contactModel,
 data = model.createData()
 
 model.calc(data, x, u)
-assert (len(filter(lambda x: x > 0, eig(data.K)[0])) == model.nv)
-assert (len(filter(lambda x: x < 0, eig(data.K)[0])) == model.ncontact)
+assert (len(list(filter(lambda x: x > 0, eig(data.K)[0]))) == model.nv)
+assert (len(list(filter(lambda x: x < 0, eig(data.K)[0]))) == model.ncontact)
 _taucheck = pinocchio.rnea(rmodel, rdata, q, v, a2m(data.a), data.contact.forces)
 _taucheck.flat[:] += rmodel.armature.flat * data.a
 assert (absmax(_taucheck[:6]) < 1e-6)
@@ -186,8 +187,8 @@ model = DifferentialActionModelFloatingInContact(rmodel, actModel, contactModel,
 data = model.createData()
 
 model.calc(data, x, u)
-assert (len(filter(lambda x: x > 0, eig(data.K)[0])) == model.nv)
-assert (len(filter(lambda x: x < 0, eig(data.K)[0])) == model.ncontact)
+assert (len(list(filter(lambda x: x > 0, eig(data.K)[0]))) == model.nv)
+assert (len(list(filter(lambda x: x < 0, eig(data.K)[0]))) == model.ncontact)
 _taucheck = pinocchio.rnea(rmodel, rdata, q, v, a2m(data.a), data.contact.forces)
 if hasattr(rmodel, 'armature'):
     _taucheck.flat += rmodel.armature.flat * data.a

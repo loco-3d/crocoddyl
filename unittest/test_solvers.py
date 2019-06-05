@@ -2,9 +2,10 @@ import copy
 import unittest
 
 import numpy as np
+from numpy.linalg import eig, inv, norm
+
 from crocoddyl import (ActionModelLQR, ActionModelUnicycle, ActionModelUnicycleVar, ShootingProblem, SolverDDP,
                        SolverFDDP, SolverKKT)
-from numpy.linalg import eig, inv, norm
 
 
 class ShootingProblemTest(unittest.TestCase):
@@ -61,8 +62,8 @@ class SolverKKTTest(unittest.TestCase):
         self.kkt.calc()
 
         # Getting the dimension of the KKT problem
-        nxu = len(filter(lambda x: x > 0, eig(self.kkt.kkt)[0]))
-        nx = len(filter(lambda x: x < 0, eig(self.kkt.kkt)[0]))
+        nxu = len(list(filter(lambda x: x > 0, eig(self.kkt.kkt)[0])))
+        nx = len(list(filter(lambda x: x < 0, eig(self.kkt.kkt)[0])))
 
         # Checking the dimension of the KKT problem
         self.assertTrue(nxu == self.kkt.nx + self.kkt.nu, "Dimension of decision variables is wrong.")

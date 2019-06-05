@@ -132,7 +132,7 @@ ddp.solve(maxiter=1,
           init_xs=[rmodel.defaultState] * len(ddp.models()),
           init_us=[
               _m.differential.quasiStatic(_d.differential, rmodel.defaultState)
-              for _m, _d in zip(ddp.models(), ddp.datas())[:-1]
+              for _m, _d in list(zip(ddp.models(), ddp.datas()))[:-1]
           ])
 
 assert (ddp.cost < 1e5)

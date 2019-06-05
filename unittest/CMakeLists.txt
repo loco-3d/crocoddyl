@@ -10,7 +10,7 @@ SET(${PROJECT_NAME}_PYTHON_TESTS
   dse3
   dynamic_derivatives
   impact
-  #locomotion
+  locomotion
   quadruped
   rk4
   robots

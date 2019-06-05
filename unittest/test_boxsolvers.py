@@ -1,4 +1,5 @@
 import numpy as np
+
 from crocoddyl import (DifferentialActionModelLQR, IntegratedActionModelEuler, ShootingProblem, SolverBoxDDP,
                        SolverBoxKKT, SolverDDP, SolverKKT)
 from crocoddyl.qpsolvers import quadprogWrapper
@@ -81,13 +82,13 @@ xddp_box, uddp_box, costddp_box = ddpbox.forwardPass(stepLength=1)
 # Check that all other values of uddp_box are the same as the previous uddp
 if limit_lower:
     assert (uddp_box[0][limit_id] == ddpbox.ul[limit_id])
-    ok_range = range(nu)
-    ok_range.pop(limit_id)
+    ok_range = list(range(nu))
+    ok_range.pop(limit_id[0])
     assert (np.allclose(uddp[0][ok_range], uddp_box[0][ok_range], atol=1e-9))
 else:
     assert (uddp_box[0][limit_id] == ddpbox.uu[limit_id])
-    ok_range = range(nu)
-    ok_range.pop(limit_id)
+    ok_range = list(range(nu))
+    ok_range.pop(limit_id[0])
     assert (np.allclose(uddp[0][ok_range], uddp_box[0][ok_range], atol=1e-9))
 
 # KKT vs Box KKT
