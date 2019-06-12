@@ -10,6 +10,42 @@
 #ifndef CROCODDYL_CORE_STATE_BASE_HPP_
 #define CROCODDYL_CORE_STATE_BASE_HPP_
 
-//TODO: StateAbstract
+#include <Eigen/Core>
+
+namespace crocoddyl {
+
+enum Jcomponent { both=0, first, second };
+
+class StateAbstract {
+ public:
+  StateAbstract(int nx, int ndx) : nx(nx), ndx(ndx) { }
+  virtual Eigen::VectorXd zero() = 0;
+  virtual Eigen::VectorXd rand() = 0;
+  virtual void diff(const Eigen::Ref<const Eigen::VectorXd>& x0,
+                    const Eigen::Ref<const Eigen::VectorXd>& x1,
+                    Eigen::Ref<Eigen::VectorXd> dxout) = 0;
+  virtual void integrate(const Eigen::Ref<const Eigen::VectorXd>& x,
+                         const Eigen::Ref<const Eigen::VectorXd>& dx,
+                         Eigen::Ref<Eigen::VectorXd> xout) = 0;
+  virtual void Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0,
+                     const Eigen::Ref<const Eigen::VectorXd>& x1,
+                     Eigen::Ref<Eigen::MatrixXd> Jfirst,
+                     Eigen::Ref<Eigen::MatrixXd> Jsecond,
+                     Jcomponent firstsecond = Jcomponent::both) = 0;
+  virtual void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x,
+                          const Eigen::Ref<const Eigen::VectorXd>& dx,
+                          Eigen::Ref<Eigen::MatrixXd> Jfirst,
+                          Eigen::Ref<Eigen::MatrixXd> Jsecond,
+                          Jcomponent firstsecond = Jcomponent::both) = 0;
+
+  int get_nx() const {return nx;}
+  int get_ndx() const {return ndx;}
+
+ protected:
+  int nx;
+  int ndx;
+};
+
+}  // namespace crocoddyl
 
 #endif  // CROCODDYL_CORE_STATE_BASE_HPP_

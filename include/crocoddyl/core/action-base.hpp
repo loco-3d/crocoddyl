@@ -10,7 +10,95 @@
 #ifndef CROCODDYL_CORE_ACTION_BASE_HPP_
 #define CROCODDYL_CORE_ACTION_BASE_HPP_
 
-//TODO: ActionModelAbstract ActionDataAbstract
+#include <crocoddyl/core/state-base.hpp>
+#include <memory>
+
 //TODO: DifferentialActionModelAbstract DifferentialActionDataAbstract
+
+namespace crocoddyl {
+
+struct ActionDataAbstract; // forward declaration
+
+class ActionModelAbstract {
+ public:
+  ActionModelAbstract(StateAbstract *const state, const int& nu) : nx(state->get_nx()),
+      ndx(state->get_ndx()), nu(nu), state(state), unone(Eigen::VectorXd::Zero(nu)) {
+    assert(nx != 0);
+    assert(ndx != 0);
+    assert(nu != 0);
+  }
+  ~ActionModelAbstract() { }
+
+  virtual void calc(std::shared_ptr<ActionDataAbstract>& data,
+                    const Eigen::Ref<const Eigen::VectorXd>& x,
+                    const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
+  virtual void calcDiff(std::shared_ptr<ActionDataAbstract>& data,
+                        const Eigen::Ref<const Eigen::VectorXd>& x,
+                        const Eigen::Ref<const Eigen::VectorXd>& u,
+                        const bool& recalc=true) = 0;
+  virtual std::shared_ptr<ActionDataAbstract> createData() = 0;
+
+  void calc(std::shared_ptr<ActionDataAbstract>& data,
+            const Eigen::Ref<const Eigen::VectorXd>& x) {
+    calc(data, x, unone);
+  }
+  void calcDiff(std::shared_ptr<ActionDataAbstract>& data,
+                const Eigen::Ref<const Eigen::VectorXd>& x) {
+    calcDiff(data, x, unone);
+  }
+
+  int get_nx() const {return nx;}
+  int get_ndx() const {return ndx;}
+  int get_nu() const {return nu;}
+  StateAbstract *const get_state() {return state;}
+
+ protected:
+  int nx;
+  int ndx;
+  int nu;
+  StateAbstract* state;
+  Eigen::VectorXd unone;
+};
+
+struct ActionDataAbstract {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  template<typename Model>
+  ActionDataAbstract(Model *const model) {
+    const int& nx = model->get_nx();
+    const int& ndx = model->get_ndx();
+    const int& nu = model->get_nu();
+    xnext = Eigen::VectorXd::Zero(nx);
+    Fx = Eigen::MatrixXd::Zero(ndx, ndx);
+    Fu = Eigen::MatrixXd::Zero(ndx, nu);
+    Lx = Eigen::VectorXd::Zero(ndx);
+    Lu = Eigen::VectorXd::Zero(nu);
+    Lxx = Eigen::MatrixXd::Zero(ndx, ndx);
+    Lxu = Eigen::MatrixXd::Zero(ndx, nu);
+    Luu = Eigen::MatrixXd::Zero(nu, nu);
+  }
+
+  const Eigen::VectorXd& get_xnext() { return xnext; }
+  const Eigen::VectorXd& get_Lx() { return Lx; }
+  const Eigen::VectorXd& get_Lu() { return Lu; }
+  const Eigen::MatrixXd& get_Lxx() { return Lxx; }
+  const Eigen::MatrixXd& get_Lxu() { return Lxu; }
+  const Eigen::MatrixXd& get_Luu() { return Luu; }
+  const Eigen::MatrixXd& get_Fx() { return Fx; }
+  const Eigen::MatrixXd& get_Fu() { return Fu; }
+
+  Eigen::VectorXd xnext;
+  Eigen::MatrixXd Fx;
+  Eigen::MatrixXd Fu;
+  Eigen::VectorXd Lx;
+  Eigen::VectorXd Lu;
+  Eigen::MatrixXd Lxx;
+  Eigen::MatrixXd Lxu;
+  Eigen::MatrixXd Luu;
+  double cost;
+};
+
+
+}  // namespace crocoddyl
 
 #endif  // CROCODDYL_CORE_ACTION_BASE_HPP_
