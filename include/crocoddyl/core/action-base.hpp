@@ -21,13 +21,9 @@ struct ActionDataAbstract; // forward declaration
 
 class ActionModelAbstract {
  public:
-  ActionModelAbstract(StateAbstract *const state, const int& nu) : nx(state->get_nx()),
-      ndx(state->get_ndx()), nu(nu), state(state), unone(Eigen::VectorXd::Zero(nu)) {
-    assert(nx != 0);
-    assert(ndx != 0);
-    assert(nu != 0);
-  }
-  ~ActionModelAbstract() { }
+  ActionModelAbstract(StateAbstract *const state,
+                      const unsigned int& nu);
+  ~ActionModelAbstract();
 
   virtual void calc(std::shared_ptr<ActionDataAbstract>& data,
                     const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -39,23 +35,19 @@ class ActionModelAbstract {
   virtual std::shared_ptr<ActionDataAbstract> createData() = 0;
 
   void calc(std::shared_ptr<ActionDataAbstract>& data,
-            const Eigen::Ref<const Eigen::VectorXd>& x) {
-    calc(data, x, unone);
-  }
+            const Eigen::Ref<const Eigen::VectorXd>& x);
   void calcDiff(std::shared_ptr<ActionDataAbstract>& data,
-                const Eigen::Ref<const Eigen::VectorXd>& x) {
-    calcDiff(data, x, unone);
-  }
+                const Eigen::Ref<const Eigen::VectorXd>& x);
 
-  int get_nx() const {return nx;}
-  int get_ndx() const {return ndx;}
-  int get_nu() const {return nu;}
-  StateAbstract *const get_state() {return state;}
+  unsigned int get_nx() const;
+  unsigned int get_ndx() const;
+  unsigned int get_nu() const;
+  StateAbstract* get_state() const;
 
  protected:
-  int nx;
-  int ndx;
-  int nu;
+  unsigned int nx;
+  unsigned int ndx;
+  unsigned int nu;
   StateAbstract* state;
   Eigen::VectorXd unone;
 };
@@ -97,7 +89,6 @@ struct ActionDataAbstract {
   Eigen::MatrixXd Luu;
   double cost;
 };
-
 
 }  // namespace crocoddyl
 

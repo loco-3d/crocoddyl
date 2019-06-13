@@ -18,7 +18,10 @@ enum Jcomponent { both=0, first, second };
 
 class StateAbstract {
  public:
-  StateAbstract(int nx, int ndx) : nx(nx), ndx(ndx) { }
+  StateAbstract(const unsigned int& nx,
+                const unsigned int& ndx);
+  ~StateAbstract();
+
   virtual Eigen::VectorXd zero() = 0;
   virtual Eigen::VectorXd rand() = 0;
   virtual void diff(const Eigen::Ref<const Eigen::VectorXd>& x0,
@@ -38,12 +41,12 @@ class StateAbstract {
                           Eigen::Ref<Eigen::MatrixXd> Jsecond,
                           Jcomponent firstsecond = Jcomponent::both) = 0;
 
-  int get_nx() const {return nx;}
-  int get_ndx() const {return ndx;}
+  const unsigned int& get_nx() const;
+  const unsigned int& get_ndx() const;
 
  protected:
-  int nx;
-  int ndx;
+  unsigned int nx;
+  unsigned int ndx;
 };
 
 }  // namespace crocoddyl
