@@ -36,7 +36,17 @@ ENDIF()
 # Disable -Werror on Unix for now.
 SET(CXX_DISABLE_WERROR True)
 
+# Create different building options
+OPTION(ENABLE_VECTORIZATION "Enable vectorization and futhers processor-related optimizations" ON)
+OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" OFF)
+OPTION(BUILD_UNIT_TESTS "Build the unitary tests" ON)
+OPTION(BUILD_BENCHMARK "Build the benchmark" OFF)
+
+
 SET(CMAKE_CXX_FLAGS "-std=c++11")
+IF(ENABLE_VECTORIZATION)
+  SET(CMAKE_CXX_FLAGS "-std=c++11 -march=native -mavx")
+ENDIF()
 
 SETUP_PROJECT()
 
@@ -49,11 +59,6 @@ ADD_OPTIONAL_DEPENDENCY("quadprog")
 ADD_OPTIONAL_DEPENDENCY("scipy")
 
 FINDPYTHON()
-
-
-# Create different building options
-OPTION(BUILD_UNIT_TESTS "Build the unitary tests" ON)
-OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" OFF)
 
 
 # Include and add the main directory
@@ -71,8 +76,6 @@ IF(BUILD_PYTHON_INTERFACE)
   INCLUDE_DIRECTORIES(bindings)
   ADD_SUBDIRECTORY(bindings)
 ENDIF(BUILD_PYTHON_INTERFACE)
-
-# ADD_SUBDIRECTORY(${PROJECT_NAME})
 
 # Build the unit tests
 IF(BUILD_UNIT_TESTS)
