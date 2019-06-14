@@ -1,6 +1,23 @@
 ADD_SUBDIRECTORY(python)
 
 SET(${PROJECT_NAME}_CPP_TESTS
+  # test_actions.cpp
+  # test_activation.cpp
+  # test_actuation.cpp
+  # test_armature.cpp
+  # test_boxsolvers.cpp
+  # test_contacts.cpp
+  # test_costs.cpp
+  # test_ddp_contact.cpp
+  # test_dse3.cpp
+  # test_dynamic_derivatives.cpp
+  # test_impact.cpp
+  # test_locomotion.cpp
+  # test_quadruped.cpp
+  # test_rk4.cpp
+  # test_robots.cpp
+  # test_solvers.cpp
+  test_state.cpp
   )
 
 MACRO(ADD_TEST_CFLAGS target flag)

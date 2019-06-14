@@ -7,7 +7,7 @@ NUMDIFF_MODIFIER = 1e4
 
 
 class NumDiffException(Exception):
-    """Raised when the NumDiff values are too hight"""
+    """Raised when the NumDiff values are too high"""
     pass
 
 
