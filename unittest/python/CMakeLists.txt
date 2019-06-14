@@ -19,5 +19,5 @@ SET(${PROJECT_NAME}_PYTHON_TESTS
   )
 
 FOREACH(TEST ${${PROJECT_NAME}_PYTHON_TESTS})
-  ADD_PYTHON_UNIT_TEST("py-${TEST}" "/unittest/python/test_${TEST}.py" ".")
+  ADD_PYTHON_UNIT_TEST("py-${TEST}" "unittest/python/test_${TEST}.py" ".")
 ENDFOREACH(TEST ${${PROJECT_NAME}_PYTHON_TESTS})
