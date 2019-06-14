@@ -6,11 +6,12 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_PYTHON_CORE_STATE_HPP_
-#define CROCODDYL_PYTHON_CORE_STATE_HPP_
+#ifndef CROCODDYL_PYTHON_CORE_STATE_BASE_HPP_
+#define CROCODDYL_PYTHON_CORE_STATE_BASE_HPP_
 
 #include <crocoddyl/core/state-base.hpp>
-    #include <iostream>
+#include <iostream>
+
 namespace crocoddyl {
 namespace python {
 
@@ -19,6 +20,9 @@ namespace bp = boost::python;
 class StateAbstract_wrap : public StateAbstract,
                            public bp::wrapper<StateAbstract> {
  public:
+  using StateAbstract::nx;
+  using StateAbstract::ndx;
+
   StateAbstract_wrap(int nx, int ndx) : StateAbstract(nx, ndx), bp::wrapper<StateAbstract>() {}
 
   Eigen::VectorXd zero() { return bp::call<Eigen::VectorXd>(this->get_override("zero").ptr()); }
@@ -155,14 +159,6 @@ class StateAbstract_wrap : public StateAbstract,
       return list;
     }
   }
-
-  unsigned int get_nx_wrap() const {
-    return get_nx();
-  }
-
-  unsigned int get_ndx_wrap() const {
-    return get_ndx();
-  }
 };
 
 void exposeStateAbstract() {
@@ -233,11 +229,11 @@ partial derivative by setting firstsecond='first' or firstsecond='second'.
 :param dx: displacement of the state (dim state.ndx).
 :param firstsecond: desired partial derivative
 :return the partial derivative(s) of the integrate(x, dx) function)")
-      .add_property("nx", &StateAbstract_wrap::get_nx_wrap, "dimension of state configuration vector")
-      .add_property("ndx", &StateAbstract_wrap::get_ndx_wrap, "dimension of state tangent vector");
+      .add_property("nx", &StateAbstract_wrap::nx, "dimension of state configuration vector")
+      .add_property("ndx", &StateAbstract_wrap::ndx, "dimension of state tangent vector");
 }
 
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_PYTHON_CORE_STATE_HPP_
+#endif  // CROCODDYL_PYTHON_CORE_STATE_BASE_HPP_
