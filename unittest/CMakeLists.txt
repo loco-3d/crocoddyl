@@ -1,23 +1,23 @@
 ADD_SUBDIRECTORY(python)
 
 SET(${PROJECT_NAME}_CPP_TESTS
-  # test_actions.cpp
-  # test_activation.cpp
-  # test_actuation.cpp
-  # test_armature.cpp
-  # test_boxsolvers.cpp
-  # test_contacts.cpp
-  # test_costs.cpp
-  # test_ddp_contact.cpp
-  # test_dse3.cpp
-  # test_dynamic_derivatives.cpp
-  # test_impact.cpp
-  # test_locomotion.cpp
-  # test_quadruped.cpp
-  # test_rk4.cpp
-  # test_robots.cpp
-  # test_solvers.cpp
-  test_state.cpp
+  # test_actions
+  # test_activation
+  # test_actuation
+  # test_armature
+  # test_boxsolvers
+  # test_contacts
+  # test_costs
+  # test_ddp_contact
+  # test_dse3
+  # test_dynamic_derivatives
+  # test_impact
+  # test_locomotion
+  # test_quadruped
+  # test_rk4
+  # test_robots
+  # test_solvers
+  test_state
   )
 
 MACRO(ADD_TEST_CFLAGS target flag)
@@ -25,20 +25,25 @@ MACRO(ADD_TEST_CFLAGS target flag)
 ENDMACRO(ADD_TEST_CFLAGS)
 
 MACRO(ADD_CPP_UNIT_TEST NAME PKGS)
-  ADD_UNIT_TEST(${NAME} ${NAME})
+  set(unittest_name ${NAME})
 
-  SET_TARGET_PROPERTIES(${NAME} PROPERTIES LINKER_LANGUAGE CXX)
-  ADD_TEST_CFLAGS(${NAME} "-DBOOST_TEST_DYN_LINK")
+  ADD_UNIT_TEST(${unittest_name} ${NAME}.cpp)
+
+  SET_TARGET_PROPERTIES(${unittest_name} PROPERTIES LINKER_LANGUAGE CXX)
+  
+  ADD_TEST_CFLAGS(${unittest_name} "-DBOOST_TEST_DYN_LINK")
+  
   SET(MODULE_NAME "${NAME}Test")
   STRING(REGEX REPLACE "-" "_" MODULE_NAME ${MODULE_NAME})
-  ADD_TEST_CFLAGS(${NAME} "-DBOOST_TEST_MODULE=${MODULE_NAME}")
+  ADD_TEST_CFLAGS(${unittest_name} "-DBOOST_TEST_MODULE=${MODULE_NAME}")
 
   FOREACH(PKG ${PKGS})
-    PKG_CONFIG_USE_DEPENDENCY(${NAME} ${PKG})
+    PKG_CONFIG_USE_DEPENDENCY(${unittest_name} ${PKG})
   ENDFOREACH(PKG)
 
-  TARGET_LINK_LIBRARIES(${NAME} ${PROJECT_NAME})
-  TARGET_LINK_LIBRARIES(${NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+  TARGET_LINK_LIBRARIES(${unittest_name} ${PROJECT_NAME})
+  MESSAGE(WARNING "Boost unnittest libs are: ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}")
+  TARGET_LINK_LIBRARIES(${unittest_name} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 ENDMACRO(ADD_CPP_UNIT_TEST NAME PKGS)
 
 
