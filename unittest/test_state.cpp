@@ -1,10 +1,10 @@
-/**
- * @file test_state.cpp
- * @author Maximilien Naveau (maximilien.naveau@gmail.com)
- * @license License BSD-2-Clause
- * @copyright Copyright (c) 2019, New York University, Max Planck Gesellshaft and LAAS.
- * @date 2019-06-18
- */
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2019, LAAS-CNRS, New York University, Max Planck Gesellshaft
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
 
 #include <boost/test/included/unit_test.hpp>
 #include <boost/bind.hpp>
@@ -16,36 +16,36 @@ using namespace boost::unit_test;
 
 //____________________________________________________________________________//
 
-void free_test_function( int i, int j )
+void test_state_dimension(crocoddyl::StateAbstract& state, int nx)
 {
-    BOOST_CHECK( true /* test assertion */ );
+  // Checking the dimension of zero and random states
+  BOOST_CHECK(state.zero().size() == nx);
+  BOOST_CHECK(state.rand().size() == nx);
 }
 
-void test_state_dimension(crocoddyl::StateAbstract& state, int Nx)
+//____________________________________________________________________________//
+
+void test_integrate_against_difference(crocoddyl::StateAbstract& state)
 {
-  BOOST_CHECK(state.zero().size() == Nx);
-  BOOST_CHECK(state.rand().size() == Nx);
+  // Generating random states
+  Eigen::VectorXd x1 = state.rand();
+  Eigen::VectorXd x2 = state.rand();
+
+  // Computing x2 by integrating its difference
+  Eigen::VectorXd dx;
+  state.diff(x1, x2, dx);
+  Eigen::VectorXd x2i;
+  state.integrate(x1, dx, x2i);
+
+  Eigen::VectorXd dxi;
+  state.diff(x2i, x2, dxi);
+
+  // Checking that both states agree
+  BOOST_CHECK(dxi.isMuchSmallerThan(1e-9));
 }
 
-    // def test_state_dimension(self):
-    //     # Checking the dimension of zero and random states
-    //     self.assertEqual(self.STATE.zero().shape, (self.NX, ), "Wrong dimension of zero state.")
-    //     self.assertEqual(self.STATE.rand().shape, (self.NX, ), "Wrong dimension of random state.")
+//____________________________________________________________________________//
 
-    // def test_integrate_against_difference(self):
-    //     # Generating random states
-    //     x1 = self.STATE.rand()
-    //     x2 = self.STATE.rand()
-
-    //     # Computing x2 by integrating its difference
-    //     dx = self.STATE.diff(x1, x2)
-    //     x2i = self.STATE.integrate(x1, dx)
-
-    //     dxi = self.STATE.diff(x2i, x2)
-
-    //     # Checking that both states agree
-    //     self.assertTrue(np.allclose(dxi, np.zeros(self.STATE.ndx), atol=1e-9),
-    //                     "Integrate function doesn't agree with difference rule.")
 
     // def test_difference_against_integrate(self):
     //     # Generating random states
@@ -136,11 +136,17 @@ void test_state_dimension(crocoddyl::StateAbstract& state, int Nx)
 bool
 init_function()
 {
-    int nx = 10;
-    framework::master_test_suite().add(BOOST_TEST_CASE(
-      boost::bind(&test_state_dimension, crocoddyl::StateVector(nx), nx) ));
+  // Here we test the state_vector
+  int nx = 10;
+  //
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(
+    &test_state_dimension, crocoddyl::StateVector(nx), nx
+  )));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(
+    &test_integrate_against_difference, crocoddyl::StateVector(nx)
+  )));
 
-    return true;
+  return true;
 }
 
 //____________________________________________________________________________//
