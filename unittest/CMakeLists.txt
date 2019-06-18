@@ -3,7 +3,7 @@ ADD_SUBDIRECTORY(python)
 SET(${PROJECT_NAME}_CPP_TESTS
   ## without KKT 
   # testutils
-  # test_state
+  test_state
   # test_robots
   # test_rk4
   # test_quadruped
@@ -14,7 +14,7 @@ SET(${PROJECT_NAME}_CPP_TESTS
   # test_ddp_contact
   # test_armature
   # test_actuation 
-  test_activation 
+  # test_activation 
   # test_actions
 
   ## with KKT 
@@ -39,14 +39,13 @@ MACRO(ADD_CPP_UNIT_TEST NAME PKGS)
   
   SET(MODULE_NAME "${NAME}Test")
   STRING(REGEX REPLACE "-" "_" MODULE_NAME ${MODULE_NAME})
-  ADD_TEST_CFLAGS(${unittest_name} "-DBOOST_TEST_MODULE=${MODULE_NAME}")
+  ADD_TEST_CFLAGS(${unittest_name} "-DTEST_MODULE_NAME=${MODULE_NAME}")
 
   FOREACH(PKG ${PKGS})
     PKG_CONFIG_USE_DEPENDENCY(${unittest_name} ${PKG})
   ENDFOREACH(PKG)
 
   TARGET_LINK_LIBRARIES(${unittest_name} ${PROJECT_NAME})
-  MESSAGE(WARNING "Boost unnittest libs are: ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}")
   TARGET_LINK_LIBRARIES(${unittest_name} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 ENDMACRO(ADD_CPP_UNIT_TEST NAME PKGS)
 
