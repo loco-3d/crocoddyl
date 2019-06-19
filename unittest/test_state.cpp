@@ -44,7 +44,7 @@ void test_integrate_against_difference(
   state.diff(x2i, x2, dxi);
 
   // Checking that both states agree
-  BOOST_CHECK(dxi.norm() < 1e-9);
+  BOOST_CHECK(dxi.isMuchSmallerThan(1.0, 1e-9));
 }
 
 //____________________________________________________________________________//
@@ -62,7 +62,7 @@ void test_difference_against_integrate(crocoddyl::StateAbstract& state)
   state.diff(x, xidx, dxd);
 
   // Checking that both states agree
-  BOOST_CHECK((dxd - dx).norm() < 1e-9);
+  BOOST_CHECK((dxd - dx).isMuchSmallerThan(1.0, 1e-9));
 }
 
 //____________________________________________________________________________//
@@ -74,8 +74,10 @@ void test_Jdiff_against_numdiff(crocoddyl::StateAbstract& state)
   Eigen::VectorXd x2 = state.rand();
 
   // Computing the partial derivatives of the difference function
-  Eigen::MatrixXd J1, J2;
-  state.Jdiff(x1, x2, J1, J2);
+  Eigen::MatrixXd J1(state.get_ndx(), state.get_ndx());
+  Eigen::MatrixXd J2(state.get_ndx(), state.get_ndx());
+  state.Jdiff(x1, x2, J1, J2, crocoddyl::Jcomponent::first);
+  state.Jdiff(x1, x2, J1, J2, crocoddyl::Jcomponent::second);
   Eigen::MatrixXd Jnum1, Jnum2;
   // crocoddyl::StateNumDiff state_num_diff (state);
   // state_num_diff.Jdiff(x1, x2, Jnum1, Jnum2)
@@ -83,8 +85,8 @@ void test_Jdiff_against_numdiff(crocoddyl::StateAbstract& state)
   // Checking the partial derivatives against NumDiff
   // The previous tolerance was 10*disturbance
   // tol = test_utils::NUMDIFF_MOD * state_num_diff.get_disturbance();
-  // BOOST_CHECK((J1 - Jnum1).isMuchSmallerThan(tol));
-  // BOOST_CHECK((J2 - Jnum2).isMuchSmallerThan(tol));
+  // BOOST_CHECK((J1 - Jnum1).isMuchSmallerThan(1.0, 1e-9));
+  // BOOST_CHECK((J2 - Jnum2).isMuchSmallerThan(1.0, 1e-9));
 
   BOOST_TEST_MESSAGE("test_Jdiff_against_numdiff is disabled");
 }
@@ -98,7 +100,8 @@ void test_Jintegrate_against_numdiff(crocoddyl::StateAbstract& state)
   Eigen::VectorXd dx = Eigen::VectorXd::Random(state.get_ndx());
 
   // Computing the partial derivatives of the difference function
-  Eigen::MatrixXd J1, J2;
+  Eigen::MatrixXd J1(state.get_ndx(), state.get_ndx());
+  Eigen::MatrixXd J2(state.get_ndx(), state.get_ndx());
   state.Jintegrate(x, dx, J1, J2);
   Eigen::MatrixXd Jnum1, Jnum2;
   // crocoddyl::StateNumDiff state_num_diff (state);
@@ -107,8 +110,8 @@ void test_Jintegrate_against_numdiff(crocoddyl::StateAbstract& state)
   // Checking the partial derivatives against NumDiff
   // The previous tolerance was 10*disturbance
   // tol = test_utils::NUMDIFF_MOD * state_num_diff.get_disturbance();
-  // BOOST_CHECK((J1 - Jnum1).isMuchSmallerThan(tol));
-  // BOOST_CHECK((J2 - Jnum2).isMuchSmallerThan(tol));
+  // BOOST_CHECK((J1 - Jnum1).isMuchSmallerThan(1.0, 1e-9));
+  // BOOST_CHECK((J2 - Jnum2).isMuchSmallerThan(1.0, 1e-9));
 
   BOOST_TEST_MESSAGE("test_Jintegrate_against_numdiff is disabled");
 }
@@ -124,15 +127,17 @@ void test_Jdiff_and_Jintegrate_are_inverses(crocoddyl::StateAbstract& state)
   state.integrate(x1, dx, x2);
 
   // Computing the partial derivatives of the integrate and difference function
-  Eigen::MatrixXd Jx, Jdx;
+  Eigen::MatrixXd Jx(state.get_ndx(), state.get_ndx());
+  Eigen::MatrixXd Jdx(state.get_ndx(), state.get_ndx());
   state.Jintegrate(x1, dx, Jx, Jdx);
-  Eigen::MatrixXd J1, J2;
+  Eigen::MatrixXd J1(state.get_ndx(), state.get_ndx());
+  Eigen::MatrixXd J2(state.get_ndx(), state.get_ndx());
   state.Jdiff(x1, x2, J1, J2);
 
   // Checking that Jdiff and Jintegrate are inverses
   Eigen::MatrixXd dX_dDX = Jdx;
   Eigen::MatrixXd dDX_dX = J2;
-  BOOST_CHECK((dX_dDX - dDX_dX.inverse()).isMuchSmallerThan(1e-9));
+  BOOST_CHECK((dX_dDX - dDX_dX.inverse()).isMuchSmallerThan(1.0, 1e-9));
 }
 
 //____________________________________________________________________________//
@@ -148,26 +153,33 @@ void test_velocity_from_Jintegrate_Jdiff(crocoddyl::StateAbstract& state)
   double h = 1e-8;
 
   // Computing the partial derivatives of the integrate and difference function
-  Eigen::MatrixXd Jx, Jdx;
+  Eigen::MatrixXd Jx(state.get_ndx(), state.get_ndx());
+  Eigen::MatrixXd Jdx(state.get_ndx(), state.get_ndx());
   state.Jintegrate(x1, dx, Jx, Jdx);
-  Eigen::MatrixXd J1, J2;
+  Eigen::MatrixXd J1(state.get_ndx(), state.get_ndx());
+  Eigen::MatrixXd J2(state.get_ndx(), state.get_ndx());
   state.Jdiff(x1, x2, J1, J2);
 
   // Checking that computed velocity from Jintegrate
   Eigen::MatrixXd dX_dDX = Jdx;
   Eigen::VectorXd x2eps(state.get_nx());
   state.integrate(x1, dx + eps * h, x2eps);
-  // self.assertTrue(np.allclose(np.dot(dX_dDX, eps), self.STATE.diff(x2, x2eps) / h, atol=1e-3),
-  //                 "Velocity computed from Jintegrate is wrong.")
-
-  // // Checking the velocity computed from Jdiff
-  // x = self.STATE.rand()
-  // dx = self.STATE.diff(x1, x)
-  // x2i = self.STATE.integrate(x, eps * h)
-  // dxi = self.STATE.diff(x1, x2i)
-  // J1, J2 = self.STATE.Jdiff(x1, x)
-  // self.assertTrue(np.allclose(np.dot(J2, eps), (-dx + dxi) / h, atol=1e-3),
-  //                 "Velocity computed from Jdiff is wrong.")
+  Eigen::VectorXd x2_eps(state.get_nx());
+  state.diff(x2, x2eps, x2_eps);
+  BOOST_CHECK((dX_dDX * eps - x2_eps / h).isMuchSmallerThan(1.0, 1e-3));
+  
+  // Checking the velocity computed from Jdiff
+  Eigen::VectorXd x = state.rand();
+  dx.setZero();
+  state.diff(x1, x, dx);
+  Eigen::VectorXd x2i(state.get_nx());
+  state.integrate(x, eps * h, x2i);
+  Eigen::VectorXd dxi(state.get_ndx());
+  state.diff(x1, x2i, dxi);
+  J1.setZero();
+  J2.setZero();
+  state.Jdiff(x1, x, J1, J2);
+  BOOST_CHECK((J2 * eps - (-dx + dxi) / h).isMuchSmallerThan(1.0, 1e-3));
 }
 
 //____________________________________________________________________________//
@@ -200,6 +212,9 @@ void register_state_vector_unit_tests()
     &test_Jdiff_and_Jintegrate_are_inverses, crocoddyl::StateVector(nx)
   )));
 
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(
+    &test_velocity_from_Jintegrate_Jdiff, crocoddyl::StateVector(nx)
+  )));
 }
 
 bool init_function()

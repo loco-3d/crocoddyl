@@ -45,8 +45,8 @@ class StateAbstract {
   const unsigned int& get_ndx() const;
 
  protected:
-  unsigned int nx;
-  unsigned int ndx;
+  unsigned int nx_;
+  unsigned int ndx_;
 };
 
 }  // namespace crocoddyl
