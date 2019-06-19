@@ -15,7 +15,7 @@ SET(${PROJECT_NAME}_CPP_TESTS
   # test_armature
   # test_actuation 
   # test_activation 
-  # test_actions
+  test_actions
 
   ## with KKT 
   # test_solvers
@@ -47,12 +47,13 @@ MACRO(ADD_CPP_UNIT_TEST NAME PKGS)
 
   TARGET_LINK_LIBRARIES(${unittest_name} ${PROJECT_NAME})
   TARGET_LINK_LIBRARIES(${unittest_name} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+
+  ADD_TEST_CFLAGS(${unittest_name} '-DCROCODDYL_SOURCE_DIR=\\\"${${PROJECT_NAME}_SOURCE_DIR}\\\"')
 ENDMACRO(ADD_CPP_UNIT_TEST NAME PKGS)
 
 
 FOREACH(TEST ${${PROJECT_NAME}_CPP_TESTS})
   ADD_CPP_UNIT_TEST(${TEST} "eigen3;pinocchio")
-  ADD_TEST_CFLAGS(${TEST} '-DCROCODDYL_SOURCE_DIR=\\\"${${PROJECT_NAME}_SOURCE_DIR}\\\"')
 ENDFOREACH(TEST ${${PROJECT_NAME}_CPP_TESTS})
 
 
