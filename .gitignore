@@ -8,3 +8,4 @@ build/*
 *.aux
 *.log
 *.pdf
+.clang-format
