@@ -6,6 +6,7 @@ SET(${PROJECT_NAME}_SOURCES
   core/optctrl/shooting.cpp
   core/solvers/ddp.cpp
   core/states/state-euclidean.cpp
+  core/states/state-num-diff.cpp
   core/actions/unicycle.cpp
   core/actions/lqr.cpp
   )

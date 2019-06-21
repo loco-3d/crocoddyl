@@ -70,6 +70,8 @@ struct ActionDataAbstract {
     Luu = Eigen::MatrixXd::Zero(nu, nu);
   }
 
+  // TODO @cmastalli to be remove according to:
+  // https://google.github.io/styleguide/cppguide.html#Structs_vs._Classes
   const Eigen::VectorXd& get_xnext() { return xnext; }
   const Eigen::VectorXd& get_Lx() { return Lx; }
   const Eigen::VectorXd& get_Lu() { return Lu; }
@@ -78,6 +80,7 @@ struct ActionDataAbstract {
   const Eigen::MatrixXd& get_Luu() { return Luu; }
   const Eigen::MatrixXd& get_Fx() { return Fx; }
   const Eigen::MatrixXd& get_Fu() { return Fu; }
+  const double& get_cost() { return cost; }
 
   Eigen::VectorXd xnext;
   Eigen::MatrixXd Fx;

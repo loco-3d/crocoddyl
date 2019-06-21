@@ -3,16 +3,16 @@
 namespace crocoddyl {
 
 StateAbstract::StateAbstract(const unsigned int& nx,
-                             const unsigned int& ndx) : nx(nx), ndx(ndx) {}
+                             const unsigned int& ndx) : nx_(nx), ndx_(ndx) {}
 
 StateAbstract::~StateAbstract() {}
 
 const unsigned int& StateAbstract::get_nx() const {
-  return nx;
+  return nx_;
 }
 
 const unsigned int& StateAbstract::get_ndx() const {
-  return ndx;
+  return ndx_;
 }
 
 }  // namespace crocoddyl
