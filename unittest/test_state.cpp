@@ -8,7 +8,6 @@
 
 #include <boost/test/included/unit_test.hpp>
 #include <boost/bind.hpp>
-#include "test_utils.hpp"
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/states/state-euclidean.hpp"
 #include "crocoddyl/core/states/state-unicycle.hpp"
