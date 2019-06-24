@@ -20,8 +20,8 @@ namespace bp = boost::python;
 class StateAbstract_wrap : public StateAbstract,
                            public bp::wrapper<StateAbstract> {
  public:
-  using StateAbstract::nx;
-  using StateAbstract::ndx;
+  using StateAbstract::nx_;
+  using StateAbstract::ndx_;
 
   StateAbstract_wrap(int nx, int ndx) : StateAbstract(nx, ndx), bp::wrapper<StateAbstract>() {}
 
@@ -229,8 +229,8 @@ partial derivative by setting firstsecond='first' or firstsecond='second'.
 :param dx: displacement of the state (dim state.ndx).
 :param firstsecond: desired partial derivative
 :return the partial derivative(s) of the integrate(x, dx) function)")
-      .add_property("nx", &StateAbstract_wrap::nx, "dimension of state configuration vector")
-      .add_property("ndx", &StateAbstract_wrap::ndx, "dimension of state tangent vector");
+      .add_property("nx", &StateAbstract_wrap::nx_, "dimension of state configuration vector")
+      .add_property("ndx", &StateAbstract_wrap::ndx_, "dimension of state tangent vector");
 }
 
 }  // namespace python
