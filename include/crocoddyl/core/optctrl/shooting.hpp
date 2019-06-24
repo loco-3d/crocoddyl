@@ -17,8 +17,8 @@ namespace crocoddyl {
 class ShootingProblem {
  public:
   ShootingProblem(const Eigen::Ref<const Eigen::VectorXd>& x0,
-                  std::vector<ActionModelAbstract*>& runningModels,
-                  ActionModelAbstract* terminalModel);
+                  std::vector<ActionModelAbstract*>& running_models,
+                  ActionModelAbstract* terminal_model);
   ~ShootingProblem();
 
   double calc(const std::vector<Eigen::VectorXd>& xs,
@@ -31,17 +31,17 @@ class ShootingProblem {
   long unsigned int get_T() const;
   Eigen::VectorXd& get_x0();
 
-  ActionModelAbstract* terminalModel;
-  std::shared_ptr<ActionDataAbstract> terminalData;
-  std::vector<ActionModelAbstract*> runningModels;
-  std::vector<std::shared_ptr<ActionDataAbstract>> runningDatas;
+  ActionModelAbstract* terminal_model_;
+  std::shared_ptr<ActionDataAbstract> terminal_data_;
+  std::vector<ActionModelAbstract*> running_models_;
+  std::vector<std::shared_ptr<ActionDataAbstract>> running_datas_;
 
  protected:
-  long unsigned int T;
-  Eigen::VectorXd x0;
+  long unsigned int T_;
+  Eigen::VectorXd x0_;
 
  private:
-  double cost;
+  double cost_;
 };
 
 }  // namespace crocoddyl

@@ -29,7 +29,7 @@ void CallbackDDPVerbose::operator()(SolverAbstract *const solver) {
     std::cout << std::setw(4) << solver->get_iter() << "  ";
     std::cout << std::scientific << std::setprecision(5) << solver->get_cost() << "  ";
     std::cout << solver->get_stop() << "  " << -solver->get_d()[1] << "  ";
-    std::cout << solver->get_Xreg() << "  " << solver->get_Ureg() << "   ";
+    std::cout << solver->get_xreg() << "  " << solver->get_ureg() << "   ";
     std::cout << std::fixed << std::setprecision(4) << solver->get_stepLength() << "     ";
     std::cout << solver->get_isFeasible() << std::endl;
   break;
@@ -37,7 +37,7 @@ void CallbackDDPVerbose::operator()(SolverAbstract *const solver) {
     std::cout << std::setw(4) << solver->get_iter() << "  ";
     std::cout << std::scientific << std::setprecision(5) << solver->get_cost() << "  ";
     std::cout << solver->get_stop() << "  " << -solver->get_d()[1] << "  ";
-    std::cout << solver->get_Xreg() << "  " << solver->get_Ureg() << "   ";
+    std::cout << solver->get_xreg() << "  " << solver->get_ureg() << "   ";
     std::cout << std::fixed << std::setprecision(4) << solver->get_stepLength() << "     ";
     std::cout << solver->get_isFeasible() << "  ";
     std::cout << std::scientific << std::setprecision(5) << solver->get_dV() << "  ";
@@ -47,7 +47,7 @@ void CallbackDDPVerbose::operator()(SolverAbstract *const solver) {
     std::cout << std::setw(4) << solver->get_iter() << "  ";
     std::cout << std::scientific << std::setprecision(5) << solver->get_cost() << "  ";
     std::cout << solver->get_stop() << "  " << -solver->get_d()[1] << "  ";
-    std::cout << solver->get_Xreg() << "  " << solver->get_Ureg() << "   ";
+    std::cout << solver->get_xreg() << "  " << solver->get_ureg() << "   ";
     std::cout << std::fixed << std::setprecision(4) << solver->get_stepLength() << "     ";
     std::cout << solver->get_isFeasible() << std::endl;
   }}

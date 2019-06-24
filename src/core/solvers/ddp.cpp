@@ -2,14 +2,14 @@
 
 namespace crocoddyl {
 
-SolverDDP::SolverDDP(ShootingProblem& problem) : SolverAbstract(problem), regFactor(10.),
-    regMin(1e-9), regMax(1e9), cost_try(0.), th_grad(1e-12), th_step(0.5), wasFeasible(false) {
+SolverDDP::SolverDDP(ShootingProblem& problem) : SolverAbstract(problem), regfactor_(10.),
+    regmin_(1e-9), regmax_(1e9), cost_try_(0.), th_grad_(1e-12), th_step_(0.5), was_feasible_(false) {
   allocateData();
 
   const unsigned int& n_alphas = 10;
-  alphas.resize(n_alphas);
+  alphas_.resize(n_alphas);
   for (unsigned int n = 0; n < n_alphas; ++n) {
-    alphas[n] = 1. / pow(2., (double) n);
+    alphas_[n] = 1. / pow(2., (double) n);
   }
 }
 
@@ -18,27 +18,27 @@ SolverDDP::~SolverDDP() {}
 bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
                       const std::vector<Eigen::VectorXd>& init_us,
                       const unsigned int& maxiter,
-                      const bool& _isFeasible,
-                      const double& regInit) {
-  setCandidate(init_xs, init_us, _isFeasible);
+                      const bool& is_feasible,
+                      const double& reginit) {
+  setCandidate(init_xs, init_us, is_feasible);
 
-  if (std::isnan(regInit)) {
-    x_reg = regMin;
-    u_reg = regMin;
+  if (std::isnan(reginit)) {
+    xreg_ = regmin_;
+    ureg_ = regmin_;
   } else {
-    x_reg = regInit;
-    u_reg = regInit;
+    xreg_ = reginit;
+    ureg_ = reginit;
   }
-  wasFeasible = false;
+  was_feasible_ = false;
 
-  for (iter = 0; iter < maxiter; ++iter) {
+  for (iter_ = 0; iter_ < maxiter; ++iter_) {
     bool recalc = true;
     while (true) {
       try {
         computeDirection(recalc);
       } catch (const char* msg) {
        recalc = false;
-        if (x_reg == regMax) {
+        if (xreg_ == regmax_) {
           return false;
         } else {
         continue;
@@ -48,44 +48,44 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
     }
     expectedImprovement();
 
-    for (std::vector<double>::const_iterator it = alphas.begin(); it != alphas.end(); ++it) {
-      stepLength = *it;
+    for (std::vector<double>::const_iterator it = alphas_.begin(); it != alphas_.end(); ++it) {
+      steplength_ = *it;
 
       try {
-        dV = tryStep(stepLength);
+        dV_ = tryStep(steplength_);
       } catch (const char* msg) {
         continue;
       }
-      dV_exp = stepLength * (d[0] + 0.5 * stepLength * d[1]);
+      dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
 
-      if (d[0] < th_grad || !isFeasible || dV > th_acceptStep * dV_exp) {
-        wasFeasible = isFeasible;
-        setCandidate(xs_try, us_try, true);
-        cost = cost_try;
+      if (d_[0] < th_grad_ || !is_feasible_ || dV_ > th_acceptstep_ * dVexp_) {
+        was_feasible_ = is_feasible_;
+        setCandidate(xs_try_, us_try_, true);
+        cost_ = cost_try_;
         break;
       }
     }
 
-    if (stepLength > th_step) {
+    if (steplength_ > th_step_) {
      decreaseRegularization();
     }
-    if (stepLength == alphas.back()) {
+    if (steplength_ == alphas_.back()) {
       increaseRegularization();
-      if (x_reg == regMax) {
+      if (xreg_ == regmax_) {
         return false;
       }
     }
     stoppingCriteria();
 
-    const long unsigned int& n_callbacks = callbacks.size();
+    const long unsigned int& n_callbacks = callbacks_.size();
     if (n_callbacks != 0) {
       for (long unsigned int c = 0; c < n_callbacks; ++c) {
-        CallbackAbstract& callback = *callbacks[c];
+        CallbackAbstract& callback = *callbacks_[c];
         callback(this);
       }
     }
 
-    if (wasFeasible && stop < th_stop) {
+    if (was_feasible_ && stop_ < th_stop_) {
       return true;
     }
   }
@@ -99,210 +99,210 @@ void SolverDDP::computeDirection(const bool& recalc) {
   backwardPass();
 }
 
-double SolverDDP::tryStep(const double& stepLength) {
-  forwardPass(stepLength);
-  return cost - cost_try;
+double SolverDDP::tryStep(const double& steplength) {
+  forwardPass(steplength);
+  return cost_ - cost_try_;
 }
 
 double SolverDDP::stoppingCriteria() {
-  stop = 0.;
-  const long unsigned int& T = this->problem.get_T();
+  stop_ = 0.;
+  const long unsigned int& T = this->problem_.get_T();
   for (long unsigned int t = 0; t < T; ++t) {
-    stop += Qu[t].squaredNorm();
+    stop_ += Qu_[t].squaredNorm();
   }
-  return stop;
+  return stop_;
 }
 
 const Eigen::Vector2d& SolverDDP::expectedImprovement() {
-  d = Eigen::Vector2d::Zero();
-  const long unsigned int& T = this->problem.get_T();
+  d_ = Eigen::Vector2d::Zero();
+  const long unsigned int& T = this->problem_.get_T();
   for (long unsigned int t = 0; t < T; ++t) {
-    d[0] += Qu[t].dot(k[t]);
-    d[1] -= k[t].dot(Quu[t] * k[t]);
+    d_[0] += Qu_[t].dot(k_[t]);
+    d_[1] -= k_[t].dot(Quu_[t] * k_[t]);
   }
-  return d;
+  return d_;
 }
 
 
 double SolverDDP::calc() {
-  cost = problem.calcDiff(xs, us);
-  if (!isFeasible) {
-    const Eigen::VectorXd& x0 = problem.get_x0();
-    problem.runningModels[0]->get_state()->diff(xs[0], x0, gaps[0]);
+  cost_ = problem_.calcDiff(xs_, us_);
+  if (!is_feasible_) {
+    const Eigen::VectorXd& x0 = problem_.get_x0();
+    problem_.running_models_[0]->get_state()->diff(xs_[0], x0, gaps_[0]);
 
-    const long unsigned int& T = problem.get_T();
+    const long unsigned int& T = problem_.get_T();
     for (unsigned long int t = 0; t < T; ++t) {
-      ActionModelAbstract* model = problem.runningModels[t];
-      std::shared_ptr<ActionDataAbstract>& d = problem.runningDatas[t];
-      model->get_state()->diff(xs[t+1], d->get_xnext(), gaps[t+1]);
+      ActionModelAbstract* model = problem_.running_models_[t];
+      std::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
+      model->get_state()->diff(xs_[t+1], d->get_xnext(), gaps_[t+1]);
     }
   }
-  return cost;
+  return cost_;
 }
 
 void SolverDDP::backwardPass() {
-  std::shared_ptr<ActionDataAbstract>& d_T = problem.terminalData;
-  Vxx.back() = d_T->get_Lxx();
-  Vx.back() = d_T->get_Lx();
+  std::shared_ptr<ActionDataAbstract>& d_T = problem_.terminal_data_;
+  Vxx_.back() = d_T->get_Lxx();
+  Vx_.back() = d_T->get_Lx();
 
-  const int& ndx = problem.terminalModel->get_ndx();
-  const Eigen::VectorXd& xReg = Eigen::VectorXd::Constant(ndx, x_reg);
-  if (!std::isnan(x_reg)) {
-    Vxx.back().diagonal() += xReg;
+  const int& ndx = problem_.terminal_model_->get_ndx();
+  const Eigen::VectorXd& xreg = Eigen::VectorXd::Constant(ndx, xreg_);
+  if (!std::isnan(xreg_)) {
+    Vxx_.back().diagonal() += xreg;
   }
 
-  for (int t = (int) problem.get_T() - 1; t >= 0; --t) {
-    ActionModelAbstract* m = problem.runningModels[t];
-    std::shared_ptr<ActionDataAbstract>& d = problem.runningDatas[t];
-    const Eigen::MatrixXd& Vxx_p = Vxx[t + 1];
-    const Eigen::VectorXd& Vx_p = Vx[t + 1];
-    const Eigen::VectorXd& gap_p = gaps[t + 1];
+  for (int t = (int) problem_.get_T() - 1; t >= 0; --t) {
+    ActionModelAbstract* m = problem_.running_models_[t];
+    std::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
+    const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
+    const Eigen::VectorXd& Vx_p = Vx_[t + 1];
+    const Eigen::VectorXd& gap_p = gaps_[t + 1];
 
     const Eigen::MatrixXd& FxTVxx_p = d->get_Fx().transpose() * Vxx_p;
-    Qxx[t] = d->get_Lxx() + FxTVxx_p * d->get_Fx();
-    Qxu[t] = d->get_Lxu() + FxTVxx_p * d->get_Fu();
-    Quu[t].noalias() = d->get_Luu() + d->get_Fu().transpose() * Vxx_p * d->get_Fu();
-    if (!isFeasible) {
+    Qxx_[t] = d->get_Lxx() + FxTVxx_p * d->get_Fx();
+    Qxu_[t] = d->get_Lxu() + FxTVxx_p * d->get_Fu();
+    Quu_[t].noalias() = d->get_Luu() + d->get_Fu().transpose() * Vxx_p * d->get_Fu();
+    if (!is_feasible_) {
       // In case the xt+1 are not f(xt,ut) i.e warm start not obtained from roll-out.
       const Eigen::VectorXd& relinearization = Vxx_p * gap_p;
-      Qx[t] = d->get_Lx() + d->get_Fx().transpose() * Vx_p + d->get_Fx().transpose() * relinearization;
-      Qu[t] = d->get_Lu() + d->get_Fu().transpose() * Vx_p + d->get_Fu().transpose() * relinearization;
+      Qx_[t] = d->get_Lx() + d->get_Fx().transpose() * Vx_p + d->get_Fx().transpose() * relinearization;
+      Qu_[t] = d->get_Lu() + d->get_Fu().transpose() * Vx_p + d->get_Fu().transpose() * relinearization;
     } else {
-      Qx[t] = d->get_Lx() + d->get_Fx().transpose() * Vx_p;
-      Qu[t] = d->get_Lu() + d->get_Fu().transpose() * Vx_p;
+      Qx_[t] = d->get_Lx() + d->get_Fx().transpose() * Vx_p;
+      Qu_[t] = d->get_Lu() + d->get_Fu().transpose() * Vx_p;
     }
 
-    if (!std::isnan(u_reg)) {
+    if (!std::isnan(ureg_)) {
       const int& nu = m->get_nu();
-      Quu[t].diagonal() += Eigen::VectorXd::Constant(nu, u_reg);
+      Quu_[t].diagonal() += Eigen::VectorXd::Constant(nu, ureg_);
     }
 
     computeGains(t);
 
-    if (std::isnan(u_reg)) {
-      Vx[t] = Qx[t] - K[t].transpose() * Qu[t];
+    if (std::isnan(ureg_)) {
+      Vx_[t] = Qx_[t] - K_[t].transpose() * Qu_[t];
     } else {
-      Vx[t] = Qx[t] + K[t].transpose() * (Quu[t] * k[t] - 2. * Qu[t]);
+      Vx_[t] = Qx_[t] + K_[t].transpose() * (Quu_[t] * k_[t] - 2. * Qu_[t]);
     }
-    Vxx[t] = Qxx[t] - Qxu[t] * K[t];
-    Vxx[t] = 0.5 * (Vxx[t] + Vxx[t].transpose());// TODO: as suggested by Nicolas
+    Vxx_[t] = Qxx_[t] - Qxu_[t] * K_[t];
+    Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose());// TODO: as suggested by Nicolas
 
-    if (!std::isnan(x_reg)) {
-      Vxx[t].diagonal() += xReg;
+    if (!std::isnan(xreg_)) {
+      Vxx_[t].diagonal() += xreg;
     }
 
-    const double& Vx_value = Vx[t].sum();
-    const double& Vxx_value = Vxx[t].sum();
+    const double& Vx_value = Vx_[t].sum();
+    const double& Vxx_value = Vxx_[t].sum();
     if (std::isnan(Vx_value) || std::isnan(Vxx_value)) {
       throw "backward error";
     }
   }
 }
 
-void SolverDDP::forwardPass(const double& stepLength) {
-  cost_try = 0.;
-  const long unsigned int& T = problem.get_T();
+void SolverDDP::forwardPass(const double& steplength) {
+  cost_try_ = 0.;
+  const long unsigned int& T = problem_.get_T();
   for (long unsigned int t = 0; t < T; ++t) {
-    ActionModelAbstract* m = problem.runningModels[t];
-    std::shared_ptr<ActionDataAbstract>& d = problem.runningDatas[t];
+    ActionModelAbstract* m = problem_.running_models_[t];
+    std::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
 
-    m->get_state()->diff(xs[t], xs_try[t], dx[t]);
-    us_try[t] = us[t] - k[t] * stepLength - K[t] * dx[t];
-    m->calc(d, xs_try[t], us_try[t]);
-    xs_try[t+1] = d->get_xnext();
-    cost_try += d->cost;
+    m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
+    us_try_[t] = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
+    m->calc(d, xs_try_[t], us_try_[t]);
+    xs_try_[t+1] = d->get_xnext();
+    cost_try_ += d->cost;
 
-    const double& value = xs_try[t+1].sum();
+    const double& value = xs_try_[t+1].sum();
     if (std::isnan(value) || std::isinf(value) ||
-        std::isnan(cost_try) || std::isnan(cost_try)) {
+        std::isnan(cost_try_) || std::isnan(cost_try_)) {
       throw "forward error";
     }
   }
 
-  ActionModelAbstract* m = problem.terminalModel;
-  std::shared_ptr<ActionDataAbstract>& d = problem.terminalData;
-  m->calc(d, xs_try.back());
-  cost_try += d->cost;
+  ActionModelAbstract* m = problem_.terminal_model_;
+  std::shared_ptr<ActionDataAbstract>& d = problem_.terminal_data_;
+  m->calc(d, xs_try_.back());
+  cost_try_ += d->cost;
 
-  if (std::isnan(cost_try) || std::isnan(cost_try)) {
+  if (std::isnan(cost_try_) || std::isnan(cost_try_)) {
     throw "forward error";
   }
 }
 
 void SolverDDP::computeGains(const long unsigned int& t) {
-  const Eigen::LLT<Eigen::MatrixXd>& Lb = Quu[t].llt();
-  K[t] = Lb.solve(Qxu[t].transpose());
-  k[t] = Lb.solve(Qu[t]);
+  const Eigen::LLT<Eigen::MatrixXd>& Lb = Quu_[t].llt();
+  K_[t] = Lb.solve(Qxu_[t].transpose());
+  k_[t] = Lb.solve(Qu_[t]);
 }
 
 void SolverDDP::increaseRegularization() {
-  x_reg *= regFactor;
-  if (x_reg > regMax) {
-    x_reg = regMax;
+  xreg_ *= regfactor_;
+  if (xreg_ > regmax_) {
+    xreg_ = regmax_;
   }
-  u_reg = x_reg;
+  ureg_ = xreg_;
 }
 
 void SolverDDP::decreaseRegularization() {
-  x_reg /= regFactor;
-  if (x_reg < regMin) {
-    x_reg = regMin;
+  xreg_ /= regfactor_;
+  if (xreg_ < regmin_) {
+    xreg_ = regmin_;
   }
-  u_reg = x_reg;
+  ureg_ = xreg_;
 }
 
 void SolverDDP::allocateData() {
-  const long unsigned int& T = problem.get_T();
-  Vxx.resize(T + 1);
-  Vx.resize(T + 1);
-  Qxx.resize(T);
-  Qxu.resize(T);
-  Quu.resize(T);
-  Qx.resize(T);
-  Qu.resize(T);
-  K.resize(T);
-  k.resize(T);
-  gaps.resize(T + 1);
+  const long unsigned int& T = problem_.get_T();
+  Vxx_.resize(T + 1);
+  Vx_.resize(T + 1);
+  Qxx_.resize(T);
+  Qxu_.resize(T);
+  Quu_.resize(T);
+  Qx_.resize(T);
+  Qu_.resize(T);
+  K_.resize(T);
+  k_.resize(T);
+  gaps_.resize(T + 1);
 
-  xs.resize(T + 1);
-  us.resize(T);
-  xs_try.resize(T + 1);
-  us_try.resize(T);
-  dx.resize(T);
+  xs_.resize(T + 1);
+  us_.resize(T);
+  xs_try_.resize(T + 1);
+  us_try_.resize(T);
+  dx_.resize(T);
 
   for (long unsigned int t = 0; t < T; ++t) {
-    ActionModelAbstract* model = problem.runningModels[t];
+    ActionModelAbstract* model = problem_.running_models_[t];
     const int& nx = model->get_nx();
     const int& ndx = model->get_ndx();
     const int& nu = model->get_nu();
 
-    Vxx[t] = Eigen::MatrixXd::Zero(ndx, ndx);
-    Vx[t] = Eigen::VectorXd::Zero(ndx);
-    Qxx[t] = Eigen::MatrixXd::Zero(ndx, ndx);
-    Qxu[t] = Eigen::MatrixXd::Zero(ndx, nu);
-    Quu[t] = Eigen::MatrixXd::Zero(nu, nu);
-    Qx[t] = Eigen::VectorXd::Zero(ndx);
-    Qu[t] = Eigen::VectorXd::Zero(nu);
-    K[t] = Eigen::MatrixXd::Zero(nu, ndx);
-    k[t] = Eigen::VectorXd::Zero(nu);
-    gaps[t] = Eigen::VectorXd::Zero(ndx);
+    Vxx_[t] = Eigen::MatrixXd::Zero(ndx, ndx);
+    Vx_[t] = Eigen::VectorXd::Zero(ndx);
+    Qxx_[t] = Eigen::MatrixXd::Zero(ndx, ndx);
+    Qxu_[t] = Eigen::MatrixXd::Zero(ndx, nu);
+    Quu_[t] = Eigen::MatrixXd::Zero(nu, nu);
+    Qx_[t] = Eigen::VectorXd::Zero(ndx);
+    Qu_[t] = Eigen::VectorXd::Zero(nu);
+    K_[t] = Eigen::MatrixXd::Zero(nu, ndx);
+    k_[t] = Eigen::VectorXd::Zero(nu);
+    gaps_[t] = Eigen::VectorXd::Zero(ndx);
 
-    xs[t] = model->get_state()->zero();
-    us[t] = Eigen::VectorXd::Zero(nu);
+    xs_[t] = model->get_state()->zero();
+    us_[t] = Eigen::VectorXd::Zero(nu);
     if (t == 0) {
-      xs_try[t] = problem.get_x0();
+      xs_try_[t] = problem_.get_x0();
     } else {
-      xs_try[t] = Eigen::VectorXd::Constant(nx, NAN);
+      xs_try_[t] = Eigen::VectorXd::Constant(nx, NAN);
     }
-    us_try[t] = Eigen::VectorXd::Constant(nu, NAN);
-    dx[t] = Eigen::VectorXd::Zero(ndx);
+    us_try_[t] = Eigen::VectorXd::Constant(nu, NAN);
+    dx_[t] = Eigen::VectorXd::Zero(ndx);
   }
-  const int& ndx = problem.terminalModel->get_ndx();
-  Vxx.back() = Eigen::MatrixXd::Zero(ndx, ndx);
-  Vx.back() = Eigen::VectorXd::Zero(ndx);
-  xs.back() = problem.terminalModel->get_state()->zero();
-  xs_try.back() = problem.terminalModel->get_state()->zero();
-  gaps.back() = Eigen::VectorXd::Zero(ndx);
+  const int& ndx = problem_.terminal_model_->get_ndx();
+  Vxx_.back() = Eigen::MatrixXd::Zero(ndx, ndx);
+  Vx_.back() = Eigen::VectorXd::Zero(ndx);
+  xs_.back() = problem_.terminal_model_->get_state()->zero();
+  xs_try_.back() = problem_.terminal_model_->get_state()->zero();
+  gaps_.back() = Eigen::VectorXd::Zero(ndx);
 }
 
 }  // namespace crocoddyl
