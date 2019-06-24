@@ -1,4 +1,3 @@
-#include <crocoddyl/core/states/state-euclidean.hpp>
 #include <crocoddyl/core/actions/unicycle.hpp>
 #include <crocoddyl/core/utils/callbacks.hpp>
 #include <crocoddyl/core/solvers/ddp.hpp>
@@ -19,17 +18,16 @@ int main() {
   std::vector<ActionModelAbstract*> runningModels;
   ActionModelAbstract* terminalModel;
   x0 = Eigen::Vector3d(1., 0., 0.);
-  StateVector state(3);
 
   // Creating the action models and warm point for the unicycle system
   for (unsigned int i = 0; i < N; ++i) {
-    ActionModelAbstract* model_i = new ActionModelUnicycle(&state);
+    ActionModelAbstract* model_i = new ActionModelUnicycle();
     runningModels.push_back(model_i);
     xs.push_back(x0);
     us.push_back(Eigen::Vector2d::Zero());
   }
   xs.push_back(x0);
-  terminalModel = new ActionModelUnicycle(&state);
+  terminalModel = new ActionModelUnicycle();
 
   // Formulating the optimal control problem
   ShootingProblem problem(x0, runningModels, terminalModel);

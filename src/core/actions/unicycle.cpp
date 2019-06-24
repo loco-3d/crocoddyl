@@ -2,9 +2,9 @@
 
 namespace crocoddyl {
 
-ActionModelUnicycle::ActionModelUnicycle(StateAbstract *const state) : ActionModelAbstract(state, 2), ncost(5),
-    dt(0.1) {
-  costWeights << 10., 1.;
+ActionModelUnicycle::ActionModelUnicycle() : ActionModelAbstract(&unicycle::state, 2, 5),
+    dt_(0.1) {
+  cost_weights_ << 10., 1.;
 }
 
 ActionModelUnicycle::~ActionModelUnicycle() {}
@@ -12,15 +12,15 @@ ActionModelUnicycle::~ActionModelUnicycle() {}
 void ActionModelUnicycle::calc(std::shared_ptr<ActionDataAbstract>& data,
                                const Eigen::Ref<const Eigen::VectorXd>& x,
                                const Eigen::Ref<const Eigen::VectorXd>& u) {
-  DataUnicycle* d = static_cast<DataUnicycle*>(data.get());
+  ActionDataUnicycle* d = static_cast<ActionDataUnicycle*>(data.get());
   const double& c = std::cos(x[2]);
   const double& s = std::sin(x[2]);
-  d->xnext << x[0] + c * u[0] * dt,
-              x[1] + s * u[0] * dt,
-              x[2] + u[1] * dt;
-  d->costResiduals.head<3>() = costWeights[0] * x;
-  d->costResiduals.tail<2>() = costWeights[1] * u;
-  d->cost = 0.5 * d->costResiduals.transpose() * d->costResiduals;
+  d->xnext << x[0] + c * u[0] * dt_,
+              x[1] + s * u[0] * dt_,
+              x[2] + u[1] * dt_;
+  d->r.head<3>() = cost_weights_[0] * x;
+  d->r.tail<2>() = cost_weights_[1] * u;
+  d->cost = 0.5 * d->r.transpose() * d->r;
 }
 
 void ActionModelUnicycle::calcDiff(std::shared_ptr<ActionDataAbstract>& data,
@@ -30,11 +30,11 @@ void ActionModelUnicycle::calcDiff(std::shared_ptr<ActionDataAbstract>& data,
   if (recalc) {
     calc(data, x, u);
   }
-  DataUnicycle* d = static_cast<DataUnicycle*>(data.get());
+  ActionDataUnicycle* d = static_cast<ActionDataUnicycle*>(data.get());
 
   // Cost derivatives
-  const double& w_x = costWeights[0] * costWeights[0];
-  const double& w_u = costWeights[1] * costWeights[1];
+  const double& w_x = cost_weights_[0] * cost_weights_[0];
+  const double& w_u = cost_weights_[1] * cost_weights_[1];
   d->Lx = x.cwiseProduct(Eigen::VectorXd::Constant(get_nx(), w_x));
   d->Lu = u.cwiseProduct(Eigen::VectorXd::Constant(get_nu(), w_u));
   d->Lxx.diagonal() << w_x, w_x, w_x;
@@ -43,20 +43,16 @@ void ActionModelUnicycle::calcDiff(std::shared_ptr<ActionDataAbstract>& data,
   // Dynamic derivatives
   const double& c = std::cos(x[2]);
   const double& s = std::sin(x[2]);
-  d->Fx << 1., 0., -s * u[0] * dt,
-           0., 1., c * u[0] * dt,
+  d->Fx << 1., 0., -s * u[0] * dt_,
+           0., 1., c * u[0] * dt_,
            0., 0., 1.;
-  d->Fu << c * dt, 0.,
-           s * dt, 0.,
-           0., dt;
+  d->Fu << c * dt_, 0.,
+           s * dt_, 0.,
+           0., dt_;
 }
 
 std::shared_ptr<ActionDataAbstract> ActionModelUnicycle::createData() {
-  return std::make_shared<DataUnicycle>(this);
-}
-
-unsigned int ActionModelUnicycle::get_ncost() const {
-  return ncost;
+  return std::make_shared<ActionDataUnicycle>(this);
 }
 
 }  // namespace crocoddyl

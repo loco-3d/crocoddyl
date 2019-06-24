@@ -33,28 +33,28 @@ class ActionModelLQR : public ActionModelAbstract {
                 const bool& recalc=true) override;
   std::shared_ptr<ActionDataAbstract> createData() override;
 
-  Eigen::MatrixXd Fx;
-  Eigen::MatrixXd Fu;
-  Eigen::VectorXd f0;
-  Eigen::MatrixXd Lxx;
-  Eigen::MatrixXd Lxu;
-  Eigen::MatrixXd Luu;
-  Eigen::VectorXd lx;
-  Eigen::VectorXd lu;
+  Eigen::MatrixXd Fx_;
+  Eigen::MatrixXd Fu_;
+  Eigen::VectorXd f0_;
+  Eigen::MatrixXd Lxx_;
+  Eigen::MatrixXd Lxu_;
+  Eigen::MatrixXd Luu_;
+  Eigen::VectorXd lx_;
+  Eigen::VectorXd lu_;
 
  private:
-  bool driftFree;
+  bool drift_free_;
 };
 
 struct ActionDataLQR : public ActionDataAbstract {
   template<typename Model>
   ActionDataLQR(Model *const model) : ActionDataAbstract(model) {
     // Setting the linear model and quadratic cost here because they are constant
-    Fx = model->Fx;
-    Fu = model->Fu;
-    Lxx = model->Lxx;
-    Luu = model->Luu;
-    Lxu = model->Lxu;
+    Fx = model->Fx_;
+    Fu = model->Fu_;
+    Lxx = model->Lxx_;
+    Luu = model->Luu_;
+    Lxu = model->Lxu_;
   }
   ~ActionDataLQR() {}
 };
