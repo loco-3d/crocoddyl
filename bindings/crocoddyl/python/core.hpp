@@ -10,16 +10,20 @@
 #define CROCODDYL_PYTHON_CORE_HPP_
 
 #include <crocoddyl/python/core/state-base.hpp>
-//#include <crocoddyl/python/core/action-base.hpp>
+#include <crocoddyl/python/core/action-base.hpp>
 #include <crocoddyl/python/core/states/state-euclidean.hpp>
+#include <crocoddyl/python/core/actions/unicycle.hpp>
+#include <crocoddyl/python/core/actions/lqr.hpp>
 
 namespace crocoddyl {
 namespace python {
 
 void exposeCore() {
   exposeStateAbstract();
+  exposeActionAbstract();
   exposeStateEuclidean();
-//  exposeActionModelAbstract();
+  exposeActionUnicycle();
+  exposeActionLQR();
 }
 
 }  // namespace python
