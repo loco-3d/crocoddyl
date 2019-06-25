@@ -1,7 +1,7 @@
-import unittest
+import crocoddyl
 from random import randint
-import libcrocoddyl_pywrap as crocoddyl
 import numpy as np
+import unittest
 
 
 class StateVectorPyDerived(crocoddyl.StateAbstract):
