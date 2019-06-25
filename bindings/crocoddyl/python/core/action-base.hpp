@@ -23,6 +23,7 @@ class ActionModelAbstract_wrap : public ActionModelAbstract,
   using ActionModelAbstract::ndx_;
   using ActionModelAbstract::nu_;
   using ActionModelAbstract::ncost_;
+  using ActionModelAbstract::unone_;
 
   ActionModelAbstract_wrap(StateAbstract *const state,
                            int nu, int ncost=0) : ActionModelAbstract(state, nu, ncost),
@@ -111,7 +112,10 @@ you need to defined the ActionDataType inside your AM.
       .add_property("nx", &ActionModelAbstract_wrap::nx_, "dimension of state configuration vector")
       .add_property("ndx", &ActionModelAbstract_wrap::ndx_, "dimension of state tangent vector")
       .add_property("nu", &ActionModelAbstract_wrap::nu_, "dimension of control vector")
-      .add_property("ncost", &ActionModelAbstract_wrap::ncost_, "dimension of cost-residual vector");
+      .add_property("ncost", &ActionModelAbstract_wrap::ncost_, "dimension of cost-residual vector")
+      .add_property("unone", bp::make_getter(&ActionModelAbstract_wrap::unone_,
+                             bp::return_value_policy<bp::return_by_value>()),
+                             "default control vector");
       // .add_property("state", &ActionModelAbstract::get_state, bp::return_value_policy<bp::manage_new_object>());
 
   boost::python::register_ptr_to_python<std::shared_ptr<ActionDataAbstract>>();
