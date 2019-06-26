@@ -60,16 +60,18 @@ class StateAbstractTestCase(unittest.TestCase):
         x1 = self.STATE.rand()
 
         # Checking that both diff functions agree
-        self.assertTrue(np.allclose(self.STATE.diff(x0, x1), self.STATE_DER.diff(x0, x1), atol=1e-9),
-                        "state.diff() function doesn't agree with Python bindings.")
+        self.assertTrue(
+            np.allclose(self.STATE.diff(x0, x1), self.STATE_DER.diff(x0, x1), atol=1e-9),
+            "state.diff() function doesn't agree with Python bindings.")
 
     def test_python_derived_integrate(self):
         x = self.STATE.rand()
         dx = self.STATE.rand()[:self.STATE.ndx]
 
         # Checking that both integrate functions agree
-        self.assertTrue(np.allclose(self.STATE.integrate(x, dx), self.STATE_DER.integrate(x, dx), atol=1e-9),
-                        "state.integrate() function doesn't agree with Python bindings.")
+        self.assertTrue(
+            np.allclose(self.STATE.integrate(x, dx), self.STATE_DER.integrate(x, dx), atol=1e-9),
+            "state.integrate() function doesn't agree with Python bindings.")
 
     def test_python_derived_Jdiff(self):
         x0 = self.STATE.rand()
@@ -78,10 +80,10 @@ class StateAbstractTestCase(unittest.TestCase):
         # Checking that both Jdiff functions agree
         J1, J2 = self.STATE.Jdiff(x0, x1, "both")
         J1d, J2d = self.STATE_DER.Jdiff(x0, x1, "both")
-        self.assertTrue(np.allclose(J1, J1d, atol=1e-9),
-                        "state.Jdiff()[0] function doesn't agree with Python bindings.")
-        self.assertTrue(np.allclose(J2, J2d, atol=1e-9),
-                        "state.Jdiff()[1] function doesn't agree with Python bindings.")
+        self.assertTrue(
+            np.allclose(J1, J1d, atol=1e-9), "state.Jdiff()[0] function doesn't agree with Python bindings.")
+        self.assertTrue(
+            np.allclose(J2, J2d, atol=1e-9), "state.Jdiff()[1] function doesn't agree with Python bindings.")
 
     def test_python_derived_Jintegrate(self):
         x = self.STATE.rand()
@@ -90,10 +92,10 @@ class StateAbstractTestCase(unittest.TestCase):
         # Checking that both Jintegrate functions agree
         J1, J2 = self.STATE.Jintegrate(x, dx, "both")
         J1d, J2d = self.STATE_DER.Jintegrate(x, dx, "both")
-        self.assertTrue(np.allclose(J1, J1d, atol=1e-9),
-                        "state.Jintegrate()[0] function doesn't agree with Python bindings.")
-        self.assertTrue(np.allclose(J2, J2d, atol=1e-9),
-                        "state.Jintegrate()[1] function doesn't agree with Python bindings.")
+        self.assertTrue(
+            np.allclose(J1, J1d, atol=1e-9), "state.Jintegrate()[0] function doesn't agree with Python bindings.")
+        self.assertTrue(
+            np.allclose(J2, J2d, atol=1e-9), "state.Jintegrate()[1] function doesn't agree with Python bindings.")
 
 
 class StateVectorTest(StateAbstractTestCase):

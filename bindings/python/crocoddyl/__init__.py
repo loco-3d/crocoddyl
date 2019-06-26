@@ -1,1 +1,1 @@
-from . libcrocoddyl_pywrap import *
+from .libcrocoddyl_pywrap import *
