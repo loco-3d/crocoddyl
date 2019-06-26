@@ -100,7 +100,7 @@ you need to defined the ActionDataType inside your AM.
       .add_property("unone",
                     bp::make_getter(&ActionModelAbstract_wrap::unone_, bp::return_value_policy<bp::return_by_value>()),
                     "default control vector");
-  // .add_property("state", &ActionModelAbstract::get_state, bp::return_value_policy<bp::manage_new_object>());
+      // .add_property("state", &ActionModelAbstract::get_state, bp::return_value_policy<bp::manage_new_object>());
 
   boost::python::register_ptr_to_python<std::shared_ptr<ActionDataAbstract>>();
 
@@ -121,31 +121,31 @@ it will be allocated here.
 :param model: action model)"))
       .add_property("cost",
                     bp::make_getter(&ActionDataAbstract_wrap::cost, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract_wrap::cost))
+                    bp::make_setter(&ActionDataAbstract_wrap::cost), "cost value")
       .add_property("xnext",
                     bp::make_getter(&ActionDataAbstract_wrap::xnext, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract_wrap::xnext))
+                    bp::make_setter(&ActionDataAbstract_wrap::xnext), "next state")
       .add_property("Fx",
                     bp::make_getter(&ActionDataAbstract_wrap::Fx, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract_wrap::Fx))
+                    bp::make_setter(&ActionDataAbstract_wrap::Fx), "Jacobian of the dynamics")
       .add_property("Fu",
                     bp::make_getter(&ActionDataAbstract_wrap::Fu, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract_wrap::Fu))
+                    bp::make_setter(&ActionDataAbstract_wrap::Fu), "Jacobian of the dynamics")
       .add_property("Lx",
                     bp::make_getter(&ActionDataAbstract_wrap::Lx, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract_wrap::Lx))
+                    bp::make_setter(&ActionDataAbstract_wrap::Lx), "Jacobian of the cost")
       .add_property("Lu",
                     bp::make_getter(&ActionDataAbstract_wrap::Lu, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract_wrap::Lu))
+                    bp::make_setter(&ActionDataAbstract_wrap::Lu), "Jacobian of the cost")
       .add_property("Lxx",
                     bp::make_getter(&ActionDataAbstract_wrap::Lxx, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract_wrap::Lxx))
+                    bp::make_setter(&ActionDataAbstract_wrap::Lxx), "Hessian of the cost")
       .add_property("Lxu",
                     bp::make_getter(&ActionDataAbstract_wrap::Lxu, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract_wrap::Lxu))
+                    bp::make_setter(&ActionDataAbstract_wrap::Lxu), "Hessian of the cost")
       .add_property("Luu",
                     bp::make_getter(&ActionDataAbstract_wrap::Luu, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract_wrap::Luu))
+                    bp::make_setter(&ActionDataAbstract_wrap::Luu), "Hessian of the cost")
       .add_property("costResiduals",
                     bp::make_getter(&ActionDataAbstract_wrap::r, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ActionDataAbstract_wrap::r))
