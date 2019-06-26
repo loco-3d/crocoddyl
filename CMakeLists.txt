@@ -63,6 +63,7 @@ SET(BOOST_COMPONENTS ${BOOST_COMPONENTS} python unit_test_framework)
 SEARCH_FOR_BOOST()
 
 # Include and add the main directory
+ADD_SUBDIRECTORY(${PROJECT_NAME})
 ADD_SUBDIRECTORY(src)
 
 # Build the Python interface
