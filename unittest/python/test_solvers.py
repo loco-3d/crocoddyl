@@ -93,8 +93,8 @@ class SolverKKTTest(unittest.TestCase):
 
             # Checking that the next primal variable is consistant with the
             # dynamics
-            self.assertTrue(np.allclose(xnext, dxs, atol=10 * h),
-                            "Primal variables doesn't ensure dynamic constraints.")
+            self.assertTrue(
+                np.allclose(xnext, dxs, atol=10 * h), "Primal variables doesn't ensure dynamic constraints.")
 
 
 # --- TEST KKT ---

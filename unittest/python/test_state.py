@@ -31,8 +31,9 @@ class StateTestCase(unittest.TestCase):
         dxi = self.STATE.diff(x2i, x2)
 
         # Checking that both states agree
-        self.assertTrue(np.allclose(dxi, np.zeros(self.STATE.ndx), atol=1e-9),
-                        "Integrate function doesn't agree with difference rule.")
+        self.assertTrue(
+            np.allclose(dxi, np.zeros(self.STATE.ndx), atol=1e-9),
+            "Integrate function doesn't agree with difference rule.")
 
     def test_difference_against_integrate(self):
         # Generating random states
@@ -105,8 +106,9 @@ class StateTestCase(unittest.TestCase):
         # Checking that computed velocity from Jintegrate
         dX_dDX = Jdx
         x2eps = self.STATE.integrate(x1, dx + eps * h)
-        self.assertTrue(np.allclose(np.dot(dX_dDX, eps), self.STATE.diff(x2, x2eps) / h, atol=1e-3),
-                        "Velocity computed from Jintegrate is wrong.")
+        self.assertTrue(
+            np.allclose(np.dot(dX_dDX, eps), self.STATE.diff(x2, x2eps) / h, atol=1e-3),
+            "Velocity computed from Jintegrate is wrong.")
 
         # Checking the velocity computed from Jdiff
         x = self.STATE.rand()
@@ -114,8 +116,8 @@ class StateTestCase(unittest.TestCase):
         x2i = self.STATE.integrate(x, eps * h)
         dxi = self.STATE.diff(x1, x2i)
         J1, J2 = self.STATE.Jdiff(x1, x)
-        self.assertTrue(np.allclose(np.dot(J2, eps), (-dx + dxi) / h, atol=1e-3),
-                        "Velocity computed from Jdiff is wrong.")
+        self.assertTrue(
+            np.allclose(np.dot(J2, eps), (-dx + dxi) / h, atol=1e-3), "Velocity computed from Jdiff is wrong.")
 
 
 class StateVectorTest(StateTestCase):
