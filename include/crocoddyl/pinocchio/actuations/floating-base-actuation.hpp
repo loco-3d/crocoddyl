@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_PINOCCHIO_ACTUACTIONS_FLOATING_BASE_ACTUATION_HPP_
 #define CROCODDYL_PINOCCHIO_ACTUACTIONS_FLOATING_BASE_ACTUATION_HPP_
 
-//TODO: ActuationModelFreeFloating ActuationDataFreeFloating
+// TODO: ActuationModelFreeFloating ActuationDataFreeFloating
 
 #endif  // CROCODDYL_PINOCCHIO_ACTUACTIONS_FLOATING_BASE_ACTUATION_HPP_

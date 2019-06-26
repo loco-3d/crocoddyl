@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_CORE_INTEGRATOR_RK4_HPP_
 #define CROCODDYL_CORE_INTEGRATOR_RK4_HPP_
 
-//TODO: IntegratedActionModelRK4 IntegratedActionDataRK4
+// TODO: IntegratedActionModelRK4 IntegratedActionDataRK4
 
 #endif  // CROCODDYL_CORE_INTEGRATOR_RK4_HPP_

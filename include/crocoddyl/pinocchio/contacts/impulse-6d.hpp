@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_PINOCCHIO_CONTACTS_IMPULSE_6D_HPP_
 #define CROCODDYL_PINOCCHIO_CONTACTS_IMPULSE_6D_HPP_
 
-//TODO: ImpulseModel6D ImpulseData6D
+// TODO: ImpulseModel6D ImpulseData6D
 
 #endif  // CROCODDYL_PINOCCHIO_CONTACTS_IMPULSE_6D_HPP_

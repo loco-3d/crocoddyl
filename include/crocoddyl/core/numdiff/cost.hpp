@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_CORE_COST_NUMDIFF_HPP_
 #define CROCODDYL_CORE_COST_NUMDIFF_HPP_
 
-//TODO: CostModelNumDiff CostDataNumDiff
+// TODO: CostModelNumDiff CostDataNumDiff
 
 #endif  // CROCODDYL_CORE_COST_NUMDIFF_HPP_

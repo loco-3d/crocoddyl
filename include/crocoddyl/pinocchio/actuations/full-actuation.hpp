@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_PINOCCHIO_ACTUACTIONS_FULL_ACTUATION_HPP_
 #define CROCODDYL_PINOCCHIO_ACTUACTIONS_FULL_ACTUATION_HPP_
 
-//TODO: ActuationModelFull ActuationDataFull
+// TODO: ActuationModelFull ActuationDataFull
 
 #endif  // CROCODDYL_PINOCCHIO_ACTUACTIONS_FULL_ACTUATION_HPP_

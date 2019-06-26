@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_PINOCCHIO_COSTS_COST_COM_HPP_
 #define CROCODDYL_PINOCCHIO_COSTS_COST_COM_HPP_
 
-//TODO: CostModelCoM CostDataCoM
+// TODO: CostModelCoM CostDataCoM
 
 #endif  // CROCODDYL_PINOCCHIO_COSTS_COST_COM_HPP_

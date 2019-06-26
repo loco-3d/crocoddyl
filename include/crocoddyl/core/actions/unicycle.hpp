@@ -6,18 +6,17 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_
 #define CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_
 
 #include <crocoddyl/core/action-base.hpp>
 #include <crocoddyl/core/states/state-euclidean.hpp>
-//TODO: ActionModelUnicycleVar
+// TODO: ActionModelUnicycleVar
 
 namespace crocoddyl {
 
 namespace unicycle {
-  StateVector state(3);
+StateVector state(3);
 }
 
 class ActionModelUnicycle : public ActionModelAbstract {
@@ -25,13 +24,10 @@ class ActionModelUnicycle : public ActionModelAbstract {
   ActionModelUnicycle();
   ~ActionModelUnicycle();
 
-  void calc(std::shared_ptr<ActionDataAbstract>& data,
-            const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) override;
-  void calcDiff(std::shared_ptr<ActionDataAbstract>& data,
-                const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u,
-                const bool& recalc=true) override;
+  void calcDiff(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) override;
   std::shared_ptr<ActionDataAbstract> createData() override;
 
  private:
@@ -42,8 +38,8 @@ class ActionModelUnicycle : public ActionModelAbstract {
 struct ActionDataUnicycle : public ActionDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  template<typename Model>
-  ActionDataUnicycle(Model *const model) : ActionDataAbstract(model) {}
+  template <typename Model>
+  ActionDataUnicycle(Model* const model) : ActionDataAbstract(model) {}
   ~ActionDataUnicycle() {}
 };
 

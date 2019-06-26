@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_CORE_STATES_STATE_UNICYCLE_HPP_
 #define CROCODDYL_CORE_STATES_STATE_UNICYCLE_HPP_
 
-//TODO: StateUnicycle
+// TODO: StateUnicycle
 
 #endif  // CROCODDYL_CORE_STATES_STATE_UNICYCLE_HPP_

@@ -6,12 +6,11 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_PINOCCHIO_COSTS_COST_FRAME_PLACEMENT_HPP_
 #define CROCODDYL_PINOCCHIO_COSTS_COST_FRAME_PLACEMENT_HPP_
 
-//TODO: CostModelFramePlacement CostDataFramePlacement
-//TODO: CostModelFrameTranslation CostDataFrameTranslation
-//TODO: CostModelFrameRotation CostDataFrameRotation
+// TODO: CostModelFramePlacement CostDataFramePlacement
+// TODO: CostModelFrameTranslation CostDataFrameTranslation
+// TODO: CostModelFrameRotation CostDataFrameRotation
 
 #endif  // CROCODDYL_PINOCCHIO_COSTS_COST_FRAME_PLACEMENT_HPP_

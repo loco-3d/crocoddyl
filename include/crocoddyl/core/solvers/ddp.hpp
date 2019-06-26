@@ -6,7 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_CORE_SOLVERS_DDP_HPP_
 #define CROCODDYL_CORE_SOLVERS_DDP_HPP_
 
@@ -20,17 +19,14 @@ class SolverDDP : public SolverAbstract {
   SolverDDP(ShootingProblem& problem);
   ~SolverDDP();
 
-  bool solve(const std::vector<Eigen::VectorXd>& init_xs,
-             const std::vector<Eigen::VectorXd>& init_us,
-             const unsigned int& maxiter=100,
-             const bool& is_feasible=false,
-             const double& regInit=NAN) override;
-  void computeDirection(const bool& recalc=true) override;
+  bool solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
+             const unsigned int& maxiter = 100, const bool& is_feasible = false, const double& regInit = NAN) override;
+  void computeDirection(const bool& recalc = true) override;
   double tryStep(const double& steplength) override;
   double stoppingCriteria() override;
   const Eigen::Vector2d& expectedImprovement() override;
 
-private:
+ private:
   double calc();
   void backwardPass();
   void forwardPass(const double& stepLength);
@@ -49,7 +45,7 @@ private:
   std::vector<Eigen::VectorXd> us_try_;
   std::vector<Eigen::VectorXd> dx_;
 
-  //allocate data
+  // allocate data
   std::vector<Eigen::MatrixXd> Vxx_;
   std::vector<Eigen::VectorXd> Vx_;
   std::vector<Eigen::MatrixXd> Qxx_;

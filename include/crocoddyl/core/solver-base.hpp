@@ -6,7 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_CORE_SOLVER_BASE_HPP_
 #define CROCODDYL_CORE_SOLVER_BASE_HPP_
 
@@ -14,26 +13,22 @@
 
 namespace crocoddyl {
 
-class CallbackAbstract; // forward declaration
+class CallbackAbstract;  // forward declaration
 
 class SolverAbstract {
  public:
   SolverAbstract(ShootingProblem& problem);
   ~SolverAbstract();
 
-  virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs,
-                     const std::vector<Eigen::VectorXd>& init_us,
-                     const unsigned int& maxiter,
-                     const bool& is_feasible,
-                     const double& reg_init) = 0;
-  //TODO: computeDirection (polimorfism) returning descent direction and lambdas
+  virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
+                     const unsigned int& maxiter, const bool& is_feasible, const double& reg_init) = 0;
+  // TODO: computeDirection (polimorfism) returning descent direction and lambdas
   virtual void computeDirection(const bool& recalc) = 0;
   virtual double tryStep(const double& step_length) = 0;
   virtual double stoppingCriteria() = 0;
   virtual const Eigen::Vector2d& expectedImprovement() = 0;
-  void setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
-                    const std::vector<Eigen::VectorXd>& us_warm,
-                    const bool& is_feasible=false);
+  void setCandidate(const std::vector<Eigen::VectorXd>& xs_warm, const std::vector<Eigen::VectorXd>& us_warm,
+                    const bool& is_feasible = false);
 
   void setCallbacks(std::vector<CallbackAbstract*>& callbacks);
 
@@ -71,7 +66,7 @@ class CallbackAbstract {
  public:
   CallbackAbstract() {}
   ~CallbackAbstract() {}
-  virtual void operator()(SolverAbstract *const solver) = 0;
+  virtual void operator()(SolverAbstract* const solver) = 0;
 };
 
 }  // namespace crocoddyl

@@ -18,40 +18,28 @@ namespace bp = boost::python;
 
 class ActionModelLQR_wrap : public ActionModelLQR {
  public:
-  ActionModelLQR_wrap(int nx, int nu, bool drift_free=true) : ActionModelLQR(nx, nu, drift_free) {}
+  ActionModelLQR_wrap(int nx, int nu, bool drift_free = true) : ActionModelLQR(nx, nu, drift_free) {}
 
-  void calc_wrap1(std::shared_ptr<ActionDataAbstract>& data,
-                  const Eigen::VectorXd& x,
-                  const Eigen::VectorXd& u) {
+  void calc_wrap1(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
     calc(data, x, u);
   }
 
-  void calc_wrap2(std::shared_ptr<ActionDataAbstract>& data,
-                 const Eigen::VectorXd& x) {
-    calc(data, x, unone_);
-  }
+  void calc_wrap2(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x) { calc(data, x, unone_); }
 
-  void calcDiff_wrap1(std::shared_ptr<ActionDataAbstract>& data,
-                      const Eigen::VectorXd& x,
-                      const Eigen::VectorXd& u,
+  void calcDiff_wrap1(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u,
                       bool recalc) {
     calcDiff(data, x, u, recalc);
   }
 
-  void calcDiff_wrap2(std::shared_ptr<ActionDataAbstract>& data,
-                      const Eigen::VectorXd& x,
-                      const Eigen::VectorXd& u) {
+  void calcDiff_wrap2(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
     calcDiff(data, x, u, true);
   }
 
-  void calcDiff_wrap3(std::shared_ptr<ActionDataAbstract>& data,
-                      const Eigen::VectorXd& x,
-                      bool recalc) {
+  void calcDiff_wrap3(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, bool recalc) {
     calcDiff(data, x, unone_, recalc);
   }
 
-  void calcDiff_wrap4(std::shared_ptr<ActionDataAbstract>& data,
-                      const Eigen::VectorXd& x) {
+  void calcDiff_wrap4(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x) {
     calcDiff(data, x, unone_, true);
   }
 };
@@ -65,7 +53,7 @@ void exposeActionLQR() {
         xnext(x,u) = Fx*x + Fu*u + f0. Its cost function is quadratic of the
         form: 1/2 [x,u].T [Lxx Lxu; Lxu.T Luu] [x,u] + [lx,lu].T [x,u].)",
       bp::init<int, int, bp::optional<bool>>(bp::args(" self", " nx", " ndu", " driftFree=True"),
-                         R"(Initialize the LQR action model.
+                                             R"(Initialize the LQR action model.
 
 :param nx: dimension of the state vector
 :param nu: dimension of the control vector
@@ -105,17 +93,17 @@ action model (i.e. dynamical system and cost function).
   boost::python::register_ptr_to_python<std::shared_ptr<ActionDataLQR>>();
 
   bp::class_<ActionDataLQR, bp::bases<ActionDataAbstract>>("ActionDataLQR",
-                                 R"(Action data for the LQR system.
+                                                           R"(Action data for the LQR system.
 
         The unicicycle data, apart of common one, contains the cost residuals used
         for the computation of calc and calcDiff.)",
-      bp::init<ActionModelLQR*>(bp::args(" self", " model"),
-                         R"(Create LQR data.
+                                                           bp::init<ActionModelLQR*>(bp::args(" self", " model"),
+                                                                                     R"(Create LQR data.
 
 :param model: LQR action model)"));
 }
 
-}  // python
-}  // crocoddyl
+}  // namespace python
+}  // namespace crocoddyl
 
 #endif  // CROCODDYL_PYTHON_CORE_ACTIONS_LQR_HPP_

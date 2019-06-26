@@ -20,38 +20,26 @@ class ActionModelUnicycle_wrap : public ActionModelUnicycle {
  public:
   ActionModelUnicycle_wrap() : ActionModelUnicycle() {}
 
-  void calc_wrap1(std::shared_ptr<ActionDataAbstract>& data,
-                  const Eigen::VectorXd& x,
-                  const Eigen::VectorXd& u) {
+  void calc_wrap1(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
     calc(data, x, u);
   }
 
-  void calc_wrap2(std::shared_ptr<ActionDataAbstract>& data,
-                 const Eigen::VectorXd& x) {
-    calc(data, x, unone_);
-  }
+  void calc_wrap2(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x) { calc(data, x, unone_); }
 
-  void calcDiff_wrap1(std::shared_ptr<ActionDataAbstract>& data,
-                      const Eigen::VectorXd& x,
-                      const Eigen::VectorXd& u,
+  void calcDiff_wrap1(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u,
                       bool recalc) {
     calcDiff(data, x, u, recalc);
   }
 
-  void calcDiff_wrap2(std::shared_ptr<ActionDataAbstract>& data,
-                      const Eigen::VectorXd& x,
-                      const Eigen::VectorXd& u) {
+  void calcDiff_wrap2(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
     calcDiff(data, x, u, true);
   }
 
-  void calcDiff_wrap3(std::shared_ptr<ActionDataAbstract>& data,
-                      const Eigen::VectorXd& x,
-                      bool recalc) {
+  void calcDiff_wrap3(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, bool recalc) {
     calcDiff(data, x, unone_, recalc);
   }
 
-  void calcDiff_wrap4(std::shared_ptr<ActionDataAbstract>& data,
-                      const Eigen::VectorXd& x) {
+  void calcDiff_wrap4(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x) {
     calcDiff(data, x, unone_, true);
   }
 };
@@ -68,7 +56,7 @@ void exposeActionUnicycle() {
         other hand, we define the quadratic cost functions for the state and
         control.)",
       bp::init<>(bp::args(" self"),
-                         R"(Initialize the unicycle action model.)"))
+                 R"(Initialize the unicycle action model.)"))
       .def("calc", &ActionModelUnicycle_wrap::calc_wrap1, bp::args(" self", " data", " x", " u=None"),
            R"(Compute the next state and cost value.
 
@@ -103,18 +91,19 @@ action model (i.e. dynamical system and cost function).
 
   boost::python::register_ptr_to_python<std::shared_ptr<ActionDataUnicycle>>();
 
-  bp::class_<ActionDataUnicycle, bp::bases<ActionDataAbstract>>("ActionDataUnicycle",
-                                 R"(Action data for the Unicycle system.
+  bp::class_<ActionDataUnicycle, bp::bases<ActionDataAbstract>>(
+      "ActionDataUnicycle",
+      R"(Action data for the Unicycle system.
 
         The unicycle data, apart of common one, contains the cost residuals used
         for the computation of calc and calcDiff.)",
       bp::init<ActionModelUnicycle*>(bp::args(" self", " model"),
-                         R"(Create unicycle data.
+                                     R"(Create unicycle data.
 
 :param model: unicycle action model)"));
 }
 
-}  // python
-}  // crocoddyl
+}  // namespace python
+}  // namespace crocoddyl
 
 #endif  // CROCODDYL_PYTHON_CORE_ACTIONS_UNICYCLE_HPP_

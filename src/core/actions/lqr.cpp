@@ -2,11 +2,9 @@
 
 namespace crocoddyl {
 
-ActionModelLQR::ActionModelLQR(const unsigned int& nx,
-                               const unsigned int& nu,
-                               bool drift_free) : ActionModelAbstract(new StateVector(nx), nu, 0),
-      drift_free_(drift_free) {
-  //TODO substitute by random (vectors) and random-orthogonal (matrices)
+ActionModelLQR::ActionModelLQR(const unsigned int& nx, const unsigned int& nu, bool drift_free)
+    : ActionModelAbstract(new StateVector(nx), nu, 0), drift_free_(drift_free) {
+  // TODO substitute by random (vectors) and random-orthogonal (matrices)
   Fx_ = Eigen::MatrixXd::Identity(nx, nx);
   Fu_ = Eigen::MatrixXd::Identity(nx, nu);
   f0_ = Eigen::VectorXd::Ones(nx);
@@ -19,8 +17,7 @@ ActionModelLQR::ActionModelLQR(const unsigned int& nx,
 
 ActionModelLQR::~ActionModelLQR() {}
 
-void ActionModelLQR::calc(std::shared_ptr<ActionDataAbstract>& data,
-                          const Eigen::Ref<const Eigen::VectorXd>& x,
+void ActionModelLQR::calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                           const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (drift_free_) {
     data->xnext = Fx_ * x + Fu_ * u;
@@ -30,10 +27,8 @@ void ActionModelLQR::calc(std::shared_ptr<ActionDataAbstract>& data,
   data->cost = 0.5 * x.dot(Lxx_ * x) + 0.5 * u.dot(Luu_ * u) + x.dot(Lxu_ * u) + lx_.dot(x) + lu_.dot(u);
 }
 
-void ActionModelLQR::calcDiff(std::shared_ptr<ActionDataAbstract>& data,
-                              const Eigen::Ref<const Eigen::VectorXd>& x,
-                              const Eigen::Ref<const Eigen::VectorXd>& u,
-                              const bool& recalc) {
+void ActionModelLQR::calcDiff(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+                              const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (recalc) {
     calc(data, x, u);
   }
@@ -46,8 +41,6 @@ void ActionModelLQR::calcDiff(std::shared_ptr<ActionDataAbstract>& data,
   data->Luu = Luu_;
 }
 
-std::shared_ptr<ActionDataAbstract> ActionModelLQR::createData() {
-  return std::make_shared<ActionDataLQR>(this);
-}
+std::shared_ptr<ActionDataAbstract> ActionModelLQR::createData() { return std::make_shared<ActionDataLQR>(this); }
 
 }  // namespace crocoddyl

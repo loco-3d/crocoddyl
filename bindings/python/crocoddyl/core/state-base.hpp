@@ -17,11 +17,10 @@ namespace python {
 
 namespace bp = boost::python;
 
-class StateAbstract_wrap : public StateAbstract,
-                           public bp::wrapper<StateAbstract> {
+class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstract> {
  public:
-  using StateAbstract::nx_;
   using StateAbstract::ndx_;
+  using StateAbstract::nx_;
 
   StateAbstract_wrap(int nx, int ndx) : StateAbstract(nx, ndx), bp::wrapper<StateAbstract>() {}
 
@@ -29,51 +28,43 @@ class StateAbstract_wrap : public StateAbstract,
 
   Eigen::VectorXd rand() { return bp::call<Eigen::VectorXd>(this->get_override("rand").ptr()); }
 
-  Eigen::VectorXd diff_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0,
-                            const Eigen::Ref<const Eigen::VectorXd>& x1) {
-    return bp::call<Eigen::VectorXd>(this->get_override("diff").ptr(),
-                                     (Eigen::VectorXd) x0,
-                                     (Eigen::VectorXd) x1);
+  Eigen::VectorXd diff_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1) {
+    return bp::call<Eigen::VectorXd>(this->get_override("diff").ptr(), (Eigen::VectorXd)x0, (Eigen::VectorXd)x1);
   }
 
-  void diff(const Eigen::Ref<const Eigen::VectorXd>& x0,
-            const Eigen::Ref<const Eigen::VectorXd>& x1,
+  void diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
             Eigen::Ref<Eigen::VectorXd> dxout) {
     dxout = diff_wrap(x0, x1);
   }
 
   Eigen::VectorXd integrate_wrap(const Eigen::Ref<const Eigen::VectorXd>& x,
                                  const Eigen::Ref<const Eigen::VectorXd>& dx) {
-    return bp::call<Eigen::VectorXd>(this->get_override("integrate").ptr(),
-                                     (Eigen::VectorXd) x,
-                                     (Eigen::VectorXd) dx);
+    return bp::call<Eigen::VectorXd>(this->get_override("integrate").ptr(), (Eigen::VectorXd)x, (Eigen::VectorXd)dx);
   }
 
-  void integrate(const Eigen::Ref<const Eigen::VectorXd>& x,
-                 const Eigen::Ref<const Eigen::VectorXd>& dx,
+  void integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                  Eigen::Ref<Eigen::VectorXd> x1out) {
     x1out = integrate_wrap(x, dx);
   }
 
-  void Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0,
-             const Eigen::Ref<const Eigen::VectorXd>& x1,
-             Eigen::Ref<Eigen::MatrixXd> Jfirst,
-             Eigen::Ref<Eigen::MatrixXd> Jsecond,
-             Jcomponent _firstsecond) {
+  void Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
+             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent _firstsecond) {
     std::string firstsecond;
     switch (_firstsecond) {
-    case first: {
-      firstsecond = "first";
-      break;
-    } case second: {
-      firstsecond = "second";
-      break;
-    } case both: {
-      firstsecond = "both";
-      break;
-    } default: {
-      firstsecond = "both";
-    }}
+      case first: {
+        firstsecond = "first";
+        break;
+      }
+      case second: {
+        firstsecond = "second";
+        break;
+      }
+      case both: {
+        firstsecond = "both";
+        break;
+      }
+      default: { firstsecond = "both"; }
+    }
 
     bp::list res = Jdiff_wrap(x0, x1, firstsecond);
     if (firstsecond == "both") {
@@ -86,46 +77,40 @@ class StateAbstract_wrap : public StateAbstract,
     }
   }
 
-  bp::list Jdiff_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0,
-                      const Eigen::Ref<const Eigen::VectorXd>& x1,
+  bp::list Jdiff_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
                       std::string firstsecond) {
     assert(firstsecond == "both" || firstsecond == "first" || firstsecond == "second");
     if (firstsecond == "both") {
-      bp::list Jacs = bp::call<bp::list>(this->get_override("Jdiff").ptr(),
-                                         (Eigen::VectorXd) x0,
-                                         (Eigen::VectorXd) x1,
-                                         firstsecond);
+      bp::list Jacs =
+          bp::call<bp::list>(this->get_override("Jdiff").ptr(), (Eigen::VectorXd)x0, (Eigen::VectorXd)x1, firstsecond);
       return Jacs;
     } else {
-      Eigen::MatrixXd J = bp::call<Eigen::MatrixXd>(this->get_override("Jdiff").ptr(),
-                                                    (Eigen::VectorXd) x0,
-                                                    (Eigen::VectorXd) x1,
-                                                    firstsecond);
+      Eigen::MatrixXd J = bp::call<Eigen::MatrixXd>(this->get_override("Jdiff").ptr(), (Eigen::VectorXd)x0,
+                                                    (Eigen::VectorXd)x1, firstsecond);
       bp::list list;
       list.append(J);
       return list;
     }
   }
 
-  void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x0,
-                  const Eigen::Ref<const Eigen::VectorXd>& x1,
-                  Eigen::Ref<Eigen::MatrixXd> Jfirst,
-                  Eigen::Ref<Eigen::MatrixXd> Jsecond,
-                  Jcomponent _firstsecond) {
+  void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
+                  Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent _firstsecond) {
     std::string firstsecond;
     switch (_firstsecond) {
-    case first: {
-      firstsecond = "first";
-      break;
-    } case second: {
-      firstsecond = "second";
-      break;
-    } case both: {
-      firstsecond = "both";
-      break;
-    } default: {
-      firstsecond = "both";
-    }}
+      case first: {
+        firstsecond = "first";
+        break;
+      }
+      case second: {
+        firstsecond = "second";
+        break;
+      }
+      case both: {
+        firstsecond = "both";
+        break;
+      }
+      default: { firstsecond = "both"; }
+    }
 
     bp::list res = Jintegrate_wrap(x0, x1, firstsecond);
     if (firstsecond == "both") {
@@ -138,22 +123,16 @@ class StateAbstract_wrap : public StateAbstract,
     }
   }
 
-  bp::list Jintegrate_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0,
-                           const Eigen::Ref<const Eigen::VectorXd>& x1,
+  bp::list Jintegrate_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
                            std::string firstsecond) {
     assert(firstsecond == "both" || firstsecond == "first" || firstsecond == "second");
     if (firstsecond == "both") {
-      bp::list Jacs =
-          bp::call<bp::list>(this->get_override("Jintegrate").ptr(),
-                             (Eigen::VectorXd) x0,
-                             (Eigen::VectorXd) x1,
-                             firstsecond);
+      bp::list Jacs = bp::call<bp::list>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x0,
+                                         (Eigen::VectorXd)x1, firstsecond);
       return Jacs;
     } else {
-      Eigen::MatrixXd J = bp::call<Eigen::MatrixXd>(this->get_override("Jintegrate").ptr(),
-                                                  (Eigen::VectorXd) x0,
-                                                  (Eigen::VectorXd) x1,
-                                                  firstsecond);
+      Eigen::MatrixXd J = bp::call<Eigen::MatrixXd>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x0,
+                                                    (Eigen::VectorXd)x1, firstsecond);
       bp::list list;
       list.append(J);
       return list;
@@ -162,9 +141,8 @@ class StateAbstract_wrap : public StateAbstract,
 };
 
 void exposeStateAbstract() {
-  bp::class_<StateAbstract_wrap, boost::noncopyable>(
-      "StateAbstract",
-      R"(Abstract class for the state representation.
+  bp::class_<StateAbstract_wrap, boost::noncopyable>("StateAbstract",
+                                                     R"(Abstract class for the state representation.
 
         A state is represented by its operators: difference, integrates and their derivatives.
         The difference operator returns the value of x1 [-] x2 operation. Instead the integrate
@@ -172,8 +150,8 @@ void exposeStateAbstract() {
         on the state manifold M or to advance the state given a tangential velocity (Tx M).
         Therefore the points x, x1 and x2 belongs to the manifold M; and dx or x1 [-] x2 lie
         on its tangential space.)",
-      bp::init<int, int>(bp::args(" self", " nx", " ndx"),
-                         R"(Initialize the state dimensions.
+                                                     bp::init<int, int>(bp::args(" self", " nx", " ndx"),
+                                                                        R"(Initialize the state dimensions.
 
 :param nx: dimension of state configuration vector,
 :param ndx: dimension of state tangent vector)"))
@@ -185,8 +163,7 @@ void exposeStateAbstract() {
            R"(Return a random reference state.
 
 :return random reference state)")
-      .def("diff", pure_virtual(&StateAbstract_wrap::diff_wrap),
-           bp::args(" self", " x0", " x1"),
+      .def("diff", pure_virtual(&StateAbstract_wrap::diff_wrap), bp::args(" self", " x0", " x1"),
            R"(Operator that differentiates the two state points.
 
 It returns the value of x1 [-] x0 operation. Note tha x0 and x1 are points in the state
@@ -194,8 +171,7 @@ manifold (in M). Instead the operator result lies in the tangent-space of M.
 :param x0: current state (dim state.nx).
 :param x1: next state (dim state.nx).
 :return x1 [-] x0 value (dim state.ndx).)")
-      .def("integrate", pure_virtual(&StateAbstract_wrap::integrate),
-           bp::args(" self", " x", " dx"),
+      .def("integrate", pure_virtual(&StateAbstract_wrap::integrate), bp::args(" self", " x", " dx"),
            R"(Operator that integrates the current state.
 
 It returns the value of x [+] dx operation. x and dx are points in the statstate.diff(x0,x1)d (in M)

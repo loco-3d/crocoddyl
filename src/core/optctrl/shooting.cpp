@@ -4,8 +4,8 @@ namespace crocoddyl {
 
 ShootingProblem::ShootingProblem(const Eigen::Ref<const Eigen::VectorXd>& x0,
                                  std::vector<ActionModelAbstract*>& running_models,
-                                 ActionModelAbstract* terminal_model) : terminal_model_(terminal_model),
-    running_models_(running_models), T_(running_models.size()), x0_(x0), cost_(0.) {
+                                 ActionModelAbstract* terminal_model)
+    : terminal_model_(terminal_model), running_models_(running_models), T_(running_models.size()), x0_(x0), cost_(0.) {
   for (unsigned int i = 0; i < running_models_.size(); ++i) {
     ActionModelAbstract* model = running_models_[i];
     running_datas_.push_back(model->createData());
@@ -15,13 +15,12 @@ ShootingProblem::ShootingProblem(const Eigen::Ref<const Eigen::VectorXd>& x0,
 
 ShootingProblem::~ShootingProblem() {}
 
-double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs,
-                             const std::vector<Eigen::VectorXd>& us) {
+double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us) {
   cost_ = 0;
   for (unsigned int i = 0; i < T_; ++i) {
     ActionModelAbstract* model = running_models_[i];
     std::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
-    const Eigen::VectorXd& x = xs[i+1];
+    const Eigen::VectorXd& x = xs[i + 1];
     const Eigen::VectorXd& u = us[i];
 
     model->calc(data, x, u);
@@ -32,8 +31,7 @@ double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs,
   return cost_;
 }
 
-double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs,
-                                 const std::vector<Eigen::VectorXd>& us) {
+double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us) {
   cost_ = 0;
   for (long unsigned int i = 0; i < T_; ++i) {
     ActionModelAbstract* model = running_models_[i];
@@ -49,9 +47,8 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs,
   return cost_;
 }
 
-void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us,
-                              std::vector<Eigen::VectorXd>& xs) {
-  xs.resize(T_+1);
+void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us, std::vector<Eigen::VectorXd>& xs) {
+  xs.resize(T_ + 1);
   xs[0] = x0_;
   for (long unsigned int i = 0; i < T_; ++i) {
     ActionModelAbstract* model = running_models_[i];
@@ -60,16 +57,12 @@ void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us,
     const Eigen::VectorXd& u = us[i];
 
     model->calc(data, x, u);
-    xs[i+1] = data->get_xnext();
+    xs[i + 1] = data->get_xnext();
   }
 }
 
-long unsigned int ShootingProblem::get_T() const {
-  return T_;
-}
+long unsigned int ShootingProblem::get_T() const { return T_; }
 
-Eigen::VectorXd& ShootingProblem::get_x0() {
-  return x0_;
-}
+Eigen::VectorXd& ShootingProblem::get_x0() { return x0_; }
 
 }  // namespace crocoddyl

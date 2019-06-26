@@ -2,22 +2,18 @@
 
 namespace crocoddyl {
 
-ActionModelUnicycle::ActionModelUnicycle() : ActionModelAbstract(&unicycle::state, 2, 5),
-    dt_(0.1) {
+ActionModelUnicycle::ActionModelUnicycle() : ActionModelAbstract(&unicycle::state, 2, 5), dt_(0.1) {
   cost_weights_ << 10., 1.;
 }
 
 ActionModelUnicycle::~ActionModelUnicycle() {}
 
-void ActionModelUnicycle::calc(std::shared_ptr<ActionDataAbstract>& data,
-                               const Eigen::Ref<const Eigen::VectorXd>& x,
+void ActionModelUnicycle::calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                                const Eigen::Ref<const Eigen::VectorXd>& u) {
   ActionDataUnicycle* d = static_cast<ActionDataUnicycle*>(data.get());
   const double& c = std::cos(x[2]);
   const double& s = std::sin(x[2]);
-  d->xnext << x[0] + c * u[0] * dt_,
-              x[1] + s * u[0] * dt_,
-              x[2] + u[1] * dt_;
+  d->xnext << x[0] + c * u[0] * dt_, x[1] + s * u[0] * dt_, x[2] + u[1] * dt_;
   d->r.head<3>() = cost_weights_[0] * x;
   d->r.tail<2>() = cost_weights_[1] * u;
   d->cost = 0.5 * d->r.transpose() * d->r;
@@ -25,8 +21,7 @@ void ActionModelUnicycle::calc(std::shared_ptr<ActionDataAbstract>& data,
 
 void ActionModelUnicycle::calcDiff(std::shared_ptr<ActionDataAbstract>& data,
                                    const Eigen::Ref<const Eigen::VectorXd>& x,
-                                   const Eigen::Ref<const Eigen::VectorXd>& u,
-                                   const bool& recalc) {
+                                   const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (recalc) {
     calc(data, x, u);
   }
@@ -43,12 +38,8 @@ void ActionModelUnicycle::calcDiff(std::shared_ptr<ActionDataAbstract>& data,
   // Dynamic derivatives
   const double& c = std::cos(x[2]);
   const double& s = std::sin(x[2]);
-  d->Fx << 1., 0., -s * u[0] * dt_,
-           0., 1., c * u[0] * dt_,
-           0., 0., 1.;
-  d->Fu << c * dt_, 0.,
-           s * dt_, 0.,
-           0., dt_;
+  d->Fx << 1., 0., -s * u[0] * dt_, 0., 1., c * u[0] * dt_, 0., 0., 1.;
+  d->Fu << c * dt_, 0., s * dt_, 0., 0., dt_;
 }
 
 std::shared_ptr<ActionDataAbstract> ActionModelUnicycle::createData() {

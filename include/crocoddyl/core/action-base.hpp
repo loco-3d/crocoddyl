@@ -6,39 +6,31 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_CORE_ACTION_BASE_HPP_
 #define CROCODDYL_CORE_ACTION_BASE_HPP_
 
 #include <crocoddyl/core/state-base.hpp>
 #include <memory>
 
-//TODO: DifferentialActionModelAbstract DifferentialActionDataAbstract
+// TODO: DifferentialActionModelAbstract DifferentialActionDataAbstract
 
 namespace crocoddyl {
 
-struct ActionDataAbstract; // forward declaration
+struct ActionDataAbstract;  // forward declaration
 
 class ActionModelAbstract {
  public:
-  ActionModelAbstract(StateAbstract *const state,
-                      const unsigned int& nu,
-                      const unsigned int& ncost=0);
+  ActionModelAbstract(StateAbstract* const state, const unsigned int& nu, const unsigned int& ncost = 0);
   ~ActionModelAbstract();
 
-  virtual void calc(std::shared_ptr<ActionDataAbstract>& data,
-                    const Eigen::Ref<const Eigen::VectorXd>& x,
+  virtual void calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                     const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
-  virtual void calcDiff(std::shared_ptr<ActionDataAbstract>& data,
-                        const Eigen::Ref<const Eigen::VectorXd>& x,
-                        const Eigen::Ref<const Eigen::VectorXd>& u,
-                        const bool& recalc=true) = 0;
+  virtual void calcDiff(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+                        const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) = 0;
   virtual std::shared_ptr<ActionDataAbstract> createData() = 0;
 
-  void calc(std::shared_ptr<ActionDataAbstract>& data,
-            const Eigen::Ref<const Eigen::VectorXd>& x);
-  void calcDiff(std::shared_ptr<ActionDataAbstract>& data,
-                const Eigen::Ref<const Eigen::VectorXd>& x);
+  void calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
+  void calcDiff(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
 
   unsigned int get_nx() const;
   unsigned int get_ndx() const;
@@ -58,8 +50,8 @@ class ActionModelAbstract {
 struct ActionDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  template<typename Model>
-  ActionDataAbstract(Model *const model) {
+  template <typename Model>
+  ActionDataAbstract(Model* const model) {
     const int& nx = model->get_nx();
     const int& ndx = model->get_ndx();
     const int& nu = model->get_nu();

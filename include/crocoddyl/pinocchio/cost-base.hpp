@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_PINOCCHIO_COST_BASE_HPP_
 #define CROCODDYL_PINOCCHIO_COST_BASE_HPP_
 
-//TODO: CostModelAbstract(Pinocchio) CostDataAbstract(Pinocchio)
+// TODO: CostModelAbstract(Pinocchio) CostDataAbstract(Pinocchio)
 
 #endif  // CROCODDYL_PINOCCHIO_COST_BASE_HPP_

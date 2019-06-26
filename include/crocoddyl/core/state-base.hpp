@@ -6,7 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_CORE_STATE_BASE_HPP_
 #define CROCODDYL_CORE_STATE_BASE_HPP_
 
@@ -14,31 +13,24 @@
 
 namespace crocoddyl {
 
-enum Jcomponent { both=0, first, second };
+enum Jcomponent { both = 0, first, second };
 
 class StateAbstract {
  public:
-  StateAbstract(const unsigned int& nx,
-                const unsigned int& ndx);
+  StateAbstract(const unsigned int& nx, const unsigned int& ndx);
   ~StateAbstract();
 
   virtual Eigen::VectorXd zero() = 0;
   virtual Eigen::VectorXd rand() = 0;
-  virtual void diff(const Eigen::Ref<const Eigen::VectorXd>& x0,
-                    const Eigen::Ref<const Eigen::VectorXd>& x1,
+  virtual void diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
                     Eigen::Ref<Eigen::VectorXd> dxout) = 0;
-  virtual void integrate(const Eigen::Ref<const Eigen::VectorXd>& x,
-                         const Eigen::Ref<const Eigen::VectorXd>& dx,
+  virtual void integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                          Eigen::Ref<Eigen::VectorXd> xout) = 0;
-  virtual void Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0,
-                     const Eigen::Ref<const Eigen::VectorXd>& x1,
-                     Eigen::Ref<Eigen::MatrixXd> Jfirst,
-                     Eigen::Ref<Eigen::MatrixXd> Jsecond,
+  virtual void Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
+                     Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
                      Jcomponent firstsecond = Jcomponent::both) = 0;
-  virtual void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x,
-                          const Eigen::Ref<const Eigen::VectorXd>& dx,
-                          Eigen::Ref<Eigen::MatrixXd> Jfirst,
-                          Eigen::Ref<Eigen::MatrixXd> Jsecond,
+  virtual void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
+                          Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
                           Jcomponent firstsecond = Jcomponent::both) = 0;
 
   const unsigned int& get_nx() const;

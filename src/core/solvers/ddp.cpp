@@ -2,24 +2,28 @@
 
 namespace crocoddyl {
 
-SolverDDP::SolverDDP(ShootingProblem& problem) : SolverAbstract(problem), regfactor_(10.),
-    regmin_(1e-9), regmax_(1e9), cost_try_(0.), th_grad_(1e-12), th_step_(0.5), was_feasible_(false) {
+SolverDDP::SolverDDP(ShootingProblem& problem)
+    : SolverAbstract(problem),
+      regfactor_(10.),
+      regmin_(1e-9),
+      regmax_(1e9),
+      cost_try_(0.),
+      th_grad_(1e-12),
+      th_step_(0.5),
+      was_feasible_(false) {
   allocateData();
 
   const unsigned int& n_alphas = 10;
   alphas_.resize(n_alphas);
   for (unsigned int n = 0; n < n_alphas; ++n) {
-    alphas_[n] = 1. / pow(2., (double) n);
+    alphas_[n] = 1. / pow(2., (double)n);
   }
 }
 
 SolverDDP::~SolverDDP() {}
 
-bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
-                      const std::vector<Eigen::VectorXd>& init_us,
-                      const unsigned int& maxiter,
-                      const bool& is_feasible,
-                      const double& reginit) {
+bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
+                      const unsigned int& maxiter, const bool& is_feasible, const double& reginit) {
   setCandidate(init_xs, init_us, is_feasible);
 
   if (std::isnan(reginit)) {
@@ -37,11 +41,11 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
       try {
         computeDirection(recalc);
       } catch (const char* msg) {
-       recalc = false;
+        recalc = false;
         if (xreg_ == regmax_) {
           return false;
         } else {
-        continue;
+          continue;
         }
       }
       break;
@@ -67,7 +71,7 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
     }
 
     if (steplength_ > th_step_) {
-     decreaseRegularization();
+      decreaseRegularization();
     }
     if (steplength_ == alphas_.back()) {
       increaseRegularization();
@@ -123,7 +127,6 @@ const Eigen::Vector2d& SolverDDP::expectedImprovement() {
   return d_;
 }
 
-
 double SolverDDP::calc() {
   cost_ = problem_.calcDiff(xs_, us_);
   if (!is_feasible_) {
@@ -134,7 +137,7 @@ double SolverDDP::calc() {
     for (unsigned long int t = 0; t < T; ++t) {
       ActionModelAbstract* model = problem_.running_models_[t];
       std::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
-      model->get_state()->diff(xs_[t+1], d->get_xnext(), gaps_[t+1]);
+      model->get_state()->diff(xs_[t + 1], d->get_xnext(), gaps_[t + 1]);
     }
   }
   return cost_;
@@ -151,7 +154,7 @@ void SolverDDP::backwardPass() {
     Vxx_.back().diagonal() += xreg;
   }
 
-  for (int t = (int) problem_.get_T() - 1; t >= 0; --t) {
+  for (int t = (int)problem_.get_T() - 1; t >= 0; --t) {
     ActionModelAbstract* m = problem_.running_models_[t];
     std::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
     const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
@@ -185,7 +188,7 @@ void SolverDDP::backwardPass() {
       Vx_[t] = Qx_[t] + K_[t].transpose() * (Quu_[t] * k_[t] - 2. * Qu_[t]);
     }
     Vxx_[t] = Qxx_[t] - Qxu_[t] * K_[t];
-    Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose());// TODO: as suggested by Nicolas
+    Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose());  // TODO: as suggested by Nicolas
 
     if (!std::isnan(xreg_)) {
       Vxx_[t].diagonal() += xreg;
@@ -209,12 +212,11 @@ void SolverDDP::forwardPass(const double& steplength) {
     m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
     us_try_[t] = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
     m->calc(d, xs_try_[t], us_try_[t]);
-    xs_try_[t+1] = d->get_xnext();
+    xs_try_[t + 1] = d->get_xnext();
     cost_try_ += d->cost;
 
-    const double& value = xs_try_[t+1].sum();
-    if (std::isnan(value) || std::isinf(value) ||
-        std::isnan(cost_try_) || std::isnan(cost_try_)) {
+    const double& value = xs_try_[t + 1].sum();
+    if (std::isnan(value) || std::isinf(value) || std::isnan(cost_try_) || std::isnan(cost_try_)) {
       throw "forward error";
     }
   }

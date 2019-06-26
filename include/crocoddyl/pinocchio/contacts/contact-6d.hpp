@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_PINOCCHIO_CONTACTS_CONTACT_6D_HPP_
 #define CROCODDYL_PINOCCHIO_CONTACTS_CONTACT_6D_HPP_
 
-//TODO: ContactModel6D ContactData6D
+// TODO: ContactModel6D ContactData6D
 
 #endif  // CROCODDYL_PINOCCHIO_CONTACTS_CONTACT_6D_HPP_

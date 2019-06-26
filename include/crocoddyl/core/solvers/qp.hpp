@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_CORE_SOLVERS_QP_HPP_
 #define CROCODDYL_CORE_SOLVERS_QP_HPP_
 
-//TODO: quadprogWrapper QPSolution
+// TODO: quadprogWrapper QPSolution
 
 #endif  // CROCODDYL_CORE_SOLVERS_QP_HPP_
