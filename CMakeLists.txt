@@ -38,7 +38,7 @@ SET(CXX_DISABLE_WERROR True)
 
 # Create different building options
 OPTION(ENABLE_VECTORIZATION "Enable vectorization and futhers processor-related optimizations" ON)
-OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" OFF)
+OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" ON)
 OPTION(BUILD_UNIT_TESTS "Build the unitary tests" ON)
 OPTION(BUILD_BENCHMARK "Build the benchmark" OFF)
 
