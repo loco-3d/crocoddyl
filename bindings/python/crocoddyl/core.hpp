@@ -9,11 +9,11 @@
 #ifndef CROCODDYL_PYTHON_CORE_HPP_
 #define CROCODDYL_PYTHON_CORE_HPP_
 
-#include <crocoddyl/python/core/state-base.hpp>
-#include <crocoddyl/python/core/action-base.hpp>
-#include <crocoddyl/python/core/states/state-euclidean.hpp>
-#include <crocoddyl/python/core/actions/unicycle.hpp>
-#include <crocoddyl/python/core/actions/lqr.hpp>
+#include <python/crocoddyl/core/state-base.hpp>
+#include <python/crocoddyl/core/action-base.hpp>
+#include <python/crocoddyl/core/states/state-euclidean.hpp>
+#include <python/crocoddyl/core/actions/unicycle.hpp>
+#include <python/crocoddyl/core/actions/lqr.hpp>
 
 namespace crocoddyl {
 namespace python {

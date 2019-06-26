@@ -1,10 +1,5 @@
 import unittest
 from random import randint
-
-import platform
-raise RuntimeError(platform.python_version())
-
-
 import numpy as np
 from crocoddyl import StateNumDiff, StatePinocchio, StateUnicycle, StateVector
 from testutils import NUMDIFF_MODIFIER, assertNumDiff
