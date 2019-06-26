@@ -63,7 +63,6 @@ void exposeActionUnicycle() {
 It describes the time-discrete evolution of the unicycle system.
 Additionally it computes the cost value associated to this discrete
 state and control pair.
-:param model: action model
 :param data: action data
 :param x: time-discrete state vector
 :param u: time-discrete control input
@@ -77,7 +76,6 @@ It computes the partial derivatives of the unicycle system and the
 cost function. If recalc == True, it first updates the state evolution
 and cost value. This function builds a quadratic approximation of the
 action model (i.e. dynamical system and cost function).
-:param model: action model
 :param data: action data
 :param x: time-discrete state vector
 :param u: time-discrete control input

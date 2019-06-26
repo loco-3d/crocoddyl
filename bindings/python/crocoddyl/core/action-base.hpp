@@ -51,7 +51,7 @@ void exposeActionAbstract() {
       R"(Abstract class for action models.
 
         In crocoddyl, an action model combines dynamics and cost data. Each node, in our optimal 
-        control problem, is described through an action model. Every time that we want describe
+        control problem, is described through an action model. Every time that we want to describe
         a problem, we need to provide ways of computing the dynamics, cost functions and their
         derivatives. These computations are mainly carry on inside calc() and calcDiff(),
         respectively.)",
@@ -64,10 +64,9 @@ void exposeActionAbstract() {
       .def("calc", pure_virtual(&ActionModelAbstract_wrap::calc), bp::args(" self", " data", " x", " u"),
            R"(Compute the next state and cost value.
 
-First, it describes the time-discrete evolution of our dynamical system
-in which we obtain the next discrete state. Additionally it computes
-the cost value associated to this discrete state and control pair.
-:param model: action model
+It describes the time-discrete evolution of our dynamical system
+in which we obtain the next state. Additionally it computes the
+cost value associated to this discrete state and control pair.
 :param data: action data
 :param x: time-discrete state vector
 :param u: time-discrete control input
@@ -79,8 +78,7 @@ the cost value associated to this discrete state and control pair.
 It computes the partial derivatives of the dynamical system and the
 cost function. If recalc == True, it first updates the state evolution
 and cost value. This function builds a quadratic approximation of the
-action model (i.e. dynamical system and cost function).
-:param model: action model
+action model (i.e. linear dynamics and quadratic cost).
 :param data: action data
 :param x: time-discrete state vector
 :param u: time-discrete control input
@@ -115,9 +113,7 @@ you need to defined the ActionDataType inside your AM.
       bp::init<ActionModelAbstract*>(bp::args(" self", " model"),
                                      R"(Create common data shared between AMs.
 
-In crocoddyl, an action data might use an externally defined cost data.
-If so, you need to pass your own cost data using costData. Otherwise
-it will be allocated here.
+The action data uses the model in order to first process it.
 :param model: action model)"))
       .add_property("cost",
                     bp::make_getter(&ActionDataAbstract_wrap::cost, bp::return_value_policy<bp::return_by_value>()),

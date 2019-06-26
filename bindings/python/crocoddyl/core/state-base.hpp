@@ -174,8 +174,8 @@ manifold (in M). Instead the operator result lies in the tangent-space of M.
       .def("integrate", pure_virtual(&StateAbstract_wrap::integrate), bp::args(" self", " x", " dx"),
            R"(Operator that integrates the current state.
 
-It returns the value of x [+] dx operation. x and dx are points in the statstate.diff(x0,x1)d (in M)
-and its tangent, respectively. Note that the operator result lies on M too.state.diff(x0,x1)
+It returns the value of x [+] dx operation. x and dx are points in the state.diff(x0,x1) (in M)
+and its tangent, respectively. Note that the operator result lies on M too.
 :param x: current state (dim state.nx).
 :param dx: displacement of the state (dim state.ndx).
 :return x [+] dx value (dim state.nx).)")
@@ -183,11 +183,12 @@ and its tangent, respectively. Note that the operator result lies on M too.state
            bp::args(" self", " x0", " x1", " firstsecond = 'both'"),
            R"(Compute the partial derivatives of difference operator.
 
-For a given state, the difference operator (x1 [-] x0) is defined by diff(x0, x1). Instead
-here it is described its partial derivatives, i.e. \partial{diff(x0, x1)}{x0} and
+The difference operator (x1 [-] x0) is defined by diff(x0, x1). Instead Jdiff
+computes its partial derivatives, i.e. \partial{diff(x0, x1)}{x0} and
 \partial{diff(x0, x1)}{x1}. By default, this function returns the derivatives of the
-first and second argument (i.e. firstsecond='both'). However we ask for a specific partial
-derivative by setting firstsecond='first' or firstsecond='second'.
+first and second argument (i.e. firstsecond='both'). However we can also specific the
+partial derivative for the first and second variables by setting firstsecond='first'
+or firstsecond='second', respectively.
 :param x0: current state (dim state.nx).
 :param x1: next state (dim state.nx).
 :param firstsecond: desired partial derivative
@@ -196,9 +197,9 @@ derivative by setting firstsecond='first' or firstsecond='second'.
            bp::args(" self", " x", " dx", " firstsecond = 'both'"),
            R"(Compute the partial derivatives of integrate operator.
 
-For a given state, the integrate operator (x [+] dx) is defined by integrate(x, dx).
-Instead here it is described its partial derivatives, i.e. \partial{integrate(x, dx)}{x}
-and \partial{integrate(x, dx)}{dx}. By default, this function returns the derivatives of
+The integrate operator (x [+] dx) is defined by integrate(x, dx). Instead Jintegrate
+computes its partial derivatives, i.e. \partial{integrate(x, dx)}{x} and
+\partial{integrate(x, dx)}{dx}. By default, this function returns the derivatives of
 the first and second argument (i.e. firstsecond='both'). However we ask for a specific
 partial derivative by setting firstsecond='first' or firstsecond='second'.
 :param x: current state (dim state.nx).

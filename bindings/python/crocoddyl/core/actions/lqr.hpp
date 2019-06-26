@@ -61,10 +61,9 @@ void exposeActionLQR() {
       .def("calc", &ActionModelLQR_wrap::calc_wrap1, bp::args(" self", " data", " x", " u=None"),
            R"(Compute the next state and cost value.
 
-It describes the time-discrete evolution of the LQR system.
-Additionally it computes the cost value associated to this discrete
+It describes the time-discrete evolution of the LQR system. Additionally it
+computes the cost value associated to this discrete
 state and control pair.
-:param model: action model
 :param data: action data
 :param x: time-discrete state vector
 :param u: time-discrete control input
@@ -78,7 +77,6 @@ It computes the partial derivatives of the LQR system and the
 cost function. If recalc == True, it first updates the state evolution
 and cost value. This function builds a quadratic approximation of the
 action model (i.e. dynamical system and cost function).
-:param model: action model
 :param data: action data
 :param x: time-discrete state vector
 :param u: time-discrete control input
