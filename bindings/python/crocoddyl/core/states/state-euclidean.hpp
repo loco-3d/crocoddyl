@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_PYTHON_CORE_STATES_STATE_EUCLIDEAN_HPP_
-#define CROCODDYL_PYTHON_CORE_STATES_STATE_EUCLIDEAN_HPP_
+#ifndef PYTHON_CROCODDYL_CORE_STATES_STATE_EUCLIDEAN_HPP_
+#define PYTHON_CROCODDYL_CORE_STATES_STATE_EUCLIDEAN_HPP_
 
 #include <crocoddyl/core/states/state-euclidean.hpp>
 
@@ -135,4 +135,4 @@ firstsecond='first' or firstsecond='second'.
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_PYTHON_CORE_STATES_STATE_EUCLIDEAN_HPP_
+#endif  // PYTHON_CROCODDYL_CORE_STATES_STATE_EUCLIDEAN_HPP_

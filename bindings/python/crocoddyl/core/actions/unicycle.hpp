@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_PYTHON_CORE_ACTIONS_UNICYCLE_HPP_
-#define CROCODDYL_PYTHON_CORE_ACTIONS_UNICYCLE_HPP_
+#ifndef PYTHON_CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_
+#define PYTHON_CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_
 
 #include <crocoddyl/core/actions/unicycle.hpp>
 
@@ -106,4 +106,4 @@ action model (i.e. dynamical system and cost function).
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_PYTHON_CORE_ACTIONS_UNICYCLE_HPP_
+#endif  // PYTHON_CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_

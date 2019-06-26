@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_PYTHON_CORE_ACTION_BASE_HPP_
-#define CROCODDYL_PYTHON_CORE_ACTION_BASE_HPP_
+#ifndef PYTHON_CROCODDYL_CORE_ACTION_BASE_HPP_
+#define PYTHON_CROCODDYL_CORE_ACTION_BASE_HPP_
 
 #include <crocoddyl/core/action-base.hpp>
 
@@ -160,4 +160,4 @@ it will be allocated here.
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_PYTHON_CORE_ACTION_BASE_HPP_
+#endif  // PYTHON_CROCODDYL_CORE_ACTION_BASE_HPP_
