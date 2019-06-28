@@ -15,7 +15,9 @@ ActionModelLQR::ActionModelLQR(const unsigned int& nx, const unsigned int& nu, b
   lu_ = Eigen::VectorXd::Ones(nu);
 }
 
-ActionModelLQR::~ActionModelLQR() {}
+ActionModelLQR::~ActionModelLQR() {
+  // delete state_; //TODO @Carlos this breaks the test_actions c++ unit-test
+}
 
 void ActionModelLQR::calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                           const Eigen::Ref<const Eigen::VectorXd>& u) {

@@ -54,7 +54,8 @@ class ActionModelAbstractTestCase(unittest.TestCase):
     MODEL_DER = None
 
     def setUp(self):
-        self.x = crocoddyl.StateVector(3).rand()
+        state = self.MODEL.State()
+        self.x = state.rand()
         self.u = np.matrix(np.random.rand(self.MODEL.nu)).T
         self.DATA = self.MODEL.createData()
         self.DATA_DER = self.MODEL_DER.createData()

@@ -18,7 +18,11 @@ namespace bp = boost::python;
 
 class ActionModelUnicycle_wrap : public ActionModelUnicycle {
  public:
-  ActionModelUnicycle_wrap() : ActionModelUnicycle() {}
+  ActionModelUnicycle_wrap() : ActionModelUnicycle() {
+    // We need to change it to the wrap object in Python
+    state_->~StateAbstract();                   // destroy the object but leave the space allocated
+    state_ = new (state_) StateVector_wrap(3);  // create a new object in the same space
+  }
 
   void calc_wrap1(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
     calc(data, x, u);

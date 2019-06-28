@@ -18,7 +18,11 @@ namespace bp = boost::python;
 
 class ActionModelLQR_wrap : public ActionModelLQR {
  public:
-  ActionModelLQR_wrap(int nx, int nu, bool drift_free = true) : ActionModelLQR(nx, nu, drift_free) {}
+  ActionModelLQR_wrap(int nx, int nu, bool drift_free = true) : ActionModelLQR(nx, nu, drift_free) {
+    // We need to change it to the wrap object in Python
+    state_->~StateAbstract();                    // destroy the object but leave the space allocated
+    state_ = new (state_) StateVector_wrap(nx);  // create a new object in the same space
+  }
 
   void calc_wrap1(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
     calc(data, x, u);

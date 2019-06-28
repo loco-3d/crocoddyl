@@ -7,7 +7,7 @@ ActionModelUnicycle::ActionModelUnicycle() : ActionModelAbstract(new StateVector
 }
 
 ActionModelUnicycle::~ActionModelUnicycle() {
-  delete state_;
+  // delete state_; //TODO @Carlos this breaks the test_actions c++ unit-test
 }
 
 void ActionModelUnicycle::calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
