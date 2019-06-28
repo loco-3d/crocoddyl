@@ -2,11 +2,13 @@
 
 namespace crocoddyl {
 
-ActionModelUnicycle::ActionModelUnicycle() : ActionModelAbstract(&unicycle::state, 2, 5), dt_(0.1) {
+ActionModelUnicycle::ActionModelUnicycle() : ActionModelAbstract(new StateVector(3), 2, 5), dt_(0.1) {
   cost_weights_ << 10., 1.;
 }
 
-ActionModelUnicycle::~ActionModelUnicycle() {}
+ActionModelUnicycle::~ActionModelUnicycle() {
+  delete state_
+}
 
 void ActionModelUnicycle::calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                                const Eigen::Ref<const Eigen::VectorXd>& u) {

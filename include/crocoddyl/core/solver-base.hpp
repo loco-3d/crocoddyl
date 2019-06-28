@@ -18,7 +18,7 @@ class CallbackAbstract;  // forward declaration
 class SolverAbstract {
  public:
   SolverAbstract(ShootingProblem& problem);
-  ~SolverAbstract();
+  virtual ~SolverAbstract();
 
   virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
                      const unsigned int& maxiter, const bool& is_feasible, const double& reg_init) = 0;

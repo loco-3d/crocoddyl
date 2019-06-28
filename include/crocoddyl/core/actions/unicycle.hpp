@@ -15,10 +15,6 @@
 
 namespace crocoddyl {
 
-namespace unicycle {
-StateVector state(3);
-}
-
 class ActionModelUnicycle : public ActionModelAbstract {
  public:
   ActionModelUnicycle();

@@ -18,7 +18,7 @@ enum Jcomponent { both = 0, first, second };
 class StateAbstract {
  public:
   StateAbstract(const unsigned int& nx, const unsigned int& ndx);
-  ~StateAbstract();
+  virtual ~StateAbstract();
 
   virtual Eigen::VectorXd zero() = 0;
   virtual Eigen::VectorXd rand() = 0;

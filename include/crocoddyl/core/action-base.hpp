@@ -21,7 +21,7 @@ struct ActionDataAbstract;  // forward declaration
 class ActionModelAbstract {
  public:
   ActionModelAbstract(StateAbstract* const state, const unsigned int& nu, const unsigned int& ncost = 0);
-  ~ActionModelAbstract();
+  virtual ~ActionModelAbstract();
 
   virtual void calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                     const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
