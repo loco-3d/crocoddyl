@@ -11,6 +11,7 @@
 
 #include <python/crocoddyl/core/state-base.hpp>
 #include <python/crocoddyl/core/action-base.hpp>
+#include <python/crocoddyl/core/optctrl/shooting.hpp>
 #include <python/crocoddyl/core/states/state-euclidean.hpp>
 #include <python/crocoddyl/core/actions/unicycle.hpp>
 #include <python/crocoddyl/core/actions/lqr.hpp>
@@ -21,6 +22,7 @@ namespace python {
 void exposeCore() {
   exposeStateAbstract();
   exposeActionAbstract();
+  exposeShootingProblem();
   exposeStateEuclidean();
   exposeActionUnicycle();
   exposeActionLQR();

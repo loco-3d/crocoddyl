@@ -9,6 +9,8 @@ ShootingProblem::ShootingProblem(const Eigen::Ref<const Eigen::VectorXd>& x0,
   allocateData();
 }
 
+ShootingProblem::ShootingProblem() : cost_(0.) {}
+
 ShootingProblem::~ShootingProblem() {}
 
 double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us) {

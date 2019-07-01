@@ -17,6 +17,7 @@ class ShootingProblem {
  public:
   ShootingProblem(const Eigen::Ref<const Eigen::VectorXd>& x0, std::vector<ActionModelAbstract*>& running_models,
                   ActionModelAbstract* terminal_model);
+  ShootingProblem();
   ~ShootingProblem();
 
   double calc(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us);
