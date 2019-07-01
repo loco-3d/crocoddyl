@@ -100,7 +100,7 @@ you need to defined the ActionDataType inside your AM.
                     "default control vector")
       .def("State", &ActionModelAbstract_wrap::get_state, bp::return_value_policy<bp::reference_existing_object>());
 
-  boost::python::register_ptr_to_python<std::shared_ptr<ActionDataAbstract>>();
+  bp::register_ptr_to_python<std::shared_ptr<ActionDataAbstract>>();
 
   bp::class_<ActionDataAbstract_wrap, boost::noncopyable>(
       "ActionDataAbstract",

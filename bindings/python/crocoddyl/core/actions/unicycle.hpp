@@ -91,7 +91,7 @@ action model (i.e. dynamical system and cost function).
       .def("createData", &ActionModelUnicycle_wrap::createData, bp::args(" self"),
            R"(Create the unicycle action data.)");
 
-  boost::python::register_ptr_to_python<std::shared_ptr<ActionDataUnicycle>>();
+  bp::register_ptr_to_python<std::shared_ptr<ActionDataUnicycle>>();
 
   bp::class_<ActionDataUnicycle, bp::bases<ActionDataAbstract>>(
       "ActionDataUnicycle",
