@@ -32,6 +32,7 @@ class ShootingProblem {
   std::vector<std::shared_ptr<ActionDataAbstract>> running_datas_;
 
  protected:
+  void allocateData();
   long unsigned int T_;
   Eigen::VectorXd x0_;
 

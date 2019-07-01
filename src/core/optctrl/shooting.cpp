@@ -6,11 +6,7 @@ ShootingProblem::ShootingProblem(const Eigen::Ref<const Eigen::VectorXd>& x0,
                                  std::vector<ActionModelAbstract*>& running_models,
                                  ActionModelAbstract* terminal_model)
     : terminal_model_(terminal_model), running_models_(running_models), T_(running_models.size()), x0_(x0), cost_(0.) {
-  for (unsigned int i = 0; i < running_models_.size(); ++i) {
-    ActionModelAbstract* model = running_models_[i];
-    running_datas_.push_back(model->createData());
-  }
-  terminal_data_ = terminal_model_->createData();
+  allocateData();
 }
 
 ShootingProblem::~ShootingProblem() {}
@@ -64,5 +60,13 @@ void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us, std::vecto
 long unsigned int ShootingProblem::get_T() const { return T_; }
 
 Eigen::VectorXd& ShootingProblem::get_x0() { return x0_; }
+
+void ShootingProblem::allocateData() {
+  for (unsigned int i = 0; i < running_models_.size(); ++i) {
+    ActionModelAbstract* model = running_models_[i];
+    running_datas_.push_back(model->createData());
+  }
+  terminal_data_ = terminal_model_->createData();
+}
 
 }  // namespace crocoddyl
