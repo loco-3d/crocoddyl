@@ -1,43 +1,8 @@
 import crocoddyl
+from utils import StateVectorDerived
 from random import randint
 import numpy as np
 import unittest
-
-
-class StateVectorPyDerived(crocoddyl.StateAbstract):
-    def __init__(self, nx):
-        crocoddyl.StateAbstract.__init__(self, nx, nx)
-
-    def zero(self):
-        return np.matrix(np.zeros(self.nx)).T
-
-    def rand(self):
-        return np.matrix(np.random.rand(self.nx)).T
-
-    def diff(self, x0, x1):
-        dx = x1 - x0
-        return x1 - x0
-
-    def integrate(self, x, dx):
-        return x + dx
-
-    def Jdiff(self, x1, x2, firstsecond='both'):
-        assert (firstsecond in ['first', 'second', 'both'])
-        if firstsecond == 'both':
-            return [self.Jdiff(x1, x2, 'first'), self.Jdiff(x1, x2, 'second')]
-
-        J = np.zeros([self.ndx, self.ndx])
-        if firstsecond == 'first':
-            J[:, :] = -np.eye(self.ndx)
-        elif firstsecond == 'second':
-            J[:, :] = np.eye(self.ndx)
-        return J
-
-    def Jintegrate(self, x, dx, firstsecond='both'):
-        assert (firstsecond in ['first', 'second', 'both'])
-        if firstsecond == 'both':
-            return [self.Jintegrate(x, dx, 'first'), self.Jintegrate(x, dx, 'second')]
-        return np.eye(self.ndx)
 
 
 class StateAbstractTestCase(unittest.TestCase):
@@ -102,7 +67,7 @@ class StateVectorTest(StateAbstractTestCase):
     StateAbstractTestCase.NX = randint(1, 101)
     StateAbstractTestCase.NDX = StateAbstractTestCase.NX
     StateAbstractTestCase.STATE = crocoddyl.StateVector(StateAbstractTestCase.NX)
-    StateAbstractTestCase.STATE_DER = StateVectorPyDerived(StateAbstractTestCase.NX)
+    StateAbstractTestCase.STATE_DER = StateVectorDerived(StateAbstractTestCase.NX)
 
 
 if __name__ == '__main__':
