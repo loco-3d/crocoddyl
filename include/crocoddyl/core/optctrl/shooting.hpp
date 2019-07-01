@@ -26,6 +26,11 @@ class ShootingProblem {
   long unsigned int get_T() const;
   Eigen::VectorXd& get_x0();
 
+  std::vector<ActionModelAbstract*>& get_runningModels();
+  ActionModelAbstract* get_terminalModel();
+  std::vector<std::shared_ptr<ActionDataAbstract>>& get_runningDatas();
+  std::shared_ptr<ActionDataAbstract>& get_terminalData();
+
   ActionModelAbstract* terminal_model_;
   std::shared_ptr<ActionDataAbstract> terminal_data_;
   std::vector<ActionModelAbstract*> running_models_;
