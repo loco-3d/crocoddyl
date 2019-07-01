@@ -6,7 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_CORE_UTILS_CALLBACKS_HPP_
 #define CROCODDYL_CORE_UTILS_CALLBACKS_HPP_
 
@@ -16,7 +15,7 @@
 
 namespace crocoddyl {
 
-enum DDPVerboseLevel { _1=0, _2 };
+enum DDPVerboseLevel { _1 = 0, _2 };
 class CallbackDDPVerbose : public CallbackAbstract {
  public:
   CallbackDDPVerbose(DDPVerboseLevel level = DDPVerboseLevel::_1);

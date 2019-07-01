@@ -6,12 +6,11 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_PINOCCHIO_COSTS_COST_IMPULSE_HPP_
 #define CROCODDYL_PINOCCHIO_COSTS_COST_IMPULSE_HPP_
 
-//TODO: CostModelImpactBase 
-//TODO CostModelImpactCoM CostDataImpactCoM
-//TODO CostModelImpactWholeBody CostDataImpactWholeBody
+// TODO: CostModelImpactBase
+// TODO CostModelImpactCoM CostDataImpactCoM
+// TODO CostModelImpactWholeBody CostDataImpactWholeBody
 
 #endif  // CROCODDYL_PINOCCHIO_COSTS_COST_IMPULSE_HPP_

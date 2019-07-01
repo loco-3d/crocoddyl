@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_PINOCCHIO_ACTIVATION_BASE_HPP_
 #define CROCODDYL_PINOCCHIO_ACTIVATION_BASE_HPP_
 
-//TODO: ActivationModelAbstract ActivationDataAbstract
+// TODO: ActivationModelAbstract ActivationDataAbstract
 
 #endif  // CROCODDYL_PINOCCHIO_ACTIVATION_BASE_HPP_

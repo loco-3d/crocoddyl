@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_PINOCCHIO_STATES_STATE_MULTIBODY_HPP_
 #define CROCODDYL_PINOCCHIO_STATES_STATE_MULTIBODY_HPP_
 
-//TODO: StatePinocchio
+// TODO: StatePinocchio
 
 #endif  // CROCODDYL_PINOCCHIO_STATES_STATE_MULTIBODY_HPP_

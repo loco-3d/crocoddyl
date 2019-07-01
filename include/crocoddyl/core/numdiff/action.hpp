@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_CORE_ACTION_NUMDIFF_HPP_
 #define CROCODDYL_CORE_ACTION_NUMDIFF_HPP_
 
-//TODO: ActionModelNumDiff ActionDataNumDiff
+// TODO: ActionModelNumDiff ActionDataNumDiff
 
 #endif  // CROCODDYL_CORE_ACTION_NUMDIFF_HPP_

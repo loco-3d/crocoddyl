@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_PINOCCHIO_IMPULSE_FWDDYN_HPP_
 #define CROCODDYL_PINOCCHIO_IMPULSE_FWDDYN_HPP_
 
-//TODO: ActionModelImpact ActionDataImpact
+// TODO: ActionModelImpact ActionDataImpact
 
 #endif  // CROCODDYL_PINOCCHIO_IMPULSE_FWDDYN_HPP_

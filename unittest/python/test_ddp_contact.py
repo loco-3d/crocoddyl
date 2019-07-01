@@ -41,16 +41,11 @@ class FF:
         contact6 = ContactModel6D(rmodel, rmodel.getFrameId(contactName), ref=pinocchio.SE3.Identity(), gains=[0., 0.])
         contactModel.addContact(name='contact', contact=contact6)
         costModel = self.costModel = CostModelSum(rmodel, nu=actModel.nu)
-        self.cost1 = CostModelFrameTranslation(rmodel,
-                                               nu=actModel.nu,
-                                               frame=rmodel.getFrameId(opPointName),
-                                               ref=np.array([.5, .4, .3]))
+        self.cost1 = CostModelFrameTranslation(
+            rmodel, nu=actModel.nu, frame=rmodel.getFrameId(opPointName), ref=np.array([.5, .4, .3]))
         stateWeights = np.array([0] * 6 + [0.01] * (rmodel.nv - 6) + [10] * rmodel.nv)
-        self.cost2 = CostModelState(rmodel,
-                                    State,
-                                    ref=State.zero(),
-                                    nu=actModel.nu,
-                                    activation=ActivationModelWeightedQuad(stateWeights**2))
+        self.cost2 = CostModelState(
+            rmodel, State, ref=State.zero(), nu=actModel.nu, activation=ActivationModelWeightedQuad(stateWeights**2))
         self.cost3 = CostModelControl(rmodel, nu=actModel.nu)
         costModel.addCost(name="pos", weight=10, cost=self.cost1)
         costModel.addCost(name="regx", weight=0.1, cost=self.cost2)
@@ -85,10 +80,8 @@ class Fix:
             if j.shortname() != 'JointModelFreeFlyer':
                 rmodel.armature[j.idx_v:j.idx_v + j.nv] = 1
         State = self.State = StatePinocchio(rmodel)
-        self.cost1 = CostModelFrameTranslation(rmodel,
-                                               nu=rmodel.nv,
-                                               frame=rmodel.getFrameId(opPointName),
-                                               ref=np.array([.5, .4, .3]))
+        self.cost1 = CostModelFrameTranslation(
+            rmodel, nu=rmodel.nv, frame=rmodel.getFrameId(opPointName), ref=np.array([.5, .4, .3]))
         self.cost2 = CostModelState(rmodel, State, ref=State.zero(), nu=rmodel.nv)
         self.cost3 = CostModelControl(rmodel, nu=rmodel.nv)
 

@@ -6,55 +6,49 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_CORE_ACTIONS_LQR_HPP_
 #define CROCODDYL_CORE_ACTIONS_LQR_HPP_
 
 #include <crocoddyl/core/action-base.hpp>
 #include <crocoddyl/core/states/state-euclidean.hpp>
 
-//TODO: DifferentialActionModelLQR DifferentialActionDataLQR
+// TODO: DifferentialActionModelLQR DifferentialActionDataLQR
 
 namespace crocoddyl {
 
 class ActionModelLQR : public ActionModelAbstract {
  public:
-  ActionModelLQR(const unsigned int& nx,
-                 const unsigned int& nu,
-                 bool driftFree=true);
+  ActionModelLQR(const unsigned int& nx, const unsigned int& nu, bool driftFree = true);
   ~ActionModelLQR();
 
-  void calc(std::shared_ptr<ActionDataAbstract>& data,
-            const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) override;
-  void calcDiff(std::shared_ptr<ActionDataAbstract>& data,
-                const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u,
-                const bool& recalc=true) override;
+  void calcDiff(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) override;
   std::shared_ptr<ActionDataAbstract> createData() override;
 
-  Eigen::MatrixXd Fx;
-  Eigen::MatrixXd Fu;
-  Eigen::VectorXd f0;
-  Eigen::MatrixXd Lxx;
-  Eigen::MatrixXd Lxu;
-  Eigen::MatrixXd Luu;
-  Eigen::VectorXd lx;
-  Eigen::VectorXd lu;
+  Eigen::MatrixXd Fx_;
+  Eigen::MatrixXd Fu_;
+  Eigen::VectorXd f0_;
+  Eigen::MatrixXd Lxx_;
+  Eigen::MatrixXd Lxu_;
+  Eigen::MatrixXd Luu_;
+  Eigen::VectorXd lx_;
+  Eigen::VectorXd lu_;
 
  private:
-  bool driftFree;
+  bool drift_free_;
 };
 
 struct ActionDataLQR : public ActionDataAbstract {
-  template<typename Model>
-  ActionDataLQR(Model *const model) : ActionDataAbstract(model) {
+  template <typename Model>
+  ActionDataLQR(Model* const model) : ActionDataAbstract(model) {
     // Setting the linear model and quadratic cost here because they are constant
-    Fx = model->Fx;
-    Fu = model->Fu;
-    Lxx = model->Lxx;
-    Luu = model->Luu;
-    Lxu = model->Lxu;
+    Fx = model->Fx_;
+    Fu = model->Fu_;
+    Lxx = model->Lxx_;
+    Luu = model->Luu_;
+    Lxu = model->Lxu_;
   }
   ~ActionDataLQR() {}
 };

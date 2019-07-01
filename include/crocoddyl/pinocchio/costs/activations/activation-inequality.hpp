@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_PINOCCHIO_COSTS_ACTIVATIONS_ACTIVATION_INEQUALITY_HPP_
 #define CROCODDYL_PINOCCHIO_COSTS_ACTIVATIONS_ACTIVATION_INEQUALITY_HPP_
 
-//TODO: ActivationModelInequality ActivationDataInequality
+// TODO: ActivationModelInequality ActivationDataInequality
 
 #endif  // CROCODDYL_PINOCCHIO_COSTS_ACTIVATIONS_ACTIVATION_INEQUALITY_HPP_

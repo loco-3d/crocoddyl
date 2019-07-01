@@ -15,15 +15,13 @@
 
 using namespace boost::unit_test;
 
-void test_construct_data(crocoddyl::ActionModelAbstract& model)
-{
+void test_construct_data(crocoddyl::ActionModelAbstract& model) {
   std::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
 }
 
 //____________________________________________________________________________//
 
-void test_calc_returns_state(crocoddyl::ActionModelAbstract& model)
-{
+void test_calc_returns_state(crocoddyl::ActionModelAbstract& model) {
   // create the corresponding data object
   std::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
 
@@ -39,8 +37,7 @@ void test_calc_returns_state(crocoddyl::ActionModelAbstract& model)
 
 //____________________________________________________________________________//
 
-void test_calc_returns_a_cost(crocoddyl::ActionModelAbstract& model)
-{
+void test_calc_returns_a_cost(crocoddyl::ActionModelAbstract& model) {
   // create the corresponding data object and set the cost to nan
   std::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
   data->cost = std::nan("");
@@ -56,9 +53,7 @@ void test_calc_returns_a_cost(crocoddyl::ActionModelAbstract& model)
 
 //____________________________________________________________________________//
 
-void test_partial_derivatives_against_numdiff(
-  crocoddyl::ActionModelAbstract& model)
-{
+void test_partial_derivatives_against_numdiff(crocoddyl::ActionModelAbstract& model) {
   // create the corresponding data object and set the cost to nan
   std::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
 
@@ -89,30 +84,24 @@ void test_partial_derivatives_against_numdiff(
 
 //____________________________________________________________________________//
 
-void register_action_model_lqr_unit_tests()
-{
-  int nx = 80 ;
-  int nu = 40 ;
+void register_action_model_lqr_unit_tests() {
+  int nx = 80;
+  int nu = 40;
   bool driftfree = true;
 
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(
-    &test_construct_data, crocoddyl::ActionModelLQR(nx, nu, driftfree)
-  )));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(
-    &test_calc_returns_state, crocoddyl::ActionModelLQR(nx, nu, driftfree)
-  )));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(
-    &test_calc_returns_a_cost, crocoddyl::ActionModelLQR(nx, nu, driftfree)
-  )));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(
-    &test_partial_derivatives_against_numdiff, crocoddyl::ActionModelLQR(nx, nu, driftfree)
-  )));
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(boost::bind(&test_construct_data, crocoddyl::ActionModelLQR(nx, nu, driftfree))));
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(boost::bind(&test_calc_returns_state, crocoddyl::ActionModelLQR(nx, nu, driftfree))));
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, crocoddyl::ActionModelLQR(nx, nu, driftfree))));
+  framework::master_test_suite().add(BOOST_TEST_CASE(
+      boost::bind(&test_partial_derivatives_against_numdiff, crocoddyl::ActionModelLQR(nx, nu, driftfree))));
 }
 
 //____________________________________________________________________________//
 
-bool init_function()
-{
+bool init_function() {
   // Here we test the state_vector
   register_action_model_lqr_unit_tests();
   return true;
@@ -120,7 +109,4 @@ bool init_function()
 
 //____________________________________________________________________________//
 
-int main( int argc, char* argv[] )
-{
-    return ::boost::unit_test::unit_test_main( &init_function, argc, argv );
-}
+int main(int argc, char* argv[]) { return ::boost::unit_test::unit_test_main(&init_function, argc, argv); }

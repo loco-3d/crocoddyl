@@ -6,49 +6,37 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_
 #define CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_
 
 #include <crocoddyl/core/action-base.hpp>
-//TODO: ActionModelUnicycleVar
+#include <crocoddyl/core/states/state-euclidean.hpp>
+// TODO: ActionModelUnicycleVar
 
 namespace crocoddyl {
 
 class ActionModelUnicycle : public ActionModelAbstract {
  public:
-  ActionModelUnicycle(StateAbstract *const state);
+  ActionModelUnicycle();
   ~ActionModelUnicycle();
 
-  void calc(std::shared_ptr<ActionDataAbstract>& data,
-            const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) override;
-  void calcDiff(std::shared_ptr<ActionDataAbstract>& data,
-                const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u,
-                const bool& recalc=true) override;
+  void calcDiff(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) override;
   std::shared_ptr<ActionDataAbstract> createData() override;
 
-  unsigned int get_ncost() const;
-
  private:
-  Eigen::Matrix<double, 2, 1> costWeights;
-  unsigned int ncost;
-  double dt;
+  Eigen::Matrix<double, 2, 1> cost_weights_;
+  double dt_;
 };
 
-struct DataUnicycle : public ActionDataAbstract {
+struct ActionDataUnicycle : public ActionDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  template<typename Model>
-  DataUnicycle(Model *const model) : ActionDataAbstract(model) {
-    const unsigned int& ncost = model->get_ncost();
-    costResiduals = Eigen::VectorXd::Zero(ncost);
-  }
-  ~DataUnicycle() {}
-  static const unsigned int ncost = 5;
-
-  Eigen::Matrix<double, ncost, 1> costResiduals;
+  template <typename Model>
+  ActionDataUnicycle(Model* const model) : ActionDataAbstract(model) {}
+  ~ActionDataUnicycle() {}
 };
 
 }  // namespace crocoddyl

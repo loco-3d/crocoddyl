@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_CORE_INTEGRATOR_EULER_HPP_
 #define CROCODDYL_CORE_INTEGRATOR_EULER_HPP_
 
-//TODO: IntegratedActionModelEuler IntegratedActionDataEuler
+// TODO: IntegratedActionModelEuler IntegratedActionDataEuler
 
 #endif  // CROCODDYL_CORE_INTEGRATOR_EULER_HPP_

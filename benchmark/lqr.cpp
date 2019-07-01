@@ -5,13 +5,12 @@
 
 #include <ctime>
 
-
 int main() {
   unsigned int NX = 37;
   unsigned int NU = 12;
   bool CALLBACKS = false;
-  unsigned int N = 100; // number of nodes
-  unsigned int T = 5e3; // number of trials
+  unsigned int N = 100;  // number of nodes
+  unsigned int T = 5e3;  // number of trials
   unsigned int MAXITER = 1;
   using namespace crocoddyl;
 
@@ -48,10 +47,10 @@ int main() {
     c_start = std::clock();
     ddp.solve(xs, us, MAXITER);
     c_end = std::clock();
-    duration.push_back(1e3 * (double) (c_end - c_start) / CLOCKS_PER_SEC);
+    duration.push_back(1e3 * (double)(c_end - c_start) / CLOCKS_PER_SEC);
   }
 
-  double avrg_duration=0., min_duration=std::numeric_limits<double>::max(), max_duration=0.;
+  double avrg_duration = 0., min_duration = std::numeric_limits<double>::max(), max_duration = 0.;
   for (unsigned int i = 0; i < T; ++i) {
     const double& dt = duration[i];
     avrg_duration += dt;

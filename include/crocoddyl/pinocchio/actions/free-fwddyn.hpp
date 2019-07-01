@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_PINOCCHIO_FREE_FWDDYN_HPP_
 #define CROCODDYL_PINOCCHIO_FREE_FWDDYN_HPP_
 
-//TODO: DifferentialActionModelFullyActuated DifferentialActionDataFullyActuacted
+// TODO: DifferentialActionModelFullyActuated DifferentialActionDataFullyActuacted
 
 #endif  // CROCODDYL_PINOCCHIO_FREE_FWDDYN_HPP_

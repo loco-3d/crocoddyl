@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_PINOCCHIO_COSTS_ACTIVATIONS_ACTIVATION_SMOOTH_ABS_HPP_
 #define CROCODDYL_PINOCCHIO_COSTS_ACTIVATIONS_ACTIVATION_SMOOTH_ABS_HPP_
 
-//TODO: ActivationModelSmoothAbs ActivationDataSmoothAbs
+// TODO: ActivationModelSmoothAbs ActivationDataSmoothAbs
 
 #endif  // CROCODDYL_PINOCCHIO_COSTS_ACTIVATIONS_ACTIVATION_SMOOTH_ABS_HPP_

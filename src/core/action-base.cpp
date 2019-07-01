@@ -2,42 +2,39 @@
 
 namespace crocoddyl {
 
-//struct ActionDataAbstract; // forward declaration
+// struct ActionDataAbstract; // forward declaration
 
-ActionModelAbstract::ActionModelAbstract(StateAbstract *const state,
-                                         const unsigned int& nu) : nx(state->get_nx()),
-    ndx(state->get_ndx()), nu(nu), state(state), unone(Eigen::VectorXd::Zero(nu)) {
-  assert(nx != 0);
-  assert(ndx != 0);
-  assert(nu != 0);
+ActionModelAbstract::ActionModelAbstract(StateAbstract* const state, const unsigned int& nu, const unsigned int& ncost)
+    : nx_(state->get_nx()),
+      ndx_(state->get_ndx()),
+      nu_(nu),
+      ncost_(ncost),
+      state_(state),
+      unone_(Eigen::VectorXd::Zero(nu)) {
+  assert(nx_ != 0);
+  assert(ndx_ != 0);
+  assert(nu_ != 0);
 }
 
 ActionModelAbstract::~ActionModelAbstract() {}
 
-void ActionModelAbstract::calc(std::shared_ptr<ActionDataAbstract>& data,
-                               const Eigen::Ref<const Eigen::VectorXd>& x) {
-  calc(data, x, unone);
+void ActionModelAbstract::calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
+  calc(data, x, unone_);
 }
 
 void ActionModelAbstract::calcDiff(std::shared_ptr<ActionDataAbstract>& data,
                                    const Eigen::Ref<const Eigen::VectorXd>& x) {
-  calcDiff(data, x, unone);
+  calcDiff(data, x, unone_);
 }
 
-unsigned int ActionModelAbstract::get_nx() const {
-  return nx;
-}
+unsigned int ActionModelAbstract::get_nx() const { return nx_; }
 
-unsigned int ActionModelAbstract::get_ndx() const {
-  return ndx;
-}
+unsigned int ActionModelAbstract::get_ndx() const { return ndx_; }
 
-unsigned int ActionModelAbstract::get_nu() const {
-  return nu;
-}
+unsigned int ActionModelAbstract::get_nu() const { return nu_; }
 
-StateAbstract* ActionModelAbstract::get_state() const {
-  return state;
-}
+unsigned int ActionModelAbstract::get_ncost() const { return ncost_; }
+
+StateAbstract* ActionModelAbstract::get_state() const { return state_; }
 
 }  // namespace crocoddyl

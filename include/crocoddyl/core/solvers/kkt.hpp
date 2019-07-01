@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_CORE_SOLVERS_KKT_HPP_
 #define CROCODDYL_CORE_SOLVERS_KKT_HPP_
 
-//TODO: SolverKKT
+// TODO: SolverKKT
 
 #endif  // CROCODDYL_CORE_SOLVERS_KKT_HPP_

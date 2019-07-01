@@ -9,15 +9,11 @@
 #include <boost/test/unit_test.hpp>
 // #include "crocoddyl/core/"
 
-BOOST_AUTO_TEST_SUITE ( BOOST_TEST_MODULE )
+BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
-BOOST_AUTO_TEST_CASE(test_activation)
-{
-
-}
+BOOST_AUTO_TEST_CASE(test_activation) {}
 
 BOOST_AUTO_TEST_SUITE_END()
-
 
 // import numpy as np
 // from crocoddyl import ActivationModelQuad, ActivationModelSmoothAbs, ActivationModelWeightedQuad
@@ -45,14 +41,11 @@ BOOST_AUTO_TEST_SUITE_END()
 // # --- Dim 1 ----------------------
 // h = np.sqrt(2 * EPS)
 
-
 // def df(am, ad, x):
 //     return (am.calc(ad, x + h) - am.calc(ad, x)) / h
 
-
 // def ddf(am, ad, x):
 //     return (am.calcDiff(ad, x + h)[0] - am.calcDiff(ad, x)[0]) / h
-
 
 // am = ActivationModelQuad()
 // ad = am.createData()
@@ -81,7 +74,6 @@ BOOST_AUTO_TEST_SUITE_END()
 // # - ------------------------------
 // # --- Dim N ----------------------
 
-
 // def df(am, ad, x):
 //     dx = x * 0
 //     J = np.zeros([len(x), len(x)])
@@ -90,7 +82,6 @@ BOOST_AUTO_TEST_SUITE_END()
 //         J[:, i] = (am.calc(ad, x + dx) - am.calc(ad, x)) / h
 //         dx[i] = 0
 //     return J
-
 
 // def ddf(am, ad, x):
 //     dx = x * 0
@@ -101,7 +92,6 @@ BOOST_AUTO_TEST_SUITE_END()
 //         dx[i] = 0
 //     return J
 //     return
-
 
 // x = np.random.rand(3)
 

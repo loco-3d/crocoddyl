@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_CORE_SOLVERS_BOX_DDP_HPP_
 #define CROCODDYL_CORE_SOLVERS_BOX_DDP_HPP_
 
-//TODO: SolverBoxDDP
+// TODO: SolverBoxDDP
 
 #endif  // CROCODDYL_CORE_SOLVERS_BOX_DDP_HPP_

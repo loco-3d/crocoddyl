@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_PINOCCHIO_CONTACTS_MULTIPLE_CONTACTS_HPP_
 #define CROCODDYL_PINOCCHIO_CONTACTS_MULTIPLE_CONTACTS_HPP_
 
-//TODO: ContactModelMultiple ContactDataMultiple
+// TODO: ContactModelMultiple ContactDataMultiple
 
 #endif  // CROCODDYL_PINOCCHIO_CONTACTS_MULTIPLE_CONTACTS_HPP_

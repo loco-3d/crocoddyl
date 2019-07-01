@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <boost/python.hpp>
-#include <crocoddyl/python/core.hpp>
+#include <python/crocoddyl/core.hpp>
 #include <eigenpy/eigenpy.hpp>
 
 namespace crocoddyl {

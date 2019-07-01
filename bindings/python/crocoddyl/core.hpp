@@ -6,23 +6,27 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_PYTHON_CORE_HPP_
-#define CROCODDYL_PYTHON_CORE_HPP_
+#ifndef PYTHON_CROCODDYL_CORE_HPP_
+#define PYTHON_CROCODDYL_CORE_HPP_
 
-#include <crocoddyl/python/core/state-base.hpp>
-//#include <crocoddyl/python/core/action-base.hpp>
-#include <crocoddyl/python/core/states/state-euclidean.hpp>
+#include <python/crocoddyl/core/state-base.hpp>
+#include <python/crocoddyl/core/action-base.hpp>
+#include <python/crocoddyl/core/states/state-euclidean.hpp>
+#include <python/crocoddyl/core/actions/unicycle.hpp>
+#include <python/crocoddyl/core/actions/lqr.hpp>
 
 namespace crocoddyl {
 namespace python {
 
 void exposeCore() {
   exposeStateAbstract();
+  exposeActionAbstract();
   exposeStateEuclidean();
-//  exposeActionModelAbstract();
+  exposeActionUnicycle();
+  exposeActionLQR();
 }
 
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_PYTHON_CORE_HPP_
+#endif  // PYTHON_CROCODDYL_CORE_HPP_

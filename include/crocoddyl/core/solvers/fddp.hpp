@@ -6,10 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef CROCODDYL_CORE_SOLVERS_FDDP_HPP_
 #define CROCODDYL_CORE_SOLVERS_FDDP_HPP_
 
-//TODO: SolverFDDP
+// TODO: SolverFDDP
 
 #endif  // CROCODDYL_CORE_SOLVERS_FDDP_HPP_

@@ -236,11 +236,12 @@ class SimpleBipedGaitProblem:
                 costModel.addCost("footTrack_" + str(i), footTrack, 1e4)
 
         stateWeights = np.array([0] * 3 + [500.] * 3 + [0.01] * (self.rmodel.nv - 6) + [10] * self.rmodel.nv)
-        stateReg = CostModelState(self.rmodel,
-                                  self.state,
-                                  self.rmodel.defaultState,
-                                  actModel.nu,
-                                  activation=ActivationModelWeightedQuad(stateWeights**2))
+        stateReg = CostModelState(
+            self.rmodel,
+            self.state,
+            self.rmodel.defaultState,
+            actModel.nu,
+            activation=ActivationModelWeightedQuad(stateWeights**2))
         ctrlReg = CostModelControl(self.rmodel, actModel.nu)
         costModel.addCost("stateReg", stateReg, 1e-1)
         costModel.addCost("ctrlReg", ctrlReg, 1e-3)
@@ -316,13 +317,14 @@ for i, phase in enumerate(GAITPHASES):
 
     # Solving the problem with the DDP solver
     ddp[i].th_stop = 1e-9
-    ddp[i].solve(maxiter=1000,
-                 regInit=.1,
-                 init_xs=[rmodel.defaultState] * len(ddp[i].models()),
-                 init_us=[
-                     m.differential.quasiStatic(d.differential, rmodel.defaultState)
-                     for m, d in zip(ddp[i].models(), ddp[i].datas())[:-1]
-                 ])
+    ddp[i].solve(
+        maxiter=1000,
+        regInit=.1,
+        init_xs=[rmodel.defaultState] * len(ddp[i].models()),
+        init_us=[
+            m.differential.quasiStatic(d.differential, rmodel.defaultState)
+            for m, d in zip(ddp[i].models(), ddp[i].datas())[:-1]
+        ])
 
     # Defining the final state as initial one for the next phase
     x0 = ddp[i].xs[-1]

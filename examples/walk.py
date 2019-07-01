@@ -68,13 +68,11 @@ def runningModel(contactIds, effectors, com=None, integrationStep=1e-2):
     # Creating the cost model for a contact phase
     costModel = CostModelSum(rmodel, actModel.nu)
     wx = np.array([0] * 6 + [.1] * (rmodel.nv - 6) + [10] * rmodel.nv)
-    costModel.addCost('xreg',
-                      weight=1e-1,
-                      cost=CostModelState(rmodel,
-                                          State,
-                                          ref=rmodel.defaultState,
-                                          nu=actModel.nu,
-                                          activation=ActivationModelWeightedQuad(wx)))
+    costModel.addCost(
+        'xreg',
+        weight=1e-1,
+        cost=CostModelState(
+            rmodel, State, ref=rmodel.defaultState, nu=actModel.nu, activation=ActivationModelWeightedQuad(wx)))
     costModel.addCost('ureg', weight=1e-4, cost=CostModelControl(rmodel, nu=actModel.nu))
     for fid, ref in effectors.items():
         costModel.addCost("track%d" % fid, weight=100., cost=CostModelFramePlacement(rmodel, fid, ref, actModel.nu))
@@ -105,25 +103,19 @@ def impactModel(contactIds, effectors):
     # Creating the cost model for a contact phase
     costModel = CostModelSum(rmodel, nu=0)
     wx = np.array([0] * 6 + [.1] * (rmodel.nv - 6) + [10] * rmodel.nv)
-    costModel.addCost('xreg',
-                      weight=1e-1,
-                      cost=CostModelState(rmodel,
-                                          State,
-                                          ref=rmodel.defaultState,
-                                          nu=0,
-                                          activation=ActivationModelWeightedQuad(wx)))
+    costModel.addCost(
+        'xreg',
+        weight=1e-1,
+        cost=CostModelState(rmodel, State, ref=rmodel.defaultState, nu=0, activation=ActivationModelWeightedQuad(wx)))
     # costModel.addCost('com',weight=1.,
     #                   cost=CostModelImpactCoM(rmodel,
     #                                           activation=ActivationModelWeightedQuad(m2a([.1,.1,3.]))))
     for fid, ref in effectors.items():
         wp = np.array([1.] * 6)
-        costModel.addCost("track%d" % fid,
-                          weight=1e5,
-                          cost=CostModelFramePlacement(rmodel,
-                                                       fid,
-                                                       ref,
-                                                       nu=0,
-                                                       activation=ActivationModelWeightedQuad(wp)))
+        costModel.addCost(
+            "track%d" % fid,
+            weight=1e5,
+            cost=CostModelFramePlacement(rmodel, fid, ref, nu=0, activation=ActivationModelWeightedQuad(wp)))
         # costModel.addCost("vel%d"%fid, weight=0.,
         #                   cost = CostModelFrameVelocity(rmodel,fid,nu=0))
 
@@ -202,8 +194,9 @@ dimp1 = ddp.datas()[imp1]
 dimp2 = ddp.datas()[imp2]
 
 print("*** SOLVE ***")
-fddp.solve(maxiter=50,
-           # ,init_xs=xs0
-           # ,init_xs=xs1
-           # ,init_us=us0
-           )
+fddp.solve(
+    maxiter=50,
+    # ,init_xs=xs0
+    # ,init_xs=xs1
+    # ,init_us=us0
+)
