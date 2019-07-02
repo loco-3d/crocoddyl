@@ -52,33 +52,33 @@ class UnicycleDerived(crocoddyl.ActionModelAbstract):
         self.dt = .1
         self.costWeights = [10., 1.]
 
-    def calc(model, data, x, u=None):
+    def calc(self, data, x, u=None):
         if u is None:
-            u = model.unone
+            u = self.unone
         v, w = m2a(u)
         px, py, theta = m2a(x)
         c, s = np.cos(theta), np.sin(theta)
         # Rollout the dynamics
-        data.xnext = a2m([px + c * v * model.dt, py + s * v * model.dt, theta + w * model.dt])
+        data.xnext = a2m([px + c * v * self.dt, py + s * v * self.dt, theta + w * self.dt])
         # Compute the cost value
-        data.costResiduals = np.vstack([model.costWeights[0] * x, model.costWeights[1] * u])
+        data.costResiduals = np.vstack([self.costWeights[0] * x, self.costWeights[1] * u])
         data.cost = .5 * sum(m2a(data.costResiduals)**2)
         return data.xnext, data.cost
 
-    def calcDiff(model, data, x, u=None, recalc=True):
+    def calcDiff(self, data, x, u=None, recalc=True):
         if u is None:
-            u = model.unone
-        xnext, cost = model.calc(data, x, u)
+            u = self.unone
+        xnext, cost = self.calc(data, x, u)
         v, w = m2a(u)
         px, py, theta = m2a(x)
         # Cost derivatives
-        data.Lx = a2m(m2a(x) * ([model.costWeights[0]**2] * model.nx))
-        data.Lu = a2m(m2a(u) * ([model.costWeights[1]**2] * model.nu))
-        data.Lxx = np.diag([model.costWeights[0]**2] * model.nx)
-        data.Luu = np.diag([model.costWeights[1]**2] * model.nu)
+        data.Lx = a2m(m2a(x) * ([self.costWeights[0]**2] * self.nx))
+        data.Lu = a2m(m2a(u) * ([self.costWeights[1]**2] * self.nu))
+        data.Lxx = np.diag([self.costWeights[0]**2] * self.nx)
+        data.Luu = np.diag([self.costWeights[1]**2] * self.nu)
         # Dynamic derivatives
-        c, s, dt = np.cos(theta), np.sin(theta), model.dt
+        c, s, dt = np.cos(theta), np.sin(theta), self.dt
         v, w = m2a(u)
         data.Fx = np.matrix([[1, 0, -s * v * dt], [0, 1, c * v * dt], [0, 0, 1]])
-        data.Fu = np.matrix([[c * model.dt, 0], [s * model.dt, 0], [0, model.dt]])
+        data.Fu = np.matrix([[c * self.dt, 0], [s * self.dt, 0], [0, self.dt]])
         return xnext, cost
