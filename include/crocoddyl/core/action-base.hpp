@@ -69,18 +69,18 @@ struct ActionDataAbstract {
     Ru = Eigen::MatrixXd::Zero(ncost, nu);
   }
 
-  const double& get_cost() { return cost; }
-  const Eigen::VectorXd& get_xnext() { return xnext; }
-  const Eigen::VectorXd& get_Lx() { return Lx; }
-  const Eigen::VectorXd& get_Lu() { return Lu; }
-  const Eigen::MatrixXd& get_Lxx() { return Lxx; }
-  const Eigen::MatrixXd& get_Lxu() { return Lxu; }
-  const Eigen::MatrixXd& get_Luu() { return Luu; }
-  const Eigen::MatrixXd& get_Fx() { return Fx; }
-  const Eigen::MatrixXd& get_Fu() { return Fu; }
-  const Eigen::VectorXd& get_r() { return r; }
-  const Eigen::MatrixXd& get_Rx() { return Rx; }
-  const Eigen::MatrixXd& get_Ru() { return Ru; }
+  const double& get_cost() const { return cost; }
+  const Eigen::VectorXd& get_xnext() const { return xnext; }
+  const Eigen::VectorXd& get_Lx() const { return Lx; }
+  const Eigen::VectorXd& get_Lu() const { return Lu; }
+  const Eigen::MatrixXd& get_Lxx() const { return Lxx; }
+  const Eigen::MatrixXd& get_Lxu() const { return Lxu; }
+  const Eigen::MatrixXd& get_Luu() const { return Luu; }
+  const Eigen::MatrixXd& get_Fx() const { return Fx; }
+  const Eigen::MatrixXd& get_Fu() const { return Fu; }
+  const Eigen::VectorXd& get_r() const { return r; }
+  const Eigen::MatrixXd& get_Rx() const { return Rx; }
+  const Eigen::MatrixXd& get_Ru() const { return Ru; }
 
   double cost;
   Eigen::VectorXd xnext;

@@ -25,7 +25,7 @@ class ShootingProblem {
   void rollout(const std::vector<Eigen::VectorXd>& us, std::vector<Eigen::VectorXd>& xs);
 
   long unsigned int get_T() const;
-  Eigen::VectorXd& get_x0();
+  const Eigen::VectorXd& get_x0() const;
 
   std::vector<ActionModelAbstract*>& get_runningModels();
   ActionModelAbstract* get_terminalModel();

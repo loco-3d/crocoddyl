@@ -61,7 +61,7 @@ void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us, std::vecto
 
 long unsigned int ShootingProblem::get_T() const { return T_; }
 
-Eigen::VectorXd& ShootingProblem::get_x0() { return x0_; }
+const Eigen::VectorXd& ShootingProblem::get_x0() const { return x0_; }
 
 void ShootingProblem::allocateData() {
   for (unsigned int i = 0; i < running_models_.size(); ++i) {
