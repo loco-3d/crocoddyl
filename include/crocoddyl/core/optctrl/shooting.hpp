@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_
-#define CROCODDYL_CORE_OPTCtRL_SHOOTING_HPP_
+#define CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_
 
 #include <crocoddyl/core/action-base.hpp>
 
