@@ -14,7 +14,19 @@ SolverAbstract::SolverAbstract(ShootingProblem& problem)
       dVexp_(0.),
       th_acceptstep_(0.1),
       th_stop_(1e-9),
-      iter_(0) {}
+      iter_(0) {
+  // Allocate common data
+  const long unsigned int& T = problem_.get_T();
+  xs_.resize(T + 1);
+  us_.resize(T);
+  for (long unsigned int t = 0; t < T; ++t) {
+    ActionModelAbstract* model = problem_.running_models_[t];
+    const int& nu = model->get_nu();
+    xs_[t] = model->get_state()->zero();
+    us_[t] = Eigen::VectorXd::Zero(nu);
+  }
+  xs_.back() = problem_.terminal_model_->get_state()->zero();
+}
 
 SolverAbstract::~SolverAbstract() {}
 

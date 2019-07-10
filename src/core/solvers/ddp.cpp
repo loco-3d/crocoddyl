@@ -266,8 +266,6 @@ void SolverDDP::allocateData() {
   k_.resize(T);
   gaps_.resize(T + 1);
 
-  xs_.resize(T + 1);
-  us_.resize(T);
   xs_try_.resize(T + 1);
   us_try_.resize(T);
   dx_.resize(T);
@@ -289,8 +287,6 @@ void SolverDDP::allocateData() {
     k_[t] = Eigen::VectorXd::Zero(nu);
     gaps_[t] = Eigen::VectorXd::Zero(ndx);
 
-    xs_[t] = model->get_state()->zero();
-    us_[t] = Eigen::VectorXd::Zero(nu);
     if (t == 0) {
       xs_try_[t] = problem_.get_x0();
     } else {
@@ -302,7 +298,6 @@ void SolverDDP::allocateData() {
   const int& ndx = problem_.terminal_model_->get_ndx();
   Vxx_.back() = Eigen::MatrixXd::Zero(ndx, ndx);
   Vx_.back() = Eigen::VectorXd::Zero(ndx);
-  xs_.back() = problem_.terminal_model_->get_state()->zero();
   xs_try_.back() = problem_.terminal_model_->get_state()->zero();
   gaps_.back() = Eigen::VectorXd::Zero(ndx);
 }
