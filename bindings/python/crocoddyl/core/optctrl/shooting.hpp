@@ -18,12 +18,12 @@ namespace python {
 
 namespace bp = boost::python;
 
-class ShootingProblem_wrap : public ShootingProblem {
+class ShootingProblem_wrap : public ShootingProblem, public bp::wrapper<ShootingProblem> {
  public:
   using ShootingProblem::T_;
 
   ShootingProblem_wrap(const Eigen::VectorXd& x0, const bp::list& running_models,
-                       ActionModelAbstract* terminal_model) : ShootingProblem() {
+                       ActionModelAbstract* terminal_model) : ShootingProblem(), bp::wrapper<ShootingProblem>() {
     x0_ = x0;
     T_ = len(running_models);
     running_models_ = python_list_to_std_vector<ActionModelAbstract*>(running_models);

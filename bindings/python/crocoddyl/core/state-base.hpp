@@ -10,7 +10,6 @@
 #define PYTHON_CROCODDYL_CORE_STATE_BASE_HPP_
 
 #include <crocoddyl/core/state-base.hpp>
-#include <iostream>
 
 namespace crocoddyl {
 namespace python {
