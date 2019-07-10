@@ -28,7 +28,7 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
       : ActionModelAbstract(state, nu, ncost), bp::wrapper<ActionModelAbstract>() {}
 
   void calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-            const Eigen::Ref<const Eigen::VectorXd>& u) {
+            const Eigen::Ref<const Eigen::VectorXd>& u) override {
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
   void calc_wrap(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
@@ -36,12 +36,12 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
   }
 
   void calcDiff(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
+                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) override {
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x,
                           (Eigen::VectorXd)u, recalc);
   }
 
-  std::shared_ptr<ActionDataAbstract> createData() { return std::make_shared<ActionDataAbstract>(this); }
+  std::shared_ptr<ActionDataAbstract> createData() override { return std::make_shared<ActionDataAbstract>(this); }
 };
 
 
