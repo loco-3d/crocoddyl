@@ -48,7 +48,8 @@ class StateVectorDerived(crocoddyl.StateAbstract):
 
 class UnicycleDerived(crocoddyl.ActionModelAbstract):
     def __init__(self):
-        crocoddyl.ActionModelAbstract.__init__(self, crocoddyl.StateVector(3), 2, 5)
+        self.state = crocoddyl.StateVector(3)
+        crocoddyl.ActionModelAbstract.__init__(self, self.state, 2, 5)
         self.dt = .1
         self.costWeights = [10., 1.]
 
