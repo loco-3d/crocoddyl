@@ -32,6 +32,8 @@ class SolverAbstract {
 
   void setCallbacks(std::vector<CallbackAbstract*>& callbacks);
 
+  const std::vector<Eigen::VectorXd>& get_xs() const;
+  const std::vector<Eigen::VectorXd>& get_us() const;
   const bool& get_isFeasible() const;
   const unsigned int& get_iter() const;
   const double& get_cost() const;

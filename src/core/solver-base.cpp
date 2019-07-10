@@ -58,6 +58,10 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
 
 void SolverAbstract::setCallbacks(std::vector<CallbackAbstract*>& callbacks) { callbacks_ = callbacks; }
 
+const std::vector<Eigen::VectorXd>& SolverAbstract::get_xs() const { return xs_; }
+
+const std::vector<Eigen::VectorXd>& SolverAbstract::get_us() const { return us_; }
+
 const bool& SolverAbstract::get_isFeasible() const { return is_feasible_; }
 
 const unsigned int& SolverAbstract::get_iter() const { return iter_; }
