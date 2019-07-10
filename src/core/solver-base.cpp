@@ -19,13 +19,21 @@ SolverAbstract::SolverAbstract(ShootingProblem& problem)
   const long unsigned int& T = problem_.get_T();
   xs_.resize(T + 1);
   us_.resize(T);
+  models_.resize(T + 1);
+  datas_.resize(T + 1);
   for (long unsigned int t = 0; t < T; ++t) {
     ActionModelAbstract* model = problem_.running_models_[t];
+    std::shared_ptr<ActionDataAbstract>& data = problem_.running_datas_[t];
     const int& nu = model->get_nu();
+
     xs_[t] = model->get_state()->zero();
     us_[t] = Eigen::VectorXd::Zero(nu);
+    models_[t] = model;
+    datas_[t] = data;
   }
   xs_.back() = problem_.terminal_model_->get_state()->zero();
+  models_.back() = problem_.terminal_model_;
+  datas_.back() = problem_.terminal_data_;
 }
 
 SolverAbstract::~SolverAbstract() {}
@@ -57,6 +65,10 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
 }
 
 void SolverAbstract::setCallbacks(std::vector<CallbackAbstract*>& callbacks) { callbacks_ = callbacks; }
+
+const std::vector<ActionModelAbstract*>& SolverAbstract::models() const { return models_; }
+
+const std::vector<std::shared_ptr<ActionDataAbstract>>& SolverAbstract::datas() const { return datas_; }
 
 const std::vector<Eigen::VectorXd>& SolverAbstract::get_xs() const { return xs_; }
 
