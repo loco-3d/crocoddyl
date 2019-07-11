@@ -96,8 +96,8 @@ These quantities are computed along a given pair of trajectories xs
 Rollout the dynamics give a sequence of control commands
 :param us: time-discrete control sequence)")
       .add_property("T", &ShootingProblem_wrap::T_, "number of nodes")
-      .def("runningModels", &ShootingProblem_wrap::get_runningModels_wrap, "running models")
-      .def("terminalModel", &ShootingProblem_wrap::get_terminalModel, bp::return_internal_reference<>(), "terminal model")
+      .add_property("runningModels", bp::make_function(&ShootingProblem_wrap::get_runningModels_wrap), "running models")
+      .add_property("terminalModel", bp::make_function(&ShootingProblem_wrap::get_terminalModel, bp::return_internal_reference<>()), "terminal model")
       .def_readonly("runningDatas", &ShootingProblem_wrap::get_runningDatas_wrap, "running datas")
       .def_readonly("terminalData", &ShootingProblem_wrap::get_terminalData_wrap, "terminal data");
 }
