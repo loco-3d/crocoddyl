@@ -66,9 +66,9 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
 
 void SolverAbstract::setCallbacks(std::vector<CallbackAbstract*>& callbacks) { callbacks_ = callbacks; }
 
-const std::vector<ActionModelAbstract*>& SolverAbstract::models() const { return models_; }
+const std::vector<ActionModelAbstract*>& SolverAbstract::get_models() const { return models_; }
 
-const std::vector<std::shared_ptr<ActionDataAbstract>>& SolverAbstract::datas() const { return datas_; }
+const std::vector<std::shared_ptr<ActionDataAbstract>>& SolverAbstract::get_datas() const { return datas_; }
 
 const std::vector<Eigen::VectorXd>& SolverAbstract::get_xs() const { return xs_; }
 

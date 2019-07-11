@@ -50,7 +50,7 @@ class ShootingProblem_wrap : public ShootingProblem, public bp::wrapper<Shooting
     return std_vector_to_python_list(xs_vec);
   }
 
-  std::vector<ActionModelAbstract*> get_runningModels_wrap() { return get_runningModels(); }
+  bp::list get_runningModels_wrap() { return std_vector_to_python_list(get_runningModels()); }
 
   bp::list get_runningDatas_wrap() { return std_vector_to_python_list(get_runningDatas()); }
 
@@ -59,9 +59,6 @@ class ShootingProblem_wrap : public ShootingProblem, public bp::wrapper<Shooting
 
 
 void exposeShootingProblem() {
-  bp::class_<std::vector<ActionModelAbstract*>>("ActionModelList")
-      .def(bp::vector_indexing_suite<std::vector<ActionModelAbstract*>>());
-
   bp::class_<ShootingProblem_wrap, boost::noncopyable>(
       "ShootingProblem",
       R"(Declare a shooting problem.

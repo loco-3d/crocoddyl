@@ -17,12 +17,22 @@ namespace python {
 
 namespace bp = boost::python;
 
+template<typename T>
+struct is_pointer { static const bool value = false; };
+
+template<typename T>
+struct is_pointer<T*> { static const bool value = true; };
+
 template<class T>
 bp::list std_vector_to_python_list(const std::vector<T>& vec) {
   const long unsigned int& n = vec.size();
   bp::list list;
   for (unsigned int i = 0; i < n; ++i) {
-    list.append(vec[i]);
+    if (is_pointer<T>::value) {
+      list.append(boost::ref(vec[i]));
+    } else {
+      list.append(vec[i]);
+    }
   }
   return list;
 }

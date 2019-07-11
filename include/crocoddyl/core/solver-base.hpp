@@ -32,8 +32,8 @@ class SolverAbstract {
 
   void setCallbacks(std::vector<CallbackAbstract*>& callbacks);
 
-  const std::vector<ActionModelAbstract*>& models() const;
-  const std::vector<std::shared_ptr<ActionDataAbstract>>& datas() const;
+  const std::vector<ActionModelAbstract*>& get_models() const;
+  const std::vector<std::shared_ptr<ActionDataAbstract>>& get_datas() const;
   const std::vector<Eigen::VectorXd>& get_xs() const;
   const std::vector<Eigen::VectorXd>& get_us() const;
   const bool& get_isFeasible() const;

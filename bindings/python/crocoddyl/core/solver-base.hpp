@@ -82,13 +82,13 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
     setCandidate(xs_warm, us_warm, is_feasible);
   }
 
-  bp::list get_xs_wrap() {
-    return std_vector_to_python_list(get_xs());
-  }
+  bp::list get_models_wrap() { return std_vector_to_python_list(get_models()); }
 
-  bp::list get_us_wrap() {
-    return std_vector_to_python_list(get_us());
-  }
+  bp::list get_datas_wrap() { return std_vector_to_python_list(get_datas()); }
+
+  bp::list get_xs_wrap() { return std_vector_to_python_list(get_xs()); }
+
+  bp::list get_us_wrap() { return std_vector_to_python_list(get_us()); }
 
  private:
   Eigen::Vector2d expected_improvement_;
@@ -185,6 +185,8 @@ us (rollout).)")
       .def("setCandidate", &SolverAbstract_wrap::setCandidate_wrap1)
       .def("setCandidate", &SolverAbstract_wrap::setCandidate_wrap2)
       .def("setCandidate", &SolverAbstract_wrap::setCandidate_wrap3)
+      .def("models", &SolverAbstract_wrap::get_models_wrap, "models")
+      .def("datas", &SolverAbstract_wrap::get_datas_wrap, "datas")
       .add_property("xs", &SolverAbstract_wrap::get_xs_wrap, "state trajectory")
       .add_property("us", &SolverAbstract_wrap::get_us_wrap, "control sequence");
 }
