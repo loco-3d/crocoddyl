@@ -7,8 +7,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/actions/action-num-diff.hpp"
-// #include <cmath>
-// #include <limits>
 
 namespace crocoddyl {
 
@@ -44,8 +42,7 @@ void ActionModelNumDiff::calcDiff(std::shared_ptr<ActionDataAbstract>& data,
   Eigen::VectorXd& xn0 = data_num_diff->data_0->xnext;
   double& c0 = data_num_diff->data_0->cost;
 
-  // std::cout << "assert stability" << std::endl;
-  // assert_stable_state_finite_differences(x);
+  assertStableStateFD(x);
 
   // Computing the d action(x,u) / dx
   dx_.setZero();
@@ -62,6 +59,7 @@ void ActionModelNumDiff::calcDiff(std::shared_ptr<ActionDataAbstract>& data,
 
     // data->Rx
     if (model_.get_ncost() > 1) {
+      // TODO: @mnaveau manage the gaussian approximation
       // data_num_diff->Rx.col(ix) = data_num_diff->data_x[ix]->cost_residual -
       //                             data_num_diff->data_0[ix]->cost_residual;
     }
@@ -82,6 +80,7 @@ void ActionModelNumDiff::calcDiff(std::shared_ptr<ActionDataAbstract>& data,
     data_num_diff->Lu(iu) = (c - c0) / disturbance_;
     // data->Ru
     if (model_.get_ncost() > 1) {
+      // TODO: @mnaveau manage the gaussian approximation
       // data_num_diff->Ru.col(iu) = data_num_diff->data_u[iu]->cost_residual -
       //                             data_num_diff->data_0[iu]->cost_residual;
     }
@@ -91,12 +90,13 @@ void ActionModelNumDiff::calcDiff(std::shared_ptr<ActionDataAbstract>& data,
 
   if (with_gauss_approx_) {
     data_num_diff->Lxx = data_num_diff->Rx.transpose() * data_num_diff->Rx;
-    data_num_diff->Lxu = data_num_diff->Ru.transpose() * data_num_diff->Ru;
+    data_num_diff->Lxu = data_num_diff->Rx.transpose() * data_num_diff->Ru;
     data_num_diff->Luu = data_num_diff->Ru.transpose() * data_num_diff->Ru;
   }
 }
 
-void ActionModelNumDiff::assert_stable_state_finite_differences(Eigen::Ref<Eigen::VectorXd> /** x */) {
+void ActionModelNumDiff::assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& /** x */) {
+  // TODO: @mnaveau make this method virtual and this one should do nothing, update the documentation.
   // md = model_.differential_;
   // if isinstance(md, DifferentialActionModelFloatingInContact)
   // {

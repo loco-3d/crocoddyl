@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_CORE_ACTIONS_NUM_DIFF_HPP_
-#define CROCODDYL_CORE_ACTIONS_NUM_DIFF_HPP_
+#ifndef CROCODDYL_CORE_ACTIONS_ACTION_NUM_DIFF_HPP_
+#define CROCODDYL_CORE_ACTIONS_ACTION_NUM_DIFF_HPP_
 
 #include <crocoddyl/core/action-base.hpp>
 #include <iostream>
@@ -24,20 +24,7 @@ class ActionModelNumDiff : public ActionModelAbstract {
   void calcDiff(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) override;
   std::shared_ptr<ActionDataAbstract> createData() override;
-  /**
-   * @brief Make sure that when we finite difference the Action Model, the user
-   * does not face unknown behaviour because of the finite differencing of a
-   * quaternion around pi. This behaviour might occur if CostModelState and
-   * FloatingInContact differential model are used together.
-   *
-   * For full discussions see issue
-   * https://gepgitlab.laas.fr/loco-3d/crocoddyl/issues/139
-   *
-   * @param model object to be checked.
-   * @param x is the state at which the check is performed.
-   */
-  void assert_stable_state_finite_differences(Eigen::Ref<Eigen::VectorXd> x);
-
+  
   ActionModelAbstract& get_model() { return model_; }
 
   /**
@@ -55,6 +42,20 @@ class ActionModelNumDiff : public ActionModelAbstract {
   bool get_with_gauss_approx() { return with_gauss_approx_; }
 
  private:
+  /**
+   * @brief Make sure that when we finite difference the Action Model, the user
+   * does not face unknown behaviour because of the finite differencing of a
+   * quaternion around pi. This behaviour might occur if CostModelState and
+   * FloatingInContact differential model are used together.
+   *
+   * For full discussions see issue
+   * https://gepgitlab.laas.fr/loco-3d/crocoddyl/issues/139
+   *
+   * @param model object to be checked.
+   * @param x is the state at which the check is performed.
+   */
+  void assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& x);
+
   /**
    * @brief Defines id we use a Gauss approximation of the cost or not.
    */
@@ -99,22 +100,26 @@ struct ActionDataNumDiff : public ActionDataAbstract {
    * @param model is the object to compute the numerical differentiation from.
    */
   template <typename Model>
-  ActionDataNumDiff(Model* model_num_diff) : ActionDataAbstract(model_num_diff) {
+  ActionDataNumDiff(Model* const model_num_diff) : ActionDataAbstract(model_num_diff) {
+    // simple renaming for conveniency
+    const unsigned& ndx = model_num_diff->get_model().get_ndx();
+    const unsigned& nu = model_num_diff->get_model().get_nu();
+    const unsigned& ncost = model_num_diff->get_model().get_ncost();
     // data_0_
     data_0 = model_num_diff->get_model().createData();
     // data_x_
-    for (unsigned i = 0; i < model_num_diff->get_ndx(); ++i) {
+    for (unsigned i = 0; i < ndx; ++i) {
       data_x.push_back(model_num_diff->get_model().createData());
     }
     // data_u_
-    for (unsigned i = 0; i < model_num_diff->get_nu(); ++i) {
+    for (unsigned i = 0; i < nu; ++i) {
       data_u.push_back(model_num_diff->get_model().createData());
     }
     // Rx
-    Rx.resize(model_num_diff->get_model().get_ncost(), model_num_diff->get_model().get_ndx());
+    Rx.resize(ncost, ndx);
     Rx.setZero();
     // Ru
-    Ru.resize(model_num_diff->get_model().get_ncost(), model_num_diff->get_model().get_nu());
+    Ru.resize(ncost, nu);
     Ru.setZero();
   }
 
