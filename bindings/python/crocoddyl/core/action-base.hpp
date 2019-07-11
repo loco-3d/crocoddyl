@@ -60,7 +60,7 @@ void exposeActionAbstract() {
 
 :param state: state description,
 :param nu: dimension of control vector,
-:param ncost: dimension of the cost-residual vector)"))
+:param ncost: dimension of the cost-residual vector)")[bp::with_custodian_and_ward<1, 2>()])
       .def("calc", pure_virtual(&ActionModelAbstract_wrap::calc_wrap), bp::args(" self", " data", " x", " u"),
            R"(Compute the next state and cost value.
 
