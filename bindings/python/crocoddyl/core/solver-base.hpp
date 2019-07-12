@@ -108,7 +108,15 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
 
   bp::list get_problem_runningModels() { return std_vector_to_python_list(problem_.running_models_); }
 
+  ActionModelAbstract* get_problem_terminalModel() { return problem_.get_terminalModel(); }
+
   bp::list get_problem_runningDatas() { return std_vector_to_python_list(problem_.running_datas_); }
+
+  std::shared_ptr<ActionDataAbstract> get_problem_terminalData() { return problem_.get_terminalData(); }
+
+  long unsigned int get_problem_T() { return problem_.get_T(); }
+
+  const Eigen::VectorXd& get_problem_x0() { return problem_.get_x0(); }
 
   bp::list get_models_wrap() { return std_vector_to_python_list(get_models()); }
 
@@ -235,7 +243,11 @@ These quantities are computed along a given pair of trajectories xs
 Rollout the dynamics give a sequence of control commands
 :param us: time-discrete control sequence)")
       .add_property("problem_runningModels", bp::make_function(&SolverAbstract_wrap::get_problem_runningModels), "running models")
+      .add_property("problem_terminalModel", bp::make_function(&SolverAbstract_wrap::get_problem_terminalModel, bp::return_internal_reference<>()), "terminal model")
       .add_property("problem_runningDatas", bp::make_function(&SolverAbstract_wrap::get_problem_runningDatas), "running datas")
+      .add_property("problem_terminalData", bp::make_function(&SolverAbstract_wrap::get_problem_terminalData), "terminal data")
+      .add_property("problem_T", bp::make_function(&SolverAbstract_wrap::get_problem_T), "number of nodes")
+      .add_property("problem_initialState", bp::make_function(&SolverAbstract_wrap::get_problem_x0, bp::return_value_policy<bp::return_by_value>()), "initial state")
       .def("models", &SolverAbstract_wrap::get_models_wrap, "models")
       .def("datas", &SolverAbstract_wrap::get_datas_wrap, "datas")
       .add_property("xs", &SolverAbstract_wrap::get_xs_wrap, "state trajectory")
