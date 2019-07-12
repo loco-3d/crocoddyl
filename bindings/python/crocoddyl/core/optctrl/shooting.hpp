@@ -21,6 +21,7 @@ namespace bp = boost::python;
 class ShootingProblem_wrap : public ShootingProblem, public bp::wrapper<ShootingProblem> {
  public:
   using ShootingProblem::T_;
+  using ShootingProblem::x0_;
 
   ShootingProblem_wrap(const Eigen::VectorXd& x0, const bp::list& running_models,
                        ActionModelAbstract* terminal_model) : ShootingProblem(), bp::wrapper<ShootingProblem>() {
@@ -96,6 +97,7 @@ These quantities are computed along a given pair of trajectories xs
 Rollout the dynamics give a sequence of control commands
 :param us: time-discrete control sequence)")
       .add_property("T", &ShootingProblem_wrap::T_, "number of nodes")
+      .add_property("initialState", bp::make_getter(&ShootingProblem_wrap::x0_, bp::return_value_policy<bp::return_by_value>()), "initial state")
       .add_property("runningModels", bp::make_function(&ShootingProblem_wrap::get_runningModels_wrap), "running models")
       .add_property("terminalModel", bp::make_function(&ShootingProblem_wrap::get_terminalModel, bp::return_internal_reference<>()), "terminal model")
       .def_readonly("runningDatas", &ShootingProblem_wrap::get_runningDatas_wrap, "running datas")
