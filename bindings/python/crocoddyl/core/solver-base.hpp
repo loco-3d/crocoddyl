@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbstract> {
  public:
+  using SolverAbstract::problem_;
+
   SolverAbstract_wrap(ShootingProblem& problem) : SolverAbstract(problem), bp::wrapper<SolverAbstract>() {}
   ~SolverAbstract_wrap() {}
 
@@ -82,6 +84,32 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
     setCandidate(xs_warm, us_warm, is_feasible);
   }
 
+  // TODO @Carlos this method doesn't match perfectly the Python API, since we need to run
+  // problem_$method instead of problem.$method
+  // ShootingProblem& get_problem_wrap() { return boost::ref(problem_); }
+  double calc_wrap(const bp::list& xs, const bp::list& us) {
+    const std::vector<Eigen::VectorXd>& xs_vec = python_list_to_std_vector<Eigen::VectorXd>(xs);
+    const std::vector<Eigen::VectorXd>& us_vec = python_list_to_std_vector<Eigen::VectorXd>(us);
+    return problem_.calc(xs_vec, us_vec);
+  }
+
+  double calcDiff_wrap(const bp::list& xs, const bp::list& us) {
+    const std::vector<Eigen::VectorXd>& xs_vec = python_list_to_std_vector<Eigen::VectorXd>(xs);
+    const std::vector<Eigen::VectorXd>& us_vec = python_list_to_std_vector<Eigen::VectorXd>(us);
+    return problem_.calcDiff(xs_vec, us_vec);
+  }
+
+  bp::list rollout_wrap(const bp::list& us) {
+    std::vector<Eigen::VectorXd> xs_vec;
+    const std::vector<Eigen::VectorXd>& us_vec = python_list_to_std_vector<Eigen::VectorXd>(us);
+    problem_.rollout(us_vec, xs_vec);
+    return std_vector_to_python_list(xs_vec);
+  }
+
+  bp::list get_problem_runningModels() { return std_vector_to_python_list(problem_.running_models_); }
+
+  bp::list get_problem_runningDatas() { return std_vector_to_python_list(problem_.running_datas_); }
+
   bp::list get_models_wrap() { return std_vector_to_python_list(get_models()); }
 
   bp::list get_datas_wrap() { return std_vector_to_python_list(get_datas()); }
@@ -109,7 +137,7 @@ void exposeSolverAbstract() {
         iterate. It also describes the globalization strategy (i.e. regularization) of the
         numerical optimization.)",
       bp::init<ShootingProblem&>(bp::args(" self", " problem"),
-                                      R"(Initialize the solver model.
+                                 R"(Initialize the solver model.
 
 :param problem: shooting problem)"))
       .def("solve", pure_virtual(&SolverAbstract_wrap::solve_wrap),
@@ -185,6 +213,29 @@ us (rollout).)")
       .def("setCandidate", &SolverAbstract_wrap::setCandidate_wrap1)
       .def("setCandidate", &SolverAbstract_wrap::setCandidate_wrap2)
       .def("setCandidate", &SolverAbstract_wrap::setCandidate_wrap3)
+      // .add_property("problem", bp::make_getter(&SolverAbstract_wrap::problem_, bp::return_internal_reference<>()), "shooting problem")
+      .def("problem_calc", &SolverAbstract_wrap::calc_wrap, bp::args(" self", " xs", " us"),
+           R"(Compute the cost and the next states.
+
+First, it computes the next state and cost for each action model
+along a state and control trajectory.
+:param xs: time-discrete state trajectory
+:param us: time-discrete control sequence
+:returns the total cost value)")
+      .def("problem_calcDiff", &SolverAbstract_wrap::calcDiff_wrap, bp::args(" self", " xs", " us"),
+           R"(Compute the cost-and-dynamics derivatives.
+
+These quantities are computed along a given pair of trajectories xs
+(states) and us (controls).
+:param xs: time-discrete state trajectory
+:param us: time-discrete control sequence)")
+      .def("problem_rollout", &SolverAbstract_wrap::rollout_wrap, bp::args(" self", " us"),
+           R"(Integrate the dynamics given a control sequence.
+
+Rollout the dynamics give a sequence of control commands
+:param us: time-discrete control sequence)")
+      .add_property("problem_runningModels", bp::make_function(&SolverAbstract_wrap::get_problem_runningModels), "running models")
+      .add_property("problem_runningDatas", bp::make_function(&SolverAbstract_wrap::get_problem_runningDatas), "running datas")
       .def("models", &SolverAbstract_wrap::get_models_wrap, "models")
       .def("datas", &SolverAbstract_wrap::get_datas_wrap, "datas")
       .add_property("xs", &SolverAbstract_wrap::get_xs_wrap, "state trajectory")
