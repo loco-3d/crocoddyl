@@ -9,7 +9,7 @@
 #ifndef PYTHON_CROCODDYL_CORE_STATE_BASE_HPP_
 #define PYTHON_CROCODDYL_CORE_STATE_BASE_HPP_
 
-#include <crocoddyl/core/state-base.hpp>
+#include "crocoddyl/core/state-base.hpp"
 
 namespace crocoddyl {
 namespace python {

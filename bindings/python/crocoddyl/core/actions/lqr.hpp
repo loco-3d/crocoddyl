@@ -9,7 +9,7 @@
 #ifndef PYTHON_CROCODDYL_CORE_ACTIONS_LQR_HPP_
 #define PYTHON_CROCODDYL_CORE_ACTIONS_LQR_HPP_
 
-#include <crocoddyl/core/actions/lqr.hpp>
+#include "crocoddyl/core/actions/lqr.hpp"
 
 namespace crocoddyl {
 namespace python {

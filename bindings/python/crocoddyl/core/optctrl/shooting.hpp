@@ -9,8 +9,8 @@
 #ifndef PYTHON_CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_
 #define PYTHON_CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_
 
-#include <crocoddyl/core/optctrl/shooting.hpp>
-#include <python/crocoddyl/utils.hpp>
+#include "crocoddyl/core/optctrl/shooting.hpp"
+#include "python/crocoddyl/utils.hpp"
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 namespace crocoddyl {

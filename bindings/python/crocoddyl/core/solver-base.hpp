@@ -9,8 +9,8 @@
 #ifndef PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_
 #define PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_
 
-#include <crocoddyl/core/solver-base.hpp>
-#include <python/crocoddyl/utils.hpp>
+#include "crocoddyl/core/solver-base.hpp"
+#include "python/crocoddyl/utils.hpp"
 
 namespace crocoddyl {
 namespace python {
