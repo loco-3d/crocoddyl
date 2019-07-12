@@ -9,7 +9,7 @@ class ActionModelAbstractTestCase(unittest.TestCase):
     MODEL_DER = None
 
     def setUp(self):
-        state = self.MODEL.State()
+        state = self.MODEL.State
         self.x = state.rand()
         self.u = np.matrix(np.random.rand(self.MODEL.nu)).T
         self.DATA = self.MODEL.createData()
