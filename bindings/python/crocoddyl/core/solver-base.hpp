@@ -20,6 +20,11 @@ namespace bp = boost::python;
 class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbstract> {
  public:
   using SolverAbstract::problem_;
+  using SolverAbstract::is_feasible_;
+  using SolverAbstract::xreg_;
+  using SolverAbstract::ureg_;
+  using SolverAbstract::th_acceptstep_;
+  using SolverAbstract::th_stop_;
 
   SolverAbstract_wrap(ShootingProblem& problem) : SolverAbstract(problem), bp::wrapper<SolverAbstract>() {}
   ~SolverAbstract_wrap() {}
@@ -251,7 +256,12 @@ Rollout the dynamics give a sequence of control commands
       .def("models", &SolverAbstract_wrap::get_models_wrap, "models")
       .def("datas", &SolverAbstract_wrap::get_datas_wrap, "datas")
       .add_property("xs", &SolverAbstract_wrap::get_xs_wrap, "state trajectory")
-      .add_property("us", &SolverAbstract_wrap::get_us_wrap, "control sequence");
+      .add_property("us", &SolverAbstract_wrap::get_us_wrap, "control sequence")
+      .def_readwrite("isFeasible", &SolverAbstract_wrap::is_feasible_, "feasible (xs,us)")
+      .def_readwrite("x_reg", &SolverAbstract_wrap::xreg_, "state regularization")
+      .def_readwrite("u_reg", &SolverAbstract_wrap::ureg_, "control regularization")
+      .def_readwrite("th_acceptStep", &SolverAbstract_wrap::th_acceptstep_, "threhold for step acceptance")
+      .def_readwrite("th_stop", &SolverAbstract_wrap::th_stop_, "threhold for stopping criteria");
 }
 
 }  // namespace python
