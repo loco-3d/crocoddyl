@@ -7,8 +7,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <boost/python.hpp>
-#include <python/crocoddyl/core.hpp>
 #include <eigenpy/eigenpy.hpp>
+
+#include "python/crocoddyl/core.hpp"
+#include "crocoddyl/core/utils/version.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -16,6 +18,8 @@ namespace python {
 namespace bp = boost::python;
 
 BOOST_PYTHON_MODULE(libcrocoddyl_pywrap) {
+  bp::scope().attr("__version__") = printVersion();
+
   eigenpy::enableEigenPy();
 
   typedef double Scalar;
