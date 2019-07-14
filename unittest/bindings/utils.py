@@ -98,7 +98,7 @@ class UnicycleDerived(crocoddyl.ActionModelAbstract):
 class DDPDerived(crocoddyl.SolverAbstract):
     def __init__(self, shootingProblem):
         crocoddyl.SolverAbstract.__init__(self, shootingProblem)
-        self.allocateData() #TODO remove it?
+        self.allocateData()  #TODO remove it?
 
         self.isFeasible = False  # Change it to true if you know that datas[t].xnext = xs[t+1]
         self.alphas = [2**(-n) for n in range(10)]

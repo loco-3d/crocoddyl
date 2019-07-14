@@ -18,12 +18,12 @@ class ShootingProblemTestCase(unittest.TestCase):
         for i in range(self.T):
             self.xs.append(state.rand())
             self.us.append(np.matrix(np.random.rand(self.MODEL.nu)).T)
-        self.PROBLEM = crocoddyl.ShootingProblem(self.xs[0], [self.MODEL]*self.T, self.MODEL)
-        self.PROBLEM_DER = crocoddyl.ShootingProblem(self.xs[0], [self.MODEL_DER]*self.T, self.MODEL_DER)
+        self.PROBLEM = crocoddyl.ShootingProblem(self.xs[0], [self.MODEL] * self.T, self.MODEL)
+        self.PROBLEM_DER = crocoddyl.ShootingProblem(self.xs[0], [self.MODEL_DER] * self.T, self.MODEL_DER)
 
     def test_number_of_nodes(self):
         self.assertEqual(self.T, self.PROBLEM.T, "Wrong number of nodes")
-    
+
     def test_calc(self):
         # Running calc functions
         cost = self.PROBLEM.calc(self.xs, self.us)
@@ -57,6 +57,7 @@ class ShootingProblemTestCase(unittest.TestCase):
 class UnicycleShootingTest(ShootingProblemTestCase):
     ShootingProblemTestCase.MODEL = crocoddyl.ActionModelUnicycle()
     ShootingProblemTestCase.MODEL_DER = UnicycleDerived()
+
 
 if __name__ == '__main__':
     unittest.main()

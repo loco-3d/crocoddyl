@@ -20,8 +20,8 @@ class SolverAbstractTestCase(unittest.TestCase):
         for i in range(self.T):
             self.xs.append(state.rand())
             self.us.append(np.matrix(np.random.rand(self.MODEL.nu)).T)
-        self.PROBLEM = crocoddyl.ShootingProblem(self.xs[0], [self.MODEL]*self.T, self.MODEL)
-        self.PROBLEM_DER = crocoddyl.ShootingProblem(self.xs[0], [self.MODEL]*self.T, self.MODEL)
+        self.PROBLEM = crocoddyl.ShootingProblem(self.xs[0], [self.MODEL] * self.T, self.MODEL)
+        self.PROBLEM_DER = crocoddyl.ShootingProblem(self.xs[0], [self.MODEL] * self.T, self.MODEL)
         self.solver = self.SOLVER(self.PROBLEM)
         self.solver_der = self.SOLVER_DER(self.PROBLEM_DER)
 
@@ -29,11 +29,11 @@ class SolverAbstractTestCase(unittest.TestCase):
         # Check the number of nodes
         self.assertEqual(self.T, self.solver.problem.T, "Wrong number of nodes in SOLVER")
         self.assertEqual(self.T, self.solver_der.problem.T, "Wrong number of nodes in SOLVER_DER")
-    
+
     def test_solve(self):
         # Run maximum 10 iterations in order to boost test analysis
-        self.solver.solve([],[],10)
-        self.solver_der.solve([],[],10)
+        self.solver.solve([], [], 10)
+        self.solver_der.solve([], [], 10)
         for x1, x2 in zip(self.solver.xs, self.solver_der.xs):
             self.assertTrue(np.allclose(x1, x2, atol=1e-9), "xs doesn't match.")
         for u1, u2 in zip(self.solver.us, self.solver_der.us):
@@ -75,17 +75,17 @@ class SolverAbstractTestCase(unittest.TestCase):
 
     def test_stopping_criteria(self):
         # Run 2 iteration in order to boost test analysis
-        self.solver.solve([],[],2)
-        self.solver_der.solve([],[],2)
+        self.solver.solve([], [], 2)
+        self.solver_der.solve([], [], 2)
         # Compute and check the stopping criteria
         stop = self.solver.stoppingCriteria()
         stopDer = self.solver_der.stoppingCriteria()
         self.assertAlmostEqual(stop, stopDer, 10, "Wrong stopping value")
-    
+
     def test_expected_improvement(self):
         # Run 2 iteration in order to boost test analysis
-        self.solver.solve([],[],2)
-        self.solver_der.solve([],[],2)
+        self.solver.solve([], [], 2)
+        self.solver_der.solve([], [], 2)
         expImp = self.solver.expectedImprovement()
         expImpDer = self.solver_der.expectedImprovement()
         self.assertTrue(np.allclose(expImp, expImpDer, atol=1e-9), "Expected improvement doesn't match.")
