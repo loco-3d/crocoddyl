@@ -31,13 +31,6 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
   SolverAbstract_wrap(ShootingProblem& problem) : SolverAbstract(problem), bp::wrapper<SolverAbstract>() {}
   ~SolverAbstract_wrap() {}
 
-  bool solve_wrap(const bp::list& init_xs, const bp::list& init_us,
-                  const unsigned int& maxiter, const bool& is_feasible, const double& reg_init) {
-    const std::vector<Eigen::VectorXd>& init_xs_vec = python_list_to_std_vector<Eigen::VectorXd>(init_xs);
-    const std::vector<Eigen::VectorXd>& init_us_vec = python_list_to_std_vector<Eigen::VectorXd>(init_us);
-    return solve(init_xs_vec, init_us_vec, maxiter, is_feasible, reg_init);
-  }
-
   bool solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
              const unsigned int& maxiter, const bool& is_feasible, const double& reg_init) override {
     return bp::call<bool>(this->get_override("solve").ptr(), init_xs, init_us, maxiter, is_feasible, reg_init);
@@ -69,32 +62,11 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
     return exp_impr;
   }
 
-  void setCandidate_wrap(const bp::list& xs_warm, const bp::list& us_warm, const bool& is_feasible = false) {
-    const std::vector<Eigen::VectorXd>& xs_warm_vec = python_list_to_std_vector<Eigen::VectorXd>(xs_warm);
-    const std::vector<Eigen::VectorXd>& us_warm_vec = python_list_to_std_vector<Eigen::VectorXd>(us_warm);
-    setCandidate(xs_warm_vec, us_warm_vec, is_feasible);
-  }
-
-  void setCandidate_wrap1(const bp::list& xs_warm, const bp::list& us_warm) {
-    setCandidate_wrap(xs_warm, us_warm);
-  }
-
-  void setCandidate_wrap2() {
-    std::vector<Eigen::VectorXd> xs_warm;
-    std::vector<Eigen::VectorXd> us_warm;
-    setCandidate(xs_warm, us_warm);
-  }
-
-  void setCandidate_wrap3(const bool& is_feasible) {
-    std::vector<Eigen::VectorXd> xs_warm;
-    std::vector<Eigen::VectorXd> us_warm;
-    setCandidate(xs_warm, us_warm, is_feasible);
-  }
-
  private:
   Eigen::Vector2d expected_improvement_;
 };
 
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setCandidate_overloads, SolverAbstract::setCandidate, 0, 3)
 
 void exposeSolverAbstract() {
   bp::class_<SolverAbstract_wrap, boost::noncopyable>(
@@ -113,8 +85,8 @@ void exposeSolverAbstract() {
                                  R"(Initialize the solver model.
 
 :param problem: shooting problem)"))
-      .def("solve", pure_virtual(&SolverAbstract_wrap::solve_wrap),
-           bp::args(" self", " init_xs=None", " init_us=None", " maxiter=100", " isFeasible=False", " regInit=None"),
+      .def("solve", pure_virtual(&SolverAbstract_wrap::solve),
+           bp::args(" self", " init_xs=[]", " init_us=[]", " maxiter=100", " isFeasible=False", " regInit=None"),
            R"(Compute the optimal trajectory xopt,uopt as lists of T+1 and T terms.
 
 From an initial guess init_xs,init_us (feasible or not), iterate
@@ -163,8 +135,8 @@ length, tested by tryStep.)")
 
 For computing the expected improvement, you need to compute first
 the search direction by running computeDirection.)")
-      .def("setCandidate", &SolverAbstract_wrap::setCandidate,
-           bp::args(" self", " xs=None", " us=None", " isFeasible=False"),
+      .def("setCandidate", &SolverAbstract_wrap::setCandidate, setCandidate_overloads(
+           bp::args(" self", " xs=[]", " us=[]", " isFeasible=False"),
            R"(Set the solver candidate warm-point values (xs, us).
 
 The solver candidates are defined as a state and control trajectory
@@ -174,7 +146,7 @@ rollout give us produces xs.
 :param xs: state trajectory of T+1 elements.
 :param us: control trajectory of T elements.
 :param isFeasible: true if the xs are obtained from integrating the
-us (rollout).)")
+us (rollout).)"))
 //       .def("setCallbacks", &SolverAbstract_wrap::setCallbacks),
 //            bp::args(" self"),
 //            R"(Set a list of callback functions using for diagnostic.
@@ -182,10 +154,6 @@ us (rollout).)")
 // Each iteration, the solver calls these set of functions in order to
 // allowed user the diagnostic of the solver's mperformance.
 // :param callbacks: set of callback functions.)")
-      .def("setCandidate", &SolverAbstract_wrap::setCandidate_wrap)
-      .def("setCandidate", &SolverAbstract_wrap::setCandidate_wrap1)
-      .def("setCandidate", &SolverAbstract_wrap::setCandidate_wrap2)
-      .def("setCandidate", &SolverAbstract_wrap::setCandidate_wrap3)
       .add_property("problem", bp::make_getter(&SolverAbstract_wrap::problem_, bp::return_internal_reference<>()), "shooting problem")
       .def("models", &SolverAbstract_wrap::get_models, bp::return_value_policy<bp::return_by_value>(), "models")
       .def("datas", &SolverAbstract_wrap::get_datas, bp::return_value_policy<bp::return_by_value>(), "datas")
