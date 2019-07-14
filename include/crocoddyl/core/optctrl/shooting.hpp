@@ -9,6 +9,7 @@
 #ifndef CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_
 #define CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_
 
+#include <vector>
 #include <crocoddyl/core/action-base.hpp>
 
 namespace crocoddyl {
