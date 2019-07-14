@@ -141,7 +141,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
         self.forwardPass(stepLength)
         return self.cost - self.cost_try
 
-    def solve(self, init_xs=None, init_us=None, maxiter=100, isFeasible=False, regInit=None):
+    def solve(self, init_xs=[], init_us=[], maxiter=100, isFeasible=False, regInit=None):
         self.setCandidate(init_xs, init_us, isFeasible)
         self.x_reg = regInit if regInit is not None else self.regMin
         self.u_reg = regInit if regInit is not None else self.regMin
