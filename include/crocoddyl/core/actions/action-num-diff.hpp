@@ -25,7 +25,7 @@ class ActionModelNumDiff : public ActionModelAbstract {
   void calcDiff(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) override;
   std::shared_ptr<ActionDataAbstract> createData() override;
-  
+
   ActionModelAbstract& get_model() { return model_; }
 
   /**
