@@ -79,7 +79,8 @@ class UnicycleDerived(crocoddyl.ActionModelAbstract):
     def calcDiff(self, data, x, u=None, recalc=True):
         if u is None:
             u = self.unone
-        xnext, cost = self.calc(data, x, u)
+        self.calc(data, x, u)
+        xnext, cost = data.xnext, data.cost
         v, w = m2a(u)
         px, py, theta = m2a(x)
         # Cost derivatives
