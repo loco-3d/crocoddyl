@@ -33,7 +33,6 @@ class StateVectorDerived(crocoddyl.StateAbstract):
         return np.matrix(np.random.rand(self.nx)).T
 
     def diff(self, x0, x1):
-        dx = x1 - x0
         return x1 - x0
 
     def integrate(self, x, dx):
@@ -80,7 +79,6 @@ class UnicycleDerived(crocoddyl.ActionModelAbstract):
         if u is None:
             u = self.unone
         self.calc(data, x, u)
-        xnext, cost = data.xnext, data.cost
         v, w = m2a(u)
         px, py, theta = m2a(x)
         # Cost derivatives
@@ -98,7 +96,7 @@ class UnicycleDerived(crocoddyl.ActionModelAbstract):
 class DDPDerived(crocoddyl.SolverAbstract):
     def __init__(self, shootingProblem):
         crocoddyl.SolverAbstract.__init__(self, shootingProblem)
-        self.allocateData()  #TODO remove it?
+        self.allocateData()  # TODO remove it?
 
         self.isFeasible = False  # Change it to true if you know that datas[t].xnext = xs[t+1]
         self.alphas = [2**(-n) for n in range(10)]
