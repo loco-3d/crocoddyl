@@ -128,14 +128,14 @@ class DDPDerived(crocoddyl.SolverAbstract):
         return [np.nan] * (self.problem.T + 1), self.k, self.Vx
 
     def stoppingCriteria(self):
-        return [np.asscalar(q.T * q) for q in self.Qu]
+        return sum([np.asscalar(q.T * q) for q in self.Qu])
 
     def expectedImprovement(self):
         d1 = sum([np.asscalar(q.T * k) for q, k in zip(self.Qu, self.k)])
         d2 = sum([-np.asscalar(k.T * q * k) for q, k in zip(self.Quu, self.k)])
-        return [d1, d2]
+        return np.matrix([d1, d2]).T
 
-    def tryStep(self, stepLength):
+    def tryStep(self, stepLength=1):
         self.forwardPass(stepLength)
         return self.cost - self.cost_try
 
@@ -157,7 +157,8 @@ class DDPDerived(crocoddyl.SolverAbstract):
                     else:
                         continue
                 break
-            d1, d2 = self.expectedImprovement()
+            d = self.expectedImprovement()
+            d1, d2 = np.asscalar(d[0]), np.asscalar(d[1])
 
             for a in self.alphas:
                 try:
@@ -179,7 +180,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
                     return self.xs, self.us, False
             self.stepLength = a
             self.iter = i
-            self.stop = sum(self.stoppingCriteria())
+            self.stop = self.stoppingCriteria()
             # TODO @Carlos bind the callbacks
             # if self.callback is not None:
             #     [c(self) for c in self.callback]
@@ -250,7 +251,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
             self.computeGains(t)
 
             if self.u_reg == 0:
-                self.Vx[t][:] = self.Qx[t] - self.Qu[t] * self.K[t]
+                self.Vx[t][:] = self.Qx[t] - self.K[t].T * self.Qu[t]
             else:
                 self.Vx[t][:] = self.Qx[t] - 2 * self.K[t].T * self.Qu[t] + self.K[t].T * self.Quu[t] * self.k[t]
             self.Vxx[t][:, :] = self.Qxx[t] - self.Qxu[t] * self.K[t]
@@ -290,7 +291,8 @@ class DDPDerived(crocoddyl.SolverAbstract):
             raiseIfNan(xtry[t + 1], ArithmeticError('forward error'))
         with np.warnings.catch_warnings():
             np.warnings.simplefilter(warning)
-            ctry += self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])[1]
+            self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])
+            ctry += self.problem.terminalData.cost
         raiseIfNan(ctry, ArithmeticError('forward error'))
         self.cost_try = ctry
         return xtry, utry, ctry
