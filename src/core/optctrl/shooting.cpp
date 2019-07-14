@@ -18,7 +18,7 @@ double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::
   for (unsigned int i = 0; i < T_; ++i) {
     ActionModelAbstract* model = running_models_[i];
     std::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
-    const Eigen::VectorXd& x = xs[i + 1];
+    const Eigen::VectorXd& x = xs[i];
     const Eigen::VectorXd& u = us[i];
 
     model->calc(data, x, u);
