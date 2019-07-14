@@ -75,7 +75,6 @@ class UnicycleDerived(crocoddyl.ActionModelAbstract):
         # Compute the cost value
         data.costResiduals = np.vstack([self.costWeights[0] * x, self.costWeights[1] * u])
         data.cost = .5 * sum(m2a(data.costResiduals)**2)
-        return data.xnext, data.cost
 
     def calcDiff(self, data, x, u=None, recalc=True):
         if u is None:
@@ -93,7 +92,6 @@ class UnicycleDerived(crocoddyl.ActionModelAbstract):
         v, w = m2a(u)
         data.Fx = np.matrix([[1, 0, -s * v * dt], [0, 1, c * v * dt], [0, 0, 1]])
         data.Fu = np.matrix([[c * self.dt, 0], [s * self.dt, 0], [0, self.dt]])
-        return xnext, cost
 
 
 class DDPDerived(crocoddyl.SolverAbstract):
