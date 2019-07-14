@@ -16,6 +16,7 @@ namespace python {
 
 namespace bp = boost::python;
 
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverDDP_solves, SolverDDP::solve, 0, 5)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverDDP_computeDirections, SolverDDP::computeDirection, 0, 1)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverDDP_trySteps, SolverDDP::tryStep, 0, 1)
 
@@ -34,8 +35,8 @@ void exposeSolverDDP() {
                                  R"(Initialize the vector dimension.
 
 :param problem: shooting problem.)"))
-      .def("solve", &SolverDDP::solve,
-           bp::args(" self", " init_xs=None", " init_us=None", " maxiter=100", " isFeasible=False", " regInit=None"),
+      .def("solve", &SolverDDP::solve, SolverDDP_solves(
+           bp::args(" self", " init_xs=[]", " init_us=[]", " maxiter=100", " isFeasible=False", " regInit=None"),
            R"(Compute the optimal trajectory xopt,uopt as lists of T+1 and T terms.
 
 From an initial guess init_xs,init_us (feasible or not), iterate
@@ -48,7 +49,7 @@ during the numerical optimization.
 :param isFeasible: true if the init_xs are obtained from integrating the init_us (rollout).
 :param regInit: initial guess for the regularization value. Very low values are typical used with very good
 guess points (init_xs, init_us).
-:returns the optimal trajectory xopt, uopt and a boolean that describes if convergence was reached.)")
+:returns the optimal trajectory xopt, uopt and a boolean that describes if convergence was reached.)"))
       .def("computeDirection", &SolverDDP::computeDirection, SolverDDP_computeDirections(
            bp::args(" self", " recalc=True"),
            R"(Compute the search direction (dx, du) for the current guess (xs, us).
