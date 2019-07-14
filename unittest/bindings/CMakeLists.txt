@@ -2,6 +2,7 @@ SET(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
   states
   actions
   shooting
+  solvers
   )
 
 FOREACH(TEST ${${PROJECT_NAME}_PYTHON_BINDINGS_TESTS})
