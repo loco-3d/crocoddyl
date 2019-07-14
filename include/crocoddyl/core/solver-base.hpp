@@ -21,15 +21,16 @@ class SolverAbstract {
   SolverAbstract(ShootingProblem& problem);
   virtual ~SolverAbstract();
 
-  virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR, const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR,
-                     const unsigned int& maxiter = 100, const bool& is_feasible = false, const double& reg_init = 1e-9) = 0;
+  virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
+                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const unsigned int& maxiter = 100,
+                     const bool& is_feasible = false, const double& reg_init = 1e-9) = 0;
   // TODO: computeDirection (polimorfism) returning descent direction and lambdas
   virtual void computeDirection(const bool& recalc) = 0;
   virtual double tryStep(const double& step_length = 1) = 0;
   virtual double stoppingCriteria() = 0;
   virtual const Eigen::Vector2d& expectedImprovement() = 0;
-  void setCandidate(const std::vector<Eigen::VectorXd>& xs_warm = DEFAULT_VECTOR, const std::vector<Eigen::VectorXd>& us_warm = DEFAULT_VECTOR,
-                    const bool& is_feasible = false);
+  void setCandidate(const std::vector<Eigen::VectorXd>& xs_warm = DEFAULT_VECTOR,
+                    const std::vector<Eigen::VectorXd>& us_warm = DEFAULT_VECTOR, const bool& is_feasible = false);
 
   void setCallbacks(std::vector<CallbackAbstract*>& callbacks);
 

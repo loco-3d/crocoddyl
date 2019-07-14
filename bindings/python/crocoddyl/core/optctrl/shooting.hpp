@@ -19,26 +19,26 @@ namespace bp = boost::python;
 
 class ShootingProblem_wrap : public ShootingProblem, public bp::wrapper<ShootingProblem> {
  public:
-  using ShootingProblem::T_;
-  using ShootingProblem::x0_;
-  using ShootingProblem::running_models_;
   using ShootingProblem::running_datas_;
+  using ShootingProblem::running_models_;
+  using ShootingProblem::T_;
   using ShootingProblem::terminal_data_;
+  using ShootingProblem::x0_;
 
-  ShootingProblem_wrap(const Eigen::VectorXd& x0,
-                       std::vector<ActionModelAbstract*> running_models,
-                       ActionModelAbstract* terminal_model) : ShootingProblem(x0, running_models, terminal_model) {}
+  ShootingProblem_wrap(const Eigen::VectorXd& x0, std::vector<ActionModelAbstract*> running_models,
+                       ActionModelAbstract* terminal_model)
+      : ShootingProblem(x0, running_models, terminal_model) {}
 };
-
 
 void exposeShootingProblem() {
   // Register custom converters between std::vector and Python list
   typedef ActionModelAbstract* ActionModelPtr;
   typedef std::shared_ptr<ActionDataAbstract> ActionDataPtr;
-  bp::to_python_converter<std::vector<ActionModelPtr, std::allocator<ActionModelPtr> >, vector_to_list<ActionModelPtr> >();
-  bp::to_python_converter<std::vector<ActionDataPtr, std::allocator<ActionDataPtr> >, vector_to_list<ActionDataPtr> >();
-  list_to_vector()
-    .from_python<std::vector<ActionModelPtr, std::allocator<ActionModelPtr> > >();
+  bp::to_python_converter<std::vector<ActionModelPtr, std::allocator<ActionModelPtr> >,
+                          vector_to_list<ActionModelPtr> >();
+  bp::to_python_converter<std::vector<ActionDataPtr, std::allocator<ActionDataPtr> >,
+                          vector_to_list<ActionDataPtr> >();
+  list_to_vector().from_python<std::vector<ActionModelPtr, std::allocator<ActionModelPtr> > >();
 
   bp::class_<ShootingProblem_wrap, boost::noncopyable>(
       "ShootingProblem",
@@ -77,12 +77,25 @@ These quantities are computed along a given pair of trajectories xs
 Rollout the dynamics give a sequence of control commands
 :param us: time-discrete control sequence)")
       .add_property("T", &ShootingProblem_wrap::T_, "number of nodes")
-      .add_property("initialState", bp::make_getter(&ShootingProblem_wrap::x0_, bp::return_value_policy<bp::return_by_value>()), "initial state")
-      .add_property("runningModels", bp::make_getter(&ShootingProblem_wrap::running_models_, bp::return_value_policy<bp::return_by_value>()),
-                     bp::make_setter(&ShootingProblem_wrap::running_models_, bp::return_value_policy<bp::return_by_value>()), "running models")
-      .add_property("terminalModel", bp::make_function(&ShootingProblem_wrap::get_terminalModel, bp::return_internal_reference<>()), "terminal model")
-      .add_property("runningDatas", bp::make_getter(&ShootingProblem_wrap::running_datas_, bp::return_value_policy<bp::return_by_value>()), "running datas")
-      .add_property("terminalData", bp::make_getter(&ShootingProblem_wrap::terminal_data_, bp::return_value_policy<bp::return_by_value>()), "terminal data");
+      .add_property("initialState",
+                    bp::make_getter(&ShootingProblem_wrap::x0_, bp::return_value_policy<bp::return_by_value>()),
+                    "initial state")
+      .add_property(
+          "runningModels",
+          bp::make_getter(&ShootingProblem_wrap::running_models_, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_setter(&ShootingProblem_wrap::running_models_, bp::return_value_policy<bp::return_by_value>()),
+          "running models")
+      .add_property("terminalModel",
+                    bp::make_function(&ShootingProblem_wrap::get_terminalModel, bp::return_internal_reference<>()),
+                    "terminal model")
+      .add_property(
+          "runningDatas",
+          bp::make_getter(&ShootingProblem_wrap::running_datas_, bp::return_value_policy<bp::return_by_value>()),
+          "running datas")
+      .add_property(
+          "terminalData",
+          bp::make_getter(&ShootingProblem_wrap::terminal_data_, bp::return_value_policy<bp::return_by_value>()),
+          "terminal data");
 }
 
 }  // namespace python

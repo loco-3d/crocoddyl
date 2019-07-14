@@ -75,20 +75,12 @@ void ShootingProblem::allocateData() {
   terminal_data_ = terminal_model_->createData();
 }
 
-std::vector<ActionModelAbstract*>& ShootingProblem::get_runningModels() {
-  return running_models_;
-}
+std::vector<ActionModelAbstract*>& ShootingProblem::get_runningModels() { return running_models_; }
 
-ActionModelAbstract* ShootingProblem::get_terminalModel() {
-  return terminal_model_;
-}
+ActionModelAbstract* ShootingProblem::get_terminalModel() { return terminal_model_; }
 
-std::vector<std::shared_ptr<ActionDataAbstract>>& ShootingProblem::get_runningDatas() {
-  return running_datas_;
-}
+std::vector<std::shared_ptr<ActionDataAbstract>>& ShootingProblem::get_runningDatas() { return running_datas_; }
 
-std::shared_ptr<ActionDataAbstract>& ShootingProblem::get_terminalData() {
-  return terminal_data_;
-}
+std::shared_ptr<ActionDataAbstract>& ShootingProblem::get_terminalData() { return terminal_data_; }
 
 }  // namespace crocoddyl

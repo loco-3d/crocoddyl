@@ -30,11 +30,11 @@ BOOST_PYTHON_MODULE(libcrocoddyl_pywrap) {
   eigenpy::enableEigenPySpecific<MatrixX>();
 
   // Register Eigen converters between std::vector and Python list
-  bp::to_python_converter<std::vector<VectorX, std::allocator<VectorX> >, vector_to_list<VectorX>, true >();
-  bp::to_python_converter<std::vector<MatrixX, std::allocator<MatrixX> >, vector_to_list<MatrixX>, true >();
+  bp::to_python_converter<std::vector<VectorX, std::allocator<VectorX> >, vector_to_list<VectorX>, true>();
+  bp::to_python_converter<std::vector<MatrixX, std::allocator<MatrixX> >, vector_to_list<MatrixX>, true>();
   list_to_vector()
-    .from_python<std::vector<VectorX, std::allocator<VectorX> > >()
-    .from_python<std::vector<MatrixX, std::allocator<MatrixX> > >();
+      .from_python<std::vector<VectorX, std::allocator<VectorX> > >()
+      .from_python<std::vector<MatrixX, std::allocator<MatrixX> > >();
 
   exposeCore();
 }

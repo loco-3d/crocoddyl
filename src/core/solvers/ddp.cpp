@@ -302,44 +302,24 @@ void SolverDDP::allocateData() {
   gaps_.back() = Eigen::VectorXd::Zero(ndx);
 }
 
-const std::vector<Eigen::MatrixXd>& SolverDDP::get_Vxx() const {
-  return Vxx_;
-}
+const std::vector<Eigen::MatrixXd>& SolverDDP::get_Vxx() const { return Vxx_; }
 
-const std::vector<Eigen::VectorXd>& SolverDDP::get_Vx() const {
-  return Vx_;
-}
+const std::vector<Eigen::VectorXd>& SolverDDP::get_Vx() const { return Vx_; }
 
-const std::vector<Eigen::MatrixXd>& SolverDDP::get_Qxx() const {
-  return Qxx_;
-}
+const std::vector<Eigen::MatrixXd>& SolverDDP::get_Qxx() const { return Qxx_; }
 
-const std::vector<Eigen::MatrixXd>& SolverDDP::get_Qxu() const {
-  return Qxu_;
-}
+const std::vector<Eigen::MatrixXd>& SolverDDP::get_Qxu() const { return Qxu_; }
 
-const std::vector<Eigen::MatrixXd>& SolverDDP::get_Quu() const {
-  return Quu_;
-}
+const std::vector<Eigen::MatrixXd>& SolverDDP::get_Quu() const { return Quu_; }
 
-const std::vector<Eigen::VectorXd>& SolverDDP::get_Qx() const {
-  return Qx_;
-}
+const std::vector<Eigen::VectorXd>& SolverDDP::get_Qx() const { return Qx_; }
 
-const std::vector<Eigen::VectorXd>& SolverDDP::get_Qu() const {
-  return Qu_;
-}
+const std::vector<Eigen::VectorXd>& SolverDDP::get_Qu() const { return Qu_; }
 
-const std::vector<Eigen::MatrixXd>& SolverDDP::get_K() const {
-  return K_;
-}
+const std::vector<Eigen::MatrixXd>& SolverDDP::get_K() const { return K_; }
 
-const std::vector<Eigen::VectorXd>& SolverDDP::get_k() const {
-  return k_;
-}
+const std::vector<Eigen::VectorXd>& SolverDDP::get_k() const { return k_; }
 
-const std::vector<Eigen::VectorXd>& SolverDDP::get_gaps() const {
-  return gaps_;
-}
+const std::vector<Eigen::VectorXd>& SolverDDP::get_gaps() const { return gaps_; }
 
 }  // namespace crocoddyl
