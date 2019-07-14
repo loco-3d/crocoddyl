@@ -26,6 +26,17 @@ class SolverDDP : public SolverAbstract {
   double stoppingCriteria() override;
   const Eigen::Vector2d& expectedImprovement() override;
 
+  const std::vector<Eigen::MatrixXd>& get_Vxx() const;
+  const std::vector<Eigen::VectorXd>& get_Vx() const;
+  const std::vector<Eigen::MatrixXd>& get_Qxx() const;
+  const std::vector<Eigen::MatrixXd>& get_Qxu() const;
+  const std::vector<Eigen::MatrixXd>& get_Quu() const;
+  const std::vector<Eigen::VectorXd>& get_Qx() const;
+  const std::vector<Eigen::VectorXd>& get_Qu() const;
+  const std::vector<Eigen::MatrixXd>& get_K() const;
+  const std::vector<Eigen::VectorXd>& get_k() const;
+  const std::vector<Eigen::VectorXd>& get_gaps() const;
+
  private:
   double calc();
   void backwardPass();
