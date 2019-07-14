@@ -7,8 +7,9 @@ SET(${PROJECT_NAME}_SOURCES
   core/solvers/ddp.cpp
   core/states/state-euclidean.cpp
   core/states/state-num-diff.cpp
-  core/actions/unicycle.cpp
-  core/actions/lqr.cpp
+  core/actions/action-unicycle.cpp
+  core/actions/action-lqr.cpp
+  core/actions/action-num-diff.cpp
   )
 
 IF(UNIX)
