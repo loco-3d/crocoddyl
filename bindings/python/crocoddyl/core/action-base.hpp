@@ -69,8 +69,7 @@ in which we obtain the next state. Additionally it computes the
 cost value associated to this discrete state and control pair.
 :param data: action data
 :param x: time-discrete state vector
-:param u: time-discrete control input
-:returns the next state and cost value)")
+:param u: time-discrete control input)")
       .def("calcDiff", pure_virtual(&ActionModelAbstract_wrap::calcDiff),
            bp::args(" self", " data", " x", " u", " recalc=True"),
            R"(Compute the derivatives of the dynamics and cost functions.
@@ -82,8 +81,7 @@ action model (i.e. linear dynamics and quadratic cost).
 :param data: action data
 :param x: time-discrete state vector
 :param u: time-discrete control input
-:param recalc: If true, it updates the state evolution and the cost value.
-:returns the next state and cost value)")
+:param recalc: If true, it updates the state evolution and the cost value.)")
       .def("createData", &ActionModelAbstract_wrap::createData, bp::args(" self"),
            R"(Create the action data.
 

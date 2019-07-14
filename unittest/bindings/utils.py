@@ -284,7 +284,8 @@ class DDPDerived(crocoddyl.SolverAbstract):
             utry[t] = us[t] - self.k[t] * stepLength - np.dot(self.K[t], m.State.diff(xs[t], xtry[t]))
             with np.warnings.catch_warnings():
                 np.warnings.simplefilter(warning)
-                xnext, cost = m.calc(d, xtry[t], utry[t])
+                m.calc(d, xtry[t], utry[t])
+                xnext, cost = d.xnext, d.cost
             xtry[t + 1] = xnext.copy()  # not sure copy helpful here.
             ctry += cost
             raiseIfNan([ctry, cost], ArithmeticError('forward error'))
