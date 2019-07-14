@@ -16,6 +16,7 @@
 #include "python/crocoddyl/core/states/state-euclidean.hpp"
 #include "python/crocoddyl/core/actions/unicycle.hpp"
 #include "python/crocoddyl/core/actions/lqr.hpp"
+#include "python/crocoddyl/core/solvers/ddp.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -28,6 +29,7 @@ void exposeCore() {
   exposeStateEuclidean();
   exposeActionUnicycle();
   exposeActionLQR();
+  exposeSolverDDP();
 }
 
 }  // namespace python
