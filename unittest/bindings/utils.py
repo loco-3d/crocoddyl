@@ -113,12 +113,12 @@ class DDPDerived(crocoddyl.SolverAbstract):
         self.th_step = .5
 
     def calc(self):
-        self.cost = self.problem_calcDiff(self.xs, self.us)
+        self.cost = self.problem.calcDiff(self.xs, self.us)
         if not self.isFeasible:
             # Gap store the state defect from the guess to feasible (rollout) trajectory, i.e.
             #   gap = x_rollout [-] x_guess = DIFF(x_guess, x_rollout)
-            self.gaps[0] = self.problem_runningModels[0].State.diff(self.xs[0], self.problem_initialState)
-            for i, (m, d, x) in enumerate(zip(self.problem_runningModels, self.problem_runningDatas, self.xs[1:])):
+            self.gaps[0] = self.problem.runningModels[0].State.diff(self.xs[0], self.problem.initialState)
+            for i, (m, d, x) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas, self.xs[1:])):
                 self.gaps[i + 1] = m.State.diff(x, d.xnext)
 
         return self.cost
@@ -127,7 +127,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
         if recalc:
             self.calc()
         self.backwardPass()
-        return [np.nan] * (self.problem_T + 1), self.k, self.Vx
+        return [np.nan] * (self.problem.T + 1), self.k, self.Vx
 
     def stoppingCriteria(self):
         return [np.asscalar(q.T * q) for q in self.Qu]
@@ -209,32 +209,32 @@ class DDPDerived(crocoddyl.SolverAbstract):
         self.Vxx = [a2m(np.zeros([m.ndx, m.ndx])) for m in self.models()]
         self.Vx = [a2m(np.zeros([m.ndx])) for m in self.models()]
 
-        self.Q = [a2m(np.zeros([m.ndx + m.nu, m.ndx + m.nu])) for m in self.problem_runningModels]
-        self.q = [a2m(np.zeros([m.ndx + m.nu])) for m in self.problem_runningModels]
-        self.Qxx = [Q[:m.ndx, :m.ndx] for m, Q in zip(self.problem_runningModels, self.Q)]
-        self.Qxu = [Q[:m.ndx, m.ndx:] for m, Q in zip(self.problem_runningModels, self.Q)]
-        self.Qux = [Qxu.T for m, Qxu in zip(self.problem_runningModels, self.Qxu)]
-        self.Quu = [Q[m.ndx:, m.ndx:] for m, Q in zip(self.problem_runningModels, self.Q)]
-        self.Qx = [q[:m.ndx] for m, q in zip(self.problem_runningModels, self.q)]
-        self.Qu = [q[m.ndx:] for m, q in zip(self.problem_runningModels, self.q)]
+        self.Q = [a2m(np.zeros([m.ndx + m.nu, m.ndx + m.nu])) for m in self.problem.runningModels]
+        self.q = [a2m(np.zeros([m.ndx + m.nu])) for m in self.problem.runningModels]
+        self.Qxx = [Q[:m.ndx, :m.ndx] for m, Q in zip(self.problem.runningModels, self.Q)]
+        self.Qxu = [Q[:m.ndx, m.ndx:] for m, Q in zip(self.problem.runningModels, self.Q)]
+        self.Qux = [Qxu.T for m, Qxu in zip(self.problem.runningModels, self.Qxu)]
+        self.Quu = [Q[m.ndx:, m.ndx:] for m, Q in zip(self.problem.runningModels, self.Q)]
+        self.Qx = [q[:m.ndx] for m, q in zip(self.problem.runningModels, self.q)]
+        self.Qu = [q[m.ndx:] for m, q in zip(self.problem.runningModels, self.q)]
 
-        self.K = [np.matrix(np.zeros([m.nu, m.ndx])) for m in self.problem_runningModels]
-        self.k = [a2m(np.zeros([m.nu])) for m in self.problem_runningModels]
+        self.K = [np.matrix(np.zeros([m.nu, m.ndx])) for m in self.problem.runningModels]
+        self.k = [a2m(np.zeros([m.nu])) for m in self.problem.runningModels]
 
-        self.xs_try = [self.problem_initialState] + [np.nan * self.problem_initialState] * self.problem_T
-        self.us_try = [np.nan] * self.problem_T
-        self.gaps = [a2m(np.zeros(self.problem_runningModels[0].ndx))
-                     ] + [a2m(np.zeros(m.ndx)) for m in self.problem_runningModels]
+        self.xs_try = [self.problem.initialState] + [np.nan * self.problem.initialState] * self.problem.T
+        self.us_try = [np.nan] * self.problem.T
+        self.gaps = [a2m(np.zeros(self.problem.runningModels[0].ndx))
+                     ] + [a2m(np.zeros(m.ndx)) for m in self.problem.runningModels]
 
     def backwardPass(self):
-        self.Vx[-1][:] = self.problem_terminalData.Lx
-        self.Vxx[-1][:, :] = self.problem_terminalData.Lxx
+        self.Vx[-1][:] = self.problem.terminalData.Lx
+        self.Vxx[-1][:, :] = self.problem.terminalData.Lxx
 
         if self.x_reg != 0:
-            ndx = self.problem_terminalModel.ndx
+            ndx = self.problem.terminalModel.ndx
             self.Vxx[-1][range(ndx), range(ndx)] += self.x_reg
 
-        for t, (model, data) in rev_enumerate(zip(self.problem_runningModels, self.problem_runningDatas)):
+        for t, (model, data) in rev_enumerate(zip(self.problem.runningModels, self.problem.runningDatas)):
             self.Qxx[t][:, :] = data.Lxx + data.Fx.T * self.Vxx[t + 1] * data.Fx
             self.Qxu[t][:, :] = data.Lxu + data.Fx.T * self.Vxx[t + 1] * data.Fu
             self.Quu[t][:, :] = data.Luu + data.Fu.T * self.Vxx[t + 1] * data.Fu
@@ -280,7 +280,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
         xs, us = self.xs, self.us
         xtry, utry = self.xs_try, self.us_try
         ctry = 0
-        for t, (m, d) in enumerate(zip(self.problem_runningModels, self.problem_runningDatas)):
+        for t, (m, d) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas)):
             utry[t] = us[t] - self.k[t] * stepLength - np.dot(self.K[t], m.State.diff(xs[t], xtry[t]))
             with np.warnings.catch_warnings():
                 np.warnings.simplefilter(warning)
@@ -291,7 +291,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
             raiseIfNan(xtry[t + 1], ArithmeticError('forward error'))
         with np.warnings.catch_warnings():
             np.warnings.simplefilter(warning)
-            ctry += self.problem_terminalModel.calc(self.problem_terminalData, xtry[-1])[1]
+            ctry += self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])[1]
         raiseIfNan(ctry, ArithmeticError('forward error'))
         self.cost_try = ctry
         return xtry, utry, ctry

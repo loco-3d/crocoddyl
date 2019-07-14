@@ -17,12 +17,12 @@ class ShootingProblem {
  public:
   ShootingProblem(const Eigen::Ref<const Eigen::VectorXd>& x0, std::vector<ActionModelAbstract*>& running_models,
                   ActionModelAbstract* terminal_model);
-  ShootingProblem();
   ~ShootingProblem();
 
   double calc(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us);
   double calcDiff(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us);
   void rollout(const std::vector<Eigen::VectorXd>& us, std::vector<Eigen::VectorXd>& xs);
+  std::vector<Eigen::VectorXd> rollout_us(const std::vector<Eigen::VectorXd>& us);
 
   long unsigned int get_T() const;
   const Eigen::VectorXd& get_x0() const;

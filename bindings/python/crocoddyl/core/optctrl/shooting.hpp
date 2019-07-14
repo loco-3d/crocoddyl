@@ -11,7 +11,6 @@
 
 #include "crocoddyl/core/optctrl/shooting.hpp"
 #include "python/crocoddyl/utils.hpp"
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 namespace crocoddyl {
 namespace python {
@@ -22,44 +21,25 @@ class ShootingProblem_wrap : public ShootingProblem, public bp::wrapper<Shooting
  public:
   using ShootingProblem::T_;
   using ShootingProblem::x0_;
+  using ShootingProblem::running_models_;
+  using ShootingProblem::running_datas_;
+  using ShootingProblem::terminal_data_;
 
-  ShootingProblem_wrap(const Eigen::VectorXd& x0, const bp::list& running_models,
-                       ActionModelAbstract* terminal_model) : ShootingProblem(), bp::wrapper<ShootingProblem>() {
-    x0_ = x0;
-    T_ = len(running_models);
-    running_models_ = python_list_to_std_vector<ActionModelAbstract*>(running_models);
-    terminal_model_ = terminal_model;
-    allocateData();
-  }
-
-  double calc_wrap(const bp::list& xs, const bp::list& us) {
-    const std::vector<Eigen::VectorXd>& xs_vec = python_list_to_std_vector<Eigen::VectorXd>(xs);
-    const std::vector<Eigen::VectorXd>& us_vec = python_list_to_std_vector<Eigen::VectorXd>(us);
-    return calc(xs_vec, us_vec);
-  }
-
-  double calcDiff_wrap(const bp::list& xs, const bp::list& us) {
-    const std::vector<Eigen::VectorXd>& xs_vec = python_list_to_std_vector<Eigen::VectorXd>(xs);
-    const std::vector<Eigen::VectorXd>& us_vec = python_list_to_std_vector<Eigen::VectorXd>(us);
-    return calcDiff(xs_vec, us_vec);
-  }
-
-  bp::list rollout_wrap(const bp::list& us) {
-    std::vector<Eigen::VectorXd> xs_vec;
-    const std::vector<Eigen::VectorXd>& us_vec = python_list_to_std_vector<Eigen::VectorXd>(us);
-    rollout(us_vec, xs_vec);
-    return std_vector_to_python_list(xs_vec);
-  }
-
-  bp::list get_runningModels_wrap() { return std_vector_to_python_list(get_runningModels()); }
-
-  bp::list get_runningDatas_wrap() { return std_vector_to_python_list(get_runningDatas()); }
-
-  std::shared_ptr<ActionDataAbstract> get_terminalData_wrap() { return get_terminalData(); }
+  ShootingProblem_wrap(const Eigen::VectorXd& x0,
+                       std::vector<ActionModelAbstract*> running_models,
+                       ActionModelAbstract* terminal_model) : ShootingProblem(x0, running_models, terminal_model) {}
 };
 
 
 void exposeShootingProblem() {
+  // Register custom converters between std::vector and Python list
+  typedef ActionModelAbstract* ActionModelPtr;
+  typedef std::shared_ptr<ActionDataAbstract> ActionDataPtr;
+  bp::to_python_converter<std::vector<ActionModelPtr, std::allocator<ActionModelPtr> >, vector_to_list<ActionModelPtr> >();
+  bp::to_python_converter<std::vector<ActionDataPtr, std::allocator<ActionDataPtr> >, vector_to_list<ActionDataPtr> >();
+  list_to_vector()
+    .from_python<std::vector<ActionModelPtr, std::allocator<ActionModelPtr> > >();
+
   bp::class_<ShootingProblem_wrap, boost::noncopyable>(
       "ShootingProblem",
       R"(Declare a shooting problem.
@@ -69,14 +49,14 @@ void exposeShootingProblem() {
         first computes the set of next states and cost values per each action model. calcDiff
         updates the derivatives of all action models. The last rollouts the stacks of actions
         models.)",
-      bp::init<Eigen::VectorXd, bp::list, ActionModelAbstract*>(
+      bp::init<Eigen::VectorXd, std::vector<ActionModelAbstract*>, ActionModelAbstract*>(
           bp::args(" self", " initialState", " runningModels", " terminalModel"),
           R"(Initialize the shooting problem.
 
 :param initialState: initial state
 :param runningModels: running action models
 :param terminalModel: terminal action model)"))
-      .def("calc", &ShootingProblem_wrap::calc_wrap, bp::args(" self", " xs", " us"),
+      .def("calc", &ShootingProblem_wrap::calc, bp::args(" self", " xs", " us"),
            R"(Compute the cost and the next states.
 
 First, it computes the next state and cost for each action model
@@ -84,24 +64,25 @@ along a state and control trajectory.
 :param xs: time-discrete state trajectory
 :param us: time-discrete control sequence
 :returns the total cost value)")
-      .def("calcDiff", &ShootingProblem_wrap::calcDiff_wrap, bp::args(" self", " xs", " us"),
+      .def("calcDiff", &ShootingProblem_wrap::calcDiff, bp::args(" self", " xs", " us"),
            R"(Compute the cost-and-dynamics derivatives.
 
 These quantities are computed along a given pair of trajectories xs
 (states) and us (controls).
 :param xs: time-discrete state trajectory
 :param us: time-discrete control sequence)")
-      .def("rollout", &ShootingProblem_wrap::rollout_wrap, bp::args(" self", " us"),
+      .def("rollout", &ShootingProblem_wrap::rollout_us, bp::args(" self", " us"),
            R"(Integrate the dynamics given a control sequence.
 
 Rollout the dynamics give a sequence of control commands
 :param us: time-discrete control sequence)")
       .add_property("T", &ShootingProblem_wrap::T_, "number of nodes")
       .add_property("initialState", bp::make_getter(&ShootingProblem_wrap::x0_, bp::return_value_policy<bp::return_by_value>()), "initial state")
-      .add_property("runningModels", bp::make_function(&ShootingProblem_wrap::get_runningModels_wrap), "running models")
+      .add_property("runningModels", bp::make_getter(&ShootingProblem_wrap::running_models_, bp::return_value_policy<bp::return_by_value>()),
+                     bp::make_setter(&ShootingProblem_wrap::running_models_, bp::return_value_policy<bp::return_by_value>()), "running models")
       .add_property("terminalModel", bp::make_function(&ShootingProblem_wrap::get_terminalModel, bp::return_internal_reference<>()), "terminal model")
-      .def_readonly("runningDatas", &ShootingProblem_wrap::get_runningDatas_wrap, "running datas")
-      .def_readonly("terminalData", &ShootingProblem_wrap::get_terminalData_wrap, "terminal data");
+      .add_property("runningDatas", bp::make_getter(&ShootingProblem_wrap::running_datas_, bp::return_value_policy<bp::return_by_value>()), "running datas")
+      .add_property("terminalData", bp::make_getter(&ShootingProblem_wrap::terminal_data_, bp::return_value_policy<bp::return_by_value>()), "terminal data");
 }
 
 }  // namespace python

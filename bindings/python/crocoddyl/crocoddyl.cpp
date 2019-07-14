@@ -11,6 +11,7 @@
 
 #include "python/crocoddyl/core.hpp"
 #include "crocoddyl/core/utils/version.hpp"
+#include "python/crocoddyl/utils.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -27,6 +28,11 @@ BOOST_PYTHON_MODULE(libcrocoddyl_pywrap) {
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> MatrixX;
   eigenpy::enableEigenPySpecific<VectorX>();
   eigenpy::enableEigenPySpecific<MatrixX>();
+
+  // Register Eigen converters between std::vector and Python list
+  bp::to_python_converter<std::vector<VectorX, std::allocator<VectorX> >, vector_to_list<VectorX>, true >();
+  list_to_vector()
+    .from_python<std::vector<Eigen::VectorXd, std::allocator<Eigen::VectorXd> > >();
 
   exposeCore();
 }

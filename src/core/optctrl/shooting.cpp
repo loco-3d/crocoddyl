@@ -9,8 +9,6 @@ ShootingProblem::ShootingProblem(const Eigen::Ref<const Eigen::VectorXd>& x0,
   allocateData();
 }
 
-ShootingProblem::ShootingProblem() : cost_(0.) {}
-
 ShootingProblem::~ShootingProblem() {}
 
 double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us) {
@@ -57,6 +55,12 @@ void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us, std::vecto
     model->calc(data, x, u);
     xs[i + 1] = data->get_xnext();
   }
+}
+
+std::vector<Eigen::VectorXd> ShootingProblem::rollout_us(const std::vector<Eigen::VectorXd>& us) {
+  std::vector<Eigen::VectorXd> xs;
+  rollout(us, xs);
+  return xs;
 }
 
 long unsigned int ShootingProblem::get_T() const { return T_; }
