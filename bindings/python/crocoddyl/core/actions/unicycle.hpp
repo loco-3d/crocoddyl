@@ -9,7 +9,7 @@
 #ifndef PYTHON_CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_
 #define PYTHON_CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_
 
-#include "crocoddyl/core/actions/unicycle.hpp"
+#include "crocoddyl/core/actions/action-unicycle.hpp"
 
 namespace crocoddyl {
 namespace python {
