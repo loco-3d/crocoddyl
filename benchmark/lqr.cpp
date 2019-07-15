@@ -1,8 +1,7 @@
-#include <crocoddyl/core/states/state-euclidean.hpp>
-#include <crocoddyl/core/actions/lqr.hpp>
-#include <crocoddyl/core/utils/callbacks.hpp>
-#include <crocoddyl/core/solvers/ddp.hpp>
-
+#include "crocoddyl/core/states/state-euclidean.hpp"
+#include "crocoddyl/core/actions/action-lqr.hpp"
+#include "crocoddyl/core/utils/callbacks.hpp"
+#include "crocoddyl/core/solvers/ddp.hpp"
 #include <ctime>
 
 int main() {
