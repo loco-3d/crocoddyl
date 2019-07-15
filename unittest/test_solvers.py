@@ -722,7 +722,7 @@ problem = ShootingProblem(model.State.zero() + 1, runningModels, model)
 # Make artificially Quu=0 at T-1
 Vxx_T = problem.terminalModel.Lxx
 Fu_T_1 = problem.runningModels[T - 1].Fu
-problem.runningModels[T - 2].Luu = -np.dot(np.dot(Fu_T_1.T, Vxx_T), Fu_T_1)
+problem.runningModels[T - 2].Luu = -1. * np.dot(np.dot(Fu_T_1.T, Vxx_T), Fu_T_1)
 
 ddp = SolverDDP(problem)
 fddp = SolverFDDP(problem)
@@ -733,6 +733,58 @@ fddp.regMax = 1e-5
 
 assert (not ddp.solve()[2])
 assert (not fddp.solve()[2])
+
+# -------------------------------------------------------------------
+# ------------- test expected improvement without gaps --------------
+# -------------------------------------------------------------------
+NX, NU = 3, 3
+T = 5
+models = [ActionModelLQR(NX, NU, driftFree=True) for t in range(T + 1)]
+problem = ShootingProblem(models[0].State.zero(), models[:-1], models[-1])
+
+# Run the KKT and FDDP solver
+kkt = SolverKKT(problem)
+[xskkt, uskkt, donekkt] = kkt.solve(maxiter=1)
+fddp = SolverFDDP(problem)
+fddp.computeDirection()
+fddp.tryStep(1.)
+
+# Checks that FDDP solution is OK
+for t in range(T):
+    assert (np.allclose(fddp.us_try[t], kkt.us[t]))
+    assert (np.allclose(fddp.xs_try[t + 1], kkt.xs[t + 1]))
+
+# Checks the expecte improvement against the KKT solver
+fddp.updateExpectedImprovement()
+d1, d2 = fddp.expectedImprovement()
+d1kkt, d2kkt = kkt.expectedImprovement()
+assert (abs(d1 - d1kkt) < 1e-14 and abs(d2 - d2kkt) < 1e-14)
+
+# -------------------------------------------------------------------
+# ------------- test expected improvement against gaps --------------
+# -------------------------------------------------------------------
+NX, NU = 3, 3
+T = 5
+models = [ActionModelLQR(NX, NU, driftFree=False) for t in range(T + 1)]
+problem = ShootingProblem(models[0].State.zero(), models[:-1], models[-1])
+
+# Run the KKT and FDDP solver
+kkt = SolverKKT(problem)
+[xskkt, uskkt, donekkt] = kkt.solve(maxiter=1)
+fddp = SolverFDDP(problem)
+fddp.computeDirection()
+fddp.tryStep(1.)
+
+# Checks that FDDP solution is OK
+for t in range(T):
+    assert (np.allclose(fddp.us_try[t], kkt.us[t]))
+    assert (np.allclose(fddp.xs_try[t + 1], kkt.xs[t + 1]))
+
+# Checks the expecte improvement against the KKT solver
+fddp.updateExpectedImprovement()
+d1, d2 = fddp.expectedImprovement()
+d1kkt, d2kkt = kkt.expectedImprovement()
+assert (abs(d1 - d1kkt) < 1e-14 and abs(d2 - d2kkt) < 1e-14)
 
 if __name__ == '__main__':
     unittest.main()

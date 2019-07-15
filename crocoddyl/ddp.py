@@ -34,6 +34,10 @@ class SolverDDP(SolverAbstract):
         self.regMin = 1e-9
         self.th_step = .5
 
+        # Quadratic model of the expected improvement
+        self.d1 = 0.
+        self.d2 = 0.
+
     def calc(self):
         """ Compute the tangent (LQR) model.
         """
@@ -69,9 +73,9 @@ class SolverDDP(SolverAbstract):
         """ Return two scalars denoting the quadratic improvement model
         (i.e. dV = f_0 - f_+ = d1*a + d2*a**2/2)
         """
-        d1 = sum([np.dot(q, k) for q, k in zip(self.Qu, self.k)])
-        d2 = sum([-np.dot(k, np.dot(q, k)) for q, k in zip(self.Quu, self.k)])
-        return [d1, d2]
+        self.d1 = sum([np.dot(q, k) for q, k in zip(self.Qu, self.k)])
+        self.d2 = sum([-np.dot(k, np.dot(q, k)) for q, k in zip(self.Quu, self.k)])
+        return [self.d1, self.d2]
 
     def tryStep(self, stepLength):
         """ Rollout the system with a predefined step length.
