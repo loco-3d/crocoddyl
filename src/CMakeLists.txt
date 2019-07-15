@@ -10,6 +10,7 @@ SET(${PROJECT_NAME}_SOURCES
   core/states/state-num-diff.cpp
   core/actions/action-unicycle.cpp
   core/actions/action-lqr.cpp
+  core/actions/diff-action-lqr.cpp
   core/actions/action-num-diff.cpp
   )
 

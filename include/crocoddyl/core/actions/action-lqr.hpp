@@ -18,7 +18,7 @@ namespace crocoddyl {
 
 class ActionModelLQR : public ActionModelAbstract {
  public:
-  ActionModelLQR(const unsigned int& nx, const unsigned int& nu, bool driftFree = true);
+  ActionModelLQR(const unsigned int& nx, const unsigned int& nu, bool drift_free = true);
   ~ActionModelLQR();
 
   void calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
