@@ -1,11 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-// BSD 3-Clause License
-//
-// Copyright (C) 2018-2019, LAAS-CNRS, New York University, Max Planck Gesellshaft
-// Copyright note valid unless otherwise stated in individual files.
-// All rights reserved.
-///////////////////////////////////////////////////////////////////////////////
-
 #include "crocoddyl/core/actions/action-num-diff.hpp"
 
 namespace crocoddyl {

@@ -1,4 +1,4 @@
-#include <crocoddyl/core/optctrl/shooting.hpp>
+#include "crocoddyl/core/optctrl/shooting.hpp"
 
 namespace crocoddyl {
 

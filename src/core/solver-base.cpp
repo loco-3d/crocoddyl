@@ -1,4 +1,4 @@
-#include <crocoddyl/core/solver-base.hpp>
+#include "crocoddyl/core/solver-base.hpp"
 
 namespace crocoddyl {
 

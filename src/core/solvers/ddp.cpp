@@ -1,4 +1,4 @@
-#include <crocoddyl/core/solvers/ddp.hpp>
+#include "crocoddyl/core/solvers/ddp.hpp"
 
 namespace crocoddyl {
 

@@ -1,4 +1,4 @@
-#include <crocoddyl/core/actions/action-lqr.hpp>
+#include "crocoddyl/core/actions/action-lqr.hpp"
 
 namespace crocoddyl {
 
