@@ -4,7 +4,7 @@ namespace crocoddyl {
 
 DifferentialActionModelAbstract::DifferentialActionModelAbstract(const unsigned int& nq, const unsigned int& nv,
                                                                  const unsigned int& nu)
-    : nq_(nq), nv_(nv), nu_(nu), nx_(nq + nv), ndx_(2 * nv), nout_(nv), unone_(Eigen::VectorXd::Zero(nu)) {
+    : nq_(nq), nv_(nv), nu_(nu), nx_(nq + nv), ndx_(2 * nv), nout_(nv), ncost_(0), unone_(Eigen::VectorXd::Zero(nu)) {
   assert(nq_ != 0);
   assert(nv_ != 0);
   assert(nu_ != 0);
