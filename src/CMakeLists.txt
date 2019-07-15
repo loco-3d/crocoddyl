@@ -1,6 +1,7 @@
 SET(${PROJECT_NAME}_SOURCES
   core/state-base.cpp
   core/action-base.cpp
+  core/diff-action-base.cpp
   core/solver-base.cpp
   core/utils/callbacks.cpp
   core/optctrl/shooting.cpp
