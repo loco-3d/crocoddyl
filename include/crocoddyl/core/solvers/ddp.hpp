@@ -19,12 +19,24 @@ class SolverDDP : public SolverAbstract {
   SolverDDP(ShootingProblem& problem);
   ~SolverDDP();
 
-  bool solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-             const unsigned int& maxiter = 100, const bool& is_feasible = false, const double& regInit = NAN) override;
+  bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
+             const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const unsigned int& maxiter = 100,
+             const bool& is_feasible = false, const double& regInit = 1e-9) override;
   void computeDirection(const bool& recalc = true) override;
-  double tryStep(const double& steplength) override;
+  double tryStep(const double& steplength = 1) override;
   double stoppingCriteria() override;
   const Eigen::Vector2d& expectedImprovement() override;
+
+  const std::vector<Eigen::MatrixXd>& get_Vxx() const;
+  const std::vector<Eigen::VectorXd>& get_Vx() const;
+  const std::vector<Eigen::MatrixXd>& get_Qxx() const;
+  const std::vector<Eigen::MatrixXd>& get_Qxu() const;
+  const std::vector<Eigen::MatrixXd>& get_Quu() const;
+  const std::vector<Eigen::VectorXd>& get_Qx() const;
+  const std::vector<Eigen::VectorXd>& get_Qu() const;
+  const std::vector<Eigen::MatrixXd>& get_K() const;
+  const std::vector<Eigen::VectorXd>& get_k() const;
+  const std::vector<Eigen::VectorXd>& get_gaps() const;
 
  private:
   double calc();

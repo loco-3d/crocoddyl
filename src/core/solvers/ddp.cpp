@@ -266,8 +266,6 @@ void SolverDDP::allocateData() {
   k_.resize(T);
   gaps_.resize(T + 1);
 
-  xs_.resize(T + 1);
-  us_.resize(T);
   xs_try_.resize(T + 1);
   us_try_.resize(T);
   dx_.resize(T);
@@ -289,8 +287,6 @@ void SolverDDP::allocateData() {
     k_[t] = Eigen::VectorXd::Zero(nu);
     gaps_[t] = Eigen::VectorXd::Zero(ndx);
 
-    xs_[t] = model->get_state()->zero();
-    us_[t] = Eigen::VectorXd::Zero(nu);
     if (t == 0) {
       xs_try_[t] = problem_.get_x0();
     } else {
@@ -302,9 +298,28 @@ void SolverDDP::allocateData() {
   const int& ndx = problem_.terminal_model_->get_ndx();
   Vxx_.back() = Eigen::MatrixXd::Zero(ndx, ndx);
   Vx_.back() = Eigen::VectorXd::Zero(ndx);
-  xs_.back() = problem_.terminal_model_->get_state()->zero();
   xs_try_.back() = problem_.terminal_model_->get_state()->zero();
   gaps_.back() = Eigen::VectorXd::Zero(ndx);
 }
+
+const std::vector<Eigen::MatrixXd>& SolverDDP::get_Vxx() const { return Vxx_; }
+
+const std::vector<Eigen::VectorXd>& SolverDDP::get_Vx() const { return Vx_; }
+
+const std::vector<Eigen::MatrixXd>& SolverDDP::get_Qxx() const { return Qxx_; }
+
+const std::vector<Eigen::MatrixXd>& SolverDDP::get_Qxu() const { return Qxu_; }
+
+const std::vector<Eigen::MatrixXd>& SolverDDP::get_Quu() const { return Quu_; }
+
+const std::vector<Eigen::VectorXd>& SolverDDP::get_Qx() const { return Qx_; }
+
+const std::vector<Eigen::VectorXd>& SolverDDP::get_Qu() const { return Qu_; }
+
+const std::vector<Eigen::MatrixXd>& SolverDDP::get_K() const { return K_; }
+
+const std::vector<Eigen::VectorXd>& SolverDDP::get_k() const { return k_; }
+
+const std::vector<Eigen::VectorXd>& SolverDDP::get_gaps() const { return gaps_; }
 
 }  // namespace crocoddyl

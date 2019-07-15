@@ -9,29 +9,37 @@
 #ifndef CROCODDYL_CORE_SOLVER_BASE_HPP_
 #define CROCODDYL_CORE_SOLVER_BASE_HPP_
 
+#include <vector>
 #include <crocoddyl/core/optctrl/shooting.hpp>
 
 namespace crocoddyl {
 
 class CallbackAbstract;  // forward declaration
+static std::vector<Eigen::VectorXd> DEFAULT_VECTOR;
 
 class SolverAbstract {
  public:
   SolverAbstract(ShootingProblem& problem);
   virtual ~SolverAbstract();
 
-  virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-                     const unsigned int& maxiter, const bool& is_feasible, const double& reg_init) = 0;
+  virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
+                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const unsigned int& maxiter = 100,
+                     const bool& is_feasible = false, const double& reg_init = 1e-9) = 0;
   // TODO: computeDirection (polimorfism) returning descent direction and lambdas
   virtual void computeDirection(const bool& recalc) = 0;
-  virtual double tryStep(const double& step_length) = 0;
+  virtual double tryStep(const double& step_length = 1) = 0;
   virtual double stoppingCriteria() = 0;
   virtual const Eigen::Vector2d& expectedImprovement() = 0;
-  void setCandidate(const std::vector<Eigen::VectorXd>& xs_warm, const std::vector<Eigen::VectorXd>& us_warm,
-                    const bool& is_feasible = false);
+  void setCandidate(const std::vector<Eigen::VectorXd>& xs_warm = DEFAULT_VECTOR,
+                    const std::vector<Eigen::VectorXd>& us_warm = DEFAULT_VECTOR, const bool& is_feasible = false);
 
   void setCallbacks(std::vector<CallbackAbstract*>& callbacks);
 
+  const ShootingProblem& get_problem() const;
+  const std::vector<ActionModelAbstract*>& get_models() const;
+  const std::vector<std::shared_ptr<ActionDataAbstract>>& get_datas() const;
+  const std::vector<Eigen::VectorXd>& get_xs() const;
+  const std::vector<Eigen::VectorXd>& get_us() const;
   const bool& get_isFeasible() const;
   const unsigned int& get_iter() const;
   const double& get_cost() const;
@@ -45,6 +53,8 @@ class SolverAbstract {
 
  protected:
   ShootingProblem problem_;
+  std::vector<ActionModelAbstract*> models_;
+  std::vector<std::shared_ptr<ActionDataAbstract>> datas_;
   std::vector<Eigen::VectorXd> xs_;
   std::vector<Eigen::VectorXd> us_;
   std::vector<CallbackAbstract*> callbacks_;

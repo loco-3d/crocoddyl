@@ -9,7 +9,7 @@
 #ifndef PYTHON_CROCODDYL_CORE_ACTION_BASE_HPP_
 #define PYTHON_CROCODDYL_CORE_ACTION_BASE_HPP_
 
-#include <crocoddyl/core/action-base.hpp>
+#include "crocoddyl/core/action-base.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -28,21 +28,19 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
       : ActionModelAbstract(state, nu, ncost), bp::wrapper<ActionModelAbstract>() {}
 
   void calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-            const Eigen::Ref<const Eigen::VectorXd>& u) {
-    return bp::call<void>(this->get_override("calc").ptr(), boost::ref(data), (Eigen::VectorXd)x, (Eigen::VectorXd)u);
+            const Eigen::Ref<const Eigen::VectorXd>& u) override {
+    return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
+  }
+  void calc_wrap(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
+    calc(data, x, u);
   }
 
   void calcDiff(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
-    return bp::call<void>(this->get_override("calcDiff").ptr(), boost::ref(data), (Eigen::VectorXd)x,
-                          (Eigen::VectorXd)u, recalc);
+                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) override {
+    return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
 
-  std::shared_ptr<ActionDataAbstract> createData() { return std::make_shared<ActionDataAbstract>(this); }
-};
-
-struct ActionDataAbstract_wrap : public ActionDataAbstract, public bp::wrapper<ActionDataAbstract> {
-  ActionDataAbstract_wrap(ActionModelAbstract* model) : ActionDataAbstract(model), bp::wrapper<ActionDataAbstract>() {}
+  std::shared_ptr<ActionDataAbstract> createData() override { return std::make_shared<ActionDataAbstract>(this); }
 };
 
 void exposeActionAbstract() {
@@ -60,8 +58,8 @@ void exposeActionAbstract() {
 
 :param state: state description,
 :param nu: dimension of control vector,
-:param ncost: dimension of the cost-residual vector)"))
-      .def("calc", pure_virtual(&ActionModelAbstract_wrap::calc), bp::args(" self", " data", " x", " u"),
+:param ncost: dimension of the cost-residual vector)")[bp::with_custodian_and_ward<1, 2>()])
+      .def("calc", pure_virtual(&ActionModelAbstract_wrap::calc_wrap), bp::args(" self", " data", " x", " u"),
            R"(Compute the next state and cost value.
 
 It describes the time-discrete evolution of our dynamical system
@@ -69,8 +67,7 @@ in which we obtain the next state. Additionally it computes the
 cost value associated to this discrete state and control pair.
 :param data: action data
 :param x: time-discrete state vector
-:param u: time-discrete control input
-:returns the next state and cost value)")
+:param u: time-discrete control input)")
       .def("calcDiff", pure_virtual(&ActionModelAbstract_wrap::calcDiff),
            bp::args(" self", " data", " x", " u", " recalc=True"),
            R"(Compute the derivatives of the dynamics and cost functions.
@@ -82,8 +79,7 @@ action model (i.e. linear dynamics and quadratic cost).
 :param data: action data
 :param x: time-discrete state vector
 :param u: time-discrete control input
-:param recalc: If true, it updates the state evolution and the cost value.
-:returns the next state and cost value)")
+:param recalc: If true, it updates the state evolution and the cost value.)")
       .def("createData", &ActionModelAbstract_wrap::createData, bp::args(" self"),
            R"(Create the action data.
 
@@ -98,11 +94,10 @@ you need to defined the ActionDataType inside your AM.
       .add_property("unone",
                     bp::make_getter(&ActionModelAbstract_wrap::unone_, bp::return_value_policy<bp::return_by_value>()),
                     "default control vector")
-      .def("State", &ActionModelAbstract_wrap::get_state, bp::return_value_policy<bp::reference_existing_object>());
+      .add_property("State", bp::make_function(&ActionModelAbstract_wrap::get_state,
+                                               bp::return_value_policy<bp::reference_existing_object>()));
 
-  boost::python::register_ptr_to_python<std::shared_ptr<ActionDataAbstract>>();
-
-  bp::class_<ActionDataAbstract_wrap, boost::noncopyable>(
+  bp::class_<ActionDataAbstract, std::shared_ptr<ActionDataAbstract>, boost::noncopyable>(
       "ActionDataAbstract",
       R"(Abstract class for action datas.
 
@@ -115,42 +110,32 @@ you need to defined the ActionDataType inside your AM.
 
 The action data uses the model in order to first process it.
 :param model: action model)"))
-      .add_property("cost",
-                    bp::make_getter(&ActionDataAbstract_wrap::cost, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract_wrap::cost), "cost value")
+      .add_property("cost", bp::make_getter(&ActionDataAbstract::cost, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ActionDataAbstract::cost), "cost value")
       .add_property("xnext",
-                    bp::make_getter(&ActionDataAbstract_wrap::xnext, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract_wrap::xnext), "next state")
-      .add_property("Fx",
-                    bp::make_getter(&ActionDataAbstract_wrap::Fx, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract_wrap::Fx), "Jacobian of the dynamics")
-      .add_property("Fu",
-                    bp::make_getter(&ActionDataAbstract_wrap::Fu, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract_wrap::Fu), "Jacobian of the dynamics")
-      .add_property("Lx",
-                    bp::make_getter(&ActionDataAbstract_wrap::Lx, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract_wrap::Lx), "Jacobian of the cost")
-      .add_property("Lu",
-                    bp::make_getter(&ActionDataAbstract_wrap::Lu, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract_wrap::Lu), "Jacobian of the cost")
-      .add_property("Lxx",
-                    bp::make_getter(&ActionDataAbstract_wrap::Lxx, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract_wrap::Lxx), "Hessian of the cost")
-      .add_property("Lxu",
-                    bp::make_getter(&ActionDataAbstract_wrap::Lxu, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract_wrap::Lxu), "Hessian of the cost")
-      .add_property("Luu",
-                    bp::make_getter(&ActionDataAbstract_wrap::Luu, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract_wrap::Luu), "Hessian of the cost")
+                    bp::make_getter(&ActionDataAbstract::xnext, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ActionDataAbstract::xnext), "next state")
+      .add_property("Fx", bp::make_getter(&ActionDataAbstract::Fx, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ActionDataAbstract::Fx), "Jacobian of the dynamics")
+      .add_property("Fu", bp::make_getter(&ActionDataAbstract::Fu, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ActionDataAbstract::Fu), "Jacobian of the dynamics")
+      .add_property("Lx", bp::make_getter(&ActionDataAbstract::Lx, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ActionDataAbstract::Lx), "Jacobian of the cost")
+      .add_property("Lu", bp::make_getter(&ActionDataAbstract::Lu, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ActionDataAbstract::Lu), "Jacobian of the cost")
+      .add_property("Lxx", bp::make_getter(&ActionDataAbstract::Lxx, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ActionDataAbstract::Lxx), "Hessian of the cost")
+      .add_property("Lxu", bp::make_getter(&ActionDataAbstract::Lxu, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ActionDataAbstract::Lxu), "Hessian of the cost")
+      .add_property("Luu", bp::make_getter(&ActionDataAbstract::Luu, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ActionDataAbstract::Luu), "Hessian of the cost")
       .add_property("costResiduals",
-                    bp::make_getter(&ActionDataAbstract_wrap::r, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract_wrap::r))
-      .add_property("Rx",
-                    bp::make_getter(&ActionDataAbstract_wrap::Rx, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract_wrap::Rx))
-      .add_property("Ru",
-                    bp::make_getter(&ActionDataAbstract_wrap::Ru, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract_wrap::Ru));
+                    bp::make_getter(&ActionDataAbstract::r, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ActionDataAbstract::r))
+      .add_property("Rx", bp::make_getter(&ActionDataAbstract::Rx, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ActionDataAbstract::Rx))
+      .add_property("Ru", bp::make_getter(&ActionDataAbstract::Ru, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ActionDataAbstract::Ru));
 }
 
 }  // namespace python

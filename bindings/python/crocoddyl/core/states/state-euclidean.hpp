@@ -9,7 +9,7 @@
 #ifndef PYTHON_CROCODDYL_CORE_STATES_STATE_EUCLIDEAN_HPP_
 #define PYTHON_CROCODDYL_CORE_STATES_STATE_EUCLIDEAN_HPP_
 
-#include <crocoddyl/core/states/state-euclidean.hpp>
+#include "crocoddyl/core/states/state-euclidean.hpp"
 
 namespace crocoddyl {
 namespace python {

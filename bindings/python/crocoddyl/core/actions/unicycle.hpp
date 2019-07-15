@@ -9,7 +9,7 @@
 #ifndef PYTHON_CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_
 #define PYTHON_CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_
 
-#include <crocoddyl/core/actions/unicycle.hpp>
+#include "crocoddyl/core/actions/action-unicycle.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -69,8 +69,7 @@ Additionally it computes the cost value associated to this discrete
 state and control pair.
 :param data: action data
 :param x: time-discrete state vector
-:param u: time-discrete control input
-:returns the next state and cost value)")
+:param u: time-discrete control input)")
       .def("calc", &ActionModelUnicycle_wrap::calc_wrap2)
       .def("calcDiff", &ActionModelUnicycle_wrap::calcDiff_wrap1,
            bp::args(" self", " data", " x", " u=None", " recalc=True"),
@@ -83,15 +82,14 @@ action model (i.e. dynamical system and cost function).
 :param data: action data
 :param x: time-discrete state vector
 :param u: time-discrete control input
-:param recalc: If true, it updates the state evolution and the cost value.
-:returns the next state and cost value)")
+:param recalc: If true, it updates the state evolution and the cost value.)")
       .def("calcDiff", &ActionModelUnicycle_wrap::calcDiff_wrap2)
       .def("calcDiff", &ActionModelUnicycle_wrap::calcDiff_wrap3)
       .def("calcDiff", &ActionModelUnicycle_wrap::calcDiff_wrap4)
       .def("createData", &ActionModelUnicycle_wrap::createData, bp::args(" self"),
            R"(Create the unicycle action data.)");
 
-  boost::python::register_ptr_to_python<std::shared_ptr<ActionDataUnicycle>>();
+  bp::register_ptr_to_python<std::shared_ptr<ActionDataUnicycle>>();
 
   bp::class_<ActionDataUnicycle, bp::bases<ActionDataAbstract>>(
       "ActionDataUnicycle",

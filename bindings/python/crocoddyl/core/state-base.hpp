@@ -9,8 +9,7 @@
 #ifndef PYTHON_CROCODDYL_CORE_STATE_BASE_HPP_
 #define PYTHON_CROCODDYL_CORE_STATE_BASE_HPP_
 
-#include <crocoddyl/core/state-base.hpp>
-#include <iostream>
+#include "crocoddyl/core/state-base.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -24,16 +23,16 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
 
   StateAbstract_wrap(int nx, int ndx) : StateAbstract(nx, ndx), bp::wrapper<StateAbstract>() {}
 
-  Eigen::VectorXd zero() { return bp::call<Eigen::VectorXd>(this->get_override("zero").ptr()); }
+  Eigen::VectorXd zero() override { return bp::call<Eigen::VectorXd>(this->get_override("zero").ptr()); }
 
-  Eigen::VectorXd rand() { return bp::call<Eigen::VectorXd>(this->get_override("rand").ptr()); }
+  Eigen::VectorXd rand() override { return bp::call<Eigen::VectorXd>(this->get_override("rand").ptr()); }
 
   Eigen::VectorXd diff_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1) {
     return bp::call<Eigen::VectorXd>(this->get_override("diff").ptr(), (Eigen::VectorXd)x0, (Eigen::VectorXd)x1);
   }
 
   void diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-            Eigen::Ref<Eigen::VectorXd> dxout) {
+            Eigen::Ref<Eigen::VectorXd> dxout) override {
     dxout = diff_wrap(x0, x1);
   }
 
@@ -43,12 +42,13 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
   }
 
   void integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
-                 Eigen::Ref<Eigen::VectorXd> x1out) {
+                 Eigen::Ref<Eigen::VectorXd> x1out) override {
     x1out = integrate_wrap(x, dx);
   }
 
   void Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent _firstsecond) {
+             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
+             Jcomponent _firstsecond) override {
     std::string firstsecond;
     switch (_firstsecond) {
       case first: {
@@ -94,7 +94,8 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
   }
 
   void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-                  Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent _firstsecond) {
+                  Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
+                  Jcomponent _firstsecond) override {
     std::string firstsecond;
     switch (_firstsecond) {
       case first: {

@@ -7,8 +7,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_
-#define CROCODDYL_CORE_OPTCtRL_SHOOTING_HPP_
+#define CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_
 
+#include <vector>
 #include <crocoddyl/core/action-base.hpp>
 
 namespace crocoddyl {
@@ -22,9 +23,15 @@ class ShootingProblem {
   double calc(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us);
   double calcDiff(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us);
   void rollout(const std::vector<Eigen::VectorXd>& us, std::vector<Eigen::VectorXd>& xs);
+  std::vector<Eigen::VectorXd> rollout_us(const std::vector<Eigen::VectorXd>& us);
 
   long unsigned int get_T() const;
-  Eigen::VectorXd& get_x0();
+  const Eigen::VectorXd& get_x0() const;
+
+  std::vector<ActionModelAbstract*>& get_runningModels();
+  ActionModelAbstract* get_terminalModel();
+  std::vector<std::shared_ptr<ActionDataAbstract>>& get_runningDatas();
+  std::shared_ptr<ActionDataAbstract>& get_terminalData();
 
   ActionModelAbstract* terminal_model_;
   std::shared_ptr<ActionDataAbstract> terminal_data_;
@@ -32,6 +39,7 @@ class ShootingProblem {
   std::vector<std::shared_ptr<ActionDataAbstract>> running_datas_;
 
  protected:
+  void allocateData();
   long unsigned int T_;
   Eigen::VectorXd x0_;
 
