@@ -6,13 +6,11 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_CORE_ACTIONS_LQR_HPP_
-#define CROCODDYL_CORE_ACTIONS_LQR_HPP_
+#ifndef CROCODDYL_CORE_ACTIONS_ACTION_LQR_HPP_
+#define CROCODDYL_CORE_ACTIONS_ACTION_LQR_HPP_
 
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/states/state-euclidean.hpp"
-
-// TODO: DifferentialActionModelLQR DifferentialActionDataLQR
 
 namespace crocoddyl {
 
@@ -55,4 +53,4 @@ struct ActionDataLQR : public ActionDataAbstract {
 
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_CORE_ACTIONS_LQR_HPP_
+#endif  // CROCODDYL_CORE_ACTIONS_ACTION_LQR_HPP_
