@@ -49,7 +49,7 @@ struct ActionDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  ActionDataAbstract(Model* const model) {
+  ActionDataAbstract(Model* const model) : cost(0.) {
     const int& nx = model->get_nx();
     const int& ndx = model->get_ndx();
     const int& nu = model->get_nu();
