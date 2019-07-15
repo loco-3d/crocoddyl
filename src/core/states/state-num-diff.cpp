@@ -5,9 +5,8 @@
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
+#include "crocoddyl/core/states/state-num-diff.hpp"
 
-#include <crocoddyl/core/states/state-num-diff.hpp>
-#include <iostream>
 namespace crocoddyl {
 
 StateNumDiff::StateNumDiff(StateAbstract& state) : StateAbstract(state.get_nx(), state.get_ndx()), state_(state) {

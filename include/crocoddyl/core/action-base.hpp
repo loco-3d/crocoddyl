@@ -9,7 +9,7 @@
 #ifndef CROCODDYL_CORE_ACTION_BASE_HPP_
 #define CROCODDYL_CORE_ACTION_BASE_HPP_
 
-#include <crocoddyl/core/state-base.hpp>
+#include "crocoddyl/core/state-base.hpp"
 #include <memory>
 
 // TODO: DifferentialActionModelAbstract DifferentialActionDataAbstract

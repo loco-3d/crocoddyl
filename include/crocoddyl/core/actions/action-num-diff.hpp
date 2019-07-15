@@ -9,7 +9,7 @@
 #ifndef CROCODDYL_CORE_ACTIONS_ACTION_NUM_DIFF_HPP_
 #define CROCODDYL_CORE_ACTIONS_ACTION_NUM_DIFF_HPP_
 
-#include <crocoddyl/core/action-base.hpp>
+#include "crocoddyl/core/action-base.hpp"
 #include <vector>
 #include <iostream>
 

@@ -1,5 +1,5 @@
-#include <crocoddyl/core/states/state-euclidean.hpp>
-#include <iostream>
+#include "crocoddyl/core/states/state-euclidean.hpp"
+
 namespace crocoddyl {
 
 StateVector::StateVector(const unsigned int& nx_) : StateAbstract(nx_, nx_) {}
