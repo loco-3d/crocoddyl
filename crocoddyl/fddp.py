@@ -29,6 +29,7 @@ class SolverFDDP(SolverAbstract):
         SolverAbstract.__init__(self, shootingProblem)
 
         self.isFeasible = False  # Change it to true if you know that datas[t].xnext = xs[t+1]
+        self.wasFeasible = False
         self.alphas = [2**(-n) for n in range(10)]
         self.th_grad = 1e-12
 
@@ -38,6 +39,14 @@ class SolverFDDP(SolverAbstract):
         self.regMax = 1e9
         self.regMin = 1e-9
         self.th_step = .5
+        self.th_acceptNegStep = 2.
+
+        # Quadratic model of the expected improvement
+        self.d1 = 0.
+        self.d2 = 0.
+        self.dg = 0.
+        self.dq = 0.
+        self.dv = 0.
 
     def calc(self):
         """ Compute the tangent (LQR) model.
@@ -49,7 +58,8 @@ class SolverFDDP(SolverAbstract):
             self.gaps[0] = self.problem.runningModels[0].State.diff(self.xs[0], self.problem.initialState)
             for i, (m, d, x) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas, self.xs[1:])):
                 self.gaps[i + 1] = m.State.diff(x, d.xnext)
-
+        elif not self.wasFeasible:
+            self.gaps[:] = [np.zeros_like(f) for f in self.gaps]
         return self.cost
 
     def computeDirection(self, recalc=True):
@@ -70,13 +80,41 @@ class SolverFDDP(SolverAbstract):
         """
         return [sum(q**2) for q in self.Qu]
 
+    def updateExpectedImprovement(self):
+        """ Update the expected improvement model.
+
+        The terms computed here doesn't depend on the step length, only
+        on the step direction. So you don't need to run for each new
+        step length trial.
+        """
+        self.dg = 0.
+        self.dq = 0.
+        if not self.isFeasible:
+            self.dg -= np.dot(self.Vx[-1].T, self.gaps[-1])
+            self.dq += np.dot(self.gaps[-1].T, np.dot(self.Vxx[-1], self.gaps[-1]))
+        for t in range(self.problem.T):
+            self.dg += np.dot(self.Qu[t].T, self.k[t])
+            self.dq -= np.dot(self.k[t].T, np.dot(self.Quu[t], self.k[t]))
+            if not self.isFeasible:
+                self.dg -= np.dot(self.Vx[t].T, self.gaps[t])
+                self.dq += np.dot(self.gaps[t].T, np.dot(self.Vxx[t], self.gaps[t]))
+
     def expectedImprovement(self):
         """ Return two scalars denoting the quadratic improvement model
         (i.e. dV = f_0 - f_+ = d1*a + d2*a**2/2)
         """
-        d1 = sum([np.dot(q, k) for q, k in zip(self.Qu, self.k)])
-        d2 = sum([-np.dot(k, np.dot(q, k)) for q, k in zip(self.Quu, self.k)])
-        return [d1, d2]
+        self.dv = 0.
+        if not self.isFeasible:
+            self.dv -= np.dot(
+                self.gaps[-1].T,
+                np.dot(self.Vxx[-1], self.problem.runningModels[-1].State.diff(self.xs_try[-1], self.xs[-1])))
+            for t in range(self.problem.T):
+                self.dv -= np.dot(
+                    self.gaps[t].T,
+                    np.dot(self.Vxx[t], self.problem.runningModels[t].State.diff(self.xs_try[t], self.xs[t])))
+        self.d1 = self.dg + self.dv
+        self.d2 = self.dq - 2 * self.dv
+        return [self.d1, self.d2]
 
     def tryStep(self, stepLength):
         """ Rollout the system with a predefined step length.
@@ -112,21 +150,33 @@ class SolverFDDP(SolverAbstract):
                     else:
                         continue
                 break
-            d1, d2 = self.expectedImprovement()
+            self.updateExpectedImprovement()
 
             for a in self.alphas:
                 try:
                     self.dV = self.tryStep(a)
                 except ArithmeticError:
                     continue
+                # During the first calc we need to compute all terms, later we only need to update the terms that
+                # depend on xs_try
+                d1, d2 = self.expectedImprovement()
+
                 self.dV_exp = a * (d1 + .5 * d2 * a)
                 # or not self.isFeasible
-                if d1 < self.th_grad or self.dV > self.th_acceptStep * self.dV_exp:
-                    # Accept step
-                    self.wasFeasible = self.isFeasible
-                    self.setCandidate(self.xs_try, self.us_try, isFeasible=(self.wasFeasible or a == 1))
-                    self.cost = self.cost_try
-                    break
+                if self.dV_exp > 0.:  # descend direction
+                    if d1 < self.th_grad or self.dV > self.th_acceptStep * self.dV_exp:
+                        # Accept step
+                        self.wasFeasible = self.isFeasible
+                        self.setCandidate(self.xs_try, self.us_try, isFeasible=(self.wasFeasible or a == 1))
+                        self.cost = self.cost_try
+                        break
+                else:  # reducing the gaps by allowing a small increment in the cost value
+                    if d1 < self.th_grad or self.dV < self.th_acceptNegStep * self.dV_exp:
+                        # Accept step
+                        self.wasFeasible = self.isFeasible
+                        self.setCandidate(self.xs_try, self.us_try, isFeasible=(self.wasFeasible or a == 1))
+                        self.cost = self.cost_try
+                        break
             if a > self.th_step:
                 self.decreaseRegularization()
             if a == self.alphas[-1]:
