@@ -100,7 +100,7 @@ class LQRDerived(crocoddyl.ActionModelAbstract):
 
         self.Fx = np.matrix(np.eye(self.nx))
         self.Fu = np.matrix(np.eye(self.nx))[:, :self.nu]
-        self.f0 = np.matrix(np.ones(self.nx)).T
+        self.f0 = np.matrix(np.zeros(self.nx)).T
         self.Lxx = np.matrix(np.eye(self.nx))
         self.Lxu = np.matrix(np.eye(self.nx))[:, :self.nu]
         self.Luu = np.matrix(np.eye(self.nu))
@@ -110,7 +110,7 @@ class LQRDerived(crocoddyl.ActionModelAbstract):
     def calc(self, data, x, u=None):
         if u is None:
             u = self.unone
-        data.xnext = np.dot(self.Fx, x) + np.dot(self.Fu, u) + self.f0
+        data.xnext = self.Fx * x + self.Fu * u + self.f0
         data.cost = 0.5 * np.asscalar(x.T * self.Lxx * x) + 0.5 * np.asscalar(u.T * self.Luu * u)
         data.cost += np.asscalar(x.T * self.Lxu * u) + np.asscalar(self.lx.T * x) + np.asscalar(self.lu.T * u)
 
