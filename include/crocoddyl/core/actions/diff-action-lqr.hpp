@@ -10,6 +10,7 @@
 #define CROCODDYL_CORE_ACTIONS_DIFF_ACTION_LQR_HPP_
 
 #include "crocoddyl/core/diff-action-base.hpp"
+#include "crocoddyl/core/states/state-euclidean.hpp"
 
 namespace crocoddyl {
 
