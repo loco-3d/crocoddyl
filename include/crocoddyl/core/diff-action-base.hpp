@@ -17,7 +17,8 @@ struct DifferentialActionDataAbstract;  // forward declaration
 
 class DifferentialActionModelAbstract {
  public:
-  DifferentialActionModelAbstract(const unsigned int& nq, const unsigned int& nv, const unsigned int& nu);
+  DifferentialActionModelAbstract(const unsigned int& nq, const unsigned int& nv, const unsigned int& nu,
+                                  const unsigned int& ncost = 0);
   virtual ~DifferentialActionModelAbstract();
 
   virtual void calc(std::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
