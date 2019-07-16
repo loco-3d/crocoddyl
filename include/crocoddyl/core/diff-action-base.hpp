@@ -9,7 +9,8 @@
 #ifndef CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_
 #define CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_
 
-#include "crocoddyl/core/action-base.hpp"
+#include "crocoddyl/core/state-base.hpp"
+#include <memory>
 
 namespace crocoddyl {
 
@@ -38,6 +39,7 @@ class DifferentialActionModelAbstract {
   unsigned int get_ndx() const;
   unsigned int get_nout() const;
   unsigned int get_ncost() const;
+  StateAbstract* get_state() const;
 
  protected:
   unsigned int nq_;
@@ -47,6 +49,7 @@ class DifferentialActionModelAbstract {
   unsigned int ndx_;
   unsigned int nout_;
   unsigned int ncost_;
+  StateAbstract* state_;
   Eigen::VectorXd unone_;
 };
 

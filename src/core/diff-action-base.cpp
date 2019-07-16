@@ -11,6 +11,7 @@ DifferentialActionModelAbstract::DifferentialActionModelAbstract(const unsigned 
       ndx_(2 * nv),
       nout_(nv),
       ncost_(ncost),
+      state_(NULL),
       unone_(Eigen::VectorXd::Zero(nu)) {
   assert(nq_ != 0);
   assert(nv_ != 0);
@@ -40,6 +41,8 @@ unsigned int DifferentialActionModelAbstract::get_nx() const { return nx_; }
 unsigned int DifferentialActionModelAbstract::get_ndx() const { return ndx_; }
 
 unsigned int DifferentialActionModelAbstract::get_nout() const { return nout_; }
+
+StateAbstract* DifferentialActionModelAbstract::get_state() const { return state_; }
 
 unsigned int DifferentialActionModelAbstract::get_ncost() const { return ncost_; }
 
