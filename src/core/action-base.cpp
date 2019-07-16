@@ -2,8 +2,6 @@
 
 namespace crocoddyl {
 
-// struct ActionDataAbstract; // forward declaration
-
 ActionModelAbstract::ActionModelAbstract(StateAbstract* const state, const unsigned int& nu, const unsigned int& ncost)
     : nx_(state->get_nx()),
       ndx_(state->get_ndx()),
