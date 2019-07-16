@@ -6,19 +6,17 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_CORE_ACTIONS_LQR_HPP_
-#define CROCODDYL_CORE_ACTIONS_LQR_HPP_
+#ifndef CROCODDYL_CORE_ACTIONS_ACTION_LQR_HPP_
+#define CROCODDYL_CORE_ACTIONS_ACTION_LQR_HPP_
 
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/states/state-euclidean.hpp"
-
-// TODO: DifferentialActionModelLQR DifferentialActionDataLQR
 
 namespace crocoddyl {
 
 class ActionModelLQR : public ActionModelAbstract {
  public:
-  ActionModelLQR(const unsigned int& nx, const unsigned int& nu, bool driftFree = true);
+  ActionModelLQR(const unsigned int& nx, const unsigned int& nu, bool drift_free = true);
   ~ActionModelLQR();
 
   void calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -55,4 +53,4 @@ struct ActionDataLQR : public ActionDataAbstract {
 
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_CORE_ACTIONS_LQR_HPP_
+#endif  // CROCODDYL_CORE_ACTIONS_ACTION_LQR_HPP_

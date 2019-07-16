@@ -1,6 +1,7 @@
 SET(${PROJECT_NAME}_SOURCES
   core/state-base.cpp
   core/action-base.cpp
+  core/diff-action-base.cpp
   core/solver-base.cpp
   core/utils/callbacks.cpp
   core/optctrl/shooting.cpp
@@ -9,6 +10,7 @@ SET(${PROJECT_NAME}_SOURCES
   core/states/state-num-diff.cpp
   core/actions/action-unicycle.cpp
   core/actions/action-lqr.cpp
+  core/actions/diff-action-lqr.cpp
   core/actions/action-num-diff.cpp
   )
 

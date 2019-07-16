@@ -1,5 +1,6 @@
 import crocoddyl
-from utils import UnicycleDerived
+from utils import UnicycleDerived, LQRDerived
+from random import randint
 import numpy as np
 import unittest
 
@@ -21,8 +22,8 @@ class ActionModelAbstractTestCase(unittest.TestCase):
         self.MODEL_DER.calc(self.DATA_DER, self.x, self.u)
         # Checking the cost value and its residual
         self.assertAlmostEqual(self.DATA.cost, self.DATA_DER.cost, 10, "Wrong cost value.")
-        self.assertTrue(
-            np.allclose(self.DATA.costResiduals, self.DATA_DER.costResiduals, atol=1e-9), "Wrong cost residuals.")
+        self.assertTrue(np.allclose(self.DATA.costResiduals, self.DATA_DER.costResiduals, atol=1e-9),
+                        "Wrong cost residuals.")
         # Checking the dimension of the next state
         self.assertEqual(self.DATA.xnext.shape, self.DATA_DER.xnext.shape, "Wrong next state dimension.")
         # Checking the next state value
@@ -48,6 +49,13 @@ class ActionModelAbstractTestCase(unittest.TestCase):
 class UnicycleTest(ActionModelAbstractTestCase):
     ActionModelAbstractTestCase.MODEL = crocoddyl.ActionModelUnicycle()
     ActionModelAbstractTestCase.MODEL_DER = UnicycleDerived()
+
+
+class LQRTest(ActionModelAbstractTestCase):
+    NX = randint(1, 21)
+    NU = randint(1, NX)
+    ActionModelAbstractTestCase.MODEL = crocoddyl.ActionModelLQR(NX, NU)
+    ActionModelAbstractTestCase.MODEL_DER = LQRDerived(NX, NU)
 
 
 if __name__ == '__main__':

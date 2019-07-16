@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_ACTIONS_LQR_HPP_
-#define PYTHON_CROCODDYL_CORE_ACTIONS_LQR_HPP_
+#ifndef PYTHON_CROCODDYL_CORE_ACTIONS_ACTION_LQR_HPP_
+#define PYTHON_CROCODDYL_CORE_ACTIONS_ACTION_LQR_HPP_
 
 #include "crocoddyl/core/actions/action-lqr.hpp"
 
@@ -93,10 +93,7 @@ action model (i.e. dynamical system and cost function).
   boost::python::register_ptr_to_python<std::shared_ptr<ActionDataLQR>>();
 
   bp::class_<ActionDataLQR, bp::bases<ActionDataAbstract>>("ActionDataLQR",
-                                                           R"(Action data for the LQR system.
-
-        The unicicycle data, apart of common one, contains the cost residuals used
-        for the computation of calc and calcDiff.)",
+                                                           R"(Action data for the LQR system.)",
                                                            bp::init<ActionModelLQR*>(bp::args(" self", " model"),
                                                                                      R"(Create LQR data.
 
@@ -106,4 +103,4 @@ action model (i.e. dynamical system and cost function).
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_CORE_ACTIONS_LQR_HPP_
+#endif  // PYTHON_CROCODDYL_CORE_ACTIONS_ACTION_LQR_HPP_

@@ -78,7 +78,8 @@ class UnicycleDerived(crocoddyl.ActionModelAbstract):
     def calcDiff(self, data, x, u=None, recalc=True):
         if u is None:
             u = self.unone
-        self.calc(data, x, u)
+        if recalc:
+            self.calc(data, x, u)
         v, w = m2a(u)
         px, py, theta = m2a(x)
         # Cost derivatives
@@ -91,6 +92,40 @@ class UnicycleDerived(crocoddyl.ActionModelAbstract):
         v, w = m2a(u)
         data.Fx = np.matrix([[1, 0, -s * v * dt], [0, 1, c * v * dt], [0, 0, 1]])
         data.Fu = np.matrix([[c * self.dt, 0], [s * self.dt, 0], [0, self.dt]])
+
+
+class LQRDerived(crocoddyl.ActionModelAbstract):
+    def __init__(self, nx, nu, driftFree=True):
+        crocoddyl.ActionModelAbstract.__init__(self, crocoddyl.StateVector(nx), nu)
+
+        self.Fx = np.matrix(np.eye(self.nx))
+        self.Fu = np.matrix(np.eye(self.nx))[:, :self.nu]
+        self.f0 = np.matrix(np.zeros(self.nx)).T
+        self.Lxx = np.matrix(np.eye(self.nx))
+        self.Lxu = np.matrix(np.eye(self.nx))[:, :self.nu]
+        self.Luu = np.matrix(np.eye(self.nu))
+        self.lx = np.matrix(np.ones(self.nx)).T
+        self.lu = np.matrix(np.ones(self.nu)).T
+
+    def calc(self, data, x, u=None):
+        if u is None:
+            u = self.unone
+        data.xnext = self.Fx * x + self.Fu * u + self.f0
+        data.cost = 0.5 * np.asscalar(x.T * self.Lxx * x) + 0.5 * np.asscalar(u.T * self.Luu * u)
+        data.cost += np.asscalar(x.T * self.Lxu * u) + np.asscalar(self.lx.T * x) + np.asscalar(self.lu.T * u)
+
+    def calcDiff(self, data, x, u=None, recalc=True):
+        if u is None:
+            u = self.unone
+        if recalc:
+            self.calc(data, x, u)
+        data.Lx = self.lx + np.dot(self.Lxx, x) + np.dot(self.Lxu, u)
+        data.Lu = self.lu + np.dot(self.Lxu.T, x) + np.dot(self.Luu, u)
+        data.Fx = self.Fx
+        data.Fu = self.Fu
+        data.Lxx = self.Lxx
+        data.Luu = self.Luu
+        data.Lxu = self.Lxu
 
 
 class DDPDerived(crocoddyl.SolverAbstract):
