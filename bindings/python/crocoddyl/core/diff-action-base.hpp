@@ -109,8 +109,10 @@ your DAM.
                     bp::make_getter(&DifferentialActionModelAbstract_wrap::unone_,
                                     bp::return_value_policy<bp::return_by_value>()),
                     "default control vector")
-      .add_property("State", bp::make_function(&DifferentialActionModelAbstract_wrap::get_state,
-                                               bp::return_value_policy<bp::reference_existing_object>()), "state");
+      .add_property("State",
+                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_state,
+                                      bp::return_value_policy<bp::reference_existing_object>()),
+                    "state");
 
   bp::class_<DifferentialActionDataAbstract, std::shared_ptr<DifferentialActionDataAbstract>, boost::noncopyable>(
       "DifferentialActionDataAbstract",

@@ -18,10 +18,10 @@ namespace bp = boost::python;
 
 class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<ActionModelAbstract> {
  public:
-  using ActionModelAbstract::nx_;
+  using ActionModelAbstract::ncost_;
   using ActionModelAbstract::ndx_;
   using ActionModelAbstract::nu_;
-  using ActionModelAbstract::ncost_;
+  using ActionModelAbstract::nx_;
   using ActionModelAbstract::unone_;
 
   ActionModelAbstract_wrap(StateAbstract* const state, int nu, int ncost = 0)
@@ -94,8 +94,10 @@ you need to defined the ActionDataType inside your AM.
       .add_property("unone",
                     bp::make_getter(&ActionModelAbstract_wrap::unone_, bp::return_value_policy<bp::return_by_value>()),
                     "default control vector")
-      .add_property("State", bp::make_function(&ActionModelAbstract_wrap::get_state,
-                                               bp::return_value_policy<bp::reference_existing_object>()), "state");
+      .add_property("State",
+                    bp::make_function(&ActionModelAbstract_wrap::get_state,
+                                      bp::return_value_policy<bp::reference_existing_object>()),
+                    "state");
 
   bp::class_<ActionDataAbstract, std::shared_ptr<ActionDataAbstract>, boost::noncopyable>(
       "ActionDataAbstract",
