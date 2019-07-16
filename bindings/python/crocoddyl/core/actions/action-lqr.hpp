@@ -93,10 +93,7 @@ action model (i.e. dynamical system and cost function).
   boost::python::register_ptr_to_python<std::shared_ptr<ActionDataLQR>>();
 
   bp::class_<ActionDataLQR, bp::bases<ActionDataAbstract>>("ActionDataLQR",
-                                                           R"(Action data for the LQR system.
-
-        The unicicycle data, apart of common one, contains the cost residuals used
-        for the computation of calc and calcDiff.)",
+                                                           R"(Action data for the LQR system.)",
                                                            bp::init<ActionModelLQR*>(bp::args(" self", " model"),
                                                                                      R"(Create LQR data.
 
