@@ -57,11 +57,13 @@ def runningModel(contactIds, effectors, com=None, integrationStep=1e-2):
     # Creating the cost model for a contact phase
     costModel = CostModelSum(rmodel, actModel.nu)
     wx = np.array([0] * 6 + [.1] * (rmodel.nv - 6) + [10] * rmodel.nv)
-    costModel.addCost(
-        'xreg',
-        weight=1e-1,
-        cost=CostModelState(
-            rmodel, State, ref=rmodel.defaultState, nu=actModel.nu, activation=ActivationModelWeightedQuad(wx)))
+    costModel.addCost('xreg',
+                      weight=1e-1,
+                      cost=CostModelState(rmodel,
+                                          State,
+                                          ref=rmodel.defaultState,
+                                          nu=actModel.nu,
+                                          activation=ActivationModelWeightedQuad(wx)))
     costModel.addCost('ureg', weight=1e-4, cost=CostModelControl(rmodel, nu=actModel.nu))
     for fid, ref in effectors.items():
         if not isinstance(ref, SE3):
@@ -125,14 +127,13 @@ d = d.differential
 m.calcDiff(d, ddp.xs[0], ddp.us[0])
 # m.calc(d,ddp.xs[0])
 
-ddp.solve(
-    maxiter=1,
-    regInit=.1,
-    init_xs=[rmodel.defaultState] * len(ddp.models()),
-    init_us=[
-        _m.differential.quasiStatic(_d.differential, rmodel.defaultState)
-        for _m, _d in list(zip(ddp.models(), ddp.datas()))[:-1]
-    ])
+ddp.solve(maxiter=1,
+          regInit=.1,
+          init_xs=[rmodel.defaultState] * len(ddp.models()),
+          init_us=[
+              _m.differential.quasiStatic(_d.differential, rmodel.defaultState)
+              for _m, _d in list(zip(ddp.models(), ddp.datas()))[:-1]
+          ])
 
 assert (ddp.cost < 1e5)
 '''

@@ -103,8 +103,12 @@ assert (np.allclose(xkkt[1], xkkt_box[1], atol=1e-9))
 assert (np.allclose(ukkt[0], ukkt_box[0], atol=1e-9))
 
 # BOX DDP VS BOX KKT
-xkkt_box, ukkt_box, donekkt_box = boxkkt.solve(
-    maxiter=2, init_xs=xs, init_us=us, qpsolver=quadprogWrapper, ul=ddpbox.ul, uu=ddpbox.uu)
+xkkt_box, ukkt_box, donekkt_box = boxkkt.solve(maxiter=2,
+                                               init_xs=xs,
+                                               init_us=us,
+                                               qpsolver=quadprogWrapper,
+                                               ul=ddpbox.ul,
+                                               uu=ddpbox.uu)
 
 assert (np.allclose(xkkt_box[0], xddp_box[0], atol=1e-9))
 assert (np.allclose(xkkt_box[1], xddp_box[1], atol=1e-9))
