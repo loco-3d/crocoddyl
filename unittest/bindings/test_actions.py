@@ -21,8 +21,8 @@ class ActionModelAbstractTestCase(unittest.TestCase):
         self.MODEL_DER.calc(self.DATA_DER, self.x, self.u)
         # Checking the cost value and its residual
         self.assertAlmostEqual(self.DATA.cost, self.DATA_DER.cost, 10, "Wrong cost value.")
-        self.assertTrue(
-            np.allclose(self.DATA.costResiduals, self.DATA_DER.costResiduals, atol=1e-9), "Wrong cost residuals.")
+        self.assertTrue(np.allclose(self.DATA.costResiduals, self.DATA_DER.costResiduals, atol=1e-9),
+                        "Wrong cost residuals.")
         # Checking the dimension of the next state
         self.assertEqual(self.DATA.xnext.shape, self.DATA_DER.xnext.shape, "Wrong next state dimension.")
         # Checking the next state value
