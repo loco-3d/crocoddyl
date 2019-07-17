@@ -2,16 +2,16 @@
 
 namespace crocoddyl {
 
-DifferentialActionModelAbstract::DifferentialActionModelAbstract(const unsigned int& nq, const unsigned int& nv,
+DifferentialActionModelAbstract::DifferentialActionModelAbstract(StateAbstract* const state,
                                                                  const unsigned int& nu, const unsigned int& ncost)
-    : nq_(nq),
-      nv_(nv),
+    : nq_(state->get_nq()),
+      nv_(state->get_nv()),
       nu_(nu),
-      nx_(nq + nv),
-      ndx_(2 * nv),
-      nout_(nv),
+      nx_(state->get_nx()),
+      ndx_(state->get_ndx()),
+      nout_(state->get_nv()),
       ncost_(ncost),
-      state_(NULL),
+      state_(state),
       unone_(Eigen::VectorXd::Zero(nu)) {
   assert(nq_ != 0);
   assert(nv_ != 0);

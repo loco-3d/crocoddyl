@@ -130,7 +130,7 @@ class LQRDerived(crocoddyl.ActionModelAbstract):
 
 class DifferentialLQRDerived(crocoddyl.DifferentialActionModelAbstract):
     def __init__(self, nq, nu, driftFree=True):
-        crocoddyl.DifferentialActionModelAbstract.__init__(self, nq, nq, nu)
+        crocoddyl.DifferentialActionModelAbstract.__init__(self, crocoddyl.StateVector(2 * nq), nu)
 
         self.Fq = np.matrix(np.eye(self.nq))
         self.Fv = np.matrix(np.eye(self.nv))

@@ -18,7 +18,7 @@ struct DifferentialActionDataLQR;  // forward declaration
 
 class DifferentialActionModelLQR : public DifferentialActionModelAbstract {
  public:
-  DifferentialActionModelLQR(unsigned const int& nq, unsigned const int& nv, bool drift_free);
+  DifferentialActionModelLQR(unsigned const int& nq, unsigned const int& nu, bool drift_free);
   ~DifferentialActionModelLQR();
 
   void calc(std::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,

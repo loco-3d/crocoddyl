@@ -28,8 +28,8 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
   using DifferentialActionModelAbstract::nx_;
   using DifferentialActionModelAbstract::unone_;
 
-  DifferentialActionModelAbstract_wrap(int nq, int nv, int nu, int ncost = 0)
-      : DifferentialActionModelAbstract(nq, nv, nu, ncost), bp::wrapper<DifferentialActionModelAbstract>() {}
+  DifferentialActionModelAbstract_wrap(StateAbstract* const state, int nu, int ncost = 0)
+      : DifferentialActionModelAbstract(state, nu, ncost), bp::wrapper<DifferentialActionModelAbstract>() {}
 
   void calc(std::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) override {
@@ -60,12 +60,12 @@ void exposeDifferentialActionAbstract() {
         action model. Every time that we want describe a problem, we need to provide ways of
         computing the dynamics, cost functions and their derivatives. These computations are
         mainly carry on inside calc() and calcDiff(), respectively.)",
-      bp::init<int, int, int, bp::optional<int>>(bp::args(" self", " nq", " nv", " nu"),
-                                                 R"(Initialize the differential action model.
+      bp::init<StateAbstract*, int, bp::optional<int>>(bp::args(" self", " state", " nu", " ncost"),
+                                                       R"(Initialize the differential action model.
 
-:param nq: dimension of configuration vector,
-:param nv: dimension of velocity vector,
-:param nu: dimension of control vector)"))
+:param state: state
+:param nu: dimension of control vector
+:param ncost: dimension of cost vector)")[bp::with_custodian_and_ward<1, 2>()])
       .def("calc", pure_virtual(&DifferentialActionModelAbstract_wrap::calc_wrap),
            bp::args(" self", " data", " x", " u"),
            R"(Compute the state evolution and cost value.

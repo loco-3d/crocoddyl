@@ -18,11 +18,11 @@ namespace bp = boost::python;
 
 class DifferentialActionModelLQR_wrap : public DifferentialActionModelLQR {
  public:
-  DifferentialActionModelLQR_wrap(int nx, int nu, bool drift_free = true)
-      : DifferentialActionModelLQR(nx, nu, drift_free) {
+  DifferentialActionModelLQR_wrap(int nq, int nu, bool drift_free = true)
+      : DifferentialActionModelLQR(nq, nu, drift_free) {
     // We need to change it to the wrap object in Python
-    state_->~StateAbstract();                    // destroy the object but leave the space allocated
-    state_ = new (state_) StateVector_wrap(nx);  // create a new object in the same space
+    state_->~StateAbstract();                     // destroy the object but leave the space allocated
+    state_ = new (state_) StateVector_wrap(2 * nq);  // create a new object in the same space
   }
 
   void calc_wrap1(std::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::VectorXd& x,
@@ -67,7 +67,7 @@ void exposeDifferentialActionLQR() {
         where Fq, Fv, Fu and f0 are randomly chosen constant terms. On the other
         hand the cost function is given by
           l(x,u) = 1/2 [x,u].T [Lxx Lxu; Lxu.T Luu] [x,u] + [lx,lu].T [x,u].)",
-      bp::init<int, int, bp::optional<bool>>(bp::args(" self", " nx", " ndu", " driftFree=True"),
+      bp::init<int, int, bp::optional<bool>>(bp::args(" self", " nq", " nu", " driftFree=True"),
                                              R"(Initialize the differential LQR action model.
 
 :param nx: dimension of the state vector

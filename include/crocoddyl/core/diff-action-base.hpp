@@ -18,7 +18,7 @@ struct DifferentialActionDataAbstract;  // forward declaration
 
 class DifferentialActionModelAbstract {
  public:
-  DifferentialActionModelAbstract(const unsigned int& nq, const unsigned int& nv, const unsigned int& nu,
+  DifferentialActionModelAbstract(StateAbstract* const state, const unsigned int& nu,
                                   const unsigned int& ncost = 0);
   virtual ~DifferentialActionModelAbstract();
 
