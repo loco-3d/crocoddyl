@@ -2,8 +2,8 @@
 
 namespace crocoddyl {
 
-DifferentialActionModelAbstract::DifferentialActionModelAbstract(StateAbstract* const state,
-                                                                 const unsigned int& nu, const unsigned int& ncost)
+DifferentialActionModelAbstract::DifferentialActionModelAbstract(StateAbstract* const state, const unsigned int& nu,
+                                                                 const unsigned int& ncost)
     : nq_(state->get_nq()),
       nv_(state->get_nv()),
       nu_(nu),
