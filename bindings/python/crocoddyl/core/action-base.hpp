@@ -24,15 +24,12 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
   using ActionModelAbstract::nx_;
   using ActionModelAbstract::unone_;
 
-  ActionModelAbstract_wrap(StateAbstract* const state, int nu, int ncost = 0)
+  ActionModelAbstract_wrap(StateAbstract* const state, const unsigned int& nu, const unsigned int& ncost = 0)
       : ActionModelAbstract(state, nu, ncost), bp::wrapper<ActionModelAbstract>() {}
 
   void calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) override {
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
-  }
-  void calc_wrap(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
-    calc(data, x, u);
   }
 
   void calcDiff(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -59,7 +56,7 @@ void exposeActionAbstract() {
 :param state: state description,
 :param nu: dimension of control vector,
 :param ncost: dimension of the cost-residual vector)")[bp::with_custodian_and_ward<1, 2>()])
-      .def("calc", pure_virtual(&ActionModelAbstract_wrap::calc_wrap), bp::args(" self", " data", " x", " u"),
+      .def("calc", pure_virtual(&ActionModelAbstract_wrap::calc), bp::args(" self", " data", " x", " u"),
            R"(Compute the next state and cost value.
 
 It describes the time-discrete evolution of our dynamical system
@@ -95,7 +92,7 @@ you need to defined the ActionDataType inside your AM.
                     bp::make_getter(&ActionModelAbstract_wrap::unone_, bp::return_value_policy<bp::return_by_value>()),
                     "default control vector")
       .add_property("State",
-                    bp::make_function(&ActionModelAbstract_wrap::get_state,
+                    bp::make_function(&ActionModelAbstract::get_state,
                                       bp::return_value_policy<bp::reference_existing_object>()),
                     "state");
 
