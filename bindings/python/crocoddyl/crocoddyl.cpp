@@ -6,6 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#define PYTHON_BINDINGS
+
 #include <boost/python.hpp>
 #include <eigenpy/eigenpy.hpp>
 

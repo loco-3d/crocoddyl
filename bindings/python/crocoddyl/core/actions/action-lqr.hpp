@@ -16,40 +16,8 @@ namespace python {
 
 namespace bp = boost::python;
 
-class ActionModelLQR_wrap : public ActionModelLQR {
- public:
-  ActionModelLQR_wrap(int nx, int nu, bool drift_free = true) : ActionModelLQR(nx, nu, drift_free) {
-    // We need to change it to the wrap object in Python
-    state_->~StateAbstract();                    // destroy the object but leave the space allocated
-    state_ = new (state_) StateVector_wrap(nx);  // create a new object in the same space
-  }
-
-  void calc_wrap1(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
-    calc(data, x, u);
-  }
-
-  void calc_wrap2(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x) { calc(data, x, unone_); }
-
-  void calcDiff_wrap1(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u,
-                      bool recalc) {
-    calcDiff(data, x, u, recalc);
-  }
-
-  void calcDiff_wrap2(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
-    calcDiff(data, x, u, true);
-  }
-
-  void calcDiff_wrap3(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, bool recalc) {
-    calcDiff(data, x, unone_, recalc);
-  }
-
-  void calcDiff_wrap4(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x) {
-    calcDiff(data, x, unone_, true);
-  }
-};
-
 void exposeActionLQR() {
-  bp::class_<ActionModelLQR_wrap, bp::bases<ActionModelAbstract>>(
+  bp::class_<ActionModelLQR, bp::bases<ActionModelAbstract>>(
       "ActionModelLQR",
       R"(LQR action model.
 
@@ -62,8 +30,10 @@ void exposeActionLQR() {
 :param nx: dimension of the state vector
 :param nu: dimension of the control vector
 :param driftFree: enable/disable the bias term of the linear dynamics)"))
-      .def("calc", &ActionModelLQR_wrap::calc_wrap1, bp::args(" self", " data", " x", " u=None"),
-           R"(Compute the next state and cost value.
+      .def<void (ActionModelLQR::*)(std::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
+                                    const Eigen::VectorXd&)>("calc", &ActionModelLQR::calc_wrap,
+                                                             bp::args(" self", " data", " x", " u=None"),
+                                                             R"(Compute the next state and cost value.
 
 It describes the time-discrete evolution of the LQR system. Additionally it
 computes the cost value associated to this discrete
@@ -71,10 +41,12 @@ state and control pair.
 :param data: action data
 :param x: time-discrete state vector
 :param u: time-discrete control input)")
-      .def("calc", &ActionModelLQR_wrap::calc_wrap2)
-      .def("calcDiff", &ActionModelLQR_wrap::calcDiff_wrap1,
-           bp::args(" self", " data", " x", " u=None", " recalc=True"),
-           R"(Compute the derivatives of the LQR dynamics and cost functions.
+      .def<void (ActionModelLQR::*)(std::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&)>(
+          "calc", &ActionModelLQR::calc_wrap, bp::args(" self", " data", " x"))
+      .def<void (ActionModelLQR::*)(std::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
+                                    const Eigen::VectorXd&, const bool&)>(
+          "calcDiff", &ActionModelLQR::calcDiff_wrap, bp::args(" self", " data", " x", " u=None", " recalc=True"),
+          R"(Compute the derivatives of the LQR dynamics and cost functions.
 
 It computes the partial derivatives of the LQR system and the
 cost function. If recalc == True, it first updates the state evolution
@@ -84,10 +56,14 @@ action model (i.e. dynamical system and cost function).
 :param x: time-discrete state vector
 :param u: time-discrete control input
 :param recalc: If true, it updates the state evolution and the cost value.)")
-      .def("calcDiff", &ActionModelLQR_wrap::calcDiff_wrap2)
-      .def("calcDiff", &ActionModelLQR_wrap::calcDiff_wrap3)
-      .def("calcDiff", &ActionModelLQR_wrap::calcDiff_wrap4)
-      .def("createData", &ActionModelLQR_wrap::createData, bp::args(" self"),
+      .def<void (ActionModelLQR::*)(std::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
+                                    const Eigen::VectorXd&)>("calcDiff", &ActionModelLQR::calcDiff_wrap,
+                                                             bp::args(" self", " data", " x", " u"))
+      .def<void (ActionModelLQR::*)(std::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&)>(
+          "calcDiff", &ActionModelLQR::calcDiff_wrap, bp::args(" self", " data", " x"))
+      .def<void (ActionModelLQR::*)(std::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&, const bool&)>(
+          "calcDiff", &ActionModelLQR::calcDiff_wrap, bp::args(" self", " data", " x", " recalc"))
+      .def("createData", &ActionModelLQR::createData, bp::args(" self"),
            R"(Create the LQR action data.)");
 
   boost::python::register_ptr_to_python<std::shared_ptr<ActionDataLQR>>();
