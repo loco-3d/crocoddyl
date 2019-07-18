@@ -35,10 +35,6 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
             const Eigen::Ref<const Eigen::VectorXd>& u) override {
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
-  void calc_wrap(std::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::VectorXd& x,
-                 const Eigen::VectorXd& u) {
-    calc(data, x, u);
-  }
 
   void calcDiff(std::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) override {
@@ -66,8 +62,7 @@ void exposeDifferentialActionAbstract() {
 :param state: state
 :param nu: dimension of control vector
 :param ncost: dimension of cost vector)")[bp::with_custodian_and_ward<1, 2>()])
-      .def("calc", pure_virtual(&DifferentialActionModelAbstract_wrap::calc_wrap),
-           bp::args(" self", " data", " x", " u"),
+      .def("calc", pure_virtual(&DifferentialActionModelAbstract_wrap::calc), bp::args(" self", " data", " x", " u"),
            R"(Compute the state evolution and cost value.
 
 First, it describes the time-continuous evolution of our dynamical system
