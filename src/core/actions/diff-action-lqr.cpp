@@ -39,8 +39,8 @@ void DifferentialActionModelLQR::calcDiff(std::shared_ptr<DifferentialActionData
   }
   data->Lx = lx_ + Lxx_ * x + Lxu_ * u;
   data->Lu = lu_ + Lxu_.transpose() * x + Luu_ * u;
-  data->Fx.topRows(nq_) = Fq_;
-  data->Fx.bottomRows(nv_) = Fv_;
+  data->Fx.leftCols(nq_) = Fq_;
+  data->Fx.rightCols(nv_) = Fv_;
   data->Fu = Fu_;
   data->Lxx = Lxx_;
   data->Lxu = Lxu_;
