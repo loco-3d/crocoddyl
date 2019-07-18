@@ -16,40 +16,8 @@ namespace python {
 
 namespace bp = boost::python;
 
-class ActionModelUnicycle_wrap : public ActionModelUnicycle {
- public:
-  ActionModelUnicycle_wrap() : ActionModelUnicycle() {
-    // We need to change it to the wrap object in Python
-    state_->~StateAbstract();                   // destroy the object but leave the space allocated
-    state_ = new (state_) StateVector_wrap(3);  // create a new object in the same space
-  }
-
-  void calc_wrap1(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
-    calc(data, x, u);
-  }
-
-  void calc_wrap2(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x) { calc(data, x, unone_); }
-
-  void calcDiff_wrap1(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u,
-                      bool recalc) {
-    calcDiff(data, x, u, recalc);
-  }
-
-  void calcDiff_wrap2(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
-    calcDiff(data, x, u, true);
-  }
-
-  void calcDiff_wrap3(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, bool recalc) {
-    calcDiff(data, x, unone_, recalc);
-  }
-
-  void calcDiff_wrap4(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x) {
-    calcDiff(data, x, unone_, true);
-  }
-};
-
 void exposeActionUnicycle() {
-  bp::class_<ActionModelUnicycle_wrap, bp::bases<ActionModelAbstract>>(
+  bp::class_<ActionModelUnicycle, bp::bases<ActionModelAbstract>>(
       "ActionModelUnicycle",
       R"(Unicycle action model.
 
@@ -61,8 +29,10 @@ void exposeActionUnicycle() {
         control.)",
       bp::init<>(bp::args(" self"),
                  R"(Initialize the unicycle action model.)"))
-      .def("calc", &ActionModelUnicycle_wrap::calc_wrap1, bp::args(" self", " data", " x", " u=None"),
-           R"(Compute the next state and cost value.
+      .def<void (ActionModelUnicycle::*)(std::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
+                                         const Eigen::VectorXd&)>("calc", &ActionModelUnicycle::calc_wrap,
+                                                                  bp::args(" self", " data", " x", " u=None"),
+                                                                  R"(Compute the next state and cost value.
 
 It describes the time-discrete evolution of the unicycle system.
 Additionally it computes the cost value associated to this discrete
@@ -70,10 +40,12 @@ state and control pair.
 :param data: action data
 :param x: time-discrete state vector
 :param u: time-discrete control input)")
-      .def("calc", &ActionModelUnicycle_wrap::calc_wrap2)
-      .def("calcDiff", &ActionModelUnicycle_wrap::calcDiff_wrap1,
-           bp::args(" self", " data", " x", " u=None", " recalc=True"),
-           R"(Compute the derivatives of the unicycle dynamics and cost functions.
+      .def<void (ActionModelUnicycle::*)(std::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&)>(
+          "calc", &ActionModelUnicycle::calc_wrap, bp::args(" self", " data", " x"))
+      .def<void (ActionModelUnicycle::*)(std::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
+                                         const Eigen::VectorXd&, const bool&)>(
+          "calcDiff", &ActionModelUnicycle::calcDiff_wrap, bp::args(" self", " data", " x", " u=None", " recalc=True"),
+          R"(Compute the derivatives of the unicycle dynamics and cost functions.
 
 It computes the partial derivatives of the unicycle system and the
 cost function. If recalc == True, it first updates the state evolution
@@ -83,10 +55,14 @@ action model (i.e. dynamical system and cost function).
 :param x: time-discrete state vector
 :param u: time-discrete control input
 :param recalc: If true, it updates the state evolution and the cost value.)")
-      .def("calcDiff", &ActionModelUnicycle_wrap::calcDiff_wrap2)
-      .def("calcDiff", &ActionModelUnicycle_wrap::calcDiff_wrap3)
-      .def("calcDiff", &ActionModelUnicycle_wrap::calcDiff_wrap4)
-      .def("createData", &ActionModelUnicycle_wrap::createData, bp::args(" self"),
+      .def<void (ActionModelUnicycle::*)(std::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
+                                         const Eigen::VectorXd&)>("calcDiff", &ActionModelUnicycle::calcDiff_wrap,
+                                                                  bp::args(" self", " data", " x", " u"))
+      .def<void (ActionModelUnicycle::*)(std::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&)>(
+          "calcDiff", &ActionModelUnicycle::calcDiff_wrap, bp::args(" self", " data", " x"))
+      .def<void (ActionModelUnicycle::*)(std::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&, const bool&)>(
+          "calcDiff", &ActionModelUnicycle::calcDiff_wrap, bp::args(" self", " data", " x", " recalc"))
+      .def("createData", &ActionModelUnicycle::createData, bp::args(" self"),
            R"(Create the unicycle action data.)");
 
   bp::register_ptr_to_python<std::shared_ptr<ActionDataUnicycle>>();

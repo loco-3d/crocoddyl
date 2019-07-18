@@ -19,6 +19,8 @@ namespace bp = boost::python;
 class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstract> {
  public:
   using StateAbstract::ndx_;
+  using StateAbstract::nq_;
+  using StateAbstract::nv_;
   using StateAbstract::nx_;
 
   StateAbstract_wrap(int nx, int ndx) : StateAbstract(nx, ndx), bp::wrapper<StateAbstract>() {}
@@ -141,6 +143,9 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
   }
 };
 
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Jdiffs, StateAbstract::Jdiff_wrap, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Jintegrates, StateAbstract::Jintegrate_wrap, 2, 3)
+
 void exposeStateAbstract() {
   bp::class_<StateAbstract_wrap, boost::noncopyable>("StateAbstract",
                                                      R"(Abstract class for the state representation.
@@ -208,7 +213,9 @@ partial derivative by setting firstsecond='first' or firstsecond='second'.
 :param firstsecond: desired partial derivative
 :return the partial derivative(s) of the integrate(x, dx) function)")
       .add_property("nx", &StateAbstract_wrap::nx_, "dimension of state configuration vector")
-      .add_property("ndx", &StateAbstract_wrap::ndx_, "dimension of state tangent vector");
+      .add_property("ndx", &StateAbstract_wrap::ndx_, "dimension of state tangent vector")
+      .add_property("nq", &StateAbstract_wrap::nq_, "dimension of configuration vector")
+      .add_property("nv", &StateAbstract_wrap::nv_, "dimension of configuration tangent vector");
 }
 
 }  // namespace python

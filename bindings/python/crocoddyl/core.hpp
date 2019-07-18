@@ -12,6 +12,7 @@
 #include "python/crocoddyl/core/state-base.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
+#include "python/crocoddyl/core/integrator/euler.hpp"
 #include "python/crocoddyl/core/optctrl/shooting.hpp"
 #include "python/crocoddyl/core/solver-base.hpp"
 #include "python/crocoddyl/core/states/state-euclidean.hpp"
@@ -27,6 +28,7 @@ void exposeCore() {
   exposeStateAbstract();
   exposeActionAbstract();
   exposeDifferentialActionAbstract();
+  exposeIntegratedActionEuler();
   exposeShootingProblem();
   exposeSolverAbstract();
   exposeStateEuclidean();

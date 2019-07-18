@@ -43,6 +43,28 @@ class ActionModelAbstract {
   unsigned int ncost_;
   StateAbstract* state_;
   Eigen::VectorXd unone_;
+
+#ifdef PYTHON_BINDINGS
+ public:
+  void calc_wrap(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
+    calc(data, x, u);
+  }
+  void calc_wrap(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x) { calc(data, x, unone_); }
+
+  void calcDiff_wrap(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u,
+                     const bool& recalc) {
+    calcDiff(data, x, u, recalc);
+  }
+  void calcDiff_wrap(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
+    calcDiff(data, x, u, true);
+  }
+  void calcDiff_wrap(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x) {
+    calcDiff(data, x, unone_, true);
+  }
+  void calcDiff_wrap(std::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const bool& recalc) {
+    calcDiff(data, x, unone_, recalc);
+  }
+#endif
 };
 
 struct ActionDataAbstract {

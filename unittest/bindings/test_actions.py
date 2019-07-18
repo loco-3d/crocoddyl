@@ -1,5 +1,5 @@
 import crocoddyl
-from utils import UnicycleDerived, LQRDerived
+from utils import UnicycleDerived, LQRDerived, DifferentialLQRDerived
 from random import randint
 import numpy as np
 import unittest
@@ -24,17 +24,27 @@ class ActionModelAbstractTestCase(unittest.TestCase):
         self.assertAlmostEqual(self.DATA.cost, self.DATA_DER.cost, 10, "Wrong cost value.")
         self.assertTrue(np.allclose(self.DATA.costResiduals, self.DATA_DER.costResiduals, atol=1e-9),
                         "Wrong cost residuals.")
-        # Checking the dimension of the next state
-        self.assertEqual(self.DATA.xnext.shape, self.DATA_DER.xnext.shape, "Wrong next state dimension.")
-        # Checking the next state value
-        self.assertTrue(np.allclose(self.DATA.xnext, self.DATA_DER.xnext, atol=1e-9), "Wrong next state.")
+
+        if isinstance(self.MODEL, crocoddyl.ActionModelAbstract):
+            # Checking the dimension of the next state
+            self.assertEqual(self.DATA.xnext.shape, self.DATA_DER.xnext.shape, "Wrong next state dimension.")
+            # Checking the next state value
+            self.assertTrue(np.allclose(self.DATA.xnext, self.DATA_DER.xnext, atol=1e-9), "Wrong next state.")
+        elif isinstance(self.MODEL, crocoddyl.DifferentialActionModelAbstract):
+            # Checking the dimension of the next state
+            self.assertEqual(self.DATA.xout.shape, self.DATA_DER.xout.shape, "Wrong next state dimension.")
+            # Checking the next state value
+            self.assertTrue(np.allclose(self.DATA.xout, self.DATA_DER.xout, atol=1e-9), "Wrong next state.")
 
     def test_calcDiff(self):
         # Run calcDiff for both action models
         self.MODEL.calcDiff(self.DATA, self.x, self.u)
         self.MODEL_DER.calcDiff(self.DATA_DER, self.x, self.u)
         # Checking the next state value
-        self.assertTrue(np.allclose(self.DATA.xnext, self.DATA_DER.xnext, atol=1e-9), "Wrong next state.")
+        if isinstance(self.MODEL, crocoddyl.ActionModelAbstract):
+            self.assertTrue(np.allclose(self.DATA.xnext, self.DATA_DER.xnext, atol=1e-9), "Wrong next state.")
+        elif isinstance(self.MODEL, crocoddyl.DifferentialActionModelAbstract):
+            self.assertTrue(np.allclose(self.DATA.xout, self.DATA_DER.xout, atol=1e-9), "Wrong next state.")
         # Checking the Jacobians of the dynamic
         self.assertTrue(np.allclose(self.DATA.Fx, self.DATA_DER.Fx, atol=1e-9), "Wrong Fx.")
         self.assertTrue(np.allclose(self.DATA.Fu, self.DATA_DER.Fu, atol=1e-9), "Wrong Fu.")
@@ -56,6 +66,13 @@ class LQRTest(ActionModelAbstractTestCase):
     NU = randint(1, NX)
     ActionModelAbstractTestCase.MODEL = crocoddyl.ActionModelLQR(NX, NU)
     ActionModelAbstractTestCase.MODEL_DER = LQRDerived(NX, NU)
+
+
+class DifferentialLQRTest(ActionModelAbstractTestCase):
+    NX = randint(1, 21)
+    NU = randint(1, NX)
+    ActionModelAbstractTestCase.MODEL = crocoddyl.DifferentialActionModelLQR(NX, NU)
+    ActionModelAbstractTestCase.MODEL_DER = DifferentialLQRDerived(NX, NU)
 
 
 if __name__ == '__main__':

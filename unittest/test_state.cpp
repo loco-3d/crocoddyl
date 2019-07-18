@@ -12,7 +12,7 @@
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/states/state-euclidean.hpp"
 #include "crocoddyl/core/states/state-unicycle.hpp"
-#include "crocoddyl/core/states/state-num-diff.hpp"
+#include "crocoddyl/core/numdiff/state.hpp"
 #include <Eigen/Dense>
 
 using namespace boost::unit_test;

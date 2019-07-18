@@ -128,6 +128,42 @@ class LQRDerived(crocoddyl.ActionModelAbstract):
         data.Lxu = self.Lxu
 
 
+class DifferentialLQRDerived(crocoddyl.DifferentialActionModelAbstract):
+    def __init__(self, nq, nu, driftFree=True):
+        crocoddyl.DifferentialActionModelAbstract.__init__(self, crocoddyl.StateVector(2 * nq), nu)
+
+        self.Fq = np.matrix(np.eye(self.nq))
+        self.Fv = np.matrix(np.eye(self.nv))
+        self.Fu = np.matrix(np.eye(self.nq))[:, :self.nu]
+        self.f0 = np.matrix(np.zeros(self.nv)).T
+        self.Lxx = np.matrix(np.eye(self.nx))
+        self.Lxu = np.matrix(np.eye(self.nx))[:, :self.nu]
+        self.Luu = np.matrix(np.eye(self.nu))
+        self.lx = np.matrix(np.ones(self.nx)).T
+        self.lu = np.matrix(np.ones(self.nu)).T
+
+    def calc(self, data, x, u=None):
+        if u is None:
+            u = self.unone
+        q, v = x[:self.nq], x[self.nq:]
+        data.xout = self.Fq * q + self.Fv * v + self.Fu * u + self.f0
+        data.cost = 0.5 * np.asscalar(x.T * self.Lxx * x) + 0.5 * np.asscalar(u.T * self.Luu * u)
+        data.cost += np.asscalar(x.T * self.Lxu * u) + np.asscalar(self.lx.T * x) + np.asscalar(self.lu.T * u)
+
+    def calcDiff(self, data, x, u=None, recalc=True):
+        if u is None:
+            u = self.unone
+        if recalc:
+            self.calc(data, x, u)
+        data.Lx = self.lx + np.dot(self.Lxx, x) + np.dot(self.Lxu, u)
+        data.Lu = self.lu + np.dot(self.Lxu.T, x) + np.dot(self.Luu, u)
+        data.Fx = np.hstack([self.Fq, self.Fv])
+        data.Fu = self.Fu
+        data.Lxx = self.Lxx
+        data.Luu = self.Luu
+        data.Lxu = self.Lxu
+
+
 class DDPDerived(crocoddyl.SolverAbstract):
     def __init__(self, shootingProblem):
         crocoddyl.SolverAbstract.__init__(self, shootingProblem)

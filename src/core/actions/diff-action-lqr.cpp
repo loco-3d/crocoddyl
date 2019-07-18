@@ -3,8 +3,7 @@
 namespace crocoddyl {
 
 DifferentialActionModelLQR::DifferentialActionModelLQR(const unsigned int& nq, const unsigned int& nu, bool drift_free)
-    : DifferentialActionModelAbstract(nq, nq, nu), drift_free_(drift_free) {
-  state_ = new StateVector(nx_);
+    : DifferentialActionModelAbstract(new StateVector(2 * nq), nu), drift_free_(drift_free) {
   // TODO substitute by random (vectors) and random-orthogonal (matrices)
   Fq_ = Eigen::MatrixXd::Identity(nq_, nq_);
   Fv_ = Eigen::MatrixXd::Identity(nv_, nv_);
@@ -40,8 +39,8 @@ void DifferentialActionModelLQR::calcDiff(std::shared_ptr<DifferentialActionData
   }
   data->Lx = lx_ + Lxx_ * x + Lxu_ * u;
   data->Lu = lu_ + Lxu_.transpose() * x + Luu_ * u;
-  data->Fx.topRows(nq_) = Fq_;
-  data->Fx.bottomRows(nv_) = Fv_;
+  data->Fx.leftCols(nq_) = Fq_;
+  data->Fx.rightCols(nv_) = Fv_;
   data->Fu = Fu_;
   data->Lxx = Lxx_;
   data->Lxu = Lxu_;

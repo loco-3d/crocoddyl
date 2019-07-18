@@ -12,7 +12,7 @@
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/actions/action-lqr.hpp"
 #include "crocoddyl/core/actions/action-unicycle.hpp"
-#include "crocoddyl/core/actions/action-num-diff.hpp"
+#include "crocoddyl/core/numdiff/action.hpp"
 #include <Eigen/Dense>
 
 using namespace boost::unit_test;

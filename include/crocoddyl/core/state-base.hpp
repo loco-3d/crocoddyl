@@ -10,6 +10,7 @@
 #define CROCODDYL_CORE_STATE_BASE_HPP_
 
 #include <Eigen/Core>
+#include <vector>
 
 namespace crocoddyl {
 
@@ -35,10 +36,70 @@ class StateAbstract {
 
   const unsigned int& get_nx() const;
   const unsigned int& get_ndx() const;
+  const unsigned int& get_nq() const;
+  const unsigned int& get_nv() const;
 
  protected:
   unsigned int nx_;
   unsigned int ndx_;
+  unsigned int nq_;
+  unsigned int nv_;
+
+#ifdef PYTHON_BINDINGS
+ public:
+  Eigen::VectorXd diff_wrap(const Eigen::VectorXd& x0, const Eigen::VectorXd& x1) {
+    Eigen::VectorXd dxout = Eigen::VectorXd::Zero(ndx_);
+    diff(x0, x1, dxout);
+    return dxout;
+  }
+  Eigen::VectorXd integrate_wrap(const Eigen::VectorXd& x, const Eigen::VectorXd& dx) {
+    Eigen::VectorXd xout = Eigen::VectorXd::Zero(nx_);
+    integrate(x, dx, xout);
+    return xout;
+  }
+  std::vector<Eigen::MatrixXd> Jdiff_wrap(const Eigen::VectorXd& x0, const Eigen::VectorXd& x1,
+                                          std::string firstsecond = "both") {
+    Eigen::MatrixXd Jfirst(ndx_, ndx_), Jsecond(ndx_, ndx_);
+    std::vector<Eigen::MatrixXd> Jacs;
+    if (firstsecond == "both") {
+      Jdiff(x0, x1, Jfirst, Jsecond, Jcomponent::both);
+      Jacs.push_back(Jfirst);
+      Jacs.push_back(Jsecond);
+    } else if (firstsecond == "first") {
+      Jdiff(x0, x1, Jfirst, Jsecond, Jcomponent::first);
+      Jacs.push_back(Jfirst);
+    } else if (firstsecond == "second") {
+      Jdiff(x0, x1, Jfirst, Jsecond, Jcomponent::second);
+      Jacs.push_back(Jsecond);
+    } else {
+      Jdiff(x0, x1, Jfirst, Jsecond, Jcomponent::both);
+      Jacs.push_back(Jfirst);
+      Jacs.push_back(Jsecond);
+    }
+    return Jacs;
+  }
+  std::vector<Eigen::MatrixXd> Jintegrate_wrap(const Eigen::VectorXd& x, const Eigen::VectorXd& dx,
+                                               std::string firstsecond = "both") {
+    Eigen::MatrixXd Jfirst(ndx_, ndx_), Jsecond(ndx_, ndx_);
+    std::vector<Eigen::MatrixXd> Jacs;
+    if (firstsecond == "both") {
+      Jintegrate(x, dx, Jfirst, Jsecond, Jcomponent::both);
+      Jacs.push_back(Jfirst);
+      Jacs.push_back(Jsecond);
+    } else if (firstsecond == "first") {
+      Jintegrate(x, dx, Jfirst, Jsecond, Jcomponent::first);
+      Jacs.push_back(Jfirst);
+    } else if (firstsecond == "second") {
+      Jintegrate(x, dx, Jfirst, Jsecond, Jcomponent::second);
+      Jacs.push_back(Jsecond);
+    } else {
+      Jintegrate(x, dx, Jfirst, Jsecond, Jcomponent::both);
+      Jacs.push_back(Jfirst);
+      Jacs.push_back(Jsecond);
+    }
+    return Jacs;
+  }
+#endif
 };
 
 }  // namespace crocoddyl
