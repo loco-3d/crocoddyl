@@ -19,11 +19,7 @@ namespace bp = boost::python;
 class DifferentialActionModelLQR_wrap : public DifferentialActionModelLQR {
  public:
   DifferentialActionModelLQR_wrap(int nq, int nu, bool drift_free = true)
-      : DifferentialActionModelLQR(nq, nu, drift_free) {
-    // We need to change it to the wrap object in Python
-    state_->~StateAbstract();                     // destroy the object but leave the space allocated
-    state_ = new (state_) StateVector_wrap(2 * nq);  // create a new object in the same space
-  }
+      : DifferentialActionModelLQR(nq, nu, drift_free) {}
 
   void calc_wrap1(std::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::VectorXd& x,
                   const Eigen::VectorXd& u) {

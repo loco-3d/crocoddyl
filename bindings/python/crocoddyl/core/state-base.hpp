@@ -143,6 +143,9 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
   }
 };
 
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Jdiffs, StateAbstract::Jdiff_wrap, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Jintegrates, StateAbstract::Jintegrate_wrap, 2, 3)
+
 void exposeStateAbstract() {
   bp::class_<StateAbstract_wrap, boost::noncopyable>("StateAbstract",
                                                      R"(Abstract class for the state representation.
