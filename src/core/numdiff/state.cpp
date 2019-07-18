@@ -1,4 +1,4 @@
-#include "crocoddyl/core/states/state-num-diff.hpp"
+#include "crocoddyl/core/numdiff/state.hpp"
 
 namespace crocoddyl {
 

@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_CORE_STATES_STATE_NUM_DIFF_HPP_
-#define CROCODDYL_CORE_STATES_STATE_NUM_DIFF_HPP_
+#ifndef CROCODDYL_CORE_NUMDIFF_STATE_HPP_
+#define CROCODDYL_CORE_NUMDIFF_STATE_HPP_
 
 #include "crocoddyl/core/state-base.hpp"
 
@@ -101,4 +101,4 @@ class StateNumDiff : public StateAbstract {
 
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_CORE_STATES_STATE_NUM_DIFF_HPP_
+#endif  // CROCODDYL_CORE_NUMDIFF_STATE_HPP_

@@ -1,4 +1,4 @@
-#include "crocoddyl/core/actions/action-num-diff.hpp"
+#include "crocoddyl/core/numdiff/action.hpp"
 
 namespace crocoddyl {
 

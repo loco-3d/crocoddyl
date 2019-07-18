@@ -4,15 +4,15 @@ SET(${PROJECT_NAME}_SOURCES
   core/diff-action-base.cpp
   core/solver-base.cpp
   core/integrator/euler.cpp
+  core/numdiff/state.cpp
+  core/numdiff/action.cpp
   core/utils/callbacks.cpp
   core/optctrl/shooting.cpp
   core/solvers/ddp.cpp
   core/states/state-euclidean.cpp
-  core/states/state-num-diff.cpp
   core/actions/action-unicycle.cpp
   core/actions/action-lqr.cpp
   core/actions/diff-action-lqr.cpp
-  core/actions/action-num-diff.cpp
   )
 
 IF(UNIX)
