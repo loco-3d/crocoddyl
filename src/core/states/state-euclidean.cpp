@@ -12,12 +12,16 @@ Eigen::VectorXd StateVector::rand() { return Eigen::VectorXd::Random(nx_); }
 
 void StateVector::diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
                        Eigen::Ref<Eigen::VectorXd> dxout) {
+  assert(x0.size() == nx_ && "StateVector::diff: x0 has wrong dimension");
+  assert(x1.size() == nx_ && "StateVector::diff: x1 has wrong dimension");
   assert(dxout.size() == ndx_ && "StateVector::diff: output must be pre-allocated");
   dxout = x1 - x0;
 }
 
 void StateVector::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                             Eigen::Ref<Eigen::VectorXd> xout) {
+  assert(x.size() == nx_ && "StateVector::diff: x has wrong dimension");
+  assert(dx.size() == ndx_ && "StateVector::diff: dx has wrong dimension");
   assert(xout.size() == nx_ && "StateVector::diff: output must be pre-allocated");
   xout = x + dx;
 }
