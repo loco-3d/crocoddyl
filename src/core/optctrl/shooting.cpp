@@ -15,7 +15,7 @@ double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::
   cost_ = 0;
   for (unsigned int i = 0; i < T_; ++i) {
     ActionModelAbstract* model = running_models_[i];
-    std::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
+    boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
     const Eigen::VectorXd& x = xs[i];
     const Eigen::VectorXd& u = us[i];
 
@@ -31,7 +31,7 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const s
   cost_ = 0;
   for (long unsigned int i = 0; i < T_; ++i) {
     ActionModelAbstract* model = running_models_[i];
-    std::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
+    boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
     const Eigen::VectorXd& x = xs[i];
     const Eigen::VectorXd& u = us[i];
 
@@ -48,7 +48,7 @@ void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us, std::vecto
   xs[0] = x0_;
   for (long unsigned int i = 0; i < T_; ++i) {
     ActionModelAbstract* model = running_models_[i];
-    std::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
+    boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
     Eigen::VectorXd& x = xs[i];
     const Eigen::VectorXd& u = us[i];
 
@@ -79,8 +79,8 @@ std::vector<ActionModelAbstract*>& ShootingProblem::get_runningModels() { return
 
 ActionModelAbstract* ShootingProblem::get_terminalModel() { return terminal_model_; }
 
-std::vector<std::shared_ptr<ActionDataAbstract>>& ShootingProblem::get_runningDatas() { return running_datas_; }
+std::vector<boost::shared_ptr<ActionDataAbstract> >& ShootingProblem::get_runningDatas() { return running_datas_; }
 
-std::shared_ptr<ActionDataAbstract>& ShootingProblem::get_terminalData() { return terminal_data_; }
+boost::shared_ptr<ActionDataAbstract>& ShootingProblem::get_terminalData() { return terminal_data_; }
 
 }  // namespace crocoddyl

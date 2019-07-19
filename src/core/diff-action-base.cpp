@@ -20,12 +20,12 @@ DifferentialActionModelAbstract::DifferentialActionModelAbstract(StateAbstract* 
 
 DifferentialActionModelAbstract::~DifferentialActionModelAbstract() {}
 
-void DifferentialActionModelAbstract::calc(std::shared_ptr<DifferentialActionDataAbstract>& data,
+void DifferentialActionModelAbstract::calc(boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                            const Eigen::Ref<const Eigen::VectorXd>& x) {
   calc(data, x, unone_);
 }
 
-void DifferentialActionModelAbstract::calcDiff(std::shared_ptr<DifferentialActionDataAbstract>& data,
+void DifferentialActionModelAbstract::calcDiff(boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                const Eigen::Ref<const Eigen::VectorXd>& x) {
   calcDiff(data, x, unone_);
 }

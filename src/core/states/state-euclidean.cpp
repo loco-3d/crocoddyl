@@ -2,7 +2,7 @@
 
 namespace crocoddyl {
 
-StateVector::StateVector(const unsigned int& nx_) : StateAbstract(nx_, nx_) {}
+StateVector::StateVector(const unsigned int& nx) : StateAbstract(nx, nx) {}
 
 StateVector::~StateVector() {}
 
@@ -29,15 +29,15 @@ void StateVector::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Ei
 void StateVector::Jdiff(const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>&,
                         Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
                         Jcomponent firstsecond) {
-  assert((firstsecond == Jcomponent::first || firstsecond == Jcomponent::second || firstsecond == Jcomponent::both) &&
+  assert((firstsecond == first || firstsecond == second || firstsecond == both) &&
          ("StateVector::Jdiff: firstsecond must be one of the Jcomponent "
           "{both, first, second }"));
-  if (firstsecond == Jcomponent::first || firstsecond == Jcomponent::both) {
+  if (firstsecond == first || firstsecond == both) {
     assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "StateVector::Jdiff: Jfirst must be of the good size");
     Jfirst.setZero();
     Jfirst.diagonal() = Eigen::VectorXd::Constant(ndx_, -1.);
   }
-  if (firstsecond == Jcomponent::second || firstsecond == Jcomponent::both) {
+  if (firstsecond == second || firstsecond == both) {
     assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ && "StateVector::Jdiff: Jfirst must be of the good size");
     Jsecond.setZero();
     Jsecond.diagonal() = Eigen::VectorXd::Constant(ndx_, 1.);
@@ -47,15 +47,15 @@ void StateVector::Jdiff(const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::R
 void StateVector::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>&,
                              Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
                              Jcomponent firstsecond) {
-  assert((firstsecond == Jcomponent::first || firstsecond == Jcomponent::second || firstsecond == Jcomponent::both) &&
+  assert((firstsecond == first || firstsecond == second || firstsecond == both) &&
          ("StateVector::Jdiff: firstsecond must be one of the Jcomponent "
           "{both, first, second }"));
-  if (firstsecond == Jcomponent::first || firstsecond == Jcomponent::both) {
+  if (firstsecond == first || firstsecond == both) {
     assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "StateVector::Jdiff: Jfirst must be of the good size");
     Jfirst.setZero();
     Jfirst.diagonal() = Eigen::VectorXd::Constant(ndx_, 1.);
   }
-  if (firstsecond == Jcomponent::second || firstsecond == Jcomponent::both) {
+  if (firstsecond == second || firstsecond == both) {
     assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ && "StateVector::Jdiff: Jfirst must be of the good size");
     Jsecond.setZero();
     Jsecond.diagonal() = Eigen::VectorXd::Constant(ndx_, 1.);

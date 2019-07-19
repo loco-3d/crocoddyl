@@ -37,7 +37,7 @@ class SolverAbstract {
 
   const ShootingProblem& get_problem() const;
   const std::vector<ActionModelAbstract*>& get_models() const;
-  const std::vector<std::shared_ptr<ActionDataAbstract>>& get_datas() const;
+  const std::vector<boost::shared_ptr<ActionDataAbstract> >& get_datas() const;
   const std::vector<Eigen::VectorXd>& get_xs() const;
   const std::vector<Eigen::VectorXd>& get_us() const;
   const bool& get_isFeasible() const;
@@ -54,7 +54,7 @@ class SolverAbstract {
  protected:
   ShootingProblem problem_;
   std::vector<ActionModelAbstract*> models_;
-  std::vector<std::shared_ptr<ActionDataAbstract>> datas_;
+  std::vector<boost::shared_ptr<ActionDataAbstract> > datas_;
   std::vector<Eigen::VectorXd> xs_;
   std::vector<Eigen::VectorXd> us_;
   std::vector<CallbackAbstract*> callbacks_;

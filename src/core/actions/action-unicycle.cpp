@@ -10,7 +10,7 @@ ActionModelUnicycle::~ActionModelUnicycle() {
   // delete state_; //TODO @Carlos this breaks the test_actions c++ unit-test
 }
 
-void ActionModelUnicycle::calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+void ActionModelUnicycle::calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                                const Eigen::Ref<const Eigen::VectorXd>& u) {
   ActionDataUnicycle* d = static_cast<ActionDataUnicycle*>(data.get());
   const double& c = std::cos(x[2]);
@@ -21,7 +21,7 @@ void ActionModelUnicycle::calc(std::shared_ptr<ActionDataAbstract>& data, const 
   d->cost = 0.5 * d->r.transpose() * d->r;
 }
 
-void ActionModelUnicycle::calcDiff(std::shared_ptr<ActionDataAbstract>& data,
+void ActionModelUnicycle::calcDiff(boost::shared_ptr<ActionDataAbstract>& data,
                                    const Eigen::Ref<const Eigen::VectorXd>& x,
                                    const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (recalc) {
@@ -44,8 +44,8 @@ void ActionModelUnicycle::calcDiff(std::shared_ptr<ActionDataAbstract>& data,
   d->Fu << c * dt_, 0., s * dt_, 0., 0., dt_;
 }
 
-std::shared_ptr<ActionDataAbstract> ActionModelUnicycle::createData() {
-  return std::make_shared<ActionDataUnicycle>(this);
+boost::shared_ptr<ActionDataAbstract> ActionModelUnicycle::createData() {
+  return boost::make_shared<ActionDataUnicycle>(this);
 }
 
 }  // namespace crocoddyl

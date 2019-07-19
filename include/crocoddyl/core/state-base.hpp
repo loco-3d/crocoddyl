@@ -29,10 +29,10 @@ class StateAbstract {
                          Eigen::Ref<Eigen::VectorXd> xout) = 0;
   virtual void Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
                      Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
-                     Jcomponent firstsecond = Jcomponent::both) = 0;
+                     Jcomponent firstsecond = both) = 0;
   virtual void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                           Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
-                          Jcomponent firstsecond = Jcomponent::both) = 0;
+                          Jcomponent firstsecond = both) = 0;
 
   const unsigned int& get_nx() const;
   const unsigned int& get_ndx() const;
@@ -62,17 +62,17 @@ class StateAbstract {
     Eigen::MatrixXd Jfirst(ndx_, ndx_), Jsecond(ndx_, ndx_);
     std::vector<Eigen::MatrixXd> Jacs;
     if (firstsecond == "both") {
-      Jdiff(x0, x1, Jfirst, Jsecond, Jcomponent::both);
+      Jdiff(x0, x1, Jfirst, Jsecond, both);
       Jacs.push_back(Jfirst);
       Jacs.push_back(Jsecond);
     } else if (firstsecond == "first") {
-      Jdiff(x0, x1, Jfirst, Jsecond, Jcomponent::first);
+      Jdiff(x0, x1, Jfirst, Jsecond, first);
       Jacs.push_back(Jfirst);
     } else if (firstsecond == "second") {
-      Jdiff(x0, x1, Jfirst, Jsecond, Jcomponent::second);
+      Jdiff(x0, x1, Jfirst, Jsecond, second);
       Jacs.push_back(Jsecond);
     } else {
-      Jdiff(x0, x1, Jfirst, Jsecond, Jcomponent::both);
+      Jdiff(x0, x1, Jfirst, Jsecond, both);
       Jacs.push_back(Jfirst);
       Jacs.push_back(Jsecond);
     }
@@ -83,17 +83,17 @@ class StateAbstract {
     Eigen::MatrixXd Jfirst(ndx_, ndx_), Jsecond(ndx_, ndx_);
     std::vector<Eigen::MatrixXd> Jacs;
     if (firstsecond == "both") {
-      Jintegrate(x, dx, Jfirst, Jsecond, Jcomponent::both);
+      Jintegrate(x, dx, Jfirst, Jsecond, both);
       Jacs.push_back(Jfirst);
       Jacs.push_back(Jsecond);
     } else if (firstsecond == "first") {
-      Jintegrate(x, dx, Jfirst, Jsecond, Jcomponent::first);
+      Jintegrate(x, dx, Jfirst, Jsecond, first);
       Jacs.push_back(Jfirst);
     } else if (firstsecond == "second") {
-      Jintegrate(x, dx, Jfirst, Jsecond, Jcomponent::second);
+      Jintegrate(x, dx, Jfirst, Jsecond, second);
       Jacs.push_back(Jsecond);
     } else {
-      Jintegrate(x, dx, Jfirst, Jsecond, Jcomponent::both);
+      Jintegrate(x, dx, Jfirst, Jsecond, both);
       Jacs.push_back(Jfirst);
       Jacs.push_back(Jsecond);
     }

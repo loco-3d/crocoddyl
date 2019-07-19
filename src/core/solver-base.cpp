@@ -23,7 +23,7 @@ SolverAbstract::SolverAbstract(ShootingProblem& problem)
   datas_.resize(T + 1);
   for (long unsigned int t = 0; t < T; ++t) {
     ActionModelAbstract* model = problem_.running_models_[t];
-    std::shared_ptr<ActionDataAbstract>& data = problem_.running_datas_[t];
+    boost::shared_ptr<ActionDataAbstract>& data = problem_.running_datas_[t];
     const int& nu = model->get_nu();
 
     xs_[t] = model->get_state()->zero();
@@ -70,7 +70,7 @@ const ShootingProblem& SolverAbstract::get_problem() const { return problem_; }
 
 const std::vector<ActionModelAbstract*>& SolverAbstract::get_models() const { return models_; }
 
-const std::vector<std::shared_ptr<ActionDataAbstract>>& SolverAbstract::get_datas() const { return datas_; }
+const std::vector<boost::shared_ptr<ActionDataAbstract> >& SolverAbstract::get_datas() const { return datas_; }
 
 const std::vector<Eigen::VectorXd>& SolverAbstract::get_xs() const { return xs_; }
 

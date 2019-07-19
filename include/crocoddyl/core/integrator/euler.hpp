@@ -20,11 +20,11 @@ class IntegratedActionModelEuler : public ActionModelAbstract {
                              const bool& with_cost_residual = true);
   ~IntegratedActionModelEuler();
 
-  void calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) override;
-  void calcDiff(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calcDiff(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) override;
-  std::shared_ptr<ActionDataAbstract> createData() override;
+  boost::shared_ptr<ActionDataAbstract> createData() override;
 
   DifferentialActionModelAbstract* get_differential() const;
 
@@ -51,7 +51,7 @@ struct IntegratedActionDataEuler : public ActionDataAbstract {
   }
   ~IntegratedActionDataEuler() {}
 
-  std::shared_ptr<DifferentialActionDataAbstract> differential;
+  boost::shared_ptr<DifferentialActionDataAbstract> differential;
   Eigen::VectorXd dx;
   Eigen::MatrixXd ddx_dx;
   Eigen::MatrixXd ddx_du;

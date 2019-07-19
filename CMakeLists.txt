@@ -43,9 +43,8 @@ OPTION(BUILD_UNIT_TESTS "Build the unitary tests" ON)
 OPTION(BUILD_BENCHMARK "Build the benchmark" OFF)
 
 
-SET(CMAKE_CXX_FLAGS "-std=c++11")
 IF(ENABLE_VECTORIZATION)
-  SET(CMAKE_CXX_FLAGS "-std=c++11 -march=native -mavx")
+  SET(CMAKE_CXX_FLAGS "-march=native -mavx")
 ENDIF()
 
 SETUP_PROJECT()

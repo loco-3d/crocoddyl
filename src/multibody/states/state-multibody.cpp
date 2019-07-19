@@ -57,7 +57,7 @@ void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Ei
          ("StateMultibody::Jdiff: firstsecond must be one of the Jcomponent "
           "{both, first, second}"));
 
-  if (firstsecond == Jcomponent::first) {
+  if (firstsecond == first) {
     assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "StateMultibody::Jdiff: Jfirst must be of the good size");
 
     diff(x1, x0, dx_);
@@ -68,7 +68,7 @@ void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Ei
     Jfirst.setZero();
     Jfirst.topLeftCorner(nv_, nv_) = -Jdq_.inverse();
     Jfirst.bottomRightCorner(nv_, nv_).diagonal() = -Eigen::VectorXd::Ones(nv_);
-  } else if (firstsecond == Jcomponent::second) {
+  } else if (firstsecond == second) {
     assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ &&
            "StateMultibody::Jdiff: Jsecond must be of the good size");
 
@@ -110,13 +110,13 @@ void StateMultibody::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x,
                                 Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent firstsecond) {
   assert(x.size() == nx_ && "StateMultibody::Jintegrate: x has wrong dimension");
   assert(dx.size() == ndx_ && "StateMultibody::Jintegrate: dx has wrong dimension");
-  assert((firstsecond == Jcomponent::first || firstsecond == Jcomponent::second || firstsecond == Jcomponent::both) &&
+  assert((firstsecond == first || firstsecond == second || firstsecond == both) &&
          ("StateMultibody::Jintegrate: firstsecond must be one of the Jcomponent "
           "{both, first, second}"));
 
   const Eigen::VectorXd& q = x.head(nq_);
   const Eigen::VectorXd& dq = dx.head(nq_);
-  if (firstsecond == Jcomponent::first) {
+  if (firstsecond == first) {
     assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ &&
            "StateMultibody::Jintegrate: Jfirst must be of the good size");
 
@@ -124,7 +124,7 @@ void StateMultibody::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x,
     Jfirst.setZero();
     Jfirst.topLeftCorner(nv_, nv_) = Jdq_;
     Jfirst.bottomRightCorner(nv_, nv_).diagonal() = Eigen::VectorXd::Ones(nv_);
-  } else if (firstsecond == Jcomponent::second) {
+  } else if (firstsecond == second) {
     assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ &&
            "StateMultibody::Jdiff: Jsecond must be of the good size");
 

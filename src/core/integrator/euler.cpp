@@ -12,11 +12,11 @@ IntegratedActionModelEuler::IntegratedActionModelEuler(DifferentialActionModelAb
 
 IntegratedActionModelEuler::~IntegratedActionModelEuler() {}
 
-void IntegratedActionModelEuler::calc(std::shared_ptr<ActionDataAbstract>& data,
+void IntegratedActionModelEuler::calc(boost::shared_ptr<ActionDataAbstract>& data,
                                       const Eigen::Ref<const Eigen::VectorXd>& x,
                                       const Eigen::Ref<const Eigen::VectorXd>& u) {
   // Static casting the data
-  std::shared_ptr<IntegratedActionDataEuler> d = std::static_pointer_cast<IntegratedActionDataEuler>(data);
+  boost::shared_ptr<IntegratedActionDataEuler> d = boost::static_pointer_cast<IntegratedActionDataEuler>(data);
 
   // Computing the acceleration and cost
   differential_->calc(d->differential, x, u);
@@ -34,7 +34,7 @@ void IntegratedActionModelEuler::calc(std::shared_ptr<ActionDataAbstract>& data,
   d->cost = d->differential->cost;
 }
 
-void IntegratedActionModelEuler::calcDiff(std::shared_ptr<ActionDataAbstract>& data,
+void IntegratedActionModelEuler::calcDiff(boost::shared_ptr<ActionDataAbstract>& data,
                                           const Eigen::Ref<const Eigen::VectorXd>& x,
                                           const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   const unsigned int& nv = differential_->get_nv();
@@ -43,7 +43,7 @@ void IntegratedActionModelEuler::calcDiff(std::shared_ptr<ActionDataAbstract>& d
   }
 
   // Static casting the data
-  std::shared_ptr<IntegratedActionDataEuler> d = std::static_pointer_cast<IntegratedActionDataEuler>(data);
+  boost::shared_ptr<IntegratedActionDataEuler> d = boost::static_pointer_cast<IntegratedActionDataEuler>(data);
 
   // Computing the derivatives for the time-continuous model (i.e. differential model)
   differential_->calcDiff(d->differential, x, u);
@@ -68,8 +68,8 @@ void IntegratedActionModelEuler::calcDiff(std::shared_ptr<ActionDataAbstract>& d
   d->Luu = d->differential->Luu;
 }
 
-std::shared_ptr<ActionDataAbstract> IntegratedActionModelEuler::createData() {
-  return std::make_shared<IntegratedActionDataEuler>(this);
+boost::shared_ptr<ActionDataAbstract> IntegratedActionModelEuler::createData() {
+  return boost::make_shared<IntegratedActionDataEuler>(this);
 }
 
 DifferentialActionModelAbstract* IntegratedActionModelEuler::get_differential() const { return differential_; }

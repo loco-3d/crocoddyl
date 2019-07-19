@@ -19,11 +19,11 @@ class ActionModelLQR : public ActionModelAbstract {
   ActionModelLQR(const unsigned int& nx, const unsigned int& nu, bool drift_free = true);
   ~ActionModelLQR();
 
-  void calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) override;
-  void calcDiff(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calcDiff(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) override;
-  std::shared_ptr<ActionDataAbstract> createData() override;
+  boost::shared_ptr<ActionDataAbstract> createData() override;
 
   Eigen::MatrixXd Fx_;
   Eigen::MatrixXd Fu_;

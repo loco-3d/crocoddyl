@@ -28,10 +28,10 @@ class StateMultibody : public StateAbstract {
                  Eigen::Ref<Eigen::VectorXd> xout) override;
   void Jdiff(const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>&,
              Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
-             Jcomponent firstsecond = Jcomponent::both) override;
+             Jcomponent firstsecond = both) override;
   void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>&,
                   Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
-                  Jcomponent firstsecond = Jcomponent::both) override;
+                  Jcomponent firstsecond = both) override;
 
  private:
   pinocchio::Model model_;

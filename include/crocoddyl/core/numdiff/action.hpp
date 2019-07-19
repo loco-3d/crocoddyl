@@ -20,11 +20,11 @@ class ActionModelNumDiff : public ActionModelAbstract {
   ActionModelNumDiff(ActionModelAbstract& model, bool with_gauss_approx = false);
   ~ActionModelNumDiff();
 
-  void calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) override;
-  void calcDiff(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calcDiff(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) override;
-  std::shared_ptr<ActionDataAbstract> createData() override;
+  boost::shared_ptr<ActionDataAbstract> createData() override;
 
   ActionModelAbstract& get_model() { return model_; }
 
@@ -140,15 +140,15 @@ struct ActionDataNumDiff : public ActionDataAbstract {
   /**
    * @brief One set of data used to compute the state 0.
    */
-  std::shared_ptr<ActionDataAbstract> data_0;
+  boost::shared_ptr<ActionDataAbstract> data_0;
   /**
    * @brief The data to compute the derivation around the state x.
    */
-  std::vector<std::shared_ptr<ActionDataAbstract>> data_x;
+  std::vector<boost::shared_ptr<ActionDataAbstract> > data_x;
   /**
    * @brief The data to compute the derivation around the state u.
    */
-  std::vector<std::shared_ptr<ActionDataAbstract>> data_u;
+  std::vector<boost::shared_ptr<ActionDataAbstract> > data_u;
 };
 
 }  // namespace crocoddyl
