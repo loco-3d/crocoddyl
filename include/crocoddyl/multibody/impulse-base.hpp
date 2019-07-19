@@ -6,9 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_PINOCCHIO_IMPULSE_BASE_HPP_
-#define CROCODDYL_PINOCCHIO_IMPULSE_BASE_HPP_
+#ifndef CROCODDYL_MULTIBODY_IMPULSE_BASE_HPP_
+#define CROCODDYL_MULTIBODY_IMPULSE_BASE_HPP_
 
 // TODO: ImpulseModelPinocchio ImpulseDataPinocchio
 
-#endif  // CROCODDYL_PINOCCHIO_IMPULSE_BASE_HPP_
+#endif  // CROCODDYL_MULTIBODY_IMPULSE_BASE_HPP_

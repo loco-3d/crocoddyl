@@ -6,10 +6,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_PINOCCHIO_COSTS_COST_FRAME_FORCE_HPP_
-#define CROCODDYL_PINOCCHIO_COSTS_COST_FRAME_FORCE_HPP_
+#ifndef CROCODDYL_MULTIBODY_COSTS_COST_FRAME_FORCE_HPP_
+#define CROCODDYL_MULTIBODY_COSTS_COST_FRAME_FORCE_HPP_
 
 // TODO: CostModelForce CostDataFor
 // TODO: CostModelForceLinearCost CostDataForceCone
 
-#endif  // CROCODDYL_PINOCCHIO_COSTS_COST_FRAME_FORCE_HPP_
+#endif  // CROCODDYL_MULTIBODY_COSTS_COST_FRAME_FORCE_HPP_

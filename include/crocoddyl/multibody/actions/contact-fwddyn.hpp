@@ -6,9 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_PINOCCHIO_CONTACT_FWDDYN_HPP_
-#define CROCODDYL_PINOCCHIO_CONTACT_FWDDYN_HPP_
+#ifndef CROCODDYL_MULTIBODY_CONTACT_FWDDYN_HPP_
+#define CROCODDYL_MULTIBODY_CONTACT_FWDDYN_HPP_
 
 // TODO: DifferentialActionModelFloatingInContact DifferentialActionDataFloatingInContact
 
-#endif  // CROCODDYL_PINOCCHIO_CONTACT_FWDDYN_HPP_
+#endif  // CROCODDYL_MULTIBODY_CONTACT_FWDDYN_HPP_
