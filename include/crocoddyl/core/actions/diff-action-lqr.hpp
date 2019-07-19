@@ -22,10 +22,10 @@ class DifferentialActionModelLQR : public DifferentialActionModelAbstract {
   ~DifferentialActionModelLQR();
 
   void calc(boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-            const Eigen::Ref<const Eigen::VectorXd>& u) override;
+            const Eigen::Ref<const Eigen::VectorXd>& u);
   void calcDiff(boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) override;
-  boost::shared_ptr<DifferentialActionDataAbstract> createData() override;
+                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
+  boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
   Eigen::MatrixXd Fq_;
   Eigen::MatrixXd Fv_;

@@ -16,7 +16,8 @@ ActionModelAbstract::ActionModelAbstract(StateAbstract* const state, const unsig
 
 ActionModelAbstract::~ActionModelAbstract() {}
 
-void ActionModelAbstract::calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
+void ActionModelAbstract::calc(boost::shared_ptr<ActionDataAbstract>& data,
+                               const Eigen::Ref<const Eigen::VectorXd>& x) {
   calc(data, x, unone_);
 }
 

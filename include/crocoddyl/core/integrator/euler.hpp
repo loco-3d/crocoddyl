@@ -21,10 +21,10 @@ class IntegratedActionModelEuler : public ActionModelAbstract {
   ~IntegratedActionModelEuler();
 
   void calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-            const Eigen::Ref<const Eigen::VectorXd>& u) override;
+            const Eigen::Ref<const Eigen::VectorXd>& u);
   void calcDiff(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) override;
-  boost::shared_ptr<ActionDataAbstract> createData() override;
+                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
+  boost::shared_ptr<ActionDataAbstract> createData();
 
   DifferentialActionModelAbstract* get_differential() const;
 

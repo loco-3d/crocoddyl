@@ -20,10 +20,10 @@ class ActionModelLQR : public ActionModelAbstract {
   ~ActionModelLQR();
 
   void calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-            const Eigen::Ref<const Eigen::VectorXd>& u) override;
+            const Eigen::Ref<const Eigen::VectorXd>& u);
   void calcDiff(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) override;
-  boost::shared_ptr<ActionDataAbstract> createData() override;
+                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
+  boost::shared_ptr<ActionDataAbstract> createData();
 
   Eigen::MatrixXd Fx_;
   Eigen::MatrixXd Fu_;

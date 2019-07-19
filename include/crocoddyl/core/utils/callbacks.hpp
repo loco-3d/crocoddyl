@@ -21,7 +21,7 @@ class CallbackDDPVerbose : public CallbackAbstract {
   CallbackDDPVerbose(DDPVerboseLevel level = _1);
   ~CallbackDDPVerbose();
 
-  void operator()(SolverAbstract *const solver) override;
+  void operator()(SolverAbstract *const solver);
 
  private:
   DDPVerboseLevel level;

@@ -20,18 +20,17 @@ class StateVector : public StateAbstract {
   StateVector(const unsigned int& nx);
   ~StateVector();
 
-  Eigen::VectorXd zero() override;
-  Eigen::VectorXd rand() override;
+  Eigen::VectorXd zero();
+  Eigen::VectorXd rand();
   void diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-            Eigen::Ref<Eigen::VectorXd> dxout) override;
+            Eigen::Ref<Eigen::VectorXd> dxout);
   void integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
-                 Eigen::Ref<Eigen::VectorXd> xout) override;
+                 Eigen::Ref<Eigen::VectorXd> xout);
   void Jdiff(const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>&,
-             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
-             Jcomponent firstsecond = both) override;
+             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent firstsecond = both);
   void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>&,
                   Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
-                  Jcomponent firstsecond = both) override;
+                  Jcomponent firstsecond = both);
 
  private:
   pinocchio::Model model_;

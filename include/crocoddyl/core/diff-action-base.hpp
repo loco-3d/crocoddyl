@@ -22,8 +22,8 @@ class DifferentialActionModelAbstract {
   DifferentialActionModelAbstract(StateAbstract* const state, const unsigned int& nu, const unsigned int& ncost = 0);
   virtual ~DifferentialActionModelAbstract();
 
-  virtual void calc(boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                    const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
+  virtual void calc(boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                    const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
   virtual void calcDiff(boost::shared_ptr<DifferentialActionDataAbstract>& data,
                         const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
                         const bool& recalc = true) = 0;
