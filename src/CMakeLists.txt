@@ -13,12 +13,14 @@ SET(${PROJECT_NAME}_SOURCES
   core/actions/action-unicycle.cpp
   core/actions/action-lqr.cpp
   core/actions/diff-action-lqr.cpp
+  multibody/states/state-multibody.cpp
   )
 
 IF(UNIX)
   ADD_LIBRARY(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SOURCES})
   SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   PKG_CONFIG_USE_DEPENDENCY(${PROJECT_NAME} eigen3)
+  PKG_CONFIG_USE_DEPENDENCY(${PROJECT_NAME} pinocchio)
 
   INSTALL(TARGETS ${PROJECT_NAME} DESTINATION lib)
   INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
