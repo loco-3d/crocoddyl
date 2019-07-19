@@ -24,8 +24,8 @@ Eigen::VectorXd StateMultibody::rand() {
 
 void StateMultibody::diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
                           Eigen::Ref<Eigen::VectorXd> dxout) {
-  assert(x0.size() == nx && "StateMultibody::diff: x0 has wrong dimension");
-  assert(x1.size() == nx && "StateMultibody::diff: x1 has wrong dimension");
+  assert(x0.size() == nx_ && "StateMultibody::diff: x0 has wrong dimension");
+  assert(x1.size() == nx_ && "StateMultibody::diff: x1 has wrong dimension");
   assert(dxout.size() == ndx_ && "StateMultibody::diff: output must be pre-allocated");
 
   const Eigen::VectorXd& q0 = x0.head(nq_);
