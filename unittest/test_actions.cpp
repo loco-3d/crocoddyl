@@ -18,14 +18,14 @@
 using namespace boost::unit_test;
 
 void test_construct_data(crocoddyl::ActionModelAbstract& model) {
-  std::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
+  boost::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
 }
 
 //____________________________________________________________________________//
 
 void test_calc_returns_state(crocoddyl::ActionModelAbstract& model) {
   // create the corresponding data object
-  std::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
+  boost::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
 
   // Generating random state and control vectors
   Eigen::VectorXd x = model.get_state()->rand();
@@ -41,8 +41,8 @@ void test_calc_returns_state(crocoddyl::ActionModelAbstract& model) {
 
 void test_calc_returns_a_cost(crocoddyl::ActionModelAbstract& model) {
   // create the corresponding data object and set the cost to nan
-  std::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
-  data->cost = std::nan("");
+  boost::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
+  data->cost = nan("");
 
   // Getting the cost value computed by calc()
   Eigen::VectorXd x = model.get_state()->rand();
@@ -50,20 +50,20 @@ void test_calc_returns_a_cost(crocoddyl::ActionModelAbstract& model) {
   model.calc(data, x, u);
 
   // Checking that calc returns a cost value
-  BOOST_CHECK(!std::isnan(data->cost));
+  BOOST_CHECK(!isnan(data->cost));
 }
 
 //____________________________________________________________________________//
 
 void test_partial_derivatives_against_numdiff(crocoddyl::ActionModelAbstract& model, double num_diff_modifier) {
   // create the corresponding data object and set the cost to nan
-  std::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
+  boost::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
 
   // create the num diff model and data
   bool with_gauss_approx = model.get_ncost() > 1;
 
   crocoddyl::ActionModelNumDiff model_num_diff(model, with_gauss_approx);
-  std::shared_ptr<crocoddyl::ActionDataAbstract> data_num_diff = model_num_diff.createData();
+  boost::shared_ptr<crocoddyl::ActionDataAbstract> data_num_diff = model_num_diff.createData();
 
   // Generating random values for the state and control
   Eigen::VectorXd x = model.get_state()->rand();
