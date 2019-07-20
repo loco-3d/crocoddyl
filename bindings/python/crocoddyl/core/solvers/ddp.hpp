@@ -21,59 +21,55 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverDDP_computeDirections, SolverDDP::c
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverDDP_trySteps, SolverDDP::tryStep, 0, 1)
 
 void exposeSolverDDP() {
-  bp::class_<SolverDDP, bp::bases<SolverAbstract>>("SolverDDP",
-                                                   R"(DDP solver.
-
-        The DDP solver computes an optimal trajectory and control commands by iteratives
-        running backward and forward passes. The backward-pass updates locally the
-        quadratic approximation of the problem and computes descent direction,
-        and the forward-pass rollouts this new policy by integrating the system dynamics
-        along a tuple of optimized control commands U*.
-        :param shootingProblem: shooting problem (list of action models along trajectory).)",
-                                                   bp::init<ShootingProblem&>(bp::args(" self", " problem"),
-                                                                              R"(Initialize the vector dimension.
-
-:param problem: shooting problem.)"))
+  bp::class_<SolverDDP, bp::bases<SolverAbstract> >(
+      "SolverDDP",
+      "DDP solver.\n\n"
+      "The DDP solver computes an optimal trajectory and control commands by iteratives\n"
+      "running backward and forward passes. The backward-pass updates locally the\n"
+      "quadratic approximation of the problem and computes descent direction,\n"
+      "and the forward-pass rollouts this new policy by integrating the system dynamics\n"
+      "along a tuple of optimized control commands U*.\n"
+      ":param shootingProblem: shooting problem (list of action models along trajectory.)",
+      bp::init<ShootingProblem&>(bp::args(" self", " problem"),
+                                 "Initialize the vector dimension.\n\n"
+                                 ":param problem: shooting problem."))
       .def("solve", &SolverDDP::solve,
            SolverDDP_solves(
                bp::args(" self", " init_xs=[]", " init_us=[]", " maxiter=100", " isFeasible=False", " regInit=None"),
-               R"(Compute the optimal trajectory xopt,uopt as lists of T+1 and T terms.
-
-From an initial guess init_xs,init_us (feasible or not), iterate
-over computeDirection and tryStep until stoppingCriteria is below
-threshold. It also describes the globalization strategy used
-during the numerical optimization.
-:param init_xs: initial guess for state trajectory with T+1 elements.
-:param init_us: initial guess for control trajectory with T elements.
-:param maxiter: maximun allowed number of iterations.
-:param isFeasible: true if the init_xs are obtained from integrating the init_us (rollout).
-:param regInit: initial guess for the regularization value. Very low values are typical used with very good
-guess points (init_xs, init_us).
-:returns the optimal trajectory xopt, uopt and a boolean that describes if convergence was reached.)"))
+               "Compute the optimal trajectory xopt,uopt as lists of T+1 and T terms.\n\n"
+               "From an initial guess init_xs,init_us (feasible or not), iterate\n"
+               "over computeDirection and tryStep until stoppingCriteria is below\n"
+               "threshold. It also describes the globalization strategy used\n"
+               "during the numerical optimization.\n"
+               ":param init_xs: initial guess for state trajectory with T+1 elements.\n"
+               ":param init_us: initial guess for control trajectory with T elements.\n"
+               ":param maxiter: maximun allowed number of iterations.\n"
+               ":param isFeasible: true if the init_xs are obtained from integrating the init_us (rollout).\n"
+               ":param regInit: initial guess for the regularization value. Very low values are typical\n"
+               "                used with very good guess points (init_xs, init_us).\n"
+               ":returns the optimal trajectory xopt, uopt and a boolean that describes if convergence was reached."))
       .def("computeDirection", &SolverDDP::computeDirection,
-           SolverDDP_computeDirections(bp::args(" self", " recalc=True"),
-                                       R"(Compute the search direction (dx, du) for the current guess (xs, us).
-
-You must call setCandidate first in order to define the current
-guess. A current guess defines a state and control trajectory
-(xs, us) of T+1 and T elements, respectively.
-:params recalc: true for recalculating the derivatives at current state and control.
-:returns the search direction dx, du and the dual lambdas as lists of T+1, T and T+1 lengths.)"))
+           SolverDDP_computeDirections(
+               bp::args(" self", " recalc=True"),
+               "Compute the search direction (dx, du) for the current guess (xs, us).\n\n"
+               "You must call setCandidate first in order to define the current\n"
+               "guess. A current guess defines a state and control trajectory\n"
+               "(xs, us) of T+1 and T elements, respectively.\n"
+               ":params recalc: true for recalculating the derivatives at current state and control.\n"
+               ":returns the search direction dx, du and the dual lambdas as lists of T+1, T and T+1 lengths."))
       .def("tryStep", &SolverDDP::tryStep,
            SolverDDP_trySteps(bp::args(" self", " stepLength=1"),
-                              R"(Rollout the system with a predefined step length.
-
-:param stepLength: step length
-:returns the cost improvement.)"))
+                              "Rollout the system with a predefined step length.\n\n"
+                              ":param stepLength: step length\n"
+                              ":returns the cost improvement."))
       .def("stoppingCriteria", &SolverDDP::stoppingCriteria, bp::args(" self"),
-           R"(Return a sum of positive parameters whose sum quantifies the DDP termination.)")
+           "Return a sum of positive parameters whose sum quantifies the DDP termination.")
       .def("expectedImprovement", &SolverDDP::expectedImprovement, bp::return_value_policy<bp::copy_const_reference>(),
            bp::args(" self"),
-           R"(Return two scalars denoting the quadratic improvement model
-
-For computing the expected improvement, you need to compute first
-the search direction by running computeDirection. The quadratic 
-improvement model is described as dV = f_0 - f_+ = d1*a + d2*a**2/2.)")
+           "Return two scalars denoting the quadratic improvement model\n\n"
+           "For computing the expected improvement, you need to compute first\n"
+           "the search direction by running computeDirection. The quadratic\n"
+           "improvement model is described as dV = f_0 - f_+ = d1*a + d2*a**2/2.")
       .add_property("Vxx", make_function(&SolverDDP::get_Vxx, bp::return_value_policy<bp::copy_const_reference>()),
                     "Vxx")
       .add_property("Vx", make_function(&SolverDDP::get_Vx, bp::return_value_policy<bp::copy_const_reference>()), "Vx")

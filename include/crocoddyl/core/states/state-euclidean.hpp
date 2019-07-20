@@ -10,8 +10,8 @@
 #define CROCODDYL_CORE_STATES_STATE_EUCLIDEAN_HPP_
 
 #include "crocoddyl/core/state-base.hpp"
-#include <pinocchio/multibody/model.hpp>
-#include <pinocchio/multibody/data.hpp>
+// #include <pinocchio/multibody/model.hpp>
+// #include <pinocchio/multibody/data.hpp>
 
 namespace crocoddyl {
 
@@ -32,8 +32,8 @@ class StateVector : public StateAbstract {
                   Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
                   Jcomponent firstsecond = both);
 
- private:
-  pinocchio::Model model_;
+  //  private:
+  //   pinocchio::Model model_;
   // pinocchio::Data data_;
 };
 
