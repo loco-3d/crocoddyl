@@ -15,6 +15,8 @@ class StateAbstractTestCase(unittest.TestCase):
         # Checking the state dimensions
         self.assertEqual(self.STATE.nx, self.STATE_DER.nx, "Wrong nx value.")
         self.assertEqual(self.STATE.ndx, self.STATE_DER.ndx, "Wrong ndx value.")
+        self.assertEqual(self.STATE.nq, self.STATE_DER.nq, "Wrong nq value.")
+        self.assertEqual(self.STATE.nv, self.STATE_DER.nv, "Wrong nv value.")
 
         # Checking the dimension of zero and random states
         self.assertEqual(self.STATE.zero().shape, (self.NX, 1), "Wrong dimension of zero state.")
