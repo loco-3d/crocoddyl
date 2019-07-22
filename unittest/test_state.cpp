@@ -54,10 +54,8 @@ void test_difference_against_integrate(crocoddyl::StateAbstract& state) {
 
   // Computing dx by differentiation of its integrate
   Eigen::VectorXd xidx(state.get_nx());
-  ;
   state.integrate(x, dx, xidx);
   Eigen::VectorXd dxd(state.get_ndx());
-  ;
   state.diff(x, xidx, dxd);
 
   // Checking that both states agree
@@ -75,8 +73,8 @@ void test_Jdiff_firstsecond(crocoddyl::StateAbstract& state) {
   Eigen::MatrixXd Jdiff_tmp(state.get_ndx(), state.get_ndx());
   Eigen::MatrixXd Jdiff_first(state.get_ndx(), state.get_ndx());
   Eigen::MatrixXd Jdiff_second(state.get_ndx(), state.get_ndx());
-  state.Jdiff(x1, x2, Jdiff_first, Jdiff_tmp, crocoddyl::Jcomponent::first);
-  state.Jdiff(x1, x2, Jdiff_tmp, Jdiff_second, crocoddyl::Jcomponent::second);
+  state.Jdiff(x1, x2, Jdiff_first, Jdiff_tmp, crocoddyl::first);
+  state.Jdiff(x1, x2, Jdiff_tmp, Jdiff_second, crocoddyl::second);
 
   // Computing the partial derivatives of the difference function separately
   Eigen::MatrixXd Jdiff_both_first(state.get_ndx(), state.get_ndx());
@@ -98,8 +96,8 @@ void test_Jint_firstsecond(crocoddyl::StateAbstract& state) {
   Eigen::MatrixXd Jint_tmp(state.get_ndx(), state.get_ndx());
   Eigen::MatrixXd Jint_first(state.get_ndx(), state.get_ndx());
   Eigen::MatrixXd Jint_second(state.get_ndx(), state.get_ndx());
-  state.Jintegrate(x, dx, Jint_first, Jint_tmp, crocoddyl::Jcomponent::first);
-  state.Jintegrate(x, dx, Jint_tmp, Jint_second, crocoddyl::Jcomponent::second);
+  state.Jintegrate(x, dx, Jint_first, Jint_tmp, crocoddyl::first);
+  state.Jintegrate(x, dx, Jint_tmp, Jint_second, crocoddyl::second);
 
   // Computing the partial derivatives of the interence function separately
   Eigen::MatrixXd Jint_both_first(state.get_ndx(), state.get_ndx());
@@ -124,8 +122,8 @@ void test_Jdiff_num_diff_firstsecond(crocoddyl::StateAbstract& state) {
   Eigen::MatrixXd Jdiff_num_diff_tmp(state.get_ndx(), state.get_ndx());
   Eigen::MatrixXd Jdiff_num_diff_first(state.get_ndx(), state.get_ndx());
   Eigen::MatrixXd Jdiff_num_diff_second(state.get_ndx(), state.get_ndx());
-  state_num_diff.Jdiff(x1, x2, Jdiff_num_diff_first, Jdiff_num_diff_tmp, crocoddyl::Jcomponent::first);
-  state_num_diff.Jdiff(x1, x2, Jdiff_num_diff_tmp, Jdiff_num_diff_second, crocoddyl::Jcomponent::second);
+  state_num_diff.Jdiff(x1, x2, Jdiff_num_diff_first, Jdiff_num_diff_tmp, crocoddyl::first);
+  state_num_diff.Jdiff(x1, x2, Jdiff_num_diff_tmp, Jdiff_num_diff_second, crocoddyl::second);
 
   // Computing the partial derivatives of the difference function separately
   Eigen::MatrixXd Jdiff_num_diff_both_first(state.get_ndx(), state.get_ndx());
@@ -150,8 +148,8 @@ void test_Jint_num_diff_firstsecond(crocoddyl::StateAbstract& state) {
   Eigen::MatrixXd Jint_num_diff_tmp(state.get_ndx(), state.get_ndx());
   Eigen::MatrixXd Jint_num_diff_first(state.get_ndx(), state.get_ndx());
   Eigen::MatrixXd Jint_num_diff_second(state.get_ndx(), state.get_ndx());
-  state_num_diff.Jintegrate(x, dx, Jint_num_diff_first, Jint_num_diff_tmp, crocoddyl::Jcomponent::first);
-  state_num_diff.Jintegrate(x, dx, Jint_num_diff_tmp, Jint_num_diff_second, crocoddyl::Jcomponent::second);
+  state_num_diff.Jintegrate(x, dx, Jint_num_diff_first, Jint_num_diff_tmp, crocoddyl::first);
+  state_num_diff.Jintegrate(x, dx, Jint_num_diff_tmp, Jint_num_diff_second, crocoddyl::second);
 
   // Computing the partial derivatives of the interence function separately
   Eigen::MatrixXd Jint_num_diff_both_first(state.get_ndx(), state.get_ndx());
@@ -172,8 +170,8 @@ void test_Jdiff_against_numdiff(crocoddyl::StateAbstract& state, double num_diff
   // Computing the partial derivatives of the difference function analytically
   Eigen::MatrixXd Jdiff_1(state.get_ndx(), state.get_ndx());
   Eigen::MatrixXd Jdiff_2(state.get_ndx(), state.get_ndx());
-  state.Jdiff(x1, x2, Jdiff_1, Jdiff_2, crocoddyl::Jcomponent::first);
-  state.Jdiff(x1, x2, Jdiff_1, Jdiff_2, crocoddyl::Jcomponent::second);
+  state.Jdiff(x1, x2, Jdiff_1, Jdiff_2, crocoddyl::first);
+  state.Jdiff(x1, x2, Jdiff_1, Jdiff_2, crocoddyl::second);
 
   // Computing the partial derivatives of the difference function numerically
   crocoddyl::StateNumDiff state_num_diff(state);

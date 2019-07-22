@@ -37,15 +37,14 @@ ENDIF()
 SET(CXX_DISABLE_WERROR True)
 
 # Create different building options
-OPTION(ENABLE_VECTORIZATION "Enable vectorization and futhers processor-related optimizations" ON)
+OPTION(ENABLE_VECTORIZATION "Enable vectorization and futhers processor-related optimizations" OFF)
 OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" ON)
 OPTION(BUILD_UNIT_TESTS "Build the unitary tests" ON)
 OPTION(BUILD_BENCHMARK "Build the benchmark" OFF)
 
 
-SET(CMAKE_CXX_FLAGS "-std=c++11")
 IF(ENABLE_VECTORIZATION)
-  SET(CMAKE_CXX_FLAGS "-std=c++11 -march=native -mavx")
+  SET(CMAKE_CXX_FLAGS "-march=native -mavx")
 ENDIF()
 
 SETUP_PROJECT()
@@ -58,9 +57,22 @@ ADD_OPTIONAL_DEPENDENCY("multicontact-api >= 1.1.0")
 ADD_OPTIONAL_DEPENDENCY("quadprog")
 ADD_OPTIONAL_DEPENDENCY("scipy")
 
-FINDPYTHON()
-SET(BOOST_COMPONENTS ${BOOST_COMPONENTS} python unit_test_framework)
+SET(BOOST_REQUIERED_COMPONENTS filesystem serialization system)
+SET(BOOST_BUILD_COMPONENTS unit_test_framework)
+SET(BOOST_OPTIONAL_COMPONENTS "")
+
+IF(BUILD_PYTHON_INTERFACE)
+  SET(BOOST_OPTIONAL_COMPONENTS ${BOOST_OPTIONAL_COMPONENTS} python)
+  FINDPYTHON()
+  INCLUDE_DIRECTORIES(SYSTEM ${PYTHON_INCLUDE_DIRS})
+ENDIF(BUILD_PYTHON_INTERFACE)
+
+SET(BOOST_COMPONENTS ${BOOST_REQUIERED_COMPONENTS} ${BOOST_OPTIONAL_COMPONENTS} ${BOOST_BUILD_COMPONENTS})
 SEARCH_FOR_BOOST()
+
+# Path to boost headers
+INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIRS})
+
 
 # Include and add the main directory
 ADD_SUBDIRECTORY(${PROJECT_NAME})
@@ -68,9 +80,6 @@ ADD_SUBDIRECTORY(src)
 
 # Build the Python interface
 IF(BUILD_PYTHON_INTERFACE)
-  INCLUDE_DIRECTORIES(SYSTEM ${PYTHON_INCLUDE_DIRS})
-  INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
-
   # Include and add the bindings directory
   INCLUDE_DIRECTORIES(bindings)
   ADD_SUBDIRECTORY(bindings)

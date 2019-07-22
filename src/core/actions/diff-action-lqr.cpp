@@ -18,7 +18,7 @@ DifferentialActionModelLQR::DifferentialActionModelLQR(const unsigned int& nq, c
 
 DifferentialActionModelLQR::~DifferentialActionModelLQR() {}
 
-void DifferentialActionModelLQR::calc(std::shared_ptr<DifferentialActionDataAbstract>& data,
+void DifferentialActionModelLQR::calc(boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                       const Eigen::Ref<const Eigen::VectorXd>& x,
                                       const Eigen::Ref<const Eigen::VectorXd>& u) {
   const Eigen::VectorXd& q = x.head(nq_);
@@ -31,7 +31,7 @@ void DifferentialActionModelLQR::calc(std::shared_ptr<DifferentialActionDataAbst
   data->cost = 0.5 * x.dot(Lxx_ * x) + 0.5 * u.dot(Luu_ * u) + x.dot(Lxu_ * u) + lx_.dot(x) + lu_.dot(u);
 }
 
-void DifferentialActionModelLQR::calcDiff(std::shared_ptr<DifferentialActionDataAbstract>& data,
+void DifferentialActionModelLQR::calcDiff(boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                           const Eigen::Ref<const Eigen::VectorXd>& x,
                                           const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (recalc) {
@@ -47,8 +47,8 @@ void DifferentialActionModelLQR::calcDiff(std::shared_ptr<DifferentialActionData
   data->Luu = Luu_;
 }
 
-std::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelLQR::createData() {
-  return std::make_shared<DifferentialActionDataLQR>(this);
+boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelLQR::createData() {
+  return boost::make_shared<DifferentialActionDataLQR>(this);
 }
 
 }  // namespace crocoddyl

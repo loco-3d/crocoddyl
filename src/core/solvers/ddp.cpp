@@ -136,7 +136,7 @@ double SolverDDP::calc() {
     const long unsigned int& T = problem_.get_T();
     for (unsigned long int t = 0; t < T; ++t) {
       ActionModelAbstract* model = problem_.running_models_[t];
-      std::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
+      boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
       model->get_state()->diff(xs_[t + 1], d->get_xnext(), gaps_[t + 1]);
     }
   }
@@ -144,7 +144,7 @@ double SolverDDP::calc() {
 }
 
 void SolverDDP::backwardPass() {
-  std::shared_ptr<ActionDataAbstract>& d_T = problem_.terminal_data_;
+  boost::shared_ptr<ActionDataAbstract>& d_T = problem_.terminal_data_;
   Vxx_.back() = d_T->get_Lxx();
   Vx_.back() = d_T->get_Lx();
 
@@ -156,7 +156,7 @@ void SolverDDP::backwardPass() {
 
   for (int t = (int)problem_.get_T() - 1; t >= 0; --t) {
     ActionModelAbstract* m = problem_.running_models_[t];
-    std::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
+    boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
     const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
     const Eigen::VectorXd& Vx_p = Vx_[t + 1];
     const Eigen::VectorXd& gap_p = gaps_[t + 1];
@@ -207,7 +207,7 @@ void SolverDDP::forwardPass(const double& steplength) {
   const long unsigned int& T = problem_.get_T();
   for (long unsigned int t = 0; t < T; ++t) {
     ActionModelAbstract* m = problem_.running_models_[t];
-    std::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
+    boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
 
     m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
     us_try_[t] = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
@@ -222,7 +222,7 @@ void SolverDDP::forwardPass(const double& steplength) {
   }
 
   ActionModelAbstract* m = problem_.terminal_model_;
-  std::shared_ptr<ActionDataAbstract>& d = problem_.terminal_data_;
+  boost::shared_ptr<ActionDataAbstract>& d = problem_.terminal_data_;
   m->calc(d, xs_try_.back());
   cost_try_ += d->cost;
 

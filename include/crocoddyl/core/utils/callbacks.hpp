@@ -18,10 +18,10 @@ namespace crocoddyl {
 enum DDPVerboseLevel { _1 = 0, _2 };
 class CallbackDDPVerbose : public CallbackAbstract {
  public:
-  CallbackDDPVerbose(DDPVerboseLevel level = DDPVerboseLevel::_1);
+  CallbackDDPVerbose(DDPVerboseLevel level = _1);
   ~CallbackDDPVerbose();
 
-  void operator()(SolverAbstract *const solver) override;
+  void operator()(SolverAbstract *const solver);
 
  private:
   DDPVerboseLevel level;

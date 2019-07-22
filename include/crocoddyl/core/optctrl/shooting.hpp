@@ -30,13 +30,13 @@ class ShootingProblem {
 
   std::vector<ActionModelAbstract*>& get_runningModels();
   ActionModelAbstract* get_terminalModel();
-  std::vector<std::shared_ptr<ActionDataAbstract>>& get_runningDatas();
-  std::shared_ptr<ActionDataAbstract>& get_terminalData();
+  std::vector<boost::shared_ptr<ActionDataAbstract> >& get_runningDatas();
+  boost::shared_ptr<ActionDataAbstract>& get_terminalData();
 
   ActionModelAbstract* terminal_model_;
-  std::shared_ptr<ActionDataAbstract> terminal_data_;
+  boost::shared_ptr<ActionDataAbstract> terminal_data_;
   std::vector<ActionModelAbstract*> running_models_;
-  std::vector<std::shared_ptr<ActionDataAbstract>> running_datas_;
+  std::vector<boost::shared_ptr<ActionDataAbstract> > running_datas_;
 
  protected:
   void allocateData();

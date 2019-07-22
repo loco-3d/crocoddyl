@@ -21,11 +21,11 @@ class DifferentialActionModelLQR : public DifferentialActionModelAbstract {
   DifferentialActionModelLQR(unsigned const int& nq, unsigned const int& nu, bool drift_free = true);
   ~DifferentialActionModelLQR();
 
-  void calc(std::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-            const Eigen::Ref<const Eigen::VectorXd>& u) override;
-  void calcDiff(std::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) override;
-  std::shared_ptr<DifferentialActionDataAbstract> createData() override;
+  void calc(boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+            const Eigen::Ref<const Eigen::VectorXd>& u);
+  void calcDiff(boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
+  boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
   Eigen::MatrixXd Fq_;
   Eigen::MatrixXd Fv_;

@@ -31,68 +31,64 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
   DifferentialActionModelAbstract_wrap(StateAbstract* const state, int nu, int ncost = 0)
       : DifferentialActionModelAbstract(state, nu, ncost), bp::wrapper<DifferentialActionModelAbstract>() {}
 
-  void calc(std::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-            const Eigen::Ref<const Eigen::VectorXd>& u) override {
+  void calc(boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+            const Eigen::Ref<const Eigen::VectorXd>& u) {
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
-  void calcDiff(std::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) override {
+  void calcDiff(boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
 
-  std::shared_ptr<DifferentialActionDataAbstract> createData() override {
-    return std::make_shared<DifferentialActionDataAbstract>(this);
+  boost::shared_ptr<DifferentialActionDataAbstract> createData() {
+    return boost::make_shared<DifferentialActionDataAbstract>(this);
   }
 };
 
 void exposeDifferentialActionAbstract() {
   bp::class_<DifferentialActionModelAbstract_wrap, boost::noncopyable>(
       "DifferentialActionModelAbstract",
-      R"(Abstract class for the differential action model.
-
-        In crocoddyl, a differential action model combines dynamics and cost data described in
-        continuous time. Each node, in our optimal control problem, is described through an
-        action model. Every time that we want describe a problem, we need to provide ways of
-        computing the dynamics, cost functions and their derivatives. These computations are
-        mainly carry on inside calc() and calcDiff(), respectively.)",
-      bp::init<StateAbstract*, int, bp::optional<int>>(bp::args(" self", " state", " nu", " ncost"),
-                                                       R"(Initialize the differential action model.
-
-:param state: state
-:param nu: dimension of control vector
-:param ncost: dimension of cost vector)")[bp::with_custodian_and_ward<1, 2>()])
+      "Abstract class for the differential action model.\n\n"
+      "In crocoddyl, a differential action model combines dynamics and cost data described in\n"
+      "continuous time. Each node, in our optimal control problem, is described through an\n"
+      "action model. Every time that we want describe a problem, we need to provide ways of\n"
+      "computing the dynamics, cost functions and their derivatives. These computations are\n"
+      "mainly carry on inside calc() and calcDiff(), respectively.",
+      bp::init<StateAbstract*, int, bp::optional<int> >(
+          bp::args(" self", " state", " nu", " ncost"),
+          "Initialize the differential action model.\n\n"
+          ":param state: state\n"
+          ":param nu: dimension of control vector\n"
+          ":param ncost: dimension of cost vector)")[bp::with_custodian_and_ward<1, 2>()])
       .def("calc", pure_virtual(&DifferentialActionModelAbstract_wrap::calc), bp::args(" self", " data", " x", " u"),
-           R"(Compute the state evolution and cost value.
-
-First, it describes the time-continuous evolution of our dynamical system
-in which along predefined integrated action self we might obtain the
-next discrete state. Indeed it computes the time derivatives of the
-state from a predefined dynamical system. Additionally it computes the
-cost value associated to this state and control pair.
-:param data: differential action data
-:param x: state vector
-:param u: control input)")
+           "Compute the state evolution and cost value.\n\n"
+           "First, it describes the time-continuous evolution of our dynamical system\n"
+           "in which along predefined integrated action self we might obtain the\n"
+           "next discrete state. Indeed it computes the time derivatives of the\n"
+           "state from a predefined dynamical system. Additionally it computes the\n"
+           "cost value associated to this state and control pair.\n"
+           ":param data: differential action data\n"
+           ":param x: state vector\n"
+           ":param u: control input")
       .def("calcDiff", pure_virtual(&DifferentialActionModelAbstract_wrap::calcDiff),
            bp::args(" self", " data", " x", " u", " recalc=True"),
-           R"(Compute the derivatives of the dynamics and cost functions.
-
-It computes the partial derivatives of the dynamical system and the cost
-function. If recalc == True, it first updates the state evolution and
-cost value. This function builds a quadratic approximation of the
-time-continuous action model (i.e. dynamical system and cost function).
-:param data: differential action data
-:param x: state vector
-:param u: control input
-:param recalc: If true, it updates the state evolution and the cost value.)")
+           "Compute the derivatives of the dynamics and cost functions.\n\n"
+           "It computes the partial derivatives of the dynamical system and the cost\n"
+           "function. If recalc == True, it first updates the state evolution and\n"
+           "cost value. This function builds a quadratic approximation of the\n"
+           "time-continuous action model (i.e. dynamical system and cost function).\n"
+           ":param data: differential action data\n"
+           ":param x: state vector\n"
+           ":param u: control input\n"
+           ":param recalc: If true, it updates the state evolution and the cost value.")
       .def("createData", &DifferentialActionModelAbstract_wrap::createData, bp::args(" self"),
-           R"(Create the differential action data.
-
-Each differential action model has its own data that needs to be
-allocated. This function returns the allocated data for a predefined
-DAM. Note that you need to defined the DifferentialActionDataType inside
-your DAM.
-:return DAM data.)")
+           "Create the differential action data.\n\n"
+           "Each differential action model has its own data that needs to be\n"
+           "allocated. This function returns the allocated data for a predefined\n"
+           "DAM. Note that you need to defined the DifferentialActionDataType inside\n"
+           "your DAM.\n"
+           ":return DAM data.")
       .add_property("nq", &DifferentialActionModelAbstract_wrap::nq_, "dimension of configuration vector")
       .add_property("nv", &DifferentialActionModelAbstract_wrap::nv_, "dimension of velocity vector")
       .add_property("nu", &DifferentialActionModelAbstract_wrap::nu_, "dimension of control vector")
@@ -109,19 +105,18 @@ your DAM.
                                       bp::return_value_policy<bp::reference_existing_object>()),
                     "state");
 
-  bp::class_<DifferentialActionDataAbstract, std::shared_ptr<DifferentialActionDataAbstract>, boost::noncopyable>(
+  bp::class_<DifferentialActionDataAbstract, boost::shared_ptr<DifferentialActionDataAbstract>, boost::noncopyable>(
       "DifferentialActionDataAbstract",
-      R"(Abstract class for action datas.
-
-        In crocoddyl, an action data contains all the required information for processing an
-        user-defined action model. The action data typically is allocated onces by running
-        model.createData() and contains the first- and second- order derivatives of the dynamics
-        and cost function, respectively.)",
-      bp::init<DifferentialActionModelAbstract*>(bp::args(" self", " model"),
-                                                 R"(Create common data shared between DAMs.
-
-The differentail action data uses the model in order to first process it.
-:param model: differential action model)"))
+      "Abstract class for action datas.\n\n"
+      "In crocoddyl, an action data contains all the required information for processing an\n"
+      "user-defined action model. The action data typically is allocated onces by running\n"
+      "model.createData() and contains the first- and second- order derivatives of the dynamics\n"
+      "and cost function, respectively.",
+      bp::init<DifferentialActionModelAbstract*>(
+          bp::args(" self", " model"),
+          "Create common data shared between DAMs.\n\n"
+          "The differentail action data uses the model in order to first process it.\n"
+          ":param model: differential action model"))
       .add_property(
           "cost",
           bp::make_getter(&DifferentialActionDataAbstract::cost, bp::return_value_policy<bp::return_by_value>()),

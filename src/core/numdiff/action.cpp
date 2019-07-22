@@ -18,15 +18,15 @@ ActionModelNumDiff::ActionModelNumDiff(ActionModelAbstract& model, bool with_gau
 
 ActionModelNumDiff::~ActionModelNumDiff() {}
 
-void ActionModelNumDiff::calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+void ActionModelNumDiff::calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                               const Eigen::Ref<const Eigen::VectorXd>& u) {
   model_.calc(data, x, u);
 }
 
-void ActionModelNumDiff::calcDiff(std::shared_ptr<ActionDataAbstract>& data,
+void ActionModelNumDiff::calcDiff(boost::shared_ptr<ActionDataAbstract>& data,
                                   const Eigen::Ref<const Eigen::VectorXd>& x,
                                   const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  std::shared_ptr<ActionDataNumDiff> data_num_diff = std::static_pointer_cast<ActionDataNumDiff>(data);
+  boost::shared_ptr<ActionDataNumDiff> data_num_diff = boost::static_pointer_cast<ActionDataNumDiff>(data);
 
   if (recalc) {
     model_.calc(data_num_diff->data_0, x, u);
@@ -117,8 +117,8 @@ void ActionModelNumDiff::assertStableStateFD(const Eigen::Ref<const Eigen::Vecto
   // }
 }
 
-std::shared_ptr<ActionDataAbstract> ActionModelNumDiff::createData() {
-  return std::make_shared<ActionDataNumDiff>(this);
+boost::shared_ptr<ActionDataAbstract> ActionModelNumDiff::createData() {
+  return boost::make_shared<ActionDataNumDiff>(this);
 }
 
 }  // namespace crocoddyl

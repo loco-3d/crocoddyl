@@ -21,11 +21,11 @@ class SolverDDP : public SolverAbstract {
 
   bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
              const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const unsigned int& maxiter = 100,
-             const bool& is_feasible = false, const double& regInit = 1e-9) override;
-  void computeDirection(const bool& recalc = true) override;
-  double tryStep(const double& steplength = 1) override;
-  double stoppingCriteria() override;
-  const Eigen::Vector2d& expectedImprovement() override;
+             const bool& is_feasible = false, const double& regInit = 1e-9);
+  void computeDirection(const bool& recalc = true);
+  double tryStep(const double& steplength = 1);
+  double stoppingCriteria();
+  const Eigen::Vector2d& expectedImprovement();
 
   const std::vector<Eigen::MatrixXd>& get_Vxx() const;
   const std::vector<Eigen::VectorXd>& get_Vx() const;

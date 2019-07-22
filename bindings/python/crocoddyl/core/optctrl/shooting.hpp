@@ -33,7 +33,7 @@ class ShootingProblem_wrap : public ShootingProblem, public bp::wrapper<Shooting
 void exposeShootingProblem() {
   // Register custom converters between std::vector and Python list
   typedef ActionModelAbstract* ActionModelPtr;
-  typedef std::shared_ptr<ActionDataAbstract> ActionDataPtr;
+  typedef boost::shared_ptr<ActionDataAbstract> ActionDataPtr;
   bp::to_python_converter<std::vector<ActionModelPtr, std::allocator<ActionModelPtr> >,
                           vector_to_list<ActionModelPtr> >();
   bp::to_python_converter<std::vector<ActionDataPtr, std::allocator<ActionDataPtr> >,
@@ -42,40 +42,35 @@ void exposeShootingProblem() {
 
   bp::class_<ShootingProblem_wrap, boost::noncopyable>(
       "ShootingProblem",
-      R"(Declare a shooting problem.
-
-        A shooting problem declares the initial state, a set of running action models and a
-        terminal action model. It has two main methods - calc, calcDiff and rollout. The
-        first computes the set of next states and cost values per each action model. calcDiff
-        updates the derivatives of all action models. The last rollouts the stacks of actions
-        models.)",
+      "Declare a shooting problem.\n\n"
+      "A shooting problem declares the initial state, a set of running action models and a\n"
+      "terminal action model. It has two main methods - calc, calcDiff and rollout. The\n"
+      "first computes the set of next states and cost values per each action model. calcDiff\n"
+      "updates the derivatives of all action models. The last rollouts the stacks of actions\n"
+      "models.",
       bp::init<Eigen::VectorXd, std::vector<ActionModelAbstract*>, ActionModelAbstract*>(
           bp::args(" self", " initialState", " runningModels", " terminalModel"),
-          R"(Initialize the shooting problem.
-
-:param initialState: initial state
-:param runningModels: running action models
-:param terminalModel: terminal action model)"))
+          "Initialize the shooting problem.\n\n"
+          ":param initialState: initial state\n"
+          ":param runningModels: running action models\n"
+          ":param terminalModel: terminal action model"))
       .def("calc", &ShootingProblem_wrap::calc, bp::args(" self", " xs", " us"),
-           R"(Compute the cost and the next states.
-
-First, it computes the next state and cost for each action model
-along a state and control trajectory.
-:param xs: time-discrete state trajectory
-:param us: time-discrete control sequence
-:returns the total cost value)")
+           "Compute the cost and the next states.\n\n"
+           "First, it computes the next state and cost for each action model\n"
+           "along a state and control trajectory.\n"
+           ":param xs: time-discrete state trajectory\n"
+           ":param us: time-discrete control sequence\n"
+           ":returns the total cost value")
       .def("calcDiff", &ShootingProblem_wrap::calcDiff, bp::args(" self", " xs", " us"),
-           R"(Compute the cost-and-dynamics derivatives.
-
-These quantities are computed along a given pair of trajectories xs
-(states) and us (controls).
-:param xs: time-discrete state trajectory
-:param us: time-discrete control sequence)")
+           "Compute the cost-and-dynamics derivatives.\n\n"
+           "These quantities are computed along a given pair of trajectories xs\n"
+           "(states) and us (controls).\n"
+           ":param xs: time-discrete state trajectory\n"
+           ":param us: time-discrete control sequence")
       .def("rollout", &ShootingProblem_wrap::rollout_us, bp::args(" self", " us"),
-           R"(Integrate the dynamics given a control sequence.
-
-Rollout the dynamics give a sequence of control commands
-:param us: time-discrete control sequence)")
+           "Integrate the dynamics given a control sequence.\n\n"
+           "Rollout the dynamics give a sequence of control commands\n"
+           ":param us: time-discrete control sequence")
       .add_property("T", &ShootingProblem_wrap::T_, "number of nodes")
       .add_property("initialState",
                     bp::make_getter(&ShootingProblem_wrap::x0_, bp::return_value_policy<bp::return_by_value>()),

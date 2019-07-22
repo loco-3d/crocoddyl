@@ -42,7 +42,7 @@ void StateNumDiff::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x1, const Eige
           "{both, first, second }"));
   dx_.setZero();
   diff(x1, x2, dx0_);
-  if (firstsecond == Jcomponent::first || firstsecond == Jcomponent::both) {
+  if (firstsecond == first || firstsecond == both) {
     assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "StateNumDiff::Jdiff: Jfirst must be of the good size");
     Jfirst.setZero();
     for (unsigned i = 0; i < ndx_; ++i) {
@@ -58,7 +58,7 @@ void StateNumDiff::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x1, const Eige
     }
     Jfirst /= disturbance_;
   }
-  if (firstsecond == Jcomponent::second || firstsecond == Jcomponent::both) {
+  if (firstsecond == second || firstsecond == both) {
     assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ && "StateNumDiff::Jdiff: Jfirst must be of the good size");
 
     Jsecond.setZero();
@@ -80,14 +80,14 @@ void StateNumDiff::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x1, const Eige
 void StateNumDiff::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                               Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
                               Jcomponent firstsecond) {
-  assert((firstsecond == Jcomponent::first || firstsecond == Jcomponent::second || firstsecond == Jcomponent::both) &&
+  assert((firstsecond == first || firstsecond == second || firstsecond == both) &&
          ("StateNumDiff::Jdiff: firstsecond must be one of the Jcomponent "
           "{both, first, second }"));
   dx_.setZero();
   // x0_ = integrate(x, dx)
   integrate(x, dx, x0_);
 
-  if (firstsecond == Jcomponent::first || firstsecond == Jcomponent::both) {
+  if (firstsecond == first || firstsecond == both) {
     assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "StateNumDiff::Jdiff: Jfirst must be of the good size");
     Jfirst.setZero();
     for (unsigned i = 0; i < ndx_; ++i) {
@@ -103,7 +103,7 @@ void StateNumDiff::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const 
     }
     Jfirst /= disturbance_;
   }
-  if (firstsecond == Jcomponent::second || firstsecond == Jcomponent::both) {
+  if (firstsecond == second || firstsecond == both) {
     assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ && "StateNumDiff::Jdiff: Jfirst must be of the good size");
     Jsecond.setZero();
     for (unsigned i = 0; i < ndx_; ++i) {

@@ -19,11 +19,11 @@ class ActionModelUnicycle : public ActionModelAbstract {
   ActionModelUnicycle();
   ~ActionModelUnicycle();
 
-  void calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-            const Eigen::Ref<const Eigen::VectorXd>& u) override;
-  void calcDiff(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) override;
-  std::shared_ptr<ActionDataAbstract> createData() override;
+  void calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+            const Eigen::Ref<const Eigen::VectorXd>& u);
+  void calcDiff(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
+  boost::shared_ptr<ActionDataAbstract> createData();
 
  private:
   Eigen::Matrix<double, 2, 1> cost_weights_;

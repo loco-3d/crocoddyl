@@ -18,12 +18,12 @@ class StateNumDiff : public StateAbstract {
   StateNumDiff(StateAbstract& state);
   ~StateNumDiff();
 
-  Eigen::VectorXd zero() override;
-  Eigen::VectorXd rand() override;
+  Eigen::VectorXd zero();
+  Eigen::VectorXd rand();
   void diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-            Eigen::Ref<Eigen::VectorXd> dxout) override;
+            Eigen::Ref<Eigen::VectorXd> dxout);
   void integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
-                 Eigen::Ref<Eigen::VectorXd> xout) override;
+                 Eigen::Ref<Eigen::VectorXd> xout);
   /**
    * @brief This computes the Jacobian of the diff method by finite
    * differenciation:
@@ -40,8 +40,7 @@ class StateNumDiff : public StateAbstract {
    * @param firstsecond
    */
   void Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x1, const Eigen::Ref<const Eigen::VectorXd>& x2,
-             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
-             Jcomponent firstsecond = Jcomponent::both) override;
+             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent firstsecond = both);
   /**
    * @brief This computes the Jacobian of the integrate method by finite
    * differenciation:
@@ -59,7 +58,7 @@ class StateNumDiff : public StateAbstract {
    */
   void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                   Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
-                  Jcomponent firstsecond = Jcomponent::both) override;
+                  Jcomponent firstsecond = both);
   const double& get_disturbance() { return disturbance_; }
 
  private:

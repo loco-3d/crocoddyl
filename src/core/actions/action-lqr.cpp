@@ -19,7 +19,7 @@ ActionModelLQR::~ActionModelLQR() {
   // delete state_; //TODO @Carlos this breaks the test_actions c++ unit-test
 }
 
-void ActionModelLQR::calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+void ActionModelLQR::calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                           const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (drift_free_) {
     data->xnext = Fx_ * x + Fu_ * u;
@@ -29,7 +29,7 @@ void ActionModelLQR::calc(std::shared_ptr<ActionDataAbstract>& data, const Eigen
   data->cost = 0.5 * x.dot(Lxx_ * x) + 0.5 * u.dot(Luu_ * u) + x.dot(Lxu_ * u) + lx_.dot(x) + lu_.dot(u);
 }
 
-void ActionModelLQR::calcDiff(std::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+void ActionModelLQR::calcDiff(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                               const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (recalc) {
     calc(data, x, u);
@@ -43,6 +43,6 @@ void ActionModelLQR::calcDiff(std::shared_ptr<ActionDataAbstract>& data, const E
   data->Luu = Luu_;
 }
 
-std::shared_ptr<ActionDataAbstract> ActionModelLQR::createData() { return std::make_shared<ActionDataLQR>(this); }
+boost::shared_ptr<ActionDataAbstract> ActionModelLQR::createData() { return boost::make_shared<ActionDataLQR>(this); }
 
 }  // namespace crocoddyl

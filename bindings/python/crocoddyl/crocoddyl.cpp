@@ -12,6 +12,7 @@
 #include <eigenpy/eigenpy.hpp>
 
 #include "python/crocoddyl/core.hpp"
+#include "python/crocoddyl/multibody.hpp"
 #include "crocoddyl/core/utils/version.hpp"
 #include "python/crocoddyl/utils.hpp"
 
@@ -39,6 +40,7 @@ BOOST_PYTHON_MODULE(libcrocoddyl_pywrap) {
       .from_python<std::vector<MatrixX, std::allocator<MatrixX> > >();
 
   exposeCore();
+  exposeMultibody();
 }
 
 }  // namespace python
