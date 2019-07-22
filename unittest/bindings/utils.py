@@ -1,4 +1,5 @@
 import crocoddyl
+import pinocchio
 import numpy as np
 import scipy.linalg as scl
 
@@ -55,6 +56,69 @@ class StateVectorDerived(crocoddyl.StateAbstract):
         if firstsecond == 'both':
             return [self.Jintegrate(x, dx, 'first'), self.Jintegrate(x, dx, 'second')]
         return np.eye(self.ndx)
+
+
+class StateMultibodyDerived(crocoddyl.StateAbstract):
+    def __init__(self, pinocchioModel):
+        crocoddyl.StateAbstract.__init__(self, pinocchioModel.nq + pinocchioModel.nv, 2 * pinocchioModel.nv)
+        self.model = pinocchioModel
+
+    def zero(self):
+        q = pinocchio.neutral(self.model)
+        v = np.matrix(np.zeros(self.nv)).T
+        return np.concatenate([q, v])
+
+    def rand(self):
+        q = pinocchio.randomConfiguration(self.model)
+        v = np.matrix(np.random.rand(self.nv)).T
+        return np.concatenate([q, v])
+
+    def diff(self, x0, x1):
+        q0 = x0[:self.nq]
+        q1 = x1[:self.nq]
+        v0 = x0[-self.nv:]
+        v1 = x1[-self.nv:]
+        dq = pinocchio.difference(self.model, q0, q1)
+        return np.concatenate([dq, v1 - v0])
+
+    def integrate(self, x, dx):
+        q = x[:self.nq]
+        v = x[-self.nv:]
+        dq = dx[:self.nv]
+        dv = dx[-self.nv:]
+        qn = pinocchio.integrate(self.model, q, dq)
+        return np.concatenate([qn, v + dv])
+
+    def Jdiff(self, x1, x2, firstsecond='both'):
+        assert (firstsecond in ['first', 'second', 'both'])
+        if firstsecond == 'both':
+            return [self.Jdiff(x1, x2, 'first'), self.Jdiff(x1, x2, 'second')]
+
+        if firstsecond == 'first':
+            dx = self.diff(x2, x1)
+            q = x2[:self.model.nq]
+            dq = dx[:self.model.nv]
+            Jdq = pinocchio.dIntegrate(self.model, q, dq)[1]
+            return np.matrix(-scl.block_diag(np.linalg.inv(Jdq), np.eye(self.nv)))
+        elif firstsecond == 'second':
+            dx = self.diff(x1, x2)
+            q = x1[:self.nq]
+            dq = dx[:self.nv]
+            Jdq = pinocchio.dIntegrate(self.model, q, dq)[1]
+            return np.matrix(scl.block_diag(np.linalg.inv(Jdq), np.eye(self.nv)))
+
+    def Jintegrate(self, x, dx, firstsecond='both'):
+        assert (firstsecond in ['first', 'second', 'both'])
+        if firstsecond == 'both':
+            return [self.Jintegrate(x, dx, 'first'), self.Jintegrate(x, dx, 'second')]
+
+        q = x[:self.nq]
+        dq = dx[:self.nv]
+        Jq, Jdq = pinocchio.dIntegrate(self.model, q, dq)
+        if firstsecond == 'first':
+            return np.matrix(scl.block_diag(np.linalg.inv(Jq), np.eye(self.nv)))
+        elif firstsecond == 'second':
+            return np.matrix(scl.block_diag(np.linalg.inv(Jdq), np.eye(self.nv)))
 
 
 class UnicycleDerived(crocoddyl.ActionModelAbstract):
