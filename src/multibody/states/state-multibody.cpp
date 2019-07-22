@@ -45,7 +45,7 @@ void StateMultibody::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const
   const Eigen::VectorXd& v = x.tail(nv_);
   const Eigen::VectorXd& dq = dx.head(nq_);
   const Eigen::VectorXd& dv = dx.tail(nv_);
-  xout << pinocchio::integrate(model_, q, dq), v - dv;
+  xout << pinocchio::integrate(model_, q, dq), v + dv;
 }
 
 void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
