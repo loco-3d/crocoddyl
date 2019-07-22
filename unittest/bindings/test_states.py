@@ -41,8 +41,9 @@ class StateAbstractTestCase(unittest.TestCase):
 
         # Checking that both integrate functions agree
         if self.STATE.__class__ == crocoddyl.libcrocoddyl_pywrap.StateMultibody:
-            self.assertTrue(np.allclose(self.STATE.integrate(x, dx)[3:], self.STATE_DER.integrate(x, dx)[3:], atol=1e-9),
-                            "state.integrate() function doesn't agree with Python bindings.")
+            self.assertTrue(
+                np.allclose(self.STATE.integrate(x, dx)[3:], self.STATE_DER.integrate(x, dx)[3:], atol=1e-9),
+                "state.integrate() function doesn't agree with Python bindings.")
         else:
             self.assertTrue(np.allclose(self.STATE.integrate(x, dx), self.STATE_DER.integrate(x, dx), atol=1e-9),
                             "state.integrate() function doesn't agree with Python bindings.")
@@ -91,6 +92,7 @@ class StateVectorTest(StateAbstractTestCase):
     StateAbstractTestCase.NDX = StateAbstractTestCase.NX
     StateAbstractTestCase.STATE = crocoddyl.StateVector(StateAbstractTestCase.NX)
     StateAbstractTestCase.STATE_DER = StateVectorDerived(StateAbstractTestCase.NX)
+
 
 class StateMultibodyTest(StateAbstractTestCase):
     MODEL = pinocchio.buildSampleModelHumanoid()
