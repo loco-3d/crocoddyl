@@ -3,7 +3,7 @@
 
 namespace crocoddyl {
 
-StateMultibody::StateMultibody(pinocchio::Model& model)
+StateMultibody::StateMultibody(const pinocchio::Model& model)
     : StateAbstract(model.nq + model.nv, 2 * model.nv),
       model_(model),
       x0_(Eigen::VectorXd::Zero(model.nq + model.nv)),
