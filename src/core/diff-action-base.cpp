@@ -3,14 +3,14 @@
 namespace crocoddyl {
 
 DifferentialActionModelAbstract::DifferentialActionModelAbstract(StateAbstract* const state, const unsigned int& nu,
-                                                                 const unsigned int& ncost)
+                                                                 const unsigned int& nr)
     : nq_(state->get_nq()),
       nv_(state->get_nv()),
       nu_(nu),
       nx_(state->get_nx()),
       ndx_(state->get_ndx()),
       nout_(state->get_nv()),
-      ncost_(ncost),
+      nr_(nr),
       state_(state),
       unone_(Eigen::VectorXd::Zero(nu)) {
   assert(nq_ != 0);
@@ -42,8 +42,8 @@ unsigned int DifferentialActionModelAbstract::get_ndx() const { return ndx_; }
 
 unsigned int DifferentialActionModelAbstract::get_nout() const { return nout_; }
 
-StateAbstract* DifferentialActionModelAbstract::get_state() const { return state_; }
+unsigned int DifferentialActionModelAbstract::get_nr() const { return nr_; }
 
-unsigned int DifferentialActionModelAbstract::get_ncost() const { return ncost_; }
+StateAbstract* DifferentialActionModelAbstract::get_state() const { return state_; }
 
 }  // namespace crocoddyl

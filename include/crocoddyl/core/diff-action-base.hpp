@@ -19,7 +19,7 @@ struct DifferentialActionDataAbstract;  // forward declaration
 
 class DifferentialActionModelAbstract {
  public:
-  DifferentialActionModelAbstract(StateAbstract* const state, const unsigned int& nu, const unsigned int& ncost = 0);
+  DifferentialActionModelAbstract(StateAbstract* const state, const unsigned int& nu, const unsigned int& nr = 0);
   virtual ~DifferentialActionModelAbstract();
 
   virtual void calc(boost::shared_ptr<DifferentialActionDataAbstract>& data,
@@ -38,7 +38,7 @@ class DifferentialActionModelAbstract {
   unsigned int get_nx() const;
   unsigned int get_ndx() const;
   unsigned int get_nout() const;
-  unsigned int get_ncost() const;
+  unsigned int get_nr() const;
   StateAbstract* get_state() const;
 
  protected:
@@ -48,7 +48,7 @@ class DifferentialActionModelAbstract {
   unsigned int nx_;
   unsigned int ndx_;
   unsigned int nout_;
-  unsigned int ncost_;
+  unsigned int nr_;
   StateAbstract* state_;
   Eigen::VectorXd unone_;
 
@@ -88,7 +88,7 @@ struct DifferentialActionDataAbstract {
     const int& ndx = model->get_ndx();
     const int& nu = model->get_nu();
     const int& nout = model->get_nout();
-    const int& ncost = model->get_ncost();
+    const int& nr = model->get_nr();
     xout = Eigen::VectorXd::Zero(nout);
     Fx = Eigen::MatrixXd::Zero(nout, ndx);
     Fu = Eigen::MatrixXd::Zero(nout, nu);
@@ -97,9 +97,9 @@ struct DifferentialActionDataAbstract {
     Lxx = Eigen::MatrixXd::Zero(ndx, ndx);
     Lxu = Eigen::MatrixXd::Zero(ndx, nu);
     Luu = Eigen::MatrixXd::Zero(nu, nu);
-    r = Eigen::VectorXd::Zero(ncost);
-    Rx = Eigen::MatrixXd::Zero(ncost, ndx);
-    Ru = Eigen::MatrixXd::Zero(ncost, nu);
+    r = Eigen::VectorXd::Zero(nr);
+    Rx = Eigen::MatrixXd::Zero(nr, ndx);
+    Ru = Eigen::MatrixXd::Zero(nr, nu);
   }
 
   const double& get_cost() const { return cost; }

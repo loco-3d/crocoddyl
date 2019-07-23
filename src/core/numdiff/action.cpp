@@ -3,10 +3,10 @@
 namespace crocoddyl {
 
 ActionModelNumDiff::ActionModelNumDiff(ActionModelAbstract& model, bool with_gauss_approx)
-    : ActionModelAbstract(model.get_state(), model.get_nu(), model.get_ncost()), model_(model) {
+    : ActionModelAbstract(model.get_state(), model.get_nu(), model.get_nr()), model_(model) {
   with_gauss_approx_ = with_gauss_approx;
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
-  assert((!with_gauss_approx_ || ncost_ > 1) && "No Gauss approximation possible with ncost = 1");
+  assert((!with_gauss_approx_ || ncost_ > 1) && "No Gauss approximation possible with nr = 1");
 
   dx_.resize(model.get_ndx());
   dx_.setZero();
@@ -50,7 +50,7 @@ void ActionModelNumDiff::calcDiff(boost::shared_ptr<ActionDataAbstract>& data,
     data_num_diff->Lx(ix) = (c - c0) / disturbance_;
 
     // data->Rx
-    if (model_.get_ncost() > 1) {
+    if (model_.get_nr() > 1) {
       // TODO: @mnaveau manage the gaussian approximation
       // data_num_diff->Rx.col(ix) = data_num_diff->data_x[ix]->cost_residual -
       //                             data_num_diff->data_0[ix]->cost_residual;
@@ -71,7 +71,7 @@ void ActionModelNumDiff::calcDiff(boost::shared_ptr<ActionDataAbstract>& data,
     // data->Lu
     data_num_diff->Lu(iu) = (c - c0) / disturbance_;
     // data->Ru
-    if (model_.get_ncost() > 1) {
+    if (model_.get_nr() > 1) {
       // TODO: @mnaveau manage the gaussian approximation
       // data_num_diff->Ru.col(iu) = data_num_diff->data_u[iu]->cost_residual -
       //                             data_num_diff->data_0[iu]->cost_residual;

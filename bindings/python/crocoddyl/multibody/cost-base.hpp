@@ -18,19 +18,19 @@ namespace bp = boost::python;
 
 class CostModelAbstract_wrap : public CostModelAbstract, public bp::wrapper<CostModelAbstract> {
  public:
-  using CostModelAbstract::ncost_;
   using CostModelAbstract::ndx_;
   using CostModelAbstract::nq_;
+  using CostModelAbstract::nr_;
   using CostModelAbstract::nu_;
   using CostModelAbstract::nv_;
   using CostModelAbstract::nx_;
   using CostModelAbstract::unone_;
 
-  CostModelAbstract_wrap(pinocchio::Model* const model, int ncost, int nu, bool with_residuals = true)
-      : CostModelAbstract(model, ncost, nu, with_residuals), bp::wrapper<CostModelAbstract>() {}
+  CostModelAbstract_wrap(pinocchio::Model* const model, int nr, int nu, bool with_residuals = true)
+      : CostModelAbstract(model, nr, nu, with_residuals), bp::wrapper<CostModelAbstract>() {}
 
-  CostModelAbstract_wrap(pinocchio::Model* const model, int ncost, bool with_residuals = true)
-      : CostModelAbstract(model, ncost, with_residuals), bp::wrapper<CostModelAbstract>() {}
+  CostModelAbstract_wrap(pinocchio::Model* const model, int nr, bool with_residuals = true)
+      : CostModelAbstract(model, nr, with_residuals), bp::wrapper<CostModelAbstract>() {}
 
   void calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
@@ -54,17 +54,17 @@ void exposeCostMultibody() {
       "It defines a template of cost model whose residual and derivatives can be retrieved from\n"
       "Pinocchio data, through the calc and calcDiff functions, respectively.",
       bp::init<pinocchio::Model*, int, int, bp::optional<bool> >(
-          bp::args(" self", " model", " ncost", " nu=model.nv", " withResiduals=True"),
+          bp::args(" self", " model", " nr", " nu=model.nv", " withResiduals=True"),
           "Initialize the differential action model.\n\n"
           ":param model: Pinocchio model of the multibody system\n"
-          ":param ncost: dimension of cost vector\n"
+          ":param nr: dimension of cost vector\n"
           ":param nu: dimension of control vector\n"
           ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
       .def(bp::init<pinocchio::Model*, int, bp::optional<bool> >(
-          bp::args(" self", " model", " ncost", " withResiduals=True"),
+          bp::args(" self", " model", " nr", " withResiduals=True"),
           "Initialize the differential action model.\n\n"
           ":param model: Pinocchio model of the multibody system\n"
-          ":param ncost: dimension of cost vector\n"
+          ":param nr: dimension of cost vector\n"
           ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
       .def("calc", pure_virtual(&CostModelAbstract_wrap::calc), bp::args(" self", " data", " x", " u"),
            "Compute the cost value and its residuals.\n\n"
@@ -92,7 +92,7 @@ void exposeCostMultibody() {
       .add_property("nu", &CostModelAbstract_wrap::nu_, "dimension of control vector")
       .add_property("nx", &CostModelAbstract_wrap::nx_, "dimension of state configuration vector")
       .add_property("ndx", &CostModelAbstract_wrap::ndx_, "dimension of state tangent vector")
-      .add_property("ncost", &CostModelAbstract_wrap::ncost_, "dimension of cost-residual vector")
+      .add_property("nr", &CostModelAbstract_wrap::nr_, "dimension of cost-residual vector")
       .add_property("unone",
                     bp::make_getter(&CostModelAbstract_wrap::unone_, bp::return_value_policy<bp::return_by_value>()),
                     "default control vector");

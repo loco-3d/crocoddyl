@@ -20,9 +20,9 @@ struct CostDataAbstract;  // forward declaration
 
 class CostModelAbstract {
  public:
-  CostModelAbstract(pinocchio::Model* const model, const unsigned int& ncost, const unsigned int& nu,
+  CostModelAbstract(pinocchio::Model* const model, const unsigned int& nr, const unsigned int& nu,
                     const bool& with_residuals = true);
-  CostModelAbstract(pinocchio::Model* const model, const unsigned int& ncost, const bool& with_residuals = true);
+  CostModelAbstract(pinocchio::Model* const model, const unsigned int& nr, const bool& with_residuals = true);
   ~CostModelAbstract();
 
   virtual void calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -40,7 +40,7 @@ class CostModelAbstract {
   unsigned int get_nu() const;
   unsigned int get_nx() const;
   unsigned int get_ndx() const;
-  unsigned int get_ncost() const;
+  unsigned int get_nr() const;
 
  protected:
   pinocchio::Model* pinocchio_;
@@ -49,7 +49,7 @@ class CostModelAbstract {
   unsigned int nu_;
   unsigned int nx_;
   unsigned int ndx_;
-  unsigned int ncost_;
+  unsigned int nr_;
   bool with_residuals_;
   Eigen::VectorXd unone_;
 
@@ -83,15 +83,15 @@ struct CostDataAbstract {
   CostDataAbstract(Model* const model, pinocchio::Data* const data) : pinocchio(data), cost(0.) {
     const int& ndx = model->get_ndx();
     const int& nu = model->get_nu();
-    const int& ncost = model->get_ncost();
+    const int& nr = model->get_nr();
     Lx = Eigen::VectorXd::Zero(ndx);
     Lu = Eigen::VectorXd::Zero(nu);
     Lxx = Eigen::MatrixXd::Zero(ndx, ndx);
     Lxu = Eigen::MatrixXd::Zero(ndx, nu);
     Luu = Eigen::MatrixXd::Zero(nu, nu);
-    r = Eigen::VectorXd::Zero(ncost);
-    Rx = Eigen::MatrixXd::Zero(ncost, ndx);
-    Ru = Eigen::MatrixXd::Zero(ncost, nu);
+    r = Eigen::VectorXd::Zero(nr);
+    Rx = Eigen::MatrixXd::Zero(nr, ndx);
+    Ru = Eigen::MatrixXd::Zero(nr, nu);
   }
 
   pinocchio::Data* get_pinocchio() const { return pinocchio; }

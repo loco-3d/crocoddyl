@@ -4,7 +4,7 @@ namespace crocoddyl {
 
 IntegratedActionModelEuler::IntegratedActionModelEuler(DifferentialActionModelAbstract* const model,
                                                        const double& time_step, const bool& with_cost_residual)
-    : ActionModelAbstract(model->get_state(), model->get_nu(), model->get_ncost()),
+    : ActionModelAbstract(model->get_state(), model->get_nu(), model->get_nr()),
       differential_(model),
       time_step_(time_step),
       time_step2_(time_step * time_step),

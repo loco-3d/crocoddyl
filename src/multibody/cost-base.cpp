@@ -2,7 +2,7 @@
 
 namespace crocoddyl {
 
-CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, const unsigned int& ncost, const unsigned int& nu,
+CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, const unsigned int& nr, const unsigned int& nu,
                                      const bool& with_residuals)
     : pinocchio_(model),
       nq_(model->nq),
@@ -10,7 +10,7 @@ CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, const unsign
       nu_(nu),
       nx_(model->nq + model->nv),
       ndx_(2 * model->nv),
-      ncost_(ncost),
+      nr_(nr),
       with_residuals_(with_residuals),
       unone_(Eigen::VectorXd::Zero(nu)) {
   assert(nq_ != 0);
@@ -18,15 +18,14 @@ CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, const unsign
   assert(nu_ != 0);
 }
 
-CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, const unsigned int& ncost,
-                                     const bool& with_residuals)
+CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, const unsigned int& nr, const bool& with_residuals)
     : pinocchio_(model),
       nq_(model->nq),
       nv_(model->nv),
       nu_(model->nv),
       nx_(model->nq + model->nv),
       ndx_(2 * model->nv),
-      ncost_(ncost),
+      nr_(nr),
       with_residuals_(with_residuals),
       unone_(Eigen::VectorXd::Zero(model->nv)) {
   assert(nq_ != 0);
@@ -57,6 +56,6 @@ unsigned int CostModelAbstract::get_nx() const { return nx_; }
 
 unsigned int CostModelAbstract::get_ndx() const { return ndx_; }
 
-unsigned int CostModelAbstract::get_ncost() const { return ncost_; }
+unsigned int CostModelAbstract::get_nr() const { return nr_; }
 
 }  // namespace crocoddyl

@@ -2,11 +2,11 @@
 
 namespace crocoddyl {
 
-ActionModelAbstract::ActionModelAbstract(StateAbstract* const state, const unsigned int& nu, const unsigned int& ncost)
+ActionModelAbstract::ActionModelAbstract(StateAbstract* const state, const unsigned int& nu, const unsigned int& nr)
     : nx_(state->get_nx()),
       ndx_(state->get_ndx()),
       nu_(nu),
-      ncost_(ncost),
+      nr_(nr),
       state_(state),
       unone_(Eigen::VectorXd::Zero(nu)) {
   assert(nx_ != 0);
@@ -32,7 +32,7 @@ unsigned int ActionModelAbstract::get_ndx() const { return ndx_; }
 
 unsigned int ActionModelAbstract::get_nu() const { return nu_; }
 
-unsigned int ActionModelAbstract::get_ncost() const { return ncost_; }
+unsigned int ActionModelAbstract::get_nr() const { return nr_; }
 
 StateAbstract* ActionModelAbstract::get_state() const { return state_; }
 

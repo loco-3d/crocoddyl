@@ -19,17 +19,17 @@ namespace bp = boost::python;
 class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstract,
                                              public bp::wrapper<DifferentialActionModelAbstract> {
  public:
-  using DifferentialActionModelAbstract::ncost_;
   using DifferentialActionModelAbstract::ndx_;
   using DifferentialActionModelAbstract::nout_;
   using DifferentialActionModelAbstract::nq_;
+  using DifferentialActionModelAbstract::nr_;
   using DifferentialActionModelAbstract::nu_;
   using DifferentialActionModelAbstract::nv_;
   using DifferentialActionModelAbstract::nx_;
   using DifferentialActionModelAbstract::unone_;
 
-  DifferentialActionModelAbstract_wrap(StateAbstract* const state, int nu, int ncost = 0)
-      : DifferentialActionModelAbstract(state, nu, ncost), bp::wrapper<DifferentialActionModelAbstract>() {}
+  DifferentialActionModelAbstract_wrap(StateAbstract* const state, int nu, int nr = 0)
+      : DifferentialActionModelAbstract(state, nu, nr), bp::wrapper<DifferentialActionModelAbstract>() {}
 
   void calc(boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
@@ -56,11 +56,11 @@ void exposeDifferentialActionAbstract() {
       "computing the dynamics, cost functions and their derivatives. These computations are\n"
       "mainly carry on inside calc() and calcDiff(), respectively.",
       bp::init<StateAbstract*, int, bp::optional<int> >(
-          bp::args(" self", " state", " nu", " ncost"),
+          bp::args(" self", " state", " nu", " nr=0"),
           "Initialize the differential action model.\n\n"
           ":param state: state\n"
           ":param nu: dimension of control vector\n"
-          ":param ncost: dimension of cost vector)")[bp::with_custodian_and_ward<1, 2>()])
+          ":param nr: dimension of cost-residual vector)")[bp::with_custodian_and_ward<1, 2>()])
       .def("calc", pure_virtual(&DifferentialActionModelAbstract_wrap::calc), bp::args(" self", " data", " x", " u"),
            "Compute the state evolution and cost value.\n\n"
            "First, it describes the time-continuous evolution of our dynamical system\n"
@@ -94,7 +94,7 @@ void exposeDifferentialActionAbstract() {
       .add_property("nx", &DifferentialActionModelAbstract_wrap::nx_, "dimension of state configuration vector")
       .add_property("ndx", &DifferentialActionModelAbstract_wrap::ndx_, "dimension of state tangent vector")
       .add_property("nout", &DifferentialActionModelAbstract_wrap::nout_, "dimension of evolution vector")
-      .add_property("ncost", &DifferentialActionModelAbstract_wrap::ncost_, "dimension of cost-residual vector")
+      .add_property("nr", &DifferentialActionModelAbstract_wrap::nr_, "dimension of cost-residual vector")
       .add_property("unone",
                     bp::make_getter(&DifferentialActionModelAbstract_wrap::unone_,
                                     bp::return_value_policy<bp::return_by_value>()),

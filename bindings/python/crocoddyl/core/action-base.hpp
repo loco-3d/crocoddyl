@@ -18,14 +18,14 @@ namespace bp = boost::python;
 
 class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<ActionModelAbstract> {
  public:
-  using ActionModelAbstract::ncost_;
   using ActionModelAbstract::ndx_;
+  using ActionModelAbstract::nr_;
   using ActionModelAbstract::nu_;
   using ActionModelAbstract::nx_;
   using ActionModelAbstract::unone_;
 
-  ActionModelAbstract_wrap(StateAbstract* const state, const unsigned int& nu, const unsigned int& ncost = 0)
-      : ActionModelAbstract(state, nu, ncost), bp::wrapper<ActionModelAbstract>() {}
+  ActionModelAbstract_wrap(StateAbstract* const state, const unsigned int& nu, const unsigned int& nr = 0)
+      : ActionModelAbstract(state, nu, nr), bp::wrapper<ActionModelAbstract>() {}
 
   void calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
@@ -50,11 +50,11 @@ void exposeActionAbstract() {
       "derivatives. These computations are mainly carry on inside calc() and calcDiff(),\n"
       "respectively.",
       bp::init<StateAbstract*, int, bp::optional<int> >(
-          bp::args(" self", " state", " nu", " ncost"),
+          bp::args(" self", " state", " nu", " nr=0"),
           "Initialize the action model.\n\n"
           ":param state: state description,\n"
           ":param nu: dimension of control vector,\n"
-          ":param ncost: dimension of the cost-residual vector")[bp::with_custodian_and_ward<1, 2>()])
+          ":param nr: dimension of the cost-residual vector")[bp::with_custodian_and_ward<1, 2>()])
       .def("calc", pure_virtual(&ActionModelAbstract_wrap::calc), bp::args(" self", " data", " x", " u"),
            "Compute the next state and cost value.\n\n"
            "It describes the time-discrete evolution of our dynamical system\n"
@@ -82,7 +82,7 @@ void exposeActionAbstract() {
       .add_property("nx", &ActionModelAbstract_wrap::nx_, "dimension of state configuration vector")
       .add_property("ndx", &ActionModelAbstract_wrap::ndx_, "dimension of state tangent vector")
       .add_property("nu", &ActionModelAbstract_wrap::nu_, "dimension of control vector")
-      .add_property("ncost", &ActionModelAbstract_wrap::ncost_, "dimension of cost-residual vector")
+      .add_property("nr", &ActionModelAbstract_wrap::nr_, "dimension of cost-residual vector")
       .add_property("unone",
                     bp::make_getter(&ActionModelAbstract_wrap::unone_, bp::return_value_policy<bp::return_by_value>()),
                     "default control vector")
