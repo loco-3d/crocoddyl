@@ -26,13 +26,13 @@ void ActionModelAbstract::calcDiff(boost::shared_ptr<ActionDataAbstract>& data,
   calcDiff(data, x, unone_);
 }
 
-unsigned int ActionModelAbstract::get_nx() const { return nx_; }
+const unsigned int& ActionModelAbstract::get_nx() const { return nx_; }
 
-unsigned int ActionModelAbstract::get_ndx() const { return ndx_; }
+const unsigned int& ActionModelAbstract::get_ndx() const { return ndx_; }
 
-unsigned int ActionModelAbstract::get_nu() const { return nu_; }
+const unsigned int& ActionModelAbstract::get_nu() const { return nu_; }
 
-unsigned int ActionModelAbstract::get_nr() const { return nr_; }
+const unsigned int& ActionModelAbstract::get_nr() const { return nr_; }
 
 StateAbstract* ActionModelAbstract::get_state() const { return state_; }
 

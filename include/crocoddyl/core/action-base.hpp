@@ -31,10 +31,10 @@ class ActionModelAbstract {
   void calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
   void calcDiff(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
 
-  unsigned int get_nx() const;
-  unsigned int get_ndx() const;
-  unsigned int get_nu() const;
-  unsigned int get_nr() const;
+  const unsigned int& get_nx() const;
+  const unsigned int& get_ndx() const;
+  const unsigned int& get_nu() const;
+  const unsigned int& get_nr() const;
   StateAbstract* get_state() const;
 
  protected:

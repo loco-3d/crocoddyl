@@ -30,19 +30,19 @@ void DifferentialActionModelAbstract::calcDiff(boost::shared_ptr<DifferentialAct
   calcDiff(data, x, unone_);
 }
 
-unsigned int DifferentialActionModelAbstract::get_nq() const { return nq_; }
+const unsigned int& DifferentialActionModelAbstract::get_nq() const { return nq_; }
 
-unsigned int DifferentialActionModelAbstract::get_nv() const { return nv_; }
+const unsigned int& DifferentialActionModelAbstract::get_nv() const { return nv_; }
 
-unsigned int DifferentialActionModelAbstract::get_nu() const { return nu_; }
+const unsigned int& DifferentialActionModelAbstract::get_nu() const { return nu_; }
 
-unsigned int DifferentialActionModelAbstract::get_nx() const { return nx_; }
+const unsigned int& DifferentialActionModelAbstract::get_nx() const { return nx_; }
 
-unsigned int DifferentialActionModelAbstract::get_ndx() const { return ndx_; }
+const unsigned int& DifferentialActionModelAbstract::get_ndx() const { return ndx_; }
 
-unsigned int DifferentialActionModelAbstract::get_nout() const { return nout_; }
+const unsigned int& DifferentialActionModelAbstract::get_nout() const { return nout_; }
 
-unsigned int DifferentialActionModelAbstract::get_nr() const { return nr_; }
+const unsigned int& DifferentialActionModelAbstract::get_nr() const { return nr_; }
 
 StateAbstract* DifferentialActionModelAbstract::get_state() const { return state_; }
 
