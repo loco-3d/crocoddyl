@@ -8,7 +8,7 @@ ActivationModelQuad::~ActivationModelQuad() {}
 
 void ActivationModelQuad::calc(boost::shared_ptr<ActivationDataAbstract>& data,
                                const Eigen::Ref<const Eigen::VectorXd>& r) {
-  data->a_norm = 0.5 * r.transpose() * r;
+  data->a_value = 0.5 * r.transpose() * r;
 }
 
 void ActivationModelQuad::calcDiff(boost::shared_ptr<ActivationDataAbstract>& data,

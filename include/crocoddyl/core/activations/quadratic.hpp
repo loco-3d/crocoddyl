@@ -10,7 +10,6 @@
 #define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_
 
 #include "crocoddyl/core/activation-base.hpp"
-// TODO: ActivationModelWeightedQuad ActivationDataWeightedQuad
 
 namespace crocoddyl {
 

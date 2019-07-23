@@ -50,11 +50,11 @@ struct ActivationDataAbstract {
 
   template <typename Activation>
   ActivationDataAbstract(Activation* const activation)
-      : a_norm(0.),
+      : a_value(0.),
         Ar(Eigen::VectorXd::Zero(activation->get_nr())),
         Arr(Eigen::MatrixXd::Zero(activation->get_nr(), activation->get_nr())) {}
 
-  double a_norm;
+  double a_value;
   Eigen::VectorXd Ar;
   Eigen::MatrixXd Arr;
 };
