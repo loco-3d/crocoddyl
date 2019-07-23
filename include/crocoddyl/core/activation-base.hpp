@@ -19,13 +19,18 @@ struct ActivationDataAbstract;  // forward declaration
 
 class ActivationModelAbstract {
  public:
-  ActivationModelAbstract();
+  ActivationModelAbstract(const unsigned int& nr);
   virtual ~ActivationModelAbstract();
 
   virtual void calc(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r) = 0;
   virtual void calcDiff(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r,
                         const bool& recalc = true) = 0;
   virtual boost::shared_ptr<ActivationDataAbstract> createData() = 0;
+
+  unsigned int get_nr() const;
+
+ protected:
+  unsigned int nr_;
 
 #ifdef PYTHON_BINDINGS
  public:
@@ -43,8 +48,12 @@ class ActivationModelAbstract {
 struct ActivationDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  template <typename Model>
-  ActivationDataAbstract(Model* const model) {}
+  template <typename Activation>
+  ActivationDataAbstract(Activation* const activation) : a_norm(0.), Ar(Eigen::VectorXd::Zero(activation->get_nr())), Arr(Eigen::MatrixXd::Zero(activation->get_nr(), activation->get_nr())) {}
+
+  double a_norm;
+  Eigen::VectorXd Ar;
+  Eigen::MatrixXd Arr;
 };
 
 }  // namespace crocoddyl
