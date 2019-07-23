@@ -11,7 +11,6 @@
 
 #include "crocoddyl/core/state-base.hpp"
 #include <pinocchio/multibody/model.hpp>
-#include <pinocchio/multibody/data.hpp>
 
 namespace crocoddyl {
 

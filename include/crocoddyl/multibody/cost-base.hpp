@@ -20,9 +20,9 @@ struct CostDataAbstract;  // forward declaration
 
 class CostModelAbstract {
  public:
-  CostModelAbstract(const pinocchio::Model& model, const unsigned int& ncost, const unsigned int& nu,
+  CostModelAbstract(pinocchio::Model* const model, const unsigned int& ncost, const unsigned int& nu,
                     const bool& with_residuals = true);
-  CostModelAbstract(const pinocchio::Model& model, const unsigned int& ncost, const bool& with_residuals = true);
+  CostModelAbstract(pinocchio::Model* const model, const unsigned int& ncost, const bool& with_residuals = true);
   ~CostModelAbstract();
 
   virtual void calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -42,7 +42,7 @@ class CostModelAbstract {
   unsigned int get_ncost() const;
 
  protected:
-  pinocchio::Model model_;
+  pinocchio::Model* model_;
   unsigned int nq_;
   unsigned int nv_;
   unsigned int nu_;
