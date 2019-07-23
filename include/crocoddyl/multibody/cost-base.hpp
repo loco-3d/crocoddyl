@@ -29,11 +29,12 @@ class CostModelAbstract {
                     const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
   virtual void calcDiff(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) = 0;
-  virtual boost::shared_ptr<CostDataAbstract> createData() = 0;
+  virtual boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data) = 0;
 
   void calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
   void calcDiff(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
 
+  pinocchio::Model* get_pinocchio() const;
   unsigned int get_nq() const;
   unsigned int get_nv() const;
   unsigned int get_nu() const;
@@ -42,7 +43,7 @@ class CostModelAbstract {
   unsigned int get_ncost() const;
 
  protected:
-  pinocchio::Model* model_;
+  pinocchio::Model* pinocchio_;
   unsigned int nq_;
   unsigned int nv_;
   unsigned int nu_;
@@ -79,7 +80,7 @@ struct CostDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  CostDataAbstract(Model* const model, const pinocchio::Data& data) : cost(0.), multibody(data) {
+  CostDataAbstract(Model* const model, pinocchio::Data* const data) : pinocchio(data), cost(0.) {
     const int& ndx = model->get_ndx();
     const int& nu = model->get_nu();
     const int& ncost = model->get_ncost();
@@ -93,6 +94,7 @@ struct CostDataAbstract {
     Ru = Eigen::MatrixXd::Zero(ncost, nu);
   }
 
+  pinocchio::Data* get_pinocchio() const { return pinocchio; }
   const double& get_cost() const { return cost; }
   const Eigen::VectorXd& get_Lx() const { return Lx; }
   const Eigen::VectorXd& get_Lu() const { return Lu; }
@@ -103,6 +105,7 @@ struct CostDataAbstract {
   const Eigen::MatrixXd& get_Rx() const { return Rx; }
   const Eigen::MatrixXd& get_Ru() const { return Ru; }
 
+  pinocchio::Data* pinocchio;
   double cost;
   Eigen::VectorXd Lx;
   Eigen::VectorXd Lu;
@@ -112,7 +115,6 @@ struct CostDataAbstract {
   Eigen::VectorXd r;
   Eigen::MatrixXd Rx;
   Eigen::MatrixXd Ru;
-  pinocchio::Data multibody;
 };
 
 }  // namespace crocoddyl

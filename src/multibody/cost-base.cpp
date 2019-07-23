@@ -4,7 +4,7 @@ namespace crocoddyl {
 
 CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, const unsigned int& ncost, const unsigned int& nu,
                                      const bool& with_residuals)
-    : model_(model),
+    : pinocchio_(model),
       nq_(model->nq),
       nv_(model->nv),
       nu_(nu),
@@ -20,7 +20,7 @@ CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, const unsign
 
 CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, const unsigned int& ncost,
                                      const bool& with_residuals)
-    : model_(model),
+    : pinocchio_(model),
       nq_(model->nq),
       nv_(model->nv),
       nu_(model->nv),
@@ -44,6 +44,8 @@ void CostModelAbstract::calcDiff(boost::shared_ptr<CostDataAbstract>& data,
                                  const Eigen::Ref<const Eigen::VectorXd>& x) {
   calcDiff(data, x, unone_);
 }
+
+pinocchio::Model* CostModelAbstract::get_pinocchio() const { return pinocchio_; }
 
 unsigned int CostModelAbstract::get_nq() const { return nq_; }
 
