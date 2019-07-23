@@ -17,7 +17,7 @@ namespace crocoddyl {
 
 class StateMultibody : public StateAbstract {
  public:
-  StateMultibody(const pinocchio::Model& model);
+  StateMultibody(pinocchio::Model* const model);
   ~StateMultibody();
 
   Eigen::VectorXd zero();
@@ -33,7 +33,7 @@ class StateMultibody : public StateAbstract {
                   Jcomponent firstsecond = both);
 
  private:
-  pinocchio::Model model_;
+  pinocchio::Model* model_;
   Eigen::VectorXd x0_;
   Eigen::VectorXd dx_;
   Eigen::MatrixXd Jdq_;

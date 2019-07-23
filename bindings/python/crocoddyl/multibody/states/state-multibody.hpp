@@ -27,9 +27,10 @@ void exposeStateMultibody() {
       "(Tx M). Additionally the Pinocchio allows us to compute analytically the\n"
       "Jacobians for the differentiate and integrate operators. Note that this code\n"
       "can be reused in any robot that is described through its Pinocchio model.",
-      bp::init<pinocchio::Model&>(bp::args(" self", " pinocchioModel"),
-                                  "Initialize the multibody state given a Pinocchio model.\n\n"
-                                  ":param pinocchioModel: pinocchio model (i.e. multibody model)"))
+      bp::init<pinocchio::Model*>(
+          bp::args(" self", " pinocchioModel"),
+          "Initialize the multibody state given a Pinocchio model.\n\n"
+          ":param pinocchioModel: pinocchio model (i.e. multibody model)")[bp::with_custodian_and_ward<1, 2>()])
       .def("zero", &StateMultibody::zero, bp::args(" self"),
            "Return the neutral robot configuration with zero velocity.\n\n"
            ":return neutral robot configuration with zero velocity")
