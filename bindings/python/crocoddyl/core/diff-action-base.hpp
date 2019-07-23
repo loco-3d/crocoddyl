@@ -86,8 +86,7 @@ void exposeDifferentialActionAbstract() {
            "Create the differential action data.\n\n"
            "Each differential action model has its own data that needs to be\n"
            "allocated. This function returns the allocated data for a predefined\n"
-           "DAM. Note that you need to defined the DifferentialActionDataType inside\n"
-           "your DAM.\n"
+           "DAM.\n"
            ":return DAM data.")
       .add_property("nq", &DifferentialActionModelAbstract_wrap::nq_, "dimension of configuration vector")
       .add_property("nv", &DifferentialActionModelAbstract_wrap::nv_, "dimension of velocity vector")
@@ -115,7 +114,7 @@ void exposeDifferentialActionAbstract() {
       bp::init<DifferentialActionModelAbstract*>(
           bp::args(" self", " model"),
           "Create common data shared between DAMs.\n\n"
-          "The differentail action data uses the model in order to first process it.\n"
+          "The differential action data uses the model in order to first process it.\n"
           ":param model: differential action model"))
       .add_property(
           "cost",

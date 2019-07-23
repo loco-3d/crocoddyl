@@ -77,8 +77,7 @@ void exposeActionAbstract() {
       .def("createData", &ActionModelAbstract_wrap::createData, bp::args(" self"),
            "Create the action data.\n\n"
            "Each action model (AM) has its own data that needs to be allocated.\n"
-           "This function returns the allocated data for a predefined AM. Note that\n"
-           "you need to defined the ActionDataType inside your AM.\n"
+           "This function returns the allocated data for a predefined AM.\n"
            ":return AM data.")
       .add_property("nx", &ActionModelAbstract_wrap::nx_, "dimension of state configuration vector")
       .add_property("ndx", &ActionModelAbstract_wrap::ndx_, "dimension of state tangent vector")
