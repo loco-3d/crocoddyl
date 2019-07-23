@@ -6,12 +6,13 @@ ActivationModelQuad::ActivationModelQuad(const unsigned int& nr) : ActivationMod
 
 ActivationModelQuad::~ActivationModelQuad() {}
 
-void ActivationModelQuad::calc(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r) {
+void ActivationModelQuad::calc(boost::shared_ptr<ActivationDataAbstract>& data,
+                               const Eigen::Ref<const Eigen::VectorXd>& r) {
   data->a_norm = 0.5 * r.transpose() * r;
 }
 
-void ActivationModelQuad::calcDiff(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r,
-                        const bool& recalc) {
+void ActivationModelQuad::calcDiff(boost::shared_ptr<ActivationDataAbstract>& data,
+                                   const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc) {
   if (recalc) {
     calc(data, r);
   }

@@ -49,7 +49,10 @@ struct ActivationDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Activation>
-  ActivationDataAbstract(Activation* const activation) : a_norm(0.), Ar(Eigen::VectorXd::Zero(activation->get_nr())), Arr(Eigen::MatrixXd::Zero(activation->get_nr(), activation->get_nr())) {}
+  ActivationDataAbstract(Activation* const activation)
+      : a_norm(0.),
+        Ar(Eigen::VectorXd::Zero(activation->get_nr())),
+        Arr(Eigen::MatrixXd::Zero(activation->get_nr(), activation->get_nr())) {}
 
   double a_norm;
   Eigen::VectorXd Ar;
