@@ -27,9 +27,6 @@ class ActivationModelAbstract {
                         const bool& recalc = true) = 0;
   virtual boost::shared_ptr<ActivationDataAbstract> createData() = 0;
 
- protected:
-  unsigned int ncost_;
-
 #ifdef PYTHON_BINDINGS
  public:
   void calc_wrap(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::VectorXd& r) { calc(data, r); }

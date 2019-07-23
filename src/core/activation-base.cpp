@@ -1,4 +1,4 @@
-#include "crocoddyl/multibody/activation-base.hpp"
+#include "crocoddyl/core/activation-base.hpp"
 
 namespace crocoddyl {
 

@@ -6,9 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_COSTS_ACTIVATIONS_ACTIVATION_SMOOTH_ABS_HPP_
-#define CROCODDYL_MULTIBODY_COSTS_ACTIVATIONS_ACTIVATION_SMOOTH_ABS_HPP_
+#ifndef CROCODDYL_CORE_ACTIVATIONS_INEQUALITY_HPP_
+#define CROCODDYL_CORE_ACTIVATIONS_INEQUALITY_HPP_
 
-// TODO: ActivationModelSmoothAbs ActivationDataSmoothAbs
+// TODO: ActivationModelInequality ActivationDataInequality
 
-#endif  // CROCODDYL_MULTIBODY_COSTS_ACTIVATIONS_ACTIVATION_SMOOTH_ABS_HPP_
+#endif  // CROCODDYL_CORE_ACTIVATIONS_INEQUALITY_HPP_

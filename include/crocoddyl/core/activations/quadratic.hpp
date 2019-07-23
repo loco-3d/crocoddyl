@@ -6,10 +6,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_COSTS_ACTIVATIONS_ACTIVATION_QUADRATIC_HPP_
-#define CROCODDYL_MULTIBODY_COSTS_ACTIVATIONS_ACTIVATION_QUADRATIC_HPP_
+#ifndef CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_
+#define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_
 
 // TODO: ActivationModelQuad ActivationDataQuad
 // TODO: ActivationModelWeightedQuad ActivationDataWeightedQuad
 
-#endif  // CROCODDYL_MULTIBODY_COSTS_ACTIVATIONS_ACTIVATION_QUADRATIC_HPP_
+#endif  // CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_

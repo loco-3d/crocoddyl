@@ -1,6 +1,7 @@
 SET(${PROJECT_NAME}_SOURCES
   core/state-base.cpp
   core/action-base.cpp
+  core/activation-base.cpp
   core/diff-action-base.cpp
   core/solver-base.cpp
   core/integrator/euler.cpp
