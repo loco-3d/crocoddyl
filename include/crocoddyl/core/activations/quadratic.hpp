@@ -9,7 +9,22 @@
 #ifndef CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_
 
-// TODO: ActivationModelQuad ActivationDataQuad
+#include "crocoddyl/core/activation-base.hpp"
 // TODO: ActivationModelWeightedQuad ActivationDataWeightedQuad
+
+namespace crocoddyl {
+
+class ActivationModelQuad : public ActivationModelAbstract {
+ public:
+  ActivationModelQuad(const unsigned int& nr);
+  ~ActivationModelQuad();
+
+  void calc(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r);
+  void calcDiff(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r,
+                        const bool& recalc = true);
+  boost::shared_ptr<ActivationDataAbstract> createData();
+};
+
+}  // namespace crocoddyl
 
 #endif  // CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_

@@ -14,6 +14,7 @@ SET(${PROJECT_NAME}_SOURCES
   core/actions/action-unicycle.cpp
   core/actions/action-lqr.cpp
   core/actions/diff-action-lqr.cpp
+  core/activations/quadratic.cpp
   multibody/cost-base.cpp
   multibody/states/state-multibody.cpp
   )
