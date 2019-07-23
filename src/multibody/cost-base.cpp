@@ -46,16 +46,16 @@ void CostModelAbstract::calcDiff(boost::shared_ptr<CostDataAbstract>& data,
 
 pinocchio::Model* CostModelAbstract::get_pinocchio() const { return pinocchio_; }
 
-unsigned int CostModelAbstract::get_nq() const { return nq_; }
+const unsigned int& CostModelAbstract::get_nq() const { return nq_; }
 
-unsigned int CostModelAbstract::get_nv() const { return nv_; }
+const unsigned int& CostModelAbstract::get_nv() const { return nv_; }
 
-unsigned int CostModelAbstract::get_nu() const { return nu_; }
+const unsigned int& CostModelAbstract::get_nu() const { return nu_; }
 
-unsigned int CostModelAbstract::get_nx() const { return nx_; }
+const unsigned int& CostModelAbstract::get_nx() const { return nx_; }
 
-unsigned int CostModelAbstract::get_ndx() const { return ndx_; }
+const unsigned int& CostModelAbstract::get_ndx() const { return ndx_; }
 
-unsigned int CostModelAbstract::get_nr() const { return nr_; }
+const unsigned int& CostModelAbstract::get_nr() const { return nr_; }
 
 }  // namespace crocoddyl
