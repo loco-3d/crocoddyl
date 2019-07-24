@@ -49,10 +49,6 @@ class CostModelAbstract_wrap : public CostModelAbstract, public bp::wrapper<Cost
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
-
-  boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data) {
-    return boost::make_shared<CostDataAbstract>(this, data);
-  }
 };
 
 void exposeCostMultibody() {
@@ -131,6 +127,9 @@ void exposeCostMultibody() {
                     bp::make_function(&CostDataAbstract::get_pinocchio,
                                       bp::return_value_policy<bp::reference_existing_object>()),
                     "pinocchio data")
+      .add_property("activation",
+                    bp::make_getter(&CostDataAbstract::activation, bp::return_value_policy<bp::return_by_value>()),
+                    "terminal data")
       .add_property("cost", bp::make_getter(&CostDataAbstract::cost, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&CostDataAbstract::cost), "cost value")
       .add_property("Lx", bp::make_getter(&CostDataAbstract::Lx, bp::return_value_policy<bp::return_by_value>()),

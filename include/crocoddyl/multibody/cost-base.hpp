@@ -34,7 +34,7 @@ class CostModelAbstract {
                     const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
   virtual void calcDiff(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) = 0;
-  virtual boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data) = 0;
+  virtual boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
   void calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
   void calcDiff(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
@@ -87,7 +87,8 @@ struct CostDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  CostDataAbstract(Model* const model, pinocchio::Data* const data) : pinocchio(data), cost(0.) {
+  CostDataAbstract(Model* const model, pinocchio::Data* const data)
+      : pinocchio(data), activation(model->get_activation()->createData()), cost(0.) {
     const int& ndx = model->get_ndx();
     const int& nu = model->get_nu();
     const int& nr = model->get_nr();
@@ -102,6 +103,7 @@ struct CostDataAbstract {
   }
 
   pinocchio::Data* get_pinocchio() const { return pinocchio; }
+  boost::shared_ptr<ActivationDataAbstract> get_activation() const { return activation; }
   const double& get_cost() const { return cost; }
   const Eigen::VectorXd& get_Lx() const { return Lx; }
   const Eigen::VectorXd& get_Lu() const { return Lu; }
@@ -113,6 +115,7 @@ struct CostDataAbstract {
   const Eigen::MatrixXd& get_Ru() const { return Ru; }
 
   pinocchio::Data* pinocchio;
+  boost::shared_ptr<ActivationDataAbstract> activation;
   double cost;
   Eigen::VectorXd Lx;
   Eigen::VectorXd Lu;
