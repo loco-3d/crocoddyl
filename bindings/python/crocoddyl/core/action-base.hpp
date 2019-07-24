@@ -88,7 +88,7 @@ void exposeActionAbstract() {
                     "default control vector")
       .add_property(
           "State",
-          bp::make_function(&ActionModelAbstract::get_state, bp::return_value_policy<bp::reference_existing_object>()),
+          bp::make_function(&ActionModelAbstract_wrap::get_state, bp::return_value_policy<bp::reference_existing_object>()),
           "state");
 
   bp::class_<ActionDataAbstract, boost::shared_ptr<ActionDataAbstract>, boost::noncopyable>(
