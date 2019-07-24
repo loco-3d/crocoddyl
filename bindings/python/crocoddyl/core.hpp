@@ -17,9 +17,9 @@
 #include "python/crocoddyl/core/optctrl/shooting.hpp"
 #include "python/crocoddyl/core/solver-base.hpp"
 #include "python/crocoddyl/core/states/state-euclidean.hpp"
-#include "python/crocoddyl/core/actions/action-unicycle.hpp"
-#include "python/crocoddyl/core/actions/action-lqr.hpp"
-#include "python/crocoddyl/core/actions/diff-action-lqr.hpp"
+#include "python/crocoddyl/core/actions/unicycle.hpp"
+#include "python/crocoddyl/core/actions/lqr.hpp"
+#include "python/crocoddyl/core/actions/diff-lqr.hpp"
 #include "python/crocoddyl/core/activations/quadratic.hpp"
 #include "python/crocoddyl/core/solvers/ddp.hpp"
 

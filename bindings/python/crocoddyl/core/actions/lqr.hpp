@@ -6,10 +6,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_ACTIONS_ACTION_LQR_HPP_
-#define PYTHON_CROCODDYL_CORE_ACTIONS_ACTION_LQR_HPP_
+#ifndef PYTHON_CROCODDYL_CORE_ACTIONS_LQR_HPP_
+#define PYTHON_CROCODDYL_CORE_ACTIONS_LQR_HPP_
 
-#include "crocoddyl/core/actions/action-lqr.hpp"
+#include "crocoddyl/core/actions/lqr.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -73,4 +73,4 @@ void exposeActionLQR() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_CORE_ACTIONS_ACTION_LQR_HPP_
+#endif  // PYTHON_CROCODDYL_CORE_ACTIONS_LQR_HPP_

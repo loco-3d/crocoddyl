@@ -1,4 +1,4 @@
-#include "crocoddyl/core/actions/action-unicycle.hpp"
+#include "crocoddyl/core/actions/unicycle.hpp"
 
 namespace crocoddyl {
 

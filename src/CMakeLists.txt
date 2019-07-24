@@ -11,9 +11,9 @@ SET(${PROJECT_NAME}_SOURCES
   core/optctrl/shooting.cpp
   core/solvers/ddp.cpp
   core/states/state-euclidean.cpp
-  core/actions/action-unicycle.cpp
-  core/actions/action-lqr.cpp
-  core/actions/diff-action-lqr.cpp
+  core/actions/unicycle.cpp
+  core/actions/lqr.cpp
+  core/actions/diff-lqr.cpp
   core/activations/quadratic.cpp
   multibody/cost-base.cpp
   multibody/states/state-multibody.cpp
