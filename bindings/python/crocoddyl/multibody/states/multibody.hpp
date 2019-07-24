@@ -6,10 +6,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_MULTIBODY_STATES_STATE_MULTIBODY_HPP_
-#define PYTHON_CROCODDYL_MULTIBODY_STATES_STATE_MULTIBODY_HPP_
+#ifndef PYTHON_CROCODDYL_MULTIBODY_STATES_MULTIBODY_HPP_
+#define PYTHON_CROCODDYL_MULTIBODY_STATES_MULTIBODY_HPP_
 
-#include "crocoddyl/multibody/states/state-multibody.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -82,4 +82,4 @@ void exposeStateMultibody() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_MULTIBODY_STATES_STATE_MULTIBODY_HPP_
+#endif  // PYTHON_CROCODDYL_MULTIBODY_STATES_MULTIBODY_HPP_

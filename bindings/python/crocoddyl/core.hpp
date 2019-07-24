@@ -16,7 +16,7 @@
 #include "python/crocoddyl/core/integrator/euler.hpp"
 #include "python/crocoddyl/core/optctrl/shooting.hpp"
 #include "python/crocoddyl/core/solver-base.hpp"
-#include "python/crocoddyl/core/states/state-euclidean.hpp"
+#include "python/crocoddyl/core/states/euclidean.hpp"
 #include "python/crocoddyl/core/actions/unicycle.hpp"
 #include "python/crocoddyl/core/actions/lqr.hpp"
 #include "python/crocoddyl/core/actions/diff-lqr.hpp"

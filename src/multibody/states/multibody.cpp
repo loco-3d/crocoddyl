@@ -1,4 +1,4 @@
-#include "crocoddyl/multibody/states/state-multibody.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
 
 namespace crocoddyl {

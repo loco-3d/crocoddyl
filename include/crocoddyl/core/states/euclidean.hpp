@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_CORE_STATES_STATE_EUCLIDEAN_HPP_
-#define CROCODDYL_CORE_STATES_STATE_EUCLIDEAN_HPP_
+#ifndef CROCODDYL_CORE_STATES_EUCLIDEAN_HPP_
+#define CROCODDYL_CORE_STATES_EUCLIDEAN_HPP_
 
 #include "crocoddyl/core/state-base.hpp"
 
@@ -33,4 +33,4 @@ class StateVector : public StateAbstract {
 
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_CORE_STATES_STATE_EUCLIDEAN_HPP_
+#endif  // CROCODDYL_CORE_STATES_EUCLIDEAN_HPP_

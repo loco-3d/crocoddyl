@@ -10,7 +10,7 @@
 #define PYTHON_CROCODDYL_MULTIBODY_HPP_
 
 #include "python/crocoddyl/multibody/cost-base.hpp"
-#include "python/crocoddyl/multibody/states/state-multibody.hpp"
+#include "python/crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
 namespace python {

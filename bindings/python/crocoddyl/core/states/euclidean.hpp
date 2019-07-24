@@ -6,10 +6,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_STATES_STATE_EUCLIDEAN_HPP_
-#define PYTHON_CROCODDYL_CORE_STATES_STATE_EUCLIDEAN_HPP_
+#ifndef PYTHON_CROCODDYL_CORE_STATES_EUCLIDEAN_HPP_
+#define PYTHON_CROCODDYL_CORE_STATES_EUCLIDEAN_HPP_
 
-#include "crocoddyl/core/states/state-euclidean.hpp"
+#include "crocoddyl/core/states/euclidean.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -77,4 +77,4 @@ void exposeStateEuclidean() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_CORE_STATES_STATE_EUCLIDEAN_HPP_
+#endif  // PYTHON_CROCODDYL_CORE_STATES_STATE_HPP_

@@ -1,4 +1,4 @@
-#include "crocoddyl/core/states/state-euclidean.hpp"
+#include "crocoddyl/core/states/euclidean.hpp"
 
 namespace crocoddyl {
 

@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_STATES_STATE_MULTIBODY_HPP_
-#define CROCODDYL_MULTIBODY_STATES_STATE_MULTIBODY_HPP_
+#ifndef CROCODDYL_MULTIBODY_STATES_MULTIBODY_HPP_
+#define CROCODDYL_MULTIBODY_STATES_MULTIBODY_HPP_
 
 #include "crocoddyl/core/state-base.hpp"
 #include <pinocchio/multibody/model.hpp>
@@ -40,4 +40,4 @@ class StateMultibody : public StateAbstract {
 
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_MULTIBODY_STATES_STATE_MULTIBODY_HPP_
+#endif  // CROCODDYL_MULTIBODY_STATES_MULTIBODY_HPP_

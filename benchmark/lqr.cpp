@@ -1,4 +1,4 @@
-#include "crocoddyl/core/states/state-euclidean.hpp"
+#include "crocoddyl/core/states/euclidean.hpp"
 #include "crocoddyl/core/actions/lqr.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
