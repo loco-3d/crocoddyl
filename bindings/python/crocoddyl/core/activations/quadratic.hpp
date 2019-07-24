@@ -17,7 +17,7 @@ namespace python {
 namespace bp = boost::python;
 
 void exposeActivationQuad() {
-  bp::class_<ActivationModelQuad, bp::bases<ActionModelAbstract> >(
+  bp::class_<ActivationModelQuad, bp::bases<ActivationModelAbstract> >(
       "ActivationModelQuad",
       "Quadratic activation model.\n\n"
       "A quadratic action describes a quadratic function that depends on the residual, i.e.\n"
