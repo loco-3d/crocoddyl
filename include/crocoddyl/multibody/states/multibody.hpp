@@ -6,18 +6,17 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_STATES_STATE_MULTIBODY_HPP_
-#define CROCODDYL_MULTIBODY_STATES_STATE_MULTIBODY_HPP_
+#ifndef CROCODDYL_MULTIBODY_STATES_MULTIBODY_HPP_
+#define CROCODDYL_MULTIBODY_STATES_MULTIBODY_HPP_
 
 #include "crocoddyl/core/state-base.hpp"
 #include <pinocchio/multibody/model.hpp>
-#include <pinocchio/multibody/data.hpp>
 
 namespace crocoddyl {
 
 class StateMultibody : public StateAbstract {
  public:
-  StateMultibody(const pinocchio::Model& model);
+  StateMultibody(pinocchio::Model* const model);
   ~StateMultibody();
 
   Eigen::VectorXd zero();
@@ -33,7 +32,7 @@ class StateMultibody : public StateAbstract {
                   Jcomponent firstsecond = both);
 
  private:
-  pinocchio::Model model_;
+  pinocchio::Model* model_;
   Eigen::VectorXd x0_;
   Eigen::VectorXd dx_;
   Eigen::MatrixXd Jdq_;
@@ -41,4 +40,4 @@ class StateMultibody : public StateAbstract {
 
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_MULTIBODY_STATES_STATE_MULTIBODY_HPP_
+#endif  // CROCODDYL_MULTIBODY_STATES_MULTIBODY_HPP_

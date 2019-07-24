@@ -6,11 +6,11 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_CORE_ACTIONS_ACTION_UNICYCLE_HPP_
-#define CROCODDYL_CORE_ACTIONS_ACTION_UNICYCLE_HPP_
+#ifndef CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_
+#define CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_
 
 #include "crocoddyl/core/action-base.hpp"
-#include "crocoddyl/core/states/state-euclidean.hpp"
+#include "crocoddyl/core/states/euclidean.hpp"
 
 namespace crocoddyl {
 
@@ -40,4 +40,4 @@ struct ActionDataUnicycle : public ActionDataAbstract {
 
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_CORE_ACTIONS_ACTION_UNICYCLE_HPP_
+#endif  // CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_

@@ -2,6 +2,7 @@ SET(${PROJECT_NAME}_SOURCES
   core/state-base.cpp
   core/action-base.cpp
   core/diff-action-base.cpp
+  core/activation-base.cpp
   core/solver-base.cpp
   core/integrator/euler.cpp
   core/numdiff/state.cpp
@@ -9,11 +10,13 @@ SET(${PROJECT_NAME}_SOURCES
   core/utils/callbacks.cpp
   core/optctrl/shooting.cpp
   core/solvers/ddp.cpp
-  core/states/state-euclidean.cpp
-  core/actions/action-unicycle.cpp
-  core/actions/action-lqr.cpp
-  core/actions/diff-action-lqr.cpp
-  multibody/states/state-multibody.cpp
+  core/states/euclidean.cpp
+  core/actions/unicycle.cpp
+  core/actions/lqr.cpp
+  core/actions/diff-lqr.cpp
+  core/activations/quadratic.cpp
+  multibody/cost-base.cpp
+  multibody/states/multibody.cpp
   )
 
 IF(UNIX)

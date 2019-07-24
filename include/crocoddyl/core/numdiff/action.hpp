@@ -105,7 +105,7 @@ struct ActionDataNumDiff : public ActionDataAbstract {
     // simple renaming for conveniency
     const unsigned& ndx = model_num_diff->get_model().get_ndx();
     const unsigned& nu = model_num_diff->get_model().get_nu();
-    const unsigned& ncost = model_num_diff->get_model().get_ncost();
+    const unsigned& nr = model_num_diff->get_model().get_nr();
     // data_0_
     data_0 = model_num_diff->get_model().createData();
     // data_x_
@@ -117,10 +117,10 @@ struct ActionDataNumDiff : public ActionDataAbstract {
       data_u.push_back(model_num_diff->get_model().createData());
     }
     // Rx
-    Rx.resize(ncost, ndx);
+    Rx.resize(nr, ndx);
     Rx.setZero();
     // Ru
-    Ru.resize(ncost, nu);
+    Ru.resize(nr, nu);
     Ru.setZero();
   }
 

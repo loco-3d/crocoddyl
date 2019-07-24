@@ -10,8 +10,8 @@
 #include <boost/test/included/unit_test.hpp>
 #include <boost/bind.hpp>
 #include "crocoddyl/core/action-base.hpp"
-#include "crocoddyl/core/actions/action-lqr.hpp"
-#include "crocoddyl/core/actions/action-unicycle.hpp"
+#include "crocoddyl/core/actions/lqr.hpp"
+#include "crocoddyl/core/actions/unicycle.hpp"
 #include "crocoddyl/core/numdiff/action.hpp"
 #include <Eigen/Dense>
 
@@ -60,7 +60,7 @@ void test_partial_derivatives_against_numdiff(crocoddyl::ActionModelAbstract& mo
   boost::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
 
   // create the num diff model and data
-  bool with_gauss_approx = model.get_ncost() > 1;
+  bool with_gauss_approx = model.get_nr() > 1;
 
   crocoddyl::ActionModelNumDiff model_num_diff(model, with_gauss_approx);
   boost::shared_ptr<crocoddyl::ActionDataAbstract> data_num_diff = model_num_diff.createData();

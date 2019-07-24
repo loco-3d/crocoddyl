@@ -1,4 +1,4 @@
-#include "crocoddyl/core/actions/action-unicycle.hpp"
+#include "crocoddyl/core/actions/unicycle.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include <ctime>

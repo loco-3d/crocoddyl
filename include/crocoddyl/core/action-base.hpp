@@ -19,7 +19,7 @@ struct ActionDataAbstract;  // forward declaration
 
 class ActionModelAbstract {
  public:
-  ActionModelAbstract(StateAbstract* const state, const unsigned int& nu, const unsigned int& ncost = 0);
+  ActionModelAbstract(StateAbstract* const state, const unsigned int& nu, const unsigned int& nr = 0);
   virtual ~ActionModelAbstract();
 
   virtual void calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -31,17 +31,17 @@ class ActionModelAbstract {
   void calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
   void calcDiff(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
 
-  unsigned int get_nx() const;
-  unsigned int get_ndx() const;
-  unsigned int get_nu() const;
-  unsigned int get_ncost() const;
+  const unsigned int& get_nx() const;
+  const unsigned int& get_ndx() const;
+  const unsigned int& get_nu() const;
+  const unsigned int& get_nr() const;
   StateAbstract* get_state() const;
 
  protected:
   unsigned int nx_;
   unsigned int ndx_;
   unsigned int nu_;
-  unsigned int ncost_;
+  unsigned int nr_;
   StateAbstract* state_;
   Eigen::VectorXd unone_;
 
@@ -76,7 +76,7 @@ struct ActionDataAbstract {
     const int& nx = model->get_nx();
     const int& ndx = model->get_ndx();
     const int& nu = model->get_nu();
-    const int& ncost = model->get_ncost();
+    const int& nr = model->get_nr();
     xnext = Eigen::VectorXd::Zero(nx);
     Fx = Eigen::MatrixXd::Zero(ndx, ndx);
     Fu = Eigen::MatrixXd::Zero(ndx, nu);
@@ -85,9 +85,9 @@ struct ActionDataAbstract {
     Lxx = Eigen::MatrixXd::Zero(ndx, ndx);
     Lxu = Eigen::MatrixXd::Zero(ndx, nu);
     Luu = Eigen::MatrixXd::Zero(nu, nu);
-    r = Eigen::VectorXd::Zero(ncost);
-    Rx = Eigen::MatrixXd::Zero(ncost, ndx);
-    Ru = Eigen::MatrixXd::Zero(ncost, nu);
+    r = Eigen::VectorXd::Zero(nr);
+    Rx = Eigen::MatrixXd::Zero(nr, ndx);
+    Ru = Eigen::MatrixXd::Zero(nr, nu);
   }
 
   const double& get_cost() const { return cost; }

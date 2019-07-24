@@ -6,9 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_ACTIVATION_BASE_HPP_
-#define CROCODDYL_MULTIBODY_ACTIVATION_BASE_HPP_
+#ifndef CROCODDYL_CORE_ACTIVATIONS_SMOOTH_ABS_HPP_
+#define CROCODDYL_CORE_ACTIVATIONS_SMOOTH_ABS_HPP_
 
-// TODO: ActivationModelAbstract ActivationDataAbstract
+// TODO: ActivationModelSmoothAbs ActivationDataSmoothAbs
 
-#endif  // CROCODDYL_MULTIBODY_ACTIVATION_BASE_HPP_
+#endif  // CROCODDYL_CORE_ACTIVATIONS_SMOOTH_ABS_HPP_

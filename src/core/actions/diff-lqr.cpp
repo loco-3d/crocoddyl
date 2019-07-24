@@ -1,4 +1,4 @@
-#include "crocoddyl/core/actions/diff-action-lqr.hpp"
+#include "crocoddyl/core/actions/diff-lqr.hpp"
 
 namespace crocoddyl {
 
