@@ -1,4 +1,4 @@
-#include "crocoddyl/multibody/costs/cost-state.hpp"
+#include "crocoddyl/multibody/costs/state.hpp"
 
 namespace crocoddyl {
 

@@ -6,9 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_COSTS_COST_COM_HPP_
-#define CROCODDYL_MULTIBODY_COSTS_COST_COM_HPP_
+#ifndef CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
+#define CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
 
-// TODO: CostModelCoM CostDataCoM
+// TODO: CostModelControl CostDataControl
 
-#endif  // CROCODDYL_MULTIBODY_COSTS_COST_COM_HPP_
+#endif  // CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_

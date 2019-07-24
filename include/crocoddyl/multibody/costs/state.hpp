@@ -6,12 +6,11 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_COSTS_COST_STATE_HPP_
-#define CROCODDYL_MULTIBODY_COSTS_COST_STATE_HPP_
+#ifndef CROCODDYL_MULTIBODY_COSTS_STATE_HPP_
+#define CROCODDYL_MULTIBODY_COSTS_STATE_HPP_
 
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
-// TODO: CostModelControl CostDataControl
 
 namespace crocoddyl {
 
@@ -35,4 +34,4 @@ class CostModelState : public CostModelAbstract {
 
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_MULTIBODY_COSTS_COST_CONTROL_HPP_
+#endif  // CROCODDYL_MULTIBODY_COSTS_STATE_HPP_

@@ -6,11 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_COSTS_COST_IMPULSE_HPP_
-#define CROCODDYL_MULTIBODY_COSTS_COST_IMPULSE_HPP_
+#ifndef CROCODDYL_MULTIBODY_COSTS_COM_HPP_
+#define CROCODDYL_MULTIBODY_COSTS_COM_HPP_
 
-// TODO: CostModelImpactBase
-// TODO CostModelImpactCoM CostDataImpactCoM
-// TODO CostModelImpactWholeBody CostDataImpactWholeBody
+// TODO: CostModelCoM CostDataCoM
 
-#endif  // CROCODDYL_MULTIBODY_COSTS_COST_IMPULSE_HPP_
+#endif  // CROCODDYL_MULTIBODY_COSTS_COST_HPP_
