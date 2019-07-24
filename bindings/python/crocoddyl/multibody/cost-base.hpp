@@ -26,6 +26,13 @@ class CostModelAbstract_wrap : public CostModelAbstract, public bp::wrapper<Cost
   using CostModelAbstract::nx_;
   using CostModelAbstract::unone_;
 
+  CostModelAbstract_wrap(pinocchio::Model* const model, ActivationModelAbstract* const activation, int nu,
+                         bool with_residuals = true)
+      : CostModelAbstract(model, activation, nu, with_residuals) {}
+
+  CostModelAbstract_wrap(pinocchio::Model* const model, ActivationModelAbstract* const activation,
+                    bool with_residuals = true) : CostModelAbstract(model, activation, with_residuals) {}
+
   CostModelAbstract_wrap(pinocchio::Model* const model, int nr, int nu, bool with_residuals = true)
       : CostModelAbstract(model, nr, nu, with_residuals), bp::wrapper<CostModelAbstract>() {}
 
@@ -53,9 +60,23 @@ void exposeCostMultibody() {
       "Abstract multibody cost model using Pinocchio.\n\n"
       "It defines a template of cost model whose residual and derivatives can be retrieved from\n"
       "Pinocchio data, through the calc and calcDiff functions, respectively.",
-      bp::init<pinocchio::Model*, int, int, bp::optional<bool> >(
+      bp::init<pinocchio::Model*, ActivationModelAbstract*, int, bp::optional<bool> >(
+          bp::args(" self", " model", " activation", " nu=model.nv", " withResiduals=True"),
+          "Initialize the differential action model.\n\n"
+          ":param model: Pinocchio model of the multibody system\n"
+          ":param activation: Activation model\n"
+          ":param nu: dimension of control vector\n"
+          ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
+      .def(bp::init<pinocchio::Model*, ActivationModelAbstract*, bp::optional<bool> >(
+          bp::args(" self", " model", " activation", " withResiduals=True"),
+          "Initialize the differential action model.\n\n"
+          ":param model: Pinocchio model of the multibody system\n"
+          ":param activation: Activation model\n"
+          ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
+      .def(bp::init<pinocchio::Model*, int, int, bp::optional<bool> >(
           bp::args(" self", " model", " nr", " nu=model.nv", " withResiduals=True"),
           "Initialize the differential action model.\n\n"
+          "For this case the default activation model is quadratic, i.e. crocoddyl.ActivationModelQuad(nr).\n"
           ":param model: Pinocchio model of the multibody system\n"
           ":param nr: dimension of cost vector\n"
           ":param nu: dimension of control vector\n"
@@ -87,6 +108,10 @@ void exposeCostMultibody() {
                     bp::make_function(&CostModelAbstract_wrap::get_pinocchio,
                                       bp::return_value_policy<bp::reference_existing_object>()),
                     "pinocchio model")
+      .add_property("activation",
+                    bp::make_function(&CostModelAbstract_wrap::get_activation,
+                                      bp::return_value_policy<bp::reference_existing_object>()),
+                    "activation model")
       .add_property("nq", &CostModelAbstract_wrap::nq_, "dimension of configuration vector")
       .add_property("nv", &CostModelAbstract_wrap::nv_, "dimension of velocity vector")
       .add_property("nu", &CostModelAbstract_wrap::nu_, "dimension of control vector")
@@ -94,8 +119,8 @@ void exposeCostMultibody() {
       .add_property("ndx", &CostModelAbstract_wrap::ndx_, "dimension of state tangent vector")
       .add_property("nr", &CostModelAbstract_wrap::nr_, "dimension of cost-residual vector")
       .add_property("unone",
-                    bp::make_getter(&CostModelAbstract_wrap::unone_, bp::return_value_policy<bp::return_by_value>()),
-                    "default control vector");
+                    bp::make_getter(&CostModelAbstract_wrap::unone_,
+                    bp::return_value_policy<bp::return_by_value>()), "default control vector");
 
   bp::class_<CostDataAbstract, boost::shared_ptr<CostDataAbstract>, boost::noncopyable>(
       "CostDataAbstract", "Abstract class for cost datas.\n\n",
@@ -105,7 +130,8 @@ void exposeCostMultibody() {
                     bp::make_function(&CostDataAbstract::get_pinocchio,
                                       bp::return_value_policy<bp::reference_existing_object>()),
                     "pinocchio data")
-      .add_property("cost", bp::make_getter(&CostDataAbstract::cost, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("cost", bp::make_getter(&CostDataAbstract::cost,
+      bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&CostDataAbstract::cost), "cost value")
       .add_property("Lx", bp::make_getter(&CostDataAbstract::Lx, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&CostDataAbstract::Lx), "Jacobian of the cost")
