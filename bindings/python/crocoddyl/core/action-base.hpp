@@ -86,10 +86,10 @@ void exposeActionAbstract() {
       .add_property("unone",
                     bp::make_getter(&ActionModelAbstract_wrap::unone_, bp::return_value_policy<bp::return_by_value>()),
                     "default control vector")
-      .add_property(
-          "State",
-          bp::make_function(&ActionModelAbstract_wrap::get_state, bp::return_value_policy<bp::reference_existing_object>()),
-          "state");
+      .add_property("State",
+                    bp::make_function(&ActionModelAbstract_wrap::get_state,
+                                      bp::return_value_policy<bp::reference_existing_object>()),
+                    "state");
 
   bp::class_<ActionDataAbstract, boost::shared_ptr<ActionDataAbstract>, boost::noncopyable>(
       "ActionDataAbstract",

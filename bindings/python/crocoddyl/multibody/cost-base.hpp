@@ -31,7 +31,8 @@ class CostModelAbstract_wrap : public CostModelAbstract, public bp::wrapper<Cost
       : CostModelAbstract(model, activation, nu, with_residuals) {}
 
   CostModelAbstract_wrap(pinocchio::Model* const model, ActivationModelAbstract* const activation,
-                    bool with_residuals = true) : CostModelAbstract(model, activation, with_residuals) {}
+                         bool with_residuals = true)
+      : CostModelAbstract(model, activation, with_residuals) {}
 
   CostModelAbstract_wrap(pinocchio::Model* const model, int nr, int nu, bool with_residuals = true)
       : CostModelAbstract(model, nr, nu, with_residuals), bp::wrapper<CostModelAbstract>() {}
@@ -119,8 +120,8 @@ void exposeCostMultibody() {
       .add_property("ndx", &CostModelAbstract_wrap::ndx_, "dimension of state tangent vector")
       .add_property("nr", &CostModelAbstract_wrap::nr_, "dimension of cost-residual vector")
       .add_property("unone",
-                    bp::make_getter(&CostModelAbstract_wrap::unone_,
-                    bp::return_value_policy<bp::return_by_value>()), "default control vector");
+                    bp::make_getter(&CostModelAbstract_wrap::unone_, bp::return_value_policy<bp::return_by_value>()),
+                    "default control vector");
 
   bp::class_<CostDataAbstract, boost::shared_ptr<CostDataAbstract>, boost::noncopyable>(
       "CostDataAbstract", "Abstract class for cost datas.\n\n",
@@ -130,8 +131,7 @@ void exposeCostMultibody() {
                     bp::make_function(&CostDataAbstract::get_pinocchio,
                                       bp::return_value_policy<bp::reference_existing_object>()),
                     "pinocchio data")
-      .add_property("cost", bp::make_getter(&CostDataAbstract::cost,
-      bp::return_value_policy<bp::return_by_value>()),
+      .add_property("cost", bp::make_getter(&CostDataAbstract::cost, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&CostDataAbstract::cost), "cost value")
       .add_property("Lx", bp::make_getter(&CostDataAbstract::Lx, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&CostDataAbstract::Lx), "Jacobian of the cost")
