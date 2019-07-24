@@ -20,6 +20,7 @@
 #include "python/crocoddyl/core/actions/action-unicycle.hpp"
 #include "python/crocoddyl/core/actions/action-lqr.hpp"
 #include "python/crocoddyl/core/actions/diff-action-lqr.hpp"
+#include "python/crocoddyl/core/activations/quadratic.hpp"
 #include "python/crocoddyl/core/solvers/ddp.hpp"
 
 namespace crocoddyl {
@@ -37,6 +38,7 @@ void exposeCore() {
   exposeActionUnicycle();
   exposeActionLQR();
   exposeDifferentialActionLQR();
+  exposeActivationQuad();
   exposeSolverDDP();
 }
 
