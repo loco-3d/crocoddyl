@@ -1,10 +1,46 @@
 #include "crocoddyl/multibody/cost-base.hpp"
+#include "crocoddyl/core/activations/quadratic.hpp"
 
 namespace crocoddyl {
+
+CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, ActivationModelAbstract* const activation,
+                                     const unsigned int& nu, const bool& with_residuals)
+    : pinocchio_(model),
+      activation_(activation),
+      nq_(model->nq),
+      nv_(model->nv),
+      nu_(nu),
+      nx_(model->nq + model->nv),
+      ndx_(2 * model->nv),
+      nr_(activation->get_nr()),
+      with_residuals_(with_residuals),
+      unone_(Eigen::VectorXd::Zero(nu)) {
+  assert(nq_ != 0);
+  assert(nv_ != 0);
+  assert(nu_ != 0);
+}
+
+CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, ActivationModelAbstract* const activation,
+                                     const bool& with_residuals)
+    : pinocchio_(model),
+      activation_(activation),
+      nq_(model->nq),
+      nv_(model->nv),
+      nu_(model->nv),
+      nx_(model->nq + model->nv),
+      ndx_(2 * model->nv),
+      nr_(activation->get_nr()),
+      with_residuals_(with_residuals),
+      unone_(Eigen::VectorXd::Zero(model->nv)) {
+  assert(nq_ != 0);
+  assert(nv_ != 0);
+  assert(nu_ != 0);
+}
 
 CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, const unsigned int& nr, const unsigned int& nu,
                                      const bool& with_residuals)
     : pinocchio_(model),
+      activation_(new ActivationModelQuad(nr)),
       nq_(model->nq),
       nv_(model->nv),
       nu_(nu),
@@ -20,6 +56,7 @@ CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, const unsign
 
 CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, const unsigned int& nr, const bool& with_residuals)
     : pinocchio_(model),
+      activation_(new ActivationModelQuad(nr)),
       nq_(model->nq),
       nv_(model->nv),
       nu_(model->nv),
@@ -45,6 +82,8 @@ void CostModelAbstract::calcDiff(boost::shared_ptr<CostDataAbstract>& data,
 }
 
 pinocchio::Model* CostModelAbstract::get_pinocchio() const { return pinocchio_; }
+
+ActivationModelAbstract* CostModelAbstract::get_activation() const { return activation_; }
 
 const unsigned int& CostModelAbstract::get_nq() const { return nq_; }
 

@@ -9,6 +9,7 @@
 #ifndef CROCODDYL_MULTIBODY_COST_BASE_HPP_
 #define CROCODDYL_MULTIBODY_COST_BASE_HPP_
 
+#include "crocoddyl/core/activation-base.hpp"
 #include <pinocchio/multibody/model.hpp>
 #include <pinocchio/multibody/data.hpp>
 #include <boost/shared_ptr.hpp>
@@ -20,6 +21,10 @@ struct CostDataAbstract;  // forward declaration
 
 class CostModelAbstract {
  public:
+  CostModelAbstract(pinocchio::Model* const model, ActivationModelAbstract* const activation, const unsigned int& nu,
+                    const bool& with_residuals = true);
+  CostModelAbstract(pinocchio::Model* const model, ActivationModelAbstract* const activation,
+                    const bool& with_residuals = true);
   CostModelAbstract(pinocchio::Model* const model, const unsigned int& nr, const unsigned int& nu,
                     const bool& with_residuals = true);
   CostModelAbstract(pinocchio::Model* const model, const unsigned int& nr, const bool& with_residuals = true);
@@ -35,6 +40,7 @@ class CostModelAbstract {
   void calcDiff(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
 
   pinocchio::Model* get_pinocchio() const;
+  ActivationModelAbstract* get_activation() const;
   const unsigned int& get_nq() const;
   const unsigned int& get_nv() const;
   const unsigned int& get_nu() const;
@@ -44,6 +50,7 @@ class CostModelAbstract {
 
  protected:
   pinocchio::Model* pinocchio_;
+  ActivationModelAbstract* activation_;
   unsigned int nq_;
   unsigned int nv_;
   unsigned int nu_;
