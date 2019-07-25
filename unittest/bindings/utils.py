@@ -228,6 +228,27 @@ class DifferentialLQRDerived(crocoddyl.DifferentialActionModelAbstract):
         data.Lxu = self.Lxu
 
 
+class StateCostDerived(crocoddyl.CostModelAbstract):
+    def __init__(self, pinocchioModel, state, activation=None, xref=None, nu=None):
+        activation = activation if activation is not None else crocoddyl.ActivationModelQuad(state.ndx)
+        self.xref = xref if xref is not None else state.zero()
+        crocoddyl.CostModelAbstract.__init__(self, pinocchioModel, activation, nu)
+        self.State = state
+
+    def calc(self, data, x, u):
+        data.costResiduals = self.State.diff(self.xref, x)
+        self.activation.calc(data.activation, data.costResiduals)
+        data.cost = data.activation.a
+
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        data.Rx = self.State.Jdiff(self.xref, x, 'second')[0]
+        self.activation.calcDiff(data.activation, data.costResiduals, recalc)
+        data.Lx = data.Rx.T * data.activation.Ar
+        data.Lxx = data.Rx.T * data.activation.Arr * data.Rx
+
+
 class DDPDerived(crocoddyl.SolverAbstract):
     def __init__(self, shootingProblem):
         crocoddyl.SolverAbstract.__init__(self, shootingProblem)
