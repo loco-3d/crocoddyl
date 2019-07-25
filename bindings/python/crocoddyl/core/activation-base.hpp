@@ -18,8 +18,6 @@ namespace bp = boost::python;
 
 class ActivationModelAbstract_wrap : public ActivationModelAbstract, public bp::wrapper<ActivationModelAbstract> {
  public:
-  using ActivationModelAbstract::nr_;
-
   ActivationModelAbstract_wrap(const unsigned int& nr)
       : ActivationModelAbstract(nr), bp::wrapper<ActivationModelAbstract>() {}
 
@@ -56,7 +54,10 @@ void exposeActivationAbstract() {
            ":param recalc: If true, it updates the residual value.")
       .def("createData", &ActivationModelAbstract_wrap::createData, bp::args(" self"),
            "Create the activation data.\n\n")
-      .add_property("nr", &ActivationModelAbstract_wrap::nr_, "dimension of cost-residual vector");
+      .add_property(
+          "nr",
+          bp::make_function(&ActivationModelAbstract_wrap::get_nr, bp::return_value_policy<bp::return_by_value>()),
+          "dimension of cost-residual vector");
 
   bp::class_<ActivationDataAbstract, boost::shared_ptr<ActivationDataAbstract>, boost::noncopyable>(
       "ActivationDataAbstract", "Abstract class for activation datas.\n\n",

@@ -19,15 +19,6 @@ namespace bp = boost::python;
 class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstract,
                                              public bp::wrapper<DifferentialActionModelAbstract> {
  public:
-  using DifferentialActionModelAbstract::ndx_;
-  using DifferentialActionModelAbstract::nout_;
-  using DifferentialActionModelAbstract::nq_;
-  using DifferentialActionModelAbstract::nr_;
-  using DifferentialActionModelAbstract::nu_;
-  using DifferentialActionModelAbstract::nv_;
-  using DifferentialActionModelAbstract::nx_;
-  using DifferentialActionModelAbstract::unone_;
-
   DifferentialActionModelAbstract_wrap(StateAbstract* const state, int nu, int nr = 0)
       : DifferentialActionModelAbstract(state, nu, nr), bp::wrapper<DifferentialActionModelAbstract>() {}
 
@@ -88,17 +79,34 @@ void exposeDifferentialActionAbstract() {
            "allocated. This function returns the allocated data for a predefined\n"
            "DAM.\n"
            ":return DAM data.")
-      .add_property("nq", &DifferentialActionModelAbstract_wrap::nq_, "dimension of configuration vector")
-      .add_property("nv", &DifferentialActionModelAbstract_wrap::nv_, "dimension of velocity vector")
-      .add_property("nu", &DifferentialActionModelAbstract_wrap::nu_, "dimension of control vector")
-      .add_property("nx", &DifferentialActionModelAbstract_wrap::nx_, "dimension of state configuration vector")
-      .add_property("ndx", &DifferentialActionModelAbstract_wrap::ndx_, "dimension of state tangent vector")
-      .add_property("nout", &DifferentialActionModelAbstract_wrap::nout_, "dimension of evolution vector")
-      .add_property("nr", &DifferentialActionModelAbstract_wrap::nr_, "dimension of cost-residual vector")
-      .add_property("unone",
-                    bp::make_getter(&DifferentialActionModelAbstract_wrap::unone_,
-                                    bp::return_value_policy<bp::return_by_value>()),
-                    "default control vector")
+      .add_property("nq",
+                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_nq,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "dimension of configuration vector")
+      .add_property("nv",
+                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_nv,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "dimension of velocity vector")
+      .add_property("nu",
+                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_nu,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "dimension of control vector")
+      .add_property("nx",
+                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_nx,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "dimension of state configuration vector")
+      .add_property("ndx",
+                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_ndx,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "dimension of state tangent vector")
+      .add_property("nout",
+                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_nout,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "dimension of evolution vector")
+      .add_property("nr",
+                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_nr,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "dimension of cost-residual vector")
       .add_property("State",
                     bp::make_function(&DifferentialActionModelAbstract_wrap::get_state,
                                       bp::return_value_policy<bp::reference_existing_object>()),

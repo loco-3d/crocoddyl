@@ -18,12 +18,6 @@ namespace bp = boost::python;
 
 class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<ActionModelAbstract> {
  public:
-  using ActionModelAbstract::ndx_;
-  using ActionModelAbstract::nr_;
-  using ActionModelAbstract::nu_;
-  using ActionModelAbstract::nx_;
-  using ActionModelAbstract::unone_;
-
   ActionModelAbstract_wrap(StateAbstract* const state, const unsigned int& nu, const unsigned int& nr = 0)
       : ActionModelAbstract(state, nu, nr), bp::wrapper<ActionModelAbstract>() {}
 
@@ -79,13 +73,18 @@ void exposeActionAbstract() {
            "Each action model (AM) has its own data that needs to be allocated.\n"
            "This function returns the allocated data for a predefined AM.\n"
            ":return AM data.")
-      .add_property("nx", &ActionModelAbstract_wrap::nx_, "dimension of state configuration vector")
-      .add_property("ndx", &ActionModelAbstract_wrap::ndx_, "dimension of state tangent vector")
-      .add_property("nu", &ActionModelAbstract_wrap::nu_, "dimension of control vector")
-      .add_property("nr", &ActionModelAbstract_wrap::nr_, "dimension of cost-residual vector")
-      .add_property("unone",
-                    bp::make_getter(&ActionModelAbstract_wrap::unone_, bp::return_value_policy<bp::return_by_value>()),
-                    "default control vector")
+      .add_property(
+          "nx", bp::make_function(&ActionModelAbstract_wrap::get_nx, bp::return_value_policy<bp::return_by_value>()),
+          "dimension of state configuration vector")
+      .add_property(
+          "ndx", bp::make_function(&ActionModelAbstract_wrap::get_ndx, bp::return_value_policy<bp::return_by_value>()),
+          "dimension of state tangent vector")
+      .add_property(
+          "nu", bp::make_function(&ActionModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
+          "dimension of control vector")
+      .add_property(
+          "nr", bp::make_function(&ActionModelAbstract_wrap::get_nr, bp::return_value_policy<bp::return_by_value>()),
+          "dimension of cost-residual vector")
       .add_property("State",
                     bp::make_function(&ActionModelAbstract_wrap::get_state,
                                       bp::return_value_policy<bp::reference_existing_object>()),
