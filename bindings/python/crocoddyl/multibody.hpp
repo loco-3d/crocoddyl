@@ -11,6 +11,7 @@
 
 #include "python/crocoddyl/multibody/cost-base.hpp"
 #include "python/crocoddyl/multibody/states/multibody.hpp"
+#include "python/crocoddyl/multibody/costs/state.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -18,6 +19,7 @@ namespace python {
 void exposeMultibody() {
   exposeCostMultibody();
   exposeStateMultibody();
+  exposeCostState();
 }
 
 }  // namespace python
