@@ -49,7 +49,11 @@ void exposeCostState() {
       .def<void (CostModelState::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &CostModelState::calcDiff_wrap, bp::args(" self", " data", " x"))
       .def<void (CostModelState::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &CostModelState::calcDiff_wrap, bp::args(" self", " data", " x", " recalc"));
+          "calcDiff", &CostModelState::calcDiff_wrap, bp::args(" self", " data", " x", " recalc"))
+      .add_property(
+          "State",
+          bp::make_function(&CostModelState::get_state, bp::return_value_policy<bp::reference_existing_object>()),
+          "state");
 }
 
 }  // namespace python

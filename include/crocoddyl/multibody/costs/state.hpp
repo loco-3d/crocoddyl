@@ -17,9 +17,10 @@ namespace crocoddyl {
 class CostModelState : public CostModelAbstract {
  public:
   CostModelState(pinocchio::Model* const model, StateAbstract* state, ActivationModelAbstract* const activation,
-                 const Eigen::Ref<const Eigen::VectorXd>& xref, const unsigned int& nu);
-  CostModelState(pinocchio::Model* const model, StateAbstract* state, const Eigen::Ref<const Eigen::VectorXd>& xref,
+                 const Eigen::VectorXd& xref, const unsigned int& nu);
+  CostModelState(pinocchio::Model* const model, StateAbstract* state, const Eigen::VectorXd& xref,
                  const unsigned int& nu);
+
   ~CostModelState();
 
   void calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -27,19 +28,11 @@ class CostModelState : public CostModelAbstract {
   void calcDiff(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
 
+  StateAbstract* get_state() const;
+
  private:
   StateAbstract* state_;
   Eigen::VectorXd xref_;
-
-#ifdef PYTHON_BINDINGS
- public:
-  CostModelState(pinocchio::Model* const model, StateAbstract* state, ActivationModelAbstract* const activation,
-                 const Eigen::VectorXd& xref, const unsigned int& nu)
-      : CostModelAbstract(model, activation, state->get_ndx(), nu), state_(state), xref_(xref) {}
-  CostModelState(pinocchio::Model* const model, StateAbstract* state, const Eigen::VectorXd& xref,
-                 const unsigned int& nu)
-      : CostModelAbstract(model, state->get_ndx(), nu), state_(state), xref_(xref) {}
-#endif
 };
 
 }  // namespace crocoddyl
