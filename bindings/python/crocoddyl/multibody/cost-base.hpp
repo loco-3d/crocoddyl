@@ -63,13 +63,13 @@ void exposeCostMultibody() {
           ":param model: Pinocchio model of the multibody system\n"
           ":param activation: Activation model\n"
           ":param nu: dimension of control vector\n"
-          ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
+          ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 3>()])
       .def(bp::init<pinocchio::Model*, ActivationModelAbstract*, bp::optional<bool> >(
           bp::args(" self", " model", " activation", " withResiduals=True"),
           "Initialize the differential action model.\n\n"
           ":param model: Pinocchio model of the multibody system\n"
           ":param activation: Activation model\n"
-          ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
+          ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 3>()])
       .def(bp::init<pinocchio::Model*, int, int, bp::optional<bool> >(
           bp::args(" self", " model", " nr", " nu=model.nv", " withResiduals=True"),
           "Initialize the differential action model.\n\n"
@@ -96,10 +96,12 @@ void exposeCostMultibody() {
            ":param x: state vector\n"
            ":param u: control input\n"
            ":param recalc: If true, it updates the cost value.")
-      .def("createData", &CostModelAbstract_wrap::createData, bp::args(" self"),
+      .def("createData", &CostModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
+           bp::args(" self", " data"),
            "Create the cost data.\n\n"
-           "Each cost model has its own data  that needs to be allocated. This function\n"
+           "Each cost model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined cost.\n"
+           ":param data: Pinocchio data\n"
            ":return cost data.")
       .add_property("pinocchio",
                     bp::make_function(&CostModelAbstract_wrap::get_pinocchio,
@@ -121,8 +123,11 @@ void exposeCostMultibody() {
 
   bp::class_<CostDataAbstract, boost::shared_ptr<CostDataAbstract>, boost::noncopyable>(
       "CostDataAbstract", "Abstract class for cost datas.\n\n",
-      bp::init<CostModelAbstract*, pinocchio::Data*>(bp::args(" self", " model"),
-                                                     "Create common data shared between cost models.\n\n"))
+      bp::init<CostModelAbstract*, pinocchio::Data*>(
+          bp::args(" self", " model", " data"),
+          "Create common data shared between cost models.\n\n"
+          ":param model: cost model\n"
+          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
       .add_property("pinocchio",
                     bp::make_function(&CostDataAbstract::get_pinocchio,
                                       bp::return_value_policy<bp::reference_existing_object>()),
