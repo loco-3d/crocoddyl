@@ -18,6 +18,7 @@ SET(${PROJECT_NAME}_SOURCES
   multibody/cost-base.cpp
   multibody/states/multibody.cpp
   multibody/costs/state.cpp
+  multibody/costs/control.cpp
   )
 
 IF(UNIX)
