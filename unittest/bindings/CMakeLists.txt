@@ -3,6 +3,7 @@ SET(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
   actions
   shooting
   solvers
+  costs
   )
 
 FOREACH(TEST ${${PROJECT_NAME}_PYTHON_BINDINGS_TESTS})
