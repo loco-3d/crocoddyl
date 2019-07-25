@@ -21,7 +21,6 @@ class ActivationModelQuad : public ActivationModelAbstract {
   void calc(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r);
   void calcDiff(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r,
                 const bool& recalc = true);
-  boost::shared_ptr<ActivationDataAbstract> createData();
 };
 
 }  // namespace crocoddyl

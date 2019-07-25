@@ -31,8 +31,6 @@ class ActivationModelAbstract_wrap : public ActivationModelAbstract, public bp::
                 const bool& recalc = true) {
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)r, recalc);
   }
-
-  boost::shared_ptr<ActivationDataAbstract> createData() { return boost::make_shared<ActivationDataAbstract>(this); }
 };
 
 void exposeActivationAbstract() {
