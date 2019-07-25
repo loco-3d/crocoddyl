@@ -3,8 +3,8 @@
 namespace crocoddyl {
 
 CostModelState::CostModelState(pinocchio::Model* const model, StateAbstract* state,
-                               ActivationModelAbstract* const activation,
-                               const Eigen::VectorXd& xref, const unsigned int& nu)
+                               ActivationModelAbstract* const activation, const Eigen::VectorXd& xref,
+                               const unsigned int& nu)
     : CostModelAbstract(model, activation, state->get_ndx(), nu), state_(state), xref_(xref) {}
 
 CostModelState::CostModelState(pinocchio::Model* const model, StateAbstract* state,
