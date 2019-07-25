@@ -8,8 +8,29 @@ CostModelState::CostModelState(pinocchio::Model* const model, StateAbstract* sta
     : CostModelAbstract(model, activation, state->get_ndx(), nu), state_(state), xref_(xref) {}
 
 CostModelState::CostModelState(pinocchio::Model* const model, StateAbstract* state,
-                               const Eigen::VectorXd& xref, const unsigned int& nu)
+                               ActivationModelAbstract* const activation, const Eigen::VectorXd& xref)
+    : CostModelAbstract(model, activation, state->get_ndx()), state_(state), xref_(xref) {}
+
+CostModelState::CostModelState(pinocchio::Model* const model, StateAbstract* state, const Eigen::VectorXd& xref,
+                               const unsigned int& nu)
     : CostModelAbstract(model, state->get_ndx(), nu), state_(state), xref_(xref) {}
+
+CostModelState::CostModelState(pinocchio::Model* const model, StateAbstract* state, const Eigen::VectorXd& xref)
+    : CostModelAbstract(model, state->get_ndx()), state_(state), xref_(xref) {}
+
+CostModelState::CostModelState(pinocchio::Model* const model, StateAbstract* state,
+                               ActivationModelAbstract* const activation, const unsigned int& nu)
+    : CostModelAbstract(model, activation, state->get_ndx(), nu), state_(state), xref_(state->zero()) {}
+
+CostModelState::CostModelState(pinocchio::Model* const model, StateAbstract* state, const unsigned int& nu)
+    : CostModelAbstract(model, state->get_ndx(), nu), state_(state), xref_(state->zero()) {}
+
+CostModelState::CostModelState(pinocchio::Model* const model, StateAbstract* state,
+                               ActivationModelAbstract* const activation)
+    : CostModelAbstract(model, activation, state->get_ndx()), state_(state), xref_(state->zero()) {}
+
+CostModelState::CostModelState(pinocchio::Model* const model, StateAbstract* state)
+    : CostModelAbstract(model, state->get_ndx()), state_(state), xref_(state->zero()) {}
 
 CostModelState::~CostModelState() {}
 

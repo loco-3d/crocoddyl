@@ -18,8 +18,16 @@ class CostModelState : public CostModelAbstract {
  public:
   CostModelState(pinocchio::Model* const model, StateAbstract* state, ActivationModelAbstract* const activation,
                  const Eigen::VectorXd& xref, const unsigned int& nu);
+  CostModelState(pinocchio::Model* const model, StateAbstract* state, ActivationModelAbstract* const activation,
+                 const Eigen::VectorXd& xref);
   CostModelState(pinocchio::Model* const model, StateAbstract* state, const Eigen::VectorXd& xref,
                  const unsigned int& nu);
+  CostModelState(pinocchio::Model* const model, StateAbstract* state, const Eigen::VectorXd& xref);
+  CostModelState(pinocchio::Model* const model, StateAbstract* state, ActivationModelAbstract* const activation,
+                 const unsigned int& nu);
+  CostModelState(pinocchio::Model* const model, StateAbstract* state, const unsigned int& nu);
+  CostModelState(pinocchio::Model* const model, StateAbstract* state, ActivationModelAbstract* const activation);
+  CostModelState(pinocchio::Model* const model, StateAbstract* state);
 
   ~CostModelState();
 
