@@ -1,0 +1,104 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+#ifndef PYTHON_CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
+#define PYTHON_CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
+
+#include "crocoddyl/multibody/costs/control.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+namespace bp = boost::python;
+
+void exposeCostControl() {
+  bp::class_<CostModelControl, bp::bases<CostModelAbstract> >(
+      "CostModelControl", bp::init<pinocchio::Model*, ActivationModelAbstract*, Eigen::VectorXd, int>(
+                              bp::args(" self", " model", " activation=crocoddyl.ActivationModelQuad(nu)",
+                                       " uref=np.zero(nu)", " nu=model.nv"),
+                              "Initialize the control cost model.\n\n"
+                              ":param model: Pinocchio model of the multibody system\n"
+                              ":param activation: activation model\n"
+                              ":param uref: reference control\n"
+                              ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
+      .def(bp::init<pinocchio::Model*, Eigen::VectorXd, int>(
+          bp::args(" self", " model", " uref", " nu"),
+          "Initialize the control cost model.\n\n"
+          "For this case the default activation model is quadratic, i.e. crocoddyl.ActivationModelQuad(nu).\n"
+          ":param model: Pinocchio model of the multibody system\n"
+          ":param uref: reference control\n"
+          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2>()])
+      .def(bp::init<pinocchio::Model*, ActivationModelAbstract*, Eigen::VectorXd>(
+          bp::args(" self", " model", " activation", " uref"),
+          "Initialize the control cost model.\n\n"
+          "For this case the default nu values is model.nv.\n"
+          ":param model: Pinocchio model of the multibody system\n"
+          ":param activation: activation model\n"
+          ":param uref: reference control")[bp::with_custodian_and_ward<1, 3>()])
+      .def(bp::init<pinocchio::Model*, Eigen::VectorXd>(
+          bp::args(" self", " model", " uref"),
+          "Initialize the control cost model.\n\n"
+          "For this case the default activation model is quadratic, i.e. crocoddyl.ActivationModelQuad(uref.size()).\n"
+          ":param model: Pinocchio model of the multibody system\n"
+          ":param uref: reference control")[bp::with_custodian_and_ward<1, 2>()])
+      .def(bp::init<pinocchio::Model*, ActivationModelAbstract*, int>(
+          bp::args(" self", " model", " activation", " nu"),
+          "Initialize the control cost model.\n\n"
+          "For this case the default uref is the zeros state, i.e. np.zero(nu).\n"
+          ":param model: Pinocchio model of the multibody system\n"
+          ":param activation: activation model\n"
+          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
+      .def(bp::init<pinocchio::Model*, int>(
+          bp::args(" self", " model", " nu"),
+          "Initialize the control cost model.\n\n"
+          "For this case the default uref is the zeros vector and the default activation\n"
+          "model is quadratic, i.e. crocoddyl.ActivationModelQuad(nu)\n"
+          ":param model: Pinocchio model of the multibody system\n"
+          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2>()])
+      .def(bp::init<pinocchio::Model*, ActivationModelAbstract*>(
+          bp::args(" self", " model", " activation"),
+          "Initialize the control cost model.\n\n"
+          "For this case the default uref is the zeros vector and nu is equals to model.nv.\n"
+          ":param model: Pinocchio model of the multibody system\n"
+          ":param activation: activation model")[bp::with_custodian_and_ward<1, 3>()])
+      .def(bp::init<pinocchio::Model*>(
+          bp::args(" self", " model"),
+          "Initialize the control cost model.\n\n"
+          "For this case the default uref is the zeros vector, i.e. np.zero(model.nv), and\n"
+          "activation is quadratic, i.e. crocoddyl.ActivationModelQuad(model.nv), and nu is equals to model.nv.\n"
+          ":param model: Pinocchio model of the multibody system")[bp::with_custodian_and_ward<1, 2>()])
+      .def<void (CostModelControl::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+                                      const Eigen::VectorXd&)>("calc", &CostModelControl::calc_wrap,
+                                                               bp::args(" self", " data", " x", " u=None"),
+                                                               "Compute the control cost.\n\n"
+                                                               ":param data: cost data\n"
+                                                               ":param x: time-discrete state vector\n"
+                                                               ":param u: time-discrete control input")
+      .def<void (CostModelControl::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
+          "calc", &CostModelControl::calc_wrap, bp::args(" self", " data", " x"))
+      .def<void (CostModelControl::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+                                      const Eigen::VectorXd&, const bool&)>(
+          "calcDiff", &CostModelControl::calcDiff_wrap, bp::args(" self", " data", " x", " u=None", " recalc=True"),
+          "Compute the derivatives of the control cost.\n\n"
+          ":param data: action data\n"
+          ":param x: time-discrete state vector\n"
+          ":param u: time-discrete control input\n"
+          ":param recalc: If true, it updates the state evolution and the cost value.")
+      .def<void (CostModelControl::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+                                      const Eigen::VectorXd&)>("calcDiff", &CostModelControl::calcDiff_wrap,
+                                                               bp::args(" self", " data", " x", " u"))
+      .def<void (CostModelControl::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
+          "calcDiff", &CostModelControl::calcDiff_wrap, bp::args(" self", " data", " x"))
+      .def<void (CostModelControl::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&, const bool&)>(
+          "calcDiff", &CostModelControl::calcDiff_wrap, bp::args(" self", " data", " x", " recalc"));
+}
+
+}  // namespace python
+}  // namespace crocoddyl
+
+#endif  // PYTHON_CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
