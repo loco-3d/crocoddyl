@@ -4,17 +4,14 @@ namespace crocoddyl {
 
 CostModelControl::CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation,
                                    const Eigen::VectorXd& uref, const unsigned int& nu)
-    : CostModelAbstract(model, activation, nu, nu), uref_(uref) {
+    : CostModelAbstract(model, activation, nu), uref_(uref) {
   assert(uref_.size() == nu_ && "CostModelControl: reference is not dimension nu");
   assert(nr_ == nu_ && "CostModelControl: nr is not equals to nu");
-  assert(activation_->get_nr() == nu_ && "CostModelControl: activation::nr is not equals to nu");
 }
 
 CostModelControl::CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation,
                                    const Eigen::VectorXd& uref)
     : CostModelAbstract(model, activation, (const unsigned)uref.size()), uref_(uref) {
-  assert(uref_.size() == nu_ && "CostModelControl: reference is not dimension nu");
-  assert(nr_ == nu_ && "CostModelControl: nr is not equals to nu");
   assert(activation_->get_nr() == nu_ && "CostModelControl: activation::nr is not equals to nu");
 }
 
@@ -22,43 +19,25 @@ CostModelControl::CostModelControl(pinocchio::Model* const model, const Eigen::V
     : CostModelAbstract(model, nu, nu), uref_(uref) {
   assert(uref_.size() == nu_ && "CostModelControl: reference is not dimension nu");
   assert(nr_ == nu_ && "CostModelControl: nr is not equals to nu");
-  assert(activation_->get_nr() == nu_ && "CostModelControl: activation::nr is not equals to nu");
 }
 
 CostModelControl::CostModelControl(pinocchio::Model* const model, const Eigen::VectorXd& uref)
-    : CostModelAbstract(model, (unsigned int)uref.size()), uref_(uref) {
-  assert(uref_.size() == nu_ && "CostModelControl: reference is not dimension nu");
-  assert(nr_ == nu_ && "CostModelControl: nr is not equals to nu");
-  assert(activation_->get_nr() == nu_ && "CostModelControl: activation::nr is not equals to nu");
-}
+    : CostModelAbstract(model, (unsigned int)uref.size(), (unsigned int)uref.size()), uref_(uref) {}
 
 CostModelControl::CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation,
                                    const unsigned int& nu)
-    : CostModelAbstract(model, activation, nu, nu), uref_(Eigen::VectorXd::Zero(nu)) {
-  assert(uref_.size() == nu_ && "CostModelControl: reference is not dimension nu");
+    : CostModelAbstract(model, activation, nu), uref_(Eigen::VectorXd::Zero(nu)) {
   assert(nr_ == nu_ && "CostModelControl: nr is not equals to nu");
-  assert(activation_->get_nr() == nu_ && "CostModelControl: activation::nr is not equals to nu");
 }
 
 CostModelControl::CostModelControl(pinocchio::Model* const model, const unsigned int& nu)
-    : CostModelAbstract(model, nu, nu), uref_(Eigen::VectorXd::Zero(nu)) {
-  assert(uref_.size() == nu_ && "CostModelControl: reference is not dimension nu");
-  assert(nr_ == nu_ && "CostModelControl: nr is not equals to nu");
-  assert(activation_->get_nr() == nu_ && "CostModelControl: activation::nr is not equals to nu");
-}
+    : CostModelAbstract(model, nu, nu), uref_(Eigen::VectorXd::Zero(nu)) {}
 
 CostModelControl::CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation)
-    : CostModelAbstract(model, activation), uref_(Eigen::VectorXd::Zero(activation->get_nr())) {
-  assert(uref_.size() == nu_ && "CostModelControl: reference is not dimension nu");
-  assert(nr_ == nu_ && "CostModelControl: nr is not equals to nu");
-  assert(activation_->get_nr() == nu_ && "CostModelControl: activation::nr is not equals to nu");
-}
+    : CostModelAbstract(model, activation), uref_(Eigen::VectorXd::Zero(activation->get_nr())) {}
 
 CostModelControl::CostModelControl(pinocchio::Model* const model)
-    : CostModelAbstract(model, model->nv), uref_(Eigen::VectorXd::Zero(model->nv)) {
-  assert(uref_.size() == nu_ && "CostModelControl: reference is not dimension nu");
-  assert(nr_ == nu_ && "CostModelControl: nr is not equals to nu");
-}
+    : CostModelAbstract(model, model->nv), uref_(Eigen::VectorXd::Zero(model->nv)) {}
 
 CostModelControl::~CostModelControl() {}
 
@@ -74,7 +53,6 @@ void CostModelControl::calcDiff(boost::shared_ptr<CostDataAbstract>& data, const
   if (recalc) {
     calc(data, x, u);
   }
-  // state_->Jdiff(xref_, x, data->Rx, data->Rx, second);
   activation_->calcDiff(data->activation, data->r, recalc);
   data->Lu = data->activation->Ar;
   data->Luu.diagonal() = data->activation->Arr.diagonal();
