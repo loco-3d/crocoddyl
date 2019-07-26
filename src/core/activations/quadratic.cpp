@@ -20,8 +20,4 @@ void ActivationModelQuad::calcDiff(boost::shared_ptr<ActivationDataAbstract>& da
   data->Arr.diagonal() = Eigen::VectorXd::Ones(nr_);
 }
 
-boost::shared_ptr<ActivationDataAbstract> ActivationModelQuad::createData() {
-  return boost::make_shared<ActivationDataAbstract>(this);
-}
-
 }  // namespace crocoddyl

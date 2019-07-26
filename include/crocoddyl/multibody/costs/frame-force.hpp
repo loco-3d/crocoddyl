@@ -6,9 +6,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_COSTS_COST_CONTROL_HPP_
-#define CROCODDYL_MULTIBODY_COSTS_COST_CONTROL_HPP_
+#ifndef CROCODDYL_MULTIBODY_COSTS_FRAME_FORCE_HPP_
+#define CROCODDYL_MULTIBODY_COSTS_FRAME_FORCE_HPP_
 
-// TODO: CostModelControl CostDataControl
+// TODO: CostModelForce CostDataFor
+// TODO: CostModelForceLinearCost CostDataForceCone
 
-#endif  // CROCODDYL_MULTIBODY_COSTS_COST_CONTROL_HPP_
+#endif  // CROCODDYL_MULTIBODY_COSTS_FRAME_FORCE_HPP_

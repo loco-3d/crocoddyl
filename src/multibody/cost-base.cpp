@@ -81,6 +81,10 @@ void CostModelAbstract::calcDiff(boost::shared_ptr<CostDataAbstract>& data,
   calcDiff(data, x, unone_);
 }
 
+boost::shared_ptr<CostDataAbstract> CostModelAbstract::createData(pinocchio::Data* const data) {
+  return boost::make_shared<CostDataAbstract>(this, data);
+}
+
 pinocchio::Model* CostModelAbstract::get_pinocchio() const { return pinocchio_; }
 
 ActivationModelAbstract* CostModelAbstract::get_activation() const { return activation_; }

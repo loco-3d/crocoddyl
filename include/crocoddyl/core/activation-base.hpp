@@ -25,7 +25,7 @@ class ActivationModelAbstract {
   virtual void calc(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r) = 0;
   virtual void calcDiff(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r,
                         const bool& recalc = true) = 0;
-  virtual boost::shared_ptr<ActivationDataAbstract> createData() = 0;
+  virtual boost::shared_ptr<ActivationDataAbstract> createData();
 
   unsigned int get_nr() const;
 

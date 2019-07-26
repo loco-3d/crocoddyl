@@ -138,7 +138,7 @@ void exposeSolverAbstract() {
       //            R"(Set a list of callback functions using for diagnostic.
 
       // Each iteration, the solver calls these set of functions in order to
-      // allowed user the diagnostic of the solver's mperformance.
+      // allowed user the diagnostic of the solver's performance.
       // :param callbacks: set of callback functions.)")
       .add_property("problem", bp::make_getter(&SolverAbstract_wrap::problem_, bp::return_internal_reference<>()),
                     "shooting problem")
@@ -153,8 +153,8 @@ void exposeSolverAbstract() {
       .def_readwrite("isFeasible", &SolverAbstract_wrap::is_feasible_, "feasible (xs,us)")
       .def_readwrite("x_reg", &SolverAbstract_wrap::xreg_, "state regularization")
       .def_readwrite("u_reg", &SolverAbstract_wrap::ureg_, "control regularization")
-      .def_readwrite("th_acceptStep", &SolverAbstract_wrap::th_acceptstep_, "threhold for step acceptance")
-      .def_readwrite("th_stop", &SolverAbstract_wrap::th_stop_, "threhold for stopping criteria");
+      .def_readwrite("th_acceptStep", &SolverAbstract_wrap::th_acceptstep_, "threshold for step acceptance")
+      .def_readwrite("th_stop", &SolverAbstract_wrap::th_stop_, "threshold for stopping criteria");
 }
 
 }  // namespace python

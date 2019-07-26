@@ -18,11 +18,6 @@ namespace bp = boost::python;
 
 class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstract> {
  public:
-  using StateAbstract::ndx_;
-  using StateAbstract::nq_;
-  using StateAbstract::nv_;
-  using StateAbstract::nx_;
-
   StateAbstract_wrap(int nx, int ndx) : StateAbstract(nx, ndx), bp::wrapper<StateAbstract>() {}
 
   Eigen::VectorXd zero() { return bp::call<Eigen::VectorXd>(this->get_override("zero").ptr()); }
@@ -203,10 +198,18 @@ void exposeStateAbstract() {
            ":param dx: displacement of the state (dim state.ndx).\n"
            ":param firstsecond: desired partial derivative\n"
            ":return the partial derivative(s) of the integrate(x, dx) function")
-      .add_property("nx", &StateAbstract_wrap::nx_, "dimension of state configuration vector")
-      .add_property("ndx", &StateAbstract_wrap::ndx_, "dimension of state tangent vector")
-      .add_property("nq", &StateAbstract_wrap::nq_, "dimension of configuration vector")
-      .add_property("nv", &StateAbstract_wrap::nv_, "dimension of configuration tangent vector");
+      .add_property("nx",
+                    bp::make_function(&StateAbstract_wrap::get_nx, bp::return_value_policy<bp::return_by_value>()),
+                    "dimension of state configuration vector")
+      .add_property("ndx",
+                    bp::make_function(&StateAbstract_wrap::get_ndx, bp::return_value_policy<bp::return_by_value>()),
+                    "dimension of state tangent vector")
+      .add_property("nq",
+                    bp::make_function(&StateAbstract_wrap::get_nq, bp::return_value_policy<bp::return_by_value>()),
+                    "dimension of configuration vector")
+      .add_property("nv",
+                    bp::make_function(&StateAbstract_wrap::get_nv, bp::return_value_policy<bp::return_by_value>()),
+                    "dimension of configuration tangent vector");
 }
 
 }  // namespace python

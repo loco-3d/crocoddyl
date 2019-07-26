@@ -758,7 +758,7 @@ for t in range(T):
 fddp.updateExpectedImprovement()
 d1, d2 = fddp.expectedImprovement()
 d1kkt, d2kkt = kkt.expectedImprovement()
-assert (abs(d1 - d1kkt) < 1e-14 and abs(d2 - d2kkt) < 1e-14)
+assert (abs(d1 - d1kkt) < 1e-12 and abs(d2 - d2kkt) < 1e-12)
 
 # -------------------------------------------------------------------
 # ------------- test expected improvement against gaps --------------
@@ -784,7 +784,7 @@ for t in range(T):
 fddp.updateExpectedImprovement()
 d1, d2 = fddp.expectedImprovement()
 d1kkt, d2kkt = kkt.expectedImprovement()
-assert (abs(d1 - d1kkt) < 1e-14 and abs(d2 - d2kkt) < 1e-14)
+assert (abs(d1 - d1kkt) < 1e-12 and abs(d2 - d2kkt) < 1e-12)
 
 if __name__ == '__main__':
     unittest.main()

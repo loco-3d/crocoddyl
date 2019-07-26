@@ -6,10 +6,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_COSTS_COST_FRAME_FORCE_HPP_
-#define CROCODDYL_MULTIBODY_COSTS_COST_FRAME_FORCE_HPP_
+#ifndef CROCODDYL_MULTIBODY_COSTS_FRAME_VELOCITY_HPP_
+#define CROCODDYL_MULTIBODY_COSTS_FRAME_VELOCITY_HPP_
 
-// TODO: CostModelForce CostDataFor
-// TODO: CostModelForceLinearCost CostDataForceCone
+// TODO: CostModelFrameVelocity CostDataFrameVelocity
+// TODO: CostModelFrameVelocityLinear CostDataFrameVelocityLinear
 
-#endif  // CROCODDYL_MULTIBODY_COSTS_COST_FRAME_FORCE_HPP_
+#endif  // CROCODDYL_MULTIBODY_COSTS_FRAME_VELOCITY_HPP_

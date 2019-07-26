@@ -37,9 +37,7 @@ void exposeActivationQuad() {
                                                        ":param r: residual vector \n"
                                                        ":param recalc: If true, it updates the residual value.")
       .def<void (ActivationModelQuad::*)(boost::shared_ptr<ActivationDataAbstract>&, const Eigen::VectorXd&)>(
-          "calcDiff", &ActivationModelQuad::calcDiff_wrap, bp::args(" self", " data", " r"))
-      .def("createData", &ActivationModelQuad::createData, bp::args(" self"),
-           "Create the quadratic activation  data.");
+          "calcDiff", &ActivationModelQuad::calcDiff_wrap, bp::args(" self", " data", " r"));
 }
 
 }  // namespace python
