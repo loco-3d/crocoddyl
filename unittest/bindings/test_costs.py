@@ -1,7 +1,6 @@
 import crocoddyl
 from utils import StateCostDerived
 import pinocchio
-from random import randint
 import numpy as np
 import unittest
 
@@ -39,7 +38,7 @@ class CostModelAbstractTestCase(unittest.TestCase):
         self.assertTrue(np.allclose(self.DATA.costResiduals, self.DATA_DER.costResiduals, atol=1e-9),
                         "Wrong cost residuals.")
 
-    def test_calc(self):
+    def test_calcDiff(self):
         # Run calc for both action models
         self.cost.calcDiff(self.DATA, self.x, self.u)
         self.costDer.calcDiff(self.DATA_DER, self.x, self.u)
