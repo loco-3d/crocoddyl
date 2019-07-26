@@ -19,8 +19,7 @@ namespace bp = boost::python;
 void exposeCostControl() {
   bp::class_<CostModelControl, bp::bases<CostModelAbstract> >(
       "CostModelControl", bp::init<pinocchio::Model*, ActivationModelAbstract*, Eigen::VectorXd>(
-                              bp::args(" self", " model", " activation",
-                                       " uref"),
+                              bp::args(" self", " model", " activation", " uref"),
                               "Initialize the control cost model.\n\n"
                               ":param model: Pinocchio model of the multibody system\n"
                               ":param activation: activation model\n"
