@@ -37,6 +37,7 @@ class CostModelState : public CostModelAbstract {
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
 
   StateAbstract* get_state() const;
+  const Eigen::VectorXd& get_xref() const;
 
  private:
   StateAbstract* state_;

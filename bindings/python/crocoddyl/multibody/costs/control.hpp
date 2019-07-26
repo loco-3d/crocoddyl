@@ -95,7 +95,10 @@ void exposeCostControl() {
       .def<void (CostModelControl::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &CostModelControl::calcDiff_wrap, bp::args(" self", " data", " x"))
       .def<void (CostModelControl::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &CostModelControl::calcDiff_wrap, bp::args(" self", " data", " x", " recalc"));
+          "calcDiff", &CostModelControl::calcDiff_wrap, bp::args(" self", " data", " x", " recalc"))
+      .add_property("uref",
+                    bp::make_function(&CostModelControl::get_uref, bp::return_value_policy<bp::return_by_value>()),
+                    "reference control");
 }
 
 }  // namespace python

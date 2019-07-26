@@ -86,4 +86,6 @@ void CostModelState::calcDiff(boost::shared_ptr<CostDataAbstract>& data, const E
 
 StateAbstract* CostModelState::get_state() const { return state_; }
 
+const Eigen::VectorXd& CostModelState::get_xref() const { return xref_; }
+
 }  // namespace crocoddyl

@@ -109,7 +109,10 @@ void exposeCostState() {
       .add_property(
           "State",
           bp::make_function(&CostModelState::get_state, bp::return_value_policy<bp::reference_existing_object>()),
-          "state");
+          "state")
+      .add_property("xref",
+                    bp::make_function(&CostModelState::get_xref, bp::return_value_policy<bp::return_by_value>()),
+                    "reference state");
 }
 
 }  // namespace python

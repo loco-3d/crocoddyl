@@ -48,14 +48,14 @@ CostModelControl::CostModelControl(pinocchio::Model* const model, const unsigned
 }
 
 CostModelControl::CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation)
-    : CostModelAbstract(model, activation), uref_(activation->get_nr()) {
+    : CostModelAbstract(model, activation), uref_(Eigen::VectorXd::Zero(activation->get_nr())) {
   assert(uref_.size() == nu_ && "CostModelControl: reference is not dimension nu");
   assert(nr_ == nu_ && "CostModelControl: nr is not equals to nu");
   assert(activation_->get_nr() == nu_ && "CostModelControl: activation::nr is not equals to nu");
 }
 
 CostModelControl::CostModelControl(pinocchio::Model* const model)
-    : CostModelAbstract(model, model->nv), uref_(model->nv) {
+    : CostModelAbstract(model, model->nv), uref_(Eigen::VectorXd::Zero(model->nv)) {
   assert(uref_.size() == nu_ && "CostModelControl: reference is not dimension nu");
   assert(nr_ == nu_ && "CostModelControl: nr is not equals to nu");
 }
@@ -79,5 +79,7 @@ void CostModelControl::calcDiff(boost::shared_ptr<CostDataAbstract>& data, const
   data->Lu = data->activation->Ar;
   data->Luu.diagonal() = data->activation->Arr.diagonal();
 }
+
+const Eigen::VectorXd& CostModelControl::get_uref() const { return uref_; }
 
 }  // namespace crocoddyl

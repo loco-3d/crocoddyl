@@ -33,6 +33,8 @@ class CostModelControl : public CostModelAbstract {
   void calcDiff(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
 
+  const Eigen::VectorXd& get_uref() const;
+
  private:
   Eigen::VectorXd uref_;
 };
