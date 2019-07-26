@@ -3,43 +3,28 @@
 namespace crocoddyl {
 
 CostModelControl::CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation,
-                                   const Eigen::VectorXd& uref, const unsigned int& nu)
-    : CostModelAbstract(model, activation, nu), uref_(uref) {
-  assert(uref_.size() == nu_ && "CostModelControl: reference is not dimension nu");
-  assert(nr_ == nu_ && "CostModelControl: nr is not equals to nu");
-}
-
-CostModelControl::CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation,
                                    const Eigen::VectorXd& uref)
     : CostModelAbstract(model, activation, (const unsigned)uref.size()), uref_(uref) {
-  assert(activation_->get_nr() == nu_ && "CostModelControl: activation::nr is not equals to nu");
+  assert(activation->get_nr() == (const unsigned)uref.size() && "CostModelControl: activation::nr is not equals to nu");
 }
 
-CostModelControl::CostModelControl(pinocchio::Model* const model, const Eigen::VectorXd& uref, const unsigned int& nu)
-    : CostModelAbstract(model, nu, nu), uref_(uref) {
-  assert(uref_.size() == nu_ && "CostModelControl: reference is not dimension nu");
-  assert(nr_ == nu_ && "CostModelControl: nr is not equals to nu");
+CostModelControl::CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation)
+    : CostModelAbstract(model, activation), uref_(Eigen::VectorXd::Zero(activation->get_nr())) {}
+
+CostModelControl::CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation,
+                                   const unsigned int& nu)
+    : CostModelAbstract(model, activation, nu), uref_(Eigen::VectorXd::Zero(nu)) {
+  assert(activation->_get_nr() == nu_ && "CostModelControl: activation::nr is not equals to nu");
 }
 
 CostModelControl::CostModelControl(pinocchio::Model* const model, const Eigen::VectorXd& uref)
     : CostModelAbstract(model, (unsigned int)uref.size(), (unsigned int)uref.size()), uref_(uref) {}
 
-CostModelControl::CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation,
-                                   const unsigned int& nu)
-    : CostModelAbstract(model, activation, nu), uref_(Eigen::VectorXd::Zero(nu)) {
-  assert(nr_ == nu_ && "CostModelControl: nr is not equals to nu");
-}
+CostModelControl::CostModelControl(pinocchio::Model* const model)
+    : CostModelAbstract(model, model->nv), uref_(Eigen::VectorXd::Zero(model->nv)) {}
 
 CostModelControl::CostModelControl(pinocchio::Model* const model, const unsigned int& nu)
     : CostModelAbstract(model, nu, nu), uref_(Eigen::VectorXd::Zero(nu)) {}
-
-CostModelControl::CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation)
-    : CostModelAbstract(model, activation), uref_(Eigen::VectorXd::Zero(activation->get_nr())) {
-  assert(nr_ == nu_ && "CostModelControl: nr is not equals to nu");
-}
-
-CostModelControl::CostModelControl(pinocchio::Model* const model)
-    : CostModelAbstract(model, model->nv), uref_(Eigen::VectorXd::Zero(model->nv)) {}
 
 CostModelControl::~CostModelControl() {}
 

@@ -16,16 +16,12 @@ namespace crocoddyl {
 class CostModelControl : public CostModelAbstract {
  public:
   CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation,
-                   const Eigen::VectorXd& uref, const unsigned int& nu);
-  CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation,
                    const Eigen::VectorXd& uref);
-  CostModelControl(pinocchio::Model* const model, const Eigen::VectorXd& uref, const unsigned int& nu);
-  CostModelControl(pinocchio::Model* const model, const Eigen::VectorXd& uref);
-  CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation, const unsigned int& nu);
-  CostModelControl(pinocchio::Model* const model, const unsigned int& nu);
   CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation);
+  CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation, const unsigned int& nu);
+  CostModelControl(pinocchio::Model* const model, const Eigen::VectorXd& uref);
   CostModelControl(pinocchio::Model* const model);
-
+  CostModelControl(pinocchio::Model* const model, const unsigned int& nu);
   ~CostModelControl();
 
   void calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
