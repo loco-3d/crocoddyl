@@ -5,7 +5,8 @@ namespace crocoddyl {
 CostModelControl::CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation,
                                    const Eigen::VectorXd& uref)
     : CostModelAbstract(model, activation, (const unsigned)uref.size()), uref_(uref) {
-  assert(activation->get_nr() == (const unsigned)uref.size() && "CostModelControl: activation::nr is not equals to nu");
+  assert(activation->get_nr() == (const unsigned)uref.size() &&
+         "CostModelControl: activation::nr is not equals to nu");
 }
 
 CostModelControl::CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation)

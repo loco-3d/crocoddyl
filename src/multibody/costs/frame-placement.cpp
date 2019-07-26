@@ -39,8 +39,8 @@ void CostModelFramePlacement::calc(boost::shared_ptr<CostDataAbstract>& data, co
 }
 
 void CostModelFramePlacement::calcDiff(boost::shared_ptr<CostDataAbstract>& data,
-                                         const Eigen::Ref<const Eigen::VectorXd>& x,
-                                         const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
+                                       const Eigen::Ref<const Eigen::VectorXd>& x,
+                                       const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (recalc) {
     calc(data, x, u);
   }

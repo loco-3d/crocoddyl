@@ -42,13 +42,11 @@ class CostModelFramePlacement : public CostModelAbstract {
   FramePlacement Mref_;
 };
 
-
 struct CostDataFramePlacement : public CostDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  CostDataFramePlacement(Model* const model, pinocchio::Data* const data)
-      : CostDataAbstract(model, data) {}
+  CostDataFramePlacement(Model* const model, pinocchio::Data* const data) : CostDataAbstract(model, data) {}
 
   pinocchio::Motion::Vector6 r;
   pinocchio::SE3 rMf;
