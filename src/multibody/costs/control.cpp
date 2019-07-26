@@ -34,7 +34,9 @@ CostModelControl::CostModelControl(pinocchio::Model* const model, const unsigned
     : CostModelAbstract(model, nu, nu), uref_(Eigen::VectorXd::Zero(nu)) {}
 
 CostModelControl::CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation)
-    : CostModelAbstract(model, activation), uref_(Eigen::VectorXd::Zero(activation->get_nr())) {}
+    : CostModelAbstract(model, activation), uref_(Eigen::VectorXd::Zero(activation->get_nr())) {
+  assert(nr_ == nu_ && "CostModelControl: nr is not equals to nu");
+}
 
 CostModelControl::CostModelControl(pinocchio::Model* const model)
     : CostModelAbstract(model, model->nv), uref_(Eigen::VectorXd::Zero(model->nv)) {}
