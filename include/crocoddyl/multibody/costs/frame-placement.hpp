@@ -46,14 +46,19 @@ struct CostDataFramePlacement : public CostDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  CostDataFramePlacement(Model* const model, pinocchio::Data* const data) : CostDataAbstract(model, data) {}
+  CostDataFramePlacement(Model* const model, pinocchio::Data* const data)
+      : CostDataAbstract(model, data), J(6, model->get_nv()), rJf(6, 6), fJf(6, model->get_nv()) {
+    r.fill(0);
+    J.fill(0);
+    rJf.fill(0);
+    fJf.fill(0);
+  }
 
   pinocchio::Motion::Vector6 r;
   pinocchio::SE3 rMf;
-  pinocchio::SE3::Matrix6 J;
-  pinocchio::SE3::Matrix6 oJf;
-  pinocchio::SE3::Matrix6 rJf;
-  pinocchio::SE3::Matrix6 fJf;
+  pinocchio::Data::Matrix6x J;
+  pinocchio::Data::Matrix6 rJf;
+  pinocchio::Data::Matrix6x fJf;
 };
 
 }  // namespace crocoddyl
