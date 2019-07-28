@@ -20,6 +20,9 @@ class CostModelAbstractTestCase(unittest.TestCase):
             Mref = crocoddyl.FramePlacement(self.ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.SE3.Random())
             self.cost = self.COST(self.ROBOT_MODEL, Mref)
             self.costDer = self.COST_DER(self.ROBOT_MODEL, Mref=Mref)
+        elif self.COST is crocoddyl.CostModelControl:
+            self.cost = self.COST(self.ROBOT_MODEL)
+            self.costDer = self.COST_DER(self.ROBOT_MODEL)
         elif self.COST is crocoddyl.CostModelState:
             self.cost = self.COST(self.ROBOT_MODEL, self.STATE)
             self.costDer = self.COST_DER(self.ROBOT_MODEL, self.STATE)
@@ -67,6 +70,11 @@ class CostModelAbstractTestCase(unittest.TestCase):
 class StateCostTest(CostModelAbstractTestCase):
     CostModelAbstractTestCase.COST = crocoddyl.CostModelState
     CostModelAbstractTestCase.COST_DER = utils.StateCostDerived
+
+
+class StateCostTest(CostModelAbstractTestCase):
+    CostModelAbstractTestCase.COST = crocoddyl.CostModelControl
+    CostModelAbstractTestCase.COST_DER = utils.ControlCostDerived
 
 
 class FramePlacementCostTest(CostModelAbstractTestCase):
