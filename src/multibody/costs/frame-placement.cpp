@@ -32,7 +32,7 @@ void CostModelFramePlacement::calc(boost::shared_ptr<CostDataAbstract>& data, co
   // Compute the frame placement w.r.t. the reference frame
   d->rMf = Mref_.oMf.inverse() * d->pinocchio->oMf[Mref_.frame];
   d->r = pinocchio::log6(d->rMf);
-  data->r = d->r; // this is needed because we overwrite it
+  data->r = d->r;  // this is needed because we overwrite it
 
   // Compute the cost
   activation_->calc(d->activation, d->r);
