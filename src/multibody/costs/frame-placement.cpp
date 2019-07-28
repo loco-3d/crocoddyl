@@ -12,16 +12,16 @@ CostModelFramePlacement::CostModelFramePlacement(pinocchio::Model* const model,
 
 CostModelFramePlacement::CostModelFramePlacement(pinocchio::Model* const model,
                                                  ActivationModelAbstract* const activation, const FramePlacement& Mref)
-    : CostModelAbstract(model, activation), Mref_(Mref) {
+    : CostModelAbstract(model, activation), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
   assert(activation->get_nr() == 6 && "CostModelFramePlacement: activation::nr is not equals to 6");
 }
 
 CostModelFramePlacement::CostModelFramePlacement(pinocchio::Model* const model, const FramePlacement& Mref,
                                                  const unsigned int& nu)
-    : CostModelAbstract(model, 6, nu), Mref_(Mref) {}
+    : CostModelAbstract(model, 6, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {}
 
 CostModelFramePlacement::CostModelFramePlacement(pinocchio::Model* const model, const FramePlacement& Mref)
-    : CostModelAbstract(model, 6), Mref_(Mref) {}
+    : CostModelAbstract(model, 6), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {}
 
 CostModelFramePlacement::~CostModelFramePlacement() {}
 
@@ -30,7 +30,7 @@ void CostModelFramePlacement::calc(boost::shared_ptr<CostDataAbstract>& data, co
   CostDataFramePlacement* d = static_cast<CostDataFramePlacement*>(data.get());
 
   // Compute the frame placement w.r.t. the reference frame
-  d->rMf = Mref_.oMf.inverse() * d->pinocchio->oMf[Mref_.frame];
+  d->rMf = oMf_inv_ * d->pinocchio->oMf[Mref_.frame];
   d->r = pinocchio::log6(d->rMf);
   data->r = d->r;  // this is needed because we overwrite it
 

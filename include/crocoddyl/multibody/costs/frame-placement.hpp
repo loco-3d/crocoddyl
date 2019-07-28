@@ -40,6 +40,7 @@ class CostModelFramePlacement : public CostModelAbstract {
 
  private:
   FramePlacement Mref_;
+  pinocchio::SE3 oMf_inv_;
 };
 
 struct CostDataFramePlacement : public CostDataAbstract {
