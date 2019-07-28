@@ -19,6 +19,7 @@ SET(${PROJECT_NAME}_SOURCES
   multibody/states/multibody.cpp
   multibody/costs/state.cpp
   multibody/costs/control.cpp
+  multibody/costs/frame-placement.cpp
   )
 
 IF(UNIX)

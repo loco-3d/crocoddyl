@@ -15,9 +15,8 @@ CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, ActivationMo
       nr_(activation->get_nr()),
       with_residuals_(with_residuals),
       unone_(Eigen::VectorXd::Zero(nu)) {
-  assert(nq_ != 0);
-  assert(nv_ != 0);
-  assert(nu_ != 0);
+  assert(nq_ != 0 && "CostModelAbstract: nq cannot be 0");
+  assert(nv_ != 0 && "CostModelAbstract: nv cannot be 0");
 }
 
 CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, ActivationModelAbstract* const activation,
@@ -32,9 +31,8 @@ CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, ActivationMo
       nr_(activation->get_nr()),
       with_residuals_(with_residuals),
       unone_(Eigen::VectorXd::Zero(model->nv)) {
-  assert(nq_ != 0);
-  assert(nv_ != 0);
-  assert(nu_ != 0);
+  assert(nq_ != 0 && "CostModelAbstract: nq cannot be 0");
+  assert(nv_ != 0 && "CostModelAbstract: nv cannot be 0");
 }
 
 CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, const unsigned int& nr, const unsigned int& nu,
@@ -49,9 +47,8 @@ CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, const unsign
       nr_(nr),
       with_residuals_(with_residuals),
       unone_(Eigen::VectorXd::Zero(nu)) {
-  assert(nq_ != 0);
-  assert(nv_ != 0);
-  assert(nu_ != 0);
+  assert(nq_ != 0 && "CostModelAbstract: nq cannot be 0");
+  assert(nv_ != 0 && "CostModelAbstract: nv cannot be 0");
 }
 
 CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, const unsigned int& nr, const bool& with_residuals)
@@ -65,9 +62,8 @@ CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, const unsign
       nr_(nr),
       with_residuals_(with_residuals),
       unone_(Eigen::VectorXd::Zero(model->nv)) {
-  assert(nq_ != 0);
-  assert(nv_ != 0);
-  assert(nu_ != 0);
+  assert(nq_ != 0 && "CostModelAbstract: nq cannot be 0");
+  assert(nv_ != 0 && "CostModelAbstract: nv cannot be 0");
 }
 
 CostModelAbstract::~CostModelAbstract() {}

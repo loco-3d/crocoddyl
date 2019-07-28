@@ -1,5 +1,5 @@
 import crocoddyl
-from utils import StateCostDerived
+import utils
 import pinocchio
 import numpy as np
 import unittest
@@ -16,10 +16,23 @@ class CostModelAbstractTestCase(unittest.TestCase):
         self.x = self.STATE.rand()
         self.u = np.matrix(np.random.rand(self.ROBOT_MODEL.nv)).T
 
-        self.cost = self.COST(self.ROBOT_MODEL, self.STATE)
-        self.costDer = self.COST_DER(self.ROBOT_MODEL, self.STATE)
+        if self.COST is crocoddyl.CostModelFramePlacement:
+            Mref = crocoddyl.FramePlacement(self.ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.SE3.Random())
+            self.cost = self.COST(self.ROBOT_MODEL, Mref)
+            self.costDer = self.COST_DER(self.ROBOT_MODEL, Mref=Mref)
+        elif self.COST is crocoddyl.CostModelControl:
+            self.cost = self.COST(self.ROBOT_MODEL)
+            self.costDer = self.COST_DER(self.ROBOT_MODEL)
+        elif self.COST is crocoddyl.CostModelState:
+            self.cost = self.COST(self.ROBOT_MODEL, self.STATE)
+            self.costDer = self.COST_DER(self.ROBOT_MODEL, self.STATE)
         self.DATA = self.cost.createData(self.ROBOT_DATA)
         self.DATA_DER = self.costDer.createData(self.ROBOT_DATA)
+
+        nq = self.ROBOT_MODEL.nq
+        pinocchio.forwardKinematics(self.ROBOT_MODEL, self.ROBOT_DATA, self.x[:nq], self.x[nq:])
+        pinocchio.computeJointJacobians(self.ROBOT_MODEL, self.ROBOT_DATA, self.x[:nq])
+        pinocchio.updateFramePlacements(self.ROBOT_MODEL, self.ROBOT_DATA)
 
     def test_dimensions(self):
         self.assertEqual(self.cost.nx, self.costDer.nx, "Wrong nx.")
@@ -56,7 +69,17 @@ class CostModelAbstractTestCase(unittest.TestCase):
 
 class StateCostTest(CostModelAbstractTestCase):
     CostModelAbstractTestCase.COST = crocoddyl.CostModelState
-    CostModelAbstractTestCase.COST_DER = StateCostDerived
+    CostModelAbstractTestCase.COST_DER = utils.StateCostDerived
+
+
+class StateCostTest(CostModelAbstractTestCase):
+    CostModelAbstractTestCase.COST = crocoddyl.CostModelControl
+    CostModelAbstractTestCase.COST_DER = utils.ControlCostDerived
+
+
+class FramePlacementCostTest(CostModelAbstractTestCase):
+    CostModelAbstractTestCase.COST = crocoddyl.CostModelFramePlacement
+    CostModelAbstractTestCase.COST_DER = utils.FramePlacementCostDerived
 
 
 if __name__ == '__main__':

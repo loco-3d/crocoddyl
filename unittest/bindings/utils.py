@@ -249,6 +249,53 @@ class StateCostDerived(crocoddyl.CostModelAbstract):
         data.Lxx = data.Rx.T * data.activation.Arr * data.Rx
 
 
+class ControlCostDerived(crocoddyl.CostModelAbstract):
+    def __init__(self, pinocchioModel, activation=None, uref=None, nu=None):
+        nu = nu if nu is not None else pinocchioModel.nv
+        activation = activation if activation is not None else crocoddyl.ActivationModelQuad(nu)
+        self.uref = uref if uref is not None else np.matrix(np.zeros(nu)).T
+        crocoddyl.CostModelAbstract.__init__(self, pinocchioModel, activation, nu)
+
+    def calc(self, data, x, u):
+        data.costResiduals = u - self.uref
+        self.activation.calc(data.activation, data.costResiduals)
+        data.cost = data.activation.a
+
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        self.activation.calcDiff(data.activation, data.residuals, recalc)
+        data.Lu = data.activation.Ar
+        data.Luu = data.activation.Arr
+
+
+class FramePlacementCostDerived(crocoddyl.CostModelAbstract):
+    def __init__(self, pinocchioModel, activation=None, Mref=None, nu=None):
+        activation = activation if activation is not None else crocoddyl.ActivationModelQuad(6)
+        crocoddyl.CostModelAbstract.__init__(self, pinocchioModel, activation, nu)
+        self.Mref = Mref
+
+    def calc(self, data, x, u):
+        data.rMf = self.Mref.oMf.inverse() * data.pinocchio.oMf[self.Mref.frame]
+        data.costResiduals = pinocchio.log(data.rMf).vector
+        self.activation.calc(data.activation, data.costResiduals)
+        data.cost = data.activation.a
+
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        pinocchio.updateFramePlacements(self.pinocchio, data.pinocchio)
+        data.rJf = pinocchio.Jlog6(data.rMf)
+        data.fJf = pinocchio.getFrameJacobian(self.pinocchio, data.pinocchio, self.Mref.frame,
+                                              pinocchio.ReferenceFrame.LOCAL)
+        data.J = data.rJf * data.fJf
+        self.activation.calcDiff(data.activation, data.costResiduals, recalc)
+        data.Rx = np.hstack([data.J, np.zeros((self.nr, self.nv))])
+        data.Lx = np.vstack([data.J.T * data.activation.Ar, np.zeros((self.nv, 1))])
+        data.Lxx = np.block([[data.J.T * data.activation.Arr * data.J,
+                              np.zeros((self.nv, self.nv))], [np.zeros((self.nv, self.ndx))]])
+
+
 class DDPDerived(crocoddyl.SolverAbstract):
     def __init__(self, shootingProblem):
         crocoddyl.SolverAbstract.__init__(self, shootingProblem)

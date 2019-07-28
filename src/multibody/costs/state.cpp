@@ -5,63 +5,55 @@ namespace crocoddyl {
 CostModelState::CostModelState(pinocchio::Model* const model, StateAbstract* state,
                                ActivationModelAbstract* const activation, const Eigen::VectorXd& xref,
                                const unsigned int& nu)
-    : CostModelAbstract(model, activation, state->get_ndx(), nu), state_(state), xref_(xref) {
+    : CostModelAbstract(model, activation, nu), state_(state), xref_(xref) {
   assert(xref_.size() == nx_ && "CostModelState: reference is not dimension nx");
-  assert(nr_ == nx_ && "CostModelState: nr is not equals to nx");
-  assert(activation_->get_nr() == nx_ && "CostModelState: activation::nr is not equals to nx");
+  assert(nr_ == ndx_ && "CostModelState: nr is not equals to ndx");
 }
 
 CostModelState::CostModelState(pinocchio::Model* const model, StateAbstract* state,
                                ActivationModelAbstract* const activation, const Eigen::VectorXd& xref)
-    : CostModelAbstract(model, activation, state->get_ndx()), state_(state), xref_(xref) {
+    : CostModelAbstract(model, activation), state_(state), xref_(xref) {
   assert(xref_.size() == nx_ && "CostModelState: reference is not dimension nx");
-  assert(nr_ == nx_ && "CostModelState: nr is not equals to nx");
-  assert(activation_->get_nr() == nx_ && "CostModelState: activation::nr is not equals to nx");
+  assert(nr_ == ndx_ && "CostModelState: nr is not equals to ndx");
 }
 
 CostModelState::CostModelState(pinocchio::Model* const model, StateAbstract* state, const Eigen::VectorXd& xref,
                                const unsigned int& nu)
     : CostModelAbstract(model, state->get_ndx(), nu), state_(state), xref_(xref) {
   assert(xref_.size() == nx_ && "CostModelState: reference is not dimension nx");
-  assert(nr_ == nx_ && "CostModelState: nr is not equals to nx");
-  assert(activation_->get_nr() == nx_ && "CostModelState: activation::nr is not equals to nx");
+  assert(nr_ == ndx_ && "CostModelState: nr is not equals to ndx");
 }
 
 CostModelState::CostModelState(pinocchio::Model* const model, StateAbstract* state, const Eigen::VectorXd& xref)
     : CostModelAbstract(model, state->get_ndx()), state_(state), xref_(xref) {
   assert(xref_.size() == nx_ && "CostModelState: reference is not dimension nx");
-  assert(nr_ == nx_ && "CostModelState: nr is not equals to nx");
-  assert(activation_->get_nr() == nx_ && "CostModelState: activation::nr is not equals to nx");
+  assert(nr_ == ndx_ && "CostModelState: nr is not equals to ndx");
 }
 
 CostModelState::CostModelState(pinocchio::Model* const model, StateAbstract* state,
                                ActivationModelAbstract* const activation, const unsigned int& nu)
-    : CostModelAbstract(model, activation, state->get_ndx(), nu), state_(state), xref_(state->zero()) {
+    : CostModelAbstract(model, activation, nu), state_(state), xref_(state->zero()) {
   assert(xref_.size() == nx_ && "CostModelState: reference is not dimension nx");
-  assert(nr_ == nx_ && "CostModelState: nr is not equals to nx");
-  assert(activation_->get_nr() == nx_ && "CostModelState: activation::nr is not equals to nx");
+  assert(nr_ == ndx_ && "CostModelState: nr is not equals to ndx");
 }
 
 CostModelState::CostModelState(pinocchio::Model* const model, StateAbstract* state, const unsigned int& nu)
     : CostModelAbstract(model, state->get_ndx(), nu), state_(state), xref_(state->zero()) {
   assert(xref_.size() == nx_ && "CostModelState: reference is not dimension nx");
-  assert(nr_ == nx_ && "CostModelState: nr is not equals to nx");
-  assert(activation_->get_nr() == nx_ && "CostModelState: activation::nr is not equals to nx");
+  assert(nr_ == ndx_ && "CostModelState: nr is not equals to ndx");
 }
 
 CostModelState::CostModelState(pinocchio::Model* const model, StateAbstract* state,
                                ActivationModelAbstract* const activation)
-    : CostModelAbstract(model, activation, state->get_ndx()), state_(state), xref_(state->zero()) {
+    : CostModelAbstract(model, activation), state_(state), xref_(state->zero()) {
   assert(xref_.size() == nx_ && "CostModelState: reference is not dimension nx");
-  assert(nr_ == nx_ && "CostModelState: nr is not equals to nx");
-  assert(activation_->get_nr() == nx_ && "CostModelState: activation::nr is not equals to nx");
+  assert(nr_ == ndx_ && "CostModelState: nr is not equals to ndx");
 }
 
 CostModelState::CostModelState(pinocchio::Model* const model, StateAbstract* state)
     : CostModelAbstract(model, state->get_ndx()), state_(state), xref_(state->zero()) {
   assert(xref_.size() == nx_ && "CostModelState: reference is not dimension nx");
-  assert(nr_ == nx_ && "CostModelState: nr is not equals to nx");
-  assert(activation_->get_nr() == nx_ && "CostModelState: activation::nr is not equals to nx");
+  assert(nr_ == ndx_ && "CostModelState: nr is not equals to ndx");
 }
 
 CostModelState::~CostModelState() {}
