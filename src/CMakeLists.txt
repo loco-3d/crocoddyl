@@ -17,6 +17,7 @@ SET(${PROJECT_NAME}_SOURCES
   core/activations/quadratic.cpp
   multibody/cost-base.cpp
   multibody/states/multibody.cpp
+  multibody/costs/cost-sum.cpp
   multibody/costs/state.cpp
   multibody/costs/control.cpp
   multibody/costs/frame-placement.cpp
