@@ -88,19 +88,27 @@ class StateAbstractTestCase(unittest.TestCase):
 
 
 class StateVectorTest(StateAbstractTestCase):
-    StateAbstractTestCase.NX = randint(1, 101)
-    StateAbstractTestCase.NDX = StateAbstractTestCase.NX
-    StateAbstractTestCase.STATE = crocoddyl.StateVector(StateAbstractTestCase.NX)
-    StateAbstractTestCase.STATE_DER = StateVectorDerived(StateAbstractTestCase.NX)
+    NX = randint(1, 101)
+    NDX = StateAbstractTestCase.NX
+    STATE = crocoddyl.StateVector(NX)
+    STATE_DER = StateVectorDerived(NX)
 
 
 class StateMultibodyTest(StateAbstractTestCase):
     MODEL = pinocchio.buildSampleModelHumanoid()
-    StateAbstractTestCase.NX = MODEL.nq + MODEL.nv
-    StateAbstractTestCase.NDX = 2 * MODEL.nv
-    StateAbstractTestCase.STATE = crocoddyl.StateMultibody(MODEL)
-    StateAbstractTestCase.STATE_DER = StateMultibodyDerived(MODEL)
+    NX = MODEL.nq + MODEL.nv
+    NDX = 2 * MODEL.nv
+    STATE = crocoddyl.StateMultibody(MODEL)
+    STATE_DER = StateMultibodyDerived(MODEL)
 
 
 if __name__ == '__main__':
-    unittest.main()
+    test_classes_to_run = [StateVectorTest, StateMultibodyTest]
+    loader = unittest.TestLoader()
+    suites_list = []
+    for test_class in test_classes_to_run:
+        suite = loader.loadTestsFromTestCase(test_class)
+        suites_list.append(suite)
+    big_suite = unittest.TestSuite(suites_list)
+    runner = unittest.TextTestRunner()
+    results = runner.run(big_suite)

@@ -27,8 +27,10 @@ BOOST_PYTHON_MODULE(libcrocoddyl_pywrap) {
   eigenpy::enableEigenPy();
 
   typedef double Scalar;
+  typedef Eigen::Matrix<Scalar, 3, 1> Vector3;
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> VectorX;
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> MatrixX;
+  eigenpy::enableEigenPySpecific<Vector3>();
   eigenpy::enableEigenPySpecific<VectorX>();
   eigenpy::enableEigenPySpecific<MatrixX>();
 

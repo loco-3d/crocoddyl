@@ -57,23 +57,31 @@ class ActionModelAbstractTestCase(unittest.TestCase):
 
 
 class UnicycleTest(ActionModelAbstractTestCase):
-    ActionModelAbstractTestCase.MODEL = crocoddyl.ActionModelUnicycle()
-    ActionModelAbstractTestCase.MODEL_DER = UnicycleDerived()
+    MODEL = crocoddyl.ActionModelUnicycle()
+    MODEL_DER = UnicycleDerived()
 
 
 class LQRTest(ActionModelAbstractTestCase):
     NX = randint(1, 21)
     NU = randint(1, NX)
-    ActionModelAbstractTestCase.MODEL = crocoddyl.ActionModelLQR(NX, NU)
-    ActionModelAbstractTestCase.MODEL_DER = LQRDerived(NX, NU)
+    MODEL = crocoddyl.ActionModelLQR(NX, NU)
+    MODEL_DER = LQRDerived(NX, NU)
 
 
 class DifferentialLQRTest(ActionModelAbstractTestCase):
     NX = randint(1, 21)
     NU = randint(1, NX)
-    ActionModelAbstractTestCase.MODEL = crocoddyl.DifferentialActionModelLQR(NX, NU)
-    ActionModelAbstractTestCase.MODEL_DER = DifferentialLQRDerived(NX, NU)
+    MODEL = crocoddyl.DifferentialActionModelLQR(NX, NU)
+    MODEL_DER = DifferentialLQRDerived(NX, NU)
 
 
 if __name__ == '__main__':
-    unittest.main()
+    test_classes_to_run = [UnicycleTest, LQRTest, DifferentialLQRTest]
+    loader = unittest.TestLoader()
+    suites_list = []
+    for test_class in test_classes_to_run:
+        suite = loader.loadTestsFromTestCase(test_class)
+        suites_list.append(suite)
+    big_suite = unittest.TestSuite(suites_list)
+    runner = unittest.TextTestRunner()
+    results = runner.run(big_suite)

@@ -21,6 +21,7 @@ SET(${PROJECT_NAME}_SOURCES
   multibody/costs/state.cpp
   multibody/costs/control.cpp
   multibody/costs/frame-placement.cpp
+  multibody/costs/frame-translation.cpp
   )
 
 IF(UNIX)

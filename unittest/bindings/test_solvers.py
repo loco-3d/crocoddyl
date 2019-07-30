@@ -92,10 +92,18 @@ class SolverAbstractTestCase(unittest.TestCase):
 
 
 class UnicycleDDPTest(SolverAbstractTestCase):
-    SolverAbstractTestCase.MODEL = crocoddyl.ActionModelUnicycle()
-    SolverAbstractTestCase.SOLVER = crocoddyl.SolverDDP
-    SolverAbstractTestCase.SOLVER_DER = DDPDerived
+    MODEL = crocoddyl.ActionModelUnicycle()
+    SOLVER = crocoddyl.SolverDDP
+    SOLVER_DER = DDPDerived
 
 
 if __name__ == '__main__':
-    unittest.main()
+    test_classes_to_run = [UnicycleDDPTest]
+    loader = unittest.TestLoader()
+    suites_list = []
+    for test_class in test_classes_to_run:
+        suite = loader.loadTestsFromTestCase(test_class)
+        suites_list.append(suite)
+    big_suite = unittest.TestSuite(suites_list)
+    runner = unittest.TextTestRunner()
+    results = runner.run(big_suite)

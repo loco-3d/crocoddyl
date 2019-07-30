@@ -6,7 +6,7 @@ namespace crocoddyl {
 CostModelFramePlacement::CostModelFramePlacement(pinocchio::Model* const model,
                                                  ActivationModelAbstract* const activation, const FramePlacement& Mref,
                                                  const unsigned int& nu)
-    : CostModelAbstract(model, activation, nu), Mref_(Mref) {
+    : CostModelAbstract(model, activation, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
   assert(activation->get_nr() == 6 && "CostModelFramePlacement: activation::nr is not equals to 6");
 }
 
