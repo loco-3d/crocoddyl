@@ -22,6 +22,7 @@ SET(${PROJECT_NAME}_SOURCES
   multibody/costs/control.cpp
   multibody/costs/frame-placement.cpp
   multibody/costs/frame-translation.cpp
+  multibody/actions/free-fwddyn.cpp
   )
 
 IF(UNIX)

@@ -16,6 +16,7 @@
 #include "python/crocoddyl/multibody/costs/control.hpp"
 #include "python/crocoddyl/multibody/costs/frame-placement.hpp"
 #include "python/crocoddyl/multibody/costs/frame-translation.hpp"
+#include "python/crocoddyl/multibody/actions/free-fwddyn.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -28,6 +29,7 @@ void exposeMultibody() {
   exposeCostControl();
   exposeCostFramePlacement();
   exposeCostFrameTranslation();
+  exposeDifferentialActionFreeFwdDynamics();
 }
 
 }  // namespace python
