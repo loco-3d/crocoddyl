@@ -264,7 +264,7 @@ class ControlCostDerived(crocoddyl.CostModelAbstract):
     def calcDiff(self, data, x, u, recalc=True):
         if recalc:
             self.calc(data, x, u)
-        self.activation.calcDiff(data.activation, data.residuals, recalc)
+        self.activation.calcDiff(data.activation, data.costResiduals, recalc)
         data.Lu = data.activation.Ar
         data.Luu = data.activation.Arr
 
