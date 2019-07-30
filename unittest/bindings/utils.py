@@ -296,6 +296,32 @@ class FramePlacementCostDerived(crocoddyl.CostModelAbstract):
                               np.zeros((self.nv, self.nv))], [np.zeros((self.nv, self.ndx))]])
 
 
+class FrameTranslationCostDerived(crocoddyl.CostModelAbstract):
+    def __init__(self, pinocchioModel, activation=None, xref=None, nu=None):
+        activation = activation if activation is not None else crocoddyl.ActivationModelQuad(3)
+        crocoddyl.CostModelAbstract.__init__(self, pinocchioModel, activation, nu)
+        self.xref = xref
+
+    def calc(self, data, x, u):
+        data.costResiduals = data.pinocchio.oMf[self.xref.frame].translation - self.xref.oxf
+        self.activation.calc(data.activation, data.costResiduals)
+        data.cost = data.activation.a
+
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        nq = self.nq
+        pinocchio.updateFramePlacements(self.pinocchio, data.pinocchio)
+        data.R = data.pinocchio.oMf[self.xref.frame].rotation
+        data.J = data.R * pinocchio.getFrameJacobian(self.pinocchio, data.pinocchio, self.xref.frame,
+                                                     pinocchio.ReferenceFrame.LOCAL)[:3, :]
+        self.activation.calcDiff(data.activation, data.costResiduals, recalc)
+        data.Rx = np.hstack([data.J, np.zeros((self.nr, self.nv))])
+        data.Lx = np.vstack([data.J.T * data.activation.Ar, np.zeros((self.nv, 1))])
+        data.Lxx = np.block([[data.J.T * data.activation.Arr * data.J,
+                              np.zeros((self.nv, self.nv))], [np.zeros((self.nv, self.ndx))]])
+
+
 class DDPDerived(crocoddyl.SolverAbstract):
     def __init__(self, shootingProblem):
         crocoddyl.SolverAbstract.__init__(self, shootingProblem)
