@@ -150,4 +150,6 @@ void StateMultibody::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x,
   }
 }
 
+pinocchio::Model* StateMultibody::get_model() const { return model_; }
+
 }  // namespace crocoddyl
