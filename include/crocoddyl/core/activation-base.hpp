@@ -28,6 +28,7 @@ class ActivationModelAbstract {
   virtual boost::shared_ptr<ActivationDataAbstract> createData();
 
   unsigned int get_nr() const;
+  void set_nr(const unsigned int& nr);
 
  protected:
   unsigned int nr_;

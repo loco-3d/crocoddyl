@@ -17,6 +17,7 @@ void CostModelSum::addCost(const std::string& name, CostModelAbstract* const cos
     std::cout << "Warning: this cost item already existed, we cannot add it" << std::endl;
   } else {
     nr_ += cost->get_nr();
+    activation_->set_nr(nr_);
   }
 }
 
@@ -24,6 +25,7 @@ void CostModelSum::removeCost(const std::string& name) {
   CostModelContainer::iterator it = costs_.find(name);
   if (it != costs_.end()) {
     nr_ -= it->second.cost->get_nr();
+    activation_->set_nr(nr_);
     costs_.erase(it);
   } else {
     std::cout << "Warning: this cost item doesn't exist, we cannot remove it" << std::endl;
