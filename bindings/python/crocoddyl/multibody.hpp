@@ -11,6 +11,7 @@
 
 #include "python/crocoddyl/multibody/cost-base.hpp"
 #include "python/crocoddyl/multibody/states/multibody.hpp"
+#include "python/crocoddyl/multibody/costs/cost-sum.hpp"
 #include "python/crocoddyl/multibody/costs/state.hpp"
 #include "python/crocoddyl/multibody/costs/control.hpp"
 #include "python/crocoddyl/multibody/costs/frame-placement.hpp"
@@ -21,6 +22,7 @@ namespace python {
 void exposeMultibody() {
   exposeCostMultibody();
   exposeStateMultibody();
+  exposeCostSum();
   exposeCostState();
   exposeCostControl();
   exposeCostFramePlacement();
