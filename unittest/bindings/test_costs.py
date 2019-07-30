@@ -132,32 +132,44 @@ class CostModelSumTestCase(unittest.TestCase):
         self.COST_SUM.removeCost("myCost")
         self.assertEqual(len(self.COST_SUM.costs), 0, "The number of cost items should be zero")
 
+
 class StateCostTest(CostModelAbstractTestCase):
-    CostModelAbstractTestCase.COST = crocoddyl.CostModelState
-    CostModelAbstractTestCase.COST_DER = utils.StateCostDerived
+    COST = crocoddyl.CostModelState
+    COST_DER = utils.StateCostDerived
 
 
 class StateCostSumTest(CostModelSumTestCase):
-    CostModelSumTestCase.COST = crocoddyl.CostModelState
+    COST = crocoddyl.CostModelState
 
 
 class ControlCostTest(CostModelAbstractTestCase):
-    CostModelAbstractTestCase.COST = crocoddyl.CostModelControl
-    CostModelAbstractTestCase.COST_DER = utils.ControlCostDerived
+    COST = crocoddyl.CostModelControl
+    COST_DER = utils.ControlCostDerived
 
 
 class ControlCostSumTest(CostModelSumTestCase):
-    CostModelSumTestCase.COST = crocoddyl.CostModelControl
+    COST = crocoddyl.CostModelControl
 
 
 class FramePlacementCostTest(CostModelAbstractTestCase):
-    CostModelAbstractTestCase.COST = crocoddyl.CostModelFramePlacement
-    CostModelAbstractTestCase.COST_DER = utils.FramePlacementCostDerived
+    COST = crocoddyl.CostModelFramePlacement
+    COST_DER = utils.FramePlacementCostDerived
 
 
 class FramePlacementCostSumTest(CostModelSumTestCase):
-    CostModelSumTestCase.COST = crocoddyl.CostModelFramePlacement
+    COST = crocoddyl.CostModelFramePlacement
 
 
 if __name__ == '__main__':
-    unittest.main()
+    test_classes_to_run = [
+        StateCostTest, StateCostSumTest, ControlCostTest, ControlCostSumTest, FramePlacementCostTest,
+        FramePlacementCostSumTest
+    ]
+    loader = unittest.TestLoader()
+    suites_list = []
+    for test_class in test_classes_to_run:
+        suite = loader.loadTestsFromTestCase(test_class)
+        suites_list.append(suite)
+    big_suite = unittest.TestSuite(suites_list)
+    runner = unittest.TextTestRunner()
+    results = runner.run(big_suite)
