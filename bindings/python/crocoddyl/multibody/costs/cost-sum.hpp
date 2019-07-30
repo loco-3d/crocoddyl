@@ -45,11 +45,11 @@ void exposeCostSum() {
           ":param nu: dimension of control vector\n"
           ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
       .def(bp::init<pinocchio::Model*, bp::optional<bool> >(
-           bp::args(" self", " model", " withResiduals"),
-           "Initialize the total cost model.\n\n"
-           "For this case the default nu is equals to model.nv.\n"
-           ":param model: Pinocchio model of the multibody system\n"
-           ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
+          bp::args(" self", " model", " withResiduals"),
+          "Initialize the total cost model.\n\n"
+          "For this case the default nu is equals to model.nv.\n"
+          ":param model: Pinocchio model of the multibody system\n"
+          ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
       .def("addCost", &CostModelSum::addCost, "add cost item")
       .def("removeCost", &CostModelSum::removeCost, "remove cost item")
       .def<void (CostModelSum::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,

@@ -26,8 +26,7 @@ void exposeCostFrameTranslation() {
                                      ":param frame: frame ID\n"
                                      ":param oxf: Frame translation w.r.t. the origin"))
       .def_readwrite("frame", &FrameTranslation::frame, "frame ID")
-      .add_property("oxf",
-                    bp::make_getter(&FrameTranslation::oxf, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("oxf", bp::make_getter(&FrameTranslation::oxf, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&FrameTranslation::oxf), "frame translation");
 
   bp::class_<CostModelFrameTranslation, bp::bases<CostModelAbstract> >(
