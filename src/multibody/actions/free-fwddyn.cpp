@@ -32,8 +32,8 @@ void DifferentialActionModelFreeFwdDynamics::calc(boost::shared_ptr<Differential
     pinocchio::computeAllTerms(*pinocchio_, d->pinocchio, q, v);
     d->M = d->pinocchio.M;
     d->M.diagonal() += armature_;
-    d->Minv = d->M.inverse();
-    d->xout = d->Minv * (u - d->pinocchio.nle);
+    d->pinocchio.Minv = d->M.inverse();
+    d->xout = d->pinocchio.Minv * (u - d->pinocchio.nle);
   }
 
   // Computing the cost value and residuals
@@ -55,15 +55,15 @@ void DifferentialActionModelFreeFwdDynamics::calcDiff(boost::shared_ptr<Differen
 
   // Computing the dynamics derivatives
   if (force_aba_) {
-    pinocchio::computeABADerivatives(*pinocchio_, d->pinocchio, q, v, u, d->ddq_dq, d->ddq_dv, d->ddq_dtau);
-    d->Fx.leftCols(nv_) = d->ddq_dq;
-    d->Fx.rightCols(nv_) = d->ddq_dv;
-    d->Fu = d->ddq_dtau;
+    pinocchio::computeABADerivatives(*pinocchio_, d->pinocchio, q, v, u);
+    d->Fx.leftCols(nv_) = d->pinocchio.ddq_dq;
+    d->Fx.rightCols(nv_) = d->pinocchio.ddq_dv;
+    d->Fu = d->pinocchio.Minv;
   } else {
-    pinocchio::computeRNEADerivatives(*pinocchio_, d->pinocchio, q, v, u);
-    d->Fx.leftCols(nv_) = -d->Minv * d->du_dq;
-    d->Fx.rightCols(nv_) = -d->Minv * d->du_dv;
-    d->Fu = d->Minv;
+    pinocchio::computeRNEADerivatives(*pinocchio_, d->pinocchio, q, v, d->xout);
+    d->Fx.leftCols(nv_) = -d->pinocchio.Minv * d->pinocchio.dtau_dq;
+    d->Fx.rightCols(nv_) = -d->pinocchio.Minv * d->pinocchio.dtau_dv;
+    d->Fu = d->pinocchio.Minv;
   }
 
   // Computing the cost derivatives
