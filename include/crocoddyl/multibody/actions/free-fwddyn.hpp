@@ -39,8 +39,13 @@ class DifferentialActionModelFreeFwdDynamics : public DifferentialActionModelAbs
 struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbstract {
   template <typename Model>
   DifferentialActionDataFreeFwdDynamics(Model* const model)
-      : DifferentialActionDataAbstract(model), pinocchio(pinocchio::Data(*model->get_pinocchio())), ddq_dq(model->get_nv(), model->get_nv()), ddq_dv(model->get_nv(), model->get_nv()), ddq_dtau(model->get_nv(), model->get_nv()) {
+      : DifferentialActionDataAbstract(model),
+        pinocchio(pinocchio::Data(*model->get_pinocchio())),
+        ddq_dq(model->get_nv(), model->get_nv()),
+        ddq_dv(model->get_nv(), model->get_nv()),
+        ddq_dtau(model->get_nv(), model->get_nv()) {
     costs = model->get_costs()->createData(&pinocchio);
+    DifferentialActionDataAbstract::shareCostMemory(costs);
     ddq_dq.fill(0);
     ddq_dv.fill(0);
     ddq_dtau.fill(0);
