@@ -124,11 +124,11 @@ void exposeActionAbstract() {
                     bp::make_setter(&ActionDataAbstract::Luu), "Hessian of the cost")
       .add_property("costResiduals",
                     bp::make_getter(&ActionDataAbstract::r, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract::r))
+                    bp::make_setter(&ActionDataAbstract::r), "cost residual")
       .add_property("Rx", bp::make_getter(&ActionDataAbstract::Rx, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract::Rx))
+                    bp::make_setter(&ActionDataAbstract::Rx), "Jacobian of the cost residual")
       .add_property("Ru", bp::make_getter(&ActionDataAbstract::Ru, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract::Ru));
+                    bp::make_setter(&ActionDataAbstract::Ru), "Jacobian of the cost residual");
 }
 
 }  // namespace python

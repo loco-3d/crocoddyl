@@ -151,11 +151,11 @@ void exposeCostMultibody() {
                     bp::make_setter(&CostDataAbstract::Luu), "Hessian of the cost")
       .add_property("costResiduals",
                     bp::make_getter(&CostDataAbstract::r, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&CostDataAbstract::r))
+                    bp::make_setter(&CostDataAbstract::r), "cost residual")
       .add_property("Rx", bp::make_getter(&CostDataAbstract::Rx, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&CostDataAbstract::Rx))
+                    bp::make_setter(&CostDataAbstract::Rx), "Jacobian of the cost residual")
       .add_property("Ru", bp::make_getter(&CostDataAbstract::Ru, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&CostDataAbstract::Ru));
+                    bp::make_setter(&CostDataAbstract::Ru), "Jacobian of the cost residual");
 }
 
 }  // namespace python
