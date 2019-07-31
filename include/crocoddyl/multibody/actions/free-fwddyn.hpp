@@ -27,6 +27,7 @@ class DifferentialActionModelFreeFwdDynamics : public DifferentialActionModelAbs
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
   boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
+  void setArmature(const Eigen::VectorXd& armature);
   CostModelSum* get_costs() const;
   pinocchio::Model* get_pinocchio() const;
 
@@ -34,6 +35,7 @@ class DifferentialActionModelFreeFwdDynamics : public DifferentialActionModelAbs
   CostModelSum* costs_;
   pinocchio::Model* pinocchio_;
   bool force_aba_;
+  Eigen::VectorXd armature_;
 };
 
 struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbstract {
@@ -43,12 +45,20 @@ struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbst
         pinocchio(pinocchio::Data(*model->get_pinocchio())),
         ddq_dq(model->get_nv(), model->get_nv()),
         ddq_dv(model->get_nv(), model->get_nv()),
-        ddq_dtau(model->get_nv(), model->get_nv()) {
+        ddq_dtau(model->get_nv(), model->get_nv()),
+        M(model->get_nv(), model->get_nv()),
+        Minv(model->get_nv(), model->get_nv()),
+        du_dq(model->get_nv(), model->get_nv()),
+        du_dv(model->get_nv(), model->get_nv()) {
     costs = model->get_costs()->createData(&pinocchio);
     DifferentialActionDataAbstract::shareCostMemory(costs);
     ddq_dq.fill(0);
     ddq_dv.fill(0);
     ddq_dtau.fill(0);
+    M.fill(0);
+    Minv.fill(0);
+    du_dq.fill(0);
+    du_dv.fill(0);
   }
 
   pinocchio::Data pinocchio;
@@ -56,6 +66,10 @@ struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbst
   Eigen::MatrixXd ddq_dq;
   Eigen::MatrixXd ddq_dv;
   pinocchio::Data::RowMatrixXs ddq_dtau;
+  Eigen::MatrixXd M;
+  Eigen::MatrixXd Minv;
+  Eigen::MatrixXd du_dq;
+  Eigen::MatrixXd du_dv;
 };
 
 }  // namespace crocoddyl
