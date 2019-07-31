@@ -65,6 +65,19 @@ void exposeDifferentialActionFreeFwdDynamics() {
                                                             const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &DifferentialActionModelFreeFwdDynamics::calcDiff_wrap,
           bp::args(" self", " data", " x", " recalc"))
+      .add_property(
+          "pinocchio",
+          bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_pinocchio, bp::return_internal_reference<>()),
+          "multibody model (i.e. pinocchio model)")
+      .add_property("armature",
+                    bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_armature,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&DifferentialActionModelFreeFwdDynamics::set_armature),
+                    "set an armature mechanism in the joints")
+      .add_property(
+          "costs",
+          bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_costs, bp::return_internal_reference<>()),
+          "total cost model")
       .def("createData", &DifferentialActionModelFreeFwdDynamics::createData, bp::args(" self"),
            "Create the free forward dynamics differential action data.");
 
@@ -74,7 +87,16 @@ void exposeDifferentialActionFreeFwdDynamics() {
       "DifferentialActionDataFreeFwdDynamics", "Action data for the differential LQR system.",
       bp::init<DifferentialActionModelFreeFwdDynamics*>(bp::args(" self", " model"),
                                                         "Create free forward-dynamics action data.\n\n"
-                                                        ":param model: free forward-dynamics action model"));
+                                                        ":param model: free forward-dynamics action model"))
+      .add_property(
+          "pinocchio",
+          bp::make_getter(&DifferentialActionDataFreeFwdDynamics::pinocchio, bp::return_internal_reference<>()),
+          "pinocchio data")
+      .add_property("costs",
+                    bp::make_getter(&DifferentialActionDataFreeFwdDynamics::costs,
+                                    bp::return_value_policy<bp::return_by_value>()),
+                    "total cost data");
+  ;
 }
 
 }  // namespace python

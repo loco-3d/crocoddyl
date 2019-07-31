@@ -46,12 +46,13 @@ void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<Differ
 void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                       const Eigen::Ref<const Eigen::VectorXd>& x,
                                                       const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  if (recalc) {
-    calc(data, x, u);
-  }
   DifferentialActionDataFreeFwdDynamics* d = static_cast<DifferentialActionDataFreeFwdDynamics*>(data.get());
   const Eigen::VectorXd& q = x.head(nq_);
   const Eigen::VectorXd& v = x.tail(nv_);
+  if (recalc) {
+    calc(data, x, u);
+    pinocchio::computeJointJacobians(*pinocchio_, d->pinocchio, q);
+  }
 
   // Computing the dynamics derivatives
   if (force_aba_) {
@@ -67,8 +68,6 @@ void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<Di
   }
 
   // Computing the cost derivatives
-  pinocchio::computeJointJacobians(*pinocchio_, d->pinocchio, q);
-  // pinocchio::updateFramePlacements(*pinocchio_, d->pinocchio); //TODO why? we run it in calc()
   costs_->calcDiff(d->costs, x, u, false);
 }
 
@@ -76,7 +75,13 @@ boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelFreeFwd
   return boost::make_shared<DifferentialActionDataFreeFwdDynamics>(this);
 }
 
-void DifferentialActionModelFreeFwdDynamics::setArmature(const Eigen::VectorXd& armature) {
+pinocchio::Model* DifferentialActionModelFreeFwdDynamics::get_pinocchio() const { return pinocchio_; }
+
+CostModelSum* DifferentialActionModelFreeFwdDynamics::get_costs() const { return costs_; }
+
+const Eigen::VectorXd& DifferentialActionModelFreeFwdDynamics::get_armature() const { return armature_; }
+
+void DifferentialActionModelFreeFwdDynamics::set_armature(const Eigen::VectorXd& armature) {
   if (armature.size() != nv_) {
     std::cout << "The armature dimension is wrong, we cannot set it." << std::endl;
   } else {
@@ -84,9 +89,5 @@ void DifferentialActionModelFreeFwdDynamics::setArmature(const Eigen::VectorXd& 
     force_aba_ = false;
   }
 }
-
-CostModelSum* DifferentialActionModelFreeFwdDynamics::get_costs() const { return costs_; }
-
-pinocchio::Model* DifferentialActionModelFreeFwdDynamics::get_pinocchio() const { return pinocchio_; }
 
 }  // namespace crocoddyl

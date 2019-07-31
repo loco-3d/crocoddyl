@@ -28,9 +28,10 @@ class DifferentialActionModelFreeFwdDynamics : public DifferentialActionModelAbs
                 const bool& recalc = true);
   boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
-  void setArmature(const Eigen::VectorXd& armature);
-  CostModelSum* get_costs() const;
   pinocchio::Model* get_pinocchio() const;
+  CostModelSum* get_costs() const;
+  const Eigen::VectorXd& get_armature() const;
+  void set_armature(const Eigen::VectorXd& armature);
 
  private:
   CostModelSum* costs_;
