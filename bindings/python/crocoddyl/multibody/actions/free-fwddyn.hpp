@@ -19,16 +19,11 @@ namespace bp = boost::python;
 void exposeDifferentialActionFreeFwdDynamics() {
   bp::class_<DifferentialActionModelFreeFwdDynamics, bp::bases<DifferentialActionModelAbstract> >(
       "DifferentialActionModelFreeFwdDynamics",
-      // "Differential action model for linear dynamics and quadratic cost.\n\n"
-      // "This class implements a linear dynamics, and quadratic costs (i.e.\n"
-      // "LQR action). Since the DAM is a second order system, and the integrated\n"
-      // "action models are implemented as being second order integrators. This\n"
-      // "class implements a second order linear system given by\n"
-      // "  x = [q, v]\n"
-      // "  dv = Fq q + Fv v + Fu u + f0\n"
-      // "where Fq, Fv, Fu and f0 are randomly chosen constant terms. On the other\n"
-      // "hand the cost function is given by\n"
-      // "  l(x,u) = 1/2 [x,u].T [Lxx Lxu; Lxu.T Luu] [x,u] + [lx,lu].T [x,u].",
+      "Differential action model for free forward dynamics in multibody systems.\n\n"
+      "This class implements a the dynamics using Articulate Body Algorithm (ABA),\n"
+      "or a custom implementation in case of system with armatures. If you want to\n"
+      "include the armature, you need to use setArmature(). On the other hand, the\n"
+      "stack of cost functions are implemented in CostModelSum()."
       bp::init<StateMultibody*, CostModelSum*>(
           bp::args(" self", " state", " costs"),
           "Initialize the free forward-dynamics action model.\n\n"
@@ -38,8 +33,8 @@ void exposeDifferentialActionFreeFwdDynamics() {
                                                             const Eigen::VectorXd&, const Eigen::VectorXd&)>(
           "calc", &DifferentialActionModelFreeFwdDynamics::calc_wrap, bp::args(" self", " data", " x", " u=None"),
           "Compute the next state and cost value.\n\n"
-          // "It describes the time-continuous evolution of the LQR system. Additionally it\n"
-          // "computes the cost value associated to this discrete state and control pair.\n"
+          "It describes the time-continuous evolution of the multibody system without any contact.\n"
+          "Additionally it computes the cost value associated to this state and control pair.\n"
           ":param data: free forward-dynamics action data\n"
           ":param x: time-continuous state vector\n"
           ":param u: time-continuous control input")
@@ -50,11 +45,12 @@ void exposeDifferentialActionFreeFwdDynamics() {
           boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::VectorXd&, const Eigen::VectorXd&,
           const bool&)>("calcDiff", &DifferentialActionModelFreeFwdDynamics::calcDiff_wrap,
                         bp::args(" self", " data", " x", " u=None", " recalc=True"),
-                        // "Compute the derivatives of the differential LQR dynamics and cost functions.\n\n"
-                        // "It computes the partial derivatives of the differential LQR system and the\n"
-                        // "cost function. If recalc == True, it first updates the state evolution\n"
-                        // "and cost value. This function builds a quadratic approximation of the\n"
-                        // "action model (i.e. dynamical system and cost function).\n"
+                        "Compute the derivatives of the differential multibody system (free of contact) and\n"
+                        "its cost functions.\n\n"
+                        "It computes the partial derivatives of the differential multibody system and the\n"
+                        "cost function. If recalc == True, it first updates the state evolution\n"
+                        "and cost value. This function builds a quadratic approximation of the\n"
+                        "action model (i.e. dynamical system and cost function).\n"
                         ":param data: free forward-dynamics action data\n"
                         ":param x: time-continuous state vector\n"
                         ":param u: time-continuous control input\n"
