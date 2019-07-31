@@ -127,6 +127,9 @@ void exposeDifferentialActionAbstract() {
           "Create common data shared between DAMs.\n\n"
           "The differential action data uses the model in order to first process it.\n"
           ":param model: differential action model"))
+      .def("shareCostMemory", &DifferentialActionDataAbstract::shareCostMemory, bp::args(" self", " cost"),
+           "Share memory with a give cost\n\n"
+           ":param cost: cost in which we want to share memory")
       .add_property(
           "cost",
           bp::make_getter(&DifferentialActionDataAbstract::cost, bp::return_value_policy<bp::return_by_value>()),
