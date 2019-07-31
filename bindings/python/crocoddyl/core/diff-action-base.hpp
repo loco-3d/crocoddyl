@@ -22,13 +22,14 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
   DifferentialActionModelAbstract_wrap(StateAbstract* const state, int nu, int nr = 0)
       : DifferentialActionModelAbstract(state, nu, nr), bp::wrapper<DifferentialActionModelAbstract>() {}
 
-  void calc(boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
-  void calcDiff(boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
+  void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
+                const bool& recalc = true) {
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
 
@@ -112,7 +113,9 @@ void exposeDifferentialActionAbstract() {
                                       bp::return_value_policy<bp::reference_existing_object>()),
                     "state");
 
-  bp::class_<DifferentialActionDataAbstract, boost::shared_ptr<DifferentialActionDataAbstract>, boost::noncopyable>(
+  bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataAbstract> >();
+
+  bp::class_<DifferentialActionDataAbstract, boost::noncopyable>(
       "DifferentialActionDataAbstract",
       "Abstract class for differential action datas.\n\n"
       "In crocoddyl, an action data contains all the required information for processing an\n"

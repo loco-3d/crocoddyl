@@ -12,7 +12,7 @@ IntegratedActionModelEuler::IntegratedActionModelEuler(DifferentialActionModelAb
 
 IntegratedActionModelEuler::~IntegratedActionModelEuler() {}
 
-void IntegratedActionModelEuler::calc(boost::shared_ptr<ActionDataAbstract>& data,
+void IntegratedActionModelEuler::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                                       const Eigen::Ref<const Eigen::VectorXd>& x,
                                       const Eigen::Ref<const Eigen::VectorXd>& u) {
   // Static casting the data
@@ -34,7 +34,7 @@ void IntegratedActionModelEuler::calc(boost::shared_ptr<ActionDataAbstract>& dat
   d->cost = d->differential->cost;
 }
 
-void IntegratedActionModelEuler::calcDiff(boost::shared_ptr<ActionDataAbstract>& data,
+void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                           const Eigen::Ref<const Eigen::VectorXd>& x,
                                           const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   const unsigned int& nv = differential_->get_nv();

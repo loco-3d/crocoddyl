@@ -23,15 +23,16 @@ class DifferentialActionModelAbstract {
   DifferentialActionModelAbstract(StateAbstract* const state, const unsigned int& nu, const unsigned int& nr = 0);
   virtual ~DifferentialActionModelAbstract();
 
-  virtual void calc(boost::shared_ptr<DifferentialActionDataAbstract>& data,
+  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                     const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
-  virtual void calcDiff(boost::shared_ptr<DifferentialActionDataAbstract>& data,
+  virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                         const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
                         const bool& recalc = true) = 0;
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData() = 0;
 
-  void calc(boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
-  void calcDiff(boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
+  void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
+  void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                const Eigen::Ref<const Eigen::VectorXd>& x);
 
   const unsigned int& get_nq() const;
   const unsigned int& get_nv() const;
@@ -55,26 +56,26 @@ class DifferentialActionModelAbstract {
 
 #ifdef PYTHON_BINDINGS
  public:
-  void calc_wrap(boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::VectorXd& x,
+  void calc_wrap(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::VectorXd& x,
                  const Eigen::VectorXd& u) {
     calc(data, x, u);
   }
-  void calc_wrap(boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::VectorXd& x) {
+  void calc_wrap(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::VectorXd& x) {
     calc(data, x, unone_);
   }
 
-  void calcDiff_wrap(boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::VectorXd& x,
+  void calcDiff_wrap(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::VectorXd& x,
                      const Eigen::VectorXd& u, const bool& recalc) {
     calcDiff(data, x, u, recalc);
   }
-  void calcDiff_wrap(boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::VectorXd& x,
+  void calcDiff_wrap(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::VectorXd& x,
                      const Eigen::VectorXd& u) {
     calcDiff(data, x, u, true);
   }
-  void calcDiff_wrap(boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::VectorXd& x) {
+  void calcDiff_wrap(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::VectorXd& x) {
     calcDiff(data, x, unone_, true);
   }
-  void calcDiff_wrap(boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::VectorXd& x,
+  void calcDiff_wrap(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::VectorXd& x,
                      const bool& recalc) {
     calcDiff(data, x, unone_, recalc);
   }

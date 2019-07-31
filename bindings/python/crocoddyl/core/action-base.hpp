@@ -21,12 +21,12 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
   ActionModelAbstract_wrap(StateAbstract* const state, const unsigned int& nu, const unsigned int& nr = 0)
       : ActionModelAbstract(state, nu, nr), bp::wrapper<ActionModelAbstract>() {}
 
-  void calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
-  void calcDiff(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
@@ -90,7 +90,9 @@ void exposeActionAbstract() {
                                       bp::return_value_policy<bp::reference_existing_object>()),
                     "state");
 
-  bp::class_<ActionDataAbstract, boost::shared_ptr<ActionDataAbstract>, boost::noncopyable>(
+  bp::register_ptr_to_python<boost::shared_ptr<ActionDataAbstract> >();
+
+  bp::class_<ActionDataAbstract, boost::noncopyable>(
       "ActionDataAbstract",
       "Abstract class for action datas.\n\n"
       "In crocoddyl, an action data contains all the required information for processing an\n"

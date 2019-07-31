@@ -18,12 +18,12 @@ ActionModelNumDiff::ActionModelNumDiff(ActionModelAbstract& model, bool with_gau
 
 ActionModelNumDiff::~ActionModelNumDiff() {}
 
-void ActionModelNumDiff::calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                              const Eigen::Ref<const Eigen::VectorXd>& u) {
+void ActionModelNumDiff::calc(const boost::shared_ptr<ActionDataAbstract>& data,
+                              const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) {
   model_.calc(data, x, u);
 }
 
-void ActionModelNumDiff::calcDiff(boost::shared_ptr<ActionDataAbstract>& data,
+void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                   const Eigen::Ref<const Eigen::VectorXd>& x,
                                   const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   boost::shared_ptr<ActionDataNumDiff> data_num_diff = boost::static_pointer_cast<ActionDataNumDiff>(data);

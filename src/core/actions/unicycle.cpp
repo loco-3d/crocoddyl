@@ -10,7 +10,8 @@ ActionModelUnicycle::~ActionModelUnicycle() {
   // delete state_; //TODO @Carlos this breaks the test_actions c++ unit-test
 }
 
-void ActionModelUnicycle::calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+void ActionModelUnicycle::calc(const boost::shared_ptr<ActionDataAbstract>& data,
+                               const Eigen::Ref<const Eigen::VectorXd>& x,
                                const Eigen::Ref<const Eigen::VectorXd>& u) {
   ActionDataUnicycle* d = static_cast<ActionDataUnicycle*>(data.get());
   const double& c = std::cos(x[2]);
@@ -21,7 +22,7 @@ void ActionModelUnicycle::calc(boost::shared_ptr<ActionDataAbstract>& data, cons
   d->cost = 0.5 * d->r.transpose() * d->r;
 }
 
-void ActionModelUnicycle::calcDiff(boost::shared_ptr<ActionDataAbstract>& data,
+void ActionModelUnicycle::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                    const Eigen::Ref<const Eigen::VectorXd>& x,
                                    const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (recalc) {

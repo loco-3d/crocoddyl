@@ -18,7 +18,7 @@ DifferentialActionModelFreeFwdDynamics::DifferentialActionModelFreeFwdDynamics(S
 
 DifferentialActionModelFreeFwdDynamics::~DifferentialActionModelFreeFwdDynamics() {}
 
-void DifferentialActionModelFreeFwdDynamics::calc(boost::shared_ptr<DifferentialActionDataAbstract>& data,
+void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                   const Eigen::Ref<const Eigen::VectorXd>& x,
                                                   const Eigen::Ref<const Eigen::VectorXd>& u) {
   DifferentialActionDataFreeFwdDynamics* d = static_cast<DifferentialActionDataFreeFwdDynamics*>(data.get());
@@ -43,7 +43,7 @@ void DifferentialActionModelFreeFwdDynamics::calc(boost::shared_ptr<Differential
   d->cost = d->costs->cost;
 }
 
-void DifferentialActionModelFreeFwdDynamics::calcDiff(boost::shared_ptr<DifferentialActionDataAbstract>& data,
+void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                       const Eigen::Ref<const Eigen::VectorXd>& x,
                                                       const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (recalc) {

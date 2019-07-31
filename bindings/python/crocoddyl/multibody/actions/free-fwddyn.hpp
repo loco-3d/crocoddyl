@@ -29,7 +29,7 @@ void exposeDifferentialActionFreeFwdDynamics() {
           "Initialize the free forward-dynamics action model.\n\n"
           ":param state: multibody state\n"
           ":param costs: stack of cost functions")[bp::with_custodian_and_ward<1, 3>()])
-      .def<void (DifferentialActionModelFreeFwdDynamics::*)(boost::shared_ptr<DifferentialActionDataAbstract>&,
+      .def<void (DifferentialActionModelFreeFwdDynamics::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                             const Eigen::VectorXd&, const Eigen::VectorXd&)>(
           "calc", &DifferentialActionModelFreeFwdDynamics::calc_wrap, bp::args(" self", " data", " x", " u=None"),
           "Compute the next state and cost value.\n\n"
@@ -38,11 +38,11 @@ void exposeDifferentialActionFreeFwdDynamics() {
           ":param data: free forward-dynamics action data\n"
           ":param x: time-continuous state vector\n"
           ":param u: time-continuous control input")
-      .def<void (DifferentialActionModelFreeFwdDynamics::*)(boost::shared_ptr<DifferentialActionDataAbstract>&,
+      .def<void (DifferentialActionModelFreeFwdDynamics::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                             const Eigen::VectorXd&)>(
           "calc", &DifferentialActionModelFreeFwdDynamics::calc_wrap, bp::args(" self", " data", " x"))
       .def<void (DifferentialActionModelFreeFwdDynamics::*)(
-          boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::VectorXd&, const Eigen::VectorXd&,
+          const boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::VectorXd&, const Eigen::VectorXd&,
           const bool&)>("calcDiff", &DifferentialActionModelFreeFwdDynamics::calcDiff_wrap,
                         bp::args(" self", " data", " x", " u=None", " recalc=True"),
                         "Compute the derivatives of the differential multibody system (free of contact) and\n"
@@ -55,23 +55,23 @@ void exposeDifferentialActionFreeFwdDynamics() {
                         ":param x: time-continuous state vector\n"
                         ":param u: time-continuous control input\n"
                         ":param recalc: If true, it updates the state evolution and the cost value.")
-      .def<void (DifferentialActionModelFreeFwdDynamics::*)(boost::shared_ptr<DifferentialActionDataAbstract>&,
+      .def<void (DifferentialActionModelFreeFwdDynamics::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                             const Eigen::VectorXd&, const Eigen::VectorXd&)>(
           "calcDiff", &DifferentialActionModelFreeFwdDynamics::calcDiff_wrap, bp::args(" self", " data", " x", " u"))
-      .def<void (DifferentialActionModelFreeFwdDynamics::*)(boost::shared_ptr<DifferentialActionDataAbstract>&,
+      .def<void (DifferentialActionModelFreeFwdDynamics::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                             const Eigen::VectorXd&)>(
           "calcDiff", &DifferentialActionModelFreeFwdDynamics::calcDiff_wrap, bp::args(" self", " data", " x"))
-      .def<void (DifferentialActionModelFreeFwdDynamics::*)(boost::shared_ptr<DifferentialActionDataAbstract>&,
+      .def<void (DifferentialActionModelFreeFwdDynamics::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                             const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &DifferentialActionModelFreeFwdDynamics::calcDiff_wrap,
           bp::args(" self", " data", " x", " recalc"))
       .def("createData", &DifferentialActionModelFreeFwdDynamics::createData, bp::args(" self"),
-           "Create the differential LQR action data.");
+           "Create the free forward dynamics differential action data.");
 
-  boost::python::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataFreeFwdDynamics> >();
+  bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataFreeFwdDynamics> >();
 
   bp::class_<DifferentialActionDataFreeFwdDynamics, bp::bases<DifferentialActionDataAbstract> >(
-      "DifferentialActionDataLQR", "Action data for the differential LQR system.",
+      "DifferentialActionDataFreeFwdDynamics", "Action data for the differential LQR system.",
       bp::init<DifferentialActionModelFreeFwdDynamics*>(bp::args(" self", " model"),
                                                         "Create free forward-dynamics action data.\n\n"
                                                         ":param model: free forward-dynamics action model"));
