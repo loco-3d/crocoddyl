@@ -46,7 +46,7 @@ struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbst
       : DifferentialActionDataAbstract(model),
         pinocchio(pinocchio::Data(*model->get_pinocchio())) {
     costs = model->get_costs()->createData(&pinocchio);
-    DifferentialActionDataAbstract::shareCostMemory(costs);
+    shareCostMemory(costs);
   }
 
   pinocchio::Data pinocchio;
