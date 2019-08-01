@@ -14,7 +14,12 @@
 
 namespace crocoddyl {
 
-enum Jcomponent { both = 0, first, second };
+enum Jcomponent { both = 0, first = 1, second = 2 };
+
+inline bool is_a_Jcomponent(Jcomponent firstsecond)
+{
+  return (firstsecond == first || firstsecond == second || firstsecond == both);
+}
 
 class StateAbstract {
  public:

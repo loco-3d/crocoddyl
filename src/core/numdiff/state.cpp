@@ -37,9 +37,8 @@ void StateNumDiff::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const E
 void StateNumDiff::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x1, const Eigen::Ref<const Eigen::VectorXd>& x2,
                          Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
                          Jcomponent firstsecond) {
-  assert((firstsecond == Jcomponent::first || firstsecond == Jcomponent::second || firstsecond == Jcomponent::both) &&
-         ("StateNumDiff::Jdiff: firstsecond must be one of the Jcomponent "
-          "{both, first, second }"));
+  assert(is_a_Jcomponent(firstsecond) && ("StateNumDiff::Jdiff: firstsecond "
+         "must be one of the Jcomponent {both, first, second }"));
   dx_.setZero();
   diff(x1, x2, dx0_);
   if (firstsecond == first || firstsecond == both) {
