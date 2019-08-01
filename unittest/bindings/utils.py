@@ -275,7 +275,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
         # Computing the cost derivatives
         self.costs.calcDiff(data.costs, x, u, False)
 
-    def set_armature(armature):
+    def set_armature(self, armature):
         if armature.size != self.nv:
             print "The armature dimension is wrong, we cannot set it."
         else:
@@ -372,7 +372,6 @@ class FrameTranslationCostDerived(crocoddyl.CostModelAbstract):
     def calcDiff(self, data, x, u, recalc=True):
         if recalc:
             self.calc(data, x, u)
-        nq = self.nq
         pinocchio.updateFramePlacements(self.pinocchio, data.pinocchio)
         data.R = data.pinocchio.oMf[self.xref.frame].rotation
         data.J = data.R * pinocchio.getFrameJacobian(self.pinocchio, data.pinocchio, self.xref.frame,
