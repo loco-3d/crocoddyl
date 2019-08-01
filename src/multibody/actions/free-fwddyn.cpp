@@ -6,6 +6,7 @@
 #include <pinocchio/algorithm/kinematics.hpp>
 #include <pinocchio/algorithm/jacobian.hpp>
 #include <pinocchio/algorithm/frames.hpp>
+#include <pinocchio/algorithm/cholesky.hpp>
 
 namespace crocoddyl {
 
@@ -30,9 +31,9 @@ void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<Differ
     d->xout = pinocchio::aba(*pinocchio_, d->pinocchio, q, v, u);
   } else {
     pinocchio::computeAllTerms(*pinocchio_, d->pinocchio, q, v);
-    d->M = d->pinocchio.M;
-    d->M.diagonal() += armature_;
-    d->pinocchio.Minv = d->M.inverse();
+    d->pinocchio.M.diagonal() += armature_;
+    pinocchio::cholesky::decompose(*pinocchio_, d->pinocchio);
+    pinocchio::cholesky::computeMinv(*pinocchio_, d->pinocchio, d->pinocchio.Minv);
     d->xout = d->pinocchio.Minv * (u - d->pinocchio.nle);
   }
 
