@@ -66,7 +66,10 @@ void exposeIntegratedActionEuler() {
       .add_property(
           "differential",
           bp::make_function(&IntegratedActionModelEuler::get_differential, bp::return_internal_reference<>()),
-          "differential action model");
+          "differential action model")
+      .add_property(
+          "dt", bp::make_function(&IntegratedActionModelEuler::get_dt, bp::return_value_policy<bp::return_by_value>()),
+          &IntegratedActionModelEuler::set_dt, "step time");
 
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataEuler> >();
 

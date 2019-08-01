@@ -74,4 +74,11 @@ boost::shared_ptr<ActionDataAbstract> IntegratedActionModelEuler::createData() {
 
 DifferentialActionModelAbstract* IntegratedActionModelEuler::get_differential() const { return differential_; }
 
+const double& IntegratedActionModelEuler::get_dt() const { return time_step_; }
+
+void IntegratedActionModelEuler::set_dt(double dt) {
+  time_step_ = dt;
+  time_step2_ = dt * dt;
+}
+
 }  // namespace crocoddyl
