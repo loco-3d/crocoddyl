@@ -103,7 +103,7 @@ struct DifferentialActionDataAbstract {
         Lu_ref(&Lu(0), model->get_nu()),
         Lxx_ref(&Lxx(0), model->get_ndx(), model->get_ndx()),
         Lxu_ref(&Lxu(0), model->get_ndx(), model->get_nu()),
-        Luu_ref(&Lxx(0), model->get_nu(), model->get_nu()),
+        Luu_ref(&Luu(0), model->get_nu(), model->get_nu()),
         r_ref(&r(0), model->get_nr()),
         Rx_ref(&Rx(0), model->get_nr(), model->get_ndx()),
         Ru_ref(&Ru(0), model->get_nr(), model->get_nu()) {
