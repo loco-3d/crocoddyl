@@ -43,8 +43,7 @@ class DifferentialActionModelFreeFwdDynamics : public DifferentialActionModelAbs
 struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbstract {
   template <typename Model>
   DifferentialActionDataFreeFwdDynamics(Model* const model)
-      : DifferentialActionDataAbstract(model),
-        pinocchio(pinocchio::Data(*model->get_pinocchio())) {
+      : DifferentialActionDataAbstract(model), pinocchio(pinocchio::Data(*model->get_pinocchio())) {
     costs = model->get_costs()->createData(&pinocchio);
     shareCostMemory(costs);
   }

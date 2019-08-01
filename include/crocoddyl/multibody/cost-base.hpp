@@ -30,14 +30,14 @@ class CostModelAbstract {
   CostModelAbstract(pinocchio::Model* const model, const unsigned int& nr, const bool& with_residuals = true);
   ~CostModelAbstract();
 
-  virtual void calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                     const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
-  virtual void calcDiff(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) = 0;
   virtual boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
-  void calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
-  void calcDiff(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
+  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
+  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
 
   pinocchio::Model* get_pinocchio() const;
   ActivationModelAbstract* get_activation() const;
@@ -62,22 +62,23 @@ class CostModelAbstract {
 
 #ifdef PYTHON_BINDINGS
  public:
-  void calc_wrap(boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
+  void calc_wrap(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
     calc(data, x, u);
   }
-  void calc_wrap(boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x) { calc(data, x, unone_); }
+  void calc_wrap(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x) { calc(data, x, unone_); }
 
-  void calcDiff_wrap(boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u,
-                     const bool& recalc) {
+  void calcDiff_wrap(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x,
+                     const Eigen::VectorXd& u, const bool& recalc) {
     calcDiff(data, x, u, recalc);
   }
-  void calcDiff_wrap(boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
+  void calcDiff_wrap(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x,
+                     const Eigen::VectorXd& u) {
     calcDiff(data, x, u, true);
   }
-  void calcDiff_wrap(boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x) {
+  void calcDiff_wrap(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x) {
     calcDiff(data, x, unone_, true);
   }
-  void calcDiff_wrap(boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x, const bool& recalc) {
+  void calcDiff_wrap(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x, const bool& recalc) {
     calcDiff(data, x, unone_, recalc);
   }
 #endif

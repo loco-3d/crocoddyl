@@ -56,16 +56,16 @@ void exposeCostControl() {
           "model is quadratic, i.e. crocoddyl.ActivationModelQuad(nu)\n"
           ":param model: Pinocchio model of the multibody system\n"
           ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2>()])
-      .def<void (CostModelControl::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                       const Eigen::VectorXd&)>("calc", &CostModelControl::calc_wrap,
                                                                bp::args(" self", " data", " x", " u=None"),
                                                                "Compute the control cost.\n\n"
                                                                ":param data: cost data\n"
                                                                ":param x: time-discrete state vector\n"
                                                                ":param u: time-discrete control input")
-      .def<void (CostModelControl::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
+      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calc", &CostModelControl::calc_wrap, bp::args(" self", " data", " x"))
-      .def<void (CostModelControl::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                       const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &CostModelControl::calcDiff_wrap, bp::args(" self", " data", " x", " u=None", " recalc=True"),
           "Compute the derivatives of the control cost.\n\n"
@@ -73,13 +73,14 @@ void exposeCostControl() {
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n"
           ":param recalc: If true, it updates the state evolution and the cost value.")
-      .def<void (CostModelControl::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                       const Eigen::VectorXd&)>("calcDiff", &CostModelControl::calcDiff_wrap,
                                                                bp::args(" self", " data", " x", " u"))
-      .def<void (CostModelControl::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
+      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &CostModelControl::calcDiff_wrap, bp::args(" self", " data", " x"))
-      .def<void (CostModelControl::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &CostModelControl::calcDiff_wrap, bp::args(" self", " data", " x", " recalc"))
+      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+                                      const bool&)>("calcDiff", &CostModelControl::calcDiff_wrap,
+                                                    bp::args(" self", " data", " x", " recalc"))
       .add_property("uref",
                     bp::make_function(&CostModelControl::get_uref, bp::return_value_policy<bp::return_by_value>()),
                     "reference control");

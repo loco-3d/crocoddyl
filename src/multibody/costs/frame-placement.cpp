@@ -25,7 +25,8 @@ CostModelFramePlacement::CostModelFramePlacement(pinocchio::Model* const model, 
 
 CostModelFramePlacement::~CostModelFramePlacement() {}
 
-void CostModelFramePlacement::calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>&,
+void CostModelFramePlacement::calc(const boost::shared_ptr<CostDataAbstract>& data,
+                                   const Eigen::Ref<const Eigen::VectorXd>&,
                                    const Eigen::Ref<const Eigen::VectorXd>&) {
   CostDataFramePlacement* d = static_cast<CostDataFramePlacement*>(data.get());
 
@@ -39,7 +40,7 @@ void CostModelFramePlacement::calc(boost::shared_ptr<CostDataAbstract>& data, co
   d->cost = d->activation->a_value;
 }
 
-void CostModelFramePlacement::calcDiff(boost::shared_ptr<CostDataAbstract>& data,
+void CostModelFramePlacement::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                        const Eigen::Ref<const Eigen::VectorXd>& x,
                                        const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (recalc) {

@@ -60,16 +60,16 @@ void exposeCostFramePlacement() {
           "crocoddyl.ActivationModelQuad(6), and nu is equals to model.nv.\n"
           ":param model: Pinocchio model of the multibody system\n"
           ":param Mref: reference frame placement")[bp::with_custodian_and_ward<1, 2>()])
-      .def<void (CostModelFramePlacement::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+      .def<void (CostModelFramePlacement::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                              const Eigen::VectorXd&)>("calc", &CostModelFramePlacement::calc_wrap,
                                                                       bp::args(" self", " data", " x", " u=None"),
                                                                       "Compute the frame placement cost.\n\n"
                                                                       ":param data: cost data\n"
                                                                       ":param x: time-discrete state vector\n"
                                                                       ":param u: time-discrete control input")
-      .def<void (CostModelFramePlacement::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
+      .def<void (CostModelFramePlacement::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calc", &CostModelFramePlacement::calc_wrap, bp::args(" self", " data", " x"))
-      .def<void (CostModelFramePlacement::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+      .def<void (CostModelFramePlacement::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                              const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &CostModelFramePlacement::calcDiff_wrap,
           bp::args(" self", " data", " x", " u=None", " recalc=True"),
@@ -78,12 +78,12 @@ void exposeCostFramePlacement() {
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n"
           ":param recalc: If true, it updates the state evolution and the cost value.")
-      .def<void (CostModelFramePlacement::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+      .def<void (CostModelFramePlacement::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                              const Eigen::VectorXd&)>(
           "calcDiff", &CostModelFramePlacement::calcDiff_wrap, bp::args(" self", " data", " x", " u"))
-      .def<void (CostModelFramePlacement::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
+      .def<void (CostModelFramePlacement::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &CostModelFramePlacement::calcDiff_wrap, bp::args(" self", " data", " x"))
-      .def<void (CostModelFramePlacement::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+      .def<void (CostModelFramePlacement::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                              const bool&)>("calcDiff", &CostModelFramePlacement::calcDiff_wrap,
                                                            bp::args(" self", " data", " x", " recalc"))
       .def("createData", &CostModelFramePlacement::createData, bp::with_custodian_and_ward_postcall<0, 2>(),

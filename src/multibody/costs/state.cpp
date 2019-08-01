@@ -58,15 +58,16 @@ CostModelState::CostModelState(pinocchio::Model* const model, StateAbstract* sta
 
 CostModelState::~CostModelState() {}
 
-void CostModelState::calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+void CostModelState::calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                           const Eigen::Ref<const Eigen::VectorXd>&) {
   state_->diff(xref_, x, data->r);
   activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;
 }
 
-void CostModelState::calcDiff(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                              const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
+void CostModelState::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+                              const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
+                              const bool& recalc) {
   if (recalc) {
     calc(data, x, u);
   }

@@ -59,16 +59,16 @@ void exposeCostFrameTranslation() {
           "crocoddyl.ActivationModelQuad(3), and nu is equals to model.nv.\n"
           ":param model: Pinocchio model of the multibody system\n"
           ":param xref: reference frame translation")[bp::with_custodian_and_ward<1, 2>()])
-      .def<void (CostModelFrameTranslation::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+      .def<void (CostModelFrameTranslation::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                                const Eigen::VectorXd&)>("calc", &CostModelFrameTranslation::calc_wrap,
                                                                         bp::args(" self", " data", " x", " u=None"),
                                                                         "Compute the frame translation cost.\n\n"
                                                                         ":param data: cost data\n"
                                                                         ":param x: time-discrete state vector\n"
                                                                         ":param u: time-discrete control input")
-      .def<void (CostModelFrameTranslation::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
+      .def<void (CostModelFrameTranslation::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calc", &CostModelFrameTranslation::calc_wrap, bp::args(" self", " data", " x"))
-      .def<void (CostModelFrameTranslation::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+      .def<void (CostModelFrameTranslation::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                                const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &CostModelFrameTranslation::calcDiff_wrap,
           bp::args(" self", " data", " x", " u=None", " recalc=True"),
@@ -77,12 +77,12 @@ void exposeCostFrameTranslation() {
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n"
           ":param recalc: If true, it updates the state evolution and the cost value.")
-      .def<void (CostModelFrameTranslation::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+      .def<void (CostModelFrameTranslation::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                                const Eigen::VectorXd&)>(
           "calcDiff", &CostModelFrameTranslation::calcDiff_wrap, bp::args(" self", " data", " x", " u"))
-      .def<void (CostModelFrameTranslation::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
+      .def<void (CostModelFrameTranslation::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &CostModelFrameTranslation::calcDiff_wrap, bp::args(" self", " data", " x"))
-      .def<void (CostModelFrameTranslation::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+      .def<void (CostModelFrameTranslation::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                                const bool&)>("calcDiff", &CostModelFrameTranslation::calcDiff_wrap,
                                                              bp::args(" self", " data", " x", " recalc"))
       .def("createData", &CostModelFrameTranslation::createData, bp::with_custodian_and_ward_postcall<0, 2>(),

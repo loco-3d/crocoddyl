@@ -30,7 +30,7 @@ void CostModelSum::removeCost(const std::string& name) {
   }
 }
 
-void CostModelSum::calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+void CostModelSum::calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const Eigen::Ref<const Eigen::VectorXd>& u) {
   CostDataSum* d = static_cast<CostDataSum*>(data.get());
   d->cost = 0.;
@@ -53,8 +53,9 @@ void CostModelSum::calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::
   }
 }
 
-void CostModelSum::calcDiff(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                            const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
+void CostModelSum::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+                            const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
+                            const bool& recalc) {
   if (recalc) {
     calc(data, x, u);
   }
