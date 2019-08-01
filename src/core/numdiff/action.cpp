@@ -6,7 +6,7 @@ ActionModelNumDiff::ActionModelNumDiff(ActionModelAbstract& model, bool with_gau
     : ActionModelAbstract(model.get_state(), model.get_nu(), model.get_nr()), model_(model) {
   with_gauss_approx_ = with_gauss_approx;
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
-  assert((!with_gauss_approx_ || ncost_ > 1) && "No Gauss approximation possible with nr = 1");
+  assert((!with_gauss_approx_ || nr_ > 1) && "No Gauss approximation possible with nr = 1");
 
   dx_.resize(model.get_ndx());
   dx_.setZero();

@@ -53,9 +53,8 @@ void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Ei
                            Jcomponent firstsecond) {
   assert(x0.size() == nx_ && "StateMultibody::Jdiff: x0 has wrong dimension");
   assert(x1.size() == nx_ && "StateMultibody::Jdiff: x1 has wrong dimension");
-  assert((firstsecond == Jcomponent::first || firstsecond == Jcomponent::second || firstsecond == Jcomponent::both) &&
-         ("StateMultibody::Jdiff: firstsecond must be one of the Jcomponent "
-          "{both, first, second}"));
+  assert(is_a_Jcomponent(firstsecond) && ("StateMultibody::Jdiff: firstsecond "
+         "must be one of the Jcomponent {both, first, second}"));
 
   if (firstsecond == first) {
     assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "StateMultibody::Jdiff: Jfirst must be of the good size");
