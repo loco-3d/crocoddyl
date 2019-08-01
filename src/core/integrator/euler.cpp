@@ -61,11 +61,11 @@ void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbst
   }
   // ddx_dx[range(nv), range(nv, 2 * nv)] += 1
   d->Fu = time_step_ * d->dxnext_ddx.transpose() * d->ddx_du;
-  d->Lx = d->differential->Lx;
-  d->Lu = d->differential->Lu;
-  d->Lxx = d->differential->Lxx;
-  d->Lxu = d->differential->Lxu;
-  d->Luu = d->differential->Luu;
+  d->Lx = d->differential->get_Lx();
+  d->Lu = d->differential->get_Lu();
+  d->Lxx = d->differential->get_Lxx();
+  d->Lxu = d->differential->get_Lxu();
+  d->Luu = d->differential->get_Luu();
 }
 
 boost::shared_ptr<ActionDataAbstract> IntegratedActionModelEuler::createData() {
