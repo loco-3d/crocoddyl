@@ -228,6 +228,68 @@ class DifferentialLQRDerived(crocoddyl.DifferentialActionModelAbstract):
         data.Lxu = self.Lxu
 
 
+class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstract):
+    def __init__(self, pinocchioState, costModel):
+        crocoddyl.DifferentialActionModelAbstract.__init__(self, pinocchioState, pinocchioState.nv, costModel.nr)
+        self.pinocchio = pinocchioState.model
+        self.costs = costModel
+        self.forceAba = True
+        self.armature = np.matrix(np.zeros(0))
+
+    def calc(self, data, x, u=None):
+        if u is None:
+            u = self.unone
+        q, v = x[:self.nq], x[-self.nv:]
+        # Computing the dynamics using ABA or manually for armature case
+        if self.forceAba:
+            data.xout = pinocchio.aba(self.pinocchio, data.pinocchio, q, v, u)
+        else:
+            pinocchio.computeAllTerms(self.pinocchio, data.pinocchio, q, v)
+            data.M = data.pinocchio.M
+            if self.pinocchio.size == self.nv:
+                data.M[range(self.nv), range(self.nv)] += self.pinocchio.armature
+            data.Minv = np.linalg.inv(data.M)
+            data.xout[:] = data.Minv * (u - data.pinocchio.nle)
+        # Computing the cost value and residuals
+        pinocchio.forwardKinematics(self.pinocchio, data.pinocchio, q, v)
+        pinocchio.updateFramePlacements(self.pinocchio, data.pinocchio)
+        self.costs.calc(data.costs, x, u)
+        data.cost = data.costs.cost
+
+    def calcDiff(self, data, x, u=None, recalc=True):
+        q, v = x[:self.nq], x[-self.nv:]
+        if u is None:
+            u = self.unone
+        if recalc:
+            self.calc(data, x, u)
+            pinocchio.computeJointJacobians(self.pinocchio, data.pinocchio, q)
+        # Computing the dynamics derivatives
+        if self.forceAba:
+            pinocchio.computeABADerivatives(self.pinocchio, data.pinocchio, q, v, u)
+            data.Fx = np.hstack([data.pinocchio.ddq_dq, data.pinocchio.ddq_dv])
+            data.Fu = data.pinocchio.Minv
+        else:
+            pinocchio.computeRNEADerivatives(self.pinocchio, data.pinocchio, q, v, data.xout)
+            data.Fx = -np.hstack([data.Minv * data.pinocchio.dtau_dq, data.Minv * data.pinocchio.dtau_dv])
+            data.Fu = data.pinocchio.Minv
+        # Computing the cost derivatives
+        self.costs.calcDiff(data.costs, x, u, False)
+
+    def set_armature(armature):
+        if armature.size != self.nv:
+            print "The armature dimension is wrong, we cannot set it."
+        else:
+            self.forceAba = False
+            self.armature = armature
+
+    def createData(self):
+        data = crocoddyl.DifferentialActionModelAbstract.createData(self)
+        data.pinocchio = pinocchio.Data(self.pinocchio)
+        data.costs = self.costs.createData(data.pinocchio)
+        data.shareCostMemory(data.costs)
+        return data
+
+
 class StateCostDerived(crocoddyl.CostModelAbstract):
     def __init__(self, pinocchioModel, state, activation=None, xref=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(state.ndx)

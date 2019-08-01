@@ -1,5 +1,6 @@
 import crocoddyl
-from utils import UnicycleDerived, LQRDerived, DifferentialLQRDerived
+import utils
+import pinocchio
 from random import randint
 import numpy as np
 import unittest
@@ -58,21 +59,35 @@ class ActionModelAbstractTestCase(unittest.TestCase):
 
 class UnicycleTest(ActionModelAbstractTestCase):
     MODEL = crocoddyl.ActionModelUnicycle()
-    MODEL_DER = UnicycleDerived()
+    MODEL_DER = utils.UnicycleDerived()
 
 
 class LQRTest(ActionModelAbstractTestCase):
     NX = randint(1, 21)
     NU = randint(1, NX)
     MODEL = crocoddyl.ActionModelLQR(NX, NU)
-    MODEL_DER = LQRDerived(NX, NU)
+    MODEL_DER = utils.LQRDerived(NX, NU)
 
 
 class DifferentialLQRTest(ActionModelAbstractTestCase):
     NX = randint(1, 21)
     NU = randint(1, NX)
     MODEL = crocoddyl.DifferentialActionModelLQR(NX, NU)
-    MODEL_DER = DifferentialLQRDerived(NX, NU)
+    MODEL_DER = utils.DifferentialLQRDerived(NX, NU)
+
+
+class FreeFwdDynamicsTest(ActionModelAbstractTestCase):
+    ROBOT_MODEL = pinocchio.buildSampleModelManipulator()
+    STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+    COST_SUM = crocoddyl.CostModelSum(ROBOT_MODEL, ROBOT_MODEL.nv)
+    COST_SUM.addCost('xReg', crocoddyl.CostModelState(ROBOT_MODEL, STATE), 1.)
+    COST_SUM.addCost(
+        'frTrack',
+        crocoddyl.CostModelFramePlacement(
+            ROBOT_MODEL, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("effector_body"), pinocchio.SE3.Random())),
+        1.)
+    MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, COST_SUM)
+    MODEL_DER = utils.DifferentialFreeFwdDynamicsDerived(STATE, COST_SUM)
 
 
 if __name__ == '__main__':
