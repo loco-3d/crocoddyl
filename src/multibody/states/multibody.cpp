@@ -43,7 +43,7 @@ void StateMultibody::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const
 
   const Eigen::VectorXd& q = x.head(nq_);
   const Eigen::VectorXd& v = x.tail(nv_);
-  const Eigen::VectorXd& dq = dx.head(nq_);
+  const Eigen::VectorXd& dq = dx.head(nv_);
   const Eigen::VectorXd& dv = dx.tail(nv_);
   xout << pinocchio::integrate(*model_, q, dq), v + dv;
 }
@@ -114,7 +114,7 @@ void StateMultibody::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x,
           "{both, first, second}"));
 
   const Eigen::VectorXd& q = x.head(nq_);
-  const Eigen::VectorXd& dq = dx.head(nq_);
+  const Eigen::VectorXd& dq = dx.head(nv_);
   if (firstsecond == first) {
     assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ &&
            "StateMultibody::Jintegrate: Jfirst must be of the good size");
