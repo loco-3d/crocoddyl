@@ -46,19 +46,18 @@ void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbst
   boost::shared_ptr<IntegratedActionDataEuler> d = boost::static_pointer_cast<IntegratedActionDataEuler>(data);
 
   // Computing the derivatives for the time-continuous model (i.e. differential model)
-  differential_->calcDiff(d->differential, x, u);
+  differential_->calcDiff(d->differential, x, u, false);
   differential_->get_state()->Jintegrate(x, d->dx, d->dxnext_dx, d->dxnext_ddx);
 
   const Eigen::MatrixXd& da_dx = d->differential->Fx;
   const Eigen::MatrixXd& da_du = d->differential->Fu;
   d->ddx_dx << da_dx * time_step_, da_dx;
   d->ddx_du << da_du * time_step_, da_du;
-
-  d->Fx = d->dxnext_dx + time_step_ * d->dxnext_ddx.transpose() * d->ddx_dx;
   for (unsigned int i = 0; i < nv; ++i) {
-    d->Fx(i, i + nv) += 1.;
+    d->ddx_dx(i, i + nv) += 1.;
   }
-  d->Fu = time_step_ * d->dxnext_ddx.transpose() * d->ddx_du;
+  d->Fx = d->dxnext_dx + time_step_ * d->dxnext_ddx * d->ddx_dx;
+  d->Fu = time_step_ * d->dxnext_ddx * d->ddx_du;
   d->Lx = d->differential->get_Lx();
   d->Lu = d->differential->get_Lu();
   d->Lxx = d->differential->get_Lxx();
