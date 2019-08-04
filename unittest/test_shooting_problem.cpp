@@ -29,9 +29,9 @@ void register_action_model_lqr_unit_tests() {
   bool driftfree = true;
   double num_diff_modifier = 1e4;
 
-  framework::master_test_suite().add(
-    BOOST_TEST_CASE(boost::bind(&test_1, crocoddyl::ShootingProblem()))
-  );
+  // framework::master_test_suite().add(
+  //   BOOST_TEST_CASE(boost::bind(&test_1, crocoddyl::ShootingProblem()))
+  // );
 }
 
 //____________________________________________________________________________//
