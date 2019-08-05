@@ -22,6 +22,9 @@ DifferentialActionModelFreeFwdDynamics::~DifferentialActionModelFreeFwdDynamics(
 void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                   const Eigen::Ref<const Eigen::VectorXd>& x,
                                                   const Eigen::Ref<const Eigen::VectorXd>& u) {
+  assert(x.size() == nx_ && "DifferentialActionModelFreeFwdDynamics::calc: x has wrong dimension");
+  assert(u.size() == nu_ && "DifferentialActionModelFreeFwdDynamics::calc: u has wrong dimension");
+
   DifferentialActionDataFreeFwdDynamics* d = static_cast<DifferentialActionDataFreeFwdDynamics*>(data.get());
   const Eigen::VectorXd& q = x.head(nq_);
   const Eigen::VectorXd& v = x.tail(nv_);
@@ -47,6 +50,9 @@ void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<Differ
 void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                       const Eigen::Ref<const Eigen::VectorXd>& x,
                                                       const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
+  assert(x.size() == nx_ && "DifferentialActionModelFreeFwdDynamics::calcDiff: x has wrong dimension");
+  assert(u.size() == nu_ && "DifferentialActionModelFreeFwdDynamics::calcDiff: u has wrong dimension");
+
   DifferentialActionDataFreeFwdDynamics* d = static_cast<DifferentialActionDataFreeFwdDynamics*>(data.get());
   const Eigen::VectorXd& q = x.head(nq_);
   const Eigen::VectorXd& v = x.tail(nv_);

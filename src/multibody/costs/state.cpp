@@ -60,6 +60,8 @@ CostModelState::~CostModelState() {}
 
 void CostModelState::calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                           const Eigen::Ref<const Eigen::VectorXd>&) {
+  assert(x.size() == nx_ && "CostModelState::calc: x has wrong dimension");
+
   state_->diff(xref_, x, data->r);
   activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;
@@ -68,6 +70,8 @@ void CostModelState::calc(const boost::shared_ptr<CostDataAbstract>& data, const
 void CostModelState::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                               const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
                               const bool& recalc) {
+  assert(x.size() == nx_ && "CostModelState::calcDiff: x has wrong dimension");
+
   if (recalc) {
     calc(data, x, u);
   }
