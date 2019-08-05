@@ -19,7 +19,7 @@ namespace bp = boost::python;
 class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstract,
                                              public bp::wrapper<DifferentialActionModelAbstract> {
  public:
-  DifferentialActionModelAbstract_wrap(StateAbstract* const state, int nu, int nr = 0)
+  DifferentialActionModelAbstract_wrap(StateAbstract* const state, int nu, int nr = 1)
       : DifferentialActionModelAbstract(state, nu, nr), bp::wrapper<DifferentialActionModelAbstract>() {}
 
   void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -48,7 +48,7 @@ void exposeDifferentialActionAbstract() {
       "computing the dynamics, cost functions and their derivatives. These computations are\n"
       "mainly carry on inside calc() and calcDiff(), respectively.",
       bp::init<StateAbstract*, int, bp::optional<int> >(
-          bp::args(" self", " state", " nu", " nr=0"),
+          bp::args(" self", " state", " nu", " nr=1"),
           "Initialize the differential action model.\n\n"
           ":param state: state\n"
           ":param nu: dimension of control vector\n"

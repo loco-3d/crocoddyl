@@ -18,7 +18,7 @@ namespace bp = boost::python;
 
 class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<ActionModelAbstract> {
  public:
-  ActionModelAbstract_wrap(StateAbstract* const state, const unsigned int& nu, const unsigned int& nr = 0)
+  ActionModelAbstract_wrap(StateAbstract* const state, const unsigned int& nu, const unsigned int& nr = 1)
       : ActionModelAbstract(state, nu, nr), bp::wrapper<ActionModelAbstract>() {}
 
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -44,7 +44,7 @@ void exposeActionAbstract() {
       "derivatives. These computations are mainly carry on inside calc() and calcDiff(),\n"
       "respectively.",
       bp::init<StateAbstract*, int, bp::optional<int> >(
-          bp::args(" self", " state", " nu", " nr=0"),
+          bp::args(" self", " state", " nu", " nr=1"),
           "Initialize the action model.\n\n"
           ":param state: state description,\n"
           ":param nu: dimension of control vector,\n"
