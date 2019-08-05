@@ -11,8 +11,8 @@ ShootingProblem::ShootingProblem(const Eigen::VectorXd& x0, const std::vector<Ac
 ShootingProblem::~ShootingProblem() {}
 
 double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us) {
-  assert(xs.size() == T_ + 1 && "Wrong dimension of the state trajectory, it should be T + 1.");
-  assert(us.size() == T_ && "Wrong dimension of the control trajectory, it should be T.");
+  assert(xs.size() == T_ + 1 && "ShootingProblem::calc: wrong dimension of the state trajectory, it should be T + 1.");
+  assert(us.size() == T_ && "ShootingProblem::calc: wrong dimension of the control trajectory, it should be T.");
 
   cost_ = 0;
   for (unsigned int i = 0; i < T_; ++i) {
@@ -30,8 +30,9 @@ double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::
 }
 
 double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us) {
-  assert(xs.size() == T_ + 1 && "Wrong dimension of the state trajectory, it should be T + 1.");
-  assert(us.size() == T_ && "Wrong dimension of the control trajectory, it should be T.");
+  assert(xs.size() == T_ + 1 &&
+         "ShootingProblem::calcDiff: wrong dimension of the state trajectory, it should be T + 1.");
+  assert(us.size() == T_ && "ShootingProblem::calcDiff: wrong dimension of the control trajectory, it should be T.");
 
   cost_ = 0;
   for (long unsigned int i = 0; i < T_; ++i) {
@@ -49,7 +50,7 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const s
 }
 
 void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us, std::vector<Eigen::VectorXd>& xs) {
-  assert(us.size() == T_ && "Wrong dimension of the control trajectory, it should be T.");
+  assert(us.size() == T_ && "ShootingProblem::rollout: wrong dimension of the control trajectory, it should be T.");
 
   xs.resize(T_ + 1);
   xs[0] = x0_;
