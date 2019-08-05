@@ -48,7 +48,7 @@ struct CostDataFrameTranslation : public CostDataAbstract {
 
   template <typename Model>
   CostDataFrameTranslation(Model* const model, pinocchio::Data* const data)
-      : CostDataAbstract(model, data), J(6, model->get_nv()), fJf(6, model->get_nv()) {
+      : CostDataAbstract(model, data), J(3, model->get_nv()), fJf(6, model->get_nv()) {
     J.fill(0);
     fJf.fill(0);
   }
