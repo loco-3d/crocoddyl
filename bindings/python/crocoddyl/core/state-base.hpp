@@ -89,7 +89,7 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
     }
   }
 
-  void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
+  void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                   Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent _firstsecond) {
     std::string firstsecond;
     switch (_firstsecond) {
@@ -108,7 +108,7 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
       default: { firstsecond = "both"; }
     }
 
-    bp::list res = Jintegrate_wrap(x0, x1, firstsecond);
+    bp::list res = Jintegrate_wrap(x, dx, firstsecond);
     if (firstsecond == "both") {
       Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
       Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[1])();
@@ -119,16 +119,16 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
     }
   }
 
-  bp::list Jintegrate_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
+  bp::list Jintegrate_wrap(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                            std::string firstsecond) {
     assert(firstsecond == "both" || firstsecond == "first" || firstsecond == "second");
     if (firstsecond == "both") {
-      bp::list Jacs = bp::call<bp::list>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x0,
-                                         (Eigen::VectorXd)x1, firstsecond);
+      bp::list Jacs = bp::call<bp::list>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x,
+                                         (Eigen::VectorXd)dx, firstsecond);
       return Jacs;
     } else {
-      Eigen::MatrixXd J = bp::call<Eigen::MatrixXd>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x0,
-                                                    (Eigen::VectorXd)x1, firstsecond);
+      Eigen::MatrixXd J = bp::call<Eigen::MatrixXd>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x,
+                                                    (Eigen::VectorXd)dx, firstsecond);
       bp::list list;
       list.append(J);
       return list;

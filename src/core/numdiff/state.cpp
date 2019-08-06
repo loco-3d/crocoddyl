@@ -34,24 +34,24 @@ void StateNumDiff::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const E
   state_.integrate(x, dx, xout);
 }
 
-void StateNumDiff::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x1, const Eigen::Ref<const Eigen::VectorXd>& x2,
+void StateNumDiff::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
                          Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
                          Jcomponent firstsecond) {
   assert(is_a_Jcomponent(firstsecond) && ("StateNumDiff::Jdiff: firstsecond "
                                           "must be one of the Jcomponent {both, first, second }"));
   dx_.setZero();
-  diff(x1, x2, dx0_);
+  diff(x0, x1, dx0_);
   if (firstsecond == first || firstsecond == both) {
     assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "StateNumDiff::Jdiff: Jfirst must be of the good size");
     Jfirst.setZero();
     for (unsigned i = 0; i < ndx_; ++i) {
       dx_(i) = disturbance_;
-      // tmp_x = int(x_1, d_x)
-      integrate(x1, dx_, tmp_x_);
-      // Jfirst[:,k] = diff(tmp_x, x2) = diff(int(x_1 + d_x), x2)
-      diff(tmp_x_, x2, Jfirst.col(i));
+      // tmp_x = int(x0, dx)
+      integrate(x0, dx_, tmp_x_);
+      // Jfirst[:,k] = diff(tmp_x, x1) = diff(int(x0 + dx), x1)
+      diff(tmp_x_, x1, Jfirst.col(i));
       // Jfirst[:,k] = Jfirst[:,k] - tmp_dx_, or
-      // Jfirst[:,k] = Jfirst[:,k] - diff(x1, x2)
+      // Jfirst[:,k] = Jfirst[:,k] - diff(x0, x1)
       Jfirst.col(i) -= dx0_;
       dx_(i) = 0.0;
     }
@@ -63,12 +63,12 @@ void StateNumDiff::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x1, const Eige
     Jsecond.setZero();
     for (unsigned i = 0; i < ndx_; ++i) {
       dx_(i) = disturbance_;
-      // tmp_x = int(x_2 + d_x)
-      integrate(x2, dx_, tmp_x_);
-      // Jsecond[:,k] = diff(x1, tmp_x) = diff(x1, int(x_2 + d_x))
-      diff(x1, tmp_x_, Jsecond.col(i));
+      // tmp_x = int(x1 + dx)
+      integrate(x1, dx_, tmp_x_);
+      // Jsecond[:,k] = diff(x0, tmp_x) = diff(x0, int(x1 + dx))
+      diff(x0, tmp_x_, Jsecond.col(i));
       // Jsecond[:,k] = J[:,k] - tmp_dx_
-      // Jsecond[:,k] = Jsecond[:,k] - diff(x1, x2)
+      // Jsecond[:,k] = Jsecond[:,k] - diff(x0, x1)
       Jsecond.col(i) -= dx0_;
       dx_(i) = 0.0;
     }
