@@ -290,6 +290,52 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
         return data
 
 
+class IntegratedActionModelEuler(crocoddyl.ActionModelAbstract):
+    def __init__(self, diffModel, timeStep=1e-3, withCostResiduals=True):
+        crocoddyl.ActionModelAbstract.__init__(self, diffModel.State, diffModel.nv, diffModel.nr)
+        self.differential = diffModel
+        self.State = self.differential.State
+        self.nq = self.differential.nq
+        self.nv = self.differential.nv
+        self.withCostResiduals = withCostResiduals
+        self.timeStep = timeStep
+
+    def createData(self):
+        return IntegratedActionDataEuler(self)
+
+    def calc(self, data, x, u=None):
+        nq, dt = self.nq, self.timeStep
+        acc, cost = self.differential.calc(data.differential, x, u)
+        if self.withCostResiduals:
+            data.costResiduals[:] = data.differential.costResiduals[:]
+        data.cost = cost
+        # data.xnext[nq:] = x[nq:] + acc*dt
+        # data.xnext[:nq] = pinocchio.integrate(self.differential.pinocchio,
+        #                                       a2m(x[:nq]),a2m(data.xnext[nq:]*dt)).flat
+        data.dx = np.concatenate([x[nq:] * dt + acc * dt**2, acc * dt])
+        data.xnext[:] = self.differential.State.integrate(x, data.dx)
+
+        return data.xnext, data.cost
+
+    def calcDiff(self, data, x, u=None, recalc=True):
+        nv, dt = self.nv, self.timeStep
+        if recalc:
+            self.calc(data, x, u)
+        self.differential.calcDiff(data.differential, x, u, recalc=False)
+        dxnext_dx, dxnext_ddx = self.State.Jintegrate(x, data.dx)
+        da_dx, da_du = data.differential.Fx, data.differential.Fu
+        ddx_dx = np.vstack([da_dx * dt, da_dx])
+        ddx_dx[range(nv), range(nv, 2 * nv)] += 1
+        data.Fx[:, :] = dxnext_dx + dt * np.dot(dxnext_ddx, ddx_dx)
+        ddx_du = np.vstack([da_du * dt, da_du])
+        data.Fu[:, :] = dt * np.dot(dxnext_ddx, ddx_du)
+        data.Lx[:] = data.differential.Lx
+        data.Lu[:] = data.differential.Lu
+        data.Lxx[:] = data.differential.Lxx
+        data.Lxu[:] = data.differential.Lxu
+        data.Luu[:] = data.differential.Luu
+
+
 class StateCostDerived(crocoddyl.CostModelAbstract):
     def __init__(self, pinocchioModel, state, activation=None, xref=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(state.ndx)

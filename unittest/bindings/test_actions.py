@@ -91,7 +91,7 @@ class FreeFwdDynamicsTest(ActionModelAbstractTestCase):
 
 
 if __name__ == '__main__':
-    test_classes_to_run = [UnicycleTest, LQRTest, DifferentialLQRTest]
+    test_classes_to_run = [UnicycleTest, LQRTest, DifferentialLQRTest, FreeFwdDynamicsTest]
     loader = unittest.TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:
