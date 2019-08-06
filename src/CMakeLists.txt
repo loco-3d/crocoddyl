@@ -15,6 +15,7 @@ SET(${PROJECT_NAME}_SOURCES
   core/actions/lqr.cpp
   core/actions/diff-lqr.cpp
   core/activations/quadratic.cpp
+  core/activations/weighted-quadratic.cpp
   multibody/cost-base.cpp
   multibody/states/multibody.cpp
   multibody/costs/cost-sum.cpp
