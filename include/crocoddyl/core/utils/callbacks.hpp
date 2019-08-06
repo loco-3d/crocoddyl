@@ -15,16 +15,16 @@
 
 namespace crocoddyl {
 
-enum DDPVerboseLevel { _1 = 0, _2 };
-class CallbackDDPVerbose : public CallbackAbstract {
+enum VerboseLevel { _1 = 0, _2 };
+class CallbackVerbose : public CallbackAbstract {
  public:
-  CallbackDDPVerbose(DDPVerboseLevel level = _1);
-  ~CallbackDDPVerbose();
+  CallbackVerbose(VerboseLevel level = _1);
+  ~CallbackVerbose();
 
   void operator()(SolverAbstract *const solver);
 
  private:
-  DDPVerboseLevel level;
+  VerboseLevel level;
 };
 
 }  // namespace crocoddyl

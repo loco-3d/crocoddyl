@@ -35,7 +35,7 @@ int main() {
   SolverDDP ddp(problem);
   if (CALLBACKS) {
     std::vector<CallbackAbstract*> cbs;
-    cbs.push_back(new CallbackDDPVerbose());
+    cbs.push_back(new CallbackVerbose());
     ddp.setCallbacks(cbs);
   }
 

@@ -149,8 +149,7 @@ void exposeSolverAbstract() {
                                   ":param us: control trajectory of T elements.\n"
                                   ":param isFeasible: true if the xs are obtained from integrating the\n"
                                   "us (rollout)."))
-      .def("setCallbacks", &SolverAbstract_wrap::setCallbacks,
-           bp::args(" self"),
+      .def("setCallbacks", &SolverAbstract_wrap::setCallbacks, bp::args(" self"),
            "Set a list of callback functions using for diagnostic.\n\n"
            "Each iteration, the solver calls these set of functions in order to\n"
            "allowed user the diagnostic of the solver's performance.\n"
