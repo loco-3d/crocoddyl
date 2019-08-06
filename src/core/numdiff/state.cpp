@@ -26,11 +26,17 @@ Eigen::VectorXd StateNumDiff::rand() { return state_.rand(); }
 
 void StateNumDiff::diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
                         Eigen::Ref<Eigen::VectorXd> dxout) {
+  assert(x0.size() == nx_ && "StateNumDiff::diff: x0 has wrong dimension");
+  assert(x1.size() == nx_ && "StateNumDiff::diff: x1 has wrong dimension");
+  assert(dxout.size() == ndx_ && "StateNumDiff::diff: output must be pre-allocated");
   state_.diff(x0, x1, dxout);
 }
 
 void StateNumDiff::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                              Eigen::Ref<Eigen::VectorXd> xout) {
+  assert(x.size() == nx_ && "StateNumDiff::integrate: x has wrong dimension");
+  assert(dx.size() == ndx_ && "StateNumDiff::integrate: dx has wrong dimension");
+  assert(xout.size() == nx_ && "StateNumDiff::integrate: output must be pre-allocated");
   state_.integrate(x, dx, xout);
 }
 
@@ -39,6 +45,9 @@ void StateNumDiff::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eige
                          Jcomponent firstsecond) {
   assert(is_a_Jcomponent(firstsecond) && ("StateNumDiff::Jdiff: firstsecond "
                                           "must be one of the Jcomponent {both, first, second }"));
+  assert(x0.size() == nx_ && "StateNumDiff::Jdiff: x0 has wrong dimension");
+  assert(x1.size() == nx_ && "StateNumDiff::Jdiff: x1 has wrong dimension");
+
   dx_.setZero();
   diff(x0, x1, dx0_);
   if (firstsecond == first || firstsecond == both) {
@@ -82,6 +91,9 @@ void StateNumDiff::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const 
   assert((firstsecond == first || firstsecond == second || firstsecond == both) &&
          ("StateNumDiff::Jdiff: firstsecond must be one of the Jcomponent "
           "{both, first, second }"));
+  assert(x.size() == nx_ && "StateNumDiff::Jintegrate: x has wrong dimension");
+  assert(dx.size() == ndx_ && "StateNumDiff::Jintegrate: dx has wrong dimension");
+
   dx_.setZero();
   // x0_ = integrate(x, dx)
   integrate(x, dx, x0_);

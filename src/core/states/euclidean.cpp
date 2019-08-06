@@ -20,9 +20,9 @@ void StateVector::diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen:
 
 void StateVector::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                             Eigen::Ref<Eigen::VectorXd> xout) {
-  assert(x.size() == nx_ && "StateVector::diff: x has wrong dimension");
-  assert(dx.size() == ndx_ && "StateVector::diff: dx has wrong dimension");
-  assert(xout.size() == nx_ && "StateVector::diff: output must be pre-allocated");
+  assert(x.size() == nx_ && "StateVector::integrate: x has wrong dimension");
+  assert(dx.size() == ndx_ && "StateVector::integrate: dx has wrong dimension");
+  assert(xout.size() == nx_ && "StateVector::integrate: output must be pre-allocated");
   xout = x + dx;
 }
 
