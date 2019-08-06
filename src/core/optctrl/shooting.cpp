@@ -57,12 +57,13 @@ void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us, std::vecto
   for (long unsigned int i = 0; i < T_; ++i) {
     ActionModelAbstract* model = running_models_[i];
     boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
-    Eigen::VectorXd& x = xs[i];
+    const Eigen::VectorXd& x = xs[i];
     const Eigen::VectorXd& u = us[i];
 
     model->calc(data, x, u);
     xs[i + 1] = data->get_xnext();
   }
+  terminal_model_->calc(terminal_data_, xs.back());
 }
 
 std::vector<Eigen::VectorXd> ShootingProblem::rollout_us(const std::vector<Eigen::VectorXd>& us) {
