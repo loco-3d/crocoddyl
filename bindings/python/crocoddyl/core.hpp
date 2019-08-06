@@ -21,6 +21,7 @@
 #include "python/crocoddyl/core/actions/lqr.hpp"
 #include "python/crocoddyl/core/actions/diff-lqr.hpp"
 #include "python/crocoddyl/core/activations/quadratic.hpp"
+#include "python/crocoddyl/core/activations/weighted-quadratic.hpp"
 #include "python/crocoddyl/core/solvers/ddp.hpp"
 
 namespace crocoddyl {
@@ -39,6 +40,7 @@ void exposeCore() {
   exposeActionLQR();
   exposeDifferentialActionLQR();
   exposeActivationQuad();
+  exposeActivationWeightedQuad();
   exposeSolverDDP();
 }
 

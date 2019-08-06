@@ -24,12 +24,16 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
 
   void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
+    assert(x.size() == nx_ && "DifferentialActionModelAbstract::calc: x has wrong dimension");
+    assert(u.size() == nu_ && "DifferentialActionModelAbstract::calc: u has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
   void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                 const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
                 const bool& recalc = true) {
+    assert(x.size() == nx_ && "DifferentialActionModelAbstract::calcDiff: x has wrong dimension");
+    assert(u.size() == nu_ && "DifferentialActionModelAbstract::calcDiff: u has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
 
