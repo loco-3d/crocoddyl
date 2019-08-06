@@ -20,6 +20,7 @@ namespace bp = boost::python;
 class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbstract> {
  public:
   using SolverAbstract::is_feasible_;
+  using SolverAbstract::iter_;
   using SolverAbstract::problem_;
   using SolverAbstract::th_acceptstep_;
   using SolverAbstract::th_stop_;
@@ -154,7 +155,8 @@ void exposeSolverAbstract() {
       .def_readwrite("x_reg", &SolverAbstract_wrap::xreg_, "state regularization")
       .def_readwrite("u_reg", &SolverAbstract_wrap::ureg_, "control regularization")
       .def_readwrite("th_acceptStep", &SolverAbstract_wrap::th_acceptstep_, "threshold for step acceptance")
-      .def_readwrite("th_stop", &SolverAbstract_wrap::th_stop_, "threshold for stopping criteria");
+      .def_readwrite("th_stop", &SolverAbstract_wrap::th_stop_, "threshold for stopping criteria")
+      .def_readwrite("iter", &SolverAbstract_wrap::iter_, "number of iterations runned in solve()");
 }
 
 }  // namespace python
