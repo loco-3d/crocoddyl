@@ -1,122 +1,80 @@
+import crocoddyl
+import pinocchio
+# import utils
+import numpy as np
+import time
 import sys
 sys.path.append("/opt/openrobots/share/example-robot-data/unittest/")
 import unittest_utils
-import crocoddyl
-import pinocchio
-import legacy
-import numpy as np
 
 # First, let's load the Pinocchio model for the Talos arm.
 ROBOT = unittest_utils.loadTalosArm()
-robot_model = ROBOT.model
-# robot_model.armature *= 0.
-
-# Note that we need to include a cost model (i.e. set of cost functions) in
-# order to fully define the action model for our optimal control problem.
-# For this particular example, we formulate three running-cost functions:
-# goal-tracking cost, state and control regularization; and one terminal-cost:
-# goal cost. First, let's create the common cost functions.
-state = crocoddyl.StateMultibody(robot_model)
-Mref = crocoddyl.FramePlacement(robot_model.getFrameId("gripper_left_joint"),
-                                pinocchio.SE3(np.eye(3), np.matrix([[.0], [.0], [.4]])))
-goalTrackingCost = crocoddyl.CostModelFramePlacement(robot_model, Mref)
-xRegCost = crocoddyl.CostModelState(robot_model, state)
-uRegCost = crocoddyl.CostModelControl(robot_model)
-
-# Create a cost model per the running and terminal action model.
-runningCostModel = crocoddyl.CostModelSum(robot_model)
-terminalCostModel = crocoddyl.CostModelSum(robot_model)
-
-# Then let's added the running and terminal cost functions
-runningCostModel.addCost("gripperPose", goalTrackingCost, 1e-3)
-runningCostModel.addCost("xReg", xRegCost, 1e-7)
-runningCostModel.addCost("uReg", uRegCost, 1e-7)
-terminalCostModel.addCost("gripperPose", goalTrackingCost, 1)
-
-# Next, we need to create an action model for running and terminal knots. The
-# forward dynamics (computed using ABA) are implemented
-# inside DifferentialActionModelFullyActuated.
-runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, runningCostModel), 1e-3)
-runningModel.differential.armature = np.matrix([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.]).T
-terminalModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, terminalCostModel), 1e-3)
-terminalModel.differential.armature = np.matrix([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.]).T
-
-# For this optimal control problem, we define 100 knots (or running action
-# models) plus a terminal knot
-T = 100
-q0 = np.matrix([0.173046, 1., -0.52366, 0., 0., 0.1, -0.005]).T
-x0 = np.vstack([q0, np.zeros((robot_model.nv, 1))])
-problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
-
-xs = [state.rand() for i in range(T + 1)]
-us = [np.matrix(np.zeros(robot_model.nv)).T for i in range(T)]
-
-rcm = legacy.CostModelSum(robot_model)
-tcm = legacy.CostModelSum(robot_model)
-
-frameName = 'gripper_left_joint'
-s = legacy.StatePinocchio(robot_model)
-SE3ref = pinocchio.SE3(np.eye(3), np.array([[.0], [.0], [.4]]))
-gtCost = legacy.CostModelFramePlacement(robot_model,
-                                        nu=robot_model.nv,
-                                        frame=robot_model.getFrameId(frameName),
-                                        ref=SE3ref)
-xrCost = legacy.CostModelState(robot_model, s, ref=s.zero(), nu=robot_model.nv)
-urCost = legacy.CostModelControl(robot_model, nu=robot_model.nv)
-
-# Then let's added the running and terminal cost functions
-rcm.addCost(name="pos", weight=1e-3, cost=gtCost)
-rcm.addCost(name="regx", weight=1e-7, cost=xrCost)
-rcm.addCost(name="regu", weight=1e-7, cost=urCost)
-tcm.addCost(name="pos", weight=1, cost=gtCost)
-
-rm = legacy.IntegratedActionModelEuler(legacy.DifferentialActionModelFullyActuated(robot_model, rcm), 1e-3)
-tm = legacy.IntegratedActionModelEuler(legacy.DifferentialActionModelFullyActuated(robot_model, tcm), 1e-3)
-
-p = legacy.ShootingProblem(legacy.m2a(x0), [rm] * T, tm)
-
-xs2 = [legacy.m2a(x) for x in xs]
-us2 = [legacy.m2a(u) for u in us]
+N = 100  # number of nodes
+T = int(5e3)  # number of trials
+MAXITER = 1
 
 
-# Creating the DDP solver for this OC problem, defining a logger
-ddp = crocoddyl.SolverDDP(problem)
-sol = legacy.SolverDDP(p)
-# cameraTF = [2., 2.68, 0.54, 0.2, 0.62, 0.72, 0.22]
-# ddp.callback = [CallbackDDPVerbose()]
-# if WITHPLOT:
-#     ddp.callback.append(CallbackDDPLogger())
-# if WITHDISPLAY:
-#     ddp.callback.append(CallbackSolverDisplay(ROBOT, 4, 1, cameraTF))
+def runBenchmark(model):
+    robot_model = ROBOT.model
+    q0 = np.matrix([0.173046, 1., -0.52366, 0., 0., 0.1, -0.005]).T
+    x0 = np.vstack([q0, np.zeros((robot_model.nv, 1))])
 
-# Solving it with the DDP algorithm
-import time
-c_start = time.time()
-ddp.solve([], [], 1)
-c_end = time.time()
-print 1e3 * (c_end - c_start)
+    # Note that we need to include a cost model (i.e. set of cost functions) in
+    # order to fully define the action model for our optimal control problem.
+    # For this particular example, we formulate three running-cost functions:
+    # goal-tracking cost, state and control regularization; and one terminal-cost:
+    # goal cost. First, let's create the common cost functions.
+    state = crocoddyl.StateMultibody(robot_model)
+    Mref = crocoddyl.FramePlacement(robot_model.getFrameId("gripper_left_joint"),
+                                    pinocchio.SE3(np.eye(3), np.matrix([[.0], [.0], [.4]])))
+    goalTrackingCost = crocoddyl.CostModelFramePlacement(robot_model, Mref)
+    xRegCost = crocoddyl.CostModelState(robot_model, state)
+    uRegCost = crocoddyl.CostModelControl(robot_model)
 
-c_start = time.time()
-sol.solve(maxiter=1)
-c_end = time.time()
-print 1e3 * (c_end - c_start)
+    # Create a cost model per the running and terminal action model.
+    runningCostModel = crocoddyl.CostModelSum(robot_model)
+    terminalCostModel = crocoddyl.CostModelSum(robot_model)
 
-# Plotting the solution and the DDP convergence
-# if WITHPLOT:
-#     log = ddp.callback[1]
-#     plotOCSolution(log.xs, log.us, figIndex=1, show=False)
-#     plotDDPConvergence(log.costs, log.control_regs, log.state_regs, log.gm_stops,
-#                        log.th_stops, log.steps, figIndex=2)
+    # Then let's added the running and terminal cost functions
+    runningCostModel.addCost("gripperPose", goalTrackingCost, 1e-3)
+    runningCostModel.addCost("xReg", xRegCost, 1e-7)
+    runningCostModel.addCost("uReg", uRegCost, 1e-7)
+    terminalCostModel.addCost("gripperPose", goalTrackingCost, 1)
 
-# Visualizing the solution in gepetto-viewer
-# if WITHDISPLAY:
-#     from crocoddyl.diagnostic import displayTrajectory
-#     displayTrajectory(ROBOT, ddp.xs, runningModel.timeStep)
+    # Next, we need to create an action model for running and terminal knots. The
+    # forward dynamics (computed using ABA) are implemented
+    # inside DifferentialActionModelFullyActuated.
+    runningModel = crocoddyl.IntegratedActionModelEuler(model(state, runningCostModel), 1e-3)
+    runningModel.differential.armature = np.matrix([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.]).T
+    terminalModel = crocoddyl.IntegratedActionModelEuler(model(state, terminalCostModel), 1e-3)
+    terminalModel.differential.armature = np.matrix([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.]).T
 
-# Printing the reached position
-frame_idx = robot_model.getFrameId("gripper_left_joint")
-print
-print("The reached pose by the wrist is")
-# print(ddp.datas()[-1].differential.pinocchio.oMf[frame_idx])
+    # For this optimal control problem, we define 100 knots (or running action
+    # models) plus a terminal knot
+    problem = crocoddyl.ShootingProblem(x0, [runningModel] * N, terminalModel)
+
+    # Creating the DDP solver for this OC problem, defining a logger
+    ddp = crocoddyl.SolverDDP(problem)
+
+    duration = []
+    for i in range(T):
+        c_start = time.time()
+        ddp.solve([], [], MAXITER)
+        c_end = time.time()
+        duration.append(1e3 * (c_end - c_start))
+
+    avrg_duration = sum(duration) / len(duration)
+    min_duration = min(duration)
+    max_duration = max(duration)
+    return avrg_duration, min_duration, max_duration
+
+
+print('cpp-wrapped free-forward dynamics:')
+avrg_duration, min_duration, max_duration = runBenchmark(crocoddyl.DifferentialActionModelFreeFwdDynamics)
+print('  CPU time [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
+
+# TODO @Carlos this is not possible without making an abstract of createData.
+# At the time being, I don't have a solution
+# print('Python-derived free-forward dynamics:')
+# avrg_duration, min_duration, max_duration, tm = runBenchmark(utils.DifferentialFreeFwdDynamicsDerived)
+# print('  CPU time [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
