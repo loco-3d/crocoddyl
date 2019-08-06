@@ -22,9 +22,10 @@ class ActivationModelAbstract {
   ActivationModelAbstract(const unsigned int& nr);
   virtual ~ActivationModelAbstract();
 
-  virtual void calc(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r) = 0;
-  virtual void calcDiff(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r,
-                        const bool& recalc = true) = 0;
+  virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
+                    const Eigen::Ref<const Eigen::VectorXd>& r) = 0;
+  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
+                        const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc = true) = 0;
   virtual boost::shared_ptr<ActivationDataAbstract> createData();
 
   unsigned int get_nr() const;
@@ -34,12 +35,13 @@ class ActivationModelAbstract {
 
 #ifdef PYTHON_BINDINGS
  public:
-  void calc_wrap(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::VectorXd& r) { calc(data, r); }
+  void calc_wrap(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::VectorXd& r) { calc(data, r); }
 
-  void calcDiff_wrap(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::VectorXd& r, const bool& recalc) {
+  void calcDiff_wrap(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::VectorXd& r,
+                     const bool& recalc) {
     calcDiff(data, r, recalc);
   }
-  void calcDiff_wrap(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::VectorXd& r) {
+  void calcDiff_wrap(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::VectorXd& r) {
     calcDiff(data, r, true);
   }
 #endif
