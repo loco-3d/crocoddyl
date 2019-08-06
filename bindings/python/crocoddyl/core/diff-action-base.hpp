@@ -19,16 +19,17 @@ namespace bp = boost::python;
 class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstract,
                                              public bp::wrapper<DifferentialActionModelAbstract> {
  public:
-  DifferentialActionModelAbstract_wrap(StateAbstract* const state, int nu, int nr = 0)
+  DifferentialActionModelAbstract_wrap(StateAbstract* const state, int nu, int nr = 1)
       : DifferentialActionModelAbstract(state, nu, nr), bp::wrapper<DifferentialActionModelAbstract>() {}
 
-  void calc(boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
-  void calcDiff(boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
+  void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
+                const bool& recalc = true) {
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
 
@@ -47,7 +48,7 @@ void exposeDifferentialActionAbstract() {
       "computing the dynamics, cost functions and their derivatives. These computations are\n"
       "mainly carry on inside calc() and calcDiff(), respectively.",
       bp::init<StateAbstract*, int, bp::optional<int> >(
-          bp::args(" self", " state", " nu", " nr=0"),
+          bp::args(" self", " state", " nu", " nr=1"),
           "Initialize the differential action model.\n\n"
           ":param state: state\n"
           ":param nu: dimension of control vector\n"
@@ -112,9 +113,11 @@ void exposeDifferentialActionAbstract() {
                                       bp::return_value_policy<bp::reference_existing_object>()),
                     "state");
 
-  bp::class_<DifferentialActionDataAbstract, boost::shared_ptr<DifferentialActionDataAbstract>, boost::noncopyable>(
+  bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataAbstract> >();
+
+  bp::class_<DifferentialActionDataAbstract, boost::noncopyable>(
       "DifferentialActionDataAbstract",
-      "Abstract class for action datas.\n\n"
+      "Abstract class for differential action datas.\n\n"
       "In crocoddyl, an action data contains all the required information for processing an\n"
       "user-defined action model. The action data typically is allocated onces by running\n"
       "model.createData() and contains the first- and second- order derivatives of the dynamics\n"
@@ -124,6 +127,9 @@ void exposeDifferentialActionAbstract() {
           "Create common data shared between DAMs.\n\n"
           "The differential action data uses the model in order to first process it.\n"
           ":param model: differential action model"))
+      .def("shareCostMemory", &DifferentialActionDataAbstract::shareCostMemory, bp::args(" self", " cost"),
+           "Share memory with a give cost\n\n"
+           ":param cost: cost in which we want to share memory")
       .add_property(
           "cost",
           bp::make_getter(&DifferentialActionDataAbstract::cost, bp::return_value_policy<bp::return_by_value>()),
@@ -139,30 +145,37 @@ void exposeDifferentialActionAbstract() {
           "Fu", bp::make_getter(&DifferentialActionDataAbstract::Fu, bp::return_value_policy<bp::return_by_value>()),
           bp::make_setter(&DifferentialActionDataAbstract::Fu), "Jacobian of the dynamics")
       .add_property(
-          "Lx", bp::make_getter(&DifferentialActionDataAbstract::Lx, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&DifferentialActionDataAbstract::Lx), "Jacobian of the cost")
+          "Lx",
+          bp::make_function(&DifferentialActionDataAbstract::get_Lx, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&DifferentialActionDataAbstract::set_Lx), "Jacobian of the cost")
       .add_property(
-          "Lu", bp::make_getter(&DifferentialActionDataAbstract::Lu, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&DifferentialActionDataAbstract::Lu), "Jacobian of the cost")
+          "Lu",
+          bp::make_function(&DifferentialActionDataAbstract::get_Lu, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&DifferentialActionDataAbstract::set_Lu), "Jacobian of the cost")
       .add_property(
-          "Lxx", bp::make_getter(&DifferentialActionDataAbstract::Lxx, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&DifferentialActionDataAbstract::Lxx), "Hessian of the cost")
+          "Lxx",
+          bp::make_function(&DifferentialActionDataAbstract::get_Lxx, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&DifferentialActionDataAbstract::set_Lxx), "Hessian of the cost")
       .add_property(
-          "Lxu", bp::make_getter(&DifferentialActionDataAbstract::Lxu, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&DifferentialActionDataAbstract::Lxu), "Hessian of the cost")
+          "Lxu",
+          bp::make_function(&DifferentialActionDataAbstract::get_Lxu, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&DifferentialActionDataAbstract::set_Lxu), "Hessian of the cost")
       .add_property(
-          "Luu", bp::make_getter(&DifferentialActionDataAbstract::Luu, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&DifferentialActionDataAbstract::Luu), "Hessian of the cost")
+          "Luu",
+          bp::make_function(&DifferentialActionDataAbstract::get_Luu, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&DifferentialActionDataAbstract::set_Luu), "Hessian of the cost")
       .add_property(
           "costResiduals",
-          bp::make_getter(&DifferentialActionDataAbstract::r, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&DifferentialActionDataAbstract::r))
+          bp::make_function(&DifferentialActionDataAbstract::get_r, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&DifferentialActionDataAbstract::set_r), "cost residual")
       .add_property(
-          "Rx", bp::make_getter(&DifferentialActionDataAbstract::Rx, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&DifferentialActionDataAbstract::Rx))
+          "Rx",
+          bp::make_function(&DifferentialActionDataAbstract::get_Rx, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&DifferentialActionDataAbstract::set_Rx), "Jacobian of the cost residual")
       .add_property(
-          "Ru", bp::make_getter(&DifferentialActionDataAbstract::Ru, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&DifferentialActionDataAbstract::Ru));
+          "Ru",
+          bp::make_function(&DifferentialActionDataAbstract::get_Ru, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&DifferentialActionDataAbstract::set_Ru), "Jacobian of the cost residual");
 }
 
 }  // namespace python

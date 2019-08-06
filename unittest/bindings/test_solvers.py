@@ -1,5 +1,6 @@
 import crocoddyl
-from utils import DDPDerived
+import utils
+import pinocchio
 from random import randint
 import numpy as np
 import unittest
@@ -94,11 +95,29 @@ class SolverAbstractTestCase(unittest.TestCase):
 class UnicycleDDPTest(SolverAbstractTestCase):
     MODEL = crocoddyl.ActionModelUnicycle()
     SOLVER = crocoddyl.SolverDDP
-    SOLVER_DER = DDPDerived
+    SOLVER_DER = utils.DDPDerived
+
+
+class ManipulatorDDPTest(SolverAbstractTestCase):
+    ROBOT_MODEL = pinocchio.buildSampleModelManipulator()
+    STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+    COST_SUM = crocoddyl.CostModelSum(ROBOT_MODEL, ROBOT_MODEL.nv)
+    COST_SUM.addCost('xReg', crocoddyl.CostModelState(ROBOT_MODEL, STATE), 1e-7)
+    COST_SUM.addCost('uReg', crocoddyl.CostModelControl(ROBOT_MODEL), 1e-7)
+    COST_SUM.addCost(
+        'frTrack',
+        crocoddyl.CostModelFramePlacement(
+            ROBOT_MODEL, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("effector_body"), pinocchio.SE3.Random())),
+        1.)
+    DIFF_MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, COST_SUM)
+    MODEL = crocoddyl.IntegratedActionModelEuler(crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, COST_SUM),
+                                                 1e-3)
+    SOLVER = crocoddyl.SolverDDP
+    SOLVER_DER = utils.DDPDerived
 
 
 if __name__ == '__main__':
-    test_classes_to_run = [UnicycleDDPTest]
+    test_classes_to_run = [UnicycleDDPTest, ManipulatorDDPTest]
     loader = unittest.TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:

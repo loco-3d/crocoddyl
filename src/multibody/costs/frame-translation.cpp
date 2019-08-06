@@ -26,7 +26,7 @@ CostModelFrameTranslation::CostModelFrameTranslation(pinocchio::Model* const mod
 
 CostModelFrameTranslation::~CostModelFrameTranslation() {}
 
-void CostModelFrameTranslation::calc(boost::shared_ptr<CostDataAbstract>& data,
+void CostModelFrameTranslation::calc(const boost::shared_ptr<CostDataAbstract>& data,
                                      const Eigen::Ref<const Eigen::VectorXd>&,
                                      const Eigen::Ref<const Eigen::VectorXd>&) {
   // Compute the frame translation w.r.t. the reference frame
@@ -37,7 +37,7 @@ void CostModelFrameTranslation::calc(boost::shared_ptr<CostDataAbstract>& data,
   data->cost = data->activation->a_value;
 }
 
-void CostModelFrameTranslation::calcDiff(boost::shared_ptr<CostDataAbstract>& data,
+void CostModelFrameTranslation::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                          const Eigen::Ref<const Eigen::VectorXd>& x,
                                          const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (recalc) {

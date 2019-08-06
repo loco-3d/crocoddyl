@@ -45,36 +45,36 @@ void exposeCostSum() {
           ":param nu: dimension of control vector\n"
           ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
       .def(bp::init<pinocchio::Model*, bp::optional<bool> >(
-           bp::args(" self", " model", " withResiduals"),
-           "Initialize the total cost model.\n\n"
-           "For this case the default nu is equals to model.nv.\n"
-           ":param model: Pinocchio model of the multibody system\n"
-           ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
-      .def("addCost", &CostModelSum::addCost, "add cost item")
+          bp::args(" self", " model", " withResiduals"),
+          "Initialize the total cost model.\n\n"
+          "For this case the default nu is equals to model.nv.\n"
+          ":param model: Pinocchio model of the multibody system\n"
+          ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
+      .def("addCost", &CostModelSum::addCost, bp::with_custodian_and_ward<1, 3>(), "add cost item")
       .def("removeCost", &CostModelSum::removeCost, "remove cost item")
-      .def<void (CostModelSum::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+      .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                   const Eigen::VectorXd&)>("calc", &CostModelSum::calc_wrap,
                                                            bp::args(" self", " data", " x", " u=None"),
                                                            "Compute the total cost.\n\n"
                                                            ":param data: cost-sum data\n"
                                                            ":param x: time-discrete state vector\n"
                                                            ":param u: time-discrete control input")
-      .def<void (CostModelSum::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
+      .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calc", &CostModelSum::calc_wrap, bp::args(" self", " data", " x"))
-      .def<void (CostModelSum::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&, const Eigen::VectorXd&,
-                                  const bool&)>(
+      .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+                                  const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &CostModelSum::calcDiff_wrap, bp::args(" self", " data", " x", " u=None", " recalc=True"),
           "Compute the derivatives of the total cost.\n\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n"
           ":param recalc: If true, it updates the state evolution and the cost value.")
-      .def<void (CostModelSum::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+      .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                   const Eigen::VectorXd&)>("calcDiff", &CostModelSum::calcDiff_wrap,
                                                            bp::args(" self", " data", " x", " u"))
-      .def<void (CostModelSum::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
+      .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &CostModelSum::calcDiff_wrap, bp::args(" self", " data", " x"))
-      .def<void (CostModelSum::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&, const bool&)>(
+      .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &CostModelSum::calcDiff_wrap, bp::args(" self", " data", " x", " recalc"))
       .def("createData", &CostModelSum::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),

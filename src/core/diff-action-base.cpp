@@ -13,19 +13,20 @@ DifferentialActionModelAbstract::DifferentialActionModelAbstract(StateAbstract* 
       nr_(nr),
       state_(state),
       unone_(Eigen::VectorXd::Zero(nu)) {
-  assert(nq_ != 0);
-  assert(nv_ != 0);
-  assert(nu_ != 0);
+  assert(nq_ != 0 && "DifferentialActionModelAbstract: nq cannot be zero");
+  assert(nv_ != 0 && "DifferentialActionModelAbstract: nv cannot be zero");
+  assert(nu_ != 0 && "DifferentialActionModelAbstract: nu cannot be zero");
+  assert(nr_ != 0 && "DifferentialActionModelAbstract: nr cannot be zero");
 }
 
 DifferentialActionModelAbstract::~DifferentialActionModelAbstract() {}
 
-void DifferentialActionModelAbstract::calc(boost::shared_ptr<DifferentialActionDataAbstract>& data,
+void DifferentialActionModelAbstract::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                            const Eigen::Ref<const Eigen::VectorXd>& x) {
   calc(data, x, unone_);
 }
 
-void DifferentialActionModelAbstract::calcDiff(boost::shared_ptr<DifferentialActionDataAbstract>& data,
+void DifferentialActionModelAbstract::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                const Eigen::Ref<const Eigen::VectorXd>& x) {
   calcDiff(data, x, unone_);
 }

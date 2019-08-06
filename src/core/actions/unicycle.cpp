@@ -10,8 +10,12 @@ ActionModelUnicycle::~ActionModelUnicycle() {
   // delete state_; //TODO @Carlos this breaks the test_actions c++ unit-test
 }
 
-void ActionModelUnicycle::calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+void ActionModelUnicycle::calc(const boost::shared_ptr<ActionDataAbstract>& data,
+                               const Eigen::Ref<const Eigen::VectorXd>& x,
                                const Eigen::Ref<const Eigen::VectorXd>& u) {
+  assert(x.size() == nx_ && "ActionModelUnicycle::calc: x has wrong dimension");
+  assert(u.size() == nu_ && "ActionModelUnicycle::calc: u has wrong dimension");
+
   ActionDataUnicycle* d = static_cast<ActionDataUnicycle*>(data.get());
   const double& c = std::cos(x[2]);
   const double& s = std::sin(x[2]);
@@ -21,9 +25,12 @@ void ActionModelUnicycle::calc(boost::shared_ptr<ActionDataAbstract>& data, cons
   d->cost = 0.5 * d->r.transpose() * d->r;
 }
 
-void ActionModelUnicycle::calcDiff(boost::shared_ptr<ActionDataAbstract>& data,
+void ActionModelUnicycle::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                    const Eigen::Ref<const Eigen::VectorXd>& x,
                                    const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
+  assert(x.size() == nx_ && "ActionModelUnicycle::calcDiff: x has wrong dimension");
+  assert(u.size() == nu_ && "ActionModelUnicycle::calcDiff: u has wrong dimension");
+
   if (recalc) {
     calc(data, x, u);
   }

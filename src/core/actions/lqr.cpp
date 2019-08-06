@@ -19,8 +19,11 @@ ActionModelLQR::~ActionModelLQR() {
   // delete state_; //TODO @Carlos this breaks the test_actions c++ unit-test
 }
 
-void ActionModelLQR::calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                          const Eigen::Ref<const Eigen::VectorXd>& u) {
+void ActionModelLQR::calc(const boost::shared_ptr<ActionDataAbstract>& data,
+                          const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) {
+  assert(x.size() == nx_ && "ActionModelLQR::calc: x has wrong dimension");
+  assert(u.size() == nu_ && "ActionModelLQR::calc: u has wrong dimension");
+
   if (drift_free_) {
     data->xnext = Fx_ * x + Fu_ * u;
   } else {
@@ -29,8 +32,12 @@ void ActionModelLQR::calc(boost::shared_ptr<ActionDataAbstract>& data, const Eig
   data->cost = 0.5 * x.dot(Lxx_ * x) + 0.5 * u.dot(Luu_ * u) + x.dot(Lxu_ * u) + lx_.dot(x) + lu_.dot(u);
 }
 
-void ActionModelLQR::calcDiff(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                              const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
+void ActionModelLQR::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+                              const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
+                              const bool& recalc) {
+  assert(x.size() == nx_ && "ActionModelLQR::calcDiff: x has wrong dimension");
+  assert(u.size() == nu_ && "ActionModelLQR::calcDiff: u has wrong dimension");
+
   if (recalc) {
     calc(data, x, u);
   }

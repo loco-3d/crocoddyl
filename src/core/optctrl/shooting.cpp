@@ -11,6 +11,9 @@ ShootingProblem::ShootingProblem(const Eigen::VectorXd& x0, const std::vector<Ac
 ShootingProblem::~ShootingProblem() {}
 
 double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us) {
+  assert(xs.size() == T_ + 1 && "ShootingProblem::calc: wrong dimension of the state trajectory, it should be T + 1.");
+  assert(us.size() == T_ && "ShootingProblem::calc: wrong dimension of the control trajectory, it should be T.");
+
   cost_ = 0;
   for (unsigned int i = 0; i < T_; ++i) {
     ActionModelAbstract* model = running_models_[i];
@@ -27,6 +30,10 @@ double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::
 }
 
 double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us) {
+  assert(xs.size() == T_ + 1 &&
+         "ShootingProblem::calcDiff: wrong dimension of the state trajectory, it should be T + 1.");
+  assert(us.size() == T_ && "ShootingProblem::calcDiff: wrong dimension of the control trajectory, it should be T.");
+
   cost_ = 0;
   for (long unsigned int i = 0; i < T_; ++i) {
     ActionModelAbstract* model = running_models_[i];
@@ -43,17 +50,20 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const s
 }
 
 void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us, std::vector<Eigen::VectorXd>& xs) {
+  assert(us.size() == T_ && "ShootingProblem::rollout: wrong dimension of the control trajectory, it should be T.");
+
   xs.resize(T_ + 1);
   xs[0] = x0_;
   for (long unsigned int i = 0; i < T_; ++i) {
     ActionModelAbstract* model = running_models_[i];
     boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
-    Eigen::VectorXd& x = xs[i];
+    const Eigen::VectorXd& x = xs[i];
     const Eigen::VectorXd& u = us[i];
 
     model->calc(data, x, u);
     xs[i + 1] = data->get_xnext();
   }
+  terminal_model_->calc(terminal_data_, xs.back());
 }
 
 std::vector<Eigen::VectorXd> ShootingProblem::rollout_us(const std::vector<Eigen::VectorXd>& us) {

@@ -43,7 +43,7 @@ void StateMultibody::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const
 
   const Eigen::VectorXd& q = x.head(nq_);
   const Eigen::VectorXd& v = x.tail(nv_);
-  const Eigen::VectorXd& dq = dx.head(nq_);
+  const Eigen::VectorXd& dq = dx.head(nv_);
   const Eigen::VectorXd& dv = dx.tail(nv_);
   xout << pinocchio::integrate(*model_, q, dq), v + dv;
 }
@@ -54,7 +54,7 @@ void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Ei
   assert(x0.size() == nx_ && "StateMultibody::Jdiff: x0 has wrong dimension");
   assert(x1.size() == nx_ && "StateMultibody::Jdiff: x1 has wrong dimension");
   assert(is_a_Jcomponent(firstsecond) && ("StateMultibody::Jdiff: firstsecond "
-         "must be one of the Jcomponent {both, first, second}"));
+                                          "must be one of the Jcomponent {both, first, second}"));
 
   if (firstsecond == first) {
     assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "StateMultibody::Jdiff: Jfirst must be of the good size");
@@ -114,7 +114,7 @@ void StateMultibody::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x,
           "{both, first, second}"));
 
   const Eigen::VectorXd& q = x.head(nq_);
-  const Eigen::VectorXd& dq = dx.head(nq_);
+  const Eigen::VectorXd& dq = dx.head(nv_);
   if (firstsecond == first) {
     assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ &&
            "StateMultibody::Jintegrate: Jfirst must be of the good size");
@@ -149,5 +149,7 @@ void StateMultibody::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x,
     Jsecond.bottomRightCorner(nv_, nv_).diagonal() = Eigen::VectorXd::Ones(nv_);
   }
 }
+
+pinocchio::Model* StateMultibody::get_model() const { return model_; }
 
 }  // namespace crocoddyl

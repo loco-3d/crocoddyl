@@ -68,11 +68,12 @@ CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, const unsign
 
 CostModelAbstract::~CostModelAbstract() {}
 
-void CostModelAbstract::calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
+void CostModelAbstract::calc(const boost::shared_ptr<CostDataAbstract>& data,
+                             const Eigen::Ref<const Eigen::VectorXd>& x) {
   calc(data, x, unone_);
 }
 
-void CostModelAbstract::calcDiff(boost::shared_ptr<CostDataAbstract>& data,
+void CostModelAbstract::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                  const Eigen::Ref<const Eigen::VectorXd>& x) {
   calcDiff(data, x, unone_);
 }

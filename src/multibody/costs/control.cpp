@@ -29,15 +29,20 @@ CostModelControl::CostModelControl(pinocchio::Model* const model, const unsigned
 
 CostModelControl::~CostModelControl() {}
 
-void CostModelControl::calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>&,
+void CostModelControl::calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>&,
                             const Eigen::Ref<const Eigen::VectorXd>& u) {
+  assert(u.size() == nu_ && "CostModelControl::calc: u has wrong dimension");
+
   data->r = u - uref_;
   activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;
 }
 
-void CostModelControl::calcDiff(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
+void CostModelControl::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+                                const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
+                                const bool& recalc) {
+  assert(u.size() == nu_ && "CostModelControl::calcDiff: u has wrong dimension");
+
   if (recalc) {
     calc(data, x, u);
   }

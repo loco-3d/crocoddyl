@@ -31,6 +31,8 @@ class StateMultibody : public StateAbstract {
                   Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
                   Jcomponent firstsecond = both);
 
+  pinocchio::Model* get_model() const;
+
  private:
   pinocchio::Model* model_;
   Eigen::VectorXd x0_;

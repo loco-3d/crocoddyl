@@ -32,12 +32,12 @@ class CostModelAbstract_wrap : public CostModelAbstract, public bp::wrapper<Cost
   CostModelAbstract_wrap(pinocchio::Model* const model, int nr, bool with_residuals = true)
       : CostModelAbstract(model, nr, with_residuals), bp::wrapper<CostModelAbstract>() {}
 
-  void calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
-  void calcDiff(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
@@ -151,11 +151,11 @@ void exposeCostMultibody() {
                     bp::make_setter(&CostDataAbstract::Luu), "Hessian of the cost")
       .add_property("costResiduals",
                     bp::make_getter(&CostDataAbstract::r, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&CostDataAbstract::r))
+                    bp::make_setter(&CostDataAbstract::r), "cost residual")
       .add_property("Rx", bp::make_getter(&CostDataAbstract::Rx, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&CostDataAbstract::Rx))
+                    bp::make_setter(&CostDataAbstract::Rx), "Jacobian of the cost residual")
       .add_property("Ru", bp::make_getter(&CostDataAbstract::Ru, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&CostDataAbstract::Ru));
+                    bp::make_setter(&CostDataAbstract::Ru), "Jacobian of the cost residual");
 }
 
 }  // namespace python

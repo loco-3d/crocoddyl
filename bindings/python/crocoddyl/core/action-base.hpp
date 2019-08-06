@@ -18,15 +18,15 @@ namespace bp = boost::python;
 
 class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<ActionModelAbstract> {
  public:
-  ActionModelAbstract_wrap(StateAbstract* const state, const unsigned int& nu, const unsigned int& nr = 0)
+  ActionModelAbstract_wrap(StateAbstract* const state, const unsigned int& nu, const unsigned int& nr = 1)
       : ActionModelAbstract(state, nu, nr), bp::wrapper<ActionModelAbstract>() {}
 
-  void calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
-  void calcDiff(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
@@ -44,7 +44,7 @@ void exposeActionAbstract() {
       "derivatives. These computations are mainly carry on inside calc() and calcDiff(),\n"
       "respectively.",
       bp::init<StateAbstract*, int, bp::optional<int> >(
-          bp::args(" self", " state", " nu", " nr=0"),
+          bp::args(" self", " state", " nu", " nr=1"),
           "Initialize the action model.\n\n"
           ":param state: state description,\n"
           ":param nu: dimension of control vector,\n"
@@ -90,7 +90,9 @@ void exposeActionAbstract() {
                                       bp::return_value_policy<bp::reference_existing_object>()),
                     "state");
 
-  bp::class_<ActionDataAbstract, boost::shared_ptr<ActionDataAbstract>, boost::noncopyable>(
+  bp::register_ptr_to_python<boost::shared_ptr<ActionDataAbstract> >();
+
+  bp::class_<ActionDataAbstract, boost::noncopyable>(
       "ActionDataAbstract",
       "Abstract class for action datas.\n\n"
       "In crocoddyl, an action data contains all the required information for processing an\n"
@@ -122,11 +124,11 @@ void exposeActionAbstract() {
                     bp::make_setter(&ActionDataAbstract::Luu), "Hessian of the cost")
       .add_property("costResiduals",
                     bp::make_getter(&ActionDataAbstract::r, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract::r))
+                    bp::make_setter(&ActionDataAbstract::r), "cost residual")
       .add_property("Rx", bp::make_getter(&ActionDataAbstract::Rx, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract::Rx))
+                    bp::make_setter(&ActionDataAbstract::Rx), "Jacobian of the cost residual")
       .add_property("Ru", bp::make_getter(&ActionDataAbstract::Ru, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract::Ru));
+                    bp::make_setter(&ActionDataAbstract::Ru), "Jacobian of the cost residual");
 }
 
 }  // namespace python

@@ -82,16 +82,16 @@ void exposeCostState() {
           "model is quadratic, i.e. crocoddyl.ActivationModelQuad(state.ndx), and nu is equals to model.nv.\n"
           ":param model: Pinocchio model of the multibody system\n"
           ":param state: state model")[bp::with_custodian_and_ward<1, 3>()])
-      .def<void (CostModelState::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+      .def<void (CostModelState::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                     const Eigen::VectorXd&)>("calc", &CostModelState::calc_wrap,
                                                              bp::args(" self", " data", " x", " u=None"),
                                                              "Compute the state cost.\n\n"
                                                              ":param data: cost data\n"
                                                              ":param x: time-discrete state vector\n"
                                                              ":param u: time-discrete control input")
-      .def<void (CostModelState::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
+      .def<void (CostModelState::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calc", &CostModelState::calc_wrap, bp::args(" self", " data", " x"))
-      .def<void (CostModelState::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+      .def<void (CostModelState::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                     const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &CostModelState::calcDiff_wrap, bp::args(" self", " data", " x", " u=None", " recalc=True"),
           "Compute the derivatives of the state cost.\n\n"
@@ -99,12 +99,12 @@ void exposeCostState() {
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n"
           ":param recalc: If true, it updates the state evolution and the cost value.")
-      .def<void (CostModelState::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+      .def<void (CostModelState::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                     const Eigen::VectorXd&)>("calcDiff", &CostModelState::calcDiff_wrap,
                                                              bp::args(" self", " data", " x", " u"))
-      .def<void (CostModelState::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
+      .def<void (CostModelState::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &CostModelState::calcDiff_wrap, bp::args(" self", " data", " x"))
-      .def<void (CostModelState::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&, const bool&)>(
+      .def<void (CostModelState::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &CostModelState::calcDiff_wrap, bp::args(" self", " data", " x", " recalc"))
       .add_property(
           "State",

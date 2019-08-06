@@ -31,9 +31,9 @@ class CostModelFrameTranslation : public CostModelAbstract {
   CostModelFrameTranslation(pinocchio::Model* const model, const FrameTranslation& xref);
   ~CostModelFrameTranslation();
 
-  void calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u);
-  void calcDiff(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
   boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
@@ -48,7 +48,7 @@ struct CostDataFrameTranslation : public CostDataAbstract {
 
   template <typename Model>
   CostDataFrameTranslation(Model* const model, pinocchio::Data* const data)
-      : CostDataAbstract(model, data), J(6, model->get_nv()), fJf(6, model->get_nv()) {
+      : CostDataAbstract(model, data), J(3, model->get_nv()), fJf(6, model->get_nv()) {
     J.fill(0);
     fJf.fill(0);
   }
