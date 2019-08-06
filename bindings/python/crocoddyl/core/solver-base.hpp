@@ -65,9 +65,24 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
   Eigen::Vector2d expected_improvement_;
 };
 
+class CallbackAbstract_wrap : public CallbackAbstract, public bp::wrapper<CallbackAbstract> {
+ public:
+  CallbackAbstract_wrap() : CallbackAbstract(), bp::wrapper<CallbackAbstract>() {}
+  ~CallbackAbstract_wrap() {}
+
+  void operator()(SolverAbstract* const solver) {
+    return bp::call<void>(this->get_override("__call__").ptr(), solver);
+  }
+};
+
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setCandidate_overloads, SolverAbstract::setCandidate, 0, 3)
 
 void exposeSolverAbstract() {
+  // Register custom converters between std::vector and Python list
+  bp::to_python_converter<std::vector<CallbackAbstract*, std::allocator<CallbackAbstract*> >,
+                          vector_to_list<CallbackAbstract*> >();
+  list_to_vector().from_python<std::vector<CallbackAbstract*, std::allocator<CallbackAbstract*> > >();
+
   bp::class_<SolverAbstract_wrap, boost::noncopyable>(
       "SolverAbstract",
       "Abstract class for optimal control solvers.\n\n"
@@ -134,13 +149,11 @@ void exposeSolverAbstract() {
                                   ":param us: control trajectory of T elements.\n"
                                   ":param isFeasible: true if the xs are obtained from integrating the\n"
                                   "us (rollout)."))
-      //       .def("setCallbacks", &SolverAbstract_wrap::setCallbacks),
-      //            bp::args(" self"),
-      //            R"(Set a list of callback functions using for diagnostic.
-
-      // Each iteration, the solver calls these set of functions in order to
-      // allowed user the diagnostic of the solver's performance.
-      // :param callbacks: set of callback functions.)")
+      .def("setCallbacks", &SolverAbstract_wrap::setCallbacks, bp::args(" self"),
+           "Set a list of callback functions using for diagnostic.\n\n"
+           "Each iteration, the solver calls these set of functions in order to\n"
+           "allowed user the diagnostic of the solver's performance.\n"
+           ":param callbacks: set of callback functions.")
       .add_property("problem", bp::make_getter(&SolverAbstract_wrap::problem_, bp::return_internal_reference<>()),
                     "shooting problem")
       .def("models", &SolverAbstract_wrap::get_models, bp::return_value_policy<bp::return_by_value>(), "models")
@@ -157,6 +170,15 @@ void exposeSolverAbstract() {
       .def_readwrite("th_acceptStep", &SolverAbstract_wrap::th_acceptstep_, "threshold for step acceptance")
       .def_readwrite("th_stop", &SolverAbstract_wrap::th_stop_, "threshold for stopping criteria")
       .def_readwrite("iter", &SolverAbstract_wrap::iter_, "number of iterations runned in solve()");
+
+  bp::class_<CallbackAbstract_wrap, boost::noncopyable>(
+      "CallbackAbstract",
+      "Abstract class for solver callbacks.\n\n"
+      "A callback is used to diagnostic the behaviour of our solver in each iteration of it.\n"
+      "For instance, it can be used to print values, record data or display motions")
+      .def("__call__", pure_virtual(&CallbackAbstract_wrap::operator()), bp::args(" self", " solver"),
+           "Run the callback function given a solver.\n\n"
+           ":param solver: solver to be diagnostic");
 }
 
 }  // namespace python

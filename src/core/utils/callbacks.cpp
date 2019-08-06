@@ -2,11 +2,11 @@
 
 namespace crocoddyl {
 
-CallbackDDPVerbose::CallbackDDPVerbose(DDPVerboseLevel level) : CallbackAbstract(), level(level) {}
+CallbackVerbose::CallbackVerbose(VerboseLevel level) : CallbackAbstract(), level(level) {}
 
-CallbackDDPVerbose::~CallbackDDPVerbose() {}
+CallbackVerbose::~CallbackVerbose() {}
 
-void CallbackDDPVerbose::operator()(SolverAbstract *const solver) {
+void CallbackVerbose::operator()(SolverAbstract *const solver) {
   if (solver->get_iter() % 10 == 0) {
     switch (level) {
       case _1: {
