@@ -47,7 +47,7 @@ void CostModelSum::calc(const boost::shared_ptr<CostDataAbstract>& data, const E
     d->cost += m_i.weight * d_i->cost;
     if (with_residuals_) {
       const unsigned int& nr_i = m_i.cost->get_nr();
-      d->r.segment(nr, nr + nr_i) = sqrt(m_i.weight) * d_i->r;
+      d->r.segment(nr, nr_i) = sqrt(m_i.weight) * d_i->r;
       nr += nr_i;
     }
   }
@@ -82,8 +82,8 @@ void CostModelSum::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
     d->Luu += m_i.weight * d_i->Luu;
     if (with_residuals_) {
       const unsigned int& nr_i = m_i.cost->get_nr();
-      d->Rx.block(nr, 0, nr + nr_i, ndx_) = sqrt(m_i.weight) * d_i->Rx;
-      d->Ru.block(nr, 0, nr + nr_i, nu_) = sqrt(m_i.weight) * d_i->Ru;
+      d->Rx.block(nr, 0, nr_i, ndx_) = sqrt(m_i.weight) * d_i->Rx;
+      d->Ru.block(nr, 0, nr_i, nu_) = sqrt(m_i.weight) * d_i->Ru;
       nr += nr_i;
     }
   }
