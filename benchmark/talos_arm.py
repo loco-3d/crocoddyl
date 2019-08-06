@@ -9,7 +9,7 @@ import numpy as np
 # First, let's load the Pinocchio model for the Talos arm.
 ROBOT = unittest_utils.loadTalosArm()
 robot_model = ROBOT.model
-robot_model.armature *= 0.
+# robot_model.armature *= 0.
 
 # Note that we need to include a cost model (i.e. set of cost functions) in
 # order to fully define the action model for our optimal control problem.
@@ -38,23 +38,20 @@ terminalCostModel.addCost("gripperPose", goalTrackingCost, 1)
 # inside DifferentialActionModelFullyActuated.
 runningModel = crocoddyl.IntegratedActionModelEuler(
     crocoddyl.DifferentialActionModelFreeFwdDynamics(state, runningCostModel), 1e-3)
-# runningModel.differential.armature = np.matrix([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0. ]).T
+runningModel.differential.armature = np.matrix([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.]).T
 terminalModel = crocoddyl.IntegratedActionModelEuler(
     crocoddyl.DifferentialActionModelFreeFwdDynamics(state, terminalCostModel), 1e-3)
-# terminalModel.differential.armature = np.matrix([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0. ]).T
+terminalModel.differential.armature = np.matrix([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.]).T
 
-# For this optimal control problem, we define 250 knots (or running action
+# For this optimal control problem, we define 100 knots (or running action
 # models) plus a terminal knot
-T = 2
+T = 100
 q0 = np.matrix([0.173046, 1., -0.52366, 0., 0., 0.1, -0.005]).T
 x0 = np.vstack([q0, np.zeros((robot_model.nv, 1))])
 problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 
-xs = [state.rand() for i in range(T+1)]
+xs = [state.rand() for i in range(T + 1)]
 us = [np.matrix(np.zeros(robot_model.nv)).T for i in range(T)]
-
-
-
 
 rcm = legacy.CostModelSum(robot_model)
 tcm = legacy.CostModelSum(robot_model)
@@ -62,7 +59,10 @@ tcm = legacy.CostModelSum(robot_model)
 frameName = 'gripper_left_joint'
 s = legacy.StatePinocchio(robot_model)
 SE3ref = pinocchio.SE3(np.eye(3), np.array([[.0], [.0], [.4]]))
-gtCost = legacy.CostModelFramePlacement(robot_model, nu=robot_model.nv, frame=robot_model.getFrameId(frameName), ref=SE3ref)
+gtCost = legacy.CostModelFramePlacement(robot_model,
+                                        nu=robot_model.nv,
+                                        frame=robot_model.getFrameId(frameName),
+                                        ref=SE3ref)
 xrCost = legacy.CostModelState(robot_model, s, ref=s.zero(), nu=robot_model.nv)
 urCost = legacy.CostModelControl(robot_model, nu=robot_model.nv)
 
@@ -72,49 +72,51 @@ rcm.addCost(name="regx", weight=1e-7, cost=xrCost)
 rcm.addCost(name="regu", weight=1e-7, cost=urCost)
 tcm.addCost(name="pos", weight=1, cost=gtCost)
 
-rm = legacy.IntegratedActionModelEuler(
-    legacy.DifferentialActionModelFullyActuated(robot_model, rcm), 1e-3)
-tm = legacy.IntegratedActionModelEuler(
-    legacy.DifferentialActionModelFullyActuated(robot_model, tcm), 1e-3)
+rm = legacy.IntegratedActionModelEuler(legacy.DifferentialActionModelFullyActuated(robot_model, rcm), 1e-3)
+tm = legacy.IntegratedActionModelEuler(legacy.DifferentialActionModelFullyActuated(robot_model, tcm), 1e-3)
 
 p = legacy.ShootingProblem(legacy.m2a(x0), [rm] * T, tm)
-
 
 xs2 = [legacy.m2a(x) for x in xs]
 us2 = [legacy.m2a(u) for u in us]
 
 
-# problem.calcDiff(xs,us)
-# p.calcDiff(xs2,us2)
+# Creating the DDP solver for this OC problem, defining a logger
+ddp = crocoddyl.SolverDDP(problem)
+sol = legacy.SolverDDP(p)
+# cameraTF = [2., 2.68, 0.54, 0.2, 0.62, 0.72, 0.22]
+# ddp.callback = [CallbackDDPVerbose()]
+# if WITHPLOT:
+#     ddp.callback.append(CallbackDDPLogger())
+# if WITHDISPLAY:
+#     ddp.callback.append(CallbackSolverDisplay(ROBOT, 4, 1, cameraTF))
 
+# Solving it with the DDP algorithm
+import time
+c_start = time.time()
+ddp.solve([], [], 1)
+c_end = time.time()
+print 1e3 * (c_end - c_start)
 
+c_start = time.time()
+sol.solve(maxiter=1)
+c_end = time.time()
+print 1e3 * (c_end - c_start)
 
-# # Creating the DDP solver for this OC problem, defining a logger
-# ddp = crocoddyl.SolverDDP(problem)
-# # cameraTF = [2., 2.68, 0.54, 0.2, 0.62, 0.72, 0.22]
-# # ddp.callback = [CallbackDDPVerbose()]
-# # if WITHPLOT:
-# #     ddp.callback.append(CallbackDDPLogger())
-# # if WITHDISPLAY:
-# #     ddp.callback.append(CallbackSolverDisplay(ROBOT, 4, 1, cameraTF))
+# Plotting the solution and the DDP convergence
+# if WITHPLOT:
+#     log = ddp.callback[1]
+#     plotOCSolution(log.xs, log.us, figIndex=1, show=False)
+#     plotDDPConvergence(log.costs, log.control_regs, log.state_regs, log.gm_stops,
+#                        log.th_stops, log.steps, figIndex=2)
 
-# # Solving it with the DDP algorithm
-# ddp.solve([], [], 6)
+# Visualizing the solution in gepetto-viewer
+# if WITHDISPLAY:
+#     from crocoddyl.diagnostic import displayTrajectory
+#     displayTrajectory(ROBOT, ddp.xs, runningModel.timeStep)
 
-# # Plotting the solution and the DDP convergence
-# # if WITHPLOT:
-# #     log = ddp.callback[1]
-# #     plotOCSolution(log.xs, log.us, figIndex=1, show=False)
-# #     plotDDPConvergence(log.costs, log.control_regs, log.state_regs, log.gm_stops,
-# #                        log.th_stops, log.steps, figIndex=2)
-
-# # Visualizing the solution in gepetto-viewer
-# # if WITHDISPLAY:
-# #     from crocoddyl.diagnostic import displayTrajectory
-# #     displayTrajectory(ROBOT, ddp.xs, runningModel.timeStep)
-
-# # Printing the reached position
-# frame_idx = robot_model.getFrameId("gripper_left_joint")
-# print
-# print("The reached pose by the wrist is")
-# # print(ddp.datas()[-1].differential.pinocchio.oMf[frame_idx])
+# Printing the reached position
+frame_idx = robot_model.getFrameId("gripper_left_joint")
+print
+print("The reached pose by the wrist is")
+# print(ddp.datas()[-1].differential.pinocchio.oMf[frame_idx])
