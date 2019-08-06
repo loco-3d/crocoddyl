@@ -50,7 +50,7 @@ void exposeCostSum() {
           "For this case the default nu is equals to model.nv.\n"
           ":param model: Pinocchio model of the multibody system\n"
           ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
-      .def("addCost", &CostModelSum::addCost, "add cost item")
+      .def("addCost", &CostModelSum::addCost, bp::with_custodian_and_ward<1, 3>(), "add cost item")
       .def("removeCost", &CostModelSum::removeCost, "remove cost item")
       .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                   const Eigen::VectorXd&)>("calc", &CostModelSum::calc_wrap,
