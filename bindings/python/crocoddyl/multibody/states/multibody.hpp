@@ -77,10 +77,8 @@ void exposeStateMultibody() {
                        ":param dx: displacement of the state (dim state.ndx()).\n"
                        ":param firstsecond: desired partial derivative\n"
                        ":return the partial derivative(s) of the integrate(x, dx) function"))
-      .add_property(
-          "model",
-          bp::make_function(&StateMultibody::get_model, bp::return_internal_reference<>()),
-          "pinocchio model");
+      .add_property("pinocchio", bp::make_function(&StateMultibody::get_pinocchio, bp::return_internal_reference<>()),
+                    "pinocchio model");
 }
 
 }  // namespace python
