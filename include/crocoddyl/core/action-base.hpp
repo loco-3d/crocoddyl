@@ -31,15 +31,11 @@ class ActionModelAbstract {
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
   void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
 
-  const unsigned int& get_nx() const;
-  const unsigned int& get_ndx() const;
   const unsigned int& get_nu() const;
   const unsigned int& get_nr() const;
   StateAbstract* get_state() const;
 
  protected:
-  unsigned int nx_;
-  unsigned int ndx_;
   unsigned int nu_;
   unsigned int nr_;
   StateAbstract* state_;
@@ -77,8 +73,8 @@ struct ActionDataAbstract {
 
   template <typename Model>
   ActionDataAbstract(Model* const model) : cost(0.) {
-    const int& nx = model->get_nx();
-    const int& ndx = model->get_ndx();
+    const int& nx = model->get_state()->get_nx();
+    const int& ndx = model->get_state()->get_ndx();
     const int& nu = model->get_nu();
     const int& nr = model->get_nr();
     xnext = Eigen::VectorXd::Zero(nx);

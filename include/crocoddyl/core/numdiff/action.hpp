@@ -103,7 +103,7 @@ struct ActionDataNumDiff : public ActionDataAbstract {
   template <typename Model>
   ActionDataNumDiff(Model* const model_num_diff) : ActionDataAbstract(model_num_diff) {
     // simple renaming for conveniency
-    const unsigned& ndx = model_num_diff->get_model().get_ndx();
+    const unsigned& ndx = model_num_diff->get_model().get_state()->get_ndx();
     const unsigned& nu = model_num_diff->get_model().get_nu();
     const unsigned& nr = model_num_diff->get_model().get_nr();
     // data_0_

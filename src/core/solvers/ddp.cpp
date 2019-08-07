@@ -148,7 +148,7 @@ void SolverDDP::backwardPass() {
   Vxx_.back() = d_T->get_Lxx();
   Vx_.back() = d_T->get_Lx();
 
-  const int& ndx = problem_.terminal_model_->get_ndx();
+  const int& ndx = problem_.terminal_model_->get_state()->get_ndx();
   const Eigen::VectorXd& xreg = Eigen::VectorXd::Constant(ndx, xreg_);
   if (!std::isnan(xreg_)) {
     Vxx_.back().diagonal() += xreg;
@@ -272,8 +272,8 @@ void SolverDDP::allocateData() {
 
   for (long unsigned int t = 0; t < T; ++t) {
     ActionModelAbstract* model = problem_.running_models_[t];
-    const int& nx = model->get_nx();
-    const int& ndx = model->get_ndx();
+    const int& nx = model->get_state()->get_nx();
+    const int& ndx = model->get_state()->get_ndx();
     const int& nu = model->get_nu();
 
     Vxx_[t] = Eigen::MatrixXd::Zero(ndx, ndx);
@@ -295,7 +295,7 @@ void SolverDDP::allocateData() {
     us_try_[t] = Eigen::VectorXd::Constant(nu, NAN);
     dx_[t] = Eigen::VectorXd::Zero(ndx);
   }
-  const int& ndx = problem_.terminal_model_->get_ndx();
+  const int& ndx = problem_.terminal_model_->get_state()->get_ndx();
   Vxx_.back() = Eigen::MatrixXd::Zero(ndx, ndx);
   Vx_.back() = Eigen::VectorXd::Zero(ndx);
   xs_try_.back() = problem_.terminal_model_->get_state()->zero();

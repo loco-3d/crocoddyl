@@ -23,14 +23,14 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
 
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
-    assert(x.size() == nx_ && "ActionModelAbstract::calc: x has wrong dimension");
+    assert(x.size() == state_->get_nx() && "ActionModelAbstract::calc: x has wrong dimension");
     assert(u.size() == nu_ && "ActionModelAbstract::calc: u has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
   void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
-    assert(x.size() == nx_ && "ActionModelAbstract::calcDiff: x has wrong dimension");
+    assert(x.size() == state_->get_nx() && "ActionModelAbstract::calcDiff: x has wrong dimension");
     assert(u.size() == nu_ && "ActionModelAbstract::calcDiff: u has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
@@ -77,12 +77,6 @@ void exposeActionAbstract() {
            "Each action model (AM) has its own data that needs to be allocated.\n"
            "This function returns the allocated data for a predefined AM.\n"
            ":return AM data.")
-      .add_property(
-          "nx", bp::make_function(&ActionModelAbstract_wrap::get_nx, bp::return_value_policy<bp::return_by_value>()),
-          "dimension of state configuration vector")
-      .add_property(
-          "ndx", bp::make_function(&ActionModelAbstract_wrap::get_ndx, bp::return_value_policy<bp::return_by_value>()),
-          "dimension of state tangent vector")
       .add_property(
           "nu", bp::make_function(&ActionModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
           "dimension of control vector")

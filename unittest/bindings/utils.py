@@ -147,9 +147,9 @@ class UnicycleDerived(crocoddyl.ActionModelAbstract):
         v, w = m2a(u)
         px, py, theta = m2a(x)
         # Cost derivatives
-        data.Lx = a2m(m2a(x) * ([self.costWeights[0]**2] * self.nx))
+        data.Lx = a2m(m2a(x) * ([self.costWeights[0]**2] * self.State.nx))
         data.Lu = a2m(m2a(u) * ([self.costWeights[1]**2] * self.nu))
-        data.Lxx = np.diag([self.costWeights[0]**2] * self.nx)
+        data.Lxx = np.diag([self.costWeights[0]**2] * self.State.nx)
         data.Luu = np.diag([self.costWeights[1]**2] * self.nu)
         # Dynamic derivatives
         c, s, dt = np.cos(theta), np.sin(theta), self.dt
@@ -162,13 +162,13 @@ class LQRDerived(crocoddyl.ActionModelAbstract):
     def __init__(self, nx, nu, driftFree=True):
         crocoddyl.ActionModelAbstract.__init__(self, crocoddyl.StateVector(nx), nu)
 
-        self.Fx = np.matrix(np.eye(self.nx))
-        self.Fu = np.matrix(np.eye(self.nx))[:, :self.nu]
-        self.f0 = np.matrix(np.zeros(self.nx)).T
-        self.Lxx = np.matrix(np.eye(self.nx))
-        self.Lxu = np.matrix(np.eye(self.nx))[:, :self.nu]
+        self.Fx = np.matrix(np.eye(self.State.nx))
+        self.Fu = np.matrix(np.eye(self.State.nx))[:, :self.nu]
+        self.f0 = np.matrix(np.zeros(self.State.nx)).T
+        self.Lxx = np.matrix(np.eye(self.State.nx))
+        self.Lxu = np.matrix(np.eye(self.State.nx))[:, :self.nu]
         self.Luu = np.matrix(np.eye(self.nu))
-        self.lx = np.matrix(np.ones(self.nx)).T
+        self.lx = np.matrix(np.ones(self.State.nx)).T
         self.lu = np.matrix(np.ones(self.nu)).T
 
     def calc(self, data, x, u=None):
@@ -196,20 +196,20 @@ class DifferentialLQRDerived(crocoddyl.DifferentialActionModelAbstract):
     def __init__(self, nq, nu, driftFree=True):
         crocoddyl.DifferentialActionModelAbstract.__init__(self, crocoddyl.StateVector(2 * nq), nu)
 
-        self.Fq = np.matrix(np.eye(self.nq))
-        self.Fv = np.matrix(np.eye(self.nv))
-        self.Fu = np.matrix(np.eye(self.nq))[:, :self.nu]
-        self.f0 = np.matrix(np.zeros(self.nv)).T
-        self.Lxx = np.matrix(np.eye(self.nx))
-        self.Lxu = np.matrix(np.eye(self.nx))[:, :self.nu]
+        self.Fq = np.matrix(np.eye(self.State.nq))
+        self.Fv = np.matrix(np.eye(self.State.nv))
+        self.Fu = np.matrix(np.eye(self.State.nq))[:, :self.nu]
+        self.f0 = np.matrix(np.zeros(self.State.nv)).T
+        self.Lxx = np.matrix(np.eye(self.State.nx))
+        self.Lxu = np.matrix(np.eye(self.State.nx))[:, :self.nu]
         self.Luu = np.matrix(np.eye(self.nu))
-        self.lx = np.matrix(np.ones(self.nx)).T
+        self.lx = np.matrix(np.ones(self.State.nx)).T
         self.lu = np.matrix(np.ones(self.nu)).T
 
     def calc(self, data, x, u=None):
         if u is None:
             u = self.unone
-        q, v = x[:self.nq], x[self.nq:]
+        q, v = x[:self.State.nq], x[self.State.nq:]
         data.xout = self.Fq * q + self.Fv * v + self.Fu * u + self.f0
         data.cost = 0.5 * np.asscalar(x.T * self.Lxx * x) + 0.5 * np.asscalar(u.T * self.Luu * u)
         data.cost += np.asscalar(x.T * self.Lxu * u) + np.asscalar(self.lx.T * x) + np.asscalar(self.lu.T * u)
@@ -239,7 +239,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
     def calc(self, data, x, u=None):
         if u is None:
             u = self.unone
-        q, v = x[:self.nq], x[-self.nv:]
+        q, v = x[:self.State.nq], x[-self.State.nv:]
         # Computing the dynamics using ABA or manually for armature case
         if self.forceAba:
             data.xout = pinocchio.aba(self.pinocchio, data.pinocchio, q, v, u)
@@ -257,7 +257,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
         data.cost = data.costs.cost
 
     def calcDiff(self, data, x, u=None, recalc=True):
-        q, v = x[:self.nq], x[-self.nv:]
+        q, v = x[:self.State.nq], x[-self.State.nv:]
         if u is None:
             u = self.unone
         if recalc:
@@ -276,7 +276,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
         self.costs.calcDiff(data.costs, x, u, False)
 
     def set_armature(self, armature):
-        if armature.size != self.nv:
+        if armature.size != self.State.nv:
             print "The armature dimension is wrong, we cannot set it."
         else:
             self.forceAba = False
@@ -294,9 +294,6 @@ class IntegratedActionModelEuler(crocoddyl.ActionModelAbstract):
     def __init__(self, diffModel, timeStep=1e-3, withCostResiduals=True):
         crocoddyl.ActionModelAbstract.__init__(self, diffModel.State, diffModel.nv, diffModel.nr)
         self.differential = diffModel
-        self.State = self.differential.State
-        self.nq = self.differential.nq
-        self.nv = self.differential.nv
         self.withCostResiduals = withCostResiduals
         self.timeStep = timeStep
 
@@ -304,10 +301,10 @@ class IntegratedActionModelEuler(crocoddyl.ActionModelAbstract):
         return IntegratedActionDataEuler(self)
 
     def calc(self, data, x, u=None):
-        nq, dt = self.nq, self.timeStep
+        nq, dt = self.State.nq, self.timeStep
         acc, cost = self.differential.calc(data.differential, x, u)
         if self.withCostResiduals:
-            data.costResiduals[:] = data.differential.costResiduals[:]
+            data.costResiduals = data.differential.costResiduals
         data.cost = cost
         # data.xnext[nq:] = x[nq:] + acc*dt
         # data.xnext[:nq] = pinocchio.integrate(self.differential.pinocchio,
@@ -318,7 +315,7 @@ class IntegratedActionModelEuler(crocoddyl.ActionModelAbstract):
         return data.xnext, data.cost
 
     def calcDiff(self, data, x, u=None, recalc=True):
-        nv, dt = self.nv, self.timeStep
+        nv, dt = self.State.nv, self.timeStep
         if recalc:
             self.calc(data, x, u)
         self.differential.calcDiff(data.differential, x, u, recalc=False)

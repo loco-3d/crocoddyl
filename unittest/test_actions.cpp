@@ -34,7 +34,7 @@ void test_calc_returns_state(crocoddyl::ActionModelAbstract& model) {
   // Getting the state dimension from calc() call
   model.calc(data, x, u);
 
-  BOOST_CHECK(data->get_xnext().size() == model.get_nx());
+  BOOST_CHECK(data->get_xnext().size() == model.get_state()->get_nx());
 }
 
 //____________________________________________________________________________//

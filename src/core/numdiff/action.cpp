@@ -8,11 +8,11 @@ ActionModelNumDiff::ActionModelNumDiff(ActionModelAbstract& model, bool with_gau
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
   assert((!with_gauss_approx_ || nr_ > 1) && "No Gauss approximation possible with nr = 1");
 
-  dx_.resize(model.get_ndx());
+  dx_.resize(state_->get_ndx());
   dx_.setZero();
   du_.resize(model.get_nu());
   du_.setZero();
-  tmp_x_.resize(model.get_nx());
+  tmp_x_.resize(state_->get_nx());
   tmp_x_.setZero();
 }
 
@@ -20,7 +20,7 @@ ActionModelNumDiff::~ActionModelNumDiff() {}
 
 void ActionModelNumDiff::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                               const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(x.size() == nx_ && "ActionModelNumDiff::calc: x has wrong dimension");
+  assert(x.size() == state_->get_nx() && "ActionModelNumDiff::calc: x has wrong dimension");
   assert(u.size() == nu_ && "ActionModelNumDiff::calc: u has wrong dimension");
   model_.calc(data, x, u);
 }
@@ -28,7 +28,7 @@ void ActionModelNumDiff::calc(const boost::shared_ptr<ActionDataAbstract>& data,
 void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                   const Eigen::Ref<const Eigen::VectorXd>& x,
                                   const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  assert(x.size() == nx_ && "ActionModelNumDiff::calcDiff: x has wrong dimension");
+  assert(x.size() == state_->get_nx() && "ActionModelNumDiff::calcDiff: x has wrong dimension");
   assert(u.size() == nu_ && "ActionModelNumDiff::calcDiff: u has wrong dimension");
   boost::shared_ptr<ActionDataNumDiff> data_num_diff = boost::static_pointer_cast<ActionDataNumDiff>(data);
 
@@ -42,7 +42,7 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
 
   // Computing the d action(x,u) / dx
   dx_.setZero();
-  for (unsigned ix = 0; ix < model_.get_ndx(); ++ix) {
+  for (unsigned ix = 0; ix < state_->get_ndx(); ++ix) {
     dx_(ix) = disturbance_;
     model_.get_state()->integrate(x, dx_, tmp_x_);
     calc(data_num_diff->data_x[ix], tmp_x_, u);

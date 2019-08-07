@@ -47,7 +47,7 @@ struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbst
   DifferentialActionDataFreeFwdDynamics(Model* const model)
       : DifferentialActionDataAbstract(model),
         pinocchio(pinocchio::Data(*model->get_pinocchio())),
-        Minv(model->get_nv(), model->get_nv()) {
+        Minv(model->get_state()->get_nv(), model->get_state()->get_nv()) {
     costs = model->get_costs()->createData(&pinocchio);
     shareCostMemory(costs);
     Minv.fill(0);

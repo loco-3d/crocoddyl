@@ -22,7 +22,7 @@ void IntegratedActionModelEuler::calc(const boost::shared_ptr<ActionDataAbstract
   differential_->calc(d->differential, x, u);
 
   // Computing the next state (discrete time)
-  const Eigen::VectorXd& v = x.tail(differential_->get_nv());
+  const Eigen::VectorXd& v = x.tail(differential_->get_state()->get_nv());
   const Eigen::VectorXd& a = d->differential->xout;
   d->dx << v * time_step_ + a * time_step2_, a * time_step_;
   differential_->get_state()->integrate(x, d->dx, d->xnext);
@@ -37,7 +37,7 @@ void IntegratedActionModelEuler::calc(const boost::shared_ptr<ActionDataAbstract
 void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                           const Eigen::Ref<const Eigen::VectorXd>& x,
                                           const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  const unsigned int& nv = differential_->get_nv();
+  const unsigned int& nv = differential_->get_state()->get_nv();
   if (recalc) {
     calc(data, x, u);
   }

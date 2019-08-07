@@ -5,14 +5,14 @@ namespace crocoddyl {
 DifferentialActionModelLQR::DifferentialActionModelLQR(const unsigned int& nq, const unsigned int& nu, bool drift_free)
     : DifferentialActionModelAbstract(new StateVector(2 * nq), nu), drift_free_(drift_free) {
   // TODO substitute by random (vectors) and random-orthogonal (matrices)
-  Fq_ = Eigen::MatrixXd::Identity(nq_, nq_);
-  Fv_ = Eigen::MatrixXd::Identity(nv_, nv_);
-  Fu_ = Eigen::MatrixXd::Identity(nq_, nu_);
-  f0_ = Eigen::VectorXd::Ones(nv_);
-  Lxx_ = Eigen::MatrixXd::Identity(nx_, nx_);
-  Lxu_ = Eigen::MatrixXd::Identity(nx_, nu_);
+  Fq_ = Eigen::MatrixXd::Identity(state_->get_nq(), state_->get_nq());
+  Fv_ = Eigen::MatrixXd::Identity(state_->get_nv(), state_->get_nv());
+  Fu_ = Eigen::MatrixXd::Identity(state_->get_nq(), nu_);
+  f0_ = Eigen::VectorXd::Ones(state_->get_nv());
+  Lxx_ = Eigen::MatrixXd::Identity(state_->get_nx(), state_->get_nx());
+  Lxu_ = Eigen::MatrixXd::Identity(state_->get_nx(), nu_);
   Luu_ = Eigen::MatrixXd::Identity(nu_, nu_);
-  lx_ = Eigen::VectorXd::Ones(nx_);
+  lx_ = Eigen::VectorXd::Ones(state_->get_nx());
   lu_ = Eigen::VectorXd::Ones(nu_);
 }
 
@@ -21,11 +21,11 @@ DifferentialActionModelLQR::~DifferentialActionModelLQR() {}
 void DifferentialActionModelLQR::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                       const Eigen::Ref<const Eigen::VectorXd>& x,
                                       const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(x.size() == nx_ && "DifferentialActionModelLQR::calc: x has wrong dimension");
+  assert(x.size() == state_->get_nx() && "DifferentialActionModelLQR::calc: x has wrong dimension");
   assert(u.size() == nu_ && "DifferentialActionModelLQR::calc: u has wrong dimension");
 
-  const Eigen::VectorXd& q = x.head(nq_);
-  const Eigen::VectorXd& v = x.tail(nv_);
+  const Eigen::VectorXd& q = x.head(state_->get_nq());
+  const Eigen::VectorXd& v = x.tail(state_->get_nv());
   if (drift_free_) {
     data->xout = Fq_ * q + Fv_ * v + Fu_ * u;
   } else {
@@ -37,7 +37,7 @@ void DifferentialActionModelLQR::calc(const boost::shared_ptr<DifferentialAction
 void DifferentialActionModelLQR::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                           const Eigen::Ref<const Eigen::VectorXd>& x,
                                           const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  assert(x.size() == nx_ && "DifferentialActionModelLQR::calcDiff: x has wrong dimension");
+  assert(x.size() == state_->get_nx() && "DifferentialActionModelLQR::calcDiff: x has wrong dimension");
   assert(u.size() == nu_ && "DifferentialActionModelLQR::calcDiff: u has wrong dimension");
 
   if (recalc) {
@@ -45,8 +45,8 @@ void DifferentialActionModelLQR::calcDiff(const boost::shared_ptr<DifferentialAc
   }
   data->Lx = lx_ + Lxx_ * x + Lxu_ * u;
   data->Lu = lu_ + Lxu_.transpose() * x + Luu_ * u;
-  data->Fx.leftCols(nq_) = Fq_;
-  data->Fx.rightCols(nv_) = Fv_;
+  data->Fx.leftCols(state_->get_nq()) = Fq_;
+  data->Fx.rightCols(state_->get_nv()) = Fv_;
   data->Fu = Fu_;
   data->Lxx = Lxx_;
   data->Lxu = Lxu_;
