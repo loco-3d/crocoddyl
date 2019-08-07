@@ -41,6 +41,8 @@ class DifferentialActionModelFreeFwdDynamics : public DifferentialActionModelAbs
 };
 
 struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbstract {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   template <typename Model>
   DifferentialActionDataFreeFwdDynamics(Model* const model)
       : DifferentialActionDataAbstract(model),
