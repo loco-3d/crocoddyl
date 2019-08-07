@@ -95,13 +95,10 @@ void exposeCostMultibody() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: Pinocchio data\n"
            ":return cost data.")
-      .add_property("State",
-                    bp::make_function(&CostModelAbstract_wrap::get_state,
-                                      bp::return_value_policy<bp::reference_existing_object>()),
+      .add_property("State", bp::make_function(&CostModelAbstract_wrap::get_state, bp::return_internal_reference<>()),
                     "state of the multibody system")
       .add_property("activation",
-                    bp::make_function(&CostModelAbstract_wrap::get_activation,
-                                      bp::return_value_policy<bp::reference_existing_object>()),
+                    bp::make_function(&CostModelAbstract_wrap::get_activation, bp::return_internal_reference<>()),
                     "activation model")
       .add_property("nu",
                     bp::make_function(&CostModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
@@ -115,8 +112,7 @@ void exposeCostMultibody() {
           ":param model: cost model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
       .add_property("pinocchio",
-                    bp::make_function(&CostDataAbstract::get_pinocchio,
-                                      bp::return_value_policy<bp::reference_existing_object>()),
+                    bp::make_function(&CostDataAbstract::get_pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
       .add_property("activation",
                     bp::make_getter(&CostDataAbstract::activation, bp::return_value_policy<bp::return_by_value>()),
