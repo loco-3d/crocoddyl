@@ -19,12 +19,12 @@ namespace bp = boost::python;
 class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstract,
                                              public bp::wrapper<DifferentialActionModelAbstract> {
  public:
-  DifferentialActionModelAbstract_wrap(StateAbstract* const state, int nu, int nr = 1)
+  DifferentialActionModelAbstract_wrap(StateAbstract& state, int nu, int nr = 1)
       : DifferentialActionModelAbstract(state, nu, nr), bp::wrapper<DifferentialActionModelAbstract>() {}
 
   void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
-    assert(x.size() == state_->get_nx() && "DifferentialActionModelAbstract::calc: x has wrong dimension");
+    assert(x.size() == state_.get_nx() && "DifferentialActionModelAbstract::calc: x has wrong dimension");
     assert(u.size() == nu_ && "DifferentialActionModelAbstract::calc: u has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
@@ -32,7 +32,7 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
   void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                 const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
                 const bool& recalc = true) {
-    assert(x.size() == state_->get_nx() && "DifferentialActionModelAbstract::calcDiff: x has wrong dimension");
+    assert(x.size() == state_.get_nx() && "DifferentialActionModelAbstract::calcDiff: x has wrong dimension");
     assert(u.size() == nu_ && "DifferentialActionModelAbstract::calcDiff: u has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
@@ -51,7 +51,7 @@ void exposeDifferentialActionAbstract() {
       "action model. Every time that we want describe a problem, we need to provide ways of\n"
       "computing the dynamics, cost functions and their derivatives. These computations are\n"
       "mainly carry on inside calc() and calcDiff(), respectively.",
-      bp::init<StateAbstract*, int, bp::optional<int> >(
+      bp::init<StateAbstract&, int, bp::optional<int> >(
           bp::args(" self", " state", " nu", " nr=1"),
           "Initialize the differential action model.\n\n"
           ":param state: state\n"
@@ -94,7 +94,7 @@ void exposeDifferentialActionAbstract() {
                     "dimension of cost-residual vector")
       .add_property("State",
                     bp::make_function(&DifferentialActionModelAbstract_wrap::get_state,
-                                      bp::return_value_policy<bp::reference_existing_object>()),
+                                      bp::return_internal_reference<>()),
                     "state");
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataAbstract> >();

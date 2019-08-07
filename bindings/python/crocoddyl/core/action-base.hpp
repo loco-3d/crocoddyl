@@ -18,19 +18,19 @@ namespace bp = boost::python;
 
 class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<ActionModelAbstract> {
  public:
-  ActionModelAbstract_wrap(StateAbstract* const state, const unsigned int& nu, const unsigned int& nr = 1)
+  ActionModelAbstract_wrap(StateAbstract& state, const unsigned int& nu, const unsigned int& nr = 1)
       : ActionModelAbstract(state, nu, nr), bp::wrapper<ActionModelAbstract>() {}
 
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
-    assert(x.size() == state_->get_nx() && "ActionModelAbstract::calc: x has wrong dimension");
+    assert(x.size() == state_.get_nx() && "ActionModelAbstract::calc: x has wrong dimension");
     assert(u.size() == nu_ && "ActionModelAbstract::calc: u has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
   void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
-    assert(x.size() == state_->get_nx() && "ActionModelAbstract::calcDiff: x has wrong dimension");
+    assert(x.size() == state_.get_nx() && "ActionModelAbstract::calcDiff: x has wrong dimension");
     assert(u.size() == nu_ && "ActionModelAbstract::calcDiff: u has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
@@ -47,7 +47,7 @@ void exposeActionAbstract() {
       "a problem, we need to provide ways of computing the dynamics, cost functions and their\n"
       "derivatives. These computations are mainly carry on inside calc() and calcDiff(),\n"
       "respectively.",
-      bp::init<StateAbstract*, int, bp::optional<int> >(
+      bp::init<StateAbstract&, int, bp::optional<int> >(
           bp::args(" self", " state", " nu", " nr=1"),
           "Initialize the action model.\n\n"
           ":param state: state description,\n"
@@ -85,7 +85,7 @@ void exposeActionAbstract() {
           "dimension of cost-residual vector")
       .add_property("State",
                     bp::make_function(&ActionModelAbstract_wrap::get_state,
-                                      bp::return_value_policy<bp::reference_existing_object>()),
+                                      bp::return_internal_reference<>()),
                     "state");
 
   bp::register_ptr_to_python<boost::shared_ptr<ActionDataAbstract> >();

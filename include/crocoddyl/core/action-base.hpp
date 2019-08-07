@@ -19,7 +19,7 @@ struct ActionDataAbstract;  // forward declaration
 
 class ActionModelAbstract {
  public:
-  ActionModelAbstract(StateAbstract* const state, const unsigned int& nu, const unsigned int& nr = 1);
+  ActionModelAbstract(StateAbstract& state, const unsigned int& nu, const unsigned int& nr = 1);
   virtual ~ActionModelAbstract();
 
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -33,12 +33,12 @@ class ActionModelAbstract {
 
   const unsigned int& get_nu() const;
   const unsigned int& get_nr() const;
-  StateAbstract* get_state() const;
+  StateAbstract& get_state() const;
 
  protected:
   unsigned int nu_;
   unsigned int nr_;
-  StateAbstract* state_;
+  StateAbstract& state_;
   Eigen::VectorXd unone_;
 
 #ifdef PYTHON_BINDINGS
@@ -73,8 +73,8 @@ struct ActionDataAbstract {
 
   template <typename Model>
   ActionDataAbstract(Model* const model) : cost(0.) {
-    const int& nx = model->get_state()->get_nx();
-    const int& ndx = model->get_state()->get_ndx();
+    const int& nx = model->get_state().get_nx();
+    const int& ndx = model->get_state().get_ndx();
     const int& nu = model->get_nu();
     const int& nr = model->get_nr();
     xnext = Eigen::VectorXd::Zero(nx);

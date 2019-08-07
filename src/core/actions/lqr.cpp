@@ -3,7 +3,7 @@
 namespace crocoddyl {
 
 ActionModelLQR::ActionModelLQR(const unsigned int& nx, const unsigned int& nu, bool drift_free)
-    : ActionModelAbstract(new StateVector(nx), nu, 0), drift_free_(drift_free) {
+    : ActionModelAbstract(*new StateVector(nx), nu, 0), drift_free_(drift_free) {
   // TODO substitute by random (vectors) and random-orthogonal (matrices)
   Fx_ = Eigen::MatrixXd::Identity(nx, nx);
   Fu_ = Eigen::MatrixXd::Identity(nx, nu);
@@ -21,7 +21,7 @@ ActionModelLQR::~ActionModelLQR() {
 
 void ActionModelLQR::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                           const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(x.size() == state_->get_nx() && "ActionModelLQR::calc: x has wrong dimension");
+  assert(x.size() == state_.get_nx() && "ActionModelLQR::calc: x has wrong dimension");
   assert(u.size() == nu_ && "ActionModelLQR::calc: u has wrong dimension");
 
   if (drift_free_) {
@@ -35,7 +35,7 @@ void ActionModelLQR::calc(const boost::shared_ptr<ActionDataAbstract>& data,
 void ActionModelLQR::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                               const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
                               const bool& recalc) {
-  assert(x.size() == state_->get_nx() && "ActionModelLQR::calcDiff: x has wrong dimension");
+  assert(x.size() == state_.get_nx() && "ActionModelLQR::calcDiff: x has wrong dimension");
   assert(u.size() == nu_ && "ActionModelLQR::calcDiff: u has wrong dimension");
 
   if (recalc) {

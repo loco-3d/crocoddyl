@@ -2,7 +2,7 @@
 
 namespace crocoddyl {
 
-DifferentialActionModelAbstract::DifferentialActionModelAbstract(StateAbstract* const state, const unsigned int& nu,
+DifferentialActionModelAbstract::DifferentialActionModelAbstract(StateAbstract& state, const unsigned int& nu,
                                                                  const unsigned int& nr)
     : nu_(nu), nr_(nr), state_(state), unone_(Eigen::VectorXd::Zero(nu)) {
   assert(nu_ != 0 && "DifferentialActionModelAbstract: nu cannot be zero");
@@ -25,6 +25,6 @@ const unsigned int& DifferentialActionModelAbstract::get_nu() const { return nu_
 
 const unsigned int& DifferentialActionModelAbstract::get_nr() const { return nr_; }
 
-StateAbstract* DifferentialActionModelAbstract::get_state() const { return state_; }
+StateAbstract& DifferentialActionModelAbstract::get_state() const { return state_; }
 
 }  // namespace crocoddyl

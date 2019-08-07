@@ -28,13 +28,13 @@ void test_calc_returns_state(crocoddyl::ActionModelAbstract& model) {
   boost::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
 
   // Generating random state and control vectors
-  Eigen::VectorXd x = model.get_state()->rand();
+  Eigen::VectorXd x = model.get_state().rand();
   Eigen::VectorXd u = Eigen::VectorXd::Random(model.get_nu());
 
   // Getting the state dimension from calc() call
   model.calc(data, x, u);
 
-  BOOST_CHECK(data->get_xnext().size() == model.get_state()->get_nx());
+  BOOST_CHECK(data->get_xnext().size() == model.get_state().get_nx());
 }
 
 //____________________________________________________________________________//
@@ -45,7 +45,7 @@ void test_calc_returns_a_cost(crocoddyl::ActionModelAbstract& model) {
   data->cost = nan("");
 
   // Getting the cost value computed by calc()
-  Eigen::VectorXd x = model.get_state()->rand();
+  Eigen::VectorXd x = model.get_state().rand();
   Eigen::VectorXd u = Eigen::VectorXd::Random(model.get_nu());
   model.calc(data, x, u);
 
@@ -66,7 +66,7 @@ void test_partial_derivatives_against_numdiff(crocoddyl::ActionModelAbstract& mo
   boost::shared_ptr<crocoddyl::ActionDataAbstract> data_num_diff = model_num_diff.createData();
 
   // Generating random values for the state and control
-  Eigen::VectorXd x = model.get_state()->rand();
+  Eigen::VectorXd x = model.get_state().rand();
   Eigen::VectorXd u = Eigen::VectorXd::Random(model.get_nu());
 
   // Computing the action derivatives
