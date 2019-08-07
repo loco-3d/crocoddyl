@@ -44,7 +44,7 @@ class DifferentialActionModelLQR : public DifferentialActionModelAbstract {
 
 struct DifferentialActionDataLQR : public DifferentialActionDataAbstract {
   template <typename Model>
-  DifferentialActionDataLQR(Model* const model) : DifferentialActionDataAbstract(model) {
+  DifferentialActionDataLQR(Model& model) : DifferentialActionDataAbstract(model) {
     // Setting the linear model and quadratic cost here because they are constant
     const unsigned int& nq = model->get_state().get_nq();
     const unsigned int& nv = model->get_state().get_nv();

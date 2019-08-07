@@ -44,7 +44,7 @@ struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbst
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  DifferentialActionDataFreeFwdDynamics(Model* const model)
+  DifferentialActionDataFreeFwdDynamics(Model& model)
       : DifferentialActionDataAbstract(model),
         pinocchio(pinocchio::Data(model->get_pinocchio())),
         Minv(model->get_state().get_nv(), model->get_state().get_nv()) {
