@@ -31,34 +31,34 @@ void exposeCostFramePlacement() {
                     "frame placement");
 
   bp::class_<CostModelFramePlacement, bp::bases<CostModelAbstract> >(
-      "CostModelFramePlacement", bp::init<pinocchio::Model*, ActivationModelAbstract*, FramePlacement, int>(
-                                     bp::args(" self", " model", " activation", " Mref", " nu"),
+      "CostModelFramePlacement", bp::init<StateMultibody&, ActivationModelAbstract&, FramePlacement, int>(
+                                     bp::args(" self", " state", " activation", " Mref", " nu"),
                                      "Initialize the frame placement cost model.\n\n"
-                                     ":param model: Pinocchio model of the multibody system\n"
+                                     ":param state: state of the multibody system\n"
                                      ":param activation: activation model\n"
                                      ":param Mref: reference frame placement\n"
                                      ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
-      .def(bp::init<pinocchio::Model*, ActivationModelAbstract*, FramePlacement>(
-          bp::args(" self", " model", " activation", " Fref"),
+      .def(bp::init<StateMultibody&, ActivationModelAbstract&, FramePlacement>(
+          bp::args(" self", " state", " activation", " Fref"),
           "Initialize the frame placement cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
-          ":param model: Pinocchio model of the multibody system\n"
+          ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param Mref: reference frame placement")[bp::with_custodian_and_ward<1, 3>()])
-      .def(bp::init<pinocchio::Model*, FramePlacement, int>(
-          bp::args(" self", " model", " Mref", " nu"),
+      .def(bp::init<StateMultibody&, FramePlacement, int>(
+          bp::args(" self", " state", " Mref", " nu"),
           "Initialize the control cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(6).\n"
-          ":param model: Pinocchio model of the multibody system\n"
+          ":param state: state of the multibody system\n"
           ":param Mref: reference frame placement\n"
           ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2>()])
-      .def(bp::init<pinocchio::Model*, FramePlacement>(
-          bp::args(" self", " model", " Mref"),
+      .def(bp::init<StateMultibody&, FramePlacement>(
+          bp::args(" self", " state", " Mref"),
           "Initialize the control cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(6), and nu is equals to model.nv.\n"
-          ":param model: Pinocchio model of the multibody system\n"
+          ":param state: state of the multibody system\n"
           ":param Mref: reference frame placement")[bp::with_custodian_and_ward<1, 2>()])
       .def<void (CostModelFramePlacement::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                              const Eigen::VectorXd&)>("calc", &CostModelFramePlacement::calc_wrap,

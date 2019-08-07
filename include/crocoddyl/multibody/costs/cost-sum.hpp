@@ -28,8 +28,8 @@ class CostModelSum : public CostModelAbstract {
   typedef std::map<std::string, CostItem> CostModelContainer;
   typedef std::map<std::string, boost::shared_ptr<CostDataAbstract> > CostDataContainer;
 
-  CostModelSum(pinocchio::Model* const model, const unsigned int& nu, const bool& with_residuals = true);
-  CostModelSum(pinocchio::Model* const model, const bool& with_residuals = true);
+  CostModelSum(StateMultibody& state, const unsigned int& nu, const bool& with_residuals = true);
+  CostModelSum(StateMultibody& state, const bool& with_residuals = true);
   ~CostModelSum();
 
   void addCost(const std::string& name, CostModelAbstract* const cost, const double& weight);
@@ -42,16 +42,18 @@ class CostModelSum : public CostModelAbstract {
   boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
   const CostModelContainer& get_costs() const;
+  const unsigned int& get_nr() const;
 
  private:
   CostModelContainer costs_;
+  unsigned int nr_;
 };
 
 struct CostDataSum : public CostDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  CostDataSum(Model* const model, pinocchio::Data* const data) : CostDataAbstract(model, data) {
+  CostDataSum(Model& model, pinocchio::Data* const data) : CostDataAbstract(model, data) {
     for (CostModelSum::CostModelContainer::const_iterator it = model->get_costs().begin();
          it != model->get_costs().end(); ++it) {
       const CostItem& item = it->second;

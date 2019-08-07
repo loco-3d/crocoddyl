@@ -9,8 +9,8 @@
 #ifndef CROCODDYL_MULTIBODY_COST_BASE_HPP_
 #define CROCODDYL_MULTIBODY_COST_BASE_HPP_
 
+#include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/core/activation-base.hpp"
-#include <pinocchio/multibody/model.hpp>
 #include <pinocchio/multibody/data.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -21,13 +21,12 @@ struct CostDataAbstract;  // forward declaration
 
 class CostModelAbstract {
  public:
-  CostModelAbstract(pinocchio::Model* const model, ActivationModelAbstract* const activation, const unsigned int& nu,
+  CostModelAbstract(StateMultibody& state, ActivationModelAbstract& activation, const unsigned int& nu,
                     const bool& with_residuals = true);
-  CostModelAbstract(pinocchio::Model* const model, ActivationModelAbstract* const activation,
+  CostModelAbstract(StateMultibody& state, ActivationModelAbstract& activation, const bool& with_residuals = true);
+  CostModelAbstract(StateMultibody& state, const unsigned int& nr, const unsigned int& nu,
                     const bool& with_residuals = true);
-  CostModelAbstract(pinocchio::Model* const model, const unsigned int& nr, const unsigned int& nu,
-                    const bool& with_residuals = true);
-  CostModelAbstract(pinocchio::Model* const model, const unsigned int& nr, const bool& with_residuals = true);
+  CostModelAbstract(StateMultibody& state, const unsigned int& nr, const bool& with_residuals = true);
   ~CostModelAbstract();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -39,24 +38,14 @@ class CostModelAbstract {
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
   void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
 
-  pinocchio::Model* get_pinocchio() const;
-  ActivationModelAbstract* get_activation() const;
-  const unsigned int& get_nq() const;
-  const unsigned int& get_nv() const;
+  StateMultibody& get_state() const;
+  ActivationModelAbstract& get_activation() const;
   const unsigned int& get_nu() const;
-  const unsigned int& get_nx() const;
-  const unsigned int& get_ndx() const;
-  const unsigned int& get_nr() const;
 
  protected:
-  pinocchio::Model* pinocchio_;
-  ActivationModelAbstract* activation_;
-  unsigned int nq_;
-  unsigned int nv_;
+  StateMultibody& state_;
+  ActivationModelAbstract& activation_;
   unsigned int nu_;
-  unsigned int nx_;
-  unsigned int ndx_;
-  unsigned int nr_;
   bool with_residuals_;
   Eigen::VectorXd unone_;
 
@@ -88,11 +77,11 @@ struct CostDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  CostDataAbstract(Model* const model, pinocchio::Data* const data)
-      : pinocchio(data), activation(model->get_activation()->createData()), cost(0.) {
-    const int& ndx = model->get_ndx();
+  CostDataAbstract(Model& model, pinocchio::Data* const data)
+      : pinocchio(data), activation(model->get_activation().createData()), cost(0.) {
+    const int& ndx = model->get_state().get_ndx();
     const int& nu = model->get_nu();
-    const int& nr = model->get_nr();
+    const int& nr = model->get_activation().get_nr();
     Lx = Eigen::VectorXd::Zero(ndx);
     Lu = Eigen::VectorXd::Zero(nu);
     Lxx = Eigen::MatrixXd::Zero(ndx, ndx);

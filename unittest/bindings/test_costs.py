@@ -18,19 +18,19 @@ class CostModelAbstractTestCase(unittest.TestCase):
 
         if self.COST is crocoddyl.CostModelFramePlacement:
             Mref = crocoddyl.FramePlacement(self.ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.SE3.Random())
-            self.cost = self.COST(self.ROBOT_MODEL, Mref)
-            self.costDer = self.COST_DER(self.ROBOT_MODEL, Mref=Mref)
+            self.cost = self.COST(self.STATE, Mref)
+            self.costDer = self.COST_DER(self.STATE, Mref=Mref)
         elif self.COST is crocoddyl.CostModelFrameTranslation:
             xref = crocoddyl.FrameTranslation(self.ROBOT_MODEL.getFrameId('rleg5_joint'),
                                               np.matrix(np.random.rand(3)).T)
-            self.cost = self.COST(self.ROBOT_MODEL, xref)
-            self.costDer = self.COST_DER(self.ROBOT_MODEL, xref=xref)
+            self.cost = self.COST(self.STATE, xref)
+            self.costDer = self.COST_DER(self.STATE, xref=xref)
         elif self.COST is crocoddyl.CostModelControl:
-            self.cost = self.COST(self.ROBOT_MODEL)
-            self.costDer = self.COST_DER(self.ROBOT_MODEL)
+            self.cost = self.COST(self.STATE)
+            self.costDer = self.COST_DER(self.STATE)
         elif self.COST is crocoddyl.CostModelState:
-            self.cost = self.COST(self.ROBOT_MODEL, self.STATE)
-            self.costDer = self.COST_DER(self.ROBOT_MODEL, self.STATE)
+            self.cost = self.COST(self.STATE)
+            self.costDer = self.COST_DER(self.STATE)
         self.DATA = self.cost.createData(self.ROBOT_DATA)
         self.DATA_DER = self.costDer.createData(self.ROBOT_DATA)
 
@@ -40,12 +40,12 @@ class CostModelAbstractTestCase(unittest.TestCase):
         pinocchio.updateFramePlacements(self.ROBOT_MODEL, self.ROBOT_DATA)
 
     def test_dimensions(self):
-        self.assertEqual(self.cost.nx, self.costDer.nx, "Wrong nx.")
-        self.assertEqual(self.cost.ndx, self.costDer.ndx, "Wrong ndx.")
+        self.assertEqual(self.cost.State.nx, self.costDer.State.nx, "Wrong nx.")
+        self.assertEqual(self.cost.State.ndx, self.costDer.State.ndx, "Wrong ndx.")
         self.assertEqual(self.cost.nu, self.costDer.nu, "Wrong nu.")
-        self.assertEqual(self.cost.nq, self.costDer.nq, "Wrong nq.")
-        self.assertEqual(self.cost.nv, self.costDer.nv, "Wrong nv.")
-        self.assertEqual(self.cost.nr, self.costDer.nr, "Wrong nr.")
+        self.assertEqual(self.cost.State.nq, self.costDer.State.nq, "Wrong nq.")
+        self.assertEqual(self.cost.State.nv, self.costDer.State.nv, "Wrong nv.")
+        self.assertEqual(self.cost.activation.nr, self.costDer.activation.nr, "Wrong nr.")
 
     def test_calc(self):
         # Run calc for both action models
@@ -82,19 +82,19 @@ class CostModelSumTestCase(unittest.TestCase):
         self.x = self.STATE.rand()
         self.u = np.matrix(np.random.rand(self.ROBOT_MODEL.nv)).T
 
-        self.COST_SUM = crocoddyl.CostModelSum(self.ROBOT_MODEL)
+        self.COST_SUM = crocoddyl.CostModelSum(self.STATE)
 
         if self.COST is crocoddyl.CostModelFramePlacement:
             Mref = crocoddyl.FramePlacement(self.ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.SE3.Random())
-            self.cost = self.COST(self.ROBOT_MODEL, Mref)
+            self.cost = self.COST(self.STATE, Mref)
         elif self.COST is crocoddyl.CostModelFrameTranslation:
             xref = crocoddyl.FrameTranslation(self.ROBOT_MODEL.getFrameId('rleg5_joint'),
                                               np.matrix(np.random.rand(3)).T)
-            self.cost = self.COST(self.ROBOT_MODEL, xref)
+            self.cost = self.COST(self.STATE, xref)
         elif self.COST is crocoddyl.CostModelControl:
-            self.cost = self.COST(self.ROBOT_MODEL)
+            self.cost = self.COST(self.STATE)
         elif self.COST is crocoddyl.CostModelState:
-            self.cost = self.COST(self.ROBOT_MODEL, self.STATE)
+            self.cost = self.COST(self.STATE)
         self.COST_SUM.addCost('myCost', self.cost, 1.)
 
         self.DATA = self.cost.createData(self.ROBOT_DATA)
@@ -106,12 +106,12 @@ class CostModelSumTestCase(unittest.TestCase):
         pinocchio.updateFramePlacements(self.ROBOT_MODEL, self.ROBOT_DATA)
 
     def test_dimensions(self):
-        self.assertEqual(self.cost.nx, self.COST_SUM.nx, "Wrong nx.")
-        self.assertEqual(self.cost.ndx, self.COST_SUM.ndx, "Wrong ndx.")
+        self.assertEqual(self.cost.State.nx, self.COST_SUM.State.nx, "Wrong nx.")
+        self.assertEqual(self.cost.State.ndx, self.COST_SUM.State.ndx, "Wrong ndx.")
         self.assertEqual(self.cost.nu, self.COST_SUM.nu, "Wrong nu.")
-        self.assertEqual(self.cost.nq, self.COST_SUM.nq, "Wrong nq.")
-        self.assertEqual(self.cost.nv, self.COST_SUM.nv, "Wrong nv.")
-        self.assertEqual(self.cost.nr, self.COST_SUM.nr, "Wrong nr.")
+        self.assertEqual(self.cost.State.nq, self.COST_SUM.State.nq, "Wrong nq.")
+        self.assertEqual(self.cost.State.nv, self.COST_SUM.State.nv, "Wrong nv.")
+        self.assertEqual(self.cost.activation.nr, self.COST_SUM.activation.nr, "Wrong nr.")
 
     def test_calc(self):
         # Run calc for both action models

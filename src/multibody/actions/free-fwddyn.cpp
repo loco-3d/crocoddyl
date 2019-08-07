@@ -12,9 +12,9 @@ namespace crocoddyl {
 
 DifferentialActionModelFreeFwdDynamics::DifferentialActionModelFreeFwdDynamics(StateMultibody& state,
                                                                                CostModelSum& costs)
-    : DifferentialActionModelAbstract(state, state.get_model().nv, costs.get_nr()),
+    : DifferentialActionModelAbstract(state, state.get_pinocchio().nv, costs.get_nr()),
       costs_(costs),
-      pinocchio_(state.get_model()),
+      pinocchio_(state.get_pinocchio()),
       force_aba_(true) {}
 
 DifferentialActionModelFreeFwdDynamics::~DifferentialActionModelFreeFwdDynamics() {}

@@ -2,11 +2,11 @@
 
 namespace crocoddyl {
 
-CostModelSum::CostModelSum(pinocchio::Model* const model, const unsigned int& nu, const bool& with_residuals)
-    : CostModelAbstract(model, (unsigned int)0, nu, with_residuals) {}
+CostModelSum::CostModelSum(StateMultibody& state, const unsigned int& nu, const bool& with_residuals)
+    : CostModelAbstract(state, (unsigned int)0, nu, with_residuals), nr_(0) {}
 
-CostModelSum::CostModelSum(pinocchio::Model* const model, const bool& with_residuals)
-    : CostModelAbstract(model, (unsigned int)0, with_residuals) {}
+CostModelSum::CostModelSum(StateMultibody& state, const bool& with_residuals)
+    : CostModelAbstract(state, (unsigned int)0, with_residuals), nr_(0) {}
 
 CostModelSum::~CostModelSum() {}
 
@@ -16,18 +16,20 @@ void CostModelSum::addCost(const std::string& name, CostModelAbstract* const cos
   if (ret.second == false) {
     std::cout << "Warning: this cost item already existed, we cannot add it" << std::endl;
   } else {
-    nr_ += cost->get_nr();
+    nr_ += cost->get_activation().get_nr();
   }
+  activation_.set_nr(nr_);
 }
 
 void CostModelSum::removeCost(const std::string& name) {
   CostModelContainer::iterator it = costs_.find(name);
   if (it != costs_.end()) {
-    nr_ -= it->second.cost->get_nr();
+    nr_ -= it->second.cost->get_activation().get_nr();
     costs_.erase(it);
   } else {
     std::cout << "Warning: this cost item doesn't exist, we cannot remove it" << std::endl;
   }
+  activation_.set_nr(nr_);
 }
 
 void CostModelSum::calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -46,7 +48,7 @@ void CostModelSum::calc(const boost::shared_ptr<CostDataAbstract>& data, const E
     m_i.cost->calc(d_i, x, u);
     d->cost += m_i.weight * d_i->cost;
     if (with_residuals_) {
-      const unsigned int& nr_i = m_i.cost->get_nr();
+      const unsigned int& nr_i = m_i.cost->get_activation().get_nr();
       d->r.segment(nr, nr_i) = sqrt(m_i.weight) * d_i->r;
       nr += nr_i;
     }
@@ -74,6 +76,7 @@ void CostModelSum::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
     const CostItem& m_i = it_m->second;
     boost::shared_ptr<CostDataAbstract>& d_i = it_d->second;
 
+    const unsigned int& ndx = state_.get_ndx();
     m_i.cost->calcDiff(d_i, x, u);
     d->Lx += m_i.weight * d_i->Lx;
     d->Lu += m_i.weight * d_i->Lu;
@@ -81,8 +84,8 @@ void CostModelSum::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
     d->Lxu += m_i.weight * d_i->Lxu;
     d->Luu += m_i.weight * d_i->Luu;
     if (with_residuals_) {
-      const unsigned int& nr_i = m_i.cost->get_nr();
-      d->Rx.block(nr, 0, nr_i, ndx_) = sqrt(m_i.weight) * d_i->Rx;
+      const unsigned int& nr_i = m_i.cost->get_activation().get_nr();
+      d->Rx.block(nr, 0, nr_i, ndx) = sqrt(m_i.weight) * d_i->Rx;
       d->Ru.block(nr, 0, nr_i, nu_) = sqrt(m_i.weight) * d_i->Ru;
       nr += nr_i;
     }
@@ -94,5 +97,7 @@ boost::shared_ptr<CostDataAbstract> CostModelSum::createData(pinocchio::Data* co
 }
 
 const CostModelSum::CostModelContainer& CostModelSum::get_costs() const { return costs_; }
+
+const unsigned int& CostModelSum::get_nr() const { return nr_; }
 
 }  // namespace crocoddyl

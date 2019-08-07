@@ -27,13 +27,13 @@ def runBenchmark(model):
     state = crocoddyl.StateMultibody(robot_model)
     Mref = crocoddyl.FramePlacement(robot_model.getFrameId("gripper_left_joint"),
                                     pinocchio.SE3(np.eye(3), np.matrix([[.0], [.0], [.4]])))
-    goalTrackingCost = crocoddyl.CostModelFramePlacement(robot_model, Mref)
-    xRegCost = crocoddyl.CostModelState(robot_model, state)
-    uRegCost = crocoddyl.CostModelControl(robot_model)
+    goalTrackingCost = crocoddyl.CostModelFramePlacement(state, Mref)
+    xRegCost = crocoddyl.CostModelState(state)
+    uRegCost = crocoddyl.CostModelControl(state)
 
     # Create a cost model per the running and terminal action model.
-    runningCostModel = crocoddyl.CostModelSum(robot_model)
-    terminalCostModel = crocoddyl.CostModelSum(robot_model)
+    runningCostModel = crocoddyl.CostModelSum(state)
+    terminalCostModel = crocoddyl.CostModelSum(state)
 
     # Then let's added the running and terminal cost functions
     runningCostModel.addCost("gripperPose", goalTrackingCost, 1e-3)

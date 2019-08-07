@@ -16,18 +16,15 @@ namespace crocoddyl {
 
 class CostModelState : public CostModelAbstract {
  public:
-  CostModelState(pinocchio::Model* const model, StateAbstract* state, ActivationModelAbstract* const activation,
-                 const Eigen::VectorXd& xref, const unsigned int& nu);
-  CostModelState(pinocchio::Model* const model, StateAbstract* state, ActivationModelAbstract* const activation,
-                 const Eigen::VectorXd& xref);
-  CostModelState(pinocchio::Model* const model, StateAbstract* state, const Eigen::VectorXd& xref,
+  CostModelState(StateMultibody& state, ActivationModelAbstract& activation, const Eigen::VectorXd& xref,
                  const unsigned int& nu);
-  CostModelState(pinocchio::Model* const model, StateAbstract* state, const Eigen::VectorXd& xref);
-  CostModelState(pinocchio::Model* const model, StateAbstract* state, ActivationModelAbstract* const activation,
-                 const unsigned int& nu);
-  CostModelState(pinocchio::Model* const model, StateAbstract* state, const unsigned int& nu);
-  CostModelState(pinocchio::Model* const model, StateAbstract* state, ActivationModelAbstract* const activation);
-  CostModelState(pinocchio::Model* const model, StateAbstract* state);
+  CostModelState(StateMultibody& state, ActivationModelAbstract& activation, const Eigen::VectorXd& xref);
+  CostModelState(StateMultibody& state, const Eigen::VectorXd& xref, const unsigned int& nu);
+  CostModelState(StateMultibody& state, const Eigen::VectorXd& xref);
+  CostModelState(StateMultibody& state, ActivationModelAbstract& activation, const unsigned int& nu);
+  CostModelState(StateMultibody& state, const unsigned int& nu);
+  CostModelState(StateMultibody& state, ActivationModelAbstract& activation);
+  CostModelState(StateMultibody& state);
 
   ~CostModelState();
 
@@ -36,11 +33,9 @@ class CostModelState : public CostModelAbstract {
   void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
 
-  StateAbstract* get_state() const;
   const Eigen::VectorXd& get_xref() const;
 
  private:
-  StateAbstract* state_;
   Eigen::VectorXd xref_;
 };
 

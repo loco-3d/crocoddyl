@@ -101,14 +101,13 @@ class UnicycleDDPTest(SolverAbstractTestCase):
 class ManipulatorDDPTest(SolverAbstractTestCase):
     ROBOT_MODEL = pinocchio.buildSampleModelManipulator()
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
-    COST_SUM = crocoddyl.CostModelSum(ROBOT_MODEL, ROBOT_MODEL.nv)
-    COST_SUM.addCost('xReg', crocoddyl.CostModelState(ROBOT_MODEL, STATE), 1e-7)
-    COST_SUM.addCost('uReg', crocoddyl.CostModelControl(ROBOT_MODEL), 1e-7)
+    COST_SUM = crocoddyl.CostModelSum(STATE, ROBOT_MODEL.nv)
+    COST_SUM.addCost('xReg', crocoddyl.CostModelState(STATE), 1e-7)
+    COST_SUM.addCost('uReg', crocoddyl.CostModelControl(STATE), 1e-7)
     COST_SUM.addCost(
         'frTrack',
         crocoddyl.CostModelFramePlacement(
-            ROBOT_MODEL, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("effector_body"), pinocchio.SE3.Random())),
-        1.)
+            STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("effector_body"), pinocchio.SE3.Random())), 1.)
     DIFF_MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, COST_SUM)
     MODEL = crocoddyl.IntegratedActionModelEuler(crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, COST_SUM),
                                                  1e-3)

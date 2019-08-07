@@ -23,12 +23,11 @@ struct FrameTranslation {
 
 class CostModelFrameTranslation : public CostModelAbstract {
  public:
-  CostModelFrameTranslation(pinocchio::Model* const model, ActivationModelAbstract* const activation,
-                            const FrameTranslation& xref, const unsigned int& nu);
-  CostModelFrameTranslation(pinocchio::Model* const model, ActivationModelAbstract* const activation,
-                            const FrameTranslation& xref);
-  CostModelFrameTranslation(pinocchio::Model* const model, const FrameTranslation& xref, const unsigned int& nu);
-  CostModelFrameTranslation(pinocchio::Model* const model, const FrameTranslation& xref);
+  CostModelFrameTranslation(StateMultibody& state, ActivationModelAbstract& activation, const FrameTranslation& xref,
+                            const unsigned int& nu);
+  CostModelFrameTranslation(StateMultibody& state, ActivationModelAbstract& activation, const FrameTranslation& xref);
+  CostModelFrameTranslation(StateMultibody& state, const FrameTranslation& xref, const unsigned int& nu);
+  CostModelFrameTranslation(StateMultibody& state, const FrameTranslation& xref);
   ~CostModelFrameTranslation();
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -41,6 +40,7 @@ class CostModelFrameTranslation : public CostModelAbstract {
 
  private:
   FrameTranslation xref_;
+  const unsigned int& nv_;
 };
 
 struct CostDataFrameTranslation : public CostDataAbstract {
@@ -48,7 +48,7 @@ struct CostDataFrameTranslation : public CostDataAbstract {
 
   template <typename Model>
   CostDataFrameTranslation(Model* const model, pinocchio::Data* const data)
-      : CostDataAbstract(model, data), J(3, model->get_nv()), fJf(6, model->get_nv()) {
+      : CostDataAbstract(model, data), J(3, model->get_state().get_nv()), fJf(6, model->get_state().get_nv()) {
     J.fill(0);
     fJf.fill(0);
   }

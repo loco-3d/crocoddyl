@@ -229,9 +229,8 @@ class DifferentialLQRDerived(crocoddyl.DifferentialActionModelAbstract):
 
 
 class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstract):
-    def __init__(self, pinocchioState, costModel):
-        crocoddyl.DifferentialActionModelAbstract.__init__(self, pinocchioState, pinocchioState.nv, costModel.nr)
-        self.pinocchio = pinocchioState.model
+    def __init__(self, state, costModel):
+        crocoddyl.DifferentialActionModelAbstract.__init__(self, state, state.nv, costModel.nr)
         self.costs = costModel
         self.forceAba = True
         self.armature = np.matrix(np.zeros(0))
@@ -334,10 +333,10 @@ class IntegratedActionModelEuler(crocoddyl.ActionModelAbstract):
 
 
 class StateCostDerived(crocoddyl.CostModelAbstract):
-    def __init__(self, pinocchioModel, state, activation=None, xref=None, nu=None):
+    def __init__(self, state, activation=None, xref=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(state.ndx)
         self.xref = xref if xref is not None else state.zero()
-        crocoddyl.CostModelAbstract.__init__(self, pinocchioModel, activation, nu)
+        crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
 
     def calc(self, data, x, u):
         data.costResiduals = self.State.diff(self.xref, x)
@@ -354,11 +353,11 @@ class StateCostDerived(crocoddyl.CostModelAbstract):
 
 
 class ControlCostDerived(crocoddyl.CostModelAbstract):
-    def __init__(self, pinocchioModel, activation=None, uref=None, nu=None):
-        nu = nu if nu is not None else pinocchioModel.nv
+    def __init__(self, state, activation=None, uref=None, nu=None):
+        nu = nu if nu is not None else state.nv
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(nu)
         self.uref = uref if uref is not None else np.matrix(np.zeros(nu)).T
-        crocoddyl.CostModelAbstract.__init__(self, pinocchioModel, activation, nu)
+        crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
 
     def calc(self, data, x, u):
         data.costResiduals = u - self.uref
@@ -374,9 +373,9 @@ class ControlCostDerived(crocoddyl.CostModelAbstract):
 
 
 class FramePlacementCostDerived(crocoddyl.CostModelAbstract):
-    def __init__(self, pinocchioModel, activation=None, Mref=None, nu=None):
+    def __init__(self, state, activation=None, Mref=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(6)
-        crocoddyl.CostModelAbstract.__init__(self, pinocchioModel, activation, nu)
+        crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
         self.Mref = Mref
 
     def calc(self, data, x, u):
@@ -394,16 +393,16 @@ class FramePlacementCostDerived(crocoddyl.CostModelAbstract):
                                               pinocchio.ReferenceFrame.LOCAL)
         data.J = data.rJf * data.fJf
         self.activation.calcDiff(data.activation, data.costResiduals, recalc)
-        data.Rx = np.hstack([data.J, np.zeros((self.nr, self.nv))])
-        data.Lx = np.vstack([data.J.T * data.activation.Ar, np.zeros((self.nv, 1))])
+        data.Rx = np.hstack([data.J, np.zeros((self.activation.nr, self.State.nv))])
+        data.Lx = np.vstack([data.J.T * data.activation.Ar, np.zeros((self.State.nv, 1))])
         data.Lxx = np.block([[data.J.T * data.activation.Arr * data.J,
-                              np.zeros((self.nv, self.nv))], [np.zeros((self.nv, self.ndx))]])
+                              np.zeros((self.State.nv, self.State.nv))], [np.zeros((self.State.nv, self.State.ndx))]])
 
 
 class FrameTranslationCostDerived(crocoddyl.CostModelAbstract):
-    def __init__(self, pinocchioModel, activation=None, xref=None, nu=None):
+    def __init__(self, state, activation=None, xref=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(3)
-        crocoddyl.CostModelAbstract.__init__(self, pinocchioModel, activation, nu)
+        crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
         self.xref = xref
 
     def calc(self, data, x, u):
@@ -414,15 +413,15 @@ class FrameTranslationCostDerived(crocoddyl.CostModelAbstract):
     def calcDiff(self, data, x, u, recalc=True):
         if recalc:
             self.calc(data, x, u)
-        pinocchio.updateFramePlacements(self.pinocchio, data.pinocchio)
+        pinocchio.updateFramePlacements(self.State.pinocchio, data.pinocchio)
         data.R = data.pinocchio.oMf[self.xref.frame].rotation
         data.J = data.R * pinocchio.getFrameJacobian(self.State.pinocchio, data.pinocchio, self.xref.frame,
                                                      pinocchio.ReferenceFrame.LOCAL)[:3, :]
         self.activation.calcDiff(data.activation, data.costResiduals, recalc)
-        data.Rx = np.hstack([data.J, np.zeros((self.nr, self.nv))])
-        data.Lx = np.vstack([data.J.T * data.activation.Ar, np.zeros((self.nv, 1))])
+        data.Rx = np.hstack([data.J, np.zeros((self.activation.nr, self.State.nv))])
+        data.Lx = np.vstack([data.J.T * data.activation.Ar, np.zeros((self.State.nv, 1))])
         data.Lxx = np.block([[data.J.T * data.activation.Arr * data.J,
-                              np.zeros((self.nv, self.nv))], [np.zeros((self.nv, self.ndx))]])
+                              np.zeros((self.State.nv, self.State.nv))], [np.zeros((self.State.nv, self.State.ndx))]])
 
 
 class DDPDerived(crocoddyl.SolverAbstract):

@@ -18,70 +18,61 @@ namespace bp = boost::python;
 
 void exposeCostState() {
   bp::class_<CostModelState, bp::bases<CostModelAbstract> >(
-      "CostModelState",
-      bp::init<pinocchio::Model*, StateAbstract*, ActivationModelAbstract*, Eigen::VectorXd, int>(
-          bp::args(" self", " model", " state", " activation=crocoddyl.ActivationModelQuad(state.ndx)",
-                   " xref=state.zero()", " nu=model.nv"),
-          "Initialize the state cost model.\n\n"
-          ":param model: Pinocchio model of the multibody system\n"
-          ":param state: state model\n"
-          ":param activation: activation model\n"
-          ":param xref: reference state\n"
-          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 4>()])
-      .def(bp::init<pinocchio::Model*, StateAbstract*, Eigen::VectorXd, int>(
-          bp::args(" self", " model", " state", " xref", " nu"),
+      "CostModelState", bp::init<StateMultibody&, ActivationModelAbstract&, Eigen::VectorXd, int>(
+                            bp::args(" self", " state", " activation=crocoddyl.ActivationModelQuad(state.ndx)",
+                                     " xref=state.zero()", " nu=model.nv"),
+                            "Initialize the state cost model.\n\n"
+                            ":param state: state of the multibody system\n"
+                            ":param activation: activation model\n"
+                            ":param xref: reference state\n"
+                            ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
+      .def(bp::init<StateMultibody&, Eigen::VectorXd, int>(
+          bp::args(" self", " state", " xref", " nu"),
           "Initialize the state cost model.\n\n"
           "For this case the default activation model is quadratic, i.e. crocoddyl.ActivationModelQuad(state.ndx).\n"
-          ":param model: Pinocchio model of the multibody system\n"
-          ":param state: state model"
+          ":param state: state of the multibody system\n"
           ":param xref: reference state\n"
-          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
-      .def(bp::init<pinocchio::Model*, StateAbstract*, ActivationModelAbstract*, Eigen::VectorXd>(
-          bp::args(" self", " model", " state", " activation", " xref"),
+          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2>()])
+      .def(bp::init<StateMultibody&, ActivationModelAbstract&, Eigen::VectorXd>(
+          bp::args(" self", " state", " activation", " xref"),
           "Initialize the state cost model.\n\n"
           "For this case the default nu values is model.nv.\n"
-          ":param model: Pinocchio model of the multibody system\n"
-          ":param state: state model\n"
+          ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
-          ":param xref: reference state")[bp::with_custodian_and_ward<1, 4>()])
-      .def(bp::init<pinocchio::Model*, StateAbstract*, Eigen::VectorXd>(
-          bp::args(" self", " model", " state", " xref"),
+          ":param xref: reference state")[bp::with_custodian_and_ward<1, 3>()])
+      .def(bp::init<StateMultibody&, Eigen::VectorXd>(
+          bp::args(" self", " state", " xref"),
           "Initialize the state cost model.\n\n"
           "For this case the default activation model is quadratic, i.e. crocoddyl.ActivationModelQuad(state.ndx),\n"
           "and nu is equals to model.nv.\n"
-          ":param model: Pinocchio model of the multibody system\n"
-          ":param state: state model"
-          ":param xref: reference state")[bp::with_custodian_and_ward<1, 3>()])
-      .def(bp::init<pinocchio::Model*, StateAbstract*, ActivationModelAbstract*, int>(
-          bp::args(" self", " model", " state", " activation", " nu"),
+          ":param state: state of the multibody system\n"
+          ":param xref: reference state")[bp::with_custodian_and_ward<1, 2>()])
+      .def(bp::init<StateMultibody&, ActivationModelAbstract&, int>(
+          bp::args(" self", " state", " activation", " nu"),
           "Initialize the state cost model.\n\n"
           "For this case the default xref is the zeros state, i.e. state.zero().\n"
-          ":param model: Pinocchio model of the multibody system\n"
-          ":param state: state model\n"
+          ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
-          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 4>()])
-      .def(bp::init<pinocchio::Model*, StateAbstract*, int>(
-          bp::args(" self", " model", " state", " nu"),
+          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
+      .def(bp::init<StateMultibody&, int>(
+          bp::args(" self", " state", " nu"),
           "Initialize the state cost model.\n\n"
           "For this case the default xref is the zeros state, i.e. state.zero(), and the default activation\n"
           "model is quadratic, i.e. crocoddyl.ActivationModelQuad(state.ndx)\n"
-          ":param model: Pinocchio model of the multibody system\n"
-          ":param state: state model\n"
-          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
-      .def(bp::init<pinocchio::Model*, StateAbstract*, ActivationModelAbstract*>(
-          bp::args(" self", " model", " state", " activation"),
+          ":param state: state of the multibody system\n"
+          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2>()])
+      .def(bp::init<StateMultibody&, ActivationModelAbstract&>(
+          bp::args(" self", " state", " activation"),
           "Initialize the state cost model.\n\n"
           "For this case the default xref is the zeros state, i.e. state.zero(), and nu is equals to model.nv.\n"
-          ":param model: Pinocchio model of the multibody system\n"
-          ":param state: state model\n"
-          ":param activation: activation model")[bp::with_custodian_and_ward<1, 4>()])
-      .def(bp::init<pinocchio::Model*, StateAbstract*>(
-          bp::args(" self", " model", " state"),
+          ":param state: state of the multibody system\n"
+          ":param activation: activation model")[bp::with_custodian_and_ward<1, 3>()])
+      .def(bp::init<StateMultibody&>(
+          bp::args(" self", " state"),
           "Initialize the state cost model.\n\n"
           "For this case the default xref is the zeros state, i.e. state.zero(), the default activation\n"
           "model is quadratic, i.e. crocoddyl.ActivationModelQuad(state.ndx), and nu is equals to model.nv.\n"
-          ":param model: Pinocchio model of the multibody system\n"
-          ":param state: state model")[bp::with_custodian_and_ward<1, 3>()])
+          ":param state: state of the multibody system")[bp::with_custodian_and_ward<1, 2>()])
       .def<void (CostModelState::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                     const Eigen::VectorXd&)>("calc", &CostModelState::calc_wrap,
                                                              bp::args(" self", " data", " x", " u=None"),

@@ -79,13 +79,12 @@ class DifferentialLQRTest(ActionModelAbstractTestCase):
 class FreeFwdDynamicsTest(ActionModelAbstractTestCase):
     ROBOT_MODEL = pinocchio.buildSampleModelManipulator()
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
-    COST_SUM = crocoddyl.CostModelSum(ROBOT_MODEL, ROBOT_MODEL.nv)
-    COST_SUM.addCost('xReg', crocoddyl.CostModelState(ROBOT_MODEL, STATE), 1.)
+    COST_SUM = crocoddyl.CostModelSum(STATE, ROBOT_MODEL.nv)
+    COST_SUM.addCost('xReg', crocoddyl.CostModelState(STATE), 1.)
     COST_SUM.addCost(
         'frTrack',
         crocoddyl.CostModelFramePlacement(
-            ROBOT_MODEL, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("effector_body"), pinocchio.SE3.Random())),
-        1.)
+            STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("effector_body"), pinocchio.SE3.Random())), 1.)
     MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, COST_SUM)
     MODEL_DER = utils.DifferentialFreeFwdDynamicsDerived(STATE, COST_SUM)
 

@@ -38,17 +38,17 @@ void exposeCostSum() {
 
   bp::class_<CostModelSum, bp::bases<CostModelAbstract> >(
       "CostModelSum",
-      bp::init<pinocchio::Model*, unsigned int, bp::optional<bool> >(
-          bp::args(" self", " model", " nu", " withResiduals"),
+      bp::init<StateMultibody&, unsigned int, bp::optional<bool> >(
+          bp::args(" self", " state", " nu", " withResiduals"),
           "Initialize the total cost model.\n\n"
-          ":param model: Pinocchio model of the multibody system\n"
+          ":param state: state of the multibody system\n"
           ":param nu: dimension of control vector\n"
           ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
-      .def(bp::init<pinocchio::Model*, bp::optional<bool> >(
-          bp::args(" self", " model", " withResiduals"),
+      .def(bp::init<StateMultibody&, bp::optional<bool> >(
+          bp::args(" self", " state", " withResiduals"),
           "Initialize the total cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
-          ":param model: Pinocchio model of the multibody system\n"
+          ":param state: state of the multibody system\n"
           ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
       .def("addCost", &CostModelSum::addCost, bp::with_custodian_and_ward<1, 3>(), "add cost item")
       .def("removeCost", &CostModelSum::removeCost, "remove cost item")
@@ -83,7 +83,9 @@ void exposeCostSum() {
            ":return total cost data.")
       .add_property("costs",
                     bp::make_function(&CostModelSum::get_costs, bp::return_value_policy<bp::return_by_value>()),
-                    "stack of costs");
+                    "stack of costs")
+      .add_property("nr", bp::make_function(&CostModelSum::get_nr, bp::return_value_policy<bp::return_by_value>()),
+                    "dimension of the total residual vector");
 }
 
 }  // namespace python
