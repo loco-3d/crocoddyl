@@ -40,7 +40,7 @@ class ActionModelLQR : public ActionModelAbstract {
 
 struct ActionDataLQR : public ActionDataAbstract {
   template <typename Model>
-  ActionDataLQR(Model* const model) : ActionDataAbstract(model) {
+  ActionDataLQR(Model& model) : ActionDataAbstract(model) {
     // Setting the linear model and quadratic cost here because they are constant
     Fx = model->Fx_;
     Fu = model->Fu_;

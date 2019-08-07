@@ -52,7 +52,7 @@ class SolverAbstract {
   const double& get_dVexp() const;
 
  protected:
-  ShootingProblem problem_;
+  ShootingProblem& problem_;
   std::vector<ActionModelAbstract*> models_;
   std::vector<boost::shared_ptr<ActionDataAbstract> > datas_;
   std::vector<Eigen::VectorXd> xs_;
@@ -76,7 +76,7 @@ class CallbackAbstract {
  public:
   CallbackAbstract() {}
   ~CallbackAbstract() {}
-  virtual void operator()(SolverAbstract* const solver) = 0;
+  virtual void operator()(SolverAbstract& solver) = 0;
 };
 
 }  // namespace crocoddyl

@@ -3,68 +3,36 @@
 
 namespace crocoddyl {
 
-CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, ActivationModelAbstract* const activation,
+CostModelAbstract::CostModelAbstract(StateMultibody& state, ActivationModelAbstract& activation,
                                      const unsigned int& nu, const bool& with_residuals)
-    : pinocchio_(model),
+    : state_(state),
       activation_(activation),
-      nq_(model->nq),
-      nv_(model->nv),
       nu_(nu),
-      nx_(model->nq + model->nv),
-      ndx_(2 * model->nv),
-      nr_(activation->get_nr()),
       with_residuals_(with_residuals),
-      unone_(Eigen::VectorXd::Zero(nu)) {
-  assert(nq_ != 0 && "CostModelAbstract: nq cannot be 0");
-  assert(nv_ != 0 && "CostModelAbstract: nv cannot be 0");
-}
+      unone_(Eigen::VectorXd::Zero(nu)) {}
 
-CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, ActivationModelAbstract* const activation,
+CostModelAbstract::CostModelAbstract(StateMultibody& state, ActivationModelAbstract& activation,
                                      const bool& with_residuals)
-    : pinocchio_(model),
+    : state_(state),
       activation_(activation),
-      nq_(model->nq),
-      nv_(model->nv),
-      nu_(model->nv),
-      nx_(model->nq + model->nv),
-      ndx_(2 * model->nv),
-      nr_(activation->get_nr()),
+      nu_(state.get_nv()),
       with_residuals_(with_residuals),
-      unone_(Eigen::VectorXd::Zero(model->nv)) {
-  assert(nq_ != 0 && "CostModelAbstract: nq cannot be 0");
-  assert(nv_ != 0 && "CostModelAbstract: nv cannot be 0");
-}
+      unone_(Eigen::VectorXd::Zero(state.get_nv())) {}
 
-CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, const unsigned int& nr, const unsigned int& nu,
+CostModelAbstract::CostModelAbstract(StateMultibody& state, const unsigned int& nr, const unsigned int& nu,
                                      const bool& with_residuals)
-    : pinocchio_(model),
-      activation_(new ActivationModelQuad(nr)),
-      nq_(model->nq),
-      nv_(model->nv),
+    : state_(state),
+      activation_(*new ActivationModelQuad(nr)),
       nu_(nu),
-      nx_(model->nq + model->nv),
-      ndx_(2 * model->nv),
-      nr_(nr),
       with_residuals_(with_residuals),
-      unone_(Eigen::VectorXd::Zero(nu)) {
-  assert(nq_ != 0 && "CostModelAbstract: nq cannot be 0");
-  assert(nv_ != 0 && "CostModelAbstract: nv cannot be 0");
-}
+      unone_(Eigen::VectorXd::Zero(nu)) {}
 
-CostModelAbstract::CostModelAbstract(pinocchio::Model* const model, const unsigned int& nr, const bool& with_residuals)
-    : pinocchio_(model),
-      activation_(new ActivationModelQuad(nr)),
-      nq_(model->nq),
-      nv_(model->nv),
-      nu_(model->nv),
-      nx_(model->nq + model->nv),
-      ndx_(2 * model->nv),
-      nr_(nr),
+CostModelAbstract::CostModelAbstract(StateMultibody& state, const unsigned int& nr, const bool& with_residuals)
+    : state_(state),
+      activation_(*new ActivationModelQuad(nr)),
+      nu_(state.get_nv()),
       with_residuals_(with_residuals),
-      unone_(Eigen::VectorXd::Zero(model->nv)) {
-  assert(nq_ != 0 && "CostModelAbstract: nq cannot be 0");
-  assert(nv_ != 0 && "CostModelAbstract: nv cannot be 0");
-}
+      unone_(Eigen::VectorXd::Zero(state.get_nv())) {}
 
 CostModelAbstract::~CostModelAbstract() {}
 
@@ -82,20 +50,10 @@ boost::shared_ptr<CostDataAbstract> CostModelAbstract::createData(pinocchio::Dat
   return boost::make_shared<CostDataAbstract>(this, data);
 }
 
-pinocchio::Model* CostModelAbstract::get_pinocchio() const { return pinocchio_; }
+StateMultibody& CostModelAbstract::get_state() const { return state_; }
 
-ActivationModelAbstract* CostModelAbstract::get_activation() const { return activation_; }
-
-const unsigned int& CostModelAbstract::get_nq() const { return nq_; }
-
-const unsigned int& CostModelAbstract::get_nv() const { return nv_; }
+ActivationModelAbstract& CostModelAbstract::get_activation() const { return activation_; }
 
 const unsigned int& CostModelAbstract::get_nu() const { return nu_; }
-
-const unsigned int& CostModelAbstract::get_nx() const { return nx_; }
-
-const unsigned int& CostModelAbstract::get_ndx() const { return ndx_; }
-
-const unsigned int& CostModelAbstract::get_nr() const { return nr_; }
 
 }  // namespace crocoddyl

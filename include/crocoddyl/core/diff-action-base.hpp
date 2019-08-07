@@ -20,7 +20,7 @@ struct DifferentialActionDataAbstract;  // forward declaration
 
 class DifferentialActionModelAbstract {
  public:
-  DifferentialActionModelAbstract(StateAbstract* const state, const unsigned int& nu, const unsigned int& nr = 1);
+  DifferentialActionModelAbstract(StateAbstract& state, const unsigned int& nu, const unsigned int& nr = 1);
   virtual ~DifferentialActionModelAbstract();
 
   virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
@@ -34,24 +34,14 @@ class DifferentialActionModelAbstract {
   void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                 const Eigen::Ref<const Eigen::VectorXd>& x);
 
-  const unsigned int& get_nq() const;
-  const unsigned int& get_nv() const;
   const unsigned int& get_nu() const;
-  const unsigned int& get_nx() const;
-  const unsigned int& get_ndx() const;
-  const unsigned int& get_nout() const;
   const unsigned int& get_nr() const;
-  StateAbstract* get_state() const;
+  StateAbstract& get_state() const;
 
  protected:
-  unsigned int nq_;
-  unsigned int nv_;
   unsigned int nu_;
-  unsigned int nx_;
-  unsigned int ndx_;
-  unsigned int nout_;
   unsigned int nr_;
-  StateAbstract* state_;
+  StateAbstract& state_;
   Eigen::VectorXd unone_;
 
 #ifdef PYTHON_BINDINGS
@@ -86,26 +76,26 @@ struct DifferentialActionDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  DifferentialActionDataAbstract(Model* const model)
+  DifferentialActionDataAbstract(Model& model)
       : cost(0.),
-        xout(model->get_nout()),
-        Fx(model->get_nout(), model->get_ndx()),
-        Fu(model->get_nout(), model->get_nu()),
-        Lx(model->get_ndx()),
+        xout(model->get_state().get_nv()),
+        Fx(model->get_state().get_nv(), model->get_state().get_ndx()),
+        Fu(model->get_state().get_nv(), model->get_nu()),
+        Lx(model->get_state().get_ndx()),
         Lu(model->get_nu()),
-        Lxx(model->get_ndx(), model->get_ndx()),
-        Lxu(model->get_ndx(), model->get_nu()),
+        Lxx(model->get_state().get_ndx(), model->get_state().get_ndx()),
+        Lxu(model->get_state().get_ndx(), model->get_nu()),
         Luu(model->get_nu(), model->get_nu()),
         r(model->get_nr()),
-        Rx(model->get_nr(), model->get_ndx()),
+        Rx(model->get_nr(), model->get_state().get_ndx()),
         Ru(model->get_nr(), model->get_nu()),
-        Lx_ref(&Lx(0), model->get_ndx()),
+        Lx_ref(&Lx(0), model->get_state().get_ndx()),
         Lu_ref(&Lu(0), model->get_nu()),
-        Lxx_ref(&Lxx(0), model->get_ndx(), model->get_ndx()),
-        Lxu_ref(&Lxu(0), model->get_ndx(), model->get_nu()),
+        Lxx_ref(&Lxx(0), model->get_state().get_ndx(), model->get_state().get_ndx()),
+        Lxu_ref(&Lxu(0), model->get_state().get_ndx(), model->get_nu()),
         Luu_ref(&Luu(0), model->get_nu(), model->get_nu()),
         r_ref(&r(0), model->get_nr()),
-        Rx_ref(&Rx(0), model->get_nr(), model->get_ndx()),
+        Rx_ref(&Rx(0), model->get_nr(), model->get_state().get_ndx()),
         Ru_ref(&Ru(0), model->get_nr(), model->get_nu()) {
     xout.fill(0);
     Fx.fill(0);

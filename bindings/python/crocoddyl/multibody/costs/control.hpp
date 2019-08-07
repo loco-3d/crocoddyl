@@ -18,43 +18,43 @@ namespace bp = boost::python;
 
 void exposeCostControl() {
   bp::class_<CostModelControl, bp::bases<CostModelAbstract> >(
-      "CostModelControl", bp::init<pinocchio::Model*, ActivationModelAbstract*, Eigen::VectorXd>(
-                              bp::args(" self", " model", " activation", " uref"),
+      "CostModelControl", bp::init<StateMultibody&, ActivationModelAbstract&, Eigen::VectorXd>(
+                              bp::args(" self", " state", " activation", " uref"),
                               "Initialize the control cost model.\n\n"
-                              ":param model: Pinocchio model of the multibody system\n"
+                              ":param state: state of the multibody system\n"
                               ":param activation: activation model\n"
                               ":param uref: reference control")[bp::with_custodian_and_ward<1, 3>()])
-      .def(bp::init<pinocchio::Model*, ActivationModelAbstract*>(
-          bp::args(" self", " model", " activation"),
+      .def(bp::init<StateMultibody&, ActivationModelAbstract&>(
+          bp::args(" self", " state", " activation"),
           "Initialize the control cost model.\n\n"
           "For this case the default uref is the zeros state, i.e. np.zero(nu), where nu is equals to activation.nr.\n"
-          ":param model: Pinocchio model of the multibody system\n"
+          ":param state: state of the multibody system\n"
           ":param activation: activation model")[bp::with_custodian_and_ward<1, 3>()])
-      .def(bp::init<pinocchio::Model*, ActivationModelAbstract*, int>(
-          bp::args(" self", " model", " activation", " nu"),
+      .def(bp::init<StateMultibody&, ActivationModelAbstract&, int>(
+          bp::args(" self", " state", " activation", " nu"),
           "Initialize the control cost model.\n\n"
           "For this case the default uref is the zeros state, i.e. np.zero(nu).\n"
-          ":param model: Pinocchio model of the multibody system\n"
+          ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
-      .def(bp::init<pinocchio::Model*, Eigen::VectorXd>(
-          bp::args(" self", " model", " uref"),
+      .def(bp::init<StateMultibody&, Eigen::VectorXd>(
+          bp::args(" self", " state", " uref"),
           "Initialize the control cost model.\n\n"
           "For this case the default activation model is quadratic, i.e. crocoddyl.ActivationModelQuad(uref.size()).\n"
-          ":param model: Pinocchio model of the multibody system\n"
+          ":param state: state of the multibody system\n"
           ":param uref: reference control")[bp::with_custodian_and_ward<1, 2>()])
-      .def(bp::init<pinocchio::Model*>(
-          bp::args(" self", " model"),
+      .def(bp::init<StateMultibody&>(
+          bp::args(" self", " state"),
           "Initialize the control cost model.\n\n"
           "For this case the default uref is the zeros vector, i.e. np.zero(model.nv), and\n"
           "activation is quadratic, i.e. crocoddyl.ActivationModelQuad(model.nv), and nu is equals to model.nv.\n"
-          ":param model: Pinocchio model of the multibody system")[bp::with_custodian_and_ward<1, 2>()])
-      .def(bp::init<pinocchio::Model*, int>(
-          bp::args(" self", " model", " nu"),
+          ":param state: state of the multibody system")[bp::with_custodian_and_ward<1, 2>()])
+      .def(bp::init<StateMultibody&, int>(
+          bp::args(" self", " state", " nu"),
           "Initialize the control cost model.\n\n"
           "For this case the default uref is the zeros vector and the default activation\n"
           "model is quadratic, i.e. crocoddyl.ActivationModelQuad(nu)\n"
-          ":param model: Pinocchio model of the multibody system\n"
+          ":param state: state of the multibody system\n"
           ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2>()])
       .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                       const Eigen::VectorXd&)>("calc", &CostModelControl::calc_wrap,

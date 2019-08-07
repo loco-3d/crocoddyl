@@ -2,7 +2,7 @@
 
 namespace crocoddyl {
 
-ActionModelUnicycle::ActionModelUnicycle() : ActionModelAbstract(new StateVector(3), 2, 5), dt_(0.1) {
+ActionModelUnicycle::ActionModelUnicycle() : ActionModelAbstract(*new StateVector(3), 2, 5), dt_(0.1) {
   cost_weights_ << 10., 1.;
 }
 
@@ -13,7 +13,7 @@ ActionModelUnicycle::~ActionModelUnicycle() {
 void ActionModelUnicycle::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                                const Eigen::Ref<const Eigen::VectorXd>& x,
                                const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(x.size() == nx_ && "ActionModelUnicycle::calc: x has wrong dimension");
+  assert(x.size() == state_.get_nx() && "ActionModelUnicycle::calc: x has wrong dimension");
   assert(u.size() == nu_ && "ActionModelUnicycle::calc: u has wrong dimension");
 
   ActionDataUnicycle* d = static_cast<ActionDataUnicycle*>(data.get());
@@ -28,7 +28,7 @@ void ActionModelUnicycle::calc(const boost::shared_ptr<ActionDataAbstract>& data
 void ActionModelUnicycle::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                    const Eigen::Ref<const Eigen::VectorXd>& x,
                                    const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  assert(x.size() == nx_ && "ActionModelUnicycle::calcDiff: x has wrong dimension");
+  assert(x.size() == state_.get_nx() && "ActionModelUnicycle::calcDiff: x has wrong dimension");
   assert(u.size() == nu_ && "ActionModelUnicycle::calcDiff: u has wrong dimension");
 
   if (recalc) {
@@ -39,8 +39,8 @@ void ActionModelUnicycle::calcDiff(const boost::shared_ptr<ActionDataAbstract>& 
   // Cost derivatives
   const double& w_x = cost_weights_[0] * cost_weights_[0];
   const double& w_u = cost_weights_[1] * cost_weights_[1];
-  d->Lx = x.cwiseProduct(Eigen::VectorXd::Constant(get_nx(), w_x));
-  d->Lu = u.cwiseProduct(Eigen::VectorXd::Constant(get_nu(), w_u));
+  d->Lx = x.cwiseProduct(Eigen::VectorXd::Constant(state_.get_nx(), w_x));
+  d->Lu = u.cwiseProduct(Eigen::VectorXd::Constant(nu_, w_u));
   d->Lxx.diagonal() << w_x, w_x, w_x;
   d->Luu.diagonal() << w_u, w_u;
 

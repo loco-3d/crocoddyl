@@ -3,25 +3,24 @@
 
 namespace crocoddyl {
 
-CostModelFramePlacement::CostModelFramePlacement(pinocchio::Model* const model,
-                                                 ActivationModelAbstract* const activation, const FramePlacement& Mref,
-                                                 const unsigned int& nu)
-    : CostModelAbstract(model, activation, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
-  assert(activation->get_nr() == 6 && "CostModelFramePlacement: activation::nr is not equals to 6");
+CostModelFramePlacement::CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation,
+                                                 const FramePlacement& Mref, const unsigned int& nu)
+    : CostModelAbstract(state, activation, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()), nv_(state.get_nv()) {
+  assert(activation_.get_nr() == 6 && "CostModelFramePlacement: activation::nr is not equals to 6");
 }
 
-CostModelFramePlacement::CostModelFramePlacement(pinocchio::Model* const model,
-                                                 ActivationModelAbstract* const activation, const FramePlacement& Mref)
-    : CostModelAbstract(model, activation), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
-  assert(activation->get_nr() == 6 && "CostModelFramePlacement: activation::nr is not equals to 6");
+CostModelFramePlacement::CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation,
+                                                 const FramePlacement& Mref)
+    : CostModelAbstract(state, activation), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()), nv_(state.get_nv()) {
+  assert(activation_.get_nr() == 6 && "CostModelFramePlacement: activation::nr is not equals to 6");
 }
 
-CostModelFramePlacement::CostModelFramePlacement(pinocchio::Model* const model, const FramePlacement& Mref,
+CostModelFramePlacement::CostModelFramePlacement(StateMultibody& state, const FramePlacement& Mref,
                                                  const unsigned int& nu)
-    : CostModelAbstract(model, 6, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {}
+    : CostModelAbstract(state, 6, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()), nv_(state.get_nv()) {}
 
-CostModelFramePlacement::CostModelFramePlacement(pinocchio::Model* const model, const FramePlacement& Mref)
-    : CostModelAbstract(model, 6), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {}
+CostModelFramePlacement::CostModelFramePlacement(StateMultibody& state, const FramePlacement& Mref)
+    : CostModelAbstract(state, 6), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()), nv_(state.get_nv()) {}
 
 CostModelFramePlacement::~CostModelFramePlacement() {}
 
@@ -36,7 +35,7 @@ void CostModelFramePlacement::calc(const boost::shared_ptr<CostDataAbstract>& da
   data->r = d->r;  // this is needed because we overwrite it
 
   // Compute the cost
-  activation_->calc(d->activation, d->r);
+  activation_.calc(d->activation, d->r);
   d->cost = d->activation->a_value;
 }
 
@@ -48,15 +47,15 @@ void CostModelFramePlacement::calcDiff(const boost::shared_ptr<CostDataAbstract>
   }
   // Update the frame placements
   CostDataFramePlacement* d = static_cast<CostDataFramePlacement*>(data.get());
-  pinocchio::updateFramePlacements(*pinocchio_, *d->pinocchio);
+  pinocchio::updateFramePlacements(state_.get_pinocchio(), *d->pinocchio);
 
   // Compute the frame Jacobian at the error point
   pinocchio::Jlog6(d->rMf, d->rJf);
-  pinocchio::getFrameJacobian(*pinocchio_, *d->pinocchio, Mref_.frame, pinocchio::LOCAL, d->fJf);
+  pinocchio::getFrameJacobian(state_.get_pinocchio(), *d->pinocchio, Mref_.frame, pinocchio::LOCAL, d->fJf);
   d->J = d->rJf * d->fJf;
 
   // Compute the derivatives of the frame placement
-  activation_->calcDiff(d->activation, d->r, recalc);
+  activation_.calcDiff(d->activation, d->r, recalc);
   d->Rx.topLeftCorner(6, nv_) = d->J;
   d->Lx.head(nv_) = d->J.transpose() * d->activation->Ar;
   d->Lxx.topLeftCorner(nv_, nv_) = d->J.transpose() * d->activation->Arr * d->J;

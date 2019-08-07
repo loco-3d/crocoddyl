@@ -22,12 +22,11 @@ struct FramePlacement {
 
 class CostModelFramePlacement : public CostModelAbstract {
  public:
-  CostModelFramePlacement(pinocchio::Model* const model, ActivationModelAbstract* const activation,
-                          const FramePlacement& Fref, const unsigned int& nu);
-  CostModelFramePlacement(pinocchio::Model* const model, ActivationModelAbstract* const activation,
-                          const FramePlacement& Fref);
-  CostModelFramePlacement(pinocchio::Model* const model, const FramePlacement& Fref, const unsigned int& nu);
-  CostModelFramePlacement(pinocchio::Model* const model, const FramePlacement& Fref);
+  CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation, const FramePlacement& Fref,
+                          const unsigned int& nu);
+  CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation, const FramePlacement& Fref);
+  CostModelFramePlacement(StateMultibody& state, const FramePlacement& Fref, const unsigned int& nu);
+  CostModelFramePlacement(StateMultibody& state, const FramePlacement& Fref);
   ~CostModelFramePlacement();
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -41,14 +40,18 @@ class CostModelFramePlacement : public CostModelAbstract {
  private:
   FramePlacement Mref_;
   pinocchio::SE3 oMf_inv_;
+  const unsigned int& nv_;
 };
 
 struct CostDataFramePlacement : public CostDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  CostDataFramePlacement(Model* const model, pinocchio::Data* const data)
-      : CostDataAbstract(model, data), J(6, model->get_nv()), rJf(6, 6), fJf(6, model->get_nv()) {
+  CostDataFramePlacement(Model& model, pinocchio::Data* const data)
+      : CostDataAbstract(model, data),
+        J(6, model->get_state().get_nv()),
+        rJf(6, 6),
+        fJf(6, model->get_state().get_nv()) {
     r.fill(0);
     J.fill(0);
     rJf.fill(0);

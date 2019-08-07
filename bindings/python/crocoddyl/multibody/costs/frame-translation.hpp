@@ -30,34 +30,34 @@ void exposeCostFrameTranslation() {
                     bp::make_setter(&FrameTranslation::oxf), "frame translation");
 
   bp::class_<CostModelFrameTranslation, bp::bases<CostModelAbstract> >(
-      "CostModelFrameTranslation", bp::init<pinocchio::Model*, ActivationModelAbstract*, FrameTranslation, int>(
-                                       bp::args(" self", " model", " activation", " xref", " nu"),
+      "CostModelFrameTranslation", bp::init<StateMultibody&, ActivationModelAbstract&, FrameTranslation, int>(
+                                       bp::args(" self", " state", " activation", " xref", " nu"),
                                        "Initialize the frame translation cost model.\n\n"
-                                       ":param model: Pinocchio model of the multibody system\n"
+                                       ":param state: state of the multibody system\n"
                                        ":param activation: activation model\n"
                                        ":param xref: reference frame translation\n"
                                        ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
-      .def(bp::init<pinocchio::Model*, ActivationModelAbstract*, FrameTranslation>(
-          bp::args(" self", " model", " activation", " xref"),
+      .def(bp::init<StateMultibody&, ActivationModelAbstract&, FrameTranslation>(
+          bp::args(" self", " state", " activation", " xref"),
           "Initialize the frame translation cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
-          ":param model: Pinocchio model of the multibody system\n"
+          ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param xref: reference frame translation")[bp::with_custodian_and_ward<1, 3>()])
-      .def(bp::init<pinocchio::Model*, FrameTranslation, int>(
-          bp::args(" self", " model", " xref", " nu"),
+      .def(bp::init<StateMultibody&, FrameTranslation, int>(
+          bp::args(" self", " state", " xref", " nu"),
           "Initialize the control cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(3).\n"
-          ":param model: Pinocchio model of the multibody system\n"
+          ":param state: state of the multibody system\n"
           ":param xref: reference frame translation\n"
           ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2>()])
-      .def(bp::init<pinocchio::Model*, FrameTranslation>(
-          bp::args(" self", " model", " xref"),
+      .def(bp::init<StateMultibody&, FrameTranslation>(
+          bp::args(" self", " state", " xref"),
           "Initialize the control cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(3), and nu is equals to model.nv.\n"
-          ":param model: Pinocchio model of the multibody system\n"
+          ":param state: state of the multibody system\n"
           ":param xref: reference frame translation")[bp::with_custodian_and_ward<1, 2>()])
       .def<void (CostModelFrameTranslation::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                                const Eigen::VectorXd&)>("calc", &CostModelFrameTranslation::calc_wrap,

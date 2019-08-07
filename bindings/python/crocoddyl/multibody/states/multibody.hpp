@@ -27,7 +27,7 @@ void exposeStateMultibody() {
       "(Tx M). Additionally the Pinocchio allows us to compute analytically the\n"
       "Jacobians for the differentiate and integrate operators. Note that this code\n"
       "can be reused in any robot that is described through its Pinocchio model.",
-      bp::init<pinocchio::Model*>(
+      bp::init<pinocchio::Model&>(
           bp::args(" self", " pinocchioModel"),
           "Initialize the multibody state given a Pinocchio model.\n\n"
           ":param pinocchioModel: pinocchio model (i.e. multibody model)")[bp::with_custodian_and_ward<1, 2>()])
@@ -77,10 +77,8 @@ void exposeStateMultibody() {
                        ":param dx: displacement of the state (dim state.ndx()).\n"
                        ":param firstsecond: desired partial derivative\n"
                        ":return the partial derivative(s) of the integrate(x, dx) function"))
-      .add_property(
-          "model",
-          bp::make_function(&StateMultibody::get_model, bp::return_value_policy<bp::reference_existing_object>()),
-          "pinocchio model");
+      .add_property("pinocchio", bp::make_function(&StateMultibody::get_pinocchio, bp::return_internal_reference<>()),
+                    "pinocchio model");
 }
 
 }  // namespace python

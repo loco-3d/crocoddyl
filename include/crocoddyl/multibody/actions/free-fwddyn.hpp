@@ -18,7 +18,7 @@ namespace crocoddyl {
 
 class DifferentialActionModelFreeFwdDynamics : public DifferentialActionModelAbstract {
  public:
-  DifferentialActionModelFreeFwdDynamics(StateMultibody* const state, CostModelSum* const costs);
+  DifferentialActionModelFreeFwdDynamics(StateMultibody& state, CostModelSum& costs);
   ~DifferentialActionModelFreeFwdDynamics();
 
   void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -28,25 +28,27 @@ class DifferentialActionModelFreeFwdDynamics : public DifferentialActionModelAbs
                 const bool& recalc = true);
   boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
-  pinocchio::Model* get_pinocchio() const;
-  CostModelSum* get_costs() const;
+  pinocchio::Model& get_pinocchio() const;
+  CostModelSum& get_costs() const;
   const Eigen::VectorXd& get_armature() const;
   void set_armature(const Eigen::VectorXd& armature);
 
  private:
-  CostModelSum* costs_;
-  pinocchio::Model* pinocchio_;
+  CostModelSum& costs_;
+  pinocchio::Model& pinocchio_;
   bool force_aba_;
   Eigen::VectorXd armature_;
 };
 
 struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbstract {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   template <typename Model>
-  DifferentialActionDataFreeFwdDynamics(Model* const model)
+  DifferentialActionDataFreeFwdDynamics(Model& model)
       : DifferentialActionDataAbstract(model),
-        pinocchio(pinocchio::Data(*model->get_pinocchio())),
-        Minv(model->get_nv(), model->get_nv()) {
-    costs = model->get_costs()->createData(&pinocchio);
+        pinocchio(pinocchio::Data(model->get_pinocchio())),
+        Minv(model->get_state().get_nv(), model->get_state().get_nv()) {
+    costs = model->get_costs().createData(&pinocchio);
     shareCostMemory(costs);
     Minv.fill(0);
   }

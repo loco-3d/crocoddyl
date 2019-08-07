@@ -85,7 +85,7 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
     if (n_callbacks != 0) {
       for (long unsigned int c = 0; c < n_callbacks; ++c) {
         CallbackAbstract& callback = *callbacks_[c];
-        callback(this);
+        callback(*this);
       }
     }
 
@@ -131,13 +131,13 @@ double SolverDDP::calc() {
   cost_ = problem_.calcDiff(xs_, us_);
   if (!is_feasible_) {
     const Eigen::VectorXd& x0 = problem_.get_x0();
-    problem_.running_models_[0]->get_state()->diff(xs_[0], x0, gaps_[0]);
+    problem_.running_models_[0]->get_state().diff(xs_[0], x0, gaps_[0]);
 
     const long unsigned int& T = problem_.get_T();
     for (unsigned long int t = 0; t < T; ++t) {
       ActionModelAbstract* model = problem_.running_models_[t];
       boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
-      model->get_state()->diff(xs_[t + 1], d->get_xnext(), gaps_[t + 1]);
+      model->get_state().diff(xs_[t + 1], d->get_xnext(), gaps_[t + 1]);
     }
   }
   return cost_;
@@ -148,7 +148,7 @@ void SolverDDP::backwardPass() {
   Vxx_.back() = d_T->get_Lxx();
   Vx_.back() = d_T->get_Lx();
 
-  const int& ndx = problem_.terminal_model_->get_ndx();
+  const int& ndx = problem_.terminal_model_->get_state().get_ndx();
   const Eigen::VectorXd& xreg = Eigen::VectorXd::Constant(ndx, xreg_);
   if (!std::isnan(xreg_)) {
     Vxx_.back().diagonal() += xreg;
@@ -209,7 +209,7 @@ void SolverDDP::forwardPass(const double& steplength) {
     ActionModelAbstract* m = problem_.running_models_[t];
     boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
 
-    m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
+    m->get_state().diff(xs_[t], xs_try_[t], dx_[t]);
     us_try_[t] = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
     m->calc(d, xs_try_[t], us_try_[t]);
     xs_try_[t + 1] = d->get_xnext();
@@ -272,8 +272,8 @@ void SolverDDP::allocateData() {
 
   for (long unsigned int t = 0; t < T; ++t) {
     ActionModelAbstract* model = problem_.running_models_[t];
-    const int& nx = model->get_nx();
-    const int& ndx = model->get_ndx();
+    const int& nx = model->get_state().get_nx();
+    const int& ndx = model->get_state().get_ndx();
     const int& nu = model->get_nu();
 
     Vxx_[t] = Eigen::MatrixXd::Zero(ndx, ndx);
@@ -295,10 +295,10 @@ void SolverDDP::allocateData() {
     us_try_[t] = Eigen::VectorXd::Constant(nu, NAN);
     dx_[t] = Eigen::VectorXd::Zero(ndx);
   }
-  const int& ndx = problem_.terminal_model_->get_ndx();
+  const int& ndx = problem_.terminal_model_->get_state().get_ndx();
   Vxx_.back() = Eigen::MatrixXd::Zero(ndx, ndx);
   Vx_.back() = Eigen::VectorXd::Zero(ndx);
-  xs_try_.back() = problem_.terminal_model_->get_state()->zero();
+  xs_try_.back() = problem_.terminal_model_->get_state().zero();
   gaps_.back() = Eigen::VectorXd::Zero(ndx);
 }
 
