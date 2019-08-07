@@ -11,8 +11,8 @@
 namespace crocoddyl {
 
 DifferentialActionModelFreeFwdDynamics::DifferentialActionModelFreeFwdDynamics(StateMultibody& state,
-                                                                               CostModelSum* const costs)
-    : DifferentialActionModelAbstract(state, state.get_model()->nv, costs->get_nr()),
+                                                                               CostModelSum& costs)
+    : DifferentialActionModelAbstract(state, state.get_model().nv, costs.get_nr()),
       costs_(costs),
       pinocchio_(state.get_model()),
       force_aba_(true) {}
@@ -31,20 +31,20 @@ void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<Differ
 
   // Computing the dynamics using ABA or manually for armature case
   if (force_aba_) {
-    d->xout = pinocchio::aba(*pinocchio_, d->pinocchio, q, v, u);
+    d->xout = pinocchio::aba(pinocchio_, d->pinocchio, q, v, u);
   } else {
-    pinocchio::computeAllTerms(*pinocchio_, d->pinocchio, q, v);
+    pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, v);
     d->pinocchio.M.diagonal() += armature_;
-    pinocchio::cholesky::decompose(*pinocchio_, d->pinocchio);
+    pinocchio::cholesky::decompose(pinocchio_, d->pinocchio);
     d->Minv.setZero();
-    pinocchio::cholesky::computeMinv(*pinocchio_, d->pinocchio, d->Minv);
+    pinocchio::cholesky::computeMinv(pinocchio_, d->pinocchio, d->Minv);
     d->xout = d->Minv * (u - d->pinocchio.nle);
   }
 
   // Computing the cost value and residuals
-  pinocchio::forwardKinematics(*pinocchio_, d->pinocchio, q, v);
-  pinocchio::updateFramePlacements(*pinocchio_, d->pinocchio);
-  costs_->calc(d->costs, x, u);
+  pinocchio::forwardKinematics(pinocchio_, d->pinocchio, q, v);
+  pinocchio::updateFramePlacements(pinocchio_, d->pinocchio);
+  costs_.calc(d->costs, x, u);
   d->cost = d->costs->cost;
 }
 
@@ -60,33 +60,33 @@ void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<Di
   const Eigen::VectorXd& v = x.tail(nv);
   if (recalc) {
     calc(data, x, u);
-    pinocchio::computeJointJacobians(*pinocchio_, d->pinocchio, q);
+    pinocchio::computeJointJacobians(pinocchio_, d->pinocchio, q);
   }
 
   // Computing the dynamics derivatives
   if (force_aba_) {
-    pinocchio::computeABADerivatives(*pinocchio_, d->pinocchio, q, v, u);
+    pinocchio::computeABADerivatives(pinocchio_, d->pinocchio, q, v, u);
     d->Fx.leftCols(nv) = d->pinocchio.ddq_dq;
     d->Fx.rightCols(nv) = d->pinocchio.ddq_dv;
     d->Fu = d->pinocchio.Minv;
   } else {
-    pinocchio::computeRNEADerivatives(*pinocchio_, d->pinocchio, q, v, d->xout);
+    pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout);
     d->Fx.leftCols(nv) = -d->Minv * d->pinocchio.dtau_dq;
     d->Fx.rightCols(nv) = -d->Minv * d->pinocchio.dtau_dv;
     d->Fu = d->Minv;
   }
 
   // Computing the cost derivatives
-  costs_->calcDiff(d->costs, x, u, false);
+  costs_.calcDiff(d->costs, x, u, false);
 }
 
 boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelFreeFwdDynamics::createData() {
   return boost::make_shared<DifferentialActionDataFreeFwdDynamics>(this);
 }
 
-pinocchio::Model* DifferentialActionModelFreeFwdDynamics::get_pinocchio() const { return pinocchio_; }
+pinocchio::Model& DifferentialActionModelFreeFwdDynamics::get_pinocchio() const { return pinocchio_; }
 
-CostModelSum* DifferentialActionModelFreeFwdDynamics::get_costs() const { return costs_; }
+CostModelSum& DifferentialActionModelFreeFwdDynamics::get_costs() const { return costs_; }
 
 const Eigen::VectorXd& DifferentialActionModelFreeFwdDynamics::get_armature() const { return armature_; }
 
