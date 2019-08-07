@@ -70,7 +70,7 @@ class CallbackAbstract_wrap : public CallbackAbstract, public bp::wrapper<Callba
   CallbackAbstract_wrap() : CallbackAbstract(), bp::wrapper<CallbackAbstract>() {}
   ~CallbackAbstract_wrap() {}
 
-  void operator()(SolverAbstract* const solver) {
+  void operator()(SolverAbstract& solver) {
     return bp::call<void>(this->get_override("__call__").ptr(), solver);
   }
 };

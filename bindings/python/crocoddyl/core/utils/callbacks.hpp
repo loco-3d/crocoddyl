@@ -23,7 +23,7 @@ void exposeCallbacks() {
       "CallbackVerbose", "Callback function for printing the solver values.",
       bp::init<bp::optional<VerboseLevel> >(bp::args(" self", " level=_1"),
                                             "Initialize the differential verbose callback.\n\n"
-                                            ":param level: verbose leve"))
+                                            ":param level: verbose level"))
       .def("__call__", &CallbackVerbose::operator(), bp::args(" self", " solver"),
            "Run the callback function given a solver.\n\n"
            ":param solver: solver to be diagnostic");

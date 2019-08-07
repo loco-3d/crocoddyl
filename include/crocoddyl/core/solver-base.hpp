@@ -76,7 +76,7 @@ class CallbackAbstract {
  public:
   CallbackAbstract() {}
   ~CallbackAbstract() {}
-  virtual void operator()(SolverAbstract* const solver) = 0;
+  virtual void operator()(SolverAbstract& solver) = 0;
 };
 
 }  // namespace crocoddyl

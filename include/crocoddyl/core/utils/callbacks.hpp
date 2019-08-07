@@ -21,7 +21,7 @@ class CallbackVerbose : public CallbackAbstract {
   CallbackVerbose(VerboseLevel level = _1);
   ~CallbackVerbose();
 
-  void operator()(SolverAbstract *const solver);
+  void operator()(SolverAbstract& solver);
 
  private:
   VerboseLevel level;

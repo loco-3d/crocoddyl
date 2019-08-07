@@ -85,7 +85,7 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
     if (n_callbacks != 0) {
       for (long unsigned int c = 0; c < n_callbacks; ++c) {
         CallbackAbstract& callback = *callbacks_[c];
-        callback(this);
+        callback(*this);
       }
     }
 
