@@ -536,32 +536,32 @@ class DDPDerived(crocoddyl.SolverAbstract):
 
     # DDP Specific
     def allocateData(self):
-        self.Vxx = [a2m(np.zeros([m.ndx, m.ndx])) for m in self.models()]
-        self.Vx = [a2m(np.zeros([m.ndx])) for m in self.models()]
+        self.Vxx = [a2m(np.zeros([m.State.ndx, m.State.ndx])) for m in self.models()]
+        self.Vx = [a2m(np.zeros([m.State.ndx])) for m in self.models()]
 
-        self.Q = [a2m(np.zeros([m.ndx + m.nu, m.ndx + m.nu])) for m in self.problem.runningModels]
-        self.q = [a2m(np.zeros([m.ndx + m.nu])) for m in self.problem.runningModels]
-        self.Qxx = [Q[:m.ndx, :m.ndx] for m, Q in zip(self.problem.runningModels, self.Q)]
-        self.Qxu = [Q[:m.ndx, m.ndx:] for m, Q in zip(self.problem.runningModels, self.Q)]
+        self.Q = [a2m(np.zeros([m.State.ndx + m.nu, m.State.ndx + m.nu])) for m in self.problem.runningModels]
+        self.q = [a2m(np.zeros([m.State.ndx + m.nu])) for m in self.problem.runningModels]
+        self.Qxx = [Q[:m.State.ndx, :m.State.ndx] for m, Q in zip(self.problem.runningModels, self.Q)]
+        self.Qxu = [Q[:m.State.ndx, m.State.ndx:] for m, Q in zip(self.problem.runningModels, self.Q)]
         self.Qux = [Qxu.T for m, Qxu in zip(self.problem.runningModels, self.Qxu)]
-        self.Quu = [Q[m.ndx:, m.ndx:] for m, Q in zip(self.problem.runningModels, self.Q)]
-        self.Qx = [q[:m.ndx] for m, q in zip(self.problem.runningModels, self.q)]
-        self.Qu = [q[m.ndx:] for m, q in zip(self.problem.runningModels, self.q)]
+        self.Quu = [Q[m.State.ndx:, m.State.ndx:] for m, Q in zip(self.problem.runningModels, self.Q)]
+        self.Qx = [q[:m.State.ndx] for m, q in zip(self.problem.runningModels, self.q)]
+        self.Qu = [q[m.State.ndx:] for m, q in zip(self.problem.runningModels, self.q)]
 
-        self.K = [np.matrix(np.zeros([m.nu, m.ndx])) for m in self.problem.runningModels]
+        self.K = [np.matrix(np.zeros([m.nu, m.State.ndx])) for m in self.problem.runningModels]
         self.k = [a2m(np.zeros([m.nu])) for m in self.problem.runningModels]
 
         self.xs_try = [self.problem.initialState] + [np.nan * self.problem.initialState] * self.problem.T
         self.us_try = [np.nan] * self.problem.T
-        self.gaps = [a2m(np.zeros(self.problem.runningModels[0].ndx))
-                     ] + [a2m(np.zeros(m.ndx)) for m in self.problem.runningModels]
+        self.gaps = [a2m(np.zeros(self.problem.runningModels[0].State.ndx))
+                     ] + [a2m(np.zeros(m.State.ndx)) for m in self.problem.runningModels]
 
     def backwardPass(self):
         self.Vx[-1][:] = self.problem.terminalData.Lx
         self.Vxx[-1][:, :] = self.problem.terminalData.Lxx
 
         if self.x_reg != 0:
-            ndx = self.problem.terminalModel.ndx
+            ndx = self.problem.terminalModel.State.ndx
             self.Vxx[-1][range(ndx), range(ndx)] += self.x_reg
 
         for t, (model, data) in rev_enumerate(zip(self.problem.runningModels, self.problem.runningDatas)):
@@ -589,7 +589,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
             self.Vxx[t][:, :] = 0.5 * (self.Vxx[t][:, :] + self.Vxx[t][:, :].T)  # ensure symmetric
 
             if self.x_reg != 0:
-                self.Vxx[t][range(model.ndx), range(model.ndx)] += self.x_reg
+                self.Vxx[t][range(model.State.ndx), range(model.State.ndx)] += self.x_reg
             raiseIfNan(self.Vxx[t], ArithmeticError('backward error'))
             raiseIfNan(self.Vx[t], ArithmeticError('backward error'))
 

@@ -92,10 +92,10 @@ void exposeDifferentialActionAbstract() {
                     bp::make_function(&DifferentialActionModelAbstract_wrap::get_nr,
                                       bp::return_value_policy<bp::return_by_value>()),
                     "dimension of cost-residual vector")
-      .add_property("State",
-                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_state,
-                                      bp::return_internal_reference<>()),
-                    "state");
+      .add_property(
+          "State",
+          bp::make_function(&DifferentialActionModelAbstract_wrap::get_state, bp::return_internal_reference<>()),
+          "state");
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataAbstract> >();
 
