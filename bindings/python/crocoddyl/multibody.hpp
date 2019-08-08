@@ -10,6 +10,7 @@
 #define PYTHON_CROCODDYL_MULTIBODY_HPP_
 
 #include "python/crocoddyl/multibody/cost-base.hpp"
+#include "python/crocoddyl/multibody/contact-base.hpp"
 #include "python/crocoddyl/multibody/states/multibody.hpp"
 #include "python/crocoddyl/multibody/costs/cost-sum.hpp"
 #include "python/crocoddyl/multibody/costs/state.hpp"
@@ -23,6 +24,7 @@ namespace python {
 
 void exposeMultibody() {
   exposeCostMultibody();
+  exposeContactAbstract();
   exposeStateMultibody();
   exposeCostSum();
   exposeCostState();
