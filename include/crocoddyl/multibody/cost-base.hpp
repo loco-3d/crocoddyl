@@ -92,18 +92,6 @@ struct CostDataAbstract {
     Ru = Eigen::MatrixXd::Zero(nr, nu);
   }
 
-  pinocchio::Data* get_pinocchio() const { return pinocchio; }
-  boost::shared_ptr<ActivationDataAbstract> get_activation() const { return activation; }
-  const double& get_cost() const { return cost; }
-  const Eigen::VectorXd& get_Lx() const { return Lx; }
-  const Eigen::VectorXd& get_Lu() const { return Lu; }
-  const Eigen::MatrixXd& get_Lxx() const { return Lxx; }
-  const Eigen::MatrixXd& get_Lxu() const { return Lxu; }
-  const Eigen::MatrixXd& get_Luu() const { return Luu; }
-  const Eigen::VectorXd& get_r() const { return r; }
-  const Eigen::MatrixXd& get_Rx() const { return Rx; }
-  const Eigen::MatrixXd& get_Ru() const { return Ru; }
-
   pinocchio::Data* pinocchio;
   boost::shared_ptr<ActivationDataAbstract> activation;
   double cost;
