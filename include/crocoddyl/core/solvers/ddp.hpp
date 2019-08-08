@@ -71,6 +71,12 @@ class SolverDDP : public SolverAbstract {
 
  private:
   Eigen::VectorXd xnext_;
+  Eigen::VectorXd x_reg_;
+  Eigen::MatrixXd FxTVxx_p_;
+  std::vector<Eigen::MatrixXd> FuTVxx_p_;
+  Eigen::VectorXd fTVxx_p_;
+  std::vector<Eigen::LLT<Eigen::MatrixXd> > Quu_llt_;
+  std::vector<Eigen::VectorXd> Quuk_;
   std::vector<double> alphas_;
   double th_grad_;
   double th_step_;
