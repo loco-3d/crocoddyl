@@ -82,11 +82,9 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
     stoppingCriteria();
 
     const long unsigned int& n_callbacks = callbacks_.size();
-    if (n_callbacks != 0) {
-      for (long unsigned int c = 0; c < n_callbacks; ++c) {
-        CallbackAbstract& callback = *callbacks_[c];
-        callback(*this);
-      }
+    for (long unsigned int c = 0; c < n_callbacks; ++c) {
+      CallbackAbstract& callback = *callbacks_[c];
+      callback(*this);
     }
 
     if (was_feasible_ && stop_ < th_stop_) {
@@ -118,11 +116,11 @@ double SolverDDP::stoppingCriteria() {
 }
 
 const Eigen::Vector2d& SolverDDP::expectedImprovement() {
-  d_ = Eigen::Vector2d::Zero();
+  d_.fill(0);
   const long unsigned int& T = this->problem_.get_T();
   for (long unsigned int t = 0; t < T; ++t) {
     d_[0] += Qu_[t].dot(k_[t]);
-    d_[1] -= k_[t].dot(Quu_[t] * k_[t]);
+    d_[1] -= k_[t].dot(Quuk_[t]);
   }
   return d_;
 }
@@ -148,10 +146,9 @@ void SolverDDP::backwardPass() {
   Vxx_.back() = d_T->get_Lxx();
   Vx_.back() = d_T->get_Lx();
 
-  const int& ndx = problem_.terminal_model_->get_state().get_ndx();
-  const Eigen::VectorXd& xreg = Eigen::VectorXd::Constant(ndx, xreg_);
+  x_reg_.fill(xreg_);
   if (!std::isnan(xreg_)) {
-    Vxx_.back().diagonal() += xreg;
+    Vxx_.back().diagonal() += x_reg_;
   }
 
   for (int t = (int)problem_.get_T() - 1; t >= 0; --t) {
@@ -161,18 +158,19 @@ void SolverDDP::backwardPass() {
     const Eigen::VectorXd& Vx_p = Vx_[t + 1];
     const Eigen::VectorXd& gap_p = gaps_[t + 1];
 
-    const Eigen::MatrixXd& FxTVxx_p = d->get_Fx().transpose() * Vxx_p;
-    Qxx_[t] = d->get_Lxx() + FxTVxx_p * d->get_Fx();
-    Qxu_[t] = d->get_Lxu() + FxTVxx_p * d->get_Fu();
-    Quu_[t].noalias() = d->get_Luu() + d->get_Fu().transpose() * Vxx_p * d->get_Fu();
+    FxTVxx_p_.noalias() = d->get_Fx().transpose() * Vxx_p;
+    FuTVxx_p_[t].noalias() = d->get_Fu().transpose() * Vxx_p;
+    Qxx_[t].noalias() = d->get_Lxx() + FxTVxx_p_ * d->get_Fx();
+    Qxu_[t].noalias() = d->get_Lxu() + FxTVxx_p_ * d->get_Fu();
+    Quu_[t].noalias() = d->get_Luu() + FuTVxx_p_[t] * d->get_Fu();
     if (!is_feasible_) {
       // In case the xt+1 are not f(xt,ut) i.e warm start not obtained from roll-out.
-      const Eigen::VectorXd& relinearization = Vxx_p * gap_p;
-      Qx_[t] = d->get_Lx() + d->get_Fx().transpose() * Vx_p + d->get_Fx().transpose() * relinearization;
-      Qu_[t] = d->get_Lu() + d->get_Fu().transpose() * Vx_p + d->get_Fu().transpose() * relinearization;
+      fTVxx_p_.noalias() = Vxx_p * gap_p;
+      Qx_[t].noalias() = d->get_Lx() + d->get_Fx().transpose() * Vx_p + d->get_Fx().transpose() * fTVxx_p_;
+      Qu_[t].noalias() = d->get_Lu() + d->get_Fu().transpose() * Vx_p + d->get_Fu().transpose() * fTVxx_p_;
     } else {
-      Qx_[t] = d->get_Lx() + d->get_Fx().transpose() * Vx_p;
-      Qu_[t] = d->get_Lu() + d->get_Fu().transpose() * Vx_p;
+      Qx_[t].noalias() = d->get_Lx() + d->get_Fx().transpose() * Vx_p;
+      Qu_[t].noalias() = d->get_Lu() + d->get_Fu().transpose() * Vx_p;
     }
 
     if (!std::isnan(ureg_)) {
@@ -183,15 +181,16 @@ void SolverDDP::backwardPass() {
     computeGains(t);
 
     if (std::isnan(ureg_)) {
-      Vx_[t] = Qx_[t] - K_[t].transpose() * Qu_[t];
+      Vx_[t].noalias() = Qx_[t] - K_[t].transpose() * Qu_[t];
     } else {
-      Vx_[t] = Qx_[t] + K_[t].transpose() * (Quu_[t] * k_[t] - 2. * Qu_[t]);
+      Quuk_[t].noalias() = Quu_[t] * k_[t];
+      Vx_[t].noalias() = Qx_[t] + K_[t].transpose() * Quuk_[t] - 2 * K_[t].transpose() * Qu_[t];
     }
     Vxx_[t] = Qxx_[t] - Qxu_[t] * K_[t];
     Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose());  // TODO: as suggested by Nicolas
 
     if (!std::isnan(xreg_)) {
-      Vxx_[t].diagonal() += xreg;
+      Vxx_[t].diagonal() += x_reg_;
     }
 
     const double& Vx_value = Vx_[t].sum();
@@ -232,9 +231,9 @@ void SolverDDP::forwardPass(const double& steplength) {
 }
 
 void SolverDDP::computeGains(const long unsigned int& t) {
-  const Eigen::LLT<Eigen::MatrixXd>& Lb = Quu_[t].llt();
-  K_[t] = Lb.solve(Qxu_[t].transpose());
-  k_[t] = Lb.solve(Qu_[t]);
+  Quu_llt_[t].compute(Quu_[t]);
+  K_[t] = Quu_llt_[t].solve(Qxu_[t].transpose());
+  k_[t] = Quu_llt_[t].solve(Qu_[t]);
 }
 
 void SolverDDP::increaseRegularization() {
@@ -270,11 +269,15 @@ void SolverDDP::allocateData() {
   us_try_.resize(T);
   dx_.resize(T);
 
+  FuTVxx_p_.resize(T);
+  Quu_llt_.resize(T);
+  Quuk_.resize(T);
+
   for (long unsigned int t = 0; t < T; ++t) {
     ActionModelAbstract* model = problem_.running_models_[t];
-    const int& nx = model->get_state().get_nx();
-    const int& ndx = model->get_state().get_ndx();
-    const int& nu = model->get_nu();
+    const unsigned int& nx = model->get_state().get_nx();
+    const unsigned int& ndx = model->get_state().get_ndx();
+    const unsigned int& nu = model->get_nu();
 
     Vxx_[t] = Eigen::MatrixXd::Zero(ndx, ndx);
     Vx_[t] = Eigen::VectorXd::Zero(ndx);
@@ -294,12 +297,20 @@ void SolverDDP::allocateData() {
     }
     us_try_[t] = Eigen::VectorXd::Constant(nu, NAN);
     dx_[t] = Eigen::VectorXd::Zero(ndx);
+
+    FuTVxx_p_[t] = Eigen::MatrixXd::Zero(nu, ndx);
+    Quu_llt_[t] = Eigen::LLT<Eigen::MatrixXd>(nu);
+    Quuk_[t] = Eigen::VectorXd(nu);
   }
-  const int& ndx = problem_.terminal_model_->get_state().get_ndx();
+  const unsigned int& ndx = problem_.terminal_model_->get_state().get_ndx();
   Vxx_.back() = Eigen::MatrixXd::Zero(ndx, ndx);
   Vx_.back() = Eigen::VectorXd::Zero(ndx);
   xs_try_.back() = problem_.terminal_model_->get_state().zero();
   gaps_.back() = Eigen::VectorXd::Zero(ndx);
+
+  x_reg_ = Eigen::VectorXd::Constant(ndx, xreg_);
+  FxTVxx_p_ = Eigen::MatrixXd::Zero(ndx, ndx);
+  fTVxx_p_ = Eigen::VectorXd::Zero(ndx);
 }
 
 const std::vector<Eigen::MatrixXd>& SolverDDP::get_Vxx() const { return Vxx_; }

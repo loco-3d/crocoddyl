@@ -275,8 +275,8 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
         self.costs.calcDiff(data.costs, x, u, False)
 
     def set_armature(self, armature):
-        if armature.size != self.State.nv:
-            print "The armature dimension is wrong, we cannot set it."
+        if armature.size is not self.State.nv:
+            print('The armature dimension is wrong, we cannot set it.')
         else:
             self.forceAba = False
             self.armature = armature
@@ -295,9 +295,6 @@ class IntegratedActionModelEuler(crocoddyl.ActionModelAbstract):
         self.differential = diffModel
         self.withCostResiduals = withCostResiduals
         self.timeStep = timeStep
-
-    def createData(self):
-        return IntegratedActionDataEuler(self)
 
     def calc(self, data, x, u=None):
         nq, dt = self.State.nq, self.timeStep

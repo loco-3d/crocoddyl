@@ -38,25 +38,16 @@ int main() {
 
   // Solving the optimal control problem
   std::clock_t c_start, c_end;
-  std::vector<double> duration;
+  Eigen::ArrayXd duration(T);
   for (unsigned int i = 0; i < T; ++i) {
     c_start = std::clock();
     ddp.solve(xs, us, MAXITER);
     c_end = std::clock();
-    duration.push_back(1e3 * (double)(c_end - c_start) / CLOCKS_PER_SEC);
+    duration[i] = 1e3 * (double)(c_end - c_start) / CLOCKS_PER_SEC;
   }
 
-  double avrg_duration = 0., min_duration = std::numeric_limits<double>::max(), max_duration = 0.;
-  for (unsigned int i = 0; i < T; ++i) {
-    const double& dt = duration[i];
-    avrg_duration += dt;
-    if (dt < min_duration) {
-      min_duration = dt;
-    }
-    if (dt > max_duration) {
-      max_duration = dt;
-    }
-  }
-  avrg_duration /= T;
+  double avrg_duration = duration.sum() / T;
+  double min_duration = duration.minCoeff();
+  double max_duration = duration.maxCoeff();
   std::cout << "CPU time [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")" << std::endl;
 }

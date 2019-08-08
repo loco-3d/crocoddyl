@@ -11,17 +11,17 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
     switch (level) {
       case _1: {
         std::cout << "iter \t cost \t      stop \t    grad \t  xreg";
-        std::cout << " \t      ureg \t step \t feas" << std::endl;
+        std::cout << " \t      ureg \t step \t feas\n";
         break;
       }
       case _2: {
         std::cout << "iter \t cost \t      stop \t    grad \t  xreg";
-        std::cout << " \t      ureg \t step \t feas \tdV-exp \t      dV" << std::endl;
+        std::cout << " \t      ureg \t step \t feas \tdV-exp \t      dV\n";
         break;
       }
       default: {
         std::cout << "iter \t cost \t      stop \t    grad \t  xreg";
-        std::cout << " \t      ureg \t step \t feas" << std::endl;
+        std::cout << " \t      ureg \t step \t feas\n";
       }
     }
   }
@@ -33,7 +33,7 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
       std::cout << solver.get_stop() << "  " << -solver.get_d()[1] << "  ";
       std::cout << solver.get_xreg() << "  " << solver.get_ureg() << "   ";
       std::cout << std::fixed << std::setprecision(4) << solver.get_stepLength() << "     ";
-      std::cout << solver.get_isFeasible() << std::endl;
+      std::cout << solver.get_isFeasible() << "\n";
       break;
     }
     case _2: {
@@ -44,7 +44,7 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
       std::cout << std::fixed << std::setprecision(4) << solver.get_stepLength() << "     ";
       std::cout << solver.get_isFeasible() << "  ";
       std::cout << std::scientific << std::setprecision(5) << solver.get_dV() << "  ";
-      std::cout << solver.get_dVexp() << std::endl;
+      std::cout << solver.get_dVexp() << "\n";
       break;
     }
     default: {
@@ -53,7 +53,7 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
       std::cout << solver.get_stop() << "  " << -solver.get_d()[1] << "  ";
       std::cout << solver.get_xreg() << "  " << solver.get_ureg() << "   ";
       std::cout << std::fixed << std::setprecision(4) << solver.get_stepLength() << "     ";
-      std::cout << solver.get_isFeasible() << std::endl;
+      std::cout << solver.get_isFeasible() << "\n";
     }
   }
 }
