@@ -111,8 +111,7 @@ void exposeCostMultibody() {
           "Create common data shared between cost models.\n\n"
           ":param model: cost model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
-      .add_property("pinocchio",
-                    bp::make_getter(&CostDataAbstract::pinocchio, bp::return_internal_reference<>()),
+      .add_property("pinocchio", bp::make_getter(&CostDataAbstract::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
       .add_property("activation",
                     bp::make_getter(&CostDataAbstract::activation, bp::return_value_policy<bp::return_by_value>()),

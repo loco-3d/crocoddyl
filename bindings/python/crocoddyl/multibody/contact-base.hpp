@@ -76,8 +76,7 @@ void exposeContactAbstract() {
           "Create common data shared between contact models.\n\n"
           ":param model: cost model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
-      .add_property("pinocchio",
-                    bp::make_getter(&ContactDataAbstract::pinocchio, bp::return_internal_reference<>()),
+      .add_property("pinocchio", bp::make_getter(&ContactDataAbstract::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
       .add_property("Jc", bp::make_getter(&ContactDataAbstract::Jc, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ContactDataAbstract::Jc), "contact Jacobian")
