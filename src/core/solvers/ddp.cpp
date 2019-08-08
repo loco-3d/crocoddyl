@@ -233,8 +233,8 @@ void SolverDDP::forwardPass(const double& steplength) {
 void SolverDDP::computeGains(const long unsigned int& t) {
   Quu_llt_[t].compute(Quu_[t]);
   K_[t] = Qxu_[t].transpose();
-  k_[t] = Qu_[t];
   Quu_llt_[t].solveInPlace(K_[t]);
+  k_[t] = Qu_[t];
   Quu_llt_[t].solveInPlace(k_[t]);
 }
 
