@@ -77,7 +77,7 @@ struct CostDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  CostDataAbstract(Model& model, pinocchio::Data* const data)
+  CostDataAbstract(Model* const model, pinocchio::Data* const data)
       : pinocchio(data), activation(model->get_activation().createData()), cost(0.) {
     const int& ndx = model->get_state().get_ndx();
     const int& nu = model->get_nu();

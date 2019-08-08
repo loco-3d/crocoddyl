@@ -76,7 +76,7 @@ struct DifferentialActionDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  DifferentialActionDataAbstract(Model& model)
+  DifferentialActionDataAbstract(Model* const model)
       : cost(0.),
         xout(model->get_state().get_nv()),
         Fx(model->get_state().get_nv(), model->get_state().get_ndx()),

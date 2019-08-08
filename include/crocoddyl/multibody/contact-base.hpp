@@ -48,7 +48,7 @@ struct ContactDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  ContactDataAbstract(Model& model, pinocchio::Data* const data)
+  ContactDataAbstract(Model* const model, pinocchio::Data* const data)
       : pinocchio(data),
         Jc(model->get_nc(), model->get_state().get_nv()),
         a0(model->get_nc()),
