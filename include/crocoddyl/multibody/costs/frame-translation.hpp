@@ -11,15 +11,9 @@
 #define CROCODDYL_MULTIBODY_COSTS_FRAME_TRANSLATION_HPP_
 
 #include "crocoddyl/multibody/cost-base.hpp"
-// #include <pinocchio/spatial/se3.hpp>
+#include "crocoddyl/multibody/frames.hpp"
 
 namespace crocoddyl {
-
-struct FrameTranslation {
-  FrameTranslation(const unsigned int& frame, const Eigen::Vector3d& oxf) : frame(frame), oxf(oxf) {}
-  unsigned int frame;
-  Eigen::Vector3d oxf;
-};
 
 class CostModelFrameTranslation : public CostModelAbstract {
  public:

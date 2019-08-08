@@ -10,15 +10,9 @@
 #define CROCODDYL_MULTIBODY_COSTS_FRAME_PLACEMENT_HPP_
 
 #include "crocoddyl/multibody/cost-base.hpp"
-#include <pinocchio/spatial/se3.hpp>
+#include "crocoddyl/multibody/frames.hpp"
 
 namespace crocoddyl {
-
-struct FramePlacement {
-  FramePlacement(const unsigned int& frame, const pinocchio::SE3& oMf) : frame(frame), oMf(oMf) {}
-  unsigned int frame;
-  pinocchio::SE3 oMf;
-};
 
 class CostModelFramePlacement : public CostModelAbstract {
  public:
