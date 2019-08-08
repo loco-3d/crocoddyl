@@ -276,7 +276,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
 
     def set_armature(self, armature):
         if armature.size is not self.State.nv:
-            print "The armature dimension is wrong, we cannot set it."
+            print('The armature dimension is wrong, we cannot set it.')
         else:
             self.forceAba = False
             self.armature = armature
