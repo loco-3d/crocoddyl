@@ -17,18 +17,6 @@ namespace python {
 namespace bp = boost::python;
 
 void exposeCostFrameTranslation() {
-  bp::class_<FrameTranslation, boost::noncopyable>(
-      "FrameTranslation",
-      "Frame translation describe using Pinocchio.\n\n"
-      "It defines a frame translation (3D vector) for a given frame ID",
-      bp::init<int, Eigen::Vector3d>(bp::args(" self", " frame", " oxf"),
-                                     "Initialize the cost model.\n\n"
-                                     ":param frame: frame ID\n"
-                                     ":param oxf: Frame translation w.r.t. the origin"))
-      .def_readwrite("frame", &FrameTranslation::frame, "frame ID")
-      .add_property("oxf", bp::make_getter(&FrameTranslation::oxf, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&FrameTranslation::oxf), "frame translation");
-
   bp::class_<CostModelFrameTranslation, bp::bases<CostModelAbstract> >(
       "CostModelFrameTranslation", bp::init<StateMultibody&, ActivationModelAbstract&, FrameTranslation, int>(
                                        bp::args(" self", " state", " activation", " xref", " nu"),
