@@ -296,9 +296,6 @@ class IntegratedActionModelEuler(crocoddyl.ActionModelAbstract):
         self.withCostResiduals = withCostResiduals
         self.timeStep = timeStep
 
-    def createData(self):
-        return IntegratedActionDataEuler(self)
-
     def calc(self, data, x, u=None):
         nq, dt = self.State.nq, self.timeStep
         acc, cost = self.differential.calc(data.differential, x, u)
