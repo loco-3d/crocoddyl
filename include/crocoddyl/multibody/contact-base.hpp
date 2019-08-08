@@ -29,7 +29,7 @@ class ContactModelAbstract {
   StateMultibody& get_state() const;
   const unsigned int& get_nc() const;
 
- private:
+ protected:
   StateMultibody& state_;
   unsigned int nc_;
 
