@@ -72,7 +72,6 @@ class CostModelAbstract {
     calcDiff(data, x, unone_, recalc);
   }
 #endif
-
 };
 
 struct CostDataAbstract {

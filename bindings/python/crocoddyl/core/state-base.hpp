@@ -227,4 +227,3 @@ void exposeStateAbstract() {
 }  // namespace crocoddyl
 
 #endif  // PYTHON_CROCODDYL_CORE_STATE_BASE_HPP_
-

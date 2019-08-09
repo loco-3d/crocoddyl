@@ -12,7 +12,11 @@ namespace crocoddyl {
 
 ShootingProblem::ShootingProblem(const Eigen::VectorXd& x0, const std::vector<ActionModelAbstract*>& running_models,
                                  ActionModelAbstract* const terminal_model)
-    : terminal_model_(terminal_model), running_models_(running_models), T_(static_cast<unsigned int>(running_models.size())), x0_(x0), cost_(0.) {
+    : terminal_model_(terminal_model),
+      running_models_(running_models),
+      T_(static_cast<unsigned int>(running_models.size())),
+      x0_(x0),
+      cost_(0.) {
   allocateData();
 }
 
