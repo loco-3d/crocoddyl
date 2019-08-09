@@ -12,7 +12,7 @@
 namespace crocoddyl {
 
 CostModelAbstract::CostModelAbstract(StateMultibody& state, ActivationModelAbstract& activation,
-                                     const unsigned int& nu, const bool& with_residuals)
+                                     unsigned int const& nu, const bool& with_residuals)
     : state_(state),
       activation_(activation),
       nu_(nu),
@@ -27,7 +27,7 @@ CostModelAbstract::CostModelAbstract(StateMultibody& state, ActivationModelAbstr
       with_residuals_(with_residuals),
       unone_(Eigen::VectorXd::Zero(state.get_nv())) {}
 
-CostModelAbstract::CostModelAbstract(StateMultibody& state, const unsigned int& nr, const unsigned int& nu,
+CostModelAbstract::CostModelAbstract(StateMultibody& state, unsigned int const& nr, const unsigned int& nu,
                                      const bool& with_residuals)
     : state_(state),
       activation_(*new ActivationModelQuad(nr)),
@@ -35,7 +35,7 @@ CostModelAbstract::CostModelAbstract(StateMultibody& state, const unsigned int& 
       with_residuals_(with_residuals),
       unone_(Eigen::VectorXd::Zero(nu)) {}
 
-CostModelAbstract::CostModelAbstract(StateMultibody& state, const unsigned int& nr, const bool& with_residuals)
+CostModelAbstract::CostModelAbstract(StateMultibody& state, unsigned int const& nr, const bool& with_residuals)
     : state_(state),
       activation_(*new ActivationModelQuad(nr)),
       nu_(state.get_nv()),

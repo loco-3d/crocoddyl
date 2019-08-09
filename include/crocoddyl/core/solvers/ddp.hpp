@@ -16,11 +16,11 @@ namespace crocoddyl {
 
 class SolverDDP : public SolverAbstract {
  public:
-  SolverDDP(ShootingProblem& problem);
+  explicit SolverDDP(ShootingProblem& problem);
   ~SolverDDP();
 
   bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-             const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const unsigned int& maxiter = 100,
+             const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, unsigned int const& maxiter = 100,
              const bool& is_feasible = false, const double& regInit = 1e-9);
   void computeDirection(const bool& recalc = true);
   double tryStep(const double& steplength = 1);
@@ -42,7 +42,7 @@ class SolverDDP : public SolverAbstract {
   double calc();
   void backwardPass();
   void forwardPass(const double& stepLength);
-  void computeGains(const long unsigned int& t);
+  void computeGains(unsigned int const& t);
   void increaseRegularization();
   void decreaseRegularization();
   void allocateData();

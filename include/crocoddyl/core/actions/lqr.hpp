@@ -16,7 +16,7 @@ namespace crocoddyl {
 
 class ActionModelLQR : public ActionModelAbstract {
  public:
-  ActionModelLQR(const unsigned int& nx, const unsigned int& nu, bool drift_free = true);
+  ActionModelLQR(unsigned int const& nx, unsigned int const& nu, bool drift_free = true);
   ~ActionModelLQR();
 
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -40,7 +40,7 @@ class ActionModelLQR : public ActionModelAbstract {
 
 struct ActionDataLQR : public ActionDataAbstract {
   template <typename Model>
-  ActionDataLQR(Model* const model) : ActionDataAbstract(model) {
+  explicit ActionDataLQR(Model* const model) : ActionDataAbstract(model) {
     // Setting the linear model and quadratic cost here because they are constant
     Fx = model->Fx_;
     Fu = model->Fu_;

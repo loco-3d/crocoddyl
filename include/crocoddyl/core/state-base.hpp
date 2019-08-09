@@ -22,7 +22,7 @@ inline bool is_a_Jcomponent(Jcomponent firstsecond) {
 
 class StateAbstract {
  public:
-  StateAbstract(const unsigned int& nx, const unsigned int& ndx);
+  StateAbstract(unsigned int const& nx, unsigned int const& ndx);
   virtual ~StateAbstract();
 
   virtual Eigen::VectorXd zero() = 0;

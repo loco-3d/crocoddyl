@@ -10,7 +10,7 @@
 
 namespace crocoddyl {
 
-CostModelSum::CostModelSum(StateMultibody& state, const unsigned int& nu, const bool& with_residuals)
+CostModelSum::CostModelSum(StateMultibody& state, unsigned int const& nu, const bool& with_residuals)
     : CostModelAbstract(state, (unsigned int)0, nu, with_residuals), nr_(0) {}
 
 CostModelSum::CostModelSum(StateMultibody& state, const bool& with_residuals)

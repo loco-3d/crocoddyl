@@ -19,7 +19,7 @@ struct ActivationDataAbstract;  // forward declaration
 
 class ActivationModelAbstract {
  public:
-  ActivationModelAbstract(const unsigned int& nr);
+  explicit ActivationModelAbstract(unsigned int const& nr);
   virtual ~ActivationModelAbstract();
 
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
@@ -29,7 +29,7 @@ class ActivationModelAbstract {
   virtual boost::shared_ptr<ActivationDataAbstract> createData();
 
   unsigned int get_nr() const;
-  void set_nr(const unsigned int& nr);
+  void set_nr(unsigned int const& nr);
 
  protected:
   unsigned int nr_;
@@ -54,7 +54,7 @@ struct ActivationDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Activation>
-  ActivationDataAbstract(Activation* const activation)
+  explicit ActivationDataAbstract(Activation* const activation)
       : a_value(0.),
         Ar(Eigen::VectorXd::Zero(activation->get_nr())),
         Arr(Eigen::MatrixXd::Zero(activation->get_nr(), activation->get_nr())) {}

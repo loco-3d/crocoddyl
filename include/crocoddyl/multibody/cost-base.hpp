@@ -21,12 +21,12 @@ struct CostDataAbstract;  // forward declaration
 
 class CostModelAbstract {
  public:
-  CostModelAbstract(StateMultibody& state, ActivationModelAbstract& activation, const unsigned int& nu,
+  CostModelAbstract(StateMultibody& state, ActivationModelAbstract& activation, unsigned int const& nu,
                     const bool& with_residuals = true);
   CostModelAbstract(StateMultibody& state, ActivationModelAbstract& activation, const bool& with_residuals = true);
-  CostModelAbstract(StateMultibody& state, const unsigned int& nr, const unsigned int& nu,
+  CostModelAbstract(StateMultibody& state, unsigned int const& nr, unsigned int const& nu,
                     const bool& with_residuals = true);
-  CostModelAbstract(StateMultibody& state, const unsigned int& nr, const bool& with_residuals = true);
+  CostModelAbstract(StateMultibody& state, unsigned int const& nr, const bool& with_residuals = true);
   ~CostModelAbstract();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,

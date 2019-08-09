@@ -10,7 +10,7 @@
 
 namespace crocoddyl {
 
-StateVector::StateVector(const unsigned int& nx) : StateAbstract(nx, nx) {}
+StateVector::StateVector(unsigned int const& nx) : StateAbstract(nx, nx) {}
 
 StateVector::~StateVector() {}
 

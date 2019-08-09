@@ -20,7 +20,7 @@ struct DifferentialActionDataAbstract;  // forward declaration
 
 class DifferentialActionModelAbstract {
  public:
-  DifferentialActionModelAbstract(StateAbstract& state, const unsigned int& nu, const unsigned int& nr = 1);
+  DifferentialActionModelAbstract(StateAbstract& state, unsigned int const& nu, unsigned int const& nr = 1);
   virtual ~DifferentialActionModelAbstract();
 
   virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
@@ -78,7 +78,7 @@ struct DifferentialActionDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  DifferentialActionDataAbstract(Model* const model)
+  explicit DifferentialActionDataAbstract(Model* const model)
       : cost(0.),
         xout(model->get_state().get_nv()),
         Fx(model->get_state().get_nv(), model->get_state().get_ndx()),

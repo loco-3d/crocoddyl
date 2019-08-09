@@ -28,8 +28,8 @@ class CostModelSum : public CostModelAbstract {
   typedef std::map<std::string, CostItem> CostModelContainer;
   typedef std::map<std::string, boost::shared_ptr<CostDataAbstract> > CostDataContainer;
 
-  CostModelSum(StateMultibody& state, const unsigned int& nu, const bool& with_residuals = true);
-  CostModelSum(StateMultibody& state, const bool& with_residuals = true);
+  CostModelSum(StateMultibody& state, unsigned int const& nu, const bool& with_residuals = true);
+  explicit CostModelSum(StateMultibody& state, const bool& with_residuals = true);
   ~CostModelSum();
 
   void addCost(const std::string& name, CostModelAbstract* const cost, const double& weight);

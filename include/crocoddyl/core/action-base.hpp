@@ -19,7 +19,7 @@ struct ActionDataAbstract;  // forward declaration
 
 class ActionModelAbstract {
  public:
-  ActionModelAbstract(StateAbstract& state, const unsigned int& nu, const unsigned int& nr = 1);
+  ActionModelAbstract(StateAbstract& state, unsigned int const& nu, unsigned int const& nr = 1);
   virtual ~ActionModelAbstract();
 
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -74,7 +74,7 @@ struct ActionDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  ActionDataAbstract(Model* const model) : cost(0.) {
+  explicit ActionDataAbstract(Model* const model) : cost(0.) {
     const int& nx = model->get_state().get_nx();
     const int& ndx = model->get_state().get_ndx();
     const int& nu = model->get_nu();

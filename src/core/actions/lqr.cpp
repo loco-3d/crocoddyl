@@ -10,9 +10,9 @@
 
 namespace crocoddyl {
 
-ActionModelLQR::ActionModelLQR(const unsigned int& nx, const unsigned int& nu, bool drift_free)
+ActionModelLQR::ActionModelLQR(unsigned int const& nx, unsigned int const& nu, bool drift_free)
     : ActionModelAbstract(*new StateVector(nx), nu, 0), drift_free_(drift_free) {
-  // TODO substitute by random (vectors) and random-orthogonal (matrices)
+  // TODO(cmastalli): substitute by random (vectors) and random-orthogonal (matrices)
   Fx_ = Eigen::MatrixXd::Identity(nx, nx);
   Fu_ = Eigen::MatrixXd::Identity(nx, nu);
   f0_ = Eigen::VectorXd::Ones(nx);

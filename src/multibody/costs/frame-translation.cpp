@@ -12,7 +12,7 @@
 namespace crocoddyl {
 
 CostModelFrameTranslation::CostModelFrameTranslation(StateMultibody& state, ActivationModelAbstract& activation,
-                                                     const FrameTranslation& xref, const unsigned int& nu)
+                                                     const FrameTranslation& xref, unsigned int const& nu)
     : CostModelAbstract(state, activation, nu), xref_(xref), nv_(state.get_nv()) {
   assert(activation_.get_nr() == 3 && "CostModelFrameTranslation: activation::nr is not equals to 3");
 }
@@ -24,7 +24,7 @@ CostModelFrameTranslation::CostModelFrameTranslation(StateMultibody& state, Acti
 }
 
 CostModelFrameTranslation::CostModelFrameTranslation(StateMultibody& state, const FrameTranslation& xref,
-                                                     const unsigned int& nu)
+                                                     unsigned int const& nu)
     : CostModelAbstract(state, 3, nu), xref_(xref), nv_(state.get_nv()) {}
 
 CostModelFrameTranslation::CostModelFrameTranslation(StateMultibody& state, const FrameTranslation& xref)

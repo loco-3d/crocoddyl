@@ -18,7 +18,7 @@ struct ContactDataAbstract;  // forward declaration
 
 class ContactModelAbstract {
  public:
-  ContactModelAbstract(StateMultibody& state, const unsigned int& nc);
+  ContactModelAbstract(StateMultibody& state, unsigned int const& nc);
   ~ContactModelAbstract();
 
   void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);

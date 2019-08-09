@@ -34,7 +34,7 @@ struct ActionDataUnicycle : public ActionDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  ActionDataUnicycle(Model* const model) : ActionDataAbstract(model) {}
+  explicit ActionDataUnicycle(Model* const model) : ActionDataAbstract(model) {}
   ~ActionDataUnicycle() {}
 };
 

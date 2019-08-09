@@ -15,7 +15,7 @@ namespace crocoddyl {
 
 class ActivationModelWeightedQuad : public ActivationModelAbstract {
  public:
-  ActivationModelWeightedQuad(const Eigen::VectorXd& weights);
+  explicit ActivationModelWeightedQuad(const Eigen::VectorXd& weights);
   ~ActivationModelWeightedQuad();
 
   void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r);
@@ -31,7 +31,7 @@ struct ActivationDataWeightedQuad : public ActivationDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Activation>
-  ActivationDataWeightedQuad(Activation* const activation)
+  explicit ActivationDataWeightedQuad(Activation* const activation)
       : ActivationDataAbstract(activation), Wr(Eigen::VectorXd::Zero(activation->get_nr())) {}
 
   Eigen::VectorXd Wr;

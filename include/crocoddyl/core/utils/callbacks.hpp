@@ -18,7 +18,7 @@ namespace crocoddyl {
 enum VerboseLevel { _1 = 0, _2 };
 class CallbackVerbose : public CallbackAbstract {
  public:
-  CallbackVerbose(VerboseLevel level = _1);
+  explicit CallbackVerbose(VerboseLevel level = _1);
   ~CallbackVerbose();
 
   void operator()(SolverAbstract& solver);

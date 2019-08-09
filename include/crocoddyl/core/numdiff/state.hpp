@@ -15,7 +15,7 @@ namespace crocoddyl {
 
 class StateNumDiff : public StateAbstract {
  public:
-  StateNumDiff(StateAbstract& state);
+  explicit StateNumDiff(StateAbstract& state);
   ~StateNumDiff();
 
   Eigen::VectorXd zero();

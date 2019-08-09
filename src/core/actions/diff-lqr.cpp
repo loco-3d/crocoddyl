@@ -10,7 +10,7 @@
 
 namespace crocoddyl {
 
-DifferentialActionModelLQR::DifferentialActionModelLQR(const unsigned int& nq, const unsigned int& nu, bool drift_free)
+DifferentialActionModelLQR::DifferentialActionModelLQR(unsigned int const& nq, unsigned int const& nu, bool drift_free)
     : DifferentialActionModelAbstract(*new StateVector(2 * nq), nu), drift_free_(drift_free) {
   // TODO(cmastalli): substitute by random (vectors) and random-orthogonal (matrices)
   Fq_ = Eigen::MatrixXd::Identity(state_.get_nq(), state_.get_nq());

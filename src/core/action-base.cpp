@@ -10,7 +10,7 @@
 
 namespace crocoddyl {
 
-ActionModelAbstract::ActionModelAbstract(StateAbstract& state, const unsigned int& nu, const unsigned int& nr)
+ActionModelAbstract::ActionModelAbstract(StateAbstract& state, unsigned int const& nu, unsigned int const& nr)
     : nu_(nu), nr_(nr), state_(state), unone_(Eigen::VectorXd::Zero(nu)) {}
 
 ActionModelAbstract::~ActionModelAbstract() {}

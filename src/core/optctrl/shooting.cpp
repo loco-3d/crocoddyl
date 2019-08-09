@@ -12,7 +12,7 @@ namespace crocoddyl {
 
 ShootingProblem::ShootingProblem(const Eigen::VectorXd& x0, const std::vector<ActionModelAbstract*>& running_models,
                                  ActionModelAbstract* const terminal_model)
-    : terminal_model_(terminal_model), running_models_(running_models), T_(running_models.size()), x0_(x0), cost_(0.) {
+    : terminal_model_(terminal_model), running_models_(running_models), T_(static_cast<unsigned int>(running_models.size())), x0_(x0), cost_(0.) {
   allocateData();
 }
 
@@ -43,7 +43,7 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const s
   assert(us.size() == T_ && "ShootingProblem::calcDiff: wrong dimension of the control trajectory, it should be T.");
 
   cost_ = 0;
-  for (long unsigned int i = 0; i < T_; ++i) {
+  for (unsigned int i = 0; i < T_; ++i) {
     ActionModelAbstract* model = running_models_[i];
     boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
     const Eigen::VectorXd& x = xs[i];
@@ -62,7 +62,7 @@ void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us, std::vecto
 
   xs.resize(T_ + 1);
   xs[0] = x0_;
-  for (long unsigned int i = 0; i < T_; ++i) {
+  for (unsigned int i = 0; i < T_; ++i) {
     ActionModelAbstract* model = running_models_[i];
     boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
     const Eigen::VectorXd& x = xs[i];
@@ -80,7 +80,7 @@ std::vector<Eigen::VectorXd> ShootingProblem::rollout_us(const std::vector<Eigen
   return xs;
 }
 
-long unsigned int ShootingProblem::get_T() const { return T_; }
+unsigned int ShootingProblem::get_T() const { return T_; }
 
 const Eigen::VectorXd& ShootingProblem::get_x0() const { return x0_; }
 

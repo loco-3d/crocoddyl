@@ -41,7 +41,7 @@ struct IntegratedActionDataEuler : public ActionDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  IntegratedActionDataEuler(Model* const model) : ActionDataAbstract(model) {
+  explicit IntegratedActionDataEuler(Model* const model) : ActionDataAbstract(model) {
     differential = model->get_differential()->createData();
     const unsigned int& ndx = model->get_state().get_ndx();
     const unsigned int& nu = model->get_nu();

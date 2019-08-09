@@ -24,12 +24,12 @@ SolverAbstract::SolverAbstract(ShootingProblem& problem)
       th_stop_(1e-9),
       iter_(0) {
   // Allocate common data
-  const long unsigned int& T = problem_.get_T();
+  const unsigned int& T = problem_.get_T();
   xs_.resize(T + 1);
   us_.resize(T);
   models_.resize(T + 1);
   datas_.resize(T + 1);
-  for (long unsigned int t = 0; t < T; ++t) {
+  for (unsigned int t = 0; t < T; ++t) {
     ActionModelAbstract* model = problem_.running_models_[t];
     boost::shared_ptr<ActionDataAbstract>& data = problem_.running_datas_[t];
     const int& nu = model->get_nu();
@@ -48,10 +48,10 @@ SolverAbstract::~SolverAbstract() {}
 
 void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
                                   const std::vector<Eigen::VectorXd>& us_warm, const bool& is_feasible) {
-  const long unsigned int& T = problem_.get_T();
+  const unsigned int& T = problem_.get_T();
 
   if (xs_warm.size() == 0) {
-    for (long unsigned int t = 0; t < T; ++t) {
+    for (unsigned int t = 0; t < T; ++t) {
       xs_[t] = problem_.running_models_[t]->get_state().zero();
     }
     xs_.back() = problem_.terminal_model_->get_state().zero();
@@ -61,7 +61,7 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
   }
 
   if (us_warm.size() == 0) {
-    for (long unsigned int t = 0; t < T; ++t) {
+    for (unsigned int t = 0; t < T; ++t) {
       const int& nu = problem_.running_models_[t]->get_nu();
       us_[t] = Eigen::VectorXd::Zero(nu);
     }

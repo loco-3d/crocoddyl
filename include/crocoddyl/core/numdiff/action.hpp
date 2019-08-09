@@ -17,7 +17,7 @@ namespace crocoddyl {
 
 class ActionModelNumDiff : public ActionModelAbstract {
  public:
-  ActionModelNumDiff(ActionModelAbstract& model, bool with_gauss_approx = false);
+  explicit ActionModelNumDiff(ActionModelAbstract& model, bool with_gauss_approx = false);
   ~ActionModelNumDiff();
 
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -101,7 +101,7 @@ struct ActionDataNumDiff : public ActionDataAbstract {
    * @param model is the object to compute the numerical differentiation from.
    */
   template <typename Model>
-  ActionDataNumDiff(Model* const model_num_diff) : ActionDataAbstract(model_num_diff) {
+  explicit ActionDataNumDiff(Model* const model_num_diff) : ActionDataAbstract(model_num_diff) {
     // simple renaming for conveniency
     const unsigned& ndx = model_num_diff->get_model().get_state().get_ndx();
     const unsigned& nu = model_num_diff->get_model().get_nu();
