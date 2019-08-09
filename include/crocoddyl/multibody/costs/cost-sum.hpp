@@ -9,6 +9,9 @@
 #ifndef CROCODDYL_MULTIBODY_COSTS_COST_SUM_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_COST_SUM_HPP_
 
+#include <string>
+#include <map>
+#include <utility>
 #include "crocoddyl/multibody/cost-base.hpp"
 
 namespace crocoddyl {
