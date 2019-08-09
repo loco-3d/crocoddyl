@@ -9,6 +9,7 @@
 #ifndef PYTHON_CROCODDYL_CORE_STATE_BASE_HPP_
 #define PYTHON_CROCODDYL_CORE_STATE_BASE_HPP_
 
+#include <string>
 #include "crocoddyl/core/state-base.hpp"
 
 namespace crocoddyl {
@@ -226,3 +227,4 @@ void exposeStateAbstract() {
 }  // namespace crocoddyl
 
 #endif  // PYTHON_CROCODDYL_CORE_STATE_BASE_HPP_
+

@@ -50,7 +50,7 @@ void test_calc_returns_a_cost(crocoddyl::ActionModelAbstract& model) {
   model.calc(data, x, u);
 
   // Checking that calc returns a cost value
-  BOOST_CHECK(!isnan(data->cost));
+  BOOST_CHECK(!std::isnan(data->cost));
 }
 
 //____________________________________________________________________________//
