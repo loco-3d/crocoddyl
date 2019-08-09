@@ -114,4 +114,4 @@ bool init_function() {
 
 //____________________________________________________________________________//
 
-int main(int argc, char* argv[]) { return ::boost::unit_test::unit_test_main(&init_function, argc, argv); }
+int main(int argc, char** argv) { return ::boost::unit_test::unit_test_main(&init_function, argc, argv); }
