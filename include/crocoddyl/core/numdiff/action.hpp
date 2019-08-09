@@ -62,7 +62,7 @@ class ActionModelNumDiff : public ActionModelAbstract {
    */
   bool with_gauss_approx_;
   /**
-   * @brief This the increment used in the finite differentation and integration.
+   * @brief This the increment used in the finite differentiation and integration.
    */
   double disturbance_;
   /**

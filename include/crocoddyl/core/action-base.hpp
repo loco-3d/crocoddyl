@@ -42,6 +42,7 @@ class ActionModelAbstract {
   Eigen::VectorXd unone_;
 
 #ifdef PYTHON_BINDINGS
+
  public:
   void calc_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x,
                  const Eigen::VectorXd& u) {
@@ -65,6 +66,7 @@ class ActionModelAbstract {
   void calcDiff_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const bool& recalc) {
     calcDiff(data, x, unone_, recalc);
   }
+
 #endif
 };
 

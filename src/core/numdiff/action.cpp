@@ -1,3 +1,11 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2019, LAAS-CNRS, New York University, Max Planck Gesellshaft
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
 #include "crocoddyl/core/numdiff/action.hpp"
 
 namespace crocoddyl {
@@ -55,7 +63,7 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
 
     // data->Rx
     if (model_.get_nr() > 1) {
-      // TODO: @mnaveau manage the gaussian approximation
+      // TODO(mnaveau): manage the gaussian approximation
       // data_num_diff->Rx.col(ix) = data_num_diff->data_x[ix]->cost_residual -
       //                             data_num_diff->data_0[ix]->cost_residual;
     }
@@ -76,7 +84,7 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
     data_num_diff->Lu(iu) = (c - c0) / disturbance_;
     // data->Ru
     if (model_.get_nr() > 1) {
-      // TODO: @mnaveau manage the gaussian approximation
+      // TODO(mnaveau): manage the gaussian approximation
       // data_num_diff->Ru.col(iu) = data_num_diff->data_u[iu]->cost_residual -
       //                             data_num_diff->data_0[iu]->cost_residual;
     }
@@ -92,7 +100,7 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
 }
 
 void ActionModelNumDiff::assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& /** x */) {
-  // TODO: @mnaveau make this method virtual and this one should do nothing, update the documentation.
+  // TODO(mnaveau): make this method virtual and this one should do nothing, update the documentation.
   // md = model_.differential_;
   // if isinstance(md, DifferentialActionModelFloatingInContact)
   // {

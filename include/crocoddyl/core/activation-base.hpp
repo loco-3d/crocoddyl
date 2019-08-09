@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_ACTIVATION_BASE_HPP_
-#define CROCODDYL_MULTIBODY_ACTIVATION_BASE_HPP_
+#ifndef CROCODDYL_CORE_ACTIVATION_BASE_HPP_
+#define CROCODDYL_CORE_ACTIVATION_BASE_HPP_
 
 #include <Eigen/Dense>
 #include <boost/shared_ptr.hpp>
@@ -35,6 +35,7 @@ class ActivationModelAbstract {
   unsigned int nr_;
 
 #ifdef PYTHON_BINDINGS
+
  public:
   void calc_wrap(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::VectorXd& r) { calc(data, r); }
 
@@ -45,6 +46,7 @@ class ActivationModelAbstract {
   void calcDiff_wrap(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::VectorXd& r) {
     calcDiff(data, r, true);
   }
+
 #endif
 };
 
@@ -64,4 +66,4 @@ struct ActivationDataAbstract {
 
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_MULTIBODY_ACTIVATION_BASE_HPP_
+#endif  // CROCODDYL_CORE_ACTIVATION_BASE_HPP_

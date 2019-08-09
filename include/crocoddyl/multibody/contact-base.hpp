@@ -34,6 +34,7 @@ class ContactModelAbstract {
   unsigned int nc_;
 
 #ifdef PYTHON_BINDINGS
+
  public:
   void calc_wrap(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& x) { calc(data, x); }
 
@@ -41,6 +42,7 @@ class ContactModelAbstract {
                      const bool& recalc = true) {
     calcDiff(data, x, recalc);
   }
+
 #endif
 };
 

@@ -50,6 +50,7 @@ class StateAbstract {
   unsigned int nv_;
 
 #ifdef PYTHON_BINDINGS
+
  public:
   Eigen::VectorXd diff_wrap(const Eigen::VectorXd& x0, const Eigen::VectorXd& x1) {
     Eigen::VectorXd dxout = Eigen::VectorXd::Zero(ndx_);

@@ -50,6 +50,7 @@ class CostModelAbstract {
   Eigen::VectorXd unone_;
 
 #ifdef PYTHON_BINDINGS
+
  public:
   void calc_wrap(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
     calc(data, x, u);
@@ -71,6 +72,7 @@ class CostModelAbstract {
     calcDiff(data, x, unone_, recalc);
   }
 #endif
+
 };
 
 struct CostDataAbstract {

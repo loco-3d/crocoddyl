@@ -1,3 +1,11 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>

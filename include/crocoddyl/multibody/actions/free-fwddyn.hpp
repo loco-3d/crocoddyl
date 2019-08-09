@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_FREE_FWDDYN_HPP_
-#define CROCODDYL_MULTIBODY_FREE_FWDDYN_HPP_
+#ifndef CROCODDYL_MULTIBODY_ACTIONS_FREE_FWDDYN_HPP_
+#define CROCODDYL_MULTIBODY_ACTIONS_FREE_FWDDYN_HPP_
 
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
@@ -60,4 +60,4 @@ struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbst
 
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_MULTIBODY_FREE_FWDDYN_HPP_
+#endif  // CROCODDYL_MULTIBODY_ACTIONS_FREE_FWDDYN_HPP_

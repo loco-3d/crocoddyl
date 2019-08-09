@@ -1,3 +1,11 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2019, LAAS-CNRS, New York University, Max Planck Gesellshaft
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
 #include "crocoddyl/core/numdiff/state.hpp"
 
 namespace crocoddyl {
@@ -7,10 +15,10 @@ StateNumDiff::StateNumDiff(StateAbstract& state) : StateAbstract(state.get_nx(),
   // disturbance vector
   dx_.resize(ndx_);
   dx_.setZero();
-  // State around which to compute the finite integrale jacobians
+  // State around which to compute the finite integrate-operator jacobians
   x0_.resize(nx_);
   x0_.setZero();
-  // State difference around which to compute the finite difference jacobians
+  // State difference around which to compute the finite difference-operator jacobians
   dx0_.resize(ndx_);
   dx0_.setZero();
   // temporary variable needed

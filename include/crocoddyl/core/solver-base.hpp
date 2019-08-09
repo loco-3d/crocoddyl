@@ -25,7 +25,7 @@ class SolverAbstract {
   virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
                      const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const unsigned int& maxiter = 100,
                      const bool& is_feasible = false, const double& reg_init = 1e-9) = 0;
-  // TODO: computeDirection (polimorfism) returning descent direction and lambdas
+  // TODO(cmastalli): computeDirection (polymorphism) returning descent direction and lambdas
   virtual void computeDirection(const bool& recalc) = 0;
   virtual double tryStep(const double& step_length = 1) = 0;
   virtual double stoppingCriteria() = 0;
