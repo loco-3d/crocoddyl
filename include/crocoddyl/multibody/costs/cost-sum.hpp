@@ -56,7 +56,7 @@ struct CostDataSum : public CostDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  CostDataSum(Model& model, pinocchio::Data* const data) : CostDataAbstract(model, data) {
+  CostDataSum(Model* const model, pinocchio::Data* const data) : CostDataAbstract(model, data) {
     for (CostModelSum::CostModelContainer::const_iterator it = model->get_costs().begin();
          it != model->get_costs().end(); ++it) {
       const CostItem& item = it->second;
