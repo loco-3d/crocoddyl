@@ -4,6 +4,7 @@ SET(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
   shooting
   solvers
   costs
+  contacts
   )
 
 FOREACH(TEST ${${PROJECT_NAME}_PYTHON_BINDINGS_TESTS})
