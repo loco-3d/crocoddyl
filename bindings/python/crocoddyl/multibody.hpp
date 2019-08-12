@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_MULTIBODY_HPP_
-#define PYTHON_CROCODDYL_MULTIBODY_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_HPP_
 
 #include "python/crocoddyl/multibody/frames.hpp"
 #include "python/crocoddyl/multibody/cost-base.hpp"
@@ -41,4 +41,4 @@ void exposeMultibody() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_MULTIBODY_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_MULTIBODY_HPP_

@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_ACTIONS_DIFF_FREE_FWDDYN_HPP_
-#define PYTHON_CROCODDYL_CORE_ACTIONS_DIFF_FREE_FWDDYN_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_ACTIONS_FREE_FWDDYN_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_ACTIONS_FREE_FWDDYN_HPP_
 
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
 
@@ -96,10 +96,9 @@ void exposeDifferentialActionFreeFwdDynamics() {
                     bp::make_getter(&DifferentialActionDataFreeFwdDynamics::costs,
                                     bp::return_value_policy<bp::return_by_value>()),
                     "total cost data");
-  ;
 }
 
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_CORE_ACTIONS_DIFF_FREE_FWDDYN_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_MULTIBODY_ACTIONS_FREE_FWDDYN_HPP_

@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_ACTION_BASE_HPP_
-#define PYTHON_CROCODDYL_CORE_ACTION_BASE_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_CORE_ACTION_BASE_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_CORE_ACTION_BASE_HPP_
 
 #include "crocoddyl/core/action-base.hpp"
 
@@ -18,7 +18,7 @@ namespace bp = boost::python;
 
 class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<ActionModelAbstract> {
  public:
-  ActionModelAbstract_wrap(StateAbstract& state, const unsigned int& nu, const unsigned int& nr = 1)
+  ActionModelAbstract_wrap(StateAbstract& state, unsigned int const& nu, unsigned int const& nr = 1)
       : ActionModelAbstract(state, nu, nr), bp::wrapper<ActionModelAbstract>() {}
 
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -131,4 +131,4 @@ void exposeActionAbstract() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_CORE_ACTION_BASE_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_ACTION_BASE_HPP_

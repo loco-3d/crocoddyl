@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_STATES_EUCLIDEAN_HPP_
-#define PYTHON_CROCODDYL_CORE_STATES_EUCLIDEAN_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_CORE_STATES_EUCLIDEAN_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_CORE_STATES_EUCLIDEAN_HPP_
 
 #include "crocoddyl/core/states/euclidean.hpp"
 
@@ -77,4 +77,4 @@ void exposeStateEuclidean() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_CORE_STATES_STATE_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_STATES_EUCLIDEAN_HPP_

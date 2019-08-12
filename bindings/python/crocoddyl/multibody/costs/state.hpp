@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_MULTIBODY_COSTS_STATE_HPP_
-#define PYTHON_CROCODDYL_MULTIBODY_COSTS_STATE_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_STATE_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_STATE_HPP_
 
 #include "crocoddyl/multibody/costs/state.hpp"
 
@@ -105,4 +105,4 @@ void exposeCostState() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_MULTIBODY_COSTS_STATE_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_STATE_HPP_

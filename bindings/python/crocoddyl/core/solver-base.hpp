@@ -6,9 +6,11 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_
-#define PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_
 
+#include <vector>
+#include <memory>
 #include "crocoddyl/core/solver-base.hpp"
 #include "python/crocoddyl/utils.hpp"
 
@@ -29,11 +31,11 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
   using SolverAbstract::xreg_;
   using SolverAbstract::xs_;
 
-  SolverAbstract_wrap(ShootingProblem& problem) : SolverAbstract(problem), bp::wrapper<SolverAbstract>() {}
+  explicit SolverAbstract_wrap(ShootingProblem& problem) : SolverAbstract(problem), bp::wrapper<SolverAbstract>() {}
   ~SolverAbstract_wrap() {}
 
   bool solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-             const unsigned int& maxiter, const bool& is_feasible, const double& reg_init) {
+             unsigned int const& maxiter, const bool& is_feasible, const double& reg_init) {
     return bp::call<bool>(this->get_override("solve").ptr(), init_xs, init_us, maxiter, is_feasible, reg_init);
   }
 
@@ -182,4 +184,4 @@ void exposeSolverAbstract() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_

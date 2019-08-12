@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_INTEGRATOR_EULER_HPP_
-#define PYTHON_CROCODDYL_CORE_INTEGRATOR_EULER_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_CORE_INTEGRATOR_EULER_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_CORE_INTEGRATOR_EULER_HPP_
 
 #include "crocoddyl/core/integrator/euler.hpp"
 
@@ -83,4 +83,4 @@ void exposeIntegratedActionEuler() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_INTEGRATOR_EULER_HPP_

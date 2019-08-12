@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_MULTIBODY_CONTACTS_CONTACT_3D_HPP_
-#define PYTHON_CROCODDYL_MULTIBODY_CONTACTS_CONTACT_3D_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_CONTACTS_CONTACT_3D_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_CONTACTS_CONTACT_3D_HPP_
 
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"
 
@@ -35,13 +35,14 @@ void exposeContact3D() {
            "of the contact frame placement.\n"
            ":param data: contact data\n"
            ":param x: state vector")
-      .def("calcDiff", &ContactModel3D::calcDiff_wrap, calcDiff_wraps(bp::args(" self", " data", " x", " recalc=True"),
-           "Compute the derivatives of the 3D contact holonomic constraint.\n\n"
-           "The rigid contact model throught acceleration-base holonomic constraint\n"
-           "of the contact frame placement.\n"
-           ":param data: cost data\n"
-           ":param x: state vector\n"
-           ":param recalc: If true, it updates the contact Jacobian and drift."))
+      .def("calcDiff", &ContactModel3D::calcDiff_wrap,
+           calcDiff_wraps(bp::args(" self", " data", " x", " recalc=True"),
+                          "Compute the derivatives of the 3D contact holonomic constraint.\n\n"
+                          "The rigid contact model throught acceleration-base holonomic constraint\n"
+                          "of the contact frame placement.\n"
+                          ":param data: cost data\n"
+                          ":param x: state vector\n"
+                          ":param recalc: If true, it updates the contact Jacobian and drift."))
       .def("createData", &ContactModel3D::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the 3D contact data.\n\n"
@@ -76,4 +77,4 @@ void exposeContact3D() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_MULTIBODY_CONTACTS_CONTACT_3D_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_MULTIBODY_CONTACTS_CONTACT_3D_HPP_

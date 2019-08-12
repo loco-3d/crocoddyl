@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_
-#define PYTHON_CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_
 
 #include "crocoddyl/core/actions/diff-lqr.hpp"
 
@@ -83,4 +83,4 @@ void exposeDifferentialActionLQR() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_

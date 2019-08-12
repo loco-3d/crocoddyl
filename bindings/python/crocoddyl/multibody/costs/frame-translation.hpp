@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_MULTIBODY_COSTS_FRAME_TRANSLATION_HPP_
-#define PYTHON_CROCODDYL_MULTIBODY_COSTS_FRAME_TRANSLATION_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_FRAME_TRANSLATION_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_FRAME_TRANSLATION_HPP_
 
 #include "crocoddyl/multibody/costs/frame-translation.hpp"
 
@@ -87,4 +87,4 @@ void exposeCostFrameTranslation() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_MULTIBODY_COSTS_FRAME_TRANSLATION_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_FRAME_TRANSLATION_HPP_
