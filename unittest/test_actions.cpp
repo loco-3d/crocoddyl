@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 #include <boost/test/included/unit_test.hpp>
 #include <boost/bind.hpp>
@@ -50,7 +51,7 @@ void test_calc_returns_a_cost(crocoddyl::ActionModelAbstract& model) {
   model.calc(data, x, u);
 
   // Checking that calc returns a cost value
-  BOOST_CHECK(!isnan(data->cost));
+  BOOST_CHECK(!std::isnan(data->cost));
 }
 
 //____________________________________________________________________________//
@@ -114,4 +115,4 @@ bool init_function() {
 
 //____________________________________________________________________________//
 
-int main(int argc, char* argv[]) { return ::boost::unit_test::unit_test_main(&init_function, argc, argv); }
+int main(int argc, char** argv) { return ::boost::unit_test::unit_test_main(&init_function, argc, argv); }

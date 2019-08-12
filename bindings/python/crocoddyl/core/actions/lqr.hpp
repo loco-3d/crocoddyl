@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_ACTIONS_LQR_HPP_
-#define PYTHON_CROCODDYL_CORE_ACTIONS_LQR_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_CORE_ACTIONS_LQR_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_CORE_ACTIONS_LQR_HPP_
 
 #include "crocoddyl/core/actions/lqr.hpp"
 
@@ -28,18 +28,15 @@ void exposeActionLQR() {
                                               ":param nx: dimension of the state vector\n"
                                               ":param nu: dimension of the control vector\n"
                                               ":param driftFree: enable/disable the bias term of the linear dynamics"))
-      .def<void (ActionModelLQR::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
-                                    const Eigen::VectorXd&)>(
-          "calc", &ActionModelLQR::calc_wrap, bp::args(" self", " data", " x", " u=None"),
-          "Compute the next state and cost value.\n\n"
-          "It describes the time-discrete evolution of the LQR system. Additionally it\n"
-          "computes the cost value associated to this discrete\n"
-          "state and control pair.\n"
-          ":param data: action data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input")
-      .def<void (ActionModelLQR::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&)>(
-          "calc", &ActionModelLQR::calc_wrap, bp::args(" self", " data", " x"))
+      .def("calc", &ActionModelLQR::calc_wrap,
+           ActionModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
+                                  "Compute the next state and cost value.\n\n"
+                                  "It describes the time-discrete evolution of the LQR system. Additionally it\n"
+                                  "computes the cost value associated to this discrete\n"
+                                  "state and control pair.\n"
+                                  ":param data: action data\n"
+                                  ":param x: time-discrete state vector\n"
+                                  ":param u: time-discrete control input"))
       .def<void (ActionModelLQR::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
                                     const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &ActionModelLQR::calcDiff_wrap, bp::args(" self", " data", " x", " u=None", " recalc=True"),
@@ -74,4 +71,4 @@ void exposeActionLQR() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_CORE_ACTIONS_LQR_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_ACTIONS_LQR_HPP_

@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_SOLVERS_DDP_HPP_
-#define PYTHON_CROCODDYL_CORE_SOLVERS_DDP_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_CORE_SOLVERS_DDP_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_CORE_SOLVERS_DDP_HPP_
 
 #include "crocoddyl/core/solvers/ddp.hpp"
 
@@ -24,7 +24,7 @@ void exposeSolverDDP() {
   bp::class_<SolverDDP, bp::bases<SolverAbstract> >(
       "SolverDDP",
       "DDP solver.\n\n"
-      "The DDP solver computes an optimal trajectory and control commands by iteratives\n"
+      "The DDP solver computes an optimal trajectory and control commands by iterates\n"
       "running backward and forward passes. The backward-pass updates locally the\n"
       "quadratic approximation of the problem and computes descent direction,\n"
       "and the forward-pass rollouts this new policy by integrating the system dynamics\n"
@@ -36,7 +36,7 @@ void exposeSolverDDP() {
       .def("solve", &SolverDDP::solve,
            SolverDDP_solves(
                bp::args(" self", " init_xs=[]", " init_us=[]", " maxiter=100", " isFeasible=False", " regInit=None"),
-               "Compute the optimal trajectory xopt,uopt as lists of T+1 and T terms.\n\n"
+               "Compute the optimal trajectory xopt, uopt as lists of T+1 and T terms.\n\n"
                "From an initial guess init_xs,init_us (feasible or not), iterate\n"
                "over computeDirection and tryStep until stoppingCriteria is below\n"
                "threshold. It also describes the globalization strategy used\n"
@@ -88,4 +88,4 @@ void exposeSolverDDP() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_CORE_SOLVERS_DDP_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_SOLVERS_DDP_HPP_

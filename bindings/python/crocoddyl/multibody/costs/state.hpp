@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_MULTIBODY_COSTS_STATE_HPP_
-#define PYTHON_CROCODDYL_MULTIBODY_COSTS_STATE_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_STATE_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_STATE_HPP_
 
 #include "crocoddyl/multibody/costs/state.hpp"
 
@@ -73,15 +73,12 @@ void exposeCostState() {
           "For this case the default xref is the zeros state, i.e. state.zero(), the default activation\n"
           "model is quadratic, i.e. crocoddyl.ActivationModelQuad(state.ndx), and nu is equals to model.nv.\n"
           ":param state: state of the multibody system")[bp::with_custodian_and_ward<1, 2>()])
-      .def<void (CostModelState::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                    const Eigen::VectorXd&)>("calc", &CostModelState::calc_wrap,
-                                                             bp::args(" self", " data", " x", " u=None"),
-                                                             "Compute the state cost.\n\n"
-                                                             ":param data: cost data\n"
-                                                             ":param x: time-discrete state vector\n"
-                                                             ":param u: time-discrete control input")
-      .def<void (CostModelState::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
-          "calc", &CostModelState::calc_wrap, bp::args(" self", " data", " x"))
+      .def("calc", &CostModelState::calc_wrap,
+           CostModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
+                                "Compute the state cost.\n\n"
+                                ":param data: cost data\n"
+                                ":param x: time-discrete state vector\n"
+                                ":param u: time-discrete control input"))
       .def<void (CostModelState::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                     const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &CostModelState::calcDiff_wrap, bp::args(" self", " data", " x", " u=None", " recalc=True"),
@@ -105,4 +102,4 @@ void exposeCostState() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_MULTIBODY_COSTS_STATE_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_STATE_HPP_

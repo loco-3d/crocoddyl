@@ -6,14 +6,14 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_UTILS_HPP_
-#define PYTHON_CROCODDYL_UTILS_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_UTILS_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_UTILS_HPP_
 
-#include <boost/python/stl_iterator.hpp>
-#include <boost/python/to_python_converter.hpp>
 #include <Eigen/Dense>
 #include <vector>
 #include <map>
+#include <boost/python/stl_iterator.hpp>
+#include <boost/python/to_python_converter.hpp>
 
 namespace crocoddyl {
 namespace python {
@@ -32,7 +32,7 @@ struct is_pointer<T*> {
 
 template <class T>
 bp::list std_vector_to_python_list(const std::vector<T>& vec) {
-  const long unsigned int& n = vec.size();
+  unsigned int const& n = static_cast<unsigned int>(vec.size());
   bp::list list;
   for (unsigned int i = 0; i < n; ++i) {
     if (is_pointer<T>::value) {
@@ -46,7 +46,7 @@ bp::list std_vector_to_python_list(const std::vector<T>& vec) {
 
 template <class T>
 std::vector<T> python_list_to_std_vector(const bp::list& list) {
-  const long int& n = len(list);
+  unsigned int const& n = static_cast<unsigned int>(len(list));
   std::vector<T> vec;
   vec.resize(n);
   for (int i = 0; i < n; ++i) {
@@ -201,4 +201,4 @@ struct dict_to_map {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_UTILS_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_UTILS_HPP_

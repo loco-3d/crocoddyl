@@ -11,6 +11,7 @@
 
 #include <Eigen/Core>
 #include <vector>
+#include <string>
 
 namespace crocoddyl {
 
@@ -22,7 +23,7 @@ inline bool is_a_Jcomponent(Jcomponent firstsecond) {
 
 class StateAbstract {
  public:
-  StateAbstract(const unsigned int& nx, const unsigned int& ndx);
+  StateAbstract(unsigned int const& nx, unsigned int const& ndx);
   virtual ~StateAbstract();
 
   virtual Eigen::VectorXd zero() = 0;
@@ -50,6 +51,7 @@ class StateAbstract {
   unsigned int nv_;
 
 #ifdef PYTHON_BINDINGS
+
  public:
   Eigen::VectorXd diff_wrap(const Eigen::VectorXd& x0, const Eigen::VectorXd& x1) {
     Eigen::VectorXd dxout = Eigen::VectorXd::Zero(ndx_);

@@ -1,8 +1,16 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
 #include "crocoddyl/core/action-base.hpp"
 
 namespace crocoddyl {
 
-ActionModelAbstract::ActionModelAbstract(StateAbstract& state, const unsigned int& nu, const unsigned int& nr)
+ActionModelAbstract::ActionModelAbstract(StateAbstract& state, unsigned int const& nu, unsigned int const& nr)
     : nu_(nu), nr_(nr), state_(state), unone_(Eigen::VectorXd::Zero(nu)) {}
 
 ActionModelAbstract::~ActionModelAbstract() {}

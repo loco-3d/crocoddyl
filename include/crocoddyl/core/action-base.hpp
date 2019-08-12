@@ -19,7 +19,7 @@ struct ActionDataAbstract;  // forward declaration
 
 class ActionModelAbstract {
  public:
-  ActionModelAbstract(StateAbstract& state, const unsigned int& nu, const unsigned int& nr = 1);
+  ActionModelAbstract(StateAbstract& state, unsigned int const& nu, unsigned int const& nr = 1);
   virtual ~ActionModelAbstract();
 
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -42,13 +42,15 @@ class ActionModelAbstract {
   Eigen::VectorXd unone_;
 
 #ifdef PYTHON_BINDINGS
+
  public:
   void calc_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x,
-                 const Eigen::VectorXd& u) {
-    calc(data, x, u);
-  }
-  void calc_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x) {
-    calc(data, x, unone_);
+                 const Eigen::VectorXd& u = Eigen::VectorXd()) {
+    if (u.size() == 0) {
+      calc(data, x);
+    } else {
+      calc(data, x, u);
+    }
   }
 
   void calcDiff_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x,
@@ -65,6 +67,7 @@ class ActionModelAbstract {
   void calcDiff_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const bool& recalc) {
     calcDiff(data, x, unone_, recalc);
   }
+
 #endif
 };
 
@@ -72,7 +75,7 @@ struct ActionDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  ActionDataAbstract(Model& model) : cost(0.) {
+  explicit ActionDataAbstract(Model* const model) : cost(0.) {
     const int& nx = model->get_state().get_nx();
     const int& ndx = model->get_state().get_ndx();
     const int& nu = model->get_nu();

@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_MULTIBODY_COST_BASE_HPP_
-#define PYTHON_CROCODDYL_MULTIBODY_COST_BASE_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COST_BASE_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COST_BASE_HPP_
 
 #include "crocoddyl/multibody/cost-base.hpp"
 
@@ -41,6 +41,8 @@ class CostModelAbstract_wrap : public CostModelAbstract, public bp::wrapper<Cost
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
 };
+
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(CostModel_calc_wraps, CostModelAbstract::calc_wrap, 2, 3)
 
 void exposeCostMultibody() {
   bp::class_<CostModelAbstract_wrap, boost::noncopyable>(
@@ -111,8 +113,7 @@ void exposeCostMultibody() {
           "Create common data shared between cost models.\n\n"
           ":param model: cost model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
-      .add_property("pinocchio",
-                    bp::make_function(&CostDataAbstract::get_pinocchio, bp::return_internal_reference<>()),
+      .add_property("pinocchio", bp::make_getter(&CostDataAbstract::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
       .add_property("activation",
                     bp::make_getter(&CostDataAbstract::activation, bp::return_value_policy<bp::return_by_value>()),
@@ -141,4 +142,4 @@ void exposeCostMultibody() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_MULTIBODY_COST_BASE_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COST_BASE_HPP_

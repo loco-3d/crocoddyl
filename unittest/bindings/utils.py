@@ -421,6 +421,59 @@ class FrameTranslationCostDerived(crocoddyl.CostModelAbstract):
                               np.zeros((self.State.nv, self.State.nv))], [np.zeros((self.State.nv, self.State.ndx))]])
 
 
+class Contact3DDerived(crocoddyl.ContactModelAbstract):
+    def __init__(self, state, xref, gains=[0., 0.]):
+        crocoddyl.ContactModelAbstract.__init__(self, state, 3)
+        self.xref = xref
+        self.gains = gains
+        self.joint = state.pinocchio.frames[xref.frame].parent
+        self.fXj = state.pinocchio.frames[xref.frame].placement.inverse().action
+        v = pinocchio.Motion().Zero()
+        self.vw = v.angular
+        self.vv = v.linear
+        self.Jw = np.matrix(np.zeros((3, state.pinocchio.nv)))
+
+    def calc(self, data, x):
+        assert (self.xref.oxf is not None or self.gains[0] == 0.)
+        v = pinocchio.getFrameVelocity(self.State.pinocchio, data.pinocchio, self.xref.frame)
+        self.vw = v.angular
+        self.vv = v.linear
+
+        fJf = pinocchio.getFrameJacobian(self.State.pinocchio, data.pinocchio, self.xref.frame,
+                                         pinocchio.ReferenceFrame.LOCAL)
+        data.Jc = fJf[:3, :]
+        self.Jw = fJf[3:, :]
+
+        data.a0 = pinocchio.getFrameAcceleration(self.State.pinocchio, data.pinocchio,
+                                                 self.xref.frame).linear + pinocchio.utils.cross(self.vw, self.vv)
+        if self.gains[0] != 0.:
+            data.a0 += np.asscalar(self.gains[0]) * (data.pinocchio.oMf[self.xref.frame].translation - self.xref.oxf)
+        if self.gains[1] != 0.:
+            data.a0 += np.asscalar(self.gains[1]) * self.vv
+
+    def calcDiff(self, data, x, recalc=True):
+        if recalc:
+            self.calc(data, x)
+        v_partial_dq, a_partial_dq, a_partial_dv, a_partial_da = pinocchio.getJointAccelerationDerivatives(
+            self.State.pinocchio, data.pinocchio, self.joint, pinocchio.ReferenceFrame.LOCAL)
+
+        vv_skew = pinocchio.utils.skew(self.vv)
+        vw_skew = pinocchio.utils.skew(self.vw)
+        fXjdv_dq = self.fXj * v_partial_dq
+        Aq = (self.fXj * a_partial_dq
+              )[:3, :] + vw_skew * fXjdv_dq[:3, :] - vv_skew * fXjdv_dq[3:, :]
+        Av = (self.fXj * a_partial_dv)[:3, :] + vw_skew * data.Jc - vv_skew * self.Jw
+
+        if np.asscalar(self.gains[0]) != 0.:
+            R = data.pinocchio.oMf[self.xref.frame].rotation
+            Aq += np.asscalar(self.gains[0]) * R * pinocchio.getFrameJacobian(
+                self.State.pinocchio, data.pinocchio, self.xref.frame, pinocchio.ReferenceFrame.LOCAL)[:3, :]
+        if np.asscalar(self.gains[1]) != 0.:
+            Aq += np.asscalar(self.gains[1]) * (self.fXj[:3, :] * v_partial_dq)
+            Av += np.asscalar(self.gains[1]) * (self.fXj[:3, :] * a_partial_da)
+        data.Ax = np.hstack([Aq, Av])
+
+
 class DDPDerived(crocoddyl.SolverAbstract):
     def __init__(self, shootingProblem):
         crocoddyl.SolverAbstract.__init__(self, shootingProblem)

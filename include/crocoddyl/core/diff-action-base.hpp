@@ -20,7 +20,7 @@ struct DifferentialActionDataAbstract;  // forward declaration
 
 class DifferentialActionModelAbstract {
  public:
-  DifferentialActionModelAbstract(StateAbstract& state, const unsigned int& nu, const unsigned int& nr = 1);
+  DifferentialActionModelAbstract(StateAbstract& state, unsigned int const& nu, unsigned int const& nr = 1);
   virtual ~DifferentialActionModelAbstract();
 
   virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
@@ -45,13 +45,15 @@ class DifferentialActionModelAbstract {
   Eigen::VectorXd unone_;
 
 #ifdef PYTHON_BINDINGS
+
  public:
   void calc_wrap(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::VectorXd& x,
-                 const Eigen::VectorXd& u) {
-    calc(data, x, u);
-  }
-  void calc_wrap(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::VectorXd& x) {
-    calc(data, x, unone_);
+                 const Eigen::VectorXd& u = Eigen::VectorXd()) {
+    if (u.size() == 0) {
+      calc(data, x);
+    } else {
+      calc(data, x, u);
+    }
   }
 
   void calcDiff_wrap(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::VectorXd& x,
@@ -69,6 +71,7 @@ class DifferentialActionModelAbstract {
                      const bool& recalc) {
     calcDiff(data, x, unone_, recalc);
   }
+
 #endif
 };
 
@@ -76,7 +79,7 @@ struct DifferentialActionDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  DifferentialActionDataAbstract(Model& model)
+  explicit DifferentialActionDataAbstract(Model* const model)
       : cost(0.),
         xout(model->get_state().get_nv()),
         Fx(model->get_state().get_nv(), model->get_state().get_ndx()),

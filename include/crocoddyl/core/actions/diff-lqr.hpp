@@ -18,7 +18,7 @@ struct DifferentialActionDataLQR;  // forward declaration
 
 class DifferentialActionModelLQR : public DifferentialActionModelAbstract {
  public:
-  DifferentialActionModelLQR(unsigned const int& nq, unsigned const int& nu, bool drift_free = true);
+  DifferentialActionModelLQR(unsigned int const& nq, unsigned int const& nu, bool drift_free = true);
   ~DifferentialActionModelLQR();
 
   void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -44,7 +44,7 @@ class DifferentialActionModelLQR : public DifferentialActionModelAbstract {
 
 struct DifferentialActionDataLQR : public DifferentialActionDataAbstract {
   template <typename Model>
-  DifferentialActionDataLQR(Model& model) : DifferentialActionDataAbstract(model) {
+  explicit DifferentialActionDataLQR(Model* const model) : DifferentialActionDataAbstract(model) {
     // Setting the linear model and quadratic cost here because they are constant
     const unsigned int& nq = model->get_state().get_nq();
     const unsigned int& nv = model->get_state().get_nv();

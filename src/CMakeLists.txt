@@ -17,12 +17,14 @@ SET(${PROJECT_NAME}_SOURCES
   core/activations/quadratic.cpp
   core/activations/weighted-quadratic.cpp
   multibody/cost-base.cpp
+  multibody/contact-base.cpp
   multibody/states/multibody.cpp
   multibody/costs/cost-sum.cpp
   multibody/costs/state.cpp
   multibody/costs/control.cpp
   multibody/costs/frame-placement.cpp
   multibody/costs/frame-translation.cpp
+  multibody/contacts/contact-3d.cpp
   multibody/actions/free-fwddyn.cpp
   )
 

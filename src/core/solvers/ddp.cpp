@@ -1,3 +1,11 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
 #include "crocoddyl/core/solvers/ddp.hpp"
 
 namespace crocoddyl {
@@ -16,7 +24,7 @@ SolverDDP::SolverDDP(ShootingProblem& problem)
   const unsigned int& n_alphas = 10;
   alphas_.resize(n_alphas);
   for (unsigned int n = 0; n < n_alphas; ++n) {
-    alphas_[n] = 1. / pow(2., (double)n);
+    alphas_[n] = 1. / pow(2., static_cast<double>(n));
   }
 }
 
@@ -81,8 +89,8 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
     }
     stoppingCriteria();
 
-    const long unsigned int& n_callbacks = callbacks_.size();
-    for (long unsigned int c = 0; c < n_callbacks; ++c) {
+    const unsigned int& n_callbacks = static_cast<unsigned int>(callbacks_.size());
+    for (unsigned int c = 0; c < n_callbacks; ++c) {
       CallbackAbstract& callback = *callbacks_[c];
       callback(*this);
     }
@@ -108,8 +116,8 @@ double SolverDDP::tryStep(const double& steplength) {
 
 double SolverDDP::stoppingCriteria() {
   stop_ = 0.;
-  const long unsigned int& T = this->problem_.get_T();
-  for (long unsigned int t = 0; t < T; ++t) {
+  const unsigned int& T = this->problem_.get_T();
+  for (unsigned int t = 0; t < T; ++t) {
     stop_ += Qu_[t].squaredNorm();
   }
   return stop_;
@@ -117,8 +125,8 @@ double SolverDDP::stoppingCriteria() {
 
 const Eigen::Vector2d& SolverDDP::expectedImprovement() {
   d_.fill(0);
-  const long unsigned int& T = this->problem_.get_T();
-  for (long unsigned int t = 0; t < T; ++t) {
+  const unsigned int& T = this->problem_.get_T();
+  for (unsigned int t = 0; t < T; ++t) {
     d_[0] += Qu_[t].dot(k_[t]);
     d_[1] -= k_[t].dot(Quuk_[t]);
   }
@@ -131,8 +139,8 @@ double SolverDDP::calc() {
     const Eigen::VectorXd& x0 = problem_.get_x0();
     problem_.running_models_[0]->get_state().diff(xs_[0], x0, gaps_[0]);
 
-    const long unsigned int& T = problem_.get_T();
-    for (unsigned long int t = 0; t < T; ++t) {
+    const unsigned int& T = problem_.get_T();
+    for (unsigned int t = 0; t < T; ++t) {
       ActionModelAbstract* model = problem_.running_models_[t];
       boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
       model->get_state().diff(xs_[t + 1], d->get_xnext(), gaps_[t + 1]);
@@ -151,7 +159,7 @@ void SolverDDP::backwardPass() {
     Vxx_.back().diagonal() += x_reg_;
   }
 
-  for (int t = (int)problem_.get_T() - 1; t >= 0; --t) {
+  for (int t = static_cast<int>(problem_.get_T()) - 1; t >= 0; --t) {
     ActionModelAbstract* m = problem_.running_models_[t];
     boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
     const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
@@ -187,7 +195,7 @@ void SolverDDP::backwardPass() {
       Vx_[t].noalias() = Qx_[t] + K_[t].transpose() * Quuk_[t] - 2 * K_[t].transpose() * Qu_[t];
     }
     Vxx_[t] = Qxx_[t] - Qxu_[t] * K_[t];
-    Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose());  // TODO: as suggested by Nicolas
+    Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose());  // TODO(cmastalli): as suggested by Nicolas
 
     if (!std::isnan(xreg_)) {
       Vxx_[t].diagonal() += x_reg_;
@@ -203,8 +211,8 @@ void SolverDDP::backwardPass() {
 
 void SolverDDP::forwardPass(const double& steplength) {
   cost_try_ = 0.;
-  const long unsigned int& T = problem_.get_T();
-  for (long unsigned int t = 0; t < T; ++t) {
+  const unsigned int& T = problem_.get_T();
+  for (unsigned int t = 0; t < T; ++t) {
     ActionModelAbstract* m = problem_.running_models_[t];
     boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
 
@@ -230,7 +238,7 @@ void SolverDDP::forwardPass(const double& steplength) {
   }
 }
 
-void SolverDDP::computeGains(const long unsigned int& t) {
+void SolverDDP::computeGains(const unsigned int& t) {
   Quu_llt_[t].compute(Quu_[t]);
   K_[t] = Qxu_[t].transpose();
   Quu_llt_[t].solveInPlace(K_[t]);
@@ -255,7 +263,7 @@ void SolverDDP::decreaseRegularization() {
 }
 
 void SolverDDP::allocateData() {
-  const long unsigned int& T = problem_.get_T();
+  const unsigned int& T = problem_.get_T();
   Vxx_.resize(T + 1);
   Vx_.resize(T + 1);
   Qxx_.resize(T);
@@ -275,7 +283,7 @@ void SolverDDP::allocateData() {
   Quu_llt_.resize(T);
   Quuk_.resize(T);
 
-  for (long unsigned int t = 0; t < T; ++t) {
+  for (unsigned int t = 0; t < T; ++t) {
     ActionModelAbstract* model = problem_.running_models_[t];
     const unsigned int& nx = model->get_state().get_nx();
     const unsigned int& ndx = model->get_state().get_ndx();

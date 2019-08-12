@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_HPP_
-#define PYTHON_CROCODDYL_CORE_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_CORE_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_CORE_HPP_
 
 #include "python/crocoddyl/core/state-base.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
@@ -49,4 +49,4 @@ void exposeCore() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_CORE_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_HPP_

@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
-#define PYTHON_CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
 
 #include "crocoddyl/multibody/costs/control.hpp"
 
@@ -56,15 +56,12 @@ void exposeCostControl() {
           "model is quadratic, i.e. crocoddyl.ActivationModelQuad(nu)\n"
           ":param state: state of the multibody system\n"
           ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2>()])
-      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                      const Eigen::VectorXd&)>("calc", &CostModelControl::calc_wrap,
-                                                               bp::args(" self", " data", " x", " u=None"),
-                                                               "Compute the control cost.\n\n"
-                                                               ":param data: cost data\n"
-                                                               ":param x: time-discrete state vector\n"
-                                                               ":param u: time-discrete control input")
-      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
-          "calc", &CostModelControl::calc_wrap, bp::args(" self", " data", " x"))
+      .def("calc", &CostModelControl::calc_wrap,
+           CostModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
+                                "Compute the control cost.\n\n"
+                                ":param data: cost data\n"
+                                ":param x: time-discrete state vector\n"
+                                ":param u: time-discrete control input"))
       .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                       const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &CostModelControl::calcDiff_wrap, bp::args(" self", " data", " x", " u=None", " recalc=True"),
@@ -89,4 +86,4 @@ void exposeCostControl() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_

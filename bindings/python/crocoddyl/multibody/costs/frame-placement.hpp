@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_MULTIBODY_COSTS_FRAME_PLACEMENT_HPP_
-#define PYTHON_CROCODDYL_MULTIBODY_COSTS_FRAME_PLACEMENT_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_FRAME_PLACEMENT_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_FRAME_PLACEMENT_HPP_
 
 #include "crocoddyl/multibody/costs/frame-placement.hpp"
 
@@ -17,19 +17,6 @@ namespace python {
 namespace bp = boost::python;
 
 void exposeCostFramePlacement() {
-  bp::class_<FramePlacement, boost::noncopyable>(
-      "FramePlacement",
-      "Frame placement describe using Pinocchio.\n\n"
-      "It defines a frame placement (SE(3) point) for a given frame ID",
-      bp::init<int, pinocchio::SE3>(bp::args(" self", " frame", " oMf"),
-                                    "Initialize the cost model.\n\n"
-                                    ":param frame: frame ID\n"
-                                    ":param oMf: Frame placement w.r.t. the origin"))
-      .def_readwrite("frame", &FramePlacement::frame, "frame ID")
-      .add_property("oMf",
-                    bp::make_getter(&FramePlacement::oMf, bp::return_value_policy<bp::reference_existing_object>()),
-                    "frame placement");
-
   bp::class_<CostModelFramePlacement, bp::bases<CostModelAbstract> >(
       "CostModelFramePlacement", bp::init<StateMultibody&, ActivationModelAbstract&, FramePlacement, int>(
                                      bp::args(" self", " state", " activation", " Mref", " nu"),
@@ -60,15 +47,12 @@ void exposeCostFramePlacement() {
           "crocoddyl.ActivationModelQuad(6), and nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
           ":param Mref: reference frame placement")[bp::with_custodian_and_ward<1, 2>()])
-      .def<void (CostModelFramePlacement::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                             const Eigen::VectorXd&)>("calc", &CostModelFramePlacement::calc_wrap,
-                                                                      bp::args(" self", " data", " x", " u=None"),
-                                                                      "Compute the frame placement cost.\n\n"
-                                                                      ":param data: cost data\n"
-                                                                      ":param x: time-discrete state vector\n"
-                                                                      ":param u: time-discrete control input")
-      .def<void (CostModelFramePlacement::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
-          "calc", &CostModelFramePlacement::calc_wrap, bp::args(" self", " data", " x"))
+      .def("calc", &CostModelFramePlacement::calc_wrap,
+           CostModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
+                                "Compute the frame placement cost.\n\n"
+                                ":param data: cost data\n"
+                                ":param x: time-discrete state vector\n"
+                                ":param u: time-discrete control input"))
       .def<void (CostModelFramePlacement::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                              const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &CostModelFramePlacement::calcDiff_wrap,
@@ -100,4 +84,4 @@ void exposeCostFramePlacement() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_MULTIBODY_COSTS_FRAME_PLACEMENT_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_FRAME_PLACEMENT_HPP_

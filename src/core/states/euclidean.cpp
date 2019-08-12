@@ -1,8 +1,16 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
 #include "crocoddyl/core/states/euclidean.hpp"
 
 namespace crocoddyl {
 
-StateVector::StateVector(const unsigned int& nx) : StateAbstract(nx, nx) {}
+StateVector::StateVector(unsigned int const& nx) : StateAbstract(nx, nx) {}
 
 StateVector::~StateVector() {}
 

@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_
-#define PYTHON_CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_
 
 #include "crocoddyl/core/activations/quadratic.hpp"
 
@@ -43,4 +43,4 @@ void exposeActivationQuad() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_

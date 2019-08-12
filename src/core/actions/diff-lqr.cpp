@@ -1,10 +1,18 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
 #include "crocoddyl/core/actions/diff-lqr.hpp"
 
 namespace crocoddyl {
 
-DifferentialActionModelLQR::DifferentialActionModelLQR(const unsigned int& nq, const unsigned int& nu, bool drift_free)
+DifferentialActionModelLQR::DifferentialActionModelLQR(unsigned int const& nq, unsigned int const& nu, bool drift_free)
     : DifferentialActionModelAbstract(*new StateVector(2 * nq), nu), drift_free_(drift_free) {
-  // TODO substitute by random (vectors) and random-orthogonal (matrices)
+  // TODO(cmastalli): substitute by random (vectors) and random-orthogonal (matrices)
   Fq_ = Eigen::MatrixXd::Identity(state_.get_nq(), state_.get_nq());
   Fv_ = Eigen::MatrixXd::Identity(state_.get_nv(), state_.get_nv());
   Fu_ = Eigen::MatrixXd::Identity(state_.get_nq(), nu_);

@@ -17,10 +17,10 @@ class CostModelControl : public CostModelAbstract {
  public:
   CostModelControl(StateMultibody& state, ActivationModelAbstract& activation, const Eigen::VectorXd& uref);
   CostModelControl(StateMultibody& state, ActivationModelAbstract& activation);
-  CostModelControl(StateMultibody& state, ActivationModelAbstract& activation, const unsigned int& nu);
+  CostModelControl(StateMultibody& state, ActivationModelAbstract& activation, unsigned int const& nu);
   CostModelControl(StateMultibody& state, const Eigen::VectorXd& uref);
-  CostModelControl(StateMultibody& state);
-  CostModelControl(StateMultibody& state, const unsigned int& nu);
+  explicit CostModelControl(StateMultibody& state);
+  CostModelControl(StateMultibody& state, unsigned int const& nu);
   ~CostModelControl();
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,

@@ -16,7 +16,7 @@ namespace crocoddyl {
 
 class StateMultibody : public StateAbstract {
  public:
-  StateMultibody(pinocchio::Model& model);
+  explicit StateMultibody(pinocchio::Model& model);
   ~StateMultibody();
 
   Eigen::VectorXd zero();
@@ -37,6 +37,10 @@ class StateMultibody : public StateAbstract {
   pinocchio::Model& pinocchio_;
   Eigen::VectorXd x0_;
   Eigen::VectorXd dx_;
+  Eigen::VectorXd q0_;
+  Eigen::VectorXd dq0_;
+  Eigen::VectorXd q1_;
+  Eigen::VectorXd dq1_;
   Eigen::MatrixXd Jdq_;
 };
 

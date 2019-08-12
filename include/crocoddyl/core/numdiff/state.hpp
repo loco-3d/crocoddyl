@@ -15,7 +15,7 @@ namespace crocoddyl {
 
 class StateNumDiff : public StateAbstract {
  public:
-  StateNumDiff(StateAbstract& state);
+  explicit StateNumDiff(StateAbstract& state);
   ~StateNumDiff();
 
   Eigen::VectorXd zero();
@@ -26,7 +26,7 @@ class StateNumDiff : public StateAbstract {
                  Eigen::Ref<Eigen::VectorXd> xout);
   /**
    * @brief This computes the Jacobian of the diff method by finite
-   * differenciation:
+   * differentiation:
    * \f{equation}{
    *    Jfirst[:,k] = diff(int(x_1, dx_dist), x_2) - diff(x_1, x_2)/disturbance
    * \f}
@@ -43,7 +43,7 @@ class StateNumDiff : public StateAbstract {
              Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent firstsecond = both);
   /**
    * @brief This computes the Jacobian of the integrate method by finite
-   * differenciation:
+   * differentiation:
    * \f{equation}{
    *    Jfirst[:,k] = diff( int(x, d_x), int( int(x, dx_dist), dx) )/disturbance
    * \f}

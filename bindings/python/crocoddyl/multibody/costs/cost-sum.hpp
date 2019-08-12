@@ -6,9 +6,14 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_MULTIBODY_COSTS_COST_SUM_HPP_
-#define PYTHON_CROCODDYL_MULTIBODY_COSTS_COST_SUM_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_COST_SUM_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_COST_SUM_HPP_
 
+#include <functional>
+#include <map>
+#include <memory>
+#include <utility>
+#include <string>
 #include "crocoddyl/multibody/costs/cost-sum.hpp"
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
 
@@ -52,15 +57,12 @@ void exposeCostSum() {
           ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
       .def("addCost", &CostModelSum::addCost, bp::with_custodian_and_ward<1, 3>(), "add cost item")
       .def("removeCost", &CostModelSum::removeCost, "remove cost item")
-      .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                  const Eigen::VectorXd&)>("calc", &CostModelSum::calc_wrap,
-                                                           bp::args(" self", " data", " x", " u=None"),
-                                                           "Compute the total cost.\n\n"
-                                                           ":param data: cost-sum data\n"
-                                                           ":param x: time-discrete state vector\n"
-                                                           ":param u: time-discrete control input")
-      .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
-          "calc", &CostModelSum::calc_wrap, bp::args(" self", " data", " x"))
+      .def("calc", &CostModelSum::calc_wrap,
+           CostModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
+                                "Compute the total cost.\n\n"
+                                ":param data: cost-sum data\n"
+                                ":param x: time-discrete state vector\n"
+                                ":param u: time-discrete control input"))
       .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                   const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &CostModelSum::calcDiff_wrap, bp::args(" self", " data", " x", " u=None", " recalc=True"),
@@ -91,4 +93,4 @@ void exposeCostSum() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_MULTIBODY_COSTS_COST_SUM_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_COST_SUM_HPP_

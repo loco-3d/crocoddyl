@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_
-#define PYTHON_CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_
 
 #include "crocoddyl/core/diff-action-base.hpp"
 
@@ -41,6 +41,8 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
     return boost::make_shared<DifferentialActionDataAbstract>(this);
   }
 };
+
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(DiffActionModel_calc_wraps, DifferentialActionModelAbstract::calc_wrap, 2, 3)
 
 void exposeDifferentialActionAbstract() {
   bp::class_<DifferentialActionModelAbstract_wrap, boost::noncopyable>(
@@ -165,4 +167,4 @@ void exposeDifferentialActionAbstract() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_

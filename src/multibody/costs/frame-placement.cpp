@@ -1,10 +1,18 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
 #include "crocoddyl/multibody/costs/frame-placement.hpp"
 #include "pinocchio/algorithm/frames.hpp"
 
 namespace crocoddyl {
 
 CostModelFramePlacement::CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation,
-                                                 const FramePlacement& Mref, const unsigned int& nu)
+                                                 const FramePlacement& Mref, unsigned int const& nu)
     : CostModelAbstract(state, activation, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()), nv_(state.get_nv()) {
   assert(activation_.get_nr() == 6 && "CostModelFramePlacement: activation::nr is not equals to 6");
 }
@@ -16,7 +24,7 @@ CostModelFramePlacement::CostModelFramePlacement(StateMultibody& state, Activati
 }
 
 CostModelFramePlacement::CostModelFramePlacement(StateMultibody& state, const FramePlacement& Mref,
-                                                 const unsigned int& nu)
+                                                 unsigned int const& nu)
     : CostModelAbstract(state, 6, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()), nv_(state.get_nv()) {}
 
 CostModelFramePlacement::CostModelFramePlacement(StateMultibody& state, const FramePlacement& Mref)

@@ -10,20 +10,14 @@
 #define CROCODDYL_MULTIBODY_COSTS_FRAME_PLACEMENT_HPP_
 
 #include "crocoddyl/multibody/cost-base.hpp"
-#include <pinocchio/spatial/se3.hpp>
+#include "crocoddyl/multibody/frames.hpp"
 
 namespace crocoddyl {
-
-struct FramePlacement {
-  FramePlacement(const unsigned int& frame, const pinocchio::SE3& oMf) : frame(frame), oMf(oMf) {}
-  unsigned int frame;
-  pinocchio::SE3 oMf;
-};
 
 class CostModelFramePlacement : public CostModelAbstract {
  public:
   CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation, const FramePlacement& Fref,
-                          const unsigned int& nu);
+                          unsigned int const& nu);
   CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation, const FramePlacement& Fref);
   CostModelFramePlacement(StateMultibody& state, const FramePlacement& Fref, const unsigned int& nu);
   CostModelFramePlacement(StateMultibody& state, const FramePlacement& Fref);
@@ -47,7 +41,7 @@ struct CostDataFramePlacement : public CostDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  CostDataFramePlacement(Model& model, pinocchio::Data* const data)
+  CostDataFramePlacement(Model* const model, pinocchio::Data* const data)
       : CostDataAbstract(model, data),
         J(6, model->get_state().get_nv()),
         rJf(6, 6),
