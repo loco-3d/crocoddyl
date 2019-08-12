@@ -55,23 +55,6 @@ void exposeContact3D() {
       .add_property("gains",
                     bp::make_function(&ContactModel3D::get_gains, bp::return_value_policy<bp::return_by_value>()),
                     "contact gains");
-
-  // bp::class_<ContactData3D, boost::shared_ptr<ContactDataAbstract> >(
-  //     "ContactData3D", "3D contact data.\n\n",
-  //     bp::init<ContactModelAbstract*, pinocchio::Data*>(
-  //         bp::args(" self", " model", " data"),
-  //         "Create common data shared between contact models.\n\n"
-  //         ":param model: cost model\n"
-  //         ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
-  //     .add_property("pinocchio", bp::make_getter(&ContactDataAbstract::pinocchio,
-  //     bp::return_internal_reference<>()),
-  //                   "pinocchio data")
-  //     .add_property("Jc", bp::make_getter(&ContactDataAbstract::Jc, bp::return_value_policy<bp::return_by_value>()),
-  //                   bp::make_setter(&ContactDataAbstract::Jc), "contact Jacobian")
-  //     .add_property("a0", bp::make_getter(&ContactDataAbstract::a0, bp::return_value_policy<bp::return_by_value>()),
-  //                   bp::make_setter(&ContactDataAbstract::a0), "contact drift")
-  //     .add_property("Ax", bp::make_getter(&ContactDataAbstract::Ax, bp::return_value_policy<bp::return_by_value>()),
-  //                   bp::make_setter(&ContactDataAbstract::Ax), "derivatives of the contact constraint");
 }
 
 }  // namespace python

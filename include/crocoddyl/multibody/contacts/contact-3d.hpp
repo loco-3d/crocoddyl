@@ -48,13 +48,17 @@ struct ContactData3D : public ContactDataAbstract {
         a_partial_dq(6, model->get_state().get_nv()),
         a_partial_dv(6, model->get_state().get_nv()),
         a_partial_da(6, model->get_state().get_nv()),
-        fXjdv_dq(6, model->get_state().get_nv()) {
+        fXjdv_dq(6, model->get_state().get_nv()),
+        fXjda_dq(6, model->get_state().get_nv()),
+        fXjda_dv(6, model->get_state().get_nv()) {
     fJf.fill(0);
     v_partial_dq.fill(0);
     a_partial_dq.fill(0);
     a_partial_dv.fill(0);
     a_partial_da.fill(0);
     fXjdv_dq.fill(0);
+    fXjda_dq.fill(0);
+    fXjda_dv.fill(0);
     vv.fill(0);
     vw.fill(0);
     vv_skew.fill(0);
@@ -72,6 +76,8 @@ struct ContactData3D : public ContactDataAbstract {
   pinocchio::Data::Matrix6x a_partial_dv;
   pinocchio::Data::Matrix6x a_partial_da;
   pinocchio::Data::Matrix6x fXjdv_dq;
+  pinocchio::Data::Matrix6x fXjda_dq;
+  pinocchio::Data::Matrix6x fXjda_dv;
   Eigen::Vector3d vv;
   Eigen::Vector3d vw;
   Eigen::Matrix3d vv_skew;
