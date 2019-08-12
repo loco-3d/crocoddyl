@@ -459,8 +459,9 @@ class Contact3DDerived(crocoddyl.ContactModelAbstract):
 
         vv_skew = pinocchio.utils.skew(self.vv)
         vw_skew = pinocchio.utils.skew(self.vw)
+        fXjdv_dq = self.fXj * v_partial_dq
         Aq = (self.fXj * a_partial_dq
-              )[:3, :] + vw_skew * (self.fXj * v_partial_dq)[:3, :] - vv_skew * (self.fXj * v_partial_dq)[3:, :]
+              )[:3, :] + vw_skew * fXjdv_dq[:3, :] - vv_skew * fXjdv_dq[3:, :]
         Av = (self.fXj * a_partial_dv)[:3, :] + vw_skew * data.Jc - vv_skew * self.Jw
 
         if np.asscalar(self.gains[0]) != 0.:
