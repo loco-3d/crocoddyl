@@ -21,10 +21,11 @@ class ContactModelAbstract {
   ContactModelAbstract(StateMultibody& state, unsigned int const& nc);
   ~ContactModelAbstract();
 
-  void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
-  void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const bool& recalc = true);
-  boost::shared_ptr<ContactDataAbstract> createData(pinocchio::Data* const data);
+  virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data,
+                    const Eigen::Ref<const Eigen::VectorXd>& x) = 0;
+  virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+                        const bool& recalc = true) = 0;
+  virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::Data* const data);
 
   StateMultibody& get_state() const;
   const unsigned int& get_nc() const;

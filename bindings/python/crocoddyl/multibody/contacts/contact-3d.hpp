@@ -29,13 +29,15 @@ void exposeContact3D() {
           ":param state: state of the multibody system\n"
           ":param xref: reference frame translation\n"
           ":param gains: gains of the contact model")[bp::with_custodian_and_ward<1, 2>()])
-      .def("calc", &ContactModel3D::calc, bp::args(" self", " data", " x"),
+      // .def<void (ContactModel3D::*)(const boost::shared_ptr<ContactDataAbstract>&, const Eigen::VectorXd&)>(
+      //     "calc", &ContactModel3D::calc_wrap, bp::args(" self", " data", " x"))
+      .def("calc", &ContactModel3D::calc_wrap, bp::args(" self", " data", " x"),
            "Compute the 3D contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
            ":param data: contact data\n"
            ":param x: state vector")
-      .def("calcDiff", &ContactModelAbstract_wrap::calcDiff, bp::args(" self", " data", " x", " recalc=True"),
+      .def("calcDiff", &ContactModel3D::calcDiff_wrap, bp::args(" self", " data", " x", " recalc=True"),
            "Compute the derivatives of the 3D contact holonomic constraint.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
@@ -48,7 +50,12 @@ void exposeContact3D() {
            "Each contact model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined cost.\n"
            ":param data: Pinocchio data\n"
-           ":return contact data.");
+           ":return contact data.")
+      .add_property("xref", bp::make_function(&ContactModel3D::get_xref, bp::return_internal_reference<>()),
+                    "reference frame translation")
+      .add_property("gains",
+                    bp::make_function(&ContactModel3D::get_gains, bp::return_value_policy<bp::return_by_value>()),
+                    "contact gains");
 
   // bp::class_<ContactData3D, boost::shared_ptr<ContactDataAbstract> >(
   //     "ContactData3D", "3D contact data.\n\n",
