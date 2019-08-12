@@ -50,8 +50,9 @@ void ContactModel3D::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data
   const unsigned int& nv = state_.get_nv();
   pinocchio::skew(d->vv, d->vv_skew);
   pinocchio::skew(d->vw, d->vw_skew);
-  d->Ax.leftCols(nv) = (d->fXj * d->a_partial_dq).topRows<3>() + d->vw_skew * (d->fXj * d->v_partial_dq).topRows<3>() -
-                       d->vv_skew * (d->fXj * d->v_partial_dq).bottomRows<3>();
+  d->fXjdv_dq = d->fXj * d->v_partial_dq;
+  d->Ax.leftCols(nv) = (d->fXj * d->a_partial_dq).topRows<3>() + d->vw_skew * (d->fXjdv_dq).topRows<3>() -
+                       d->vv_skew * (d->fXjdv_dq).bottomRows<3>();
   d->Ax.rightCols(nv) =
       (d->fXj * d->a_partial_dv).topRows<3>() + d->vw_skew * d->Jc - d->vv_skew * d->fJf.bottomRows<3>();
 
