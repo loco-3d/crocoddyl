@@ -23,27 +23,25 @@ void exposeContact3D() {
       "It defines a rigid 3D contact models (point contact) based on acceleration-based holonomic constraints.\n"
       "The calc and calcDiff functions compute the contact Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<StateMultibody&, FrameTranslation, Eigen::Vector2d>(
-          bp::args(" self", " state", " xref", " gains"),
+      bp::init<StateMultibody&, FrameTranslation, bp::optional<Eigen::Vector2d> >(
+          bp::args(" self", " state", " xref", " gains=np.matrix([ [0.],[0.] ]"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param xref: reference frame translation\n"
           ":param gains: gains of the contact model")[bp::with_custodian_and_ward<1, 2>()])
-      // .def<void (ContactModel3D::*)(const boost::shared_ptr<ContactDataAbstract>&, const Eigen::VectorXd&)>(
-      //     "calc", &ContactModel3D::calc_wrap, bp::args(" self", " data", " x"))
       .def("calc", &ContactModel3D::calc_wrap, bp::args(" self", " data", " x"),
            "Compute the 3D contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
            ":param data: contact data\n"
            ":param x: state vector")
-      .def("calcDiff", &ContactModel3D::calcDiff_wrap, bp::args(" self", " data", " x", " recalc=True"),
+      .def("calcDiff", &ContactModel3D::calcDiff_wrap, calcDiff_wraps(bp::args(" self", " data", " x", " recalc=True"),
            "Compute the derivatives of the 3D contact holonomic constraint.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
            ":param data: cost data\n"
            ":param x: state vector\n"
-           ":param recalc: If true, it updates the contact Jacobian and drift.")
+           ":param recalc: If true, it updates the contact Jacobian and drift."))
       .def("createData", &ContactModel3D::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the 3D contact data.\n\n"
