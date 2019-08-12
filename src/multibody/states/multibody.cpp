@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/multibody/states/multibody.hpp"
-#include "pinocchio/algorithm/joint-configuration.hpp"
+#include <pinocchio/algorithm/joint-configuration.hpp>
 
 namespace crocoddyl {
 
@@ -16,6 +16,10 @@ StateMultibody::StateMultibody(pinocchio::Model& model)
       pinocchio_(model),
       x0_(Eigen::VectorXd::Zero(model.nq + model.nv)),
       dx_(Eigen::VectorXd::Zero(2 * model.nv)),
+      q0_(Eigen::VectorXd::Zero(model.nq)),
+      dq0_(Eigen::VectorXd::Zero(model.nv)),
+      q1_(Eigen::VectorXd::Zero(model.nq)),
+      dq1_(Eigen::VectorXd::Zero(model.nv)),
       Jdq_(Eigen::MatrixXd::Zero(model.nv, model.nv)) {
   x0_.head(nq_) = pinocchio::neutral(pinocchio_);
 }
@@ -36,11 +40,12 @@ void StateMultibody::diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eig
   assert(x1.size() == nx_ && "StateMultibody::diff: x1 has wrong dimension");
   assert(dxout.size() == ndx_ && "StateMultibody::diff: output must be pre-allocated");
 
-  const Eigen::VectorXd& q0 = x0.head(nq_);
-  const Eigen::VectorXd& v0 = x0.tail(nv_);
-  const Eigen::VectorXd& q1 = x1.head(nq_);
-  const Eigen::VectorXd& v1 = x1.tail(nv_);
-  dxout << pinocchio::difference(pinocchio_, q0, q1), v1 - v0;
+  q0_ = x0.head(nq_);
+  q1_ = x1.head(nq_);
+  dq0_ = x0.tail(nv_);
+  dq1_ = x1.tail(nv_);
+  pinocchio::difference(pinocchio_, q0_, q1_, dxout.head(nv_));
+  dxout.tail(nv_) = dq1_ - dq0_;
 }
 
 void StateMultibody::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
@@ -49,11 +54,14 @@ void StateMultibody::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const
   assert(dx.size() == ndx_ && "StateMultibody::diff: dx has wrong dimension");
   assert(xout.size() == nx_ && "StateMultibody::diff: output must be pre-allocated");
 
-  const Eigen::VectorXd& q = x.head(nq_);
-  const Eigen::VectorXd& v = x.tail(nv_);
-  const Eigen::VectorXd& dq = dx.head(nv_);
-  const Eigen::VectorXd& dv = dx.tail(nv_);
-  xout << pinocchio::integrate(pinocchio_, q, dq), v + dv;
+  q0_ = x.head(nq_);
+  dq0_ = dx.head(nv_);
+  pinocchio::integrate(pinocchio_, q0_, dq0_, q1_);
+  xout.head(nq_) = q1_;
+
+  dq0_ = x.tail(nv_);
+  dq1_ = dx.tail(nv_);
+  xout.tail(nv_) = dq0_ + dq1_;
 }
 
 void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
@@ -68,9 +76,9 @@ void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Ei
     assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "StateMultibody::Jdiff: Jfirst must be of the good size");
 
     diff(x1, x0, dx_);
-    const Eigen::VectorXd& q1 = x1.head(nq_);
-    const Eigen::VectorXd& dq1 = dx_.head(nv_);
-    pinocchio::dIntegrate(pinocchio_, q1, dq1, Jdq_, pinocchio::ARG1);
+    q1_ = x1.head(nq_);
+    dq1_ = dx_.head(nv_);
+    pinocchio::dIntegrate(pinocchio_, q1_, dq1_, Jdq_, pinocchio::ARG1);
 
     Jfirst.setZero();
     Jfirst.topLeftCorner(nv_, nv_) = -Jdq_.inverse();
@@ -80,9 +88,9 @@ void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Ei
            "StateMultibody::Jdiff: Jsecond must be of the good size");
 
     diff(x0, x1, dx_);
-    const Eigen::VectorXd& q0 = x0.head(nq_);
-    const Eigen::VectorXd& dq0 = dx_.head(nv_);
-    pinocchio::dIntegrate(pinocchio_, q0, dq0, Jdq_, pinocchio::ARG1);
+    q0_ = x0.head(nq_);
+    dq0_ = dx_.head(nv_);
+    pinocchio::dIntegrate(pinocchio_, q0_, dq0_, Jdq_, pinocchio::ARG1);
 
     Jsecond.setZero();
     Jsecond.topLeftCorner(nv_, nv_) = Jdq_.inverse();
@@ -94,9 +102,9 @@ void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Ei
 
     // Computing Jfirst
     diff(x1, x0, dx_);
-    const Eigen::VectorXd& q1 = x1.head(nq_);
-    const Eigen::VectorXd& dq1 = dx_.head(nv_);
-    pinocchio::dIntegrate(pinocchio_, q1, dq1, Jdq_, pinocchio::ARG1);
+    q1_ = x1.head(nq_);
+    dq1_ = dx_.head(nv_);
+    pinocchio::dIntegrate(pinocchio_, q1_, dq1_, Jdq_, pinocchio::ARG1);
     Jfirst.setZero();
     Jfirst.topLeftCorner(nv_, nv_) = -Jdq_.inverse();
     Jfirst.bottomRightCorner(nv_, nv_).diagonal() = -Eigen::VectorXd::Ones(nv_);
@@ -121,13 +129,13 @@ void StateMultibody::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x,
          ("StateMultibody::Jintegrate: firstsecond must be one of the Jcomponent "
           "{both, first, second}"));
 
-  const Eigen::VectorXd& q = x.head(nq_);
-  const Eigen::VectorXd& dq = dx.head(nv_);
+  q0_ = x.head(nq_);
+  dq0_ = dx.head(nv_);
   if (firstsecond == first) {
     assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ &&
            "StateMultibody::Jintegrate: Jfirst must be of the good size");
 
-    pinocchio::dIntegrate(pinocchio_, q, dq, Jdq_, pinocchio::ARG0);
+    pinocchio::dIntegrate(pinocchio_, q0_, dq0_, Jdq_, pinocchio::ARG0);
     Jfirst.setZero();
     Jfirst.topLeftCorner(nv_, nv_) = Jdq_;
     Jfirst.bottomRightCorner(nv_, nv_).diagonal() = Eigen::VectorXd::Ones(nv_);
@@ -135,7 +143,7 @@ void StateMultibody::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x,
     assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ &&
            "StateMultibody::Jdiff: Jsecond must be of the good size");
 
-    pinocchio::dIntegrate(pinocchio_, q, dq, Jdq_, pinocchio::ARG1);
+    pinocchio::dIntegrate(pinocchio_, q0_, dq0_, Jdq_, pinocchio::ARG1);
     Jsecond.setZero();
     Jsecond.topLeftCorner(nv_, nv_) = Jdq_;
     Jsecond.bottomRightCorner(nv_, nv_).diagonal() = Eigen::VectorXd::Ones(nv_);
@@ -145,13 +153,13 @@ void StateMultibody::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x,
            "StateMultibody::Jdiff: Jsecond must be of the good size");
 
     // Computing Jfirst
-    pinocchio::dIntegrate(pinocchio_, q, dq, Jdq_, pinocchio::ARG0);
+    pinocchio::dIntegrate(pinocchio_, q0_, dq0_, Jdq_, pinocchio::ARG0);
     Jfirst.setZero();
     Jfirst.topLeftCorner(nv_, nv_) = Jdq_;
     Jfirst.bottomRightCorner(nv_, nv_).diagonal() = Eigen::VectorXd::Ones(nv_);
 
     // Computing Jsecond
-    pinocchio::dIntegrate(pinocchio_, q, dq, Jdq_, pinocchio::ARG1);
+    pinocchio::dIntegrate(pinocchio_, q0_, dq0_, Jdq_, pinocchio::ARG1);
     Jsecond.setZero();
     Jsecond.topLeftCorner(nv_, nv_) = Jdq_;
     Jsecond.bottomRightCorner(nv_, nv_).diagonal() = Eigen::VectorXd::Ones(nv_);
