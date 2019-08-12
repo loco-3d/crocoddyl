@@ -55,8 +55,7 @@ void ContactModel3D::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data
   d->fXjda_dv.noalias() = d->fXj * d->a_partial_dv;
   d->Ax.leftCols(nv).noalias() =
       d->fXjda_dq.topRows<3>() + d->vw_skew * d->fXjdv_dq.topRows<3>() - d->vv_skew * d->fXjdv_dq.bottomRows<3>();
-  d->Ax.rightCols(nv).noalias() =
-      d->fXjda_dv.topRows<3>() + d->vw_skew * d->Jc - d->vv_skew * d->fJf.bottomRows<3>();
+  d->Ax.rightCols(nv).noalias() = d->fXjda_dv.topRows<3>() + d->vw_skew * d->Jc - d->vv_skew * d->fJf.bottomRows<3>();
 
   if (gains_[0] != 0.) {
     d->oRf = d->pinocchio->oMf[xref_.frame].rotation();
