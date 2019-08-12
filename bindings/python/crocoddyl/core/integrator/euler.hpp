@@ -30,16 +30,13 @@ void exposeIntegratedActionEuler() {
           ":param stepTime: step time\n"
           ":param withCostResidual: includes the cost residuals and derivatives.")[bp::with_custodian_and_ward<1,
                                                                                                                2>()])
-      .def<void (IntegratedActionModelEuler::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
-                                                const Eigen::VectorXd&)>(
-          "calc", &IntegratedActionModelEuler::calc_wrap, bp::args(" self", " data", " x", " u=None"),
-          "Compute the time-discrete evolution of a differential action model.\n\n"
-          "It describes the time-discrete evolution of action model.\n"
-          ":param data: action data\n"
-          ":param x: state vector\n"
-          ":param u: control input")
-      .def<void (IntegratedActionModelEuler::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&)>(
-          "calc", &IntegratedActionModelEuler::calc_wrap, bp::args(" self", " data", " x"))
+      .def("calc", &IntegratedActionModelEuler::calc_wrap,
+           ActionModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
+                                  "Compute the time-discrete evolution of a differential action model.\n\n"
+                                  "It describes the time-discrete evolution of action model.\n"
+                                  ":param data: action data\n"
+                                  ":param x: state vector\n"
+                                  ":param u: control input"))
       .def<void (IntegratedActionModelEuler::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
                                                 const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &IntegratedActionModelEuler::calcDiff_wrap,

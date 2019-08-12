@@ -47,15 +47,12 @@ void exposeCostFrameTranslation() {
           "crocoddyl.ActivationModelQuad(3), and nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
           ":param xref: reference frame translation")[bp::with_custodian_and_ward<1, 2>()])
-      .def<void (CostModelFrameTranslation::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                               const Eigen::VectorXd&)>("calc", &CostModelFrameTranslation::calc_wrap,
-                                                                        bp::args(" self", " data", " x", " u=None"),
-                                                                        "Compute the frame translation cost.\n\n"
-                                                                        ":param data: cost data\n"
-                                                                        ":param x: time-discrete state vector\n"
-                                                                        ":param u: time-discrete control input")
-      .def<void (CostModelFrameTranslation::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
-          "calc", &CostModelFrameTranslation::calc_wrap, bp::args(" self", " data", " x"))
+      .def("calc", &CostModelFrameTranslation::calc_wrap,
+           CostModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
+                                "Compute the frame translation cost.\n\n"
+                                ":param data: cost data\n"
+                                ":param x: time-discrete state vector\n"
+                                ":param u: time-discrete control input"))
       .def<void (CostModelFrameTranslation::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                                const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &CostModelFrameTranslation::calcDiff_wrap,

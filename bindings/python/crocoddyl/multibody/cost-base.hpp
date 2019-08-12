@@ -42,6 +42,8 @@ class CostModelAbstract_wrap : public CostModelAbstract, public bp::wrapper<Cost
   }
 };
 
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(CostModel_calc_wraps, CostModelAbstract::calc_wrap, 2, 3)
+
 void exposeCostMultibody() {
   bp::class_<CostModelAbstract_wrap, boost::noncopyable>(
       "CostModelAbstract",

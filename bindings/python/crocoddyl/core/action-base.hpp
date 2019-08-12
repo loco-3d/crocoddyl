@@ -38,6 +38,8 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
   boost::shared_ptr<ActionDataAbstract> createData() { return boost::make_shared<ActionDataAbstract>(this); }
 };
 
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ActionModel_calc_wraps, ActionModelAbstract::calc_wrap, 2, 3)
+
 void exposeActionAbstract() {
   bp::class_<ActionModelAbstract_wrap, boost::noncopyable>(
       "ActionModelAbstract",

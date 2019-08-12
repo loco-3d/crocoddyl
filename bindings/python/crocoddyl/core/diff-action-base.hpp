@@ -42,6 +42,8 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
   }
 };
 
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(DiffActionModel_calc_wraps, DifferentialActionModelAbstract::calc_wrap, 2, 3)
+
 void exposeDifferentialActionAbstract() {
   bp::class_<DifferentialActionModelAbstract_wrap, boost::noncopyable>(
       "DifferentialActionModelAbstract",

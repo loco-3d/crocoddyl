@@ -27,18 +27,15 @@ void exposeActionUnicycle() {
       "other hand, we define the quadratic cost functions for the state and\n"
       "control.",
       bp::init<>(bp::args(" self"), "Initialize the unicycle action model."))
-      .def<void (ActionModelUnicycle::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
-                                         const Eigen::VectorXd&)>(
-          "calc", &ActionModelUnicycle::calc_wrap, bp::args(" self", " data", " x", " u=None"),
-          "Compute the next state and cost value.\n\n"
-          "It describes the time-discrete evolution of the unicycle system.\n"
-          "Additionally it computes the cost value associated to this discrete\n"
-          "state and control pair.\n"
-          ":param data: action data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input")
-      .def<void (ActionModelUnicycle::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&)>(
-          "calc", &ActionModelUnicycle::calc_wrap, bp::args(" self", " data", " x"))
+      .def("calc", &ActionModelUnicycle::calc_wrap,
+           ActionModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
+                                  "Compute the next state and cost value.\n\n"
+                                  "It describes the time-discrete evolution of the unicycle system.\n"
+                                  "Additionally it computes the cost value associated to this discrete\n"
+                                  "state and control pair.\n"
+                                  ":param data: action data\n"
+                                  ":param x: time-discrete state vector\n"
+                                  ":param u: time-discrete control input"))
       .def<void (ActionModelUnicycle::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
                                          const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &ActionModelUnicycle::calcDiff_wrap, bp::args(" self", " data", " x", " u=None", " recalc=True"),

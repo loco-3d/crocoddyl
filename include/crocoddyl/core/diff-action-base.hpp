@@ -48,11 +48,12 @@ class DifferentialActionModelAbstract {
 
  public:
   void calc_wrap(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::VectorXd& x,
-                 const Eigen::VectorXd& u) {
-    calc(data, x, u);
-  }
-  void calc_wrap(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::VectorXd& x) {
-    calc(data, x, unone_);
+                 const Eigen::VectorXd& u = Eigen::VectorXd()) {
+    if (u.size() == 0) {
+      calc(data, x);
+    } else {
+      calc(data, x, u);
+    }
   }
 
   void calcDiff_wrap(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::VectorXd& x,
