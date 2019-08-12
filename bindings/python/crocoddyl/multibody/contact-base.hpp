@@ -30,7 +30,7 @@ class ContactModelAbstract_wrap : public ContactModelAbstract, public bp::wrappe
   }
 };
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(calcDiff_wraps, ContactModelAbstract::calcDiff_wrap, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ContactModel_calcDiff_wraps, ContactModelAbstract::calcDiff_wrap, 2, 3)
 
 void exposeContactAbstract() {
   bp::class_<ContactModelAbstract_wrap, boost::noncopyable>(

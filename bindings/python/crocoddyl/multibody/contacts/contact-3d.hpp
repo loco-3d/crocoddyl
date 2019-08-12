@@ -36,13 +36,13 @@ void exposeContact3D() {
            ":param data: contact data\n"
            ":param x: state vector")
       .def("calcDiff", &ContactModel3D::calcDiff_wrap,
-           calcDiff_wraps(bp::args(" self", " data", " x", " recalc=True"),
-                          "Compute the derivatives of the 3D contact holonomic constraint.\n\n"
-                          "The rigid contact model throught acceleration-base holonomic constraint\n"
-                          "of the contact frame placement.\n"
-                          ":param data: cost data\n"
-                          ":param x: state vector\n"
-                          ":param recalc: If true, it updates the contact Jacobian and drift."))
+           ContactModel_calcDiff_wraps(bp::args(" self", " data", " x", " recalc=True"),
+                                       "Compute the derivatives of the 3D contact holonomic constraint.\n\n"
+                                       "The rigid contact model throught acceleration-base holonomic constraint\n"
+                                       "of the contact frame placement.\n"
+                                       ":param data: cost data\n"
+                                       ":param x: state vector\n"
+                                       ":param recalc: If true, it updates the contact Jacobian and drift."))
       .def("createData", &ContactModel3D::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the 3D contact data.\n\n"
