@@ -392,8 +392,11 @@ class FramePlacementCostDerived(crocoddyl.CostModelAbstract):
         self.activation.calcDiff(data.activation, data.costResiduals, recalc)
         data.Rx = np.hstack([data.J, np.zeros((self.activation.nr, self.State.nv))])
         data.Lx = np.vstack([data.J.T * data.activation.Ar, np.zeros((self.State.nv, 1))])
-        data.Lxx = np.block([[data.J.T * data.activation.Arr * data.J,
-                              np.zeros((self.State.nv, self.State.nv))], [np.zeros((self.State.nv, self.State.ndx))]])
+        data.Lxx = np.vstack([
+            np.hstack([data.J.T * data.activation.Arr * data.J,
+                       np.zeros((self.State.nv, self.State.nv))]),
+            np.zeros((self.State.nv, self.State.ndx))
+        ])
 
 
 class FrameTranslationCostDerived(crocoddyl.CostModelAbstract):
@@ -417,8 +420,11 @@ class FrameTranslationCostDerived(crocoddyl.CostModelAbstract):
         self.activation.calcDiff(data.activation, data.costResiduals, recalc)
         data.Rx = np.hstack([data.J, np.zeros((self.activation.nr, self.State.nv))])
         data.Lx = np.vstack([data.J.T * data.activation.Ar, np.zeros((self.State.nv, 1))])
-        data.Lxx = np.block([[data.J.T * data.activation.Arr * data.J,
-                              np.zeros((self.State.nv, self.State.nv))], [np.zeros((self.State.nv, self.State.ndx))]])
+        data.Lxx = np.vstack([
+            np.hstack([data.J.T * data.activation.Arr * data.J,
+                       np.zeros((self.State.nv, self.State.nv))]),
+            np.zeros((self.State.nv, self.State.ndx))
+        ])
 
 
 class Contact3DDerived(crocoddyl.ContactModelAbstract):
@@ -460,8 +466,7 @@ class Contact3DDerived(crocoddyl.ContactModelAbstract):
         vv_skew = pinocchio.utils.skew(self.vv)
         vw_skew = pinocchio.utils.skew(self.vw)
         fXjdv_dq = self.fXj * v_partial_dq
-        Aq = (self.fXj * a_partial_dq
-              )[:3, :] + vw_skew * fXjdv_dq[:3, :] - vv_skew * fXjdv_dq[3:, :]
+        Aq = (self.fXj * a_partial_dq)[:3, :] + vw_skew * fXjdv_dq[:3, :] - vv_skew * fXjdv_dq[3:, :]
         Av = (self.fXj * a_partial_dv)[:3, :] + vw_skew * data.Jc - vv_skew * self.Jw
 
         if np.asscalar(self.gains[0]) != 0.:
