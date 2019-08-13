@@ -29,7 +29,7 @@ class StateAbstractTestCase(unittest.TestCase):
 
         # Checking that both diff functions agree
         if self.STATE.__class__ == crocoddyl.libcrocoddyl_pywrap.StateMultibody:
-            self.assertTrue(np.allclose(self.STATE.diff(x0, x1)[3:], self.STATE_DER.diff(x0, x1)[3:], atol=1e-9),
+            self.assertTrue(np.allclose(2*self.STATE.diff(x0, x1)[3:], self.STATE_DER.diff(x0, x1)[3:], atol=1e-9),
                             "state.diff() function doesn't agree with Python bindings.")
         else:
             self.assertTrue(np.allclose(self.STATE.diff(x0, x1), self.STATE_DER.diff(x0, x1), atol=1e-9),
