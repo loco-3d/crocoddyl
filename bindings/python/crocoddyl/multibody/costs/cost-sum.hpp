@@ -15,7 +15,6 @@
 #include <utility>
 #include <string>
 #include "crocoddyl/multibody/costs/cost-sum.hpp"
-#include <boost/python/suite/indexing/map_indexing_suite.hpp>
 
 namespace crocoddyl {
 namespace python {
@@ -37,8 +36,7 @@ void exposeCostSum() {
                                                ":param cost: cost model\n"
                                                ":param weight: cost weight")[bp::with_custodian_and_ward<1, 3>()])
       .def_readwrite("name", &CostItem::name, "cost name")
-      .add_property("cost", bp::make_getter(&CostItem::cost, bp::return_value_policy<bp::reference_existing_object>()),
-                    "cost model")
+      .add_property("cost", bp::make_getter(&CostItem::cost, bp::return_internal_reference<>()), "cost model")
       .def_readwrite("weight", &CostItem::weight, "cost weight");
 
   bp::class_<CostModelSum, bp::bases<CostModelAbstract> >(
