@@ -92,6 +92,7 @@ class StateMultibodyManipulatorTest(StateAbstractTestCase):
     STATE = crocoddyl.StateMultibody(MODEL)
     STATE_DER = StateMultibodyDerived(MODEL)
 
+
 class StateMultibodyHumanoidTest(StateAbstractTestCase):
     MODEL = pinocchio.buildSampleModelHumanoidRandom()
     NX = MODEL.nq + MODEL.nv

@@ -89,8 +89,25 @@ class FreeFwdDynamicsTest(ActionModelAbstractTestCase):
     MODEL_DER = utils.DifferentialFreeFwdDynamicsDerived(STATE, COST_SUM)
 
 
+class FreeFwdDynamicsWithArmatureTest(ActionModelAbstractTestCase):
+    ROBOT_MODEL = pinocchio.buildSampleModelManipulator()
+    STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+    COST_SUM = crocoddyl.CostModelSum(STATE, ROBOT_MODEL.nv)
+    COST_SUM.addCost('xReg', crocoddyl.CostModelState(STATE), 1.)
+    COST_SUM.addCost(
+        'frTrack',
+        crocoddyl.CostModelFramePlacement(
+            STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("effector_body"), pinocchio.SE3.Random())), 1.)
+    MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, COST_SUM)
+    MODEL.armature = 0.1 * np.matrix(np.ones(ROBOT_MODEL.nv)).T
+    MODEL_DER = utils.DifferentialFreeFwdDynamicsDerived(STATE, COST_SUM)
+    MODEL_DER.set_armature(0.1 * np.matrix(np.ones(ROBOT_MODEL.nv)).T)
+
+
 if __name__ == '__main__':
-    test_classes_to_run = [UnicycleTest, LQRTest, DifferentialLQRTest, FreeFwdDynamicsTest]
+    test_classes_to_run = [
+        UnicycleTest, LQRTest, DifferentialLQRTest, FreeFwdDynamicsTest, FreeFwdDynamicsWithArmatureTest
+    ]
     loader = unittest.TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:
