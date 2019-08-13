@@ -36,8 +36,7 @@ void exposeContactMultiple() {
           ":param name: contact name\n"
           ":param contact: contact model")[bp::with_custodian_and_ward<1, 3>()])
       .def_readwrite("name", &ContactItem::name, "contact name")
-      .add_property("contact",
-                    bp::make_getter(&ContactItem::contact, bp::return_internal_reference<>()),
+      .add_property("contact", bp::make_getter(&ContactItem::contact, bp::return_internal_reference<>()),
                     "contact model");
 
   bp::class_<ContactModelMultiple, bp::bases<ContactModelAbstract> >(
