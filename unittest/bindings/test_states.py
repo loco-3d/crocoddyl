@@ -85,8 +85,14 @@ class StateVectorTest(StateAbstractTestCase):
     STATE_DER = StateVectorDerived(NX)
 
 
-class StateMultibodyTest(StateAbstractTestCase):
-    MODEL = pinocchio.buildSampleModelHumanoid()
+class StateMultibodyManipulatorTest(StateAbstractTestCase):
+    MODEL = pinocchio.buildSampleModelManipulator()
+    NX = MODEL.nq + MODEL.nv
+    NDX = 2 * MODEL.nv
+    STATE = crocoddyl.StateMultibody(MODEL)
+    STATE_DER = StateMultibodyDerived(MODEL)
+
+class StateMultibodyHumanoidTest(StateAbstractTestCase):
     MODEL = pinocchio.buildSampleModelHumanoidRandom()
     NX = MODEL.nq + MODEL.nv
     NDX = 2 * MODEL.nv
@@ -95,7 +101,7 @@ class StateMultibodyTest(StateAbstractTestCase):
 
 
 if __name__ == '__main__':
-    test_classes_to_run = [StateVectorTest, StateMultibodyTest]
+    test_classes_to_run = [StateVectorTest, StateMultibodyManipulatorTest, StateMultibodyHumanoidTest]
     loader = unittest.TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:
