@@ -75,13 +75,19 @@ void CostModelState::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                               const bool& recalc) {
   assert(x.size() == state_.get_nx() && "CostModelState::calcDiff: x has wrong dimension");
 
+  CostDataState* d = static_cast<CostDataState*>(data.get());
   if (recalc) {
     calc(data, x, u);
   }
   state_.Jdiff(xref_, x, data->Rx, data->Rx, second);
   activation_.calcDiff(data->activation, data->r, recalc);
-  data->Lx = data->Rx.transpose() * data->activation->Ar;
-  data->Lxx = data->Rx.transpose() * data->activation->Arr * data->Rx;
+  data->Lx.noalias() = data->Rx.transpose() * data->activation->Ar;
+  d->Arr_Rx.noalias() = data->activation->Arr * data->Rx;
+  data->Lxx.noalias() = data->Rx.transpose() * d->Arr_Rx;
+}
+
+boost::shared_ptr<CostDataAbstract> CostModelState::createData(pinocchio::Data* const data) {
+  return boost::make_shared<CostDataState>(this, data);
 }
 
 const Eigen::VectorXd& CostModelState::get_xref() const { return xref_; }
