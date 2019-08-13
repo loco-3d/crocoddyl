@@ -45,8 +45,7 @@ struct CostDataState : public CostDataAbstract {
 
   template <typename Model>
   CostDataState(Model* const model, pinocchio::Data* const data)
-      : CostDataAbstract(model, data),
-        Arr_Rx(model->get_activation().get_nr(), model->get_state().get_ndx()) {
+      : CostDataAbstract(model, data), Arr_Rx(model->get_activation().get_nr(), model->get_state().get_ndx()) {
     Arr_Rx.fill(0);
   }
 
