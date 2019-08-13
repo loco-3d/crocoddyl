@@ -3,6 +3,7 @@ import utils
 import pinocchio
 import numpy as np
 import unittest
+import sys
 
 
 class CostModelAbstractTestCase(unittest.TestCase):
@@ -191,3 +192,4 @@ if __name__ == '__main__':
     big_suite = unittest.TestSuite(suites_list)
     runner = unittest.TextTestRunner()
     results = runner.run(big_suite)
+    sys.exit(not results.wasSuccessful())

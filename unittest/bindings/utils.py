@@ -392,8 +392,11 @@ class FramePlacementCostDerived(crocoddyl.CostModelAbstract):
         self.activation.calcDiff(data.activation, data.costResiduals, recalc)
         data.Rx = np.hstack([data.J, np.zeros((self.activation.nr, self.State.nv))])
         data.Lx = np.vstack([data.J.T * data.activation.Ar, np.zeros((self.State.nv, 1))])
-        data.Lxx = np.block([[data.J.T * data.activation.Arr * data.J,
-                              np.zeros((self.State.nv, self.State.nv))], [np.zeros((self.State.nv, self.State.ndx))]])
+        data.Lxx = np.vstack([
+            np.hstack([data.J.T * data.activation.Arr * data.J,
+                       np.zeros((self.State.nv, self.State.nv))]),
+            np.zeros((self.State.nv, self.State.ndx))
+        ])
 
 
 class FrameTranslationCostDerived(crocoddyl.CostModelAbstract):
@@ -417,8 +420,11 @@ class FrameTranslationCostDerived(crocoddyl.CostModelAbstract):
         self.activation.calcDiff(data.activation, data.costResiduals, recalc)
         data.Rx = np.hstack([data.J, np.zeros((self.activation.nr, self.State.nv))])
         data.Lx = np.vstack([data.J.T * data.activation.Ar, np.zeros((self.State.nv, 1))])
-        data.Lxx = np.block([[data.J.T * data.activation.Arr * data.J,
-                              np.zeros((self.State.nv, self.State.nv))], [np.zeros((self.State.nv, self.State.ndx))]])
+        data.Lxx = np.vstack([
+            np.hstack([data.J.T * data.activation.Arr * data.J,
+                       np.zeros((self.State.nv, self.State.nv))]),
+            np.zeros((self.State.nv, self.State.ndx))
+        ])
 
 
 class Contact3DDerived(crocoddyl.ContactModelAbstract):
