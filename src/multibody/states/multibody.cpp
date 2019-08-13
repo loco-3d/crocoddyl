@@ -116,9 +116,9 @@ void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Ei
 
     // Computing Jsecond
     diff(x0, x1, dx_);
-    const Eigen::VectorXd& q0 = x0.head(nq_);
-    const Eigen::VectorXd& dq0 = dx_.head(nv_);
-    pinocchio::dIntegrate(pinocchio_, q0, dq0, Ji_, pinocchio::ARG1);
+    q0_ = x0.head(nq_);
+    dq0_ = dx_.head(nv_);
+    pinocchio::dIntegrate(pinocchio_, q0_, dq0_, Ji_, pinocchio::ARG1);
     updateJdiff(Ji_);
 
     Jsecond.setZero();
