@@ -45,11 +45,13 @@ struct CostDataFramePlacement : public CostDataAbstract {
       : CostDataAbstract(model, data),
         J(6, model->get_state().get_nv()),
         rJf(6, 6),
-        fJf(6, model->get_state().get_nv()) {
+        fJf(6, model->get_state().get_nv()),
+        Arr_J(6, model->get_state().get_nv()) {
     r.fill(0);
     J.fill(0);
     rJf.fill(0);
     fJf.fill(0);
+    Arr_J.fill(0);
   }
 
   pinocchio::Motion::Vector6 r;
@@ -57,6 +59,7 @@ struct CostDataFramePlacement : public CostDataAbstract {
   pinocchio::Data::Matrix6x J;
   pinocchio::Data::Matrix6 rJf;
   pinocchio::Data::Matrix6x fJf;
+  pinocchio::Data::Matrix6x Arr_J;
 };
 
 }  // namespace crocoddyl
