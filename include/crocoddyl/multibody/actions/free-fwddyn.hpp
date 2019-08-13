@@ -47,15 +47,18 @@ struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbst
   explicit DifferentialActionDataFreeFwdDynamics(Model* const model)
       : DifferentialActionDataAbstract(model),
         pinocchio(pinocchio::Data(model->get_pinocchio())),
-        Minv(model->get_state().get_nv(), model->get_state().get_nv()) {
+        Minv(model->get_state().get_nv(), model->get_state().get_nv()),
+        u_drift(model->get_nu()) {
     costs = model->get_costs().createData(&pinocchio);
     shareCostMemory(costs);
     Minv.fill(0);
+    u_drift.fill(0);
   }
 
   pinocchio::Data pinocchio;
   boost::shared_ptr<CostDataAbstract> costs;
   Eigen::MatrixXd Minv;
+  Eigen::VectorXd u_drift;
 };
 
 }  // namespace crocoddyl

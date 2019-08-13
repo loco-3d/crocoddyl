@@ -57,16 +57,17 @@ void CostModelFramePlacement::calcDiff(const boost::shared_ptr<CostDataAbstract>
   CostDataFramePlacement* d = static_cast<CostDataFramePlacement*>(data.get());
   pinocchio::updateFramePlacements(state_.get_pinocchio(), *d->pinocchio);
 
-  // Compute the frame Jacobian at the error point
+  // // Compute the frame Jacobian at the error point
   pinocchio::Jlog6(d->rMf, d->rJf);
   pinocchio::getFrameJacobian(state_.get_pinocchio(), *d->pinocchio, Mref_.frame, pinocchio::LOCAL, d->fJf);
-  d->J = d->rJf * d->fJf;
+  d->J.noalias() = d->rJf * d->fJf;
 
   // Compute the derivatives of the frame placement
-  activation_.calcDiff(d->activation, d->r, recalc);
-  d->Rx.topLeftCorner(6, nv_) = d->J;
-  d->Lx.head(nv_) = d->J.transpose() * d->activation->Ar;
-  d->Lxx.topLeftCorner(nv_, nv_) = d->J.transpose() * d->activation->Arr * d->J;
+  activation_.calcDiff(data->activation, data->r, recalc);
+  data->Rx.topLeftCorner(6, nv_) = d->J;
+  data->Lx.head(nv_).noalias() = d->J.transpose() * data->activation->Ar;
+  d->Arr_J.noalias() = data->activation->Arr * d->J;
+  data->Lxx.topLeftCorner(nv_, nv_).noalias() = d->J.transpose() * d->Arr_J;
 }
 
 boost::shared_ptr<CostDataAbstract> CostModelFramePlacement::createData(pinocchio::Data* const data) {

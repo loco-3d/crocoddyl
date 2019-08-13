@@ -245,10 +245,10 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
         else:
             pinocchio.computeAllTerms(self.State.pinocchio, data.pinocchio, q, v)
             data.M = data.pinocchio.M
-            if self.pinocchio.size == self.nv:
-                data.M[range(self.nv), range(self.nv)] += self.pinocchio.armature
+            if self.armature.size == self.State.nv:
+                data.M[range(self.State.nv), range(self.State.nv)] += self.armature
             data.Minv = np.linalg.inv(data.M)
-            data.xout[:] = data.Minv * (u - data.pinocchio.nle)
+            data.xout = data.Minv * (u - data.pinocchio.nle)
         # Computing the cost value and residuals
         pinocchio.forwardKinematics(self.State.pinocchio, data.pinocchio, q, v)
         pinocchio.updateFramePlacements(self.State.pinocchio, data.pinocchio)
@@ -270,7 +270,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
         else:
             pinocchio.computeRNEADerivatives(self.State.pinocchio, data.pinocchio, q, v, data.xout)
             data.Fx = -np.hstack([data.Minv * data.pinocchio.dtau_dq, data.Minv * data.pinocchio.dtau_dv])
-            data.Fu = data.pinocchio.Minv
+            data.Fu = data.Minv
         # Computing the cost derivatives
         self.costs.calcDiff(data.costs, x, u, False)
 
@@ -279,7 +279,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
             print('The armature dimension is wrong, we cannot set it.')
         else:
             self.forceAba = False
-            self.armature = armature
+            self.armature = armature.T
 
     def createData(self):
         data = crocoddyl.DifferentialActionModelAbstract.createData(self)
@@ -460,8 +460,7 @@ class Contact3DDerived(crocoddyl.ContactModelAbstract):
         vv_skew = pinocchio.utils.skew(self.vv)
         vw_skew = pinocchio.utils.skew(self.vw)
         fXjdv_dq = self.fXj * v_partial_dq
-        Aq = (self.fXj * a_partial_dq
-              )[:3, :] + vw_skew * fXjdv_dq[:3, :] - vv_skew * fXjdv_dq[3:, :]
+        Aq = (self.fXj * a_partial_dq)[:3, :] + vw_skew * fXjdv_dq[:3, :] - vv_skew * fXjdv_dq[3:, :]
         Av = (self.fXj * a_partial_dv)[:3, :] + vw_skew * data.Jc - vv_skew * self.Jw
 
         if np.asscalar(self.gains[0]) != 0.:

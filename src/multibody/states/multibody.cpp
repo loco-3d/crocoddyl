@@ -20,7 +20,8 @@ StateMultibody::StateMultibody(pinocchio::Model& model)
       dq0_(Eigen::VectorXd::Zero(model.nv)),
       q1_(Eigen::VectorXd::Zero(model.nq)),
       dq1_(Eigen::VectorXd::Zero(model.nv)),
-      Jdq_(Eigen::MatrixXd::Zero(model.nv, model.nv)) {
+      Ji_(Eigen::MatrixXd::Zero(model.nv, model.nv)),
+      Jd_(Eigen::MatrixXd::Zero(model.nv, model.nv)) {
   x0_.head(nq_) = pinocchio::neutral(pinocchio_);
 }
 
@@ -78,10 +79,11 @@ void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Ei
     diff(x1, x0, dx_);
     q1_ = x1.head(nq_);
     dq1_ = dx_.head(nv_);
-    pinocchio::dIntegrate(pinocchio_, q1_, dq1_, Jdq_, pinocchio::ARG1);
+    pinocchio::dIntegrate(pinocchio_, q1_, dq1_, Ji_, pinocchio::ARG1);
+    updateJdiff(Ji_, false);
 
     Jfirst.setZero();
-    Jfirst.topLeftCorner(nv_, nv_) = -Jdq_.inverse();
+    Jfirst.topLeftCorner(nv_, nv_) = Jd_;
     Jfirst.bottomRightCorner(nv_, nv_).diagonal() = -Eigen::VectorXd::Ones(nv_);
   } else if (firstsecond == second) {
     assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ &&
@@ -90,10 +92,11 @@ void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Ei
     diff(x0, x1, dx_);
     q0_ = x0.head(nq_);
     dq0_ = dx_.head(nv_);
-    pinocchio::dIntegrate(pinocchio_, q0_, dq0_, Jdq_, pinocchio::ARG1);
+    pinocchio::dIntegrate(pinocchio_, q0_, dq0_, Ji_, pinocchio::ARG1);
+    updateJdiff(Ji_);
 
     Jsecond.setZero();
-    Jsecond.topLeftCorner(nv_, nv_) = Jdq_.inverse();
+    Jsecond.topLeftCorner(nv_, nv_) = Jd_;
     Jsecond.bottomRightCorner(nv_, nv_).diagonal() = Eigen::VectorXd::Ones(nv_);
   } else {  // computing both
     assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "StateMultibody::Jdiff: Jfirst must be of the good size");
@@ -104,18 +107,22 @@ void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Ei
     diff(x1, x0, dx_);
     q1_ = x1.head(nq_);
     dq1_ = dx_.head(nv_);
-    pinocchio::dIntegrate(pinocchio_, q1_, dq1_, Jdq_, pinocchio::ARG1);
+    pinocchio::dIntegrate(pinocchio_, q1_, dq1_, Ji_, pinocchio::ARG1);
+    updateJdiff(Ji_, false);
+
     Jfirst.setZero();
-    Jfirst.topLeftCorner(nv_, nv_) = -Jdq_.inverse();
+    Jfirst.topLeftCorner(nv_, nv_) = Jd_;
     Jfirst.bottomRightCorner(nv_, nv_).diagonal() = -Eigen::VectorXd::Ones(nv_);
 
     // Computing Jsecond
     diff(x0, x1, dx_);
-    const Eigen::VectorXd& q0 = x0.head(nq_);
-    const Eigen::VectorXd& dq0 = dx_.head(nv_);
-    pinocchio::dIntegrate(pinocchio_, q0, dq0, Jdq_, pinocchio::ARG1);
+    q0_ = x0.head(nq_);
+    dq0_ = dx_.head(nv_);
+    pinocchio::dIntegrate(pinocchio_, q0_, dq0_, Ji_, pinocchio::ARG1);
+    updateJdiff(Ji_);
+
     Jsecond.setZero();
-    Jsecond.topLeftCorner(nv_, nv_) = Jdq_.inverse();
+    Jsecond.topLeftCorner(nv_, nv_) = Jd_;
     Jsecond.bottomRightCorner(nv_, nv_).diagonal() = Eigen::VectorXd::Ones(nv_);
   }
 }
@@ -135,17 +142,17 @@ void StateMultibody::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x,
     assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ &&
            "StateMultibody::Jintegrate: Jfirst must be of the good size");
 
-    pinocchio::dIntegrate(pinocchio_, q0_, dq0_, Jdq_, pinocchio::ARG0);
+    pinocchio::dIntegrate(pinocchio_, q0_, dq0_, Ji_, pinocchio::ARG0);
     Jfirst.setZero();
-    Jfirst.topLeftCorner(nv_, nv_) = Jdq_;
+    Jfirst.topLeftCorner(nv_, nv_) = Ji_;
     Jfirst.bottomRightCorner(nv_, nv_).diagonal() = Eigen::VectorXd::Ones(nv_);
   } else if (firstsecond == second) {
     assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ &&
            "StateMultibody::Jdiff: Jsecond must be of the good size");
 
-    pinocchio::dIntegrate(pinocchio_, q0_, dq0_, Jdq_, pinocchio::ARG1);
+    pinocchio::dIntegrate(pinocchio_, q0_, dq0_, Ji_, pinocchio::ARG1);
     Jsecond.setZero();
-    Jsecond.topLeftCorner(nv_, nv_) = Jdq_;
+    Jsecond.topLeftCorner(nv_, nv_) = Ji_;
     Jsecond.bottomRightCorner(nv_, nv_).diagonal() = Eigen::VectorXd::Ones(nv_);
   } else {  // computing both
     assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "StateMultibody::Jdiff: Jfirst must be of the good size");
@@ -153,19 +160,33 @@ void StateMultibody::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x,
            "StateMultibody::Jdiff: Jsecond must be of the good size");
 
     // Computing Jfirst
-    pinocchio::dIntegrate(pinocchio_, q0_, dq0_, Jdq_, pinocchio::ARG0);
+    pinocchio::dIntegrate(pinocchio_, q0_, dq0_, Ji_, pinocchio::ARG0);
     Jfirst.setZero();
-    Jfirst.topLeftCorner(nv_, nv_) = Jdq_;
+    Jfirst.topLeftCorner(nv_, nv_) = Ji_;
     Jfirst.bottomRightCorner(nv_, nv_).diagonal() = Eigen::VectorXd::Ones(nv_);
 
     // Computing Jsecond
-    pinocchio::dIntegrate(pinocchio_, q0_, dq0_, Jdq_, pinocchio::ARG1);
+    pinocchio::dIntegrate(pinocchio_, q0_, dq0_, Ji_, pinocchio::ARG1);
     Jsecond.setZero();
-    Jsecond.topLeftCorner(nv_, nv_) = Jdq_;
+    Jsecond.topLeftCorner(nv_, nv_) = Ji_;
     Jsecond.bottomRightCorner(nv_, nv_).diagonal() = Eigen::VectorXd::Ones(nv_);
   }
 }
 
 pinocchio::Model& StateMultibody::get_pinocchio() const { return pinocchio_; }
+
+void StateMultibody::updateJdiff(const Eigen::Ref<const Eigen::MatrixXd>& Jdq, bool positive) {
+  if (positive) {
+    Jd_.diagonal() = Jdq.diagonal();
+    Jd_.block<3, 3>(0, 0) = Jdq.block<3, 3>(0, 0).transpose();
+    Jd_.block<3, 3>(0, 3) = Jdq.block<3, 3>(0, 3).transpose();
+    Jd_.block<3, 3>(3, 3) = Jdq.block<3, 3>(3, 3).transpose();
+  } else {
+    Jd_.diagonal() = -Jdq.diagonal();
+    Jd_.block<3, 3>(0, 0) = -Jdq.block<3, 3>(0, 0).transpose();
+    Jd_.block<3, 3>(0, 3) = -Jdq.block<3, 3>(0, 3).transpose();
+    Jd_.block<3, 3>(3, 3) = -Jdq.block<3, 3>(3, 3).transpose();
+  }
+}
 
 }  // namespace crocoddyl

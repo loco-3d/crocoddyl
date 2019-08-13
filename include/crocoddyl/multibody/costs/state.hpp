@@ -32,11 +32,24 @@ class CostModelState : public CostModelAbstract {
             const Eigen::Ref<const Eigen::VectorXd>& u);
   void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
+  boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
   const Eigen::VectorXd& get_xref() const;
 
  private:
   Eigen::VectorXd xref_;
+};
+
+struct CostDataState : public CostDataAbstract {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  template <typename Model>
+  CostDataState(Model* const model, pinocchio::Data* const data)
+      : CostDataAbstract(model, data), Arr_Rx(model->get_activation().get_nr(), model->get_state().get_ndx()) {
+    Arr_Rx.fill(0);
+  }
+
+  Eigen::MatrixXd Arr_Rx;
 };
 
 }  // namespace crocoddyl

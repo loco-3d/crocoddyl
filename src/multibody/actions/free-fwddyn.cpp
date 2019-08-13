@@ -1,9 +1,3 @@
-#include "crocoddyl/multibody/actions/free-fwddyn.hpp"
-#include <pinocchio/algorithm/aba.hpp>
-#include <pinocchio/algorithm/aba-derivatives.hpp>
-#include <pinocchio/algorithm/rnea-derivatives.hpp>
-#include <pinocchio/algorithm/compute-all-terms.hpp>
-#include <pinocchio/algorithm/kinematics.hpp>
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
@@ -12,6 +6,12 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/multibody/actions/free-fwddyn.hpp"
+#include <pinocchio/algorithm/aba.hpp>
+#include <pinocchio/algorithm/aba-derivatives.hpp>
+#include <pinocchio/algorithm/rnea-derivatives.hpp>
+#include <pinocchio/algorithm/compute-all-terms.hpp>
+#include <pinocchio/algorithm/kinematics.hpp>
 #include <pinocchio/algorithm/jacobian.hpp>
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/cholesky.hpp>
@@ -23,7 +23,8 @@ DifferentialActionModelFreeFwdDynamics::DifferentialActionModelFreeFwdDynamics(S
     : DifferentialActionModelAbstract(state, state.get_pinocchio().nv, costs.get_nr()),
       costs_(costs),
       pinocchio_(state.get_pinocchio()),
-      force_aba_(true) {}
+      force_aba_(true),
+      armature_(Eigen::VectorXd::Zero(state.get_nv())) {}
 
 DifferentialActionModelFreeFwdDynamics::~DifferentialActionModelFreeFwdDynamics() {}
 
@@ -34,23 +35,24 @@ void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<Differ
   assert(u.size() == nu_ && "DifferentialActionModelFreeFwdDynamics::calc: u has wrong dimension");
 
   DifferentialActionDataFreeFwdDynamics* d = static_cast<DifferentialActionDataFreeFwdDynamics*>(data.get());
-  const Eigen::VectorXd& q = x.head(state_.get_nq());
-  const Eigen::VectorXd& v = x.tail(state_.get_nv());
+  d->qcur = x.head(state_.get_nq());
+  d->vcur = x.tail(state_.get_nv());
 
   // Computing the dynamics using ABA or manually for armature case
   if (force_aba_) {
-    d->xout = pinocchio::aba(pinocchio_, d->pinocchio, q, v, u);
+    d->xout = pinocchio::aba(pinocchio_, d->pinocchio, d->qcur, d->vcur, u);
   } else {
-    pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, v);
+    pinocchio::computeAllTerms(pinocchio_, d->pinocchio, d->qcur, d->vcur);
     d->pinocchio.M.diagonal() += armature_;
     pinocchio::cholesky::decompose(pinocchio_, d->pinocchio);
     d->Minv.setZero();
     pinocchio::cholesky::computeMinv(pinocchio_, d->pinocchio, d->Minv);
-    d->xout = d->Minv * (u - d->pinocchio.nle);
+    d->u_drift = u - d->pinocchio.nle;
+    d->xout.noalias() = d->Minv * d->u_drift;
   }
 
   // Computing the cost value and residuals
-  pinocchio::forwardKinematics(pinocchio_, d->pinocchio, q, v);
+  pinocchio::forwardKinematics(pinocchio_, d->pinocchio, d->qcur, d->vcur);
   pinocchio::updateFramePlacements(pinocchio_, d->pinocchio);
   costs_.calc(d->costs, x, u);
   d->cost = d->costs->cost;
@@ -64,23 +66,26 @@ void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<Di
 
   DifferentialActionDataFreeFwdDynamics* d = static_cast<DifferentialActionDataFreeFwdDynamics*>(data.get());
   const unsigned int& nv = state_.get_nv();
-  const Eigen::VectorXd& q = x.head(state_.get_nq());
-  const Eigen::VectorXd& v = x.tail(nv);
   if (recalc) {
     calc(data, x, u);
-    pinocchio::computeJointJacobians(pinocchio_, d->pinocchio, q);
+    pinocchio::computeJointJacobians(pinocchio_, d->pinocchio, d->qcur);
+  } else {
+    d->qcur = x.head(state_.get_nq());
+    d->vcur = x.tail(nv);
   }
 
   // Computing the dynamics derivatives
   if (force_aba_) {
-    pinocchio::computeABADerivatives(pinocchio_, d->pinocchio, q, v, u);
+    pinocchio::computeABADerivatives(pinocchio_, d->pinocchio, d->qcur, d->vcur, u);
     d->Fx.leftCols(nv) = d->pinocchio.ddq_dq;
     d->Fx.rightCols(nv) = d->pinocchio.ddq_dv;
     d->Fu = d->pinocchio.Minv;
   } else {
-    pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout);
-    d->Fx.leftCols(nv) = -d->Minv * d->pinocchio.dtau_dq;
-    d->Fx.rightCols(nv) = -d->Minv * d->pinocchio.dtau_dv;
+    pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, d->qcur, d->vcur, d->xout);
+    d->Fx.leftCols(nv).noalias() = d->Minv * d->pinocchio.dtau_dq;
+    d->Fx.leftCols(nv) *= -1.;
+    d->Fx.rightCols(nv).noalias() = d->Minv * d->pinocchio.dtau_dv;
+    d->Fx.rightCols(nv) *= -1.;
     d->Fu = d->Minv;
   }
 

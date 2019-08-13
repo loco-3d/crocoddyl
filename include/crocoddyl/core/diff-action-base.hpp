@@ -82,6 +82,8 @@ struct DifferentialActionDataAbstract {
   explicit DifferentialActionDataAbstract(Model* const model)
       : cost(0.),
         xout(model->get_state().get_nv()),
+        qcur(model->get_state().get_nq()),
+        vcur(model->get_state().get_nv()),
         Fx(model->get_state().get_nv(), model->get_state().get_ndx()),
         Fu(model->get_state().get_nv(), model->get_nu()),
         Lx(model->get_state().get_ndx()),
@@ -101,6 +103,8 @@ struct DifferentialActionDataAbstract {
         Rx_ref(&Rx(0), model->get_nr(), model->get_state().get_ndx()),
         Ru_ref(&Ru(0), model->get_nr(), model->get_nu()) {
     xout.fill(0);
+    qcur.fill(0);
+    vcur.fill(0);
     Fx.fill(0);
     Fu.fill(0);
     Lx.fill(0);
@@ -149,6 +153,8 @@ struct DifferentialActionDataAbstract {
 
   double cost;
   Eigen::VectorXd xout;
+  Eigen::VectorXd qcur;
+  Eigen::VectorXd vcur;
   Eigen::MatrixXd Fx;
   Eigen::MatrixXd Fu;
   Eigen::VectorXd Lx;

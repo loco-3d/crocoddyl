@@ -96,7 +96,14 @@ void exposeCostState() {
           "calcDiff", &CostModelState::calcDiff_wrap, bp::args(" self", " data", " x", " recalc"))
       .add_property("xref",
                     bp::make_function(&CostModelState::get_xref, bp::return_value_policy<bp::return_by_value>()),
-                    "reference state");
+                    "reference state")
+      .def("createData", &CostModelState::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
+           bp::args(" self", " data"),
+           "Create the state cost data.\n\n"
+           "Each cost model has its own data that needs to be allocated. This function\n"
+           "returns the allocated data for a predefined cost.\n"
+           ":param data: Pinocchio data\n"
+           ":return cost data.");
 }
 
 }  // namespace python
