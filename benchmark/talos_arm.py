@@ -1,14 +1,13 @@
 import crocoddyl
 import pinocchio
 # import utils
+import example_robot_data
 import numpy as np
 import time
-import sys
-sys.path.append("/opt/openrobots/share/example-robot-data/unittest/")
-import unittest_utils
+
 
 # First, let's load the Pinocchio model for the Talos arm.
-ROBOT = unittest_utils.loadTalosArm()
+ROBOT = example_robot_data.loadTalosArm()
 N = 100  # number of nodes
 T = int(5e3)  # number of trials
 MAXITER = 1
