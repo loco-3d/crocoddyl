@@ -7,20 +7,23 @@ import sys
 
 
 class ContactModelAbstractTestCase(unittest.TestCase):
+    ROBOT_MODEL = None
+    ROBOT_STATE = None
     CONTACT = None
     CONTACT_DER = None
 
     def setUp(self):
-        self.x = self.STATE.rand()
-        self.DATA = self.CONTACT.createData(self.ROBOT_DATA)
-        self.DATA_DER = self.CONTACT_DER.createData(self.ROBOT_DATA)
+        self.x = self.ROBOT_STATE.rand()
+        self.robot_data = self.ROBOT_MODEL.createData()
+        self.data = self.CONTACT.createData(self.robot_data)
+        self.data_der = self.CONTACT_DER.createData(self.robot_data)
 
         nq, nv = self.ROBOT_MODEL.nq, self.ROBOT_MODEL.nv
-        pinocchio.forwardKinematics(self.ROBOT_MODEL, self.ROBOT_DATA, self.x[:nq], self.x[nq:],
+        pinocchio.forwardKinematics(self.ROBOT_MODEL, self.robot_data, self.x[:nq], self.x[nq:],
                                     pinocchio.utils.zero(nv))
-        pinocchio.computeJointJacobians(self.ROBOT_MODEL, self.ROBOT_DATA)
-        pinocchio.updateFramePlacements(self.ROBOT_MODEL, self.ROBOT_DATA)
-        pinocchio.computeForwardKinematicsDerivatives(self.ROBOT_MODEL, self.ROBOT_DATA, self.x[:nq], self.x[nq:],
+        pinocchio.computeJointJacobians(self.ROBOT_MODEL, self.robot_data)
+        pinocchio.updateFramePlacements(self.ROBOT_MODEL, self.robot_data)
+        pinocchio.computeForwardKinematicsDerivatives(self.ROBOT_MODEL, self.robot_data, self.x[:nq], self.x[nq:],
                                                       pinocchio.utils.zero(nv))
 
     def test_nc_dimension(self):
@@ -28,30 +31,29 @@ class ContactModelAbstractTestCase(unittest.TestCase):
 
     def test_calc(self):
         # Run calc for both action models
-        self.CONTACT.calc(self.DATA, self.x)
-        self.CONTACT_DER.calc(self.DATA_DER, self.x)
+        self.CONTACT.calc(self.data, self.x)
+        self.CONTACT_DER.calc(self.data_der, self.x)
         # Checking the cost value and its residual
-        self.assertTrue(np.allclose(self.DATA.Jc, self.DATA_DER.Jc, atol=1e-9), "Wrong contact Jacobian (Jc).")
-        self.assertTrue(np.allclose(self.DATA.a0, self.DATA_DER.a0, atol=1e-9), "Wrong drift acceleration (a0).")
+        self.assertTrue(np.allclose(self.data.Jc, self.data_der.Jc, atol=1e-9), "Wrong contact Jacobian (Jc).")
+        self.assertTrue(np.allclose(self.data.a0, self.data_der.a0, atol=1e-9), "Wrong drift acceleration (a0).")
 
     def test_calcDiff(self):
         # Run calc for both action models
-        self.CONTACT.calcDiff(self.DATA, self.x, True)
-        self.CONTACT_DER.calcDiff(self.DATA_DER, self.x, True)
+        self.CONTACT.calcDiff(self.data, self.x, True)
+        self.CONTACT_DER.calcDiff(self.data_der, self.x, True)
         # Checking the Jacobians of the contact constraint
-        self.assertTrue(np.allclose(self.DATA.Ax, self.DATA_DER.Ax, atol=1e-9),
+        self.assertTrue(np.allclose(self.data.Ax, self.data_der.Ax, atol=1e-9),
                         "Wrong derivatives of the contact constraint (Ax).")
 
 
 class Contact3DTest(ContactModelAbstractTestCase):
     ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
-    ROBOT_DATA = ROBOT_MODEL.createData()
-    STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+    ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     gains = np.matrix(np.random.rand(2)).T
     xref = crocoddyl.FrameTranslation(ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.SE3.Random().translation)
-    CONTACT = crocoddyl.ContactModel3D(STATE, xref, gains)
-    CONTACT_DER = utils.Contact3DDerived(STATE, xref, gains)
+    CONTACT = crocoddyl.ContactModel3D(ROBOT_STATE, xref, gains)
+    CONTACT_DER = utils.Contact3DDerived(ROBOT_STATE, xref, gains)
 
 
 if __name__ == '__main__':
