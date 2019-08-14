@@ -99,7 +99,7 @@ class Contact3DTest(ContactModelAbstractTestCase):
     CONTACT_DER = utils.Contact3DDerived(ROBOT_STATE, xref, gains)
 
 
-class Contact3DMultipleTest(ContactModelAbstractTestCase):
+class Contact3DMultipleTest(ContactModelMultipleAbstractTestCase):
     ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
