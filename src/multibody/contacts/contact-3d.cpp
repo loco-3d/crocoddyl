@@ -62,7 +62,7 @@ void ContactModel3D::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data
     d->Ax.leftCols(nv).noalias() += gains_[0] * d->oRf * d->Jc;
   }
   if (gains_[1] != 0.) {
-    d->Ax.leftCols(nv).noalias() += gains_[1] * d->fXj.topRows<3>() * d->a_partial_dq;
+    d->Ax.leftCols(nv).noalias() += gains_[1] * d->fXj.topRows<3>() * d->v_partial_dq;
     d->Ax.rightCols(nv).noalias() += gains_[1] * d->fXj.topRows<3>() * d->a_partial_da;
   }
 }

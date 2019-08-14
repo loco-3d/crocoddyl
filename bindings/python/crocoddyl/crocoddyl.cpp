@@ -8,6 +8,7 @@
 
 #define PYTHON_BINDINGS
 
+#include <pinocchio/fwd.hpp>
 #include <boost/python.hpp>
 #include <eigenpy/eigenpy.hpp>
 
