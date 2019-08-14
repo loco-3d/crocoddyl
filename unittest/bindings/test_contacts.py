@@ -2,7 +2,6 @@ import crocoddyl
 import utils
 import pinocchio
 import numpy as np
-import random
 import unittest
 import sys
 
@@ -16,10 +15,13 @@ class ContactModelAbstractTestCase(unittest.TestCase):
         self.DATA = self.CONTACT.createData(self.ROBOT_DATA)
         self.DATA_DER = self.CONTACT_DER.createData(self.ROBOT_DATA)
 
-        nq = self.ROBOT_MODEL.nq
-        pinocchio.forwardKinematics(self.ROBOT_MODEL, self.ROBOT_DATA, self.x[:nq], self.x[nq:])
-        pinocchio.computeJointJacobians(self.ROBOT_MODEL, self.ROBOT_DATA, self.x[:nq])
+        nq, nv = self.ROBOT_MODEL.nq, self.ROBOT_MODEL.nv
+        pinocchio.forwardKinematics(self.ROBOT_MODEL, self.ROBOT_DATA, self.x[:nq], self.x[nq:],
+                                    pinocchio.utils.zero(nv))
+        pinocchio.computeJointJacobians(self.ROBOT_MODEL, self.ROBOT_DATA)
         pinocchio.updateFramePlacements(self.ROBOT_MODEL, self.ROBOT_DATA)
+        pinocchio.computeForwardKinematicsDerivatives(self.ROBOT_MODEL, self.ROBOT_DATA, self.x[:nq], self.x[nq:],
+                                                      pinocchio.utils.zero(nv))
 
     def test_nc_dimension(self):
         self.assertEqual(self.CONTACT.nc, self.CONTACT_DER.nc, "Wrong nc.")
