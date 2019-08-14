@@ -44,7 +44,9 @@ If you have never added robotpkg as a softwares repository, please follow first 
 
 4. The installation of Crocoddyl:
 
-		sudo apt install robotpkg-crocoddyl
+		sudo apt install robotpkg-py27-crocoddyl # for Python 2
+
+		sudo apt install robotpkg-py35-crocoddyl # for Python 3
 
 Finally you will need to configure your environment variables, e.g.:
 
@@ -62,9 +64,11 @@ Finally you will need to configure your environment variables, e.g.:
 * [SciPy](https://www.scipy.org/)
 * [quadprog](https://pypi.org/project/quadprog/)
 * [multicontact-api](https://gepgitlab.laas.fr/loco-3d/multicontact-api)
-* [matplotlib](https://matplotlib.org/) (optional)
 * [example-robot-data](https://gepgitlab.laas.fr/gepetto/example-robot-data) (optional for running examples)
+* [gepetto-viewer-corba](https://github.com/Gepetto/gepetto-viewer-corba) (optional for running examples and notebooks)
 * [jupyter](https://jupyter.org/) (optional for running notebooks)
+* [matplotlib](https://matplotlib.org/) (optional for running examples)
+
 
 You can run examples and tests from the root dir of the repository:
 
