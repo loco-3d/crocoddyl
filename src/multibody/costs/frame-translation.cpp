@@ -13,22 +13,22 @@ namespace crocoddyl {
 
 CostModelFrameTranslation::CostModelFrameTranslation(StateMultibody& state, ActivationModelAbstract& activation,
                                                      const FrameTranslation& xref, unsigned int const& nu)
-    : CostModelAbstract(state, activation, nu), xref_(xref), nv_(state.get_nv()) {
+    : CostModelAbstract(state, activation, nu), xref_(xref) {
   assert(activation_.get_nr() == 3 && "CostModelFrameTranslation: activation::nr is not equals to 3");
 }
 
 CostModelFrameTranslation::CostModelFrameTranslation(StateMultibody& state, ActivationModelAbstract& activation,
                                                      const FrameTranslation& xref)
-    : CostModelAbstract(state, activation), xref_(xref), nv_(state.get_nv()) {
+    : CostModelAbstract(state, activation), xref_(xref) {
   assert(activation_.get_nr() == 3 && "CostModelFramePlacement: activation::nr is not equals to 3");
 }
 
 CostModelFrameTranslation::CostModelFrameTranslation(StateMultibody& state, const FrameTranslation& xref,
                                                      unsigned int const& nu)
-    : CostModelAbstract(state, 3, nu), xref_(xref), nv_(state.get_nv()) {}
+    : CostModelAbstract(state, 3, nu), xref_(xref) {}
 
 CostModelFrameTranslation::CostModelFrameTranslation(StateMultibody& state, const FrameTranslation& xref)
-    : CostModelAbstract(state, 3), xref_(xref), nv_(state.get_nv()) {}
+    : CostModelAbstract(state, 3), xref_(xref) {}
 
 CostModelFrameTranslation::~CostModelFrameTranslation() {}
 
@@ -58,10 +58,11 @@ void CostModelFrameTranslation::calcDiff(const boost::shared_ptr<CostDataAbstrac
   d->J = d->pinocchio->oMf[xref_.frame].rotation() * d->fJf.topRows<3>();
 
   // Compute the derivatives of the frame placement
+  unsigned int const& nv = state_.get_nv();
   activation_.calcDiff(d->activation, d->r, recalc);
-  d->Rx.topLeftCorner(3, nv_) = d->J;
-  d->Lx.head(nv_) = d->J.transpose() * d->activation->Ar;
-  d->Lxx.topLeftCorner(nv_, nv_) = d->J.transpose() * d->activation->Arr * d->J;
+  d->Rx.leftCols(nv) = d->J;
+  d->Lx.head(nv) = d->J.transpose() * d->activation->Ar;
+  d->Lxx.topLeftCorner(nv, nv) = d->J.transpose() * d->activation->Arr * d->J;
 }
 
 boost::shared_ptr<CostDataAbstract> CostModelFrameTranslation::createData(pinocchio::Data* const data) {

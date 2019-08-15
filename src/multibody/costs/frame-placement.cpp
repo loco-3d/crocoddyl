@@ -65,7 +65,7 @@ void CostModelFramePlacement::calcDiff(const boost::shared_ptr<CostDataAbstract>
   // Compute the derivatives of the frame placement
   unsigned int const& nv = state_.get_nv();
   activation_.calcDiff(data->activation, data->r, recalc);
-  data->Rx.topLeftCorner(6, nv) = d->J;
+  data->Rx.leftCols(nv) = d->J;
   data->Lx.head(nv).noalias() = d->J.transpose() * data->activation->Ar;
   d->Arr_J.noalias() = data->activation->Arr * d->J;
   data->Lxx.topLeftCorner(nv, nv).noalias() = d->J.transpose() * d->Arr_J;

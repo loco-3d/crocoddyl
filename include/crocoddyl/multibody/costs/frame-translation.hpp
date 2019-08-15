@@ -34,7 +34,6 @@ class CostModelFrameTranslation : public CostModelAbstract {
 
  private:
   FrameTranslation xref_;
-  const unsigned int& nv_;
 };
 
 struct CostDataFrameTranslation : public CostDataAbstract {
