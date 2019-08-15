@@ -11,7 +11,9 @@
 namespace crocoddyl {
 
 ActionModelAbstract::ActionModelAbstract(StateAbstract& state, unsigned int const& nu, unsigned int const& nr)
-    : nu_(nu), nr_(nr), state_(state), unone_(Eigen::VectorXd::Zero(nu)) {}
+    : nu_(nu), nr_(nr), state_(state), unone_(Eigen::VectorXd::Zero(nu)) {
+  assert(nu_ != 0 && "ActionModelAbstract: nu cannot be zero");
+}
 
 ActionModelAbstract::~ActionModelAbstract() {}
 
