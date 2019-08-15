@@ -369,6 +369,32 @@ class ControlCostDerived(crocoddyl.CostModelAbstract):
         data.Luu = data.activation.Arr
 
 
+class CoMPositionCostDerived(crocoddyl.CostModelAbstract):
+    def __init__(self, state, activation=None, cref=None, nu=None):
+        activation = activation if activation is not None else crocoddyl.ActivationModelQuad(3)
+        crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
+        self.cref = cref
+
+    def calc(self, data, x, u):
+        data.costResiduals = data.pinocchio.com[0] - self.cref
+        self.activation.calc(data.activation, data.costResiduals)
+        data.cost = data.activation.a
+
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        self.activation.calcDiff(data.activation, data.costResiduals, recalc)
+        data.Rx = np.hstack([data.pinocchio.Jcom, np.zeros((self.activation.nr, self.State.nv))])
+        data.Lx = np.vstack([data.pinocchio.Jcom.T * data.activation.Ar, np.zeros((self.State.nv, 1))])
+        data.Lxx = np.vstack([
+            np.hstack([
+                data.pinocchio.Jcom.T * data.activation.Arr * data.pinocchio.Jcom,
+                np.zeros((self.State.nv, self.State.nv))
+            ]),
+            np.zeros((self.State.nv, self.State.ndx))
+        ])
+
+
 class FramePlacementCostDerived(crocoddyl.CostModelAbstract):
     def __init__(self, state, activation=None, Mref=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(6)
