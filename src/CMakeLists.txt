@@ -22,6 +22,7 @@ SET(${PROJECT_NAME}_SOURCES
   multibody/costs/cost-sum.cpp
   multibody/costs/state.cpp
   multibody/costs/control.cpp
+  multibody/costs/com-position.cpp
   multibody/costs/frame-placement.cpp
   multibody/costs/frame-translation.cpp
   multibody/contacts/multiple-contacts.cpp
