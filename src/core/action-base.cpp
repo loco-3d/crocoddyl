@@ -25,6 +25,10 @@ void ActionModelAbstract::calcDiff(const boost::shared_ptr<ActionDataAbstract>& 
   calcDiff(data, x, unone_);
 }
 
+boost::shared_ptr<ActionDataAbstract> ActionModelAbstract::createData() {
+  return boost::make_shared<ActionDataAbstract>(this);
+}
+
 const unsigned int& ActionModelAbstract::get_nu() const { return nu_; }
 
 const unsigned int& ActionModelAbstract::get_nr() const { return nr_; }

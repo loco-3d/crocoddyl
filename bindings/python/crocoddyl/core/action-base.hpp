@@ -34,8 +34,6 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
     assert(u.size() == nu_ && "ActionModelAbstract::calcDiff: u has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
-
-  boost::shared_ptr<ActionDataAbstract> createData() { return boost::make_shared<ActionDataAbstract>(this); }
 };
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ActionModel_calc_wraps, ActionModelAbstract::calc_wrap, 2, 3)

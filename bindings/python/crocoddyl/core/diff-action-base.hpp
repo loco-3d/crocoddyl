@@ -36,10 +36,6 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
     assert(u.size() == nu_ && "DifferentialActionModelAbstract::calcDiff: u has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
-
-  boost::shared_ptr<DifferentialActionDataAbstract> createData() {
-    return boost::make_shared<DifferentialActionDataAbstract>(this);
-  }
 };
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(DiffActionModel_calc_wraps, DifferentialActionModelAbstract::calc_wrap, 2, 3)

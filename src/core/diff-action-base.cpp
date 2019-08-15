@@ -29,6 +29,10 @@ void DifferentialActionModelAbstract::calcDiff(const boost::shared_ptr<Different
   calcDiff(data, x, unone_);
 }
 
+boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelAbstract::createData() {
+  return boost::make_shared<DifferentialActionDataAbstract>(this);
+}
+
 const unsigned int& DifferentialActionModelAbstract::get_nu() const { return nu_; }
 
 const unsigned int& DifferentialActionModelAbstract::get_nr() const { return nr_; }
