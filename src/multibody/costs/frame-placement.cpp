@@ -13,22 +13,22 @@ namespace crocoddyl {
 
 CostModelFramePlacement::CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation,
                                                  const FramePlacement& Mref, unsigned int const& nu)
-    : CostModelAbstract(state, activation, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()), nv_(state.get_nv()) {
+    : CostModelAbstract(state, activation, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
   assert(activation_.get_nr() == 6 && "CostModelFramePlacement: activation::nr is not equals to 6");
 }
 
 CostModelFramePlacement::CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation,
                                                  const FramePlacement& Mref)
-    : CostModelAbstract(state, activation), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()), nv_(state.get_nv()) {
+    : CostModelAbstract(state, activation), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
   assert(activation_.get_nr() == 6 && "CostModelFramePlacement: activation::nr is not equals to 6");
 }
 
 CostModelFramePlacement::CostModelFramePlacement(StateMultibody& state, const FramePlacement& Mref,
                                                  unsigned int const& nu)
-    : CostModelAbstract(state, 6, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()), nv_(state.get_nv()) {}
+    : CostModelAbstract(state, 6, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {}
 
 CostModelFramePlacement::CostModelFramePlacement(StateMultibody& state, const FramePlacement& Mref)
-    : CostModelAbstract(state, 6), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()), nv_(state.get_nv()) {}
+    : CostModelAbstract(state, 6), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {}
 
 CostModelFramePlacement::~CostModelFramePlacement() {}
 
@@ -63,11 +63,12 @@ void CostModelFramePlacement::calcDiff(const boost::shared_ptr<CostDataAbstract>
   d->J.noalias() = d->rJf * d->fJf;
 
   // Compute the derivatives of the frame placement
+  unsigned int const& nv = state_.get_nv();
   activation_.calcDiff(data->activation, data->r, recalc);
-  data->Rx.topLeftCorner(6, nv_) = d->J;
-  data->Lx.head(nv_).noalias() = d->J.transpose() * data->activation->Ar;
+  data->Rx.leftCols(nv) = d->J;
+  data->Lx.head(nv).noalias() = d->J.transpose() * data->activation->Ar;
   d->Arr_J.noalias() = data->activation->Arr * d->J;
-  data->Lxx.topLeftCorner(nv_, nv_).noalias() = d->J.transpose() * d->Arr_J;
+  data->Lxx.topLeftCorner(nv, nv).noalias() = d->J.transpose() * d->Arr_J;
 }
 
 boost::shared_ptr<CostDataAbstract> CostModelFramePlacement::createData(pinocchio::Data* const data) {

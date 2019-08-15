@@ -24,6 +24,7 @@ class CostModelAbstractTestCase(unittest.TestCase):
         pinocchio.forwardKinematics(self.ROBOT_MODEL, self.robot_data, self.x[:nq], self.x[nq:])
         pinocchio.computeJointJacobians(self.ROBOT_MODEL, self.robot_data, self.x[:nq])
         pinocchio.updateFramePlacements(self.ROBOT_MODEL, self.robot_data)
+        pinocchio.jacobianCenterOfMass(self.ROBOT_MODEL, self.robot_data, self.x[:nq], False)
 
     def test_dimensions(self):
         self.assertEqual(self.COST.State.nx, self.COST_DER.State.nx, "Wrong nx.")
@@ -78,6 +79,7 @@ class CostModelSumTestCase(unittest.TestCase):
         pinocchio.forwardKinematics(self.ROBOT_MODEL, self.robot_data, self.x[:nq], self.x[nq:])
         pinocchio.computeJointJacobians(self.ROBOT_MODEL, self.robot_data, self.x[:nq])
         pinocchio.updateFramePlacements(self.ROBOT_MODEL, self.robot_data)
+        pinocchio.jacobianCenterOfMass(self.ROBOT_MODEL, self.robot_data, self.x[:nq], False)
 
     def test_dimensions(self):
         self.assertEqual(self.COST.State.nx, self.cost_sum.State.nx, "Wrong nx.")
@@ -146,6 +148,23 @@ class ControlCostSumTest(CostModelSumTestCase):
     COST = crocoddyl.CostModelControl(ROBOT_STATE)
 
 
+class CoMPositionCostTest(CostModelAbstractTestCase):
+    ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
+    ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+
+    cref = pinocchio.utils.rand(3)
+    COST = crocoddyl.CostModelCoMPosition(ROBOT_STATE, cref)
+    COST_DER = utils.CoMPositionCostDerived(ROBOT_STATE, cref=cref)
+
+
+class CoMPositionCostSumTest(CostModelSumTestCase):
+    ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
+    ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+
+    cref = pinocchio.utils.rand(3)
+    COST = crocoddyl.CostModelCoMPosition(ROBOT_STATE, cref)
+
+
 class FramePlacementCostTest(CostModelAbstractTestCase):
     ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
@@ -182,8 +201,9 @@ class FrameTranslationCostSumTest(CostModelSumTestCase):
 
 if __name__ == '__main__':
     test_classes_to_run = [
-        StateCostTest, StateCostSumTest, ControlCostTest, ControlCostSumTest, FramePlacementCostTest,
-        FramePlacementCostSumTest, FrameTranslationCostTest, FrameTranslationCostSumTest
+        StateCostTest, StateCostSumTest, ControlCostTest, ControlCostSumTest, CoMPositionCostTest,
+        CoMPositionCostSumTest, FramePlacementCostTest, FramePlacementCostSumTest, FrameTranslationCostTest,
+        FrameTranslationCostSumTest
     ]
     loader = unittest.TestLoader()
     suites_list = []

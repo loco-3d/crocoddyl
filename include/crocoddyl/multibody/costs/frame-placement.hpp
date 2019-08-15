@@ -19,7 +19,7 @@ class CostModelFramePlacement : public CostModelAbstract {
   CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation, const FramePlacement& Fref,
                           unsigned int const& nu);
   CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation, const FramePlacement& Fref);
-  CostModelFramePlacement(StateMultibody& state, const FramePlacement& Fref, const unsigned int& nu);
+  CostModelFramePlacement(StateMultibody& state, const FramePlacement& Fref, unsigned int const& nu);
   CostModelFramePlacement(StateMultibody& state, const FramePlacement& Fref);
   ~CostModelFramePlacement();
 
@@ -34,7 +34,6 @@ class CostModelFramePlacement : public CostModelAbstract {
  private:
   FramePlacement Mref_;
   pinocchio::SE3 oMf_inv_;
-  const unsigned int& nv_;
 };
 
 struct CostDataFramePlacement : public CostDataAbstract {

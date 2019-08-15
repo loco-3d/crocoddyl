@@ -20,7 +20,7 @@ class CostModelFrameTranslation : public CostModelAbstract {
   CostModelFrameTranslation(StateMultibody& state, ActivationModelAbstract& activation, const FrameTranslation& xref,
                             unsigned int const& nu);
   CostModelFrameTranslation(StateMultibody& state, ActivationModelAbstract& activation, const FrameTranslation& xref);
-  CostModelFrameTranslation(StateMultibody& state, const FrameTranslation& xref, const unsigned int& nu);
+  CostModelFrameTranslation(StateMultibody& state, const FrameTranslation& xref, unsigned int const& nu);
   CostModelFrameTranslation(StateMultibody& state, const FrameTranslation& xref);
   ~CostModelFrameTranslation();
 
@@ -34,7 +34,6 @@ class CostModelFrameTranslation : public CostModelAbstract {
 
  private:
   FrameTranslation xref_;
-  const unsigned int& nv_;
 };
 
 struct CostDataFrameTranslation : public CostDataAbstract {

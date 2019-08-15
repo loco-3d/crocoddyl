@@ -14,7 +14,6 @@ class DifferentialActionModelAbstract:
     the dynamics, cost functions and their derivatives. These computations are
     mainly carry on inside calc() and calcDiff(), respectively.
     """
-
     def __init__(self, nq, nv, nu):
         self.nq = nq
         self.nv = nv
@@ -200,7 +199,6 @@ class DifferentialActionModelLQR(DifferentialActionModelAbstract):
     is given by
       l(x,u) = 1/2 [x,u].T [Lxx Lxu; Lxu.T Luu] [x,u] + [lx,lu].T [x,u]
     """
-
     def __init__(self, nq, nu, driftFree=True):
         DifferentialActionModelAbstract.__init__(self, nq, nq, nu)
         self.DifferentialActionDataType = DifferentialActionDataLQR

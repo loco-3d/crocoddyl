@@ -16,6 +16,7 @@
 #include "python/crocoddyl/multibody/costs/cost-sum.hpp"
 #include "python/crocoddyl/multibody/costs/state.hpp"
 #include "python/crocoddyl/multibody/costs/control.hpp"
+#include "python/crocoddyl/multibody/costs/com-position.hpp"
 #include "python/crocoddyl/multibody/costs/frame-placement.hpp"
 #include "python/crocoddyl/multibody/costs/frame-translation.hpp"
 #include "python/crocoddyl/multibody/contacts/multiple-contacts.hpp"
@@ -33,6 +34,7 @@ void exposeMultibody() {
   exposeCostSum();
   exposeCostState();
   exposeCostControl();
+  exposeCostCoMPosition();
   exposeCostFramePlacement();
   exposeCostFrameTranslation();
   exposeContactMultiple();
