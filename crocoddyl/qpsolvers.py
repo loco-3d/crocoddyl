@@ -28,7 +28,6 @@ class QPSolution:
     dual: value of the lagrangian multipliers.
     niter: number of iterations needed to solve the problem.
     """
-
     def __init__(self, nx, nc):
         self.argmin = zeros(nx)
         self.optimum = 0.
