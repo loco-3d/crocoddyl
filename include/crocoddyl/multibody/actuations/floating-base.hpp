@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_ACTUATIONS_FLOATING_BASE_ACTUATION_HPP_
-#define CROCODDYL_MULTIBODY_ACTUATIONS_FLOATING_BASE_ACTUATION_HPP_
+#ifndef CROCODDYL_MULTIBODY_ACTUATIONS_FLOATING_BASE_HPP_
+#define CROCODDYL_MULTIBODY_ACTUATIONS_FLOATING_BASE_HPP_
 
 // TODO: ActuationModelFreeFloating ActuationDataFreeFloating
 

@@ -6,9 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_ACTUATIONS_FULL_ACTUATION_HPP_
-#define CROCODDYL_MULTIBODY_ACTUATIONS_FULL_ACTUATION_HPP_
+#ifndef CROCODDYL_MULTIBODY_ACTUATIONS_FULL_HPP_
+#define CROCODDYL_MULTIBODY_ACTUATIONS_FULL_HPP_
 
 // TODO: ActuationModelFull ActuationDataFull
 
-#endif  // CROCODDYL_MULTIBODY_ACTUATIONS_FULL_ACTUATION_HPP_
+#endif  // CROCODDYL_MULTIBODY_ACTUATIONS_FULL_HPP_
