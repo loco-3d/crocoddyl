@@ -11,7 +11,9 @@
 namespace crocoddyl {
 
 ActionModelAbstract::ActionModelAbstract(StateAbstract& state, unsigned int const& nu, unsigned int const& nr)
-    : nu_(nu), nr_(nr), state_(state), unone_(Eigen::VectorXd::Zero(nu)) {}
+    : nu_(nu), nr_(nr), state_(state), unone_(Eigen::VectorXd::Zero(nu)) {
+  assert(nu_ != 0 && "ActionModelAbstract: nu cannot be zero");
+}
 
 ActionModelAbstract::~ActionModelAbstract() {}
 
@@ -23,6 +25,10 @@ void ActionModelAbstract::calc(const boost::shared_ptr<ActionDataAbstract>& data
 void ActionModelAbstract::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                    const Eigen::Ref<const Eigen::VectorXd>& x) {
   calcDiff(data, x, unone_);
+}
+
+boost::shared_ptr<ActionDataAbstract> ActionModelAbstract::createData() {
+  return boost::make_shared<ActionDataAbstract>(this);
 }
 
 const unsigned int& ActionModelAbstract::get_nu() const { return nu_; }

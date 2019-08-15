@@ -121,6 +121,36 @@ class StateMultibodyDerived(crocoddyl.StateAbstract):
             return np.matrix(scl.block_diag(np.linalg.inv(Jdq), np.eye(self.nv)))
 
 
+class FreeFloatingActuationDerived(crocoddyl.ActuationModelAbstract):
+    def __init__(self, state):
+        assert (state.pinocchio.joints[1].shortname() == 'JointModelFreeFlyer')
+        crocoddyl.ActuationModelAbstract.__init__(self, state, state.nv - 6)
+
+    def calc(self, data, x, u):
+        data.a = np.vstack([pinocchio.utils.zero(6), u])
+
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        Au = pinocchio.utils.eye(self.State.nv)
+        Au[range(6), range(6)] *= 0
+        data.Au = Au
+
+
+class FullActuationDerived(crocoddyl.ActuationModelAbstract):
+    def __init__(self, state):
+        assert (state.pinocchio.joints[1].shortname() != 'JointModelFreeFlyer')
+        crocoddyl.ActuationModelAbstract.__init__(self, state, state.nv)
+
+    def calc(self, data, x, u):
+        data.a = u
+
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        data.Au = pinocchio.utils.eye(self.nu)
+
+
 class UnicycleDerived(crocoddyl.ActionModelAbstract):
     def __init__(self):
         crocoddyl.ActionModelAbstract.__init__(self, crocoddyl.StateVector(3), 2, 5)
