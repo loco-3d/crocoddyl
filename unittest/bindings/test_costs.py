@@ -199,11 +199,28 @@ class FrameTranslationCostSumTest(CostModelSumTestCase):
     COST = crocoddyl.CostModelFrameTranslation(ROBOT_STATE, xref)
 
 
+class FrameVelocityCostTest(CostModelAbstractTestCase):
+    ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
+    ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+
+    vref = crocoddyl.FrameMotion(ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.Motion.Random())
+    COST = crocoddyl.CostModelFrameVelocity(ROBOT_STATE, vref)
+    COST_DER = utils.FrameVelocityCostDerived(ROBOT_STATE, vref=vref)
+
+
+class FrameVelocityCostSumTest(CostModelSumTestCase):
+    ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
+    ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+
+    vref = crocoddyl.FrameMotion(ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.Motion.Random())
+    COST = crocoddyl.CostModelFrameVelocity(ROBOT_STATE, vref)
+
+
 if __name__ == '__main__':
     test_classes_to_run = [
         StateCostTest, StateCostSumTest, ControlCostTest, ControlCostSumTest, CoMPositionCostTest,
         CoMPositionCostSumTest, FramePlacementCostTest, FramePlacementCostSumTest, FrameTranslationCostTest,
-        FrameTranslationCostSumTest
+        FrameTranslationCostSumTest, FrameVelocityCostTest, FrameVelocityCostSumTest
     ]
     loader = unittest.TestLoader()
     suites_list = []

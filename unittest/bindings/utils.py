@@ -453,6 +453,32 @@ class FrameTranslationCostDerived(crocoddyl.CostModelAbstract):
         ])
 
 
+class FrameVelocityCostDerived(crocoddyl.CostModelAbstract):
+    def __init__(self, state, activation=None, vref=None, nu=None):
+        activation = activation if activation is not None else crocoddyl.ActivationModelQuad(6)
+        crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
+        self.vref = vref
+        self.joint = state.pinocchio.frames[vref.frame].parent
+        self.fXj = state.pinocchio.frames[vref.frame].placement.inverse().action
+
+    def calc(self, data, x, u):
+        data.costResiduals = (pinocchio.getFrameVelocity(self.State.pinocchio, data.pinocchio, self.vref.frame) -
+                              self.vref.oMf).vector
+        self.activation.calc(data.activation, data.costResiduals)
+        data.cost = data.activation.a
+
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        v_partial_dq, v_partial_dv = pinocchio.getJointVelocityDerivatives(self.State.pinocchio, data.pinocchio,
+                                                                           self.joint, pinocchio.ReferenceFrame.LOCAL)
+
+        self.activation.calcDiff(data.activation, data.costResiduals, recalc)
+        data.Rx = np.hstack([self.fXj * v_partial_dq, self.fXj * v_partial_dv])
+        data.Lx = data.Rx.T * data.activation.Ar
+        data.Lxx = data.Rx.T * data.activation.Arr * data.Rx
+
+
 class Contact3DDerived(crocoddyl.ContactModelAbstract):
     def __init__(self, state, xref, gains=[0., 0.]):
         crocoddyl.ContactModelAbstract.__init__(self, state, 3)
