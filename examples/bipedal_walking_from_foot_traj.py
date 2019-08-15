@@ -88,7 +88,6 @@ class TaskSE3:
 class SimpleBipedGaitProblem:
     """ Defines a simple 3d locomotion problem
     """
-
     def __init__(self, rmodel, rightFoot, leftFoot):
         self.rmodel = rmodel
         self.rdata = rmodel.createData()

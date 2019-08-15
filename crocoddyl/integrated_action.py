@@ -59,7 +59,6 @@ class IntegratedActionDataEuler:
     the calcDiff function needs to be taken into account when considering
     this integration scheme.
     """
-
     def __init__(self, model):
         nx, ndx, nu = model.nx, model.ndx, model.nu
         self.differential = model.differential.createData()
@@ -119,7 +118,6 @@ class IntegratedActionModelRK4:
     data.dx = (dt/6)(k0+2k1+2k2+k3)
 
     '''
-
     def calc(self, data, x, u=None):
         nq, dt = self.nq, self.timeStep
 
@@ -176,7 +174,6 @@ class IntegratedActionModelRK4:
     dy2_du = dintegrate_right*dt/2*dk1_du
     dy3_du = dintegrate_right*dt*dk2_du
     '''
-
     def calcDiff(self, data, x, u=None, recalc=True):
         ndx, nu, nv, dt = self.ndx, self.nu, self.nv, self.timeStep
         if recalc:
