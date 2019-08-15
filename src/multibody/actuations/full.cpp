@@ -12,7 +12,7 @@ namespace crocoddyl {
 
 ActuationModelFull::ActuationModelFull(StateMultibody& state) : ActuationModelAbstract(state, state.get_nv()) {
   pinocchio::JointModelFreeFlyer ff_joint;
-  assert(state.get_pinocchio().joints[1].shortname() == ff_joint.shortname() &&
+  assert(state.get_pinocchio().joints[1].shortname() != ff_joint.shortname() &&
          "ActuationModelFull: the first joint cannot be free-flyer");
   if (state.get_pinocchio().joints[1].shortname() == ff_joint.shortname()) {
     std::cout << "Warning: the first joint cannot be a free-flyer" << std::endl;
@@ -22,15 +22,16 @@ ActuationModelFull::ActuationModelFull(StateMultibody& state) : ActuationModelAb
 ActuationModelFull::~ActuationModelFull() {}
 
 void ActuationModelFull::calc(const boost::shared_ptr<ActuationDataAbstract>& data,
-                              const Eigen::Ref<const Eigen::VectorXd>& u) {
+                              const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>& u) {
   assert(u.size() == nu_ && "ActuationModelFull::calc: u has wrong dimension");
-  data->a.diagonal() = u;
+  data->a = u;
 }
 
 void ActuationModelFull::calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data,
+                                  const Eigen::Ref<const Eigen::VectorXd>& x,
                                   const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (recalc) {
-    calc(data, u);
+    calc(data, x, u);
   }
   // The derivatives has constant values which were set in createData.
 }

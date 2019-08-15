@@ -19,9 +19,10 @@ class ActuationModelFull : public ActuationModelAbstract {
   explicit ActuationModelFull(StateMultibody& state);
   ~ActuationModelFull();
 
-  void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& u);
-  void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& u,
-                const bool& recalc = true);
+  void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+            const Eigen::Ref<const Eigen::VectorXd>& u);
+  void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
   boost::shared_ptr<ActuationDataAbstract> createData();
 };
 

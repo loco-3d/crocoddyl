@@ -22,22 +22,25 @@ void exposeActuationFloatingBase() {
       "Floating-base actuation models.\n\n"
       "It simplies consider a floating-base actuation model, where the first 6 elements are unactuated.",
       bp::init<StateMultibody&>(bp::args(" self", " state"),
-                                    "Initialize the floating-base actuation model.\n\n"
-                                    ":param state: state of multibody system")[bp::with_custodian_and_ward<1, 2>()])
-      .def("calc", &ActuationModelFloatingBase::calc_wrap, bp::args(" self", " data", " u"),
+                                "Initialize the floating-base actuation model.\n\n"
+                                ":param state: state of multibody system")[bp::with_custodian_and_ward<1, 2>()])
+      .def("calc", &ActuationModelFloatingBase::calc_wrap, bp::args(" self", " data", " x", " u"),
            "Compute the actuation signal from the control input u.\n\n"
            "It describes the time-continuos evolution of the floating-base actuation model.\n"
            ":param data: floating-base actuation data\n"
-           ":param u: time-discrete control input")
-      .def("calcDiff", &ActuationModelFloatingBase::calcDiff, ActuationModel_calcDiff_wraps(
-           bp::args(" self", " data", " u", " recalc=True"),
-           "Compute the derivatives of the actuation model.\n\n"
-           "It computes the partial derivatives of the floating-base actuation. It assumes that you\n"
-           "create the data using this class. The reason is that the derivatives are constant and\n"
-           "defined in createData."
-           ":param data: floating-base actuation data\n"
-           ":param u: time-discrete control input\n"
-           ":param recalc: If true, it updates the actuation signal."))
+           ":param x: state vector\n"
+           ":param u: control input")
+      .def("calcDiff", &ActuationModelFloatingBase::calcDiff_wrap,
+           ActuationModel_calcDiff_wraps(
+               bp::args(" self", " data", " x", " u", " recalc=True"),
+               "Compute the derivatives of the actuation model.\n\n"
+               "It computes the partial derivatives of the floating-base actuation. It assumes that you\n"
+               "create the data using this class. The reason is that the derivatives are constant and\n"
+               "defined in createData."
+               ":param data: floating-base actuation data\n"
+               ":param x: state vector\n"
+               ":param u: control input\n"
+               ":param recalc: If true, it updates the actuation signal."))
       .def("createData", &ActuationModelFloatingBase::createData, bp::args(" self"),
            "Create the floating-base actuation data.\n\n"
            "Each actuation model (AM) has its own data that needs to be allocated.\n"

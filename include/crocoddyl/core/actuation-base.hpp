@@ -23,10 +23,11 @@ class ActuationModelAbstract {
   ActuationModelAbstract(StateAbstract& state, unsigned int const& nu);
   virtual ~ActuationModelAbstract();
 
-  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data,
+  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                     const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
   virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data,
-                        const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) = 0;
+                        const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
+                        const bool& recalc = true) = 0;
   virtual boost::shared_ptr<ActuationDataAbstract> createData();
 
   const unsigned int& get_nu() const;
@@ -39,11 +40,14 @@ class ActuationModelAbstract {
 #ifdef PYTHON_BINDINGS
 
  public:
-  void calc_wrap(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::VectorXd& u) { calc(data, u); }
+  void calc_wrap(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::VectorXd& x,
+                 const Eigen::VectorXd& u) {
+    calc(data, x, u);
+  }
 
-  void calcDiff_wrap(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::VectorXd& u,
-                     const bool& recalc = true) {
-    calcDiff(data, u, recalc);
+  void calcDiff_wrap(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::VectorXd& x,
+                     const Eigen::VectorXd& u, const bool& recalc = true) {
+    calcDiff(data, x, u, recalc);
   }
 
 #endif
@@ -56,7 +60,7 @@ struct ActuationDataAbstract {
   explicit ActuationDataAbstract(Model* const model)
       : a(model->get_state().get_nv()),
         Ax(model->get_state().get_nv(), model->get_state().get_ndx()),
-        Au(model->get_state().get_nv(), model->get_nu()) {
+        Au(model->get_state().get_nv(), model->get_state().get_nv()) {
     a.fill(0);
     Ax.fill(0);
     Au.fill(0);
