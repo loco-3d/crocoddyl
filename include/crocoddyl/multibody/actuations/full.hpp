@@ -9,6 +9,21 @@
 #ifndef CROCODDYL_MULTIBODY_ACTUATIONS_FULL_HPP_
 #define CROCODDYL_MULTIBODY_ACTUATIONS_FULL_HPP_
 
-// TODO: ActuationModelFull ActuationDataFull
+#include "crocoddyl/core/actuation-base.hpp"
+
+namespace crocoddyl {
+
+class ActuationModelFull : public ActuationModelAbstract {
+ public:
+  explicit ActuationModelFull(StateMultibody& state);
+  ~ActuationModelFull();
+
+  void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
+  void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& u,
+                const bool& recalc = true) = 0;
+  boost::shared_ptr<ActuationDataAbstract> createData();
+};
+
+}  // namespace crocoddyl
 
 #endif  // CROCODDYL_MULTIBODY_ACTUATIONS_FULL_HPP_

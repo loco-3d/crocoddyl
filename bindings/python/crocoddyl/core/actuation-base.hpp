@@ -85,8 +85,7 @@ void exposeActuationAbstract() {
                                         "Create common data shared between actuation models.\n\n"
                                         "The actuation data uses the model in order to first process it.\n"
                                         ":param model: actuation model"))
-      .add_property("a",
-                    bp::make_getter(&ActuationDataAbstract::a, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("a", bp::make_getter(&ActuationDataAbstract::a, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ActuationDataAbstract::a), "actuation signal")
       .add_property("Ax", bp::make_getter(&ActuationDataAbstract::Ax, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ActuationDataAbstract::Ax), "Jacobian of the actuation model")

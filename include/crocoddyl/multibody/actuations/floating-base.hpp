@@ -9,6 +9,22 @@
 #ifndef CROCODDYL_MULTIBODY_ACTUATIONS_FLOATING_BASE_HPP_
 #define CROCODDYL_MULTIBODY_ACTUATIONS_FLOATING_BASE_HPP_
 
-// TODO: ActuationModelFreeFloating ActuationDataFreeFloating
+#include "crocoddyl/core/actuation-base.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 
-#endif  // CROCODDYL_MULTIBODY_ACTUATIONS_FLOATING_BASE_ACTUATION_HPP_
+namespace crocoddyl {
+
+class ActuationModelFloatingBase : public ActuationModelAbstract {
+ public:
+  explicit ActuationModelFloatingBase(StateMultibody& state);
+  ~ActuationModelFloatingBase();
+
+  void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
+  void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& u,
+                const bool& recalc = true) = 0;
+  boost::shared_ptr<ActuationDataAbstract> createData();
+};
+
+}  // namespace crocoddyl
+
+#endif  // CROCODDYL_MULTIBODY_ACTUATIONS_FLOATING_BASE_HPP_
