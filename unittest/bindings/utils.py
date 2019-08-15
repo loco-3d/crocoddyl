@@ -65,12 +65,12 @@ class StateMultibodyDerived(crocoddyl.StateAbstract):
 
     def zero(self):
         q = pinocchio.neutral(self.model)
-        v = np.matrix(np.zeros(self.nv)).T
+        v = pinocchio.utils.zero(self.nv)
         return np.concatenate([q, v])
 
     def rand(self):
         q = pinocchio.randomConfiguration(self.model)
-        v = np.matrix(np.random.rand(self.nv)).T
+        v = pinocchio.utils.rand(self.nv)
         return np.concatenate([q, v])
 
     def diff(self, x0, x1):
@@ -353,7 +353,7 @@ class ControlCostDerived(crocoddyl.CostModelAbstract):
     def __init__(self, state, activation=None, uref=None, nu=None):
         nu = nu if nu is not None else state.nv
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(nu)
-        self.uref = uref if uref is not None else np.matrix(np.zeros(nu)).T
+        self.uref = uref if uref is not None else pinocchio.utils.zero(nu)
         crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
 
     def calc(self, data, x, u):
@@ -384,14 +384,14 @@ class CoMPositionCostDerived(crocoddyl.CostModelAbstract):
         if recalc:
             self.calc(data, x, u)
         self.activation.calcDiff(data.activation, data.costResiduals, recalc)
-        data.Rx = np.hstack([data.pinocchio.Jcom, np.zeros((self.activation.nr, self.State.nv))])
-        data.Lx = np.vstack([data.pinocchio.Jcom.T * data.activation.Ar, np.zeros((self.State.nv, 1))])
+        data.Rx = np.hstack([data.pinocchio.Jcom, pinocchio.utils.zero((self.activation.nr, self.State.nv))])
+        data.Lx = np.vstack([data.pinocchio.Jcom.T * data.activation.Ar, pinocchio.utils.zero((self.State.nv, 1))])
         data.Lxx = np.vstack([
             np.hstack([
                 data.pinocchio.Jcom.T * data.activation.Arr * data.pinocchio.Jcom,
-                np.zeros((self.State.nv, self.State.nv))
+                pinocchio.utils.zero((self.State.nv, self.State.nv))
             ]),
-            np.zeros((self.State.nv, self.State.ndx))
+            pinocchio.utils.zero((self.State.nv, self.State.ndx))
         ])
 
 
@@ -416,12 +416,12 @@ class FramePlacementCostDerived(crocoddyl.CostModelAbstract):
                                               pinocchio.ReferenceFrame.LOCAL)
         data.J = data.rJf * data.fJf
         self.activation.calcDiff(data.activation, data.costResiduals, recalc)
-        data.Rx = np.hstack([data.J, np.zeros((self.activation.nr, self.State.nv))])
-        data.Lx = np.vstack([data.J.T * data.activation.Ar, np.zeros((self.State.nv, 1))])
+        data.Rx = np.hstack([data.J, pinocchio.utils.zero((self.activation.nr, self.State.nv))])
+        data.Lx = np.vstack([data.J.T * data.activation.Ar, pinocchio.utils.zero((self.State.nv, 1))])
         data.Lxx = np.vstack([
             np.hstack([data.J.T * data.activation.Arr * data.J,
-                       np.zeros((self.State.nv, self.State.nv))]),
-            np.zeros((self.State.nv, self.State.ndx))
+                       pinocchio.utils.zero((self.State.nv, self.State.nv))]),
+            pinocchio.utils.zero((self.State.nv, self.State.ndx))
         ])
 
 
@@ -444,12 +444,12 @@ class FrameTranslationCostDerived(crocoddyl.CostModelAbstract):
         data.J = data.R * pinocchio.getFrameJacobian(self.State.pinocchio, data.pinocchio, self.xref.frame,
                                                      pinocchio.ReferenceFrame.LOCAL)[:3, :]
         self.activation.calcDiff(data.activation, data.costResiduals, recalc)
-        data.Rx = np.hstack([data.J, np.zeros((self.activation.nr, self.State.nv))])
-        data.Lx = np.vstack([data.J.T * data.activation.Ar, np.zeros((self.State.nv, 1))])
+        data.Rx = np.hstack([data.J, pinocchio.utils.zero((self.activation.nr, self.State.nv))])
+        data.Lx = np.vstack([data.J.T * data.activation.Ar, pinocchio.utils.zero((self.State.nv, 1))])
         data.Lxx = np.vstack([
             np.hstack([data.J.T * data.activation.Arr * data.J,
-                       np.zeros((self.State.nv, self.State.nv))]),
-            np.zeros((self.State.nv, self.State.ndx))
+                       pinocchio.utils.zero((self.State.nv, self.State.nv))]),
+            pinocchio.utils.zero((self.State.nv, self.State.ndx))
         ])
 
 
@@ -463,7 +463,7 @@ class Contact3DDerived(crocoddyl.ContactModelAbstract):
         v = pinocchio.Motion().Zero()
         self.vw = v.angular
         self.vv = v.linear
-        self.Jw = np.matrix(np.zeros((3, state.pinocchio.nv)))
+        self.Jw = pinocchio.utils.zero((3, state.pinocchio.nv))
 
     def calc(self, data, x):
         assert (self.xref.oxf is not None or self.gains[0] == 0.)

@@ -15,7 +15,7 @@ class CostModelAbstractTestCase(unittest.TestCase):
     def setUp(self):
         self.robot_data = self.ROBOT_MODEL.createData()
         self.x = self.ROBOT_STATE.rand()
-        self.u = np.matrix(np.random.rand(self.ROBOT_MODEL.nv)).T
+        self.u = pinocchio.utils.rand(self.ROBOT_MODEL.nv)
 
         self.data = self.COST.createData(self.robot_data)
         self.data_der = self.COST_DER.createData(self.robot_data)
@@ -67,7 +67,7 @@ class CostModelSumTestCase(unittest.TestCase):
     def setUp(self):
         self.robot_data = self.ROBOT_MODEL.createData()
         self.x = self.ROBOT_STATE.rand()
-        self.u = np.matrix(np.random.rand(self.ROBOT_MODEL.nv)).T
+        self.u = pinocchio.utils.rand(self.ROBOT_MODEL.nv)
 
         self.cost_sum = crocoddyl.CostModelSum(self.ROBOT_STATE)
         self.cost_sum.addCost('myCost', self.COST, 1.)
@@ -186,7 +186,7 @@ class FrameTranslationCostTest(CostModelAbstractTestCase):
     ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
-    xref = crocoddyl.FrameTranslation(ROBOT_MODEL.getFrameId('rleg5_joint'), np.matrix(np.random.rand(3)).T)
+    xref = crocoddyl.FrameTranslation(ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.utils.rand(3))
     COST = crocoddyl.CostModelFrameTranslation(ROBOT_STATE, xref)
     COST_DER = utils.FrameTranslationCostDerived(ROBOT_STATE, xref=xref)
 
@@ -195,7 +195,7 @@ class FrameTranslationCostSumTest(CostModelSumTestCase):
     ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
-    xref = crocoddyl.FrameTranslation(ROBOT_MODEL.getFrameId('rleg5_joint'), np.matrix(np.random.rand(3)).T)
+    xref = crocoddyl.FrameTranslation(ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.utils.rand(3))
     COST = crocoddyl.CostModelFrameTranslation(ROBOT_STATE, xref)
 
 
