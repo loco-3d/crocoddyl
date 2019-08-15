@@ -79,6 +79,7 @@ class CostModelSumTestCase(unittest.TestCase):
         pinocchio.forwardKinematics(self.ROBOT_MODEL, self.robot_data, self.x[:nq], self.x[nq:])
         pinocchio.computeJointJacobians(self.ROBOT_MODEL, self.robot_data, self.x[:nq])
         pinocchio.updateFramePlacements(self.ROBOT_MODEL, self.robot_data)
+        pinocchio.jacobianCenterOfMass(self.ROBOT_MODEL, self.robot_data, self.x[:nq], False)
 
     def test_dimensions(self):
         self.assertEqual(self.COST.State.nx, self.cost_sum.State.nx, "Wrong nx.")
