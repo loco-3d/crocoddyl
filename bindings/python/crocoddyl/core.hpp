@@ -10,6 +10,7 @@
 #define BINDINGS_PYTHON_CROCODDYL_CORE_HPP_
 
 #include "python/crocoddyl/core/state-base.hpp"
+#include "python/crocoddyl/core/actuation-base.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
@@ -30,6 +31,7 @@ namespace python {
 
 void exposeCore() {
   exposeStateAbstract();
+  exposeActuationAbstract();
   exposeActionAbstract();
   exposeDifferentialActionAbstract();
   exposeActivationAbstract();
