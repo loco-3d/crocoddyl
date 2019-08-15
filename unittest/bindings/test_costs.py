@@ -20,8 +20,10 @@ class CostModelAbstractTestCase(unittest.TestCase):
         self.data = self.COST.createData(self.robot_data)
         self.data_der = self.COST_DER.createData(self.robot_data)
 
-        nq = self.ROBOT_MODEL.nq
+        nq, nv = self.ROBOT_MODEL.nq, self.ROBOT_MODEL.nv
         pinocchio.forwardKinematics(self.ROBOT_MODEL, self.robot_data, self.x[:nq], self.x[nq:])
+        pinocchio.computeForwardKinematicsDerivatives(self.ROBOT_MODEL, self.robot_data, self.x[:nq], self.x[nq:],
+                                                      pinocchio.utils.zero(nv))
         pinocchio.computeJointJacobians(self.ROBOT_MODEL, self.robot_data, self.x[:nq])
         pinocchio.updateFramePlacements(self.ROBOT_MODEL, self.robot_data)
         pinocchio.jacobianCenterOfMass(self.ROBOT_MODEL, self.robot_data, self.x[:nq], False)
@@ -75,8 +77,10 @@ class CostModelSumTestCase(unittest.TestCase):
         self.data = self.COST.createData(self.robot_data)
         self.data_sum = self.cost_sum.createData(self.robot_data)
 
-        nq = self.ROBOT_MODEL.nq
+        nq, nv = self.ROBOT_MODEL.nq, self.ROBOT_MODEL.nv
         pinocchio.forwardKinematics(self.ROBOT_MODEL, self.robot_data, self.x[:nq], self.x[nq:])
+        pinocchio.computeForwardKinematicsDerivatives(self.ROBOT_MODEL, self.robot_data, self.x[:nq], self.x[nq:],
+                                                      pinocchio.utils.zero(nv))
         pinocchio.computeJointJacobians(self.ROBOT_MODEL, self.robot_data, self.x[:nq])
         pinocchio.updateFramePlacements(self.ROBOT_MODEL, self.robot_data)
         pinocchio.jacobianCenterOfMass(self.ROBOT_MODEL, self.robot_data, self.x[:nq], False)
