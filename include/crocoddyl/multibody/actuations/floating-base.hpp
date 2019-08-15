@@ -19,9 +19,9 @@ class ActuationModelFloatingBase : public ActuationModelAbstract {
   explicit ActuationModelFloatingBase(StateMultibody& state);
   ~ActuationModelFloatingBase();
 
-  void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
+  void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& u);
   void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& u,
-                const bool& recalc = true) = 0;
+                const bool& recalc = true);
   boost::shared_ptr<ActuationDataAbstract> createData();
 };
 

@@ -20,6 +20,8 @@ SET(${PROJECT_NAME}_SOURCES
   multibody/cost-base.cpp
   multibody/contact-base.cpp
   multibody/states/multibody.cpp
+  multibody/actuations/floating-base.cpp
+  multibody/actuations/full.cpp
   multibody/costs/cost-sum.cpp
   multibody/costs/state.cpp
   multibody/costs/control.cpp
