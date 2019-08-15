@@ -1,7 +1,6 @@
 import crocoddyl
 import utils
 import pinocchio
-from random import randint
 import numpy as np
 import unittest
 import sys
