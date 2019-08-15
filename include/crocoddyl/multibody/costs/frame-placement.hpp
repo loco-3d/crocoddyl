@@ -19,7 +19,7 @@ class CostModelFramePlacement : public CostModelAbstract {
   CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation, const FramePlacement& Fref,
                           unsigned int const& nu);
   CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation, const FramePlacement& Fref);
-  CostModelFramePlacement(StateMultibody& state, const FramePlacement& Fref, const unsigned int& nu);
+  CostModelFramePlacement(StateMultibody& state, const FramePlacement& Fref, unsigned int const& nu);
   CostModelFramePlacement(StateMultibody& state, const FramePlacement& Fref);
   ~CostModelFramePlacement();
 

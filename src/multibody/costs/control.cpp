@@ -30,7 +30,7 @@ CostModelControl::CostModelControl(StateMultibody& state, const Eigen::VectorXd&
 CostModelControl::CostModelControl(StateMultibody& state)
     : CostModelAbstract(state, state.get_nv()), uref_(Eigen::VectorXd::Zero(state.get_nv())) {}
 
-CostModelControl::CostModelControl(StateMultibody& state, const unsigned int& nu)
+CostModelControl::CostModelControl(StateMultibody& state, unsigned int const& nu)
     : CostModelAbstract(state, nu, nu), uref_(Eigen::VectorXd::Zero(nu)) {}
 
 CostModelControl::~CostModelControl() {}
