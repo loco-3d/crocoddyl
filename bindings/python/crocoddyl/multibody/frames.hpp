@@ -40,6 +40,17 @@ void exposeFrames() {
       .def_readwrite("frame", &FramePlacement::frame, "frame ID")
       .add_property("oMf", bp::make_getter(&FramePlacement::oMf, bp::return_internal_reference<>()),
                     "frame placement");
+
+  bp::class_<FrameMotion, boost::noncopyable>(
+      "FrameMotion",
+      "Frame motion describe using Pinocchio.\n\n"
+      "It defines a frame motion (tangent of SE(3) point) for a given frame ID",
+      bp::init<int, pinocchio::Motion>(bp::args(" self", " frame", " oMf"),
+                                       "Initialize the frame motion.\n\n"
+                                       ":param frame: frame ID\n"
+                                       ":param oMf: Frame motion w.r.t. the origin"))
+      .def_readwrite("frame", &FrameMotion::frame, "frame ID")
+      .add_property("oMf", bp::make_getter(&FrameMotion::oMf, bp::return_internal_reference<>()), "frame motion");
 }
 
 }  // namespace python
