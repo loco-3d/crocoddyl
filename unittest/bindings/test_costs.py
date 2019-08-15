@@ -15,13 +15,15 @@ class CostModelAbstractTestCase(unittest.TestCase):
     def setUp(self):
         self.robot_data = self.ROBOT_MODEL.createData()
         self.x = self.ROBOT_STATE.rand()
-        self.u = np.matrix(np.random.rand(self.ROBOT_MODEL.nv)).T
+        self.u = pinocchio.utils.rand(self.ROBOT_MODEL.nv)
 
         self.data = self.COST.createData(self.robot_data)
         self.data_der = self.COST_DER.createData(self.robot_data)
 
-        nq = self.ROBOT_MODEL.nq
+        nq, nv = self.ROBOT_MODEL.nq, self.ROBOT_MODEL.nv
         pinocchio.forwardKinematics(self.ROBOT_MODEL, self.robot_data, self.x[:nq], self.x[nq:])
+        pinocchio.computeForwardKinematicsDerivatives(self.ROBOT_MODEL, self.robot_data, self.x[:nq], self.x[nq:],
+                                                      pinocchio.utils.zero(nv))
         pinocchio.computeJointJacobians(self.ROBOT_MODEL, self.robot_data, self.x[:nq])
         pinocchio.updateFramePlacements(self.ROBOT_MODEL, self.robot_data)
         pinocchio.jacobianCenterOfMass(self.ROBOT_MODEL, self.robot_data, self.x[:nq], False)
@@ -67,7 +69,7 @@ class CostModelSumTestCase(unittest.TestCase):
     def setUp(self):
         self.robot_data = self.ROBOT_MODEL.createData()
         self.x = self.ROBOT_STATE.rand()
-        self.u = np.matrix(np.random.rand(self.ROBOT_MODEL.nv)).T
+        self.u = pinocchio.utils.rand(self.ROBOT_MODEL.nv)
 
         self.cost_sum = crocoddyl.CostModelSum(self.ROBOT_STATE)
         self.cost_sum.addCost('myCost', self.COST, 1.)
@@ -75,8 +77,10 @@ class CostModelSumTestCase(unittest.TestCase):
         self.data = self.COST.createData(self.robot_data)
         self.data_sum = self.cost_sum.createData(self.robot_data)
 
-        nq = self.ROBOT_MODEL.nq
+        nq, nv = self.ROBOT_MODEL.nq, self.ROBOT_MODEL.nv
         pinocchio.forwardKinematics(self.ROBOT_MODEL, self.robot_data, self.x[:nq], self.x[nq:])
+        pinocchio.computeForwardKinematicsDerivatives(self.ROBOT_MODEL, self.robot_data, self.x[:nq], self.x[nq:],
+                                                      pinocchio.utils.zero(nv))
         pinocchio.computeJointJacobians(self.ROBOT_MODEL, self.robot_data, self.x[:nq])
         pinocchio.updateFramePlacements(self.ROBOT_MODEL, self.robot_data)
         pinocchio.jacobianCenterOfMass(self.ROBOT_MODEL, self.robot_data, self.x[:nq], False)
@@ -186,7 +190,7 @@ class FrameTranslationCostTest(CostModelAbstractTestCase):
     ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
-    xref = crocoddyl.FrameTranslation(ROBOT_MODEL.getFrameId('rleg5_joint'), np.matrix(np.random.rand(3)).T)
+    xref = crocoddyl.FrameTranslation(ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.utils.rand(3))
     COST = crocoddyl.CostModelFrameTranslation(ROBOT_STATE, xref)
     COST_DER = utils.FrameTranslationCostDerived(ROBOT_STATE, xref=xref)
 
@@ -195,15 +199,32 @@ class FrameTranslationCostSumTest(CostModelSumTestCase):
     ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
-    xref = crocoddyl.FrameTranslation(ROBOT_MODEL.getFrameId('rleg5_joint'), np.matrix(np.random.rand(3)).T)
+    xref = crocoddyl.FrameTranslation(ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.utils.rand(3))
     COST = crocoddyl.CostModelFrameTranslation(ROBOT_STATE, xref)
+
+
+class FrameVelocityCostTest(CostModelAbstractTestCase):
+    ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
+    ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+
+    vref = crocoddyl.FrameMotion(ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.Motion.Random())
+    COST = crocoddyl.CostModelFrameVelocity(ROBOT_STATE, vref)
+    COST_DER = utils.FrameVelocityCostDerived(ROBOT_STATE, vref=vref)
+
+
+class FrameVelocityCostSumTest(CostModelSumTestCase):
+    ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
+    ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+
+    vref = crocoddyl.FrameMotion(ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.Motion.Random())
+    COST = crocoddyl.CostModelFrameVelocity(ROBOT_STATE, vref)
 
 
 if __name__ == '__main__':
     test_classes_to_run = [
         StateCostTest, StateCostSumTest, ControlCostTest, ControlCostSumTest, CoMPositionCostTest,
         CoMPositionCostSumTest, FramePlacementCostTest, FramePlacementCostSumTest, FrameTranslationCostTest,
-        FrameTranslationCostSumTest
+        FrameTranslationCostSumTest, FrameVelocityCostTest, FrameVelocityCostSumTest
     ]
     loader = unittest.TestLoader()
     suites_list = []

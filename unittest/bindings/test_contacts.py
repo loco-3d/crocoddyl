@@ -93,7 +93,7 @@ class Contact3DTest(ContactModelAbstractTestCase):
     ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
-    gains = np.matrix(np.random.rand(2)).T
+    gains = pinocchio.utils.rand(2)
     xref = crocoddyl.FrameTranslation(ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.SE3.Random().translation)
     CONTACT = crocoddyl.ContactModel3D(ROBOT_STATE, xref, gains)
     CONTACT_DER = utils.Contact3DDerived(ROBOT_STATE, xref, gains)
@@ -103,7 +103,7 @@ class Contact3DMultipleTest(ContactModelMultipleAbstractTestCase):
     ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
-    gains = np.matrix(np.random.rand(2)).T
+    gains = pinocchio.utils.rand(2)
     xref = crocoddyl.FrameTranslation(ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.SE3.Random().translation)
     CONTACT = crocoddyl.ContactModel3D(ROBOT_STATE, xref, gains)
 

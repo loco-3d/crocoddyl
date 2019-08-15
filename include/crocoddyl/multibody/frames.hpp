@@ -12,19 +12,26 @@
 
 #include <Eigen/Dense>
 #include <pinocchio/spatial/se3.hpp>
+#include <pinocchio/spatial/motion.hpp>
 
 namespace crocoddyl {
 
 struct FrameTranslation {
-  FrameTranslation(const unsigned int& frame, const Eigen::Vector3d& oxf) : frame(frame), oxf(oxf) {}
+  FrameTranslation(unsigned int const& frame, const Eigen::Vector3d& oxf) : frame(frame), oxf(oxf) {}
   unsigned int frame;
   Eigen::Vector3d oxf;
 };
 
 struct FramePlacement {
-  FramePlacement(const unsigned int& frame, const pinocchio::SE3& oMf) : frame(frame), oMf(oMf) {}
+  FramePlacement(unsigned int const& frame, const pinocchio::SE3& oMf) : frame(frame), oMf(oMf) {}
   unsigned int frame;
   pinocchio::SE3 oMf;
+};
+
+struct FrameMotion {
+  FrameMotion(unsigned int const& frame, const pinocchio::Motion& oMf) : frame(frame), oMf(oMf) {}
+  unsigned int frame;
+  pinocchio::Motion oMf;
 };
 
 }  // namespace crocoddyl

@@ -21,7 +21,7 @@ class SolverAbstractTestCase(unittest.TestCase):
         self.xs.append(state.rand())
         for i in range(self.T):
             self.xs.append(state.rand())
-            self.us.append(np.matrix(np.random.rand(self.MODEL.nu)).T)
+            self.us.append(pinocchio.utils.rand(self.MODEL.nu))
         self.PROBLEM = crocoddyl.ShootingProblem(self.xs[0], [self.MODEL] * self.T, self.MODEL)
         self.PROBLEM_DER = crocoddyl.ShootingProblem(self.xs[0], [self.MODEL] * self.T, self.MODEL)
         self.solver = self.SOLVER(self.PROBLEM)

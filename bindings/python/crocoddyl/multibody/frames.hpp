@@ -22,7 +22,7 @@ void exposeFrames() {
       "Frame translation describe using Pinocchio.\n\n"
       "It defines a frame translation (3D vector) for a given frame ID",
       bp::init<int, Eigen::Vector3d>(bp::args(" self", " frame", " oxf"),
-                                     "Initialize the cost model.\n\n"
+                                     "Initialize the frame translation.\n\n"
                                      ":param frame: frame ID\n"
                                      ":param oxf: Frame translation w.r.t. the origin"))
       .def_readwrite("frame", &FrameTranslation::frame, "frame ID")
@@ -34,13 +34,23 @@ void exposeFrames() {
       "Frame placement describe using Pinocchio.\n\n"
       "It defines a frame placement (SE(3) point) for a given frame ID",
       bp::init<int, pinocchio::SE3>(bp::args(" self", " frame", " oMf"),
-                                    "Initialize the cost model.\n\n"
+                                    "Initialize the frame placement.\n\n"
                                     ":param frame: frame ID\n"
                                     ":param oMf: Frame placement w.r.t. the origin"))
       .def_readwrite("frame", &FramePlacement::frame, "frame ID")
-      .add_property("oMf",
-                    bp::make_getter(&FramePlacement::oMf, bp::return_value_policy<bp::reference_existing_object>()),
+      .add_property("oMf", bp::make_getter(&FramePlacement::oMf, bp::return_internal_reference<>()),
                     "frame placement");
+
+  bp::class_<FrameMotion, boost::noncopyable>(
+      "FrameMotion",
+      "Frame motion describe using Pinocchio.\n\n"
+      "It defines a frame motion (tangent of SE(3) point) for a given frame ID",
+      bp::init<int, pinocchio::Motion>(bp::args(" self", " frame", " oMf"),
+                                       "Initialize the frame motion.\n\n"
+                                       ":param frame: frame ID\n"
+                                       ":param oMf: Frame motion w.r.t. the origin"))
+      .def_readwrite("frame", &FrameMotion::frame, "frame ID")
+      .add_property("oMf", bp::make_getter(&FrameMotion::oMf, bp::return_internal_reference<>()), "frame motion");
 }
 
 }  // namespace python
