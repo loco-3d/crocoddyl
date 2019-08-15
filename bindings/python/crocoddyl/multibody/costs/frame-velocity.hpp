@@ -19,12 +19,12 @@ namespace bp = boost::python;
 void exposeCostFrameVelocity() {
   bp::class_<CostModelFrameVelocity, bp::bases<CostModelAbstract> >(
       "CostModelFrameVelocity", bp::init<StateMultibody&, ActivationModelAbstract&, FrameMotion, int>(
-                                     bp::args(" self", " state", " activation", " vref", " nu"),
-                                     "Initialize the frame velocity cost model.\n\n"
-                                     ":param state: state of the multibody system\n"
-                                     ":param activation: activation model\n"
-                                     ":param vref: reference frame velocity\n"
-                                     ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
+                                    bp::args(" self", " state", " activation", " vref", " nu"),
+                                    "Initialize the frame velocity cost model.\n\n"
+                                    ":param state: state of the multibody system\n"
+                                    ":param activation: activation model\n"
+                                    ":param vref: reference frame velocity\n"
+                                    ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
       .def(bp::init<StateMultibody&, ActivationModelAbstract&, FrameMotion>(
           bp::args(" self", " state", " activation", " vref"),
           "Initialize the frame velocity cost model.\n\n"
@@ -54,7 +54,7 @@ void exposeCostFrameVelocity() {
                                 ":param x: time-discrete state vector\n"
                                 ":param u: time-discrete control input"))
       .def<void (CostModelFrameVelocity::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                             const Eigen::VectorXd&, const bool&)>(
+                                            const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &CostModelFrameVelocity::calcDiff_wrap,
           bp::args(" self", " data", " x", " u=None", " recalc=True"),
           "Compute the derivatives of the frame velocity cost.\n\n"
@@ -63,13 +63,13 @@ void exposeCostFrameVelocity() {
           ":param u: time-discrete control input\n"
           ":param recalc: If true, it updates the state evolution and the cost value.")
       .def<void (CostModelFrameVelocity::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                             const Eigen::VectorXd&)>(
+                                            const Eigen::VectorXd&)>(
           "calcDiff", &CostModelFrameVelocity::calcDiff_wrap, bp::args(" self", " data", " x", " u"))
       .def<void (CostModelFrameVelocity::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &CostModelFrameVelocity::calcDiff_wrap, bp::args(" self", " data", " x"))
       .def<void (CostModelFrameVelocity::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                             const bool&)>("calcDiff", &CostModelFrameVelocity::calcDiff_wrap,
-                                                           bp::args(" self", " data", " x", " recalc"))
+                                            const bool&)>("calcDiff", &CostModelFrameVelocity::calcDiff_wrap,
+                                                          bp::args(" self", " data", " x", " recalc"))
       .def("createData", &CostModelFrameVelocity::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the frame velocity cost data.\n\n"
