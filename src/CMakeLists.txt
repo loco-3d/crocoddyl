@@ -25,6 +25,7 @@ SET(${PROJECT_NAME}_SOURCES
   multibody/costs/com-position.cpp
   multibody/costs/frame-placement.cpp
   multibody/costs/frame-translation.cpp
+  multibody/costs/frame-velocity.cpp
   multibody/contacts/multiple-contacts.cpp
   multibody/contacts/contact-3d.cpp
   multibody/actions/free-fwddyn.cpp
