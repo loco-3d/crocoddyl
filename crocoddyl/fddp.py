@@ -24,7 +24,6 @@ class SolverFDDP(SolverAbstract):
     searching for a good optimization.
     :param shootingProblem: shooting problem (list of action models along trajectory)
     """
-
     def __init__(self, shootingProblem):
         SolverAbstract.__init__(self, shootingProblem)
 

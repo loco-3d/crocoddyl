@@ -15,7 +15,6 @@ class ContactSequenceWrapper:
     2) end-effector trajectories (swing trajectories)
     3) easier accessors for centroidal trajectories and stored in centroidalphi class.
     """
-
     def __init__(self, cs, ee_map, ee_splines=None):
         self.cs = cs  # contact sequence file from multicontact-api
         self.ee_map = ee_map  # map of contact patches

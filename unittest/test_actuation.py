@@ -8,7 +8,6 @@ from testutils import NUMDIFF_MODIFIER, assertNumDiff
 
 class DifferentialActionModelActuated:
     '''Unperfect class written to validate the actuation model. Do not use except for tests. '''
-
     def __init__(self, pinocchioModel, actuationModel):
         self.pinocchio = pinocchioModel
         self.actuation = actuationModel

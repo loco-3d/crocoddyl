@@ -15,7 +15,6 @@ class ActionModelAbstract:
     the dynamics, cost functions and their derivatives. These computations are
     mainly carry on inside calc() and calcDiff(), respectively.
     """
-
     def __init__(self, State, nu):
         """ Construct common variables for action models.
 
@@ -194,7 +193,6 @@ class ActionDataLQR(ActionDataAbstract):
 class ActionModelNumDiff(ActionModelAbstract):
     """ Abstract action model that uses NumDiff for derivative computation.
     """
-
     def __init__(self, model, withGaussApprox=False):
         ActionModelAbstract.__init__(self, model.State, model.nu)
         self.ActionDataType = ActionDataNumDiff
