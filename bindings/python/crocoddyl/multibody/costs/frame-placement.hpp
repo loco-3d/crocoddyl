@@ -34,7 +34,7 @@ void exposeCostFramePlacement() {
           ":param Mref: reference frame placement")[bp::with_custodian_and_ward<1, 3>()])
       .def(bp::init<StateMultibody&, FramePlacement, int>(
           bp::args(" self", " state", " Mref", " nu"),
-          "Initialize the control cost model.\n\n"
+          "Initialize the frame placement cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(6).\n"
           ":param state: state of the multibody system\n"
@@ -42,7 +42,7 @@ void exposeCostFramePlacement() {
           ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2>()])
       .def(bp::init<StateMultibody&, FramePlacement>(
           bp::args(" self", " state", " Mref"),
-          "Initialize the control cost model.\n\n"
+          "Initialize the frame placement cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(6), and nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"

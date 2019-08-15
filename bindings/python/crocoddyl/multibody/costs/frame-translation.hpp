@@ -34,7 +34,7 @@ void exposeCostFrameTranslation() {
           ":param xref: reference frame translation")[bp::with_custodian_and_ward<1, 3>()])
       .def(bp::init<StateMultibody&, FrameTranslation, int>(
           bp::args(" self", " state", " xref", " nu"),
-          "Initialize the control cost model.\n\n"
+          "Initialize the frame translation cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(3).\n"
           ":param state: state of the multibody system\n"
@@ -42,7 +42,7 @@ void exposeCostFrameTranslation() {
           ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2>()])
       .def(bp::init<StateMultibody&, FrameTranslation>(
           bp::args(" self", " state", " xref"),
-          "Initialize the control cost model.\n\n"
+          "Initialize the frame translation cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(3), and nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
