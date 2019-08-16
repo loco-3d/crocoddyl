@@ -79,8 +79,7 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
   }
 
   // Computing the dynamics derivatives
-  // pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, d->qcur, d->vcur, d->xout, d->contacts->f);
-  // TODO(cmastalli): add forces in contact models
+  pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, d->qcur, d->vcur, d->xout, d->contacts->fext);
   pinocchio::computeForwardKinematicsDerivatives(pinocchio_, d->pinocchio, d->qcur, d->vcur, d->xout);
   pinocchio::updateFramePlacements(pinocchio_, d->pinocchio);
 

@@ -16,6 +16,8 @@
 
 namespace crocoddyl {
 
+struct ContactDataMultiple;  // forward declaration
+
 struct ContactItem {
   ContactItem() {}
   ContactItem(const std::string& name, ContactModelAbstract* contact) : name(name), contact(contact) {}
@@ -24,7 +26,7 @@ struct ContactItem {
   ContactModelAbstract* contact;
 };
 
-class ContactModelMultiple : public ContactModelAbstract {
+class ContactModelMultiple {
  public:
   typedef std::map<std::string, ContactItem> ContactModelContainer;
   typedef std::map<std::string, boost::shared_ptr<ContactDataAbstract> > ContactDataContainer;
@@ -36,18 +38,32 @@ class ContactModelMultiple : public ContactModelAbstract {
   void addContact(const std::string& name, ContactModelAbstract* const contact);
   void removeContact(const std::string& name);
 
-  void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
-  void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
+  void calcDiff(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const bool& recalc = true);
-  void updateLagrangian(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& lambda);
-  boost::shared_ptr<ContactDataAbstract> createData(pinocchio::Data* const data);
+  void updateLagrangian(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::VectorXd& lambda);
+  boost::shared_ptr<ContactDataMultiple> createData(pinocchio::Data* const data);
 
+  StateMultibody& get_state() const;
   const ContactModelContainer& get_contacts() const;
   const unsigned int& get_nc() const;
 
  private:
+  StateMultibody& state_;
   ContactModelContainer contacts_;
   unsigned int nc_;
+
+#ifdef PYTHON_BINDINGS
+
+ public:
+  void calc_wrap(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::VectorXd& x) { calc(data, x); }
+
+  void calcDiff_wrap(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::VectorXd& x,
+                     const bool& recalc = true) {
+    calcDiff(data, x, recalc);
+  }
+
+#endif
 };
 
 struct ContactDataMultiple : ContactDataAbstract {
