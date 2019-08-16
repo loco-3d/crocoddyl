@@ -30,6 +30,12 @@ class ContactModelAbstract_wrap : public ContactModelAbstract, public bp::wrappe
     assert(x.size() == state_.get_nx() && "ContactModelAbstract::calcDiff: x has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, recalc);
   }
+
+  void updateLagrangian(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& lambda) {
+    assert(lambda.size() <= 6 &&
+           "ContactModelAbstract::updateLagrangian: lambda has wrong dimension, it should be <= 6");
+    return bp::call<void>(this->get_override("updateLagrangian").ptr(), data, lambda);
+  }
 };
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ContactModel_calcDiff_wraps, ContactModelAbstract::calcDiff_wrap, 2, 3)
@@ -59,6 +65,11 @@ void exposeContactAbstract() {
            ":param data: cost data\n"
            ":param x: state vector\n"
            ":param recalc: If true, it updates the contact Jacobian and drift.")
+      .def("updateLagrangian", pure_virtual(&ContactModelAbstract_wrap::updateLagrangian),
+           bp::args(" self", " data", " lambda"),
+           "Convert the Lagrangian into a stack of spatial forces.\n\n"
+           ":param data: cost data\n"
+           ":param lambda: Lagrangian vector")
       .def("createData", &ContactModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the contact data.\n\n"
@@ -87,7 +98,8 @@ void exposeContactAbstract() {
       .add_property("a0", bp::make_getter(&ContactDataAbstract::a0, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ContactDataAbstract::a0), "contact drift")
       .add_property("Ax", bp::make_getter(&ContactDataAbstract::Ax, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ContactDataAbstract::Ax), "derivatives of the contact constraint");
+                    bp::make_setter(&ContactDataAbstract::Ax), "derivatives of the contact constraint")
+      .def_readwrite("fext", &ContactDataAbstract::fext, "external joint spatial forces");
 }
 
 }  // namespace python

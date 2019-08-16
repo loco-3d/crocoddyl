@@ -79,6 +79,26 @@ void ContactModelMultiple::calcDiff(const boost::shared_ptr<ContactDataAbstract>
   }
 }
 
+void ContactModelMultiple::updateLagrangian(const boost::shared_ptr<ContactDataAbstract>& data,
+                                            const Eigen::VectorXd& lambda) {
+  assert(lambda.size() == nc_ &&
+         "ContactModelMultiple::updateLagrangian: lambda has wrong dimension, it should be nc vector");
+  ContactDataMultiple* d = static_cast<ContactDataMultiple*>(data.get());
+  unsigned int nc = 0;
+
+  ContactModelContainer::iterator it_m, end_m;
+  ContactDataContainer::iterator it_d, end_d;
+  for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = d->contacts.begin(), end_d = d->contacts.end();
+       it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
+    const ContactItem& m_i = it_m->second;
+    boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+
+    unsigned int const& nc_i = m_i.contact->get_nc();
+    m_i.contact->updateLagrangian(d_i, lambda.segment(nc, nc_i));
+    nc += nc_i;
+  }
+}
+
 boost::shared_ptr<ContactDataAbstract> ContactModelMultiple::createData(pinocchio::Data* const data) {
   return boost::make_shared<ContactDataMultiple>(this, data);
 }

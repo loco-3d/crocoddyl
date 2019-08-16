@@ -25,6 +25,7 @@ class ContactModel3D : public ContactModelAbstract {
   void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
   void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const bool& recalc = true);
+  void updateLagrangian(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& lambda);
   boost::shared_ptr<ContactDataAbstract> createData(pinocchio::Data* const data);
 
   const FrameTranslation& get_xref() const;
@@ -42,7 +43,8 @@ struct ContactData3D : public ContactDataAbstract {
   ContactData3D(Model* const model, pinocchio::Data* const data)
       : ContactDataAbstract(model, data),
         joint(model->get_state().get_pinocchio().frames[model->get_xref().frame].parent),
-        fXj(model->get_state().get_pinocchio().frames[model->get_xref().frame].placement.inverse().toActionMatrix()),
+        jMf(model->get_state().get_pinocchio().frames[model->get_xref().frame].placement),
+        fXj(jMf.inverse().toActionMatrix()),
         fJf(6, model->get_state().get_nv()),
         v_partial_dq(6, model->get_state().get_nv()),
         a_partial_dq(6, model->get_state().get_nv()),
@@ -67,6 +69,7 @@ struct ContactData3D : public ContactDataAbstract {
   }
 
   pinocchio::JointIndex joint;
+  pinocchio::SE3 jMf;
   pinocchio::SE3::ActionMatrixType fXj;
   pinocchio::Motion v;
   pinocchio::Motion a;

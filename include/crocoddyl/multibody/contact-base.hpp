@@ -11,6 +11,7 @@
 
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include <pinocchio/multibody/data.hpp>
+#include <pinocchio/spatial/force.hpp>
 
 namespace crocoddyl {
 
@@ -25,6 +26,7 @@ class ContactModelAbstract {
                     const Eigen::Ref<const Eigen::VectorXd>& x) = 0;
   virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const bool& recalc = true) = 0;
+  virtual void updateLagrangian(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& lambda) = 0;
   virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::Data* const data);
 
   StateMultibody& get_state() const;
@@ -55,7 +57,8 @@ struct ContactDataAbstract {
       : pinocchio(data),
         Jc(model->get_nc(), model->get_state().get_nv()),
         a0(model->get_nc()),
-        Ax(model->get_nc(), model->get_state().get_ndx()) {
+        Ax(model->get_nc(), model->get_state().get_ndx()),
+        fext(model->get_state().get_pinocchio().njoints, pinocchio::Force::Zero()) {
     Jc.fill(0);
     a0.fill(0);
     Ax.fill(0);
@@ -65,6 +68,7 @@ struct ContactDataAbstract {
   Eigen::MatrixXd Jc;
   Eigen::VectorXd a0;
   Eigen::MatrixXd Ax;
+  pinocchio::container::aligned_vector<pinocchio::Force> fext;
 };
 
 }  // namespace crocoddyl

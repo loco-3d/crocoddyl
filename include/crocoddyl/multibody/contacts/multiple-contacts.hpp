@@ -38,6 +38,7 @@ class ContactModelMultiple : public ContactModelAbstract {
   void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
   void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const bool& recalc = true);
+  void updateLagrangian(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& lambda);
   boost::shared_ptr<ContactDataAbstract> createData(pinocchio::Data* const data);
 
   const ContactModelContainer& get_contacts() const;

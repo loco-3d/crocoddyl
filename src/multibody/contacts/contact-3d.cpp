@@ -67,6 +67,13 @@ void ContactModel3D::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data
   }
 }
 
+void ContactModel3D::updateLagrangian(const boost::shared_ptr<ContactDataAbstract>& data,
+                                      const Eigen::VectorXd& lambda) {
+  assert(lambda.size() == 3 && "ContactModel3D::updateLagrangian: lambda has wrong dimension, it should be 3d vector");
+  ContactData3D* d = static_cast<ContactData3D*>(data.get());
+  data->fext[d->joint] = d->jMf.act(pinocchio::Force(lambda, Eigen::Vector3d::Zero()));
+}
+
 boost::shared_ptr<ContactDataAbstract> ContactModel3D::createData(pinocchio::Data* const data) {
   return boost::make_shared<ContactData3D>(this, data);
 }

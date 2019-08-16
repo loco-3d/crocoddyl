@@ -43,6 +43,10 @@ void exposeContact3D() {
                                        ":param data: cost data\n"
                                        ":param x: state vector\n"
                                        ":param recalc: If true, it updates the contact Jacobian and drift."))
+      .def("updateLagrangian", &ContactModel3D::updateLagrangian, bp::args(" self", " data", " lambda"),
+           "Convert the Lagrangian into a stack of spatial forces.\n\n"
+           ":param data: cost data\n"
+           ":param lambda: Lagrangian vector")
       .def("createData", &ContactModel3D::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the 3D contact data.\n\n"
