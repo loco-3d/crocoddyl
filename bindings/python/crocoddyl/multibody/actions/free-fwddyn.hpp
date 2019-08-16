@@ -62,21 +62,21 @@ void exposeDifferentialActionFreeFwdDynamics() {
                                                             const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &DifferentialActionModelFreeFwdDynamics::calcDiff_wrap,
           bp::args(" self", " data", " x", " recalc"))
+      .def("createData", &DifferentialActionModelFreeFwdDynamics::createData, bp::args(" self"),
+           "Create the free forward dynamics differential action data.")
       .add_property(
           "pinocchio",
           bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_pinocchio, bp::return_internal_reference<>()),
           "multibody model (i.e. pinocchio model)")
-      .add_property("armature",
-                    bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_armature,
-                                      bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_function(&DifferentialActionModelFreeFwdDynamics::set_armature),
-                    "set an armature mechanism in the joints")
       .add_property(
           "costs",
           bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_costs, bp::return_internal_reference<>()),
           "total cost model")
-      .def("createData", &DifferentialActionModelFreeFwdDynamics::createData, bp::args(" self"),
-           "Create the free forward dynamics differential action data.");
+      .add_property("armature",
+                    bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_armature,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&DifferentialActionModelFreeFwdDynamics::set_armature),
+                    "set an armature mechanism in the joints");
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataFreeFwdDynamics> >();
 
