@@ -99,7 +99,8 @@ void exposeContactAbstract() {
                     bp::make_setter(&ContactDataAbstract::a0), "contact drift")
       .add_property("Ax", bp::make_getter(&ContactDataAbstract::Ax, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ContactDataAbstract::Ax), "derivatives of the contact constraint")
-      .def_readwrite("fext", &ContactDataAbstract::fext, "external joint spatial forces");
+      .def_readwrite("joint", &ContactDataAbstract::joint, "joint index of the contact frame")
+      .def_readwrite("f", &ContactDataAbstract::f, "external spatial forces");
 }
 
 }  // namespace python

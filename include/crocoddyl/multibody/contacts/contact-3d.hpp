@@ -42,7 +42,6 @@ struct ContactData3D : public ContactDataAbstract {
   template <typename Model>
   ContactData3D(Model* const model, pinocchio::Data* const data)
       : ContactDataAbstract(model, data),
-        joint(model->get_state().get_pinocchio().frames[model->get_xref().frame].parent),
         jMf(model->get_state().get_pinocchio().frames[model->get_xref().frame].placement),
         fXj(jMf.inverse().toActionMatrix()),
         fJf(6, model->get_state().get_nv()),
@@ -53,6 +52,7 @@ struct ContactData3D : public ContactDataAbstract {
         fXjdv_dq(6, model->get_state().get_nv()),
         fXjda_dq(6, model->get_state().get_nv()),
         fXjda_dv(6, model->get_state().get_nv()) {
+    joint = model->get_state().get_pinocchio().frames[model->get_xref().frame].parent;
     fJf.fill(0);
     v_partial_dq.fill(0);
     a_partial_dq.fill(0);
@@ -68,7 +68,6 @@ struct ContactData3D : public ContactDataAbstract {
     oRf.fill(0);
   }
 
-  pinocchio::JointIndex joint;
   pinocchio::SE3 jMf;
   pinocchio::SE3::ActionMatrixType fXj;
   pinocchio::Motion v;

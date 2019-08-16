@@ -55,20 +55,22 @@ struct ContactDataAbstract {
   template <typename Model>
   ContactDataAbstract(Model* const model, pinocchio::Data* const data)
       : pinocchio(data),
+        joint(0),
         Jc(model->get_nc(), model->get_state().get_nv()),
         a0(model->get_nc()),
         Ax(model->get_nc(), model->get_state().get_ndx()),
-        fext(model->get_state().get_pinocchio().njoints, pinocchio::Force::Zero()) {
+        f(pinocchio::Force::Zero()) {
     Jc.fill(0);
     a0.fill(0);
     Ax.fill(0);
   }
 
   pinocchio::Data* pinocchio;
+  pinocchio::JointIndex joint;
   Eigen::MatrixXd Jc;
   Eigen::VectorXd a0;
   Eigen::MatrixXd Ax;
-  pinocchio::container::aligned_vector<pinocchio::Force> fext;
+  pinocchio::Force f;
 };
 
 }  // namespace crocoddyl

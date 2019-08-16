@@ -28,6 +28,7 @@ class ContactModelMultiple : public ContactModelAbstract {
  public:
   typedef std::map<std::string, ContactItem> ContactModelContainer;
   typedef std::map<std::string, boost::shared_ptr<ContactDataAbstract> > ContactDataContainer;
+  typedef pinocchio::container::aligned_vector<pinocchio::Force>::iterator ForceIterator;
 
   ContactModelMultiple(StateMultibody& state);
   ~ContactModelMultiple();
@@ -53,7 +54,8 @@ struct ContactDataMultiple : ContactDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  ContactDataMultiple(Model* const model, pinocchio::Data* const data) : ContactDataAbstract(model, data) {
+  ContactDataMultiple(Model* const model, pinocchio::Data* const data)
+      : ContactDataAbstract(model, data), fext(model->get_state().get_pinocchio().njoints, pinocchio::Force::Zero()) {
     for (ContactModelMultiple::ContactModelContainer::const_iterator it = model->get_contacts().begin();
          it != model->get_contacts().end(); ++it) {
       const ContactItem& item = it->second;
@@ -62,6 +64,7 @@ struct ContactDataMultiple : ContactDataAbstract {
   }
 
   ContactModelMultiple::ContactDataContainer contacts;
+  pinocchio::container::aligned_vector<pinocchio::Force> fext;
 };
 
 }  // namespace crocoddyl

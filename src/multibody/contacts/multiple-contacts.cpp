@@ -86,6 +86,10 @@ void ContactModelMultiple::updateLagrangian(const boost::shared_ptr<ContactDataA
   ContactDataMultiple* d = static_cast<ContactDataMultiple*>(data.get());
   unsigned int nc = 0;
 
+  for (ForceIterator it = d->fext.begin(); it != d->fext.end(); ++it) {
+    *it = pinocchio::Force::Zero();
+  }
+
   ContactModelContainer::iterator it_m, end_m;
   ContactDataContainer::iterator it_d, end_d;
   for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = d->contacts.begin(), end_d = d->contacts.end();
@@ -95,6 +99,7 @@ void ContactModelMultiple::updateLagrangian(const boost::shared_ptr<ContactDataA
 
     unsigned int const& nc_i = m_i.contact->get_nc();
     m_i.contact->updateLagrangian(d_i, lambda.segment(nc, nc_i));
+    d->fext[d_i->joint] = d_i->f;
     nc += nc_i;
   }
 }
