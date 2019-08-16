@@ -21,11 +21,13 @@ class ContactModelAbstract_wrap : public ContactModelAbstract, public bp::wrappe
   ContactModelAbstract_wrap(StateMultibody& state, int nc) : ContactModelAbstract(state, nc) {}
 
   void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
+    assert(x.size() == state_.get_nx() && "ContactModelAbstract::calc: x has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x);
   }
 
   void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const bool& recalc = true) {
+    assert(x.size() == state_.get_nx() && "ContactModelAbstract::calcDiff: x has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, recalc);
   }
 };
