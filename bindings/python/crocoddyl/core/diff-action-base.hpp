@@ -147,7 +147,7 @@ void exposeDifferentialActionAbstract() {
           bp::make_function(&DifferentialActionDataAbstract::get_Luu, bp::return_value_policy<bp::return_by_value>()),
           bp::make_function(&DifferentialActionDataAbstract::set_Luu), "Hessian of the cost")
       .add_property(
-          "costResiduals",
+          "r",
           bp::make_function(&DifferentialActionDataAbstract::get_r, bp::return_value_policy<bp::return_by_value>()),
           bp::make_function(&DifferentialActionDataAbstract::set_r), "cost residual")
       .add_property(

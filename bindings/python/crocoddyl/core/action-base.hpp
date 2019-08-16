@@ -119,7 +119,7 @@ void exposeActionAbstract() {
                     bp::make_setter(&ActionDataAbstract::Lxu), "Hessian of the cost")
       .add_property("Luu", bp::make_getter(&ActionDataAbstract::Luu, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ActionDataAbstract::Luu), "Hessian of the cost")
-      .add_property("costResiduals",
+      .add_property("r",
                     bp::make_getter(&ActionDataAbstract::r, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ActionDataAbstract::r), "cost residual")
       .add_property("Rx", bp::make_getter(&ActionDataAbstract::Rx, bp::return_value_policy<bp::return_by_value>()),
