@@ -83,22 +83,31 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
   pinocchio::computeForwardKinematicsDerivatives(pinocchio_, d->pinocchio, d->qcur, d->vcur, d->xout);
   pinocchio::updateFramePlacements(pinocchio_, d->pinocchio);
 
-  // if (force_aba_) {
-  //   pinocchio::computeABADerivatives(pinocchio_, d->pinocchio, d->qcur, d->vcur, u);
-  //   d->Fx.leftCols(nv) = d->pinocchio.ddq_dq;
-  //   d->Fx.rightCols(nv) = d->pinocchio.ddq_dv;
-  //   d->Fu = d->pinocchio.Minv;
-  // } else {
-  //   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, d->qcur, d->vcur, d->xout);
-  //   d->Fx.leftCols(nv).noalias() = d->Minv * d->pinocchio.dtau_dq;
-  //   d->Fx.leftCols(nv) *= -1.;
-  //   d->Fx.rightCols(nv).noalias() = d->Minv * d->pinocchio.dtau_dv;
-  //   d->Fx.rightCols(nv) *= -1.;
-  //   d->Fu = d->Minv;
-  // }
+  actuation_.calcDiff(d->actuation, x, u, false);
+  contacts_.calcDiff(d->contacts, x, false);
 
-  // // Computing the cost derivatives
-  // costs_.calcDiff(d->costs, x, u, false);
+  // Kinv = [ [a_partial_dtau, -a_partial_da], [-f_partial_dtau, f_partial_da] ]
+  pinocchio::cholesky::decompose(pinocchio_, d->pinocchio);
+  d->Minv.setZero();
+  pinocchio::cholesky::computeMinv(pinocchio_, d->pinocchio, d->Minv);
+  // TODO(cmastalli): use cholesky
+  d->f_partial_da = d->pinocchio.JMinvJt.inverse();
+  d->JtinvM.noalias() = d->f_partial_da * d->contacts->Jc;
+  d->f_partial_dtau.noalias() = -d->JtinvM * d->Minv;
+  d->a_partial_da = d->f_partial_dtau.transpose();
+  d->JtJtinv.noalias() = -d->contacts->Jc.transpose() * d->f_partial_dtau;
+  d->a_partial_dtau.noalias() = d->Minv - d->Minv * d->JtJtinv;
+
+  d->Fx.leftCols(nv).noalias() = d->a_partial_dtau * d->pinocchio.dtau_dq;
+  d->Fx.rightCols(nv).noalias() = d->a_partial_dtau * d->pinocchio.dtau_dv;
+  d->Fx.noalias() += d->a_partial_da * d->contacts->Ax;
+  d->Fx.noalias() += d->a_partial_dtau * d->actuation->Ax;
+  d->Fu.noalias() = d->a_partial_dtau * d->actuation->Au;
+
+  // Computing the cost derivatives
+  // TODO(cmastalli): Set the derivatives of the Lagrangian, i.e. compute f_partial_dx and f_partial_du
+  // contacts_.updateLagrangian(d->contacts, -d->pinocchio.lambda_c);
+  costs_.calcDiff(d->costs, x, u, false);
 }
 
 boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelContactFwdDynamics::createData() {

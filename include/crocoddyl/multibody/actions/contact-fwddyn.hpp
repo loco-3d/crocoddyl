@@ -53,17 +53,39 @@ struct DifferentialActionDataContactFwdDynamics : public DifferentialActionDataA
 
   template <typename Model>
   explicit DifferentialActionDataContactFwdDynamics(Model* const model)
-      : DifferentialActionDataAbstract(model), pinocchio(pinocchio::Data(model->get_pinocchio())) {
+      : DifferentialActionDataAbstract(model),
+        pinocchio(pinocchio::Data(model->get_pinocchio())),
+        a_partial_dtau(model->get_state().get_nv(), model->get_state().get_nv()),
+        a_partial_da(model->get_state().get_nv(), model->get_contacts().get_nc()),
+        f_partial_dtau(model->get_contacts().get_nc(), model->get_state().get_nv()),
+        f_partial_da(model->get_contacts().get_nc(), model->get_contacts().get_nc()),
+        Minv(model->get_state().get_nv(), model->get_state().get_nv()),
+        JtinvM(model->get_contacts().get_nc(), model->get_state().get_nv()),
+        JtJtinv(model->get_state().get_nv(), model->get_state().get_nv()) {
     actuation = model->get_actuation().createData();
     contacts = model->get_contacts().createData(&pinocchio);
     costs = model->get_costs().createData(&pinocchio);
     shareCostMemory(costs);
+    a_partial_dtau.fill(0);
+    a_partial_da.fill(0);
+    f_partial_dtau.fill(0);
+    f_partial_da.fill(0);
+    Minv.fill(0);
+    JtinvM.fill(0);
+    JtJtinv.fill(0);
   }
 
   pinocchio::Data pinocchio;
   boost::shared_ptr<ActuationDataAbstract> actuation;
   boost::shared_ptr<ContactDataMultiple> contacts;
   boost::shared_ptr<CostDataSum> costs;
+  Eigen::MatrixXd a_partial_dtau;
+  Eigen::MatrixXd a_partial_da;
+  Eigen::MatrixXd f_partial_dtau;
+  Eigen::MatrixXd f_partial_da;
+  Eigen::MatrixXd Minv;
+  Eigen::MatrixXd JtinvM;
+  Eigen::MatrixXd JtJtinv;
 };
 
 }  // namespace crocoddyl
