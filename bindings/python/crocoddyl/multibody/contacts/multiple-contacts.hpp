@@ -31,7 +31,7 @@ void exposeContactMultiple() {
                           map_to_dict<std::string, ContactItem> >();
   bp::to_python_converter<std::map<std::string, ContactDataPtr, std::less<std::string>,
                                    std::allocator<std::pair<const std::string, ContactDataPtr> > >,
-                          map_to_dict<std::string, ContactDataPtr> >();
+                          map_to_dict<std::string, ContactDataPtr, false> >();
   dict_to_map<std::string, ContactItem>().from_python();
   dict_to_map<std::string, ContactDataPtr>().from_python();
 
