@@ -117,7 +117,7 @@ struct DifferentialActionDataAbstract {
     Ru.fill(0);
   }
 
-  void shareCostMemory(const boost::shared_ptr<CostDataAbstract>& costs) {
+  void shareCostMemory(const boost::shared_ptr<CostDataSum>& costs) {
     // Share memory with the cost data
     new (&Lx_ref) Eigen::Map<Eigen::VectorXd>(&costs->Lx(0), costs->Lx.size());
     new (&Lu_ref) Eigen::Map<Eigen::VectorXd>(&costs->Lu(0), costs->Lu.size());

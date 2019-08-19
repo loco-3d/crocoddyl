@@ -91,7 +91,7 @@ class CostModelSumTestCase(unittest.TestCase):
         self.assertEqual(self.COST.nu, self.cost_sum.nu, "Wrong nu.")
         self.assertEqual(self.COST.State.nq, self.cost_sum.State.nq, "Wrong nq.")
         self.assertEqual(self.COST.State.nv, self.cost_sum.State.nv, "Wrong nv.")
-        self.assertEqual(self.COST.activation.nr, self.cost_sum.activation.nr, "Wrong nr.")
+        self.assertEqual(self.COST.activation.nr, self.cost_sum.nr, "Wrong nr.")
 
     def test_calc(self):
         # Run calc for both action models

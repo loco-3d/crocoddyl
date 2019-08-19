@@ -11,10 +11,10 @@
 namespace crocoddyl {
 
 CostModelSum::CostModelSum(StateMultibody& state, unsigned int const& nu, const bool& with_residuals)
-    : CostModelAbstract(state, (unsigned int)0, nu, with_residuals), nr_(0) {}
+    : state_(state), nu_(nu), nr_(0), with_residuals_(with_residuals) {}
 
 CostModelSum::CostModelSum(StateMultibody& state, const bool& with_residuals)
-    : CostModelAbstract(state, (unsigned int)0, with_residuals), nr_(0) {}
+    : state_(state), nu_(state.get_nv()), nr_(0), with_residuals_(with_residuals) {}
 
 CostModelSum::~CostModelSum() {}
 
@@ -26,7 +26,6 @@ void CostModelSum::addCost(const std::string& name, CostModelAbstract* const cos
   } else {
     nr_ += cost->get_activation().get_nr();
   }
-  activation_.set_nr(nr_);
 }
 
 void CostModelSum::removeCost(const std::string& name) {
@@ -37,74 +36,82 @@ void CostModelSum::removeCost(const std::string& name) {
   } else {
     std::cout << "Warning: this cost item doesn't exist, we cannot remove it" << std::endl;
   }
-  activation_.set_nr(nr_);
 }
 
-void CostModelSum::calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const Eigen::Ref<const Eigen::VectorXd>& u) {
-  CostDataSum* d = static_cast<CostDataSum*>(data.get());
-  d->cost = 0.;
+  data->cost = 0.;
   unsigned int nr = 0;
 
   CostModelContainer::iterator it_m, end_m;
   CostDataContainer::iterator it_d, end_d;
-  for (it_m = costs_.begin(), end_m = costs_.end(), it_d = d->costs.begin(), end_d = d->costs.end();
+  for (it_m = costs_.begin(), end_m = costs_.end(), it_d = data->costs.begin(), end_d = data->costs.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const CostItem& m_i = it_m->second;
     boost::shared_ptr<CostDataAbstract>& d_i = it_d->second;
 
     m_i.cost->calc(d_i, x, u);
-    d->cost += m_i.weight * d_i->cost;
+    data->cost += m_i.weight * d_i->cost;
     if (with_residuals_) {
       unsigned int const& nr_i = m_i.cost->get_activation().get_nr();
-      d->r.segment(nr, nr_i) = sqrt(m_i.weight) * d_i->r;
+      data->r.segment(nr, nr_i) = sqrt(m_i.weight) * d_i->r;
       nr += nr_i;
     }
   }
 }
 
-void CostModelSum::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                            const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
-                            const bool& recalc) {
+void CostModelSum::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+                            const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (recalc) {
     calc(data, x, u);
   }
-  CostDataSum* d = static_cast<CostDataSum*>(data.get());
   unsigned int nr = 0;
-  d->Lx.fill(0);
-  d->Lu.fill(0);
-  d->Lxx.fill(0);
-  d->Lxu.fill(0);
-  d->Luu.fill(0);
+  data->Lx.fill(0);
+  data->Lu.fill(0);
+  data->Lxx.fill(0);
+  data->Lxu.fill(0);
+  data->Luu.fill(0);
 
   unsigned int const& ndx = state_.get_ndx();
   CostModelContainer::iterator it_m, end_m;
   CostDataContainer::iterator it_d, end_d;
-  for (it_m = costs_.begin(), end_m = costs_.end(), it_d = d->costs.begin(), end_d = d->costs.end();
+  for (it_m = costs_.begin(), end_m = costs_.end(), it_d = data->costs.begin(), end_d = data->costs.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const CostItem& m_i = it_m->second;
     boost::shared_ptr<CostDataAbstract>& d_i = it_d->second;
 
     m_i.cost->calcDiff(d_i, x, u);
-    d->Lx += m_i.weight * d_i->Lx;
-    d->Lu += m_i.weight * d_i->Lu;
-    d->Lxx += m_i.weight * d_i->Lxx;
-    d->Lxu += m_i.weight * d_i->Lxu;
-    d->Luu += m_i.weight * d_i->Luu;
+    data->Lx += m_i.weight * d_i->Lx;
+    data->Lu += m_i.weight * d_i->Lu;
+    data->Lxx += m_i.weight * d_i->Lxx;
+    data->Lxu += m_i.weight * d_i->Lxu;
+    data->Luu += m_i.weight * d_i->Luu;
     if (with_residuals_) {
       const unsigned int& nr_i = m_i.cost->get_activation().get_nr();
-      d->Rx.block(nr, 0, nr_i, ndx) = sqrt(m_i.weight) * d_i->Rx;
-      d->Ru.block(nr, 0, nr_i, nu_) = sqrt(m_i.weight) * d_i->Ru;
+      data->Rx.block(nr, 0, nr_i, ndx) = sqrt(m_i.weight) * d_i->Rx;
+      data->Ru.block(nr, 0, nr_i, nu_) = sqrt(m_i.weight) * d_i->Ru;
       nr += nr_i;
     }
   }
 }
 
-boost::shared_ptr<CostDataAbstract> CostModelSum::createData(pinocchio::Data* const data) {
+boost::shared_ptr<CostDataSum> CostModelSum::createData(pinocchio::Data* const data) {
   return boost::make_shared<CostDataSum>(this, data);
 }
 
+void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
+  calc(data, x, unone_);
+}
+
+void CostModelSum::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
+  calcDiff(data, x, unone_);
+}
+
+StateMultibody& CostModelSum::get_state() const { return state_; }
+
 const CostModelSum::CostModelContainer& CostModelSum::get_costs() const { return costs_; }
+
+const unsigned int& CostModelSum::get_nu() const { return nu_; }
 
 const unsigned int& CostModelSum::get_nr() const { return nr_; }
 

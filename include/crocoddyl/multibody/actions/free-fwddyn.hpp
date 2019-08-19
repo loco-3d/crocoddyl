@@ -56,7 +56,7 @@ struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbst
   }
 
   pinocchio::Data pinocchio;
-  boost::shared_ptr<CostDataAbstract> costs;
+  boost::shared_ptr<CostDataSum> costs;
   Eigen::MatrixXd Minv;
   Eigen::VectorXd u_drift;
 };

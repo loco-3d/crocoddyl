@@ -75,6 +75,7 @@ class CostModelAbstract {
   void calcDiff_wrap(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x, const bool& recalc) {
     calcDiff(data, x, unone_, recalc);
   }
+
 #endif
 };
 

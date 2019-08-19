@@ -63,7 +63,7 @@ struct DifferentialActionDataContactFwdDynamics : public DifferentialActionDataA
   pinocchio::Data pinocchio;
   boost::shared_ptr<ActuationDataAbstract> actuation;
   boost::shared_ptr<ContactDataMultiple> contacts;
-  boost::shared_ptr<CostDataAbstract> costs;
+  boost::shared_ptr<CostDataSum> costs;
 };
 
 }  // namespace crocoddyl
