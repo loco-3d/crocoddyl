@@ -97,7 +97,7 @@ void exposeContactMultiple() {
       .add_property("contacts",
                     bp::make_getter(&ContactDataMultiple::contacts, bp::return_value_policy<bp::return_by_value>()),
                     "stack of contacts data")
-      .def_readwrite("fex", &ContactDataMultiple::fext, "external spatial forces");
+      .def_readwrite("fext", &ContactDataMultiple::fext, "external spatial forces");
 }
 
 }  // namespace python
