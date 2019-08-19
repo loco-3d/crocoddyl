@@ -30,7 +30,7 @@ void exposeDifferentialActionContactFwdDynamics() {
           ":param state: multibody state\n"
           ":param actuation: floating-base actuation model\n"
           ":param contacts: multiple contact model\n"
-          ":param costs: stack of cost functions")[bp::with_custodian_and_ward<1, 3>()])
+          ":param costs: stack of cost functions")[bp::with_custodian_and_ward<1, 5>()])
       .def("calc", &DifferentialActionModelContactFwdDynamics::calc_wrap,
            DiffActionModel_calc_wraps(
                bp::args(" self", " data", " x", " u=None"),
