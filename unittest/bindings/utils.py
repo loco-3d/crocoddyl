@@ -132,8 +132,7 @@ class FreeFloatingActuationDerived(crocoddyl.ActuationModelAbstract):
     def calcDiff(self, data, x, u, recalc=True):
         if recalc:
             self.calc(data, x, u)
-        Au = pinocchio.utils.eye(self.State.nv)
-        Au[range(6), range(6)] *= 0
+        Au = np.vstack([pinocchio.utils.zero((6, self.nu)) , pinocchio.utils.eye(self.nu)])
         data.Au = Au
 
 

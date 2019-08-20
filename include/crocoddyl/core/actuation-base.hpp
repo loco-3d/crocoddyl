@@ -60,7 +60,7 @@ struct ActuationDataAbstract {
   explicit ActuationDataAbstract(Model* const model)
       : a(model->get_state().get_nv()),
         Ax(model->get_state().get_nv(), model->get_state().get_ndx()),
-        Au(model->get_state().get_nv(), model->get_state().get_nv()) {
+        Au(model->get_state().get_nv(), model->get_nu()) {
     a.fill(0);
     Ax.fill(0);
     Au.fill(0);

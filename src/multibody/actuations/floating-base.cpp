@@ -40,7 +40,7 @@ void ActuationModelFloatingBase::calcDiff(const boost::shared_ptr<ActuationDataA
 
 boost::shared_ptr<ActuationDataAbstract> ActuationModelFloatingBase::createData() {
   boost::shared_ptr<ActuationDataAbstract> data = boost::make_shared<ActuationDataAbstract>(this);
-  data->Au.diagonal() << Eigen::VectorXd::Zero(6), Eigen::VectorXd::Ones(nu_);
+  data->Au.diagonal(-6).fill(1.);
   return data;
 }
 
