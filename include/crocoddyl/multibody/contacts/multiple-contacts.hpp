@@ -16,8 +16,6 @@
 
 namespace crocoddyl {
 
-struct ContactDataMultiple;  // forward declaration
-
 struct ContactItem {
   ContactItem() {}
   ContactItem(const std::string& name, ContactModelAbstract* contact) : name(name), contact(contact) {}
@@ -25,6 +23,8 @@ struct ContactItem {
   std::string name;
   ContactModelAbstract* contact;
 };
+
+struct ContactDataMultiple;  // forward declaration
 
 class ContactModelMultiple {
  public:

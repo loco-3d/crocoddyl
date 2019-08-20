@@ -42,7 +42,8 @@ void exposeShootingProblem() {
           "Initialize the shooting problem.\n\n"
           ":param initialState: initial state\n"
           ":param runningModels: running action models\n"
-          ":param terminalModel: terminal action model")[bp::with_custodian_and_ward<1, 4>()])
+          ":param terminalModel: terminal action model")
+          [bp::with_custodian_and_ward<1, 3, bp::with_custodian_and_ward<1, 4> >()])
       .def("calc", &ShootingProblem::calc, bp::args(" self", " xs", " us"),
            "Compute the cost and the next states.\n\n"
            "First, it computes the next state and cost for each action model\n"

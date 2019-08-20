@@ -18,25 +18,28 @@ namespace bp = boost::python;
 
 void exposeCostControl() {
   bp::class_<CostModelControl, bp::bases<CostModelAbstract> >(
-      "CostModelControl", bp::init<StateMultibody&, ActivationModelAbstract&, Eigen::VectorXd>(
-                              bp::args(" self", " state", " activation", " uref"),
-                              "Initialize the control cost model.\n\n"
-                              ":param state: state of the multibody system\n"
-                              ":param activation: activation model\n"
-                              ":param uref: reference control")[bp::with_custodian_and_ward<1, 3>()])
+      "CostModelControl",
+      bp::init<StateMultibody&, ActivationModelAbstract&, Eigen::VectorXd>(
+          bp::args(" self", " state", " activation", " uref"),
+          "Initialize the control cost model.\n\n"
+          ":param state: state of the multibody system\n"
+          ":param activation: activation model\n"
+          ":param uref: reference control")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .def(bp::init<StateMultibody&, ActivationModelAbstract&>(
           bp::args(" self", " state", " activation"),
           "Initialize the control cost model.\n\n"
           "For this case the default uref is the zeros state, i.e. np.zero(nu), where nu is equals to activation.nr.\n"
           ":param state: state of the multibody system\n"
-          ":param activation: activation model")[bp::with_custodian_and_ward<1, 3>()])
+          ":param activation: activation model")[bp::with_custodian_and_ward<1, 2,
+                                                                             bp::with_custodian_and_ward<1, 3> >()])
       .def(bp::init<StateMultibody&, ActivationModelAbstract&, int>(
           bp::args(" self", " state", " activation", " nu"),
           "Initialize the control cost model.\n\n"
           "For this case the default uref is the zeros state, i.e. np.zero(nu).\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
-          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
+          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2,
+                                                                                bp::with_custodian_and_ward<1, 3> >()])
       .def(bp::init<StateMultibody&, Eigen::VectorXd>(
           bp::args(" self", " state", " uref"),
           "Initialize the control cost model.\n\n"

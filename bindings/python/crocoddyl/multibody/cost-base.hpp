@@ -56,13 +56,15 @@ void exposeCostMultibody() {
           ":param state: state of the multibody system\n"
           ":param activation: Activation model\n"
           ":param nu: dimension of control vector\n"
-          ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 3>()])
+          ":param withResiduals: true if the cost function has residuals")
+          [bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .def(bp::init<StateMultibody&, ActivationModelAbstract&, bp::optional<bool> >(
           bp::args(" self", " state", " activation", " withResiduals=True"),
           "Initialize the cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: Activation model\n"
-          ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 3>()])
+          ":param withResiduals: true if the cost function has residuals")
+               [bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .def(bp::init<StateMultibody&, int, int, bp::optional<bool> >(
           bp::args(" self", " state", " nr", " nu=model.nv", " withResiduals=True"),
           "Initialize the cost model.\n\n"
@@ -112,7 +114,7 @@ void exposeCostMultibody() {
           bp::args(" self", " model", " data"),
           "Create common data shared between cost models.\n\n"
           ":param model: cost model\n"
-          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
+          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("pinocchio", bp::make_getter(&CostDataAbstract::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
       .add_property("activation",

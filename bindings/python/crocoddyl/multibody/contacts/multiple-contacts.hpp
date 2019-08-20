@@ -93,7 +93,7 @@ void exposeContactMultiple() {
           bp::args(" self", " model", " data"),
           "Create multicontact data.\n\n"
           ":param model: multicontact model\n"
-          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
+          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("contacts",
                     bp::make_getter(&ContactDataMultiple::contacts, bp::return_value_policy<bp::return_by_value>()),
                     "stack of contacts data")

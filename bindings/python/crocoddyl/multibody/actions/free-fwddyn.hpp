@@ -24,11 +24,11 @@ void exposeDifferentialActionFreeFwdDynamics() {
       "or a custom implementation in case of system with armatures. If you want to\n"
       "include the armature, you need to use setArmature(). On the other hand, the\n"
       "stack of cost functions are implemented in CostModelSum().",
-      bp::init<StateMultibody&, CostModelSum&>(
-          bp::args(" self", " state", " costs"),
-          "Initialize the free forward-dynamics action model.\n\n"
-          ":param state: multibody state\n"
-          ":param costs: stack of cost functions")[bp::with_custodian_and_ward<1, 3>()])
+      bp::init<StateMultibody&, CostModelSum&>(bp::args(" self", " state", " costs"),
+                                               "Initialize the free forward-dynamics action model.\n\n"
+                                               ":param state: multibody state\n"
+                                               ":param costs: stack of cost functions")
+          [bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .def("calc", &DifferentialActionModelFreeFwdDynamics::calc_wrap,
            DiffActionModel_calc_wraps(
                bp::args(" self", " data", " x", " u=None"),

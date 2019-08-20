@@ -18,20 +18,23 @@ namespace bp = boost::python;
 
 void exposeCostCoMPosition() {
   bp::class_<CostModelCoMPosition, bp::bases<CostModelAbstract> >(
-      "CostModelCoMPosition", bp::init<StateMultibody&, ActivationModelAbstract&, Eigen::Vector3d, int>(
-                                  bp::args(" self", " state", " activation", " cref", " nu"),
-                                  "Initialize the CoM position cost model.\n\n"
-                                  ":param state: state of the multibody system\n"
-                                  ":param activation: activation model\n"
-                                  ":param cref: reference CoM position\n"
-                                  ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
+      "CostModelCoMPosition",
+      bp::init<StateMultibody&, ActivationModelAbstract&, Eigen::Vector3d, int>(
+          bp::args(" self", " state", " activation", " cref", " nu"),
+          "Initialize the CoM position cost model.\n\n"
+          ":param state: state of the multibody system\n"
+          ":param activation: activation model\n"
+          ":param cref: reference CoM position\n"
+          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2,
+                                                                                bp::with_custodian_and_ward<1, 3> >()])
       .def(bp::init<StateMultibody&, ActivationModelAbstract&, Eigen::Vector3d>(
           bp::args(" self", " state", " activation", " cref"),
           "Initialize the CoM position cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
-          ":param cref: reference CoM position")[bp::with_custodian_and_ward<1, 3>()])
+          ":param cref: reference CoM position")[bp::with_custodian_and_ward<1, 2,
+                                                                             bp::with_custodian_and_ward<1, 3> >()])
       .def(bp::init<StateMultibody&, Eigen::Vector3d, int>(
           bp::args(" self", " state", " cref", " nu"),
           "Initialize the CoM position cost model.\n\n"
