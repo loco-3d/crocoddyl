@@ -48,18 +48,24 @@ void exposeCostSum() {
 
   bp::class_<CostModelSum, boost::noncopyable>(
       "CostModelSum",
-      bp::init<StateMultibody&, unsigned int, bp::optional<bool> >(
-          bp::args(" self", " state", " nu", " withResiduals"),
+      bp::init<StateMultibody&, unsigned int, bool>(
+          bp::args(" self", " state", " nu=state.nv", " withResiduals=True"),
           "Initialize the total cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param nu: dimension of control vector\n"
           ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
-      .def(bp::init<StateMultibody&, bp::optional<bool> >(
-          bp::args(" self", " state", " withResiduals"),
+      .def(bp::init<StateMultibody&, unsigned int>(
+          bp::args(" self", " state", " nu"),
           "Initialize the total cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
+          ":param nu: dimension of control vector\n"
           ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
+      .def(bp::init<StateMultibody&>(
+          bp::args(" self", " state"),
+          "Initialize the total cost model.\n\n"
+          "For this case the default nu is equals to model.nv.\n"
+          ":param state: state of the multibody system")[bp::with_custodian_and_ward<1, 2>()])
       .def("addCost", &CostModelSum::addCost, bp::with_custodian_and_ward<1, 3>(),
            bp::args(" self", " name", " cost", " weight"),
            "Add a cost item.\n\n"
