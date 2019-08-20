@@ -60,8 +60,15 @@ void exposeCostSum() {
           "For this case the default nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
           ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
-      .def("addCost", &CostModelSum::addCost, bp::with_custodian_and_ward<1, 3>(), "add cost item")
-      .def("removeCost", &CostModelSum::removeCost, "remove cost item")
+      .def("addCost", &CostModelSum::addCost, bp::with_custodian_and_ward<1, 3>(),
+           bp::args(" self", " name", " cost", " weight"),
+           "Add a cost item.\n\n"
+           ":param name: cost name\n"
+           ":param cost: cost model\n"
+           ":param weight: cost weight")
+      .def("removeCost", &CostModelSum::removeCost, bp::args(" self", " name"),
+           "Remove a cost item.\n\n"
+           ":param name: cost name")
       .def("calc", &CostModelSum::calc_wrap,
            CostModelSum_calc_wraps(bp::args(" self", " data", " x", " u=None"),
                                    "Compute the total cost.\n\n"

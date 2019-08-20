@@ -51,8 +51,14 @@ void exposeContactMultiple() {
       bp::init<StateMultibody&>(bp::args(" self", " state"),
                                 "Initialize the multiple contact model.\n\n"
                                 ":param state: state of the multibody system")[bp::with_custodian_and_ward<1, 2>()])
-      .def("addContact", &ContactModelMultiple::addContact, bp::with_custodian_and_ward<1, 3>(), "add contact item")
-      .def("removeContact", &ContactModelMultiple::removeContact, "remove contact item")
+      .def("addContact", &ContactModelMultiple::addContact, bp::with_custodian_and_ward<1, 3>(),
+           bp::args(" self", " name", " contact"),
+           "Add a contact item.\n\n"
+           ":param name: contact name\n"
+           ":param contact: contact model")
+      .def("removeContact", &ContactModelMultiple::removeContact, bp::args(" self", " name"),
+           "Remove a contact item.\n\n"
+           ":param name: contact name")
       .def("calc", &ContactModelMultiple::calc_wrap, bp::args(" self", " data", " x"),
            "Compute the total contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
