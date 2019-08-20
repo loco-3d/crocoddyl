@@ -178,14 +178,10 @@ pinocchio::Model& StateMultibody::get_pinocchio() const { return pinocchio_; }
 void StateMultibody::updateJdiff(const Eigen::Ref<const Eigen::MatrixXd>& Jdq, bool positive) {
   if (positive) {
     Jd_.diagonal() = Jdq.diagonal();
-    Jd_.block<3, 3>(0, 0) = Jdq.block<3, 3>(0, 0).transpose();
-    Jd_.block<3, 3>(0, 3) = Jdq.block<3, 3>(0, 3).transpose();
-    Jd_.block<3, 3>(3, 3) = Jdq.block<3, 3>(3, 3).transpose();
+    Jd_.block<6, 6>(0, 0) = Jdq.block<6, 6>(0, 0).inverse();
   } else {
     Jd_.diagonal() = -Jdq.diagonal();
-    Jd_.block<3, 3>(0, 0) = -Jdq.block<3, 3>(0, 0).transpose();
-    Jd_.block<3, 3>(0, 3) = -Jdq.block<3, 3>(0, 3).transpose();
-    Jd_.block<3, 3>(3, 3) = -Jdq.block<3, 3>(3, 3).transpose();
+    Jd_.block<6, 6>(0, 0) = -Jdq.block<6, 6>(0, 0).inverse();
   }
 }
 
