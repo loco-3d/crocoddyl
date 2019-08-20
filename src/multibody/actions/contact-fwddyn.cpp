@@ -55,7 +55,7 @@ void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<Dif
   pinocchio::forwardDynamics(pinocchio_, d->pinocchio, d->qcur, d->vcur, d->actuation->a, d->contacts->Jc,
                              d->contacts->a0, JMinvJt_damping_, false);
   d->xout = d->pinocchio.ddq;
-  contacts_.updateLagrangian(d->contacts, -d->pinocchio.lambda_c);
+  contacts_.updateLagrangian(d->contacts, d->pinocchio.lambda_c);
 
   // Computing the cost value and residuals
   costs_.calc(d->costs, x, u);
@@ -86,21 +86,22 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
   actuation_.calcDiff(d->actuation, x, u, false);
   contacts_.calcDiff(d->contacts, x, false);
 
-  // Kinv = [ [a_partial_dtau, -a_partial_da], [-f_partial_dtau, f_partial_da] ]
+  // Kinv = [ [Minv - Minv*Jt*Jtinv, Jinv], [Jtinv, -JtinvMJinv] ]
+  // Kinv = [ [a_partial_dtau, a_partial_da], [f_partial_dtau, f_partial_da] ]
   pinocchio::cholesky::decompose(pinocchio_, d->pinocchio);
   d->Minv.setZero();
   pinocchio::cholesky::computeMinv(pinocchio_, d->pinocchio, d->Minv);
   // TODO(cmastalli): use cholesky
-  d->f_partial_da = d->pinocchio.JMinvJt.inverse();
-  d->JtinvM.noalias() = d->f_partial_da * d->contacts->Jc;
-  d->f_partial_dtau.noalias() = -d->JtinvM * d->Minv;
+  d->f_partial_da = -d->pinocchio.JMinvJt.inverse();
+  d->JtinvM.noalias() = -d->f_partial_da * d->contacts->Jc;
+  d->f_partial_dtau.noalias() = d->JtinvM * d->Minv;
   d->a_partial_da = d->f_partial_dtau.transpose();
-  d->JtJtinv.noalias() = -d->contacts->Jc.transpose() * d->f_partial_dtau;
+  d->JtJtinv.noalias() = d->contacts->Jc.transpose() * d->f_partial_dtau;
   d->a_partial_dtau.noalias() = d->Minv - d->Minv * d->JtJtinv;
 
-  d->Fx.leftCols(nv).noalias() = d->a_partial_dtau * d->pinocchio.dtau_dq;
-  d->Fx.rightCols(nv).noalias() = d->a_partial_dtau * d->pinocchio.dtau_dv;
-  d->Fx.noalias() += d->a_partial_da * d->contacts->Ax;
+  d->Fx.leftCols(nv).noalias() = -d->a_partial_dtau * d->pinocchio.dtau_dq;
+  d->Fx.rightCols(nv).noalias() = -d->a_partial_dtau * d->pinocchio.dtau_dv;
+  d->Fx.noalias() -= d->a_partial_da * d->contacts->Ax;
   d->Fx.noalias() += d->a_partial_dtau * d->actuation->Ax;
   d->Fu.noalias() = d->a_partial_dtau * d->actuation->Au;
 
