@@ -96,7 +96,7 @@ void exposeSolverAbstract() {
       "numerical optimization.",
       bp::init<ShootingProblem&>(bp::args(" self", " problem"),
                                  "Initialize the solver model.\n\n"
-                                 ":param problem: shooting problem"))
+                                 ":param problem: shooting problem")[bp::with_custodian_and_ward<1, 2>()])
       .def("solve", pure_virtual(&SolverAbstract_wrap::solve),
            bp::args(" self", " init_xs=[]", " init_us=[]", " maxiter=100", " isFeasible=False", " regInit=None"),
            "Compute the optimal trajectory xopt,uopt as lists of T+1 and T terms.\n\n"
