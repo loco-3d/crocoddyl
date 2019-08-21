@@ -40,7 +40,7 @@ class CostModelAbstract {
 
   StateMultibody& get_state() const;
   ActivationModelAbstract& get_activation() const;
-  const unsigned int& get_nu() const;
+  unsigned int const& get_nu() const;
 
  protected:
   StateMultibody& state_;

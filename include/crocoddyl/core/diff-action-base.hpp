@@ -34,8 +34,8 @@ class DifferentialActionModelAbstract {
   void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                 const Eigen::Ref<const Eigen::VectorXd>& x);
 
-  const unsigned int& get_nu() const;
-  const unsigned int& get_nr() const;
+  unsigned int const& get_nu() const;
+  unsigned int const& get_nr() const;
   StateAbstract& get_state() const;
 
  protected:

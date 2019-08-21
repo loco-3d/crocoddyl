@@ -33,9 +33,9 @@ boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelAbstrac
   return boost::make_shared<DifferentialActionDataAbstract>(this);
 }
 
-const unsigned int& DifferentialActionModelAbstract::get_nu() const { return nu_; }
+unsigned int const& DifferentialActionModelAbstract::get_nu() const { return nu_; }
 
-const unsigned int& DifferentialActionModelAbstract::get_nr() const { return nr_; }
+unsigned int const& DifferentialActionModelAbstract::get_nr() const { return nr_; }
 
 StateAbstract& DifferentialActionModelAbstract::get_state() const { return state_; }
 

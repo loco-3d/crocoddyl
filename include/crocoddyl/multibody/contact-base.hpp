@@ -30,7 +30,7 @@ class ContactModelAbstract {
   virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::Data* const data);
 
   StateMultibody& get_state() const;
-  const unsigned int& get_nc() const;
+  unsigned int const& get_nc() const;
 
  protected:
   StateMultibody& state_;

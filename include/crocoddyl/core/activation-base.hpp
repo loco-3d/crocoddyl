@@ -28,8 +28,8 @@ class ActivationModelAbstract {
                         const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc = true) = 0;
   virtual boost::shared_ptr<ActivationDataAbstract> createData();
 
-  unsigned int get_nr() const;
   void set_nr(unsigned int const& nr);
+  unsigned int const& get_nr() const;
 
  protected:
   unsigned int nr_;

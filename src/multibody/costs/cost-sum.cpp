@@ -116,8 +116,8 @@ StateMultibody& CostModelSum::get_state() const { return state_; }
 
 const CostModelSum::CostModelContainer& CostModelSum::get_costs() const { return costs_; }
 
-const unsigned int& CostModelSum::get_nu() const { return nu_; }
+unsigned int const& CostModelSum::get_nu() const { return nu_; }
 
-const unsigned int& CostModelSum::get_nr() const { return nr_; }
+unsigned int const& CostModelSum::get_nr() const { return nr_; }
 
 }  // namespace crocoddyl

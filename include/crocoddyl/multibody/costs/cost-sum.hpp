@@ -51,8 +51,8 @@ class CostModelSum {
 
   StateMultibody& get_state() const;
   const CostModelContainer& get_costs() const;
-  const unsigned int& get_nu() const;
-  const unsigned int& get_nr() const;
+  unsigned int const& get_nu() const;
+  unsigned int const& get_nr() const;
 
  private:
   StateMultibody& state_;
