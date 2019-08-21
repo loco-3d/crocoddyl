@@ -34,6 +34,10 @@ void ActuationModelFull::calcDiff(const boost::shared_ptr<ActuationDataAbstract>
     calc(data, x, u);
   }
   // The derivatives has constant values which were set in createData.
+  assert(data->Ax == Eigen::MatrixXd::Zero(state_.get_nv(), state_.get_ndx()) &&
+         "ActuationModelFull::calcDiff: Ax has wrong value");
+  assert(data->Au == Eigen::MatrixXd::Identity(state_.get_nv(), nu_) &&
+         "ActuationModelFull::calcDiff: Au has wrong value");
 }
 
 boost::shared_ptr<ActuationDataAbstract> ActuationModelFull::createData() {

@@ -36,11 +36,19 @@ void ActuationModelFloatingBase::calcDiff(const boost::shared_ptr<ActuationDataA
     calc(data, x, u);
   }
   // The derivatives has constant values which were set in createData.
+  assert(data->Ax == Eigen::MatrixXd::Zero(state_.get_nv(), state_.get_ndx()) &&
+         "ActuationModelFloatingBase::calcDiff: Ax has wrong value");
+  assert(data->Au == Au_ && "ActuationModelFloatingBase::calcDiff: Au has wrong value");
 }
 
 boost::shared_ptr<ActuationDataAbstract> ActuationModelFloatingBase::createData() {
   boost::shared_ptr<ActuationDataAbstract> data = boost::make_shared<ActuationDataAbstract>(this);
   data->Au.diagonal(-6).fill(1.);
+
+#ifndef NDEBUG
+  Au_ = data->Au;
+#endif
+
   return data;
 }
 
