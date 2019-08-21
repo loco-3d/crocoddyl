@@ -18,6 +18,7 @@ SolverDDP::SolverDDP(ShootingProblem& problem)
       cost_try_(0.),
       th_grad_(1e-12),
       th_step_(0.5),
+      th_div_(1e31),
       was_feasible_(false) {
   allocateData();
 
@@ -222,8 +223,9 @@ void SolverDDP::forwardPass(const double& steplength) {
     xs_try_[t + 1] = d->get_xnext();
     cost_try_ += d->cost;
 
-    const double& value = xs_try_[t + 1].sum();
-    if (std::isnan(value) || std::isinf(value) || std::isnan(cost_try_) || std::isnan(cost_try_)) {
+    const double& value = xs_try_[t + 1].lpNorm<Eigen::Infinity>();
+    if (std::isnan(value) || std::isinf(value) || value >= th_div_ || std::isnan(cost_try_) || std::isnan(cost_try_) ||
+        cost_try_ >= th_div_) {
       throw "forward error";
     }
   }
@@ -233,7 +235,7 @@ void SolverDDP::forwardPass(const double& steplength) {
   m->calc(d, xs_try_.back());
   cost_try_ += d->cost;
 
-  if (std::isnan(cost_try_) || std::isnan(cost_try_)) {
+  if (std::isnan(cost_try_) || std::isnan(cost_try_) || cost_try_ >= th_div_) {
     throw "forward error";
   }
 }

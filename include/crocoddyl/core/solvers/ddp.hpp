@@ -81,6 +81,7 @@ class SolverDDP : public SolverAbstract {
   std::vector<double> alphas_;
   double th_grad_;
   double th_step_;
+  double th_div_;
   bool was_feasible_;
 };
 
