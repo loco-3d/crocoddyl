@@ -33,7 +33,7 @@ void exposeActuationFull() {
                "Compute the derivatives of the actuation model.\n\n"
                "It computes the partial derivatives of the full actuation. It assumes that you\n"
                "create the data using this class. The reason is that the derivatives are constant and\n"
-               "defined in createData."
+               "defined in createData. The Hessian is constant, so we don't write again this value.\n"
                ":param data: full actuation data\n"
                ":param x: state vector\n"
                ":param u: control input\n"
