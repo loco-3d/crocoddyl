@@ -38,7 +38,7 @@ void ActivationModelWeightedQuad::calcDiff(const boost::shared_ptr<ActivationDat
 }
 
 boost::shared_ptr<ActivationDataAbstract> ActivationModelWeightedQuad::createData() {
-  boost::shared_ptr<ActivationDataAbstract> data = boost::make_shared<ActivationDataAbstract>(this);
+  boost::shared_ptr<ActivationDataWeightedQuad> data = boost::make_shared<ActivationDataWeightedQuad>(this);
   data->Arr.diagonal() = weights_;
 
 #ifndef NDEBUG
