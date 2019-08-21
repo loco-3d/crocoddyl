@@ -40,7 +40,11 @@ void exposeActivationWeightedQuad() {
                                                  const Eigen::VectorXd&)>(
           "calcDiff", &ActivationModelWeightedQuad::calcDiff_wrap, bp::args(" self", " data", " r"))
       .def("createData", &ActivationModelWeightedQuad::createData, bp::args(" self"),
-           "Create the weighted quadratic action data.");
+           "Create the weighted quadratic action data.")
+      .add_property(
+          "weights",
+          bp::make_function(&ActivationModelWeightedQuad::get_weights, bp::return_value_policy<bp::return_by_value>()),
+          "weights of the quadratic term");
 }
 
 }  // namespace python

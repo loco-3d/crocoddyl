@@ -40,4 +40,6 @@ boost::shared_ptr<ActivationDataAbstract> ActivationModelWeightedQuad::createDat
   return boost::make_shared<ActivationDataWeightedQuad>(this);
 }
 
+const Eigen::VectorXd& ActivationModelWeightedQuad::get_weights() const { return weights_; }
+
 }  // namespace crocoddyl
