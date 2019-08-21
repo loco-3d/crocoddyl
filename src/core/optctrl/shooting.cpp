@@ -17,6 +17,7 @@ ShootingProblem::ShootingProblem(const Eigen::VectorXd& x0, const std::vector<Ac
       T_(static_cast<unsigned int>(running_models.size())),
       x0_(x0),
       cost_(0.) {
+  assert(x0_.size() == running_models_[0]->get_state().get_nx() && "ShootingProblem: x0 has wrong dimension");
   allocateData();
 }
 
@@ -89,7 +90,7 @@ unsigned int ShootingProblem::get_T() const { return T_; }
 const Eigen::VectorXd& ShootingProblem::get_x0() const { return x0_; }
 
 void ShootingProblem::allocateData() {
-  for (unsigned int i = 0; i < running_models_.size(); ++i) {
+  for (unsigned int i = 0; i < T_; ++i) {
     ActionModelAbstract* model = running_models_[i];
     running_datas_.push_back(model->createData());
   }
