@@ -34,6 +34,7 @@ void exposeActivationWeightedQuad() {
           "calcDiff", &ActivationModelWeightedQuad::calcDiff_wrap, bp::args(" self", " data", " r", " recalc=True"),
           "Compute the derivatives of a quadratic function.\n\n"
           ":param data: activation data\n"
+          "Note that the Hessian is constant, so we don't write again this value.\n"
           ":param r: residual vector \n"
           ":param recalc: If true, it updates the residual value.")
       .def<void (ActivationModelWeightedQuad::*)(const boost::shared_ptr<ActivationDataAbstract>&,

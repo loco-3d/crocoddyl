@@ -27,6 +27,10 @@ class ActivationModelWeightedQuad : public ActivationModelAbstract {
 
  private:
   Eigen::VectorXd weights_;
+
+#ifndef NDEBUG
+  Eigen::MatrixXd Arr_;
+#endif
 };
 
 struct ActivationDataWeightedQuad : public ActivationDataAbstract {

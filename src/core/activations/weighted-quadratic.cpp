@@ -33,11 +33,19 @@ void ActivationModelWeightedQuad::calcDiff(const boost::shared_ptr<ActivationDat
 
   boost::shared_ptr<ActivationDataWeightedQuad> d = boost::static_pointer_cast<ActivationDataWeightedQuad>(data);
   data->Ar = d->Wr;
-  data->Arr.diagonal() = weights_;
+  // The Hessian has constant values which were set in createData.
+  assert(data->Arr == Arr_ && "ActivationModelWeightedQuad::calcDiff: Arr has wrong value");
 }
 
 boost::shared_ptr<ActivationDataAbstract> ActivationModelWeightedQuad::createData() {
-  return boost::make_shared<ActivationDataWeightedQuad>(this);
+  boost::shared_ptr<ActivationDataAbstract> data = boost::make_shared<ActivationDataAbstract>(this);
+  data->Arr.diagonal() = weights_;
+
+#ifndef NDEBUG
+  Arr_ = data->Arr;
+#endif
+
+  return data;
 }
 
 const Eigen::VectorXd& ActivationModelWeightedQuad::get_weights() const { return weights_; }

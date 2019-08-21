@@ -27,7 +27,14 @@ void ActivationModelQuad::calcDiff(const boost::shared_ptr<ActivationDataAbstrac
     calc(data, r);
   }
   data->Ar = r;
-  data->Arr.diagonal() = Eigen::VectorXd::Ones(nr_);
+  // The Hessian has constant values which were set in createData.
+  assert(data->Arr == Eigen::MatrixXd::Identity(nr_, nr_) && "ActivationModelQuad::calcDiff: Arr has wrong value");
+}
+
+boost::shared_ptr<ActivationDataAbstract> ActivationModelQuad::createData() {
+  boost::shared_ptr<ActivationDataAbstract> data = boost::make_shared<ActivationDataAbstract>(this);
+  data->Arr.diagonal().fill(1.);
+  return data;
 }
 
 }  // namespace crocoddyl
