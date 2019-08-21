@@ -41,7 +41,7 @@ void exposeDifferentialActionContactFwdDynamics() {
                "It describes the time-continuous evolution of the multibody system with contact. The\n"
                "contacts are modelled as holonomic constraints.\n"
                "Additionally it computes the cost value associated to this state and control pair.\n"
-               ":param data: free forward-dynamics action data\n"
+               ":param data: contact forward-dynamics action data\n"
                ":param x: time-continuous state vector\n"
                ":param u: time-continuous control input"))
       .def<void (DifferentialActionModelContactFwdDynamics::*)(
@@ -54,7 +54,7 @@ void exposeDifferentialActionContactFwdDynamics() {
                         "cost function. If recalc == True, it first updates the state evolution\n"
                         "and cost value. This function builds a quadratic approximation of the\n"
                         "action model (i.e. dynamical system and cost function).\n"
-                        ":param data: free forward-dynamics action data\n"
+                        ":param data: contact forward-dynamics action data\n"
                         ":param x: time-continuous state vector\n"
                         ":param u: time-continuous control input\n"
                         ":param recalc: If true, it updates the state evolution and the cost value.")
@@ -70,7 +70,7 @@ void exposeDifferentialActionContactFwdDynamics() {
           "calcDiff", &DifferentialActionModelContactFwdDynamics::calcDiff_wrap,
           bp::args(" self", " data", " x", " recalc"))
       .def("createData", &DifferentialActionModelContactFwdDynamics::createData, bp::args(" self"),
-           "Create the free forward dynamics differential action data.")
+           "Create the contact forward dynamics differential action data.")
       .add_property("pinocchio",
                     bp::make_function(&DifferentialActionModelContactFwdDynamics::get_pinocchio,
                                       bp::return_internal_reference<>()),
