@@ -23,6 +23,9 @@ IntegratedActionModelEuler::~IntegratedActionModelEuler() {}
 void IntegratedActionModelEuler::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                                       const Eigen::Ref<const Eigen::VectorXd>& x,
                                       const Eigen::Ref<const Eigen::VectorXd>& u) {
+  assert(x.size() == state_.get_nx() && "IntegratedActionModelEuler::calc: x has wrong dimension");
+  assert(u.size() == nu_ && "IntegratedActionModelEuler::calc: u has wrong dimension");
+
   // Static casting the data
   boost::shared_ptr<IntegratedActionDataEuler> d = boost::static_pointer_cast<IntegratedActionDataEuler>(data);
 
@@ -45,6 +48,9 @@ void IntegratedActionModelEuler::calc(const boost::shared_ptr<ActionDataAbstract
 void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                           const Eigen::Ref<const Eigen::VectorXd>& x,
                                           const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
+  assert(x.size() == state_.get_nx() && "IntegratedActionModelEuler::calcDiff: x has wrong dimension");
+  assert(u.size() == nu_ && "IntegratedActionModelEuler::calcDiff: u has wrong dimension");
+
   const unsigned int& nv = differential_->get_state().get_nv();
   if (recalc) {
     calc(data, x, u);
