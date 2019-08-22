@@ -18,7 +18,6 @@ SolverDDP::SolverDDP(ShootingProblem& problem)
       cost_try_(0.),
       th_grad_(1e-12),
       th_step_(0.5),
-      th_div_(1e31),
       was_feasible_(false) {
   allocateData();
 
@@ -202,10 +201,11 @@ void SolverDDP::backwardPass() {
       Vxx_[t].diagonal() += x_reg_;
     }
 
-    const double& Vx_value = Vx_[t].sum();
-    const double& Vxx_value = Vxx_[t].sum();
-    if (std::isnan(Vx_value) || std::isnan(Vxx_value)) {
-      throw "backward error";
+    if (raiseIfNaN(Vx_[t].lpNorm<Eigen::Infinity>())) {
+      throw "backward_error";
+    }
+    if (raiseIfNaN(Vxx_[t].lpNorm<Eigen::Infinity>())) {
+      throw "backward_error";
     }
   }
 }
@@ -223,10 +223,11 @@ void SolverDDP::forwardPass(const double& steplength) {
     xs_try_[t + 1] = d->get_xnext();
     cost_try_ += d->cost;
 
-    const double& value = xs_try_[t + 1].lpNorm<Eigen::Infinity>();
-    if (std::isnan(value) || std::isinf(value) || value >= th_div_ || std::isnan(cost_try_) || std::isnan(cost_try_) ||
-        cost_try_ >= th_div_) {
-      throw "forward error";
+    if (raiseIfNaN(cost_try_)) {
+      throw "forward_error";
+    }
+    if (raiseIfNaN(xs_try_[t + 1].lpNorm<Eigen::Infinity>())) {
+      throw "forward_error";
     }
   }
 
@@ -235,8 +236,8 @@ void SolverDDP::forwardPass(const double& steplength) {
   m->calc(d, xs_try_.back());
   cost_try_ += d->cost;
 
-  if (std::isnan(cost_try_) || std::isnan(cost_try_) || cost_try_ >= th_div_) {
-    throw "forward error";
+  if (raiseIfNaN(cost_try_)) {
+    throw "forward_error";
   }
 }
 

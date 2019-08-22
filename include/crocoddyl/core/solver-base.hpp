@@ -79,6 +79,8 @@ class CallbackAbstract {
   virtual void operator()(SolverAbstract& solver) = 0;
 };
 
+bool raiseIfNaN(const double& value);
+
 }  // namespace crocoddyl
 
 #endif  // CROCODDYL_CORE_SOLVER_BASE_HPP_
