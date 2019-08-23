@@ -21,7 +21,8 @@ namespace crocoddyl {
 class DifferentialActionModelContactFwdDynamics : public DifferentialActionModelAbstract {
  public:
   DifferentialActionModelContactFwdDynamics(StateMultibody& state, ActuationModelFloatingBase& actuation,
-                                            ContactModelMultiple& contacts, CostModelSum& costs);
+                                            ContactModelMultiple& contacts, CostModelSum& costs,
+                                            const double& JMinvJt_damping = 0.);
   ~DifferentialActionModelContactFwdDynamics();
 
   void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -36,7 +37,10 @@ class DifferentialActionModelContactFwdDynamics : public DifferentialActionModel
   CostModelSum& get_costs() const;
   pinocchio::Model& get_pinocchio() const;
   const Eigen::VectorXd& get_armature() const;
+  const double& get_damping_factor() const;
+
   void set_armature(const Eigen::VectorXd& armature);
+  void set_damping_factor(const double& damping);
 
  private:
   ActuationModelFloatingBase& actuation_;
@@ -55,37 +59,20 @@ struct DifferentialActionDataContactFwdDynamics : public DifferentialActionDataA
   explicit DifferentialActionDataContactFwdDynamics(Model* const model)
       : DifferentialActionDataAbstract(model),
         pinocchio(pinocchio::Data(model->get_pinocchio())),
-        a_partial_dtau(model->get_state().get_nv(), model->get_state().get_nv()),
-        a_partial_da(model->get_state().get_nv(), model->get_contacts().get_nc()),
-        f_partial_dtau(model->get_contacts().get_nc(), model->get_state().get_nv()),
-        f_partial_da(model->get_contacts().get_nc(), model->get_contacts().get_nc()),
-        Minv(model->get_state().get_nv(), model->get_state().get_nv()),
-        JtinvM(model->get_contacts().get_nc(), model->get_state().get_nv()),
-        JtJtinv(model->get_state().get_nv(), model->get_state().get_nv()) {
+        Kinv(model->get_state().get_nv() + model->get_contacts().get_nc(),
+             model->get_state().get_nv() + model->get_contacts().get_nc()) {
     actuation = model->get_actuation().createData();
     contacts = model->get_contacts().createData(&pinocchio);
     costs = model->get_costs().createData(&pinocchio);
     shareCostMemory(costs);
-    a_partial_dtau.fill(0);
-    a_partial_da.fill(0);
-    f_partial_dtau.fill(0);
-    f_partial_da.fill(0);
-    Minv.fill(0);
-    JtinvM.fill(0);
-    JtJtinv.fill(0);
+    Kinv.fill(0);
   }
 
   pinocchio::Data pinocchio;
   boost::shared_ptr<ActuationDataAbstract> actuation;
   boost::shared_ptr<ContactDataMultiple> contacts;
   boost::shared_ptr<CostDataSum> costs;
-  Eigen::MatrixXd a_partial_dtau;
-  Eigen::MatrixXd a_partial_da;
-  Eigen::MatrixXd f_partial_dtau;
-  Eigen::MatrixXd f_partial_da;
-  Eigen::MatrixXd Minv;
-  Eigen::MatrixXd JtinvM;
-  Eigen::MatrixXd JtJtinv;
+  Eigen::MatrixXd Kinv;
 };
 
 }  // namespace crocoddyl

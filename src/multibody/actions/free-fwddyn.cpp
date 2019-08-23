@@ -104,6 +104,7 @@ CostModelSum& DifferentialActionModelFreeFwdDynamics::get_costs() const { return
 const Eigen::VectorXd& DifferentialActionModelFreeFwdDynamics::get_armature() const { return armature_; }
 
 void DifferentialActionModelFreeFwdDynamics::set_armature(const Eigen::VectorXd& armature) {
+  assert(armature.size() == state_.get_nv() && "The armature dimension is wrong, we cannot set it.");
   if (armature.size() != state_.get_nv()) {
     std::cout << "The armature dimension is wrong, we cannot set it." << std::endl;
   } else {
