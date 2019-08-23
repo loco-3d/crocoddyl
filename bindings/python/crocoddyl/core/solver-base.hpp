@@ -72,7 +72,9 @@ class CallbackAbstract_wrap : public CallbackAbstract, public bp::wrapper<Callba
   CallbackAbstract_wrap() : CallbackAbstract(), bp::wrapper<CallbackAbstract>() {}
   ~CallbackAbstract_wrap() {}
 
-  void operator()(SolverAbstract& solver) { return bp::call<void>(this->get_override("__call__").ptr(), solver); }
+  void operator()(SolverAbstract& solver) {
+    return bp::call<void>(this->get_override("__call__").ptr(), boost::ref(solver));
+  }
 };
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setCandidate_overloads, SolverAbstract::setCandidate, 0, 3)
