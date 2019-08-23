@@ -19,6 +19,7 @@ struct ContactDataAbstract;  // forward declaration
 
 class ContactModelAbstract {
  public:
+  ContactModelAbstract(StateMultibody& state, unsigned int const& nc, unsigned int const& nu);
   ContactModelAbstract(StateMultibody& state, unsigned int const& nc);
   ~ContactModelAbstract();
 
@@ -27,14 +28,18 @@ class ContactModelAbstract {
   virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const bool& recalc = true) = 0;
   virtual void updateLagrangian(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& lambda) = 0;
+  void updateLagrangianDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::MatrixXd& Gx,
+                            const Eigen::MatrixXd& Gu);
   virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::Data* const data);
 
   StateMultibody& get_state() const;
   unsigned int const& get_nc() const;
+  unsigned int const& get_nu() const;
 
  protected:
   StateMultibody& state_;
   unsigned int nc_;
+  unsigned int nu_;
 
 #ifdef PYTHON_BINDINGS
 
@@ -59,10 +64,14 @@ struct ContactDataAbstract {
         Jc(model->get_nc(), model->get_state().get_nv()),
         a0(model->get_nc()),
         Ax(model->get_nc(), model->get_state().get_ndx()),
+        Gx(model->get_nc(), model->get_state().get_ndx()),
+        Gu(model->get_nc(), model->get_nu()),
         f(pinocchio::Force::Zero()) {
     Jc.fill(0);
     a0.fill(0);
     Ax.fill(0);
+    Gx.fill(0);
+    Gu.fill(0);
   }
 
   pinocchio::Data* pinocchio;
@@ -70,6 +79,8 @@ struct ContactDataAbstract {
   Eigen::MatrixXd Jc;
   Eigen::VectorXd a0;
   Eigen::MatrixXd Ax;
+  Eigen::MatrixXd Gx;
+  Eigen::MatrixXd Gu;
   pinocchio::Force f;
 };
 

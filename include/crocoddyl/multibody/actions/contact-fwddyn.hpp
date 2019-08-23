@@ -22,7 +22,7 @@ class DifferentialActionModelContactFwdDynamics : public DifferentialActionModel
  public:
   DifferentialActionModelContactFwdDynamics(StateMultibody& state, ActuationModelFloatingBase& actuation,
                                             ContactModelMultiple& contacts, CostModelSum& costs,
-                                            const double& JMinvJt_damping = 0.);
+                                            const double& JMinvJt_damping = 0., const bool& enable_force = false);
   ~DifferentialActionModelContactFwdDynamics();
 
   void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -50,6 +50,7 @@ class DifferentialActionModelContactFwdDynamics : public DifferentialActionModel
   bool force_aba_;
   Eigen::VectorXd armature_;
   double JMinvJt_damping_;
+  bool enable_force_;
 };
 
 struct DifferentialActionDataContactFwdDynamics : public DifferentialActionDataAbstract {
@@ -60,12 +61,16 @@ struct DifferentialActionDataContactFwdDynamics : public DifferentialActionDataA
       : DifferentialActionDataAbstract(model),
         pinocchio(pinocchio::Data(model->get_pinocchio())),
         Kinv(model->get_state().get_nv() + model->get_contacts().get_nc(),
-             model->get_state().get_nv() + model->get_contacts().get_nc()) {
+             model->get_state().get_nv() + model->get_contacts().get_nc()),
+        Gx(model->get_contacts().get_nc(), model->get_state().get_ndx()),
+        Gu(model->get_contacts().get_nc(), model->get_nu()) {
     actuation = model->get_actuation().createData();
     contacts = model->get_contacts().createData(&pinocchio);
     costs = model->get_costs().createData(&pinocchio);
     shareCostMemory(costs);
     Kinv.fill(0);
+    Gx.fill(0);
+    Gu.fill(0);
   }
 
   pinocchio::Data pinocchio;
@@ -73,6 +78,8 @@ struct DifferentialActionDataContactFwdDynamics : public DifferentialActionDataA
   boost::shared_ptr<ContactDataMultiple> contacts;
   boost::shared_ptr<CostDataSum> costs;
   Eigen::MatrixXd Kinv;
+  Eigen::MatrixXd Gx;
+  Eigen::MatrixXd Gu;
 };
 
 }  // namespace crocoddyl

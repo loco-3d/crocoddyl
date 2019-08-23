@@ -47,10 +47,11 @@ void exposeContactMultiple() {
                     "contact model");
 
   bp::class_<ContactModelMultiple, boost::noncopyable>(
-      "ContactModelMultiple",
-      bp::init<StateMultibody&>(bp::args(" self", " state"),
-                                "Initialize the multiple contact model.\n\n"
-                                ":param state: state of the multibody system")[bp::with_custodian_and_ward<1, 2>()])
+      "ContactModelMultiple", bp::init<StateMultibody&, bp::optional<int> >(
+                                  bp::args(" self", " state", " nu=state.nv"),
+                                  "Initialize the multiple contact model.\n\n"
+                                  ":param state: state of the multibody system\n"
+                                  ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2>()])
       .def("addContact", &ContactModelMultiple::addContact, bp::with_custodian_and_ward<1, 3>(),
            bp::args(" self", " name", " contact"),
            "Add a contact item.\n\n"
@@ -78,6 +79,12 @@ void exposeContactMultiple() {
            "Convert the Lagrangian into a stack of spatial forces.\n\n"
            ":param data: cost data\n"
            ":param lambda: Lagrangian vector")
+      .def("updateLagrangianDiff", &ContactModelMultiple::updateLagrangianDiff,
+           bp::args(" self", " data", " Gx", " Gu"),
+           "Update the Jacobian of the Lagrangian.\n\n"
+           ":param data: cost data\n"
+           ":param Gx: Jacobian of Lagrangian w.r.t. the state\n"
+           ":param Gu: Jacobian of the Lagrangian w.r.t. the control")
       .def("createData", &ContactModelMultiple::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the total contact data.\n\n"
@@ -91,7 +98,10 @@ void exposeContactMultiple() {
                     "state of the multibody system")
       .add_property("nc",
                     bp::make_function(&ContactModelMultiple::get_nc, bp::return_value_policy<bp::return_by_value>()),
-                    "dimension of the total contact vector");
+                    "dimension of the total contact vector")
+      .add_property("nu",
+                    bp::make_function(&ContactModelMultiple::get_nu, bp::return_value_policy<bp::return_by_value>()),
+                    "dimension of control vector");
 
   bp::class_<ContactDataMultiple, boost::shared_ptr<ContactDataMultiple>, bp::bases<ContactDataAbstract> >(
       "ContactDataMultiple", "Data class for multiple contacts.\n\n",

@@ -10,11 +10,15 @@
 
 namespace crocoddyl {
 
-ContactModelMultiple::ContactModelMultiple(StateMultibody& state) : state_(state), nc_(0) {}
+ContactModelMultiple::ContactModelMultiple(StateMultibody& state, unsigned int const& nu)
+    : state_(state), nc_(0), nu_(nu) {}
+
+ContactModelMultiple::ContactModelMultiple(StateMultibody& state) : state_(state), nc_(0), nu_(state.get_nv()) {}
 
 ContactModelMultiple::~ContactModelMultiple() {}
 
 void ContactModelMultiple::addContact(const std::string& name, ContactModelAbstract* const contact) {
+  assert(contact->get_nu() == nu_ && "Contact item doesn't have the same control dimension");
   std::pair<ContactModelContainer::iterator, bool> ret =
       contacts_.insert(std::make_pair(name, ContactItem(name, contact)));
   if (ret.second == false) {
@@ -105,6 +109,30 @@ void ContactModelMultiple::updateLagrangian(const boost::shared_ptr<ContactDataM
   }
 }
 
+void ContactModelMultiple::updateLagrangianDiff(const boost::shared_ptr<ContactDataMultiple>& data,
+                                                const Eigen::MatrixXd& Gx, const Eigen::MatrixXd& Gu) {
+  unsigned int const& ndx = state_.get_ndx();
+  assert((Gx.rows() == nc_ || Gx.cols() == ndx) && "Gx has wrong dimension");
+  assert((Gu.rows() == nc_ || Gu.cols() == nu_) && "Gu has wrong dimension");
+  assert(data->contacts.size() == contacts_.size() && "it doesn't match the number of contact datas and models");
+  unsigned int nc = 0;
+
+  ContactModelContainer::iterator it_m, end_m;
+  ContactDataContainer::iterator it_d, end_d;
+  for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();
+       it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
+    const ContactItem& m_i = it_m->second;
+    boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+    assert(it_m->first == it_d->first && "it doesn't match the contact name between data and model");
+
+    unsigned int const& nc_i = m_i.contact->get_nc();
+    const Eigen::Block<const Eigen::MatrixXd> Gx_i = Gx.block(nc, 0, nc_i, ndx);
+    const Eigen::Block<const Eigen::MatrixXd> Gu_i = Gu.block(nc, 0, nc_i, nu_);
+    m_i.contact->updateLagrangianDiff(d_i, Gx_i, Gu_i);
+    nc += nc_i;
+  }
+}
+
 boost::shared_ptr<ContactDataMultiple> ContactModelMultiple::createData(pinocchio::Data* const data) {
   return boost::make_shared<ContactDataMultiple>(this, data);
 }
@@ -114,5 +142,7 @@ StateMultibody& ContactModelMultiple::get_state() const { return state_; }
 const ContactModelMultiple::ContactModelContainer& ContactModelMultiple::get_contacts() const { return contacts_; }
 
 const unsigned int& ContactModelMultiple::get_nc() const { return nc_; }
+
+const unsigned int& ContactModelMultiple::get_nu() const { return nu_; }
 
 }  // namespace crocoddyl

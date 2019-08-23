@@ -18,6 +18,7 @@ namespace bp = boost::python;
 
 class ContactModelAbstract_wrap : public ContactModelAbstract, public bp::wrapper<ContactModelAbstract> {
  public:
+  ContactModelAbstract_wrap(StateMultibody& state, int nc, int nu) : ContactModelAbstract(state, nc, nu) {}
   ContactModelAbstract_wrap(StateMultibody& state, int nc) : ContactModelAbstract(state, nc) {}
 
   void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
@@ -32,7 +33,7 @@ class ContactModelAbstract_wrap : public ContactModelAbstract, public bp::wrappe
   }
 
   void updateLagrangian(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& lambda) {
-    assert(lambda.size() <= 6 && "lambda has wrong dimension, it should be <= 6");
+    assert(lambda.size() == nc_ && "lambda has wrong dimension");
     return bp::call<void>(this->get_override("updateLagrangian").ptr(), data, lambda);
   }
 };
@@ -46,10 +47,12 @@ void exposeContactAbstract() {
       "It defines a template for rigid contact models based on acceleration-based holonomic constraints.\n"
       "The calc and calcDiff functions compute the contact Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<StateMultibody&, int>(bp::args(" self", " state", " nc"),
-                                     "Initialize the contact model.\n\n"
-                                     ":param state: state of the multibody system\n"
-                                     ":param nc: dimension of contact model")[bp::with_custodian_and_ward<1, 2>()])
+      bp::init<StateMultibody&, int, bp::optional<int> >(
+          bp::args(" self", " state", " nc", " nu=state.nv"),
+          "Initialize the contact model.\n\n"
+          ":param state: state of the multibody system\n"
+          ":param nc: dimension of contact model\n"
+          ":param nu: dimension of the control vector")[bp::with_custodian_and_ward<1, 2>()])
       .def("calc", pure_virtual(&ContactModelAbstract_wrap::calc), bp::args(" self", " data", " x"),
            "Compute the contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
@@ -69,6 +72,12 @@ void exposeContactAbstract() {
            "Convert the Lagrangian into a stack of spatial forces.\n\n"
            ":param data: cost data\n"
            ":param lambda: Lagrangian vector")
+      .def("updateLagrangianDiff", &ContactModelAbstract_wrap::updateLagrangianDiff,
+           bp::args(" self", " data", " Gx", " Gu"),
+           "Update the Jacobian of the Lagrangian.\n\n"
+           ":param data: cost data\n"
+           ":param Gx: Jacobian of Lagrangian w.r.t. the state\n"
+           ":param Gu: Jacobian of the Lagrangian w.r.t. the control")
       .def("createData", &ContactModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the contact data.\n\n"
@@ -81,7 +90,10 @@ void exposeContactAbstract() {
                     "state of the multibody system")
       .add_property(
           "nc", bp::make_function(&ContactModelAbstract_wrap::get_nc, bp::return_value_policy<bp::return_by_value>()),
-          "dimension of contact");
+          "dimension of contact")
+      .add_property(
+          "nu", bp::make_function(&ContactModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
+          "dimension of control");
 
   bp::class_<ContactDataAbstract, boost::shared_ptr<ContactDataAbstract>, boost::noncopyable>(
       "ContactDataAbstract", "Abstract class for contact datas.\n\n",
@@ -97,7 +109,11 @@ void exposeContactAbstract() {
       .add_property("a0", bp::make_getter(&ContactDataAbstract::a0, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ContactDataAbstract::a0), "contact drift")
       .add_property("Ax", bp::make_getter(&ContactDataAbstract::Ax, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ContactDataAbstract::Ax), "derivatives of the contact constraint")
+                    bp::make_setter(&ContactDataAbstract::Ax), "Jacobian of the contact constraint")
+      .add_property("Gx", bp::make_getter(&ContactDataAbstract::Ax, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ContactDataAbstract::Ax), "Jacobian of the contact forces")
+      .add_property("Gu", bp::make_getter(&ContactDataAbstract::Ax, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ContactDataAbstract::Ax), "Jacobian of the contact forces")
       .def_readwrite("joint", &ContactDataAbstract::joint, "joint index of the contact frame")
       .def_readwrite("f", &ContactDataAbstract::f, "external spatial forces");
 }

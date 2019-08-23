@@ -25,16 +25,18 @@ void exposeDifferentialActionContactFwdDynamics() {
       "include the armature, you need to use setArmature(). On the other hand, the\n"
       "stack of cost functions are implemented in CostModelSum().",
       bp::init<StateMultibody&, ActuationModelFloatingBase&, ContactModelMultiple&, CostModelSum&,
-               bp::optional<double> >(
-          bp::args(" self", " state", " actuation", " contacts", " costs", " inv_damping=0."),
+               bp::optional<double, bool> >(
+          bp::args(" self", " state", " actuation", " contacts", " costs", " inv_damping=0.", "enable_force=False"),
           "Initialize the constrained forward-dynamics action model.\n\n"
           "The damping factor is needed when the contact Jacobian is not full-rank. Otherwise,\n"
-          "a good damping factor could be 1e-12."
+          "a good damping factor could be 1e-12. In addition, if you have cost based on forces,\n"
+          "you need to enable the computation of the force Jacobians (i.e. enable_force=True)."
           ":param state: multibody state\n"
           ":param actuation: floating-base actuation model\n"
           ":param contacts: multiple contact model\n"
           ":param costs: stack of cost functions\n"
-          ":param inv_damping: Damping factor for cholesky decomposition of JMinvJt")[bp::with_custodian_and_ward<
+          ":param inv_damping: Damping factor for cholesky decomposition of JMinvJt\n"
+          ":param enable_force: Enable the computation of force Jacobians")[bp::with_custodian_and_ward<
           1, 2,
           bp::with_custodian_and_ward<1, 3,
                                       bp::with_custodian_and_ward<1, 4, bp::with_custodian_and_ward<1, 5> > > >()])

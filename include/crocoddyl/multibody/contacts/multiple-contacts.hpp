@@ -32,6 +32,7 @@ class ContactModelMultiple {
   typedef std::map<std::string, boost::shared_ptr<ContactDataAbstract> > ContactDataContainer;
   typedef pinocchio::container::aligned_vector<pinocchio::Force>::iterator ForceIterator;
 
+  ContactModelMultiple(StateMultibody& state, unsigned int const& nu);
   ContactModelMultiple(StateMultibody& state);
   ~ContactModelMultiple();
 
@@ -42,16 +43,20 @@ class ContactModelMultiple {
   void calcDiff(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const bool& recalc = true);
   void updateLagrangian(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::VectorXd& lambda);
+  void updateLagrangianDiff(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::MatrixXd& Gx,
+                            const Eigen::MatrixXd& Gu);
   boost::shared_ptr<ContactDataMultiple> createData(pinocchio::Data* const data);
 
   StateMultibody& get_state() const;
   const ContactModelContainer& get_contacts() const;
   const unsigned int& get_nc() const;
+  const unsigned int& get_nu() const;
 
  private:
   StateMultibody& state_;
   ContactModelContainer contacts_;
   unsigned int nc_;
+  unsigned int nu_;
 
 #ifdef PYTHON_BINDINGS
 

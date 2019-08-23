@@ -17,7 +17,7 @@ namespace crocoddyl {
 
 DifferentialActionModelContactFwdDynamics::DifferentialActionModelContactFwdDynamics(
     StateMultibody& state, ActuationModelFloatingBase& actuation, ContactModelMultiple& contacts, CostModelSum& costs,
-    const double& JMinvJt_damping)
+    const double& JMinvJt_damping, const bool& enable_force)
     : DifferentialActionModelAbstract(state, actuation.get_nu(), costs.get_nr()),
       actuation_(actuation),
       contacts_(contacts),
@@ -25,7 +25,11 @@ DifferentialActionModelContactFwdDynamics::DifferentialActionModelContactFwdDyna
       pinocchio_(state.get_pinocchio()),
       force_aba_(true),
       armature_(Eigen::VectorXd::Zero(state.get_nv())),
-      JMinvJt_damping_(fabs(JMinvJt_damping)) {}
+      JMinvJt_damping_(fabs(JMinvJt_damping)),
+      enable_force_(enable_force) {
+  assert(contacts_.get_nu() == nu_ && "Contacts doesn't have the same control dimension");
+  assert(costs_.get_nu() == nu_ && "Costs doesn't have the same control dimension");
+}
 
 DifferentialActionModelContactFwdDynamics::~DifferentialActionModelContactFwdDynamics() {}
 
@@ -91,10 +95,10 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
   actuation_.calcDiff(d->actuation, x, u, false);
   contacts_.calcDiff(d->contacts, x, false);
 
-  Eigen::Block<typename Eigen::MatrixXd> a_partial_dtau = d->Kinv.topLeftCorner(nv, nv);
-  Eigen::Block<typename Eigen::MatrixXd> a_partial_da = d->Kinv.topRightCorner(nv, nc);
-  // Eigen::Block<typename Eigen::MatrixXd> f_partial_dtau = d->Kinv.bottomLeftCorner(nc, nv);
-  // Eigen::Block<typename Eigen::MatrixXd> f_partial_da = d->Kinv.bottomRightCorner(nc, nc);
+  Eigen::Block<Eigen::MatrixXd> a_partial_dtau = d->Kinv.topLeftCorner(nv, nv);
+  Eigen::Block<Eigen::MatrixXd> a_partial_da = d->Kinv.topRightCorner(nv, nc);
+  Eigen::Block<Eigen::MatrixXd> f_partial_dtau = d->Kinv.bottomLeftCorner(nc, nv);
+  Eigen::Block<Eigen::MatrixXd> f_partial_da = d->Kinv.bottomRightCorner(nc, nc);
 
   d->Fx.leftCols(nv).noalias() = -a_partial_dtau * d->pinocchio.dtau_dq;
   d->Fx.rightCols(nv).noalias() = -a_partial_dtau * d->pinocchio.dtau_dv;
@@ -103,8 +107,14 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
   d->Fu.noalias() = a_partial_dtau * d->actuation->Au;
 
   // Computing the cost derivatives
-  // TODO(cmastalli): Set the derivatives of the Lagrangian, i.e. compute f_partial_dx and f_partial_du
-  // contacts_.updateLagrangianDiff(d->contacts, f_partial_dx, f_partial_du);
+  if (enable_force_) {
+    d->Gx.leftCols(nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dq;
+    d->Gx.rightCols(nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dv;
+    d->Gx.noalias() += f_partial_da * d->contacts->Ax;
+    d->Gx.noalias() -= f_partial_dtau * d->actuation->Ax;
+    d->Gu.noalias() = -f_partial_dtau * d->actuation->Au;
+    contacts_.updateLagrangianDiff(d->contacts, d->Gx, d->Gu);
+  }
   costs_.calcDiff(d->costs, x, u, false);
 }
 

@@ -12,6 +12,10 @@
 
 namespace crocoddyl {
 
+ContactModel3D::ContactModel3D(StateMultibody& state, const FrameTranslation& xref, unsigned int const& nu,
+                               const Eigen::Vector2d& gains)
+    : ContactModelAbstract(state, 3, nu), xref_(xref), gains_(gains) {}
+
 ContactModel3D::ContactModel3D(StateMultibody& state, const FrameTranslation& xref, const Eigen::Vector2d& gains)
     : ContactModelAbstract(state, 3), xref_(xref), gains_(gains) {}
 
