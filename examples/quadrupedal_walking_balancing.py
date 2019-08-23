@@ -613,7 +613,7 @@ for i, phase in enumerate(GAITPHASES):
                  init_xs=[rmodel.defaultState] * len(ddp[i].models()),
                  init_us=[
                      m.differential.quasiStatic(d.differential, rmodel.defaultState)
-                     for m, d in zip(ddp[i].models(), ddp[i].datas())[:-1]
+                     for m, d in list(zip(ddp[i].models(), ddp[i].datas()))[:-1]
                  ])
 
     # Defining the final state as initial one for the next phase
