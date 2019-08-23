@@ -24,13 +24,17 @@ void exposeDifferentialActionContactFwdDynamics() {
       "is also a custom implementation in case of system with armatures. If you want to\n"
       "include the armature, you need to use setArmature(). On the other hand, the\n"
       "stack of cost functions are implemented in CostModelSum().",
-      bp::init<StateMultibody&, ActuationModelFloatingBase&, ContactModelMultiple&, CostModelSum&>(
-          bp::args(" self", " state", " actuation", " contacts", " costs"),
+      bp::init<StateMultibody&, ActuationModelFloatingBase&, ContactModelMultiple&, CostModelSum&,
+               bp::optional<double> >(
+          bp::args(" self", " state", " actuation", " contacts", " costs", " inv_damping=0."),
           "Initialize the constrained forward-dynamics action model.\n\n"
+          "The damping factor is needed when the contact Jacobian is not full-rank. Otherwise,\n"
+          "a good damping factor could be 1e-12."
           ":param state: multibody state\n"
           ":param actuation: floating-base actuation model\n"
           ":param contacts: multiple contact model\n"
-          ":param costs: stack of cost functions")[bp::with_custodian_and_ward<
+          ":param costs: stack of cost functions\n"
+          ":param inv_damping: Damping factor for cholesky decomposition of JMinvJt")[bp::with_custodian_and_ward<
           1, 2,
           bp::with_custodian_and_ward<1, 3,
                                       bp::with_custodian_and_ward<1, 4, bp::with_custodian_and_ward<1, 5> > > >()])
@@ -91,7 +95,12 @@ void exposeDifferentialActionContactFwdDynamics() {
                     bp::make_function(&DifferentialActionModelContactFwdDynamics::get_armature,
                                       bp::return_value_policy<bp::return_by_value>()),
                     bp::make_function(&DifferentialActionModelContactFwdDynamics::set_armature),
-                    "set an armature mechanism in the joints");
+                    "set an armature mechanism in the joints")
+      .add_property("JMinvJt_damping",
+                    bp::make_function(&DifferentialActionModelContactFwdDynamics::get_damping_factor,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&DifferentialActionModelContactFwdDynamics::set_damping_factor),
+                    "Damping factor for cholesky decomposition of JMinvJt");
 }
 
 }  // namespace python
