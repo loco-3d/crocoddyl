@@ -481,7 +481,7 @@ class SimpleQuadrupedalGaitProblem:
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
         dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
-                                                                     costModel, 1e-9)
+                                                                     costModel)
         model = crocoddyl.IntegratedActionModelEuler(dmodel, timeStep)
         return model
 
@@ -530,8 +530,6 @@ class SimpleQuadrupedalGaitProblem:
 
 # Loading the HyQ model
 hyq = example_robot_data.loadHyQ()
-if WITHDISPLAY:
-    hyq.initDisplay(loadModel=True)
 
 rmodel = hyq.model
 
@@ -556,35 +554,35 @@ GAITPHASES = [{
         'stepKnots': 25,
         'supportKnots': 5
     }
-    # }, {
-    #     'trotting': {
-    #         'stepLength': 0.15,
-    #         'stepHeight': 0.2,
-    #         'timeStep': 1e-2,
-    #         'stepKnots': 25,
-    #         'supportKnots': 5
-    #     }
-    # }, {
-    #     'pacing': {
-    #         'stepLength': 0.15,
-    #         'stepHeight': 0.2,
-    #         'timeStep': 1e-2,
-    #         'stepKnots': 25,
-    #         'supportKnots': 5
-    #     }
-    # }, {
-    #     'bounding': {
-    #         'stepLength': 0.15,
-    #         'stepHeight': 0.2,
-    #         'timeStep': 1e-2,
-    #         'stepKnots': 25,
-    #         'supportKnots': 5
-    #     }
-    # }, {
-    #     'jumping': {
-    #         'jumpHeight': 0.5,
-    #         'timeStep': 1e-2
-    #     }
+    }, {
+        'trotting': {
+            'stepLength': 0.15,
+            'stepHeight': 0.2,
+            'timeStep': 1e-2,
+            'stepKnots': 25,
+            'supportKnots': 5
+        }
+    }, {
+        'pacing': {
+            'stepLength': 0.15,
+            'stepHeight': 0.2,
+            'timeStep': 1e-2,
+            'stepKnots': 25,
+            'supportKnots': 5
+        }
+    }, {
+        'bounding': {
+            'stepLength': 0.15,
+            'stepHeight': 0.2,
+            'timeStep': 1e-2,
+            'stepKnots': 25,
+            'supportKnots': 5
+        }
+    }, {
+        'jumping': {
+            'jumpHeight': 0.5,
+            'timeStep': 1e-2
+        }
 }]
 cameraTF = [2., 2.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 
@@ -617,9 +615,8 @@ for i, phase in enumerate(GAITPHASES):
 
     # Added the callback functions
     print('*** SOLVE ' + key + ' ***')
-    # ddp[i].setCallbacks([crocoddyl.CallbackVerbose()])
     if WITHDISPLAY:
-        ddp[i].setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackSolverDisplay(hyq, 4, 1, cameraTF)])
+        ddp[i].setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackSolverDisplay(hyq, 4, 4, cameraTF)])
     else:
         ddp[i].setCallbacks([crocoddyl.CallbackVerbose()])
 
@@ -632,7 +629,7 @@ for i, phase in enumerate(GAITPHASES):
     #                  m.differential.quasiStatic(d.differential, rmodel.defaultState)
     #                  for m, d in zip(ddp[i].models(), ddp[i].datas())[:-1]
     #              ])
-    ddp[i].solve([], [], 100)
+    ddp[i].solve([rmodel.defaultState] * len(ddp[i].models()), [], 100, False, 0.1)
 
     # Defining the final state as initial one for the next phase
     x0 = ddp[i].xs[-1]
