@@ -19,6 +19,8 @@ static std::vector<Eigen::VectorXd> DEFAULT_VECTOR;
 
 class SolverAbstract {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   explicit SolverAbstract(ShootingProblem& problem);
   virtual ~SolverAbstract();
 

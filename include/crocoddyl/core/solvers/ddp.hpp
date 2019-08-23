@@ -17,6 +17,8 @@ namespace crocoddyl {
 
 class SolverDDP : public SolverAbstract {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   explicit SolverDDP(ShootingProblem& problem);
   ~SolverDDP();
 

@@ -16,6 +16,8 @@ namespace crocoddyl {
 
 class ShootingProblem {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   ShootingProblem(const Eigen::VectorXd& x0, const std::vector<ActionModelAbstract*>& running_models,
                   ActionModelAbstract* const terminal_model);
   ~ShootingProblem();
