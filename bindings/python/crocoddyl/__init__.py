@@ -5,7 +5,7 @@ from .libcrocoddyl_pywrap import __version__
 def setGepettoViewerBackground(robot):
     if not hasattr(robot, 'viewer'):
         # Spawn robot model
-        robot.initDisplay(loadModel=True)
+        robot.initViewer(loadModel=True)
         # Set white background and floor
         window_id = robot.viewer.gui.getWindowID('python-pinocchio')
         robot.viewer.gui.setBackgroundColor1(window_id, [1., 1., 1., 1.])
