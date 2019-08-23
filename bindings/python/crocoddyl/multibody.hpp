@@ -25,6 +25,7 @@
 #include "python/crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "python/crocoddyl/multibody/contacts/contact-3d.hpp"
 #include "python/crocoddyl/multibody/actions/free-fwddyn.hpp"
+#include "python/crocoddyl/multibody/actions/contact-fwddyn.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -46,6 +47,7 @@ void exposeMultibody() {
   exposeContactMultiple();
   exposeContact3D();
   exposeDifferentialActionFreeFwdDynamics();
+  exposeDifferentialActionContactFwdDynamics();
 }
 
 }  // namespace python

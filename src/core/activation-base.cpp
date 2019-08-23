@@ -18,8 +18,6 @@ boost::shared_ptr<ActivationDataAbstract> ActivationModelAbstract::createData() 
   return boost::make_shared<ActivationDataAbstract>(this);
 }
 
-unsigned int ActivationModelAbstract::get_nr() const { return nr_; }
-
-void ActivationModelAbstract::set_nr(unsigned int const& nr) { nr_ = nr; }
+unsigned int const& ActivationModelAbstract::get_nr() const { return nr_; }
 
 }  // namespace crocoddyl

@@ -13,8 +13,8 @@ namespace crocoddyl {
 DifferentialActionModelAbstract::DifferentialActionModelAbstract(StateAbstract& state, unsigned int const& nu,
                                                                  unsigned int const& nr)
     : nu_(nu), nr_(nr), state_(state), unone_(Eigen::VectorXd::Zero(nu)) {
-  assert(nu_ != 0 && "DifferentialActionModelAbstract: nu cannot be zero");
-  assert(nr_ != 0 && "DifferentialActionModelAbstract: nr cannot be zero");
+  assert(nu_ != 0 && "nu cannot be zero");
+  assert(nr_ != 0 && "nr cannot be zero");
 }
 
 DifferentialActionModelAbstract::~DifferentialActionModelAbstract() {}
@@ -33,9 +33,9 @@ boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelAbstrac
   return boost::make_shared<DifferentialActionDataAbstract>(this);
 }
 
-const unsigned int& DifferentialActionModelAbstract::get_nu() const { return nu_; }
+unsigned int const& DifferentialActionModelAbstract::get_nu() const { return nu_; }
 
-const unsigned int& DifferentialActionModelAbstract::get_nr() const { return nr_; }
+unsigned int const& DifferentialActionModelAbstract::get_nr() const { return nr_; }
 
 StateAbstract& DifferentialActionModelAbstract::get_state() const { return state_; }
 

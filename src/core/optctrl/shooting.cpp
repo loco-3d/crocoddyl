@@ -17,14 +17,15 @@ ShootingProblem::ShootingProblem(const Eigen::VectorXd& x0, const std::vector<Ac
       T_(static_cast<unsigned int>(running_models.size())),
       x0_(x0),
       cost_(0.) {
+  assert(x0_.size() == running_models_[0]->get_state().get_nx() && "x0 has wrong dimension");
   allocateData();
 }
 
 ShootingProblem::~ShootingProblem() {}
 
 double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us) {
-  assert(xs.size() == T_ + 1 && "ShootingProblem::calc: wrong dimension of the state trajectory, it should be T + 1.");
-  assert(us.size() == T_ && "ShootingProblem::calc: wrong dimension of the control trajectory, it should be T.");
+  assert(xs.size() == T_ + 1 && "Wrong dimension of the state trajectory, it should be T + 1.");
+  assert(us.size() == T_ && "Wrong dimension of the control trajectory, it should be T.");
 
   cost_ = 0;
   for (unsigned int i = 0; i < T_; ++i) {
@@ -42,9 +43,8 @@ double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::
 }
 
 double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us) {
-  assert(xs.size() == T_ + 1 &&
-         "ShootingProblem::calcDiff: wrong dimension of the state trajectory, it should be T + 1.");
-  assert(us.size() == T_ && "ShootingProblem::calcDiff: wrong dimension of the control trajectory, it should be T.");
+  assert(xs.size() == T_ + 1 && "Wrong dimension of the state trajectory, it should be T + 1.");
+  assert(us.size() == T_ && "Wrong dimension of the control trajectory, it should be T.");
 
   cost_ = 0;
   for (unsigned int i = 0; i < T_; ++i) {
@@ -62,7 +62,7 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const s
 }
 
 void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us, std::vector<Eigen::VectorXd>& xs) {
-  assert(us.size() == T_ && "ShootingProblem::rollout: wrong dimension of the control trajectory, it should be T.");
+  assert(us.size() == T_ && "Wrong dimension of the control trajectory, it should be T.");
 
   xs.resize(T_ + 1);
   xs[0] = x0_;
@@ -89,7 +89,7 @@ unsigned int ShootingProblem::get_T() const { return T_; }
 const Eigen::VectorXd& ShootingProblem::get_x0() const { return x0_; }
 
 void ShootingProblem::allocateData() {
-  for (unsigned int i = 0; i < running_models_.size(); ++i) {
+  for (unsigned int i = 0; i < T_; ++i) {
     ActionModelAbstract* model = running_models_[i];
     running_datas_.push_back(model->createData());
   }

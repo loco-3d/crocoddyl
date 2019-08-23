@@ -23,12 +23,19 @@ void exposeContact3D() {
       "It defines a rigid 3D contact models (point contact) based on acceleration-based holonomic constraints.\n"
       "The calc and calcDiff functions compute the contact Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<StateMultibody&, FrameTranslation, bp::optional<Eigen::Vector2d> >(
-          bp::args(" self", " state", " xref", " gains=np.matrix([ [0.],[0.] ]"),
+      bp::init<StateMultibody&, FrameTranslation, int, bp::optional<Eigen::Vector2d> >(
+          bp::args(" self", " state", " xref", " nu=state.nv", " gains=np.matrix([ [0.],[0.] ]"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param xref: reference frame translation\n"
+          ":param nu: dimension of control vector\n"
           ":param gains: gains of the contact model")[bp::with_custodian_and_ward<1, 2>()])
+      .def(bp::init<StateMultibody&, FrameTranslation, bp::optional<Eigen::Vector2d> >(
+          bp::args(" self", " state", " xref"),
+          "Initialize the state cost model.\n\n"
+          "For this case the default activation model is quadratic, i.e. crocoddyl.ActivationModelQuad(state.ndx).\n"
+          ":param state: state of the multibody system\n"
+          ":param xref: reference state")[bp::with_custodian_and_ward<1, 2>()])
       .def("calc", &ContactModel3D::calc_wrap, bp::args(" self", " data", " x"),
            "Compute the 3D contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
@@ -43,6 +50,10 @@ void exposeContact3D() {
                                        ":param data: cost data\n"
                                        ":param x: state vector\n"
                                        ":param recalc: If true, it updates the contact Jacobian and drift."))
+      .def("updateLagrangian", &ContactModel3D::updateLagrangian, bp::args(" self", " data", " lambda"),
+           "Convert the Lagrangian into a stack of spatial forces.\n\n"
+           ":param data: cost data\n"
+           ":param lambda: Lagrangian vector")
       .def("createData", &ContactModel3D::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the 3D contact data.\n\n"

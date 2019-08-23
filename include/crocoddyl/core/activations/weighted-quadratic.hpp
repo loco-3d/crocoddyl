@@ -23,8 +23,14 @@ class ActivationModelWeightedQuad : public ActivationModelAbstract {
                 const bool& recalc = true);
   boost::shared_ptr<ActivationDataAbstract> createData();
 
+  const Eigen::VectorXd& get_weights() const;
+
  private:
   Eigen::VectorXd weights_;
+
+#ifndef NDEBUG
+  Eigen::MatrixXd Arr_;
+#endif
 };
 
 struct ActivationDataWeightedQuad : public ActivationDataAbstract {

@@ -62,6 +62,6 @@ StateMultibody& CostModelAbstract::get_state() const { return state_; }
 
 ActivationModelAbstract& CostModelAbstract::get_activation() const { return activation_; }
 
-const unsigned int& CostModelAbstract::get_nu() const { return nu_; }
+unsigned int const& CostModelAbstract::get_nu() const { return nu_; }
 
 }  // namespace crocoddyl

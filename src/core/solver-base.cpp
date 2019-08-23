@@ -104,4 +104,12 @@ const double& SolverAbstract::get_dV() const { return dV_; }
 
 const double& SolverAbstract::get_dVexp() const { return dVexp_; }
 
+bool raiseIfNaN(const double& value) {
+  if (std::isnan(value) || std::isinf(value) || value >= 1e30) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 }  // namespace crocoddyl

@@ -43,8 +43,8 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
   }
   was_feasible_ = false;
 
+  bool recalc = true;
   for (iter_ = 0; iter_ < maxiter; ++iter_) {
-    bool recalc = true;
     while (true) {
       try {
         computeDirection(recalc);
@@ -60,6 +60,8 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
     }
     expectedImprovement();
 
+    // We need to recalculate the derivatives when the step length passes
+    recalc = false;
     for (std::vector<double>::const_iterator it = alphas_.begin(); it != alphas_.end(); ++it) {
       steplength_ = *it;
 
@@ -74,6 +76,7 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
         was_feasible_ = is_feasible_;
         setCandidate(xs_try_, us_try_, true);
         cost_ = cost_try_;
+        recalc = true;
         break;
       }
     }
@@ -201,10 +204,11 @@ void SolverDDP::backwardPass() {
       Vxx_[t].diagonal() += x_reg_;
     }
 
-    const double& Vx_value = Vx_[t].sum();
-    const double& Vxx_value = Vxx_[t].sum();
-    if (std::isnan(Vx_value) || std::isnan(Vxx_value)) {
-      throw "backward error";
+    if (raiseIfNaN(Vx_[t].lpNorm<Eigen::Infinity>())) {
+      throw "backward_error";
+    }
+    if (raiseIfNaN(Vxx_[t].lpNorm<Eigen::Infinity>())) {
+      throw "backward_error";
     }
   }
 }
@@ -222,9 +226,11 @@ void SolverDDP::forwardPass(const double& steplength) {
     xs_try_[t + 1] = d->get_xnext();
     cost_try_ += d->cost;
 
-    const double& value = xs_try_[t + 1].sum();
-    if (std::isnan(value) || std::isinf(value) || std::isnan(cost_try_) || std::isnan(cost_try_)) {
-      throw "forward error";
+    if (raiseIfNaN(cost_try_)) {
+      throw "forward_error";
+    }
+    if (raiseIfNaN(xs_try_[t + 1].lpNorm<Eigen::Infinity>())) {
+      throw "forward_error";
     }
   }
 
@@ -233,8 +239,8 @@ void SolverDDP::forwardPass(const double& steplength) {
   m->calc(d, xs_try_.back());
   cost_try_ += d->cost;
 
-  if (std::isnan(cost_try_) || std::isnan(cost_try_)) {
-    throw "forward error";
+  if (raiseIfNaN(cost_try_)) {
+    throw "forward_error";
   }
 }
 

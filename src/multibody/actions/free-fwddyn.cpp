@@ -31,8 +31,8 @@ DifferentialActionModelFreeFwdDynamics::~DifferentialActionModelFreeFwdDynamics(
 void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                   const Eigen::Ref<const Eigen::VectorXd>& x,
                                                   const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(x.size() == state_.get_nx() && "DifferentialActionModelFreeFwdDynamics::calc: x has wrong dimension");
-  assert(u.size() == nu_ && "DifferentialActionModelFreeFwdDynamics::calc: u has wrong dimension");
+  assert(x.size() == state_.get_nx() && "x has wrong dimension");
+  assert(u.size() == nu_ && "u has wrong dimension");
 
   DifferentialActionDataFreeFwdDynamics* d = static_cast<DifferentialActionDataFreeFwdDynamics*>(data.get());
   d->qcur = x.head(state_.get_nq());
@@ -61,8 +61,8 @@ void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<Differ
 void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                       const Eigen::Ref<const Eigen::VectorXd>& x,
                                                       const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  assert(x.size() == state_.get_nx() && "DifferentialActionModelFreeFwdDynamics::calcDiff: x has wrong dimension");
-  assert(u.size() == nu_ && "DifferentialActionModelFreeFwdDynamics::calcDiff: u has wrong dimension");
+  assert(x.size() == state_.get_nx() && "x has wrong dimension");
+  assert(u.size() == nu_ && "u has wrong dimension");
 
   DifferentialActionDataFreeFwdDynamics* d = static_cast<DifferentialActionDataFreeFwdDynamics*>(data.get());
   const unsigned int& nv = state_.get_nv();
@@ -104,6 +104,7 @@ CostModelSum& DifferentialActionModelFreeFwdDynamics::get_costs() const { return
 const Eigen::VectorXd& DifferentialActionModelFreeFwdDynamics::get_armature() const { return armature_; }
 
 void DifferentialActionModelFreeFwdDynamics::set_armature(const Eigen::VectorXd& armature) {
+  assert(armature.size() == state_.get_nv() && "The armature dimension is wrong, we cannot set it.");
   if (armature.size() != state_.get_nv()) {
     std::cout << "The armature dimension is wrong, we cannot set it." << std::endl;
   } else {

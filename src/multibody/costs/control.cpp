@@ -13,7 +13,7 @@ namespace crocoddyl {
 CostModelControl::CostModelControl(StateMultibody& state, ActivationModelAbstract& activation,
                                    const Eigen::VectorXd& uref)
     : CostModelAbstract(state, activation, (const unsigned)uref.size()), uref_(uref) {
-  assert(activation.get_nr() == (const unsigned)uref.size() && "CostModelControl: activation::nr is not equals to nu");
+  assert(activation.get_nr() == (const unsigned)uref.size() && "activation::nr is not equals to nu");
 }
 
 CostModelControl::CostModelControl(StateMultibody& state, ActivationModelAbstract& activation)
@@ -21,7 +21,7 @@ CostModelControl::CostModelControl(StateMultibody& state, ActivationModelAbstrac
 
 CostModelControl::CostModelControl(StateMultibody& state, ActivationModelAbstract& activation, const unsigned int& nu)
     : CostModelAbstract(state, activation, nu), uref_(Eigen::VectorXd::Zero(nu)) {
-  assert(activation.get_nr() == nu_ && "CostModelControl: activation::nr is not equals to nu");
+  assert(activation.get_nr() == nu_ && "activation::nr is not equals to nu");
 }
 
 CostModelControl::CostModelControl(StateMultibody& state, const Eigen::VectorXd& uref)
@@ -37,7 +37,7 @@ CostModelControl::~CostModelControl() {}
 
 void CostModelControl::calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>&,
                             const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(u.size() == nu_ && "CostModelControl::calc: u has wrong dimension");
+  assert(u.size() == nu_ && "u has wrong dimension");
 
   data->r = u - uref_;
   activation_.calc(data->activation, data->r);
@@ -47,7 +47,7 @@ void CostModelControl::calc(const boost::shared_ptr<CostDataAbstract>& data, con
 void CostModelControl::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                 const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
                                 const bool& recalc) {
-  assert(u.size() == nu_ && "CostModelControl::calcDiff: u has wrong dimension");
+  assert(u.size() == nu_ && "u has wrong dimension");
 
   if (recalc) {
     calc(data, x, u);

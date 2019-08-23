@@ -33,11 +33,15 @@ class CostModelAbstract_wrap : public CostModelAbstract, public bp::wrapper<Cost
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
+    assert(x.size() == state_.get_nx() && "x has wrong dimension");
+    assert(u.size() == nu_ && "u has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
   void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
+    assert(x.size() == state_.get_nx() && "x has wrong dimension");
+    assert(u.size() == nu_ && "u has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
 };
@@ -56,13 +60,15 @@ void exposeCostMultibody() {
           ":param state: state of the multibody system\n"
           ":param activation: Activation model\n"
           ":param nu: dimension of control vector\n"
-          ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 3>()])
+          ":param withResiduals: true if the cost function has residuals")
+          [bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .def(bp::init<StateMultibody&, ActivationModelAbstract&, bp::optional<bool> >(
           bp::args(" self", " state", " activation", " withResiduals=True"),
           "Initialize the cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: Activation model\n"
-          ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 3>()])
+          ":param withResiduals: true if the cost function has residuals")
+               [bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .def(bp::init<StateMultibody&, int, int, bp::optional<bool> >(
           bp::args(" self", " state", " nr", " nu=model.nv", " withResiduals=True"),
           "Initialize the cost model.\n\n"
@@ -112,7 +118,7 @@ void exposeCostMultibody() {
           bp::args(" self", " model", " data"),
           "Create common data shared between cost models.\n\n"
           ":param model: cost model\n"
-          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
+          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("pinocchio", bp::make_getter(&CostDataAbstract::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
       .add_property("activation",
@@ -130,8 +136,7 @@ void exposeCostMultibody() {
                     bp::make_setter(&CostDataAbstract::Lxu), "Hessian of the cost")
       .add_property("Luu", bp::make_getter(&CostDataAbstract::Luu, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&CostDataAbstract::Luu), "Hessian of the cost")
-      .add_property("costResiduals",
-                    bp::make_getter(&CostDataAbstract::r, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("r", bp::make_getter(&CostDataAbstract::r, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&CostDataAbstract::r), "cost residual")
       .add_property("Rx", bp::make_getter(&CostDataAbstract::Rx, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&CostDataAbstract::Rx), "Jacobian of the cost residual")

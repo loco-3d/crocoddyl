@@ -19,6 +19,8 @@ static std::vector<Eigen::VectorXd> DEFAULT_VECTOR;
 
 class SolverAbstract {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   explicit SolverAbstract(ShootingProblem& problem);
   virtual ~SolverAbstract();
 
@@ -78,6 +80,8 @@ class CallbackAbstract {
   ~CallbackAbstract() {}
   virtual void operator()(SolverAbstract& solver) = 0;
 };
+
+bool raiseIfNaN(const double& value);
 
 }  // namespace crocoddyl
 

@@ -26,7 +26,7 @@ void exposeShootingProblem() {
   bp::to_python_converter<std::vector<ActionModelPtr, std::allocator<ActionModelPtr> >,
                           vector_to_list<ActionModelPtr> >();
   bp::to_python_converter<std::vector<ActionDataPtr, std::allocator<ActionDataPtr> >,
-                          vector_to_list<ActionDataPtr> >();
+                          vector_to_list<ActionDataPtr, false> >();
   list_to_vector().from_python<std::vector<ActionModelPtr, std::allocator<ActionModelPtr> > >();
 
   bp::class_<ShootingProblem, boost::noncopyable>(
@@ -42,7 +42,8 @@ void exposeShootingProblem() {
           "Initialize the shooting problem.\n\n"
           ":param initialState: initial state\n"
           ":param runningModels: running action models\n"
-          ":param terminalModel: terminal action model")[bp::with_custodian_and_ward<1, 4>()])
+          ":param terminalModel: terminal action model")
+          [bp::with_custodian_and_ward<1, 3, bp::with_custodian_and_ward<1, 4> >()])
       .def("calc", &ShootingProblem::calc, bp::args(" self", " xs", " us"),
            "Compute the cost and the next states.\n\n"
            "First, it computes the next state and cost for each action model\n"

@@ -24,6 +24,11 @@ class ActuationModelFloatingBase : public ActuationModelAbstract {
   void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
   boost::shared_ptr<ActuationDataAbstract> createData();
+
+#ifndef NDEBUG
+ private:
+  Eigen::MatrixXd Au_;
+#endif
 };
 
 }  // namespace crocoddyl

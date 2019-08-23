@@ -22,13 +22,13 @@ class ActivationModelAbstract_wrap : public ActivationModelAbstract, public bp::
       : ActivationModelAbstract(nr), bp::wrapper<ActivationModelAbstract>() {}
 
   void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r) {
-    assert(r.size() == nr_ && "ActivationModelAbstract::calc: r has wrong dimension");
+    assert(r.size() == nr_ && "r has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)r);
   }
 
   void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r,
                 const bool& recalc = true) {
-    assert(r.size() == nr_ && "ActivationModelAbstract::calcDiff: r has wrong dimension");
+    assert(r.size() == nr_ && "r has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)r, recalc);
   }
 };

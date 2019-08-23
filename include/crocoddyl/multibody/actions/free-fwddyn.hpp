@@ -28,8 +28,8 @@ class DifferentialActionModelFreeFwdDynamics : public DifferentialActionModelAbs
                 const bool& recalc = true);
   boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
-  pinocchio::Model& get_pinocchio() const;
   CostModelSum& get_costs() const;
+  pinocchio::Model& get_pinocchio() const;
   const Eigen::VectorXd& get_armature() const;
   void set_armature(const Eigen::VectorXd& armature);
 
@@ -56,7 +56,7 @@ struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbst
   }
 
   pinocchio::Data pinocchio;
-  boost::shared_ptr<CostDataAbstract> costs;
+  boost::shared_ptr<CostDataSum> costs;
   Eigen::MatrixXd Minv;
   Eigen::VectorXd u_drift;
 };

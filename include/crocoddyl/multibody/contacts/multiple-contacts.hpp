@@ -24,35 +24,59 @@ struct ContactItem {
   ContactModelAbstract* contact;
 };
 
-class ContactModelMultiple : public ContactModelAbstract {
+struct ContactDataMultiple;  // forward declaration
+
+class ContactModelMultiple {
  public:
   typedef std::map<std::string, ContactItem> ContactModelContainer;
   typedef std::map<std::string, boost::shared_ptr<ContactDataAbstract> > ContactDataContainer;
+  typedef pinocchio::container::aligned_vector<pinocchio::Force>::iterator ForceIterator;
 
+  ContactModelMultiple(StateMultibody& state, unsigned int const& nu);
   ContactModelMultiple(StateMultibody& state);
   ~ContactModelMultiple();
 
   void addContact(const std::string& name, ContactModelAbstract* const contact);
   void removeContact(const std::string& name);
 
-  void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
-  void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
+  void calcDiff(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const bool& recalc = true);
-  boost::shared_ptr<ContactDataAbstract> createData(pinocchio::Data* const data);
+  void updateLagrangian(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::VectorXd& lambda);
+  void updateLagrangianDiff(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::MatrixXd& Gx,
+                            const Eigen::MatrixXd& Gu);
+  boost::shared_ptr<ContactDataMultiple> createData(pinocchio::Data* const data);
 
+  StateMultibody& get_state() const;
   const ContactModelContainer& get_contacts() const;
   const unsigned int& get_nc() const;
+  const unsigned int& get_nu() const;
 
  private:
+  StateMultibody& state_;
   ContactModelContainer contacts_;
   unsigned int nc_;
+  unsigned int nu_;
+
+#ifdef PYTHON_BINDINGS
+
+ public:
+  void calc_wrap(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::VectorXd& x) { calc(data, x); }
+
+  void calcDiff_wrap(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::VectorXd& x,
+                     const bool& recalc = true) {
+    calcDiff(data, x, recalc);
+  }
+
+#endif
 };
 
 struct ContactDataMultiple : ContactDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  ContactDataMultiple(Model* const model, pinocchio::Data* const data) : ContactDataAbstract(model, data) {
+  ContactDataMultiple(Model* const model, pinocchio::Data* const data)
+      : ContactDataAbstract(model, data), fext(model->get_state().get_pinocchio().njoints, pinocchio::Force::Zero()) {
     for (ContactModelMultiple::ContactModelContainer::const_iterator it = model->get_contacts().begin();
          it != model->get_contacts().end(); ++it) {
       const ContactItem& item = it->second;
@@ -61,6 +85,7 @@ struct ContactDataMultiple : ContactDataAbstract {
   }
 
   ContactModelMultiple::ContactDataContainer contacts;
+  pinocchio::container::aligned_vector<pinocchio::Force> fext;
 };
 
 }  // namespace crocoddyl

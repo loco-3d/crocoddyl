@@ -14,13 +14,13 @@ namespace crocoddyl {
 CostModelFramePlacement::CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation,
                                                  const FramePlacement& Mref, unsigned int const& nu)
     : CostModelAbstract(state, activation, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
-  assert(activation_.get_nr() == 6 && "CostModelFramePlacement: activation::nr is not equals to 6");
+  assert(activation_.get_nr() == 6 && "activation::nr is not equals to 6");
 }
 
 CostModelFramePlacement::CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation,
                                                  const FramePlacement& Mref)
     : CostModelAbstract(state, activation), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
-  assert(activation_.get_nr() == 6 && "CostModelFramePlacement: activation::nr is not equals to 6");
+  assert(activation_.get_nr() == 6 && "activation::nr is not equals to 6");
 }
 
 CostModelFramePlacement::CostModelFramePlacement(StateMultibody& state, const FramePlacement& Mref,

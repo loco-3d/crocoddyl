@@ -18,20 +18,23 @@ namespace bp = boost::python;
 
 void exposeCostFrameTranslation() {
   bp::class_<CostModelFrameTranslation, bp::bases<CostModelAbstract> >(
-      "CostModelFrameTranslation", bp::init<StateMultibody&, ActivationModelAbstract&, FrameTranslation, int>(
-                                       bp::args(" self", " state", " activation", " xref", " nu"),
-                                       "Initialize the frame translation cost model.\n\n"
-                                       ":param state: state of the multibody system\n"
-                                       ":param activation: activation model\n"
-                                       ":param xref: reference frame translation\n"
-                                       ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
+      "CostModelFrameTranslation",
+      bp::init<StateMultibody&, ActivationModelAbstract&, FrameTranslation, int>(
+          bp::args(" self", " state", " activation", " xref", " nu"),
+          "Initialize the frame translation cost model.\n\n"
+          ":param state: state of the multibody system\n"
+          ":param activation: activation model\n"
+          ":param xref: reference frame translation\n"
+          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2,
+                                                                                bp::with_custodian_and_ward<1, 3> >()])
       .def(bp::init<StateMultibody&, ActivationModelAbstract&, FrameTranslation>(
           bp::args(" self", " state", " activation", " xref"),
           "Initialize the frame translation cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
-          ":param xref: reference frame translation")[bp::with_custodian_and_ward<1, 3>()])
+          ":param xref: reference frame translation")
+               [bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .def(bp::init<StateMultibody&, FrameTranslation, int>(
           bp::args(" self", " state", " xref", " nu"),
           "Initialize the frame translation cost model.\n\n"

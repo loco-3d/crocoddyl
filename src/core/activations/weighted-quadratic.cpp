@@ -17,7 +17,7 @@ ActivationModelWeightedQuad::~ActivationModelWeightedQuad() {}
 
 void ActivationModelWeightedQuad::calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                                        const Eigen::Ref<const Eigen::VectorXd>& r) {
-  assert(r.size() == nr_ && "ActivationModelWeightedQuad::calc: r has wrong dimension");
+  assert(r.size() == nr_ && "r has wrong dimension");
   boost::shared_ptr<ActivationDataWeightedQuad> d = boost::static_pointer_cast<ActivationDataWeightedQuad>(data);
 
   d->Wr = weights_.cwiseProduct(r);
@@ -26,18 +26,28 @@ void ActivationModelWeightedQuad::calc(const boost::shared_ptr<ActivationDataAbs
 
 void ActivationModelWeightedQuad::calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
                                            const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc) {
-  assert(r.size() == nr_ && "ActivationModelWeightedQuad::calcDiff: r has wrong dimension");
+  assert(r.size() == nr_ && "r has wrong dimension");
   if (recalc) {
     calc(data, r);
   }
 
   boost::shared_ptr<ActivationDataWeightedQuad> d = boost::static_pointer_cast<ActivationDataWeightedQuad>(data);
   data->Ar = d->Wr;
-  data->Arr.diagonal() = weights_;
+  // The Hessian has constant values which were set in createData.
+  assert(data->Arr == Arr_ && "Arr has wrong value");
 }
 
 boost::shared_ptr<ActivationDataAbstract> ActivationModelWeightedQuad::createData() {
-  return boost::make_shared<ActivationDataWeightedQuad>(this);
+  boost::shared_ptr<ActivationDataWeightedQuad> data = boost::make_shared<ActivationDataWeightedQuad>(this);
+  data->Arr.diagonal() = weights_;
+
+#ifndef NDEBUG
+  Arr_ = data->Arr;
+#endif
+
+  return data;
 }
+
+const Eigen::VectorXd& ActivationModelWeightedQuad::get_weights() const { return weights_; }
 
 }  // namespace crocoddyl

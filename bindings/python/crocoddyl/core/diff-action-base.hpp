@@ -24,16 +24,16 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
 
   void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
-    assert(x.size() == state_.get_nx() && "DifferentialActionModelAbstract::calc: x has wrong dimension");
-    assert(u.size() == nu_ && "DifferentialActionModelAbstract::calc: u has wrong dimension");
+    assert(x.size() == state_.get_nx() && "x has wrong dimension");
+    assert(u.size() == nu_ && "u has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
   void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                 const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
                 const bool& recalc = true) {
-    assert(x.size() == state_.get_nx() && "DifferentialActionModelAbstract::calcDiff: x has wrong dimension");
-    assert(u.size() == nu_ && "DifferentialActionModelAbstract::calcDiff: u has wrong dimension");
+    assert(x.size() == state_.get_nx() && "x has wrong dimension");
+    assert(u.size() == nu_ && "u has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
 };
@@ -147,7 +147,7 @@ void exposeDifferentialActionAbstract() {
           bp::make_function(&DifferentialActionDataAbstract::get_Luu, bp::return_value_policy<bp::return_by_value>()),
           bp::make_function(&DifferentialActionDataAbstract::set_Luu), "Hessian of the cost")
       .add_property(
-          "costResiduals",
+          "r",
           bp::make_function(&DifferentialActionDataAbstract::get_r, bp::return_value_policy<bp::return_by_value>()),
           bp::make_function(&DifferentialActionDataAbstract::set_r), "cost residual")
       .add_property(

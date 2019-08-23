@@ -20,49 +20,14 @@ namespace python {
 
 namespace bp = boost::python;
 
-template <typename T>
-struct is_pointer {
-  static const bool value = false;
-};
-
-template <typename T>
-struct is_pointer<T*> {
-  static const bool value = true;
-};
-
-template <class T>
-bp::list std_vector_to_python_list(const std::vector<T>& vec) {
-  unsigned int const& n = static_cast<unsigned int>(vec.size());
-  bp::list list;
-  for (unsigned int i = 0; i < n; ++i) {
-    if (is_pointer<T>::value) {
-      list.append(boost::ref(vec[i]));
-    } else {
-      list.append(vec[i]);
-    }
-  }
-  return list;
-}
-
-template <class T>
-std::vector<T> python_list_to_std_vector(const bp::list& list) {
-  unsigned int const& n = static_cast<unsigned int>(len(list));
-  std::vector<T> vec;
-  vec.resize(n);
-  for (int i = 0; i < n; ++i) {
-    vec[i] = bp::extract<T>(list[i]);
-  }
-  return vec;
-}
-
 /// @note Registers converter from a provided type to the python
 ///       iterable type to the.
-template <class T>
+template <class T, bool NoProxy = true>
 struct vector_to_list {
   static PyObject* convert(const std::vector<T>& vec) {
     bp::list* l = new boost::python::list();
     for (size_t i = 0; i < vec.size(); i++) {
-      if (is_pointer<T>::value) {
+      if (NoProxy) {
         l->append(boost::ref(vec[i]));
       } else {
         l->append(vec[i]);
@@ -123,13 +88,17 @@ struct list_to_vector {
 
 /// @note Registers converter from a provided type to the python
 ///       iterable type to the.
-template <class K, class V>
+template <class K, class V, bool NoProxy = true>
 struct map_to_dict {
   static PyObject* convert(const std::map<K, V>& map) {
     bp::dict* dict = new boost::python::dict();
     typename std::map<K, V>::const_iterator it;
     for (it = map.begin(); it != map.end(); ++it) {
-      dict->setdefault(it->first, boost::ref(it->second));
+      if (NoProxy) {
+        dict->setdefault(it->first, boost::ref(it->second));
+      } else {
+        dict->setdefault(it->first, it->second);
+      }
     }
     return dict->ptr();
   }

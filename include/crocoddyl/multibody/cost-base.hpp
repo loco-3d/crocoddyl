@@ -40,7 +40,7 @@ class CostModelAbstract {
 
   StateMultibody& get_state() const;
   ActivationModelAbstract& get_activation() const;
-  const unsigned int& get_nu() const;
+  unsigned int const& get_nu() const;
 
  protected:
   StateMultibody& state_;
@@ -75,6 +75,7 @@ class CostModelAbstract {
   void calcDiff_wrap(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x, const bool& recalc) {
     calcDiff(data, x, unone_, recalc);
   }
+
 #endif
 };
 

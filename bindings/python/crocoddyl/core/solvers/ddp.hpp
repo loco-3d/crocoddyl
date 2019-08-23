@@ -32,7 +32,7 @@ void exposeSolverDDP() {
       ":param shootingProblem: shooting problem (list of action models along trajectory.)",
       bp::init<ShootingProblem&>(bp::args(" self", " problem"),
                                  "Initialize the vector dimension.\n\n"
-                                 ":param problem: shooting problem."))
+                                 ":param problem: shooting problem.")[bp::with_custodian_and_ward<1, 2>()])
       .def("solve", &SolverDDP::solve,
            SolverDDP_solves(
                bp::args(" self", " init_xs=[]", " init_us=[]", " maxiter=100", " isFeasible=False", " regInit=None"),

@@ -30,14 +30,17 @@ void exposeActivationQuad() {
            ":param data: activation data\n"
            ":param r: residual vector")
       .def<void (ActivationModelQuad::*)(const boost::shared_ptr<ActivationDataAbstract>&, const Eigen::VectorXd&,
-                                         const bool&)>("calcDiff", &ActivationModelQuad::calcDiff_wrap,
-                                                       bp::args(" self", " data", " r", " recalc=True"),
-                                                       "Compute the derivatives of a quadratic function.\n\n"
-                                                       ":param data: activation data\n"
-                                                       ":param r: residual vector \n"
-                                                       ":param recalc: If true, it updates the residual value.")
+                                         const bool&)>(
+          "calcDiff", &ActivationModelQuad::calcDiff_wrap, bp::args(" self", " data", " r", " recalc=True"),
+          "Compute the derivatives of a quadratic function.\n\n"
+          "Note that the Hessian is constant, so we don't write again this value.\n"
+          ":param data: activation data\n"
+          ":param r: residual vector \n"
+          ":param recalc: If true, it updates the residual value.")
       .def<void (ActivationModelQuad::*)(const boost::shared_ptr<ActivationDataAbstract>&, const Eigen::VectorXd&)>(
-          "calcDiff", &ActivationModelQuad::calcDiff_wrap, bp::args(" self", " data", " r"));
+          "calcDiff", &ActivationModelQuad::calcDiff_wrap, bp::args(" self", " data", " r"))
+      .def("createData", &ActivationModelQuad::createData, bp::args(" self"),
+           "Create the quadratic activation data.\n\n");
 }
 
 }  // namespace python

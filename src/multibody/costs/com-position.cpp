@@ -13,13 +13,13 @@ namespace crocoddyl {
 CostModelCoMPosition::CostModelCoMPosition(StateMultibody& state, ActivationModelAbstract& activation,
                                            const Eigen::Vector3d& cref, unsigned int const& nu)
     : CostModelAbstract(state, activation, nu), cref_(cref) {
-  assert(activation_.get_nr() == 3 && "CostModelCoMPosition: activation::nr is not equals to 3");
+  assert(activation_.get_nr() == 3 && "activation::nr is not equals to 3");
 }
 
 CostModelCoMPosition::CostModelCoMPosition(StateMultibody& state, ActivationModelAbstract& activation,
                                            const Eigen::Vector3d& cref)
     : CostModelAbstract(state, activation), cref_(cref) {
-  assert(activation_.get_nr() == 3 && "CostModelCoMPosition: activation::nr is not equals to 3");
+  assert(activation_.get_nr() == 3 && "activation::nr is not equals to 3");
 }
 
 CostModelCoMPosition::CostModelCoMPosition(StateMultibody& state, const Eigen::Vector3d& cref, unsigned int const& nu)

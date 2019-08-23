@@ -37,9 +37,9 @@ Eigen::VectorXd StateMultibody::rand() {
 
 void StateMultibody::diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
                           Eigen::Ref<Eigen::VectorXd> dxout) {
-  assert(x0.size() == nx_ && "StateMultibody::diff: x0 has wrong dimension");
-  assert(x1.size() == nx_ && "StateMultibody::diff: x1 has wrong dimension");
-  assert(dxout.size() == ndx_ && "StateMultibody::diff: output must be pre-allocated");
+  assert(x0.size() == nx_ && "x0 has wrong dimension");
+  assert(x1.size() == nx_ && "x1 has wrong dimension");
+  assert(dxout.size() == ndx_ && "Output must be pre-allocated");
 
   q0_ = x0.head(nq_);
   q1_ = x1.head(nq_);
@@ -51,9 +51,9 @@ void StateMultibody::diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eig
 
 void StateMultibody::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                                Eigen::Ref<Eigen::VectorXd> xout) {
-  assert(x.size() == nx_ && "StateMultibody::diff: x has wrong dimension");
-  assert(dx.size() == ndx_ && "StateMultibody::diff: dx has wrong dimension");
-  assert(xout.size() == nx_ && "StateMultibody::diff: output must be pre-allocated");
+  assert(x.size() == nx_ && "x has wrong dimension");
+  assert(dx.size() == ndx_ && "dx has wrong dimension");
+  assert(xout.size() == nx_ && "Output must be pre-allocated");
 
   q0_ = x.head(nq_);
   dq0_ = dx.head(nv_);
@@ -68,13 +68,12 @@ void StateMultibody::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const
 void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
                            Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
                            Jcomponent firstsecond) {
-  assert(x0.size() == nx_ && "StateMultibody::Jdiff: x0 has wrong dimension");
-  assert(x1.size() == nx_ && "StateMultibody::Jdiff: x1 has wrong dimension");
-  assert(is_a_Jcomponent(firstsecond) && ("StateMultibody::Jdiff: firstsecond "
-                                          "must be one of the Jcomponent {both, first, second}"));
+  assert(x0.size() == nx_ && "x0 has wrong dimension");
+  assert(x1.size() == nx_ && "x1 has wrong dimension");
+  assert(is_a_Jcomponent(firstsecond) && ("firstsecond must be one of the Jcomponent {both, first, second}"));
 
   if (firstsecond == first) {
-    assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "StateMultibody::Jdiff: Jfirst must be of the good size");
+    assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "Jfirst must be of the good size");
 
     diff(x1, x0, dx_);
     q1_ = x1.head(nq_);
@@ -86,8 +85,7 @@ void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Ei
     Jfirst.topLeftCorner(nv_, nv_) = Jd_;
     Jfirst.bottomRightCorner(nv_, nv_).diagonal() = -Eigen::VectorXd::Ones(nv_);
   } else if (firstsecond == second) {
-    assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ &&
-           "StateMultibody::Jdiff: Jsecond must be of the good size");
+    assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ && "Jsecond must be of the good size");
 
     diff(x0, x1, dx_);
     q0_ = x0.head(nq_);
@@ -99,9 +97,8 @@ void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Ei
     Jsecond.topLeftCorner(nv_, nv_) = Jd_;
     Jsecond.bottomRightCorner(nv_, nv_).diagonal() = Eigen::VectorXd::Ones(nv_);
   } else {  // computing both
-    assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "StateMultibody::Jdiff: Jfirst must be of the good size");
-    assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ &&
-           "StateMultibody::Jdiff: Jsecond must be of the good size");
+    assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "Jfirst must be of the good size");
+    assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ && "Jsecond must be of the good size");
 
     // Computing Jfirst
     diff(x1, x0, dx_);
@@ -130,34 +127,30 @@ void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Ei
 void StateMultibody::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x,
                                 const Eigen::Ref<const Eigen::VectorXd>& dx, Eigen::Ref<Eigen::MatrixXd> Jfirst,
                                 Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent firstsecond) {
-  assert(x.size() == nx_ && "StateMultibody::Jintegrate: x has wrong dimension");
-  assert(dx.size() == ndx_ && "StateMultibody::Jintegrate: dx has wrong dimension");
+  assert(x.size() == nx_ && "x has wrong dimension");
+  assert(dx.size() == ndx_ && "dx has wrong dimension");
   assert((firstsecond == first || firstsecond == second || firstsecond == both) &&
-         ("StateMultibody::Jintegrate: firstsecond must be one of the Jcomponent "
-          "{both, first, second}"));
+         ("firstsecond must be one of the Jcomponent {both, first, second}"));
 
   q0_ = x.head(nq_);
   dq0_ = dx.head(nv_);
   if (firstsecond == first) {
-    assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ &&
-           "StateMultibody::Jintegrate: Jfirst must be of the good size");
+    assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "Jfirst must be of the good size");
 
     pinocchio::dIntegrate(pinocchio_, q0_, dq0_, Ji_, pinocchio::ARG0);
     Jfirst.setZero();
     Jfirst.topLeftCorner(nv_, nv_) = Ji_;
     Jfirst.bottomRightCorner(nv_, nv_).diagonal() = Eigen::VectorXd::Ones(nv_);
   } else if (firstsecond == second) {
-    assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ &&
-           "StateMultibody::Jdiff: Jsecond must be of the good size");
+    assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ && "Jsecond must be of the good size");
 
     pinocchio::dIntegrate(pinocchio_, q0_, dq0_, Ji_, pinocchio::ARG1);
     Jsecond.setZero();
     Jsecond.topLeftCorner(nv_, nv_) = Ji_;
     Jsecond.bottomRightCorner(nv_, nv_).diagonal() = Eigen::VectorXd::Ones(nv_);
   } else {  // computing both
-    assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "StateMultibody::Jdiff: Jfirst must be of the good size");
-    assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ &&
-           "StateMultibody::Jdiff: Jsecond must be of the good size");
+    assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "Jfirst must be of the good size");
+    assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ && "Jsecond must be of the good size");
 
     // Computing Jfirst
     pinocchio::dIntegrate(pinocchio_, q0_, dq0_, Ji_, pinocchio::ARG0);
@@ -178,14 +171,10 @@ pinocchio::Model& StateMultibody::get_pinocchio() const { return pinocchio_; }
 void StateMultibody::updateJdiff(const Eigen::Ref<const Eigen::MatrixXd>& Jdq, bool positive) {
   if (positive) {
     Jd_.diagonal() = Jdq.diagonal();
-    Jd_.block<3, 3>(0, 0) = Jdq.block<3, 3>(0, 0).transpose();
-    Jd_.block<3, 3>(0, 3) = Jdq.block<3, 3>(0, 3).transpose();
-    Jd_.block<3, 3>(3, 3) = Jdq.block<3, 3>(3, 3).transpose();
+    Jd_.block<6, 6>(0, 0) = Jdq.block<6, 6>(0, 0).inverse();
   } else {
     Jd_.diagonal() = -Jdq.diagonal();
-    Jd_.block<3, 3>(0, 0) = -Jdq.block<3, 3>(0, 0).transpose();
-    Jd_.block<3, 3>(0, 3) = -Jdq.block<3, 3>(0, 3).transpose();
-    Jd_.block<3, 3>(3, 3) = -Jdq.block<3, 3>(3, 3).transpose();
+    Jd_.block<6, 6>(0, 0) = -Jdq.block<6, 6>(0, 0).inverse();
   }
 }
 

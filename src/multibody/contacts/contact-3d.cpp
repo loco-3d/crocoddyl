@@ -12,6 +12,10 @@
 
 namespace crocoddyl {
 
+ContactModel3D::ContactModel3D(StateMultibody& state, const FrameTranslation& xref, unsigned int const& nu,
+                               const Eigen::Vector2d& gains)
+    : ContactModelAbstract(state, 3, nu), xref_(xref), gains_(gains) {}
+
 ContactModel3D::ContactModel3D(StateMultibody& state, const FrameTranslation& xref, const Eigen::Vector2d& gains)
     : ContactModelAbstract(state, 3), xref_(xref), gains_(gains) {}
 
@@ -47,7 +51,7 @@ void ContactModel3D::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data
   ContactData3D* d = static_cast<ContactData3D*>(data.get());
   pinocchio::getJointAccelerationDerivatives(state_.get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                              d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
-  const unsigned int& nv = state_.get_nv();
+  unsigned int const& nv = state_.get_nv();
   pinocchio::skew(d->vv, d->vv_skew);
   pinocchio::skew(d->vw, d->vw_skew);
   d->fXjdv_dq.noalias() = d->fXj * d->v_partial_dq;
@@ -65,6 +69,13 @@ void ContactModel3D::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data
     d->Ax.leftCols(nv).noalias() += gains_[1] * d->fXj.topRows<3>() * d->v_partial_dq;
     d->Ax.rightCols(nv).noalias() += gains_[1] * d->fXj.topRows<3>() * d->a_partial_da;
   }
+}
+
+void ContactModel3D::updateLagrangian(const boost::shared_ptr<ContactDataAbstract>& data,
+                                      const Eigen::VectorXd& lambda) {
+  assert(lambda.size() == 3 && "lambda has wrong dimension, it should be 3d vector");
+  ContactData3D* d = static_cast<ContactData3D*>(data.get());
+  data->f = d->jMf.act(pinocchio::Force(lambda, Eigen::Vector3d::Zero()));
 }
 
 boost::shared_ptr<ContactDataAbstract> ContactModel3D::createData(pinocchio::Data* const data) {
