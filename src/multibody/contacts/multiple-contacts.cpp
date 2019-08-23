@@ -36,6 +36,7 @@ void ContactModelMultiple::removeContact(const std::string& name) {
 
 void ContactModelMultiple::calc(const boost::shared_ptr<ContactDataMultiple>& data,
                                 const Eigen::Ref<const Eigen::VectorXd>& x) {
+  assert(data->contacts.size() == contacts_.size() && "it doesn't match the number of contact datas and models");
   unsigned int nc = 0;
 
   unsigned int const& nv = state_.get_nv();
@@ -45,6 +46,7 @@ void ContactModelMultiple::calc(const boost::shared_ptr<ContactDataMultiple>& da
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const ContactItem& m_i = it_m->second;
     boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+    assert(it_m->first == it_d->first && "it doesn't match the contact name between data and model");
 
     m_i.contact->calc(d_i, x);
     unsigned int const& nc_i = m_i.contact->get_nc();
@@ -56,6 +58,7 @@ void ContactModelMultiple::calc(const boost::shared_ptr<ContactDataMultiple>& da
 
 void ContactModelMultiple::calcDiff(const boost::shared_ptr<ContactDataMultiple>& data,
                                     const Eigen::Ref<const Eigen::VectorXd>& x, const bool& recalc) {
+  assert(data->contacts.size() == contacts_.size() && "it doesn't match the number of contact datas and models");
   if (recalc) {
     calc(data, x);
   }
@@ -68,6 +71,7 @@ void ContactModelMultiple::calcDiff(const boost::shared_ptr<ContactDataMultiple>
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const ContactItem& m_i = it_m->second;
     boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+    assert(it_m->first == it_d->first && "it doesn't match the contact name between data and model");
 
     m_i.contact->calcDiff(d_i, x, false);
     unsigned int const& nc_i = m_i.contact->get_nc();
@@ -79,6 +83,7 @@ void ContactModelMultiple::calcDiff(const boost::shared_ptr<ContactDataMultiple>
 void ContactModelMultiple::updateLagrangian(const boost::shared_ptr<ContactDataMultiple>& data,
                                             const Eigen::VectorXd& lambda) {
   assert(lambda.size() == nc_ && "lambda has wrong dimension, it should be nc vector");
+  assert(data->contacts.size() == contacts_.size() && "it doesn't match the number of contact datas and models");
   unsigned int nc = 0;
 
   for (ForceIterator it = data->fext.begin(); it != data->fext.end(); ++it) {
@@ -91,6 +96,7 @@ void ContactModelMultiple::updateLagrangian(const boost::shared_ptr<ContactDataM
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const ContactItem& m_i = it_m->second;
     boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+    assert(it_m->first == it_d->first && "it doesn't match the contact name between data and model");
 
     unsigned int const& nc_i = m_i.contact->get_nc();
     m_i.contact->updateLagrangian(d_i, lambda.segment(nc, nc_i));

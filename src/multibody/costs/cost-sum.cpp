@@ -43,6 +43,7 @@ void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen:
                         const Eigen::Ref<const Eigen::VectorXd>& u) {
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
   assert(u.size() == nu_ && "u has wrong dimension");
+  assert(data->costs.size() == costs_.size() && "it doesn't match the number of cost datas and models");
   data->cost = 0.;
   unsigned int nr = 0;
 
@@ -52,6 +53,7 @@ void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen:
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const CostItem& m_i = it_m->second;
     boost::shared_ptr<CostDataAbstract>& d_i = it_d->second;
+    assert(it_m->first == it_d->first && "it doesn't match the cost name between data and model");
 
     m_i.cost->calc(d_i, x, u);
     data->cost += m_i.weight * d_i->cost;
@@ -67,6 +69,7 @@ void CostModelSum::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Ei
                             const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
   assert(u.size() == nu_ && "u has wrong dimension");
+  assert(data->costs.size() == costs_.size() && "it doesn't match the number of cost datas and models");
   if (recalc) {
     calc(data, x, u);
   }
@@ -84,6 +87,7 @@ void CostModelSum::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Ei
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const CostItem& m_i = it_m->second;
     boost::shared_ptr<CostDataAbstract>& d_i = it_d->second;
+    assert(it_m->first == it_d->first && "it doesn't match the cost name between data and model");
 
     m_i.cost->calcDiff(d_i, x, u);
     data->Lx += m_i.weight * d_i->Lx;
