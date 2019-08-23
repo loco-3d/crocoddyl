@@ -29,8 +29,8 @@ DifferentialActionModelLQR::~DifferentialActionModelLQR() {}
 void DifferentialActionModelLQR::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                       const Eigen::Ref<const Eigen::VectorXd>& x,
                                       const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(x.size() == state_.get_nx() && "DifferentialActionModelLQR::calc: x has wrong dimension");
-  assert(u.size() == nu_ && "DifferentialActionModelLQR::calc: u has wrong dimension");
+  assert(x.size() == state_.get_nx() && "x has wrong dimension");
+  assert(u.size() == nu_ && "u has wrong dimension");
 
   const Eigen::VectorXd& q = x.head(state_.get_nq());
   const Eigen::VectorXd& v = x.tail(state_.get_nv());
@@ -45,8 +45,8 @@ void DifferentialActionModelLQR::calc(const boost::shared_ptr<DifferentialAction
 void DifferentialActionModelLQR::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                           const Eigen::Ref<const Eigen::VectorXd>& x,
                                           const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  assert(x.size() == state_.get_nx() && "DifferentialActionModelLQR::calcDiff: x has wrong dimension");
-  assert(u.size() == nu_ && "DifferentialActionModelLQR::calcDiff: u has wrong dimension");
+  assert(x.size() == state_.get_nx() && "x has wrong dimension");
+  assert(u.size() == nu_ && "u has wrong dimension");
 
   if (recalc) {
     calc(data, x, u);

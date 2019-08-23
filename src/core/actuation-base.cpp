@@ -11,7 +11,7 @@
 namespace crocoddyl {
 
 ActuationModelAbstract::ActuationModelAbstract(StateAbstract& state, unsigned int const& nu) : nu_(nu), state_(state) {
-  assert(nu_ != 0 && "ActuationModelAbstract: nu cannot be zero");
+  assert(nu_ != 0 && "nu cannot be zero");
 }
 
 ActuationModelAbstract::~ActuationModelAbstract() {}

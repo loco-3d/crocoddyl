@@ -78,8 +78,7 @@ void ContactModelMultiple::calcDiff(const boost::shared_ptr<ContactDataMultiple>
 
 void ContactModelMultiple::updateLagrangian(const boost::shared_ptr<ContactDataMultiple>& data,
                                             const Eigen::VectorXd& lambda) {
-  assert(lambda.size() == nc_ &&
-         "ContactModelMultiple::updateLagrangian: lambda has wrong dimension, it should be nc vector");
+  assert(lambda.size() == nc_ && "lambda has wrong dimension, it should be nc vector");
   unsigned int nc = 0;
 
   for (ForceIterator it = data->fext.begin(); it != data->fext.end(); ++it) {

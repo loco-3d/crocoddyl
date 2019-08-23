@@ -73,7 +73,7 @@ void CostModelState::calc(const boost::shared_ptr<CostDataAbstract>& data, const
 void CostModelState::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                               const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
                               const bool& recalc) {
-  assert(x.size() == state_.get_nx() && "CostModelState::calcDiff: x has wrong dimension");
+  assert(x.size() == state_.get_nx() && "x has wrong dimension");
 
   CostDataState* d = static_cast<CostDataState*>(data.get());
   if (recalc) {

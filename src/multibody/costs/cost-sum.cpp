@@ -19,7 +19,7 @@ CostModelSum::CostModelSum(StateMultibody& state, const bool& with_residuals)
 CostModelSum::~CostModelSum() {}
 
 void CostModelSum::addCost(const std::string& name, CostModelAbstract* const cost, const double& weight) {
-  assert(cost->get_nu() == nu_ && "CostModelSum::addCost: cost item doesn't have the same control dimension");
+  assert(cost->get_nu() == nu_ && "Cost item doesn't have the same control dimension");
   std::pair<CostModelContainer::iterator, bool> ret =
       costs_.insert(std::make_pair(name, CostItem(name, cost, weight)));
   if (ret.second == false) {
@@ -41,8 +41,8 @@ void CostModelSum::removeCost(const std::string& name) {
 
 void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(x.size() == state_.get_nx() && "CostModelSum::calc: x has wrong dimension");
-  assert(u.size() == nu_ && "CostModelSum::calc: u has wrong dimension");
+  assert(x.size() == state_.get_nx() && "x has wrong dimension");
+  assert(u.size() == nu_ && "u has wrong dimension");
   data->cost = 0.;
   unsigned int nr = 0;
 
@@ -65,8 +65,8 @@ void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen:
 
 void CostModelSum::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                             const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  assert(x.size() == state_.get_nx() && "CostModelSum::calcDiff: x has wrong dimension");
-  assert(u.size() == nu_ && "CostModelSum::calcDiff: u has wrong dimension");
+  assert(x.size() == state_.get_nx() && "x has wrong dimension");
+  assert(u.size() == nu_ && "u has wrong dimension");
   if (recalc) {
     calc(data, x, u);
   }

@@ -15,13 +15,13 @@ namespace crocoddyl {
 CostModelFrameVelocity::CostModelFrameVelocity(StateMultibody& state, ActivationModelAbstract& activation,
                                                const FrameMotion& vref, unsigned int const& nu)
     : CostModelAbstract(state, activation, nu), vref_(vref) {
-  assert(activation_.get_nr() == 6 && "CostModelFrameVelocity: activation::nr is not equals to 6");
+  assert(activation_.get_nr() == 6 && "activation::nr is not equals to 6");
 }
 
 CostModelFrameVelocity::CostModelFrameVelocity(StateMultibody& state, ActivationModelAbstract& activation,
                                                const FrameMotion& vref)
     : CostModelAbstract(state, activation), vref_(vref) {
-  assert(activation_.get_nr() == 6 && "CostModelFrameVelocity: activation::nr is not equals to 6");
+  assert(activation_.get_nr() == 6 && "activation::nr is not equals to 6");
 }
 
 CostModelFrameVelocity::CostModelFrameVelocity(StateMultibody& state, const FrameMotion& vref, unsigned int const& nu)

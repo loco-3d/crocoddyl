@@ -47,7 +47,7 @@ void ContactModel3D::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data
   ContactData3D* d = static_cast<ContactData3D*>(data.get());
   pinocchio::getJointAccelerationDerivatives(state_.get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                              d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
-  const unsigned int& nv = state_.get_nv();
+  unsigned int const& nv = state_.get_nv();
   pinocchio::skew(d->vv, d->vv_skew);
   pinocchio::skew(d->vw, d->vw_skew);
   d->fXjdv_dq.noalias() = d->fXj * d->v_partial_dq;
@@ -69,7 +69,7 @@ void ContactModel3D::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data
 
 void ContactModel3D::updateLagrangian(const boost::shared_ptr<ContactDataAbstract>& data,
                                       const Eigen::VectorXd& lambda) {
-  assert(lambda.size() == 3 && "ContactModel3D::updateLagrangian: lambda has wrong dimension, it should be 3d vector");
+  assert(lambda.size() == 3 && "lambda has wrong dimension, it should be 3d vector");
   ContactData3D* d = static_cast<ContactData3D*>(data.get());
   data->f = d->jMf.act(pinocchio::Force(lambda, Eigen::Vector3d::Zero()));
 }

@@ -16,19 +16,19 @@ ActivationModelQuad::~ActivationModelQuad() {}
 
 void ActivationModelQuad::calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                                const Eigen::Ref<const Eigen::VectorXd>& r) {
-  assert(r.size() == nr_ && "ActivationModelQuad::calc: r has wrong dimension");
+  assert(r.size() == nr_ && "r has wrong dimension");
   data->a_value = 0.5 * r.transpose() * r;
 }
 
 void ActivationModelQuad::calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
                                    const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc) {
-  assert(r.size() == nr_ && "ActivationModelQuad::calcDiff: r has wrong dimension");
+  assert(r.size() == nr_ && "r has wrong dimension");
   if (recalc) {
     calc(data, r);
   }
   data->Ar = r;
   // The Hessian has constant values which were set in createData.
-  assert(data->Arr == Eigen::MatrixXd::Identity(nr_, nr_) && "ActivationModelQuad::calcDiff: Arr has wrong value");
+  assert(data->Arr == Eigen::MatrixXd::Identity(nr_, nr_) && "Arr has wrong value");
 }
 
 boost::shared_ptr<ActivationDataAbstract> ActivationModelQuad::createData() {

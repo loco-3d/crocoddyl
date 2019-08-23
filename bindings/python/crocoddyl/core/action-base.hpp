@@ -23,15 +23,15 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
 
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
-    assert(x.size() == state_.get_nx() && "ActionModelAbstract::calc: x has wrong dimension");
-    assert(u.size() == nu_ && "ActionModelAbstract::calc: u has wrong dimension");
+    assert(x.size() == state_.get_nx() && "x has wrong dimension");
+    assert(u.size() == nu_ && "u has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
   void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
-    assert(x.size() == state_.get_nx() && "ActionModelAbstract::calcDiff: x has wrong dimension");
-    assert(u.size() == nu_ && "ActionModelAbstract::calcDiff: u has wrong dimension");
+    assert(x.size() == state_.get_nx() && "x has wrong dimension");
+    assert(u.size() == nu_ && "u has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
 };

@@ -13,8 +13,8 @@ namespace crocoddyl {
 DifferentialActionModelAbstract::DifferentialActionModelAbstract(StateAbstract& state, unsigned int const& nu,
                                                                  unsigned int const& nr)
     : nu_(nu), nr_(nr), state_(state), unone_(Eigen::VectorXd::Zero(nu)) {
-  assert(nu_ != 0 && "DifferentialActionModelAbstract: nu cannot be zero");
-  assert(nr_ != 0 && "DifferentialActionModelAbstract: nr cannot be zero");
+  assert(nu_ != 0 && "nu cannot be zero");
+  assert(nr_ != 0 && "nr cannot be zero");
 }
 
 DifferentialActionModelAbstract::~DifferentialActionModelAbstract() {}
