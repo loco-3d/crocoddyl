@@ -24,8 +24,7 @@ class ActionModelAbstractTestCase(unittest.TestCase):
         self.MODEL_DER.calc(self.DATA_DER, self.x, self.u)
         # Checking the cost value and its residual
         self.assertAlmostEqual(self.DATA.cost, self.DATA_DER.cost, 10, "Wrong cost value.")
-        self.assertTrue(np.allclose(self.DATA.r, self.DATA_DER.r, atol=1e-9),
-                        "Wrong cost residuals.")
+        self.assertTrue(np.allclose(self.DATA.r, self.DATA_DER.r, atol=1e-9), "Wrong cost residuals.")
 
         if isinstance(self.MODEL, crocoddyl.ActionModelAbstract):
             # Checking the dimension of the next state

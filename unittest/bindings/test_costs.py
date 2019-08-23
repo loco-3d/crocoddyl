@@ -42,8 +42,7 @@ class CostModelAbstractTestCase(unittest.TestCase):
         self.COST_DER.calc(self.data_der, self.x, self.u)
         # Checking the cost value and its residual
         self.assertAlmostEqual(self.data.cost, self.data_der.cost, 10, "Wrong cost value.")
-        self.assertTrue(np.allclose(self.data.r, self.data_der.r, atol=1e-9),
-                        "Wrong cost residuals.")
+        self.assertTrue(np.allclose(self.data.r, self.data_der.r, atol=1e-9), "Wrong cost residuals.")
 
     def test_calcDiff(self):
         # Run calc for both action models
@@ -51,8 +50,7 @@ class CostModelAbstractTestCase(unittest.TestCase):
         self.COST_DER.calcDiff(self.data_der, self.x, self.u)
         # Checking the cost value and its residual
         self.assertAlmostEqual(self.data.cost, self.data_der.cost, 10, "Wrong cost value.")
-        self.assertTrue(np.allclose(self.data.r, self.data_der.r, atol=1e-9),
-                        "Wrong cost residuals.")
+        self.assertTrue(np.allclose(self.data.r, self.data_der.r, atol=1e-9), "Wrong cost residuals.")
         # Checking the Jacobians and Hessians of the cost
         self.assertTrue(np.allclose(self.data.Lx, self.data_der.Lx, atol=1e-9), "Wrong Lx.")
         self.assertTrue(np.allclose(self.data.Lu, self.data_der.Lu, atol=1e-9), "Wrong Lu.")
@@ -99,8 +97,7 @@ class CostModelSumTestCase(unittest.TestCase):
         self.cost_sum.calc(self.data_sum, self.x, self.u)
         # Checking the cost value and its residual
         self.assertAlmostEqual(self.data.cost, self.data_sum.cost, 10, "Wrong cost value.")
-        self.assertTrue(np.allclose(self.data.r, self.data_sum.r, atol=1e-9),
-                        "Wrong cost residuals.")
+        self.assertTrue(np.allclose(self.data.r, self.data_sum.r, atol=1e-9), "Wrong cost residuals.")
 
     def test_calcDiff(self):
         # Run calc for both action models
@@ -108,8 +105,7 @@ class CostModelSumTestCase(unittest.TestCase):
         self.cost_sum.calcDiff(self.data_sum, self.x, self.u)
         # Checking the cost value and its residual
         self.assertAlmostEqual(self.data.cost, self.data_sum.cost, 10, "Wrong cost value.")
-        self.assertTrue(np.allclose(self.data.r, self.data_sum.r, atol=1e-9),
-                        "Wrong cost residuals.")
+        self.assertTrue(np.allclose(self.data.r, self.data_sum.r, atol=1e-9), "Wrong cost residuals.")
         # Checking the Jacobians and Hessians of the cost
         self.assertTrue(np.allclose(self.data.Lx, self.data_sum.Lx, atol=1e-9), "Wrong Lx.")
         self.assertTrue(np.allclose(self.data.Lu, self.data_sum.Lu, atol=1e-9), "Wrong Lu.")

@@ -132,7 +132,7 @@ class FreeFloatingActuationDerived(crocoddyl.ActuationModelAbstract):
     def calcDiff(self, data, x, u, recalc=True):
         if recalc:
             self.calc(data, x, u)
-        Au = np.vstack([pinocchio.utils.zero((6, self.nu)) , pinocchio.utils.eye(self.nu)])
+        Au = np.vstack([pinocchio.utils.zero((6, self.nu)), pinocchio.utils.eye(self.nu)])
         data.Au = Au
 
 
@@ -492,7 +492,7 @@ class FrameVelocityCostDerived(crocoddyl.CostModelAbstract):
 
     def calc(self, data, x, u):
         data.r = (pinocchio.getFrameVelocity(self.State.pinocchio, data.pinocchio, self.vref.frame) -
-                              self.vref.oMf).vector
+                  self.vref.oMf).vector
         self.activation.calc(data.activation, data.r)
         data.cost = data.activation.a
 
