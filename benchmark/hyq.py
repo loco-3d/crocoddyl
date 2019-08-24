@@ -627,7 +627,9 @@ for i, phase in enumerate(GAITPHASES):
     #                  m.differential.quasiStatic(d.differential, rmodel.defaultState)
     #                  for m, d in zip(ddp[i].models(), ddp[i].datas())[:-1]
     #              ])
-    ddp[i].solve([rmodel.defaultState] * len(ddp[i].models()), [], 100, False, 0.1)
+    xs = [rmodel.defaultState] * len(ddp[i].models())
+    us = [m.quasicStatic(d, rmodel.defaultState) for m, d in list(zip(ddp[i].models(), ddp[i].datas()))[:-1]]
+    ddp[i].solve(xs, us, 100, False, 0.1)
 
     # Defining the final state as initial one for the next phase
     x0 = ddp[i].xs[-1]
