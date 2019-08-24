@@ -581,7 +581,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
         if not self.isFeasible:
             # Gap store the state defect from the guess to feasible (rollout) trajectory, i.e.
             #   gap = x_rollout [-] x_guess = DIFF(x_guess, x_rollout)
-            self.gaps[0] = self.problem.runningModels[0].state.diff(self.xs[0], self.problem.initialState)
+            self.gaps[0] = self.problem.runningModels[0].state.diff(self.xs[0], self.problem.x0)
             for i, (m, d, x) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas, self.xs[1:])):
                 self.gaps[i + 1] = m.state.diff(x, d.xnext)
 
@@ -686,7 +686,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
         self.K = [np.matrix(np.zeros([m.nu, m.state.ndx])) for m in self.problem.runningModels]
         self.k = [a2m(np.zeros([m.nu])) for m in self.problem.runningModels]
 
-        self.xs_try = [self.problem.initialState] + [np.nan * self.problem.initialState] * self.problem.T
+        self.xs_try = [self.problem.x0] + [np.nan * self.problem.x0] * self.problem.T
         self.us_try = [np.nan] * self.problem.T
         self.gaps = [a2m(np.zeros(self.problem.runningModels[0].state.ndx))
                      ] + [a2m(np.zeros(m.state.ndx)) for m in self.problem.runningModels]
