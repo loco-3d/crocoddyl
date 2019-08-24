@@ -62,8 +62,7 @@ void exposeShootingProblem() {
            "Rollout the dynamics give a sequence of control commands\n"
            ":param us: time-discrete control sequence")
       .add_property("T", bp::make_function(&ShootingProblem::get_T), "number of nodes")
-      .add_property("x0",
-                    bp::make_function(&ShootingProblem::get_x0, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("x0", bp::make_function(&ShootingProblem::get_x0, bp::return_value_policy<bp::return_by_value>()),
                     "initial state")
       .add_property(
           "runningModels",

@@ -60,7 +60,7 @@ void exposeActuationAbstract() {
            bp::args(" self", " data", " x", " u", " recalc=True"),
            "Compute the derivatives of the actuation model.\n\n"
            "It computes the partial derivatives of the actuation model which is\n"
-           "describes in continouos time."
+           "describes in continouos time.\n"
            ":param data: actuation data\n"
            ":param x: state vector\n"
            ":param u: control input\n"
