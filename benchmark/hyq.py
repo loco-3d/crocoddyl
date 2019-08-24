@@ -620,13 +620,6 @@ for i, phase in enumerate(GAITPHASES):
 
     # Solving the problem with the DDP solver
     ddp[i].th_stop = 1e-9
-    # ddp[i].solve(maxiter=1000,
-    #              regInit=.1,
-    #              init_xs=[rmodel.defaultState] * len(ddp[i].models()),
-    #              init_us=[
-    #                  m.differential.quasiStatic(d.differential, rmodel.defaultState)
-    #                  for m, d in zip(ddp[i].models(), ddp[i].datas())[:-1]
-    #              ])
     xs = [rmodel.defaultState] * len(ddp[i].models())
     us = [m.quasicStatic(d, rmodel.defaultState) for m, d in list(zip(ddp[i].models(), ddp[i].datas()))[:-1]]
     ddp[i].solve(xs, us, 100, False, 0.1)
