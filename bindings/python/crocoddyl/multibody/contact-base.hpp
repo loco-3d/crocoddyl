@@ -85,7 +85,7 @@ void exposeContactAbstract() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: Pinocchio data\n"
            ":return contact data.")
-      .add_property("State",
+      .add_property("state",
                     bp::make_function(&ContactModelAbstract_wrap::get_state, bp::return_internal_reference<>()),
                     "state of the multibody system")
       .add_property(

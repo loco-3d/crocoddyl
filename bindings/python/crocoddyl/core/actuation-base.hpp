@@ -74,7 +74,7 @@ void exposeActuationAbstract() {
           "nu",
           bp::make_function(&ActuationModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
           "dimension of control vector")
-      .add_property("State",
+      .add_property("state",
                     bp::make_function(&ActuationModelAbstract_wrap::get_state, bp::return_internal_reference<>()),
                     "state");
 

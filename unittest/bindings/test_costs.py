@@ -29,11 +29,11 @@ class CostModelAbstractTestCase(unittest.TestCase):
         pinocchio.jacobianCenterOfMass(self.ROBOT_MODEL, self.robot_data, self.x[:nq], False)
 
     def test_dimensions(self):
-        self.assertEqual(self.COST.State.nx, self.COST_DER.State.nx, "Wrong nx.")
-        self.assertEqual(self.COST.State.ndx, self.COST_DER.State.ndx, "Wrong ndx.")
+        self.assertEqual(self.COST.state.nx, self.COST_DER.state.nx, "Wrong nx.")
+        self.assertEqual(self.COST.state.ndx, self.COST_DER.state.ndx, "Wrong ndx.")
         self.assertEqual(self.COST.nu, self.COST_DER.nu, "Wrong nu.")
-        self.assertEqual(self.COST.State.nq, self.COST_DER.State.nq, "Wrong nq.")
-        self.assertEqual(self.COST.State.nv, self.COST_DER.State.nv, "Wrong nv.")
+        self.assertEqual(self.COST.state.nq, self.COST_DER.state.nq, "Wrong nq.")
+        self.assertEqual(self.COST.state.nv, self.COST_DER.state.nv, "Wrong nv.")
         self.assertEqual(self.COST.activation.nr, self.COST_DER.activation.nr, "Wrong nr.")
 
     def test_calc(self):
@@ -84,11 +84,11 @@ class CostModelSumTestCase(unittest.TestCase):
         pinocchio.jacobianCenterOfMass(self.ROBOT_MODEL, self.robot_data, self.x[:nq], False)
 
     def test_dimensions(self):
-        self.assertEqual(self.COST.State.nx, self.cost_sum.State.nx, "Wrong nx.")
-        self.assertEqual(self.COST.State.ndx, self.cost_sum.State.ndx, "Wrong ndx.")
+        self.assertEqual(self.COST.state.nx, self.cost_sum.state.nx, "Wrong nx.")
+        self.assertEqual(self.COST.state.ndx, self.cost_sum.state.ndx, "Wrong ndx.")
         self.assertEqual(self.COST.nu, self.cost_sum.nu, "Wrong nu.")
-        self.assertEqual(self.COST.State.nq, self.cost_sum.State.nq, "Wrong nq.")
-        self.assertEqual(self.COST.State.nv, self.cost_sum.State.nv, "Wrong nv.")
+        self.assertEqual(self.COST.state.nq, self.cost_sum.state.nq, "Wrong nq.")
+        self.assertEqual(self.COST.state.nv, self.cost_sum.state.nv, "Wrong nv.")
         self.assertEqual(self.COST.activation.nr, self.cost_sum.nr, "Wrong nr.")
 
     def test_calc(self):

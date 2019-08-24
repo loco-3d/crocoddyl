@@ -15,7 +15,7 @@ class SolverAbstractTestCase(unittest.TestCase):
     def setUp(self):
         # Set up the solvers
         self.T = randint(1, 21)
-        state = self.MODEL.State
+        state = self.MODEL.state
         self.xs = []
         self.us = []
         self.xs.append(state.rand())

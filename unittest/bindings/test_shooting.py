@@ -12,7 +12,7 @@ class ShootingProblemTestCase(unittest.TestCase):
 
     def setUp(self):
         self.T = randint(1, 101)
-        state = self.MODEL.State
+        state = self.MODEL.state
         self.xs = []
         self.us = []
         self.xs.append(state.rand())
