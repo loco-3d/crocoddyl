@@ -8,8 +8,6 @@ import example_robot_data
 WITHDISPLAY = 'disp' in sys.argv
 WITHPLOT = 'plot' in sys.argv
 
-np.set_printoptions(precision=4, suppress=True, linewidth=200)  #, threshold=400)
-
 
 def plotSolution(rmodel, xs, us):
     import matplotlib.pyplot as plt
@@ -93,7 +91,7 @@ def plotSolution(rmodel, xs, us):
     Cx = []
     Cy = []
     for x in xs:
-        q = a2m(x[:rmodel.nq])
+        q = x[:rmodel.nq]
         c = pinocchio.centerOfMass(rmodel, rdata, q)
         Cx.append(np.asscalar(c[0]))
         Cy.append(np.asscalar(c[1]))
@@ -171,7 +169,7 @@ class SimpleQuadrupedalGaitProblem:
         comModels += comBackwardModels + [comBackwardTermModel]
 
         # Defining the shooting problem
-        problem = ShootingProblem(x0, comModels, comModels[-1])
+        problem = crocoddyl.ShootingProblem(x0, comModels, comModels[-1])
         return problem
 
     def createWalkingProblem(self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots):
@@ -554,35 +552,35 @@ GAITPHASES = [{
         'stepKnots': 25,
         'supportKnots': 5
     }
-    }, {
-        'trotting': {
-            'stepLength': 0.15,
-            'stepHeight': 0.2,
-            'timeStep': 1e-2,
-            'stepKnots': 25,
-            'supportKnots': 5
-        }
-    }, {
-        'pacing': {
-            'stepLength': 0.15,
-            'stepHeight': 0.2,
-            'timeStep': 1e-2,
-            'stepKnots': 25,
-            'supportKnots': 5
-        }
-    }, {
-        'bounding': {
-            'stepLength': 0.15,
-            'stepHeight': 0.2,
-            'timeStep': 1e-2,
-            'stepKnots': 25,
-            'supportKnots': 5
-        }
-    }, {
-        'jumping': {
-            'jumpHeight': 0.5,
-            'timeStep': 1e-2
-        }
+}, {
+    'trotting': {
+        'stepLength': 0.15,
+        'stepHeight': 0.2,
+        'timeStep': 1e-2,
+        'stepKnots': 25,
+        'supportKnots': 5
+    }
+}, {
+    'pacing': {
+        'stepLength': 0.15,
+        'stepHeight': 0.2,
+        'timeStep': 1e-2,
+        'stepKnots': 25,
+        'supportKnots': 5
+    }
+}, {
+    'bounding': {
+        'stepLength': 0.15,
+        'stepHeight': 0.2,
+        'timeStep': 1e-2,
+        'stepKnots': 25,
+        'supportKnots': 5
+    }
+}, {
+    'jumping': {
+        'jumpHeight': 0.5,
+        'timeStep': 1e-2
+    }
 }]
 cameraTF = [2., 2.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 
@@ -621,7 +619,7 @@ for i, phase in enumerate(GAITPHASES):
         ddp[i].setCallbacks([crocoddyl.CallbackVerbose()])
 
     # Solving the problem with the DDP solver
-    # ddp[i].th_stop = 1e-9
+    ddp[i].th_stop = 1e-9
     # ddp[i].solve(maxiter=1000,
     #              regInit=.1,
     #              init_xs=[rmodel.defaultState] * len(ddp[i].models()),
