@@ -67,7 +67,6 @@ class DifferentialActionModelFloatingInContact(DifferentialActionModelAbstract):
         fs = data.contact.forces
 
         pinocchio.computeRNEADerivatives(self.pinocchio, data.pinocchio, q, v, a, fs)
-        pinocchio.computeForwardKinematicsDerivatives(self.pinocchio, data.pinocchio, q, v, a)
         pinocchio.updateFramePlacements(self.pinocchio, data.pinocchio)
 
         # [a;-f] = K^-1 [ tau - b, -gamma ]
