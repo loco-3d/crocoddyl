@@ -5,12 +5,12 @@ import example_robot_data
 
 robot = example_robot_data.loadTalosArm()
 robot_model = robot.model
-robot.initViewer(loadModel=True)
 
 DT = 1e-3
 T = 25
 target = np.array([0.4, 0., .4])
 
+robot.initViewer(loadModel=True)
 robot.viewer.gui.addSphere('world/point', .05, [1., 0., 0., 1.])  # radius = .1, RGBA=1001
 robot.viewer.gui.applyConfiguration('world/point', target.tolist() + [0., 0., 0., 1.])  # xyz+quaternion
 robot.viewer.gui.refresh()
