@@ -83,6 +83,22 @@ If you want to learn about Crocoddyl, take a look at the Jupyter notebooks. Star
 - [examples/notebooks/bipedal_walking_from_foot_traj.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/bipedal_walking_from_foot_traj.ipynb)
 - [examples/notebooks/introduction_to_crocoddyl.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/introduction_to_crocoddyl.ipynb)
 
+
+## Citing Crocoddyl
+
+To cite **Crocoddyl** in your academic research, please use the following bibtex lines:
+```
+@misc{crocoddylweb,
+   author = {Carlos Mastalli, Rohan Budhiraja and Nicolas Mansard and others},
+   title = {Crocoddyl: a fast and flexible optimal control library for robot control under contact sequence},
+   howpublished = {https://gepgitlab.laas.fr/loco-3d/crocoddyl/wikis/home},
+   year = {2019}
+}
+```
+
+and the following paper describes different algorithm implemented in **Crocoddyl**:
+
+
 ## <img align="center" height="20" src="http://www.pvhc.net/img205/oohmbjfzlxapxqbpkawx.png"/> Publications
 - R. Budhiraja, J. Carpentier, C. Mastalli and N. Mansard. [Differential Dynamic Programming for Multi-Phase Rigid Contact Dynamics](https://hal.archives-ouvertes.fr/hal-01851596/document), IEEE RAS International Conference on Humanoid Robots (ICHR), 2018
 - Y. Tassa, N. Mansard, E. Todorov. [Control-Limited Differential Dynamic Programming](https://homes.cs.washington.edu/~todorov/papers/TassaICRA14.pdf), IEEE International Conference on Automation and Robotics (ICRA), 2014
