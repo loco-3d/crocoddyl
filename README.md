@@ -7,7 +7,7 @@ Contact RObot COntrol by Differential DYnamic programming Library (crocoddyl)
 
 The source code is released under the [BSD 3-Clause license](LICENSE).
 
-**Authors:** Carlos Mastalli and Rohan Budhiraja <br />
+**Authors:** [Carlos Mastalli](https://cmastalli.github.io/) and Rohan Budhiraja <br />
 **Instructors:** Justin Carpentier and Nicolas Mansard <br />
 **With additional support from the Gepetto team at LAAS-CNRS.**
 
@@ -58,10 +58,9 @@ Finally you will need to configure your environment variables, e.g.:
 
 ### Building from source
 
-**Crocoddyl** is yet a pure Python library; you don't need to build it, however, you need to add it inside PYTHONPATH. It has the following dependecies:
+**Crocoddyl** is c++ library with Python bindings for versatible and fast prototyping. It has the following dependecies:
 
 * [pinocchio](https://github.com/stack-of-tasks/pinocchio)
-* [SciPy](https://www.scipy.org/)
 * [quadprog](https://pypi.org/project/quadprog/)
 * [multicontact-api](https://gepgitlab.laas.fr/loco-3d/multicontact-api)
 * [example-robot-data](https://gepgitlab.laas.fr/gepetto/example-robot-data) (optional for running examples)
@@ -99,7 +98,13 @@ To cite **Crocoddyl** in your academic research, please use the following bibtex
 and the following paper describes different algorithm implemented in **Crocoddyl**:
 
 
-## <img align="center" height="20" src="http://www.pvhc.net/img205/oohmbjfzlxapxqbpkawx.png"/> Publications
+### Publications
 - R. Budhiraja, J. Carpentier, C. Mastalli and N. Mansard. [Differential Dynamic Programming for Multi-Phase Rigid Contact Dynamics](https://hal.archives-ouvertes.fr/hal-01851596/document), IEEE RAS International Conference on Humanoid Robots (ICHR), 2018
 - Y. Tassa, N. Mansard, E. Todorov. [Control-Limited Differential Dynamic Programming](https://homes.cs.washington.edu/~todorov/papers/TassaICRA14.pdf), IEEE International Conference on Automation and Robotics (ICRA), 2014
 - R. Budhiraja, J. Carpentier and N. Mansard. [Dynamics Consensus between Centroidal and Whole-Body Models for Locomotion of Legged Robots](https://hal.laas.fr/hal-01875031/document), IEEE International Conference on Automation and Robotics (ICRA), 2019
+
+
+## Questions and Issues
+
+You have a question or an issue? You may either directly open a [new issue](https://gepgitlab.laas.fr/loco-3d/crocoddyl/issues) or use the mailing list <crocoddyl@laas.fr>.
+
