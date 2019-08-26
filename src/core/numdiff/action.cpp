@@ -54,19 +54,14 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
     dx_(ix) = disturbance_;
     model_.get_state().integrate(x, dx_, tmp_x_);
     calc(data_num_diff->data_x[ix], tmp_x_, u);
-    // data->Fx
+
     Eigen::VectorXd& xn = data_num_diff->data_x[ix]->xnext;
     double& c = data_num_diff->data_x[ix]->cost;
     model_.get_state().diff(xn0, xn, data_num_diff->Fx.col(ix));
-    // data->Lx
+
     data_num_diff->Lx(ix) = (c - c0) / disturbance_;
 
-    // data->Rx
-    if (model_.get_nr() > 1) {
-      // TODO(mnaveau): manage the gaussian approximation
-      // data_num_diff->Rx.col(ix) = data_num_diff->data_x[ix]->cost_residual -
-      //                             data_num_diff->data_0[ix]->cost_residual;
-    }
+    data_num_diff->Rx.col(ix) = (data_num_diff->data_x[ix]->r - data_num_diff->data_0->r) / disturbance_;
     dx_(ix) = 0.0;
   }
   data_num_diff->Fx /= disturbance_;
@@ -76,18 +71,13 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
   for (unsigned iu = 0; iu < model_.get_nu(); ++iu) {
     du_(iu) = disturbance_;
     calc(data_num_diff->data_u[iu], x, u + du_);
-    // data->Fu
+
     Eigen::VectorXd& xn = data_num_diff->data_u[iu]->xnext;
     double& c = data_num_diff->data_u[iu]->cost;
     model_.get_state().diff(xn0, xn, data_num_diff->Fu.col(iu));
-    // data->Lu
+
     data_num_diff->Lu(iu) = (c - c0) / disturbance_;
-    // data->Ru
-    if (model_.get_nr() > 1) {
-      // TODO(mnaveau): manage the gaussian approximation
-      // data_num_diff->Ru.col(iu) = data_num_diff->data_u[iu]->cost_residual -
-      //                             data_num_diff->data_0[iu]->cost_residual;
-    }
+    data_num_diff->Ru.col(iu) = (data_num_diff->data_u[iu]->r - data_num_diff->data_0->r) / disturbance_;
     du_(iu) = 0.0;
   }
   data_num_diff->Fu /= disturbance_;

@@ -38,7 +38,6 @@ struct ActionDataUnicycle : public ActionDataAbstract {
 
   template <typename Model>
   explicit ActionDataUnicycle(Model* const model) : ActionDataAbstract(model) {}
-  ~ActionDataUnicycle() {}
 };
 
 }  // namespace crocoddyl
