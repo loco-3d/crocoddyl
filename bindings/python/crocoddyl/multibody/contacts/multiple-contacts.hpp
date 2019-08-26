@@ -94,7 +94,7 @@ void exposeContactMultiple() {
           "contacts",
           bp::make_function(&ContactModelMultiple::get_contacts, bp::return_value_policy<bp::return_by_value>()),
           "stack of contacts")
-      .add_property("State", bp::make_function(&ContactModelMultiple::get_state, bp::return_internal_reference<>()),
+      .add_property("state", bp::make_function(&ContactModelMultiple::get_state, bp::return_internal_reference<>()),
                     "state of the multibody system")
       .add_property("nc",
                     bp::make_function(&ContactModelMultiple::get_nc, bp::return_value_policy<bp::return_by_value>()),

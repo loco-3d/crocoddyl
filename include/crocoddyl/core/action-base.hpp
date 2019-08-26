@@ -10,6 +10,7 @@
 #define CROCODDYL_CORE_ACTION_BASE_HPP_
 
 #include "crocoddyl/core/state-base.hpp"
+#include "crocoddyl/core/utils/math.hpp"
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 
@@ -30,6 +31,10 @@ class ActionModelAbstract {
 
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
   void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
+
+  void quasicStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<Eigen::VectorXd> u,
+                    const Eigen::Ref<const Eigen::VectorXd>& x, unsigned int const& maxiter = 100,
+                    const double& tol = 1e-9);
 
   unsigned int const& get_nu() const;
   unsigned int const& get_nr() const;
@@ -66,6 +71,14 @@ class ActionModelAbstract {
   }
   void calcDiff_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const bool& recalc) {
     calcDiff(data, x, unone_, recalc);
+  }
+
+  Eigen::VectorXd quasicStatic_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x,
+                                    unsigned int const& maxiter = 100, const double& tol = 1e-9) {
+    Eigen::VectorXd u(nu_);
+    u.setZero();
+    quasicStatic(data, u, x, maxiter, tol);
+    return u;
   }
 
 #endif

@@ -2,11 +2,8 @@ import sys
 
 import numpy as np
 import pinocchio
-from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, CallbackDDPLogger, CallbackDDPVerbose,
-                       CallbackSolverDisplay, ContactModel3D, ContactModelMultiple, CostModelCoM, CostModelControl,
-                       CostModelFrameTranslation, CostModelFrameVelocity, CostModelState, CostModelSum,
-                       DifferentialActionModelFloatingInContact, IntegratedActionModelEuler, ShootingProblem,
-                       SolverDDP, StatePinocchio, a2m, displayTrajectory, loadHyQ, m2a)
+import crocoddyl
+import example_robot_data
 
 WITHDISPLAY = 'disp' in sys.argv
 WITHPLOT = 'plot' in sys.argv
@@ -94,7 +91,7 @@ def plotSolution(rmodel, xs, us):
     Cx = []
     Cy = []
     for x in xs:
-        q = a2m(x[:rmodel.nq])
+        q = x[:rmodel.nq]
         c = pinocchio.centerOfMass(rmodel, rdata, q)
         Cx.append(np.asscalar(c[0]))
         Cy.append(np.asscalar(c[1]))
@@ -106,17 +103,12 @@ def plotSolution(rmodel, xs, us):
     plt.show()
 
 
-class TaskSE3:
-    def __init__(self, oXf, frameId):
-        self.oXf = oXf
-        self.frameId = frameId
-
-
 class SimpleQuadrupedalGaitProblem:
     def __init__(self, rmodel, lfFoot, rfFoot, lhFoot, rhFoot):
         self.rmodel = rmodel
         self.rdata = rmodel.createData()
-        self.state = StatePinocchio(self.rmodel)
+        self.state = crocoddyl.StateMultibody(self.rmodel)
+        self.actuation = crocoddyl.ActuationModelFloatingBase(self.state)
         # Getting the frame id for all the legs
         self.lfFootId = self.rmodel.getFrameId(lfFoot)
         self.rfFootId = self.rmodel.getFrameId(rfFoot)
@@ -124,7 +116,7 @@ class SimpleQuadrupedalGaitProblem:
         self.rhFootId = self.rmodel.getFrameId(rhFoot)
         # Defining default state
         q0 = self.rmodel.referenceConfigurations["half_sitting"]
-        self.rmodel.defaultState = np.concatenate([m2a(q0), np.zeros(self.rmodel.nv)])
+        self.rmodel.defaultState = np.concatenate([q0, np.zeros((self.rmodel.nv, 1))])
         self.firstStep = True
 
     def createCoMProblem(self, x0, comGoTo, timeStep, numKnots):
@@ -137,10 +129,10 @@ class SimpleQuadrupedalGaitProblem:
         :return shooting problem
         """
         # Compute the current foot positions
-        q0 = a2m(x0[:self.rmodel.nq])
+        q0 = x0[:self.rmodel.nq]
         pinocchio.forwardKinematics(self.rmodel, self.rdata, q0)
         pinocchio.updateFramePlacements(self.rmodel, self.rdata)
-        com0 = m2a(pinocchio.centerOfMass(self.rmodel, self.rdata, q0))
+        com0 = pinocchio.centerOfMass(self.rmodel, self.rdata, q0)
         # lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
         # rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
         # lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
@@ -158,8 +150,8 @@ class SimpleQuadrupedalGaitProblem:
         ]
         comForwardTermModel = self.createSwingFootModel(timeStep,
                                                         [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
-                                                        com0 + [comGoTo, 0., 0.])
-        comForwardTermModel.differential.costs['comTrack'].weight = 1e6
+                                                        com0 + np.matrix([comGoTo, 0., 0.]).T)
+        comForwardTermModel.differential.costs.costs['comTrack'].weight = 1e6
 
         comBackwardModels = [
             self.createSwingFootModel(
@@ -169,15 +161,15 @@ class SimpleQuadrupedalGaitProblem:
         ]
         comBackwardTermModel = self.createSwingFootModel(timeStep,
                                                          [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
-                                                         com0 + [-comGoTo, 0., 0.])
-        comBackwardTermModel.differential.costs['comTrack'].weight = 1e6
+                                                         com0 + np.matrix([-comGoTo, 0., 0.]).T)
+        comBackwardTermModel.differential.costs.costs['comTrack'].weight = 1e6
 
         # Adding the CoM tasks
         comModels += comForwardModels + [comForwardTermModel]
         comModels += comBackwardModels + [comBackwardTermModel]
 
         # Defining the shooting problem
-        problem = ShootingProblem(x0, comModels, comModels[-1])
+        problem = crocoddyl.ShootingProblem(x0, comModels, comModels[-1])
         return problem
 
     def createWalkingProblem(self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots):
@@ -192,14 +184,14 @@ class SimpleQuadrupedalGaitProblem:
         :return shooting problem
         """
         # Compute the current foot positions
-        q0 = a2m(x0[:self.rmodel.nq])
+        q0 = x0[:self.rmodel.nq]
         pinocchio.forwardKinematics(self.rmodel, self.rdata, q0)
         pinocchio.updateFramePlacements(self.rmodel, self.rdata)
         rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
         rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
         lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
         lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
-        comRef = m2a(rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
+        comRef = (rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
         comRef[2] = 0.5325
 
         # Defining the action models along the time instances
@@ -225,11 +217,10 @@ class SimpleQuadrupedalGaitProblem:
                                            [self.lfFootId, self.rfFootId, self.rhFootId], [self.lhFootId])
         lfStep = self.createFootstepModels(comRef, [lfFootPos0], stepLength, stepHeight, timeStep, stepKnots,
                                            [self.rfFootId, self.lhFootId, self.rhFootId], [self.lfFootId])
-
         loco3dModel += doubleSupport + rhStep + rfStep
         loco3dModel += doubleSupport + lhStep + lfStep
 
-        problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
+        problem = crocoddyl.ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
 
     def createTrottingProblem(self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots):
@@ -244,14 +235,14 @@ class SimpleQuadrupedalGaitProblem:
         :return shooting problem
         """
         # Compute the current foot positions
-        q0 = a2m(x0[:self.rmodel.nq])
+        q0 = x0[:self.rmodel.nq]
         pinocchio.forwardKinematics(self.rmodel, self.rdata, q0)
         pinocchio.updateFramePlacements(self.rmodel, self.rdata)
         rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
         rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
         lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
         lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
-        comRef = m2a(rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
+        comRef = (rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
         comRef[2] = 0.5325
 
         # Defining the action models along the time instances
@@ -277,7 +268,7 @@ class SimpleQuadrupedalGaitProblem:
         loco3dModel += doubleSupport + rflhStep
         loco3dModel += doubleSupport + lfrhStep
 
-        problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
+        problem = crocoddyl.ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
 
     def createPacingProblem(self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots):
@@ -292,14 +283,14 @@ class SimpleQuadrupedalGaitProblem:
         :return shooting problem
         """
         # Compute the current foot positions
-        q0 = a2m(x0[:self.rmodel.nq])
+        q0 = x0[:self.rmodel.nq]
         pinocchio.forwardKinematics(self.rmodel, self.rdata, q0)
         pinocchio.updateFramePlacements(self.rmodel, self.rdata)
         rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
         rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
         lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
         lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
-        comRef = m2a(rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
+        comRef = (rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
         comRef[2] = 0.5325
 
         # Defining the action models along the time instances
@@ -326,7 +317,7 @@ class SimpleQuadrupedalGaitProblem:
         loco3dModel += doubleSupport + rightSteps
         loco3dModel += doubleSupport + leftSteps
 
-        problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
+        problem = crocoddyl.ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
 
     def createBoundingProblem(self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots):
@@ -341,14 +332,14 @@ class SimpleQuadrupedalGaitProblem:
         :return shooting problem
         """
         # Compute the current foot positions
-        q0 = a2m(x0[:self.rmodel.nq])
+        q0 = x0[:self.rmodel.nq]
         pinocchio.forwardKinematics(self.rmodel, self.rdata, q0)
         pinocchio.updateFramePlacements(self.rmodel, self.rdata)
         rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
         rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
         lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
         lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
-        comRef = m2a(rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
+        comRef = (rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
         comRef[2] = 0.5325
 
         # Defining the action models along the time instances
@@ -367,7 +358,7 @@ class SimpleQuadrupedalGaitProblem:
         loco3dModel += doubleSupport + hindSteps
         loco3dModel += doubleSupport + frontSteps
 
-        problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
+        problem = crocoddyl.ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
 
     def createJumpingProblem(self, x0, jumpHeight, timeStep):
@@ -375,7 +366,7 @@ class SimpleQuadrupedalGaitProblem:
         rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
         lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
         lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
-        comRef = m2a(rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
+        comRef = (rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
         comRef[2] = 0.5325
 
         takeOffKnots = 30
@@ -390,14 +381,14 @@ class SimpleQuadrupedalGaitProblem:
         ]
         flyingPhase = [
             self.createSwingFootModel(timeStep, [],
-                                      np.array([0., 0., jumpHeight * (k + 1) / flyingKnots]) + comRef)
+                                      np.matrix([0., 0., jumpHeight * (k + 1) / flyingKnots]).T + comRef)
             for k in range(flyingKnots)
         ]
 
         loco3dModel += takeOff
         loco3dModel += flyingPhase
 
-        problem = ShootingProblem(x0, loco3dModel, loco3dModel[-1])
+        problem = crocoddyl.ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
 
     def createFootstepModels(self, comPos0, feetPos0, stepLength, stepHeight, timeStep, numKnots, supportFootIds,
@@ -426,17 +417,18 @@ class SimpleQuadrupedalGaitProblem:
                 # resKnot = numKnots % 2
                 phKnots = numKnots / 2
                 if k < phKnots:
-                    dp = a2m([[stepLength * (k + 1) / numKnots, 0., stepHeight * k / phKnots]])
+                    dp = np.matrix([[stepLength * (k + 1) / numKnots, 0., stepHeight * k / phKnots]]).T
                 elif k == phKnots:
-                    dp = a2m([[stepLength * (k + 1) / numKnots, 0., stepHeight]])
+                    dp = np.matrix([[stepLength * (k + 1) / numKnots, 0., stepHeight]]).T
                 else:
-                    dp = a2m([[stepLength * (k + 1) / numKnots, 0., stepHeight * (1 - float(k - phKnots) / phKnots)]])
+                    dp = np.matrix(
+                        [[stepLength * (k + 1) / numKnots, 0., stepHeight * (1 - float(k - phKnots) / phKnots)]]).T
                 tref = np.asmatrix(p + dp)
 
-                swingFootTask += [TaskSE3(pinocchio.SE3(np.eye(3), tref), i)]
+                swingFootTask += [crocoddyl.FramePlacement(i, pinocchio.SE3(np.eye(3), tref))]
 
             # Adding an action model for this knot
-            comTask = np.array([stepLength * (k + 1) / numKnots, 0., 0.]) * comPercentage + comPos0
+            comTask = np.matrix([stepLength * (k + 1) / numKnots, 0., 0.]).T * comPercentage + comPos0
             footSwingModel += [
                 self.createSwingFootModel(timeStep, supportFootIds, comTask=comTask, swingFootTask=swingFootTask)
             ]
@@ -444,9 +436,9 @@ class SimpleQuadrupedalGaitProblem:
         footSwitchModel = self.createFootSwitchModel(supportFootIds, swingFootTask)
 
         # Updating the current foot position for next step
-        comPos0 += np.array([stepLength * comPercentage, 0., 0.])
+        comPos0 += np.matrix([stepLength * comPercentage, 0., 0.]).T
         for p in feetPos0:
-            p += a2m([[stepLength, 0., 0.]])
+            p += np.matrix([[stepLength, 0., 0.]]).T
         return footSwingModel + [footSwitchModel]
 
     def createSwingFootModel(self, timeStep, supportFootIds, comTask=None, swingFootTask=None):
@@ -458,72 +450,92 @@ class SimpleQuadrupedalGaitProblem:
         :param swingFootTask: swinging foot task
         :return action model for a swing foot phase
         """
-        # Creating the action model for floating-base systems. A walker system
-        # is by default a floating-base system
-        actModel = ActuationModelFreeFloating(self.rmodel)
-
         # Creating a 3D multi-contact model, and then including the supporting
         # foot
-        contactModel = ContactModelMultiple(self.rmodel)
+        contactModel = crocoddyl.ContactModelMultiple(self.state, self.actuation.nu)
         for i in supportFootIds:
-            supportContactModel = ContactModel3D(self.rmodel, i, ref=[0., 0., 0.], gains=[0., 0.])
+            xref = crocoddyl.FrameTranslation(i, np.matrix([0., 0., 0.]).T)
+            supportContactModel = crocoddyl.ContactModel3D(self.state, xref, self.actuation.nu, np.matrix([0., 0.]).T)
             contactModel.addContact('contact_' + str(i), supportContactModel)
 
         # Creating the cost model for a contact phase
-        costModel = CostModelSum(self.rmodel, actModel.nu)
+        costModel = crocoddyl.CostModelSum(self.state, self.actuation.nu)
         if isinstance(comTask, np.ndarray):
-            comTrack = CostModelCoM(self.rmodel, comTask, actModel.nu)
+            comTrack = crocoddyl.CostModelCoMPosition(self.state, comTask, self.actuation.nu)
             costModel.addCost("comTrack", comTrack, 1e4)
         if swingFootTask is not None:
             for i in swingFootTask:
-                footTrack = CostModelFrameTranslation(self.rmodel, i.frameId, m2a(i.oXf.translation), actModel.nu)
+                xref = crocoddyl.FrameTranslation(i.frame, i.oMf.translation)
+                footTrack = crocoddyl.CostModelFrameTranslation(self.state, xref, self.actuation.nu)
                 costModel.addCost("footTrack_" + str(i), footTrack, 1e4)
 
         stateWeights = np.array([0] * 3 + [500.] * 3 + [0.01] * (self.rmodel.nv - 6) + [10] * self.rmodel.nv)
-        stateReg = CostModelState(self.rmodel, self.state, self.rmodel.defaultState, actModel.nu,
-                                  ActivationModelWeightedQuad(stateWeights**2))
-        ctrlReg = CostModelControl(self.rmodel, actModel.nu)
+        stateReg = crocoddyl.CostModelState(self.state,
+                                            crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeights**2).T),
+                                            self.rmodel.defaultState, self.actuation.nu)
+        ctrlReg = crocoddyl.CostModelControl(self.state, self.actuation.nu)
         costModel.addCost("stateReg", stateReg, 1e-1)
         costModel.addCost("ctrlReg", ctrlReg, 1e-4)
 
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
-        dmodel = DifferentialActionModelFloatingInContact(self.rmodel, actModel, contactModel, costModel)
-        model = IntegratedActionModelEuler(dmodel)
-        model.timeStep = timeStep
+        dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
+                                                                     costModel)
+        model = crocoddyl.IntegratedActionModelEuler(dmodel, timeStep)
         return model
 
-    def createFootSwitchModel(self, supportFootId, swingFootTask):
+    def createFootSwitchModel(self, supportFootIds, swingFootTask):
         """ Action model for a foot switch phase.
 
         :param supportFootIds: Ids of the constrained feet
         :param swingFootTask: swinging foot task
         :return action model for a foot switch phase
         """
-        model = self.createSwingFootModel(0., supportFootId, swingFootTask=swingFootTask)
+        # Creating a 3D multi-contact model, and then including the supporting
+        # foot
+        contactModel = crocoddyl.ContactModelMultiple(self.state, self.actuation.nu)
+        for i in supportFootIds:
+            xref = crocoddyl.FrameTranslation(i, np.matrix([0., 0., 0.]).T)
+            supportContactModel = crocoddyl.ContactModel3D(self.state, xref, self.actuation.nu, np.matrix([0., 0.]).T)
+            contactModel.addContact('contact_' + str(i), supportContactModel)
+
+        # Creating the cost model for a contact phase
+        costModel = crocoddyl.CostModelSum(self.state, self.actuation.nu)
+        if swingFootTask is not None:
+            for i in swingFootTask:
+                xref = crocoddyl.FrameTranslation(i.frame, i.oMf.translation)
+                footTrack = crocoddyl.CostModelFrameTranslation(self.state, xref, self.actuation.nu)
+                costModel.addCost("footTrack_" + str(i), footTrack, 1e7)
+        stateWeights = np.array([0] * 3 + [500.] * 3 + [0.01] * (self.rmodel.nv - 6) + [10] * self.rmodel.nv)
+        stateReg = crocoddyl.CostModelState(self.state,
+                                            crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeights**2).T),
+                                            self.rmodel.defaultState, self.actuation.nu)
+        ctrlReg = crocoddyl.CostModelControl(self.state, self.actuation.nu)
+        costModel.addCost("stateReg", stateReg, 1e1)
+        costModel.addCost("ctrlReg", ctrlReg, 1e-3)
 
         for i in swingFootTask:
-            impactFootVelCost = CostModelFrameVelocity(self.rmodel, i.frameId)
-            model.differential.costs.addCost('impactVel_' + str(i), impactFootVelCost, 1e4)
-            model.differential.costs['impactVel_' + str(i)].weight = 1e6
-            model.differential.costs['footTrack_' + str(i)].weight = 1e7
-        model.differential.costs['stateReg'].weight = 1e1
-        model.differential.costs['ctrlReg'].weight = 1e-3
+            vref = crocoddyl.FrameMotion(i.frame, pinocchio.Motion.Zero())
+            impactFootVelCost = crocoddyl.CostModelFrameVelocity(self.state, vref, self.actuation.nu)
+            costModel.addCost('impactVel_' + str(i.frame), impactFootVelCost, 1e6)
+
+        # Creating the action model for the KKT dynamics with simpletic Euler
+        # integration scheme
+        dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
+                                                                     costModel)
+        model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.)
         return model
 
 
 # Loading the HyQ model
-hyq = loadHyQ()
-if WITHDISPLAY:
-    hyq.initDisplay(loadModel=True)
+hyq = example_robot_data.loadHyQ()
 
 rmodel = hyq.model
-rdata = rmodel.createData()
 
 # Defining the initial state of the robot
 q0 = rmodel.referenceConfigurations['half_sitting'].copy()
 v0 = pinocchio.utils.zero(rmodel.nv)
-x0 = m2a(np.concatenate([q0, v0]))
+x0 = np.concatenate([q0, v0])
 
 # Setting up the 3d walking problem
 lfFoot = 'lf_foot'
@@ -578,43 +590,40 @@ for i, phase in enumerate(GAITPHASES):
     for key, value in phase.items():
         if key == 'walking':
             # Creating a walking problem
-            ddp[i] = SolverDDP(
+            ddp[i] = crocoddyl.SolverDDP(
                 gait.createWalkingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                           value['stepKnots'], value['supportKnots']))
         elif key == 'trotting':
             # Creating a trotting problem
-            ddp[i] = SolverDDP(
+            ddp[i] = crocoddyl.SolverDDP(
                 gait.createTrottingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                            value['stepKnots'], value['supportKnots']))
         elif key == 'pacing':
             # Creating a pacing problem
-            ddp[i] = SolverDDP(
+            ddp[i] = crocoddyl.SolverDDP(
                 gait.createPacingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                          value['stepKnots'], value['supportKnots']))
         elif key == 'bounding':
             # Creating a bounding problem
-            ddp[i] = SolverDDP(
+            ddp[i] = crocoddyl.SolverDDP(
                 gait.createBoundingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                            value['stepKnots'], value['supportKnots']))
         elif key == 'jumping':
             # Creating a jumping problem
-            ddp[i] = SolverDDP(gait.createJumpingProblem(x0, value['jumpHeight'], value['timeStep']))
+            ddp[i] = crocoddyl.SolverDDP(gait.createJumpingProblem(x0, value['jumpHeight'], value['timeStep']))
 
     # Added the callback functions
     print('*** SOLVE ' + key + ' ***')
-    ddp[i].callback = [CallbackDDPLogger(), CallbackDDPVerbose()]
     if WITHDISPLAY:
-        ddp[i].callback.append(CallbackSolverDisplay(hyq, 4, 1, cameraTF))
+        ddp[i].setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackSolverDisplay(hyq, 4, 4, cameraTF)])
+    else:
+        ddp[i].setCallbacks([crocoddyl.CallbackVerbose()])
 
     # Solving the problem with the DDP solver
     ddp[i].th_stop = 1e-9
-    ddp[i].solve(maxiter=1000,
-                 regInit=.1,
-                 init_xs=[rmodel.defaultState] * len(ddp[i].models()),
-                 init_us=[
-                     m.differential.quasiStatic(d.differential, rmodel.defaultState)
-                     for m, d in zip(ddp[i].models(), ddp[i].datas())[:-1]
-                 ])
+    xs = [rmodel.defaultState] * len(ddp[i].models())
+    us = [m.quasicStatic(d, rmodel.defaultState) for m, d in list(zip(ddp[i].models(), ddp[i].datas()))[:-1]]
+    ddp[i].solve(xs, us, 100, False, 0.1)
 
     # Defining the final state as initial one for the next phase
     x0 = ddp[i].xs[-1]
@@ -622,7 +631,7 @@ for i, phase in enumerate(GAITPHASES):
 # Display the entire motion
 if WITHDISPLAY:
     for i, phase in enumerate(GAITPHASES):
-        displayTrajectory(hyq, ddp[i].xs, ddp[i].models()[0].timeStep)
+        crocoddyl.displayTrajectory(hyq, ddp[i].xs, ddp[i].models()[0].dt)
 
 # Plotting the entire motion
 if WITHPLOT:

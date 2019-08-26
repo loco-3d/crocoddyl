@@ -101,7 +101,7 @@ void exposeCostSum() {
            "Create the total cost data.\n\n"
            ":param data: Pinocchio data\n"
            ":return total cost data.")
-      .add_property("State", bp::make_function(&CostModelSum::get_state, bp::return_internal_reference<>()),
+      .add_property("state", bp::make_function(&CostModelSum::get_state, bp::return_internal_reference<>()),
                     "state of the multibody system")
       .add_property("costs",
                     bp::make_function(&CostModelSum::get_costs, bp::return_value_policy<bp::return_by_value>()),

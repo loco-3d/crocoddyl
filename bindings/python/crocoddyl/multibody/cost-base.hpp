@@ -103,7 +103,7 @@ void exposeCostMultibody() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: Pinocchio data\n"
            ":return cost data.")
-      .add_property("State", bp::make_function(&CostModelAbstract_wrap::get_state, bp::return_internal_reference<>()),
+      .add_property("state", bp::make_function(&CostModelAbstract_wrap::get_state, bp::return_internal_reference<>()),
                     "state of the multibody system")
       .add_property("activation",
                     bp::make_function(&CostModelAbstract_wrap::get_activation, bp::return_internal_reference<>()),

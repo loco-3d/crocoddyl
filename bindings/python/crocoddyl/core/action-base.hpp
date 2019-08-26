@@ -37,6 +37,7 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
 };
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ActionModel_calc_wraps, ActionModelAbstract::calc_wrap, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ActionModel_quasicStatic_wraps, ActionModelAbstract::quasicStatic_wrap, 2, 4)
 
 void exposeActionAbstract() {
   bp::class_<ActionModelAbstract_wrap, boost::noncopyable>(
@@ -77,13 +78,24 @@ void exposeActionAbstract() {
            "Each action model (AM) has its own data that needs to be allocated.\n"
            "This function returns the allocated data for a predefined AM.\n"
            ":return AM data.")
+      .def("quasicStatic", &ActionModelAbstract_wrap::quasicStatic_wrap,
+           ActionModel_quasicStatic_wraps(
+               bp::args(" self", " data", " x", " maxiter=100", " tol=1e-9"),
+               "Compute the quasic-static control given a state.\n\n"
+               "It runs an iterative Newton step in order to compute the quasic-static regime\n"
+               "given a state configuration.\n"
+               ":param data: action data\n"
+               ":param x: discrete-time state vector\n"
+               ":param maxiter: maximum allowed number of iterations\n"
+               ":param tol: stopping tolerance criteria\n"
+               ":return u: quasic-static control"))
       .add_property(
           "nu", bp::make_function(&ActionModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
           "dimension of control vector")
       .add_property(
           "nr", bp::make_function(&ActionModelAbstract_wrap::get_nr, bp::return_value_policy<bp::return_by_value>()),
           "dimension of cost-residual vector")
-      .add_property("State",
+      .add_property("state",
                     bp::make_function(&ActionModelAbstract_wrap::get_state, bp::return_internal_reference<>()),
                     "state");
 
