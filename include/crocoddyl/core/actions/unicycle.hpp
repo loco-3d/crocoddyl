@@ -25,8 +25,11 @@ class ActionModelUnicycle : public ActionModelAbstract {
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
   boost::shared_ptr<ActionDataAbstract> createData();
 
+  const Eigen::Vector2d& get_cost_weights() const;
+  void set_cost_weights(const Eigen::Vector2d& weights);
+
  private:
-  Eigen::Matrix<double, 2, 1> cost_weights_;
+  Eigen::Vector2d cost_weights_;
   double dt_;
 };
 

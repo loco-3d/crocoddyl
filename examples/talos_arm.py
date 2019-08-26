@@ -17,7 +17,6 @@ WITHPLOT = 'plot' in sys.argv
 talos_arm = example_robot_data.loadTalosArm()
 robot_model = talos_arm.model
 
-
 # Create a cost model per the running and terminal action model.
 state = crocoddyl.StateMultibody(robot_model)
 runningCostModel = crocoddyl.CostModelSum(state)
@@ -50,7 +49,6 @@ runningModel.differential.armature = np.matrix([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.
 terminalModel = crocoddyl.IntegratedActionModelEuler(
     crocoddyl.DifferentialActionModelFreeFwdDynamics(state, terminalCostModel), 0.)
 terminalModel.differential.armature = np.matrix([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.]).T
-
 
 # For this optimal control problem, we define 250 knots (or running action
 # models) plus a terminal knot

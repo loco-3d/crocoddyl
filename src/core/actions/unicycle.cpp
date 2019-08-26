@@ -63,4 +63,8 @@ boost::shared_ptr<ActionDataAbstract> ActionModelUnicycle::createData() {
   return boost::make_shared<ActionDataUnicycle>(this);
 }
 
+const Eigen::Vector2d& ActionModelUnicycle::get_cost_weights() const { return cost_weights_; }
+
+void ActionModelUnicycle::set_cost_weights(const Eigen::Vector2d& weights) { cost_weights_ = weights; }
+
 }  // namespace crocoddyl

@@ -34,7 +34,7 @@ terminalCostModel.addCost("gripperPose", goalTrackingCost, 1000.)
 terminalCostModel.addCost("stateReg", xRegCost, 1e-4)
 terminalCostModel.addCost("ctrlReg", uRegCost, 1e-7)
 
-# Create the action model 
+# Create the action model
 runningModel = crocoddyl.IntegratedActionModelEuler(
     crocoddyl.DifferentialActionModelFreeFwdDynamics(state, runningCostModel), DT)
 terminalModel = crocoddyl.IntegratedActionModelEuler(
