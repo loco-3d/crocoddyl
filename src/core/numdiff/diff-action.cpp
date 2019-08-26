@@ -6,12 +6,13 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/numdiff/action.hpp"
+#include "crocoddyl/core/numdiff/diff-action.hpp"
 
 namespace crocoddyl {
 
-ActionModelNumDiff::ActionModelNumDiff(ActionModelAbstract& model, bool with_gauss_approx)
-    : ActionModelAbstract(model.get_state(), model.get_nu(), model.get_nr()), model_(model) {
+DifferentialActionModelNumDiff::DifferentialActionModelNumDiff(DifferentialActionModelAbstract& model,
+                                                               bool with_gauss_approx)
+    : DifferentialActionModelAbstract(model.get_state(), model.get_nu(), model.get_nr()), model_(model) {
   with_gauss_approx_ = with_gauss_approx;
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
   assert((!with_gauss_approx_ || nr_ > 1) && "No Gauss approximation possible with nr = 1");
@@ -24,26 +25,28 @@ ActionModelNumDiff::ActionModelNumDiff(ActionModelAbstract& model, bool with_gau
   tmp_x_.setZero();
 }
 
-ActionModelNumDiff::~ActionModelNumDiff() {}
+DifferentialActionModelNumDiff::~DifferentialActionModelNumDiff() {}
 
-void ActionModelNumDiff::calc(const boost::shared_ptr<ActionDataAbstract>& data,
-                              const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) {
+void DifferentialActionModelNumDiff::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                                          const Eigen::Ref<const Eigen::VectorXd>& x,
+                                          const Eigen::Ref<const Eigen::VectorXd>& u) {
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
   assert(u.size() == nu_ && "u has wrong dimension");
   model_.calc(data, x, u);
 }
 
-void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
-                                  const Eigen::Ref<const Eigen::VectorXd>& x,
-                                  const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
+void DifferentialActionModelNumDiff::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                                              const Eigen::Ref<const Eigen::VectorXd>& x,
+                                              const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
   assert(u.size() == nu_ && "u has wrong dimension");
-  boost::shared_ptr<ActionDataNumDiff> data_num_diff = boost::static_pointer_cast<ActionDataNumDiff>(data);
+  boost::shared_ptr<DifferentialActionDataNumDiff> data_num_diff =
+      boost::static_pointer_cast<DifferentialActionDataNumDiff>(data);
 
   if (recalc) {
     model_.calc(data_num_diff->data_0, x, u);
   }
-  Eigen::VectorXd& xn0 = data_num_diff->data_0->xnext;
+  Eigen::VectorXd& xn0 = data_num_diff->data_0->xout;
   double& c0 = data_num_diff->data_0->cost;
 
   assertStableStateFD(x);
@@ -55,12 +58,11 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
     model_.get_state().integrate(x, dx_, tmp_x_);
     calc(data_num_diff->data_x[ix], tmp_x_, u);
 
-    Eigen::VectorXd& xn = data_num_diff->data_x[ix]->xnext;
+    Eigen::VectorXd& xn = data_num_diff->data_x[ix]->xout;
     double& c = data_num_diff->data_x[ix]->cost;
     model_.get_state().diff(xn0, xn, data_num_diff->Fx.col(ix));
 
     data_num_diff->Lx(ix) = (c - c0) / disturbance_;
-
     data_num_diff->Rx.col(ix) = (data_num_diff->data_x[ix]->r - data_num_diff->data_0->r) / disturbance_;
     dx_(ix) = 0.0;
   }
@@ -72,7 +74,7 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
     du_(iu) = disturbance_;
     calc(data_num_diff->data_u[iu], x, u + du_);
 
-    Eigen::VectorXd& xn = data_num_diff->data_u[iu]->xnext;
+    Eigen::VectorXd& xn = data_num_diff->data_u[iu]->xout;
     double& c = data_num_diff->data_u[iu]->cost;
     model_.get_state().diff(xn0, xn, data_num_diff->Fu.col(iu));
 
@@ -89,38 +91,12 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
   }
 }
 
-void ActionModelNumDiff::assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& /** x */) {
-  // TODO(mnaveau): make this method virtual and this one should do nothing, update the documentation.
-  // md = model_.differential_;
-  // if isinstance(md, DifferentialActionModelFloatingInContact)
-  // {
-  //   if hasattr(md, "costs")
-  //   {
-  //     mc = md.costs;
-  //     if isinstance(mc, CostModelState)
-  //     {
-  //       assert (~np.isclose(model.State.diff(mc.ref, x)[3:6], np.ones(3) * np.pi, atol=1e-6).any())
-  //       assert (~np.isclose(model.State.diff(mc.ref, x)[3:6], -np.ones(3) * np.pi, atol=1e-6).any())
-  //     }
-  //     else if isinstance(mc, CostModelSum)
-  //     {
-  //       for (key, cost) in mc.costs.items()
-  //       {
-  //         if isinstance(cost.cost, CostModelState)
-  //         {
-  //           assert (~np.isclose(
-  //               model.State.diff(cost.cost.ref, x)[3:6], np.ones(3) * np.pi, atol=1e-6).any())
-  //           assert (~np.isclose(
-  //               model.State.diff(cost.cost.ref, x)[3:6], -np.ones(3) * np.pi, atol=1e-6).any())
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+void DifferentialActionModelNumDiff::assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& /** x */) {
+  // TODO(cmastalli): First we need to do it AMNumDiff and then to replicate it.
 }
 
-boost::shared_ptr<ActionDataAbstract> ActionModelNumDiff::createData() {
-  return boost::make_shared<ActionDataNumDiff>(this);
+boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelNumDiff::createData() {
+  return boost::make_shared<DifferentialActionDataNumDiff>(this);
 }
 
 }  // namespace crocoddyl

@@ -61,7 +61,8 @@ for p in ps:
 
 q0 = np.matrix([2., 1.5, -2., 0., 0., 0., 0.]).T
 x0 = np.concatenate([q0, pinocchio.utils.zero(state.nv)])
-seqs = [[crocoddyl.IntegratedActionModelEuler(runningModel, DT)] * T + [crocoddyl.IntegratedActionModelEuler(terminalModel)]
+seqs = [[crocoddyl.IntegratedActionModelEuler(runningModel, DT)] * T +
+        [crocoddyl.IntegratedActionModelEuler(terminalModel)]
         for runningModel, terminalModel in zip(runningModels, terminalModels)]
 problem = crocoddyl.ShootingProblem(x0, sum(seqs, [])[:-1], seqs[-1][-1])
 
