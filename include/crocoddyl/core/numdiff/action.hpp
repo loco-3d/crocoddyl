@@ -26,7 +26,7 @@ class ActionModelNumDiff : public ActionModelAbstract {
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
   boost::shared_ptr<ActionDataAbstract> createData();
 
-  ActionModelAbstract& get_model() { return model_; }
+  ActionModelAbstract& get_model() const { return model_; }
 
   /**
    * @brief Get the disturbance_ object
