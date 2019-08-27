@@ -23,7 +23,10 @@ void ActionModelNumDiff::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                               const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) {
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
   assert(u.size() == nu_ && "u has wrong dimension");
-  model_.calc(data, x, u);
+  boost::shared_ptr<ActionDataNumDiff> data_nd = boost::static_pointer_cast<ActionDataNumDiff>(data);
+  model_.calc(data_nd->data_0, x, u);
+  data->cost = data_nd->data_0->cost;
+  data->xnext = data_nd->data_0->xnext;
 }
 
 void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,

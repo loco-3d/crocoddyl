@@ -25,7 +25,10 @@ void DifferentialActionModelNumDiff::calc(const boost::shared_ptr<DifferentialAc
                                           const Eigen::Ref<const Eigen::VectorXd>& u) {
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
   assert(u.size() == nu_ && "u has wrong dimension");
-  model_.calc(data, x, u);
+  DifferentialActionDataNumDiff* data_nd = static_cast<DifferentialActionDataNumDiff*>(data.get());
+  model_.calc(data_nd->data_0, x, u);
+  data->cost = data_nd->data_0->cost;
+  data->xout = data_nd->data_0->xout;
 }
 
 void DifferentialActionModelNumDiff::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
