@@ -58,15 +58,14 @@ void DifferentialActionModelNumDiff::calcDiff(const boost::shared_ptr<Differenti
     model_.get_state().integrate(x, dx_, tmp_x_);
     calc(data_num_diff->data_x[ix], tmp_x_, u);
 
-    Eigen::VectorXd& xn = data_num_diff->data_x[ix]->xout;
-    double& c = data_num_diff->data_x[ix]->cost;
-    model_.get_state().diff(xn0, xn, data_num_diff->Fx.col(ix));
+    const Eigen::VectorXd& xn = data_num_diff->data_x[ix]->xout;
+    const double& c = data_num_diff->data_x[ix]->cost;
+    data_num_diff->Fx.col(ix) = (xn - xn0) / disturbance_;
 
     data_num_diff->Lx(ix) = (c - c0) / disturbance_;
     data_num_diff->Rx.col(ix) = (data_num_diff->data_x[ix]->r - data_num_diff->data_0->r) / disturbance_;
     dx_(ix) = 0.0;
   }
-  data_num_diff->Fx /= disturbance_;
 
   // Computing the d action(x,u) / du
   du_.setZero();
@@ -74,15 +73,14 @@ void DifferentialActionModelNumDiff::calcDiff(const boost::shared_ptr<Differenti
     du_(iu) = disturbance_;
     calc(data_num_diff->data_u[iu], x, u + du_);
 
-    Eigen::VectorXd& xn = data_num_diff->data_u[iu]->xout;
-    double& c = data_num_diff->data_u[iu]->cost;
-    model_.get_state().diff(xn0, xn, data_num_diff->Fu.col(iu));
+    const Eigen::VectorXd& xn = data_num_diff->data_u[iu]->xout;
+    const double& c = data_num_diff->data_u[iu]->cost;
+    data_num_diff->Fu.col(iu) = (xn - xn0) / disturbance_;
 
     data_num_diff->Lu(iu) = (c - c0) / disturbance_;
     data_num_diff->Ru.col(iu) = (data_num_diff->data_u[iu]->r - data_num_diff->data_0->r) / disturbance_;
     du_(iu) = 0.0;
   }
-  data_num_diff->Fu /= disturbance_;
 
   if (with_gauss_approx_) {
     data_num_diff->Lxx = data_num_diff->Rx.transpose() * data_num_diff->Rx;
