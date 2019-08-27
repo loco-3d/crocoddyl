@@ -41,6 +41,9 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
   }
   const Eigen::VectorXd& xn0 = data_nd->data_0->xnext;
   double& c0 = data_nd->data_0->cost;
+  const double& c0 = data_nd->data_0->cost;
+  data->xnext = data_nd->data_0->xnext;
+  data->cost = data_nd->data_0->cost;
 
   assertStableStateFD(x);
 
@@ -55,11 +58,11 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
     const double& c = data_nd->data_x[ix]->cost;
     model_.get_state().diff(xn0, xn, data_nd->Fx.col(ix));
 
-    data_nd->Lx(ix) = (c - c0) / disturbance_;
+    data->Lx(ix) = (c - c0) / disturbance_;
     data_nd->Rx.col(ix) = (data_nd->data_x[ix]->r - data_nd->data_0->r) / disturbance_;
     data_nd->dx(ix) = 0.0;
   }
-  data_nd->Fx /= disturbance_;
+  data->Fx /= disturbance_;
 
   // Computing the d action(x,u) / du
   data_nd->du.setZero();
@@ -71,16 +74,16 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
     const double& c = data_nd->data_u[iu]->cost;
     model_.get_state().diff(xn0, xn, data_nd->Fu.col(iu));
 
-    data_nd->Lu(iu) = (c - c0) / disturbance_;
+    data->Lu(iu) = (c - c0) / disturbance_;
     data_nd->Ru.col(iu) = (data_nd->data_u[iu]->r - data_nd->data_0->r) / disturbance_;
     data_nd->du(iu) = 0.0;
   }
-  data_nd->Fu /= disturbance_;
+  data->Fu /= disturbance_;
 
   if (with_gauss_approx_) {
-    data_nd->Lxx = data_nd->Rx.transpose() * data_nd->Rx;
-    data_nd->Lxu = data_nd->Rx.transpose() * data_nd->Ru;
-    data_nd->Luu = data_nd->Ru.transpose() * data_nd->Ru;
+    data->Lxx = data_nd->Rx.transpose() * data_nd->Rx;
+    data->Lxu = data_nd->Rx.transpose() * data_nd->Ru;
+    data->Luu = data_nd->Ru.transpose() * data_nd->Ru;
   }
 }
 
