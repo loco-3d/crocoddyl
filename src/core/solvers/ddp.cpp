@@ -50,6 +50,7 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
         computeDirection(recalc);
       } catch (const char* msg) {
         recalc = false;
+        increaseRegularization();
         if (xreg_ == regmax_) {
           return false;
         } else {
@@ -185,7 +186,7 @@ void SolverDDP::backwardPass() {
     }
 
     if (!std::isnan(ureg_)) {
-      const int& nu = m->get_nu();
+      unsigned int const& nu = m->get_nu();
       Quu_[t].diagonal() += Eigen::VectorXd::Constant(nu, ureg_);
     }
 
