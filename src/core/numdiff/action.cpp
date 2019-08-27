@@ -40,7 +40,6 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
     model_.calc(data_nd->data_0, x, u);
   }
   const Eigen::VectorXd& xn0 = data_nd->data_0->xnext;
-  double& c0 = data_nd->data_0->cost;
   const double& c0 = data_nd->data_0->cost;
   data->xnext = data_nd->data_0->xnext;
   data->cost = data_nd->data_0->cost;
