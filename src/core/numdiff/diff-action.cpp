@@ -53,7 +53,7 @@ void DifferentialActionModelNumDiff::calcDiff(const boost::shared_ptr<Differenti
 
   // Computing the d action(x,u) / dx
   dx_.setZero();
-  for (unsigned ix = 0; ix < state_.get_ndx(); ++ix) {
+  for (unsigned int ix = 0; ix < state_.get_ndx(); ++ix) {
     dx_(ix) = disturbance_;
     model_.get_state().integrate(x, dx_, tmp_x_);
     calc(data_num_diff->data_x[ix], tmp_x_, u);
