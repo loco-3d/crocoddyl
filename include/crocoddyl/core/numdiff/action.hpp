@@ -28,18 +28,7 @@ class ActionModelNumDiff : public ActionModelAbstract {
 
   ActionModelAbstract& get_model() const { return model_; }
 
-  /**
-   * @brief Get the disturbance_ object
-   *
-   * @return double
-   */
-  double get_disturbance() { return disturbance_; }
-  /**
-   * @brief Get the with_gauss_approx_ object
-   *
-   * @return true
-   * @return false
-   */
+  const double& get_disturbance() const { return disturbance_; }
   bool get_with_gauss_approx() { return with_gauss_approx_; }
 
  private:
@@ -57,38 +46,8 @@ class ActionModelNumDiff : public ActionModelAbstract {
    */
   void assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& x);
 
-  /**
-   * @brief Defines id we use a Gauss approximation of the cost or not.
-   */
   bool with_gauss_approx_;
-  /**
-   * @brief This the increment used in the finite differentiation and integration.
-   */
   double disturbance_;
-  /**
-   * @brief This is the vector containing the small element during the finite
-   * differentiation and integration. This is a temporary variable but used
-   * quiet often. For sake of memory management we allocate it once in the
-   * constructor of this class.
-   */
-  Eigen::VectorXd dx_;
-  /**
-   * @brief This is the vector containing the small element during the finite
-   * differentiation and integration. This is a temporary variable but used
-   * quiet often. For sake of memory management we allocate it once in the
-   * constructor of this class.
-   */
-  Eigen::VectorXd du_;
-  /**
-   * @brief This is the vector containing the result of an integration. This is
-   * a temporary variable but used quiet often. For sake of memory management we
-   * allocate it once in the constructor of this class.
-   */
-  Eigen::VectorXd tmp_x_;
-  /**
-   * @brief This is the model from which to compute the finite differentiation
-   * from.
-   */
   ActionModelAbstract& model_;
 };
 
@@ -101,53 +60,37 @@ struct ActionDataNumDiff : public ActionDataAbstract {
    * @param model is the object to compute the numerical differentiation from.
    */
   template <typename Model>
-  explicit ActionDataNumDiff(Model* const model_num_diff) : ActionDataAbstract(model_num_diff) {
-    // simple renaming for conveniency
-    const unsigned& ndx = model_num_diff->get_model().get_state().get_ndx();
-    const unsigned& nu = model_num_diff->get_model().get_nu();
-    const unsigned& nr = model_num_diff->get_model().get_nr();
-    // data_0_
-    data_0 = model_num_diff->get_model().createData();
-    // data_x_
-    for (unsigned i = 0; i < ndx; ++i) {
-      data_x.push_back(model_num_diff->get_model().createData());
-    }
-    // data_u_
-    for (unsigned i = 0; i < nu; ++i) {
-      data_u.push_back(model_num_diff->get_model().createData());
-    }
-    // Rx
-    Rx.resize(nr, ndx);
+  explicit ActionDataNumDiff(Model* const model)
+      : ActionDataAbstract(model),
+        Rx(model->get_model().get_nr(), model->get_model().get_state().get_ndx()),
+        Ru(model->get_model().get_nr(), model->get_model().get_nu()),
+        dx(model->get_model().get_state().get_ndx()),
+        du(model->get_model().get_nu()),
+        xp(model->get_model().get_state().get_nx()) {
     Rx.setZero();
-    // Ru
-    Ru.resize(nr, nu);
     Ru.setZero();
+    dx.setZero();
+    du.setZero();
+    xp.setZero();
+
+    const unsigned& ndx = model->get_model().get_state().get_ndx();
+    const unsigned& nu = model->get_model().get_nu();
+    data_0 = model->get_model().createData();
+    for (unsigned i = 0; i < ndx; ++i) {
+      data_x.push_back(model->get_model().createData());
+    }
+    for (unsigned i = 0; i < nu; ++i) {
+      data_u.push_back(model->get_model().createData());
+    }
   }
 
-  /**
-   * @brief Destroy the ActionDataNumDiff object
-   */
-  ~ActionDataNumDiff() {}
-
-  /**
-   * @brief @todo write the doc
-   */
   Eigen::MatrixXd Rx;
-  /**
-   * @brief @todo write the doc
-   */
   Eigen::MatrixXd Ru;
-  /**
-   * @brief One set of data used to compute the state 0.
-   */
+  Eigen::VectorXd dx;
+  Eigen::VectorXd du;
+  Eigen::VectorXd xp;
   boost::shared_ptr<ActionDataAbstract> data_0;
-  /**
-   * @brief The data to compute the derivation around the state x.
-   */
   std::vector<boost::shared_ptr<ActionDataAbstract> > data_x;
-  /**
-   * @brief The data to compute the derivation around the state u.
-   */
   std::vector<boost::shared_ptr<ActionDataAbstract> > data_u;
 };
 

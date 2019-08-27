@@ -15,13 +15,6 @@ ActionModelNumDiff::ActionModelNumDiff(ActionModelAbstract& model, bool with_gau
   with_gauss_approx_ = with_gauss_approx;
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
   assert((!with_gauss_approx_ || nr_ > 1) && "No Gauss approximation possible with nr = 1");
-
-  dx_.resize(state_.get_ndx());
-  dx_.setZero();
-  du_.resize(model.get_nu());
-  du_.setZero();
-  tmp_x_.resize(state_.get_nx());
-  tmp_x_.setZero();
 }
 
 ActionModelNumDiff::~ActionModelNumDiff() {}
@@ -49,11 +42,11 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
   assertStableStateFD(x);
 
   // Computing the d action(x,u) / dx
-  dx_.setZero();
+  data_num_diff->dx.setZero();
   for (unsigned int ix = 0; ix < state_.get_ndx(); ++ix) {
-    dx_(ix) = disturbance_;
-    model_.get_state().integrate(x, dx_, tmp_x_);
-    calc(data_num_diff->data_x[ix], tmp_x_, u);
+    data_num_diff->dx(ix) = disturbance_;
+    model_.get_state().integrate(x, data_num_diff->dx, data_num_diff->xp);
+    calc(data_num_diff->data_x[ix], data_num_diff->xp, u);
 
     const Eigen::VectorXd& xn = data_num_diff->data_x[ix]->xnext;
     const double& c = data_num_diff->data_x[ix]->cost;
@@ -61,15 +54,15 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
 
     data_num_diff->Lx(ix) = (c - c0) / disturbance_;
     data_num_diff->Rx.col(ix) = (data_num_diff->data_x[ix]->r - data_num_diff->data_0->r) / disturbance_;
-    dx_(ix) = 0.0;
+    data_num_diff->dx(ix) = 0.0;
   }
   data_num_diff->Fx /= disturbance_;
 
   // Computing the d action(x,u) / du
-  du_.setZero();
+  data_num_diff->du.setZero();
   for (unsigned iu = 0; iu < model_.get_nu(); ++iu) {
-    du_(iu) = disturbance_;
-    calc(data_num_diff->data_u[iu], x, u + du_);
+    data_num_diff->du(iu) = disturbance_;
+    calc(data_num_diff->data_u[iu], x, u + data_num_diff->du);
 
     const Eigen::VectorXd& xn = data_num_diff->data_u[iu]->xnext;
     const double& c = data_num_diff->data_u[iu]->cost;
@@ -77,7 +70,7 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
 
     data_num_diff->Lu(iu) = (c - c0) / disturbance_;
     data_num_diff->Ru.col(iu) = (data_num_diff->data_u[iu]->r - data_num_diff->data_0->r) / disturbance_;
-    du_(iu) = 0.0;
+    data_num_diff->du(iu) = 0.0;
   }
   data_num_diff->Fu /= disturbance_;
 
