@@ -51,7 +51,7 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
   for (unsigned int ix = 0; ix < state_.get_ndx(); ++ix) {
     data_nd->dx(ix) = disturbance_;
     model_.get_state().integrate(x, data_nd->dx, data_nd->xp);
-    calc(data_nd->data_x[ix], data_nd->xp, u);
+    model_.calc(data_nd->data_x[ix], data_nd->xp, u);
 
     const Eigen::VectorXd& xn = data_nd->data_x[ix]->xnext;
     const double& c = data_nd->data_x[ix]->cost;
@@ -67,7 +67,7 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
   data_nd->du.setZero();
   for (unsigned iu = 0; iu < model_.get_nu(); ++iu) {
     data_nd->du(iu) = disturbance_;
-    calc(data_nd->data_u[iu], x, u + data_nd->du);
+    model_.calc(data_nd->data_u[iu], x, u + data_nd->du);
 
     const Eigen::VectorXd& xn = data_nd->data_u[iu]->xnext;
     const double& c = data_nd->data_u[iu]->cost;
