@@ -3,9 +3,9 @@
 ###########################################################################
 
 # Creating the DDP solver
-ddp = SolverDDP(problem)
-# ddp.callback = [ CallbackDDPVerbose() ]
+ddp = crocoddyl.SolverDDP(problem)
+ddp.setCallbacks([ CallbackDDPVerbose() ])
 
 # Solving this problem
-xs, us, done = ddp.solve(maxiter=1000)
+done = ddp.solve(1000)
 print done
