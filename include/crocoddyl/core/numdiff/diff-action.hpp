@@ -27,20 +27,16 @@ class DifferentialActionModelNumDiff : public DifferentialActionModelAbstract {
                 const bool& recalc = true);
   boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
-  DifferentialActionModelAbstract& get_model() const { return model_; }
-
-  double get_disturbance() { return disturbance_; }
-  bool get_with_gauss_approx() { return with_gauss_approx_; }
+  DifferentialActionModelAbstract& get_model() const;
+  const double& get_disturbance() const;
+  bool get_with_gauss_approx();
 
  private:
   void assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& x);
 
+  DifferentialActionModelAbstract& model_;
   bool with_gauss_approx_;
   double disturbance_;
-  Eigen::VectorXd dx_;
-  Eigen::VectorXd du_;
-  Eigen::VectorXd tmp_x_;
-  DifferentialActionModelAbstract& model_;
 };
 
 struct DifferentialActionDataNumDiff : public DifferentialActionDataAbstract {
@@ -52,26 +48,35 @@ struct DifferentialActionDataNumDiff : public DifferentialActionDataAbstract {
    * @param model is the object to compute the numerical differentiation from.
    */
   template <typename Model>
-  explicit DifferentialActionDataNumDiff(Model* const model_num_diff)
-      : DifferentialActionDataAbstract(model_num_diff) {
-    const unsigned& ndx = model_num_diff->get_model().get_state().get_ndx();
-    const unsigned& nu = model_num_diff->get_model().get_nu();
-    const unsigned& nr = model_num_diff->get_model().get_nr();
-    data_0 = model_num_diff->get_model().createData();
-    for (unsigned i = 0; i < ndx; ++i) {
-      data_x.push_back(model_num_diff->get_model().createData());
-    }
-    for (unsigned i = 0; i < nu; ++i) {
-      data_u.push_back(model_num_diff->get_model().createData());
-    }
-    Rx.resize(nr, ndx);
-    Ru.resize(nr, nu);
+  explicit DifferentialActionDataNumDiff(Model* const model)
+      : DifferentialActionDataAbstract(model),
+        Rx(model->get_model().get_nr(), model->get_model().get_state().get_ndx()),
+        Ru(model->get_model().get_nr(), model->get_model().get_nu()),
+        dx(model->get_model().get_state().get_ndx()),
+        du(model->get_model().get_nu()),
+        xp(model->get_model().get_state().get_nx()) {
     Rx.setZero();
     Ru.setZero();
+    dx.setZero();
+    du.setZero();
+    xp.setZero();
+
+    unsigned int const& ndx = model->get_model().get_state().get_ndx();
+    unsigned int const& nu = model->get_model().get_nu();
+    data_0 = model->get_model().createData();
+    for (unsigned int i = 0; i < ndx; ++i) {
+      data_x.push_back(model->get_model().createData());
+    }
+    for (unsigned int i = 0; i < nu; ++i) {
+      data_u.push_back(model->get_model().createData());
+    }
   }
 
   Eigen::MatrixXd Rx;
   Eigen::MatrixXd Ru;
+  Eigen::VectorXd dx;
+  Eigen::VectorXd du;
+  Eigen::VectorXd xp;
   boost::shared_ptr<DifferentialActionDataAbstract> data_0;
   std::vector<boost::shared_ptr<DifferentialActionDataAbstract> > data_x;
   std::vector<boost::shared_ptr<DifferentialActionDataAbstract> > data_u;

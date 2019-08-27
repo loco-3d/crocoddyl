@@ -117,6 +117,8 @@ void exposeActionAbstract() {
       .add_property("xnext",
                     bp::make_getter(&ActionDataAbstract::xnext, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ActionDataAbstract::xnext), "next state")
+      .add_property("r", bp::make_getter(&ActionDataAbstract::r, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ActionDataAbstract::r), "cost residual")
       .add_property("Fx", bp::make_getter(&ActionDataAbstract::Fx, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ActionDataAbstract::Fx), "Jacobian of the dynamics")
       .add_property("Fu", bp::make_getter(&ActionDataAbstract::Fu, bp::return_value_policy<bp::return_by_value>()),
@@ -130,13 +132,7 @@ void exposeActionAbstract() {
       .add_property("Lxu", bp::make_getter(&ActionDataAbstract::Lxu, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ActionDataAbstract::Lxu), "Hessian of the cost")
       .add_property("Luu", bp::make_getter(&ActionDataAbstract::Luu, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract::Luu), "Hessian of the cost")
-      .add_property("r", bp::make_getter(&ActionDataAbstract::r, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract::r), "cost residual")
-      .add_property("Rx", bp::make_getter(&ActionDataAbstract::Rx, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract::Rx), "Jacobian of the cost residual")
-      .add_property("Ru", bp::make_getter(&ActionDataAbstract::Ru, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract::Ru), "Jacobian of the cost residual");
+                    bp::make_setter(&ActionDataAbstract::Luu), "Hessian of the cost");
 }
 
 }  // namespace python

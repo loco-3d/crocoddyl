@@ -88,26 +88,31 @@ struct ActionDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  explicit ActionDataAbstract(Model* const model) : cost(0.) {
-    const int& nx = model->get_state().get_nx();
-    const int& ndx = model->get_state().get_ndx();
-    const int& nu = model->get_nu();
-    const int& nr = model->get_nr();
-    xnext = Eigen::VectorXd::Zero(nx);
-    Fx = Eigen::MatrixXd::Zero(ndx, ndx);
-    Fu = Eigen::MatrixXd::Zero(ndx, nu);
-    Lx = Eigen::VectorXd::Zero(ndx);
-    Lu = Eigen::VectorXd::Zero(nu);
-    Lxx = Eigen::MatrixXd::Zero(ndx, ndx);
-    Lxu = Eigen::MatrixXd::Zero(ndx, nu);
-    Luu = Eigen::MatrixXd::Zero(nu, nu);
-    r = Eigen::VectorXd::Zero(nr);
-    Rx = Eigen::MatrixXd::Zero(nr, ndx);
-    Ru = Eigen::MatrixXd::Zero(nr, nu);
+  explicit ActionDataAbstract(Model* const model)
+      : cost(0.),
+        xnext(model->get_state().get_nx()),
+        r(model->get_nr()),
+        Fx(model->get_state().get_ndx(), model->get_state().get_ndx()),
+        Fu(model->get_state().get_ndx(), model->get_nu()),
+        Lx(model->get_state().get_ndx()),
+        Lu(model->get_nu()),
+        Lxx(model->get_state().get_ndx(), model->get_state().get_ndx()),
+        Lxu(model->get_state().get_ndx(), model->get_nu()),
+        Luu(model->get_nu(), model->get_nu()) {
+    xnext.setZero();
+    r.setZero();
+    Fx.setZero();
+    Fu.setZero();
+    Lx.setZero();
+    Lu.setZero();
+    Lxx.setZero();
+    Lxu.setZero();
+    Luu.setZero();
   }
 
   const double& get_cost() const { return cost; }
   const Eigen::VectorXd& get_xnext() const { return xnext; }
+  const Eigen::VectorXd& get_r() const { return r; }
   const Eigen::VectorXd& get_Lx() const { return Lx; }
   const Eigen::VectorXd& get_Lu() const { return Lu; }
   const Eigen::MatrixXd& get_Lxx() const { return Lxx; }
@@ -115,12 +120,10 @@ struct ActionDataAbstract {
   const Eigen::MatrixXd& get_Luu() const { return Luu; }
   const Eigen::MatrixXd& get_Fx() const { return Fx; }
   const Eigen::MatrixXd& get_Fu() const { return Fu; }
-  const Eigen::VectorXd& get_r() const { return r; }
-  const Eigen::MatrixXd& get_Rx() const { return Rx; }
-  const Eigen::MatrixXd& get_Ru() const { return Ru; }
 
   double cost;
   Eigen::VectorXd xnext;
+  Eigen::VectorXd r;
   Eigen::MatrixXd Fx;
   Eigen::MatrixXd Fu;
   Eigen::VectorXd Lx;
@@ -128,9 +131,6 @@ struct ActionDataAbstract {
   Eigen::MatrixXd Lxx;
   Eigen::MatrixXd Lxu;
   Eigen::MatrixXd Luu;
-  Eigen::VectorXd r;
-  Eigen::MatrixXd Rx;
-  Eigen::MatrixXd Ru;
 };
 
 }  // namespace crocoddyl

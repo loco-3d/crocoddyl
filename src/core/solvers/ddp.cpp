@@ -50,6 +50,7 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
         computeDirection(recalc);
       } catch (const char* msg) {
         recalc = false;
+        increaseRegularization();
         if (xreg_ == regmax_) {
           return false;
         } else {
@@ -185,7 +186,7 @@ void SolverDDP::backwardPass() {
     }
 
     if (!std::isnan(ureg_)) {
-      const int& nu = m->get_nu();
+      unsigned int const& nu = m->get_nu();
       Quu_[t].diagonal() += Eigen::VectorXd::Constant(nu, ureg_);
     }
 
@@ -197,7 +198,7 @@ void SolverDDP::backwardPass() {
       Quuk_[t].noalias() = Quu_[t] * k_[t];
       Vx_[t].noalias() = Qx_[t] + K_[t].transpose() * Quuk_[t] - 2 * K_[t].transpose() * Qu_[t];
     }
-    Vxx_[t] = Qxx_[t] - Qxu_[t] * K_[t];
+    Vxx_[t].noalias() = Qxx_[t] - Qxu_[t] * K_[t];
     Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose());  // TODO(cmastalli): as suggested by Nicolas
 
     if (!std::isnan(xreg_)) {

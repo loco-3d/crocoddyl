@@ -54,7 +54,15 @@ void exposeActionNumDiff() {
            "This function returns the allocated data for a predefined AM.\n"
            ":return AM data.")
       .add_property("model", bp::make_function(&ActionModelNumDiff::get_model, bp::return_internal_reference<>()),
-                    "action model");
+                    "action model")
+      .add_property(
+          "disturbance",
+          bp::make_function(&ActionModelNumDiff::get_disturbance, bp::return_value_policy<bp::return_by_value>()),
+          "disturbance value used in the numerical differentiation")
+      .add_property("withGaussApprox",
+                    bp::make_function(&ActionModelNumDiff::get_with_gauss_approx,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "Gauss approximation for computing the Hessians");
 }
 
 }  // namespace python
