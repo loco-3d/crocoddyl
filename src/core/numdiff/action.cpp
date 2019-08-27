@@ -31,53 +31,53 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
                                   const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
   assert(u.size() == nu_ && "u has wrong dimension");
-  boost::shared_ptr<ActionDataNumDiff> data_num_diff = boost::static_pointer_cast<ActionDataNumDiff>(data);
+  boost::shared_ptr<ActionDataNumDiff> data_nd = boost::static_pointer_cast<ActionDataNumDiff>(data);
 
   if (recalc) {
-    model_.calc(data_num_diff->data_0, x, u);
+    model_.calc(data_nd->data_0, x, u);
   }
-  Eigen::VectorXd& xn0 = data_num_diff->data_0->xnext;
-  double& c0 = data_num_diff->data_0->cost;
+  Eigen::VectorXd& xn0 = data_nd->data_0->xnext;
+  double& c0 = data_nd->data_0->cost;
 
   assertStableStateFD(x);
 
   // Computing the d action(x,u) / dx
-  data_num_diff->dx.setZero();
+  data_nd->dx.setZero();
   for (unsigned int ix = 0; ix < state_.get_ndx(); ++ix) {
-    data_num_diff->dx(ix) = disturbance_;
-    model_.get_state().integrate(x, data_num_diff->dx, data_num_diff->xp);
-    calc(data_num_diff->data_x[ix], data_num_diff->xp, u);
+    data_nd->dx(ix) = disturbance_;
+    model_.get_state().integrate(x, data_nd->dx, data_nd->xp);
+    calc(data_nd->data_x[ix], data_nd->xp, u);
 
-    const Eigen::VectorXd& xn = data_num_diff->data_x[ix]->xnext;
-    const double& c = data_num_diff->data_x[ix]->cost;
-    model_.get_state().diff(xn0, xn, data_num_diff->Fx.col(ix));
+    const Eigen::VectorXd& xn = data_nd->data_x[ix]->xnext;
+    const double& c = data_nd->data_x[ix]->cost;
+    model_.get_state().diff(xn0, xn, data_nd->Fx.col(ix));
 
-    data_num_diff->Lx(ix) = (c - c0) / disturbance_;
-    data_num_diff->Rx.col(ix) = (data_num_diff->data_x[ix]->r - data_num_diff->data_0->r) / disturbance_;
-    data_num_diff->dx(ix) = 0.0;
+    data_nd->Lx(ix) = (c - c0) / disturbance_;
+    data_nd->Rx.col(ix) = (data_nd->data_x[ix]->r - data_nd->data_0->r) / disturbance_;
+    data_nd->dx(ix) = 0.0;
   }
-  data_num_diff->Fx /= disturbance_;
+  data_nd->Fx /= disturbance_;
 
   // Computing the d action(x,u) / du
-  data_num_diff->du.setZero();
+  data_nd->du.setZero();
   for (unsigned iu = 0; iu < model_.get_nu(); ++iu) {
-    data_num_diff->du(iu) = disturbance_;
-    calc(data_num_diff->data_u[iu], x, u + data_num_diff->du);
+    data_nd->du(iu) = disturbance_;
+    calc(data_nd->data_u[iu], x, u + data_nd->du);
 
-    const Eigen::VectorXd& xn = data_num_diff->data_u[iu]->xnext;
-    const double& c = data_num_diff->data_u[iu]->cost;
-    model_.get_state().diff(xn0, xn, data_num_diff->Fu.col(iu));
+    const Eigen::VectorXd& xn = data_nd->data_u[iu]->xnext;
+    const double& c = data_nd->data_u[iu]->cost;
+    model_.get_state().diff(xn0, xn, data_nd->Fu.col(iu));
 
-    data_num_diff->Lu(iu) = (c - c0) / disturbance_;
-    data_num_diff->Ru.col(iu) = (data_num_diff->data_u[iu]->r - data_num_diff->data_0->r) / disturbance_;
-    data_num_diff->du(iu) = 0.0;
+    data_nd->Lu(iu) = (c - c0) / disturbance_;
+    data_nd->Ru.col(iu) = (data_nd->data_u[iu]->r - data_nd->data_0->r) / disturbance_;
+    data_nd->du(iu) = 0.0;
   }
-  data_num_diff->Fu /= disturbance_;
+  data_nd->Fu /= disturbance_;
 
   if (with_gauss_approx_) {
-    data_num_diff->Lxx = data_num_diff->Rx.transpose() * data_num_diff->Rx;
-    data_num_diff->Lxu = data_num_diff->Rx.transpose() * data_num_diff->Ru;
-    data_num_diff->Luu = data_num_diff->Ru.transpose() * data_num_diff->Ru;
+    data_nd->Lxx = data_nd->Rx.transpose() * data_nd->Rx;
+    data_nd->Lxu = data_nd->Rx.transpose() * data_nd->Ru;
+    data_nd->Luu = data_nd->Ru.transpose() * data_nd->Ru;
   }
 }
 
