@@ -88,15 +88,17 @@ struct ActionDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  explicit ActionDataAbstract(Model* const model) : cost(0.), xnext(model->get_state().get_nx()),
-      r(model->get_nr()),
-      Fx(model->get_state().get_ndx(), model->get_state().get_ndx()),
-      Fu(model->get_state().get_ndx(), model->get_nu()),
-      Lx(model->get_state().get_ndx()),
-      Lu(model->get_nu()),
-      Lxx(model->get_state().get_ndx(), model->get_state().get_ndx()),
-      Lxu(model->get_state().get_ndx(), model->get_nu()),
-      Luu(model->get_nu(), model->get_nu()) {
+  explicit ActionDataAbstract(Model* const model)
+      : cost(0.),
+        xnext(model->get_state().get_nx()),
+        r(model->get_nr()),
+        Fx(model->get_state().get_ndx(), model->get_state().get_ndx()),
+        Fu(model->get_state().get_ndx(), model->get_nu()),
+        Lx(model->get_state().get_ndx()),
+        Lu(model->get_nu()),
+        Lxx(model->get_state().get_ndx(), model->get_state().get_ndx()),
+        Lxu(model->get_state().get_ndx(), model->get_nu()),
+        Luu(model->get_nu(), model->get_nu()) {
     xnext.setZero();
     r.setZero();
     Fx.setZero();
