@@ -4,7 +4,7 @@
 
 # Creating the DDP solver
 ddp = crocoddyl.SolverDDP(problem)
-ddp.setCallbacks([ CallbackDDPVerbose() ])
+ddp.setCallbacks([crocoddyl.CallbackDDPVerbose()])
 
 # Solving this problem
 done = ddp.solve(1000)
