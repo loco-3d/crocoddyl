@@ -35,9 +35,9 @@ class DifferentialActionModelNumDiff : public DifferentialActionModelAbstract {
  private:
   void assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& x);
 
+  DifferentialActionModelAbstract& model_;
   bool with_gauss_approx_;
   double disturbance_;
-  DifferentialActionModelAbstract& model_;
 };
 
 struct DifferentialActionDataNumDiff : public DifferentialActionDataAbstract {

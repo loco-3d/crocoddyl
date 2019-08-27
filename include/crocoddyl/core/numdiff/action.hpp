@@ -46,9 +46,9 @@ class ActionModelNumDiff : public ActionModelAbstract {
    */
   void assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& x);
 
+  ActionModelAbstract& model_;
   bool with_gauss_approx_;
   double disturbance_;
-  ActionModelAbstract& model_;
 };
 
 struct ActionDataNumDiff : public ActionDataAbstract {

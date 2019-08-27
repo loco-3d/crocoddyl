@@ -94,6 +94,7 @@ struct ActionDataAbstract {
     const int& nu = model->get_nu();
     const int& nr = model->get_nr();
     xnext = Eigen::VectorXd::Zero(nx);
+    r = Eigen::VectorXd::Zero(nr);
     Fx = Eigen::MatrixXd::Zero(ndx, ndx);
     Fu = Eigen::MatrixXd::Zero(ndx, nu);
     Lx = Eigen::VectorXd::Zero(ndx);
@@ -101,13 +102,11 @@ struct ActionDataAbstract {
     Lxx = Eigen::MatrixXd::Zero(ndx, ndx);
     Lxu = Eigen::MatrixXd::Zero(ndx, nu);
     Luu = Eigen::MatrixXd::Zero(nu, nu);
-    r = Eigen::VectorXd::Zero(nr);
-    Rx = Eigen::MatrixXd::Zero(nr, ndx);
-    Ru = Eigen::MatrixXd::Zero(nr, nu);
   }
 
   const double& get_cost() const { return cost; }
   const Eigen::VectorXd& get_xnext() const { return xnext; }
+  const Eigen::VectorXd& get_r() const { return r; }
   const Eigen::VectorXd& get_Lx() const { return Lx; }
   const Eigen::VectorXd& get_Lu() const { return Lu; }
   const Eigen::MatrixXd& get_Lxx() const { return Lxx; }
@@ -115,12 +114,10 @@ struct ActionDataAbstract {
   const Eigen::MatrixXd& get_Luu() const { return Luu; }
   const Eigen::MatrixXd& get_Fx() const { return Fx; }
   const Eigen::MatrixXd& get_Fu() const { return Fu; }
-  const Eigen::VectorXd& get_r() const { return r; }
-  const Eigen::MatrixXd& get_Rx() const { return Rx; }
-  const Eigen::MatrixXd& get_Ru() const { return Ru; }
 
   double cost;
   Eigen::VectorXd xnext;
+  Eigen::VectorXd r;
   Eigen::MatrixXd Fx;
   Eigen::MatrixXd Fu;
   Eigen::VectorXd Lx;
@@ -128,9 +125,6 @@ struct ActionDataAbstract {
   Eigen::MatrixXd Lxx;
   Eigen::MatrixXd Lxu;
   Eigen::MatrixXd Luu;
-  Eigen::VectorXd r;
-  Eigen::MatrixXd Rx;
-  Eigen::MatrixXd Ru;
 };
 
 }  // namespace crocoddyl
