@@ -39,7 +39,7 @@ void DifferentialActionModelNumDiff::calcDiff(const boost::shared_ptr<Differenti
   if (recalc) {
     model_.calc(data_nd->data_0, x, u);
   }
-  Eigen::VectorXd& xn0 = data_nd->data_0->xout;
+  const Eigen::VectorXd& xn0 = data_nd->data_0->xout;
   double& c0 = data_nd->data_0->cost;
 
   assertStableStateFD(x);

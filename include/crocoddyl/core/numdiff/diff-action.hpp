@@ -51,9 +51,15 @@ struct DifferentialActionDataNumDiff : public DifferentialActionDataAbstract {
   explicit DifferentialActionDataNumDiff(Model* const model)
       : DifferentialActionDataAbstract(model),
         Rx(model->get_model().get_nr(), model->get_model().get_state().get_ndx()),
-        Ru(model->get_model().get_nr(), model->get_model().get_nu()) {
+        Ru(model->get_model().get_nr(), model->get_model().get_nu()),
+        dx(model->get_model().get_state().get_ndx()),
+        du(model->get_model().get_nu()),
+        xp(model->get_model().get_state().get_nx()) {
     Rx.setZero();
     Ru.setZero();
+    dx.setZero();
+    du.setZero();
+    xp.setZero();
 
     const unsigned& ndx = model->get_model().get_state().get_ndx();
     const unsigned& nu = model->get_model().get_nu();
