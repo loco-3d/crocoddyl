@@ -82,6 +82,12 @@ void DifferentialActionModelNumDiff::calcDiff(const boost::shared_ptr<Differenti
   }
 }
 
+DifferentialActionModelAbstract& DifferentialActionModelNumDiff::get_model() const { return model_; }
+
+const double& DifferentialActionModelNumDiff::get_disturbance() const { return disturbance_; }
+
+bool DifferentialActionModelNumDiff::get_with_gauss_approx() { return with_gauss_approx_; }
+
 void DifferentialActionModelNumDiff::assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& /** x */) {
   // TODO(cmastalli): First we need to do it AMNumDiff and then to replicate it.
 }

@@ -81,6 +81,12 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
   }
 }
 
+ActionModelAbstract& ActionModelNumDiff::get_model() const { return model_; }
+
+const double& ActionModelNumDiff::get_disturbance() const { return disturbance_; }
+
+bool ActionModelNumDiff::get_with_gauss_approx() { return with_gauss_approx_; }
+
 void ActionModelNumDiff::assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& /** x */) {
   // TODO(mnaveau): make this method virtual and this one should do nothing, update the documentation.
   // md = model_.differential_;

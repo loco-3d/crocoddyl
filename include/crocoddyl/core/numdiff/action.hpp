@@ -26,10 +26,9 @@ class ActionModelNumDiff : public ActionModelAbstract {
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
   boost::shared_ptr<ActionDataAbstract> createData();
 
-  ActionModelAbstract& get_model() const { return model_; }
-
-  const double& get_disturbance() const { return disturbance_; }
-  bool get_with_gauss_approx() { return with_gauss_approx_; }
+  ActionModelAbstract& get_model() const;
+  const double& get_disturbance() const;
+  bool get_with_gauss_approx();
 
  private:
   /**

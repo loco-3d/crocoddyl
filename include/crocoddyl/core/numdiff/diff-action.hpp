@@ -27,10 +27,9 @@ class DifferentialActionModelNumDiff : public DifferentialActionModelAbstract {
                 const bool& recalc = true);
   boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
-  DifferentialActionModelAbstract& get_model() const { return model_; }
-
-  const double& get_disturbance() const { return disturbance_; }
-  bool get_with_gauss_approx() { return with_gauss_approx_; }
+  DifferentialActionModelAbstract& get_model() const;
+  const double& get_disturbance() const;
+  bool get_with_gauss_approx();
 
  private:
   void assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& x);
