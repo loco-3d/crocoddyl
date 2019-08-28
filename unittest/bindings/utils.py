@@ -560,6 +560,44 @@ class Contact3DDerived(crocoddyl.ContactModelAbstract):
         data.Ax = np.hstack([Aq, Av])
 
 
+class Contact6DDerived(crocoddyl.ContactModelAbstract):
+    def __init__(self, state, Mref, gains=[0., 0.]):
+        crocoddyl.ContactModelAbstract.__init__(self, state, 6)
+        self.Mref = Mref
+        self.gains = gains
+        self.joint = state.pinocchio.frames[Mref.frame].parent
+        self.fXj = state.pinocchio.frames[Mref.frame].placement.inverse().action
+        v = pinocchio.Motion().Zero()
+
+    def calc(self, data, x):
+        assert (self.Mref.oMf is not None or self.gains[0] == 0.)
+        data.Jc = pinocchio.getFrameJacobian(self.state.pinocchio, data.pinocchio, self.Mref.frame,
+                                             pinocchio.ReferenceFrame.LOCAL)
+        data.a0 = pinocchio.getFrameAcceleration(self.state.pinocchio, data.pinocchio, self.Mref.frame).vector
+        if self.gains[0] != 0.:
+            self.rMf = self.Mref.oMf.inverse() * data.pinocchio.oMf[self.Mref.frame]
+            data.a0 += np.asscalar(self.gains[0]) * pinocchio.log6(self.rMf).vector
+        if self.gains[1] != 0.:
+            v = pinocchio.getFrameVelocity(self.state.pinocchio, data.pinocchio, self.Mref.frame).vector
+            data.a0 += np.asscalar(self.gains[1]) * v
+
+    def calcDiff(self, data, x, recalc=True):
+        if recalc:
+            self.calc(data, x)
+        v_partial_dq, a_partial_dq, a_partial_dv, a_partial_da = pinocchio.getJointAccelerationDerivatives(
+            self.state.pinocchio, data.pinocchio, self.joint, pinocchio.ReferenceFrame.LOCAL)
+
+        Aq = (self.fXj * a_partial_dq)
+        Av = (self.fXj * a_partial_dv)
+
+        if np.asscalar(self.gains[0]) != 0.:
+            Aq += np.asscalar(self.gains[0]) * pinocchio.Jlog6(self.rMf) * data.Jc
+        if np.asscalar(self.gains[1]) != 0.:
+            Aq += np.asscalar(self.gains[1]) * (self.fXj * v_partial_dq)
+            Av += np.asscalar(self.gains[1]) * (self.fXj * a_partial_da)
+        data.Ax = np.hstack([Aq, Av])
+
+
 class DDPDerived(crocoddyl.SolverAbstract):
     def __init__(self, shootingProblem):
         crocoddyl.SolverAbstract.__init__(self, shootingProblem)

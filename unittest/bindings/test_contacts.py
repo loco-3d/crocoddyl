@@ -108,8 +108,27 @@ class Contact3DMultipleTest(ContactModelMultipleAbstractTestCase):
     CONTACT = crocoddyl.ContactModel3D(ROBOT_STATE, xref, gains)
 
 
+class Contact6DTest(ContactModelAbstractTestCase):
+    ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
+    ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+
+    gains = pinocchio.utils.rand(2)
+    Mref = crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.SE3.Random())
+    CONTACT = crocoddyl.ContactModel6D(ROBOT_STATE, Mref, gains)
+    CONTACT_DER = utils.Contact6DDerived(ROBOT_STATE, Mref, gains)
+
+
+class Contact6DMultipleTest(ContactModelMultipleAbstractTestCase):
+    ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
+    ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+
+    gains = pinocchio.utils.rand(2)
+    Mref = crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.SE3.Random())
+    CONTACT = crocoddyl.ContactModel6D(ROBOT_STATE, Mref, gains)
+
+
 if __name__ == '__main__':
-    test_classes_to_run = [Contact3DTest, Contact3DMultipleTest]
+    test_classes_to_run = [Contact3DTest, Contact3DMultipleTest, Contact6DTest, Contact6DMultipleTest]
     loader = unittest.TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:

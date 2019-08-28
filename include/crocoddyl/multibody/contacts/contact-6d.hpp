@@ -74,7 +74,6 @@ struct ContactData6D : public ContactDataAbstract {
   pinocchio::Data::Matrix6x a_partial_da;
   pinocchio::SE3::Matrix6 rMf_Jlog6;
 
-
   Eigen::Matrix3d vv_skew;
   Eigen::Matrix3d vw_skew;
   Eigen::Matrix3d oRf;
