@@ -33,9 +33,9 @@ void exposeContact3D() {
       .def(bp::init<StateMultibody&, FrameTranslation, bp::optional<Eigen::Vector2d> >(
           bp::args(" self", " state", " xref"),
           "Initialize the state cost model.\n\n"
-          "For this case the default activation model is quadratic, i.e. crocoddyl.ActivationModelQuad(state.ndx).\n"
           ":param state: state of the multibody system\n"
-          ":param xref: reference state")[bp::with_custodian_and_ward<1, 2>()])
+          ":param Mref: reference frame translation\n"
+          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2>()])
       .def("calc", &ContactModel3D::calc_wrap, bp::args(" self", " data", " x"),
            "Compute the 3D contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
