@@ -24,6 +24,7 @@
 #include "python/crocoddyl/multibody/costs/frame-velocity.hpp"
 #include "python/crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "python/crocoddyl/multibody/contacts/contact-3d.hpp"
+#include "python/crocoddyl/multibody/contacts/contact-6d.hpp"
 #include "python/crocoddyl/multibody/actions/free-fwddyn.hpp"
 #include "python/crocoddyl/multibody/actions/contact-fwddyn.hpp"
 
@@ -46,6 +47,7 @@ void exposeMultibody() {
   exposeCostFrameVelocity();
   exposeContactMultiple();
   exposeContact3D();
+  exposeContact6D();
   exposeDifferentialActionFreeFwdDynamics();
   exposeDifferentialActionContactFwdDynamics();
 }
