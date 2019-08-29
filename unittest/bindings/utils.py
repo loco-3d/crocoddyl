@@ -567,7 +567,6 @@ class Contact6DDerived(crocoddyl.ContactModelAbstract):
         self.gains = gains
         self.joint = state.pinocchio.frames[Mref.frame].parent
         self.fXj = state.pinocchio.frames[Mref.frame].placement.inverse().action
-        v = pinocchio.Motion().Zero()
 
     def calc(self, data, x):
         assert (self.Mref.oMf is not None or self.gains[0] == 0.)
