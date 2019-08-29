@@ -48,7 +48,7 @@ void ImpulseModel6D::updateLagrangian(const boost::shared_ptr<ImpulseDataAbstrac
   data->f = d->jMf.act(pinocchio::Force(lambda, Eigen::Vector3d::Zero()));
 }
 
-boost::shared_ptr<ImpulseDataAbstract> ImpulseModel6D::createDTata(pinocchio::Data* const data) {
+boost::shared_ptr<ImpulseDataAbstract> ImpulseModel6D::createData(pinocchio::Data* const data) {
   return boost::make_shared<ImpulseData6D>(this, data);
 }
 
