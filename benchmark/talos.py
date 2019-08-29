@@ -110,7 +110,7 @@ class SimpleBipedGaitProblem:
         pinocchio.updateFramePlacements(self.rmodel, self.rdata)
         rfPos0 = self.rdata.oMf[self.rfId].translation
         lfPos0 = self.rdata.oMf[self.lfId].translation
-        comRef = rfPos0 + lfPos0 / 2
+        comRef = (rfPos0 + lfPos0) / 2
         comRef[2] = 0.6185
 
         # Defining the action models along the time instances
