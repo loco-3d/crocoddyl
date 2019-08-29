@@ -32,7 +32,7 @@ class ImpulseModelMultiple {
   typedef std::map<std::string, boost::shared_ptr<ImpulseDataAbstract> > ImpulseDataContainer;
   typedef pinocchio::container::aligned_vector<pinocchio::Force>::iterator ForceIterator;
 
-  ImpulseModelMultiple(StateMultibody& state);
+  explicit ImpulseModelMultiple(StateMultibody& state);
   ~ImpulseModelMultiple();
 
   void addImpulse(const std::string& name, ImpulseModelAbstract* const impulse);
