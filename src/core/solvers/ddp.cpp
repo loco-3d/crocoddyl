@@ -215,6 +215,8 @@ void SolverDDP::backwardPass() {
 }
 
 void SolverDDP::forwardPass(const double& steplength) {
+  assert(stepLength <= 1. && "Step length has to be <= 1.");
+  assert(stepLength >= 0. && "Step length has to be >= 0.");
   cost_try_ = 0.;
   const unsigned int& T = problem_.get_T();
   for (unsigned int t = 0; t < T; ++t) {
