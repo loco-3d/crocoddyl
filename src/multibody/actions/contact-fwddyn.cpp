@@ -23,7 +23,7 @@ DifferentialActionModelContactFwdDynamics::DifferentialActionModelContactFwdDyna
       contacts_(contacts),
       costs_(costs),
       pinocchio_(state.get_pinocchio()),
-      force_aba_(true),
+      with_armature_(true),
       armature_(Eigen::VectorXd::Zero(state.get_nv())),
       JMinvJt_damping_(fabs(JMinvJt_damping)),
       enable_force_(enable_force) {
@@ -47,7 +47,7 @@ void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<Dif
   pinocchio::computeAllTerms(pinocchio_, d->pinocchio, d->qcur, d->vcur);
   pinocchio::updateFramePlacements(pinocchio_, d->pinocchio);
 
-  if (!force_aba_) {
+  if (!with_armature_) {
     d->pinocchio.M.diagonal() += armature_;
   }
   actuation_.calc(d->actuation, x, u);
@@ -140,7 +140,7 @@ void DifferentialActionModelContactFwdDynamics::set_armature(const Eigen::Vector
     std::cout << "The armature dimension is wrong, we cannot set it." << std::endl;
   } else {
     armature_ = armature;
-    force_aba_ = false;
+    with_armature_ = false;
   }
 }
 

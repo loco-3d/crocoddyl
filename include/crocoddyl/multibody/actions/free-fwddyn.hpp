@@ -36,7 +36,7 @@ class DifferentialActionModelFreeFwdDynamics : public DifferentialActionModelAbs
  private:
   CostModelSum& costs_;
   pinocchio::Model& pinocchio_;
-  bool force_aba_;
+  bool with_armature_;
   Eigen::VectorXd armature_;
 };
 
