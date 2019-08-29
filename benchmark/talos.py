@@ -168,7 +168,8 @@ class SimpleBipedGaitProblem:
                 elif k == phKnots:
                     dp = np.matrix([[stepLength * (k + 1) / numKnots, 0., stepHeight]]).T
                 else:
-                    dp = np.matrix([[stepLength * (k + 1) / numKnots, 0., stepHeight * (1 - float(k - phKnots) / phKnots)]]).T
+                    dp = np.matrix(
+                        [[stepLength * (k + 1) / numKnots, 0., stepHeight * (1 - float(k - phKnots) / phKnots)]]).T
                 tref = np.asmatrix(p + dp)
 
                 swingFootTask += [crocoddyl.FramePlacement(i, pinocchio.SE3(np.eye(3), tref))]
@@ -222,15 +223,15 @@ class SimpleBipedGaitProblem:
         stateWeights = np.array([0] * 3 + [500.] * 3 + [0.01] * (self.state.nv - 6) + [10] * self.state.nv)
         stateReg = crocoddyl.CostModelState(self.state,
                                             crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeights**2).T),
-                                            self.rmodel.defaultState,
-                                            self.actuation.nu)
+                                            self.rmodel.defaultState, self.actuation.nu)
         ctrlReg = crocoddyl.CostModelControl(self.state, self.actuation.nu)
         costModel.addCost("stateReg", stateReg, 1e-1)
         costModel.addCost("ctrlReg", ctrlReg, 1e-3)
 
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
-        dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel, costModel)
+        dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
+                                                                     costModel)
         model = crocoddyl.IntegratedActionModelEuler(dmodel, timeStep)
         return model
 
@@ -266,15 +267,15 @@ class SimpleBipedGaitProblem:
         stateWeights = np.array([0] * 3 + [500.] * 3 + [0.01] * (self.state.nv - 6) + [10] * self.state.nv)
         stateReg = crocoddyl.CostModelState(self.state,
                                             crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeights**2).T),
-                                            self.rmodel.defaultState,
-                                            self.actuation.nu)
+                                            self.rmodel.defaultState, self.actuation.nu)
         ctrlReg = crocoddyl.CostModelControl(self.state, self.actuation.nu)
         costModel.addCost("stateReg", stateReg, 1e1)
         costModel.addCost("ctrlReg", ctrlReg, 1e-3)
 
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
-        dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel, costModel)
+        dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
+                                                                     costModel)
         model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.)
         return model
 
@@ -282,7 +283,6 @@ class SimpleBipedGaitProblem:
 # Creating the lower-body part of Talos
 talos_legs = example_robot_data.loadTalosLegs()
 rmodel = talos_legs.model
-
 
 # Defining the initial state of the robot
 q0 = rmodel.referenceConfigurations['half_sitting'].copy()
@@ -321,7 +321,6 @@ for i, phase in enumerate(GAITPHASES):
         ddp[i].setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackSolverDisplay(talos_legs, 4, 4, cameraTF)])
     else:
         ddp[i].setCallbacks([crocoddyl.CallbackVerbose()])
-
 
     # Solving the problem with the DDP solver
     ddp[i].th_stop = 1e-9

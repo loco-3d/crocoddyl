@@ -8,7 +8,6 @@ import example_robot_data
 WITHDISPLAY = 'display' in sys.argv
 WITHPLOT = 'plot' in sys.argv
 
-
 # Loading the HyQ model
 hyq = example_robot_data.loadHyQ()
 

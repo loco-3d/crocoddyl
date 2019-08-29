@@ -9,10 +9,8 @@ import example_robot_data
 WITHDISPLAY = 'display' in sys.argv
 WITHPLOT = 'plot' in sys.argv
 
-
 # Creating the lower-body part of Talos
 talos_legs = example_robot_data.loadTalosLegs()
-
 
 # Defining the initial state of the robot
 q0 = talos_legs.model.referenceConfigurations['half_sitting'].copy()
@@ -51,7 +49,6 @@ for i, phase in enumerate(GAITPHASES):
         ddp[i].setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackSolverDisplay(talos_legs, 4, 4, cameraTF)])
     else:
         ddp[i].setCallbacks([crocoddyl.CallbackVerbose()])
-
 
     # Solving the problem with the DDP solver
     ddp[i].th_stop = 1e-9

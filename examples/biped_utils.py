@@ -96,7 +96,8 @@ class SimpleBipedGaitProblem:
                 elif k == phKnots:
                     dp = np.matrix([[stepLength * (k + 1) / numKnots, 0., stepHeight]]).T
                 else:
-                    dp = np.matrix([[stepLength * (k + 1) / numKnots, 0., stepHeight * (1 - float(k - phKnots) / phKnots)]]).T
+                    dp = np.matrix(
+                        [[stepLength * (k + 1) / numKnots, 0., stepHeight * (1 - float(k - phKnots) / phKnots)]]).T
                 tref = np.asmatrix(p + dp)
 
                 swingFootTask += [crocoddyl.FramePlacement(i, pinocchio.SE3(np.eye(3), tref))]
@@ -131,7 +132,7 @@ class SimpleBipedGaitProblem:
         for i in supportFootIds:
             Mref = crocoddyl.FramePlacement(i, pinocchio.SE3.Identity())
             supportContactModel = \
-                crocoddyl.ContactModel6D(self.state, Mref,self.actuation.nu, np.matrix([0., 0.]).T)
+                crocoddyl.ContactModel6D(self.state, Mref, self.actuation.nu, np.matrix([0., 0.]).T)
             contactModel.addContact('contact_' + str(i), supportContactModel)
 
         # Creating the cost model for a contact phase
@@ -141,24 +142,21 @@ class SimpleBipedGaitProblem:
             costModel.addCost("comTrack", comTrack, 1e4)
         if swingFootTask is not None:
             for i in swingFootTask:
-                footTrack = \
-                    crocoddyl.CostModelFramePlacement(self.state,
-                                            i,
-                                            self.actuation.nu)
+                footTrack = crocoddyl.CostModelFramePlacement(self.state, i, self.actuation.nu)
                 costModel.addCost("footTrack_" + str(i), footTrack, 1e4)
 
         stateWeights = np.array([0] * 3 + [500.] * 3 + [0.01] * (self.state.nv - 6) + [10] * self.state.nv)
         stateReg = crocoddyl.CostModelState(self.state,
                                             crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeights**2).T),
-                                            self.rmodel.defaultState,
-                                            self.actuation.nu)
+                                            self.rmodel.defaultState, self.actuation.nu)
         ctrlReg = crocoddyl.CostModelControl(self.state, self.actuation.nu)
         costModel.addCost("stateReg", stateReg, 1e-1)
         costModel.addCost("ctrlReg", ctrlReg, 1e-3)
 
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
-        dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel, costModel)
+        dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
+                                                                     costModel)
         model = crocoddyl.IntegratedActionModelEuler(dmodel, timeStep)
         return model
 
@@ -174,18 +172,14 @@ class SimpleBipedGaitProblem:
         contactModel = crocoddyl.ContactModelMultiple(self.state, self.actuation.nu)
         for i in supportFootIds:
             Mref = crocoddyl.FramePlacement(i, pinocchio.SE3.Identity())
-            supportContactModel = \
-                crocoddyl.ContactModel6D(self.state, Mref,self.actuation.nu, np.matrix([0., 0.]).T)
+            supportContactModel = crocoddyl.ContactModel6D(self.state, Mref, self.actuation.nu, np.matrix([0., 0.]).T)
             contactModel.addContact('contact_' + str(i), supportContactModel)
 
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, self.actuation.nu)
         if swingFootTask is not None:
             for i in swingFootTask:
-                footTrack = \
-                    crocoddyl.CostModelFramePlacement(self.state,
-                                            i,
-                                            self.actuation.nu)
+                footTrack = crocoddyl.CostModelFramePlacement(self.state, i, self.actuation.nu)
                 costModel.addCost("footTrack_" + str(i), footTrack, 1e8)
                 footVel = crocoddyl.FrameMotion(i.frame, pinocchio.Motion.Zero())
                 impactFootVelCost = crocoddyl.CostModelFrameVelocity(self.state, footVel, self.actuation.nu)
@@ -194,15 +188,15 @@ class SimpleBipedGaitProblem:
         stateWeights = np.array([0] * 3 + [500.] * 3 + [0.01] * (self.state.nv - 6) + [10] * self.state.nv)
         stateReg = crocoddyl.CostModelState(self.state,
                                             crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeights**2).T),
-                                            self.rmodel.defaultState,
-                                            self.actuation.nu)
+                                            self.rmodel.defaultState, self.actuation.nu)
         ctrlReg = crocoddyl.CostModelControl(self.state, self.actuation.nu)
         costModel.addCost("stateReg", stateReg, 1e1)
         costModel.addCost("ctrlReg", ctrlReg, 1e-3)
 
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
-        dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel, costModel)
+        dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
+                                                                     costModel)
         model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.)
         return model
 
