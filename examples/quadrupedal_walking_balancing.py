@@ -16,9 +16,9 @@ def plotSolution(rmodel, xs, us):
     X = [0.] * nx
     U = [0.] * nu
     for i in range(nx):
-        X[i] = [x[i] for x in xs]
+        X[i] = [np.asscalar(x[i]) for x in xs]
     for i in range(nu):
-        U[i] = [u[i] for u in us]
+        U[i] = [np.asscalar(u[i]) for u in us]
 
     # Plotting the joint positions, velocities and torques
     plt.figure(1)
