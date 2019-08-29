@@ -50,7 +50,6 @@ def runBenchmark(gait_phase):
 
     duration = []
     xs = [robot_model.defaultState] * len(ddp.models())
-    print len(xs)
     us = [m.quasicStatic(d, robot_model.defaultState) for m, d in list(zip(ddp.models(), ddp.datas()))[:-1]]
     for i in range(T):
         c_start = time.time()
@@ -75,7 +74,7 @@ if GAIT == 'walking':
             'supportKnots': 5
         }
     }
-if GAIT == 'trotting':
+elif GAIT == 'trotting':
     GAITPHASE = {
         'trotting': {
             'stepLength': 0.15,
@@ -85,7 +84,7 @@ if GAIT == 'trotting':
             'supportKnots': 5
         }
     }
-if GAIT == 'pacing':
+elif GAIT == 'pacing':
     GAITPHASE = {
         'pacing': {
             'stepLength': 0.15,
@@ -95,7 +94,7 @@ if GAIT == 'pacing':
             'supportKnots': 5
         }
     }
-if GAIT == 'bounding':
+elif GAIT == 'bounding':
     GAITPHASE = {
         'bounding': {
             'stepLength': 0.15,
@@ -105,7 +104,7 @@ if GAIT == 'bounding':
             'supportKnots': 5
         }
     }
-if GAIT == 'jumping':
+elif GAIT == 'jumping':
     GAITPHASE = {'jumping': {'jumpHeight': 0.5, 'timeStep': 1e-2}}
 
 print('cpp-wrapped contact-forward dynamics on quadruped:')
