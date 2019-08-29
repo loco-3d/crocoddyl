@@ -18,8 +18,7 @@ namespace crocoddyl {
 
 struct ImpulseItem {
   ImpulseItem() {}
-  ImpulseItem(const std::string& name, ImpulseModelAbstract* impulse) : name(name),
-                                                                        impulse(impulse) {}
+  ImpulseItem(const std::string& name, ImpulseModelAbstract* impulse) : name(name), impulse(impulse) {}
 
   std::string name;
   ImpulseModelAbstract* impulse;
@@ -39,13 +38,10 @@ class ImpulseModelMultiple {
   void addImpulse(const std::string& name, ImpulseModelAbstract* const impulse);
   void removeImpulse(const std::string& name);
 
-  void calc(const boost::shared_ptr<ImpulseDataMultiple>& data,
-            const Eigen::Ref<const Eigen::VectorXd>& x);
-  void calcDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
-                const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
+  void calcDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const bool& recalc = true);
-  void updateLagrangian(const boost::shared_ptr<ImpulseDataMultiple>& data,
-                        const Eigen::VectorXd& lambda);
+  void updateLagrangian(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::VectorXd& lambda);
   boost::shared_ptr<ImpulseDataMultiple> createData(pinocchio::Data* const data);
 
   StateMultibody& get_state() const;
@@ -60,11 +56,9 @@ class ImpulseModelMultiple {
 #ifdef PYTHON_BINDINGS
 
  public:
-  void calc_wrap(const boost::shared_ptr<ImpulseDataMultiple>& data,
-                 const Eigen::VectorXd& x) { calc(data, x); }
+  void calc_wrap(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::VectorXd& x) { calc(data, x); }
 
-  void calcDiff_wrap(const boost::shared_ptr<ImpulseDataMultiple>& data,
-                     const Eigen::VectorXd& x,
+  void calcDiff_wrap(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::VectorXd& x,
                      const bool& recalc = true) {
     calcDiff(data, x, recalc);
   }
@@ -77,8 +71,7 @@ struct ImpulseDataMultiple : ImpulseDataAbstract {
 
   template <typename Model>
   ImpulseDataMultiple(Model* const model, pinocchio::Data* const data)
-      : ImpulseDataAbstract(model, data),
-        fext(model->get_state().get_pinocchio().njoints, pinocchio::Force::Zero()) {
+      : ImpulseDataAbstract(model, data), fext(model->get_state().get_pinocchio().njoints, pinocchio::Force::Zero()) {
     for (ImpulseModelMultiple::ImpulseModelContainer::const_iterator it = model->get_impulses().begin();
          it != model->get_impulses().end(); ++it) {
       const ImpulseItem& item = it->second;

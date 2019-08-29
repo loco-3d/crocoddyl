@@ -16,19 +16,17 @@
 namespace crocoddyl {
 
 struct ImpulseDataAbstract;  // forward declaration
-  
+
 class ImpulseModelAbstract {
  public:
   ImpulseModelAbstract(StateMultibody& state, unsigned int const& nimp);
   ~ImpulseModelAbstract();
-  
+
   virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
                     const Eigen::Ref<const Eigen::VectorXd>& x) = 0;
-  virtual void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                        const Eigen::Ref<const Eigen::VectorXd>& x,
+  virtual void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const bool& recalc = true) = 0;
-  virtual void updateLagrangian(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                                const Eigen::VectorXd& lambda) = 0;
+  virtual void updateLagrangian(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& lambda) = 0;
 
   virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::Data* const data);
 
@@ -42,11 +40,9 @@ class ImpulseModelAbstract {
 #ifdef PYTHON_BINDINGS
 
  public:
-  void calc_wrap(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                 const Eigen::VectorXd& x) { calc(data, x); }
+  void calc_wrap(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& x) { calc(data, x); }
 
-  void calcDiff_wrap(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                     const Eigen::VectorXd& x,
+  void calcDiff_wrap(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& x,
                      const bool& recalc = true) {
     calcDiff(data, x, recalc);
   }

@@ -18,32 +18,27 @@ namespace bp = boost::python;
 
 class ImpulseModelAbstract_wrap : public ImpulseModelAbstract, public bp::wrapper<ImpulseModelAbstract> {
  public:
-  ImpulseModelAbstract_wrap(StateMultibody& state, int nimp) :
-    ImpulseModelAbstract(state, nimp) {}
+  ImpulseModelAbstract_wrap(StateMultibody& state, int nimp) : ImpulseModelAbstract(state, nimp) {}
   ImpulseModelAbstract_wrap(StateMultibody& state, int nimp) : ImpulseModelAbstract(state, nimp) {}
 
-  void calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
-            const Eigen::Ref<const Eigen::VectorXd>& x) {
+  void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
     assert(x.size() == state_.get_nx() && "x has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x);
   }
 
-  void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const bool& recalc = true) {
     assert(x.size() == state_.get_nx() && "x has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, recalc);
   }
 
-  void updateLagrangian(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                        const Eigen::VectorXd& lambda) {
+  void updateLagrangian(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& lambda) {
     assert(lambda.size() == nimp_ && "lambda has wrong dimension");
     return bp::call<void>(this->get_override("updateLagrangian").ptr(), data, lambda);
   }
 };
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ImpulseModel_calcDiff_wraps,
-                                       ImpulseModelAbstract::calcDiff_wrap, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ImpulseModel_calcDiff_wraps, ImpulseModelAbstract::calcDiff_wrap, 2, 3)
 
 void exposeImpulseAbstract() {
   bp::class_<ImpulseModelAbstract_wrap, boost::noncopyable>(
@@ -53,27 +48,26 @@ void exposeImpulseAbstract() {
       "The calc and calcDiff functions compute the impulse Jacobian\n"
       "the derivatives respectively.",
       bp::init<StateMultibody&, int, bp::optional<int> >(
-         bp::args(" self", " state", " nimp"),
-         "Initialize the impulse model.\n\n"
-         ":param state: state of the multibody system\n"
-         ":param nimp: dimension of impulse model")[bp::with_custodian_and_ward<1, 2>()])
-    .def("calc", pure_virtual(&ImpulseModelAbstract_wrap::calc),
-         bp::args(" self", " data", " x"),
-         "Compute the impulse Jacobian\n"
-         ":param data: impulse data\n"
-         ":param x: state vector")
-    .def("calcDiff", pure_virtual(&ImpulseModelAbstract_wrap::calcDiff),
-         bp::args(" self", " data", " x", " recalc=True"),
-         "Compute the derivatives of impulse Jacobian\n"
-         ":param data: cost data\n"
-         ":param x: state vector\n"
-         ":param recalc: If true, it updates the impulse Jacobian")
-    .def("updateLagrangian", pure_virtual(&ImpulseModelAbstract_wrap::updateLagrangian),
-         bp::args(" self", " data", " lambda"),
-         "Convert the Lagrangian into a stack of spatial forces.\n\n"
-         ":param data: cost data\n"
-         ":param lambda: Lagrangian vector")
-    .def("createData", &ImpulseModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
+          bp::args(" self", " state", " nimp"),
+          "Initialize the impulse model.\n\n"
+          ":param state: state of the multibody system\n"
+          ":param nimp: dimension of impulse model")[bp::with_custodian_and_ward<1, 2>()])
+      .def("calc", pure_virtual(&ImpulseModelAbstract_wrap::calc), bp::args(" self", " data", " x"),
+           "Compute the impulse Jacobian\n"
+           ":param data: impulse data\n"
+           ":param x: state vector")
+      .def("calcDiff", pure_virtual(&ImpulseModelAbstract_wrap::calcDiff),
+           bp::args(" self", " data", " x", " recalc=True"),
+           "Compute the derivatives of impulse Jacobian\n"
+           ":param data: cost data\n"
+           ":param x: state vector\n"
+           ":param recalc: If true, it updates the impulse Jacobian")
+      .def("updateLagrangian", pure_virtual(&ImpulseModelAbstract_wrap::updateLagrangian),
+           bp::args(" self", " data", " lambda"),
+           "Convert the Lagrangian into a stack of spatial forces.\n\n"
+           ":param data: cost data\n"
+           ":param lambda: Lagrangian vector")
+      .def("createData", &ImpulseModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the impulse data.\n\n"
            "Each impulse model has its own data that needs to be allocated. This function\n"
@@ -84,7 +78,8 @@ void exposeImpulseAbstract() {
                     bp::make_function(&ImpulseModelAbstract_wrap::get_state, bp::return_internal_reference<>()),
                     "state of the multibody system")
       .add_property(
-          "nimp", bp::make_function(&ImpulseModelAbstract_wrap::get_nimp, bp::return_value_policy<bp::return_by_value>()),
+          "nimp",
+          bp::make_function(&ImpulseModelAbstract_wrap::get_nimp, bp::return_value_policy<bp::return_by_value>()),
           "dimension of impulse");
 
   bp::class_<ImpulseDataAbstract, boost::shared_ptr<ImpulseDataAbstract>, boost::noncopyable>(

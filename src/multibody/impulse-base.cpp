@@ -10,8 +10,7 @@
 
 namespace crocoddyl {
 
-ImpulseModelAbstract::ImpulseModelAbstract(StateMultibody& state,
-                                           unsigned int const& nimp)
+ImpulseModelAbstract::ImpulseModelAbstract(StateMultibody& state, unsigned int const& nimp)
     : state_(state), nimp_(nimp) {}
 
 ImpulseModelAbstract::~ImpulseModelAbstract() {}
@@ -23,6 +22,5 @@ boost::shared_ptr<ImpulseDataAbstract> ImpulseModelAbstract::createData(pinocchi
 StateMultibody& ImpulseModelAbstract::get_state() const { return state_; }
 
 unsigned int const& ImpulseModelAbstract::get_nimp() const { return nimp_; }
-
 
 }  // namespace crocoddyl

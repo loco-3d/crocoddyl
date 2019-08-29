@@ -22,13 +22,10 @@ class ImpulseModel6D : public ImpulseModelAbstract {
 
   ~ImpulseModel6D();
 
-  void calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
-            const Eigen::Ref<const Eigen::VectorXd>& x);
-  void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
+  void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const bool& recalc = true);
-  void updateLagrangian(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                        const Eigen::VectorXd& lambda);
+  void updateLagrangian(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& lambda);
   boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::Data* const data);
 
   const FrameTranslation& get_xref() const;

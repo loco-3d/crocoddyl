@@ -10,8 +10,7 @@
 
 namespace crocoddyl {
 
-ImpulseModelMultiple::ImpulseModelMultiple(StateMultibody& state)
-    : state_(state), nimp_(0) {}
+ImpulseModelMultiple::ImpulseModelMultiple(StateMultibody& state) : state_(state), nimp_(0) {}
 
 ImpulseModelMultiple::~ImpulseModelMultiple() {}
 
@@ -43,8 +42,7 @@ void ImpulseModelMultiple::calc(const boost::shared_ptr<ImpulseDataMultiple>& da
   unsigned int const& nv = state_.get_nv();
   ImpulseModelContainer::iterator it_m, end_m;
   ImpulseDataContainer::iterator it_d, end_d;
-  for (it_m = impulses_.begin(), end_m = impulses_.end(),
-         it_d = data->impulses.begin(), end_d = data->impulses.end();
+  for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const ImpulseItem& m_i = it_m->second;
     boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
@@ -58,8 +56,7 @@ void ImpulseModelMultiple::calc(const boost::shared_ptr<ImpulseDataMultiple>& da
 }
 
 void ImpulseModelMultiple::calcDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
-                                    const Eigen::Ref<const Eigen::VectorXd>& x,
-                                    const bool& recalc) {
+                                    const Eigen::Ref<const Eigen::VectorXd>& x, const bool& recalc) {
   assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
   if (recalc) {
     calc(data, x);
@@ -69,8 +66,7 @@ void ImpulseModelMultiple::calcDiff(const boost::shared_ptr<ImpulseDataMultiple>
   unsigned int const& nv = state_.get_nv();
   ImpulseModelContainer::iterator it_m, end_m;
   ImpulseDataContainer::iterator it_d, end_d;
-  for (it_m = impulses_.begin(), end_m = impulses_.end(),
-         it_d = data->impulses.begin(), end_d = data->impulses.end();
+  for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const ImpulseItem& m_i = it_m->second;
     boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
