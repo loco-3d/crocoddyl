@@ -80,7 +80,8 @@ void exposeCostCoMPosition() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: Pinocchio data\n"
            ":return cost data.")
-      .add_property("cref", bp::make_function(&CostModelCoMPosition::get_cref, bp::return_internal_reference<>()),
+      .add_property("cref",
+                    bp::make_function(&CostModelCoMPosition::get_cref, bp::return_value_policy<bp::return_by_value>()),
                     "reference CoM position");
 }
 
