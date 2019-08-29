@@ -24,7 +24,7 @@ def runBenchmark(gait_phase):
         # Creating a walking problem
         ddp = crocoddyl.SolverDDP(
             gait.createWalkingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
-                                          value['stepKnots'], value['supportKnots']))
+                                      value['stepKnots'], value['supportKnots']))
 
     duration = []
     xs = [robot_model.defaultState] * len(ddp.models())
@@ -52,7 +52,6 @@ if GAIT == 'walking':
             'supportKnots': 1
         }
     }
-
 
 print('cpp-wrapped contact-forward dynamics on quadruped:')
 avrg_duration, min_duration, max_duration = runBenchmark(GAITPHASE)
