@@ -32,6 +32,7 @@ SET(${PROJECT_NAME}_SOURCES
   multibody/costs/frame-velocity.cpp
   multibody/contacts/multiple-contacts.cpp
   multibody/contacts/contact-3d.cpp
+  multibody/contacts/contact-6d.cpp
   multibody/actions/free-fwddyn.cpp
   multibody/actions/contact-fwddyn.cpp
   )

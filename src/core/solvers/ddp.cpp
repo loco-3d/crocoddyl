@@ -199,7 +199,7 @@ void SolverDDP::backwardPass() {
       Vx_[t].noalias() = Qx_[t] + K_[t].transpose() * Quuk_[t] - 2 * K_[t].transpose() * Qu_[t];
     }
     Vxx_[t].noalias() = Qxx_[t] - Qxu_[t] * K_[t];
-    Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose());  // TODO(cmastalli): as suggested by Nicolas
+    Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose()).eval();  // TODO(cmastalli): as suggested by Nicolas
 
     if (!std::isnan(xreg_)) {
       Vxx_[t].diagonal() += x_reg_;
