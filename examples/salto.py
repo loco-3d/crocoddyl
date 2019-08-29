@@ -209,7 +209,8 @@ ddp.alphas = [4**(-n) for n in range(10)]
 ddp.callback = [CallbackDDPVerbose()]
 ddp.th_stop = 1e-4
 us0 = [
-    m.differential.quasiStatic(d.differential, rmodel.defaultState) for m, d in list(zip(ddp.models(), ddp.datas()))[:imp]
+    m.differential.quasiStatic(d.differential, rmodel.defaultState)
+    for m, d in list(zip(ddp.models(), ddp.datas()))[:imp]
 ] + [np.zeros(0)] + [
     m.differential.quasiStatic(d.differential, rmodel.defaultState)
     for m, d in list(zip(ddp.models(), ddp.datas()))[imp + 1:-1]

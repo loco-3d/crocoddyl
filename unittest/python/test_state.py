@@ -1,6 +1,5 @@
 import unittest
 from random import randint
-
 import numpy as np
 from crocoddyl import StateNumDiff, StatePinocchio, StateUnicycle, StateVector
 from testutils import NUMDIFF_MODIFIER, assertNumDiff

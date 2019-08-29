@@ -4,3 +4,8 @@
 *~
 *.orig
 *.ipynb_checkpoints
+build/*
+*.aux
+*.log
+*.pdf
+.clang-format

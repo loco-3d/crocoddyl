@@ -195,7 +195,8 @@ ddp = SolverDDP(problem)
 ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]  # CallbackSolverDisplay(robot,rate=5) ]
 ddp.th_stop = 1e-4
 us0 = [
-    m.differential.quasiStatic(d.differential, rmodel.defaultState) for m, d in list(zip(ddp.models(), ddp.datas()))[:imp]
+    m.differential.quasiStatic(d.differential, rmodel.defaultState)
+    for m, d in list(zip(ddp.models(), ddp.datas()))[:imp]
 ] + [np.zeros(0)] + [
     m.differential.quasiStatic(d.differential, rmodel.defaultState)
     for m, d in list(zip(ddp.models(), ddp.datas()))[imp + 1:-1]

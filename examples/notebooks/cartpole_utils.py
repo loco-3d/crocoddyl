@@ -22,9 +22,9 @@ def animateCartpole(xs, sleep=50):
         return patch, line, time_text
 
     def animate(i):
-        x_cart = xs[i][0]
+        x_cart = np.asscalar(xs[i][0])
         y_cart = 0.
-        theta = xs[i][1]
+        theta = np.asscalar(xs[i][1])
         patch.set_xy([x_cart - cart_size / 2, y_cart - cart_size / 2])
         x_pole = np.cumsum([x_cart, -pole_length * sin(theta)])
         y_pole = np.cumsum([y_cart, pole_length * cos(theta)])

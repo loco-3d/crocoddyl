@@ -1,0 +1,53 @@
+#include "crocoddyl/core/actions/unicycle.hpp"
+#include "crocoddyl/core/utils/callbacks.hpp"
+#include "crocoddyl/core/solvers/ddp.hpp"
+#include <ctime>
+
+int main() {
+  bool CALLBACKS = false;
+  unsigned int N = 200;  // number of nodes
+  unsigned int T = 5e3;  // number of trials
+  unsigned int MAXITER = 1;
+  using namespace crocoddyl;
+
+  Eigen::VectorXd x0;
+  std::vector<Eigen::VectorXd> xs;
+  std::vector<Eigen::VectorXd> us;
+  std::vector<ActionModelAbstract*> runningModels;
+  ActionModelAbstract* terminalModel;
+  x0 = Eigen::Vector3d(1., 0., 0.);
+
+  // Creating the action models and warm point for the unicycle system
+  for (unsigned int i = 0; i < N; ++i) {
+    ActionModelAbstract* model_i = new ActionModelUnicycle();
+    runningModels.push_back(model_i);
+    xs.push_back(x0);
+    us.push_back(Eigen::Vector2d::Zero());
+  }
+  xs.push_back(x0);
+  terminalModel = new ActionModelUnicycle();
+
+  // Formulating the optimal control problem
+  ShootingProblem problem(x0, runningModels, terminalModel);
+  SolverDDP ddp(problem);
+  if (CALLBACKS) {
+    std::vector<CallbackAbstract*> cbs;
+    cbs.push_back(new CallbackVerbose());
+    ddp.setCallbacks(cbs);
+  }
+
+  // Solving the optimal control problem
+  std::clock_t c_start, c_end;
+  Eigen::ArrayXd duration(T);
+  for (unsigned int i = 0; i < T; ++i) {
+    c_start = std::clock();
+    ddp.solve(xs, us, MAXITER);
+    c_end = std::clock();
+    duration[i] = 1e3 * (double)(c_end - c_start) / CLOCKS_PER_SEC;
+  }
+
+  double avrg_duration = duration.sum() / T;
+  double min_duration = duration.minCoeff();
+  double max_duration = duration.maxCoeff();
+  std::cout << "CPU time [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")" << std::endl;
+}

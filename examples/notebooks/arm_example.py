@@ -1,58 +1,64 @@
-import numpy as np
-
+import crocoddyl
 import pinocchio
-from crocoddyl import *
+import numpy as np
+import example_robot_data
 
-robot = loadTalosArm()
-robot.initDisplay(loadModel=True)
+robot = example_robot_data.loadTalosArm()
+robot_model = robot.model
 
-robot.q0.flat[:] = [2, 1.5, -2, 0, 0, 0, 0]
-robot.model.armature[:] = .2
-frameId = robot.model.getFrameId('gripper_left_joint')
-DT = 1e-2
+DT = 1e-3
 T = 25
+target = np.array([0.4, 0., .4])
 
-target = np.array([0.4, 0, .4])
-
-robot.viewer.gui.addSphere('world/point', .1, [1, 0, 0, 1])  # radius = .1, RGBA=1001
-robot.viewer.gui.applyConfiguration('world/point', target.tolist() + [0, 0, 0, 1])  # xyz+quaternion
+robot.initViewer(loadModel=True)
+robot.viewer.gui.addSphere('world/point', .05, [1., 0., 0., 1.])  # radius = .1, RGBA=1001
+robot.viewer.gui.applyConfiguration('world/point', target.tolist() + [0., 0., 0., 1.])  # xyz+quaternion
 robot.viewer.gui.refresh()
 
 # Create the cost functions
-costTrack = CostModelFrameTranslation(robot.model, frame=frameId, ref=target)
-costXReg = CostModelState(robot.model, StatePinocchio(robot.model))
-costUReg = CostModelControl(robot.model)
+Mref = crocoddyl.FrameTranslation(robot_model.getFrameId("gripper_left_joint"), np.matrix(target).T)
+state = crocoddyl.StateMultibody(robot.model)
+goalTrackingCost = crocoddyl.CostModelFrameTranslation(state, Mref)
+xRegCost = crocoddyl.CostModelState(state)
+uRegCost = crocoddyl.CostModelControl(state)
 
 # Create cost model per each action model
-runningCostModel = CostModelSum(robot.model)
-terminalCostModel = CostModelSum(robot.model)
+runningCostModel = crocoddyl.CostModelSum(state)
+terminalCostModel = crocoddyl.CostModelSum(state)
 
 # Then let's added the running and terminal cost functions
-runningCostModel.addCost(name="pos", weight=1, cost=costTrack)
-runningCostModel.addCost(name="xreg", weight=1e-4, cost=costXReg)
-runningCostModel.addCost(name="ureg", weight=1e-7, cost=costUReg)
-terminalCostModel.addCost(name="pos", weight=1000, cost=costTrack)
-terminalCostModel.addCost(name="xreg", weight=1e-4, cost=costXReg)
-terminalCostModel.addCost(name="ureg", weight=1e-7, cost=costUReg)
+runningCostModel.addCost("gripperPose", goalTrackingCost, 1.)
+runningCostModel.addCost("stateReg", xRegCost, 1e-4)
+runningCostModel.addCost("ctrlReg", uRegCost, 1e-7)
+terminalCostModel.addCost("gripperPose", goalTrackingCost, 1000.)
+terminalCostModel.addCost("stateReg", xRegCost, 1e-4)
+terminalCostModel.addCost("ctrlReg", uRegCost, 1e-7)
 
 # Create the action model
-runningModel = DifferentialActionModelFullyActuated(robot.model, runningCostModel)
-terminalModel = DifferentialActionModelFullyActuated(robot.model, terminalCostModel)
+runningModel = crocoddyl.IntegratedActionModelEuler(
+    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, runningCostModel), DT)
+terminalModel = crocoddyl.IntegratedActionModelEuler(
+    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, terminalCostModel))
+#runningModel.differential.armature = 0.2 * np.matrix(np.ones(state.nv)).T
+#terminalModel.differential.armature = 0.2 * np.matrix(np.ones(state.nv)).T
 
 # Create the problem
-x0 = np.concatenate([m2a(robot.q0), np.zeros(robot.model.nv)])
-problem = ShootingProblem(x0, [IntegratedActionModelEuler(runningModel)] * T,
-                          IntegratedActionModelEuler(terminalModel))
+q0 = np.matrix([2., 1.5, -2., 0., 0., 0., 0.]).T
+x0 = np.concatenate([q0, pinocchio.utils.zero(state.nv)])
+problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 
 # Creating the DDP solver for this OC problem, defining a logger
-ddp = SolverDDP(problem)
-ddp.callback = [CallbackDDPVerbose()]
+ddp = crocoddyl.SolverDDP(problem)
+ddp.setCallbacks([crocoddyl.CallbackVerbose()])
 
 # Solving it with the DDP algorithm
 ddp.solve()
 
 # Visualizing the solution in gepetto-viewer
-for x in ddp.xs:
-    robot.display(a2m(x))
+crocoddyl.displayTrajectory(robot, ddp.xs, runningModel.dt)
 
-print('Finally reached = ', ddp.datas()[T].differential.costs['pos'].pinocchio.oMf[frameId].translation.T)
+robot_data = robot_model.createData()
+xT = ddp.xs[-1]
+pinocchio.forwardKinematics(robot_model, robot_data, xT[:state.nq])
+pinocchio.updateFramePlacements(robot_model, robot_data)
+print('Finally reached = ', robot_data.oMf[robot_model.getFrameId("gripper_left_joint")].translation.T)
