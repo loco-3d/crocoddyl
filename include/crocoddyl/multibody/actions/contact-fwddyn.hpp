@@ -47,7 +47,7 @@ class DifferentialActionModelContactFwdDynamics : public DifferentialActionModel
   ContactModelMultiple& contacts_;
   CostModelSum& costs_;
   pinocchio::Model& pinocchio_;
-  bool force_aba_;
+  bool with_armature_;
   Eigen::VectorXd armature_;
   double JMinvJt_damping_;
   bool enable_force_;

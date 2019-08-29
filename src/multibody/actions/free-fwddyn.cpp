@@ -23,7 +23,7 @@ DifferentialActionModelFreeFwdDynamics::DifferentialActionModelFreeFwdDynamics(S
     : DifferentialActionModelAbstract(state, state.get_pinocchio().nv, costs.get_nr()),
       costs_(costs),
       pinocchio_(state.get_pinocchio()),
-      force_aba_(true),
+      with_armature_(true),
       armature_(Eigen::VectorXd::Zero(state.get_nv())) {}
 
 DifferentialActionModelFreeFwdDynamics::~DifferentialActionModelFreeFwdDynamics() {}
@@ -39,7 +39,7 @@ void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<Differ
   d->vcur = x.tail(state_.get_nv());
 
   // Computing the dynamics using ABA or manually for armature case
-  if (force_aba_) {
+  if (with_armature_) {
     d->xout = pinocchio::aba(pinocchio_, d->pinocchio, d->qcur, d->vcur, u);
   } else {
     pinocchio::computeAllTerms(pinocchio_, d->pinocchio, d->qcur, d->vcur);
@@ -75,7 +75,7 @@ void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<Di
   }
 
   // Computing the dynamics derivatives
-  if (force_aba_) {
+  if (with_armature_) {
     pinocchio::computeABADerivatives(pinocchio_, d->pinocchio, d->qcur, d->vcur, u);
     d->Fx.leftCols(nv) = d->pinocchio.ddq_dq;
     d->Fx.rightCols(nv) = d->pinocchio.ddq_dv;
@@ -109,7 +109,7 @@ void DifferentialActionModelFreeFwdDynamics::set_armature(const Eigen::VectorXd&
     std::cout << "The armature dimension is wrong, we cannot set it." << std::endl;
   } else {
     armature_ = armature;
-    force_aba_ = false;
+    with_armature_ = false;
   }
 }
 
