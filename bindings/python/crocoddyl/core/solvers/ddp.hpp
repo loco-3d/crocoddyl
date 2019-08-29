@@ -70,6 +70,20 @@ void exposeSolverDDP() {
            "For computing the expected improvement, you need to compute first\n"
            "the search direction by running computeDirection. The quadratic\n"
            "improvement model is described as dV = f_0 - f_+ = d1*a + d2*a**2/2.")
+      .def("calc", &SolverDDP::calc, bp::args(" self"),
+           "Update the Jacobian and Hessian of the optimal control problem\n\n"
+           "These derivatives are computed around the guess state and control\n"
+           "trajectory. These trajectory can be set by using setCandidate.\n"
+           ":return the total cost around the guess trajectory.")
+      .def("backwardPass", &SolverDDP::backwardPass, bp::args(" self"),
+           "Run the backward pass (Riccati sweep)\n\n"
+           "It assumes that the Jacobian and Hessians of the optimal control problem have been\n"
+           "compute. These terms are computed by running calc.")
+      .def("forwardPass", &SolverDDP::forwardPass, bp::args(" self", " stepLength=1"),
+           "Run the forward pass or rollout\n\n"
+           "It rollouts the action model give the computed policy (feedfoward terns and feedback\n"
+           "gains) by the backwardPass. We can define different step lengths\n"
+           ":param stepLength: applied step length (<= 1. and >= 0.)")
       .add_property("Vxx", make_function(&SolverDDP::get_Vxx, bp::return_value_policy<bp::copy_const_reference>()),
                     "Vxx")
       .add_property("Vx", make_function(&SolverDDP::get_Vx, bp::return_value_policy<bp::copy_const_reference>()), "Vx")
