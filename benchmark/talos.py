@@ -306,7 +306,6 @@ GAITPHASES = \
                   'timeStep': 0.0375, 'stepKnots': 25, 'supportKnots': 1}}]
 cameraTF = [3., 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 
-GAITPHASES = GAITPHASES[:1] ## TODO remove after debugging
 ddp = [None] * len(GAITPHASES)
 for i, phase in enumerate(GAITPHASES):
     for key, value in phase.items():
