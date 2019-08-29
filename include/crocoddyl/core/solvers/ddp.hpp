@@ -29,6 +29,9 @@ class SolverDDP : public SolverAbstract {
   double tryStep(const double& steplength = 1);
   double stoppingCriteria();
   const Eigen::Vector2d& expectedImprovement();
+  double calc();
+  void backwardPass();
+  void forwardPass(const double& stepLength);
 
   const std::vector<Eigen::MatrixXd>& get_Vxx() const;
   const std::vector<Eigen::VectorXd>& get_Vx() const;
@@ -42,9 +45,6 @@ class SolverDDP : public SolverAbstract {
   const std::vector<Eigen::VectorXd>& get_gaps() const;
 
  private:
-  double calc();
-  void backwardPass();
-  void forwardPass(const double& stepLength);
   void computeGains(unsigned int const& t);
   void increaseRegularization();
   void decreaseRegularization();
