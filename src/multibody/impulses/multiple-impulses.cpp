@@ -10,7 +10,7 @@
 
 namespace crocoddyl {
 
-ImpulseModelMultiple::ImpulseModelMultiple(StateMultibody& state) : state_(state), nimp_(0) {}
+ImpulseModelMultiple::ImpulseModelMultiple(StateMultibody& state) : state_(state), ni_(0) {}
 
 ImpulseModelMultiple::~ImpulseModelMultiple() {}
 
@@ -20,14 +20,14 @@ void ImpulseModelMultiple::addImpulse(const std::string& name, ImpulseModelAbstr
   if (ret.second == false) {
     std::cout << "Warning: this impulse item already existed, we cannot add it" << std::endl;
   } else {
-    nimp_ += impulse->get_nimp();
+    ni_ += impulse->get_ni();
   }
 }
 
 void ImpulseModelMultiple::removeImpulse(const std::string& name) {
   ImpulseModelContainer::iterator it = impulses_.find(name);
   if (it != impulses_.end()) {
-    nimp_ -= it->second.impulse->get_nimp();
+    ni_ -= it->second.impulse->get_ni();
     impulses_.erase(it);
   } else {
     std::cout << "Warning: this impulse item doesn't exist, we cannot remove it" << std::endl;
@@ -37,7 +37,7 @@ void ImpulseModelMultiple::removeImpulse(const std::string& name) {
 void ImpulseModelMultiple::calc(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                 const Eigen::Ref<const Eigen::VectorXd>& x) {
   assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
-  unsigned int nimp = 0;
+  unsigned int ni = 0;
 
   unsigned int const& nv = state_.get_nv();
   ImpulseModelContainer::iterator it_m, end_m;
@@ -49,9 +49,9 @@ void ImpulseModelMultiple::calc(const boost::shared_ptr<ImpulseDataMultiple>& da
     assert(it_m->first == it_d->first && "it doesn't match the impulse name between data and model");
 
     m_i.impulse->calc(d_i, x);
-    unsigned int const& nimp_i = m_i.impulse->get_nimp();
-    data->Jc.block(nimp, 0, nimp_i, nv) = d_i->Jc;
-    nimp += nimp_i;
+    unsigned int const& ni_i = m_i.impulse->get_ni();
+    data->Jc.block(ni, 0, ni_i, nv) = d_i->Jc;
+    ni += ni_i;
   }
 }
 
@@ -61,7 +61,7 @@ void ImpulseModelMultiple::calcDiff(const boost::shared_ptr<ImpulseDataMultiple>
   if (recalc) {
     calc(data, x);
   }
-  unsigned int nimp = 0;
+  unsigned int ni = 0;
 
   unsigned int const& nv = state_.get_nv();
   ImpulseModelContainer::iterator it_m, end_m;
@@ -73,17 +73,17 @@ void ImpulseModelMultiple::calcDiff(const boost::shared_ptr<ImpulseDataMultiple>
     assert(it_m->first == it_d->first && "it doesn't match the impulse name between data and model");
 
     m_i.impulse->calcDiff(d_i, x, false);
-    unsigned int const& nimp_i = m_i.impulse->get_nimp();
-    data->Vq.block(nimp, 0, nimp_i, nv) = d_i->Vq;
-    nimp += nimp_i;
+    unsigned int const& ni_i = m_i.impulse->get_ni();
+    data->Vq.block(ni, 0, ni_i, nv) = d_i->Vq;
+    ni += ni_i;
   }
 }
 
 void ImpulseModelMultiple::updateLagrangian(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                             const Eigen::VectorXd& lambda) {
-  assert(lambda.size() == nimp_ && "lambda has wrong dimension, it should be nimp vector");
+  assert(lambda.size() == ni_ && "lambda has wrong dimension, it should be ni vector");
   assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
-  unsigned int nimp = 0;
+  unsigned int ni = 0;
 
   for (ForceIterator it = data->fext.begin(); it != data->fext.end(); ++it) {
     *it = pinocchio::Force::Zero();
@@ -97,10 +97,10 @@ void ImpulseModelMultiple::updateLagrangian(const boost::shared_ptr<ImpulseDataM
     boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
     assert(it_m->first == it_d->first && "it doesn't match the impulse name between data and model");
 
-    unsigned int const& nimp_i = m_i.impulse->get_nimp();
-    m_i.impulse->updateLagrangian(d_i, lambda.segment(nimp, nimp_i));
+    unsigned int const& ni_i = m_i.impulse->get_ni();
+    m_i.impulse->updateLagrangian(d_i, lambda.segment(ni, ni_i));
     data->fext[d_i->joint] = d_i->f;
-    nimp += nimp_i;
+    ni += ni_i;
   }
 }
 
@@ -112,6 +112,6 @@ StateMultibody& ImpulseModelMultiple::get_state() const { return state_; }
 
 const ImpulseModelMultiple::ImpulseModelContainer& ImpulseModelMultiple::get_impulses() const { return impulses_; }
 
-const unsigned int& ImpulseModelMultiple::get_nimp() const { return nimp_; }
+const unsigned int& ImpulseModelMultiple::get_ni() const { return ni_; }
 
 }  // namespace crocoddyl

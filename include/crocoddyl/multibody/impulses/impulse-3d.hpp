@@ -19,7 +19,6 @@ namespace crocoddyl {
 class ImpulseModel3D : public ImpulseModelAbstract {
  public:
   ImpulseModel3D(StateMultibody& state, const FrameTranslation& xref);
-
   ~ImpulseModel3D();
 
   void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);

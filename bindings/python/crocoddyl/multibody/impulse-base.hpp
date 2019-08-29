@@ -33,7 +33,7 @@ class ImpulseModelAbstract_wrap : public ImpulseModelAbstract, public bp::wrappe
   }
 
   void updateLagrangian(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& lambda) {
-    assert(lambda.size() == nimp_ && "lambda has wrong dimension");
+    assert(lambda.size() == ni_ && "lambda has wrong dimension");
     return bp::call<void>(this->get_override("updateLagrangian").ptr(), data, lambda);
   }
 };
@@ -79,7 +79,7 @@ void exposeImpulseAbstract() {
                     "state of the multibody system")
       .add_property(
           "nimp",
-          bp::make_function(&ImpulseModelAbstract_wrap::get_nimp, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&ImpulseModelAbstract_wrap::get_ni, bp::return_value_policy<bp::return_by_value>()),
           "dimension of impulse");
 
   bp::class_<ImpulseDataAbstract, boost::shared_ptr<ImpulseDataAbstract>, boost::noncopyable>(

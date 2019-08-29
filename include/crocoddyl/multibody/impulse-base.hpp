@@ -19,7 +19,7 @@ struct ImpulseDataAbstract;  // forward declaration
 
 class ImpulseModelAbstract {
  public:
-  ImpulseModelAbstract(StateMultibody& state, unsigned int const& nimp);
+  ImpulseModelAbstract(StateMultibody& state, unsigned int const& ni);
   ~ImpulseModelAbstract();
 
   virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
@@ -31,11 +31,11 @@ class ImpulseModelAbstract {
   virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::Data* const data);
 
   StateMultibody& get_state() const;
-  unsigned int const& get_nimp() const;
+  unsigned int const& get_ni() const;
 
  protected:
   StateMultibody& state_;
-  unsigned int nimp_;
+  unsigned int ni_;
 
 #ifdef PYTHON_BINDINGS
 
@@ -57,8 +57,8 @@ struct ImpulseDataAbstract {
   ImpulseDataAbstract(Model* const model, pinocchio::Data* const data)
       : pinocchio(data),
         joint(0),
-        Jc(model->get_nimp(), model->get_state().get_nv()),
-        Vq(model->get_nimp(), model->get_state().get_nv()),
+        Jc(model->get_ni(), model->get_state().get_nv()),
+        Vq(model->get_ni(), model->get_state().get_nv()),
         f(pinocchio::Force::Zero()) {
     Jc.fill(0);
     Vq.fill(0);

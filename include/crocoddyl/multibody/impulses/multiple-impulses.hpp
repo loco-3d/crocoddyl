@@ -46,12 +46,12 @@ class ImpulseModelMultiple {
 
   StateMultibody& get_state() const;
   const ImpulseModelContainer& get_impulses() const;
-  const unsigned int& get_nimp() const;
+  const unsigned int& get_ni() const;
 
  private:
   StateMultibody& state_;
   ImpulseModelContainer impulses_;
-  unsigned int nimp_;
+  unsigned int ni_;
 
 #ifdef PYTHON_BINDINGS
 
