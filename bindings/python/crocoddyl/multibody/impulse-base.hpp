@@ -90,6 +90,8 @@ void exposeImpulseAbstract() {
                     "pinocchio data")
       .add_property("Jc", bp::make_getter(&ImpulseDataAbstract::Jc, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ImpulseDataAbstract::Jc), "impulse Jacobian")
+      .add_property("Vq", bp::make_getter(&ImpulseDataAbstract::Vq, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ImpulseDataAbstract::Vq), "Jacobian of the impulse constraint")
       .def_readwrite("joint", &ImpulseDataAbstract::joint, "joint index of the impulse frame")
       .def_readwrite("f", &ImpulseDataAbstract::f, "external spatial forces");
 }

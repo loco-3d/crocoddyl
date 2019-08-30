@@ -47,10 +47,10 @@ void exposeImpulseMultiple() {
                     "impulse model");
 
   bp::class_<ImpulseModelMultiple, boost::noncopyable>(
-      "ImpulseModelMultiple", bp::init<StateMultibody&>(
-                                  bp::args(" self", " state"),
-                                  "Initialize the multiple impulse model.\n\n"
-                                  ":param state: state of the multibody system")[bp::with_custodian_and_ward<1, 2>()])
+      "ImpulseModelMultiple",
+      bp::init<StateMultibody&>(bp::args(" self", " state"),
+                                "Initialize the multiple impulse model.\n\n"
+                                ":param state: state of the multibody system")[bp::with_custodian_and_ward<1, 2>()])
       .def("addImpulse", &ImpulseModelMultiple::addImpulse, bp::with_custodian_and_ward<1, 3>(),
            bp::args(" self", " name", " impulse"),
            "Add a impulse item.\n\n"
