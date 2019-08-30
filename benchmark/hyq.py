@@ -1,9 +1,9 @@
 import time
 
+import example_robot_data
 import numpy as np
 
 import crocoddyl
-import example_robot_data
 import pinocchio
 from crocoddyl.utils.quadruped import SimpleQuadrupedalGaitProblem
 
@@ -24,7 +24,7 @@ def runBenchmark(gait_phase):
     v0 = pinocchio.utils.zero(robot_model.nv)
     x0 = np.concatenate([q0, v0])
 
-    type_of_gait = gait_phase.keys()[0]
+    type_of_gait = list(gait_phase.keys())[0]
     value = gait_phase[type_of_gait]
     if type_of_gait == 'walking':
         # Creating a walking problem
