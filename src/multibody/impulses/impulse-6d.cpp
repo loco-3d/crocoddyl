@@ -33,7 +33,7 @@ void ImpulseModel6D::calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data
   ImpulseData6D* d = static_cast<ImpulseData6D*>(data.get());
   pinocchio::getJointVelocityDerivatives(state_.get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                          d->v_partial_dq, d->v_partial_dv);
-  d->Vq = d->fXj * d->v_partial_dq;
+  d->Vq.noalias() = d->fXj * d->v_partial_dq;
 }
 
 void ImpulseModel6D::updateLagrangian(const boost::shared_ptr<ImpulseDataAbstract>& data,
