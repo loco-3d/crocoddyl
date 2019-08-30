@@ -1,10 +1,12 @@
-import crocoddyl
-import utils
-import pinocchio
-from random import randint
-import numpy as np
-import unittest
 import sys
+import unittest
+from random import randint
+
+import numpy as np
+
+import crocoddyl
+import pinocchio
+from crocoddyl.utils import DifferentialFreeFwdDynamicsDerived, DifferentialLQRDerived, LQRDerived, UnicycleDerived
 
 
 class ActionModelAbstractTestCase(unittest.TestCase):
@@ -59,21 +61,21 @@ class ActionModelAbstractTestCase(unittest.TestCase):
 
 class UnicycleTest(ActionModelAbstractTestCase):
     MODEL = crocoddyl.ActionModelUnicycle()
-    MODEL_DER = utils.UnicycleDerived()
+    MODEL_DER = UnicycleDerived()
 
 
 class LQRTest(ActionModelAbstractTestCase):
     NX = randint(1, 21)
     NU = randint(1, NX)
     MODEL = crocoddyl.ActionModelLQR(NX, NU)
-    MODEL_DER = utils.LQRDerived(NX, NU)
+    MODEL_DER = LQRDerived(NX, NU)
 
 
 class DifferentialLQRTest(ActionModelAbstractTestCase):
     NX = randint(1, 21)
     NU = randint(1, NX)
     MODEL = crocoddyl.DifferentialActionModelLQR(NX, NU)
-    MODEL_DER = utils.DifferentialLQRDerived(NX, NU)
+    MODEL_DER = DifferentialLQRDerived(NX, NU)
 
 
 class FreeFwdDynamicsTest(ActionModelAbstractTestCase):
@@ -86,7 +88,7 @@ class FreeFwdDynamicsTest(ActionModelAbstractTestCase):
         crocoddyl.CostModelFramePlacement(
             STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("effector_body"), pinocchio.SE3.Random())), 1.)
     MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, COST_SUM)
-    MODEL_DER = utils.DifferentialFreeFwdDynamicsDerived(STATE, COST_SUM)
+    MODEL_DER = DifferentialFreeFwdDynamicsDerived(STATE, COST_SUM)
 
 
 class FreeFwdDynamicsWithArmatureTest(ActionModelAbstractTestCase):
@@ -100,7 +102,7 @@ class FreeFwdDynamicsWithArmatureTest(ActionModelAbstractTestCase):
             STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("effector_body"), pinocchio.SE3.Random())), 1.)
     MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, COST_SUM)
     MODEL.armature = 0.1 * np.matrix(np.ones(ROBOT_MODEL.nv)).T
-    MODEL_DER = utils.DifferentialFreeFwdDynamicsDerived(STATE, COST_SUM)
+    MODEL_DER = DifferentialFreeFwdDynamicsDerived(STATE, COST_SUM)
     MODEL_DER.set_armature(0.1 * np.matrix(np.ones(ROBOT_MODEL.nv)).T)
 
 

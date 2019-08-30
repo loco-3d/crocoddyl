@@ -1,9 +1,11 @@
-import crocoddyl
-from utils import UnicycleDerived
-from random import randint
-import numpy as np
-import unittest
 import sys
+import unittest
+from random import randint
+
+import numpy as np
+
+import crocoddyl
+from crocoddyl.utils import UnicycleDerived
 
 
 class ShootingProblemTestCase(unittest.TestCase):

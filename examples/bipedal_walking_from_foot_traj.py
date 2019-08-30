@@ -1,10 +1,11 @@
 import sys
 
 import numpy as np
-import pinocchio
+
 import crocoddyl
-import biped_utils
 import example_robot_data
+import pinocchio
+from crocoddyl.utils.biped import SimpleBipedGaitProblem, plotSolution
 
 WITHDISPLAY = 'display' in sys.argv
 WITHPLOT = 'plot' in sys.argv
@@ -20,7 +21,7 @@ x0 = np.concatenate([q0, v0])
 # Setting up the 3d walking problem
 rightFoot = 'right_sole_link'
 leftFoot = 'left_sole_link'
-gait = biped_utils.SimpleBipedGaitProblem(talos_legs.model, rightFoot, leftFoot)
+gait = SimpleBipedGaitProblem(talos_legs.model, rightFoot, leftFoot)
 
 # Setting up all tasks
 GAITPHASES = \
@@ -71,4 +72,4 @@ if WITHPLOT:
     for i, phase in enumerate(GAITPHASES):
         xs.extend(ddp[i].xs)
         us.extend(ddp[i].us)
-    biped_utils.plotSolution(talos_legs.model, xs, us)
+    plotSolution(talos_legs.model, xs, us)

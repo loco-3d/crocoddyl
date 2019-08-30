@@ -1,9 +1,11 @@
 import sys
+
 import numpy as np
-import pinocchio
+
 import crocoddyl
-import quadruped_utils
 import example_robot_data
+import pinocchio
+from crocoddyl.utils.quadruped import SimpleQuadrupedalGaitProblem, plotSolution
 
 WITHDISPLAY = 'display' in sys.argv
 WITHPLOT = 'plot' in sys.argv
@@ -21,7 +23,7 @@ lfFoot = 'lf_foot'
 rfFoot = 'rf_foot'
 lhFoot = 'lh_foot'
 rhFoot = 'rh_foot'
-gait = quadruped_utils.SimpleQuadrupedalGaitProblem(hyq.model, lfFoot, rfFoot, lhFoot, rhFoot)
+gait = SimpleQuadrupedalGaitProblem(hyq.model, lfFoot, rfFoot, lhFoot, rhFoot)
 
 # Setting up all tasks
 GAITPHASES = [{
@@ -119,4 +121,4 @@ if WITHPLOT:
     for i, phase in enumerate(GAITPHASES):
         xs.extend(ddp[i].xs)
         us.extend(ddp[i].us)
-    quadruped_utils.plotSolution(hyq.model, xs, us)
+    plotSolution(hyq.model, xs, us)

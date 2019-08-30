@@ -1,10 +1,12 @@
-import crocoddyl
-import utils
-import pinocchio
-from random import randint
-import numpy as np
-import unittest
 import sys
+import unittest
+from random import randint
+
+import numpy as np
+
+import crocoddyl
+import pinocchio
+from crocoddyl.utils import DDPDerived
 
 
 class SolverAbstractTestCase(unittest.TestCase):
@@ -96,7 +98,7 @@ class SolverAbstractTestCase(unittest.TestCase):
 class UnicycleDDPTest(SolverAbstractTestCase):
     MODEL = crocoddyl.ActionModelUnicycle()
     SOLVER = crocoddyl.SolverDDP
-    SOLVER_DER = utils.DDPDerived
+    SOLVER_DER = DDPDerived
 
 
 class ManipulatorDDPTest(SolverAbstractTestCase):
@@ -113,7 +115,7 @@ class ManipulatorDDPTest(SolverAbstractTestCase):
     MODEL = crocoddyl.IntegratedActionModelEuler(crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, COST_SUM),
                                                  1e-3)
     SOLVER = crocoddyl.SolverDDP
-    SOLVER_DER = utils.DDPDerived
+    SOLVER_DER = DDPDerived
 
 
 if __name__ == '__main__':
