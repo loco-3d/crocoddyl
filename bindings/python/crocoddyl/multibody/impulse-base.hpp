@@ -46,11 +46,10 @@ void exposeImpulseAbstract() {
       "It defines a template for impulse models.\n"
       "The calc and calcDiff functions compute the impulse Jacobian\n"
       "the derivatives respectively.",
-      bp::init<StateMultibody&, int>(
-          bp::args(" self", " state", " ni"),
-          "Initialize the impulse model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param ni: dimension of impulse model")[bp::with_custodian_and_ward<1, 2>()])
+      bp::init<StateMultibody&, int>(bp::args(" self", " state", " ni"),
+                                     "Initialize the impulse model.\n\n"
+                                     ":param state: state of the multibody system\n"
+                                     ":param ni: dimension of impulse model")[bp::with_custodian_and_ward<1, 2>()])
       .def("calc", pure_virtual(&ImpulseModelAbstract_wrap::calc), bp::args(" self", " data", " x"),
            "Compute the impulse Jacobian\n"
            ":param data: impulse data\n"

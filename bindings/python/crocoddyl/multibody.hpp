@@ -26,6 +26,9 @@
 #include "python/crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "python/crocoddyl/multibody/contacts/contact-3d.hpp"
 #include "python/crocoddyl/multibody/contacts/contact-6d.hpp"
+#include "python/crocoddyl/multibody/impulses/multiple-impulses.hpp"
+#include "python/crocoddyl/multibody/impulses/impulse-3d.hpp"
+#include "python/crocoddyl/multibody/impulses/impulse-6d.hpp"
 #include "python/crocoddyl/multibody/actions/free-fwddyn.hpp"
 #include "python/crocoddyl/multibody/actions/contact-fwddyn.hpp"
 
@@ -50,6 +53,9 @@ void exposeMultibody() {
   exposeContactMultiple();
   exposeContact3D();
   exposeContact6D();
+  exposeImpulseMultiple();
+  exposeImpulse3D();
+  exposeImpulse6D();
   exposeDifferentialActionFreeFwdDynamics();
   exposeDifferentialActionContactFwdDynamics();
 }
