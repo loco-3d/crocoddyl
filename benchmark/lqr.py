@@ -1,7 +1,9 @@
-import crocoddyl
-import utils
-import numpy as np
 import time
+
+import numpy as np
+
+import crocoddyl
+from crocoddyl.utils import LQRDerived
 
 NX = 37
 NU = 12
@@ -38,5 +40,5 @@ avrg_duration, min_duration, max_duration = runBenchmark(crocoddyl.ActionModelLQ
 print('  CPU time [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
 
 print('Python-derived lqr:')
-avrg_duration, min_duration, max_duration = runBenchmark(utils.LQRDerived)
+avrg_duration, min_duration, max_duration = runBenchmark(LQRDerived)
 print('  CPU time [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))

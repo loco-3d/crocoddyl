@@ -1,9 +1,12 @@
-import crocoddyl
-import utils
-import pinocchio
-import numpy as np
-import unittest
 import sys
+import unittest
+
+import numpy as np
+
+import crocoddyl
+import pinocchio
+from crocoddyl.utils import (CoMPositionCostDerived, ControlCostDerived, FramePlacementCostDerived,
+                             FrameTranslationCostDerived, FrameVelocityCostDerived, StateCostDerived)
 
 
 class CostModelAbstractTestCase(unittest.TestCase):
@@ -123,7 +126,7 @@ class StateCostTest(CostModelAbstractTestCase):
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     COST = crocoddyl.CostModelState(ROBOT_STATE)
-    COST_DER = utils.StateCostDerived(ROBOT_STATE)
+    COST_DER = StateCostDerived(ROBOT_STATE)
 
 
 class StateCostSumTest(CostModelSumTestCase):
@@ -138,7 +141,7 @@ class ControlCostTest(CostModelAbstractTestCase):
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     COST = crocoddyl.CostModelControl(ROBOT_STATE)
-    COST_DER = utils.ControlCostDerived(ROBOT_STATE)
+    COST_DER = ControlCostDerived(ROBOT_STATE)
 
 
 class ControlCostSumTest(CostModelSumTestCase):
@@ -154,7 +157,7 @@ class CoMPositionCostTest(CostModelAbstractTestCase):
 
     cref = pinocchio.utils.rand(3)
     COST = crocoddyl.CostModelCoMPosition(ROBOT_STATE, cref)
-    COST_DER = utils.CoMPositionCostDerived(ROBOT_STATE, cref=cref)
+    COST_DER = CoMPositionCostDerived(ROBOT_STATE, cref=cref)
 
 
 class CoMPositionCostSumTest(CostModelSumTestCase):
@@ -171,7 +174,7 @@ class FramePlacementCostTest(CostModelAbstractTestCase):
 
     Mref = crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.SE3.Random())
     COST = crocoddyl.CostModelFramePlacement(ROBOT_STATE, Mref)
-    COST_DER = utils.FramePlacementCostDerived(ROBOT_STATE, Mref=Mref)
+    COST_DER = FramePlacementCostDerived(ROBOT_STATE, Mref=Mref)
 
 
 class FramePlacementCostSumTest(CostModelSumTestCase):
@@ -188,7 +191,7 @@ class FrameTranslationCostTest(CostModelAbstractTestCase):
 
     xref = crocoddyl.FrameTranslation(ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.utils.rand(3))
     COST = crocoddyl.CostModelFrameTranslation(ROBOT_STATE, xref)
-    COST_DER = utils.FrameTranslationCostDerived(ROBOT_STATE, xref=xref)
+    COST_DER = FrameTranslationCostDerived(ROBOT_STATE, xref=xref)
 
 
 class FrameTranslationCostSumTest(CostModelSumTestCase):
@@ -205,7 +208,7 @@ class FrameVelocityCostTest(CostModelAbstractTestCase):
 
     vref = crocoddyl.FrameMotion(ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.Motion.Random())
     COST = crocoddyl.CostModelFrameVelocity(ROBOT_STATE, vref)
-    COST_DER = utils.FrameVelocityCostDerived(ROBOT_STATE, vref=vref)
+    COST_DER = FrameVelocityCostDerived(ROBOT_STATE, vref=vref)
 
 
 class FrameVelocityCostSumTest(CostModelSumTestCase):

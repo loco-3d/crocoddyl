@@ -1,9 +1,11 @@
-import numpy as np
-import pinocchio
-import crocoddyl
-import biped_utils
-import example_robot_data
 import time
+
+import numpy as np
+
+import crocoddyl
+import example_robot_data
+import pinocchio
+from crocoddyl.utils.biped import SimpleBipedGaitProblem
 
 T = int(5e3)  # number of trials
 MAXITER = 1
@@ -13,7 +15,7 @@ GAIT = "walking"  # 55 nodes
 def runBenchmark(gait_phase):
     robot_model = example_robot_data.loadTalosLegs().model
     rightFoot, leftFoot = 'right_sole_link', 'left_sole_link'
-    gait = biped_utils.SimpleBipedGaitProblem(robot_model, rightFoot, leftFoot)
+    gait = SimpleBipedGaitProblem(robot_model, rightFoot, leftFoot)
     q0 = robot_model.referenceConfigurations['half_sitting'].copy()
     v0 = pinocchio.utils.zero(robot_model.nv)
     x0 = np.concatenate([q0, v0])

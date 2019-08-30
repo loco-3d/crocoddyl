@@ -1,9 +1,11 @@
-import crocoddyl
-import utils
-import pinocchio
-import numpy as np
-import unittest
 import sys
+import unittest
+
+import numpy as np
+
+import crocoddyl
+import pinocchio
+from crocoddyl.utils import Contact3DDerived, Contact6DDerived
 
 
 class ContactModelAbstractTestCase(unittest.TestCase):
@@ -96,7 +98,7 @@ class Contact3DTest(ContactModelAbstractTestCase):
     gains = pinocchio.utils.rand(2)
     xref = crocoddyl.FrameTranslation(ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.SE3.Random().translation)
     CONTACT = crocoddyl.ContactModel3D(ROBOT_STATE, xref, gains)
-    CONTACT_DER = utils.Contact3DDerived(ROBOT_STATE, xref, gains)
+    CONTACT_DER = Contact3DDerived(ROBOT_STATE, xref, gains)
 
 
 class Contact3DMultipleTest(ContactModelMultipleAbstractTestCase):
@@ -115,7 +117,7 @@ class Contact6DTest(ContactModelAbstractTestCase):
     gains = pinocchio.utils.rand(2)
     Mref = crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.SE3.Random())
     CONTACT = crocoddyl.ContactModel6D(ROBOT_STATE, Mref, gains)
-    CONTACT_DER = utils.Contact6DDerived(ROBOT_STATE, Mref, gains)
+    CONTACT_DER = Contact6DDerived(ROBOT_STATE, Mref, gains)
 
 
 class Contact6DMultipleTest(ContactModelMultipleAbstractTestCase):

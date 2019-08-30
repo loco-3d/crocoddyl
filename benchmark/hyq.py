@@ -1,9 +1,11 @@
-import numpy as np
-import pinocchio
-import crocoddyl
-import quadruped_utils
-import example_robot_data
 import time
+
+import numpy as np
+
+import crocoddyl
+import example_robot_data
+import pinocchio
+from crocoddyl.utils.quadruped import SimpleQuadrupedalGaitProblem
 
 T = int(5e3)  # number of trials
 MAXITER = 1
@@ -17,7 +19,7 @@ GAIT = "walking"  # 115 nodes
 def runBenchmark(gait_phase):
     robot_model = example_robot_data.loadHyQ().model
     lfFoot, rfFoot, lhFoot, rhFoot = 'lf_foot', 'rf_foot', 'lh_foot', 'rh_foot'
-    gait = quadruped_utils.SimpleQuadrupedalGaitProblem(robot_model, lfFoot, rfFoot, lhFoot, rhFoot)
+    gait = SimpleQuadrupedalGaitProblem(robot_model, lfFoot, rfFoot, lhFoot, rhFoot)
     q0 = robot_model.referenceConfigurations['half_sitting'].copy()
     v0 = pinocchio.utils.zero(robot_model.nv)
     x0 = np.concatenate([q0, v0])

@@ -1,10 +1,12 @@
-import crocoddyl
-from utils import StateVectorDerived, StateMultibodyDerived
-import pinocchio
-from random import randint
-import numpy as np
-import unittest
 import sys
+import unittest
+from random import randint
+
+import numpy as np
+
+import crocoddyl
+import pinocchio
+from crocoddyl.utils import StateMultibodyDerived, StateVectorDerived
 
 
 class StateAbstractTestCase(unittest.TestCase):
