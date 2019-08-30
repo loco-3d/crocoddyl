@@ -18,8 +18,8 @@ namespace bp = boost::python;
 
 class ImpulseModelAbstract_wrap : public ImpulseModelAbstract, public bp::wrapper<ImpulseModelAbstract> {
  public:
-  ImpulseModelAbstract_wrap(StateMultibody& state, int nimp) : ImpulseModelAbstract(state, nimp) {}
-  ImpulseModelAbstract_wrap(StateMultibody& state, int nimp) : ImpulseModelAbstract(state, nimp) {}
+  ImpulseModelAbstract_wrap(StateMultibody& state, int ni) : ImpulseModelAbstract(state, ni) {}
+  ImpulseModelAbstract_wrap(StateMultibody& state, int ni) : ImpulseModelAbstract(state, ni) {}
 
   void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
     assert(x.size() == state_.get_nx() && "x has wrong dimension");
@@ -48,10 +48,10 @@ void exposeImpulseAbstract() {
       "The calc and calcDiff functions compute the impulse Jacobian\n"
       "the derivatives respectively.",
       bp::init<StateMultibody&, int, bp::optional<int> >(
-          bp::args(" self", " state", " nimp"),
+          bp::args(" self", " state", " ni"),
           "Initialize the impulse model.\n\n"
           ":param state: state of the multibody system\n"
-          ":param nimp: dimension of impulse model")[bp::with_custodian_and_ward<1, 2>()])
+          ":param ni: dimension of impulse model")[bp::with_custodian_and_ward<1, 2>()])
       .def("calc", pure_virtual(&ImpulseModelAbstract_wrap::calc), bp::args(" self", " data", " x"),
            "Compute the impulse Jacobian\n"
            ":param data: impulse data\n"
@@ -78,7 +78,7 @@ void exposeImpulseAbstract() {
                     bp::make_function(&ImpulseModelAbstract_wrap::get_state, bp::return_internal_reference<>()),
                     "state of the multibody system")
       .add_property(
-          "nimp",
+          "ni",
           bp::make_function(&ImpulseModelAbstract_wrap::get_ni, bp::return_value_policy<bp::return_by_value>()),
           "dimension of impulse");
 
