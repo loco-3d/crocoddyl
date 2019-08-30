@@ -597,6 +597,44 @@ class Contact6DDerived(crocoddyl.ContactModelAbstract):
         data.Ax = np.hstack([Aq, Av])
 
 
+class Impulse3DDerived(crocoddyl.ImpulseModelAbstract):
+    def __init__(self, state, frame):
+        crocoddyl.ImpulseModelAbstract.__init__(self, state, 3)
+        self.frame = frame
+        self.joint = state.pinocchio.frames[frame].parent
+        self.fXj = state.pinocchio.frames[frame].placement.inverse().action
+
+    def calc(self, data, x):
+        data.Jc = pinocchio.getFrameJacobian(self.state.pinocchio, data.pinocchio, self.frame,
+                                         pinocchio.ReferenceFrame.LOCAL)[:3, :]
+
+    def calcDiff(self, data, x, recalc=True):
+        if recalc:
+            self.calc(data, x)
+        v_partial_dq, v_partial_dv = pinocchio.getJointVelocityDerivatives(
+            self.state.pinocchio, data.pinocchio, self.joint, pinocchio.ReferenceFrame.LOCAL)
+        data.Vq = self.fXj[:3, :] * v_partial_dq
+
+
+class Impulse6DDerived(crocoddyl.ImpulseModelAbstract):
+    def __init__(self, state, frame):
+        crocoddyl.ImpulseModelAbstract.__init__(self, state, 6)
+        self.frame = frame
+        self.joint = state.pinocchio.frames[frame].parent
+        self.fXj = state.pinocchio.frames[frame].placement.inverse().action
+
+    def calc(self, data, x):
+        data.Jc = pinocchio.getFrameJacobian(self.state.pinocchio, data.pinocchio, self.frame,
+                                         pinocchio.ReferenceFrame.LOCAL)
+
+    def calcDiff(self, data, x, recalc=True):
+        if recalc:
+            self.calc(data, x)
+        v_partial_dq, v_partial_dv = pinocchio.getJointVelocityDerivatives(
+            self.state.pinocchio, data.pinocchio, self.joint, pinocchio.ReferenceFrame.LOCAL)
+        data.Vq = self.fXj * v_partial_dq
+
+
 class DDPDerived(crocoddyl.SolverAbstract):
     def __init__(self, shootingProblem):
         crocoddyl.SolverAbstract.__init__(self, shootingProblem)
