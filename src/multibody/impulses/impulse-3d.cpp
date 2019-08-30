@@ -12,8 +12,8 @@
 
 namespace crocoddyl {
 
-ImpulseModel3D::ImpulseModel3D(StateMultibody& state, const FrameTranslation& xref)
-    : ImpulseModelAbstract(state, 3), xref_(xref) {}
+ImpulseModel3D::ImpulseModel3D(StateMultibody& state, unsigned int const& frame)
+    : ImpulseModelAbstract(state, 3), frame_(frame) {}
 
 ImpulseModel3D::~ImpulseModel3D() {}
 
@@ -21,7 +21,7 @@ void ImpulseModel3D::calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
                           const Eigen::Ref<const Eigen::VectorXd>&) {
   ImpulseData3D* d = static_cast<ImpulseData3D*>(data.get());
 
-  pinocchio::getFrameJacobian(state_.get_pinocchio(), *d->pinocchio, xref_.frame, pinocchio::LOCAL, d->fJf);
+  pinocchio::getFrameJacobian(state_.get_pinocchio(), *d->pinocchio, frame_, pinocchio::LOCAL, d->fJf);
   d->Jc = d->fJf.topRows<3>();
 }
 
@@ -48,6 +48,6 @@ boost::shared_ptr<ImpulseDataAbstract> ImpulseModel3D::createData(pinocchio::Dat
   return boost::make_shared<ImpulseData3D>(this, data);
 }
 
-const FrameTranslation& ImpulseModel3D::get_xref() const { return xref_; }
+unsigned int const& ImpulseModel3D::get_frame() const { return frame_; }
 
 }  // namespace crocoddyl
