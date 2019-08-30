@@ -1,7 +1,7 @@
 import crocoddyl
-import utils
 import numpy as np
 import time
+from crocoddyl.utils import UnicycleDerived
 
 N = 200  # number of nodes
 T = int(5e3)  # number of trials
@@ -36,5 +36,5 @@ avrg_duration, min_duration, max_duration = runBenchmark(crocoddyl.ActionModelUn
 print('  CPU time [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
 
 print('Python-derived unicycle:')
-avrg_duration, min_duration, max_duration = runBenchmark(utils.UnicycleDerived)
+avrg_duration, min_duration, max_duration = runBenchmark(UnicycleDerived)
 print('  CPU time [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))

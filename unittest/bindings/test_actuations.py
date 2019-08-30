@@ -1,9 +1,11 @@
-import crocoddyl
-import utils
-import pinocchio
-import numpy as np
-import unittest
 import sys
+import unittest
+
+import numpy as np
+
+import crocoddyl
+import pinocchio
+from crocoddyl.utils import FreeFloatingActuationDerived, FullActuationDerived
 
 
 class ActuationModelAbstractTestCase(unittest.TestCase):
@@ -37,14 +39,14 @@ class FloatingBaseActuationTest(ActuationModelAbstractTestCase):
     STATE = crocoddyl.StateMultibody(pinocchio.buildSampleModelHumanoidRandom())
 
     ACTUATION = crocoddyl.ActuationModelFloatingBase(STATE)
-    ACTUATION_DER = utils.FreeFloatingActuationDerived(STATE)
+    ACTUATION_DER = FreeFloatingActuationDerived(STATE)
 
 
 class FullActuationTest(ActuationModelAbstractTestCase):
     STATE = crocoddyl.StateMultibody(pinocchio.buildSampleModelManipulator())
 
     ACTUATION = crocoddyl.ActuationModelFull(STATE)
-    ACTUATION_DER = utils.FullActuationDerived(STATE)
+    ACTUATION_DER = FullActuationDerived(STATE)
 
 
 if __name__ == '__main__':
