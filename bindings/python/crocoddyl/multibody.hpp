@@ -15,6 +15,7 @@
 #include "python/crocoddyl/multibody/actuations/full.hpp"
 #include "python/crocoddyl/multibody/cost-base.hpp"
 #include "python/crocoddyl/multibody/contact-base.hpp"
+#include "python/crocoddyl/multibody/impulse-base.hpp"
 #include "python/crocoddyl/multibody/costs/cost-sum.hpp"
 #include "python/crocoddyl/multibody/costs/state.hpp"
 #include "python/crocoddyl/multibody/costs/control.hpp"
@@ -38,6 +39,7 @@ void exposeMultibody() {
   exposeActuationFull();
   exposeCostMultibody();
   exposeContactAbstract();
+  exposeImpulseAbstract();
   exposeCostSum();
   exposeCostState();
   exposeCostControl();

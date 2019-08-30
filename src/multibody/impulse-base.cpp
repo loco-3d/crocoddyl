@@ -10,8 +10,7 @@
 
 namespace crocoddyl {
 
-ImpulseModelAbstract::ImpulseModelAbstract(StateMultibody& state, unsigned int const& ni)
-    : state_(state), ni_(ni) {}
+ImpulseModelAbstract::ImpulseModelAbstract(StateMultibody& state, unsigned int const& ni) : state_(state), ni_(ni) {}
 
 ImpulseModelAbstract::~ImpulseModelAbstract() {}
 

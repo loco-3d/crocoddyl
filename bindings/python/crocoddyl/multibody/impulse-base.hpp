@@ -19,7 +19,6 @@ namespace bp = boost::python;
 class ImpulseModelAbstract_wrap : public ImpulseModelAbstract, public bp::wrapper<ImpulseModelAbstract> {
  public:
   ImpulseModelAbstract_wrap(StateMultibody& state, int ni) : ImpulseModelAbstract(state, ni) {}
-  ImpulseModelAbstract_wrap(StateMultibody& state, int ni) : ImpulseModelAbstract(state, ni) {}
 
   void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
     assert(x.size() == state_.get_nx() && "x has wrong dimension");
@@ -47,7 +46,7 @@ void exposeImpulseAbstract() {
       "It defines a template for impulse models.\n"
       "The calc and calcDiff functions compute the impulse Jacobian\n"
       "the derivatives respectively.",
-      bp::init<StateMultibody&, int, bp::optional<int> >(
+      bp::init<StateMultibody&, int>(
           bp::args(" self", " state", " ni"),
           "Initialize the impulse model.\n\n"
           ":param state: state of the multibody system\n"
@@ -78,8 +77,7 @@ void exposeImpulseAbstract() {
                     bp::make_function(&ImpulseModelAbstract_wrap::get_state, bp::return_internal_reference<>()),
                     "state of the multibody system")
       .add_property(
-          "ni",
-          bp::make_function(&ImpulseModelAbstract_wrap::get_ni, bp::return_value_policy<bp::return_by_value>()),
+          "ni", bp::make_function(&ImpulseModelAbstract_wrap::get_ni, bp::return_value_policy<bp::return_by_value>()),
           "dimension of impulse");
 
   bp::class_<ImpulseDataAbstract, boost::shared_ptr<ImpulseDataAbstract>, boost::noncopyable>(
