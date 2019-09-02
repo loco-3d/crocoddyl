@@ -63,7 +63,7 @@ Finally you will need to configure your environment variables, e.g.:
 * [pinocchio](https://github.com/stack-of-tasks/pinocchio)
 * [quadprog](https://pypi.org/project/quadprog/)
 * [multicontact-api](https://gepgitlab.laas.fr/loco-3d/multicontact-api)
-* [example-robot-data](https://gepgitlab.laas.fr/gepetto/example-robot-data) (optional for running examples)
+* [example-robot-data](https://gepgitlab.laas.fr/gepetto/example-robot-data) (optional for running examples, install Python loaders)
 * [gepetto-viewer-corba](https://github.com/Gepetto/gepetto-viewer-corba) (optional for running examples and notebooks)
 * [jupyter](https://jupyter.org/) (optional for running notebooks)
 * [matplotlib](https://matplotlib.org/) (optional for running examples)
