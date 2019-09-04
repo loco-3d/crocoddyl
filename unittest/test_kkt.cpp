@@ -28,14 +28,14 @@ void test_kkt_constructor(crocoddyl::ShootingProblem& problem) {
   // crocoddyl::SolverAbstract* solver = crocoddyl::SolverKKT(problem); 
   // check if the dimensions are stored correctly 
   // this is only a sanity check to see if everything compiles 
-  long unsigned int& T = problem->get_T();  
-  crocoddyl::ActionModelAbstract* model_zero = problem->get_runningModels()[0];
+  const long unsigned int T = problem.get_T();  
+  crocoddyl::ActionModelAbstract* model_zero = problem.get_runningModels()[0];
   const unsigned int nx_ac = model_zero->get_nx();
   const unsigned int ndx_ac = model_zero->get_ndx();
   const unsigned int nu_ac = model_zero->get_nu();
 
   for (long unsigned int t = 0; t < T; ++t) {
-    crocoddyl::ActionModelAbstract* model_i = problem->get_runningModels()[t];
+    crocoddyl::ActionModelAbstract* model_i = problem.get_runningModels()[t];
     BOOST_CHECK_EQUAL(model_i->get_nx(), nx_ac);
     BOOST_CHECK_EQUAL(model_i->get_ndx(), ndx_ac);
     BOOST_CHECK_EQUAL(model_i->get_nu(), nu_ac);
@@ -64,7 +64,7 @@ void register_state_vector_unit_tests() {
     us.push_back(Eigen::Vector2d::Zero());
   }
   xs.push_back(x0);
-  crocoddyl::ActionModelAbstract* terminalModel = new crocoddyl::ActionModelUnicycle();
+  terminalModel = new crocoddyl::ActionModelUnicycle();
 
   // Formulating the optimal control problem
   crocoddyl::ShootingProblem problem(x0, runningModels, terminalModel);
