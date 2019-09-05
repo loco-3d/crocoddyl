@@ -22,11 +22,13 @@ namespace bp = boost::python;
 class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbstract> {
  public:
   using SolverAbstract::is_feasible_;
+  using SolverAbstract::cost_;
   using SolverAbstract::iter_;
   using SolverAbstract::problem_;
   using SolverAbstract::th_acceptstep_;
   using SolverAbstract::th_stop_;
   using SolverAbstract::ureg_;
+  using SolverAbstract::steplength_;
   using SolverAbstract::us_;
   using SolverAbstract::xreg_;
   using SolverAbstract::xs_;
@@ -167,8 +169,10 @@ void exposeSolverAbstract() {
                     bp::make_setter(&SolverAbstract_wrap::us_, bp::return_value_policy<bp::return_by_value>()),
                     "control sequence")
       .def_readwrite("isFeasible", &SolverAbstract_wrap::is_feasible_, "feasible (xs,us)")
+      .def_readwrite("cost", &SolverAbstract_wrap::cost_, "total cost")
       .def_readwrite("x_reg", &SolverAbstract_wrap::xreg_, "state regularization")
       .def_readwrite("u_reg", &SolverAbstract_wrap::ureg_, "control regularization")
+      .def_readwrite("stepLength", &SolverAbstract_wrap::steplength_, "applied step length")
       .def_readwrite("th_acceptStep", &SolverAbstract_wrap::th_acceptstep_, "threshold for step acceptance")
       .def_readwrite("th_stop", &SolverAbstract_wrap::th_stop_, "threshold for stopping criteria")
       .def_readwrite("iter", &SolverAbstract_wrap::iter_, "number of iterations runned in solve()");
