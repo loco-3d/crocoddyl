@@ -308,6 +308,56 @@ class HeightMap:
         return np.array([self.heightMapDerX[idy,idx], self.heightMapDerY[idy,idx]])
         
         
+        
+class CostModelHeightMapDistance(CostModelPinocchio):
+    """ Cost model for the distance of a frame 3d position to a user-specified height map.
+
+    The class proposes a cost model to penalize the distance of a given 3d position
+    of the robot (e.g., a foot) to a height map (e.g., the terrain).
+    """
+
+    def __init__(self, pinocchioModel, frame, heightMap, nu=None, activation=None, clearance = 0):
+        self.CostDataType = CostDataHeightMapDistance
+        CostModelPinocchio.__init__(self, pinocchioModel, ncost=1, nu=nu)
+        self.heightMap = heightMap
+        self.frame = frame
+        self.activation = activation if activation is not None else ActivationModelInequality(np.array([0.]), np.array([np.inf]))
+        self.clearance = clearance
+        
+    def calc(self, data, x, u):
+        p = m2a(data.pinocchio.oMf[self.frame].translation)
+        data.residuals = p[2] - (self.heightMap.getHeight(p[:2]) + self.clearance)
+        data.cost = sum(self.activation.calc(data.activation, data.residuals))
+        return data.cost
+
+    def calcDiff(self, data, x, u, recalc=True):
+        pinocchio.updateFramePlacements(self.pinocchio, data.pinocchio)
+        if recalc:
+            self.calc(data, x, u)
+        nq = self.nq        
+        xy = m2a(data.pinocchio.oMf[self.frame].translation)[:2]
+        R = data.pinocchio.oMf[self.frame].rotation
+        J = m2a(R * pinocchio.getFrameJacobian(self.pinocchio, data.pinocchio, self.frame,
+                                               pinocchio.ReferenceFrame.LOCAL)[:3, :])
+        Ax, Axx = self.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
+        data.Rq[:, :nq] = J[2,:] - self.heightMap.getHeightGradient(xy).dot(J[:2,:])
+        data.Lq[:] = np.dot(data.Rq.T, Ax)
+        data.Lqq[:, :] = np.dot(data.Rq.T, Axx * data.Rq)
+        return data.cost
+
+
+class CostDataHeightMapDistance(CostDataPinocchio):
+    def __init__(self, model, pinocchioData):
+        CostDataPinocchio.__init__(self, model, pinocchioData)
+        self.activation = model.activation.createData()
+        self.Lu = 0
+        self.Lv = 0
+        self.Lxu = 0
+        self.Luu = 0
+        self.Lvv = 0
+        self.Ru = 0
+        self.Rv = 0
+
 
 
 class CostModelFrameVelocity(CostModelPinocchio):
