@@ -8,6 +8,7 @@ object in argument if you want to use the display functionalities.
 
 import copy
 import time
+import threading
 
 from .diagnostic import displayTrajectory
 
@@ -69,6 +70,36 @@ class CallbackSolverDisplay:
         dt = solver.models()[0].timeStep
         displayTrajectory(self.robotwrapper, solver.xs, dt, self.rate, self.cameraTF)
 
+class DisplayThread(threading.Thread):
+    def __init__(self, callback_object, solver):
+        threading.Thread.__init__(self)
+        self.cbo = callback_object
+        self.solver = solver
+        self.dt = solver.models()[0].timeStep
+        self.displaying = True
+      
+    def run(self):
+        displayTrajectory(self.cbo.robotwrapper, self.solver.xs, self.dt, self.cbo.rate, self.cbo.cameraTF)
+        self.displaying = False
+
+
+
+class CallbackSolverDisplayParallel:
+    def __init__(self, robotwrapper, rate=-1, freq=1, cameraTF=None):
+        self.robotwrapper = robotwrapper
+        self.rate = rate
+        self.cameraTF = cameraTF
+        self.freq = freq
+        self.thread = None
+
+    def __call__(self, solver):
+        if (solver.iter + 1) % self.freq:
+            return
+        
+        if self.thread is None or self.thread.displaying==False:
+            self.thread = DisplayThread(self, solver)
+            self.thread.start()
+        
 
 class CallbackSolverTimer:
     def __init__(self):
