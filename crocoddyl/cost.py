@@ -92,6 +92,7 @@ class CostModelNumDiff(CostModelPinocchio):
         data.cost = self.model0.calc(data.data0, x, u)
         if self.withGaussApprox:
             data.residuals = data.data0.residuals
+        return data.cost
 
     def calcDiff(self, data, x, u, recalc=True):
         if recalc:
@@ -121,6 +122,12 @@ class CostModelNumDiff(CostModelPinocchio):
                 data.Ru[:, iu] = (data.datau[iu].residuals - data.data0.residuals) / h
         if self.withGaussApprox:
             data.L[:, :] = np.dot(data.R.T, data.R)
+            data.Lxx = np.dot(data.Rx.T, data.Rx)
+            #TODO
+#            data.Lxu = np.dot(data.Lx.T, data.Lu)
+            data.Luu = np.dot(data.Ru.T, data.Ru)
+#            print self.model0, np.max(np.abs(data.Lx)), np.max(np.abs(data.Lu))
+        return data.cost
 
 
 class CostDataNumDiff(CostDataPinocchio):
