@@ -650,7 +650,7 @@ class CostModelForceLinearCone(CostModelPinocchio):
     """
 
     def __init__(self, pinocchioModel, contactModel, A, ref=None, nu=None, activation=None):
-        self.CostDataType = CostDataForce
+        self.CostDataType = CostDataForceLinearCone
         CostModelPinocchio.__init__(self, pinocchioModel, ncost=A.shape[0], nu=nu)
         self.A = A
         self.nfaces = A.shape[0]
@@ -663,7 +663,17 @@ class CostModelForceLinearCone(CostModelPinocchio):
         if data.contact is None:
             raise RuntimeError('''The CostForce data should be specifically initialized from the
             contact data ... no automatic way of doing that yet ...''')
-        data.f = data.contact.f
+        # rotate forces from local to world frame
+        frame_index = self.contact.frame
+        R = m2a(data.pinocchio.oMf[frame_index].rotation)
+        f_world = R.dot(data.contact.f) 
+        data.f = f_world
+#        print "frame id", frame_index
+#        print "f local", data.contact.f.T
+#        print "f world", f_world.T
+        
+#        data.f = data.contact.f
+        
         data.residuals = np.dot(self.A, data.f) - self.ref
         data.cost = sum(self.activation.calc(data.activation, data.residuals))
         return data.cost
@@ -673,25 +683,36 @@ class CostModelForceLinearCone(CostModelPinocchio):
             self.calc(data, x, u)
         assert (self.nu == len(u) and self.contact.nu == self.nu)
         df_dx, df_du = data.contact.df_dx, data.contact.df_du
+        
+        # rotate from local to world frame
+        frame_index = self.contact.frame
+        R = m2a(data.pinocchio.oMf[frame_index].rotation)
+        df_dx_w, df_du_w = R.dot(df_dx), R.dot(df_du)
+        # TODO: add term due to variations of R with respect to q
+
         Ax, Axx = self.activation.calcDiff(data.activation, data.residuals)
         sel = Axx.astype(bool)[:, 0]
+        
         A = self.A[sel, :]
         A2 = np.dot(A.T, A)
 
-        data.Rx[:, :] = np.dot(self.A, df_dx)
-        data.Ru[:, :] = np.dot(self.A, df_du)
+        data.Rx[:, :] = np.dot(self.A, df_dx_w)
+        data.Ru[:, :] = np.dot(self.A, df_du_w)
 
         data.Lx[:] = np.dot(data.Rx[sel, :].T, Ax[sel])
         data.Lu[:] = np.dot(data.Ru[sel, :].T, Ax[sel])
 
-        data.Lxx[:, :] = np.dot(df_dx.T, np.dot(A2, df_dx))
-        data.Lxu[:, :] = np.dot(df_dx.T, np.dot(A2, df_du))
-        data.Luu[:, :] = np.dot(df_du.T, np.dot(A2, df_du))
+        data.Lxx[:, :] = np.dot(df_dx_w.T, np.dot(A2, df_dx_w))
+#        Lxx1 = np.outer( data.Rx[:].T , data.Rx[:] )
+#        Lxx1 - data.Lxx[:, :]
+        
+        data.Lxu[:, :] = np.dot(df_dx_w.T, np.dot(A2, df_du_w))
+        data.Luu[:, :] = np.dot(df_du_w.T, np.dot(A2, df_du_w))
 
         return data.cost
 
 
-class CostDataForceCone(CostDataPinocchio):
+class CostDataForceLinearCone(CostDataPinocchio):
     def __init__(self, model, pinocchioData, contactData=None):
         CostDataPinocchio.__init__(self, model, pinocchioData)
         self.contact = contactData
