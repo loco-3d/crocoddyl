@@ -44,7 +44,6 @@ class SolverDDP : public SolverAbstract {
   const std::vector<Eigen::VectorXd>& get_k() const;
   const std::vector<Eigen::VectorXd>& get_gaps() const;
 
- private:
   void computeGains(unsigned int const& t);
   void increaseRegularization();
   void decreaseRegularization();
@@ -72,7 +71,6 @@ class SolverDDP : public SolverAbstract {
   std::vector<Eigen::VectorXd> k_;
   std::vector<Eigen::VectorXd> gaps_;
 
- private:
   Eigen::VectorXd xnext_;
   Eigen::VectorXd x_reg_;
   Eigen::MatrixXd FxTVxx_p_;
