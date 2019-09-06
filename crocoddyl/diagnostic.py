@@ -85,4 +85,4 @@ def displayTrajectory(robot, xs, dt=0.1, rate=-1, cameraTF=None):
     for i, x in enumerate(xs):
         if not i % S:
             robot.display(a2m(x[:robot.nq]))
-            time.sleep(dt)
+            time.sleep(S*dt)
