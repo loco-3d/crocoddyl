@@ -7,10 +7,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/optctrl/shooting.hpp"
+#include <iostream>
+#ifdef WITH_MULTITHREADING
+#include <omp.h>
+#define NUM_THREADS 32
+#endif //WITH_MULTITHREADING
 
 namespace crocoddyl {
 
-ShootingProblem::ShootingProblem(const Eigen::VectorXd& x0, const std::vector<ActionModelAbstract*>& running_models,
+ShootingProblem::ShootingProblem(const Eigen::VectorXd& x0,
+                                 const std::vector<ActionModelAbstract*>& running_models,
                                  ActionModelAbstract* const terminal_model)
     : terminal_model_(terminal_model),
       running_models_(running_models),
@@ -47,15 +53,20 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const s
   assert(us.size() == T_ && "Wrong dimension of the control trajectory, it should be T.");
 
   cost_ = 0;
-  for (unsigned int i = 0; i < T_; ++i) {
-    ActionModelAbstract* model = running_models_[i];
-    boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
-    const Eigen::VectorXd& x = xs[i];
-    const Eigen::VectorXd& u = us[i];
+  unsigned int i;
 
-    model->calcDiff(data, x, u);
-    cost_ += data->cost;
+#ifdef WITH_MULTITHREADING
+  omp_set_num_threads(NUM_THREADS);
+#pragma omp parallel for
+#endif
+  for (i = 0; i < T_; ++i) {
+    running_models_[i]->calcDiff(running_datas_[i], xs[i], us[i]);
   }
+
+  for (unsigned int i = 0; i < T_; ++i) {
+    cost_ += running_datas_[i]->cost;
+  }
+  
   terminal_model_->calcDiff(terminal_data_, xs.back());
   cost_ += terminal_data_->cost;
   return cost_;

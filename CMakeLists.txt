@@ -40,7 +40,7 @@ SET(CXX_DISABLE_WERROR True)
 OPTION(ENABLE_VECTORIZATION "Enable vectorization and futhers processor-related optimizations" OFF)
 OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" ON)
 OPTION(BUILD_UNIT_TESTS "Build the unitary tests" ON)
-OPTION(BUILD_BENCHMARK "Build the benchmark" OFF)
+OPTION(BUILD_BENCHMARK "Build the benchmark" ON)
 
 
 IF(ENABLE_VECTORIZATION)
@@ -56,6 +56,20 @@ ADD_REQUIRED_DEPENDENCY("pinocchio >= 2.1.0")
 ADD_OPTIONAL_DEPENDENCY("multicontact-api >= 1.1.0")
 ADD_OPTIONAL_DEPENDENCY("quadprog")
 ADD_OPTIONAL_DEPENDENCY("scipy")
+
+
+OPTION(BUILD_WITH_MULTITHREADING "Build the library with the OpenMP support (required OpenMP)" ON)
+
+#OpenMP
+if(BUILD_WITH_MULTITHREADING)
+  find_package(OpenMP)
+ENDIF()
+if(OPENMP_FOUND)
+  SET(CMAKE_CXX_FLAGS "-fopenmp")
+  ADD_DEFINITIONS(-DWITH_MULTITHREADING)
+  LIST(APPEND CFLAGS_DEPENDENCIES "-DWITH_MULTITHREADING")
+ENDIF()
+
 
 SET(BOOST_REQUIERED_COMPONENTS filesystem serialization system)
 SET(BOOST_BUILD_COMPONENTS unit_test_framework)
