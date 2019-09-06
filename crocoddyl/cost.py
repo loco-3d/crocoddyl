@@ -271,6 +271,43 @@ class CostDataFrameTranslation(CostDataPinocchio):
         self.Lvv = 0
         self.Ru = 0
         self.Rv = 0
+        
+        
+class HeightMap:
+    
+    def __init__(self, heightMapMatrix, firstPointXyCoordinates, xyGridResolution, heightMapDerX, heightMapDerY):
+        self.heightMapMatrix = heightMapMatrix
+        self.xy0 = firstPointXyCoordinates
+        self.xyRes = xyGridResolution
+        self.nx = heightMapMatrix.shape[1]
+        self.ny = heightMapMatrix.shape[0]
+        self.heightMapDerX = heightMapDerX
+        self.heightMapDerY = heightMapDerY
+        
+        
+    def getIndex(self, xy):
+        delta_xy = (xy-self.xy0)
+        idx = int(delta_xy[0]/self.xyRes[0])
+        idy = int(-delta_xy[1]/self.xyRes[1])
+        
+        if(idx<0 or idy<0 or idx>self.nx-1 or idy>self.ny-1):
+            print "HeightMap Point out of map", delta_xy, idx, idy, self.nx, self.ny
+            return np.nan, np.nan
+            
+        return idx,idy
+        
+    def getHeight(self, xy):
+        # compute indeces to access heightMapMatrix
+        idx,idy = self.getIndex(xy)
+        if np.isnan(idx): return np.nan
+        return self.heightMapMatrix[idy, idx]
+        
+    def getHeightGradient(self, xy):
+        idx,idy = self.getIndex(xy)
+        if np.isnan(idx): return np.nan
+        return np.array([self.heightMapDerX[idy,idx], self.heightMapDerY[idy,idx]])
+        
+        
 
 
 class CostModelFrameVelocity(CostModelPinocchio):
