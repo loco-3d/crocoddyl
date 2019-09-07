@@ -49,8 +49,8 @@ void exposeSolverFDDP() {
                "                used with very good guess points (init_xs, init_us).\n"
                ":returns the optimal trajectory xopt, uopt and a boolean that describes if convergence was reached."))
 
-      .def("expectedImprovement", &SolverFDDP::expectedImprovement, bp::return_value_policy<bp::copy_const_reference>(),
-           bp::args(" self"),
+      .def("expectedImprovement", &SolverFDDP::expectedImprovement,
+           bp::return_value_policy<bp::copy_const_reference>(), bp::args(" self"),
            "Return two scalars denoting the quadratic improvement model\n\n"
            "For computing the expected improvement, you need to compute first\n"
            "the search direction by running computeDirection. The quadratic\n"
