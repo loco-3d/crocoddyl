@@ -31,13 +31,11 @@ class SolverFDDP : public SolverDDP {
              unsigned int const& maxiter = 100,
              const bool& is_feasible = false, const double& regInit = 1e-9);
  protected:
-
   double dg_;
   double dq_;
   double dv_;
 
-private:
-
+ private:
   double th_acceptNegStep_;
 };
 

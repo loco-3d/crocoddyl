@@ -12,10 +12,10 @@ namespace crocoddyl {
 
 SolverFDDP::SolverFDDP(ShootingProblem& problem)
     : SolverDDP(problem),
-      th_acceptNegStep_(2),
       dg_(0),
       dq_(0),
-      dv_(0) {}
+      dv_(0),
+      th_acceptNegStep_(2) {}
 
 SolverFDDP::~SolverFDDP() {}
 
@@ -193,7 +193,6 @@ void SolverFDDP::backwardPass() {
     boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
     const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
     const Eigen::VectorXd& Vx_p = Vx_[t + 1];
-    const Eigen::VectorXd& gap_p = gaps_[t + 1];
 
     FxTVxx_p_.noalias() = d->get_Fx().transpose() * Vxx_p;
     FuTVxx_p_[t].noalias() = d->get_Fu().transpose() * Vxx_p;
