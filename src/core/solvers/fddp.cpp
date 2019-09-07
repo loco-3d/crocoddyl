@@ -90,7 +90,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
     }
     stoppingCriteria();
 
-    const unsigned int& n_callbacks = static_cast<unsigned int>(callbacks_.size());
+    unsigned int const& n_callbacks = static_cast<unsigned int>(callbacks_.size());
     for (unsigned int c = 0; c < n_callbacks; ++c) {
       CallbackAbstract& callback = *callbacks_[c];
       callback(*this);
@@ -106,7 +106,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
 void SolverFDDP::updateExpectedImprovement() {
   dg_ = 0;
   dq_ = 0;
-  const unsigned int& T = this->problem_.get_T();
+  unsigned int const& T = this->problem_.get_T();
   if (!is_feasible_) {
     dg_ -= Vx_.back().transpose() * gaps_.back();
     dq_ += gaps_.back().transpose() * Vxx_.back() * gaps_.back();
@@ -124,7 +124,7 @@ void SolverFDDP::updateExpectedImprovement() {
 const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
   dv_ = 0;
   d_.fill(0);
-  const unsigned int& T = this->problem_.get_T();
+  unsigned int const& T = this->problem_.get_T();
   if (!is_feasible_) {
     problem_.running_models_.back()->get_state().diff(xs_try_.back(), xs_.back(), dx_.back());
     dv_ -= gaps_.back().transpose() * Vxx_.back() * dx_.back();
@@ -144,7 +144,7 @@ double SolverFDDP::calc() {
     const Eigen::VectorXd& x0 = problem_.get_x0();
     problem_.running_models_[0]->get_state().diff(xs_[0], x0, gaps_[0]);
 
-    const unsigned int& T = problem_.get_T();
+    unsigned int const& T = problem_.get_T();
     for (unsigned int t = 0; t < T; ++t) {
       ActionModelAbstract* model = problem_.running_models_[t];
       boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
@@ -228,7 +228,7 @@ void SolverFDDP::forwardPass(const double& steplength) {
 
   xnext_ = problem_.get_x0();
 
-  const unsigned int& T = problem_.get_T();
+  unsigned int const& T = problem_.get_T();
   for (unsigned int t = 0; t < T; ++t) {
     ActionModelAbstract* m = problem_.running_models_[t];
     boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
