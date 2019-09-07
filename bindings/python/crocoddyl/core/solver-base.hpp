@@ -21,14 +21,14 @@ namespace bp = boost::python;
 
 class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbstract> {
  public:
-  using SolverAbstract::is_feasible_;
   using SolverAbstract::cost_;
+  using SolverAbstract::is_feasible_;
   using SolverAbstract::iter_;
   using SolverAbstract::problem_;
+  using SolverAbstract::steplength_;
   using SolverAbstract::th_acceptstep_;
   using SolverAbstract::th_stop_;
   using SolverAbstract::ureg_;
-  using SolverAbstract::steplength_;
   using SolverAbstract::us_;
   using SolverAbstract::xreg_;
   using SolverAbstract::xs_;
