@@ -113,10 +113,11 @@ void SolverFDDP::updateExpectedImprovement() {
   }
   for (unsigned int t = 0; t < T; ++t) {
     dg_ += Qu_[t].transpose() * k_[t];
-    dq_ -= k_[t].transpose() * Quu_[t] * k_[t];
+    dq_ -= k_[t].transpose() * Quuk_[t];
     if (!is_feasible_) {
       dg_ -= Vx_[t].transpose() * gaps_[t];
-      dq_ += gaps_[t].transpose() * Vxx_[t] * gaps_[t];
+      fTVxx_p_.noalias() = Vxx_[t] * gaps_[t];
+      dq_ += gaps_[t].transpose() * fTVxx_p_;
     }
   }
 }
@@ -127,10 +128,12 @@ const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
   unsigned int const& T = this->problem_.get_T();
   if (!is_feasible_) {
     problem_.running_models_.back()->get_state().diff(xs_try_.back(), xs_.back(), dx_.back());
-    dv_ -= gaps_.back().transpose() * Vxx_.back() * dx_.back();
+    fTVxx_p_.noalias() = Vxx_.back() * dx_.back();
+    dv_ -= gaps_.back().transpose() * fTVxx_p_;
     for (unsigned int t = 0; t < T; ++t) {
       problem_.running_models_[t]->get_state().diff(xs_try_[t], xs_[t], dx_[t]);
-      dv_ -= gaps_[t].transpose() * Vxx_[t] * dx_[t];
+      fTVxx_p_.noalias() = Vxx_[t] * dx_[t];
+      dv_ -= gaps_[t].transpose() * fTVxx_p_;
     }
   }
   d_[0] = dg_ + dv_;
@@ -151,7 +154,7 @@ double SolverFDDP::calc() {
       model->get_state().diff(xs_[t + 1], d->get_xnext(), gaps_[t + 1]);
     }
   } else if (!was_feasible_) {
-    for (std::vector<Eigen::VectorXd>::iterator it = gaps_.begin(); it != gaps_.end(); it++) {
+    for (std::vector<Eigen::VectorXd>::iterator it = gaps_.begin(); it != gaps_.end(); ++it) {
       it->setZero();
     }
   }
@@ -209,7 +212,7 @@ void SolverFDDP::backwardPass() {
 
     // Compute and store the Vx gradient at end of the interval (rollout state)
     if (!is_feasible_) {
-      Vx_[t] += Vxx_[t] * gaps_[t];
+      Vx_[t].noalias() += Vxx_[t] * gaps_[t];
     }
 
     if (raiseIfNaN(Vx_[t].lpNorm<Eigen::Infinity>())) {
@@ -225,9 +228,7 @@ void SolverFDDP::forwardPass(const double& steplength) {
   assert(steplength <= 1. && "Step length has to be <= 1.");
   assert(steplength >= 0. && "Step length has to be >= 0.");
   cost_try_ = 0.;
-
   xnext_ = problem_.get_x0();
-
   unsigned int const& T = problem_.get_T();
   for (unsigned int t = 0; t < T; ++t) {
     ActionModelAbstract* m = problem_.running_models_[t];
@@ -238,7 +239,7 @@ void SolverFDDP::forwardPass(const double& steplength) {
       m->get_state().integrate(xnext_, gaps_[t] * (steplength - 1), xs_try_[t]);
     }
     m->get_state().diff(xs_[t], xs_try_[t], dx_[t]);
-    us_try_[t] = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
+    us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
     m->calc(d, xs_try_[t], us_try_[t]);
     cost_try_ += d->cost;
 
