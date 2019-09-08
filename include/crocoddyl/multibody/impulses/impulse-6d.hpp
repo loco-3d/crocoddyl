@@ -40,9 +40,13 @@ struct ImpulseData6D : public ImpulseDataAbstract {
       : ImpulseDataAbstract(model, data),
         jMf(model->get_state().get_pinocchio().frames[model->get_frame()].placement),
         fXj(jMf.inverse().toActionMatrix()),
-        fJf(6, model->get_state().get_nv()) {
+        fJf(6, model->get_state().get_nv()),
+        v_partial_dq(6, model->get_state().get_nv()),
+        v_partial_dv(6, model->get_state().get_nv()) {
     joint = model->get_state().get_pinocchio().frames[model->get_frame()].parent;
     fJf.fill(0);
+    v_partial_dq.fill(0);
+    v_partial_dv.fill(0);
   }
 
   pinocchio::SE3 jMf;
