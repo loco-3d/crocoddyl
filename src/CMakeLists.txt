@@ -21,6 +21,10 @@ SET(${PROJECT_NAME}_SOURCES
   core/activations/weighted-quadratic.cpp
   multibody/cost-base.cpp
   multibody/contact-base.cpp
+  multibody/impulse-base.cpp
+  multibody/impulses/multiple-impulses.cpp
+  multibody/impulses/impulse-3d.cpp
+  multibody/impulses/impulse-6d.cpp
   multibody/states/multibody.cpp
   multibody/actuations/floating-base.cpp
   multibody/actuations/full.cpp
