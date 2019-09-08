@@ -606,13 +606,13 @@ class Impulse3DDerived(crocoddyl.ImpulseModelAbstract):
 
     def calc(self, data, x):
         data.Jc = pinocchio.getFrameJacobian(self.state.pinocchio, data.pinocchio, self.frame,
-                                         pinocchio.ReferenceFrame.LOCAL)[:3, :]
+                                             pinocchio.ReferenceFrame.LOCAL)[:3, :]
 
     def calcDiff(self, data, x, recalc=True):
         if recalc:
             self.calc(data, x)
-        v_partial_dq, v_partial_dv = pinocchio.getJointVelocityDerivatives(
-            self.state.pinocchio, data.pinocchio, self.joint, pinocchio.ReferenceFrame.LOCAL)
+        v_partial_dq, v_partial_dv = pinocchio.getJointVelocityDerivatives(self.state.pinocchio, data.pinocchio,
+                                                                           self.joint, pinocchio.ReferenceFrame.LOCAL)
         data.Vq = self.fXj[:3, :] * v_partial_dq
 
 
@@ -625,13 +625,13 @@ class Impulse6DDerived(crocoddyl.ImpulseModelAbstract):
 
     def calc(self, data, x):
         data.Jc = pinocchio.getFrameJacobian(self.state.pinocchio, data.pinocchio, self.frame,
-                                         pinocchio.ReferenceFrame.LOCAL)
+                                             pinocchio.ReferenceFrame.LOCAL)
 
     def calcDiff(self, data, x, recalc=True):
         if recalc:
             self.calc(data, x)
-        v_partial_dq, v_partial_dv = pinocchio.getJointVelocityDerivatives(
-            self.state.pinocchio, data.pinocchio, self.joint, pinocchio.ReferenceFrame.LOCAL)
+        v_partial_dq, v_partial_dv = pinocchio.getJointVelocityDerivatives(self.state.pinocchio, data.pinocchio,
+                                                                           self.joint, pinocchio.ReferenceFrame.LOCAL)
         data.Vq = self.fXj * v_partial_dq
 
 
