@@ -96,12 +96,14 @@ class Impulse3DTest(ImpulseModelAbstractTestCase):
     IMPULSE = crocoddyl.ImpulseModel3D(ROBOT_STATE, frame)
     IMPULSE_DER = Impulse3DDerived(ROBOT_STATE, frame)
 
+
 class Impulse3DMultipleTest(ImpulseModelMultipleAbstractTestCase):
     ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     gains = pinocchio.utils.rand(2)
     IMPULSE = crocoddyl.ImpulseModel3D(ROBOT_STATE, ROBOT_MODEL.getFrameId('rleg5_joint'))
+
 
 class Impulse6DTest(ImpulseModelAbstractTestCase):
     ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
