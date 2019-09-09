@@ -8,13 +8,14 @@
 
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
+#include <Eigen/Dense>
+#include <pinocchio/fwd.hpp>
 #include <boost/test/included/unit_test.hpp>
 #include <boost/bind.hpp>
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/actions/lqr.hpp"
 #include "crocoddyl/core/actions/unicycle.hpp"
 #include "crocoddyl/core/numdiff/action.hpp"
-#include <Eigen/Dense>
 
 using namespace boost::unit_test;
 
