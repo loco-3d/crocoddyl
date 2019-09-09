@@ -11,12 +11,11 @@
 #ifdef WITH_MULTITHREADING
 #include <omp.h>
 #define NUM_THREADS 4
-#endif //WITH_MULTITHREADING
+#endif  // WITH_MULTITHREADING
 
 namespace crocoddyl {
 
-ShootingProblem::ShootingProblem(const Eigen::VectorXd& x0,
-                                 const std::vector<ActionModelAbstract*>& running_models,
+ShootingProblem::ShootingProblem(const Eigen::VectorXd& x0, const std::vector<ActionModelAbstract*>& running_models,
                                  ActionModelAbstract* const terminal_model)
     : terminal_model_(terminal_model),
       running_models_(running_models),
@@ -66,7 +65,7 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const s
   for (unsigned int i = 0; i < T_; ++i) {
     cost_ += running_datas_[i]->cost;
   }
-  
+
   terminal_model_->calcDiff(terminal_data_, xs.back());
   cost_ += terminal_data_->cost;
   return cost_;

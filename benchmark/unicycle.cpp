@@ -1,17 +1,16 @@
 #include "crocoddyl/core/actions/unicycle.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
-#include<time.h>
+#include <time.h>
 
 #ifdef WITH_MULTITHREADING
-#include<omp.h>
-#endif //WITH_MULTITHREADING
-
+#include <omp.h>
+#endif  // WITH_MULTITHREADING
 
 int main() {
   bool CALLBACKS = false;
   unsigned int N = 200;  // number of nodes
-  unsigned int T = 10;  // number of trials
+  unsigned int T = 10;   // number of trials
   unsigned int MAXITER = 1;
   using namespace crocoddyl;
 
@@ -48,28 +47,30 @@ int main() {
     clock_gettime(CLOCK_MONOTONIC, &start);
     ddp.solve(xs, us, MAXITER);
     clock_gettime(CLOCK_MONOTONIC, &finish);
-    elapsed = (finish.tv_sec - start.tv_sec)*1000000.0;
-    elapsed += (finish.tv_nsec - start.tv_nsec)/ 1000.0;
+    elapsed = (finish.tv_sec - start.tv_sec) * 1000000.0;
+    elapsed += (finish.tv_nsec - start.tv_nsec) / 1000.0;
 
-    duration[i] = elapsed; //in us
+    duration[i] = elapsed;  // in us
   }
 
   double avrg_duration = duration.sum() / T;
   double min_duration = duration.minCoeff();
   double max_duration = duration.maxCoeff();
-  std::cout << "Wall time solve [us]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")" << std::endl;
+  std::cout << "Wall time solve [us]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
+            << std::endl;
 
   for (unsigned int i = 0; i < T; ++i) {
     clock_gettime(CLOCK_MONOTONIC, &start);
     problem.calcDiff(xs, us);
     clock_gettime(CLOCK_MONOTONIC, &finish);
-    elapsed = (finish.tv_sec - start.tv_sec)*1000000.0;
-    elapsed += (finish.tv_nsec - start.tv_nsec)/ 1000.0;
-    duration[i] = elapsed; //in us
+    elapsed = (finish.tv_sec - start.tv_sec) * 1000000.0;
+    elapsed += (finish.tv_nsec - start.tv_nsec) / 1000.0;
+    duration[i] = elapsed;  // in us
   }
 
   avrg_duration = duration.sum() / T;
   min_duration = duration.minCoeff();
   max_duration = duration.maxCoeff();
-  std::cout << "Wall time calcDiff [us]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")" << std::endl;
+  std::cout << "Wall time calcDiff [us]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
+            << std::endl;
 }
