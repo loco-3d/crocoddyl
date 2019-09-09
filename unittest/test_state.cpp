@@ -19,15 +19,11 @@
 
 using namespace boost::unit_test;
 
-//____________________________________________________________________________//
-
 void test_state_dimension(crocoddyl::StateAbstract& state, int nx) {
   // Checking the dimension of zero and random states
   BOOST_CHECK(state.zero().size() == nx);
   BOOST_CHECK(state.rand().size() == nx);
 }
-
-//____________________________________________________________________________//
 
 void test_integrate_against_difference(crocoddyl::StateAbstract& state) {
   // Generating random states
@@ -47,8 +43,6 @@ void test_integrate_against_difference(crocoddyl::StateAbstract& state) {
   BOOST_CHECK(dxi.isMuchSmallerThan(1.0, 1e-9));
 }
 
-//____________________________________________________________________________//
-
 void test_difference_against_integrate(crocoddyl::StateAbstract& state) {
   // Generating random states
   Eigen::VectorXd x = state.rand();
@@ -63,8 +57,6 @@ void test_difference_against_integrate(crocoddyl::StateAbstract& state) {
   // Checking that both states agree
   BOOST_CHECK((dxd - dx).isMuchSmallerThan(1.0, 1e-9));
 }
-
-//____________________________________________________________________________//
 
 void test_Jdiff_firstsecond(crocoddyl::StateAbstract& state) {
   // Generating random values for the initial and terminal states
@@ -87,8 +79,6 @@ void test_Jdiff_firstsecond(crocoddyl::StateAbstract& state) {
   BOOST_CHECK((Jdiff_second - Jdiff_both_second).isMuchSmallerThan(1.0, 1e-9));
 }
 
-//____________________________________________________________________________//
-
 void test_Jint_firstsecond(crocoddyl::StateAbstract& state) {
   // Generating random values for the initial and terminal states
   Eigen::VectorXd x = state.rand();
@@ -109,8 +99,6 @@ void test_Jint_firstsecond(crocoddyl::StateAbstract& state) {
   BOOST_CHECK((Jint_first - Jint_both_first).isMuchSmallerThan(1.0, 1e-9));
   BOOST_CHECK((Jint_second - Jint_both_second).isMuchSmallerThan(1.0, 1e-9));
 }
-
-//____________________________________________________________________________//
 
 void test_Jdiff_num_diff_firstsecond(crocoddyl::StateAbstract& state) {
   // Generating random values for the initial and terminal states
@@ -136,8 +124,6 @@ void test_Jdiff_num_diff_firstsecond(crocoddyl::StateAbstract& state) {
   BOOST_CHECK((Jdiff_num_diff_second - Jdiff_num_diff_both_second).isMuchSmallerThan(1.0, 1e-9));
 }
 
-//____________________________________________________________________________//
-
 void test_Jint_num_diff_firstsecond(crocoddyl::StateAbstract& state) {
   // Generating random values for the initial and terminal states
   Eigen::VectorXd x = state.rand();
@@ -161,8 +147,6 @@ void test_Jint_num_diff_firstsecond(crocoddyl::StateAbstract& state) {
   BOOST_CHECK((Jint_num_diff_first - Jint_num_diff_both_first).isMuchSmallerThan(1.0, 1e-9));
   BOOST_CHECK((Jint_num_diff_second - Jint_num_diff_both_second).isMuchSmallerThan(1.0, 1e-9));
 }
-
-//____________________________________________________________________________//
 
 void test_Jdiff_against_numdiff(crocoddyl::StateAbstract& state, double num_diff_modifier) {
   // Generating random values for the initial and terminal states
@@ -188,8 +172,6 @@ void test_Jdiff_against_numdiff(crocoddyl::StateAbstract& state, double num_diff
   BOOST_CHECK((Jdiff_2 - Jdiff_num_2).isMuchSmallerThan(1.0, tol));
 }
 
-//____________________________________________________________________________//
-
 void test_Jintegrate_against_numdiff(crocoddyl::StateAbstract& state, double num_diff_modifier) {
   // Generating random values for the initial state and its rate of change
   Eigen::VectorXd x = state.rand();
@@ -213,8 +195,6 @@ void test_Jintegrate_against_numdiff(crocoddyl::StateAbstract& state, double num
   BOOST_CHECK((Jint_2 - Jint_num_2).isMuchSmallerThan(1.0, tol));
 }
 
-//____________________________________________________________________________//
-
 void test_Jdiff_and_Jintegrate_are_inverses(crocoddyl::StateAbstract& state) {
   // Generating random states
   Eigen::VectorXd x1 = state.rand();
@@ -235,8 +215,6 @@ void test_Jdiff_and_Jintegrate_are_inverses(crocoddyl::StateAbstract& state) {
   Eigen::MatrixXd dDX_dX = J2;
   BOOST_CHECK((dX_dDX - dDX_dX.inverse()).isMuchSmallerThan(1.0, 1e-9));
 }
-
-//____________________________________________________________________________//
 
 void test_velocity_from_Jintegrate_Jdiff(crocoddyl::StateAbstract& state) {
   // Generating random states
@@ -277,8 +255,6 @@ void test_velocity_from_Jintegrate_Jdiff(crocoddyl::StateAbstract& state) {
   BOOST_CHECK((J2 * eps - (-dx + dxi) / h).isMuchSmallerThan(1.0, 1e-3));
 }
 
-//____________________________________________________________________________//
-
 void register_state_vector_unit_tests() {
   int nx = 10;
   double num_diff_modifier = 1e4;
@@ -316,14 +292,10 @@ void register_state_vector_unit_tests() {
       BOOST_TEST_CASE(boost::bind(&test_velocity_from_Jintegrate_Jdiff, crocoddyl::StateVector(nx))));
 }
 
-//____________________________________________________________________________//
-
 bool init_function() {
   // Here we test the state_vector
   register_state_vector_unit_tests();
   return true;
 }
-
-//____________________________________________________________________________//
 
 int main(int argc, char** argv) { return ::boost::unit_test::unit_test_main(&init_function, argc, argv); }
