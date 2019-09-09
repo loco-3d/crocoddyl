@@ -10,7 +10,7 @@
 #include <iostream>
 #ifdef WITH_MULTITHREADING
 #include <omp.h>
-#define NUM_THREADS 4
+#define NUM_THREADS NTHREADS
 #endif  // WITH_MULTITHREADING
 
 namespace crocoddyl {

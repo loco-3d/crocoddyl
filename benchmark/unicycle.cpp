@@ -10,7 +10,7 @@
 int main() {
   bool CALLBACKS = false;
   unsigned int N = 200;  // number of nodes
-  unsigned int T = 10;   // number of trials
+  unsigned int T = 5e3;   // number of trials
   unsigned int MAXITER = 1;
   using namespace crocoddyl;
 

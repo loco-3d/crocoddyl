@@ -37,7 +37,7 @@ ENDIF()
 SET(CXX_DISABLE_WERROR True)
 
 # Create different building options
-OPTION(ENABLE_VECTORIZATION "Enable vectorization and futhers processor-related optimizations" ON)
+OPTION(ENABLE_VECTORIZATION "Enable vectorization and futhers processor-related optimizations" OFF)
 OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" ON)
 OPTION(BUILD_UNIT_TESTS "Build the unitary tests" ON)
 OPTION(BUILD_BENCHMARK "Build the benchmark" ON)
@@ -58,16 +58,25 @@ ADD_OPTIONAL_DEPENDENCY("quadprog")
 ADD_OPTIONAL_DEPENDENCY("scipy")
 
 
-OPTION(BUILD_WITH_MULTITHREADING "Build the library with the OpenMP support (required OpenMP)" ON)
+OPTION(BUILD_WITH_MULTITHREADS "Build the library with the OpenMP support (required OpenMP)" OFF)
+IF(BUILD_WITH_MULTITHREADS)
+  SET(BUILD_WITH_NTHREADS "4" CACHE STRING "Number of threads")
+  string(REGEX MATCH "^[0-9]+$" BUILD_WITH_NTHREADS  ${BUILD_WITH_NTHREADS})
+  IF(NOT BUILD_WITH_NTHREADS MATCHES "^[0-9]+$")
+    SET(BUILD_WITH_NTHREADS 4)
+    MESSAGE("Warning: the number of threads have to be an interger value, set to ${BUILD_WITH_NTHREADS}")
+  ENDIF()
+ENDIF()
 
-#OpenMP
-if(BUILD_WITH_MULTITHREADING)
+# Add OpenMP
+if(BUILD_WITH_MULTITHREADS)
   find_package(OpenMP)
 ENDIF()
 if(OPENMP_FOUND)
   SET(CMAKE_CXX_FLAGS "-fopenmp")
   ADD_DEFINITIONS(-DWITH_MULTITHREADING)
-  LIST(APPEND CFLAGS_DEPENDENCIES "-DWITH_MULTITHREADING")
+  ADD_DEFINITIONS(-DNTHREADS=${BUILD_WITH_NTHREADS})
+  LIST(APPEND CFLAGS_DEPENDENCIES "-DWITH_MULTITHREADING", "DNTHREADS")
 ENDIF()
 
 
