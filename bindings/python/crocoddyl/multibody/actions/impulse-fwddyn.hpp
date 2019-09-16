@@ -1,0 +1,105 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+#ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_ACTIONS_IMPULSE_FWDDYN_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_ACTIONS_IMPULSE_FWDDYN_HPP_
+
+#include "crocoddyl/multibody/actions/impulse-fwddyn.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+namespace bp = boost::python;
+
+void exposeActionImpulseFwdDynamics() {
+  bp::class_<ActionModelImpulseFwdDynamics, bp::bases<ActionModelAbstract> >(
+      "ActionModelImpulseFwdDynamics",
+      "Action model for impulse forward dynamics in multibody systems.\n\n"
+      "The impulse is modelled as holonomic constraits in the contact frame. There\n"
+      "is also a custom implementation in case of system with armatures. If you want to\n"
+      "include the armature, you need to use setArmature(). On the other hand, the\n"
+      "stack of cost functions are implemented in CostModelSum().",
+      bp::init<StateMultibody&, ImpulseModelMultiple&, CostModelSum&, bp::optional<double, double, bool> >(
+          bp::args(" self", " state", " impulses", " costs", " r_coeff=0.", " inv_damping=0.", "enable_force=False"),
+          "Initialize the impulse forward-dynamics action model.\n\n"
+          "The damping factor is needed when the contact Jacobian is not full-rank. Otherwise,\n"
+          "a good damping factor could be 1e-12. In addition, if you have cost based on forces,\n"
+          "you need to enable the computation of the force Jacobians (i.e. enable_force=True)."
+          ":param state: multibody state\n"
+          ":param impulses: multiple impulse model\n"
+          ":param costs: stack of cost functions\n"
+          ":param r_coeff: restitution coefficient\n"
+          ":param inv_damping: Damping factor for cholesky decomposition of JMinvJt\n"
+          ":param enable_force: Enable the computation of force Jacobians")[bp::with_custodian_and_ward<
+          1, 2, bp::with_custodian_and_ward<1, 3, bp::with_custodian_and_ward<1, 4> > >()])
+      .def("calc", &ActionModelImpulseFwdDynamics::calc_wrap,
+           ActionModel_calc_wraps(
+               bp::args(" self", " data", " x", " u=None"),
+               "Compute the next state and cost value.\n\n"
+               "It describes the time-continuous evolution of the multibody system with impulse. The\n"
+               "impulses are modelled as holonomic constraints.\n"
+               "Additionally it computes the cost value associated to this state and control pair.\n"
+               ":param data: impulse forward-dynamics action data\n"
+               ":param x: time-continuous state vector\n"
+               ":param u: time-continuous control input"))
+      .def<void (ActionModelImpulseFwdDynamics::*)(const boost::shared_ptr<ActionDataAbstract>&,
+                                                   const Eigen::VectorXd&, const Eigen::VectorXd&, const bool&)>(
+          "calcDiff", &ActionModelImpulseFwdDynamics::calcDiff_wrap,
+          bp::args(" self", " data", " x", " u=None", " recalc=True"),
+          "Compute the derivatives of the differential multibody system and its cost\n"
+          "functions.\n\n"
+          "It computes the partial derivatives of the differential multibody system and the\n"
+          "cost function. If recalc == True, it first updates the state evolution\n"
+          "and cost value. This function builds a quadratic approximation of the\n"
+          "action model (i.e. dynamical system and cost function).\n"
+          ":param data: impulse forward-dynamics action data\n"
+          ":param x: time-continuous state vector\n"
+          ":param u: time-continuous control input\n"
+          ":param recalc: If true, it updates the state evolution and the cost value.")
+      .def<void (ActionModelImpulseFwdDynamics::*)(const boost::shared_ptr<ActionDataAbstract>&,
+                                                   const Eigen::VectorXd&, const Eigen::VectorXd&)>(
+          "calcDiff", &ActionModelImpulseFwdDynamics::calcDiff_wrap, bp::args(" self", " data", " x", " u"))
+      .def<void (ActionModelImpulseFwdDynamics::*)(const boost::shared_ptr<ActionDataAbstract>&,
+                                                   const Eigen::VectorXd&)>(
+          "calcDiff", &ActionModelImpulseFwdDynamics::calcDiff_wrap, bp::args(" self", " data", " x"))
+      .def<void (ActionModelImpulseFwdDynamics::*)(const boost::shared_ptr<ActionDataAbstract>&,
+                                                   const Eigen::VectorXd&, const bool&)>(
+          "calcDiff", &ActionModelImpulseFwdDynamics::calcDiff_wrap, bp::args(" self", " data", " x", " recalc"))
+      .def("createData", &ActionModelImpulseFwdDynamics::createData, bp::args(" self"),
+           "Create the impulse forward dynamics differential action data.")
+      .add_property(
+          "pinocchio",
+          bp::make_function(&ActionModelImpulseFwdDynamics::get_pinocchio, bp::return_internal_reference<>()),
+          "multibody model (i.e. pinocchio model)")
+      .add_property("impulses",
+                    bp::make_function(&ActionModelImpulseFwdDynamics::get_impulses, bp::return_internal_reference<>()),
+                    "multiple contact model")
+      .add_property("costs",
+                    bp::make_function(&ActionModelImpulseFwdDynamics::get_costs, bp::return_internal_reference<>()),
+                    "total cost model")
+      .add_property("armature",
+                    bp::make_function(&ActionModelImpulseFwdDynamics::get_armature,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&ActionModelImpulseFwdDynamics::set_armature),
+                    "set an armature mechanism in the joints")
+      .add_property("r_coeff",
+                    bp::make_function(&ActionModelImpulseFwdDynamics::get_restitution_coefficient,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&ActionModelImpulseFwdDynamics::set_restitution_coefficient),
+                    "Restitution coefficient that describes elastic impacts")
+      .add_property("JMinvJt_damping",
+                    bp::make_function(&ActionModelImpulseFwdDynamics::get_damping_factor,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&ActionModelImpulseFwdDynamics::set_damping_factor),
+                    "Damping factor for cholesky decomposition of JMinvJt");
+}
+
+}  // namespace python
+}  // namespace crocoddyl
+
+#endif  // BINDINGS_PYTHON_CROCODDYL_MULTIBODY_ACTIONS_IMPULSE_FWDDYN_HPP_

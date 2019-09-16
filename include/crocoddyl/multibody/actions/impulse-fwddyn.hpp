@@ -36,10 +36,11 @@ class ActionModelImpulseFwdDynamics : public ActionModelAbstract {
   pinocchio::Model& get_pinocchio() const;
   const Eigen::VectorXd& get_armature() const;
   const double& get_restitution_coefficient() const;
+  const double& get_damping_factor() const;
 
   void set_armature(const Eigen::VectorXd& armature);
   void set_restitution_coefficient(const double& r_coeff);
-  const double& get_damping_factor() const;
+  void set_damping_factor(const double& damping);
 
  private:
   ImpulseModelMultiple& impulses_;

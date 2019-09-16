@@ -143,4 +143,5 @@ void ActionModelImpulseFwdDynamics::set_armature(const Eigen::VectorXd& armature
 
 void ActionModelImpulseFwdDynamics::set_restitution_coefficient(const double& r_coeff) { r_coeff_ = r_coeff; }
 
+void ActionModelImpulseFwdDynamics::set_damping_factor(const double& damping) { JMinvJt_damping_ = damping; }
 }  // namespace crocoddyl

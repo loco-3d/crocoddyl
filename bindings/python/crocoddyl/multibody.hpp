@@ -31,6 +31,7 @@
 #include "python/crocoddyl/multibody/impulses/impulse-6d.hpp"
 #include "python/crocoddyl/multibody/actions/free-fwddyn.hpp"
 #include "python/crocoddyl/multibody/actions/contact-fwddyn.hpp"
+#include "python/crocoddyl/multibody/actions/impulse-fwddyn.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -58,6 +59,7 @@ void exposeMultibody() {
   exposeImpulse6D();
   exposeDifferentialActionFreeFwdDynamics();
   exposeDifferentialActionContactFwdDynamics();
+  exposeActionImpulseFwdDynamics();
 }
 
 }  // namespace python
