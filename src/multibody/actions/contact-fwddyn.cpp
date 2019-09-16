@@ -40,11 +40,11 @@ void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<Dif
   assert(u.size() == nu_ && "u has wrong dimension");
 
   DifferentialActionDataContactFwdDynamics* d = static_cast<DifferentialActionDataContactFwdDynamics*>(data.get());
-  d->qcur = x.head(state_.get_nq());
-  d->vcur = x.tail(state_.get_nv());
+  d->q = x.head(state_.get_nq());
+  d->v = x.tail(state_.get_nv());
 
   // Computing the forward dynamics with the holonomic constraints defined by the contact model
-  pinocchio::computeAllTerms(pinocchio_, d->pinocchio, d->qcur, d->vcur);
+  pinocchio::computeAllTerms(pinocchio_, d->pinocchio, d->q, d->v);
   pinocchio::updateFramePlacements(pinocchio_, d->pinocchio);
 
   if (!with_armature_) {
@@ -61,7 +61,7 @@ void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<Dif
   }
 #endif
 
-  pinocchio::forwardDynamics(pinocchio_, d->pinocchio, d->qcur, d->vcur, d->actuation->a, d->contacts->Jc,
+  pinocchio::forwardDynamics(pinocchio_, d->pinocchio, d->q, d->v, d->actuation->a, d->contacts->Jc,
                              d->contacts->a0, JMinvJt_damping_, false);
   d->xout = d->pinocchio.ddq;
   contacts_.updateLagrangian(d->contacts, d->pinocchio.lambda_c);
@@ -84,12 +84,12 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
   if (recalc) {
     calc(data, x, u);
   } else {
-    d->qcur = x.head(state_.get_nq());
-    d->vcur = x.tail(nv);
+    d->q = x.head(state_.get_nq());
+    d->v = x.tail(nv);
   }
 
   // Computing the dynamics derivatives
-  pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, d->qcur, d->vcur, d->xout, d->contacts->fext);
+  pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, d->q, d->v, d->xout, d->contacts->fext);
   pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->contacts->Jc, d->Kinv);
 
   actuation_.calcDiff(d->actuation, x, u, false);
