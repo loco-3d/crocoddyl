@@ -40,6 +40,7 @@ SET(${PROJECT_NAME}_SOURCES
   multibody/contacts/contact-6d.cpp
   multibody/actions/free-fwddyn.cpp
   multibody/actions/contact-fwddyn.cpp
+  multibody/actions/impulse-fwddyn.cpp
   )
 
 IF(UNIX)
