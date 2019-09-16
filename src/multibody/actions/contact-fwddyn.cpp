@@ -61,8 +61,8 @@ void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<Dif
   }
 #endif
 
-  pinocchio::forwardDynamics(pinocchio_, d->pinocchio, d->q, d->v, d->actuation->a, d->contacts->Jc,
-                             d->contacts->a0, JMinvJt_damping_, false);
+  pinocchio::forwardDynamics(pinocchio_, d->pinocchio, d->q, d->v, d->actuation->a, d->contacts->Jc, d->contacts->a0,
+                             JMinvJt_damping_, false);
   d->xout = d->pinocchio.ddq;
   contacts_.updateLagrangian(d->contacts, d->pinocchio.lambda_c);
 
