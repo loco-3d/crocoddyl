@@ -12,6 +12,7 @@
 #include <string>
 #include <map>
 #include <utility>
+#include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 
 namespace crocoddyl {
@@ -95,34 +96,77 @@ struct CostDataSum {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  CostDataSum(Model* const model, pinocchio::Data* const data) : pinocchio(data), cost(0.) {
+  CostDataSum(Model* const model, pinocchio::Data* const data)
+      : r_internal(model->get_nr()),
+        Lx_internal(model->get_state().get_ndx()),
+        Lu_internal(model->get_nu()),
+        Lxx_internal(model->get_state().get_ndx(), model->get_state().get_ndx()),
+        Lxu_internal(model->get_state().get_ndx(), model->get_nu()),
+        Luu_internal(model->get_nu(), model->get_nu()),
+        pinocchio(data),
+        cost(0.),
+        r(&r_internal(0), r_internal.size()),
+        Lx(&Lx_internal(0), Lx_internal.size()),
+        Lu(&Lu_internal(0), Lu_internal.size()),
+        Lxx(&Lxx_internal(0), Lxx_internal.rows(), Lxx_internal.cols()),
+        Lxu(&Lxu_internal(0), Lxu_internal.rows(), Lxu_internal.cols()),
+        Luu(&Luu_internal(0), Luu_internal.rows(), Luu_internal.cols()),
+        Rx(model->get_nr(), model->get_state().get_ndx()),
+        Ru(model->get_nr(), model->get_nu()) {
+    r.setZero();
+    Lx.setZero();
+    Lu.setZero();
+    Lxx.setZero();
+    Lxu.setZero();
+    Luu.setZero();
     for (CostModelSum::CostModelContainer::const_iterator it = model->get_costs().begin();
          it != model->get_costs().end(); ++it) {
       const CostItem& item = it->second;
       costs.insert(std::make_pair(item.name, item.cost->createData(data)));
     }
-    const int& ndx = model->get_state().get_ndx();
-    const int& nu = model->get_nu();
-    const int& nr = model->get_nr();
-    Lx = Eigen::VectorXd::Zero(ndx);
-    Lu = Eigen::VectorXd::Zero(nu);
-    Lxx = Eigen::MatrixXd::Zero(ndx, ndx);
-    Lxu = Eigen::MatrixXd::Zero(ndx, nu);
-    Luu = Eigen::MatrixXd::Zero(nu, nu);
-    r = Eigen::VectorXd::Zero(nr);
-    Rx = Eigen::MatrixXd::Zero(nr, ndx);
-    Ru = Eigen::MatrixXd::Zero(nr, nu);
   }
+
+  void shareMemory(DifferentialActionDataAbstract* const model) {
+    // Share memory with the differential action data
+    new (&r) Eigen::Map<Eigen::VectorXd>(&model->r(0), model->r.size());
+    new (&Lx) Eigen::Map<Eigen::VectorXd>(&model->Lx(0), model->Lx.size());
+    new (&Lu) Eigen::Map<Eigen::VectorXd>(&model->Lu(0), model->Lu.size());
+    new (&Lxx) Eigen::Map<Eigen::MatrixXd>(&model->Lxx(0), model->Lxx.rows(), model->Lxx.cols());
+    new (&Lxu) Eigen::Map<Eigen::MatrixXd>(&model->Lxu(0), model->Lxu.rows(), model->Lxu.cols());
+    new (&Luu) Eigen::Map<Eigen::MatrixXd>(&model->Luu(0), model->Luu.rows(), model->Luu.cols());
+  }
+
+  Eigen::VectorXd get_r() const { return r; }
+  Eigen::VectorXd get_Lx() const { return Lx; }
+  Eigen::VectorXd get_Lu() const { return Lu; }
+  Eigen::MatrixXd get_Lxx() const { return Lxx; }
+  Eigen::MatrixXd get_Lxu() const { return Lxu; }
+  Eigen::MatrixXd get_Luu() const { return Luu; }
+
+  void set_r(Eigen::VectorXd _r) { r = _r; }
+  void set_Lx(Eigen::VectorXd _Lx) { Lx = _Lx; }
+  void set_Lu(Eigen::VectorXd _Lu) { Lu = _Lu; }
+  void set_Lxx(Eigen::MatrixXd _Lxx) { Lxx = _Lxx; }
+  void set_Lxu(Eigen::MatrixXd _Lxu) { Lxu = _Lxu; }
+  void set_Luu(Eigen::MatrixXd _Luu) { Luu = _Luu; }
+
+  // Creates internal data in case we don't share it externally
+  Eigen::VectorXd r_internal;
+  Eigen::VectorXd Lx_internal;
+  Eigen::VectorXd Lu_internal;
+  Eigen::MatrixXd Lxx_internal;
+  Eigen::MatrixXd Lxu_internal;
+  Eigen::MatrixXd Luu_internal;
 
   CostModelSum::CostDataContainer costs;
   pinocchio::Data* pinocchio;
   double cost;
-  Eigen::VectorXd Lx;
-  Eigen::VectorXd Lu;
-  Eigen::MatrixXd Lxx;
-  Eigen::MatrixXd Lxu;
-  Eigen::MatrixXd Luu;
-  Eigen::VectorXd r;
+  Eigen::Map<Eigen::VectorXd> r;
+  Eigen::Map<Eigen::VectorXd> Lx;
+  Eigen::Map<Eigen::VectorXd> Lu;
+  Eigen::Map<Eigen::MatrixXd> Lxx;
+  Eigen::Map<Eigen::MatrixXd> Lxu;
+  Eigen::Map<Eigen::MatrixXd> Luu;
   Eigen::MatrixXd Rx;
   Eigen::MatrixXd Ru;
 };

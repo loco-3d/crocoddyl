@@ -314,7 +314,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
         data = crocoddyl.DifferentialActionModelAbstract.createData(self)
         data.pinocchio = pinocchio.Data(self.state.pinocchio)
         data.costs = self.costs.createData(data.pinocchio)
-        data.shareCostMemory(data.costs)
+        data.costs.shareMemory(data)
         return data
 
 

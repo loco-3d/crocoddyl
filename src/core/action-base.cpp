@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/action-base.hpp"
-#include <iostream>
+
 namespace crocoddyl {
 
 ActionModelAbstract::ActionModelAbstract(StateAbstract& state, unsigned int const& nu, unsigned int const& nr)

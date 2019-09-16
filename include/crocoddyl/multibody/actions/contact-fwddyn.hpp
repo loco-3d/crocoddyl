@@ -67,7 +67,7 @@ struct DifferentialActionDataContactFwdDynamics : public DifferentialActionDataA
     actuation = model->get_actuation().createData();
     contacts = model->get_contacts().createData(&pinocchio);
     costs = model->get_costs().createData(&pinocchio);
-    shareCostMemory(costs);
+    costs->shareMemory(this);
     Kinv.fill(0);
     Gx.fill(0);
     Gu.fill(0);
