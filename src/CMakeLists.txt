@@ -10,6 +10,7 @@ SET(${PROJECT_NAME}_SOURCES
   core/utils/callbacks.cpp
   core/optctrl/shooting.cpp
   core/solvers/ddp.cpp
+  core/solvers/kkt.cpp
   core/states/euclidean.cpp
   core/actions/unicycle.cpp
   core/actions/lqr.cpp

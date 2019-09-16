@@ -11,7 +11,7 @@
 
 namespace crocoddyl {
 
-    SolverKKT::SolverKKT(ShootingProblem& problem)
+SolverKKT::SolverKKT(ShootingProblem& problem)
     : SolverAbstract(problem),
       regfactor_(10.),
       regmin_(1e-9),
@@ -30,6 +30,31 @@ namespace crocoddyl {
 }
 
 SolverKKT::~SolverKKT() {}
+
+bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
+                      const unsigned int& maxiter, const bool& is_feasible, const double& reginit) {
+               throw(std::runtime_error("SolverKKT::solve() this method is not implemented yet"));
+             }
+
+void SolverKKT::computeDirection(const bool& recalc){
+  throw(std::runtime_error("SolverKKT::computeDirection() this method is not implemented yet"));
+}
+
+double SolverKKT::tryStep(const double& steplength){
+    throw(std::runtime_error("SolverKKT::tryStep() this method is not implemented yet"));
+
+}
+
+double SolverKKT::stoppingCriteria(){
+    throw(std::runtime_error("SolverKKT::stoppingCriteria() this method is not implemented yet"));
+
+}
+
+const Eigen::Vector2d& SolverKKT::expectedImprovement(){
+      throw(std::runtime_error("SolverKKT::stoppingCriteria() this method is not implemented yet"));
+}
+
+
 
 
 void SolverKKT::allocateData() {
@@ -57,6 +82,9 @@ void SolverKKT::allocateData() {
   }
 
 }
+
+
+
 
 
 

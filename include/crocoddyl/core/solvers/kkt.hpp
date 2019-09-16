@@ -23,22 +23,16 @@ class SolverKKT : public SolverAbstract {
   SolverKKT(ShootingProblem& problem);
   ~SolverKKT();
 
-  // bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-  //            const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const unsigned int& maxiter = 100,
-  //            const bool& is_feasible = false, const double& regInit = 1e-9);
-  // void computeDirection(const bool& recalc = true);
-  // double tryStep(const double& steplength = 1);
-  // double stoppingCriteria();
-  // const Eigen::Vector2d& expectedImprovement();
+  bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
+             const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const unsigned int& maxiter = 100,
+             const bool& is_feasible = false, const double& regInit = 1e-9);
+  void computeDirection(const bool& recalc = true);
+  double tryStep(const double& steplength = 1);
+  double stoppingCriteria();
+  const Eigen::Vector2d& expectedImprovement();
 
 
  private:
-  // double calc();
-  // void backwardPass();
-  // void forwardPass(const double& stepLength);
-  // void computeGains(const long unsigned int& t);
-  // void increaseRegularization();
-  // void decreaseRegularization();
   void allocateData();
 
  protected:
@@ -57,18 +51,21 @@ class SolverKKT : public SolverAbstract {
   std::vector<Eigen::VectorXd> dx_;
 
   // allocate data
-  std::vector<Eigen::MatrixXd> Vxx_;
-  std::vector<Eigen::VectorXd> Vx_;
-  std::vector<Eigen::MatrixXd> Qxx_;
-  std::vector<Eigen::MatrixXd> Qxu_;
-  std::vector<Eigen::MatrixXd> Quu_;
-  std::vector<Eigen::VectorXd> Qx_;
-  std::vector<Eigen::VectorXd> Qu_;
-  std::vector<Eigen::MatrixXd> K_;
-  std::vector<Eigen::VectorXd> k_;
+  std::vector<Eigen::MatrixXd> kkt_;
+  std::vector<Eigen::VectorXd> kktref_;
+  // std::vector<Eigen::MatrixXd> hess_;
+  // std::vector<Eigen::MatrixXd> jac_;
+  // std::vector<Eigen::MatrixXd> jacT_;
+  // std::vector<Eigen::VectorXd> grad_;
+  // std::vector<Eigen::VectorXd> cval_;
+  // std::vector<Eigen::MatrixXd> K_;
+  // std::vector<Eigen::VectorXd> k_;
   std::vector<Eigen::VectorXd> gaps_;
 
  private:
+  // double calc();
+  // void compute_primal_dual();
+  
   Eigen::VectorXd xnext_;
   std::vector<double> alphas_;
   double th_grad_;

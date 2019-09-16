@@ -14,7 +14,7 @@
 #include "crocoddyl/core/solver-base.hpp"
 #include "crocoddyl/core/solvers/kkt.hpp"
 #include "crocoddyl/core/optctrl/shooting.hpp"
-#include "crocoddyl/core/states/unicycle.hpp"
+#include "crocoddyl/core/actions/unicycle.hpp"
 #include "crocoddyl/core/numdiff/state.hpp"
 #include <Eigen/Dense>
 
@@ -23,11 +23,8 @@ using namespace boost::unit_test;
 
 //____________________________________________________________________________//
 
-void test_kkt_constructor(crocoddyl::ShootingProblem& problem) {
-  // construct the solver 
-  // crocoddyl::SolverAbstract* solver = crocoddyl::SolverKKT(problem); 
-  // check if the dimensions are stored correctly 
-  // this is only a sanity check to see if everything compiles 
+void test_shooting_problem(crocoddyl::ShootingProblem& problem) {
+  // test my understanding 
   const long unsigned int T = problem.get_T();  
   crocoddyl::ActionModelAbstract* model_zero = problem.get_runningModels()[0];
   const unsigned int nx_ac = model_zero->get_nx();
@@ -40,7 +37,28 @@ void test_kkt_constructor(crocoddyl::ShootingProblem& problem) {
     BOOST_CHECK_EQUAL(model_i->get_ndx(), ndx_ac);
     BOOST_CHECK_EQUAL(model_i->get_nu(), nu_ac);
 }
+  crocoddyl::ActionModelAbstract* model_terminal = problem.get_terminalModel();
+  BOOST_CHECK_EQUAL(model_terminal->get_nx(), nx_ac);
+  BOOST_CHECK_EQUAL(model_terminal->get_ndx(), ndx_ac);
+  // BOOST_CHECK_EQUAL(model_terminal->get_nu(), nu_ac);
+
 }
+
+//____________________________________________________________________________//
+
+
+void test_kkt_constructor(crocoddyl::ShootingProblem& problem) {
+  crocoddyl::SolverKKT kkt(problem);
+
+  // BOOST_CHECK_EQUAL(solver->get_xs().size(), );
+  BOOST_CHECK_EQUAL(kkt.get_us().size(),kkt.get_problem().get_T());
+
+
+
+
+
+}
+
 
 
 
@@ -68,6 +86,9 @@ void register_state_vector_unit_tests() {
 
   // Formulating the optimal control problem
   crocoddyl::ShootingProblem problem(x0, runningModels, terminalModel);
+
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(boost::bind(&test_shooting_problem, problem)));
 
   framework::master_test_suite().add(
       BOOST_TEST_CASE(boost::bind(&test_kkt_constructor, problem)));
