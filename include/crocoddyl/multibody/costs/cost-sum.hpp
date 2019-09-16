@@ -12,7 +12,6 @@
 #include <string>
 #include <map>
 #include <utility>
-#include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 
 namespace crocoddyl {
@@ -126,14 +125,15 @@ struct CostDataSum {
     }
   }
 
-  void shareMemory(DifferentialActionDataAbstract* const model) {
+  template <typename ActionData>
+  void shareMemory(ActionData* const data) {
     // Share memory with the differential action data
-    new (&r) Eigen::Map<Eigen::VectorXd>(&model->r(0), model->r.size());
-    new (&Lx) Eigen::Map<Eigen::VectorXd>(&model->Lx(0), model->Lx.size());
-    new (&Lu) Eigen::Map<Eigen::VectorXd>(&model->Lu(0), model->Lu.size());
-    new (&Lxx) Eigen::Map<Eigen::MatrixXd>(&model->Lxx(0), model->Lxx.rows(), model->Lxx.cols());
-    new (&Lxu) Eigen::Map<Eigen::MatrixXd>(&model->Lxu(0), model->Lxu.rows(), model->Lxu.cols());
-    new (&Luu) Eigen::Map<Eigen::MatrixXd>(&model->Luu(0), model->Luu.rows(), model->Luu.cols());
+    new (&r) Eigen::Map<Eigen::VectorXd>(&data->r(0), data->r.size());
+    new (&Lx) Eigen::Map<Eigen::VectorXd>(&data->Lx(0), data->Lx.size());
+    new (&Lu) Eigen::Map<Eigen::VectorXd>(&data->Lu(0), data->Lu.size());
+    new (&Lxx) Eigen::Map<Eigen::MatrixXd>(&data->Lxx(0), data->Lxx.rows(), data->Lxx.cols());
+    new (&Lxu) Eigen::Map<Eigen::MatrixXd>(&data->Lxu(0), data->Lxu.rows(), data->Lxu.cols());
+    new (&Luu) Eigen::Map<Eigen::MatrixXd>(&data->Luu(0), data->Luu.rows(), data->Luu.cols());
   }
 
   Eigen::VectorXd get_r() const { return r; }

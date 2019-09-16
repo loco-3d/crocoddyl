@@ -117,9 +117,12 @@ void exposeCostSum() {
                                                 "Create total cost data.\n\n"
                                                 ":param model: total cost model\n"
                                                 ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
-      .def("shareMemory", &CostDataSum::shareMemory, bp::args(" self", " model"),
+      .def("shareMemory", &CostDataSum::shareMemory<DifferentialActionDataAbstract>, bp::args(" self", " model"),
            "Share memory with a given differential action data\n\n"
            ":param model: differential action data that we want to share memory")
+      .def("shareMemory", &CostDataSum::shareMemory<ActionDataAbstract>, bp::args(" self", " model"),
+           "Share memory with a given action data\n\n"
+           ":param model: action data that we want to share memory")
       .add_property("costs", bp::make_getter(&CostDataSum::costs, bp::return_value_policy<bp::return_by_value>()),
                     "stack of costs data")
       .add_property("pinocchio", bp::make_getter(&CostDataSum::pinocchio, bp::return_internal_reference<>()),
