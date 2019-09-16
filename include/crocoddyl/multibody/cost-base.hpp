@@ -84,18 +84,25 @@ struct CostDataAbstract {
 
   template <typename Model>
   CostDataAbstract(Model* const model, pinocchio::Data* const data)
-      : pinocchio(data), activation(model->get_activation().createData()), cost(0.) {
-    const int& ndx = model->get_state().get_ndx();
-    const int& nu = model->get_nu();
-    const int& nr = model->get_activation().get_nr();
-    Lx = Eigen::VectorXd::Zero(ndx);
-    Lu = Eigen::VectorXd::Zero(nu);
-    Lxx = Eigen::MatrixXd::Zero(ndx, ndx);
-    Lxu = Eigen::MatrixXd::Zero(ndx, nu);
-    Luu = Eigen::MatrixXd::Zero(nu, nu);
-    r = Eigen::VectorXd::Zero(nr);
-    Rx = Eigen::MatrixXd::Zero(nr, ndx);
-    Ru = Eigen::MatrixXd::Zero(nr, nu);
+      : pinocchio(data),
+        activation(model->get_activation().createData()),
+        cost(0.),
+        Lx(model->get_state().get_ndx()),
+        Lu(model->get_nu()),
+        Lxx(model->get_state().get_ndx(), model->get_state().get_ndx()),
+        Lxu(model->get_state().get_ndx(), model->get_nu()),
+        Luu(model->get_nu(), model->get_nu()),
+        r(model->get_activation().get_nr()),
+        Rx(model->get_activation().get_nr(), model->get_state().get_ndx()),
+        Ru(model->get_activation().get_nr(), model->get_nu()) {
+    Lx.fill(0);
+    Lu.fill(0);
+    Lxx.fill(0);
+    Lxu.fill(0);
+    Luu.fill(0);
+    r.fill(0);
+    Rx.fill(0);
+    Ru.fill(0);
   }
 
   pinocchio::Data* pinocchio;
