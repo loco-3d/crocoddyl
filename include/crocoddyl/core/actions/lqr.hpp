@@ -48,7 +48,6 @@ struct ActionDataLQR : public ActionDataAbstract {
     Luu = model->Luu_;
     Lxu = model->Lxu_;
   }
-  ~ActionDataLQR() {}
 };
 
 }  // namespace crocoddyl

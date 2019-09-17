@@ -60,8 +60,6 @@ struct DifferentialActionDataContactFwdDynamics : public DifferentialActionDataA
   explicit DifferentialActionDataContactFwdDynamics(Model* const model)
       : DifferentialActionDataAbstract(model),
         pinocchio(pinocchio::Data(model->get_pinocchio())),
-        q(model->get_state().get_nq()),
-        v(model->get_state().get_nv()),
         Kinv(model->get_state().get_nv() + model->get_contacts().get_nc(),
              model->get_state().get_nv() + model->get_contacts().get_nc()),
         Gx(model->get_contacts().get_nc(), model->get_state().get_ndx()),
@@ -70,8 +68,6 @@ struct DifferentialActionDataContactFwdDynamics : public DifferentialActionDataA
     contacts = model->get_contacts().createData(&pinocchio);
     costs = model->get_costs().createData(&pinocchio);
     costs->shareMemory(this);
-    q.fill(0);
-    v.fill(0);
     Kinv.fill(0);
     Gx.fill(0);
     Gu.fill(0);
@@ -81,8 +77,6 @@ struct DifferentialActionDataContactFwdDynamics : public DifferentialActionDataA
   boost::shared_ptr<ActuationDataAbstract> actuation;
   boost::shared_ptr<ContactDataMultiple> contacts;
   boost::shared_ptr<CostDataSum> costs;
-  Eigen::VectorXd q;
-  Eigen::VectorXd v;
   Eigen::MatrixXd Kinv;
   Eigen::MatrixXd Gx;
   Eigen::MatrixXd Gu;

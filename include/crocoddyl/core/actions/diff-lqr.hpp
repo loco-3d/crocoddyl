@@ -44,8 +44,7 @@ class DifferentialActionModelLQR : public DifferentialActionModelAbstract {
 
 struct DifferentialActionDataLQR : public DifferentialActionDataAbstract {
   template <typename Model>
-  explicit DifferentialActionDataLQR(Model* const model)
-      : DifferentialActionDataAbstract(model), q(model->get_state().get_nq()), v(model->get_state().get_nv()) {
+  explicit DifferentialActionDataLQR(Model* const model) : DifferentialActionDataAbstract(model) {
     // Setting the linear model and quadratic cost here because they are constant
     Fx.leftCols(model->get_state().get_nq()) = model->Fq_;
     Fx.rightCols(model->get_state().get_nv()) = model->Fv_;
@@ -53,13 +52,7 @@ struct DifferentialActionDataLQR : public DifferentialActionDataAbstract {
     Lxx = model->Lxx_;
     Luu = model->Luu_;
     Lxu = model->Lxu_;
-
-    q.fill(0);
-    v.fill(0);
   }
-
-  Eigen::VectorXd q;
-  Eigen::VectorXd v;
 };
 
 }  // namespace crocoddyl
