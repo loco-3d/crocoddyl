@@ -51,6 +51,7 @@ void exposeActionAbstract() {
       bp::init<StateAbstract&, int, bp::optional<int> >(
           bp::args(" self", " state", " nu", " nr=1"),
           "Initialize the action model.\n\n"
+          "You can also describe autonomous systems by setting nu = 0.\n"
           ":param state: state description,\n"
           ":param nu: dimension of control vector,\n"
           ":param nr: dimension of the cost-residual vector")[bp::with_custodian_and_ward<1, 2>()])

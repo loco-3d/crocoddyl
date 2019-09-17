@@ -20,7 +20,7 @@ struct ActionDataAbstract;  // forward declaration
 
 class ActionModelAbstract {
  public:
-  ActionModelAbstract(StateAbstract& state, unsigned int const& nu, unsigned int const& nr = 1);
+  ActionModelAbstract(StateAbstract& state, unsigned int const& nu, unsigned int const& nr = 0);
   virtual ~ActionModelAbstract();
 
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,

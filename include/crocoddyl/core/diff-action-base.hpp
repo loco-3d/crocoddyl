@@ -19,7 +19,7 @@ struct DifferentialActionDataAbstract;  // forward declaration
 
 class DifferentialActionModelAbstract {
  public:
-  DifferentialActionModelAbstract(StateAbstract& state, unsigned int const& nu, unsigned int const& nr = 1);
+  DifferentialActionModelAbstract(StateAbstract& state, unsigned int const& nu, unsigned int const& nr = 0);
   virtual ~DifferentialActionModelAbstract();
 
   virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
