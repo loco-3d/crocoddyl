@@ -11,7 +11,7 @@
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/contact-dynamics.hpp>
 #include <pinocchio/algorithm/rnea-derivatives.hpp>
-// #include <pinocchio/algorithm/kinematics-derivatives.hpp>
+#include <pinocchio/algorithm/kinematics-derivatives.hpp>
 
 namespace crocoddyl {
 
@@ -39,11 +39,11 @@ void ActionModelImpulseFwdDynamics::calc(const boost::shared_ptr<ActionDataAbstr
   unsigned int const& nq = state_.get_nq();
   unsigned int const& nv = state_.get_nv();
   ActionDataImpulseFwdDynamics* d = static_cast<ActionDataImpulseFwdDynamics*>(data.get());
-  d->q = x.head(nq);
-  d->v = x.tail(nv);
+  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(nq);
+  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(nv);
 
   // Computing the forward dynamics with the holonomic constraints defined by the contact model
-  pinocchio::computeAllTerms(pinocchio_, d->pinocchio, d->q, d->v);
+  pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, v);
   pinocchio::updateFramePlacements(pinocchio_, d->pinocchio);
 
   if (!with_armature_) {
@@ -59,8 +59,8 @@ void ActionModelImpulseFwdDynamics::calc(const boost::shared_ptr<ActionDataAbstr
   }
 #endif
 
-  pinocchio::impulseDynamics(pinocchio_, d->pinocchio, d->q, d->v, d->impulses->Jc, r_coeff_, false);
-  d->xnext.head(nq) = d->q;
+  pinocchio::impulseDynamics(pinocchio_, d->pinocchio, q, v, d->impulses->Jc, r_coeff_, false);
+  d->xnext.head(nq) = q;
   d->xnext.tail(nv) = d->pinocchio.dq_after;
   impulses_.updateLagrangian(d->impulses, d->pinocchio.impulse_c);
 
@@ -74,34 +74,36 @@ void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataA
                                              const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
 
-  ActionDataImpulseFwdDynamics* d = static_cast<ActionDataImpulseFwdDynamics*>(data.get());
   unsigned int const& nv = state_.get_nv();
-  // unsigned int const& nc = impulses_.get_nc();
+  unsigned int const& ni = impulses_.get_ni();
+  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_.get_nq());
+  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(nv);
+
+  ActionDataImpulseFwdDynamics* d = static_cast<ActionDataImpulseFwdDynamics*>(data.get());
   if (recalc) {
     calc(data, x, u);
-  } else {
-    d->q = x.head(state_.get_nq());
-    d->v = x.tail(nv);
   }
 
   // Computing the dynamics derivatives
   pinocchio_.gravity.setZero();
-  pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, d->q, d->vnone, d->pinocchio.dq_after - d->v,
+  pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, d->vnone, d->pinocchio.dq_after - v,
                                     d->impulses->fext);
   pinocchio_.gravity = gravity_;
   pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->impulses->Jc, d->Kinv);
 
+  pinocchio::computeForwardKinematicsDerivatives(pinocchio_, d->pinocchio, q, d->pinocchio.dq_after, d->vnone);
   impulses_.calcDiff(d->impulses, x, false);
 
   Eigen::Block<Eigen::MatrixXd> a_partial_dtau = d->Kinv.topLeftCorner(nv, nv);
-  // Eigen::Block<Eigen::MatrixXd> a_partial_da = d->Kinv.topRightCorner(nv, nc);
-  // Eigen::Block<Eigen::MatrixXd> f_partial_dtau = d->Kinv.bottomLeftCorner(nc, nv);
-  // Eigen::Block<Eigen::MatrixXd> f_partial_da = d->Kinv.bottomRightCorner(nc, nc);
+  Eigen::Block<Eigen::MatrixXd> a_partial_da = d->Kinv.topRightCorner(nv, ni);
+  // Eigen::Block<Eigen::MatrixXd> f_partial_dtau = d->Kinv.bottomLeftCorner(ni, nv);
+  // Eigen::Block<Eigen::MatrixXd> f_partial_da = d->Kinv.bottomRightCorner(ni, ni);
 
-  d->Fx.leftCols(nv).noalias() = -a_partial_dtau * d->pinocchio.dtau_dq;
-  d->Fx.rightCols(nv).noalias() = -a_partial_dtau * d->pinocchio.dtau_dv;
-  // d->Fx.noalias() -= a_partial_da * d->impulses->Ax;
-  // d->Fx.noalias() += a_partial_dtau * d->actuation->Ax;
+  d->Fx.topLeftCorner(nv, nv).setIdentity();
+  d->Fx.topRightCorner(nv, nv).setZero();
+  d->Fx.bottomLeftCorner(nv, nv).noalias() = -a_partial_dtau * d->pinocchio.dtau_dq;
+  d->Fx.bottomLeftCorner(nv, nv).noalias() -= a_partial_da * d->impulses->Vq;
+  d->Fx.bottomRightCorner(nv, nv).noalias() = a_partial_dtau * d->pinocchio.M.selfadjointView<Eigen::Upper>();
 
   // // Computing the cost derivatives
   // if (enable_force_) {
@@ -144,4 +146,5 @@ void ActionModelImpulseFwdDynamics::set_armature(const Eigen::VectorXd& armature
 void ActionModelImpulseFwdDynamics::set_restitution_coefficient(const double& r_coeff) { r_coeff_ = r_coeff; }
 
 void ActionModelImpulseFwdDynamics::set_damping_factor(const double& damping) { JMinvJt_damping_ = damping; }
+
 }  // namespace crocoddyl
