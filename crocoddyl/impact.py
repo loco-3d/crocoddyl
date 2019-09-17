@@ -247,7 +247,6 @@ class CostModelImpactWholeBody(CostModelImpactBase):
     Penalize the impact on the whole body, i.e. the sum-of-square of ||vnext-v||
     with vnext the velocity after impact and v the velocity before impact.
     '''
-
     def __init__(self, pinocchioModel, activation=None):
         self.CostDataType = CostDataImpactWholeBody
         CostModelImpactBase.__init__(self, pinocchioModel, ncost=pinocchioModel.nv)
@@ -288,7 +287,6 @@ class CostModelImpactCoM(CostModelImpactBase):
     Penalize the impact on the com, i.e. the sum-of-square of ||Jcom*(vnext-v)||
     with vnext the velocity after impact and v the velocity before impact.
     '''
-
     def __init__(self, pinocchioModel, activation=None):
         self.CostDataType = CostDataImpactCoM
         CostModelImpactBase.__init__(self, pinocchioModel, ncost=3)

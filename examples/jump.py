@@ -195,10 +195,11 @@ ddp = SolverDDP(problem)
 ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]  # CallbackSolverDisplay(robot,rate=5) ]
 ddp.th_stop = 1e-4
 us0 = [
-    m.differential.quasiStatic(d.differential, rmodel.defaultState) for m, d in zip(ddp.models(), ddp.datas())[:imp]
+    m.differential.quasiStatic(d.differential, rmodel.defaultState)
+    for m, d in list(zip(ddp.models(), ddp.datas()))[:imp]
 ] + [np.zeros(0)] + [
     m.differential.quasiStatic(d.differential, rmodel.defaultState)
-    for m, d in zip(ddp.models(), ddp.datas())[imp + 1:-1]
+    for m, d in list(zip(ddp.models(), ddp.datas()))[imp + 1:-1]
 ]
 
 print("*** SOLVE %s ***" % PHASE_NAME)
@@ -226,7 +227,7 @@ ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]  # CallbackSolverDisp
 
 us = usddp + [
     np.zeros(0) if isinstance(m, ActionModelImpact) else m.differential.quasiStatic(
-        d.differential, rmodel.defaultState) for m, d in zip(ddp.models(), ddp.datas())[len(usddp):-1]
+        d.differential, rmodel.defaultState) for m, d in list(zip(ddp.models(), ddp.datas()))[len(usddp):-1]
 ]
 ddp.setCandidate(xs=xsddp + [rmodel.defaultState] * (len(models) - len(xsddp)), us=us)
 ddp.th_stop = 5e-4

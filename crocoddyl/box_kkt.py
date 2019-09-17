@@ -10,7 +10,6 @@ class SolverBoxKKT(SolverKKT):
 
     This solver uses quadprogWrapper as the default to solve the QP.
     """
-
     def solve(self, maxiter=100, init_xs=None, init_us=None, isFeasible=False, qpsolver=None, ul=None, uu=None):
         self.qpsolver = qpsolver if qpsolver is not None else quadprogWrapper
         self.ul = ul

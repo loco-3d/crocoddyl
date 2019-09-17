@@ -12,7 +12,6 @@ class SolverBoxDDP(SolverDDP):
 
     This solver uses quadprogWrapper as the default to solve the QP.
     """
-
     def solve(self,
               maxiter=100,
               init_xs=None,

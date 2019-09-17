@@ -4,4 +4,4 @@
 # Hint:
 # Use IntegratedActionModelEuler
 timeStep = 5e-2
-cartpoleIAM = IntegratedActionModelEuler(cartpoleND, timeStep)
+cartpoleIAM = crocoddyl.IntegratedActionModelEuler(cartpoleND, timeStep)

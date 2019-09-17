@@ -15,7 +15,6 @@ class CostModelPinocchio:
     can be retrieved from Pinocchio data, through the calc and calcDiff
     functions, respectively.
     """
-
     def __init__(self, pinocchioModel, ncost, withResiduals=True, nu=None):
         self.ncost = ncost
         self.nq = pinocchioModel.nq
@@ -41,7 +40,6 @@ class CostDataPinocchio:
 
     It stores the data corresponting to the CostModelPinocchio class.
     """
-
     def __init__(self, model, pinocchioData):
         ncost, nv, ndx, nu = model.ncost, model.nv, model.ndx, model.nu
         self.pinocchio = pinocchioData
@@ -72,7 +70,6 @@ class CostDataPinocchio:
 class CostModelNumDiff(CostModelPinocchio):
     """ Abstract cost model that uses NumDiff for derivative computation.
     """
-
     def __init__(self, costModel, State, withGaussApprox=False, reevals=[]):
         '''
         reevals is a list of lambdas of (pinocchiomodel,pinocchiodata,x,u) to be
@@ -225,7 +222,6 @@ class CostModelFrameTranslation(CostModelPinocchio):
     a frame of the robot. Parametrize it with the frame index frameIdx and
     the effector desired position ref.
     """
-
     def __init__(self, pinocchioModel, frame, ref, nu=None, activation=None):
         self.CostDataType = CostDataFrameTranslation
         CostModelPinocchio.__init__(self, pinocchioModel, ncost=3, nu=nu)
@@ -273,7 +269,6 @@ class CostModelFrameVelocity(CostModelPinocchio):
     end-effector. It assumes that updateFramePlacement and computeForwardKinematicsDerivatives
     have been runned.
     """
-
     def __init__(self, pinocchioModel, frame, ref=None, nu=None, activation=None):
         self.CostDataType = CostDataFrameVelocity
         CostModelPinocchio.__init__(self, pinocchioModel, ncost=6)
@@ -322,7 +317,6 @@ class CostModelFrameVelocityLinear(CostModelPinocchio):
     end-effector. It assumes that updateFramePlacement and computeForwardKinematicsDerivatives
     have been runned.
     """
-
     def __init__(self, pinocchioModel, frame, ref=None, nu=None, activation=None):
         self.CostDataType = CostDataFrameVelocityLinear
         CostModelPinocchio.__init__(self, pinocchioModel, ncost=3)
@@ -371,7 +365,6 @@ class CostModelFramePlacement(CostModelPinocchio):
     for a frame of the robot. Parametrize it with the frame index frameIdx and
     the effector desired pinocchio::SE3 ref.
     """
-
     def __init__(self, pinocchioModel, frame, ref, nu=None, activation=None):
         self.CostDataType = CostDataFramePlacement
         CostModelPinocchio.__init__(self, pinocchioModel, ncost=6, nu=nu)
@@ -420,7 +413,6 @@ class CostModelFrameRotation(CostModelPinocchio):
     The class proposes a model of a cost function orientation (3d) for a frame of the robot.
     Parametrize it with the frame index frameIdx and the effector desired rotation matrix.
     """
-
     def __init__(self, pinocchioModel, frame, ref, nu=None, activation=None):
         self.CostDataType = CostDataFrameRotation
         CostModelPinocchio.__init__(self, pinocchioModel, ncost=3, nu=nu)
@@ -470,7 +462,6 @@ class CostModelCoM(CostModelPinocchio):
     The class proposes a model of a cost function CoM. It is parametrized with the
     desired CoM position.
     """
-
     def __init__(self, pinocchioModel, ref, nu=None, activation=None):
         self.CostDataType = CostDataCoM
         CostModelPinocchio.__init__(self, pinocchioModel, ncost=3, nu=nu)
@@ -513,7 +504,6 @@ class CostModelState(CostModelPinocchio):
     It tracks a reference state vector. Generally speaking, the state error lie in the
     tangent-space of the state manifold (or more precisely the configuration manifold).
     """
-
     def __init__(self, pinocchioModel, State, ref=None, nu=None, activation=None):
         self.CostDataType = CostDataState
         CostModelPinocchio.__init__(self, pinocchioModel, ncost=State.ndx, nu=nu)
@@ -550,7 +540,6 @@ class CostModelControl(CostModelPinocchio):
 
     It tracks a reference control vector.
     """
-
     def __init__(self, pinocchioModel, nu=None, ref=None, activation=None):
         self.CostDataType = CostDataControl
         nu = nu if nu is not None else pinocchioModel.nv
@@ -593,7 +582,6 @@ class CostModelForce(CostModelPinocchio):
     The class proposes a model of a cost function for tracking a reference
     value of a 6D force, being given the contact model and its derivatives.
     """
-
     def __init__(self, pinocchioModel, contactModel, ncost=6, ref=None, nu=None, activation=None):
         self.CostDataType = CostDataForce
         CostModelPinocchio.__init__(self, pinocchioModel, ncost=ncost, nu=nu)
@@ -641,7 +629,6 @@ class CostModelForceLinearCone(CostModelPinocchio):
     The class proposes a model which implements Af-ref<=0 for the linear conic cost. (The inequality
     is implemented by the activation function. By default ref is zero (Af<=0).
     """
-
     def __init__(self, pinocchioModel, contactModel, A, ref=None, nu=None, activation=None):
         self.CostDataType = CostDataForce
         CostModelPinocchio.__init__(self, pinocchioModel, ncost=A.shape[0], nu=nu)
