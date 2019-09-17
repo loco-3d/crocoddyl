@@ -104,12 +104,12 @@ struct CostDataSum {
         Luu_internal(model->get_nu(), model->get_nu()),
         pinocchio(data),
         cost(0.),
-        r(&r_internal(0), r_internal.size()),
-        Lx(&Lx_internal(0), Lx_internal.size()),
-        Lu(&Lu_internal(0), Lu_internal.size()),
-        Lxx(&Lxx_internal(0), Lxx_internal.rows(), Lxx_internal.cols()),
-        Lxu(&Lxu_internal(0), Lxu_internal.rows(), Lxu_internal.cols()),
-        Luu(&Luu_internal(0), Luu_internal.rows(), Luu_internal.cols()),
+        r(r_internal.data(), model->get_nr()),
+        Lx(Lx_internal.data(), model->get_state().get_ndx()),
+        Lu(Lu_internal.data(), model->get_nu()),
+        Lxx(Lxx_internal.data(), model->get_state().get_ndx(), model->get_state().get_ndx()),
+        Lxu(Lxu_internal.data(), model->get_state().get_ndx(), model->get_nu()),
+        Luu(Luu_internal.data(), model->get_nu(), model->get_nu()),
         Rx(model->get_nr(), model->get_state().get_ndx()),
         Ru(model->get_nr(), model->get_nu()) {
     r.setZero();
@@ -128,12 +128,12 @@ struct CostDataSum {
   template <typename ActionData>
   void shareMemory(ActionData* const data) {
     // Share memory with the differential action data
-    new (&r) Eigen::Map<Eigen::VectorXd>(&data->r(0), data->r.size());
-    new (&Lx) Eigen::Map<Eigen::VectorXd>(&data->Lx(0), data->Lx.size());
-    new (&Lu) Eigen::Map<Eigen::VectorXd>(&data->Lu(0), data->Lu.size());
-    new (&Lxx) Eigen::Map<Eigen::MatrixXd>(&data->Lxx(0), data->Lxx.rows(), data->Lxx.cols());
-    new (&Lxu) Eigen::Map<Eigen::MatrixXd>(&data->Lxu(0), data->Lxu.rows(), data->Lxu.cols());
-    new (&Luu) Eigen::Map<Eigen::MatrixXd>(&data->Luu(0), data->Luu.rows(), data->Luu.cols());
+    new (&r) Eigen::Map<Eigen::VectorXd>(data->r.data(), data->r.size());
+    new (&Lx) Eigen::Map<Eigen::VectorXd>(data->Lx.data(), data->Lx.size());
+    new (&Lu) Eigen::Map<Eigen::VectorXd>(data->Lu.data(), data->Lu.size());
+    new (&Lxx) Eigen::Map<Eigen::MatrixXd>(data->Lxx.data(), data->Lxx.rows(), data->Lxx.cols());
+    new (&Lxu) Eigen::Map<Eigen::MatrixXd>(data->Lxu.data(), data->Lxu.rows(), data->Lxu.cols());
+    new (&Luu) Eigen::Map<Eigen::MatrixXd>(data->Luu.data(), data->Luu.rows(), data->Luu.cols());
   }
 
   Eigen::VectorXd get_r() const { return r; }
