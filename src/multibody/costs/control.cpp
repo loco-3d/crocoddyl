@@ -37,6 +37,7 @@ CostModelControl::~CostModelControl() {}
 
 void CostModelControl::calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>&,
                             const Eigen::Ref<const Eigen::VectorXd>& u) {
+  assert(nu_ != 0 && "it seems to be an autonomous system, if so, don't add this cost function");
   assert(u.size() == nu_ && "u has wrong dimension");
 
   data->r = u - uref_;
@@ -47,6 +48,7 @@ void CostModelControl::calc(const boost::shared_ptr<CostDataAbstract>& data, con
 void CostModelControl::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                 const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
                                 const bool& recalc) {
+  assert(nu_ != 0 && "it seems to be an autonomous system, if so, don't add this cost function");
   assert(u.size() == nu_ && "u has wrong dimension");
 
   if (recalc) {

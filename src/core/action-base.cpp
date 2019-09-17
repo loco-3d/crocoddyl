@@ -28,19 +28,23 @@ void ActionModelAbstract::calcDiff(const boost::shared_ptr<ActionDataAbstract>& 
 void ActionModelAbstract::quasicStatic(const boost::shared_ptr<ActionDataAbstract>& data,
                                        Eigen::Ref<Eigen::VectorXd> u, const Eigen::Ref<const Eigen::VectorXd>& x,
                                        unsigned int const& maxiter, const double& tol) {
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
 
   unsigned int const& ndx = state_.get_ndx();
   Eigen::VectorXd dx = Eigen::VectorXd::Zero(ndx);
-  Eigen::VectorXd du = Eigen::VectorXd::Zero(nu_);
-  for (unsigned int i = 0; i < maxiter; ++i) {
-    calcDiff(data, x, u);
-    state_.diff(x, data->xnext, dx);
-    du = -pseudoInverse(data->Fu) * data->Fx * dx;
-    u += du;
-    if (du.norm() <= tol) {
-      break;
+  if (nu_ == 0) {
+    // TODO(cmastalli): create a method for autonomous systems
+  } else {
+    Eigen::VectorXd du = Eigen::VectorXd::Zero(nu_);
+    for (unsigned int i = 0; i < maxiter; ++i) {
+      calcDiff(data, x, u);
+      state_.diff(x, data->xnext, dx);
+      du = -pseudoInverse(data->Fu) * data->Fx * dx;
+      u += du;
+      if (du.norm() <= tol) {
+        break;
+      }
     }
   }
 }
