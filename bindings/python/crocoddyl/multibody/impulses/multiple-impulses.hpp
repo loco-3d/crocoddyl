@@ -71,16 +71,16 @@ void exposeImpulseMultiple() {
                "Compute the derivatives of the total impulse holonomic constraint.\n\n"
                "The rigid impulse model throught acceleration-base holonomic constraint\n"
                "of the impulse frame placement.\n"
-               ":param data: cost data\n"
+               ":param data: impulse data\n"
                ":param x: state vector\n"
                ":param recalc: If true, it updates the impulse Jacobian and drift."))
       .def("updateLagrangian", &ImpulseModelMultiple::updateLagrangian, bp::args(" self", " data", " lambda"),
            "Convert the Lagrangian into a stack of spatial forces.\n\n"
-           ":param data: cost data\n"
+           ":param data: impulse data\n"
            ":param lambda: Lagrangian vector")
       .def("updateImpulseVelocity", &ImpulseModelMultiple::updateImpulseVelocity, bp::args(" self", " data", " vnext"),
            "Update the velocity after impulse.\n\n"
-           ":param data: cost data\n"
+           ":param data: impulse data\n"
            ":param vnext: velocity after impulse")
       .def("createData", &ImpulseModelMultiple::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),

@@ -57,24 +57,24 @@ void exposeImpulseAbstract() {
       .def("calcDiff", pure_virtual(&ImpulseModelAbstract_wrap::calcDiff),
            bp::args(" self", " data", " x", " recalc=True"),
            "Compute the derivatives of impulse Jacobian\n"
-           ":param data: cost data\n"
+           ":param data: impulse data\n"
            ":param x: state vector\n"
            ":param recalc: If true, it updates the impulse Jacobian")
       .def("updateLagrangian", pure_virtual(&ImpulseModelAbstract_wrap::updateLagrangian),
            bp::args(" self", " data", " lambda"),
            "Convert the Lagrangian into a stack of spatial forces.\n\n"
-           ":param data: cost data\n"
+           ":param data: impulse data\n"
            ":param lambda: Lagrangian vector")
       .def("updateImpulseVelocity", &ImpulseModelAbstract_wrap::updateImpulseVelocity,
            bp::args(" self", " data", " vnext"),
            "Update the velocity after impulse.\n\n"
-           ":param data: cost data\n"
+           ":param data: impulse data\n"
            ":param vnext: velocity after impulse")
       .def("createData", &ImpulseModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the impulse data.\n\n"
            "Each impulse model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined cost.\n"
+           "returns the allocated data for a predefined impulse.\n"
            ":param data: Pinocchio data\n"
            ":return impulse data.")
       .add_property("state",
@@ -89,7 +89,7 @@ void exposeImpulseAbstract() {
       bp::init<ImpulseModelAbstract*, pinocchio::Data*>(
           bp::args(" self", " model", " data"),
           "Create common data shared between impulse models.\n\n"
-          ":param model: cost model\n"
+          ":param model: impulse model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
       .add_property("pinocchio", bp::make_getter(&ImpulseDataAbstract::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")

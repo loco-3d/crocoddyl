@@ -64,25 +64,25 @@ void exposeContactAbstract() {
            "Compute the derivatives of contact holonomic constraint.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
-           ":param data: cost data\n"
+           ":param data: contact data\n"
            ":param x: state vector\n"
            ":param recalc: If true, it updates the contact Jacobian and drift.")
       .def("updateLagrangian", pure_virtual(&ContactModelAbstract_wrap::updateLagrangian),
            bp::args(" self", " data", " lambda"),
            "Convert the Lagrangian into a stack of spatial forces.\n\n"
-           ":param data: cost data\n"
+           ":param data: contact data\n"
            ":param lambda: Lagrangian vector")
       .def("updateLagrangianDiff", &ContactModelAbstract_wrap::updateLagrangianDiff,
            bp::args(" self", " data", " Gx", " Gu"),
            "Update the Jacobian of the Lagrangian.\n\n"
-           ":param data: cost data\n"
+           ":param data: contact data\n"
            ":param Gx: Jacobian of Lagrangian w.r.t. the state\n"
            ":param Gu: Jacobian of the Lagrangian w.r.t. the control")
       .def("createData", &ContactModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the contact data.\n\n"
            "Each contact model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined cost.\n"
+           "returns the allocated data for a predefined contact.\n"
            ":param data: Pinocchio data\n"
            ":return contact data.")
       .add_property("state",
@@ -100,7 +100,7 @@ void exposeContactAbstract() {
       bp::init<ContactModelAbstract*, pinocchio::Data*>(
           bp::args(" self", " model", " data"),
           "Create common data shared between contact models.\n\n"
-          ":param model: cost model\n"
+          ":param model: contact model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
       .add_property("pinocchio", bp::make_getter(&ContactDataAbstract::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")

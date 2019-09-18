@@ -72,17 +72,17 @@ void exposeContactMultiple() {
                "Compute the derivatives of the total contact holonomic constraint.\n\n"
                "The rigid contact model throught acceleration-base holonomic constraint\n"
                "of the contact frame placement.\n"
-               ":param data: cost data\n"
+               ":param data: contact data\n"
                ":param x: state vector\n"
                ":param recalc: If true, it updates the contact Jacobian and drift."))
       .def("updateLagrangian", &ContactModelMultiple::updateLagrangian, bp::args(" self", " data", " lambda"),
            "Convert the Lagrangian into a stack of spatial forces.\n\n"
-           ":param data: cost data\n"
+           ":param data: contact data\n"
            ":param lambda: Lagrangian vector")
       .def("updateLagrangianDiff", &ContactModelMultiple::updateLagrangianDiff,
            bp::args(" self", " data", " Gx", " Gu"),
            "Update the Jacobian of the Lagrangian.\n\n"
-           ":param data: cost data\n"
+           ":param data: contact data\n"
            ":param Gx: Jacobian of Lagrangian w.r.t. the state\n"
            ":param Gu: Jacobian of the Lagrangian w.r.t. the control")
       .def("createData", &ContactModelMultiple::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
