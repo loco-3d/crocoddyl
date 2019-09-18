@@ -80,11 +80,11 @@ void exposeContactMultiple() {
            ":param data: contact data\n"
            ":param lambda: Lagrangian vector")
       .def("updateLagrangianDiff", &ContactModelMultiple::updateLagrangianDiff,
-           bp::args(" self", " data", " Gx", " Gu"),
+           bp::args(" self", " data", " df_dx", " df_du"),
            "Update the Jacobian of the Lagrangian.\n\n"
            ":param data: contact data\n"
-           ":param Gx: Jacobian of Lagrangian w.r.t. the state\n"
-           ":param Gu: Jacobian of the Lagrangian w.r.t. the control")
+           ":param df_dx: Jacobian of Lagrangian w.r.t. the state\n"
+           ":param df_du: Jacobian of the Lagrangian w.r.t. the control")
       .def("createData", &ContactModelMultiple::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the total contact data.\n\n"

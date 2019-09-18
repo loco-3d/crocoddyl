@@ -103,32 +103,33 @@ void ContactModelMultiple::updateLagrangian(const boost::shared_ptr<ContactDataM
     assert(it_m->first == it_d->first && "it doesn't match the contact name between data and model");
 
     unsigned int const& nc_i = m_i.contact->get_nc();
-    m_i.contact->updateLagrangian(d_i, lambda.segment(nc, nc_i));
+    const Eigen::VectorBlock<const Eigen::VectorXd, Eigen::Dynamic> lambda_i = lambda.segment(nc, nc_i);
+    m_i.contact->updateLagrangian(d_i, lambda_i);
     data->fext[d_i->joint] = d_i->f;
     nc += nc_i;
   }
 }
 
 void ContactModelMultiple::updateLagrangianDiff(const boost::shared_ptr<ContactDataMultiple>& data,
-                                                const Eigen::MatrixXd& Gx, const Eigen::MatrixXd& Gu) {
+                                                const Eigen::MatrixXd& df_dx, const Eigen::MatrixXd& df_du) const {
   unsigned int const& ndx = state_.get_ndx();
-  assert((Gx.rows() == nc_ || Gx.cols() == ndx) && "Gx has wrong dimension");
-  assert((Gu.rows() == nc_ || Gu.cols() == nu_) && "Gu has wrong dimension");
+  assert((df_dx.rows() == nc_ || df_dx.cols() == ndx) && "df_dx has wrong dimension");
+  assert((df_du.rows() == nc_ || df_du.cols() == nu_) && "df_du has wrong dimension");
   assert(data->contacts.size() == contacts_.size() && "it doesn't match the number of contact datas and models");
   unsigned int nc = 0;
 
-  ContactModelContainer::iterator it_m, end_m;
-  ContactDataContainer::iterator it_d, end_d;
+  ContactModelContainer::const_iterator it_m, end_m;
+  ContactDataContainer::const_iterator it_d, end_d;
   for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const ContactItem& m_i = it_m->second;
-    boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+    const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
     assert(it_m->first == it_d->first && "it doesn't match the contact name between data and model");
 
     unsigned int const& nc_i = m_i.contact->get_nc();
-    const Eigen::Block<const Eigen::MatrixXd> Gx_i = Gx.block(nc, 0, nc_i, ndx);
-    const Eigen::Block<const Eigen::MatrixXd> Gu_i = Gu.block(nc, 0, nc_i, nu_);
-    m_i.contact->updateLagrangianDiff(d_i, Gx_i, Gu_i);
+    const Eigen::Block<const Eigen::MatrixXd> df_dx_i = df_dx.block(nc, 0, nc_i, ndx);
+    const Eigen::Block<const Eigen::MatrixXd> df_du_i = df_du.block(nc, 0, nc_i, nu_);
+    m_i.contact->updateLagrangianDiff(d_i, df_dx_i, df_du_i);
     nc += nc_i;
   }
 }

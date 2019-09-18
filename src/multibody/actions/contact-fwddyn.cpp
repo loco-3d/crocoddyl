@@ -108,12 +108,12 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
 
   // Computing the cost derivatives
   if (enable_force_) {
-    d->Gx.leftCols(nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dq;
-    d->Gx.rightCols(nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dv;
-    d->Gx.noalias() += f_partial_da * d->contacts->da_dx;
-    d->Gx.noalias() -= f_partial_dtau * d->actuation->dtau_dx;
-    d->Gu.noalias() = -f_partial_dtau * d->actuation->dtau_du;
-    contacts_.updateLagrangianDiff(d->contacts, d->Gx, d->Gu);
+    d->df_dx.leftCols(nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dq;
+    d->df_dx.rightCols(nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dv;
+    d->df_dx.noalias() += f_partial_da * d->contacts->da_dx;
+    d->df_dx.noalias() -= f_partial_dtau * d->actuation->dtau_dx;
+    d->df_du.noalias() = -f_partial_dtau * d->actuation->dtau_du;
+    contacts_.updateLagrangianDiff(d->contacts, d->df_dx, d->df_du);
   }
   costs_.calcDiff(d->costs, x, u, false);
 }

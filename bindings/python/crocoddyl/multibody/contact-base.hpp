@@ -73,11 +73,11 @@ void exposeContactAbstract() {
            ":param data: contact data\n"
            ":param lambda: Lagrangian vector")
       .def("updateLagrangianDiff", &ContactModelAbstract_wrap::updateLagrangianDiff,
-           bp::args(" self", " data", " Gx", " Gu"),
+           bp::args(" self", " data", " df_dx", " df_du"),
            "Update the Jacobian of the Lagrangian.\n\n"
            ":param data: contact data\n"
-           ":param Gx: Jacobian of Lagrangian w.r.t. the state\n"
-           ":param Gu: Jacobian of the Lagrangian w.r.t. the control")
+           ":param df_dx: Jacobian of Lagrangian w.r.t. the state\n"
+           ":param df_du: Jacobian of the Lagrangian w.r.t. the control")
       .def("createData", &ContactModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the contact data.\n\n"
@@ -111,10 +111,12 @@ void exposeContactAbstract() {
       .add_property("da_dx",
                     bp::make_getter(&ContactDataAbstract::da_dx, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ContactDataAbstract::da_dx), "Jacobian of the constrained acceleration")
-      .add_property("Gx", bp::make_getter(&ContactDataAbstract::Gx, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ContactDataAbstract::Gx), "Jacobian of the contact forces")
-      .add_property("Gu", bp::make_getter(&ContactDataAbstract::Gu, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ContactDataAbstract::Gu), "Jacobian of the contact forces")
+      .add_property("df_dx",
+                    bp::make_getter(&ContactDataAbstract::df_dx, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ContactDataAbstract::df_dx), "Jacobian of the contact forces")
+      .add_property("df_du",
+                    bp::make_getter(&ContactDataAbstract::df_du, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ContactDataAbstract::df_du), "Jacobian of the contact forces")
       .def_readwrite("joint", &ContactDataAbstract::joint, "joint index of the contact frame")
       .def_readwrite("f", &ContactDataAbstract::f, "external spatial forces");
 }
