@@ -108,8 +108,9 @@ void exposeContactAbstract() {
                     bp::make_setter(&ContactDataAbstract::Jc), "contact Jacobian")
       .add_property("a0", bp::make_getter(&ContactDataAbstract::a0, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ContactDataAbstract::a0), "contact drift")
-      .add_property("Ax", bp::make_getter(&ContactDataAbstract::Ax, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ContactDataAbstract::Ax), "Jacobian of the contact constraint")
+      .add_property("da_dx",
+                    bp::make_getter(&ContactDataAbstract::da_dx, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ContactDataAbstract::da_dx), "Jacobian of the constrained acceleration")
       .add_property("Gx", bp::make_getter(&ContactDataAbstract::Gx, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ContactDataAbstract::Gx), "Jacobian of the contact forces")
       .add_property("Gu", bp::make_getter(&ContactDataAbstract::Gu, bp::return_value_policy<bp::return_by_value>()),

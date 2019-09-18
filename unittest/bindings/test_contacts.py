@@ -44,8 +44,8 @@ class ContactModelAbstractTestCase(unittest.TestCase):
         self.CONTACT.calcDiff(self.data, self.x, True)
         self.CONTACT_DER.calcDiff(self.data_der, self.x, True)
         # Checking the Jacobians of the contact constraint
-        self.assertTrue(np.allclose(self.data.Ax, self.data_der.Ax, atol=1e-9),
-                        "Wrong derivatives of the contact constraint (Ax).")
+        self.assertTrue(np.allclose(self.data.da_dx, self.data_der.da_dx, atol=1e-9),
+                        "Wrong derivatives of the constrained acceleration (da_dx).")
 
 
 class ContactModelMultipleAbstractTestCase(unittest.TestCase):
@@ -87,8 +87,8 @@ class ContactModelMultipleAbstractTestCase(unittest.TestCase):
         self.CONTACT.calcDiff(self.data, self.x, True)
         self.contacts.calcDiff(self.data_multiple, self.x, True)
         # Checking the Jacobians of the contact constraint
-        self.assertTrue(np.allclose(self.data.Ax, self.data_multiple.Ax, atol=1e-9),
-                        "Wrong derivatives of the contact constraint (Ax).")
+        self.assertTrue(np.allclose(self.data.da_dx, self.data_multiple.da_dx, atol=1e-9),
+                        "Wrong derivatives of the constrained acceleration (da_dx).")
 
 
 class Contact3DTest(ContactModelAbstractTestCase):

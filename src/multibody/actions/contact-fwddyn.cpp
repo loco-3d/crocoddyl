@@ -102,7 +102,7 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
 
   d->Fx.leftCols(nv).noalias() = -a_partial_dtau * d->pinocchio.dtau_dq;
   d->Fx.rightCols(nv).noalias() = -a_partial_dtau * d->pinocchio.dtau_dv;
-  d->Fx.noalias() -= a_partial_da * d->contacts->Ax;
+  d->Fx.noalias() -= a_partial_da * d->contacts->da_dx;
   d->Fx.noalias() += a_partial_dtau * d->actuation->Ax;
   d->Fu.noalias() = a_partial_dtau * d->actuation->Au;
 
@@ -110,7 +110,7 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
   if (enable_force_) {
     d->Gx.leftCols(nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dq;
     d->Gx.rightCols(nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dv;
-    d->Gx.noalias() += f_partial_da * d->contacts->Ax;
+    d->Gx.noalias() += f_partial_da * d->contacts->da_dx;
     d->Gx.noalias() -= f_partial_dtau * d->actuation->Ax;
     d->Gu.noalias() = -f_partial_dtau * d->actuation->Au;
     contacts_.updateLagrangianDiff(d->contacts, d->Gx, d->Gu);

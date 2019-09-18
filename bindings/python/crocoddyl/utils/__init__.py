@@ -547,17 +547,17 @@ class Contact3DDerived(crocoddyl.ContactModelAbstract):
         vv_skew = pinocchio.utils.skew(self.vv)
         vw_skew = pinocchio.utils.skew(self.vw)
         fXjdv_dq = self.fXj * v_partial_dq
-        Aq = (self.fXj * a_partial_dq)[:3, :] + vw_skew * fXjdv_dq[:3, :] - vv_skew * fXjdv_dq[3:, :]
-        Av = (self.fXj * a_partial_dv)[:3, :] + vw_skew * data.Jc - vv_skew * self.Jw
+        da_dq = (self.fXj * a_partial_dq)[:3, :] + vw_skew * fXjdv_dq[:3, :] - vv_skew * fXjdv_dq[3:, :]
+        da_dv = (self.fXj * a_partial_dv)[:3, :] + vw_skew * data.Jc - vv_skew * self.Jw
 
         if np.asscalar(self.gains[0]) != 0.:
             R = data.pinocchio.oMf[self.xref.frame].rotation
-            Aq += np.asscalar(self.gains[0]) * R * pinocchio.getFrameJacobian(
+            da_dq += np.asscalar(self.gains[0]) * R * pinocchio.getFrameJacobian(
                 self.state.pinocchio, data.pinocchio, self.xref.frame, pinocchio.ReferenceFrame.LOCAL)[:3, :]
         if np.asscalar(self.gains[1]) != 0.:
-            Aq += np.asscalar(self.gains[1]) * (self.fXj[:3, :] * v_partial_dq)
-            Av += np.asscalar(self.gains[1]) * (self.fXj[:3, :] * a_partial_da)
-        data.Ax = np.hstack([Aq, Av])
+            da_dq += np.asscalar(self.gains[1]) * (self.fXj[:3, :] * v_partial_dq)
+            da_dv += np.asscalar(self.gains[1]) * (self.fXj[:3, :] * a_partial_da)
+        data.da_dx = np.hstack([da_dq, da_dv])
 
 
 class Contact6DDerived(crocoddyl.ContactModelAbstract):
@@ -586,15 +586,15 @@ class Contact6DDerived(crocoddyl.ContactModelAbstract):
         v_partial_dq, a_partial_dq, a_partial_dv, a_partial_da = pinocchio.getJointAccelerationDerivatives(
             self.state.pinocchio, data.pinocchio, self.joint, pinocchio.ReferenceFrame.LOCAL)
 
-        Aq = (self.fXj * a_partial_dq)
-        Av = (self.fXj * a_partial_dv)
+        da_dq = (self.fXj * a_partial_dq)
+        da_dv = (self.fXj * a_partial_dv)
 
         if np.asscalar(self.gains[0]) != 0.:
-            Aq += np.asscalar(self.gains[0]) * pinocchio.Jlog6(self.rMf) * data.Jc
+            da_dq += np.asscalar(self.gains[0]) * pinocchio.Jlog6(self.rMf) * data.Jc
         if np.asscalar(self.gains[1]) != 0.:
-            Aq += np.asscalar(self.gains[1]) * (self.fXj * v_partial_dq)
-            Av += np.asscalar(self.gains[1]) * (self.fXj * a_partial_da)
-        data.Ax = np.hstack([Aq, Av])
+            da_dq += np.asscalar(self.gains[1]) * (self.fXj * v_partial_dq)
+            da_dv += np.asscalar(self.gains[1]) * (self.fXj * a_partial_da)
+        data.da_dx = np.hstack([da_dq, da_dv])
 
 
 class Impulse3DDerived(crocoddyl.ImpulseModelAbstract):

@@ -63,13 +63,13 @@ struct ContactDataAbstract {
         joint(0),
         Jc(model->get_nc(), model->get_state().get_nv()),
         a0(model->get_nc()),
-        Ax(model->get_nc(), model->get_state().get_ndx()),
+        da_dx(model->get_nc(), model->get_state().get_ndx()),
         Gx(model->get_nc(), model->get_state().get_ndx()),
         Gu(model->get_nc(), model->get_nu()),
         f(pinocchio::Force::Zero()) {
     Jc.fill(0);
     a0.fill(0);
-    Ax.fill(0);
+    da_dx.fill(0);
     Gx.fill(0);
     Gu.fill(0);
   }
@@ -78,7 +78,7 @@ struct ContactDataAbstract {
   pinocchio::JointIndex joint;
   Eigen::MatrixXd Jc;
   Eigen::VectorXd a0;
-  Eigen::MatrixXd Ax;
+  Eigen::MatrixXd da_dx;
   Eigen::MatrixXd Gx;
   Eigen::MatrixXd Gu;
   pinocchio::Force f;
