@@ -69,7 +69,12 @@ void exposeImpulseAbstract() {
            bp::args(" self", " data", " vnext"),
            "Update the velocity after impulse.\n\n"
            ":param data: impulse data\n"
-           ":param vnext: velocity after impulse")
+           ":param vnext: velocity after impulse (dimension nv)")
+      .def("updateImpulseVelocityDiff", &ImpulseModelAbstract_wrap::updateImpulseVelocityDiff,
+           bp::args(" self", " data", " dvnext_dx"),
+           "Update the velocity after impulse.\n\n"
+           ":param data: impulse data\n"
+           ":param dvnext_dx: Jacobian of the impulse velocity (dimension nv*ndx)")
       .def("createData", &ImpulseModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the impulse data.\n\n"
@@ -93,6 +98,12 @@ void exposeImpulseAbstract() {
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
       .add_property("pinocchio", bp::make_getter(&ImpulseDataAbstract::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
+      .add_property("vnext",
+                    bp::make_getter(&ImpulseDataAbstract::vnext, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ImpulseDataAbstract::vnext), "impulse velocity")
+      .add_property("dvnext_dx",
+                    bp::make_getter(&ImpulseDataAbstract::dvnext_dx, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ImpulseDataAbstract::dvnext_dx), "Jacobian of the impulse velocity")
       .add_property("Jc", bp::make_getter(&ImpulseDataAbstract::Jc, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ImpulseDataAbstract::Jc), "impulse Jacobian")
       .add_property("Vq", bp::make_getter(&ImpulseDataAbstract::Vq, bp::return_value_policy<bp::return_by_value>()),
