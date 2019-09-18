@@ -90,12 +90,15 @@ void exposeActuationAbstract() {
                                         "Create common data shared between actuation models.\n\n"
                                         "The actuation data uses the model in order to first process it.\n"
                                         ":param model: actuation model"))
-      .add_property("a", bp::make_getter(&ActuationDataAbstract::a, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActuationDataAbstract::a), "actuation signal")
-      .add_property("Ax", bp::make_getter(&ActuationDataAbstract::Ax, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActuationDataAbstract::Ax), "Jacobian of the actuation model")
-      .add_property("Au", bp::make_getter(&ActuationDataAbstract::Au, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActuationDataAbstract::Au), "Jacobian of the actuation model");
+      .add_property("tau",
+                    bp::make_getter(&ActuationDataAbstract::tau, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ActuationDataAbstract::tau), "actuation-force signal")
+      .add_property("dtau_dx",
+                    bp::make_getter(&ActuationDataAbstract::dtau_dx, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ActuationDataAbstract::dtau_dx), "Jacobian of the actuation model")
+      .add_property("dtau_du",
+                    bp::make_getter(&ActuationDataAbstract::dtau_du, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ActuationDataAbstract::dtau_du), "Jacobian of the actuation model");
 }
 
 }  // namespace python

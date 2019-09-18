@@ -61,7 +61,7 @@ void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<Dif
   }
 #endif
 
-  pinocchio::forwardDynamics(pinocchio_, d->pinocchio, q, v, d->actuation->a, d->contacts->Jc, d->contacts->a0,
+  pinocchio::forwardDynamics(pinocchio_, d->pinocchio, q, v, d->actuation->tau, d->contacts->Jc, d->contacts->a0,
                              JMinvJt_damping_, false);
   d->xout = d->pinocchio.ddq;
   contacts_.updateLagrangian(d->contacts, d->pinocchio.lambda_c);
@@ -103,16 +103,16 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
   d->Fx.leftCols(nv).noalias() = -a_partial_dtau * d->pinocchio.dtau_dq;
   d->Fx.rightCols(nv).noalias() = -a_partial_dtau * d->pinocchio.dtau_dv;
   d->Fx.noalias() -= a_partial_da * d->contacts->da_dx;
-  d->Fx.noalias() += a_partial_dtau * d->actuation->Ax;
-  d->Fu.noalias() = a_partial_dtau * d->actuation->Au;
+  d->Fx.noalias() += a_partial_dtau * d->actuation->dtau_dx;
+  d->Fu.noalias() = a_partial_dtau * d->actuation->dtau_du;
 
   // Computing the cost derivatives
   if (enable_force_) {
     d->Gx.leftCols(nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dq;
     d->Gx.rightCols(nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dv;
     d->Gx.noalias() += f_partial_da * d->contacts->da_dx;
-    d->Gx.noalias() -= f_partial_dtau * d->actuation->Ax;
-    d->Gu.noalias() = -f_partial_dtau * d->actuation->Au;
+    d->Gx.noalias() -= f_partial_dtau * d->actuation->dtau_dx;
+    d->Gu.noalias() = -f_partial_dtau * d->actuation->dtau_du;
     contacts_.updateLagrangianDiff(d->contacts, d->Gx, d->Gu);
   }
   costs_.calcDiff(d->costs, x, u, false);

@@ -127,13 +127,13 @@ class FreeFloatingActuationDerived(crocoddyl.ActuationModelAbstract):
         crocoddyl.ActuationModelAbstract.__init__(self, state, state.nv - 6)
 
     def calc(self, data, x, u):
-        data.a = np.vstack([pinocchio.utils.zero(6), u])
+        data.tau = np.vstack([pinocchio.utils.zero(6), u])
 
     def calcDiff(self, data, x, u, recalc=True):
         if recalc:
             self.calc(data, x, u)
-        Au = np.vstack([pinocchio.utils.zero((6, self.nu)), pinocchio.utils.eye(self.nu)])
-        data.Au = Au
+        dtau_du = np.vstack([pinocchio.utils.zero((6, self.nu)), pinocchio.utils.eye(self.nu)])
+        data.dtau_du = dtau_du
 
 
 class FullActuationDerived(crocoddyl.ActuationModelAbstract):
@@ -142,12 +142,12 @@ class FullActuationDerived(crocoddyl.ActuationModelAbstract):
         crocoddyl.ActuationModelAbstract.__init__(self, state, state.nv)
 
     def calc(self, data, x, u):
-        data.a = u
+        data.tau = u
 
     def calcDiff(self, data, x, u, recalc=True):
         if recalc:
             self.calc(data, x, u)
-        data.Au = pinocchio.utils.eye(self.nu)
+        data.dtau_du = pinocchio.utils.eye(self.nu)
 
 
 class UnicycleDerived(crocoddyl.ActionModelAbstract):

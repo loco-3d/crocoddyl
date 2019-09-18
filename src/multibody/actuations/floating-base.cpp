@@ -26,7 +26,7 @@ void ActuationModelFloatingBase::calc(const boost::shared_ptr<ActuationDataAbstr
                                       const Eigen::Ref<const Eigen::VectorXd>&,
                                       const Eigen::Ref<const Eigen::VectorXd>& u) {
   assert(u.size() == nu_ && "u has wrong dimension");
-  data->a.tail(nu_) = u;
+  data->tau.tail(nu_) = u;
 }
 
 void ActuationModelFloatingBase::calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data,
@@ -36,16 +36,16 @@ void ActuationModelFloatingBase::calcDiff(const boost::shared_ptr<ActuationDataA
     calc(data, x, u);
   }
   // The derivatives has constant values which were set in createData.
-  assert(data->Ax == Eigen::MatrixXd::Zero(state_.get_nv(), state_.get_ndx()) && "Ax has wrong value");
-  assert(data->Au == Au_ && "Au has wrong value");
+  assert(data->dtau_dx == Eigen::MatrixXd::Zero(state_.get_nv(), state_.get_ndx()) && "dtau_dx has wrong value");
+  assert(data->dtau_du == dtau_du_ && "dtau_du has wrong value");
 }
 
 boost::shared_ptr<ActuationDataAbstract> ActuationModelFloatingBase::createData() {
   boost::shared_ptr<ActuationDataAbstract> data = boost::make_shared<ActuationDataAbstract>(this);
-  data->Au.diagonal(-6).fill(1.);
+  data->dtau_du.diagonal(-6).fill(1.);
 
 #ifndef NDEBUG
-  Au_ = data->Au;
+  dtau_du_ = data->dtau_du;
 #endif
 
   return data;
