@@ -43,6 +43,7 @@ class ImpulseModelMultiple {
                 const bool& recalc = true);
   void updateLagrangian(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::VectorXd& lambda);
   boost::shared_ptr<ImpulseDataMultiple> createData(pinocchio::Data* const data);
+  void updateImpulseVelocity(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::VectorXd& vnext) const;
 
   StateMultibody& get_state() const;
   const ImpulseModelContainer& get_impulses() const;
@@ -71,7 +72,10 @@ struct ImpulseDataMultiple : ImpulseDataAbstract {
 
   template <typename Model>
   ImpulseDataMultiple(Model* const model, pinocchio::Data* const data)
-      : ImpulseDataAbstract(model, data), fext(model->get_state().get_pinocchio().njoints, pinocchio::Force::Zero()) {
+      : ImpulseDataAbstract(model, data),
+        vnext(model->get_state().get_nv()),
+        fext(model->get_state().get_pinocchio().njoints, pinocchio::Force::Zero()) {
+    vnext.fill(0);
     for (ImpulseModelMultiple::ImpulseModelContainer::const_iterator it = model->get_impulses().begin();
          it != model->get_impulses().end(); ++it) {
       const ImpulseItem& item = it->second;
@@ -79,6 +83,7 @@ struct ImpulseDataMultiple : ImpulseDataAbstract {
     }
   }
 
+  Eigen::VectorXd vnext;
   ImpulseModelMultiple::ImpulseDataContainer impulses;
   pinocchio::container::aligned_vector<pinocchio::Force> fext;
 };

@@ -63,6 +63,7 @@ void ActionModelImpulseFwdDynamics::calc(const boost::shared_ptr<ActionDataAbstr
   d->xnext.head(nq) = q;
   d->xnext.tail(nv) = d->pinocchio.dq_after;
   impulses_.updateLagrangian(d->impulses, d->pinocchio.impulse_c);
+  impulses_.updateImpulseVelocity(d->impulses, d->pinocchio.dq_after);
 
   // Computing the cost value and residuals
   costs_.calc(d->costs, x, u);

@@ -78,6 +78,10 @@ void exposeImpulseMultiple() {
            "Convert the Lagrangian into a stack of spatial forces.\n\n"
            ":param data: cost data\n"
            ":param lambda: Lagrangian vector")
+      .def("updateImpulseVelocity", &ImpulseModelMultiple::updateImpulseVelocity, bp::args(" self", " data", " vnext"),
+           "Update the velocity after impulse.\n\n"
+           ":param data: cost data\n"
+           ":param vnext: velocity after impulse")
       .def("createData", &ImpulseModelMultiple::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the total impulse data.\n\n"

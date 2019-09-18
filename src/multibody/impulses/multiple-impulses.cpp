@@ -104,6 +104,11 @@ void ImpulseModelMultiple::updateLagrangian(const boost::shared_ptr<ImpulseDataM
   }
 }
 
+void ImpulseModelMultiple::updateImpulseVelocity(const boost::shared_ptr<ImpulseDataMultiple>& data,
+                                                 const Eigen::VectorXd& vnext) const {
+  data->vnext = vnext;
+}
+
 boost::shared_ptr<ImpulseDataMultiple> ImpulseModelMultiple::createData(pinocchio::Data* const data) {
   return boost::make_shared<ImpulseDataMultiple>(this, data);
 }
