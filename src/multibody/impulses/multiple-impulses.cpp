@@ -106,7 +106,19 @@ void ImpulseModelMultiple::updateLagrangian(const boost::shared_ptr<ImpulseDataM
 
 void ImpulseModelMultiple::updateImpulseVelocity(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                                  const Eigen::VectorXd& vnext) const {
-  data->vnext = vnext;
+  assert(vnext.rows() == state_.get_nv() && "vnext has wrong dimension");
+  assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
+
+  ImpulseModelContainer::const_iterator it_m, end_m;
+  ImpulseDataContainer::const_iterator it_d, end_d;
+  for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
+       it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
+    const ImpulseItem& m_i = it_m->second;
+    const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
+    assert(it_m->first == it_d->first && "it doesn't match the impulse name between data and model");
+
+    m_i.impulse->updateImpulseVelocity(d_i, vnext);
+  }
 }
 
 boost::shared_ptr<ImpulseDataMultiple> ImpulseModelMultiple::createData(pinocchio::Data* const data) {

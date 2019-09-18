@@ -14,6 +14,12 @@ ImpulseModelAbstract::ImpulseModelAbstract(StateMultibody& state, unsigned int c
 
 ImpulseModelAbstract::~ImpulseModelAbstract() {}
 
+void ImpulseModelAbstract::updateImpulseVelocity(const boost::shared_ptr<ImpulseDataAbstract>& data,
+                                                 const Eigen::VectorXd& vnext) const {
+  assert(vnext.rows() == state_.get_nv() && "vnext has wrong dimension");
+  data->vnext = vnext;
+}
+
 boost::shared_ptr<ImpulseDataAbstract> ImpulseModelAbstract::createData(pinocchio::Data* const data) {
   return boost::make_shared<ImpulseDataAbstract>(this, data);
 }

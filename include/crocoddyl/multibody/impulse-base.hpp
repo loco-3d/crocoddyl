@@ -27,6 +27,7 @@ class ImpulseModelAbstract {
   virtual void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const bool& recalc = true) = 0;
   virtual void updateLagrangian(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& lambda) = 0;
+  void updateImpulseVelocity(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& vnext) const;
 
   virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::Data* const data);
 
@@ -57,15 +58,18 @@ struct ImpulseDataAbstract {
   ImpulseDataAbstract(Model* const model, pinocchio::Data* const data)
       : pinocchio(data),
         joint(0),
+        vnext(model->get_state().get_nv()),
         Jc(model->get_ni(), model->get_state().get_nv()),
         Vq(model->get_ni(), model->get_state().get_nv()),
         f(pinocchio::Force::Zero()) {
+    vnext.fill(0);
     Jc.fill(0);
     Vq.fill(0);
   }
 
   pinocchio::Data* pinocchio;
   pinocchio::JointIndex joint;
+  Eigen::VectorXd vnext;
   Eigen::MatrixXd Jc;
   Eigen::MatrixXd Vq;
   pinocchio::Force f;
