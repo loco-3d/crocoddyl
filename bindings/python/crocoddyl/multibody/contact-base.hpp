@@ -110,10 +110,10 @@ void exposeContactAbstract() {
                     bp::make_setter(&ContactDataAbstract::a0), "contact drift")
       .add_property("Ax", bp::make_getter(&ContactDataAbstract::Ax, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ContactDataAbstract::Ax), "Jacobian of the contact constraint")
-      .add_property("Gx", bp::make_getter(&ContactDataAbstract::Ax, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ContactDataAbstract::Ax), "Jacobian of the contact forces")
-      .add_property("Gu", bp::make_getter(&ContactDataAbstract::Ax, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ContactDataAbstract::Ax), "Jacobian of the contact forces")
+      .add_property("Gx", bp::make_getter(&ContactDataAbstract::Gx, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ContactDataAbstract::Gx), "Jacobian of the contact forces")
+      .add_property("Gu", bp::make_getter(&ContactDataAbstract::Gu, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ContactDataAbstract::Gu), "Jacobian of the contact forces")
       .def_readwrite("joint", &ContactDataAbstract::joint, "joint index of the contact frame")
       .def_readwrite("f", &ContactDataAbstract::f, "external spatial forces");
 }
