@@ -42,9 +42,9 @@ class ContactModelMultiple {
   void calc(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
   void calcDiff(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const bool& recalc = true);
-  void updateLagrangian(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::VectorXd& lambda);
-  void updateLagrangianDiff(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::MatrixXd& df_dx,
-                            const Eigen::MatrixXd& df_du) const;
+  void updateForce(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::VectorXd& force);
+  void updateForceDiff(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::MatrixXd& df_dx,
+                       const Eigen::MatrixXd& df_du) const;
   boost::shared_ptr<ContactDataMultiple> createData(pinocchio::Data* const data);
 
   StateMultibody& get_state() const;

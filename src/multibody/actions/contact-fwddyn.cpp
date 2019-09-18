@@ -64,7 +64,7 @@ void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<Dif
   pinocchio::forwardDynamics(pinocchio_, d->pinocchio, q, v, d->actuation->tau, d->contacts->Jc, d->contacts->a0,
                              JMinvJt_damping_, false);
   d->xout = d->pinocchio.ddq;
-  contacts_.updateLagrangian(d->contacts, d->pinocchio.lambda_c);
+  contacts_.updateForce(d->contacts, d->pinocchio.lambda_c);
 
   // Computing the cost value and residuals
   costs_.calc(d->costs, x, u);
@@ -113,7 +113,7 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
     d->df_dx.noalias() += f_partial_da * d->contacts->da_dx;
     d->df_dx.noalias() -= f_partial_dtau * d->actuation->dtau_dx;
     d->df_du.noalias() = -f_partial_dtau * d->actuation->dtau_du;
-    contacts_.updateLagrangianDiff(d->contacts, d->df_dx, d->df_du);
+    contacts_.updateForceDiff(d->contacts, d->df_dx, d->df_du);
   }
   costs_.calcDiff(d->costs, x, u, false);
 }

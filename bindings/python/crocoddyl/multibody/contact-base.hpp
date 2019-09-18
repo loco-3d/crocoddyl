@@ -32,9 +32,9 @@ class ContactModelAbstract_wrap : public ContactModelAbstract, public bp::wrappe
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, recalc);
   }
 
-  void updateLagrangian(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& lambda) {
-    assert(lambda.size() == nc_ && "lambda has wrong dimension");
-    return bp::call<void>(this->get_override("updateLagrangian").ptr(), data, lambda);
+  void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& force) {
+    assert(force.size() == nc_ && "force has wrong dimension");
+    return bp::call<void>(this->get_override("updateForce").ptr(), data, force);
   }
 };
 
@@ -67,17 +67,16 @@ void exposeContactAbstract() {
            ":param data: contact data\n"
            ":param x: state vector\n"
            ":param recalc: If true, it updates the contact Jacobian and drift.")
-      .def("updateLagrangian", pure_virtual(&ContactModelAbstract_wrap::updateLagrangian),
-           bp::args(" self", " data", " lambda"),
-           "Convert the Lagrangian into a stack of spatial forces.\n\n"
+      .def("updateForce", pure_virtual(&ContactModelAbstract_wrap::updateForce), bp::args(" self", " data", " force"),
+           "Convert the force into a stack of spatial forces.\n\n"
            ":param data: contact data\n"
-           ":param lambda: Lagrangian vector")
-      .def("updateLagrangianDiff", &ContactModelAbstract_wrap::updateLagrangianDiff,
+           ":param force: force vector (dimension nc)")
+      .def("updateForceDiff", &ContactModelAbstract_wrap::updateForceDiff,
            bp::args(" self", " data", " df_dx", " df_du"),
-           "Update the Jacobian of the Lagrangian.\n\n"
+           "Update the Jacobians of the force.\n\n"
            ":param data: contact data\n"
-           ":param df_dx: Jacobian of Lagrangian w.r.t. the state\n"
-           ":param df_du: Jacobian of the Lagrangian w.r.t. the control")
+           ":param df_dx: Jacobian of the force with respect to the state\n"
+           ":param df_du: Jacobian of the force with respect to the control")
       .def("createData", &ContactModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the contact data.\n\n"

@@ -75,16 +75,15 @@ void exposeContactMultiple() {
                ":param data: contact data\n"
                ":param x: state vector\n"
                ":param recalc: If true, it updates the contact Jacobian and drift."))
-      .def("updateLagrangian", &ContactModelMultiple::updateLagrangian, bp::args(" self", " data", " lambda"),
-           "Convert the Lagrangian into a stack of spatial forces.\n\n"
+      .def("updateForce", &ContactModelMultiple::updateForce, bp::args(" self", " data", " force"),
+           "Convert the force into a stack of spatial forces.\n\n"
            ":param data: contact data\n"
-           ":param lambda: Lagrangian vector")
-      .def("updateLagrangianDiff", &ContactModelMultiple::updateLagrangianDiff,
-           bp::args(" self", " data", " df_dx", " df_du"),
-           "Update the Jacobian of the Lagrangian.\n\n"
+           ":param lambda: force vector (dimension nc)")
+      .def("updateForceDiff", &ContactModelMultiple::updateForceDiff, bp::args(" self", " data", " df_dx", " df_du"),
+           "Update the Jacobians of the force.\n\n"
            ":param data: contact data\n"
-           ":param df_dx: Jacobian of Lagrangian w.r.t. the state\n"
-           ":param df_du: Jacobian of the Lagrangian w.r.t. the control")
+           ":param df_dx: Jacobian of the force with respect to the state (dimension nc*ndx)\n"
+           ":param df_du: Jacobian of the force with respect to the control (dimension nc*nu)")
       .def("createData", &ContactModelMultiple::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the total contact data.\n\n"

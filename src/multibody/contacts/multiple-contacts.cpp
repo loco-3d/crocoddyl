@@ -84,9 +84,9 @@ void ContactModelMultiple::calcDiff(const boost::shared_ptr<ContactDataMultiple>
   }
 }
 
-void ContactModelMultiple::updateLagrangian(const boost::shared_ptr<ContactDataMultiple>& data,
-                                            const Eigen::VectorXd& lambda) {
-  assert(lambda.size() == nc_ && "lambda has wrong dimension, it should be nc vector");
+void ContactModelMultiple::updateForce(const boost::shared_ptr<ContactDataMultiple>& data,
+                                       const Eigen::VectorXd& force) {
+  assert(force.size() == nc_ && "force has wrong dimension, it should be nc vector");
   assert(data->contacts.size() == contacts_.size() && "it doesn't match the number of contact datas and models");
   unsigned int nc = 0;
 
@@ -103,15 +103,15 @@ void ContactModelMultiple::updateLagrangian(const boost::shared_ptr<ContactDataM
     assert(it_m->first == it_d->first && "it doesn't match the contact name between data and model");
 
     unsigned int const& nc_i = m_i.contact->get_nc();
-    const Eigen::VectorBlock<const Eigen::VectorXd, Eigen::Dynamic> lambda_i = lambda.segment(nc, nc_i);
-    m_i.contact->updateLagrangian(d_i, lambda_i);
+    const Eigen::VectorBlock<const Eigen::VectorXd, Eigen::Dynamic> force_i = force.segment(nc, nc_i);
+    m_i.contact->updateForce(d_i, force_i);
     data->fext[d_i->joint] = d_i->f;
     nc += nc_i;
   }
 }
 
-void ContactModelMultiple::updateLagrangianDiff(const boost::shared_ptr<ContactDataMultiple>& data,
-                                                const Eigen::MatrixXd& df_dx, const Eigen::MatrixXd& df_du) const {
+void ContactModelMultiple::updateForceDiff(const boost::shared_ptr<ContactDataMultiple>& data,
+                                           const Eigen::MatrixXd& df_dx, const Eigen::MatrixXd& df_du) const {
   unsigned int const& ndx = state_.get_ndx();
   assert((df_dx.rows() == nc_ || df_dx.cols() == ndx) && "df_dx has wrong dimension");
   assert((df_du.rows() == nc_ || df_du.cols() == nu_) && "df_du has wrong dimension");
@@ -129,7 +129,7 @@ void ContactModelMultiple::updateLagrangianDiff(const boost::shared_ptr<ContactD
     unsigned int const& nc_i = m_i.contact->get_nc();
     const Eigen::Block<const Eigen::MatrixXd> df_dx_i = df_dx.block(nc, 0, nc_i, ndx);
     const Eigen::Block<const Eigen::MatrixXd> df_du_i = df_du.block(nc, 0, nc_i, nu_);
-    m_i.contact->updateLagrangianDiff(d_i, df_dx_i, df_du_i);
+    m_i.contact->updateForceDiff(d_i, df_dx_i, df_du_i);
     nc += nc_i;
   }
 }

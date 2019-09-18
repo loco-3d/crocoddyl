@@ -27,9 +27,9 @@ class ContactModelAbstract {
                     const Eigen::Ref<const Eigen::VectorXd>& x) = 0;
   virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const bool& recalc = true) = 0;
-  virtual void updateLagrangian(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& lambda) = 0;
-  void updateLagrangianDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::MatrixXd& df_dx,
-                            const Eigen::MatrixXd& df_du) const;
+  virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& force) = 0;
+  void updateForceDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::MatrixXd& df_dx,
+                       const Eigen::MatrixXd& df_du) const;
   virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::Data* const data);
 
   StateMultibody& get_state() const;

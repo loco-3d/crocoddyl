@@ -64,11 +64,10 @@ void ContactModel6D::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data
   }
 }
 
-void ContactModel6D::updateLagrangian(const boost::shared_ptr<ContactDataAbstract>& data,
-                                      const Eigen::VectorXd& lambda) {
-  assert(lambda.size() == 6 && "lambda has wrong dimension, it should be 6d vector");
+void ContactModel6D::updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& force) {
+  assert(force.size() == 6 && "force has wrong dimension, it should be 6d vector");
   ContactData6D* d = static_cast<ContactData6D*>(data.get());
-  data->f = d->jMf.act(pinocchio::Force(lambda));
+  data->f = d->jMf.act(pinocchio::Force(force));
 }
 
 boost::shared_ptr<ContactDataAbstract> ContactModel6D::createData(pinocchio::Data* const data) {
