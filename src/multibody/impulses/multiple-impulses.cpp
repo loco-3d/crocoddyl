@@ -79,9 +79,9 @@ void ImpulseModelMultiple::calcDiff(const boost::shared_ptr<ImpulseDataMultiple>
   }
 }
 
-void ImpulseModelMultiple::updateLagrangian(const boost::shared_ptr<ImpulseDataMultiple>& data,
-                                            const Eigen::VectorXd& lambda) {
-  assert(lambda.size() == ni_ && "lambda has wrong dimension, it should be ni vector");
+void ImpulseModelMultiple::updateForce(const boost::shared_ptr<ImpulseDataMultiple>& data,
+                                       const Eigen::VectorXd& force) {
+  assert(force.size() == ni_ && "force has wrong dimension, it should be ni vector");
   assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
   unsigned int ni = 0;
 
@@ -98,7 +98,8 @@ void ImpulseModelMultiple::updateLagrangian(const boost::shared_ptr<ImpulseDataM
     assert(it_m->first == it_d->first && "it doesn't match the impulse name between data and model");
 
     unsigned int const& ni_i = m_i.impulse->get_ni();
-    m_i.impulse->updateLagrangian(d_i, lambda.segment(ni, ni_i));
+    const Eigen::VectorBlock<const Eigen::VectorXd, Eigen::Dynamic> force_i = force.segment(ni, ni_i);
+    m_i.impulse->updateForce(d_i, force_i);
     data->fext[d_i->joint] = d_i->f;
     ni += ni_i;
   }

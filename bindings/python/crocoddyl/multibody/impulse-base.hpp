@@ -31,9 +31,9 @@ class ImpulseModelAbstract_wrap : public ImpulseModelAbstract, public bp::wrappe
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, recalc);
   }
 
-  void updateLagrangian(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& lambda) {
-    assert(lambda.size() == ni_ && "lambda has wrong dimension");
-    return bp::call<void>(this->get_override("updateLagrangian").ptr(), data, lambda);
+  void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force) {
+    assert(force.size() == ni_ && "force has wrong dimension");
+    return bp::call<void>(this->get_override("updateForce").ptr(), data, force);
   }
 };
 
@@ -60,11 +60,10 @@ void exposeImpulseAbstract() {
            ":param data: impulse data\n"
            ":param x: state vector\n"
            ":param recalc: If true, it updates the impulse Jacobian")
-      .def("updateLagrangian", pure_virtual(&ImpulseModelAbstract_wrap::updateLagrangian),
-           bp::args(" self", " data", " lambda"),
-           "Convert the Lagrangian into a stack of spatial forces.\n\n"
+      .def("updateForce", pure_virtual(&ImpulseModelAbstract_wrap::updateForce), bp::args(" self", " data", " lambda"),
+           "Convert the force into a stack of spatial forces.\n\n"
            ":param data: impulse data\n"
-           ":param lambda: Lagrangian vector")
+           ":param force: force vector (dimension ni)")
       .def("updateImpulseVelocity", &ImpulseModelAbstract_wrap::updateImpulseVelocity,
            bp::args(" self", " data", " vnext"),
            "Update the velocity after impulse.\n\n"

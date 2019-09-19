@@ -37,11 +37,10 @@ void ImpulseModel3D::calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data
   d->dv_dq.noalias() = d->fXj.topRows<3>() * d->v_partial_dq;
 }
 
-void ImpulseModel3D::updateLagrangian(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                                      const Eigen::VectorXd& lambda) {
-  assert(lambda.size() == 3 && "lambda has wrong dimension, it should be 3d vector");
+void ImpulseModel3D::updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force) {
+  assert(force.size() == 3 && "force has wrong dimension, it should be 3d vector");
   ImpulseData3D* d = static_cast<ImpulseData3D*>(data.get());
-  data->f = d->jMf.act(pinocchio::Force(lambda, Eigen::Vector3d::Zero()));
+  data->f = d->jMf.act(pinocchio::Force(force, Eigen::Vector3d::Zero()));
 }
 
 boost::shared_ptr<ImpulseDataAbstract> ImpulseModel3D::createData(pinocchio::Data* const data) {

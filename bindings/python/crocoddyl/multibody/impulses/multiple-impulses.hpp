@@ -74,10 +74,10 @@ void exposeImpulseMultiple() {
                ":param data: impulse data\n"
                ":param x: state vector\n"
                ":param recalc: If true, it updates the impulse Jacobian and drift."))
-      .def("updateLagrangian", &ImpulseModelMultiple::updateLagrangian, bp::args(" self", " data", " lambda"),
-           "Convert the Lagrangian into a stack of spatial forces.\n\n"
+      .def("updateForce", &ImpulseModelMultiple::updateForce, bp::args(" self", " data", " lambda"),
+           "Convert the force into a stack of spatial forces.\n\n"
            ":param data: impulse data\n"
-           ":param lambda: Lagrangian vector")
+           ":param force: force vector (dimension ni)")
       .def("updateImpulseVelocity", &ImpulseModelMultiple::updateImpulseVelocity, bp::args(" self", " data", " vnext"),
            "Update the velocity after impulse.\n\n"
            ":param data: impulse data\n"
