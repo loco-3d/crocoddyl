@@ -55,6 +55,26 @@ const Eigen::Vector2d& SolverKKT::expectedImprovement(){
 }
 
 
+double SolverKKT::calc(){
+  // problem calc diff 
+
+  // some indices 
+  int ix = 0; 
+  int iu = 0; 
+  //offset on constraint xnext = f(x,u) due to x0 = ref.
+  int cx0 = 0; // this should not be zero, modify later 
+
+   // loop over models and fill out kkt matrix 
+
+
+   // do terminal model 
+
+   // constraint value = x_guess - x_ref = diff(x_ref,x_guess)
+
+   // set upper right block of kkt matrix jac.T = jacobian.transpose()  
+
+}
+
 
 
 void SolverKKT::allocateData() {
@@ -65,6 +85,10 @@ void SolverKKT::allocateData() {
   xs_try_.resize(T + 1);
   us_try_.resize(T);
   dx_.resize(T);
+  nx_ = 0; 
+  ndx_ = 0;
+  nu_ = 0; 
+
 
   for (long unsigned int t = 0; t < T; ++t) {
     ActionModelAbstract* model = problem_.running_models_[t];
@@ -79,9 +103,30 @@ void SolverKKT::allocateData() {
     }
     us_try_[t] = Eigen::VectorXd::Constant(nu, NAN);
     dx_[t] = Eigen::VectorXd::Zero(ndx);
+    nx_ += nx; 
+    ndx_ += ndx;
+    nu_ += nu;   
   }
+  // add terminal model 
+  ActionModelAbstract* model = problem_.get_terminalModel();
+  nx_ +=  model->get_nx();
+  ndx_ +=  model->get_ndx();
+
+  // set dimensions for kkt matrix and kkt_ref vector 
+  kkt_.resize(2*ndx_+nu_, 2*ndx_+nu_);
+  kkt_.setZero(); 
+  kktref_.resize(2*ndx_+nu_);
+  kktref_.setZero();
+
+
 
 }
+
+const int& SolverKKT::get_nx() const { return nx_; }
+const int& SolverKKT::get_ndx() const { return ndx_; }
+const int& SolverKKT::get_nu() const { return nu_; } 
+const Eigen::MatrixXd& SolverKKT::get_kkt() const {return kkt_;}
+const Eigen::VectorXd& SolverKKT::get_kktref() const{return kktref_;}
 
 
 

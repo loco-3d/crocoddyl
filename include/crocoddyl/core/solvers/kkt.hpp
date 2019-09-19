@@ -30,6 +30,12 @@ class SolverKKT : public SolverAbstract {
   double tryStep(const double& steplength = 1);
   double stoppingCriteria();
   const Eigen::Vector2d& expectedImprovement();
+  // for testing purposes remove later and check matrix dimensions instead 
+  const int& get_nx() const; 
+  const int& get_ndx() const;
+  const int& get_nu() const; 
+  const Eigen::MatrixXd& get_kkt() const;
+  const Eigen::VectorXd& get_kktref() const; 
 
 
  private:
@@ -51,19 +57,18 @@ class SolverKKT : public SolverAbstract {
   std::vector<Eigen::VectorXd> dx_;
 
   // allocate data
-  std::vector<Eigen::MatrixXd> kkt_;
-  std::vector<Eigen::VectorXd> kktref_;
-  // std::vector<Eigen::MatrixXd> hess_;
-  // std::vector<Eigen::MatrixXd> jac_;
-  // std::vector<Eigen::MatrixXd> jacT_;
-  // std::vector<Eigen::VectorXd> grad_;
-  // std::vector<Eigen::VectorXd> cval_;
-  // std::vector<Eigen::MatrixXd> K_;
-  // std::vector<Eigen::VectorXd> k_;
+  Eigen::MatrixXd kkt_;
+  Eigen::VectorXd kktref_;
+  Eigen::MatrixXd hess_;
+  Eigen::MatrixXd jac_;
+  Eigen::MatrixXd jacT_;
+  Eigen::VectorXd grad_;
+  Eigen::VectorXd cval_;
+
   std::vector<Eigen::VectorXd> gaps_;
 
  private:
-  // double calc();
+  double calc();
   // void compute_primal_dual();
   
   Eigen::VectorXd xnext_;

@@ -40,7 +40,6 @@ void test_shooting_problem(crocoddyl::ShootingProblem& problem) {
   crocoddyl::ActionModelAbstract* model_terminal = problem.get_terminalModel();
   BOOST_CHECK_EQUAL(model_terminal->get_nx(), nx_ac);
   BOOST_CHECK_EQUAL(model_terminal->get_ndx(), ndx_ac);
-  // BOOST_CHECK_EQUAL(model_terminal->get_nu(), nu_ac);
 
 }
 
@@ -48,13 +47,29 @@ void test_shooting_problem(crocoddyl::ShootingProblem& problem) {
 
 
 void test_kkt_constructor(crocoddyl::ShootingProblem& problem) {
+  const long unsigned int T = problem.get_T();  
+  crocoddyl::ActionModelAbstract* model_zero = problem.get_runningModels()[0];
+  const unsigned int nx_ac = model_zero->get_nx();
+  const unsigned int ndx_ac = model_zero->get_ndx();
+  const unsigned int nu_ac = model_zero->get_nu();
+  
+  const unsigned int nx_val = (T+1)*nx_ac;
+  const unsigned int ndx_val = (T+1)*ndx_ac;
+  const unsigned int nu_val = T*nu_ac; 
+
   crocoddyl::SolverKKT kkt(problem);
 
-  // BOOST_CHECK_EQUAL(solver->get_xs().size(), );
-  BOOST_CHECK_EQUAL(kkt.get_us().size(),kkt.get_problem().get_T());
-
-
-
+  // check trajectory dimensions
+  BOOST_CHECK_EQUAL(kkt.get_us().size(),T);
+  BOOST_CHECK_EQUAL(kkt.get_xs().size(),T+1);
+  // check problem dimensions nx, ndx, nu 
+  BOOST_CHECK_EQUAL(kkt.get_nx(),nx_val);
+  BOOST_CHECK_EQUAL(kkt.get_ndx(),ndx_val);
+  BOOST_CHECK_EQUAL(kkt.get_nu(),nu_val);
+  // check kkt matrix dimensions
+  BOOST_CHECK_EQUAL(kkt.get_kkt().rows(),2*ndx_val+ nu_val);
+  BOOST_CHECK_EQUAL(kkt.get_kkt().cols(),2*ndx_val+ nu_val);
+  BOOST_CHECK_EQUAL(kkt.get_kktref().rows(),2*ndx_val+ nu_val); 
 
 
 }
