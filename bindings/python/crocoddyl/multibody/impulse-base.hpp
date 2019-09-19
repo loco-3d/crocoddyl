@@ -60,19 +60,10 @@ void exposeImpulseAbstract() {
            ":param data: impulse data\n"
            ":param x: state vector\n"
            ":param recalc: If true, it updates the impulse Jacobian")
-      .def("updateVelocity", &ImpulseModelAbstract_wrap::updateVelocity, bp::args(" self", " data", " vnext"),
-           "Update the velocity after impulse.\n\n"
-           ":param data: impulse data\n"
-           ":param vnext: velocity after impulse (dimension nv)")
       .def("updateForce", pure_virtual(&ImpulseModelAbstract_wrap::updateForce), bp::args(" self", " data", " force"),
            "Convert the force into a stack of spatial forces.\n\n"
            ":param data: impulse data\n"
            ":param force: force vector (dimension ni)")
-      .def("updateVelocityDiff", &ImpulseModelAbstract_wrap::updateVelocityDiff,
-           bp::args(" self", " data", " dvnext_dx"),
-           "Update the velocity after impulse.\n\n"
-           ":param data: impulse data\n"
-           ":param dvnext_dx: Jacobian of the impulse velocity (dimension nv*ndx)")
       .def("updateForceDiff", &ImpulseModelAbstract_wrap::updateForceDiff, bp::args(" self", " data", " df_dq"),
            "Update the Jacobian of the impulse force.\n\n"
            "The Jacobian df_dv is zero, then we ignore it\n"
@@ -101,12 +92,6 @@ void exposeImpulseAbstract() {
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
       .add_property("pinocchio", bp::make_getter(&ImpulseDataAbstract::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
-      .add_property("vnext",
-                    bp::make_getter(&ImpulseDataAbstract::vnext, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ImpulseDataAbstract::vnext), "impulse velocity")
-      .add_property("dvnext_dx",
-                    bp::make_getter(&ImpulseDataAbstract::dvnext_dx, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ImpulseDataAbstract::dvnext_dx), "Jacobian of the impulse velocity")
       .add_property("Jc", bp::make_getter(&ImpulseDataAbstract::Jc, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ImpulseDataAbstract::Jc), "impulse Jacobian")
       .add_property("dv_dq",

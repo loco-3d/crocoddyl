@@ -110,16 +110,7 @@ void ImpulseModelMultiple::updateVelocity(const boost::shared_ptr<ImpulseDataMul
   assert(vnext.rows() == state_.get_nv() && "vnext has wrong dimension");
   assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
 
-  ImpulseModelContainer::const_iterator it_m, end_m;
-  ImpulseDataContainer::const_iterator it_d, end_d;
-  for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
-       it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-    const ImpulseItem& m_i = it_m->second;
-    const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
-    assert(it_m->first == it_d->first && "it doesn't match the impulse name between data and model");
-
-    m_i.impulse->updateVelocity(d_i, vnext);
-  }
+  data->vnext = vnext;
 }
 
 void ImpulseModelMultiple::updateVelocityDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
@@ -128,16 +119,7 @@ void ImpulseModelMultiple::updateVelocityDiff(const boost::shared_ptr<ImpulseDat
          "dvnext_dx has wrong dimension");
   assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
 
-  ImpulseModelContainer::const_iterator it_m, end_m;
-  ImpulseDataContainer::const_iterator it_d, end_d;
-  for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
-       it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-    const ImpulseItem& m_i = it_m->second;
-    const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
-    assert(it_m->first == it_d->first && "it doesn't match the impulse name between data and model");
-
-    m_i.impulse->updateVelocityDiff(d_i, dvnext_dx);
-  }
+  data->dvnext_dx = dvnext_dx;
 }
 
 void ImpulseModelMultiple::updateForceDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
