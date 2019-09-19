@@ -31,9 +31,6 @@ class DifferentialActionModelUAM(DifferentialActionModelAbstract):
         pinocchio.computeAllTerms(self.pinocchio, data.pinocchio, q, v)
         data.M = data.pinocchio.M
         data.Minv = np.linalg.inv(data.M)
-        # print data.Minv
-        # print data.tauq
-        # print data.pinocchio.nle
         data.xout[:] = data.Minv * (a2m(data.tauq) - data.pinocchio.nle).flat
 
         # --- Cost

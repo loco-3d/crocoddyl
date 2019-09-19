@@ -31,6 +31,14 @@ class ActuationModelUAM:
         return ActuationDataUAM(self, pinocchioData)
 
 
+# This is the matrix that, given a force vector representing the four motors, outputs the thrust and moment
+# [      0,      0,     0,     0]
+# [      0,      0,     0,     0]
+# [      1,      1,     1,     1]
+# [     -d,      d,    -d,     d]
+# [     -d,     -d,     d,     d]
+# [ -cm/cf, -cm/cf, cm/cf, cm/cf]
+
 class ActuationDataUAM:
     def __init__(self, model, pinocchioData):
         self.pinocchio = pinocchioData
