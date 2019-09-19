@@ -95,12 +95,23 @@ To cite **Crocoddyl** in your academic research, please use the following bibtex
 }
 ```
 
-and the following paper describes different algorithm implemented in **Crocoddyl**:
+and the following one for the reference to the paper introducing **Crocoddyl**:
+```
+@unpublished{mastalli2020crocoddyl,
+  author={Mastalli, Carlos and Budhiraja, Rohan and Merkt, Wolfgang and Saurel, Guilhem and Hammoud, Bilal
+  and Naveau, Maximilien and Carpentier, Justin and Vijayakumar, Sethu and Mansard, Nicolas},
+  title={{Crocoddyl: An Efficient and Versatile Framework for Multi-Contact Optimal Control}},
+  year={2020}
+}
+```
+
+The rest of the publications describes different component of **Crocoddyl**:
 
 
 ### Publications
-- R. Budhiraja, J. Carpentier, C. Mastalli and N. Mansard. [Differential Dynamic Programming for Multi-Phase Rigid Contact Dynamics](https://hal.archives-ouvertes.fr/hal-01851596/document), IEEE RAS International Conference on Humanoid Robots (ICHR), 2018
-- Y. Tassa, N. Mansard, E. Todorov. [Control-Limited Differential Dynamic Programming](https://homes.cs.washington.edu/~todorov/papers/TassaICRA14.pdf), IEEE International Conference on Automation and Robotics (ICRA), 2014
+- C. Mastalli et al. [Crocoddyl: An Efficient and Versatile Framework for Multi-Contact Optimal Control](https://hal.archives-ouvertes.fr/hal-01851596/document), pre-print, 2020
+- R. Budhiraja, J. Carpentier, C. Mastalli and N. Mansard. [Differential Dynamic Programming for Multi-Phase Rigid Contact Dynamics](https://cmastalli.github.io/publications/crocoddyl20unpub.html), IEEE RAS International Conference on Humanoid Robots (ICHR), 2018
+- Y. Tassa, N. Mansard, E. Todorov. [Control-Limited Differential Dynamic Programming](https://cmastalli.github.io/publications/mddp18.html), IEEE International Conference on Automation and Robotics (ICRA), 2014
 - R. Budhiraja, J. Carpentier and N. Mansard. [Dynamics Consensus between Centroidal and Whole-Body Models for Locomotion of Legged Robots](https://hal.laas.fr/hal-01875031/document), IEEE International Conference on Automation and Robotics (ICRA), 2019
 
 
