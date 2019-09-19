@@ -75,6 +75,7 @@ void exposeImpulseAbstract() {
            ":param dvnext_dx: Jacobian of the impulse velocity (dimension nv*ndx)")
       .def("updateForceDiff", &ImpulseModelAbstract_wrap::updateForceDiff, bp::args(" self", " data", " df_dq"),
            "Update the Jacobian of the impulse force.\n\n"
+           "The Jacobian df_dv is zero, then we ignore it\n"
            ":param data: impulse data\n"
            ":param df_dq: Jacobian of the impulse force (dimension ni*nv)")
       .def("createData", &ImpulseModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
