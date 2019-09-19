@@ -79,6 +79,13 @@ void ImpulseModelMultiple::calcDiff(const boost::shared_ptr<ImpulseDataMultiple>
   }
 }
 
+void ImpulseModelMultiple::updateVelocity(const boost::shared_ptr<ImpulseDataMultiple>& data,
+                                          const Eigen::VectorXd& vnext) const {
+  assert(vnext.rows() == state_.get_nv() && "vnext has wrong dimension");
+
+  data->vnext = vnext;
+}
+
 void ImpulseModelMultiple::updateForce(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                        const Eigen::VectorXd& force) {
   assert(force.size() == ni_ && "force has wrong dimension, it should be ni vector");
@@ -105,19 +112,10 @@ void ImpulseModelMultiple::updateForce(const boost::shared_ptr<ImpulseDataMultip
   }
 }
 
-void ImpulseModelMultiple::updateVelocity(const boost::shared_ptr<ImpulseDataMultiple>& data,
-                                          const Eigen::VectorXd& vnext) const {
-  assert(vnext.rows() == state_.get_nv() && "vnext has wrong dimension");
-  assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
-
-  data->vnext = vnext;
-}
-
 void ImpulseModelMultiple::updateVelocityDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                               const Eigen::MatrixXd& dvnext_dx) const {
   assert((dvnext_dx.rows() == state_.get_nv() && dvnext_dx.cols() == state_.get_ndx()) &&
          "dvnext_dx has wrong dimension");
-  assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
 
   data->dvnext_dx = dvnext_dx;
 }
