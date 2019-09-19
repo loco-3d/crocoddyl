@@ -26,10 +26,11 @@ class ImpulseModelAbstract {
                     const Eigen::Ref<const Eigen::VectorXd>& x) = 0;
   virtual void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const bool& recalc = true) = 0;
-  virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force) = 0;
-  void updateVelocity(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& vnext) const;
 
+  void updateVelocity(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& vnext) const;
+  virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force) = 0;
   void updateVelocityDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::MatrixXd& dvnext_dx) const;
+  void updateForceDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::MatrixXd& df_dq) const;
 
   virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::Data* const data);
 
@@ -64,11 +65,13 @@ struct ImpulseDataAbstract {
         dvnext_dx(model->get_state().get_nv(), model->get_state().get_ndx()),
         Jc(model->get_ni(), model->get_state().get_nv()),
         dv_dq(model->get_ni(), model->get_state().get_nv()),
+        df_dq(model->get_ni(), model->get_state().get_nv()),
         f(pinocchio::Force::Zero()) {
     vnext.fill(0);
     dvnext_dx.fill(0);
     Jc.fill(0);
     dv_dq.fill(0);
+    df_dq.fill(0);
   }
 
   pinocchio::Data* pinocchio;
@@ -77,6 +80,7 @@ struct ImpulseDataAbstract {
   Eigen::MatrixXd dvnext_dx;
   Eigen::MatrixXd Jc;
   Eigen::MatrixXd dv_dq;
+  Eigen::MatrixXd df_dq;
   pinocchio::Force f;
 };
 

@@ -144,6 +144,28 @@ void ImpulseModelMultiple::updateVelocityDiff(const boost::shared_ptr<ImpulseDat
   }
 }
 
+void ImpulseModelMultiple::updateForceDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
+                                           const Eigen::MatrixXd& df_dq) const {
+  unsigned int const& nv = state_.get_nv();
+  assert((df_dq.rows() == ni_ && df_dq.cols() == nv) && "df_dq has wrong dimension");
+  assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
+  unsigned int ni = 0;
+
+  ImpulseModelContainer::const_iterator it_m, end_m;
+  ImpulseDataContainer::const_iterator it_d, end_d;
+  for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
+       it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
+    const ImpulseItem& m_i = it_m->second;
+    const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
+    assert(it_m->first == it_d->first && "it doesn't match the impulse name between data and model");
+
+    unsigned int const& ni_i = m_i.impulse->get_ni();
+    const Eigen::Block<const Eigen::MatrixXd> df_dq_i = df_dq.block(ni, 0, ni_i, nv);
+    m_i.impulse->updateForceDiff(d_i, df_dq_i);
+    ni += ni_i;
+  }
+}
+
 boost::shared_ptr<ImpulseDataMultiple> ImpulseModelMultiple::createData(pinocchio::Data* const data) {
   return boost::make_shared<ImpulseDataMultiple>(this, data);
 }

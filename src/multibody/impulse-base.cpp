@@ -27,6 +27,12 @@ void ImpulseModelAbstract::updateVelocityDiff(const boost::shared_ptr<ImpulseDat
   data->dvnext_dx = dvnext_dx;
 }
 
+void ImpulseModelAbstract::updateForceDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
+                                           const Eigen::MatrixXd& df_dq) const {
+  assert((df_dq.rows() == ni_ || df_dq.cols() == state_.get_nv()) && "df_dq has wrong dimension");
+  data->df_dq = df_dq;
+}
+
 boost::shared_ptr<ImpulseDataAbstract> ImpulseModelAbstract::createData(pinocchio::Data* const data) {
   return boost::make_shared<ImpulseDataAbstract>(this, data);
 }
