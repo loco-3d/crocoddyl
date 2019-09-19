@@ -78,7 +78,7 @@ void exposeContactMultiple() {
       .def("updateForce", &ContactModelMultiple::updateForce, bp::args(" self", " data", " force"),
            "Convert the force into a stack of spatial forces.\n\n"
            ":param data: contact data\n"
-           ":param lambda: force vector (dimension nc)")
+           ":param force: force vector (dimension nc)")
       .def("updateForceDiff", &ContactModelMultiple::updateForceDiff, bp::args(" self", " data", " df_dx", " df_du"),
            "Update the Jacobians of the force.\n\n"
            ":param data: contact data\n"
