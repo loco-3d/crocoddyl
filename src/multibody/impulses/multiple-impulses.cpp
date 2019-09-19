@@ -105,8 +105,8 @@ void ImpulseModelMultiple::updateForce(const boost::shared_ptr<ImpulseDataMultip
   }
 }
 
-void ImpulseModelMultiple::updateImpulseVelocity(const boost::shared_ptr<ImpulseDataMultiple>& data,
-                                                 const Eigen::VectorXd& vnext) const {
+void ImpulseModelMultiple::updateVelocity(const boost::shared_ptr<ImpulseDataMultiple>& data,
+                                          const Eigen::VectorXd& vnext) const {
   assert(vnext.rows() == state_.get_nv() && "vnext has wrong dimension");
   assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
 
@@ -120,12 +120,12 @@ void ImpulseModelMultiple::updateImpulseVelocity(const boost::shared_ptr<Impulse
     const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
     assert(it_m->first == it_d->first && "it doesn't match the impulse name between data and model");
 
-    m_i.impulse->updateImpulseVelocity(d_i, vnext);
+    m_i.impulse->updateVelocity(d_i, vnext);
   }
 }
 
-void ImpulseModelMultiple::updateImpulseVelocityDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
-                                                     const Eigen::MatrixXd& dvnext_dx) const {
+void ImpulseModelMultiple::updateVelocityDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
+                                              const Eigen::MatrixXd& dvnext_dx) const {
   assert((dvnext_dx.rows() == state_.get_nv() && dvnext_dx.cols() == state_.get_ndx()) &&
          "dvnext_dx has wrong dimension");
   assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
@@ -140,7 +140,7 @@ void ImpulseModelMultiple::updateImpulseVelocityDiff(const boost::shared_ptr<Imp
     const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
     assert(it_m->first == it_d->first && "it doesn't match the impulse name between data and model");
 
-    m_i.impulse->updateImpulseVelocityDiff(d_i, dvnext_dx);
+    m_i.impulse->updateVelocityDiff(d_i, dvnext_dx);
   }
 }
 

@@ -27,10 +27,9 @@ class ImpulseModelAbstract {
   virtual void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const bool& recalc = true) = 0;
   virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force) = 0;
-  void updateImpulseVelocity(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& vnext) const;
+  void updateVelocity(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& vnext) const;
 
-  void updateImpulseVelocityDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                                 const Eigen::MatrixXd& dvnext_dx) const;
+  void updateVelocityDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::MatrixXd& dvnext_dx) const;
 
   virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::Data* const data);
 
