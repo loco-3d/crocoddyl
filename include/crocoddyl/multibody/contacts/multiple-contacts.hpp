@@ -45,6 +45,7 @@ class ContactModelMultiple {
 
   void updateAcceleration(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::VectorXd& dv) const;
   void updateForce(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::VectorXd& force);
+  void updateAccelerationDiff(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::MatrixXd& ddv_dx) const;
   void updateForceDiff(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::MatrixXd& df_dx,
                        const Eigen::MatrixXd& df_du) const;
   boost::shared_ptr<ContactDataMultiple> createData(pinocchio::Data* const data);
@@ -78,7 +79,12 @@ struct ContactDataMultiple : ContactDataAbstract {
 
   template <typename Model>
   ContactDataMultiple(Model* const model, pinocchio::Data* const data)
-      : ContactDataAbstract(model, data), fext(model->get_state().get_pinocchio().njoints, pinocchio::Force::Zero()) {
+      : ContactDataAbstract(model, data),
+        dv(model->get_state().get_nv()),
+        ddv_dx(model->get_state().get_nv(), model->get_state().get_ndx()),
+        fext(model->get_state().get_pinocchio().njoints, pinocchio::Force::Zero()) {
+    dv.fill(0);
+    ddv_dx.fill(0);
     for (ContactModelMultiple::ContactModelContainer::const_iterator it = model->get_contacts().begin();
          it != model->get_contacts().end(); ++it) {
       const ContactItem& item = it->second;
@@ -86,6 +92,8 @@ struct ContactDataMultiple : ContactDataAbstract {
     }
   }
 
+  Eigen::VectorXd dv;
+  Eigen::VectorXd ddv_dx;
   ContactModelMultiple::ContactDataContainer contacts;
   pinocchio::container::aligned_vector<pinocchio::Force> fext;
 };

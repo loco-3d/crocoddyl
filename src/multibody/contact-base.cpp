@@ -18,12 +18,6 @@ ContactModelAbstract::ContactModelAbstract(StateMultibody& state, unsigned int c
 
 ContactModelAbstract::~ContactModelAbstract() {}
 
-void ContactModelAbstract::updateAcceleration(const boost::shared_ptr<ContactDataAbstract>& data,
-                                              const Eigen::VectorXd& dv) const {
-  assert(dv.rows() == state_.get_nv() && "dv has wrong dimension");
-  data->dv = dv;
-}
-
 void ContactModelAbstract::updateForceDiff(const boost::shared_ptr<ContactDataAbstract>& data,
                                            const Eigen::MatrixXd& df_dx, const Eigen::MatrixXd& df_du) const {
   assert((df_dx.rows() == nc_ || df_dx.cols() == state_.get_nx()) && "df_dx has wrong dimension");
