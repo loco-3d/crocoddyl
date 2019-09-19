@@ -110,8 +110,6 @@ void ImpulseModelMultiple::updateVelocity(const boost::shared_ptr<ImpulseDataMul
   assert(vnext.rows() == state_.get_nv() && "vnext has wrong dimension");
   assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
 
-  data->vnext = vnext;
-
   ImpulseModelContainer::const_iterator it_m, end_m;
   ImpulseDataContainer::const_iterator it_d, end_d;
   for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
@@ -129,8 +127,6 @@ void ImpulseModelMultiple::updateVelocityDiff(const boost::shared_ptr<ImpulseDat
   assert((dvnext_dx.rows() == state_.get_nv() && dvnext_dx.cols() == state_.get_ndx()) &&
          "dvnext_dx has wrong dimension");
   assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
-
-  data->dvnext_dx = dvnext_dx;
 
   ImpulseModelContainer::const_iterator it_m, end_m;
   ImpulseDataContainer::const_iterator it_d, end_d;
