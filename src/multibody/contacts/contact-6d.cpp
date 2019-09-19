@@ -51,16 +51,16 @@ void ContactModel6D::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data
   pinocchio::getJointAccelerationDerivatives(state_.get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                              d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
   unsigned int const& nv = state_.get_nv();
-  d->da_dx.leftCols(nv).noalias() = d->fXj * d->a_partial_dq;
-  d->da_dx.rightCols(nv).noalias() = d->fXj * d->a_partial_dv;
+  d->da0_dx.leftCols(nv).noalias() = d->fXj * d->a_partial_dq;
+  d->da0_dx.rightCols(nv).noalias() = d->fXj * d->a_partial_dv;
 
   if (gains_[0] != 0.) {
     pinocchio::Jlog6(d->rMf, d->rMf_Jlog6);
-    d->da_dx.leftCols(nv).noalias() += gains_[0] * d->rMf_Jlog6 * d->Jc;
+    d->da0_dx.leftCols(nv).noalias() += gains_[0] * d->rMf_Jlog6 * d->Jc;
   }
   if (gains_[1] != 0.) {
-    d->da_dx.leftCols(nv).noalias() += gains_[1] * d->fXj * d->v_partial_dq;
-    d->da_dx.rightCols(nv).noalias() += gains_[1] * d->fXj * d->a_partial_da;
+    d->da0_dx.leftCols(nv).noalias() += gains_[1] * d->fXj * d->v_partial_dq;
+    d->da0_dx.rightCols(nv).noalias() += gains_[1] * d->fXj * d->a_partial_da;
   }
 }
 

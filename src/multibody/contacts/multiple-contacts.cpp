@@ -79,7 +79,7 @@ void ContactModelMultiple::calcDiff(const boost::shared_ptr<ContactDataMultiple>
 
     m_i.contact->calcDiff(d_i, x, false);
     unsigned int const& nc_i = m_i.contact->get_nc();
-    data->da_dx.block(nc, 0, nc_i, ndx) = d_i->da_dx;
+    data->da0_dx.block(nc, 0, nc_i, ndx) = d_i->da0_dx;
     nc += nc_i;
   }
 }

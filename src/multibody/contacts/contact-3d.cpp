@@ -57,18 +57,18 @@ void ContactModel3D::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data
   d->fXjdv_dq.noalias() = d->fXj * d->v_partial_dq;
   d->fXjda_dq.noalias() = d->fXj * d->a_partial_dq;
   d->fXjda_dv.noalias() = d->fXj * d->a_partial_dv;
-  d->da_dx.leftCols(nv).noalias() =
+  d->da0_dx.leftCols(nv).noalias() =
       d->fXjda_dq.topRows<3>() + d->vw_skew * d->fXjdv_dq.topRows<3>() - d->vv_skew * d->fXjdv_dq.bottomRows<3>();
-  d->da_dx.rightCols(nv).noalias() =
+  d->da0_dx.rightCols(nv).noalias() =
       d->fXjda_dv.topRows<3>() + d->vw_skew * d->Jc - d->vv_skew * d->fJf.bottomRows<3>();
 
   if (gains_[0] != 0.) {
     d->oRf = d->pinocchio->oMf[xref_.frame].rotation();
-    d->da_dx.leftCols(nv).noalias() += gains_[0] * d->oRf * d->Jc;
+    d->da0_dx.leftCols(nv).noalias() += gains_[0] * d->oRf * d->Jc;
   }
   if (gains_[1] != 0.) {
-    d->da_dx.leftCols(nv).noalias() += gains_[1] * d->fXj.topRows<3>() * d->v_partial_dq;
-    d->da_dx.rightCols(nv).noalias() += gains_[1] * d->fXj.topRows<3>() * d->a_partial_da;
+    d->da0_dx.leftCols(nv).noalias() += gains_[1] * d->fXj.topRows<3>() * d->v_partial_dq;
+    d->da0_dx.rightCols(nv).noalias() += gains_[1] * d->fXj.topRows<3>() * d->a_partial_da;
   }
 }
 
