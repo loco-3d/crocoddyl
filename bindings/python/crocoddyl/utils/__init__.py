@@ -613,7 +613,7 @@ class Impulse3DDerived(crocoddyl.ImpulseModelAbstract):
             self.calc(data, x)
         v_partial_dq, v_partial_dv = pinocchio.getJointVelocityDerivatives(self.state.pinocchio, data.pinocchio,
                                                                            self.joint, pinocchio.ReferenceFrame.LOCAL)
-        data.Vq = self.fXj[:3, :] * v_partial_dq
+        data.dv_dq = self.fXj[:3, :] * v_partial_dq
 
 
 class Impulse6DDerived(crocoddyl.ImpulseModelAbstract):
@@ -632,7 +632,7 @@ class Impulse6DDerived(crocoddyl.ImpulseModelAbstract):
             self.calc(data, x)
         v_partial_dq, v_partial_dv = pinocchio.getJointVelocityDerivatives(self.state.pinocchio, data.pinocchio,
                                                                            self.joint, pinocchio.ReferenceFrame.LOCAL)
-        data.Vq = self.fXj * v_partial_dq
+        data.dv_dq = self.fXj * v_partial_dq
 
 
 class DDPDerived(crocoddyl.SolverAbstract):

@@ -106,8 +106,9 @@ void exposeImpulseAbstract() {
                     bp::make_setter(&ImpulseDataAbstract::dvnext_dx), "Jacobian of the impulse velocity")
       .add_property("Jc", bp::make_getter(&ImpulseDataAbstract::Jc, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ImpulseDataAbstract::Jc), "impulse Jacobian")
-      .add_property("Vq", bp::make_getter(&ImpulseDataAbstract::Vq, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ImpulseDataAbstract::Vq), "Jacobian of the impulse constraint")
+      .add_property("dv_dq",
+                    bp::make_getter(&ImpulseDataAbstract::dv_dq, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ImpulseDataAbstract::dv_dq), "Jacobian of the constrained velocityu")
       .def_readwrite("joint", &ImpulseDataAbstract::joint, "joint index of the impulse frame")
       .def_readwrite("f", &ImpulseDataAbstract::f, "external spatial forces");
 }

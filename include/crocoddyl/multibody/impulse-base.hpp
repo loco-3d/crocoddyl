@@ -64,12 +64,12 @@ struct ImpulseDataAbstract {
         vnext(model->get_state().get_nv()),
         dvnext_dx(model->get_state().get_nv(), model->get_state().get_ndx()),
         Jc(model->get_ni(), model->get_state().get_nv()),
-        Vq(model->get_ni(), model->get_state().get_nv()),
+        dv_dq(model->get_ni(), model->get_state().get_nv()),
         f(pinocchio::Force::Zero()) {
     vnext.fill(0);
     dvnext_dx.fill(0);
     Jc.fill(0);
-    Vq.fill(0);
+    dv_dq.fill(0);
   }
 
   pinocchio::Data* pinocchio;
@@ -77,7 +77,7 @@ struct ImpulseDataAbstract {
   Eigen::VectorXd vnext;
   Eigen::MatrixXd dvnext_dx;
   Eigen::MatrixXd Jc;
-  Eigen::MatrixXd Vq;
+  Eigen::MatrixXd dv_dq;
   pinocchio::Force f;
 };
 
