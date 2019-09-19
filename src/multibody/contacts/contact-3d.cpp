@@ -57,25 +57,25 @@ void ContactModel3D::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data
   d->fXjdv_dq.noalias() = d->fXj * d->v_partial_dq;
   d->fXjda_dq.noalias() = d->fXj * d->a_partial_dq;
   d->fXjda_dv.noalias() = d->fXj * d->a_partial_dv;
-  d->Ax.leftCols(nv).noalias() =
+  d->da0_dx.leftCols(nv).noalias() =
       d->fXjda_dq.topRows<3>() + d->vw_skew * d->fXjdv_dq.topRows<3>() - d->vv_skew * d->fXjdv_dq.bottomRows<3>();
-  d->Ax.rightCols(nv).noalias() = d->fXjda_dv.topRows<3>() + d->vw_skew * d->Jc - d->vv_skew * d->fJf.bottomRows<3>();
+  d->da0_dx.rightCols(nv).noalias() =
+      d->fXjda_dv.topRows<3>() + d->vw_skew * d->Jc - d->vv_skew * d->fJf.bottomRows<3>();
 
   if (gains_[0] != 0.) {
     d->oRf = d->pinocchio->oMf[xref_.frame].rotation();
-    d->Ax.leftCols(nv).noalias() += gains_[0] * d->oRf * d->Jc;
+    d->da0_dx.leftCols(nv).noalias() += gains_[0] * d->oRf * d->Jc;
   }
   if (gains_[1] != 0.) {
-    d->Ax.leftCols(nv).noalias() += gains_[1] * d->fXj.topRows<3>() * d->v_partial_dq;
-    d->Ax.rightCols(nv).noalias() += gains_[1] * d->fXj.topRows<3>() * d->a_partial_da;
+    d->da0_dx.leftCols(nv).noalias() += gains_[1] * d->fXj.topRows<3>() * d->v_partial_dq;
+    d->da0_dx.rightCols(nv).noalias() += gains_[1] * d->fXj.topRows<3>() * d->a_partial_da;
   }
 }
 
-void ContactModel3D::updateLagrangian(const boost::shared_ptr<ContactDataAbstract>& data,
-                                      const Eigen::VectorXd& lambda) {
-  assert(lambda.size() == 3 && "lambda has wrong dimension, it should be 3d vector");
+void ContactModel3D::updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& force) {
+  assert(force.size() == 3 && "lambda has wrong dimension, it should be 3d vector");
   ContactData3D* d = static_cast<ContactData3D*>(data.get());
-  data->f = d->jMf.act(pinocchio::Force(lambda, Eigen::Vector3d::Zero()));
+  data->f = d->jMf.act(pinocchio::Force(force, Eigen::Vector3d::Zero()));
 }
 
 boost::shared_ptr<ContactDataAbstract> ContactModel3D::createData(pinocchio::Data* const data) {

@@ -31,9 +31,9 @@ class ImpulseModelAbstract_wrap : public ImpulseModelAbstract, public bp::wrappe
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, recalc);
   }
 
-  void updateLagrangian(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& lambda) {
-    assert(lambda.size() == ni_ && "lambda has wrong dimension");
-    return bp::call<void>(this->get_override("updateLagrangian").ptr(), data, lambda);
+  void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force) {
+    assert(force.size() == ni_ && "force has wrong dimension");
+    return bp::call<void>(this->get_override("updateForce").ptr(), data, force);
   }
 };
 
@@ -57,19 +57,23 @@ void exposeImpulseAbstract() {
       .def("calcDiff", pure_virtual(&ImpulseModelAbstract_wrap::calcDiff),
            bp::args(" self", " data", " x", " recalc=True"),
            "Compute the derivatives of impulse Jacobian\n"
-           ":param data: cost data\n"
+           ":param data: impulse data\n"
            ":param x: state vector\n"
            ":param recalc: If true, it updates the impulse Jacobian")
-      .def("updateLagrangian", pure_virtual(&ImpulseModelAbstract_wrap::updateLagrangian),
-           bp::args(" self", " data", " lambda"),
-           "Convert the Lagrangian into a stack of spatial forces.\n\n"
-           ":param data: cost data\n"
-           ":param lambda: Lagrangian vector")
+      .def("updateForce", pure_virtual(&ImpulseModelAbstract_wrap::updateForce), bp::args(" self", " data", " force"),
+           "Convert the force into a stack of spatial forces.\n\n"
+           ":param data: impulse data\n"
+           ":param force: force vector (dimension ni)")
+      .def("updateForceDiff", &ImpulseModelAbstract_wrap::updateForceDiff, bp::args(" self", " data", " df_dq"),
+           "Update the Jacobian of the impulse force.\n\n"
+           "The Jacobian df_dv is zero, then we ignore it\n"
+           ":param data: impulse data\n"
+           ":param df_dq: Jacobian of the impulse force (dimension ni*nv)")
       .def("createData", &ImpulseModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the impulse data.\n\n"
            "Each impulse model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined cost.\n"
+           "returns the allocated data for a predefined impulse.\n"
            ":param data: Pinocchio data\n"
            ":return impulse data.")
       .add_property("state",
@@ -84,14 +88,15 @@ void exposeImpulseAbstract() {
       bp::init<ImpulseModelAbstract*, pinocchio::Data*>(
           bp::args(" self", " model", " data"),
           "Create common data shared between impulse models.\n\n"
-          ":param model: cost model\n"
+          ":param model: impulse model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
       .add_property("pinocchio", bp::make_getter(&ImpulseDataAbstract::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
       .add_property("Jc", bp::make_getter(&ImpulseDataAbstract::Jc, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ImpulseDataAbstract::Jc), "impulse Jacobian")
-      .add_property("Vq", bp::make_getter(&ImpulseDataAbstract::Vq, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ImpulseDataAbstract::Vq), "Jacobian of the impulse constraint")
+      .add_property("dv0_dq",
+                    bp::make_getter(&ImpulseDataAbstract::dv0_dq, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ImpulseDataAbstract::dv0_dq), "Jacobian of the previous impulse velocity")
       .def_readwrite("joint", &ImpulseDataAbstract::joint, "joint index of the impulse frame")
       .def_readwrite("f", &ImpulseDataAbstract::f, "external spatial forces");
 }

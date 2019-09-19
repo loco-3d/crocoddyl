@@ -95,34 +95,78 @@ struct CostDataSum {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  CostDataSum(Model* const model, pinocchio::Data* const data) : pinocchio(data), cost(0.) {
+  CostDataSum(Model* const model, pinocchio::Data* const data)
+      : r_internal(model->get_nr()),
+        Lx_internal(model->get_state().get_ndx()),
+        Lu_internal(model->get_nu()),
+        Lxx_internal(model->get_state().get_ndx(), model->get_state().get_ndx()),
+        Lxu_internal(model->get_state().get_ndx(), model->get_nu()),
+        Luu_internal(model->get_nu(), model->get_nu()),
+        pinocchio(data),
+        cost(0.),
+        r(r_internal.data(), model->get_nr()),
+        Lx(Lx_internal.data(), model->get_state().get_ndx()),
+        Lu(Lu_internal.data(), model->get_nu()),
+        Lxx(Lxx_internal.data(), model->get_state().get_ndx(), model->get_state().get_ndx()),
+        Lxu(Lxu_internal.data(), model->get_state().get_ndx(), model->get_nu()),
+        Luu(Luu_internal.data(), model->get_nu(), model->get_nu()),
+        Rx(model->get_nr(), model->get_state().get_ndx()),
+        Ru(model->get_nr(), model->get_nu()) {
+    r.setZero();
+    Lx.setZero();
+    Lu.setZero();
+    Lxx.setZero();
+    Lxu.setZero();
+    Luu.setZero();
     for (CostModelSum::CostModelContainer::const_iterator it = model->get_costs().begin();
          it != model->get_costs().end(); ++it) {
       const CostItem& item = it->second;
       costs.insert(std::make_pair(item.name, item.cost->createData(data)));
     }
-    const int& ndx = model->get_state().get_ndx();
-    const int& nu = model->get_nu();
-    const int& nr = model->get_nr();
-    Lx = Eigen::VectorXd::Zero(ndx);
-    Lu = Eigen::VectorXd::Zero(nu);
-    Lxx = Eigen::MatrixXd::Zero(ndx, ndx);
-    Lxu = Eigen::MatrixXd::Zero(ndx, nu);
-    Luu = Eigen::MatrixXd::Zero(nu, nu);
-    r = Eigen::VectorXd::Zero(nr);
-    Rx = Eigen::MatrixXd::Zero(nr, ndx);
-    Ru = Eigen::MatrixXd::Zero(nr, nu);
   }
+
+  template <typename ActionData>
+  void shareMemory(ActionData* const data) {
+    // Share memory with the differential action data
+    new (&r) Eigen::Map<Eigen::VectorXd>(data->r.data(), data->r.size());
+    new (&Lx) Eigen::Map<Eigen::VectorXd>(data->Lx.data(), data->Lx.size());
+    new (&Lu) Eigen::Map<Eigen::VectorXd>(data->Lu.data(), data->Lu.size());
+    new (&Lxx) Eigen::Map<Eigen::MatrixXd>(data->Lxx.data(), data->Lxx.rows(), data->Lxx.cols());
+    new (&Lxu) Eigen::Map<Eigen::MatrixXd>(data->Lxu.data(), data->Lxu.rows(), data->Lxu.cols());
+    new (&Luu) Eigen::Map<Eigen::MatrixXd>(data->Luu.data(), data->Luu.rows(), data->Luu.cols());
+  }
+
+  Eigen::VectorXd get_r() const { return r; }
+  Eigen::VectorXd get_Lx() const { return Lx; }
+  Eigen::VectorXd get_Lu() const { return Lu; }
+  Eigen::MatrixXd get_Lxx() const { return Lxx; }
+  Eigen::MatrixXd get_Lxu() const { return Lxu; }
+  Eigen::MatrixXd get_Luu() const { return Luu; }
+
+  void set_r(Eigen::VectorXd _r) { r = _r; }
+  void set_Lx(Eigen::VectorXd _Lx) { Lx = _Lx; }
+  void set_Lu(Eigen::VectorXd _Lu) { Lu = _Lu; }
+  void set_Lxx(Eigen::MatrixXd _Lxx) { Lxx = _Lxx; }
+  void set_Lxu(Eigen::MatrixXd _Lxu) { Lxu = _Lxu; }
+  void set_Luu(Eigen::MatrixXd _Luu) { Luu = _Luu; }
+
+  // Creates internal data in case we don't share it externally
+  Eigen::VectorXd r_internal;
+  Eigen::VectorXd Lx_internal;
+  Eigen::VectorXd Lu_internal;
+  Eigen::MatrixXd Lxx_internal;
+  Eigen::MatrixXd Lxu_internal;
+  Eigen::MatrixXd Luu_internal;
 
   CostModelSum::CostDataContainer costs;
   pinocchio::Data* pinocchio;
   double cost;
-  Eigen::VectorXd Lx;
-  Eigen::VectorXd Lu;
-  Eigen::MatrixXd Lxx;
-  Eigen::MatrixXd Lxu;
-  Eigen::MatrixXd Luu;
-  Eigen::VectorXd r;
+  Eigen::Map<Eigen::VectorXd> r;
+  Eigen::Map<Eigen::VectorXd> Lx;
+  Eigen::Map<Eigen::VectorXd> Lu;
+  Eigen::Map<Eigen::MatrixXd> Lxx;
+  Eigen::Map<Eigen::MatrixXd> Lxu;
+  Eigen::Map<Eigen::MatrixXd> Luu;
   Eigen::MatrixXd Rx;
   Eigen::MatrixXd Ru;
 };

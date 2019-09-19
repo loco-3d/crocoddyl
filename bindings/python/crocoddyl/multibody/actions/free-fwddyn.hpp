@@ -81,7 +81,7 @@ void exposeDifferentialActionFreeFwdDynamics() {
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataFreeFwdDynamics> >();
 
   bp::class_<DifferentialActionDataFreeFwdDynamics, bp::bases<DifferentialActionDataAbstract> >(
-      "DifferentialActionDataFreeFwdDynamics", "Action data for the differential LQR system.",
+      "DifferentialActionDataFreeFwdDynamics", "Action data for the free forward dynamics system.",
       bp::init<DifferentialActionModelFreeFwdDynamics*>(bp::args(" self", " model"),
                                                         "Create free forward-dynamics action data.\n\n"
                                                         ":param model: free forward-dynamics action model"))

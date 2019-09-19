@@ -26,7 +26,9 @@ class ImpulseModelAbstract {
                     const Eigen::Ref<const Eigen::VectorXd>& x) = 0;
   virtual void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const bool& recalc = true) = 0;
-  virtual void updateLagrangian(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& lambda) = 0;
+
+  virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force) = 0;
+  void updateForceDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::MatrixXd& df_dq) const;
 
   virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::Data* const data);
 
@@ -58,16 +60,19 @@ struct ImpulseDataAbstract {
       : pinocchio(data),
         joint(0),
         Jc(model->get_ni(), model->get_state().get_nv()),
-        Vq(model->get_ni(), model->get_state().get_nv()),
+        dv0_dq(model->get_ni(), model->get_state().get_nv()),
+        df_dq(model->get_ni(), model->get_state().get_nv()),
         f(pinocchio::Force::Zero()) {
     Jc.fill(0);
-    Vq.fill(0);
+    dv0_dq.fill(0);
+    df_dq.fill(0);
   }
 
   pinocchio::Data* pinocchio;
   pinocchio::JointIndex joint;
   Eigen::MatrixXd Jc;
-  Eigen::MatrixXd Vq;
+  Eigen::MatrixXd dv0_dq;
+  Eigen::MatrixXd df_dq;
   pinocchio::Force f;
 };
 

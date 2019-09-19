@@ -41,10 +41,10 @@ void exposeImpulse3D() {
                                        ":param data: cost data\n"
                                        ":param x: state vector\n"
                                        ":param recalc: If true, it updates the impulse Jacobian and drift."))
-      .def("updateLagrangian", &ImpulseModel3D::updateLagrangian, bp::args(" self", " data", " lambda"),
-           "Convert the Lagrangian into a stack of spatial forces.\n\n"
+      .def("updateForce", &ImpulseModel3D::updateForce, bp::args(" self", " data", " force"),
+           "Convert the force into a stack of spatial forces.\n\n"
            ":param data: cost data\n"
-           ":param lambda: Lagrangian vector")
+           ":param force: force vector (dimension 3)")
       .def("createData", &ImpulseModel3D::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the 3D impulse data.\n\n"

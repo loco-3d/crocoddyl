@@ -127,13 +127,13 @@ class FreeFloatingActuationDerived(crocoddyl.ActuationModelAbstract):
         crocoddyl.ActuationModelAbstract.__init__(self, state, state.nv - 6)
 
     def calc(self, data, x, u):
-        data.a = np.vstack([pinocchio.utils.zero(6), u])
+        data.tau = np.vstack([pinocchio.utils.zero(6), u])
 
     def calcDiff(self, data, x, u, recalc=True):
         if recalc:
             self.calc(data, x, u)
-        Au = np.vstack([pinocchio.utils.zero((6, self.nu)), pinocchio.utils.eye(self.nu)])
-        data.Au = Au
+        dtau_du = np.vstack([pinocchio.utils.zero((6, self.nu)), pinocchio.utils.eye(self.nu)])
+        data.dtau_du = dtau_du
 
 
 class FullActuationDerived(crocoddyl.ActuationModelAbstract):
@@ -142,12 +142,12 @@ class FullActuationDerived(crocoddyl.ActuationModelAbstract):
         crocoddyl.ActuationModelAbstract.__init__(self, state, state.nv)
 
     def calc(self, data, x, u):
-        data.a = u
+        data.tau = u
 
     def calcDiff(self, data, x, u, recalc=True):
         if recalc:
             self.calc(data, x, u)
-        data.Au = pinocchio.utils.eye(self.nu)
+        data.dtau_du = pinocchio.utils.eye(self.nu)
 
 
 class UnicycleDerived(crocoddyl.ActionModelAbstract):
@@ -261,7 +261,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
     def __init__(self, state, costModel):
         crocoddyl.DifferentialActionModelAbstract.__init__(self, state, state.nv, costModel.nr)
         self.costs = costModel
-        self.forceAba = True
+        self.enable_force = True
         self.armature = np.matrix(np.zeros(0))
 
     def calc(self, data, x, u=None):
@@ -269,7 +269,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
             u = self.unone
         q, v = x[:self.state.nq], x[-self.state.nv:]
         # Computing the dynamics using ABA or manually for armature case
-        if self.forceAba:
+        if self.enable_force:
             data.xout = pinocchio.aba(self.state.pinocchio, data.pinocchio, q, v, u)
         else:
             pinocchio.computeAllTerms(self.state.pinocchio, data.pinocchio, q, v)
@@ -292,7 +292,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
             self.calc(data, x, u)
             pinocchio.computeJointJacobians(self.state.pinocchio, data.pinocchio, q)
         # Computing the dynamics derivatives
-        if self.forceAba:
+        if self.enable_force:
             pinocchio.computeABADerivatives(self.state.pinocchio, data.pinocchio, q, v, u)
             data.Fx = np.hstack([data.pinocchio.ddq_dq, data.pinocchio.ddq_dv])
             data.Fu = data.pinocchio.Minv
@@ -307,14 +307,14 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
         if armature.size is not self.state.nv:
             print('The armature dimension is wrong, we cannot set it.')
         else:
-            self.forceAba = False
+            self.enable_force = False
             self.armature = armature.T
 
     def createData(self):
         data = crocoddyl.DifferentialActionModelAbstract.createData(self)
         data.pinocchio = pinocchio.Data(self.state.pinocchio)
         data.costs = self.costs.createData(data.pinocchio)
-        data.shareCostMemory(data.costs)
+        data.costs.shareMemory(data)
         return data
 
 
@@ -547,17 +547,17 @@ class Contact3DDerived(crocoddyl.ContactModelAbstract):
         vv_skew = pinocchio.utils.skew(self.vv)
         vw_skew = pinocchio.utils.skew(self.vw)
         fXjdv_dq = self.fXj * v_partial_dq
-        Aq = (self.fXj * a_partial_dq)[:3, :] + vw_skew * fXjdv_dq[:3, :] - vv_skew * fXjdv_dq[3:, :]
-        Av = (self.fXj * a_partial_dv)[:3, :] + vw_skew * data.Jc - vv_skew * self.Jw
+        da0_dq = (self.fXj * a_partial_dq)[:3, :] + vw_skew * fXjdv_dq[:3, :] - vv_skew * fXjdv_dq[3:, :]
+        da0_dv = (self.fXj * a_partial_dv)[:3, :] + vw_skew * data.Jc - vv_skew * self.Jw
 
         if np.asscalar(self.gains[0]) != 0.:
             R = data.pinocchio.oMf[self.xref.frame].rotation
-            Aq += np.asscalar(self.gains[0]) * R * pinocchio.getFrameJacobian(
+            da0_dq += np.asscalar(self.gains[0]) * R * pinocchio.getFrameJacobian(
                 self.state.pinocchio, data.pinocchio, self.xref.frame, pinocchio.ReferenceFrame.LOCAL)[:3, :]
         if np.asscalar(self.gains[1]) != 0.:
-            Aq += np.asscalar(self.gains[1]) * (self.fXj[:3, :] * v_partial_dq)
-            Av += np.asscalar(self.gains[1]) * (self.fXj[:3, :] * a_partial_da)
-        data.Ax = np.hstack([Aq, Av])
+            da0_dq += np.asscalar(self.gains[1]) * (self.fXj[:3, :] * v_partial_dq)
+            da0_dv += np.asscalar(self.gains[1]) * (self.fXj[:3, :] * a_partial_da)
+        data.da0_dx = np.hstack([da0_dq, da0_dv])
 
 
 class Contact6DDerived(crocoddyl.ContactModelAbstract):
@@ -586,15 +586,15 @@ class Contact6DDerived(crocoddyl.ContactModelAbstract):
         v_partial_dq, a_partial_dq, a_partial_dv, a_partial_da = pinocchio.getJointAccelerationDerivatives(
             self.state.pinocchio, data.pinocchio, self.joint, pinocchio.ReferenceFrame.LOCAL)
 
-        Aq = (self.fXj * a_partial_dq)
-        Av = (self.fXj * a_partial_dv)
+        da0_dq = (self.fXj * a_partial_dq)
+        da0_dv = (self.fXj * a_partial_dv)
 
         if np.asscalar(self.gains[0]) != 0.:
-            Aq += np.asscalar(self.gains[0]) * pinocchio.Jlog6(self.rMf) * data.Jc
+            da0_dq += np.asscalar(self.gains[0]) * pinocchio.Jlog6(self.rMf) * data.Jc
         if np.asscalar(self.gains[1]) != 0.:
-            Aq += np.asscalar(self.gains[1]) * (self.fXj * v_partial_dq)
-            Av += np.asscalar(self.gains[1]) * (self.fXj * a_partial_da)
-        data.Ax = np.hstack([Aq, Av])
+            da0_dq += np.asscalar(self.gains[1]) * (self.fXj * v_partial_dq)
+            da0_dv += np.asscalar(self.gains[1]) * (self.fXj * a_partial_da)
+        data.da0_dx = np.hstack([da0_dq, da0_dv])
 
 
 class Impulse3DDerived(crocoddyl.ImpulseModelAbstract):
@@ -613,7 +613,7 @@ class Impulse3DDerived(crocoddyl.ImpulseModelAbstract):
             self.calc(data, x)
         v_partial_dq, v_partial_dv = pinocchio.getJointVelocityDerivatives(self.state.pinocchio, data.pinocchio,
                                                                            self.joint, pinocchio.ReferenceFrame.LOCAL)
-        data.Vq = self.fXj[:3, :] * v_partial_dq
+        data.dv0_dq = self.fXj[:3, :] * v_partial_dq
 
 
 class Impulse6DDerived(crocoddyl.ImpulseModelAbstract):
@@ -632,7 +632,7 @@ class Impulse6DDerived(crocoddyl.ImpulseModelAbstract):
             self.calc(data, x)
         v_partial_dq, v_partial_dv = pinocchio.getJointVelocityDerivatives(self.state.pinocchio, data.pinocchio,
                                                                            self.joint, pinocchio.ReferenceFrame.LOCAL)
-        data.Vq = self.fXj * v_partial_dq
+        data.dv0_dq = self.fXj * v_partial_dq
 
 
 class DDPDerived(crocoddyl.SolverAbstract):

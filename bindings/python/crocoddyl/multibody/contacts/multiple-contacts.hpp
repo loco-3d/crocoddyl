@@ -72,19 +72,22 @@ void exposeContactMultiple() {
                "Compute the derivatives of the total contact holonomic constraint.\n\n"
                "The rigid contact model throught acceleration-base holonomic constraint\n"
                "of the contact frame placement.\n"
-               ":param data: cost data\n"
+               ":param data: contact data\n"
                ":param x: state vector\n"
                ":param recalc: If true, it updates the contact Jacobian and drift."))
-      .def("updateLagrangian", &ContactModelMultiple::updateLagrangian, bp::args(" self", " data", " lambda"),
-           "Convert the Lagrangian into a stack of spatial forces.\n\n"
-           ":param data: cost data\n"
-           ":param lambda: Lagrangian vector")
-      .def("updateLagrangianDiff", &ContactModelMultiple::updateLagrangianDiff,
-           bp::args(" self", " data", " Gx", " Gu"),
-           "Update the Jacobian of the Lagrangian.\n\n"
-           ":param data: cost data\n"
-           ":param Gx: Jacobian of Lagrangian w.r.t. the state\n"
-           ":param Gu: Jacobian of the Lagrangian w.r.t. the control")
+      .def("updateAcceleration", &ContactModelMultiple::updateAcceleration, bp::args(" self", " data", " dv"),
+           "Update the constrained acceleration.\n\n"
+           ":param data: contact data\n"
+           ":param dv: constrained acceleration (dimension nv)")
+      .def("updateForce", &ContactModelMultiple::updateForce, bp::args(" self", " data", " force"),
+           "Convert the force into a stack of spatial forces.\n\n"
+           ":param data: contact data\n"
+           ":param force: force vector (dimension nc)")
+      .def("updateForceDiff", &ContactModelMultiple::updateForceDiff, bp::args(" self", " data", " df_dx", " df_du"),
+           "Update the Jacobians of the force.\n\n"
+           ":param data: contact data\n"
+           ":param df_dx: Jacobian of the force with respect to the state (dimension nc*ndx)\n"
+           ":param df_du: Jacobian of the force with respect to the control (dimension nc*nu)")
       .def("createData", &ContactModelMultiple::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the total contact data.\n\n"
@@ -110,6 +113,12 @@ void exposeContactMultiple() {
           "Create multicontact data.\n\n"
           ":param model: multicontact model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("dv", bp::make_getter(&ContactDataMultiple::dv, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ContactDataMultiple::dv), "constrained acceleration in generalized coordinates")
+      .add_property("ddv_dx",
+                    bp::make_getter(&ContactDataMultiple::ddv_dx, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ContactDataMultiple::ddv_dx),
+                    "Jacobian of the constrained acceleration in generalized coordinates")
       .add_property("contacts",
                     bp::make_getter(&ContactDataMultiple::contacts, bp::return_value_policy<bp::return_by_value>()),
                     "stack of contacts data")

@@ -27,9 +27,10 @@ class ContactModelAbstract {
                     const Eigen::Ref<const Eigen::VectorXd>& x) = 0;
   virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const bool& recalc = true) = 0;
-  virtual void updateLagrangian(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& lambda) = 0;
-  void updateLagrangianDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::MatrixXd& Gx,
-                            const Eigen::MatrixXd& Gu);
+
+  virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& force) = 0;
+  void updateForceDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::MatrixXd& df_dx,
+                       const Eigen::MatrixXd& df_du) const;
   virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::Data* const data);
 
   StateMultibody& get_state() const;
@@ -63,24 +64,24 @@ struct ContactDataAbstract {
         joint(0),
         Jc(model->get_nc(), model->get_state().get_nv()),
         a0(model->get_nc()),
-        Ax(model->get_nc(), model->get_state().get_ndx()),
-        Gx(model->get_nc(), model->get_state().get_ndx()),
-        Gu(model->get_nc(), model->get_nu()),
+        da0_dx(model->get_nc(), model->get_state().get_ndx()),
+        df_dx(model->get_nc(), model->get_state().get_ndx()),
+        df_du(model->get_nc(), model->get_nu()),
         f(pinocchio::Force::Zero()) {
     Jc.fill(0);
     a0.fill(0);
-    Ax.fill(0);
-    Gx.fill(0);
-    Gu.fill(0);
+    da0_dx.fill(0);
+    df_dx.fill(0);
+    df_du.fill(0);
   }
 
   pinocchio::Data* pinocchio;
   pinocchio::JointIndex joint;
   Eigen::MatrixXd Jc;
   Eigen::VectorXd a0;
-  Eigen::MatrixXd Ax;
-  Eigen::MatrixXd Gx;
-  Eigen::MatrixXd Gu;
+  Eigen::MatrixXd da0_dx;
+  Eigen::MatrixXd df_dx;
+  Eigen::MatrixXd df_du;
   pinocchio::Force f;
 };
 

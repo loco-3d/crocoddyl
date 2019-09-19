@@ -33,14 +33,13 @@ void ImpulseModel6D::calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data
   ImpulseData6D* d = static_cast<ImpulseData6D*>(data.get());
   pinocchio::getJointVelocityDerivatives(state_.get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                          d->v_partial_dq, d->v_partial_dv);
-  d->Vq.noalias() = d->fXj * d->v_partial_dq;
+  d->dv0_dq.noalias() = d->fXj * d->v_partial_dq;
 }
 
-void ImpulseModel6D::updateLagrangian(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                                      const Eigen::VectorXd& lambda) {
-  assert(lambda.size() == 3 && "lambda has wrong dimension, it should be 6d vector");
+void ImpulseModel6D::updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force) {
+  assert(force.size() == 6 && "force has wrong dimension, it should be 6d vector");
   ImpulseData6D* d = static_cast<ImpulseData6D*>(data.get());
-  data->f = d->jMf.act(pinocchio::Force(lambda, Eigen::Vector3d::Zero()));
+  data->f = d->jMf.act(pinocchio::Force(force));
 }
 
 boost::shared_ptr<ImpulseDataAbstract> ImpulseModel6D::createData(pinocchio::Data* const data) {

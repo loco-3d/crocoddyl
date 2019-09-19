@@ -24,15 +24,15 @@ class ActuationModelAbstractTestCase(unittest.TestCase):
         self.ACTUATION.calc(self.DATA, self.x, self.u)
         self.ACTUATION_DER.calc(self.DATA_DER, self.x, self.u)
         # Checking the actuation signal
-        self.assertTrue(np.allclose(self.DATA.a, self.DATA_DER.a, atol=1e-9), "Wrong actuation signal.")
+        self.assertTrue(np.allclose(self.DATA.tau, self.DATA_DER.tau, atol=1e-9), "Wrong actuation signal.")
 
     def test_calcDiff(self):
         # Run calcDiff for both action models
         self.ACTUATION.calcDiff(self.DATA, self.x, self.u)
         self.ACTUATION_DER.calcDiff(self.DATA_DER, self.x, self.u)
         # Checking the Jacobians of the actuation model
-        self.assertTrue(np.allclose(self.DATA.Ax, self.DATA_DER.Ax, atol=1e-9), "Wrong Ax.")
-        self.assertTrue(np.allclose(self.DATA.Au, self.DATA_DER.Au, atol=1e-9), "Wrong Au.")
+        self.assertTrue(np.allclose(self.DATA.dtau_dx, self.DATA_DER.dtau_dx, atol=1e-9), "Wrong dtau_dx.")
+        self.assertTrue(np.allclose(self.DATA.dtau_du, self.DATA_DER.dtau_du, atol=1e-9), "Wrong dtau_du.")
 
 
 class FloatingBaseActuationTest(ActuationModelAbstractTestCase):

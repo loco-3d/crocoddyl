@@ -32,9 +32,9 @@ class ContactModelAbstract_wrap : public ContactModelAbstract, public bp::wrappe
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, recalc);
   }
 
-  void updateLagrangian(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& lambda) {
-    assert(lambda.size() == nc_ && "lambda has wrong dimension");
-    return bp::call<void>(this->get_override("updateLagrangian").ptr(), data, lambda);
+  void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& force) {
+    assert(force.size() == nc_ && "force has wrong dimension");
+    return bp::call<void>(this->get_override("updateForce").ptr(), data, force);
   }
 };
 
@@ -64,25 +64,24 @@ void exposeContactAbstract() {
            "Compute the derivatives of contact holonomic constraint.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
-           ":param data: cost data\n"
+           ":param data: contact data\n"
            ":param x: state vector\n"
            ":param recalc: If true, it updates the contact Jacobian and drift.")
-      .def("updateLagrangian", pure_virtual(&ContactModelAbstract_wrap::updateLagrangian),
-           bp::args(" self", " data", " lambda"),
-           "Convert the Lagrangian into a stack of spatial forces.\n\n"
-           ":param data: cost data\n"
-           ":param lambda: Lagrangian vector")
-      .def("updateLagrangianDiff", &ContactModelAbstract_wrap::updateLagrangianDiff,
-           bp::args(" self", " data", " Gx", " Gu"),
-           "Update the Jacobian of the Lagrangian.\n\n"
-           ":param data: cost data\n"
-           ":param Gx: Jacobian of Lagrangian w.r.t. the state\n"
-           ":param Gu: Jacobian of the Lagrangian w.r.t. the control")
+      .def("updateForce", pure_virtual(&ContactModelAbstract_wrap::updateForce), bp::args(" self", " data", " force"),
+           "Convert the force into a stack of spatial forces.\n\n"
+           ":param data: contact data\n"
+           ":param force: force vector (dimension nc)")
+      .def("updateForceDiff", &ContactModelAbstract_wrap::updateForceDiff,
+           bp::args(" self", " data", " df_dx", " df_du"),
+           "Update the Jacobians of the force.\n\n"
+           ":param data: contact data\n"
+           ":param df_dx: Jacobian of the force with respect to the state\n"
+           ":param df_du: Jacobian of the force with respect to the control")
       .def("createData", &ContactModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the contact data.\n\n"
            "Each contact model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined cost.\n"
+           "returns the allocated data for a predefined contact.\n"
            ":param data: Pinocchio data\n"
            ":return contact data.")
       .add_property("state",
@@ -100,20 +99,23 @@ void exposeContactAbstract() {
       bp::init<ContactModelAbstract*, pinocchio::Data*>(
           bp::args(" self", " model", " data"),
           "Create common data shared between contact models.\n\n"
-          ":param model: cost model\n"
+          ":param model: contact model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
       .add_property("pinocchio", bp::make_getter(&ContactDataAbstract::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
       .add_property("Jc", bp::make_getter(&ContactDataAbstract::Jc, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ContactDataAbstract::Jc), "contact Jacobian")
       .add_property("a0", bp::make_getter(&ContactDataAbstract::a0, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ContactDataAbstract::a0), "contact drift")
-      .add_property("Ax", bp::make_getter(&ContactDataAbstract::Ax, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ContactDataAbstract::Ax), "Jacobian of the contact constraint")
-      .add_property("Gx", bp::make_getter(&ContactDataAbstract::Ax, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ContactDataAbstract::Ax), "Jacobian of the contact forces")
-      .add_property("Gu", bp::make_getter(&ContactDataAbstract::Ax, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ContactDataAbstract::Ax), "Jacobian of the contact forces")
+                    bp::make_setter(&ContactDataAbstract::a0), "desired contact acceleration")
+      .add_property("da0_dx",
+                    bp::make_getter(&ContactDataAbstract::da0_dx, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ContactDataAbstract::da0_dx), "Jacobian of the desired contact acceleration")
+      .add_property("df_dx",
+                    bp::make_getter(&ContactDataAbstract::df_dx, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ContactDataAbstract::df_dx), "Jacobian of the contact forces")
+      .add_property("df_du",
+                    bp::make_getter(&ContactDataAbstract::df_du, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ContactDataAbstract::df_du), "Jacobian of the contact forces")
       .def_readwrite("joint", &ContactDataAbstract::joint, "joint index of the contact frame")
       .def_readwrite("f", &ContactDataAbstract::f, "external spatial forces");
 }

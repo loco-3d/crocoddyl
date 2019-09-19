@@ -42,7 +42,7 @@ void CostModelSum::removeCost(const std::string& name) {
 void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const Eigen::Ref<const Eigen::VectorXd>& u) {
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
   assert(data->costs.size() == costs_.size() && "it doesn't match the number of cost datas and models");
   data->cost = 0.;
   unsigned int nr = 0;
@@ -68,7 +68,7 @@ void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen:
 void CostModelSum::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                             const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
   assert(data->costs.size() == costs_.size() && "it doesn't match the number of cost datas and models");
   if (recalc) {
     calc(data, x, u);

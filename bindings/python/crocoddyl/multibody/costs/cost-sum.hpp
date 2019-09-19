@@ -117,24 +117,30 @@ void exposeCostSum() {
                                                 "Create total cost data.\n\n"
                                                 ":param model: total cost model\n"
                                                 ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
+      .def("shareMemory", &CostDataSum::shareMemory<DifferentialActionDataAbstract>, bp::args(" self", " model"),
+           "Share memory with a given differential action data\n\n"
+           ":param model: differential action data that we want to share memory")
+      .def("shareMemory", &CostDataSum::shareMemory<ActionDataAbstract>, bp::args(" self", " model"),
+           "Share memory with a given action data\n\n"
+           ":param model: action data that we want to share memory")
       .add_property("costs", bp::make_getter(&CostDataSum::costs, bp::return_value_policy<bp::return_by_value>()),
                     "stack of costs data")
       .add_property("pinocchio", bp::make_getter(&CostDataSum::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
       .add_property("cost", bp::make_getter(&CostDataSum::cost, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&CostDataSum::cost), "cost value")
-      .add_property("Lx", bp::make_getter(&CostDataSum::Lx, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&CostDataSum::Lx), "Jacobian of the cost")
-      .add_property("Lu", bp::make_getter(&CostDataSum::Lu, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&CostDataSum::Lu), "Jacobian of the cost")
-      .add_property("Lxx", bp::make_getter(&CostDataSum::Lxx, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&CostDataSum::Lxx), "Hessian of the cost")
-      .add_property("Lxu", bp::make_getter(&CostDataSum::Lxu, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&CostDataSum::Lxu), "Hessian of the cost")
-      .add_property("Luu", bp::make_getter(&CostDataSum::Luu, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&CostDataSum::Luu), "Hessian of the cost")
-      .add_property("r", bp::make_getter(&CostDataSum::r, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&CostDataSum::r), "cost residual")
+      .add_property("r", bp::make_function(&CostDataSum::get_r, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&CostDataSum::set_r), "cost residual")
+      .add_property("Lx", bp::make_function(&CostDataSum::get_Lx, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&CostDataSum::set_Lx), "Jacobian of the cost")
+      .add_property("Lu", bp::make_function(&CostDataSum::get_Lu, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&CostDataSum::set_Lu), "Jacobian of the cost")
+      .add_property("Lxx", bp::make_function(&CostDataSum::get_Lxx, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&CostDataSum::set_Lxx), "Hessian of the cost")
+      .add_property("Lxu", bp::make_function(&CostDataSum::get_Lxu, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&CostDataSum::set_Lxu), "Hessian of the cost")
+      .add_property("Luu", bp::make_function(&CostDataSum::get_Luu, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&CostDataSum::set_Luu), "Hessian of the cost")
       .add_property("Rx", bp::make_getter(&CostDataSum::Rx, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&CostDataSum::Rx), "Jacobian of the cost residual")
       .add_property("Ru", bp::make_getter(&CostDataSum::Ru, bp::return_value_policy<bp::return_by_value>()),

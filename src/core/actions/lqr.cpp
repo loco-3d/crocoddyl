@@ -30,7 +30,7 @@ ActionModelLQR::~ActionModelLQR() {
 void ActionModelLQR::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                           const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) {
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
 
   if (drift_free_) {
     data->xnext = Fx_ * x + Fu_ * u;
@@ -44,7 +44,7 @@ void ActionModelLQR::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                               const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
                               const bool& recalc) {
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
 
   if (recalc) {
     calc(data, x, u);

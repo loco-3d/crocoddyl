@@ -23,7 +23,7 @@ class ImpulseModel6D : public ImpulseModelAbstract {
   void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
   void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const bool& recalc = true);
-  void updateLagrangian(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& lambda);
+  void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force);
   boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::Data* const data);
 
   unsigned int const& get_frame() const;

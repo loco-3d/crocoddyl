@@ -24,7 +24,7 @@ void IntegratedActionModelEuler::calc(const boost::shared_ptr<ActionDataAbstract
                                       const Eigen::Ref<const Eigen::VectorXd>& x,
                                       const Eigen::Ref<const Eigen::VectorXd>& u) {
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
 
   // Static casting the data
   boost::shared_ptr<IntegratedActionDataEuler> d = boost::static_pointer_cast<IntegratedActionDataEuler>(data);
@@ -49,7 +49,7 @@ void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbst
                                           const Eigen::Ref<const Eigen::VectorXd>& x,
                                           const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
 
   const unsigned int& nv = differential_->get_state().get_nv();
   if (recalc) {
@@ -72,11 +72,11 @@ void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbst
   }
   d->Fx = d->dxnext_dx + time_step_ * d->dxnext_ddx * d->ddx_dx;
   d->Fu = time_step_ * d->dxnext_ddx * d->ddx_du;
-  d->Lx = d->differential->get_Lx();
-  d->Lu = d->differential->get_Lu();
-  d->Lxx = d->differential->get_Lxx();
-  d->Lxu = d->differential->get_Lxu();
-  d->Luu = d->differential->get_Luu();
+  d->Lx = d->differential->Lx;
+  d->Lu = d->differential->Lu;
+  d->Lxx = d->differential->Lxx;
+  d->Lxu = d->differential->Lxu;
+  d->Luu = d->differential->Luu;
 }
 
 boost::shared_ptr<ActionDataAbstract> IntegratedActionModelEuler::createData() {
