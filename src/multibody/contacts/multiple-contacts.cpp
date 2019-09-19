@@ -84,6 +84,23 @@ void ContactModelMultiple::calcDiff(const boost::shared_ptr<ContactDataMultiple>
   }
 }
 
+void ContactModelMultiple::updateAcceleration(const boost::shared_ptr<ContactDataMultiple>& data,
+                                              const Eigen::VectorXd& dv) const {
+  assert(dv.rows() == state_.get_nv() && "dv has wrong dimension");
+  assert(data->contacts.size() == contacts_.size() && "it doesn't match the number of contact datas and models");
+
+  ContactModelContainer::const_iterator it_m, end_m;
+  ContactDataContainer::const_iterator it_d, end_d;
+  for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();
+       it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
+    const ContactItem& m_i = it_m->second;
+    const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+    assert(it_m->first == it_d->first && "it doesn't match the contact name between data and model");
+
+    m_i.contact->updateAcceleration(d_i, dv);
+  }
+}
+
 void ContactModelMultiple::updateForce(const boost::shared_ptr<ContactDataMultiple>& data,
                                        const Eigen::VectorXd& force) {
   assert(force.size() == nc_ && "force has wrong dimension, it should be nc vector");

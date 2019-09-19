@@ -42,6 +42,8 @@ class ContactModelMultiple {
   void calc(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
   void calcDiff(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const bool& recalc = true);
+
+  void updateAcceleration(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::VectorXd& dv) const;
   void updateForce(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::VectorXd& force);
   void updateForceDiff(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::MatrixXd& df_dx,
                        const Eigen::MatrixXd& df_du) const;

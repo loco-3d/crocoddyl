@@ -27,6 +27,8 @@ class ContactModelAbstract {
                     const Eigen::Ref<const Eigen::VectorXd>& x) = 0;
   virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const bool& recalc = true) = 0;
+
+  void updateAcceleration(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& dv) const;
   virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& force) = 0;
   void updateForceDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::MatrixXd& df_dx,
                        const Eigen::MatrixXd& df_du) const;
@@ -61,12 +63,14 @@ struct ContactDataAbstract {
   ContactDataAbstract(Model* const model, pinocchio::Data* const data)
       : pinocchio(data),
         joint(0),
+        dv(model->get_state().get_nv()),
         Jc(model->get_nc(), model->get_state().get_nv()),
         a0(model->get_nc()),
         da_dx(model->get_nc(), model->get_state().get_ndx()),
         df_dx(model->get_nc(), model->get_state().get_ndx()),
         df_du(model->get_nc(), model->get_nu()),
         f(pinocchio::Force::Zero()) {
+    dv.fill(0);
     Jc.fill(0);
     a0.fill(0);
     da_dx.fill(0);
@@ -76,6 +80,7 @@ struct ContactDataAbstract {
 
   pinocchio::Data* pinocchio;
   pinocchio::JointIndex joint;
+  Eigen::VectorXd dv;
   Eigen::MatrixXd Jc;
   Eigen::VectorXd a0;
   Eigen::MatrixXd da_dx;

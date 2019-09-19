@@ -67,6 +67,10 @@ void exposeContactAbstract() {
            ":param data: contact data\n"
            ":param x: state vector\n"
            ":param recalc: If true, it updates the contact Jacobian and drift.")
+      .def("updateAcceleration", &ContactModelAbstract_wrap::updateAcceleration, bp::args(" self", " data", " dv"),
+           "Update the constrained acceleration.\n\n"
+           ":param data: contact data\n"
+           ":param dv: constrained acceleration (dimension nv)")
       .def("updateForce", pure_virtual(&ContactModelAbstract_wrap::updateForce), bp::args(" self", " data", " force"),
            "Convert the force into a stack of spatial forces.\n\n"
            ":param data: contact data\n"
