@@ -261,7 +261,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
     def __init__(self, state, costModel):
         crocoddyl.DifferentialActionModelAbstract.__init__(self, state, state.nv, costModel.nr)
         self.costs = costModel
-        self.forceAba = True
+        self.enable_force = True
         self.armature = np.matrix(np.zeros(0))
 
     def calc(self, data, x, u=None):
@@ -269,7 +269,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
             u = self.unone
         q, v = x[:self.state.nq], x[-self.state.nv:]
         # Computing the dynamics using ABA or manually for armature case
-        if self.forceAba:
+        if self.enable_force:
             data.xout = pinocchio.aba(self.state.pinocchio, data.pinocchio, q, v, u)
         else:
             pinocchio.computeAllTerms(self.state.pinocchio, data.pinocchio, q, v)
@@ -292,7 +292,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
             self.calc(data, x, u)
             pinocchio.computeJointJacobians(self.state.pinocchio, data.pinocchio, q)
         # Computing the dynamics derivatives
-        if self.forceAba:
+        if self.enable_force:
             pinocchio.computeABADerivatives(self.state.pinocchio, data.pinocchio, q, v, u)
             data.Fx = np.hstack([data.pinocchio.ddq_dq, data.pinocchio.ddq_dv])
             data.Fu = data.pinocchio.Minv
@@ -307,7 +307,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
         if armature.size is not self.state.nv:
             print('The armature dimension is wrong, we cannot set it.')
         else:
-            self.forceAba = False
+            self.enable_force = False
             self.armature = armature.T
 
     def createData(self):
