@@ -97,8 +97,8 @@ void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataA
 
   Eigen::Block<Eigen::MatrixXd> a_partial_dtau = d->Kinv.topLeftCorner(nv, nv);
   Eigen::Block<Eigen::MatrixXd> a_partial_da = d->Kinv.topRightCorner(nv, ni);
-  // Eigen::Block<Eigen::MatrixXd> f_partial_dtau = d->Kinv.bottomLeftCorner(ni, nv);
-  // Eigen::Block<Eigen::MatrixXd> f_partial_da = d->Kinv.bottomRightCorner(ni, ni);
+  Eigen::Block<Eigen::MatrixXd> f_partial_dtau = d->Kinv.bottomLeftCorner(ni, nv);
+  Eigen::Block<Eigen::MatrixXd> f_partial_da = d->Kinv.bottomRightCorner(ni, ni);
 
   d->Fx.topLeftCorner(nv, nv).setIdentity();
   d->Fx.topRightCorner(nv, nv).setZero();
@@ -106,15 +106,13 @@ void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataA
   d->Fx.bottomLeftCorner(nv, nv).noalias() -= a_partial_da * d->impulses->dv_dq;
   d->Fx.bottomRightCorner(nv, nv).noalias() = a_partial_dtau * d->pinocchio.M.selfadjointView<Eigen::Upper>();
 
-  // // Computing the cost derivatives
-  // if (enable_force_) {
-  //   d->Gx.leftCols(nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dq;
-  //   d->Gx.rightCols(nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dv;
-  //   d->Gx.noalias() += f_partial_da * d->impulses->Ax;
-  //   d->Gx.noalias() -= f_partial_dtau * d->actuation->Ax;
-  //   d->Gu.noalias() = -f_partial_dtau * d->actuation->Au;
-  //   impulses_.updateLagrangianDiff(d->impulses, d->Gx, d->Gu);
-  // }
+  // Computing the cost derivatives
+  if (enable_force_) {
+    d->df_dq.noalias() = f_partial_dtau * d->pinocchio.dtau_dq;
+    d->df_dq.noalias() += f_partial_da * d->impulses->dv_dq;
+    impulses_.updateVelocityDiff(d->impulses, d->Fx.bottomRows(nv));
+    impulses_.updateForceDiff(d->impulses, d->df_dq);
+  }
   costs_.calcDiff(d->costs, x, u, false);
 }
 

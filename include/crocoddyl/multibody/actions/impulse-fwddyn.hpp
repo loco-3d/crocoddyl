@@ -64,15 +64,13 @@ struct ActionDataImpulseFwdDynamics : public ActionDataAbstract {
         vnone(model->get_state().get_nv()),
         Kinv(model->get_state().get_nv() + model->get_impulses().get_ni(),
              model->get_state().get_nv() + model->get_impulses().get_ni()),
-        Gx(model->get_impulses().get_ni(), model->get_state().get_ndx()),
-        Gu(model->get_impulses().get_ni(), model->get_nu()) {
+        df_dq(model->get_impulses().get_ni(), model->get_state().get_nv()) {
     impulses = model->get_impulses().createData(&pinocchio);
     costs = model->get_costs().createData(&pinocchio);
     costs->shareMemory(this);
     vnone.fill(0);
     Kinv.fill(0);
-    Gx.fill(0);
-    Gu.fill(0);
+    df_dq.fill(0);
   }
 
   pinocchio::Data pinocchio;
@@ -80,8 +78,7 @@ struct ActionDataImpulseFwdDynamics : public ActionDataAbstract {
   boost::shared_ptr<CostDataSum> costs;
   Eigen::VectorXd vnone;
   Eigen::MatrixXd Kinv;
-  Eigen::MatrixXd Gx;
-  Eigen::MatrixXd Gu;
+  Eigen::MatrixXd df_dq;
 };
 
 }  // namespace crocoddyl
