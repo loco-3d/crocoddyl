@@ -60,18 +60,18 @@ struct ImpulseDataAbstract {
       : pinocchio(data),
         joint(0),
         Jc(model->get_ni(), model->get_state().get_nv()),
-        dv_dq(model->get_ni(), model->get_state().get_nv()),
+        dv0_dq(model->get_ni(), model->get_state().get_nv()),
         df_dq(model->get_ni(), model->get_state().get_nv()),
         f(pinocchio::Force::Zero()) {
     Jc.fill(0);
-    dv_dq.fill(0);
+    dv0_dq.fill(0);
     df_dq.fill(0);
   }
 
   pinocchio::Data* pinocchio;
   pinocchio::JointIndex joint;
   Eigen::MatrixXd Jc;
-  Eigen::MatrixXd dv_dq;
+  Eigen::MatrixXd dv0_dq;
   Eigen::MatrixXd df_dq;
   pinocchio::Force f;
 };

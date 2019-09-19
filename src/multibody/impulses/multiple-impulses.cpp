@@ -74,7 +74,7 @@ void ImpulseModelMultiple::calcDiff(const boost::shared_ptr<ImpulseDataMultiple>
 
     m_i.impulse->calcDiff(d_i, x, false);
     unsigned int const& ni_i = m_i.impulse->get_ni();
-    data->dv_dq.block(ni, 0, ni_i, nv) = d_i->dv_dq;
+    data->dv0_dq.block(ni, 0, ni_i, nv) = d_i->dv0_dq;
     ni += ni_i;
   }
 }

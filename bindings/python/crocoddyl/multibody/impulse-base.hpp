@@ -94,9 +94,9 @@ void exposeImpulseAbstract() {
                     "pinocchio data")
       .add_property("Jc", bp::make_getter(&ImpulseDataAbstract::Jc, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ImpulseDataAbstract::Jc), "impulse Jacobian")
-      .add_property("dv_dq",
-                    bp::make_getter(&ImpulseDataAbstract::dv_dq, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ImpulseDataAbstract::dv_dq), "Jacobian of the constrained velocityu")
+      .add_property("dv0_dq",
+                    bp::make_getter(&ImpulseDataAbstract::dv0_dq, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ImpulseDataAbstract::dv0_dq), "Jacobian of the previous impulse velocity")
       .def_readwrite("joint", &ImpulseDataAbstract::joint, "joint index of the impulse frame")
       .def_readwrite("f", &ImpulseDataAbstract::f, "external spatial forces");
 }

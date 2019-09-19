@@ -34,7 +34,7 @@ void ImpulseModel3D::calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data
   ImpulseData3D* d = static_cast<ImpulseData3D*>(data.get());
   pinocchio::getJointVelocityDerivatives(state_.get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                          d->v_partial_dq, d->v_partial_dv);
-  d->dv_dq.noalias() = d->fXj.topRows<3>() * d->v_partial_dq;
+  d->dv0_dq.noalias() = d->fXj.topRows<3>() * d->v_partial_dq;
 }
 
 void ImpulseModel3D::updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force) {

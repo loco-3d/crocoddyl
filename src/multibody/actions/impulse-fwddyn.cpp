@@ -103,13 +103,13 @@ void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataA
   d->Fx.topLeftCorner(nv, nv).setIdentity();
   d->Fx.topRightCorner(nv, nv).setZero();
   d->Fx.bottomLeftCorner(nv, nv).noalias() = -a_partial_dtau * d->pinocchio.dtau_dq;
-  d->Fx.bottomLeftCorner(nv, nv).noalias() -= a_partial_da * d->impulses->dv_dq;
+  d->Fx.bottomLeftCorner(nv, nv).noalias() -= a_partial_da * d->impulses->dv0_dq;
   d->Fx.bottomRightCorner(nv, nv).noalias() = a_partial_dtau * d->pinocchio.M.selfadjointView<Eigen::Upper>();
 
   // Computing the cost derivatives
   if (enable_force_) {
     d->df_dq.noalias() = f_partial_dtau * d->pinocchio.dtau_dq;
-    d->df_dq.noalias() += f_partial_da * d->impulses->dv_dq;
+    d->df_dq.noalias() += f_partial_da * d->impulses->dv0_dq;
     impulses_.updateVelocityDiff(d->impulses, d->Fx.bottomRows(nv));
     impulses_.updateForceDiff(d->impulses, d->df_dq);
   }
