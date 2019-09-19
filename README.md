@@ -15,6 +15,7 @@ The source code is released under the [BSD 3-Clause license](LICENSE).
 [![pipeline status](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/pipeline.svg)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/pipelines?ref=devel)
 [![coverage report](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/coverage.svg)](https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/devel/coverage/)
 [![contributors](https://img.shields.io/github/contributors/loco-3d/crocoddyl)](https://img.shields.io/github/contributors/loco-3d/crocoddyl)
+[![GitHub repo size](https://img.shields.io/github/repo-size/loco-3d/crocoddyl)](https://img.shields.io/github/repo-size/loco-3d/crocoddyl)
 
 If you want to follow the current developments, you can directly refer to the [devel branch](https://gepgitlab.laas.fr/loco-3d/cddp/tree/devel).
 
