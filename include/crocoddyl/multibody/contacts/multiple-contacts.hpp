@@ -93,7 +93,7 @@ struct ContactDataMultiple : ContactDataAbstract {
   }
 
   Eigen::VectorXd dv;
-  Eigen::VectorXd ddv_dx;
+  Eigen::MatrixXd ddv_dx;
   ContactModelMultiple::ContactDataContainer contacts;
   pinocchio::container::aligned_vector<pinocchio::Force> fext;
 };

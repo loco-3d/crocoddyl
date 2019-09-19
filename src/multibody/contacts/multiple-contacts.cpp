@@ -86,7 +86,7 @@ void ContactModelMultiple::calcDiff(const boost::shared_ptr<ContactDataMultiple>
 
 void ContactModelMultiple::updateAcceleration(const boost::shared_ptr<ContactDataMultiple>& data,
                                               const Eigen::VectorXd& dv) const {
-  assert(dv.rows() == state_.get_nv() && "dv has wrong dimension");
+  assert(dv.size() == state_.get_nv() && "dv has wrong dimension");
 
   data->dv = dv;
 }
