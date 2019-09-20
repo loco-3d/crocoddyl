@@ -11,11 +11,11 @@ FOREACH(BENCHMARK_NAME ${${PROJECT_NAME}_BENCHMARK})
 ENDFOREACH(BENCHMARK_NAME ${${PROJECT_NAME}_BENCHMARK})
 
 SET(${PROJECT_NAME}_BENCHMARK_PYTHON
-  hyq
+  unicycle
   lqr
   talos_arm
-  talos_legs
-  unicycle
+  bipedal_walk
+  quadrupedal_gaits
   )
 
 FOREACH(benchmark ${${PROJECT_NAME}_BENCHMARK_PYTHON})
