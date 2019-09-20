@@ -36,9 +36,7 @@ bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
                throw(std::runtime_error("SolverKKT::solve() this method is not implemented yet"));
              }
 
-void SolverKKT::computeDirection(const bool& recalc){
-  throw(std::runtime_error("SolverKKT::computeDirection() this method is not implemented yet"));
-}
+
 
 double SolverKKT::tryStep(const double& steplength){
     throw(std::runtime_error("SolverKKT::tryStep() this method is not implemented yet"));
@@ -65,7 +63,6 @@ double SolverKKT::calc(){
   //offset on constraint xnext = f(x,u) due to x0 = ref.
   const unsigned int cx0 = problem_.get_runningModels()[0]->get_ndx(); 
   // fill diagonals of dynamics gradient as identity 
-  // block starts,ends, rows,columns
   kkt_.block(ndx_+nu_,0,ndx_,ndx_) = Eigen::MatrixXd::Identity(ndx_,ndx_); 
   // loop over models and fill out kkt matrix 
   for (long unsigned int t = 0; t < T; ++t) {
@@ -116,23 +113,57 @@ double SolverKKT::calc(){
 
 
 void SolverKKT::computePrimalDual(){
-  throw(std::runtime_error("SolverKKT::computePrimalDual() this method is not implemented yet"));
+  // Cholesky decomposition and positive definiteness check
+  
+  const Eigen::LLT<Eigen::MatrixXd>& llt_ = kkt_.llt();
+  primaldual_ = llt_.solve(-kktref_);
+  primal_ = primaldual_.segment(0, ndx_+nu_);
+  dual_ = primaldual_.segment(ndx_+nu_, ndx_);
+  
 }
 
+
+void SolverKKT::computeDirection(const bool& recalc){
+  const long unsigned int& T = problem_.get_T();
+  if (recalc) {
+    calc();
+  }
+  computePrimalDual();
+  Eigen::VectorXd p_x = primal_.segment(0,ndx_);
+  Eigen::VectorXd p_u = primal_.segment(ndx_,nu_);
+  int ix = 0; 
+  int iu = 0; 
+
+  for (long unsigned int t = 0; t < T; ++t) {
+    const unsigned int ndxi = problem_.running_models_[t]->get_ndx();
+    const unsigned int nui = problem_.running_models_[t]->get_nu();
+    dxs_[t] = p_x.segment(ix, ndxi);
+    dus_[t] = p_u.segment(iu, nui); 
+    lambdas_[t] = dual_.segment(ix, ndxi); 
+    ix += ndxi; 
+    iu += nui; 
+  }
+  const unsigned int ndxi = problem_.terminal_model_->get_ndx();
+  dxs_.back() = p_x.segment(ix, ndxi);
+  lambdas_.back() = dual_.segment(ix, ndxi); 
+
+}
 
 
 void SolverKKT::allocateData() {
   const long unsigned int& T = problem_.get_T();
- 
-  gaps_.resize(T + 1);
-
+  // 
+  dxs_.resize(T+1); 
+  dus_.resize(T); 
+  lambdas_.resize(T+1);
+  // 
   xs_try_.resize(T + 1);
   us_try_.resize(T);
   dx_.resize(T);
   nx_ = 0; 
-  ndx_ = 0;
-  nu_ = 0; 
-
+  ndx_ = 0;  
+  nu_ = 0;     
+  
 
   for (long unsigned int t = 0; t < T; ++t) {
     ActionModelAbstract* model = problem_.running_models_[t];
@@ -147,6 +178,11 @@ void SolverKKT::allocateData() {
     }
     us_try_[t] = Eigen::VectorXd::Constant(nu, NAN);
     dx_[t] = Eigen::VectorXd::Zero(ndx);
+
+    dxs_[t] = Eigen::VectorXd::Zero(ndx); 
+    dus_[t] = Eigen::VectorXd::Zero(nu); 
+    lambdas_[t] = Eigen::VectorXd::Zero(ndx);
+
     nx_ += nx; 
     ndx_ += ndx;
     nu_ += nu;   
@@ -155,15 +191,21 @@ void SolverKKT::allocateData() {
   ActionModelAbstract* model = problem_.get_terminalModel();
   nx_ +=  model->get_nx();
   ndx_ +=  model->get_ndx();
-
+  xs_try_.back() = problem_.terminal_model_->get_state()->zero();
+  dxs_.back() = Eigen::VectorXd::Zero(model->get_ndx()); 
+  lambdas_.back() = Eigen::VectorXd::Zero(model->get_ndx()); 
   // set dimensions for kkt matrix and kkt_ref vector 
   kkt_.resize(2*ndx_+nu_, 2*ndx_+nu_);
   kkt_.setZero(); 
   kktref_.resize(2*ndx_+nu_);
   kktref_.setZero();
-
-
-
+  // 
+  primaldual_.resize(2*ndx_+nu_);
+  primaldual_.setZero();
+  primal_.resize(ndx_+nu_);
+  primal_.setZero();
+  dual_.resize(ndx_);
+  dual_.setZero();
 }
 
 const int& SolverKKT::get_nx() const { return nx_; }

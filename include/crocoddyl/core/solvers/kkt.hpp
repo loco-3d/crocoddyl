@@ -50,10 +50,12 @@ class SolverKKT : public SolverAbstract {
   std::vector<Eigen::VectorXd> xs_try_;
   std::vector<Eigen::VectorXd> us_try_;
   std::vector<Eigen::VectorXd> dx_;
+  // the vectors below are used to store results of compute direction 
+  std::vector<Eigen::VectorXd> dxs_;
+  std::vector<Eigen::VectorXd> dus_;
+  std::vector<Eigen::VectorXd> lambdas_;
 
-  
-
-  std::vector<Eigen::VectorXd> gaps_;
+  // std::vector<Eigen::VectorXd> gaps_;
 
  private:
   void allocateData();
@@ -64,6 +66,11 @@ class SolverKKT : public SolverAbstract {
   // allocate data
   Eigen::MatrixXd kkt_;
   Eigen::VectorXd kktref_;
+  Eigen::VectorXd primaldual_; 
+  Eigen::VectorXd primal_;
+  Eigen::VectorXd dual_;
+  // this will be used to invert 
+  // Eigen::LLT<Eigen::MatrixXd> llt_;
   // Eigen::MatrixXd hess_;
   // Eigen::MatrixXd jac_;
   // Eigen::MatrixXd jacT_;
