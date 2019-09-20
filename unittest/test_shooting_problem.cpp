@@ -16,6 +16,9 @@
 
 using namespace boost::unit_test;
 
+/**
+ * @brief This class is an extremely simple lqr with identity matrices
+ */
 class ActionModelLQRIdentity: public crocoddyl::ActionModelLQR
 {
 public:
@@ -37,27 +40,31 @@ public:
  * from an ActionModelLQRIdentity
  * while managing the creation and deletion of the memory inside the unit tests.
  */
-struct ShootingProblemFactory{
+template <typename ActionModelLQRType>
+class ShootingProblemFactory{
+public:
   /**
    * @brief Construct a new ShootingProblemFactory object
    * 
+   * @tparam ActionModelLQRType 
    * @param nx is the dimension of the state
    * @param nu is the dimension of teh control 
    * @param drift_free Is a ActionLQR parameter
    * @param horizon_size
    */
   ShootingProblemFactory(int nx, int nu, bool drift_free,
-                                           unsigned horizon_size)
+                         unsigned horizon_size)
   {
-    running_models.clear();
+    running_models_.clear();
     for(unsigned i = 0 ; i < horizon_size ; ++i)
     {
-      running_models.push_back(new ActionModelLQRIdentity(nx, nu, drift_free));
+      running_models_.push_back(new ActionModelLQRType(nx, nu, drift_free));
     }
-    terminal_model = new ActionModelLQRIdentity (nx, nu, drift_free);
-    x0 = terminal_model->get_state()->rand();
-    shooting_problem = 
-      new crocoddyl::ShootingProblem(x0, running_models, terminal_model);
+    terminal_model_ = new ActionModelLQRType (nx, nu, drift_free);
+    x0_ = terminal_model_->get_state()->rand();
+    x0_.fill(1.0);
+    shooting_problem_ = 
+      new crocoddyl::ShootingProblem(x0_, running_models_, terminal_model_);
   }
 
   /**
@@ -65,25 +72,35 @@ struct ShootingProblemFactory{
    */
   ~ShootingProblemFactory()
   {
-    for(unsigned i = 0 ; i < running_models.size() ; ++i)
+    for(unsigned i = 0 ; i < running_models_.size() ; ++i)
     {
-      if(running_models[i] != NULL)
+      if(running_models_[i] != NULL)
       {
-        delete running_models[i];
-        running_models[i] = NULL;
+        delete running_models_[i];
+        running_models_[i] = NULL;
       }
     }
-    running_models.clear();
-    if(terminal_model != NULL)
+    running_models_.clear();
+    if(terminal_model_ != NULL)
     {
-      delete terminal_model;
-      terminal_model = NULL;
+      delete terminal_model_;
+      terminal_model_ = NULL;
     }
-    if(shooting_problem != NULL)
+    if(shooting_problem_ != NULL)
     {
-      delete shooting_problem;
-      shooting_problem = NULL;
+      delete shooting_problem_;
+      shooting_problem_ = NULL;
     }
+  }
+
+  const Eigen::VectorXd& get_x0() const
+  {
+    return x0_;
+  }
+
+  Eigen::VectorXd& get_x0()
+  {
+    return x0_;
   }
 
   /**
@@ -93,13 +110,13 @@ struct ShootingProblemFactory{
    */
   crocoddyl::ShootingProblem& get_shooting_problem()
   {
-    return *shooting_problem;
+    return *shooting_problem_;
   }
-
-  std::vector<crocoddyl::ActionModelAbstract*> running_models; 
-  ActionModelLQRIdentity* terminal_model;
-  Eigen::VectorXd x0;
-  crocoddyl::ShootingProblem* shooting_problem;
+private:
+  std::vector<crocoddyl::ActionModelAbstract*> running_models_; 
+  ActionModelLQRType* terminal_model_;
+  Eigen::VectorXd x0_;
+  crocoddyl::ShootingProblem* shooting_problem_;
 };
 
 //____________________________________________________________________________//
@@ -107,7 +124,8 @@ struct ShootingProblemFactory{
 
 void test_trajectory_dimension(int nx, int nu, bool drift_free, unsigned horizon_size) {
   // Create the shooting problem
-  ShootingProblemFactory factory(nx, nu, drift_free, horizon_size);
+  ShootingProblemFactory<crocoddyl::ActionModelLQR> factory(
+    nx, nu, drift_free, horizon_size);
   crocoddyl::ShootingProblem& shooting_problem = factory.get_shooting_problem();
 
   // Compute the sum of all the state dimensions
@@ -135,7 +153,8 @@ void test_trajectory_dimension(int nx, int nu, bool drift_free, unsigned horizon
 
 void test_control_dimension(int nx, int nu, bool drift_free, unsigned horizon_size) {
   // Create the shooting problem
-  ShootingProblemFactory factory(nx, nu, drift_free, horizon_size);
+  ShootingProblemFactory<crocoddyl::ActionModelLQR> factory(
+    nx, nu, drift_free, horizon_size);
   crocoddyl::ShootingProblem& shooting_problem = factory.get_shooting_problem();
 
   long int sum_control_dims = 0;
@@ -155,7 +174,8 @@ void test_control_dimension(int nx, int nu, bool drift_free, unsigned horizon_si
 
 void test_get_T(int nx, int nu, bool drift_free, unsigned horizon_size) {
   // Create the shooting problem
-  ShootingProblemFactory factory(nx, nu, drift_free, horizon_size);
+  ShootingProblemFactory<crocoddyl::ActionModelLQR> factory(
+    nx, nu, drift_free, horizon_size);
   crocoddyl::ShootingProblem& shooting_problem = factory.get_shooting_problem();
 
   BOOST_CHECK( shooting_problem.get_T() == horizon_size );
@@ -166,11 +186,12 @@ void test_get_T(int nx, int nu, bool drift_free, unsigned horizon_size) {
 
 void test_get_x0(int nx, int nu, bool drift_free, unsigned horizon_size) {
   // Create the shooting problem
-  ShootingProblemFactory factory(nx, nu, drift_free, horizon_size);
+  ShootingProblemFactory<crocoddyl::ActionModelLQR> factory(
+    nx, nu, drift_free, horizon_size);
   crocoddyl::ShootingProblem& shooting_problem = factory.get_shooting_problem();
 
   double tol = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
-  BOOST_CHECK(( shooting_problem.get_x0() - factory.x0).isMuchSmallerThan(1.0, tol));
+  BOOST_CHECK(( shooting_problem.get_x0() - factory.get_x0()).isMuchSmallerThan(1.0, tol));
 }
 
 //____________________________________________________________________________//
@@ -178,7 +199,8 @@ void test_get_x0(int nx, int nu, bool drift_free, unsigned horizon_size) {
 
 void test_data_dim(int nx, int nu, bool drift_free, unsigned horizon_size) {
   // Create the shooting problem
-  ShootingProblemFactory factory(nx, nu, drift_free, horizon_size);
+  ShootingProblemFactory<crocoddyl::ActionModelLQR> factory(
+    nx, nu, drift_free, horizon_size);
   crocoddyl::ShootingProblem& shooting_problem = factory.get_shooting_problem();
 
   for(unsigned i = 0 ; i < shooting_problem.get_runningDatas().size() ; ++i)
@@ -218,13 +240,13 @@ void test_calc() {
    * here that all costs and xnext have been computed properly.
    */
 
-  std::cout << "Create the shooting problem" << std::endl;
   // Create the shooting problem
   int nx = 2;
   int nu = 1;
   bool drift_free = true;
   unsigned horizon_size = 3;
-  ShootingProblemFactory factory(nx, nu, drift_free, horizon_size);
+  ShootingProblemFactory<ActionModelLQRIdentity> factory(
+    nx, nu, drift_free, horizon_size);
   crocoddyl::ShootingProblem& shooting_problem = factory.get_shooting_problem();
 
   std::vector<Eigen::VectorXd> x_vec;
@@ -255,7 +277,111 @@ void test_calc() {
     (Eigen::VectorXd(2) << 3, 1).finished()).isMuchSmallerThan(1.0, tol) );
   BOOST_CHECK( (shooting_problem.get_terminalData()->xnext - 
     (Eigen::VectorXd(2) << 1, 1).finished()).isMuchSmallerThan(1.0, tol) );
+}
+
+//____________________________________________________________________________//
+//____________________________________________________________________________//
+
+void test_calc_diff(int nx, int nu, bool drift_free, unsigned horizon_size) {
+  /**
+   * @TODO TestShootingProblem::test_calc_diff to be improved, I just want to check
+   * here that all costs and xnext have been computed properly.
+   */
+
+  // Create the shooting problems
+  ShootingProblemFactory<crocoddyl::ActionModelLQR> factory(
+    nx, nu, drift_free, horizon_size);
+  ShootingProblemFactory<crocoddyl::ActionModelLQR> factory2(
+    nx, nu, drift_free, horizon_size);
+  crocoddyl::ShootingProblem& shooting_problem = factory.get_shooting_problem();
+  crocoddyl::ShootingProblem& shooting_problem2 = factory.get_shooting_problem();
+
+  std::vector<Eigen::VectorXd> x_vec;
+  std::vector<Eigen::VectorXd> u_vec;
+  for(unsigned i = 0 ; i < horizon_size + 1 ; ++i)
+  {
+    Eigen::VectorXd x, u;
+    x.resize(nx);
+    x.fill(1.0);
+    u.resize(nu);
+    u.fill(2.0);
+    x_vec.push_back(x);
+    u_vec.push_back(u);
+  }
+
+  shooting_problem.calc(x_vec, u_vec);
+  shooting_problem.calcDiff(x_vec, u_vec);
+
+  BOOST_CHECK(shooting_problem.get_runningDatas()[0]->cost ==
+              shooting_problem2.get_runningDatas()[0]->cost);
+  BOOST_CHECK(shooting_problem.get_runningDatas()[1]->cost ==
+              shooting_problem2.get_runningDatas()[1]->cost);
+  BOOST_CHECK(shooting_problem.get_runningDatas()[2]->cost ==
+              shooting_problem2.get_runningDatas()[2]->cost);
+  BOOST_CHECK(shooting_problem.get_terminalData()->cost == 
+              shooting_problem2.get_terminalData()->cost);
+
+  double tol = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
+  BOOST_CHECK( (shooting_problem.get_runningDatas()[0]->xnext - 
+    shooting_problem2.get_runningDatas()[0]->xnext).isMuchSmallerThan(1.0, tol) );
+  BOOST_CHECK( (shooting_problem.get_runningDatas()[1]->xnext - 
+    shooting_problem2.get_runningDatas()[1]->xnext).isMuchSmallerThan(1.0, tol) );
+  BOOST_CHECK( (shooting_problem.get_runningDatas()[2]->xnext - 
+    shooting_problem2.get_runningDatas()[2]->xnext).isMuchSmallerThan(1.0, tol) );
+  BOOST_CHECK( (shooting_problem.get_terminalData()->xnext -
+    shooting_problem2.get_terminalData()->xnext).isMuchSmallerThan(1.0, tol) );
+}
+
+//____________________________________________________________________________//
+//____________________________________________________________________________//
+
+void test_rollout() {
+  /**
+   * @TODO TestShootingProblem::test_calc_diff to be improved, I just want to check
+   * here that all costs and xnext have been computed properly.
+   */
+
+  // Create the shooting problems
+  // Create the shooting problem
+  int nx = 2;
+  int nu = 1;
+  bool drift_free = true;
+  unsigned horizon_size = 3;
+  ShootingProblemFactory<ActionModelLQRIdentity> factory(
+    nx, nu, drift_free, horizon_size);
+  crocoddyl::ShootingProblem& shooting_problem = factory.get_shooting_problem();
+
+  std::vector<Eigen::VectorXd> x_vec;
+  x_vec.clear();
+  std::vector<Eigen::VectorXd> u_vec;
+  u_vec.clear();
+  for(unsigned i = 0 ; i < horizon_size + 1 ; ++i)
+  {
+    Eigen::VectorXd x, u;
+    x.resize(nx);
+    x.fill(1.0);
+    u.resize(nu);
+    u.fill(2.0);
+    x_vec.push_back(x);
+    u_vec.push_back(u);
+    std::cout << "u = " << u.transpose() << std::endl;
+  }
+  shooting_problem.rollout(u_vec, x_vec);
   
+  BOOST_CHECK(shooting_problem.get_runningDatas()[0]->cost == 9);
+  BOOST_CHECK(shooting_problem.get_runningDatas()[1]->cost == 19);
+  BOOST_CHECK(shooting_problem.get_runningDatas()[2]->cost == 33);
+  BOOST_CHECK(shooting_problem.get_terminalData()->cost == 0);
+
+  double tol = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
+  BOOST_CHECK( (shooting_problem.get_runningDatas()[0]->xnext - 
+    (Eigen::VectorXd(2) << 3, 1).finished()).isMuchSmallerThan(1.0, tol) );
+  BOOST_CHECK( (shooting_problem.get_runningDatas()[1]->xnext - 
+    (Eigen::VectorXd(2) << 5, 1).finished()).isMuchSmallerThan(1.0, tol) );
+  BOOST_CHECK( (shooting_problem.get_runningDatas()[2]->xnext - 
+    (Eigen::VectorXd(2) << 7, 1).finished()).isMuchSmallerThan(1.0, tol) );
+  BOOST_CHECK( (shooting_problem.get_terminalData()->xnext - 
+    (Eigen::VectorXd(2) << 0, 0).finished()).isMuchSmallerThan(1.0, tol) );
 }
 
 //____________________________________________________________________________//
@@ -297,6 +423,14 @@ void register_action_model_lqr_unit_tests() {
     BOOST_TEST_CASE(&test_calc)
   );
   
+  framework::master_test_suite().add(
+    BOOST_TEST_CASE(boost::bind(&test_calc_diff,
+    nx, nu, drift_free, horizon_size ))
+  );
+
+  framework::master_test_suite().add(
+    BOOST_TEST_CASE(&test_rollout)
+  );
 }
 
 //____________________________________________________________________________//

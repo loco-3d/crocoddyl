@@ -1,5 +1,5 @@
 #include "crocoddyl/core/optctrl/shooting.hpp"
-
+#include <iostream>
 namespace crocoddyl {
 
 ShootingProblem::ShootingProblem(const Eigen::VectorXd& x0, const std::vector<ActionModelAbstract*>& running_models,
@@ -44,7 +44,9 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const s
 }
 
 void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us, std::vector<Eigen::VectorXd>& xs) {
-  xs.resize(T_ + 1);
+  if (xs.size() < T_ + 1){
+    xs.resize(T_ + 1);
+  }
   xs[0] = x0_;
   for (long unsigned int i = 0; i < T_; ++i) {
     ActionModelAbstract* model = running_models_[i];
