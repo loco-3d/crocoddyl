@@ -8,7 +8,7 @@ class ActuationModelUAM:
     We implement here the simplest model: tau = S.T*u, where S is constant.
     '''
 
-    def __init__(self, pinocchioModel):
+    def __init__(self, pinocchioModel, rotorDistance, coefM, coefF):
         self.pinocchio = pinocchioModel
         if (pinocchioModel.joints[1].shortname() != 'JointModelFreeFlyer'):
             warnings.warn('Strange that the first joint is not a freeflyer')
@@ -17,6 +17,9 @@ class ActuationModelUAM:
         self.nx = self.nq + self.nv
         self.ndx = self.nv * 2
         self.nu = self.nv - 2
+        self.d = rotorDistance
+        self.cm = coefM
+        self.cf = coefF
 
     def calc(self, data, x, u):
         data.a[2:] = u
@@ -43,11 +46,13 @@ class ActuationDataUAM:
     def __init__(self, model, pinocchioData):
         self.pinocchio = pinocchioData
         ndx, nv, nu = model.ndx, model.nv, model.nu
+        d, cf, cm = model.d, model.cf, model.cf
         self.a = np.zeros(nv)  # result of calc
         self.A = np.zeros([nv, ndx + nu])  # result of calcDiff
         self.Ax = self.A[:, :ndx]
         self.Au = self.A[:, ndx:]
-        np.fill_diagonal(self.Au[2:, :], 1)
+        self.Au[2:,:] = np.array([[1,1,1,1],[-d,d,-d,d],[-d,-d,d,d],[-cm/cf,-cm/cf,cm/cf,cm/cf]])
+        # np.fill_diagonal(self.Au[2:, :], 1)
 
 class ActuationModelFreeFloating:
     '''
