@@ -13,11 +13,12 @@ ShootingProblem::~ShootingProblem() {}
 double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us) {
   cost_ = 0;
   for (unsigned int i = 0; i < T_; ++i) {
+    // just get some aliases here
     ActionModelAbstract* model = running_models_[i];
     boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
     const Eigen::VectorXd& x = xs[i];
     const Eigen::VectorXd& u = us[i];
-
+    // Actually compute the model costs
     model->calc(data, x, u);
     cost_ += data->cost;
   }

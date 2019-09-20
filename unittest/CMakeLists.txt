@@ -16,7 +16,7 @@ SET(${PROJECT_NAME}_CPP_TESTS
   # test_actuation 
   # test_activation 
   test_actions
-#  test_shooting_problem
+  test_shooting_problem
   test_kkt
   ## with KKT
   # test_solvers
