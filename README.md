@@ -14,6 +14,12 @@ The source code is released under the [BSD 3-Clause license](LICENSE).
 [![License BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg?style=flat)](https://tldrlegal.com/license/bsd-3-clause-license-%28revised%29#fulltext)
 [![pipeline status](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/pipeline.svg)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/pipelines?ref=devel)
 [![coverage report](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/coverage.svg)](https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/devel/coverage/)
+[![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/loco-3d/crocoddyl)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/-/tags)
+[![GitHub repo size](https://img.shields.io/github/repo-size/loco-3d/crocoddyl)](https://img.shields.io/github/repo-size/loco-3d/crocoddyl)
+[![contributors](https://img.shields.io/github/contributors/loco-3d/crocoddyl)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/-/graphs/master)
+
+[![GitHub Release Date](https://img.shields.io/github/release-date/loco-3d/crocoddyl)](https://img.shields.io/github/release-date/loco-3d/crocoddyl)
+[![GitHub last commit](https://img.shields.io/github/last-commit/loco-3d/crocoddyl)](https://img.shields.io/github/last-commit/loco-3d/crocoddyl)
 
 If you want to follow the current developments, you can directly refer to the [devel branch](https://gepgitlab.laas.fr/loco-3d/cddp/tree/devel).
 
@@ -95,11 +101,22 @@ To cite **Crocoddyl** in your academic research, please use the following bibtex
 }
 ```
 
-and the following paper describes different algorithm implemented in **Crocoddyl**:
+and the following one for the reference to the paper introducing **Crocoddyl**:
+```
+@unpublished{mastalli2020crocoddyl,
+  author={Mastalli, Carlos and Budhiraja, Rohan and Merkt, Wolfgang and Saurel, Guilhem and Hammoud, Bilal
+  and Naveau, Maximilien and Carpentier, Justin and Vijayakumar, Sethu and Mansard, Nicolas},
+  title={{Crocoddyl: An Efficient and Versatile Framework for Multi-Contact Optimal Control}},
+  year={2020}
+}
+```
+
+The rest of the publications describes different component of **Crocoddyl**:
 
 
 ### Publications
-- R. Budhiraja, J. Carpentier, C. Mastalli and N. Mansard. [Differential Dynamic Programming for Multi-Phase Rigid Contact Dynamics](https://hal.archives-ouvertes.fr/hal-01851596/document), IEEE RAS International Conference on Humanoid Robots (ICHR), 2018
+- C. Mastalli et al. [Crocoddyl: An Efficient and Versatile Framework for Multi-Contact Optimal Control](https://cmastalli.github.io/publications/crocoddyl20unpub.html), pre-print, 2020
+- R. Budhiraja, J. Carpentier, C. Mastalli and N. Mansard. [Differential Dynamic Programming for Multi-Phase Rigid Contact Dynamics](https://cmastalli.github.io/publications/mddp18.html), IEEE RAS International Conference on Humanoid Robots (ICHR), 2018
 - Y. Tassa, N. Mansard, E. Todorov. [Control-Limited Differential Dynamic Programming](https://homes.cs.washington.edu/~todorov/papers/TassaICRA14.pdf), IEEE International Conference on Automation and Robotics (ICRA), 2014
 - R. Budhiraja, J. Carpentier and N. Mansard. [Dynamics Consensus between Centroidal and Whole-Body Models for Locomotion of Legged Robots](https://hal.laas.fr/hal-01875031/document), IEEE International Conference on Automation and Robotics (ICRA), 2019
 
