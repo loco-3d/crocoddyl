@@ -28,11 +28,11 @@ gait = SimpleQuadrupedalGaitProblem(hyq.model, lfFoot, rfFoot, lhFoot, rhFoot)
 # Setting up all tasks
 GAITPHASES = [{
     'walking': {
-        'stepLength': 0.15,
-        'stepHeight': 0.2,
+        'stepLength': 0.25,
+        'stepHeight': 0.25,
         'timeStep': 1e-2,
         'stepKnots': 25,
-        'supportKnots': 5
+        'supportKnots': 2
     }
 }, {
     'trotting': {
@@ -40,7 +40,7 @@ GAITPHASES = [{
         'stepHeight': 0.2,
         'timeStep': 1e-2,
         'stepKnots': 25,
-        'supportKnots': 5
+        'supportKnots': 2
     }
 }, {
     'pacing': {
@@ -53,7 +53,7 @@ GAITPHASES = [{
 }, {
     'bounding': {
         'stepLength': 0.15,
-        'stepHeight': 0.2,
+        'stepHeight': 0.1,
         'timeStep': 1e-2,
         'stepKnots': 25,
         'supportKnots': 5
