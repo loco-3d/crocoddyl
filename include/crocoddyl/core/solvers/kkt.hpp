@@ -38,9 +38,6 @@ class SolverKKT : public SolverAbstract {
   const Eigen::VectorXd& get_kktref() const; 
 
 
- private:
-  void allocateData();
-
  protected:
   double regfactor_;
   double regmin_;
@@ -49,27 +46,30 @@ class SolverKKT : public SolverAbstract {
   int ndx_;
   int nu_; 
   
-
-
   double cost_try_;
   std::vector<Eigen::VectorXd> xs_try_;
   std::vector<Eigen::VectorXd> us_try_;
   std::vector<Eigen::VectorXd> dx_;
 
-  // allocate data
-  Eigen::MatrixXd kkt_;
-  Eigen::VectorXd kktref_;
-  Eigen::MatrixXd hess_;
-  Eigen::MatrixXd jac_;
-  Eigen::MatrixXd jacT_;
-  Eigen::VectorXd grad_;
-  Eigen::VectorXd cval_;
+  
 
   std::vector<Eigen::VectorXd> gaps_;
 
  private:
+  void allocateData();
   double calc();
-  // void compute_primal_dual();
+  void computePrimalDual();
+
+
+  // allocate data
+  Eigen::MatrixXd kkt_;
+  Eigen::VectorXd kktref_;
+  // Eigen::MatrixXd hess_;
+  // Eigen::MatrixXd jac_;
+  // Eigen::MatrixXd jacT_;
+  // Eigen::VectorXd grad_;
+  // Eigen::VectorXd cval_;
+
   
   Eigen::VectorXd xnext_;
   std::vector<double> alphas_;
