@@ -77,6 +77,6 @@ class CallbackSolverLogger(libcrocoddyl_pywrap.CallbackAbstract):
         self.costs.append(solver.cost)
         self.control_regs.append(solver.u_reg)
         self.state_regs.append(solver.x_reg)
-        self.th_stops.append(solver.stoppingCriteria)
+        self.th_stops.append(solver.stoppingCriteria())
         self.gm_stops.append(-np.asscalar(solver.expectedImprovement()[1]))
         self.gaps.append(copy.copy(solver.gaps))
