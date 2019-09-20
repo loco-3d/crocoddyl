@@ -5,7 +5,7 @@ import pinocchio
 import numpy as np
 import example_robot_data
 
-WITHDISPLAY = 'disp' in sys.argv
+WITHDISPLAY = 'display' in sys.argv
 WITHPLOT = 'plot' in sys.argv
 
 # In this example test, we will solve the reaching-goal task with the Talos arm.
