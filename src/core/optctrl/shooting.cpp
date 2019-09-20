@@ -1,5 +1,5 @@
 #include "crocoddyl/core/optctrl/shooting.hpp"
-#include <iostream>
+
 namespace crocoddyl {
 
 ShootingProblem::ShootingProblem(const Eigen::VectorXd& x0, const std::vector<ActionModelAbstract*>& running_models,

@@ -387,6 +387,53 @@ void test_rollout() {
 //____________________________________________________________________________//
 //____________________________________________________________________________//
 
+void test_rollout_us() {
+  /**
+   * @TODO TestShootingProblem::test_calc_diff to be improved, I just want to check
+   * here that all costs and xnext have been computed properly.
+   */
+
+  // Create the shooting problems
+  // Create the shooting problem
+  int nx = 2;
+  int nu = 1;
+  bool drift_free = true;
+  unsigned horizon_size = 3;
+  ShootingProblemFactory<ActionModelLQRIdentity> factory(
+    nx, nu, drift_free, horizon_size);
+  crocoddyl::ShootingProblem& shooting_problem = factory.get_shooting_problem();
+
+  std::vector<Eigen::VectorXd> u_vec;
+  u_vec.clear();
+  for(unsigned i = 0 ; i < horizon_size + 1 ; ++i)
+  {
+    Eigen::VectorXd u;
+    u.resize(nu);
+    u.fill(2.0);
+    u_vec.push_back(u);
+    std::cout << "u = " << u.transpose() << std::endl;
+  }
+  shooting_problem.rollout_us(u_vec);
+  
+  BOOST_CHECK(shooting_problem.get_runningDatas()[0]->cost == 9);
+  BOOST_CHECK(shooting_problem.get_runningDatas()[1]->cost == 19);
+  BOOST_CHECK(shooting_problem.get_runningDatas()[2]->cost == 33);
+  BOOST_CHECK(shooting_problem.get_terminalData()->cost == 0);
+
+  double tol = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
+  BOOST_CHECK( (shooting_problem.get_runningDatas()[0]->xnext - 
+    (Eigen::VectorXd(2) << 3, 1).finished()).isMuchSmallerThan(1.0, tol) );
+  BOOST_CHECK( (shooting_problem.get_runningDatas()[1]->xnext - 
+    (Eigen::VectorXd(2) << 5, 1).finished()).isMuchSmallerThan(1.0, tol) );
+  BOOST_CHECK( (shooting_problem.get_runningDatas()[2]->xnext - 
+    (Eigen::VectorXd(2) << 7, 1).finished()).isMuchSmallerThan(1.0, tol) );
+  BOOST_CHECK( (shooting_problem.get_terminalData()->xnext - 
+    (Eigen::VectorXd(2) << 0, 0).finished()).isMuchSmallerThan(1.0, tol) );
+}
+
+//____________________________________________________________________________//
+//____________________________________________________________________________//
+
 void register_action_model_lqr_unit_tests() {
   int nx = 80;
   int nu = 40;
@@ -430,6 +477,10 @@ void register_action_model_lqr_unit_tests() {
 
   framework::master_test_suite().add(
     BOOST_TEST_CASE(&test_rollout)
+  );
+
+  framework::master_test_suite().add(
+    BOOST_TEST_CASE(&test_rollout_us)
   );
 }
 
