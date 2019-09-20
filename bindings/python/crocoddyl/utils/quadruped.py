@@ -258,6 +258,7 @@ class SimpleQuadrupedalGaitProblem:
         return problem
 
     def createJumpingProblem(self, x0, jumpHeight, timeStep):
+        q0 = x0[:self.rmodel.nq]
         rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
         rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
         lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
