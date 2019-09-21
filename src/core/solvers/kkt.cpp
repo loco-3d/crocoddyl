@@ -21,7 +21,7 @@ SolverKKT::SolverKKT(ShootingProblem& problem)
       th_step_(0.5),
       was_feasible_(false) {
   allocateData();
-
+  // 
   const unsigned int& n_alphas = 10;
   alphas_.resize(n_alphas);
   for (unsigned int n = 0; n < n_alphas; ++n) {
@@ -31,26 +31,6 @@ SolverKKT::SolverKKT(ShootingProblem& problem)
 
 SolverKKT::~SolverKKT() {}
 
-bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-                      const unsigned int& maxiter, const bool& is_feasible, const double& reginit) {
-               throw(std::runtime_error("SolverKKT::solve() this method is not implemented yet"));
-             }
-
-
-
-double SolverKKT::tryStep(const double& steplength){
-    throw(std::runtime_error("SolverKKT::tryStep() this method is not implemented yet"));
-
-}
-
-double SolverKKT::stoppingCriteria(){
-    throw(std::runtime_error("SolverKKT::stoppingCriteria() this method is not implemented yet"));
-
-}
-
-const Eigen::Vector2d& SolverKKT::expectedImprovement(){
-      throw(std::runtime_error("SolverKKT::stoppingCriteria() this method is not implemented yet"));
-}
 
 
 double SolverKKT::calc(){
@@ -74,7 +54,6 @@ double SolverKKT::calc(){
     if(t==0){
       m->get_state()->diff(problem_.get_x0(), xs_[0], kktref_.segment(ndx_+nu_, ndxi));
     }
-    // fill the kkt matrix 
     // hessian
     kkt_.block(ix,ix,ndxi,ndxi) = d->get_Lxx();
     kkt_.block(ix,ndx_+iu,ndxi,nui) = d->get_Lxu();
@@ -149,6 +128,146 @@ void SolverKKT::computeDirection(const bool& recalc){
 
 }
 
+const Eigen::Vector2d& SolverKKT::expectedImprovement(){
+  d_ = Eigen::Vector2d::Zero();
+  // -grad^T.primal
+  d_(0) = - kktref_.segment(0, ndx_+nu_).dot(primal_); 
+  // -(hessian.primal)^T.primal
+  d_(1) = - (kkt_.block(0,0,ndx_,ndx_)*primal_).dot(primal_);
+  return d_; 
+}
+
+double SolverKKT::stoppingCriteria(){
+  stop_ = 0.; 
+  const long unsigned int& T = problem_.get_T();
+  Eigen::VectorXd dL = kktref_.segment(0, ndx_+nu_); 
+  Eigen::VectorXd dF; dF.resize(ndx_+nu_);  dF.setZero();
+  int ix = 0; 
+  int iu = 0; 
+
+  
+  for (long unsigned int t = 0; t<T; ++t){
+
+    boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
+    const unsigned int ndxi = problem_.running_models_[t]->get_ndx();
+    const unsigned int nui = problem_.running_models_[t]->get_nu();
+    dF.segment(ix, ndxi) = lambdas_[t] - d->get_Fx()*lambdas_[t+1]; 
+    dF.segment(ndx_+iu, nui) = - d->get_Fu()*lambdas_[t+1];
+    ix += ndxi; 
+    iu += nui; 
+
+  }
+  const unsigned int ndxi = problem_.terminal_model_->get_ndx();
+  dF.segment(ix,ndxi) = lambdas_.back(); 
+  stop_ = (dL + dF).squaredNorm() + kktref_.segment(ndx_+nu_, ndx_).squaredNorm();
+
+  return stop_; 
+}
+
+
+double SolverKKT::tryStep(const double& steplength){
+  const long unsigned int& T = problem_.get_T();
+  for (long unsigned int t = 0; t<T; ++t){
+
+    ActionModelAbstract* m = problem_.running_models_[t];
+    m->get_state()-> integrate(xs_[t], steplength*dxs_[t], xs_try_[t+1]);
+    us_try_[t] = us_[t] + steplength*dus_[t]; 
+  }
+  cost_try_ = problem_.calc(xs_try_, us_try_); 
+  return cost_ - cost_try_; 
+
+}
+
+
+bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
+                      const unsigned int& maxiter, const bool& is_feasible, const double& reginit) {
+  setCandidate(init_xs, init_us, is_feasible); 
+  if (std::isnan(reginit)) {
+    xreg_ = 0.;
+    ureg_ = 0.;
+  } else {
+    xreg_ = reginit;
+    ureg_ = reginit;
+  }
+
+  for (iter_ = 0; iter_ < maxiter; ++iter_) {
+    bool recalc = true;
+    while (true) {
+      try {
+        computeDirection(recalc);
+      } catch (const char* msg) {
+        recalc = false;
+        if (xreg_ == regmax_) {
+          return false;
+        } else {
+          continue;
+        }
+      }
+      break;
+    }
+    // 
+    expectedImprovement();
+    // 
+    for (std::vector<double>::const_iterator it = alphas_.begin(); it != alphas_.end(); ++it) {
+      steplength_ = *it;
+
+      try {
+        dV_ = tryStep(steplength_);
+      } catch (const char* msg) {
+        continue;
+      }
+      dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
+
+      if (d_[0] < th_grad_ || !is_feasible_ || dV_ > th_acceptstep_ * dVexp_) {
+        was_feasible_ = is_feasible_;
+        setCandidate(xs_try_, us_try_, true);
+        cost_ = cost_try_;
+        break;
+      }
+    }
+
+    if (steplength_ > th_step_) {
+      decreaseRegularization();
+    }
+    if (steplength_ == alphas_.back()) {
+      increaseRegularization();
+      if (xreg_ == regmax_) {
+        return false;
+      }
+    }
+    stoppingCriteria();
+
+    const long unsigned int& n_callbacks = callbacks_.size();
+    if (n_callbacks != 0) {
+      for (long unsigned int c = 0; c < n_callbacks; ++c) {
+        CallbackAbstract& callback = *callbacks_[c];
+        callback(this);
+      }
+    }
+
+    if (was_feasible_ && stop_ < th_stop_) {
+      return true;
+    }
+  }
+  return false;
+   
+}
+
+void SolverKKT::increaseRegularization() {
+  xreg_ *= regfactor_;
+  if (xreg_ > regmax_) {
+    xreg_ = regmax_;
+  }
+  ureg_ = xreg_;
+}
+
+void SolverKKT::decreaseRegularization() {
+  xreg_ /= regfactor_;
+  if (xreg_ < regmin_) {
+    xreg_ = regmin_;
+  }
+  ureg_ = xreg_;
+}
 
 void SolverKKT::allocateData() {
   const long unsigned int& T = problem_.get_T();
@@ -159,7 +278,6 @@ void SolverKKT::allocateData() {
   // 
   xs_try_.resize(T + 1);
   us_try_.resize(T);
-  dx_.resize(T);
   nx_ = 0; 
   ndx_ = 0;  
   nu_ = 0;     
@@ -177,8 +295,6 @@ void SolverKKT::allocateData() {
       xs_try_[t] = Eigen::VectorXd::Constant(nx, NAN);
     }
     us_try_[t] = Eigen::VectorXd::Constant(nu, NAN);
-    dx_[t] = Eigen::VectorXd::Zero(ndx);
-
     dxs_[t] = Eigen::VectorXd::Zero(ndx); 
     dus_[t] = Eigen::VectorXd::Zero(nu); 
     lambdas_[t] = Eigen::VectorXd::Zero(ndx);
@@ -195,17 +311,12 @@ void SolverKKT::allocateData() {
   dxs_.back() = Eigen::VectorXd::Zero(model->get_ndx()); 
   lambdas_.back() = Eigen::VectorXd::Zero(model->get_ndx()); 
   // set dimensions for kkt matrix and kkt_ref vector 
-  kkt_.resize(2*ndx_+nu_, 2*ndx_+nu_);
-  kkt_.setZero(); 
-  kktref_.resize(2*ndx_+nu_);
-  kktref_.setZero();
+  kkt_.resize(2*ndx_+nu_, 2*ndx_+nu_); kkt_.setZero(); 
+  kktref_.resize(2*ndx_+nu_); kktref_.setZero();
   // 
-  primaldual_.resize(2*ndx_+nu_);
-  primaldual_.setZero();
-  primal_.resize(ndx_+nu_);
-  primal_.setZero();
-  dual_.resize(ndx_);
-  dual_.setZero();
+  primaldual_.resize(2*ndx_+nu_); primaldual_.setZero();
+  primal_.resize(ndx_+nu_); primal_.setZero();
+  dual_.resize(ndx_); dual_.setZero();
 }
 
 const int& SolverKKT::get_nx() const { return nx_; }
