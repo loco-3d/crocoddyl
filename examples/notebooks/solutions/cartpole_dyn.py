@@ -2,7 +2,7 @@
 #      xddot, thddot = cartpole_dynamics(self, data, x, u)
 def cartpole_dynamics(model, data, x, u):
     # Getting the state and control variables
-    x, th, xdot, thdot = np.asscalar(x[0]), np.asscalar(x[1]), np.asscalar(x[2]), np.asscalar(x[3])
+    th, thdot = np.asscalar(x[1]), np.asscalar(x[3])
     f = np.asscalar(u[0])
 
     # Shortname for system parameters
