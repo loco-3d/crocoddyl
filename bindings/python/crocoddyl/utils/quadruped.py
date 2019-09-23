@@ -257,33 +257,59 @@ class SimpleQuadrupedalGaitProblem:
         problem = crocoddyl.ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
 
-    def createJumpingProblem(self, x0, jumpHeight, timeStep):
+    def createJumpingProblem(self, x0, jumpHeight, jumpLength, timeStep, groundKnots, flyingKnots):
         q0 = x0[:self.rmodel.nq]
+        pinocchio.forwardKinematics(self.rmodel, self.rdata, q0)
+        pinocchio.updateFramePlacements(self.rmodel, self.rdata)
         rfFootPos0 = self.rdata.oMf[self.rfFootId].translation
         rhFootPos0 = self.rdata.oMf[self.rhFootId].translation
         lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
         lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
+        df = jumpLength[2] - rfFootPos0[2]
+        rfFootPos0[2] = 0.
+        rhFootPos0[2] = 0.
+        lfFootPos0[2] = 0.
+        lhFootPos0[2] = 0.
         comRef = (rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
         comRef[2] = np.asscalar(pinocchio.centerOfMass(self.rmodel, self.rdata, q0)[2])
-
-        takeOffKnots = 30
-        flyingKnots = 30
 
         loco3dModel = []
         takeOff = [
             self.createSwingFootModel(
                 timeStep,
                 [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
-            ) for k in range(takeOffKnots)
+            ) for k in range(groundKnots)
         ]
-        flyingPhase = [
-            self.createSwingFootModel(timeStep, [],
-                                      np.matrix([0., 0., jumpHeight * (k + 1) / flyingKnots]).T + comRef)
-            for k in range(flyingKnots)
+        flyingUpPhase = [
+            self.createSwingFootModel(
+                timeStep, [],
+                np.matrix([jumpLength[0], jumpLength[1], jumpLength[2] + jumpHeight]).T * (k + 1) / flyingKnots +
+                comRef) for k in range(flyingKnots)
         ]
+        flyingDownPhase = []
+        for k in range(flyingKnots):
+            flyingDownPhase += [self.createSwingFootModel(timeStep, [])]
 
+        f0 = np.matrix(jumpLength).T
+        footTask = [
+            crocoddyl.FramePlacement(self.lfFootId, pinocchio.SE3(np.eye(3), lfFootPos0 + f0)),
+            crocoddyl.FramePlacement(self.rfFootId, pinocchio.SE3(np.eye(3), rfFootPos0 + f0)),
+            crocoddyl.FramePlacement(self.lhFootId, pinocchio.SE3(np.eye(3), lhFootPos0 + f0)),
+            crocoddyl.FramePlacement(self.rhFootId, pinocchio.SE3(np.eye(3), rhFootPos0 + f0))
+        ]
+        landingPhase = [
+            self.createFootSwitchModel([self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId], footTask, False)
+        ]
+        f0[2] = df
+        landed = [
+            self.createSwingFootModel(timeStep, [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+                                      comTask=comRef + f0) for k in range(groundKnots)
+        ]
         loco3dModel += takeOff
-        loco3dModel += flyingPhase
+        loco3dModel += flyingUpPhase
+        loco3dModel += flyingDownPhase
+        loco3dModel += landingPhase
+        loco3dModel += landed
 
         problem = crocoddyl.ShootingProblem(x0, loco3dModel, loco3dModel[-1])
         return problem
@@ -324,11 +350,11 @@ class SimpleQuadrupedalGaitProblem:
 
                 swingFootTask += [crocoddyl.FramePlacement(i, pinocchio.SE3(np.eye(3), tref))]
 
-            # Adding an action model for this knot
             comTask = np.matrix([stepLength * (k + 1) / numKnots, 0., 0.]).T * comPercentage + comPos0
             footSwingModel += [
                 self.createSwingFootModel(timeStep, supportFootIds, comTask=comTask, swingFootTask=swingFootTask)
             ]
+
         # Action model for the foot switch
         footSwitchModel = self.createFootSwitchModel(supportFootIds, swingFootTask)
 
@@ -352,7 +378,7 @@ class SimpleQuadrupedalGaitProblem:
         contactModel = crocoddyl.ContactModelMultiple(self.state, self.actuation.nu)
         for i in supportFootIds:
             xref = crocoddyl.FrameTranslation(i, np.matrix([0., 0., 0.]).T)
-            supportContactModel = crocoddyl.ContactModel3D(self.state, xref, self.actuation.nu, np.matrix([0., 0.]).T)
+            supportContactModel = crocoddyl.ContactModel3D(self.state, xref, self.actuation.nu, np.matrix([0., 50.]).T)
             contactModel.addContact('contact_' + str(i), supportContactModel)
 
         # Creating the cost model for a contact phase
