@@ -23,7 +23,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_trySteps, SolverFDDP::tryStep,
 void exposeSolverFDDP() {
   bp::class_<SolverFDDP, bp::bases<SolverDDP> >(
       "SolverFDDP",
-      "FDDP solver.\n\n"
+      "Feasibility-prone DDP (FDDP) solver.\n\n"
       "The FDDP solver computes an optimal trajectory and control commands by iterates\n"
       "running backward and forward passes. The backward-pass updates locally the\n"
       "quadratic approximation of the problem and computes descent direction,\n"
@@ -48,7 +48,6 @@ void exposeSolverFDDP() {
                ":param regInit: initial guess for the regularization value. Very low values are typical\n"
                "                used with very good guess points (init_xs, init_us).\n"
                ":returns the optimal trajectory xopt, uopt and a boolean that describes if convergence was reached."))
-
       .def("expectedImprovement", &SolverFDDP::expectedImprovement,
            bp::return_value_policy<bp::copy_const_reference>(), bp::args(" self"),
            "Return two scalars denoting the quadratic improvement model\n\n"
@@ -74,4 +73,4 @@ void exposeSolverFDDP() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_SOLVERS_DDP_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_SOLVERS_FDDP_HPP_
