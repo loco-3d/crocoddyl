@@ -35,31 +35,41 @@ If you have never added robotpkg as a softwares repository, please follow first 
 
 1. Add robotpkg as source repository to apt:
 
-		sudo tee /etc/apt/sources.list.d/robotpkg.list <<EOF
-		deb [arch=amd64] http://robotpkg.openrobots.org/wip/packages/debian/pub $(lsb_release -sc) robotpkg
-		deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -sc) robotpkg
-		EOF
+```bash
+sudo tee /etc/apt/sources.list.d/robotpkg.list <<EOF
+deb [arch=amd64] http://robotpkg.openrobots.org/wip/packages/debian/pub $(lsb_release -sc) robotpkg
+deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -sc) robotpkg
+EOF
+```
 
 2. Register the authentication certificate of robotpkg:
 
-		curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | sudo apt-key add -
+```bash
+curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | sudo apt-key add -
+```
 
 3. You need to run at least once apt update to fetch the package descriptions:
 
-		sudo apt-get update
+```bash
+sudo apt-get update
+```
 
 4. The installation of Crocoddyl:
 
-		sudo apt install robotpkg-py27-crocoddyl # for Python 2
+```bash
+sudo apt install robotpkg-py27-crocoddyl # for Python 2
 
-		sudo apt install robotpkg-py35-crocoddyl # for Python 3
+sudo apt install robotpkg-py35-crocoddyl # for Python 3
+```
 
 Finally you will need to configure your environment variables, e.g.:
 
-		export PATH=/opt/openrobots/bin:$PATH
-		export PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH
-		export LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH
-		export PYTHONPATH=/opt/openrobots/lib/python2.7/site-packages:$PYTHONPATH
+```bash
+export PATH=/opt/openrobots/bin:$PATH
+export PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH
+export LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH
+export PYTHONPATH=/opt/openrobots/lib/python2.7/site-packages:$PYTHONPATH
+```
 
 
 ### Building from source
@@ -77,14 +87,18 @@ Finally you will need to configure your environment variables, e.g.:
 
 You can run examples and tests from your build dir:
 
-		cd build
-		make test
-		make examples-bipedal_walk
+```bash
+cd build
+make test
+make examples-bipedal_walk
+```
 
 If you want to see the 3D result and/or graphs, you can use
 
-		export CROCODDYL_DISPLAY=1
-		export CROCODDYL_PLOT=1
+```bash
+export CROCODDYL_DISPLAY=1
+export CROCODDYL_PLOT=1
+```
 
 If you want to learn about Crocoddyl, take a look at the Jupyter notebooks. Start in the following order.
 - [examples/notebooks/unicycle_towards_origin.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/unicycle_towards_origin.ipynb)
@@ -97,7 +111,7 @@ If you want to learn about Crocoddyl, take a look at the Jupyter notebooks. Star
 ## Citing Crocoddyl
 
 To cite **Crocoddyl** in your academic research, please use the following bibtex lines:
-```
+```tex
 @misc{crocoddylweb,
    author = {Carlos Mastalli, Rohan Budhiraja and Nicolas Mansard and others},
    title = {Crocoddyl: a fast and flexible optimal control library for robot control under contact sequence},
@@ -107,7 +121,7 @@ To cite **Crocoddyl** in your academic research, please use the following bibtex
 ```
 
 and the following one for the reference to the paper introducing **Crocoddyl**:
-```
+```tex
 @unpublished{mastalli2020crocoddyl,
   author={Mastalli, Carlos and Budhiraja, Rohan and Merkt, Wolfgang and Saurel, Guilhem and Hammoud, Bilal
   and Naveau, Maximilien and Carpentier, Justin and Vijayakumar, Sethu and Mansard, Nicolas},
