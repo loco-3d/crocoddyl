@@ -27,38 +27,38 @@ gait = SimpleQuadrupedalGaitProblem(hyq.model, lfFoot, rfFoot, lhFoot, rhFoot)
 
 # Setting up all tasks
 GAITPHASES = [{
-        'walking': {
-            'stepLength': 0.25,
-            'stepHeight': 0.25,
-            'timeStep': 1e-2,
-            'stepKnots': 25,
-            'supportKnots': 2
-        }
-    }, {
-        'trotting': {
-            'stepLength': 0.15,
-            'stepHeight': 0.2,
-            'timeStep': 1e-2,
-            'stepKnots': 25,
-            'supportKnots': 2
-        }
-    }, {
-        'pacing': {
-            'stepLength': 0.15,
-            'stepHeight': 0.2,
-            'timeStep': 1e-2,
-            'stepKnots': 25,
-            'supportKnots': 5
-        }
-    }, {
-        'bounding': {
-            'stepLength': 0.15,
-            'stepHeight': 0.1,
-            'timeStep': 1e-2,
-            'stepKnots': 25,
-            'supportKnots': 5
-        }
-    }, {
+    'walking': {
+        'stepLength': 0.25,
+        'stepHeight': 0.25,
+        'timeStep': 1e-2,
+        'stepKnots': 25,
+        'supportKnots': 2
+    }
+}, {
+    'trotting': {
+        'stepLength': 0.15,
+        'stepHeight': 0.2,
+        'timeStep': 1e-2,
+        'stepKnots': 25,
+        'supportKnots': 2
+    }
+}, {
+    'pacing': {
+        'stepLength': 0.15,
+        'stepHeight': 0.2,
+        'timeStep': 1e-2,
+        'stepKnots': 25,
+        'supportKnots': 5
+    }
+}, {
+    'bounding': {
+        'stepLength': 0.15,
+        'stepHeight': 0.1,
+        'timeStep': 1e-2,
+        'stepKnots': 25,
+        'supportKnots': 5
+    }
+}, {
     'jumping': {
         'jumpHeight': 0.15,
         'jumpLength': [0.0, 0.3, 0.],
