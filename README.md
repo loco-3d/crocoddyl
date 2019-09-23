@@ -25,7 +25,7 @@ If you want to follow the current developments, you can directly refer to the [d
 
 
 ## <img align="center" height="20" src="https://i.imgur.com/x1morBF.png"/> Installation
-**Crocoddyl** can be easily installed on various Linux (Ubuntu, Fedora, etc.) and Unix distributions (Mac OS X, BSD, etc.). Please refer to 
+**Crocoddyl** can be easily installed on various Linux (Ubuntu, Fedora, etc.) and Unix distributions (Mac OS X, BSD, etc.). Please refer to
 
 ### Installation through robotpkg
 
@@ -75,11 +75,16 @@ Finally you will need to configure your environment variables, e.g.:
 * [matplotlib](https://matplotlib.org/) (optional for running examples)
 
 
-You can run examples and tests from the root dir of the repository:
+You can run examples and tests from your build dir:
 
-		cd PATH_TO_CROCODDYL
-		python examples/talos_arm.py
-		python unittest/all.py
+		cd build
+		make test
+		make examples-bipedal_walk
+
+If you want to see the 3D result and/or graphs, you can use
+
+		export CROCODDYL_DISPLAY=1
+		export CROCODDYL_PLOT=1
 
 If you want to learn about Crocoddyl, take a look at the Jupyter notebooks. Start in the following order.
 - [examples/notebooks/unicycle_towards_origin.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/unicycle_towards_origin.ipynb)
@@ -124,4 +129,3 @@ The rest of the publications describes different component of **Crocoddyl**:
 ## Questions and Issues
 
 You have a question or an issue? You may either directly open a [new issue](https://gepgitlab.laas.fr/loco-3d/crocoddyl/issues) or use the mailing list <crocoddyl@laas.fr>.
-
