@@ -31,7 +31,8 @@ class DifferentialActionModelUAM(DifferentialActionModelAbstract):
         pinocchio.computeAllTerms(self.pinocchio, data.pinocchio, q, v)
         data.M = data.pinocchio.M
         data.Minv = np.linalg.inv(data.M)
-        data.xout[:] = data.Minv * (a2m(data.tauq) - data.pinocchio.nle).flat
+        data.r = data.tauq - m2a(data.pinocchio.nle)
+        data.xout[:] = np.dot(data.Minv, data.r)
 
         # --- Cost
         pinocchio.forwardKinematics(self.pinocchio, data.pinocchio, q, v)
@@ -63,6 +64,15 @@ class DifferentialActionModelUAM(DifferentialActionModelAbstract):
         self.costs.calcDiff(data.costs, x, u, recalc=False)
         return data.xout, data.cost
 
+    def quasiStatic(self, data, x):
+        nu, nq, nv = self.nu, self.nq, self.nv
+        if len(x) == nq:
+            x = np.concatenate([x, np.zeros(nv)])
+        else:
+            x[nq:] = 0
+        self.calcDiff(data, x, np.zeros(nu))
+        return np.dot(np.linalg.pinv(data.actuation.Au), -data.r)[:nu]
+
 class DifferentialActionDataUAM(DifferentialActionDataAbstract):
     def __init__(self, model):
         self.pinocchio = model.pinocchio.createData()
@@ -74,3 +84,4 @@ class DifferentialActionDataUAM(DifferentialActionDataAbstract):
         nv = model.nv
         self.tauq = np.zeros(nv)
         self.xout = np.zeros(nv)
+        self.r    = np.zeros(nv)

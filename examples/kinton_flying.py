@@ -1,4 +1,4 @@
-from crocoddyl import *
+ºfrom crocoddyl import *
 import pinocchio as pin
 import numpy as np
 from crocoddyl.diagnostic import displayTrajectory

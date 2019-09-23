@@ -22,7 +22,11 @@ class ActuationModelUAM:
         self.cf = coefF
 
     def calc(self, data, x, u):
-        data.a[2:] = u
+        d, cf, cm = self.d, self.cf, self.cf
+        S = np.array(np.zeros([self.nv,self.nu]))
+        S[2:6,:4] = np.array([[1,1,1,1],[-d,d,-d,d],[-d,-d,d,d],[-cm/cf,-cm/cf,cm/cf,cm/cf]])
+        np.fill_diagonal(S[6:, 4:], 1)
+        data.a = np.dot(S,u)
         return data.a
 
     def calcDiff(self, data, x, u, recalc=True):
@@ -33,15 +37,6 @@ class ActuationModelUAM:
     def createData(self, pinocchioData):
         return ActuationDataUAM(self, pinocchioData)
 
-
-# This is the matrix that, given a force vector representing the four motors, outputs the thrust and moment
-# [      0,      0,     0,     0]
-# [      0,      0,     0,     0]
-# [      1,      1,     1,     1]
-# [     -d,      d,    -d,     d]
-# [     -d,     -d,     d,     d]
-# [ -cm/cf, -cm/cf, cm/cf, cm/cf]
-
 class ActuationDataUAM:
     def __init__(self, model, pinocchioData):
         self.pinocchio = pinocchioData
@@ -51,8 +46,15 @@ class ActuationDataUAM:
         self.A = np.zeros([nv, ndx + nu])  # result of calcDiff
         self.Ax = self.A[:, :ndx]
         self.Au = self.A[:, ndx:]
-        self.Au[2:,:] = np.array([[1,1,1,1],[-d,d,-d,d],[-d,-d,d,d],[-cm/cf,-cm/cf,cm/cf,cm/cf]])
-        # np.fill_diagonal(self.Au[2:, :], 1)
+        self.Au[2:6,:4] = np.array([[1,1,1,1],[-d,d,-d,d],[-d,-d,d,d],[-cm/cf,-cm/cf,cm/cf,cm/cf]])
+        np.fill_diagonal(self.Au[6:, 4:], 1)
+# This is the matrix that, given a force vector representing the four motors, outputs the thrust and moment
+# [      0,      0,     0,     0]
+# [      0,      0,     0,     0]
+# [      1,      1,     1,     1]
+# [     -d,      d,    -d,     d]
+# [     -d,     -d,     d,     d]
+# [ -cm/cf, -cm/cf, cm/cf, cm/cf]
 
 class ActuationModelFreeFloating:
     '''
