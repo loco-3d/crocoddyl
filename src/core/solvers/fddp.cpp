@@ -61,14 +61,13 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
       if (dVexp_ > 0) {  // descend direction
         if (d_[0] < th_grad_ || dV_ > th_acceptstep_ * dVexp_) {
           // Accept step
-
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
           cost_ = cost_try_;
           recalc = true;
           break;
         }
-      } else {
+      } else {  // reducing the gaps by allowing a small increment in the cost value
         if (d_[0] < th_grad_ || dV_ < th_acceptNegStep_ * dVexp_) {
           // accept step
           was_feasible_ = is_feasible_;
@@ -108,32 +107,32 @@ void SolverFDDP::updateExpectedImprovement() {
   dq_ = 0;
   unsigned int const& T = this->problem_.get_T();
   if (!is_feasible_) {
-    dg_ -= Vx_.back().transpose() * gaps_.back();
-    dq_ += gaps_.back().transpose() * Vxx_.back() * gaps_.back();
+    dg_ -= Vx_.back().dot(gaps_.back());
+    fTVxx_p_.noalias() = Vxx_.back() * gaps_.back();
+    dq_ += gaps_.back().dot(fTVxx_p_);
   }
   for (unsigned int t = 0; t < T; ++t) {
-    dg_ += Qu_[t].transpose() * k_[t];
-    dq_ -= k_[t].transpose() * Quuk_[t];
+    dg_ += Qu_[t].dot(k_[t]);
+    dq_ -= k_[t].dot(Quuk_[t]);
     if (!is_feasible_) {
-      dg_ -= Vx_[t].transpose() * gaps_[t];
+      dg_ -= Vx_[t].dot(gaps_[t]);
       fTVxx_p_.noalias() = Vxx_[t] * gaps_[t];
-      dq_ += gaps_[t].transpose() * fTVxx_p_;
+      dq_ += gaps_[t].dot(fTVxx_p_);
     }
   }
 }
 
 const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
   dv_ = 0;
-  d_.fill(0);
   unsigned int const& T = this->problem_.get_T();
   if (!is_feasible_) {
     problem_.running_models_.back()->get_state().diff(xs_try_.back(), xs_.back(), dx_.back());
     fTVxx_p_.noalias() = Vxx_.back() * dx_.back();
-    dv_ -= gaps_.back().transpose() * fTVxx_p_;
+    dv_ -= gaps_.back().dot(fTVxx_p_);
     for (unsigned int t = 0; t < T; ++t) {
       problem_.running_models_[t]->get_state().diff(xs_try_[t], xs_[t], dx_[t]);
       fTVxx_p_.noalias() = Vxx_[t] * dx_[t];
-      dv_ -= gaps_[t].transpose() * fTVxx_p_;
+      dv_ -= gaps_[t].dot(fTVxx_p_);
     }
   }
   d_[0] = dg_ + dv_;
