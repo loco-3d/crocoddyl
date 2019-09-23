@@ -27,41 +27,44 @@ gait = SimpleQuadrupedalGaitProblem(hyq.model, lfFoot, rfFoot, lhFoot, rhFoot)
 
 # Setting up all tasks
 GAITPHASES = [{
-    'walking': {
-        'stepLength': 0.25,
-        'stepHeight': 0.25,
-        'timeStep': 1e-2,
-        'stepKnots': 25,
-        'supportKnots': 2
-    }
-}, {
-    'trotting': {
-        'stepLength': 0.15,
-        'stepHeight': 0.2,
-        'timeStep': 1e-2,
-        'stepKnots': 25,
-        'supportKnots': 2
-    }
-}, {
-    'pacing': {
-        'stepLength': 0.15,
-        'stepHeight': 0.2,
-        'timeStep': 1e-2,
-        'stepKnots': 25,
-        'supportKnots': 5
-    }
-}, {
-    'bounding': {
-        'stepLength': 0.15,
-        'stepHeight': 0.1,
-        'timeStep': 1e-2,
-        'stepKnots': 25,
-        'supportKnots': 5
-    }
-}, {
+        'walking': {
+            'stepLength': 0.25,
+            'stepHeight': 0.25,
+            'timeStep': 1e-2,
+            'stepKnots': 25,
+            'supportKnots': 2
+        }
+    }, {
+        'trotting': {
+            'stepLength': 0.15,
+            'stepHeight': 0.2,
+            'timeStep': 1e-2,
+            'stepKnots': 25,
+            'supportKnots': 2
+        }
+    }, {
+        'pacing': {
+            'stepLength': 0.15,
+            'stepHeight': 0.2,
+            'timeStep': 1e-2,
+            'stepKnots': 25,
+            'supportKnots': 5
+        }
+    }, {
+        'bounding': {
+            'stepLength': 0.15,
+            'stepHeight': 0.1,
+            'timeStep': 1e-2,
+            'stepKnots': 25,
+            'supportKnots': 5
+        }
+    }, {
     'jumping': {
-        'jumpHeight': 0.5,
-        'timeStep': 1e-2
+        'jumpHeight': 0.15,
+        'jumpLength': [0.0, 0.3, 0.],
+        'timeStep': 1e-2,
+        'groundKnots': 10,
+        'flyingKnots': 20
     }
 }]
 cameraTF = [2., 2.68, 0.84, 0.2, 0.62, 0.72, 0.22]
@@ -71,27 +74,29 @@ for i, phase in enumerate(GAITPHASES):
     for key, value in phase.items():
         if key == 'walking':
             # Creating a walking problem
-            ddp[i] = crocoddyl.SolverDDP(
+            ddp[i] = crocoddyl.SolverFDDP(
                 gait.createWalkingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                           value['stepKnots'], value['supportKnots']))
         elif key == 'trotting':
             # Creating a trotting problem
-            ddp[i] = crocoddyl.SolverDDP(
+            ddp[i] = crocoddyl.SolverFDDP(
                 gait.createTrottingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                            value['stepKnots'], value['supportKnots']))
         elif key == 'pacing':
             # Creating a pacing problem
-            ddp[i] = crocoddyl.SolverDDP(
+            ddp[i] = crocoddyl.SolverFDDP(
                 gait.createPacingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                          value['stepKnots'], value['supportKnots']))
         elif key == 'bounding':
             # Creating a bounding problem
-            ddp[i] = crocoddyl.SolverDDP(
+            ddp[i] = crocoddyl.SolverFDDP(
                 gait.createBoundingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                            value['stepKnots'], value['supportKnots']))
         elif key == 'jumping':
             # Creating a jumping problem
-            ddp[i] = crocoddyl.SolverDDP(gait.createJumpingProblem(x0, value['jumpHeight'], value['timeStep']))
+            ddp[i] = crocoddyl.SolverFDDP(
+                gait.createJumpingProblem(x0, value['jumpHeight'], value['jumpLength'], value['timeStep'],
+                                          value['groundKnots'], value['flyingKnots']))
 
     # Added the callback functions
     print('*** SOLVE ' + key + ' ***')
