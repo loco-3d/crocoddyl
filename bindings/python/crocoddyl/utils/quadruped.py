@@ -381,12 +381,26 @@ class SimpleQuadrupedalGaitProblem:
         model = crocoddyl.IntegratedActionModelEuler(dmodel, timeStep)
         return model
 
-    def createFootSwitchModel(self, supportFootIds, swingFootTask):
+    def createFootSwitchModel(self, supportFootIds, swingFootTask, pseudoImpulse=True):
         """ Action model for a foot switch phase.
 
         :param supportFootIds: Ids of the constrained feet
         :param swingFootTask: swinging foot task
+        :param pseudoImpulse: true for pseudo-impulse models, otherwise it uses the impulse model
         :return action model for a foot switch phase
+        """
+        if pseudoImpulse:
+            return self.createPseudoImpulseModel(supportFootIds, swingFootTask)
+        else:
+            return self.createImpulseModel(supportFootIds, swingFootTask)
+
+    def createPseudoImpulseModel(self, supportFootIds, swingFootTask):
+        """ Action model for pseudo-impulse models.
+
+        A pseudo-impulse model consists of adding high-penalty cost for the contact velocities.
+        :param supportFootIds: Ids of the constrained feet
+        :param swingFootTask: swinging foot task
+        :return pseudo-impulse differential action model
         """
         # Creating a 3D multi-contact model, and then including the supporting
         # foot
@@ -401,8 +415,11 @@ class SimpleQuadrupedalGaitProblem:
         if swingFootTask is not None:
             for i in swingFootTask:
                 xref = crocoddyl.FrameTranslation(i.frame, i.oMf.translation)
+                vref = crocoddyl.FrameMotion(i.frame, pinocchio.Motion.Zero())
                 footTrack = crocoddyl.CostModelFrameTranslation(self.state, xref, self.actuation.nu)
+                impactFootVelCost = crocoddyl.CostModelFrameVelocity(self.state, vref, self.actuation.nu)
                 costModel.addCost("footTrack_" + str(i), footTrack, 1e7)
+                costModel.addCost('impactVel_' + str(i.frame), impactFootVelCost, 1e6)
         stateWeights = np.array([0] * 3 + [500.] * 3 + [0.01] * (self.rmodel.nv - 6) + [10] * self.rmodel.nv)
         stateReg = crocoddyl.CostModelState(self.state,
                                             crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeights**2).T),
@@ -411,16 +428,43 @@ class SimpleQuadrupedalGaitProblem:
         costModel.addCost("stateReg", stateReg, 1e1)
         costModel.addCost("ctrlReg", ctrlReg, 1e-3)
 
-        for i in swingFootTask:
-            vref = crocoddyl.FrameMotion(i.frame, pinocchio.Motion.Zero())
-            impactFootVelCost = crocoddyl.CostModelFrameVelocity(self.state, vref, self.actuation.nu)
-            costModel.addCost('impactVel_' + str(i.frame), impactFootVelCost, 1e6)
-
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
         dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
                                                                      costModel)
         model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.)
+        return model
+
+    def createImpulseModel(self, supportFootIds, swingFootTask):
+        """ Action model for impulse models.
+
+        An impulse model consists of describing the impulse dynamics against a set of contacts.
+        :param supportFootIds: Ids of the constrained feet
+        :param swingFootTask: swinging foot task
+        :return impact action model
+        """
+        # Creating a 3D multi-contact model, and then including the supporting foot
+        impulseModel = crocoddyl.ImpulseModelMultiple(self.state)
+        for i in supportFootIds:
+            supportContactModel = crocoddyl.ImpulseModel3D(self.state, i)
+            impulseModel.addImpulse("impulse_" + str(i), supportContactModel)
+
+        # Creating the cost model for a contact phase
+        costModel = crocoddyl.CostModelSum(self.state, 0)
+        if swingFootTask is not None:
+            for i in swingFootTask:
+                xref = crocoddyl.FrameTranslation(i.frame, i.oMf.translation)
+                footTrack = crocoddyl.CostModelFrameTranslation(self.state, xref, 0)
+                costModel.addCost("footTrack_" + str(i), footTrack, 1e7)
+        stateWeights = np.array([1.] * 6 + [10.0] * (self.rmodel.nv - 6) + [10] * self.rmodel.nv)
+        stateReg = crocoddyl.CostModelState(self.state,
+                                            crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeights**2).T),
+                                            self.rmodel.defaultState, 0)
+        costModel.addCost("stateReg", stateReg, 1e1)
+
+        # Creating the action model for the KKT dynamics with simpletic Euler
+        # integration scheme
+        model = crocoddyl.ActionModelImpulseFwdDynamics(self.state, impulseModel, costModel)
         return model
 
 
