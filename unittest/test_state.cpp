@@ -10,12 +10,14 @@
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 #include <Eigen/Dense>
 #include <pinocchio/fwd.hpp>
+#include <pinocchio/parsers/urdf.hpp>
 #include <boost/test/included/unit_test.hpp>
 #include <boost/bind.hpp>
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"
 #include "crocoddyl/core/states/unicycle.hpp"
 #include "crocoddyl/core/numdiff/state.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 
 using namespace boost::unit_test;
 
@@ -292,9 +294,57 @@ void register_state_vector_unit_tests() {
       BOOST_TEST_CASE(boost::bind(&test_velocity_from_Jintegrate_Jdiff, crocoddyl::StateVector(nx))));
 }
 
+void register_state_multibody_unit_tests(const std::string& urdf_file) {
+  double num_diff_modifier = 1e4;
+  pinocchio::Model model;
+  pinocchio::urdf::buildModel(urdf_file, pinocchio::JointModelFreeFlyer(),
+                              model, false);
+
+  crocoddyl::StateMultibody state_multibody(model);
+  std::cout << model.nq << " " << model.nv << " " << model.nq + model.nv << std::endl;
+  std::cout << state_multibody.zero().size() << std::endl;
+  std::cout << state_multibody.rand().size() << std::endl;
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(boost::bind(&test_state_dimension, crocoddyl::StateMultibody(model), model.nq + model.nv)));
+
+//   framework::master_test_suite().add(
+//       BOOST_TEST_CASE(boost::bind(&test_integrate_against_difference, crocoddyl::StateMultibody(model))));
+
+//   framework::master_test_suite().add(
+//       BOOST_TEST_CASE(boost::bind(&test_difference_against_integrate, crocoddyl::StateMultibody(model))));
+
+//   framework::master_test_suite().add(
+//       BOOST_TEST_CASE(boost::bind(&test_Jdiff_firstsecond, crocoddyl::StateMultibody(model))));
+
+//   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_Jint_firstsecond, crocoddyl::StateMultibody(model))));
+
+//   framework::master_test_suite().add(
+//       BOOST_TEST_CASE(boost::bind(&test_Jdiff_num_diff_firstsecond, crocoddyl::StateMultibody(model))));
+
+//   framework::master_test_suite().add(
+//       BOOST_TEST_CASE(boost::bind(&test_Jint_num_diff_firstsecond, crocoddyl::StateMultibody(model))));
+
+//   framework::master_test_suite().add(
+//       BOOST_TEST_CASE(boost::bind(&test_Jdiff_against_numdiff, crocoddyl::StateMultibody(model), num_diff_modifier)));
+
+//   framework::master_test_suite().add(
+//       BOOST_TEST_CASE(boost::bind(&test_Jintegrate_against_numdiff, crocoddyl::StateMultibody(model), num_diff_modifier)));
+
+//   framework::master_test_suite().add(
+//       BOOST_TEST_CASE(boost::bind(&test_Jdiff_and_Jintegrate_are_inverses, crocoddyl::StateMultibody(model))));
+
+//   framework::master_test_suite().add(
+//       BOOST_TEST_CASE(boost::bind(&test_velocity_from_Jintegrate_Jdiff, crocoddyl::StateMultibody(model))));
+}
+
+
+//____________________________________________________________________________//
+
 bool init_function() {
   // Here we test the state_vector
   register_state_vector_unit_tests();
+  register_state_multibody_unit_tests(HYQ_URDF);
+  // register_state_multibody_unit_tests(THALOS_URDF);
   return true;
 }
 
