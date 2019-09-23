@@ -248,11 +248,13 @@ void SolverDDP::forwardPass(const double& steplength) {
 }
 
 void SolverDDP::computeGains(const unsigned int& t) {
-  Quu_llt_[t].compute(Quu_[t]);
-  K_[t] = Qxu_[t].transpose();
-  Quu_llt_[t].solveInPlace(K_[t]);
-  k_[t] = Qu_[t];
-  Quu_llt_[t].solveInPlace(k_[t]);
+  if (problem_.running_models_[t]->get_nu() > 0) {
+    Quu_llt_[t].compute(Quu_[t]);
+    K_[t] = Qxu_[t].transpose();
+    Quu_llt_[t].solveInPlace(K_[t]);
+    k_[t] = Qu_[t];
+    Quu_llt_[t].solveInPlace(k_[t]);
+  }
 }
 
 void SolverDDP::increaseRegularization() {
