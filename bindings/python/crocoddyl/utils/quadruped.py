@@ -443,9 +443,9 @@ class SimpleQuadrupedalGaitProblem:
                 xref = crocoddyl.FrameTranslation(i.frame, i.oMf.translation)
                 vref = crocoddyl.FrameMotion(i.frame, pinocchio.Motion.Zero())
                 footTrack = crocoddyl.CostModelFrameTranslation(self.state, xref, self.actuation.nu)
-                impactFootVelCost = crocoddyl.CostModelFrameVelocity(self.state, vref, self.actuation.nu)
+                impulseFootVelCost = crocoddyl.CostModelFrameVelocity(self.state, vref, self.actuation.nu)
                 costModel.addCost("footTrack_" + str(i), footTrack, 1e7)
-                costModel.addCost('impactVel_' + str(i.frame), impactFootVelCost, 1e6)
+                costModel.addCost('impulseVel_' + str(i.frame), impulseFootVelCost, 1e6)
         stateWeights = np.array([0] * 3 + [500.] * 3 + [0.01] * (self.rmodel.nv - 6) + [10] * self.rmodel.nv)
         stateReg = crocoddyl.CostModelState(self.state,
                                             crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeights**2).T),
@@ -467,7 +467,7 @@ class SimpleQuadrupedalGaitProblem:
         An impulse model consists of describing the impulse dynamics against a set of contacts.
         :param supportFootIds: Ids of the constrained feet
         :param swingFootTask: swinging foot task
-        :return impact action model
+        :return impulse action model
         """
         # Creating a 3D multi-contact model, and then including the supporting foot
         impulseModel = crocoddyl.ImpulseModelMultiple(self.state)
