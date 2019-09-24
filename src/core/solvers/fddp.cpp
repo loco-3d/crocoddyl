@@ -60,7 +60,6 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
 
       if (dVexp_ > 0) {  // descend direction
         if (d_[0] < th_grad_ || dV_ > th_acceptstep_ * dVexp_) {
-          // Accept step
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
           cost_ = cost_try_;
@@ -69,7 +68,6 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
         }
       } else {  // reducing the gaps by allowing a small increment in the cost value
         if (d_[0] < th_grad_ || dV_ < th_acceptNegStep_ * dVexp_) {
-          // accept step
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
           cost_ = cost_try_;
@@ -78,6 +76,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
         }
       }
     }
+
     if (steplength_ > th_step_) {
       decreaseRegularization();
     }
@@ -102,24 +101,17 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
   return false;
 }
 
-void SolverFDDP::updateExpectedImprovement() {
-  dg_ = 0;
-  dq_ = 0;
-  unsigned int const& T = this->problem_.get_T();
-  if (!is_feasible_) {
-    dg_ -= Vx_.back().dot(gaps_.back());
-    fTVxx_p_.noalias() = Vxx_.back() * gaps_.back();
-    dq_ += gaps_.back().dot(fTVxx_p_);
+
+void SolverFDDP::computeDirection(const bool& recalc) {
+  if (recalc) {
+    calc();
   }
-  for (unsigned int t = 0; t < T; ++t) {
-    dg_ += Qu_[t].dot(k_[t]);
-    dq_ -= k_[t].dot(Quuk_[t]);
-    if (!is_feasible_) {
-      dg_ -= Vx_[t].dot(gaps_[t]);
-      fTVxx_p_.noalias() = Vxx_[t] * gaps_[t];
-      dq_ += gaps_[t].dot(fTVxx_p_);
-    }
-  }
+  backwardPass();
+}
+
+double SolverFDDP::tryStep(const double& steplength) {
+  forwardPass(steplength);
+  return cost_ - cost_try_;
 }
 
 const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
@@ -138,6 +130,26 @@ const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
   d_[0] = dg_ + dv_;
   d_[1] = dq_ - 2 * dv_;
   return d_;
+}
+
+void SolverFDDP::updateExpectedImprovement() {
+  dg_ = 0;
+  dq_ = 0;
+  unsigned int const& T = this->problem_.get_T();
+  if (!is_feasible_) {
+    dg_ -= Vx_.back().dot(gaps_.back());
+    fTVxx_p_.noalias() = Vxx_.back() * gaps_.back();
+    dq_ += gaps_.back().dot(fTVxx_p_);
+  }
+  for (unsigned int t = 0; t < T; ++t) {
+    dg_ += Qu_[t].dot(k_[t]);
+    dq_ -= k_[t].dot(Quuk_[t]);
+    if (!is_feasible_) {
+      dg_ -= Vx_[t].dot(gaps_[t]);
+      fTVxx_p_.noalias() = Vxx_[t] * gaps_[t];
+      dq_ += gaps_[t].dot(fTVxx_p_);
+    }
+  }
 }
 
 double SolverFDDP::calc() {
@@ -171,7 +183,7 @@ void SolverFDDP::backwardPass() {
   }
 
   if (!is_feasible_) {
-    Vx_.back() += Vxx_.back() * gaps_.back();
+    Vx_.back().noalias() += Vxx_.back() * gaps_.back();
   }
 
   for (int t = static_cast<int>(problem_.get_T()) - 1; t >= 0; --t) {
@@ -202,8 +214,7 @@ void SolverFDDP::backwardPass() {
       Vx_[t].noalias() = Qx_[t] + K_[t].transpose() * Quuk_[t] - 2 * K_[t].transpose() * Qu_[t];
     }
     Vxx_[t].noalias() = Qxx_[t] - Qxu_[t] * K_[t];
-    Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose()).eval();
-    // TODO(cmastalli): as suggested by Nicolas
+    Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose()).eval();  // TODO(cmastalli): as suggested by Nicolas
 
     if (!std::isnan(xreg_)) {
       Vxx_[t].diagonal() += x_reg_;
@@ -240,12 +251,13 @@ void SolverFDDP::forwardPass(const double& steplength) {
     m->get_state().diff(xs_[t], xs_try_[t], dx_[t]);
     us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
     m->calc(d, xs_try_[t], us_try_[t]);
+    xnext_ = d->get_xnext();
     cost_try_ += d->cost;
 
     if (raiseIfNaN(cost_try_)) {
       throw "forward_error";
     }
-    if (raiseIfNaN(d->get_xnext().lpNorm<Eigen::Infinity>())) {
+    if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
       throw "forward_error";
     }
   }
@@ -254,10 +266,9 @@ void SolverFDDP::forwardPass(const double& steplength) {
   boost::shared_ptr<ActionDataAbstract>& d = problem_.terminal_data_;
 
   if ((is_feasible_) || (steplength == 1)) {
-    xs_try_.back() = problem_.running_datas_.back()->get_xnext();
+    xs_try_.back() = xnext_;
   } else {
-    m->get_state().integrate(problem_.running_datas_.back()->get_xnext(), gaps_.back() * (steplength - 1),
-                             xs_try_.back());
+    m->get_state().integrate(xnext_, gaps_.back() * (steplength - 1), xs_try_.back());
   }
   m->calc(d, xs_try_.back());
   cost_try_ += d->cost;
