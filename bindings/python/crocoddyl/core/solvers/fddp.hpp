@@ -49,9 +49,9 @@ void exposeSolverFDDP() {
                ":returns the optimal trajectory xopt, uopt and a boolean that describes if convergence was reached."))
       .def("tryStep", &SolverFDDP::tryStep,
            SolverFDDP_trySteps(bp::args(" self", " stepLength=1"),
-                              "Rollout the system with a predefined step length.\n\n"
-                              ":param stepLength: step length\n"
-                              ":returns the cost improvement."))
+                               "Rollout the system with a predefined step length.\n\n"
+                               ":param stepLength: step length\n"
+                               ":returns the cost improvement."))
       .def("expectedImprovement", &SolverFDDP::expectedImprovement,
            bp::return_value_policy<bp::copy_const_reference>(), bp::args(" self"),
            "Return two scalars denoting the quadratic improvement model\n\n"
