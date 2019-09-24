@@ -1,3 +1,4 @@
+import os
 import sys
 
 import crocoddyl
@@ -5,8 +6,8 @@ import pinocchio
 import numpy as np
 import example_robot_data
 
-WITHDISPLAY = 'display' in sys.argv
-WITHPLOT = 'plot' in sys.argv
+WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
+WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
 # In this example test, we will solve the reaching-goal task with the Talos arm.
 # For that, we use the forward dynamics (with its analytical derivatives)
