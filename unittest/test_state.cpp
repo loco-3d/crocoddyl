@@ -21,50 +21,34 @@
 
 using namespace boost::unit_test;
 
-class StateAbstractFactory
-{
-public:
-  crocoddyl::StateAbstract& get_state()
-  {
-    return *state_;
-  }
+class StateAbstractFactory {
+ public:
+  crocoddyl::StateAbstract& get_state() { return *state_; }
   boost::shared_ptr<crocoddyl::StateAbstract> state_;
 };
 
-class StateVectorFactory: public StateAbstractFactory
-{
-public:
-  StateVectorFactory(int nx): StateAbstractFactory()
-  {
+class StateVectorFactory : public StateAbstractFactory {
+ public:
+  StateVectorFactory(int nx) : StateAbstractFactory() {
     state_vector_ = boost::make_shared<crocoddyl::StateVector>(nx);
     state_ = state_vector_;
   }
   boost::shared_ptr<crocoddyl::StateVector> state_vector_;
 };
 
-class StateMultibodyFactory: public StateAbstractFactory
-{
-public:
-  StateMultibodyFactory(const std::string& urdf_file = "", bool free_flyer=true):
-      StateAbstractFactory()
-  {
+class StateMultibodyFactory : public StateAbstractFactory {
+ public:
+  StateMultibodyFactory(const std::string& urdf_file = "", bool free_flyer = true) : StateAbstractFactory() {
     pinocchio_model_.reset(new pinocchio::Model());
-    if(urdf_file.size() != 0)
-    {
-      if(free_flyer)
-      {
-        pinocchio::urdf::buildModel(urdf_file, pinocchio::JointModelFreeFlyer(),
-                                    *pinocchio_model_);
+    if (urdf_file.size() != 0) {
+      if (free_flyer) {
+        pinocchio::urdf::buildModel(urdf_file, pinocchio::JointModelFreeFlyer(), *pinocchio_model_);
         pinocchio_model_->lowerPositionLimit.head<7>().fill(-1.0);
         pinocchio_model_->upperPositionLimit.head<7>().fill(1.0);
-      }
-      else
-      {
+      } else {
         pinocchio::urdf::buildModel(urdf_file, *pinocchio_model_);
-      }      
-    }
-    else
-    {
+      }
+    } else {
       pinocchio::buildModels::humanoidRandom(*pinocchio_model_, free_flyer);
     }
 
@@ -326,8 +310,7 @@ void register_state_vector_unit_tests() {
   int nx = 10;
   double num_diff_modifier = 1e4;
 
-  framework::master_test_suite().add(
-      BOOST_TEST_CASE(boost::bind(&test_state_dimension, StateVectorFactory(nx), nx)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_state_dimension, StateVectorFactory(nx), nx)));
 
   framework::master_test_suite().add(
       BOOST_TEST_CASE(boost::bind(&test_integrate_against_difference, StateVectorFactory(nx))));
@@ -335,11 +318,9 @@ void register_state_vector_unit_tests() {
   framework::master_test_suite().add(
       BOOST_TEST_CASE(boost::bind(&test_difference_against_integrate, StateVectorFactory(nx))));
 
-  framework::master_test_suite().add(
-      BOOST_TEST_CASE(boost::bind(&test_Jdiff_firstsecond, StateVectorFactory(nx))));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_firstsecond, StateVectorFactory(nx))));
 
-  framework::master_test_suite().add(
-      BOOST_TEST_CASE(boost::bind(&test_Jint_firstsecond, StateVectorFactory(nx))));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_Jint_firstsecond, StateVectorFactory(nx))));
 
   framework::master_test_suite().add(
       BOOST_TEST_CASE(boost::bind(&test_Jdiff_num_diff_firstsecond, StateVectorFactory(nx))));
@@ -360,14 +341,14 @@ void register_state_vector_unit_tests() {
       BOOST_TEST_CASE(boost::bind(&test_velocity_from_Jintegrate_Jdiff, StateVectorFactory(nx))));
 }
 
-void register_state_multibody_unit_tests(const std::string& urdf_file = "", bool free_flyer=true) {
+void register_state_multibody_unit_tests(const std::string& urdf_file = "", bool free_flyer = true) {
   double num_diff_modifier = 1e4;
   StateMultibodyFactory factory = StateMultibodyFactory(urdf_file, free_flyer);
 
   framework::master_test_suite().add(
       BOOST_TEST_CASE(boost::bind(&test_state_dimension, StateMultibodyFactory(urdf_file, free_flyer),
-                      factory.pinocchio_model_->nq + factory.pinocchio_model_->nv)));
-  
+                                  factory.pinocchio_model_->nq + factory.pinocchio_model_->nv)));
+
   framework::master_test_suite().add(
       BOOST_TEST_CASE(boost::bind(&test_integrate_against_difference, StateMultibodyFactory(urdf_file, free_flyer))));
 
@@ -377,7 +358,8 @@ void register_state_multibody_unit_tests(const std::string& urdf_file = "", bool
   framework::master_test_suite().add(
       BOOST_TEST_CASE(boost::bind(&test_Jdiff_firstsecond, StateMultibodyFactory(urdf_file, free_flyer))));
 
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_Jint_firstsecond, StateMultibodyFactory(urdf_file, free_flyer))));
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(boost::bind(&test_Jint_firstsecond, StateMultibodyFactory(urdf_file, free_flyer))));
 
   framework::master_test_suite().add(
       BOOST_TEST_CASE(boost::bind(&test_Jdiff_num_diff_firstsecond, StateMultibodyFactory(urdf_file, free_flyer))));
@@ -385,19 +367,18 @@ void register_state_multibody_unit_tests(const std::string& urdf_file = "", bool
   framework::master_test_suite().add(
       BOOST_TEST_CASE(boost::bind(&test_Jint_num_diff_firstsecond, StateMultibodyFactory(urdf_file, free_flyer))));
 
-  framework::master_test_suite().add(
-      BOOST_TEST_CASE(boost::bind(&test_Jdiff_against_numdiff, StateMultibodyFactory(urdf_file, free_flyer), num_diff_modifier)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(
+      boost::bind(&test_Jdiff_against_numdiff, StateMultibodyFactory(urdf_file, free_flyer), num_diff_modifier)));
 
-  framework::master_test_suite().add(
-      BOOST_TEST_CASE(boost::bind(&test_Jintegrate_against_numdiff, StateMultibodyFactory(urdf_file, free_flyer), num_diff_modifier)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(
+      boost::bind(&test_Jintegrate_against_numdiff, StateMultibodyFactory(urdf_file, free_flyer), num_diff_modifier)));
 
-  framework::master_test_suite().add(
-      BOOST_TEST_CASE(boost::bind(&test_Jdiff_and_Jintegrate_are_inverses, StateMultibodyFactory(urdf_file, free_flyer))));
+  framework::master_test_suite().add(BOOST_TEST_CASE(
+      boost::bind(&test_Jdiff_and_Jintegrate_are_inverses, StateMultibodyFactory(urdf_file, free_flyer))));
 
-  framework::master_test_suite().add(
-      BOOST_TEST_CASE(boost::bind(&test_velocity_from_Jintegrate_Jdiff, StateMultibodyFactory(urdf_file, free_flyer))));
+  framework::master_test_suite().add(BOOST_TEST_CASE(
+      boost::bind(&test_velocity_from_Jintegrate_Jdiff, StateMultibodyFactory(urdf_file, free_flyer))));
 }
-
 
 //____________________________________________________________________________//
 
@@ -406,8 +387,8 @@ bool init_function() {
   register_state_vector_unit_tests();
   register_state_multibody_unit_tests(THALOS_ARM_URDF, false);
   register_state_multibody_unit_tests(HYQ_URDF);
-  register_state_multibody_unit_tests(THALOS_URDF); 
-  register_state_multibody_unit_tests(); // random humanoid
+  register_state_multibody_unit_tests(THALOS_URDF);
+  register_state_multibody_unit_tests();  // random humanoid
   return true;
 }
 
