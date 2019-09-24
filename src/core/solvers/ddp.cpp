@@ -163,6 +163,10 @@ void SolverDDP::backwardPass() {
     Vxx_.back().diagonal() += x_reg_;
   }
 
+  if (!is_feasible_) {
+    Vx_.back().noalias() += Vxx_.back() * gaps_.back();
+  }
+
   for (int t = static_cast<int>(problem_.get_T()) - 1; t >= 0; --t) {
     ActionModelAbstract* m = problem_.running_models_[t];
     boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
