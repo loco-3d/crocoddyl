@@ -36,7 +36,7 @@ class StateVectorFactory : public StateAbstractFactory {
  public:
   StateVectorFactory(int nx) : StateAbstractFactory() {
     state_vector_ = boost::make_shared<crocoddyl::StateVector>(nx);
-    state_ = state_vector_;
+    state_ = state_vector_.get();
   }
   boost::shared_ptr<crocoddyl::StateVector> state_vector_;
 };
@@ -58,7 +58,7 @@ class StateMultibodyFactory : public StateAbstractFactory {
     }
 
     state_multibody_.reset(new crocoddyl::StateMultibody(*pinocchio_model_));
-    state_ = state_multibody_;
+    state_ = state_multibody_.get();
   }
   boost::shared_ptr<crocoddyl::StateMultibody> state_multibody_;
   boost::shared_ptr<pinocchio::Model> pinocchio_model_;
