@@ -29,7 +29,7 @@ using namespace boost::unit_test;
 class StateAbstractFactory {
  public:
   crocoddyl::StateAbstract& get_state() { return *state_; }
-  boost::shared_ptr<crocoddyl::StateAbstract> state_;
+  crocoddyl::StateAbstract* state_;
 };
 
 class StateVectorFactory : public StateAbstractFactory {
