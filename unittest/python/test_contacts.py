@@ -369,7 +369,7 @@ x0 = model.State.rand()
 xref = model.State.rand()
 xref[:7] = x0[:7]
 xref[3:7] = [0, 0, 0, 1]  # TODO: remove this after adding assertion to include any case
-pinocchio.forwardKinematics(rmodel, rdata, a2m(xref))
+pinocchio.forwardKinematics(rmodel, rdata, a2m(xref[:rmodel.nq]))
 pinocchio.updateFramePlacements(rmodel, rdata)
 c1.ref[:] = m2a(rdata.oMf[c1.frame].translation.copy())
 
