@@ -392,7 +392,7 @@ class SimpleQuadrupedalGaitProblem:
                 footTrack = crocoddyl.CostModelFrameTranslation(self.state, xref, self.actuation.nu)
                 costModel.addCost("footTrack_" + str(i), footTrack, 1e4)
 
-        stateWeights = np.array([0] * 3 + [500.] * 3 + [0.01] * (self.rmodel.nv - 6) + [10] * self.rmodel.nv)
+        stateWeights = np.array([0.] * 3 + [500.] * 3 + [0.01] * (self.rmodel.nv - 6) + [10.] * self.rmodel.nv)
         stateReg = crocoddyl.CostModelState(self.state,
                                             crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeights**2).T),
                                             self.rmodel.defaultState, self.actuation.nu)
@@ -433,7 +433,7 @@ class SimpleQuadrupedalGaitProblem:
         contactModel = crocoddyl.ContactModelMultiple(self.state, self.actuation.nu)
         for i in supportFootIds:
             xref = crocoddyl.FrameTranslation(i, np.matrix([0., 0., 0.]).T)
-            supportContactModel = crocoddyl.ContactModel3D(self.state, xref, self.actuation.nu, np.matrix([0., 0.]).T)
+            supportContactModel = crocoddyl.ContactModel3D(self.state, xref, self.actuation.nu, np.matrix([0., 50.]).T)
             contactModel.addContact('contact_' + str(i), supportContactModel)
 
         # Creating the cost model for a contact phase
@@ -446,7 +446,7 @@ class SimpleQuadrupedalGaitProblem:
                 impulseFootVelCost = crocoddyl.CostModelFrameVelocity(self.state, vref, self.actuation.nu)
                 costModel.addCost("footTrack_" + str(i), footTrack, 1e7)
                 costModel.addCost('impulseVel_' + str(i.frame), impulseFootVelCost, 1e6)
-        stateWeights = np.array([0] * 3 + [500.] * 3 + [0.01] * (self.rmodel.nv - 6) + [10] * self.rmodel.nv)
+        stateWeights = np.array([0.] * 3 + [500.] * 3 + [0.01] * (self.rmodel.nv - 6) + [10.] * self.rmodel.nv)
         stateReg = crocoddyl.CostModelState(self.state,
                                             crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeights**2).T),
                                             self.rmodel.defaultState, self.actuation.nu)
@@ -482,7 +482,7 @@ class SimpleQuadrupedalGaitProblem:
                 xref = crocoddyl.FrameTranslation(i.frame, i.oMf.translation)
                 footTrack = crocoddyl.CostModelFrameTranslation(self.state, xref, 0)
                 costModel.addCost("footTrack_" + str(i), footTrack, 1e7)
-        stateWeights = np.array([1.] * 6 + [10.0] * (self.rmodel.nv - 6) + [10] * self.rmodel.nv)
+        stateWeights = np.array([1.] * 6 + [10.] * (self.rmodel.nv - 6) + [10.] * self.rmodel.nv)
         stateReg = crocoddyl.CostModelState(self.state,
                                             crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeights**2).T),
                                             self.rmodel.defaultState, 0)
