@@ -72,7 +72,10 @@ void exposeSolverFDDP() {
            "Run the forward pass or rollout\n\n"
            "It rollouts the action model give the computed policy (feedfoward terns and feedback\n"
            "gains) by the backwardPass. We can define different step lengths\n"
-           ":param stepLength: applied step length (<= 1. and >= 0.)");
+           ":param stepLength: applied step length (<= 1. and >= 0.)")
+      .add_property("th_acceptNegStep", bp::make_function(&SolverFDDP::get_th_acceptnegstep),
+                    bp::make_function(&SolverFDDP::set_th_acceptnegstep),
+                    "threshold for step acceptance in ascent direction");
 }
 
 }  // namespace python

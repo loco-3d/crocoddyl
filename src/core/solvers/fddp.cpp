@@ -10,7 +10,7 @@
 
 namespace crocoddyl {
 
-SolverFDDP::SolverFDDP(ShootingProblem& problem) : SolverDDP(problem), dg_(0), dq_(0), dv_(0), th_acceptNegStep_(2) {}
+SolverFDDP::SolverFDDP(ShootingProblem& problem) : SolverDDP(problem), dg_(0), dq_(0), dv_(0), th_acceptnegstep_(2) {}
 
 SolverFDDP::~SolverFDDP() {}
 
@@ -67,7 +67,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
           break;
         }
       } else {  // reducing the gaps by allowing a small increment in the cost value
-        if (d_[0] < th_grad_ || dV_ < th_acceptNegStep_ * dVexp_) {
+        if (d_[0] < th_grad_ || dV_ < th_acceptnegstep_ * dVexp_) {
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
           cost_ = cost_try_;
@@ -207,5 +207,9 @@ void SolverFDDP::forwardPass(const double& steplength) {
     throw "forward_error";
   }
 }
+
+double SolverFDDP::get_th_acceptnegstep() const { return th_acceptnegstep_; }
+
+void SolverFDDP::set_th_acceptnegstep(double th_acceptnegstep) { th_acceptnegstep_ = th_acceptnegstep; }
 
 }  // namespace crocoddyl

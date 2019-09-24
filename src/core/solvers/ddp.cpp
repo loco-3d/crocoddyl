@@ -335,6 +335,18 @@ void SolverDDP::allocateData() {
   fTVxx_p_ = Eigen::VectorXd::Zero(ndx);
 }
 
+const double& SolverDDP::get_regfactor() const { return regfactor_; }
+
+const double& SolverDDP::get_regmin() const { return regmin_; }
+
+const double& SolverDDP::get_regmax() const { return regmax_; }
+
+const std::vector<double>& SolverDDP::get_alphas() const { return alphas_; }
+
+const double& SolverDDP::get_th_step() const { return th_step_; }
+
+const double& SolverDDP::get_th_grad() const { return th_grad_; }
+
 const std::vector<Eigen::MatrixXd>& SolverDDP::get_Vxx() const { return Vxx_; }
 
 const std::vector<Eigen::VectorXd>& SolverDDP::get_Vx() const { return Vx_; }
@@ -354,5 +366,17 @@ const std::vector<Eigen::MatrixXd>& SolverDDP::get_K() const { return K_; }
 const std::vector<Eigen::VectorXd>& SolverDDP::get_k() const { return k_; }
 
 const std::vector<Eigen::VectorXd>& SolverDDP::get_gaps() const { return gaps_; }
+
+void SolverDDP::set_regfactor(double regfactor) { regfactor_ = regfactor; }
+
+void SolverDDP::set_regmin(double regmin) { regmin_ = regmin; }
+
+void SolverDDP::set_regmax(double regmax) { regmax_ = regmax; }
+
+void SolverDDP::set_alphas(const std::vector<double>& alphas) { alphas_ = alphas; }
+
+void SolverDDP::set_th_step(double th_step) { th_step_ = th_step; }
+
+void SolverDDP::set_th_grad(double th_grad) { th_grad_ = th_grad; }
 
 }  // namespace crocoddyl

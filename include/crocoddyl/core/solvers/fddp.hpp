@@ -31,13 +31,16 @@ class SolverFDDP : public SolverDDP {
   double calc();
   void forwardPass(const double& stepLength);
 
+  double get_th_acceptnegstep() const;
+  void set_th_acceptnegstep(double th_acceptnegstep);
+
  protected:
   double dg_;
   double dq_;
   double dv_;
 
  private:
-  double th_acceptNegStep_;
+  double th_acceptnegstep_;
 };
 
 }  // namespace crocoddyl
