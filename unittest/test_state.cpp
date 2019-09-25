@@ -452,10 +452,10 @@ void register_state_multibody_unit_tests(const std::string& urdf_file = "", bool
 bool init_function() {
   // Here we test the state_vector
   register_state_vector_unit_tests();
-  // register_state_multibody_unit_tests(TALOS_ARM_URDF, false);
-  // register_state_multibody_unit_tests(HYQ_URDF, true);
-  // register_state_multibody_unit_tests(TALOS_URDF);
-  // register_state_multibody_unit_tests();  // random humanoid
+  register_state_multibody_unit_tests(TALOS_ARM_URDF, false);
+  register_state_multibody_unit_tests(HYQ_URDF, true);
+  register_state_multibody_unit_tests(TALOS_URDF);
+  register_state_multibody_unit_tests();  // random humanoid
   return true;
 }
 
