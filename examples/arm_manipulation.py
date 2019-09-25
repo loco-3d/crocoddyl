@@ -62,7 +62,7 @@ problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 ddp = crocoddyl.SolverDDP(problem)
 cameraTF = [2., 2.68, 0.54, 0.2, 0.62, 0.72, 0.22]
 if WITHDISPLAY:
-    ddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackSolverDisplay(talos_arm, 4, 4, cameraTF)])
+    ddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(talos_arm, 4, 4, cameraTF)])
 else:
     ddp.setCallbacks([crocoddyl.CallbackVerbose()])
 

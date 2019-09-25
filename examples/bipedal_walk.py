@@ -48,7 +48,7 @@ for i, phase in enumerate(GAITPHASES):
     # Added the callback functions
     print('*** SOLVE ' + key + ' ***')
     if WITHDISPLAY:
-        ddp[i].setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackSolverDisplay(talos_legs, 4, 4, cameraTF)])
+        ddp[i].setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(talos_legs, 4, 4, cameraTF)])
     else:
         ddp[i].setCallbacks([crocoddyl.CallbackVerbose()])
 

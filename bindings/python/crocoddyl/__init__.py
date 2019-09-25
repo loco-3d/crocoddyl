@@ -38,7 +38,7 @@ def displayTrajectory(robot, xs, dt=0.1, rate=-1, cameraTF=None):
             time.sleep(dt)
 
 
-class CallbackSolverDisplay(libcrocoddyl_pywrap.CallbackAbstract):
+class CallbackDisplay(libcrocoddyl_pywrap.CallbackAbstract):
     def __init__(self, robotwrapper, rate=-1, freq=1, cameraTF=None):
         libcrocoddyl_pywrap.CallbackAbstract.__init__(self)
         self.robotwrapper = robotwrapper
@@ -53,7 +53,7 @@ class CallbackSolverDisplay(libcrocoddyl_pywrap.CallbackAbstract):
         displayTrajectory(self.robotwrapper, solver.xs, dt, self.rate, self.cameraTF)
 
 
-class CallbackSolverLogger(libcrocoddyl_pywrap.CallbackAbstract):
+class CallbackLogger(libcrocoddyl_pywrap.CallbackAbstract):
     def __init__(self):
         libcrocoddyl_pywrap.CallbackAbstract.__init__(self)
         self.steps = []
