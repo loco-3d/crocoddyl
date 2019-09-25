@@ -25,6 +25,7 @@ class SolverFDDP : public SolverDDP {
   bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
              const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, unsigned int const& maxiter = 100,
              const bool& is_feasible = false, const double& regInit = 1e-9);
+  void computeDirection(const bool& recalc = true);
   double tryStep(const double& steplength = 1);
   const Eigen::Vector2d& expectedImprovement();
   void updateExpectedImprovement();

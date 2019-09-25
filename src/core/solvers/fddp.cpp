@@ -101,6 +101,13 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
   return false;
 }
 
+void SolverFDDP::computeDirection(const bool& recalc) {
+  if (recalc) {
+    calc();
+  }
+  backwardPass();
+}
+
 double SolverFDDP::tryStep(const double& steplength) {
   forwardPass(steplength);
   return cost_ - cost_try_;
