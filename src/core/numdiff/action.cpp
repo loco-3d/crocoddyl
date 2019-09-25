@@ -84,6 +84,13 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
     data->Lxu = data_nd->Rx.transpose() * data_nd->Ru;
     data->Luu = data_nd->Ru.transpose() * data_nd->Ru;
   }
+  else
+  {
+    data->Lxx.fill(0.0);
+    data->Lxu.fill(0.0);
+    data->Luu.fill(0.0);
+  }
+  
 }
 
 ActionModelAbstract& ActionModelNumDiff::get_model() const { return model_; }

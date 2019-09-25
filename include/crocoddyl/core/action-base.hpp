@@ -41,10 +41,10 @@ class ActionModelAbstract {
   StateAbstract& get_state() const;
 
  protected:
-  unsigned int nu_;
-  unsigned int nr_;
-  StateAbstract& state_;
-  Eigen::VectorXd unone_;
+  unsigned int nu_; //!< Control dimension
+  unsigned int nr_; //!< Dimension of the cost residual
+  StateAbstract& state_; //!< Model of the state
+  Eigen::VectorXd unone_; //!< Neutral state
 
 #ifdef PYTHON_BINDINGS
 
@@ -90,6 +90,7 @@ struct ActionDataAbstract {
   template <typename Model>
   explicit ActionDataAbstract(Model* const model)
       : cost(0.),
+        costResidual(model->get_nr()),
         xnext(model->get_state().get_nx()),
         r(model->get_nr()),
         Fx(model->get_state().get_ndx(), model->get_state().get_ndx()),
@@ -122,6 +123,7 @@ struct ActionDataAbstract {
   const Eigen::MatrixXd& get_Fu() const { return Fu; }
 
   double cost;
+  Eigen::VectorXd costResidual;
   Eigen::VectorXd xnext;
   Eigen::VectorXd r;
   Eigen::MatrixXd Fx;

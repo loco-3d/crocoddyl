@@ -22,6 +22,14 @@ class ActionModelNumDiff : public ActionModelAbstract {
 
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u);
+  /**
+   * @brief calcDiff computes the 
+   * 
+   * @param data 
+   * @param x 
+   * @param u 
+   * @param recalc 
+   */
   void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
   boost::shared_ptr<ActionDataAbstract> createData();
@@ -83,7 +91,7 @@ struct ActionDataNumDiff : public ActionDataAbstract {
     }
   }
 
-  Eigen::MatrixXd Rx;
+  Eigen::MatrixXd Rx; //!< Cost Jacobian: 
   Eigen::MatrixXd Ru;
   Eigen::VectorXd dx;
   Eigen::VectorXd du;
