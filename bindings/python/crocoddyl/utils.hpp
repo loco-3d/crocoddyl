@@ -25,12 +25,13 @@ namespace bp = boost::python;
 template <class T, bool NoProxy = true>
 struct vector_to_list {
   static PyObject* convert(const std::vector<T>& vec) {
+    typedef typename std::vector<T>::const_iterator const_iter;
     bp::list* l = new boost::python::list();
-    for (size_t i = 0; i < vec.size(); i++) {
+    for (const_iter it = vec.begin(); it != vec.end(); ++it) {
       if (NoProxy) {
-        l->append(boost::ref(vec[i]));
+        l->append(boost::ref(*it));
       } else {
-        l->append(vec[i]);
+        l->append(*it);
       }
     }
     return l->ptr();
