@@ -494,7 +494,7 @@ class SimpleQuadrupedalGaitProblem:
         return model
 
 
-def plotSolution(rmodel, xs, us):
+def plotSolution(rmodel, xs, us, figIndex=1, show=True):
     import matplotlib.pyplot as plt
     # Getting the state and control trajectories
     nx, nq, nu = xs[0].shape[0], rmodel.nq, us[0].shape[0]
@@ -506,7 +506,7 @@ def plotSolution(rmodel, xs, us):
         U[i] = [np.asscalar(u[i]) if u.shape[0] != 0 else 0 for u in us]
 
     # Plotting the joint positions, velocities and torques
-    plt.figure(1)
+    plt.figure(figIndex)
     legJointNames = ['HAA', 'HFE', 'KFE']
     # LF foot
     plt.subplot(4, 3, 1)
@@ -569,9 +569,8 @@ def plotSolution(rmodel, xs, us):
     plt.ylabel('RH')
     plt.legend()
     plt.xlabel('knots')
-    plt.show()
 
-    plt.figure(2)
+    plt.figure(figIndex + 1)
     rdata = rmodel.createData()
     Cx = []
     Cy = []
@@ -585,4 +584,5 @@ def plotSolution(rmodel, xs, us):
     plt.xlabel('x [m]')
     plt.ylabel('y [m]')
     plt.grid(True)
-    plt.show()
+    if show:
+        plt.show()
