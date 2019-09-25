@@ -107,7 +107,6 @@ for i, phase in enumerate(GAITPHASES):
         ddp[i].setCallbacks([crocoddyl.CallbackVerbose()])
 
     # Solving the problem with the DDP solver
-    ddp[i].th_stop = 1e-9
     xs = [hyq.model.defaultState] * len(ddp[i].models())
     us = [m.quasicStatic(d, hyq.model.defaultState) for m, d in list(zip(ddp[i].models(), ddp[i].datas()))[:-1]]
     ddp[i].solve(xs, us, 100, False, 0.1)
