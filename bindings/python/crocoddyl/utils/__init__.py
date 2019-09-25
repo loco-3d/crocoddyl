@@ -834,3 +834,247 @@ class DDPDerived(crocoddyl.SolverAbstract):
         raiseIfNan(ctry, ArithmeticError('forward error'))
         self.cost_try = ctry
         return xtry, utry, ctry
+
+
+class FDDPDerived(crocoddyl.SolverAbstract):
+    def __init__(self, shootingProblem):
+        crocoddyl.SolverAbstract.__init__(self, shootingProblem)
+        self.allocateData()  # TODO remove it?
+
+        self.isFeasible = False
+        self.wasFeasible = False
+        self.alphas = [2**(-n) for n in range(10)]
+        self.th_grad = 1e-12
+
+        self.x_reg = 0
+        self.u_reg = 0
+        self.regFactor = 10
+        self.regMax = 1e9
+        self.regMin = 1e-9
+        self.th_step = .5
+        self.th_acceptNegStep = 2.
+
+        # Quadratic model of the expected improvement
+        self.dg = 0.
+        self.dq = 0.
+        self.dv = 0.
+
+    def solve(self, init_xs=[], init_us=[], maxiter=100, isFeasible=False, regInit=None):
+        self.setCandidate(init_xs, init_us, isFeasible)
+        self.x_reg = regInit if regInit is not None else self.regMin
+        self.u_reg = regInit if regInit is not None else self.regMin
+        self.wasFeasible = False
+        for i in range(maxiter):
+            recalc = True
+            while True:
+                try:
+                    self.computeDirection(recalc=recalc)
+                except ArithmeticError:
+                    recalc = False
+                    self.increaseRegularization()
+                    if self.x_reg == self.regMax:
+                        return self.xs, self.us, False
+                    else:
+                        continue
+                break
+            self.updateExpectedImprovement()
+
+            for a in self.alphas:
+                try:
+                    self.dV = self.tryStep(a)
+                except ArithmeticError:
+                    continue
+                d1, d2 = self.expectedImprovement()
+
+                self.dV_exp = a * (d1 + .5 * d2 * a)
+                if self.dV_exp > 0.:  # descend direction
+                    if d1 < self.th_grad or self.dV > self.th_acceptStep * self.dV_exp:
+                        self.wasFeasible = self.isFeasible
+                        self.setCandidate(self.xs_try, self.us_try, (self.wasFeasible or a == 1))
+                        self.cost = self.cost_try
+                        break
+                else:  # reducing the gaps by allowing a small increment in the cost value
+                    if d1 < self.th_grad or self.dV < self.th_acceptNegStep * self.dV_exp:
+                        self.wasFeasible = self.isFeasible
+                        self.setCandidate(self.xs_try, self.us_try, (self.wasFeasible or a == 1))
+                        self.cost = self.cost_try
+                        break
+            if a > self.th_step:
+                self.decreaseRegularization()
+            if a == self.alphas[-1]:
+                self.increaseRegularization()
+                if self.x_reg == self.regMax:
+                    return self.xs, self.us, False
+            self.stepLength = a
+            self.iter = i
+            self.stop = self.stoppingCriteria()
+            # TODO @Carlos bind the callbacks
+            # if self.callback is not None:
+            #     [c(self) for c in self.callback]
+
+            if self.wasFeasible and self.stop < self.th_stop:
+                return self.xs, self.us, True
+        return self.xs, self.us, False
+
+    def computeDirection(self, recalc=True):
+        if recalc:
+            self.calc()
+        self.backwardPass()
+        return [np.nan] * (self.problem.T + 1), self.k, self.Vx
+
+    def tryStep(self, stepLength=1):
+        self.forwardPass(stepLength)
+        return self.cost - self.cost_try
+
+    def updateExpectedImprovement(self):
+        self.dg = 0.
+        self.dq = 0.
+        if not self.isFeasible:
+            self.dg -= np.asscalar(self.Vx[-1].T * self.gaps[-1])
+            self.dq += np.asscalar(self.gaps[-1].T * self.Vxx[-1] * self.gaps[-1])
+        for t in range(self.problem.T):
+            self.dg += np.asscalar(self.Qu[t].T * self.k[t])
+            self.dq -= np.asscalar(self.k[t].T * self.Quu[t] * self.k[t])
+            if not self.isFeasible:
+                self.dg -= np.asscalar(self.Vx[t].T * self.gaps[t])
+                self.dq += np.asscalar(self.gaps[t].T * self.Vxx[t] * self.gaps[t])
+
+    def expectedImprovement(self):
+        self.dv = 0.
+        if not self.isFeasible:
+            dx = self.problem.runningModels[-1].state.diff(self.xs_try[-1], self.xs[-1])
+            self.dv -= np.asscalar(self.gaps[-1].T * self.Vxx[-1] * dx)
+            for t in range(self.problem.T):
+                dx = self.problem.runningModels[t].state.diff(self.xs_try[t], self.xs[t])
+                self.dv -= np.asscalar(self.gaps[t].T * self.Vxx[t] * dx)
+        d1 = self.dg + self.dv
+        d2 = self.dq - 2 * self.dv
+        return np.matrix([d1, d2]).T
+
+    def calc(self):
+        self.cost = self.problem.calcDiff(self.xs, self.us)
+        if not self.isFeasible:
+            self.gaps[0] = self.problem.runningModels[0].state.diff(self.xs[0], self.problem.x0)
+            for i, (m, d, x) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas, self.xs[1:])):
+                self.gaps[i + 1] = m.state.diff(x, d.xnext)
+        elif not self.wasFeasible:
+            self.gaps[:] = [np.zeros_like(f) for f in self.gaps]
+        return self.cost
+
+    def backwardPass(self):
+        self.Vx[-1][:] = self.problem.terminalData.Lx
+        self.Vxx[-1][:, :] = self.problem.terminalData.Lxx
+
+        if self.x_reg != 0:
+            ndx = self.problem.terminalModel.state.ndx
+            self.Vxx[-1][range(ndx), range(ndx)] += self.x_reg
+
+        # Compute and store the Vx gradient at end of the interval (rollout state)
+        if not self.isFeasible:
+            self.Vx[-1] += np.dot(self.Vxx[-1], self.gaps[-1])
+
+        for t, (model, data) in rev_enumerate(zip(self.problem.runningModels, self.problem.runningDatas)):
+            self.Qxx[t][:, :] = data.Lxx + data.Fx.T * self.Vxx[t + 1] * data.Fx
+            self.Qxu[t][:, :] = data.Lxu + data.Fx.T * self.Vxx[t + 1] * data.Fu
+            self.Quu[t][:, :] = data.Luu + data.Fu.T * self.Vxx[t + 1] * data.Fu
+            self.Qx[t][:] = data.Lx + data.Fx.T * self.Vx[t + 1]
+            self.Qu[t][:] = data.Lu + data.Fu.T * self.Vx[t + 1]
+
+            if self.u_reg != 0:
+                self.Quu[t][range(model.nu), range(model.nu)] += self.u_reg
+
+            self.computeGains(t)
+
+            if self.u_reg == 0:
+                self.Vx[t][:] = self.Qx[t] - self.K[t].T * self.Qu[t]
+            else:
+                self.Vx[t][:] = self.Qx[t] - 2 * self.K[t].T * self.Qu[t] + self.K[t].T * self.Quu[t] * self.k[t]
+            self.Vxx[t][:, :] = self.Qxx[t] - self.Qxu[t] * self.K[t]
+            self.Vxx[t][:, :] = 0.5 * (self.Vxx[t][:, :] + self.Vxx[t][:, :].T)  # ensure symmetric
+
+            if self.x_reg != 0:
+                self.Vxx[t][range(model.state.ndx), range(model.state.ndx)] += self.x_reg
+
+            # Compute and store the Vx gradient at end of the interval (rollout state)
+            if not self.isFeasible:
+                self.Vx[t] += np.dot(self.Vxx[t], self.gaps[t])
+
+            raiseIfNan(self.Vxx[t], ArithmeticError('backward error'))
+            raiseIfNan(self.Vx[t], ArithmeticError('backward error'))
+
+    def computeGains(self, t):
+        try:
+            if self.Quu[t].shape[0] > 0:
+                Lb = scl.cho_factor(self.Quu[t])
+                self.K[t][:, :] = scl.cho_solve(Lb, self.Qux[t])
+                self.k[t][:] = scl.cho_solve(Lb, self.Qu[t])
+            else:
+                pass
+        except scl.LinAlgError:
+            raise ArithmeticError('backward error')
+
+    def forwardPass(self, stepLength, warning='ignore'):
+        xs, us = self.xs, self.us
+        xtry, utry = self.xs_try, self.us_try
+        ctry = 0
+        xnext = self.problem.x0
+        for t, (m, d) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas)):
+            if self.isFeasible or stepLength == 1:
+                xtry[t] = xnext.copy()
+            else:
+                xtry[t] = m.state.integrate(xnext, self.gaps[t] * (stepLength - 1))
+            utry[t] = us[t] - self.k[t] * stepLength - self.K[t] * m.state.diff(xs[t], xtry[t])
+            with np.warnings.catch_warnings():
+                np.warnings.simplefilter(warning)
+                m.calc(d, xtry[t], utry[t])
+                xnext, cost = d.xnext, d.cost
+            ctry += cost
+            raiseIfNan([ctry, cost], ArithmeticError('forward error'))
+            raiseIfNan(xnext, ArithmeticError('forward error'))
+        if self.isFeasible or stepLength == 1:
+            xtry[-1] = xnext.copy()
+        else:
+            xtry[-1] = self.problem.terminalModel.state.integrate(xnext, self.gaps[-1] * (stepLength - 1))
+        with np.warnings.catch_warnings():
+            np.warnings.simplefilter(warning)
+            self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])
+            ctry += self.problem.terminalData.cost
+        raiseIfNan(ctry, ArithmeticError('forward error'))
+        self.cost_try = ctry
+        return xtry, utry, ctry
+
+    def stoppingCriteria(self):
+        return sum([np.asscalar(q.T * q) for q in self.Qu])
+
+    def increaseRegularization(self):
+        self.x_reg *= self.regFactor
+        if self.x_reg > self.regMax:
+            self.x_reg = self.regMax
+        self.u_reg = self.x_reg
+
+    def decreaseRegularization(self):
+        self.x_reg /= self.regFactor
+        if self.x_reg < self.regMin:
+            self.x_reg = self.regMin
+        self.u_reg = self.x_reg
+
+    def allocateData(self):
+        self.Vxx = [a2m(np.zeros([m.state.ndx, m.state.ndx])) for m in self.models()]
+        self.Vx = [a2m(np.zeros([m.state.ndx])) for m in self.models()]
+
+        self.Q = [a2m(np.zeros([m.state.ndx + m.nu, m.state.ndx + m.nu])) for m in self.problem.runningModels]
+        self.q = [a2m(np.zeros([m.state.ndx + m.nu])) for m in self.problem.runningModels]
+        self.Qxx = [Q[:m.state.ndx, :m.state.ndx] for m, Q in zip(self.problem.runningModels, self.Q)]
+        self.Qxu = [Q[:m.state.ndx, m.state.ndx:] for m, Q in zip(self.problem.runningModels, self.Q)]
+        self.Qux = [Qxu.T for m, Qxu in zip(self.problem.runningModels, self.Qxu)]
+        self.Quu = [Q[m.state.ndx:, m.state.ndx:] for m, Q in zip(self.problem.runningModels, self.Q)]
+        self.Qx = [q[:m.state.ndx] for m, q in zip(self.problem.runningModels, self.q)]
+        self.Qu = [q[m.state.ndx:] for m, q in zip(self.problem.runningModels, self.q)]
+
+        self.K = [np.matrix(np.zeros([m.nu, m.state.ndx])) for m in self.problem.runningModels]
+        self.k = [a2m(np.zeros([m.nu])) for m in self.problem.runningModels]
+
+        self.xs_try = [self.problem.x0] + [np.nan * self.problem.x0] * self.problem.T
+        self.us_try = [np.nan] * self.problem.T
+        self.gaps = [a2m(np.zeros(self.problem.runningModels[0].state.ndx))
+                     ] + [a2m(np.zeros(m.state.ndx)) for m in self.problem.runningModels]
