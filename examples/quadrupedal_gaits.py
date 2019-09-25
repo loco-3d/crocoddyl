@@ -102,11 +102,10 @@ for i, phase in enumerate(GAITPHASES):
     # Added the callback functions
     print('*** SOLVE ' + key + ' ***')
     if WITHDISPLAY and WITHPLOT:
-        ddp[i].setCallbacks([
-            crocoddyl.CallbackLogger(),
-            crocoddyl.CallbackVerbose(),
-            crocoddyl.CallbackDisplay(talos_arm, 4, 4, cameraTF)
-        ])
+        ddp[i].setCallbacks(
+            [crocoddyl.CallbackLogger(),
+             crocoddyl.CallbackVerbose(),
+             crocoddyl.CallbackDisplay(hyq, 4, 4, cameraTF)])
     elif WITHDISPLAY:
         ddp[i].setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackVerbose()])
     elif WITHPLOT:
