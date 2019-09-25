@@ -774,17 +774,16 @@ class DDPDerived(crocoddyl.SolverAbstract):
             ndx = self.problem.terminalModel.state.ndx
             self.Vxx[-1][range(ndx), range(ndx)] += self.x_reg
 
+        # Compute and store the Vx gradient at end of the interval (rollout state)
+        if not self.isFeasible:
+            self.Vx[-1] += np.dot(self.Vxx[-1], self.gaps[-1])
+
         for t, (model, data) in rev_enumerate(zip(self.problem.runningModels, self.problem.runningDatas)):
             self.Qxx[t][:, :] = data.Lxx + data.Fx.T * self.Vxx[t + 1] * data.Fx
             self.Qxu[t][:, :] = data.Lxu + data.Fx.T * self.Vxx[t + 1] * data.Fu
             self.Quu[t][:, :] = data.Luu + data.Fu.T * self.Vxx[t + 1] * data.Fu
             self.Qx[t][:] = data.Lx + data.Fx.T * self.Vx[t + 1]
             self.Qu[t][:] = data.Lu + data.Fu.T * self.Vx[t + 1]
-            if not self.isFeasible:
-                # In case the xt+1 are not f(xt,ut) i.e warm start not obtained from roll-out.
-                relinearization = self.Vxx[t + 1] * self.gaps[t + 1]
-                self.Qx[t][:] += data.Fx.T * relinearization
-                self.Qu[t][:] += data.Fu.T * relinearization
 
             if self.u_reg != 0:
                 self.Quu[t][range(model.nu), range(model.nu)] += self.u_reg
@@ -800,6 +799,11 @@ class DDPDerived(crocoddyl.SolverAbstract):
 
             if self.x_reg != 0:
                 self.Vxx[t][range(model.state.ndx), range(model.state.ndx)] += self.x_reg
+
+            # Compute and store the Vx gradient at end of the interval (rollout state)
+            if not self.isFeasible:
+                self.Vx[t] += np.dot(self.Vxx[t], self.gaps[t])
+
             raiseIfNan(self.Vxx[t], ArithmeticError('backward error'))
             raiseIfNan(self.Vx[t], ArithmeticError('backward error'))
 
