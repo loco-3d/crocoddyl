@@ -61,8 +61,19 @@ problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 # Creating the DDP solver for this OC problem, defining a logger
 ddp = crocoddyl.SolverDDP(problem)
 cameraTF = [2., 2.68, 0.54, 0.2, 0.62, 0.72, 0.22]
-if WITHDISPLAY:
-    ddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(talos_arm, 4, 4, cameraTF)])
+if WITHDISPLAY and WITHPLOT:
+    ddp.setCallbacks([
+        crocoddyl.CallbackLogger(),
+        crocoddyl.CallbackVerbose(),
+        crocoddyl.CallbackDisplay(talos_arm, 4, 4, cameraTF)
+    ])
+elif WITHDISPLAY:
+    ddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackVerbose()])
+elif WITHPLOT:
+    ddp.setCallbacks([
+        crocoddyl.CallbackLogger(),
+        crocoddyl.CallbackVerbose(),
+    ])
 else:
     ddp.setCallbacks([crocoddyl.CallbackVerbose()])
 
@@ -70,11 +81,16 @@ else:
 ddp.solve()
 
 # Plotting the solution and the DDP convergence
-# if WITHPLOT:
-#     log = ddp.callback[1]
-#     plotOCSolution(log.xs, log.us, figIndex=1, show=False)
-#     plotDDPConvergence(log.costs, log.control_regs, log.state_regs, log.gm_stops, log.th_stops, log.steps,
-#                        figIndex=2)
+if WITHPLOT:
+    log = ddp.getCallbacks()[0]
+    crocoddyl.plotOCSolution(log.xs, log.us, figIndex=1, show=False)
+    crocoddyl.plotConvergence(log.costs,
+                              log.control_regs,
+                              log.state_regs,
+                              log.gm_stops,
+                              log.th_stops,
+                              log.steps,
+                              figIndex=2)
 
 # Visualizing the solution in gepetto-viewer
 if WITHDISPLAY:
