@@ -110,11 +110,12 @@ def plotOCSolution(xs, us, figIndex=1, show=True):
         plt.show()
 
 
-def plotConvergence(costs, muLM, muV, gamma, theta, alpha, figIndex=1, show=True):
+def plotConvergence(costs, muLM, muV, gamma, theta, alpha, figIndex=1, show=True, figTitle=""):
     import matplotlib.pyplot as plt
     import numpy as np
 
     plt.figure(figIndex, figsize=(6.4, 8))
+    plt.suptitle(figTitle, fontsize=14)
     # Plotting the total cost sequence
     plt.subplot(511)
     plt.ylabel('cost')
