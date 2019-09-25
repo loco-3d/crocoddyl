@@ -26,6 +26,13 @@ ddp.solve()
 
 # Plotting the solution, solver convergence and unicycle motion
 log = ddp.getCallbacks()[0]
-crocoddyl.plotOCSolution(log.xs, log.us)
-crocoddyl.plotConvergence(log.costs, log.control_regs, log.state_regs, log.gm_stops, log.th_stops, log.steps)
-plotUnicycleSolution(log.xs)
+crocoddyl.plotOCSolution(log.xs, log.us, figIndex=1, show=False)
+crocoddyl.plotConvergence(log.costs,
+                          log.control_regs,
+                          log.state_regs,
+                          log.gm_stops,
+                          log.th_stops,
+                          log.steps,
+                          figIndex=2,
+                          show=False)
+plotUnicycleSolution(log.xs, figIndex=3, show=True)
