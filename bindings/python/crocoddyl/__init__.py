@@ -110,7 +110,7 @@ def plotOCSolution(xs, us, figIndex=1, show=True):
         plt.show()
 
 
-def plotSolverConvergence(costs, muLM, muV, gamma, theta, alpha, figIndex=1, show=True):
+def plotConvergence(costs, muLM, muV, gamma, theta, alpha, figIndex=1, show=True):
     import matplotlib.pyplot as plt
     import numpy as np
 
