@@ -640,7 +640,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
         crocoddyl.SolverAbstract.__init__(self, shootingProblem)
         self.allocateData()  # TODO remove it?
 
-        self.isFeasible = False  # Change it to true if you know that datas[t].xnext = xs[t+1]
+        self.isFeasible = False
         self.alphas = [2**(-n) for n in range(10)]
         self.th_grad = 1e-12
 
@@ -654,8 +654,6 @@ class DDPDerived(crocoddyl.SolverAbstract):
     def calc(self):
         self.cost = self.problem.calcDiff(self.xs, self.us)
         if not self.isFeasible:
-            # Gap store the state defect from the guess to feasible (rollout) trajectory, i.e.
-            #   gap = x_rollout [-] x_guess = DIFF(x_guess, x_rollout)
             self.gaps[0] = self.problem.runningModels[0].state.diff(self.xs[0], self.problem.x0)
             for i, (m, d, x) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas, self.xs[1:])):
                 self.gaps[i + 1] = m.state.diff(x, d.xnext)
@@ -728,8 +726,6 @@ class DDPDerived(crocoddyl.SolverAbstract):
 
             if self.wasFeasible and self.stop < self.th_stop:
                 return self.xs, self.us, True
-
-        # Warning: no convergence in max iterations
         return self.xs, self.us, False
 
     def increaseRegularization(self):
@@ -744,7 +740,6 @@ class DDPDerived(crocoddyl.SolverAbstract):
             self.x_reg = self.regMin
         self.u_reg = self.x_reg
 
-    # DDP Specific
     def allocateData(self):
         self.Vxx = [a2m(np.zeros([m.state.ndx, m.state.ndx])) for m in self.models()]
         self.Vx = [a2m(np.zeros([m.state.ndx])) for m in self.models()]
@@ -819,8 +814,6 @@ class DDPDerived(crocoddyl.SolverAbstract):
             raise ArithmeticError('backward error')
 
     def forwardPass(self, stepLength, warning='ignore'):
-        # Argument warning is also introduce for debug: by default, it masks the numpy warnings
-        #    that can be reactivated during debug.
         xs, us = self.xs, self.us
         xtry, utry = self.xs_try, self.us_try
         ctry = 0
