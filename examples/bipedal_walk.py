@@ -1,3 +1,4 @@
+import os
 import sys
 
 import numpy as np
@@ -7,8 +8,8 @@ import example_robot_data
 import pinocchio
 from crocoddyl.utils.biped import SimpleBipedGaitProblem, plotSolution
 
-WITHDISPLAY = 'display' in sys.argv
-WITHPLOT = 'plot' in sys.argv
+WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
+WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
 # Creating the lower-body part of Talos
 talos_legs = example_robot_data.loadTalosLegs()
@@ -46,8 +47,19 @@ for i, phase in enumerate(GAITPHASES):
 
     # Added the callback functions
     print('*** SOLVE ' + key + ' ***')
-    if WITHDISPLAY:
-        ddp[i].setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackSolverDisplay(talos_legs, 4, 4, cameraTF)])
+    if WITHDISPLAY and WITHPLOT:
+        ddp[i].setCallbacks([
+            crocoddyl.CallbackLogger(),
+            crocoddyl.CallbackVerbose(),
+            crocoddyl.CallbackDisplay(talos_legs, 4, 4, cameraTF)
+        ])
+    elif WITHDISPLAY:
+        ddp[i].setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackVerbose()])
+    elif WITHPLOT:
+        ddp[i].setCallbacks([
+            crocoddyl.CallbackLogger(),
+            crocoddyl.CallbackVerbose(),
+        ])
     else:
         ddp[i].setCallbacks([crocoddyl.CallbackVerbose()])
 
@@ -70,6 +82,20 @@ if WITHPLOT:
     xs = []
     us = []
     for i, phase in enumerate(GAITPHASES):
-        xs.extend(ddp[i].xs)
+        xs.extend(ddp[i].xs[:-1])
         us.extend(ddp[i].us)
-    plotSolution(talos_legs.model, xs, us)
+    log = ddp[0].getCallbacks()[0]
+    plotSolution(talos_legs.model, xs, us, figIndex=1, show=False)
+
+    for i, phase in enumerate(GAITPHASES):
+        title = phase.keys()[0] + " (phase " + str(i) + ")"
+        log = ddp[i].getCallbacks()[0]
+        crocoddyl.plotConvergence(log.costs,
+                                  log.control_regs,
+                                  log.state_regs,
+                                  log.gm_stops,
+                                  log.th_stops,
+                                  log.steps,
+                                  figTitle=title,
+                                  figIndex=i + 3,
+                                  show=True if i == len(GAITPHASES) - 1 else False)

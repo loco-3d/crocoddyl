@@ -36,6 +36,7 @@ class SolverAbstract {
                     const std::vector<Eigen::VectorXd>& us_warm = DEFAULT_VECTOR, const bool& is_feasible = false);
 
   void setCallbacks(const std::vector<CallbackAbstract*>& callbacks);
+  const std::vector<CallbackAbstract*>& getCallbacks() const;
 
   const ShootingProblem& get_problem() const;
   const std::vector<ActionModelAbstract*>& get_models() const;

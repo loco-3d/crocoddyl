@@ -163,27 +163,23 @@ void SolverDDP::backwardPass() {
     Vxx_.back().diagonal() += x_reg_;
   }
 
+  if (!is_feasible_) {
+    Vx_.back().noalias() += Vxx_.back() * gaps_.back();
+  }
+
   for (int t = static_cast<int>(problem_.get_T()) - 1; t >= 0; --t) {
     ActionModelAbstract* m = problem_.running_models_[t];
     boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
     const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
     const Eigen::VectorXd& Vx_p = Vx_[t + 1];
-    const Eigen::VectorXd& gap_p = gaps_[t + 1];
 
     FxTVxx_p_.noalias() = d->get_Fx().transpose() * Vxx_p;
     FuTVxx_p_[t].noalias() = d->get_Fu().transpose() * Vxx_p;
     Qxx_[t].noalias() = d->get_Lxx() + FxTVxx_p_ * d->get_Fx();
     Qxu_[t].noalias() = d->get_Lxu() + FxTVxx_p_ * d->get_Fu();
     Quu_[t].noalias() = d->get_Luu() + FuTVxx_p_[t] * d->get_Fu();
-    if (!is_feasible_) {
-      // In case the xt+1 are not f(xt,ut) i.e warm start not obtained from roll-out.
-      fTVxx_p_.noalias() = Vxx_p * gap_p;
-      Qx_[t].noalias() = d->get_Lx() + d->get_Fx().transpose() * Vx_p + d->get_Fx().transpose() * fTVxx_p_;
-      Qu_[t].noalias() = d->get_Lu() + d->get_Fu().transpose() * Vx_p + d->get_Fu().transpose() * fTVxx_p_;
-    } else {
-      Qx_[t].noalias() = d->get_Lx() + d->get_Fx().transpose() * Vx_p;
-      Qu_[t].noalias() = d->get_Lu() + d->get_Fu().transpose() * Vx_p;
-    }
+    Qx_[t].noalias() = d->get_Lx() + d->get_Fx().transpose() * Vx_p;
+    Qu_[t].noalias() = d->get_Lu() + d->get_Fu().transpose() * Vx_p;
 
     if (!std::isnan(ureg_)) {
       unsigned int const& nu = m->get_nu();
@@ -203,6 +199,11 @@ void SolverDDP::backwardPass() {
 
     if (!std::isnan(xreg_)) {
       Vxx_[t].diagonal() += x_reg_;
+    }
+
+    // Compute and store the Vx gradient at end of the interval (rollout state)
+    if (!is_feasible_) {
+      Vx_[t].noalias() += Vxx_[t] * gaps_[t];
     }
 
     if (raiseIfNaN(Vx_[t].lpNorm<Eigen::Infinity>())) {
@@ -248,11 +249,13 @@ void SolverDDP::forwardPass(const double& steplength) {
 }
 
 void SolverDDP::computeGains(const unsigned int& t) {
-  Quu_llt_[t].compute(Quu_[t]);
-  K_[t] = Qxu_[t].transpose();
-  Quu_llt_[t].solveInPlace(K_[t]);
-  k_[t] = Qu_[t];
-  Quu_llt_[t].solveInPlace(k_[t]);
+  if (problem_.running_models_[t]->get_nu() > 0) {
+    Quu_llt_[t].compute(Quu_[t]);
+    K_[t] = Qxu_[t].transpose();
+    Quu_llt_[t].solveInPlace(K_[t]);
+    k_[t] = Qu_[t];
+    Quu_llt_[t].solveInPlace(k_[t]);
+  }
 }
 
 void SolverDDP::increaseRegularization() {
@@ -332,6 +335,18 @@ void SolverDDP::allocateData() {
   fTVxx_p_ = Eigen::VectorXd::Zero(ndx);
 }
 
+const double& SolverDDP::get_regfactor() const { return regfactor_; }
+
+const double& SolverDDP::get_regmin() const { return regmin_; }
+
+const double& SolverDDP::get_regmax() const { return regmax_; }
+
+const std::vector<double>& SolverDDP::get_alphas() const { return alphas_; }
+
+const double& SolverDDP::get_th_step() const { return th_step_; }
+
+const double& SolverDDP::get_th_grad() const { return th_grad_; }
+
 const std::vector<Eigen::MatrixXd>& SolverDDP::get_Vxx() const { return Vxx_; }
 
 const std::vector<Eigen::VectorXd>& SolverDDP::get_Vx() const { return Vx_; }
@@ -351,5 +366,17 @@ const std::vector<Eigen::MatrixXd>& SolverDDP::get_K() const { return K_; }
 const std::vector<Eigen::VectorXd>& SolverDDP::get_k() const { return k_; }
 
 const std::vector<Eigen::VectorXd>& SolverDDP::get_gaps() const { return gaps_; }
+
+void SolverDDP::set_regfactor(double regfactor) { regfactor_ = regfactor; }
+
+void SolverDDP::set_regmin(double regmin) { regmin_ = regmin; }
+
+void SolverDDP::set_regmax(double regmax) { regmax_ = regmax; }
+
+void SolverDDP::set_alphas(const std::vector<double>& alphas) { alphas_ = alphas; }
+
+void SolverDDP::set_th_step(double th_step) { th_step_ = th_step; }
+
+void SolverDDP::set_th_grad(double th_grad) { th_grad_ = th_grad; }
 
 }  // namespace crocoddyl

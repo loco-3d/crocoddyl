@@ -55,8 +55,8 @@ int main() {
     clock_gettime(CLOCK_MONOTONIC, &start);
     ddp.solve(xs, us, MAXITER);
     clock_gettime(CLOCK_MONOTONIC, &finish);
-    elapsed = (finish.tv_sec - start.tv_sec) * 1000000.0;
-    elapsed += (finish.tv_nsec - start.tv_nsec) / 1000.0;
+    elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
+    elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;
     duration[i] = elapsed / 1000.;
   }
 
@@ -70,8 +70,8 @@ int main() {
     clock_gettime(CLOCK_MONOTONIC, &start);
     problem.calc(xs, us);
     clock_gettime(CLOCK_MONOTONIC, &finish);
-    elapsed = (finish.tv_sec - start.tv_sec) * 1000000.0;
-    elapsed += (finish.tv_nsec - start.tv_nsec) / 1000.0;
+    elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
+    elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;
     duration[i] = elapsed / 1000.;
   }
 
@@ -86,8 +86,8 @@ int main() {
     clock_gettime(CLOCK_MONOTONIC, &start);
     problem.calcDiff(xs, us);
     clock_gettime(CLOCK_MONOTONIC, &finish);
-    elapsed = (finish.tv_sec - start.tv_sec) * 1000000.0;
-    elapsed += (finish.tv_nsec - start.tv_nsec) / 1000.0;
+    elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
+    elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;
     duration[i] = elapsed / 1000.;
   }
 

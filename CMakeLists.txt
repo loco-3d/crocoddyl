@@ -41,6 +41,7 @@ OPTION(ENABLE_VECTORIZATION "Enable vectorization and futhers processor-related 
 OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" ON)
 OPTION(BUILD_UNIT_TESTS "Build the unitary tests" ON)
 OPTION(BUILD_BENCHMARK "Build the benchmark" ON)
+OPTION(BUILD_EXAMPLES "Build the examples" ON)
 
 
 IF(ENABLE_VECTORIZATION)
@@ -52,7 +53,7 @@ SETUP_PROJECT()
 # Add the different required and optional dependencies
 ADD_REQUIRED_DEPENDENCY("eigen3 >= 3.0.5")
 ADD_REQUIRED_DEPENDENCY("eigenpy")
-ADD_REQUIRED_DEPENDENCY("pinocchio >= 2.1.0")
+ADD_REQUIRED_DEPENDENCY("pinocchio >= 2.1.7")
 ADD_OPTIONAL_DEPENDENCY("multicontact-api >= 1.1.0")
 ADD_OPTIONAL_DEPENDENCY("quadprog")
 ADD_OPTIONAL_DEPENDENCY("scipy")
@@ -118,6 +119,11 @@ ENDIF(BUILD_UNIT_TESTS)
 IF(BUILD_BENCHMARK)
   ADD_SUBDIRECTORY(benchmark)
 ENDIF(BUILD_BENCHMARK)
+
+# Build the examples
+IF(BUILD_EXAMPLES)
+  ADD_SUBDIRECTORY(examples)
+ENDIF(BUILD_EXAMPLES)
 
 
 SETUP_PROJECT_FINALIZE()

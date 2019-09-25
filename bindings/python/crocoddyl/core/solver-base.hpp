@@ -158,6 +158,10 @@ void exposeSolverAbstract() {
            "Each iteration, the solver calls these set of functions in order to\n"
            "allowed user the diagnostic of the solver's performance.\n"
            ":param callbacks: set of callback functions.")
+      .def("getCallbacks", &SolverAbstract_wrap::getCallbacks, bp::return_value_policy<bp::return_by_value>(),
+           bp::args(" self"),
+           "Return the list of callback functions using for diagnostic.\n\n"
+           ":return set of callback functions.")
       .add_property("problem", bp::make_function(&SolverAbstract_wrap::get_problem, bp::return_internal_reference<>()),
                     "shooting problem")
       .def("models", &SolverAbstract_wrap::get_models, bp::return_value_policy<bp::return_by_value>(), "models")

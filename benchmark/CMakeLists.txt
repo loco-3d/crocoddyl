@@ -11,16 +11,16 @@ FOREACH(BENCHMARK_NAME ${${PROJECT_NAME}_BENCHMARK})
 ENDFOREACH(BENCHMARK_NAME ${${PROJECT_NAME}_BENCHMARK})
 
 SET(${PROJECT_NAME}_BENCHMARK_PYTHON
-  hyq
-  lqr
-  talos_arm
-  talos_legs
   unicycle
+  lqr
+  arm_manipulation
+  bipedal_walk
+  quadrupedal_gaits
   )
 
 FOREACH(benchmark ${${PROJECT_NAME}_BENCHMARK_PYTHON})
   PYTHON_BUILD(. "${benchmark}.py")
   ADD_CUSTOM_TARGET("benchmark-${benchmark}"
-    ${CMAKE_COMMAND} -E env PYTHONPATH=${PROJECT_BINARY_DIR}/bindings/python
+    ${CMAKE_COMMAND} -E env PYTHONPATH=$ENV{PYTHONPATH}:${PROJECT_BINARY_DIR}/bindings/python
     ${PYTHON_EXECUTABLE} -c "from ${benchmark} import *")
 ENDFOREACH(benchmark ${${PROJECT_NAME}_BENCHMARK_PYTHON})
