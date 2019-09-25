@@ -103,8 +103,8 @@ export CROCODDYL_PLOT=1
 If you want to learn about Crocoddyl, take a look at the Jupyter notebooks. Start in the following order.
 - [examples/notebooks/unicycle_towards_origin.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/unicycle_towards_origin.ipynb)
 - [examples/notebooks/cartpole_swing_up.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/cartpole_swing_up.py)
-- [examples/notebooks/manipulator.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/manipulator.ipynb)
-- [examples/notebooks/bipedal_walking_from_foot_traj.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/bipedal_walking_from_foot_traj.ipynb)
+- [examples/notebooks/arm_manipulation.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/arm_manipulation.ipynb)
+- [examples/notebooks/bipedal_walking.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/bipedal_walking.ipynb)
 - [examples/notebooks/introduction_to_crocoddyl.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/introduction_to_crocoddyl.ipynb)
 
 
