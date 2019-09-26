@@ -6,6 +6,7 @@ import numpy as np
 import crocoddyl
 import pinocchio
 from crocoddyl.utils import FreeFloatingActuationDerived, FullActuationDerived
+import example_robot_data
 
 
 class ActuationModelAbstractTestCase(unittest.TestCase):
@@ -35,22 +36,29 @@ class ActuationModelAbstractTestCase(unittest.TestCase):
         self.assertTrue(np.allclose(self.DATA.dtau_du, self.DATA_DER.dtau_du, atol=1e-9), "Wrong dtau_du.")
 
 
-class FloatingBaseActuationTest(ActuationModelAbstractTestCase):
-    STATE = crocoddyl.StateMultibody(pinocchio.buildSampleModelHumanoidRandom())
-
-    ACTUATION = crocoddyl.ActuationModelFloatingBase(STATE)
-    ACTUATION_DER = FreeFloatingActuationDerived(STATE)
-
-
-class FullActuationTest(ActuationModelAbstractTestCase):
-    STATE = crocoddyl.StateMultibody(pinocchio.buildSampleModelManipulator())
+class TalosArmFullActuationTest(ActuationModelAbstractTestCase):
+    STATE = crocoddyl.StateMultibody(example_robot_data.loadTalosArm().model)
 
     ACTUATION = crocoddyl.ActuationModelFull(STATE)
     ACTUATION_DER = FullActuationDerived(STATE)
 
 
+class HyQFloatingBaseActuationTest(ActuationModelAbstractTestCase):
+    STATE = crocoddyl.StateMultibody(example_robot_data.loadHyQ().model)
+
+    ACTUATION = crocoddyl.ActuationModelFloatingBase(STATE)
+    ACTUATION_DER = FreeFloatingActuationDerived(STATE)
+
+
+class TalosFloatingBaseActuationTest(ActuationModelAbstractTestCase):
+    STATE = crocoddyl.StateMultibody(example_robot_data.loadTalos().model)
+
+    ACTUATION = crocoddyl.ActuationModelFloatingBase(STATE)
+    ACTUATION_DER = FreeFloatingActuationDerived(STATE)
+
+
 if __name__ == '__main__':
-    test_classes_to_run = [FloatingBaseActuationTest, FullActuationTest]
+    test_classes_to_run = [TalosArmFullActuationTest, HyQFloatingBaseActuationTest, TalosFloatingBaseActuationTest]
     loader = unittest.TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:
