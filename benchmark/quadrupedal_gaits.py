@@ -70,7 +70,7 @@ def runBenchmark(gait_phase):
 
     duration = []
     xs = [robot_model.defaultState] * len(ddp.models())
-    us = [m.quasicStatic(d, robot_model.defaultState) for m, d in list(zip(ddp.models(), ddp.datas()))[:-1]]
+    us = [m.quasiStatic(d, robot_model.defaultState) for m, d in list(zip(ddp.models(), ddp.datas()))[:-1]]
     for i in range(T):
         c_start = time.time()
         ddp.solve(xs, us, MAXITER, False, 0.1)
