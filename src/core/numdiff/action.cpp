@@ -76,7 +76,7 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
     model_.get_state().diff(xn0, xn, data_nd->Fu.col(iu));
 
     data->Lu(iu) = (c - c0) / disturbance_;
-    if (with_gauss_approx_) {  
+    if (with_gauss_approx_) {
       data_nd->Ru.col(iu) = (data_nd->data_u[iu]->r - data_nd->data_0->r) / disturbance_;
     }
     data_nd->du(iu) = 0.0;
@@ -87,14 +87,11 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
     data->Lxx = data_nd->Rx.transpose() * data_nd->Rx;
     data->Lxu = data_nd->Rx.transpose() * data_nd->Ru;
     data->Luu = data_nd->Ru.transpose() * data_nd->Ru;
-  }
-  else
-  {
+  } else {
     data->Lxx.fill(0.0);
     data->Lxu.fill(0.0);
     data->Luu.fill(0.0);
   }
-  
 }
 
 ActionModelAbstract& ActionModelNumDiff::get_model() const { return model_; }

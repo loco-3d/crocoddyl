@@ -17,13 +17,13 @@ namespace crocoddyl {
 
 /**
  * @brief This class computes the numerical differentiation of an ActionModel.
- * 
+ *
  * It computes the same quantity as a normal model would do but using numerical
  * differentiation.
  * The subtility is in the computation of the Hessian of the cost. Let us
  * concider that the ActionModel owns a cost residual. This means that the cost
- * is the square of a residual \f$ l(x,u) = .5 r(x,u)**2 \f$, with 
- * \f$ r(x,u) \f$ being a vector. Therefore the derivatives of the cost 
+ * is the square of a residual \f$ l(x,u) = .5 r(x,u)**2 \f$, with
+ * \f$ r(x,u) \f$ being a vector. Therefore the derivatives of the cost
  * \f$ l \f$ can be expressed in function of the derivatives of the residuals
  * (jacobians), denoted by \f$ R_x \f$ and \f$ R_u \f$. Which would be:
  * \f{eqnarray*}{
@@ -49,8 +49,8 @@ class ActionModelNumDiff : public ActionModelAbstract {
  public:
   /**
    * @brief Construct a new ActionModelNumDiff object
-   * 
-   * @param model 
+   *
+   * @param model
    * @param with_gauss_approx defines if we use the Gauss approximation of the
    * cost hessian or not.
    */
@@ -60,12 +60,12 @@ class ActionModelNumDiff : public ActionModelAbstract {
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u);
   /**
-   * @brief calcDiff computes the 
-   * 
-   * @param data 
-   * @param x 
-   * @param u 
-   * @param recalc 
+   * @brief calcDiff computes the
+   *
+   * @param data
+   * @param x
+   * @param u
+   * @param recalc
    */
   void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
@@ -127,14 +127,16 @@ struct ActionDataNumDiff : public ActionDataAbstract {
     }
   }
 
-  Eigen::MatrixXd Rx; //!< Cost residual jacobian: d r / dx
-  Eigen::MatrixXd Ru; //!< Cost residual jacobian: d r / du
-  Eigen::VectorXd dx; //!< State disturbance
-  Eigen::VectorXd du; //!< Control disturbance
-  Eigen::VectorXd xp; //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$"
-  boost::shared_ptr<ActionDataAbstract> data_0; //!< The data that contains the final results
-  std::vector<boost::shared_ptr<ActionDataAbstract> > data_x; //!< The temporary data associated with the state variation
-  std::vector<boost::shared_ptr<ActionDataAbstract> > data_u; //!< The temporary data associated with the control variation
+  Eigen::MatrixXd Rx;  //!< Cost residual jacobian: d r / dx
+  Eigen::MatrixXd Ru;  //!< Cost residual jacobian: d r / du
+  Eigen::VectorXd dx;  //!< State disturbance
+  Eigen::VectorXd du;  //!< Control disturbance
+  Eigen::VectorXd xp;  //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$"
+  boost::shared_ptr<ActionDataAbstract> data_0;  //!< The data that contains the final results
+  std::vector<boost::shared_ptr<ActionDataAbstract> >
+      data_x;  //!< The temporary data associated with the state variation
+  std::vector<boost::shared_ptr<ActionDataAbstract> >
+      data_u;  //!< The temporary data associated with the control variation
 };
 
 }  // namespace crocoddyl

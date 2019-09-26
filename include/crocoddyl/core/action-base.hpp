@@ -41,10 +41,10 @@ class ActionModelAbstract {
   StateAbstract& get_state() const;
 
  protected:
-  unsigned int nu_; //!< Control dimension
-  unsigned int nr_; //!< Dimension of the cost residual
-  StateAbstract& state_; //!< Model of the state
-  Eigen::VectorXd unone_; //!< Neutral state
+  unsigned int nu_;        //!< Control dimension
+  unsigned int nr_;        //!< Dimension of the cost residual
+  StateAbstract& state_;   //!< Model of the state
+  Eigen::VectorXd unone_;  //!< Neutral state
 
 #ifdef PYTHON_BINDINGS
 
