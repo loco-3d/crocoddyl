@@ -20,13 +20,15 @@ class IntegratedActionModelEuler : public ActionModelAbstract {
                              const bool& with_cost_residual = true);
   ~IntegratedActionModelEuler();
 
-  void calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u);
-  void calcDiff(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
   boost::shared_ptr<ActionDataAbstract> createData();
 
   DifferentialActionModelAbstract* get_differential() const;
+  const double& get_dt() const;
+  void set_dt(double dt);
 
  private:
   DifferentialActionModelAbstract* differential_;
@@ -39,9 +41,9 @@ struct IntegratedActionDataEuler : public ActionDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  IntegratedActionDataEuler(Model* const model) : ActionDataAbstract(model) {
+  explicit IntegratedActionDataEuler(Model* const model) : ActionDataAbstract(model) {
     differential = model->get_differential()->createData();
-    const unsigned int& ndx = model->get_ndx();
+    const unsigned int& ndx = model->get_state().get_ndx();
     const unsigned int& nu = model->get_nu();
     dx = Eigen::VectorXd::Zero(ndx);
     ddx_dx = Eigen::MatrixXd::Zero(ndx, ndx);

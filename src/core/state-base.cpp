@@ -1,8 +1,16 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
 #include "crocoddyl/core/state-base.hpp"
 
 namespace crocoddyl {
 
-StateAbstract::StateAbstract(const unsigned int& nx, const unsigned int& ndx) : nx_(nx), ndx_(ndx) {
+StateAbstract::StateAbstract(unsigned int const& nx, unsigned int const& ndx) : nx_(nx), ndx_(ndx) {
   nv_ = ndx / 2;
   nq_ = nx_ - nv_;
 }

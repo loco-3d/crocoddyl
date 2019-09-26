@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_ACTIVATION_BASE_HPP_
-#define PYTHON_CROCODDYL_CORE_ACTIVATION_BASE_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_CORE_ACTIVATION_BASE_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_CORE_ACTIVATION_BASE_HPP_
 
 #include "crocoddyl/core/activation-base.hpp"
 
@@ -18,15 +18,17 @@ namespace bp = boost::python;
 
 class ActivationModelAbstract_wrap : public ActivationModelAbstract, public bp::wrapper<ActivationModelAbstract> {
  public:
-  ActivationModelAbstract_wrap(const unsigned int& nr)
+  explicit ActivationModelAbstract_wrap(unsigned int const& nr)
       : ActivationModelAbstract(nr), bp::wrapper<ActivationModelAbstract>() {}
 
-  void calc(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r) {
+  void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r) {
+    assert(r.size() == nr_ && "r has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)r);
   }
 
-  void calcDiff(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r,
+  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r,
                 const bool& recalc = true) {
+    assert(r.size() == nr_ && "r has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)r, recalc);
   }
 };
@@ -78,4 +80,4 @@ void exposeActivationAbstract() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_CORE_ACTIVATION_BASE_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_ACTIVATION_BASE_HPP_

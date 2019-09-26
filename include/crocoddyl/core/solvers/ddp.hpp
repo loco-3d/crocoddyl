@@ -9,24 +9,41 @@
 #ifndef CROCODDYL_CORE_SOLVERS_DDP_HPP_
 #define CROCODDYL_CORE_SOLVERS_DDP_HPP_
 
-#include "crocoddyl/core/solver-base.hpp"
 #include <Eigen/Cholesky>
+#include <vector>
+#include "crocoddyl/core/solver-base.hpp"
 
 namespace crocoddyl {
 
 class SolverDDP : public SolverAbstract {
  public:
-  SolverDDP(ShootingProblem& problem);
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  explicit SolverDDP(ShootingProblem& problem);
   ~SolverDDP();
 
   bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-             const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const unsigned int& maxiter = 100,
+             const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, unsigned int const& maxiter = 100,
              const bool& is_feasible = false, const double& regInit = 1e-9);
   void computeDirection(const bool& recalc = true);
   double tryStep(const double& steplength = 1);
   double stoppingCriteria();
   const Eigen::Vector2d& expectedImprovement();
+  double calc();
+  void backwardPass();
+  void forwardPass(const double& stepLength);
 
+  void computeGains(unsigned int const& t);
+  void increaseRegularization();
+  void decreaseRegularization();
+  void allocateData();
+
+  const double& get_regfactor() const;
+  const double& get_regmin() const;
+  const double& get_regmax() const;
+  const std::vector<double>& get_alphas() const;
+  const double& get_th_step() const;
+  const double& get_th_grad() const;
   const std::vector<Eigen::MatrixXd>& get_Vxx() const;
   const std::vector<Eigen::VectorXd>& get_Vx() const;
   const std::vector<Eigen::MatrixXd>& get_Qxx() const;
@@ -38,14 +55,12 @@ class SolverDDP : public SolverAbstract {
   const std::vector<Eigen::VectorXd>& get_k() const;
   const std::vector<Eigen::VectorXd>& get_gaps() const;
 
- private:
-  double calc();
-  void backwardPass();
-  void forwardPass(const double& stepLength);
-  void computeGains(const long unsigned int& t);
-  void increaseRegularization();
-  void decreaseRegularization();
-  void allocateData();
+  void set_regfactor(double reg_factor);
+  void set_regmin(double regmin);
+  void set_regmax(double regmax);
+  void set_alphas(const std::vector<double>& alphas);
+  void set_th_step(double th_step);
+  void set_th_grad(double th_grad);
 
  protected:
   double regfactor_;
@@ -69,8 +84,13 @@ class SolverDDP : public SolverAbstract {
   std::vector<Eigen::VectorXd> k_;
   std::vector<Eigen::VectorXd> gaps_;
 
- private:
   Eigen::VectorXd xnext_;
+  Eigen::VectorXd x_reg_;
+  Eigen::MatrixXd FxTVxx_p_;
+  std::vector<Eigen::MatrixXd> FuTVxx_p_;
+  Eigen::VectorXd fTVxx_p_;
+  std::vector<Eigen::LLT<Eigen::MatrixXd> > Quu_llt_;
+  std::vector<Eigen::VectorXd> Quuk_;
   std::vector<double> alphas_;
   double th_grad_;
   double th_step_;

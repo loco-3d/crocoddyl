@@ -1,31 +1,31 @@
 import numpy as np
 
-from crocoddyl import *
+import crocoddyl
 from unicycle_utils import plotUnicycleSolution
 
 # Creating an action model for the unicycle system
-model = ActionModelUnicycle()
+model = crocoddyl.ActionModelUnicycle()
 
 # Setting up the cost weights
-model.costWeights = [
+model.r = [
     10.,  # state weight
     1.  # control weight
 ]
 
 # Formulating the optimal control problem
 T = 20  # number of knots
-x0 = np.array([-1., -1., 1.])  #x,y,theta
-problem = ShootingProblem(x0, [model] * T, model)
+x0 = np.matrix([-1., -1., 1.]).T  #x,y,theta
+problem = crocoddyl.ShootingProblem(x0, [model] * T, model)
 
 # Creating the DDP solver for this OC problem, defining a logger
-ddp = SolverDDP(problem)
-ddp.callback = [CallbackDDPLogger(), CallbackDDPVerbose()]
+ddp = crocoddyl.SolverDDP(problem)
+ddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
 
 # Solving it with the DDP algorithm
 ddp.solve()
 
-# Plotting the solution, solver convergence and unycicle motion
-log = ddp.callback[0]
-plotOCSolution(log.xs, log.us)
-plotDDPConvergence(log.costs, log.control_regs, log.state_regs, log.gm_stops, log.th_stops, log.steps)
+# Plotting the solution, solver convergence and unicycle motion
+log = ddp.getCallbacks()[0]
+crocoddyl.plotOCSolution(log.xs, log.us)
+crocoddyl.plotConvergence(log.costs, log.control_regs, log.state_regs, log.gm_stops, log.th_stops, log.steps)
 plotUnicycleSolution(log.xs)

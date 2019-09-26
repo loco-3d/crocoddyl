@@ -6,14 +6,16 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
+#include <Eigen/Dense>
+#include <pinocchio/fwd.hpp>
 #include <boost/test/included/unit_test.hpp>
 #include <boost/bind.hpp>
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/actions/lqr.hpp"
 #include "crocoddyl/core/actions/unicycle.hpp"
 #include "crocoddyl/core/numdiff/action.hpp"
-#include <Eigen/Dense>
 
 using namespace boost::unit_test;
 
@@ -21,23 +23,19 @@ void test_construct_data(crocoddyl::ActionModelAbstract& model) {
   boost::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
 }
 
-//____________________________________________________________________________//
-
 void test_calc_returns_state(crocoddyl::ActionModelAbstract& model) {
   // create the corresponding data object
   boost::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
 
   // Generating random state and control vectors
-  Eigen::VectorXd x = model.get_state()->rand();
+  Eigen::VectorXd x = model.get_state().rand();
   Eigen::VectorXd u = Eigen::VectorXd::Random(model.get_nu());
 
   // Getting the state dimension from calc() call
   model.calc(data, x, u);
 
-  BOOST_CHECK(data->get_xnext().size() == model.get_nx());
+  BOOST_CHECK(data->get_xnext().size() == model.get_state().get_nx());
 }
-
-//____________________________________________________________________________//
 
 void test_calc_returns_a_cost(crocoddyl::ActionModelAbstract& model) {
   // create the corresponding data object and set the cost to nan
@@ -45,15 +43,13 @@ void test_calc_returns_a_cost(crocoddyl::ActionModelAbstract& model) {
   data->cost = nan("");
 
   // Getting the cost value computed by calc()
-  Eigen::VectorXd x = model.get_state()->rand();
+  Eigen::VectorXd x = model.get_state().rand();
   Eigen::VectorXd u = Eigen::VectorXd::Random(model.get_nu());
   model.calc(data, x, u);
 
   // Checking that calc returns a cost value
-  BOOST_CHECK(!isnan(data->cost));
+  BOOST_CHECK(!std::isnan(data->cost));
 }
-
-//____________________________________________________________________________//
 
 void test_partial_derivatives_against_numdiff(crocoddyl::ActionModelAbstract& model, double num_diff_modifier) {
   // create the corresponding data object and set the cost to nan
@@ -66,7 +62,7 @@ void test_partial_derivatives_against_numdiff(crocoddyl::ActionModelAbstract& mo
   boost::shared_ptr<crocoddyl::ActionDataAbstract> data_num_diff = model_num_diff.createData();
 
   // Generating random values for the state and control
-  Eigen::VectorXd x = model.get_state()->rand();
+  Eigen::VectorXd x = model.get_state().rand();
   Eigen::VectorXd u = Eigen::VectorXd::Random(model.get_nu());
 
   // Computing the action derivatives
@@ -86,8 +82,6 @@ void test_partial_derivatives_against_numdiff(crocoddyl::ActionModelAbstract& mo
   }
 }
 
-//____________________________________________________________________________//
-
 void register_action_model_lqr_unit_tests() {
   int nx = 80;
   int nu = 40;
@@ -104,14 +98,10 @@ void register_action_model_lqr_unit_tests() {
       &test_partial_derivatives_against_numdiff, crocoddyl::ActionModelLQR(nx, nu, driftfree), num_diff_modifier)));
 }
 
-//____________________________________________________________________________//
-
 bool init_function() {
   // Here we test the state_vector
   register_action_model_lqr_unit_tests();
   return true;
 }
 
-//____________________________________________________________________________//
-
-int main(int argc, char* argv[]) { return ::boost::unit_test::unit_test_main(&init_function, argc, argv); }
+int main(int argc, char** argv) { return ::boost::unit_test::unit_test_main(&init_function, argc, argv); }

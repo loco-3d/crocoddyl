@@ -6,9 +6,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_STATE_BASE_HPP_
-#define PYTHON_CROCODDYL_CORE_STATE_BASE_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_CORE_STATE_BASE_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_CORE_STATE_BASE_HPP_
 
+#include <string>
 #include "crocoddyl/core/state-base.hpp"
 
 namespace crocoddyl {
@@ -25,6 +26,8 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
   Eigen::VectorXd rand() { return bp::call<Eigen::VectorXd>(this->get_override("rand").ptr()); }
 
   Eigen::VectorXd diff_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1) {
+    assert(x0.size() == nx_ && "x0 has wrong dimension");
+    assert(x1.size() == nx_ && "x1 has wrong dimension");
     return bp::call<Eigen::VectorXd>(this->get_override("diff").ptr(), (Eigen::VectorXd)x0, (Eigen::VectorXd)x1);
   }
 
@@ -35,6 +38,8 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
 
   Eigen::VectorXd integrate_wrap(const Eigen::Ref<const Eigen::VectorXd>& x,
                                  const Eigen::Ref<const Eigen::VectorXd>& dx) {
+    assert(x.size() == nx_ && "x has wrong dimension");
+    assert(dx.size() == ndx_ && "dx has wrong dimension");
     return bp::call<Eigen::VectorXd>(this->get_override("integrate").ptr(), (Eigen::VectorXd)x, (Eigen::VectorXd)dx);
   }
 
@@ -75,7 +80,11 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
 
   bp::list Jdiff_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
                       std::string firstsecond) {
-    assert(firstsecond == "both" || firstsecond == "first" || firstsecond == "second");
+    assert((firstsecond == "both" || firstsecond == "first" || firstsecond == "second") &&
+           "firstsecond must be one of the Jcomponent {both, first, second}");
+    assert(x0.size() == nx_ && "x0 has wrong dimension");
+    assert(x1.size() == nx_ && "x1 has wrong dimension");
+
     if (firstsecond == "both") {
       bp::list Jacs =
           bp::call<bp::list>(this->get_override("Jdiff").ptr(), (Eigen::VectorXd)x0, (Eigen::VectorXd)x1, firstsecond);
@@ -89,7 +98,7 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
     }
   }
 
-  void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
+  void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                   Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent _firstsecond) {
     std::string firstsecond;
     switch (_firstsecond) {
@@ -108,7 +117,7 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
       default: { firstsecond = "both"; }
     }
 
-    bp::list res = Jintegrate_wrap(x0, x1, firstsecond);
+    bp::list res = Jintegrate_wrap(x, dx, firstsecond);
     if (firstsecond == "both") {
       Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
       Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[1])();
@@ -119,16 +128,20 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
     }
   }
 
-  bp::list Jintegrate_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
+  bp::list Jintegrate_wrap(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                            std::string firstsecond) {
-    assert(firstsecond == "both" || firstsecond == "first" || firstsecond == "second");
+    assert((firstsecond == "both" || firstsecond == "first" || firstsecond == "second") &&
+           "firstsecond must be one of the Jcomponent {both, first, second}");
+    assert(x.size() == nx_ && "x has wrong dimension");
+    assert(dx.size() == ndx_ && "dx has wrong dimension");
+
     if (firstsecond == "both") {
-      bp::list Jacs = bp::call<bp::list>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x0,
-                                         (Eigen::VectorXd)x1, firstsecond);
+      bp::list Jacs = bp::call<bp::list>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x,
+                                         (Eigen::VectorXd)dx, firstsecond);
       return Jacs;
     } else {
-      Eigen::MatrixXd J = bp::call<Eigen::MatrixXd>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x0,
-                                                    (Eigen::VectorXd)x1, firstsecond);
+      Eigen::MatrixXd J = bp::call<Eigen::MatrixXd>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x,
+                                                    (Eigen::VectorXd)dx, firstsecond);
       bp::list list;
       list.append(J);
       return list;
@@ -215,4 +228,4 @@ void exposeStateAbstract() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_CORE_STATE_BASE_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_STATE_BASE_HPP_

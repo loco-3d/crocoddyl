@@ -1,3 +1,11 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
 #include "crocoddyl/core/integrator/euler.hpp"
 
 namespace crocoddyl {
@@ -12,9 +20,12 @@ IntegratedActionModelEuler::IntegratedActionModelEuler(DifferentialActionModelAb
 
 IntegratedActionModelEuler::~IntegratedActionModelEuler() {}
 
-void IntegratedActionModelEuler::calc(boost::shared_ptr<ActionDataAbstract>& data,
+void IntegratedActionModelEuler::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                                       const Eigen::Ref<const Eigen::VectorXd>& x,
                                       const Eigen::Ref<const Eigen::VectorXd>& u) {
+  assert(x.size() == state_.get_nx() && "x has wrong dimension");
+  assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
+
   // Static casting the data
   boost::shared_ptr<IntegratedActionDataEuler> d = boost::static_pointer_cast<IntegratedActionDataEuler>(data);
 
@@ -22,10 +33,10 @@ void IntegratedActionModelEuler::calc(boost::shared_ptr<ActionDataAbstract>& dat
   differential_->calc(d->differential, x, u);
 
   // Computing the next state (discrete time)
-  const Eigen::VectorXd& v = x.bottomRows(differential_->get_nv());
+  const Eigen::VectorXd& v = x.tail(differential_->get_state().get_nv());
   const Eigen::VectorXd& a = d->differential->xout;
   d->dx << v * time_step_ + a * time_step2_, a * time_step_;
-  differential_->get_state()->integrate(x, d->dx, d->xnext);
+  differential_->get_state().integrate(x, d->dx, d->xnext);
 
   // Updating the cost value
   if (with_cost_residual_) {
@@ -34,10 +45,13 @@ void IntegratedActionModelEuler::calc(boost::shared_ptr<ActionDataAbstract>& dat
   d->cost = d->differential->cost;
 }
 
-void IntegratedActionModelEuler::calcDiff(boost::shared_ptr<ActionDataAbstract>& data,
+void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                           const Eigen::Ref<const Eigen::VectorXd>& x,
                                           const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  const unsigned int& nv = differential_->get_nv();
+  assert(x.size() == state_.get_nx() && "x has wrong dimension");
+  assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
+
+  const unsigned int& nv = differential_->get_state().get_nv();
   if (recalc) {
     calc(data, x, u);
   }
@@ -46,21 +60,18 @@ void IntegratedActionModelEuler::calcDiff(boost::shared_ptr<ActionDataAbstract>&
   boost::shared_ptr<IntegratedActionDataEuler> d = boost::static_pointer_cast<IntegratedActionDataEuler>(data);
 
   // Computing the derivatives for the time-continuous model (i.e. differential model)
-  differential_->calcDiff(d->differential, x, u);
-  differential_->get_state()->Jintegrate(x, d->dx, d->dxnext_dx, d->dxnext_ddx);
+  differential_->calcDiff(d->differential, x, u, false);
+  differential_->get_state().Jintegrate(x, d->dx, d->dxnext_dx, d->dxnext_ddx);
 
-  //
   const Eigen::MatrixXd& da_dx = d->differential->Fx;
   const Eigen::MatrixXd& da_du = d->differential->Fu;
   d->ddx_dx << da_dx * time_step_, da_dx;
   d->ddx_du << da_du * time_step_, da_du;
-
-  d->Fx = d->dxnext_dx + time_step_ * d->dxnext_ddx.transpose() * d->ddx_dx;
   for (unsigned int i = 0; i < nv; ++i) {
-    d->Fx(i, i + nv) += 1.;
+    d->ddx_dx(i, i + nv) += 1.;
   }
-  // ddx_dx[range(nv), range(nv, 2 * nv)] += 1
-  d->Fu = time_step_ * d->dxnext_ddx.transpose() * d->ddx_du;
+  d->Fx = d->dxnext_dx + time_step_ * d->dxnext_ddx * d->ddx_dx;
+  d->Fu = time_step_ * d->dxnext_ddx * d->ddx_du;
   d->Lx = d->differential->Lx;
   d->Lu = d->differential->Lu;
   d->Lxx = d->differential->Lxx;
@@ -73,5 +84,12 @@ boost::shared_ptr<ActionDataAbstract> IntegratedActionModelEuler::createData() {
 }
 
 DifferentialActionModelAbstract* IntegratedActionModelEuler::get_differential() const { return differential_; }
+
+const double& IntegratedActionModelEuler::get_dt() const { return time_step_; }
+
+void IntegratedActionModelEuler::set_dt(double dt) {
+  time_step_ = dt;
+  time_step2_ = dt * dt;
+}
 
 }  // namespace crocoddyl

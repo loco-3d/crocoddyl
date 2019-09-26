@@ -11,19 +11,19 @@
 
 #include <Eigen/Core>
 #include <vector>
+#include <string>
 
 namespace crocoddyl {
 
 enum Jcomponent { both = 0, first = 1, second = 2 };
 
-inline bool is_a_Jcomponent(Jcomponent firstsecond)
-{
+inline bool is_a_Jcomponent(Jcomponent firstsecond) {
   return (firstsecond == first || firstsecond == second || firstsecond == both);
 }
 
 class StateAbstract {
  public:
-  StateAbstract(const unsigned int& nx, const unsigned int& ndx);
+  StateAbstract(unsigned int const& nx, unsigned int const& ndx);
   virtual ~StateAbstract();
 
   virtual Eigen::VectorXd zero() = 0;
@@ -51,6 +51,7 @@ class StateAbstract {
   unsigned int nv_;
 
 #ifdef PYTHON_BINDINGS
+
  public:
   Eigen::VectorXd diff_wrap(const Eigen::VectorXd& x0, const Eigen::VectorXd& x1) {
     Eigen::VectorXd dxout = Eigen::VectorXd::Zero(ndx_);

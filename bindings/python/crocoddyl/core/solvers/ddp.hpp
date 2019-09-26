@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_SOLVERS_DDP_HPP_
-#define PYTHON_CROCODDYL_CORE_SOLVERS_DDP_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_CORE_SOLVERS_DDP_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_CORE_SOLVERS_DDP_HPP_
 
 #include "crocoddyl/core/solvers/ddp.hpp"
 
@@ -24,7 +24,7 @@ void exposeSolverDDP() {
   bp::class_<SolverDDP, bp::bases<SolverAbstract> >(
       "SolverDDP",
       "DDP solver.\n\n"
-      "The DDP solver computes an optimal trajectory and control commands by iteratives\n"
+      "The DDP solver computes an optimal trajectory and control commands by iterates\n"
       "running backward and forward passes. The backward-pass updates locally the\n"
       "quadratic approximation of the problem and computes descent direction,\n"
       "and the forward-pass rollouts this new policy by integrating the system dynamics\n"
@@ -32,11 +32,11 @@ void exposeSolverDDP() {
       ":param shootingProblem: shooting problem (list of action models along trajectory.)",
       bp::init<ShootingProblem&>(bp::args(" self", " problem"),
                                  "Initialize the vector dimension.\n\n"
-                                 ":param problem: shooting problem."))
+                                 ":param problem: shooting problem.")[bp::with_custodian_and_ward<1, 2>()])
       .def("solve", &SolverDDP::solve,
            SolverDDP_solves(
                bp::args(" self", " init_xs=[]", " init_us=[]", " maxiter=100", " isFeasible=False", " regInit=None"),
-               "Compute the optimal trajectory xopt,uopt as lists of T+1 and T terms.\n\n"
+               "Compute the optimal trajectory xopt, uopt as lists of T+1 and T terms.\n\n"
                "From an initial guess init_xs,init_us (feasible or not), iterate\n"
                "over computeDirection and tryStep until stoppingCriteria is below\n"
                "threshold. It also describes the globalization strategy used\n"
@@ -70,6 +70,20 @@ void exposeSolverDDP() {
            "For computing the expected improvement, you need to compute first\n"
            "the search direction by running computeDirection. The quadratic\n"
            "improvement model is described as dV = f_0 - f_+ = d1*a + d2*a**2/2.")
+      .def("calc", &SolverDDP::calc, bp::args(" self"),
+           "Update the Jacobian and Hessian of the optimal control problem\n\n"
+           "These derivatives are computed around the guess state and control\n"
+           "trajectory. These trajectory can be set by using setCandidate.\n"
+           ":return the total cost around the guess trajectory.")
+      .def("backwardPass", &SolverDDP::backwardPass, bp::args(" self"),
+           "Run the backward pass (Riccati sweep)\n\n"
+           "It assumes that the Jacobian and Hessians of the optimal control problem have been\n"
+           "compute. These terms are computed by running calc.")
+      .def("forwardPass", &SolverDDP::forwardPass, bp::args(" self", " stepLength=1"),
+           "Run the forward pass or rollout\n\n"
+           "It rollouts the action model give the computed policy (feedfoward terns and feedback\n"
+           "gains) by the backwardPass. We can define different step lengths\n"
+           ":param stepLength: applied step length (<= 1. and >= 0.)")
       .add_property("Vxx", make_function(&SolverDDP::get_Vxx, bp::return_value_policy<bp::copy_const_reference>()),
                     "Vxx")
       .add_property("Vx", make_function(&SolverDDP::get_Vx, bp::return_value_policy<bp::copy_const_reference>()), "Vx")
@@ -82,10 +96,34 @@ void exposeSolverDDP() {
       .add_property("Qx", make_function(&SolverDDP::get_Qx, bp::return_value_policy<bp::copy_const_reference>()), "Qx")
       .add_property("Qu", make_function(&SolverDDP::get_Qu, bp::return_value_policy<bp::copy_const_reference>()), "Qu")
       .add_property("K", make_function(&SolverDDP::get_K, bp::return_value_policy<bp::copy_const_reference>()), "K")
-      .add_property("k", make_function(&SolverDDP::get_k, bp::return_value_policy<bp::copy_const_reference>()), "k");
+      .add_property("k", make_function(&SolverDDP::get_k, bp::return_value_policy<bp::copy_const_reference>()), "k")
+      .add_property("gaps", make_function(&SolverDDP::get_gaps, bp::return_value_policy<bp::copy_const_reference>()),
+                    "gaps")
+      .add_property("regFactor",
+                    bp::make_function(&SolverDDP::get_regfactor, bp::return_value_policy<bp::copy_const_reference>()),
+                    bp::make_function(&SolverDDP::set_regfactor),
+                    "regularization factor used for increasing or decreasing the value.")
+      .add_property("regMin",
+                    bp::make_function(&SolverDDP::get_regmin, bp::return_value_policy<bp::copy_const_reference>()),
+                    bp::make_function(&SolverDDP::set_regmin), "minimum regularization value.")
+      .add_property("regMax",
+                    bp::make_function(&SolverDDP::get_regmax, bp::return_value_policy<bp::copy_const_reference>()),
+                    bp::make_function(&SolverDDP::set_regmax), "maximum regularization value.")
+      .add_property("th_step",
+                    bp::make_function(&SolverDDP::get_th_step, bp::return_value_policy<bp::copy_const_reference>()),
+                    bp::make_function(&SolverDDP::set_th_step),
+                    "threshold for decreasing the regularization after approving a step (higher values decreases the "
+                    "regularization)")
+      .add_property("th_grad",
+                    bp::make_function(&SolverDDP::get_th_grad, bp::return_value_policy<bp::copy_const_reference>()),
+                    bp::make_function(&SolverDDP::set_th_grad),
+                    "threshold for accepting step which gradients is lower than this value")
+      .add_property("alphas",
+                    bp::make_function(&SolverDDP::get_alphas, bp::return_value_policy<bp::copy_const_reference>()),
+                    bp::make_function(&SolverDDP::set_alphas), "list of step length (alpha) values");
 }
 
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_CORE_SOLVERS_DDP_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_SOLVERS_DDP_HPP_

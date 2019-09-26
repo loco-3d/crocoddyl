@@ -6,9 +6,11 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_
-#define PYTHON_CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_
 
+#include <vector>
+#include <memory>
 #include "crocoddyl/core/optctrl/shooting.hpp"
 #include "python/crocoddyl/utils.hpp"
 
@@ -24,7 +26,7 @@ void exposeShootingProblem() {
   bp::to_python_converter<std::vector<ActionModelPtr, std::allocator<ActionModelPtr> >,
                           vector_to_list<ActionModelPtr> >();
   bp::to_python_converter<std::vector<ActionDataPtr, std::allocator<ActionDataPtr> >,
-                          vector_to_list<ActionDataPtr> >();
+                          vector_to_list<ActionDataPtr, false> >();
   list_to_vector().from_python<std::vector<ActionModelPtr, std::allocator<ActionModelPtr> > >();
 
   bp::class_<ShootingProblem, boost::noncopyable>(
@@ -40,7 +42,8 @@ void exposeShootingProblem() {
           "Initialize the shooting problem.\n\n"
           ":param initialState: initial state\n"
           ":param runningModels: running action models\n"
-          ":param terminalModel: terminal action model")[bp::with_custodian_and_ward<1, 4>()])
+          ":param terminalModel: terminal action model")
+          [bp::with_custodian_and_ward<1, 3, bp::with_custodian_and_ward<1, 4> >()])
       .def("calc", &ShootingProblem::calc, bp::args(" self", " xs", " us"),
            "Compute the cost and the next states.\n\n"
            "First, it computes the next state and cost for each action model\n"
@@ -59,8 +62,7 @@ void exposeShootingProblem() {
            "Rollout the dynamics give a sequence of control commands\n"
            ":param us: time-discrete control sequence")
       .add_property("T", bp::make_function(&ShootingProblem::get_T), "number of nodes")
-      .add_property("initialState",
-                    bp::make_function(&ShootingProblem::get_x0, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("x0", bp::make_function(&ShootingProblem::get_x0, bp::return_value_policy<bp::return_by_value>()),
                     "initial state")
       .add_property(
           "runningModels",
@@ -82,4 +84,4 @@ void exposeShootingProblem() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_

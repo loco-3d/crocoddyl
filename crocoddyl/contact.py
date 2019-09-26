@@ -57,7 +57,7 @@ class ContactDataPinocchio:
         self.Aq = self.Ax[:, :nv]
         self.Av = self.Ax[:, nv:]
         self.f = np.nan  # not set at construction type
-        self.forces = pinocchio.StdVect_Force()
+        self.forces = pinocchio.StdVec_Force()
         for i in range(model.pinocchio.njoints):
             self.forces.append(pinocchio.Force.Zero())
 

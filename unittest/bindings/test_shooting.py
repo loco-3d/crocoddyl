@@ -1,8 +1,11 @@
-import crocoddyl
-from utils import UnicycleDerived
-from random import randint
-import numpy as np
+import sys
 import unittest
+from random import randint
+
+import numpy as np
+
+import crocoddyl
+from crocoddyl.utils import UnicycleDerived
 
 
 class ShootingProblemTestCase(unittest.TestCase):
@@ -11,7 +14,7 @@ class ShootingProblemTestCase(unittest.TestCase):
 
     def setUp(self):
         self.T = randint(1, 101)
-        state = self.MODEL.State
+        state = self.MODEL.state
         self.xs = []
         self.us = []
         self.xs.append(state.rand())
@@ -69,3 +72,4 @@ if __name__ == '__main__':
     big_suite = unittest.TestSuite(suites_list)
     runner = unittest.TextTestRunner()
     results = runner.run(big_suite)
+    sys.exit(not results.wasSuccessful())

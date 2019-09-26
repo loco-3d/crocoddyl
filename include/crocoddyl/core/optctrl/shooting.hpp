@@ -16,6 +16,8 @@ namespace crocoddyl {
 
 class ShootingProblem {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   ShootingProblem(const Eigen::VectorXd& x0, const std::vector<ActionModelAbstract*>& running_models,
                   ActionModelAbstract* const terminal_model);
   ~ShootingProblem();
@@ -25,7 +27,7 @@ class ShootingProblem {
   void rollout(const std::vector<Eigen::VectorXd>& us, std::vector<Eigen::VectorXd>& xs);
   std::vector<Eigen::VectorXd> rollout_us(const std::vector<Eigen::VectorXd>& us);
 
-  long unsigned int get_T() const;
+  unsigned int get_T() const;
   const Eigen::VectorXd& get_x0() const;
 
   std::vector<ActionModelAbstract*>& get_runningModels();
@@ -40,7 +42,7 @@ class ShootingProblem {
 
  protected:
   void allocateData();
-  long unsigned int T_;
+  unsigned int T_;
   Eigen::VectorXd x0_;
 
  private:

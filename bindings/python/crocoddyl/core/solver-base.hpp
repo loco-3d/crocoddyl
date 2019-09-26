@@ -6,9 +6,11 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_
-#define PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_
 
+#include <vector>
+#include <memory>
 #include "crocoddyl/core/solver-base.hpp"
 #include "python/crocoddyl/utils.hpp"
 
@@ -19,8 +21,11 @@ namespace bp = boost::python;
 
 class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbstract> {
  public:
+  using SolverAbstract::cost_;
   using SolverAbstract::is_feasible_;
+  using SolverAbstract::iter_;
   using SolverAbstract::problem_;
+  using SolverAbstract::steplength_;
   using SolverAbstract::th_acceptstep_;
   using SolverAbstract::th_stop_;
   using SolverAbstract::ureg_;
@@ -28,11 +33,11 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
   using SolverAbstract::xreg_;
   using SolverAbstract::xs_;
 
-  SolverAbstract_wrap(ShootingProblem& problem) : SolverAbstract(problem), bp::wrapper<SolverAbstract>() {}
+  explicit SolverAbstract_wrap(ShootingProblem& problem) : SolverAbstract(problem), bp::wrapper<SolverAbstract>() {}
   ~SolverAbstract_wrap() {}
 
   bool solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-             const unsigned int& maxiter, const bool& is_feasible, const double& reg_init) {
+             unsigned int const& maxiter, const bool& is_feasible, const double& reg_init) {
     return bp::call<bool>(this->get_override("solve").ptr(), init_xs, init_us, maxiter, is_feasible, reg_init);
   }
 
@@ -64,9 +69,24 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
   Eigen::Vector2d expected_improvement_;
 };
 
+class CallbackAbstract_wrap : public CallbackAbstract, public bp::wrapper<CallbackAbstract> {
+ public:
+  CallbackAbstract_wrap() : CallbackAbstract(), bp::wrapper<CallbackAbstract>() {}
+  ~CallbackAbstract_wrap() {}
+
+  void operator()(SolverAbstract& solver) {
+    return bp::call<void>(this->get_override("__call__").ptr(), boost::ref(solver));
+  }
+};
+
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setCandidate_overloads, SolverAbstract::setCandidate, 0, 3)
 
 void exposeSolverAbstract() {
+  // Register custom converters between std::vector and Python list
+  bp::to_python_converter<std::vector<CallbackAbstract*, std::allocator<CallbackAbstract*> >,
+                          vector_to_list<CallbackAbstract*> >();
+  list_to_vector().from_python<std::vector<CallbackAbstract*, std::allocator<CallbackAbstract*> > >();
+
   bp::class_<SolverAbstract_wrap, boost::noncopyable>(
       "SolverAbstract",
       "Abstract class for optimal control solvers.\n\n"
@@ -80,7 +100,7 @@ void exposeSolverAbstract() {
       "numerical optimization.",
       bp::init<ShootingProblem&>(bp::args(" self", " problem"),
                                  "Initialize the solver model.\n\n"
-                                 ":param problem: shooting problem"))
+                                 ":param problem: shooting problem")[bp::with_custodian_and_ward<1, 2>()])
       .def("solve", pure_virtual(&SolverAbstract_wrap::solve),
            bp::args(" self", " init_xs=[]", " init_us=[]", " maxiter=100", " isFeasible=False", " regInit=None"),
            "Compute the optimal trajectory xopt,uopt as lists of T+1 and T terms.\n\n"
@@ -133,14 +153,16 @@ void exposeSolverAbstract() {
                                   ":param us: control trajectory of T elements.\n"
                                   ":param isFeasible: true if the xs are obtained from integrating the\n"
                                   "us (rollout)."))
-      //       .def("setCallbacks", &SolverAbstract_wrap::setCallbacks),
-      //            bp::args(" self"),
-      //            R"(Set a list of callback functions using for diagnostic.
-
-      // Each iteration, the solver calls these set of functions in order to
-      // allowed user the diagnostic of the solver's performance.
-      // :param callbacks: set of callback functions.)")
-      .add_property("problem", bp::make_getter(&SolverAbstract_wrap::problem_, bp::return_internal_reference<>()),
+      .def("setCallbacks", &SolverAbstract_wrap::setCallbacks, bp::args(" self"),
+           "Set a list of callback functions using for diagnostic.\n\n"
+           "Each iteration, the solver calls these set of functions in order to\n"
+           "allowed user the diagnostic of the solver's performance.\n"
+           ":param callbacks: set of callback functions.")
+      .def("getCallbacks", &SolverAbstract_wrap::getCallbacks, bp::return_value_policy<bp::return_by_value>(),
+           bp::args(" self"),
+           "Return the list of callback functions using for diagnostic.\n\n"
+           ":return set of callback functions.")
+      .add_property("problem", bp::make_function(&SolverAbstract_wrap::get_problem, bp::return_internal_reference<>()),
                     "shooting problem")
       .def("models", &SolverAbstract_wrap::get_models, bp::return_value_policy<bp::return_by_value>(), "models")
       .def("datas", &SolverAbstract_wrap::get_datas, bp::return_value_policy<bp::return_by_value>(), "datas")
@@ -151,13 +173,25 @@ void exposeSolverAbstract() {
                     bp::make_setter(&SolverAbstract_wrap::us_, bp::return_value_policy<bp::return_by_value>()),
                     "control sequence")
       .def_readwrite("isFeasible", &SolverAbstract_wrap::is_feasible_, "feasible (xs,us)")
+      .def_readwrite("cost", &SolverAbstract_wrap::cost_, "total cost")
       .def_readwrite("x_reg", &SolverAbstract_wrap::xreg_, "state regularization")
       .def_readwrite("u_reg", &SolverAbstract_wrap::ureg_, "control regularization")
+      .def_readwrite("stepLength", &SolverAbstract_wrap::steplength_, "applied step length")
       .def_readwrite("th_acceptStep", &SolverAbstract_wrap::th_acceptstep_, "threshold for step acceptance")
-      .def_readwrite("th_stop", &SolverAbstract_wrap::th_stop_, "threshold for stopping criteria");
+      .def_readwrite("th_stop", &SolverAbstract_wrap::th_stop_, "threshold for stopping criteria")
+      .def_readwrite("iter", &SolverAbstract_wrap::iter_, "number of iterations runned in solve()");
+
+  bp::class_<CallbackAbstract_wrap, boost::noncopyable>(
+      "CallbackAbstract",
+      "Abstract class for solver callbacks.\n\n"
+      "A callback is used to diagnostic the behaviour of our solver in each iteration of it.\n"
+      "For instance, it can be used to print values, record data or display motions")
+      .def("__call__", pure_virtual(&CallbackAbstract_wrap::operator()), bp::args(" self", " solver"),
+           "Run the callback function given a solver.\n\n"
+           ":param solver: solver to be diagnostic");
 }
 
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_

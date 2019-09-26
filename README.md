@@ -7,79 +7,157 @@ Contact RObot COntrol by Differential DYnamic programming Library (crocoddyl)
 
 The source code is released under the [BSD 3-Clause license](LICENSE).
 
-**Authors:** Carlos Mastalli and Rohan Budhiraja <br />
-**Instructors:** Justin Carpentier and Nicolas Mansard <br />
+**Authors:** [Carlos Mastalli](https://cmastalli.github.io/) and Rohan Budhiraja <br />
+**Instructors:** Nicolas Mansard <br />
 **With additional support from the Gepetto team at LAAS-CNRS.**
 
 [![License BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg?style=flat)](https://tldrlegal.com/license/bsd-3-clause-license-%28revised%29#fulltext)
 [![pipeline status](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/pipeline.svg)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/pipelines?ref=devel)
-[![coverage report](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/coverage.svg)](https://gepgitlab.laas.fr/loco-3d/cddp/commits/devel)
+[![coverage report](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/coverage.svg)](https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/devel/coverage/)
+[![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/loco-3d/crocoddyl)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/-/tags)
+[![GitHub repo size](https://img.shields.io/github/repo-size/loco-3d/crocoddyl)](https://img.shields.io/github/repo-size/loco-3d/crocoddyl)
+[![contributors](https://img.shields.io/github/contributors/loco-3d/crocoddyl)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/-/graphs/master)
+
+[![GitHub Release Date](https://img.shields.io/github/release-date/loco-3d/crocoddyl)](https://img.shields.io/github/release-date/loco-3d/crocoddyl)
+[![GitHub last commit](https://img.shields.io/github/last-commit/loco-3d/crocoddyl)](https://img.shields.io/github/last-commit/loco-3d/crocoddyl)
 
 If you want to follow the current developments, you can directly refer to the [devel branch](https://gepgitlab.laas.fr/loco-3d/cddp/tree/devel).
 
 
 ## <img align="center" height="20" src="https://i.imgur.com/x1morBF.png"/> Installation
-**Crocoddyl** can be easily installed on various Linux (Ubuntu, Fedora, etc.) and Unix distributions (Mac OS X, BSD, etc.). Please refer to 
+**Crocoddyl** can be easily installed on various Linux (Ubuntu, Fedora, etc.) and Unix distributions (Mac OS X, BSD, etc.). Please refer to
 
 ### Installation through robotpkg
 
-You can install this package throught robotpkg. robotpkg is a package manager tailored for robotics softwares. It greatly simplifies the release of new versions along with the management of their dependencies. You just need to add the robotpkg apt repository to your sources.list and then use `sudo apt install robotpkg-py27-crocoddyl`:
+You can install this package through robotpkg. robotpkg is a package manager tailored for robotics softwares. It greatly simplifies the release of new versions along with the management of their dependencies. You just need to add the robotpkg apt repository to your sources.list and then use `sudo apt install robotpkg-py27-crocoddyl`:
 
 If you have never added robotpkg as a softwares repository, please follow first the instructions from 1 to 3. Otherwise, go directly to instruction 4. Those instructions are similar to the installation procedures presented in [http://robotpkg.openrobots.org/debian.html](http://robotpkg.openrobots.org/debian.html).
 
 1. Add robotpkg as source repository to apt:
 
-		sudo tee /etc/apt/sources.list.d/robotpkg.list <<EOF
-		deb [arch=amd64] http://robotpkg.openrobots.org/wip/packages/debian/pub $(lsb_release -sc) robotpkg
-		deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -sc) robotpkg
-		EOF
+```bash
+sudo tee /etc/apt/sources.list.d/robotpkg.list <<EOF
+deb [arch=amd64] http://robotpkg.openrobots.org/wip/packages/debian/pub $(lsb_release -sc) robotpkg
+deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -sc) robotpkg
+EOF
+```
 
 2. Register the authentication certificate of robotpkg:
 
-		curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | sudo apt-key add -
+```bash
+curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | sudo apt-key add -
+```
 
 3. You need to run at least once apt update to fetch the package descriptions:
 
-		sudo apt-get update
+```bash
+sudo apt-get update
+```
 
 4. The installation of Crocoddyl:
 
-		sudo apt install robotpkg-crocoddyl
+```bash
+sudo apt install robotpkg-py27-crocoddyl # for Python 2
+
+sudo apt install robotpkg-py35-crocoddyl # for Python 3
+```
 
 Finally you will need to configure your environment variables, e.g.:
 
-		export PATH=/opt/openrobots/bin:$PATH
-		export PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH
-		export LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH
-		export PYTHONPATH=/opt/openrobots/lib/python2.7/site-packages:$PYTHONPATH
+```bash
+export PATH=/opt/openrobots/bin:$PATH
+export PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH
+export LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH
+export PYTHONPATH=/opt/openrobots/lib/python2.7/site-packages:$PYTHONPATH
+```
 
 
 ### Building from source
 
-**Crocoddyl** is yet a pure Python library; you don't need to build it, however, you need to add it inside PYTHONPATH. It has the following dependecies:
+**Crocoddyl** is c++ library with Python bindings for versatile and fast prototyping. It has the following dependencies:
 
 * [pinocchio](https://github.com/stack-of-tasks/pinocchio)
-* [SciPy](https://www.scipy.org/)
 * [quadprog](https://pypi.org/project/quadprog/)
 * [multicontact-api](https://gepgitlab.laas.fr/loco-3d/multicontact-api)
-* [matplotlib](https://matplotlib.org/) (optional)
-* [example-robot-data](https://gepgitlab.laas.fr/gepetto/example-robot-data) (optional for running examples)
-* [jupyter](https://jupyter.org/) (optional for running notebooks)
+* [example-robot-data](https://gepgitlab.laas.fr/gepetto/example-robot-data) (optional for examples, install Python loaders)
+* [gepetto-viewer-corba](https://github.com/Gepetto/gepetto-viewer-corba) (optional for display)
+* [jupyter](https://jupyter.org/) (optional for notebooks)
+* [matplotlib](https://matplotlib.org/) (optional for examples)
 
-You can run examples and tests from the root dir of the repository:
 
-		cd PATH_TO_CROCODDYL
-		python examples/talos_arm.py
-		python unittest/all.py
+You can run examples, unit-tests and benchmarks from your build dir:
+
+```bash
+cd build
+make test
+make examples-bipedal_walk
+make benchmarks-bipedal_walk
+```
+
+If you want to see the 3D result and/or graphs of your run examples, you can use
+
+```bash
+export CROCODDYL_DISPLAY=1
+export CROCODDYL_PLOT=1
+```
 
 If you want to learn about Crocoddyl, take a look at the Jupyter notebooks. Start in the following order.
 - [examples/notebooks/unicycle_towards_origin.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/unicycle_towards_origin.ipynb)
 - [examples/notebooks/cartpole_swing_up.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/cartpole_swing_up.py)
-- [examples/notebooks/manipulator.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/manipulator.ipynb)
-- [examples/notebooks/bipedal_walking_from_foot_traj.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/bipedal_walking_from_foot_traj.ipynb)
+- [examples/notebooks/arm_manipulation.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/arm_manipulation.ipynb)
+- [examples/notebooks/bipedal_walking.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/bipedal_walking.ipynb)
 - [examples/notebooks/introduction_to_crocoddyl.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/introduction_to_crocoddyl.ipynb)
 
-## <img align="center" height="20" src="http://www.pvhc.net/img205/oohmbjfzlxapxqbpkawx.png"/> Publications
-- R. Budhiraja, J. Carpentier, C. Mastalli and N. Mansard. [Differential Dynamic Programming for Multi-Phase Rigid Contact Dynamics](https://hal.archives-ouvertes.fr/hal-01851596/document), IEEE RAS International Conference on Humanoid Robots (ICHR), 2018
+
+## Citing Crocoddyl
+
+To cite **Crocoddyl** in your academic research, please use the following bibtex lines:
+```tex
+@misc{crocoddylweb,
+   author = {Carlos Mastalli, Rohan Budhiraja and Nicolas Mansard and others},
+   title = {Crocoddyl: a fast and flexible optimal control library for robot control under contact sequence},
+   howpublished = {https://gepgitlab.laas.fr/loco-3d/crocoddyl/wikis/home},
+   year = {2019}
+}
+```
+
+and the following one for the reference to the paper introducing **Crocoddyl**:
+```tex
+@unpublished{mastalli2020crocoddyl,
+  author={Mastalli, Carlos and Budhiraja, Rohan and Merkt, Wolfgang and Saurel, Guilhem and Hammoud, Bilal
+  and Naveau, Maximilien and Carpentier, Justin and Vijayakumar, Sethu and Mansard, Nicolas},
+  title={{Crocoddyl: An Efficient and Versatile Framework for Multi-Contact Optimal Control}},
+  year={2020}
+}
+```
+
+The rest of the publications describes different component of **Crocoddyl**:
+
+
+### Publications
+- C. Mastalli et al. [Crocoddyl: An Efficient and Versatile Framework for Multi-Contact Optimal Control](https://cmastalli.github.io/publications/crocoddyl20unpub.html), pre-print, 2020
+- R. Budhiraja, J. Carpentier, C. Mastalli and N. Mansard. [Differential Dynamic Programming for Multi-Phase Rigid Contact Dynamics](https://cmastalli.github.io/publications/mddp18.html), IEEE RAS International Conference on Humanoid Robots (ICHR), 2018
 - Y. Tassa, N. Mansard, E. Todorov. [Control-Limited Differential Dynamic Programming](https://homes.cs.washington.edu/~todorov/papers/TassaICRA14.pdf), IEEE International Conference on Automation and Robotics (ICRA), 2014
 - R. Budhiraja, J. Carpentier and N. Mansard. [Dynamics Consensus between Centroidal and Whole-Body Models for Locomotion of Legged Robots](https://hal.laas.fr/hal-01875031/document), IEEE International Conference on Automation and Robotics (ICRA), 2019
+
+
+## Questions and Issues
+
+You have a question or an issue? You may either directly open a [new issue](https://gepgitlab.laas.fr/loco-3d/crocoddyl/issues) or use the mailing list <crocoddyl@laas.fr>.
+
+
+## Credits
+
+The following people have been involved in the development of **Crocoddyl**:
+
+- [Carlos Mastalli](https://cmastalli.github.io/) (LAAS-CNRS): main developer and manager of the project
+- [Nicolas Mansard](http://projects.laas.fr/gepetto/index.php/Members/NicolasMansard) (LAAS-CNRS): project instructor
+- [Rohan Budhiraja](https://scholar.google.com/citations?user=NW9Io9AAAAAJ) (LAAS-CNRS): features extension
+- [Maximilien Naveau](https://scholar.google.fr/citations?user=y_-cGlUAAAAJ&hl=fr) (MPI): unit-test support
+- [Guilhem Saurel](http://projects.laas.fr/gepetto/index.php/Members/GuilhemSaurel) (LAAS-CNRS): continuous integration and deployment
+- [Bilal Hammoud](https://scholar.google.com/citations?hl=en&user=h_4NKpsAAAAJ) (MPI): features extension
+
+
+## Acknowledgments
+
+The development of **Pinocchio** is supported by the [EU MEMMO project](http://www.memmo-project.eu/), and the [Gepetto team](http://projects.laas.fr/gepetto/) [@LAAS-CNRS](http://www.laas.fr).

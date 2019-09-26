@@ -1,8 +1,12 @@
-import crocoddyl
-from utils import UnicycleDerived, LQRDerived, DifferentialLQRDerived
-from random import randint
-import numpy as np
+import sys
 import unittest
+from random import randint
+
+import numpy as np
+
+import crocoddyl
+import pinocchio
+from crocoddyl.utils import DifferentialFreeFwdDynamicsDerived, DifferentialLQRDerived, LQRDerived, UnicycleDerived
 
 
 class ActionModelAbstractTestCase(unittest.TestCase):
@@ -10,7 +14,7 @@ class ActionModelAbstractTestCase(unittest.TestCase):
     MODEL_DER = None
 
     def setUp(self):
-        state = self.MODEL.State
+        state = self.MODEL.state
         self.x = state.rand()
         self.u = np.matrix(np.random.rand(self.MODEL.nu)).T
         self.DATA = self.MODEL.createData()
@@ -22,8 +26,7 @@ class ActionModelAbstractTestCase(unittest.TestCase):
         self.MODEL_DER.calc(self.DATA_DER, self.x, self.u)
         # Checking the cost value and its residual
         self.assertAlmostEqual(self.DATA.cost, self.DATA_DER.cost, 10, "Wrong cost value.")
-        self.assertTrue(np.allclose(self.DATA.costResiduals, self.DATA_DER.costResiduals, atol=1e-9),
-                        "Wrong cost residuals.")
+        self.assertTrue(np.allclose(self.DATA.r, self.DATA_DER.r, atol=1e-9), "Wrong cost residuals.")
 
         if isinstance(self.MODEL, crocoddyl.ActionModelAbstract):
             # Checking the dimension of the next state
@@ -75,8 +78,38 @@ class DifferentialLQRTest(ActionModelAbstractTestCase):
     MODEL_DER = DifferentialLQRDerived(NX, NU)
 
 
+class FreeFwdDynamicsTest(ActionModelAbstractTestCase):
+    ROBOT_MODEL = pinocchio.buildSampleModelManipulator()
+    STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+    COST_SUM = crocoddyl.CostModelSum(STATE, ROBOT_MODEL.nv)
+    COST_SUM.addCost('xReg', crocoddyl.CostModelState(STATE), 1.)
+    COST_SUM.addCost(
+        'frTrack',
+        crocoddyl.CostModelFramePlacement(
+            STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("effector_body"), pinocchio.SE3.Random())), 1.)
+    MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, COST_SUM)
+    MODEL_DER = DifferentialFreeFwdDynamicsDerived(STATE, COST_SUM)
+
+
+class FreeFwdDynamicsWithArmatureTest(ActionModelAbstractTestCase):
+    ROBOT_MODEL = pinocchio.buildSampleModelManipulator()
+    STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+    COST_SUM = crocoddyl.CostModelSum(STATE, ROBOT_MODEL.nv)
+    COST_SUM.addCost('xReg', crocoddyl.CostModelState(STATE), 1.)
+    COST_SUM.addCost(
+        'frTrack',
+        crocoddyl.CostModelFramePlacement(
+            STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("effector_body"), pinocchio.SE3.Random())), 1.)
+    MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, COST_SUM)
+    MODEL.armature = 0.1 * np.matrix(np.ones(ROBOT_MODEL.nv)).T
+    MODEL_DER = DifferentialFreeFwdDynamicsDerived(STATE, COST_SUM)
+    MODEL_DER.set_armature(0.1 * np.matrix(np.ones(ROBOT_MODEL.nv)).T)
+
+
 if __name__ == '__main__':
-    test_classes_to_run = [UnicycleTest, LQRTest, DifferentialLQRTest]
+    test_classes_to_run = [
+        UnicycleTest, LQRTest, DifferentialLQRTest, FreeFwdDynamicsTest, FreeFwdDynamicsWithArmatureTest
+    ]
     loader = unittest.TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:
@@ -85,3 +118,4 @@ if __name__ == '__main__':
     big_suite = unittest.TestSuite(suites_list)
     runner = unittest.TextTestRunner()
     results = runner.run(big_suite)
+    sys.exit(not results.wasSuccessful())

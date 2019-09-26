@@ -42,9 +42,9 @@ costModelND = CostModelNumDiff(
     StatePinocchio(rmodel),
     withGaussApprox=True,
     reevals=[
-        lambda m, d, x, u: pinocchio.forwardKinematics(m, d, a2m(
-            x[:rmodel.nq]), a2m(x[rmodel.nq:])), lambda m, d, x, u: pinocchio.computeJointJacobians(
-                m, d, a2m(x[:rmodel.nq])), lambda m, d, x, u: pinocchio.updateFramePlacements(m, d)
+        lambda m, d, x, u: pinocchio.forwardKinematics(m, d, a2m(x[:rmodel.nq]), a2m(x[rmodel.nq:])),
+        lambda m, d, x, u: pinocchio.computeJointJacobians(m, d, a2m(x[:rmodel.nq])),
+        lambda m, d, x, u: pinocchio.updateFramePlacements(m, d)
     ])
 costDataND = costModelND.createData(rdata)
 
@@ -81,9 +81,9 @@ costModelND = CostModelNumDiff(
     StatePinocchio(rmodel),
     withGaussApprox=True,
     reevals=[
-        lambda m, d, x, u: pinocchio.forwardKinematics(m, d, a2m(
-            x[:rmodel.nq]), a2m(x[rmodel.nq:])), lambda m, d, x, u: pinocchio.computeJointJacobians(
-                m, d, a2m(x[:rmodel.nq])), lambda m, d, x, u: pinocchio.updateFramePlacements(m, d)
+        lambda m, d, x, u: pinocchio.forwardKinematics(m, d, a2m(x[:rmodel.nq]), a2m(x[rmodel.nq:])),
+        lambda m, d, x, u: pinocchio.computeJointJacobians(m, d, a2m(x[:rmodel.nq])),
+        lambda m, d, x, u: pinocchio.updateFramePlacements(m, d)
     ])
 costDataND = costModelND.createData(rdata)
 
@@ -119,9 +119,9 @@ costModelND = CostModelNumDiff(
     StatePinocchio(rmodel),
     withGaussApprox=True,
     reevals=[
-        lambda m, d, x, u: pinocchio.forwardKinematics(m, d, a2m(x[:rmodel.nq]), a2m(x[rmodel.nq:])), lambda m, d, x,
-        u: pinocchio.computeForwardKinematicsDerivatives(m, d, a2m(x[:rmodel.nq]), a2m(x[rmodel.nq:]), zero(rmodel.nv)
-                                                         ), lambda m, d, x, u: pinocchio.updateFramePlacements(m, d)
+        lambda m, d, x, u: pinocchio.forwardKinematics(m, d, a2m(x[:rmodel.nq]), a2m(x[rmodel.nq:])),
+        lambda m, d, x, u: pinocchio.computeForwardKinematicsDerivatives(m, d, a2m(x[:rmodel.nq]), a2m(x[
+            rmodel.nq:]), zero(rmodel.nv)), lambda m, d, x, u: pinocchio.updateFramePlacements(m, d)
     ])
 costDataND = costModelND.createData(rdata)
 
@@ -157,9 +157,9 @@ costModelND = CostModelNumDiff(
     StatePinocchio(rmodel),
     withGaussApprox=True,
     reevals=[
-        lambda m, d, x, u: pinocchio.forwardKinematics(m, d, a2m(x[:rmodel.nq]), a2m(x[rmodel.nq:])), lambda m, d, x,
-        u: pinocchio.computeForwardKinematicsDerivatives(m, d, a2m(x[:rmodel.nq]), a2m(x[rmodel.nq:]), zero(rmodel.nv)
-                                                         ), lambda m, d, x, u: pinocchio.updateFramePlacements(m, d)
+        lambda m, d, x, u: pinocchio.forwardKinematics(m, d, a2m(x[:rmodel.nq]), a2m(x[rmodel.nq:])),
+        lambda m, d, x, u: pinocchio.computeForwardKinematicsDerivatives(m, d, a2m(x[:rmodel.nq]), a2m(x[
+            rmodel.nq:]), zero(rmodel.nv)), lambda m, d, x, u: pinocchio.updateFramePlacements(m, d)
     ])
 costDataND = costModelND.createData(rdata)
 
@@ -198,9 +198,9 @@ costModelND = CostModelNumDiff(
     StatePinocchio(rmodel),
     withGaussApprox=True,
     reevals=[
-        lambda m, d, x, u: pinocchio.forwardKinematics(m, d, a2m(
-            x[:rmodel.nq]), a2m(x[rmodel.nq:])), lambda m, d, x, u: pinocchio.computeJointJacobians(
-                m, d, a2m(x[:rmodel.nq])), lambda m, d, x, u: pinocchio.updateFramePlacements(m, d)
+        lambda m, d, x, u: pinocchio.forwardKinematics(m, d, a2m(x[:rmodel.nq]), a2m(x[rmodel.nq:])),
+        lambda m, d, x, u: pinocchio.computeJointJacobians(m, d, a2m(x[:rmodel.nq])),
+        lambda m, d, x, u: pinocchio.updateFramePlacements(m, d)
     ])
 costDataND = costModelND.createData(rdata)
 
@@ -397,9 +397,9 @@ costModelND = CostModelNumDiff(
     StatePinocchio(rmodel),
     withGaussApprox=True,
     reevals=[
-        lambda m, d, x, u: pinocchio.forwardKinematics(m, d, a2m(
-            x[:rmodel.nq]), a2m(x[rmodel.nq:])), lambda m, d, x, u: pinocchio.computeJointJacobians(
-                m, d, a2m(x[:rmodel.nq])), lambda m, d, x, u: pinocchio.updateFramePlacements(m, d)
+        lambda m, d, x, u: pinocchio.forwardKinematics(m, d, a2m(x[:rmodel.nq]), a2m(x[rmodel.nq:])),
+        lambda m, d, x, u: pinocchio.computeJointJacobians(m, d, a2m(x[:rmodel.nq])),
+        lambda m, d, x, u: pinocchio.updateFramePlacements(m, d)
     ])
 costDataND = costModelND.createData(rdata)
 costModelND.calcDiff(costDataND, x, u)

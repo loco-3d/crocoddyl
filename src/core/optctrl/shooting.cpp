@@ -1,16 +1,37 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
 #include "crocoddyl/core/optctrl/shooting.hpp"
+#include <iostream>
+#ifdef WITH_MULTITHREADING
+#include <omp.h>
+#define NUM_THREADS WITH_NTHREADS
+#endif  // WITH_MULTITHREADING
 
 namespace crocoddyl {
 
 ShootingProblem::ShootingProblem(const Eigen::VectorXd& x0, const std::vector<ActionModelAbstract*>& running_models,
                                  ActionModelAbstract* const terminal_model)
-    : terminal_model_(terminal_model), running_models_(running_models), T_(running_models.size()), x0_(x0), cost_(0.) {
+    : terminal_model_(terminal_model),
+      running_models_(running_models),
+      T_(static_cast<unsigned int>(running_models.size())),
+      x0_(x0),
+      cost_(0.) {
+  assert(x0_.size() == running_models_[0]->get_state().get_nx() && "x0 has wrong dimension");
   allocateData();
 }
 
 ShootingProblem::~ShootingProblem() {}
 
 double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us) {
+  assert(xs.size() == T_ + 1 && "Wrong dimension of the state trajectory, it should be T + 1.");
+  assert(us.size() == T_ && "Wrong dimension of the control trajectory, it should be T.");
+
   cost_ = 0;
   for (unsigned int i = 0; i < T_; ++i) {
     // just get some aliases here
@@ -28,35 +49,45 @@ double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::
 }
 
 double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us) {
-  cost_ = 0;
-  for (long unsigned int i = 0; i < T_; ++i) {
-    ActionModelAbstract* model = running_models_[i];
-    boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
-    const Eigen::VectorXd& x = xs[i];
-    const Eigen::VectorXd& u = us[i];
+  assert(xs.size() == T_ + 1 && "Wrong dimension of the state trajectory, it should be T + 1.");
+  assert(us.size() == T_ && "Wrong dimension of the control trajectory, it should be T.");
 
-    model->calcDiff(data, x, u);
-    cost_ += data->cost;
+  cost_ = 0;
+  unsigned int i;
+
+#ifdef WITH_MULTITHREADING
+  omp_set_num_threads(NUM_THREADS);
+#pragma omp parallel for
+#endif
+  for (i = 0; i < T_; ++i) {
+    running_models_[i]->calcDiff(running_datas_[i], xs[i], us[i]);
   }
+
+  for (unsigned int i = 0; i < T_; ++i) {
+    cost_ += running_datas_[i]->cost;
+  }
+
   terminal_model_->calcDiff(terminal_data_, xs.back());
   cost_ += terminal_data_->cost;
   return cost_;
 }
 
 void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us, std::vector<Eigen::VectorXd>& xs) {
+  assert(us.size() == T_ && "Wrong dimension of the control trajectory, it should be T.");
   if (xs.size() < T_ + 1){
     xs.resize(T_ + 1);
   }
   xs[0] = x0_;
-  for (long unsigned int i = 0; i < T_; ++i) {
+  for (unsigned int i = 0; i < T_; ++i) {
     ActionModelAbstract* model = running_models_[i];
     boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
-    Eigen::VectorXd& x = xs[i];
+    const Eigen::VectorXd& x = xs[i];
     const Eigen::VectorXd& u = us[i];
 
     model->calc(data, x, u);
     xs[i + 1] = data->get_xnext();
   }
+  terminal_model_->calc(terminal_data_, xs.back());
 }
 
 std::vector<Eigen::VectorXd> ShootingProblem::rollout_us(const std::vector<Eigen::VectorXd>& us) {
@@ -65,12 +96,12 @@ std::vector<Eigen::VectorXd> ShootingProblem::rollout_us(const std::vector<Eigen
   return xs;
 }
 
-long unsigned int ShootingProblem::get_T() const { return T_; }
+unsigned int ShootingProblem::get_T() const { return T_; }
 
 const Eigen::VectorXd& ShootingProblem::get_x0() const { return x0_; }
 
 void ShootingProblem::allocateData() {
-  for (unsigned int i = 0; i < running_models_.size(); ++i) {
+  for (unsigned int i = 0; i < T_; ++i) {
     ActionModelAbstract* model = running_models_[i];
     running_datas_.push_back(model->createData());
   }

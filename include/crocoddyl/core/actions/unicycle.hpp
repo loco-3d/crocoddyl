@@ -19,14 +19,17 @@ class ActionModelUnicycle : public ActionModelAbstract {
   ActionModelUnicycle();
   ~ActionModelUnicycle();
 
-  void calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u);
-  void calcDiff(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
   boost::shared_ptr<ActionDataAbstract> createData();
 
+  const Eigen::Vector2d& get_cost_weights() const;
+  void set_cost_weights(const Eigen::Vector2d& weights);
+
  private:
-  Eigen::Matrix<double, 2, 1> cost_weights_;
+  Eigen::Vector2d cost_weights_;
   double dt_;
 };
 
@@ -34,8 +37,7 @@ struct ActionDataUnicycle : public ActionDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  ActionDataUnicycle(Model* const model) : ActionDataAbstract(model) {}
-  ~ActionDataUnicycle() {}
+  explicit ActionDataUnicycle(Model* const model) : ActionDataAbstract(model) {}
 };
 
 }  // namespace crocoddyl

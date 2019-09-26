@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
-#define PYTHON_CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
 
 #include "crocoddyl/multibody/costs/control.hpp"
 
@@ -18,54 +18,54 @@ namespace bp = boost::python;
 
 void exposeCostControl() {
   bp::class_<CostModelControl, bp::bases<CostModelAbstract> >(
-      "CostModelControl", bp::init<pinocchio::Model*, ActivationModelAbstract*, Eigen::VectorXd>(
-                              bp::args(" self", " model", " activation", " uref"),
-                              "Initialize the control cost model.\n\n"
-                              ":param model: Pinocchio model of the multibody system\n"
-                              ":param activation: activation model\n"
-                              ":param uref: reference control")[bp::with_custodian_and_ward<1, 3>()])
-      .def(bp::init<pinocchio::Model*, ActivationModelAbstract*>(
-          bp::args(" self", " model", " activation"),
+      "CostModelControl",
+      bp::init<StateMultibody&, ActivationModelAbstract&, Eigen::VectorXd>(
+          bp::args(" self", " state", " activation", " uref"),
+          "Initialize the control cost model.\n\n"
+          ":param state: state of the multibody system\n"
+          ":param activation: activation model\n"
+          ":param uref: reference control")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .def(bp::init<StateMultibody&, ActivationModelAbstract&>(
+          bp::args(" self", " state", " activation"),
           "Initialize the control cost model.\n\n"
           "For this case the default uref is the zeros state, i.e. np.zero(nu), where nu is equals to activation.nr.\n"
-          ":param model: Pinocchio model of the multibody system\n"
-          ":param activation: activation model")[bp::with_custodian_and_ward<1, 3>()])
-      .def(bp::init<pinocchio::Model*, ActivationModelAbstract*, int>(
-          bp::args(" self", " model", " activation", " nu"),
+          ":param state: state of the multibody system\n"
+          ":param activation: activation model")[bp::with_custodian_and_ward<1, 2,
+                                                                             bp::with_custodian_and_ward<1, 3> >()])
+      .def(bp::init<StateMultibody&, ActivationModelAbstract&, int>(
+          bp::args(" self", " state", " activation", " nu"),
           "Initialize the control cost model.\n\n"
           "For this case the default uref is the zeros state, i.e. np.zero(nu).\n"
-          ":param model: Pinocchio model of the multibody system\n"
+          ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
-          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
-      .def(bp::init<pinocchio::Model*, Eigen::VectorXd>(
-          bp::args(" self", " model", " uref"),
+          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2,
+                                                                                bp::with_custodian_and_ward<1, 3> >()])
+      .def(bp::init<StateMultibody&, Eigen::VectorXd>(
+          bp::args(" self", " state", " uref"),
           "Initialize the control cost model.\n\n"
           "For this case the default activation model is quadratic, i.e. crocoddyl.ActivationModelQuad(uref.size()).\n"
-          ":param model: Pinocchio model of the multibody system\n"
+          ":param state: state of the multibody system\n"
           ":param uref: reference control")[bp::with_custodian_and_ward<1, 2>()])
-      .def(bp::init<pinocchio::Model*>(
-          bp::args(" self", " model"),
+      .def(bp::init<StateMultibody&>(
+          bp::args(" self", " state"),
           "Initialize the control cost model.\n\n"
           "For this case the default uref is the zeros vector, i.e. np.zero(model.nv), and\n"
           "activation is quadratic, i.e. crocoddyl.ActivationModelQuad(model.nv), and nu is equals to model.nv.\n"
-          ":param model: Pinocchio model of the multibody system")[bp::with_custodian_and_ward<1, 2>()])
-      .def(bp::init<pinocchio::Model*, int>(
-          bp::args(" self", " model", " nu"),
+          ":param state: state of the multibody system")[bp::with_custodian_and_ward<1, 2>()])
+      .def(bp::init<StateMultibody&, int>(
+          bp::args(" self", " state", " nu"),
           "Initialize the control cost model.\n\n"
           "For this case the default uref is the zeros vector and the default activation\n"
           "model is quadratic, i.e. crocoddyl.ActivationModelQuad(nu)\n"
-          ":param model: Pinocchio model of the multibody system\n"
+          ":param state: state of the multibody system\n"
           ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2>()])
-      .def<void (CostModelControl::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                      const Eigen::VectorXd&)>("calc", &CostModelControl::calc_wrap,
-                                                               bp::args(" self", " data", " x", " u=None"),
-                                                               "Compute the control cost.\n\n"
-                                                               ":param data: cost data\n"
-                                                               ":param x: time-discrete state vector\n"
-                                                               ":param u: time-discrete control input")
-      .def<void (CostModelControl::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
-          "calc", &CostModelControl::calc_wrap, bp::args(" self", " data", " x"))
-      .def<void (CostModelControl::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+      .def("calc", &CostModelControl::calc_wrap,
+           CostModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
+                                "Compute the control cost.\n\n"
+                                ":param data: cost data\n"
+                                ":param x: time-discrete state vector\n"
+                                ":param u: time-discrete control input"))
+      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                       const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &CostModelControl::calcDiff_wrap, bp::args(" self", " data", " x", " u=None", " recalc=True"),
           "Compute the derivatives of the control cost.\n\n"
@@ -73,13 +73,14 @@ void exposeCostControl() {
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n"
           ":param recalc: If true, it updates the state evolution and the cost value.")
-      .def<void (CostModelControl::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                       const Eigen::VectorXd&)>("calcDiff", &CostModelControl::calcDiff_wrap,
                                                                bp::args(" self", " data", " x", " u"))
-      .def<void (CostModelControl::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
+      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &CostModelControl::calcDiff_wrap, bp::args(" self", " data", " x"))
-      .def<void (CostModelControl::*)(boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &CostModelControl::calcDiff_wrap, bp::args(" self", " data", " x", " recalc"))
+      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+                                      const bool&)>("calcDiff", &CostModelControl::calcDiff_wrap,
+                                                    bp::args(" self", " data", " x", " recalc"))
       .add_property("uref",
                     bp::make_function(&CostModelControl::get_uref, bp::return_value_policy<bp::return_by_value>()),
                     "reference control");
@@ -88,4 +89,4 @@ void exposeCostControl() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_

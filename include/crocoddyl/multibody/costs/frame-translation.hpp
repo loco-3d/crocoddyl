@@ -11,29 +11,22 @@
 #define CROCODDYL_MULTIBODY_COSTS_FRAME_TRANSLATION_HPP_
 
 #include "crocoddyl/multibody/cost-base.hpp"
-// #include <pinocchio/spatial/se3.hpp>
+#include "crocoddyl/multibody/frames.hpp"
 
 namespace crocoddyl {
 
-struct FrameTranslation {
-  FrameTranslation(const unsigned int& frame, const Eigen::Vector3d& oxf) : frame(frame), oxf(oxf) {}
-  unsigned int frame;
-  Eigen::Vector3d oxf;
-};
-
 class CostModelFrameTranslation : public CostModelAbstract {
  public:
-  CostModelFrameTranslation(pinocchio::Model* const model, ActivationModelAbstract* const activation,
-                            const FrameTranslation& xref, const unsigned int& nu);
-  CostModelFrameTranslation(pinocchio::Model* const model, ActivationModelAbstract* const activation,
-                            const FrameTranslation& xref);
-  CostModelFrameTranslation(pinocchio::Model* const model, const FrameTranslation& xref, const unsigned int& nu);
-  CostModelFrameTranslation(pinocchio::Model* const model, const FrameTranslation& xref);
+  CostModelFrameTranslation(StateMultibody& state, ActivationModelAbstract& activation, const FrameTranslation& xref,
+                            unsigned int const& nu);
+  CostModelFrameTranslation(StateMultibody& state, ActivationModelAbstract& activation, const FrameTranslation& xref);
+  CostModelFrameTranslation(StateMultibody& state, const FrameTranslation& xref, unsigned int const& nu);
+  CostModelFrameTranslation(StateMultibody& state, const FrameTranslation& xref);
   ~CostModelFrameTranslation();
 
-  void calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u);
-  void calcDiff(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
   boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
@@ -48,7 +41,7 @@ struct CostDataFrameTranslation : public CostDataAbstract {
 
   template <typename Model>
   CostDataFrameTranslation(Model* const model, pinocchio::Data* const data)
-      : CostDataAbstract(model, data), J(6, model->get_nv()), fJf(6, model->get_nv()) {
+      : CostDataAbstract(model, data), J(3, model->get_state().get_nv()), fJf(6, model->get_state().get_nv()) {
     J.fill(0);
     fJf.fill(0);
   }

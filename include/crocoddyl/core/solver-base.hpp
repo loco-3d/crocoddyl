@@ -19,13 +19,15 @@ static std::vector<Eigen::VectorXd> DEFAULT_VECTOR;
 
 class SolverAbstract {
  public:
-  SolverAbstract(ShootingProblem& problem);
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  explicit SolverAbstract(ShootingProblem& problem);
   virtual ~SolverAbstract();
 
   virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const unsigned int& maxiter = 100,
+                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, unsigned int const& maxiter = 100,
                      const bool& is_feasible = false, const double& reg_init = 1e-9) = 0;
-  // TODO: computeDirection (polimorfism) returning descent direction and lambdas
+  // TODO(cmastalli): computeDirection (polymorphism) returning descent direction and lambdas
   virtual void computeDirection(const bool& recalc) = 0;
   virtual double tryStep(const double& step_length = 1) = 0;
   virtual double stoppingCriteria() = 0;
@@ -33,7 +35,8 @@ class SolverAbstract {
   void setCandidate(const std::vector<Eigen::VectorXd>& xs_warm = DEFAULT_VECTOR,
                     const std::vector<Eigen::VectorXd>& us_warm = DEFAULT_VECTOR, const bool& is_feasible = false);
 
-  void setCallbacks(std::vector<CallbackAbstract*>& callbacks);
+  void setCallbacks(const std::vector<CallbackAbstract*>& callbacks);
+  const std::vector<CallbackAbstract*>& getCallbacks() const;
 
   const ShootingProblem& get_problem() const;
   const std::vector<ActionModelAbstract*>& get_models() const;
@@ -52,7 +55,7 @@ class SolverAbstract {
   const double& get_dVexp() const;
 
  protected:
-  ShootingProblem problem_;
+  ShootingProblem& problem_;
   std::vector<ActionModelAbstract*> models_;
   std::vector<boost::shared_ptr<ActionDataAbstract> > datas_;
   std::vector<Eigen::VectorXd> xs_;
@@ -76,8 +79,10 @@ class CallbackAbstract {
  public:
   CallbackAbstract() {}
   ~CallbackAbstract() {}
-  virtual void operator()(SolverAbstract* const solver) = 0;
+  virtual void operator()(SolverAbstract& solver) = 0;
 };
+
+bool raiseIfNaN(const double& value);
 
 }  // namespace crocoddyl
 

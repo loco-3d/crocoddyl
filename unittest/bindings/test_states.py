@@ -1,9 +1,12 @@
-import crocoddyl
-from utils import StateVectorDerived, StateMultibodyDerived
-import pinocchio
-from random import randint
-import numpy as np
+import sys
 import unittest
+from random import randint
+
+import numpy as np
+
+import crocoddyl
+import pinocchio
+from crocoddyl.utils import StateMultibodyDerived, StateVectorDerived
 
 
 class StateAbstractTestCase(unittest.TestCase):
@@ -28,25 +31,16 @@ class StateAbstractTestCase(unittest.TestCase):
         x1 = self.STATE.rand()
 
         # Checking that both diff functions agree
-        if self.STATE.__class__ == crocoddyl.libcrocoddyl_pywrap.StateMultibody:
-            self.assertTrue(np.allclose(self.STATE.diff(x0, x1)[3:], self.STATE_DER.diff(x0, x1)[3:], atol=1e-9),
-                            "state.diff() function doesn't agree with Python bindings.")
-        else:
-            self.assertTrue(np.allclose(self.STATE.diff(x0, x1), self.STATE_DER.diff(x0, x1), atol=1e-9),
-                            "state.diff() function doesn't agree with Python bindings.")
+        self.assertTrue(np.allclose(self.STATE.diff(x0, x1), self.STATE_DER.diff(x0, x1), atol=1e-9),
+                        "state.diff() function doesn't agree with Python bindings.")
 
     def test_python_derived_integrate(self):
         x = self.STATE.rand()
         dx = self.STATE.rand()[:self.STATE.ndx]
 
         # Checking that both integrate functions agree
-        if self.STATE.__class__ == crocoddyl.libcrocoddyl_pywrap.StateMultibody:
-            self.assertTrue(
-                np.allclose(self.STATE.integrate(x, dx)[3:], self.STATE_DER.integrate(x, dx)[3:], atol=1e-9),
-                "state.integrate() function doesn't agree with Python bindings.")
-        else:
-            self.assertTrue(np.allclose(self.STATE.integrate(x, dx), self.STATE_DER.integrate(x, dx), atol=1e-9),
-                            "state.integrate() function doesn't agree with Python bindings.")
+        self.assertTrue(np.allclose(self.STATE.integrate(x, dx), self.STATE_DER.integrate(x, dx), atol=1e-9),
+                        "state.integrate() function doesn't agree with Python bindings.")
 
     def test_python_derived_Jdiff(self):
         x0 = self.STATE.rand()
@@ -94,8 +88,16 @@ class StateVectorTest(StateAbstractTestCase):
     STATE_DER = StateVectorDerived(NX)
 
 
-class StateMultibodyTest(StateAbstractTestCase):
-    MODEL = pinocchio.buildSampleModelHumanoid()
+class StateMultibodyManipulatorTest(StateAbstractTestCase):
+    MODEL = pinocchio.buildSampleModelManipulator()
+    NX = MODEL.nq + MODEL.nv
+    NDX = 2 * MODEL.nv
+    STATE = crocoddyl.StateMultibody(MODEL)
+    STATE_DER = StateMultibodyDerived(MODEL)
+
+
+class StateMultibodyHumanoidTest(StateAbstractTestCase):
+    MODEL = pinocchio.buildSampleModelHumanoidRandom()
     NX = MODEL.nq + MODEL.nv
     NDX = 2 * MODEL.nv
     STATE = crocoddyl.StateMultibody(MODEL)
@@ -103,7 +105,7 @@ class StateMultibodyTest(StateAbstractTestCase):
 
 
 if __name__ == '__main__':
-    test_classes_to_run = [StateVectorTest, StateMultibodyTest]
+    test_classes_to_run = [StateVectorTest, StateMultibodyManipulatorTest, StateMultibodyHumanoidTest]
     loader = unittest.TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:
@@ -112,3 +114,4 @@ if __name__ == '__main__':
     big_suite = unittest.TestSuite(suites_list)
     runner = unittest.TextTestRunner()
     results = runner.run(big_suite)
+    sys.exit(not results.wasSuccessful())

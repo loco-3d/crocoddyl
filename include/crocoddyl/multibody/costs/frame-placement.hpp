@@ -10,29 +10,22 @@
 #define CROCODDYL_MULTIBODY_COSTS_FRAME_PLACEMENT_HPP_
 
 #include "crocoddyl/multibody/cost-base.hpp"
-#include <pinocchio/spatial/se3.hpp>
+#include "crocoddyl/multibody/frames.hpp"
 
 namespace crocoddyl {
 
-struct FramePlacement {
-  FramePlacement(const unsigned int& frame, const pinocchio::SE3& oMf) : frame(frame), oMf(oMf) {}
-  unsigned int frame;
-  pinocchio::SE3 oMf;
-};
-
 class CostModelFramePlacement : public CostModelAbstract {
  public:
-  CostModelFramePlacement(pinocchio::Model* const model, ActivationModelAbstract* const activation,
-                          const FramePlacement& Fref, const unsigned int& nu);
-  CostModelFramePlacement(pinocchio::Model* const model, ActivationModelAbstract* const activation,
-                          const FramePlacement& Fref);
-  CostModelFramePlacement(pinocchio::Model* const model, const FramePlacement& Fref, const unsigned int& nu);
-  CostModelFramePlacement(pinocchio::Model* const model, const FramePlacement& Fref);
+  CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation, const FramePlacement& Fref,
+                          unsigned int const& nu);
+  CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation, const FramePlacement& Fref);
+  CostModelFramePlacement(StateMultibody& state, const FramePlacement& Fref, unsigned int const& nu);
+  CostModelFramePlacement(StateMultibody& state, const FramePlacement& Fref);
   ~CostModelFramePlacement();
 
-  void calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u);
-  void calcDiff(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
   boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
@@ -48,11 +41,16 @@ struct CostDataFramePlacement : public CostDataAbstract {
 
   template <typename Model>
   CostDataFramePlacement(Model* const model, pinocchio::Data* const data)
-      : CostDataAbstract(model, data), J(6, model->get_nv()), rJf(6, 6), fJf(6, model->get_nv()) {
+      : CostDataAbstract(model, data),
+        J(6, model->get_state().get_nv()),
+        rJf(6, 6),
+        fJf(6, model->get_state().get_nv()),
+        Arr_J(6, model->get_state().get_nv()) {
     r.fill(0);
     J.fill(0);
     rJf.fill(0);
     fJf.fill(0);
+    Arr_J.fill(0);
   }
 
   pinocchio::Motion::Vector6 r;
@@ -60,6 +58,7 @@ struct CostDataFramePlacement : public CostDataAbstract {
   pinocchio::Data::Matrix6x J;
   pinocchio::Data::Matrix6 rJf;
   pinocchio::Data::Matrix6x fJf;
+  pinocchio::Data::Matrix6x Arr_J;
 };
 
 }  // namespace crocoddyl

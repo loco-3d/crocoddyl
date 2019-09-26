@@ -14,7 +14,6 @@ class DifferentialActionModelAbstract:
     the dynamics, cost functions and their derivatives. These computations are
     mainly carry on inside calc() and calcDiff(), respectively.
     """
-
     def __init__(self, nq, nv, nu):
         self.nq = nq
         self.nv = nv
@@ -167,7 +166,7 @@ class DifferentialActionModelFullyActuated(DifferentialActionModelAbstract):
             pinocchio.computeABADerivatives(self.pinocchio, data.pinocchio, q, v, tauq)
             data.Fx[:, :nv] = data.pinocchio.ddq_dq
             data.Fx[:, nv:] = data.pinocchio.ddq_dv
-            data.Fu[:, :] = data.Minv
+            data.Fu[:, :] = data.pinocchio.Minv
         else:
             pinocchio.computeRNEADerivatives(self.pinocchio, data.pinocchio, q, v, a)
             data.Fx[:, :nv] = -np.dot(data.Minv, data.pinocchio.dtau_dq)
@@ -200,7 +199,6 @@ class DifferentialActionModelLQR(DifferentialActionModelAbstract):
     is given by
       l(x,u) = 1/2 [x,u].T [Lxx Lxu; Lxu.T Luu] [x,u] + [lx,lu].T [x,u]
     """
-
     def __init__(self, nq, nu, driftFree=True):
         DifferentialActionModelAbstract.__init__(self, nq, nq, nu)
         self.DifferentialActionDataType = DifferentialActionDataLQR

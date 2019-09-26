@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_
-#define PYTHON_CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_
 
 #include "crocoddyl/core/activations/quadratic.hpp"
 
@@ -29,18 +29,21 @@ void exposeActivationQuad() {
            "Compute the 0.5 * ||r||^2.\n\n"
            ":param data: activation data\n"
            ":param r: residual vector")
-      .def<void (ActivationModelQuad::*)(boost::shared_ptr<ActivationDataAbstract>&, const Eigen::VectorXd&,
-                                         const bool&)>("calcDiff", &ActivationModelQuad::calcDiff_wrap,
-                                                       bp::args(" self", " data", " r", " recalc=True"),
-                                                       "Compute the derivatives of a quadratic function.\n\n"
-                                                       ":param data: activation data\n"
-                                                       ":param r: residual vector \n"
-                                                       ":param recalc: If true, it updates the residual value.")
-      .def<void (ActivationModelQuad::*)(boost::shared_ptr<ActivationDataAbstract>&, const Eigen::VectorXd&)>(
-          "calcDiff", &ActivationModelQuad::calcDiff_wrap, bp::args(" self", " data", " r"));
+      .def<void (ActivationModelQuad::*)(const boost::shared_ptr<ActivationDataAbstract>&, const Eigen::VectorXd&,
+                                         const bool&)>(
+          "calcDiff", &ActivationModelQuad::calcDiff_wrap, bp::args(" self", " data", " r", " recalc=True"),
+          "Compute the derivatives of a quadratic function.\n\n"
+          "Note that the Hessian is constant, so we don't write again this value.\n"
+          ":param data: activation data\n"
+          ":param r: residual vector \n"
+          ":param recalc: If true, it updates the residual value.")
+      .def<void (ActivationModelQuad::*)(const boost::shared_ptr<ActivationDataAbstract>&, const Eigen::VectorXd&)>(
+          "calcDiff", &ActivationModelQuad::calcDiff_wrap, bp::args(" self", " data", " r"))
+      .def("createData", &ActivationModelQuad::createData, bp::args(" self"),
+           "Create the quadratic activation data.\n\n");
 }
 
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_

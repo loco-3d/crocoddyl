@@ -6,66 +6,32 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_UTILS_HPP_
-#define PYTHON_CROCODDYL_UTILS_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_UTILS_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_UTILS_HPP_
 
-#include <boost/python/stl_iterator.hpp>
-#include <boost/python/to_python_converter.hpp>
 #include <Eigen/Dense>
 #include <vector>
 #include <map>
+#include <boost/python/stl_iterator.hpp>
+#include <boost/python/to_python_converter.hpp>
 
 namespace crocoddyl {
 namespace python {
 
 namespace bp = boost::python;
 
-template <typename T>
-struct is_pointer {
-  static const bool value = false;
-};
-
-template <typename T>
-struct is_pointer<T*> {
-  static const bool value = true;
-};
-
-template <class T>
-bp::list std_vector_to_python_list(const std::vector<T>& vec) {
-  const long unsigned int& n = vec.size();
-  bp::list list;
-  for (unsigned int i = 0; i < n; ++i) {
-    if (is_pointer<T>::value) {
-      list.append(boost::ref(vec[i]));
-    } else {
-      list.append(vec[i]);
-    }
-  }
-  return list;
-}
-
-template <class T>
-std::vector<T> python_list_to_std_vector(const bp::list& list) {
-  const long int& n = len(list);
-  std::vector<T> vec;
-  vec.resize(n);
-  for (int i = 0; i < n; ++i) {
-    vec[i] = bp::extract<T>(list[i]);
-  }
-  return vec;
-}
-
 /// @note Registers converter from a provided type to the python
 ///       iterable type to the.
-template <class T>
+template <class T, bool NoProxy = true>
 struct vector_to_list {
   static PyObject* convert(const std::vector<T>& vec) {
+    typedef typename std::vector<T>::const_iterator const_iter;
     bp::list* l = new boost::python::list();
-    for (size_t i = 0; i < vec.size(); i++) {
-      if (is_pointer<T>::value) {
-        l->append(boost::ref(vec[i]));
+    for (const_iter it = vec.begin(); it != vec.end(); ++it) {
+      if (NoProxy) {
+        l->append(boost::ref(*it));
       } else {
-        l->append(vec[i]);
+        l->append(*it);
       }
     }
     return l->ptr();
@@ -123,13 +89,17 @@ struct list_to_vector {
 
 /// @note Registers converter from a provided type to the python
 ///       iterable type to the.
-template <class K, class V>
+template <class K, class V, bool NoProxy = true>
 struct map_to_dict {
   static PyObject* convert(const std::map<K, V>& map) {
     bp::dict* dict = new boost::python::dict();
     typename std::map<K, V>::const_iterator it;
     for (it = map.begin(); it != map.end(); ++it) {
-      dict->setdefault(it->first, boost::ref(it->second));
+      if (NoProxy) {
+        dict->setdefault(it->first, boost::ref(it->second));
+      } else {
+        dict->setdefault(it->first, it->second);
+      }
     }
     return dict->ptr();
   }
@@ -201,4 +171,4 @@ struct dict_to_map {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_UTILS_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_UTILS_HPP_

@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_ACTION_BASE_HPP_
-#define PYTHON_CROCODDYL_CORE_ACTION_BASE_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_CORE_ACTION_BASE_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_CORE_ACTION_BASE_HPP_
 
 #include "crocoddyl/core/action-base.hpp"
 
@@ -18,21 +18,26 @@ namespace bp = boost::python;
 
 class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<ActionModelAbstract> {
  public:
-  ActionModelAbstract_wrap(StateAbstract* const state, const unsigned int& nu, const unsigned int& nr = 0)
+  ActionModelAbstract_wrap(StateAbstract& state, unsigned int const& nu, unsigned int const& nr = 1)
       : ActionModelAbstract(state, nu, nr), bp::wrapper<ActionModelAbstract>() {}
 
-  void calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
+    assert(x.size() == state_.get_nx() && "x has wrong dimension");
+    assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
-  void calcDiff(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
+    assert(x.size() == state_.get_nx() && "x has wrong dimension");
+    assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
-
-  boost::shared_ptr<ActionDataAbstract> createData() { return boost::make_shared<ActionDataAbstract>(this); }
 };
+
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ActionModel_calc_wraps, ActionModelAbstract::calc_wrap, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ActionModel_quasicStatic_wraps, ActionModelAbstract::quasicStatic_wrap, 2, 4)
 
 void exposeActionAbstract() {
   bp::class_<ActionModelAbstract_wrap, boost::noncopyable>(
@@ -43,9 +48,10 @@ void exposeActionAbstract() {
       "a problem, we need to provide ways of computing the dynamics, cost functions and their\n"
       "derivatives. These computations are mainly carry on inside calc() and calcDiff(),\n"
       "respectively.",
-      bp::init<StateAbstract*, int, bp::optional<int> >(
-          bp::args(" self", " state", " nu", " nr=0"),
+      bp::init<StateAbstract&, int, bp::optional<int> >(
+          bp::args(" self", " state", " nu", " nr=1"),
           "Initialize the action model.\n\n"
+          "You can also describe autonomous systems by setting nu = 0.\n"
           ":param state: state description,\n"
           ":param nu: dimension of control vector,\n"
           ":param nr: dimension of the cost-residual vector")[bp::with_custodian_and_ward<1, 2>()])
@@ -73,24 +79,30 @@ void exposeActionAbstract() {
            "Each action model (AM) has its own data that needs to be allocated.\n"
            "This function returns the allocated data for a predefined AM.\n"
            ":return AM data.")
-      .add_property(
-          "nx", bp::make_function(&ActionModelAbstract_wrap::get_nx, bp::return_value_policy<bp::return_by_value>()),
-          "dimension of state configuration vector")
-      .add_property(
-          "ndx", bp::make_function(&ActionModelAbstract_wrap::get_ndx, bp::return_value_policy<bp::return_by_value>()),
-          "dimension of state tangent vector")
+      .def("quasicStatic", &ActionModelAbstract_wrap::quasicStatic_wrap,
+           ActionModel_quasicStatic_wraps(
+               bp::args(" self", " data", " x", " maxiter=100", " tol=1e-9"),
+               "Compute the quasic-static control given a state.\n\n"
+               "It runs an iterative Newton step in order to compute the quasic-static regime\n"
+               "given a state configuration.\n"
+               ":param data: action data\n"
+               ":param x: discrete-time state vector\n"
+               ":param maxiter: maximum allowed number of iterations\n"
+               ":param tol: stopping tolerance criteria\n"
+               ":return u: quasic-static control"))
       .add_property(
           "nu", bp::make_function(&ActionModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
           "dimension of control vector")
       .add_property(
           "nr", bp::make_function(&ActionModelAbstract_wrap::get_nr, bp::return_value_policy<bp::return_by_value>()),
           "dimension of cost-residual vector")
-      .add_property("State",
-                    bp::make_function(&ActionModelAbstract_wrap::get_state,
-                                      bp::return_value_policy<bp::reference_existing_object>()),
+      .add_property("state",
+                    bp::make_function(&ActionModelAbstract_wrap::get_state, bp::return_internal_reference<>()),
                     "state");
 
-  bp::class_<ActionDataAbstract, boost::shared_ptr<ActionDataAbstract>, boost::noncopyable>(
+  bp::register_ptr_to_python<boost::shared_ptr<ActionDataAbstract> >();
+
+  bp::class_<ActionDataAbstract, boost::noncopyable>(
       "ActionDataAbstract",
       "Abstract class for action datas.\n\n"
       "In crocoddyl, an action data contains all the required information for processing an\n"
@@ -106,6 +118,8 @@ void exposeActionAbstract() {
       .add_property("xnext",
                     bp::make_getter(&ActionDataAbstract::xnext, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ActionDataAbstract::xnext), "next state")
+      .add_property("r", bp::make_getter(&ActionDataAbstract::r, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ActionDataAbstract::r), "cost residual")
       .add_property("Fx", bp::make_getter(&ActionDataAbstract::Fx, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ActionDataAbstract::Fx), "Jacobian of the dynamics")
       .add_property("Fu", bp::make_getter(&ActionDataAbstract::Fu, bp::return_value_policy<bp::return_by_value>()),
@@ -119,17 +133,10 @@ void exposeActionAbstract() {
       .add_property("Lxu", bp::make_getter(&ActionDataAbstract::Lxu, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ActionDataAbstract::Lxu), "Hessian of the cost")
       .add_property("Luu", bp::make_getter(&ActionDataAbstract::Luu, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract::Luu), "Hessian of the cost")
-      .add_property("costResiduals",
-                    bp::make_getter(&ActionDataAbstract::r, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract::r))
-      .add_property("Rx", bp::make_getter(&ActionDataAbstract::Rx, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract::Rx))
-      .add_property("Ru", bp::make_getter(&ActionDataAbstract::Ru, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActionDataAbstract::Ru));
+                    bp::make_setter(&ActionDataAbstract::Luu), "Hessian of the cost");
 }
 
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_CORE_ACTION_BASE_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_ACTION_BASE_HPP_

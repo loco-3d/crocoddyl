@@ -16,7 +16,6 @@ class StateAbstract:
     the points x, x1 and x2 belongs to the manifold M; and dx or x1 [-] x2 lie
     on its tangential space.
     """
-
     def __init__(self, nx, ndx):
         # Setting up the dimension of the state vector and its tangent vector
         self.nx = nx
@@ -97,7 +96,6 @@ class StateVector(StateAbstract):
     point and its velocity lie in the same space, all Jacobians are described
     throught the identity matrix.
     """
-
     def __init__(self, nx):
         # Euclidean point and its velocity lie in the same space dimension.
         StateAbstract.__init__(self, nx, nx)
@@ -173,7 +171,6 @@ class StateNumDiff(StateAbstract):
     computation of a custom State. For doing so, we need to construct this class
     by passing as an argument our State object.
     """
-
     def __init__(self, State):
         StateAbstract.__init__(self, State.nx, State.ndx)
         self.State = State
@@ -275,7 +272,6 @@ class StatePinocchio(StateAbstract):
     Jacobians for the differentiate and integrate operators. Note that this code
     can be reused in any robot that is described through its Pinocchio model.
     """
-
     def __init__(self, pinocchioModel):
         StateAbstract.__init__(self, pinocchioModel.nq + pinocchioModel.nv, 2 * pinocchioModel.nv)
         self.model = pinocchioModel

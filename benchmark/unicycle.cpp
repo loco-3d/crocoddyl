@@ -1,7 +1,19 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
 #include "crocoddyl/core/actions/unicycle.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
-#include <ctime>
+#include <time.h>
+
+#ifdef WITH_MULTITHREADING
+#include <omp.h>
+#endif  // WITH_MULTITHREADING
 
 int main() {
   bool CALLBACKS = false;
@@ -32,31 +44,58 @@ int main() {
   SolverDDP ddp(problem);
   if (CALLBACKS) {
     std::vector<CallbackAbstract*> cbs;
-    cbs.push_back(new CallbackDDPVerbose());
+    cbs.push_back(new CallbackVerbose());
     ddp.setCallbacks(cbs);
   }
 
   // Solving the optimal control problem
-  std::clock_t c_start, c_end;
-  std::vector<double> duration;
+  struct timespec start, finish;
+  double elapsed;
+  Eigen::ArrayXd duration(T);
   for (unsigned int i = 0; i < T; ++i) {
-    c_start = std::clock();
+    clock_gettime(CLOCK_MONOTONIC, &start);
     ddp.solve(xs, us, MAXITER);
-    c_end = std::clock();
-    duration.push_back(1e3 * (double)(c_end - c_start) / CLOCKS_PER_SEC);
+    clock_gettime(CLOCK_MONOTONIC, &finish);
+    elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
+    elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;
+    duration[i] = elapsed / 1000.;
   }
 
-  double avrg_duration = 0., min_duration = std::numeric_limits<double>::max(), max_duration = 0.;
+  double avrg_duration = duration.sum() / T;
+  double min_duration = duration.minCoeff();
+  double max_duration = duration.maxCoeff();
+  std::cout << "Wall time solve [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
+            << std::endl;
+
+  // Running calc
   for (unsigned int i = 0; i < T; ++i) {
-    const double& dt = duration[i];
-    avrg_duration += dt;
-    if (dt < min_duration) {
-      min_duration = dt;
-    }
-    if (dt > max_duration) {
-      max_duration = dt;
-    }
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    problem.calc(xs, us);
+    clock_gettime(CLOCK_MONOTONIC, &finish);
+    elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
+    elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;
+    duration[i] = elapsed / 1000.;
   }
-  avrg_duration /= T;
-  std::cout << "CPU time [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")" << std::endl;
+
+  avrg_duration = duration.sum() / T;
+  min_duration = duration.minCoeff();
+  max_duration = duration.maxCoeff();
+  std::cout << "Wall time calc [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
+            << std::endl;
+
+  // Running calcDiff
+  for (unsigned int i = 0; i < T; ++i) {
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    problem.calcDiff(xs, us);
+    clock_gettime(CLOCK_MONOTONIC, &finish);
+    elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
+    elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;
+    duration[i] = elapsed / 1000.;
+  }
+
+  avrg_duration = duration.sum() / T;
+  min_duration = duration.minCoeff();
+  max_duration = duration.maxCoeff();
+  std::cout << "Wall time calcDiff [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
+            << std::endl;
 }

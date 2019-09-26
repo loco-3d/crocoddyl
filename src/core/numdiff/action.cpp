@@ -1,3 +1,11 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2019, LAAS-CNRS, New York University, Max Planck Gesellshaft
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
 #include "crocoddyl/core/numdiff/action.hpp"
 
 namespace crocoddyl {
@@ -7,88 +15,85 @@ ActionModelNumDiff::ActionModelNumDiff(ActionModelAbstract& model, bool with_gau
   with_gauss_approx_ = with_gauss_approx;
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
   assert((!with_gauss_approx_ || nr_ > 1) && "No Gauss approximation possible with nr = 1");
-
-  dx_.resize(model.get_ndx());
-  dx_.setZero();
-  du_.resize(model.get_nu());
-  du_.setZero();
-  tmp_x_.resize(model.get_nx());
-  tmp_x_.setZero();
 }
 
 ActionModelNumDiff::~ActionModelNumDiff() {}
 
-void ActionModelNumDiff::calc(boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                              const Eigen::Ref<const Eigen::VectorXd>& u) {
-  model_.calc(data, x, u);
+void ActionModelNumDiff::calc(const boost::shared_ptr<ActionDataAbstract>& data,
+                              const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) {
+  assert(x.size() == state_.get_nx() && "x has wrong dimension");
+  assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
+  boost::shared_ptr<ActionDataNumDiff> data_nd = boost::static_pointer_cast<ActionDataNumDiff>(data);
+  model_.calc(data_nd->data_0, x, u);
+  data->cost = data_nd->data_0->cost;
+  data->xnext = data_nd->data_0->xnext;
 }
 
-void ActionModelNumDiff::calcDiff(boost::shared_ptr<ActionDataAbstract>& data,
+void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                   const Eigen::Ref<const Eigen::VectorXd>& x,
                                   const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  boost::shared_ptr<ActionDataNumDiff> data_num_diff = boost::static_pointer_cast<ActionDataNumDiff>(data);
+  assert(x.size() == state_.get_nx() && "x has wrong dimension");
+  assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
+  boost::shared_ptr<ActionDataNumDiff> data_nd = boost::static_pointer_cast<ActionDataNumDiff>(data);
 
   if (recalc) {
-    model_.calc(data_num_diff->data_0, x, u);
+    model_.calc(data_nd->data_0, x, u);
   }
-  Eigen::VectorXd& xn0 = data_num_diff->data_0->xnext;
-  double& c0 = data_num_diff->data_0->cost;
+  const Eigen::VectorXd& xn0 = data_nd->data_0->xnext;
+  const double& c0 = data_nd->data_0->cost;
+  data->xnext = data_nd->data_0->xnext;
+  data->cost = data_nd->data_0->cost;
 
   assertStableStateFD(x);
 
   // Computing the d action(x,u) / dx
-  dx_.setZero();
-  for (unsigned ix = 0; ix < model_.get_ndx(); ++ix) {
-    dx_(ix) = disturbance_;
-    model_.get_state()->integrate(x, dx_, tmp_x_);
-    calc(data_num_diff->data_x[ix], tmp_x_, u);
-    // data->Fx
-    Eigen::VectorXd& xn = data_num_diff->data_x[ix]->xnext;
-    double& c = data_num_diff->data_x[ix]->cost;
-    model_.get_state()->diff(xn0, xn, data_num_diff->Fx.col(ix));
-    // data->Lx
-    data_num_diff->Lx(ix) = (c - c0) / disturbance_;
+  data_nd->dx.setZero();
+  for (unsigned int ix = 0; ix < state_.get_ndx(); ++ix) {
+    data_nd->dx(ix) = disturbance_;
+    model_.get_state().integrate(x, data_nd->dx, data_nd->xp);
+    model_.calc(data_nd->data_x[ix], data_nd->xp, u);
 
-    // data->Rx
-    if (model_.get_nr() > 1) {
-      // TODO: @mnaveau manage the gaussian approximation
-      // data_num_diff->Rx.col(ix) = data_num_diff->data_x[ix]->cost_residual -
-      //                             data_num_diff->data_0[ix]->cost_residual;
-    }
-    dx_(ix) = 0.0;
+    const Eigen::VectorXd& xn = data_nd->data_x[ix]->xnext;
+    const double& c = data_nd->data_x[ix]->cost;
+    model_.get_state().diff(xn0, xn, data_nd->Fx.col(ix));
+
+    data->Lx(ix) = (c - c0) / disturbance_;
+    data_nd->Rx.col(ix) = (data_nd->data_x[ix]->r - data_nd->data_0->r) / disturbance_;
+    data_nd->dx(ix) = 0.0;
   }
-  data_num_diff->Fx /= disturbance_;
+  data->Fx /= disturbance_;
 
   // Computing the d action(x,u) / du
-  du_.setZero();
+  data_nd->du.setZero();
   for (unsigned iu = 0; iu < model_.get_nu(); ++iu) {
-    du_(iu) = disturbance_;
-    calc(data_num_diff->data_u[iu], x, u + du_);
-    // data->Fu
-    Eigen::VectorXd& xn = data_num_diff->data_u[iu]->xnext;
-    double& c = data_num_diff->data_u[iu]->cost;
-    model_.get_state()->diff(xn0, xn, data_num_diff->Fu.col(iu));
-    // data->Lu
-    data_num_diff->Lu(iu) = (c - c0) / disturbance_;
-    // data->Ru
-    if (model_.get_nr() > 1) {
-      // TODO: @mnaveau manage the gaussian approximation
-      // data_num_diff->Ru.col(iu) = data_num_diff->data_u[iu]->cost_residual -
-      //                             data_num_diff->data_0[iu]->cost_residual;
-    }
-    du_(iu) = 0.0;
+    data_nd->du(iu) = disturbance_;
+    model_.calc(data_nd->data_u[iu], x, u + data_nd->du);
+
+    const Eigen::VectorXd& xn = data_nd->data_u[iu]->xnext;
+    const double& c = data_nd->data_u[iu]->cost;
+    model_.get_state().diff(xn0, xn, data_nd->Fu.col(iu));
+
+    data->Lu(iu) = (c - c0) / disturbance_;
+    data_nd->Ru.col(iu) = (data_nd->data_u[iu]->r - data_nd->data_0->r) / disturbance_;
+    data_nd->du(iu) = 0.0;
   }
-  data_num_diff->Fu /= disturbance_;
+  data->Fu /= disturbance_;
 
   if (with_gauss_approx_) {
-    data_num_diff->Lxx = data_num_diff->Rx.transpose() * data_num_diff->Rx;
-    data_num_diff->Lxu = data_num_diff->Rx.transpose() * data_num_diff->Ru;
-    data_num_diff->Luu = data_num_diff->Ru.transpose() * data_num_diff->Ru;
+    data->Lxx = data_nd->Rx.transpose() * data_nd->Rx;
+    data->Lxu = data_nd->Rx.transpose() * data_nd->Ru;
+    data->Luu = data_nd->Ru.transpose() * data_nd->Ru;
   }
 }
 
+ActionModelAbstract& ActionModelNumDiff::get_model() const { return model_; }
+
+const double& ActionModelNumDiff::get_disturbance() const { return disturbance_; }
+
+bool ActionModelNumDiff::get_with_gauss_approx() { return with_gauss_approx_; }
+
 void ActionModelNumDiff::assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& /** x */) {
-  // TODO: @mnaveau make this method virtual and this one should do nothing, update the documentation.
+  // TODO(mnaveau): make this method virtual and this one should do nothing, update the documentation.
   // md = model_.differential_;
   // if isinstance(md, DifferentialActionModelFloatingInContact)
   // {

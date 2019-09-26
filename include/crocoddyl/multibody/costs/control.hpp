@@ -15,18 +15,17 @@ namespace crocoddyl {
 
 class CostModelControl : public CostModelAbstract {
  public:
-  CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation,
-                   const Eigen::VectorXd& uref);
-  CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation);
-  CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation, const unsigned int& nu);
-  CostModelControl(pinocchio::Model* const model, const Eigen::VectorXd& uref);
-  CostModelControl(pinocchio::Model* const model);
-  CostModelControl(pinocchio::Model* const model, const unsigned int& nu);
+  CostModelControl(StateMultibody& state, ActivationModelAbstract& activation, const Eigen::VectorXd& uref);
+  CostModelControl(StateMultibody& state, ActivationModelAbstract& activation);
+  CostModelControl(StateMultibody& state, ActivationModelAbstract& activation, unsigned int const& nu);
+  CostModelControl(StateMultibody& state, const Eigen::VectorXd& uref);
+  explicit CostModelControl(StateMultibody& state);
+  CostModelControl(StateMultibody& state, unsigned int const& nu);
   ~CostModelControl();
 
-  void calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u);
-  void calcDiff(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
 
   const Eigen::VectorXd& get_uref() const;

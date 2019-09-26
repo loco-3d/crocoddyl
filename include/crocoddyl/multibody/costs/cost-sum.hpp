@@ -9,6 +9,9 @@
 #ifndef CROCODDYL_MULTIBODY_COSTS_COST_SUM_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_COST_SUM_HPP_
 
+#include <string>
+#include <map>
+#include <utility>
 #include "crocoddyl/multibody/cost-base.hpp"
 
 namespace crocoddyl {
@@ -23,35 +26,98 @@ struct CostItem {
   double weight;
 };
 
-class CostModelSum : public CostModelAbstract {
+struct CostDataSum;  // forward declaration
+
+class CostModelSum {
  public:
   typedef std::map<std::string, CostItem> CostModelContainer;
   typedef std::map<std::string, boost::shared_ptr<CostDataAbstract> > CostDataContainer;
 
-  CostModelSum(pinocchio::Model* const model, const unsigned int& nu, const bool& with_residuals = true);
-  CostModelSum(pinocchio::Model* const model, const bool& with_residuals = true);
+  CostModelSum(StateMultibody& state, unsigned int const& nu, const bool& with_residuals = true);
+  explicit CostModelSum(StateMultibody& state, const bool& with_residuals = true);
   ~CostModelSum();
 
   void addCost(const std::string& name, CostModelAbstract* const cost, const double& weight);
   void removeCost(const std::string& name);
 
-  void calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u);
-  void calcDiff(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
-  boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
+  boost::shared_ptr<CostDataSum> createData(pinocchio::Data* const data);
 
+  void calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
+  void calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
+
+  StateMultibody& get_state() const;
   const CostModelContainer& get_costs() const;
+  unsigned int const& get_nu() const;
+  unsigned int const& get_nr() const;
 
  private:
+  StateMultibody& state_;
   CostModelContainer costs_;
+  unsigned int nu_;
+  unsigned int nr_;
+  bool with_residuals_;
+  Eigen::VectorXd unone_;
+
+#ifdef PYTHON_BINDINGS
+
+ public:
+  void calc_wrap(const boost::shared_ptr<CostDataSum>& data, const Eigen::VectorXd& x,
+                 const Eigen::VectorXd& u = Eigen::VectorXd()) {
+    if (u.size() == 0) {
+      calc(data, x);
+    } else {
+      calc(data, x, u);
+    }
+  }
+
+  void calcDiff_wrap(const boost::shared_ptr<CostDataSum>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u,
+                     const bool& recalc) {
+    calcDiff(data, x, u, recalc);
+  }
+  void calcDiff_wrap(const boost::shared_ptr<CostDataSum>& data, const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
+    calcDiff(data, x, u, true);
+  }
+  void calcDiff_wrap(const boost::shared_ptr<CostDataSum>& data, const Eigen::VectorXd& x) {
+    calcDiff(data, x, unone_, true);
+  }
+  void calcDiff_wrap(const boost::shared_ptr<CostDataSum>& data, const Eigen::VectorXd& x, const bool& recalc) {
+    calcDiff(data, x, unone_, recalc);
+  }
+
+#endif
 };
 
-struct CostDataSum : public CostDataAbstract {
+struct CostDataSum {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  CostDataSum(Model* const model, pinocchio::Data* const data) : CostDataAbstract(model, data) {
+  CostDataSum(Model* const model, pinocchio::Data* const data)
+      : r_internal(model->get_nr()),
+        Lx_internal(model->get_state().get_ndx()),
+        Lu_internal(model->get_nu()),
+        Lxx_internal(model->get_state().get_ndx(), model->get_state().get_ndx()),
+        Lxu_internal(model->get_state().get_ndx(), model->get_nu()),
+        Luu_internal(model->get_nu(), model->get_nu()),
+        pinocchio(data),
+        cost(0.),
+        r(r_internal.data(), model->get_nr()),
+        Lx(Lx_internal.data(), model->get_state().get_ndx()),
+        Lu(Lu_internal.data(), model->get_nu()),
+        Lxx(Lxx_internal.data(), model->get_state().get_ndx(), model->get_state().get_ndx()),
+        Lxu(Lxu_internal.data(), model->get_state().get_ndx(), model->get_nu()),
+        Luu(Luu_internal.data(), model->get_nu(), model->get_nu()),
+        Rx(model->get_nr(), model->get_state().get_ndx()),
+        Ru(model->get_nr(), model->get_nu()) {
+    r.setZero();
+    Lx.setZero();
+    Lu.setZero();
+    Lxx.setZero();
+    Lxu.setZero();
+    Luu.setZero();
     for (CostModelSum::CostModelContainer::const_iterator it = model->get_costs().begin();
          it != model->get_costs().end(); ++it) {
       const CostItem& item = it->second;
@@ -59,7 +125,50 @@ struct CostDataSum : public CostDataAbstract {
     }
   }
 
+  template <typename ActionData>
+  void shareMemory(ActionData* const data) {
+    // Share memory with the differential action data
+    new (&r) Eigen::Map<Eigen::VectorXd>(data->r.data(), data->r.size());
+    new (&Lx) Eigen::Map<Eigen::VectorXd>(data->Lx.data(), data->Lx.size());
+    new (&Lu) Eigen::Map<Eigen::VectorXd>(data->Lu.data(), data->Lu.size());
+    new (&Lxx) Eigen::Map<Eigen::MatrixXd>(data->Lxx.data(), data->Lxx.rows(), data->Lxx.cols());
+    new (&Lxu) Eigen::Map<Eigen::MatrixXd>(data->Lxu.data(), data->Lxu.rows(), data->Lxu.cols());
+    new (&Luu) Eigen::Map<Eigen::MatrixXd>(data->Luu.data(), data->Luu.rows(), data->Luu.cols());
+  }
+
+  Eigen::VectorXd get_r() const { return r; }
+  Eigen::VectorXd get_Lx() const { return Lx; }
+  Eigen::VectorXd get_Lu() const { return Lu; }
+  Eigen::MatrixXd get_Lxx() const { return Lxx; }
+  Eigen::MatrixXd get_Lxu() const { return Lxu; }
+  Eigen::MatrixXd get_Luu() const { return Luu; }
+
+  void set_r(Eigen::VectorXd _r) { r = _r; }
+  void set_Lx(Eigen::VectorXd _Lx) { Lx = _Lx; }
+  void set_Lu(Eigen::VectorXd _Lu) { Lu = _Lu; }
+  void set_Lxx(Eigen::MatrixXd _Lxx) { Lxx = _Lxx; }
+  void set_Lxu(Eigen::MatrixXd _Lxu) { Lxu = _Lxu; }
+  void set_Luu(Eigen::MatrixXd _Luu) { Luu = _Luu; }
+
+  // Creates internal data in case we don't share it externally
+  Eigen::VectorXd r_internal;
+  Eigen::VectorXd Lx_internal;
+  Eigen::VectorXd Lu_internal;
+  Eigen::MatrixXd Lxx_internal;
+  Eigen::MatrixXd Lxu_internal;
+  Eigen::MatrixXd Luu_internal;
+
   CostModelSum::CostDataContainer costs;
+  pinocchio::Data* pinocchio;
+  double cost;
+  Eigen::Map<Eigen::VectorXd> r;
+  Eigen::Map<Eigen::VectorXd> Lx;
+  Eigen::Map<Eigen::VectorXd> Lu;
+  Eigen::Map<Eigen::MatrixXd> Lxx;
+  Eigen::Map<Eigen::MatrixXd> Lxu;
+  Eigen::Map<Eigen::MatrixXd> Luu;
+  Eigen::MatrixXd Rx;
+  Eigen::MatrixXd Ru;
 };
 
 }  // namespace crocoddyl

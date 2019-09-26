@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_ACTIVATION_BASE_HPP_
-#define CROCODDYL_MULTIBODY_ACTIVATION_BASE_HPP_
+#ifndef CROCODDYL_CORE_ACTIVATION_BASE_HPP_
+#define CROCODDYL_CORE_ACTIVATION_BASE_HPP_
 
 #include <Eigen/Dense>
 #include <boost/shared_ptr.hpp>
@@ -19,29 +19,33 @@ struct ActivationDataAbstract;  // forward declaration
 
 class ActivationModelAbstract {
  public:
-  ActivationModelAbstract(const unsigned int& nr);
+  explicit ActivationModelAbstract(unsigned int const& nr);
   virtual ~ActivationModelAbstract();
 
-  virtual void calc(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r) = 0;
-  virtual void calcDiff(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r,
-                        const bool& recalc = true) = 0;
+  virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
+                    const Eigen::Ref<const Eigen::VectorXd>& r) = 0;
+  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
+                        const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc = true) = 0;
   virtual boost::shared_ptr<ActivationDataAbstract> createData();
 
-  unsigned int get_nr() const;
+  unsigned int const& get_nr() const;
 
  protected:
   unsigned int nr_;
 
 #ifdef PYTHON_BINDINGS
- public:
-  void calc_wrap(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::VectorXd& r) { calc(data, r); }
 
-  void calcDiff_wrap(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::VectorXd& r, const bool& recalc) {
+ public:
+  void calc_wrap(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::VectorXd& r) { calc(data, r); }
+
+  void calcDiff_wrap(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::VectorXd& r,
+                     const bool& recalc) {
     calcDiff(data, r, recalc);
   }
-  void calcDiff_wrap(boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::VectorXd& r) {
+  void calcDiff_wrap(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::VectorXd& r) {
     calcDiff(data, r, true);
   }
+
 #endif
 };
 
@@ -49,7 +53,7 @@ struct ActivationDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Activation>
-  ActivationDataAbstract(Activation* const activation)
+  explicit ActivationDataAbstract(Activation* const activation)
       : a_value(0.),
         Ar(Eigen::VectorXd::Zero(activation->get_nr())),
         Arr(Eigen::MatrixXd::Zero(activation->get_nr(), activation->get_nr())) {}
@@ -61,4 +65,4 @@ struct ActivationDataAbstract {
 
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_MULTIBODY_ACTIVATION_BASE_HPP_
+#endif  // CROCODDYL_CORE_ACTIVATION_BASE_HPP_

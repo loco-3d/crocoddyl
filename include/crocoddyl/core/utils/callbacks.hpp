@@ -9,22 +9,22 @@
 #ifndef CROCODDYL_CORE_UTILS_CALLBACKS_HPP_
 #define CROCODDYL_CORE_UTILS_CALLBACKS_HPP_
 
-#include "crocoddyl/core/solver-base.hpp"
 #include <iostream>
 #include <iomanip>
+#include "crocoddyl/core/solver-base.hpp"
 
 namespace crocoddyl {
 
-enum DDPVerboseLevel { _1 = 0, _2 };
-class CallbackDDPVerbose : public CallbackAbstract {
+enum VerboseLevel { _1 = 0, _2 };
+class CallbackVerbose : public CallbackAbstract {
  public:
-  CallbackDDPVerbose(DDPVerboseLevel level = _1);
-  ~CallbackDDPVerbose();
+  explicit CallbackVerbose(VerboseLevel level = _1);
+  ~CallbackVerbose();
 
-  void operator()(SolverAbstract *const solver);
+  void operator()(SolverAbstract& solver);
 
  private:
-  DDPVerboseLevel level;
+  VerboseLevel level;
 };
 
 }  // namespace crocoddyl

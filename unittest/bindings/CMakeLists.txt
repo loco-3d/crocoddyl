@@ -1,9 +1,12 @@
 SET(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
   states
+  actuations
   actions
   shooting
   solvers
   costs
+  contacts
+  impulses
   )
 
 FOREACH(TEST ${${PROJECT_NAME}_PYTHON_BINDINGS_TESTS})

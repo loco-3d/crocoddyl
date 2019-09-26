@@ -16,32 +16,40 @@ namespace crocoddyl {
 
 class CostModelState : public CostModelAbstract {
  public:
-  CostModelState(pinocchio::Model* const model, StateAbstract* state, ActivationModelAbstract* const activation,
-                 const Eigen::VectorXd& xref, const unsigned int& nu);
-  CostModelState(pinocchio::Model* const model, StateAbstract* state, ActivationModelAbstract* const activation,
-                 const Eigen::VectorXd& xref);
-  CostModelState(pinocchio::Model* const model, StateAbstract* state, const Eigen::VectorXd& xref,
-                 const unsigned int& nu);
-  CostModelState(pinocchio::Model* const model, StateAbstract* state, const Eigen::VectorXd& xref);
-  CostModelState(pinocchio::Model* const model, StateAbstract* state, ActivationModelAbstract* const activation,
-                 const unsigned int& nu);
-  CostModelState(pinocchio::Model* const model, StateAbstract* state, const unsigned int& nu);
-  CostModelState(pinocchio::Model* const model, StateAbstract* state, ActivationModelAbstract* const activation);
-  CostModelState(pinocchio::Model* const model, StateAbstract* state);
+  CostModelState(StateMultibody& state, ActivationModelAbstract& activation, const Eigen::VectorXd& xref,
+                 unsigned int const& nu);
+  CostModelState(StateMultibody& state, ActivationModelAbstract& activation, const Eigen::VectorXd& xref);
+  CostModelState(StateMultibody& state, const Eigen::VectorXd& xref, unsigned int const& nu);
+  CostModelState(StateMultibody& state, const Eigen::VectorXd& xref);
+  CostModelState(StateMultibody& state, ActivationModelAbstract& activation, unsigned int const& nu);
+  CostModelState(StateMultibody& state, unsigned int const& nu);
+  CostModelState(StateMultibody& state, ActivationModelAbstract& activation);
+  explicit CostModelState(StateMultibody& state);
 
   ~CostModelState();
 
-  void calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u);
-  void calcDiff(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
+  boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
-  StateAbstract* get_state() const;
   const Eigen::VectorXd& get_xref() const;
 
  private:
-  StateAbstract* state_;
   Eigen::VectorXd xref_;
+};
+
+struct CostDataState : public CostDataAbstract {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  template <typename Model>
+  CostDataState(Model* const model, pinocchio::Data* const data)
+      : CostDataAbstract(model, data), Arr_Rx(model->get_activation().get_nr(), model->get_state().get_ndx()) {
+    Arr_Rx.fill(0);
+  }
+
+  Eigen::MatrixXd Arr_Rx;
 };
 
 }  // namespace crocoddyl

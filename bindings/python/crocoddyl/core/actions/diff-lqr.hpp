@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PYTHON_CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_
-#define PYTHON_CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_
 
 #include "crocoddyl/core/actions/diff-lqr.hpp"
 
@@ -34,19 +34,15 @@ void exposeDifferentialActionLQR() {
                                               ":param nx: dimension of the state vector\n"
                                               ":param nu: dimension of the control vector\n"
                                               ":param driftFree: enable/disable the bias term of the linear dynamics"))
-      .def<void (DifferentialActionModelLQR::*)(boost::shared_ptr<DifferentialActionDataAbstract>&,
-                                                const Eigen::VectorXd&, const Eigen::VectorXd&)>(
-          "calc", &DifferentialActionModelLQR::calc_wrap, bp::args(" self", " data", " x", " u=None"),
-          "Compute the next state and cost value.\n\n"
-          "It describes the time-continuous evolution of the LQR system. Additionally it\n"
-          "computes the cost value associated to this discrete state and control pair.\n"
-          ":param data: action data\n"
-          ":param x: time-continuous state vector\n"
-          ":param u: time-continuous control input")
-      .def<void (DifferentialActionModelLQR::*)(boost::shared_ptr<DifferentialActionDataAbstract>&,
-                                                const Eigen::VectorXd&)>(
-          "calc", &DifferentialActionModelLQR::calc_wrap, bp::args(" self", " data", " x"))
-      .def<void (DifferentialActionModelLQR::*)(boost::shared_ptr<DifferentialActionDataAbstract>&,
+      .def("calc", &DifferentialActionModelLQR::calc_wrap,
+           DiffActionModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
+                                      "Compute the next state and cost value.\n\n"
+                                      "It describes the time-continuous evolution of the LQR system. Additionally it\n"
+                                      "computes the cost value associated to this discrete state and control pair.\n"
+                                      ":param data: action data\n"
+                                      ":param x: time-continuous state vector\n"
+                                      ":param u: time-continuous control input"))
+      .def<void (DifferentialActionModelLQR::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                 const Eigen::VectorXd&, const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &DifferentialActionModelLQR::calcDiff_wrap,
           bp::args(" self", " data", " x", " u=None", " recalc=True"),
@@ -59,13 +55,13 @@ void exposeDifferentialActionLQR() {
           ":param x: time-continuous state vector\n"
           ":param u: time-continuous control input\n"
           ":param recalc: If true, it updates the state evolution and the cost value.")
-      .def<void (DifferentialActionModelLQR::*)(boost::shared_ptr<DifferentialActionDataAbstract>&,
+      .def<void (DifferentialActionModelLQR::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                 const Eigen::VectorXd&, const Eigen::VectorXd&)>(
           "calcDiff", &DifferentialActionModelLQR::calcDiff_wrap, bp::args(" self", " data", " x", " u"))
-      .def<void (DifferentialActionModelLQR::*)(boost::shared_ptr<DifferentialActionDataAbstract>&,
+      .def<void (DifferentialActionModelLQR::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                 const Eigen::VectorXd&)>(
           "calcDiff", &DifferentialActionModelLQR::calcDiff_wrap, bp::args(" self", " data", " x"))
-      .def<void (DifferentialActionModelLQR::*)(boost::shared_ptr<DifferentialActionDataAbstract>&,
+      .def<void (DifferentialActionModelLQR::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                 const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &DifferentialActionModelLQR::calcDiff_wrap, bp::args(" self", " data", " x", " recalc"))
       .def("createData", &DifferentialActionModelLQR::createData, bp::args(" self"),
@@ -83,4 +79,4 @@ void exposeDifferentialActionLQR() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // PYTHON_CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_

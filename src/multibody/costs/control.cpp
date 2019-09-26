@@ -1,47 +1,60 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
 #include "crocoddyl/multibody/costs/control.hpp"
 
 namespace crocoddyl {
 
-CostModelControl::CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation,
+CostModelControl::CostModelControl(StateMultibody& state, ActivationModelAbstract& activation,
                                    const Eigen::VectorXd& uref)
-    : CostModelAbstract(model, activation, (const unsigned)uref.size()), uref_(uref) {
-  assert(activation->get_nr() == (const unsigned)uref.size() &&
-         "CostModelControl: activation::nr is not equals to nu");
+    : CostModelAbstract(state, activation, (const unsigned)uref.size()), uref_(uref) {
+  assert(activation.get_nr() == (const unsigned)uref.size() && "activation::nr is not equals to nu");
 }
 
-CostModelControl::CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation)
-    : CostModelAbstract(model, activation), uref_(Eigen::VectorXd::Zero(activation->get_nr())) {}
+CostModelControl::CostModelControl(StateMultibody& state, ActivationModelAbstract& activation)
+    : CostModelAbstract(state, activation), uref_(Eigen::VectorXd::Zero(activation.get_nr())) {}
 
-CostModelControl::CostModelControl(pinocchio::Model* const model, ActivationModelAbstract* const activation,
-                                   const unsigned int& nu)
-    : CostModelAbstract(model, activation, nu), uref_(Eigen::VectorXd::Zero(nu)) {
-  assert(activation->get_nr() == nu_ && "CostModelControl: activation::nr is not equals to nu");
+CostModelControl::CostModelControl(StateMultibody& state, ActivationModelAbstract& activation, const unsigned int& nu)
+    : CostModelAbstract(state, activation, nu), uref_(Eigen::VectorXd::Zero(nu)) {
+  assert(activation.get_nr() == nu_ && "activation::nr is not equals to nu");
 }
 
-CostModelControl::CostModelControl(pinocchio::Model* const model, const Eigen::VectorXd& uref)
-    : CostModelAbstract(model, (unsigned int)uref.size(), (unsigned int)uref.size()), uref_(uref) {}
+CostModelControl::CostModelControl(StateMultibody& state, const Eigen::VectorXd& uref)
+    : CostModelAbstract(state, (unsigned int)uref.size(), (unsigned int)uref.size()), uref_(uref) {}
 
-CostModelControl::CostModelControl(pinocchio::Model* const model)
-    : CostModelAbstract(model, model->nv), uref_(Eigen::VectorXd::Zero(model->nv)) {}
+CostModelControl::CostModelControl(StateMultibody& state)
+    : CostModelAbstract(state, state.get_nv()), uref_(Eigen::VectorXd::Zero(state.get_nv())) {}
 
-CostModelControl::CostModelControl(pinocchio::Model* const model, const unsigned int& nu)
-    : CostModelAbstract(model, nu, nu), uref_(Eigen::VectorXd::Zero(nu)) {}
+CostModelControl::CostModelControl(StateMultibody& state, unsigned int const& nu)
+    : CostModelAbstract(state, nu, nu), uref_(Eigen::VectorXd::Zero(nu)) {}
 
 CostModelControl::~CostModelControl() {}
 
-void CostModelControl::calc(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>&,
+void CostModelControl::calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>&,
                             const Eigen::Ref<const Eigen::VectorXd>& u) {
+  assert(nu_ != 0 && "it seems to be an autonomous system, if so, don't add this cost function");
+  assert(u.size() == nu_ && "u has wrong dimension");
+
   data->r = u - uref_;
-  activation_->calc(data->activation, data->r);
+  activation_.calc(data->activation, data->r);
   data->cost = data->activation->a_value;
 }
 
-void CostModelControl::calcDiff(boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
+void CostModelControl::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+                                const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
+                                const bool& recalc) {
+  assert(nu_ != 0 && "it seems to be an autonomous system, if so, don't add this cost function");
+  assert(u.size() == nu_ && "u has wrong dimension");
+
   if (recalc) {
     calc(data, x, u);
   }
-  activation_->calcDiff(data->activation, data->r, recalc);
+  activation_.calcDiff(data->activation, data->r, recalc);
   data->Lu = data->activation->Ar;
   data->Luu.diagonal() = data->activation->Arr.diagonal();
 }
