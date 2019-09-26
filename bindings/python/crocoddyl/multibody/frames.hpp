@@ -29,6 +29,18 @@ void exposeFrames() {
       .add_property("oxf", bp::make_getter(&FrameTranslation::oxf, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&FrameTranslation::oxf), "frame translation");
 
+  bp::class_<FrameRotation, boost::noncopyable>(
+      "FrameRotation",
+      "Frame rotation describe using Pinocchio.\n\n"
+      "It defines a frame rotation (rotation matrix) for a given frame ID",
+      bp::init<int, Eigen::Matrix3d>(bp::args(" self", " frame", " oRf"),
+                                     "Initialize the frame translation.\n\n"
+                                     ":param frame: frame ID\n"
+                                     ":param oRf: Frame rotation w.r.t. the origin"))
+      .def_readwrite("frame", &FrameRotation::frame, "frame ID")
+      .add_property("oRf", bp::make_getter(&FrameRotation::oRf, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&FrameRotation::oRf), "frame rotation");
+
   bp::class_<FramePlacement, boost::noncopyable>(
       "FramePlacement",
       "Frame placement describe using Pinocchio.\n\n"
