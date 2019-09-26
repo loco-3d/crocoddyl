@@ -94,6 +94,14 @@ class ActionModelNumDiff : public ActionModelAbstract {
    */
   const double& get_disturbance() const;
 
+  /**
+   * @brief Identify if the Gauss approximation is going to be used or not.
+   * 
+   * @return true 
+   * @return false 
+   */
+  bool get_with_gauss_approx();
+
  private:
   /**
    * @brief Make sure that when we finite difference the Action Model, the user
