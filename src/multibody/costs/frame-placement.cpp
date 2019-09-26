@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <pinocchio/algorithm/frames.hpp>
 #include "crocoddyl/multibody/costs/frame-placement.hpp"
-#include "pinocchio/algorithm/frames.hpp"
 
 namespace crocoddyl {
 
