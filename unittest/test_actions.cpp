@@ -79,6 +79,10 @@ void test_partial_derivatives_against_numdiff(crocoddyl::ActionModelAbstract& mo
     BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isMuchSmallerThan(1.0, tol));
     BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isMuchSmallerThan(1.0, tol));
     BOOST_CHECK((data->Luu - data_num_diff->Luu).isMuchSmallerThan(1.0, tol));
+  }else{
+    BOOST_CHECK((data_num_diff->Lxx).isMuchSmallerThan(1.0, tol));
+    BOOST_CHECK((data_num_diff->Lxu).isMuchSmallerThan(1.0, tol));
+    BOOST_CHECK((data_num_diff->Luu).isMuchSmallerThan(1.0, tol));
   }
 }
 

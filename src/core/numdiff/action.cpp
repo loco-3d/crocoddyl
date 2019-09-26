@@ -58,7 +58,9 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
     model_.get_state().diff(xn0, xn, data_nd->Fx.col(ix));
 
     data->Lx(ix) = (c - c0) / disturbance_;
-    data_nd->Rx.col(ix) = (data_nd->data_x[ix]->r - data_nd->data_0->r) / disturbance_;
+    if (with_gauss_approx_) {
+      data_nd->Rx.col(ix) = (data_nd->data_x[ix]->r - data_nd->data_0->r) / disturbance_;
+    }
     data_nd->dx(ix) = 0.0;
   }
   data->Fx /= disturbance_;
@@ -74,7 +76,9 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
     model_.get_state().diff(xn0, xn, data_nd->Fu.col(iu));
 
     data->Lu(iu) = (c - c0) / disturbance_;
-    data_nd->Ru.col(iu) = (data_nd->data_u[iu]->r - data_nd->data_0->r) / disturbance_;
+    if (with_gauss_approx_) {  
+      data_nd->Ru.col(iu) = (data_nd->data_u[iu]->r - data_nd->data_0->r) / disturbance_;
+    }
     data_nd->du(iu) = 0.0;
   }
   data->Fu /= disturbance_;
@@ -100,33 +104,7 @@ const double& ActionModelNumDiff::get_disturbance() const { return disturbance_;
 bool ActionModelNumDiff::get_with_gauss_approx() { return with_gauss_approx_; }
 
 void ActionModelNumDiff::assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& /** x */) {
-  // TODO(mnaveau): make this method virtual and this one should do nothing, update the documentation.
-  // md = model_.differential_;
-  // if isinstance(md, DifferentialActionModelFloatingInContact)
-  // {
-  //   if hasattr(md, "costs")
-  //   {
-  //     mc = md.costs;
-  //     if isinstance(mc, CostModelState)
-  //     {
-  //       assert (~np.isclose(model.State.diff(mc.ref, x)[3:6], np.ones(3) * np.pi, atol=1e-6).any())
-  //       assert (~np.isclose(model.State.diff(mc.ref, x)[3:6], -np.ones(3) * np.pi, atol=1e-6).any())
-  //     }
-  //     else if isinstance(mc, CostModelSum)
-  //     {
-  //       for (key, cost) in mc.costs.items()
-  //       {
-  //         if isinstance(cost.cost, CostModelState)
-  //         {
-  //           assert (~np.isclose(
-  //               model.State.diff(cost.cost.ref, x)[3:6], np.ones(3) * np.pi, atol=1e-6).any())
-  //           assert (~np.isclose(
-  //               model.State.diff(cost.cost.ref, x)[3:6], -np.ones(3) * np.pi, atol=1e-6).any())
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+  // do nothing in the general case
 }
 
 boost::shared_ptr<ActionDataAbstract> ActionModelNumDiff::createData() {

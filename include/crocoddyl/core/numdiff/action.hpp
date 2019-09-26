@@ -15,8 +15,45 @@
 
 namespace crocoddyl {
 
+/**
+ * @brief This class computes the numerical differentiation of an ActionModel.
+ * 
+ * It computes the same quantity as a normal model would do but using numerical
+ * differentiation.
+ * The subtility is in the computation of the Hessian of the cost. Let us
+ * concider that the ActionModel owns a cost residual. This means that the cost
+ * is the square of a residual \f$ l(x,u) = .5 r(x,u)**2 \f$, with 
+ * \f$ r(x,u) \f$ being a vector. Therefore the derivatives of the cost 
+ * \f$ l \f$ can be expressed in function of the derivatives of the residuals
+ * (jacobians), denoted by \f$ R_x \f$ and \f$ R_u \f$. Which would be:
+ * \f{eqnarray*}{
+ *     L_x    &=& R_x^T r \\
+ *     L_u    &=& R_u^T r \\
+ *     L_{xx} &=& R_x^T R_x + R_{xx} r
+ * \f}
+ * with \f$ R_{xx} \f$ the derivatives of the jacobian (i.e. not a matrix, but a
+ * dim-3 tensor). The Gauss approximation boils down to neglecting this terms.
+ * So \f$ L_{xx} \sim R_x^T R_x \f$. Similarly for \f$ L_{xu} \sim R_x^T R_u \f$
+ * and \f$ L_{uu} \sim R_u^T R_u \f$. The above set of equations becomes:
+ * \f{eqnarray*}{
+ *     L_x    &=& R_x^T r \\
+ *     L_u    &=& R_u^T r \\
+ *     L_{xx} &\sim& R_x^T R_x \\
+ *     L_{xu} &\sim& R_x^T R_u \\
+ *     L_{uu} &\sim& R_u^T R_u
+ * \f}
+ * In the case that the cost does not have a residual we set the Hessian to
+ * \f$ 0 \f$, i.e. \f$ L_{xx} = L_{xu} = L_{uu} = 0 \f$.
+ */
 class ActionModelNumDiff : public ActionModelAbstract {
  public:
+  /**
+   * @brief Construct a new ActionModelNumDiff object
+   * 
+   * @param model 
+   * @param with_gauss_approx defines if we use the Gauss approximation of the
+   * cost hessian or not.
+   */
   explicit ActionModelNumDiff(ActionModelAbstract& model, bool with_gauss_approx = false);
   ~ActionModelNumDiff();
 
@@ -48,7 +85,6 @@ class ActionModelNumDiff : public ActionModelAbstract {
    * For full discussions see issue
    * https://gepgitlab.laas.fr/loco-3d/crocoddyl/issues/139
    *
-   * @param model object to be checked.
    * @param x is the state at which the check is performed.
    */
   void assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& x);
@@ -91,14 +127,14 @@ struct ActionDataNumDiff : public ActionDataAbstract {
     }
   }
 
-  Eigen::MatrixXd Rx; //!< Cost Jacobian: 
-  Eigen::MatrixXd Ru;
-  Eigen::VectorXd dx;
-  Eigen::VectorXd du;
-  Eigen::VectorXd xp;
-  boost::shared_ptr<ActionDataAbstract> data_0;
-  std::vector<boost::shared_ptr<ActionDataAbstract> > data_x;
-  std::vector<boost::shared_ptr<ActionDataAbstract> > data_u;
+  Eigen::MatrixXd Rx; //!< Cost residual jacobian: d r / dx
+  Eigen::MatrixXd Ru; //!< Cost residual jacobian: d r / du
+  Eigen::VectorXd dx; //!< State disturbance
+  Eigen::VectorXd du; //!< Control disturbance
+  Eigen::VectorXd xp; //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$"
+  boost::shared_ptr<ActionDataAbstract> data_0; //!< The data that contains the final results
+  std::vector<boost::shared_ptr<ActionDataAbstract> > data_x; //!< The temporary data associated with the state variation
+  std::vector<boost::shared_ptr<ActionDataAbstract> > data_u; //!< The temporary data associated with the control variation
 };
 
 }  // namespace crocoddyl
