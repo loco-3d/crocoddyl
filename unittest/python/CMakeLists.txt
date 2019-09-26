@@ -10,13 +10,15 @@ SET(${PROJECT_NAME}_PYTHON_TESTS
   dse3
   dynamic_derivatives
   impact
-  locomotion
   quadruped
   rk4
   robots
   solvers
   state
 )
+if(${MULTICONTACT_API_FOUND})
+  SET(${PROJECT_NAME}_PYTHON_TESTS ${${PROJECT_NAME}_PYTHON_TESTS} locomotion)
+endif(${MULTICONTACT_API_FOUND})
 
 FOREACH(TEST ${${PROJECT_NAME}_PYTHON_TESTS})
   ADD_PYTHON_UNIT_TEST("py-${TEST}" "unittest/python/test_${TEST}.py" ".")
