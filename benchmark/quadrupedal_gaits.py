@@ -1,3 +1,4 @@
+import sys
 import time
 
 import example_robot_data
@@ -9,11 +10,28 @@ from crocoddyl.utils.quadruped import SimpleQuadrupedalGaitProblem
 
 T = int(5e3)  # number of trials
 MAXITER = 1
-GAIT = "walking"  # 115 nodes
-# GAIT = "trotting"  # 63 nodes
-# GAIT = "pacing"  # 63 nodes
-# GAIT = "bounding"  # 63 nodes
-# GAIT = "jumping"  # 61 nodes
+WALKING = 'walk' in sys.argv
+TROTTING = 'trot' in sys.argv
+PACING = 'pace' in sys.argv
+BOUNDING = 'bound' in sys.argv
+JUMPING = 'jump' in sys.argv
+
+GAIT = "walking"  # 104 nodes
+if WALKING:
+    print('running walking benchmark ...')
+    GAIT = "walking"  # 104 nodes
+if TROTTING:
+    print('running trotting benchmark ...')
+    GAIT = "trotting"  # 54 nodes
+if PACING:
+    print('running pacing benchmark ...')
+    GAIT = "pacing"  # 54 nodes
+if BOUNDING:
+    print('running bounding benchmark ...')
+    GAIT = "bounding"  # 54 nodes
+if JUMPING:
+    print('running jumping benchmark ...')
+    GAIT = "jumping"  # 61 nodes
 
 
 def runBenchmark(gait_phase):
@@ -69,11 +87,11 @@ def runBenchmark(gait_phase):
 if GAIT == 'walking':
     GAITPHASE = {
         'walking': {
-            'stepLength': 0.15,
-            'stepHeight': 0.2,
+            'stepLength': 0.25,
+            'stepHeight': 0.25,
             'timeStep': 1e-2,
             'stepKnots': 25,
-            'supportKnots': 5
+            'supportKnots': 2
         }
     }
 elif GAIT == 'trotting':
@@ -83,7 +101,7 @@ elif GAIT == 'trotting':
             'stepHeight': 0.2,
             'timeStep': 1e-2,
             'stepKnots': 25,
-            'supportKnots': 5
+            'supportKnots': 2
         }
     }
 elif GAIT == 'pacing':
@@ -93,17 +111,17 @@ elif GAIT == 'pacing':
             'stepHeight': 0.2,
             'timeStep': 1e-2,
             'stepKnots': 25,
-            'supportKnots': 5
+            'supportKnots': 2
         }
     }
 elif GAIT == 'bounding':
     GAITPHASE = {
         'bounding': {
-            'stepLength': 0.15,
-            'stepHeight': 0.2,
+            'stepLength': 0.007,
+            'stepHeight': 0.05,
             'timeStep': 1e-2,
             'stepKnots': 25,
-            'supportKnots': 5
+            'supportKnots': 12
         }
     }
 elif GAIT == 'jumping':

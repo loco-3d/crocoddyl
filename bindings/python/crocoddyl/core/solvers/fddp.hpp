@@ -17,13 +17,13 @@ namespace python {
 namespace bp = boost::python;
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_solves, SolverFDDP::solve, 0, 5)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_computeDirections, SolverFDDP::computeDirection, 0, 1)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_computeDirections, SolverDDP::computeDirection, 0, 1)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_trySteps, SolverFDDP::tryStep, 0, 1)
 
 void exposeSolverFDDP() {
   bp::class_<SolverFDDP, bp::bases<SolverDDP> >(
       "SolverFDDP",
-      "FDDP solver.\n\n"
+      "Feasibility-prone DDP (FDDP) solver.\n\n"
       "The FDDP solver computes an optimal trajectory and control commands by iterates\n"
       "running backward and forward passes. The backward-pass updates locally the\n"
       "quadratic approximation of the problem and computes descent direction,\n"
@@ -48,30 +48,47 @@ void exposeSolverFDDP() {
                ":param regInit: initial guess for the regularization value. Very low values are typical\n"
                "                used with very good guess points (init_xs, init_us).\n"
                ":returns the optimal trajectory xopt, uopt and a boolean that describes if convergence was reached."))
-
+      .def("computeDirection", &SolverFDDP::computeDirection,
+           SolverFDDP_computeDirections(
+               bp::args(" self", " recalc=True"),
+               "Compute the search direction (dx, du) for the current guess (xs, us).\n\n"
+               "You must call setCandidate first in order to define the current\n"
+               "guess. A current guess defines a state and control trajectory\n"
+               "(xs, us) of T+1 and T elements, respectively.\n"
+               ":params recalc: true for recalculating the derivatives at current state and control.\n"
+               ":returns the search direction dx, du and the dual lambdas as lists of T+1, T and T+1 lengths."))
+      .def("tryStep", &SolverFDDP::tryStep,
+           SolverFDDP_trySteps(bp::args(" self", " stepLength=1"),
+                               "Rollout the system with a predefined step length.\n\n"
+                               ":param stepLength: step length\n"
+                               ":returns the cost improvement."))
       .def("expectedImprovement", &SolverFDDP::expectedImprovement,
            bp::return_value_policy<bp::copy_const_reference>(), bp::args(" self"),
            "Return two scalars denoting the quadratic improvement model\n\n"
            "For computing the expected improvement, you need to compute first\n"
            "the search direction by running computeDirection. The quadratic\n"
-           "improvement model is described as dV = f_0 - f_+ = d1*a + d2*a**2/2.")
+           "improvement model is described as dV = f_0 - f_+ = d1*a + d2*a**2/2.\n"
+           "Additionally, you need to update the expected model by running\n"
+           "updateExpectedImprovement.")
+      .def("updateExpectedImprovement", &SolverFDDP::updateExpectedImprovement,
+           bp::return_value_policy<bp::copy_const_reference>(), bp::args(" self"),
+           "Update the expected improvement model\n\n")
       .def("calc", &SolverFDDP::calc, bp::args(" self"),
            "Update the Jacobian and Hessian of the optimal control problem\n\n"
            "These derivatives are computed around the guess state and control\n"
            "trajectory. These trajectory can be set by using setCandidate.\n"
            ":return the total cost around the guess trajectory.")
-      .def("backwardPass", &SolverFDDP::backwardPass, bp::args(" self"),
-           "Run the backward pass (Riccati sweep)\n\n"
-           "It assumes that the Jacobian and Hessians of the optimal control problem have been\n"
-           "compute. These terms are computed by running calc.")
       .def("forwardPass", &SolverFDDP::forwardPass, bp::args(" self", " stepLength=1"),
            "Run the forward pass or rollout\n\n"
            "It rollouts the action model give the computed policy (feedfoward terns and feedback\n"
            "gains) by the backwardPass. We can define different step lengths\n"
-           ":param stepLength: applied step length (<= 1. and >= 0.)");
+           ":param stepLength: applied step length (<= 1. and >= 0.)")
+      .add_property("th_acceptNegStep", bp::make_function(&SolverFDDP::get_th_acceptnegstep),
+                    bp::make_function(&SolverFDDP::set_th_acceptnegstep),
+                    "threshold for step acceptance in ascent direction");
 }
 
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_SOLVERS_DDP_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_SOLVERS_FDDP_HPP_

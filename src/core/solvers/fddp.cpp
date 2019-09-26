@@ -10,7 +10,7 @@
 
 namespace crocoddyl {
 
-SolverFDDP::SolverFDDP(ShootingProblem& problem) : SolverDDP(problem), dg_(0), dq_(0), dv_(0), th_acceptNegStep_(2) {}
+SolverFDDP::SolverFDDP(ShootingProblem& problem) : SolverDDP(problem), dg_(0), dq_(0), dv_(0), th_acceptnegstep_(2) {}
 
 SolverFDDP::~SolverFDDP() {}
 
@@ -60,17 +60,14 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
 
       if (dVexp_ > 0) {  // descend direction
         if (d_[0] < th_grad_ || dV_ > th_acceptstep_ * dVexp_) {
-          // Accept step
-
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
           cost_ = cost_try_;
           recalc = true;
           break;
         }
-      } else {
-        if (d_[0] < th_grad_ || dV_ < th_acceptNegStep_ * dVexp_) {
-          // accept step
+      } else {  // reducing the gaps by allowing a small increment in the cost value
+        if (d_[0] < th_grad_ || dV_ < th_acceptnegstep_ * dVexp_) {
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
           cost_ = cost_try_;
@@ -79,6 +76,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
         }
       }
     }
+
     if (steplength_ > th_step_) {
       decreaseRegularization();
     }
@@ -103,42 +101,54 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
   return false;
 }
 
-void SolverFDDP::updateExpectedImprovement() {
-  dg_ = 0;
-  dq_ = 0;
-  unsigned int const& T = this->problem_.get_T();
-  if (!is_feasible_) {
-    dg_ -= Vx_.back().transpose() * gaps_.back();
-    dq_ += gaps_.back().transpose() * Vxx_.back() * gaps_.back();
+void SolverFDDP::computeDirection(const bool& recalc) {
+  if (recalc) {
+    calc();
   }
-  for (unsigned int t = 0; t < T; ++t) {
-    dg_ += Qu_[t].transpose() * k_[t];
-    dq_ -= k_[t].transpose() * Quuk_[t];
-    if (!is_feasible_) {
-      dg_ -= Vx_[t].transpose() * gaps_[t];
-      fTVxx_p_.noalias() = Vxx_[t] * gaps_[t];
-      dq_ += gaps_[t].transpose() * fTVxx_p_;
-    }
-  }
+  backwardPass();
+}
+
+double SolverFDDP::tryStep(const double& steplength) {
+  forwardPass(steplength);
+  return cost_ - cost_try_;
 }
 
 const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
   dv_ = 0;
-  d_.fill(0);
   unsigned int const& T = this->problem_.get_T();
   if (!is_feasible_) {
     problem_.running_models_.back()->get_state().diff(xs_try_.back(), xs_.back(), dx_.back());
     fTVxx_p_.noalias() = Vxx_.back() * dx_.back();
-    dv_ -= gaps_.back().transpose() * fTVxx_p_;
+    dv_ -= gaps_.back().dot(fTVxx_p_);
     for (unsigned int t = 0; t < T; ++t) {
       problem_.running_models_[t]->get_state().diff(xs_try_[t], xs_[t], dx_[t]);
       fTVxx_p_.noalias() = Vxx_[t] * dx_[t];
-      dv_ -= gaps_[t].transpose() * fTVxx_p_;
+      dv_ -= gaps_[t].dot(fTVxx_p_);
     }
   }
   d_[0] = dg_ + dv_;
   d_[1] = dq_ - 2 * dv_;
   return d_;
+}
+
+void SolverFDDP::updateExpectedImprovement() {
+  dg_ = 0;
+  dq_ = 0;
+  unsigned int const& T = this->problem_.get_T();
+  if (!is_feasible_) {
+    dg_ -= Vx_.back().dot(gaps_.back());
+    fTVxx_p_.noalias() = Vxx_.back() * gaps_.back();
+    dq_ += gaps_.back().dot(fTVxx_p_);
+  }
+  for (unsigned int t = 0; t < T; ++t) {
+    dg_ += Qu_[t].dot(k_[t]);
+    dq_ -= k_[t].dot(Quuk_[t]);
+    if (!is_feasible_) {
+      dg_ -= Vx_[t].dot(gaps_[t]);
+      fTVxx_p_.noalias() = Vxx_[t] * gaps_[t];
+      dq_ += gaps_[t].dot(fTVxx_p_);
+    }
+  }
 }
 
 double SolverFDDP::calc() {
@@ -161,69 +171,6 @@ double SolverFDDP::calc() {
   return cost_;
 }
 
-void SolverFDDP::backwardPass() {
-  boost::shared_ptr<ActionDataAbstract>& d_T = problem_.terminal_data_;
-  Vxx_.back() = d_T->get_Lxx();
-  Vx_.back() = d_T->get_Lx();
-
-  x_reg_.fill(xreg_);
-  if (!std::isnan(xreg_)) {
-    Vxx_.back().diagonal() += x_reg_;
-  }
-
-  if (!is_feasible_) {
-    Vx_.back() += Vxx_.back() * gaps_.back();
-  }
-
-  for (int t = static_cast<int>(problem_.get_T()) - 1; t >= 0; --t) {
-    ActionModelAbstract* m = problem_.running_models_[t];
-    boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
-    const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
-    const Eigen::VectorXd& Vx_p = Vx_[t + 1];
-
-    FxTVxx_p_.noalias() = d->get_Fx().transpose() * Vxx_p;
-    FuTVxx_p_[t].noalias() = d->get_Fu().transpose() * Vxx_p;
-    Qxx_[t].noalias() = d->get_Lxx() + FxTVxx_p_ * d->get_Fx();
-    Qxu_[t].noalias() = d->get_Lxu() + FxTVxx_p_ * d->get_Fu();
-    Quu_[t].noalias() = d->get_Luu() + FuTVxx_p_[t] * d->get_Fu();
-    Qx_[t].noalias() = d->get_Lx() + d->get_Fx().transpose() * Vx_p;
-    Qu_[t].noalias() = d->get_Lu() + d->get_Fu().transpose() * Vx_p;
-
-    if (!std::isnan(ureg_)) {
-      unsigned int const& nu = m->get_nu();
-      Quu_[t].diagonal() += Eigen::VectorXd::Constant(nu, ureg_);
-    }
-
-    computeGains(t);
-
-    if (std::isnan(ureg_)) {
-      Vx_[t].noalias() = Qx_[t] - K_[t].transpose() * Qu_[t];
-    } else {
-      Quuk_[t].noalias() = Quu_[t] * k_[t];
-      Vx_[t].noalias() = Qx_[t] + K_[t].transpose() * Quuk_[t] - 2 * K_[t].transpose() * Qu_[t];
-    }
-    Vxx_[t].noalias() = Qxx_[t] - Qxu_[t] * K_[t];
-    Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose()).eval();
-    // TODO(cmastalli): as suggested by Nicolas
-
-    if (!std::isnan(xreg_)) {
-      Vxx_[t].diagonal() += x_reg_;
-    }
-
-    // Compute and store the Vx gradient at end of the interval (rollout state)
-    if (!is_feasible_) {
-      Vx_[t].noalias() += Vxx_[t] * gaps_[t];
-    }
-
-    if (raiseIfNaN(Vx_[t].lpNorm<Eigen::Infinity>())) {
-      throw "backward_error";
-    }
-    if (raiseIfNaN(Vxx_[t].lpNorm<Eigen::Infinity>())) {
-      throw "backward_error";
-    }
-  }
-}
-
 void SolverFDDP::forwardPass(const double& steplength) {
   assert(steplength <= 1. && "Step length has to be <= 1.");
   assert(steplength >= 0. && "Step length has to be >= 0.");
@@ -241,12 +188,13 @@ void SolverFDDP::forwardPass(const double& steplength) {
     m->get_state().diff(xs_[t], xs_try_[t], dx_[t]);
     us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
     m->calc(d, xs_try_[t], us_try_[t]);
+    xnext_ = d->get_xnext();
     cost_try_ += d->cost;
 
     if (raiseIfNaN(cost_try_)) {
       throw "forward_error";
     }
-    if (raiseIfNaN(d->get_xnext().lpNorm<Eigen::Infinity>())) {
+    if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
       throw "forward_error";
     }
   }
@@ -255,10 +203,9 @@ void SolverFDDP::forwardPass(const double& steplength) {
   boost::shared_ptr<ActionDataAbstract>& d = problem_.terminal_data_;
 
   if ((is_feasible_) || (steplength == 1)) {
-    xs_try_.back() = problem_.running_datas_.back()->get_xnext();
+    xs_try_.back() = xnext_;
   } else {
-    m->get_state().integrate(problem_.running_datas_.back()->get_xnext(), gaps_.back() * (steplength - 1),
-                             xs_try_.back());
+    m->get_state().integrate(xnext_, gaps_.back() * (steplength - 1), xs_try_.back());
   }
   m->calc(d, xs_try_.back());
   cost_try_ += d->cost;
@@ -267,5 +214,9 @@ void SolverFDDP::forwardPass(const double& steplength) {
     throw "forward_error";
   }
 }
+
+double SolverFDDP::get_th_acceptnegstep() const { return th_acceptnegstep_; }
+
+void SolverFDDP::set_th_acceptnegstep(double th_acceptnegstep) { th_acceptnegstep_ = th_acceptnegstep; }
 
 }  // namespace crocoddyl
