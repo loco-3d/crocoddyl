@@ -10,11 +10,9 @@
 
 namespace crocoddyl {
 
-ActionModelNumDiff::ActionModelNumDiff(ActionModelAbstract& model, bool with_gauss_approx)
+ActionModelNumDiff::ActionModelNumDiff(ActionModelAbstract& model)
     : ActionModelAbstract(model.get_state(), model.get_nu(), model.get_nr()), model_(model) {
-  with_gauss_approx_ = with_gauss_approx;
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
-  assert((!with_gauss_approx_ || nr_ > 1) && "No Gauss approximation possible with nr = 1");
 }
 
 ActionModelNumDiff::~ActionModelNumDiff() {}
@@ -58,7 +56,7 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
     model_.get_state().diff(xn0, xn, data_nd->Fx.col(ix));
 
     data->Lx(ix) = (c - c0) / disturbance_;
-    if (with_gauss_approx_) {
+    if (model_.get_nr() > 0) {
       data_nd->Rx.col(ix) = (data_nd->data_x[ix]->r - data_nd->data_0->r) / disturbance_;
     }
     data_nd->dx(ix) = 0.0;
@@ -76,14 +74,14 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
     model_.get_state().diff(xn0, xn, data_nd->Fu.col(iu));
 
     data->Lu(iu) = (c - c0) / disturbance_;
-    if (with_gauss_approx_) {
+    if (model_.get_nr() > 0) {
       data_nd->Ru.col(iu) = (data_nd->data_u[iu]->r - data_nd->data_0->r) / disturbance_;
     }
     data_nd->du(iu) = 0.0;
   }
   data->Fu /= disturbance_;
 
-  if (with_gauss_approx_) {
+  if (model_.get_nr() > 0) {
     data->Lxx = data_nd->Rx.transpose() * data_nd->Rx;
     data->Lxu = data_nd->Rx.transpose() * data_nd->Ru;
     data->Luu = data_nd->Ru.transpose() * data_nd->Ru;
@@ -98,7 +96,7 @@ ActionModelAbstract& ActionModelNumDiff::get_model() const { return model_; }
 
 const double& ActionModelNumDiff::get_disturbance() const { return disturbance_; }
 
-bool ActionModelNumDiff::get_with_gauss_approx() { return with_gauss_approx_; }
+bool ActionModelNumDiff::get_with_gauss_approx() { return model_.get_nr() > 0; }
 
 void ActionModelNumDiff::assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& /** x */) {
   // do nothing in the general case

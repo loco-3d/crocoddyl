@@ -90,7 +90,6 @@ struct ActionDataAbstract {
   template <typename Model>
   explicit ActionDataAbstract(Model* const model)
       : cost(0.),
-        costResidual(model->get_nr()),
         xnext(model->get_state().get_nx()),
         r(model->get_nr()),
         Fx(model->get_state().get_ndx(), model->get_state().get_ndx()),
@@ -123,7 +122,6 @@ struct ActionDataAbstract {
   const Eigen::MatrixXd& get_Fu() const { return Fu; }
 
   double cost;
-  Eigen::VectorXd costResidual;
   Eigen::VectorXd xnext;
   Eigen::VectorXd r;
   Eigen::MatrixXd Fx;
