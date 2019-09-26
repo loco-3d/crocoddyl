@@ -16,7 +16,6 @@
 #include <Eigen/Dense>
 #include <numeric>
 
-
 namespace crocoddyl {
 
 class SolverKKT : public SolverAbstract {
@@ -31,24 +30,24 @@ class SolverKKT : public SolverAbstract {
   double tryStep(const double& steplength = 1);
   double stoppingCriteria();
   const Eigen::Vector2d& expectedImprovement();
-  // for testing purposes remove later and check matrix dimensions instead 
-  const int& get_nx() const; 
+  // for testing purposes remove later and check matrix dimensions instead
+  const int& get_nx() const;
   const int& get_ndx() const;
-  const int& get_nu() const; 
+  const int& get_nu() const;
   const Eigen::MatrixXd& get_kkt() const;
-  const Eigen::VectorXd& get_kktref() const; 
+  const Eigen::VectorXd& get_kktref() const;
 
  protected:
   double regfactor_;
   double regmin_;
   double regmax_;
-  int nx_; 
+  int nx_;
   int ndx_;
-  int nu_; 
+  int nu_;
   double cost_try_;
   std::vector<Eigen::VectorXd> xs_try_;
   std::vector<Eigen::VectorXd> us_try_;
-  // the vectors below are used to store results of compute direction 
+  // the vectors below are used to store results of compute direction
   std::vector<Eigen::VectorXd> dxs_;
   std::vector<Eigen::VectorXd> dus_;
   std::vector<Eigen::VectorXd> lambdas_;
@@ -62,7 +61,7 @@ class SolverKKT : public SolverAbstract {
   // allocate data
   Eigen::MatrixXd kkt_;
   Eigen::VectorXd kktref_;
-  Eigen::VectorXd primaldual_; 
+  Eigen::VectorXd primaldual_;
   Eigen::VectorXd primal_;
   Eigen::VectorXd dual_;
   std::vector<double> alphas_;
@@ -72,7 +71,5 @@ class SolverKKT : public SolverAbstract {
 };
 
 }  // namespace crocoddyl
-
-
 
 #endif  // CROCODDYL_CORE_SOLVERS_KKT_HPP_

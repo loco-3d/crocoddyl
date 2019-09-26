@@ -74,7 +74,7 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const s
 
 void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us, std::vector<Eigen::VectorXd>& xs) {
   assert(us.size() == T_ && "Wrong dimension of the control trajectory, it should be T.");
-  if (xs.size() < T_ + 1){
+  if (xs.size() < T_ + 1) {
     xs.resize(T_ + 1);
   }
   xs[0] = x0_;

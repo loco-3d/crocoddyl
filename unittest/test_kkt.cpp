@@ -6,7 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 #include <boost/test/included/unit_test.hpp>
 #include <boost/bind.hpp>
@@ -18,14 +17,13 @@
 #include "crocoddyl/core/numdiff/state.hpp"
 #include <Eigen/Dense>
 
-
 using namespace boost::unit_test;
 
 //____________________________________________________________________________//
 
 void test_shooting_problem(crocoddyl::ShootingProblem& problem) {
-  // test my understanding 
-  const long unsigned int T = problem.get_T();  
+  // test my understanding
+  const long unsigned int T = problem.get_T();
   crocoddyl::ActionModelAbstract* model_zero = problem.get_runningModels()[0];
   const unsigned int nx_ac = model_zero->get_state().get_nx();
   const unsigned int ndx_ac = model_zero->get_state().get_ndx();
@@ -36,46 +34,39 @@ void test_shooting_problem(crocoddyl::ShootingProblem& problem) {
     BOOST_CHECK_EQUAL(model_i->get_state().get_nx(), nx_ac);
     BOOST_CHECK_EQUAL(model_i->get_state().get_ndx(), ndx_ac);
     BOOST_CHECK_EQUAL(model_i->get_nu(), nu_ac);
-}
+  }
   crocoddyl::ActionModelAbstract* model_terminal = problem.get_terminalModel();
   BOOST_CHECK_EQUAL(model_terminal->get_state().get_nx(), nx_ac);
   BOOST_CHECK_EQUAL(model_terminal->get_state().get_ndx(), ndx_ac);
-
 }
 
 //____________________________________________________________________________//
 
-
 void test_kkt_constructor(crocoddyl::ShootingProblem& problem) {
-  const long unsigned int T = problem.get_T();  
+  const long unsigned int T = problem.get_T();
   crocoddyl::ActionModelAbstract* model_zero = problem.get_runningModels()[0];
   const unsigned int nx_ac = model_zero->get_state().get_nx();
   const unsigned int ndx_ac = model_zero->get_state().get_ndx();
   const unsigned int nu_ac = model_zero->get_nu();
-  
-  const unsigned int nx_val = (unsigned int)(T+1) * nx_ac;
-  const unsigned int ndx_val = (unsigned int)(T+1) * ndx_ac;
-  const unsigned int nu_val = (unsigned int)T * nu_ac; 
+
+  const unsigned int nx_val = (unsigned int)(T + 1) * nx_ac;
+  const unsigned int ndx_val = (unsigned int)(T + 1) * ndx_ac;
+  const unsigned int nu_val = (unsigned int)T * nu_ac;
 
   crocoddyl::SolverKKT kkt(problem);
 
   // check trajectory dimensions
-  BOOST_CHECK_EQUAL(kkt.get_us().size(),T);
-  BOOST_CHECK_EQUAL(kkt.get_xs().size(),T+1);
-  // check problem dimensions nx, ndx, nu 
+  BOOST_CHECK_EQUAL(kkt.get_us().size(), T);
+  BOOST_CHECK_EQUAL(kkt.get_xs().size(), T + 1);
+  // check problem dimensions nx, ndx, nu
   BOOST_CHECK_EQUAL(kkt.get_nx(), nx_val);
   BOOST_CHECK_EQUAL(kkt.get_ndx(), ndx_val);
   BOOST_CHECK_EQUAL(kkt.get_nu(), nu_val);
   // check kkt matrix dimensions
-  BOOST_CHECK_EQUAL(kkt.get_kkt().rows(),2*ndx_val+ nu_val);
-  BOOST_CHECK_EQUAL(kkt.get_kkt().cols(),2*ndx_val+ nu_val);
-  BOOST_CHECK_EQUAL(kkt.get_kktref().rows(),2*ndx_val+ nu_val); 
-
-
+  BOOST_CHECK_EQUAL(kkt.get_kkt().rows(), 2 * ndx_val + nu_val);
+  BOOST_CHECK_EQUAL(kkt.get_kkt().cols(), 2 * ndx_val + nu_val);
+  BOOST_CHECK_EQUAL(kkt.get_kktref().rows(), 2 * ndx_val + nu_val);
 }
-
-
-
 
 //____________________________________________________________________________//
 
@@ -102,13 +93,10 @@ void register_state_vector_unit_tests() {
   // Formulating the optimal control problem
   crocoddyl::ShootingProblem problem(x0, runningModels, terminalModel);
 
-  framework::master_test_suite().add(
-      BOOST_TEST_CASE(boost::bind(&test_shooting_problem, problem)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_shooting_problem, problem)));
 
-  framework::master_test_suite().add(
-      BOOST_TEST_CASE(boost::bind(&test_kkt_constructor, problem)));
-
-    }
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_kkt_constructor, problem)));
+}
 
 //____________________________________________________________________________//
 

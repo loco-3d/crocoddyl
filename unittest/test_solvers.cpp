@@ -14,12 +14,9 @@
 
 using namespace boost::unit_test;
 
-class SolverDPPFactory{
-public:
-  SolverDPPFactory()
-  {
-
-  }
+class SolverDPPFactory {
+ public:
+  SolverDPPFactory() {}
 
   std::unique_ptr<crocoddyl::ShootingProblem> shooting_problem_;
   std::unique_ptr<crocoddyl::SolverDDP> ddp_solver_;
@@ -28,13 +25,11 @@ public:
 //____________________________________________________________________________//
 //____________________________________________________________________________//
 
-void test_1(crocoddyl::SolverAbstract& solver) {
-}
+void test_1(crocoddyl::SolverAbstract& solver) {}
 
 //____________________________________________________________________________//
 
-void test_2(crocoddyl::SolverAbstract& solver) {
-}
+void test_2(crocoddyl::SolverAbstract& solver) {}
 
 //____________________________________________________________________________//
 //____________________________________________________________________________//
