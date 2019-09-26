@@ -19,11 +19,10 @@ namespace bp = boost::python;
 void exposeActionNumDiff() {
   bp::class_<ActionModelNumDiff, bp::bases<ActionModelAbstract> >(
       "ActionModelNumDiff", "Abstract class for computing calcDiff by using numerical differentiation.\n\n",
-      bp::init<ActionModelAbstract&>(
-          bp::args(" self", " model"),
-          "Initialize the action model NumDiff.\n\n"
-          ":param model: action model where we compute the derivatives through NumDiff"
-          )[bp::with_custodian_and_ward<1, 2>()])
+      bp::init<ActionModelAbstract&>(bp::args(" self", " model"),
+                                     "Initialize the action model NumDiff.\n\n"
+                                     ":param model: action model where we compute the derivatives through NumDiff")
+          [bp::with_custodian_and_ward<1, 2>()])
       .def("calc", &ActionModelNumDiff::calc_wrap,
            ActionModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
                                   "Compute the next state and cost value.\n\n"

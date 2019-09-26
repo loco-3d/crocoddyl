@@ -66,7 +66,7 @@ class ActionModelNumDiff : public ActionModelAbstract {
    */
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u);
-  
+
   /**
    * @brief @copydoc ActionDataAbstract::calcDiff()
    */
@@ -75,30 +75,30 @@ class ActionModelNumDiff : public ActionModelAbstract {
 
   /**
    * @brief Create a Data object from the given model.
-   * 
-   * @return boost::shared_ptr<ActionDataAbstract> 
+   *
+   * @return boost::shared_ptr<ActionDataAbstract>
    */
   boost::shared_ptr<ActionDataAbstract> createData();
 
   /**
    * @brief Get the model_ object
-   * 
-   * @return ActionModelAbstract& 
+   *
+   * @return ActionModelAbstract&
    */
   ActionModelAbstract& get_model() const;
 
   /**
    * @brief Get the disturbance_ object
-   * 
-   * @return const double& 
+   *
+   * @return const double&
    */
   const double& get_disturbance() const;
 
   /**
    * @brief Identify if the Gauss approximation is going to be used or not.
-   * 
-   * @return true 
-   * @return false 
+   *
+   * @return true
+   * @return false
    */
   bool get_with_gauss_approx();
 
