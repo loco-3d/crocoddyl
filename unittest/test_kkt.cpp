@@ -6,16 +6,18 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#define BOOST_TEST_ALTERNATIVE_INIT_API
+#define BOOST_TEST_NO_MAIN
 #include <boost/test/included/unit_test.hpp>
 #include <boost/bind.hpp>
+
+#include <Eigen/Dense>
+
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/solver-base.hpp"
 #include "crocoddyl/core/solvers/kkt.hpp"
 #include "crocoddyl/core/optctrl/shooting.hpp"
 #include "crocoddyl/core/actions/unicycle.hpp"
 #include "crocoddyl/core/numdiff/state.hpp"
-#include <Eigen/Dense>
 
 using namespace boost::unit_test;
 
