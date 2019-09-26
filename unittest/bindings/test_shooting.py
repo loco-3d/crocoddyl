@@ -5,7 +5,9 @@ from random import randint
 import numpy as np
 
 import crocoddyl
-from crocoddyl.utils import UnicycleDerived
+import pinocchio
+from crocoddyl.utils import UnicycleDerived, DifferentialFreeFwdDynamicsDerived
+import example_robot_data
 
 
 class ShootingProblemTestCase(unittest.TestCase):
@@ -62,8 +64,25 @@ class UnicycleShootingTest(ShootingProblemTestCase):
     MODEL_DER = UnicycleDerived()
 
 
+class TalosArmShootingTest(ShootingProblemTestCase):
+    ROBOT_MODEL = example_robot_data.loadTalosArm().model
+    STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+    COST_SUM = crocoddyl.CostModelSum(STATE)
+    COST_SUM.addCost(
+        'gripperPose',
+        crocoddyl.CostModelFramePlacement(
+            STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("gripper_left_joint"), pinocchio.SE3.Random())),
+        1e-3)
+    COST_SUM.addCost("xReg", crocoddyl.CostModelState(STATE), 1e-7)
+    COST_SUM.addCost("uReg", crocoddyl.CostModelControl(STATE), 1e-7)
+    DIFF_MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, COST_SUM)
+    DIFF_MODEL_DER = DifferentialFreeFwdDynamicsDerived(STATE, COST_SUM)
+    MODEL = crocoddyl.IntegratedActionModelEuler(DIFF_MODEL, 1e-3)
+    MODEL_DER = crocoddyl.IntegratedActionModelEuler(DIFF_MODEL_DER, 1e-3)
+
+
 if __name__ == '__main__':
-    test_classes_to_run = [UnicycleShootingTest]
+    test_classes_to_run = [UnicycleShootingTest, TalosArmShootingTest]
     loader = unittest.TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:
