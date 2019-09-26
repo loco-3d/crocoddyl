@@ -27,19 +27,19 @@ void test_shooting_problem(crocoddyl::ShootingProblem& problem) {
   // test my understanding 
   const long unsigned int T = problem.get_T();  
   crocoddyl::ActionModelAbstract* model_zero = problem.get_runningModels()[0];
-  const unsigned int nx_ac = model_zero->get_nx();
-  const unsigned int ndx_ac = model_zero->get_ndx();
+  const unsigned int nx_ac = model_zero->get_state().get_nx();
+  const unsigned int ndx_ac = model_zero->get_state().get_ndx();
   const unsigned int nu_ac = model_zero->get_nu();
 
   for (long unsigned int t = 0; t < T; ++t) {
     crocoddyl::ActionModelAbstract* model_i = problem.get_runningModels()[t];
-    BOOST_CHECK_EQUAL(model_i->get_nx(), nx_ac);
-    BOOST_CHECK_EQUAL(model_i->get_ndx(), ndx_ac);
+    BOOST_CHECK_EQUAL(model_i->get_state().get_nx(), nx_ac);
+    BOOST_CHECK_EQUAL(model_i->get_state().get_ndx(), ndx_ac);
     BOOST_CHECK_EQUAL(model_i->get_nu(), nu_ac);
 }
   crocoddyl::ActionModelAbstract* model_terminal = problem.get_terminalModel();
-  BOOST_CHECK_EQUAL(model_terminal->get_nx(), nx_ac);
-  BOOST_CHECK_EQUAL(model_terminal->get_ndx(), ndx_ac);
+  BOOST_CHECK_EQUAL(model_terminal->get_state().get_nx(), nx_ac);
+  BOOST_CHECK_EQUAL(model_terminal->get_state().get_ndx(), ndx_ac);
 
 }
 
@@ -49,13 +49,13 @@ void test_shooting_problem(crocoddyl::ShootingProblem& problem) {
 void test_kkt_constructor(crocoddyl::ShootingProblem& problem) {
   const long unsigned int T = problem.get_T();  
   crocoddyl::ActionModelAbstract* model_zero = problem.get_runningModels()[0];
-  const unsigned int nx_ac = model_zero->get_nx();
-  const unsigned int ndx_ac = model_zero->get_ndx();
+  const unsigned int nx_ac = model_zero->get_state().get_nx();
+  const unsigned int ndx_ac = model_zero->get_state().get_ndx();
   const unsigned int nu_ac = model_zero->get_nu();
   
-  const unsigned int nx_val = (T+1)*nx_ac;
-  const unsigned int ndx_val = (T+1)*ndx_ac;
-  const unsigned int nu_val = T*nu_ac; 
+  const unsigned int nx_val = (unsigned int)(T+1) * nx_ac;
+  const unsigned int ndx_val = (unsigned int)(T+1) * ndx_ac;
+  const unsigned int nu_val = (unsigned int)T * nu_ac; 
 
   crocoddyl::SolverKKT kkt(problem);
 
@@ -63,9 +63,9 @@ void test_kkt_constructor(crocoddyl::ShootingProblem& problem) {
   BOOST_CHECK_EQUAL(kkt.get_us().size(),T);
   BOOST_CHECK_EQUAL(kkt.get_xs().size(),T+1);
   // check problem dimensions nx, ndx, nu 
-  BOOST_CHECK_EQUAL(kkt.get_nx(),nx_val);
-  BOOST_CHECK_EQUAL(kkt.get_ndx(),ndx_val);
-  BOOST_CHECK_EQUAL(kkt.get_nu(),nu_val);
+  BOOST_CHECK_EQUAL(kkt.get_nx(), nx_val);
+  BOOST_CHECK_EQUAL(kkt.get_ndx(), ndx_val);
+  BOOST_CHECK_EQUAL(kkt.get_nu(), nu_val);
   // check kkt matrix dimensions
   BOOST_CHECK_EQUAL(kkt.get_kkt().rows(),2*ndx_val+ nu_val);
   BOOST_CHECK_EQUAL(kkt.get_kkt().cols(),2*ndx_val+ nu_val);

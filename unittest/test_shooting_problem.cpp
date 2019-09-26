@@ -61,7 +61,7 @@ public:
       running_models_.push_back(new ActionModelLQRType(nx, nu, drift_free));
     }
     terminal_model_ = new ActionModelLQRType (nx, nu, drift_free);
-    x0_ = terminal_model_->get_state()->rand();
+    x0_ = terminal_model_->get_state().rand();
     x0_.fill(1.0);
     shooting_problem_ = 
       new crocoddyl::ShootingProblem(x0_, running_models_, terminal_model_);
@@ -132,18 +132,18 @@ void test_trajectory_dimension(int nx, int nu, bool drift_free, unsigned horizon
   long int sum_state_dims = 0;
   for(unsigned i = 0 ; i < shooting_problem.get_runningModels().size() ; ++i)
   {
-    Eigen::VectorXd x = shooting_problem.get_runningModels()[i]->get_state()->zero();
+    Eigen::VectorXd x = shooting_problem.get_runningModels()[i]->get_state().zero();
     sum_state_dims += x.size();
   }
-  Eigen::VectorXd x = shooting_problem.get_terminalModel()->get_state()->zero();
+  Eigen::VectorXd x = shooting_problem.get_terminalModel()->get_state().zero();
   sum_state_dims += x.size();
 
   int sum_model_state_dims = 0;
   for(unsigned i = 0 ; i < shooting_problem.get_runningModels().size() ; ++i)
   {
-    sum_model_state_dims += shooting_problem.get_runningModels()[i]->get_nx();
+    sum_model_state_dims += shooting_problem.get_runningModels()[i]->get_state().get_nx();
   }
-  sum_model_state_dims += shooting_problem.get_terminalModel()->get_nx();
+  sum_model_state_dims += shooting_problem.get_terminalModel()->get_state().get_nx();
 
   BOOST_CHECK( sum_model_state_dims == sum_state_dims );
 }
@@ -214,8 +214,6 @@ void test_data_dim(int nx, int nu, bool drift_free, unsigned horizon_size) {
     BOOST_CHECK( nx*nu == shooting_problem.get_runningDatas()[i]->Lxu.size());
     BOOST_CHECK( nu*nu == shooting_problem.get_runningDatas()[i]->Luu.size());
     BOOST_CHECK( 0 == shooting_problem.get_runningDatas()[i]->r.size());
-    BOOST_CHECK( 0 == shooting_problem.get_runningDatas()[i]->Rx.size());
-    BOOST_CHECK( 0 == shooting_problem.get_runningDatas()[i]->Ru.size());
   }
 
   BOOST_CHECK( nx == shooting_problem.get_terminalData()->xnext.size());
@@ -227,8 +225,6 @@ void test_data_dim(int nx, int nu, bool drift_free, unsigned horizon_size) {
   BOOST_CHECK( nx*nu == shooting_problem.get_terminalData()->Lxu.size());
   BOOST_CHECK( nu*nu == shooting_problem.get_terminalData()->Luu.size());
   BOOST_CHECK( 0 == shooting_problem.get_terminalData()->r.size());
-  BOOST_CHECK( 0 == shooting_problem.get_terminalData()->Rx.size());
-  BOOST_CHECK( 0 == shooting_problem.get_terminalData()->Ru.size());
 }
 
 //____________________________________________________________________________//
@@ -249,18 +245,11 @@ void test_calc() {
     nx, nu, drift_free, horizon_size);
   crocoddyl::ShootingProblem& shooting_problem = factory.get_shooting_problem();
 
-  std::vector<Eigen::VectorXd> x_vec;
-  std::vector<Eigen::VectorXd> u_vec;
-  for(unsigned i = 0 ; i < horizon_size + 1 ; ++i)
-  {
-    Eigen::VectorXd x, u;
-    x.resize(nx);
-    x.fill(1.0);
-    u.resize(nu);
-    u.fill(2.0);
-    x_vec.push_back(x);
-    u_vec.push_back(u);
-  }
+  std::vector<Eigen::VectorXd> x_vec(horizon_size + 1, Eigen::VectorXd(nx));
+  std::vector<Eigen::VectorXd> u_vec(horizon_size, Eigen::VectorXd(nu));
+  for(unsigned i = 0 ; i < x_vec.size() ; ++i){x_vec[i].fill(1.0);}
+  for(unsigned i = 0 ; i < u_vec.size() ; ++i){u_vec[i].fill(2.0);}
+
 
   shooting_problem.calc(x_vec, u_vec);
   BOOST_CHECK(shooting_problem.get_runningDatas()[0]->cost == 9);
@@ -296,18 +285,10 @@ void test_calc_diff(int nx, int nu, bool drift_free, unsigned horizon_size) {
   crocoddyl::ShootingProblem& shooting_problem = factory.get_shooting_problem();
   crocoddyl::ShootingProblem& shooting_problem2 = factory.get_shooting_problem();
 
-  std::vector<Eigen::VectorXd> x_vec;
-  std::vector<Eigen::VectorXd> u_vec;
-  for(unsigned i = 0 ; i < horizon_size + 1 ; ++i)
-  {
-    Eigen::VectorXd x, u;
-    x.resize(nx);
-    x.fill(1.0);
-    u.resize(nu);
-    u.fill(2.0);
-    x_vec.push_back(x);
-    u_vec.push_back(u);
-  }
+  std::vector<Eigen::VectorXd> x_vec(horizon_size + 1, Eigen::VectorXd(nx));
+  std::vector<Eigen::VectorXd> u_vec(horizon_size, Eigen::VectorXd(nu));
+  for(unsigned i = 0 ; i < x_vec.size() ; ++i){x_vec[i].fill(1.0);}
+  for(unsigned i = 0 ; i < u_vec.size() ; ++i){u_vec[i].fill(2.0);}
 
   shooting_problem.calc(x_vec, u_vec);
   shooting_problem.calcDiff(x_vec, u_vec);
@@ -351,27 +332,23 @@ void test_rollout() {
     nx, nu, drift_free, horizon_size);
   crocoddyl::ShootingProblem& shooting_problem = factory.get_shooting_problem();
 
-  std::vector<Eigen::VectorXd> x_vec;
-  x_vec.clear();
-  std::vector<Eigen::VectorXd> u_vec;
-  u_vec.clear();
-  for(unsigned i = 0 ; i < horizon_size + 1 ; ++i)
-  {
-    Eigen::VectorXd x, u;
-    x.resize(nx);
-    x.fill(1.0);
-    u.resize(nu);
-    u.fill(2.0);
-    x_vec.push_back(x);
-    u_vec.push_back(u);
-    std::cout << "u = " << u.transpose() << std::endl;
-  }
+  std::vector<Eigen::VectorXd> x_vec(horizon_size + 1, Eigen::VectorXd(nx));
+  std::vector<Eigen::VectorXd> u_vec(horizon_size, Eigen::VectorXd(nu));
+  for(unsigned i = 0 ; i < x_vec.size() ; ++i){x_vec[i].fill(1.0);}
+  for(unsigned i = 0 ; i < u_vec.size() ; ++i){u_vec[i].fill(2.0);}
+
   shooting_problem.rollout(u_vec, x_vec);
   
+  std::cout << shooting_problem.get_terminalData()->cost
+            << " ; "
+            << shooting_problem.get_terminalData()->xnext.transpose()
+            << std::endl;
+
   BOOST_CHECK(shooting_problem.get_runningDatas()[0]->cost == 9);
   BOOST_CHECK(shooting_problem.get_runningDatas()[1]->cost == 19);
   BOOST_CHECK(shooting_problem.get_runningDatas()[2]->cost == 33);
-  BOOST_CHECK(shooting_problem.get_terminalData()->cost == 0);
+  BOOST_CHECK(shooting_problem.get_terminalData()->cost == 
+              shooting_problem.get_runningDatas().back()->cost);
 
   double tol = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
   BOOST_CHECK( (shooting_problem.get_runningDatas()[0]->xnext - 
@@ -381,7 +358,7 @@ void test_rollout() {
   BOOST_CHECK( (shooting_problem.get_runningDatas()[2]->xnext - 
     (Eigen::VectorXd(2) << 7, 1).finished()).isMuchSmallerThan(1.0, tol) );
   BOOST_CHECK( (shooting_problem.get_terminalData()->xnext - 
-    (Eigen::VectorXd(2) << 0, 0).finished()).isMuchSmallerThan(1.0, tol) );
+    shooting_problem.get_runningDatas().back()->xnext).isMuchSmallerThan(1.0, tol) );
 }
 
 //____________________________________________________________________________//
@@ -403,22 +380,18 @@ void test_rollout_us() {
     nx, nu, drift_free, horizon_size);
   crocoddyl::ShootingProblem& shooting_problem = factory.get_shooting_problem();
 
-  std::vector<Eigen::VectorXd> u_vec;
-  u_vec.clear();
-  for(unsigned i = 0 ; i < horizon_size + 1 ; ++i)
-  {
-    Eigen::VectorXd u;
-    u.resize(nu);
-    u.fill(2.0);
-    u_vec.push_back(u);
-    std::cout << "u = " << u.transpose() << std::endl;
-  }
+  std::vector<Eigen::VectorXd> x_vec(horizon_size + 1, Eigen::VectorXd(nx));
+  std::vector<Eigen::VectorXd> u_vec(horizon_size, Eigen::VectorXd(nu));
+  for(unsigned i = 0 ; i < x_vec.size() ; ++i){x_vec[i].fill(1.0);}
+  for(unsigned i = 0 ; i < u_vec.size() ; ++i){u_vec[i].fill(2.0);}
+
   shooting_problem.rollout_us(u_vec);
   
   BOOST_CHECK(shooting_problem.get_runningDatas()[0]->cost == 9);
   BOOST_CHECK(shooting_problem.get_runningDatas()[1]->cost == 19);
   BOOST_CHECK(shooting_problem.get_runningDatas()[2]->cost == 33);
-  BOOST_CHECK(shooting_problem.get_terminalData()->cost == 0);
+  BOOST_CHECK(shooting_problem.get_terminalData()->cost == 
+              shooting_problem.get_runningDatas().back()->cost);
 
   double tol = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
   BOOST_CHECK( (shooting_problem.get_runningDatas()[0]->xnext - 
@@ -428,7 +401,7 @@ void test_rollout_us() {
   BOOST_CHECK( (shooting_problem.get_runningDatas()[2]->xnext - 
     (Eigen::VectorXd(2) << 7, 1).finished()).isMuchSmallerThan(1.0, tol) );
   BOOST_CHECK( (shooting_problem.get_terminalData()->xnext - 
-    (Eigen::VectorXd(2) << 0, 0).finished()).isMuchSmallerThan(1.0, tol) );
+    shooting_problem.get_runningDatas().back()->xnext).isMuchSmallerThan(1.0, tol) );
 }
 
 //____________________________________________________________________________//

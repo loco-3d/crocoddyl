@@ -41,18 +41,18 @@ double SolverKKT::calc(){
   int ix = 0; 
   int iu = 0; 
   //offset on constraint xnext = f(x,u) due to x0 = ref.
-  const unsigned int cx0 = problem_.get_runningModels()[0]->get_ndx(); 
+  const unsigned int cx0 = problem_.get_runningModels()[0]->get_state().get_ndx(); 
   // fill diagonals of dynamics gradient as identity 
   kkt_.block(ndx_+nu_,0,ndx_,ndx_) = Eigen::MatrixXd::Identity(ndx_,ndx_); 
   // loop over models and fill out kkt matrix 
   for (long unsigned int t = 0; t < T; ++t) {
     ActionModelAbstract* m = problem_.running_models_[t];
     boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
-    const unsigned int ndxi = m->get_ndx();
+    const unsigned int ndxi = m->get_state().get_ndx();
     const unsigned int nui = m->get_nu();
     // compute gap at initial state 
     if(t==0){
-      m->get_state()->diff(problem_.get_x0(), xs_[0], kktref_.segment(ndx_+nu_, ndxi));
+      m->get_state().diff(problem_.get_x0(), xs_[0], kktref_.segment(ndx_+nu_, ndxi));
     }
     // hessian
     kkt_.block(ix,ix,ndxi,ndxi) = d->get_Lxx();
@@ -66,14 +66,14 @@ double SolverKKT::calc(){
     kktref_.segment(ix, ndxi) = d->get_Lx();
     kktref_.segment(ndx_+iu, nui) = d->get_Lu();
     // constraint value = x_guess - x_ref = diff(x_ref,x_guess)
-    m->get_state()->diff(d->get_xnext(), xs_[t + 1], kktref_.segment(ndx_+nu_+cx0+ix, ndxi));
+    m->get_state().diff(d->get_xnext(), xs_[t + 1], kktref_.segment(ndx_+nu_+cx0+ix, ndxi));
     // increment node index for state and control 
     ix += ndxi; 
     iu += nui;
   }
   // do terminal model 
   boost::shared_ptr<ActionDataAbstract>& df = problem_.terminal_data_;
-  const unsigned int ndxf = problem_.terminal_model_->get_ndx();
+  const unsigned int ndxf = problem_.terminal_model_->get_state().get_ndx();
   kkt_.block(ix,ix,ndxf,ndxf) = df->get_Lxx();
   kktref_.segment(ix, ndxf) = df->get_Lx();
   // jacobian transpose 
@@ -114,7 +114,7 @@ void SolverKKT::computeDirection(const bool& recalc){
   int iu = 0; 
 
   for (long unsigned int t = 0; t < T; ++t) {
-    const unsigned int ndxi = problem_.running_models_[t]->get_ndx();
+    const unsigned int ndxi = problem_.running_models_[t]->get_state().get_ndx();
     const unsigned int nui = problem_.running_models_[t]->get_nu();
     dxs_[t] = p_x.segment(ix, ndxi);
     dus_[t] = p_u.segment(iu, nui); 
@@ -122,7 +122,7 @@ void SolverKKT::computeDirection(const bool& recalc){
     ix += ndxi; 
     iu += nui; 
   }
-  const unsigned int ndxi = problem_.terminal_model_->get_ndx();
+  const unsigned int ndxi = problem_.terminal_model_->get_state().get_ndx();
   dxs_.back() = p_x.segment(ix, ndxi);
   lambdas_.back() = dual_.segment(ix, ndxi); 
 
@@ -149,7 +149,7 @@ double SolverKKT::stoppingCriteria(){
   for (long unsigned int t = 0; t<T; ++t){
 
     boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
-    const unsigned int ndxi = problem_.running_models_[t]->get_ndx();
+    const unsigned int ndxi = problem_.running_models_[t]->get_state().get_ndx();
     const unsigned int nui = problem_.running_models_[t]->get_nu();
     dF.segment(ix, ndxi) = lambdas_[t] - d->get_Fx()*lambdas_[t+1]; 
     dF.segment(ndx_+iu, nui) = - d->get_Fu()*lambdas_[t+1];
@@ -157,7 +157,7 @@ double SolverKKT::stoppingCriteria(){
     iu += nui; 
 
   }
-  const unsigned int ndxi = problem_.terminal_model_->get_ndx();
+  const unsigned int ndxi = problem_.terminal_model_->get_state().get_ndx();
   dF.segment(ix,ndxi) = lambdas_.back(); 
   stop_ = (dL + dF).squaredNorm() + kktref_.segment(ndx_+nu_, ndx_).squaredNorm();
 
@@ -170,7 +170,7 @@ double SolverKKT::tryStep(const double& steplength){
   for (long unsigned int t = 0; t<T; ++t){
 
     ActionModelAbstract* m = problem_.running_models_[t];
-    m->get_state()-> integrate(xs_[t], steplength*dxs_[t], xs_try_[t+1]);
+    m->get_state().integrate(xs_[t], steplength*dxs_[t], xs_try_[t+1]);
     us_try_[t] = us_[t] + steplength*dus_[t]; 
   }
   cost_try_ = problem_.calc(xs_try_, us_try_); 
@@ -241,7 +241,7 @@ bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
     if (n_callbacks != 0) {
       for (long unsigned int c = 0; c < n_callbacks; ++c) {
         CallbackAbstract& callback = *callbacks_[c];
-        callback(this);
+        callback(*this);
       }
     }
 
@@ -285,8 +285,8 @@ void SolverKKT::allocateData() {
 
   for (long unsigned int t = 0; t < T; ++t) {
     ActionModelAbstract* model = problem_.running_models_[t];
-    const int& nx = model->get_nx();
-    const int& ndx = model->get_ndx();
+    const int& nx = model->get_state().get_nx();
+    const int& ndx = model->get_state().get_ndx();
     const int& nu = model->get_nu();
 
     if (t == 0) {
@@ -305,11 +305,11 @@ void SolverKKT::allocateData() {
   }
   // add terminal model 
   ActionModelAbstract* model = problem_.get_terminalModel();
-  nx_ +=  model->get_nx();
-  ndx_ +=  model->get_ndx();
-  xs_try_.back() = problem_.terminal_model_->get_state()->zero();
-  dxs_.back() = Eigen::VectorXd::Zero(model->get_ndx()); 
-  lambdas_.back() = Eigen::VectorXd::Zero(model->get_ndx()); 
+  nx_ +=  model->get_state().get_nx();
+  ndx_ +=  model->get_state().get_ndx();
+  xs_try_.back() = problem_.terminal_model_->get_state().zero();
+  dxs_.back() = Eigen::VectorXd::Zero(model->get_state().get_ndx()); 
+  lambdas_.back() = Eigen::VectorXd::Zero(model->get_state().get_ndx()); 
   // set dimensions for kkt matrix and kkt_ref vector 
   kkt_.resize(2*ndx_+nu_, 2*ndx_+nu_); kkt_.setZero(); 
   kktref_.resize(2*ndx_+nu_); kktref_.setZero();
