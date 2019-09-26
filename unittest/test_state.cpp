@@ -26,14 +26,12 @@
 
 using namespace boost::unit_test;
 
-template<class PtrType>
-void delete_pointer(PtrType* ptr)
-{
-  if(ptr != NULL)
-    {
-      delete ptr;
-      ptr = NULL;
-    }
+template <class PtrType>
+void delete_pointer(PtrType* ptr) {
+  if (ptr != NULL) {
+    delete ptr;
+    ptr = NULL;
+  }
 }
 
 class StateAbstractFactory {
@@ -45,24 +43,16 @@ class StateAbstractFactory {
 class StateVectorFactory : public StateAbstractFactory {
  public:
   StateVectorFactory(int nx) : StateAbstractFactory() {
-    std::cout << "creating the StateVector" << std::endl;
     state_vector_ = new crocoddyl::StateVector(nx);
     state_ = state_vector_;
-    std::cout << "created the StateVector" << std::endl;
   }
-  ~StateVectorFactory()
-  {
-    std::cout << "deleting the StateVector" << std::endl;
-    delete_pointer(state_vector_);
-    std::cout << "deleted the StateVector" << std::endl;
-  }
+  ~StateVectorFactory() { delete_pointer(state_vector_); }
   crocoddyl::StateVector* state_vector_;
 };
 
 class StateMultibodyFactory : public StateAbstractFactory {
  public:
   StateMultibodyFactory(const std::string& urdf_file = "", bool free_flyer = true) : StateAbstractFactory() {
-    std::cout << "creating the state" << std::endl;
     pinocchio_model_ = new pinocchio::Model();
     if (urdf_file.size() != 0) {
       if (free_flyer) {
@@ -78,24 +68,11 @@ class StateMultibodyFactory : public StateAbstractFactory {
     }
     state_multibody_ = new crocoddyl::StateMultibody(*pinocchio_model_);
     state_ = state_multibody_;
-    std::cout << "created the state" << std::endl;
   }
-  ~StateMultibodyFactory()
-  {
+  ~StateMultibodyFactory() {
     delete_pointer(free_flyer_joint_);
     delete_pointer(state_multibody_);
     delete_pointer(pinocchio_model_);
-
-    std::cout << "deleting the StateMultibodyFactory ";
-    if (free_flyer_joint_)
-    {
-      std::cout << "with free flyer.";
-    }
-    else
-    {
-      std::cout << "without free flyer.";
-    }
-    std::cout << std::endl;
   }
   pinocchio::JointModelFreeFlyer* free_flyer_joint_;
   crocoddyl::StateMultibody* state_multibody_;
@@ -105,16 +82,13 @@ class StateMultibodyFactory : public StateAbstractFactory {
 //----------------------------------------------------------------------------//
 
 void test_state_dimension(StateAbstractFactory* factory, int nx) {
-  std::cout << "test_state_dimension" << std::endl;
   crocoddyl::StateAbstract* state = factory->get_state();
   // Checking the dimension of zero and random states
   BOOST_CHECK(state->zero().size() == nx);
   BOOST_CHECK(state->rand().size() == nx);
-  std::cout << "test_state_dimension end" << std::endl;
 }
 
 void test_integrate_against_difference(StateAbstractFactory* factory) {
-  std::cout << "test_integrate_against_difference" << std::endl;
   crocoddyl::StateAbstract* state = factory->get_state();
   // Generating random states
   Eigen::VectorXd x1 = state->rand();
@@ -131,11 +105,9 @@ void test_integrate_against_difference(StateAbstractFactory* factory) {
 
   // Checking that both states agree
   BOOST_CHECK(dxi.isMuchSmallerThan(1.0, 1e-9));
-  std::cout << "test_integrate_against_difference end" << std::endl;
 }
 
 void test_difference_against_integrate(StateAbstractFactory* factory) {
-  std::cout << "test_difference_against_integrate" << std::endl;
   crocoddyl::StateAbstract* state = factory->get_state();
   // Generating random states
   Eigen::VectorXd x = state->rand();
@@ -149,11 +121,9 @@ void test_difference_against_integrate(StateAbstractFactory* factory) {
 
   // Checking that both states agree
   BOOST_CHECK((dxd - dx).isMuchSmallerThan(1.0, 1e-9));
-  std::cout << "test_difference_against_integrate end" << std::endl;
 }
 
 void test_Jdiff_firstsecond(StateAbstractFactory* factory) {
-  std::cout << "test_Jdiff_firstsecond" << std::endl;
   crocoddyl::StateAbstract* state = factory->get_state();
   // Generating random values for the initial and terminal states
   Eigen::VectorXd x1 = state->rand();
@@ -173,11 +143,9 @@ void test_Jdiff_firstsecond(StateAbstractFactory* factory) {
 
   BOOST_CHECK((Jdiff_first - Jdiff_both_first).isMuchSmallerThan(1.0, 1e-9));
   BOOST_CHECK((Jdiff_second - Jdiff_both_second).isMuchSmallerThan(1.0, 1e-9));
-  std::cout << "test_Jdiff_firstsecond end" << std::endl;
 }
 
 void test_Jint_firstsecond(StateAbstractFactory* factory) {
-  std::cout << "test_Jint_firstsecond" << std::endl;
   crocoddyl::StateAbstract* state = factory->get_state();
   // Generating random values for the initial and terminal states
   Eigen::VectorXd x = state->rand();
@@ -197,11 +165,9 @@ void test_Jint_firstsecond(StateAbstractFactory* factory) {
 
   BOOST_CHECK((Jint_first - Jint_both_first).isMuchSmallerThan(1.0, 1e-9));
   BOOST_CHECK((Jint_second - Jint_both_second).isMuchSmallerThan(1.0, 1e-9));
-  std::cout << "test_Jint_firstsecond end" << std::endl;
 }
 
 void test_Jdiff_num_diff_firstsecond(StateAbstractFactory* factory) {
-  std::cout << "test_Jdiff_num_diff_firstsecond" << std::endl;
   crocoddyl::StateAbstract* state = factory->get_state();
   // Generating random values for the initial and terminal states
   Eigen::VectorXd x1 = state->rand();
@@ -224,11 +190,9 @@ void test_Jdiff_num_diff_firstsecond(StateAbstractFactory* factory) {
 
   BOOST_CHECK((Jdiff_num_diff_first - Jdiff_num_diff_both_first).isMuchSmallerThan(1.0, 1e-9));
   BOOST_CHECK((Jdiff_num_diff_second - Jdiff_num_diff_both_second).isMuchSmallerThan(1.0, 1e-9));
-  std::cout << "test_Jdiff_num_diff_firstsecond end" << std::endl;
 }
 
 void test_Jint_num_diff_firstsecond(StateAbstractFactory* factory) {
-  std::cout << "test_Jint_num_diff_firstsecond" << std::endl;
   crocoddyl::StateAbstract* state = factory->get_state();
   // Generating random values for the initial and terminal states
   Eigen::VectorXd x = state->rand();
@@ -251,11 +215,9 @@ void test_Jint_num_diff_firstsecond(StateAbstractFactory* factory) {
 
   BOOST_CHECK((Jint_num_diff_first - Jint_num_diff_both_first).isMuchSmallerThan(1.0, 1e-9));
   BOOST_CHECK((Jint_num_diff_second - Jint_num_diff_both_second).isMuchSmallerThan(1.0, 1e-9));
-  std::cout << "test_Jint_num_diff_firstsecond end" << std::endl;
 }
 
 void test_Jdiff_against_numdiff(StateAbstractFactory* factory, double num_diff_modifier) {
-  std::cout << "test_Jdiff_against_numdiff" << std::endl;
   crocoddyl::StateAbstract* state = factory->get_state();
   // Generating random values for the initial and terminal states
   Eigen::VectorXd x1 = state->rand();
@@ -278,11 +240,9 @@ void test_Jdiff_against_numdiff(StateAbstractFactory* factory, double num_diff_m
   double tol = num_diff_modifier * state_num_diff.get_disturbance();
   BOOST_CHECK((Jdiff_1 - Jdiff_num_1).isMuchSmallerThan(1.0, tol));
   BOOST_CHECK((Jdiff_2 - Jdiff_num_2).isMuchSmallerThan(1.0, tol));
-  std::cout << "test_Jdiff_against_numdiff end" << std::endl;
 }
 
 void test_Jintegrate_against_numdiff(StateAbstractFactory* factory, double num_diff_modifier) {
-  std::cout << "test_Jintegrate_against_numdiff" << std::endl;
   crocoddyl::StateAbstract* state = factory->get_state();
   // Generating random values for the initial state and its rate of change
   Eigen::VectorXd x = state->rand();
@@ -304,11 +264,9 @@ void test_Jintegrate_against_numdiff(StateAbstractFactory* factory, double num_d
   double tol = num_diff_modifier * state_num_diff.get_disturbance();
   BOOST_CHECK((Jint_1 - Jint_num_1).isMuchSmallerThan(1.0, tol));
   BOOST_CHECK((Jint_2 - Jint_num_2).isMuchSmallerThan(1.0, tol));
-  std::cout << "test_Jintegrate_against_numdiff end" << std::endl;
 }
 
 void test_Jdiff_and_Jintegrate_are_inverses(StateAbstractFactory* factory) {
-  std::cout << "test_Jdiff_and_Jintegrate_are_inverses" << std::endl;
   crocoddyl::StateAbstract* state = factory->get_state();
   // Generating random states
   Eigen::VectorXd x1 = state->rand();
@@ -328,11 +286,9 @@ void test_Jdiff_and_Jintegrate_are_inverses(StateAbstractFactory* factory) {
   Eigen::MatrixXd dX_dDX = Jdx;
   Eigen::MatrixXd dDX_dX = J2;
   BOOST_CHECK((dX_dDX - dDX_dX.inverse()).isMuchSmallerThan(1.0, 1e-9));
-  std::cout << "test_Jdiff_and_Jintegrate_are_inverses end" << std::endl;
 }
 
 void test_velocity_from_Jintegrate_Jdiff(StateAbstractFactory* factory) {
-  std::cout << "test_velocity_from_Jintegrate_Jdiff" << std::endl;
   crocoddyl::StateAbstract* state = factory->get_state();
   // Generating random states
   Eigen::VectorXd x1 = state->rand();
@@ -370,14 +326,14 @@ void test_velocity_from_Jintegrate_Jdiff(StateAbstractFactory* factory) {
   J2.setZero();
   state->Jdiff(x1, x, J1, J2);
   BOOST_CHECK((J2 * eps - (-dx + dxi) / h).isMuchSmallerThan(1.0, 1e-3));
-  std::cout << "test_velocity_from_Jintegrate_Jdiff end" << std::endl;
 }
 
 void register_state_vector_unit_tests() {
   int nx = 10;
   double num_diff_modifier = 1e4;
 
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_state_dimension, new StateVectorFactory(nx), nx)));
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(boost::bind(&test_state_dimension, new StateVectorFactory(nx), nx)));
 
   framework::master_test_suite().add(
       BOOST_TEST_CASE(boost::bind(&test_integrate_against_difference, new StateVectorFactory(nx))));
@@ -385,7 +341,8 @@ void register_state_vector_unit_tests() {
   framework::master_test_suite().add(
       BOOST_TEST_CASE(boost::bind(&test_difference_against_integrate, new StateVectorFactory(nx))));
 
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_firstsecond, new StateVectorFactory(nx))));
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(boost::bind(&test_Jdiff_firstsecond, new StateVectorFactory(nx))));
 
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_Jint_firstsecond, new StateVectorFactory(nx))));
 
@@ -416,11 +373,11 @@ void register_state_multibody_unit_tests(const std::string& urdf_file = "", bool
       BOOST_TEST_CASE(boost::bind(&test_state_dimension, new StateMultibodyFactory(urdf_file, free_flyer),
                                   factory->pinocchio_model_->nq + factory->pinocchio_model_->nv)));
 
-  framework::master_test_suite().add(
-      BOOST_TEST_CASE(boost::bind(&test_integrate_against_difference, new StateMultibodyFactory(urdf_file, free_flyer))));
+  framework::master_test_suite().add(BOOST_TEST_CASE(
+      boost::bind(&test_integrate_against_difference, new StateMultibodyFactory(urdf_file, free_flyer))));
 
-  framework::master_test_suite().add(
-      BOOST_TEST_CASE(boost::bind(&test_difference_against_integrate, new StateMultibodyFactory(urdf_file, free_flyer))));
+  framework::master_test_suite().add(BOOST_TEST_CASE(
+      boost::bind(&test_difference_against_integrate, new StateMultibodyFactory(urdf_file, free_flyer))));
 
   framework::master_test_suite().add(
       BOOST_TEST_CASE(boost::bind(&test_Jdiff_firstsecond, new StateMultibodyFactory(urdf_file, free_flyer))));
@@ -428,8 +385,8 @@ void register_state_multibody_unit_tests(const std::string& urdf_file = "", bool
   framework::master_test_suite().add(
       BOOST_TEST_CASE(boost::bind(&test_Jint_firstsecond, new StateMultibodyFactory(urdf_file, free_flyer))));
 
-  framework::master_test_suite().add(
-      BOOST_TEST_CASE(boost::bind(&test_Jdiff_num_diff_firstsecond, new StateMultibodyFactory(urdf_file, free_flyer))));
+  framework::master_test_suite().add(BOOST_TEST_CASE(
+      boost::bind(&test_Jdiff_num_diff_firstsecond, new StateMultibodyFactory(urdf_file, free_flyer))));
 
   framework::master_test_suite().add(
       BOOST_TEST_CASE(boost::bind(&test_Jint_num_diff_firstsecond, new StateMultibodyFactory(urdf_file, free_flyer))));
@@ -437,8 +394,8 @@ void register_state_multibody_unit_tests(const std::string& urdf_file = "", bool
   framework::master_test_suite().add(BOOST_TEST_CASE(
       boost::bind(&test_Jdiff_against_numdiff, new StateMultibodyFactory(urdf_file, free_flyer), num_diff_modifier)));
 
-  framework::master_test_suite().add(BOOST_TEST_CASE(
-      boost::bind(&test_Jintegrate_against_numdiff, new StateMultibodyFactory(urdf_file, free_flyer), num_diff_modifier)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(
+      &test_Jintegrate_against_numdiff, new StateMultibodyFactory(urdf_file, free_flyer), num_diff_modifier)));
 
   framework::master_test_suite().add(BOOST_TEST_CASE(
       boost::bind(&test_Jdiff_and_Jintegrate_are_inverses, new StateMultibodyFactory(urdf_file, free_flyer))));
