@@ -55,10 +55,7 @@ void test_partial_derivatives_against_numdiff(crocoddyl::ActionModelAbstract& mo
   // create the corresponding data object and set the cost to nan
   boost::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
 
-  // create the num diff model and data
-  bool with_gauss_approx = model.get_nr() > 1;
-
-  crocoddyl::ActionModelNumDiff model_num_diff(model, with_gauss_approx);
+  crocoddyl::ActionModelNumDiff model_num_diff(model);
   boost::shared_ptr<crocoddyl::ActionDataAbstract> data_num_diff = model_num_diff.createData();
 
   // Generating random values for the state and control
@@ -79,6 +76,10 @@ void test_partial_derivatives_against_numdiff(crocoddyl::ActionModelAbstract& mo
     BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isMuchSmallerThan(1.0, tol));
     BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isMuchSmallerThan(1.0, tol));
     BOOST_CHECK((data->Luu - data_num_diff->Luu).isMuchSmallerThan(1.0, tol));
+  } else {
+    BOOST_CHECK((data_num_diff->Lxx).isMuchSmallerThan(1.0, tol));
+    BOOST_CHECK((data_num_diff->Lxu).isMuchSmallerThan(1.0, tol));
+    BOOST_CHECK((data_num_diff->Luu).isMuchSmallerThan(1.0, tol));
   }
 }
 
