@@ -2,10 +2,12 @@ import sys
 import unittest
 
 import numpy as np
+import collections
 
 import crocoddyl
 import pinocchio
 from crocoddyl.utils import Impulse3DDerived, Impulse6DDerived
+import example_robot_data
 
 
 class ImpulseModelAbstractTestCase(unittest.TestCase):
@@ -50,17 +52,18 @@ class ImpulseModelAbstractTestCase(unittest.TestCase):
 class ImpulseModelMultipleAbstractTestCase(unittest.TestCase):
     ROBOT_MODEL = None
     ROBOT_STATE = None
-    IMPULSE = None
+    IMPULSES = None
 
     def setUp(self):
         self.x = self.ROBOT_STATE.rand()
         self.robot_data = self.ROBOT_MODEL.createData()
 
-        self.impulses = crocoddyl.ImpulseModelMultiple(self.ROBOT_STATE)
-        self.impulses.addImpulse("myImpulse", self.IMPULSE)
-
-        self.data = self.IMPULSE.createData(self.robot_data)
-        self.data_multiple = self.impulses.createData(self.robot_data)
+        self.impulseSum = crocoddyl.ImpulseModelMultiple(self.ROBOT_STATE)
+        self.datas = collections.OrderedDict([[name, impulse.createData(self.robot_data)]
+                                              for name, impulse in self.IMPULSES.items()])
+        for name, impulse in self.IMPULSES.items():
+            self.impulseSum.addImpulse(name, impulse)
+        self.dataSum = self.impulseSum.createData(self.robot_data)
 
         nq, nv = self.ROBOT_MODEL.nq, self.ROBOT_MODEL.nv
         pinocchio.forwardKinematics(self.ROBOT_MODEL, self.robot_data, self.x[:nq], self.x[nq:],
@@ -71,56 +74,72 @@ class ImpulseModelMultipleAbstractTestCase(unittest.TestCase):
                                                       pinocchio.utils.zero(nv))
 
     def test_ni_dimension(self):
-        self.assertEqual(self.IMPULSE.ni, self.impulses.ni, "Wrong ni.")
+        ni = sum([impulse.ni for impulse in self.IMPULSES.itervalues()])
+        self.assertEqual(self.impulseSum.ni, ni, "Wrong nc.")
 
     def test_calc(self):
         # Run calc for both action models
-        self.IMPULSE.calc(self.data, self.x)
-        self.impulses.calc(self.data_multiple, self.x)
+        for impulse, data in zip(self.IMPULSES.values(), self.datas.values()):
+            impulse.calc(data, self.x)
+        self.impulseSum.calc(self.dataSum, self.x)
         # Checking the cost value and its residual
-        self.assertTrue(np.allclose(self.data.Jc, self.data_multiple.Jc, atol=1e-9), "Wrong contact Jacobian (Jc).")
+        Jc = np.vstack([data.Jc for data in self.datas.values()])
+        self.assertTrue(np.allclose(self.dataSum.Jc, Jc, atol=1e-9), "Wrong contact Jacobian (Jc).")
 
     def test_calcDiff(self):
         # Run calc for both action models
-        self.IMPULSE.calcDiff(self.data, self.x, True)
-        self.impulses.calcDiff(self.data_multiple, self.x, True)
+        for impulse, data in zip(self.IMPULSES.values(), self.datas.values()):
+            impulse.calcDiff(data, self.x, True)
+        self.impulseSum.calcDiff(self.dataSum, self.x, True)
         # Checking the Jacobians of the contact constraint
-        self.assertTrue(np.allclose(self.data.dv0_dq, self.data_multiple.dv0_dq, atol=1e-9),
-                        "Wrong Jacobian of the acceleration before impulse (dv0_dq).")
+        dv0_dq = np.vstack([data.dv0_dq for data in self.datas.values()])
+        self.assertTrue(np.allclose(self.dataSum.dv0_dq, dv0_dq, atol=1e-9),
+                        "Wrong Jacobian of the velocity before impulse (dv0_dq).")
 
 
 class Impulse3DTest(ImpulseModelAbstractTestCase):
-    ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
+    ROBOT_MODEL = example_robot_data.loadHyQ().model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     # gains = pinocchio.utils.rand(2)
-    frame = ROBOT_MODEL.getFrameId('rleg5_joint')
+    frame = ROBOT_MODEL.getFrameId('lf_foot')
     IMPULSE = crocoddyl.ImpulseModel3D(ROBOT_STATE, frame)
     IMPULSE_DER = Impulse3DDerived(ROBOT_STATE, frame)
 
 
 class Impulse3DMultipleTest(ImpulseModelMultipleAbstractTestCase):
-    ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
+    ROBOT_MODEL = example_robot_data.loadHyQ().model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     gains = pinocchio.utils.rand(2)
-    IMPULSE = crocoddyl.ImpulseModel3D(ROBOT_STATE, ROBOT_MODEL.getFrameId('rleg5_joint'))
+    IMPULSES = collections.OrderedDict(
+        sorted({
+            'lf_foot': crocoddyl.ImpulseModel3D(ROBOT_STATE, ROBOT_MODEL.getFrameId('lf_foot')),
+            'rh_foot': crocoddyl.ImpulseModel3D(ROBOT_STATE, ROBOT_MODEL.getFrameId('rh_foot'))
+        }.items(),
+               key=lambda t: t[0]))
 
 
 class Impulse6DTest(ImpulseModelAbstractTestCase):
-    ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
+    ROBOT_MODEL = example_robot_data.loadICub().model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
-    frame = ROBOT_MODEL.getFrameId('rleg5_joint')
+    frame = ROBOT_MODEL.getFrameId('r_sole')
     IMPULSE = crocoddyl.ImpulseModel6D(ROBOT_STATE, frame)
     IMPULSE_DER = Impulse6DDerived(ROBOT_STATE, frame)
 
 
 class Impulse6DMultipleTest(ImpulseModelMultipleAbstractTestCase):
-    ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
+    ROBOT_MODEL = example_robot_data.loadICub().model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
-    IMPULSE = crocoddyl.ImpulseModel6D(ROBOT_STATE, ROBOT_MODEL.getFrameId('rleg5_joint'))
+    gains = pinocchio.utils.rand(2)
+    IMPULSES = collections.OrderedDict(
+        sorted({
+            'l_sole': crocoddyl.ImpulseModel6D(ROBOT_STATE, ROBOT_MODEL.getFrameId('l_sole')),
+            'r_sole': crocoddyl.ImpulseModel6D(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'))
+        }.items(),
+               key=lambda t: t[0]))
 
 
 if __name__ == '__main__':
