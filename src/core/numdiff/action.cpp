@@ -10,11 +10,9 @@
 
 namespace crocoddyl {
 
-ActionModelNumDiff::ActionModelNumDiff(ActionModelAbstract& model, bool with_gauss_approx)
+ActionModelNumDiff::ActionModelNumDiff(ActionModelAbstract& model)
     : ActionModelAbstract(model.get_state(), model.get_nu(), model.get_nr()), model_(model) {
-  with_gauss_approx_ = with_gauss_approx;
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
-  assert((!with_gauss_approx_ || nr_ > 1) && "No Gauss approximation possible with nr = 1");
 }
 
 ActionModelNumDiff::~ActionModelNumDiff() {}
@@ -22,7 +20,7 @@ ActionModelNumDiff::~ActionModelNumDiff() {}
 void ActionModelNumDiff::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                               const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) {
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
   boost::shared_ptr<ActionDataNumDiff> data_nd = boost::static_pointer_cast<ActionDataNumDiff>(data);
   model_.calc(data_nd->data_0, x, u);
   data->cost = data_nd->data_0->cost;
@@ -33,7 +31,7 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
                                   const Eigen::Ref<const Eigen::VectorXd>& x,
                                   const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
   boost::shared_ptr<ActionDataNumDiff> data_nd = boost::static_pointer_cast<ActionDataNumDiff>(data);
 
   if (recalc) {
@@ -58,7 +56,9 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
     model_.get_state().diff(xn0, xn, data_nd->Fx.col(ix));
 
     data->Lx(ix) = (c - c0) / disturbance_;
-    data_nd->Rx.col(ix) = (data_nd->data_x[ix]->r - data_nd->data_0->r) / disturbance_;
+    if (model_.get_nr() > 0) {
+      data_nd->Rx.col(ix) = (data_nd->data_x[ix]->r - data_nd->data_0->r) / disturbance_;
+    }
     data_nd->dx(ix) = 0.0;
   }
   data->Fx /= disturbance_;
@@ -74,15 +74,21 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
     model_.get_state().diff(xn0, xn, data_nd->Fu.col(iu));
 
     data->Lu(iu) = (c - c0) / disturbance_;
-    data_nd->Ru.col(iu) = (data_nd->data_u[iu]->r - data_nd->data_0->r) / disturbance_;
+    if (model_.get_nr() > 0) {
+      data_nd->Ru.col(iu) = (data_nd->data_u[iu]->r - data_nd->data_0->r) / disturbance_;
+    }
     data_nd->du(iu) = 0.0;
   }
   data->Fu /= disturbance_;
 
-  if (with_gauss_approx_) {
+  if (model_.get_nr() > 0) {
     data->Lxx = data_nd->Rx.transpose() * data_nd->Rx;
     data->Lxu = data_nd->Rx.transpose() * data_nd->Ru;
     data->Luu = data_nd->Ru.transpose() * data_nd->Ru;
+  } else {
+    data->Lxx.fill(0.0);
+    data->Lxu.fill(0.0);
+    data->Luu.fill(0.0);
   }
 }
 
@@ -90,36 +96,10 @@ ActionModelAbstract& ActionModelNumDiff::get_model() const { return model_; }
 
 const double& ActionModelNumDiff::get_disturbance() const { return disturbance_; }
 
-bool ActionModelNumDiff::get_with_gauss_approx() { return with_gauss_approx_; }
+bool ActionModelNumDiff::get_with_gauss_approx() { return model_.get_nr() > 0; }
 
 void ActionModelNumDiff::assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& /** x */) {
-  // TODO(mnaveau): make this method virtual and this one should do nothing, update the documentation.
-  // md = model_.differential_;
-  // if isinstance(md, DifferentialActionModelFloatingInContact)
-  // {
-  //   if hasattr(md, "costs")
-  //   {
-  //     mc = md.costs;
-  //     if isinstance(mc, CostModelState)
-  //     {
-  //       assert (~np.isclose(model.State.diff(mc.ref, x)[3:6], np.ones(3) * np.pi, atol=1e-6).any())
-  //       assert (~np.isclose(model.State.diff(mc.ref, x)[3:6], -np.ones(3) * np.pi, atol=1e-6).any())
-  //     }
-  //     else if isinstance(mc, CostModelSum)
-  //     {
-  //       for (key, cost) in mc.costs.items()
-  //       {
-  //         if isinstance(cost.cost, CostModelState)
-  //         {
-  //           assert (~np.isclose(
-  //               model.State.diff(cost.cost.ref, x)[3:6], np.ones(3) * np.pi, atol=1e-6).any())
-  //           assert (~np.isclose(
-  //               model.State.diff(cost.cost.ref, x)[3:6], -np.ones(3) * np.pi, atol=1e-6).any())
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+  // do nothing in the general case
 }
 
 boost::shared_ptr<ActionDataAbstract> ActionModelNumDiff::createData() {

@@ -33,6 +33,17 @@ class SolverDDP : public SolverAbstract {
   void backwardPass();
   void forwardPass(const double& stepLength);
 
+  void computeGains(unsigned int const& t);
+  void increaseRegularization();
+  void decreaseRegularization();
+  void allocateData();
+
+  const double& get_regfactor() const;
+  const double& get_regmin() const;
+  const double& get_regmax() const;
+  const std::vector<double>& get_alphas() const;
+  const double& get_th_step() const;
+  const double& get_th_grad() const;
   const std::vector<Eigen::MatrixXd>& get_Vxx() const;
   const std::vector<Eigen::VectorXd>& get_Vx() const;
   const std::vector<Eigen::MatrixXd>& get_Qxx() const;
@@ -44,10 +55,12 @@ class SolverDDP : public SolverAbstract {
   const std::vector<Eigen::VectorXd>& get_k() const;
   const std::vector<Eigen::VectorXd>& get_gaps() const;
 
-  void computeGains(unsigned int const& t);
-  void increaseRegularization();
-  void decreaseRegularization();
-  void allocateData();
+  void set_regfactor(double reg_factor);
+  void set_regmin(double regmin);
+  void set_regmax(double regmax);
+  void set_alphas(const std::vector<double>& alphas);
+  void set_th_step(double th_step);
+  void set_th_grad(double th_grad);
 
  protected:
   double regfactor_;

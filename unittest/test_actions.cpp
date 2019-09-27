@@ -8,21 +8,20 @@
 
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
+#include <Eigen/Dense>
+#include <pinocchio/fwd.hpp>
 #include <boost/test/included/unit_test.hpp>
 #include <boost/bind.hpp>
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/actions/lqr.hpp"
 #include "crocoddyl/core/actions/unicycle.hpp"
 #include "crocoddyl/core/numdiff/action.hpp"
-#include <Eigen/Dense>
 
 using namespace boost::unit_test;
 
 void test_construct_data(crocoddyl::ActionModelAbstract& model) {
   boost::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
 }
-
-//____________________________________________________________________________//
 
 void test_calc_returns_state(crocoddyl::ActionModelAbstract& model) {
   // create the corresponding data object
@@ -38,8 +37,6 @@ void test_calc_returns_state(crocoddyl::ActionModelAbstract& model) {
   BOOST_CHECK(data->get_xnext().size() == model.get_state().get_nx());
 }
 
-//____________________________________________________________________________//
-
 void test_calc_returns_a_cost(crocoddyl::ActionModelAbstract& model) {
   // create the corresponding data object and set the cost to nan
   boost::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
@@ -54,16 +51,11 @@ void test_calc_returns_a_cost(crocoddyl::ActionModelAbstract& model) {
   BOOST_CHECK(!std::isnan(data->cost));
 }
 
-//____________________________________________________________________________//
-
 void test_partial_derivatives_against_numdiff(crocoddyl::ActionModelAbstract& model, double num_diff_modifier) {
   // create the corresponding data object and set the cost to nan
   boost::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
 
-  // create the num diff model and data
-  bool with_gauss_approx = model.get_nr() > 1;
-
-  crocoddyl::ActionModelNumDiff model_num_diff(model, with_gauss_approx);
+  crocoddyl::ActionModelNumDiff model_num_diff(model);
   boost::shared_ptr<crocoddyl::ActionDataAbstract> data_num_diff = model_num_diff.createData();
 
   // Generating random values for the state and control
@@ -84,10 +76,12 @@ void test_partial_derivatives_against_numdiff(crocoddyl::ActionModelAbstract& mo
     BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isMuchSmallerThan(1.0, tol));
     BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isMuchSmallerThan(1.0, tol));
     BOOST_CHECK((data->Luu - data_num_diff->Luu).isMuchSmallerThan(1.0, tol));
+  } else {
+    BOOST_CHECK((data_num_diff->Lxx).isMuchSmallerThan(1.0, tol));
+    BOOST_CHECK((data_num_diff->Lxu).isMuchSmallerThan(1.0, tol));
+    BOOST_CHECK((data_num_diff->Luu).isMuchSmallerThan(1.0, tol));
   }
 }
-
-//____________________________________________________________________________//
 
 void register_action_model_lqr_unit_tests() {
   int nx = 80;
@@ -105,14 +99,10 @@ void register_action_model_lqr_unit_tests() {
       &test_partial_derivatives_against_numdiff, crocoddyl::ActionModelLQR(nx, nu, driftfree), num_diff_modifier)));
 }
 
-//____________________________________________________________________________//
-
 bool init_function() {
   // Here we test the state_vector
   register_action_model_lqr_unit_tests();
   return true;
 }
-
-//____________________________________________________________________________//
 
 int main(int argc, char** argv) { return ::boost::unit_test::unit_test_main(&init_function, argc, argv); }

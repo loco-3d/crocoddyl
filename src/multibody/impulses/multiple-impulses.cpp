@@ -74,14 +74,21 @@ void ImpulseModelMultiple::calcDiff(const boost::shared_ptr<ImpulseDataMultiple>
 
     m_i.impulse->calcDiff(d_i, x, false);
     unsigned int const& ni_i = m_i.impulse->get_ni();
-    data->Vq.block(ni, 0, ni_i, nv) = d_i->Vq;
+    data->dv0_dq.block(ni, 0, ni_i, nv) = d_i->dv0_dq;
     ni += ni_i;
   }
 }
 
-void ImpulseModelMultiple::updateLagrangian(const boost::shared_ptr<ImpulseDataMultiple>& data,
-                                            const Eigen::VectorXd& lambda) {
-  assert(lambda.size() == ni_ && "lambda has wrong dimension, it should be ni vector");
+void ImpulseModelMultiple::updateVelocity(const boost::shared_ptr<ImpulseDataMultiple>& data,
+                                          const Eigen::VectorXd& vnext) const {
+  assert(vnext.rows() == state_.get_nv() && "vnext has wrong dimension");
+
+  data->vnext = vnext;
+}
+
+void ImpulseModelMultiple::updateForce(const boost::shared_ptr<ImpulseDataMultiple>& data,
+                                       const Eigen::VectorXd& force) {
+  assert(force.size() == ni_ && "force has wrong dimension, it should be ni vector");
   assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
   unsigned int ni = 0;
 
@@ -98,8 +105,39 @@ void ImpulseModelMultiple::updateLagrangian(const boost::shared_ptr<ImpulseDataM
     assert(it_m->first == it_d->first && "it doesn't match the impulse name between data and model");
 
     unsigned int const& ni_i = m_i.impulse->get_ni();
-    m_i.impulse->updateLagrangian(d_i, lambda.segment(ni, ni_i));
+    const Eigen::VectorBlock<const Eigen::VectorXd, Eigen::Dynamic> force_i = force.segment(ni, ni_i);
+    m_i.impulse->updateForce(d_i, force_i);
     data->fext[d_i->joint] = d_i->f;
+    ni += ni_i;
+  }
+}
+
+void ImpulseModelMultiple::updateVelocityDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
+                                              const Eigen::MatrixXd& dvnext_dx) const {
+  assert((dvnext_dx.rows() == state_.get_nv() && dvnext_dx.cols() == state_.get_ndx()) &&
+         "dvnext_dx has wrong dimension");
+
+  data->dvnext_dx = dvnext_dx;
+}
+
+void ImpulseModelMultiple::updateForceDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
+                                           const Eigen::MatrixXd& df_dq) const {
+  unsigned int const& nv = state_.get_nv();
+  assert((df_dq.rows() == ni_ && df_dq.cols() == nv) && "df_dq has wrong dimension");
+  assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
+  unsigned int ni = 0;
+
+  ImpulseModelContainer::const_iterator it_m, end_m;
+  ImpulseDataContainer::const_iterator it_d, end_d;
+  for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
+       it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
+    const ImpulseItem& m_i = it_m->second;
+    const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
+    assert(it_m->first == it_d->first && "it doesn't match the impulse name between data and model");
+
+    unsigned int const& ni_i = m_i.impulse->get_ni();
+    const Eigen::Block<const Eigen::MatrixXd> df_dq_i = df_dq.block(ni, 0, ni_i, nv);
+    m_i.impulse->updateForceDiff(d_i, df_dq_i);
     ni += ni_i;
   }
 }

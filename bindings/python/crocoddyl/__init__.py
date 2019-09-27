@@ -38,7 +38,7 @@ def displayTrajectory(robot, xs, dt=0.1, rate=-1, cameraTF=None):
             time.sleep(dt)
 
 
-class CallbackSolverDisplay(libcrocoddyl_pywrap.CallbackAbstract):
+class CallbackDisplay(libcrocoddyl_pywrap.CallbackAbstract):
     def __init__(self, robotwrapper, rate=-1, freq=1, cameraTF=None):
         libcrocoddyl_pywrap.CallbackAbstract.__init__(self)
         self.robotwrapper = robotwrapper
@@ -53,7 +53,7 @@ class CallbackSolverDisplay(libcrocoddyl_pywrap.CallbackAbstract):
         displayTrajectory(self.robotwrapper, solver.xs, dt, self.rate, self.cameraTF)
 
 
-class CallbackSolverLogger(libcrocoddyl_pywrap.CallbackAbstract):
+class CallbackLogger(libcrocoddyl_pywrap.CallbackAbstract):
     def __init__(self):
         libcrocoddyl_pywrap.CallbackAbstract.__init__(self)
         self.steps = []
@@ -77,6 +77,70 @@ class CallbackSolverLogger(libcrocoddyl_pywrap.CallbackAbstract):
         self.costs.append(solver.cost)
         self.control_regs.append(solver.u_reg)
         self.state_regs.append(solver.x_reg)
-        self.th_stops.append(solver.stoppingCriteria)
+        self.th_stops.append(solver.stoppingCriteria())
         self.gm_stops.append(-np.asscalar(solver.expectedImprovement()[1]))
         self.gaps.append(copy.copy(solver.gaps))
+
+
+def plotOCSolution(xs, us, figIndex=1, show=True):
+    import matplotlib.pyplot as plt
+    import numpy as np
+    # Getting the state and control trajectories
+    nx, nu = xs[0].shape[0], us[0].shape[0]
+    X = [0.] * nx
+    U = [0.] * nu
+    for i in range(nx):
+        X[i] = [np.asscalar(x[i]) for x in xs]
+    for i in range(nu):
+        U[i] = [np.asscalar(u[i]) for u in us]
+
+    plt.figure(figIndex)
+
+    # Plotting the state trajectories
+    plt.subplot(211)
+    [plt.plot(X[i], label='x' + str(i)) for i in range(nx)]
+    plt.legend()
+
+    # Plotting the control commands
+    plt.subplot(212)
+    [plt.plot(U[i], label='u' + str(i)) for i in range(nu)]
+    plt.legend()
+    plt.xlabel('knots')
+    if show:
+        plt.show()
+
+
+def plotConvergence(costs, muLM, muV, gamma, theta, alpha, figIndex=1, show=True, figTitle=""):
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    plt.figure(figIndex, figsize=(6.4, 8))
+    plt.suptitle(figTitle, fontsize=14)
+    # Plotting the total cost sequence
+    plt.subplot(511)
+    plt.ylabel('cost')
+    plt.plot(costs)
+
+    # Ploting mu sequences
+    plt.subplot(512)
+    plt.ylabel('mu')
+    plt.plot(muLM, label='LM')
+    plt.plot(muV, label='V')
+    plt.legend()
+
+    # Plotting the gradient sequence (gamma and theta)
+    plt.subplot(513)
+    plt.ylabel('gamma')
+    plt.plot(gamma)
+    plt.subplot(514)
+    plt.ylabel('theta')
+    plt.plot(theta)
+
+    # Plotting the alpha sequence
+    plt.subplot(515)
+    plt.ylabel('alpha')
+    ind = np.arange(len(alpha))
+    plt.bar(ind, alpha)
+    plt.xlabel('iteration')
+    if show:
+        plt.show()

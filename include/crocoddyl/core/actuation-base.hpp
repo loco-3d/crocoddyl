@@ -58,17 +58,17 @@ struct ActuationDataAbstract {
 
   template <typename Model>
   explicit ActuationDataAbstract(Model* const model)
-      : a(model->get_state().get_nv()),
-        Ax(model->get_state().get_nv(), model->get_state().get_ndx()),
-        Au(model->get_state().get_nv(), model->get_nu()) {
-    a.fill(0);
-    Ax.fill(0);
-    Au.fill(0);
+      : tau(model->get_state().get_nv()),
+        dtau_dx(model->get_state().get_nv(), model->get_state().get_ndx()),
+        dtau_du(model->get_state().get_nv(), model->get_nu()) {
+    tau.fill(0);
+    dtau_dx.fill(0);
+    dtau_du.fill(0);
   }
 
-  Eigen::VectorXd a;
-  Eigen::MatrixXd Ax;
-  Eigen::MatrixXd Au;
+  Eigen::VectorXd tau;
+  Eigen::MatrixXd dtau_dx;
+  Eigen::MatrixXd dtau_du;
 };
 
 }  // namespace crocoddyl

@@ -27,7 +27,7 @@ class ActuationModelFloatingBase : public ActuationModelAbstract {
 
 #ifndef NDEBUG
  private:
-  Eigen::MatrixXd Au_;
+  Eigen::MatrixXd dtau_du_;
 #endif
 };
 

@@ -6,7 +6,7 @@ import numpy as np
 
 import crocoddyl
 import pinocchio
-from crocoddyl.utils import DDPDerived
+from crocoddyl.utils import DDPDerived, FDDPDerived
 
 
 class SolverAbstractTestCase(unittest.TestCase):
@@ -101,6 +101,12 @@ class UnicycleDDPTest(SolverAbstractTestCase):
     SOLVER_DER = DDPDerived
 
 
+class UnicycleFDDPTest(SolverAbstractTestCase):
+    MODEL = crocoddyl.ActionModelUnicycle()
+    SOLVER = crocoddyl.SolverFDDP
+    SOLVER_DER = FDDPDerived
+
+
 class ManipulatorDDPTest(SolverAbstractTestCase):
     ROBOT_MODEL = pinocchio.buildSampleModelManipulator()
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
@@ -118,8 +124,25 @@ class ManipulatorDDPTest(SolverAbstractTestCase):
     SOLVER_DER = DDPDerived
 
 
+class ManipulatorFDDPTest(SolverAbstractTestCase):
+    ROBOT_MODEL = pinocchio.buildSampleModelManipulator()
+    STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+    COST_SUM = crocoddyl.CostModelSum(STATE, ROBOT_MODEL.nv)
+    COST_SUM.addCost('xReg', crocoddyl.CostModelState(STATE), 1e-7)
+    COST_SUM.addCost('uReg', crocoddyl.CostModelControl(STATE), 1e-7)
+    COST_SUM.addCost(
+        'frTrack',
+        crocoddyl.CostModelFramePlacement(
+            STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("effector_body"), pinocchio.SE3.Random())), 1.)
+    DIFF_MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, COST_SUM)
+    MODEL = crocoddyl.IntegratedActionModelEuler(crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, COST_SUM),
+                                                 1e-3)
+    SOLVER = crocoddyl.SolverFDDP
+    SOLVER_DER = FDDPDerived
+
+
 if __name__ == '__main__':
-    test_classes_to_run = [UnicycleDDPTest, ManipulatorDDPTest]
+    test_classes_to_run = [UnicycleDDPTest, UnicycleFDDPTest, ManipulatorDDPTest, ManipulatorFDDPTest]
     loader = unittest.TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:

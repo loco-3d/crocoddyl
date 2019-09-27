@@ -18,12 +18,12 @@ ContactModelAbstract::ContactModelAbstract(StateMultibody& state, unsigned int c
 
 ContactModelAbstract::~ContactModelAbstract() {}
 
-void ContactModelAbstract::updateLagrangianDiff(const boost::shared_ptr<ContactDataAbstract>& data,
-                                                const Eigen::MatrixXd& Gx, const Eigen::MatrixXd& Gu) {
-  assert((Gx.rows() == nc_ || Gx.cols() == state_.get_nx()) && "Gx has wrong dimension");
-  assert((Gu.rows() == nc_ || Gu.cols() == nu_) && "Gu has wrong dimension");
-  data->Gx = Gx;
-  data->Gu = Gu;
+void ContactModelAbstract::updateForceDiff(const boost::shared_ptr<ContactDataAbstract>& data,
+                                           const Eigen::MatrixXd& df_dx, const Eigen::MatrixXd& df_du) const {
+  assert((df_dx.rows() == nc_ || df_dx.cols() == state_.get_nx()) && "df_dx has wrong dimension");
+  assert((df_du.rows() == nc_ || df_du.cols() == nu_) && "df_du has wrong dimension");
+  data->df_dx = df_dx;
+  data->df_du = df_du;
 }
 
 boost::shared_ptr<ContactDataAbstract> ContactModelAbstract::createData(pinocchio::Data* const data) {

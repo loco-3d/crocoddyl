@@ -127,13 +127,13 @@ class FreeFloatingActuationDerived(crocoddyl.ActuationModelAbstract):
         crocoddyl.ActuationModelAbstract.__init__(self, state, state.nv - 6)
 
     def calc(self, data, x, u):
-        data.a = np.vstack([pinocchio.utils.zero(6), u])
+        data.tau = np.vstack([pinocchio.utils.zero(6), u])
 
     def calcDiff(self, data, x, u, recalc=True):
         if recalc:
             self.calc(data, x, u)
-        Au = np.vstack([pinocchio.utils.zero((6, self.nu)), pinocchio.utils.eye(self.nu)])
-        data.Au = Au
+        dtau_du = np.vstack([pinocchio.utils.zero((6, self.nu)), pinocchio.utils.eye(self.nu)])
+        data.dtau_du = dtau_du
 
 
 class FullActuationDerived(crocoddyl.ActuationModelAbstract):
@@ -142,12 +142,12 @@ class FullActuationDerived(crocoddyl.ActuationModelAbstract):
         crocoddyl.ActuationModelAbstract.__init__(self, state, state.nv)
 
     def calc(self, data, x, u):
-        data.a = u
+        data.tau = u
 
     def calcDiff(self, data, x, u, recalc=True):
         if recalc:
             self.calc(data, x, u)
-        data.Au = pinocchio.utils.eye(self.nu)
+        data.dtau_du = pinocchio.utils.eye(self.nu)
 
 
 class UnicycleDerived(crocoddyl.ActionModelAbstract):
@@ -261,7 +261,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
     def __init__(self, state, costModel):
         crocoddyl.DifferentialActionModelAbstract.__init__(self, state, state.nv, costModel.nr)
         self.costs = costModel
-        self.forceAba = True
+        self.enable_force = True
         self.armature = np.matrix(np.zeros(0))
 
     def calc(self, data, x, u=None):
@@ -269,7 +269,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
             u = self.unone
         q, v = x[:self.state.nq], x[-self.state.nv:]
         # Computing the dynamics using ABA or manually for armature case
-        if self.forceAba:
+        if self.enable_force:
             data.xout = pinocchio.aba(self.state.pinocchio, data.pinocchio, q, v, u)
         else:
             pinocchio.computeAllTerms(self.state.pinocchio, data.pinocchio, q, v)
@@ -292,7 +292,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
             self.calc(data, x, u)
             pinocchio.computeJointJacobians(self.state.pinocchio, data.pinocchio, q)
         # Computing the dynamics derivatives
-        if self.forceAba:
+        if self.enable_force:
             pinocchio.computeABADerivatives(self.state.pinocchio, data.pinocchio, q, v, u)
             data.Fx = np.hstack([data.pinocchio.ddq_dq, data.pinocchio.ddq_dv])
             data.Fu = data.pinocchio.Minv
@@ -307,14 +307,14 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
         if armature.size is not self.state.nv:
             print('The armature dimension is wrong, we cannot set it.')
         else:
-            self.forceAba = False
+            self.enable_force = False
             self.armature = armature.T
 
     def createData(self):
         data = crocoddyl.DifferentialActionModelAbstract.createData(self)
         data.pinocchio = pinocchio.Data(self.state.pinocchio)
         data.costs = self.costs.createData(data.pinocchio)
-        data.shareCostMemory(data.costs)
+        data.costs.shareMemory(data)
         return data
 
 
@@ -547,17 +547,17 @@ class Contact3DDerived(crocoddyl.ContactModelAbstract):
         vv_skew = pinocchio.utils.skew(self.vv)
         vw_skew = pinocchio.utils.skew(self.vw)
         fXjdv_dq = self.fXj * v_partial_dq
-        Aq = (self.fXj * a_partial_dq)[:3, :] + vw_skew * fXjdv_dq[:3, :] - vv_skew * fXjdv_dq[3:, :]
-        Av = (self.fXj * a_partial_dv)[:3, :] + vw_skew * data.Jc - vv_skew * self.Jw
+        da0_dq = (self.fXj * a_partial_dq)[:3, :] + vw_skew * fXjdv_dq[:3, :] - vv_skew * fXjdv_dq[3:, :]
+        da0_dv = (self.fXj * a_partial_dv)[:3, :] + vw_skew * data.Jc - vv_skew * self.Jw
 
         if np.asscalar(self.gains[0]) != 0.:
             R = data.pinocchio.oMf[self.xref.frame].rotation
-            Aq += np.asscalar(self.gains[0]) * R * pinocchio.getFrameJacobian(
+            da0_dq += np.asscalar(self.gains[0]) * R * pinocchio.getFrameJacobian(
                 self.state.pinocchio, data.pinocchio, self.xref.frame, pinocchio.ReferenceFrame.LOCAL)[:3, :]
         if np.asscalar(self.gains[1]) != 0.:
-            Aq += np.asscalar(self.gains[1]) * (self.fXj[:3, :] * v_partial_dq)
-            Av += np.asscalar(self.gains[1]) * (self.fXj[:3, :] * a_partial_da)
-        data.Ax = np.hstack([Aq, Av])
+            da0_dq += np.asscalar(self.gains[1]) * (self.fXj[:3, :] * v_partial_dq)
+            da0_dv += np.asscalar(self.gains[1]) * (self.fXj[:3, :] * a_partial_da)
+        data.da0_dx = np.hstack([da0_dq, da0_dv])
 
 
 class Contact6DDerived(crocoddyl.ContactModelAbstract):
@@ -586,15 +586,15 @@ class Contact6DDerived(crocoddyl.ContactModelAbstract):
         v_partial_dq, a_partial_dq, a_partial_dv, a_partial_da = pinocchio.getJointAccelerationDerivatives(
             self.state.pinocchio, data.pinocchio, self.joint, pinocchio.ReferenceFrame.LOCAL)
 
-        Aq = (self.fXj * a_partial_dq)
-        Av = (self.fXj * a_partial_dv)
+        da0_dq = (self.fXj * a_partial_dq)
+        da0_dv = (self.fXj * a_partial_dv)
 
         if np.asscalar(self.gains[0]) != 0.:
-            Aq += np.asscalar(self.gains[0]) * pinocchio.Jlog6(self.rMf) * data.Jc
+            da0_dq += np.asscalar(self.gains[0]) * pinocchio.Jlog6(self.rMf) * data.Jc
         if np.asscalar(self.gains[1]) != 0.:
-            Aq += np.asscalar(self.gains[1]) * (self.fXj * v_partial_dq)
-            Av += np.asscalar(self.gains[1]) * (self.fXj * a_partial_da)
-        data.Ax = np.hstack([Aq, Av])
+            da0_dq += np.asscalar(self.gains[1]) * (self.fXj * v_partial_dq)
+            da0_dv += np.asscalar(self.gains[1]) * (self.fXj * a_partial_da)
+        data.da0_dx = np.hstack([da0_dq, da0_dv])
 
 
 class Impulse3DDerived(crocoddyl.ImpulseModelAbstract):
@@ -613,7 +613,7 @@ class Impulse3DDerived(crocoddyl.ImpulseModelAbstract):
             self.calc(data, x)
         v_partial_dq, v_partial_dv = pinocchio.getJointVelocityDerivatives(self.state.pinocchio, data.pinocchio,
                                                                            self.joint, pinocchio.ReferenceFrame.LOCAL)
-        data.Vq = self.fXj[:3, :] * v_partial_dq
+        data.dv0_dq = self.fXj[:3, :] * v_partial_dq
 
 
 class Impulse6DDerived(crocoddyl.ImpulseModelAbstract):
@@ -632,7 +632,7 @@ class Impulse6DDerived(crocoddyl.ImpulseModelAbstract):
             self.calc(data, x)
         v_partial_dq, v_partial_dv = pinocchio.getJointVelocityDerivatives(self.state.pinocchio, data.pinocchio,
                                                                            self.joint, pinocchio.ReferenceFrame.LOCAL)
-        data.Vq = self.fXj * v_partial_dq
+        data.dv0_dq = self.fXj * v_partial_dq
 
 
 class DDPDerived(crocoddyl.SolverAbstract):
@@ -640,7 +640,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
         crocoddyl.SolverAbstract.__init__(self, shootingProblem)
         self.allocateData()  # TODO remove it?
 
-        self.isFeasible = False  # Change it to true if you know that datas[t].xnext = xs[t+1]
+        self.isFeasible = False
         self.alphas = [2**(-n) for n in range(10)]
         self.th_grad = 1e-12
 
@@ -654,8 +654,6 @@ class DDPDerived(crocoddyl.SolverAbstract):
     def calc(self):
         self.cost = self.problem.calcDiff(self.xs, self.us)
         if not self.isFeasible:
-            # Gap store the state defect from the guess to feasible (rollout) trajectory, i.e.
-            #   gap = x_rollout [-] x_guess = DIFF(x_guess, x_rollout)
             self.gaps[0] = self.problem.runningModels[0].state.diff(self.xs[0], self.problem.x0)
             for i, (m, d, x) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas, self.xs[1:])):
                 self.gaps[i + 1] = m.state.diff(x, d.xnext)
@@ -728,8 +726,6 @@ class DDPDerived(crocoddyl.SolverAbstract):
 
             if self.wasFeasible and self.stop < self.th_stop:
                 return self.xs, self.us, True
-
-        # Warning: no convergence in max iterations
         return self.xs, self.us, False
 
     def increaseRegularization(self):
@@ -744,7 +740,6 @@ class DDPDerived(crocoddyl.SolverAbstract):
             self.x_reg = self.regMin
         self.u_reg = self.x_reg
 
-    # DDP Specific
     def allocateData(self):
         self.Vxx = [a2m(np.zeros([m.state.ndx, m.state.ndx])) for m in self.models()]
         self.Vx = [a2m(np.zeros([m.state.ndx])) for m in self.models()]
@@ -774,17 +769,16 @@ class DDPDerived(crocoddyl.SolverAbstract):
             ndx = self.problem.terminalModel.state.ndx
             self.Vxx[-1][range(ndx), range(ndx)] += self.x_reg
 
+        # Compute and store the Vx gradient at end of the interval (rollout state)
+        if not self.isFeasible:
+            self.Vx[-1] += np.dot(self.Vxx[-1], self.gaps[-1])
+
         for t, (model, data) in rev_enumerate(zip(self.problem.runningModels, self.problem.runningDatas)):
             self.Qxx[t][:, :] = data.Lxx + data.Fx.T * self.Vxx[t + 1] * data.Fx
             self.Qxu[t][:, :] = data.Lxu + data.Fx.T * self.Vxx[t + 1] * data.Fu
             self.Quu[t][:, :] = data.Luu + data.Fu.T * self.Vxx[t + 1] * data.Fu
             self.Qx[t][:] = data.Lx + data.Fx.T * self.Vx[t + 1]
             self.Qu[t][:] = data.Lu + data.Fu.T * self.Vx[t + 1]
-            if not self.isFeasible:
-                # In case the xt+1 are not f(xt,ut) i.e warm start not obtained from roll-out.
-                relinearization = self.Vxx[t + 1] * self.gaps[t + 1]
-                self.Qx[t][:] += data.Fx.T * relinearization
-                self.Qu[t][:] += data.Fu.T * relinearization
 
             if self.u_reg != 0:
                 self.Quu[t][range(model.nu), range(model.nu)] += self.u_reg
@@ -800,6 +794,11 @@ class DDPDerived(crocoddyl.SolverAbstract):
 
             if self.x_reg != 0:
                 self.Vxx[t][range(model.state.ndx), range(model.state.ndx)] += self.x_reg
+
+            # Compute and store the Vx gradient at end of the interval (rollout state)
+            if not self.isFeasible:
+                self.Vx[t] += np.dot(self.Vxx[t], self.gaps[t])
+
             raiseIfNan(self.Vxx[t], ArithmeticError('backward error'))
             raiseIfNan(self.Vx[t], ArithmeticError('backward error'))
 
@@ -815,8 +814,6 @@ class DDPDerived(crocoddyl.SolverAbstract):
             raise ArithmeticError('backward error')
 
     def forwardPass(self, stepLength, warning='ignore'):
-        # Argument warning is also introduce for debug: by default, it masks the numpy warnings
-        #    that can be reactivated during debug.
         xs, us = self.xs, self.us
         xtry, utry = self.xs_try, self.us_try
         ctry = 0
@@ -830,6 +827,148 @@ class DDPDerived(crocoddyl.SolverAbstract):
             ctry += cost
             raiseIfNan([ctry, cost], ArithmeticError('forward error'))
             raiseIfNan(xtry[t + 1], ArithmeticError('forward error'))
+        with np.warnings.catch_warnings():
+            np.warnings.simplefilter(warning)
+            self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])
+            ctry += self.problem.terminalData.cost
+        raiseIfNan(ctry, ArithmeticError('forward error'))
+        self.cost_try = ctry
+        return xtry, utry, ctry
+
+
+class FDDPDerived(DDPDerived):
+    def __init__(self, shootingProblem):
+        DDPDerived.__init__(self, shootingProblem)
+
+        self.th_acceptNegStep = 2.
+        self.dg = 0.
+        self.dq = 0.
+        self.dv = 0.
+
+    def solve(self, init_xs=[], init_us=[], maxiter=100, isFeasible=False, regInit=None):
+        self.setCandidate(init_xs, init_us, isFeasible)
+        self.x_reg = regInit if regInit is not None else self.regMin
+        self.u_reg = regInit if regInit is not None else self.regMin
+        self.wasFeasible = False
+        for i in range(maxiter):
+            recalc = True
+            while True:
+                try:
+                    self.computeDirection(recalc=recalc)
+                except ArithmeticError:
+                    recalc = False
+                    self.increaseRegularization()
+                    if self.x_reg == self.regMax:
+                        return self.xs, self.us, False
+                    else:
+                        continue
+                break
+            self.updateExpectedImprovement()
+
+            for a in self.alphas:
+                try:
+                    self.dV = self.tryStep(a)
+                except ArithmeticError:
+                    continue
+                d1, d2 = self.expectedImprovement()
+
+                self.dV_exp = a * (d1 + .5 * d2 * a)
+                if self.dV_exp > 0.:  # descend direction
+                    if d1 < self.th_grad or self.dV > self.th_acceptStep * self.dV_exp:
+                        self.wasFeasible = self.isFeasible
+                        self.setCandidate(self.xs_try, self.us_try, (self.wasFeasible or a == 1))
+                        self.cost = self.cost_try
+                        break
+                else:  # reducing the gaps by allowing a small increment in the cost value
+                    if d1 < self.th_grad or self.dV < self.th_acceptNegStep * self.dV_exp:
+                        self.wasFeasible = self.isFeasible
+                        self.setCandidate(self.xs_try, self.us_try, (self.wasFeasible or a == 1))
+                        self.cost = self.cost_try
+                        break
+            if a > self.th_step:
+                self.decreaseRegularization()
+            if a == self.alphas[-1]:
+                self.increaseRegularization()
+                if self.x_reg == self.regMax:
+                    return self.xs, self.us, False
+            self.stepLength = a
+            self.iter = i
+            self.stop = self.stoppingCriteria()
+            # TODO @Carlos bind the callbacks
+            # if self.callback is not None:
+            #     [c(self) for c in self.callback]
+
+            if self.wasFeasible and self.stop < self.th_stop:
+                return self.xs, self.us, True
+        return self.xs, self.us, False
+
+    def computeDirection(self, recalc=True):
+        if recalc:
+            self.calc()
+        self.backwardPass()
+        return [np.nan] * (self.problem.T + 1), self.k, self.Vx
+
+    def tryStep(self, stepLength=1):
+        self.forwardPass(stepLength)
+        return self.cost - self.cost_try
+
+    def updateExpectedImprovement(self):
+        self.dg = 0.
+        self.dq = 0.
+        if not self.isFeasible:
+            self.dg -= np.asscalar(self.Vx[-1].T * self.gaps[-1])
+            self.dq += np.asscalar(self.gaps[-1].T * self.Vxx[-1] * self.gaps[-1])
+        for t in range(self.problem.T):
+            self.dg += np.asscalar(self.Qu[t].T * self.k[t])
+            self.dq -= np.asscalar(self.k[t].T * self.Quu[t] * self.k[t])
+            if not self.isFeasible:
+                self.dg -= np.asscalar(self.Vx[t].T * self.gaps[t])
+                self.dq += np.asscalar(self.gaps[t].T * self.Vxx[t] * self.gaps[t])
+
+    def expectedImprovement(self):
+        self.dv = 0.
+        if not self.isFeasible:
+            dx = self.problem.runningModels[-1].state.diff(self.xs_try[-1], self.xs[-1])
+            self.dv -= np.asscalar(self.gaps[-1].T * self.Vxx[-1] * dx)
+            for t in range(self.problem.T):
+                dx = self.problem.runningModels[t].state.diff(self.xs_try[t], self.xs[t])
+                self.dv -= np.asscalar(self.gaps[t].T * self.Vxx[t] * dx)
+        d1 = self.dg + self.dv
+        d2 = self.dq - 2 * self.dv
+        return np.matrix([d1, d2]).T
+
+    def calc(self):
+        self.cost = self.problem.calcDiff(self.xs, self.us)
+        if not self.isFeasible:
+            self.gaps[0] = self.problem.runningModels[0].state.diff(self.xs[0], self.problem.x0)
+            for i, (m, d, x) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas, self.xs[1:])):
+                self.gaps[i + 1] = m.state.diff(x, d.xnext)
+        elif not self.wasFeasible:
+            self.gaps[:] = [np.zeros_like(f) for f in self.gaps]
+        return self.cost
+
+    def forwardPass(self, stepLength, warning='ignore'):
+        xs, us = self.xs, self.us
+        xtry, utry = self.xs_try, self.us_try
+        ctry = 0
+        xnext = self.problem.x0
+        for t, (m, d) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas)):
+            if self.isFeasible or stepLength == 1:
+                xtry[t] = xnext.copy()
+            else:
+                xtry[t] = m.state.integrate(xnext, self.gaps[t] * (stepLength - 1))
+            utry[t] = us[t] - self.k[t] * stepLength - self.K[t] * m.state.diff(xs[t], xtry[t])
+            with np.warnings.catch_warnings():
+                np.warnings.simplefilter(warning)
+                m.calc(d, xtry[t], utry[t])
+                xnext, cost = d.xnext, d.cost
+            ctry += cost
+            raiseIfNan([ctry, cost], ArithmeticError('forward error'))
+            raiseIfNan(xnext, ArithmeticError('forward error'))
+        if self.isFeasible or stepLength == 1:
+            xtry[-1] = xnext.copy()
+        else:
+            xtry[-1] = self.problem.terminalModel.state.integrate(xnext, self.gaps[-1] * (stepLength - 1))
         with np.warnings.catch_warnings():
             np.warnings.simplefilter(warning)
             self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])

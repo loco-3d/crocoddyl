@@ -51,24 +51,23 @@ void ContactModel6D::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data
   pinocchio::getJointAccelerationDerivatives(state_.get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                              d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
   unsigned int const& nv = state_.get_nv();
-  d->Ax.leftCols(nv).noalias() = d->fXj * d->a_partial_dq;
-  d->Ax.rightCols(nv).noalias() = d->fXj * d->a_partial_dv;
+  d->da0_dx.leftCols(nv).noalias() = d->fXj * d->a_partial_dq;
+  d->da0_dx.rightCols(nv).noalias() = d->fXj * d->a_partial_dv;
 
   if (gains_[0] != 0.) {
     pinocchio::Jlog6(d->rMf, d->rMf_Jlog6);
-    d->Ax.leftCols(nv).noalias() += gains_[0] * d->rMf_Jlog6 * d->Jc;
+    d->da0_dx.leftCols(nv).noalias() += gains_[0] * d->rMf_Jlog6 * d->Jc;
   }
   if (gains_[1] != 0.) {
-    d->Ax.leftCols(nv).noalias() += gains_[1] * d->fXj * d->v_partial_dq;
-    d->Ax.rightCols(nv).noalias() += gains_[1] * d->fXj * d->a_partial_da;
+    d->da0_dx.leftCols(nv).noalias() += gains_[1] * d->fXj * d->v_partial_dq;
+    d->da0_dx.rightCols(nv).noalias() += gains_[1] * d->fXj * d->a_partial_da;
   }
 }
 
-void ContactModel6D::updateLagrangian(const boost::shared_ptr<ContactDataAbstract>& data,
-                                      const Eigen::VectorXd& lambda) {
-  assert(lambda.size() == 6 && "lambda has wrong dimension, it should be 6d vector");
+void ContactModel6D::updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& force) {
+  assert(force.size() == 6 && "force has wrong dimension, it should be 6d vector");
   ContactData6D* d = static_cast<ContactData6D*>(data.get());
-  data->f = d->jMf.act(pinocchio::Force(lambda));
+  data->f = d->jMf.act(pinocchio::Force(force));
 }
 
 boost::shared_ptr<ContactDataAbstract> ContactModel6D::createData(pinocchio::Data* const data) {

@@ -21,14 +21,19 @@ class SolverFDDP : public SolverDDP {
 
   explicit SolverFDDP(ShootingProblem& problem);
   ~SolverFDDP();
-  double calc();
-  void backwardPass();
-  void forwardPass(const double& stepLength);
-  const Eigen::Vector2d& expectedImprovement();
-  void updateExpectedImprovement();
+
   bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
              const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, unsigned int const& maxiter = 100,
              const bool& is_feasible = false, const double& regInit = 1e-9);
+  void computeDirection(const bool& recalc = true);
+  double tryStep(const double& steplength = 1);
+  const Eigen::Vector2d& expectedImprovement();
+  void updateExpectedImprovement();
+  double calc();
+  void forwardPass(const double& stepLength);
+
+  double get_th_acceptnegstep() const;
+  void set_th_acceptnegstep(double th_acceptnegstep);
 
  protected:
   double dg_;
@@ -36,7 +41,7 @@ class SolverFDDP : public SolverDDP {
   double dv_;
 
  private:
-  double th_acceptNegStep_;
+  double th_acceptnegstep_;
 };
 
 }  // namespace crocoddyl

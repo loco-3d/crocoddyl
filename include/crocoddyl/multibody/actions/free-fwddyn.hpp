@@ -50,7 +50,7 @@ struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbst
         Minv(model->get_state().get_nv(), model->get_state().get_nv()),
         u_drift(model->get_nu()) {
     costs = model->get_costs().createData(&pinocchio);
-    shareCostMemory(costs);
+    costs->shareMemory(this);
     Minv.fill(0);
     u_drift.fill(0);
   }

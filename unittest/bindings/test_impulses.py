@@ -43,7 +43,8 @@ class ImpulseModelAbstractTestCase(unittest.TestCase):
         self.IMPULSE.calcDiff(self.data, self.x, True)
         self.IMPULSE_DER.calcDiff(self.data_der, self.x, True)
         # Checking the Jacobians of the contact constraint
-        self.assertTrue(np.allclose(self.data.Vq, self.data_der.Vq, atol=1e-9), "Wrong drift acceleration (Vq).")
+        self.assertTrue(np.allclose(self.data.dv0_dq, self.data_der.dv0_dq, atol=1e-9),
+                        "Wrong Jacobian of the acceleration before impulse (dv0_dq).")
 
 
 class ImpulseModelMultipleAbstractTestCase(unittest.TestCase):
@@ -84,7 +85,8 @@ class ImpulseModelMultipleAbstractTestCase(unittest.TestCase):
         self.IMPULSE.calcDiff(self.data, self.x, True)
         self.impulses.calcDiff(self.data_multiple, self.x, True)
         # Checking the Jacobians of the contact constraint
-        self.assertTrue(np.allclose(self.data.Vq, self.data_multiple.Vq, atol=1e-9), "Wrong drift acceleration (Vq).")
+        self.assertTrue(np.allclose(self.data.dv0_dq, self.data_multiple.dv0_dq, atol=1e-9),
+                        "Wrong Jacobian of the acceleration before impulse (dv0_dq).")
 
 
 class Impulse3DTest(ImpulseModelAbstractTestCase):

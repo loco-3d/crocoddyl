@@ -32,8 +32,9 @@ void DifferentialActionModelLQR::calc(const boost::shared_ptr<DifferentialAction
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
   assert(u.size() == nu_ && "u has wrong dimension");
 
-  const Eigen::VectorXd& q = x.head(state_.get_nq());
-  const Eigen::VectorXd& v = x.tail(state_.get_nv());
+  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_.get_nq());
+  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(state_.get_nv());
+
   if (drift_free_) {
     data->xout = Fq_ * q + Fv_ * v + Fu_ * u;
   } else {

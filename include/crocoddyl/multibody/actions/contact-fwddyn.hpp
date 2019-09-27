@@ -62,15 +62,15 @@ struct DifferentialActionDataContactFwdDynamics : public DifferentialActionDataA
         pinocchio(pinocchio::Data(model->get_pinocchio())),
         Kinv(model->get_state().get_nv() + model->get_contacts().get_nc(),
              model->get_state().get_nv() + model->get_contacts().get_nc()),
-        Gx(model->get_contacts().get_nc(), model->get_state().get_ndx()),
-        Gu(model->get_contacts().get_nc(), model->get_nu()) {
+        df_dx(model->get_contacts().get_nc(), model->get_state().get_ndx()),
+        df_du(model->get_contacts().get_nc(), model->get_nu()) {
     actuation = model->get_actuation().createData();
     contacts = model->get_contacts().createData(&pinocchio);
     costs = model->get_costs().createData(&pinocchio);
-    shareCostMemory(costs);
+    costs->shareMemory(this);
     Kinv.fill(0);
-    Gx.fill(0);
-    Gu.fill(0);
+    df_dx.fill(0);
+    df_du.fill(0);
   }
 
   pinocchio::Data pinocchio;
@@ -78,8 +78,8 @@ struct DifferentialActionDataContactFwdDynamics : public DifferentialActionDataA
   boost::shared_ptr<ContactDataMultiple> contacts;
   boost::shared_ptr<CostDataSum> costs;
   Eigen::MatrixXd Kinv;
-  Eigen::MatrixXd Gx;
-  Eigen::MatrixXd Gu;
+  Eigen::MatrixXd df_dx;
+  Eigen::MatrixXd df_du;
 };
 
 }  // namespace crocoddyl

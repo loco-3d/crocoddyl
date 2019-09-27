@@ -20,7 +20,7 @@ struct ActionDataAbstract;  // forward declaration
 
 class ActionModelAbstract {
  public:
-  ActionModelAbstract(StateAbstract& state, unsigned int const& nu, unsigned int const& nr = 1);
+  ActionModelAbstract(StateAbstract& state, unsigned int const& nu, unsigned int const& nr = 0);
   virtual ~ActionModelAbstract();
 
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -41,10 +41,10 @@ class ActionModelAbstract {
   StateAbstract& get_state() const;
 
  protected:
-  unsigned int nu_;
-  unsigned int nr_;
-  StateAbstract& state_;
-  Eigen::VectorXd unone_;
+  unsigned int nu_;        //!< Control dimension
+  unsigned int nr_;        //!< Dimension of the cost residual
+  StateAbstract& state_;   //!< Model of the state
+  Eigen::VectorXd unone_;  //!< Neutral state
 
 #ifdef PYTHON_BINDINGS
 
