@@ -23,7 +23,7 @@ namespace crocoddyl {
  * The subtility is in the computation of the Hessian of the cost. Let us
  * consider that the ActionModel owns a cost residual. This means that the cost
  * is the square of a residual \f$ l(x,u) = .5 r(x,u)**2 \f$, with
- * \f$ r(x,u) \f$ being the reisual vector. Therefore the derivatives of the
+ * \f$ r(x,u) \f$ being the residual vector. Therefore the derivatives of the
  * cost \f$ l \f$ can be expressed in function of the derivatives of the
  * residuals (Jacobians), denoted by \f$ R_x \f$ and \f$ R_u \f$. Which would be:
  * \f{eqnarray*}{
@@ -51,8 +51,6 @@ class ActionModelNumDiff : public ActionModelAbstract {
    * @brief Construct a new ActionModelNumDiff object
    *
    * @param model
-   * @param with_gauss_approx defines if we use the Gauss approximation of the
-   * cost hessian or not.
    */
   explicit ActionModelNumDiff(ActionModelAbstract& model);
 
