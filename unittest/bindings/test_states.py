@@ -5,7 +5,6 @@ from random import randint
 import numpy as np
 
 import crocoddyl
-import pinocchio
 from crocoddyl.utils import StateMultibodyDerived, StateVectorDerived
 import example_robot_data
 

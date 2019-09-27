@@ -6,7 +6,8 @@ import numpy as np
 import crocoddyl
 import pinocchio
 from crocoddyl.utils import (CoMPositionCostDerived, ControlCostDerived, FramePlacementCostDerived,
-                             FrameTranslationCostDerived, FrameVelocityCostDerived, StateCostDerived)
+                             FrameTranslationCostDerived, FrameRotationCostDerived, FrameVelocityCostDerived,
+                             StateCostDerived)
 
 
 class CostModelAbstractTestCase(unittest.TestCase):
@@ -202,6 +203,23 @@ class FrameTranslationCostSumTest(CostModelSumTestCase):
     COST = crocoddyl.CostModelFrameTranslation(ROBOT_STATE, xref)
 
 
+class FrameRotationCostTest(CostModelAbstractTestCase):
+    ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
+    ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+
+    Rref = crocoddyl.FrameRotation(ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.SE3.Random().rotation)
+    COST = crocoddyl.CostModelFrameRotation(ROBOT_STATE, Rref)
+    COST_DER = FrameRotationCostDerived(ROBOT_STATE, Rref=Rref)
+
+
+class FrameRotationCostSumTest(CostModelSumTestCase):
+    ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
+    ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+
+    Rref = crocoddyl.FrameRotation(ROBOT_MODEL.getFrameId('rleg5_joint'), pinocchio.SE3.Random().rotation)
+    COST = crocoddyl.CostModelFrameRotation(ROBOT_STATE, Rref)
+
+
 class FrameVelocityCostTest(CostModelAbstractTestCase):
     ROBOT_MODEL = pinocchio.buildSampleModelHumanoidRandom()
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
@@ -223,7 +241,8 @@ if __name__ == '__main__':
     test_classes_to_run = [
         StateCostTest, StateCostSumTest, ControlCostTest, ControlCostSumTest, CoMPositionCostTest,
         CoMPositionCostSumTest, FramePlacementCostTest, FramePlacementCostSumTest, FrameTranslationCostTest,
-        FrameTranslationCostSumTest, FrameVelocityCostTest, FrameVelocityCostSumTest
+        FrameTranslationCostSumTest, FrameRotationCostTest, FrameRotationCostSumTest, FrameVelocityCostTest,
+        FrameVelocityCostSumTest
     ]
     loader = unittest.TestLoader()
     suites_list = []

@@ -481,6 +481,36 @@ class FrameTranslationCostDerived(crocoddyl.CostModelAbstract):
         ])
 
 
+class FrameRotationCostDerived(crocoddyl.CostModelAbstract):
+    def __init__(self, state, activation=None, Rref=None, nu=None):
+        activation = activation if activation is not None else crocoddyl.ActivationModelQuad(3)
+        crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
+        self.Rref = Rref
+
+    def calc(self, data, x, u):
+        data.rRf = self.Rref.oRf.transpose() * data.pinocchio.oMf[self.Rref.frame].rotation
+        data.r = pinocchio.log3(data.rRf)
+        self.activation.calc(data.activation, data.r)
+        data.cost = data.activation.a
+
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        pinocchio.updateFramePlacements(self.state.pinocchio, data.pinocchio)
+        data.rJf = pinocchio.Jlog3(data.rRf)
+        data.fJf = pinocchio.getFrameJacobian(self.state.pinocchio, data.pinocchio, self.Rref.frame,
+                                              pinocchio.ReferenceFrame.LOCAL)[:3, :]
+        data.J = data.rJf * data.fJf
+        self.activation.calcDiff(data.activation, data.r, recalc)
+        data.Rx = np.hstack([data.J, pinocchio.utils.zero((self.activation.nr, self.state.nv))])
+        data.Lx = np.vstack([data.J.T * data.activation.Ar, pinocchio.utils.zero((self.state.nv, 1))])
+        data.Lxx = np.vstack([
+            np.hstack([data.J.T * data.activation.Arr * data.J,
+                       pinocchio.utils.zero((self.state.nv, self.state.nv))]),
+            pinocchio.utils.zero((self.state.nv, self.state.ndx))
+        ])
+
+
 class FrameVelocityCostDerived(crocoddyl.CostModelAbstract):
     def __init__(self, state, activation=None, vref=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(6)
