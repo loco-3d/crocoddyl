@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_CORE_SOLVER_BASE_HPP_
-#define CROCODDYL_CORE_SOLVER_BASE_HPP_
+#ifndef CROCODDYL_UNITTEST_CORCODDYL_TEST_TEST_COMMON_HPP_
+#define CROCODDYL_UNITTEST_CORCODDYL_TEST_TEST_COMMON_HPP_
 
 namespace crocoddyl_unit_test {
 
@@ -21,4 +21,4 @@ void delete_pointer(PtrType* ptr) {
 
 }  // namespace crocoddyl_unit_test
 
-#endif
+#endif  // CROCODDYL_UNITTEST_CORCODDYL_TEST_TEST_COMMON_HPP_
