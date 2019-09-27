@@ -22,14 +22,9 @@
 
 using namespace boost::unit_test;
 
-struct ActionModelTypes
-{
-  enum Type{
-    ActionModelUnicycle,
-    ActionModelLQR
-  };
-  static std::vector<Type> init_all()
-  {
+struct ActionModelTypes {
+  enum Type { ActionModelUnicycle, ActionModelLQR };
+  static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
     v.push_back(ActionModelUnicycle);
@@ -40,10 +35,9 @@ struct ActionModelTypes
 };
 const std::vector<ActionModelTypes::Type> ActionModelTypes::all(ActionModelTypes::init_all());
 
-class ActionModelFactory{
-public:
-  ActionModelFactory(ActionModelTypes::Type type)
-  {
+class ActionModelFactory {
+ public:
+  ActionModelFactory(ActionModelTypes::Type type) {
     nx_ = 80;
     nu_ = 40;
     driftfree_ = true;
@@ -52,40 +46,35 @@ public:
     action_model_unicycle_ = NULL;
     diff_action_model_lqr_ = NULL;
     action_model_lqr_ = NULL;
-    switch (type)
-    {
-    case ActionModelTypes::ActionModelUnicycle :
-      std::cout << "created an ActionModelUnicycle" << std::endl;
-      action_model_unicycle_ = new crocoddyl::ActionModelUnicycle();
-      action_model_ = action_model_unicycle_;
-      break;
+    switch (type) {
+      case ActionModelTypes::ActionModelUnicycle:
+        action_model_unicycle_ = new crocoddyl::ActionModelUnicycle();
+        action_model_ = action_model_unicycle_;
+        break;
 
-    case ActionModelTypes::ActionModelLQR :
-      std::cout << "created an ActionModelLQR" << std::endl;
-      action_model_lqr_ = new crocoddyl::ActionModelLQR(nx_, nu_, driftfree_);
-      action_model_ = action_model_lqr_;
-      break;
-    
-    default:
-      throw std::runtime_error("test_actions.cpp: This type of ActionModel requested has not been implemented yet.");
-      break;
+      case ActionModelTypes::ActionModelLQR:
+        action_model_lqr_ = new crocoddyl::ActionModelLQR(nx_, nu_, driftfree_);
+        action_model_ = action_model_lqr_;
+        break;
+
+      default:
+        throw std::runtime_error("test_actions.cpp: This type of ActionModel requested has not been implemented yet.");
+        break;
     }
   }
 
-  ~ActionModelFactory(){
-    std::cout << "delete factory" << std::endl;
+  ~ActionModelFactory() {
     crocoddyl_unit_test::delete_pointer(action_model_unicycle_);
     crocoddyl_unit_test::delete_pointer(diff_action_model_lqr_);
     crocoddyl_unit_test::delete_pointer(action_model_lqr_);
     action_model_ = NULL;
-    std::cout << "delete factory done" << std::endl;
   }
 
-  crocoddyl::ActionModelAbstract* get_action_model(){return action_model_;}
+  crocoddyl::ActionModelAbstract* get_action_model() { return action_model_; }
 
   double num_diff_modifier_;
 
-private:
+ private:
   int nx_;
   int nu_;
   bool driftfree_;
@@ -98,19 +87,16 @@ private:
 
 void test_construct_data(ActionModelTypes::Type action_model_type) {
   // create the model
-  ActionModelFactory factory (action_model_type);
+  ActionModelFactory factory(action_model_type);
   crocoddyl::ActionModelAbstract* model = factory.get_action_model();
-  std::cout << "model address: " << model << std::endl;
 
   // create the corresponding data object
   boost::shared_ptr<crocoddyl::ActionDataAbstract> data = model->createData();
-
-  std::cout << "test_construct_data end" << std::endl;
 }
 
 void test_calc_returns_state(ActionModelTypes::Type action_model_type) {
   // create the model
-  ActionModelFactory factory (action_model_type);
+  ActionModelFactory factory(action_model_type);
   crocoddyl::ActionModelAbstract* model = factory.get_action_model();
 
   // create the corresponding data object
@@ -128,7 +114,7 @@ void test_calc_returns_state(ActionModelTypes::Type action_model_type) {
 
 void test_calc_returns_a_cost(ActionModelTypes::Type action_model_type) {
   // create the model
-  ActionModelFactory factory (action_model_type);
+  ActionModelFactory factory(action_model_type);
   crocoddyl::ActionModelAbstract* model = factory.get_action_model();
 
   // create the corresponding data object and set the cost to nan
@@ -146,7 +132,7 @@ void test_calc_returns_a_cost(ActionModelTypes::Type action_model_type) {
 
 void test_partial_derivatives_against_numdiff(ActionModelTypes::Type action_model_type) {
   // create the model
-  ActionModelFactory factory (action_model_type);
+  ActionModelFactory factory(action_model_type);
   crocoddyl::ActionModelAbstract* model = factory.get_action_model();
 
   // create the corresponding data object and set the cost to nan
@@ -181,20 +167,17 @@ void test_partial_derivatives_against_numdiff(ActionModelTypes::Type action_mode
 }
 
 void register_action_model_unit_tests(ActionModelTypes::Type action_model_type) {
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_construct_data, action_model_type)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_state, action_model_type)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, action_model_type)));
   framework::master_test_suite().add(
-      BOOST_TEST_CASE(boost::bind(&test_construct_data, action_model_type)));
-  framework::master_test_suite().add(
-      BOOST_TEST_CASE(boost::bind(&test_calc_returns_state, action_model_type)));
-  framework::master_test_suite().add(
-      BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, action_model_type)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(
-      &test_partial_derivatives_against_numdiff, action_model_type)));
+      BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, action_model_type)));
 }
 
 bool init_function() {
-  for (size_t i = 0 ; i < ActionModelTypes::all.size() ; ++i){
+  for (size_t i = 0; i < ActionModelTypes::all.size(); ++i) {
     register_action_model_unit_tests(ActionModelTypes::all[i]);
-  }  
+  }
   return true;
 }
 

@@ -9,7 +9,7 @@
 #ifndef CROCODDYL_CORE_SOLVER_BASE_HPP_
 #define CROCODDYL_CORE_SOLVER_BASE_HPP_
 
-namespace crocoddyl_unit_test{
+namespace crocoddyl_unit_test {
 
 template <class PtrType>
 void delete_pointer(PtrType* ptr) {
@@ -19,6 +19,6 @@ void delete_pointer(PtrType* ptr) {
   }
 }
 
-} // namespace crocoddyl_unit_test
+}  // namespace crocoddyl_unit_test
 
 #endif
