@@ -46,15 +46,20 @@ class ActuationDataUAM:
         self.A = np.zeros([nv, ndx + nu])  # result of calcDiff
         self.Ax = self.A[:, :ndx]
         self.Au = self.A[:, ndx:]
-        self.Au[2:6,:4] = np.array([[1,1,1,1],[-d,d,-d,d],[-d,-d,d,d],[-cm/cf,-cm/cf,cm/cf,cm/cf]])
+        self.Au[2:6,:4] = np.array([[1,1,1,1],[-d,d,d,-d],[-d,d,-d,d],[-cm/cf,-cm/cf,cm/cf,cm/cf]])
         np.fill_diagonal(self.Au[6:, 4:], 1)
-# This is the matrix that, given a force vector representing the four motors, outputs the thrust and moment
-# [      0,      0,     0,     0]
-# [      0,      0,     0,     0]
-# [      1,      1,     1,     1]
-# [     -d,      d,    -d,     d]
-# [     -d,     -d,     d,     d]
-# [ -cm/cf, -cm/cf, cm/cf, cm/cf]
+        # Actuation considering motor forces instead of thrust and moments
+        # This is the matrix that, given a force vector representing the four motors, outputs the thrust and moment
+        # [      0,      0,     0,     0]
+        # [      0,      0,     0,     0]
+        # [      1,      1,     1,     1]
+        # [     -d,      d,    -d,     d]
+        # [     -d,     -d,     d,     d]
+        # [ -cm/cf, -cm/cf, cm/cf, cm/cf]
+
+
+
+
 
 class ActuationModelFreeFloating:
     '''
