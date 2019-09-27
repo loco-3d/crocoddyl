@@ -31,7 +31,7 @@ ENDMACRO(ADD_TEST_CFLAGS)
 MACRO(ADD_CPP_UNIT_TEST NAME PKGS)
   set(unittest_name ${NAME})
 
-  ADD_UNIT_TEST(${unittest_name} ${NAME}.cpp)
+  ADD_UNIT_TEST(${unittest_name} ${NAME}.cpp crocoddyl_test/test_common.hpp)
 
   SET_TARGET_PROPERTIES(${unittest_name} PROPERTIES LINKER_LANGUAGE CXX)
   
