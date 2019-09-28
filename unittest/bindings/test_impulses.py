@@ -74,7 +74,7 @@ class ImpulseModelMultipleAbstractTestCase(unittest.TestCase):
                                                       pinocchio.utils.zero(nv))
 
     def test_ni_dimension(self):
-        ni = sum([impulse.ni for impulse in self.IMPULSES.itervalues()])
+        ni = sum([impulse.ni for impulse in self.IMPULSES.values()])
         self.assertEqual(self.impulseSum.ni, ni, "Wrong nc.")
 
     def test_calc(self):
@@ -116,8 +116,7 @@ class Impulse3DMultipleTest(ImpulseModelMultipleAbstractTestCase):
         sorted({
             'lf_foot': crocoddyl.ImpulseModel3D(ROBOT_STATE, ROBOT_MODEL.getFrameId('lf_foot')),
             'rh_foot': crocoddyl.ImpulseModel3D(ROBOT_STATE, ROBOT_MODEL.getFrameId('rh_foot'))
-        }.items(),
-               key=lambda t: t[0]))
+        }.items(), key=lambda t: t[0]))
 
 
 class Impulse6DTest(ImpulseModelAbstractTestCase):
@@ -138,8 +137,7 @@ class Impulse6DMultipleTest(ImpulseModelMultipleAbstractTestCase):
         sorted({
             'l_sole': crocoddyl.ImpulseModel6D(ROBOT_STATE, ROBOT_MODEL.getFrameId('l_sole')),
             'r_sole': crocoddyl.ImpulseModel6D(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'))
-        }.items(),
-               key=lambda t: t[0]))
+        }.items(), key=lambda t: t[0]))
 
 
 if __name__ == '__main__':

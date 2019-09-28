@@ -75,7 +75,7 @@ class ContactModelMultipleAbstractTestCase(unittest.TestCase):
                                                       pinocchio.utils.zero(nv))
 
     def test_nc_dimension(self):
-        nc = sum([contact.nc for contact in self.CONTACTS.itervalues()])
+        nc = sum([contact.nc for contact in self.CONTACTS.values()])
         self.assertEqual(self.contactSum.nc, nc, "Wrong nc.")
 
     def test_calc(self):
@@ -127,8 +127,7 @@ class Contact3DMultipleTest(ContactModelMultipleAbstractTestCase):
                 ROBOT_STATE,
                 crocoddyl.FrameTranslation(ROBOT_MODEL.getFrameId('rh_foot'),
                                            pinocchio.SE3.Random().translation), gains)
-        }.items(),
-               key=lambda t: t[0]))
+        }.items(), key=lambda t: t[0]))
 
 
 class Contact6DTest(ContactModelAbstractTestCase):
@@ -155,8 +154,7 @@ class Contact6DMultipleTest(ContactModelMultipleAbstractTestCase):
             'r_foot':
             crocoddyl.ContactModel6D(
                 ROBOT_STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId('r_sole'), pinocchio.SE3.Random()), gains)
-        }.items(),
-               key=lambda t: t[0]))
+        }.items(), key=lambda t: t[0]))
 
 
 if __name__ == '__main__':
