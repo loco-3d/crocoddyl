@@ -3,7 +3,7 @@ from .action import (ActionDataAbstract, ActionDataLQR, ActionDataNumDiff, Actio
 from .activation import (ActivationDataInequality, ActivationDataQuad, ActivationDataSmoothAbs,
                          ActivationDataWeightedQuad, ActivationModelInequality, ActivationModelQuad,
                          ActivationModelSmoothAbs, ActivationModelWeightedQuad)
-from .actuation import ActuationDataFreeFloating, ActuationDataFull, ActuationModelFreeFloating, ActuationModelFull
+from .actuation import ActuationDataFreeFloating, ActuationDataFull, ActuationModelFreeFloating, ActuationModelFull, ActuationModelUAM
 from .box_ddp import SolverBoxDDP
 from .box_kkt import SolverBoxKKT
 from .callbacks import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay, CallbackSolverTimer
@@ -23,12 +23,13 @@ from .differential_action import (DifferentialActionDataAbstract, DifferentialAc
                                   DifferentialActionModelLQR, DifferentialActionModelNumDiff)
 from .fddp import SolverFDDP
 from .floating_contact import DifferentialActionDataFloatingInContact, DifferentialActionModelFloatingInContact
+from .flying import DifferentialActionModelUAM, DifferentialActionDataUAM
 from .impact import (ActionDataImpact, ActionModelImpact, CostModelImpactCoM, CostModelImpactWholeBody, ImpulseData6D,
                      ImpulseDataPinocchio, ImpulseModel3D, ImpulseModel6D, ImpulseModelMultiple, ImpulseModelPinocchio)
 from .integrated_action import (IntegratedActionDataEuler, IntegratedActionDataRK4, IntegratedActionModelEuler,
                                 IntegratedActionModelRK4)
 from .kkt import SolverKKT
-from .robots import getTalosPathFromRos, loadHyQ, loadTalos, loadTalosArm, loadTalosLegs
+from .robots import getTalosPathFromRos, loadHyQ, loadTalos, loadTalosArm, loadTalosLegs, loadKinton, loadKintonArm
 from .shooting import ShootingProblem
 from .solver import SolverAbstract
 from .state import StateAbstract, StateNumDiff, StatePinocchio, StateVector

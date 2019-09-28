@@ -125,3 +125,23 @@ def loadHyQ(modelPath='/opt/openrobots/share/example-robot-data'):
     robot.q0[2] = 0.57750958
     robot.model.referenceConfigurations["half_sitting"] = robot.q0
     return robot
+
+def loadKinton(modelPath='/opt/openrobots/share/example-robot-data'):
+    URDF_FILENAME = "kinton_arm.urdf"
+    URDF_SUBPATH = "/kinton_description/urdf/" + URDF_FILENAME
+    robot = RobotWrapper.BuildFromURDF(modelPath + URDF_SUBPATH, [modelPath], pinocchio.JointModelFreeFlyer())
+    robot.q0.flat[7:] = [0, 0, 0, 0, 0, 0]
+    robot.model.referenceConfigurations["initial_pose"] = robot.q0
+    return robot
+
+def loadKintonArm(modelPath='/opt/openrobots/share/example-robot-data'):
+    URDF_FILENAME = "kinton_arm.urdf"
+    URDF_SUBPATH = "/kinton_description/urdf/" + URDF_FILENAME
+    robot = RobotWrapper.BuildFromURDF(modelPath + URDF_SUBPATH, [modelPath])
+    return robot
+
+def loadKintonArm(modelPath='/opt/openrobots/share/example-robot-data'):
+    URDF_FILENAME = "kinton_arm.urdf"
+    URDF_SUBPATH = "/kinton_description/urdf/" + URDF_FILENAME
+    robot = RobotWrapper.BuildFromURDF(modelPath + URDF_SUBPATH, [modelPath])
+    return robot
