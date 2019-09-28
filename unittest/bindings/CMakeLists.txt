@@ -6,6 +6,7 @@ SET(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
   solvers
   costs
   contacts
+  impulses
   )
 
 FOREACH(TEST ${${PROJECT_NAME}_PYTHON_BINDINGS_TESTS})

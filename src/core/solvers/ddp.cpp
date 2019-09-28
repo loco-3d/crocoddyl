@@ -93,7 +93,7 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
     }
     stoppingCriteria();
 
-    const unsigned int& n_callbacks = static_cast<unsigned int>(callbacks_.size());
+    unsigned int const& n_callbacks = static_cast<unsigned int>(callbacks_.size());
     for (unsigned int c = 0; c < n_callbacks; ++c) {
       CallbackAbstract& callback = *callbacks_[c];
       callback(*this);
@@ -120,7 +120,7 @@ double SolverDDP::tryStep(const double& steplength) {
 
 double SolverDDP::stoppingCriteria() {
   stop_ = 0.;
-  const unsigned int& T = this->problem_.get_T();
+  unsigned int const& T = this->problem_.get_T();
   for (unsigned int t = 0; t < T; ++t) {
     stop_ += Qu_[t].squaredNorm();
   }
@@ -129,7 +129,7 @@ double SolverDDP::stoppingCriteria() {
 
 const Eigen::Vector2d& SolverDDP::expectedImprovement() {
   d_.fill(0);
-  const unsigned int& T = this->problem_.get_T();
+  unsigned int const& T = this->problem_.get_T();
   for (unsigned int t = 0; t < T; ++t) {
     d_[0] += Qu_[t].dot(k_[t]);
     d_[1] -= k_[t].dot(Quuk_[t]);
@@ -143,7 +143,7 @@ double SolverDDP::calc() {
     const Eigen::VectorXd& x0 = problem_.get_x0();
     problem_.running_models_[0]->get_state().diff(xs_[0], x0, gaps_[0]);
 
-    const unsigned int& T = problem_.get_T();
+    unsigned int const& T = problem_.get_T();
     for (unsigned int t = 0; t < T; ++t) {
       ActionModelAbstract* model = problem_.running_models_[t];
       boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
@@ -218,13 +218,13 @@ void SolverDDP::forwardPass(const double& steplength) {
   assert(steplength <= 1. && "Step length has to be <= 1.");
   assert(steplength >= 0. && "Step length has to be >= 0.");
   cost_try_ = 0.;
-  const unsigned int& T = problem_.get_T();
+  unsigned int const& T = problem_.get_T();
   for (unsigned int t = 0; t < T; ++t) {
     ActionModelAbstract* m = problem_.running_models_[t];
     boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
 
     m->get_state().diff(xs_[t], xs_try_[t], dx_[t]);
-    us_try_[t] = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
+    us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
     m->calc(d, xs_try_[t], us_try_[t]);
     xs_try_[t + 1] = d->get_xnext();
     cost_try_ += d->cost;

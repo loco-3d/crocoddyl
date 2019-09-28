@@ -15,6 +15,7 @@
 #include "python/crocoddyl/multibody/actuations/full.hpp"
 #include "python/crocoddyl/multibody/cost-base.hpp"
 #include "python/crocoddyl/multibody/contact-base.hpp"
+#include "python/crocoddyl/multibody/impulse-base.hpp"
 #include "python/crocoddyl/multibody/costs/cost-sum.hpp"
 #include "python/crocoddyl/multibody/costs/state.hpp"
 #include "python/crocoddyl/multibody/costs/control.hpp"
@@ -25,6 +26,9 @@
 #include "python/crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "python/crocoddyl/multibody/contacts/contact-3d.hpp"
 #include "python/crocoddyl/multibody/contacts/contact-6d.hpp"
+#include "python/crocoddyl/multibody/impulses/multiple-impulses.hpp"
+#include "python/crocoddyl/multibody/impulses/impulse-3d.hpp"
+#include "python/crocoddyl/multibody/impulses/impulse-6d.hpp"
 #include "python/crocoddyl/multibody/actions/free-fwddyn.hpp"
 #include "python/crocoddyl/multibody/actions/contact-fwddyn.hpp"
 
@@ -38,6 +42,7 @@ void exposeMultibody() {
   exposeActuationFull();
   exposeCostMultibody();
   exposeContactAbstract();
+  exposeImpulseAbstract();
   exposeCostSum();
   exposeCostState();
   exposeCostControl();
@@ -48,6 +53,9 @@ void exposeMultibody() {
   exposeContactMultiple();
   exposeContact3D();
   exposeContact6D();
+  exposeImpulseMultiple();
+  exposeImpulse3D();
+  exposeImpulse6D();
   exposeDifferentialActionFreeFwdDynamics();
   exposeDifferentialActionContactFwdDynamics();
 }

@@ -40,17 +40,52 @@ int main() {
   }
 
   // Solving the optimal control problem
-  std::clock_t c_start, c_end;
+  struct timespec start, finish;
+  double elapsed;
   Eigen::ArrayXd duration(T);
   for (unsigned int i = 0; i < T; ++i) {
-    c_start = std::clock();
+    clock_gettime(CLOCK_MONOTONIC, &start);
     ddp.solve(xs, us, MAXITER);
-    c_end = std::clock();
-    duration[i] = 1e3 * (double)(c_end - c_start) / CLOCKS_PER_SEC;
+    clock_gettime(CLOCK_MONOTONIC, &finish);
+    elapsed = (finish.tv_sec - start.tv_sec) * 1000000.0;
+    elapsed += (finish.tv_nsec - start.tv_nsec) / 1000.0;
+    duration[i] = elapsed / 1000.;
   }
 
   double avrg_duration = duration.sum() / T;
   double min_duration = duration.minCoeff();
   double max_duration = duration.maxCoeff();
-  std::cout << "CPU time [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")" << std::endl;
+  std::cout << "Wall time [mu]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")" << std::endl;
+
+  // Running calc
+  for (unsigned int i = 0; i < T; ++i) {
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    problem.calc(xs, us);
+    clock_gettime(CLOCK_MONOTONIC, &finish);
+    elapsed = (finish.tv_sec - start.tv_sec) * 1000000.0;
+    elapsed += (finish.tv_nsec - start.tv_nsec) / 1000.0;
+    duration[i] = elapsed / 1000.;
+  }
+
+  avrg_duration = duration.sum() / T;
+  min_duration = duration.minCoeff();
+  max_duration = duration.maxCoeff();
+  std::cout << "Wall time calc [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
+            << std::endl;
+
+  // Running calcDiff
+  for (unsigned int i = 0; i < T; ++i) {
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    problem.calcDiff(xs, us);
+    clock_gettime(CLOCK_MONOTONIC, &finish);
+    elapsed = (finish.tv_sec - start.tv_sec) * 1000000.0;
+    elapsed += (finish.tv_nsec - start.tv_nsec) / 1000.0;
+    duration[i] = elapsed / 1000.;
+  }
+
+  avrg_duration = duration.sum() / T;
+  min_duration = duration.minCoeff();
+  max_duration = duration.maxCoeff();
+  std::cout << "Wall time calcDiff [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
+            << std::endl;
 }

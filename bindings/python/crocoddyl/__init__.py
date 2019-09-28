@@ -51,3 +51,32 @@ class CallbackSolverDisplay(libcrocoddyl_pywrap.CallbackAbstract):
             return
         dt = solver.models()[0].dt
         displayTrajectory(self.robotwrapper, solver.xs, dt, self.rate, self.cameraTF)
+
+
+class CallbackSolverLogger(libcrocoddyl_pywrap.CallbackAbstract):
+    def __init__(self):
+        libcrocoddyl_pywrap.CallbackAbstract.__init__(self)
+        self.steps = []
+        self.iters = []
+        self.costs = []
+        self.control_regs = []
+        self.state_regs = []
+        self.th_stops = []
+        self.gm_stops = []
+        self.xs = []
+        self.us = []
+        self.gaps = []
+
+    def __call__(self, solver):
+        import copy
+        import numpy as np
+        self.xs = copy.copy(solver.xs)
+        self.us = copy.copy(solver.us)
+        self.steps.append(solver.stepLength)
+        self.iters.append(solver.iter)
+        self.costs.append(solver.cost)
+        self.control_regs.append(solver.u_reg)
+        self.state_regs.append(solver.x_reg)
+        self.th_stops.append(solver.stoppingCriteria)
+        self.gm_stops.append(-np.asscalar(solver.expectedImprovement()[1]))
+        self.gaps.append(copy.copy(solver.gaps))

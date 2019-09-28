@@ -26,6 +26,7 @@
 #include "python/crocoddyl/core/activations/quadratic.hpp"
 #include "python/crocoddyl/core/activations/weighted-quadratic.hpp"
 #include "python/crocoddyl/core/solvers/ddp.hpp"
+#include "python/crocoddyl/core/solvers/fddp.hpp"
 #include "python/crocoddyl/core/utils/callbacks.hpp"
 
 namespace crocoddyl {
@@ -49,6 +50,7 @@ void exposeCore() {
   exposeActivationQuad();
   exposeActivationWeightedQuad();
   exposeSolverDDP();
+  exposeSolverFDDP();
   exposeCallbacks();
 }
 

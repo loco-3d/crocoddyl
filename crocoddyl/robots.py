@@ -139,9 +139,3 @@ def loadKintonArm(modelPath='/opt/openrobots/share/example-robot-data'):
     URDF_SUBPATH = "/kinton_description/urdf/" + URDF_FILENAME
     robot = RobotWrapper.BuildFromURDF(modelPath + URDF_SUBPATH, [modelPath])
     return robot
-
-def loadKintonArm(modelPath='/opt/openrobots/share/example-robot-data'):
-    URDF_FILENAME = "kinton_arm.urdf"
-    URDF_SUBPATH = "/kinton_description/urdf/" + URDF_FILENAME
-    robot = RobotWrapper.BuildFromURDF(modelPath + URDF_SUBPATH, [modelPath])
-    return robot

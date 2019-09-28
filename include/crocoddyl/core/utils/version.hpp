@@ -9,9 +9,9 @@
 #ifndef CROCODDYL_CORE_UTILS_VERSION_HPP_
 #define CROCODDYL_CORE_UTILS_VERSION_HPP_
 
-#include "crocoddyl/config.hh"
 #include <string>
 #include <sstream>
+#include "crocoddyl/config.hh"
 
 namespace crocoddyl {
 

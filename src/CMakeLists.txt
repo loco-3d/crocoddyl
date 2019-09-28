@@ -12,6 +12,7 @@ SET(${PROJECT_NAME}_SOURCES
   core/utils/callbacks.cpp
   core/optctrl/shooting.cpp
   core/solvers/ddp.cpp
+  core/solvers/fddp.cpp
   core/states/euclidean.cpp
   core/actions/unicycle.cpp
   core/actions/lqr.cpp
@@ -20,6 +21,10 @@ SET(${PROJECT_NAME}_SOURCES
   core/activations/weighted-quadratic.cpp
   multibody/cost-base.cpp
   multibody/contact-base.cpp
+  multibody/impulse-base.cpp
+  multibody/impulses/multiple-impulses.cpp
+  multibody/impulses/impulse-3d.cpp
+  multibody/impulses/impulse-6d.cpp
   multibody/states/multibody.cpp
   multibody/actuations/floating-base.cpp
   multibody/actuations/full.cpp
@@ -44,6 +49,10 @@ IF(UNIX)
   PKG_CONFIG_USE_DEPENDENCY(${PROJECT_NAME} pinocchio)
   TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_SERIALIZATION_LIBRARY})
 
+  if(OPENMP_FOUND)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenMP_CXX_LIBRARIES})
+  ENDIF()
+  
   INSTALL(TARGETS ${PROJECT_NAME} DESTINATION lib)
   INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
           DESTINATION include
