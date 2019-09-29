@@ -1,17 +1,7 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[13]:
-
-
 from crocoddyl import *
 import pinocchio as pin
 import numpy as np
 from crocoddyl.diagnostic import displayTrajectory
-
-
-# In[14]:
-
 
 # LOAD ROBOT
 robot = loadKinton()
@@ -22,10 +12,6 @@ robot.framesForwardKinematics(robot.q0)
 
 rmodel = robot.model
 
-
-# In[15]:
-
-
 # DEFINE TARGET POSITION
 target_pos  = np.array([0,0,1])
 target_quat = pin.Quaternion(1, 0, 0, 0)
@@ -35,10 +21,6 @@ target_quat.normalize()
 robot.viewer.gui.addXYZaxis('world/framegoal', [1., 0., 0., 1.], .015, 4)
 robot.viewer.gui.applyConfiguration('world/framegoal', target_pos.tolist() + [target_quat[0], target_quat[1], target_quat[2], target_quat[3]])
 robot.viewer.gui.refresh()
-
-
-# In[16]:
-
 
 # ACTUATION MODEL
 distanceRotorCOG = 0.1525
@@ -98,27 +80,22 @@ terminalCostModel.addCost(name="pos", weight=0, cost=goalTrackingCost)
 runningModel = IntegratedActionModelEuler(DifferentialActionModelUAM(robot.model, actModel, runningCostModel))
 terminalModel = IntegratedActionModelEuler(DifferentialActionModelUAM(robot.model, actModel, terminalCostModel))
 
-
-# In[ ]:
-
-
 # DEFINING THE SHOOTING PROBLEM & SOLVING
+import time
 
 # Defining the time duration for running action models and the terminal one
-dt = 1e-3
+dt = 1e-2
 runningModel.timeStep = dt
 
-# For this optimal control problem, we define 250 knots (or running action
-# models) plus a terminal knot
-print "----------MARK 1----------"
-T = 1000
+T = 100
 q0 = rmodel.referenceConfigurations["initial_pose"].copy()
 v0 = pin.utils.zero(rmodel.nv)
 x0 = m2a(np.concatenate([q0, v0]))
 rmodel.defaultState = x0.copy()
 
-print "----------MARK 2----------"
+t = time.time()
 problem = ShootingProblem(x0, [runningModel] * T, terminalModel)
+print "TIME: Shooting problem, " + str(time.time()-t)
 
 # Creating the DDP solver for this OC problem, defining a logger
 fddp = SolverFDDP(problem)
@@ -126,7 +103,6 @@ fddp.callback = [CallbackDDPVerbose()]
 fddp.callback.append(CallbackDDPLogger())
 #fddp.setCallbacks([CallbackVerbose()])
 
-print "----------MARK 3----------"
 # us0 = [
 #     m.differential.quasiStatic(d.differential, rmodel.defaultState)
 #     if isinstance(m, IntegratedActionModelEuler) else np.zeros(0)
@@ -134,19 +110,12 @@ print "----------MARK 3----------"
 # xs0 = [problem.initialState]*len(fddp.models())
 
 # Solving it with the DDP algorithm
-print "----------SOLVING----------"
 #fddp.solve(init_xs=xs0, init_us=us0)
+t = time.time()
 fddp.solve()
-
-
-# In[6]:
-
+print "TIME: Solve time, " + str(time.time()-t)
 
 displayTrajectory(robot, fddp.xs, runningModel.timeStep)
-
-
-# In[7]:
-
 
 # Control trajectory
 f1 = []
@@ -177,10 +146,6 @@ for x in fddp.xs:
     Vy.append(x[14])
     Vz.append(x[15])
 
-
-# In[9]:
-
-
 import matplotlib.pyplot as plt
 t = np.arange(0., 1, dt)
 
@@ -210,11 +175,4 @@ plt.title('State - Velocity')
 plt.ylabel('Velocity, [m/s]')
 plt.xlabel('[s]')
 
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
+plt.show()
