@@ -73,7 +73,7 @@ uLimCost = CostModelControl(rmodel,
 runningCostModel.addCost(name="pos", weight=0.1, cost=goalTrackingCost)
 runningCostModel.addCost(name="regx", weight=1e-4, cost=xRegCost)
 runningCostModel.addCost(name="regu", weight=1e-6, cost=uRegCost)
-# runningCostModel.addCost(name="limu", weight=1e-3, cost=uLimCost)
+runningCostModel.addCost(name="limu", weight=1e-3, cost=uLimCost)
 terminalCostModel.addCost(name="pos", weight=0, cost=goalTrackingCost)
 
 # DIFFERENTIAL ACTION MODEL
