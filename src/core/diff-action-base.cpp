@@ -36,4 +36,26 @@ unsigned int const& DifferentialActionModelAbstract::get_nr() const { return nr_
 
 StateAbstract& DifferentialActionModelAbstract::get_state() const { return state_; }
 
+const Eigen::VectorXd& DifferentialActionModelAbstract::get_u_lower_limit() const { return u_lower_limit_; }
+
+const Eigen::VectorXd& DifferentialActionModelAbstract::get_u_upper_limit() const { return u_upper_limit_; }
+
+void DifferentialActionModelAbstract::set_u_lower_limit(const Eigen::Ref<const Eigen::VectorXd>& u_in) {
+  assert(nu_ == u_in.size() && "Number of rows of u_in must match nu_");
+  u_lower_limit_ = u_in;
+  update_has_control_limits();
+}
+
+void DifferentialActionModelAbstract::set_u_upper_limit(const Eigen::Ref<const Eigen::VectorXd>& u_in) {
+  assert(nu_ == u_in.size() && "Number of rows of u_in must match nu_");
+  u_upper_limit_ = u_in;
+  update_has_control_limits();
+}
+
+bool const& DifferentialActionModelAbstract::get_has_control_limits() const { return has_control_limits_; }
+
+void DifferentialActionModelAbstract::update_has_control_limits() {
+  has_control_limits_ = u_lower_limit_.allFinite() && u_upper_limit_.allFinite();
+}
+
 }  // namespace crocoddyl
