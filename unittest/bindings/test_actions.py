@@ -7,6 +7,7 @@ import numpy as np
 import crocoddyl
 import pinocchio
 from crocoddyl.utils import DifferentialFreeFwdDynamicsDerived, DifferentialLQRDerived, LQRDerived, UnicycleDerived
+import example_robot_data
 
 
 class ActionModelAbstractTestCase(unittest.TestCase):
@@ -78,37 +79,42 @@ class DifferentialLQRTest(ActionModelAbstractTestCase):
     MODEL_DER = DifferentialLQRDerived(NX, NU)
 
 
-class FreeFwdDynamicsTest(ActionModelAbstractTestCase):
-    ROBOT_MODEL = pinocchio.buildSampleModelManipulator()
+class TalosArmFreeFwdDynamicsTest(ActionModelAbstractTestCase):
+    ROBOT_MODEL = example_robot_data.loadTalosArm().model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
-    COST_SUM = crocoddyl.CostModelSum(STATE, ROBOT_MODEL.nv)
-    COST_SUM.addCost('xReg', crocoddyl.CostModelState(STATE), 1.)
+    COST_SUM = crocoddyl.CostModelSum(STATE)
     COST_SUM.addCost(
-        'frTrack',
+        'gripperPose',
         crocoddyl.CostModelFramePlacement(
-            STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("effector_body"), pinocchio.SE3.Random())), 1.)
+            STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("gripper_left_joint"), pinocchio.SE3.Random())),
+        1e-3)
+    COST_SUM.addCost("xReg", crocoddyl.CostModelState(STATE), 1e-7)
+    COST_SUM.addCost("uReg", crocoddyl.CostModelControl(STATE), 1e-7)
     MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, COST_SUM)
     MODEL_DER = DifferentialFreeFwdDynamicsDerived(STATE, COST_SUM)
 
 
-class FreeFwdDynamicsWithArmatureTest(ActionModelAbstractTestCase):
-    ROBOT_MODEL = pinocchio.buildSampleModelManipulator()
+class TalosArmFreeFwdDynamicsWithArmatureTest(ActionModelAbstractTestCase):
+    ROBOT_MODEL = example_robot_data.loadTalosArm().model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
-    COST_SUM = crocoddyl.CostModelSum(STATE, ROBOT_MODEL.nv)
-    COST_SUM.addCost('xReg', crocoddyl.CostModelState(STATE), 1.)
+    COST_SUM = crocoddyl.CostModelSum(STATE)
     COST_SUM.addCost(
-        'frTrack',
+        'gripperPose',
         crocoddyl.CostModelFramePlacement(
-            STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("effector_body"), pinocchio.SE3.Random())), 1.)
+            STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("gripper_left_joint"), pinocchio.SE3.Random())),
+        1e-3)
+    COST_SUM.addCost("xReg", crocoddyl.CostModelState(STATE), 1e-7)
+    COST_SUM.addCost("uReg", crocoddyl.CostModelControl(STATE), 1e-7)
     MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, COST_SUM)
+    MODEL_DER = DifferentialFreeFwdDynamicsDerived(STATE, COST_SUM)
     MODEL.armature = 0.1 * np.matrix(np.ones(ROBOT_MODEL.nv)).T
-    MODEL_DER = DifferentialFreeFwdDynamicsDerived(STATE, COST_SUM)
     MODEL_DER.set_armature(0.1 * np.matrix(np.ones(ROBOT_MODEL.nv)).T)
 
 
 if __name__ == '__main__':
     test_classes_to_run = [
-        UnicycleTest, LQRTest, DifferentialLQRTest, FreeFwdDynamicsTest, FreeFwdDynamicsWithArmatureTest
+        UnicycleTest, LQRTest, DifferentialLQRTest, TalosArmFreeFwdDynamicsTest,
+        TalosArmFreeFwdDynamicsWithArmatureTest
     ]
     loader = unittest.TestLoader()
     suites_list = []

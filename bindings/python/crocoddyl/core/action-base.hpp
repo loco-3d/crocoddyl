@@ -37,7 +37,7 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
 };
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ActionModel_calc_wraps, ActionModelAbstract::calc_wrap, 2, 3)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ActionModel_quasicStatic_wraps, ActionModelAbstract::quasicStatic_wrap, 2, 4)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ActionModel_quasiStatic_wraps, ActionModelAbstract::quasiStatic_wrap, 2, 4)
 
 void exposeActionAbstract() {
   bp::class_<ActionModelAbstract_wrap, boost::noncopyable>(
@@ -79,8 +79,8 @@ void exposeActionAbstract() {
            "Each action model (AM) has its own data that needs to be allocated.\n"
            "This function returns the allocated data for a predefined AM.\n"
            ":return AM data.")
-      .def("quasicStatic", &ActionModelAbstract_wrap::quasicStatic_wrap,
-           ActionModel_quasicStatic_wraps(
+      .def("quasiStatic", &ActionModelAbstract_wrap::quasiStatic_wrap,
+           ActionModel_quasiStatic_wraps(
                bp::args(" self", " data", " x", " maxiter=100", " tol=1e-9"),
                "Compute the quasic-static control given a state.\n\n"
                "It runs an iterative Newton step in order to compute the quasic-static regime\n"

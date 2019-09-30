@@ -118,7 +118,7 @@ for i, phase in enumerate(GAITPHASES):
 
     # Solving the problem with the DDP solver
     xs = [hyq.model.defaultState] * len(ddp[i].models())
-    us = [m.quasicStatic(d, hyq.model.defaultState) for m, d in list(zip(ddp[i].models(), ddp[i].datas()))[:-1]]
+    us = [m.quasiStatic(d, hyq.model.defaultState) for m, d in list(zip(ddp[i].models(), ddp[i].datas()))[:-1]]
     ddp[i].solve(xs, us, 100, False, 0.1)
 
     # Defining the final state as initial one for the next phase

@@ -22,6 +22,12 @@ struct FrameTranslation {
   Eigen::Vector3d oxf;
 };
 
+struct FrameRotation {
+  FrameRotation(unsigned int const& frame, const Eigen::Matrix3d& oRf) : frame(frame), oRf(oRf) {}
+  unsigned int frame;
+  Eigen::Matrix3d oRf;
+};
+
 struct FramePlacement {
   FramePlacement(unsigned int const& frame, const pinocchio::SE3& oMf) : frame(frame), oMf(oMf) {}
   unsigned int frame;

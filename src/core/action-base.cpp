@@ -25,9 +25,9 @@ void ActionModelAbstract::calcDiff(const boost::shared_ptr<ActionDataAbstract>& 
   calcDiff(data, x, unone_);
 }
 
-void ActionModelAbstract::quasicStatic(const boost::shared_ptr<ActionDataAbstract>& data,
-                                       Eigen::Ref<Eigen::VectorXd> u, const Eigen::Ref<const Eigen::VectorXd>& x,
-                                       unsigned int const& maxiter, const double& tol) {
+void ActionModelAbstract::quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<Eigen::VectorXd> u,
+                                      const Eigen::Ref<const Eigen::VectorXd>& x, unsigned int const& maxiter,
+                                      const double& tol) {
   assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
 

@@ -28,7 +28,7 @@ void exposeCostFramePlacement() {
           ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2,
                                                                                 bp::with_custodian_and_ward<1, 3> >()])
       .def(bp::init<StateMultibody&, ActivationModelAbstract&, FramePlacement>(
-          bp::args(" self", " state", " activation", " Fref"),
+          bp::args(" self", " state", " activation", " Mref"),
           "Initialize the frame placement cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
