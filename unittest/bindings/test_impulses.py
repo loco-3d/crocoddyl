@@ -116,7 +116,7 @@ class Impulse3DMultipleTest(ImpulseModelMultipleAbstractTestCase):
         sorted({
             'lf_foot': crocoddyl.ImpulseModel3D(ROBOT_STATE, ROBOT_MODEL.getFrameId('lf_foot')),
             'rh_foot': crocoddyl.ImpulseModel3D(ROBOT_STATE, ROBOT_MODEL.getFrameId('rh_foot'))
-        }.items(), key=lambda t: t[0]))
+        }.items()))
 
 
 class Impulse6DTest(ImpulseModelAbstractTestCase):
@@ -137,7 +137,7 @@ class Impulse6DMultipleTest(ImpulseModelMultipleAbstractTestCase):
         sorted({
             'l_sole': crocoddyl.ImpulseModel6D(ROBOT_STATE, ROBOT_MODEL.getFrameId('l_sole')),
             'r_sole': crocoddyl.ImpulseModel6D(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'))
-        }.items(), key=lambda t: t[0]))
+        }.items()))
 
 
 if __name__ == '__main__':

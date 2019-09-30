@@ -127,7 +127,7 @@ class Contact3DMultipleTest(ContactModelMultipleAbstractTestCase):
                 ROBOT_STATE,
                 crocoddyl.FrameTranslation(ROBOT_MODEL.getFrameId('rh_foot'),
                                            pinocchio.SE3.Random().translation), gains)
-        }.items(), key=lambda t: t[0]))
+        }.items()))
 
 
 class Contact6DTest(ContactModelAbstractTestCase):
@@ -154,7 +154,7 @@ class Contact6DMultipleTest(ContactModelMultipleAbstractTestCase):
             'r_foot':
             crocoddyl.ContactModel6D(
                 ROBOT_STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId('r_sole'), pinocchio.SE3.Random()), gains)
-        }.items(), key=lambda t: t[0]))
+        }.items()))
 
 
 if __name__ == '__main__':
