@@ -35,3 +35,4 @@ from .solver import SolverAbstract
 from .state import StateAbstract, StateNumDiff, StatePinocchio, StateVector
 from .unicycle import ActionModelUnicycle, ActionModelUnicycleVar, StateUnicycle
 from .utils import a2m, absmax, absmin, m2a
+from .plots import *

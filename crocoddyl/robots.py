@@ -132,6 +132,8 @@ def loadKinton(modelPath='/opt/openrobots/share/example-robot-data'):
     robot = RobotWrapper.BuildFromURDF(modelPath + URDF_SUBPATH, [modelPath], pinocchio.JointModelFreeFlyer())
     robot.q0.flat[7:] = [0, 0, 0, 0, 0, 0]
     robot.model.referenceConfigurations["initial_pose"] = robot.q0
+    robot.q0.flat[7:] = [0, 0.2, 1.7, 2, 0, 0]
+    robot.model.referenceConfigurations["centered"] = robot.q0 
     return robot
 
 def loadKintonArm(modelPath='/opt/openrobots/share/example-robot-data'):
