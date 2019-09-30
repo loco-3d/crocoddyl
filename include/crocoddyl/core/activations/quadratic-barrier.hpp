@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_CORE_ACTIVATIONS_INEQUALITY_HPP_
-#define CROCODDYL_CORE_ACTIVATIONS_INEQUALITY_HPP_
+#ifndef CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_BARRIER_HPP_
+#define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_BARRIER_HPP_
 
 #include "crocoddyl/core/activation-base.hpp"
 
@@ -35,10 +35,10 @@ struct ActivationBounds {
   double beta;
 };
 
-class ActivationModelInequality : public ActivationModelAbstract {
+class ActivationModelQuadraticBarrier : public ActivationModelAbstract {
  public:
-  explicit ActivationModelInequality(const ActivationBounds& bounds);
-  ~ActivationModelInequality();
+  explicit ActivationModelQuadraticBarrier(const ActivationBounds& bounds);
+  ~ActivationModelQuadraticBarrier();
 
   void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r);
   void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r,
@@ -52,11 +52,11 @@ class ActivationModelInequality : public ActivationModelAbstract {
   ActivationBounds bounds_;
 };
 
-struct ActivationDataInequality : public ActivationDataAbstract {
+struct ActivationDataQuadraticBarrier : public ActivationDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Activation>
-  explicit ActivationDataInequality(Activation* const activation)
+  explicit ActivationDataQuadraticBarrier(Activation* const activation)
       : ActivationDataAbstract(activation), rlb_min_(activation->get_nr()), rub_max_(activation->get_nr()) {
     rlb_min_.fill(0);
     rub_max_.fill(0);
@@ -68,4 +68,4 @@ struct ActivationDataInequality : public ActivationDataAbstract {
 
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_CORE_ACTIVATIONS_INEQUALITY_HPP_
+#endif  // CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_BARRIER_HPP_

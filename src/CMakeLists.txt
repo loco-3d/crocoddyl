@@ -19,7 +19,7 @@ SET(${PROJECT_NAME}_SOURCES
   core/actions/diff-lqr.cpp
   core/activations/quadratic.cpp
   core/activations/weighted-quadratic.cpp
-  core/activations/inequality.cpp
+  core/activations/quadratic-barrier.cpp
   multibody/cost-base.cpp
   multibody/contact-base.cpp
   multibody/impulse-base.cpp

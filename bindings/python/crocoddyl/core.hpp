@@ -25,7 +25,7 @@
 #include "python/crocoddyl/core/actions/diff-lqr.hpp"
 #include "python/crocoddyl/core/activations/quadratic.hpp"
 #include "python/crocoddyl/core/activations/weighted-quadratic.hpp"
-#include "python/crocoddyl/core/activations/inequality.hpp"
+#include "python/crocoddyl/core/activations/quadratic-barrier.hpp"
 #include "python/crocoddyl/core/solvers/ddp.hpp"
 #include "python/crocoddyl/core/solvers/fddp.hpp"
 #include "python/crocoddyl/core/utils/callbacks.hpp"
@@ -50,7 +50,7 @@ void exposeCore() {
   exposeDifferentialActionLQR();
   exposeActivationQuad();
   exposeActivationWeightedQuad();
-  exposeActivationInequality();
+  exposeActivationQuadraticBarrier();
   exposeSolverDDP();
   exposeSolverFDDP();
   exposeCallbacks();

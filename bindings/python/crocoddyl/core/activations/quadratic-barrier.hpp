@@ -6,17 +6,17 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef BINDINGS_PYTHON_CROCODDYL_CORE_ACTIVATIONS_INEQUALITY_HPP_
-#define BINDINGS_PYTHON_CROCODDYL_CORE_ACTIVATIONS_INEQUALITY_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_BARRIER_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_BARRIER_HPP_
 
-#include "crocoddyl/core/activations/inequality.hpp"
+#include "crocoddyl/core/activations/quadratic-barrier.hpp"
 
 namespace crocoddyl {
 namespace python {
 
 namespace bp = boost::python;
 
-void exposeActivationInequality() {
+void exposeActivationQuadraticBarrier() {
   bp::class_<ActivationBounds>(
       "ActivationBounds",
       "Activation bounds.\n\n"
@@ -33,8 +33,8 @@ void exposeActivationInequality() {
                     "upper bounds")
       .add_property("beta", &ActivationBounds::beta, "beta");
 
-  bp::class_<ActivationModelInequality, bp::bases<ActivationModelAbstract> >(
-      "ActivationModelInequality",
+  bp::class_<ActivationModelQuadraticBarrier, bp::bases<ActivationModelAbstract> >(
+      "ActivationModelQuadraticBarrier",
       "Inequality activation model.\n\n"
       "The activation is zero when r is between the lower (lb) and upper (ub) bounds, beta\n"
       "determines how much of the total range is not activated (default 0.9). This is the\n"
@@ -46,30 +46,32 @@ void exposeActivationInequality() {
                                  ":param bounds: activation bounds\n"
                                  ":param ub: upper bounds\n"
                                  ":param beta: range of activation (between 0 to 1)"))
-      .def("calc", &ActivationModelInequality::calc_wrap, bp::args(" self", " data", " r"),
+      .def("calc", &ActivationModelQuadraticBarrier::calc_wrap, bp::args(" self", " data", " r"),
            "Compute the inequality activation.\n\n"
            ":param data: activation data\n"
            ":param r: residual vector")
-      .def<void (ActivationModelInequality::*)(const boost::shared_ptr<ActivationDataAbstract>&,
-                                               const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &ActivationModelInequality::calcDiff_wrap, bp::args(" self", " data", " r", " recalc=True"),
+      .def<void (ActivationModelQuadraticBarrier::*)(const boost::shared_ptr<ActivationDataAbstract>&,
+                                                     const Eigen::VectorXd&, const bool&)>(
+          "calcDiff", &ActivationModelQuadraticBarrier::calcDiff_wrap,
+          bp::args(" self", " data", " r", " recalc=True"),
           "Compute the derivatives of inequality activation.\n\n"
           ":param data: activation data\n"
           "Note that the Hessian is constant, so we don't write again this value.\n"
           ":param r: residual vector \n"
           ":param recalc: If true, it updates the residual value.")
-      .def<void (ActivationModelInequality::*)(const boost::shared_ptr<ActivationDataAbstract>&,
-                                               const Eigen::VectorXd&)>(
-          "calcDiff", &ActivationModelInequality::calcDiff_wrap, bp::args(" self", " data", " r"))
-      .def("createData", &ActivationModelInequality::createData, bp::args(" self"),
+      .def<void (ActivationModelQuadraticBarrier::*)(const boost::shared_ptr<ActivationDataAbstract>&,
+                                                     const Eigen::VectorXd&)>(
+          "calcDiff", &ActivationModelQuadraticBarrier::calcDiff_wrap, bp::args(" self", " data", " r"))
+      .def("createData", &ActivationModelQuadraticBarrier::createData, bp::args(" self"),
            "Create the weighted quadratic action data.")
-      .add_property(
-          "bounds",
-          bp::make_function(&ActivationModelInequality::get_bounds, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_function(&ActivationModelInequality::set_bounds), "bounds (beta, lower and upper bounds)");
+      .add_property("bounds",
+                    bp::make_function(&ActivationModelQuadraticBarrier::get_bounds,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&ActivationModelQuadraticBarrier::set_bounds),
+                    "bounds (beta, lower and upper bounds)");
 }
 
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_ACTIVATIONS_INEQUALITY_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_BARRIER_HPP_
