@@ -18,7 +18,7 @@
 #include "crocoddyl/core/actions/unicycle.hpp"
 #include "crocoddyl/core/actions/diff-lqr.hpp"
 #include "crocoddyl/core/numdiff/action.hpp"
-#include "crocoddyl_test/test_common.hpp"
+#include "crocoddyl_unittest_common.hpp"
 
 using namespace boost::unit_test;
 
@@ -43,18 +43,14 @@ class ActionModelFactory {
     driftfree_ = true;
     num_diff_modifier_ = 1e4;
     action_model_ = NULL;
-    action_model_unicycle_ = NULL;
-    diff_action_model_lqr_ = NULL;
-    action_model_lqr_ = NULL;
-    switch (type) {
+    action_type_ = type;
+    switch (action_type_) {
       case ActionModelTypes::ActionModelUnicycle:
-        action_model_unicycle_ = new crocoddyl::ActionModelUnicycle();
-        action_model_ = action_model_unicycle_;
+        action_model_ = new crocoddyl::ActionModelUnicycle();
         break;
 
       case ActionModelTypes::ActionModelLQR:
-        action_model_lqr_ = new crocoddyl::ActionModelLQR(nx_, nu_, driftfree_);
-        action_model_ = action_model_lqr_;
+        action_model_ = new crocoddyl::ActionModelLQR(nx_, nu_, driftfree_);
         break;
 
       default:
@@ -64,9 +60,19 @@ class ActionModelFactory {
   }
 
   ~ActionModelFactory() {
-    crocoddyl_unit_test::delete_pointer(action_model_unicycle_);
-    crocoddyl_unit_test::delete_pointer(diff_action_model_lqr_);
-    crocoddyl_unit_test::delete_pointer(action_model_lqr_);
+    switch (action_type_) {
+      case ActionModelTypes::ActionModelUnicycle:
+        crocoddyl_unit_test::delete_pointer((crocoddyl::ActionModelUnicycle*)action_model_);
+        break;
+
+      case ActionModelTypes::ActionModelLQR:
+        crocoddyl_unit_test::delete_pointer((crocoddyl::ActionModelLQR*)action_model_);
+        break;
+
+      default:
+        throw std::runtime_error("test_actions.cpp: This type of ActionModel requested has not been implemented yet.");
+        break;
+    }
     action_model_ = NULL;
   }
 
@@ -78,10 +84,7 @@ class ActionModelFactory {
   int nx_;
   int nu_;
   bool driftfree_;
-
-  crocoddyl::ActionModelUnicycle* action_model_unicycle_;
-  crocoddyl::DifferentialActionModelLQR* diff_action_model_lqr_;
-  crocoddyl::ActionModelLQR* action_model_lqr_;
+  ActionModelTypes::Type action_type_;
   crocoddyl::ActionModelAbstract* action_model_;
 };
 
