@@ -96,9 +96,20 @@ void exposeActionAbstract() {
       .add_property(
           "nr", bp::make_function(&ActionModelAbstract_wrap::get_nr, bp::return_value_policy<bp::return_by_value>()),
           "dimension of cost-residual vector")
-      .add_property("state",
-                    bp::make_function(&ActionModelAbstract_wrap::get_state, bp::return_internal_reference<>()),
-                    "state");
+      .add_property(
+          "state", bp::make_function(&ActionModelAbstract_wrap::get_state, bp::return_internal_reference<>()), "state")
+      .add_property("has_control_limits",
+                    bp::make_function(&ActionModelAbstract_wrap::get_has_control_limits,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "indicates whether problem has finite control limits")
+      .add_property("u_lower_limit",
+                    bp::make_function(&ActionModelAbstract_wrap::get_u_lower_limit,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    &ActionModelAbstract_wrap::set_u_lower_limit, "lower control limits")
+      .add_property("u_upper_limit",
+                    bp::make_function(&ActionModelAbstract_wrap::get_u_upper_limit,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    &ActionModelAbstract_wrap::set_u_upper_limit, "upper control limits");
 
   bp::register_ptr_to_python<boost::shared_ptr<ActionDataAbstract> >();
 
