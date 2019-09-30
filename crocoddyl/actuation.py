@@ -22,9 +22,10 @@ class ActuationModelUAM:
         self.cf = coefF
 
     def calc(self, data, x, u):
+        # data.a[2:] = u
         d, cf, cm = self.d, self.cf, self.cf
         S = np.array(np.zeros([self.nv,self.nu]))
-        S[2:6,:4] = np.array([[1,1,1,1],[-d,d,-d,d],[-d,-d,d,d],[-cm/cf,-cm/cf,cm/cf,cm/cf]])
+        S[2:6,:4] = np.array([[1,1,1,1],[-d,d,d,-d],[-d,d,-d,d],[-cm/cf,-cm/cf,cm/cf,cm/cf]])
         np.fill_diagonal(S[6:, 4:], 1)
         data.a = np.dot(S,u)
         return data.a
@@ -48,17 +49,14 @@ class ActuationDataUAM:
         self.Au = self.A[:, ndx:]
         self.Au[2:6,:4] = np.array([[1,1,1,1],[-d,d,d,-d],[-d,d,-d,d],[-cm/cf,-cm/cf,cm/cf,cm/cf]])
         np.fill_diagonal(self.Au[6:, 4:], 1)
-        # Actuation considering motor forces instead of thrust and moments
-        # This is the matrix that, given a force vector representing the four motors, outputs the thrust and moment
-        # [      0,      0,     0,     0]
-        # [      0,      0,     0,     0]
-        # [      1,      1,     1,     1]
-        # [     -d,      d,    -d,     d]
-        # [     -d,     -d,     d,     d]
-        # [ -cm/cf, -cm/cf, cm/cf, cm/cf]
-
-
-
+        #np.fill_diagonal(self.Au[2:, :], 1)
+# This is the matrix that, given a force vector representing the four motors, outputs the thrust and moment
+# [      0,      0,     0,     0]
+# [      0,      0,     0,     0]
+# [      1,      1,     1,     1]
+# [     -d,      d,    -d,     d]
+# [     -d,     -d,     d,     d]
+# [ -cm/cf, -cm/cf, cm/cf, cm/cf]
 
 
 class ActuationModelFreeFloating:
