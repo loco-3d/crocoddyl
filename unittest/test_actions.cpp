@@ -54,7 +54,7 @@ class ActionModelFactory {
         break;
 
       default:
-        throw std::runtime_error("test_actions.cpp: This type of ActionModel requested has not been implemented yet.");
+        throw std::runtime_error(__FILE__ ": The type of ActionModel requested has not been implemented yet.");
         break;
     }
   }
@@ -70,7 +70,7 @@ class ActionModelFactory {
         break;
 
       default:
-        throw std::runtime_error("test_actions.cpp: This type of ActionModel requested has not been implemented yet.");
+        throw std::runtime_error(__FILE__ ": The type of ActionModel requested has not been implemented yet.");
         break;
     }
     action_model_ = NULL;
@@ -87,6 +87,8 @@ class ActionModelFactory {
   ActionModelTypes::Type action_type_;
   crocoddyl::ActionModelAbstract* action_model_;
 };
+
+//----------------------------------------------------------------------------//
 
 void test_construct_data(ActionModelTypes::Type action_model_type) {
   // create the model
@@ -168,6 +170,8 @@ void test_partial_derivatives_against_numdiff(ActionModelTypes::Type action_mode
     BOOST_CHECK((data_num_diff->Luu).isMuchSmallerThan(1.0, tol));
   }
 }
+
+//----------------------------------------------------------------------------//
 
 void register_action_model_unit_tests(ActionModelTypes::Type action_model_type) {
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_construct_data, action_model_type)));
