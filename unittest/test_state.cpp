@@ -28,31 +28,30 @@
 
 using namespace boost::unit_test;
 
-struct StateTypes {
+struct TestTypes {
   enum Type {
     StateVector,
     StateMultibodyTalosArm,
     StateMultibodyHyQ,
     StateMultibodyTalos,
-    StateMultibodyRandomHumanoid
+    StateMultibodyRandomHumanoid,
+    NbTestTypes
   };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
-    v.push_back(StateVector);
-    v.push_back(StateMultibodyTalosArm);
-    v.push_back(StateMultibodyHyQ);
-    v.push_back(StateMultibodyTalos);
-    v.push_back(StateMultibodyRandomHumanoid);
+    for (int i = 0; i < NbTestTypes; ++i) {
+      v.push_back((Type)i);
+    }
     return v;
   }
   static const std::vector<Type> all;
 };
-const std::vector<StateTypes::Type> StateTypes::all(StateTypes::init_all());
+const std::vector<TestTypes::Type> TestTypes::all(TestTypes::init_all());
 
 class StateFactory {
  public:
-  StateFactory(StateTypes::Type type) {
+  StateFactory(TestTypes::Type type) {
     // default initialization
     nx_ = 0;
     num_diff_modifier_ = 1e4;
@@ -62,44 +61,39 @@ class StateFactory {
     state_type_ = type;
 
     switch (state_type_) {
-      case StateTypes::StateVector:
+      case TestTypes::StateVector:
         nx_ = 80;
         state_ = new crocoddyl::StateVector(nx_);
         break;
-
-      case StateTypes::StateMultibodyTalosArm:
+      case TestTypes::StateMultibodyTalosArm:
         construct_state_multibody(TALOS_ARM_URDF, false);
         break;
-
-      case StateTypes::StateMultibodyHyQ:
+      case TestTypes::StateMultibodyHyQ:
         construct_state_multibody(HYQ_URDF);
         break;
-
-      case StateTypes::StateMultibodyTalos:
+      case TestTypes::StateMultibodyTalos:
         construct_state_multibody(TALOS_URDF);
         break;
-
-      case StateTypes::StateMultibodyRandomHumanoid:
+      case TestTypes::StateMultibodyRandomHumanoid:
         construct_state_multibody();
         break;
-
       default:
-        throw std::runtime_error(__FILE__ ": The type of State requested has not been implemented yet.");
+        throw std::runtime_error(__FILE__ ": Wrong TestTypes::Type given");
         break;
     }
   }
 
   ~StateFactory() {
-    if (state_type_ == StateTypes::StateVector) {
+    if (state_type_ == TestTypes::StateVector) {
       crocoddyl_unit_test::delete_pointer((crocoddyl::StateVector*)state_);
-    } else if (state_type_ == StateTypes::StateMultibodyTalosArm || state_type_ == StateTypes::StateMultibodyHyQ ||
-               state_type_ == StateTypes::StateMultibodyTalos ||
-               state_type_ == StateTypes::StateMultibodyRandomHumanoid) {
+    } else if (state_type_ == TestTypes::StateMultibodyTalosArm || state_type_ == TestTypes::StateMultibodyHyQ ||
+               state_type_ == TestTypes::StateMultibodyTalos ||
+               state_type_ == TestTypes::StateMultibodyRandomHumanoid) {
       crocoddyl_unit_test::delete_pointer((crocoddyl::StateMultibody*)state_);
       crocoddyl_unit_test::delete_pointer(free_flyer_joint_);
       crocoddyl_unit_test::delete_pointer(pinocchio_model_);
     } else {
-      throw std::runtime_error(__FILE__ ": The type of State requested has not been implemented yet.");
+      throw std::runtime_error(__FILE__ ": Wrong TestTypes::Type given");
     }
 
     state_ = NULL;
@@ -131,7 +125,7 @@ class StateFactory {
   int nx_;                    //!< The size of the StateVector to test.
 
  private:
-  StateTypes::Type state_type_;      //!< The current type to test
+  TestTypes::Type state_type_;       //!< The current type to test
   crocoddyl::StateAbstract* state_;  //!< The pointer to the state in testing
 
   pinocchio::JointModelFreeFlyer* free_flyer_joint_;  //!< The free flyer joint to build the pinocchio model.
@@ -140,15 +134,17 @@ class StateFactory {
 
 //----------------------------------------------------------------------------//
 
-void test_state_dimension(StateTypes::Type state_type) {
+void test_state_dimension(TestTypes::Type state_type) {
   StateFactory factory(state_type);
   crocoddyl::StateAbstract* state = factory.get_state();
   // Checking the dimension of zero and random states
   BOOST_CHECK(state->zero().size() == factory.nx_);
   BOOST_CHECK(state->rand().size() == factory.nx_);
+  BOOST_CHECK(state->get_nx() == (state->get_nq() + state->get_nv()));
+  BOOST_CHECK(state->get_ndx() == (2 * state->get_nv()));
 }
 
-void test_integrate_against_difference(StateTypes::Type state_type) {
+void test_integrate_against_difference(TestTypes::Type state_type) {
   StateFactory factory(state_type);
   crocoddyl::StateAbstract* state = factory.get_state();
   // Generating random states
@@ -168,7 +164,7 @@ void test_integrate_against_difference(StateTypes::Type state_type) {
   BOOST_CHECK(dxi.isMuchSmallerThan(1.0, 1e-9));
 }
 
-void test_difference_against_integrate(StateTypes::Type state_type) {
+void test_difference_against_integrate(TestTypes::Type state_type) {
   StateFactory factory(state_type);
   crocoddyl::StateAbstract* state = factory.get_state();
   // Generating random states
@@ -185,7 +181,7 @@ void test_difference_against_integrate(StateTypes::Type state_type) {
   BOOST_CHECK((dxd - dx).isMuchSmallerThan(1.0, 1e-9));
 }
 
-void test_Jdiff_firstsecond(StateTypes::Type state_type) {
+void test_Jdiff_firstsecond(TestTypes::Type state_type) {
   StateFactory factory(state_type);
   crocoddyl::StateAbstract* state = factory.get_state();
   // Generating random values for the initial and terminal states
@@ -208,7 +204,7 @@ void test_Jdiff_firstsecond(StateTypes::Type state_type) {
   BOOST_CHECK((Jdiff_second - Jdiff_both_second).isMuchSmallerThan(1.0, 1e-9));
 }
 
-void test_Jint_firstsecond(StateTypes::Type state_type) {
+void test_Jint_firstsecond(TestTypes::Type state_type) {
   StateFactory factory(state_type);
   crocoddyl::StateAbstract* state = factory.get_state();
   // Generating random values for the initial and terminal states
@@ -231,7 +227,7 @@ void test_Jint_firstsecond(StateTypes::Type state_type) {
   BOOST_CHECK((Jint_second - Jint_both_second).isMuchSmallerThan(1.0, 1e-9));
 }
 
-void test_Jdiff_num_diff_firstsecond(StateTypes::Type state_type) {
+void test_Jdiff_num_diff_firstsecond(TestTypes::Type state_type) {
   StateFactory factory(state_type);
   crocoddyl::StateAbstract* state = factory.get_state();
   // Generating random values for the initial and terminal states
@@ -257,7 +253,7 @@ void test_Jdiff_num_diff_firstsecond(StateTypes::Type state_type) {
   BOOST_CHECK((Jdiff_num_diff_second - Jdiff_num_diff_both_second).isMuchSmallerThan(1.0, 1e-9));
 }
 
-void test_Jint_num_diff_firstsecond(StateTypes::Type state_type) {
+void test_Jint_num_diff_firstsecond(TestTypes::Type state_type) {
   StateFactory factory(state_type);
   crocoddyl::StateAbstract* state = factory.get_state();
   // Generating random values for the initial and terminal states
@@ -283,7 +279,7 @@ void test_Jint_num_diff_firstsecond(StateTypes::Type state_type) {
   BOOST_CHECK((Jint_num_diff_second - Jint_num_diff_both_second).isMuchSmallerThan(1.0, 1e-9));
 }
 
-void test_Jdiff_against_numdiff(StateTypes::Type state_type) {
+void test_Jdiff_against_numdiff(TestTypes::Type state_type) {
   StateFactory factory(state_type);
   crocoddyl::StateAbstract* state = factory.get_state();
   // Generating random values for the initial and terminal states
@@ -309,7 +305,7 @@ void test_Jdiff_against_numdiff(StateTypes::Type state_type) {
   BOOST_CHECK((Jdiff_2 - Jdiff_num_2).isMuchSmallerThan(1.0, tol));
 }
 
-void test_Jintegrate_against_numdiff(StateTypes::Type state_type) {
+void test_Jintegrate_against_numdiff(TestTypes::Type state_type) {
   StateFactory factory(state_type);
   crocoddyl::StateAbstract* state = factory.get_state();
   // Generating random values for the initial state and its rate of change
@@ -334,7 +330,7 @@ void test_Jintegrate_against_numdiff(StateTypes::Type state_type) {
   BOOST_CHECK((Jint_2 - Jint_num_2).isMuchSmallerThan(1.0, tol));
 }
 
-void test_Jdiff_and_Jintegrate_are_inverses(StateTypes::Type state_type) {
+void test_Jdiff_and_Jintegrate_are_inverses(TestTypes::Type state_type) {
   StateFactory factory(state_type);
   crocoddyl::StateAbstract* state = factory.get_state();
   // Generating random states
@@ -357,7 +353,7 @@ void test_Jdiff_and_Jintegrate_are_inverses(StateTypes::Type state_type) {
   BOOST_CHECK((dX_dDX - dDX_dX.inverse()).isMuchSmallerThan(1.0, 1e-9));
 }
 
-void test_velocity_from_Jintegrate_Jdiff(StateTypes::Type state_type) {
+void test_velocity_from_Jintegrate_Jdiff(TestTypes::Type state_type) {
   StateFactory factory(state_type);
   crocoddyl::StateAbstract* state = factory.get_state();
   // Generating random states
@@ -400,7 +396,7 @@ void test_velocity_from_Jintegrate_Jdiff(StateTypes::Type state_type) {
 
 //----------------------------------------------------------------------------//
 
-void register_state_unit_tests(StateTypes::Type state_type) {
+void register_state_unit_tests(TestTypes::Type state_type) {
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_state_dimension, state_type)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_integrate_against_difference, state_type)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_difference_against_integrate, state_type)));
@@ -416,8 +412,8 @@ void register_state_unit_tests(StateTypes::Type state_type) {
 }
 
 bool init_function() {
-  for (size_t i = 0; i < StateTypes::all.size(); ++i) {
-    register_state_unit_tests(StateTypes::all[i]);
+  for (size_t i = 0; i < TestTypes::all.size(); ++i) {
+    register_state_unit_tests(TestTypes::all[i]);
   }
   return true;
 }
