@@ -183,6 +183,9 @@ void SolverBoxDDP::backwardPass() {
 
 void SolverBoxDDP::computeGains(const unsigned int& t) {
   if (problem_.running_models_[t]->get_nu() > 0) {
+      if (!problem_.running_models_[t]->get_has_control_limits()) {
+          std::cerr << "NOT LIMITED!!" << std::endl;
+      }
     Eigen::VectorXd low_limit = problem_.running_models_[t]->get_u_lower_limit() - us_[t],
                     high_limit = problem_.running_models_[t]->get_u_upper_limit() - us_[t];
 
