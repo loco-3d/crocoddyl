@@ -101,7 +101,7 @@ INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIRS})
 
 
 # Include and add the main directory
-ADD_SUBDIRECTORY(${PROJECT_NAME})
+ADD_SUBDIRECTORY(unittest/python/${PROJECT_NAME})
 ADD_SUBDIRECTORY(src)
 
 # Build the Python interface
