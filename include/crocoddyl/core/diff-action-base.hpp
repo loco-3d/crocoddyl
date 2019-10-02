@@ -17,6 +17,25 @@ namespace crocoddyl {
 
 struct DifferentialActionDataAbstract;  // forward declaration
 
+/**
+ * @brief This class DifferentialActionModelAbstract represents a first-order
+ * ODE, i.e.
+ * \f[
+ * \mathbf{\dot{v}} = \mathbf{f}(\mathbf{q}, \mathbf{v}, \boldsymbol{\tau})
+ * \f]
+ * where \f$ xout = \mathbf{\dot{v}} \f$ and represents the  acceleration of the
+ * system. Note that Jacobians Fx and Fu in the
+ * DifferentialActionDataAbstract are in \f$ \mathbb{R}^{nv\times ndx} \f$ and
+ * \f$ \mathbb{R}^{nv\times nu} \f$, respectively.
+ *
+ * Then we use the acceleration to integrate the system, and as consequence we
+ * obtain:
+ * \f[
+ * \mathbf{\dot{x}} = (\mathbf{v}, \mathbf{\dot{v}}) = \mathbf{f}(\mathbf{x},\mathbf{u})
+ * \f]
+ * where this \f$ f \f$ function is different to the other one.
+ * So \f$ xout \f$ is interpreted here as \f$ vdout \f$ or \f$ aout \f$.
+ */
 class DifferentialActionModelAbstract {
  public:
   DifferentialActionModelAbstract(StateAbstract& state, unsigned int const& nu, unsigned int const& nr = 0);

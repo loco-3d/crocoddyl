@@ -83,7 +83,7 @@ void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us, std::vecto
     const Eigen::VectorXd& u = us[i];
 
     model->calc(data, x, u);
-    xs[i + 1] = data->get_xnext();
+    xs[i + 1] = data->xnext;
   }
   terminal_model_->calc(terminal_data_, xs.back());
 }

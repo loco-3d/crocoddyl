@@ -161,7 +161,7 @@ double SolverFDDP::calc() {
     for (unsigned int t = 0; t < T; ++t) {
       ActionModelAbstract* model = problem_.running_models_[t];
       boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
-      model->get_state().diff(xs_[t + 1], d->get_xnext(), gaps_[t + 1]);
+      model->get_state().diff(xs_[t + 1], d->xnext, gaps_[t + 1]);
     }
   } else if (!was_feasible_) {
     for (std::vector<Eigen::VectorXd>::iterator it = gaps_.begin(); it != gaps_.end(); ++it) {
@@ -188,7 +188,7 @@ void SolverFDDP::forwardPass(const double& steplength) {
     m->get_state().diff(xs_[t], xs_try_[t], dx_[t]);
     us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
     m->calc(d, xs_try_[t], us_try_[t]);
-    xnext_ = d->get_xnext();
+    xnext_ = d->xnext;
     cost_try_ += d->cost;
 
     if (raiseIfNaN(cost_try_)) {
