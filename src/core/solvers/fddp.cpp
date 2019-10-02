@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2019, LAAS-CNRS, The University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -99,18 +99,6 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
     }
   }
   return false;
-}
-
-void SolverFDDP::computeDirection(const bool& recalc) {
-  if (recalc) {
-    calc();
-  }
-  backwardPass();
-}
-
-double SolverFDDP::tryStep(const double& steplength) {
-  forwardPass(steplength);
-  return cost_ - cost_try_;
 }
 
 const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
