@@ -24,13 +24,13 @@ class SolverFDDP : public SolverDDP {
 
   bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
              const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, unsigned int const& maxiter = 100,
-             const bool& is_feasible = false, const double& regInit = 1e-9);
-  void computeDirection(const bool& recalc = true);
-  double tryStep(const double& steplength = 1);
-  const Eigen::Vector2d& expectedImprovement();
+             const bool& is_feasible = false, const double& regInit = 1e-9) override;
+  void computeDirection(const bool& recalc = true) override;
+  double tryStep(const double& steplength = 1) override;
+  const Eigen::Vector2d& expectedImprovement() override;
   void updateExpectedImprovement();
-  double calc();
-  void forwardPass(const double& stepLength);
+  double calc() override;
+  void forwardPass(const double& stepLength) override;
 
   double get_th_acceptnegstep() const;
   void set_th_acceptnegstep(double th_acceptnegstep);

@@ -24,19 +24,19 @@ class SolverDDP : public SolverAbstract {
 
   bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
              const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, unsigned int const& maxiter = 100,
-             const bool& is_feasible = false, const double& regInit = 1e-9);
-  void computeDirection(const bool& recalc = true);
-  double tryStep(const double& steplength = 1);
-  double stoppingCriteria();
-  const Eigen::Vector2d& expectedImprovement();
-  double calc();
-  void backwardPass();
-  void forwardPass(const double& stepLength);
+             const bool& is_feasible = false, const double& regInit = 1e-9) override;
+  void computeDirection(const bool& recalc = true) override;
+  double tryStep(const double& steplength = 1) override;
+  double stoppingCriteria() override;
+  const Eigen::Vector2d& expectedImprovement() override;
+  virtual double calc();
+  virtual void backwardPass();
+  virtual void forwardPass(const double& stepLength);
 
-  void computeGains(unsigned int const& t);
+  virtual void computeGains(unsigned int const& t);
   void increaseRegularization();
   void decreaseRegularization();
-  void allocateData();
+  virtual void allocateData();
 
   const double& get_regfactor() const;
   const double& get_regmin() const;
