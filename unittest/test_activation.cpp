@@ -1,24 +1,24 @@
-/**
- * @file test_activation.cpp
- * @author Maximilien Naveau (maximilien.naveau@gmail.com)
- * @license License BSD-2-Clause
- * @copyright Copyright (c) 2019, New York University, Max Planck Gesellshaft and LAAS.
- * @date 2019-06-18
- */
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2019, LAAS-CNRS, New York University, Max Planck Gesellshaft
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
 
-#include <boost/test/unit_test.hpp>
-// #include "crocoddyl/core/"
-
-BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
-
-BOOST_AUTO_TEST_CASE(test_activation) {}
-
-BOOST_AUTO_TEST_SUITE_END()
-
-// import numpy as np
-// from crocoddyl import ActivationModelQuad, ActivationModelSmoothAbs, ActivationModelWeightedQuad
-// from crocoddyl.utils import EPS
-// from testutils import assertNumDiff
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_ALTERNATIVE_INIT_API
+#include <iterator>
+#include <Eigen/Dense>
+#include <pinocchio/fwd.hpp>
+#include <boost/test/included/unit_test.hpp>
+#include <boost/bind.hpp>
+#include "crocoddyl/core/activation-base.hpp"
+#include "crocoddyl/core/activations/quadratic-barrier.hpp"
+#include "crocoddyl/core/activations/quadratic.hpp"
+#include "crocoddyl/core/activations/smooth-abs.hpp"
+#include "crocoddyl/core/activations/weighted-quadratic.hpp"
+#include "crocoddyl_unittest_common.hpp"
 
 // # Comment:
 // '''
@@ -36,6 +36,74 @@ BOOST_AUTO_TEST_SUITE_END()
 // sum(ri' a''(ri) ri') = R' r
 // c'' = R'R
 // '''
+
+using namespace boost::unit_test;
+
+struct ActionModelTypes {
+  enum Type { ActionModelUnicycle, ActionModelLQR };
+  static std::vector<Type> init_all() {
+    std::vector<Type> v;
+    v.clear();
+    v.push_back(ActionModelUnicycle);
+    v.push_back(ActionModelLQR);
+    return v;
+  }
+  static const std::vector<Type> all;
+};
+const std::vector<ActionModelTypes::Type> ActionModelTypes::all(ActionModelTypes::init_all());
+
+class ActionModelFactory {
+ public:
+  ActionModelFactory(ActionModelTypes::Type type) {
+    nx_ = 80;
+    nu_ = 40;
+    driftfree_ = true;
+    num_diff_modifier_ = 1e4;
+    action_model_ = NULL;
+    action_type_ = type;
+    switch (action_type_) {
+      case ActionModelTypes::ActionModelUnicycle:
+        action_model_ = new crocoddyl::ActionModelUnicycle();
+        break;
+
+      case ActionModelTypes::ActionModelLQR:
+        action_model_ = new crocoddyl::ActionModelLQR(nx_, nu_, driftfree_);
+        break;
+
+      default:
+        throw std::runtime_error("test_actions.cpp: This type of ActionModel requested has not been implemented yet.");
+        break;
+    }
+  }
+
+  ~ActionModelFactory() {
+    switch (action_type_) {
+      case ActionModelTypes::ActionModelUnicycle:
+        crocoddyl_unit_test::delete_pointer((crocoddyl::ActionModelUnicycle*)action_model_);
+        break;
+
+      case ActionModelTypes::ActionModelLQR:
+        crocoddyl_unit_test::delete_pointer((crocoddyl::ActionModelLQR*)action_model_);
+        break;
+
+      default:
+        throw std::runtime_error("test_actions.cpp: This type of ActionModel requested has not been implemented yet.");
+        break;
+    }
+    action_model_ = NULL;
+  }
+
+  crocoddyl::ActionModelAbstract* get_action_model() { return action_model_; }
+
+  double num_diff_modifier_;
+
+ private:
+  int nx_;
+  int nu_;
+  bool driftfree_;
+  ActionModelTypes::Type action_type_;
+  crocoddyl::ActionModelAbstract* action_model_;
+};
 
 // # - ------------------------------
 // # --- Dim 1 ----------------------
