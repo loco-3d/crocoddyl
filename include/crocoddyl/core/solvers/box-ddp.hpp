@@ -16,7 +16,7 @@
 
 namespace crocoddyl {
 
-class SolverBoxDDP : public SolverFDDP {
+class SolverBoxDDP : public SolverDDP {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 

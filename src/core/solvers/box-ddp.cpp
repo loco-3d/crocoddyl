@@ -11,7 +11,7 @@
 
 namespace crocoddyl {
 
-SolverBoxDDP::SolverBoxDDP(ShootingProblem& problem) : SolverFDDP(problem) {
+SolverBoxDDP::SolverBoxDDP(ShootingProblem& problem) : SolverDDP(problem) {
   allocateData();
 
   const unsigned int& n_alphas = 10;
@@ -24,7 +24,7 @@ SolverBoxDDP::SolverBoxDDP(ShootingProblem& problem) : SolverFDDP(problem) {
 SolverBoxDDP::~SolverBoxDDP() {}
 
 void SolverBoxDDP::allocateData() {
-  SolverFDDP::allocateData();
+  SolverDDP::allocateData();
   
   const unsigned int& T = problem_.get_T();
   Quu_inv_.resize(T);
@@ -40,7 +40,7 @@ void SolverBoxDDP::computeGains(const unsigned int& t) {
   if (problem_.running_models_[t]->get_nu() > 0) {
     if (!problem_.running_models_[t]->get_has_control_limits()) {
       std::cerr << "NOT LIMITED!!" << problem_.running_models_[t]->get_u_lower_limit() << std::endl;
-      SolverFDDP::computeGains(t);
+      SolverDDP::computeGains(t);
       return;
     }
     Eigen::VectorXd low_limit = problem_.running_models_[t]->get_u_lower_limit() - us_[t],
