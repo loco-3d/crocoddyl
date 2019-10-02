@@ -3,7 +3,8 @@ from .action import (ActionDataAbstract, ActionDataLQR, ActionDataNumDiff, Actio
 from .activation import (ActivationDataInequality, ActivationDataQuad, ActivationDataSmoothAbs,
                          ActivationDataWeightedQuad, ActivationModelInequality, ActivationModelQuad,
                          ActivationModelSmoothAbs, ActivationModelWeightedQuad)
-from .actuation import ActuationDataFreeFloating, ActuationDataFull, ActuationModelFreeFloating, ActuationModelFull, ActuationModelUAM
+from .actuation import (ActuationDataFreeFloating, ActuationDataFull, ActuationDataUAM, ActuationDataDoublePendulum,
+                        ActuationModelFreeFloating, ActuationModelFull, ActuationModelUAM, ActuationModelDoublePendulum)
 from .box_ddp import SolverBoxDDP
 from .box_kkt import SolverBoxKKT
 from .callbacks import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay, CallbackSolverTimer
@@ -14,7 +15,7 @@ from .cost import (CostDataCoM, CostDataControl, CostDataForce, CostDataFramePla
                    CostDataState, CostDataSum, CostModelCoM, CostModelControl, CostModelForce,
                    CostModelForceLinearCone, CostModelFramePlacement, CostModelFrameRotation,
                    CostModelFrameTranslation, CostModelFrameVelocity, CostModelFrameVelocityLinear, CostModelNumDiff,
-                   CostModelPinocchio, CostModelState, CostModelSum)
+                   CostModelPinocchio, CostModelState, CostModelSum, CostModelDoublePendulum, CostDataDoublePendulum)
 from .ddp import SolverDDP
 from .diagnostic import displayTrajectory, plotDDPConvergence, plotOCSolution
 from .differential_action import (DifferentialActionDataAbstract, DifferentialActionDataFullyActuated,

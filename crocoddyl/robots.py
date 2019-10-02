@@ -145,6 +145,6 @@ def loadKintonArm(modelPath='/opt/openrobots/share/example-robot-data'):
 def loadBorinotArm(modelPath='/opt/openrobots/share/example-robot-data'):
     URDF_FILENAME = "borinot_arm.urdf"
     URDF_SUBPATH = "/borinot_arm/urdf/" + URDF_FILENAME
-    robot = RobotWrapper.BuildFromURDF(modelPath + URDF_SUBPATH, [modelPath])
-    robot.q0.flat = [np.pi,0]
+    robot = RobotWrapper.BuildFromURDF(modelPath + URDF_SUBPATH, [modelPath], None)
+    robot.q0.flat = [np.pi]
     return robot

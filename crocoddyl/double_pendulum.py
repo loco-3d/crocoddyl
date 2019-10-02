@@ -5,11 +5,10 @@ from .differential_action import DifferentialActionDataAbstract, DifferentialAct
 from .state import StatePinocchio
 from .utils import a2m, m2a
 
-
-class DifferentialActionModelUAM(DifferentialActionModelAbstract):
+class DifferentialActionModelDoublePendulum(DifferentialActionModelAbstract):
     def __init__(self, pinocchioModel, actuationModel, costModel):
         DifferentialActionModelAbstract.__init__(self, pinocchioModel.nq, pinocchioModel.nv, actuationModel.nu)
-        self.DifferentialActionDataType = DifferentialActionDataUAM
+        self.DifferentialActionDataType = DifferentialActionDataDoublePendulum
         self.pinocchio = pinocchioModel
         self.State = StatePinocchio(self.pinocchio)
         self.actuation = actuationModel
@@ -25,8 +24,7 @@ class DifferentialActionModelUAM(DifferentialActionModelAbstract):
         nq, nv = self.nq, self.nv
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
-
-        data.tauq[:] = self.actuation.calc(data.actuation, x, u)
+        tauq[:] = self.actuation.calc(data.actuation, x, u)
 
         pinocchio.computeAllTerms(self.pinocchio, data.pinocchio, q, v)
         data.M = data.pinocchio.M
@@ -48,39 +46,28 @@ class DifferentialActionModelUAM(DifferentialActionModelAbstract):
         nq, nv = self.nq, self.nv
         q = a2m(x[:nq])
         v = a2m(x[-nv:])
+        tauq = a2m(u)
         a = a2m(data.xout)
-
-        dtau_dx = data.actuation.Ax
-        dtau_du = data.actuation.Au
-
-        pinocchio.computeRNEADerivatives(self.pinocchio, data.pinocchio, q, v, a)
-        data.Fx[:, :nv] = -np.dot(data.Minv, data.pinocchio.dtau_dq)
-        data.Fx[:, nv:] = -np.dot(data.Minv, data.pinocchio.dtau_dv)
-        data.Fx += np.dot(data.Minv, dtau_dx)
-        data.Fu[:, :] = np.dot(data.Minv, dtau_du)
-        # Cost
+        # --- Dynamics
+        if self.forceAba:
+            pinocchio.computeABADerivatives(self.pinocchio, data.pinocchio, q, v, tauq)
+            data.Fx[:, :nv] = data.pinocchio.ddq_dq
+            data.Fx[:, nv:] = data.pinocchio.ddq_dv
+            data.Fu[:, :] = data.pinocchio.Minv
+        else:
+            pinocchio.computeRNEADerivatives(self.pinocchio, data.pinocchio, q, v, a)
+            data.Fx[:, :nv] = -np.dot(data.Minv, data.pinocchio.dtau_dq)
+            data.Fx[:, nv:] = -np.dot(data.Minv, data.pinocchio.dtau_dv)
+            data.Fu[:, :] = data.Minv
+        # --- Cost
         pinocchio.computeJointJacobians(self.pinocchio, data.pinocchio, q)
         pinocchio.updateFramePlacements(self.pinocchio, data.pinocchio)
         self.costs.calcDiff(data.costs, x, u, recalc=False)
         return data.xout, data.cost
 
-    def quasiStatic(self, data, x):
-        nu, nq, nv = self.nu, self.nq, self.nv
-        if len(x) == nq:
-            x = np.concatenate([x, np.zeros(nv)])
-        else:
-            x[nq:] = 0
-        self.calcDiff(data, x, np.zeros(nu))
-        return np.dot(np.linalg.pinv(data.actuation.Au), -data.r)[:nu]
 
-class DifferentialActionDataUAM(DifferentialActionDataAbstract):
+class DifferentialActionDataDoublePendulum(DifferentialActionDataAbstract):
     def __init__(self, model):
         self.pinocchio = model.pinocchio.createData()
-        self.actuation = model.actuation.createData(self.pinocchio)
         costData = model.costs.createData(self.pinocchio)
         DifferentialActionDataAbstract.__init__(self, model, costData)
-
-        nv = model.nv
-        self.tauq = np.zeros(nv)
-        self.xout = np.zeros(nv)
-        self.r    = np.zeros(nv)

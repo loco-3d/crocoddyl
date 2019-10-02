@@ -2,6 +2,41 @@ import warnings
 
 import numpy as np
 
+class ActuationModelDoublePendulum:
+    def __init__(self, pinocchioModel):
+        self.pinocchio = pinocchioModel
+        self.nq = pinocchioModel.nq
+        self.nv = pinocchioModel.nv
+        self.nx = self.nq + self.nv
+        self.ndx = self.nv * 2
+        self.nu = 1
+
+    def calc(self, data, x, u):
+        S = np.zeros([self.nv,self.nu])
+        #S[1] = 1
+        S[0] = 1
+        data.a = np.dot(S,u)
+        return data.a
+
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        return data.a
+
+    def createData(self, pinocchioData):
+        return ActuationDataDoublePendulum(self, pinocchioData)
+
+class ActuationDataDoublePendulum:
+    def __init__(self, model, pinocchioData):
+        self.pinocchio = pinocchioData
+        ndx, nv, nu = model.ndx, model.nv, model.nu
+        self.a = np.zeros(nv)  # result of calc
+        self.A = np.zeros([nv, ndx + nu])  # result of calcDiff
+        self.Ax = self.A[:, :ndx]
+        self.Au = self.A[:, ndx:]
+        # self.Au[1,0] = 1
+        self.Au[0,0] = 1
+
 class ActuationModelUAM:
     '''
     This model transforms an actuation u into a joint torque tau.

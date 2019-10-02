@@ -560,7 +560,11 @@ class CostModelControl(CostModelPinocchio):
         # data.Ru[:,:] = np.eye(nu)
         Ax, Axx = self.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
         data.Lu[:] = Ax
-        data.Luu[:, :] = np.diag(m2a(Axx))
+        if type(Axx) is np.ndarray:
+            data.Luu[:, :] = np.diag(Axx)
+        else:
+            data.Luu[:, :] = np.diag(m2a(Axx))
+        #data.Luu[:, :] = np.diag(m2a(Axx))
 
 
 class CostDataControl(CostDataPinocchio):
@@ -676,3 +680,54 @@ class CostDataForceCone(CostDataPinocchio):
         CostDataPinocchio.__init__(self, model, pinocchioData)
         self.contact = contactData
         self.activation = model.activation.createData()
+
+class CostModelDoublePendulum(CostModelPinocchio):
+    def __init__(self, pinocchioModel, frame, ref, nu=None, activation=None):
+        self.CostDataType = CostDataDoublePendulum
+        CostModelPinocchio.__init__(self, pinocchioModel, ncost=6, nu=nu)
+        self.ref = ref
+        self.frame = frame
+        self.activation = activation if activation is not None else ActivationModelQuad()
+
+    def calc(self, data, x, u):
+        c1 = np.cos(x[0])
+        c2 = np.cos(x[1])
+        s1 = np.sin(x[0])
+        s2 = np.sin(x[1])
+        data.residuals = np.array([s1, s2, 1-c1, 1-c2, x[2], x[3]])
+        data.cost = sum(self.activation.calc(data.activation, data.residuals))
+        return data.cost
+
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        c1 = np.cos(x[0])
+        c2 = np.cos(x[1])
+        s1 = np.sin(x[0])
+        s2 = np.sin(x[1])
+        nq = self.nq
+        Ax, Axx = self.activation.calcDiff(data.activation, data.residuals, recalc=recalc)
+        J = np.zeros([6, 4])
+        J[:2,:2] = np.diag([c1, c2])
+        J[2:4,:2] = np.diag([s1, s2])
+        J[4:6,2:4] = np.diag([1,1])
+        data.Lx[:] = np.dot(np.transpose(J), Ax)
+        H = np.zeros([6, 4])
+        H[:2,:2] = np.diag([c1**2-s1**2, c2**2-s2**2])
+        H[2:4,:2] = np.diag([s1**2+(1-c1)*c1, s2**2+(1-c2)*c2])
+        J[4:6,2:4] = np.diag([1,1])
+        data.Lxx[:, :] = np.dot(np.transpose(H), Axx)
+        return data.cost
+
+
+class CostDataDoublePendulum(CostDataPinocchio):
+    def __init__(self, model, pinocchioData):
+        CostDataPinocchio.__init__(self, model, pinocchioData)
+        self.activation = model.activation.createData()
+        self.Lu = 0
+        self.Lv = 0
+        self.Lxu = 0
+        self.Luu = 0
+        self.Lvv = 0
+        self.Ru = 0
+        self.Rv = 0
