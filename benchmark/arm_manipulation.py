@@ -1,18 +1,18 @@
 import crocoddyl
 import pinocchio
-# import utils
 import example_robot_data
 import numpy as np
+import sys
 import time
 
 # First, let's load the Pinocchio model for the Talos arm.
 ROBOT = example_robot_data.loadTalosArm()
 N = 100  # number of nodes
-T = int(5e3)  # number of trials
+T = int(sys.argv[1]) if (len(sys.argv) > 1) else int(5e3)  # number of trials
 MAXITER = 1
 
 
-def runBenchmark(model):
+def createProblem(model):
     robot_model = ROBOT.model
     q0 = np.matrix([0.173046, 1., -0.52366, 0., 0., 0.1, -0.005]).T
     x0 = np.vstack([q0, np.zeros((robot_model.nv, 1))])
@@ -50,14 +50,18 @@ def runBenchmark(model):
     # For this optimal control problem, we define 100 knots (or running action
     # models) plus a terminal knot
     problem = crocoddyl.ShootingProblem(x0, [runningModel] * N, terminalModel)
+    xs = [x0] * (len(problem.runningModels) + 1)
+    us = [m.quasiStatic(d, x0) for m, d in list(zip(problem.runningModels, problem.runningDatas))]
+    return xs, us, problem
 
-    # Creating the DDP solver for this OC problem, defining a logger
+
+def runDDPSolveBenchmark(xs, us, problem):
     ddp = crocoddyl.SolverDDP(problem)
 
     duration = []
     for i in range(T):
         c_start = time.time()
-        ddp.solve([], [], MAXITER)
+        ddp.solve(xs, us, MAXITER, False, 0.1)
         c_end = time.time()
         duration.append(1e3 * (c_end - c_start))
 
@@ -67,9 +71,44 @@ def runBenchmark(model):
     return avrg_duration, min_duration, max_duration
 
 
-print('cpp-wrapped free-forward dynamics:')
-avrg_duration, min_duration, max_duration = runBenchmark(crocoddyl.DifferentialActionModelFreeFwdDynamics)
-print('  CPU time [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
+def runShootingProblemCalcBenchmark(xs, us, problem):
+    duration = []
+    for i in range(T):
+        c_start = time.time()
+        problem.calc(xs, us)
+        c_end = time.time()
+        duration.append(1e3 * (c_end - c_start))
+
+    avrg_duration = sum(duration) / len(duration)
+    min_duration = min(duration)
+    max_duration = max(duration)
+    return avrg_duration, min_duration, max_duration
+
+
+def runShootingProblemCalcDiffBenchmark(xs, us, problem):
+    duration = []
+    for i in range(T):
+        c_start = time.time()
+        problem.calcDiff(xs, us)
+        c_end = time.time()
+        duration.append(1e3 * (c_end - c_start))
+
+    avrg_duration = sum(duration) / len(duration)
+    min_duration = min(duration)
+    max_duration = max(duration)
+    return avrg_duration, min_duration, max_duration
+
+
+print('\033[1m')
+print('Python bindings:')
+xs, us, problem = createProblem(crocoddyl.DifferentialActionModelFreeFwdDynamics)
+avrg_duration, min_duration, max_duration = runDDPSolveBenchmark(xs, us, problem)
+print('  DDP.solve [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
+avrg_duration, min_duration, max_duration = runShootingProblemCalcBenchmark(xs, us, problem)
+print('  ShootingProblem.calc [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
+avrg_duration, min_duration, max_duration = runShootingProblemCalcDiffBenchmark(xs, us, problem)
+print('  ShootingProblem.calcDiff [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
+print('\033[0m')
 
 # TODO @Carlos this is not possible without making an abstract of createData.
 # At the time being, I don't have a solution

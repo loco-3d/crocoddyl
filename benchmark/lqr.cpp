@@ -12,7 +12,7 @@
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include <ctime>
 
-int main() {
+int main(int argc, char* argv[]) {
   unsigned int NX = 37;
   unsigned int NU = 12;
   bool CALLBACKS = false;
@@ -20,6 +20,9 @@ int main() {
   unsigned int T = 5e3;  // number of trials
   unsigned int MAXITER = 1;
   using namespace crocoddyl;
+  if (argc > 1) {
+    T = atoi(argv[1]);
+  }
 
   Eigen::VectorXd x0;
   std::vector<Eigen::VectorXd> xs;
@@ -63,7 +66,7 @@ int main() {
   double avrg_duration = duration.sum() / T;
   double min_duration = duration.minCoeff();
   double max_duration = duration.maxCoeff();
-  std::cout << "Wall time [mu]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")" << std::endl;
+  std::cout << "DDP.solve [mu]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")" << std::endl;
 
   // Running calc
   for (unsigned int i = 0; i < T; ++i) {
@@ -78,7 +81,7 @@ int main() {
   avrg_duration = duration.sum() / T;
   min_duration = duration.minCoeff();
   max_duration = duration.maxCoeff();
-  std::cout << "Wall time calc [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
+  std::cout << "ShootingProblem.calc [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
             << std::endl;
 
   // Running calcDiff
@@ -94,6 +97,6 @@ int main() {
   avrg_duration = duration.sum() / T;
   min_duration = duration.minCoeff();
   max_duration = duration.maxCoeff();
-  std::cout << "Wall time calcDiff [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
+  std::cout << "ShootingProblem.calcDiff [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
             << std::endl;
 }

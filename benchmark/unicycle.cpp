@@ -15,12 +15,15 @@
 #include <omp.h>
 #endif  // WITH_MULTITHREADING
 
-int main() {
+int main(int argc, char* argv[]) {
   bool CALLBACKS = false;
   unsigned int N = 200;  // number of nodes
   unsigned int T = 5e3;  // number of trials
   unsigned int MAXITER = 1;
   using namespace crocoddyl;
+  if (argc > 1) {
+    T = atoi(argv[1]);
+  }
 
   Eigen::VectorXd x0;
   std::vector<Eigen::VectorXd> xs;
@@ -64,7 +67,7 @@ int main() {
   double avrg_duration = duration.sum() / T;
   double min_duration = duration.minCoeff();
   double max_duration = duration.maxCoeff();
-  std::cout << "Wall time solve [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
+  std::cout << "  DDP.solve [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
             << std::endl;
 
   // Running calc
@@ -80,7 +83,7 @@ int main() {
   avrg_duration = duration.sum() / T;
   min_duration = duration.minCoeff();
   max_duration = duration.maxCoeff();
-  std::cout << "Wall time calc [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
+  std::cout << "  ShootingProblem.calc [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
             << std::endl;
 
   // Running calcDiff
@@ -96,6 +99,6 @@ int main() {
   avrg_duration = duration.sum() / T;
   min_duration = duration.minCoeff();
   max_duration = duration.maxCoeff();
-  std::cout << "Wall time calcDiff [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
-            << std::endl;
+  std::cout << "  ShootingProblem.calcDiff [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration
+            << ")" << std::endl;
 }

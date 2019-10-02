@@ -90,8 +90,8 @@ You can run examples, unit-tests and benchmarks from your build dir:
 ```bash
 cd build
 make test
-make examples-bipedal_walk
-make benchmarks-bipedal_walk
+make examples-quadrupedal_gaits
+make benchmarks-quadrupedal_gaits INPUT="100 walk" # number of trials ; type of gait
 ```
 
 If you want to see the 3D result and/or graphs of your run examples, you can use
