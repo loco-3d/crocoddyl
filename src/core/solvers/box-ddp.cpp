@@ -100,7 +100,7 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
     
     // Clamp!
     if (m->get_has_control_limits()) {
-      // us_try_[t].noalias() = us_try_[t].cwiseMax(m->get_u_lower_limit()).cwiseMin(m->get_u_upper_limit());
+      us_try_[t].noalias() = us_try_[t].cwiseMax(m->get_u_lower_limit()).cwiseMin(m->get_u_upper_limit());
     }
 
     m->calc(d, xs_try_[t], us_try_[t]);
