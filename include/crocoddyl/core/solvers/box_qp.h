@@ -66,7 +66,7 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
         clamped_idx.clear();
         free_idx.clear();
 
-        for (size_t i = 0; i < grad.size(); ++i)
+        for (int i = 0; i < grad.size(); ++i)
         {
             if ((x(i) == b_low(i) && grad(i) > 0) || (x(i) == b_high(i) && grad(i) < 0))
                 clamped_idx.push_back(i);
@@ -118,7 +118,7 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
         Eigen::VectorXd x_new;
         for (int ai = 0; ai < alpha_space.rows(); ++ai)
         {
-            int alpha = alpha_space[ai];
+            const double& alpha = alpha_space[ai];
 
             x_new = x;
             for (size_t i = 0; i < free_idx.size(); ++i)
