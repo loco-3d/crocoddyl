@@ -22,13 +22,13 @@ class SolverFDDP : public SolverDDP {
   explicit SolverFDDP(ShootingProblem& problem);
   ~SolverFDDP();
 
-  bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-             const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, unsigned int const& maxiter = 100,
-             const bool& is_feasible = false, const double& regInit = 1e-9) override;
-  const Eigen::Vector2d& expectedImprovement() override;
+  virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
+                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, unsigned int const& maxiter = 100,
+                     const bool& is_feasible = false, const double& regInit = 1e-9);
+  virtual const Eigen::Vector2d& expectedImprovement();
   void updateExpectedImprovement();
-  double calc() override;
-  void forwardPass(const double& stepLength) override;
+  virtual double calc();
+  virtual void forwardPass(const double& stepLength);
 
   double get_th_acceptnegstep() const;
   void set_th_acceptnegstep(double th_acceptnegstep);

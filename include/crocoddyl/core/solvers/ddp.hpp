@@ -22,13 +22,13 @@ class SolverDDP : public SolverAbstract {
   explicit SolverDDP(ShootingProblem& problem);
   ~SolverDDP();
 
-  bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-             const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, unsigned int const& maxiter = 100,
-             const bool& is_feasible = false, const double& regInit = 1e-9) override;
-  void computeDirection(const bool& recalc = true) override;
-  double tryStep(const double& steplength = 1) override;
-  double stoppingCriteria() override;
-  const Eigen::Vector2d& expectedImprovement() override;
+  virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
+                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, unsigned int const& maxiter = 100,
+                     const bool& is_feasible = false, const double& regInit = 1e-9);
+  virtual void computeDirection(const bool& recalc = true);
+  virtual double tryStep(const double& steplength = 1);
+  virtual double stoppingCriteria();
+  virtual const Eigen::Vector2d& expectedImprovement();
   virtual double calc();
   virtual void backwardPass();
   virtual void forwardPass(const double& stepLength);
