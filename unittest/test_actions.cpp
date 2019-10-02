@@ -38,7 +38,6 @@ const std::vector<TestTypes::Type> TestTypes::all(TestTypes::init_all());
 
 class ActionModelFactory {
  public:
-
   ActionModelFactory(TestTypes::Type type) {
     num_diff_modifier_ = 1e4;
     action_model_ = NULL;
@@ -52,7 +51,7 @@ class ActionModelFactory {
         break;
       case TestTypes::ActionModelLQRDriftFree:
         nx_ = 80;
-        nu_ = 40;      
+        nu_ = 40;
         action_model_ = new crocoddyl::ActionModelLQR(nx_, nu_, true);
         break;
       case TestTypes::ActionModelLQR:
