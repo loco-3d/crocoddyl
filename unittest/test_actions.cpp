@@ -39,19 +39,24 @@ const std::vector<TestTypes::Type> TestTypes::all(TestTypes::init_all());
 class ActionModelFactory {
  public:
   ActionModelFactory(TestTypes::Type type) {
-    nx_ = 80;
-    nu_ = 40;
     num_diff_modifier_ = 1e4;
     action_model_ = NULL;
     action_type_ = type;
+
     switch (action_type_) {
       case TestTypes::ActionModelUnicycle:
+        nx_ = 3;
+        nu_ = 2;
         action_model_ = new crocoddyl::ActionModelUnicycle();
         break;
       case TestTypes::ActionModelLQRDriftFree:
+        nx_ = 80;
+        nu_ = 40;
         action_model_ = new crocoddyl::ActionModelLQR(nx_, nu_, true);
         break;
       case TestTypes::ActionModelLQR:
+        nx_ = 80;
+        nu_ = 40;
         action_model_ = new crocoddyl::ActionModelLQR(nx_, nu_, false);
         break;
       default:
@@ -81,10 +86,10 @@ class ActionModelFactory {
   crocoddyl::ActionModelAbstract* get_action_model() { return action_model_; }
 
   double num_diff_modifier_;
+  unsigned int nx_;
 
  private:
-  int nx_;
-  int nu_;
+  unsigned int nu_;
   bool driftfree_;
   TestTypes::Type action_type_;
   crocoddyl::ActionModelAbstract* action_model_;
@@ -117,6 +122,7 @@ void test_calc_returns_state(TestTypes::Type action_model_type) {
   model->calc(data, x, u);
 
   BOOST_CHECK(data->xnext.size() == model->get_state().get_nx());
+  BOOST_CHECK(factory.nx_ == model->get_state().get_nx());
 }
 
 void test_calc_returns_a_cost(TestTypes::Type action_model_type) {

@@ -39,6 +39,7 @@ class DifferentialActionModelLQR : public DifferentialActionModelAbstract {
   Eigen::VectorXd lu_;
 
  private:
+  StateVector internal_state_;
   bool drift_free_;
 };
 

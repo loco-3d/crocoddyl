@@ -10,13 +10,11 @@
 
 namespace crocoddyl {
 
-ActionModelUnicycle::ActionModelUnicycle() : ActionModelAbstract(*new StateVector(3), 2, 5), dt_(0.1) {
+ActionModelUnicycle::ActionModelUnicycle() : ActionModelAbstract(internal_state_, 2, 5), internal_state_(3), dt_(0.1) {
   cost_weights_ << 10., 1.;
 }
 
-ActionModelUnicycle::~ActionModelUnicycle() {
-  // delete state_; //TODO @Carlos this breaks the test_actions c++ unit-test
-}
+ActionModelUnicycle::~ActionModelUnicycle() {}
 
 void ActionModelUnicycle::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                                const Eigen::Ref<const Eigen::VectorXd>& x,

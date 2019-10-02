@@ -11,7 +11,7 @@
 namespace crocoddyl {
 
 ActionModelLQR::ActionModelLQR(unsigned int const& nx, unsigned int const& nu, bool drift_free)
-    : ActionModelAbstract(*new StateVector(nx), nu, 0), drift_free_(drift_free) {
+    : ActionModelAbstract(internal_state_, nu, 0), internal_state_(nx), drift_free_(drift_free) {
   // TODO(cmastalli): substitute by random (vectors) and random-orthogonal (matrices)
   Fx_ = Eigen::MatrixXd::Identity(nx, nx);
   Fu_ = Eigen::MatrixXd::Identity(nx, nu);
@@ -23,9 +23,7 @@ ActionModelLQR::ActionModelLQR(unsigned int const& nx, unsigned int const& nu, b
   lu_ = Eigen::VectorXd::Ones(nu);
 }
 
-ActionModelLQR::~ActionModelLQR() {
-  // delete state_; //TODO @Carlos this breaks the test_actions c++ unit-test
-}
+ActionModelLQR::~ActionModelLQR() {}
 
 void ActionModelLQR::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                           const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) {
