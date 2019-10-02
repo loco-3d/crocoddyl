@@ -147,7 +147,7 @@ double SolverDDP::calc() {
     for (unsigned int t = 0; t < T; ++t) {
       ActionModelAbstract* model = problem_.running_models_[t];
       boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
-      model->get_state().diff(xs_[t + 1], d->get_xnext(), gaps_[t + 1]);
+      model->get_state().diff(xs_[t + 1], d->xnext, gaps_[t + 1]);
     }
   }
   return cost_;
@@ -155,8 +155,8 @@ double SolverDDP::calc() {
 
 void SolverDDP::backwardPass() {
   boost::shared_ptr<ActionDataAbstract>& d_T = problem_.terminal_data_;
-  Vxx_.back() = d_T->get_Lxx();
-  Vx_.back() = d_T->get_Lx();
+  Vxx_.back() = d_T->Lxx;
+  Vx_.back() = d_T->Lx;
 
   x_reg_.fill(xreg_);
   if (!std::isnan(xreg_)) {
@@ -173,13 +173,13 @@ void SolverDDP::backwardPass() {
     const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
     const Eigen::VectorXd& Vx_p = Vx_[t + 1];
 
-    FxTVxx_p_.noalias() = d->get_Fx().transpose() * Vxx_p;
-    FuTVxx_p_[t].noalias() = d->get_Fu().transpose() * Vxx_p;
-    Qxx_[t].noalias() = d->get_Lxx() + FxTVxx_p_ * d->get_Fx();
-    Qxu_[t].noalias() = d->get_Lxu() + FxTVxx_p_ * d->get_Fu();
-    Quu_[t].noalias() = d->get_Luu() + FuTVxx_p_[t] * d->get_Fu();
-    Qx_[t].noalias() = d->get_Lx() + d->get_Fx().transpose() * Vx_p;
-    Qu_[t].noalias() = d->get_Lu() + d->get_Fu().transpose() * Vx_p;
+    FxTVxx_p_.noalias() = d->Fx.transpose() * Vxx_p;
+    FuTVxx_p_[t].noalias() = d->Fu.transpose() * Vxx_p;
+    Qxx_[t].noalias() = d->Lxx + FxTVxx_p_ * d->Fx;
+    Qxu_[t].noalias() = d->Lxu + FxTVxx_p_ * d->Fu;
+    Quu_[t].noalias() = d->Luu + FuTVxx_p_[t] * d->Fu;
+    Qx_[t].noalias() = d->Lx + d->Fx.transpose() * Vx_p;
+    Qu_[t].noalias() = d->Lu + d->Fu.transpose() * Vx_p;
 
     if (!std::isnan(ureg_)) {
       unsigned int const& nu = m->get_nu();
@@ -227,7 +227,7 @@ void SolverDDP::forwardPass(const double& steplength) {
     m->get_state().diff(xs_[t], xs_try_[t], dx_[t]);
     us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
     m->calc(d, xs_try_[t], us_try_[t]);
-    xs_try_[t + 1] = d->get_xnext();
+    xs_try_[t + 1] = d->xnext;
     cost_try_ += d->cost;
 
     if (raiseIfNaN(cost_try_)) {

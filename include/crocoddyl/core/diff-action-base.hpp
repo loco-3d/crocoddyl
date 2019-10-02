@@ -100,17 +100,6 @@ struct DifferentialActionDataAbstract {
     Luu.setZero();
   }
 
-  const double& get_cost() const { return cost; }
-  const Eigen::VectorXd& get_xout() const { return xout; }
-  const Eigen::VectorXd& get_r() const { return r; }
-  const Eigen::VectorXd& get_Lx() const { return Lx; }
-  const Eigen::VectorXd& get_Lu() const { return Lu; }
-  const Eigen::MatrixXd& get_Lxx() const { return Lxx; }
-  const Eigen::MatrixXd& get_Lxu() const { return Lxu; }
-  const Eigen::MatrixXd& get_Luu() const { return Luu; }
-  const Eigen::MatrixXd& get_Fx() const { return Fx; }
-  const Eigen::MatrixXd& get_Fu() const { return Fu; }
-
   double cost;
   Eigen::VectorXd xout;
   Eigen::MatrixXd Fx;

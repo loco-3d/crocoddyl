@@ -116,7 +116,7 @@ void test_calc_returns_state(TestTypes::Type action_model_type) {
   // Getting the state dimension from calc() call
   model->calc(data, x, u);
 
-  BOOST_CHECK(data->get_xnext().size() == model->get_state().get_nx());
+  BOOST_CHECK(data->xnext.size() == model->get_state().get_nx());
 }
 
 void test_calc_returns_a_cost(TestTypes::Type action_model_type) {
