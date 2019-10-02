@@ -46,17 +46,6 @@ void SolverBoxDDP::computeGains(const unsigned int& t) {
     Eigen::VectorXd low_limit = problem_.running_models_[t]->get_u_lower_limit() - us_[t],
                     high_limit = problem_.running_models_[t]->get_u_upper_limit() - us_[t];
 
-    // std::cout << "[" << t << "] low_limit: " << low_limit.transpose() << std::endl;
-    // std::cout << "[" << t << "] high_limit: " << high_limit.transpose() << std::endl;
-    // std::cout << "[" << t << "] us_[t]: " << us_[t].transpose() << std::endl;
-
-    Quu_llt_[t].compute(Quu_[t]);
-    K_[t] = Qxu_[t].transpose();
-    Quu_llt_[t].solveInPlace(K_[t]);
-    k_[t] = Qu_[t];
-    Quu_llt_[t].solveInPlace(k_[t]);
-    // std::cout << "[Inverse]: k_["<<t<<"]:" << k_[t] .transpose() <<std::endl;
-
     exotica::BoxQPSolution boxqp_sol =
         exotica::BoxQP(Quu_[t], Qu_[t], low_limit, high_limit, us_[t], 0.1, 100, 1e-5, ureg_);
 
@@ -69,13 +58,7 @@ void SolverBoxDDP::computeGains(const unsigned int& t) {
     K_[t] = Quu_inv_[t] * Qxu_[t].transpose();
     k_[t] = -boxqp_sol.x;
 
-    // if (boxqp_sol.clamped_idx.size() > 0)
-    //   std::cout << "clamped_idx.size() = " << boxqp_sol.clamped_idx.size() << std::endl;
-
     for (size_t j = 0; j < boxqp_sol.clamped_idx.size(); ++j) K_[t](boxqp_sol.clamped_idx[j]) = 0.0;
-
-    // Compare with good old unconstrained
-    // std::cout << "[Box-QP]: k_["<<t<<"]:" << k_[t] .transpose()<<std::endl;
   }
 }
 
