@@ -1,4 +1,5 @@
 import crocoddyl
+from crocoddyl.utils import DifferentialFreeFwdDynamicsDerived
 import pinocchio
 import example_robot_data
 import numpy as np
@@ -108,10 +109,13 @@ avrg_duration, min_duration, max_duration = runShootingProblemCalcBenchmark(xs, 
 print('  ShootingProblem.calc [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
 avrg_duration, min_duration, max_duration = runShootingProblemCalcDiffBenchmark(xs, us, problem)
 print('  ShootingProblem.calcDiff [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
-print('\033[0m')
 
-# TODO @Carlos this is not possible without making an abstract of createData.
-# At the time being, I don't have a solution
-# print('Python-derived free-forward dynamics:')
-# avrg_duration, min_duration, max_duration, tm = runBenchmark(utils.DifferentialFreeFwdDynamicsDerived)
-# print('  CPU time [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
+print('Python:')
+xs, us, problem = createProblem(DifferentialFreeFwdDynamicsDerived)
+avrg_duration, min_duration, max_duration = runDDPSolveBenchmark(xs, us, problem)
+print('  DDP.solve [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
+avrg_duration, min_duration, max_duration = runShootingProblemCalcBenchmark(xs, us, problem)
+print('  ShootingProblem.calc [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
+avrg_duration, min_duration, max_duration = runShootingProblemCalcDiffBenchmark(xs, us, problem)
+print('  ShootingProblem.calcDiff [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
+print('\033[0m')
