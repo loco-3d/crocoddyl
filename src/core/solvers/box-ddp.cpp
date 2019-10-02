@@ -11,7 +11,7 @@
 
 namespace crocoddyl {
 
-SolverBoxDDP::SolverBoxDDP(ShootingProblem& problem) : SolverDDP(problem) {
+SolverBoxDDP::SolverBoxDDP(ShootingProblem& problem) : SolverFDDP(problem) {
   allocateData();
 
   const unsigned int& n_alphas = 10;
@@ -24,7 +24,7 @@ SolverBoxDDP::SolverBoxDDP(ShootingProblem& problem) : SolverDDP(problem) {
 SolverBoxDDP::~SolverBoxDDP() {}
 
 void SolverBoxDDP::allocateData() {
-  SolverDDP::allocateData();
+  SolverFDDP::allocateData();
   
   const unsigned int& T = problem_.get_T();
   Quu_inv_.resize(T);
@@ -36,85 +36,11 @@ void SolverBoxDDP::allocateData() {
   }
 }
 
-bool SolverBoxDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-                      const unsigned int& maxiter, const bool& is_feasible, const double& reginit) {
-  return SolverDDP::solve(init_xs, init_us, maxiter, is_feasible, reginit);
-}
-
-void SolverBoxDDP::computeDirection(const bool& recalc) {
-  if (recalc) {
-    calc();
-  }
-  backwardPass();
-}
-
-void SolverBoxDDP::backwardPass() {
-  boost::shared_ptr<ActionDataAbstract>& d_T = problem_.terminal_data_;
-  Vxx_.back() = d_T->get_Lxx();
-  Vx_.back() = d_T->get_Lx();
-
-  x_reg_.fill(xreg_);
-  if (!std::isnan(xreg_)) {
-    Vxx_.back().diagonal() += x_reg_;
-  }
-
-  if (!is_feasible_) {
-    Vx_.back().noalias() += Vxx_.back() * gaps_.back();
-  }
-
-  for (int t = static_cast<int>(problem_.get_T()) - 1; t >= 0; --t) {
-    ActionModelAbstract* m = problem_.running_models_[t];
-    boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
-    const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
-    const Eigen::VectorXd& Vx_p = Vx_[t + 1];
-
-    FxTVxx_p_.noalias() = d->get_Fx().transpose() * Vxx_p;
-    FuTVxx_p_[t].noalias() = d->get_Fu().transpose() * Vxx_p;
-    Qxx_[t].noalias() = d->get_Lxx() + FxTVxx_p_ * d->get_Fx();
-    Qxu_[t].noalias() = d->get_Lxu() + FxTVxx_p_ * d->get_Fu();
-    Quu_[t].noalias() = d->get_Luu() + FuTVxx_p_[t] * d->get_Fu();
-    Qx_[t].noalias() = d->get_Lx() + d->get_Fx().transpose() * Vx_p;
-    Qu_[t].noalias() = d->get_Lu() + d->get_Fu().transpose() * Vx_p;
-
-    if (!std::isnan(ureg_)) {
-      unsigned int const& nu = m->get_nu();
-      Quu_[t].diagonal() += Eigen::VectorXd::Constant(nu, ureg_);
-    }
-
-    computeGains(t);
-
-    if (std::isnan(ureg_)) {
-      Vx_[t].noalias() = Qx_[t] - K_[t].transpose() * Qu_[t];
-    } else {
-      Quuk_[t].noalias() = Quu_[t] * k_[t];
-      Vx_[t].noalias() = Qx_[t] + K_[t].transpose() * Quuk_[t] - 2 * K_[t].transpose() * Qu_[t];
-    }
-    Vxx_[t].noalias() = Qxx_[t] - Qxu_[t] * K_[t];
-    Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose()).eval();  // TODO(cmastalli): as suggested by Nicolas
-
-    if (!std::isnan(xreg_)) {
-      Vxx_[t].diagonal() += x_reg_;
-    }
-
-    // Compute and store the Vx gradient at end of the interval (rollout state)
-    if (!is_feasible_) {
-      Vx_[t].noalias() += Vxx_[t] * gaps_[t];
-    }
-
-    if (raiseIfNaN(Vx_[t].lpNorm<Eigen::Infinity>())) {
-      throw "backward_error";
-    }
-    if (raiseIfNaN(Vxx_[t].lpNorm<Eigen::Infinity>())) {
-      throw "backward_error";
-    }
-  }
-}
-
 void SolverBoxDDP::computeGains(const unsigned int& t) {
   if (problem_.running_models_[t]->get_nu() > 0) {
     if (!problem_.running_models_[t]->get_has_control_limits()) {
       std::cerr << "NOT LIMITED!!" << problem_.running_models_[t]->get_u_lower_limit() << std::endl;
-      SolverDDP::computeGains(t);
+      SolverFDDP::computeGains(t);
       return;
     }
     Eigen::VectorXd low_limit = problem_.running_models_[t]->get_u_lower_limit() - us_[t],
@@ -152,6 +78,56 @@ void SolverBoxDDP::computeGains(const unsigned int& t) {
     // std::cout << "[Inverse]: K_["<<t<<"]:" << K_[t] .transpose()<<std::endl;
 
     // std::cout << "K_[" << t << "]: " << K_[t] << std::endl;
+  }
+}
+
+void SolverBoxDDP::forwardPass(const double& steplength) {
+  assert(steplength <= 1. && "Step length has to be <= 1.");
+  assert(steplength >= 0. && "Step length has to be >= 0.");
+  cost_try_ = 0.;
+  xnext_ = problem_.get_x0();
+  unsigned int const& T = problem_.get_T();
+  for (unsigned int t = 0; t < T; ++t) {
+    ActionModelAbstract* m = problem_.running_models_[t];
+    boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
+    if ((is_feasible_) || (steplength == 1)) {
+      xs_try_[t] = xnext_;
+    } else {
+      m->get_state().integrate(xnext_, gaps_[t] * (steplength - 1), xs_try_[t]);
+    }
+    m->get_state().diff(xs_[t], xs_try_[t], dx_[t]);
+    us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
+    
+    // Clamp!
+    if (m->get_has_control_limits()) {
+      // us_try_[t].noalias() = us_try_[t].cwiseMax(m->get_u_lower_limit()).cwiseMin(m->get_u_upper_limit());
+    }
+
+    m->calc(d, xs_try_[t], us_try_[t]);
+    xnext_ = d->get_xnext();
+    cost_try_ += d->cost;
+
+    if (raiseIfNaN(cost_try_)) {
+      throw "forward_error";
+    }
+    if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
+      throw "forward_error";
+    }
+  }
+
+  ActionModelAbstract* m = problem_.terminal_model_;
+  boost::shared_ptr<ActionDataAbstract>& d = problem_.terminal_data_;
+
+  if ((is_feasible_) || (steplength == 1)) {
+    xs_try_.back() = xnext_;
+  } else {
+    m->get_state().integrate(xnext_, gaps_.back() * (steplength - 1), xs_try_.back());
+  }
+  m->calc(d, xs_try_.back());
+  cost_try_ += d->cost;
+
+  if (raiseIfNaN(cost_try_)) {
+    throw "forward_error";
   }
 }
 

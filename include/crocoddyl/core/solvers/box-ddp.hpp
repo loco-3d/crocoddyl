@@ -11,27 +11,21 @@
 
 #include <Eigen/Cholesky>
 #include <vector>
-#include "crocoddyl/core/solvers/ddp.hpp"
+#include "crocoddyl/core/solvers/fddp.hpp"
 #include "crocoddyl/core/solvers/box_qp.h"
 
 namespace crocoddyl {
 
-class SolverBoxDDP : public SolverDDP {
+class SolverBoxDDP : public SolverFDDP {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   explicit SolverBoxDDP(ShootingProblem& problem);
   ~SolverBoxDDP();
 
-  void allocateData();
-
-  bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-             const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, unsigned int const& maxiter = 100,
-             const bool& is_feasible = false, const double& regInit = 1e-9);
-
-  void computeDirection(const bool& recalc = true);
-  void computeGains(unsigned int const& t);
-  void backwardPass();
+  void allocateData() override;
+  void computeGains(unsigned int const& t) override;
+  void forwardPass(const double& steplength) override;
 protected:
   std::vector<Eigen::MatrixXd> Quu_inv_;
 };
