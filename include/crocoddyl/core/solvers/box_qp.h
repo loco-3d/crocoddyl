@@ -39,8 +39,8 @@ typedef struct BoxQPSolution
 {
     Eigen::MatrixXd Hff_inv;
     Eigen::MatrixXd x;
-    std::vector<int> free_idx;
-    std::vector<int> clamped_idx;
+    std::vector<size_t> free_idx;
+    std::vector<size_t> clamped_idx;
 } BoxQPSolution;
 
 inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
@@ -50,7 +50,7 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
 {
     int it = 0;
     Eigen::VectorXd delta_xf, x = x_init;
-    std::vector<int> clamped_idx, free_idx;
+    std::vector<size_t> clamped_idx, free_idx;
     Eigen::VectorXd grad = q + H * x_init;
     Eigen::MatrixXd Hff, Hfc, Hff_inv;
 
