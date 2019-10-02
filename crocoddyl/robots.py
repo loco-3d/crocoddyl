@@ -133,11 +133,18 @@ def loadKinton(modelPath='/opt/openrobots/share/example-robot-data'):
     robot.q0.flat[7:] = [0, 0, 0, 0, 0, 0]
     robot.model.referenceConfigurations["initial_pose"] = robot.q0
     robot.q0.flat[7:] = [0, 0.2, 1.7, 2, 0, 0]
-    robot.model.referenceConfigurations["centered"] = robot.q0 
+    robot.model.referenceConfigurations["centered"] = robot.q0
     return robot
 
 def loadKintonArm(modelPath='/opt/openrobots/share/example-robot-data'):
     URDF_FILENAME = "kinton_arm.urdf"
     URDF_SUBPATH = "/kinton_description/urdf/" + URDF_FILENAME
     robot = RobotWrapper.BuildFromURDF(modelPath + URDF_SUBPATH, [modelPath])
+    return robot
+
+def loadBorinotArm(modelPath='/opt/openrobots/share/example-robot-data'):
+    URDF_FILENAME = "borinot_arm.urdf"
+    URDF_SUBPATH = "/borinot_arm/urdf/" + URDF_FILENAME
+    robot = RobotWrapper.BuildFromURDF(modelPath + URDF_SUBPATH, [modelPath])
+    robot.q0.flat = [np.pi,0]
     return robot
