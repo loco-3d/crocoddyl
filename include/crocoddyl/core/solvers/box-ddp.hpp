@@ -26,7 +26,8 @@ class SolverBoxDDP : public SolverDDP {
   void allocateData() override;
   void computeGains(unsigned int const& t) override;
   void forwardPass(const double& steplength) override;
-protected:
+
+ protected:
   std::vector<Eigen::MatrixXd> Quu_inv_;
 };
 

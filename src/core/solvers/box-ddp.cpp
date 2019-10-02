@@ -25,13 +25,13 @@ SolverBoxDDP::~SolverBoxDDP() {}
 
 void SolverBoxDDP::allocateData() {
   SolverDDP::allocateData();
-  
+
   const unsigned int& T = problem_.get_T();
   Quu_inv_.resize(T);
   for (unsigned int t = 0; t < T; ++t) {
     ActionModelAbstract* model = problem_.running_models_[t];
     const unsigned int& nu = model->get_nu();
-   
+
     Quu_inv_[t] = Eigen::MatrixXd::Zero(nu, nu);
   }
 }
@@ -50,8 +50,15 @@ void SolverBoxDDP::computeGains(const unsigned int& t) {
     // std::cout << "[" << t << "] high_limit: " << high_limit.transpose() << std::endl;
     // std::cout << "[" << t << "] us_[t]: " << us_[t].transpose() << std::endl;
 
-    const double regularisation = 0.001;
-    exotica::BoxQPSolution boxqp_sol = exotica::BoxQP(Quu_[t], Qu_[t], low_limit, high_limit, us_[t], 0.1, 100, 1e-5, regularisation);
+    Quu_llt_[t].compute(Quu_[t]);
+    K_[t] = Qxu_[t].transpose();
+    Quu_llt_[t].solveInPlace(K_[t]);
+    k_[t] = Qu_[t];
+    Quu_llt_[t].solveInPlace(k_[t]);
+    // std::cout << "[Inverse]: k_["<<t<<"]:" << k_[t] .transpose() <<std::endl;
+
+    exotica::BoxQPSolution boxqp_sol =
+        exotica::BoxQP(Quu_[t], Qu_[t], low_limit, high_limit, us_[t], 0.1, 100, 1e-5, ureg_);
 
     Quu_inv_[t].setZero();
     for (size_t i = 0; i < boxqp_sol.free_idx.size(); ++i)
@@ -60,24 +67,15 @@ void SolverBoxDDP::computeGains(const unsigned int& t) {
 
     // Compute controls
     K_[t] = Quu_inv_[t] * Qxu_[t].transpose();
-    k_[t] = - boxqp_sol.x;
+    k_[t] = -boxqp_sol.x;
 
     // if (boxqp_sol.clamped_idx.size() > 0)
     //   std::cout << "clamped_idx.size() = " << boxqp_sol.clamped_idx.size() << std::endl;
 
-    for (size_t j = 0; j < boxqp_sol.clamped_idx.size(); ++j)
-      K_[t](boxqp_sol.clamped_idx[j]) = 0.0;
+    for (size_t j = 0; j < boxqp_sol.clamped_idx.size(); ++j) K_[t](boxqp_sol.clamped_idx[j]) = 0.0;
 
     // Compare with good old unconstrained
-    // std::cout << "[Box-QP]: K_["<<t<<"]:" << K_[t] .transpose()<<std::endl;
-    // Quu_llt_[t].compute(Quu_[t]);
-    // K_[t] = Qxu_[t].transpose();
-    // Quu_llt_[t].solveInPlace(K_[t]);
-    // k_[t] = Qu_[t];
-    // Quu_llt_[t].solveInPlace(k_[t]);
-    // std::cout << "[Inverse]: K_["<<t<<"]:" << K_[t] .transpose()<<std::endl;
-
-    // std::cout << "K_[" << t << "]: " << K_[t] << std::endl;
+    // std::cout << "[Box-QP]: k_["<<t<<"]:" << k_[t] .transpose()<<std::endl;
   }
 }
 
@@ -97,10 +95,10 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
     }
     m->get_state().diff(xs_[t], xs_try_[t], dx_[t]);
     us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
-    
+
     // Clamp!
     if (m->get_has_control_limits()) {
-      us_try_[t].noalias() = us_try_[t].cwiseMax(m->get_u_lower_limit()).cwiseMin(m->get_u_upper_limit());
+      us_try_[t] = us_try_[t].cwiseMax(m->get_u_lower_limit()).cwiseMin(m->get_u_upper_limit());
     }
 
     m->calc(d, xs_try_[t], us_try_[t]);
