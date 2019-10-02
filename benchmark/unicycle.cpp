@@ -33,9 +33,9 @@ int main(int argc, char* argv[]) {
   x0 = Eigen::Vector3d(1., 0., 0.);
 
   // Creating the action models and warm point for the unicycle system
+  ActionModelAbstract* model = new ActionModelUnicycle();
   for (unsigned int i = 0; i < N; ++i) {
-    ActionModelAbstract* model_i = new ActionModelUnicycle();
-    runningModels.push_back(model_i);
+    runningModels.push_back(model);
     xs.push_back(x0);
     us.push_back(Eigen::Vector2d::Zero());
   }

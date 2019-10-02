@@ -32,9 +32,9 @@ int main(int argc, char* argv[]) {
   x0 = Eigen::VectorXd::Zero(NX);
 
   // Creating the action models and warm point for the LQR system
+  ActionModelAbstract* model = new ActionModelLQR(NX, NU);
   for (unsigned int i = 0; i < N; ++i) {
-    ActionModelAbstract* model_i = new ActionModelLQR(NX, NU);
-    runningModels.push_back(model_i);
+    runningModels.push_back(model);
     xs.push_back(x0);
     us.push_back(Eigen::VectorXd::Zero(NU));
   }
