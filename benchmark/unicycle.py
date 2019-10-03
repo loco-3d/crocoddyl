@@ -9,6 +9,7 @@ import subprocess
 N = 200  # number of nodes
 T = int(sys.argv[1]) if (len(sys.argv) > 1) else int(5e3)  # number of trials
 MAXITER = 1
+CALLBACKS = False
 
 
 def createProblem(model):
@@ -24,6 +25,8 @@ def createProblem(model):
 
 def runDDPSolveBenchmark(xs, us, problem):
     ddp = crocoddyl.SolverDDP(problem)
+    if CALLBACKS:
+        ddp.setCallbacks([crocoddyl.CallbackVerbose()])
     duration = []
     for i in range(T):
         c_start = time.time()
