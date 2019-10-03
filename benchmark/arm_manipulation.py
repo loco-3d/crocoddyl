@@ -3,14 +3,17 @@ from crocoddyl.utils import DifferentialFreeFwdDynamicsDerived
 import pinocchio
 import example_robot_data
 import numpy as np
+import os
 import sys
 import time
+import subprocess
 
 # First, let's load the Pinocchio model for the Talos arm.
 ROBOT = example_robot_data.loadTalosArm()
 N = 100  # number of nodes
 T = int(sys.argv[1]) if (len(sys.argv) > 1) else int(5e3)  # number of trials
 MAXITER = 1
+CALLBACKS = False
 
 
 def createProblem(model):
@@ -58,7 +61,8 @@ def createProblem(model):
 
 def runDDPSolveBenchmark(xs, us, problem):
     ddp = crocoddyl.SolverDDP(problem)
-
+    if CALLBACKS:
+        ddp.setCallbacks([crocoddyl.CallbackVerbose()])
     duration = []
     for i in range(T):
         c_start = time.time()
@@ -101,6 +105,9 @@ def runShootingProblemCalcDiffBenchmark(xs, us, problem):
 
 
 print('\033[1m')
+print('C++:')
+popen = subprocess.check_call([os.path.dirname(os.path.abspath(__file__)) + "/arm-manipulation", str(T)])
+
 print('Python bindings:')
 xs, us, problem = createProblem(crocoddyl.DifferentialActionModelFreeFwdDynamics)
 avrg_duration, min_duration, max_duration = runDDPSolveBenchmark(xs, us, problem)

@@ -19,17 +19,16 @@
 #include <ctime>
 
 int main(int argc, char* argv[]) {
-  // bool CALLBACKS = false;
-  // unsigned int N = 100;  // number of nodes
+  bool CALLBACKS = false;
+  unsigned int N = 100;  // number of nodes
   unsigned int T = 5e3;  // number of trials
-  // unsigned int MAXITER = 1;
-  using namespace crocoddyl;
+  unsigned int MAXITER = 1;
   if (argc > 1) {
     T = atoi(argv[1]);
   }
 
   pinocchio::Model robot_model;
-  pinocchio::urdf::buildModel(TALOS_URDF, robot_model);
+  pinocchio::urdf::buildModel(TALOS_ARM_URDF, robot_model);
   crocoddyl::StateMultibody state(robot_model);
 
   Eigen::VectorXd q0(state.get_nq());
@@ -61,88 +60,83 @@ int main(int argc, char* argv[]) {
   // Next, we need to create an action model for running and terminal knots. The
   // forward dynamics (computed using ABA) are implemented
   // inside DifferentialActionModelFullyActuated.
-  crocoddyl::DifferentialActionModelFreeFwdDynamics diff_action(state, runningCostModel);
+  crocoddyl::DifferentialActionModelFreeFwdDynamics runningDAM(state, runningCostModel);
+  crocoddyl::DifferentialActionModelFreeFwdDynamics terminalDAM(state, terminalCostModel);
   Eigen::VectorXd armature(state.get_nq());
   armature << 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.;
-  diff_action.set_armature(armature);
-  crocoddyl::DifferentialActionModelAbstract* model = &diff_action;
-  crocoddyl::ActionModelAbstract* runningModel = new crocoddyl::IntegratedActionModelEuler(model, 1e-3);
-  crocoddyl::ActionModelAbstract* terminalModel = new crocoddyl::IntegratedActionModelEuler(model, 1e-3);
+  runningDAM.set_armature(armature);
+  terminalDAM.set_armature(armature);
+  crocoddyl::ActionModelAbstract* runningModel = new crocoddyl::IntegratedActionModelEuler(&runningDAM, 1e-3);
+  crocoddyl::ActionModelAbstract* terminalModel = new crocoddyl::IntegratedActionModelEuler(&terminalDAM, 1e-3);
 
-  // std::vector<Eigen::VectorXd> xs;
-  // std::vector<Eigen::VectorXd> us;
-  // std::vector<ActionModelAbstract*> runningModels;
-  // ActionModelAbstract* terminalModel;
-  // x0 = Eigen::VectorXd::Zero(NX);
+  // For this optimal control problem, we define 100 knots (or running action
+  // models) plus a terminal knot
+  std::vector<crocoddyl::ActionModelAbstract*> runningModels(N, runningModel);
+  crocoddyl::ShootingProblem problem(x0, runningModels, terminalModel);
+  std::vector<Eigen::VectorXd> xs(N + 1, x0);
+  std::vector<Eigen::VectorXd> us(N, Eigen::VectorXd::Zero(runningModel->get_nu()));
+  for (unsigned int i = 0; i < N; ++i) {
+    crocoddyl::ActionModelAbstract* model = problem.get_runningModels()[i];
+    boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = problem.get_runningDatas()[i];
+    model->quasiStatic(data, us[i], x0);
+  }
 
-  // // Creating the action models and warm point for the LQR system
-  // ActionModelAbstract* model = new ActionModelLQR(NX, NU);
-  // for (unsigned int i = 0; i < N; ++i) {
-  //   runningModels.push_back(model);
-  //   xs.push_back(x0);
-  //   us.push_back(Eigen::VectorXd::Zero(NU));
-  // }
-  // xs.push_back(x0);
-  // terminalModel = new ActionModelLQR(NX, NU);
+  // Formulating the optimal control problem
+  crocoddyl::SolverDDP ddp(problem);
+  if (CALLBACKS) {
+    std::vector<crocoddyl::CallbackAbstract*> cbs;
+    cbs.push_back(new crocoddyl::CallbackVerbose());
+    ddp.setCallbacks(cbs);
+  }
 
-  // // Formulating the optimal control problem
-  // ShootingProblem problem(x0, runningModels, terminalModel);
-  // SolverDDP ddp(problem);
-  // if (CALLBACKS) {
-  //   std::vector<CallbackAbstract*> cbs;
-  //   cbs.push_back(new CallbackVerbose());
-  //   ddp.setCallbacks(cbs);
-  // }
+  // Solving the optimal control problem
+  struct timespec start, finish;
+  double elapsed;
+  Eigen::ArrayXd duration(T);
+  for (unsigned int i = 0; i < T; ++i) {
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    ddp.solve(xs, us, MAXITER, false, 0.1);
+    clock_gettime(CLOCK_MONOTONIC, &finish);
+    elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
+    elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;
+    duration[i] = elapsed / 1000.;
+  }
 
-  // // Solving the optimal control problem
-  // struct timespec start, finish;
-  // double elapsed;
-  // Eigen::ArrayXd duration(T);
-  // for (unsigned int i = 0; i < T; ++i) {
-  //   clock_gettime(CLOCK_MONOTONIC, &start);
-  //   ddp.solve(xs, us, MAXITER);
-  //   clock_gettime(CLOCK_MONOTONIC, &finish);
-  //   elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
-  //   elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;
-  //   duration[i] = elapsed / 1000.;
-  // }
+  double avrg_duration = duration.sum() / T;
+  double min_duration = duration.minCoeff();
+  double max_duration = duration.maxCoeff();
+  std::cout << "  DDP.solve [mu]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
+            << std::endl;
 
-  // double avrg_duration = duration.sum() / T;
-  // double min_duration = duration.minCoeff();
-  // double max_duration = duration.maxCoeff();
-  // std::cout << "DDP.solve [mu]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")" <<
-  // std::endl;
+  // Running calc
+  for (unsigned int i = 0; i < T; ++i) {
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    problem.calc(xs, us);
+    clock_gettime(CLOCK_MONOTONIC, &finish);
+    elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
+    elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;
+    duration[i] = elapsed / 1000.;
+  }
 
-  // // Running calc
-  // for (unsigned int i = 0; i < T; ++i) {
-  //   clock_gettime(CLOCK_MONOTONIC, &start);
-  //   problem.calc(xs, us);
-  //   clock_gettime(CLOCK_MONOTONIC, &finish);
-  //   elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
-  //   elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;
-  //   duration[i] = elapsed / 1000.;
-  // }
+  avrg_duration = duration.sum() / T;
+  min_duration = duration.minCoeff();
+  max_duration = duration.maxCoeff();
+  std::cout << "  ShootingProblem.calc [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
+            << std::endl;
 
-  // avrg_duration = duration.sum() / T;
-  // min_duration = duration.minCoeff();
-  // max_duration = duration.maxCoeff();
-  // std::cout << "ShootingProblem.calc [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
-  //           << std::endl;
+  // Running calcDiff
+  for (unsigned int i = 0; i < T; ++i) {
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    problem.calcDiff(xs, us);
+    clock_gettime(CLOCK_MONOTONIC, &finish);
+    elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
+    elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;
+    duration[i] = elapsed / 1000.;
+  }
 
-  // // Running calcDiff
-  // for (unsigned int i = 0; i < T; ++i) {
-  //   clock_gettime(CLOCK_MONOTONIC, &start);
-  //   problem.calcDiff(xs, us);
-  //   clock_gettime(CLOCK_MONOTONIC, &finish);
-  //   elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
-  //   elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;
-  //   duration[i] = elapsed / 1000.;
-  // }
-
-  // avrg_duration = duration.sum() / T;
-  // min_duration = duration.minCoeff();
-  // max_duration = duration.maxCoeff();
-  // std::cout << "ShootingProblem.calcDiff [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration <<
-  // ")"
-  //           << std::endl;
+  avrg_duration = duration.sum() / T;
+  min_duration = duration.minCoeff();
+  max_duration = duration.maxCoeff();
+  std::cout << "  ShootingProblem.calcDiff [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration
+            << ")" << std::endl;
 }
