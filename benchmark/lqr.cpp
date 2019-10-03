@@ -19,24 +19,23 @@ int main(int argc, char* argv[]) {
   unsigned int N = 100;  // number of nodes
   unsigned int T = 5e3;  // number of trials
   unsigned int MAXITER = 1;
-  using namespace crocoddyl;
   if (argc > 1) {
     T = atoi(argv[1]);
   }
 
   // Creating the action models and warm point for the LQR system
   Eigen::VectorXd x0 = Eigen::VectorXd::Zero(NX);
-  ActionModelAbstract* model = new ActionModelLQR(NX, NU);
+  crocoddyl::ActionModelAbstract* model = new crocoddyl::ActionModelLQR(NX, NU);
   std::vector<Eigen::VectorXd> xs(N + 1, x0);
   std::vector<Eigen::VectorXd> us(N, Eigen::VectorXd::Zero(NU));
-  std::vector<ActionModelAbstract*> runningModels(N, model);
+  std::vector<crocoddyl::ActionModelAbstract*> runningModels(N, model);
 
   // Formulating the optimal control problem
-  ShootingProblem problem(x0, runningModels, model);
-  SolverDDP ddp(problem);
+  crocoddyl::ShootingProblem problem(x0, runningModels, model);
+  crocoddyl::SolverDDP ddp(problem);
   if (CALLBACKS) {
-    std::vector<CallbackAbstract*> cbs;
-    cbs.push_back(new CallbackVerbose());
+    std::vector<crocoddyl::CallbackAbstract*> cbs;
+    cbs.push_back(new crocoddyl::CallbackVerbose());
     ddp.setCallbacks(cbs);
   }
 
