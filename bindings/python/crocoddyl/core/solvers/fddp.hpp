@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2019, LAAS-CNRS, The University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,7 +18,6 @@ namespace bp = boost::python;
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_solves, SolverFDDP::solve, 0, 5)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_computeDirections, SolverDDP::computeDirection, 0, 1)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_trySteps, SolverFDDP::tryStep, 0, 1)
 
 void exposeSolverFDDP() {
   bp::class_<SolverFDDP, bp::bases<SolverDDP> >(
@@ -57,11 +56,6 @@ void exposeSolverFDDP() {
                "(xs, us) of T+1 and T elements, respectively.\n"
                ":params recalc: true for recalculating the derivatives at current state and control.\n"
                ":returns the search direction dx, du and the dual lambdas as lists of T+1, T and T+1 lengths."))
-      .def("tryStep", &SolverFDDP::tryStep,
-           SolverFDDP_trySteps(bp::args(" self", " stepLength=1"),
-                               "Rollout the system with a predefined step length.\n\n"
-                               ":param stepLength: step length\n"
-                               ":returns the cost improvement."))
       .def("expectedImprovement", &SolverFDDP::expectedImprovement,
            bp::return_value_policy<bp::copy_const_reference>(), bp::args(" self"),
            "Return two scalars denoting the quadratic improvement model\n\n"
@@ -73,16 +67,6 @@ void exposeSolverFDDP() {
       .def("updateExpectedImprovement", &SolverFDDP::updateExpectedImprovement,
            bp::return_value_policy<bp::copy_const_reference>(), bp::args(" self"),
            "Update the expected improvement model\n\n")
-      .def("calc", &SolverFDDP::calc, bp::args(" self"),
-           "Update the Jacobian and Hessian of the optimal control problem\n\n"
-           "These derivatives are computed around the guess state and control\n"
-           "trajectory. These trajectory can be set by using setCandidate.\n"
-           ":return the total cost around the guess trajectory.")
-      .def("forwardPass", &SolverFDDP::forwardPass, bp::args(" self", " stepLength=1"),
-           "Run the forward pass or rollout\n\n"
-           "It rollouts the action model give the computed policy (feedfoward terns and feedback\n"
-           "gains) by the backwardPass. We can define different step lengths\n"
-           ":param stepLength: applied step length (<= 1. and >= 0.)")
       .add_property("th_acceptNegStep", bp::make_function(&SolverFDDP::get_th_acceptnegstep),
                     bp::make_function(&SolverFDDP::set_th_acceptnegstep),
                     "threshold for step acceptance in ascent direction");

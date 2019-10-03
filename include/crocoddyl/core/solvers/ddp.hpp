@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2019, LAAS-CNRS, The University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,21 +22,21 @@ class SolverDDP : public SolverAbstract {
   explicit SolverDDP(ShootingProblem& problem);
   ~SolverDDP();
 
-  bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-             const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, unsigned int const& maxiter = 100,
-             const bool& is_feasible = false, const double& regInit = 1e-9);
-  void computeDirection(const bool& recalc = true);
-  double tryStep(const double& steplength = 1);
-  double stoppingCriteria();
-  const Eigen::Vector2d& expectedImprovement();
-  double calc();
-  void backwardPass();
-  void forwardPass(const double& stepLength);
+  virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
+                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, unsigned int const& maxiter = 100,
+                     const bool& is_feasible = false, const double& regInit = 1e-9);
+  virtual void computeDirection(const bool& recalc = true);
+  virtual double tryStep(const double& steplength = 1);
+  virtual double stoppingCriteria();
+  virtual const Eigen::Vector2d& expectedImprovement();
+  virtual double calc();
+  virtual void backwardPass();
+  virtual void forwardPass(const double& stepLength);
 
-  void computeGains(unsigned int const& t);
+  virtual void computeGains(unsigned int const& t);
   void increaseRegularization();
   void decreaseRegularization();
-  void allocateData();
+  virtual void allocateData();
 
   const double& get_regfactor() const;
   const double& get_regmin() const;
