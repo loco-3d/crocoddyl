@@ -24,25 +24,15 @@ int main(int argc, char* argv[]) {
     T = atoi(argv[1]);
   }
 
-  Eigen::VectorXd x0;
-  std::vector<Eigen::VectorXd> xs;
-  std::vector<Eigen::VectorXd> us;
-  std::vector<ActionModelAbstract*> runningModels;
-  ActionModelAbstract* terminalModel;
-  x0 = Eigen::VectorXd::Zero(NX);
-
   // Creating the action models and warm point for the LQR system
+  Eigen::VectorXd x0 = Eigen::VectorXd::Zero(NX);
   ActionModelAbstract* model = new ActionModelLQR(NX, NU);
-  for (unsigned int i = 0; i < N; ++i) {
-    runningModels.push_back(model);
-    xs.push_back(x0);
-    us.push_back(Eigen::VectorXd::Zero(NU));
-  }
-  xs.push_back(x0);
-  terminalModel = new ActionModelLQR(NX, NU);
+  std::vector<Eigen::VectorXd> xs(N + 1, x0);
+  std::vector<Eigen::VectorXd> us(N, Eigen::VectorXd::Zero(NU));
+  std::vector<ActionModelAbstract*> runningModels(N, model);
 
   // Formulating the optimal control problem
-  ShootingProblem problem(x0, runningModels, terminalModel);
+  ShootingProblem problem(x0, runningModels, model);
   SolverDDP ddp(problem);
   if (CALLBACKS) {
     std::vector<CallbackAbstract*> cbs;

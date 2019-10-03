@@ -25,25 +25,15 @@ int main(int argc, char* argv[]) {
     T = atoi(argv[1]);
   }
 
-  Eigen::VectorXd x0;
-  std::vector<Eigen::VectorXd> xs;
-  std::vector<Eigen::VectorXd> us;
-  std::vector<ActionModelAbstract*> runningModels;
-  ActionModelAbstract* terminalModel;
-  x0 = Eigen::Vector3d(1., 0., 0.);
-
   // Creating the action models and warm point for the unicycle system
+  Eigen::VectorXd x0 = Eigen::Vector3d(1., 0., 0.);
   ActionModelAbstract* model = new ActionModelUnicycle();
-  for (unsigned int i = 0; i < N; ++i) {
-    runningModels.push_back(model);
-    xs.push_back(x0);
-    us.push_back(Eigen::Vector2d::Zero());
-  }
-  xs.push_back(x0);
-  terminalModel = new ActionModelUnicycle();
+  std::vector<Eigen::VectorXd> xs(N + 1, x0);
+  std::vector<Eigen::VectorXd> us(N, Eigen::Vector2d::Zero());
+  std::vector<ActionModelAbstract*> runningModels(N, model);
 
   // Formulating the optimal control problem
-  ShootingProblem problem(x0, runningModels, terminalModel);
+  ShootingProblem problem(x0, runningModels, model);
   SolverDDP ddp(problem);
   if (CALLBACKS) {
     std::vector<CallbackAbstract*> cbs;
