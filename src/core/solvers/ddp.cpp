@@ -24,7 +24,7 @@ SolverDDP::SolverDDP(ShootingProblem& problem)
   const unsigned int& n_alphas = 10;
   alphas_.resize(n_alphas);
   for (unsigned int n = 0; n < n_alphas; ++n) {
-    alphas_[n] = 1. / (static_cast<double>(n) * static_cast<double>(n));
+    alphas_[n] = 1. / pow(2., static_cast<double>(n));
   }
 }
 
