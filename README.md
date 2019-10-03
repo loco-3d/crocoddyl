@@ -90,11 +90,11 @@ You can run examples, unit-tests and benchmarks from your build dir:
 ```bash
 cd build
 make test
-make examples-quadrupedal_gaits
-make benchmarks-quadrupedal_gaits INPUT="100 walk" # number of trials ; type of gait
+make -s examples-quadrupedal_gaits INPUT="display plot" # enable display and plot
+make -s benchmarks-quadrupedal_gaits INPUT="100 walk" # number of trials ; type of gait
 ```
 
-If you want to see the 3D result and/or graphs of your run examples, you can use
+Alternatively, you cansee the 3D result and/or graphs of your run examples, you can use
 
 ```bash
 export CROCODDYL_DISPLAY=1
