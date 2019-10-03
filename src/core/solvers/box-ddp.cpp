@@ -85,7 +85,7 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
     }
 
     m->calc(d, xs_try_[t], us_try_[t]);
-    xnext_ = d->get_xnext();
+    xnext_ = d->xnext;
     cost_try_ += d->cost;
 
     if (raiseIfNaN(cost_try_)) {
