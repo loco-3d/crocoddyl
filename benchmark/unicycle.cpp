@@ -11,10 +11,6 @@
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include <time.h>
 
-#ifdef WITH_MULTITHREADING
-#include <omp.h>
-#endif  // WITH_MULTITHREADING
-
 int main(int argc, char* argv[]) {
   bool CALLBACKS = false;
   unsigned int N = 200;  // number of nodes
