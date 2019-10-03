@@ -17,8 +17,8 @@ IntegratedActionModelEuler::IntegratedActionModelEuler(DifferentialActionModelAb
       time_step_(time_step),
       time_step2_(time_step * time_step),
       with_cost_residual_(with_cost_residual) {
-  set_u_lower_limit(differential_->get_u_lower_limit());
-  set_u_upper_limit(differential_->get_u_upper_limit());
+  set_u_lb(differential_->get_u_lb());
+  set_u_ub(differential_->get_u_ub());
 }
 
 IntegratedActionModelEuler::~IntegratedActionModelEuler() {}

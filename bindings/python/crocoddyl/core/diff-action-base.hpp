@@ -99,14 +99,14 @@ void exposeDifferentialActionAbstract() {
                     bp::make_function(&DifferentialActionModelAbstract_wrap::get_has_control_limits,
                                       bp::return_value_policy<bp::return_by_value>()),
                     "indicates whether problem has finite control limits")
-      .add_property("u_lower_limit",
-                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_u_lower_limit,
+      .add_property("u_lb",
+                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_u_lb,
                                       bp::return_value_policy<bp::return_by_value>()),
-                    &DifferentialActionModelAbstract_wrap::set_u_lower_limit, "lower control limits")
-      .add_property("u_upper_limit",
-                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_u_upper_limit,
+                    &DifferentialActionModelAbstract_wrap::set_u_lb, "lower control limits")
+      .add_property("u_ub",
+                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_u_ub,
                                       bp::return_value_policy<bp::return_by_value>()),
-                    &DifferentialActionModelAbstract_wrap::set_u_upper_limit, "upper control limits");
+                    &DifferentialActionModelAbstract_wrap::set_u_ub, "upper control limits");
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataAbstract> >();
 

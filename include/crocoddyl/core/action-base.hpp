@@ -40,21 +40,21 @@ class ActionModelAbstract {
   unsigned int const& get_nr() const;
   StateAbstract& get_state() const;
 
-  const Eigen::VectorXd& get_u_lower_limit() const;
-  const Eigen::VectorXd& get_u_upper_limit() const;
+  const Eigen::VectorXd& get_u_lb() const;
+  const Eigen::VectorXd& get_u_ub() const;
   bool const& get_has_control_limits() const;
 
-  void set_u_lower_limit(const Eigen::Ref<const Eigen::VectorXd>& u_in);
-  void set_u_upper_limit(const Eigen::Ref<const Eigen::VectorXd>& u_in);
+  void set_u_lb(const Eigen::Ref<const Eigen::VectorXd>& u_in);
+  void set_u_ub(const Eigen::Ref<const Eigen::VectorXd>& u_in);
 
  protected:
-  unsigned int nu_;                //!< Control dimension
-  unsigned int nr_;                //!< Dimension of the cost residual
-  StateAbstract& state_;           //!< Model of the state
-  Eigen::VectorXd unone_;          //!< Neutral state
-  Eigen::VectorXd u_lower_limit_;  //!< Lower control limits
-  Eigen::VectorXd u_upper_limit_;  //!< Upper control limits
-  bool has_control_limits_;        //!< Indicates whether any of the control limits is finite
+  unsigned int nu_;          //!< Control dimension
+  unsigned int nr_;          //!< Dimension of the cost residual
+  StateAbstract& state_;     //!< Model of the state
+  Eigen::VectorXd unone_;    //!< Neutral state
+  Eigen::VectorXd u_lb_;     //!< Lower control limits
+  Eigen::VectorXd u_ub_;     //!< Upper control limits
+  bool has_control_limits_;  //!< Indicates whether any of the control limits is finite
 
   void update_has_control_limits();
 

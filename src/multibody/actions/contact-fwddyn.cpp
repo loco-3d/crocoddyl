@@ -30,8 +30,8 @@ DifferentialActionModelContactFwdDynamics::DifferentialActionModelContactFwdDyna
   assert(contacts_.get_nu() == nu_ && "Contacts doesn't have the same control dimension");
   assert(costs_.get_nu() == nu_ && "Costs doesn't have the same control dimension");
 
-  set_u_lower_limit(-1. * pinocchio_.effortLimit.tail(nu_));
-  set_u_upper_limit(+1. * pinocchio_.effortLimit.tail(nu_));
+  set_u_lb(-1. * pinocchio_.effortLimit.tail(nu_));
+  set_u_ub(+1. * pinocchio_.effortLimit.tail(nu_));
 }
 
 DifferentialActionModelContactFwdDynamics::~DifferentialActionModelContactFwdDynamics() {}

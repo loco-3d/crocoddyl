@@ -15,8 +15,8 @@ ActionModelAbstract::ActionModelAbstract(StateAbstract& state, unsigned int cons
       nr_(nr),
       state_(state),
       unone_(Eigen::VectorXd::Zero(nu)),
-      u_lower_limit_(Eigen::VectorXd::Constant(nu, 1, -std::numeric_limits<double>::infinity())),
-      u_upper_limit_(Eigen::VectorXd::Constant(nu, 1, std::numeric_limits<double>::infinity())),
+      u_lb_(Eigen::VectorXd::Constant(nu, 1, -std::numeric_limits<double>::infinity())),
+      u_ub_(Eigen::VectorXd::Constant(nu, 1, std::numeric_limits<double>::infinity())),
       has_control_limits_(false) {}
 
 ActionModelAbstract::~ActionModelAbstract() {}
@@ -65,26 +65,24 @@ const unsigned int& ActionModelAbstract::get_nr() const { return nr_; }
 
 StateAbstract& ActionModelAbstract::get_state() const { return state_; }
 
-const Eigen::VectorXd& ActionModelAbstract::get_u_lower_limit() const { return u_lower_limit_; }
+const Eigen::VectorXd& ActionModelAbstract::get_u_lb() const { return u_lb_; }
 
-const Eigen::VectorXd& ActionModelAbstract::get_u_upper_limit() const { return u_upper_limit_; }
+const Eigen::VectorXd& ActionModelAbstract::get_u_ub() const { return u_ub_; }
 
-void ActionModelAbstract::set_u_lower_limit(const Eigen::Ref<const Eigen::VectorXd>& u_in) {
+void ActionModelAbstract::set_u_lb(const Eigen::Ref<const Eigen::VectorXd>& u_in) {
   assert(nu_ == u_in.size() && "Number of rows of u_in must match nu_");
-  u_lower_limit_ = u_in;
+  u_lb_ = u_in;
   update_has_control_limits();
 }
 
-void ActionModelAbstract::set_u_upper_limit(const Eigen::Ref<const Eigen::VectorXd>& u_in) {
+void ActionModelAbstract::set_u_ub(const Eigen::Ref<const Eigen::VectorXd>& u_in) {
   assert(nu_ == u_in.size() && "Number of rows of u_in must match nu_");
-  u_upper_limit_ = u_in;
+  u_ub_ = u_in;
   update_has_control_limits();
 }
 
 bool const& ActionModelAbstract::get_has_control_limits() const { return has_control_limits_; }
 
-void ActionModelAbstract::update_has_control_limits() {
-  has_control_limits_ = u_lower_limit_.allFinite() && u_upper_limit_.allFinite();
-}
+void ActionModelAbstract::update_has_control_limits() { has_control_limits_ = u_lb_.allFinite() && u_ub_.allFinite(); }
 
 }  // namespace crocoddyl
