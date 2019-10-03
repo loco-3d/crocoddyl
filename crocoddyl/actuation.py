@@ -13,8 +13,7 @@ class ActuationModelDoublePendulum:
 
     def calc(self, data, x, u):
         S = np.zeros([self.nv,self.nu])
-        #S[1] = 1
-        S[0] = 1
+        S[1] = 1
         data.a = np.dot(S,u)
         return data.a
 
@@ -34,8 +33,7 @@ class ActuationDataDoublePendulum:
         self.A = np.zeros([nv, ndx + nu])  # result of calcDiff
         self.Ax = self.A[:, :ndx]
         self.Au = self.A[:, ndx:]
-        # self.Au[1,0] = 1
-        self.Au[0,0] = 1
+        self.Au[1,0] = 1
 
 class ActuationModelUAM:
     '''
