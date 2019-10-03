@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
   double avrg_duration = duration.sum() / T;
   double min_duration = duration.minCoeff();
   double max_duration = duration.maxCoeff();
-  std::cout << "DDP.solve [mu]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")" << std::endl;
+  std::cout << "DDP.solve [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")" << std::endl;
 
   // Running calc
   for (unsigned int i = 0; i < T; ++i) {
