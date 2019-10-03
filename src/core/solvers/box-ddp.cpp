@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019, The University of Edinburgh
+// Copyright (C) 2019, CNRS-LAAS, The University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -17,7 +17,7 @@ SolverBoxDDP::SolverBoxDDP(ShootingProblem& problem) : SolverDDP(problem) {
   const unsigned int& n_alphas = 10;
   alphas_.resize(n_alphas);
   for (unsigned int n = 0; n < n_alphas; ++n) {
-    alphas_[n] = 1. / pow(2., static_cast<double>(n));
+    alphas_[n] = 1. / (static_cast<double>(n) * static_cast<double>(n));
   }
 }
 
@@ -39,15 +39,14 @@ void SolverBoxDDP::allocateData() {
 void SolverBoxDDP::computeGains(const unsigned int& t) {
   if (problem_.running_models_[t]->get_nu() > 0) {
     if (!problem_.running_models_[t]->get_has_control_limits()) {
-      std::cerr << "NOT LIMITED!!" << problem_.running_models_[t]->get_u_lower_limit() << std::endl;
+      std::cerr << "NOT LIMITED!!" << problem_.running_models_[t]->get_u_lb() << std::endl;
       SolverDDP::computeGains(t);
       return;
     }
-    Eigen::VectorXd low_limit = problem_.running_models_[t]->get_u_lower_limit() - us_[t],
-                    high_limit = problem_.running_models_[t]->get_u_upper_limit() - us_[t];
+    Eigen::VectorXd low_limit = problem_.running_models_[t]->get_u_lb() - us_[t],
+                    high_limit = problem_.running_models_[t]->get_u_ub() - us_[t];
 
-    exotica::BoxQPSolution boxqp_sol =
-        exotica::BoxQP(Quu_[t], Qu_[t], low_limit, high_limit, us_[t], 0.1, 100, 1e-5, ureg_);
+    BoxQPSolution boxqp_sol = BoxQP(Quu_[t], Qu_[t], low_limit, high_limit, us_[t], 0.1, 100, 1e-5, ureg_);
 
     Quu_inv_[t].setZero();
     for (size_t i = 0; i < boxqp_sol.free_idx.size(); ++i)
@@ -55,8 +54,8 @@ void SolverBoxDDP::computeGains(const unsigned int& t) {
         Quu_inv_[t](boxqp_sol.free_idx[i], boxqp_sol.free_idx[j]) = boxqp_sol.Hff_inv(i, j);
 
     // Compute controls
-    K_[t] = Quu_inv_[t] * Qxu_[t].transpose();
-    k_[t] = -boxqp_sol.x;
+    K_[t].noalias() = Quu_inv_[t] * Qxu_[t].transpose();
+    k_[t].noalias() = -boxqp_sol.x;
 
     for (size_t j = 0; j < boxqp_sol.clamped_idx.size(); ++j) K_[t](boxqp_sol.clamped_idx[j]) = 0.0;
   }
@@ -81,7 +80,7 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
 
     // Clamp!
     if (m->get_has_control_limits()) {
-      us_try_[t] = us_try_[t].cwiseMax(m->get_u_lower_limit()).cwiseMin(m->get_u_upper_limit());
+      us_try_[t] = us_try_[t].cwiseMax(m->get_u_lb()).cwiseMin(m->get_u_ub());
     }
 
     m->calc(d, xs_try_[t], us_try_[t]);

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019, The University of Edinburgh
+// Copyright (C) 2019, CNRS-LAAS, The University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,7 +12,7 @@
 #include <Eigen/Cholesky>
 #include <vector>
 #include "crocoddyl/core/solvers/fddp.hpp"
-#include "crocoddyl/core/solvers/box_qp.h"
+#include "crocoddyl/core/solvers/box-qp.hpp"
 
 namespace crocoddyl {
 
@@ -23,9 +23,9 @@ class SolverBoxDDP : public SolverDDP {
   explicit SolverBoxDDP(ShootingProblem& problem);
   ~SolverBoxDDP();
 
-  void allocateData() override;
-  void computeGains(unsigned int const& t) override;
-  void forwardPass(const double& steplength) override;
+  virtual void allocateData();
+  virtual void computeGains(unsigned int const& t);
+  virtual void forwardPass(const double& steplength);
 
  protected:
   std::vector<Eigen::MatrixXd> Quu_inv_;

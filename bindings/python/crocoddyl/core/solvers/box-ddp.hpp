@@ -10,7 +10,6 @@
 #define BINDINGS_PYTHON_CROCODDYL_CORE_SOLVERS_BOX_DDP_HPP_
 
 #include "crocoddyl/core/solvers/box-ddp.hpp"
-#include "crocoddyl/core/solvers/box_qp.h"
 
 namespace crocoddyl {
 namespace python {
