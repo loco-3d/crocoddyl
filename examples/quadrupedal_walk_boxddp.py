@@ -76,7 +76,6 @@ if WITHPLOT:
 
     # Plot convergence
     log = boxddp.getCallbacks()[0]
-    from crocoddyl import plotConvergence
     crocoddyl.plotConvergence(log.costs,
                               log.control_regs,
                               log.state_regs,
