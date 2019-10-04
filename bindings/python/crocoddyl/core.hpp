@@ -26,6 +26,7 @@
 #include "python/crocoddyl/core/activations/quadratic.hpp"
 #include "python/crocoddyl/core/activations/weighted-quadratic.hpp"
 #include "python/crocoddyl/core/activations/quadratic-barrier.hpp"
+#include "python/crocoddyl/core/activations/smooth-abs.hpp"
 #include "python/crocoddyl/core/solvers/box-ddp.hpp"
 #include "python/crocoddyl/core/solvers/ddp.hpp"
 #include "python/crocoddyl/core/solvers/fddp.hpp"
