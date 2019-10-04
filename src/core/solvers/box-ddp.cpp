@@ -26,27 +26,35 @@ SolverBoxDDP::~SolverBoxDDP() {}
 void SolverBoxDDP::allocateData() {
   SolverDDP::allocateData();
 
-  const unsigned int& T = problem_.get_T();
+  unsigned int nu_max = 0;
+  unsigned int const& T = problem_.get_T();
   Quu_inv_.resize(T);
   for (unsigned int t = 0; t < T; ++t) {
     ActionModelAbstract* model = problem_.running_models_[t];
-    const unsigned int& nu = model->get_nu();
+    unsigned int const& nu = model->get_nu();
+
+    // Store the largest number of controls across all models to allocate u_ll_, u_hl_
+    if (nu > nu_max) nu_max = nu;
 
     Quu_inv_[t] = Eigen::MatrixXd::Zero(nu, nu);
   }
+
+  u_ll_.resize(nu_max);
+  u_hl_.resize(nu_max);
 }
 
 void SolverBoxDDP::computeGains(const unsigned int& t) {
   if (problem_.running_models_[t]->get_nu() > 0) {
     if (!problem_.running_models_[t]->get_has_control_limits()) {
-      std::cerr << "NOT LIMITED!!" << problem_.running_models_[t]->get_u_lb() << std::endl;
+      // No control limits on this model: Use vanilla DDP
       SolverDDP::computeGains(t);
       return;
     }
-    Eigen::VectorXd low_limit = problem_.running_models_[t]->get_u_lb() - us_[t],
-                    high_limit = problem_.running_models_[t]->get_u_ub() - us_[t];
 
-    BoxQPSolution boxqp_sol = BoxQP(Quu_[t], Qu_[t], low_limit, high_limit, us_[t], 0.1, 100, 1e-5, ureg_);
+    u_ll_ = problem_.running_models_[t]->get_u_lb() - us_[t];
+    u_hl_ = problem_.running_models_[t]->get_u_ub() - us_[t];
+
+    BoxQPSolution boxqp_sol = BoxQP(Quu_[t], Qu_[t], u_ll_, u_hl_, us_[t], 0.1, 100, 1e-5, ureg_);
 
     Quu_inv_[t].setZero();
     for (size_t i = 0; i < boxqp_sol.free_idx.size(); ++i)

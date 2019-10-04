@@ -29,6 +29,8 @@ class SolverBoxDDP : public SolverDDP {
 
  protected:
   std::vector<Eigen::MatrixXd> Quu_inv_;
+  Eigen::VectorXd u_ll_;
+  Eigen::VectorXd u_hl_;
 };
 
 }  // namespace crocoddyl
