@@ -3,7 +3,7 @@ Contact RObot COntrol by Differential DYnamic programming Library (crocoddyl)
 
 ## <img align="center" height="20" src="https://i.imgur.com/vAYeCzC.png"/> Introduction
 
-**[Crocoddyl]((https://cmastalli.github.io/publications/crocoddyl20unpub.html))** is an optimal control library for robot control under contact sequence.
+**[Crocoddyl](https://cmastalli.github.io/publications/crocoddyl20unpub.html)** is an optimal control library for robot control under contact sequence.
 Its solver is based on an efficient Differential Dynamic Programming (DDP) algorithm.
 **Crocoddyl** computes optimal trajectories along to optimal feedback gains.
 It uses **Pinocchio** for fast computation of robot dynamics and its analytical derivatives.
