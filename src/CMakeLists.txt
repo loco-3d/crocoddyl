@@ -20,6 +20,7 @@ SET(${PROJECT_NAME}_SOURCES
   core/activations/quadratic.cpp
   core/activations/weighted-quadratic.cpp
   core/activations/quadratic-barrier.cpp
+  core/activations/smooth-abs.cpp
   multibody/cost-base.cpp
   multibody/contact-base.cpp
   multibody/impulse-base.cpp
