@@ -12,7 +12,13 @@ namespace crocoddyl {
 
 DifferentialActionModelAbstract::DifferentialActionModelAbstract(StateAbstract& state, unsigned int const& nu,
                                                                  unsigned int const& nr)
-    : nu_(nu), nr_(nr), state_(state), unone_(Eigen::VectorXd::Zero(nu)) {}
+    : nu_(nu),
+      nr_(nr),
+      state_(state),
+      unone_(Eigen::VectorXd::Zero(nu)),
+      u_lb_(Eigen::VectorXd::Constant(nu, -std::numeric_limits<double>::infinity())),
+      u_ub_(Eigen::VectorXd::Constant(nu, std::numeric_limits<double>::infinity())),
+      has_control_limits_(false) {}
 
 DifferentialActionModelAbstract::~DifferentialActionModelAbstract() {}
 

@@ -15,8 +15,8 @@ ActionModelAbstract::ActionModelAbstract(StateAbstract& state, unsigned int cons
       nr_(nr),
       state_(state),
       unone_(Eigen::VectorXd::Zero(nu)),
-      u_lb_(Eigen::VectorXd::Constant(nu, 1, -std::numeric_limits<double>::infinity())),
-      u_ub_(Eigen::VectorXd::Constant(nu, 1, std::numeric_limits<double>::infinity())),
+      u_lb_(Eigen::VectorXd::Constant(nu, -std::numeric_limits<double>::infinity())),
+      u_ub_(Eigen::VectorXd::Constant(nu, std::numeric_limits<double>::infinity())),
       has_control_limits_(false) {}
 
 ActionModelAbstract::~ActionModelAbstract() {}
