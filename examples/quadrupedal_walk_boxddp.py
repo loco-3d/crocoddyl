@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 import crocoddyl
 import pinocchio
 from crocoddyl.utils.quadruped import SimpleQuadrupedalGaitProblem
-from crocoddyl import plotConvergence
 
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
@@ -77,6 +76,7 @@ if WITHPLOT:
 
     # Plot convergence
     log = boxddp.getCallbacks()[0]
+    from crocoddyl import plotConvergence
     crocoddyl.plotConvergence(log.costs,
                               log.control_regs,
                               log.state_regs,
