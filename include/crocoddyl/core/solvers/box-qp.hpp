@@ -30,6 +30,10 @@ typedef struct BoxQPSolution {
 inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, const Eigen::VectorXd& b_low,
                            const Eigen::VectorXd& b_high, const Eigen::VectorXd& x_init, const double gamma,
                            const int max_iterations, const double epsilon, const double lambda) {
+  if (max_iterations < 0) {
+    throw std::runtime_error("Max iterations needs to be positive.");
+  }
+
   int it = 0;
   Eigen::VectorXd delta_xf(x_init.size()), x = x_init;
   std::vector<size_t> clamped_idx, free_idx;
@@ -102,9 +106,9 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
     if (clamped_idx.size() == 0) {
       // std::cout << "Hff_inv=" << Hff_inv.rows() << "x" << Hff_inv.cols() << ", q_free=" << q_free.size() << ",
       // x_free=" << x_free.size() << std::endl;
-      delta_xf = -Hff_inv * (q_free)-x_free;
+      delta_xf.noalias() = -Hff_inv * (q_free)-x_free;
     } else {
-      delta_xf = -Hff_inv * (q_free + Hfc * x_clamped) - x_free;
+      delta_xf.noalias() = -Hff_inv * (q_free + Hfc * x_clamped) - x_free;
     }
 
     double f_old = (0.5 * x.transpose() * H * x + q.transpose() * x)(0);
