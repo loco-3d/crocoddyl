@@ -60,13 +60,13 @@ class ActionModelNumDiff : public ActionModelAbstract {
   ~ActionModelNumDiff();
 
   /**
-   * @brief @copydoc ActionDataAbstract::calc()
+   * @brief @copydoc ActionModelAbstract::calc()
    */
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u);
 
   /**
-   * @brief @copydoc ActionDataAbstract::calcDiff()
+   * @brief @copydoc ActionModelAbstract::calcDiff()
    */
   void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);

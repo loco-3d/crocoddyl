@@ -9,6 +9,7 @@ SET(${PROJECT_NAME}_SOURCES
   core/numdiff/state.cpp
   core/numdiff/action.cpp
   core/numdiff/diff-action.cpp
+  core/numdiff/activation.cpp
   core/utils/callbacks.cpp
   core/optctrl/shooting.cpp
   core/solvers/ddp.cpp
