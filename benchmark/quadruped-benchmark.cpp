@@ -1,10 +1,13 @@
+
 #include "quadruped-gaits.hpp"
 #include <pinocchio/parsers/urdf.hpp>
+#include <pinocchio/parsers/srdf.hpp>
+#include <pinocchio/multibody/joint/fwd.hpp>
 #include <crocoddyl/core/solvers/ddp.hpp>
 #include <ctime>
+#include <iostream>
 
 int main(int argc, char* argv[]) {
-  bool CALLBACKS = false;
   unsigned int T = 5e3;  // number of trials
   unsigned int MAXITER = 1000;
 
@@ -13,11 +16,11 @@ int main(int argc, char* argv[]) {
   }
   
   pinocchio::Model rmodel;
-  pinocchio::urdf::buildModel(HYQ_URDF, rmodel);
-  crocoddyl::StateMultibody state(rmodel);
+  pinocchio::urdf::buildModel(HYQ_URDF, pinocchio::JointModelFreeFlyer(), rmodel);
+  pinocchio::srdf::loadReferenceConfigurations(rmodel, HYQ_SRDF, false);
 
-  crocoddyl::SimpleQuadrupedalGaitProblem gait(robot_model, "lfFoot", "rfFoot",
-                                               "lhFoot", "rhFoot");
+  crocoddyl::SimpleQuadrupedGaitProblem gait(rmodel, "lf_foot", "rf_foot",
+                                             "lh_foot", "rh_foot");
 
   const Eigen::VectorXd& x0 = gait.get_defaultState();
 
@@ -26,25 +29,22 @@ int main(int argc, char* argv[]) {
   const unsigned int  stepKnots (25), supportKnots(2);
   
   //DDP Solver
-  crocoddyl::SolverDDP ddp(gait.createWalkingProblem(x0, stepLength, stepHeight, timeStep,
-                                                     stepKnots, supportKnots));
+  crocoddyl::ShootingProblem problem(gait.createWalkingProblem(x0, stepLength, stepHeight,
+                                                               timeStep,stepKnots,
+                                                               supportKnots));
+  crocoddyl::SolverDDP ddp(problem);
   
   //Initial State
   const unsigned int N = ddp.get_problem().get_T();
   const std::vector<Eigen::VectorXd> xs(N + 1, x0);
-  std::vector<Eigen::VectorXd> us(N, Eigen::VectorXd::Zero(runningModel->get_nu()));
+  std::vector<Eigen::VectorXd> us(N, Eigen::VectorXd::Zero(problem.get_runningModels()[0]->get_nu()));
   for (unsigned int i = 0; i < N; ++i) {
     crocoddyl::ActionModelAbstract* model = problem.get_runningModels()[i];
     boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = problem.get_runningDatas()[i];
     model->quasiStatic(data, us[i], x0);
   }
   
-  if (CALLBACKS) {
-    std::vector<crocoddyl::CallbackAbstract*> cbs;
-    cbs.push_back(new crocoddyl::CallbackVerbose());
-    ddp.setCallbacks(cbs);
-  }
-  
+ 
   // Solving the optimal control problem
   struct timespec start, finish;
   double elapsed;
@@ -99,3 +99,4 @@ int main(int argc, char* argv[]) {
   max_duration = duration.maxCoeff();
   std::cout << "  ShootingProblem.calcDiff [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration
             << ")" << std::endl;
+}

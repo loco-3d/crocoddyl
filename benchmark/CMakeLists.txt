@@ -2,7 +2,6 @@ SET(${PROJECT_NAME}_BENCHMARK
   unicycle
   lqr
   arm-manipulation
-  quadruped
   )
 
 FOREACH(BENCHMARK_NAME ${${PROJECT_NAME}_BENCHMARK})
@@ -22,6 +21,8 @@ FOREACH(BENCHMARK_NAME ${${PROJECT_NAME}_BENCHMARK})
     TALOS_URDF="${EXAMPLE_ROBOT_DATA_PKGDATAROOTDIR}/example-robot-data/talos_data/urdf/talos_reduced.urdf")
   TARGET_COMPILE_DEFINITIONS(${BENCHMARK_NAME} PUBLIC
     HYQ_URDF="${EXAMPLE_ROBOT_DATA_PKGDATAROOTDIR}/example-robot-data/hyq_description/robots/hyq_no_sensors.urdf")
+  TARGET_COMPILE_DEFINITIONS(${BENCHMARK_NAME} PUBLIC
+    HYQ_SRDF="${EXAMPLE_ROBOT_DATA_PKGDATAROOTDIR}/example-robot-data/hyq_description/srdf/hyq.srdf")
   TARGET_COMPILE_DEFINITIONS(${BENCHMARK_NAME} PUBLIC
     TALOS_ARM_URDF="${EXAMPLE_ROBOT_DATA_PKGDATAROOTDIR}/example-robot-data/talos_data/robots/talos_left_arm.urdf")
 ENDFOREACH(BENCHMARK_NAME ${${PROJECT_NAME}_BENCHMARK})
