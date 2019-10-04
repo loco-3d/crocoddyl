@@ -17,8 +17,19 @@ IntegratedActionModelEuler::IntegratedActionModelEuler(DifferentialActionModelAb
       time_step_(time_step),
       time_step2_(time_step * time_step),
       with_cost_residual_(with_cost_residual) {
-  set_u_lb(differential_->get_u_lb());
-  set_u_ub(differential_->get_u_ub());
+  unsigned int const& ntau = differential_->get_nu();
+  if (ntau < nu_) {
+    Eigen::VectorXd lb = Eigen::VectorXd::Constant(nu_, -std::numeric_limits<double>::infinity());
+    lb.tail(ntau) = differential_->get_u_lb();
+    set_u_lb(lb);
+
+    Eigen::VectorXd ub = Eigen::VectorXd::Constant(nu_, -std::numeric_limits<double>::infinity());
+    ub.tail(ntau) = differential_->get_u_ub();
+    set_u_ub(ub);
+  } else {
+    set_u_lb(differential_->get_u_lb());
+    set_u_ub(differential_->get_u_ub());
+  }
 }
 
 IntegratedActionModelEuler::~IntegratedActionModelEuler() {}
