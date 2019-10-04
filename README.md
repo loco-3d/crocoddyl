@@ -37,18 +37,18 @@ If you want to follow the current developments, you can directly refer to the [d
  * analytical and sparse derivatives
  * geometrical systems friendly (with SE(3) manifold support)
  * handle autonomous and nonautomous dynamical systems
- <!-- * automatic differentiation support -->
  * numerical differentiation support
+<!-- * automatic differentiation support -->
 
 **Crocoddyl** is efficient and flexible:
 
  * cache friendly,
  * multi-thread friendly
- <!-- * automatic code generation support -->
  * Python bindings (including models and solvers abstractions)
  * C++11/14/17/20 compliant
  * extensively tested
-
+ <!-- * automatic code generation support -->
+ 
 
 ### Installation through robotpkg
 
