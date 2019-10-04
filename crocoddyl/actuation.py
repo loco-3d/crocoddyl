@@ -14,7 +14,7 @@ class ActuationModelDoublePendulum:
     def calc(self, data, x, u):
         S = np.zeros([self.nv,self.nu])
         S[1] = 1
-        data.a = np.dot(S,u)
+        data.a[:] = np.dot(S,u)
         return data.a
 
     def calcDiff(self, data, x, u, recalc=True):
