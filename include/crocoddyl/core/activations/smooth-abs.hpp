@@ -9,6 +9,31 @@
 #ifndef CROCODDYL_CORE_ACTIVATIONS_SMOOTH_ABS_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_SMOOTH_ABS_HPP_
 
-// TODO: ActivationModelSmoothAbs ActivationDataSmoothAbs
+#include "crocoddyl/core/activation-base.hpp"
+
+namespace crocoddyl {
+
+class ActivationModelSmoothAbs : public ActivationModelAbstract {
+ public:
+  explicit ActivationModelSmoothAbs(unsigned int const& nr);
+  ~ActivationModelSmoothAbs();
+
+  void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r);
+  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r,
+                const bool& recalc = true);
+  boost::shared_ptr<ActivationDataAbstract> createData();
+};
+
+struct ActivationDataSmoothAbs : public ActivationDataAbstract {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  template <typename Activation>
+  explicit ActivationDataSmoothAbs(Activation* const activation)
+      : ActivationDataAbstract(activation), a(Eigen::VectorXd::Zero(activation->get_nr())) {}
+
+  Eigen::VectorXd a;
+};
+
+}  // namespace crocoddyl
 
 #endif  // CROCODDYL_CORE_ACTIVATIONS_SMOOTH_ABS_HPP_
