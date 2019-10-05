@@ -47,24 +47,7 @@ void ActivationModelNumDiff::calcDiff(const boost::shared_ptr<ActivationDataAbst
   }
 
   // Computing the d^2 action(r) / dr^2
-  for (unsigned int i_row = 0; i_row < nr; ++i_row) {
-    for (unsigned int i_col = 0; i_col < nr; ++i_col) {
-      data_nd->rp = r;
-      data_nd->rp(i_row) += disturbance_;
-      data_nd->rp(i_col) += disturbance_;
-      model_.calc(data_nd->data_r2p[0], data_nd->rp);
-      data_nd->rp = r;
-      data_nd->rp(i_row) += disturbance_;
-      model_.calc(data_nd->data_r2p[1], data_nd->rp);
-      data_nd->rp = r;
-      data_nd->rp(i_col) += disturbance_;
-      model_.calc(data_nd->data_r2p[2], data_nd->rp);
-
-      data->Arr(i_row, i_col) =
-          (data_nd->data_r2p[0]->a_value - data_nd->data_r2p[1]->a_value - data_nd->data_r2p[2]->a_value + a_value0) /
-          (disturbance_ * disturbance_);
-    }
-  }
+  data->Arr.noalias() = data->Ar * data->Ar.transpose();
 }
 
 ActivationModelAbstract& ActivationModelNumDiff::get_model() const { return model_; }

@@ -178,7 +178,7 @@ void test_partial_derivatives_against_numdiff(TestTypes::Type test_type) {
   BOOST_CHECK(std::abs(data->a_value - data_num_diff->a_value) < tol);
   BOOST_CHECK((data->Ar - data_num_diff->Ar).isMuchSmallerThan(1.0, tol));
 
-  // numerical differentiation of the Hessian is not good enough right now.
+  // numerical differentiation of the Hessian is not good enough to be tested.
   // BOOST_CHECK((data->Arr - data_num_diff->Arr).isMuchSmallerThan(1.0, tol));
 }
 
