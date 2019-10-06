@@ -53,6 +53,7 @@ void exposeCore() {
   exposeActivationQuad();
   exposeActivationWeightedQuad();
   exposeActivationQuadraticBarrier();
+  exposeActivationSmoothAbs();
   exposeSolverDDP();
   exposeSolverFDDP();
   exposeSolverBoxDDP();
