@@ -2,6 +2,7 @@ SET(${PROJECT_NAME}_EXAMPLES_PYTHON
   arm_manipulation
   bipedal_walk
   quadrupedal_gaits
+  quadrupedal_walk_boxddp
   )
 
 FOREACH(examples ${${PROJECT_NAME}_EXAMPLES_PYTHON})

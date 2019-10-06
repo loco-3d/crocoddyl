@@ -13,6 +13,7 @@ SET(${PROJECT_NAME}_SOURCES
   core/optctrl/shooting.cpp
   core/solvers/ddp.cpp
   core/solvers/fddp.cpp
+  core/solvers/box-ddp.cpp
   core/states/euclidean.cpp
   core/actions/unicycle.cpp
   core/actions/lqr.cpp
