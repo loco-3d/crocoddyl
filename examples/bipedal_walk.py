@@ -54,7 +54,7 @@ for i, phase in enumerate(GAITPHASES):
             crocoddyl.CallbackDisplay(talos_legs, 4, 4, cameraTF)
         ])
     elif WITHDISPLAY:
-        ddp[i].setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackVerbose()])
+        ddp[i].setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(talos_legs, 4, 4, cameraTF)])
     elif WITHPLOT:
         ddp[i].setCallbacks([
             crocoddyl.CallbackLogger(),

@@ -45,7 +45,7 @@ if WITHDISPLAY and WITHPLOT:
          crocoddyl.CallbackVerbose(),
          crocoddyl.CallbackDisplay(hyq, 4, 4, cameraTF)])
 elif WITHDISPLAY:
-    boxddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackVerbose()])
+    boxddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(hyq, 4, 4, cameraTF)])
 elif WITHPLOT:
     boxddp.setCallbacks([
         crocoddyl.CallbackLogger(),
