@@ -53,7 +53,7 @@ SETUP_PROJECT()
 # Add the different required and optional dependencies
 ADD_REQUIRED_DEPENDENCY("eigen3 >= 3.0.5")
 ADD_REQUIRED_DEPENDENCY("eigenpy")
-ADD_REQUIRED_DEPENDENCY("pinocchio >= 2.1.7")
+ADD_REQUIRED_DEPENDENCY("pinocchio >= 2.1.8")
 ADD_REQUIRED_DEPENDENCY("example-robot-data >= 2.2.0")
 ADD_OPTIONAL_DEPENDENCY("multicontact-api >= 1.1.0")
 ADD_OPTIONAL_DEPENDENCY("quadprog")

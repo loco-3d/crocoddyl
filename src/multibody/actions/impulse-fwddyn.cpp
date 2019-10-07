@@ -59,7 +59,7 @@ void ActionModelImpulseFwdDynamics::calc(const boost::shared_ptr<ActionDataAbstr
   }
 #endif
 
-  pinocchio::impulseDynamics(pinocchio_, d->pinocchio, q, v, d->impulses->Jc, r_coeff_, false);
+  pinocchio::impulseDynamics(pinocchio_, d->pinocchio, v, d->impulses->Jc, r_coeff_, JMinvJt_damping_);
   d->xnext.head(nq) = q;
   d->xnext.tail(nv) = d->pinocchio.dq_after;
   impulses_.updateVelocity(d->impulses, d->pinocchio.dq_after);
