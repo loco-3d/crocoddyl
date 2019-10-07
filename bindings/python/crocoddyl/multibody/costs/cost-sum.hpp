@@ -48,13 +48,13 @@ void exposeCostSum() {
 
   bp::class_<CostModelSum, boost::noncopyable>(
       "CostModelSum",
-      bp::init<StateMultibody&, unsigned int, bool>(
+      bp::init<StateMultibody&, std::size_t, bool>(
           bp::args(" self", " state", " nu=state.nv", " withResiduals=True"),
           "Initialize the total cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param nu: dimension of control vector\n"
           ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
-      .def(bp::init<StateMultibody&, unsigned int>(
+      .def(bp::init<StateMultibody&, std::size_t>(
           bp::args(" self", " state", " nu"),
           "Initialize the total cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"

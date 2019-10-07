@@ -61,13 +61,13 @@ struct DifferentialActionDataNumDiff : public DifferentialActionDataAbstract {
     du.setZero();
     xp.setZero();
 
-    unsigned int const& ndx = model->get_model().get_state().get_ndx();
-    unsigned int const& nu = model->get_model().get_nu();
+    const std::size_t& ndx = model->get_model().get_state().get_ndx();
+    const std::size_t& nu = model->get_model().get_nu();
     data_0 = model->get_model().createData();
-    for (unsigned int i = 0; i < ndx; ++i) {
+    for (std::size_t i = 0; i < ndx; ++i) {
       data_x.push_back(model->get_model().createData());
     }
-    for (unsigned int i = 0; i < nu; ++i) {
+    for (std::size_t i = 0; i < nu; ++i) {
       data_u.push_back(model->get_model().createData());
     }
   }

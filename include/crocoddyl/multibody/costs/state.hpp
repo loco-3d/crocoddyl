@@ -17,12 +17,12 @@ namespace crocoddyl {
 class CostModelState : public CostModelAbstract {
  public:
   CostModelState(StateMultibody& state, ActivationModelAbstract& activation, const Eigen::VectorXd& xref,
-                 unsigned int const& nu);
+                 const std::size_t& nu);
   CostModelState(StateMultibody& state, ActivationModelAbstract& activation, const Eigen::VectorXd& xref);
-  CostModelState(StateMultibody& state, const Eigen::VectorXd& xref, unsigned int const& nu);
+  CostModelState(StateMultibody& state, const Eigen::VectorXd& xref, const std::size_t& nu);
   CostModelState(StateMultibody& state, const Eigen::VectorXd& xref);
-  CostModelState(StateMultibody& state, ActivationModelAbstract& activation, unsigned int const& nu);
-  CostModelState(StateMultibody& state, unsigned int const& nu);
+  CostModelState(StateMultibody& state, ActivationModelAbstract& activation, const std::size_t& nu);
+  CostModelState(StateMultibody& state, const std::size_t& nu);
   CostModelState(StateMultibody& state, ActivationModelAbstract& activation);
   explicit CostModelState(StateMultibody& state);
 

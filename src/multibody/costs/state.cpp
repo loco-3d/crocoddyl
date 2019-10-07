@@ -11,7 +11,7 @@
 namespace crocoddyl {
 
 CostModelState::CostModelState(StateMultibody& state, ActivationModelAbstract& activation, const Eigen::VectorXd& xref,
-                               unsigned int const& nu)
+                               const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), xref_(xref) {
   assert(xref_.size() == state_.get_nx() && "CostModelState: reference is not dimension nx");
   assert(activation_.get_nr() == state_.get_ndx() && "CostModelState: nr is not equals to ndx");
@@ -23,7 +23,7 @@ CostModelState::CostModelState(StateMultibody& state, ActivationModelAbstract& a
   assert(activation_.get_nr() == state_.get_ndx() && "CostModelState: nr is not equals to ndx");
 }
 
-CostModelState::CostModelState(StateMultibody& state, const Eigen::VectorXd& xref, unsigned int const& nu)
+CostModelState::CostModelState(StateMultibody& state, const Eigen::VectorXd& xref, const std::size_t& nu)
     : CostModelAbstract(state, state.get_ndx(), nu), xref_(xref) {
   assert(xref_.size() == state_.get_nx() && "CostModelState: reference is not dimension nx");
   assert(activation_.get_nr() == state_.get_ndx() && "CostModelState: nr is not equals to ndx");
@@ -35,13 +35,13 @@ CostModelState::CostModelState(StateMultibody& state, const Eigen::VectorXd& xre
   assert(activation_.get_nr() == state_.get_ndx() && "CostModelState: nr is not equals to ndx");
 }
 
-CostModelState::CostModelState(StateMultibody& state, ActivationModelAbstract& activation, unsigned int const& nu)
+CostModelState::CostModelState(StateMultibody& state, ActivationModelAbstract& activation, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), xref_(state.zero()) {
   assert(xref_.size() == state_.get_nx() && "CostModelState: reference is not dimension nx");
   assert(activation_.get_nr() == state_.get_ndx() && "CostModelState: nr is not equals to ndx");
 }
 
-CostModelState::CostModelState(StateMultibody& state, unsigned int const& nu)
+CostModelState::CostModelState(StateMultibody& state, const std::size_t& nu)
     : CostModelAbstract(state, state.get_ndx(), nu), xref_(state.zero()) {
   assert(xref_.size() == state_.get_nx() && "CostModelState: reference is not dimension nx");
   assert(activation_.get_nr() == state_.get_ndx() && "CostModelState: nr is not equals to ndx");

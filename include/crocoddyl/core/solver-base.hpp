@@ -25,7 +25,7 @@ class SolverAbstract {
   virtual ~SolverAbstract();
 
   virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, unsigned int const& maxiter = 100,
+                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t& maxiter = 100,
                      const bool& is_feasible = false, const double& reg_init = 1e-9) = 0;
   // TODO(cmastalli): computeDirection (polymorphism) returning descent direction and lambdas
   virtual void computeDirection(const bool& recalc) = 0;
@@ -44,7 +44,7 @@ class SolverAbstract {
   const std::vector<Eigen::VectorXd>& get_xs() const;
   const std::vector<Eigen::VectorXd>& get_us() const;
   const bool& get_isFeasible() const;
-  const unsigned int& get_iter() const;
+  const std::size_t& get_iter() const;
   const double& get_cost() const;
   const double& get_stop() const;
   const Eigen::Vector2d& get_d() const;
@@ -72,7 +72,7 @@ class SolverAbstract {
   double dVexp_;
   double th_acceptstep_;
   double th_stop_;
-  unsigned int iter_;
+  std::size_t iter_;
 };
 
 class CallbackAbstract {

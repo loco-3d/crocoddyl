@@ -23,7 +23,7 @@ class SolverFDDP : public SolverDDP {
   ~SolverFDDP();
 
   virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, unsigned int const& maxiter = 100,
+                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t& maxiter = 100,
                      const bool& is_feasible = false, const double& regInit = 1e-9);
   virtual const Eigen::Vector2d& expectedImprovement();
   void updateExpectedImprovement();

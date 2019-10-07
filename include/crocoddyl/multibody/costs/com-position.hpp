@@ -16,9 +16,9 @@ namespace crocoddyl {
 class CostModelCoMPosition : public CostModelAbstract {
  public:
   CostModelCoMPosition(StateMultibody& state, ActivationModelAbstract& activation, const Eigen::Vector3d& cref,
-                       unsigned int const& nu);
+                       const std::size_t& nu);
   CostModelCoMPosition(StateMultibody& state, ActivationModelAbstract& activation, const Eigen::Vector3d& cref);
-  CostModelCoMPosition(StateMultibody& state, const Eigen::Vector3d& cref, unsigned int const& nu);
+  CostModelCoMPosition(StateMultibody& state, const Eigen::Vector3d& cref, const std::size_t& nu);
   CostModelCoMPosition(StateMultibody& state, const Eigen::Vector3d& cref);
   ~CostModelCoMPosition();
 

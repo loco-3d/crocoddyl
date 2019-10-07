@@ -18,7 +18,7 @@ namespace crocoddyl {
 
 class ContactModel6D : public ContactModelAbstract {
  public:
-  ContactModel6D(StateMultibody& state, const FramePlacement& xref, unsigned int const& nu,
+  ContactModel6D(StateMultibody& state, const FramePlacement& xref, const std::size_t& nu,
                  const Eigen::Vector2d& gains = Eigen::Vector2d::Zero());
   ContactModel6D(StateMultibody& state, const FramePlacement& xref,
                  const Eigen::Vector2d& gains = Eigen::Vector2d::Zero());

@@ -12,7 +12,7 @@
 namespace crocoddyl {
 
 CostModelFrameTranslation::CostModelFrameTranslation(StateMultibody& state, ActivationModelAbstract& activation,
-                                                     const FrameTranslation& xref, unsigned int const& nu)
+                                                     const FrameTranslation& xref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), xref_(xref) {
   assert(activation_.get_nr() == 3 && "activation::nr is not equals to 3");
 }
@@ -24,7 +24,7 @@ CostModelFrameTranslation::CostModelFrameTranslation(StateMultibody& state, Acti
 }
 
 CostModelFrameTranslation::CostModelFrameTranslation(StateMultibody& state, const FrameTranslation& xref,
-                                                     unsigned int const& nu)
+                                                     const std::size_t& nu)
     : CostModelAbstract(state, 3, nu), xref_(xref) {}
 
 CostModelFrameTranslation::CostModelFrameTranslation(StateMultibody& state, const FrameTranslation& xref)
@@ -58,7 +58,7 @@ void CostModelFrameTranslation::calcDiff(const boost::shared_ptr<CostDataAbstrac
   d->J = d->pinocchio->oMf[xref_.frame].rotation() * d->fJf.topRows<3>();
 
   // Compute the derivatives of the frame placement
-  unsigned int const& nv = state_.get_nv();
+  const std::size_t& nv = state_.get_nv();
   activation_.calcDiff(d->activation, d->r, recalc);
   d->Rx.leftCols(nv) = d->J;
   d->Lx.head(nv) = d->J.transpose() * d->activation->Ar;

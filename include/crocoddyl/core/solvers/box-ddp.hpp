@@ -24,7 +24,7 @@ class SolverBoxDDP : public SolverDDP {
   ~SolverBoxDDP();
 
   virtual void allocateData();
-  virtual void computeGains(unsigned int const& t);
+  virtual void computeGains(const std::size_t& t);
   virtual void forwardPass(const double& steplength);
 
  protected:

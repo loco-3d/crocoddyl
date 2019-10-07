@@ -19,8 +19,8 @@ struct ContactDataAbstract;  // forward declaration
 
 class ContactModelAbstract {
  public:
-  ContactModelAbstract(StateMultibody& state, unsigned int const& nc, unsigned int const& nu);
-  ContactModelAbstract(StateMultibody& state, unsigned int const& nc);
+  ContactModelAbstract(StateMultibody& state, const std::size_t& nc, const std::size_t& nu);
+  ContactModelAbstract(StateMultibody& state, const std::size_t& nc);
   ~ContactModelAbstract();
 
   virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data,
@@ -34,13 +34,13 @@ class ContactModelAbstract {
   virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::Data* const data);
 
   StateMultibody& get_state() const;
-  unsigned int const& get_nc() const;
-  unsigned int const& get_nu() const;
+  const std::size_t& get_nc() const;
+  const std::size_t& get_nu() const;
 
  protected:
   StateMultibody& state_;
-  unsigned int nc_;
-  unsigned int nu_;
+  std::size_t nc_;
+  std::size_t nu_;
 
 #ifdef PYTHON_BINDINGS
 

@@ -17,7 +17,7 @@ IntegratedActionModelEuler::IntegratedActionModelEuler(DifferentialActionModelAb
       time_step_(time_step),
       time_step2_(time_step * time_step),
       with_cost_residual_(with_cost_residual) {
-  unsigned int const& ntau = differential_->get_nu();
+  const std::size_t& ntau = differential_->get_nu();
   if (ntau < nu_) {
     Eigen::VectorXd lb = Eigen::VectorXd::Constant(nu_, -std::numeric_limits<double>::infinity());
     lb.tail(ntau) = differential_->get_u_lb();
@@ -65,7 +65,7 @@ void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbst
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
   assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
 
-  const unsigned int& nv = differential_->get_state().get_nv();
+  const std::size_t& nv = differential_->get_state().get_nv();
   if (recalc) {
     calc(data, x, u);
   }
@@ -81,7 +81,7 @@ void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbst
   const Eigen::MatrixXd& da_du = d->differential->Fu;
   d->ddx_dx << da_dx * time_step_, da_dx;
   d->ddx_du << da_du * time_step_, da_du;
-  for (unsigned int i = 0; i < nv; ++i) {
+  for (std::size_t i = 0; i < nv; ++i) {
     d->ddx_dx(i, i + nv) += 1.;
   }
   d->Fx = d->dxnext_dx + time_step_ * d->dxnext_ddx * d->ddx_dx;

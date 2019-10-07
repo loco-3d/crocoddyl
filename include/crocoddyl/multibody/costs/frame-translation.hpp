@@ -18,9 +18,9 @@ namespace crocoddyl {
 class CostModelFrameTranslation : public CostModelAbstract {
  public:
   CostModelFrameTranslation(StateMultibody& state, ActivationModelAbstract& activation, const FrameTranslation& xref,
-                            unsigned int const& nu);
+                            const std::size_t& nu);
   CostModelFrameTranslation(StateMultibody& state, ActivationModelAbstract& activation, const FrameTranslation& xref);
-  CostModelFrameTranslation(StateMultibody& state, const FrameTranslation& xref, unsigned int const& nu);
+  CostModelFrameTranslation(StateMultibody& state, const FrameTranslation& xref, const std::size_t& nu);
   CostModelFrameTranslation(StateMultibody& state, const FrameTranslation& xref);
   ~CostModelFrameTranslation();
 

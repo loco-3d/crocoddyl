@@ -86,10 +86,10 @@ class ActionModelFactory {
   crocoddyl::ActionModelAbstract* get_action_model() { return action_model_; }
 
   double num_diff_modifier_;
-  unsigned int nx_;
+  std::size_t nx_;
 
  private:
-  unsigned int nu_;
+  std::size_t nu_;
   bool driftfree_;
   TestTypes::Type action_type_;
   crocoddyl::ActionModelAbstract* action_model_;
@@ -121,7 +121,7 @@ void test_calc_returns_state(TestTypes::Type action_model_type) {
   // Getting the state dimension from calc() call
   model->calc(data, x, u);
 
-  BOOST_CHECK(data->xnext.size() == model->get_state().get_nx());
+  BOOST_CHECK(static_cast<std::size_t>(data->xnext.size()) == model->get_state().get_nx());
   BOOST_CHECK(factory.nx_ == model->get_state().get_nx());
 }
 

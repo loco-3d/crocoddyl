@@ -11,7 +11,7 @@
 namespace crocoddyl {
 
 ActivationModelWeightedQuad::ActivationModelWeightedQuad(const Eigen::VectorXd& weights)
-    : ActivationModelAbstract((unsigned int)weights.size()), weights_(weights) {}
+    : ActivationModelAbstract(weights.size()), weights_(weights) {}
 
 ActivationModelWeightedQuad::~ActivationModelWeightedQuad() {}
 

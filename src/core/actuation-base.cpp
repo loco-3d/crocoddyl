@@ -10,7 +10,7 @@
 
 namespace crocoddyl {
 
-ActuationModelAbstract::ActuationModelAbstract(StateAbstract& state, unsigned int const& nu) : nu_(nu), state_(state) {
+ActuationModelAbstract::ActuationModelAbstract(StateAbstract& state, const std::size_t& nu) : nu_(nu), state_(state) {
   assert(nu_ != 0 && "nu cannot be zero");
 }
 
@@ -20,7 +20,7 @@ boost::shared_ptr<ActuationDataAbstract> ActuationModelAbstract::createData() {
   return boost::make_shared<ActuationDataAbstract>(this);
 }
 
-unsigned int const& ActuationModelAbstract::get_nu() const { return nu_; }
+const std::size_t& ActuationModelAbstract::get_nu() const { return nu_; }
 
 StateAbstract& ActuationModelAbstract::get_state() const { return state_; }
 

@@ -11,8 +11,8 @@
 
 namespace crocoddyl {
 
-CostModelAbstract::CostModelAbstract(StateMultibody& state, ActivationModelAbstract& activation,
-                                     unsigned int const& nu, const bool& with_residuals)
+CostModelAbstract::CostModelAbstract(StateMultibody& state, ActivationModelAbstract& activation, const std::size_t& nu,
+                                     const bool& with_residuals)
     : state_(state),
       activation_(activation),
       nu_(nu),
@@ -27,7 +27,7 @@ CostModelAbstract::CostModelAbstract(StateMultibody& state, ActivationModelAbstr
       with_residuals_(with_residuals),
       unone_(Eigen::VectorXd::Zero(state.get_nv())) {}
 
-CostModelAbstract::CostModelAbstract(StateMultibody& state, unsigned int const& nr, const unsigned int& nu,
+CostModelAbstract::CostModelAbstract(StateMultibody& state, const std::size_t& nr, const std::size_t& nu,
                                      const bool& with_residuals)
     : state_(state),
       activation_(*new ActivationModelQuad(nr)),
@@ -35,7 +35,7 @@ CostModelAbstract::CostModelAbstract(StateMultibody& state, unsigned int const& 
       with_residuals_(with_residuals),
       unone_(Eigen::VectorXd::Zero(nu)) {}
 
-CostModelAbstract::CostModelAbstract(StateMultibody& state, unsigned int const& nr, const bool& with_residuals)
+CostModelAbstract::CostModelAbstract(StateMultibody& state, const std::size_t& nr, const bool& with_residuals)
     : state_(state),
       activation_(*new ActivationModelQuad(nr)),
       nu_(state.get_nv()),
@@ -62,6 +62,6 @@ StateMultibody& CostModelAbstract::get_state() const { return state_; }
 
 ActivationModelAbstract& CostModelAbstract::get_activation() const { return activation_; }
 
-unsigned int const& CostModelAbstract::get_nu() const { return nu_; }
+const std::size_t& CostModelAbstract::get_nu() const { return nu_; }
 
 }  // namespace crocoddyl

@@ -10,7 +10,7 @@
 
 namespace crocoddyl {
 
-ContactModelMultiple::ContactModelMultiple(StateMultibody& state, unsigned int const& nu)
+ContactModelMultiple::ContactModelMultiple(StateMultibody& state, const std::size_t& nu)
     : state_(state), nc_(0), nu_(nu) {}
 
 ContactModelMultiple::ContactModelMultiple(StateMultibody& state) : state_(state), nc_(0), nu_(state.get_nv()) {}
@@ -41,9 +41,9 @@ void ContactModelMultiple::removeContact(const std::string& name) {
 void ContactModelMultiple::calc(const boost::shared_ptr<ContactDataMultiple>& data,
                                 const Eigen::Ref<const Eigen::VectorXd>& x) {
   assert(data->contacts.size() == contacts_.size() && "it doesn't match the number of contact datas and models");
-  unsigned int nc = 0;
+  std::size_t nc = 0;
 
-  unsigned int const& nv = state_.get_nv();
+  const std::size_t& nv = state_.get_nv();
   ContactModelContainer::iterator it_m, end_m;
   ContactDataContainer::iterator it_d, end_d;
   for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();
@@ -53,7 +53,7 @@ void ContactModelMultiple::calc(const boost::shared_ptr<ContactDataMultiple>& da
     assert(it_m->first == it_d->first && "it doesn't match the contact name between data and model");
 
     m_i.contact->calc(d_i, x);
-    unsigned int const& nc_i = m_i.contact->get_nc();
+    const std::size_t& nc_i = m_i.contact->get_nc();
     data->a0.segment(nc, nc_i) = d_i->a0;
     data->Jc.block(nc, 0, nc_i, nv) = d_i->Jc;
     nc += nc_i;
@@ -66,9 +66,9 @@ void ContactModelMultiple::calcDiff(const boost::shared_ptr<ContactDataMultiple>
   if (recalc) {
     calc(data, x);
   }
-  unsigned int nc = 0;
+  std::size_t nc = 0;
 
-  unsigned int const& ndx = state_.get_ndx();
+  const std::size_t& ndx = state_.get_ndx();
   ContactModelContainer::iterator it_m, end_m;
   ContactDataContainer::iterator it_d, end_d;
   for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();
@@ -78,7 +78,7 @@ void ContactModelMultiple::calcDiff(const boost::shared_ptr<ContactDataMultiple>
     assert(it_m->first == it_d->first && "it doesn't match the contact name between data and model");
 
     m_i.contact->calcDiff(d_i, x, false);
-    unsigned int const& nc_i = m_i.contact->get_nc();
+    const std::size_t& nc_i = m_i.contact->get_nc();
     data->da0_dx.block(nc, 0, nc_i, ndx) = d_i->da0_dx;
     nc += nc_i;
   }
@@ -95,7 +95,7 @@ void ContactModelMultiple::updateForce(const boost::shared_ptr<ContactDataMultip
                                        const Eigen::VectorXd& force) {
   assert(force.size() == nc_ && "force has wrong dimension, it should be nc vector");
   assert(data->contacts.size() == contacts_.size() && "it doesn't match the number of contact datas and models");
-  unsigned int nc = 0;
+  std::size_t nc = 0;
 
   for (ForceIterator it = data->fext.begin(); it != data->fext.end(); ++it) {
     *it = pinocchio::Force::Zero();
@@ -109,7 +109,7 @@ void ContactModelMultiple::updateForce(const boost::shared_ptr<ContactDataMultip
     boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
     assert(it_m->first == it_d->first && "it doesn't match the contact name between data and model");
 
-    unsigned int const& nc_i = m_i.contact->get_nc();
+    const std::size_t& nc_i = m_i.contact->get_nc();
     const Eigen::VectorBlock<const Eigen::VectorXd, Eigen::Dynamic> force_i = force.segment(nc, nc_i);
     m_i.contact->updateForce(d_i, force_i);
     data->fext[d_i->joint] = d_i->f;
@@ -126,11 +126,11 @@ void ContactModelMultiple::updateAccelerationDiff(const boost::shared_ptr<Contac
 
 void ContactModelMultiple::updateForceDiff(const boost::shared_ptr<ContactDataMultiple>& data,
                                            const Eigen::MatrixXd& df_dx, const Eigen::MatrixXd& df_du) const {
-  unsigned int const& ndx = state_.get_ndx();
+  const std::size_t& ndx = state_.get_ndx();
   assert((df_dx.rows() == nc_ || df_dx.cols() == ndx) && "df_dx has wrong dimension");
   assert((df_du.rows() == nc_ || df_du.cols() == nu_) && "df_du has wrong dimension");
   assert(data->contacts.size() == contacts_.size() && "it doesn't match the number of contact datas and models");
-  unsigned int nc = 0;
+  std::size_t nc = 0;
 
   ContactModelContainer::const_iterator it_m, end_m;
   ContactDataContainer::const_iterator it_d, end_d;
@@ -140,7 +140,7 @@ void ContactModelMultiple::updateForceDiff(const boost::shared_ptr<ContactDataMu
     const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
     assert(it_m->first == it_d->first && "it doesn't match the contact name between data and model");
 
-    unsigned int const& nc_i = m_i.contact->get_nc();
+    std::size_t const& nc_i = m_i.contact->get_nc();
     const Eigen::Block<const Eigen::MatrixXd> df_dx_i = df_dx.block(nc, 0, nc_i, ndx);
     const Eigen::Block<const Eigen::MatrixXd> df_du_i = df_du.block(nc, 0, nc_i, nu_);
     m_i.contact->updateForceDiff(d_i, df_dx_i, df_du_i);
@@ -156,8 +156,8 @@ StateMultibody& ContactModelMultiple::get_state() const { return state_; }
 
 const ContactModelMultiple::ContactModelContainer& ContactModelMultiple::get_contacts() const { return contacts_; }
 
-const unsigned int& ContactModelMultiple::get_nc() const { return nc_; }
+const std::size_t& ContactModelMultiple::get_nc() const { return nc_; }
 
-const unsigned int& ContactModelMultiple::get_nu() const { return nu_; }
+const std::size_t& ContactModelMultiple::get_nu() const { return nu_; }
 
 }  // namespace crocoddyl

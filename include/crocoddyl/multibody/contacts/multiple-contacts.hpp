@@ -32,7 +32,7 @@ class ContactModelMultiple {
   typedef std::map<std::string, boost::shared_ptr<ContactDataAbstract> > ContactDataContainer;
   typedef pinocchio::container::aligned_vector<pinocchio::Force>::iterator ForceIterator;
 
-  ContactModelMultiple(StateMultibody& state, unsigned int const& nu);
+  ContactModelMultiple(StateMultibody& state, const std::size_t& nu);
   ContactModelMultiple(StateMultibody& state);
   ~ContactModelMultiple();
 
@@ -52,14 +52,14 @@ class ContactModelMultiple {
 
   StateMultibody& get_state() const;
   const ContactModelContainer& get_contacts() const;
-  const unsigned int& get_nc() const;
-  const unsigned int& get_nu() const;
+  const std::size_t& get_nc() const;
+  const std::size_t& get_nu() const;
 
  private:
   StateMultibody& state_;
   ContactModelContainer contacts_;
-  unsigned int nc_;
-  unsigned int nu_;
+  std::size_t nc_;
+  std::size_t nu_;
 
 #ifdef PYTHON_BINDINGS
 

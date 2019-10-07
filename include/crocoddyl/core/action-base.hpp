@@ -20,7 +20,7 @@ struct ActionDataAbstract;  // forward declaration
 
 class ActionModelAbstract {
  public:
-  ActionModelAbstract(StateAbstract& state, unsigned int const& nu, unsigned int const& nr = 0);
+  ActionModelAbstract(StateAbstract& state, const std::size_t& nu, const std::size_t& nr = 0);
   virtual ~ActionModelAbstract();
 
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -33,11 +33,11 @@ class ActionModelAbstract {
   void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
 
   void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<Eigen::VectorXd> u,
-                   const Eigen::Ref<const Eigen::VectorXd>& x, unsigned int const& maxiter = 100,
+                   const Eigen::Ref<const Eigen::VectorXd>& x, const std::size_t& maxiter = 100,
                    const double& tol = 1e-9);
 
-  unsigned int const& get_nu() const;
-  unsigned int const& get_nr() const;
+  const std::size_t& get_nu() const;
+  const std::size_t& get_nr() const;
   StateAbstract& get_state() const;
 
   const Eigen::VectorXd& get_u_lb() const;
@@ -48,8 +48,8 @@ class ActionModelAbstract {
   void set_u_ub(const Eigen::Ref<const Eigen::VectorXd>& u_in);
 
  protected:
-  unsigned int nu_;          //!< Control dimension
-  unsigned int nr_;          //!< Dimension of the cost residual
+  std::size_t nu_;           //!< Control dimension
+  std::size_t nr_;           //!< Dimension of the cost residual
   StateAbstract& state_;     //!< Model of the state
   Eigen::VectorXd unone_;    //!< Neutral state
   Eigen::VectorXd u_lb_;     //!< Lower control limits
@@ -86,7 +86,7 @@ class ActionModelAbstract {
   }
 
   Eigen::VectorXd quasiStatic_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x,
-                                   unsigned int const& maxiter = 100, const double& tol = 1e-9) {
+                                   const std::size_t& maxiter = 100, const double& tol = 1e-9) {
     Eigen::VectorXd u(nu_);
     u.setZero();
     quasiStatic(data, u, x, maxiter, tol);

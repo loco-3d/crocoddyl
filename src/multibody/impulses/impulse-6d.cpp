@@ -12,7 +12,7 @@
 
 namespace crocoddyl {
 
-ImpulseModel6D::ImpulseModel6D(StateMultibody& state, unsigned int const& frame)
+ImpulseModel6D::ImpulseModel6D(StateMultibody& state, const std::size_t& frame)
     : ImpulseModelAbstract(state, 6), frame_(frame) {}
 
 ImpulseModel6D::~ImpulseModel6D() {}
@@ -46,6 +46,6 @@ boost::shared_ptr<ImpulseDataAbstract> ImpulseModel6D::createData(pinocchio::Dat
   return boost::make_shared<ImpulseData6D>(this, data);
 }
 
-unsigned int const& ImpulseModel6D::get_frame() const { return frame_; }
+const std::size_t& ImpulseModel6D::get_frame() const { return frame_; }
 
 }  // namespace crocoddyl

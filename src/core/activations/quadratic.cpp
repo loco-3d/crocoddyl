@@ -10,7 +10,7 @@
 
 namespace crocoddyl {
 
-ActivationModelQuad::ActivationModelQuad(unsigned int const& nr) : ActivationModelAbstract(nr) {}
+ActivationModelQuad::ActivationModelQuad(const std::size_t& nr) : ActivationModelAbstract(nr) {}
 
 ActivationModelQuad::~ActivationModelQuad() {}
 

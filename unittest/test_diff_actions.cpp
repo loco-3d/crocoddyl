@@ -107,7 +107,7 @@ void test_calc_returns_state(TestTypes::Type test_type) {
   // Getting the state dimension from calc() call
   model->calc(data, x, u);
 
-  BOOST_CHECK(data->xout.size() == model->get_state().get_nv());
+  BOOST_CHECK(static_cast<std::size_t>(data->xout.size()) == model->get_state().get_nv());
 }
 
 void test_calc_returns_a_cost(TestTypes::Type test_type) {

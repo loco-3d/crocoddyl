@@ -21,9 +21,9 @@ SolverDDP::SolverDDP(ShootingProblem& problem)
       was_feasible_(false) {
   allocateData();
 
-  const unsigned int& n_alphas = 10;
+  const std::size_t& n_alphas = 10;
   alphas_.resize(n_alphas);
-  for (unsigned int n = 0; n < n_alphas; ++n) {
+  for (std::size_t n = 0; n < n_alphas; ++n) {
     alphas_[n] = 1. / pow(2., static_cast<double>(n));
   }
 }
@@ -31,7 +31,7 @@ SolverDDP::SolverDDP(ShootingProblem& problem)
 SolverDDP::~SolverDDP() {}
 
 bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-                      const unsigned int& maxiter, const bool& is_feasible, const double& reginit) {
+                      const std::size_t& maxiter, const bool& is_feasible, const double& reginit) {
   setCandidate(init_xs, init_us, is_feasible);
 
   if (std::isnan(reginit)) {
@@ -93,8 +93,8 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
     }
     stoppingCriteria();
 
-    unsigned int const& n_callbacks = static_cast<unsigned int>(callbacks_.size());
-    for (unsigned int c = 0; c < n_callbacks; ++c) {
+    const std::size_t& n_callbacks = callbacks_.size();
+    for (std::size_t c = 0; c < n_callbacks; ++c) {
       CallbackAbstract& callback = *callbacks_[c];
       callback(*this);
     }
@@ -120,8 +120,8 @@ double SolverDDP::tryStep(const double& steplength) {
 
 double SolverDDP::stoppingCriteria() {
   stop_ = 0.;
-  unsigned int const& T = this->problem_.get_T();
-  for (unsigned int t = 0; t < T; ++t) {
+  const std::size_t& T = this->problem_.get_T();
+  for (std::size_t t = 0; t < T; ++t) {
     stop_ += Qu_[t].squaredNorm();
   }
   return stop_;
@@ -129,8 +129,8 @@ double SolverDDP::stoppingCriteria() {
 
 const Eigen::Vector2d& SolverDDP::expectedImprovement() {
   d_.fill(0);
-  unsigned int const& T = this->problem_.get_T();
-  for (unsigned int t = 0; t < T; ++t) {
+  const std::size_t& T = this->problem_.get_T();
+  for (std::size_t t = 0; t < T; ++t) {
     d_[0] += Qu_[t].dot(k_[t]);
     d_[1] -= k_[t].dot(Quuk_[t]);
   }
@@ -143,8 +143,8 @@ double SolverDDP::calc() {
     const Eigen::VectorXd& x0 = problem_.get_x0();
     problem_.running_models_[0]->get_state().diff(xs_[0], x0, gaps_[0]);
 
-    unsigned int const& T = problem_.get_T();
-    for (unsigned int t = 0; t < T; ++t) {
+    const std::size_t& T = problem_.get_T();
+    for (std::size_t t = 0; t < T; ++t) {
       ActionModelAbstract* model = problem_.running_models_[t];
       boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
       model->get_state().diff(xs_[t + 1], d->xnext, gaps_[t + 1]);
@@ -182,7 +182,7 @@ void SolverDDP::backwardPass() {
     Qu_[t].noalias() = d->Lu + d->Fu.transpose() * Vx_p;
 
     if (!std::isnan(ureg_)) {
-      unsigned int const& nu = m->get_nu();
+      const std::size_t& nu = m->get_nu();
       Quu_[t].diagonal() += Eigen::VectorXd::Constant(nu, ureg_);
     }
 
@@ -219,8 +219,8 @@ void SolverDDP::forwardPass(const double& steplength) {
   assert(steplength <= 1. && "Step length has to be <= 1.");
   assert(steplength >= 0. && "Step length has to be >= 0.");
   cost_try_ = 0.;
-  unsigned int const& T = problem_.get_T();
-  for (unsigned int t = 0; t < T; ++t) {
+  const std::size_t& T = problem_.get_T();
+  for (std::size_t t = 0; t < T; ++t) {
     ActionModelAbstract* m = problem_.running_models_[t];
     boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
 
@@ -248,7 +248,7 @@ void SolverDDP::forwardPass(const double& steplength) {
   }
 }
 
-void SolverDDP::computeGains(const unsigned int& t) {
+void SolverDDP::computeGains(const std::size_t& t) {
   if (problem_.running_models_[t]->get_nu() > 0) {
     Quu_llt_[t].compute(Quu_[t]);
     K_[t] = Qxu_[t].transpose();
@@ -275,7 +275,7 @@ void SolverDDP::decreaseRegularization() {
 }
 
 void SolverDDP::allocateData() {
-  const unsigned int& T = problem_.get_T();
+  const std::size_t& T = problem_.get_T();
   Vxx_.resize(T + 1);
   Vx_.resize(T + 1);
   Qxx_.resize(T);
@@ -295,11 +295,11 @@ void SolverDDP::allocateData() {
   Quu_llt_.resize(T);
   Quuk_.resize(T);
 
-  for (unsigned int t = 0; t < T; ++t) {
+  for (std::size_t t = 0; t < T; ++t) {
     ActionModelAbstract* model = problem_.running_models_[t];
-    const unsigned int& nx = model->get_state().get_nx();
-    const unsigned int& ndx = model->get_state().get_ndx();
-    const unsigned int& nu = model->get_nu();
+    const std::size_t& nx = model->get_state().get_nx();
+    const std::size_t& ndx = model->get_state().get_ndx();
+    const std::size_t& nu = model->get_nu();
 
     Vxx_[t] = Eigen::MatrixXd::Zero(ndx, ndx);
     Vx_[t] = Eigen::VectorXd::Zero(ndx);
@@ -324,7 +324,7 @@ void SolverDDP::allocateData() {
     Quu_llt_[t] = Eigen::LLT<Eigen::MatrixXd>(nu);
     Quuk_[t] = Eigen::VectorXd(nu);
   }
-  const unsigned int& ndx = problem_.terminal_model_->get_state().get_ndx();
+  const std::size_t& ndx = problem_.terminal_model_->get_state().get_ndx();
   Vxx_.back() = Eigen::MatrixXd::Zero(ndx, ndx);
   Vx_.back() = Eigen::VectorXd::Zero(ndx);
   xs_try_.back() = problem_.terminal_model_->get_state().zero();

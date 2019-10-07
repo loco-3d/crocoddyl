@@ -20,7 +20,7 @@ struct ActuationDataAbstract;  // forward declaration
 
 class ActuationModelAbstract {
  public:
-  ActuationModelAbstract(StateAbstract& state, unsigned int const& nu);
+  ActuationModelAbstract(StateAbstract& state, const std::size_t& nu);
   virtual ~ActuationModelAbstract();
 
   virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -30,11 +30,11 @@ class ActuationModelAbstract {
                         const bool& recalc = true) = 0;
   virtual boost::shared_ptr<ActuationDataAbstract> createData();
 
-  const unsigned int& get_nu() const;
+  const std::size_t& get_nu() const;
   StateAbstract& get_state() const;
 
  protected:
-  unsigned int nu_;
+  std::size_t nu_;
   StateAbstract& state_;
 
 #ifdef PYTHON_BINDINGS

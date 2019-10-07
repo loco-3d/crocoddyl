@@ -33,7 +33,7 @@ class CostModelSum {
   typedef std::map<std::string, CostItem> CostModelContainer;
   typedef std::map<std::string, boost::shared_ptr<CostDataAbstract> > CostDataContainer;
 
-  CostModelSum(StateMultibody& state, unsigned int const& nu, const bool& with_residuals = true);
+  CostModelSum(StateMultibody& state, const std::size_t& nu, const bool& with_residuals = true);
   explicit CostModelSum(StateMultibody& state, const bool& with_residuals = true);
   ~CostModelSum();
 
@@ -51,14 +51,14 @@ class CostModelSum {
 
   StateMultibody& get_state() const;
   const CostModelContainer& get_costs() const;
-  unsigned int const& get_nu() const;
-  unsigned int const& get_nr() const;
+  const std::size_t& get_nu() const;
+  const std::size_t& get_nr() const;
 
  private:
   StateMultibody& state_;
   CostModelContainer costs_;
-  unsigned int nu_;
-  unsigned int nr_;
+  std::size_t nu_;
+  std::size_t nr_;
   bool with_residuals_;
   Eigen::VectorXd unone_;
 

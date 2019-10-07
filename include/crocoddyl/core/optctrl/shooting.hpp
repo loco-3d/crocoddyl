@@ -27,7 +27,7 @@ class ShootingProblem {
   void rollout(const std::vector<Eigen::VectorXd>& us, std::vector<Eigen::VectorXd>& xs);
   std::vector<Eigen::VectorXd> rollout_us(const std::vector<Eigen::VectorXd>& us);
 
-  unsigned int get_T() const;
+  const std::size_t& get_T() const;
   const Eigen::VectorXd& get_x0() const;
 
   std::vector<ActionModelAbstract*>& get_runningModels();
@@ -42,7 +42,7 @@ class ShootingProblem {
 
  protected:
   void allocateData();
-  unsigned int T_;
+  std::size_t T_;
   Eigen::VectorXd x0_;
 
  private:

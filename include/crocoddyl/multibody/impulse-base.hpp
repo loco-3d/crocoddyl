@@ -19,7 +19,7 @@ struct ImpulseDataAbstract;  // forward declaration
 
 class ImpulseModelAbstract {
  public:
-  ImpulseModelAbstract(StateMultibody& state, unsigned int const& ni);
+  ImpulseModelAbstract(StateMultibody& state, const std::size_t& ni);
   ~ImpulseModelAbstract();
 
   virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
@@ -33,11 +33,11 @@ class ImpulseModelAbstract {
   virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::Data* const data);
 
   StateMultibody& get_state() const;
-  unsigned int const& get_ni() const;
+  const std::size_t& get_ni() const;
 
  protected:
   StateMultibody& state_;
-  unsigned int ni_;
+  std::size_t ni_;
 
 #ifdef PYTHON_BINDINGS
 

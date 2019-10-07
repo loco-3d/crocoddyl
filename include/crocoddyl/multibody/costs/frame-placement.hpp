@@ -17,9 +17,9 @@ namespace crocoddyl {
 class CostModelFramePlacement : public CostModelAbstract {
  public:
   CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation, const FramePlacement& Fref,
-                          unsigned int const& nu);
+                          const std::size_t& nu);
   CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation, const FramePlacement& Fref);
-  CostModelFramePlacement(StateMultibody& state, const FramePlacement& Fref, unsigned int const& nu);
+  CostModelFramePlacement(StateMultibody& state, const FramePlacement& Fref, const std::size_t& nu);
   CostModelFramePlacement(StateMultibody& state, const FramePlacement& Fref);
   ~CostModelFramePlacement();
 

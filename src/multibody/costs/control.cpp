@@ -12,25 +12,26 @@ namespace crocoddyl {
 
 CostModelControl::CostModelControl(StateMultibody& state, ActivationModelAbstract& activation,
                                    const Eigen::VectorXd& uref)
-    : CostModelAbstract(state, activation, (const unsigned)uref.size()), uref_(uref) {
-  assert(activation.get_nr() == (const unsigned)uref.size() && "activation::nr is not equals to nu");
+    : CostModelAbstract(state, activation, static_cast<std::size_t>(uref.size())), uref_(uref) {
+  assert(activation.get_nr() == uref.size() && "activation::nr is not equals to nu");
 }
 
 CostModelControl::CostModelControl(StateMultibody& state, ActivationModelAbstract& activation)
     : CostModelAbstract(state, activation), uref_(Eigen::VectorXd::Zero(activation.get_nr())) {}
 
-CostModelControl::CostModelControl(StateMultibody& state, ActivationModelAbstract& activation, const unsigned int& nu)
+CostModelControl::CostModelControl(StateMultibody& state, ActivationModelAbstract& activation, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), uref_(Eigen::VectorXd::Zero(nu)) {
   assert(activation.get_nr() == nu_ && "activation::nr is not equals to nu");
 }
 
 CostModelControl::CostModelControl(StateMultibody& state, const Eigen::VectorXd& uref)
-    : CostModelAbstract(state, (unsigned int)uref.size(), (unsigned int)uref.size()), uref_(uref) {}
+    : CostModelAbstract(state, static_cast<std::size_t>(uref.size()), static_cast<std::size_t>(uref.size())),
+      uref_(uref) {}
 
 CostModelControl::CostModelControl(StateMultibody& state)
     : CostModelAbstract(state, state.get_nv()), uref_(Eigen::VectorXd::Zero(state.get_nv())) {}
 
-CostModelControl::CostModelControl(StateMultibody& state, unsigned int const& nu)
+CostModelControl::CostModelControl(StateMultibody& state, const std::size_t& nu)
     : CostModelAbstract(state, nu, nu), uref_(Eigen::VectorXd::Zero(nu)) {}
 
 CostModelControl::~CostModelControl() {}

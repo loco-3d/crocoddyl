@@ -18,7 +18,7 @@ namespace bp = boost::python;
 
 class ActuationModelAbstract_wrap : public ActuationModelAbstract, public bp::wrapper<ActuationModelAbstract> {
  public:
-  ActuationModelAbstract_wrap(StateAbstract& state, unsigned int const& nu)
+  ActuationModelAbstract_wrap(StateAbstract& state, const std::size_t& nu)
       : ActuationModelAbstract(state, nu), bp::wrapper<ActuationModelAbstract>() {}
 
   void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,

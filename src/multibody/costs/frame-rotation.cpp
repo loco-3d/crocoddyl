@@ -12,7 +12,7 @@
 namespace crocoddyl {
 
 CostModelFrameRotation::CostModelFrameRotation(StateMultibody& state, ActivationModelAbstract& activation,
-                                               const FrameRotation& Rref, unsigned int const& nu)
+                                               const FrameRotation& Rref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), Rref_(Rref), oRf_inv_(Rref.oRf.transpose()) {
   assert(activation_.get_nr() == 3 && "activation::nr is not equals to 3");
 }
@@ -23,8 +23,7 @@ CostModelFrameRotation::CostModelFrameRotation(StateMultibody& state, Activation
   assert(activation_.get_nr() == 3 && "activation::nr is not equals to 3");
 }
 
-CostModelFrameRotation::CostModelFrameRotation(StateMultibody& state, const FrameRotation& Rref,
-                                               unsigned int const& nu)
+CostModelFrameRotation::CostModelFrameRotation(StateMultibody& state, const FrameRotation& Rref, const std::size_t& nu)
     : CostModelAbstract(state, 3, nu), Rref_(Rref), oRf_inv_(Rref.oRf.transpose()) {}
 
 CostModelFrameRotation::CostModelFrameRotation(StateMultibody& state, const FrameRotation& Rref)
@@ -62,7 +61,7 @@ void CostModelFrameRotation::calcDiff(const boost::shared_ptr<CostDataAbstract>&
   d->J.noalias() = d->rJf * d->fJf.topRows<3>();
 
   // Compute the derivatives of the frame placement
-  unsigned int const& nv = state_.get_nv();
+  const std::size_t& nv = state_.get_nv();
   activation_.calcDiff(data->activation, data->r, recalc);
   data->Rx.leftCols(nv) = d->J;
   data->Lx.head(nv).noalias() = d->J.transpose() * data->activation->Ar;

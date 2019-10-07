@@ -17,7 +17,7 @@ namespace crocoddyl {
 
 class ImpulseModel3D : public ImpulseModelAbstract {
  public:
-  ImpulseModel3D(StateMultibody& state, unsigned int const& frame);
+  ImpulseModel3D(StateMultibody& state, const std::size_t& frame);
   ~ImpulseModel3D();
 
   void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
@@ -26,10 +26,10 @@ class ImpulseModel3D : public ImpulseModelAbstract {
   void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force);
   boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::Data* const data);
 
-  unsigned int const& get_frame() const;
+  const std::size_t& get_frame() const;
 
  private:
-  unsigned int frame_;
+  std::size_t frame_;
 };
 
 struct ImpulseData3D : public ImpulseDataAbstract {

@@ -82,8 +82,8 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
   assert(u.size() == nu_ && "u has wrong dimension");
 
-  unsigned int const& nv = state_.get_nv();
-  unsigned int const& nc = contacts_.get_nc();
+  const std::size_t& nv = state_.get_nv();
+  const std::size_t& nc = contacts_.get_nc();
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_.get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(nv);
 
@@ -140,8 +140,9 @@ const Eigen::VectorXd& DifferentialActionModelContactFwdDynamics::get_armature()
 const double& DifferentialActionModelContactFwdDynamics::get_damping_factor() const { return JMinvJt_damping_; }
 
 void DifferentialActionModelContactFwdDynamics::set_armature(const Eigen::VectorXd& armature) {
-  assert(armature.size() == state_.get_nv() && "The armature dimension is wrong, we cannot set it.");
-  if (armature.size() != state_.get_nv()) {
+  assert(static_cast<std::size_t>(armature.size()) == state_.get_nv() &&
+         "The armature dimension is wrong, we cannot set it.");
+  if (static_cast<std::size_t>(armature.size()) != state_.get_nv()) {
     std::cout << "The armature dimension is wrong, we cannot set it." << std::endl;
   } else {
     armature_ = armature;

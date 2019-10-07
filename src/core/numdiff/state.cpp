@@ -60,7 +60,7 @@ void StateNumDiff::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eige
   if (firstsecond == first || firstsecond == both) {
     assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "Jfirst must be of the good size");
     Jfirst.setZero();
-    for (unsigned int i = 0; i < ndx_; ++i) {
+    for (std::size_t i = 0; i < ndx_; ++i) {
       dx_(i) = disturbance_;
       // tmp_x = int(x0, dx)
       integrate(x0, dx_, tmp_x_);
@@ -77,7 +77,7 @@ void StateNumDiff::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eige
     assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ && "Jfirst must be of the good size");
 
     Jsecond.setZero();
-    for (unsigned int i = 0; i < ndx_; ++i) {
+    for (std::size_t i = 0; i < ndx_; ++i) {
       dx_(i) = disturbance_;
       // tmp_x = int(x1 + dx)
       integrate(x1, dx_, tmp_x_);
@@ -107,7 +107,7 @@ void StateNumDiff::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const 
   if (firstsecond == first || firstsecond == both) {
     assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "Jfirst must be of the good size");
     Jfirst.setZero();
-    for (unsigned int i = 0; i < ndx_; ++i) {
+    for (std::size_t i = 0; i < ndx_; ++i) {
       dx_(i) = disturbance_;
       // tmp_x_ = integrate(x, dx_) = integrate(x, disturbance_vector)
       integrate(x, dx_, tmp_x_);
@@ -123,7 +123,7 @@ void StateNumDiff::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const 
   if (firstsecond == second || firstsecond == both) {
     assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ && "Jfirst must be of the good size");
     Jsecond.setZero();
-    for (unsigned int i = 0; i < ndx_; ++i) {
+    for (std::size_t i = 0; i < ndx_; ++i) {
       dx_(i) = disturbance_;
       // tmp_x_ = integrate(x, dx + dx_) = integrate(x, dx + disturbance_vector)
       integrate(x, dx + dx_, tmp_x_);

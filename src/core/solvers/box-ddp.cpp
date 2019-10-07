@@ -14,9 +14,9 @@ namespace crocoddyl {
 SolverBoxDDP::SolverBoxDDP(ShootingProblem& problem) : SolverDDP(problem) {
   allocateData();
 
-  const unsigned int& n_alphas = 10;
+  const std::size_t& n_alphas = 10;
   alphas_.resize(n_alphas);
-  for (unsigned int n = 0; n < n_alphas; ++n) {
+  for (std::size_t n = 0; n < n_alphas; ++n) {
     alphas_[n] = 1. / pow(2., static_cast<double>(n));
   }
 }
@@ -26,12 +26,12 @@ SolverBoxDDP::~SolverBoxDDP() {}
 void SolverBoxDDP::allocateData() {
   SolverDDP::allocateData();
 
-  unsigned int nu_max = 0;
-  unsigned int const& T = problem_.get_T();
+  std::size_t nu_max = 0;
+  const std::size_t& T = problem_.get_T();
   Quu_inv_.resize(T);
-  for (unsigned int t = 0; t < T; ++t) {
+  for (std::size_t t = 0; t < T; ++t) {
     ActionModelAbstract* model = problem_.running_models_[t];
-    unsigned int const& nu = model->get_nu();
+    const std::size_t& nu = model->get_nu();
 
     // Store the largest number of controls across all models to allocate u_ll_, u_hl_
     if (nu > nu_max) nu_max = nu;
@@ -43,7 +43,7 @@ void SolverBoxDDP::allocateData() {
   u_hl_.resize(nu_max);
 }
 
-void SolverBoxDDP::computeGains(const unsigned int& t) {
+void SolverBoxDDP::computeGains(const std::size_t& t) {
   if (problem_.running_models_[t]->get_nu() > 0) {
     if (!problem_.running_models_[t]->get_has_control_limits()) {
       // No control limits on this model: Use vanilla DDP
@@ -74,8 +74,8 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
   assert(steplength >= 0. && "Step length has to be >= 0.");
   cost_try_ = 0.;
   xnext_ = problem_.get_x0();
-  unsigned int const& T = problem_.get_T();
-  for (unsigned int t = 0; t < T; ++t) {
+  const std::size_t& T = problem_.get_T();
+  for (std::size_t t = 0; t < T; ++t) {
     ActionModelAbstract* m = problem_.running_models_[t];
     boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
     if ((is_feasible_) || (steplength == 1)) {

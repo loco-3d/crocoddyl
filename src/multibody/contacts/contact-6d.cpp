@@ -13,7 +13,7 @@
 
 namespace crocoddyl {
 
-ContactModel6D::ContactModel6D(StateMultibody& state, const FramePlacement& Mref, unsigned int const& nu,
+ContactModel6D::ContactModel6D(StateMultibody& state, const FramePlacement& Mref, const std::size_t& nu,
                                const Eigen::Vector2d& gains)
     : ContactModelAbstract(state, 6, nu), Mref_(Mref), gains_(gains) {}
 
@@ -50,7 +50,7 @@ void ContactModel6D::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data
   ContactData6D* d = static_cast<ContactData6D*>(data.get());
   pinocchio::getJointAccelerationDerivatives(state_.get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                              d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
-  unsigned int const& nv = state_.get_nv();
+  const std::size_t& nv = state_.get_nv();
   d->da0_dx.leftCols(nv).noalias() = d->fXj * d->a_partial_dq;
   d->da0_dx.rightCols(nv).noalias() = d->fXj * d->a_partial_dv;
 

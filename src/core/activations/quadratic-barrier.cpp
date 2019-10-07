@@ -11,7 +11,7 @@
 namespace crocoddyl {
 
 ActivationModelQuadraticBarrier::ActivationModelQuadraticBarrier(const ActivationBounds& bounds)
-    : ActivationModelAbstract((unsigned int)bounds.lb.size()), bounds_(bounds) {}
+    : ActivationModelAbstract(bounds.lb.size()), bounds_(bounds) {}
 
 ActivationModelQuadraticBarrier::~ActivationModelQuadraticBarrier() {}
 

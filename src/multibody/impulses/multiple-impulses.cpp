@@ -37,9 +37,9 @@ void ImpulseModelMultiple::removeImpulse(const std::string& name) {
 void ImpulseModelMultiple::calc(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                 const Eigen::Ref<const Eigen::VectorXd>& x) {
   assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
-  unsigned int ni = 0;
+  std::size_t ni = 0;
 
-  unsigned int const& nv = state_.get_nv();
+  const std::size_t& nv = state_.get_nv();
   ImpulseModelContainer::iterator it_m, end_m;
   ImpulseDataContainer::iterator it_d, end_d;
   for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
@@ -49,7 +49,7 @@ void ImpulseModelMultiple::calc(const boost::shared_ptr<ImpulseDataMultiple>& da
     assert(it_m->first == it_d->first && "it doesn't match the impulse name between data and model");
 
     m_i.impulse->calc(d_i, x);
-    unsigned int const& ni_i = m_i.impulse->get_ni();
+    const std::size_t& ni_i = m_i.impulse->get_ni();
     data->Jc.block(ni, 0, ni_i, nv) = d_i->Jc;
     ni += ni_i;
   }
@@ -61,9 +61,9 @@ void ImpulseModelMultiple::calcDiff(const boost::shared_ptr<ImpulseDataMultiple>
   if (recalc) {
     calc(data, x);
   }
-  unsigned int ni = 0;
+  std::size_t ni = 0;
 
-  unsigned int const& nv = state_.get_nv();
+  const std::size_t& nv = state_.get_nv();
   ImpulseModelContainer::iterator it_m, end_m;
   ImpulseDataContainer::iterator it_d, end_d;
   for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
@@ -73,7 +73,7 @@ void ImpulseModelMultiple::calcDiff(const boost::shared_ptr<ImpulseDataMultiple>
     assert(it_m->first == it_d->first && "it doesn't match the impulse name between data and model");
 
     m_i.impulse->calcDiff(d_i, x, false);
-    unsigned int const& ni_i = m_i.impulse->get_ni();
+    const std::size_t& ni_i = m_i.impulse->get_ni();
     data->dv0_dq.block(ni, 0, ni_i, nv) = d_i->dv0_dq;
     ni += ni_i;
   }
@@ -90,7 +90,7 @@ void ImpulseModelMultiple::updateForce(const boost::shared_ptr<ImpulseDataMultip
                                        const Eigen::VectorXd& force) {
   assert(force.size() == ni_ && "force has wrong dimension, it should be ni vector");
   assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
-  unsigned int ni = 0;
+  std::size_t ni = 0;
 
   for (ForceIterator it = data->fext.begin(); it != data->fext.end(); ++it) {
     *it = pinocchio::Force::Zero();
@@ -104,7 +104,7 @@ void ImpulseModelMultiple::updateForce(const boost::shared_ptr<ImpulseDataMultip
     boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
     assert(it_m->first == it_d->first && "it doesn't match the impulse name between data and model");
 
-    unsigned int const& ni_i = m_i.impulse->get_ni();
+    const std::size_t& ni_i = m_i.impulse->get_ni();
     const Eigen::VectorBlock<const Eigen::VectorXd, Eigen::Dynamic> force_i = force.segment(ni, ni_i);
     m_i.impulse->updateForce(d_i, force_i);
     data->fext[d_i->joint] = d_i->f;
@@ -122,10 +122,10 @@ void ImpulseModelMultiple::updateVelocityDiff(const boost::shared_ptr<ImpulseDat
 
 void ImpulseModelMultiple::updateForceDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                            const Eigen::MatrixXd& df_dq) const {
-  unsigned int const& nv = state_.get_nv();
+  const std::size_t& nv = state_.get_nv();
   assert((df_dq.rows() == ni_ && df_dq.cols() == nv) && "df_dq has wrong dimension");
   assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
-  unsigned int ni = 0;
+  std::size_t ni = 0;
 
   ImpulseModelContainer::const_iterator it_m, end_m;
   ImpulseDataContainer::const_iterator it_d, end_d;
@@ -135,7 +135,7 @@ void ImpulseModelMultiple::updateForceDiff(const boost::shared_ptr<ImpulseDataMu
     const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
     assert(it_m->first == it_d->first && "it doesn't match the impulse name between data and model");
 
-    unsigned int const& ni_i = m_i.impulse->get_ni();
+    const std::size_t& ni_i = m_i.impulse->get_ni();
     const Eigen::Block<const Eigen::MatrixXd> df_dq_i = df_dq.block(ni, 0, ni_i, nv);
     m_i.impulse->updateForceDiff(d_i, df_dq_i);
     ni += ni_i;
@@ -150,6 +150,6 @@ StateMultibody& ImpulseModelMultiple::get_state() const { return state_; }
 
 const ImpulseModelMultiple::ImpulseModelContainer& ImpulseModelMultiple::get_impulses() const { return impulses_; }
 
-const unsigned int& ImpulseModelMultiple::get_ni() const { return ni_; }
+const std::size_t& ImpulseModelMultiple::get_ni() const { return ni_; }
 
 }  // namespace crocoddyl

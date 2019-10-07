@@ -18,7 +18,7 @@ namespace crocoddyl {
 
 class ContactModel3D : public ContactModelAbstract {
  public:
-  ContactModel3D(StateMultibody& state, const FrameTranslation& xref, unsigned int const& nu,
+  ContactModel3D(StateMultibody& state, const FrameTranslation& xref, const std::size_t& nu,
                  const Eigen::Vector2d& gains = Eigen::Vector2d::Zero());
   ContactModel3D(StateMultibody& state, const FrameTranslation& xref,
                  const Eigen::Vector2d& gains = Eigen::Vector2d::Zero());

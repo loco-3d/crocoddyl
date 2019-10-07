@@ -46,7 +46,7 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
 
   // Computing the d action(x,u) / dx
   data_nd->dx.setZero();
-  for (unsigned int ix = 0; ix < state_.get_ndx(); ++ix) {
+  for (std::size_t ix = 0; ix < state_.get_ndx(); ++ix) {
     data_nd->dx(ix) = disturbance_;
     model_.get_state().integrate(x, data_nd->dx, data_nd->xp);
     model_.calc(data_nd->data_x[ix], data_nd->xp, u);

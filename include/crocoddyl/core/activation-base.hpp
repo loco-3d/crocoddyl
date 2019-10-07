@@ -19,7 +19,7 @@ struct ActivationDataAbstract;  // forward declaration
 
 class ActivationModelAbstract {
  public:
-  explicit ActivationModelAbstract(unsigned int const& nr);
+  explicit ActivationModelAbstract(const std::size_t& nr);
   virtual ~ActivationModelAbstract();
 
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
@@ -28,10 +28,10 @@ class ActivationModelAbstract {
                         const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc = true) = 0;
   virtual boost::shared_ptr<ActivationDataAbstract> createData();
 
-  unsigned int const& get_nr() const;
+  const std::size_t& get_nr() const;
 
  protected:
-  unsigned int nr_;
+  std::size_t nr_;
 
 #ifdef PYTHON_BINDINGS
 

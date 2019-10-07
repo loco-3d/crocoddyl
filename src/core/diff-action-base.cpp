@@ -10,8 +10,8 @@
 
 namespace crocoddyl {
 
-DifferentialActionModelAbstract::DifferentialActionModelAbstract(StateAbstract& state, unsigned int const& nu,
-                                                                 unsigned int const& nr)
+DifferentialActionModelAbstract::DifferentialActionModelAbstract(StateAbstract& state, const std::size_t& nu,
+                                                                 const std::size_t& nr)
     : nu_(nu),
       nr_(nr),
       state_(state),
@@ -36,9 +36,9 @@ boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelAbstrac
   return boost::make_shared<DifferentialActionDataAbstract>(this);
 }
 
-unsigned int const& DifferentialActionModelAbstract::get_nu() const { return nu_; }
+const std::size_t& DifferentialActionModelAbstract::get_nu() const { return nu_; }
 
-unsigned int const& DifferentialActionModelAbstract::get_nr() const { return nr_; }
+const std::size_t& DifferentialActionModelAbstract::get_nr() const { return nr_; }
 
 StateAbstract& DifferentialActionModelAbstract::get_state() const { return state_; }
 

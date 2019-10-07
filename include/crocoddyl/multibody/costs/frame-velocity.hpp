@@ -17,9 +17,9 @@ namespace crocoddyl {
 class CostModelFrameVelocity : public CostModelAbstract {
  public:
   CostModelFrameVelocity(StateMultibody& state, ActivationModelAbstract& activation, const FrameMotion& Fref,
-                         unsigned int const& nu);
+                         const std::size_t& nu);
   CostModelFrameVelocity(StateMultibody& state, ActivationModelAbstract& activation, const FrameMotion& Fref);
-  CostModelFrameVelocity(StateMultibody& state, const FrameMotion& vref, unsigned int const& nu);
+  CostModelFrameVelocity(StateMultibody& state, const FrameMotion& vref, const std::size_t& nu);
   CostModelFrameVelocity(StateMultibody& state, const FrameMotion& vref);
   ~CostModelFrameVelocity();
 

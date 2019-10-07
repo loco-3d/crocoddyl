@@ -37,7 +37,7 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
   ~SolverAbstract_wrap() {}
 
   bool solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-             unsigned int const& maxiter, const bool& is_feasible, const double& reg_init) {
+             const std::size_t& maxiter, const bool& is_feasible, const double& reg_init) {
     return bp::call<bool>(this->get_override("solve").ptr(), init_xs, init_us, maxiter, is_feasible, reg_init);
   }
 

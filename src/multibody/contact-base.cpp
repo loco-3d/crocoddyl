@@ -10,10 +10,10 @@
 
 namespace crocoddyl {
 
-ContactModelAbstract::ContactModelAbstract(StateMultibody& state, unsigned int const& nc, unsigned int const& nu)
+ContactModelAbstract::ContactModelAbstract(StateMultibody& state, const std::size_t& nc, const std::size_t& nu)
     : state_(state), nc_(nc), nu_(nu) {}
 
-ContactModelAbstract::ContactModelAbstract(StateMultibody& state, unsigned int const& nc)
+ContactModelAbstract::ContactModelAbstract(StateMultibody& state, const std::size_t& nc)
     : state_(state), nc_(nc), nu_(state.get_nv()) {}
 
 ContactModelAbstract::~ContactModelAbstract() {}
@@ -32,8 +32,8 @@ boost::shared_ptr<ContactDataAbstract> ContactModelAbstract::createData(pinocchi
 
 StateMultibody& ContactModelAbstract::get_state() const { return state_; }
 
-unsigned int const& ContactModelAbstract::get_nc() const { return nc_; }
+const std::size_t& ContactModelAbstract::get_nc() const { return nc_; }
 
-unsigned int const& ContactModelAbstract::get_nu() const { return nu_; }
+const std::size_t& ContactModelAbstract::get_nu() const { return nu_; }
 
 }  // namespace crocoddyl

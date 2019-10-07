@@ -36,8 +36,8 @@ void ActionModelImpulseFwdDynamics::calc(const boost::shared_ptr<ActionDataAbstr
                                          const Eigen::Ref<const Eigen::VectorXd>& u) {
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
 
-  unsigned int const& nq = state_.get_nq();
-  unsigned int const& nv = state_.get_nv();
+  const std::size_t& nq = state_.get_nq();
+  const std::size_t& nv = state_.get_nv();
   ActionDataImpulseFwdDynamics* d = static_cast<ActionDataImpulseFwdDynamics*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(nq);
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(nv);
@@ -75,8 +75,8 @@ void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataA
                                              const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   assert(x.size() == state_.get_nx() && "x has wrong dimension");
 
-  unsigned int const& nv = state_.get_nv();
-  unsigned int const& ni = impulses_.get_ni();
+  const std::size_t& nv = state_.get_nv();
+  const std::size_t& ni = impulses_.get_ni();
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_.get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(nv);
 
@@ -133,8 +133,9 @@ const double& ActionModelImpulseFwdDynamics::get_restitution_coefficient() const
 const double& ActionModelImpulseFwdDynamics::get_damping_factor() const { return JMinvJt_damping_; }
 
 void ActionModelImpulseFwdDynamics::set_armature(const Eigen::VectorXd& armature) {
-  assert(armature.size() == state_.get_nv() && "The armature dimension is wrong, we cannot set it.");
-  if (armature.size() != state_.get_nv()) {
+  assert(static_cast<std::size_t>(armature.size()) == state_.get_nv() &&
+         "The armature dimension is wrong, we cannot set it.");
+  if (static_cast<std::size_t>(armature.size()) != state_.get_nv()) {
     std::cout << "The armature dimension is wrong, we cannot set it." << std::endl;
   } else {
     armature_ = armature;

@@ -10,7 +10,7 @@
 #include <iostream>
 namespace crocoddyl {
 
-ActivationModelSmoothAbs::ActivationModelSmoothAbs(unsigned int const& nr) : ActivationModelAbstract(nr) {}
+ActivationModelSmoothAbs::ActivationModelSmoothAbs(const std::size_t& nr) : ActivationModelAbstract(nr) {}
 
 ActivationModelSmoothAbs::~ActivationModelSmoothAbs() {}
 
