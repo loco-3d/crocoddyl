@@ -19,12 +19,12 @@ from .cost import (CostDataCoM, CostDataControl, CostDataForce, CostDataFramePla
 from .ddp import SolverDDP
 from .diagnostic import displayTrajectory, plotDDPConvergence, plotOCSolution
 from .differential_action import (DifferentialActionDataAbstract, DifferentialActionDataFullyActuated,
-                                  DifferentialActionDataLQR, DifferentialActionDataNumDiff,
+                                  DifferentialActionDataLQR, DifferentialActionDataNumDiff, DifferentialActionDataActuated,
                                   DifferentialActionModelAbstract, DifferentialActionModelFullyActuated,
-                                  DifferentialActionModelLQR, DifferentialActionModelNumDiff)
+                                  DifferentialActionModelLQR, DifferentialActionModelNumDiff, DifferentialActionModelActuated)
 from .fddp import SolverFDDP
 from .floating_contact import DifferentialActionDataFloatingInContact, DifferentialActionModelFloatingInContact
-from .flying import DifferentialActionModelUAM, DifferentialActionDataUAM
+# from .flying import DifferentialActionModelUAM, DifferentialActionDataUAM
 from .impact import (ActionDataImpact, ActionModelImpact, CostModelImpactCoM, CostModelImpactWholeBody, ImpulseData6D,
                      ImpulseDataPinocchio, ImpulseModel3D, ImpulseModel6D, ImpulseModelMultiple, ImpulseModelPinocchio)
 from .integrated_action import (IntegratedActionDataEuler, IntegratedActionDataRK4, IntegratedActionModelEuler,

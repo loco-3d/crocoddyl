@@ -3,17 +3,21 @@ import warnings
 import numpy as np
 
 class ActuationModelDoublePendulum:
-    def __init__(self, pinocchioModel):
+    def __init__(self, pinocchioModel,actLink):
         self.pinocchio = pinocchioModel
         self.nq = pinocchioModel.nq
         self.nv = pinocchioModel.nv
         self.nx = self.nq + self.nv
         self.ndx = self.nv * 2
         self.nu = 1
+        self.actLink = actLink
 
     def calc(self, data, x, u):
         S = np.zeros([self.nv,self.nu])
-        S[1] = 1
+        if self.actLink == 1:
+            S[0] = 1
+        else:
+            S[1] = 1
         data.a[:] = np.dot(S,u)
         return data.a
 
@@ -33,7 +37,11 @@ class ActuationDataDoublePendulum:
         self.A = np.zeros([nv, ndx + nu])  # result of calcDiff
         self.Ax = self.A[:, :ndx]
         self.Au = self.A[:, ndx:]
-        self.Au[1,0] = 1
+        if model.actLink == 1:
+            self.Au[0,0] = 1
+        else:
+            self.Au[1,0] = 1
+
 
 class ActuationModelUAM:
     '''
