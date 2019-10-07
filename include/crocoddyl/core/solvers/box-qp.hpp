@@ -18,12 +18,16 @@
 #include <vector>
 
 namespace crocoddyl {
-typedef struct BoxQPSolution {
+struct BoxQPSolution {
+  BoxQPSolution(const Eigen::MatrixXd& Hff_inv_in, const Eigen::VectorXd& x_in, const std::vector<size_t>& free_idx_in,
+                const std::vector<size_t>& clamped_idx_in)
+      : Hff_inv(Hff_inv_in), x(x_in), free_idx(free_idx_in), clamped_idx(clamped_idx_in) {}
+
   Eigen::MatrixXd Hff_inv;
   Eigen::MatrixXd x;
   std::vector<size_t> free_idx;
   std::vector<size_t> clamped_idx;
-} BoxQPSolution;
+};
 
 // Based on Yuval Tassa's BoxQP
 // Cf. https://www.mathworks.com/matlabcentral/fileexchange/52069-ilqg-ddp-trajectory-optimization
@@ -45,7 +49,7 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
   Hff_inv_llt.solveInPlace(Hff_inv);
 
   if (grad.lpNorm<Eigen::Infinity>() <= epsilon) {
-    return {Hff_inv, x_init, free_idx, clamped_idx};
+    return BoxQPSolution(Hff_inv, x_init, free_idx, clamped_idx);
   }
 
   while (grad.lpNorm<Eigen::Infinity>() > epsilon && it < max_iterations) {
@@ -63,7 +67,7 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
     }
 
     if (free_idx.size() == 0) {
-      return {Hff_inv, x, free_idx, clamped_idx};
+      return BoxQPSolution(Hff_inv, x, free_idx, clamped_idx);
     }
 
     Hff.resize(free_idx.size(), free_idx.size());
@@ -138,7 +142,7 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
     if (!armijo_reached) break;
   }
 
-  return {Hff_inv, x, free_idx, clamped_idx};
+  return BoxQPSolution(Hff_inv, x, free_idx, clamped_idx);
 }
 
 inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, const Eigen::VectorXd& b_low,
