@@ -29,7 +29,9 @@ struct ActivationDataSmoothAbs : public ActivationDataAbstract {
 
   template <typename Activation>
   explicit ActivationDataSmoothAbs(Activation* const activation)
-      : ActivationDataAbstract(activation), a(Eigen::VectorXd::Zero(activation->get_nr())) {}
+      : ActivationDataAbstract(activation), a(Eigen::VectorXd::Zero(activation->get_nr())) {
+    Arr = 2 * Eigen::MatrixXd::Identity(activation->get_nr(), activation->get_nr());
+  }
 
   Eigen::VectorXd a;
 };
