@@ -86,14 +86,14 @@ void ContactModelMultiple::calcDiff(const boost::shared_ptr<ContactDataMultiple>
 
 void ContactModelMultiple::updateAcceleration(const boost::shared_ptr<ContactDataMultiple>& data,
                                               const Eigen::VectorXd& dv) const {
-  assert(dv.size() == state_.get_nv() && "dv has wrong dimension");
+  assert(static_cast<std::size_t>(dv.size()) == state_.get_nv() && "dv has wrong dimension");
 
   data->dv = dv;
 }
 
 void ContactModelMultiple::updateForce(const boost::shared_ptr<ContactDataMultiple>& data,
                                        const Eigen::VectorXd& force) {
-  assert(force.size() == nc_ && "force has wrong dimension, it should be nc vector");
+  assert(static_cast<std::size_t>(force.size()) == nc_ && "force has wrong dimension, it should be nc vector");
   assert(data->contacts.size() == contacts_.size() && "it doesn't match the number of contact datas and models");
   std::size_t nc = 0;
 
@@ -119,7 +119,9 @@ void ContactModelMultiple::updateForce(const boost::shared_ptr<ContactDataMultip
 
 void ContactModelMultiple::updateAccelerationDiff(const boost::shared_ptr<ContactDataMultiple>& data,
                                                   const Eigen::MatrixXd& ddv_dx) const {
-  assert((ddv_dx.rows() == state_.get_nv() && ddv_dx.cols() == state_.get_ndx()) && "ddv_dx has wrong dimension");
+  assert((static_cast<std::size_t>(ddv_dx.rows()) == state_.get_nv() &&
+          static_cast<std::size_t>(ddv_dx.cols()) == state_.get_ndx()) &&
+         "ddv_dx has wrong dimension");
 
   data->ddv_dx = ddv_dx;
 }
@@ -127,8 +129,10 @@ void ContactModelMultiple::updateAccelerationDiff(const boost::shared_ptr<Contac
 void ContactModelMultiple::updateForceDiff(const boost::shared_ptr<ContactDataMultiple>& data,
                                            const Eigen::MatrixXd& df_dx, const Eigen::MatrixXd& df_du) const {
   const std::size_t& ndx = state_.get_ndx();
-  assert((df_dx.rows() == nc_ || df_dx.cols() == ndx) && "df_dx has wrong dimension");
-  assert((df_du.rows() == nc_ || df_du.cols() == nu_) && "df_du has wrong dimension");
+  assert((static_cast<std::size_t>(df_dx.rows()) == nc_ || static_cast<std::size_t>(df_dx.cols()) == ndx) &&
+         "df_dx has wrong dimension");
+  assert((static_cast<std::size_t>(df_du.rows()) == nc_ || static_cast<std::size_t>(df_du.cols()) == nu_) &&
+         "df_du has wrong dimension");
   assert(data->contacts.size() == contacts_.size() && "it doesn't match the number of contact datas and models");
   std::size_t nc = 0;
 

@@ -19,8 +19,8 @@ ActionModelUnicycle::~ActionModelUnicycle() {}
 void ActionModelUnicycle::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                                const Eigen::Ref<const Eigen::VectorXd>& x,
                                const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == state_.get_nx() && "x has wrong dimension");
+  assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
 
   ActionDataUnicycle* d = static_cast<ActionDataUnicycle*>(data.get());
   const double& c = std::cos(x[2]);
@@ -34,8 +34,8 @@ void ActionModelUnicycle::calc(const boost::shared_ptr<ActionDataAbstract>& data
 void ActionModelUnicycle::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                    const Eigen::Ref<const Eigen::VectorXd>& x,
                                    const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == state_.get_nx() && "x has wrong dimension");
+  assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
 
   if (recalc) {
     calc(data, x, u);

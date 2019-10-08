@@ -26,8 +26,8 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
   Eigen::VectorXd rand() { return bp::call<Eigen::VectorXd>(this->get_override("rand").ptr()); }
 
   Eigen::VectorXd diff_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1) {
-    assert(x0.size() == nx_ && "x0 has wrong dimension");
-    assert(x1.size() == nx_ && "x1 has wrong dimension");
+    assert(static_cast<std::size_t>(x0.size()) == nx_ && "x0 has wrong dimension");
+    assert(static_cast<std::size_t>(x1.size()) == nx_ && "x1 has wrong dimension");
     return bp::call<Eigen::VectorXd>(this->get_override("diff").ptr(), (Eigen::VectorXd)x0, (Eigen::VectorXd)x1);
   }
 
@@ -38,8 +38,8 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
 
   Eigen::VectorXd integrate_wrap(const Eigen::Ref<const Eigen::VectorXd>& x,
                                  const Eigen::Ref<const Eigen::VectorXd>& dx) {
-    assert(x.size() == nx_ && "x has wrong dimension");
-    assert(dx.size() == ndx_ && "dx has wrong dimension");
+    assert(static_cast<std::size_t>(x.size()) == nx_ && "x has wrong dimension");
+    assert(static_cast<std::size_t>(dx.size()) == ndx_ && "dx has wrong dimension");
     return bp::call<Eigen::VectorXd>(this->get_override("integrate").ptr(), (Eigen::VectorXd)x, (Eigen::VectorXd)dx);
   }
 
@@ -82,8 +82,8 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
                       std::string firstsecond) {
     assert((firstsecond == "both" || firstsecond == "first" || firstsecond == "second") &&
            "firstsecond must be one of the Jcomponent {both, first, second}");
-    assert(x0.size() == nx_ && "x0 has wrong dimension");
-    assert(x1.size() == nx_ && "x1 has wrong dimension");
+    assert(static_cast<std::size_t>(x0.size()) == nx_ && "x0 has wrong dimension");
+    assert(static_cast<std::size_t>(x1.size()) == nx_ && "x1 has wrong dimension");
 
     if (firstsecond == "both") {
       bp::list Jacs =
@@ -132,8 +132,8 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
                            std::string firstsecond) {
     assert((firstsecond == "both" || firstsecond == "first" || firstsecond == "second") &&
            "firstsecond must be one of the Jcomponent {both, first, second}");
-    assert(x.size() == nx_ && "x has wrong dimension");
-    assert(dx.size() == ndx_ && "dx has wrong dimension");
+    assert(static_cast<std::size_t>(x.size()) == nx_ && "x has wrong dimension");
+    assert(static_cast<std::size_t>(dx.size()) == ndx_ && "dx has wrong dimension");
 
     if (firstsecond == "both") {
       bp::list Jacs = bp::call<bp::list>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x,

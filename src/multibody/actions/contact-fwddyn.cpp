@@ -39,8 +39,8 @@ DifferentialActionModelContactFwdDynamics::~DifferentialActionModelContactFwdDyn
 void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                      const Eigen::Ref<const Eigen::VectorXd>& x,
                                                      const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == state_.get_nx() && "x has wrong dimension");
+  assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
 
   DifferentialActionDataContactFwdDynamics* d = static_cast<DifferentialActionDataContactFwdDynamics*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_.get_nq());
@@ -79,8 +79,8 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
                                                          const Eigen::Ref<const Eigen::VectorXd>& x,
                                                          const Eigen::Ref<const Eigen::VectorXd>& u,
                                                          const bool& recalc) {
-  assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == state_.get_nx() && "x has wrong dimension");
+  assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
 
   const std::size_t& nv = state_.get_nv();
   const std::size_t& nc = contacts_.get_nc();

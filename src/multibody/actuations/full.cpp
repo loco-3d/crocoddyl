@@ -23,7 +23,7 @@ ActuationModelFull::~ActuationModelFull() {}
 
 void ActuationModelFull::calc(const boost::shared_ptr<ActuationDataAbstract>& data,
                               const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
   data->tau = u;
 }
 

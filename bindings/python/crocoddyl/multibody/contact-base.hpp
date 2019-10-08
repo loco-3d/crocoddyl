@@ -22,18 +22,18 @@ class ContactModelAbstract_wrap : public ContactModelAbstract, public bp::wrappe
   ContactModelAbstract_wrap(StateMultibody& state, int nc) : ContactModelAbstract(state, nc) {}
 
   void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
-    assert(x.size() == state_.get_nx() && "x has wrong dimension");
+    assert(static_cast<std::size_t>(x.size()) == state_.get_nx() && "x has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x);
   }
 
   void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const bool& recalc = true) {
-    assert(x.size() == state_.get_nx() && "x has wrong dimension");
+    assert(static_cast<std::size_t>(x.size()) == state_.get_nx() && "x has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, recalc);
   }
 
   void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& force) {
-    assert(force.size() == nc_ && "force has wrong dimension");
+    assert(static_cast<std::size_t>(force.size()) == nc_ && "force has wrong dimension");
     return bp::call<void>(this->get_override("updateForce").ptr(), data, force);
   }
 };

@@ -36,7 +36,8 @@ void ImpulseModelMultiple::removeImpulse(const std::string& name) {
 
 void ImpulseModelMultiple::calc(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                 const Eigen::Ref<const Eigen::VectorXd>& x) {
-  assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
+  assert(static_cast<std::size_t>(data->impulses.size()) == impulses_.size() &&
+         "it doesn't match the number of impulse datas and models");
   std::size_t ni = 0;
 
   const std::size_t& nv = state_.get_nv();
@@ -57,7 +58,8 @@ void ImpulseModelMultiple::calc(const boost::shared_ptr<ImpulseDataMultiple>& da
 
 void ImpulseModelMultiple::calcDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                     const Eigen::Ref<const Eigen::VectorXd>& x, const bool& recalc) {
-  assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
+  assert(static_cast<std::size_t>(data->impulses.size()) == impulses_.size() &&
+         "it doesn't match the number of impulse datas and models");
   if (recalc) {
     calc(data, x);
   }
@@ -81,15 +83,16 @@ void ImpulseModelMultiple::calcDiff(const boost::shared_ptr<ImpulseDataMultiple>
 
 void ImpulseModelMultiple::updateVelocity(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                           const Eigen::VectorXd& vnext) const {
-  assert(vnext.rows() == state_.get_nv() && "vnext has wrong dimension");
+  assert(static_cast<std::size_t>(vnext.rows()) == state_.get_nv() && "vnext has wrong dimension");
 
   data->vnext = vnext;
 }
 
 void ImpulseModelMultiple::updateForce(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                        const Eigen::VectorXd& force) {
-  assert(force.size() == ni_ && "force has wrong dimension, it should be ni vector");
-  assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
+  assert(static_cast<std::size_t>(force.size()) == ni_ && "force has wrong dimension, it should be ni vector");
+  assert(static_cast<std::size_t>(data->impulses.size()) == impulses_.size() &&
+         "it doesn't match the number of impulse datas and models");
   std::size_t ni = 0;
 
   for (ForceIterator it = data->fext.begin(); it != data->fext.end(); ++it) {
@@ -114,7 +117,8 @@ void ImpulseModelMultiple::updateForce(const boost::shared_ptr<ImpulseDataMultip
 
 void ImpulseModelMultiple::updateVelocityDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                               const Eigen::MatrixXd& dvnext_dx) const {
-  assert((dvnext_dx.rows() == state_.get_nv() && dvnext_dx.cols() == state_.get_ndx()) &&
+  assert((static_cast<std::size_t>(dvnext_dx.rows()) == state_.get_nv() &&
+          static_cast<std::size_t>(dvnext_dx.cols()) == state_.get_ndx()) &&
          "dvnext_dx has wrong dimension");
 
   data->dvnext_dx = dvnext_dx;
@@ -123,7 +127,8 @@ void ImpulseModelMultiple::updateVelocityDiff(const boost::shared_ptr<ImpulseDat
 void ImpulseModelMultiple::updateForceDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                            const Eigen::MatrixXd& df_dq) const {
   const std::size_t& nv = state_.get_nv();
-  assert((df_dq.rows() == ni_ && df_dq.cols() == nv) && "df_dq has wrong dimension");
+  assert((static_cast<std::size_t>(df_dq.rows()) == ni_ && static_cast<std::size_t>(df_dq.cols()) == nv) &&
+         "df_dq has wrong dimension");
   assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
   std::size_t ni = 0;
 

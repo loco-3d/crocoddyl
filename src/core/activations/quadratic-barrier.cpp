@@ -17,7 +17,7 @@ ActivationModelQuadraticBarrier::~ActivationModelQuadraticBarrier() {}
 
 void ActivationModelQuadraticBarrier::calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                                            const Eigen::Ref<const Eigen::VectorXd>& r) {
-  assert(r.size() == nr_ && "r has wrong dimension");
+  assert(static_cast<std::size_t>(r.size()) == nr_ && "r has wrong dimension");
   boost::shared_ptr<ActivationDataQuadraticBarrier> d =
       boost::static_pointer_cast<ActivationDataQuadraticBarrier>(data);
 
@@ -28,7 +28,7 @@ void ActivationModelQuadraticBarrier::calc(const boost::shared_ptr<ActivationDat
 
 void ActivationModelQuadraticBarrier::calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
                                                const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc) {
-  assert(r.size() == nr_ && "r has wrong dimension");
+  assert(static_cast<std::size_t>(r.size()) == nr_ && "r has wrong dimension");
   if (recalc) {
     calc(data, r);
   }

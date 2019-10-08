@@ -13,7 +13,7 @@ namespace crocoddyl {
 CostModelControl::CostModelControl(StateMultibody& state, ActivationModelAbstract& activation,
                                    const Eigen::VectorXd& uref)
     : CostModelAbstract(state, activation, static_cast<std::size_t>(uref.size())), uref_(uref) {
-  assert(activation.get_nr() == uref.size() && "activation::nr is not equals to nu");
+  assert(activation.get_nr() == static_cast<std::size_t>(uref.size()) && "activation::nr is not equals to nu");
 }
 
 CostModelControl::CostModelControl(StateMultibody& state, ActivationModelAbstract& activation)
@@ -39,7 +39,7 @@ CostModelControl::~CostModelControl() {}
 void CostModelControl::calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>&,
                             const Eigen::Ref<const Eigen::VectorXd>& u) {
   assert(nu_ != 0 && "it seems to be an autonomous system, if so, don't add this cost function");
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
 
   data->r = u - uref_;
   activation_.calc(data->activation, data->r);
@@ -50,7 +50,7 @@ void CostModelControl::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                 const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
                                 const bool& recalc) {
   assert(nu_ != 0 && "it seems to be an autonomous system, if so, don't add this cost function");
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
 
   if (recalc) {
     calc(data, x, u);

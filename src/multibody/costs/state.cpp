@@ -13,49 +13,49 @@ namespace crocoddyl {
 CostModelState::CostModelState(StateMultibody& state, ActivationModelAbstract& activation, const Eigen::VectorXd& xref,
                                const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), xref_(xref) {
-  assert(xref_.size() == state_.get_nx() && "CostModelState: reference is not dimension nx");
+  assert(static_cast<std::size_t>(xref_.size()) == state_.get_nx() && "CostModelState: reference is not dimension nx");
   assert(activation_.get_nr() == state_.get_ndx() && "CostModelState: nr is not equals to ndx");
 }
 
 CostModelState::CostModelState(StateMultibody& state, ActivationModelAbstract& activation, const Eigen::VectorXd& xref)
     : CostModelAbstract(state, activation), xref_(xref) {
-  assert(xref_.size() == state_.get_nx() && "CostModelState: reference is not dimension nx");
+  assert(static_cast<std::size_t>(xref_.size()) == state_.get_nx() && "CostModelState: reference is not dimension nx");
   assert(activation_.get_nr() == state_.get_ndx() && "CostModelState: nr is not equals to ndx");
 }
 
 CostModelState::CostModelState(StateMultibody& state, const Eigen::VectorXd& xref, const std::size_t& nu)
     : CostModelAbstract(state, state.get_ndx(), nu), xref_(xref) {
-  assert(xref_.size() == state_.get_nx() && "CostModelState: reference is not dimension nx");
+  assert(static_cast<std::size_t>(xref_.size()) == state_.get_nx() && "CostModelState: reference is not dimension nx");
   assert(activation_.get_nr() == state_.get_ndx() && "CostModelState: nr is not equals to ndx");
 }
 
 CostModelState::CostModelState(StateMultibody& state, const Eigen::VectorXd& xref)
     : CostModelAbstract(state, state.get_ndx()), xref_(xref) {
-  assert(xref_.size() == state_.get_nx() && "CostModelState: reference is not dimension nx");
+  assert(static_cast<std::size_t>(xref_.size()) == state_.get_nx() && "CostModelState: reference is not dimension nx");
   assert(activation_.get_nr() == state_.get_ndx() && "CostModelState: nr is not equals to ndx");
 }
 
 CostModelState::CostModelState(StateMultibody& state, ActivationModelAbstract& activation, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), xref_(state.zero()) {
-  assert(xref_.size() == state_.get_nx() && "CostModelState: reference is not dimension nx");
+  assert(static_cast<std::size_t>(xref_.size()) == state_.get_nx() && "CostModelState: reference is not dimension nx");
   assert(activation_.get_nr() == state_.get_ndx() && "CostModelState: nr is not equals to ndx");
 }
 
 CostModelState::CostModelState(StateMultibody& state, const std::size_t& nu)
     : CostModelAbstract(state, state.get_ndx(), nu), xref_(state.zero()) {
-  assert(xref_.size() == state_.get_nx() && "CostModelState: reference is not dimension nx");
+  assert(static_cast<std::size_t>(xref_.size()) == state_.get_nx() && "CostModelState: reference is not dimension nx");
   assert(activation_.get_nr() == state_.get_ndx() && "CostModelState: nr is not equals to ndx");
 }
 
 CostModelState::CostModelState(StateMultibody& state, ActivationModelAbstract& activation)
     : CostModelAbstract(state, activation), xref_(state.zero()) {
-  assert(xref_.size() == state_.get_nx() && "CostModelState: reference is not dimension nx");
+  assert(static_cast<std::size_t>(xref_.size()) == state_.get_nx() && "CostModelState: reference is not dimension nx");
   assert(activation_.get_nr() == state_.get_ndx() && "CostModelState: nr is not equals to ndx");
 }
 
 CostModelState::CostModelState(StateMultibody& state)
     : CostModelAbstract(state, state.get_ndx()), xref_(state.zero()) {
-  assert(xref_.size() == state_.get_nx() && "CostModelState: reference is not dimension nx");
+  assert(static_cast<std::size_t>(xref_.size()) == state_.get_nx() && "CostModelState: reference is not dimension nx");
   assert(activation_.get_nr() == state_.get_ndx() && "CostModelState: nr is not equals to ndx");
 }
 
@@ -63,7 +63,7 @@ CostModelState::~CostModelState() {}
 
 void CostModelState::calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                           const Eigen::Ref<const Eigen::VectorXd>&) {
-  assert(x.size() == state_.get_nx() && "CostModelState::calc: x has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == state_.get_nx() && "CostModelState::calc: x has wrong dimension");
 
   state_.diff(xref_, x, data->r);
   activation_.calc(data->activation, data->r);
@@ -73,7 +73,7 @@ void CostModelState::calc(const boost::shared_ptr<CostDataAbstract>& data, const
 void CostModelState::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                               const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
                               const bool& recalc) {
-  assert(x.size() == state_.get_nx() && "x has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == state_.get_nx() && "x has wrong dimension");
 
   CostDataState* d = static_cast<CostDataState*>(data.get());
   if (recalc) {
