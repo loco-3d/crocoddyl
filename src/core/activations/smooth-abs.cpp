@@ -20,7 +20,7 @@ void ActivationModelSmoothAbs::calc(const boost::shared_ptr<ActivationDataAbstra
   boost::shared_ptr<ActivationDataSmoothAbs> d = boost::static_pointer_cast<ActivationDataSmoothAbs>(data);
 
   d->a = (r.array().cwiseAbs2().array() + 1).array().cwiseSqrt();
-  data->a_value = d->a.squaredNorm();
+  data->a_value = d->a.sum();
 }
 
 void ActivationModelSmoothAbs::calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,

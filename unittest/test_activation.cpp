@@ -42,7 +42,8 @@ using namespace boost::unit_test;
 struct TestTypes {
   enum Type {
     ActivationModelQuadraticBarrier,
-    ActivationModelQuad, /*ActivationModelSmoothAbs,*/
+    ActivationModelQuad,
+    ActivationModelSmoothAbs,
     ActivationModelWeightedQuad,
     NbTestTypes
   };
@@ -78,14 +79,14 @@ class Factory {
       case TestTypes::ActivationModelQuad:
         model_ = new crocoddyl::ActivationModelQuad(nr_);
         break;
-      // case TestTypes::ActivationModelSmoothAbs:
-      //   model_ = new crocoddyl::ActivationModelSmoothAbs(nr_);
-      //   break;
+      case TestTypes::ActivationModelSmoothAbs:
+        model_ = new crocoddyl::ActivationModelSmoothAbs(nr_);
+        break;
       case TestTypes::ActivationModelWeightedQuad:
         model_ = new crocoddyl::ActivationModelWeightedQuad(weights);
         break;
       default:
-        throw std::runtime_error(__FILE__ ": Wrong TestTypes::Type given");
+        throw std::runtime_error(__FILE__ ":\n Construct wrong TestTypes::Type");
         break;
     }
   }
@@ -98,14 +99,14 @@ class Factory {
       case TestTypes::ActivationModelQuad:
         crocoddyl_unit_test::delete_pointer((crocoddyl::ActivationModelQuad*)model_);
         break;
-      // case TestTypes::ActivationModelSmoothAbs:
-      //   crocoddyl_unit_test::delete_pointer((crocoddyl::ActivationModelSmoothAbs)model_ );
-      //   break;
+      case TestTypes::ActivationModelSmoothAbs:
+        crocoddyl_unit_test::delete_pointer((crocoddyl::ActivationModelSmoothAbs*)model_);
+        break;
       case TestTypes::ActivationModelWeightedQuad:
         crocoddyl_unit_test::delete_pointer((crocoddyl::ActivationModelWeightedQuad*)model_);
         break;
       default:
-        throw std::runtime_error(__FILE__ ": Wrong TestTypes::Type given");
+        throw std::runtime_error(__FILE__ ":\n Destroy wrong TestTypes::Type");
         break;
     }
     model_ = NULL;
