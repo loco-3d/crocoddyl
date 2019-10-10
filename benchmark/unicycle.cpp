@@ -22,10 +22,10 @@ int main(int argc, char* argv[]) {
 
   // Creating the action models and warm point for the unicycle system
   Eigen::VectorXd x0 = Eigen::Vector3d(1., 0., 0.);
-  crocoddyl::ActionModelAbstract* model = new crocoddyl::ActionModelUnicycle();
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> model = boost::make_shared<crocoddyl::ActionModelUnicycle>();
   std::vector<Eigen::VectorXd> xs(N + 1, x0);
   std::vector<Eigen::VectorXd> us(N, Eigen::Vector2d::Zero());
-  std::vector<crocoddyl::ActionModelAbstract*> runningModels(N, model);
+  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(N, model);
 
   // Formulating the optimal control problem
   crocoddyl::ShootingProblem problem(x0, runningModels, model);

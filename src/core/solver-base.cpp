@@ -30,8 +30,8 @@ SolverAbstract::SolverAbstract(ShootingProblem& problem)
   models_.resize(T + 1);
   datas_.resize(T + 1);
   for (std::size_t t = 0; t < T; ++t) {
-    ActionModelAbstract* model = problem_.running_models_[t];
-    boost::shared_ptr<ActionDataAbstract>& data = problem_.running_datas_[t];
+    const boost::shared_ptr<ActionModelAbstract>& model = problem_.running_models_[t];
+    const boost::shared_ptr<ActionDataAbstract>& data = problem_.running_datas_[t];
     const std::size_t& nu = model->get_nu();
 
     xs_[t] = model->get_state()->zero();
@@ -78,7 +78,7 @@ const std::vector<CallbackAbstract*>& SolverAbstract::getCallbacks() const { ret
 
 const ShootingProblem& SolverAbstract::get_problem() const { return problem_; }
 
-const std::vector<ActionModelAbstract*>& SolverAbstract::get_models() const { return models_; }
+const std::vector<boost::shared_ptr<ActionModelAbstract> >& SolverAbstract::get_models() const { return models_; }
 
 const std::vector<boost::shared_ptr<ActionDataAbstract> >& SolverAbstract::get_datas() const { return datas_; }
 

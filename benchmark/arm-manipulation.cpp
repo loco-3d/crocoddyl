@@ -67,18 +67,20 @@ int main(int argc, char* argv[]) {
   armature << 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.;
   runningDAM.set_armature(armature);
   terminalDAM.set_armature(armature);
-  crocoddyl::ActionModelAbstract* runningModel = new crocoddyl::IntegratedActionModelEuler(&runningDAM, 1e-3);
-  crocoddyl::ActionModelAbstract* terminalModel = new crocoddyl::IntegratedActionModelEuler(&terminalDAM, 1e-3);
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModel =
+      boost::make_shared<crocoddyl::IntegratedActionModelEuler>(&runningDAM, 1e-3);
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> terminalModel =
+      boost::make_shared<crocoddyl::IntegratedActionModelEuler>(&terminalDAM, 1e-3);
 
   // For this optimal control problem, we define 100 knots (or running action
   // models) plus a terminal knot
-  std::vector<crocoddyl::ActionModelAbstract*> runningModels(N, runningModel);
+  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(N, runningModel);
   crocoddyl::ShootingProblem problem(x0, runningModels, terminalModel);
   std::vector<Eigen::VectorXd> xs(N + 1, x0);
   std::vector<Eigen::VectorXd> us(N, Eigen::VectorXd::Zero(runningModel->get_nu()));
   for (unsigned int i = 0; i < N; ++i) {
-    crocoddyl::ActionModelAbstract* model = problem.get_runningModels()[i];
-    boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = problem.get_runningDatas()[i];
+    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = problem.get_runningModels()[i];
+    const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = problem.get_runningDatas()[i];
     model->quasiStatic(data, us[i], x0);
   }
 

@@ -30,7 +30,7 @@ void SolverBoxDDP::allocateData() {
   const std::size_t& T = problem_.get_T();
   Quu_inv_.resize(T);
   for (std::size_t t = 0; t < T; ++t) {
-    ActionModelAbstract* model = problem_.running_models_[t];
+    const boost::shared_ptr<ActionModelAbstract>& model = problem_.running_models_[t];
     const std::size_t& nu = model->get_nu();
 
     // Store the largest number of controls across all models to allocate u_ll_, u_hl_
@@ -76,8 +76,8 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
   xnext_ = problem_.get_x0();
   const std::size_t& T = problem_.get_T();
   for (std::size_t t = 0; t < T; ++t) {
-    ActionModelAbstract* m = problem_.running_models_[t];
-    boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
+    const boost::shared_ptr<ActionModelAbstract>& m = problem_.running_models_[t];
+    const boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
     if ((is_feasible_) || (steplength == 1)) {
       xs_try_[t] = xnext_;
     } else {
@@ -103,8 +103,8 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
     }
   }
 
-  ActionModelAbstract* m = problem_.terminal_model_;
-  boost::shared_ptr<ActionDataAbstract>& d = problem_.terminal_data_;
+  const boost::shared_ptr<ActionModelAbstract>& m = problem_.terminal_model_;
+  const boost::shared_ptr<ActionDataAbstract>& d = problem_.terminal_data_;
 
   if ((is_feasible_) || (steplength == 1)) {
     xs_try_.back() = xnext_;
