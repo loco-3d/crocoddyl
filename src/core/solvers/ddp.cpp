@@ -10,7 +10,7 @@
 
 namespace crocoddyl {
 
-SolverDDP::SolverDDP(ShootingProblem& problem)
+SolverDDP::SolverDDP(boost::shared_ptr<ShootingProblem> problem)
     : SolverAbstract(problem),
       regfactor_(10.),
       regmin_(1e-9),
@@ -120,7 +120,7 @@ double SolverDDP::tryStep(const double& steplength) {
 
 double SolverDDP::stoppingCriteria() {
   stop_ = 0.;
-  const std::size_t& T = this->problem_.get_T();
+  const std::size_t& T = this->problem_->get_T();
   for (std::size_t t = 0; t < T; ++t) {
     stop_ += Qu_[t].squaredNorm();
   }
@@ -129,7 +129,7 @@ double SolverDDP::stoppingCriteria() {
 
 const Eigen::Vector2d& SolverDDP::expectedImprovement() {
   d_.fill(0);
-  const std::size_t& T = this->problem_.get_T();
+  const std::size_t& T = this->problem_->get_T();
   for (std::size_t t = 0; t < T; ++t) {
     d_[0] += Qu_[t].dot(k_[t]);
     d_[1] -= k_[t].dot(Quuk_[t]);
@@ -138,15 +138,15 @@ const Eigen::Vector2d& SolverDDP::expectedImprovement() {
 }
 
 double SolverDDP::calc() {
-  cost_ = problem_.calcDiff(xs_, us_);
+  cost_ = problem_->calcDiff(xs_, us_);
   if (!is_feasible_) {
-    const Eigen::VectorXd& x0 = problem_.get_x0();
-    problem_.running_models_[0]->get_state()->diff(xs_[0], x0, gaps_[0]);
+    const Eigen::VectorXd& x0 = problem_->get_x0();
+    problem_->running_models_[0]->get_state()->diff(xs_[0], x0, gaps_[0]);
 
-    const std::size_t& T = problem_.get_T();
+    const std::size_t& T = problem_->get_T();
     for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& model = problem_.running_models_[t];
-      const boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
+      const boost::shared_ptr<ActionModelAbstract>& model = problem_->running_models_[t];
+      const boost::shared_ptr<ActionDataAbstract>& d = problem_->running_datas_[t];
       model->get_state()->diff(xs_[t + 1], d->xnext, gaps_[t + 1]);
     }
   }
@@ -154,7 +154,7 @@ double SolverDDP::calc() {
 }
 
 void SolverDDP::backwardPass() {
-  const boost::shared_ptr<ActionDataAbstract>& d_T = problem_.terminal_data_;
+  const boost::shared_ptr<ActionDataAbstract>& d_T = problem_->terminal_data_;
   Vxx_.back() = d_T->Lxx;
   Vx_.back() = d_T->Lx;
 
@@ -167,9 +167,9 @@ void SolverDDP::backwardPass() {
     Vx_.back().noalias() += Vxx_.back() * gaps_.back();
   }
 
-  for (int t = static_cast<int>(problem_.get_T()) - 1; t >= 0; --t) {
-    const boost::shared_ptr<ActionModelAbstract>& m = problem_.running_models_[t];
-    const boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
+  for (int t = static_cast<int>(problem_->get_T()) - 1; t >= 0; --t) {
+    const boost::shared_ptr<ActionModelAbstract>& m = problem_->running_models_[t];
+    const boost::shared_ptr<ActionDataAbstract>& d = problem_->running_datas_[t];
     const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
     const Eigen::VectorXd& Vx_p = Vx_[t + 1];
 
@@ -219,10 +219,10 @@ void SolverDDP::forwardPass(const double& steplength) {
   assert(steplength <= 1. && "Step length has to be <= 1.");
   assert(steplength >= 0. && "Step length has to be >= 0.");
   cost_try_ = 0.;
-  const std::size_t& T = problem_.get_T();
+  const std::size_t& T = problem_->get_T();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& m = problem_.running_models_[t];
-    const boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
+    const boost::shared_ptr<ActionModelAbstract>& m = problem_->running_models_[t];
+    const boost::shared_ptr<ActionDataAbstract>& d = problem_->running_datas_[t];
 
     m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
     us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
@@ -238,8 +238,8 @@ void SolverDDP::forwardPass(const double& steplength) {
     }
   }
 
-  const boost::shared_ptr<ActionModelAbstract>& m = problem_.terminal_model_;
-  const boost::shared_ptr<ActionDataAbstract>& d = problem_.terminal_data_;
+  const boost::shared_ptr<ActionModelAbstract>& m = problem_->terminal_model_;
+  const boost::shared_ptr<ActionDataAbstract>& d = problem_->terminal_data_;
   m->calc(d, xs_try_.back());
   cost_try_ += d->cost;
 
@@ -249,7 +249,7 @@ void SolverDDP::forwardPass(const double& steplength) {
 }
 
 void SolverDDP::computeGains(const std::size_t& t) {
-  if (problem_.running_models_[t]->get_nu() > 0) {
+  if (problem_->running_models_[t]->get_nu() > 0) {
     Quu_llt_[t].compute(Quu_[t]);
     K_[t] = Qxu_[t].transpose();
     Quu_llt_[t].solveInPlace(K_[t]);
@@ -275,7 +275,7 @@ void SolverDDP::decreaseRegularization() {
 }
 
 void SolverDDP::allocateData() {
-  const std::size_t& T = problem_.get_T();
+  const std::size_t& T = problem_->get_T();
   Vxx_.resize(T + 1);
   Vx_.resize(T + 1);
   Qxx_.resize(T);
@@ -296,7 +296,7 @@ void SolverDDP::allocateData() {
   Quuk_.resize(T);
 
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = problem_.running_models_[t];
+    const boost::shared_ptr<ActionModelAbstract>& model = problem_->running_models_[t];
     const std::size_t& nx = model->get_state()->get_nx();
     const std::size_t& ndx = model->get_state()->get_ndx();
     const std::size_t& nu = model->get_nu();
@@ -313,7 +313,7 @@ void SolverDDP::allocateData() {
     gaps_[t] = Eigen::VectorXd::Zero(ndx);
 
     if (t == 0) {
-      xs_try_[t] = problem_.get_x0();
+      xs_try_[t] = problem_->get_x0();
     } else {
       xs_try_[t] = Eigen::VectorXd::Constant(nx, NAN);
     }
@@ -324,10 +324,10 @@ void SolverDDP::allocateData() {
     Quu_llt_[t] = Eigen::LLT<Eigen::MatrixXd>(nu);
     Quuk_[t] = Eigen::VectorXd(nu);
   }
-  const std::size_t& ndx = problem_.terminal_model_->get_state()->get_ndx();
+  const std::size_t& ndx = problem_->terminal_model_->get_state()->get_ndx();
   Vxx_.back() = Eigen::MatrixXd::Zero(ndx, ndx);
   Vx_.back() = Eigen::VectorXd::Zero(ndx);
-  xs_try_.back() = problem_.terminal_model_->get_state()->zero();
+  xs_try_.back() = problem_->terminal_model_->get_state()->zero();
   gaps_.back() = Eigen::VectorXd::Zero(ndx);
 
   x_reg_ = Eigen::VectorXd::Constant(ndx, xreg_);

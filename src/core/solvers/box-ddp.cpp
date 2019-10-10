@@ -11,7 +11,7 @@
 
 namespace crocoddyl {
 
-SolverBoxDDP::SolverBoxDDP(ShootingProblem& problem) : SolverDDP(problem) {
+SolverBoxDDP::SolverBoxDDP(boost::shared_ptr<ShootingProblem> problem) : SolverDDP(problem) {
   allocateData();
 
   const std::size_t& n_alphas = 10;
@@ -27,10 +27,10 @@ void SolverBoxDDP::allocateData() {
   SolverDDP::allocateData();
 
   std::size_t nu_max = 0;
-  const std::size_t& T = problem_.get_T();
+  const std::size_t& T = problem_->get_T();
   Quu_inv_.resize(T);
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = problem_.running_models_[t];
+    const boost::shared_ptr<ActionModelAbstract>& model = problem_->running_models_[t];
     const std::size_t& nu = model->get_nu();
 
     // Store the largest number of controls across all models to allocate u_ll_, u_hl_
@@ -44,15 +44,15 @@ void SolverBoxDDP::allocateData() {
 }
 
 void SolverBoxDDP::computeGains(const std::size_t& t) {
-  if (problem_.running_models_[t]->get_nu() > 0) {
-    if (!problem_.running_models_[t]->get_has_control_limits()) {
+  if (problem_->running_models_[t]->get_nu() > 0) {
+    if (!problem_->running_models_[t]->get_has_control_limits()) {
       // No control limits on this model: Use vanilla DDP
       SolverDDP::computeGains(t);
       return;
     }
 
-    u_ll_ = problem_.running_models_[t]->get_u_lb() - us_[t];
-    u_hl_ = problem_.running_models_[t]->get_u_ub() - us_[t];
+    u_ll_ = problem_->running_models_[t]->get_u_lb() - us_[t];
+    u_hl_ = problem_->running_models_[t]->get_u_ub() - us_[t];
 
     BoxQPSolution boxqp_sol = BoxQP(Quu_[t], Qu_[t], u_ll_, u_hl_, us_[t], 0.1, 100, 1e-5, ureg_);
 
@@ -73,11 +73,11 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
   assert(steplength <= 1. && "Step length has to be <= 1.");
   assert(steplength >= 0. && "Step length has to be >= 0.");
   cost_try_ = 0.;
-  xnext_ = problem_.get_x0();
-  const std::size_t& T = problem_.get_T();
+  xnext_ = problem_->get_x0();
+  const std::size_t& T = problem_->get_T();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& m = problem_.running_models_[t];
-    const boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
+    const boost::shared_ptr<ActionModelAbstract>& m = problem_->running_models_[t];
+    const boost::shared_ptr<ActionDataAbstract>& d = problem_->running_datas_[t];
     if ((is_feasible_) || (steplength == 1)) {
       xs_try_[t] = xnext_;
     } else {
@@ -103,8 +103,8 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
     }
   }
 
-  const boost::shared_ptr<ActionModelAbstract>& m = problem_.terminal_model_;
-  const boost::shared_ptr<ActionDataAbstract>& d = problem_.terminal_data_;
+  const boost::shared_ptr<ActionModelAbstract>& m = problem_->terminal_model_;
+  const boost::shared_ptr<ActionDataAbstract>& d = problem_->terminal_data_;
 
   if ((is_feasible_) || (steplength == 1)) {
     xs_try_.back() = xnext_;

@@ -29,9 +29,9 @@ void exposeSolverFDDP() {
       "and the forward-pass rollouts this new policy by integrating the system dynamics\n"
       "along a tuple of optimized control commands U*.\n"
       ":param shootingProblem: shooting problem (list of action models along trajectory.)",
-      bp::init<ShootingProblem&>(bp::args(" self", " problem"),
-                                 "Initialize the vector dimension.\n\n"
-                                 ":param problem: shooting problem.")[bp::with_custodian_and_ward<1, 2>()])
+      bp::init<boost::shared_ptr<ShootingProblem> >(bp::args(" self", " problem"),
+                                                    "Initialize the vector dimension.\n\n"
+                                                    ":param problem: shooting problem."))
       .def("solve", &SolverFDDP::solve,
            SolverFDDP_solves(
                bp::args(" self", " init_xs=[]", " init_us=[]", " maxiter=100", " isFeasible=False", " regInit=None"),

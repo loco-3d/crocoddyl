@@ -19,7 +19,7 @@ class SolverFDDP : public SolverDDP {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  explicit SolverFDDP(ShootingProblem& problem);
+  explicit SolverFDDP(boost::shared_ptr<ShootingProblem> problem);
   ~SolverFDDP();
 
   virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,

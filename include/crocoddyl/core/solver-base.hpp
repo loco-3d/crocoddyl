@@ -21,7 +21,7 @@ class SolverAbstract {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  explicit SolverAbstract(ShootingProblem& problem);
+  explicit SolverAbstract(boost::shared_ptr<ShootingProblem> problem);
   virtual ~SolverAbstract();
 
   virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
@@ -38,7 +38,7 @@ class SolverAbstract {
   void setCallbacks(const std::vector<CallbackAbstract*>& callbacks);
   const std::vector<CallbackAbstract*>& getCallbacks() const;
 
-  const ShootingProblem& get_problem() const;
+  const boost::shared_ptr<ShootingProblem>& get_problem() const;
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& get_models() const;
   const std::vector<boost::shared_ptr<ActionDataAbstract> >& get_datas() const;
   const std::vector<Eigen::VectorXd>& get_xs() const;
@@ -55,7 +55,7 @@ class SolverAbstract {
   const double& get_dVexp() const;
 
  protected:
-  ShootingProblem& problem_;
+  boost::shared_ptr<ShootingProblem> problem_;
   std::vector<boost::shared_ptr<ActionModelAbstract> > models_;
   std::vector<boost::shared_ptr<ActionDataAbstract> > datas_;
   std::vector<Eigen::VectorXd> xs_;

@@ -75,12 +75,13 @@ int main(int argc, char* argv[]) {
   // For this optimal control problem, we define 100 knots (or running action
   // models) plus a terminal knot
   std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(N, runningModel);
-  crocoddyl::ShootingProblem problem(x0, runningModels, terminalModel);
+  boost::shared_ptr<crocoddyl::ShootingProblem> problem =
+      boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModels, terminalModel);
   std::vector<Eigen::VectorXd> xs(N + 1, x0);
   std::vector<Eigen::VectorXd> us(N, Eigen::VectorXd::Zero(runningModel->get_nu()));
   for (unsigned int i = 0; i < N; ++i) {
-    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = problem.get_runningModels()[i];
-    const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = problem.get_runningDatas()[i];
+    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = problem->get_runningModels()[i];
+    const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = problem->get_runningDatas()[i];
     model->quasiStatic(data, us[i], x0);
   }
 
@@ -114,7 +115,7 @@ int main(int argc, char* argv[]) {
   // Running calc
   for (unsigned int i = 0; i < T; ++i) {
     clock_gettime(CLOCK_MONOTONIC, &start);
-    problem.calc(xs, us);
+    problem->calc(xs, us);
     clock_gettime(CLOCK_MONOTONIC, &finish);
     elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
     elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;
@@ -130,7 +131,7 @@ int main(int argc, char* argv[]) {
   // Running calcDiff
   for (unsigned int i = 0; i < T; ++i) {
     clock_gettime(CLOCK_MONOTONIC, &start);
-    problem.calcDiff(xs, us);
+    problem->calcDiff(xs, us);
     clock_gettime(CLOCK_MONOTONIC, &finish);
     elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
     elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;

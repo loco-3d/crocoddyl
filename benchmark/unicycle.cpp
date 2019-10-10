@@ -28,7 +28,8 @@ int main(int argc, char* argv[]) {
   std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(N, model);
 
   // Formulating the optimal control problem
-  crocoddyl::ShootingProblem problem(x0, runningModels, model);
+  boost::shared_ptr<crocoddyl::ShootingProblem> problem =
+      boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModels, model);
   crocoddyl::SolverDDP ddp(problem);
   if (CALLBACKS) {
     std::vector<crocoddyl::CallbackAbstract*> cbs;
@@ -58,7 +59,7 @@ int main(int argc, char* argv[]) {
   // Running calc
   for (unsigned int i = 0; i < T; ++i) {
     clock_gettime(CLOCK_MONOTONIC, &start);
-    problem.calc(xs, us);
+    problem->calc(xs, us);
     clock_gettime(CLOCK_MONOTONIC, &finish);
     elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
     elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;
@@ -74,7 +75,7 @@ int main(int argc, char* argv[]) {
   // Running calcDiff
   for (unsigned int i = 0; i < T; ++i) {
     clock_gettime(CLOCK_MONOTONIC, &start);
-    problem.calcDiff(xs, us);
+    problem->calcDiff(xs, us);
     clock_gettime(CLOCK_MONOTONIC, &finish);
     elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
     elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;
