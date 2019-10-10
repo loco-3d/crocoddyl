@@ -47,9 +47,9 @@ void exposeImpulseAbstract() {
       "The calc and calcDiff functions compute the impulse Jacobian\n"
       "the derivatives respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, int>(bp::args(" self", " state", " ni"),
-          "Initialize the impulse model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param ni: dimension of impulse model"))
+                                                       "Initialize the impulse model.\n\n"
+                                                       ":param state: state of the multibody system\n"
+                                                       ":param ni: dimension of impulse model"))
       .def("calc", pure_virtual(&ImpulseModelAbstract_wrap::calc), bp::args(" self", " data", " x"),
            "Compute the impulse Jacobian\n"
            ":param data: impulse data\n"
@@ -76,7 +76,8 @@ void exposeImpulseAbstract() {
            "returns the allocated data for a predefined impulse.\n"
            ":param data: Pinocchio data\n"
            ":return impulse data.")
-      .add_property("state",
+      .add_property(
+          "state",
           bp::make_function(&ImpulseModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
           "state of the multibody system")
       .add_property(

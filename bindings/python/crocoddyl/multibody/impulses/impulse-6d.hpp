@@ -23,11 +23,10 @@ void exposeImpulse6D() {
       "It defines a rigid 6D impulse models based on acceleration-based holonomic constraints.\n"
       "The calc and calcDiff functions compute the impulse Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, int>(
-          bp::args(" self", " state", " frame"),
-          "Initialize the impulse model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param frame: reference frame id"))
+      bp::init<boost::shared_ptr<StateMultibody>, int>(bp::args(" self", " state", " frame"),
+                                                       "Initialize the impulse model.\n\n"
+                                                       ":param state: state of the multibody system\n"
+                                                       ":param frame: reference frame id"))
       .def("calc", &ImpulseModel6D::calc_wrap, bp::args(" self", " data", " x"),
            "Compute the 6D impulse Jacobian and drift.\n\n"
            "The rigid impulse model throught acceleration-base holonomic constraint\n"

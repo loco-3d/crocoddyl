@@ -22,7 +22,8 @@ class CostModelAbstract_wrap : public CostModelAbstract, public bp::wrapper<Cost
                          bool with_residuals = true)
       : CostModelAbstract(state, activation, nu, with_residuals) {}
 
-  CostModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation, bool with_residuals = true)
+  CostModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
+                         bool with_residuals = true)
       : CostModelAbstract(state, activation, with_residuals) {}
 
   CostModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, int nr, int nu, bool with_residuals = true)
@@ -60,15 +61,13 @@ void exposeCostMultibody() {
           ":param state: state of the multibody system\n"
           ":param activation: Activation model\n"
           ":param nu: dimension of control vector\n"
-          ":param withResiduals: true if the cost function has residuals")
-          [bp::with_custodian_and_ward<1, 3>()])
+          ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 3>()])
       .def(bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, bp::optional<bool> >(
           bp::args(" self", " state", " activation", " withResiduals=True"),
           "Initialize the cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: Activation model\n"
-          ":param withResiduals: true if the cost function has residuals")
-               [bp::with_custodian_and_ward<1, 3>()])
+          ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 3>()])
       .def(bp::init<boost::shared_ptr<StateMultibody>, int, int, bp::optional<bool> >(
           bp::args(" self", " state", " nr", " nu=model.nv", " withResiduals=True"),
           "Initialize the cost model.\n\n"
@@ -103,7 +102,8 @@ void exposeCostMultibody() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: Pinocchio data\n"
            ":return cost data.")
-      .add_property("state",
+      .add_property(
+          "state",
           bp::make_function(&CostModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
           "state of the multibody system")
       .add_property("activation",

@@ -47,9 +47,9 @@ void exposeActuationAbstract() {
       "of this model. These computations are mainly carry on inside calc() and calcDiff(),\n"
       "respectively.",
       bp::init<boost::shared_ptr<StateAbstract>, int>(bp::args(" self", " state", " nu"),
-                                    "Initialize the actuation model.\n\n"
-                                    ":param state: state description,\n"
-                                    ":param nu: dimension of control vector"))
+                                                      "Initialize the actuation model.\n\n"
+                                                      ":param state: state description,\n"
+                                                      ":param nu: dimension of control vector"))
       .def("calc", pure_virtual(&ActuationModelAbstract_wrap::calc), bp::args(" self", " data", " x", " u"),
            "Compute the actuation signal from the control input u.\n\n"
            "It describes the time-continuos evolution of the actuation model.\n"
@@ -74,9 +74,10 @@ void exposeActuationAbstract() {
           "nu",
           bp::make_function(&ActuationModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
           "dimension of control vector")
-      .add_property("state",
-                    bp::make_function(&ActuationModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
-                    "state");
+      .add_property(
+          "state",
+          bp::make_function(&ActuationModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
+          "state");
 
   bp::register_ptr_to_python<boost::shared_ptr<ActuationDataAbstract> >();
 

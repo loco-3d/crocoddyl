@@ -16,8 +16,8 @@
 namespace crocoddyl {
 
 DifferentialActionModelContactFwdDynamics::DifferentialActionModelContactFwdDynamics(
-    boost::shared_ptr<StateMultibody> state, ActuationModelFloatingBase& actuation, ContactModelMultiple& contacts, CostModelSum& costs,
-    const double& JMinvJt_damping, const bool& enable_force)
+    boost::shared_ptr<StateMultibody> state, ActuationModelFloatingBase& actuation, ContactModelMultiple& contacts,
+    CostModelSum& costs, const double& JMinvJt_damping, const bool& enable_force)
     : DifferentialActionModelAbstract(state, actuation.get_nu(), costs.get_nr()),
       actuation_(actuation),
       contacts_(contacts),

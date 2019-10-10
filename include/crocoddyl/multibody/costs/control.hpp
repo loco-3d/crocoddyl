@@ -15,9 +15,11 @@ namespace crocoddyl {
 
 class CostModelControl : public CostModelAbstract {
  public:
-  CostModelControl(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation, const Eigen::VectorXd& uref);
+  CostModelControl(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
+                   const Eigen::VectorXd& uref);
   CostModelControl(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation);
-  CostModelControl(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation, const std::size_t& nu);
+  CostModelControl(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
+                   const std::size_t& nu);
   CostModelControl(boost::shared_ptr<StateMultibody> state, const Eigen::VectorXd& uref);
   explicit CostModelControl(boost::shared_ptr<StateMultibody> state);
   CostModelControl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu);

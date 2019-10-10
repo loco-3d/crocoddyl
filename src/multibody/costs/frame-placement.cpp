@@ -11,14 +11,15 @@
 
 namespace crocoddyl {
 
-CostModelFramePlacement::CostModelFramePlacement(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
-                                                 const FramePlacement& Mref, const std::size_t& nu)
+CostModelFramePlacement::CostModelFramePlacement(boost::shared_ptr<StateMultibody> state,
+                                                 ActivationModelAbstract& activation, const FramePlacement& Mref,
+                                                 const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
   assert(activation_.get_nr() == 6 && "activation::nr is not equals to 6");
 }
 
-CostModelFramePlacement::CostModelFramePlacement(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
-                                                 const FramePlacement& Mref)
+CostModelFramePlacement::CostModelFramePlacement(boost::shared_ptr<StateMultibody> state,
+                                                 ActivationModelAbstract& activation, const FramePlacement& Mref)
     : CostModelAbstract(state, activation), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
   assert(activation_.get_nr() == 6 && "activation::nr is not equals to 6");
 }

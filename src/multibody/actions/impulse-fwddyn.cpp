@@ -15,9 +15,10 @@
 
 namespace crocoddyl {
 
-ActionModelImpulseFwdDynamics::ActionModelImpulseFwdDynamics(boost::shared_ptr<StateMultibody> state, ImpulseModelMultiple& impulses,
-                                                             CostModelSum& costs, const double& r_coeff,
-                                                             const double& JMinvJt_damping, const bool& enable_force)
+ActionModelImpulseFwdDynamics::ActionModelImpulseFwdDynamics(boost::shared_ptr<StateMultibody> state,
+                                                             ImpulseModelMultiple& impulses, CostModelSum& costs,
+                                                             const double& r_coeff, const double& JMinvJt_damping,
+                                                             const bool& enable_force)
     : ActionModelAbstract(state, 0, costs.get_nr()),
       impulses_(impulses),
       costs_(costs),

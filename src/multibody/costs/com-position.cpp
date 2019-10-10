@@ -10,19 +10,21 @@
 
 namespace crocoddyl {
 
-CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
-                                           const Eigen::Vector3d& cref, const std::size_t& nu)
+CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> state,
+                                           ActivationModelAbstract& activation, const Eigen::Vector3d& cref,
+                                           const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), cref_(cref) {
   assert(activation_.get_nr() == 3 && "activation::nr is not equals to 3");
 }
 
-CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
-                                           const Eigen::Vector3d& cref)
+CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> state,
+                                           ActivationModelAbstract& activation, const Eigen::Vector3d& cref)
     : CostModelAbstract(state, activation), cref_(cref) {
   assert(activation_.get_nr() == 3 && "activation::nr is not equals to 3");
 }
 
-CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> state, const Eigen::Vector3d& cref, const std::size_t& nu)
+CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> state, const Eigen::Vector3d& cref,
+                                           const std::size_t& nu)
     : CostModelAbstract(state, 3, nu), cref_(cref) {}
 
 CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> state, const Eigen::Vector3d& cref)

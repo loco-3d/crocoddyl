@@ -15,9 +15,10 @@ namespace crocoddyl {
 
 class CostModelCoMPosition : public CostModelAbstract {
  public:
-  CostModelCoMPosition(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation, const Eigen::Vector3d& cref,
-                       const std::size_t& nu);
-  CostModelCoMPosition(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation, const Eigen::Vector3d& cref);
+  CostModelCoMPosition(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
+                       const Eigen::Vector3d& cref, const std::size_t& nu);
+  CostModelCoMPosition(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
+                       const Eigen::Vector3d& cref);
   CostModelCoMPosition(boost::shared_ptr<StateMultibody> state, const Eigen::Vector3d& cref, const std::size_t& nu);
   CostModelCoMPosition(boost::shared_ptr<StateMultibody> state, const Eigen::Vector3d& cref);
   ~CostModelCoMPosition();

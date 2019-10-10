@@ -10,7 +10,8 @@
 
 namespace crocoddyl {
 
-ActuationModelFull::ActuationModelFull(boost::shared_ptr<StateMultibody> state) : ActuationModelAbstract(state, state->get_nv()) {
+ActuationModelFull::ActuationModelFull(boost::shared_ptr<StateMultibody> state)
+    : ActuationModelAbstract(state, state->get_nv()) {
   pinocchio::JointModelFreeFlyer ff_joint;
   assert(state->get_pinocchio().joints[1].shortname() != ff_joint.shortname() &&
          "The first joint cannot be free-flyer");

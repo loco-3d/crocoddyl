@@ -20,9 +20,10 @@ namespace crocoddyl {
 
 class DifferentialActionModelContactFwdDynamics : public DifferentialActionModelAbstract {
  public:
-  DifferentialActionModelContactFwdDynamics(boost::shared_ptr<StateMultibody> state, ActuationModelFloatingBase& actuation,
-                                            ContactModelMultiple& contacts, CostModelSum& costs,
-                                            const double& JMinvJt_damping = 0., const bool& enable_force = false);
+  DifferentialActionModelContactFwdDynamics(boost::shared_ptr<StateMultibody> state,
+                                            ActuationModelFloatingBase& actuation, ContactModelMultiple& contacts,
+                                            CostModelSum& costs, const double& JMinvJt_damping = 0.,
+                                            const bool& enable_force = false);
   ~DifferentialActionModelContactFwdDynamics();
 
   void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,

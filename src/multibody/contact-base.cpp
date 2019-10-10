@@ -10,7 +10,8 @@
 
 namespace crocoddyl {
 
-ContactModelAbstract::ContactModelAbstract(boost::shared_ptr<StateMultibody> state, const std::size_t& nc, const std::size_t& nu)
+ContactModelAbstract::ContactModelAbstract(boost::shared_ptr<StateMultibody> state, const std::size_t& nc,
+                                           const std::size_t& nu)
     : state_(state), nc_(nc), nu_(nu) {}
 
 ContactModelAbstract::ContactModelAbstract(boost::shared_ptr<StateMultibody> state, const std::size_t& nc)
@@ -20,8 +21,11 @@ ContactModelAbstract::~ContactModelAbstract() {}
 
 void ContactModelAbstract::updateForceDiff(const boost::shared_ptr<ContactDataAbstract>& data,
                                            const Eigen::MatrixXd& df_dx, const Eigen::MatrixXd& df_du) const {
-  assert((static_cast<std::size_t>(df_dx.rows()) == nc_ || static_cast<std::size_t>(df_dx.cols()) == state_->get_nx()) && "df_dx has wrong dimension");
-  assert((static_cast<std::size_t>(df_du.rows()) == nc_ || static_cast<std::size_t>(df_du.cols()) == nu_) && "df_du has wrong dimension");
+  assert(
+      (static_cast<std::size_t>(df_dx.rows()) == nc_ || static_cast<std::size_t>(df_dx.cols()) == state_->get_nx()) &&
+      "df_dx has wrong dimension");
+  assert((static_cast<std::size_t>(df_du.rows()) == nc_ || static_cast<std::size_t>(df_du.cols()) == nu_) &&
+         "df_du has wrong dimension");
   data->df_dx = df_dx;
   data->df_du = df_du;
 }

@@ -13,7 +13,8 @@ namespace crocoddyl {
 ContactModelMultiple::ContactModelMultiple(boost::shared_ptr<StateMultibody> state, const std::size_t& nu)
     : state_(state), nc_(0), nu_(nu) {}
 
-ContactModelMultiple::ContactModelMultiple(boost::shared_ptr<StateMultibody> state) : state_(state), nc_(0), nu_(state->get_nv()) {}
+ContactModelMultiple::ContactModelMultiple(boost::shared_ptr<StateMultibody> state)
+    : state_(state), nc_(0), nu_(state->get_nv()) {}
 
 ContactModelMultiple::~ContactModelMultiple() {}
 

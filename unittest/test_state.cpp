@@ -104,7 +104,7 @@ class StateFactory {
   int nx_;                    //!< The size of the StateVector to test.
 
  private:
-  TestTypes::Type state_type_;       //!< The current type to test
+  TestTypes::Type state_type_;                         //!< The current type to test
   boost::shared_ptr<crocoddyl::StateAbstract> state_;  //!< The pointer to the state in testing
 
   pinocchio::JointModelFreeFlyer free_flyer_joint_;  //!< The free flyer joint to build the pinocchio model.

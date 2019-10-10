@@ -19,7 +19,8 @@ CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state, Acti
 CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation)
     : CostModelAbstract(state, activation), uref_(Eigen::VectorXd::Zero(activation.get_nr())) {}
 
-CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation, const std::size_t& nu)
+CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
+                                   const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), uref_(Eigen::VectorXd::Zero(nu)) {
   assert(activation.get_nr() == nu_ && "activation::nr is not equals to nu");
 }

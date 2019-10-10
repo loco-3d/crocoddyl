@@ -10,20 +10,22 @@
 
 namespace crocoddyl {
 
-CostModelState::CostModelState(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation, const Eigen::VectorXd& xref,
-                               const std::size_t& nu)
+CostModelState::CostModelState(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
+                               const Eigen::VectorXd& xref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), xref_(xref) {
   assert(static_cast<std::size_t>(xref_.size()) == state_->get_nx() && "reference is not dimension nx");
   assert(activation_.get_nr() == state_->get_ndx() && "nr is not equals to ndx");
 }
 
-CostModelState::CostModelState(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation, const Eigen::VectorXd& xref)
+CostModelState::CostModelState(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
+                               const Eigen::VectorXd& xref)
     : CostModelAbstract(state, activation), xref_(xref) {
   assert(static_cast<std::size_t>(xref_.size()) == state_->get_nx() && "reference is not dimension nx");
   assert(activation_.get_nr() == state_->get_ndx() && "nr is not equals to ndx");
 }
 
-CostModelState::CostModelState(boost::shared_ptr<StateMultibody> state, const Eigen::VectorXd& xref, const std::size_t& nu)
+CostModelState::CostModelState(boost::shared_ptr<StateMultibody> state, const Eigen::VectorXd& xref,
+                               const std::size_t& nu)
     : CostModelAbstract(state, state->get_ndx(), nu), xref_(xref) {
   assert(static_cast<std::size_t>(xref_.size()) == state_->get_nx() && "reference is not dimension nx");
   assert(activation_.get_nr() == state_->get_ndx() && "nr is not equals to ndx");
@@ -35,7 +37,8 @@ CostModelState::CostModelState(boost::shared_ptr<StateMultibody> state, const Ei
   assert(activation_.get_nr() == state_->get_ndx() && "nr is not equals to ndx");
 }
 
-CostModelState::CostModelState(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation, const std::size_t& nu)
+CostModelState::CostModelState(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
+                               const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), xref_(state->zero()) {
   assert(static_cast<std::size_t>(xref_.size()) == state_->get_nx() && "reference is not dimension nx");
   assert(activation_.get_nr() == state_->get_ndx() && "nr is not equals to ndx");

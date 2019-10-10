@@ -12,19 +12,21 @@
 
 namespace crocoddyl {
 
-CostModelFrameVelocity::CostModelFrameVelocity(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
-                                               const FrameMotion& vref, const std::size_t& nu)
+CostModelFrameVelocity::CostModelFrameVelocity(boost::shared_ptr<StateMultibody> state,
+                                               ActivationModelAbstract& activation, const FrameMotion& vref,
+                                               const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), vref_(vref) {
   assert(activation_.get_nr() == 6 && "activation::nr is not equals to 6");
 }
 
-CostModelFrameVelocity::CostModelFrameVelocity(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
-                                               const FrameMotion& vref)
+CostModelFrameVelocity::CostModelFrameVelocity(boost::shared_ptr<StateMultibody> state,
+                                               ActivationModelAbstract& activation, const FrameMotion& vref)
     : CostModelAbstract(state, activation), vref_(vref) {
   assert(activation_.get_nr() == 6 && "activation::nr is not equals to 6");
 }
 
-CostModelFrameVelocity::CostModelFrameVelocity(boost::shared_ptr<StateMultibody> state, const FrameMotion& vref, const std::size_t& nu)
+CostModelFrameVelocity::CostModelFrameVelocity(boost::shared_ptr<StateMultibody> state, const FrameMotion& vref,
+                                               const std::size_t& nu)
     : CostModelAbstract(state, 6, nu), vref_(vref) {}
 
 CostModelFrameVelocity::CostModelFrameVelocity(boost::shared_ptr<StateMultibody> state, const FrameMotion& vref)

@@ -11,23 +11,25 @@
 
 namespace crocoddyl {
 
-CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
-                                                     const FrameTranslation& xref, const std::size_t& nu)
+CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state,
+                                                     ActivationModelAbstract& activation, const FrameTranslation& xref,
+                                                     const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), xref_(xref) {
   assert(activation_.get_nr() == 3 && "activation::nr is not equals to 3");
 }
 
-CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
-                                                     const FrameTranslation& xref)
+CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state,
+                                                     ActivationModelAbstract& activation, const FrameTranslation& xref)
     : CostModelAbstract(state, activation), xref_(xref) {
   assert(activation_.get_nr() == 3 && "activation::nr is not equals to 3");
 }
 
-CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
-                                                     const std::size_t& nu)
+CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state,
+                                                     const FrameTranslation& xref, const std::size_t& nu)
     : CostModelAbstract(state, 3, nu), xref_(xref) {}
 
-CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref)
+CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state,
+                                                     const FrameTranslation& xref)
     : CostModelAbstract(state, 3), xref_(xref) {}
 
 CostModelFrameTranslation::~CostModelFrameTranslation() {}

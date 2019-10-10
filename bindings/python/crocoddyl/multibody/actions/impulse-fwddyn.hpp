@@ -36,8 +36,8 @@ void exposeActionImpulseFwdDynamics() {
           ":param costs: stack of cost functions\n"
           ":param r_coeff: restitution coefficient\n"
           ":param inv_damping: Damping factor for cholesky decomposition of JMinvJt\n"
-          ":param enable_force: Enable the computation of force Jacobians")[bp::with_custodian_and_ward<1, 3,
-          bp::with_custodian_and_ward<1, 4> >()])
+          ":param enable_force: Enable the computation of force Jacobians")
+          [bp::with_custodian_and_ward<1, 3, bp::with_custodian_and_ward<1, 4> >()])
       .def("calc", &ActionModelImpulseFwdDynamics::calc_wrap,
            ActionModel_calc_wraps(
                bp::args(" self", " data", " x", " u=None"),

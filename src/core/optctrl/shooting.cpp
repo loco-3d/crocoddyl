@@ -18,7 +18,8 @@ namespace crocoddyl {
 ShootingProblem::ShootingProblem(const Eigen::VectorXd& x0, const std::vector<ActionModelAbstract*>& running_models,
                                  ActionModelAbstract* const terminal_model)
     : terminal_model_(terminal_model), running_models_(running_models), T_(running_models.size()), x0_(x0), cost_(0.) {
-  assert(static_cast<std::size_t>(x0_.size()) == running_models_[0]->get_state()->get_nx() && "x0 has wrong dimension");
+  assert(static_cast<std::size_t>(x0_.size()) == running_models_[0]->get_state()->get_nx() &&
+         "x0 has wrong dimension");
   allocateData();
 }
 

@@ -10,8 +10,8 @@
 
 namespace crocoddyl {
 
-DifferentialActionModelAbstract::DifferentialActionModelAbstract(boost::shared_ptr<StateAbstract> state, const std::size_t& nu,
-                                                                 const std::size_t& nr)
+DifferentialActionModelAbstract::DifferentialActionModelAbstract(boost::shared_ptr<StateAbstract> state,
+                                                                 const std::size_t& nu, const std::size_t& nr)
     : nu_(nu),
       nr_(nr),
       state_(state),

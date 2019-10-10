@@ -18,15 +18,14 @@ namespace bp = boost::python;
 
 void exposeCostState() {
   bp::class_<CostModelState, bp::bases<CostModelAbstract> >(
-      "CostModelState",
-      bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, Eigen::VectorXd, int>(
-          bp::args(" self", " state", " activation=crocoddyl.ActivationModelQuad(state.ndx)", " xref=state.zero()",
-                   " nu=model.nv"),
-          "Initialize the state cost model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param activation: activation model\n"
-          ":param xref: reference state\n"
-          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
+      "CostModelState", bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, Eigen::VectorXd, int>(
+                            bp::args(" self", " state", " activation=crocoddyl.ActivationModelQuad(state.ndx)",
+                                     " xref=state.zero()", " nu=model.nv"),
+                            "Initialize the state cost model.\n\n"
+                            ":param state: state of the multibody system\n"
+                            ":param activation: activation model\n"
+                            ":param xref: reference state\n"
+                            ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
       .def(bp::init<boost::shared_ptr<StateMultibody>, Eigen::VectorXd, int>(
           bp::args(" self", " state", " xref", " nu"),
           "Initialize the state cost model.\n\n"

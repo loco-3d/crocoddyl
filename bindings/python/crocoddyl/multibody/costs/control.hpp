@@ -18,13 +18,12 @@ namespace bp = boost::python;
 
 void exposeCostControl() {
   bp::class_<CostModelControl, bp::bases<CostModelAbstract> >(
-      "CostModelControl",
-      bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, Eigen::VectorXd>(
-          bp::args(" self", " state", " activation", " uref"),
-          "Initialize the control cost model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param activation: activation model\n"
-          ":param uref: reference control")[bp::with_custodian_and_ward<1, 3>()])
+      "CostModelControl", bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, Eigen::VectorXd>(
+                              bp::args(" self", " state", " activation", " uref"),
+                              "Initialize the control cost model.\n\n"
+                              ":param state: state of the multibody system\n"
+                              ":param activation: activation model\n"
+                              ":param uref: reference control")[bp::with_custodian_and_ward<1, 3>()])
       .def(bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&>(
           bp::args(" self", " state", " activation"),
           "Initialize the control cost model.\n\n"

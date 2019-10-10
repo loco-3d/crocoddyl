@@ -29,7 +29,8 @@ int main(int argc, char* argv[]) {
 
   pinocchio::Model robot_model;
   pinocchio::urdf::buildModel(TALOS_ARM_URDF, robot_model);
-  boost::shared_ptr<crocoddyl::StateMultibody> state = boost::make_shared<crocoddyl::StateMultibody>(boost::ref(robot_model));
+  boost::shared_ptr<crocoddyl::StateMultibody> state =
+      boost::make_shared<crocoddyl::StateMultibody>(boost::ref(robot_model));
 
   Eigen::VectorXd q0(state->get_nq());
   Eigen::VectorXd x0(state->get_nx());

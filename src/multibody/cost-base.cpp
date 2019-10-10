@@ -11,8 +11,8 @@
 
 namespace crocoddyl {
 
-CostModelAbstract::CostModelAbstract(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation, const std::size_t& nu,
-                                     const bool& with_residuals)
+CostModelAbstract::CostModelAbstract(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
+                                     const std::size_t& nu, const bool& with_residuals)
     : state_(state),
       activation_(activation),
       nu_(nu),
@@ -27,15 +27,16 @@ CostModelAbstract::CostModelAbstract(boost::shared_ptr<StateMultibody> state, Ac
       with_residuals_(with_residuals),
       unone_(Eigen::VectorXd::Zero(state->get_nv())) {}
 
-CostModelAbstract::CostModelAbstract(boost::shared_ptr<StateMultibody> state, const std::size_t& nr, const std::size_t& nu,
-                                     const bool& with_residuals)
+CostModelAbstract::CostModelAbstract(boost::shared_ptr<StateMultibody> state, const std::size_t& nr,
+                                     const std::size_t& nu, const bool& with_residuals)
     : state_(state),
       activation_(*new ActivationModelQuad(nr)),
       nu_(nu),
       with_residuals_(with_residuals),
       unone_(Eigen::VectorXd::Zero(nu)) {}
 
-CostModelAbstract::CostModelAbstract(boost::shared_ptr<StateMultibody> state, const std::size_t& nr, const bool& with_residuals)
+CostModelAbstract::CostModelAbstract(boost::shared_ptr<StateMultibody> state, const std::size_t& nr,
+                                     const bool& with_residuals)
     : state_(state),
       activation_(*new ActivationModelQuad(nr)),
       nu_(state->get_nv()),

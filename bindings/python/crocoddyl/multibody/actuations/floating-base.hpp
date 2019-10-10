@@ -22,8 +22,8 @@ void exposeActuationFloatingBase() {
       "Floating-base actuation models.\n\n"
       "It simplies consider a floating-base actuation model, where the first 6 elements are unactuated.",
       bp::init<boost::shared_ptr<StateMultibody> >(bp::args(" self", " state"),
-          "Initialize the floating-base actuation model.\n\n"
-          ":param state: state of multibody system"))
+                                                   "Initialize the floating-base actuation model.\n\n"
+                                                   ":param state: state of multibody system"))
       .def("calc", &ActuationModelFloatingBase::calc_wrap, bp::args(" self", " data", " x", " u"),
            "Compute the actuation signal from the control input u.\n\n"
            "It describes the time-continuos evolution of the floating-base actuation model.\n"

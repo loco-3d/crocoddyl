@@ -46,14 +46,13 @@ void exposeCostSum() {
       .add_property("cost", bp::make_getter(&CostItem::cost, bp::return_internal_reference<>()), "cost model")
       .def_readwrite("weight", &CostItem::weight, "cost weight");
 
-  bp::class_<CostModelSum, boost::noncopyable>(
-      "CostModelSum",
-      bp::init<boost::shared_ptr<StateMultibody>, std::size_t, bool>(
-          bp::args(" self", " state", " nu=state.nv", " withResiduals=True"),
-          "Initialize the total cost model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param nu: dimension of control vector\n"
-          ":param withResiduals: true if the cost function has residuals"))
+  bp::class_<CostModelSum, boost::noncopyable>("CostModelSum",
+                                               bp::init<boost::shared_ptr<StateMultibody>, std::size_t, bool>(
+                                                   bp::args(" self", " state", " nu=state.nv", " withResiduals=True"),
+                                                   "Initialize the total cost model.\n\n"
+                                                   ":param state: state of the multibody system\n"
+                                                   ":param nu: dimension of control vector\n"
+                                                   ":param withResiduals: true if the cost function has residuals"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, std::size_t>(
           bp::args(" self", " state", " nu"),
           "Initialize the total cost model.\n\n"
@@ -61,11 +60,10 @@ void exposeCostSum() {
           ":param state: state of the multibody system\n"
           ":param nu: dimension of control vector\n"
           ":param withResiduals: true if the cost function has residuals"))
-      .def(bp::init<boost::shared_ptr<StateMultibody> >(
-          bp::args(" self", " state"),
-          "Initialize the total cost model.\n\n"
-          "For this case the default nu is equals to model.nv.\n"
-          ":param state: state of the multibody system"))
+      .def(bp::init<boost::shared_ptr<StateMultibody> >(bp::args(" self", " state"),
+                                                        "Initialize the total cost model.\n\n"
+                                                        "For this case the default nu is equals to model.nv.\n"
+                                                        ":param state: state of the multibody system"))
       .def("addCost", &CostModelSum::addCost, bp::with_custodian_and_ward<1, 3>(),
            bp::args(" self", " name", " cost", " weight"),
            "Add a cost item.\n\n"

@@ -11,19 +11,21 @@
 
 namespace crocoddyl {
 
-CostModelFrameRotation::CostModelFrameRotation(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
-                                               const FrameRotation& Rref, const std::size_t& nu)
+CostModelFrameRotation::CostModelFrameRotation(boost::shared_ptr<StateMultibody> state,
+                                               ActivationModelAbstract& activation, const FrameRotation& Rref,
+                                               const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), Rref_(Rref), oRf_inv_(Rref.oRf.transpose()) {
   assert(activation_.get_nr() == 3 && "activation::nr is not equals to 3");
 }
 
-CostModelFrameRotation::CostModelFrameRotation(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
-                                               const FrameRotation& Rref)
+CostModelFrameRotation::CostModelFrameRotation(boost::shared_ptr<StateMultibody> state,
+                                               ActivationModelAbstract& activation, const FrameRotation& Rref)
     : CostModelAbstract(state, activation), Rref_(Rref), oRf_inv_(Rref.oRf.transpose()) {
   assert(activation_.get_nr() == 3 && "activation::nr is not equals to 3");
 }
 
-CostModelFrameRotation::CostModelFrameRotation(boost::shared_ptr<StateMultibody> state, const FrameRotation& Rref, const std::size_t& nu)
+CostModelFrameRotation::CostModelFrameRotation(boost::shared_ptr<StateMultibody> state, const FrameRotation& Rref,
+                                               const std::size_t& nu)
     : CostModelAbstract(state, 3, nu), Rref_(Rref), oRf_inv_(Rref.oRf.transpose()) {}
 
 CostModelFrameRotation::CostModelFrameRotation(boost::shared_ptr<StateMultibody> state, const FrameRotation& Rref)

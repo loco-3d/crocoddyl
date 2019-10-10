@@ -10,7 +10,8 @@
 
 namespace crocoddyl {
 
-StateNumDiff::StateNumDiff(boost::shared_ptr<StateAbstract> state) : StateAbstract(state->get_nx(), state->get_ndx()), state_(state) {
+StateNumDiff::StateNumDiff(boost::shared_ptr<StateAbstract> state)
+    : StateAbstract(state->get_nx(), state->get_ndx()), state_(state) {
   disturbance_ = 1e-6;
   // disturbance vector
   dx_.resize(ndx_);
@@ -58,7 +59,8 @@ void StateNumDiff::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eige
   dx_.setZero();
   diff(x0, x1, dx0_);
   if (firstsecond == first || firstsecond == both) {
-    assert(static_cast<std::size_t>(Jfirst.rows()) == ndx_ && static_cast<std::size_t>(Jfirst.cols()) == ndx_ && "Jfirst must be of the good size");
+    assert(static_cast<std::size_t>(Jfirst.rows()) == ndx_ && static_cast<std::size_t>(Jfirst.cols()) == ndx_ &&
+           "Jfirst must be of the good size");
     Jfirst.setZero();
     for (std::size_t i = 0; i < ndx_; ++i) {
       dx_(i) = disturbance_;
@@ -74,7 +76,8 @@ void StateNumDiff::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eige
     Jfirst /= disturbance_;
   }
   if (firstsecond == second || firstsecond == both) {
-    assert(static_cast<std::size_t>(Jsecond.rows()) == ndx_ && static_cast<std::size_t>(Jsecond.cols()) == ndx_ && "Jfirst must be of the good size");
+    assert(static_cast<std::size_t>(Jsecond.rows()) == ndx_ && static_cast<std::size_t>(Jsecond.cols()) == ndx_ &&
+           "Jfirst must be of the good size");
 
     Jsecond.setZero();
     for (std::size_t i = 0; i < ndx_; ++i) {
@@ -105,7 +108,8 @@ void StateNumDiff::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const 
   integrate(x, dx, x0_);
 
   if (firstsecond == first || firstsecond == both) {
-    assert(static_cast<std::size_t>(Jfirst.rows()) == ndx_ && static_cast<std::size_t>(Jfirst.cols()) == ndx_ && "Jfirst must be of the good size");
+    assert(static_cast<std::size_t>(Jfirst.rows()) == ndx_ && static_cast<std::size_t>(Jfirst.cols()) == ndx_ &&
+           "Jfirst must be of the good size");
     Jfirst.setZero();
     for (std::size_t i = 0; i < ndx_; ++i) {
       dx_(i) = disturbance_;
@@ -121,7 +125,8 @@ void StateNumDiff::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const 
     Jfirst /= disturbance_;
   }
   if (firstsecond == second || firstsecond == both) {
-    assert(static_cast<std::size_t>(Jsecond.rows()) == ndx_ && static_cast<std::size_t>(Jsecond.cols()) == ndx_ && "Jfirst must be of the good size");
+    assert(static_cast<std::size_t>(Jsecond.rows()) == ndx_ && static_cast<std::size_t>(Jsecond.cols()) == ndx_ &&
+           "Jfirst must be of the good size");
     Jsecond.setZero();
     for (std::size_t i = 0; i < ndx_; ++i) {
       dx_(i) = disturbance_;

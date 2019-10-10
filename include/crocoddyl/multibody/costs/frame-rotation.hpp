@@ -16,9 +16,10 @@ namespace crocoddyl {
 
 class CostModelFrameRotation : public CostModelAbstract {
  public:
-  CostModelFrameRotation(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation, const FrameRotation& Fref,
-                         const std::size_t& nu);
-  CostModelFrameRotation(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation, const FrameRotation& Fref);
+  CostModelFrameRotation(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
+                         const FrameRotation& Fref, const std::size_t& nu);
+  CostModelFrameRotation(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
+                         const FrameRotation& Fref);
   CostModelFrameRotation(boost::shared_ptr<StateMultibody> state, const FrameRotation& Fref, const std::size_t& nu);
   CostModelFrameRotation(boost::shared_ptr<StateMultibody> state, const FrameRotation& Fref);
   ~CostModelFrameRotation();

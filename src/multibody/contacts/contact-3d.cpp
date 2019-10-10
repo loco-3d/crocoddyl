@@ -12,11 +12,12 @@
 
 namespace crocoddyl {
 
-ContactModel3D::ContactModel3D(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref, const std::size_t& nu,
-                               const Eigen::Vector2d& gains)
+ContactModel3D::ContactModel3D(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
+                               const std::size_t& nu, const Eigen::Vector2d& gains)
     : ContactModelAbstract(state, 3, nu), xref_(xref), gains_(gains) {}
 
-ContactModel3D::ContactModel3D(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref, const Eigen::Vector2d& gains)
+ContactModel3D::ContactModel3D(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
+                               const Eigen::Vector2d& gains)
     : ContactModelAbstract(state, 3), xref_(xref), gains_(gains) {}
 
 ContactModel3D::~ContactModel3D() {}

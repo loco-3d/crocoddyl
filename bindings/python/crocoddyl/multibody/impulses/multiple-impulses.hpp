@@ -47,10 +47,10 @@ void exposeImpulseMultiple() {
                     "impulse model");
 
   bp::class_<ImpulseModelMultiple, boost::noncopyable>(
-      "ImpulseModelMultiple", bp::init<boost::shared_ptr<StateMultibody> >(
-                                  bp::args(" self", " state"),
-                                  "Initialize the multiple impulse model.\n\n"
-                                  ":param state: state of the multibody system"))
+      "ImpulseModelMultiple",
+      bp::init<boost::shared_ptr<StateMultibody> >(bp::args(" self", " state"),
+                                                   "Initialize the multiple impulse model.\n\n"
+                                                   ":param state: state of the multibody system"))
       .def("addImpulse", &ImpulseModelMultiple::addImpulse, bp::with_custodian_and_ward<1, 3>(),
            bp::args(" self", " name", " impulse"),
            "Add a impulse item.\n\n"
@@ -100,7 +100,8 @@ void exposeImpulseMultiple() {
           "impulses",
           bp::make_function(&ImpulseModelMultiple::get_impulses, bp::return_value_policy<bp::return_by_value>()),
           "stack of impulses")
-      .add_property("state", bp::make_function(&ImpulseModelMultiple::get_state, bp::return_value_policy<bp::return_by_value>()),
+      .add_property(
+          "state", bp::make_function(&ImpulseModelMultiple::get_state, bp::return_value_policy<bp::return_by_value>()),
           "state of the multibody system")
       .add_property("ni",
                     bp::make_function(&ImpulseModelMultiple::get_ni, bp::return_value_policy<bp::return_by_value>()),

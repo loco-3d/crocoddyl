@@ -47,11 +47,11 @@ void exposeContactMultiple() {
                     "contact model");
 
   bp::class_<ContactModelMultiple, boost::noncopyable>(
-      "ContactModelMultiple", bp::init<boost::shared_ptr<StateMultibody>, bp::optional<int> >(
-                                  bp::args(" self", " state", " nu=state.nv"),
-                                  "Initialize the multiple contact model.\n\n"
-                                  ":param state: state of the multibody system\n"
-                                  ":param nu: dimension of control vector"))
+      "ContactModelMultiple",
+      bp::init<boost::shared_ptr<StateMultibody>, bp::optional<int> >(bp::args(" self", " state", " nu=state.nv"),
+                                                                      "Initialize the multiple contact model.\n\n"
+                                                                      ":param state: state of the multibody system\n"
+                                                                      ":param nu: dimension of control vector"))
       .def("addContact", &ContactModelMultiple::addContact, bp::with_custodian_and_ward<1, 3>(),
            bp::args(" self", " name", " contact"),
            "Add a contact item.\n\n"
@@ -97,8 +97,9 @@ void exposeContactMultiple() {
           "contacts",
           bp::make_function(&ContactModelMultiple::get_contacts, bp::return_value_policy<bp::return_by_value>()),
           "stack of contacts")
-      .add_property("state", bp::make_function(&ContactModelMultiple::get_state, bp::return_value_policy<bp::return_by_value>()),
-                    "state of the multibody system")
+      .add_property(
+          "state", bp::make_function(&ContactModelMultiple::get_state, bp::return_value_policy<bp::return_by_value>()),
+          "state of the multibody system")
       .add_property("nc",
                     bp::make_function(&ContactModelMultiple::get_nc, bp::return_value_policy<bp::return_by_value>()),
                     "dimension of the total contact vector")

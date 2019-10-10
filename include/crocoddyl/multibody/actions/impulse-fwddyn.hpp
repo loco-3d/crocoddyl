@@ -20,8 +20,8 @@ namespace crocoddyl {
 
 class ActionModelImpulseFwdDynamics : public ActionModelAbstract {
  public:
-  ActionModelImpulseFwdDynamics(boost::shared_ptr<StateMultibody> state, ImpulseModelMultiple& impulses, CostModelSum& costs,
-                                const double& r_coeff = 0., const double& JMinvJt_damping = 0.,
+  ActionModelImpulseFwdDynamics(boost::shared_ptr<StateMultibody> state, ImpulseModelMultiple& impulses,
+                                CostModelSum& costs, const double& r_coeff = 0., const double& JMinvJt_damping = 0.,
                                 const bool& enable_force = false);
   ~ActionModelImpulseFwdDynamics();
 
