@@ -29,6 +29,8 @@ struct ActivationBounds {
     }
     assert(((lb - ub).array() <= 0).all() && "The lower and upper bounds are badly defined");
   }
+  ActivationBounds(const ActivationBounds& bounds) : lb(bounds.lb), ub(bounds.ub), beta(bounds.beta) {}
+  ActivationBounds() : beta(1.) {}
 
   Eigen::VectorXd lb;
   Eigen::VectorXd ub;
