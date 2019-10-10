@@ -24,7 +24,7 @@ void exposeDifferentialActionContactFwdDynamics() {
       "is also a custom implementation in case of system with armatures. If you want to\n"
       "include the armature, you need to use setArmature(). On the other hand, the\n"
       "stack of cost functions are implemented in CostModelSum().",
-      bp::init<StateMultibody&, ActuationModelFloatingBase&, ContactModelMultiple&, CostModelSum&,
+      bp::init<boost::shared_ptr<StateMultibody>, ActuationModelFloatingBase&, ContactModelMultiple&, CostModelSum&,
                bp::optional<double, bool> >(
           bp::args(" self", " state", " actuation", " contacts", " costs", " inv_damping=0.", "enable_force=False"),
           "Initialize the constrained forward-dynamics action model.\n\n"
@@ -37,9 +37,7 @@ void exposeDifferentialActionContactFwdDynamics() {
           ":param costs: stack of cost functions\n"
           ":param inv_damping: Damping factor for cholesky decomposition of JMinvJt\n"
           ":param enable_force: Enable the computation of force Jacobians")[bp::with_custodian_and_ward<
-          1, 2,
-          bp::with_custodian_and_ward<1, 3,
-                                      bp::with_custodian_and_ward<1, 4, bp::with_custodian_and_ward<1, 5> > > >()])
+          1, 3, bp::with_custodian_and_ward<1, 4, bp::with_custodian_and_ward<1, 5> > >()])
       .def("calc", &DifferentialActionModelContactFwdDynamics::calc_wrap,
            DiffActionModel_calc_wraps(
                bp::args(" self", " data", " x", " u=None"),

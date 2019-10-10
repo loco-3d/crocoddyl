@@ -19,46 +19,44 @@ namespace bp = boost::python;
 void exposeCostControl() {
   bp::class_<CostModelControl, bp::bases<CostModelAbstract> >(
       "CostModelControl",
-      bp::init<StateMultibody&, ActivationModelAbstract&, Eigen::VectorXd>(
+      bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, Eigen::VectorXd>(
           bp::args(" self", " state", " activation", " uref"),
           "Initialize the control cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
-          ":param uref: reference control")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .def(bp::init<StateMultibody&, ActivationModelAbstract&>(
+          ":param uref: reference control")[bp::with_custodian_and_ward<1, 3>()])
+      .def(bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&>(
           bp::args(" self", " state", " activation"),
           "Initialize the control cost model.\n\n"
           "For this case the default uref is the zeros state, i.e. np.zero(nu), where nu is equals to activation.nr.\n"
           ":param state: state of the multibody system\n"
-          ":param activation: activation model")[bp::with_custodian_and_ward<1, 2,
-                                                                             bp::with_custodian_and_ward<1, 3> >()])
-      .def(bp::init<StateMultibody&, ActivationModelAbstract&, int>(
+          ":param activation: activation model")[bp::with_custodian_and_ward<1, 3>()])
+      .def(bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, int>(
           bp::args(" self", " state", " activation", " nu"),
           "Initialize the control cost model.\n\n"
           "For this case the default uref is the zeros state, i.e. np.zero(nu).\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
-          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2,
-                                                                                bp::with_custodian_and_ward<1, 3> >()])
-      .def(bp::init<StateMultibody&, Eigen::VectorXd>(
+          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
+      .def(bp::init<boost::shared_ptr<StateMultibody>, Eigen::VectorXd>(
           bp::args(" self", " state", " uref"),
           "Initialize the control cost model.\n\n"
           "For this case the default activation model is quadratic, i.e. crocoddyl.ActivationModelQuad(uref.size()).\n"
           ":param state: state of the multibody system\n"
-          ":param uref: reference control")[bp::with_custodian_and_ward<1, 2>()])
-      .def(bp::init<StateMultibody&>(
+          ":param uref: reference control"))
+      .def(bp::init<boost::shared_ptr<StateMultibody> >(
           bp::args(" self", " state"),
           "Initialize the control cost model.\n\n"
           "For this case the default uref is the zeros vector, i.e. np.zero(model.nv), and\n"
           "activation is quadratic, i.e. crocoddyl.ActivationModelQuad(model.nv), and nu is equals to model.nv.\n"
-          ":param state: state of the multibody system")[bp::with_custodian_and_ward<1, 2>()])
-      .def(bp::init<StateMultibody&, int>(
+          ":param state: state of the multibody system"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, int>(
           bp::args(" self", " state", " nu"),
           "Initialize the control cost model.\n\n"
           "For this case the default uref is the zeros vector and the default activation\n"
           "model is quadratic, i.e. crocoddyl.ActivationModelQuad(nu)\n"
           ":param state: state of the multibody system\n"
-          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2>()])
+          ":param nu: dimension of control vector"))
       .def("calc", &CostModelControl::calc_wrap,
            CostModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
                                 "Compute the control cost.\n\n"

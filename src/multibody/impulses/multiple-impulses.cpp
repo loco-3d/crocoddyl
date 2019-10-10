@@ -10,7 +10,7 @@
 
 namespace crocoddyl {
 
-ImpulseModelMultiple::ImpulseModelMultiple(StateMultibody& state) : state_(state), ni_(0) {}
+ImpulseModelMultiple::ImpulseModelMultiple(boost::shared_ptr<StateMultibody> state) : state_(state), ni_(0) {}
 
 ImpulseModelMultiple::~ImpulseModelMultiple() {}
 
@@ -40,7 +40,7 @@ void ImpulseModelMultiple::calc(const boost::shared_ptr<ImpulseDataMultiple>& da
          "it doesn't match the number of impulse datas and models");
   std::size_t ni = 0;
 
-  const std::size_t& nv = state_.get_nv();
+  const std::size_t& nv = state_->get_nv();
   ImpulseModelContainer::iterator it_m, end_m;
   ImpulseDataContainer::iterator it_d, end_d;
   for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
@@ -65,7 +65,7 @@ void ImpulseModelMultiple::calcDiff(const boost::shared_ptr<ImpulseDataMultiple>
   }
   std::size_t ni = 0;
 
-  const std::size_t& nv = state_.get_nv();
+  const std::size_t& nv = state_->get_nv();
   ImpulseModelContainer::iterator it_m, end_m;
   ImpulseDataContainer::iterator it_d, end_d;
   for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
@@ -83,7 +83,7 @@ void ImpulseModelMultiple::calcDiff(const boost::shared_ptr<ImpulseDataMultiple>
 
 void ImpulseModelMultiple::updateVelocity(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                           const Eigen::VectorXd& vnext) const {
-  assert(static_cast<std::size_t>(vnext.rows()) == state_.get_nv() && "vnext has wrong dimension");
+  assert(static_cast<std::size_t>(vnext.rows()) == state_->get_nv() && "vnext has wrong dimension");
 
   data->vnext = vnext;
 }
@@ -117,8 +117,8 @@ void ImpulseModelMultiple::updateForce(const boost::shared_ptr<ImpulseDataMultip
 
 void ImpulseModelMultiple::updateVelocityDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                               const Eigen::MatrixXd& dvnext_dx) const {
-  assert((static_cast<std::size_t>(dvnext_dx.rows()) == state_.get_nv() &&
-          static_cast<std::size_t>(dvnext_dx.cols()) == state_.get_ndx()) &&
+  assert((static_cast<std::size_t>(dvnext_dx.rows()) == state_->get_nv() &&
+          static_cast<std::size_t>(dvnext_dx.cols()) == state_->get_ndx()) &&
          "dvnext_dx has wrong dimension");
 
   data->dvnext_dx = dvnext_dx;
@@ -126,7 +126,7 @@ void ImpulseModelMultiple::updateVelocityDiff(const boost::shared_ptr<ImpulseDat
 
 void ImpulseModelMultiple::updateForceDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                            const Eigen::MatrixXd& df_dq) const {
-  const std::size_t& nv = state_.get_nv();
+  const std::size_t& nv = state_->get_nv();
   assert((static_cast<std::size_t>(df_dq.rows()) == ni_ && static_cast<std::size_t>(df_dq.cols()) == nv) &&
          "df_dq has wrong dimension");
   assert(data->impulses.size() == impulses_.size() && "it doesn't match the number of impulse datas and models");
@@ -151,7 +151,7 @@ boost::shared_ptr<ImpulseDataMultiple> ImpulseModelMultiple::createData(pinocchi
   return boost::make_shared<ImpulseDataMultiple>(this, data);
 }
 
-StateMultibody& ImpulseModelMultiple::get_state() const { return state_; }
+const boost::shared_ptr<StateMultibody>& ImpulseModelMultiple::get_state() const { return state_; }
 
 const ImpulseModelMultiple::ImpulseModelContainer& ImpulseModelMultiple::get_impulses() const { return impulses_; }
 

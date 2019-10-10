@@ -33,8 +33,8 @@ class CostModelSum {
   typedef std::map<std::string, CostItem> CostModelContainer;
   typedef std::map<std::string, boost::shared_ptr<CostDataAbstract> > CostDataContainer;
 
-  CostModelSum(StateMultibody& state, const std::size_t& nu, const bool& with_residuals = true);
-  explicit CostModelSum(StateMultibody& state, const bool& with_residuals = true);
+  CostModelSum(boost::shared_ptr<StateMultibody> state, const std::size_t& nu, const bool& with_residuals = true);
+  explicit CostModelSum(boost::shared_ptr<StateMultibody> state, const bool& with_residuals = true);
   ~CostModelSum();
 
   void addCost(const std::string& name, CostModelAbstract* const cost, const double& weight);
@@ -49,13 +49,13 @@ class CostModelSum {
   void calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
   void calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
 
-  StateMultibody& get_state() const;
+  const boost::shared_ptr<StateMultibody>& get_state() const;
   const CostModelContainer& get_costs() const;
   const std::size_t& get_nu() const;
   const std::size_t& get_nr() const;
 
  private:
-  StateMultibody& state_;
+  boost::shared_ptr<StateMultibody> state_;
   CostModelContainer costs_;
   std::size_t nu_;
   std::size_t nr_;
@@ -97,20 +97,20 @@ struct CostDataSum {
   template <typename Model>
   CostDataSum(Model* const model, pinocchio::Data* const data)
       : r_internal(model->get_nr()),
-        Lx_internal(model->get_state().get_ndx()),
+        Lx_internal(model->get_state()->get_ndx()),
         Lu_internal(model->get_nu()),
-        Lxx_internal(model->get_state().get_ndx(), model->get_state().get_ndx()),
-        Lxu_internal(model->get_state().get_ndx(), model->get_nu()),
+        Lxx_internal(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
+        Lxu_internal(model->get_state()->get_ndx(), model->get_nu()),
         Luu_internal(model->get_nu(), model->get_nu()),
         pinocchio(data),
         cost(0.),
         r(r_internal.data(), model->get_nr()),
-        Lx(Lx_internal.data(), model->get_state().get_ndx()),
+        Lx(Lx_internal.data(), model->get_state()->get_ndx()),
         Lu(Lu_internal.data(), model->get_nu()),
-        Lxx(Lxx_internal.data(), model->get_state().get_ndx(), model->get_state().get_ndx()),
-        Lxu(Lxu_internal.data(), model->get_state().get_ndx(), model->get_nu()),
+        Lxx(Lxx_internal.data(), model->get_state()->get_ndx(), model->get_state()->get_ndx()),
+        Lxu(Lxu_internal.data(), model->get_state()->get_ndx(), model->get_nu()),
         Luu(Luu_internal.data(), model->get_nu(), model->get_nu()),
-        Rx(model->get_nr(), model->get_state().get_ndx()),
+        Rx(model->get_nr(), model->get_state()->get_ndx()),
         Ru(model->get_nr(), model->get_nu()) {
     r.setZero();
     Lx.setZero();

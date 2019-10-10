@@ -32,7 +32,7 @@ class ImpulseModelMultiple {
   typedef std::map<std::string, boost::shared_ptr<ImpulseDataAbstract> > ImpulseDataContainer;
   typedef pinocchio::container::aligned_vector<pinocchio::Force>::iterator ForceIterator;
 
-  explicit ImpulseModelMultiple(StateMultibody& state);
+  explicit ImpulseModelMultiple(boost::shared_ptr<StateMultibody> state);
   ~ImpulseModelMultiple();
 
   void addImpulse(const std::string& name, ImpulseModelAbstract* const impulse);
@@ -48,12 +48,12 @@ class ImpulseModelMultiple {
   void updateVelocityDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::MatrixXd& dvnext_dx) const;
   void updateForceDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::MatrixXd& df_dq) const;
 
-  StateMultibody& get_state() const;
+  const boost::shared_ptr<StateMultibody>& get_state() const;
   const ImpulseModelContainer& get_impulses() const;
   const std::size_t& get_ni() const;
 
  private:
-  StateMultibody& state_;
+  boost::shared_ptr<StateMultibody> state_;
   ImpulseModelContainer impulses_;
   std::size_t ni_;
 
@@ -76,9 +76,9 @@ struct ImpulseDataMultiple : ImpulseDataAbstract {
   template <typename Model>
   ImpulseDataMultiple(Model* const model, pinocchio::Data* const data)
       : ImpulseDataAbstract(model, data),
-        vnext(model->get_state().get_nv()),
-        dvnext_dx(model->get_state().get_nv(), model->get_state().get_ndx()),
-        fext(model->get_state().get_pinocchio().njoints, pinocchio::Force::Zero()) {
+        vnext(model->get_state()->get_nv()),
+        dvnext_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
+        fext(model->get_state()->get_pinocchio().njoints, pinocchio::Force::Zero()) {
     vnext.fill(0);
     dvnext_dx.fill(0);
     for (ImpulseModelMultiple::ImpulseModelContainer::const_iterator it = model->get_impulses().begin();

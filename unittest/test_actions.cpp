@@ -115,14 +115,14 @@ void test_calc_returns_state(TestTypes::Type action_model_type) {
   boost::shared_ptr<crocoddyl::ActionDataAbstract> data = model->createData();
 
   // Generating random state and control vectors
-  Eigen::VectorXd x = model->get_state().rand();
+  Eigen::VectorXd x = model->get_state()->rand();
   Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Getting the state dimension from calc() call
   model->calc(data, x, u);
 
-  BOOST_CHECK(static_cast<std::size_t>(data->xnext.size()) == model->get_state().get_nx());
-  BOOST_CHECK(factory.nx_ == model->get_state().get_nx());
+  BOOST_CHECK(static_cast<std::size_t>(data->xnext.size()) == model->get_state()->get_nx());
+  BOOST_CHECK(factory.nx_ == model->get_state()->get_nx());
 }
 
 void test_calc_returns_a_cost(TestTypes::Type action_model_type) {
@@ -135,7 +135,7 @@ void test_calc_returns_a_cost(TestTypes::Type action_model_type) {
   data->cost = nan("");
 
   // Getting the cost value computed by calc()
-  Eigen::VectorXd x = model->get_state().rand();
+  Eigen::VectorXd x = model->get_state()->rand();
   Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
   model->calc(data, x, u);
 
@@ -155,7 +155,7 @@ void test_partial_derivatives_against_numdiff(TestTypes::Type action_model_type)
   boost::shared_ptr<crocoddyl::ActionDataAbstract> data_num_diff = model_num_diff.createData();
 
   // Generating random values for the state and control
-  Eigen::VectorXd x = model->get_state().rand();
+  Eigen::VectorXd x = model->get_state()->rand();
   Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Computing the action derivatives

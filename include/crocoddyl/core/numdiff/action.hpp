@@ -137,18 +137,18 @@ struct ActionDataNumDiff : public ActionDataAbstract {
   template <typename Model>
   explicit ActionDataNumDiff(Model* const model)
       : ActionDataAbstract(model),
-        Rx(model->get_model().get_nr(), model->get_model().get_state().get_ndx()),
+        Rx(model->get_model().get_nr(), model->get_model().get_state()->get_ndx()),
         Ru(model->get_model().get_nr(), model->get_model().get_nu()),
-        dx(model->get_model().get_state().get_ndx()),
+        dx(model->get_model().get_state()->get_ndx()),
         du(model->get_model().get_nu()),
-        xp(model->get_model().get_state().get_nx()) {
+        xp(model->get_model().get_state()->get_nx()) {
     Rx.setZero();
     Ru.setZero();
     dx.setZero();
     du.setZero();
     xp.setZero();
 
-    const std::size_t& ndx = model->get_model().get_state().get_ndx();
+    const std::size_t& ndx = model->get_model().get_state()->get_ndx();
     const std::size_t& nu = model->get_model().get_nu();
     data_0 = model->get_model().createData();
     for (std::size_t i = 0; i < ndx; ++i) {

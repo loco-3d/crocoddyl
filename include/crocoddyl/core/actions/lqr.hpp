@@ -35,7 +35,6 @@ class ActionModelLQR : public ActionModelAbstract {
   Eigen::VectorXd lu_;
 
  private:
-  StateVector internal_state_;
   bool drift_free_;
 };
 

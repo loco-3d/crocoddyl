@@ -29,12 +29,12 @@ int main(int argc, char* argv[]) {
 
   pinocchio::Model robot_model;
   pinocchio::urdf::buildModel(TALOS_ARM_URDF, robot_model);
-  crocoddyl::StateMultibody state(robot_model);
+  boost::shared_ptr<crocoddyl::StateMultibody> state = boost::make_shared<crocoddyl::StateMultibody>(boost::ref(robot_model));
 
-  Eigen::VectorXd q0(state.get_nq());
-  Eigen::VectorXd x0(state.get_nx());
+  Eigen::VectorXd q0(state->get_nq());
+  Eigen::VectorXd x0(state->get_nx());
   q0 << 0.173046, 1., -0.52366, 0., 0., 0.1, -0.005;
-  x0 << q0, Eigen::VectorXd::Zero(state.get_nv());
+  x0 << q0, Eigen::VectorXd::Zero(state->get_nv());
 
   // Note that we need to include a cost model (i.e. set of cost functions) in
   // order to fully define the action model for our optimal control problem.
@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
   // inside DifferentialActionModelFullyActuated.
   crocoddyl::DifferentialActionModelFreeFwdDynamics runningDAM(state, runningCostModel);
   crocoddyl::DifferentialActionModelFreeFwdDynamics terminalDAM(state, terminalCostModel);
-  Eigen::VectorXd armature(state.get_nq());
+  Eigen::VectorXd armature(state->get_nq());
   armature << 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.;
   runningDAM.set_armature(armature);
   terminalDAM.set_armature(armature);

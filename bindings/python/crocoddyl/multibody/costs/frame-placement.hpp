@@ -19,37 +19,35 @@ namespace bp = boost::python;
 void exposeCostFramePlacement() {
   bp::class_<CostModelFramePlacement, bp::bases<CostModelAbstract> >(
       "CostModelFramePlacement",
-      bp::init<StateMultibody&, ActivationModelAbstract&, FramePlacement, int>(
+      bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, FramePlacement, int>(
           bp::args(" self", " state", " activation", " Mref", " nu"),
           "Initialize the frame placement cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param Mref: reference frame placement\n"
-          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2,
-                                                                                bp::with_custodian_and_ward<1, 3> >()])
-      .def(bp::init<StateMultibody&, ActivationModelAbstract&, FramePlacement>(
+          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
+      .def(bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, FramePlacement>(
           bp::args(" self", " state", " activation", " Mref"),
           "Initialize the frame placement cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
-          ":param Mref: reference frame placement")[bp::with_custodian_and_ward<1, 2,
-                                                                                bp::with_custodian_and_ward<1, 3> >()])
-      .def(bp::init<StateMultibody&, FramePlacement, int>(
+          ":param Mref: reference frame placement")[bp::with_custodian_and_ward<1, 3>()])
+      .def(bp::init<boost::shared_ptr<StateMultibody>, FramePlacement, int>(
           bp::args(" self", " state", " Mref", " nu"),
           "Initialize the frame placement cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(6).\n"
           ":param state: state of the multibody system\n"
           ":param Mref: reference frame placement\n"
-          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2>()])
-      .def(bp::init<StateMultibody&, FramePlacement>(
+          ":param nu: dimension of control vector"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, FramePlacement>(
           bp::args(" self", " state", " Mref"),
           "Initialize the frame placement cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(6), and nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
-          ":param Mref: reference frame placement")[bp::with_custodian_and_ward<1, 2>()])
+          ":param Mref: reference frame placement"))
       .def("calc", &CostModelFramePlacement::calc_wrap,
            CostModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
                                 "Compute the frame placement cost.\n\n"

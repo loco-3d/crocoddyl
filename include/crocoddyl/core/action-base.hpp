@@ -20,7 +20,7 @@ struct ActionDataAbstract;  // forward declaration
 
 class ActionModelAbstract {
  public:
-  ActionModelAbstract(StateAbstract& state, const std::size_t& nu, const std::size_t& nr = 0);
+  ActionModelAbstract(boost::shared_ptr<StateAbstract> state, const std::size_t& nu, const std::size_t& nr = 0);
   virtual ~ActionModelAbstract();
 
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -38,7 +38,7 @@ class ActionModelAbstract {
 
   const std::size_t& get_nu() const;
   const std::size_t& get_nr() const;
-  StateAbstract& get_state() const;
+  const boost::shared_ptr<StateAbstract>& get_state() const;
 
   const Eigen::VectorXd& get_u_lb() const;
   const Eigen::VectorXd& get_u_ub() const;
@@ -48,13 +48,13 @@ class ActionModelAbstract {
   void set_u_ub(const Eigen::Ref<const Eigen::VectorXd>& u_in);
 
  protected:
-  std::size_t nu_;           //!< Control dimension
-  std::size_t nr_;           //!< Dimension of the cost residual
-  StateAbstract& state_;     //!< Model of the state
-  Eigen::VectorXd unone_;    //!< Neutral state
-  Eigen::VectorXd u_lb_;     //!< Lower control limits
-  Eigen::VectorXd u_ub_;     //!< Upper control limits
-  bool has_control_limits_;  //!< Indicates whether any of the control limits is finite
+  std::size_t nu_;                          //!< Control dimension
+  std::size_t nr_;                          //!< Dimension of the cost residual
+  boost::shared_ptr<StateAbstract> state_;  //!< Model of the state
+  Eigen::VectorXd unone_;                   //!< Neutral state
+  Eigen::VectorXd u_lb_;                    //!< Lower control limits
+  Eigen::VectorXd u_ub_;                    //!< Upper control limits
+  bool has_control_limits_;                 //!< Indicates whether any of the control limits is finite
 
   void update_has_control_limits();
 
@@ -102,14 +102,14 @@ struct ActionDataAbstract {
   template <typename Model>
   explicit ActionDataAbstract(Model* const model)
       : cost(0.),
-        xnext(model->get_state().get_nx()),
+        xnext(model->get_state()->get_nx()),
         r(model->get_nr()),
-        Fx(model->get_state().get_ndx(), model->get_state().get_ndx()),
-        Fu(model->get_state().get_ndx(), model->get_nu()),
-        Lx(model->get_state().get_ndx()),
+        Fx(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
+        Fu(model->get_state()->get_ndx(), model->get_nu()),
+        Lx(model->get_state()->get_ndx()),
         Lu(model->get_nu()),
-        Lxx(model->get_state().get_ndx(), model->get_state().get_ndx()),
-        Lxu(model->get_state().get_ndx(), model->get_nu()),
+        Lxx(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
+        Lxu(model->get_state()->get_ndx(), model->get_nu()),
         Luu(model->get_nu(), model->get_nu()) {
     xnext.setZero();
     r.setZero();

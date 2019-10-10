@@ -39,7 +39,6 @@ class DifferentialActionModelLQR : public DifferentialActionModelAbstract {
   Eigen::VectorXd lu_;
 
  private:
-  StateVector internal_state_;
   bool drift_free_;
 };
 
@@ -47,8 +46,8 @@ struct DifferentialActionDataLQR : public DifferentialActionDataAbstract {
   template <typename Model>
   explicit DifferentialActionDataLQR(Model* const model) : DifferentialActionDataAbstract(model) {
     // Setting the linear model and quadratic cost here because they are constant
-    Fx.leftCols(model->get_state().get_nq()) = model->Fq_;
-    Fx.rightCols(model->get_state().get_nv()) = model->Fv_;
+    Fx.leftCols(model->get_state()->get_nq()) = model->Fq_;
+    Fx.rightCols(model->get_state()->get_nv()) = model->Fv_;
     Fu = model->Fu_;
     Lxx = model->Lxx_;
     Luu = model->Luu_;

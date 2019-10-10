@@ -10,12 +10,12 @@
 
 namespace crocoddyl {
 
-ActuationModelFloatingBase::ActuationModelFloatingBase(StateMultibody& state)
-    : ActuationModelAbstract(state, state.get_nv() - 6) {
+ActuationModelFloatingBase::ActuationModelFloatingBase(boost::shared_ptr<StateMultibody> state)
+    : ActuationModelAbstract(state, state->get_nv() - 6) {
   pinocchio::JointModelFreeFlyer ff_joint;
-  assert(state.get_pinocchio().joints[1].shortname() == ff_joint.shortname() &&
+  assert(state->get_pinocchio().joints[1].shortname() == ff_joint.shortname() &&
          "The first joint has to be free-flyer");
-  if (state.get_pinocchio().joints[1].shortname() != ff_joint.shortname()) {
+  if (state->get_pinocchio().joints[1].shortname() != ff_joint.shortname()) {
     std::cout << "Warning: the first joint has to be a free-flyer" << std::endl;
   }
 }
@@ -36,7 +36,7 @@ void ActuationModelFloatingBase::calcDiff(const boost::shared_ptr<ActuationDataA
     calc(data, x, u);
   }
   // The derivatives has constant values which were set in createData.
-  assert(data->dtau_dx == Eigen::MatrixXd::Zero(state_.get_nv(), state_.get_ndx()) && "dtau_dx has wrong value");
+  assert(data->dtau_dx == Eigen::MatrixXd::Zero(state_->get_nv(), state_->get_ndx()) && "dtau_dx has wrong value");
   assert(data->dtau_du == dtau_du_ && "dtau_du has wrong value");
 }
 

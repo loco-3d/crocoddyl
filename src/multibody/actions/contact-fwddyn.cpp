@@ -16,15 +16,15 @@
 namespace crocoddyl {
 
 DifferentialActionModelContactFwdDynamics::DifferentialActionModelContactFwdDynamics(
-    StateMultibody& state, ActuationModelFloatingBase& actuation, ContactModelMultiple& contacts, CostModelSum& costs,
+    boost::shared_ptr<StateMultibody> state, ActuationModelFloatingBase& actuation, ContactModelMultiple& contacts, CostModelSum& costs,
     const double& JMinvJt_damping, const bool& enable_force)
     : DifferentialActionModelAbstract(state, actuation.get_nu(), costs.get_nr()),
       actuation_(actuation),
       contacts_(contacts),
       costs_(costs),
-      pinocchio_(state.get_pinocchio()),
+      pinocchio_(state->get_pinocchio()),
       with_armature_(true),
-      armature_(Eigen::VectorXd::Zero(state.get_nv())),
+      armature_(Eigen::VectorXd::Zero(state->get_nv())),
       JMinvJt_damping_(fabs(JMinvJt_damping)),
       enable_force_(enable_force) {
   assert(contacts_.get_nu() == nu_ && "Contacts doesn't have the same control dimension");
@@ -39,12 +39,12 @@ DifferentialActionModelContactFwdDynamics::~DifferentialActionModelContactFwdDyn
 void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                      const Eigen::Ref<const Eigen::VectorXd>& x,
                                                      const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(static_cast<std::size_t>(x.size()) == state_.get_nx() && "x has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
   assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
 
   DifferentialActionDataContactFwdDynamics* d = static_cast<DifferentialActionDataContactFwdDynamics*>(data.get());
-  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_.get_nq());
-  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(state_.get_nv());
+  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_->get_nq());
+  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(state_->get_nv());
 
   // Computing the forward dynamics with the holonomic constraints defined by the contact model
   pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, v);
@@ -79,12 +79,12 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
                                                          const Eigen::Ref<const Eigen::VectorXd>& x,
                                                          const Eigen::Ref<const Eigen::VectorXd>& u,
                                                          const bool& recalc) {
-  assert(static_cast<std::size_t>(x.size()) == state_.get_nx() && "x has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
   assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
 
-  const std::size_t& nv = state_.get_nv();
+  const std::size_t& nv = state_->get_nv();
   const std::size_t& nc = contacts_.get_nc();
-  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_.get_nq());
+  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(nv);
 
   DifferentialActionDataContactFwdDynamics* d = static_cast<DifferentialActionDataContactFwdDynamics*>(data.get());
@@ -140,9 +140,9 @@ const Eigen::VectorXd& DifferentialActionModelContactFwdDynamics::get_armature()
 const double& DifferentialActionModelContactFwdDynamics::get_damping_factor() const { return JMinvJt_damping_; }
 
 void DifferentialActionModelContactFwdDynamics::set_armature(const Eigen::VectorXd& armature) {
-  assert(static_cast<std::size_t>(armature.size()) == state_.get_nv() &&
+  assert(static_cast<std::size_t>(armature.size()) == state_->get_nv() &&
          "The armature dimension is wrong, we cannot set it.");
-  if (static_cast<std::size_t>(armature.size()) != state_.get_nv()) {
+  if (static_cast<std::size_t>(armature.size()) != state_->get_nv()) {
     std::cout << "The armature dimension is wrong, we cannot set it." << std::endl;
   } else {
     armature_ = armature;

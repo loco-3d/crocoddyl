@@ -81,9 +81,9 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
     if ((is_feasible_) || (steplength == 1)) {
       xs_try_[t] = xnext_;
     } else {
-      m->get_state().integrate(xnext_, gaps_[t] * (steplength - 1), xs_try_[t]);
+      m->get_state()->integrate(xnext_, gaps_[t] * (steplength - 1), xs_try_[t]);
     }
-    m->get_state().diff(xs_[t], xs_try_[t], dx_[t]);
+    m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
     us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
 
     // Clamp!
@@ -109,7 +109,7 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
   if ((is_feasible_) || (steplength == 1)) {
     xs_try_.back() = xnext_;
   } else {
-    m->get_state().integrate(xnext_, gaps_.back() * (steplength - 1), xs_try_.back());
+    m->get_state()->integrate(xnext_, gaps_.back() * (steplength - 1), xs_try_.back());
   }
   m->calc(d, xs_try_.back());
   cost_try_ += d->cost;

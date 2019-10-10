@@ -18,7 +18,7 @@ namespace crocoddyl {
 
 class DifferentialActionModelFreeFwdDynamics : public DifferentialActionModelAbstract {
  public:
-  DifferentialActionModelFreeFwdDynamics(StateMultibody& state, CostModelSum& costs);
+  DifferentialActionModelFreeFwdDynamics(boost::shared_ptr<StateMultibody> state, CostModelSum& costs);
   ~DifferentialActionModelFreeFwdDynamics();
 
   void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -47,7 +47,7 @@ struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbst
   explicit DifferentialActionDataFreeFwdDynamics(Model* const model)
       : DifferentialActionDataAbstract(model),
         pinocchio(pinocchio::Data(model->get_pinocchio())),
-        Minv(model->get_state().get_nv(), model->get_state().get_nv()),
+        Minv(model->get_state()->get_nv(), model->get_state()->get_nv()),
         u_drift(model->get_nu()) {
     costs = model->get_costs().createData(&pinocchio);
     costs->shareMemory(this);

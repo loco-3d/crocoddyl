@@ -16,11 +16,11 @@ namespace crocoddyl {
 
 class CostModelFrameVelocity : public CostModelAbstract {
  public:
-  CostModelFrameVelocity(StateMultibody& state, ActivationModelAbstract& activation, const FrameMotion& Fref,
+  CostModelFrameVelocity(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation, const FrameMotion& Fref,
                          const std::size_t& nu);
-  CostModelFrameVelocity(StateMultibody& state, ActivationModelAbstract& activation, const FrameMotion& Fref);
-  CostModelFrameVelocity(StateMultibody& state, const FrameMotion& vref, const std::size_t& nu);
-  CostModelFrameVelocity(StateMultibody& state, const FrameMotion& vref);
+  CostModelFrameVelocity(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation, const FrameMotion& Fref);
+  CostModelFrameVelocity(boost::shared_ptr<StateMultibody> state, const FrameMotion& vref, const std::size_t& nu);
+  CostModelFrameVelocity(boost::shared_ptr<StateMultibody> state, const FrameMotion& vref);
   ~CostModelFrameVelocity();
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -41,12 +41,12 @@ struct CostDataFrameVelocity : public CostDataAbstract {
   template <typename Model>
   CostDataFrameVelocity(Model* const model, pinocchio::Data* const data)
       : CostDataAbstract(model, data),
-        joint(model->get_state().get_pinocchio().frames[model->get_vref().frame].parent),
+        joint(model->get_state()->get_pinocchio().frames[model->get_vref().frame].parent),
         vr(pinocchio::Motion::Zero()),
-        fXj(model->get_state().get_pinocchio().frames[model->get_vref().frame].placement.inverse().toActionMatrix()),
-        v_partial_dq(6, model->get_state().get_nv()),
-        v_partial_dv(6, model->get_state().get_nv()),
-        Arr_Rx(6, model->get_state().get_nv()) {
+        fXj(model->get_state()->get_pinocchio().frames[model->get_vref().frame].placement.inverse().toActionMatrix()),
+        v_partial_dq(6, model->get_state()->get_nv()),
+        v_partial_dv(6, model->get_state()->get_nv()),
+        Arr_Rx(6, model->get_state()->get_nv()) {
     v_partial_dq.fill(0);
     v_partial_dv.fill(0);
     Arr_Rx.fill(0);

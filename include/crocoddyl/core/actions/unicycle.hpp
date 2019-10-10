@@ -29,7 +29,6 @@ class ActionModelUnicycle : public ActionModelAbstract {
   void set_cost_weights(const Eigen::Vector2d& weights);
 
  private:
-  StateVector internal_state_;
   Eigen::Vector2d cost_weights_;
   double dt_;
 };

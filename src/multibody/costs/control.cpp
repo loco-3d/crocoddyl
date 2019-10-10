@@ -10,28 +10,28 @@
 
 namespace crocoddyl {
 
-CostModelControl::CostModelControl(StateMultibody& state, ActivationModelAbstract& activation,
+CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
                                    const Eigen::VectorXd& uref)
     : CostModelAbstract(state, activation, static_cast<std::size_t>(uref.size())), uref_(uref) {
   assert(activation.get_nr() == static_cast<std::size_t>(uref.size()) && "activation::nr is not equals to nu");
 }
 
-CostModelControl::CostModelControl(StateMultibody& state, ActivationModelAbstract& activation)
+CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation)
     : CostModelAbstract(state, activation), uref_(Eigen::VectorXd::Zero(activation.get_nr())) {}
 
-CostModelControl::CostModelControl(StateMultibody& state, ActivationModelAbstract& activation, const std::size_t& nu)
+CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), uref_(Eigen::VectorXd::Zero(nu)) {
   assert(activation.get_nr() == nu_ && "activation::nr is not equals to nu");
 }
 
-CostModelControl::CostModelControl(StateMultibody& state, const Eigen::VectorXd& uref)
+CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state, const Eigen::VectorXd& uref)
     : CostModelAbstract(state, static_cast<std::size_t>(uref.size()), static_cast<std::size_t>(uref.size())),
       uref_(uref) {}
 
-CostModelControl::CostModelControl(StateMultibody& state)
-    : CostModelAbstract(state, state.get_nv()), uref_(Eigen::VectorXd::Zero(state.get_nv())) {}
+CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state)
+    : CostModelAbstract(state, state->get_nv()), uref_(Eigen::VectorXd::Zero(state->get_nv())) {}
 
-CostModelControl::CostModelControl(StateMultibody& state, const std::size_t& nu)
+CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu)
     : CostModelAbstract(state, nu, nu), uref_(Eigen::VectorXd::Zero(nu)) {}
 
 CostModelControl::~CostModelControl() {}

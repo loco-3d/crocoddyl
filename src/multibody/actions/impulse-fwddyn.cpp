@@ -15,29 +15,29 @@
 
 namespace crocoddyl {
 
-ActionModelImpulseFwdDynamics::ActionModelImpulseFwdDynamics(StateMultibody& state, ImpulseModelMultiple& impulses,
+ActionModelImpulseFwdDynamics::ActionModelImpulseFwdDynamics(boost::shared_ptr<StateMultibody> state, ImpulseModelMultiple& impulses,
                                                              CostModelSum& costs, const double& r_coeff,
                                                              const double& JMinvJt_damping, const bool& enable_force)
     : ActionModelAbstract(state, 0, costs.get_nr()),
       impulses_(impulses),
       costs_(costs),
-      pinocchio_(state.get_pinocchio()),
+      pinocchio_(state->get_pinocchio()),
       with_armature_(true),
-      armature_(Eigen::VectorXd::Zero(state.get_nv())),
+      armature_(Eigen::VectorXd::Zero(state->get_nv())),
       r_coeff_(r_coeff),
       JMinvJt_damping_(JMinvJt_damping),
       enable_force_(enable_force),
-      gravity_(state.get_pinocchio().gravity) {}
+      gravity_(state->get_pinocchio().gravity) {}
 
 ActionModelImpulseFwdDynamics::~ActionModelImpulseFwdDynamics() {}
 
 void ActionModelImpulseFwdDynamics::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                                          const Eigen::Ref<const Eigen::VectorXd>& x,
                                          const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(static_cast<std::size_t>(x.size()) == state_.get_nx() && "x has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
 
-  const std::size_t& nq = state_.get_nq();
-  const std::size_t& nv = state_.get_nv();
+  const std::size_t& nq = state_->get_nq();
+  const std::size_t& nv = state_->get_nv();
   ActionDataImpulseFwdDynamics* d = static_cast<ActionDataImpulseFwdDynamics*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(nq);
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(nv);
@@ -73,11 +73,11 @@ void ActionModelImpulseFwdDynamics::calc(const boost::shared_ptr<ActionDataAbstr
 void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                              const Eigen::Ref<const Eigen::VectorXd>& x,
                                              const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  assert(static_cast<std::size_t>(x.size()) == state_.get_nx() && "x has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
 
-  const std::size_t& nv = state_.get_nv();
+  const std::size_t& nv = state_->get_nv();
   const std::size_t& ni = impulses_.get_ni();
-  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_.get_nq());
+  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(nv);
 
   ActionDataImpulseFwdDynamics* d = static_cast<ActionDataImpulseFwdDynamics*>(data.get());
@@ -133,9 +133,9 @@ const double& ActionModelImpulseFwdDynamics::get_restitution_coefficient() const
 const double& ActionModelImpulseFwdDynamics::get_damping_factor() const { return JMinvJt_damping_; }
 
 void ActionModelImpulseFwdDynamics::set_armature(const Eigen::VectorXd& armature) {
-  assert(static_cast<std::size_t>(armature.size()) == state_.get_nv() &&
+  assert(static_cast<std::size_t>(armature.size()) == state_->get_nv() &&
          "The armature dimension is wrong, we cannot set it.");
-  if (static_cast<std::size_t>(armature.size()) != state_.get_nv()) {
+  if (static_cast<std::size_t>(armature.size()) != state_->get_nv()) {
     std::cout << "The armature dimension is wrong, we cannot set it." << std::endl;
   } else {
     armature_ = armature;

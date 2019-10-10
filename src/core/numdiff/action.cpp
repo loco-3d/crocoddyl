@@ -19,8 +19,8 @@ ActionModelNumDiff::~ActionModelNumDiff() {}
 
 void ActionModelNumDiff::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                               const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
+  assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
   boost::shared_ptr<ActionDataNumDiff> data_nd = boost::static_pointer_cast<ActionDataNumDiff>(data);
   model_.calc(data_nd->data_0, x, u);
   data->cost = data_nd->data_0->cost;
@@ -30,8 +30,8 @@ void ActionModelNumDiff::calc(const boost::shared_ptr<ActionDataAbstract>& data,
 void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                   const Eigen::Ref<const Eigen::VectorXd>& x,
                                   const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
+  assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
   boost::shared_ptr<ActionDataNumDiff> data_nd = boost::static_pointer_cast<ActionDataNumDiff>(data);
 
   if (recalc) {
@@ -46,14 +46,14 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
 
   // Computing the d action(x,u) / dx
   data_nd->dx.setZero();
-  for (std::size_t ix = 0; ix < state_.get_ndx(); ++ix) {
+  for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
     data_nd->dx(ix) = disturbance_;
-    model_.get_state().integrate(x, data_nd->dx, data_nd->xp);
+    model_.get_state()->integrate(x, data_nd->dx, data_nd->xp);
     model_.calc(data_nd->data_x[ix], data_nd->xp, u);
 
     const Eigen::VectorXd& xn = data_nd->data_x[ix]->xnext;
     const double& c = data_nd->data_x[ix]->cost;
-    model_.get_state().diff(xn0, xn, data_nd->Fx.col(ix));
+    model_.get_state()->diff(xn0, xn, data_nd->Fx.col(ix));
 
     data->Lx(ix) = (c - c0) / disturbance_;
     if (model_.get_nr() > 0) {
@@ -71,7 +71,7 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
 
     const Eigen::VectorXd& xn = data_nd->data_u[iu]->xnext;
     const double& c = data_nd->data_u[iu]->cost;
-    model_.get_state().diff(xn0, xn, data_nd->Fu.col(iu));
+    model_.get_state()->diff(xn0, xn, data_nd->Fu.col(iu));
 
     data->Lu(iu) = (c - c0) / disturbance_;
     if (model_.get_nr() > 0) {

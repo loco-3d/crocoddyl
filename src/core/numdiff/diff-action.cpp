@@ -23,8 +23,8 @@ DifferentialActionModelNumDiff::~DifferentialActionModelNumDiff() {}
 void DifferentialActionModelNumDiff::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                           const Eigen::Ref<const Eigen::VectorXd>& x,
                                           const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
+  assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
   DifferentialActionDataNumDiff* data_nd = static_cast<DifferentialActionDataNumDiff*>(data.get());
   model_.calc(data_nd->data_0, x, u);
   data->cost = data_nd->data_0->cost;
@@ -34,8 +34,8 @@ void DifferentialActionModelNumDiff::calc(const boost::shared_ptr<DifferentialAc
 void DifferentialActionModelNumDiff::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                               const Eigen::Ref<const Eigen::VectorXd>& x,
                                               const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
+  assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
   boost::shared_ptr<DifferentialActionDataNumDiff> data_nd =
       boost::static_pointer_cast<DifferentialActionDataNumDiff>(data);
 
@@ -51,9 +51,9 @@ void DifferentialActionModelNumDiff::calcDiff(const boost::shared_ptr<Differenti
 
   // Computing the d action(x,u) / dx
   data_nd->dx.setZero();
-  for (std::size_t ix = 0; ix < state_.get_ndx(); ++ix) {
+  for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
     data_nd->dx(ix) = disturbance_;
-    model_.get_state().integrate(x, data_nd->dx, data_nd->xp);
+    model_.get_state()->integrate(x, data_nd->dx, data_nd->xp);
     model_.calc(data_nd->data_x[ix], data_nd->xp, u);
 
     const Eigen::VectorXd& xn = data_nd->data_x[ix]->xout;

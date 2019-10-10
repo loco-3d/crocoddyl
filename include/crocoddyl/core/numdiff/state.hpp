@@ -9,13 +9,15 @@
 #ifndef CROCODDYL_CORE_NUMDIFF_STATE_HPP_
 #define CROCODDYL_CORE_NUMDIFF_STATE_HPP_
 
+#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 #include "crocoddyl/core/state-base.hpp"
 
 namespace crocoddyl {
 
 class StateNumDiff : public StateAbstract {
  public:
-  explicit StateNumDiff(StateAbstract& state);
+  explicit StateNumDiff(boost::shared_ptr<StateAbstract> state);
   ~StateNumDiff();
 
   Eigen::VectorXd zero();
@@ -66,7 +68,7 @@ class StateNumDiff : public StateAbstract {
    * @brief This is the state we need to compute the numerical differentiation
    * from.
    */
-  StateAbstract& state_;
+  boost::shared_ptr<StateAbstract> state_;
   /**
    * @brief This the increment used in the finite differentiation and integration.
    */

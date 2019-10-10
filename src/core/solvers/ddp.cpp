@@ -141,13 +141,13 @@ double SolverDDP::calc() {
   cost_ = problem_.calcDiff(xs_, us_);
   if (!is_feasible_) {
     const Eigen::VectorXd& x0 = problem_.get_x0();
-    problem_.running_models_[0]->get_state().diff(xs_[0], x0, gaps_[0]);
+    problem_.running_models_[0]->get_state()->diff(xs_[0], x0, gaps_[0]);
 
     const std::size_t& T = problem_.get_T();
     for (std::size_t t = 0; t < T; ++t) {
       ActionModelAbstract* model = problem_.running_models_[t];
       boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
-      model->get_state().diff(xs_[t + 1], d->xnext, gaps_[t + 1]);
+      model->get_state()->diff(xs_[t + 1], d->xnext, gaps_[t + 1]);
     }
   }
   return cost_;
@@ -224,7 +224,7 @@ void SolverDDP::forwardPass(const double& steplength) {
     ActionModelAbstract* m = problem_.running_models_[t];
     boost::shared_ptr<ActionDataAbstract>& d = problem_.running_datas_[t];
 
-    m->get_state().diff(xs_[t], xs_try_[t], dx_[t]);
+    m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
     us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
     m->calc(d, xs_try_[t], us_try_[t]);
     xs_try_[t + 1] = d->xnext;
@@ -297,8 +297,8 @@ void SolverDDP::allocateData() {
 
   for (std::size_t t = 0; t < T; ++t) {
     ActionModelAbstract* model = problem_.running_models_[t];
-    const std::size_t& nx = model->get_state().get_nx();
-    const std::size_t& ndx = model->get_state().get_ndx();
+    const std::size_t& nx = model->get_state()->get_nx();
+    const std::size_t& ndx = model->get_state()->get_ndx();
     const std::size_t& nu = model->get_nu();
 
     Vxx_[t] = Eigen::MatrixXd::Zero(ndx, ndx);
@@ -324,10 +324,10 @@ void SolverDDP::allocateData() {
     Quu_llt_[t] = Eigen::LLT<Eigen::MatrixXd>(nu);
     Quuk_[t] = Eigen::VectorXd(nu);
   }
-  const std::size_t& ndx = problem_.terminal_model_->get_state().get_ndx();
+  const std::size_t& ndx = problem_.terminal_model_->get_state()->get_ndx();
   Vxx_.back() = Eigen::MatrixXd::Zero(ndx, ndx);
   Vx_.back() = Eigen::VectorXd::Zero(ndx);
-  xs_try_.back() = problem_.terminal_model_->get_state().zero();
+  xs_try_.back() = problem_.terminal_model_->get_state()->zero();
   gaps_.back() = Eigen::VectorXd::Zero(ndx);
 
   x_reg_ = Eigen::VectorXd::Constant(ndx, xreg_);

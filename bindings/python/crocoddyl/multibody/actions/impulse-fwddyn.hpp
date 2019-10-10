@@ -24,7 +24,8 @@ void exposeActionImpulseFwdDynamics() {
       "is also a custom implementation in case of system with armatures. If you want to\n"
       "include the armature, you need to use setArmature(). On the other hand, the\n"
       "stack of cost functions are implemented in CostModelSum().",
-      bp::init<StateMultibody&, ImpulseModelMultiple&, CostModelSum&, bp::optional<double, double, bool> >(
+      bp::init<boost::shared_ptr<StateMultibody>, ImpulseModelMultiple&, CostModelSum&,
+               bp::optional<double, double, bool> >(
           bp::args(" self", " state", " impulses", " costs", " r_coeff=0.", " inv_damping=0.", "enable_force=False"),
           "Initialize the impulse forward-dynamics action model.\n\n"
           "The damping factor is needed when the contact Jacobian is not full-rank. Otherwise,\n"
@@ -35,8 +36,8 @@ void exposeActionImpulseFwdDynamics() {
           ":param costs: stack of cost functions\n"
           ":param r_coeff: restitution coefficient\n"
           ":param inv_damping: Damping factor for cholesky decomposition of JMinvJt\n"
-          ":param enable_force: Enable the computation of force Jacobians")[bp::with_custodian_and_ward<
-          1, 2, bp::with_custodian_and_ward<1, 3, bp::with_custodian_and_ward<1, 4> > >()])
+          ":param enable_force: Enable the computation of force Jacobians")[bp::with_custodian_and_ward<1, 3,
+          bp::with_custodian_and_ward<1, 4> >()])
       .def("calc", &ActionModelImpulseFwdDynamics::calc_wrap,
            ActionModel_calc_wraps(
                bp::args(" self", " data", " x", " u=None"),

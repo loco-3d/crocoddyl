@@ -18,9 +18,9 @@ namespace crocoddyl {
 
 class ContactModel3D : public ContactModelAbstract {
  public:
-  ContactModel3D(StateMultibody& state, const FrameTranslation& xref, const std::size_t& nu,
+  ContactModel3D(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref, const std::size_t& nu,
                  const Eigen::Vector2d& gains = Eigen::Vector2d::Zero());
-  ContactModel3D(StateMultibody& state, const FrameTranslation& xref,
+  ContactModel3D(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
                  const Eigen::Vector2d& gains = Eigen::Vector2d::Zero());
   ~ContactModel3D();
 
@@ -44,17 +44,17 @@ struct ContactData3D : public ContactDataAbstract {
   template <typename Model>
   ContactData3D(Model* const model, pinocchio::Data* const data)
       : ContactDataAbstract(model, data),
-        jMf(model->get_state().get_pinocchio().frames[model->get_xref().frame].placement),
+        jMf(model->get_state()->get_pinocchio().frames[model->get_xref().frame].placement),
         fXj(jMf.inverse().toActionMatrix()),
-        fJf(6, model->get_state().get_nv()),
-        v_partial_dq(6, model->get_state().get_nv()),
-        a_partial_dq(6, model->get_state().get_nv()),
-        a_partial_dv(6, model->get_state().get_nv()),
-        a_partial_da(6, model->get_state().get_nv()),
-        fXjdv_dq(6, model->get_state().get_nv()),
-        fXjda_dq(6, model->get_state().get_nv()),
-        fXjda_dv(6, model->get_state().get_nv()) {
-    joint = model->get_state().get_pinocchio().frames[model->get_xref().frame].parent;
+        fJf(6, model->get_state()->get_nv()),
+        v_partial_dq(6, model->get_state()->get_nv()),
+        a_partial_dq(6, model->get_state()->get_nv()),
+        a_partial_dv(6, model->get_state()->get_nv()),
+        a_partial_da(6, model->get_state()->get_nv()),
+        fXjdv_dq(6, model->get_state()->get_nv()),
+        fXjda_dq(6, model->get_state()->get_nv()),
+        fXjda_dv(6, model->get_state()->get_nv()) {
+    joint = model->get_state()->get_pinocchio().frames[model->get_xref().frame].parent;
     fJf.fill(0);
     v_partial_dq.fill(0);
     a_partial_dq.fill(0);

@@ -13,11 +13,11 @@
 
 namespace crocoddyl {
 
-ContactModel6D::ContactModel6D(StateMultibody& state, const FramePlacement& Mref, const std::size_t& nu,
+ContactModel6D::ContactModel6D(boost::shared_ptr<StateMultibody> state, const FramePlacement& Mref, const std::size_t& nu,
                                const Eigen::Vector2d& gains)
     : ContactModelAbstract(state, 6, nu), Mref_(Mref), gains_(gains) {}
 
-ContactModel6D::ContactModel6D(StateMultibody& state, const FramePlacement& Mref, const Eigen::Vector2d& gains)
+ContactModel6D::ContactModel6D(boost::shared_ptr<StateMultibody> state, const FramePlacement& Mref, const Eigen::Vector2d& gains)
     : ContactModelAbstract(state, 6), Mref_(Mref), gains_(gains) {}
 
 ContactModel6D::~ContactModel6D() {}
@@ -26,9 +26,9 @@ void ContactModel6D::calc(const boost::shared_ptr<ContactDataAbstract>& data,
                           const Eigen::Ref<const Eigen::VectorXd>&) {
   ContactData6D* d = static_cast<ContactData6D*>(data.get());
 
-  pinocchio::getFrameJacobian(state_.get_pinocchio(), *d->pinocchio, Mref_.frame, pinocchio::LOCAL, d->Jc);
+  pinocchio::getFrameJacobian(state_->get_pinocchio(), *d->pinocchio, Mref_.frame, pinocchio::LOCAL, d->Jc);
 
-  d->a = pinocchio::getFrameAcceleration(state_.get_pinocchio(), *d->pinocchio, Mref_.frame);
+  d->a = pinocchio::getFrameAcceleration(state_->get_pinocchio(), *d->pinocchio, Mref_.frame);
   d->a0 = d->a.toVector();
 
   if (gains_[0] != 0.) {
@@ -36,7 +36,7 @@ void ContactModel6D::calc(const boost::shared_ptr<ContactDataAbstract>& data,
     d->a0 += gains_[0] * pinocchio::log6(d->rMf).toVector();
   }
   if (gains_[1] != 0.) {
-    d->v = pinocchio::getFrameVelocity(state_.get_pinocchio(), *d->pinocchio, Mref_.frame);
+    d->v = pinocchio::getFrameVelocity(state_->get_pinocchio(), *d->pinocchio, Mref_.frame);
     d->a0 += gains_[1] * d->v.toVector();
   }
 }
@@ -48,9 +48,9 @@ void ContactModel6D::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data
   }
 
   ContactData6D* d = static_cast<ContactData6D*>(data.get());
-  pinocchio::getJointAccelerationDerivatives(state_.get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
+  pinocchio::getJointAccelerationDerivatives(state_->get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                              d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
-  const std::size_t& nv = state_.get_nv();
+  const std::size_t& nv = state_->get_nv();
   d->da0_dx.leftCols(nv).noalias() = d->fXj * d->a_partial_dq;
   d->da0_dx.rightCols(nv).noalias() = d->fXj * d->a_partial_dv;
 

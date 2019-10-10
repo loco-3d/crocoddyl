@@ -19,8 +19,8 @@ struct ContactDataAbstract;  // forward declaration
 
 class ContactModelAbstract {
  public:
-  ContactModelAbstract(StateMultibody& state, const std::size_t& nc, const std::size_t& nu);
-  ContactModelAbstract(StateMultibody& state, const std::size_t& nc);
+  ContactModelAbstract(boost::shared_ptr<StateMultibody> state, const std::size_t& nc, const std::size_t& nu);
+  ContactModelAbstract(boost::shared_ptr<StateMultibody> state, const std::size_t& nc);
   ~ContactModelAbstract();
 
   virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data,
@@ -33,12 +33,12 @@ class ContactModelAbstract {
                        const Eigen::MatrixXd& df_du) const;
   virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::Data* const data);
 
-  StateMultibody& get_state() const;
+  const boost::shared_ptr<StateMultibody>& get_state() const;
   const std::size_t& get_nc() const;
   const std::size_t& get_nu() const;
 
  protected:
-  StateMultibody& state_;
+  boost::shared_ptr<StateMultibody> state_;
   std::size_t nc_;
   std::size_t nu_;
 
@@ -62,10 +62,10 @@ struct ContactDataAbstract {
   ContactDataAbstract(Model* const model, pinocchio::Data* const data)
       : pinocchio(data),
         joint(0),
-        Jc(model->get_nc(), model->get_state().get_nv()),
+        Jc(model->get_nc(), model->get_state()->get_nv()),
         a0(model->get_nc()),
-        da0_dx(model->get_nc(), model->get_state().get_ndx()),
-        df_dx(model->get_nc(), model->get_state().get_ndx()),
+        da0_dx(model->get_nc(), model->get_state()->get_ndx()),
+        df_dx(model->get_nc(), model->get_state()->get_ndx()),
         df_du(model->get_nc(), model->get_nu()),
         f(pinocchio::Force::Zero()) {
     Jc.fill(0);

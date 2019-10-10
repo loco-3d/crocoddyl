@@ -20,7 +20,7 @@ namespace crocoddyl {
 
 class ActionModelImpulseFwdDynamics : public ActionModelAbstract {
  public:
-  ActionModelImpulseFwdDynamics(StateMultibody& state, ImpulseModelMultiple& impulses, CostModelSum& costs,
+  ActionModelImpulseFwdDynamics(boost::shared_ptr<StateMultibody> state, ImpulseModelMultiple& impulses, CostModelSum& costs,
                                 const double& r_coeff = 0., const double& JMinvJt_damping = 0.,
                                 const bool& enable_force = false);
   ~ActionModelImpulseFwdDynamics();
@@ -61,10 +61,10 @@ struct ActionDataImpulseFwdDynamics : public ActionDataAbstract {
   explicit ActionDataImpulseFwdDynamics(Model* const model)
       : ActionDataAbstract(model),
         pinocchio(pinocchio::Data(model->get_pinocchio())),
-        vnone(model->get_state().get_nv()),
-        Kinv(model->get_state().get_nv() + model->get_impulses().get_ni(),
-             model->get_state().get_nv() + model->get_impulses().get_ni()),
-        df_dq(model->get_impulses().get_ni(), model->get_state().get_nv()) {
+        vnone(model->get_state()->get_nv()),
+        Kinv(model->get_state()->get_nv() + model->get_impulses().get_ni(),
+             model->get_state()->get_nv() + model->get_impulses().get_ni()),
+        df_dq(model->get_impulses().get_ni(), model->get_state()->get_nv()) {
     impulses = model->get_impulses().createData(&pinocchio);
     costs = model->get_costs().createData(&pinocchio);
     costs->shareMemory(this);

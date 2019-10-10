@@ -12,11 +12,11 @@
 
 namespace crocoddyl {
 
-ContactModel3D::ContactModel3D(StateMultibody& state, const FrameTranslation& xref, const std::size_t& nu,
+ContactModel3D::ContactModel3D(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref, const std::size_t& nu,
                                const Eigen::Vector2d& gains)
     : ContactModelAbstract(state, 3, nu), xref_(xref), gains_(gains) {}
 
-ContactModel3D::ContactModel3D(StateMultibody& state, const FrameTranslation& xref, const Eigen::Vector2d& gains)
+ContactModel3D::ContactModel3D(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref, const Eigen::Vector2d& gains)
     : ContactModelAbstract(state, 3), xref_(xref), gains_(gains) {}
 
 ContactModel3D::~ContactModel3D() {}
@@ -24,14 +24,14 @@ ContactModel3D::~ContactModel3D() {}
 void ContactModel3D::calc(const boost::shared_ptr<ContactDataAbstract>& data,
                           const Eigen::Ref<const Eigen::VectorXd>&) {
   ContactData3D* d = static_cast<ContactData3D*>(data.get());
-  d->v = pinocchio::getFrameVelocity(state_.get_pinocchio(), *d->pinocchio, xref_.frame);
+  d->v = pinocchio::getFrameVelocity(state_->get_pinocchio(), *d->pinocchio, xref_.frame);
   d->vw = d->v.angular();
   d->vv = d->v.linear();
 
-  pinocchio::getFrameJacobian(state_.get_pinocchio(), *d->pinocchio, xref_.frame, pinocchio::LOCAL, d->fJf);
+  pinocchio::getFrameJacobian(state_->get_pinocchio(), *d->pinocchio, xref_.frame, pinocchio::LOCAL, d->fJf);
   d->Jc = d->fJf.topRows<3>();
 
-  d->a = pinocchio::getFrameAcceleration(state_.get_pinocchio(), *d->pinocchio, xref_.frame);
+  d->a = pinocchio::getFrameAcceleration(state_->get_pinocchio(), *d->pinocchio, xref_.frame);
   d->a0 = d->a.linear() + d->vw.cross(d->vv);
 
   if (gains_[0] != 0.) {
@@ -49,9 +49,9 @@ void ContactModel3D::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data
   }
 
   ContactData3D* d = static_cast<ContactData3D*>(data.get());
-  pinocchio::getJointAccelerationDerivatives(state_.get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
+  pinocchio::getJointAccelerationDerivatives(state_->get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                              d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
-  const std::size_t& nv = state_.get_nv();
+  const std::size_t& nv = state_->get_nv();
   pinocchio::skew(d->vv, d->vv_skew);
   pinocchio::skew(d->vw, d->vw_skew);
   d->fXjdv_dq.noalias() = d->fXj * d->v_partial_dq;

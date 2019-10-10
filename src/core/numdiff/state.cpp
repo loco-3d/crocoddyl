@@ -10,7 +10,7 @@
 
 namespace crocoddyl {
 
-StateNumDiff::StateNumDiff(StateAbstract& state) : StateAbstract(state.get_nx(), state.get_ndx()), state_(state) {
+StateNumDiff::StateNumDiff(boost::shared_ptr<StateAbstract> state) : StateAbstract(state->get_nx(), state->get_ndx()), state_(state) {
   disturbance_ = 1e-6;
   // disturbance vector
   dx_.resize(ndx_);
@@ -28,37 +28,37 @@ StateNumDiff::StateNumDiff(StateAbstract& state) : StateAbstract(state.get_nx(),
 
 StateNumDiff::~StateNumDiff() {}
 
-Eigen::VectorXd StateNumDiff::zero() { return state_.zero(); }
+Eigen::VectorXd StateNumDiff::zero() { return state_->zero(); }
 
-Eigen::VectorXd StateNumDiff::rand() { return state_.rand(); }
+Eigen::VectorXd StateNumDiff::rand() { return state_->rand(); }
 
 void StateNumDiff::diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
                         Eigen::Ref<Eigen::VectorXd> dxout) {
-  assert(x0.size() == nx_ && "x0 has wrong dimension");
-  assert(x1.size() == nx_ && "x1 has wrong dimension");
-  assert(dxout.size() == ndx_ && "output must be pre-allocated");
-  state_.diff(x0, x1, dxout);
+  assert(static_cast<std::size_t>(x0.size()) == nx_ && "x0 has wrong dimension");
+  assert(static_cast<std::size_t>(x1.size()) == nx_ && "x1 has wrong dimension");
+  assert(static_cast<std::size_t>(dxout.size()) == ndx_ && "output must be pre-allocated");
+  state_->diff(x0, x1, dxout);
 }
 
 void StateNumDiff::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                              Eigen::Ref<Eigen::VectorXd> xout) {
-  assert(x.size() == nx_ && "x has wrong dimension");
-  assert(dx.size() == ndx_ && "dx has wrong dimension");
-  assert(xout.size() == nx_ && "output must be pre-allocated");
-  state_.integrate(x, dx, xout);
+  assert(static_cast<std::size_t>(x.size()) == nx_ && "x has wrong dimension");
+  assert(static_cast<std::size_t>(dx.size()) == ndx_ && "dx has wrong dimension");
+  assert(static_cast<std::size_t>(xout.size()) == nx_ && "output must be pre-allocated");
+  state_->integrate(x, dx, xout);
 }
 
 void StateNumDiff::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
                          Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
                          Jcomponent firstsecond) {
   assert(is_a_Jcomponent(firstsecond) && ("firstsecond must be one of the Jcomponent {both, first, second}"));
-  assert(x0.size() == nx_ && "x0 has wrong dimension");
-  assert(x1.size() == nx_ && "x1 has wrong dimension");
+  assert(static_cast<std::size_t>(x0.size()) == nx_ && "x0 has wrong dimension");
+  assert(static_cast<std::size_t>(x1.size()) == nx_ && "x1 has wrong dimension");
 
   dx_.setZero();
   diff(x0, x1, dx0_);
   if (firstsecond == first || firstsecond == both) {
-    assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "Jfirst must be of the good size");
+    assert(static_cast<std::size_t>(Jfirst.rows()) == ndx_ && static_cast<std::size_t>(Jfirst.cols()) == ndx_ && "Jfirst must be of the good size");
     Jfirst.setZero();
     for (std::size_t i = 0; i < ndx_; ++i) {
       dx_(i) = disturbance_;
@@ -74,7 +74,7 @@ void StateNumDiff::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eige
     Jfirst /= disturbance_;
   }
   if (firstsecond == second || firstsecond == both) {
-    assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ && "Jfirst must be of the good size");
+    assert(static_cast<std::size_t>(Jsecond.rows()) == ndx_ && static_cast<std::size_t>(Jsecond.cols()) == ndx_ && "Jfirst must be of the good size");
 
     Jsecond.setZero();
     for (std::size_t i = 0; i < ndx_; ++i) {
@@ -97,15 +97,15 @@ void StateNumDiff::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const 
                               Jcomponent firstsecond) {
   assert((firstsecond == first || firstsecond == second || firstsecond == both) &&
          ("firstsecond must be one of the Jcomponent {both, first, second}"));
-  assert(x.size() == nx_ && "x has wrong dimension");
-  assert(dx.size() == ndx_ && "dx has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == nx_ && "x has wrong dimension");
+  assert(static_cast<std::size_t>(dx.size()) == ndx_ && "dx has wrong dimension");
 
   dx_.setZero();
   // x0_ = integrate(x, dx)
   integrate(x, dx, x0_);
 
   if (firstsecond == first || firstsecond == both) {
-    assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "Jfirst must be of the good size");
+    assert(static_cast<std::size_t>(Jfirst.rows()) == ndx_ && static_cast<std::size_t>(Jfirst.cols()) == ndx_ && "Jfirst must be of the good size");
     Jfirst.setZero();
     for (std::size_t i = 0; i < ndx_; ++i) {
       dx_(i) = disturbance_;
@@ -121,7 +121,7 @@ void StateNumDiff::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const 
     Jfirst /= disturbance_;
   }
   if (firstsecond == second || firstsecond == both) {
-    assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ && "Jfirst must be of the good size");
+    assert(static_cast<std::size_t>(Jsecond.rows()) == ndx_ && static_cast<std::size_t>(Jsecond.cols()) == ndx_ && "Jfirst must be of the good size");
     Jsecond.setZero();
     for (std::size_t i = 0; i < ndx_; ++i) {
       dx_(i) = disturbance_;

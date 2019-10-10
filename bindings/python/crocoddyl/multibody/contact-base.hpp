@@ -18,17 +18,18 @@ namespace bp = boost::python;
 
 class ContactModelAbstract_wrap : public ContactModelAbstract, public bp::wrapper<ContactModelAbstract> {
  public:
-  ContactModelAbstract_wrap(StateMultibody& state, int nc, int nu) : ContactModelAbstract(state, nc, nu) {}
-  ContactModelAbstract_wrap(StateMultibody& state, int nc) : ContactModelAbstract(state, nc) {}
+  ContactModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, int nc, int nu)
+      : ContactModelAbstract(state, nc, nu) {}
+  ContactModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, int nc) : ContactModelAbstract(state, nc) {}
 
   void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
-    assert(static_cast<std::size_t>(x.size()) == state_.get_nx() && "x has wrong dimension");
+    assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x);
   }
 
   void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const bool& recalc = true) {
-    assert(static_cast<std::size_t>(x.size()) == state_.get_nx() && "x has wrong dimension");
+    assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, recalc);
   }
 
@@ -47,12 +48,12 @@ void exposeContactAbstract() {
       "It defines a template for rigid contact models based on acceleration-based holonomic constraints.\n"
       "The calc and calcDiff functions compute the contact Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<StateMultibody&, int, bp::optional<int> >(
+      bp::init<boost::shared_ptr<StateMultibody>, int, bp::optional<int> >(
           bp::args(" self", " state", " nc", " nu=state.nv"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param nc: dimension of contact model\n"
-          ":param nu: dimension of the control vector")[bp::with_custodian_and_ward<1, 2>()])
+          ":param nu: dimension of the control vector"))
       .def("calc", pure_virtual(&ContactModelAbstract_wrap::calc), bp::args(" self", " data", " x"),
            "Compute the contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
@@ -85,8 +86,8 @@ void exposeContactAbstract() {
            ":param data: Pinocchio data\n"
            ":return contact data.")
       .add_property("state",
-                    bp::make_function(&ContactModelAbstract_wrap::get_state, bp::return_internal_reference<>()),
-                    "state of the multibody system")
+          bp::make_function(&ContactModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
+          "state of the multibody system")
       .add_property(
           "nc", bp::make_function(&ContactModelAbstract_wrap::get_nc, bp::return_value_policy<bp::return_by_value>()),
           "dimension of contact")

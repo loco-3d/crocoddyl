@@ -11,23 +11,23 @@
 
 namespace crocoddyl {
 
-CostModelFrameTranslation::CostModelFrameTranslation(StateMultibody& state, ActivationModelAbstract& activation,
+CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
                                                      const FrameTranslation& xref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), xref_(xref) {
   assert(activation_.get_nr() == 3 && "activation::nr is not equals to 3");
 }
 
-CostModelFrameTranslation::CostModelFrameTranslation(StateMultibody& state, ActivationModelAbstract& activation,
+CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
                                                      const FrameTranslation& xref)
     : CostModelAbstract(state, activation), xref_(xref) {
   assert(activation_.get_nr() == 3 && "activation::nr is not equals to 3");
 }
 
-CostModelFrameTranslation::CostModelFrameTranslation(StateMultibody& state, const FrameTranslation& xref,
+CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
                                                      const std::size_t& nu)
     : CostModelAbstract(state, 3, nu), xref_(xref) {}
 
-CostModelFrameTranslation::CostModelFrameTranslation(StateMultibody& state, const FrameTranslation& xref)
+CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref)
     : CostModelAbstract(state, 3), xref_(xref) {}
 
 CostModelFrameTranslation::~CostModelFrameTranslation() {}
@@ -51,14 +51,14 @@ void CostModelFrameTranslation::calcDiff(const boost::shared_ptr<CostDataAbstrac
   }
   // Update the frame placements
   CostDataFrameTranslation* d = static_cast<CostDataFrameTranslation*>(data.get());
-  pinocchio::updateFramePlacements(state_.get_pinocchio(), *d->pinocchio);
+  pinocchio::updateFramePlacements(state_->get_pinocchio(), *d->pinocchio);
 
   // Compute the frame Jacobian at the error point
-  pinocchio::getFrameJacobian(state_.get_pinocchio(), *d->pinocchio, xref_.frame, pinocchio::LOCAL, d->fJf);
+  pinocchio::getFrameJacobian(state_->get_pinocchio(), *d->pinocchio, xref_.frame, pinocchio::LOCAL, d->fJf);
   d->J = d->pinocchio->oMf[xref_.frame].rotation() * d->fJf.topRows<3>();
 
   // Compute the derivatives of the frame placement
-  const std::size_t& nv = state_.get_nv();
+  const std::size_t& nv = state_->get_nv();
   activation_.calcDiff(d->activation, d->r, recalc);
   d->Rx.leftCols(nv) = d->J;
   d->Lx.head(nv) = d->J.transpose() * d->activation->Ar;
