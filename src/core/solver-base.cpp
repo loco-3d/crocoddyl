@@ -72,9 +72,11 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
   is_feasible_ = is_feasible;
 }
 
-void SolverAbstract::setCallbacks(const std::vector<CallbackAbstract*>& callbacks) { callbacks_ = callbacks; }
+void SolverAbstract::setCallbacks(const std::vector<boost::shared_ptr<CallbackAbstract> >& callbacks) {
+  callbacks_ = callbacks;
+}
 
-const std::vector<CallbackAbstract*>& SolverAbstract::getCallbacks() const { return callbacks_; }
+const std::vector<boost::shared_ptr<CallbackAbstract> >& SolverAbstract::getCallbacks() const { return callbacks_; }
 
 const boost::shared_ptr<ShootingProblem>& SolverAbstract::get_problem() const { return problem_; }
 

@@ -35,8 +35,8 @@ int main(int argc, char* argv[]) {
       boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModels, model);
   crocoddyl::SolverDDP ddp(problem);
   if (CALLBACKS) {
-    std::vector<crocoddyl::CallbackAbstract*> cbs;
-    cbs.push_back(new crocoddyl::CallbackVerbose());
+    std::vector<boost::shared_ptr<crocoddyl::CallbackAbstract> > cbs;
+    cbs.push_back(boost::make_shared<crocoddyl::CallbackVerbose>());
     ddp.setCallbacks(cbs);
   }
 

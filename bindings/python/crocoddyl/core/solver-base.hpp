@@ -84,9 +84,10 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setCandidate_overloads, SolverAbstract::s
 
 void exposeSolverAbstract() {
   // Register custom converters between std::vector and Python list
-  bp::to_python_converter<std::vector<CallbackAbstract*, std::allocator<CallbackAbstract*> >,
-                          vector_to_list<CallbackAbstract*> >();
-  list_to_vector().from_python<std::vector<CallbackAbstract*, std::allocator<CallbackAbstract*> > >();
+  typedef boost::shared_ptr<CallbackAbstract> CallbackAbstractPtr;
+  bp::to_python_converter<std::vector<CallbackAbstractPtr, std::allocator<CallbackAbstractPtr> >,
+                          vector_to_list<CallbackAbstractPtr> >();
+  list_to_vector().from_python<std::vector<CallbackAbstractPtr, std::allocator<CallbackAbstractPtr> > >();
 
   bp::class_<SolverAbstract_wrap, boost::noncopyable>(
       "SolverAbstract",

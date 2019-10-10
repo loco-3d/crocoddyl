@@ -35,8 +35,8 @@ class SolverAbstract {
   void setCandidate(const std::vector<Eigen::VectorXd>& xs_warm = DEFAULT_VECTOR,
                     const std::vector<Eigen::VectorXd>& us_warm = DEFAULT_VECTOR, const bool& is_feasible = false);
 
-  void setCallbacks(const std::vector<CallbackAbstract*>& callbacks);
-  const std::vector<CallbackAbstract*>& getCallbacks() const;
+  void setCallbacks(const std::vector<boost::shared_ptr<CallbackAbstract> >& callbacks);
+  const std::vector<boost::shared_ptr<CallbackAbstract> >& getCallbacks() const;
 
   const boost::shared_ptr<ShootingProblem>& get_problem() const;
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& get_models() const;
@@ -60,7 +60,7 @@ class SolverAbstract {
   std::vector<boost::shared_ptr<ActionDataAbstract> > datas_;
   std::vector<Eigen::VectorXd> xs_;
   std::vector<Eigen::VectorXd> us_;
-  std::vector<CallbackAbstract*> callbacks_;
+  std::vector<boost::shared_ptr<CallbackAbstract> > callbacks_;
   bool is_feasible_;
   double cost_;
   double stop_;

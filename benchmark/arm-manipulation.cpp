@@ -88,8 +88,8 @@ int main(int argc, char* argv[]) {
   // Formulating the optimal control problem
   crocoddyl::SolverDDP ddp(problem);
   if (CALLBACKS) {
-    std::vector<crocoddyl::CallbackAbstract*> cbs;
-    cbs.push_back(new crocoddyl::CallbackVerbose());
+    std::vector<boost::shared_ptr<crocoddyl::CallbackAbstract> > cbs;
+    cbs.push_back(boost::make_shared<crocoddyl::CallbackVerbose>());
     ddp.setCallbacks(cbs);
   }
 
