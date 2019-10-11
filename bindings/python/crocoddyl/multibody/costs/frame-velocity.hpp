@@ -90,11 +90,11 @@ void exposeCostFrameVelocity() {
           "Create frame velocity cost data.\n\n"
           ":param model: frame Velocity cost model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("joint", bp::make_getter(&CostDataFrameVelocity::joint),
-                    "joint index")
+      .add_property("joint", bp::make_getter(&CostDataFrameVelocity::joint), "joint index")
       .add_property("vr", bp::make_getter(&CostDataFrameVelocity::vr, bp::return_value_policy<bp::return_by_value>()),
                     "error velocity of the frame")
-      .add_property("fXj", bp::make_getter(&CostDataFrameVelocity::fXj, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("fXj",
+                    bp::make_getter(&CostDataFrameVelocity::fXj, bp::return_value_policy<bp::return_by_value>()),
                     "action matrix from contact to local frames")
       .add_property(
           "v_partial_dq",

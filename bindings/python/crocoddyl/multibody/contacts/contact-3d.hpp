@@ -86,22 +86,18 @@ void exposeContact3D() {
                     "spatial acceleration of the contact body")
       .add_property("fJf", bp::make_getter(&ContactData3D::fJf, bp::return_value_policy<bp::return_by_value>()),
                     "local Jacobian of the contact frame")
-      .add_property(
-          "v_partial_dq",
-          bp::make_getter(&ContactData3D::v_partial_dq, bp::return_value_policy<bp::return_by_value>()),
-          "Jacobian of the spatial body velocity")
-      .add_property(
-          "a_partial_dq",
-          bp::make_getter(&ContactData3D::a_partial_dq, bp::return_value_policy<bp::return_by_value>()),
-          "Jacobian of the spatial body acceleration")
-      .add_property(
-          "a_partial_dv",
-          bp::make_getter(&ContactData3D::a_partial_dv, bp::return_value_policy<bp::return_by_value>()),
-          "Jacobian of the spatial body acceleration")
-      .add_property(
-          "a_partial_da",
-          bp::make_getter(&ContactData3D::a_partial_da, bp::return_value_policy<bp::return_by_value>()),
-          "Jacobian of the spatial body acceleration")
+      .add_property("v_partial_dq",
+                    bp::make_getter(&ContactData3D::v_partial_dq, bp::return_value_policy<bp::return_by_value>()),
+                    "Jacobian of the spatial body velocity")
+      .add_property("a_partial_dq",
+                    bp::make_getter(&ContactData3D::a_partial_dq, bp::return_value_policy<bp::return_by_value>()),
+                    "Jacobian of the spatial body acceleration")
+      .add_property("a_partial_dv",
+                    bp::make_getter(&ContactData3D::a_partial_dv, bp::return_value_policy<bp::return_by_value>()),
+                    "Jacobian of the spatial body acceleration")
+      .add_property("a_partial_da",
+                    bp::make_getter(&ContactData3D::a_partial_da, bp::return_value_policy<bp::return_by_value>()),
+                    "Jacobian of the spatial body acceleration")
       .add_property("oRf", bp::make_getter(&ContactData3D::oRf, bp::return_value_policy<bp::return_by_value>()),
                     "Rotation matrix of the contact body expressed in the world frame");
 }

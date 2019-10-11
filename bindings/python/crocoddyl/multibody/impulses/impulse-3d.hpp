@@ -71,14 +71,12 @@ void exposeImpulse3D() {
                     "action matrix from impulse to local frames")
       .add_property("fJf", bp::make_getter(&ImpulseData3D::fJf, bp::return_value_policy<bp::return_by_value>()),
                     "local Jacobian of the impulse frame")
-      .add_property(
-          "v_partial_dq",
-          bp::make_getter(&ImpulseData3D::v_partial_dq, bp::return_value_policy<bp::return_by_value>()),
-          "Jacobian of the spatial body velocity")
-      .add_property(
-          "v_partial_dv",
-          bp::make_getter(&ImpulseData3D::v_partial_dv, bp::return_value_policy<bp::return_by_value>()),
-          "Jacobian of the spatial body velocity");
+      .add_property("v_partial_dq",
+                    bp::make_getter(&ImpulseData3D::v_partial_dq, bp::return_value_policy<bp::return_by_value>()),
+                    "Jacobian of the spatial body velocity")
+      .add_property("v_partial_dv",
+                    bp::make_getter(&ImpulseData3D::v_partial_dv, bp::return_value_policy<bp::return_by_value>()),
+                    "Jacobian of the spatial body velocity");
 }
 
 }  // namespace python
