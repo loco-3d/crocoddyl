@@ -92,7 +92,17 @@ void exposeDifferentialActionFreeFwdDynamics() {
       .add_property("costs",
                     bp::make_getter(&DifferentialActionDataFreeFwdDynamics::costs,
                                     bp::return_value_policy<bp::return_by_value>()),
-                    "total cost data");
+                    "total cost data")
+      .add_property("Minv",
+                    bp::make_getter(&DifferentialActionDataFreeFwdDynamics::Minv,
+                                    bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&DifferentialActionDataFreeFwdDynamics::Minv),
+                    "inverse of the joint-space inertia matrix")
+      .add_property("u_drift",
+                    bp::make_getter(&DifferentialActionDataFreeFwdDynamics::u_drift,
+                                    bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&DifferentialActionDataFreeFwdDynamics::u_drift),
+                    "force-bias vector that accounts for control, Coriolis and gravitational effects");
 }
 
 }  // namespace python
