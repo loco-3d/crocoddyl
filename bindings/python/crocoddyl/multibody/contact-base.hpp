@@ -96,13 +96,15 @@ void exposeContactAbstract() {
           "nu", bp::make_function(&ContactModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
           "dimension of control");
 
+  bp::register_ptr_to_python<boost::shared_ptr<ContactDataAbstract> >();
+
   bp::class_<ContactDataAbstract, boost::shared_ptr<ContactDataAbstract>, boost::noncopyable>(
       "ContactDataAbstract", "Abstract class for contact datas.\n\n",
       bp::init<ContactModelAbstract*, pinocchio::Data*>(
           bp::args(" self", " model", " data"),
           "Create common data shared between contact models.\n\n"
           ":param model: contact model\n"
-          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
+          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("pinocchio", bp::make_getter(&ContactDataAbstract::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
       .add_property("Jc", bp::make_getter(&ContactDataAbstract::Jc, bp::return_value_policy<bp::return_by_value>()),
