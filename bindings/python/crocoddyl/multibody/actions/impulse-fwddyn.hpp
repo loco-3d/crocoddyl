@@ -24,8 +24,8 @@ void exposeActionImpulseFwdDynamics() {
       "is also a custom implementation in case of system with armatures. If you want to\n"
       "include the armature, you need to use setArmature(). On the other hand, the\n"
       "stack of cost functions are implemented in CostModelSum().",
-      bp::init<boost::shared_ptr<StateMultibody>, ImpulseModelMultiple&, boost::shared_ptr<CostModelSum>,
-               bp::optional<double, double, bool> >(
+      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ImpulseModelMultiple>,
+               boost::shared_ptr<CostModelSum>, bp::optional<double, double, bool> >(
           bp::args(" self", " state", " impulses", " costs", " r_coeff=0.", " inv_damping=0.", "enable_force=False"),
           "Initialize the impulse forward-dynamics action model.\n\n"
           "The damping factor is needed when the contact Jacobian is not full-rank. Otherwise,\n"
@@ -77,7 +77,8 @@ void exposeActionImpulseFwdDynamics() {
           bp::make_function(&ActionModelImpulseFwdDynamics::get_pinocchio, bp::return_internal_reference<>()),
           "multibody model (i.e. pinocchio model)")
       .add_property("impulses",
-                    bp::make_function(&ActionModelImpulseFwdDynamics::get_impulses, bp::return_internal_reference<>()),
+                    bp::make_function(&ActionModelImpulseFwdDynamics::get_impulses,
+                                      bp::return_value_policy<bp::return_by_value>()),
                     "multiple contact model")
       .add_property(
           "costs",

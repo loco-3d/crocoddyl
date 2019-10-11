@@ -16,9 +16,10 @@
 namespace crocoddyl {
 
 DifferentialActionModelContactFwdDynamics::DifferentialActionModelContactFwdDynamics(
-    boost::shared_ptr<StateMultibody> state, ActuationModelFloatingBase& actuation, ContactModelMultiple& contacts,
-    boost::shared_ptr<CostModelSum> costs, const double& JMinvJt_damping, const bool& enable_force)
-    : DifferentialActionModelAbstract(state, actuation.get_nu(), costs->get_nr()),
+    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelFloatingBase> actuation,
+    boost::shared_ptr<ContactModelMultiple> contacts, boost::shared_ptr<CostModelSum> costs,
+    const double& JMinvJt_damping, const bool& enable_force)
+    : DifferentialActionModelAbstract(state, actuation->get_nu(), costs->get_nr()),
       actuation_(actuation),
       contacts_(contacts),
       costs_(costs),
@@ -27,7 +28,7 @@ DifferentialActionModelContactFwdDynamics::DifferentialActionModelContactFwdDyna
       armature_(Eigen::VectorXd::Zero(state->get_nv())),
       JMinvJt_damping_(fabs(JMinvJt_damping)),
       enable_force_(enable_force) {
-  assert(contacts_.get_nu() == nu_ && "Contacts doesn't have the same control dimension");
+  assert(contacts_->get_nu() == nu_ && "Contacts doesn't have the same control dimension");
   assert(costs_->get_nu() == nu_ && "Costs doesn't have the same control dimension");
 
   set_u_lb(-1. * pinocchio_.effortLimit.tail(nu_));
@@ -53,8 +54,8 @@ void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<Dif
   if (!with_armature_) {
     d->pinocchio.M.diagonal() += armature_;
   }
-  actuation_.calc(d->actuation, x, u);
-  contacts_.calc(d->contacts, x);
+  actuation_->calc(d->actuation, x, u);
+  contacts_->calc(d->contacts, x);
 
 #ifndef NDEBUG
   Eigen::FullPivLU<Eigen::MatrixXd> Jc_lu(d->contacts->Jc);
@@ -67,8 +68,8 @@ void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<Dif
   pinocchio::forwardDynamics(pinocchio_, d->pinocchio, q, v, d->actuation->tau, d->contacts->Jc, d->contacts->a0,
                              JMinvJt_damping_, false);
   d->xout = d->pinocchio.ddq;
-  contacts_.updateAcceleration(d->contacts, d->pinocchio.ddq);
-  contacts_.updateForce(d->contacts, d->pinocchio.lambda_c);
+  contacts_->updateAcceleration(d->contacts, d->pinocchio.ddq);
+  contacts_->updateForce(d->contacts, d->pinocchio.lambda_c);
 
   // Computing the cost value and residuals
   costs_->calc(d->costs, x, u);
@@ -83,7 +84,7 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
   assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
 
   const std::size_t& nv = state_->get_nv();
-  const std::size_t& nc = contacts_.get_nc();
+  const std::size_t& nc = contacts_->get_nc();
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(nv);
 
@@ -96,8 +97,8 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout, d->contacts->fext);
   pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->contacts->Jc, d->Kinv);
 
-  actuation_.calcDiff(d->actuation, x, u, false);
-  contacts_.calcDiff(d->contacts, x, false);
+  actuation_->calcDiff(d->actuation, x, u, false);
+  contacts_->calcDiff(d->contacts, x, false);
 
   Eigen::Block<Eigen::MatrixXd> a_partial_dtau = d->Kinv.topLeftCorner(nv, nv);
   Eigen::Block<Eigen::MatrixXd> a_partial_da = d->Kinv.topRightCorner(nv, nc);
@@ -117,8 +118,8 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
     d->df_dx.noalias() += f_partial_da * d->contacts->da0_dx;
     d->df_dx.noalias() -= f_partial_dtau * d->actuation->dtau_dx;
     d->df_du.noalias() = -f_partial_dtau * d->actuation->dtau_du;
-    contacts_.updateAccelerationDiff(d->contacts, d->Fx.bottomRows(nv));
-    contacts_.updateForceDiff(d->contacts, d->df_dx, d->df_du);
+    contacts_->updateAccelerationDiff(d->contacts, d->Fx.bottomRows(nv));
+    contacts_->updateForceDiff(d->contacts, d->df_dx, d->df_du);
   }
   costs_->calcDiff(d->costs, x, u, false);
 }
@@ -129,9 +130,9 @@ boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelContact
 
 pinocchio::Model& DifferentialActionModelContactFwdDynamics::get_pinocchio() const { return pinocchio_; }
 
-ActuationModelFloatingBase& DifferentialActionModelContactFwdDynamics::get_actuation() const { return actuation_; }
+const boost::shared_ptr<ActuationModelFloatingBase>& DifferentialActionModelContactFwdDynamics::get_actuation() const { return actuation_; }
 
-ContactModelMultiple& DifferentialActionModelContactFwdDynamics::get_contacts() const { return contacts_; }
+const boost::shared_ptr<ContactModelMultiple>& DifferentialActionModelContactFwdDynamics::get_contacts() const { return contacts_; }
 
 const boost::shared_ptr<CostModelSum>& DifferentialActionModelContactFwdDynamics::get_costs() const { return costs_; }
 

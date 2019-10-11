@@ -16,7 +16,7 @@
 namespace crocoddyl {
 
 ActionModelImpulseFwdDynamics::ActionModelImpulseFwdDynamics(boost::shared_ptr<StateMultibody> state,
-                                                             ImpulseModelMultiple& impulses,
+                                                             boost::shared_ptr<ImpulseModelMultiple> impulses,
                                                              boost::shared_ptr<CostModelSum> costs,
                                                              const double& r_coeff, const double& JMinvJt_damping,
                                                              const bool& enable_force)
@@ -51,7 +51,7 @@ void ActionModelImpulseFwdDynamics::calc(const boost::shared_ptr<ActionDataAbstr
   if (!with_armature_) {
     d->pinocchio.M.diagonal() += armature_;
   }
-  impulses_.calc(d->impulses, x);
+  impulses_->calc(d->impulses, x);
 
 #ifndef NDEBUG
   Eigen::FullPivLU<Eigen::MatrixXd> Jc_lu(d->impulses->Jc);
@@ -64,8 +64,8 @@ void ActionModelImpulseFwdDynamics::calc(const boost::shared_ptr<ActionDataAbstr
   pinocchio::impulseDynamics(pinocchio_, d->pinocchio, v, d->impulses->Jc, r_coeff_, JMinvJt_damping_);
   d->xnext.head(nq) = q;
   d->xnext.tail(nv) = d->pinocchio.dq_after;
-  impulses_.updateVelocity(d->impulses, d->pinocchio.dq_after);
-  impulses_.updateForce(d->impulses, d->pinocchio.impulse_c);
+  impulses_->updateVelocity(d->impulses, d->pinocchio.dq_after);
+  impulses_->updateForce(d->impulses, d->pinocchio.impulse_c);
 
   // Computing the cost value and residuals
   costs_->calc(d->costs, x, u);
@@ -78,7 +78,7 @@ void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataA
   assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
 
   const std::size_t& nv = state_->get_nv();
-  const std::size_t& ni = impulses_.get_ni();
+  const std::size_t& ni = impulses_->get_ni();
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(nv);
 
@@ -95,7 +95,7 @@ void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataA
   pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->impulses->Jc, d->Kinv);
 
   pinocchio::computeForwardKinematicsDerivatives(pinocchio_, d->pinocchio, q, d->pinocchio.dq_after, d->vnone);
-  impulses_.calcDiff(d->impulses, x, false);
+  impulses_->calcDiff(d->impulses, x, false);
 
   Eigen::Block<Eigen::MatrixXd> a_partial_dtau = d->Kinv.topLeftCorner(nv, nv);
   Eigen::Block<Eigen::MatrixXd> a_partial_da = d->Kinv.topRightCorner(nv, ni);
@@ -112,8 +112,8 @@ void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataA
   if (enable_force_) {
     d->df_dq.noalias() = f_partial_dtau * d->pinocchio.dtau_dq;
     d->df_dq.noalias() += f_partial_da * d->impulses->dv0_dq;
-    impulses_.updateVelocityDiff(d->impulses, d->Fx.bottomRows(nv));
-    impulses_.updateForceDiff(d->impulses, d->df_dq);
+    impulses_->updateVelocityDiff(d->impulses, d->Fx.bottomRows(nv));
+    impulses_->updateForceDiff(d->impulses, d->df_dq);
   }
   costs_->calcDiff(d->costs, x, u, false);
 }
@@ -124,7 +124,7 @@ boost::shared_ptr<ActionDataAbstract> ActionModelImpulseFwdDynamics::createData(
 
 pinocchio::Model& ActionModelImpulseFwdDynamics::get_pinocchio() const { return pinocchio_; }
 
-ImpulseModelMultiple& ActionModelImpulseFwdDynamics::get_impulses() const { return impulses_; }
+const boost::shared_ptr<ImpulseModelMultiple>& ActionModelImpulseFwdDynamics::get_impulses() const { return impulses_; }
 
 const boost::shared_ptr<CostModelSum>& ActionModelImpulseFwdDynamics::get_costs() const { return costs_; }
 

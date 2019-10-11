@@ -24,8 +24,8 @@ void exposeDifferentialActionContactFwdDynamics() {
       "is also a custom implementation in case of system with armatures. If you want to\n"
       "include the armature, you need to use setArmature(). On the other hand, the\n"
       "stack of cost functions are implemented in CostModelSum().",
-      bp::init<boost::shared_ptr<StateMultibody>, ActuationModelFloatingBase&, ContactModelMultiple&,
-               boost::shared_ptr<CostModelSum>, bp::optional<double, bool> >(
+      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActuationModelFloatingBase>,
+               boost::shared_ptr<ContactModelMultiple>, boost::shared_ptr<CostModelSum>, bp::optional<double, bool> >(
           bp::args(" self", " state", " actuation", " contacts", " costs", " inv_damping=0.", "enable_force=False"),
           "Initialize the constrained forward-dynamics action model.\n\n"
           "The damping factor is needed when the contact Jacobian is not full-rank. Otherwise,\n"
@@ -36,8 +36,7 @@ void exposeDifferentialActionContactFwdDynamics() {
           ":param contacts: multiple contact model\n"
           ":param costs: stack of cost functions\n"
           ":param inv_damping: Damping factor for cholesky decomposition of JMinvJt\n"
-          ":param enable_force: Enable the computation of force Jacobians")
-          [bp::with_custodian_and_ward<1, 3, bp::with_custodian_and_ward<1, 4> >()])
+          ":param enable_force: Enable the computation of force Jacobians"))
       .def("calc", &DifferentialActionModelContactFwdDynamics::calc_wrap,
            DiffActionModel_calc_wraps(
                bp::args(" self", " data", " x", " u=None"),
@@ -81,11 +80,11 @@ void exposeDifferentialActionContactFwdDynamics() {
                     "multibody model (i.e. pinocchio model)")
       .add_property("actuation",
                     bp::make_function(&DifferentialActionModelContactFwdDynamics::get_actuation,
-                                      bp::return_internal_reference<>()),
+                                      bp::return_value_policy<bp::return_by_value>()),
                     "actuation model")
       .add_property("contacts",
                     bp::make_function(&DifferentialActionModelContactFwdDynamics::get_contacts,
-                                      bp::return_internal_reference<>()),
+                                      bp::return_value_policy<bp::return_by_value>()),
                     "multiple contact model")
       .add_property("costs",
                     bp::make_function(&DifferentialActionModelContactFwdDynamics::get_costs,
