@@ -99,6 +99,32 @@ void exposeActionImpulseFwdDynamics() {
                                       bp::return_value_policy<bp::return_by_value>()),
                     bp::make_function(&ActionModelImpulseFwdDynamics::set_damping_factor),
                     "Damping factor for cholesky decomposition of JMinvJt");
+
+  bp::register_ptr_to_python<boost::shared_ptr<ActionDataImpulseFwdDynamics> >();
+
+  bp::class_<ActionDataImpulseFwdDynamics, bp::bases<ActionDataAbstract> >(
+      "ActionDataImpulseFwdDynamics", "Action data for the impulse forward dynamics system.",
+      bp::init<ActionModelImpulseFwdDynamics*>(bp::args(" self", " model"),
+                                               "Create impulse forward-dynamics action data.\n\n"
+                                               ":param model: impulse forward-dynamics action model"))
+      .add_property("pinocchio",
+                    bp::make_getter(&ActionDataImpulseFwdDynamics::pinocchio, bp::return_internal_reference<>()),
+                    "pinocchio data")
+      .add_property(
+          "impulses",
+          bp::make_getter(&ActionDataImpulseFwdDynamics::impulses, bp::return_value_policy<bp::return_by_value>()),
+          "impulses data")
+      .add_property(
+          "costs",
+          bp::make_getter(&ActionDataImpulseFwdDynamics::costs, bp::return_value_policy<bp::return_by_value>()),
+          "total cost data")
+      .add_property(
+          "Kinv", bp::make_getter(&ActionDataImpulseFwdDynamics::Kinv, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_setter(&ActionDataImpulseFwdDynamics::Kinv), "inverse of the KKT matrix")
+      .add_property(
+          "df_dq",
+          bp::make_getter(&ActionDataImpulseFwdDynamics::df_dq, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_setter(&ActionDataImpulseFwdDynamics::df_dq), "Jacobian of the impulse force");
 }
 
 }  // namespace python
