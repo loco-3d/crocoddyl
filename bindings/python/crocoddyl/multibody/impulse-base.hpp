@@ -84,6 +84,8 @@ void exposeImpulseAbstract() {
           "ni", bp::make_function(&ImpulseModelAbstract_wrap::get_ni, bp::return_value_policy<bp::return_by_value>()),
           "dimension of impulse");
 
+  bp::register_ptr_to_python<boost::shared_ptr<ImpulseDataAbstract> >();
+
   bp::class_<ImpulseDataAbstract, boost::shared_ptr<ImpulseDataAbstract>, boost::noncopyable>(
       "ImpulseDataAbstract", "Abstract class for impulse datas.\n\n",
       bp::init<ImpulseModelAbstract*, pinocchio::Data*>(
