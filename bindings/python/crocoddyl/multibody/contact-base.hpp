@@ -98,7 +98,7 @@ void exposeContactAbstract() {
 
   bp::register_ptr_to_python<boost::shared_ptr<ContactDataAbstract> >();
 
-  bp::class_<ContactDataAbstract, boost::shared_ptr<ContactDataAbstract>, boost::noncopyable>(
+  bp::class_<ContactDataAbstract, boost::noncopyable>(
       "ContactDataAbstract", "Abstract class for contact datas.\n\n",
       bp::init<ContactModelAbstract*, pinocchio::Data*>(
           bp::args(" self", " model", " data"),

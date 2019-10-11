@@ -86,7 +86,7 @@ void exposeImpulseAbstract() {
 
   bp::register_ptr_to_python<boost::shared_ptr<ImpulseDataAbstract> >();
 
-  bp::class_<ImpulseDataAbstract, boost::shared_ptr<ImpulseDataAbstract>, boost::noncopyable>(
+  bp::class_<ImpulseDataAbstract, boost::noncopyable>(
       "ImpulseDataAbstract", "Abstract class for impulse datas.\n\n",
       bp::init<ImpulseModelAbstract*, pinocchio::Data*>(
           bp::args(" self", " model", " data"),
