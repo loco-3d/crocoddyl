@@ -66,6 +66,42 @@ void exposeContact6D() {
       .add_property("gains",
                     bp::make_function(&ContactModel6D::get_gains, bp::return_value_policy<bp::return_by_value>()),
                     "contact gains");
+
+  bp::register_ptr_to_python<boost::shared_ptr<ContactData6D> >();
+
+  bp::class_<ContactData6D, bp::bases<ContactDataAbstract> >(
+      "ContactData6D", "Data for 6D contact.\n\n",
+      bp::init<ContactModel6D*, pinocchio::Data*>(
+          bp::args(" self", " model", " data"),
+          "Create 3D contact data.\n\n"
+          ":param model: 6D contact model\n"
+          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("jMf", bp::make_getter(&ContactData6D::jMf, bp::return_value_policy<bp::return_by_value>()),
+                    "local frame placement of the contact frame")
+      .add_property("rMf", bp::make_getter(&ContactData6D::jMf, bp::return_value_policy<bp::return_by_value>()),
+                    "error frame placement of the contact frame")
+      .add_property("fXj", bp::make_getter(&ContactData6D::fXj, bp::return_value_policy<bp::return_by_value>()),
+                    "action matrix from contact to local frames")
+      .add_property("v", bp::make_getter(&ContactData6D::v, bp::return_value_policy<bp::return_by_value>()),
+                    "spatial velocity of the contact body")
+      .add_property("a", bp::make_getter(&ContactData6D::a, bp::return_value_policy<bp::return_by_value>()),
+                    "spatial acceleration of the contact body")
+      .add_property(
+          "v_partial_dq",
+          bp::make_getter(&ContactData6D::v_partial_dq, bp::return_value_policy<bp::return_by_value>()),
+          "Jacobian of the spatial body velocity")
+      .add_property(
+          "a_partial_dq",
+          bp::make_getter(&ContactData6D::a_partial_dq, bp::return_value_policy<bp::return_by_value>()),
+          "Jacobian of the spatial body acceleration")
+      .add_property(
+          "a_partial_dv",
+          bp::make_getter(&ContactData6D::a_partial_dv, bp::return_value_policy<bp::return_by_value>()),
+          "Jacobian of the spatial body acceleration")
+      .add_property(
+          "a_partial_da",
+          bp::make_getter(&ContactData6D::a_partial_da, bp::return_value_policy<bp::return_by_value>()),
+          "Jacobian of the spatial body acceleration");
 }
 
 }  // namespace python
