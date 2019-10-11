@@ -93,13 +93,13 @@ void exposeCostFramePlacement() {
       .add_property("r", bp::make_getter(&CostDataFramePlacement::r, bp::return_value_policy<bp::return_by_value>()),
                     "cost residual")
       .add_property("rMf", bp::make_getter(&CostDataFramePlacement::rMf, bp::return_value_policy<bp::return_by_value>()),
-                    "error frame placement of the contact frame")
+                    "error frame placement of the frame")
       .add_property("J", bp::make_getter(&CostDataFramePlacement::J, bp::return_value_policy<bp::return_by_value>()),
                     "Jacobian at the error point")
       .add_property("rJf", bp::make_getter(&CostDataFramePlacement::rJf, bp::return_value_policy<bp::return_by_value>()),
-                    "error Jacobian of the frame placement")
+                    "error Jacobian of the frame")
       .add_property("fJf", bp::make_getter(&CostDataFramePlacement::fJf, bp::return_value_policy<bp::return_by_value>()),
-                    "local Jacobian of the frame placement");
+                    "local Jacobian of the frame");
 }
 
 }  // namespace python
