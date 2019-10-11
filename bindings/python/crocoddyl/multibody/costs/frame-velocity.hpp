@@ -80,6 +80,30 @@ void exposeCostFrameVelocity() {
            ":return cost data.")
       .add_property("vref", bp::make_function(&CostModelFrameVelocity::get_vref, bp::return_internal_reference<>()),
                     "reference frame velocity");
+
+  bp::register_ptr_to_python<boost::shared_ptr<CostDataFrameVelocity> >();
+
+  bp::class_<CostDataFrameVelocity, bp::bases<ContactDataAbstract> >(
+      "CostDataFrameVelocity", "Data for frame velocity cost.\n\n",
+      bp::init<CostModelFrameVelocity*, pinocchio::Data*>(
+          bp::args(" self", " model", " data"),
+          "Create frame velocity cost data.\n\n"
+          ":param model: frame Velocity cost model\n"
+          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("joint", bp::make_getter(&CostDataFrameVelocity::joint),
+                    "joint index")
+      .add_property("vr", bp::make_getter(&CostDataFrameVelocity::vr, bp::return_value_policy<bp::return_by_value>()),
+                    "error velocity of the frame")
+      .add_property("fXj", bp::make_getter(&CostDataFrameVelocity::fXj, bp::return_value_policy<bp::return_by_value>()),
+                    "action matrix from contact to local frames")
+      .add_property(
+          "v_partial_dq",
+          bp::make_getter(&CostDataFrameVelocity::v_partial_dq, bp::return_value_policy<bp::return_by_value>()),
+          "Jacobian of the spatial body velocity")
+      .add_property(
+          "v_partial_dv",
+          bp::make_getter(&CostDataFrameVelocity::v_partial_dv, bp::return_value_policy<bp::return_by_value>()),
+          "Jacobian of the spatial body velocity");
 }
 
 }  // namespace python
