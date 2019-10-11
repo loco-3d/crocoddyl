@@ -80,6 +80,20 @@ void exposeCostFrameTranslation() {
            ":return cost data.")
       .add_property("xref", bp::make_function(&CostModelFrameTranslation::get_xref, bp::return_internal_reference<>()),
                     "reference frame translation");
+
+  bp::register_ptr_to_python<boost::shared_ptr<CostDataFrameTranslation> >();
+
+  bp::class_<CostDataFrameTranslation, bp::bases<ContactDataAbstract> >(
+      "CostDataFrameTranslation", "Data for frame translation cost.\n\n",
+      bp::init<CostModelFrameTranslation*, pinocchio::Data*>(
+          bp::args(" self", " model", " data"),
+          "Create frame translation cost data.\n\n"
+          ":param model: frame translation cost model\n"
+          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("J", bp::make_getter(&CostDataFrameTranslation::J, bp::return_value_policy<bp::return_by_value>()),
+                    "Jacobian at the error point")
+      .add_property("fJf", bp::make_getter(&CostDataFrameTranslation::fJf, bp::return_value_policy<bp::return_by_value>()),
+                    "local Jacobian of the frame");
 }
 
 }  // namespace python
