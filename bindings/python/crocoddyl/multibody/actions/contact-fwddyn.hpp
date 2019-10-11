@@ -100,6 +100,43 @@ void exposeDifferentialActionContactFwdDynamics() {
                                       bp::return_value_policy<bp::return_by_value>()),
                     bp::make_function(&DifferentialActionModelContactFwdDynamics::set_damping_factor),
                     "Damping factor for cholesky decomposition of JMinvJt");
+
+  bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataContactFwdDynamics> >();
+
+  bp::class_<DifferentialActionDataContactFwdDynamics, bp::bases<DifferentialActionDataAbstract> >(
+      "DifferentialActionDataContactFwdDynamics", "Action data for the contact forward dynamics system.",
+      bp::init<DifferentialActionModelContactFwdDynamics*>(bp::args(" self", " model"),
+                                                           "Create contact forward-dynamics action data.\n\n"
+                                                           ":param model: contact forward-dynamics action model"))
+      .add_property(
+          "pinocchio",
+          bp::make_getter(&DifferentialActionDataContactFwdDynamics::pinocchio, bp::return_internal_reference<>()),
+          "pinocchio data")
+      .add_property("actuation",
+                    bp::make_getter(&DifferentialActionDataContactFwdDynamics::actuation,
+                                    bp::return_value_policy<bp::return_by_value>()),
+                    "actuation data")
+      .add_property("contacts",
+                    bp::make_getter(&DifferentialActionDataContactFwdDynamics::contacts,
+                                    bp::return_value_policy<bp::return_by_value>()),
+                    "contacts data")
+      .add_property("costs",
+                    bp::make_getter(&DifferentialActionDataContactFwdDynamics::costs,
+                                    bp::return_value_policy<bp::return_by_value>()),
+                    "total cost data")
+      .add_property("Kinv",
+                    bp::make_getter(&DifferentialActionDataContactFwdDynamics::Kinv,
+                                    bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&DifferentialActionDataContactFwdDynamics::Kinv), "inverse of the KKT matrix")
+      .add_property("df_dx",
+                    bp::make_getter(&DifferentialActionDataContactFwdDynamics::df_dx,
+                                    bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&DifferentialActionDataContactFwdDynamics::df_dx), "Jacobian of the contact force")
+      .add_property("df_du",
+                    bp::make_getter(&DifferentialActionDataContactFwdDynamics::df_du,
+                                    bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&DifferentialActionDataContactFwdDynamics::df_du),
+                    "Jacobian of the contact force");
 }
 
 }  // namespace python
