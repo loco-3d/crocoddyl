@@ -73,7 +73,7 @@ void exposeContact6D() {
       "ContactData6D", "Data for 6D contact.\n\n",
       bp::init<ContactModel6D*, pinocchio::Data*>(
           bp::args(" self", " model", " data"),
-          "Create 3D contact data.\n\n"
+          "Create 6D contact data.\n\n"
           ":param model: 6D contact model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("jMf", bp::make_getter(&ContactData6D::jMf, bp::return_value_policy<bp::return_by_value>()),

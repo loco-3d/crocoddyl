@@ -80,6 +80,26 @@ void exposeCostFramePlacement() {
            ":return cost data.")
       .add_property("Mref", bp::make_function(&CostModelFramePlacement::get_Mref, bp::return_internal_reference<>()),
                     "reference frame placement");
+
+  bp::register_ptr_to_python<boost::shared_ptr<CostDataFramePlacement> >();
+
+  bp::class_<CostDataFramePlacement, bp::bases<ContactDataAbstract> >(
+      "CostDataFramePlacement", "Data for frame placement cost.\n\n",
+      bp::init<CostModelFramePlacement*, pinocchio::Data*>(
+          bp::args(" self", " model", " data"),
+          "Create frame placement cost data.\n\n"
+          ":param model: frame placement cost model\n"
+          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("r", bp::make_getter(&CostDataFramePlacement::r, bp::return_value_policy<bp::return_by_value>()),
+                    "cost residual")
+      .add_property("rMf", bp::make_getter(&CostDataFramePlacement::rMf, bp::return_value_policy<bp::return_by_value>()),
+                    "error frame placement of the contact frame")
+      .add_property("J", bp::make_getter(&CostDataFramePlacement::J, bp::return_value_policy<bp::return_by_value>()),
+                    "Jacobian at the error point")
+      .add_property("rJf", bp::make_getter(&CostDataFramePlacement::rJf, bp::return_value_policy<bp::return_by_value>()),
+                    "error Jacobian of the frame placement")
+      .add_property("fJf", bp::make_getter(&CostDataFramePlacement::fJf, bp::return_value_policy<bp::return_by_value>()),
+                    "local Jacobian of the frame placement");
 }
 
 }  // namespace python
