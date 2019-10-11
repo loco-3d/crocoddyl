@@ -17,7 +17,8 @@ namespace crocoddyl {
 
 class DifferentialActionModelNumDiff : public DifferentialActionModelAbstract {
  public:
-  explicit DifferentialActionModelNumDiff(DifferentialActionModelAbstract& model, bool with_gauss_approx = false);
+  explicit DifferentialActionModelNumDiff(boost::shared_ptr<DifferentialActionModelAbstract> model,
+                                          bool with_gauss_approx = false);
   ~DifferentialActionModelNumDiff();
 
   void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -27,14 +28,14 @@ class DifferentialActionModelNumDiff : public DifferentialActionModelAbstract {
                 const bool& recalc = true);
   boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
-  DifferentialActionModelAbstract& get_model() const;
+  const boost::shared_ptr<DifferentialActionModelAbstract>& get_model() const;
   const double& get_disturbance() const;
   bool get_with_gauss_approx();
 
  private:
   void assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& x);
 
-  DifferentialActionModelAbstract& model_;
+  boost::shared_ptr<DifferentialActionModelAbstract> model_;
   bool with_gauss_approx_;
   double disturbance_;
 };
@@ -50,25 +51,25 @@ struct DifferentialActionDataNumDiff : public DifferentialActionDataAbstract {
   template <typename Model>
   explicit DifferentialActionDataNumDiff(Model* const model)
       : DifferentialActionDataAbstract(model),
-        Rx(model->get_model().get_nr(), model->get_model().get_state()->get_ndx()),
-        Ru(model->get_model().get_nr(), model->get_model().get_nu()),
-        dx(model->get_model().get_state()->get_ndx()),
-        du(model->get_model().get_nu()),
-        xp(model->get_model().get_state()->get_nx()) {
+        Rx(model->get_model()->get_nr(), model->get_model()->get_state()->get_ndx()),
+        Ru(model->get_model()->get_nr(), model->get_model()->get_nu()),
+        dx(model->get_model()->get_state()->get_ndx()),
+        du(model->get_model()->get_nu()),
+        xp(model->get_model()->get_state()->get_nx()) {
     Rx.setZero();
     Ru.setZero();
     dx.setZero();
     du.setZero();
     xp.setZero();
 
-    const std::size_t& ndx = model->get_model().get_state()->get_ndx();
-    const std::size_t& nu = model->get_model().get_nu();
-    data_0 = model->get_model().createData();
+    const std::size_t& ndx = model->get_model()->get_state()->get_ndx();
+    const std::size_t& nu = model->get_model()->get_nu();
+    data_0 = model->get_model()->createData();
     for (std::size_t i = 0; i < ndx; ++i) {
-      data_x.push_back(model->get_model().createData());
+      data_x.push_back(model->get_model()->createData());
     }
     for (std::size_t i = 0; i < nu; ++i) {
-      data_u.push_back(model->get_model().createData());
+      data_u.push_back(model->get_model()->createData());
     }
   }
 

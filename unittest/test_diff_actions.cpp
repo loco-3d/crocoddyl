@@ -124,7 +124,7 @@ void test_partial_derivatives_against_numdiff(TestTypes::Type test_type) {
   // create the corresponding data object and set the cost to nan
   const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data = model->createData();
 
-  crocoddyl::DifferentialActionModelNumDiff model_num_diff(*model.get());
+  crocoddyl::DifferentialActionModelNumDiff model_num_diff(model);
   const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data_num_diff = model_num_diff.createData();
 
   // Generating random values for the state and control

@@ -22,7 +22,7 @@ class ActivationModelNumDiff : public ActivationModelAbstract {
    *
    * @param model
    */
-  explicit ActivationModelNumDiff(ActivationModelAbstract& model);
+  explicit ActivationModelNumDiff(boost::shared_ptr<ActivationModelAbstract> model);
 
   /**
    * @brief Destroy the ActivationModelNumDiff object
@@ -52,7 +52,7 @@ class ActivationModelNumDiff : public ActivationModelAbstract {
    *
    * @return ActivationModelAbstract&
    */
-  ActivationModelAbstract& get_model() const;
+  const boost::shared_ptr<ActivationModelAbstract>& get_model() const;
 
   /**
    * @brief Get the disturbance_ object
@@ -65,7 +65,7 @@ class ActivationModelNumDiff : public ActivationModelAbstract {
   /**
    * @brief This is the model to compute the finite differenciation from
    */
-  ActivationModelAbstract& model_;
+  boost::shared_ptr<ActivationModelAbstract> model_;
 
   /**
    * @brief This is the numerical disturbance value used during the numerical
@@ -84,19 +84,19 @@ struct ActivationDataNumDiff : public ActivationDataAbstract {
    */
   template <typename Model>
   explicit ActivationDataNumDiff(Model* const model)
-      : ActivationDataAbstract(model), dr(model->get_model().get_nr()), rp(model->get_model().get_nr()) {
+      : ActivationDataAbstract(model), dr(model->get_model()->get_nr()), rp(model->get_model()->get_nr()) {
     dr.setZero();
     rp.setZero();
-    data_0 = model->get_model().createData();
-    unsigned int const& nr = model->get_model().get_nr();
+    data_0 = model->get_model()->createData();
+    const std::size_t& nr = model->get_model()->get_nr();
     data_rp.clear();
-    for (unsigned int i = 0; i < nr; ++i) {
-      data_rp.push_back(model->get_model().createData());
+    for (std::size_t i = 0; i < nr; ++i) {
+      data_rp.push_back(model->get_model()->createData());
     }
 
     data_r2p.clear();
-    for (unsigned int i = 0; i < 4; ++i) {
-      data_r2p.push_back(model->get_model().createData());
+    for (std::size_t i = 0; i < 4; ++i) {
+      data_r2p.push_back(model->get_model()->createData());
     }
   }
 
