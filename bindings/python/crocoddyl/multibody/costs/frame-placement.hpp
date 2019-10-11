@@ -83,7 +83,7 @@ void exposeCostFramePlacement() {
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataFramePlacement> >();
 
-  bp::class_<CostDataFramePlacement, bp::bases<ContactDataAbstract> >(
+  bp::class_<CostDataFramePlacement, bp::bases<CostDataAbstract> >(
       "CostDataFramePlacement", "Data for frame placement cost.\n\n",
       bp::init<CostModelFramePlacement*, pinocchio::Data*>(
           bp::args(" self", " model", " data"),

@@ -83,7 +83,7 @@ void exposeCostFrameRotation() {
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataFrameRotation> >();
 
-  bp::class_<CostDataFrameRotation, bp::bases<ContactDataAbstract> >(
+  bp::class_<CostDataFrameRotation, bp::bases<CostDataAbstract> >(
       "CostDataFrameRotation", "Data for frame rotation cost.\n\n",
       bp::init<CostModelFrameRotation*, pinocchio::Data*>(
           bp::args(" self", " model", " data"),

@@ -83,7 +83,7 @@ void exposeCostFrameTranslation() {
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataFrameTranslation> >();
 
-  bp::class_<CostDataFrameTranslation, bp::bases<ContactDataAbstract> >(
+  bp::class_<CostDataFrameTranslation, bp::bases<CostDataAbstract> >(
       "CostDataFrameTranslation", "Data for frame translation cost.\n\n",
       bp::init<CostModelFrameTranslation*, pinocchio::Data*>(
           bp::args(" self", " model", " data"),

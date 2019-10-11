@@ -83,7 +83,7 @@ void exposeCostFrameVelocity() {
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataFrameVelocity> >();
 
-  bp::class_<CostDataFrameVelocity, bp::bases<ContactDataAbstract> >(
+  bp::class_<CostDataFrameVelocity, bp::bases<CostDataAbstract> >(
       "CostDataFrameVelocity", "Data for frame velocity cost.\n\n",
       bp::init<CostModelFrameVelocity*, pinocchio::Data*>(
           bp::args(" self", " model", " data"),
