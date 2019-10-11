@@ -78,19 +78,19 @@ void exposeDifferentialActionNumDiff() {
                                                 ":param model: numdiff diff-action model"))
       .add_property(
           "Rx", bp::make_getter(&DifferentialActionDataNumDiff::Rx, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&DifferentialActionDataNumDiff::Rx), "Jacobian of the cost residual.")
+          "Jacobian of the cost residual.")
       .add_property(
           "Ru", bp::make_getter(&DifferentialActionDataNumDiff::Ru, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&DifferentialActionDataNumDiff::Ru), "Jacobian of the cost residual.")
+          "Jacobian of the cost residual.")
       .add_property(
           "dx", bp::make_getter(&DifferentialActionDataNumDiff::dx, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&DifferentialActionDataNumDiff::dx), "state disturbance.")
+          "state disturbance.")
       .add_property(
           "du", bp::make_getter(&DifferentialActionDataNumDiff::du, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&DifferentialActionDataNumDiff::du), "control disturbance.")
+          "control disturbance.")
       .add_property(
           "xp", bp::make_getter(&DifferentialActionDataNumDiff::du, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&DifferentialActionDataNumDiff::du), "rate state after disturbance.")
+          "rate state after disturbance.")
       .add_property(
           "data_0",
           bp::make_getter(&DifferentialActionDataNumDiff::data_0, bp::return_value_policy<bp::return_by_value>()),

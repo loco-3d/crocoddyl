@@ -120,11 +120,11 @@ void exposeActionImpulseFwdDynamics() {
           "total cost data")
       .add_property(
           "Kinv", bp::make_getter(&ActionDataImpulseFwdDynamics::Kinv, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&ActionDataImpulseFwdDynamics::Kinv), "inverse of the KKT matrix")
+          "inverse of the KKT matrix")
       .add_property(
           "df_dq",
           bp::make_getter(&ActionDataImpulseFwdDynamics::df_dq, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&ActionDataImpulseFwdDynamics::df_dq), "Jacobian of the impulse force");
+          "Jacobian of the impulse force");
 }
 
 }  // namespace python
