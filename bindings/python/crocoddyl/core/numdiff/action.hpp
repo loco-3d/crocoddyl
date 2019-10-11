@@ -62,6 +62,31 @@ void exposeActionNumDiff() {
                     bp::make_function(&ActionModelNumDiff::get_with_gauss_approx,
                                       bp::return_value_policy<bp::return_by_value>()),
                     "Gauss approximation for computing the Hessians");
+
+  bp::register_ptr_to_python<boost::shared_ptr<ActionDataNumDiff> >();
+
+  bp::class_<ActionDataNumDiff, bp::bases<ActionDataAbstract> >(
+      "ActionDataNumDiff", "Numerical differentiation action data.",
+      bp::init<ActionModelNumDiff*>(bp::args(" self", " model"),
+                                    "Create numerical differentiation action data.\n\n"
+                                    ":param model: numdiff action model"))
+      .add_property("Rx", bp::make_getter(&ActionDataNumDiff::Rx, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ActionDataNumDiff::Rx), "Jacobian of the cost residual.")
+      .add_property("Ru", bp::make_getter(&ActionDataNumDiff::Ru, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ActionDataNumDiff::Ru), "Jacobian of the cost residual.")
+      .add_property("dx", bp::make_getter(&ActionDataNumDiff::dx, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ActionDataNumDiff::dx), "state disturbance.")
+      .add_property("du", bp::make_getter(&ActionDataNumDiff::du, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&ActionDataNumDiff::du), "control disturbance.")
+      .add_property("data_0",
+                    bp::make_getter(&ActionDataNumDiff::data_0, bp::return_value_policy<bp::return_by_value>()),
+                    "data that contains the final results")
+      .add_property("data_x",
+                    bp::make_getter(&ActionDataNumDiff::data_x, bp::return_value_policy<bp::return_by_value>()),
+                    "temporary data associated with the state variation")
+      .add_property("data_u",
+                    bp::make_getter(&ActionDataNumDiff::data_u, bp::return_value_policy<bp::return_by_value>()),
+                    "temporary data associated with the control variation");
 }
 
 }  // namespace python
