@@ -130,9 +130,13 @@ boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelContact
 
 pinocchio::Model& DifferentialActionModelContactFwdDynamics::get_pinocchio() const { return pinocchio_; }
 
-const boost::shared_ptr<ActuationModelFloatingBase>& DifferentialActionModelContactFwdDynamics::get_actuation() const { return actuation_; }
+const boost::shared_ptr<ActuationModelFloatingBase>& DifferentialActionModelContactFwdDynamics::get_actuation() const {
+  return actuation_;
+}
 
-const boost::shared_ptr<ContactModelMultiple>& DifferentialActionModelContactFwdDynamics::get_contacts() const { return contacts_; }
+const boost::shared_ptr<ContactModelMultiple>& DifferentialActionModelContactFwdDynamics::get_contacts() const {
+  return contacts_;
+}
 
 const boost::shared_ptr<CostModelSum>& DifferentialActionModelContactFwdDynamics::get_costs() const { return costs_; }
 

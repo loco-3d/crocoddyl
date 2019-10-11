@@ -124,7 +124,9 @@ boost::shared_ptr<ActionDataAbstract> ActionModelImpulseFwdDynamics::createData(
 
 pinocchio::Model& ActionModelImpulseFwdDynamics::get_pinocchio() const { return pinocchio_; }
 
-const boost::shared_ptr<ImpulseModelMultiple>& ActionModelImpulseFwdDynamics::get_impulses() const { return impulses_; }
+const boost::shared_ptr<ImpulseModelMultiple>& ActionModelImpulseFwdDynamics::get_impulses() const {
+  return impulses_;
+}
 
 const boost::shared_ptr<CostModelSum>& ActionModelImpulseFwdDynamics::get_costs() const { return costs_; }
 
