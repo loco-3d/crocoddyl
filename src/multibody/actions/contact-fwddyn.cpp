@@ -17,8 +17,8 @@ namespace crocoddyl {
 
 DifferentialActionModelContactFwdDynamics::DifferentialActionModelContactFwdDynamics(
     boost::shared_ptr<StateMultibody> state, ActuationModelFloatingBase& actuation, ContactModelMultiple& contacts,
-    CostModelSum& costs, const double& JMinvJt_damping, const bool& enable_force)
-    : DifferentialActionModelAbstract(state, actuation.get_nu(), costs.get_nr()),
+    boost::shared_ptr<CostModelSum> costs, const double& JMinvJt_damping, const bool& enable_force)
+    : DifferentialActionModelAbstract(state, actuation.get_nu(), costs->get_nr()),
       actuation_(actuation),
       contacts_(contacts),
       costs_(costs),
@@ -28,7 +28,7 @@ DifferentialActionModelContactFwdDynamics::DifferentialActionModelContactFwdDyna
       JMinvJt_damping_(fabs(JMinvJt_damping)),
       enable_force_(enable_force) {
   assert(contacts_.get_nu() == nu_ && "Contacts doesn't have the same control dimension");
-  assert(costs_.get_nu() == nu_ && "Costs doesn't have the same control dimension");
+  assert(costs_->get_nu() == nu_ && "Costs doesn't have the same control dimension");
 
   set_u_lb(-1. * pinocchio_.effortLimit.tail(nu_));
   set_u_ub(+1. * pinocchio_.effortLimit.tail(nu_));
@@ -71,7 +71,7 @@ void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<Dif
   contacts_.updateForce(d->contacts, d->pinocchio.lambda_c);
 
   // Computing the cost value and residuals
-  costs_.calc(d->costs, x, u);
+  costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
 }
 
@@ -120,7 +120,7 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
     contacts_.updateAccelerationDiff(d->contacts, d->Fx.bottomRows(nv));
     contacts_.updateForceDiff(d->contacts, d->df_dx, d->df_du);
   }
-  costs_.calcDiff(d->costs, x, u, false);
+  costs_->calcDiff(d->costs, x, u, false);
 }
 
 boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelContactFwdDynamics::createData() {
@@ -133,7 +133,7 @@ ActuationModelFloatingBase& DifferentialActionModelContactFwdDynamics::get_actua
 
 ContactModelMultiple& DifferentialActionModelContactFwdDynamics::get_contacts() const { return contacts_; }
 
-CostModelSum& DifferentialActionModelContactFwdDynamics::get_costs() const { return costs_; }
+const boost::shared_ptr<CostModelSum>& DifferentialActionModelContactFwdDynamics::get_costs() const { return costs_; }
 
 const Eigen::VectorXd& DifferentialActionModelContactFwdDynamics::get_armature() const { return armature_; }
 

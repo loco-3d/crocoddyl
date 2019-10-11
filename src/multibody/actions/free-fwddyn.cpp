@@ -19,8 +19,8 @@
 namespace crocoddyl {
 
 DifferentialActionModelFreeFwdDynamics::DifferentialActionModelFreeFwdDynamics(boost::shared_ptr<StateMultibody> state,
-                                                                               CostModelSum& costs)
-    : DifferentialActionModelAbstract(state, state->get_pinocchio().nv, costs.get_nr()),
+                                                                               boost::shared_ptr<CostModelSum> costs)
+    : DifferentialActionModelAbstract(state, state->get_pinocchio().nv, costs->get_nr()),
       costs_(costs),
       pinocchio_(state->get_pinocchio()),
       with_armature_(true),
@@ -54,7 +54,7 @@ void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<Differ
   // Computing the cost value and residuals
   pinocchio::forwardKinematics(pinocchio_, d->pinocchio, q, v);
   pinocchio::updateFramePlacements(pinocchio_, d->pinocchio);
-  costs_.calc(d->costs, x, u);
+  costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
 }
 
@@ -90,7 +90,7 @@ void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<Di
   }
 
   // Computing the cost derivatives
-  costs_.calcDiff(d->costs, x, u, false);
+  costs_->calcDiff(d->costs, x, u, false);
 }
 
 boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelFreeFwdDynamics::createData() {
@@ -99,7 +99,7 @@ boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelFreeFwd
 
 pinocchio::Model& DifferentialActionModelFreeFwdDynamics::get_pinocchio() const { return pinocchio_; }
 
-CostModelSum& DifferentialActionModelFreeFwdDynamics::get_costs() const { return costs_; }
+const boost::shared_ptr<CostModelSum>& DifferentialActionModelFreeFwdDynamics::get_costs() const { return costs_; }
 
 const Eigen::VectorXd& DifferentialActionModelFreeFwdDynamics::get_armature() const { return armature_; }
 

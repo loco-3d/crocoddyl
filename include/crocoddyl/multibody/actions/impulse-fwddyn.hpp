@@ -21,8 +21,8 @@ namespace crocoddyl {
 class ActionModelImpulseFwdDynamics : public ActionModelAbstract {
  public:
   ActionModelImpulseFwdDynamics(boost::shared_ptr<StateMultibody> state, ImpulseModelMultiple& impulses,
-                                CostModelSum& costs, const double& r_coeff = 0., const double& JMinvJt_damping = 0.,
-                                const bool& enable_force = false);
+                                boost::shared_ptr<CostModelSum> costs, const double& r_coeff = 0.,
+                                const double& JMinvJt_damping = 0., const bool& enable_force = false);
   ~ActionModelImpulseFwdDynamics();
 
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -32,7 +32,7 @@ class ActionModelImpulseFwdDynamics : public ActionModelAbstract {
   boost::shared_ptr<ActionDataAbstract> createData();
 
   ImpulseModelMultiple& get_impulses() const;
-  CostModelSum& get_costs() const;
+  const boost::shared_ptr<CostModelSum>& get_costs() const;
   pinocchio::Model& get_pinocchio() const;
   const Eigen::VectorXd& get_armature() const;
   const double& get_restitution_coefficient() const;
@@ -44,7 +44,7 @@ class ActionModelImpulseFwdDynamics : public ActionModelAbstract {
 
  private:
   ImpulseModelMultiple& impulses_;
-  CostModelSum& costs_;
+  boost::shared_ptr<CostModelSum> costs_;
   pinocchio::Model& pinocchio_;
   bool with_armature_;
   Eigen::VectorXd armature_;
@@ -66,7 +66,7 @@ struct ActionDataImpulseFwdDynamics : public ActionDataAbstract {
              model->get_state()->get_nv() + model->get_impulses().get_ni()),
         df_dq(model->get_impulses().get_ni(), model->get_state()->get_nv()) {
     impulses = model->get_impulses().createData(&pinocchio);
-    costs = model->get_costs().createData(&pinocchio);
+    costs = model->get_costs()->createData(&pinocchio);
     costs->shareMemory(this);
     vnone.fill(0);
     Kinv.fill(0);

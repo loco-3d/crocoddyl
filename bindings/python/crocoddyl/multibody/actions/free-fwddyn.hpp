@@ -24,11 +24,11 @@ void exposeDifferentialActionFreeFwdDynamics() {
       "or a custom implementation in case of system with armatures. If you want to\n"
       "include the armature, you need to use setArmature(). On the other hand, the\n"
       "stack of cost functions are implemented in CostModelSum().",
-      bp::init<boost::shared_ptr<StateMultibody>, CostModelSum&>(
+      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<CostModelSum> >(
           bp::args(" self", " state", " costs"),
           "Initialize the free forward-dynamics action model.\n\n"
           ":param state: multibody state\n"
-          ":param costs: stack of cost functions")[bp::with_custodian_and_ward<1, 3>()])
+          ":param costs: stack of cost functions"))
       .def("calc", &DifferentialActionModelFreeFwdDynamics::calc_wrap,
            DiffActionModel_calc_wraps(
                bp::args(" self", " data", " x", " u=None"),
@@ -68,10 +68,10 @@ void exposeDifferentialActionFreeFwdDynamics() {
           "pinocchio",
           bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_pinocchio, bp::return_internal_reference<>()),
           "multibody model (i.e. pinocchio model)")
-      .add_property(
-          "costs",
-          bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_costs, bp::return_internal_reference<>()),
-          "total cost model")
+      .add_property("costs",
+                    bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_costs,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "total cost model")
       .add_property("armature",
                     bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_armature,
                                       bp::return_value_policy<bp::return_by_value>()),

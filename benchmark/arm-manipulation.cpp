@@ -50,14 +50,14 @@ int main(int argc, char* argv[]) {
   boost::shared_ptr<crocoddyl::CostModelAbstract> uRegCost = boost::make_shared<crocoddyl::CostModelControl>(state);
 
   // Create a cost model per the running and terminal action model.
-  crocoddyl::CostModelSum runningCostModel(state);
-  crocoddyl::CostModelSum terminalCostModel(state);
+  boost::shared_ptr<crocoddyl::CostModelSum> runningCostModel = boost::make_shared<crocoddyl::CostModelSum>(state);
+  boost::shared_ptr<crocoddyl::CostModelSum> terminalCostModel = boost::make_shared<crocoddyl::CostModelSum>(state);
 
   // Then let's added the running and terminal cost functions
-  runningCostModel.addCost("gripperPose", goalTrackingCost, 1e-3);
-  runningCostModel.addCost("xReg", xRegCost, 1e-7);
-  runningCostModel.addCost("uReg", uRegCost, 1e-7);
-  terminalCostModel.addCost("gripperPose", goalTrackingCost, 1);
+  runningCostModel->addCost("gripperPose", goalTrackingCost, 1e-3);
+  runningCostModel->addCost("xReg", xRegCost, 1e-7);
+  runningCostModel->addCost("uReg", uRegCost, 1e-7);
+  terminalCostModel->addCost("gripperPose", goalTrackingCost, 1);
 
   // Next, we need to create an action model for running and terminal knots. The
   // forward dynamics (computed using ABA) are implemented

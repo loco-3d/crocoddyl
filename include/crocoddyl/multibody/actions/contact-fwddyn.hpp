@@ -22,7 +22,7 @@ class DifferentialActionModelContactFwdDynamics : public DifferentialActionModel
  public:
   DifferentialActionModelContactFwdDynamics(boost::shared_ptr<StateMultibody> state,
                                             ActuationModelFloatingBase& actuation, ContactModelMultiple& contacts,
-                                            CostModelSum& costs, const double& JMinvJt_damping = 0.,
+                                            boost::shared_ptr<CostModelSum> costs, const double& JMinvJt_damping = 0.,
                                             const bool& enable_force = false);
   ~DifferentialActionModelContactFwdDynamics();
 
@@ -35,7 +35,7 @@ class DifferentialActionModelContactFwdDynamics : public DifferentialActionModel
 
   ActuationModelFloatingBase& get_actuation() const;
   ContactModelMultiple& get_contacts() const;
-  CostModelSum& get_costs() const;
+  const boost::shared_ptr<CostModelSum>& get_costs() const;
   pinocchio::Model& get_pinocchio() const;
   const Eigen::VectorXd& get_armature() const;
   const double& get_damping_factor() const;
@@ -46,7 +46,7 @@ class DifferentialActionModelContactFwdDynamics : public DifferentialActionModel
  private:
   ActuationModelFloatingBase& actuation_;
   ContactModelMultiple& contacts_;
-  CostModelSum& costs_;
+  boost::shared_ptr<CostModelSum> costs_;
   pinocchio::Model& pinocchio_;
   bool with_armature_;
   Eigen::VectorXd armature_;
@@ -67,7 +67,7 @@ struct DifferentialActionDataContactFwdDynamics : public DifferentialActionDataA
         df_du(model->get_contacts().get_nc(), model->get_nu()) {
     actuation = model->get_actuation().createData();
     contacts = model->get_contacts().createData(&pinocchio);
-    costs = model->get_costs().createData(&pinocchio);
+    costs = model->get_costs()->createData(&pinocchio);
     costs->shareMemory(this);
     Kinv.fill(0);
     df_dx.fill(0);

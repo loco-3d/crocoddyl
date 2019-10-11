@@ -16,10 +16,11 @@
 namespace crocoddyl {
 
 ActionModelImpulseFwdDynamics::ActionModelImpulseFwdDynamics(boost::shared_ptr<StateMultibody> state,
-                                                             ImpulseModelMultiple& impulses, CostModelSum& costs,
+                                                             ImpulseModelMultiple& impulses,
+                                                             boost::shared_ptr<CostModelSum> costs,
                                                              const double& r_coeff, const double& JMinvJt_damping,
                                                              const bool& enable_force)
-    : ActionModelAbstract(state, 0, costs.get_nr()),
+    : ActionModelAbstract(state, 0, costs->get_nr()),
       impulses_(impulses),
       costs_(costs),
       pinocchio_(state->get_pinocchio()),
@@ -67,7 +68,7 @@ void ActionModelImpulseFwdDynamics::calc(const boost::shared_ptr<ActionDataAbstr
   impulses_.updateForce(d->impulses, d->pinocchio.impulse_c);
 
   // Computing the cost value and residuals
-  costs_.calc(d->costs, x, u);
+  costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
 }
 
@@ -114,7 +115,7 @@ void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataA
     impulses_.updateVelocityDiff(d->impulses, d->Fx.bottomRows(nv));
     impulses_.updateForceDiff(d->impulses, d->df_dq);
   }
-  costs_.calcDiff(d->costs, x, u, false);
+  costs_->calcDiff(d->costs, x, u, false);
 }
 
 boost::shared_ptr<ActionDataAbstract> ActionModelImpulseFwdDynamics::createData() {
@@ -125,7 +126,7 @@ pinocchio::Model& ActionModelImpulseFwdDynamics::get_pinocchio() const { return 
 
 ImpulseModelMultiple& ActionModelImpulseFwdDynamics::get_impulses() const { return impulses_; }
 
-CostModelSum& ActionModelImpulseFwdDynamics::get_costs() const { return costs_; }
+const boost::shared_ptr<CostModelSum>& ActionModelImpulseFwdDynamics::get_costs() const { return costs_; }
 
 const Eigen::VectorXd& ActionModelImpulseFwdDynamics::get_armature() const { return armature_; }
 
