@@ -57,6 +57,7 @@ struct ActivationDataAbstract {
       : a_value(0.),
         Ar(Eigen::VectorXd::Zero(activation->get_nr())),
         Arr(Eigen::MatrixXd::Zero(activation->get_nr(), activation->get_nr())) {}
+  virtual ~ActivationDataAbstract() {}
 
   double a_value;
   Eigen::VectorXd Ar;

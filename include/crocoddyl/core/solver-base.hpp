@@ -78,7 +78,8 @@ class SolverAbstract {
 class CallbackAbstract {
  public:
   CallbackAbstract() {}
-  ~CallbackAbstract() {}
+  virtual ~CallbackAbstract() {}
+
   virtual void operator()(SolverAbstract& solver) = 0;
 };
 

@@ -74,6 +74,7 @@ struct ContactDataAbstract {
     df_dx.fill(0);
     df_du.fill(0);
   }
+  virtual ~ContactDataAbstract() {}
 
   pinocchio::Data* pinocchio;
   pinocchio::JointIndex joint;

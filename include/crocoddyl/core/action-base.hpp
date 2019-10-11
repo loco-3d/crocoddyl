@@ -121,6 +121,7 @@ struct ActionDataAbstract {
     Lxu.setZero();
     Luu.setZero();
   }
+  virtual ~ActionDataAbstract() {}
 
   double cost;
   Eigen::VectorXd xnext;

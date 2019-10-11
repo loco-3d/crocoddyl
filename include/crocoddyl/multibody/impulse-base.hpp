@@ -67,6 +67,7 @@ struct ImpulseDataAbstract {
     dv0_dq.fill(0);
     df_dq.fill(0);
   }
+  virtual ~ImpulseDataAbstract() {}
 
   pinocchio::Data* pinocchio;
   pinocchio::JointIndex joint;

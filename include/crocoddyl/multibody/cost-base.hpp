@@ -105,6 +105,7 @@ struct CostDataAbstract {
     Rx.fill(0);
     Ru.fill(0);
   }
+  virtual ~CostDataAbstract() {}
 
   pinocchio::Data* pinocchio;
   boost::shared_ptr<ActivationDataAbstract> activation;

@@ -131,6 +131,7 @@ struct DifferentialActionDataAbstract {
     Lxu.setZero();
     Luu.setZero();
   }
+  virtual ~DifferentialActionDataAbstract() {}
 
   double cost;
   Eigen::VectorXd xout;

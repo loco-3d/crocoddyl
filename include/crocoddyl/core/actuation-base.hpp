@@ -65,6 +65,7 @@ struct ActuationDataAbstract {
     dtau_dx.fill(0);
     dtau_du.fill(0);
   }
+  virtual ~ActuationDataAbstract() {}
 
   Eigen::VectorXd tau;
   Eigen::MatrixXd dtau_dx;
