@@ -44,9 +44,10 @@ int main(int argc, char* argv[]) {
   // goal cost. First, let's create the common cost functions.
   crocoddyl::FramePlacement Mref(robot_model.getFrameId("gripper_left_joint"),
                                  pinocchio::SE3(Eigen::Matrix3d::Identity(), Eigen::Vector3d(.0, .0, .4)));
-  crocoddyl::CostModelAbstract* goalTrackingCost = new crocoddyl::CostModelFramePlacement(state, Mref);
-  crocoddyl::CostModelAbstract* xRegCost = new crocoddyl::CostModelState(state);
-  crocoddyl::CostModelAbstract* uRegCost = new crocoddyl::CostModelControl(state);
+  boost::shared_ptr<crocoddyl::CostModelAbstract> goalTrackingCost =
+      boost::make_shared<crocoddyl::CostModelFramePlacement>(state, Mref);
+  boost::shared_ptr<crocoddyl::CostModelAbstract> xRegCost = boost::make_shared<crocoddyl::CostModelState>(state);
+  boost::shared_ptr<crocoddyl::CostModelAbstract> uRegCost = boost::make_shared<crocoddyl::CostModelControl>(state);
 
   // Create a cost model per the running and terminal action model.
   crocoddyl::CostModelSum runningCostModel(state);

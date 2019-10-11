@@ -18,11 +18,11 @@ namespace crocoddyl {
 
 struct CostItem {
   CostItem() {}
-  CostItem(const std::string& name, CostModelAbstract* cost, const double& weight)
+  CostItem(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, const double& weight)
       : name(name), cost(cost), weight(weight) {}
 
   std::string name;
-  CostModelAbstract* cost;
+  boost::shared_ptr<CostModelAbstract> cost;
   double weight;
 };
 
@@ -37,7 +37,7 @@ class CostModelSum {
   explicit CostModelSum(boost::shared_ptr<StateMultibody> state, const bool& with_residuals = true);
   ~CostModelSum();
 
-  void addCost(const std::string& name, CostModelAbstract* const cost, const double& weight);
+  void addCost(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, const double& weight);
   void removeCost(const std::string& name);
 
   void calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,

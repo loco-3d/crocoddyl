@@ -36,14 +36,15 @@ void exposeCostSum() {
   dict_to_map<std::string, CostDataPtr>().from_python();
 
   bp::class_<CostItem, boost::noncopyable>("CostItem", "Describe a cost item.\n\n",
-                                           bp::init<std::string, CostModelAbstract*, double>(
+                                           bp::init<std::string, boost::shared_ptr<CostModelAbstract>, double>(
                                                bp::args(" self", " name", " cost", " weight"),
                                                "Initialize the cost item.\n\n"
                                                ":param name: cost name\n"
                                                ":param cost: cost model\n"
-                                               ":param weight: cost weight")[bp::with_custodian_and_ward<1, 3>()])
+                                               ":param weight: cost weight"))
       .def_readwrite("name", &CostItem::name, "cost name")
-      .add_property("cost", bp::make_getter(&CostItem::cost, bp::return_internal_reference<>()), "cost model")
+      .add_property("cost", bp::make_getter(&CostItem::cost, bp::return_value_policy<bp::return_by_value>()),
+                    "cost model")
       .def_readwrite("weight", &CostItem::weight, "cost weight");
 
   bp::class_<CostModelSum, boost::noncopyable>("CostModelSum",
@@ -64,8 +65,7 @@ void exposeCostSum() {
                                                         "Initialize the total cost model.\n\n"
                                                         "For this case the default nu is equals to model.nv.\n"
                                                         ":param state: state of the multibody system"))
-      .def("addCost", &CostModelSum::addCost, bp::with_custodian_and_ward<1, 3>(),
-           bp::args(" self", " name", " cost", " weight"),
+      .def("addCost", &CostModelSum::addCost, bp::args(" self", " name", " cost", " weight"),
            "Add a cost item.\n\n"
            ":param name: cost name\n"
            ":param cost: cost model\n"
