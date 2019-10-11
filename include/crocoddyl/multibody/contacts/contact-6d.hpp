@@ -57,10 +57,6 @@ struct ContactData6D : public ContactDataAbstract {
     a_partial_dv.fill(0);
     a_partial_da.fill(0);
     rMf_Jlog6.fill(0);
-
-    vv_skew.fill(0);
-    vw_skew.fill(0);
-    oRf.fill(0);
   }
 
   pinocchio::SE3 jMf;
@@ -73,10 +69,6 @@ struct ContactData6D : public ContactDataAbstract {
   pinocchio::Data::Matrix6x a_partial_dv;
   pinocchio::Data::Matrix6x a_partial_da;
   pinocchio::SE3::Matrix6 rMf_Jlog6;
-
-  Eigen::Matrix3d vv_skew;
-  Eigen::Matrix3d vw_skew;
-  Eigen::Matrix3d oRf;
 };
 
 }  // namespace crocoddyl
