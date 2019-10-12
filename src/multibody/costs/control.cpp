@@ -13,7 +13,7 @@ namespace crocoddyl {
 CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state,
                                    boost::shared_ptr<ActivationModelAbstract> activation, const Eigen::VectorXd& uref)
     : CostModelAbstract(state, activation, static_cast<std::size_t>(uref.size())), uref_(uref) {
-  assert(activation.get_nr() == static_cast<std::size_t>(uref.size()) && "nr is not equals to nu");
+  assert(activation->get_nr() == static_cast<std::size_t>(uref.size()) && "nr is not equals to nu");
 }
 
 CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state,
@@ -23,7 +23,7 @@ CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state,
 CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state,
                                    boost::shared_ptr<ActivationModelAbstract> activation, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), uref_(Eigen::VectorXd::Zero(nu)) {
-  assert(activation.get_nr() == nu_ && "nr is not equals to nu");
+  assert(activation->get_nr() == nu_ && "nr is not equals to nu");
 }
 
 CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state, const Eigen::VectorXd& uref)

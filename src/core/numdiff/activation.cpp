@@ -19,7 +19,7 @@ ActivationModelNumDiff::~ActivationModelNumDiff() {}
 
 void ActivationModelNumDiff::calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                                   const Eigen::Ref<const Eigen::VectorXd>& r) {
-  assert(r.size() == model_->get_nr() && "r has wrong dimension");
+  assert(static_cast<std::size_t>(r.size()) == model_->get_nr() && "r has wrong dimension");
   boost::shared_ptr<ActivationDataNumDiff> data_nd = boost::static_pointer_cast<ActivationDataNumDiff>(data);
   model_->calc(data_nd->data_0, r);
   data->a_value = data_nd->data_0->a_value;
@@ -27,7 +27,7 @@ void ActivationModelNumDiff::calc(const boost::shared_ptr<ActivationDataAbstract
 
 void ActivationModelNumDiff::calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
                                       const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc) {
-  assert(r.size() == model_->get_nr() && "r has wrong dimension");
+  assert(static_cast<std::size_t>(r.size()) == model_->get_nr() && "r has wrong dimension");
   boost::shared_ptr<ActivationDataNumDiff> data_nd = boost::static_pointer_cast<ActivationDataNumDiff>(data);
 
   if (recalc) {
