@@ -19,20 +19,20 @@ namespace bp = boost::python;
 void exposeCostFrameRotation() {
   bp::class_<CostModelFrameRotation, bp::bases<CostModelAbstract> >(
       "CostModelFrameRotation",
-      bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, FrameRotation, int>(
+      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameRotation, int>(
           bp::args(" self", " state", " activation", " Rref", " nu"),
           "Initialize the frame rotation cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param Rref: reference frame rotation\n"
-          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
-      .def(bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, FrameRotation>(
+          ":param nu: dimension of control vector"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameRotation>(
           bp::args(" self", " state", " activation", " Rref"),
           "Initialize the frame rotation cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
-          ":param Rref: reference frame rotation")[bp::with_custodian_and_ward<1, 3>()])
+          ":param Rref: reference frame rotation"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameRotation, int>(
           bp::args(" self", " state", " Rref", " nu"),
           "Initialize the frame rotation cost model.\n\n"

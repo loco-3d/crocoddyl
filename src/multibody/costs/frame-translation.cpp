@@ -12,16 +12,17 @@
 namespace crocoddyl {
 
 CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state,
-                                                     ActivationModelAbstract& activation, const FrameTranslation& xref,
-                                                     const std::size_t& nu)
+                                                     boost::shared_ptr<ActivationModelAbstract> activation,
+                                                     const FrameTranslation& xref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), xref_(xref) {
-  assert(activation_.get_nr() == 3 && "activation::nr is not equals to 3");
+  assert(activation_->get_nr() == 3 && "nr is not equals to 3");
 }
 
 CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state,
-                                                     ActivationModelAbstract& activation, const FrameTranslation& xref)
+                                                     boost::shared_ptr<ActivationModelAbstract> activation,
+                                                     const FrameTranslation& xref)
     : CostModelAbstract(state, activation), xref_(xref) {
-  assert(activation_.get_nr() == 3 && "activation::nr is not equals to 3");
+  assert(activation_->get_nr() == 3 && "nr is not equals to 3");
 }
 
 CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state,
@@ -41,7 +42,7 @@ void CostModelFrameTranslation::calc(const boost::shared_ptr<CostDataAbstract>& 
   data->r = data->pinocchio->oMf[xref_.frame].translation() - xref_.oxf;
 
   // Compute the cost
-  activation_.calc(data->activation, data->r);
+  activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;
 }
 
@@ -61,7 +62,7 @@ void CostModelFrameTranslation::calcDiff(const boost::shared_ptr<CostDataAbstrac
 
   // Compute the derivatives of the frame placement
   const std::size_t& nv = state_->get_nv();
-  activation_.calcDiff(d->activation, d->r, recalc);
+  activation_->calcDiff(d->activation, d->r, recalc);
   d->Rx.leftCols(nv) = d->J;
   d->Lx.head(nv) = d->J.transpose() * d->activation->Ar;
   d->Lxx.topLeftCorner(nv, nv) = d->J.transpose() * d->activation->Arr * d->J;

@@ -18,12 +18,12 @@ namespace bp = boost::python;
 
 class CostModelAbstract_wrap : public CostModelAbstract, public bp::wrapper<CostModelAbstract> {
  public:
-  CostModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation, int nu,
-                         bool with_residuals = true)
+  CostModelAbstract_wrap(boost::shared_ptr<StateMultibody> state,
+                         boost::shared_ptr<ActivationModelAbstract> activation, int nu, bool with_residuals = true)
       : CostModelAbstract(state, activation, nu, with_residuals) {}
 
-  CostModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
-                         bool with_residuals = true)
+  CostModelAbstract_wrap(boost::shared_ptr<StateMultibody> state,
+                         boost::shared_ptr<ActivationModelAbstract> activation, bool with_residuals = true)
       : CostModelAbstract(state, activation, with_residuals) {}
 
   CostModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, int nr, int nu, bool with_residuals = true)
@@ -55,19 +55,20 @@ void exposeCostMultibody() {
       "Abstract multibody cost model using Pinocchio.\n\n"
       "It defines a template of cost model whose residual and derivatives can be retrieved from\n"
       "Pinocchio data, through the calc and calcDiff functions, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, int, bp::optional<bool> >(
-          bp::args(" self", " state", " activation", " nu=model.nv", " withResiduals=True"),
-          "Initialize the cost model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param activation: Activation model\n"
-          ":param nu: dimension of control vector\n"
-          ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 3>()])
-      .def(bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, bp::optional<bool> >(
-          bp::args(" self", " state", " activation", " withResiduals=True"),
-          "Initialize the cost model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param activation: Activation model\n"
-          ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 3>()])
+      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, int,
+               bp::optional<bool> >(bp::args(" self", " state", " activation", " nu=model.nv", " withResiduals=True"),
+                                    "Initialize the cost model.\n\n"
+                                    ":param state: state of the multibody system\n"
+                                    ":param activation: Activation model\n"
+                                    ":param nu: dimension of control vector\n"
+                                    ":param withResiduals: true if the cost function has residuals"))
+      .def(
+          bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, bp::optional<bool> >(
+              bp::args(" self", " state", " activation", " withResiduals=True"),
+              "Initialize the cost model.\n\n"
+              ":param state: state of the multibody system\n"
+              ":param activation: Activation model\n"
+              ":param withResiduals: true if the cost function has residuals"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, int, int, bp::optional<bool> >(
           bp::args(" self", " state", " nr", " nu=model.nv", " withResiduals=True"),
           "Initialize the cost model.\n\n"
@@ -106,9 +107,10 @@ void exposeCostMultibody() {
           "state",
           bp::make_function(&CostModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
           "state of the multibody system")
-      .add_property("activation",
-                    bp::make_function(&CostModelAbstract_wrap::get_activation, bp::return_internal_reference<>()),
-                    "activation model")
+      .add_property(
+          "activation",
+          bp::make_function(&CostModelAbstract_wrap::get_activation, bp::return_value_policy<bp::return_by_value>()),
+          "activation model")
       .add_property("nu",
                     bp::make_function(&CostModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
                     "dimension of control vector");

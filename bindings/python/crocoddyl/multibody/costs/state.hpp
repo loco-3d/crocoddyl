@@ -18,14 +18,15 @@ namespace bp = boost::python;
 
 void exposeCostState() {
   bp::class_<CostModelState, bp::bases<CostModelAbstract> >(
-      "CostModelState", bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, Eigen::VectorXd, int>(
-                            bp::args(" self", " state", " activation=crocoddyl.ActivationModelQuad(state.ndx)",
-                                     " xref=state.zero()", " nu=model.nv"),
-                            "Initialize the state cost model.\n\n"
-                            ":param state: state of the multibody system\n"
-                            ":param activation: activation model\n"
-                            ":param xref: reference state\n"
-                            ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
+      "CostModelState",
+      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, Eigen::VectorXd, int>(
+          bp::args(" self", " state", " activation=crocoddyl.ActivationModelQuad(state.ndx)", " xref=state.zero()",
+                   " nu=model.nv"),
+          "Initialize the state cost model.\n\n"
+          ":param state: state of the multibody system\n"
+          ":param activation: activation model\n"
+          ":param xref: reference state\n"
+          ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, Eigen::VectorXd, int>(
           bp::args(" self", " state", " xref", " nu"),
           "Initialize the state cost model.\n\n"
@@ -33,7 +34,7 @@ void exposeCostState() {
           ":param state: state of the multibody system\n"
           ":param xref: reference state\n"
           ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, Eigen::VectorXd>(
+      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, Eigen::VectorXd>(
           bp::args(" self", " state", " activation", " xref"),
           "Initialize the state cost model.\n\n"
           "For this case the default nu values is model.nv.\n"
@@ -47,13 +48,13 @@ void exposeCostState() {
           "and nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
           ":param xref: reference state"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, int>(
+      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, int>(
           bp::args(" self", " state", " activation", " nu"),
           "Initialize the state cost model.\n\n"
           "For this case the default xref is the zeros state, i.e. state.zero().\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
-          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
+          ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, int>(
           bp::args(" self", " state", " nu"),
           "Initialize the state cost model.\n\n"
@@ -61,12 +62,12 @@ void exposeCostState() {
           "model is quadratic, i.e. crocoddyl.ActivationModelQuad(state.ndx)\n"
           ":param state: state of the multibody system\n"
           ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&>(
+      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract> >(
           bp::args(" self", " state", " activation"),
           "Initialize the state cost model.\n\n"
           "For this case the default xref is the zeros state, i.e. state.zero(), and nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
-          ":param activation: activation model")[bp::with_custodian_and_ward<1, 3>()])
+          ":param activation: activation model"))
       .def(bp::init<boost::shared_ptr<StateMultibody> >(
           bp::args(" self", " state"),
           "Initialize the state cost model.\n\n"

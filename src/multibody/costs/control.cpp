@@ -10,19 +10,20 @@
 
 namespace crocoddyl {
 
-CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
-                                   const Eigen::VectorXd& uref)
+CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state,
+                                   boost::shared_ptr<ActivationModelAbstract> activation, const Eigen::VectorXd& uref)
     : CostModelAbstract(state, activation, static_cast<std::size_t>(uref.size())), uref_(uref) {
-  assert(activation.get_nr() == static_cast<std::size_t>(uref.size()) && "activation::nr is not equals to nu");
+  assert(activation.get_nr() == static_cast<std::size_t>(uref.size()) && "nr is not equals to nu");
 }
 
-CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation)
-    : CostModelAbstract(state, activation), uref_(Eigen::VectorXd::Zero(activation.get_nr())) {}
+CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state,
+                                   boost::shared_ptr<ActivationModelAbstract> activation)
+    : CostModelAbstract(state, activation), uref_(Eigen::VectorXd::Zero(activation->get_nr())) {}
 
-CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
-                                   const std::size_t& nu)
+CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state,
+                                   boost::shared_ptr<ActivationModelAbstract> activation, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), uref_(Eigen::VectorXd::Zero(nu)) {
-  assert(activation.get_nr() == nu_ && "activation::nr is not equals to nu");
+  assert(activation.get_nr() == nu_ && "nr is not equals to nu");
 }
 
 CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state, const Eigen::VectorXd& uref)
@@ -43,7 +44,7 @@ void CostModelControl::calc(const boost::shared_ptr<CostDataAbstract>& data, con
   assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
 
   data->r = u - uref_;
-  activation_.calc(data->activation, data->r);
+  activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;
 }
 
@@ -56,7 +57,7 @@ void CostModelControl::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
   if (recalc) {
     calc(data, x, u);
   }
-  activation_.calcDiff(data->activation, data->r, recalc);
+  activation_->calcDiff(data->activation, data->r, recalc);
   data->Lu = data->activation->Ar;
   data->Luu.diagonal() = data->activation->Arr.diagonal();
 }

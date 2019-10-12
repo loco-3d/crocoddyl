@@ -12,16 +12,17 @@
 namespace crocoddyl {
 
 CostModelFramePlacement::CostModelFramePlacement(boost::shared_ptr<StateMultibody> state,
-                                                 ActivationModelAbstract& activation, const FramePlacement& Mref,
-                                                 const std::size_t& nu)
+                                                 boost::shared_ptr<ActivationModelAbstract> activation,
+                                                 const FramePlacement& Mref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
-  assert(activation_.get_nr() == 6 && "activation::nr is not equals to 6");
+  assert(activation_->get_nr() == 6 && "nr is not equals to 6");
 }
 
 CostModelFramePlacement::CostModelFramePlacement(boost::shared_ptr<StateMultibody> state,
-                                                 ActivationModelAbstract& activation, const FramePlacement& Mref)
+                                                 boost::shared_ptr<ActivationModelAbstract> activation,
+                                                 const FramePlacement& Mref)
     : CostModelAbstract(state, activation), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
-  assert(activation_.get_nr() == 6 && "activation::nr is not equals to 6");
+  assert(activation_->get_nr() == 6 && "nr is not equals to 6");
 }
 
 CostModelFramePlacement::CostModelFramePlacement(boost::shared_ptr<StateMultibody> state, const FramePlacement& Mref,
@@ -44,7 +45,7 @@ void CostModelFramePlacement::calc(const boost::shared_ptr<CostDataAbstract>& da
   data->r = d->r;  // this is needed because we overwrite it
 
   // Compute the cost
-  activation_.calc(d->activation, d->r);
+  activation_->calc(d->activation, d->r);
   d->cost = d->activation->a_value;
 }
 
@@ -65,7 +66,7 @@ void CostModelFramePlacement::calcDiff(const boost::shared_ptr<CostDataAbstract>
 
   // Compute the derivatives of the frame placement
   const std::size_t& nv = state_->get_nv();
-  activation_.calcDiff(data->activation, data->r, recalc);
+  activation_->calcDiff(data->activation, data->r, recalc);
   data->Rx.leftCols(nv) = d->J;
   data->Lx.head(nv).noalias() = d->J.transpose() * data->activation->Ar;
   d->Arr_J.noalias() = data->activation->Arr * d->J;
