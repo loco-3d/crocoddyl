@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <ctime>
 #include <pinocchio/parsers/urdf.hpp>
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
@@ -16,7 +17,6 @@
 #include "crocoddyl/multibody/costs/control.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
-#include <ctime>
 
 int main(int argc, char* argv[]) {
   bool CALLBACKS = false;

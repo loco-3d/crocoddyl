@@ -6,11 +6,11 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <ctime>
 #include "crocoddyl/core/states/euclidean.hpp"
 #include "crocoddyl/core/actions/lqr.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
-#include <ctime>
 
 int main(int argc, char* argv[]) {
   unsigned int NX = 37;

@@ -6,10 +6,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <time.h>
 #include "crocoddyl/core/actions/unicycle.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
-#include <time.h>
 
 int main(int argc, char* argv[]) {
   bool CALLBACKS = false;
