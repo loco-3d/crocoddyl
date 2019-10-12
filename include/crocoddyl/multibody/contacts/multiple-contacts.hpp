@@ -18,7 +18,8 @@ namespace crocoddyl {
 
 struct ContactItem {
   ContactItem() {}
-  ContactItem(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact) : name(name), contact(contact) {}
+  ContactItem(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact)
+      : name(name), contact(contact) {}
 
   std::string name;
   boost::shared_ptr<ContactModelAbstract> contact;
