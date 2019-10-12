@@ -34,31 +34,31 @@ class SimpleQuadrupedGaitProblem {
                              const std::string& lhFoot, const std::string& rhFoot);
   ~SimpleQuadrupedGaitProblem();
 
-  ShootingProblem createWalkingProblem(const Eigen::VectorXd& x0, const double stepLength, const double stepHeight,
-                                       const double timeStep, const std::size_t stepKnots,
-                                       const std::size_t supportKnots);
+  boost::shared_ptr<crocoddyl::ShootingProblem> createWalkingProblem(const Eigen::VectorXd& x0,
+                                                                     const double stepLength, const double stepHeight,
+                                                                     const double timeStep,
+                                                                     const std::size_t stepKnots,
+                                                                     const std::size_t supportKnots);
 
-  void createFootStepModels(double timeStep, Eigen::Vector3d& comPos0, std::vector<Eigen::Vector3d>& feetPos0,
-                            double stepLength, double stepHeight, std::size_t numKnots,
-                            const std::vector<pinocchio::FrameIndex>& supportFootIds,
-                            const std::vector<pinocchio::FrameIndex>& swingFootIds,
-                            std::vector<ActionModelAbstract*>& actionModelList);
+  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > createFootStepModels(
+      double timeStep, Eigen::Vector3d& comPos0, std::vector<Eigen::Vector3d>& feetPos0, double stepLength,
+      double stepHeight, std::size_t numKnots, const std::vector<pinocchio::FrameIndex>& supportFootIds,
+      const std::vector<pinocchio::FrameIndex>& swingFootIds);
 
-  void createSwingFootModel(double timeStep, const std::vector<pinocchio::FrameIndex>& supportFootIds,
-                            const Eigen::Vector3d& comTask, const std::vector<FramePlacement>& swingFootTask,
-                            std::vector<ActionModelAbstract*>& actionModelList);
+  boost::shared_ptr<ActionModelAbstract> createSwingFootModel(
+      double timeStep, const std::vector<pinocchio::FrameIndex>& supportFootIds,
+      const Eigen::Vector3d& comTask = Eigen::Vector3d::Constant(std::numeric_limits<double>::infinity()),
+      const std::vector<crocoddyl::FramePlacement>& swingFootTask = std::vector<crocoddyl::FramePlacement>());
 
-  void createFootSwitchModel(const std::vector<pinocchio::FrameIndex>& supportFootIds,
-                             const std::vector<FramePlacement>& swingFootTask, bool pseudoImpulse,
-                             std::vector<ActionModelAbstract*>& actionModelList);
+  boost::shared_ptr<ActionModelAbstract> createFootSwitchModel(
+      const std::vector<pinocchio::FrameIndex>& supportFootIds, const std::vector<FramePlacement>& swingFootTask,
+      bool pseudoImpulse = true);
 
-  void createPseudoImpulseModel(const std::vector<pinocchio::FrameIndex>& supportFootIds,
-                                const std::vector<FramePlacement>& swingFootTask,
-                                std::vector<ActionModelAbstract*>& actionModelList);
+  boost::shared_ptr<ActionModelAbstract> createPseudoImpulseModel(
+      const std::vector<pinocchio::FrameIndex>& supportFootIds, const std::vector<FramePlacement>& swingFootTask);
 
-  void createImpulseModel(const std::vector<pinocchio::FrameIndex>& supportFootIds,
-                          const std::vector<FramePlacement>& swingFootTask,
-                          std::vector<ActionModelAbstract*>& actionModelList);
+  boost::shared_ptr<ActionModelAbstract> createImpulseModel(const std::vector<pinocchio::FrameIndex>& supportFootIds,
+                                                            const std::vector<FramePlacement>& swingFootTask);
 
   const Eigen::VectorXd& get_defaultState() const { return defaultState_; };
 
@@ -66,8 +66,8 @@ class SimpleQuadrupedGaitProblem {
   pinocchio::Model rmodel_;
   pinocchio::Data rdata_;
   pinocchio::FrameIndex lfFootId_, rfFootId_, lhFootId_, rhFootId_;
-  StateMultibody state_;
-  ActuationModelFloatingBase actuation_;
+  boost::shared_ptr<StateMultibody> state_;
+  boost::shared_ptr<ActuationModelFloatingBase> actuation_;
   bool firstStep_;
   Eigen::VectorXd defaultState_;
 };
