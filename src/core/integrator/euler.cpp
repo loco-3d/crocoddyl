@@ -10,7 +10,7 @@
 
 namespace crocoddyl {
 
-IntegratedActionModelEuler::IntegratedActionModelEuler(DifferentialActionModelAbstract* const model,
+IntegratedActionModelEuler::IntegratedActionModelEuler(boost::shared_ptr<DifferentialActionModelAbstract> model,
                                                        const double& time_step, const bool& with_cost_residual)
     : ActionModelAbstract(model->get_state(), model->get_nu(), model->get_nr()),
       differential_(model),
@@ -97,7 +97,9 @@ boost::shared_ptr<ActionDataAbstract> IntegratedActionModelEuler::createData() {
   return boost::make_shared<IntegratedActionDataEuler>(this);
 }
 
-DifferentialActionModelAbstract* IntegratedActionModelEuler::get_differential() const { return differential_; }
+const boost::shared_ptr<DifferentialActionModelAbstract>& IntegratedActionModelEuler::get_differential() const {
+  return differential_;
+}
 
 const double& IntegratedActionModelEuler::get_dt() const { return time_step_; }
 
