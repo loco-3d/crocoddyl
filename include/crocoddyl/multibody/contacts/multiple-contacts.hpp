@@ -18,10 +18,10 @@ namespace crocoddyl {
 
 struct ContactItem {
   ContactItem() {}
-  ContactItem(const std::string& name, ContactModelAbstract* contact) : name(name), contact(contact) {}
+  ContactItem(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact) : name(name), contact(contact) {}
 
   std::string name;
-  ContactModelAbstract* contact;
+  boost::shared_ptr<ContactModelAbstract> contact;
 };
 
 struct ContactDataMultiple;  // forward declaration
@@ -36,7 +36,7 @@ class ContactModelMultiple {
   ContactModelMultiple(boost::shared_ptr<StateMultibody> state);
   ~ContactModelMultiple();
 
-  void addContact(const std::string& name, ContactModelAbstract* const contact);
+  void addContact(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact);
   void removeContact(const std::string& name);
 
   void calc(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::Ref<const Eigen::VectorXd>& x);

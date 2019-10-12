@@ -37,13 +37,12 @@ void exposeContactMultiple() {
 
   bp::class_<ContactItem, boost::noncopyable>(
       "ContactItem", "Describe a contact item.\n\n",
-      bp::init<std::string, ContactModelAbstract*>(
-          bp::args(" self", " name", " contact"),
-          "Initialize the contact item.\n\n"
-          ":param name: contact name\n"
-          ":param contact: contact model")[bp::with_custodian_and_ward<1, 3>()])
+      bp::init<std::string, boost::shared_ptr<ContactModelAbstract> >(bp::args(" self", " name", " contact"),
+                                                                      "Initialize the contact item.\n\n"
+                                                                      ":param name: contact name\n"
+                                                                      ":param contact: contact model"))
       .def_readwrite("name", &ContactItem::name, "contact name")
-      .add_property("contact", bp::make_getter(&ContactItem::contact, bp::return_internal_reference<>()),
+      .add_property("contact", bp::make_getter(&ContactItem::contact, bp::return_value_policy<bp::return_by_value>()),
                     "contact model");
 
   bp::class_<ContactModelMultiple, boost::noncopyable>(
@@ -52,8 +51,7 @@ void exposeContactMultiple() {
                                                                       "Initialize the multiple contact model.\n\n"
                                                                       ":param state: state of the multibody system\n"
                                                                       ":param nu: dimension of control vector"))
-      .def("addContact", &ContactModelMultiple::addContact, bp::with_custodian_and_ward<1, 3>(),
-           bp::args(" self", " name", " contact"),
+      .def("addContact", &ContactModelMultiple::addContact, bp::args(" self", " name", " contact"),
            "Add a contact item.\n\n"
            ":param name: contact name\n"
            ":param contact: contact model")
