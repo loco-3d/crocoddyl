@@ -11,13 +11,13 @@
 namespace crocoddyl {
 
 ActivationModelWeightedQuad::ActivationModelWeightedQuad(const Eigen::VectorXd& weights)
-    : ActivationModelAbstract((unsigned int)weights.size()), weights_(weights) {}
+    : ActivationModelAbstract(weights.size()), weights_(weights) {}
 
 ActivationModelWeightedQuad::~ActivationModelWeightedQuad() {}
 
 void ActivationModelWeightedQuad::calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                                        const Eigen::Ref<const Eigen::VectorXd>& r) {
-  assert(r.size() == nr_ && "r has wrong dimension");
+  assert(static_cast<std::size_t>(r.size()) == nr_ && "r has wrong dimension");
   boost::shared_ptr<ActivationDataWeightedQuad> d = boost::static_pointer_cast<ActivationDataWeightedQuad>(data);
 
   d->Wr = weights_.cwiseProduct(r);
@@ -26,7 +26,7 @@ void ActivationModelWeightedQuad::calc(const boost::shared_ptr<ActivationDataAbs
 
 void ActivationModelWeightedQuad::calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
                                            const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc) {
-  assert(r.size() == nr_ && "r has wrong dimension");
+  assert(static_cast<std::size_t>(r.size()) == nr_ && "r has wrong dimension");
   if (recalc) {
     calc(data, r);
   }

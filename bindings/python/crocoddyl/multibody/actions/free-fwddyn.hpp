@@ -24,11 +24,11 @@ void exposeDifferentialActionFreeFwdDynamics() {
       "or a custom implementation in case of system with armatures. If you want to\n"
       "include the armature, you need to use setArmature(). On the other hand, the\n"
       "stack of cost functions are implemented in CostModelSum().",
-      bp::init<StateMultibody&, CostModelSum&>(bp::args(" self", " state", " costs"),
-                                               "Initialize the free forward-dynamics action model.\n\n"
-                                               ":param state: multibody state\n"
-                                               ":param costs: stack of cost functions")
-          [bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<CostModelSum> >(
+          bp::args(" self", " state", " costs"),
+          "Initialize the free forward-dynamics action model.\n\n"
+          ":param state: multibody state\n"
+          ":param costs: stack of cost functions"))
       .def("calc", &DifferentialActionModelFreeFwdDynamics::calc_wrap,
            DiffActionModel_calc_wraps(
                bp::args(" self", " data", " x", " u=None"),
@@ -68,10 +68,10 @@ void exposeDifferentialActionFreeFwdDynamics() {
           "pinocchio",
           bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_pinocchio, bp::return_internal_reference<>()),
           "multibody model (i.e. pinocchio model)")
-      .add_property(
-          "costs",
-          bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_costs, bp::return_internal_reference<>()),
-          "total cost model")
+      .add_property("costs",
+                    bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_costs,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "total cost model")
       .add_property("armature",
                     bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_armature,
                                       bp::return_value_policy<bp::return_by_value>()),
@@ -92,7 +92,15 @@ void exposeDifferentialActionFreeFwdDynamics() {
       .add_property("costs",
                     bp::make_getter(&DifferentialActionDataFreeFwdDynamics::costs,
                                     bp::return_value_policy<bp::return_by_value>()),
-                    "total cost data");
+                    "total cost data")
+      .add_property("Minv",
+                    bp::make_getter(&DifferentialActionDataFreeFwdDynamics::Minv,
+                                    bp::return_value_policy<bp::return_by_value>()),
+                    "inverse of the joint-space inertia matrix")
+      .add_property("u_drift",
+                    bp::make_getter(&DifferentialActionDataFreeFwdDynamics::u_drift,
+                                    bp::return_value_policy<bp::return_by_value>()),
+                    "force-bias vector that accounts for control, Coriolis and gravitational effects");
 }
 
 }  // namespace python

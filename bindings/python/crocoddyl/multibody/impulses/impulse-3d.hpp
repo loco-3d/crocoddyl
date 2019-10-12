@@ -23,10 +23,10 @@ void exposeImpulse3D() {
       "It defines a rigid 3D impulse models (point impulse) based on acceleration-based holonomic constraints.\n"
       "The calc and calcDiff functions compute the impulse Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<StateMultibody&, int>(bp::args(" self", " state", " frame"),
-                                     "Initialize the 3D impulse model.\n\n"
-                                     ":param state: state of the multibody system\n"
-                                     ":param frame: reference frame id")[bp::with_custodian_and_ward<1, 2>()])
+      bp::init<boost::shared_ptr<StateMultibody>, int>(bp::args(" self", " state", " frame"),
+                                                       "Initialize the 3D impulse model.\n\n"
+                                                       ":param state: state of the multibody system\n"
+                                                       ":param frame: reference frame id"))
       .def("calc", &ImpulseModel3D::calc_wrap, bp::args(" self", " data", " x"),
            "Compute the 3D impulse Jacobian and drift.\n\n"
            "The rigid impulse model throught acceleration-base holonomic constraint\n"
@@ -55,6 +55,28 @@ void exposeImpulse3D() {
       .add_property("frame",
                     bp::make_function(&ImpulseModel3D::get_frame, bp::return_value_policy<bp::return_by_value>()),
                     "reference frame id");
+
+  bp::register_ptr_to_python<boost::shared_ptr<ImpulseData3D> >();
+
+  bp::class_<ImpulseData3D, bp::bases<ImpulseDataAbstract> >(
+      "ImpulseData3D", "Data for 3D impulse.\n\n",
+      bp::init<ImpulseModel3D*, pinocchio::Data*>(
+          bp::args(" self", " model", " data"),
+          "Create 3D impulse data.\n\n"
+          ":param model: 3D impulse model\n"
+          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("jMf", bp::make_getter(&ImpulseData3D::jMf, bp::return_value_policy<bp::return_by_value>()),
+                    "local frame placement of the impulse frame")
+      .add_property("fXj", bp::make_getter(&ImpulseData3D::fXj, bp::return_value_policy<bp::return_by_value>()),
+                    "action matrix from impulse to local frames")
+      .add_property("fJf", bp::make_getter(&ImpulseData3D::fJf, bp::return_value_policy<bp::return_by_value>()),
+                    "local Jacobian of the impulse frame")
+      .add_property("v_partial_dq",
+                    bp::make_getter(&ImpulseData3D::v_partial_dq, bp::return_value_policy<bp::return_by_value>()),
+                    "Jacobian of the spatial body velocity")
+      .add_property("v_partial_dv",
+                    bp::make_getter(&ImpulseData3D::v_partial_dv, bp::return_value_policy<bp::return_by_value>()),
+                    "Jacobian of the spatial body velocity");
 }
 
 }  // namespace python

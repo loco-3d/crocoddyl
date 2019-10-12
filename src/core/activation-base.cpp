@@ -10,7 +10,7 @@
 
 namespace crocoddyl {
 
-ActivationModelAbstract::ActivationModelAbstract(unsigned int const& nr) : nr_(nr) {}
+ActivationModelAbstract::ActivationModelAbstract(const std::size_t& nr) : nr_(nr) {}
 
 ActivationModelAbstract::~ActivationModelAbstract() {}
 
@@ -18,6 +18,6 @@ boost::shared_ptr<ActivationDataAbstract> ActivationModelAbstract::createData() 
   return boost::make_shared<ActivationDataAbstract>(this);
 }
 
-unsigned int const& ActivationModelAbstract::get_nr() const { return nr_; }
+const std::size_t& ActivationModelAbstract::get_nr() const { return nr_; }
 
 }  // namespace crocoddyl

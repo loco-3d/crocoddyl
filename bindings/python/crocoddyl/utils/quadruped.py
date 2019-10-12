@@ -379,7 +379,7 @@ class SimpleQuadrupedalGaitProblem:
         for i in supportFootIds:
             xref = crocoddyl.FrameTranslation(i, np.matrix([0., 0., 0.]).T)
             supportContactModel = crocoddyl.ContactModel3D(self.state, xref, self.actuation.nu, np.matrix([0., 50.]).T)
-            contactModel.addContact('contact_' + str(i), supportContactModel)
+            contactModel.addContact(self.rmodel.frames[i].name + "_contact", supportContactModel)
 
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, self.actuation.nu)
@@ -390,7 +390,7 @@ class SimpleQuadrupedalGaitProblem:
             for i in swingFootTask:
                 xref = crocoddyl.FrameTranslation(i.frame, i.oMf.translation)
                 footTrack = crocoddyl.CostModelFrameTranslation(self.state, xref, self.actuation.nu)
-                costModel.addCost("footTrack_" + str(i), footTrack, 1e4)
+                costModel.addCost(self.rmodel.frames[i.frame].name + "_footTrack", footTrack, 1e4)
 
         stateWeights = np.array([0.] * 3 + [500.] * 3 + [0.01] * (self.rmodel.nv - 6) + [10.] * self.rmodel.nv)
         stateReg = crocoddyl.CostModelState(self.state,
@@ -434,7 +434,7 @@ class SimpleQuadrupedalGaitProblem:
         for i in supportFootIds:
             xref = crocoddyl.FrameTranslation(i, np.matrix([0., 0., 0.]).T)
             supportContactModel = crocoddyl.ContactModel3D(self.state, xref, self.actuation.nu, np.matrix([0., 50.]).T)
-            contactModel.addContact('contact_' + str(i), supportContactModel)
+            contactModel.addContact(self.rmodel.frames[i].name + "_contact", supportContactModel)
 
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, self.actuation.nu)
@@ -444,8 +444,8 @@ class SimpleQuadrupedalGaitProblem:
                 vref = crocoddyl.FrameMotion(i.frame, pinocchio.Motion.Zero())
                 footTrack = crocoddyl.CostModelFrameTranslation(self.state, xref, self.actuation.nu)
                 impulseFootVelCost = crocoddyl.CostModelFrameVelocity(self.state, vref, self.actuation.nu)
-                costModel.addCost("footTrack_" + str(i), footTrack, 1e7)
-                costModel.addCost('impulseVel_' + str(i.frame), impulseFootVelCost, 1e6)
+                costModel.addCost(self.rmodel.frames[i.frame].name + "_footTrack", footTrack, 1e7)
+                costModel.addCost(self.rmodel.frames[i.frame].name + "_impulseVel", impulseFootVelCost, 1e6)
         stateWeights = np.array([0.] * 3 + [500.] * 3 + [0.01] * (self.rmodel.nv - 6) + [10.] * self.rmodel.nv)
         stateReg = crocoddyl.CostModelState(self.state,
                                             crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeights**2).T),
@@ -473,7 +473,7 @@ class SimpleQuadrupedalGaitProblem:
         impulseModel = crocoddyl.ImpulseModelMultiple(self.state)
         for i in supportFootIds:
             supportContactModel = crocoddyl.ImpulseModel3D(self.state, i)
-            impulseModel.addImpulse("impulse_" + str(i), supportContactModel)
+            impulseModel.addImpulse(self.rmodel.frames[i].name + "_impulse", supportContactModel)
 
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, 0)
@@ -481,7 +481,7 @@ class SimpleQuadrupedalGaitProblem:
             for i in swingFootTask:
                 xref = crocoddyl.FrameTranslation(i.frame, i.oMf.translation)
                 footTrack = crocoddyl.CostModelFrameTranslation(self.state, xref, 0)
-                costModel.addCost("footTrack_" + str(i), footTrack, 1e7)
+                costModel.addCost(self.rmodel.frames[i.frame].name + "_footTrack", footTrack, 1e7)
         stateWeights = np.array([1.] * 6 + [10.] * (self.rmodel.nv - 6) + [10.] * self.rmodel.nv)
         stateReg = crocoddyl.CostModelState(self.state,
                                             crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeights**2).T),

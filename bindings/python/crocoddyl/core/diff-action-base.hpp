@@ -19,21 +19,21 @@ namespace bp = boost::python;
 class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstract,
                                              public bp::wrapper<DifferentialActionModelAbstract> {
  public:
-  DifferentialActionModelAbstract_wrap(StateAbstract& state, int nu, int nr = 1)
+  DifferentialActionModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, int nu, int nr = 1)
       : DifferentialActionModelAbstract(state, nu, nr), bp::wrapper<DifferentialActionModelAbstract>() {}
 
   void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
-    assert(x.size() == state_.get_nx() && "x has wrong dimension");
-    assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
+    assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
+    assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
   void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                 const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
                 const bool& recalc = true) {
-    assert(x.size() == state_.get_nx() && "x has wrong dimension");
-    assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
+    assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
+    assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
 };
@@ -49,13 +49,13 @@ void exposeDifferentialActionAbstract() {
       "action model. Every time that we want describe a problem, we need to provide ways of\n"
       "computing the dynamics, cost functions and their derivatives. These computations are\n"
       "mainly carry on inside calc() and calcDiff(), respectively.",
-      bp::init<StateAbstract&, int, bp::optional<int> >(
+      bp::init<boost::shared_ptr<StateAbstract>, int, bp::optional<int> >(
           bp::args(" self", " state", " nu", " nr=1"),
           "Initialize the differential action model.\n\n"
           "You can also describe autonomous systems by setting nu = 0.\n"
           ":param state: state\n"
           ":param nu: dimension of control vector\n"
-          ":param nr: dimension of cost-residual vector)")[bp::with_custodian_and_ward<1, 2>()])
+          ":param nr: dimension of cost-residual vector)"))
       .def("calc", pure_virtual(&DifferentialActionModelAbstract_wrap::calc), bp::args(" self", " data", " x", " u"),
            "Compute the state evolution and cost value.\n\n"
            "First, it describes the time-continuous evolution of our dynamical system\n"
@@ -91,10 +91,10 @@ void exposeDifferentialActionAbstract() {
                     bp::make_function(&DifferentialActionModelAbstract_wrap::get_nr,
                                       bp::return_value_policy<bp::return_by_value>()),
                     "dimension of cost-residual vector")
-      .add_property(
-          "state",
-          bp::make_function(&DifferentialActionModelAbstract_wrap::get_state, bp::return_internal_reference<>()),
-          "state")
+      .add_property("state",
+                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_state,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "state")
       .add_property("has_control_limits",
                     bp::make_function(&DifferentialActionModelAbstract_wrap::get_has_control_limits,
                                       bp::return_value_policy<bp::return_by_value>()),

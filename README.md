@@ -45,7 +45,7 @@ If you want to follow the current developments, you can directly refer to the [d
  * cache friendly,
  * multi-thread friendly
  * Python bindings (including models and solvers abstractions)
- * C++11/14/17/20 compliant
+ * C++98/11/14/17/20 compliant
  * extensively tested
  <!-- * automatic code generation support -->
  
@@ -103,8 +103,6 @@ export PYTHONPATH=/opt/openrobots/lib/python2.7/site-packages:$PYTHONPATH
 **Crocoddyl** is c++ library with Python bindings for versatile and fast prototyping. It has the following dependencies:
 
 * [pinocchio](https://github.com/stack-of-tasks/pinocchio)
-* [quadprog](https://pypi.org/project/quadprog/)
-* [multicontact-api](https://gepgitlab.laas.fr/loco-3d/multicontact-api)
 * [example-robot-data](https://gepgitlab.laas.fr/gepetto/example-robot-data) (optional for examples, install Python loaders)
 * [gepetto-viewer-corba](https://github.com/Gepetto/gepetto-viewer-corba) (optional for display)
 * [jupyter](https://jupyter.org/) (optional for notebooks)

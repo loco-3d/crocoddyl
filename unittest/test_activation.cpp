@@ -8,6 +8,7 @@
 
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
+
 #include <iterator>
 #include <Eigen/Dense>
 #include <pinocchio/fwd.hpp>
@@ -19,7 +20,6 @@
 #include "crocoddyl/core/activations/smooth-abs.hpp"
 #include "crocoddyl/core/activations/weighted-quadratic.hpp"
 #include "crocoddyl/core/numdiff/activation.hpp"
-#include "crocoddyl_unittest_common.hpp"
 
 /**
  * c = sum( a(ri) )
@@ -66,24 +66,22 @@ class Factory {
 
     nr_ = 5;
     num_diff_modifier_ = 1e4;
-    bounds_ = NULL;
     Eigen::VectorXd lb = Eigen::VectorXd::Random(nr_);
     Eigen::VectorXd ub = lb + Eigen::VectorXd::Ones(nr_) + Eigen::VectorXd::Random(nr_);
     Eigen::VectorXd weights = Eigen::VectorXd::Random(nr_);
 
     switch (test_type_) {
       case TestTypes::ActivationModelQuadraticBarrier:
-        bounds_ = new crocoddyl::ActivationBounds(lb, ub);
-        model_ = new crocoddyl::ActivationModelQuadraticBarrier(*bounds_);
+        model_ = boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(crocoddyl::ActivationBounds(lb, ub));
         break;
       case TestTypes::ActivationModelQuad:
-        model_ = new crocoddyl::ActivationModelQuad(nr_);
+        model_ = boost::make_shared<crocoddyl::ActivationModelQuad>(nr_);
         break;
       case TestTypes::ActivationModelSmoothAbs:
-        model_ = new crocoddyl::ActivationModelSmoothAbs(nr_);
+        model_ = boost::make_shared<crocoddyl::ActivationModelSmoothAbs>(nr_);
         break;
       case TestTypes::ActivationModelWeightedQuad:
-        model_ = new crocoddyl::ActivationModelWeightedQuad(weights);
+        model_ = boost::make_shared<crocoddyl::ActivationModelWeightedQuad>(weights);
         break;
       default:
         throw std::runtime_error(__FILE__ ":\n Construct wrong TestTypes::Type");
@@ -91,38 +89,16 @@ class Factory {
     }
   }
 
-  ~Factory() {
-    switch (test_type_) {
-      case TestTypes::ActivationModelQuadraticBarrier:
-        crocoddyl_unit_test::delete_pointer((crocoddyl::ActivationModelQuadraticBarrier*)model_);
-        break;
-      case TestTypes::ActivationModelQuad:
-        crocoddyl_unit_test::delete_pointer((crocoddyl::ActivationModelQuad*)model_);
-        break;
-      case TestTypes::ActivationModelSmoothAbs:
-        crocoddyl_unit_test::delete_pointer((crocoddyl::ActivationModelSmoothAbs*)model_);
-        break;
-      case TestTypes::ActivationModelWeightedQuad:
-        crocoddyl_unit_test::delete_pointer((crocoddyl::ActivationModelWeightedQuad*)model_);
-        break;
-      default:
-        throw std::runtime_error(__FILE__ ":\n Destroy wrong TestTypes::Type");
-        break;
-    }
-    model_ = NULL;
-    crocoddyl_unit_test::delete_pointer(bounds_);
-    bounds_ = NULL;
-  }
+  ~Factory() {}
 
-  crocoddyl::ActivationModelAbstract* get_model() { return model_; }
-  unsigned int get_nr() { return nr_; }
+  boost::shared_ptr<crocoddyl::ActivationModelAbstract> get_model() { return model_; }
+  const std::size_t& get_nr() { return nr_; }
   double get_num_diff_modifier() { return num_diff_modifier_; }
 
  private:
   double num_diff_modifier_;
-  unsigned int nr_;
-  crocoddyl::ActivationModelAbstract* model_;
-  crocoddyl::ActivationBounds* bounds_;
+  std::size_t nr_;
+  boost::shared_ptr<crocoddyl::ActivationModelAbstract> model_;
   TestTypes::Type test_type_;
 };
 
@@ -131,7 +107,7 @@ class Factory {
 void test_construct_data(TestTypes::Type test_type) {
   // create the model
   Factory factory(test_type);
-  crocoddyl::ActivationModelAbstract* model = factory.get_model();
+  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.get_model();
 
   // create the corresponding data object
   boost::shared_ptr<crocoddyl::ActivationDataAbstract> data = model->createData();
@@ -140,13 +116,13 @@ void test_construct_data(TestTypes::Type test_type) {
 void test_calc_returns_a_value(TestTypes::Type test_type) {
   // create the model
   Factory factory(test_type);
-  crocoddyl::ActivationModelAbstract* model = factory.get_model();
+  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.get_model();
 
   // create the corresponding data object
   boost::shared_ptr<crocoddyl::ActivationDataAbstract> data = model->createData();
 
   // Generating random input vector
-  Eigen::VectorXd r = Eigen::VectorXd::Random(model->get_nr());
+  const Eigen::VectorXd& r = Eigen::VectorXd::Random(model->get_nr());
   data->a_value = nan("");
 
   // Getting the state dimension from calc() call
@@ -159,16 +135,16 @@ void test_calc_returns_a_value(TestTypes::Type test_type) {
 void test_partial_derivatives_against_numdiff(TestTypes::Type test_type) {
   // create the model
   Factory factory(test_type);
-  crocoddyl::ActivationModelAbstract* model = factory.get_model();
+  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.get_model();
 
   // create the corresponding data object and set the cost to nan
   boost::shared_ptr<crocoddyl::ActivationDataAbstract> data = model->createData();
 
-  crocoddyl::ActivationModelNumDiff model_num_diff(*model);
+  crocoddyl::ActivationModelNumDiff model_num_diff(model);
   boost::shared_ptr<crocoddyl::ActivationDataAbstract> data_num_diff = model_num_diff.createData();
 
   // Generating random values for the state and control
-  Eigen::VectorXd r = Eigen::VectorXd::Random(model->get_nr());
+  const Eigen::VectorXd& r = Eigen::VectorXd::Random(model->get_nr());
 
   // Computing the action derivatives
   model->calcDiff(data, r);

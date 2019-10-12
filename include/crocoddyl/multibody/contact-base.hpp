@@ -19,8 +19,8 @@ struct ContactDataAbstract;  // forward declaration
 
 class ContactModelAbstract {
  public:
-  ContactModelAbstract(StateMultibody& state, unsigned int const& nc, unsigned int const& nu);
-  ContactModelAbstract(StateMultibody& state, unsigned int const& nc);
+  ContactModelAbstract(boost::shared_ptr<StateMultibody> state, const std::size_t& nc, const std::size_t& nu);
+  ContactModelAbstract(boost::shared_ptr<StateMultibody> state, const std::size_t& nc);
   ~ContactModelAbstract();
 
   virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data,
@@ -33,14 +33,14 @@ class ContactModelAbstract {
                        const Eigen::MatrixXd& df_du) const;
   virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::Data* const data);
 
-  StateMultibody& get_state() const;
-  unsigned int const& get_nc() const;
-  unsigned int const& get_nu() const;
+  const boost::shared_ptr<StateMultibody>& get_state() const;
+  const std::size_t& get_nc() const;
+  const std::size_t& get_nu() const;
 
  protected:
-  StateMultibody& state_;
-  unsigned int nc_;
-  unsigned int nu_;
+  boost::shared_ptr<StateMultibody> state_;
+  std::size_t nc_;
+  std::size_t nu_;
 
 #ifdef PYTHON_BINDINGS
 
@@ -62,10 +62,10 @@ struct ContactDataAbstract {
   ContactDataAbstract(Model* const model, pinocchio::Data* const data)
       : pinocchio(data),
         joint(0),
-        Jc(model->get_nc(), model->get_state().get_nv()),
+        Jc(model->get_nc(), model->get_state()->get_nv()),
         a0(model->get_nc()),
-        da0_dx(model->get_nc(), model->get_state().get_ndx()),
-        df_dx(model->get_nc(), model->get_state().get_ndx()),
+        da0_dx(model->get_nc(), model->get_state()->get_ndx()),
+        df_dx(model->get_nc(), model->get_state()->get_ndx()),
         df_du(model->get_nc(), model->get_nu()),
         f(pinocchio::Force::Zero()) {
     Jc.fill(0);
@@ -74,6 +74,7 @@ struct ContactDataAbstract {
     df_dx.fill(0);
     df_du.fill(0);
   }
+  virtual ~ContactDataAbstract() {}
 
   pinocchio::Data* pinocchio;
   pinocchio::JointIndex joint;

@@ -23,7 +23,7 @@ inline bool is_a_Jcomponent(Jcomponent firstsecond) {
 
 class StateAbstract {
  public:
-  StateAbstract(unsigned int const& nx, unsigned int const& ndx);
+  StateAbstract(const std::size_t& nx, const std::size_t& ndx);
   virtual ~StateAbstract();
 
   virtual Eigen::VectorXd zero() = 0;
@@ -39,16 +39,16 @@ class StateAbstract {
                           Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
                           Jcomponent firstsecond = both) = 0;
 
-  const unsigned int& get_nx() const;
-  const unsigned int& get_ndx() const;
-  const unsigned int& get_nq() const;
-  const unsigned int& get_nv() const;
+  const std::size_t& get_nx() const;
+  const std::size_t& get_ndx() const;
+  const std::size_t& get_nq() const;
+  const std::size_t& get_nv() const;
 
  protected:
-  unsigned int nx_;
-  unsigned int ndx_;
-  unsigned int nq_;
-  unsigned int nv_;
+  std::size_t nx_;
+  std::size_t ndx_;
+  std::size_t nq_;
+  std::size_t nv_;
 
 #ifdef PYTHON_BINDINGS
 

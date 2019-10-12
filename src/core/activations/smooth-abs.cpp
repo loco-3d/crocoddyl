@@ -10,13 +10,13 @@
 #include <iostream>
 namespace crocoddyl {
 
-ActivationModelSmoothAbs::ActivationModelSmoothAbs(unsigned int const& nr) : ActivationModelAbstract(nr) {}
+ActivationModelSmoothAbs::ActivationModelSmoothAbs(const std::size_t& nr) : ActivationModelAbstract(nr) {}
 
 ActivationModelSmoothAbs::~ActivationModelSmoothAbs() {}
 
 void ActivationModelSmoothAbs::calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                                     const Eigen::Ref<const Eigen::VectorXd>& r) {
-  assert(r.size() == nr_ && "r has wrong dimension");
+  assert(static_cast<std::size_t>(r.size()) == nr_ && "r has wrong dimension");
   boost::shared_ptr<ActivationDataSmoothAbs> d = boost::static_pointer_cast<ActivationDataSmoothAbs>(data);
 
   d->a = (r.array().cwiseAbs2().array() + 1).array().cwiseSqrt();
@@ -25,7 +25,7 @@ void ActivationModelSmoothAbs::calc(const boost::shared_ptr<ActivationDataAbstra
 
 void ActivationModelSmoothAbs::calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
                                         const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc) {
-  assert(r.size() == nr_ && "r has wrong dimension");
+  assert(static_cast<std::size_t>(r.size()) == nr_ && "r has wrong dimension");
   if (recalc) {
     calc(data, r);
   }

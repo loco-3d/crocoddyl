@@ -21,12 +21,13 @@ struct CostDataAbstract;  // forward declaration
 
 class CostModelAbstract {
  public:
-  CostModelAbstract(StateMultibody& state, ActivationModelAbstract& activation, unsigned int const& nu,
+  CostModelAbstract(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
+                    const std::size_t& nu, const bool& with_residuals = true);
+  CostModelAbstract(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
                     const bool& with_residuals = true);
-  CostModelAbstract(StateMultibody& state, ActivationModelAbstract& activation, const bool& with_residuals = true);
-  CostModelAbstract(StateMultibody& state, unsigned int const& nr, unsigned int const& nu,
+  CostModelAbstract(boost::shared_ptr<StateMultibody> state, const std::size_t& nr, const std::size_t& nu,
                     const bool& with_residuals = true);
-  CostModelAbstract(StateMultibody& state, unsigned int const& nr, const bool& with_residuals = true);
+  CostModelAbstract(boost::shared_ptr<StateMultibody> state, const std::size_t& nr, const bool& with_residuals = true);
   ~CostModelAbstract();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -38,14 +39,14 @@ class CostModelAbstract {
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
   void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
 
-  StateMultibody& get_state() const;
+  const boost::shared_ptr<StateMultibody>& get_state() const;
   ActivationModelAbstract& get_activation() const;
-  unsigned int const& get_nu() const;
+  const std::size_t& get_nu() const;
 
  protected:
-  StateMultibody& state_;
+  boost::shared_ptr<StateMultibody> state_;
   ActivationModelAbstract& activation_;
-  unsigned int nu_;
+  std::size_t nu_;
   bool with_residuals_;
   Eigen::VectorXd unone_;
 
@@ -87,13 +88,13 @@ struct CostDataAbstract {
       : pinocchio(data),
         activation(model->get_activation().createData()),
         cost(0.),
-        Lx(model->get_state().get_ndx()),
+        Lx(model->get_state()->get_ndx()),
         Lu(model->get_nu()),
-        Lxx(model->get_state().get_ndx(), model->get_state().get_ndx()),
-        Lxu(model->get_state().get_ndx(), model->get_nu()),
+        Lxx(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
+        Lxu(model->get_state()->get_ndx(), model->get_nu()),
         Luu(model->get_nu(), model->get_nu()),
         r(model->get_activation().get_nr()),
-        Rx(model->get_activation().get_nr(), model->get_state().get_ndx()),
+        Rx(model->get_activation().get_nr(), model->get_state()->get_ndx()),
         Ru(model->get_activation().get_nr(), model->get_nu()) {
     Lx.fill(0);
     Lu.fill(0);
@@ -104,6 +105,7 @@ struct CostDataAbstract {
     Rx.fill(0);
     Ru.fill(0);
   }
+  virtual ~CostDataAbstract() {}
 
   pinocchio::Data* pinocchio;
   boost::shared_ptr<ActivationDataAbstract> activation;

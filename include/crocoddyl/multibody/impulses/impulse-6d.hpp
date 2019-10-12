@@ -17,7 +17,7 @@ namespace crocoddyl {
 
 class ImpulseModel6D : public ImpulseModelAbstract {
  public:
-  ImpulseModel6D(StateMultibody& state, unsigned int const& frame);
+  ImpulseModel6D(boost::shared_ptr<StateMultibody> state, const std::size_t& frame);
   ~ImpulseModel6D();
 
   void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
@@ -26,10 +26,10 @@ class ImpulseModel6D : public ImpulseModelAbstract {
   void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force);
   boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::Data* const data);
 
-  unsigned int const& get_frame() const;
+  const std::size_t& get_frame() const;
 
  private:
-  unsigned int frame_;
+  std::size_t frame_;
 };
 
 struct ImpulseData6D : public ImpulseDataAbstract {
@@ -38,12 +38,12 @@ struct ImpulseData6D : public ImpulseDataAbstract {
   template <typename Model>
   ImpulseData6D(Model* const model, pinocchio::Data* const data)
       : ImpulseDataAbstract(model, data),
-        jMf(model->get_state().get_pinocchio().frames[model->get_frame()].placement),
+        jMf(model->get_state()->get_pinocchio().frames[model->get_frame()].placement),
         fXj(jMf.inverse().toActionMatrix()),
-        fJf(6, model->get_state().get_nv()),
-        v_partial_dq(6, model->get_state().get_nv()),
-        v_partial_dv(6, model->get_state().get_nv()) {
-    joint = model->get_state().get_pinocchio().frames[model->get_frame()].parent;
+        fJf(6, model->get_state()->get_nv()),
+        v_partial_dq(6, model->get_state()->get_nv()),
+        v_partial_dv(6, model->get_state()->get_nv()) {
+    joint = model->get_state()->get_pinocchio().frames[model->get_frame()].parent;
     fJf.fill(0);
     v_partial_dq.fill(0);
     v_partial_dv.fill(0);

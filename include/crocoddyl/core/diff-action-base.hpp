@@ -38,7 +38,8 @@ struct DifferentialActionDataAbstract;  // forward declaration
  */
 class DifferentialActionModelAbstract {
  public:
-  DifferentialActionModelAbstract(StateAbstract& state, unsigned int const& nu, unsigned int const& nr = 0);
+  DifferentialActionModelAbstract(boost::shared_ptr<StateAbstract> state, const std::size_t& nu,
+                                  const std::size_t& nr = 0);
   virtual ~DifferentialActionModelAbstract();
 
   virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
@@ -52,9 +53,9 @@ class DifferentialActionModelAbstract {
   void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                 const Eigen::Ref<const Eigen::VectorXd>& x);
 
-  unsigned int const& get_nu() const;
-  unsigned int const& get_nr() const;
-  StateAbstract& get_state() const;
+  const std::size_t& get_nu() const;
+  const std::size_t& get_nr() const;
+  const boost::shared_ptr<StateAbstract>& get_state() const;
 
   const Eigen::VectorXd& get_u_lb() const;
   const Eigen::VectorXd& get_u_ub() const;
@@ -64,13 +65,13 @@ class DifferentialActionModelAbstract {
   void set_u_ub(const Eigen::Ref<const Eigen::VectorXd>& u_in);
 
  protected:
-  unsigned int nu_;          //!< Control dimension
-  unsigned int nr_;          //!< Dimension of the cost residual
-  StateAbstract& state_;     //!< Model of the state
-  Eigen::VectorXd unone_;    //!< Neutral state
-  Eigen::VectorXd u_lb_;     //!< Lower control limits
-  Eigen::VectorXd u_ub_;     //!< Upper control limits
-  bool has_control_limits_;  //!< Indicates whether any of the control limits is finite
+  std::size_t nu_;                          //!< Control dimension
+  std::size_t nr_;                          //!< Dimension of the cost residual
+  boost::shared_ptr<StateAbstract> state_;  //!< Model of the state
+  Eigen::VectorXd unone_;                   //!< Neutral state
+  Eigen::VectorXd u_lb_;                    //!< Lower control limits
+  Eigen::VectorXd u_ub_;                    //!< Upper control limits
+  bool has_control_limits_;                 //!< Indicates whether any of the control limits is finite
 
   void update_has_control_limits();
 
@@ -111,14 +112,14 @@ struct DifferentialActionDataAbstract {
   template <typename Model>
   explicit DifferentialActionDataAbstract(Model* const model)
       : cost(0.),
-        xout(model->get_state().get_nv()),
-        Fx(model->get_state().get_nv(), model->get_state().get_ndx()),
-        Fu(model->get_state().get_nv(), model->get_nu()),
+        xout(model->get_state()->get_nv()),
+        Fx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
+        Fu(model->get_state()->get_nv(), model->get_nu()),
         r(model->get_nr()),
-        Lx(model->get_state().get_ndx()),
+        Lx(model->get_state()->get_ndx()),
         Lu(model->get_nu()),
-        Lxx(model->get_state().get_ndx(), model->get_state().get_ndx()),
-        Lxu(model->get_state().get_ndx(), model->get_nu()),
+        Lxx(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
+        Lxu(model->get_state()->get_ndx(), model->get_nu()),
         Luu(model->get_nu(), model->get_nu()) {
     xout.setZero();
     r.setZero();
@@ -130,6 +131,7 @@ struct DifferentialActionDataAbstract {
     Lxu.setZero();
     Luu.setZero();
   }
+  virtual ~DifferentialActionDataAbstract() {}
 
   double cost;
   Eigen::VectorXd xout;

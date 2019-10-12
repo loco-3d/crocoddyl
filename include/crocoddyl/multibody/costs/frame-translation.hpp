@@ -17,11 +17,13 @@ namespace crocoddyl {
 
 class CostModelFrameTranslation : public CostModelAbstract {
  public:
-  CostModelFrameTranslation(StateMultibody& state, ActivationModelAbstract& activation, const FrameTranslation& xref,
-                            unsigned int const& nu);
-  CostModelFrameTranslation(StateMultibody& state, ActivationModelAbstract& activation, const FrameTranslation& xref);
-  CostModelFrameTranslation(StateMultibody& state, const FrameTranslation& xref, unsigned int const& nu);
-  CostModelFrameTranslation(StateMultibody& state, const FrameTranslation& xref);
+  CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
+                            const FrameTranslation& xref, const std::size_t& nu);
+  CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
+                            const FrameTranslation& xref);
+  CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
+                            const std::size_t& nu);
+  CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref);
   ~CostModelFrameTranslation();
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -41,7 +43,7 @@ struct CostDataFrameTranslation : public CostDataAbstract {
 
   template <typename Model>
   CostDataFrameTranslation(Model* const model, pinocchio::Data* const data)
-      : CostDataAbstract(model, data), J(3, model->get_state().get_nv()), fJf(6, model->get_state().get_nv()) {
+      : CostDataAbstract(model, data), J(3, model->get_state()->get_nv()), fJf(6, model->get_state()->get_nv()) {
     J.fill(0);
     fJf.fill(0);
   }

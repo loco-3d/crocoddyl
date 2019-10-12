@@ -20,11 +20,11 @@ class SolverBoxDDP : public SolverDDP {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  explicit SolverBoxDDP(ShootingProblem& problem);
+  explicit SolverBoxDDP(boost::shared_ptr<ShootingProblem> problem);
   ~SolverBoxDDP();
 
   virtual void allocateData();
-  virtual void computeGains(unsigned int const& t);
+  virtual void computeGains(const std::size_t& t);
   virtual void forwardPass(const double& steplength);
 
  protected:

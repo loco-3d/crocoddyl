@@ -11,23 +11,24 @@
 
 namespace crocoddyl {
 
-CostModelFramePlacement::CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation,
-                                                 const FramePlacement& Mref, unsigned int const& nu)
+CostModelFramePlacement::CostModelFramePlacement(boost::shared_ptr<StateMultibody> state,
+                                                 ActivationModelAbstract& activation, const FramePlacement& Mref,
+                                                 const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
   assert(activation_.get_nr() == 6 && "activation::nr is not equals to 6");
 }
 
-CostModelFramePlacement::CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation,
-                                                 const FramePlacement& Mref)
+CostModelFramePlacement::CostModelFramePlacement(boost::shared_ptr<StateMultibody> state,
+                                                 ActivationModelAbstract& activation, const FramePlacement& Mref)
     : CostModelAbstract(state, activation), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
   assert(activation_.get_nr() == 6 && "activation::nr is not equals to 6");
 }
 
-CostModelFramePlacement::CostModelFramePlacement(StateMultibody& state, const FramePlacement& Mref,
-                                                 unsigned int const& nu)
+CostModelFramePlacement::CostModelFramePlacement(boost::shared_ptr<StateMultibody> state, const FramePlacement& Mref,
+                                                 const std::size_t& nu)
     : CostModelAbstract(state, 6, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {}
 
-CostModelFramePlacement::CostModelFramePlacement(StateMultibody& state, const FramePlacement& Mref)
+CostModelFramePlacement::CostModelFramePlacement(boost::shared_ptr<StateMultibody> state, const FramePlacement& Mref)
     : CostModelAbstract(state, 6), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {}
 
 CostModelFramePlacement::~CostModelFramePlacement() {}
@@ -55,15 +56,15 @@ void CostModelFramePlacement::calcDiff(const boost::shared_ptr<CostDataAbstract>
   }
   // Update the frame placements
   CostDataFramePlacement* d = static_cast<CostDataFramePlacement*>(data.get());
-  pinocchio::updateFramePlacements(state_.get_pinocchio(), *d->pinocchio);
+  pinocchio::updateFramePlacements(state_->get_pinocchio(), *d->pinocchio);
 
-  // // Compute the frame Jacobian at the error point
+  // Compute the frame Jacobian at the error point
   pinocchio::Jlog6(d->rMf, d->rJf);
-  pinocchio::getFrameJacobian(state_.get_pinocchio(), *d->pinocchio, Mref_.frame, pinocchio::LOCAL, d->fJf);
+  pinocchio::getFrameJacobian(state_->get_pinocchio(), *d->pinocchio, Mref_.frame, pinocchio::LOCAL, d->fJf);
   d->J.noalias() = d->rJf * d->fJf;
 
   // Compute the derivatives of the frame placement
-  unsigned int const& nv = state_.get_nv();
+  const std::size_t& nv = state_->get_nv();
   activation_.calcDiff(data->activation, data->r, recalc);
   data->Rx.leftCols(nv) = d->J;
   data->Lx.head(nv).noalias() = d->J.transpose() * data->activation->Ar;

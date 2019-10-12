@@ -15,7 +15,7 @@ namespace crocoddyl {
 
 class ActivationModelSmoothAbs : public ActivationModelAbstract {
  public:
-  explicit ActivationModelSmoothAbs(unsigned int const& nr);
+  explicit ActivationModelSmoothAbs(const std::size_t& nr);
   ~ActivationModelSmoothAbs();
 
   void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r);

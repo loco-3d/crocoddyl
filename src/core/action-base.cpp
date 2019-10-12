@@ -10,7 +10,8 @@
 
 namespace crocoddyl {
 
-ActionModelAbstract::ActionModelAbstract(StateAbstract& state, unsigned int const& nu, unsigned int const& nr)
+ActionModelAbstract::ActionModelAbstract(boost::shared_ptr<StateAbstract> state, const std::size_t& nu,
+                                         const std::size_t& nr)
     : nu_(nu),
       nr_(nr),
       state_(state),
@@ -32,20 +33,20 @@ void ActionModelAbstract::calcDiff(const boost::shared_ptr<ActionDataAbstract>& 
 }
 
 void ActionModelAbstract::quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<Eigen::VectorXd> u,
-                                      const Eigen::Ref<const Eigen::VectorXd>& x, unsigned int const& maxiter,
+                                      const Eigen::Ref<const Eigen::VectorXd>& x, const std::size_t& maxiter,
                                       const double& tol) {
-  assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
-  assert(x.size() == state_.get_nx() && "x has wrong dimension");
+  assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
 
-  unsigned int const& ndx = state_.get_ndx();
+  const std::size_t& ndx = state_->get_ndx();
   Eigen::VectorXd dx = Eigen::VectorXd::Zero(ndx);
   if (nu_ == 0) {
     // TODO(cmastalli): create a method for autonomous systems
   } else {
     Eigen::VectorXd du = Eigen::VectorXd::Zero(nu_);
-    for (unsigned int i = 0; i < maxiter; ++i) {
+    for (std::size_t i = 0; i < maxiter; ++i) {
       calcDiff(data, x, u);
-      state_.diff(x, data->xnext, dx);
+      state_->diff(x, data->xnext, dx);
       du = -pseudoInverse(data->Fu) * data->Fx * dx;
       u += du;
       if (du.norm() <= tol) {
@@ -59,25 +60,25 @@ boost::shared_ptr<ActionDataAbstract> ActionModelAbstract::createData() {
   return boost::make_shared<ActionDataAbstract>(this);
 }
 
-const unsigned int& ActionModelAbstract::get_nu() const { return nu_; }
+const std::size_t& ActionModelAbstract::get_nu() const { return nu_; }
 
-const unsigned int& ActionModelAbstract::get_nr() const { return nr_; }
+const std::size_t& ActionModelAbstract::get_nr() const { return nr_; }
 
-StateAbstract& ActionModelAbstract::get_state() const { return state_; }
+const boost::shared_ptr<StateAbstract>& ActionModelAbstract::get_state() const { return state_; }
 
 const Eigen::VectorXd& ActionModelAbstract::get_u_lb() const { return u_lb_; }
 
 const Eigen::VectorXd& ActionModelAbstract::get_u_ub() const { return u_ub_; }
 
-void ActionModelAbstract::set_u_lb(const Eigen::Ref<const Eigen::VectorXd>& u_in) {
-  assert(nu_ == u_in.size() && "Number of rows of u_in must match nu_");
-  u_lb_ = u_in;
+void ActionModelAbstract::set_u_lb(const Eigen::Ref<const Eigen::VectorXd>& u_lb) {
+  assert(nu_ == static_cast<std::size_t>(u_lb.size()) && "u_lb has wrong dimension");
+  u_lb_ = u_lb;
   update_has_control_limits();
 }
 
-void ActionModelAbstract::set_u_ub(const Eigen::Ref<const Eigen::VectorXd>& u_in) {
-  assert(nu_ == u_in.size() && "Number of rows of u_in must match nu_");
-  u_ub_ = u_in;
+void ActionModelAbstract::set_u_ub(const Eigen::Ref<const Eigen::VectorXd>& u_ub) {
+  assert(nu_ == static_cast<std::size_t>(u_ub.size()) && "u_ub has wrong dimension");
+  u_ub_ = u_ub;
   update_has_control_limits();
 }
 

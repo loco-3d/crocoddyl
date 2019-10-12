@@ -18,8 +18,9 @@ class ShootingProblem {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  ShootingProblem(const Eigen::VectorXd& x0, const std::vector<ActionModelAbstract*>& running_models,
-                  ActionModelAbstract* const terminal_model);
+  ShootingProblem(const Eigen::VectorXd& x0,
+                  const std::vector<boost::shared_ptr<ActionModelAbstract> >& running_models,
+                  boost::shared_ptr<ActionModelAbstract> terminal_model);
   ~ShootingProblem();
 
   double calc(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us);
@@ -27,22 +28,22 @@ class ShootingProblem {
   void rollout(const std::vector<Eigen::VectorXd>& us, std::vector<Eigen::VectorXd>& xs);
   std::vector<Eigen::VectorXd> rollout_us(const std::vector<Eigen::VectorXd>& us);
 
-  unsigned int get_T() const;
+  const std::size_t& get_T() const;
   const Eigen::VectorXd& get_x0() const;
 
-  std::vector<ActionModelAbstract*>& get_runningModels();
-  ActionModelAbstract* get_terminalModel();
-  std::vector<boost::shared_ptr<ActionDataAbstract> >& get_runningDatas();
-  boost::shared_ptr<ActionDataAbstract>& get_terminalData();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& get_runningModels();
+  const boost::shared_ptr<ActionModelAbstract>& get_terminalModel();
+  const std::vector<boost::shared_ptr<ActionDataAbstract> >& get_runningDatas();
+  const boost::shared_ptr<ActionDataAbstract>& get_terminalData();
 
-  ActionModelAbstract* terminal_model_;
+  boost::shared_ptr<ActionModelAbstract> terminal_model_;
   boost::shared_ptr<ActionDataAbstract> terminal_data_;
-  std::vector<ActionModelAbstract*> running_models_;
+  std::vector<boost::shared_ptr<ActionModelAbstract> > running_models_;
   std::vector<boost::shared_ptr<ActionDataAbstract> > running_datas_;
 
  protected:
   void allocateData();
-  unsigned int T_;
+  std::size_t T_;
   Eigen::VectorXd x0_;
 
  private:

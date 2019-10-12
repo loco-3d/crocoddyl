@@ -10,8 +10,8 @@
 
 namespace crocoddyl {
 
-DifferentialActionModelAbstract::DifferentialActionModelAbstract(StateAbstract& state, unsigned int const& nu,
-                                                                 unsigned int const& nr)
+DifferentialActionModelAbstract::DifferentialActionModelAbstract(boost::shared_ptr<StateAbstract> state,
+                                                                 const std::size_t& nu, const std::size_t& nr)
     : nu_(nu),
       nr_(nr),
       state_(state),
@@ -36,25 +36,25 @@ boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelAbstrac
   return boost::make_shared<DifferentialActionDataAbstract>(this);
 }
 
-unsigned int const& DifferentialActionModelAbstract::get_nu() const { return nu_; }
+const std::size_t& DifferentialActionModelAbstract::get_nu() const { return nu_; }
 
-unsigned int const& DifferentialActionModelAbstract::get_nr() const { return nr_; }
+const std::size_t& DifferentialActionModelAbstract::get_nr() const { return nr_; }
 
-StateAbstract& DifferentialActionModelAbstract::get_state() const { return state_; }
+const boost::shared_ptr<StateAbstract>& DifferentialActionModelAbstract::get_state() const { return state_; }
 
 const Eigen::VectorXd& DifferentialActionModelAbstract::get_u_lb() const { return u_lb_; }
 
 const Eigen::VectorXd& DifferentialActionModelAbstract::get_u_ub() const { return u_ub_; }
 
-void DifferentialActionModelAbstract::set_u_lb(const Eigen::Ref<const Eigen::VectorXd>& u_in) {
-  assert(nu_ == u_in.size() && "Number of rows of u_in must match nu_");
-  u_lb_ = u_in;
+void DifferentialActionModelAbstract::set_u_lb(const Eigen::Ref<const Eigen::VectorXd>& u_lb) {
+  assert(static_cast<std::size_t>(u_lb.size()) == nu_ && "lower bound has wrong dimension");
+  u_lb_ = u_lb;
   update_has_control_limits();
 }
 
-void DifferentialActionModelAbstract::set_u_ub(const Eigen::Ref<const Eigen::VectorXd>& u_in) {
-  assert(nu_ == u_in.size() && "Number of rows of u_in must match nu_");
-  u_ub_ = u_in;
+void DifferentialActionModelAbstract::set_u_ub(const Eigen::Ref<const Eigen::VectorXd>& u_ub) {
+  assert(static_cast<std::size_t>(u_ub.size()) == nu_ && "upper bound has wrong dimension");
+  u_ub_ = u_ub;
   update_has_control_limits();
 }
 

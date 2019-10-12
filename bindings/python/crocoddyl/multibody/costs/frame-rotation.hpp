@@ -19,37 +19,35 @@ namespace bp = boost::python;
 void exposeCostFrameRotation() {
   bp::class_<CostModelFrameRotation, bp::bases<CostModelAbstract> >(
       "CostModelFrameRotation",
-      bp::init<StateMultibody&, ActivationModelAbstract&, FrameRotation, int>(
+      bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, FrameRotation, int>(
           bp::args(" self", " state", " activation", " Rref", " nu"),
           "Initialize the frame rotation cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param Rref: reference frame rotation\n"
-          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2,
-                                                                                bp::with_custodian_and_ward<1, 3> >()])
-      .def(bp::init<StateMultibody&, ActivationModelAbstract&, FrameRotation>(
+          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
+      .def(bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, FrameRotation>(
           bp::args(" self", " state", " activation", " Rref"),
           "Initialize the frame rotation cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
-          ":param Rref: reference frame rotation")[bp::with_custodian_and_ward<1, 2,
-                                                                               bp::with_custodian_and_ward<1, 3> >()])
-      .def(bp::init<StateMultibody&, FrameRotation, int>(
+          ":param Rref: reference frame rotation")[bp::with_custodian_and_ward<1, 3>()])
+      .def(bp::init<boost::shared_ptr<StateMultibody>, FrameRotation, int>(
           bp::args(" self", " state", " Rref", " nu"),
           "Initialize the frame rotation cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(6).\n"
           ":param state: state of the multibody system\n"
           ":param Rref: reference frame rotation\n"
-          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2>()])
-      .def(bp::init<StateMultibody&, FrameRotation>(
+          ":param nu: dimension of control vector"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, FrameRotation>(
           bp::args(" self", " state", " Rref"),
           "Initialize the frame rotation cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(6), and nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
-          ":param Rref: reference frame rotation")[bp::with_custodian_and_ward<1, 2>()])
+          ":param Rref: reference frame rotation"))
       .def("calc", &CostModelFrameRotation::calc_wrap,
            CostModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
                                 "Compute the frame rotation cost.\n\n"
@@ -82,6 +80,29 @@ void exposeCostFrameRotation() {
            ":return cost data.")
       .add_property("Rref", bp::make_function(&CostModelFrameRotation::get_Rref, bp::return_internal_reference<>()),
                     "reference frame rotation");
+
+  bp::register_ptr_to_python<boost::shared_ptr<CostDataFrameRotation> >();
+
+  bp::class_<CostDataFrameRotation, bp::bases<CostDataAbstract> >(
+      "CostDataFrameRotation", "Data for frame rotation cost.\n\n",
+      bp::init<CostModelFrameRotation*, pinocchio::Data*>(
+          bp::args(" self", " model", " data"),
+          "Create frame rotation cost data.\n\n"
+          ":param model: frame rotation cost model\n"
+          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("r", bp::make_getter(&CostDataFrameRotation::r, bp::return_value_policy<bp::return_by_value>()),
+                    "cost residual")
+      .add_property("rRf",
+                    bp::make_getter(&CostDataFrameRotation::rRf, bp::return_value_policy<bp::return_by_value>()),
+                    "rotation error of the frame")
+      .add_property("J", bp::make_getter(&CostDataFrameRotation::J, bp::return_value_policy<bp::return_by_value>()),
+                    "Jacobian at the error point")
+      .add_property("rJf",
+                    bp::make_getter(&CostDataFrameRotation::rJf, bp::return_value_policy<bp::return_by_value>()),
+                    "error Jacobian of the frame")
+      .add_property("fJf",
+                    bp::make_getter(&CostDataFrameRotation::fJf, bp::return_value_policy<bp::return_by_value>()),
+                    "local Jacobian of the frame");
 }
 
 }  // namespace python

@@ -18,30 +18,31 @@ namespace bp = boost::python;
 
 class CostModelAbstract_wrap : public CostModelAbstract, public bp::wrapper<CostModelAbstract> {
  public:
-  CostModelAbstract_wrap(StateMultibody& state, ActivationModelAbstract& activation, int nu,
+  CostModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation, int nu,
                          bool with_residuals = true)
       : CostModelAbstract(state, activation, nu, with_residuals) {}
 
-  CostModelAbstract_wrap(StateMultibody& state, ActivationModelAbstract& activation, bool with_residuals = true)
+  CostModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
+                         bool with_residuals = true)
       : CostModelAbstract(state, activation, with_residuals) {}
 
-  CostModelAbstract_wrap(StateMultibody& state, int nr, int nu, bool with_residuals = true)
+  CostModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, int nr, int nu, bool with_residuals = true)
       : CostModelAbstract(state, nr, nu, with_residuals), bp::wrapper<CostModelAbstract>() {}
 
-  CostModelAbstract_wrap(StateMultibody& state, int nr, bool with_residuals = true)
+  CostModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, int nr, bool with_residuals = true)
       : CostModelAbstract(state, nr, with_residuals), bp::wrapper<CostModelAbstract>() {}
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
-    assert(x.size() == state_.get_nx() && "x has wrong dimension");
-    assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
+    assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
+    assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
   void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
-    assert(x.size() == state_.get_nx() && "x has wrong dimension");
-    assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
+    assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
+    assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
 };
@@ -54,36 +55,34 @@ void exposeCostMultibody() {
       "Abstract multibody cost model using Pinocchio.\n\n"
       "It defines a template of cost model whose residual and derivatives can be retrieved from\n"
       "Pinocchio data, through the calc and calcDiff functions, respectively.",
-      bp::init<StateMultibody&, ActivationModelAbstract&, int, bp::optional<bool> >(
+      bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, int, bp::optional<bool> >(
           bp::args(" self", " state", " activation", " nu=model.nv", " withResiduals=True"),
           "Initialize the cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: Activation model\n"
           ":param nu: dimension of control vector\n"
-          ":param withResiduals: true if the cost function has residuals")
-          [bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .def(bp::init<StateMultibody&, ActivationModelAbstract&, bp::optional<bool> >(
+          ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 3>()])
+      .def(bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, bp::optional<bool> >(
           bp::args(" self", " state", " activation", " withResiduals=True"),
           "Initialize the cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: Activation model\n"
-          ":param withResiduals: true if the cost function has residuals")
-               [bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .def(bp::init<StateMultibody&, int, int, bp::optional<bool> >(
+          ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 3>()])
+      .def(bp::init<boost::shared_ptr<StateMultibody>, int, int, bp::optional<bool> >(
           bp::args(" self", " state", " nr", " nu=model.nv", " withResiduals=True"),
           "Initialize the cost model.\n\n"
           "For this case the default activation model is quadratic, i.e. crocoddyl.ActivationModelQuad(nr).\n"
           ":param state: state of the multibody system\n"
           ":param nr: dimension of cost vector\n"
           ":param nu: dimension of control vector\n"
-          ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
-      .def(bp::init<StateMultibody&, int, bp::optional<bool> >(
+          ":param withResiduals: true if the cost function has residuals"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, int, bp::optional<bool> >(
           bp::args(" self", " state", " nr", " withResiduals=True"),
           "Initialize the cost model.\n\n"
           "For this case the default activation model is quadratic, i.e. crocoddyl.ActivationModelQuad(nr).\n"
           ":param state: state of the multibody system\n"
           ":param nr: dimension of cost vector\n"
-          ":param withResiduals: true if the cost function has residuals")[bp::with_custodian_and_ward<1, 2>()])
+          ":param withResiduals: true if the cost function has residuals"))
       .def("calc", pure_virtual(&CostModelAbstract_wrap::calc), bp::args(" self", " data", " x", " u"),
            "Compute the cost value and its residuals.\n\n"
            ":param data: cost data\n"
@@ -103,8 +102,10 @@ void exposeCostMultibody() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: Pinocchio data\n"
            ":return cost data.")
-      .add_property("state", bp::make_function(&CostModelAbstract_wrap::get_state, bp::return_internal_reference<>()),
-                    "state of the multibody system")
+      .add_property(
+          "state",
+          bp::make_function(&CostModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
+          "state of the multibody system")
       .add_property("activation",
                     bp::make_function(&CostModelAbstract_wrap::get_activation, bp::return_internal_reference<>()),
                     "activation model")
@@ -112,7 +113,9 @@ void exposeCostMultibody() {
                     bp::make_function(&CostModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
                     "dimension of control vector");
 
-  bp::class_<CostDataAbstract, boost::shared_ptr<CostDataAbstract>, boost::noncopyable>(
+  bp::register_ptr_to_python<boost::shared_ptr<CostDataAbstract> >();
+
+  bp::class_<CostDataAbstract, boost::noncopyable>(
       "CostDataAbstract", "Abstract class for cost datas.\n\n",
       bp::init<CostModelAbstract*, pinocchio::Data*>(
           bp::args(" self", " model", " data"),

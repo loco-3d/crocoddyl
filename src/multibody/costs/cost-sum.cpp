@@ -10,15 +10,15 @@
 
 namespace crocoddyl {
 
-CostModelSum::CostModelSum(StateMultibody& state, unsigned int const& nu, const bool& with_residuals)
+CostModelSum::CostModelSum(boost::shared_ptr<StateMultibody> state, const std::size_t& nu, const bool& with_residuals)
     : state_(state), nu_(nu), nr_(0), with_residuals_(with_residuals) {}
 
-CostModelSum::CostModelSum(StateMultibody& state, const bool& with_residuals)
-    : state_(state), nu_(state.get_nv()), nr_(0), with_residuals_(with_residuals) {}
+CostModelSum::CostModelSum(boost::shared_ptr<StateMultibody> state, const bool& with_residuals)
+    : state_(state), nu_(state->get_nv()), nr_(0), with_residuals_(with_residuals) {}
 
 CostModelSum::~CostModelSum() {}
 
-void CostModelSum::addCost(const std::string& name, CostModelAbstract* const cost, const double& weight) {
+void CostModelSum::addCost(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, const double& weight) {
   assert(cost->get_nu() == nu_ && "Cost item doesn't have the same control dimension");
   std::pair<CostModelContainer::iterator, bool> ret =
       costs_.insert(std::make_pair(name, CostItem(name, cost, weight)));
@@ -41,11 +41,11 @@ void CostModelSum::removeCost(const std::string& name) {
 
 void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
+  assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
   assert(data->costs.size() == costs_.size() && "it doesn't match the number of cost datas and models");
   data->cost = 0.;
-  unsigned int nr = 0;
+  std::size_t nr = 0;
 
   CostModelContainer::iterator it_m, end_m;
   CostDataContainer::iterator it_d, end_d;
@@ -58,7 +58,7 @@ void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen:
     m_i.cost->calc(d_i, x, u);
     data->cost += m_i.weight * d_i->cost;
     if (with_residuals_) {
-      unsigned int const& nr_i = m_i.cost->get_activation().get_nr();
+      const std::size_t& nr_i = m_i.cost->get_activation().get_nr();
       data->r.segment(nr, nr_i) = sqrt(m_i.weight) * d_i->r;
       nr += nr_i;
     }
@@ -67,20 +67,20 @@ void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen:
 
 void CostModelSum::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                             const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert((u.size() == nu_ || nu_ == 0) && "u has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
+  assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
   assert(data->costs.size() == costs_.size() && "it doesn't match the number of cost datas and models");
   if (recalc) {
     calc(data, x, u);
   }
-  unsigned int nr = 0;
+  std::size_t nr = 0;
   data->Lx.fill(0);
   data->Lu.fill(0);
   data->Lxx.fill(0);
   data->Lxu.fill(0);
   data->Luu.fill(0);
 
-  unsigned int const& ndx = state_.get_ndx();
+  const std::size_t& ndx = state_->get_ndx();
   CostModelContainer::iterator it_m, end_m;
   CostDataContainer::iterator it_d, end_d;
   for (it_m = costs_.begin(), end_m = costs_.end(), it_d = data->costs.begin(), end_d = data->costs.end();
@@ -96,7 +96,7 @@ void CostModelSum::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Ei
     data->Lxu += m_i.weight * d_i->Lxu;
     data->Luu += m_i.weight * d_i->Luu;
     if (with_residuals_) {
-      const unsigned int& nr_i = m_i.cost->get_activation().get_nr();
+      const std::size_t& nr_i = m_i.cost->get_activation().get_nr();
       data->Rx.block(nr, 0, nr_i, ndx) = sqrt(m_i.weight) * d_i->Rx;
       data->Ru.block(nr, 0, nr_i, nu_) = sqrt(m_i.weight) * d_i->Ru;
       nr += nr_i;
@@ -116,12 +116,12 @@ void CostModelSum::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Ei
   calcDiff(data, x, unone_);
 }
 
-StateMultibody& CostModelSum::get_state() const { return state_; }
+const boost::shared_ptr<StateMultibody>& CostModelSum::get_state() const { return state_; }
 
 const CostModelSum::CostModelContainer& CostModelSum::get_costs() const { return costs_; }
 
-unsigned int const& CostModelSum::get_nu() const { return nu_; }
+const std::size_t& CostModelSum::get_nu() const { return nu_; }
 
-unsigned int const& CostModelSum::get_nr() const { return nr_; }
+const std::size_t& CostModelSum::get_nr() const { return nr_; }
 
 }  // namespace crocoddyl

@@ -19,11 +19,11 @@ class SolverFDDP : public SolverDDP {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  explicit SolverFDDP(ShootingProblem& problem);
+  explicit SolverFDDP(boost::shared_ptr<ShootingProblem> problem);
   ~SolverFDDP();
 
   virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, unsigned int const& maxiter = 100,
+                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t& maxiter = 100,
                      const bool& is_feasible = false, const double& regInit = 1e-9);
   virtual const Eigen::Vector2d& expectedImprovement();
   void updateExpectedImprovement();

@@ -11,23 +11,24 @@
 
 namespace crocoddyl {
 
-CostModelFrameRotation::CostModelFrameRotation(StateMultibody& state, ActivationModelAbstract& activation,
-                                               const FrameRotation& Rref, unsigned int const& nu)
+CostModelFrameRotation::CostModelFrameRotation(boost::shared_ptr<StateMultibody> state,
+                                               ActivationModelAbstract& activation, const FrameRotation& Rref,
+                                               const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), Rref_(Rref), oRf_inv_(Rref.oRf.transpose()) {
   assert(activation_.get_nr() == 3 && "activation::nr is not equals to 3");
 }
 
-CostModelFrameRotation::CostModelFrameRotation(StateMultibody& state, ActivationModelAbstract& activation,
-                                               const FrameRotation& Rref)
+CostModelFrameRotation::CostModelFrameRotation(boost::shared_ptr<StateMultibody> state,
+                                               ActivationModelAbstract& activation, const FrameRotation& Rref)
     : CostModelAbstract(state, activation), Rref_(Rref), oRf_inv_(Rref.oRf.transpose()) {
   assert(activation_.get_nr() == 3 && "activation::nr is not equals to 3");
 }
 
-CostModelFrameRotation::CostModelFrameRotation(StateMultibody& state, const FrameRotation& Rref,
-                                               unsigned int const& nu)
+CostModelFrameRotation::CostModelFrameRotation(boost::shared_ptr<StateMultibody> state, const FrameRotation& Rref,
+                                               const std::size_t& nu)
     : CostModelAbstract(state, 3, nu), Rref_(Rref), oRf_inv_(Rref.oRf.transpose()) {}
 
-CostModelFrameRotation::CostModelFrameRotation(StateMultibody& state, const FrameRotation& Rref)
+CostModelFrameRotation::CostModelFrameRotation(boost::shared_ptr<StateMultibody> state, const FrameRotation& Rref)
     : CostModelAbstract(state, 3), Rref_(Rref), oRf_inv_(Rref.oRf.transpose()) {}
 
 CostModelFrameRotation::~CostModelFrameRotation() {}
@@ -54,15 +55,15 @@ void CostModelFrameRotation::calcDiff(const boost::shared_ptr<CostDataAbstract>&
   }
   // Update the frame placements
   CostDataFrameRotation* d = static_cast<CostDataFrameRotation*>(data.get());
-  pinocchio::updateFramePlacements(state_.get_pinocchio(), *d->pinocchio);
+  pinocchio::updateFramePlacements(state_->get_pinocchio(), *d->pinocchio);
 
   // // Compute the frame Jacobian at the error point
   pinocchio::Jlog3(d->rRf, d->rJf);
-  pinocchio::getFrameJacobian(state_.get_pinocchio(), *d->pinocchio, Rref_.frame, pinocchio::LOCAL, d->fJf);
+  pinocchio::getFrameJacobian(state_->get_pinocchio(), *d->pinocchio, Rref_.frame, pinocchio::LOCAL, d->fJf);
   d->J.noalias() = d->rJf * d->fJf.topRows<3>();
 
   // Compute the derivatives of the frame placement
-  unsigned int const& nv = state_.get_nv();
+  const std::size_t& nv = state_->get_nv();
   activation_.calcDiff(data->activation, data->r, recalc);
   data->Rx.leftCols(nv) = d->J;
   data->Lx.head(nv).noalias() = d->J.transpose() * data->activation->Ar;

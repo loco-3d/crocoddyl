@@ -43,8 +43,8 @@ struct IntegratedActionDataEuler : public ActionDataAbstract {
   template <typename Model>
   explicit IntegratedActionDataEuler(Model* const model) : ActionDataAbstract(model) {
     differential = model->get_differential()->createData();
-    const unsigned int& ndx = model->get_state().get_ndx();
-    const unsigned int& nu = model->get_nu();
+    const std::size_t& ndx = model->get_state()->get_ndx();
+    const std::size_t& nu = model->get_nu();
     dx = Eigen::VectorXd::Zero(ndx);
     ddx_dx = Eigen::MatrixXd::Zero(ndx, ndx);
     ddx_du = Eigen::MatrixXd::Zero(ndx, nu);

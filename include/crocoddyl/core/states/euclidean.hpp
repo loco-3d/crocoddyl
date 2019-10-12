@@ -15,7 +15,7 @@ namespace crocoddyl {
 
 class StateVector : public StateAbstract {
  public:
-  explicit StateVector(unsigned int const& nx);
+  explicit StateVector(const std::size_t& nx);
   ~StateVector();
 
   Eigen::VectorXd zero();

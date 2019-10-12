@@ -10,22 +10,24 @@
 
 namespace crocoddyl {
 
-CostModelCoMPosition::CostModelCoMPosition(StateMultibody& state, ActivationModelAbstract& activation,
-                                           const Eigen::Vector3d& cref, unsigned int const& nu)
+CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> state,
+                                           ActivationModelAbstract& activation, const Eigen::Vector3d& cref,
+                                           const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), cref_(cref) {
   assert(activation_.get_nr() == 3 && "activation::nr is not equals to 3");
 }
 
-CostModelCoMPosition::CostModelCoMPosition(StateMultibody& state, ActivationModelAbstract& activation,
-                                           const Eigen::Vector3d& cref)
+CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> state,
+                                           ActivationModelAbstract& activation, const Eigen::Vector3d& cref)
     : CostModelAbstract(state, activation), cref_(cref) {
   assert(activation_.get_nr() == 3 && "activation::nr is not equals to 3");
 }
 
-CostModelCoMPosition::CostModelCoMPosition(StateMultibody& state, const Eigen::Vector3d& cref, unsigned int const& nu)
+CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> state, const Eigen::Vector3d& cref,
+                                           const std::size_t& nu)
     : CostModelAbstract(state, 3, nu), cref_(cref) {}
 
-CostModelCoMPosition::CostModelCoMPosition(StateMultibody& state, const Eigen::Vector3d& cref)
+CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> state, const Eigen::Vector3d& cref)
     : CostModelAbstract(state, 3), cref_(cref) {}
 
 CostModelCoMPosition::~CostModelCoMPosition() {}
@@ -50,7 +52,7 @@ void CostModelCoMPosition::calcDiff(const boost::shared_ptr<CostDataAbstract>& d
   CostDataCoMPosition* d = static_cast<CostDataCoMPosition*>(data.get());
 
   // Compute the derivatives of the frame placement
-  unsigned int const& nv = state_.get_nv();
+  const std::size_t& nv = state_->get_nv();
   activation_.calcDiff(data->activation, data->r, recalc);
   data->Rx.leftCols(nv) = data->pinocchio->Jcom;
   data->Lx.head(nv).noalias() = data->pinocchio->Jcom.transpose() * data->activation->Ar;

@@ -16,11 +16,12 @@ namespace crocoddyl {
 
 class CostModelFrameRotation : public CostModelAbstract {
  public:
-  CostModelFrameRotation(StateMultibody& state, ActivationModelAbstract& activation, const FrameRotation& Fref,
-                         unsigned int const& nu);
-  CostModelFrameRotation(StateMultibody& state, ActivationModelAbstract& activation, const FrameRotation& Fref);
-  CostModelFrameRotation(StateMultibody& state, const FrameRotation& Fref, unsigned int const& nu);
-  CostModelFrameRotation(StateMultibody& state, const FrameRotation& Fref);
+  CostModelFrameRotation(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
+                         const FrameRotation& Fref, const std::size_t& nu);
+  CostModelFrameRotation(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
+                         const FrameRotation& Fref);
+  CostModelFrameRotation(boost::shared_ptr<StateMultibody> state, const FrameRotation& Fref, const std::size_t& nu);
+  CostModelFrameRotation(boost::shared_ptr<StateMultibody> state, const FrameRotation& Fref);
   ~CostModelFrameRotation();
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -42,10 +43,10 @@ struct CostDataFrameRotation : public CostDataAbstract {
   template <typename Model>
   CostDataFrameRotation(Model* const model, pinocchio::Data* const data)
       : CostDataAbstract(model, data),
-        J(3, model->get_state().get_nv()),
+        J(3, model->get_state()->get_nv()),
         rJf(3, 3),
-        fJf(6, model->get_state().get_nv()),
-        Arr_J(3, model->get_state().get_nv()) {
+        fJf(6, model->get_state()->get_nv()),
+        Arr_J(3, model->get_state()->get_nv()) {
     r.fill(0);
     rRf.setIdentity();
     J.fill(0);

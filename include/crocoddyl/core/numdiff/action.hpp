@@ -52,7 +52,7 @@ class ActionModelNumDiff : public ActionModelAbstract {
    *
    * @param model
    */
-  explicit ActionModelNumDiff(ActionModelAbstract& model);
+  explicit ActionModelNumDiff(boost::shared_ptr<ActionModelAbstract> model);
 
   /**
    * @brief Destroy the ActionModelNumDiff object
@@ -83,7 +83,7 @@ class ActionModelNumDiff : public ActionModelAbstract {
    *
    * @return ActionModelAbstract&
    */
-  ActionModelAbstract& get_model() const;
+  const boost::shared_ptr<ActionModelAbstract>& get_model() const;
 
   /**
    * @brief Get the disturbance_ object
@@ -117,7 +117,7 @@ class ActionModelNumDiff : public ActionModelAbstract {
   /**
    * @brief This is the model to compute the finite differenciation from
    */
-  ActionModelAbstract& model_;
+  boost::shared_ptr<ActionModelAbstract> model_;
 
   /**
    * @brief This is the numerical disturbance value used during the numerical
@@ -137,25 +137,25 @@ struct ActionDataNumDiff : public ActionDataAbstract {
   template <typename Model>
   explicit ActionDataNumDiff(Model* const model)
       : ActionDataAbstract(model),
-        Rx(model->get_model().get_nr(), model->get_model().get_state().get_ndx()),
-        Ru(model->get_model().get_nr(), model->get_model().get_nu()),
-        dx(model->get_model().get_state().get_ndx()),
-        du(model->get_model().get_nu()),
-        xp(model->get_model().get_state().get_nx()) {
+        Rx(model->get_model()->get_nr(), model->get_model()->get_state()->get_ndx()),
+        Ru(model->get_model()->get_nr(), model->get_model()->get_nu()),
+        dx(model->get_model()->get_state()->get_ndx()),
+        du(model->get_model()->get_nu()),
+        xp(model->get_model()->get_state()->get_nx()) {
     Rx.setZero();
     Ru.setZero();
     dx.setZero();
     du.setZero();
     xp.setZero();
 
-    unsigned int const& ndx = model->get_model().get_state().get_ndx();
-    unsigned int const& nu = model->get_model().get_nu();
-    data_0 = model->get_model().createData();
-    for (unsigned int i = 0; i < ndx; ++i) {
-      data_x.push_back(model->get_model().createData());
+    const std::size_t& ndx = model->get_model()->get_state()->get_ndx();
+    const std::size_t& nu = model->get_model()->get_nu();
+    data_0 = model->get_model()->createData();
+    for (std::size_t i = 0; i < ndx; ++i) {
+      data_x.push_back(model->get_model()->createData());
     }
-    for (unsigned int i = 0; i < nu; ++i) {
-      data_u.push_back(model->get_model().createData());
+    for (std::size_t i = 0; i < nu; ++i) {
+      data_u.push_back(model->get_model()->createData());
     }
   }
 

@@ -22,17 +22,18 @@ int main(int argc, char* argv[]) {
 
   // Creating the action models and warm point for the unicycle system
   Eigen::VectorXd x0 = Eigen::Vector3d(1., 0., 0.);
-  crocoddyl::ActionModelAbstract* model = new crocoddyl::ActionModelUnicycle();
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> model = boost::make_shared<crocoddyl::ActionModelUnicycle>();
   std::vector<Eigen::VectorXd> xs(N + 1, x0);
   std::vector<Eigen::VectorXd> us(N, Eigen::Vector2d::Zero());
-  std::vector<crocoddyl::ActionModelAbstract*> runningModels(N, model);
+  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(N, model);
 
   // Formulating the optimal control problem
-  crocoddyl::ShootingProblem problem(x0, runningModels, model);
+  boost::shared_ptr<crocoddyl::ShootingProblem> problem =
+      boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModels, model);
   crocoddyl::SolverDDP ddp(problem);
   if (CALLBACKS) {
-    std::vector<crocoddyl::CallbackAbstract*> cbs;
-    cbs.push_back(new crocoddyl::CallbackVerbose());
+    std::vector<boost::shared_ptr<crocoddyl::CallbackAbstract> > cbs;
+    cbs.push_back(boost::make_shared<crocoddyl::CallbackVerbose>());
     ddp.setCallbacks(cbs);
   }
 
@@ -58,7 +59,7 @@ int main(int argc, char* argv[]) {
   // Running calc
   for (unsigned int i = 0; i < T; ++i) {
     clock_gettime(CLOCK_MONOTONIC, &start);
-    problem.calc(xs, us);
+    problem->calc(xs, us);
     clock_gettime(CLOCK_MONOTONIC, &finish);
     elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
     elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;
@@ -74,7 +75,7 @@ int main(int argc, char* argv[]) {
   // Running calcDiff
   for (unsigned int i = 0; i < T; ++i) {
     clock_gettime(CLOCK_MONOTONIC, &start);
-    problem.calcDiff(xs, us);
+    problem->calcDiff(xs, us);
     clock_gettime(CLOCK_MONOTONIC, &finish);
     elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
     elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;

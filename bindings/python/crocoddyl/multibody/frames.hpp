@@ -21,10 +21,10 @@ void exposeFrames() {
       "FrameTranslation",
       "Frame translation describe using Pinocchio.\n\n"
       "It defines a frame translation (3D vector) for a given frame ID",
-      bp::init<unsigned int, Eigen::Vector3d>(bp::args(" self", " frame", " oxf"),
-                                              "Initialize the frame translation.\n\n"
-                                              ":param frame: frame ID\n"
-                                              ":param oxf: Frame translation w.r.t. the origin"))
+      bp::init<FrameIndex, Eigen::Vector3d>(bp::args(" self", " frame", " oxf"),
+                                            "Initialize the frame translation.\n\n"
+                                            ":param frame: frame ID\n"
+                                            ":param oxf: Frame translation w.r.t. the origin"))
       .def_readwrite("frame", &FrameTranslation::frame, "frame ID")
       .add_property("oxf", bp::make_getter(&FrameTranslation::oxf, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&FrameTranslation::oxf), "frame translation");
@@ -33,10 +33,10 @@ void exposeFrames() {
       "FrameRotation",
       "Frame rotation describe using Pinocchio.\n\n"
       "It defines a frame rotation (rotation matrix) for a given frame ID",
-      bp::init<unsigned int, Eigen::Matrix3d>(bp::args(" self", " frame", " oRf"),
-                                              "Initialize the frame translation.\n\n"
-                                              ":param frame: frame ID\n"
-                                              ":param oRf: Frame rotation w.r.t. the origin"))
+      bp::init<FrameIndex, Eigen::Matrix3d>(bp::args(" self", " frame", " oRf"),
+                                            "Initialize the frame translation.\n\n"
+                                            ":param frame: frame ID\n"
+                                            ":param oRf: Frame rotation w.r.t. the origin"))
       .def_readwrite("frame", &FrameRotation::frame, "frame ID")
       .add_property("oRf", bp::make_getter(&FrameRotation::oRf, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&FrameRotation::oRf), "frame rotation");
@@ -45,10 +45,10 @@ void exposeFrames() {
       "FramePlacement",
       "Frame placement describe using Pinocchio.\n\n"
       "It defines a frame placement (SE(3) point) for a given frame ID",
-      bp::init<unsigned int, pinocchio::SE3>(bp::args(" self", " frame", " oMf"),
-                                             "Initialize the frame placement.\n\n"
-                                             ":param frame: frame ID\n"
-                                             ":param oMf: Frame placement w.r.t. the origin"))
+      bp::init<FrameIndex, pinocchio::SE3>(bp::args(" self", " frame", " oMf"),
+                                           "Initialize the frame placement.\n\n"
+                                           ":param frame: frame ID\n"
+                                           ":param oMf: Frame placement w.r.t. the origin"))
       .def_readwrite("frame", &FramePlacement::frame, "frame ID")
       .add_property("oMf", bp::make_getter(&FramePlacement::oMf, bp::return_internal_reference<>()),
                     "frame placement");
@@ -57,10 +57,10 @@ void exposeFrames() {
       "FrameMotion",
       "Frame motion describe using Pinocchio.\n\n"
       "It defines a frame motion (tangent of SE(3) point) for a given frame ID",
-      bp::init<unsigned int, pinocchio::Motion>(bp::args(" self", " frame", " oMf"),
-                                                "Initialize the frame motion.\n\n"
-                                                ":param frame: frame ID\n"
-                                                ":param oMf: Frame motion w.r.t. the origin"))
+      bp::init<FrameIndex, pinocchio::Motion>(bp::args(" self", " frame", " oMf"),
+                                              "Initialize the frame motion.\n\n"
+                                              ":param frame: frame ID\n"
+                                              ":param oMf: Frame motion w.r.t. the origin"))
       .def_readwrite("frame", &FrameMotion::frame, "frame ID")
       .add_property("oMf", bp::make_getter(&FrameMotion::oMf, bp::return_internal_reference<>()), "frame motion");
 }

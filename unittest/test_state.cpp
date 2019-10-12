@@ -10,21 +10,16 @@
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
 #include <Eigen/Dense>
-
 #include <pinocchio/fwd.hpp>
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/parsers/sample-models.hpp>
-
 #include <boost/test/included/unit_test.hpp>
 #include <boost/bind.hpp>
-
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"
 #include "crocoddyl/core/states/unicycle.hpp"
 #include "crocoddyl/core/numdiff/state.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
-
-#include "crocoddyl_unittest_common.hpp"
 
 using namespace boost::unit_test;
 
@@ -55,15 +50,12 @@ class StateFactory {
     // default initialization
     nx_ = 0;
     num_diff_modifier_ = 1e4;
-    state_ = NULL;
-    free_flyer_joint_ = NULL;
-    pinocchio_model_ = NULL;
     state_type_ = type;
 
     switch (state_type_) {
       case TestTypes::StateVector:
         nx_ = 80;
-        state_ = new crocoddyl::StateVector(nx_);
+        state_ = boost::make_shared<crocoddyl::StateVector>(nx_);
         break;
       case TestTypes::StateMultibodyTalosArm:
         construct_state_multibody(TALOS_ARM_URDF, false);
@@ -83,73 +75,56 @@ class StateFactory {
     }
   }
 
-  ~StateFactory() {
-    if (state_type_ == TestTypes::StateVector) {
-      crocoddyl_unit_test::delete_pointer((crocoddyl::StateVector*)state_);
-    } else if (state_type_ == TestTypes::StateMultibodyTalosArm || state_type_ == TestTypes::StateMultibodyHyQ ||
-               state_type_ == TestTypes::StateMultibodyTalos ||
-               state_type_ == TestTypes::StateMultibodyRandomHumanoid) {
-      crocoddyl_unit_test::delete_pointer((crocoddyl::StateMultibody*)state_);
-      crocoddyl_unit_test::delete_pointer(free_flyer_joint_);
-      crocoddyl_unit_test::delete_pointer(pinocchio_model_);
-    } else {
-      throw std::runtime_error(__FILE__ ": Wrong TestTypes::Type given");
-    }
-
-    state_ = NULL;
-    free_flyer_joint_ = NULL;
-    pinocchio_model_ = NULL;
-  }
+  ~StateFactory() {}
 
   void construct_state_multibody(const std::string& urdf_file = "", bool free_flyer = true) {
-    pinocchio_model_ = new pinocchio::Model();
     if (urdf_file.size() != 0) {
       if (free_flyer) {
-        free_flyer_joint_ = new pinocchio::JointModelFreeFlyer();
-        pinocchio::urdf::buildModel(urdf_file, *free_flyer_joint_, *pinocchio_model_);
-        pinocchio_model_->lowerPositionLimit.head<3>().fill(-1.0);
-        pinocchio_model_->upperPositionLimit.head<3>().fill(1.0);
+        pinocchio::urdf::buildModel(urdf_file, free_flyer_joint_, pinocchio_model_);
+        pinocchio_model_.lowerPositionLimit.head<3>().fill(-1.0);
+        pinocchio_model_.upperPositionLimit.head<3>().fill(1.0);
       } else {
-        pinocchio::urdf::buildModel(urdf_file, *pinocchio_model_);
+        pinocchio::urdf::buildModel(urdf_file, pinocchio_model_);
       }
     } else {
-      pinocchio::buildModels::humanoidRandom(*pinocchio_model_, free_flyer);
+      pinocchio::buildModels::humanoidRandom(pinocchio_model_, free_flyer);
     }
-    state_ = new crocoddyl::StateMultibody(*pinocchio_model_);
-    nx_ = pinocchio_model_->nq + pinocchio_model_->nv;
+    state_ = boost::make_shared<crocoddyl::StateMultibody>(boost::ref(pinocchio_model_));
+    nx_ = pinocchio_model_.nq + pinocchio_model_.nv;
   }
 
-  crocoddyl::StateAbstract* get_state() { return state_; }
+  boost::shared_ptr<crocoddyl::StateAbstract> get_state() { return state_; }
 
-  double num_diff_modifier_;  //!< Multiplier of the precision during the tests.
-  int nx_;                    //!< The size of the StateVector to test.
+  const std::size_t& get_nx() { return nx_; }
+  double get_num_diff_modifier() { return num_diff_modifier_; }
 
  private:
-  TestTypes::Type state_type_;       //!< The current type to test
-  crocoddyl::StateAbstract* state_;  //!< The pointer to the state in testing
-
-  pinocchio::JointModelFreeFlyer* free_flyer_joint_;  //!< The free flyer joint to build the pinocchio model.
-  pinocchio::Model* pinocchio_model_;                 //!< The pinocchio_model to build the StateMultibody.
+  TestTypes::Type state_type_;                         //!< The current type to test
+  boost::shared_ptr<crocoddyl::StateAbstract> state_;  //!< The pointer to the state in testing
+  std::size_t nx_;                                     //!< The size of the StateVector to test.
+  double num_diff_modifier_;                           //!< Multiplier of the precision during the tests.
+  pinocchio::JointModelFreeFlyer free_flyer_joint_;    //!< The free flyer joint to build the pinocchio model.
+  pinocchio::Model pinocchio_model_;                   //!< The pinocchio_model to build the StateMultibody.
 };
 
 //----------------------------------------------------------------------------//
 
 void test_state_dimension(TestTypes::Type state_type) {
   StateFactory factory(state_type);
-  crocoddyl::StateAbstract* state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Checking the dimension of zero and random states
-  BOOST_CHECK(state->zero().size() == factory.nx_);
-  BOOST_CHECK(state->rand().size() == factory.nx_);
+  BOOST_CHECK(static_cast<std::size_t>(state->zero().size()) == factory.get_nx());
+  BOOST_CHECK(static_cast<std::size_t>(state->rand().size()) == factory.get_nx());
   BOOST_CHECK(state->get_nx() == (state->get_nq() + state->get_nv()));
   BOOST_CHECK(state->get_ndx() == (2 * state->get_nv()));
 }
 
 void test_integrate_against_difference(TestTypes::Type state_type) {
   StateFactory factory(state_type);
-  crocoddyl::StateAbstract* state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Generating random states
-  Eigen::VectorXd x1 = state->rand();
-  Eigen::VectorXd x2 = state->rand();
+  const Eigen::VectorXd& x1 = state->rand();
+  const Eigen::VectorXd& x2 = state->rand();
 
   // Computing x2 by integrating its difference
   Eigen::VectorXd dx(state->get_ndx());
@@ -166,10 +141,10 @@ void test_integrate_against_difference(TestTypes::Type state_type) {
 
 void test_difference_against_integrate(TestTypes::Type state_type) {
   StateFactory factory(state_type);
-  crocoddyl::StateAbstract* state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Generating random states
-  Eigen::VectorXd x = state->rand();
-  Eigen::VectorXd dx = Eigen::VectorXd::Random(state->get_ndx());
+  const Eigen::VectorXd& x = state->rand();
+  const Eigen::VectorXd& dx = Eigen::VectorXd::Random(state->get_ndx());
 
   // Computing dx by differentiation of its integrate
   Eigen::VectorXd xidx(state->get_nx());
@@ -183,10 +158,10 @@ void test_difference_against_integrate(TestTypes::Type state_type) {
 
 void test_Jdiff_firstsecond(TestTypes::Type state_type) {
   StateFactory factory(state_type);
-  crocoddyl::StateAbstract* state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Generating random values for the initial and terminal states
-  Eigen::VectorXd x1 = state->rand();
-  Eigen::VectorXd x2 = state->rand();
+  const Eigen::VectorXd& x1 = state->rand();
+  const Eigen::VectorXd& x2 = state->rand();
 
   // Computing the partial derivatives of the difference function separately
   Eigen::MatrixXd Jdiff_tmp(state->get_ndx(), state->get_ndx());
@@ -206,10 +181,10 @@ void test_Jdiff_firstsecond(TestTypes::Type state_type) {
 
 void test_Jint_firstsecond(TestTypes::Type state_type) {
   StateFactory factory(state_type);
-  crocoddyl::StateAbstract* state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Generating random values for the initial and terminal states
-  Eigen::VectorXd x = state->rand();
-  Eigen::VectorXd dx = Eigen::VectorXd::Random(state->get_ndx());
+  const Eigen::VectorXd& x = state->rand();
+  const Eigen::VectorXd& dx = Eigen::VectorXd::Random(state->get_ndx());
 
   // Computing the partial derivatives of the difference function separately
   Eigen::MatrixXd Jint_tmp(state->get_ndx(), state->get_ndx());
@@ -229,13 +204,13 @@ void test_Jint_firstsecond(TestTypes::Type state_type) {
 
 void test_Jdiff_num_diff_firstsecond(TestTypes::Type state_type) {
   StateFactory factory(state_type);
-  crocoddyl::StateAbstract* state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Generating random values for the initial and terminal states
-  Eigen::VectorXd x1 = state->rand();
-  Eigen::VectorXd x2 = state->rand();
+  const Eigen::VectorXd& x1 = state->rand();
+  const Eigen::VectorXd& x2 = state->rand();
 
   // Get the num diff state
-  crocoddyl::StateNumDiff state_num_diff(*state);
+  crocoddyl::StateNumDiff state_num_diff(state);
 
   // Computing the partial derivatives of the difference function separately
   Eigen::MatrixXd Jdiff_num_diff_tmp(state->get_ndx(), state->get_ndx());
@@ -255,13 +230,13 @@ void test_Jdiff_num_diff_firstsecond(TestTypes::Type state_type) {
 
 void test_Jint_num_diff_firstsecond(TestTypes::Type state_type) {
   StateFactory factory(state_type);
-  crocoddyl::StateAbstract* state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Generating random values for the initial and terminal states
-  Eigen::VectorXd x = state->rand();
-  Eigen::VectorXd dx = Eigen::VectorXd::Random(state->get_ndx());
+  const Eigen::VectorXd& x = state->rand();
+  const Eigen::VectorXd& dx = Eigen::VectorXd::Random(state->get_ndx());
 
   // Get the num diff state
-  crocoddyl::StateNumDiff state_num_diff(*state);
+  crocoddyl::StateNumDiff state_num_diff(state);
 
   // Computing the partial derivatives of the difference function separately
   Eigen::MatrixXd Jint_num_diff_tmp(state->get_ndx(), state->get_ndx());
@@ -281,10 +256,10 @@ void test_Jint_num_diff_firstsecond(TestTypes::Type state_type) {
 
 void test_Jdiff_against_numdiff(TestTypes::Type state_type) {
   StateFactory factory(state_type);
-  crocoddyl::StateAbstract* state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Generating random values for the initial and terminal states
-  Eigen::VectorXd x1 = state->rand();
-  Eigen::VectorXd x2 = state->rand();
+  const Eigen::VectorXd& x1 = state->rand();
+  const Eigen::VectorXd& x2 = state->rand();
 
   // Computing the partial derivatives of the difference function analytically
   Eigen::MatrixXd Jdiff_1(state->get_ndx(), state->get_ndx());
@@ -293,24 +268,24 @@ void test_Jdiff_against_numdiff(TestTypes::Type state_type) {
   state->Jdiff(x1, x2, Jdiff_1, Jdiff_2, crocoddyl::second);
 
   // Computing the partial derivatives of the difference function numerically
-  crocoddyl::StateNumDiff state_num_diff(*state);
+  crocoddyl::StateNumDiff state_num_diff(state);
   Eigen::MatrixXd Jdiff_num_1(state->get_ndx(), state->get_ndx());
   Eigen::MatrixXd Jdiff_num_2(state->get_ndx(), state->get_ndx());
   state_num_diff.Jdiff(x1, x2, Jdiff_num_1, Jdiff_num_2);
 
   // Checking the partial derivatives against NumDiff
   // The previous tolerance was 10*disturbance
-  double tol = factory.num_diff_modifier_ * state_num_diff.get_disturbance();
+  double tol = factory.get_num_diff_modifier() * state_num_diff.get_disturbance();
   BOOST_CHECK((Jdiff_1 - Jdiff_num_1).isMuchSmallerThan(1.0, tol));
   BOOST_CHECK((Jdiff_2 - Jdiff_num_2).isMuchSmallerThan(1.0, tol));
 }
 
 void test_Jintegrate_against_numdiff(TestTypes::Type state_type) {
   StateFactory factory(state_type);
-  crocoddyl::StateAbstract* state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Generating random values for the initial state and its rate of change
-  Eigen::VectorXd x = state->rand();
-  Eigen::VectorXd dx = Eigen::VectorXd::Random(state->get_ndx());
+  const Eigen::VectorXd& x = state->rand();
+  const Eigen::VectorXd& dx = Eigen::VectorXd::Random(state->get_ndx());
 
   // Computing the partial derivatives of the difference function analytically
   Eigen::MatrixXd Jint_1(state->get_ndx(), state->get_ndx());
@@ -318,24 +293,24 @@ void test_Jintegrate_against_numdiff(TestTypes::Type state_type) {
   state->Jintegrate(x, dx, Jint_1, Jint_2);
 
   // Computing the partial derivatives of the difference function numerically
-  crocoddyl::StateNumDiff state_num_diff(*state);
+  crocoddyl::StateNumDiff state_num_diff(state);
   Eigen::MatrixXd Jint_num_1(state->get_ndx(), state->get_ndx());
   Eigen::MatrixXd Jint_num_2(state->get_ndx(), state->get_ndx());
   state_num_diff.Jintegrate(x, dx, Jint_num_1, Jint_num_2);
 
   // Checking the partial derivatives against NumDiff
   // The previous tolerance was 10*disturbance
-  double tol = factory.num_diff_modifier_ * state_num_diff.get_disturbance();
+  double tol = factory.get_num_diff_modifier() * state_num_diff.get_disturbance();
   BOOST_CHECK((Jint_1 - Jint_num_1).isMuchSmallerThan(1.0, tol));
   BOOST_CHECK((Jint_2 - Jint_num_2).isMuchSmallerThan(1.0, tol));
 }
 
 void test_Jdiff_and_Jintegrate_are_inverses(TestTypes::Type state_type) {
   StateFactory factory(state_type);
-  crocoddyl::StateAbstract* state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Generating random states
-  Eigen::VectorXd x1 = state->rand();
-  Eigen::VectorXd dx = Eigen::VectorXd::Random(state->get_ndx());
+  const Eigen::VectorXd& x1 = state->rand();
+  const Eigen::VectorXd& dx = Eigen::VectorXd::Random(state->get_ndx());
   Eigen::VectorXd x2(state->get_nx());
   state->integrate(x1, dx, x2);
 
@@ -355,9 +330,9 @@ void test_Jdiff_and_Jintegrate_are_inverses(TestTypes::Type state_type) {
 
 void test_velocity_from_Jintegrate_Jdiff(TestTypes::Type state_type) {
   StateFactory factory(state_type);
-  crocoddyl::StateAbstract* state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Generating random states
-  Eigen::VectorXd x1 = state->rand();
+  const Eigen::VectorXd& x1 = state->rand();
   Eigen::VectorXd dx = Eigen::VectorXd::Random(state->get_ndx());
   Eigen::VectorXd x2(state->get_nx());
   state->integrate(x1, dx, x2);
@@ -373,7 +348,7 @@ void test_velocity_from_Jintegrate_Jdiff(TestTypes::Type state_type) {
   state->Jdiff(x1, x2, J1, J2);
 
   // Checking that computed velocity from Jintegrate
-  Eigen::MatrixXd dX_dDX = Jdx;
+  const Eigen::MatrixXd& dX_dDX = Jdx;
   Eigen::VectorXd x2eps(state->get_nx());
   state->integrate(x1, dx + eps * h, x2eps);
   Eigen::VectorXd x2_eps(state->get_ndx());
@@ -381,7 +356,7 @@ void test_velocity_from_Jintegrate_Jdiff(TestTypes::Type state_type) {
   BOOST_CHECK((dX_dDX * eps - x2_eps / h).isMuchSmallerThan(1.0, 1e-3));
 
   // Checking the velocity computed from Jdiff
-  Eigen::VectorXd x = state->rand();
+  const Eigen::VectorXd& x = state->rand();
   dx.setZero();
   state->diff(x1, x, dx);
   Eigen::VectorXd x2i(state->get_nx());
