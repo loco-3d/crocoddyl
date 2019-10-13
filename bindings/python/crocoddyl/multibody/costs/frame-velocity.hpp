@@ -19,20 +19,20 @@ namespace bp = boost::python;
 void exposeCostFrameVelocity() {
   bp::class_<CostModelFrameVelocity, bp::bases<CostModelAbstract> >(
       "CostModelFrameVelocity",
-      bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, FrameMotion, int>(
+      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameMotion, int>(
           bp::args(" self", " state", " activation", " vref", " nu"),
           "Initialize the frame velocity cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param vref: reference frame velocity\n"
-          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 3>()])
-      .def(bp::init<boost::shared_ptr<StateMultibody>, ActivationModelAbstract&, FrameMotion>(
+          ":param nu: dimension of control vector"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameMotion>(
           bp::args(" self", " state", " activation", " vref"),
           "Initialize the frame velocity cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
-          ":param vref: reference frame velocity")[bp::with_custodian_and_ward<1, 3>()])
+          ":param vref: reference frame velocity"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameMotion, int>(
           bp::args(" self", " state", " vref", " nu"),
           "Initialize the frame velocity cost model.\n\n"

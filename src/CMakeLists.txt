@@ -46,6 +46,7 @@ SET(${PROJECT_NAME}_SOURCES
   multibody/actions/free-fwddyn.cpp
   multibody/actions/contact-fwddyn.cpp
   multibody/actions/impulse-fwddyn.cpp
+  multibody/utils/quadruped-gaits.cpp
   )
 
 IF(UNIX)

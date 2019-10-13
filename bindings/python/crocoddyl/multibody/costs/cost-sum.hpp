@@ -47,6 +47,8 @@ void exposeCostSum() {
                     "cost model")
       .def_readwrite("weight", &CostItem::weight, "cost weight");
 
+  bp::register_ptr_to_python<boost::shared_ptr<CostModelSum> >();
+
   bp::class_<CostModelSum, boost::noncopyable>("CostModelSum",
                                                bp::init<boost::shared_ptr<StateMultibody>, std::size_t, bool>(
                                                    bp::args(" self", " state", " nu=state.nv", " withResiduals=True"),

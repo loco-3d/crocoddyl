@@ -23,13 +23,12 @@ void exposeIntegratedActionEuler() {
       "This class implements a sympletic Euler integrator (a.k.a semi-implicit\n"
       "integrator) give a differential action model, i.e.:\n"
       "  [q+, v+] = State.integrate([q, v], [v + a * dt, a * dt] * dt).",
-      bp::init<DifferentialActionModelAbstract*, bp::optional<double, bool> >(
+      bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, bp::optional<double, bool> >(
           bp::args(" self", " diffModel", " stepTime", " withCostResidual"),
           "Initialize the sympletic Euler integrator.\n\n"
           ":param diffModel: differential action model\n"
           ":param stepTime: step time\n"
-          ":param withCostResidual: includes the cost residuals and derivatives.")[bp::with_custodian_and_ward<1,
-                                                                                                               2>()])
+          ":param withCostResidual: includes the cost residuals and derivatives."))
       .def("calc", &IntegratedActionModelEuler::calc_wrap,
            ActionModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
                                   "Compute the time-discrete evolution of a differential action model.\n\n"
@@ -60,10 +59,10 @@ void exposeIntegratedActionEuler() {
                                                               bp::args(" self", " data", " x", " recalc"))
       .def("createData", &IntegratedActionModelEuler::createData, bp::args(" self"),
            "Create the Euler integrator data.")
-      .add_property(
-          "differential",
-          bp::make_function(&IntegratedActionModelEuler::get_differential, bp::return_internal_reference<>()),
-          "differential action model")
+      .add_property("differential",
+                    bp::make_function(&IntegratedActionModelEuler::get_differential,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "differential action model")
       .add_property(
           "dt", bp::make_function(&IntegratedActionModelEuler::get_dt, bp::return_value_policy<bp::return_by_value>()),
           &IntegratedActionModelEuler::set_dt, "step time");

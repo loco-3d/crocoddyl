@@ -18,10 +18,11 @@ namespace crocoddyl {
 
 struct ImpulseItem {
   ImpulseItem() {}
-  ImpulseItem(const std::string& name, ImpulseModelAbstract* impulse) : name(name), impulse(impulse) {}
+  ImpulseItem(const std::string& name, boost::shared_ptr<ImpulseModelAbstract> impulse)
+      : name(name), impulse(impulse) {}
 
   std::string name;
-  ImpulseModelAbstract* impulse;
+  boost::shared_ptr<ImpulseModelAbstract> impulse;
 };
 
 struct ImpulseDataMultiple;  // forward declaration
@@ -35,7 +36,7 @@ class ImpulseModelMultiple {
   explicit ImpulseModelMultiple(boost::shared_ptr<StateMultibody> state);
   ~ImpulseModelMultiple();
 
-  void addImpulse(const std::string& name, ImpulseModelAbstract* const impulse);
+  void addImpulse(const std::string& name, boost::shared_ptr<ImpulseModelAbstract> impulse);
   void removeImpulse(const std::string& name);
 
   void calc(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::Ref<const Eigen::VectorXd>& x);

@@ -17,10 +17,11 @@ namespace crocoddyl {
 
 class CostModelFrameTranslation : public CostModelAbstract {
  public:
-  CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
-                            const FrameTranslation& xref, const std::size_t& nu);
-  CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
-                            const FrameTranslation& xref);
+  CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state,
+                            boost::shared_ptr<ActivationModelAbstract> activation, const FrameTranslation& xref,
+                            const std::size_t& nu);
+  CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state,
+                            boost::shared_ptr<ActivationModelAbstract> activation, const FrameTranslation& xref);
   CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
                             const std::size_t& nu);
   CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref);

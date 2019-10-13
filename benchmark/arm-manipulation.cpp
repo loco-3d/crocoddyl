@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <ctime>
 #include <pinocchio/parsers/urdf.hpp>
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
@@ -16,7 +17,6 @@
 #include "crocoddyl/multibody/costs/control.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
-#include <ctime>
 
 int main(int argc, char* argv[]) {
   bool CALLBACKS = false;
@@ -62,16 +62,18 @@ int main(int argc, char* argv[]) {
   // Next, we need to create an action model for running and terminal knots. The
   // forward dynamics (computed using ABA) are implemented
   // inside DifferentialActionModelFullyActuated.
-  crocoddyl::DifferentialActionModelFreeFwdDynamics runningDAM(state, runningCostModel);
-  crocoddyl::DifferentialActionModelFreeFwdDynamics terminalDAM(state, terminalCostModel);
+  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> runningDAM =
+      boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(state, runningCostModel);
+  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> terminalDAM =
+      boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(state, terminalCostModel);
   Eigen::VectorXd armature(state->get_nq());
   armature << 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.;
-  runningDAM.set_armature(armature);
-  terminalDAM.set_armature(armature);
+  runningDAM->set_armature(armature);
+  terminalDAM->set_armature(armature);
   boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModel =
-      boost::make_shared<crocoddyl::IntegratedActionModelEuler>(&runningDAM, 1e-3);
+      boost::make_shared<crocoddyl::IntegratedActionModelEuler>(runningDAM, 1e-3);
   boost::shared_ptr<crocoddyl::ActionModelAbstract> terminalModel =
-      boost::make_shared<crocoddyl::IntegratedActionModelEuler>(&terminalDAM, 1e-3);
+      boost::make_shared<crocoddyl::IntegratedActionModelEuler>(terminalDAM, 1e-3);
 
   // For this optimal control problem, we define 100 knots (or running action
   // models) plus a terminal knot

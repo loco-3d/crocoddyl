@@ -14,7 +14,7 @@ ImpulseModelMultiple::ImpulseModelMultiple(boost::shared_ptr<StateMultibody> sta
 
 ImpulseModelMultiple::~ImpulseModelMultiple() {}
 
-void ImpulseModelMultiple::addImpulse(const std::string& name, ImpulseModelAbstract* const impulse) {
+void ImpulseModelMultiple::addImpulse(const std::string& name, boost::shared_ptr<ImpulseModelAbstract> impulse) {
   std::pair<ImpulseModelContainer::iterator, bool> ret =
       impulses_.insert(std::make_pair(name, ImpulseItem(name, impulse)));
   if (ret.second == false) {

@@ -37,22 +37,22 @@ void exposeImpulseMultiple() {
 
   bp::class_<ImpulseItem, boost::noncopyable>(
       "ImpulseItem", "Describe a impulse item.\n\n",
-      bp::init<std::string, ImpulseModelAbstract*>(
-          bp::args(" self", " name", " impulse"),
-          "Initialize the impulse item.\n\n"
-          ":param name: impulse name\n"
-          ":param impulse: impulse model")[bp::with_custodian_and_ward<1, 3>()])
+      bp::init<std::string, boost::shared_ptr<ImpulseModelAbstract> >(bp::args(" self", " name", " impulse"),
+                                                                      "Initialize the impulse item.\n\n"
+                                                                      ":param name: impulse name\n"
+                                                                      ":param impulse: impulse model"))
       .def_readwrite("name", &ImpulseItem::name, "impulse name")
-      .add_property("impulse", bp::make_getter(&ImpulseItem::impulse, bp::return_internal_reference<>()),
+      .add_property("impulse", bp::make_getter(&ImpulseItem::impulse, bp::return_value_policy<bp::return_by_value>()),
                     "impulse model");
+
+  bp::register_ptr_to_python<boost::shared_ptr<ImpulseModelMultiple> >();
 
   bp::class_<ImpulseModelMultiple, boost::noncopyable>(
       "ImpulseModelMultiple",
       bp::init<boost::shared_ptr<StateMultibody> >(bp::args(" self", " state"),
                                                    "Initialize the multiple impulse model.\n\n"
                                                    ":param state: state of the multibody system"))
-      .def("addImpulse", &ImpulseModelMultiple::addImpulse, bp::with_custodian_and_ward<1, 3>(),
-           bp::args(" self", " name", " impulse"),
+      .def("addImpulse", &ImpulseModelMultiple::addImpulse, bp::args(" self", " name", " impulse"),
            "Add a impulse item.\n\n"
            ":param name: impulse name\n"
            ":param impulse: impulse model")

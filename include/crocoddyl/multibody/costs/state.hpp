@@ -16,15 +16,16 @@ namespace crocoddyl {
 
 class CostModelState : public CostModelAbstract {
  public:
-  CostModelState(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
+  CostModelState(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
                  const Eigen::VectorXd& xref, const std::size_t& nu);
-  CostModelState(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation,
+  CostModelState(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
                  const Eigen::VectorXd& xref);
   CostModelState(boost::shared_ptr<StateMultibody> state, const Eigen::VectorXd& xref, const std::size_t& nu);
   CostModelState(boost::shared_ptr<StateMultibody> state, const Eigen::VectorXd& xref);
-  CostModelState(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation, const std::size_t& nu);
+  CostModelState(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
+                 const std::size_t& nu);
   CostModelState(boost::shared_ptr<StateMultibody> state, const std::size_t& nu);
-  CostModelState(boost::shared_ptr<StateMultibody> state, ActivationModelAbstract& activation);
+  CostModelState(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation);
   explicit CostModelState(boost::shared_ptr<StateMultibody> state);
 
   ~CostModelState();
@@ -46,7 +47,7 @@ struct CostDataState : public CostDataAbstract {
 
   template <typename Model>
   CostDataState(Model* const model, pinocchio::Data* const data)
-      : CostDataAbstract(model, data), Arr_Rx(model->get_activation().get_nr(), model->get_state()->get_ndx()) {
+      : CostDataAbstract(model, data), Arr_Rx(model->get_activation()->get_nr(), model->get_state()->get_ndx()) {
     Arr_Rx.fill(0);
   }
 

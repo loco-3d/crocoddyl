@@ -18,7 +18,7 @@ ContactModelMultiple::ContactModelMultiple(boost::shared_ptr<StateMultibody> sta
 
 ContactModelMultiple::~ContactModelMultiple() {}
 
-void ContactModelMultiple::addContact(const std::string& name, ContactModelAbstract* const contact) {
+void ContactModelMultiple::addContact(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact) {
   assert(contact->get_nu() == nu_ && "Contact item doesn't have the same control dimension");
   std::pair<ContactModelContainer::iterator, bool> ret =
       contacts_.insert(std::make_pair(name, ContactItem(name, contact)));

@@ -25,14 +25,14 @@ void CostModelSum::addCost(const std::string& name, boost::shared_ptr<CostModelA
   if (ret.second == false) {
     std::cout << "Warning: this cost item already existed, we cannot add it" << std::endl;
   } else {
-    nr_ += cost->get_activation().get_nr();
+    nr_ += cost->get_activation()->get_nr();
   }
 }
 
 void CostModelSum::removeCost(const std::string& name) {
   CostModelContainer::iterator it = costs_.find(name);
   if (it != costs_.end()) {
-    nr_ -= it->second.cost->get_activation().get_nr();
+    nr_ -= it->second.cost->get_activation()->get_nr();
     costs_.erase(it);
   } else {
     std::cout << "Warning: this cost item doesn't exist, we cannot remove it" << std::endl;
@@ -58,7 +58,7 @@ void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen:
     m_i.cost->calc(d_i, x, u);
     data->cost += m_i.weight * d_i->cost;
     if (with_residuals_) {
-      const std::size_t& nr_i = m_i.cost->get_activation().get_nr();
+      const std::size_t& nr_i = m_i.cost->get_activation()->get_nr();
       data->r.segment(nr, nr_i) = sqrt(m_i.weight) * d_i->r;
       nr += nr_i;
     }
@@ -96,7 +96,7 @@ void CostModelSum::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Ei
     data->Lxu += m_i.weight * d_i->Lxu;
     data->Luu += m_i.weight * d_i->Luu;
     if (with_residuals_) {
-      const std::size_t& nr_i = m_i.cost->get_activation().get_nr();
+      const std::size_t& nr_i = m_i.cost->get_activation()->get_nr();
       data->Rx.block(nr, 0, nr_i, ndx) = sqrt(m_i.weight) * d_i->Rx;
       data->Ru.block(nr, 0, nr_i, nu_) = sqrt(m_i.weight) * d_i->Ru;
       nr += nr_i;

@@ -40,6 +40,8 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ActionModel_calc_wraps, ActionModelAbstra
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ActionModel_quasiStatic_wraps, ActionModelAbstract::quasiStatic_wrap, 2, 4)
 
 void exposeActionAbstract() {
+  bp::register_ptr_to_python<boost::shared_ptr<ActionModelAbstract> >();
+
   bp::class_<ActionModelAbstract_wrap, boost::noncopyable>(
       "ActionModelAbstract",
       "Abstract class for action models.\n\n"

@@ -13,16 +13,17 @@
 namespace crocoddyl {
 
 CostModelFrameVelocity::CostModelFrameVelocity(boost::shared_ptr<StateMultibody> state,
-                                               ActivationModelAbstract& activation, const FrameMotion& vref,
-                                               const std::size_t& nu)
+                                               boost::shared_ptr<ActivationModelAbstract> activation,
+                                               const FrameMotion& vref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), vref_(vref) {
-  assert(activation_.get_nr() == 6 && "activation::nr is not equals to 6");
+  assert(activation_->get_nr() == 6 && "nr is not equals to 6");
 }
 
 CostModelFrameVelocity::CostModelFrameVelocity(boost::shared_ptr<StateMultibody> state,
-                                               ActivationModelAbstract& activation, const FrameMotion& vref)
+                                               boost::shared_ptr<ActivationModelAbstract> activation,
+                                               const FrameMotion& vref)
     : CostModelAbstract(state, activation), vref_(vref) {
-  assert(activation_.get_nr() == 6 && "activation::nr is not equals to 6");
+  assert(activation_->get_nr() == 6 && "nr is not equals to 6");
 }
 
 CostModelFrameVelocity::CostModelFrameVelocity(boost::shared_ptr<StateMultibody> state, const FrameMotion& vref,
@@ -43,7 +44,7 @@ void CostModelFrameVelocity::calc(const boost::shared_ptr<CostDataAbstract>& dat
   data->r = d->vr.toVector();
 
   // Compute the cost
-  activation_.calc(data->activation, data->r);
+  activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;
 }
 
@@ -61,7 +62,7 @@ void CostModelFrameVelocity::calcDiff(const boost::shared_ptr<CostDataAbstract>&
 
   // Compute the derivatives of the frame velocity
   const std::size_t& nv = state_->get_nv();
-  activation_.calcDiff(data->activation, data->r, recalc);
+  activation_->calcDiff(data->activation, data->r, recalc);
   data->Rx.leftCols(nv).noalias() = d->fXj * d->v_partial_dq;
   data->Rx.rightCols(nv).noalias() = d->fXj * d->v_partial_dv;
   data->Lx.noalias() = data->Rx.transpose() * data->activation->Ar;
