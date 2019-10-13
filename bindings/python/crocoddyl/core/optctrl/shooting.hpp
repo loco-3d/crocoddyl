@@ -29,6 +29,8 @@ void exposeShootingProblem() {
                           vector_to_list<ActionDataPtr, false> >();
   list_to_vector().from_python<std::vector<ActionModelPtr, std::allocator<ActionModelPtr> > >();
 
+  bp::register_ptr_to_python<boost::shared_ptr<ShootingProblem> >();
+
   bp::class_<ShootingProblem, boost::noncopyable>(
       "ShootingProblem",
       "Declare a shooting problem.\n\n"

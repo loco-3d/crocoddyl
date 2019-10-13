@@ -40,6 +40,8 @@ class ImpulseModelAbstract_wrap : public ImpulseModelAbstract, public bp::wrappe
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ImpulseModel_calcDiff_wraps, ImpulseModelAbstract::calcDiff_wrap, 2, 3)
 
 void exposeImpulseAbstract() {
+  bp::register_ptr_to_python<boost::shared_ptr<ImpulseModelAbstract> >();
+
   bp::class_<ImpulseModelAbstract_wrap, boost::noncopyable>(
       "ImpulseModelAbstract",
       "Abstract impulse model.\n\n"

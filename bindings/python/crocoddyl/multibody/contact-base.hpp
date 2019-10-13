@@ -42,6 +42,8 @@ class ContactModelAbstract_wrap : public ContactModelAbstract, public bp::wrappe
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ContactModel_calcDiff_wraps, ContactModelAbstract::calcDiff_wrap, 2, 3)
 
 void exposeContactAbstract() {
+  bp::register_ptr_to_python<boost::shared_ptr<ContactModelAbstract> >();
+
   bp::class_<ContactModelAbstract_wrap, boost::noncopyable>(
       "ContactModelAbstract",
       "Abstract rigid contact model.\n\n"

@@ -50,6 +50,8 @@ class CostModelAbstract_wrap : public CostModelAbstract, public bp::wrapper<Cost
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(CostModel_calc_wraps, CostModelAbstract::calc_wrap, 2, 3)
 
 void exposeCostMultibody() {
+  bp::register_ptr_to_python<boost::shared_ptr<CostModelAbstract> >();
+
   bp::class_<CostModelAbstract_wrap, boost::noncopyable>(
       "CostModelAbstract",
       "Abstract multibody cost model using Pinocchio.\n\n"

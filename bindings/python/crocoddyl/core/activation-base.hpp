@@ -34,6 +34,8 @@ class ActivationModelAbstract_wrap : public ActivationModelAbstract, public bp::
 };
 
 void exposeActivationAbstract() {
+  bp::register_ptr_to_python<boost::shared_ptr<ActivationModelAbstract> >();
+
   bp::class_<ActivationModelAbstract_wrap, boost::noncopyable>(
       "ActivationModelAbstract",
       "Abstract class for activation models.\n\n"

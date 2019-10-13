@@ -39,6 +39,8 @@ class ActuationModelAbstract_wrap : public ActuationModelAbstract, public bp::wr
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ActuationModel_calcDiff_wraps, ActuationModelAbstract::calcDiff_wrap, 3, 4)
 
 void exposeActuationAbstract() {
+  bp::register_ptr_to_python<boost::shared_ptr<ActuationModelAbstract> >();
+
   bp::class_<ActuationModelAbstract_wrap, boost::noncopyable>(
       "ActuationModelAbstract",
       "Abstract class for actuation models.\n\n"

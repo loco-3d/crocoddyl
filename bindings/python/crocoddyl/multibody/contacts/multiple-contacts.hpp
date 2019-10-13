@@ -45,6 +45,8 @@ void exposeContactMultiple() {
       .add_property("contact", bp::make_getter(&ContactItem::contact, bp::return_value_policy<bp::return_by_value>()),
                     "contact model");
 
+  bp::register_ptr_to_python<boost::shared_ptr<ContactModelMultiple> >();
+
   bp::class_<ContactModelMultiple, boost::noncopyable>(
       "ContactModelMultiple",
       bp::init<boost::shared_ptr<StateMultibody>, bp::optional<int> >(bp::args(" self", " state", " nu=state.nv"),

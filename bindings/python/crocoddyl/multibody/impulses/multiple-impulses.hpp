@@ -45,6 +45,8 @@ void exposeImpulseMultiple() {
       .add_property("impulse", bp::make_getter(&ImpulseItem::impulse, bp::return_value_policy<bp::return_by_value>()),
                     "impulse model");
 
+  bp::register_ptr_to_python<boost::shared_ptr<ImpulseModelMultiple> >();
+
   bp::class_<ImpulseModelMultiple, boost::noncopyable>(
       "ImpulseModelMultiple",
       bp::init<boost::shared_ptr<StateMultibody> >(bp::args(" self", " state"),
