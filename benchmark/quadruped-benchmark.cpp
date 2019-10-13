@@ -9,16 +9,14 @@
 #include <ctime>
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/parsers/srdf.hpp>
-#include <pinocchio/multibody/joint/fwd.hpp>
 #include "quadruped-gaits.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
-#include "crocoddyl/core/solvers/ddp.hpp"
+#include "crocoddyl/core/solvers/fddp.hpp"
 
 int main(int argc, char* argv[]) {
-  bool CALLBACKS = true;
+  bool CALLBACKS = false;
   unsigned int T = 5e3;  // number of trials
-  unsigned int MAXITER = 1;//1000;
-
+  unsigned int MAXITER = 1;
   if (argc > 1) {
     T = atoi(argv[1]);
   }
@@ -38,7 +36,7 @@ int main(int argc, char* argv[]) {
   // DDP Solver
   boost::shared_ptr<crocoddyl::ShootingProblem> problem =
       gait.createWalkingProblem(x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots);
-  crocoddyl::SolverDDP ddp(problem);
+  crocoddyl::SolverFDDP ddp(problem);
   if (CALLBACKS) {
     std::vector<boost::shared_ptr<crocoddyl::CallbackAbstract> > cbs;
     cbs.push_back(boost::make_shared<crocoddyl::CallbackVerbose>());
@@ -47,7 +45,7 @@ int main(int argc, char* argv[]) {
 
   // Initial State
   const std::size_t& N = ddp.get_problem()->get_T();
-  const std::vector<Eigen::VectorXd> xs(N + 1, x0);
+  std::vector<Eigen::VectorXd> xs(N + 1, x0);
   std::vector<Eigen::VectorXd> us(N, Eigen::VectorXd::Zero(problem->get_runningModels()[0]->get_nu()));
   for (std::size_t i = 0; i < N; ++i) {
     const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = problem->get_runningModels()[i];
@@ -59,7 +57,6 @@ int main(int argc, char* argv[]) {
   struct timespec start, finish;
   double elapsed;
   Eigen::ArrayXd duration(T);
-  Eigen::ArrayXi nIters(T);
   for (unsigned int i = 0; i < T; ++i) {
     clock_gettime(CLOCK_MONOTONIC, &start);
     ddp.solve(xs, us, MAXITER, false, 0.1);
@@ -67,7 +64,6 @@ int main(int argc, char* argv[]) {
     elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
     elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;
     duration[i] = elapsed / 1000.;
-    nIters[i] = static_cast<int>(ddp.get_iter());
   }
 
   double avrg_duration = duration.mean();
@@ -75,7 +71,6 @@ int main(int argc, char* argv[]) {
   double max_duration = duration.maxCoeff();
   std::cout << "  DDP.solve [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
             << std::endl;
-  std::cout << "  DDP.solve Mean Iter : " << nIters.mean() << std::endl;
 
   // Running calc
   for (unsigned int i = 0; i < T; ++i) {
@@ -90,7 +85,7 @@ int main(int argc, char* argv[]) {
   avrg_duration = duration.sum() / T;
   min_duration = duration.minCoeff();
   max_duration = duration.maxCoeff();
-  std::cout << "  Shootingproblem->calc [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
+  std::cout << "  ShootingProblem.calc [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
             << std::endl;
 
   // Running calcDiff
@@ -106,6 +101,6 @@ int main(int argc, char* argv[]) {
   avrg_duration = duration.sum() / T;
   min_duration = duration.minCoeff();
   max_duration = duration.maxCoeff();
-  std::cout << "  Shootingproblem->calcDiff [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration
+  std::cout << "  ShootingProblem.calcDiff [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration
             << ")" << std::endl;
 }

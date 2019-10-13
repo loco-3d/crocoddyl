@@ -85,7 +85,7 @@ boost::shared_ptr<crocoddyl::ShootingProblem> SimpleQuadrupedGaitProblem::create
   if (firstStep_) {
     rhStep = createFootStepModels(timeStep, comRef, rhFootPos0vec, 0.5 * stepLength, stepHeight, stepKnots,
                                   legs_lf_rf_lh, rhFoot);
-    rfStep = createFootStepModels(timeStep, comRef, rhFootPos0vec, 0.5 * stepLength, stepHeight, stepKnots,
+    rfStep = createFootStepModels(timeStep, comRef, rfFootPos0vec, 0.5 * stepLength, stepHeight, stepKnots,
                                   legs_lf_lh_rh, rfFoot);
     firstStep_ = false;
   } else {
@@ -100,11 +100,11 @@ boost::shared_ptr<crocoddyl::ShootingProblem> SimpleQuadrupedGaitProblem::create
                                 lfFoot);
 
   loco3dModel.insert(loco3dModel.end(), doubleSupport.begin(), doubleSupport.end());
-  // loco3dModel.insert(loco3dModel.end(), rhStep.begin(), rhStep.end());
-  // loco3dModel.insert(loco3dModel.end(), rfStep.begin(), rfStep.end());
-  // loco3dModel.insert(loco3dModel.end(), doubleSupport.begin(), doubleSupport.end());
-  // loco3dModel.insert(loco3dModel.end(), lhStep.begin(), lhStep.end());
-  // loco3dModel.insert(loco3dModel.end(), lfStep.begin(), lfStep.end());
+  loco3dModel.insert(loco3dModel.end(), rhStep.begin(), rhStep.end());
+  loco3dModel.insert(loco3dModel.end(), rfStep.begin(), rfStep.end());
+  loco3dModel.insert(loco3dModel.end(), doubleSupport.begin(), doubleSupport.end());
+  loco3dModel.insert(loco3dModel.end(), lhStep.begin(), lhStep.end());
+  loco3dModel.insert(loco3dModel.end(), lfStep.begin(), lfStep.end());
 
   return boost::make_shared<crocoddyl::ShootingProblem>(x0, loco3dModel, loco3dModel.back());
 }
@@ -114,7 +114,7 @@ std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > SimpleQuadrupedG
     double stepHeight, std::size_t numKnots, const std::vector<pinocchio::FrameIndex>& supportFootIds,
     const std::vector<pinocchio::FrameIndex>& swingFootIds) {
   std::size_t numLegs = static_cast<std::size_t>(supportFootIds.size() + swingFootIds.size());
-  double comPercentage = static_cast<double>(swingFootIds.size() / numLegs);
+  double comPercentage = static_cast<double>(swingFootIds.size()) / static_cast<double>(numLegs);
 
   // Action models for the foot swing
   std::vector<boost::shared_ptr<ActionModelAbstract> > footSwingModel;
@@ -136,6 +136,7 @@ std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > SimpleQuadrupedG
       else
         dp << stepLength * _kp1_n, 0., stepHeight * (1 - (_k - _phKnots) / _phKnots);
       Eigen::Vector3d tref = feetPos0[i] + dp;
+
       swingFootTask.push_back(
           crocoddyl::FramePlacement(swingFootIds[i], pinocchio::SE3(Eigen::Matrix3d::Identity(), tref)));
     }
@@ -172,7 +173,7 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> SimpleQuadrupedGaitProblem::cr
   // Creating the cost model for a contact phase
   boost::shared_ptr<crocoddyl::CostModelSum> costModel =
       boost::make_shared<crocoddyl::CostModelSum>(state_, actuation_->get_nu());
-  if (!comTask.array().allFinite()) {
+  if (comTask.array().allFinite()) {
     boost::shared_ptr<crocoddyl::CostModelAbstract> comTrack =
         boost::make_shared<crocoddyl::CostModelCoMPosition>(state_, comTask, actuation_->get_nu());
     costModel->addCost("comTrack", comTrack, 1e4);
@@ -258,7 +259,7 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> SimpleQuadrupedGaitProblem::cr
       boost::make_shared<crocoddyl::CostModelState>(state_, stateActivation, defaultState_, actuation_->get_nu());
   boost::shared_ptr<crocoddyl::CostModelAbstract> ctrlReg =
       boost::make_shared<crocoddyl::CostModelControl>(state_, actuation_->get_nu());
-  costModel->addCost("stateReg", stateReg, 1e-1);
+  costModel->addCost("stateReg", stateReg, 1e1);
   costModel->addCost("ctrlReg", ctrlReg, 1e-3);
 
   // Creating the action model for the KKT dynamics with simpletic Euler integration scheme
@@ -287,7 +288,7 @@ boost::shared_ptr<ActionModelAbstract> SimpleQuadrupedGaitProblem::createImpulse
          ++it) {
       crocoddyl::FrameTranslation xref(it->frame, it->oMf.translation());
       boost::shared_ptr<crocoddyl::CostModelAbstract> footTrack =
-          boost::make_shared<crocoddyl::CostModelFrameTranslation>(state_, xref, actuation_->get_nu());
+          boost::make_shared<crocoddyl::CostModelFrameTranslation>(state_, xref, 0);
       costModel->addCost(rmodel_.frames[it->frame].name + "_footTrack", footTrack, 1e7);
     }
   }
@@ -298,7 +299,7 @@ boost::shared_ptr<ActionModelAbstract> SimpleQuadrupedGaitProblem::createImpulse
   boost::shared_ptr<crocoddyl::ActivationModelAbstract> stateActivation =
       boost::make_shared<crocoddyl::ActivationModelWeightedQuad>(stateWeights);
   boost::shared_ptr<crocoddyl::CostModelAbstract> stateReg =
-      boost::make_shared<crocoddyl::CostModelState>(state_, stateActivation, defaultState_, actuation_->get_nu());
+      boost::make_shared<crocoddyl::CostModelState>(state_, stateActivation, defaultState_, 0);
   costModel->addCost("stateReg", stateReg, 1e1);
 
   // Creating the action model for the KKT dynamics with simpletic Euler integration scheme

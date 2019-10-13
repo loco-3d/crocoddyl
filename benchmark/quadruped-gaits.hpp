@@ -5,26 +5,26 @@
 #include <cmath>
 #include <limits>
 
-#include <crocoddyl/multibody/actions/contact-fwddyn.hpp>
-#include <crocoddyl/multibody/actions/impulse-fwddyn.hpp>
-#include <crocoddyl/multibody/actuations/floating-base.hpp>
-#include <crocoddyl/multibody/impulses/impulse-3d.hpp>
-#include <crocoddyl/multibody/contacts/contact-3d.hpp>
-#include <crocoddyl/multibody/costs/frame-translation.hpp>
-#include <crocoddyl/multibody/costs/frame-velocity.hpp>
-#include <crocoddyl/multibody/costs/com-position.hpp>
-#include <crocoddyl/multibody/costs/state.hpp>
-#include <crocoddyl/multibody/costs/control.hpp>
-#include <crocoddyl/core/activations/weighted-quadratic.hpp>
-#include <crocoddyl/core/integrator/euler.hpp>
-#include <crocoddyl/core/optctrl/shooting.hpp>
-
 #include <pinocchio/spatial/se3.hpp>
 #include <pinocchio/multibody/model.hpp>
 #include <pinocchio/multibody/frame.hpp>
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/center-of-mass.hpp>
 #include <pinocchio/algorithm/kinematics.hpp>
+
+#include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
+#include "crocoddyl/multibody/actions/impulse-fwddyn.hpp"
+#include "crocoddyl/core/integrator/euler.hpp"
+#include "crocoddyl/multibody/actuations/floating-base.hpp"
+#include "crocoddyl/multibody/contacts/contact-3d.hpp"
+#include "crocoddyl/multibody/impulses/impulse-3d.hpp"
+#include "crocoddyl/multibody/costs/com-position.hpp"
+#include "crocoddyl/multibody/costs/frame-translation.hpp"
+#include "crocoddyl/multibody/costs/frame-velocity.hpp"
+#include "crocoddyl/multibody/costs/state.hpp"
+#include "crocoddyl/multibody/costs/control.hpp"
+#include "crocoddyl/core/activations/weighted-quadratic.hpp"
+#include "crocoddyl/core/optctrl/shooting.hpp"
 
 namespace crocoddyl {
 
