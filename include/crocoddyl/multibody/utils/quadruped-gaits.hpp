@@ -1,9 +1,13 @@
-#include <iostream>
-#include <string>
-#include <vector>
-#include <list>
-#include <cmath>
-#include <limits>
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+#ifndef CROCODDYL_MULTIBODY_UTILS_QUADRUPED_GAITS_HPP_
+#define CROCODDYL_MULTIBODY_UTILS_QUADRUPED_GAITS_HPP_
 
 #include <pinocchio/spatial/se3.hpp>
 #include <pinocchio/multibody/model.hpp>
@@ -72,3 +76,5 @@ class SimpleQuadrupedGaitProblem {
   Eigen::VectorXd defaultstate_;
 };
 }  // namespace crocoddyl
+
+#endif  // CROCODDYL_MULTIBODY_UTILS_QUADRUPED_GAITS_HPP_

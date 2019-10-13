@@ -9,7 +9,7 @@
 #include <ctime>
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/parsers/srdf.hpp>
-#include "quadruped-gaits.hpp"
+#include "crocoddyl/multibody/utils/quadruped-gaits.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/solvers/fddp.hpp"
 

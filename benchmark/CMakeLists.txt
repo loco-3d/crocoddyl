@@ -2,14 +2,12 @@ SET(${PROJECT_NAME}_BENCHMARK
   unicycle
   lqr
   arm-manipulation
+  quadruped-benchmark
   )
 
 FOREACH(BENCHMARK_NAME ${${PROJECT_NAME}_BENCHMARK})
   ADD_EXECUTABLE(${BENCHMARK_NAME} ${BENCHMARK_NAME}.cpp)
 ENDFOREACH(BENCHMARK_NAME ${${PROJECT_NAME}_BENCHMARK})
-
-#Quadruped benchmark
-ADD_EXECUTABLE(quadruped-benchmark quadruped-benchmark.cpp quadruped-gaits.cpp)
 
 list(APPEND ${PROJECT_NAME}_BENCHMARK quadruped-benchmark)
 
