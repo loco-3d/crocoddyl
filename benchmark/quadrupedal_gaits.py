@@ -3,11 +3,14 @@ from crocoddyl.utils.quadruped import SimpleQuadrupedalGaitProblem
 import pinocchio
 import example_robot_data
 import numpy as np
+import os
 import sys
 import time
+import subprocess
 
 T = int(sys.argv[1]) if (len(sys.argv) > 1) else int(5e3)  # number of trials
 MAXITER = 1
+CALLBACKS = False
 WALKING = 'walk' in sys.argv
 TROTTING = 'trot' in sys.argv
 PACING = 'pace' in sys.argv
@@ -71,8 +74,9 @@ def createProblem(gait_phase):
 
 
 def runDDPSolveBenchmark(xs, us, problem):
-    ddp = crocoddyl.SolverDDP(problem)
-
+    ddp = crocoddyl.SolverFDDP(problem)
+    if CALLBACKS:
+        ddp.setCallbacks([crocoddyl.CallbackVerbose()])
     duration = []
     for i in range(T):
         c_start = time.time()
@@ -167,6 +171,9 @@ elif GAIT == 'jumping':
     }
 
 print('\033[1m')
+print('C++:')
+popen = subprocess.check_call([os.path.dirname(os.path.abspath(__file__)) + "/quadrupedal-gaits", str(T)])
+
 print('Python bindings:')
 xs, us, problem = createProblem(GAITPHASE)
 avrg_duration, min_duration, max_duration = runDDPSolveBenchmark(xs, us, problem)
