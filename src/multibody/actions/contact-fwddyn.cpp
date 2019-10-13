@@ -61,7 +61,7 @@ void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<Dif
   Eigen::FullPivLU<Eigen::MatrixXd> Jc_lu(d->contacts->Jc);
 
   if (Jc_lu.rank() < d->contacts->Jc.rows()) {
-    assert(JMinvJt_damping_ > 0. && "It is needed a damping factor since the contact Jacobian is not full-rank");
+    assert(JMinvJt_damping_ > 0. && "A damping factor is needed as the contact Jacobian is not full-rank");
   }
 #endif
 

@@ -23,7 +23,7 @@ IntegratedActionModelEuler::IntegratedActionModelEuler(boost::shared_ptr<Differe
     lb.tail(ntau) = differential_->get_u_lb();
     set_u_lb(lb);
 
-    Eigen::VectorXd ub = Eigen::VectorXd::Constant(nu_, -std::numeric_limits<double>::infinity());
+    Eigen::VectorXd ub = Eigen::VectorXd::Constant(nu_, std::numeric_limits<double>::infinity());
     ub.tail(ntau) = differential_->get_u_ub();
     set_u_ub(ub);
   } else {

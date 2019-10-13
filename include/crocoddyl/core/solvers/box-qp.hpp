@@ -42,7 +42,7 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
   Eigen::VectorXd delta_xf(x_init.size()), x = x_init;
   std::vector<size_t> clamped_idx, free_idx;
   Eigen::VectorXd grad = q + H * x_init;
-  Eigen::MatrixXd Hff, Hfc, Hff_inv;
+  Eigen::MatrixXd Hff, Hfc, Hff_inv(H.rows(), H.cols());
   Eigen::LLT<Eigen::MatrixXd> Hff_inv_llt = Eigen::LLT<Eigen::MatrixXd>(H.rows());
 
   Hff_inv_llt.compute(Eigen::MatrixXd::Identity(H.rows(), H.cols()) * lambda + H);

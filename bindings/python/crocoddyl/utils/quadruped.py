@@ -407,7 +407,7 @@ class SimpleQuadrupedalGaitProblem:
         model = crocoddyl.IntegratedActionModelEuler(dmodel, timeStep)
         return model
 
-    def createFootSwitchModel(self, supportFootIds, swingFootTask, pseudoImpulse=True):
+    def createFootSwitchModel(self, supportFootIds, swingFootTask, pseudoImpulse=False):
         """ Action model for a foot switch phase.
 
         :param supportFootIds: Ids of the constrained feet
@@ -461,7 +461,7 @@ class SimpleQuadrupedalGaitProblem:
         model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.)
         return model
 
-    def createImpulseModel(self, supportFootIds, swingFootTask):
+    def createImpulseModel(self, supportFootIds, swingFootTask, JMinvJt_damping=1e-12, r_coeff=0.0):
         """ Action model for impulse models.
 
         An impulse model consists of describing the impulse dynamics against a set of contacts.
@@ -491,6 +491,8 @@ class SimpleQuadrupedalGaitProblem:
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
         model = crocoddyl.ActionModelImpulseFwdDynamics(self.state, impulseModel, costModel)
+        model.JMinvJt_damping = JMinvJt_damping
+        model.r_coeff = r_coeff
         return model
 
 
