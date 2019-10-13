@@ -30,8 +30,8 @@ namespace crocoddyl {
 
 class SimpleQuadrupedGaitProblem {
  public:
-  SimpleQuadrupedGaitProblem(const pinocchio::Model& rmodel, const std::string& lfFoot, const std::string& rfFoot,
-                             const std::string& lhFoot, const std::string& rhFoot);
+  SimpleQuadrupedGaitProblem(const pinocchio::Model& rmodel, const std::string& lf_foot, const std::string& rf_foot,
+                             const std::string& lh_foot, const std::string& rh_foot);
   ~SimpleQuadrupedGaitProblem();
 
   boost::shared_ptr<crocoddyl::ShootingProblem> createWalkingProblem(const Eigen::VectorXd& x0,
@@ -60,15 +60,15 @@ class SimpleQuadrupedGaitProblem {
   boost::shared_ptr<ActionModelAbstract> createImpulseModel(const std::vector<pinocchio::FrameIndex>& supportFootIds,
                                                             const std::vector<FramePlacement>& swingFootTask);
 
-  const Eigen::VectorXd& get_defaultState() const { return defaultState_; };
+  const Eigen::VectorXd& get_defaultState() const;
 
  protected:
   pinocchio::Model rmodel_;
   pinocchio::Data rdata_;
-  pinocchio::FrameIndex lfFootId_, rfFootId_, lhFootId_, rhFootId_;
+  pinocchio::FrameIndex lf_foot_id_, rf_foot_id_, lh_foot_id_, rh_foot_id_;
   boost::shared_ptr<StateMultibody> state_;
   boost::shared_ptr<ActuationModelFloatingBase> actuation_;
-  bool firstStep_;
-  Eigen::VectorXd defaultState_;
+  bool firtstep_;
+  Eigen::VectorXd defaultstate_;
 };
 }  // namespace crocoddyl
