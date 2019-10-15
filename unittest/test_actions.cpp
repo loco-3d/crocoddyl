@@ -9,80 +9,15 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
-#include <iterator>
-#include <Eigen/Dense>
-#include <pinocchio/fwd.hpp>
-#include <boost/test/included/unit_test.hpp>
-#include <boost/bind.hpp>
-#include "crocoddyl/core/action-base.hpp"
-#include "crocoddyl/core/actions/lqr.hpp"
-#include "crocoddyl/core/actions/unicycle.hpp"
-#include "crocoddyl/core/actions/diff-lqr.hpp"
-#include "crocoddyl/core/numdiff/action.hpp"
+#include "crocoddyl_action_factory.hpp"
+#include "crocoddyl_unittest_common.hpp"
 
 using namespace boost::unit_test;
-
-struct TestTypes {
-  enum Type { ActionModelUnicycle, ActionModelLQRDriftFree, ActionModelLQR, NbTestTypes };
-  static std::vector<Type> init_all() {
-    std::vector<Type> v;
-    v.clear();
-    for (int i = 0; i < NbTestTypes; ++i) {
-      v.push_back((Type)i);
-    }
-    return v;
-  }
-  static const std::vector<Type> all;
-};
-const std::vector<TestTypes::Type> TestTypes::all(TestTypes::init_all());
-
-class ActionModelFactory {
- public:
-  ActionModelFactory(TestTypes::Type type) {
-    num_diff_modifier_ = 1e4;
-    action_type_ = type;
-
-    switch (action_type_) {
-      case TestTypes::ActionModelUnicycle:
-        nx_ = 3;
-        nu_ = 2;
-        action_model_ = boost::make_shared<crocoddyl::ActionModelUnicycle>();
-        break;
-      case TestTypes::ActionModelLQRDriftFree:
-        nx_ = 80;
-        nu_ = 40;
-        action_model_ = boost::make_shared<crocoddyl::ActionModelLQR>(nx_, nu_, true);
-        break;
-      case TestTypes::ActionModelLQR:
-        nx_ = 80;
-        nu_ = 40;
-        action_model_ = boost::make_shared<crocoddyl::ActionModelLQR>(nx_, nu_, false);
-        break;
-      default:
-        throw std::runtime_error(__FILE__ ": Wrong TestTypes::Type given");
-        break;
-    }
-  }
-
-  ~ActionModelFactory() {}
-
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> get_action_model() { return action_model_; }
-
-  const std::size_t& get_nx() { return nx_; }
-  double get_num_diff_modifier() { return num_diff_modifier_; }
-
- private:
-  std::size_t nx_;
-  std::size_t nu_;
-  double num_diff_modifier_;
-  bool driftfree_;
-  TestTypes::Type action_type_;
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> action_model_;
-};
+using namespace crocoddyl_unit_test;
 
 //----------------------------------------------------------------------------//
 
-void test_construct_data(TestTypes::Type action_model_type) {
+void test_construct_data(ActionModelTypes::Type action_model_type) {
   // create the model
   ActionModelFactory factory(action_model_type);
   const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.get_action_model();
@@ -91,7 +26,7 @@ void test_construct_data(TestTypes::Type action_model_type) {
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
 }
 
-void test_calc_returns_state(TestTypes::Type action_model_type) {
+void test_calc_returns_state(ActionModelTypes::Type action_model_type) {
   // create the model
   ActionModelFactory factory(action_model_type);
   const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.get_action_model();
@@ -110,7 +45,7 @@ void test_calc_returns_state(TestTypes::Type action_model_type) {
   BOOST_CHECK(factory.get_nx() == model->get_state()->get_nx());
 }
 
-void test_calc_returns_a_cost(TestTypes::Type action_model_type) {
+void test_calc_returns_a_cost(ActionModelTypes::Type action_model_type) {
   // create the model
   ActionModelFactory factory(action_model_type);
   const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.get_action_model();
@@ -128,7 +63,7 @@ void test_calc_returns_a_cost(TestTypes::Type action_model_type) {
   BOOST_CHECK(!std::isnan(data->cost));
 }
 
-void test_partial_derivatives_against_numdiff(TestTypes::Type action_model_type) {
+void test_partial_derivatives_against_numdiff(ActionModelTypes::Type action_model_type) {
   // create the model
   ActionModelFactory factory(action_model_type);
   const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.get_action_model();
@@ -166,7 +101,7 @@ void test_partial_derivatives_against_numdiff(TestTypes::Type action_model_type)
 
 //----------------------------------------------------------------------------//
 
-void register_action_model_unit_tests(TestTypes::Type action_model_type) {
+void register_action_model_unit_tests(ActionModelTypes::Type action_model_type) {
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_construct_data, action_model_type)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_state, action_model_type)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, action_model_type)));
@@ -175,8 +110,8 @@ void register_action_model_unit_tests(TestTypes::Type action_model_type) {
 }
 
 bool init_function() {
-  for (size_t i = 0; i < TestTypes::all.size(); ++i) {
-    register_action_model_unit_tests(TestTypes::all[i]);
+  for (size_t i = 0; i < ActionModelTypes::all.size(); ++i) {
+    register_action_model_unit_tests(ActionModelTypes::all[i]);
   }
   return true;
 }
