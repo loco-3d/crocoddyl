@@ -19,7 +19,7 @@ ImpulseModel6D::~ImpulseModel6D() {}
 
 void ImpulseModel6D::calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
                           const Eigen::Ref<const Eigen::VectorXd>&) {
-  ImpulseData6D* d = static_cast<ImpulseData6D*>(data.get());
+  boost::shared_ptr<ImpulseData6D> d = boost::static_pointer_cast<ImpulseData6D>(data);
 
   pinocchio::getFrameJacobian(state_->get_pinocchio(), *d->pinocchio, frame_, pinocchio::LOCAL, d->Jc);
 }
@@ -30,7 +30,7 @@ void ImpulseModel6D::calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data
     calc(data, x);
   }
 
-  ImpulseData6D* d = static_cast<ImpulseData6D*>(data.get());
+  boost::shared_ptr<ImpulseData6D> d = boost::static_pointer_cast<ImpulseData6D>(data);
   pinocchio::getJointVelocityDerivatives(state_->get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                          d->v_partial_dq, d->v_partial_dv);
   d->dv0_dq.noalias() = d->fXj * d->v_partial_dq;
@@ -38,7 +38,7 @@ void ImpulseModel6D::calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data
 
 void ImpulseModel6D::updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force) {
   assert(force.size() == 6 && "force has wrong dimension, it should be 6d vector");
-  ImpulseData6D* d = static_cast<ImpulseData6D*>(data.get());
+  boost::shared_ptr<ImpulseData6D> d = boost::static_pointer_cast<ImpulseData6D>(data);
   data->f = d->jMf.act(pinocchio::Force(force));
 }
 

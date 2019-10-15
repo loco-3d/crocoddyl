@@ -24,13 +24,14 @@ void test_construct_data(ImpulseModelTypes::Type test_type) {
   boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
 }
 
-void test_calc_returns_state(ImpulseModelTypes::Type /*test_type*/) {
-  // // create the model
-  // ImpulseModelFactory factory(test_type);
-  // boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.get_model();
+void test_calc_returns_jacobian(ImpulseModelTypes::Type test_type) {
+  // create the model
+  ImpulseModelFactory factory(test_type);
+  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.get_model();
 
-  // // create the corresponding data object
-  // boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData();
+  // create the corresponding data object
+  pinocchio::Data pinocchio_data (factory.get_state_factory()->get_pinocchio_model());
+  boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
 
   // // Generating random state and control vectors
   // Eigen::VectorXd x = model->get_state().rand();
@@ -42,31 +43,14 @@ void test_calc_returns_state(ImpulseModelTypes::Type /*test_type*/) {
   // BOOST_CHECK(data->xout.size() == model->get_state().get_nv());
 }
 
-void test_calc_returns_a_cost(ImpulseModelTypes::Type /*test_type*/) {
-  // // create the model
-  // ImpulseModelFactory factory(test_type);
-  // boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.get_model();
+void test_partial_derivatives_against_numdiff(ImpulseModelTypes::Type test_type) {
+  // create the model
+  ImpulseModelFactory factory(test_type);
+  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.get_model();
 
-  // // create the corresponding data object and set the cost to nan
-  // boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData();
-  // data->cost = nan("");
-
-  // // Getting the cost value computed by calc()
-  // Eigen::VectorXd x = model->get_state().rand();
-  // Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
-  // model->calc(data, x, u);
-
-  // // Checking that calc returns a cost value
-  // BOOST_CHECK(!std::isnan(data->cost));
-}
-
-void test_partial_derivatives_against_numdiff(ImpulseModelTypes::Type /*test_type*/) {
-  // // create the model
-  // ImpulseModelFactory factory(test_type);
-  // boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.get_model();
-
-  // // create the corresponding data object and set the cost to nan
-  // boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData();
+  // create the corresponding data object
+  pinocchio::Data pinocchio_data (factory.get_state_factory()->get_pinocchio_model());
+  boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
 
   // crocoddyl::DifferentialActionModelNumDiff model_num_diff(*model);
   // boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data_num_diff = model_num_diff.createData();
@@ -98,17 +82,16 @@ void test_partial_derivatives_against_numdiff(ImpulseModelTypes::Type /*test_typ
 
 //----------------------------------------------------------------------------//
 
-void register_action_model_unit_tests(ImpulseModelTypes::Type test_type) {
+void register_unit_tests(ImpulseModelTypes::Type test_type) {
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_construct_data, test_type)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_state, test_type)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, test_type)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_jacobian, test_type)));
   framework::master_test_suite().add(
       BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, test_type)));
 }
 
 bool init_function() {
   for (size_t i = 0; i < ImpulseModelTypes::all.size(); ++i) {
-    register_action_model_unit_tests(ImpulseModelTypes::all[i]);
+    register_unit_tests(ImpulseModelTypes::all[i]);
   }
   return true;
 }

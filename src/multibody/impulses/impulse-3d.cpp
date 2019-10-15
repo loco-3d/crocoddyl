@@ -19,7 +19,7 @@ ImpulseModel3D::~ImpulseModel3D() {}
 
 void ImpulseModel3D::calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
                           const Eigen::Ref<const Eigen::VectorXd>&) {
-  ImpulseData3D* d = static_cast<ImpulseData3D*>(data.get());
+  boost::shared_ptr<ImpulseData3D> d = boost::static_pointer_cast<ImpulseData3D>(data);
 
   pinocchio::getFrameJacobian(state_->get_pinocchio(), *d->pinocchio, frame_, pinocchio::LOCAL, d->fJf);
   d->Jc = d->fJf.topRows<3>();
@@ -31,7 +31,7 @@ void ImpulseModel3D::calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data
     calc(data, x);
   }
 
-  ImpulseData3D* d = static_cast<ImpulseData3D*>(data.get());
+  boost::shared_ptr<ImpulseData3D> d = boost::static_pointer_cast<ImpulseData3D>(data);
   pinocchio::getJointVelocityDerivatives(state_->get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                          d->v_partial_dq, d->v_partial_dv);
   d->dv0_dq.noalias() = d->fXj.topRows<3>() * d->v_partial_dq;
@@ -39,7 +39,7 @@ void ImpulseModel3D::calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data
 
 void ImpulseModel3D::updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force) {
   assert(force.size() == 3 && "force has wrong dimension, it should be 3d vector");
-  ImpulseData3D* d = static_cast<ImpulseData3D*>(data.get());
+  boost::shared_ptr<ImpulseData3D> d = boost::static_pointer_cast<ImpulseData3D>(data);
   data->f = d->jMf.act(pinocchio::Force(force, Eigen::Vector3d::Zero()));
 }
 
