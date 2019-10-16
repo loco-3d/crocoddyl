@@ -15,6 +15,7 @@ class CostModelPinocchio:
     can be retrieved from Pinocchio data, through the calc and calcDiff
     functions, respectively.
     """
+
     def __init__(self, pinocchioModel, ncost, withResiduals=True, nu=None):
         self.ncost = ncost
         self.nq = pinocchioModel.nq
@@ -40,6 +41,7 @@ class CostDataPinocchio:
 
     It stores the data corresponting to the CostModelPinocchio class.
     """
+
     def __init__(self, model, pinocchioData):
         ncost, nv, ndx, nu = model.ncost, model.nv, model.ndx, model.nu
         self.pinocchio = pinocchioData
@@ -70,6 +72,7 @@ class CostDataPinocchio:
 class CostModelNumDiff(CostModelPinocchio):
     """ Abstract cost model that uses NumDiff for derivative computation.
     """
+
     def __init__(self, costModel, State, withGaussApprox=False, reevals=[]):
         '''
         reevals is a list of lambdas of (pinocchiomodel,pinocchiodata,x,u) to be

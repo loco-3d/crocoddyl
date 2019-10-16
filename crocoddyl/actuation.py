@@ -13,12 +13,12 @@ class ActuationModelDoublePendulum:
         self.actLink = actLink
 
     def calc(self, data, x, u):
-        S = np.zeros([self.nv,self.nu])
+        S = np.zeros([self.nv, self.nu])
         if self.actLink == 1:
             S[0] = 1
         else:
             S[1] = 1
-        data.a[:] = np.dot(S,u)
+        data.a[:] = np.dot(S, u)
         return data.a
 
     def calcDiff(self, data, x, u, recalc=True):
@@ -29,6 +29,7 @@ class ActuationModelDoublePendulum:
     def createData(self, pinocchioData):
         return ActuationDataDoublePendulum(self, pinocchioData)
 
+
 class ActuationDataDoublePendulum:
     def __init__(self, model, pinocchioData):
         self.pinocchio = pinocchioData
@@ -38,9 +39,9 @@ class ActuationDataDoublePendulum:
         self.Ax = self.A[:, :ndx]
         self.Au = self.A[:, ndx:]
         if model.actLink == 1:
-            self.Au[0,0] = 1
+            self.Au[0, 0] = 1
         else:
-            self.Au[1,0] = 1
+            self.Au[1, 0] = 1
 
 
 class ActuationModelUAM:
@@ -63,12 +64,11 @@ class ActuationModelUAM:
         self.cf = coefF
 
     def calc(self, data, x, u):
-        # data.a[2:] = u
         d, cf, cm = self.d, self.cf, self.cf
-        S = np.array(np.zeros([self.nv,self.nu]))
-        S[2:6,:4] = np.array([[1,1,1,1],[-d,d,d,-d],[-d,d,-d,d],[-cm/cf,-cm/cf,cm/cf,cm/cf]])
+        S = np.array(np.zeros([self.nv, self.nu]))
+        S[2:6, :4] = np.array([[1, 1, 1, 1], [-d, d, d, -d], [-d, d, -d, d], [-cm / cf, -cm / cf, cm / cf, cm / cf]])
         np.fill_diagonal(S[6:, 4:], 1)
-        data.a = np.dot(S,u)
+        data.a = np.dot(S, u)
         return data.a
 
     def calcDiff(self, data, x, u, recalc=True):
@@ -79,6 +79,7 @@ class ActuationModelUAM:
     def createData(self, pinocchioData):
         return ActuationDataUAM(self, pinocchioData)
 
+
 class ActuationDataUAM:
     def __init__(self, model, pinocchioData):
         self.pinocchio = pinocchioData
@@ -88,9 +89,9 @@ class ActuationDataUAM:
         self.A = np.zeros([nv, ndx + nu])  # result of calcDiff
         self.Ax = self.A[:, :ndx]
         self.Au = self.A[:, ndx:]
-        self.Au[2:6,:4] = np.array([[1,1,1,1],[-d,d,d,-d],[-d,d,-d,d],[-cm/cf,-cm/cf,cm/cf,cm/cf]])
+        self.Au[2:6, :4] = np.array([[1, 1, 1, 1], [-d, d, d, -d], [-d, d, -d, d], [-cm / cf, -cm / cf, cm / cf, cm / cf]])
         np.fill_diagonal(self.Au[6:, 4:], 1)
-        #np.fill_diagonal(self.Au[2:, :], 1)
+        # np.fill_diagonal(self.Au[2:, :], 1)
 # This is the matrix that, given a force vector representing the four motors, outputs the thrust and moment
 # [      0,      0,     0,     0]
 # [      0,      0,     0,     0]
@@ -105,6 +106,7 @@ class ActuationModelFreeFloating:
     This model transforms an actuation u into a joint torque tau.
     We implement here the simplest model: tau = S.T*u, where S is constant.
     '''
+
     def __init__(self, pinocchioModel):
         self.pinocchio = pinocchioModel
         if (pinocchioModel.joints[1].shortname() != 'JointModelFreeFlyer'):
