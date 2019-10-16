@@ -10,11 +10,12 @@
 #define CROCODDYL_CORE_SOLVERS_KKT_HPP_
 
 // TODO: SolverKKT
-
-#include "crocoddyl/core/solver-base.hpp"
-#include <Eigen/Cholesky>
 #include <Eigen/Dense>
-#include <numeric>
+#include <Eigen/Cholesky>
+#include "crocoddyl/core/solver-base.hpp"
+
+
+
 
 namespace crocoddyl {
 
@@ -30,35 +31,29 @@ class SolverKKT : public SolverAbstract {
   double tryStep(const double& steplength = 1);
   double stoppingCriteria();
   const Eigen::Vector2d& expectedImprovement();
-  // for testing purposes remove later and check matrix dimensions instead
-  const int& get_nx() const;
-  const int& get_ndx() const;
-  const int& get_nu() const;
-  const Eigen::MatrixXd& get_kkt() const;
-  const Eigen::VectorXd& get_kktref() const;
 
  protected:
   double regfactor_;
   double regmin_;
   double regmax_;
-  int nx_;
-  int ndx_;
-  int nu_;
   double cost_try_;
   std::vector<Eigen::VectorXd> xs_try_;
   std::vector<Eigen::VectorXd> us_try_;
-  // the vectors below are used to store results of compute direction
+
+ private:
+  int nx_;
+  int ndx_;
+  int nu_;
   std::vector<Eigen::VectorXd> dxs_;
   std::vector<Eigen::VectorXd> dus_;
   std::vector<Eigen::VectorXd> lambdas_;
-
- private:
   void allocateData();
   double calc();
   void computePrimalDual();
   void increaseRegularization();
   void decreaseRegularization();
   // allocate data
+  //
   Eigen::MatrixXd kkt_;
   Eigen::VectorXd kktref_;
   Eigen::VectorXd primaldual_;
@@ -68,6 +63,10 @@ class SolverKKT : public SolverAbstract {
   double th_grad_;
   double th_step_;
   bool was_feasible_;
+  Eigen::LLT<Eigen::MatrixXd> kkt_llt_;
+  Eigen::VectorXd kkt_primal_; 
+
+
 };
 
 }  // namespace crocoddyl
