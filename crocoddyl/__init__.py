@@ -30,7 +30,7 @@ from .impact import (ActionDataImpact, ActionModelImpact, CostModelImpactCoM, Co
 from .integrated_action import (IntegratedActionDataEuler, IntegratedActionDataRK4, IntegratedActionModelEuler,
                                 IntegratedActionModelRK4)
 from .kkt import SolverKKT
-from .robots import getTalosPathFromRos, loadHyQ, loadTalos, loadTalosArm, loadTalosLegs, loadKinton, loadKintonArm, loadBorinotArm
+from .robots import getTalosPathFromRos, loadHyQ, loadTalos, loadTalosArm, loadTalosLegs, loadKinton, loadKintonArm, load2dofPlanar, loadHector
 from .shooting import ShootingProblem
 from .solver import SolverAbstract
 from .state import StateAbstract, StateNumDiff, StatePinocchio, StateVector

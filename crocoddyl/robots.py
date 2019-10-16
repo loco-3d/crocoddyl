@@ -142,9 +142,15 @@ def loadKintonArm(modelPath='/opt/openrobots/share/example-robot-data'):
     robot = RobotWrapper.BuildFromURDF(modelPath + URDF_SUBPATH, [modelPath])
     return robot
 
-def loadBorinotArm(modelPath='/opt/openrobots/share/example-robot-data'):
-    URDF_FILENAME = "borinot_arm.urdf"
-    URDF_SUBPATH = "/borinot_arm/urdf/" + URDF_FILENAME
+def load2dofPlanar(modelPath='/home/pepms/robotics/other-tools/robot-data'):
+    URDF_FILENAME = "2dof_planar.urdf"
+    URDF_SUBPATH = "/2dof_planar/urdf/" + URDF_FILENAME
     robot = RobotWrapper.BuildFromURDF(modelPath + URDF_SUBPATH, [modelPath], None)
     robot.q0.flat = [np.pi]
+    return robot
+
+def loadHector(modelPath='/home/pepms/robotics/other-tools/robot-data'):
+    URDF_FILENAME = "quadrotor_base.urdf"
+    URDF_SUBPATH = "/hector-description/urdf/" + URDF_FILENAME
+    robot = RobotWrapper.BuildFromURDF(modelPath + URDF_SUBPATH, [modelPath], pinocchio.JointModelFreeFlyer())
     return robot
