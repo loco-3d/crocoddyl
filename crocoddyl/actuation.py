@@ -2,8 +2,9 @@ import warnings
 
 import numpy as np
 
+
 class ActuationModelDoublePendulum:
-    def __init__(self, pinocchioModel,actLink):
+    def __init__(self, pinocchioModel, actLink):
         self.pinocchio = pinocchioModel
         self.nq = pinocchioModel.nq
         self.nv = pinocchioModel.nv
@@ -50,7 +51,7 @@ class ActuationModelUAM:
     We implement here the simplest model: tau = S.T*u, where S is constant.
     '''
 
-    def __init__(self, pinocchioModel, rotorDistance, coefM, coefF):
+    def __init__(self, pinocchioModel, quadrotorType, rotorDistance, coefM, coefF):
         self.pinocchio = pinocchioModel
         if (pinocchioModel.joints[1].shortname() != 'JointModelFreeFlyer'):
             warnings.warn('Strange that the first joint is not a freeflyer')
@@ -59,6 +60,16 @@ class ActuationModelUAM:
         self.nx = self.nq + self.nv
         self.ndx = self.nv * 2
         self.nu = self.nv - 2
+        # quadrotorType (from top view)
+        # X Type -> Motor 1: Front Right, CCW
+        #           Motor 2: Back Left, CCW
+        #           Motor 3: Front Left, CW
+        #           Motor 4: Back Right, CW
+        # + Type -> Motor 1: Front, CCW
+        #           Motor 2: Left, CCW
+        #           Motor 3: Back, CW
+        #           Motor 4: Right, CW
+        self.type = quadrotorType
         self.d = rotorDistance
         self.cm = coefM
         self.cf = coefF
@@ -66,7 +77,11 @@ class ActuationModelUAM:
     def calc(self, data, x, u):
         d, cf, cm = self.d, self.cf, self.cf
         S = np.array(np.zeros([self.nv, self.nu]))
-        S[2:6, :4] = np.array([[1, 1, 1, 1], [-d, d, d, -d], [-d, d, -d, d], [-cm / cf, -cm / cf, cm / cf, cm / cf]])
+        if self.type == 'x':
+            S[2:6, :4] = np.array([[1, 1, 1, 1], [-d, d, d, -d], [-d, d, -d, d], [-cm / cf, -cm / cf, cm / cf, cm / cf]])
+        elif self.type == '+':
+            S[2:6, :4] = np.array([[1, 1, 1, 1], [0, d, 0, -d], [-d, 0, d, 0], [-cm / cf, cm / cf, -cm / cf, cm / cf]])
+
         np.fill_diagonal(S[6:, 4:], 1)
         data.a = np.dot(S, u)
         return data.a
@@ -83,22 +98,17 @@ class ActuationModelUAM:
 class ActuationDataUAM:
     def __init__(self, model, pinocchioData):
         self.pinocchio = pinocchioData
-        ndx, nv, nu = model.ndx, model.nv, model.nu
+        type, ndx, nv, nu = model.type, model.ndx, model.nv, model.nu
         d, cf, cm = model.d, model.cf, model.cf
         self.a = np.zeros(nv)  # result of calc
         self.A = np.zeros([nv, ndx + nu])  # result of calcDiff
         self.Ax = self.A[:, :ndx]
         self.Au = self.A[:, ndx:]
-        self.Au[2:6, :4] = np.array([[1, 1, 1, 1], [-d, d, d, -d], [-d, d, -d, d], [-cm / cf, -cm / cf, cm / cf, cm / cf]])
+        if type == 'x':
+            self.Au[2:6, :4] = np.array([[1, 1, 1, 1], [-d, d, d, -d], [-d, d, -d, d], [-cm / cf, -cm / cf, cm / cf, cm / cf]])
+        elif type == '+':
+            self.Au[2:6, :4] = np.array([[1, 1, 1, 1], [0, d, 0, -d], [-d, 0, d, 0], [-cm / cf, cm / cf, -cm / cf, cm / cf]])
         np.fill_diagonal(self.Au[6:, 4:], 1)
-        # np.fill_diagonal(self.Au[2:, :], 1)
-# This is the matrix that, given a force vector representing the four motors, outputs the thrust and moment
-# [      0,      0,     0,     0]
-# [      0,      0,     0,     0]
-# [      1,      1,     1,     1]
-# [     -d,      d,    -d,     d]
-# [     -d,     -d,     d,     d]
-# [ -cm/cf, -cm/cf, cm/cf, cm/cf]
 
 
 class ActuationModelFreeFloating:
