@@ -67,16 +67,16 @@ void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0,
            && static_cast<std::size_t>(Jfirst.cols()) == ndx_
            && "Jfirst must be of the good size");
     Jfirst.setZero();
-    NColAlignedVectorBlock dx_ = Jfirst.rightCols<1>();
-    MatrixBlock Jdq_ = Jfirst.bottomLeftCorner(nv_, nv_);
+    NColAlignedVectorBlock dx = Jfirst.rightCols<1>();
+    MatrixBlock Jdq = Jfirst.bottomLeftCorner(nv_, nv_);
 
-    diff(x1, x0, dx_);
-    pinocchio::dIntegrate(pinocchio_, x1.head(nq_), dx_.topRows(nv_),
-                          Jdq_ , pinocchio::ARG1);
-    updateJdiff(Jdq_, Jfirst.topLeftCorner(nv_, nv_), false);
+    diff(x1, x0, dx);
+    pinocchio::dIntegrate(pinocchio_, x1.head(nq_), dx.topRows(nv_),
+                          Jdq , pinocchio::ARG1);
+    updateJdiff(Jdq, Jfirst.topLeftCorner(nv_, nv_), false);
 
-    Jdq_.setZero();
-    dx_.setZero();
+    Jdq.setZero();
+    dx.setZero();
     Jfirst.bottomRightCorner(nv_, nv_).diagonal() = -Eigen::VectorXd::Ones(nv_);
   } else if (firstsecond == second) {
     assert(static_cast<std::size_t>(Jsecond.rows()) == ndx_
@@ -84,16 +84,16 @@ void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0,
            && "Jsecond must be of the good size");
 
     Jsecond.setZero();
-    NColAlignedVectorBlock dx_ = Jsecond.rightCols<1>();
-    MatrixBlock Jdq_ = Jsecond.bottomLeftCorner(nv_, nv_);
+    NColAlignedVectorBlock dx = Jsecond.rightCols<1>();
+    MatrixBlock Jdq = Jsecond.bottomLeftCorner(nv_, nv_);
 
-    diff(x0, x1, dx_);
-    pinocchio::dIntegrate(pinocchio_, x0.head(nq_), dx_.topRows(nv_),
-                          Jdq_, pinocchio::ARG1);
-    updateJdiff(Jdq_, Jsecond.topLeftCorner(nv_, nv_));
+    diff(x0, x1, dx);
+    pinocchio::dIntegrate(pinocchio_, x0.head(nq_), dx.topRows(nv_),
+                          Jdq, pinocchio::ARG1);
+    updateJdiff(Jdq, Jsecond.topLeftCorner(nv_, nv_));
 
-    Jdq_.setZero();
-    dx_.setZero();
+    Jdq.setZero();
+    dx.setZero();
     Jsecond.bottomRightCorner(nv_, nv_).diagonal() = Eigen::VectorXd::Ones(nv_);
   } else {  // computing both
     assert(static_cast<std::size_t>(Jfirst.rows()) == ndx_ && static_cast<std::size_t>(Jfirst.cols()) == ndx_ &&
@@ -104,28 +104,28 @@ void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0,
     Jsecond.setZero();
 
     // Computing Jfirst
-    NColAlignedVectorBlock dx1_ = Jfirst.rightCols<1>();
-    MatrixBlock Jdq1_ = Jfirst.bottomLeftCorner(nv_, nv_);
+    NColAlignedVectorBlock dx1 = Jfirst.rightCols<1>();
+    MatrixBlock Jdq1 = Jfirst.bottomLeftCorner(nv_, nv_);
     
-    diff(x1, x0, dx1_);
-    pinocchio::dIntegrate(pinocchio_, x1.head(nq_), dx1_.topRows(nv_),
-                          Jdq1_, pinocchio::ARG1);
-    updateJdiff(Jdq1_, Jfirst.topLeftCorner(nv_, nv_), false);
-    Jdq1_.setZero();
-    dx1_.setZero();
+    diff(x1, x0, dx1);
+    pinocchio::dIntegrate(pinocchio_, x1.head(nq_), dx1.topRows(nv_),
+                          Jdq1, pinocchio::ARG1);
+    updateJdiff(Jdq1, Jfirst.topLeftCorner(nv_, nv_), false);
+    Jdq1.setZero();
+    dx1.setZero();
     Jfirst.bottomRightCorner(nv_, nv_).diagonal() = -Eigen::VectorXd::Ones(nv_);
 
     // Computing Jsecond
-    NColAlignedVectorBlock dx2_ = Jsecond.rightCols<1>();
-    MatrixBlock Jdq2_ = Jsecond.bottomLeftCorner(nv_, nv_);
+    NColAlignedVectorBlock dx2 = Jsecond.rightCols<1>();
+    MatrixBlock Jdq2 = Jsecond.bottomLeftCorner(nv_, nv_);
     
-    diff(x0, x1, dx2_);
-    pinocchio::dIntegrate(pinocchio_, x0.head(nq_), dx2_.topRows(nv_),
-                          Jdq2_, pinocchio::ARG1);
-    updateJdiff(Jdq2_, Jsecond.topLeftCorner(nv_, nv_));
+    diff(x0, x1, dx2);
+    pinocchio::dIntegrate(pinocchio_, x0.head(nq_), dx2.topRows(nv_),
+                          Jdq2, pinocchio::ARG1);
+    updateJdiff(Jdq2, Jsecond.topLeftCorner(nv_, nv_));
 
-    dx2_.setZero();
-    Jdq2_.setZero();
+    dx2.setZero();
+    Jdq2.setZero();
     Jsecond.bottomRightCorner(nv_, nv_).diagonal() = Eigen::VectorXd::Ones(nv_);
   }
 }
