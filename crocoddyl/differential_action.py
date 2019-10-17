@@ -323,6 +323,7 @@ class DifferentialActionDataNumDiff:
             self.Lxu = self.L[:ndx, ndx:]
             self.Luu = self.L[ndx:, ndx:]
 
+
 class DifferentialActionModelActuated(DifferentialActionModelAbstract):
     def __init__(self, pinocchioModel, actuationModel, costModel):
         DifferentialActionModelAbstract.__init__(self, pinocchioModel.nq, pinocchioModel.nv, actuationModel.nu)
