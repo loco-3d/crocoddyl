@@ -20,9 +20,9 @@ StateMultibody::StateMultibody(pinocchio::Model& model)
 
 StateMultibody::~StateMultibody() {}
 
-Eigen::VectorXd StateMultibody::zero() { return x0_; }
+Eigen::VectorXd StateMultibody::zero() const { return x0_; }
 
-Eigen::VectorXd StateMultibody::rand() {
+Eigen::VectorXd StateMultibody::rand() const {
   Eigen::VectorXd xrand = Eigen::VectorXd::Random(nx_);
   xrand.head(nq_) = pinocchio::randomConfiguration(pinocchio_);
   return xrand;
@@ -30,7 +30,7 @@ Eigen::VectorXd StateMultibody::rand() {
 
 void StateMultibody::diff(const Eigen::Ref<const Eigen::VectorXd>& x0,
                           const Eigen::Ref<const Eigen::VectorXd>& x1,
-                          Eigen::Ref<Eigen::VectorXd> dxout) {
+                          Eigen::Ref<Eigen::VectorXd> dxout) const {
   assert(static_cast<std::size_t>(x0.size()) == nx_ && "x0 has wrong dimension");
   assert(static_cast<std::size_t>(x1.size()) == nx_ && "x1 has wrong dimension");
   assert(static_cast<std::size_t>(dxout.size()) == ndx_ && "Output must be pre-allocated");
@@ -41,7 +41,7 @@ void StateMultibody::diff(const Eigen::Ref<const Eigen::VectorXd>& x0,
 
 void StateMultibody::integrate(const Eigen::Ref<const Eigen::VectorXd>& x,
                                const Eigen::Ref<const Eigen::VectorXd>& dx,
-                               Eigen::Ref<Eigen::VectorXd> xout) {
+                               Eigen::Ref<Eigen::VectorXd> xout) const {
   assert(static_cast<std::size_t>(x.size()) == nx_ && "x has wrong dimension");
   assert(static_cast<std::size_t>(dx.size()) == ndx_ && "dx has wrong dimension");
   assert(static_cast<std::size_t>(xout.size()) == nx_ && "Output must be pre-allocated");
@@ -54,7 +54,7 @@ void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0,
                            const Eigen::Ref<const Eigen::VectorXd>& x1,
                            Eigen::Ref<Eigen::MatrixXd> Jfirst,
                            Eigen::Ref<Eigen::MatrixXd> Jsecond,
-                           Jcomponent firstsecond) {
+                           Jcomponent firstsecond) const {
   assert(static_cast<std::size_t>(x0.size()) == nx_ && "x0 has wrong dimension");
   assert(static_cast<std::size_t>(x1.size()) == nx_ && "x1 has wrong dimension");
   assert(is_a_Jcomponent(firstsecond) && ("firstsecond must be one of the Jcomponent {both, first, second}"));
@@ -134,7 +134,7 @@ void StateMultibody::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x,
                                 const Eigen::Ref<const Eigen::VectorXd>& dx,
                                 Eigen::Ref<Eigen::MatrixXd> Jfirst,
                                 Eigen::Ref<Eigen::MatrixXd> Jsecond,
-                                Jcomponent firstsecond) {
+                                Jcomponent firstsecond) const {
   assert(static_cast<std::size_t>(x.size()) == nx_ && "x has wrong dimension");
   assert(static_cast<std::size_t>(dx.size()) == ndx_ && "dx has wrong dimension");
   assert((firstsecond == first || firstsecond == second || firstsecond == both) &&
@@ -180,7 +180,7 @@ pinocchio::Model& StateMultibody::get_pinocchio() const { return pinocchio_; }
 
 void StateMultibody::updateJdiff(const Eigen::Ref<const Eigen::MatrixXd>& Jdq,
                                  Eigen::Ref<Eigen::MatrixXd> Jd,
-                                 bool positive) {
+                                 bool positive) const {
   if (positive) {
     Jd.diagonal() = Jdq.diagonal();
     Jd.block<6, 6>(0, 0) = Jdq.block<6, 6>(0, 0).inverse();
