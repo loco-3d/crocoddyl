@@ -20,12 +20,12 @@ class StateNumDiff : public StateAbstract {
   explicit StateNumDiff(boost::shared_ptr<StateAbstract> state);
   ~StateNumDiff();
 
-  Eigen::VectorXd zero();
-  Eigen::VectorXd rand();
+  Eigen::VectorXd zero() const;
+  Eigen::VectorXd rand() const;
   void diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-            Eigen::Ref<Eigen::VectorXd> dxout);
+            Eigen::Ref<Eigen::VectorXd> dxout) const;
   void integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
-                 Eigen::Ref<Eigen::VectorXd> xout);
+                 Eigen::Ref<Eigen::VectorXd> xout) const;
   /**
    * @brief This computes the Jacobian of the diff method by finite
    * differentiation:
@@ -42,7 +42,7 @@ class StateNumDiff : public StateAbstract {
    * @param firstsecond
    */
   void Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent firstsecond = both);
+             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent firstsecond = both) const;
   /**
    * @brief This computes the Jacobian of the integrate method by finite
    * differentiation:
@@ -60,8 +60,8 @@ class StateNumDiff : public StateAbstract {
    */
   void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                   Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
-                  Jcomponent firstsecond = both);
-  const double& get_disturbance() { return disturbance_; }
+                  Jcomponent firstsecond = both) const;
+  const double& get_disturbance() const { return disturbance_; }
 
  private:
   /**
@@ -73,31 +73,8 @@ class StateNumDiff : public StateAbstract {
    * @brief This the increment used in the finite differentiation and integration.
    */
   double disturbance_;
-  /**
-   * @brief This is the vector containing the small element during the finite
-   * differentiation and integration. This is a temporary variable but used
-   * quiet often. For sake of memory management we allocate it once in the
-   * constructor of this class.
-   */
-  Eigen::VectorXd dx_;
-  /**
-   * @brief This is the result of diff(x0, x1, dx0_) in the finite
-   * differentiation. This is the state difference around which to compute
-   * the jacobians of the finite difference.
-   */
-  Eigen::VectorXd dx0_;
-  /**
-   * @brief This is the result of integrate(x, dx x0_) in the finite
-   * integration. This is the state around which to compute the jacobians of
-   * the finite integrate
-   */
-  Eigen::VectorXd x0_;
-  /**
-   * @brief This is the vector containing the result of an integration. This is
-   * a temporary variable but used quiet often. For sake of memory management we
-   * allocate it once in the constructor of this class.
-   */
-  Eigen::VectorXd tmp_x_;
+
+
 };
 
 }  // namespace crocoddyl

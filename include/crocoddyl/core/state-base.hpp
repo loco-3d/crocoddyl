@@ -26,18 +26,18 @@ class StateAbstract {
   StateAbstract(const std::size_t& nx, const std::size_t& ndx);
   virtual ~StateAbstract();
 
-  virtual Eigen::VectorXd zero() = 0;
-  virtual Eigen::VectorXd rand() = 0;
+  virtual Eigen::VectorXd zero() const = 0;
+  virtual Eigen::VectorXd rand() const = 0;
   virtual void diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-                    Eigen::Ref<Eigen::VectorXd> dxout) = 0;
+                    Eigen::Ref<Eigen::VectorXd> dxout) const = 0;
   virtual void integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
-                         Eigen::Ref<Eigen::VectorXd> xout) = 0;
+                         Eigen::Ref<Eigen::VectorXd> xout) const = 0;
   virtual void Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
                      Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
-                     Jcomponent firstsecond = both) = 0;
+                     Jcomponent firstsecond = both) const = 0;
   virtual void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                           Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
-                          Jcomponent firstsecond = both) = 0;
+                          Jcomponent firstsecond = both) const = 0;
 
   const std::size_t& get_nx() const;
   const std::size_t& get_ndx() const;
