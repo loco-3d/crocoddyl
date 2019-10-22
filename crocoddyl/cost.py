@@ -320,6 +320,7 @@ class CostModelFrameVelocityLinear(CostModelPinocchio):
     end-effector. It assumes that updateFramePlacement and computeForwardKinematicsDerivatives
     have been runned.
     """
+
     def __init__(self, pinocchioModel, frame, ref=None, nu=None, activation=None):
         self.CostDataType = CostDataFrameVelocityLinear
         CostModelPinocchio.__init__(self, pinocchioModel, ncost=3)

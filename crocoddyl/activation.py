@@ -8,6 +8,7 @@ class ActivationModelAbstract:
     the activation value and its derivatives from it. Activation value and
     its derivatives are computed by calc() and calcDiff(), respectively.
     """
+
     def __init__(self):
         self.ActivationDataType = ActivationDataAbstract
 
@@ -78,6 +79,7 @@ class ActivationModelInequality(ActivationModelAbstract):
     a(r) = (r**2)/2 for r<b_l.
     a(r) = 0. for b_l<=r<=b_u
     """
+
     def __init__(self, lowerLimit, upperLimit, beta=None):
         assert ((lowerLimit <= upperLimit).all())
         assert (not np.any(np.isinf(lowerLimit)) and not np.any(np.isinf(upperLimit)) or beta is None)
@@ -95,6 +97,7 @@ class ActivationModelInequality(ActivationModelAbstract):
 
     def calc(self, data, r):
         '''Return [ a(r_1) ... a(r_n) ] '''
+        # return np.minimum(r - self.lower, 0)**2 / 2 + np.maximum(r - self.upper, 0)**2 / 2
         return np.minimum(r - self.lower, 0)**2 / 2 + np.maximum(r - self.upper, 0)**2 / 2
 
     def calcDiff(self, data, r, recalc=True):
@@ -111,6 +114,45 @@ class ActivationModelInequality(ActivationModelAbstract):
 
 
 class ActivationDataInequality(ActivationDataAbstract):
+    def __init__(self, model):
+        pass
+
+
+class ActivationModelInequalityCont(ActivationModelAbstract):
+
+    def __init__(self, lowerLimit, upperLimit, beta=None):
+        assert ((lowerLimit <= upperLimit).all())
+        assert (not np.any(np.isinf(lowerLimit)) and not np.any(np.isinf(upperLimit)) or beta is None)
+        self.ActivationDataType = ActivationDataInequalityCont
+
+        if beta is None:
+            self.beta = 0
+            self.lower = lowerLimit
+            self.upper = upperLimit
+        else:
+            assert (beta > 0 and beta <= 1)
+            self.beta = beta
+
+        self.m = (lowerLimit + upperLimit) / 2
+        self.d = (upperLimit - lowerLimit) / 2
+        self.lower = self.m - self.beta * self.d
+        self.upper = self.m + self.beta * self.d
+
+    def calc(self, data, r):
+        '''Return [ a(r_1) ... a(r_n) ] '''
+        return ((r - self.m) / self.d)**6
+
+    def calcDiff(self, data, r, recalc=True):
+        if recalc:
+            self.calc(data, r)
+
+        return 6 * ((r - self.m) / self.d)**5, (30 * ((r - self.m) / self.d)**4)[:, None]
+
+    def createData(self):
+        return ActivationDataInequalityCont(self)
+
+
+class ActivationDataInequalityCont(ActivationDataAbstract):
     def __init__(self, model):
         pass
 

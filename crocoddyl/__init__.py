@@ -1,7 +1,7 @@
 from .action import (ActionDataAbstract, ActionDataLQR, ActionDataNumDiff, ActionModelAbstract, ActionModelLQR,
                      ActionModelNumDiff)
-from .activation import (ActivationDataInequality, ActivationDataQuad, ActivationDataSmoothAbs,
-                         ActivationDataWeightedQuad, ActivationModelInequality, ActivationModelQuad,
+from .activation import (ActivationDataInequality, ActivationDataInequalityCont, ActivationDataQuad, ActivationDataSmoothAbs,
+                         ActivationDataWeightedQuad, ActivationModelInequality, ActivationModelInequalityCont, ActivationModelQuad,
                          ActivationModelSmoothAbs, ActivationModelWeightedQuad)
 from .actuation import (ActuationDataFreeFloating, ActuationDataFull, ActuationDataUAM, ActuationDataDoublePendulum,
                         ActuationModelFreeFloating, ActuationModelFull, ActuationModelUAM, ActuationModelDoublePendulum)
