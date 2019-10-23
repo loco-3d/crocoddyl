@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>crocoddyl</name>
+  <version>1.0.0</version>
+  <description>Crocoddyl optimal control library</description>
+  <!-- The maintainer listed here is for the ROS release to receive emails for the buildfarm. 
+  Please check the repository URL for project maintainer. -->
+  <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
+  <license>BSD</license>
+
+  <url type="website">https://github.com/loco-3d/crocoddyl</url>
+
+  <build_depend>git</build_depend>
+  <depend>python</depend>
+  <depend>python-numpy</depend>
+  <depend>boost</depend>
+  <depend>eigenpy</depend>
+  <depend>example-robot-data</depend>
+  <depend>pinocchio</depend>
+
+  <buildtool_depend>cmake</buildtool_depend>
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+</package>
