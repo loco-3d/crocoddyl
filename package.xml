@@ -3,9 +3,12 @@
   <name>crocoddyl</name>
   <version>1.0.0</version>
   <description>Crocoddyl optimal control library</description>
-  <!-- The maintainer listed here is for the ROS release to receive emails for the buildfarm. 
-  Please check the repository URL for project maintainer. -->
+  <!-- The maintainers listed here are for receiving emails e.g. from the ROS buildfarm. 
+  Please check the README.md at the repository URL for additional detail. -->
+  <maintainer email="carlos.mastalli@gmail.com">Carlos Mastalli</maintainer>
   <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
+
+  <!-- Please refer to README.md for list of authors/credits. -->
   <license>BSD</license>
 
   <url type="website">https://github.com/loco-3d/crocoddyl</url>
