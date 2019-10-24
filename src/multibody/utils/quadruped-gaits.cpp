@@ -195,7 +195,8 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> SimpleQuadrupedGaitProblem::cr
   state_weights.head<3>().fill(0.);
   state_weights.segment<3>(3).fill(pow(500., 2));
   state_weights.segment(6, rmodel_.nv - 6).fill(pow(0.01, 2));
-  state_weights.segment(rmodel_.nv, rmodel_.nv).fill(pow(10., 2));
+  state_weights.segment(rmodel_.nv, 6).fill(pow(10., 2));
+  state_weights.segment(rmodel_.nv + 6, rmodel_.nv - 6).fill(pow(1., 2));
   boost::shared_ptr<crocoddyl::ActivationModelAbstract> state_activation =
       boost::make_shared<crocoddyl::ActivationModelWeightedQuad>(state_weights);
   boost::shared_ptr<crocoddyl::CostModelAbstract> state_reg =
@@ -203,7 +204,7 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> SimpleQuadrupedGaitProblem::cr
   boost::shared_ptr<crocoddyl::CostModelAbstract> ctrl_reg =
       boost::make_shared<crocoddyl::CostModelControl>(state_, actuation_->get_nu());
   cost_model->addCost("stateReg", state_reg, 1e-1);
-  cost_model->addCost("ctrlReg", ctrl_reg, 1e-4);
+  cost_model->addCost("ctrlReg", ctrl_reg, 1e-3);
 
   // Creating the action model for the KKT dynamics with simpletic Euler integration scheme
   boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> dmodel =
