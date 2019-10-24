@@ -20,19 +20,20 @@ namespace bp = boost::python;
 class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstract> {
  public:
   StateAbstract_wrap(int nx, int ndx) : StateAbstract(nx, ndx), bp::wrapper<StateAbstract>() {}
-  
+
   Eigen::VectorXd zero() const { return bp::call<Eigen::VectorXd>(this->get_override("zero").ptr()); }
 
   Eigen::VectorXd rand() const { return bp::call<Eigen::VectorXd>(this->get_override("rand").ptr()); }
 
-  Eigen::VectorXd diff_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1) const {
+  Eigen::VectorXd diff_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0,
+                            const Eigen::Ref<const Eigen::VectorXd>& x1) const {
     assert(static_cast<std::size_t>(x0.size()) == nx_ && "x0 has wrong dimension");
     assert(static_cast<std::size_t>(x1.size()) == nx_ && "x1 has wrong dimension");
     return bp::call<Eigen::VectorXd>(this->get_override("diff").ptr(), (Eigen::VectorXd)x0, (Eigen::VectorXd)x1);
   }
 
   void diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-            Eigen::Ref<Eigen::VectorXd> dxout) const  {
+            Eigen::Ref<Eigen::VectorXd> dxout) const {
     dxout = diff_wrap(x0, x1);
   }
 
@@ -99,7 +100,8 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
   }
 
   void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
-                  Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent _firstsecond) const {
+                  Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
+                  Jcomponent _firstsecond) const {
     std::string firstsecond;
     switch (_firstsecond) {
       case first: {
@@ -129,7 +131,7 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
   }
 
   bp::list Jintegrate_wrap(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
-                           std::string firstsecond) const{
+                           std::string firstsecond) const {
     assert((firstsecond == "both" || firstsecond == "first" || firstsecond == "second") &&
            "firstsecond must be one of the Jcomponent {both, first, second}");
     assert(static_cast<std::size_t>(x.size()) == nx_ && "x has wrong dimension");

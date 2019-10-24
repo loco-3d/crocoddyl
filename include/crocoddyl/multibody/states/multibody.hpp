@@ -26,7 +26,8 @@ class StateMultibody : public StateAbstract {
   void integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                  Eigen::Ref<Eigen::VectorXd> xout) const;
   void Jdiff(const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>&,
-             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent firstsecond = both) const;
+             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
+             Jcomponent firstsecond = both) const;
   void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>&,
                   Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
                   Jcomponent firstsecond = both) const;
@@ -34,8 +35,7 @@ class StateMultibody : public StateAbstract {
   pinocchio::Model& get_pinocchio() const;
 
  private:
-  void updateJdiff(const Eigen::Ref<const Eigen::MatrixXd>& Jdq,
-                   Eigen::Ref<Eigen::MatrixXd> Jd_,
+  void updateJdiff(const Eigen::Ref<const Eigen::MatrixXd>& Jdq, Eigen::Ref<Eigen::MatrixXd> Jd_,
                    bool positive = true) const;
 
   pinocchio::Model& pinocchio_;

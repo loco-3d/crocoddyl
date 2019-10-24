@@ -42,7 +42,8 @@ class StateNumDiff : public StateAbstract {
    * @param firstsecond
    */
   void Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent firstsecond = both) const;
+             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
+             Jcomponent firstsecond = both) const;
   /**
    * @brief This computes the Jacobian of the integrate method by finite
    * differentiation:
@@ -73,8 +74,6 @@ class StateNumDiff : public StateAbstract {
    * @brief This the increment used in the finite differentiation and integration.
    */
   double disturbance_;
-
-
 };
 
 }  // namespace crocoddyl
