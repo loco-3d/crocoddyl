@@ -21,9 +21,6 @@
 #include <boost/bind.hpp>
 #include <boost/test/included/unit_test.hpp>
 
-namespace crocoddyl_unit_test {
+namespace crocoddyl_unit_test {}  // namespace crocoddyl_unit_test
 
-
-} // namespace crocoddyl_unit_test
-
-#endif // CROCODDYL_UNITTEST_COMMON_HPP_
+#endif  // CROCODDYL_UNITTEST_COMMON_HPP_

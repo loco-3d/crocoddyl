@@ -6,7 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/parsers/sample-models.hpp>
 
@@ -94,7 +93,7 @@ class StateFactory {
   boost::shared_ptr<crocoddyl::StateAbstract> get_state() { return state_; }
   const std::size_t& get_nx() { return nx_; }
   double get_num_diff_modifier() { return num_diff_modifier_; }
-  const pinocchio::Model& get_pinocchio_model(){return pinocchio_model_;}
+  const pinocchio::Model& get_pinocchio_model() { return pinocchio_model_; }
 
  private:
   StateTypes::Type state_type_;                        //!< The current type to test
@@ -105,6 +104,6 @@ class StateFactory {
   pinocchio::Model pinocchio_model_;                   //!< The pinocchio_model to build the StateMultibody.
 };
 
-} // namespace crocoddyl_unit_test
+}  // namespace crocoddyl_unit_test
 
-#endif // CROCODDYL_STATE_FACTORY_HPP_
+#endif  // CROCODDYL_STATE_FACTORY_HPP_

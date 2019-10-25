@@ -78,6 +78,6 @@ class ActionModelFactory {
   boost::shared_ptr<crocoddyl::ActionModelAbstract> action_model_;
 };
 
-} // namespace crocoddyl_unit_test
+}  // namespace crocoddyl_unit_test
 
-#endif // CROCODDYL_ACTION_FACTORY_HPP_
+#endif  // CROCODDYL_ACTION_FACTORY_HPP_

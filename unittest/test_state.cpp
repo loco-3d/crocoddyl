@@ -6,7 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #include "crocoddyl_state_factory.hpp"
 #include "crocoddyl_unittest_common.hpp"
 

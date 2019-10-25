@@ -18,15 +18,17 @@
 namespace crocoddyl_unit_test {
 
 struct ImpulseModelTypes {
-  enum Type { ImpulseModel3DTalosArm,
-              ImpulseModel3DHyQ,
-              ImpulseModel3DTalos,
-              ImpulseModel3DRandomHumanoid,
-              ImpulseModel6DTalosArm,
-              ImpulseModel6DHyQ,
-              ImpulseModel6DTalos,
-              ImpulseModel6DRandomHumanoid,
-              NbImpulseModelTypes };
+  enum Type {
+    ImpulseModel3DTalosArm,
+    ImpulseModel3DHyQ,
+    ImpulseModel3DTalos,
+    ImpulseModel3DRandomHumanoid,
+    ImpulseModel6DTalosArm,
+    ImpulseModel6DHyQ,
+    ImpulseModel6DTalos,
+    ImpulseModel6DRandomHumanoid,
+    NbImpulseModelTypes
+  };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
@@ -43,7 +45,7 @@ class ImpulseModelFactory {
  public:
   ImpulseModelFactory(ImpulseModelTypes::Type type) {
     test_type_ = type;
-    
+
     size_t frame = 0;
     boost::shared_ptr<crocoddyl::StateMultibody> state;
 
@@ -109,12 +111,11 @@ class ImpulseModelFactory {
   double num_diff_modifier_;
 
  private:
-  ImpulseModelTypes::Type test_type_; //!< The type of impulse to test
-  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model_; //!< The pointer to the impulse model
-  boost::shared_ptr<StateFactory> state_factory_; //!< The pointer to the multibody state factory
+  ImpulseModelTypes::Type test_type_;                         //!< The type of impulse to test
+  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model_;  //!< The pointer to the impulse model
+  boost::shared_ptr<StateFactory> state_factory_;             //!< The pointer to the multibody state factory
 };
 
+}  // namespace crocoddyl_unit_test
 
-} // namespace crocoddyl_unit_test
-
-#endif // CROCODDYL_IMPULSES_FACTORY_HPP_
+#endif  // CROCODDYL_IMPULSES_FACTORY_HPP_

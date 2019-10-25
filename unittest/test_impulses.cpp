@@ -14,7 +14,7 @@
 
 using namespace crocoddyl_unit_test;
 using namespace boost::unit_test;
-    
+
 //----------------------------------------------------------------------------//
 
 void test_construct_data(ImpulseModelTypes::Type test_type) {
@@ -23,7 +23,7 @@ void test_construct_data(ImpulseModelTypes::Type test_type) {
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.get_model();
 
   // create the corresponding data object
-  pinocchio::Data pinocchio_data (factory.get_state_factory()->get_pinocchio_model());
+  pinocchio::Data pinocchio_data(factory.get_state_factory()->get_pinocchio_model());
   boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
 }
 
@@ -33,7 +33,7 @@ void test_calc_no_computation(ImpulseModelTypes::Type test_type) {
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.get_model();
 
   // create the corresponding data object
-  pinocchio::Data pinocchio_data (factory.get_state_factory()->get_pinocchio_model());
+  pinocchio::Data pinocchio_data(factory.get_state_factory()->get_pinocchio_model());
   boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
 
   // Getting the jacobian from the model
@@ -54,7 +54,7 @@ void test_calc_fetch_jacobians(ImpulseModelTypes::Type test_type) {
 
   // create the corresponding data object
   const pinocchio::Model& pinocchio_model = factory.get_state_factory()->get_pinocchio_model();
-  pinocchio::Data pinocchio_data (pinocchio_model);
+  pinocchio::Data pinocchio_data(pinocchio_model);
   boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
 
   // Compute the jacobian and check that the impulse model fetch it.
@@ -79,7 +79,7 @@ void test_calc_diff_no_computation(ImpulseModelTypes::Type test_type) {
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.get_model();
 
   // create the corresponding data object
-  pinocchio::Data pinocchio_data (factory.get_state_factory()->get_pinocchio_model());
+  pinocchio::Data pinocchio_data(factory.get_state_factory()->get_pinocchio_model());
   boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
 
   // Getting the jacobian from the model
@@ -100,13 +100,13 @@ void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type test_type) {
 
   // create the corresponding data object
   const pinocchio::Model& pinocchio_model = factory.get_state_factory()->get_pinocchio_model();
-  pinocchio::Data pinocchio_data (pinocchio_model);
+  pinocchio::Data pinocchio_data(pinocchio_model);
   boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
 
   // Compute the jacobian and check that the impulse model fetch it.
   Eigen::VectorXd q = model->get_state()->rand().segment(0, model->get_state()->get_nq());
   Eigen::VectorXd v = Eigen::VectorXd::Random(model->get_state()->get_nv());
-  Eigen::VectorXd a = Eigen::VectorXd::Random(model->get_state()->get_nv());  
+  Eigen::VectorXd a = Eigen::VectorXd::Random(model->get_state()->get_nv());
   pinocchio::computeJointJacobians(pinocchio_model, pinocchio_data, q);
   pinocchio::updateFramePlacements(pinocchio_model, pinocchio_data);
   pinocchio::computeForwardKinematicsDerivatives(pinocchio_model, pinocchio_data, q, v, a);
@@ -129,7 +129,7 @@ void test_update_force(ImpulseModelTypes::Type test_type) {
 
   // create the corresponding data object
   const pinocchio::Model& pinocchio_model = factory.get_state_factory()->get_pinocchio_model();
-  pinocchio::Data pinocchio_data (pinocchio_model);
+  pinocchio::Data pinocchio_data(pinocchio_model);
   boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
 
   // Create a random force and update it
@@ -150,7 +150,7 @@ void test_update_force_diff(ImpulseModelTypes::Type test_type) {
 
   // create the corresponding data object
   const pinocchio::Model& pinocchio_model = factory.get_state_factory()->get_pinocchio_model();
-  pinocchio::Data pinocchio_data (pinocchio_model);
+  pinocchio::Data pinocchio_data(pinocchio_model);
   boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
 
   // Create a random force and update it
