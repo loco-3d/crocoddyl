@@ -41,7 +41,7 @@ void test_calc_no_computation(ImpulseModelTypes::Type test_type) {
   model->calc(data, dx);
 
   // Check that nothing has been computed and that all value are initialized to 0
-  BOOST_CHECK(data->Jc.hasNaN());
+  BOOST_CHECK(data->Jc.hasNaN() || data->Jc.isZero());
   BOOST_CHECK(data->dv0_dq.isZero());
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(data->df_dq.isZero());
@@ -87,8 +87,8 @@ void test_calc_diff_no_computation(ImpulseModelTypes::Type test_type) {
   model->calcDiff(data, dx);
 
   // Check that nothing has been computed and that all value are initialized to 0
-  BOOST_CHECK(data->Jc.hasNaN());
-  BOOST_CHECK(data->dv0_dq.hasNaN());
+  BOOST_CHECK(data->Jc.hasNaN() || data->Jc.isZero());
+  BOOST_CHECK(data->dv0_dq.hasNaN() || data->dv0_dq.isZero());
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(data->df_dq.isZero());
 }
