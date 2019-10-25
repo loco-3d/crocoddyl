@@ -50,28 +50,24 @@ class ImpulseModelFactory {
     switch (test_type_) {
       case ImpulseModelTypes::ImpulseModel3DTalosArm:
         state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyTalosArm);
-        std::cout << "gripper_left_base_link" << std::endl;
-        frame = state_factory_->get_pinocchio_model().getFrameId("gripper_left_base_link");
+        frame = state_factory_->get_pinocchio_model().getFrameId("gripper_left_fingertip_1_link");
         state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->get_state());
         model_.reset(new crocoddyl::ImpulseModel3D(state, frame));
         break;
       case ImpulseModelTypes::ImpulseModel3DHyQ:
         state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyHyQ);
-        std::cout << "lf_foot" << std::endl;
         frame = state_factory_->get_pinocchio_model().getFrameId("lf_foot");
         state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->get_state());
         model_.reset(new crocoddyl::ImpulseModel3D(state, frame));
         break;
       case ImpulseModelTypes::ImpulseModel3DTalos:
         state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyTalos);
-        std::cout << "gripper_left_base_link" << std::endl;
-        frame = state_factory_->get_pinocchio_model().getFrameId("gripper_left_base_link");
+        frame = state_factory_->get_pinocchio_model().getFrameId("gripper_left_fingertip_1_link");
         state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->get_state());
         model_.reset(new crocoddyl::ImpulseModel3D(state, frame));
         break;
       case ImpulseModelTypes::ImpulseModel3DRandomHumanoid:
         state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyRandomHumanoid);
-        std::cout << "rleg6" << std::endl;
         frame = state_factory_->get_pinocchio_model().getFrameId("rleg6_body");
         state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->get_state());
         model_.reset(new crocoddyl::ImpulseModel3D(state, frame));
@@ -79,28 +75,24 @@ class ImpulseModelFactory {
 
       case ImpulseModelTypes::ImpulseModel6DTalosArm:
         state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyTalosArm);
-        std::cout << "gripper_left_base_link" << std::endl;
-        frame = state_factory_->get_pinocchio_model().getFrameId("gripper_left_base_link");
+        frame = state_factory_->get_pinocchio_model().getFrameId("gripper_left_fingertip_1_link");
         state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->get_state());
         model_.reset(new crocoddyl::ImpulseModel6D(state, frame));
         break;
       case ImpulseModelTypes::ImpulseModel6DHyQ:
         state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyHyQ);
-        std::cout << "lf_foot" << std::endl;
         frame = state_factory_->get_pinocchio_model().getFrameId("lf_foot");
         state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->get_state());
         model_.reset(new crocoddyl::ImpulseModel6D(state, frame));
         break;
       case ImpulseModelTypes::ImpulseModel6DTalos:
         state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyTalos);
-        std::cout << "gripper_left_base_link" << std::endl;
-        frame = state_factory_->get_pinocchio_model().getFrameId("gripper_left_base_link");
+        frame = state_factory_->get_pinocchio_model().getFrameId("gripper_left_fingertip_1_link");
         state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->get_state());
         model_.reset(new crocoddyl::ImpulseModel6D(state, frame));
         break;
       case ImpulseModelTypes::ImpulseModel6DRandomHumanoid:
         state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyRandomHumanoid);
-        std::cout << "rleg6" << std::endl;
         frame = state_factory_->get_pinocchio_model().getFrameId("rleg6_body");
         state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->get_state());
         model_.reset(new crocoddyl::ImpulseModel6D(state, frame));
