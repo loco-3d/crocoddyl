@@ -51,7 +51,7 @@ class ActuationModelUAM:
     We implement here the simplest model: tau = S.T*u, where S is constant.
     '''
 
-    def __init__(self, pinocchioModel, quadrotorType, rotorDistance, coefM, coefF):
+    def __init__(self, pinocchioModel, quadrotorType, rotorDistance, coefM, coefF, uLim, lLim):
         self.pinocchio = pinocchioModel
         if (pinocchioModel.joints[1].shortname() != 'JointModelFreeFlyer'):
             warnings.warn('Strange that the first joint is not a freeflyer')
@@ -73,17 +73,30 @@ class ActuationModelUAM:
         self.d = rotorDistance
         self.cm = coefM
         self.cf = coefF
+        self.uLim = uLim
+        self.lLim = lLim
 
     def calc(self, data, x, u):
         d, cf, cm = self.d, self.cf, self.cf
-        S = np.array(np.zeros([self.nv, self.nu]))
-        if self.type == 'x':
-            S[2:6, :4] = np.array([[1, 1, 1, 1], [-d, d, d, -d], [-d, d, -d, d], [-cm / cf, -cm / cf, cm / cf, cm / cf]])
-        elif self.type == '+':
-            S[2:6, :4] = np.array([[1, 1, 1, 1], [0, d, 0, -d], [-d, 0, d, 0], [-cm / cf, cm / cf, -cm / cf, cm / cf]])
+        uLim, lLim = self.uLim, self.lLim
 
-        np.fill_diagonal(S[6:, 4:], 1)
-        data.a = np.dot(S, u)
+        # Jacobian of torques with respect motor vertical forces
+        J_tau_f = np.array(np.zeros([self.nv, self.nu]))
+        if self.type == 'x':
+            J_tau_f[2:6, :4] = np.array([[1, 1, 1, 1], [-d, d, d, -d], [-d, d, -d, d], [-cm / cf, -cm / cf, cm / cf, cm / cf]])
+        elif self.type == '+':
+            J_tau_f[2:6, :4] = np.array([[1, 1, 1, 1], [0, d, 0, -d], [-d, 0, d, 0], [-cm / cf, cm / cf, -cm / cf, cm / cf]])
+
+        np.fill_diagonal(J_tau_f[6:, 4:], 1)
+        # Actuation function - tanh
+        range = uLim - lLim
+        range = uLim - lLim
+        f = lLim + range / 2 + range / 2 * np.tanh(u)
+        d_f = range / 2 * np.tanh(u)**2
+        J_f_u = np.zeros([4, 4])
+        np.fill_diagonal(J_f_u, d_f)
+
+        data.a = np.dot(J_tau_f, f)
         return data.a
 
     def calcDiff(self, data, x, u, recalc=True):
