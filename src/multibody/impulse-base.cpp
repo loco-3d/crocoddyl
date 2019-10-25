@@ -10,13 +10,16 @@
 
 namespace crocoddyl {
 
-ImpulseModelAbstract::ImpulseModelAbstract(StateMultibody& state, unsigned int const& ni) : state_(state), ni_(ni) {}
+ImpulseModelAbstract::ImpulseModelAbstract(boost::shared_ptr<StateMultibody> state, const std::size_t& ni)
+    : state_(state), ni_(ni) {}
 
 ImpulseModelAbstract::~ImpulseModelAbstract() {}
 
 void ImpulseModelAbstract::updateForceDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
                                            const Eigen::MatrixXd& df_dq) const {
-  assert((df_dq.rows() == ni_ || df_dq.cols() == state_.get_nv()) && "df_dq has wrong dimension");
+  assert(
+      (static_cast<std::size_t>(df_dq.rows()) == ni_ || static_cast<std::size_t>(df_dq.cols()) == state_->get_nv()) &&
+      "df_dq has wrong dimension");
   data->df_dq = df_dq;
 }
 
@@ -24,8 +27,8 @@ boost::shared_ptr<ImpulseDataAbstract> ImpulseModelAbstract::createData(pinocchi
   return boost::make_shared<ImpulseDataAbstract>(this, data);
 }
 
-StateMultibody& ImpulseModelAbstract::get_state() const { return state_; }
+const boost::shared_ptr<StateMultibody>& ImpulseModelAbstract::get_state() const { return state_; }
 
-unsigned int const& ImpulseModelAbstract::get_ni() const { return ni_; }
+const std::size_t& ImpulseModelAbstract::get_ni() const { return ni_; }
 
 }  // namespace crocoddyl

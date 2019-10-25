@@ -10,19 +10,19 @@
 
 namespace crocoddyl {
 
-ActivationModelQuad::ActivationModelQuad(unsigned int const& nr) : ActivationModelAbstract(nr) {}
+ActivationModelQuad::ActivationModelQuad(const std::size_t& nr) : ActivationModelAbstract(nr) {}
 
 ActivationModelQuad::~ActivationModelQuad() {}
 
 void ActivationModelQuad::calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                                const Eigen::Ref<const Eigen::VectorXd>& r) {
-  assert(r.size() == nr_ && "r has wrong dimension");
+  assert(static_cast<std::size_t>(r.size()) == nr_ && "r has wrong dimension");
   data->a_value = 0.5 * r.transpose() * r;
 }
 
 void ActivationModelQuad::calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
                                    const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc) {
-  assert(r.size() == nr_ && "r has wrong dimension");
+  assert(static_cast<std::size_t>(r.size()) == nr_ && "r has wrong dimension");
   if (recalc) {
     calc(data, r);
   }

@@ -18,25 +18,25 @@
 
 namespace crocoddyl {
 
-DifferentialActionModelFreeFwdDynamics::DifferentialActionModelFreeFwdDynamics(StateMultibody& state,
-                                                                               CostModelSum& costs)
-    : DifferentialActionModelAbstract(state, state.get_pinocchio().nv, costs.get_nr()),
+DifferentialActionModelFreeFwdDynamics::DifferentialActionModelFreeFwdDynamics(boost::shared_ptr<StateMultibody> state,
+                                                                               boost::shared_ptr<CostModelSum> costs)
+    : DifferentialActionModelAbstract(state, state->get_pinocchio().nv, costs->get_nr()),
       costs_(costs),
-      pinocchio_(state.get_pinocchio()),
+      pinocchio_(state->get_pinocchio()),
       with_armature_(true),
-      armature_(Eigen::VectorXd::Zero(state.get_nv())) {}
+      armature_(Eigen::VectorXd::Zero(state->get_nv())) {}
 
 DifferentialActionModelFreeFwdDynamics::~DifferentialActionModelFreeFwdDynamics() {}
 
 void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                   const Eigen::Ref<const Eigen::VectorXd>& x,
                                                   const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
+  assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
 
   DifferentialActionDataFreeFwdDynamics* d = static_cast<DifferentialActionDataFreeFwdDynamics*>(data.get());
-  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_.get_nq());
-  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(state_.get_nv());
+  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_->get_nq());
+  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(state_->get_nv());
 
   // Computing the dynamics using ABA or manually for armature case
   if (with_armature_) {
@@ -54,18 +54,18 @@ void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<Differ
   // Computing the cost value and residuals
   pinocchio::forwardKinematics(pinocchio_, d->pinocchio, q, v);
   pinocchio::updateFramePlacements(pinocchio_, d->pinocchio);
-  costs_.calc(d->costs, x, u);
+  costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
 }
 
 void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                       const Eigen::Ref<const Eigen::VectorXd>& x,
                                                       const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
+  assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
 
-  const unsigned int& nv = state_.get_nv();
-  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_.get_nq());
+  const std::size_t& nv = state_->get_nv();
+  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(nv);
 
   DifferentialActionDataFreeFwdDynamics* d = static_cast<DifferentialActionDataFreeFwdDynamics*>(data.get());
@@ -90,7 +90,7 @@ void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<Di
   }
 
   // Computing the cost derivatives
-  costs_.calcDiff(d->costs, x, u, false);
+  costs_->calcDiff(d->costs, x, u, false);
 }
 
 boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelFreeFwdDynamics::createData() {
@@ -99,13 +99,14 @@ boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelFreeFwd
 
 pinocchio::Model& DifferentialActionModelFreeFwdDynamics::get_pinocchio() const { return pinocchio_; }
 
-CostModelSum& DifferentialActionModelFreeFwdDynamics::get_costs() const { return costs_; }
+const boost::shared_ptr<CostModelSum>& DifferentialActionModelFreeFwdDynamics::get_costs() const { return costs_; }
 
 const Eigen::VectorXd& DifferentialActionModelFreeFwdDynamics::get_armature() const { return armature_; }
 
 void DifferentialActionModelFreeFwdDynamics::set_armature(const Eigen::VectorXd& armature) {
-  assert(armature.size() == state_.get_nv() && "The armature dimension is wrong, we cannot set it.");
-  if (armature.size() != state_.get_nv()) {
+  assert(static_cast<std::size_t>(armature.size()) == state_->get_nv() &&
+         "The armature dimension is wrong, we cannot set it.");
+  if (static_cast<std::size_t>(armature.size()) != state_->get_nv()) {
     std::cout << "The armature dimension is wrong, we cannot set it." << std::endl;
   } else {
     armature_ = armature;

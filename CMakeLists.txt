@@ -37,7 +37,7 @@ ENDIF()
 SET(CXX_DISABLE_WERROR True)
 
 # Create different building options
-OPTION(ENABLE_VECTORIZATION "Enable vectorization and futhers processor-related optimizations" OFF)
+OPTION(ENABLE_VECTORIZATION "Enable vectorization and further processor-related optimizations" OFF)
 OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" ON)
 OPTION(BUILD_UNIT_TESTS "Build the unitary tests" ON)
 OPTION(BUILD_BENCHMARK "Build the benchmark" ON)
@@ -53,8 +53,8 @@ SETUP_PROJECT()
 # Add the different required and optional dependencies
 ADD_REQUIRED_DEPENDENCY("eigen3 >= 3.0.5")
 ADD_REQUIRED_DEPENDENCY("eigenpy")
-ADD_REQUIRED_DEPENDENCY("pinocchio >= 2.1.0")
-ADD_REQUIRED_DEPENDENCY("example-robot-data >= 2.1.0")
+ADD_REQUIRED_DEPENDENCY("pinocchio >= 2.1.8")
+ADD_REQUIRED_DEPENDENCY("example-robot-data >= 2.2.0")
 ADD_OPTIONAL_DEPENDENCY("multicontact-api >= 1.1.0")
 ADD_OPTIONAL_DEPENDENCY("quadprog")
 ADD_OPTIONAL_DEPENDENCY("scipy")
@@ -72,10 +72,10 @@ ENDIF()
 
 # Add OpenMP
 if(BUILD_WITH_MULTITHREADS)
-  find_package(OpenMP)
+  FIND_PACKAGE(OpenMP)
 ENDIF()
 if(OPENMP_FOUND AND BUILD_WITH_MULTITHREADS)
-  SET(CMAKE_CXX_FLAGS "-fopenmp")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
   ADD_DEFINITIONS(-DWITH_MULTITHREADING)
   ADD_DEFINITIONS(-DWITH_NTHREADS=${BUILD_WITH_NTHREADS})
   LIST(APPEND CFLAGS_DEPENDENCIES "-DWITH_MULTITHREADING" "-DWITH_NTHREADS")
@@ -101,7 +101,7 @@ INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIRS})
 
 
 # Include and add the main directory
-ADD_SUBDIRECTORY(${PROJECT_NAME})
+ADD_SUBDIRECTORY(unittest/python/${PROJECT_NAME})
 ADD_SUBDIRECTORY(src)
 
 # Build the Python interface

@@ -3,13 +3,16 @@ Contact RObot COntrol by Differential DYnamic programming Library (crocoddyl)
 
 ## <img align="center" height="20" src="https://i.imgur.com/vAYeCzC.png"/> Introduction
 
-**Crocoddyl** is an optimal control library for robot control under contact sequence. Its solver is based on an efficient Differential Dynamic Programming (DDP) algorithm. **Crocoddyl** computes optimal trajectories along to optimal feedback gains. It uses **Pinocchio** for fast computation of robot dynamics and its analytical derivatives.
+**[Crocoddyl](https://cmastalli.github.io/publications/crocoddyl20unpub.html)** is an optimal control library for robot control under contact sequence.
+Its solver is based on an efficient Differential Dynamic Programming (DDP) algorithm.
+**Crocoddyl** computes optimal trajectories along to optimal feedback gains.
+It uses **Pinocchio** for fast computation of robot dynamics and its analytical derivatives.
 
 The source code is released under the [BSD 3-Clause license](LICENSE).
 
 **Authors:** [Carlos Mastalli](https://cmastalli.github.io/) and Rohan Budhiraja <br />
 **Instructors:** Nicolas Mansard <br />
-**With additional support from the Gepetto team at LAAS-CNRS.**
+**With additional support from the Gepetto team at LAAS-CNRS and MEMMO project. For more details see Section Credits**
 
 [![License BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg?style=flat)](https://tldrlegal.com/license/bsd-3-clause-license-%28revised%29#fulltext)
 [![pipeline status](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/pipeline.svg)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/pipelines?ref=devel)
@@ -25,13 +28,36 @@ If you want to follow the current developments, you can directly refer to the [d
 
 
 ## <img align="center" height="20" src="https://i.imgur.com/x1morBF.png"/> Installation
-**Crocoddyl** can be easily installed on various Linux (Ubuntu, Fedora, etc.) and Unix distributions (Mac OS X, BSD, etc.). Please refer to
+**Crocoddyl** can be easily installed on various Linux (Ubuntu, Fedora, etc.) and Unix distributions (Mac OS X, BSD, etc.).
+
+## Crocoddyl features
+**Crocoddyl** is versatible:
+
+ * various optimal control solvers (DDP, FDDP, BoxDDP, etc) - single and multi-shooting methods
+ * analytical and sparse derivatives
+ * geometrical systems friendly (with SE(3) manifold support)
+ * handle autonomous and nonautomous dynamical systems
+ * numerical differentiation support
+<!-- * automatic differentiation support -->
+
+**Crocoddyl** is efficient and flexible:
+
+ * cache friendly,
+ * multi-thread friendly
+ * Python bindings (including models and solvers abstractions)
+ * C++98/11/14/17/20 compliant
+ * extensively tested
+ <!-- * automatic code generation support -->
+ 
 
 ### Installation through robotpkg
 
-You can install this package through robotpkg. robotpkg is a package manager tailored for robotics softwares. It greatly simplifies the release of new versions along with the management of their dependencies. You just need to add the robotpkg apt repository to your sources.list and then use `sudo apt install robotpkg-py27-crocoddyl`:
+You can install this package through robotpkg. robotpkg is a package manager tailored for robotics softwares.
+It greatly simplifies the release of new versions along with the management of their dependencies.
+You just need to add the robotpkg apt repository to your sources.list and then use `sudo apt install robotpkg-py27-crocoddyl` (or `py3X` for python 3.X, depending on your system):
 
-If you have never added robotpkg as a softwares repository, please follow first the instructions from 1 to 3. Otherwise, go directly to instruction 4. Those instructions are similar to the installation procedures presented in [http://robotpkg.openrobots.org/debian.html](http://robotpkg.openrobots.org/debian.html).
+If you have never added robotpkg as a softwares repository, please follow first the instructions from 1 to 3; otherwise, go directly to instruction 4.
+Those instructions are similar to the installation procedures presented in [http://robotpkg.openrobots.org/debian.html](http://robotpkg.openrobots.org/debian.html).
 
 1. Add robotpkg as source repository to apt:
 
@@ -77,8 +103,6 @@ export PYTHONPATH=/opt/openrobots/lib/python2.7/site-packages:$PYTHONPATH
 **Crocoddyl** is c++ library with Python bindings for versatile and fast prototyping. It has the following dependencies:
 
 * [pinocchio](https://github.com/stack-of-tasks/pinocchio)
-* [quadprog](https://pypi.org/project/quadprog/)
-* [multicontact-api](https://gepgitlab.laas.fr/loco-3d/multicontact-api)
 * [example-robot-data](https://gepgitlab.laas.fr/gepetto/example-robot-data) (optional for examples, install Python loaders)
 * [gepetto-viewer-corba](https://github.com/Gepetto/gepetto-viewer-corba) (optional for display)
 * [jupyter](https://jupyter.org/) (optional for notebooks)
@@ -90,11 +114,11 @@ You can run examples, unit-tests and benchmarks from your build dir:
 ```bash
 cd build
 make test
-make examples-bipedal_walk
-make benchmarks-bipedal_walk
+make -s examples-quadrupedal_gaits INPUT="display plot" # enable display and plot
+make -s benchmarks-quadrupedal_gaits INPUT="100 walk" # number of trials ; type of gait
 ```
 
-If you want to see the 3D result and/or graphs of your run examples, you can use
+Alternatively, you cansee the 3D result and/or graphs of your run examples, you can use
 
 ```bash
 export CROCODDYL_DISPLAY=1
@@ -153,6 +177,7 @@ The following people have been involved in the development of **Crocoddyl**:
 - [Carlos Mastalli](https://cmastalli.github.io/) (LAAS-CNRS): main developer and manager of the project
 - [Nicolas Mansard](http://projects.laas.fr/gepetto/index.php/Members/NicolasMansard) (LAAS-CNRS): project instructor
 - [Rohan Budhiraja](https://scholar.google.com/citations?user=NW9Io9AAAAAJ) (LAAS-CNRS): features extension
+- [Justin Carpentier](https://jcarpent.github.io/) (INRIA): efficient analytical rigid-body dynamics derivatives
 - [Maximilien Naveau](https://scholar.google.fr/citations?user=y_-cGlUAAAAJ&hl=fr) (MPI): unit-test support
 - [Guilhem Saurel](http://projects.laas.fr/gepetto/index.php/Members/GuilhemSaurel) (LAAS-CNRS): continuous integration and deployment
 - [Bilal Hammoud](https://scholar.google.com/citations?hl=en&user=h_4NKpsAAAAJ) (MPI): features extension

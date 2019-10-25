@@ -16,21 +16,29 @@
 
 namespace crocoddyl {
 
+typedef std::size_t FrameIndex;
+
 struct FrameTranslation {
-  FrameTranslation(unsigned int const& frame, const Eigen::Vector3d& oxf) : frame(frame), oxf(oxf) {}
-  unsigned int frame;
+  FrameTranslation(const FrameIndex& frame, const Eigen::Vector3d& oxf) : frame(frame), oxf(oxf) {}
+  FrameIndex frame;
   Eigen::Vector3d oxf;
 };
 
+struct FrameRotation {
+  FrameRotation(const FrameIndex& frame, const Eigen::Matrix3d& oRf) : frame(frame), oRf(oRf) {}
+  FrameIndex frame;
+  Eigen::Matrix3d oRf;
+};
+
 struct FramePlacement {
-  FramePlacement(unsigned int const& frame, const pinocchio::SE3& oMf) : frame(frame), oMf(oMf) {}
-  unsigned int frame;
+  FramePlacement(const FrameIndex& frame, const pinocchio::SE3& oMf) : frame(frame), oMf(oMf) {}
+  FrameIndex frame;
   pinocchio::SE3 oMf;
 };
 
 struct FrameMotion {
-  FrameMotion(unsigned int const& frame, const pinocchio::Motion& oMf) : frame(frame), oMf(oMf) {}
-  unsigned int frame;
+  FrameMotion(const FrameIndex& frame, const pinocchio::Motion& oMf) : frame(frame), oMf(oMf) {}
+  FrameIndex frame;
   pinocchio::Motion oMf;
 };
 

@@ -18,21 +18,21 @@ namespace bp = boost::python;
 
 class ImpulseModelAbstract_wrap : public ImpulseModelAbstract, public bp::wrapper<ImpulseModelAbstract> {
  public:
-  ImpulseModelAbstract_wrap(StateMultibody& state, int ni) : ImpulseModelAbstract(state, ni) {}
+  ImpulseModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, int ni) : ImpulseModelAbstract(state, ni) {}
 
   void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
-    assert(x.size() == state_.get_nx() && "x has wrong dimension");
+    assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x);
   }
 
   void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const bool& recalc = true) {
-    assert(x.size() == state_.get_nx() && "x has wrong dimension");
+    assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, recalc);
   }
 
   void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force) {
-    assert(force.size() == ni_ && "force has wrong dimension");
+    assert(static_cast<std::size_t>(force.size()) == ni_ && "force has wrong dimension");
     return bp::call<void>(this->get_override("updateForce").ptr(), data, force);
   }
 };
@@ -40,16 +40,18 @@ class ImpulseModelAbstract_wrap : public ImpulseModelAbstract, public bp::wrappe
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ImpulseModel_calcDiff_wraps, ImpulseModelAbstract::calcDiff_wrap, 2, 3)
 
 void exposeImpulseAbstract() {
+  bp::register_ptr_to_python<boost::shared_ptr<ImpulseModelAbstract> >();
+
   bp::class_<ImpulseModelAbstract_wrap, boost::noncopyable>(
       "ImpulseModelAbstract",
       "Abstract impulse model.\n\n"
       "It defines a template for impulse models.\n"
       "The calc and calcDiff functions compute the impulse Jacobian\n"
       "the derivatives respectively.",
-      bp::init<StateMultibody&, int>(bp::args(" self", " state", " ni"),
-                                     "Initialize the impulse model.\n\n"
-                                     ":param state: state of the multibody system\n"
-                                     ":param ni: dimension of impulse model")[bp::with_custodian_and_ward<1, 2>()])
+      bp::init<boost::shared_ptr<StateMultibody>, int>(bp::args(" self", " state", " ni"),
+                                                       "Initialize the impulse model.\n\n"
+                                                       ":param state: state of the multibody system\n"
+                                                       ":param ni: dimension of impulse model"))
       .def("calc", pure_virtual(&ImpulseModelAbstract_wrap::calc), bp::args(" self", " data", " x"),
            "Compute the impulse Jacobian\n"
            ":param data: impulse data\n"
@@ -76,14 +78,17 @@ void exposeImpulseAbstract() {
            "returns the allocated data for a predefined impulse.\n"
            ":param data: Pinocchio data\n"
            ":return impulse data.")
-      .add_property("state",
-                    bp::make_function(&ImpulseModelAbstract_wrap::get_state, bp::return_internal_reference<>()),
-                    "state of the multibody system")
+      .add_property(
+          "state",
+          bp::make_function(&ImpulseModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
+          "state of the multibody system")
       .add_property(
           "ni", bp::make_function(&ImpulseModelAbstract_wrap::get_ni, bp::return_value_policy<bp::return_by_value>()),
           "dimension of impulse");
 
-  bp::class_<ImpulseDataAbstract, boost::shared_ptr<ImpulseDataAbstract>, boost::noncopyable>(
+  bp::register_ptr_to_python<boost::shared_ptr<ImpulseDataAbstract> >();
+
+  bp::class_<ImpulseDataAbstract, boost::noncopyable>(
       "ImpulseDataAbstract", "Abstract class for impulse datas.\n\n",
       bp::init<ImpulseModelAbstract*, pinocchio::Data*>(
           bp::args(" self", " model", " data"),

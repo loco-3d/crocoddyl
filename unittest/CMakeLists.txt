@@ -14,8 +14,9 @@ SET(${PROJECT_NAME}_CPP_TESTS
   # test_ddp_contact
   # test_armature
   # test_actuation 
-  # test_activation 
+  test_activation 
   test_actions
+  test_diff_actions
 
   ## with KKT 
   # test_solvers
@@ -56,11 +57,11 @@ ENDMACRO(ADD_CPP_UNIT_TEST NAME PKGS)
 FOREACH(TEST ${${PROJECT_NAME}_CPP_TESTS})
   ADD_CPP_UNIT_TEST(${TEST} "eigen3;pinocchio")
   # first look if a robot_properties_${robot_name} package contain a config file.
-  target_compile_definitions(${TEST} PUBLIC
+  TARGET_COMPILE_DEFINITIONS(${TEST} PUBLIC
     TALOS_URDF="${EXAMPLE_ROBOT_DATA_PKGDATAROOTDIR}/example-robot-data/talos_data/urdf/talos_reduced.urdf")
-  target_compile_definitions(${TEST} PUBLIC
+  TARGET_COMPILE_DEFINITIONS(${TEST} PUBLIC
     HYQ_URDF="${EXAMPLE_ROBOT_DATA_PKGDATAROOTDIR}/example-robot-data/hyq_description/robots/hyq_no_sensors.urdf")
-  target_compile_definitions(${TEST} PUBLIC
+  TARGET_COMPILE_DEFINITIONS(${TEST} PUBLIC
     TALOS_ARM_URDF="${EXAMPLE_ROBOT_DATA_PKGDATAROOTDIR}/example-robot-data/talos_data/robots/talos_left_arm.urdf")
 
 ENDFOREACH(TEST ${${PROJECT_NAME}_CPP_TESTS})

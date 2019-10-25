@@ -15,7 +15,7 @@ namespace crocoddyl {
 
 class ActivationModelQuad : public ActivationModelAbstract {
  public:
-  explicit ActivationModelQuad(unsigned int const& nr);
+  explicit ActivationModelQuad(const std::size_t& nr);
   ~ActivationModelQuad();
 
   void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r);

@@ -18,9 +18,9 @@ namespace crocoddyl {
 
 class ContactModel6D : public ContactModelAbstract {
  public:
-  ContactModel6D(StateMultibody& state, const FramePlacement& xref, unsigned int const& nu,
+  ContactModel6D(boost::shared_ptr<StateMultibody> state, const FramePlacement& xref, const std::size_t& nu,
                  const Eigen::Vector2d& gains = Eigen::Vector2d::Zero());
-  ContactModel6D(StateMultibody& state, const FramePlacement& xref,
+  ContactModel6D(boost::shared_ptr<StateMultibody> state, const FramePlacement& xref,
                  const Eigen::Vector2d& gains = Eigen::Vector2d::Zero());
   ~ContactModel6D();
 
@@ -44,23 +44,19 @@ struct ContactData6D : public ContactDataAbstract {
   template <typename Model>
   ContactData6D(Model* const model, pinocchio::Data* const data)
       : ContactDataAbstract(model, data),
-        jMf(model->get_state().get_pinocchio().frames[model->get_Mref().frame].placement),
+        jMf(model->get_state()->get_pinocchio().frames[model->get_Mref().frame].placement),
         rMf(pinocchio::SE3::Identity()),
         fXj(jMf.inverse().toActionMatrix()),
-        v_partial_dq(6, model->get_state().get_nv()),
-        a_partial_dq(6, model->get_state().get_nv()),
-        a_partial_dv(6, model->get_state().get_nv()),
-        a_partial_da(6, model->get_state().get_nv()) {
-    joint = model->get_state().get_pinocchio().frames[model->get_Mref().frame].parent;
+        v_partial_dq(6, model->get_state()->get_nv()),
+        a_partial_dq(6, model->get_state()->get_nv()),
+        a_partial_dv(6, model->get_state()->get_nv()),
+        a_partial_da(6, model->get_state()->get_nv()) {
+    joint = model->get_state()->get_pinocchio().frames[model->get_Mref().frame].parent;
     v_partial_dq.fill(0);
     a_partial_dq.fill(0);
     a_partial_dv.fill(0);
     a_partial_da.fill(0);
     rMf_Jlog6.fill(0);
-
-    vv_skew.fill(0);
-    vw_skew.fill(0);
-    oRf.fill(0);
   }
 
   pinocchio::SE3 jMf;
@@ -73,10 +69,6 @@ struct ContactData6D : public ContactDataAbstract {
   pinocchio::Data::Matrix6x a_partial_dv;
   pinocchio::Data::Matrix6x a_partial_da;
   pinocchio::SE3::Matrix6 rMf_Jlog6;
-
-  Eigen::Matrix3d vv_skew;
-  Eigen::Matrix3d vw_skew;
-  Eigen::Matrix3d oRf;
 };
 
 }  // namespace crocoddyl

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2019, LAAS-CNRS, The University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,10 +9,10 @@
 #ifndef CROCODDYL_CORE_ACTION_BASE_HPP_
 #define CROCODDYL_CORE_ACTION_BASE_HPP_
 
-#include "crocoddyl/core/state-base.hpp"
-#include "crocoddyl/core/utils/math.hpp"
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include "crocoddyl/core/state-base.hpp"
+#include "crocoddyl/core/utils/math.hpp"
 
 namespace crocoddyl {
 
@@ -20,7 +20,7 @@ struct ActionDataAbstract;  // forward declaration
 
 class ActionModelAbstract {
  public:
-  ActionModelAbstract(StateAbstract& state, unsigned int const& nu, unsigned int const& nr = 0);
+  ActionModelAbstract(boost::shared_ptr<StateAbstract> state, const std::size_t& nu, const std::size_t& nr = 0);
   virtual ~ActionModelAbstract();
 
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -32,19 +32,31 @@ class ActionModelAbstract {
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
   void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
 
-  void quasicStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<Eigen::VectorXd> u,
-                    const Eigen::Ref<const Eigen::VectorXd>& x, unsigned int const& maxiter = 100,
-                    const double& tol = 1e-9);
+  void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<Eigen::VectorXd> u,
+                   const Eigen::Ref<const Eigen::VectorXd>& x, const std::size_t& maxiter = 100,
+                   const double& tol = 1e-9);
 
-  unsigned int const& get_nu() const;
-  unsigned int const& get_nr() const;
-  StateAbstract& get_state() const;
+  const std::size_t& get_nu() const;
+  const std::size_t& get_nr() const;
+  const boost::shared_ptr<StateAbstract>& get_state() const;
+
+  const Eigen::VectorXd& get_u_lb() const;
+  const Eigen::VectorXd& get_u_ub() const;
+  bool const& get_has_control_limits() const;
+
+  void set_u_lb(const Eigen::Ref<const Eigen::VectorXd>& u_in);
+  void set_u_ub(const Eigen::Ref<const Eigen::VectorXd>& u_in);
 
  protected:
-  unsigned int nu_;        //!< Control dimension
-  unsigned int nr_;        //!< Dimension of the cost residual
-  StateAbstract& state_;   //!< Model of the state
-  Eigen::VectorXd unone_;  //!< Neutral state
+  std::size_t nu_;                          //!< Control dimension
+  std::size_t nr_;                          //!< Dimension of the cost residual
+  boost::shared_ptr<StateAbstract> state_;  //!< Model of the state
+  Eigen::VectorXd unone_;                   //!< Neutral state
+  Eigen::VectorXd u_lb_;                    //!< Lower control limits
+  Eigen::VectorXd u_ub_;                    //!< Upper control limits
+  bool has_control_limits_;                 //!< Indicates whether any of the control limits is finite
+
+  void update_has_control_limits();
 
 #ifdef PYTHON_BINDINGS
 
@@ -73,11 +85,11 @@ class ActionModelAbstract {
     calcDiff(data, x, unone_, recalc);
   }
 
-  Eigen::VectorXd quasicStatic_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x,
-                                    unsigned int const& maxiter = 100, const double& tol = 1e-9) {
+  Eigen::VectorXd quasiStatic_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x,
+                                   const std::size_t& maxiter = 100, const double& tol = 1e-9) {
     Eigen::VectorXd u(nu_);
     u.setZero();
-    quasicStatic(data, u, x, maxiter, tol);
+    quasiStatic(data, u, x, maxiter, tol);
     return u;
   }
 
@@ -90,14 +102,14 @@ struct ActionDataAbstract {
   template <typename Model>
   explicit ActionDataAbstract(Model* const model)
       : cost(0.),
-        xnext(model->get_state().get_nx()),
+        xnext(model->get_state()->get_nx()),
         r(model->get_nr()),
-        Fx(model->get_state().get_ndx(), model->get_state().get_ndx()),
-        Fu(model->get_state().get_ndx(), model->get_nu()),
-        Lx(model->get_state().get_ndx()),
+        Fx(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
+        Fu(model->get_state()->get_ndx(), model->get_nu()),
+        Lx(model->get_state()->get_ndx()),
         Lu(model->get_nu()),
-        Lxx(model->get_state().get_ndx(), model->get_state().get_ndx()),
-        Lxu(model->get_state().get_ndx(), model->get_nu()),
+        Lxx(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
+        Lxu(model->get_state()->get_ndx(), model->get_nu()),
         Luu(model->get_nu(), model->get_nu()) {
     xnext.setZero();
     r.setZero();
@@ -109,17 +121,7 @@ struct ActionDataAbstract {
     Lxu.setZero();
     Luu.setZero();
   }
-
-  const double& get_cost() const { return cost; }
-  const Eigen::VectorXd& get_xnext() const { return xnext; }
-  const Eigen::VectorXd& get_r() const { return r; }
-  const Eigen::VectorXd& get_Lx() const { return Lx; }
-  const Eigen::VectorXd& get_Lu() const { return Lu; }
-  const Eigen::MatrixXd& get_Lxx() const { return Lxx; }
-  const Eigen::MatrixXd& get_Lxu() const { return Lxu; }
-  const Eigen::MatrixXd& get_Luu() const { return Luu; }
-  const Eigen::MatrixXd& get_Fx() const { return Fx; }
-  const Eigen::MatrixXd& get_Fu() const { return Fu; }
+  virtual ~ActionDataAbstract() {}
 
   double cost;
   Eigen::VectorXd xnext;

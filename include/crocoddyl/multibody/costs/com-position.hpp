@@ -15,11 +15,12 @@ namespace crocoddyl {
 
 class CostModelCoMPosition : public CostModelAbstract {
  public:
-  CostModelCoMPosition(StateMultibody& state, ActivationModelAbstract& activation, const Eigen::Vector3d& cref,
-                       unsigned int const& nu);
-  CostModelCoMPosition(StateMultibody& state, ActivationModelAbstract& activation, const Eigen::Vector3d& cref);
-  CostModelCoMPosition(StateMultibody& state, const Eigen::Vector3d& cref, unsigned int const& nu);
-  CostModelCoMPosition(StateMultibody& state, const Eigen::Vector3d& cref);
+  CostModelCoMPosition(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
+                       const Eigen::Vector3d& cref, const std::size_t& nu);
+  CostModelCoMPosition(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
+                       const Eigen::Vector3d& cref);
+  CostModelCoMPosition(boost::shared_ptr<StateMultibody> state, const Eigen::Vector3d& cref, const std::size_t& nu);
+  CostModelCoMPosition(boost::shared_ptr<StateMultibody> state, const Eigen::Vector3d& cref);
   ~CostModelCoMPosition();
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -39,7 +40,7 @@ struct CostDataCoMPosition : public CostDataAbstract {
 
   template <typename Model>
   CostDataCoMPosition(Model* const model, pinocchio::Data* const data)
-      : CostDataAbstract(model, data), Arr_Jcom(3, model->get_state().get_nv()) {
+      : CostDataAbstract(model, data), Arr_Jcom(3, model->get_state()->get_nv()) {
     Arr_Jcom.fill(0);
   }
 

@@ -19,32 +19,27 @@ class StateMultibody : public StateAbstract {
   explicit StateMultibody(pinocchio::Model& model);
   ~StateMultibody();
 
-  Eigen::VectorXd zero();
-  Eigen::VectorXd rand();
+  Eigen::VectorXd zero() const;
+  Eigen::VectorXd rand() const;
   void diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-            Eigen::Ref<Eigen::VectorXd> dxout);
+            Eigen::Ref<Eigen::VectorXd> dxout) const;
   void integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
-                 Eigen::Ref<Eigen::VectorXd> xout);
+                 Eigen::Ref<Eigen::VectorXd> xout) const;
   void Jdiff(const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>&,
-             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent firstsecond = both);
+             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
+             Jcomponent firstsecond = both) const;
   void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>&,
                   Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
-                  Jcomponent firstsecond = both);
+                  Jcomponent firstsecond = both) const;
 
   pinocchio::Model& get_pinocchio() const;
 
  private:
-  void updateJdiff(const Eigen::Ref<const Eigen::MatrixXd>& J, bool positive = true);
+  void updateJdiff(const Eigen::Ref<const Eigen::MatrixXd>& Jdq, Eigen::Ref<Eigen::MatrixXd> Jd_,
+                   bool positive = true) const;
 
   pinocchio::Model& pinocchio_;
   Eigen::VectorXd x0_;
-  Eigen::VectorXd dx_;
-  Eigen::VectorXd q0_;
-  Eigen::VectorXd dq0_;
-  Eigen::VectorXd q1_;
-  Eigen::VectorXd dq1_;
-  Eigen::MatrixXd Ji_;
-  Eigen::MatrixXd Jd_;
 };
 
 }  // namespace crocoddyl

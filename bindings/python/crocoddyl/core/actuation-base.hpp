@@ -18,20 +18,20 @@ namespace bp = boost::python;
 
 class ActuationModelAbstract_wrap : public ActuationModelAbstract, public bp::wrapper<ActuationModelAbstract> {
  public:
-  ActuationModelAbstract_wrap(StateAbstract& state, unsigned int const& nu)
+  ActuationModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t& nu)
       : ActuationModelAbstract(state, nu), bp::wrapper<ActuationModelAbstract>() {}
 
   void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
-    assert(x.size() == state_.get_nx() && "x has wrong dimension");
-    assert(u.size() == nu_ && "u has wrong dimension");
+    assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
+    assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
   void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
-    assert(x.size() == state_.get_nx() && "x has wrong dimension");
-    assert(u.size() == nu_ && "u has wrong dimension");
+    assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
+    assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
 };
@@ -39,6 +39,8 @@ class ActuationModelAbstract_wrap : public ActuationModelAbstract, public bp::wr
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ActuationModel_calcDiff_wraps, ActuationModelAbstract::calcDiff_wrap, 3, 4)
 
 void exposeActuationAbstract() {
+  bp::register_ptr_to_python<boost::shared_ptr<ActuationModelAbstract> >();
+
   bp::class_<ActuationModelAbstract_wrap, boost::noncopyable>(
       "ActuationModelAbstract",
       "Abstract class for actuation models.\n\n"
@@ -46,10 +48,10 @@ void exposeActuationAbstract() {
       "time), where a is the actuation signal of our system, and it also computes the derivatives\n"
       "of this model. These computations are mainly carry on inside calc() and calcDiff(),\n"
       "respectively.",
-      bp::init<StateAbstract&, int>(bp::args(" self", " state", " nu"),
-                                    "Initialize the actuation model.\n\n"
-                                    ":param state: state description,\n"
-                                    ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2>()])
+      bp::init<boost::shared_ptr<StateAbstract>, int>(bp::args(" self", " state", " nu"),
+                                                      "Initialize the actuation model.\n\n"
+                                                      ":param state: state description,\n"
+                                                      ":param nu: dimension of control vector"))
       .def("calc", pure_virtual(&ActuationModelAbstract_wrap::calc), bp::args(" self", " data", " x", " u"),
            "Compute the actuation signal from the control input u.\n\n"
            "It describes the time-continuos evolution of the actuation model.\n"
@@ -74,9 +76,10 @@ void exposeActuationAbstract() {
           "nu",
           bp::make_function(&ActuationModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
           "dimension of control vector")
-      .add_property("state",
-                    bp::make_function(&ActuationModelAbstract_wrap::get_state, bp::return_internal_reference<>()),
-                    "state");
+      .add_property(
+          "state",
+          bp::make_function(&ActuationModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
+          "state");
 
   bp::register_ptr_to_python<boost::shared_ptr<ActuationDataAbstract> >();
 

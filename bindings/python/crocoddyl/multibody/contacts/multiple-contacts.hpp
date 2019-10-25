@@ -37,23 +37,23 @@ void exposeContactMultiple() {
 
   bp::class_<ContactItem, boost::noncopyable>(
       "ContactItem", "Describe a contact item.\n\n",
-      bp::init<std::string, ContactModelAbstract*>(
-          bp::args(" self", " name", " contact"),
-          "Initialize the contact item.\n\n"
-          ":param name: contact name\n"
-          ":param contact: contact model")[bp::with_custodian_and_ward<1, 3>()])
+      bp::init<std::string, boost::shared_ptr<ContactModelAbstract> >(bp::args(" self", " name", " contact"),
+                                                                      "Initialize the contact item.\n\n"
+                                                                      ":param name: contact name\n"
+                                                                      ":param contact: contact model"))
       .def_readwrite("name", &ContactItem::name, "contact name")
-      .add_property("contact", bp::make_getter(&ContactItem::contact, bp::return_internal_reference<>()),
+      .add_property("contact", bp::make_getter(&ContactItem::contact, bp::return_value_policy<bp::return_by_value>()),
                     "contact model");
 
+  bp::register_ptr_to_python<boost::shared_ptr<ContactModelMultiple> >();
+
   bp::class_<ContactModelMultiple, boost::noncopyable>(
-      "ContactModelMultiple", bp::init<StateMultibody&, bp::optional<int> >(
-                                  bp::args(" self", " state", " nu=state.nv"),
-                                  "Initialize the multiple contact model.\n\n"
-                                  ":param state: state of the multibody system\n"
-                                  ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2>()])
-      .def("addContact", &ContactModelMultiple::addContact, bp::with_custodian_and_ward<1, 3>(),
-           bp::args(" self", " name", " contact"),
+      "ContactModelMultiple",
+      bp::init<boost::shared_ptr<StateMultibody>, bp::optional<int> >(bp::args(" self", " state", " nu=state.nv"),
+                                                                      "Initialize the multiple contact model.\n\n"
+                                                                      ":param state: state of the multibody system\n"
+                                                                      ":param nu: dimension of control vector"))
+      .def("addContact", &ContactModelMultiple::addContact, bp::args(" self", " name", " contact"),
            "Add a contact item.\n\n"
            ":param name: contact name\n"
            ":param contact: contact model")
@@ -97,8 +97,9 @@ void exposeContactMultiple() {
           "contacts",
           bp::make_function(&ContactModelMultiple::get_contacts, bp::return_value_policy<bp::return_by_value>()),
           "stack of contacts")
-      .add_property("state", bp::make_function(&ContactModelMultiple::get_state, bp::return_internal_reference<>()),
-                    "state of the multibody system")
+      .add_property(
+          "state", bp::make_function(&ContactModelMultiple::get_state, bp::return_value_policy<bp::return_by_value>()),
+          "state of the multibody system")
       .add_property("nc",
                     bp::make_function(&ContactModelMultiple::get_nc, bp::return_value_policy<bp::return_by_value>()),
                     "dimension of the total contact vector")

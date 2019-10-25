@@ -12,7 +12,7 @@
 
 namespace crocoddyl {
 
-ImpulseModel3D::ImpulseModel3D(StateMultibody& state, unsigned int const& frame)
+ImpulseModel3D::ImpulseModel3D(boost::shared_ptr<StateMultibody> state, const std::size_t& frame)
     : ImpulseModelAbstract(state, 3), frame_(frame) {}
 
 ImpulseModel3D::~ImpulseModel3D() {}
@@ -21,7 +21,7 @@ void ImpulseModel3D::calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
                           const Eigen::Ref<const Eigen::VectorXd>&) {
   ImpulseData3D* d = static_cast<ImpulseData3D*>(data.get());
 
-  pinocchio::getFrameJacobian(state_.get_pinocchio(), *d->pinocchio, frame_, pinocchio::LOCAL, d->fJf);
+  pinocchio::getFrameJacobian(state_->get_pinocchio(), *d->pinocchio, frame_, pinocchio::LOCAL, d->fJf);
   d->Jc = d->fJf.topRows<3>();
 }
 
@@ -32,7 +32,7 @@ void ImpulseModel3D::calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data
   }
 
   ImpulseData3D* d = static_cast<ImpulseData3D*>(data.get());
-  pinocchio::getJointVelocityDerivatives(state_.get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
+  pinocchio::getJointVelocityDerivatives(state_->get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                          d->v_partial_dq, d->v_partial_dv);
   d->dv0_dq.noalias() = d->fXj.topRows<3>() * d->v_partial_dq;
 }
@@ -47,6 +47,6 @@ boost::shared_ptr<ImpulseDataAbstract> ImpulseModel3D::createData(pinocchio::Dat
   return boost::make_shared<ImpulseData3D>(this, data);
 }
 
-unsigned int const& ImpulseModel3D::get_frame() const { return frame_; }
+const std::size_t& ImpulseModel3D::get_frame() const { return frame_; }
 
 }  // namespace crocoddyl

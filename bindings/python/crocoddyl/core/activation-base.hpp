@@ -18,22 +18,24 @@ namespace bp = boost::python;
 
 class ActivationModelAbstract_wrap : public ActivationModelAbstract, public bp::wrapper<ActivationModelAbstract> {
  public:
-  explicit ActivationModelAbstract_wrap(unsigned int const& nr)
+  explicit ActivationModelAbstract_wrap(const std::size_t& nr)
       : ActivationModelAbstract(nr), bp::wrapper<ActivationModelAbstract>() {}
 
   void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r) {
-    assert(r.size() == nr_ && "r has wrong dimension");
+    assert(static_cast<std::size_t>(r.size()) == nr_ && "r has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)r);
   }
 
   void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r,
                 const bool& recalc = true) {
-    assert(r.size() == nr_ && "r has wrong dimension");
+    assert(static_cast<std::size_t>(r.size()) == nr_ && "r has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)r, recalc);
   }
 };
 
 void exposeActivationAbstract() {
+  bp::register_ptr_to_python<boost::shared_ptr<ActivationModelAbstract> >();
+
   bp::class_<ActivationModelAbstract_wrap, boost::noncopyable>(
       "ActivationModelAbstract",
       "Abstract class for activation models.\n\n"
@@ -61,7 +63,9 @@ void exposeActivationAbstract() {
           bp::make_function(&ActivationModelAbstract_wrap::get_nr, bp::return_value_policy<bp::return_by_value>()),
           "dimension of cost-residual vector");
 
-  bp::class_<ActivationDataAbstract, boost::shared_ptr<ActivationDataAbstract>, boost::noncopyable>(
+  bp::register_ptr_to_python<boost::shared_ptr<ActivationDataAbstract> >();
+
+  bp::class_<ActivationDataAbstract, boost::noncopyable>(
       "ActivationDataAbstract", "Abstract class for activation datas.\n\n",
       bp::init<ActivationModelAbstract*>(bp::args(" self", " model"),
                                          "Create common data shared between AMs.\n\n"

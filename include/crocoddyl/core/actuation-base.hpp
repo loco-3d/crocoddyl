@@ -20,7 +20,7 @@ struct ActuationDataAbstract;  // forward declaration
 
 class ActuationModelAbstract {
  public:
-  ActuationModelAbstract(StateAbstract& state, unsigned int const& nu);
+  ActuationModelAbstract(boost::shared_ptr<StateAbstract> state, const std::size_t& nu);
   virtual ~ActuationModelAbstract();
 
   virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -30,12 +30,12 @@ class ActuationModelAbstract {
                         const bool& recalc = true) = 0;
   virtual boost::shared_ptr<ActuationDataAbstract> createData();
 
-  const unsigned int& get_nu() const;
-  StateAbstract& get_state() const;
+  const std::size_t& get_nu() const;
+  const boost::shared_ptr<StateAbstract>& get_state() const;
 
  protected:
-  unsigned int nu_;
-  StateAbstract& state_;
+  std::size_t nu_;
+  boost::shared_ptr<StateAbstract> state_;
 
 #ifdef PYTHON_BINDINGS
 
@@ -58,13 +58,14 @@ struct ActuationDataAbstract {
 
   template <typename Model>
   explicit ActuationDataAbstract(Model* const model)
-      : tau(model->get_state().get_nv()),
-        dtau_dx(model->get_state().get_nv(), model->get_state().get_ndx()),
-        dtau_du(model->get_state().get_nv(), model->get_nu()) {
+      : tau(model->get_state()->get_nv()),
+        dtau_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
+        dtau_du(model->get_state()->get_nv(), model->get_nu()) {
     tau.fill(0);
     dtau_dx.fill(0);
     dtau_du.fill(0);
   }
+  virtual ~ActuationDataAbstract() {}
 
   Eigen::VectorXd tau;
   Eigen::MatrixXd dtau_dx;

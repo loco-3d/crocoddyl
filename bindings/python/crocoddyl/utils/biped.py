@@ -182,7 +182,7 @@ class SimpleBipedGaitProblem:
             Mref = crocoddyl.FramePlacement(i, pinocchio.SE3.Identity())
             supportContactModel = \
                 crocoddyl.ContactModel6D(self.state, Mref, self.actuation.nu, np.matrix([0., 0.]).T)
-            contactModel.addContact('contact_' + str(i), supportContactModel)
+            contactModel.addContact(self.rmodel.frames[i].name + "_contact", supportContactModel)
 
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, self.actuation.nu)
@@ -192,7 +192,7 @@ class SimpleBipedGaitProblem:
         if swingFootTask is not None:
             for i in swingFootTask:
                 footTrack = crocoddyl.CostModelFramePlacement(self.state, i, self.actuation.nu)
-                costModel.addCost("footTrack_" + str(i), footTrack, 1e4)
+                costModel.addCost(self.rmodel.frames[i.frame].name + "_footTrack", footTrack, 1e4)
 
         stateWeights = np.array([0] * 3 + [500.] * 3 + [0.01] * (self.state.nv - 6) + [10] * self.state.nv)
         stateReg = crocoddyl.CostModelState(self.state,
@@ -237,17 +237,17 @@ class SimpleBipedGaitProblem:
         for i in supportFootIds:
             Mref = crocoddyl.FramePlacement(i, pinocchio.SE3.Identity())
             supportContactModel = crocoddyl.ContactModel6D(self.state, Mref, self.actuation.nu, np.matrix([0., 0.]).T)
-            contactModel.addContact('contact_' + str(i), supportContactModel)
+            contactModel.addContact(self.rmodel.frames[i].name + "_contact", supportContactModel)
 
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, self.actuation.nu)
         if swingFootTask is not None:
             for i in swingFootTask:
                 footTrack = crocoddyl.CostModelFramePlacement(self.state, i, self.actuation.nu)
-                costModel.addCost("footTrack_" + str(i), footTrack, 1e8)
+                costModel.addCost(self.rmodel.frames[i.frame].name + "_footTrack", footTrack, 1e8)
                 footVel = crocoddyl.FrameMotion(i.frame, pinocchio.Motion.Zero())
                 impulseFootVelCost = crocoddyl.CostModelFrameVelocity(self.state, footVel, self.actuation.nu)
-                costModel.addCost('impulseVel_' + str(i.frame), impulseFootVelCost, 1e6)
+                costModel.addCost(self.rmodel.frames[i.frame].name + "_impulseVel", impulseFootVelCost, 1e6)
 
         stateWeights = np.array([0] * 3 + [500.] * 3 + [0.01] * (self.state.nv - 6) + [10] * self.state.nv)
         stateReg = crocoddyl.CostModelState(self.state,
@@ -276,7 +276,7 @@ class SimpleBipedGaitProblem:
         impulseModel = crocoddyl.ImpulseModelMultiple(self.state)
         for i in supportFootIds:
             supportContactModel = crocoddyl.ImpulseModel6D(self.state, i)
-            impulseModel.addImpulse("impulse_" + str(i), supportContactModel)
+            impulseModel.addImpulse(self.rmodel.frames[i].name + "_impulse", supportContactModel)
 
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, 0)
@@ -284,7 +284,7 @@ class SimpleBipedGaitProblem:
             for i in swingFootTask:
                 xref = crocoddyl.FrameTranslation(i.frame, i.oMf.translation)
                 footTrack = crocoddyl.CostModelFrameTranslation(self.state, xref, 0)
-                costModel.addCost("footTrack_" + str(i), footTrack, 1e8)
+                costModel.addCost(self.rmodel.frames[i.frame].name + "_footTrack", footTrack, 1e8)
         stateWeights = np.array([1.] * 6 + [0.1] * (self.rmodel.nv - 6) + [10] * self.rmodel.nv)
         stateReg = crocoddyl.CostModelState(self.state,
                                             crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeights**2).T),

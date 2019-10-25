@@ -19,7 +19,7 @@ struct ImpulseDataAbstract;  // forward declaration
 
 class ImpulseModelAbstract {
  public:
-  ImpulseModelAbstract(StateMultibody& state, unsigned int const& ni);
+  ImpulseModelAbstract(boost::shared_ptr<StateMultibody> state, const std::size_t& ni);
   ~ImpulseModelAbstract();
 
   virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
@@ -32,12 +32,12 @@ class ImpulseModelAbstract {
 
   virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::Data* const data);
 
-  StateMultibody& get_state() const;
-  unsigned int const& get_ni() const;
+  const boost::shared_ptr<StateMultibody>& get_state() const;
+  const std::size_t& get_ni() const;
 
  protected:
-  StateMultibody& state_;
-  unsigned int ni_;
+  boost::shared_ptr<StateMultibody> state_;
+  std::size_t ni_;
 
 #ifdef PYTHON_BINDINGS
 
@@ -59,14 +59,15 @@ struct ImpulseDataAbstract {
   ImpulseDataAbstract(Model* const model, pinocchio::Data* const data)
       : pinocchio(data),
         joint(0),
-        Jc(model->get_ni(), model->get_state().get_nv()),
-        dv0_dq(model->get_ni(), model->get_state().get_nv()),
-        df_dq(model->get_ni(), model->get_state().get_nv()),
+        Jc(model->get_ni(), model->get_state()->get_nv()),
+        dv0_dq(model->get_ni(), model->get_state()->get_nv()),
+        df_dq(model->get_ni(), model->get_state()->get_nv()),
         f(pinocchio::Force::Zero()) {
     Jc.fill(0);
     dv0_dq.fill(0);
     df_dq.fill(0);
   }
+  virtual ~ImpulseDataAbstract() {}
 
   pinocchio::Data* pinocchio;
   pinocchio::JointIndex joint;

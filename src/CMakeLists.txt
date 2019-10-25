@@ -9,16 +9,20 @@ SET(${PROJECT_NAME}_SOURCES
   core/numdiff/state.cpp
   core/numdiff/action.cpp
   core/numdiff/diff-action.cpp
+  core/numdiff/activation.cpp
   core/utils/callbacks.cpp
   core/optctrl/shooting.cpp
   core/solvers/ddp.cpp
   core/solvers/fddp.cpp
+  core/solvers/box-ddp.cpp
   core/states/euclidean.cpp
   core/actions/unicycle.cpp
   core/actions/lqr.cpp
   core/actions/diff-lqr.cpp
   core/activations/quadratic.cpp
   core/activations/weighted-quadratic.cpp
+  core/activations/quadratic-barrier.cpp
+  core/activations/smooth-abs.cpp
   multibody/cost-base.cpp
   multibody/contact-base.cpp
   multibody/impulse-base.cpp
@@ -34,6 +38,7 @@ SET(${PROJECT_NAME}_SOURCES
   multibody/costs/com-position.cpp
   multibody/costs/frame-placement.cpp
   multibody/costs/frame-translation.cpp
+  multibody/costs/frame-rotation.cpp
   multibody/costs/frame-velocity.cpp
   multibody/contacts/multiple-contacts.cpp
   multibody/contacts/contact-3d.cpp
@@ -41,6 +46,7 @@ SET(${PROJECT_NAME}_SOURCES
   multibody/actions/free-fwddyn.cpp
   multibody/actions/contact-fwddyn.cpp
   multibody/actions/impulse-fwddyn.cpp
+  multibody/utils/quadruped-gaits.cpp
   )
 
 IF(UNIX)

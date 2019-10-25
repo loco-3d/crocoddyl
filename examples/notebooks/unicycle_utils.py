@@ -13,10 +13,11 @@ def plotUnicycle(x):
     return refs
 
 
-def plotUnicycleSolution(xs):
+def plotUnicycleSolution(xs, figIndex=1, show=True):
     import matplotlib.pylab as plt
-    plt.figure(1, figsize=(6.4, 6.4))
+    plt.figure(figIndex, figsize=(6.4, 6.4))
     for x in xs:
         plotUnicycle(x)
     plt.axis([-2, 2., -2., 2.])
-    plt.show()
+    if show:
+        plt.show()

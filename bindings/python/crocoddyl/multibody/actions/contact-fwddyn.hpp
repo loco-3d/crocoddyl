@@ -24,8 +24,8 @@ void exposeDifferentialActionContactFwdDynamics() {
       "is also a custom implementation in case of system with armatures. If you want to\n"
       "include the armature, you need to use setArmature(). On the other hand, the\n"
       "stack of cost functions are implemented in CostModelSum().",
-      bp::init<StateMultibody&, ActuationModelFloatingBase&, ContactModelMultiple&, CostModelSum&,
-               bp::optional<double, bool> >(
+      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActuationModelFloatingBase>,
+               boost::shared_ptr<ContactModelMultiple>, boost::shared_ptr<CostModelSum>, bp::optional<double, bool> >(
           bp::args(" self", " state", " actuation", " contacts", " costs", " inv_damping=0.", "enable_force=False"),
           "Initialize the constrained forward-dynamics action model.\n\n"
           "The damping factor is needed when the contact Jacobian is not full-rank. Otherwise,\n"
@@ -36,10 +36,7 @@ void exposeDifferentialActionContactFwdDynamics() {
           ":param contacts: multiple contact model\n"
           ":param costs: stack of cost functions\n"
           ":param inv_damping: Damping factor for cholesky decomposition of JMinvJt\n"
-          ":param enable_force: Enable the computation of force Jacobians")[bp::with_custodian_and_ward<
-          1, 2,
-          bp::with_custodian_and_ward<1, 3,
-                                      bp::with_custodian_and_ward<1, 4, bp::with_custodian_and_ward<1, 5> > > >()])
+          ":param enable_force: Enable the computation of force Jacobians"))
       .def("calc", &DifferentialActionModelContactFwdDynamics::calc_wrap,
            DiffActionModel_calc_wraps(
                bp::args(" self", " data", " x", " u=None"),
@@ -83,16 +80,16 @@ void exposeDifferentialActionContactFwdDynamics() {
                     "multibody model (i.e. pinocchio model)")
       .add_property("actuation",
                     bp::make_function(&DifferentialActionModelContactFwdDynamics::get_actuation,
-                                      bp::return_internal_reference<>()),
+                                      bp::return_value_policy<bp::return_by_value>()),
                     "actuation model")
       .add_property("contacts",
                     bp::make_function(&DifferentialActionModelContactFwdDynamics::get_contacts,
-                                      bp::return_internal_reference<>()),
+                                      bp::return_value_policy<bp::return_by_value>()),
                     "multiple contact model")
-      .add_property(
-          "costs",
-          bp::make_function(&DifferentialActionModelContactFwdDynamics::get_costs, bp::return_internal_reference<>()),
-          "total cost model")
+      .add_property("costs",
+                    bp::make_function(&DifferentialActionModelContactFwdDynamics::get_costs,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "total cost model")
       .add_property("armature",
                     bp::make_function(&DifferentialActionModelContactFwdDynamics::get_armature,
                                       bp::return_value_policy<bp::return_by_value>()),
@@ -103,6 +100,42 @@ void exposeDifferentialActionContactFwdDynamics() {
                                       bp::return_value_policy<bp::return_by_value>()),
                     bp::make_function(&DifferentialActionModelContactFwdDynamics::set_damping_factor),
                     "Damping factor for cholesky decomposition of JMinvJt");
+
+  bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataContactFwdDynamics> >();
+
+  bp::class_<DifferentialActionDataContactFwdDynamics, bp::bases<DifferentialActionDataAbstract> >(
+      "DifferentialActionDataContactFwdDynamics", "Action data for the contact forward dynamics system.",
+      bp::init<DifferentialActionModelContactFwdDynamics*>(bp::args(" self", " model"),
+                                                           "Create contact forward-dynamics action data.\n\n"
+                                                           ":param model: contact forward-dynamics action model"))
+      .add_property(
+          "pinocchio",
+          bp::make_getter(&DifferentialActionDataContactFwdDynamics::pinocchio, bp::return_internal_reference<>()),
+          "pinocchio data")
+      .add_property("actuation",
+                    bp::make_getter(&DifferentialActionDataContactFwdDynamics::actuation,
+                                    bp::return_value_policy<bp::return_by_value>()),
+                    "actuation data")
+      .add_property("contacts",
+                    bp::make_getter(&DifferentialActionDataContactFwdDynamics::contacts,
+                                    bp::return_value_policy<bp::return_by_value>()),
+                    "contacts data")
+      .add_property("costs",
+                    bp::make_getter(&DifferentialActionDataContactFwdDynamics::costs,
+                                    bp::return_value_policy<bp::return_by_value>()),
+                    "total cost data")
+      .add_property("Kinv",
+                    bp::make_getter(&DifferentialActionDataContactFwdDynamics::Kinv,
+                                    bp::return_value_policy<bp::return_by_value>()),
+                    "inverse of the KKT matrix")
+      .add_property("df_dx",
+                    bp::make_getter(&DifferentialActionDataContactFwdDynamics::df_dx,
+                                    bp::return_value_policy<bp::return_by_value>()),
+                    "Jacobian of the contact force")
+      .add_property("df_du",
+                    bp::make_getter(&DifferentialActionDataContactFwdDynamics::df_du,
+                                    bp::return_value_policy<bp::return_by_value>()),
+                    "Jacobian of the contact force");
 }
 
 }  // namespace python

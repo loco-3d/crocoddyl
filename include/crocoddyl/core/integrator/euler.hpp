@@ -16,7 +16,7 @@ namespace crocoddyl {
 
 class IntegratedActionModelEuler : public ActionModelAbstract {
  public:
-  IntegratedActionModelEuler(DifferentialActionModelAbstract* const model, const double& time_step = 1e-3,
+  IntegratedActionModelEuler(boost::shared_ptr<DifferentialActionModelAbstract> model, const double& time_step = 1e-3,
                              const bool& with_cost_residual = true);
   ~IntegratedActionModelEuler();
 
@@ -26,12 +26,12 @@ class IntegratedActionModelEuler : public ActionModelAbstract {
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
   boost::shared_ptr<ActionDataAbstract> createData();
 
-  DifferentialActionModelAbstract* get_differential() const;
+  const boost::shared_ptr<DifferentialActionModelAbstract>& get_differential() const;
   const double& get_dt() const;
   void set_dt(double dt);
 
  private:
-  DifferentialActionModelAbstract* differential_;
+  boost::shared_ptr<DifferentialActionModelAbstract> differential_;
   double time_step_;
   double time_step2_;
   bool with_cost_residual_;
@@ -43,8 +43,8 @@ struct IntegratedActionDataEuler : public ActionDataAbstract {
   template <typename Model>
   explicit IntegratedActionDataEuler(Model* const model) : ActionDataAbstract(model) {
     differential = model->get_differential()->createData();
-    const unsigned int& ndx = model->get_state().get_ndx();
-    const unsigned int& nu = model->get_nu();
+    const std::size_t& ndx = model->get_state()->get_ndx();
+    const std::size_t& nu = model->get_nu();
     dx = Eigen::VectorXd::Zero(ndx);
     ddx_dx = Eigen::MatrixXd::Zero(ndx, ndx);
     ddx_du = Eigen::MatrixXd::Zero(ndx, nu);

@@ -68,7 +68,7 @@ if WITHDISPLAY and WITHPLOT:
         crocoddyl.CallbackDisplay(talos_arm, 4, 4, cameraTF)
     ])
 elif WITHDISPLAY:
-    ddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackVerbose()])
+    ddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(talos_arm, 4, 4, cameraTF)])
 elif WITHPLOT:
     ddp.setCallbacks([
         crocoddyl.CallbackLogger(),
