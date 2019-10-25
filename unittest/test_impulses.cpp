@@ -9,8 +9,8 @@
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
 #include <pinocchio/algorithm/frames.hpp>
 
-#include "crocoddyl_impulses_factory.hpp"
-#include "crocoddyl_unittest_common.hpp"
+#include "impulses_factory.hpp"
+#include "unittest_common.hpp"
 
 using namespace crocoddyl_unit_test;
 using namespace boost::unit_test;

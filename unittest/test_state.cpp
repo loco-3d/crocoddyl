@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl_state_factory.hpp"
-#include "crocoddyl_unittest_common.hpp"
+#include "state_factory.hpp"
+#include "unittest_common.hpp"
 
 using namespace boost::unit_test;
 using namespace crocoddyl_unit_test;

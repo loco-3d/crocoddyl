@@ -9,8 +9,8 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
-#include "crocoddyl_action_factory.hpp"
-#include "crocoddyl_unittest_common.hpp"
+#include "action_factory.hpp"
+#include "unittest_common.hpp"
 
 using namespace boost::unit_test;
 using namespace crocoddyl_unit_test;

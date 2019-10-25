@@ -10,7 +10,7 @@
 #include "crocoddyl/multibody/impulses/impulse-3d.hpp"
 #include "crocoddyl/multibody/impulses/impulse-6d.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
-#include "crocoddyl_state_factory.hpp"
+#include "state_factory.hpp"
 
 #ifndef CROCODDYL_IMPULSES_FACTORY_HPP_
 #define CROCODDYL_IMPULSES_FACTORY_HPP_
