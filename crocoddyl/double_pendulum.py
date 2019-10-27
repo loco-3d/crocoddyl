@@ -1,16 +1,12 @@
 import numpy as np
 import pinocchio
+import crocoddyl
 
-from .differential_action import DifferentialActionDataAbstract, DifferentialActionModelAbstract
-from .state import StatePinocchio
-from .utils import a2m, m2a
-
-class DifferentialActionModelDoublePendulum(DifferentialActionModelAbstract):
-    def __init__(self, pinocchioModel, actuationModel, costModel):
-        DifferentialActionModelAbstract.__init__(self, pinocchioModel.nq, pinocchioModel.nv, actuationModel.nu)
+class DifferentialActionModelDoublePendulum(crocoddyl.DifferentialActionModelAbstract):
+    def __init__(self, state, actuationModel, costModel):
+        crocoddyl.DifferentialActionModelAbstract.__init__(self, state, state.nv, costModel.nr)
         self.DifferentialActionDataType = DifferentialActionDataDoublePendulum
         self.pinocchio = pinocchioModel
-        self.State = StatePinocchio(self.pinocchio)
         self.actuation = actuationModel
         self.costs = costModel
 
