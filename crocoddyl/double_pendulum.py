@@ -11,9 +11,7 @@ class DifferentialActionModelDoublePendulum(crocoddyl.DifferentialActionModelAbs
         self.costs = costModel
 
     @property
-    def ncost(self):
-        return self.costs.ncost
-
+    
     def calc(self, data, x, u=None):
         if u is None:
             u = self.unone
