@@ -2,11 +2,11 @@ import numpy as np
 import pinocchio
 import crocoddyl
 
+
 class DifferentialActionModelDoublePendulum(crocoddyl.DifferentialActionModelAbstract):
     def __init__(self, state, actuationModel, costModel):
-        crocoddyl.DifferentialActionModelAbstract.__init__(self, state, state.nv, costModel.nr)
+        crocoddyl.DifferentialActionModelAbstract.__init__(self, state, actuationModel.nu, costModel.nr)
         self.DifferentialActionDataType = DifferentialActionDataDoublePendulum
-        self.pinocchio = pinocchioModel
         self.actuation = actuationModel
         self.costs = costModel
 
@@ -14,19 +14,18 @@ class DifferentialActionModelDoublePendulum(crocoddyl.DifferentialActionModelAbs
         self.pinocchioData = pinocchio.Data(self.state.pinocchio)
 
     @property
-
     def calc(self, data, x, u=None):
         if u is None:
             u = self.unone
         nq, nv = self.state.nq, self.state.nv
         q, v = x[:nq], x[-nv:]
-        tauq[:] = self.actuation.calc(data.actuation, x, u)
+        tauq = self.actuation.calc(data.actuation, x, u)
 
         pinocchio.computeAllTerms(self.state.pinocchio, self.pinocchioData, q, v)
         data.M = self.pinocchioData.M
-        data.Minv = np.linalg.inv(data.M)
-        data.r = data.tauq - m2a(self.pinocchioData.nle)
-        data.xout[:] = data.Minv * (data.tauq - )np.dot(data.Minv, data.r)
+        pinocchio.cholesky.decompose(self.state.pinocchio, self.pinocchioData)
+        data.Minv = pinocchio.computeMinverse(self.state.pinocchio, self.pinocchioData)
+        data.xout[:] = data.Minv * (tauq - self.pinocchioData.nle)
 
         # --- Cost
         pinocchio.forwardKinematics(self.pinocchio, data.pinocchio, q, v)
