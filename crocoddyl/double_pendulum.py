@@ -25,7 +25,7 @@ class DifferentialActionModelDoublePendulum(crocoddyl.DifferentialActionModelAbs
         data.M = self.pinocchioData.M
         pinocchio.cholesky.decompose(self.state.pinocchio, self.pinocchioData)
         data.Minv = pinocchio.computeMinverse(self.state.pinocchio, self.pinocchioData)
-        data.xout[:] = data.Minv * (tauq - self.pinocchioData.nle)
+        data.xout = data.Minv * (tauq - self.pinocchioData.nle)
 
         # --- Cost
         pinocchio.forwardKinematics(self.pinocchio, data.pinocchio, q, v)
@@ -38,27 +38,25 @@ class DifferentialActionModelDoublePendulum(crocoddyl.DifferentialActionModelAbs
             u = self.unone
         if recalc:
             xout, cost = self.calc(data, x, u)
-        nq, nv = self.nq, self.nv
-        q = a2m(x[:nq])
-        v = a2m(x[-nv:])
-        tauq = a2m(u)
-        a = a2m(data.xout)
+
+        nq, nv = self.state.nq, self.state.nv
+        q, v = x[:nq], x[-nv:]
+        tauq = u  # In the case of being underactuated, u == tauq ?
         # --- Dynamics
-        if self.forceAba:
-            pinocchio.computeABADerivatives(self.pinocchio, data.pinocchio, q, v, tauq)
-            data.Fx[:, :nv] = data.pinocchio.ddq_dq
-            data.Fx[:, nv:] = data.pinocchio.ddq_dv
-            data.Fu[:, :] = data.pinocchio.Minv
+        if self.enableAba:
+            pinocchio.computeABADerivatives(self.state.pinocchio, self.pinocchioData, q, v, tauq)
+            data.Fx = np.hstack([data.pinocchio.ddq_dq, data.pinocchio.ddq_dv])
+            data.Fu = self.pinocchioData.Minv
         else:
-            pinocchio.computeRNEADerivatives(self.pinocchio, data.pinocchio, q, v, a)
-            data.Fx[:, :nv] = -np.dot(data.Minv, data.pinocchio.dtau_dq)
-            data.Fx[:, nv:] = -np.dot(data.Minv, data.pinocchio.dtau_dv)
-            data.Fu[:, :] = data.Minv
+            pinocchio.computeRNEADerivatives(self.state.pinocchio, self.pinocchioData, q, v, data.xout)
+            data.Fx = -np.hstack([data.Minv * self.pinocchioData.dtau_dq, data.Minv * self.pinocchioData.dtau_dv])
+            data.Fu = data.Minv
         # --- Cost
-        pinocchio.computeJointJacobians(self.pinocchio, data.pinocchio, q)
-        pinocchio.updateFramePlacements(self.pinocchio, data.pinocchio)
-        self.costs.calcDiff(data.costs, x, u, recalc=False)
-        return data.xout, data.cost
+        pinocchio.computeJointJacobians(self.state.pinocchio, self.pinocchioData, q)  # Needed?
+        pinocchio.updateFramePlacements(self.state.pinocchio, self.pinocchioData)  # Needed?
+
+        self.costs.calcDiff(data.costs, x, u, False)
+        return data.xout, data.cost  # Needed?
 
 
 class DifferentialActionDataDoublePendulum(DifferentialActionDataAbstract):
