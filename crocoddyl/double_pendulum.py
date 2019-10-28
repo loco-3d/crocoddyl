@@ -57,10 +57,3 @@ class DifferentialActionModelDoublePendulum(crocoddyl.DifferentialActionModelAbs
 
         self.costs.calcDiff(data.costs, x, u, False)
         return data.xout, data.cost  # Needed?
-
-
-class DifferentialActionDataDoublePendulum(DifferentialActionDataAbstract):
-    def __init__(self, model):
-        self.pinocchio = model.pinocchio.createData()
-        costData = model.costs.createData(self.pinocchio)
-        DifferentialActionDataAbstract.__init__(self, model, costData)
