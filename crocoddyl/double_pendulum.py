@@ -15,6 +15,7 @@ class DifferentialActionModelDoublePendulum(crocoddyl.DifferentialActionModelAbs
 
     @property
     def calc(self, data, x, u=None):
+        self.costsData.shareMemory(data)  # Needed?
         if u is None:
             u = self.unone
         nq, nv = self.state.nq, self.state.nv
@@ -28,9 +29,10 @@ class DifferentialActionModelDoublePendulum(crocoddyl.DifferentialActionModelAbs
         data.xout = data.Minv * (tauq - self.pinocchioData.nle)
 
         # --- Cost
-        pinocchio.forwardKinematics(self.pinocchio, data.pinocchio, q, v)
-        pinocchio.updateFramePlacements(self.pinocchio, data.pinocchio)
-        data.cost = self.costs.calc(data.costs, x, u)
+        pinocchio.forwardKinematics(self.state.pinocchio, self.pinocchioData, q, v)
+        pinocchio.updateFramePlacements(self.state.pinocchio, self.pinocchioData)
+        self.costs.calc(self.costsData, x, u)
+        data.cost = self.costsData.cost
         return data.xout, data.cost
 
     def calcDiff(self, data, x, u=None, recalc=True):
