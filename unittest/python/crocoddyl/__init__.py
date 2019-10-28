@@ -1,10 +1,10 @@
 from .action import (ActionDataAbstract, ActionDataLQR, ActionDataNumDiff, ActionModelAbstract, ActionModelLQR,
                      ActionModelNumDiff)
-from .activation import (ActivationDataInequality, ActivationDataInequalityCont, ActivationDataQuad, ActivationDataSmoothAbs,
-                         ActivationDataWeightedQuad, ActivationModelInequality, ActivationModelInequalityCont, ActivationModelQuad,
+from .activation import (ActivationDataInequality, ActivationDataQuad, ActivationDataSmoothAbs,
+                         ActivationDataWeightedQuad, ActivationModelInequality, ActivationModelQuad,
                          ActivationModelSmoothAbs, ActivationModelWeightedQuad)
-from .actuation import (ActuationDataFreeFloating, ActuationDataFull, ActuationDataUAM, ActuationDataDoublePendulum,
-                        ActuationModelFreeFloating, ActuationModelFull, ActuationModelUAM, ActuationModelDoublePendulum)
+from .actuation import (ActuationDataFreeFloating, ActuationDataFull,
+                        ActuationModelFreeFloating, ActuationModelFull)
 from .box_ddp import SolverBoxDDP
 from .box_kkt import SolverBoxKKT
 from .callbacks import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay, CallbackSolverTimer
@@ -15,7 +15,7 @@ from .cost import (CostDataCoM, CostDataControl, CostDataForce, CostDataFramePla
                    CostDataState, CostDataSum, CostModelCoM, CostModelControl, CostModelForce,
                    CostModelForceLinearCone, CostModelFramePlacement, CostModelFrameRotation,
                    CostModelFrameTranslation, CostModelFrameVelocity, CostModelFrameVelocityLinear, CostModelNumDiff,
-                   CostModelPinocchio, CostModelState, CostModelSum, CostModelDoublePendulum, CostDataDoublePendulum)
+                   CostModelPinocchio, CostModelState, CostModelSum)
 from .ddp import SolverDDP
 from .diagnostic import displayTrajectory, plotDDPConvergence, plotOCSolution
 from .differential_action import (DifferentialActionDataAbstract, DifferentialActionDataFullyActuated,
@@ -30,10 +30,9 @@ from .impact import (ActionDataImpact, ActionModelImpact, CostModelImpactCoM, Co
 from .integrated_action import (IntegratedActionDataEuler, IntegratedActionDataRK4, IntegratedActionModelEuler,
                                 IntegratedActionModelRK4)
 from .kkt import SolverKKT
-from .robots import getTalosPathFromRos, loadHyQ, loadTalos, loadTalosArm, loadTalosLegs, loadKinton, loadKintonArm, load2dofPlanar, loadHector
+from .robots import getTalosPathFromRos, loadHyQ, loadTalos, loadTalosArm, loadTalosLegs
 from .shooting import ShootingProblem
 from .solver import SolverAbstract
 from .state import StateAbstract, StateNumDiff, StatePinocchio, StateVector
 from .unicycle import ActionModelUnicycle, ActionModelUnicycleVar, StateUnicycle
 from .utils import a2m, absmax, absmin, m2a
-from .plots import *
