@@ -6,12 +6,12 @@ import crocoddyl
 class DifferentialActionModelDoublePendulum(crocoddyl.DifferentialActionModelAbstract):
     def __init__(self, state, actuationModel, costModel):
         crocoddyl.DifferentialActionModelAbstract.__init__(self, state, actuationModel.nu, costModel.nr)
-        self.DifferentialActionDataType = DifferentialActionDataDoublePendulum
         self.actuation = actuationModel
         self.costs = costModel
 
         # Internal model Data
         self.pinocchioData = pinocchio.Data(self.state.pinocchio)
+        self.costsData = self.costs.createData(self.pinocchioData)
 
     @property
     def calc(self, data, x, u=None):
