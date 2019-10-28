@@ -10,21 +10,23 @@ class DifferentialActionModelDoublePendulum(crocoddyl.DifferentialActionModelAbs
         self.actuation = actuationModel
         self.costs = costModel
 
+        # Internal model Data
+        self.pinocchioData = pinocchio.Data(self.state.pinocchio)
+
     @property
-    
+
     def calc(self, data, x, u=None):
         if u is None:
             u = self.unone
-        nq, nv = self.nq, self.nv
-        q = a2m(x[:nq])
-        v = a2m(x[-nv:])
+        nq, nv = self.state.nq, self.state.nv
+        q, v = x[:nq], x[-nv:]
         tauq[:] = self.actuation.calc(data.actuation, x, u)
 
-        pinocchio.computeAllTerms(self.pinocchio, data.pinocchio, q, v)
-        data.M = data.pinocchio.M
+        pinocchio.computeAllTerms(self.state.pinocchio, self.pinocchioData, q, v)
+        data.M = self.pinocchioData.M
         data.Minv = np.linalg.inv(data.M)
-        data.r = data.tauq - m2a(data.pinocchio.nle)
-        data.xout[:] = np.dot(data.Minv, data.r)
+        data.r = data.tauq - m2a(self.pinocchioData.nle)
+        data.xout[:] = data.Minv * (data.tauq - )np.dot(data.Minv, data.r)
 
         # --- Cost
         pinocchio.forwardKinematics(self.pinocchio, data.pinocchio, q, v)
