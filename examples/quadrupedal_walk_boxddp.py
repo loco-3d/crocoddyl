@@ -24,7 +24,7 @@ lfFoot, rfFoot, lhFoot, rhFoot = 'lf_foot', 'rf_foot', 'lh_foot', 'rh_foot'
 gait = SimpleQuadrupedalGaitProblem(robot_model, lfFoot, rfFoot, lhFoot, rhFoot)
 
 # Defining the initial state of the robot
-q0 = robot_model.referenceConfigurations['half_sitting'].copy()
+q0 = robot_model.referenceConfigurations['standing'].copy()
 v0 = pinocchio.utils.zero(robot_model.nv)
 x0 = np.concatenate([q0, v0])
 
