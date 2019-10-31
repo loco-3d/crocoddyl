@@ -36,3 +36,30 @@ class CostModelDoublePendulum(crocoddyl.costModelAbstract):
         H[4:6, 2:4] = np.diag([1, 1])
         Lxx = np.dot(H.T, Axx)
         data.Lxx = np.diag([Lxx[0, 0], Lxx[1, 0], Lxx[2, 0], Lxx[3, 0]])
+
+class ActuationModelDoublePendulum:
+    def __init__(self, pinocchioModel, actLink):
+        self.pinocchio = pinocchioModel
+        self.nq = pinocchioModel.nq
+        self.nv = pinocchioModel.nv
+        self.nx = self.nq + self.nv
+        self.ndx = self.nv * 2
+        self.nu = 1
+        self.actLink = actLink
+
+    def calc(self, data, x, u):
+        S = np.zeros([self.nv, self.nu])
+        if self.actLink == 1:
+            S[0] = 1
+        else:
+            S[1] = 1
+        data.a[:] = np.dot(S, u)
+        return data.a
+
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        return data.a
+
+    def createData(self, pinocchioData):
+        return ActuationDataDoublePendulum(self, pinocchioData)
