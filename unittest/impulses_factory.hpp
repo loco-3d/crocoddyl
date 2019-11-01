@@ -6,6 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <cstdlib> 
+#include <ctime> 
 #include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/multibody/impulses/impulse-3d.hpp"
 #include "crocoddyl/multibody/impulses/impulse-6d.hpp"
@@ -115,6 +117,24 @@ class ImpulseModelFactory {
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model_;  //!< The pointer to the impulse model
   boost::shared_ptr<StateFactory> state_factory_;             //!< The pointer to the multibody state factory
 };
+
+boost::shared_ptr<ImpulseModelFactory> create_random_factory(){
+  static bool once = true;
+  if (once)
+  {
+    srand((unsigned)time(NULL));
+    once = false;
+  }
+  boost::shared_ptr<ImpulseModelFactory> ptr;
+  if (rand()%2 == 0){
+    ptr = boost::make_shared<ImpulseModelFactory>(
+      ImpulseModelTypes::ImpulseModel3DRandomHumanoid);
+  }else{
+    ptr = boost::make_shared<ImpulseModelFactory>(
+      ImpulseModelTypes::ImpulseModel6DRandomHumanoid);
+  }  
+  return ptr;
+}
 
 }  // namespace crocoddyl_unit_test
 
