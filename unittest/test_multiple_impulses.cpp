@@ -17,6 +17,48 @@ using namespace boost::unit_test;
 
 //----------------------------------------------------------------------------//
 
+/**
+ * These methods modify the return type of the model function in
+ * order to use the boost::execution_monitor::execute method which catch the
+ * assert signal
+ */
+int calc(crocoddyl::ImpulseModelMultiple& model,
+                         boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data,
+                         Eigen::VectorXd& dx){
+  model.calc(data, dx);
+  return 0;
+}
+
+int calcDiff(crocoddyl::ImpulseModelMultiple& model,
+                         boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data,
+                         Eigen::VectorXd& dx, bool recalc){
+  model.calcDiff(data, dx, recalc);
+  return 0;
+}
+
+int updateForce(crocoddyl::ImpulseModelMultiple& model,
+                boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data,
+                Eigen::VectorXd& dx){
+  model.updateForce(data, dx);
+  return 0;
+}
+
+int updateVelocityDiff(crocoddyl::ImpulseModelMultiple& model,
+                       boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data,
+                       const Eigen::MatrixXd& dvnext_dx){
+  model.updateVelocityDiff(data, dvnext_dx);
+  return 0;
+}
+
+int updateForceDiff(crocoddyl::ImpulseModelMultiple& model,
+                       boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data,
+                       const Eigen::MatrixXd& df_dq){
+  model.updateForceDiff(data, df_dq);
+  return 0;
+}
+
+//----------------------------------------------------------------------------//
+
 void test_constructor(){
   // Setup the test
   StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
@@ -186,18 +228,6 @@ void test_calc_no_computation() {
   BOOST_CHECK(data->dv0_dq.hasNaN() || data->dv0_dq.isZero());
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(data->df_dq.isZero());
-}
-
-/**
- * @brief This method basically modify the return type of the calc function in
- * order to use the boost::execution_monitor::execute method which catch the
- * assert signal
- */
-int calc(crocoddyl::ImpulseModelMultiple& model,
-                         boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data,
-                         Eigen::VectorXd& dx){
-  model.calc(data, dx);
-  return 0;
 }
 
 void test_assert_calc_wrong_data_size() {
@@ -420,18 +450,6 @@ void test_calc_diff_no_computation() {
   BOOST_CHECK(data->df_dq.isZero());
 }
 
-/**
- * @brief This method basically modify the return type of the calc_diff function in
- * order to use the boost::execution_monitor::execute method which catch the
- * assert signal
- */
-int calcDiff(crocoddyl::ImpulseModelMultiple& model,
-                         boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data,
-                         Eigen::VectorXd& dx, bool recalc){
-  model.calcDiff(data, dx, recalc);
-  return 0;
-}
-
 void test_assert_calc_diff_wrong_data_size() {
 
   // Setup the test
@@ -577,19 +595,6 @@ void test_updateForce() {
   BOOST_CHECK(data->df_dq.isZero());
 }
 
-/**
- * @brief This method basically modify the return type of the updateForce 
- * function in order to use the boost::execution_monitor::execute method which 
- * catch the assert signal
- */
-int updateForce(crocoddyl::ImpulseModelMultiple& model,
-                boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data,
-                Eigen::VectorXd& dx){
-  model.updateForce(data, dx);
-  return 0;
-}
-
-
 void test_assert_updateForce_assert_force_size(){
   // Setup the test
   StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
@@ -673,7 +678,7 @@ void test_assert_updateForce_assert_wrong_data_size(){
   BOOST_CHECK(error_message.find(assert_argument) != std::string::npos);
 }
 
-void test_assert_updateFroce_mismatch_model_data() {
+void test_assert_updateForce_mismatch_model_data() {
   // Setup the test
   StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
   crocoddyl::ImpulseModelMultiple model1(
@@ -723,23 +728,312 @@ void test_assert_updateFroce_mismatch_model_data() {
 }
 
 void test_updateVelocityDiff() {
+  // Setup the test
+  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  crocoddyl::ImpulseModelMultiple model(
+    boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.get_state()));
+  // create the corresponding data object
+  pinocchio::Data pinocchio_data(state_factory.get_pinocchio_model());
+  
+  // create and add some impulse objects
+  std::vector<boost::shared_ptr<ImpulseModelFactory> > impulse_factories;
+  for(unsigned i=0 ; i<5 ; ++i){
+    impulse_factories.push_back(create_random_factory());
+    std::ostringstream os;
+    os << "random_impulse_" << i;
+    model.addImpulse(os.str(), impulse_factories.back()->get_model());
+  }
+  
+  // create the data of the multiple-impulses
+  boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data =
+    model.createData(&pinocchio_data);
 
+  // create the velocity diff
+  Eigen::MatrixXd dvnext_dx = Eigen::MatrixXd::Random(
+    state_factory.get_state()->get_nv(), state_factory.get_state()->get_ndx());
+
+  // call the update
+  model.updateVelocityDiff(data, dvnext_dx);
+
+  // Test
+  BOOST_CHECK((data->dvnext_dx - dvnext_dx).isMuchSmallerThan(1.0, 1e-9));
+}
+
+void test_assert_updateVelocityDiff() {
+  // Setup the test
+  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  crocoddyl::ImpulseModelMultiple model(
+    boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.get_state()));
+  // create the corresponding data object
+  pinocchio::Data pinocchio_data(state_factory.get_pinocchio_model());
+  
+  // create and add some impulse objects
+  std::vector<boost::shared_ptr<ImpulseModelFactory> > impulse_factories;
+  for(unsigned i=0 ; i<5 ; ++i){
+    impulse_factories.push_back(create_random_factory());
+    std::ostringstream os;
+    os << "random_impulse_" << i;
+    model.addImpulse(os.str(), impulse_factories.back()->get_model());
+  }
+  
+  // create the data of the multiple-impulses
+  boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data =
+    model.createData(&pinocchio_data);
+
+  // create the velocity diff
+  Eigen::MatrixXd dvnext_dx;
+
+  // call the update
+  std::string error_message = GetErrorMessages(
+    boost::bind(&updateVelocityDiff, model, data, dvnext_dx));
+
+  // expected error message content
+  std::string function_name = "void crocoddyl::ImpulseModelMultiple::updateVelocityDiff("
+                              "const boost::shared_ptr<crocoddyl::ImpulseDataMultiple>&, "
+                              "const MatrixXd&) const";
+  std::string assert_argument = "(static_cast<std::size_t>(dvnext_dx.rows()) == state_->get_nv() &&"
+                                " static_cast<std::size_t>(dvnext_dx.cols()) == state_->get_ndx()) && "
+                                "\"dvnext_dx has wrong dimension\"";
+
+  // Perform the checks
+  BOOST_CHECK(error_message.find(function_name) != std::string::npos);
+  BOOST_CHECK(error_message.find(assert_argument) != std::string::npos);
 }
 
 void test_updateForceDiff() {
+  // Setup the test
+  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  crocoddyl::ImpulseModelMultiple model(
+    boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.get_state()));
+  // create the corresponding data object
+  pinocchio::Data pinocchio_data(state_factory.get_pinocchio_model());
+  
+  // create and add some impulse objects
+  std::vector<boost::shared_ptr<ImpulseModelFactory> > impulse_factories;
+  for(unsigned i=0 ; i<5 ; ++i){
+    impulse_factories.push_back(create_random_factory());
+    std::ostringstream os;
+    os << "random_impulse_" << i;
+    model.addImpulse(os.str(), impulse_factories.back()->get_model());
+  }
+  
+  // create the data of the multiple-impulses
+  boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data =
+    model.createData(&pinocchio_data);
 
+  // create force diff
+  Eigen::MatrixXd df_dq = Eigen::MatrixXd::Random(
+    model.get_ni(), state_factory.get_state()->get_nv());
+  
+  // call update force diff
+  model.updateForceDiff(data, df_dq);
+
+  // Test
+  crocoddyl::ImpulseModelMultiple::ImpulseDataContainer::iterator it_d, end_d;
+  for (it_d = data->impulses.begin(), end_d = data->impulses.end() ; it_d != end_d ; ++it_d) {
+    BOOST_CHECK(!it_d->second->df_dq.isZero());
+  }
+}
+
+void test_assert_updateForceDiff_df_dq_size() {
+  // Setup the test
+  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  crocoddyl::ImpulseModelMultiple model(
+    boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.get_state()));
+  // create the corresponding data object
+  pinocchio::Data pinocchio_data(state_factory.get_pinocchio_model());
+  
+  // create and add some impulse objects
+  std::vector<boost::shared_ptr<ImpulseModelFactory> > impulse_factories;
+  for(unsigned i=0 ; i<5 ; ++i){
+    impulse_factories.push_back(create_random_factory());
+    std::ostringstream os;
+    os << "random_impulse_" << i;
+    model.addImpulse(os.str(), impulse_factories.back()->get_model());
+  }
+  
+  // create the data of the multiple-impulses
+  boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data =
+    model.createData(&pinocchio_data);
+
+  // create force diff
+  Eigen::MatrixXd df_dq;
+
+  // call that trigger assert
+  std::string error_message = GetErrorMessages(boost::bind(&updateForceDiff, model, data, df_dq));
+
+  // expected error message content
+  std::cout << "error_message = " << error_message << std::endl;
+  std::string function_name = "void crocoddyl::ImpulseModelMultiple::updateForceDiff("
+                              "const boost::shared_ptr<crocoddyl::ImpulseDataMultiple>&,"
+                              " const MatrixXd&) const";
+  std::string assert_argument = "(static_cast<std::size_t>(df_dq.rows()) == ni_ && "
+                                "static_cast<std::size_t>(df_dq.cols()) == nv) &&"
+                                " \"df_dq has wrong dimension\"";
+
+  // Perform the checks
+  BOOST_CHECK(error_message.find(function_name) != std::string::npos);
+  BOOST_CHECK(error_message.find(assert_argument) != std::string::npos);
+}
+
+void test_assert_updateForceDiff_assert_wrong_data_size(){
+  // Setup the test
+  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  crocoddyl::ImpulseModelMultiple model(
+    boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.get_state()));
+  // create the corresponding data object
+  pinocchio::Data pinocchio_data(state_factory.get_pinocchio_model());
+  
+  // create the data of the multiple-impulses
+  boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data =
+    model.createData(&pinocchio_data);
+
+  // create and add some impulse objects
+  std::vector<boost::shared_ptr<ImpulseModelFactory> > impulse_factories;
+  for(unsigned i=0 ; i<5 ; ++i){
+    impulse_factories.push_back(create_random_factory());
+    std::ostringstream os;
+    os << "random_impulse_" << i;
+    model.addImpulse(os.str(), impulse_factories.back()->get_model());
+  }
+
+  // create force diff
+  Eigen::MatrixXd df_dq = Eigen::MatrixXd::Random(
+    model.get_ni(), state_factory.get_state()->get_nv());
+
+  // call that trigger assert
+  std::string error_message = GetErrorMessages(boost::bind(&updateForceDiff, model, data, df_dq));
+
+  // expected error message content
+  std::cout << "error_message = " << error_message << std::endl;
+  std::string function_name = "void crocoddyl::ImpulseModelMultiple::updateForceDiff("
+                              "const boost::shared_ptr<crocoddyl::ImpulseDataMultiple>&,"
+                              " const MatrixXd&) const";
+  std::string assert_argument = "data->impulses.size() == impulses_.size() && "
+                                "\"it doesn't match the number of impulse datas and models\"";
+
+  // Perform the checks
+  BOOST_CHECK(error_message.find(function_name) != std::string::npos);
+  BOOST_CHECK(error_message.find(assert_argument) != std::string::npos);
+}
+
+void test_assert_updateForceDiff_assert_mismatch_model_data(){
+  // Setup the test
+  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  crocoddyl::ImpulseModelMultiple model1(
+    boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.get_state()));
+  crocoddyl::ImpulseModelMultiple model2(
+    boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.get_state()));
+  // create the corresponding data object
+  pinocchio::Data pinocchio_data(state_factory.get_pinocchio_model());
+  
+  // create and add some impulse objects
+  std::vector<boost::shared_ptr<ImpulseModelFactory> > impulse_factories;
+  for(unsigned i=0 ; i<5 ; ++i){
+    impulse_factories.push_back(create_random_factory());
+    {
+      std::ostringstream os;
+      os << "random_impulse1_" << i;
+      model1.addImpulse(os.str(), impulse_factories.back()->get_model());
+    }
+    {
+      std::ostringstream os;
+      os << "random_impulse2_" << i;
+      model2.addImpulse(os.str(), impulse_factories.back()->get_model());
+    }
+  }
+  
+  // create the data of the multiple-impulses
+  boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data1 =
+    model1.createData(&pinocchio_data);
+  boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data2 =
+    model2.createData(&pinocchio_data);
+
+  // create force diff
+  Eigen::MatrixXd df_dq = Eigen::MatrixXd::Random(
+    model1.get_ni(), state_factory.get_state()->get_nv());
+
+  // call that trigger assert
+  std::string error_message = GetErrorMessages(boost::bind(&updateForceDiff, model1, data2, df_dq));
+
+  // expected error message content
+  std::cout << "error_message = " << error_message << std::endl;
+  std::string function_name = "void crocoddyl::ImpulseModelMultiple::updateForceDiff("
+                              "const boost::shared_ptr<crocoddyl::ImpulseDataMultiple>&,"
+                              " const MatrixXd&) const";
+  std::string assert_argument = "it_m->first == it_d->first && \"it doesn't match"
+                                " the impulse name between data and model\"";
+
+  // Perform the checks
+  BOOST_CHECK(error_message.find(function_name) != std::string::npos);
+  BOOST_CHECK(error_message.find(assert_argument) != std::string::npos);
 }
 
 void test_get_state() {
-
+  // Setup the test
+  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  crocoddyl::ImpulseModelMultiple model(
+    boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.get_state()));
+  
+  // Test
+  BOOST_CHECK(state_factory.get_state() == model.get_state());
 }
 
 void test_get_impulses() {
+  // Setup the test
+  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  crocoddyl::ImpulseModelMultiple model(
+    boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.get_state()));
+  // create the corresponding data object
+  pinocchio::Data pinocchio_data(state_factory.get_pinocchio_model());
+  
+  // create and add some impulse objects
+  std::vector<boost::shared_ptr<ImpulseModelFactory> > impulse_factories;
+  for(unsigned i=0 ; i<5 ; ++i){
+    impulse_factories.push_back(create_random_factory());
+    std::ostringstream os;
+    os << "random_impulse_" << i;
+    model.addImpulse(os.str(), impulse_factories.back()->get_model());
+  }
 
+  // get the impulses
+  const crocoddyl::ImpulseModelMultiple::ImpulseModelContainer& impulses = model.get_impulses();
+
+  // test
+  crocoddyl::ImpulseModelMultiple::ImpulseModelContainer::const_iterator it_m, end_m;
+  unsigned i;
+  for (i = 0, it_m = impulses.begin(), end_m = impulses.end() ; it_m != end_m ; ++it_m, ++i) {
+    std::ostringstream os;
+    os << "random_impulse_" << i;
+    BOOST_CHECK(it_m->first == os.str());
+  }
 }
 
 void test_get_ni(){
+  // Setup the test
+  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  crocoddyl::ImpulseModelMultiple model(
+    boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.get_state()));
+  // create the corresponding data object
+  pinocchio::Data pinocchio_data(state_factory.get_pinocchio_model());
+  
+  // create and add some impulse objects
+  std::vector<boost::shared_ptr<ImpulseModelFactory> > impulse_factories;
+  for(unsigned i=0 ; i<5 ; ++i){
+    impulse_factories.push_back(create_random_factory());
+    std::ostringstream os;
+    os << "random_impulse_" << i;
+    model.addImpulse(os.str(), impulse_factories.back()->get_model());
+  }
 
+  // compute ni
+  std::size_t ni = 0;
+  crocoddyl::ImpulseModelMultiple::ImpulseModelContainer::const_iterator it_m, end_m;
+  for (it_m = model.get_impulses().begin(), end_m = model.get_impulses().end() ; it_m != end_m ; ++it_m) {
+    ni += it_m->second.impulse->get_ni();
+  }
+
+  BOOST_CHECK(ni == model.get_ni());
 }
 
 //----------------------------------------------------------------------------//
@@ -767,7 +1061,11 @@ void register_unit_tests() {
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_assert_calc_diff_mismatch_model_data)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_assert_updateForce_assert_force_size)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_assert_updateForce_assert_wrong_data_size)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_assert_updateFroce_mismatch_model_data)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_assert_updateForce_mismatch_model_data)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_assert_updateVelocityDiff)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_assert_updateForceDiff_df_dq_size)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_assert_updateForceDiff_assert_wrong_data_size)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_assert_updateForceDiff_assert_mismatch_model_data)));
 #endif // #ifndef NDEBUG
 }
 
