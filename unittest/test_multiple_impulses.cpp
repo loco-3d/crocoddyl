@@ -200,7 +200,7 @@ int calc(crocoddyl::ImpulseModelMultiple& model,
   return 0;
 }
 
-void test_calc_wrong_data_size() {
+void test_assert_calc_wrong_data_size() {
 
   // Setup the test
   StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
@@ -245,7 +245,7 @@ void test_calc_wrong_data_size() {
   BOOST_CHECK(error_message.find(assert_argument) != std::string::npos);
 }
 
-void test_calc_mismatch_model_data() {
+void test_assert_calc_mismatch_model_data() {
 
   // Setup the test
   StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
@@ -432,7 +432,7 @@ int calcDiff(crocoddyl::ImpulseModelMultiple& model,
   return 0;
 }
 
-void test_calc_diff_wrong_data_size() {
+void test_assert_calc_diff_wrong_data_size() {
 
   // Setup the test
   StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
@@ -478,7 +478,7 @@ void test_calc_diff_wrong_data_size() {
   BOOST_CHECK(error_message.find(assert_argument) != std::string::npos);
 }
 
-void test_calc_diff_mismatch_model_data() {
+void test_assert_calc_diff_mismatch_model_data() {
 
   // Setup the test
   StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
@@ -590,7 +590,7 @@ int updateForce(crocoddyl::ImpulseModelMultiple& model,
 }
 
 
-void test_updateForce_assert_force_size(){
+void test_assert_updateForce_assert_force_size(){
   // Setup the test
   StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(
@@ -630,7 +630,7 @@ void test_updateForce_assert_force_size(){
   BOOST_CHECK(error_message.find(assert_argument) != std::string::npos);
 }
 
-void test_updateForce_assert_wrong_data_size(){
+void test_assert_updateForce_assert_wrong_data_size(){
   // Setup the test
   StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(
@@ -673,7 +673,7 @@ void test_updateForce_assert_wrong_data_size(){
   BOOST_CHECK(error_message.find(assert_argument) != std::string::npos);
 }
 
-void test_updateFroce_mismatch_model_data() {
+void test_assert_updateFroce_mismatch_model_data() {
   // Setup the test
   StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
   crocoddyl::ImpulseModelMultiple model1(
@@ -752,20 +752,23 @@ void register_unit_tests() {
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_removeImpulse_error_message)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_no_computation)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_wrong_data_size)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_mismatch_model_data)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_no_computation)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_wrong_data_size)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_mismatch_model_data)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_updateForce)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_updateForce_assert_force_size)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_updateForce_assert_wrong_data_size)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_updateFroce_mismatch_model_data)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_updateVelocityDiff)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_get_state)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_get_impulses)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_get_ni)));
+
+#ifndef NDEBUG // here we test asserts
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_assert_calc_wrong_data_size)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_assert_calc_mismatch_model_data)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_assert_calc_diff_wrong_data_size)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_assert_calc_diff_mismatch_model_data)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_assert_updateForce_assert_force_size)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_assert_updateForce_assert_wrong_data_size)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_assert_updateFroce_mismatch_model_data)));
+#endif // #ifndef NDEBUG
 }
 
 bool init_function() {
