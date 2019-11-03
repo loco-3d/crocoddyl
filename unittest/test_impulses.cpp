@@ -149,6 +149,7 @@ void test_calc_diff_no_recalc(ImpulseModelTypes::Type test_type) {
   // BOOST_CHECK(!data->dv0_dq.isZero());
   // BOOST_CHECK(data->f.toVector().isZero());
   // BOOST_CHECK(data->df_dq.isZero());
+  std::cout << "test_calc_diff_no_recalc done" << std::endl;
 }
 
 void test_update_force(ImpulseModelTypes::Type test_type) {
