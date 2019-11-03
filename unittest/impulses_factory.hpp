@@ -6,8 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <cstdlib>
-#include <ctime>
+#include <iostream>
 #include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/multibody/impulses/impulse-3d.hpp"
 #include "crocoddyl/multibody/impulses/impulse-6d.hpp"
@@ -42,6 +41,30 @@ struct ImpulseModelTypes {
   static const std::vector<Type> all;
 };
 const std::vector<ImpulseModelTypes::Type> ImpulseModelTypes::all(ImpulseModelTypes::init_all());
+
+std::ostream& operator<<(std::ostream& os, const ImpulseModelTypes::Type& type){
+  switch (type) {
+    case ImpulseModelTypes::ImpulseModel3DTalosArm:
+      os << "ImpulseModel3DTalosArm";
+    case ImpulseModelTypes::ImpulseModel3DHyQ:
+      os << "ImpulseModel3DHyQ";
+    case ImpulseModelTypes::ImpulseModel3DTalos:
+      os << "ImpulseModel3DTalos";
+    case ImpulseModelTypes::ImpulseModel3DRandomHumanoid:
+      os << "ImpulseModel3DRandomHumanoid";
+    case ImpulseModelTypes::ImpulseModel6DTalosArm:
+      os << "ImpulseModel6DTalosArm";
+    case ImpulseModelTypes::ImpulseModel6DHyQ:
+      os << "ImpulseModel6DHyQ";
+    case ImpulseModelTypes::ImpulseModel6DTalos:
+      os << "ImpulseModel6DTalos";
+    case ImpulseModelTypes::ImpulseModel6DRandomHumanoid:
+      os << "ImpulseModel6DRandomHumanoid";
+    default:
+      os << "Unkown type";
+  }
+  return os;
+}
 
 class ImpulseModelFactory {
  public:

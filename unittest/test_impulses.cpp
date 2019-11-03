@@ -196,6 +196,7 @@ void test_update_force_diff(ImpulseModelTypes::Type test_type) {
 //----------------------------------------------------------------------------//
 
 void register_unit_tests(ImpulseModelTypes::Type test_type) {
+  std::cout << "the test type is: " << test_type << std::endl;
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_construct_data, test_type)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_no_computation, test_type)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_fetch_jacobians, test_type)));
