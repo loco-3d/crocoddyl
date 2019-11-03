@@ -142,7 +142,7 @@ void test_calc_diff_no_recalc(ImpulseModelTypes::Type test_type) {
 
   // Getting the jacobian from the model
   Eigen::VectorXd dx;
-  model->calcDiff(data, dx, false);
+  // model->calcDiff(data, dx, false);
 
   // Check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(data->Jc.isZero());
@@ -201,7 +201,7 @@ void register_unit_tests(ImpulseModelTypes::Type test_type) {
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_fetch_jacobians, test_type)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_no_computation, test_type)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_fetch_derivatives, test_type)));
-  // framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_no_recalc, test_type)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_no_recalc, test_type)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_update_force, test_type)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_update_force_diff, test_type)));
 }
