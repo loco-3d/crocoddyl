@@ -136,9 +136,9 @@ void test_calc_diff_no_recalc(ImpulseModelTypes::Type test_type) {
   Eigen::VectorXd q = model->get_state()->rand().segment(0, model->get_state()->get_nq());
   Eigen::VectorXd v = Eigen::VectorXd::Random(model->get_state()->get_nv());
   Eigen::VectorXd a = Eigen::VectorXd::Random(model->get_state()->get_nv());
-  pinocchio::computeJointJacobians(pinocchio_model, pinocchio_data, q);
-  pinocchio::updateFramePlacements(pinocchio_model, pinocchio_data);
-  pinocchio::computeForwardKinematicsDerivatives(pinocchio_model, pinocchio_data, q, v, a);
+  // pinocchio::computeJointJacobians(pinocchio_model, pinocchio_data, q);
+  // pinocchio::updateFramePlacements(pinocchio_model, pinocchio_data);
+  // pinocchio::computeForwardKinematicsDerivatives(pinocchio_model, pinocchio_data, q, v, a);
 
   // Getting the jacobian from the model
   Eigen::VectorXd dx;

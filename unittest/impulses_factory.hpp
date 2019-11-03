@@ -42,26 +42,35 @@ struct ImpulseModelTypes {
 };
 const std::vector<ImpulseModelTypes::Type> ImpulseModelTypes::all(ImpulseModelTypes::init_all());
 
-std::ostream& operator<<(std::ostream& os, const ImpulseModelTypes::Type& type){
+std::ostream& operator<<(const ImpulseModelTypes::Type& type){
   switch (type) {
     case ImpulseModelTypes::ImpulseModel3DTalosArm:
       os << "ImpulseModel3DTalosArm";
+      break;
     case ImpulseModelTypes::ImpulseModel3DHyQ:
       os << "ImpulseModel3DHyQ";
+      break;
     case ImpulseModelTypes::ImpulseModel3DTalos:
       os << "ImpulseModel3DTalos";
+      break;
     case ImpulseModelTypes::ImpulseModel3DRandomHumanoid:
       os << "ImpulseModel3DRandomHumanoid";
+      break;
     case ImpulseModelTypes::ImpulseModel6DTalosArm:
       os << "ImpulseModel6DTalosArm";
+      break;
     case ImpulseModelTypes::ImpulseModel6DHyQ:
       os << "ImpulseModel6DHyQ";
+      break;
     case ImpulseModelTypes::ImpulseModel6DTalos:
       os << "ImpulseModel6DTalos";
+      break;
     case ImpulseModelTypes::ImpulseModel6DRandomHumanoid:
       os << "ImpulseModel6DRandomHumanoid";
+      break;
     default:
       os << "Unkown type";
+      break;
   }
   return os;
 }
