@@ -201,7 +201,7 @@ void register_unit_tests(ImpulseModelTypes::Type test_type) {
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_fetch_jacobians, test_type)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_no_computation, test_type)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_fetch_derivatives, test_type)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_no_recalc, test_type)));
+  // framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_no_recalc, test_type)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_update_force, test_type)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_update_force_diff, test_type)));
 }
