@@ -25,6 +25,7 @@ void test_construct_data(ImpulseModelTypes::Type test_type) {
   // create the corresponding data object
   pinocchio::Data pinocchio_data(factory.get_state_factory()->get_pinocchio_model());
   boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
+  std::cout << "test_construct_data done" << std::endl;
 }
 
 void test_calc_no_computation(ImpulseModelTypes::Type test_type) {
@@ -45,6 +46,7 @@ void test_calc_no_computation(ImpulseModelTypes::Type test_type) {
   BOOST_CHECK(data->dv0_dq.isZero());
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(data->df_dq.isZero());
+  std::cout << "test_calc_no_computation done" << std::endl;
 }
 
 void test_calc_fetch_jacobians(ImpulseModelTypes::Type test_type) {
@@ -71,6 +73,7 @@ void test_calc_fetch_jacobians(ImpulseModelTypes::Type test_type) {
   BOOST_CHECK(data->dv0_dq.isZero());
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(data->df_dq.isZero());
+  std::cout << "test_calc_fetch_jacobians done" << std::endl;
 }
 
 void test_calc_diff_no_computation(ImpulseModelTypes::Type test_type) {
@@ -91,6 +94,7 @@ void test_calc_diff_no_computation(ImpulseModelTypes::Type test_type) {
   BOOST_CHECK(data->dv0_dq.hasNaN() || data->dv0_dq.isZero());
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(data->df_dq.isZero());
+  std::cout << "test_calc_diff_no_computation done" << std::endl;
 }
 
 void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type test_type) {
@@ -120,6 +124,7 @@ void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type test_type) {
   BOOST_CHECK(!data->dv0_dq.isZero());
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(data->df_dq.isZero());
+  std::cout << "test_calc_diff_fetch_derivatives done" << std::endl;
 }
 
 void test_calc_diff_no_recalc(ImpulseModelTypes::Type test_type) {
@@ -136,19 +141,19 @@ void test_calc_diff_no_recalc(ImpulseModelTypes::Type test_type) {
   Eigen::VectorXd q = model->get_state()->rand().segment(0, model->get_state()->get_nq());
   Eigen::VectorXd v = Eigen::VectorXd::Random(model->get_state()->get_nv());
   Eigen::VectorXd a = Eigen::VectorXd::Random(model->get_state()->get_nv());
-  // pinocchio::computeJointJacobians(pinocchio_model, pinocchio_data, q);
-  // pinocchio::updateFramePlacements(pinocchio_model, pinocchio_data);
-  // pinocchio::computeForwardKinematicsDerivatives(pinocchio_model, pinocchio_data, q, v, a);
+  pinocchio::computeJointJacobians(pinocchio_model, pinocchio_data, q);
+  pinocchio::updateFramePlacements(pinocchio_model, pinocchio_data);
+  pinocchio::computeForwardKinematicsDerivatives(pinocchio_model, pinocchio_data, q, v, a);
 
   // Getting the jacobian from the model
   Eigen::VectorXd dx;
-  // model->calcDiff(data, dx, false);
+  model->calcDiff(data, dx, false);
 
   // Check that nothing has been computed and that all value are initialized to 0
-  // BOOST_CHECK(data->Jc.isZero());
-  // BOOST_CHECK(!data->dv0_dq.isZero());
-  // BOOST_CHECK(data->f.toVector().isZero());
-  // BOOST_CHECK(data->df_dq.isZero());
+  BOOST_CHECK(data->Jc.isZero());
+  BOOST_CHECK(!data->dv0_dq.isZero());
+  BOOST_CHECK(data->f.toVector().isZero());
+  BOOST_CHECK(data->df_dq.isZero());
   std::cout << "test_calc_diff_no_recalc done" << std::endl;
 }
 
@@ -171,6 +176,7 @@ void test_update_force(ImpulseModelTypes::Type test_type) {
   BOOST_CHECK(data->dv0_dq.isZero());
   BOOST_CHECK(!data->f.toVector().isZero());
   BOOST_CHECK(data->df_dq.isZero());
+  std::cout << "test_update_force done" << std::endl;
 }
 
 void test_update_force_diff(ImpulseModelTypes::Type test_type) {
@@ -192,6 +198,7 @@ void test_update_force_diff(ImpulseModelTypes::Type test_type) {
   BOOST_CHECK(data->dv0_dq.isZero());
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(!data->df_dq.isZero());
+  std::cout << "test_update_force_diff done" << std::endl;
 }
 
 //----------------------------------------------------------------------------//
