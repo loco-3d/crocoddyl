@@ -2,7 +2,7 @@ import crocoddyl
 import pinocchio
 import numpy as np
 import example_robot_data
-from double_pendulum_utils import DifferentialActionModelDoublePendulum, CostModelDoublePendulum
+from double_pendulum_utils import CostModelDoublePendulum, ActuationModelDoublePendulum
 
 robot = example_robot_data.loadDoublePendulum()
 robot_model = robot.model
@@ -33,38 +33,34 @@ state = crocoddyl.StateMultibody(robot_model)
 runningCostModel = crocoddyl.CostModelSum(state, 1)
 terminalCostModel = crocoddyl.CostModelSum(state, 1)
 
+weights = np.array([1, 1, 1, 1] + [0.1] * 2)
+
 xRegCost = crocoddyl.CostModelState(state, 1)
-# xRegCost = CostModelState(robot.model, state, ref=state.zero(), nu=1)
 uRegCost = crocoddyl.CostModelControl(state, 1)
-# uRegCost = CostModelControl(robot.model, nu = 1)
-xPendCost = CostModelDoublePendulum(robot.model,
-                                    state,
+xPendCost = CostModelDoublePendulum(state,
                                     1,
-                                    crocoddyl.ActivationModelWeightedQuad(np.array([1, 1, 1, 1] + [0.1] * 2)))
+                                    crocoddyl.ActivationModelWeightedQuad(np.matrix(weights).T))
 
 runningCostModel.addCost("regx", xRegCost, 1e-6)
 runningCostModel.addCost("regu", uRegCost, 1e-3)
 runningCostModel.addCost("pend", xPendCost, 1)
 terminalCostModel.addCost("ori2", xPendCost, 1e5)
 
-actModel = ActuationModelDoublePendulum(robot.model, actLink=2)
-# runningModel = IntegratedActionModelEuler(DifferentialActionModelActuated(robot.model, actModel, runningCostModel))
-# terminalModel = IntegratedActionModelEuler(DifferentialActionModelActuated(robot.model, actModel, terminalCostModel))
-#
-# dt = 1e-2
-# runningModel.timeStep = dt
-#
-# T = 100
-# x0 = np.array([3.14, 0, 0., 0. ])
-# problem = ShootingProblem(x0, [runningModel] * T, terminalModel)
-#
-# ddp = SolverFDDP(problem)
-# ddp.callback = [CallbackDDPVerbose()]
-# ddp.callback.append(CallbackDDPLogger())
-#
-# us0 = np.zeros([T,1])
-# xs0 = [problem.initialState+0.1]*len(ddp.models())
-#
-# ddp.solve(init_xs=xs0,init_us=us0,maxiter=150)
-#
-# displayTrajectory(robot, ddp.xs, runningModel.timeStep)
+dt = 1e-2
+
+actModel = ActuationModelDoublePendulum(state, actLink=1)
+runningModel = crocoddyl.IntegratedActionModelEuler(
+    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, runningCostModel), dt)
+terminalModel = crocoddyl.IntegratedActionModelEuler(crocoddyl.DifferentialActionModelFreeFwdDynamics(state, terminalCostModel), dt)
+
+T = 100
+x0 = np.array([3.14, 0, 0., 0.])
+problem = crocoddyl.ShootingProblem(np.matrix(x0).T, [runningModel] * T, terminalModel)
+
+ddp = crocoddyl.SolverFDDP(problem)
+
+ddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
+
+ddp.solve()
+
+# crocoddyl.displayTrajectory(robot, ddp.xs, dt)
