@@ -51,7 +51,8 @@ dt = 1e-2
 actModel = ActuationModelDoublePendulum(state, actLink=1)
 runningModel = crocoddyl.IntegratedActionModelEuler(
     crocoddyl.DifferentialActionModelFreeFwdDynamics(state, runningCostModel), dt)
-terminalModel = crocoddyl.IntegratedActionModelEuler(crocoddyl.DifferentialActionModelFreeFwdDynamics(state, terminalCostModel), dt)
+terminalModel = crocoddyl.IntegratedActionModelEuler(
+    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, terminalCostModel), dt)
 
 T = 100
 x0 = np.array([3.14, 0, 0., 0.])
