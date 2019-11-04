@@ -55,7 +55,7 @@ terminalModel = crocoddyl.IntegratedActionModelEuler(
     crocoddyl.DifferentialActionModelFreeFwdDynamics(state, terminalCostModel), dt)
 
 T = 100
-x0 = np.array([3.14, 0, 0., 0.])
+x0 = [3.14, 0, 0., 0.]
 problem = crocoddyl.ShootingProblem(np.matrix(x0).T, [runningModel] * T, terminalModel)
 
 ddp = crocoddyl.SolverFDDP(problem)
