@@ -14,6 +14,9 @@ PKG_CONFIG_USE_DEPENDENCY(${PROJECT_NAME}_pywrap pinocchio)
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}_pywrap ${PROJECT_NAME})
 TARGET_LINK_BOOST_PYTHON(${PROJECT_NAME}_pywrap)
+# BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS spews conversion warnings from int to long unsigned int.
+# Unfortunately, using literals does not work in a macro. As such, this turns them off for the entire wrapper:
+TARGET_COMPILE_OPTIONS(${PROJECT_NAME}_pywrap PRIVATE "-Wno-conversion")
 
 INSTALL(TARGETS ${PROJECT_NAME}_pywrap DESTINATION ${PYTHON_SITELIB}/${PROJECT_NAME})
 
