@@ -42,7 +42,7 @@ struct ImpulseModelTypes {
 };
 const std::vector<ImpulseModelTypes::Type> ImpulseModelTypes::all(ImpulseModelTypes::init_all());
 
-std::ostream& operator<<(std::ostream& os, const ImpulseModelTypes::Type& type){
+std::ostream& operator<<(std::ostream& os, const ImpulseModelTypes::Type& type) {
   switch (type) {
     case ImpulseModelTypes::ImpulseModel3DTalosArm:
       os << "ImpulseModel3DTalosArm";
