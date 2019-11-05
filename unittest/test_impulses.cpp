@@ -55,14 +55,13 @@ void test_calc_fetch_jacobians(ImpulseModelTypes::Type test_type) {
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.get_model();
 
   // create the corresponding data object
-  const pinocchio::Model& pinocchio_model = factory.get_state_factory()->get_pinocchio_model();
-  pinocchio::Data pinocchio_data(pinocchio_model);
+  pinocchio::Data pinocchio_data(factory.get_state_factory()->get_pinocchio_model());
   boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
 
   // Compute the jacobian and check that the impulse model fetch it.
   Eigen::VectorXd q = model->get_state()->rand().segment(0, model->get_state()->get_nq());
-  pinocchio::computeJointJacobians(pinocchio_model, pinocchio_data, q);
-  pinocchio::updateFramePlacements(pinocchio_model, pinocchio_data);
+  pinocchio::computeJointJacobians(factory.get_state_factory()->get_pinocchio_model(), pinocchio_data, q);
+  pinocchio::updateFramePlacements(factory.get_state_factory()->get_pinocchio_model(), pinocchio_data);
 
   // Getting the jacobian from the model
   Eigen::VectorXd dx;
@@ -82,18 +81,18 @@ void test_calc_diff_no_computation(ImpulseModelTypes::Type test_type) {
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.get_model();
 
   // create the corresponding data object
-  // pinocchio::Data pinocchio_data(factory.get_state_factory()->get_pinocchio_model());
-  // boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
+  pinocchio::Data pinocchio_data(factory.get_state_factory()->get_pinocchio_model());
+  boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
 
   // Getting the jacobian from the model
-  // Eigen::VectorXd dx;
-  // model->calcDiff(data, dx, true);
+  Eigen::VectorXd dx;
+  model->calcDiff(data, dx, true);
 
-  // // Check that nothing has been computed and that all value are initialized to 0
-  // BOOST_CHECK(data->Jc.hasNaN() || data->Jc.isZero());
-  // BOOST_CHECK(data->dv0_dq.hasNaN() || data->dv0_dq.isZero());
-  // BOOST_CHECK(data->f.toVector().isZero());
-  // BOOST_CHECK(data->df_dq.isZero());
+  // Check that nothing has been computed and that all value are initialized to 0
+  BOOST_CHECK(data->Jc.hasNaN() || data->Jc.isZero());
+  BOOST_CHECK(data->dv0_dq.hasNaN() || data->dv0_dq.isZero());
+  BOOST_CHECK(data->f.toVector().isZero());
+  BOOST_CHECK(data->df_dq.isZero());
   std::cout << "test_calc_diff_no_computation done" << std::endl;
 }
 
@@ -103,17 +102,16 @@ void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type test_type) {
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.get_model();
 
   // create the corresponding data object
-  const pinocchio::Model& pinocchio_model = factory.get_state_factory()->get_pinocchio_model();
-  pinocchio::Data pinocchio_data(pinocchio_model);
+  pinocchio::Data pinocchio_data(factory.get_state_factory()->get_pinocchio_model());
   boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
 
   // Compute the jacobian and check that the impulse model fetch it.
   Eigen::VectorXd q = model->get_state()->rand().segment(0, model->get_state()->get_nq());
   Eigen::VectorXd v = Eigen::VectorXd::Random(model->get_state()->get_nv());
   Eigen::VectorXd a = Eigen::VectorXd::Random(model->get_state()->get_nv());
-  pinocchio::computeJointJacobians(pinocchio_model, pinocchio_data, q);
-  pinocchio::updateFramePlacements(pinocchio_model, pinocchio_data);
-  pinocchio::computeForwardKinematicsDerivatives(pinocchio_model, pinocchio_data, q, v, a);
+  pinocchio::computeJointJacobians(factory.get_state_factory()->get_pinocchio_model(), pinocchio_data, q);
+  pinocchio::updateFramePlacements(factory.get_state_factory()->get_pinocchio_model(), pinocchio_data);
+  pinocchio::computeForwardKinematicsDerivatives(factory.get_state_factory()->get_pinocchio_model(), pinocchio_data, q, v, a);
 
   // Getting the jacobian from the model
   Eigen::VectorXd dx;
@@ -133,17 +131,16 @@ void test_calc_diff_no_recalc(ImpulseModelTypes::Type test_type) {
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.get_model();
 
   // create the corresponding data object
-  const pinocchio::Model& pinocchio_model = factory.get_state_factory()->get_pinocchio_model();
-  pinocchio::Data pinocchio_data(pinocchio_model);
+  pinocchio::Data pinocchio_data(factory.get_state_factory()->get_pinocchio_model());
   boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
 
   // Compute the jacobian and check that the impulse model fetch it.
   Eigen::VectorXd q = model->get_state()->rand().segment(0, model->get_state()->get_nq());
   Eigen::VectorXd v = Eigen::VectorXd::Random(model->get_state()->get_nv());
   Eigen::VectorXd a = Eigen::VectorXd::Random(model->get_state()->get_nv());
-  pinocchio::computeJointJacobians(pinocchio_model, pinocchio_data, q);
-  pinocchio::updateFramePlacements(pinocchio_model, pinocchio_data);
-  pinocchio::computeForwardKinematicsDerivatives(pinocchio_model, pinocchio_data, q, v, a);
+  pinocchio::computeJointJacobians(factory.get_state_factory()->get_pinocchio_model(), pinocchio_data, q);
+  pinocchio::updateFramePlacements(factory.get_state_factory()->get_pinocchio_model(), pinocchio_data);
+  pinocchio::computeForwardKinematicsDerivatives(factory.get_state_factory()->get_pinocchio_model(), pinocchio_data, q, v, a);
 
   // Getting the jacobian from the model
   Eigen::VectorXd dx;
@@ -163,8 +160,7 @@ void test_update_force(ImpulseModelTypes::Type test_type) {
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.get_model();
 
   // create the corresponding data object
-  const pinocchio::Model& pinocchio_model = factory.get_state_factory()->get_pinocchio_model();
-  pinocchio::Data pinocchio_data(pinocchio_model);
+  pinocchio::Data pinocchio_data(factory.get_state_factory()->get_pinocchio_model());
   boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
 
   // Create a random force and update it
@@ -185,8 +181,7 @@ void test_update_force_diff(ImpulseModelTypes::Type test_type) {
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.get_model();
 
   // create the corresponding data object
-  const pinocchio::Model& pinocchio_model = factory.get_state_factory()->get_pinocchio_model();
-  pinocchio::Data pinocchio_data(pinocchio_model);
+  pinocchio::Data pinocchio_data(factory.get_state_factory()->get_pinocchio_model());
   boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
 
   // Create a random force and update it
@@ -210,7 +205,7 @@ void register_unit_tests(ImpulseModelTypes::Type test_type) {
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_fetch_jacobians, test_type)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_no_computation, test_type)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_fetch_derivatives, test_type)));
-  // framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_no_recalc, test_type)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_no_recalc, test_type)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_update_force, test_type)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_update_force_diff, test_type)));
 }
