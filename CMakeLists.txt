@@ -1,10 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-# Check if the cmake (git submodule) have been initialized
-IF(NOT EXISTS "${PROJECT_SOURCE_DIR}/cmake/base.cmake")
-  MESSAGE(FATAL_ERROR "\nPlease run the following command first:\ngit submodule update --init\n")
-ENDIF()
-
 # Set up project properties
 SET(PROJECT_NAMESPACE loco-3d)
 SET(PROJECT_NAME crocoddyl)
@@ -12,17 +7,21 @@ SET(PROJECT_DESCRIPTION "Contact RObot COntrol by Differential DYnamic programmi
 SET(PROJECT_URL https://gepgitlab.laas.fr/${PROJECT_NAMESPACE}/${PROJECT_NAME})
 
 # Include important cmake modules
-INCLUDE(cmake/base.cmake)
+INCLUDE(cmake/base.cmake RESULT_VARIABLE SUBMODULE_FOUND)
 INCLUDE(cmake/test.cmake)
 INCLUDE(cmake/boost.cmake)
 INCLUDE(cmake/python.cmake)
+
+# Check if the cmake (git submodule) have been initialized
+IF(SUBMODULE_FOUND STREQUAL "NOTFOUND")
+  MESSAGE(FATAL_ERROR "\nPlease run the following command first:\ngit submodule update --init\n")
+ENDIF(SUBMODULE_FOUND STREQUAL "NOTFOUND")
 
 # Print initial message
 MESSAGE("${PROJECT_DESCRIPTION}, version ${PROJECT_VERSION}")
 MESSAGE("Copyright (C) 2018-2019 CNRS-LAAS")
 MESSAGE("All rights reserved.")
 MESSAGE("Released under the BSD 3-Clause License.")
-
 
 # Set a default build type to 'Release' if none was specified
 IF(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
