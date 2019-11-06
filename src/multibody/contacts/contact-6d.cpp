@@ -68,6 +68,7 @@ void ContactModel6D::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data
 void ContactModel6D::updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& force) {
   assert(force.size() == 6 && "force has wrong dimension, it should be 6d vector");
   ContactData6D* d = static_cast<ContactData6D*>(data.get());
+  d->frame_force = force;
   data->f = d->jMf.act(pinocchio::Force(force));
 }
 
