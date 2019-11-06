@@ -19,7 +19,7 @@ namespace bp = boost::python;
 void exposeCostContactForce() {
   bp::class_<CostModelContactForce, bp::bases<CostModelAbstract> >(
       "CostModelContactForce", bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>,
-                                        boost::shared_ptr<ContactModelAbstract>, pinocchio::Force, int>(
+                                        boost::shared_ptr<ContactModelAbstract>, Eigen::VectorXd, int>(
                                    bp::args(" self", " state", " activation", " contact", " fref", " nu"),
                                    "Initialize the contact force cost model.\n\n"
                                    ":param state: state of the multibody system\n"
@@ -28,7 +28,7 @@ void exposeCostContactForce() {
                                    ":param fref: reference force\n"
                                    ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>,
-                    boost::shared_ptr<ContactModelAbstract>, pinocchio::Force>(
+                    boost::shared_ptr<ContactModelAbstract>, Eigen::VectorXd>(
           bp::args(" self", " state", " activation", " contact", " fref"),
           "Initialize the contact force cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
@@ -36,7 +36,7 @@ void exposeCostContactForce() {
           ":param activation: activation model\n"
           ":param contact: contact model\n"
           ":param fref: reference force\n"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ContactModelAbstract>, pinocchio::Force, int>(
+      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ContactModelAbstract>, Eigen::VectorXd, int>(
           bp::args(" self", " state", " contact", " fref", " nu"),
           "Initialize the contact force cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
@@ -45,7 +45,7 @@ void exposeCostContactForce() {
           ":param contact: contact model\n"
           ":param fref: reference force\n"
           ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ContactModelAbstract>, pinocchio::Force>(
+      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ContactModelAbstract>, Eigen::VectorXd>(
           bp::args(" self", " state", " contact", " fref"),
           "Initialize the contact force cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"

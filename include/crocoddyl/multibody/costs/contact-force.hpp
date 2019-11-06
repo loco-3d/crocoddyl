@@ -17,14 +17,14 @@ namespace crocoddyl {
 class CostModelContactForce : public CostModelAbstract {
  public:
   CostModelContactForce(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-                        boost::shared_ptr<ContactModelAbstract> contact, const pinocchio::Force& fref,
+                        boost::shared_ptr<ContactModelAbstract> contact, const Eigen::VectorXd& fref,
                         const std::size_t& nu);
   CostModelContactForce(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-                        boost::shared_ptr<ContactModelAbstract> contact, const pinocchio::Force& fref);
+                        boost::shared_ptr<ContactModelAbstract> contact, const Eigen::VectorXd& fref);
   CostModelContactForce(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ContactModelAbstract> contact,
-                        const pinocchio::Force& fref, const std::size_t& nu);
+                        const Eigen::VectorXd& fref, const std::size_t& nu);
   CostModelContactForce(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ContactModelAbstract> contact,
-                        const pinocchio::Force& fref);
+                        const Eigen::VectorXd& fref);
   ~CostModelContactForce();
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -33,11 +33,11 @@ class CostModelContactForce : public CostModelAbstract {
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
   boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
-  const pinocchio::Force& get_fref() const { return fref_; };
+  const Eigen::VectorXd& get_fref() const { return fref_; };
 
  protected:
   boost::shared_ptr<ContactModelAbstract> contact_;
-  pinocchio::Force fref_;
+  Eigen::VectorXd fref_;
 };
 
 struct CostDataContactForce : public CostDataAbstract {
