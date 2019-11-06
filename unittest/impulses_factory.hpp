@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <iostream>
 #include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/multibody/impulses/impulse-3d.hpp"
 #include "crocoddyl/multibody/impulses/impulse-6d.hpp"
@@ -40,6 +41,39 @@ struct ImpulseModelTypes {
   static const std::vector<Type> all;
 };
 const std::vector<ImpulseModelTypes::Type> ImpulseModelTypes::all(ImpulseModelTypes::init_all());
+
+std::ostream& operator<<(std::ostream& os, const ImpulseModelTypes::Type& type) {
+  switch (type) {
+    case ImpulseModelTypes::ImpulseModel3DTalosArm:
+      os << "ImpulseModel3DTalosArm";
+      break;
+    case ImpulseModelTypes::ImpulseModel3DHyQ:
+      os << "ImpulseModel3DHyQ";
+      break;
+    case ImpulseModelTypes::ImpulseModel3DTalos:
+      os << "ImpulseModel3DTalos";
+      break;
+    case ImpulseModelTypes::ImpulseModel3DRandomHumanoid:
+      os << "ImpulseModel3DRandomHumanoid";
+      break;
+    case ImpulseModelTypes::ImpulseModel6DTalosArm:
+      os << "ImpulseModel6DTalosArm";
+      break;
+    case ImpulseModelTypes::ImpulseModel6DHyQ:
+      os << "ImpulseModel6DHyQ";
+      break;
+    case ImpulseModelTypes::ImpulseModel6DTalos:
+      os << "ImpulseModel6DTalos";
+      break;
+    case ImpulseModelTypes::ImpulseModel6DRandomHumanoid:
+      os << "ImpulseModel6DRandomHumanoid";
+      break;
+    default:
+      os << "Unkown type";
+      break;
+  }
+  return os;
+}
 
 class ImpulseModelFactory {
  public:
@@ -115,6 +149,21 @@ class ImpulseModelFactory {
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model_;  //!< The pointer to the impulse model
   boost::shared_ptr<StateFactory> state_factory_;             //!< The pointer to the multibody state factory
 };
+
+boost::shared_ptr<ImpulseModelFactory> create_random_factory() {
+  static bool once = true;
+  if (once) {
+    srand((unsigned)time(NULL));
+    once = false;
+  }
+  boost::shared_ptr<ImpulseModelFactory> ptr;
+  if (rand() % 2 == 0) {
+    ptr = boost::make_shared<ImpulseModelFactory>(ImpulseModelTypes::ImpulseModel3DRandomHumanoid);
+  } else {
+    ptr = boost::make_shared<ImpulseModelFactory>(ImpulseModelTypes::ImpulseModel6DRandomHumanoid);
+  }
+  return ptr;
+}
 
 }  // namespace crocoddyl_unit_test
 

@@ -18,6 +18,7 @@ SET(${PROJECT_NAME}_CPP_TESTS
   test_actions
   test_diff_actions
   test_impulses
+  test_multiple_impulses
 
   ## with KKT 
   # test_solvers
