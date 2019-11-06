@@ -15,12 +15,13 @@ namespace crocoddyl {
 
 class CostModelCentroidalMomentum : public CostModelAbstract {
  public:
-  typedef Eigen::Matrix<double,6,1> Vector6;
-  
-  CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-                       const Vector6& ref, const std::size_t& nu);
-  CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-                       const Vector6& ref);
+  typedef Eigen::Matrix<double, 6, 1> Vector6;
+
+  CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state,
+                              boost::shared_ptr<ActivationModelAbstract> activation, const Vector6& ref,
+                              const std::size_t& nu);
+  CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state,
+                              boost::shared_ptr<ActivationModelAbstract> activation, const Vector6& ref);
   CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6& ref, const std::size_t& nu);
   CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6& ref);
   ~CostModelCentroidalMomentum();
@@ -42,16 +43,15 @@ struct CostDataCentroidalMomentum : public CostDataAbstract {
 
   template <typename Model>
   CostDataCentroidalMomentum(Model* const model, pinocchio::Data* const data)
-    : CostDataAbstract(model, data),
-      hdot_partial_dq(6, model->get_state()->get_nv()),
-      hdot_partial_dv(6, model->get_state()->get_nv()){
+      : CostDataAbstract(model, data),
+        hdot_partial_dq(6, model->get_state()->get_nv()),
+        hdot_partial_dv(6, model->get_state()->get_nv()) {
     hdot_partial_dq.fill(0);
     hdot_partial_dv.fill(0);
   }
 
   pinocchio::Data::Matrix6x hdot_partial_dq;
   pinocchio::Data::Matrix6x hdot_partial_dv;
-
 };
 
 }  // namespace crocoddyl

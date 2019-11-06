@@ -17,7 +17,7 @@ namespace python {
 namespace bp = boost::python;
 
 void exposeCostCentroidalMomentum() {
-  typedef Eigen::Matrix<double,6,1> Vector6;
+  typedef Eigen::Matrix<double, 6, 1> Vector6;
   bp::class_<CostModelCentroidalMomentum, bp::bases<CostModelAbstract> >(
       "CostModelCentroidalMomentum",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, Vector6, int>(
@@ -56,7 +56,7 @@ void exposeCostCentroidalMomentum() {
                                 ":param x: time-discrete state vector\n"
                                 ":param u: time-discrete control input"))
       .def<void (CostModelCentroidalMomentum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                          const Eigen::VectorXd&, const bool&)>(
+                                                 const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &CostModelCentroidalMomentum::calcDiff_wrap,
           bp::args(" self", " data", " x", " u=None", " recalc=True"),
           "Compute the derivatives of the Centroidal Momentum cost.\n\n"
@@ -65,13 +65,13 @@ void exposeCostCentroidalMomentum() {
           ":param u: time-discrete control input\n"
           ":param recalc: If true, it updates the state evolution and the cost value.")
       .def<void (CostModelCentroidalMomentum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                          const Eigen::VectorXd&)>("calcDiff", &CostModelCentroidalMomentum::calcDiff_wrap,
-                                                                   bp::args(" self", " data", " x", " u"))
+                                                 const Eigen::VectorXd&)>(
+          "calcDiff", &CostModelCentroidalMomentum::calcDiff_wrap, bp::args(" self", " data", " x", " u"))
       .def<void (CostModelCentroidalMomentum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &CostModelCentroidalMomentum::calcDiff_wrap, bp::args(" self", " data", " x"))
       .def<void (CostModelCentroidalMomentum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                          const bool&)>("calcDiff", &CostModelCentroidalMomentum::calcDiff_wrap,
-                                                        bp::args(" self", " data", " x", " recalc"))
+                                                 const bool&)>("calcDiff", &CostModelCentroidalMomentum::calcDiff_wrap,
+                                                               bp::args(" self", " data", " x", " recalc"))
       .def("createData", &CostModelCentroidalMomentum::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the Centroidal Momentum cost data.\n\n"
@@ -79,9 +79,10 @@ void exposeCostCentroidalMomentum() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: Pinocchio data\n"
            ":return cost data.")
-      .add_property("ref",
-                    bp::make_function(&CostModelCentroidalMomentum::get_ref, bp::return_value_policy<bp::return_by_value>()),
-                    "reference Centroidal Momentum");
+      .add_property(
+          "ref",
+          bp::make_function(&CostModelCentroidalMomentum::get_ref, bp::return_value_policy<bp::return_by_value>()),
+          "reference Centroidal Momentum");
 }
 
 }  // namespace python

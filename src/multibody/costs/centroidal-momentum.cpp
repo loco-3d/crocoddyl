@@ -56,16 +56,13 @@ void CostModelCentroidalMomentum::calcDiff(const boost::shared_ptr<CostDataAbstr
   Eigen::Ref<pinocchio::Data::Matrix6x> Rv = data->Rx.rightCols(nv);
 
   activation_->calcDiff(data->activation, data->r, recalc);
-  pinocchio::getCentroidalDynamicsDerivatives(state_->get_pinocchio(),
-                                              *data->pinocchio, Rq,
-                                              d->hdot_partial_dq,
-                                              d->hdot_partial_dv,
-                                              Rv);
+  pinocchio::getCentroidalDynamicsDerivatives(state_->get_pinocchio(), *data->pinocchio, Rq, d->hdot_partial_dq,
+                                              d->hdot_partial_dv, Rv);
 
   // The derivative computation in pinocchio does not take the frame of reference into
   // account. So we need to update the com frame as well.
-  for (int i=0;i<data->pinocchio->Jcom.cols();++i){
-      data->Rx.block<3,1>(3,i) -= data->pinocchio->Jcom.col(i).cross(data->pinocchio->hg.linear());
+  for (int i = 0; i < data->pinocchio->Jcom.cols(); ++i) {
+    data->Rx.block<3, 1>(3, i) -= data->pinocchio->Jcom.col(i).cross(data->pinocchio->hg.linear());
   }
   data->Lx.noalias() = data->Rx.transpose() * data->activation->Ar;
   data->Lxx.noalias() = data->Rx.transpose() * data->activation->Arr * data->Rx;
