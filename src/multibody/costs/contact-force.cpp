@@ -14,13 +14,17 @@ CostModelContactForce::CostModelContactForce(boost::shared_ptr<StateMultibody> s
                                              boost::shared_ptr<ActivationModelAbstract> activation,
                                              boost::shared_ptr<ContactModelAbstract> contact,
                                              const pinocchio::Force& fref, const std::size_t& nu)
-    : CostModelAbstract(state, activation, nu), contact_(contact), fref_(fref) {}
+    : CostModelAbstract(state, activation, nu), contact_(contact), fref_(fref) {
+  assert(activation_->get_nr() == contact->get_nc() && "nr is not equals to 6");
+}
 
 CostModelContactForce::CostModelContactForce(boost::shared_ptr<StateMultibody> state,
                                              boost::shared_ptr<ActivationModelAbstract> activation,
                                              boost::shared_ptr<ContactModelAbstract> contact,
                                              const pinocchio::Force& fref)
-    : CostModelAbstract(state, activation), contact_(contact), fref_(fref) {}
+    : CostModelAbstract(state, activation), contact_(contact), fref_(fref) {
+  assert(activation_->get_nr() == contact->get_nc() && "nr is not equals to 6");
+}
 
 CostModelContactForce::CostModelContactForce(boost::shared_ptr<StateMultibody> state,
                                              boost::shared_ptr<ContactModelAbstract> contact,
