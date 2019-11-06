@@ -13,37 +13,33 @@ namespace crocoddyl {
 CostModelContactForce::CostModelContactForce(boost::shared_ptr<StateMultibody> state,
                                              boost::shared_ptr<ActivationModelAbstract> activation,
                                              boost::shared_ptr<ContactModelAbstract> contact,
-                                             const pinocchio::Force& fref,
-                                             const std::size_t& nu)
-  : CostModelAbstract(state, activation, nu), contact_(contact), fref_(fref) {
-}
+                                             const pinocchio::Force& fref, const std::size_t& nu)
+    : CostModelAbstract(state, activation, nu), contact_(contact), fref_(fref) {}
 
 CostModelContactForce::CostModelContactForce(boost::shared_ptr<StateMultibody> state,
                                              boost::shared_ptr<ActivationModelAbstract> activation,
                                              boost::shared_ptr<ContactModelAbstract> contact,
                                              const pinocchio::Force& fref)
-  : CostModelAbstract(state, activation), contact_(contact), fref_(fref) {
-}
+    : CostModelAbstract(state, activation), contact_(contact), fref_(fref) {}
 
 CostModelContactForce::CostModelContactForce(boost::shared_ptr<StateMultibody> state,
                                              boost::shared_ptr<ContactModelAbstract> contact,
-                                             const pinocchio::Force& fref,
-                                             const std::size_t& nu)
-  : CostModelAbstract(state, contact->get_nc(), nu), contact_(contact), fref_(fref) {}
+                                             const pinocchio::Force& fref, const std::size_t& nu)
+    : CostModelAbstract(state, contact->get_nc(), nu), contact_(contact), fref_(fref) {}
 
 CostModelContactForce::CostModelContactForce(boost::shared_ptr<StateMultibody> state,
                                              boost::shared_ptr<ContactModelAbstract> contact,
                                              const pinocchio::Force& fref)
-  : CostModelAbstract(state, contact->get_nc()), contact_(contact), fref_(fref) {}
+    : CostModelAbstract(state, contact->get_nc()), contact_(contact), fref_(fref) {}
 
 CostModelContactForce::~CostModelContactForce() {}
 
 void CostModelContactForce::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                 const Eigen::Ref<const Eigen::VectorXd>&/*x*/,
-                                 const Eigen::Ref<const Eigen::VectorXd>&/*u*/) {
+                                 const Eigen::Ref<const Eigen::VectorXd>& /*x*/,
+                                 const Eigen::Ref<const Eigen::VectorXd>& /*u*/) {
   CostDataContactForce* d = static_cast<CostDataContactForce*>(data.get());
-  
-  data->r = (d->contact_->f-fref_).toVector();
+
+  data->r = (d->contact_->f - fref_).toVector();
 
   // Compute the cost
   activation_->calc(data->activation, data->r);
@@ -52,8 +48,7 @@ void CostModelContactForce::calc(const boost::shared_ptr<CostDataAbstract>& data
 
 void CostModelContactForce::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                      const Eigen::Ref<const Eigen::VectorXd>& x,
-                                     const Eigen::Ref<const Eigen::VectorXd>& u,
-                                     const bool& recalc) {
+                                     const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (recalc) {
     calc(data, x, u);
   }

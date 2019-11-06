@@ -16,35 +16,25 @@ namespace crocoddyl {
 
 class CostModelContactForce : public CostModelAbstract {
  public:
-  CostModelContactForce(boost::shared_ptr<StateMultibody> state,
-                        boost::shared_ptr<ActivationModelAbstract> activation,
-                        boost::shared_ptr<ContactModelAbstract> contact,
-                        const pinocchio::Force& fref,
+  CostModelContactForce(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
+                        boost::shared_ptr<ContactModelAbstract> contact, const pinocchio::Force& fref,
                         const std::size_t& nu);
-  CostModelContactForce(boost::shared_ptr<StateMultibody> state,
-                        boost::shared_ptr<ActivationModelAbstract> activation,
-                        boost::shared_ptr<ContactModelAbstract> contact,
-                        const pinocchio::Force& fref);
-  CostModelContactForce(boost::shared_ptr<StateMultibody> state,
-                        boost::shared_ptr<ContactModelAbstract> contact,
-                        const pinocchio::Force& fref,
-                        const std::size_t& nu);
-  CostModelContactForce(boost::shared_ptr<StateMultibody> state,
-                        boost::shared_ptr<ContactModelAbstract> contact,
+  CostModelContactForce(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
+                        boost::shared_ptr<ContactModelAbstract> contact, const pinocchio::Force& fref);
+  CostModelContactForce(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ContactModelAbstract> contact,
+                        const pinocchio::Force& fref, const std::size_t& nu);
+  CostModelContactForce(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ContactModelAbstract> contact,
                         const pinocchio::Force& fref);
   ~CostModelContactForce();
 
-  void calc(const boost::shared_ptr<CostDataAbstract>& data,
-            const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u);
-  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u,
-                const bool& recalc = true);
+  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
   boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
   const pinocchio::Force& get_fref() const { return fref_; };
-  
+
  protected:
   boost::shared_ptr<ContactModelAbstract> contact_;
   pinocchio::Force fref_;
@@ -55,8 +45,7 @@ struct CostDataContactForce : public CostDataAbstract {
 
   template <typename Model>
   CostDataContactForce(Model* const model, pinocchio::Data* const data)
-      : CostDataAbstract(model, data),
-        Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
+      : CostDataAbstract(model, data), Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
     Arr_Ru.fill(0);
   }
   boost::shared_ptr<ContactDataAbstract> contact_;

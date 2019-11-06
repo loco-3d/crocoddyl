@@ -18,20 +18,17 @@ namespace bp = boost::python;
 
 void exposeCostContactForce() {
   bp::class_<CostModelContactForce, bp::bases<CostModelAbstract> >(
-      "CostModelContactForce",
-      bp::init<boost::shared_ptr<StateMultibody>,
-      boost::shared_ptr<ActivationModelAbstract>,
-      boost::shared_ptr<ContactModelAbstract>, pinocchio::Force, int>(
-          bp::args(" self", " state", " activation", " contact", " fref", " nu"),
-          "Initialize the contact force cost model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param activation: activation model\n"
-          ":param contact: contact model\n"
-          ":param fref: reference force\n"
-          ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>,
-           boost::shared_ptr<ActivationModelAbstract>,
-           boost::shared_ptr<ContactModelAbstract>, pinocchio::Force>(
+      "CostModelContactForce", bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>,
+                                        boost::shared_ptr<ContactModelAbstract>, pinocchio::Force, int>(
+                                   bp::args(" self", " state", " activation", " contact", " fref", " nu"),
+                                   "Initialize the contact force cost model.\n\n"
+                                   ":param state: state of the multibody system\n"
+                                   ":param activation: activation model\n"
+                                   ":param contact: contact model\n"
+                                   ":param fref: reference force\n"
+                                   ":param nu: dimension of control vector"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>,
+                    boost::shared_ptr<ContactModelAbstract>, pinocchio::Force>(
           bp::args(" self", " state", " activation", " contact", " fref"),
           "Initialize the contact force cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
@@ -39,8 +36,7 @@ void exposeCostContactForce() {
           ":param activation: activation model\n"
           ":param contact: contact model\n"
           ":param fref: reference force\n"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>,
-           boost::shared_ptr<ContactModelAbstract>, pinocchio::Force, int>(
+      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ContactModelAbstract>, pinocchio::Force, int>(
           bp::args(" self", " state", " contact", " fref", " nu"),
           "Initialize the contact force cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
@@ -49,8 +45,7 @@ void exposeCostContactForce() {
           ":param contact: contact model\n"
           ":param fref: reference force\n"
           ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>,
-           boost::shared_ptr<ContactModelAbstract>, pinocchio::Force>(
+      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ContactModelAbstract>, pinocchio::Force>(
           bp::args(" self", " state", " contact", " fref"),
           "Initialize the contact force cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
@@ -64,8 +59,7 @@ void exposeCostContactForce() {
                                 ":param data: cost data\n"
                                 ":param x: time-discrete state vector\n"
                                 ":param u: time-discrete control input"))
-      .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                           const Eigen::VectorXd&,
+      .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                            const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &CostModelContactForce::calcDiff_wrap,
           bp::args(" self", " data", " x", " u=None", " recalc=True"),
@@ -74,30 +68,22 @@ void exposeCostContactForce() {
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n"
           ":param recalc: If true, it updates the state evolution and the cost value.")
-      .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                           const Eigen::VectorXd&,
-                                           const Eigen::VectorXd&)>(
-          "calcDiff", &CostModelContactForce::calcDiff_wrap,
-          bp::args(" self", " data", " x", " u"))
-      .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                           const Eigen::VectorXd&)>(
-          "calcDiff", &CostModelContactForce::calcDiff_wrap,
-          bp::args(" self", " data", " x"))
-      .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                           const Eigen::VectorXd&,
-                                           const bool&)>(
-          "calcDiff", &CostModelContactForce::calcDiff_wrap,
-          bp::args(" self", " data", " x", " recalc"))
-      .def("createData", &CostModelContactForce::createData,
-           bp::with_custodian_and_ward_postcall<0, 2>(),
+      .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+                                           const Eigen::VectorXd&)>("calcDiff", &CostModelContactForce::calcDiff_wrap,
+                                                                    bp::args(" self", " data", " x", " u"))
+      .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
+          "calcDiff", &CostModelContactForce::calcDiff_wrap, bp::args(" self", " data", " x"))
+      .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
+                                           const bool&)>("calcDiff", &CostModelContactForce::calcDiff_wrap,
+                                                         bp::args(" self", " data", " x", " recalc"))
+      .def("createData", &CostModelContactForce::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the contact force cost data.\n\n"
            "Each cost model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined cost.\n"
            ":param data: Pinocchio data\n"
            ":return cost data.")
-      .add_property("fref", bp::make_function(&CostModelContactForce::get_fref,
-                                              bp::return_internal_reference<>()),
+      .add_property("fref", bp::make_function(&CostModelContactForce::get_fref, bp::return_internal_reference<>()),
                     "reference contact force");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataContactForce> >();
@@ -109,10 +95,9 @@ void exposeCostContactForce() {
           "Create contact force cost data.\n\n"
           ":param model: contact force cost model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property(
-          "Arr_Ru",
-          bp::make_getter(&CostDataContactForce::Arr_Ru, bp::return_value_policy<bp::return_by_value>()),
-          "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)");
+      .add_property("Arr_Ru",
+                    bp::make_getter(&CostDataContactForce::Arr_Ru, bp::return_value_policy<bp::return_by_value>()),
+                    "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)");
 }
 
 }  // namespace python
