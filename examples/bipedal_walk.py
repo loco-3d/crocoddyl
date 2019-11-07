@@ -11,6 +11,8 @@ from crocoddyl.utils.biped import SimpleBipedGaitProblem, plotSolution
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
+crocoddyl.switchToNumpyMatrix()
+
 # Creating the lower-body part of Talos
 talos_legs = example_robot_data.loadTalosLegs()
 

@@ -15,6 +15,7 @@ from crocoddyl.utils.quadruped import SimpleQuadrupedalGaitProblem
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
+crocoddyl.switchToNumpyMatrix()
 # Loading the anymal model
 anymal = example_robot_data.loadANYmal()
 robot_model = anymal.model
