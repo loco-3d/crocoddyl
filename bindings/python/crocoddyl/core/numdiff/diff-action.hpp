@@ -10,6 +10,7 @@
 #define BINDINGS_PYTHON_CROCODDYL_CORE_NUMDIFF_DIFF_ACTION_HPP_
 
 #include "crocoddyl/core/numdiff/diff-action.hpp"
+#include "python/crocoddyl/utils.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -17,6 +18,16 @@ namespace python {
 namespace bp = boost::python;
 
 void exposeDifferentialActionNumDiff() {
+  // Register custom converters between std::vector and Python list
+  typedef boost::shared_ptr<DifferentialActionModelAbstract> DifferentialActionModelPtr;
+  typedef boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionDataPtr;
+  bp::to_python_converter<std::vector<DifferentialActionModelPtr, std::allocator<DifferentialActionModelPtr> >,
+                          vector_to_list<DifferentialActionModelPtr, false> >();
+  bp::to_python_converter<std::vector<DifferentialActionDataPtr, std::allocator<DifferentialActionDataPtr> >,
+                          vector_to_list<DifferentialActionDataPtr, false> >();
+  list_to_vector()
+      .from_python<std::vector<DifferentialActionModelPtr, std::allocator<DifferentialActionModelPtr> > >();
+
   bp::class_<DifferentialActionModelNumDiff, bp::bases<DifferentialActionModelAbstract> >(
       "DifferentialActionModelNumDiff",
       "Abstract class for computing calcDiff by using numerical differentiation.\n\n",
