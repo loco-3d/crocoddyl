@@ -98,8 +98,9 @@ void exposeCostContactForce() {
       .add_property("Arr_Ru",
                     bp::make_getter(&CostDataContactForce::Arr_Ru, bp::return_value_policy<bp::return_by_value>()),
                     "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)")
-    .add_property("contact", bp::make_getter(&CostDataContactForce::contact_, bp::return_value_policy<bp::return_by_value>()),
-                  bp::make_setter(&CostDataContactForce::contact_), "contact data associated with the current cost");
+      .add_property("contact",
+                    bp::make_getter(&CostDataContactForce::contact_, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&CostDataContactForce::contact_), "contact data associated with the current cost");
 }
 
 }  // namespace python
