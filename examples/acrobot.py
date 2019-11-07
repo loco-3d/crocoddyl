@@ -14,19 +14,6 @@ robot.q0.flat = q0
 robot.framesForwardKinematics(robot.q0)
 robot.display(robot.q0)
 
-IDX_LINK1 = robot.model.getFrameId('link1', pinocchio.FrameType.BODY)
-IDX_LINK2 = robot.model.getFrameId('link2', pinocchio.FrameType.BODY)
-Mlink1 = robot.data.oMf[IDX_LINK1]
-Mlink2 = robot.data.oMf[IDX_LINK2]
-
-target_pos = np.array([0, 0, 0.3])
-target_quat = pinocchio.Quaternion(1, 0, 0, 0)
-target_quat.normalize()
-
-Mref = pinocchio.SE3()
-Mref.translation = target_pos.reshape(3, 1)
-Mref.rotation = target_quat.matrix()
-
 robot.viewer.gui.refresh()
 
 state = crocoddyl.StateMultibody(robot_model)
