@@ -24,18 +24,18 @@ void exposeContact3D() {
       "The calc and calcDiff functions compute the contact Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, FrameTranslation, int, bp::optional<Eigen::Vector2d> >(
-          bp::args(" self", " state", " xref", " nu=state.nv", " gains=np.matrix([ [0.],[0.] ]"),
+          bp::args(" self", " state", " xref", " nu=state.nv", " gains=np.matrix([ [0.],[0.] ])"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param xref: reference frame translation\n"
           ":param nu: dimension of control vector\n"
           ":param gains: gains of the contact model"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameTranslation, bp::optional<Eigen::Vector2d> >(
-          bp::args(" self", " state", " xref"),
-          "Initialize the state cost model.\n\n"
+          bp::args(" self", " state", " xref", " gains=np.matrix([ [0.],[0.] ])"),
+          "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param Mref: reference frame translation\n"
-          ":param nu: dimension of control vector"))
+          ":param gains: gains of the contact model"))
       .def("calc", &ContactModel3D::calc_wrap, bp::args(" self", " data", " x"),
            "Compute the 3D contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
