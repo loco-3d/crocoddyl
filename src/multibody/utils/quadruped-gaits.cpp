@@ -27,7 +27,7 @@ SimpleQuadrupedGaitProblem::SimpleQuadrupedGaitProblem(const pinocchio::Model& r
       actuation_(boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state_)),
       firtstep_(true),
       defaultstate_(rmodel_.nq + rmodel_.nv) {
-  defaultstate_.head(rmodel_.nq) = rmodel_.referenceConfigurations["half_sitting"];
+  defaultstate_.head(rmodel_.nq) = rmodel_.referenceConfigurations["standing"];
   defaultstate_.tail(rmodel_.nv).setZero();
 }
 

@@ -15,7 +15,7 @@ class SimpleQuadrupedalGaitProblem:
         self.lhFootId = self.rmodel.getFrameId(lhFoot)
         self.rhFootId = self.rmodel.getFrameId(rhFoot)
         # Defining default state
-        q0 = self.rmodel.referenceConfigurations["half_sitting"]
+        q0 = self.rmodel.referenceConfigurations["standing"]
         self.rmodel.defaultState = np.concatenate([q0, np.zeros((self.rmodel.nv, 1))])
         self.firstStep = True
 
