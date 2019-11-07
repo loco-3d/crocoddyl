@@ -82,30 +82,42 @@ class CallbackLogger(libcrocoddyl_pywrap.CallbackAbstract):
         self.gaps.append(copy.copy(solver.gaps))
 
 
-def plotOCSolution(xs, us, figIndex=1, show=True):
+def plotOCSolution(xs=None, us=None, figIndex=1, show=True):
     import matplotlib.pyplot as plt
     import numpy as np
-    # Getting the state and control trajectories
-    nx, nu = xs[0].shape[0], us[0].shape[0]
-    X = [0.] * nx
-    U = [0.] * nu
-    for i in range(nx):
-        X[i] = [np.asscalar(x[i]) for x in xs]
-    for i in range(nu):
-        U[i] = [np.asscalar(u[i]) for u in us]
+    plt.rcParams['pdf.fonttype'] = 42
+    plt.rcParams['ps.fonttype'] = 42
 
+    # Getting the state and control trajectories
+    if xs is not None:
+        xsPlotIdx = 111
+        nx = xs[0].shape[0]
+        X = [0.] * nx
+        for i in range(nx):
+            X[i] = [np.asscalar(x[i]) for x in xs]
+    if us is not None:
+        usPlotIdx = 111
+        nu = us[0].shape[0]
+        U = [0.] * nu
+        for i in range(nu):
+            U[i] = [np.asscalar(u[i]) if u.shape[0] != 0 else 0 for u in us]
+    if xs is not None and us is not None:
+        xsPlotIdx = 211
+        usPlotIdx = 212
     plt.figure(figIndex)
 
     # Plotting the state trajectories
-    plt.subplot(211)
-    [plt.plot(X[i], label='x' + str(i)) for i in range(nx)]
-    plt.legend()
+    if xs is not None:
+        plt.subplot(xsPlotIdx)
+        [plt.plot(X[i], label='x' + str(i)) for i in range(nx)]
+        plt.legend()
 
     # Plotting the control commands
-    plt.subplot(212)
-    [plt.plot(U[i], label='u' + str(i)) for i in range(nu)]
-    plt.legend()
-    plt.xlabel('knots')
+    if us is not None:
+        plt.subplot(usPlotIdx)
+        [plt.plot(U[i], label='u' + str(i)) for i in range(nu)]
+        plt.legend()
+        plt.xlabel('knots')
     if show:
         plt.show()
 
@@ -113,9 +125,11 @@ def plotOCSolution(xs, us, figIndex=1, show=True):
 def plotConvergence(costs, muLM, muV, gamma, theta, alpha, figIndex=1, show=True, figTitle=""):
     import matplotlib.pyplot as plt
     import numpy as np
-
+    plt.rcParams['pdf.fonttype'] = 42
+    plt.rcParams['ps.fonttype'] = 42
     plt.figure(figIndex, figsize=(6.4, 8))
     plt.suptitle(figTitle, fontsize=14)
+
     # Plotting the total cost sequence
     plt.subplot(511)
     plt.ylabel('cost')

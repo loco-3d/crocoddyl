@@ -15,6 +15,8 @@ from crocoddyl.utils.quadruped import SimpleQuadrupedalGaitProblem
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
+crocoddyl.switchToNumpyMatrix()
+
 # Loading the anymal model
 anymal = example_robot_data.loadANYmal()
 robot_model = anymal.model
@@ -68,7 +70,7 @@ if WITHPLOT:
     # Plot control vs limits
     fig = plt.figure(1)
     plt.title('Control ($u$)')
-    plt.plot(np.asarray(boxddp.us)[:, :, 0])
+    crocoddyl.plotOCSolution(us=boxddp.us, figIndex=1, show=False)
     plt.xlim(0, len(boxddp.us) - 1)
     plt.hlines(boxddp.models()[0].u_lb, 0, len(boxddp.us) - 1, 'r')
     plt.hlines(boxddp.models()[0].u_ub, 0, len(boxddp.us) - 1, 'r')
