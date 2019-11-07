@@ -8,27 +8,28 @@
 
 #include "crocoddyl/multibody/costs/centroidal-momentum.hpp"
 #include <pinocchio/algorithm/centroidal-derivatives.hpp>
+
 namespace crocoddyl {
 
 CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state,
                                                          boost::shared_ptr<ActivationModelAbstract> activation,
-                                                         const Vector6& ref, const std::size_t& nu)
+                                                         const Vector6d& ref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), ref_(ref) {
   assert(activation_->get_nr() == 6 && "nr is not equals to 6");
 }
 
 CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state,
                                                          boost::shared_ptr<ActivationModelAbstract> activation,
-                                                         const Vector6& ref)
+                                                         const Vector6d& ref)
     : CostModelAbstract(state, activation), ref_(ref) {
   assert(activation_->get_nr() == 6 && "nr is not equals to 6");
 }
 
-CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6& ref,
+CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6d& ref,
                                                          const std::size_t& nu)
     : CostModelAbstract(state, 6, nu), ref_(ref) {}
 
-CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6& ref)
+CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6d& ref)
     : CostModelAbstract(state, 6), ref_(ref) {}
 
 CostModelCentroidalMomentum::~CostModelCentroidalMomentum() {}
@@ -64,8 +65,10 @@ void CostModelCentroidalMomentum::calcDiff(const boost::shared_ptr<CostDataAbstr
   for (int i = 0; i < data->pinocchio->Jcom.cols(); ++i) {
     data->Rx.block<3, 1>(3, i) -= data->pinocchio->Jcom.col(i).cross(data->pinocchio->hg.linear());
   }
+
+  d->Arr_Rx.noalias() = data->activation->Arr * data->Rx;
   data->Lx.noalias() = data->Rx.transpose() * data->activation->Ar;
-  data->Lxx.noalias() = data->Rx.transpose() * data->activation->Arr * data->Rx;
+  data->Lxx.noalias() = data->Rx.transpose() * d->Arr_Rx;
 }
 
 boost::shared_ptr<CostDataAbstract> CostModelCentroidalMomentum::createData(pinocchio::Data* const data) {

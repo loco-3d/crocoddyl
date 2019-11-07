@@ -15,15 +15,15 @@ namespace crocoddyl {
 
 class CostModelCentroidalMomentum : public CostModelAbstract {
  public:
-  typedef Eigen::Matrix<double, 6, 1> Vector6;
+  typedef Eigen::Matrix<double, 6, 1> Vector6d;
 
   CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state,
-                              boost::shared_ptr<ActivationModelAbstract> activation, const Vector6& ref,
+                              boost::shared_ptr<ActivationModelAbstract> activation, const Vector6d& ref,
                               const std::size_t& nu);
   CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state,
-                              boost::shared_ptr<ActivationModelAbstract> activation, const Vector6& ref);
-  CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6& ref, const std::size_t& nu);
-  CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6& ref);
+                              boost::shared_ptr<ActivationModelAbstract> activation, const Vector6d& ref);
+  CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6d& ref, const std::size_t& nu);
+  CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6d& ref);
   ~CostModelCentroidalMomentum();
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -35,7 +35,7 @@ class CostModelCentroidalMomentum : public CostModelAbstract {
   const Eigen::VectorXd& get_ref() const;
 
  private:
-  Vector6 ref_;
+  Vector6d ref_;
 };
 
 struct CostDataCentroidalMomentum : public CostDataAbstract {
@@ -52,6 +52,7 @@ struct CostDataCentroidalMomentum : public CostDataAbstract {
 
   pinocchio::Data::Matrix6x hdot_partial_dq;
   pinocchio::Data::Matrix6x hdot_partial_dv;
+  pinocchio::Data::Matrix6x Arr_Rx;
 };
 
 }  // namespace crocoddyl
