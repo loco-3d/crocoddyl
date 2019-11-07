@@ -1,5 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
+
 # Check if the cmake (git submodule) have been initialized
 IF(NOT EXISTS "${PROJECT_SOURCE_DIR}/cmake/base.cmake")
   MESSAGE(FATAL_ERROR "\nPlease run the following command first:\ngit submodule update --init\n")
