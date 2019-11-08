@@ -82,6 +82,7 @@ class DifferentialLQRTest(ActionModelAbstractTestCase):
 class TalosArmFreeFwdDynamicsTest(ActionModelAbstractTestCase):
     ROBOT_MODEL = example_robot_data.loadTalosArm().model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+    ACTUATION = crocoddyl.ActuationModelFull(STATE)
     COST_SUM = crocoddyl.CostModelSum(STATE)
     COST_SUM.addCost(
         'gripperPose',
@@ -90,13 +91,14 @@ class TalosArmFreeFwdDynamicsTest(ActionModelAbstractTestCase):
         1e-3)
     COST_SUM.addCost("xReg", crocoddyl.CostModelState(STATE), 1e-7)
     COST_SUM.addCost("uReg", crocoddyl.CostModelControl(STATE), 1e-7)
-    MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, COST_SUM)
-    MODEL_DER = DifferentialFreeFwdDynamicsDerived(STATE, COST_SUM)
+    MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
+    MODEL_DER = DifferentialFreeFwdDynamicsDerived(STATE, ACTUATION, COST_SUM)
 
 
 class TalosArmFreeFwdDynamicsWithArmatureTest(ActionModelAbstractTestCase):
     ROBOT_MODEL = example_robot_data.loadTalosArm().model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+    ACTUATION = crocoddyl.ActuationModelFull(STATE)
     COST_SUM = crocoddyl.CostModelSum(STATE)
     COST_SUM.addCost(
         'gripperPose',
@@ -105,8 +107,8 @@ class TalosArmFreeFwdDynamicsWithArmatureTest(ActionModelAbstractTestCase):
         1e-3)
     COST_SUM.addCost("xReg", crocoddyl.CostModelState(STATE), 1e-7)
     COST_SUM.addCost("uReg", crocoddyl.CostModelControl(STATE), 1e-7)
-    MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, COST_SUM)
-    MODEL_DER = DifferentialFreeFwdDynamicsDerived(STATE, COST_SUM)
+    MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
+    MODEL_DER = DifferentialFreeFwdDynamicsDerived(STATE, ACTUATION, COST_SUM)
     MODEL.armature = 0.1 * np.matrix(np.ones(ROBOT_MODEL.nv)).T
     MODEL_DER.set_armature(0.1 * np.matrix(np.ones(ROBOT_MODEL.nv)).T)
 

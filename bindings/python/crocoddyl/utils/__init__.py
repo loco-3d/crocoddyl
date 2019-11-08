@@ -260,14 +260,16 @@ class DifferentialLQRDerived(crocoddyl.DifferentialActionModelAbstract):
 
 
 class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstract):
-    def __init__(self, state, costModel):
-        crocoddyl.DifferentialActionModelAbstract.__init__(self, state, state.nv, costModel.nr)
+    def __init__(self, state, actuationModel, costModel):
+        crocoddyl.DifferentialActionModelAbstract.__init__(self, state, actuationModel.nu, costModel.nr)
+        self.actuation = actuationModel
         self.costs = costModel
         self.enable_force = True
         self.armature = np.matrix(np.zeros(0))
 
         # We cannot abstract data in Python bindings, let's create this internal data inside model
         self.pinocchioData = pinocchio.Data(self.state.pinocchio)
+        self.actuationData = self.actuation.createData()
         self.costsData = self.costs.createData(self.pinocchioData)
 
     def calc(self, data, x, u=None):
@@ -275,6 +277,8 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
         if u is None:
             u = self.unone
         q, v = x[:self.state.nq], x[-self.state.nv:]
+        tau = self.actuation.calc(self.actuationData, x, u)
+
         # Computing the dynamics using ABA or manually for armature case
         if self.enable_force:
             data.xout = pinocchio.aba(self.state.pinocchio, self.pinocchioData, q, v, u)
@@ -284,7 +288,8 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
             if self.armature.size == self.state.nv:
                 data.M[range(self.state.nv), range(self.state.nv)] += self.armature
             data.Minv = np.linalg.inv(data.M)
-            data.xout = data.Minv * (u - self.pinocchioData.nle)
+            data.xout = data.Minv * (tau - self.pinocchioData.nle)
+
         # Computing the cost value and residuals
         pinocchio.forwardKinematics(self.state.pinocchio, self.pinocchioData, q, v)
         pinocchio.updateFramePlacements(self.state.pinocchio, self.pinocchioData)
@@ -294,6 +299,8 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
     def calcDiff(self, data, x, u=None, recalc=True):
         self.costsData.shareMemory(data)
         q, v = x[:self.state.nq], x[-self.state.nv:]
+        tau = self.actuation.calc(self.actuationData, x, u)
+        
         if u is None:
             u = self.unone
         if recalc:
