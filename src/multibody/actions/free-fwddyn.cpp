@@ -86,16 +86,16 @@ void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<Di
   // Computing the dynamics derivatives
   if (with_armature_) {
     pinocchio::computeABADerivatives(pinocchio_, d->pinocchio, q, v, u);
-    d->Fx.leftCols(nv) = d->pinocchio.ddq_dq;
-    d->Fx.rightCols(nv) = d->pinocchio.ddq_dv;
-    d->Fu = d->pinocchio.Minv * d->actuation->dtau_du;
+    d->Fx.leftCols(nv).noalias() = d->pinocchio.Minv * d->pinocchio.dtau_dq;
+    d->Fx.rightCols(nv).noalias() = d->pinocchio.Minv * d->pinocchio.dtau_dv;
+    d->Fu.noalias() = d->pinocchio.Minv * d->actuation->dtau_du;
   } else {
     pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout);
     d->Fx.leftCols(nv).noalias() = d->Minv * d->pinocchio.dtau_dq;
     d->Fx.leftCols(nv) *= -1.;
     d->Fx.rightCols(nv).noalias() = d->Minv * d->pinocchio.dtau_dv;
     d->Fx.rightCols(nv) *= -1.;
-    d->Fu = d->Minv * d->actuation->dtau_du;
+    d->Fu.noalias() = d->Minv * d->actuation->dtau_du;
   }
 
   // Computing the cost derivatives
@@ -107,6 +107,10 @@ boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelFreeFwd
 }
 
 pinocchio::Model& DifferentialActionModelFreeFwdDynamics::get_pinocchio() const { return pinocchio_; }
+
+const boost::shared_ptr<ActuationModelAbstract>& DifferentialActionModelFreeFwdDynamics::get_actuation() const {
+  return actuation_;
+}
 
 const boost::shared_ptr<CostModelSum>& DifferentialActionModelFreeFwdDynamics::get_costs() const { return costs_; }
 
