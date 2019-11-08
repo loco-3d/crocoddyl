@@ -14,7 +14,7 @@
 #include <Eigen/Cholesky>
 #include "crocoddyl/core/solver-base.hpp"
 
-
+#include<iostream>
 
 
 namespace crocoddyl {
@@ -31,6 +31,12 @@ class SolverKKT : public SolverAbstract {
   double tryStep(const double& steplength = 1);
   double stoppingCriteria();
   const Eigen::Vector2d& expectedImprovement();
+  const Eigen::MatrixXd& get_kkt() const;
+  const Eigen::VectorXd& get_kktref() const;
+  const Eigen::VectorXd& get_primaldual() const;
+  const Eigen::VectorXd& get_primal() const;
+  const Eigen::VectorXd& get_dual() const;
+
 
  protected:
   double regfactor_;
