@@ -15,6 +15,7 @@
 #include "crocoddyl/multibody/costs/frame-placement.hpp"
 #include "crocoddyl/multibody/costs/state.hpp"
 #include "crocoddyl/multibody/costs/control.hpp"
+#include "crocoddyl/multibody/actuations/full.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
 
@@ -59,13 +60,16 @@ int main(int argc, char* argv[]) {
   runningCostModel->addCost("uReg", uRegCost, 1e-7);
   terminalCostModel->addCost("gripperPose", goalTrackingCost, 1);
 
+  // We define an actuation model
+  boost::shared_ptr<crocoddyl::ActuationModelFull> actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state) ;
+
   // Next, we need to create an action model for running and terminal knots. The
   // forward dynamics (computed using ABA) are implemented
   // inside DifferentialActionModelFullyActuated.
   boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> runningDAM =
-      boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(state, runningCostModel);
+      boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(state, actuation, runningCostModel);
   boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> terminalDAM =
-      boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(state, terminalCostModel);
+      boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(state, actuation, terminalCostModel);
   Eigen::VectorXd armature(state->get_nq());
   armature << 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.;
   runningDAM->set_armature(armature);
