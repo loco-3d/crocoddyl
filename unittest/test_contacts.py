@@ -1,12 +1,9 @@
 import numpy as np
-from numpy.linalg import eig, norm, pinv
+from numpy.linalg import norm, pinv
 
 import pinocchio
-from crocoddyl import (ActionModelNumDiff, ContactModel3D,
-                       ContactModel6D, ContactModelMultiple, CostModelControl,
-                       CostModelFrameTranslation, CostModelState, CostModelSum,
-                       DifferentialActionModelNumDiff,
-                       IntegratedActionModelEuler, ShootingProblem, SolverDDP)
+from crocoddyl import (ContactModel3D, ContactModel6D, ContactModelMultiple, CostModelSum,
+                       DifferentialActionModelNumDiff)
 from crocoddyl import ActuationModelFloatingBase as ActuationModelFreeFloating
 from crocoddyl import CostModelContactForce as CostModelForce
 from crocoddyl import DifferentialActionModelContactFwdDynamics as DifferentialActionModelFloatingInContact
@@ -18,9 +15,10 @@ from crocoddyl.utils import a2m, m2a
 from pinocchio.utils import rand, zero
 from testutils import NUMDIFF_MODIFIER, assertNumDiff, df_dq, df_dx, EPS
 
+
 def absmax(A):
     return np.max(abs(A))
-    
+
 
 # Loading Talos arm with FF TODO use a bided or quadruped
 # -----------------------------------------------------------------------------
@@ -40,11 +38,8 @@ np.set_printoptions(linewidth=400, suppress=True)
 State = StatePinocchio(rmodel)
 actModel = ActuationModelFreeFloating(State)
 gains = pinocchio.utils.rand(2)
-Mref_lf = FramePlacement (rmodel.getFrameId('LF_FOOT'),
-                          pinocchio.SE3.Random())
-contactModel = ContactModel6D(State,
-                              Mref_lf, actModel.nu,
-                              gains)
+Mref_lf = FramePlacement(rmodel.getFrameId('LF_FOOT'), pinocchio.SE3.Random())
+contactModel = ContactModel6D(State, Mref_lf, actModel.nu, gains)
 contactData = contactModel.createData(rdata)
 
 q = pinocchio.randomConfiguration(rmodel)
@@ -91,12 +86,9 @@ Av_numdiff = df_dx(lambda _v: returna_at0(q, _v), v, h=eps)
 assert (np.isclose(contactData.da0_dx[:, :rmodel.nv], Aq_numdiff, atol=np.sqrt(eps)).all())
 assert (np.isclose(contactData.da0_dx[:, rmodel.nv:], Av_numdiff, atol=np.sqrt(eps)).all())
 
-Mref_lf_t = FrameTranslation (rmodel.getFrameId('LF_FOOT'),
-                            pinocchio.SE3.Random().translation)
+Mref_lf_t = FrameTranslation(rmodel.getFrameId('LF_FOOT'), pinocchio.SE3.Random().translation)
 
-contactModel = ContactModel3D(State,
-                              Mref_lf_t, actModel.nu,
-                              gains)
+contactModel = ContactModel3D(State, Mref_lf_t, actModel.nu, gains)
 contactData = contactModel.createData(rdata)
 
 q = pinocchio.randomConfiguration(rmodel)
@@ -154,24 +146,21 @@ x = np.vstack([q, v])
 u = a2m(np.random.rand(rmodel.nv - 6) * 2 - 1)
 
 actModel = ActuationModelFreeFloating(State)
-contactModel3 = ContactModel3D(State,
-                               Mref_lf_t, actModel.nu, gains)
+contactModel3 = ContactModel3D(State, Mref_lf_t, actModel.nu, gains)
 
 rmodel.frames[Mref_lf_t.frame].placement = pinocchio.SE3.Random()
 contactModel = ContactModelMultiple(State, actModel.nu)
-contactModel.addContact("LF_FOOT_contact",contactModel3)
+contactModel.addContact("LF_FOOT_contact", contactModel3)
 
-model = DifferentialActionModelFloatingInContact(State,
-                                                 actModel, contactModel,
-                                                 CostModelSum(State, actModel.nu, False), 0.,
-                                                 True)
+model = DifferentialActionModelFloatingInContact(State, actModel, contactModel,
+                                                 CostModelSum(State, actModel.nu, False), 0., True)
 data = model.createData()
 
 model.calc(data, x, u)
-#assert (len(list(filter(lambda x: x > 0, eig(data.K)[0]))) == model.nv)
-#assert (len(list(filter(lambda x: x < 0, eig(data.K)[0]))) == model.ncontact)
+# assert (len(list(filter(lambda x: x > 0, eig(data.K)[0]))) == model.nv)
+# assert (len(list(filter(lambda x: x < 0, eig(data.K)[0]))) == model.ncontact)
 _taucheck = pinocchio.rnea(rmodel, rdata, q, v, data.xout, data.contacts.fext)
-#_taucheck.flat[:] += rmodel.armature.flat * data.a
+# _taucheck.flat[:] += rmodel.armature.flat * data.a
 assert (absmax(_taucheck[:6]) < 1e-6)
 assert (absmax(m2a(_taucheck[6:] - u)) < 1e-6)
 
@@ -191,17 +180,15 @@ rmodel.frames[Mref_lf.frame].placement = pinocchio.SE3.Random()
 contactModel = ContactModelMultiple(State, actModel.nu)
 contactModel.addContact("LF_FOOT_contact", contactModel6)
 
-model = DifferentialActionModelFloatingInContact(State,
-                                                 actModel, contactModel,
-                                                 CostModelSum(State, actModel.nu, False),
-                                                 0.,True)
+model = DifferentialActionModelFloatingInContact(State, actModel, contactModel,
+                                                 CostModelSum(State, actModel.nu, False), 0., True)
 data = model.createData()
 
 model.calc(data, x, u)
-#assert (len(list(filter(lambda x: x > 0, eig(data.K)[0]))) == model.nv)
-#assert (len(list(filter(lambda x: x < 0, eig(data.K)[0]))) == model.ncontact)
+# assert (len(list(filter(lambda x: x > 0, eig(data.K)[0]))) == model.nv)
+# assert (len(list(filter(lambda x: x < 0, eig(data.K)[0]))) == model.ncontact)
 _taucheck = pinocchio.rnea(rmodel, rdata, q, v, data.xout, data.contacts.fext)
-#_taucheck.flat[:] += rmodel.armature.flat * data.a
+# _taucheck.flat[:] += rmodel.armature.flat * data.a
 assert (absmax(_taucheck[:6]) < 1e-6)
 assert (absmax(m2a(_taucheck[6:] - u)) < 1e-6)
 
@@ -226,9 +213,9 @@ def calcForces(q_, v_, u_):
 Fq = df_dq(rmodel, lambda _q: calcForces(_q, v, u), q)
 Fv = df_dx(lambda _v: calcForces(q, _v, u), v)
 Fu = df_dx(lambda _u: calcForces(q, v, _u), u)
-assertNumDiff(Fq, data.df_dx[:,:robot.nv], 1e-3)
-#NUMDIFF_MODIFIER * mnum.disturbance)  # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
-assertNumDiff(Fv, data.df_dx[:,robot.nv:],
+assertNumDiff(Fq, data.df_dx[:, :robot.nv], 1e-3)
+# NUMDIFF_MODIFIER * mnum.disturbance)  # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(Fv, data.df_dx[:, robot.nv:],
               NUMDIFF_MODIFIER * mnum.disturbance)  # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
 assertNumDiff(Fu, data.df_du,
               NUMDIFF_MODIFIER * mnum.disturbance)  # threshold was 1e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
@@ -236,16 +223,14 @@ assertNumDiff(Fu, data.df_du,
 Fq = df_dq(rmodel, lambda _q: calcForces(_q, v, u), q)
 Fv = df_dx(lambda _v: calcForces(q, _v, u), v)
 Fu = df_dx(lambda _u: calcForces(q, v, _u), u)
-assert (absmax(Fq - data.df_dx[:,:rmodel.nv]) < 1e-3)
-assert (absmax(Fv - data.df_dx[:,rmodel.nv:]) < 1e-3)
+assert (absmax(Fq - data.df_dx[:, :rmodel.nv]) < 1e-3)
+assert (absmax(Fv - data.df_dx[:, rmodel.nv:]) < 1e-3)
 assert (absmax(Fu - data.df_du) < 1e-3)
 
-#model.costs = CostModelSum(State, actModel.nu)
-model.costs.addCost("force",
-                    CostModelForce(State,
-                                        model.contacts.contacts["LF_FOOT_contact"].contact,
-                                        a2m(np.random.rand(6)), actModel.nu),
-                    1.)
+# model.costs = CostModelSum(State, actModel.nu)
+model.costs.addCost(
+    "force",
+    CostModelForce(State, model.contacts.contacts["LF_FOOT_contact"].contact, a2m(np.random.rand(6)), actModel.nu), 1.)
 
 data = model.createData()
 data.costs.costs["force"].contact = data.contacts.contacts["LF_FOOT_contact"]
@@ -268,7 +253,6 @@ assertNumDiff(data.Fx, dnum.Fx,
               NUMDIFF_MODIFIER * mnum.disturbance)  # threshold was 2.7e-2, is now 2.11e-4 (see assertNumDiff.__doc__)
 assertNumDiff(data.Fu, dnum.Fu,
               NUMDIFF_MODIFIER * mnum.disturbance)  # threshold was 7e-3, is now 2.11e-4 (see assertNumDiff.__doc__)
-
 """
 nfaces = 10
 nc = model.contact.ncontact
