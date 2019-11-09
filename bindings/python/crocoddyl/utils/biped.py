@@ -214,7 +214,7 @@ class SimpleBipedGaitProblem:
 
         :param supportFootIds: Ids of the constrained feet
         :param swingFootTask: swinging foot task
-        :param pseudoImpulse: true for pseudo impulse models, otherwise it uses the impulse model
+        :param pseudoImpulse: true for pseudo-impulse models, otherwise it uses the impulse model
         :return action model for a foot switch phase
         """
         if pseudoImpulse:
@@ -225,7 +225,7 @@ class SimpleBipedGaitProblem:
     def createPseudoImpulseModel(self, supportFootIds, swingFootTask):
         """ Action model for pseudo-impulse models.
 
-      A pseudo-impulse model consists of adding high-penalty cost for the contact velocities.
+        A pseudo-impulse model consists of adding high-penalty cost for the contact velocities.
         :param supportFootIds: Ids of the constrained feet
         :param swingFootTask: swinging foot task
         :return pseudo-impulse differential action model
