@@ -171,13 +171,18 @@ void SolverDDP::backwardPass() {
     const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
     const Eigen::VectorXd& Vx_p = Vx_[t + 1];
 
+    Qxx_[t] = d->Lxx;
+    Qxu_[t] = d->Lxu;
+    Quu_[t] = d->Luu;
+    Qx_[t] = d->Lx;
+    Qu_[t] = d->Lu;
     FxTVxx_p_.noalias() = d->Fx.transpose() * Vxx_p;
     FuTVxx_p_[t].noalias() = d->Fu.transpose() * Vxx_p;
-    Qxx_[t].noalias() = d->Lxx + FxTVxx_p_ * d->Fx;
-    Qxu_[t].noalias() = d->Lxu + FxTVxx_p_ * d->Fu;
-    Quu_[t].noalias() = d->Luu + FuTVxx_p_[t] * d->Fu;
-    Qx_[t].noalias() = d->Lx + d->Fx.transpose() * Vx_p;
-    Qu_[t].noalias() = d->Lu + d->Fu.transpose() * Vx_p;
+    Qxx_[t].noalias() += FxTVxx_p_ * d->Fx;
+    Qxu_[t].noalias() += FxTVxx_p_ * d->Fu;
+    Quu_[t].noalias() += FuTVxx_p_[t] * d->Fu;
+    Qx_[t].noalias() += d->Fx.transpose() * Vx_p;
+    Qu_[t].noalias() += d->Fu.transpose() * Vx_p;
 
     if (!std::isnan(ureg_)) {
       Quu_[t].diagonal().array() += ureg_;
@@ -185,14 +190,17 @@ void SolverDDP::backwardPass() {
 
     computeGains(t);
 
+    Vx_[t] = Qx_[t];
     if (std::isnan(ureg_)) {
-      Vx_[t].noalias() = Qx_[t] - K_[t].transpose() * Qu_[t];
+      Vx_[t].noalias() -= K_[t].transpose() * Qu_[t];
     } else {
       Quuk_[t].noalias() = Quu_[t] * k_[t];
-      Vx_[t].noalias() = Qx_[t] + K_[t].transpose() * Quuk_[t] - 2 * K_[t].transpose() * Qu_[t];
+      Vx_[t].noalias() += K_[t].transpose() * Quuk_[t];
+      Vx_[t].noalias() -= 2 * (K_[t].transpose() * Qu_[t]);
     }
-    Vxx_[t].noalias() = Qxx_[t] - Qxu_[t] * K_[t];
-    Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose()).eval();  // TODO(cmastalli): as suggested by Nicolas
+    Vxx_[t] = Qxx_[t];
+    Vxx_[t].noalias() -= Qxu_[t] * K_[t];
+    Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose()).eval();
 
     if (!std::isnan(xreg_)) {
       Vxx_[t].diagonal().array() += xreg_;
