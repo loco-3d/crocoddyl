@@ -84,8 +84,9 @@ void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbst
   for (std::size_t i = 0; i < nv; ++i) {
     d->ddx_dx(i, i + nv) += 1.;
   }
-  d->Fx = d->dxnext_dx + time_step_ * d->dxnext_ddx * d->ddx_dx;
-  d->Fu = time_step_ * d->dxnext_ddx * d->ddx_du;
+  d->Fx = d->dxnext_dx;
+  d->Fx.noalias() += time_step_ * (d->dxnext_ddx * d->ddx_dx);
+  d->Fu.noalias() = time_step_ * (d->dxnext_ddx * d->ddx_du);
   d->Lx = d->differential->Lx;
   d->Lu = d->differential->Lu;
   d->Lxx = d->differential->Lxx;
