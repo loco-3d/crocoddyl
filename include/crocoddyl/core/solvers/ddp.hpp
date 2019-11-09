@@ -85,7 +85,6 @@ class SolverDDP : public SolverAbstract {
   std::vector<Eigen::VectorXd> gaps_;
 
   Eigen::VectorXd xnext_;
-  Eigen::VectorXd x_reg_;
   Eigen::MatrixXd FxTVxx_p_;
   std::vector<Eigen::MatrixXd> FuTVxx_p_;
   Eigen::VectorXd fTVxx_p_;

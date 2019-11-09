@@ -158,9 +158,8 @@ void SolverDDP::backwardPass() {
   Vxx_.back() = d_T->Lxx;
   Vx_.back() = d_T->Lx;
 
-  x_reg_.fill(xreg_);
   if (!std::isnan(xreg_)) {
-    Vxx_.back().diagonal() += x_reg_;
+    Vxx_.back().diagonal().array() += xreg_;
   }
 
   if (!is_feasible_) {
@@ -168,7 +167,6 @@ void SolverDDP::backwardPass() {
   }
 
   for (int t = static_cast<int>(problem_->get_T()) - 1; t >= 0; --t) {
-    const boost::shared_ptr<ActionModelAbstract>& m = problem_->running_models_[t];
     const boost::shared_ptr<ActionDataAbstract>& d = problem_->running_datas_[t];
     const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
     const Eigen::VectorXd& Vx_p = Vx_[t + 1];
@@ -182,8 +180,7 @@ void SolverDDP::backwardPass() {
     Qu_[t].noalias() = d->Lu + d->Fu.transpose() * Vx_p;
 
     if (!std::isnan(ureg_)) {
-      const std::size_t& nu = m->get_nu();
-      Quu_[t].diagonal() += Eigen::VectorXd::Constant(nu, ureg_);
+      Quu_[t].diagonal().array() += ureg_;
     }
 
     computeGains(t);
@@ -198,7 +195,7 @@ void SolverDDP::backwardPass() {
     Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose()).eval();  // TODO(cmastalli): as suggested by Nicolas
 
     if (!std::isnan(xreg_)) {
-      Vxx_[t].diagonal() += x_reg_;
+      Vxx_[t].diagonal().array() += xreg_;
     }
 
     // Compute and store the Vx gradient at end of the interval (rollout state)
@@ -330,7 +327,6 @@ void SolverDDP::allocateData() {
   xs_try_.back() = problem_->terminal_model_->get_state()->zero();
   gaps_.back() = Eigen::VectorXd::Zero(ndx);
 
-  x_reg_ = Eigen::VectorXd::Constant(ndx, xreg_);
   FxTVxx_p_ = Eigen::MatrixXd::Zero(ndx, ndx);
   fTVxx_p_ = Eigen::VectorXd::Zero(ndx);
 }
