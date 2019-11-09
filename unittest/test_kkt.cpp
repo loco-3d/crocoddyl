@@ -80,25 +80,21 @@ void test_kkt_matrix_lqr() {
 
   kkt.setCandidate(xs,us,false);
   kkt.computeDirection(true); 
-
+  // check if kkt matrix is invertible 
   std::cout<<"kkt invertible "<<kkt.get_kkt().fullPivLu().isInvertible()<<std::endl;
 
-
+  // compute condition number for kkt matrix 
   Eigen::JacobiSVD<Eigen::MatrixXd> svd(kkt.get_kkt());
   double cond = svd.singularValues()(0) / svd.singularValues()(svd.singularValues().size()-1);
   std::cout<<"kkt condition number "<<cond<<std::endl;
+
+  // solve the kkt system by hand 
   std::cout<<"kkt matrix\n"<<kkt.get_kkt()<<std::endl;
-
   Eigen::MatrixXd invKKT = kkt.get_kkt().inverse(); 
-
   std::cout<<"inverse kkt matrix\n"<<invKKT<<std::endl;
-
   std::cout<<"solution \n"<<invKKT*(-kkt.get_kktref())<<std::endl;
 
-
-
-
-
+  // print derivatives to make sure they are filled correctly in the kkt matrix 
   for (unsigned int i = 0; i < N; ++i) {
     boost::shared_ptr<crocoddyl::ActionDataAbstract>& d = problem.running_datas_[i];
 
@@ -113,7 +109,6 @@ void test_kkt_matrix_lqr() {
   boost::shared_ptr<crocoddyl::ActionDataAbstract>& df = problem.terminal_data_;
   std::cout<<"Lxx at "<<N<<"\n"<<df->get_Lxx()<<std::endl;
   std::cout<<"Fx at "<<N<<"\n"<<df->get_Fx()<<std::endl;
-  // std::cout<<"Luu at "<<N<<"\n"<<df->get_Luu()<<std::endl;
 
 
   std::cout<<"kktref vector\n"<<kkt.get_kktref()<<std::endl;
@@ -121,16 +116,11 @@ void test_kkt_matrix_lqr() {
 
   for (unsigned int i = 0; i < N; ++i) {
     boost::shared_ptr<crocoddyl::ActionDataAbstract>& d = problem.running_datas_[i];
-
     std::cout<<"Lx at "<<i<<"\n"<<d->get_Lx()<<std::endl;
     std::cout<<"Lu at "<<i<<"\n"<<d->get_Lu()<<std::endl;
-
-
-    
   }
 
   std::cout<<"Lx at "<<N<<"\n"<<df->get_Lx()<<std::endl;
-
   std::cout<<"PrimalDual vector\n"<<kkt.get_primaldual()<<std::endl;
 
 }
@@ -383,7 +373,7 @@ void test_kkt_lqr(){
 //____________________________________________________________________________//
 
 void register_state_vector_unit_tests() {
-  unsigned int N = 200;  // number of nodes
+  unsigned int N = 50;  // number of nodes
 
   Eigen::VectorXd x0;
   std::vector<Eigen::VectorXd> xs;
@@ -405,12 +395,12 @@ void register_state_vector_unit_tests() {
   // Formulating the optimal control problem
   crocoddyl::ShootingProblem problem(x0, runningModels, terminalModel);
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_kkt_matrix_lqr)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_kkt_matrix_unicycle)));
+  // framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_kkt_matrix_unicycle)));
   // framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_shooting_problem, problem)));
-  // framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_ddp_unicycle, problem)));
-  // framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_ddp_lqr)));
-  // framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_kkt_unicycle, problem)));
-  // framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_kkt_lqr)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_ddp_unicycle, problem)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_ddp_lqr)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_kkt_unicycle, problem)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_kkt_lqr)));
 }
 
 //____________________________________________________________________________//

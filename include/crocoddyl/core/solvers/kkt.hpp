@@ -14,9 +14,6 @@
 #include <Eigen/Cholesky>
 #include "crocoddyl/core/solver-base.hpp"
 
-#include<iostream>
-
-
 namespace crocoddyl {
 
 class SolverKKT : public SolverAbstract {
@@ -56,8 +53,8 @@ class SolverKKT : public SolverAbstract {
   void allocateData();
   double calc();
   void computePrimalDual();
-  void increaseRegularization();
-  void decreaseRegularization();
+  // void increaseRegularization();
+  // void decreaseRegularization();
   // allocate data
   //
   Eigen::MatrixXd kkt_;
@@ -71,6 +68,8 @@ class SolverKKT : public SolverAbstract {
   bool was_feasible_;
   Eigen::LLT<Eigen::MatrixXd> kkt_llt_;
   Eigen::VectorXd kkt_primal_; 
+  Eigen::VectorXd dF;
+  
 
 
 };
