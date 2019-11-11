@@ -35,6 +35,7 @@ class IntegratedActionModelEuler : public ActionModelAbstract {
   double time_step_;
   double time_step2_;
   bool with_cost_residual_;
+  bool enable_integration_;
 };
 
 struct IntegratedActionDataEuler : public ActionDataAbstract {
