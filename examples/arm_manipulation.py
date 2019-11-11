@@ -9,6 +9,8 @@ import example_robot_data
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
+crocoddyl.switchToNumpyMatrix()
+
 # In this example test, we will solve the reaching-goal task with the Talos arm.
 # For that, we use the forward dynamics (with its analytical derivatives)
 # developed inside crocoddyl; it describes inside DifferentialActionModelFullyActuated class.
@@ -43,12 +45,13 @@ terminalCostModel.addCost("gripperPose", goalTrackingCost, 1)
 # Next, we need to create an action model for running and terminal knots. The
 # forward dynamics (computed using ABA) are implemented
 # inside DifferentialActionModelFullyActuated.
+actuationModel = crocoddyl.ActuationModelFull(state)
 dt = 1e-3
 runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, runningCostModel), dt)
+    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuationModel, runningCostModel), dt)
 runningModel.differential.armature = np.matrix([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.]).T
 terminalModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, terminalCostModel), 0.)
+    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuationModel, terminalCostModel), 0.)
 terminalModel.differential.armature = np.matrix([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.]).T
 
 # For this optimal control problem, we define 250 knots (or running action

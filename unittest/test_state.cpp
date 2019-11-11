@@ -6,110 +6,15 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#define BOOST_TEST_NO_MAIN
-#define BOOST_TEST_ALTERNATIVE_INIT_API
-
-#include <Eigen/Dense>
-#include <pinocchio/fwd.hpp>
-#include <pinocchio/parsers/urdf.hpp>
-#include <pinocchio/parsers/sample-models.hpp>
-#include <boost/test/included/unit_test.hpp>
-#include <boost/bind.hpp>
-#include "crocoddyl/core/state-base.hpp"
-#include "crocoddyl/core/states/euclidean.hpp"
-#include "crocoddyl/core/states/unicycle.hpp"
-#include "crocoddyl/core/numdiff/state.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
+#include "state_factory.hpp"
+#include "unittest_common.hpp"
 
 using namespace boost::unit_test;
-
-struct TestTypes {
-  enum Type {
-    StateVector,
-    StateMultibodyTalosArm,
-    StateMultibodyHyQ,
-    StateMultibodyTalos,
-    StateMultibodyRandomHumanoid,
-    NbTestTypes
-  };
-  static std::vector<Type> init_all() {
-    std::vector<Type> v;
-    v.clear();
-    for (int i = 0; i < NbTestTypes; ++i) {
-      v.push_back((Type)i);
-    }
-    return v;
-  }
-  static const std::vector<Type> all;
-};
-const std::vector<TestTypes::Type> TestTypes::all(TestTypes::init_all());
-
-class StateFactory {
- public:
-  StateFactory(TestTypes::Type type) {
-    // default initialization
-    nx_ = 0;
-    num_diff_modifier_ = 1e4;
-    state_type_ = type;
-
-    switch (state_type_) {
-      case TestTypes::StateVector:
-        nx_ = 80;
-        state_ = boost::make_shared<crocoddyl::StateVector>(nx_);
-        break;
-      case TestTypes::StateMultibodyTalosArm:
-        construct_state_multibody(TALOS_ARM_URDF, false);
-        break;
-      case TestTypes::StateMultibodyHyQ:
-        construct_state_multibody(HYQ_URDF);
-        break;
-      case TestTypes::StateMultibodyTalos:
-        construct_state_multibody(TALOS_URDF);
-        break;
-      case TestTypes::StateMultibodyRandomHumanoid:
-        construct_state_multibody();
-        break;
-      default:
-        throw std::runtime_error(__FILE__ ": Wrong TestTypes::Type given");
-        break;
-    }
-  }
-
-  ~StateFactory() {}
-
-  void construct_state_multibody(const std::string& urdf_file = "", bool free_flyer = true) {
-    if (urdf_file.size() != 0) {
-      if (free_flyer) {
-        pinocchio::urdf::buildModel(urdf_file, free_flyer_joint_, pinocchio_model_);
-        pinocchio_model_.lowerPositionLimit.head<3>().fill(-1.0);
-        pinocchio_model_.upperPositionLimit.head<3>().fill(1.0);
-      } else {
-        pinocchio::urdf::buildModel(urdf_file, pinocchio_model_);
-      }
-    } else {
-      pinocchio::buildModels::humanoidRandom(pinocchio_model_, free_flyer);
-    }
-    state_ = boost::make_shared<crocoddyl::StateMultibody>(boost::ref(pinocchio_model_));
-    nx_ = pinocchio_model_.nq + pinocchio_model_.nv;
-  }
-
-  boost::shared_ptr<crocoddyl::StateAbstract> get_state() { return state_; }
-
-  const std::size_t& get_nx() { return nx_; }
-  double get_num_diff_modifier() { return num_diff_modifier_; }
-
- private:
-  TestTypes::Type state_type_;                         //!< The current type to test
-  boost::shared_ptr<crocoddyl::StateAbstract> state_;  //!< The pointer to the state in testing
-  std::size_t nx_;                                     //!< The size of the StateVector to test.
-  double num_diff_modifier_;                           //!< Multiplier of the precision during the tests.
-  pinocchio::JointModelFreeFlyer free_flyer_joint_;    //!< The free flyer joint to build the pinocchio model.
-  pinocchio::Model pinocchio_model_;                   //!< The pinocchio_model to build the StateMultibody.
-};
+using namespace crocoddyl_unit_test;
 
 //----------------------------------------------------------------------------//
 
-void test_state_dimension(TestTypes::Type state_type) {
+void test_state_dimension(StateTypes::Type state_type) {
   StateFactory factory(state_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Checking the dimension of zero and random states
@@ -119,7 +24,7 @@ void test_state_dimension(TestTypes::Type state_type) {
   BOOST_CHECK(state->get_ndx() == (2 * state->get_nv()));
 }
 
-void test_integrate_against_difference(TestTypes::Type state_type) {
+void test_integrate_against_difference(StateTypes::Type state_type) {
   StateFactory factory(state_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Generating random states
@@ -139,7 +44,7 @@ void test_integrate_against_difference(TestTypes::Type state_type) {
   BOOST_CHECK(dxi.isMuchSmallerThan(1.0, 1e-9));
 }
 
-void test_difference_against_integrate(TestTypes::Type state_type) {
+void test_difference_against_integrate(StateTypes::Type state_type) {
   StateFactory factory(state_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Generating random states
@@ -156,7 +61,7 @@ void test_difference_against_integrate(TestTypes::Type state_type) {
   BOOST_CHECK((dxd - dx).isMuchSmallerThan(1.0, 1e-9));
 }
 
-void test_Jdiff_firstsecond(TestTypes::Type state_type) {
+void test_Jdiff_firstsecond(StateTypes::Type state_type) {
   StateFactory factory(state_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Generating random values for the initial and terminal states
@@ -179,7 +84,7 @@ void test_Jdiff_firstsecond(TestTypes::Type state_type) {
   BOOST_CHECK((Jdiff_second - Jdiff_both_second).isMuchSmallerThan(1.0, 1e-9));
 }
 
-void test_Jint_firstsecond(TestTypes::Type state_type) {
+void test_Jint_firstsecond(StateTypes::Type state_type) {
   StateFactory factory(state_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Generating random values for the initial and terminal states
@@ -202,7 +107,7 @@ void test_Jint_firstsecond(TestTypes::Type state_type) {
   BOOST_CHECK((Jint_second - Jint_both_second).isMuchSmallerThan(1.0, 1e-9));
 }
 
-void test_Jdiff_num_diff_firstsecond(TestTypes::Type state_type) {
+void test_Jdiff_num_diff_firstsecond(StateTypes::Type state_type) {
   StateFactory factory(state_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Generating random values for the initial and terminal states
@@ -228,7 +133,7 @@ void test_Jdiff_num_diff_firstsecond(TestTypes::Type state_type) {
   BOOST_CHECK((Jdiff_num_diff_second - Jdiff_num_diff_both_second).isMuchSmallerThan(1.0, 1e-9));
 }
 
-void test_Jint_num_diff_firstsecond(TestTypes::Type state_type) {
+void test_Jint_num_diff_firstsecond(StateTypes::Type state_type) {
   StateFactory factory(state_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Generating random values for the initial and terminal states
@@ -254,7 +159,7 @@ void test_Jint_num_diff_firstsecond(TestTypes::Type state_type) {
   BOOST_CHECK((Jint_num_diff_second - Jint_num_diff_both_second).isMuchSmallerThan(1.0, 1e-9));
 }
 
-void test_Jdiff_against_numdiff(TestTypes::Type state_type) {
+void test_Jdiff_against_numdiff(StateTypes::Type state_type) {
   StateFactory factory(state_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Generating random values for the initial and terminal states
@@ -280,7 +185,7 @@ void test_Jdiff_against_numdiff(TestTypes::Type state_type) {
   BOOST_CHECK((Jdiff_2 - Jdiff_num_2).isMuchSmallerThan(1.0, tol));
 }
 
-void test_Jintegrate_against_numdiff(TestTypes::Type state_type) {
+void test_Jintegrate_against_numdiff(StateTypes::Type state_type) {
   StateFactory factory(state_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Generating random values for the initial state and its rate of change
@@ -305,7 +210,7 @@ void test_Jintegrate_against_numdiff(TestTypes::Type state_type) {
   BOOST_CHECK((Jint_2 - Jint_num_2).isMuchSmallerThan(1.0, tol));
 }
 
-void test_Jdiff_and_Jintegrate_are_inverses(TestTypes::Type state_type) {
+void test_Jdiff_and_Jintegrate_are_inverses(StateTypes::Type state_type) {
   StateFactory factory(state_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Generating random states
@@ -328,7 +233,7 @@ void test_Jdiff_and_Jintegrate_are_inverses(TestTypes::Type state_type) {
   BOOST_CHECK((dX_dDX - dDX_dX.inverse()).isMuchSmallerThan(1.0, 1e-9));
 }
 
-void test_velocity_from_Jintegrate_Jdiff(TestTypes::Type state_type) {
+void test_velocity_from_Jintegrate_Jdiff(StateTypes::Type state_type) {
   StateFactory factory(state_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
   // Generating random states
@@ -371,7 +276,7 @@ void test_velocity_from_Jintegrate_Jdiff(TestTypes::Type state_type) {
 
 //----------------------------------------------------------------------------//
 
-void register_state_unit_tests(TestTypes::Type state_type) {
+void register_state_unit_tests(StateTypes::Type state_type) {
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_state_dimension, state_type)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_integrate_against_difference, state_type)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_difference_against_integrate, state_type)));
@@ -387,8 +292,8 @@ void register_state_unit_tests(TestTypes::Type state_type) {
 }
 
 bool init_function() {
-  for (size_t i = 0; i < TestTypes::all.size(); ++i) {
-    register_state_unit_tests(TestTypes::all[i]);
+  for (size_t i = 0; i < StateTypes::all.size(); ++i) {
+    register_state_unit_tests(StateTypes::all[i]);
   }
   return true;
 }

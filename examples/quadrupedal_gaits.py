@@ -11,11 +11,13 @@ from crocoddyl.utils.quadruped import SimpleQuadrupedalGaitProblem, plotSolution
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
+crocoddyl.switchToNumpyMatrix()
+
 # Loading the anymal model
 anymal = example_robot_data.loadANYmal()
 
 # Defining the initial state of the robot
-q0 = anymal.model.referenceConfigurations['half_sitting'].copy()
+q0 = anymal.model.referenceConfigurations['standing'].copy()
 v0 = pinocchio.utils.zero(anymal.model.nv)
 x0 = np.concatenate([q0, v0])
 

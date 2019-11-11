@@ -15,16 +15,18 @@ from crocoddyl.utils.quadruped import SimpleQuadrupedalGaitProblem
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
-# Loading the HyQ model
-hyq = example_robot_data.loadHyQ()
-robot_model = hyq.model
+crocoddyl.switchToNumpyMatrix()
+
+# Loading the anymal model
+anymal = example_robot_data.loadANYmal()
+robot_model = anymal.model
 
 # Setting up the 3d walking problem
-lfFoot, rfFoot, lhFoot, rhFoot = 'lf_foot', 'rf_foot', 'lh_foot', 'rh_foot'
+lfFoot, rfFoot, lhFoot, rhFoot = 'LF_FOOT', 'RF_FOOT', 'LH_FOOT', 'RH_FOOT'
 gait = SimpleQuadrupedalGaitProblem(robot_model, lfFoot, rfFoot, lhFoot, rhFoot)
 
 # Defining the initial state of the robot
-q0 = robot_model.referenceConfigurations['half_sitting'].copy()
+q0 = robot_model.referenceConfigurations['standing'].copy()
 v0 = pinocchio.utils.zero(robot_model.nv)
 x0 = np.concatenate([q0, v0])
 
@@ -43,9 +45,9 @@ if WITHDISPLAY and WITHPLOT:
     boxddp.setCallbacks(
         [crocoddyl.CallbackLogger(),
          crocoddyl.CallbackVerbose(),
-         crocoddyl.CallbackDisplay(hyq, 4, 4, cameraTF)])
+         crocoddyl.CallbackDisplay(anymal, 4, 4, cameraTF)])
 elif WITHDISPLAY:
-    boxddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(hyq, 4, 4, cameraTF)])
+    boxddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(anymal, 4, 4, cameraTF)])
 elif WITHPLOT:
     boxddp.setCallbacks([
         crocoddyl.CallbackLogger(),
@@ -68,7 +70,7 @@ if WITHPLOT:
     # Plot control vs limits
     fig = plt.figure(1)
     plt.title('Control ($u$)')
-    plt.plot(np.asarray(boxddp.us)[:, :, 0])
+    crocoddyl.plotOCSolution(us=boxddp.us, figIndex=1, show=False)
     plt.xlim(0, len(boxddp.us) - 1)
     plt.hlines(boxddp.models()[0].u_lb, 0, len(boxddp.us) - 1, 'r')
     plt.hlines(boxddp.models()[0].u_ub, 0, len(boxddp.us) - 1, 'r')
@@ -89,5 +91,5 @@ if WITHPLOT:
 # Display the entire motion
 if WITHDISPLAY:
     while True:
-        crocoddyl.displayTrajectory(hyq, boxddp.xs, boxddp.models()[0].dt)
+        crocoddyl.displayTrajectory(anymal, boxddp.xs, boxddp.models()[0].dt)
         time.sleep(2.0)
