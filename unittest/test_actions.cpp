@@ -8,69 +8,82 @@
 
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
-#include <Eigen/Dense>
-#include <pinocchio/fwd.hpp>
-#include <boost/test/included/unit_test.hpp>
-#include <boost/bind.hpp>
-#include "crocoddyl/core/action-base.hpp"
-#include "crocoddyl/core/actions/lqr.hpp"
-#include "crocoddyl/core/actions/unicycle.hpp"
-#include "crocoddyl/core/numdiff/action.hpp"
+
+#include "action_factory.hpp"
+#include "unittest_common.hpp"
 
 using namespace boost::unit_test;
+using namespace crocoddyl_unit_test;
 
-void test_construct_data(crocoddyl::ActionModelAbstract& model) {
-  boost::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
+//----------------------------------------------------------------------------//
+
+void test_construct_data(ActionModelTypes::Type action_model_type) {
+  // create the model
+  ActionModelFactory factory(action_model_type);
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.get_action_model();
+
+  // create the corresponding data object
+  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
 }
 
-void test_calc_returns_state(crocoddyl::ActionModelAbstract& model) {
+void test_calc_returns_state(ActionModelTypes::Type action_model_type) {
+  // create the model
+  ActionModelFactory factory(action_model_type);
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.get_action_model();
+
   // create the corresponding data object
-  boost::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
+  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
 
   // Generating random state and control vectors
-  Eigen::VectorXd x = model.get_state().rand();
-  Eigen::VectorXd u = Eigen::VectorXd::Random(model.get_nu());
+  const Eigen::VectorXd& x = model->get_state()->rand();
+  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
 
   // Getting the state dimension from calc() call
-  model.calc(data, x, u);
+  model->calc(data, x, u);
 
-  BOOST_CHECK(data->get_xnext().size() == model.get_state().get_nx());
+  BOOST_CHECK(static_cast<std::size_t>(data->xnext.size()) == model->get_state()->get_nx());
+  BOOST_CHECK(factory.get_nx() == model->get_state()->get_nx());
 }
 
-void test_calc_returns_a_cost(crocoddyl::ActionModelAbstract& model) {
+void test_calc_returns_a_cost(ActionModelTypes::Type action_model_type) {
+  // create the model
+  ActionModelFactory factory(action_model_type);
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.get_action_model();
+
   // create the corresponding data object and set the cost to nan
-  boost::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
+  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
   data->cost = nan("");
 
   // Getting the cost value computed by calc()
-  Eigen::VectorXd x = model.get_state().rand();
-  Eigen::VectorXd u = Eigen::VectorXd::Random(model.get_nu());
-  model.calc(data, x, u);
+  const Eigen::VectorXd& x = model->get_state()->rand();
+  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  model->calc(data, x, u);
 
   // Checking that calc returns a cost value
   BOOST_CHECK(!std::isnan(data->cost));
 }
 
-void test_partial_derivatives_against_numdiff(crocoddyl::ActionModelAbstract& model, double num_diff_modifier) {
+void test_partial_derivatives_against_numdiff(ActionModelTypes::Type action_model_type) {
+  // create the model
+  ActionModelFactory factory(action_model_type);
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.get_action_model();
+
   // create the corresponding data object and set the cost to nan
-  boost::shared_ptr<crocoddyl::ActionDataAbstract> data = model.createData();
+  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
 
-  // create the num diff model and data
-  bool with_gauss_approx = model.get_nr() > 1;
-
-  crocoddyl::ActionModelNumDiff model_num_diff(model, with_gauss_approx);
-  boost::shared_ptr<crocoddyl::ActionDataAbstract> data_num_diff = model_num_diff.createData();
+  crocoddyl::ActionModelNumDiff model_num_diff(model);
+  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data_num_diff = model_num_diff.createData();
 
   // Generating random values for the state and control
-  Eigen::VectorXd x = model.get_state().rand();
-  Eigen::VectorXd u = Eigen::VectorXd::Random(model.get_nu());
+  const Eigen::VectorXd& x = model->get_state()->rand();
+  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
 
   // Computing the action derivatives
-  model.calcDiff(data, x, u);
+  model->calcDiff(data, x, u);
   model_num_diff.calcDiff(data_num_diff, x, u);
 
   // Checking the partial derivatives against NumDiff
-  double tol = num_diff_modifier * model_num_diff.get_disturbance();
+  double tol = factory.get_num_diff_modifier() * model_num_diff.get_disturbance();
   BOOST_CHECK((data->Fx - data_num_diff->Fx).isMuchSmallerThan(1.0, tol));
   BOOST_CHECK((data->Fu - data_num_diff->Fu).isMuchSmallerThan(1.0, tol));
   BOOST_CHECK((data->Lx - data_num_diff->Lx).isMuchSmallerThan(1.0, tol));
@@ -79,28 +92,27 @@ void test_partial_derivatives_against_numdiff(crocoddyl::ActionModelAbstract& mo
     BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isMuchSmallerThan(1.0, tol));
     BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isMuchSmallerThan(1.0, tol));
     BOOST_CHECK((data->Luu - data_num_diff->Luu).isMuchSmallerThan(1.0, tol));
+  } else {
+    BOOST_CHECK((data_num_diff->Lxx).isMuchSmallerThan(1.0, tol));
+    BOOST_CHECK((data_num_diff->Lxu).isMuchSmallerThan(1.0, tol));
+    BOOST_CHECK((data_num_diff->Luu).isMuchSmallerThan(1.0, tol));
   }
 }
 
-void register_action_model_lqr_unit_tests() {
-  int nx = 80;
-  int nu = 40;
-  bool driftfree = true;
-  double num_diff_modifier = 1e4;
+//----------------------------------------------------------------------------//
 
+void register_action_model_unit_tests(ActionModelTypes::Type action_model_type) {
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_construct_data, action_model_type)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_state, action_model_type)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, action_model_type)));
   framework::master_test_suite().add(
-      BOOST_TEST_CASE(boost::bind(&test_construct_data, crocoddyl::ActionModelLQR(nx, nu, driftfree))));
-  framework::master_test_suite().add(
-      BOOST_TEST_CASE(boost::bind(&test_calc_returns_state, crocoddyl::ActionModelLQR(nx, nu, driftfree))));
-  framework::master_test_suite().add(
-      BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, crocoddyl::ActionModelLQR(nx, nu, driftfree))));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(
-      &test_partial_derivatives_against_numdiff, crocoddyl::ActionModelLQR(nx, nu, driftfree), num_diff_modifier)));
+      BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, action_model_type)));
 }
 
 bool init_function() {
-  // Here we test the state_vector
-  register_action_model_lqr_unit_tests();
+  for (size_t i = 0; i < ActionModelTypes::all.size(); ++i) {
+    register_action_model_unit_tests(ActionModelTypes::all[i]);
+  }
   return true;
 }
 

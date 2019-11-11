@@ -11,26 +11,25 @@ from crocoddyl.utils.quadruped import SimpleQuadrupedalGaitProblem, plotSolution
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
-# Loading the HyQ model
-hyq = example_robot_data.loadHyQ()
+crocoddyl.switchToNumpyMatrix()
+
+# Loading the anymal model
+anymal = example_robot_data.loadANYmal()
 
 # Defining the initial state of the robot
-q0 = hyq.model.referenceConfigurations['half_sitting'].copy()
-v0 = pinocchio.utils.zero(hyq.model.nv)
+q0 = anymal.model.referenceConfigurations['standing'].copy()
+v0 = pinocchio.utils.zero(anymal.model.nv)
 x0 = np.concatenate([q0, v0])
 
 # Setting up the 3d walking problem
-lfFoot = 'lf_foot'
-rfFoot = 'rf_foot'
-lhFoot = 'lh_foot'
-rhFoot = 'rh_foot'
-gait = SimpleQuadrupedalGaitProblem(hyq.model, lfFoot, rfFoot, lhFoot, rhFoot)
+lfFoot, rfFoot, lhFoot, rhFoot = 'LF_FOOT', 'RF_FOOT', 'LH_FOOT', 'RH_FOOT'
+gait = SimpleQuadrupedalGaitProblem(anymal.model, lfFoot, rfFoot, lhFoot, rhFoot)
 
 # Setting up all tasks
 GAITPHASES = [{
     'walking': {
         'stepLength': 0.25,
-        'stepHeight': 0.25,
+        'stepHeight': 0.15,
         'timeStep': 1e-2,
         'stepKnots': 25,
         'supportKnots': 2
@@ -38,7 +37,7 @@ GAITPHASES = [{
 }, {
     'trotting': {
         'stepLength': 0.15,
-        'stepHeight': 0.2,
+        'stepHeight': 0.1,
         'timeStep': 1e-2,
         'stepKnots': 25,
         'supportKnots': 2
@@ -46,7 +45,7 @@ GAITPHASES = [{
 }, {
     'pacing': {
         'stepLength': 0.15,
-        'stepHeight': 0.2,
+        'stepHeight': 0.1,
         'timeStep': 1e-2,
         'stepKnots': 25,
         'supportKnots': 5
@@ -102,12 +101,13 @@ for i, phase in enumerate(GAITPHASES):
     # Added the callback functions
     print('*** SOLVE ' + key + ' ***')
     if WITHDISPLAY and WITHPLOT:
-        ddp[i].setCallbacks(
-            [crocoddyl.CallbackLogger(),
-             crocoddyl.CallbackVerbose(),
-             crocoddyl.CallbackDisplay(hyq, 4, 4, cameraTF)])
+        ddp[i].setCallbacks([
+            crocoddyl.CallbackLogger(),
+            crocoddyl.CallbackVerbose(),
+            crocoddyl.CallbackDisplay(anymal, 4, 4, cameraTF)
+        ])
     elif WITHDISPLAY:
-        ddp[i].setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackVerbose()])
+        ddp[i].setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(anymal, 4, 4, cameraTF)])
     elif WITHPLOT:
         ddp[i].setCallbacks([
             crocoddyl.CallbackLogger(),
@@ -117,8 +117,8 @@ for i, phase in enumerate(GAITPHASES):
         ddp[i].setCallbacks([crocoddyl.CallbackVerbose()])
 
     # Solving the problem with the DDP solver
-    xs = [hyq.model.defaultState] * len(ddp[i].models())
-    us = [m.quasicStatic(d, hyq.model.defaultState) for m, d in list(zip(ddp[i].models(), ddp[i].datas()))[:-1]]
+    xs = [anymal.model.defaultState] * len(ddp[i].models())
+    us = [m.quasiStatic(d, anymal.model.defaultState) for m, d in list(zip(ddp[i].models(), ddp[i].datas()))[:-1]]
     ddp[i].solve(xs, us, 100, False, 0.1)
 
     # Defining the final state as initial one for the next phase
@@ -127,7 +127,7 @@ for i, phase in enumerate(GAITPHASES):
 # Display the entire motion
 if WITHDISPLAY:
     for i, phase in enumerate(GAITPHASES):
-        crocoddyl.displayTrajectory(hyq, ddp[i].xs, ddp[i].models()[0].dt)
+        crocoddyl.displayTrajectory(anymal, ddp[i].xs, ddp[i].models()[0].dt)
 
 # Plotting the entire motion
 if WITHPLOT:
@@ -137,7 +137,7 @@ if WITHPLOT:
         xs.extend(ddp[i].xs[:-1])
         us.extend(ddp[i].us)
     log = ddp[0].getCallbacks()[0]
-    plotSolution(hyq.model, xs, us, figIndex=1, show=False)
+    plotSolution(anymal.model, xs, us, figIndex=1, show=False)
 
     for i, phase in enumerate(GAITPHASES):
         title = phase.keys()[0] + " (phase " + str(i) + ")"

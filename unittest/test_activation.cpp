@@ -1,127 +1,162 @@
-/**
- * @file test_activation.cpp
- * @author Maximilien Naveau (maximilien.naveau@gmail.com)
- * @license License BSD-2-Clause
- * @copyright Copyright (c) 2019, New York University, Max Planck Gesellschaft and LAAS.
- * @date 2019-06-18
- */
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2019, LAAS-CNRS, New York University, Max Planck Gesellshaft
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
 
-#include <boost/test/unit_test.hpp>
-// #include "crocoddyl/core/"
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_ALTERNATIVE_INIT_API
 
-BOOST_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
+#include <iterator>
+#include <Eigen/Dense>
+#include <pinocchio/fwd.hpp>
+#include <boost/test/included/unit_test.hpp>
+#include <boost/bind.hpp>
+#include "crocoddyl/core/activation-base.hpp"
+#include "crocoddyl/core/activations/quadratic-barrier.hpp"
+#include "crocoddyl/core/activations/quadratic.hpp"
+#include "crocoddyl/core/activations/smooth-abs.hpp"
+#include "crocoddyl/core/activations/weighted-quadratic.hpp"
+#include "crocoddyl/core/numdiff/activation.hpp"
 
-BOOST_AUTO_TEST_CASE(test_activation) {}
 
-BOOST_AUTO_TEST_SUITE_END()
+using namespace boost::unit_test;
 
-// import numpy as np
-// from crocoddyl import ActivationModelQuad, ActivationModelSmoothAbs, ActivationModelWeightedQuad
-// from crocoddyl.utils import EPS
-// from testutils import assertNumDiff
+struct TestTypes {
+  enum Type {
+    ActivationModelQuadraticBarrier,
+    ActivationModelQuad,
+    ActivationModelSmoothAbs,
+    ActivationModelWeightedQuad,
+    NbTestTypes
+  };
+  static std::vector<Type> init_all() {
+    std::vector<Type> v;
+    v.clear();
+    for (int i = 0; i < NbTestTypes; ++i) {
+      v.push_back((Type)i);
+    }
+    return v;
+  }
+  static const std::vector<Type> all;
+};
+const std::vector<TestTypes::Type> TestTypes::all(TestTypes::init_all());
 
-// # Comment:
-// '''
-// c = sum( a(ri) )
-// c' = sum( [a(ri)]' ) = sum( ri' a'(ri) ) = R' [ a'(ri) ]_i
-// c'' = R' [a'(ri) ]_i' = R' [a''(ri) ] R
+class Factory {
+ public:
+  Factory(TestTypes::Type type) {
+    test_type_ = type;
 
-// ex
-// a(x) =  x**2/x
-// a'(x) = x
-// a''(x) = 1
+    nr_ = 5;
+    num_diff_modifier_ = 1e4;
+    Eigen::VectorXd lb = Eigen::VectorXd::Random(nr_);
+    Eigen::VectorXd ub = lb + Eigen::VectorXd::Ones(nr_) + Eigen::VectorXd::Random(nr_);
+    Eigen::VectorXd weights = Eigen::VectorXd::Random(nr_);
 
-// sum(a(ri)) = sum(ri**2/2) = .5*r'r
-// sum(ri' a'(ri)) = sum(ri' ri) = R' r
-// sum(ri' a''(ri) ri') = R' r
-// c'' = R'R
-// '''
+    switch (test_type_) {
+      case TestTypes::ActivationModelQuadraticBarrier:
+        model_ = boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(crocoddyl::ActivationBounds(lb, ub));
+        break;
+      case TestTypes::ActivationModelQuad:
+        model_ = boost::make_shared<crocoddyl::ActivationModelQuad>(nr_);
+        break;
+      case TestTypes::ActivationModelSmoothAbs:
+        model_ = boost::make_shared<crocoddyl::ActivationModelSmoothAbs>(nr_);
+        break;
+      case TestTypes::ActivationModelWeightedQuad:
+        model_ = boost::make_shared<crocoddyl::ActivationModelWeightedQuad>(weights);
+        break;
+      default:
+        throw std::runtime_error(__FILE__ ":\n Construct wrong TestTypes::Type");
+        break;
+    }
+  }
 
-// # - ------------------------------
-// # --- Dim 1 ----------------------
-// h = np.sqrt(2 * EPS)
+  ~Factory() {}
 
-// def df(am, ad, x):
-//     return (am.calc(ad, x + h) - am.calc(ad, x)) / h
+  boost::shared_ptr<crocoddyl::ActivationModelAbstract> get_model() { return model_; }
+  const std::size_t& get_nr() { return nr_; }
+  double get_num_diff_modifier() { return num_diff_modifier_; }
 
-// def ddf(am, ad, x):
-//     return (am.calcDiff(ad, x + h)[0] - am.calcDiff(ad, x)[0]) / h
+ private:
+  double num_diff_modifier_;
+  std::size_t nr_;
+  boost::shared_ptr<crocoddyl::ActivationModelAbstract> model_;
+  TestTypes::Type test_type_;
+};
 
-// am = ActivationModelQuad()
-// ad = am.createData()
-// x = np.random.rand(1)
+//----------------------------------------------------------------------------//
 
-// am.calc(ad, x)
-// assertNumDiff(df(am, ad, x),
-//               am.calcDiff(ad, x)[0], 1e-6)  # threshold was 1e-6, is now 1e-6 (see assertNumDiff.__doc__)
-// assertNumDiff(ddf(am, ad, x),
-//               am.calcDiff(ad, x)[1], 1e-6)  # threshold was 1e-6, is now 1e-6 (see assertNumDiff.__doc__)
+void test_construct_data(TestTypes::Type test_type) {
+  // create the model
+  Factory factory(test_type);
+  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.get_model();
 
-// am = ActivationModelWeightedQuad(np.random.rand(1))
-// ad = am.createData()
-// assertNumDiff(df(am, ad, x),
-//               am.calcDiff(ad, x)[0], 1e-6)  # threshold was 1e-6, is now 1e-6 (see assertNumDiff.__doc__)
-// assertNumDiff(ddf(am, ad, x),
-//               am.calcDiff(ad, x)[1], 1e-6)  # threshold was 1e-6, is now 1e-6 (see assertNumDiff.__doc__)
+  // create the corresponding data object
+  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data = model->createData();
+}
 
-// am = ActivationModelSmoothAbs()
-// ad = am.createData()
-// assertNumDiff(df(am, ad, x),
-//               am.calcDiff(ad, x)[0], 1e-6)  # threshold was 1e-6, is now 1e-6 (see assertNumDiff.__doc__)
-// assertNumDiff(ddf(am, ad, x),
-//               am.calcDiff(ad, x)[1], 1e-6)  # threshold was 1e-6, is now 1e-6 (see assertNumDiff.__doc__)
+void test_calc_returns_a_value(TestTypes::Type test_type) {
+  // create the model
+  Factory factory(test_type);
+  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.get_model();
 
-// # - ------------------------------
-// # --- Dim N ----------------------
+  // create the corresponding data object
+  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data = model->createData();
 
-// def df(am, ad, x):
-//     dx = x * 0
-//     J = np.zeros([len(x), len(x)])
-//     for i, _ in enumerate(x):
-//         dx[i] = h
-//         J[:, i] = (am.calc(ad, x + dx) - am.calc(ad, x)) / h
-//         dx[i] = 0
-//     return J
+  // Generating random input vector
+  const Eigen::VectorXd& r = Eigen::VectorXd::Random(model->get_nr());
+  data->a_value = nan("");
 
-// def ddf(am, ad, x):
-//     dx = x * 0
-//     J = np.zeros([len(x), len(x)])
-//     for i, _ in enumerate(x):
-//         dx[i] = h
-//         J[:, i] = (am.calcDiff(ad, x + dx)[0] - am.calcDiff(ad, x)[0]) / h
-//         dx[i] = 0
-//     return J
-//     return
+  // Getting the state dimension from calc() call
+  model->calc(data, r);
 
-// x = np.random.rand(3)
+  // Checking that calc returns a value
+  BOOST_CHECK(!std::isnan(data->a_value));
+}
 
-// am = ActivationModelQuad()
-// ad = am.createData()
-// J = df(am, ad, x)
-// H = ddf(am, ad, x)
-// assertNumDiff(np.diag(J.diagonal()), J, 5e-8)  # threshold was 1e-9, is now 5e-8 (see assertNumDiff.__doc__)
-// assertNumDiff(np.diag(H.diagonal()), H, 5e-8)  # threshold was 1e-9, is now 5e-8 (see assertNumDiff.__doc__)
-// assertNumDiff(df(am, ad, x).diagonal(),
-//               am.calcDiff(ad, x)[0],
-//               np.sqrt(2 * EPS))  # threshold was 1e-6, is now 2.11e-8 (see assertNumDiff.__doc__)
-// assertNumDiff(ddf(am, ad, x).diagonal(),
-//               am.calcDiff(ad, x)[1][:, 0],
-//               np.sqrt(2 * EPS))  # threshold was 1e-6, is now 2.11e-8 (see assertNumDiff.__doc__)
+void test_partial_derivatives_against_numdiff(TestTypes::Type test_type) {
+  // create the model
+  Factory factory(test_type);
+  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.get_model();
 
-// am = ActivationModelWeightedQuad(np.random.rand(len(x)))
-// ad = am.createData()
-// assertNumDiff(df(am, ad, x).diagonal(),
-//               am.calcDiff(ad, x)[0],
-//               np.sqrt(2 * EPS))  # threshold was 1e-6, is now 2.11e-8 (see assertNumDiff.__doc__)
-// assertNumDiff(ddf(am, ad, x).diagonal(),
-//               am.calcDiff(ad, x)[1][:, 0],
-//               np.sqrt(2 * EPS))  # threshold was 1e-6, is now 2.11e-8 (see assertNumDiff.__doc__)
+  // create the corresponding data object and set the cost to nan
+  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data = model->createData();
 
-// am = ActivationModelSmoothAbs()
-// ad = am.createData()
-// assertNumDiff(df(am, ad, x).diagonal(),
-//               am.calcDiff(ad, x)[0],
-//               np.sqrt(2 * EPS))  # threshold was 1e-6, is now 2.11e-8 (see assertNumDiff.__doc__)
-// assertNumDiff(ddf(am, ad, x).diagonal(),
-//               am.calcDiff(ad, x)[1][:, 0],
-//               np.sqrt(2 * EPS))  # threshold was 1e-6, is now 2.11e-8 (see assertNumDiff.__doc__)
+  crocoddyl::ActivationModelNumDiff model_num_diff(model);
+  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data_num_diff = model_num_diff.createData();
+
+  // Generating random values for the state and control
+  const Eigen::VectorXd& r = Eigen::VectorXd::Random(model->get_nr());
+
+  // Computing the action derivatives
+  model->calcDiff(data, r);
+  model_num_diff.calcDiff(data_num_diff, r);
+
+  // Checking the partial derivatives against NumDiff
+  double tol = factory.get_num_diff_modifier() * model_num_diff.get_disturbance();
+  BOOST_CHECK(std::abs(data->a_value - data_num_diff->a_value) < tol);
+  BOOST_CHECK((data->Ar - data_num_diff->Ar).isMuchSmallerThan(1.0, tol));
+
+  // numerical differentiation of the Hessian is not good enough to be tested.
+  // BOOST_CHECK((data->Arr - data_num_diff->Arr).isMuchSmallerThan(1.0, tol));
+}
+
+//----------------------------------------------------------------------------//
+
+void register_unit_tests(TestTypes::Type type) {
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_construct_data, type)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_value, type)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, type)));
+}
+
+bool init_function() {
+  for (size_t i = 0; i < TestTypes::all.size(); ++i) {
+    register_unit_tests(TestTypes::all[i]);
+  }
+  return true;
+}
+
+int main(int argc, char** argv) { return ::boost::unit_test::unit_test_main(&init_function, argc, argv); }

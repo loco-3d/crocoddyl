@@ -14,16 +14,18 @@ SET(${PROJECT_NAME}_CPP_TESTS
   # test_ddp_contact
   # test_armature
   # test_actuation 
-  # test_activation 
+  test_activation 
   test_actions
   test_shooting_problem
   test_kkt
-  ## with KKT
+  test_diff_actions
+  test_impulses
+  test_multiple_impulses
   # test_solvers
   # test_costs
   # test_contacts
   # test_boxsolvers
-  )
+)
 
 MACRO(ADD_TEST_CFLAGS target flag)
   SET_PROPERTY(TARGET ${target} APPEND_STRING PROPERTY COMPILE_FLAGS " ${flag}")
@@ -32,7 +34,7 @@ ENDMACRO(ADD_TEST_CFLAGS)
 MACRO(ADD_CPP_UNIT_TEST NAME PKGS)
   set(unittest_name ${NAME})
 
-  ADD_UNIT_TEST(${unittest_name} ${NAME}.cpp)
+  ADD_UNIT_TEST(${unittest_name} ${NAME}.cpp crocoddyl_state_factory.hpp)
 
   SET_TARGET_PROPERTIES(${unittest_name} PROPERTIES LINKER_LANGUAGE CXX)
   
@@ -57,11 +59,11 @@ ENDMACRO(ADD_CPP_UNIT_TEST NAME PKGS)
 FOREACH(TEST ${${PROJECT_NAME}_CPP_TESTS})
   ADD_CPP_UNIT_TEST(${TEST} "eigen3;pinocchio")
   # first look if a robot_properties_${robot_name} package contain a config file.
-  target_compile_definitions(${TEST} PUBLIC
+  TARGET_COMPILE_DEFINITIONS(${TEST} PUBLIC
     TALOS_URDF="${EXAMPLE_ROBOT_DATA_PKGDATAROOTDIR}/example-robot-data/talos_data/urdf/talos_reduced.urdf")
-  target_compile_definitions(${TEST} PUBLIC
+  TARGET_COMPILE_DEFINITIONS(${TEST} PUBLIC
     HYQ_URDF="${EXAMPLE_ROBOT_DATA_PKGDATAROOTDIR}/example-robot-data/hyq_description/robots/hyq_no_sensors.urdf")
-  target_compile_definitions(${TEST} PUBLIC
+  TARGET_COMPILE_DEFINITIONS(${TEST} PUBLIC
     TALOS_ARM_URDF="${EXAMPLE_ROBOT_DATA_PKGDATAROOTDIR}/example-robot-data/talos_data/robots/talos_left_arm.urdf")
 
 ENDFOREACH(TEST ${${PROJECT_NAME}_CPP_TESTS})

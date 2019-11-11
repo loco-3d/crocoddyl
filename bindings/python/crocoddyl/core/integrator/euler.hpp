@@ -23,13 +23,12 @@ void exposeIntegratedActionEuler() {
       "This class implements a sympletic Euler integrator (a.k.a semi-implicit\n"
       "integrator) give a differential action model, i.e.:\n"
       "  [q+, v+] = State.integrate([q, v], [v + a * dt, a * dt] * dt).",
-      bp::init<DifferentialActionModelAbstract*, bp::optional<double, bool> >(
+      bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, bp::optional<double, bool> >(
           bp::args(" self", " diffModel", " stepTime", " withCostResidual"),
           "Initialize the sympletic Euler integrator.\n\n"
           ":param diffModel: differential action model\n"
           ":param stepTime: step time\n"
-          ":param withCostResidual: includes the cost residuals and derivatives.")[bp::with_custodian_and_ward<1,
-                                                                                                               2>()])
+          ":param withCostResidual: includes the cost residuals and derivatives."))
       .def("calc", &IntegratedActionModelEuler::calc_wrap,
            ActionModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
                                   "Compute the time-discrete evolution of a differential action model.\n\n"
@@ -60,10 +59,10 @@ void exposeIntegratedActionEuler() {
                                                               bp::args(" self", " data", " x", " recalc"))
       .def("createData", &IntegratedActionModelEuler::createData, bp::args(" self"),
            "Create the Euler integrator data.")
-      .add_property(
-          "differential",
-          bp::make_function(&IntegratedActionModelEuler::get_differential, bp::return_internal_reference<>()),
-          "differential action model")
+      .add_property("differential",
+                    bp::make_function(&IntegratedActionModelEuler::get_differential,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "differential action model")
       .add_property(
           "dt", bp::make_function(&IntegratedActionModelEuler::get_dt, bp::return_value_policy<bp::return_by_value>()),
           &IntegratedActionModelEuler::set_dt, "step time");
@@ -74,7 +73,30 @@ void exposeIntegratedActionEuler() {
       "IntegratedActionDataEuler", "Sympletic Euler integrator data.",
       bp::init<IntegratedActionModelEuler*>(bp::args(" self", " model"),
                                             "Create sympletic Euler integrator data.\n\n"
-                                            ":param model: sympletic Euler integrator model"));
+                                            ":param model: sympletic Euler integrator model"))
+      .add_property(
+          "differential",
+          bp::make_getter(&IntegratedActionDataEuler::differential, bp::return_value_policy<bp::return_by_value>()),
+          "differential action data")
+      .add_property(
+          "dx", bp::make_getter(&IntegratedActionDataEuler::ddx_dx, bp::return_value_policy<bp::return_by_value>()),
+          "state rate.")
+      .add_property(
+          "ddx_dx",
+          bp::make_getter(&IntegratedActionDataEuler::ddx_dx, bp::return_value_policy<bp::return_by_value>()),
+          "Jacobian of the state rate with respect to the state.")
+      .add_property(
+          "ddx_du",
+          bp::make_getter(&IntegratedActionDataEuler::ddx_du, bp::return_value_policy<bp::return_by_value>()),
+          "Jacobian of the state rate with respect to the control.")
+      .add_property(
+          "dxnext_dx",
+          bp::make_getter(&IntegratedActionDataEuler::dxnext_dx, bp::return_value_policy<bp::return_by_value>()),
+          "Jacobian of the next state with respect to the state.")
+      .add_property(
+          "dxnext_ddx",
+          bp::make_getter(&IntegratedActionDataEuler::dxnext_ddx, bp::return_value_policy<bp::return_by_value>()),
+          "Jacobian of the next state with respect to the state rate.");
 }
 
 }  // namespace python

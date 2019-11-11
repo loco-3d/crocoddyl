@@ -16,19 +16,23 @@
 namespace crocoddyl {
 
 DifferentialActionModelContactFwdDynamics::DifferentialActionModelContactFwdDynamics(
-    StateMultibody& state, ActuationModelFloatingBase& actuation, ContactModelMultiple& contacts, CostModelSum& costs,
+    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelFloatingBase> actuation,
+    boost::shared_ptr<ContactModelMultiple> contacts, boost::shared_ptr<CostModelSum> costs,
     const double& JMinvJt_damping, const bool& enable_force)
-    : DifferentialActionModelAbstract(state, actuation.get_nu(), costs.get_nr()),
+    : DifferentialActionModelAbstract(state, actuation->get_nu(), costs->get_nr()),
       actuation_(actuation),
       contacts_(contacts),
       costs_(costs),
-      pinocchio_(state.get_pinocchio()),
+      pinocchio_(state->get_pinocchio()),
       with_armature_(true),
-      armature_(Eigen::VectorXd::Zero(state.get_nv())),
+      armature_(Eigen::VectorXd::Zero(state->get_nv())),
       JMinvJt_damping_(fabs(JMinvJt_damping)),
       enable_force_(enable_force) {
-  assert(contacts_.get_nu() == nu_ && "Contacts doesn't have the same control dimension");
-  assert(costs_.get_nu() == nu_ && "Costs doesn't have the same control dimension");
+  assert(contacts_->get_nu() == nu_ && "Contacts doesn't have the same control dimension");
+  assert(costs_->get_nu() == nu_ && "Costs doesn't have the same control dimension");
+
+  set_u_lb(-1. * pinocchio_.effortLimit.tail(nu_));
+  set_u_ub(+1. * pinocchio_.effortLimit.tail(nu_));
 }
 
 DifferentialActionModelContactFwdDynamics::~DifferentialActionModelContactFwdDynamics() {}
@@ -36,12 +40,12 @@ DifferentialActionModelContactFwdDynamics::~DifferentialActionModelContactFwdDyn
 void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                      const Eigen::Ref<const Eigen::VectorXd>& x,
                                                      const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
+  assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
 
   DifferentialActionDataContactFwdDynamics* d = static_cast<DifferentialActionDataContactFwdDynamics*>(data.get());
-  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_.get_nq());
-  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(state_.get_nv());
+  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_->get_nq());
+  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(state_->get_nv());
 
   // Computing the forward dynamics with the holonomic constraints defined by the contact model
   pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, v);
@@ -50,25 +54,25 @@ void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<Dif
   if (!with_armature_) {
     d->pinocchio.M.diagonal() += armature_;
   }
-  actuation_.calc(d->actuation, x, u);
-  contacts_.calc(d->contacts, x);
+  actuation_->calc(d->actuation, x, u);
+  contacts_->calc(d->contacts, x);
 
 #ifndef NDEBUG
   Eigen::FullPivLU<Eigen::MatrixXd> Jc_lu(d->contacts->Jc);
 
   if (Jc_lu.rank() < d->contacts->Jc.rows()) {
-    assert(JMinvJt_damping_ > 0. && "It is needed a damping factor since the contact Jacobian is not full-rank");
+    assert(JMinvJt_damping_ > 0. && "A damping factor is needed as the contact Jacobian is not full-rank");
   }
 #endif
 
-  pinocchio::forwardDynamics(pinocchio_, d->pinocchio, q, v, d->actuation->tau, d->contacts->Jc, d->contacts->a0,
-                             JMinvJt_damping_, false);
+  pinocchio::forwardDynamics(pinocchio_, d->pinocchio, d->actuation->tau, d->contacts->Jc, d->contacts->a0,
+                             JMinvJt_damping_);
   d->xout = d->pinocchio.ddq;
-  contacts_.updateAcceleration(d->contacts, d->pinocchio.ddq);
-  contacts_.updateForce(d->contacts, d->pinocchio.lambda_c);
+  contacts_->updateAcceleration(d->contacts, d->pinocchio.ddq);
+  contacts_->updateForce(d->contacts, d->pinocchio.lambda_c);
 
   // Computing the cost value and residuals
-  costs_.calc(d->costs, x, u);
+  costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
 }
 
@@ -76,12 +80,12 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
                                                          const Eigen::Ref<const Eigen::VectorXd>& x,
                                                          const Eigen::Ref<const Eigen::VectorXd>& u,
                                                          const bool& recalc) {
-  assert(x.size() == state_.get_nx() && "x has wrong dimension");
-  assert(u.size() == nu_ && "u has wrong dimension");
+  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
+  assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
 
-  unsigned int const& nv = state_.get_nv();
-  unsigned int const& nc = contacts_.get_nc();
-  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_.get_nq());
+  const std::size_t& nv = state_->get_nv();
+  const std::size_t& nc = contacts_->get_nc();
+  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(nv);
 
   DifferentialActionDataContactFwdDynamics* d = static_cast<DifferentialActionDataContactFwdDynamics*>(data.get());
@@ -93,8 +97,8 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout, d->contacts->fext);
   pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->contacts->Jc, d->Kinv);
 
-  actuation_.calcDiff(d->actuation, x, u, false);
-  contacts_.calcDiff(d->contacts, x, false);
+  actuation_->calcDiff(d->actuation, x, u, false);
+  contacts_->calcDiff(d->contacts, x, false);
 
   Eigen::Block<Eigen::MatrixXd> a_partial_dtau = d->Kinv.topLeftCorner(nv, nv);
   Eigen::Block<Eigen::MatrixXd> a_partial_da = d->Kinv.topRightCorner(nv, nc);
@@ -114,10 +118,10 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
     d->df_dx.noalias() += f_partial_da * d->contacts->da0_dx;
     d->df_dx.noalias() -= f_partial_dtau * d->actuation->dtau_dx;
     d->df_du.noalias() = -f_partial_dtau * d->actuation->dtau_du;
-    contacts_.updateAccelerationDiff(d->contacts, d->Fx.bottomRows(nv));
-    contacts_.updateForceDiff(d->contacts, d->df_dx, d->df_du);
+    contacts_->updateAccelerationDiff(d->contacts, d->Fx.bottomRows(nv));
+    contacts_->updateForceDiff(d->contacts, d->df_dx, d->df_du);
   }
-  costs_.calcDiff(d->costs, x, u, false);
+  costs_->calcDiff(d->costs, x, u, false);
 }
 
 boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelContactFwdDynamics::createData() {
@@ -126,19 +130,24 @@ boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelContact
 
 pinocchio::Model& DifferentialActionModelContactFwdDynamics::get_pinocchio() const { return pinocchio_; }
 
-ActuationModelFloatingBase& DifferentialActionModelContactFwdDynamics::get_actuation() const { return actuation_; }
+const boost::shared_ptr<ActuationModelFloatingBase>& DifferentialActionModelContactFwdDynamics::get_actuation() const {
+  return actuation_;
+}
 
-ContactModelMultiple& DifferentialActionModelContactFwdDynamics::get_contacts() const { return contacts_; }
+const boost::shared_ptr<ContactModelMultiple>& DifferentialActionModelContactFwdDynamics::get_contacts() const {
+  return contacts_;
+}
 
-CostModelSum& DifferentialActionModelContactFwdDynamics::get_costs() const { return costs_; }
+const boost::shared_ptr<CostModelSum>& DifferentialActionModelContactFwdDynamics::get_costs() const { return costs_; }
 
 const Eigen::VectorXd& DifferentialActionModelContactFwdDynamics::get_armature() const { return armature_; }
 
 const double& DifferentialActionModelContactFwdDynamics::get_damping_factor() const { return JMinvJt_damping_; }
 
 void DifferentialActionModelContactFwdDynamics::set_armature(const Eigen::VectorXd& armature) {
-  assert(armature.size() == state_.get_nv() && "The armature dimension is wrong, we cannot set it.");
-  if (armature.size() != state_.get_nv()) {
+  assert(static_cast<std::size_t>(armature.size()) == state_->get_nv() &&
+         "The armature dimension is wrong, we cannot set it.");
+  if (static_cast<std::size_t>(armature.size()) != state_->get_nv()) {
     std::cout << "The armature dimension is wrong, we cannot set it." << std::endl;
   } else {
     armature_ = armature;

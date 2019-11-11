@@ -1,15 +1,16 @@
-import sys
-import time
-
+import crocoddyl
+from crocoddyl.utils.quadruped import SimpleQuadrupedalGaitProblem
+import pinocchio
 import example_robot_data
 import numpy as np
+import os
+import sys
+import time
+import subprocess
 
-import crocoddyl
-import pinocchio
-from crocoddyl.utils.quadruped import SimpleQuadrupedalGaitProblem
-
-T = int(5e3)  # number of trials
+T = int(sys.argv[1]) if (len(sys.argv) > 1) else int(5e3)  # number of trials
 MAXITER = 1
+CALLBACKS = False
 WALKING = 'walk' in sys.argv
 TROTTING = 'trot' in sys.argv
 PACING = 'pace' in sys.argv
@@ -34,11 +35,11 @@ if JUMPING:
     GAIT = "jumping"  # 61 nodes
 
 
-def runBenchmark(gait_phase):
+def createProblem(gait_phase):
     robot_model = example_robot_data.loadHyQ().model
     lfFoot, rfFoot, lhFoot, rhFoot = 'lf_foot', 'rf_foot', 'lh_foot', 'rh_foot'
     gait = SimpleQuadrupedalGaitProblem(robot_model, lfFoot, rfFoot, lhFoot, rhFoot)
-    q0 = robot_model.referenceConfigurations['half_sitting'].copy()
+    q0 = robot_model.referenceConfigurations['standing'].copy()
     v0 = pinocchio.utils.zero(robot_model.nv)
     x0 = np.concatenate([q0, v0])
 
@@ -46,34 +47,68 @@ def runBenchmark(gait_phase):
     value = gait_phase[type_of_gait]
     if type_of_gait == 'walking':
         # Creating a walking problem
-        ddp = crocoddyl.SolverDDP(
-            gait.createWalkingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
-                                      value['stepKnots'], value['supportKnots']))
+        problem = gait.createWalkingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
+                                            value['stepKnots'], value['supportKnots'])
     elif type_of_gait == 'trotting':
         # Creating a trotting problem
-        ddp = crocoddyl.SolverDDP(
-            gait.createTrottingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
-                                       value['stepKnots'], value['supportKnots']))
+        problem = gait.createTrottingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
+                                             value['stepKnots'], value['supportKnots'])
     elif type_of_gait == 'pacing':
         # Creating a pacing problem
-        ddp = crocoddyl.SolverDDP(
-            gait.createPacingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
-                                     value['stepKnots'], value['supportKnots']))
+        problem = gait.createPacingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
+                                           value['stepKnots'], value['supportKnots'])
     elif type_of_gait == 'bounding':
         # Creating a bounding problem
-        ddp = crocoddyl.SolverDDP(
-            gait.createBoundingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
-                                       value['stepKnots'], value['supportKnots']))
+        problem = gait.createBoundingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
+                                             value['stepKnots'], value['supportKnots'])
     elif type_of_gait == 'jumping':
         # Creating a jumping problem
-        ddp = crocoddyl.SolverDDP(gait.createJumpingProblem(x0, value['jumpHeight'], value['timeStep']))
+        problem = gait.createJumpingProblem(x0, value['jumpHeight'], value['jumpLength'], value['timeStep'],
+                                            value['groundKnots'], value['flyingKnots'])
 
+    xs = [robot_model.defaultState] * (len(problem.runningModels) + 1)
+    us = [
+        m.quasiStatic(d, robot_model.defaultState) for m, d in list(zip(problem.runningModels, problem.runningDatas))
+    ]
+    return xs, us, problem
+
+
+def runDDPSolveBenchmark(xs, us, problem):
+    ddp = crocoddyl.SolverFDDP(problem)
+    if CALLBACKS:
+        ddp.setCallbacks([crocoddyl.CallbackVerbose()])
     duration = []
-    xs = [robot_model.defaultState] * len(ddp.models())
-    us = [m.quasicStatic(d, robot_model.defaultState) for m, d in list(zip(ddp.models(), ddp.datas()))[:-1]]
     for i in range(T):
         c_start = time.time()
         ddp.solve(xs, us, MAXITER, False, 0.1)
+        c_end = time.time()
+        duration.append(1e3 * (c_end - c_start))
+
+    avrg_duration = sum(duration) / len(duration)
+    min_duration = min(duration)
+    max_duration = max(duration)
+    return avrg_duration, min_duration, max_duration
+
+
+def runShootingProblemCalcBenchmark(xs, us, problem):
+    duration = []
+    for i in range(T):
+        c_start = time.time()
+        problem.calc(xs, us)
+        c_end = time.time()
+        duration.append(1e3 * (c_end - c_start))
+
+    avrg_duration = sum(duration) / len(duration)
+    min_duration = min(duration)
+    max_duration = max(duration)
+    return avrg_duration, min_duration, max_duration
+
+
+def runShootingProblemCalcDiffBenchmark(xs, us, problem):
+    duration = []
+    for i in range(T):
+        c_start = time.time()
+        problem.calcDiff(xs, us)
         c_end = time.time()
         duration.append(1e3 * (c_end - c_start))
 
@@ -125,8 +160,26 @@ elif GAIT == 'bounding':
         }
     }
 elif GAIT == 'jumping':
-    GAITPHASE = {'jumping': {'jumpHeight': 0.5, 'timeStep': 1e-2}}
+    GAITPHASE = {
+        'jumping': {
+            'jumpHeight': 0.15,
+            'jumpLength': [0.0, 0.3, 0.],
+            'timeStep': 1e-2,
+            'groundKnots': 10,
+            'flyingKnots': 20
+        }
+    }
 
-print('cpp-wrapped contact-forward dynamics on quadruped:')
-avrg_duration, min_duration, max_duration = runBenchmark(GAITPHASE)
-print('  CPU time [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
+print('\033[1m')
+print('C++:')
+popen = subprocess.check_call([os.path.dirname(os.path.abspath(__file__)) + "/quadrupedal-gaits", str(T)])
+
+print('Python bindings:')
+xs, us, problem = createProblem(GAITPHASE)
+avrg_duration, min_duration, max_duration = runDDPSolveBenchmark(xs, us, problem)
+print('  DDP.solve [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
+avrg_duration, min_duration, max_duration = runShootingProblemCalcBenchmark(xs, us, problem)
+print('  ShootingProblem.calc [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
+avrg_duration, min_duration, max_duration = runShootingProblemCalcDiffBenchmark(xs, us, problem)
+print('  ShootingProblem.calcDiff [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
+print('\033[0m')

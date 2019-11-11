@@ -18,10 +18,11 @@ namespace crocoddyl {
 
 struct ContactItem {
   ContactItem() {}
-  ContactItem(const std::string& name, ContactModelAbstract* contact) : name(name), contact(contact) {}
+  ContactItem(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact)
+      : name(name), contact(contact) {}
 
   std::string name;
-  ContactModelAbstract* contact;
+  boost::shared_ptr<ContactModelAbstract> contact;
 };
 
 struct ContactDataMultiple;  // forward declaration
@@ -32,11 +33,11 @@ class ContactModelMultiple {
   typedef std::map<std::string, boost::shared_ptr<ContactDataAbstract> > ContactDataContainer;
   typedef pinocchio::container::aligned_vector<pinocchio::Force>::iterator ForceIterator;
 
-  ContactModelMultiple(StateMultibody& state, unsigned int const& nu);
-  ContactModelMultiple(StateMultibody& state);
+  ContactModelMultiple(boost::shared_ptr<StateMultibody> state, const std::size_t& nu);
+  ContactModelMultiple(boost::shared_ptr<StateMultibody> state);
   ~ContactModelMultiple();
 
-  void addContact(const std::string& name, ContactModelAbstract* const contact);
+  void addContact(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact);
   void removeContact(const std::string& name);
 
   void calc(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
@@ -50,16 +51,16 @@ class ContactModelMultiple {
                        const Eigen::MatrixXd& df_du) const;
   boost::shared_ptr<ContactDataMultiple> createData(pinocchio::Data* const data);
 
-  StateMultibody& get_state() const;
+  const boost::shared_ptr<StateMultibody>& get_state() const;
   const ContactModelContainer& get_contacts() const;
-  const unsigned int& get_nc() const;
-  const unsigned int& get_nu() const;
+  const std::size_t& get_nc() const;
+  const std::size_t& get_nu() const;
 
  private:
-  StateMultibody& state_;
+  boost::shared_ptr<StateMultibody> state_;
   ContactModelContainer contacts_;
-  unsigned int nc_;
-  unsigned int nu_;
+  std::size_t nc_;
+  std::size_t nu_;
 
 #ifdef PYTHON_BINDINGS
 
@@ -80,9 +81,9 @@ struct ContactDataMultiple : ContactDataAbstract {
   template <typename Model>
   ContactDataMultiple(Model* const model, pinocchio::Data* const data)
       : ContactDataAbstract(model, data),
-        dv(model->get_state().get_nv()),
-        ddv_dx(model->get_state().get_nv(), model->get_state().get_ndx()),
-        fext(model->get_state().get_pinocchio().njoints, pinocchio::Force::Zero()) {
+        dv(model->get_state()->get_nv()),
+        ddv_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
+        fext(model->get_state()->get_pinocchio().njoints, pinocchio::Force::Zero()) {
     dv.fill(0);
     ddv_dx.fill(0);
     for (ContactModelMultiple::ContactModelContainer::const_iterator it = model->get_contacts().begin();

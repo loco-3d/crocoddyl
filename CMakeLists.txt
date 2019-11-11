@@ -1,29 +1,27 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-# Check if the cmake (git submodule) have been initialized
-IF(NOT EXISTS "${PROJECT_SOURCE_DIR}/cmake/base.cmake")
-  MESSAGE(FATAL_ERROR "\nPlease run the following command first:\ngit submodule update --init\n")
-ENDIF()
-
-# Include important cmake modules
-INCLUDE(cmake/base.cmake)
-INCLUDE(cmake/test.cmake)
-INCLUDE(cmake/boost.cmake)
-INCLUDE(cmake/python.cmake)
-
 # Set up project properties
 SET(PROJECT_NAMESPACE loco-3d)
 SET(PROJECT_NAME crocoddyl)
 SET(PROJECT_DESCRIPTION "Contact RObot COntrol by Differential DYnamic programming Library (Crocoddyl)")
 SET(PROJECT_URL https://gepgitlab.laas.fr/${PROJECT_NAMESPACE}/${PROJECT_NAME})
 
+# Include important cmake modules
+INCLUDE(cmake/base.cmake RESULT_VARIABLE SUBMODULE_FOUND)
+INCLUDE(cmake/test.cmake)
+INCLUDE(cmake/boost.cmake)
+INCLUDE(cmake/python.cmake)
+
+# Check if the cmake (git submodule) have been initialized
+IF(SUBMODULE_FOUND STREQUAL "NOTFOUND")
+  MESSAGE(FATAL_ERROR "\nPlease run the following command first:\ngit submodule update --init\n")
+ENDIF(SUBMODULE_FOUND STREQUAL "NOTFOUND")
 
 # Print initial message
 MESSAGE("${PROJECT_DESCRIPTION}, version ${PROJECT_VERSION}")
 MESSAGE("Copyright (C) 2018-2019 CNRS-LAAS")
 MESSAGE("All rights reserved.")
 MESSAGE("Released under the BSD 3-Clause License.")
-
 
 # Set a default build type to 'Release' if none was specified
 IF(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -37,7 +35,7 @@ ENDIF()
 SET(CXX_DISABLE_WERROR True)
 
 # Create different building options
-OPTION(ENABLE_VECTORIZATION "Enable vectorization and futhers processor-related optimizations" OFF)
+OPTION(ENABLE_VECTORIZATION "Enable vectorization and further processor-related optimizations" OFF)
 OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" ON)
 OPTION(BUILD_UNIT_TESTS "Build the unitary tests" ON)
 OPTION(BUILD_BENCHMARK "Build the benchmark" ON)
@@ -48,13 +46,14 @@ IF(ENABLE_VECTORIZATION)
   SET(CMAKE_CXX_FLAGS "-march=native -mavx")
 ENDIF()
 
-SETUP_PROJECT()
+CMAKE_POLICY(SET CMP0048 OLD)
+PROJECT(${PROJECT_NAME} CXX)
 
 # Add the different required and optional dependencies
 ADD_REQUIRED_DEPENDENCY("eigen3 >= 3.0.5")
 ADD_REQUIRED_DEPENDENCY("eigenpy")
-ADD_REQUIRED_DEPENDENCY("pinocchio >= 2.1.0")
-ADD_OPTIONAL_DEPENDENCY("example-robot-data >= 2.1.0")
+ADD_REQUIRED_DEPENDENCY("pinocchio >= 2.1.9")
+ADD_REQUIRED_DEPENDENCY("example-robot-data >= 2.4.0")
 ADD_OPTIONAL_DEPENDENCY("multicontact-api >= 1.1.0")
 ADD_OPTIONAL_DEPENDENCY("quadprog")
 ADD_OPTIONAL_DEPENDENCY("scipy")
@@ -72,10 +71,10 @@ ENDIF()
 
 # Add OpenMP
 if(BUILD_WITH_MULTITHREADS)
-  find_package(OpenMP)
+  FIND_PACKAGE(OpenMP)
 ENDIF()
 if(OPENMP_FOUND AND BUILD_WITH_MULTITHREADS)
-  SET(CMAKE_CXX_FLAGS "-fopenmp")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
   ADD_DEFINITIONS(-DWITH_MULTITHREADING)
   ADD_DEFINITIONS(-DWITH_NTHREADS=${BUILD_WITH_NTHREADS})
   LIST(APPEND CFLAGS_DEPENDENCIES "-DWITH_MULTITHREADING" "-DWITH_NTHREADS")
@@ -101,7 +100,7 @@ INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIRS})
 
 
 # Include and add the main directory
-ADD_SUBDIRECTORY(${PROJECT_NAME})
+ADD_SUBDIRECTORY(unittest/python/${PROJECT_NAME})
 ADD_SUBDIRECTORY(src)
 
 # Build the Python interface
@@ -125,6 +124,3 @@ ENDIF(BUILD_BENCHMARK)
 IF(BUILD_EXAMPLES)
   ADD_SUBDIRECTORY(examples)
 ENDIF(BUILD_EXAMPLES)
-
-
-SETUP_PROJECT_FINALIZE()

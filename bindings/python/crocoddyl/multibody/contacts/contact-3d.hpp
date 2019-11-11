@@ -23,19 +23,19 @@ void exposeContact3D() {
       "It defines a rigid 3D contact models (point contact) based on acceleration-based holonomic constraints.\n"
       "The calc and calcDiff functions compute the contact Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<StateMultibody&, FrameTranslation, int, bp::optional<Eigen::Vector2d> >(
-          bp::args(" self", " state", " xref", " nu=state.nv", " gains=np.matrix([ [0.],[0.] ]"),
+      bp::init<boost::shared_ptr<StateMultibody>, FrameTranslation, int, bp::optional<Eigen::Vector2d> >(
+          bp::args(" self", " state", " xref", " nu=state.nv", " gains=np.matrix([ [0.],[0.] ])"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param xref: reference frame translation\n"
           ":param nu: dimension of control vector\n"
-          ":param gains: gains of the contact model")[bp::with_custodian_and_ward<1, 2>()])
-      .def(bp::init<StateMultibody&, FrameTranslation, bp::optional<Eigen::Vector2d> >(
-          bp::args(" self", " state", " xref"),
-          "Initialize the state cost model.\n\n"
+          ":param gains: gains of the contact model"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, FrameTranslation, bp::optional<Eigen::Vector2d> >(
+          bp::args(" self", " state", " xref", " gains=np.matrix([ [0.],[0.] ])"),
+          "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param Mref: reference frame translation\n"
-          ":param nu: dimension of control vector")[bp::with_custodian_and_ward<1, 2>()])
+          ":param gains: gains of the contact model"))
       .def("calc", &ContactModel3D::calc_wrap, bp::args(" self", " data", " x"),
            "Compute the 3D contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
@@ -66,6 +66,40 @@ void exposeContact3D() {
       .add_property("gains",
                     bp::make_function(&ContactModel3D::get_gains, bp::return_value_policy<bp::return_by_value>()),
                     "contact gains");
+
+  bp::register_ptr_to_python<boost::shared_ptr<ContactData3D> >();
+
+  bp::class_<ContactData3D, bp::bases<ContactDataAbstract> >(
+      "ContactData3D", "Data for 3D contact.\n\n",
+      bp::init<ContactModel3D*, pinocchio::Data*>(
+          bp::args(" self", " model", " data"),
+          "Create 3D contact data.\n\n"
+          ":param model: 3D contact model\n"
+          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("jMf", bp::make_getter(&ContactData3D::jMf, bp::return_value_policy<bp::return_by_value>()),
+                    "local frame placement of the contact frame")
+      .add_property("fXj", bp::make_getter(&ContactData3D::fXj, bp::return_value_policy<bp::return_by_value>()),
+                    "action matrix from contact to local frames")
+      .add_property("v", bp::make_getter(&ContactData3D::v, bp::return_value_policy<bp::return_by_value>()),
+                    "spatial velocity of the contact body")
+      .add_property("a", bp::make_getter(&ContactData3D::a, bp::return_value_policy<bp::return_by_value>()),
+                    "spatial acceleration of the contact body")
+      .add_property("fJf", bp::make_getter(&ContactData3D::fJf, bp::return_value_policy<bp::return_by_value>()),
+                    "local Jacobian of the contact frame")
+      .add_property("v_partial_dq",
+                    bp::make_getter(&ContactData3D::v_partial_dq, bp::return_value_policy<bp::return_by_value>()),
+                    "Jacobian of the spatial body velocity")
+      .add_property("a_partial_dq",
+                    bp::make_getter(&ContactData3D::a_partial_dq, bp::return_value_policy<bp::return_by_value>()),
+                    "Jacobian of the spatial body acceleration")
+      .add_property("a_partial_dv",
+                    bp::make_getter(&ContactData3D::a_partial_dv, bp::return_value_policy<bp::return_by_value>()),
+                    "Jacobian of the spatial body acceleration")
+      .add_property("a_partial_da",
+                    bp::make_getter(&ContactData3D::a_partial_da, bp::return_value_policy<bp::return_by_value>()),
+                    "Jacobian of the spatial body acceleration")
+      .add_property("oRf", bp::make_getter(&ContactData3D::oRf, bp::return_value_policy<bp::return_by_value>()),
+                    "Rotation matrix of the contact body expressed in the world frame");
 }
 
 }  // namespace python

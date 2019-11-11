@@ -16,11 +16,13 @@ namespace crocoddyl {
 
 class CostModelFramePlacement : public CostModelAbstract {
  public:
-  CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation, const FramePlacement& Fref,
-                          unsigned int const& nu);
-  CostModelFramePlacement(StateMultibody& state, ActivationModelAbstract& activation, const FramePlacement& Fref);
-  CostModelFramePlacement(StateMultibody& state, const FramePlacement& Fref, unsigned int const& nu);
-  CostModelFramePlacement(StateMultibody& state, const FramePlacement& Fref);
+  CostModelFramePlacement(boost::shared_ptr<StateMultibody> state,
+                          boost::shared_ptr<ActivationModelAbstract> activation, const FramePlacement& Fref,
+                          const std::size_t& nu);
+  CostModelFramePlacement(boost::shared_ptr<StateMultibody> state,
+                          boost::shared_ptr<ActivationModelAbstract> activation, const FramePlacement& Fref);
+  CostModelFramePlacement(boost::shared_ptr<StateMultibody> state, const FramePlacement& Fref, const std::size_t& nu);
+  CostModelFramePlacement(boost::shared_ptr<StateMultibody> state, const FramePlacement& Fref);
   ~CostModelFramePlacement();
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -42,10 +44,10 @@ struct CostDataFramePlacement : public CostDataAbstract {
   template <typename Model>
   CostDataFramePlacement(Model* const model, pinocchio::Data* const data)
       : CostDataAbstract(model, data),
-        J(6, model->get_state().get_nv()),
+        J(6, model->get_state()->get_nv()),
         rJf(6, 6),
-        fJf(6, model->get_state().get_nv()),
-        Arr_J(6, model->get_state().get_nv()) {
+        fJf(6, model->get_state()->get_nv()),
+        Arr_J(6, model->get_state()->get_nv()) {
     r.fill(0);
     J.fill(0);
     rJf.fill(0);

@@ -10,42 +10,44 @@
 
 namespace crocoddyl {
 
-StateVector::StateVector(unsigned int const& nx) : StateAbstract(nx, nx) {}
+StateVector::StateVector(const std::size_t& nx) : StateAbstract(nx, nx) {}
 
 StateVector::~StateVector() {}
 
-Eigen::VectorXd StateVector::zero() { return Eigen::VectorXd::Zero(nx_); }
+Eigen::VectorXd StateVector::zero() const { return Eigen::VectorXd::Zero(nx_); }
 
-Eigen::VectorXd StateVector::rand() { return Eigen::VectorXd::Random(nx_); }
+Eigen::VectorXd StateVector::rand() const { return Eigen::VectorXd::Random(nx_); }
 
 void StateVector::diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-                       Eigen::Ref<Eigen::VectorXd> dxout) {
-  assert(x0.size() == nx_ && "x0 has wrong dimension");
-  assert(x1.size() == nx_ && "x1 has wrong dimension");
-  assert(dxout.size() == ndx_ && "output must be pre-allocated");
+                       Eigen::Ref<Eigen::VectorXd> dxout) const {
+  assert(static_cast<std::size_t>(x0.size()) == nx_ && "x0 has wrong dimension");
+  assert(static_cast<std::size_t>(x1.size()) == nx_ && "x1 has wrong dimension");
+  assert(static_cast<std::size_t>(dxout.size()) == ndx_ && "output must be pre-allocated");
   dxout = x1 - x0;
 }
 
 void StateVector::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
-                            Eigen::Ref<Eigen::VectorXd> xout) {
-  assert(x.size() == nx_ && "x has wrong dimension");
-  assert(dx.size() == ndx_ && "dx has wrong dimension");
-  assert(xout.size() == nx_ && "Output must be pre-allocated");
+                            Eigen::Ref<Eigen::VectorXd> xout) const {
+  assert(static_cast<std::size_t>(x.size()) == nx_ && "x has wrong dimension");
+  assert(static_cast<std::size_t>(dx.size()) == ndx_ && "dx has wrong dimension");
+  assert(static_cast<std::size_t>(xout.size()) == nx_ && "Output must be pre-allocated");
   xout = x + dx;
 }
 
 void StateVector::Jdiff(const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>&,
                         Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
-                        Jcomponent firstsecond) {
+                        Jcomponent firstsecond) const {
   assert((firstsecond == first || firstsecond == second || firstsecond == both) &&
          ("firstsecond must be one of the Jcomponent {both, first, second}"));
   if (firstsecond == first || firstsecond == both) {
-    assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "Jfirst must be of the good size");
+    assert(static_cast<std::size_t>(Jfirst.rows()) == ndx_ && static_cast<std::size_t>(Jfirst.cols()) == ndx_ &&
+           "Jfirst must be of the good size");
     Jfirst.setZero();
     Jfirst.diagonal() = Eigen::VectorXd::Constant(ndx_, -1.);
   }
   if (firstsecond == second || firstsecond == both) {
-    assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ && "Jfirst must be of the good size");
+    assert(static_cast<std::size_t>(Jsecond.rows()) == ndx_ && static_cast<std::size_t>(Jsecond.cols()) == ndx_ &&
+           "Jfirst must be of the good size");
     Jsecond.setZero();
     Jsecond.diagonal() = Eigen::VectorXd::Constant(ndx_, 1.);
   }
@@ -53,16 +55,18 @@ void StateVector::Jdiff(const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::R
 
 void StateVector::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>&,
                              Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
-                             Jcomponent firstsecond) {
+                             Jcomponent firstsecond) const {
   assert((firstsecond == first || firstsecond == second || firstsecond == both) &&
          ("firstsecond must be one of the Jcomponent {both, first, second}"));
   if (firstsecond == first || firstsecond == both) {
-    assert(Jfirst.rows() == ndx_ && Jfirst.cols() == ndx_ && "Jfirst must be of the good size");
+    assert(static_cast<std::size_t>(Jfirst.rows()) == ndx_ && static_cast<std::size_t>(Jfirst.cols()) == ndx_ &&
+           "Jfirst must be of the good size");
     Jfirst.setZero();
     Jfirst.diagonal() = Eigen::VectorXd::Constant(ndx_, 1.);
   }
   if (firstsecond == second || firstsecond == both) {
-    assert(Jsecond.rows() == ndx_ && Jsecond.cols() == ndx_ && "Jfirst must be of the good size");
+    assert(static_cast<std::size_t>(Jsecond.rows()) == ndx_ && static_cast<std::size_t>(Jsecond.cols()) == ndx_ &&
+           "Jfirst must be of the good size");
     Jsecond.setZero();
     Jsecond.diagonal() = Eigen::VectorXd::Constant(ndx_, 1.);
   }

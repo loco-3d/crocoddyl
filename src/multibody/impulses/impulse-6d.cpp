@@ -12,16 +12,16 @@
 
 namespace crocoddyl {
 
-ImpulseModel6D::ImpulseModel6D(StateMultibody& state, unsigned int const& frame)
+ImpulseModel6D::ImpulseModel6D(boost::shared_ptr<StateMultibody> state, const std::size_t& frame)
     : ImpulseModelAbstract(state, 6), frame_(frame) {}
 
 ImpulseModel6D::~ImpulseModel6D() {}
 
 void ImpulseModel6D::calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
                           const Eigen::Ref<const Eigen::VectorXd>&) {
-  ImpulseData6D* d = static_cast<ImpulseData6D*>(data.get());
+  boost::shared_ptr<ImpulseData6D> d = boost::static_pointer_cast<ImpulseData6D>(data);
 
-  pinocchio::getFrameJacobian(state_.get_pinocchio(), *d->pinocchio, frame_, pinocchio::LOCAL, d->Jc);
+  pinocchio::getFrameJacobian(state_->get_pinocchio(), *d->pinocchio, frame_, pinocchio::LOCAL, d->Jc);
 }
 
 void ImpulseModel6D::calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
@@ -30,15 +30,15 @@ void ImpulseModel6D::calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data
     calc(data, x);
   }
 
-  ImpulseData6D* d = static_cast<ImpulseData6D*>(data.get());
-  pinocchio::getJointVelocityDerivatives(state_.get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
+  boost::shared_ptr<ImpulseData6D> d = boost::static_pointer_cast<ImpulseData6D>(data);
+  pinocchio::getJointVelocityDerivatives(state_->get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                          d->v_partial_dq, d->v_partial_dv);
   d->dv0_dq.noalias() = d->fXj * d->v_partial_dq;
 }
 
 void ImpulseModel6D::updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force) {
   assert(force.size() == 6 && "force has wrong dimension, it should be 6d vector");
-  ImpulseData6D* d = static_cast<ImpulseData6D*>(data.get());
+  boost::shared_ptr<ImpulseData6D> d = boost::static_pointer_cast<ImpulseData6D>(data);
   data->f = d->jMf.act(pinocchio::Force(force));
 }
 
@@ -46,6 +46,6 @@ boost::shared_ptr<ImpulseDataAbstract> ImpulseModel6D::createData(pinocchio::Dat
   return boost::make_shared<ImpulseData6D>(this, data);
 }
 
-unsigned int const& ImpulseModel6D::get_frame() const { return frame_; }
+const std::size_t& ImpulseModel6D::get_frame() const { return frame_; }
 
 }  // namespace crocoddyl

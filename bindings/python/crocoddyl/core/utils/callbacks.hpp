@@ -17,6 +17,8 @@ namespace python {
 namespace bp = boost::python;
 
 void exposeCallbacks() {
+  bp::register_ptr_to_python<boost::shared_ptr<CallbackAbstract> >();
+
   bp::enum_<VerboseLevel>("VerboseLevel").value("_1", _1).value("_2", _2);
 
   bp::class_<CallbackVerbose, bp::bases<CallbackAbstract> >(

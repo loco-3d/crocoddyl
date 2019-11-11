@@ -21,11 +21,11 @@ class SolverAbstract {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  explicit SolverAbstract(ShootingProblem& problem);
+  explicit SolverAbstract(boost::shared_ptr<ShootingProblem> problem);
   virtual ~SolverAbstract();
 
   virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, unsigned int const& maxiter = 100,
+                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t& maxiter = 100,
                      const bool& is_feasible = false, const double& reg_init = 1e-9) = 0;
   // TODO(cmastalli): computeDirection (polymorphism) returning descent direction and lambdas
   virtual void computeDirection(const bool& recalc) = 0;
@@ -35,16 +35,16 @@ class SolverAbstract {
   void setCandidate(const std::vector<Eigen::VectorXd>& xs_warm = DEFAULT_VECTOR,
                     const std::vector<Eigen::VectorXd>& us_warm = DEFAULT_VECTOR, const bool& is_feasible = false);
 
-  void setCallbacks(const std::vector<CallbackAbstract*>& callbacks);
-  const std::vector<CallbackAbstract*>& getCallbacks() const;
+  void setCallbacks(const std::vector<boost::shared_ptr<CallbackAbstract> >& callbacks);
+  const std::vector<boost::shared_ptr<CallbackAbstract> >& getCallbacks() const;
 
-  const ShootingProblem& get_problem() const;
-  const std::vector<ActionModelAbstract*>& get_models() const;
+  const boost::shared_ptr<ShootingProblem>& get_problem() const;
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& get_models() const;
   const std::vector<boost::shared_ptr<ActionDataAbstract> >& get_datas() const;
   const std::vector<Eigen::VectorXd>& get_xs() const;
   const std::vector<Eigen::VectorXd>& get_us() const;
   const bool& get_isFeasible() const;
-  const unsigned int& get_iter() const;
+  const std::size_t& get_iter() const;
   const double& get_cost() const;
   const double& get_stop() const;
   const Eigen::Vector2d& get_d() const;
@@ -55,12 +55,12 @@ class SolverAbstract {
   const double& get_dVexp() const;
 
  protected:
-  ShootingProblem& problem_;
-  std::vector<ActionModelAbstract*> models_;
+  boost::shared_ptr<ShootingProblem> problem_;
+  std::vector<boost::shared_ptr<ActionModelAbstract> > models_;
   std::vector<boost::shared_ptr<ActionDataAbstract> > datas_;
   std::vector<Eigen::VectorXd> xs_;
   std::vector<Eigen::VectorXd> us_;
-  std::vector<CallbackAbstract*> callbacks_;
+  std::vector<boost::shared_ptr<CallbackAbstract> > callbacks_;
   bool is_feasible_;
   double cost_;
   double stop_;
@@ -72,13 +72,14 @@ class SolverAbstract {
   double dVexp_;
   double th_acceptstep_;
   double th_stop_;
-  unsigned int iter_;
+  std::size_t iter_;
 };
 
 class CallbackAbstract {
  public:
   CallbackAbstract() {}
-  ~CallbackAbstract() {}
+  virtual ~CallbackAbstract() {}
+
   virtual void operator()(SolverAbstract& solver) = 0;
 };
 

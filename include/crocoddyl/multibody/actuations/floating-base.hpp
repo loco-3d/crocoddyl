@@ -16,7 +16,7 @@ namespace crocoddyl {
 
 class ActuationModelFloatingBase : public ActuationModelAbstract {
  public:
-  explicit ActuationModelFloatingBase(StateMultibody& state);
+  explicit ActuationModelFloatingBase(boost::shared_ptr<StateMultibody> state);
   ~ActuationModelFloatingBase();
 
   void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,

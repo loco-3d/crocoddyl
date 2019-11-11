@@ -5,8 +5,8 @@ from random import randint
 import numpy as np
 
 import crocoddyl
-import pinocchio
 from crocoddyl.utils import StateMultibodyDerived, StateVectorDerived
+import example_robot_data
 
 
 class StateAbstractTestCase(unittest.TestCase):
@@ -88,16 +88,24 @@ class StateVectorTest(StateAbstractTestCase):
     STATE_DER = StateVectorDerived(NX)
 
 
-class StateMultibodyManipulatorTest(StateAbstractTestCase):
-    MODEL = pinocchio.buildSampleModelManipulator()
+class StateMultibodyTalosArmTest(StateAbstractTestCase):
+    MODEL = example_robot_data.loadTalosArm().model
     NX = MODEL.nq + MODEL.nv
     NDX = 2 * MODEL.nv
     STATE = crocoddyl.StateMultibody(MODEL)
     STATE_DER = StateMultibodyDerived(MODEL)
 
 
-class StateMultibodyHumanoidTest(StateAbstractTestCase):
-    MODEL = pinocchio.buildSampleModelHumanoidRandom()
+class StateMultibodyHyQTest(StateAbstractTestCase):
+    MODEL = example_robot_data.loadHyQ().model
+    NX = MODEL.nq + MODEL.nv
+    NDX = 2 * MODEL.nv
+    STATE = crocoddyl.StateMultibody(MODEL)
+    STATE_DER = StateMultibodyDerived(MODEL)
+
+
+class StateMultibodyTalosTest(StateAbstractTestCase):
+    MODEL = example_robot_data.loadTalos().model
     NX = MODEL.nq + MODEL.nv
     NDX = 2 * MODEL.nv
     STATE = crocoddyl.StateMultibody(MODEL)
@@ -105,7 +113,7 @@ class StateMultibodyHumanoidTest(StateAbstractTestCase):
 
 
 if __name__ == '__main__':
-    test_classes_to_run = [StateVectorTest, StateMultibodyManipulatorTest, StateMultibodyHumanoidTest]
+    test_classes_to_run = [StateVectorTest, StateMultibodyTalosArmTest, StateMultibodyHyQTest, StateMultibodyTalosTest]
     loader = unittest.TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:

@@ -15,20 +15,21 @@ namespace crocoddyl {
 
 class StateVector : public StateAbstract {
  public:
-  explicit StateVector(unsigned int const& nx);
+  explicit StateVector(const std::size_t& nx);
   ~StateVector();
 
-  Eigen::VectorXd zero();
-  Eigen::VectorXd rand();
+  Eigen::VectorXd zero() const;
+  Eigen::VectorXd rand() const;
   void diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-            Eigen::Ref<Eigen::VectorXd> dxout);
+            Eigen::Ref<Eigen::VectorXd> dxout) const;
   void integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
-                 Eigen::Ref<Eigen::VectorXd> xout);
+                 Eigen::Ref<Eigen::VectorXd> xout) const;
   void Jdiff(const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>&,
-             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent firstsecond = both);
+             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
+             Jcomponent firstsecond = both) const;
   void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>&,
                   Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
-                  Jcomponent firstsecond = both);
+                  Jcomponent firstsecond = both) const;
 };
 
 }  // namespace crocoddyl

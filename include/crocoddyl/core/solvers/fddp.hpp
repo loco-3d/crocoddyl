@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2019, LAAS-CNRS, The University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,18 +19,16 @@ class SolverFDDP : public SolverDDP {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  explicit SolverFDDP(ShootingProblem& problem);
+  explicit SolverFDDP(boost::shared_ptr<ShootingProblem> problem);
   ~SolverFDDP();
 
-  bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-             const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, unsigned int const& maxiter = 100,
-             const bool& is_feasible = false, const double& regInit = 1e-9);
-  void computeDirection(const bool& recalc = true);
-  double tryStep(const double& steplength = 1);
-  const Eigen::Vector2d& expectedImprovement();
+  virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
+                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t& maxiter = 100,
+                     const bool& is_feasible = false, const double& regInit = 1e-9);
+  virtual const Eigen::Vector2d& expectedImprovement();
   void updateExpectedImprovement();
-  double calc();
-  void forwardPass(const double& stepLength);
+  virtual double calc();
+  virtual void forwardPass(const double& stepLength);
 
   double get_th_acceptnegstep() const;
   void set_th_acceptnegstep(double th_acceptnegstep);

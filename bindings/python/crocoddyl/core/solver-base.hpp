@@ -33,11 +33,12 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
   using SolverAbstract::xreg_;
   using SolverAbstract::xs_;
 
-  explicit SolverAbstract_wrap(ShootingProblem& problem) : SolverAbstract(problem), bp::wrapper<SolverAbstract>() {}
+  explicit SolverAbstract_wrap(boost::shared_ptr<ShootingProblem> problem)
+      : SolverAbstract(problem), bp::wrapper<SolverAbstract>() {}
   ~SolverAbstract_wrap() {}
 
   bool solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-             unsigned int const& maxiter, const bool& is_feasible, const double& reg_init) {
+             const std::size_t& maxiter, const bool& is_feasible, const double& reg_init) {
     return bp::call<bool>(this->get_override("solve").ptr(), init_xs, init_us, maxiter, is_feasible, reg_init);
   }
 
@@ -83,9 +84,10 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setCandidate_overloads, SolverAbstract::s
 
 void exposeSolverAbstract() {
   // Register custom converters between std::vector and Python list
-  bp::to_python_converter<std::vector<CallbackAbstract*, std::allocator<CallbackAbstract*> >,
-                          vector_to_list<CallbackAbstract*> >();
-  list_to_vector().from_python<std::vector<CallbackAbstract*, std::allocator<CallbackAbstract*> > >();
+  typedef boost::shared_ptr<CallbackAbstract> CallbackAbstractPtr;
+  bp::to_python_converter<std::vector<CallbackAbstractPtr, std::allocator<CallbackAbstractPtr> >,
+                          vector_to_list<CallbackAbstractPtr, false> >();
+  list_to_vector().from_python<std::vector<CallbackAbstractPtr, std::allocator<CallbackAbstractPtr> > >();
 
   bp::class_<SolverAbstract_wrap, boost::noncopyable>(
       "SolverAbstract",
@@ -98,9 +100,9 @@ void exposeSolverAbstract() {
       "solve function is used to define when the search direction and length are computed in each\n"
       "iterate. It also describes the globalization strategy (i.e. regularization) of the\n"
       "numerical optimization.",
-      bp::init<ShootingProblem&>(bp::args(" self", " problem"),
-                                 "Initialize the solver model.\n\n"
-                                 ":param problem: shooting problem")[bp::with_custodian_and_ward<1, 2>()])
+      bp::init<boost::shared_ptr<ShootingProblem> >(bp::args(" self", " problem"),
+                                                    "Initialize the solver model.\n\n"
+                                                    ":param problem: shooting problem"))
       .def("solve", pure_virtual(&SolverAbstract_wrap::solve),
            bp::args(" self", " init_xs=[]", " init_us=[]", " maxiter=100", " isFeasible=False", " regInit=None"),
            "Compute the optimal trajectory xopt,uopt as lists of T+1 and T terms.\n\n"
@@ -162,8 +164,10 @@ void exposeSolverAbstract() {
            bp::args(" self"),
            "Return the list of callback functions using for diagnostic.\n\n"
            ":return set of callback functions.")
-      .add_property("problem", bp::make_function(&SolverAbstract_wrap::get_problem, bp::return_internal_reference<>()),
-                    "shooting problem")
+      .add_property(
+          "problem",
+          bp::make_function(&SolverAbstract_wrap::get_problem, bp::return_value_policy<bp::return_by_value>()),
+          "shooting problem")
       .def("models", &SolverAbstract_wrap::get_models, bp::return_value_policy<bp::return_by_value>(), "models")
       .def("datas", &SolverAbstract_wrap::get_datas, bp::return_value_policy<bp::return_by_value>(), "datas")
       .add_property("xs", bp::make_getter(&SolverAbstract_wrap::xs_, bp::return_value_policy<bp::return_by_value>()),

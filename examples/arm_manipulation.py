@@ -9,6 +9,8 @@ import example_robot_data
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
+crocoddyl.switchToNumpyMatrix()
+
 # In this example test, we will solve the reaching-goal task with the Talos arm.
 # For that, we use the forward dynamics (with its analytical derivatives)
 # developed inside crocoddyl; it describes inside DifferentialActionModelFullyActuated class.
@@ -35,9 +37,9 @@ xRegCost = crocoddyl.CostModelState(state)
 uRegCost = crocoddyl.CostModelControl(state)
 
 # Then let's added the running and terminal cost functions
-runningCostModel.addCost("gripperPose", goalTrackingCost, 1e-3)
-runningCostModel.addCost("xReg", xRegCost, 1e-7)
-runningCostModel.addCost("uReg", uRegCost, 1e-7)
+runningCostModel.addCost("gripperPose", goalTrackingCost, 1)
+runningCostModel.addCost("xReg", xRegCost, 1e-4)
+runningCostModel.addCost("uReg", uRegCost, 1e-4)
 terminalCostModel.addCost("gripperPose", goalTrackingCost, 1)
 
 # Next, we need to create an action model for running and terminal knots. The
@@ -68,7 +70,7 @@ if WITHDISPLAY and WITHPLOT:
         crocoddyl.CallbackDisplay(talos_arm, 4, 4, cameraTF)
     ])
 elif WITHDISPLAY:
-    ddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackVerbose()])
+    ddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(talos_arm, 4, 4, cameraTF)])
 elif WITHPLOT:
     ddp.setCallbacks([
         crocoddyl.CallbackLogger(),
