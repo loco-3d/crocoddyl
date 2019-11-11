@@ -31,9 +31,9 @@ class SolverKKT : public SolverAbstract {
   const Eigen::MatrixXd& get_kkt() const;
   const Eigen::VectorXd& get_kktref() const;
   const Eigen::VectorXd& get_primaldual() const;
-  const Eigen::VectorXd& get_primal() const;
-  const Eigen::VectorXd& get_dual() const;
-
+  const int& get_nx_() const;
+  const int& get_ndx_() const;
+  const int& get_nu_() const;
 
  protected:
   double regfactor_;
@@ -44,6 +44,7 @@ class SolverKKT : public SolverAbstract {
   std::vector<Eigen::VectorXd> us_try_;
 
  private:
+
   int nx_;
   int ndx_;
   int nu_;
@@ -53,10 +54,9 @@ class SolverKKT : public SolverAbstract {
   void allocateData();
   double calc();
   void computePrimalDual();
-  // void increaseRegularization();
-  // void decreaseRegularization();
+  void increaseRegularization();
+  void decreaseRegularization();
   // allocate data
-  //
   Eigen::MatrixXd kkt_;
   Eigen::VectorXd kktref_;
   Eigen::VectorXd primaldual_;
@@ -66,11 +66,8 @@ class SolverKKT : public SolverAbstract {
   double th_grad_;
   double th_step_;
   bool was_feasible_;
-  Eigen::LLT<Eigen::MatrixXd> kkt_llt_;
-  Eigen::VectorXd kkt_primal_; 
+  Eigen::VectorXd kkt_primal_;
   Eigen::VectorXd dF;
-  
-
 
 };
 
