@@ -54,9 +54,9 @@ int main(int argc, char* argv[]) {
   boost::shared_ptr<crocoddyl::CostModelSum> terminalCostModel = boost::make_shared<crocoddyl::CostModelSum>(state);
 
   // Then let's added the running and terminal cost functions
-  runningCostModel->addCost("gripperPose", goalTrackingCost, 1e-3);
-  runningCostModel->addCost("xReg", xRegCost, 1e-7);
-  runningCostModel->addCost("uReg", uRegCost, 1e-7);
+  runningCostModel->addCost("gripperPose", goalTrackingCost, 1);
+  runningCostModel->addCost("xReg", xRegCost, 1e-4);
+  runningCostModel->addCost("uReg", uRegCost, 1e-4);
   terminalCostModel->addCost("gripperPose", goalTrackingCost, 1);
 
   // Next, we need to create an action model for running and terminal knots. The

@@ -29,13 +29,13 @@ gait = SimpleBipedGaitProblem(talos_legs.model, rightFoot, leftFoot)
 # Setting up all tasks
 GAITPHASES = \
     [{'walking': {'stepLength': 0.6, 'stepHeight': 0.1,
-                  'timeStep': 0.0375, 'stepKnots': 25, 'supportKnots': 1}},
+                  'timeStep': 0.03, 'stepKnots': 25, 'supportKnots': 1}},
      {'walking': {'stepLength': 0.6, 'stepHeight': 0.1,
-                  'timeStep': 0.0375, 'stepKnots': 25, 'supportKnots': 1}},
+                  'timeStep': 0.03, 'stepKnots': 25, 'supportKnots': 1}},
      {'walking': {'stepLength': 0.6, 'stepHeight': 0.1,
-                  'timeStep': 0.0375, 'stepKnots': 25, 'supportKnots': 1}},
+                  'timeStep': 0.03, 'stepKnots': 25, 'supportKnots': 1}},
      {'walking': {'stepLength': 0.6, 'stepHeight': 0.1,
-                  'timeStep': 0.0375, 'stepKnots': 25, 'supportKnots': 1}}]
+                  'timeStep': 0.03, 'stepKnots': 25, 'supportKnots': 1}}]
 cameraTF = [3., 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 
 ddp = [None] * len(GAITPHASES)
