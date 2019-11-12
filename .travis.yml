@@ -15,16 +15,17 @@ before_install:
   - curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | sudo apt-key add -
 
 install:
-  - sudo apt update -qq && sudo apt install -y robotpkg-py27-pinocchio robotpkg-example-robot-data
+  - sudo apt update -qq && sudo apt upgrade -y -qq
+  - sudo apt install -y robotpkg-py27-pinocchio robotpkg-example-robot-data
   - export PATH=/opt/openrobots/bin:$PATH
   - export PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH
   - export LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH
   - export PYTHONPATH=/opt/openrobots/lib/python2.7/site-packages:$PYTHONPATH
 
-# script:
-#   - mkdir _build ; cd _build ; cmake ..
-#   - make -j2
-#   - make test
+script:
+  - mkdir _build ; cd _build ; cmake ..
+  - make -j2
+  - make test
 
 # after_success:
 #   - 
