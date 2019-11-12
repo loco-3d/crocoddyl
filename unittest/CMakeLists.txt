@@ -17,11 +17,10 @@ SET(${PROJECT_NAME}_CPP_TESTS
   test_activation 
   test_actions
   test_shooting_problem
-  test_kkt
+  test_solvers
   test_diff_actions
   test_impulses
   test_multiple_impulses
-  # test_solvers
   # test_costs
   # test_contacts
   # test_boxsolvers
