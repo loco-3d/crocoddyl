@@ -10,14 +10,12 @@ jobs:
       env: CMAKE_BUILD_TYPE=Release
 
 before_install:
-  - echo "deb [arch=amd64] http://robotpkg.openrobots.org/wip/packages/debian/pub $(lsb_release -sc) robotpkg" | sudo tee -a /etc/apt/sources.list.d/robotpkg.list
-  - echo "deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -sc) robotpkg" | sudo tee -a /etc/apt/sources.list.d/robotpkg.list
-  - curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | sudo apt-key add -
+  - echo "deb [arch=amd64] http://robotpkg.openrobots.org/wip/packages/debian/pub $(lsb_release -sc) robotpkg" | sudo tee -a /etc/apt/sources.list.d/robotpkg.list && echo "deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -sc) robotpkg" | sudo tee -a /etc/apt/sources.list.d/robotpkg.list && curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | sudo apt-key add -
 
 install:
   - sudo apt update -qq
   # - sudo apt upgrade -y -qq
-  - sudo apt install -y libeigen3-dev doxygen robotpkg-py27-eigenpy robotpkg-py27-pinocchio robotpkg-example-robot-data
+  - sudo apt install -y -qq libeigen3-dev doxygen robotpkg-py27-eigenpy robotpkg-py27-pinocchio robotpkg-py27-example-robot-data python-scipy robotpkg-py27-quadprog
   - export PATH=/opt/openrobots/bin:$PATH
   - export PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH
   - export LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH
@@ -26,6 +24,7 @@ install:
 script:
   - mkdir _build ; cd _build ; cmake ..
   - make -j2
+  - export PYTHONPATH=$(pwd)/bindings/python:$PYTHONPATH
   - make test
 
 # after_success:
