@@ -36,7 +36,7 @@ double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::
     const boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
     const Eigen::VectorXd& x = xs[i];
     const Eigen::VectorXd& u = us[i];
-    // Actually compute the model costs
+
     model->calc(data, x, u);
     cost_ += data->cost;
   }
@@ -71,9 +71,8 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const s
 
 void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us, std::vector<Eigen::VectorXd>& xs) {
   assert(us.size() == T_ && "Wrong dimension of the control trajectory, it should be T.");
-  if (xs.size() < T_ + 1) {
-    xs.resize(T_ + 1);
-  }
+  assert(xs.size() == T_ + 1 && "Wrong dimension of the state trajectory, it should be T + 1.");
+
   xs[0] = x0_;
   for (std::size_t i = 0; i < T_; ++i) {
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
@@ -89,6 +88,7 @@ void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us, std::vecto
 
 std::vector<Eigen::VectorXd> ShootingProblem::rollout_us(const std::vector<Eigen::VectorXd>& us) {
   std::vector<Eigen::VectorXd> xs;
+  xs.resize(T_ + 1);
   rollout(us, xs);
   return xs;
 }
