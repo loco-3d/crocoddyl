@@ -51,11 +51,11 @@ class SolverKKT : public SolverAbstract {
   std::vector<Eigen::VectorXd> dxs_;
   std::vector<Eigen::VectorXd> dus_;
   std::vector<Eigen::VectorXd> lambdas_;
-  void allocateData();
   double calc();
   void computePrimalDual();
   void increaseRegularization();
   void decreaseRegularization();
+  void allocateData();
 
   // allocate data
   Eigen::MatrixXd kkt_;
