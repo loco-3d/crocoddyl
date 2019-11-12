@@ -41,6 +41,8 @@ class CostModelDoublePendulum(crocoddyl.CostModelAbstract):
 class ActuationModelDoublePendulum(crocoddyl.ActuationModelAbstract):
     def __init__(self, state, actLink):
         crocoddyl.ActuationModelAbstract.__init__(self, state, 1)
+        self.nv = state.nv
+        self.actLink = actLink
 
     def calc(self, data, x, u):
         S = pinocchio.utils.zero((self.nv, self.nu))
