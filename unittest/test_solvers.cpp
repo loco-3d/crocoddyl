@@ -1,16 +1,17 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS, New York University, Max Planck Gesellschaft
+// Copyright (C) 2018-2020, LAAS-CNRS, New York University, Max Planck Gesellschaft,
+//                          University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
+
 #include <boost/test/included/unit_test.hpp>
 #include <boost/bind.hpp>
-
 #include "crocoddyl/core/solvers/ddp.hpp"
 
 using namespace boost::unit_test;
