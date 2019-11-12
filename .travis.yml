@@ -1,4 +1,5 @@
 dist: bionic
+language: cpp
 sudo: required
 
 jobs:
