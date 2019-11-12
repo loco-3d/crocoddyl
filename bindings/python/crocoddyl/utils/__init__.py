@@ -271,13 +271,15 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
         self.pinocchioData = pinocchio.Data(self.state.pinocchio)
         self.actuationData = self.actuation.createData()
         self.costsData = self.costs.createData(self.pinocchioData)
+        self.Minv = None
 
     def calc(self, data, x, u=None):
         self.costsData.shareMemory(data)
         if u is None:
             u = self.unone
         q, v = x[:self.state.nq], x[-self.state.nv:]
-        tau = self.actuation.calc(self.actuationData, x, u)
+        self.actuation.calc(self.actuationData, x, u)
+        tau = self.actuationData.tau
 
         # Computing the dynamics using ABA or manually for armature case
         if self.enable_force:
@@ -287,8 +289,8 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
             data.M = self.pinocchioData.M
             if self.armature.size == self.state.nv:
                 data.M[range(self.state.nv), range(self.state.nv)] += self.armature
-            data.Minv = np.linalg.inv(data.M)
-            data.xout = data.Minv * (tau - self.pinocchioData.nle)
+            self.Minv = np.linalg.inv(data.M)
+            data.xout = self.Minv * (tau - self.pinocchioData.nle)
 
         # Computing the cost value and residuals
         pinocchio.forwardKinematics(self.state.pinocchio, self.pinocchioData, q, v)
@@ -298,9 +300,10 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
 
     def calcDiff(self, data, x, u=None, recalc=True):
         self.costsData.shareMemory(data)
-        q, v = x[:self.state.nq], x[-self.state.nv:]
-        tau = self.actuation.calc(self.actuationData, x, u)
-        
+        nq, nv = self.state.nv, self.state.nq
+        q, v = x[:nq], x[-nv:]
+        self.actuation.calcDiff(self.actuationData, x, u)
+
         if u is None:
             u = self.unone
         if recalc:
@@ -309,12 +312,16 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
         # Computing the dynamics derivatives
         if self.enable_force:
             pinocchio.computeABADerivatives(self.state.pinocchio, self.pinocchioData, q, v, u)
-            data.Fx = np.hstack([self.pinocchioData.ddq_dq, self.pinocchioData.ddq_dv])
-            data.Fu = self.pinocchioData.Minv
+            ddq_dq = self.pinocchioData.ddq_dq
+            ddq_dv = self.pinocchioData.ddq_dv
+            data.Fx = np.hstack([ddq_dq, ddq_dv]) + self.pinocchioData.Minv * self.actuationData.dtau_dx
+            data.Fu = self.pinocchioData.Minv * self.actuationData.dtau_du
         else:
             pinocchio.computeRNEADerivatives(self.state.pinocchio, self.pinocchioData, q, v, data.xout)
-            data.Fx = -np.hstack([data.Minv * self.pinocchioData.dtau_dq, data.Minv * self.pinocchioData.dtau_dv])
-            data.Fu = data.Minv
+            ddq_dq = self.Minv * (self.actuationData.dtau_dx[:, :nv] - self.pinocchioData.dtau_dq)
+            ddq_dv = self.Minv * (self.actuationData.dtau_dx[:, nv:] - self.pinocchioData.dtau_dv)
+            data.Fx = np.hstack([ddq_dq, ddq_dv])
+            data.Fu = self.Minv * self.actuationData.dtau_du
         # Computing the cost derivatives
         self.costs.calcDiff(self.costsData, x, u, False)
 

@@ -45,19 +45,21 @@ for p in ps:
     Mref = crocoddyl.FrameTranslation(robot_model.getFrameId("gripper_left_joint"), np.matrix(p).T)
     goalTrackingCost = crocoddyl.CostModelFrameTranslation(state, Mref)
 
+    actuation = crocoddyl.ActuationModelFull(state)
+
     # Create the running action model
     runningCostModel = crocoddyl.CostModelSum(state)
     runningCostModel.addCost("gripperPose", goalTrackingCost, 1.)
     runningCostModel.addCost("xReg", xRegCost, 1e-4)
     runningCostModel.addCost("uReg", uRegCost, 1e-7)
-    runningModels += [crocoddyl.DifferentialActionModelFreeFwdDynamics(state, runningCostModel)]
+    runningModels += [crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, runningCostModel)]
 
     # Create the terminal action model
     terminalCostModel = crocoddyl.CostModelSum(state)
     terminalCostModel.addCost("gripperPose", goalTrackingCost, 1000.)
     terminalCostModel.addCost("xreg", xRegCost, 1e-4)
     terminalCostModel.addCost("uReg", uRegCost, 1e-7)
-    terminalModels += [crocoddyl.DifferentialActionModelFreeFwdDynamics(state, terminalCostModel)]
+    terminalModels += [crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, terminalCostModel)]
 
 q0 = np.matrix([2., 1.5, -2., 0., 0., 0., 0.]).T
 x0 = np.concatenate([q0, pinocchio.utils.zero(state.nv)])

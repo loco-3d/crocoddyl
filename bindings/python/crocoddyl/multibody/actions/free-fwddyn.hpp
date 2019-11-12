@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,12 +24,12 @@ void exposeDifferentialActionFreeFwdDynamics() {
       "or a custom implementation in case of system with armatures. If you want to\n"
       "include the armature, you need to use setArmature(). On the other hand, the\n"
       "stack of cost functions are implemented in CostModelSum().",
-      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActuationModelAbstract>, boost::shared_ptr<CostModelSum> >(
-          bp::args(" self", " state", " actuation", " costs"),
-          "Initialize the free forward-dynamics action model.\n\n"
-          ":param state: multibody state\n"
-          ":param actuation: abstract actuation model\n"
-          ":param costs: stack of cost functions"))
+      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActuationModelAbstract>,
+               boost::shared_ptr<CostModelSum> >(bp::args(" self", " state", " actuation", " costs"),
+                                                 "Initialize the free forward-dynamics action model.\n\n"
+                                                 ":param state: multibody state\n"
+                                                 ":param actuation: abstract actuation model\n"
+                                                 ":param costs: stack of cost functions"))
       .def("calc", &DifferentialActionModelFreeFwdDynamics::calc_wrap,
            DiffActionModel_calc_wraps(
                bp::args(" self", " data", " x", " u=None"),
@@ -70,9 +70,9 @@ void exposeDifferentialActionFreeFwdDynamics() {
           bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_pinocchio, bp::return_internal_reference<>()),
           "multibody model (i.e. pinocchio model)")
       .add_property("actuation",
-              bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_actuation,
-                                  bp::return_value_policy<bp::return_by_value>()),
-              "actuation model")
+                    bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_actuation,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "actuation model")
       .add_property("costs",
                     bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_costs,
                                       bp::return_value_policy<bp::return_by_value>()),
@@ -95,9 +95,9 @@ void exposeDifferentialActionFreeFwdDynamics() {
           bp::make_getter(&DifferentialActionDataFreeFwdDynamics::pinocchio, bp::return_internal_reference<>()),
           "pinocchio data")
       .add_property("actuation",
-                bp::make_getter(&DifferentialActionDataFreeFwdDynamics::actuation,
-                                bp::return_value_policy<bp::return_by_value>()),
-                "actuation data")
+                    bp::make_getter(&DifferentialActionDataFreeFwdDynamics::actuation,
+                                    bp::return_value_policy<bp::return_by_value>()),
+                    "actuation data")
       .add_property("costs",
                     bp::make_getter(&DifferentialActionDataFreeFwdDynamics::costs,
                                     bp::return_value_policy<bp::return_by_value>()),

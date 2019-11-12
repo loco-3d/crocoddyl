@@ -46,9 +46,10 @@ def createProblem(model):
     # Next, we need to create an action model for running and terminal knots. The
     # forward dynamics (computed using ABA) are implemented
     # inside DifferentialActionModelFullyActuated.
-    runningModel = crocoddyl.IntegratedActionModelEuler(model(state, runningCostModel), 1e-3)
+    actuation = crocoddyl.ActuationModelFull(state)
+    runningModel = crocoddyl.IntegratedActionModelEuler(model(state, actuation, runningCostModel), 1e-3)
     runningModel.differential.armature = np.matrix([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.]).T
-    terminalModel = crocoddyl.IntegratedActionModelEuler(model(state, terminalCostModel), 1e-3)
+    terminalModel = crocoddyl.IntegratedActionModelEuler(model(state, actuation, terminalCostModel), 1e-3)
     terminalModel.differential.armature = np.matrix([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.]).T
 
     # For this optimal control problem, we define 100 knots (or running action

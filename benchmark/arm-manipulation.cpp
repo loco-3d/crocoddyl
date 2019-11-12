@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,7 +61,8 @@ int main(int argc, char* argv[]) {
   terminalCostModel->addCost("gripperPose", goalTrackingCost, 1);
 
   // We define an actuation model
-  boost::shared_ptr<crocoddyl::ActuationModelFull> actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state) ;
+  boost::shared_ptr<crocoddyl::ActuationModelFull> actuation =
+      boost::make_shared<crocoddyl::ActuationModelFull>(state);
 
   // Next, we need to create an action model for running and terminal knots. The
   // forward dynamics (computed using ABA) are implemented

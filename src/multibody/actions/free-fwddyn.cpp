@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,9 +18,9 @@
 
 namespace crocoddyl {
 
-DifferentialActionModelFreeFwdDynamics::DifferentialActionModelFreeFwdDynamics(boost::shared_ptr<StateMultibody> state, 
-                                                                               boost::shared_ptr<ActuationModelAbstract> actuation,                                                                              
-                                                                               boost::shared_ptr<CostModelSum> costs)
+DifferentialActionModelFreeFwdDynamics::DifferentialActionModelFreeFwdDynamics(
+    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation,
+    boost::shared_ptr<CostModelSum> costs)
     : DifferentialActionModelAbstract(state, actuation->get_nu(), costs->get_nr()),
       actuation_(actuation),
       costs_(costs),
@@ -66,8 +66,7 @@ void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<Differ
 
 void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                       const Eigen::Ref<const Eigen::VectorXd>& x,
-                                                      const Eigen::Ref<const Eigen::VectorXd>& u, 
-                                                      const bool& recalc) {
+                                                      const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
   assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
 
@@ -88,16 +87,13 @@ void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<Di
     pinocchio::computeABADerivatives(pinocchio_, d->pinocchio, q, v, u);
     d->Fx.leftCols(nv) = d->pinocchio.ddq_dq;
     d->Fx.rightCols(nv) = d->pinocchio.ddq_dv;
-    // d->Fx.leftCols(nv).noalias() += d->pinocchio.Minv * d->pinocchio.dtau_dq;
-    // d->Fx.rightCols(nv).noalias() += d->pinocchio.Minv * d->pinocchio.dtau_dv;
-    d->Fx += d->pinocchio.Minv * d->actuation->dtau_dx; 
+    d->Fx += d->pinocchio.Minv * d->actuation->dtau_dx;
     d->Fu.noalias() = d->pinocchio.Minv * d->actuation->dtau_du;
   } else {
     pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout);
-    d->Fx.leftCols(nv).noalias() = d->Minv * d->pinocchio.dtau_dq;
-    d->Fx.leftCols(nv) *= -1.;
-    d->Fx.rightCols(nv).noalias() = d->Minv * d->pinocchio.dtau_dv;
-    d->Fx.rightCols(nv) *= -1.;
+    d->dtau_dx.leftCols(nv) = d->actuation->dtau_dx.leftCols(nv) - d->pinocchio.dtau_dq;
+    d->dtau_dx.rightCols(nv) = d->actuation->dtau_dx.rightCols(nv) - d->pinocchio.dtau_dv;
+    d->Fx.noalias() = d->Minv * d->dtau_dx;
     d->Fu.noalias() = d->Minv * d->actuation->dtau_du;
   }
 
