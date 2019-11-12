@@ -8,7 +8,6 @@
 
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/parsers/sample-models.hpp>
-
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"
 #include "crocoddyl/core/states/unicycle.hpp"
