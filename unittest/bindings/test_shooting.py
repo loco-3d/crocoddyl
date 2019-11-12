@@ -67,6 +67,7 @@ class UnicycleShootingTest(ShootingProblemTestCase):
 class TalosArmShootingTest(ShootingProblemTestCase):
     ROBOT_MODEL = example_robot_data.loadTalosArm().model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+    ACTUATION = crocoddyl.ActuationModelFull(STATE)
     COST_SUM = crocoddyl.CostModelSum(STATE)
     COST_SUM.addCost(
         'gripperPose',
@@ -75,8 +76,8 @@ class TalosArmShootingTest(ShootingProblemTestCase):
         1e-3)
     COST_SUM.addCost("xReg", crocoddyl.CostModelState(STATE), 1e-7)
     COST_SUM.addCost("uReg", crocoddyl.CostModelControl(STATE), 1e-7)
-    DIFF_MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, COST_SUM)
-    DIFF_MODEL_DER = DifferentialFreeFwdDynamicsDerived(STATE, COST_SUM)
+    DIFF_MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
+    DIFF_MODEL_DER = DifferentialFreeFwdDynamicsDerived(STATE, ACTUATION, COST_SUM)
     MODEL = crocoddyl.IntegratedActionModelEuler(DIFF_MODEL, 1e-3)
     MODEL_DER = crocoddyl.IntegratedActionModelEuler(DIFF_MODEL_DER, 1e-3)
 
