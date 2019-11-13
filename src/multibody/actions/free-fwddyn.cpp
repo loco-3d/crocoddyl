@@ -84,7 +84,7 @@ void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<Di
 
   // Computing the dynamics derivatives
   if (with_armature_) {
-    pinocchio::computeABADerivatives(pinocchio_, d->pinocchio, q, v, u);
+    pinocchio::computeABADerivatives(pinocchio_, d->pinocchio, q, v, d->actuation->tau);
     d->Fx.leftCols(nv) = d->pinocchio.ddq_dq;
     d->Fx.rightCols(nv) = d->pinocchio.ddq_dv;
     d->Fx += d->pinocchio.Minv * d->actuation->dtau_dx;
