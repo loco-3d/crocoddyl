@@ -123,7 +123,8 @@ void exposeContactAbstract() {
                     bp::make_getter(&ContactDataAbstract::df_du, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ContactDataAbstract::df_du), "Jacobian of the contact forces")
       .def_readwrite("joint", &ContactDataAbstract::joint, "joint index of the contact frame")
-      .def_readwrite("f", &ContactDataAbstract::f, "external spatial forces");
+      .def_readwrite("f", &ContactDataAbstract::f, "external spatial force at the parent joint level.")
+      .def_readwrite("frame_force", &ContactDataAbstract::frame_force, "external spatial force at contact frame");
 }
 
 }  // namespace python

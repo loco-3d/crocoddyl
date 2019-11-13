@@ -1,8 +1,9 @@
 import numpy as np
 import pinocchio
-from crocoddyl.utils import EPS
+# from crocoddyl.utils import EPS
 from pinocchio.utils import zero
 
+EPS = np.finfo(float).eps
 NUMDIFF_MODIFIER = 1e4
 
 

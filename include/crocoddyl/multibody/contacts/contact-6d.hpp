@@ -58,7 +58,6 @@ struct ContactData6D : public ContactDataAbstract {
     a_partial_da.fill(0);
     rMf_Jlog6.fill(0);
   }
-
   pinocchio::SE3 jMf;
   pinocchio::SE3 rMf;
   pinocchio::SE3::ActionMatrixType fXj;
