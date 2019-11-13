@@ -5,6 +5,7 @@ SET(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
   shooting
   solvers
   costs
+  force_cost
   contacts
   impulses
   )

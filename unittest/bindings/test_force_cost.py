@@ -9,12 +9,12 @@ from crocoddyl import CostModelContactForce as CostModelForce
 from crocoddyl import DifferentialActionModelContactFwdDynamics as DifferentialActionModelFloatingInContact
 from crocoddyl import StateMultibody as StatePinocchio
 from crocoddyl import FramePlacement, FrameTranslation
-from example_robot_data import loadANYmal
+from example_robot_data import loadICub
 from crocoddyl.utils import a2m, m2a
 
 from pinocchio.utils import rand, zero
 from testutils import NUMDIFF_MODIFIER, assertNumDiff, df_dq, df_dx, EPS
-
+NUMDIFF_MODIFIER = 1e6
 
 def absmax(A):
     return np.max(abs(A))
@@ -22,14 +22,8 @@ def absmax(A):
 
 # Loading Talos arm with FF TODO use a bided or quadruped
 # -----------------------------------------------------------------------------
-robot = loadANYmal()
-robot.model.armature[6:] = 1.
-qmin = robot.model.lowerPositionLimit
-qmin[:7] = -1
-robot.model.lowerPositionLimit = qmin
-qmax = robot.model.upperPositionLimit
-qmax[:7] = 1
-robot.model.upperPositionLimit = qmax
+# robot = loadANYmal()
+robot = loadICub()
 rmodel = robot.model
 rdata = rmodel.createData()
 
@@ -38,7 +32,7 @@ np.set_printoptions(linewidth=400, suppress=True)
 State = StatePinocchio(rmodel)
 actModel = ActuationModelFreeFloating(State)
 gains = pinocchio.utils.rand(2)
-Mref_lf = FramePlacement(rmodel.getFrameId('LF_FOOT'), pinocchio.SE3.Random())
+Mref_lf = FramePlacement(rmodel.getFrameId('r_sole'), pinocchio.SE3.Random())
 
 q = pinocchio.randomConfiguration(rmodel)
 v = rand(rmodel.nv)
@@ -49,7 +43,7 @@ u = m2a(rand(rmodel.nv - 6))
 contactModel6 = ContactModel6D(State, Mref_lf, actModel.nu, gains)
 rmodel.frames[Mref_lf.frame].placement = pinocchio.SE3.Random()
 contactModel = ContactModelMultiple(State, actModel.nu)
-contactModel.addContact("LF_FOOT_contact", contactModel6)
+contactModel.addContact("r_sole_contact", contactModel6)
 
 model = DifferentialActionModelFloatingInContact(State, actModel, contactModel,
                                                  CostModelSum(State, actModel.nu, False), 0., True)
@@ -76,10 +70,10 @@ assertNumDiff(data.Fu, dnum.Fu,
 # model.costs = CostModelSum(State, actModel.nu)
 model.costs.addCost(
     "force",
-    CostModelForce(State, model.contacts.contacts["LF_FOOT_contact"].contact, a2m(np.random.rand(6)), actModel.nu), 1.)
+    CostModelForce(State, model.contacts.contacts["r_sole_contact"].contact, a2m(np.random.rand(6)), actModel.nu), 1.)
 
 data = model.createData()
-data.costs.costs["force"].contact = data.contacts.contacts["LF_FOOT_contact"]
+data.costs.costs["force"].contact = data.contacts.contacts["r_sole_contact"]
 
 cmodel = model.costs.costs['force'].cost
 cdata = data.costs.costs['force']
@@ -89,10 +83,10 @@ model.calcDiff(data, x, u)
 mnum = DifferentialActionModelNumDiff(model, False)
 dnum = mnum.createData()
 for d in dnum.data_x:
-    d.costs.costs["force"].contact = d.contacts.contacts["LF_FOOT_contact"]
+    d.costs.costs["force"].contact = d.contacts.contacts["r_sole_contact"]
 for d in dnum.data_u:
-    d.costs.costs["force"].contact = d.contacts.contacts["LF_FOOT_contact"]
-dnum.data_0.costs.costs["force"].contact = dnum.data_0.contacts.contacts["LF_FOOT_contact"]
+    d.costs.costs["force"].contact = d.contacts.contacts["r_sole_contact"]
+dnum.data_0.costs.costs["force"].contact = dnum.data_0.contacts.contacts["r_sole_contact"]
 
 mnum.calcDiff(dnum, x, u)
 assertNumDiff(data.Fx, dnum.Fx,
