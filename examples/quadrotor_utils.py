@@ -1,7 +1,3 @@
-import numpy as np
-import matplotlib.pyplot as plt
-
-
 class PlotUAM:
     def __init__(self, quadrotorType, stateTraj, controlTraj, knots, dt, d, cf, cm):
         self.stateTraj = stateTraj
@@ -18,11 +14,13 @@ class PlotUAM:
         fig, axs = plt.subplots(1, 2, figsize=(15, 10))
         fig.suptitle('Motor forces')
         t = self.PlotDataType.t_state
-        axs[0].plot(t, self.PlotDataType.state[:, 0], t, self.PlotDataType.state[:, 1], t, self.PlotDataType.state[:, 2])
-        axs[0].legend(['x','y','z'])
+        axs[0].plot(t, self.PlotDataType.state[:, 0], t, self.PlotDataType.state[:, 1], t,
+                    self.PlotDataType.state[:, 2])
+        axs[0].legend(['x', 'y', 'z'])
         axs[0].set_title('Position')
-        axs[1].plot(t, self.PlotDataType.state[:, 7], t, self.PlotDataType.state[:, 8], t, self.PlotDataType.state[:, 9])
-        axs[1].legend(['x','y','z'])
+        axs[1].plot(t, self.PlotDataType.state[:, 7], t, self.PlotDataType.state[:, 8], t,
+                    self.PlotDataType.state[:, 9])
+        axs[1].legend(['x', 'y', 'z'])
         axs[1].set_title('Velocity')
         return fig, axs
 
@@ -44,12 +42,12 @@ class PlotUAM:
         fig, axs = plt.subplots(1, 2, figsize=(15, 10))
         fig.suptitle('Motor forces')
         t = self.PlotDataType.t
-        axs[0].plot(t,self.PlotDataType.M[:,0], t,self.PlotDataType.M[:,1], t,self.PlotDataType.M[:,2])
+        axs[0].plot(t, self.PlotDataType.M[:, 0], t, self.PlotDataType.M[:, 1], t, self.PlotDataType.M[:, 2])
         axs[0].set_title('Moments')
-        axs[0].legend(['Mx','My','Mz'])
-        axs[1].plot(t,self.PlotDataType.thrust)
+        axs[0].legend(['Mx', 'My', 'Mz'])
+        axs[1].plot(t, self.PlotDataType.thrust)
         axs[1].set_title('Thrust')
-        return fig,axs
+        return fig, axs
 
     # def plotArmActuation(self):
     #     fig, axs = plt.subplot(1,1figsize=(15,10))
@@ -71,11 +69,13 @@ class PlotDataUAM():
         if model.type == 'x':
             Mx = model.d * (-self.control[:, 0] + self.control[:, 1] + self.control[:, 2] - self.control[:, 3])
             My = model.d * (-self.control[:, 0] + self.control[:, 1] - self.control[:, 2] + self.control[:, 3])
-            Mz = model.cm / model.cf * (-self.control[:, 0] - self.control[:, 1] + self.control[:, 2] + self.control[:, 3])
+            Mz = model.cm / model.cf * (-self.control[:, 0] - self.control[:, 1] + self.control[:, 2] +
+                                        self.control[:, 3])
         elif model.type == '+':
             Mx = model.d * (self.control[:, 1] - self.control[:, 3])
             My = model.d * (-self.control[:, 0] + self.control[:, 2])
-            Mz = model.cm / model.cf * (-self.control[:, 0] + self.control[:, 1] - self.control[:, 2] + self.control[:, 3])
+            Mz = model.cm / model.cf * (-self.control[:, 0] + self.control[:, 1] - self.control[:, 2] +
+                                        self.control[:, 3])
         self.M = np.zeros([np.size(self.control, 0), 3])
         self.M[:, 0] = Mx
         self.M[:, 1] = My
