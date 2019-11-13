@@ -137,21 +137,20 @@ If you want to learn about Crocoddyl, take a look at the Jupyter notebooks. Star
 
 To cite **Crocoddyl** in your academic research, please use the following bibtex lines:
 ```tex
-@misc{crocoddylweb,
-   author = {Carlos Mastalli, Rohan Budhiraja and Nicolas Mansard and others},
-   title = {Crocoddyl: a fast and flexible optimal control library for robot control under contact sequence},
-   howpublished = {https://gepgitlab.laas.fr/loco-3d/crocoddyl/wikis/home},
-   year = {2019}
-}
-```
-
-and the following one for the reference to the paper introducing **Crocoddyl**:
-```tex
 @unpublished{mastalli2020crocoddyl,
   author={Mastalli, Carlos and Budhiraja, Rohan and Merkt, Wolfgang and Saurel, Guilhem and Hammoud, Bilal
   and Naveau, Maximilien and Carpentier, Justin and Vijayakumar, Sethu and Mansard, Nicolas},
   title={{Crocoddyl: An Efficient and Versatile Framework for Multi-Contact Optimal Control}},
   year={2020}
+}
+```
+and the following one to reference this website:
+```tex
+@misc{crocoddylweb,
+   author = {Carlos Mastalli, Rohan Budhiraja and Nicolas Mansard and others},
+   title = {Crocoddyl: a fast and flexible optimal control library for robot control under contact sequence},
+   howpublished = {https://gepgitlab.laas.fr/loco-3d/crocoddyl/wikis/home},
+   year = {2019}
 }
 ```
 
@@ -174,15 +173,17 @@ You have a question or an issue? You may either directly open a [new issue](http
 
 The following people have been involved in the development of **Crocoddyl**:
 
-- [Carlos Mastalli](https://cmastalli.github.io/) (LAAS-CNRS): main developer and manager of the project
+- [Carlos Mastalli](https://cmastalli.github.io/) (University of Edinburgh): main developer and manager of the project
 - [Nicolas Mansard](http://projects.laas.fr/gepetto/index.php/Members/NicolasMansard) (LAAS-CNRS): project instructor
 - [Rohan Budhiraja](https://scholar.google.com/citations?user=NW9Io9AAAAAJ) (LAAS-CNRS): features extension
 - [Justin Carpentier](https://jcarpent.github.io/) (INRIA): efficient analytical rigid-body dynamics derivatives
 - [Maximilien Naveau](https://scholar.google.fr/citations?user=y_-cGlUAAAAJ&hl=fr) (MPI): unit-test support
 - [Guilhem Saurel](http://projects.laas.fr/gepetto/index.php/Members/GuilhemSaurel) (LAAS-CNRS): continuous integration and deployment
+- [Wolfgang Merkt](http://www.wolfgangmerkt.com/research/) (University of Edinburgh): feature extension and debugging
+- [Josep Martí Saumell](https://www.iri.upc.edu/staff/jmarti) (UPC): feature extension
 - [Bilal Hammoud](https://scholar.google.com/citations?hl=en&user=h_4NKpsAAAAJ) (MPI): features extension
 
 
 ## Acknowledgments
 
-The development of **Pinocchio** is supported by the [EU MEMMO project](http://www.memmo-project.eu/), and the [Gepetto team](http://projects.laas.fr/gepetto/) [@LAAS-CNRS](http://www.laas.fr).
+The development of **Pinocchio** is supported by the [EU MEMMO project](http://www.memmo-project.eu/), the [Gepetto team](http://projects.laas.fr/gepetto/) [@LAAS-CNRS](http://www.laas.fr), and the [Statistical Machine Learning and Motor Control Group](http://wcms.inf.ed.ac.uk/ipab/slmc) [@University of Edinburgh](https://www.edinburgh-robotics.org/).
