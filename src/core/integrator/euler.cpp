@@ -16,7 +16,8 @@ IntegratedActionModelEuler::IntegratedActionModelEuler(boost::shared_ptr<Differe
       differential_(model),
       time_step_(time_step),
       time_step2_(time_step * time_step),
-      with_cost_residual_(with_cost_residual) {
+      with_cost_residual_(with_cost_residual),
+      enable_integration_(true) {
   const std::size_t& ntau = differential_->get_nu();
   if (ntau < nu_) {
     Eigen::VectorXd lb = Eigen::VectorXd::Constant(nu_, -std::numeric_limits<double>::infinity());
@@ -29,6 +30,9 @@ IntegratedActionModelEuler::IntegratedActionModelEuler(boost::shared_ptr<Differe
   } else {
     set_u_lb(differential_->get_u_lb());
     set_u_ub(differential_->get_u_ub());
+  }
+  if (time_step == 0.) {
+    enable_integration_ = false;
   }
 }
 
@@ -49,14 +53,20 @@ void IntegratedActionModelEuler::calc(const boost::shared_ptr<ActionDataAbstract
   // Computing the next state (discrete time)
   const Eigen::VectorXd& v = x.tail(differential_->get_state()->get_nv());
   const Eigen::VectorXd& a = d->differential->xout;
-  d->dx << v * time_step_ + a * time_step2_, a * time_step_;
-  differential_->get_state()->integrate(x, d->dx, d->xnext);
+  if (enable_integration_) {
+    d->dx << v * time_step_ + a * time_step2_, a * time_step_;
+    differential_->get_state()->integrate(x, d->dx, d->xnext);
+    d->cost = time_step_ * d->differential->cost;
+  } else {
+    d->dx.setZero();
+    d->xnext = x;
+    d->cost = d->differential->cost;
+  }
 
   // Updating the cost value
   if (with_cost_residual_) {
     d->r = d->differential->r;
   }
-  d->cost = d->differential->cost;
 }
 
 void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
@@ -77,20 +87,30 @@ void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbst
   differential_->calcDiff(d->differential, x, u, false);
   differential_->get_state()->Jintegrate(x, d->dx, d->dxnext_dx, d->dxnext_ddx);
 
-  const Eigen::MatrixXd& da_dx = d->differential->Fx;
-  const Eigen::MatrixXd& da_du = d->differential->Fu;
-  d->ddx_dx << da_dx * time_step_, da_dx;
-  d->ddx_du << da_du * time_step_, da_du;
-  for (std::size_t i = 0; i < nv; ++i) {
-    d->ddx_dx(i, i + nv) += 1.;
+  d->Fx = d->dxnext_dx;
+  if (enable_integration_) {
+    const Eigen::MatrixXd& da_dx = d->differential->Fx;
+    const Eigen::MatrixXd& da_du = d->differential->Fu;
+    d->ddx_dx << da_dx * time_step_, da_dx;
+    d->ddx_du << da_du * time_step_, da_du;
+    for (std::size_t i = 0; i < nv; ++i) {
+      d->ddx_dx(i, i + nv) += 1.;
+    }
+    d->Fx.noalias() += time_step_ * (d->dxnext_ddx * d->ddx_dx);
+    d->Fu.noalias() = time_step_ * (d->dxnext_ddx * d->ddx_du);
+    d->Lx = time_step_ * d->differential->Lx;
+    d->Lu = time_step_ * d->differential->Lu;
+    d->Lxx = time_step_ * d->differential->Lxx;
+    d->Lxu = time_step_ * d->differential->Lxu;
+    d->Luu = time_step_ * d->differential->Luu;
+  } else {
+    d->Fu.setZero();
+    d->Lx = d->differential->Lx;
+    d->Lu = d->differential->Lu;
+    d->Lxx = d->differential->Lxx;
+    d->Lxu = d->differential->Lxu;
+    d->Luu = d->differential->Luu;
   }
-  d->Fx = d->dxnext_dx + time_step_ * d->dxnext_ddx * d->ddx_dx;
-  d->Fu = time_step_ * d->dxnext_ddx * d->ddx_du;
-  d->Lx = d->differential->Lx;
-  d->Lu = d->differential->Lu;
-  d->Lxx = d->differential->Lxx;
-  d->Lxu = d->differential->Lxu;
-  d->Luu = d->differential->Luu;
 }
 
 boost::shared_ptr<ActionDataAbstract> IntegratedActionModelEuler::createData() {

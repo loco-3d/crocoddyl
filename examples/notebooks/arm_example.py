@@ -35,10 +35,11 @@ terminalCostModel.addCost("stateReg", xRegCost, 1e-4)
 terminalCostModel.addCost("ctrlReg", uRegCost, 1e-7)
 
 # Create the action model
+actuation = crocoddyl.ActuationModelFull(state)
 runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, runningCostModel), DT)
+    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, runningCostModel), DT)
 terminalModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, terminalCostModel))
+    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, terminalCostModel))
 #runningModel.differential.armature = 0.2 * np.matrix(np.ones(state.nv)).T
 #terminalModel.differential.armature = 0.2 * np.matrix(np.ones(state.nv)).T
 

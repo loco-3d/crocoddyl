@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -20,7 +20,7 @@ namespace crocoddyl {
 class DifferentialActionModelFreeFwdDynamics : public DifferentialActionModelAbstract {
  public:
   DifferentialActionModelFreeFwdDynamics(boost::shared_ptr<StateMultibody> state,
-                                         boost::shared_ptr<ActuationModelAbstract> actuation,                                        
+                                         boost::shared_ptr<ActuationModelAbstract> actuation,
                                          boost::shared_ptr<CostModelSum> costs);
   ~DifferentialActionModelFreeFwdDynamics();
 
@@ -53,12 +53,14 @@ struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbst
       : DifferentialActionDataAbstract(model),
         pinocchio(pinocchio::Data(model->get_pinocchio())),
         Minv(model->get_state()->get_nv(), model->get_state()->get_nv()),
-        u_drift(model->get_nu()) {
+        u_drift(model->get_nu()),
+        dtau_dx(model->get_nu(), model->get_state()->get_ndx()) {
     actuation = model->get_actuation()->createData();
     costs = model->get_costs()->createData(&pinocchio);
     costs->shareMemory(this);
     Minv.fill(0);
     u_drift.fill(0);
+    dtau_dx.fill(0);
   }
 
   pinocchio::Data pinocchio;
@@ -66,6 +68,7 @@ struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbst
   boost::shared_ptr<CostDataSum> costs;
   Eigen::MatrixXd Minv;
   Eigen::VectorXd u_drift;
+  Eigen::MatrixXd dtau_dx;
 };
 
 }  // namespace crocoddyl
