@@ -15,12 +15,13 @@ StateMultibody::StateMultibody(pinocchio::Model& model)
     : StateAbstract(model.nq + model.nv, 2 * model.nv),
       pinocchio_(model),
       x0_(Eigen::VectorXd::Zero(model.nq + model.nv)),
-      joint_type_(Single) {
+      joint_type_(Simple) {
   x0_.head(nq_) = pinocchio::neutral(pinocchio_);
 
   // In a multibody system, we could define the first joint using Lie groups.
-  // The current cases are free-flye (SE3) and sperical (S03).
-  // The rest of joints use Euclidean algebra. We use this fact for computing Jdiff
+  // The current cases are free-flyer (SE3) and spherical (S03).
+  // Instead simple represents any joint that can model within the Eucliden manifold.
+  // The rest of joints use Euclidean algebra. We use this fact for computing Jdiff.
   if (model.joints[1].shortname() == "JointModelFreeFlyer") {
     joint_type_ = FreeFlyer;
   } else if (model.joints[1].shortname() == "JointDataSphericalZYX") {
