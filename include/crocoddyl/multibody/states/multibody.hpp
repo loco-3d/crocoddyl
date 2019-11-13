@@ -14,10 +14,10 @@
 
 namespace crocoddyl {
 
-enum JointType { FreeFlyer = 0, Spherical, Single };
-
 class StateMultibody : public StateAbstract {
  public:
+  enum JointType { FreeFlyer = 0, Spherical, Simple };
+
   explicit StateMultibody(pinocchio::Model& model);
   ~StateMultibody();
 
