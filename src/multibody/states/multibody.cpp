@@ -14,8 +14,18 @@ namespace crocoddyl {
 StateMultibody::StateMultibody(pinocchio::Model& model)
     : StateAbstract(model.nq + model.nv, 2 * model.nv),
       pinocchio_(model),
-      x0_(Eigen::VectorXd::Zero(model.nq + model.nv)) {
+      x0_(Eigen::VectorXd::Zero(model.nq + model.nv)),
+      joint_type_(Single) {
   x0_.head(nq_) = pinocchio::neutral(pinocchio_);
+
+  // In a multibody system, we could define the first joint using Lie groups.
+  // The current cases are free-flye (SE3) and sperical (S03).
+  // The rest of joints use Euclidean algebra. We use this fact for computing Jdiff
+  if (model.joints[1].shortname() == "JointModelFreeFlyer") {
+    joint_type_ = FreeFlyer;
+  } else if (model.joints[1].shortname() == "JointDataSphericalZYX") {
+    joint_type_ = Spherical;
+  }
 }
 
 StateMultibody::~StateMultibody() {}
@@ -166,10 +176,22 @@ void StateMultibody::updateJdiff(const Eigen::Ref<const Eigen::MatrixXd>& Jdq, E
                                  bool positive) const {
   if (positive) {
     Jd.diagonal() = Jdq.diagonal();
-    Jd.block<6, 6>(0, 0) = Jdq.block<6, 6>(0, 0).inverse();
+
+    // Needed only for systems with bases defined as SE3 and S03 group
+    if (joint_type_ == FreeFlyer) {
+      Jd.block<6, 6>(0, 0) = Jdq.block<6, 6>(0, 0).inverse();
+    } else if (joint_type_ == Spherical) {
+      Jd.block<3, 3>(0, 0) = Jdq.block<3, 3>(0, 0).inverse();
+    }
   } else {
     Jd.diagonal() = -Jdq.diagonal();
-    Jd.block<6, 6>(0, 0) = -Jdq.block<6, 6>(0, 0).inverse();
+
+    // Needed only for systems with bases defined as SE3 and S03 group
+    if (joint_type_ == FreeFlyer) {
+      Jd.block<6, 6>(0, 0) = -Jdq.block<6, 6>(0, 0).inverse();
+    } else if (joint_type_ == Spherical) {
+      Jd.block<3, 3>(0, 0) = -Jdq.block<3, 3>(0, 0).inverse();
+    }
   }
 }
 
