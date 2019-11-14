@@ -28,8 +28,8 @@ xPendCost = CostModelDoublePendulum(state, crocoddyl.ActivationModelWeightedQuad
 
 dt = 1e-2
 
-runningCostModel.addCost("uReg", uRegCost, 1e-6 / dt)
-runningCostModel.addCost("xGoal", xPendCost, 1e-3 / dt)
+runningCostModel.addCost("uReg", uRegCost, 1e-4 / dt)
+runningCostModel.addCost("xGoal", xPendCost, 1e-5 / dt)
 terminalCostModel.addCost("xGoal", xPendCost, 1e4)
 
 runningModel = crocoddyl.IntegratedActionModelEuler(
