@@ -58,6 +58,7 @@ class PlotUAM:
         self.PlotDataType = PlotDataUAM(self)
 
     def plotFlyingPlatformState(self):
+        import matplotlib.pyplot as plt
         fig, axs = plt.subplots(1, 2, figsize=(15, 10))
         fig.suptitle('Motor forces')
         t = self.PlotDataType.t_state
@@ -72,6 +73,7 @@ class PlotUAM:
         return fig, axs
 
     def plotMotorForces(self):
+        import matplotlib.pyplot as plt
         fig, axs = plt.subplots(2, 2, figsize=(15, 10))
         fig.suptitle('Motor forces')
         t = self.PlotDataType.t
@@ -86,6 +88,7 @@ class PlotUAM:
         return fig, axs
 
     def plotFlyingPlatformActuation(self):
+        import matplotlib.pyplot as plt
         fig, axs = plt.subplots(1, 2, figsize=(15, 10))
         fig.suptitle('Motor forces')
         t = self.PlotDataType.t

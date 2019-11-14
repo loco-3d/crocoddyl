@@ -54,14 +54,19 @@ terminalModel = crocoddyl.IntegratedActionModelEuler(
 
 # Creating the shooting problem and the FDDP solver
 T = 33
-problem = crocoddyl.ShootingProblem(np.vstack([hector.q0, pinocchio.utils.zero((state.nv))]), [runningModel]*T, terminalModel)
+problem = crocoddyl.ShootingProblem(np.vstack([hector.q0, pinocchio.utils.zero((state.nv))]), [runningModel] * T,
+                                    terminalModel)
 fddp = crocoddyl.SolverFDDP(problem)
 
 fddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
 
 cameraTF = [-0.03, 4.4, 2.3, -0.02, 0.56, 0.83, -0.03]
 if WITHDISPLAY and WITHPLOT:
-    fddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(hector, 4, 4, cameraTF, False)])
+    fddp.setCallbacks([
+        crocoddyl.CallbackLogger(),
+        crocoddyl.CallbackVerbose(),
+        crocoddyl.CallbackDisplay(hector, 4, 4, cameraTF, False)
+    ])
 elif WITHDISPLAY:
     fddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(hector, 4, 4, cameraTF, False)])
 else:

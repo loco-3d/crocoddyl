@@ -2,7 +2,6 @@ import os
 import sys
 
 import crocoddyl
-import pinocchio
 import numpy as np
 import example_robot_data
 from crocoddyl.utils.pendulum import CostModelDoublePendulum, ActuationModelDoublePendulum
@@ -45,7 +44,11 @@ fddp = crocoddyl.SolverFDDP(problem)
 
 cameraTF = [1.4, 0., 0.2, 0.5, 0.5, 0.5, 0.5]
 if WITHDISPLAY and WITHPLOT:
-    fddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(robot, 4, 4, cameraTF, False)])
+    fddp.setCallbacks([
+        crocoddyl.CallbackLogger(),
+        crocoddyl.CallbackVerbose(),
+        crocoddyl.CallbackDisplay(robot, 4, 4, cameraTF, False)
+    ])
 elif WITHDISPLAY:
     fddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(robot, 4, 4, cameraTF, False)])
 else:
