@@ -1,4 +1,6 @@
 SET(${PROJECT_NAME}_EXAMPLES_PYTHON
+  double_pendulum
+  quadrotor
   arm_manipulation
   bipedal_walk
   quadrupedal_gaits

@@ -2,7 +2,7 @@ import crocoddyl
 import pinocchio
 import numpy as np
 import example_robot_data
-from quadrotor_utils import ActuationModelUAM
+from crocoddyl.utils.quadrotor import ActuationModelUAM
 
 crocoddyl.switchToNumpyMatrix()
 

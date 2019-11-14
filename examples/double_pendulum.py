@@ -2,7 +2,7 @@ import crocoddyl
 import pinocchio
 import numpy as np
 import example_robot_data
-from double_pendulum_utils import CostModelDoublePendulum, ActuationModelDoublePendulum
+from crocoddyl.utils.pendulum import CostModelDoublePendulum, ActuationModelDoublePendulum
 
 crocoddyl.switchToNumpyMatrix()
 
