@@ -55,11 +55,8 @@ void exposeMultibody() {
   exposeCostFrameTranslation();
   exposeCostFrameRotation();
   exposeCostFrameVelocity();
-<<<<<<< bindings/python/crocoddyl/multibody.hpp
-  exposeCostCentroidalMomentum();
-=======
   exposeCostContactForce();
->>>>>>> bindings/python/crocoddyl/multibody.hpp
+  exposeCostCentroidalMomentum();
   exposeContactMultiple();
   exposeContact3D();
   exposeContact6D();

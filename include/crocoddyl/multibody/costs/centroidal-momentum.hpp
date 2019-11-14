@@ -13,10 +13,10 @@
 
 namespace crocoddyl {
 
+typedef Eigen::Matrix<double, 6, 1> Vector6d;
+
 class CostModelCentroidalMomentum : public CostModelAbstract {
  public:
-  typedef Eigen::Matrix<double, 6, 1> Vector6d;
-
   CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state,
                               boost::shared_ptr<ActivationModelAbstract> activation, const Vector6d& ref,
                               const std::size_t& nu);
@@ -32,7 +32,7 @@ class CostModelCentroidalMomentum : public CostModelAbstract {
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
   boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
-  const Eigen::VectorXd& get_ref() const;
+  const Vector6d& get_ref() const;
 
  private:
   Vector6d ref_;

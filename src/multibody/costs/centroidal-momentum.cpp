@@ -75,6 +75,6 @@ boost::shared_ptr<CostDataAbstract> CostModelCentroidalMomentum::createData(pino
   return boost::make_shared<CostDataCentroidalMomentum>(this, data);
 }
 
-const Eigen::VectorXd& CostModelCentroidalMomentum::get_ref() const { return ref_; }
+const Vector6d& CostModelCentroidalMomentum::get_ref() const { return ref_; }
 
 }  // namespace crocoddyl
