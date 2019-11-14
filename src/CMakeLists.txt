@@ -42,6 +42,7 @@ SET(${PROJECT_NAME}_SOURCES
   multibody/costs/frame-rotation.cpp
   multibody/costs/frame-velocity.cpp
   multibody/costs/contact-force.cpp
+  multibody/costs/centroidal-momentum.cpp
   multibody/contacts/multiple-contacts.cpp
   multibody/contacts/contact-3d.cpp
   multibody/contacts/contact-6d.cpp
