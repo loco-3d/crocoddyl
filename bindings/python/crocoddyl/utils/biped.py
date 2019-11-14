@@ -188,19 +188,19 @@ class SimpleBipedGaitProblem:
         costModel = crocoddyl.CostModelSum(self.state, self.actuation.nu)
         if isinstance(comTask, np.ndarray):
             comTrack = crocoddyl.CostModelCoMPosition(self.state, comTask, self.actuation.nu)
-            costModel.addCost("comTrack", comTrack, 1e4)
+            costModel.addCost("comTrack", comTrack, 1e6)
         if swingFootTask is not None:
             for i in swingFootTask:
                 footTrack = crocoddyl.CostModelFramePlacement(self.state, i, self.actuation.nu)
-                costModel.addCost(self.rmodel.frames[i.frame].name + "_footTrack", footTrack, 1e4)
+                costModel.addCost(self.rmodel.frames[i.frame].name + "_footTrack", footTrack, 1e6)
 
         stateWeights = np.array([0] * 3 + [500.] * 3 + [0.01] * (self.state.nv - 6) + [10] * self.state.nv)
         stateReg = crocoddyl.CostModelState(self.state,
                                             crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeights**2).T),
                                             self.rmodel.defaultState, self.actuation.nu)
         ctrlReg = crocoddyl.CostModelControl(self.state, self.actuation.nu)
-        costModel.addCost("stateReg", stateReg, 1e-1)
-        costModel.addCost("ctrlReg", ctrlReg, 1e-3)
+        costModel.addCost("stateReg", stateReg, 1e1)
+        costModel.addCost("ctrlReg", ctrlReg, 1e-1)
 
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
@@ -214,7 +214,7 @@ class SimpleBipedGaitProblem:
 
         :param supportFootIds: Ids of the constrained feet
         :param swingFootTask: swinging foot task
-        :param pseudoImpulse: true for pseudo impulse models, otherwise it uses the impulse model
+        :param pseudoImpulse: true for pseudo-impulse models, otherwise it uses the impulse model
         :return action model for a foot switch phase
         """
         if pseudoImpulse:
@@ -225,7 +225,7 @@ class SimpleBipedGaitProblem:
     def createPseudoImpulseModel(self, supportFootIds, swingFootTask):
         """ Action model for pseudo-impulse models.
 
-      A pseudo-impulse model consists of adding high-penalty cost for the contact velocities.
+        A pseudo-impulse model consists of adding high-penalty cost for the contact velocities.
         :param supportFootIds: Ids of the constrained feet
         :param swingFootTask: swinging foot task
         :return pseudo-impulse differential action model

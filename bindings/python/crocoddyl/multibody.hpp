@@ -24,6 +24,7 @@
 #include "python/crocoddyl/multibody/costs/frame-translation.hpp"
 #include "python/crocoddyl/multibody/costs/frame-rotation.hpp"
 #include "python/crocoddyl/multibody/costs/frame-velocity.hpp"
+#include "python/crocoddyl/multibody/costs/contact-force.hpp"
 #include "python/crocoddyl/multibody/costs/centroidal-momentum.hpp"
 #include "python/crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "python/crocoddyl/multibody/contacts/contact-3d.hpp"
@@ -54,7 +55,11 @@ void exposeMultibody() {
   exposeCostFrameTranslation();
   exposeCostFrameRotation();
   exposeCostFrameVelocity();
+<<<<<<< bindings/python/crocoddyl/multibody.hpp
   exposeCostCentroidalMomentum();
+=======
+  exposeCostContactForce();
+>>>>>>> bindings/python/crocoddyl/multibody.hpp
   exposeContactMultiple();
   exposeContact3D();
   exposeContact6D();

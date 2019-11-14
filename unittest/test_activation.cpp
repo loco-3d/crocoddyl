@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS, New York University, Max Planck Gesellshaft
+// Copyright (C) 2018-2020, LAAS-CNRS, New York University, Max Planck Gesellshaft
+//                          University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -20,22 +21,6 @@
 #include "crocoddyl/core/activations/smooth-abs.hpp"
 #include "crocoddyl/core/activations/weighted-quadratic.hpp"
 #include "crocoddyl/core/numdiff/activation.hpp"
-
-/**
- * c = sum( a(ri) )
- * c' = sum( [a(ri)]' ) = sum( ri' a'(ri) ) = R' [ a'(ri) ]_i
- * c'' = R' [a'(ri) ]_i' = R' [a''(ri) ] R
- *
- * ex
- * a(x) =  x**2/x
- * a'(x) = x
- * a''(x) = 1
- *
- * sum(a(ri)) = sum(ri**2/2) = .5*r'r
- * sum(ri' a'(ri)) = sum(ri' ri) = R' r
- * sum(ri' a''(ri) ri') = R' r
- * c'' = R'R
- */
 
 using namespace boost::unit_test;
 

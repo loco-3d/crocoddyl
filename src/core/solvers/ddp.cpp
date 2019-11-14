@@ -158,9 +158,8 @@ void SolverDDP::backwardPass() {
   Vxx_.back() = d_T->Lxx;
   Vx_.back() = d_T->Lx;
 
-  x_reg_.fill(xreg_);
   if (!std::isnan(xreg_)) {
-    Vxx_.back().diagonal() += x_reg_;
+    Vxx_.back().diagonal().array() += xreg_;
   }
 
   if (!is_feasible_) {
@@ -168,37 +167,43 @@ void SolverDDP::backwardPass() {
   }
 
   for (int t = static_cast<int>(problem_->get_T()) - 1; t >= 0; --t) {
-    const boost::shared_ptr<ActionModelAbstract>& m = problem_->running_models_[t];
     const boost::shared_ptr<ActionDataAbstract>& d = problem_->running_datas_[t];
     const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
     const Eigen::VectorXd& Vx_p = Vx_[t + 1];
 
+    Qxx_[t] = d->Lxx;
+    Qxu_[t] = d->Lxu;
+    Quu_[t] = d->Luu;
+    Qx_[t] = d->Lx;
+    Qu_[t] = d->Lu;
     FxTVxx_p_.noalias() = d->Fx.transpose() * Vxx_p;
     FuTVxx_p_[t].noalias() = d->Fu.transpose() * Vxx_p;
-    Qxx_[t].noalias() = d->Lxx + FxTVxx_p_ * d->Fx;
-    Qxu_[t].noalias() = d->Lxu + FxTVxx_p_ * d->Fu;
-    Quu_[t].noalias() = d->Luu + FuTVxx_p_[t] * d->Fu;
-    Qx_[t].noalias() = d->Lx + d->Fx.transpose() * Vx_p;
-    Qu_[t].noalias() = d->Lu + d->Fu.transpose() * Vx_p;
+    Qxx_[t].noalias() += FxTVxx_p_ * d->Fx;
+    Qxu_[t].noalias() += FxTVxx_p_ * d->Fu;
+    Quu_[t].noalias() += FuTVxx_p_[t] * d->Fu;
+    Qx_[t].noalias() += d->Fx.transpose() * Vx_p;
+    Qu_[t].noalias() += d->Fu.transpose() * Vx_p;
 
     if (!std::isnan(ureg_)) {
-      const std::size_t& nu = m->get_nu();
-      Quu_[t].diagonal() += Eigen::VectorXd::Constant(nu, ureg_);
+      Quu_[t].diagonal().array() += ureg_;
     }
 
     computeGains(t);
 
+    Vx_[t] = Qx_[t];
     if (std::isnan(ureg_)) {
-      Vx_[t].noalias() = Qx_[t] - K_[t].transpose() * Qu_[t];
+      Vx_[t].noalias() -= K_[t].transpose() * Qu_[t];
     } else {
       Quuk_[t].noalias() = Quu_[t] * k_[t];
-      Vx_[t].noalias() = Qx_[t] + K_[t].transpose() * Quuk_[t] - 2 * K_[t].transpose() * Qu_[t];
+      Vx_[t].noalias() += K_[t].transpose() * Quuk_[t];
+      Vx_[t].noalias() -= 2 * (K_[t].transpose() * Qu_[t]);
     }
-    Vxx_[t].noalias() = Qxx_[t] - Qxu_[t] * K_[t];
-    Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose()).eval();  // TODO(cmastalli): as suggested by Nicolas
+    Vxx_[t] = Qxx_[t];
+    Vxx_[t].noalias() -= Qxu_[t] * K_[t];
+    Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose()).eval();
 
     if (!std::isnan(xreg_)) {
-      Vxx_[t].diagonal() += x_reg_;
+      Vxx_[t].diagonal().array() += xreg_;
     }
 
     // Compute and store the Vx gradient at end of the interval (rollout state)
@@ -330,7 +335,6 @@ void SolverDDP::allocateData() {
   xs_try_.back() = problem_->terminal_model_->get_state()->zero();
   gaps_.back() = Eigen::VectorXd::Zero(ndx);
 
-  x_reg_ = Eigen::VectorXd::Constant(ndx, xreg_);
   FxTVxx_p_ = Eigen::MatrixXd::Zero(ndx, ndx);
   fTVxx_p_ = Eigen::VectorXd::Zero(ndx);
 }

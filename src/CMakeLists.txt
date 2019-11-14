@@ -14,6 +14,7 @@ SET(${PROJECT_NAME}_SOURCES
   core/optctrl/shooting.cpp
   core/solvers/ddp.cpp
   core/solvers/fddp.cpp
+  core/solvers/kkt.cpp
   core/solvers/box-ddp.cpp
   core/states/euclidean.cpp
   core/actions/unicycle.cpp
@@ -40,6 +41,7 @@ SET(${PROJECT_NAME}_SOURCES
   multibody/costs/frame-translation.cpp
   multibody/costs/frame-rotation.cpp
   multibody/costs/frame-velocity.cpp
+  multibody/costs/contact-force.cpp
   multibody/costs/centroidal-momentum.cpp
   multibody/contacts/multiple-contacts.cpp
   multibody/contacts/contact-3d.cpp

@@ -385,12 +385,12 @@ class SimpleQuadrupedalGaitProblem:
         costModel = crocoddyl.CostModelSum(self.state, self.actuation.nu)
         if isinstance(comTask, np.ndarray):
             comTrack = crocoddyl.CostModelCoMPosition(self.state, comTask, self.actuation.nu)
-            costModel.addCost("comTrack", comTrack, 1e4)
+            costModel.addCost("comTrack", comTrack, 1e6)
         if swingFootTask is not None:
             for i in swingFootTask:
                 xref = crocoddyl.FrameTranslation(i.frame, i.oMf.translation)
                 footTrack = crocoddyl.CostModelFrameTranslation(self.state, xref, self.actuation.nu)
-                costModel.addCost(self.rmodel.frames[i.frame].name + "_footTrack", footTrack, 1e4)
+                costModel.addCost(self.rmodel.frames[i.frame].name + "_footTrack", footTrack, 1e6)
 
         stateWeights = np.array([0.] * 3 + [500.] * 3 + [0.01] * (self.rmodel.nv - 6) + [10.] * 6 + [1.] *
                                 (self.rmodel.nv - 6))
@@ -398,8 +398,8 @@ class SimpleQuadrupedalGaitProblem:
                                             crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeights**2).T),
                                             self.rmodel.defaultState, self.actuation.nu)
         ctrlReg = crocoddyl.CostModelControl(self.state, self.actuation.nu)
-        costModel.addCost("stateReg", stateReg, 1e-1)
-        costModel.addCost("ctrlReg", ctrlReg, 1e-3)
+        costModel.addCost("stateReg", stateReg, 1e1)
+        costModel.addCost("ctrlReg", ctrlReg, 1e-1)
 
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme

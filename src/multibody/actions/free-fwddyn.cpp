@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,13 +18,17 @@
 
 namespace crocoddyl {
 
-DifferentialActionModelFreeFwdDynamics::DifferentialActionModelFreeFwdDynamics(boost::shared_ptr<StateMultibody> state,
-                                                                               boost::shared_ptr<CostModelSum> costs)
-    : DifferentialActionModelAbstract(state, state->get_pinocchio().nv, costs->get_nr()),
+DifferentialActionModelFreeFwdDynamics::DifferentialActionModelFreeFwdDynamics(
+    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation,
+    boost::shared_ptr<CostModelSum> costs)
+    : DifferentialActionModelAbstract(state, actuation->get_nu(), costs->get_nr()),
+      actuation_(actuation),
       costs_(costs),
       pinocchio_(state->get_pinocchio()),
       with_armature_(true),
-      armature_(Eigen::VectorXd::Zero(state->get_nv())) {}
+      armature_(Eigen::VectorXd::Zero(state->get_nv())) {
+  assert(costs_->get_nu() == nu_ && "Costs doesn't have the same control dimension");
+}
 
 DifferentialActionModelFreeFwdDynamics::~DifferentialActionModelFreeFwdDynamics() {}
 
@@ -38,16 +42,18 @@ void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<Differ
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(state_->get_nv());
 
+  actuation_->calc(d->actuation, x, u);
+
   // Computing the dynamics using ABA or manually for armature case
   if (with_armature_) {
-    d->xout = pinocchio::aba(pinocchio_, d->pinocchio, q, v, u);
+    d->xout = pinocchio::aba(pinocchio_, d->pinocchio, q, v, d->actuation->tau);
   } else {
     pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, v);
     d->pinocchio.M.diagonal() += armature_;
     pinocchio::cholesky::decompose(pinocchio_, d->pinocchio);
     d->Minv.setZero();
     pinocchio::cholesky::computeMinv(pinocchio_, d->pinocchio, d->Minv);
-    d->u_drift = u - d->pinocchio.nle;
+    d->u_drift = d->actuation->tau - d->pinocchio.nle;
     d->xout.noalias() = d->Minv * d->u_drift;
   }
 
@@ -74,19 +80,21 @@ void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<Di
     pinocchio::computeJointJacobians(pinocchio_, d->pinocchio, q);
   }
 
+  actuation_->calcDiff(d->actuation, x, u, false);
+
   // Computing the dynamics derivatives
   if (with_armature_) {
-    pinocchio::computeABADerivatives(pinocchio_, d->pinocchio, q, v, u);
+    pinocchio::computeABADerivatives(pinocchio_, d->pinocchio, q, v, d->actuation->tau);
     d->Fx.leftCols(nv) = d->pinocchio.ddq_dq;
     d->Fx.rightCols(nv) = d->pinocchio.ddq_dv;
-    d->Fu = d->pinocchio.Minv;
+    d->Fx += d->pinocchio.Minv * d->actuation->dtau_dx;
+    d->Fu.noalias() = d->pinocchio.Minv * d->actuation->dtau_du;
   } else {
     pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout);
-    d->Fx.leftCols(nv).noalias() = d->Minv * d->pinocchio.dtau_dq;
-    d->Fx.leftCols(nv) *= -1.;
-    d->Fx.rightCols(nv).noalias() = d->Minv * d->pinocchio.dtau_dv;
-    d->Fx.rightCols(nv) *= -1.;
-    d->Fu = d->Minv;
+    d->dtau_dx.leftCols(nv) = d->actuation->dtau_dx.leftCols(nv) - d->pinocchio.dtau_dq;
+    d->dtau_dx.rightCols(nv) = d->actuation->dtau_dx.rightCols(nv) - d->pinocchio.dtau_dv;
+    d->Fx.noalias() = d->Minv * d->dtau_dx;
+    d->Fu.noalias() = d->Minv * d->actuation->dtau_du;
   }
 
   // Computing the cost derivatives
@@ -98,6 +106,10 @@ boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelFreeFwd
 }
 
 pinocchio::Model& DifferentialActionModelFreeFwdDynamics::get_pinocchio() const { return pinocchio_; }
+
+const boost::shared_ptr<ActuationModelAbstract>& DifferentialActionModelFreeFwdDynamics::get_actuation() const {
+  return actuation_;
+}
 
 const boost::shared_ptr<CostModelSum>& DifferentialActionModelFreeFwdDynamics::get_costs() const { return costs_; }
 
