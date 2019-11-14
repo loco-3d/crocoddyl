@@ -37,18 +37,6 @@ class ActuationModelUAM(crocoddyl.ActuationModelAbstract):
         np.fill_diagonal(self.S[6:, 4:], 1)
 
     def calc(self, data, x, u):
-        # d, cf, cm = self.d, self.cf, self.cf
-        # uLim, lLim = self.uLim, self.lLim
-
-        # Actuation function - tanh
-        # range = uLim - lLim
-        # range = uLim - lLim
-        # f = lLim + range / 2 + range / 2 * np.tanh(u)
-        # d_f = range / 2 * np.tanh(u)**2
-        # J_f_u = np.zeros([4, 4])
-        # np.fill_diagonal(J_f_u, d_f)
-        # data.a = np.dot(J_tau_f, f)
-
         data.tau = self.S * u
 
     def calcDiff(self, data, x, u, recalc=True):
