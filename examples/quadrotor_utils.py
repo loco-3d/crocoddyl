@@ -1,3 +1,62 @@
+import numpy as np
+import pinocchio
+import crocoddyl
+
+
+class ActuationModelUAM(crocoddyl.ActuationModelAbstract):
+    def __init__(self, state, quadrotorType, rotorDistance, coefM, coefF, uLim, lLim):
+        crocoddyl.ActuationModelAbstract.__init__(self, state, state.nv - 2)
+        # quadrotorType (from top view)
+        # X Type -> Motor 1: Front Right, CCW
+        #           Motor 2: Back Left, CCW
+        #           Motor 3: Front Left, CW
+        #           Motor 4: Back Right, CW
+        # + Type -> Motor 1: Front, CCW
+        #           Motor 2: Left, CCW
+        #           Motor 3: Back, CW
+        #           Motor 4: Right, CW
+        self.type = quadrotorType
+        self.d = rotorDistance
+        self.cm = coefM
+        self.cf = coefF
+        self.uLim = uLim
+        self.lLim = lLim
+
+        # Jacobian of generalized torque with respect motor vertical forces
+        self.S = pinocchio.utils.zero((state.nv, self.nu))
+        if self.type == 'x':
+            self.S[2:6, :4] = np.matrix(
+                [[1, 1, 1, 1], [-self.d, self.d, self.d, -self.d], [-self.d, self.d, -self.d, self.d],
+                 [-self.cm / self.cf, -self.cm / self.cf, self.cm / self.cf, self.cm / self.cf]])
+        elif self.type == '+':
+            self.S[2:6, :4] = np.matrix(
+                [[1, 1, 1, 1], [0, self.d, 0, -self.d], [-self.d, 0, self.d, 0],
+                 [-self.cm / self.cf, self.cm / self.cf, -self.cm / self.cf, self.cm / self.cf]])
+
+        # In case it is a UAM instead of a UAV, for the arm tau = u
+        np.fill_diagonal(self.S[6:, 4:], 1)
+
+    def calc(self, data, x, u):
+        # d, cf, cm = self.d, self.cf, self.cf
+        # uLim, lLim = self.uLim, self.lLim
+
+        # Actuation function - tanh
+        # range = uLim - lLim
+        # range = uLim - lLim
+        # f = lLim + range / 2 + range / 2 * np.tanh(u)
+        # d_f = range / 2 * np.tanh(u)**2
+        # J_f_u = np.zeros([4, 4])
+        # np.fill_diagonal(J_f_u, d_f)
+        # data.a = np.dot(J_tau_f, f)
+
+        data.tau = self.S * u
+
+    def calcDiff(self, data, x, u, recalc=True):
+        if recalc:
+            self.calc(data, x, u)
+        data.dtau_du = self.S
+
+
 class PlotUAM:
     def __init__(self, quadrotorType, stateTraj, controlTraj, knots, dt, d, cf, cm):
         self.stateTraj = stateTraj

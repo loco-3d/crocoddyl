@@ -45,10 +45,10 @@ T = 100
 x0 = [3.14, 0, 0., 0.]
 problem = crocoddyl.ShootingProblem(np.matrix(x0).T, [runningModel] * T, terminalModel)
 
-ddp = crocoddyl.SolverFDDP(problem)
+fddp = crocoddyl.SolverFDDP(problem)
 
-ddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
+fddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
 
-ddp.solve()
+fddp.solve()
 
-crocoddyl.displayTrajectory(robot, ddp.xs, dt)
+crocoddyl.displayTrajectory(robot, fddp.xs, dt)
