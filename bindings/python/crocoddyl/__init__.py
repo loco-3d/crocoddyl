@@ -2,7 +2,7 @@ from .libcrocoddyl_pywrap import *
 from .libcrocoddyl_pywrap import __version__
 
 
-def setGepettoViewerBackground(robot):
+def setGepettoViewerBackground(robot, floor):
     if not hasattr(robot, 'viewer'):
         # Spawn robot model
         robot.initViewer(loadModel=True)
@@ -10,13 +10,14 @@ def setGepettoViewerBackground(robot):
         window_id = robot.viewer.gui.getWindowID('python-pinocchio')
         robot.viewer.gui.setBackgroundColor1(window_id, [1., 1., 1., 1.])
         robot.viewer.gui.setBackgroundColor2(window_id, [1., 1., 1., 1.])
-        robot.viewer.gui.addFloor('hpp-gui/floor')
-        robot.viewer.gui.setScale('hpp-gui/floor', [0.5, 0.5, 0.5])
-        robot.viewer.gui.setColor('hpp-gui/floor', [0.7, 0.7, 0.7, 1.])
-        robot.viewer.gui.setLightingMode('hpp-gui/floor', 'OFF')
+        if floor:
+            robot.viewer.gui.addFloor('hpp-gui/floor')
+            robot.viewer.gui.setScale('hpp-gui/floor', [0.5, 0.5, 0.5])
+            robot.viewer.gui.setColor('hpp-gui/floor', [0.7, 0.7, 0.7, 1.])
+            robot.viewer.gui.setLightingMode('hpp-gui/floor', 'OFF')
 
 
-def displayTrajectory(robot, xs, dt=0.1, rate=-1, cameraTF=None):
+def displayTrajectory(robot, xs, dt=0.1, rate=-1, cameraTF=None, floor=True):
     """  Display a robot trajectory xs using Gepetto-viewer gui.
 
     :param robot: Robot wrapper
@@ -25,7 +26,7 @@ def displayTrajectory(robot, xs, dt=0.1, rate=-1, cameraTF=None):
     :param rate: visualization rate
     :param cameraTF: camera transform
     """
-    setGepettoViewerBackground(robot)
+    setGepettoViewerBackground(robot, floor)
     if cameraTF is not None:
         robot.viewer.gui.setCameraTransform(0, cameraTF)
     import numpy as np
@@ -39,18 +40,19 @@ def displayTrajectory(robot, xs, dt=0.1, rate=-1, cameraTF=None):
 
 
 class CallbackDisplay(libcrocoddyl_pywrap.CallbackAbstract):
-    def __init__(self, robotwrapper, rate=-1, freq=1, cameraTF=None):
+    def __init__(self, robotwrapper, rate=-1, freq=1, cameraTF=None, floor=True):
         libcrocoddyl_pywrap.CallbackAbstract.__init__(self)
         self.robotwrapper = robotwrapper
         self.rate = rate
         self.cameraTF = cameraTF
         self.freq = freq
+        self.floor = floor
 
     def __call__(self, solver):
         if (solver.iter + 1) % self.freq:
             return
         dt = solver.models()[0].dt
-        displayTrajectory(self.robotwrapper, solver.xs, dt, self.rate, self.cameraTF)
+        displayTrajectory(self.robotwrapper, solver.xs, dt, self.rate, self.cameraTF, self.floor)
 
 
 class CallbackLogger(libcrocoddyl_pywrap.CallbackAbstract):
