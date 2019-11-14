@@ -67,12 +67,14 @@ struct ContactDataAbstract {
         da0_dx(model->get_nc(), model->get_state()->get_ndx()),
         df_dx(model->get_nc(), model->get_state()->get_ndx()),
         df_du(model->get_nc(), model->get_nu()),
-        f(pinocchio::Force::Zero()) {
+        f(pinocchio::Force::Zero()),
+        frame_force(model->get_nc()) {
     Jc.fill(0);
     a0.fill(0);
     da0_dx.fill(0);
     df_dx.fill(0);
     df_du.fill(0);
+    frame_force.fill(0);
   }
   virtual ~ContactDataAbstract() {}
 
@@ -84,6 +86,7 @@ struct ContactDataAbstract {
   Eigen::MatrixXd df_dx;
   Eigen::MatrixXd df_du;
   pinocchio::Force f;
+  Eigen::VectorXd frame_force;
 };
 
 }  // namespace crocoddyl

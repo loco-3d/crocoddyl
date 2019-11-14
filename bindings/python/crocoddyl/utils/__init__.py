@@ -18,6 +18,10 @@ def rev_enumerate(l):
     return reversed(list(enumerate(l)))
 
 
+def absmax(A):
+    return np.max(abs(A))
+
+
 def raiseIfNan(A, error=None):
     if error is None:
         error = scl.LinAlgError("NaN in array")
