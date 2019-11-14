@@ -1,8 +1,7 @@
 import numpy as np
 
 import pinocchio
-from crocoddyl import (ContactModel6D, ContactModelMultiple,
-                       CostModelSum, DifferentialActionModelNumDiff)
+from crocoddyl import (ContactModel6D, ContactModelMultiple, CostModelSum, DifferentialActionModelNumDiff)
 from crocoddyl import ActuationModelFloatingBase as ActuationModelFreeFloating
 from crocoddyl import CostModelCentroidalMomentum as CostModelMomentum
 from crocoddyl import DifferentialActionModelContactFwdDynamics as DifferentialActionModelFloatingInContact
