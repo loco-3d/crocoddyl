@@ -1,25 +1,22 @@
+import os
+import sys
+
 import crocoddyl
 import pinocchio
 import numpy as np
 import example_robot_data
 from crocoddyl.utils.quadrotor import ActuationModelUAM
 
+WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
+WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
+
 crocoddyl.switchToNumpyMatrix()
 
 hector = example_robot_data.loadHector()
 robot_model = hector.model
 
-hector.initViewer(loadModel=True)
-hector.display(hector.q0)
-
 target_pos = np.array([1, 0, 1])
 target_quat = pinocchio.Quaternion(1, 0, 0, 0)
-target_quat.normalize()
-hector.viewer.gui.addXYZaxis('world/wp', [1., 0., 0., 1.], .03, 0.5)
-hector.viewer.gui.applyConfiguration(
-    'world/wp',
-    target_pos.tolist() + [target_quat[0], target_quat[1], target_quat[2], target_quat[3]])
-hector.viewer.gui.refresh()
 
 state = crocoddyl.StateMultibody(robot_model)
 distance_rotor_COG = 0.1525
@@ -44,25 +41,52 @@ goalTrackingCost = crocoddyl.CostModelFramePlacement(state, Mref, actModel.nu)
 xRegCost = crocoddyl.CostModelState(state, crocoddyl.ActivationModelWeightedQuad(stateWeights), state.zero(),
                                     actModel.nu)
 uRegCost = crocoddyl.CostModelControl(state, actModel.nu)
+runningCostModel.addCost("xReg", xRegCost, 1e-6)
+runningCostModel.addCost("uReg", uRegCost, 1e-6)
+runningCostModel.addCost("trackPose", goalTrackingCost, 1e-2)
+terminalCostModel.addCost("goalPose", goalTrackingCost, 100)
 
-runningCostModel.addCost("regx", xRegCost, 1e-6)
-runningCostModel.addCost("regu", uRegCost, 1e-6)
-runningCostModel.addCost("pos", goalTrackingCost, 1e-2)
-terminalCostModel.addCost("pos", goalTrackingCost, 100)
-
-dt, T = 3e-2, 33
-
+dt = 3e-2
 runningModel = crocoddyl.IntegratedActionModelEuler(
     crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actModel, runningCostModel), dt)
 terminalModel = crocoddyl.IntegratedActionModelEuler(
     crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actModel, terminalCostModel), dt)
 
+# Creating the shooting problem and the FDDP solver
+T = 33
 problem = crocoddyl.ShootingProblem(np.vstack([hector.q0, pinocchio.utils.zero((state.nv))]), [runningModel]*T, terminalModel)
-
 fddp = crocoddyl.SolverFDDP(problem)
 
 fddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
 
+cameraTF = [-0.03, 4.4, 2.3, -0.02, 0.56, 0.83, -0.03]
+if WITHDISPLAY and WITHPLOT:
+    fddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(hector, 4, 4, cameraTF, False)])
+elif WITHDISPLAY:
+    fddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(hector, 4, 4, cameraTF, False)])
+else:
+    fddp.setCallbacks([crocoddyl.CallbackVerbose()])
+
+# Solving the problem with the FDDP solver
 fddp.solve()
 
-crocoddyl.displayTrajectory(hector, fddp.xs, dt)
+# Plotting the entire motion
+if WITHPLOT:
+    log = fddp.getCallbacks()[0]
+    crocoddyl.plotOCSolution(log.xs, log.us, figIndex=1, show=False)
+    crocoddyl.plotConvergence(log.costs,
+                              log.control_regs,
+                              log.state_regs,
+                              log.gm_stops,
+                              log.th_stops,
+                              log.steps,
+                              figIndex=2)
+
+# Display the entire motion
+if WITHDISPLAY:
+    hector.viewer.gui.addXYZaxis('world/wp', [1., 0., 0., 1.], .03, 0.5)
+    hector.viewer.gui.applyConfiguration(
+        'world/wp',
+        target_pos.tolist() + [target_quat[0], target_quat[1], target_quat[2], target_quat[3]])
+
+    crocoddyl.displayTrajectory(hector, fddp.xs, dt, False)
