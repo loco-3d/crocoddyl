@@ -8,7 +8,6 @@ class ActivationModelAbstract:
     the activation value and its derivatives from it. Activation value and
     its derivatives are computed by calc() and calcDiff(), respectively.
     """
-
     def __init__(self):
         self.ActivationDataType = ActivationDataAbstract
 
@@ -79,7 +78,6 @@ class ActivationModelInequality(ActivationModelAbstract):
     a(r) = (r**2)/2 for r<b_l.
     a(r) = 0. for b_l<=r<=b_u
     """
-
     def __init__(self, lowerLimit, upperLimit, beta=None):
         assert ((lowerLimit <= upperLimit).all())
         assert (not np.any(np.isinf(lowerLimit)) and not np.any(np.isinf(upperLimit)) or beta is None)

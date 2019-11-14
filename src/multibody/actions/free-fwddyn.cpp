@@ -66,8 +66,7 @@ void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<Differ
 
 void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                       const Eigen::Ref<const Eigen::VectorXd>& x,
-                                                      const Eigen::Ref<const Eigen::VectorXd>& u, 
-                                                      const bool& recalc) {
+                                                      const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
   assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
 

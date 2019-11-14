@@ -2,7 +2,7 @@ import numpy as np
 import pinocchio
 
 from .state import StatePinocchio, StateVector
-from .utils import EPS, a2m, m2a, randomOrthonormalMatrix
+from .utils import EPS, a2m, randomOrthonormalMatrix
 
 
 class DifferentialActionModelAbstract:
@@ -14,7 +14,6 @@ class DifferentialActionModelAbstract:
     the dynamics, cost functions and their derivatives. These computations are
     mainly carry on inside calc() and calcDiff(), respectively.
     """
-
     def __init__(self, nq, nv, nu):
         self.nq = nq
         self.nv = nv

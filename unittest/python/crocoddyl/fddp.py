@@ -1,6 +1,5 @@
 import numpy as np
 import scipy.linalg as scl
-import time
 
 from .solver import SolverAbstract
 from .utils import raiseIfNan
@@ -141,9 +140,7 @@ class SolverFDDP(SolverAbstract):
             recalc = True
             while True:
                 try:
-                    # t = time.time()
                     self.computeDirection(recalc=recalc)
-                    # print "TIME, Solving: Compute direction. Iteration " + str(i) + ": " + str(time.time()-t)
                 except ArithmeticError:
                     recalc = False
                     self.increaseRegularization()

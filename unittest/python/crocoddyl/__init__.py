@@ -3,8 +3,7 @@ from .action import (ActionDataAbstract, ActionDataLQR, ActionDataNumDiff, Actio
 from .activation import (ActivationDataInequality, ActivationDataQuad, ActivationDataSmoothAbs,
                          ActivationDataWeightedQuad, ActivationModelInequality, ActivationModelQuad,
                          ActivationModelSmoothAbs, ActivationModelWeightedQuad)
-from .actuation import (ActuationDataFreeFloating, ActuationDataFull,
-                        ActuationModelFreeFloating, ActuationModelFull)
+from .actuation import ActuationDataFreeFloating, ActuationDataFull, ActuationModelFreeFloating, ActuationModelFull
 from .box_ddp import SolverBoxDDP
 from .box_kkt import SolverBoxKKT
 from .callbacks import CallbackDDPLogger, CallbackDDPVerbose, CallbackSolverDisplay, CallbackSolverTimer
@@ -19,12 +18,11 @@ from .cost import (CostDataCoM, CostDataControl, CostDataForce, CostDataFramePla
 from .ddp import SolverDDP
 from .diagnostic import displayTrajectory, plotDDPConvergence, plotOCSolution
 from .differential_action import (DifferentialActionDataAbstract, DifferentialActionDataFullyActuated,
-                                  DifferentialActionDataLQR, DifferentialActionDataNumDiff, DifferentialActionDataActuated,
+                                  DifferentialActionDataLQR, DifferentialActionDataNumDiff,
                                   DifferentialActionModelAbstract, DifferentialActionModelFullyActuated,
-                                  DifferentialActionModelLQR, DifferentialActionModelNumDiff, DifferentialActionModelActuated)
+                                  DifferentialActionModelLQR, DifferentialActionModelNumDiff)
 from .fddp import SolverFDDP
 from .floating_contact import DifferentialActionDataFloatingInContact, DifferentialActionModelFloatingInContact
-# from .flying import DifferentialActionModelUAM, DifferentialActionDataUAM
 from .impact import (ActionDataImpact, ActionModelImpact, CostModelImpactCoM, CostModelImpactWholeBody, ImpulseData6D,
                      ImpulseDataPinocchio, ImpulseModel3D, ImpulseModel6D, ImpulseModelMultiple, ImpulseModelPinocchio)
 from .integrated_action import (IntegratedActionDataEuler, IntegratedActionDataRK4, IntegratedActionModelEuler,

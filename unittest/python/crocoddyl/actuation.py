@@ -8,7 +8,6 @@ class ActuationModelFreeFloating:
     This model transforms an actuation u into a joint torque tau.
     We implement here the simplest model: tau = S.T*u, where S is constant.
     '''
-
     def __init__(self, pinocchioModel):
         self.pinocchio = pinocchioModel
         if (pinocchioModel.joints[1].shortname() != 'JointModelFreeFlyer'):
