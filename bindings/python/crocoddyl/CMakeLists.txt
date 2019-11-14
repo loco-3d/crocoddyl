@@ -31,6 +31,8 @@ ENDFOREACH(python ${${PROJECT_NAME}_PYTHON_BINDINGS_FILES})
 
 SET(${PROJECT_NAME}_BINDINGS_UTILS_PYTHON_FILES
   __init__.py
+  pendulum.py
+  quadrotor.py
   biped.py
   quadruped.py
   )
