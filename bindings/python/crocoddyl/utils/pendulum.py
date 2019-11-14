@@ -1,6 +1,6 @@
-import numpy as np
-import pinocchio
 import crocoddyl
+import pinocchio
+import numpy as np
 
 
 class CostModelDoublePendulum(crocoddyl.CostModelAbstract):
