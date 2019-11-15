@@ -51,6 +51,8 @@ if WITHDISPLAY and WITHPLOT:
     ])
 elif WITHDISPLAY:
     fddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(robot, 4, 4, cameraTF, False)])
+elif WITHPLOT:
+    fddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
 else:
     fddp.setCallbacks([crocoddyl.CallbackVerbose()])
 
