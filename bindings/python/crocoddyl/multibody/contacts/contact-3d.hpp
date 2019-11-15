@@ -76,10 +76,6 @@ void exposeContact3D() {
           "Create 3D contact data.\n\n"
           ":param model: 3D contact model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("jMf", bp::make_getter(&ContactData3D::jMf, bp::return_value_policy<bp::return_by_value>()),
-                    "local frame placement of the contact frame")
-      .add_property("fXj", bp::make_getter(&ContactData3D::fXj, bp::return_value_policy<bp::return_by_value>()),
-                    "action matrix from contact to local frames")
       .add_property("v", bp::make_getter(&ContactData3D::v, bp::return_value_policy<bp::return_by_value>()),
                     "spatial velocity of the contact body")
       .add_property("a", bp::make_getter(&ContactData3D::a, bp::return_value_policy<bp::return_by_value>()),

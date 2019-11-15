@@ -109,6 +109,10 @@ void exposeContactAbstract() {
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("pinocchio", bp::make_getter(&ContactDataAbstract::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
+      .add_property("jMf", bp::make_getter(&ContactDataAbstract::jMf, bp::return_value_policy<bp::return_by_value>()),
+                    "local frame placement of the contact frame")
+      .add_property("fXj", bp::make_getter(&ContactDataAbstract::fXj, bp::return_value_policy<bp::return_by_value>()),
+                    "action matrix from contact to local frames")
       .add_property("Jc", bp::make_getter(&ContactDataAbstract::Jc, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ContactDataAbstract::Jc), "contact Jacobian")
       .add_property("a0", bp::make_getter(&ContactDataAbstract::a0, bp::return_value_policy<bp::return_by_value>()),
