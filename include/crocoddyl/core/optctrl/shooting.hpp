@@ -30,6 +30,7 @@ class ShootingProblem {
 
   const std::size_t& get_T() const;
   const Eigen::VectorXd& get_x0() const;
+  void set_x0(Eigen::VectorXd x0_in);
 
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& get_runningModels();
   const boost::shared_ptr<ActionModelAbstract>& get_terminalModel();
