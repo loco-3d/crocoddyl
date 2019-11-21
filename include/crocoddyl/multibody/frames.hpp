@@ -13,6 +13,7 @@
 #include <Eigen/Dense>
 #include <pinocchio/spatial/se3.hpp>
 #include <pinocchio/spatial/motion.hpp>
+#include <pinocchio/spatial/force.hpp>
 
 namespace crocoddyl {
 
@@ -40,6 +41,12 @@ struct FrameMotion {
   FrameMotion(const FrameIndex& frame, const pinocchio::Motion& oMf) : frame(frame), oMf(oMf) {}
   FrameIndex frame;
   pinocchio::Motion oMf;
+};
+
+struct FrameForce {
+  FrameForce(const FrameIndex& frame, const pinocchio::Force& oFf) :  frame(frame), oFf(oFf) {}
+  FrameIndex frame;
+  pinocchio::Force oFf;
 };
 
 }  // namespace crocoddyl
