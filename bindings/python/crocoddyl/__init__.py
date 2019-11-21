@@ -5,19 +5,34 @@ from .libcrocoddyl_pywrap import __version__
 def setGepettoViewerBackground(robot, floor):
     if not hasattr(robot, 'viewer'):
         # Spawn robot model
-        robot.initViewer(loadModel=True)
+        robot.initViewer(windowName="crocoddyl", loadModel=False)
+        robot.loadViewerModel(rootNodeName="robot")
         # Set white background and floor
-        window_id = robot.viewer.gui.getWindowID('python-pinocchio')
+        window_id = robot.viewer.gui.getWindowID("crocoddyl")
         robot.viewer.gui.setBackgroundColor1(window_id, [1., 1., 1., 1.])
         robot.viewer.gui.setBackgroundColor2(window_id, [1., 1., 1., 1.])
+        robot.viewer.gui.createGroup("world/floor")
         if floor:
-            robot.viewer.gui.addFloor('hpp-gui/floor')
-            robot.viewer.gui.setScale('hpp-gui/floor', [0.5, 0.5, 0.5])
-            robot.viewer.gui.setColor('hpp-gui/floor', [0.7, 0.7, 0.7, 1.])
-            robot.viewer.gui.setLightingMode('hpp-gui/floor', 'OFF')
+            robot.viewer.gui.addFloor("world/floor/flat")
+            robot.viewer.gui.setScale("world/floor/flat", [0.5, 0.5, 0.5])
+            robot.viewer.gui.setColor("world/floor/flat", [0.7, 0.7, 0.7, 1.])
+            robot.viewer.gui.setLightingMode("world/floor/flat", 'OFF')
 
 
-def displayTrajectory(robot, xs, dt=0.1, rate=-1, cameraTF=None, floor=True):
+def rotationMatrixFromTwoVectors(a, b):
+    import pinocchio
+    import numpy as np
+
+    a_copy = a / np.linalg.norm(a)
+    b_copy = b / np.linalg.norm(b)
+    a_cross_b = pinocchio.utils.cross(a_copy, b_copy)
+    s = np.linalg.norm(a_cross_b)
+    c = np.asscalar(a_copy.T * b_copy)
+    ab_skew = pinocchio.utils.skew(a_cross_b)
+    return np.matrix(np.eye(3)) + ab_skew + ab_skew * ab_skew * (1 - c) / s**2
+
+
+def displayTrajectory(robot, xs, fs=None, dt=0.1, rate=-1, cameraTF=None, floor=True):
     """  Display a robot trajectory xs using Gepetto-viewer gui.
 
     :param robot: Robot wrapper
@@ -30,11 +45,38 @@ def displayTrajectory(robot, xs, dt=0.1, rate=-1, cameraTF=None, floor=True):
     if cameraTF is not None:
         robot.viewer.gui.setCameraTransform(0, cameraTF)
     import numpy as np
+    if fs is not None:
+        import pinocchio
+
+        totalWeight = sum(m.mass for m in robot.model.inertias) * np.linalg.norm(robot.model.gravity.linear)
+
+        forceGroup = "world/robot/contact_forces"
+        forceRadius = 0.015
+        forceLength = 0.5
+        forceColor = [1., 0., 1., 1.]
+        robot.viewer.gui.createGroup(forceGroup)
+        for f in fs[0]:
+            key = f['key']
+            t, R = f['oMf'].translation, rotationMatrixFromTwoVectors(np.matrix([1., 0., 0.]).T, f['f'].linear)
+            robot.viewer.gui.addArrow(forceGroup + "/" + key, forceRadius, forceLength, forceColor)
 
     import time
     S = 1 if rate <= 0 else max(len(xs) / rate, 1)
     for i, x in enumerate(xs):
         if not i % S:
+            if fs is not None:
+                robot.viewer.gui.setFloatProperty(forceGroup, 'Alpha', 0.)
+                for f in fs[i]:
+                    key = f['key']
+                    robot.viewer.gui.setFloatProperty(forceGroup + "/" + key, 'Alpha', 1.)
+                for f in fs[i]:
+                    key = f['key']
+                    force = f['f'].linear
+                    t, R = f['oMf'].translation, rotationMatrixFromTwoVectors(np.matrix([1., 0., 0.]).T, force)
+                    pose = pinocchio.se3ToXYZQUATtuple(pinocchio.SE3(R, t))
+                    forceMagnitud = np.linalg.norm(force) / totalWeight
+                    robot.viewer.gui.setVector3Property(forceGroup + "/" + key, 'Scale', [1. * forceMagnitud, 1., 1.])
+                    robot.viewer.gui.applyConfiguration(forceGroup + "/" + key, pose)
             robot.display(x[:robot.nq])
             time.sleep(dt)
 
@@ -52,7 +94,25 @@ class CallbackDisplay(libcrocoddyl_pywrap.CallbackAbstract):
         if (solver.iter + 1) % self.freq:
             return
         dt = solver.models()[0].dt
-        displayTrajectory(self.robotwrapper, solver.xs, dt, self.rate, self.cameraTF, self.floor)
+
+        fs = []
+        for data in solver.datas():
+            if hasattr(data, "differential"):
+                if isinstance(data.differential, libcrocoddyl_pywrap.DifferentialActionDataContactFwdDynamics):
+                    fc = []
+                    for key, contact in data.differential.contacts.contacts.items():
+                        oMf = contact.pinocchio.oMi[contact.joint] * contact.jMf
+                        force = contact.jMf.actInv(contact.f)
+                        fc.append({"key": str(contact.joint), "oMf": oMf, "f": force})
+                    fs.append(fc)
+            elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
+                fc = []
+                for key, impulse in data.impulses.impulses.items():
+                    force = impulse.jMf.actInv(impulse.f)
+                    oMf = impulse.pinocchio.oMi[impulse.joint] * impulse.jMf
+                    fc.append({"key": str(impulse.joint), "oMf": oMf, "f": force})
+                fs.append(fc)
+        displayTrajectory(self.robotwrapper, solver.xs, fs, dt, self.rate, self.cameraTF, self.floor)
 
 
 class CallbackLogger(libcrocoddyl_pywrap.CallbackAbstract):
