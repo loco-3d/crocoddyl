@@ -10,6 +10,7 @@
 #define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_FRAMES_HPP_
 
 #include "crocoddyl/multibody/frames.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
 
 namespace crocoddyl {
 namespace python {

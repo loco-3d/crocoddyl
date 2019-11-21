@@ -10,7 +10,7 @@
 #define BINDINGS_PYTHON_CROCODDYL_CORE_NUMDIFF_DIFF_ACTION_HPP_
 
 #include "crocoddyl/core/numdiff/diff-action.hpp"
-#include "python/crocoddyl/utils.hpp"
+#include "python/crocoddyl/utils/vector-converter.hpp"
 
 namespace crocoddyl {
 namespace python {

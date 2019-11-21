@@ -15,7 +15,8 @@
 #include "python/crocoddyl/core.hpp"
 #include "python/crocoddyl/multibody.hpp"
 #include "crocoddyl/core/utils/version.hpp"
-#include "python/crocoddyl/utils.hpp"
+#include "python/crocoddyl/utils/vector-converter.hpp"
+#include "python/crocoddyl/utils/map-converter.hpp"
 
 namespace crocoddyl {
 namespace python {

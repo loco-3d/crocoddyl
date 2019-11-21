@@ -15,6 +15,7 @@
 #include <utility>
 #include <string>
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
+#include "python/crocoddyl/utils/map-converter.hpp"
 
 namespace crocoddyl {
 namespace python {
