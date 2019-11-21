@@ -80,7 +80,7 @@ void exposeCostCoMPosition() {
            ":return cost data.")
       .add_property("cref",
                     bp::make_function(&CostModelCoMPosition::get_cref, bp::return_value_policy<bp::return_by_value>()),
-                    "reference CoM position");
+                    &CostModelCoMPosition::set_cref, "reference CoM position");
 }
 
 }  // namespace python

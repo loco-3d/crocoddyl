@@ -66,7 +66,7 @@ void exposeShootingProblem() {
       .add_property("T", bp::make_function(&ShootingProblem::get_T, bp::return_value_policy<bp::return_by_value>()),
                     "number of nodes")
       .add_property("x0", bp::make_function(&ShootingProblem::get_x0, bp::return_value_policy<bp::return_by_value>()),
-                    "initial state")
+                    &ShootingProblem::set_x0, "initial state")
       .add_property(
           "runningModels",
           bp::make_function(&ShootingProblem::get_runningModels, bp::return_value_policy<bp::return_by_value>()),

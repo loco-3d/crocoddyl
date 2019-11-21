@@ -97,6 +97,12 @@ const std::size_t& ShootingProblem::get_T() const { return T_; }
 
 const Eigen::VectorXd& ShootingProblem::get_x0() const { return x0_; }
 
+void ShootingProblem::set_x0(Eigen::VectorXd x0_in) {
+  if (x0_in.size() != x0_.size()) throw std::invalid_argument("Invalid size of x0 provided.");
+
+  x0_ = x0_in;
+}
+
 void ShootingProblem::allocateData() {
   for (std::size_t i = 0; i < T_; ++i) {
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
