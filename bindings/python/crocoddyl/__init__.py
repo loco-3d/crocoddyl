@@ -17,7 +17,7 @@ def rotationMatrixFromTwoVectors(a, b):
 
 
 class GepettoDisplay:
-    def __init__(self, robot, rate=-1, freq=1, cameraTF=None, floor=True):
+    def __init__(self, robot, rate=-1, freq=1, cameraTF=None, floor=True, frameNames=[]):
         self.robot = robot
         self.rate = rate
         self.freq = freq
@@ -25,34 +25,44 @@ class GepettoDisplay:
         # Visuals properties
         self.floorGroup = "world/floor"
         self.forceGroup = "world/robot/contact_forces"
+        self.frameTrajGroup = "world/robot/frame_trajectory"
         self.backgroundColor = [1., 1., 1., 1.]
         self.floorScale = [0.5, 0.5, 0.5]
         self.floorColor = [0.7, 0.7, 0.7, 1.]
         self.forceRadius = 0.015
         self.forceLength = 0.5
         self.forceColor = [1., 0., 1., 1.]
+        self.frameTrajNames = []
+        for n in frameNames:
+            self.frameTrajNames.append(robot.model.getFrameId(n))
+        self.frameTrajColor = {}
+        self.frameTrajLineWidth = 10
+        for fr in self.frameTrajNames:
+            self.frameTrajColor[fr] = list(np.hstack([np.random.choice(range(256), size=3) / 256., 1.]))
 
         self.addRobot()
         self.setBackground()
         if cameraTF is not None:
             self.robot.viewer.gui.setCameraTransform(0, cameraTF)
-
-        # floor visuals properties
         if floor:
             self.addFloor()
-
-        # Force visuals properties
         self.totalWeight = sum(m.mass
                                for m in self.robot.model.inertias) * np.linalg.norm(self.robot.model.gravity.linear)
         self.x_axis = np.matrix([1., 0., 0.]).T
         self.robot.viewer.gui.createGroup(self.forceGroup)
+        self.robot.viewer.gui.createGroup(self.frameTrajGroup)
 
-    def display(self, xs, fs=[], dts=[], factor=1.):
+    def display(self, xs, fs=[], ps=[], dts=[], factor=1.):
         if fs:
             for f in fs[0]:
                 key = f["key"]
                 self.robot.viewer.gui.addArrow(self.forceGroup + "/" + key, self.forceRadius, self.forceLength,
                                                self.forceColor)
+        if ps:
+            for key, p in ps.items():
+                self.robot.viewer.gui.addCurve(self.frameTrajGroup + "/" + str(key), p, self.frameTrajColor[key])
+                self.robot.viewer.gui.setCurveLineWidth(self.frameTrajGroup + "/" + str(key), self.frameTrajLineWidth)
+                self.robot.viewer.gui.setCurvePoints(self.frameTrajGroup + "/" + str(key), p)
         if not dts:
             dts = [0.] * len(xs)
 
@@ -66,37 +76,23 @@ class GepettoDisplay:
                         self.robot.viewer.gui.setFloatProperty(self.forceGroup + "/" + key, "Alpha", 1.)
                     for f in fs[i]:
                         key = f["key"]
-                        force = f["f"].linear
-                        t, R = f["oMf"].translation, rotationMatrixFromTwoVectors(self.x_axis, force)
-                        pose = pinocchio.se3ToXYZQUATtuple(pinocchio.SE3(R, t))
-                        forceMagnitud = np.linalg.norm(force) / self.totalWeight
+                        pose = f["oMf"]
+                        wrench = f["f"]
+                        R = rotationMatrixFromTwoVectors(self.x_axis, wrench.linear)
+                        forcePose = pinocchio.se3ToXYZQUATtuple(pinocchio.SE3(R, pose.translation))
+                        forceMagnitud = np.linalg.norm(wrench.linear) / self.totalWeight
                         self.robot.viewer.gui.setVector3Property(self.forceGroup + "/" + key, "Scale",
                                                                  [1. * forceMagnitud, 1., 1.])
-                        self.robot.viewer.gui.applyConfiguration(self.forceGroup + "/" + key, pose)
+                        self.robot.viewer.gui.applyConfiguration(self.forceGroup + "/" + key, forcePose)
                 self.robot.display(x[:self.robot.nq])
                 time.sleep(dts[i] * factor)
 
     def displayFromSolver(self, solver, factor=1.):
-        fs = []
-        for data in solver.datas():
-            if hasattr(data, "differential"):
-                if isinstance(data.differential, libcrocoddyl_pywrap.DifferentialActionDataContactFwdDynamics):
-                    fc = []
-                    for key, contact in data.differential.contacts.contacts.items():
-                        oMf = contact.pinocchio.oMi[contact.joint] * contact.jMf
-                        force = contact.jMf.actInv(contact.f)
-                        fc.append({"key": str(contact.joint), "oMf": oMf, "f": force})
-                    fs.append(fc)
-            elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
-                fc = []
-                for key, impulse in data.impulses.impulses.items():
-                    force = impulse.jMf.actInv(impulse.f)
-                    oMf = impulse.pinocchio.oMi[impulse.joint] * impulse.jMf
-                    fc.append({"key": str(impulse.joint), "oMf": oMf, "f": force})
-                fs.append(fc)
+        fs = self.getForceTrajectoryFromSolver(solver)
+        ps = self.getFrameTrajectoryFromSolver(solver)
 
         dts = [m.dt if hasattr(m, "differential") else 0. for m in solver.models()]
-        self.display(solver.xs, fs, dts, factor)
+        self.display(solver.xs, fs, ps, dts, factor)
 
     def addRobot(self):
         # Spawn robot model
@@ -115,6 +111,40 @@ class GepettoDisplay:
         self.robot.viewer.gui.setScale(self.floorGroup + "/flat", self.floorScale)
         self.robot.viewer.gui.setColor(self.floorGroup + "/flat", self.floorColor)
         self.robot.viewer.gui.setLightingMode(self.floorGroup + "/flat", "OFF")
+
+    def getForceTrajectoryFromSolver(self, solver):
+        fs = []
+        for data in solver.datas():
+            if hasattr(data, "differential"):
+                if isinstance(data.differential, libcrocoddyl_pywrap.DifferentialActionDataContactFwdDynamics):
+                    fc = []
+                    for key, contact in data.differential.contacts.contacts.items():
+                        oMf = contact.pinocchio.oMi[contact.joint] * contact.jMf
+                        force = contact.jMf.actInv(contact.f)
+                        fc.append({"key": str(contact.joint), "oMf": oMf, "f": force})
+                    fs.append(fc)
+            elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
+                fc = []
+                for key, impulse in data.impulses.impulses.items():
+                    force = impulse.jMf.actInv(impulse.f)
+                    oMf = impulse.pinocchio.oMi[impulse.joint] * impulse.jMf
+                    fc.append({"key": str(impulse.joint), "oMf": oMf, "f": force})
+                fs.append(fc)
+        return fs
+
+    def getFrameTrajectoryFromSolver(self, solver):
+        ps = {fr: [] for fr in self.frameTrajNames}
+        for key, p in ps.items():
+            for data in solver.datas():
+                if hasattr(data, "differential"):
+                    if hasattr(data.differential, "pinocchio"):
+                        pose = data.differential.pinocchio.oMf[key]
+                        p.append(np.asarray(pose.translation.T).reshape(-1).tolist())
+                elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
+                    if hasattr(data, "pinocchio"):
+                        pose = data.pinocchio.oMf[key]
+                        p.append(np.asarray(pose.translation.T).reshape(-1).tolist())
+        return ps
 
 
 class CallbackDisplay(libcrocoddyl_pywrap.CallbackAbstract):

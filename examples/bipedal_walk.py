@@ -50,13 +50,13 @@ for i, phase in enumerate(GAITPHASES):
     # Added the callback functions
     print('*** SOLVE ' + key + ' ***')
     if WITHDISPLAY and WITHPLOT:
-        display = crocoddyl.GepettoDisplay(talos_legs, 4, 4, cameraTF)
+        display = crocoddyl.GepettoDisplay(talos_legs, 4, 4, cameraTF, frameNames=[rightFoot, leftFoot])
         ddp[i].setCallbacks(
             [crocoddyl.CallbackLogger(),
              crocoddyl.CallbackVerbose(),
              crocoddyl.CallbackDisplay(display)])
     elif WITHDISPLAY:
-        display = crocoddyl.GepettoDisplay(talos_legs, 4, 4, cameraTF)
+        display = crocoddyl.GepettoDisplay(talos_legs, 4, 4, cameraTF, frameNames=[rightFoot, leftFoot])
         ddp[i].setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
     elif WITHPLOT:
         ddp[i].setCallbacks([
@@ -77,7 +77,7 @@ for i, phase in enumerate(GAITPHASES):
 
 # Display the entire motion
 if WITHDISPLAY:
-    display = crocoddyl.GepettoDisplay(talos_legs)
+    display = crocoddyl.GepettoDisplay(talos_legs, frameNames=[rightFoot, leftFoot])
     for i, phase in enumerate(GAITPHASES):
         display.displayFromSolver(ddp[i])
 
