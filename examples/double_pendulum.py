@@ -44,13 +44,11 @@ fddp = crocoddyl.SolverFDDP(problem)
 
 cameraTF = [1.4, 0., 0.2, 0.5, 0.5, 0.5, 0.5]
 if WITHDISPLAY and WITHPLOT:
-    fddp.setCallbacks([
-        crocoddyl.CallbackLogger(),
-        crocoddyl.CallbackVerbose(),
-        crocoddyl.CallbackDisplay(robot, 4, 4, cameraTF, False)
-    ])
+    display = crocoddyl.GepettoDisplay(robot, 4, 4, cameraTF)
+    fddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHDISPLAY:
-    fddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(robot, 4, 4, cameraTF, False)])
+    display = crocoddyl.GepettoDisplay(robot, 4, 4, cameraTF)
+    fddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHPLOT:
     fddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
 else:
@@ -73,4 +71,5 @@ if WITHPLOT:
 
 # Display the entire motion
 if WITHDISPLAY:
-    crocoddyl.displayTrajectory(robot, fddp.xs, dt, False)
+    display = crocoddyl.GepettoDisplay(robot)
+    display.display(robot, fddp.xs, None, dt, False)
