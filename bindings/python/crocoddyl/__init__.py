@@ -47,7 +47,7 @@ class GepettoDisplay:
         self.x_axis = np.matrix([1., 0., 0.]).T
         self.robot.viewer.gui.createGroup(self.forceGroup)
 
-    def display(self, xs, fs=[], dts=[]):
+    def display(self, xs, fs=[], dts=[], factor=1.):
         if fs:
             for f in fs[0]:
                 key = f["key"]
@@ -74,9 +74,9 @@ class GepettoDisplay:
                                                                  [1. * forceMagnitud, 1., 1.])
                         self.robot.viewer.gui.applyConfiguration(self.forceGroup + "/" + key, pose)
                 self.robot.display(x[:self.robot.nq])
-                time.sleep(dts[i])
+                time.sleep(dts[i] * factor)
 
-    def displayFromSolver(self, solver):
+    def displayFromSolver(self, solver, factor=1.):
         fs = []
         for data in solver.datas():
             if hasattr(data, "differential"):
@@ -96,7 +96,7 @@ class GepettoDisplay:
                 fs.append(fc)
 
         dts = [m.dt if hasattr(m, "differential") else 0. for m in solver.models()]
-        self.display(solver.xs, fs, dts)
+        self.display(solver.xs, fs, dts, factor)
 
     def addRobot(self):
         # Spawn robot model
