@@ -79,7 +79,7 @@ for i, phase in enumerate(GAITPHASES):
 if WITHDISPLAY:
     display = crocoddyl.GepettoDisplay(talos_legs)
     for i, phase in enumerate(GAITPHASES):
-        display.display(ddp[i].xs, None, ddp[i].models()[0].dt)
+        display.displayFromSolver(ddp[i])
 
 # Plotting the entire motion
 if WITHPLOT:

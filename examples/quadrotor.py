@@ -65,7 +65,7 @@ if WITHDISPLAY and WITHPLOT:
     display = crocoddyl.GepettoDisplay(hector, 4, 4, cameraTF)
     fddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHDISPLAY:
-    display = crocoddyl.GepettoDisplay(robot, 4, 4, cameraTF)
+    display = crocoddyl.GepettoDisplay(hector, 4, 4, cameraTF)
     fddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHPLOT:
     fddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
@@ -95,4 +95,4 @@ if WITHDISPLAY:
         'world/wp',
         target_pos.tolist() + [target_quat[0], target_quat[1], target_quat[2], target_quat[3]])
 
-    display.display(hector, fddp.xs, None, dt, False)
+    display.displayFromSolver(fddp)
