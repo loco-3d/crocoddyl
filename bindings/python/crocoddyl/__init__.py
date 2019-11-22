@@ -156,8 +156,8 @@ class CallbackLogger(libcrocoddyl_pywrap.CallbackAbstract):
 def plotOCSolution(xs=None, us=None, figIndex=1, show=True):
     import matplotlib.pyplot as plt
     import numpy as np
-    plt.rcParams['pdf.fonttype'] = 42
-    plt.rcParams['ps.fonttype'] = 42
+    plt.rcParams["pdf.fonttype"] = 42
+    plt.rcParams["ps.fonttype"] = 42
 
     # Getting the state and control trajectories
     if xs is not None:
@@ -180,15 +180,15 @@ def plotOCSolution(xs=None, us=None, figIndex=1, show=True):
     # Plotting the state trajectories
     if xs is not None:
         plt.subplot(xsPlotIdx)
-        [plt.plot(X[i], label='x' + str(i)) for i in range(nx)]
+        [plt.plot(X[i], label="x" + str(i)) for i in range(nx)]
         plt.legend()
 
     # Plotting the control commands
     if us is not None:
         plt.subplot(usPlotIdx)
-        [plt.plot(U[i], label='u' + str(i)) for i in range(nu)]
+        [plt.plot(U[i], label="u" + str(i)) for i in range(nu)]
         plt.legend()
-        plt.xlabel('knots')
+        plt.xlabel("knots")
     if show:
         plt.show()
 
@@ -196,36 +196,36 @@ def plotOCSolution(xs=None, us=None, figIndex=1, show=True):
 def plotConvergence(costs, muLM, muV, gamma, theta, alpha, figIndex=1, show=True, figTitle=""):
     import matplotlib.pyplot as plt
     import numpy as np
-    plt.rcParams['pdf.fonttype'] = 42
-    plt.rcParams['ps.fonttype'] = 42
+    plt.rcParams["pdf.fonttype"] = 42
+    plt.rcParams["ps.fonttype"] = 42
     plt.figure(figIndex, figsize=(6.4, 8))
     plt.suptitle(figTitle, fontsize=14)
 
     # Plotting the total cost sequence
     plt.subplot(511)
-    plt.ylabel('cost')
+    plt.ylabel("cost")
     plt.plot(costs)
 
     # Ploting mu sequences
     plt.subplot(512)
-    plt.ylabel('mu')
-    plt.plot(muLM, label='LM')
-    plt.plot(muV, label='V')
+    plt.ylabel("mu")
+    plt.plot(muLM, label="LM")
+    plt.plot(muV, label="V")
     plt.legend()
 
     # Plotting the gradient sequence (gamma and theta)
     plt.subplot(513)
-    plt.ylabel('gamma')
+    plt.ylabel("gamma")
     plt.plot(gamma)
     plt.subplot(514)
-    plt.ylabel('theta')
+    plt.ylabel("theta")
     plt.plot(theta)
 
     # Plotting the alpha sequence
     plt.subplot(515)
-    plt.ylabel('alpha')
+    plt.ylabel("alpha")
     ind = np.arange(len(alpha))
     plt.bar(ind, alpha)
-    plt.xlabel('iteration')
+    plt.xlabel("iteration")
     if show:
         plt.show()
