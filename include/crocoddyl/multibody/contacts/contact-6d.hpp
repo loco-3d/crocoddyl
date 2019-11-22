@@ -44,23 +44,22 @@ struct ContactData6D : public ContactDataAbstract {
   template <typename Model>
   ContactData6D(Model* const model, pinocchio::Data* const data)
       : ContactDataAbstract(model, data),
-        jMf(model->get_state()->get_pinocchio().frames[model->get_Mref().frame].placement),
         rMf(pinocchio::SE3::Identity()),
-        fXj(jMf.inverse().toActionMatrix()),
         v_partial_dq(6, model->get_state()->get_nv()),
         a_partial_dq(6, model->get_state()->get_nv()),
         a_partial_dv(6, model->get_state()->get_nv()),
         a_partial_da(6, model->get_state()->get_nv()) {
     joint = model->get_state()->get_pinocchio().frames[model->get_Mref().frame].parent;
+    jMf = model->get_state()->get_pinocchio().frames[model->get_Mref().frame].placement;
+    fXj = jMf.inverse().toActionMatrix();
     v_partial_dq.fill(0);
     a_partial_dq.fill(0);
     a_partial_dv.fill(0);
     a_partial_da.fill(0);
     rMf_Jlog6.fill(0);
   }
-  pinocchio::SE3 jMf;
+
   pinocchio::SE3 rMf;
-  pinocchio::SE3::ActionMatrixType fXj;
   pinocchio::Motion v;
   pinocchio::Motion a;
   pinocchio::Data::Matrix6x v_partial_dq;

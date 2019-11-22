@@ -1,58 +1,161 @@
 from .libcrocoddyl_pywrap import *
 from .libcrocoddyl_pywrap import __version__
 
+import pinocchio
+import numpy as np
+import time
 
-def setGepettoViewerBackground(robot, floor):
-    if not hasattr(robot, 'viewer'):
-        # Spawn robot model
-        robot.initViewer(loadModel=True)
-        # Set white background and floor
-        window_id = robot.viewer.gui.getWindowID('python-pinocchio')
-        robot.viewer.gui.setBackgroundColor1(window_id, [1., 1., 1., 1.])
-        robot.viewer.gui.setBackgroundColor2(window_id, [1., 1., 1., 1.])
+
+def rotationMatrixFromTwoVectors(a, b):
+    a_copy = a / np.linalg.norm(a)
+    b_copy = b / np.linalg.norm(b)
+    a_cross_b = pinocchio.utils.cross(a_copy, b_copy)
+    s = np.linalg.norm(a_cross_b)
+    c = np.asscalar(a_copy.T * b_copy)
+    ab_skew = pinocchio.utils.skew(a_cross_b)
+    return np.matrix(np.eye(3)) + ab_skew + ab_skew * ab_skew * (1 - c) / s**2
+
+
+class GepettoDisplay:
+    def __init__(self, robot, rate=-1, freq=1, cameraTF=None, floor=True, frameNames=[]):
+        self.robot = robot
+        self.rate = rate
+        self.freq = freq
+
+        # Visuals properties
+        self.floorGroup = "world/floor"
+        self.forceGroup = "world/robot/contact_forces"
+        self.frameTrajGroup = "world/robot/frame_trajectory"
+        self.backgroundColor = [1., 1., 1., 1.]
+        self.floorScale = [0.5, 0.5, 0.5]
+        self.floorColor = [0.7, 0.7, 0.7, 1.]
+        self.forceRadius = 0.015
+        self.forceLength = 0.5
+        self.forceColor = [1., 0., 1., 1.]
+        self.frameTrajNames = []
+        for n in frameNames:
+            self.frameTrajNames.append(robot.model.getFrameId(n))
+        self.frameTrajColor = {}
+        self.frameTrajLineWidth = 10
+        for fr in self.frameTrajNames:
+            self.frameTrajColor[fr] = list(np.hstack([np.random.choice(range(256), size=3) / 256., 1.]))
+
+        self.addRobot()
+        self.setBackground()
+        if cameraTF is not None:
+            self.robot.viewer.gui.setCameraTransform(0, cameraTF)
         if floor:
-            robot.viewer.gui.addFloor('hpp-gui/floor')
-            robot.viewer.gui.setScale('hpp-gui/floor', [0.5, 0.5, 0.5])
-            robot.viewer.gui.setColor('hpp-gui/floor', [0.7, 0.7, 0.7, 1.])
-            robot.viewer.gui.setLightingMode('hpp-gui/floor', 'OFF')
+            self.addFloor()
+        self.totalWeight = sum(m.mass
+                               for m in self.robot.model.inertias) * np.linalg.norm(self.robot.model.gravity.linear)
+        self.x_axis = np.matrix([1., 0., 0.]).T
+        self.robot.viewer.gui.createGroup(self.forceGroup)
+        self.robot.viewer.gui.createGroup(self.frameTrajGroup)
 
+    def display(self, xs, fs=[], ps=[], dts=[], factor=1.):
+        if fs:
+            for f in fs[0]:
+                key = f["key"]
+                self.robot.viewer.gui.addArrow(self.forceGroup + "/" + key, self.forceRadius, self.forceLength,
+                                               self.forceColor)
+        if ps:
+            for key, p in ps.items():
+                self.robot.viewer.gui.addCurve(self.frameTrajGroup + "/" + str(key), p, self.frameTrajColor[key])
+                self.robot.viewer.gui.setCurveLineWidth(self.frameTrajGroup + "/" + str(key), self.frameTrajLineWidth)
+                self.robot.viewer.gui.setCurvePoints(self.frameTrajGroup + "/" + str(key), p)
+        if not dts:
+            dts = [0.] * len(xs)
 
-def displayTrajectory(robot, xs, dt=0.1, rate=-1, cameraTF=None, floor=True):
-    """  Display a robot trajectory xs using Gepetto-viewer gui.
+        S = 1 if self.rate <= 0 else max(len(xs) / self.rate, 1)
+        for i, x in enumerate(xs):
+            if not i % S:
+                if fs:
+                    self.robot.viewer.gui.setFloatProperty(self.forceGroup, "Alpha", 0.)
+                    for f in fs[i]:
+                        key = f["key"]
+                        self.robot.viewer.gui.setFloatProperty(self.forceGroup + "/" + key, "Alpha", 1.)
+                    for f in fs[i]:
+                        key = f["key"]
+                        pose = f["oMf"]
+                        wrench = f["f"]
+                        R = rotationMatrixFromTwoVectors(self.x_axis, wrench.linear)
+                        forcePose = pinocchio.se3ToXYZQUATtuple(pinocchio.SE3(R, pose.translation))
+                        forceMagnitud = np.linalg.norm(wrench.linear) / self.totalWeight
+                        self.robot.viewer.gui.setVector3Property(self.forceGroup + "/" + key, "Scale",
+                                                                 [1. * forceMagnitud, 1., 1.])
+                        self.robot.viewer.gui.applyConfiguration(self.forceGroup + "/" + key, forcePose)
+                self.robot.display(x[:self.robot.nq])
+                time.sleep(dts[i] * factor)
 
-    :param robot: Robot wrapper
-    :param xs: state trajectory
-    :param dt: step duration
-    :param rate: visualization rate
-    :param cameraTF: camera transform
-    """
-    setGepettoViewerBackground(robot, floor)
-    if cameraTF is not None:
-        robot.viewer.gui.setCameraTransform(0, cameraTF)
-    import numpy as np
+    def displayFromSolver(self, solver, factor=1.):
+        fs = self.getForceTrajectoryFromSolver(solver)
+        ps = self.getFrameTrajectoryFromSolver(solver)
 
-    import time
-    S = 1 if rate <= 0 else max(len(xs) / rate, 1)
-    for i, x in enumerate(xs):
-        if not i % S:
-            robot.display(x[:robot.nq])
-            time.sleep(dt)
+        dts = [m.dt if hasattr(m, "differential") else 0. for m in solver.models()]
+        self.display(solver.xs, fs, ps, dts, factor)
+
+    def addRobot(self):
+        # Spawn robot model
+        self.robot.initViewer(windowName="crocoddyl", loadModel=False)
+        self.robot.loadViewerModel(rootNodeName="robot")
+
+    def setBackground(self):
+        # Set white background and floor
+        window_id = self.robot.viewer.gui.getWindowID("crocoddyl")
+        self.robot.viewer.gui.setBackgroundColor1(window_id, self.backgroundColor)
+        self.robot.viewer.gui.setBackgroundColor2(window_id, self.backgroundColor)
+
+    def addFloor(self):
+        self.robot.viewer.gui.createGroup(self.floorGroup)
+        self.robot.viewer.gui.addFloor(self.floorGroup + "/flat")
+        self.robot.viewer.gui.setScale(self.floorGroup + "/flat", self.floorScale)
+        self.robot.viewer.gui.setColor(self.floorGroup + "/flat", self.floorColor)
+        self.robot.viewer.gui.setLightingMode(self.floorGroup + "/flat", "OFF")
+
+    def getForceTrajectoryFromSolver(self, solver):
+        fs = []
+        for data in solver.datas():
+            if hasattr(data, "differential"):
+                if isinstance(data.differential, libcrocoddyl_pywrap.DifferentialActionDataContactFwdDynamics):
+                    fc = []
+                    for key, contact in data.differential.contacts.contacts.items():
+                        oMf = contact.pinocchio.oMi[contact.joint] * contact.jMf
+                        force = contact.jMf.actInv(contact.f)
+                        fc.append({"key": str(contact.joint), "oMf": oMf, "f": force})
+                    fs.append(fc)
+            elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
+                fc = []
+                for key, impulse in data.impulses.impulses.items():
+                    force = impulse.jMf.actInv(impulse.f)
+                    oMf = impulse.pinocchio.oMi[impulse.joint] * impulse.jMf
+                    fc.append({"key": str(impulse.joint), "oMf": oMf, "f": force})
+                fs.append(fc)
+        return fs
+
+    def getFrameTrajectoryFromSolver(self, solver):
+        ps = {fr: [] for fr in self.frameTrajNames}
+        for key, p in ps.items():
+            for data in solver.datas():
+                if hasattr(data, "differential"):
+                    if hasattr(data.differential, "pinocchio"):
+                        pose = data.differential.pinocchio.oMf[key]
+                        p.append(np.asarray(pose.translation.T).reshape(-1).tolist())
+                elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
+                    if hasattr(data, "pinocchio"):
+                        pose = data.pinocchio.oMf[key]
+                        p.append(np.asarray(pose.translation.T).reshape(-1).tolist())
+        return ps
 
 
 class CallbackDisplay(libcrocoddyl_pywrap.CallbackAbstract):
-    def __init__(self, robotwrapper, rate=-1, freq=1, cameraTF=None, floor=True):
+    def __init__(self, display):
         libcrocoddyl_pywrap.CallbackAbstract.__init__(self)
-        self.robotwrapper = robotwrapper
-        self.rate = rate
-        self.cameraTF = cameraTF
-        self.freq = freq
-        self.floor = floor
+        self.visualization = display
 
     def __call__(self, solver):
-        if (solver.iter + 1) % self.freq:
+        if (solver.iter + 1) % self.visualization.freq:
             return
-        dt = solver.models()[0].dt
-        displayTrajectory(self.robotwrapper, solver.xs, dt, self.rate, self.cameraTF, self.floor)
+        self.visualization.displayFromSolver(solver)
 
 
 class CallbackLogger(libcrocoddyl_pywrap.CallbackAbstract):
@@ -71,7 +174,6 @@ class CallbackLogger(libcrocoddyl_pywrap.CallbackAbstract):
 
     def __call__(self, solver):
         import copy
-        import numpy as np
         self.xs = copy.copy(solver.xs)
         self.us = copy.copy(solver.us)
         self.steps.append(solver.stepLength)
@@ -87,8 +189,8 @@ class CallbackLogger(libcrocoddyl_pywrap.CallbackAbstract):
 def plotOCSolution(xs=None, us=None, figIndex=1, show=True):
     import matplotlib.pyplot as plt
     import numpy as np
-    plt.rcParams['pdf.fonttype'] = 42
-    plt.rcParams['ps.fonttype'] = 42
+    plt.rcParams["pdf.fonttype"] = 42
+    plt.rcParams["ps.fonttype"] = 42
 
     # Getting the state and control trajectories
     if xs is not None:
@@ -111,15 +213,15 @@ def plotOCSolution(xs=None, us=None, figIndex=1, show=True):
     # Plotting the state trajectories
     if xs is not None:
         plt.subplot(xsPlotIdx)
-        [plt.plot(X[i], label='x' + str(i)) for i in range(nx)]
+        [plt.plot(X[i], label="x" + str(i)) for i in range(nx)]
         plt.legend()
 
     # Plotting the control commands
     if us is not None:
         plt.subplot(usPlotIdx)
-        [plt.plot(U[i], label='u' + str(i)) for i in range(nu)]
+        [plt.plot(U[i], label="u" + str(i)) for i in range(nu)]
         plt.legend()
-        plt.xlabel('knots')
+        plt.xlabel("knots")
     if show:
         plt.show()
 
@@ -127,36 +229,36 @@ def plotOCSolution(xs=None, us=None, figIndex=1, show=True):
 def plotConvergence(costs, muLM, muV, gamma, theta, alpha, figIndex=1, show=True, figTitle=""):
     import matplotlib.pyplot as plt
     import numpy as np
-    plt.rcParams['pdf.fonttype'] = 42
-    plt.rcParams['ps.fonttype'] = 42
+    plt.rcParams["pdf.fonttype"] = 42
+    plt.rcParams["ps.fonttype"] = 42
     plt.figure(figIndex, figsize=(6.4, 8))
     plt.suptitle(figTitle, fontsize=14)
 
     # Plotting the total cost sequence
     plt.subplot(511)
-    plt.ylabel('cost')
+    plt.ylabel("cost")
     plt.plot(costs)
 
     # Ploting mu sequences
     plt.subplot(512)
-    plt.ylabel('mu')
-    plt.plot(muLM, label='LM')
-    plt.plot(muV, label='V')
+    plt.ylabel("mu")
+    plt.plot(muLM, label="LM")
+    plt.plot(muV, label="V")
     plt.legend()
 
     # Plotting the gradient sequence (gamma and theta)
     plt.subplot(513)
-    plt.ylabel('gamma')
+    plt.ylabel("gamma")
     plt.plot(gamma)
     plt.subplot(514)
-    plt.ylabel('theta')
+    plt.ylabel("theta")
     plt.plot(theta)
 
     # Plotting the alpha sequence
     plt.subplot(515)
-    plt.ylabel('alpha')
+    plt.ylabel("alpha")
     ind = np.arange(len(alpha))
     plt.bar(ind, alpha)
-    plt.xlabel('iteration')
+    plt.xlabel("iteration")
     if show:
         plt.show()

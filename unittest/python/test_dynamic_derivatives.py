@@ -107,7 +107,7 @@ assertNumDiff(D, -data.ddq_dq, NUMDIFF_MODIFIER * h)  # threshold was 1e-3, is n
 # ---- ABA AND RNEA with forces
 
 # Set forces container
-fs = pinocchio.StdVect_Force()
+fs = pinocchio.StdVec_Force()
 for i in range(model.njoints):
     fs.append(pinocchio.Force.Random())
 

@@ -65,13 +65,11 @@ problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 ddp = crocoddyl.SolverDDP(problem)
 cameraTF = [2., 2.68, 0.54, 0.2, 0.62, 0.72, 0.22]
 if WITHDISPLAY and WITHPLOT:
-    ddp.setCallbacks([
-        crocoddyl.CallbackLogger(),
-        crocoddyl.CallbackVerbose(),
-        crocoddyl.CallbackDisplay(talos_arm, 4, 4, cameraTF)
-    ])
+    display = crocoddyl.GepettoDisplay(talos_arm, 4, 4, cameraTF)
+    ddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHDISPLAY:
-    ddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(talos_arm, 4, 4, cameraTF)])
+    display = crocoddyl.GepettoDisplay(talos_arm, 4, 4, cameraTF)
+    ddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHPLOT:
     ddp.setCallbacks([
         crocoddyl.CallbackLogger(),
@@ -97,4 +95,5 @@ if WITHPLOT:
 
 # Visualizing the solution in gepetto-viewer
 if WITHDISPLAY:
-    crocoddyl.displayTrajectory(talos_arm, ddp.xs, runningModel.dt)
+    display = crocoddyl.GepettoDisplay(talos_arm, 4, 4, cameraTF)
+    display.display(talos_arm, ddp.xs, None, runningModel.dt)

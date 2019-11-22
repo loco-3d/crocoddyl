@@ -62,31 +62,32 @@ struct ContactDataAbstract {
   ContactDataAbstract(Model* const model, pinocchio::Data* const data)
       : pinocchio(data),
         joint(0),
+        jMf(pinocchio::SE3::Identity()),
+        fXj(jMf.inverse().toActionMatrix()),
         Jc(model->get_nc(), model->get_state()->get_nv()),
         a0(model->get_nc()),
         da0_dx(model->get_nc(), model->get_state()->get_ndx()),
         df_dx(model->get_nc(), model->get_state()->get_ndx()),
         df_du(model->get_nc(), model->get_nu()),
-        f(pinocchio::Force::Zero()),
-        frame_force(model->get_nc()) {
+        f(pinocchio::Force::Zero()) {
     Jc.fill(0);
     a0.fill(0);
     da0_dx.fill(0);
     df_dx.fill(0);
     df_du.fill(0);
-    frame_force.fill(0);
   }
   virtual ~ContactDataAbstract() {}
 
   pinocchio::Data* pinocchio;
   pinocchio::JointIndex joint;
+  pinocchio::SE3 jMf;
+  pinocchio::SE3::ActionMatrixType fXj;
   Eigen::MatrixXd Jc;
   Eigen::VectorXd a0;
   Eigen::MatrixXd da0_dx;
   Eigen::MatrixXd df_dx;
   Eigen::MatrixXd df_du;
   pinocchio::Force f;
-  Eigen::VectorXd frame_force;
 };
 
 }  // namespace crocoddyl

@@ -10,6 +10,7 @@
 #define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_FRAMES_HPP_
 
 #include "crocoddyl/multibody/frames.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -27,7 +28,8 @@ void exposeFrames() {
                                             ":param oxf: Frame translation w.r.t. the origin"))
       .def_readwrite("frame", &FrameTranslation::frame, "frame ID")
       .add_property("oxf", bp::make_getter(&FrameTranslation::oxf, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&FrameTranslation::oxf), "frame translation");
+                    bp::make_setter(&FrameTranslation::oxf), "frame translation")
+      .def(PrintableVisitor<FrameTranslation>());
 
   bp::class_<FrameRotation, boost::noncopyable>(
       "FrameRotation",
@@ -39,7 +41,8 @@ void exposeFrames() {
                                             ":param oRf: Frame rotation w.r.t. the origin"))
       .def_readwrite("frame", &FrameRotation::frame, "frame ID")
       .add_property("oRf", bp::make_getter(&FrameRotation::oRf, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&FrameRotation::oRf), "frame rotation");
+                    bp::make_setter(&FrameRotation::oRf), "frame rotation")
+      .def(PrintableVisitor<FrameRotation>());
 
   bp::class_<FramePlacement, boost::noncopyable>(
       "FramePlacement",
@@ -50,8 +53,8 @@ void exposeFrames() {
                                            ":param frame: frame ID\n"
                                            ":param oMf: Frame placement w.r.t. the origin"))
       .def_readwrite("frame", &FramePlacement::frame, "frame ID")
-      .add_property("oMf", bp::make_getter(&FramePlacement::oMf, bp::return_internal_reference<>()),
-                    "frame placement");
+      .add_property("oMf", bp::make_getter(&FramePlacement::oMf, bp::return_internal_reference<>()), "frame placement")
+      .def(PrintableVisitor<FramePlacement>());
 
   bp::class_<FrameMotion, boost::noncopyable>(
       "FrameMotion",
@@ -62,7 +65,20 @@ void exposeFrames() {
                                               ":param frame: frame ID\n"
                                               ":param oMf: Frame motion w.r.t. the origin"))
       .def_readwrite("frame", &FrameMotion::frame, "frame ID")
-      .add_property("oMf", bp::make_getter(&FrameMotion::oMf, bp::return_internal_reference<>()), "frame motion");
+      .add_property("oMf", bp::make_getter(&FrameMotion::oMf, bp::return_internal_reference<>()), "frame motion")
+      .def(PrintableVisitor<FrameMotion>());
+
+  bp::class_<FrameForce, boost::noncopyable>(
+      "FrameForce",
+      "Frame force describe using Pinocchio.\n\n"
+      "It defines a frame motion (tangent of SE(3) point) for a given frame ID",
+      bp::init<FrameIndex, pinocchio::Force>(bp::args(" self", " frame", " oFf"),
+                                             "Initialize the frame motion.\n\n"
+                                             ":param frame: frame ID\n"
+                                             ":param oFf: Frame force w.r.t. the origin"))
+      .def_readwrite("frame", &FrameForce::frame, "frame ID")
+      .add_property("oFf", bp::make_getter(&FrameForce::oFf, bp::return_internal_reference<>()), "frame force")
+      .def(PrintableVisitor<FrameForce>());
 }
 
 }  // namespace python

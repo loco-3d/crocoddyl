@@ -12,35 +12,24 @@ namespace crocoddyl {
 
 CostModelContactForce::CostModelContactForce(boost::shared_ptr<StateMultibody> state,
                                              boost::shared_ptr<ActivationModelAbstract> activation,
-                                             boost::shared_ptr<ContactModelAbstract> contact,
-                                             const Eigen::VectorXd& fref, const std::size_t& nu)
-    : CostModelAbstract(state, activation, nu), contact_(contact), fref_(fref) {
-  assert(activation_->get_nr() == contact->get_nc() && "nr is not equals to 6");
-  assert(fref.size() == contact->get_nc() && "fref size does not match contact");
+                                             const FrameForce& fref, const std::size_t& nu)
+    : CostModelAbstract(state, activation, nu), fref_(fref) {
+  assert(activation_->get_nr() == 6 && "nr is not equals to 6");
 }
 
 CostModelContactForce::CostModelContactForce(boost::shared_ptr<StateMultibody> state,
                                              boost::shared_ptr<ActivationModelAbstract> activation,
-                                             boost::shared_ptr<ContactModelAbstract> contact,
-                                             const Eigen::VectorXd& fref)
-    : CostModelAbstract(state, activation), contact_(contact), fref_(fref) {
-  assert(activation_->get_nr() == contact->get_nc() && "nr is not equals to 6");
-  assert(fref.size() == contact->get_nc() && "fref size does not match contact");
+                                             const FrameForce& fref)
+    : CostModelAbstract(state, activation), fref_(fref) {
+  assert(activation_->get_nr() == 6 && "nr is not equals to 6");
 }
 
-CostModelContactForce::CostModelContactForce(boost::shared_ptr<StateMultibody> state,
-                                             boost::shared_ptr<ContactModelAbstract> contact,
-                                             const Eigen::VectorXd& fref, const std::size_t& nu)
-    : CostModelAbstract(state, contact->get_nc(), nu), contact_(contact), fref_(fref) {
-  assert(fref.size() == contact->get_nc() && "fref size does not match contact");
-}
+CostModelContactForce::CostModelContactForce(boost::shared_ptr<StateMultibody> state, const FrameForce& fref,
+                                             const std::size_t& nu)
+    : CostModelAbstract(state, 6, nu), fref_(fref) {}
 
-CostModelContactForce::CostModelContactForce(boost::shared_ptr<StateMultibody> state,
-                                             boost::shared_ptr<ContactModelAbstract> contact,
-                                             const Eigen::VectorXd& fref)
-    : CostModelAbstract(state, contact->get_nc()), contact_(contact), fref_(fref) {
-  assert(fref.size() == contact->get_nc() && "fref size does not match contact");
-}
+CostModelContactForce::CostModelContactForce(boost::shared_ptr<StateMultibody> state, const FrameForce& fref)
+    : CostModelAbstract(state, 6), fref_(fref) {}
 
 CostModelContactForce::~CostModelContactForce() {}
 
@@ -49,7 +38,8 @@ void CostModelContactForce::calc(const boost::shared_ptr<CostDataAbstract>& data
                                  const Eigen::Ref<const Eigen::VectorXd>& /*u*/) {
   CostDataContactForce* d = static_cast<CostDataContactForce*>(data.get());
 
-  data->r = d->contact_->frame_force - fref_;
+  // We transform the force to the contact frame
+  data->r = (d->contact_->jMf.actInv(d->contact_->f) - fref_.oFf).toVector();
 
   // Compute the cost
   activation_->calc(data->activation, data->r);
@@ -84,5 +74,7 @@ void CostModelContactForce::calcDiff(const boost::shared_ptr<CostDataAbstract>& 
 boost::shared_ptr<CostDataAbstract> CostModelContactForce::createData(pinocchio::Data* const data) {
   return boost::make_shared<CostDataContactForce>(this, data);
 }
+
+const FrameForce& CostModelContactForce::get_fref() const { return fref_; }
 
 }  // namespace crocoddyl

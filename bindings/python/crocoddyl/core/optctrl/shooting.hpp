@@ -12,7 +12,7 @@
 #include <vector>
 #include <memory>
 #include "crocoddyl/core/optctrl/shooting.hpp"
-#include "python/crocoddyl/utils.hpp"
+#include "python/crocoddyl/utils/vector-converter.hpp"
 
 namespace crocoddyl {
 namespace python {

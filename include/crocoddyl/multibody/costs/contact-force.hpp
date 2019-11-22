@@ -11,20 +11,18 @@
 
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
+#include "crocoddyl/multibody/frames.hpp"
 
 namespace crocoddyl {
 
 class CostModelContactForce : public CostModelAbstract {
  public:
   CostModelContactForce(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-                        boost::shared_ptr<ContactModelAbstract> contact, const Eigen::VectorXd& fref,
-                        const std::size_t& nu);
+                        const FrameForce& fref, const std::size_t& nu);
   CostModelContactForce(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-                        boost::shared_ptr<ContactModelAbstract> contact, const Eigen::VectorXd& fref);
-  CostModelContactForce(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ContactModelAbstract> contact,
-                        const Eigen::VectorXd& fref, const std::size_t& nu);
-  CostModelContactForce(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ContactModelAbstract> contact,
-                        const Eigen::VectorXd& fref);
+                        const FrameForce& fref);
+  CostModelContactForce(boost::shared_ptr<StateMultibody> state, const FrameForce& fref, const std::size_t& nu);
+  CostModelContactForce(boost::shared_ptr<StateMultibody> state, const FrameForce& fref);
   ~CostModelContactForce();
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -33,11 +31,10 @@ class CostModelContactForce : public CostModelAbstract {
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
   boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
-  const Eigen::VectorXd& get_fref() const { return fref_; };
+  const FrameForce& get_fref() const;
 
  protected:
-  boost::shared_ptr<ContactModelAbstract> contact_;
-  Eigen::VectorXd fref_;
+  FrameForce fref_;
 };
 
 struct CostDataContactForce : public CostDataAbstract {
