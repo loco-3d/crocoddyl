@@ -1,5 +1,17 @@
+
+<img align="right" src="https://i.imgur.com/o2LfbDq.gif" width="25%"/>
+
 Contact RObot COntrol by Differential DYnamic programming Library (crocoddyl)
 ===============================================
+
+
+<table >
+  <tr>
+    <td align="left"><img src="https://cmastalli.github.io/assets/img/publications/highly_dynamic_maneuvers.png" width="10000"/></td>
+    <td align="right"><img src="https://i.imgur.com/RQR2Ovx.gif"/> <img src="https://i.imgur.com/kTW0ePh.gif"/></td>
+  </tr>
+</table>
+
 
 ## <img align="center" height="20" src="https://i.imgur.com/vAYeCzC.png"/> Introduction
 
