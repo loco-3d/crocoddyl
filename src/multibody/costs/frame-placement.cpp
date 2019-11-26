@@ -39,6 +39,8 @@ void CostModelFramePlacement::calc(const boost::shared_ptr<CostDataAbstract>& da
                                    const Eigen::Ref<const Eigen::VectorXd>&) {
   CostDataFramePlacement* d = static_cast<CostDataFramePlacement*>(data.get());
 
+  oMf_inv_ = Mref_.oMf.inverse();
+
   // Compute the frame placement w.r.t. the reference frame
   d->rMf = oMf_inv_ * d->pinocchio->oMf[Mref_.frame];
   d->r = pinocchio::log6(d->rMf);
@@ -77,6 +79,6 @@ boost::shared_ptr<CostDataAbstract> CostModelFramePlacement::createData(pinocchi
   return boost::make_shared<CostDataFramePlacement>(this, data);
 }
 
-const FramePlacement& CostModelFramePlacement::get_Mref() const { return Mref_; }
+FramePlacement& CostModelFramePlacement::get_Mref() { return Mref_; }
 
 }  // namespace crocoddyl
