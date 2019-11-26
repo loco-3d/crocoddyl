@@ -19,13 +19,7 @@
 namespace crocoddyl_unit_test {
 
 struct SolverTypes {
-  enum Type {
-    SolverKKT,
-    SolverDDP,
-    SolverFDDP,
-    SolverBoxDDP,
-    NbSolverTypes
-  };
+  enum Type { SolverKKT, SolverDDP, SolverFDDP, SolverBoxDDP, NbSolverTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
@@ -40,18 +34,15 @@ const std::vector<SolverTypes::Type> SolverTypes::all(SolverTypes::init_all());
 
 class SolverFactory {
  public:
-  SolverFactory(SolverTypes::Type solver_type, ActionModelTypes::Type action_type,
-                size_t nb_running_models) {
+  SolverFactory(SolverTypes::Type solver_type, ActionModelTypes::Type action_type, size_t nb_running_models) {
     // default initialization
     solver_type_ = solver_type;
     action_factory_ = boost::make_shared<ActionModelFactory>(action_type);
     nb_running_models_ = nb_running_models;
 
     running_models_.resize(nb_running_models_, action_factory_->get_action_model());
-    problem_ = boost::make_shared<crocoddyl::ShootingProblem>(
-        action_factory_->get_action_model()->get_state()->zero(),
-        running_models_,
-        action_factory_->get_action_model());
+    problem_ = boost::make_shared<crocoddyl::ShootingProblem>(action_factory_->get_action_model()->get_state()->zero(),
+                                                              running_models_, action_factory_->get_action_model());
 
     switch (solver_type_) {
       case SolverTypes::SolverKKT:
@@ -77,12 +68,13 @@ class SolverFactory {
   boost::shared_ptr<crocoddyl::SolverAbstract> get_solver() { return solver_; }
 
  private:
-  size_t nb_running_models_; //!< This is the number of models in the shooting problem.
-  SolverTypes::Type solver_type_; //!< The current type to test
-  boost::shared_ptr<crocoddyl::SolverAbstract> solver_; //!< The pointer to the solver in testing
-  boost::shared_ptr<ActionModelFactory> action_factory_; //!< The pointer to the action_model in testing
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > running_models_; //!< The list of models in the shooting problem
-  boost::shared_ptr<crocoddyl::ShootingProblem> problem_; //!< The pointer to the shooting problem in testing
+  size_t nb_running_models_;                              //!< This is the number of models in the shooting problem.
+  SolverTypes::Type solver_type_;                         //!< The current type to test
+  boost::shared_ptr<crocoddyl::SolverAbstract> solver_;   //!< The pointer to the solver in testing
+  boost::shared_ptr<ActionModelFactory> action_factory_;  //!< The pointer to the action_model in testing
+  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> >
+      running_models_;                                     //!< The list of models in the shooting problem
+  boost::shared_ptr<crocoddyl::ShootingProblem> problem_;  //!< The pointer to the shooting problem in testing
 };
 
 }  // namespace crocoddyl_unit_test

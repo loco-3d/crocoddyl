@@ -19,8 +19,7 @@ using namespace crocoddyl_unit_test;
 void test_kkt_dimension(ActionModelTypes::Type action_type, size_t nb_running_models) {
   // Create the kkt solver
   SolverFactory factory(SolverTypes::SolverKKT, action_type, nb_running_models);
-  boost::shared_ptr<crocoddyl::SolverKKT> kkt =
-    boost::static_pointer_cast<crocoddyl::SolverKKT>(factory.get_solver());
+  boost::shared_ptr<crocoddyl::SolverKKT> kkt = boost::static_pointer_cast<crocoddyl::SolverKKT>(factory.get_solver());
 
   // define some aliases
   const std::size_t& T = kkt->get_problem()->get_T();
@@ -41,8 +40,7 @@ void test_kkt_dimension(ActionModelTypes::Type action_type, size_t nb_running_mo
 void test_kkt_search_direction(ActionModelTypes::Type action_type, size_t nb_running_models) {
   // Create the kkt solver
   SolverFactory factory(SolverTypes::SolverKKT, action_type, nb_running_models);
-  boost::shared_ptr<crocoddyl::SolverKKT> kkt =
-    boost::static_pointer_cast<crocoddyl::SolverKKT>(factory.get_solver());
+  boost::shared_ptr<crocoddyl::SolverKKT> kkt = boost::static_pointer_cast<crocoddyl::SolverKKT>(factory.get_solver());
 
   // Compute the search direction
   kkt->computeDirection();
@@ -57,17 +55,17 @@ void test_kkt_search_direction(ActionModelTypes::Type action_type, size_t nb_run
   BOOST_CHECK((hess - hess.transpose()).isMuchSmallerThan(1.0, 1e-9));
 
   // Check initial state
-  BOOST_CHECK((kkt->get_dxs()[0] - kkt->get_problem()->get_x0()).
-      isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((kkt->get_dxs()[0] - kkt->get_problem()->get_x0()).isMuchSmallerThan(1.0, 1e-9));
 }
 
 //____________________________________________________________________________//
 
-void test_solver_against_kkt_solver(SolverTypes::Type solver_type, ActionModelTypes::Type action_type, size_t nb_running_models) {
+void test_solver_against_kkt_solver(SolverTypes::Type solver_type, ActionModelTypes::Type action_type,
+                                    size_t nb_running_models) {
   // Create the solver
   SolverFactory solver_factory(solver_type, action_type, nb_running_models);
   boost::shared_ptr<crocoddyl::SolverAbstract> solver =
-    boost::static_pointer_cast<crocoddyl::SolverKKT>(solver_factory.get_solver());
+      boost::static_pointer_cast<crocoddyl::SolverKKT>(solver_factory.get_solver());
 
   // Get the pointer to the problem so we can create the equivalent kkt solver.
   const boost::shared_ptr<crocoddyl::ShootingProblem>& problem = solver->get_problem();
@@ -116,18 +114,19 @@ void test_solver_against_kkt_solver(SolverTypes::Type solver_type, ActionModelTy
 bool init_function() {
   size_t nb_running_models = 10;
 
-  for(size_t action_type = 0 ; action_type < ActionModelTypes::all.size() ; ++action_type)
-  {
-    framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_kkt_dimension, ActionModelTypes::all[action_type], nb_running_models)));
-    framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_kkt_search_direction, ActionModelTypes::all[action_type], nb_running_models)));
+  for (size_t action_type = 0; action_type < ActionModelTypes::all.size(); ++action_type) {
+    framework::master_test_suite().add(
+        BOOST_TEST_CASE(boost::bind(&test_kkt_dimension, ActionModelTypes::all[action_type], nb_running_models)));
+    framework::master_test_suite().add(BOOST_TEST_CASE(
+        boost::bind(&test_kkt_search_direction, ActionModelTypes::all[action_type], nb_running_models)));
   }
-  
+
   // We start from 1 as 0 is the kkt solver
-  for(size_t solver_type = 1 ; solver_type < SolverTypes::all.size() ; ++solver_type)
-  {
-    for(size_t action_type = 0 ; action_type < ActionModelTypes::all.size() ; ++action_type)
-    {
-      framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_solver_against_kkt_solver, SolverTypes::all[solver_type], ActionModelTypes::all[action_type], nb_running_models)));
+  for (size_t solver_type = 1; solver_type < SolverTypes::all.size(); ++solver_type) {
+    for (size_t action_type = 0; action_type < ActionModelTypes::all.size(); ++action_type) {
+      framework::master_test_suite().add(
+          BOOST_TEST_CASE(boost::bind(&test_solver_against_kkt_solver, SolverTypes::all[solver_type],
+                                      ActionModelTypes::all[action_type], nb_running_models)));
     }
   }
   return true;
