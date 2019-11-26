@@ -1,9 +1,13 @@
 import numpy as np
+
+import eigenpy
 import pinocchio
 from crocoddyl import (ActuationModelFreeFloating, CostModelSum, DifferentialActionModelNumDiff, StatePinocchio, a2m,
                        loadTalosArm, m2a)
 from pinocchio.utils import rand
 from testutils import NUMDIFF_MODIFIER, assertNumDiff
+
+eigenpy.switchToNumpyMatrix()
 
 
 class DifferentialActionModelActuated:

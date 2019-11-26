@@ -1,6 +1,7 @@
 import numpy as np
 from numpy.linalg import norm
 
+import eigenpy
 import pinocchio
 from crocoddyl import (ActionModelNumDiff, ActivationModelInequality, ActivationModelWeightedQuad, CostModelCoM,
                        CostModelControl, CostModelFramePlacement, CostModelFrameRotation, CostModelFrameTranslation,
@@ -10,6 +11,8 @@ from crocoddyl import (ActionModelNumDiff, ActivationModelInequality, Activation
                        loadTalosArm, m2a)
 from pinocchio.utils import rand, zero
 from testutils import NUMDIFF_MODIFIER, assertNumDiff
+
+eigenpy.switchToNumpyMatrix()
 
 robot = loadTalosArm()
 qmin = robot.model.lowerPositionLimit

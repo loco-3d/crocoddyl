@@ -1,6 +1,7 @@
 import numpy as np
 from numpy.linalg import eig, norm, pinv
 
+import eigenpy
 import pinocchio
 from crocoddyl import (ActionModelNumDiff, ActuationModelFreeFloating, CallbackDDPLogger, ContactModel3D,
                        ContactModel6D, ContactModelMultiple, CostModelControl, CostModelForce,
@@ -11,6 +12,8 @@ from crocoddyl import (ActionModelNumDiff, ActuationModelFreeFloating, CallbackD
 from crocoddyl.utils import EPS
 from pinocchio.utils import rand, zero
 from testutils import NUMDIFF_MODIFIER, assertNumDiff, df_dq, df_dx
+
+eigenpy.switchToNumpyMatrix()
 
 # Loading Talos arm with FF TODO use a bided or quadruped
 # -----------------------------------------------------------------------------
