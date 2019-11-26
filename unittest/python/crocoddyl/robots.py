@@ -1,34 +1,17 @@
 import numpy as np
+from example_robot_data import getModelPath, readParamsFromSrdf
+
 import pinocchio
 from pinocchio.robot_wrapper import RobotWrapper
 
 
-def getTalosPathFromRos():
-    '''
-    Uses environment variable ROS_PACKAGE_PATH.
-    Typically returns /opt/openrobots/share/talos_data
-    '''
-    import rospkg
-    rospack = rospkg.RosPack()
-    MODEL_PATH = rospack.get_path('talos_data') + '/../'
-    return MODEL_PATH
-
-
-def readParamsFromSrdf(robot, SRDF_PATH, verbose):
-    rmodel = robot.model
-
-    pinocchio.loadRotorParameters(rmodel, SRDF_PATH, verbose)
-    rmodel.armature = np.multiply(rmodel.rotorInertia.flat, np.square(rmodel.rotorGearRatio.flat))
-    pinocchio.loadReferenceConfigurations(rmodel, SRDF_PATH, verbose)
-    robot.q0.flat[:] = rmodel.referenceConfigurations["half_sitting"].copy()
-    return
-
-
-def loadTalosArm(modelPath='/opt/openrobots/share/example-robot-data', freeFloating=False):
+def loadTalosArm(modelPath=None, freeFloating=False):
     URDF_FILENAME = "talos_left_arm.urdf"
     URDF_SUBPATH = "/talos_data/robots/" + URDF_FILENAME
     SRDF_FILENAME = "talos.srdf"
     SRDF_SUBPATH = "/talos_data/srdf/" + SRDF_FILENAME
+    if modelPath is None:
+        modelPath = getModelPath(URDF_SUBPATH)
     robot = RobotWrapper.BuildFromURDF(modelPath + URDF_SUBPATH, [modelPath],
                                        pinocchio.JointModelFreeFlyer() if freeFloating else None)
     rmodel = robot.model
@@ -47,11 +30,13 @@ def loadTalosArm(modelPath='/opt/openrobots/share/example-robot-data', freeFloat
     return robot
 
 
-def loadTalos(modelPath='/opt/openrobots/share/example-robot-data'):
+def loadTalos(modelPath=None):
     URDF_FILENAME = "talos_reduced.urdf"
     SRDF_FILENAME = "talos.srdf"
     SRDF_SUBPATH = "/talos_data/srdf/" + SRDF_FILENAME
     URDF_SUBPATH = "/talos_data/urdf/" + URDF_FILENAME
+    if modelPath is None:
+        modelPath = getModelPath(URDF_SUBPATH)
     robot = RobotWrapper.BuildFromURDF(modelPath + URDF_SUBPATH, [modelPath], pinocchio.JointModelFreeFlyer())
     # Load SRDF file
     readParamsFromSrdf(robot, modelPath + SRDF_SUBPATH, False)
@@ -65,10 +50,14 @@ def loadTalos(modelPath='/opt/openrobots/share/example-robot-data'):
     return robot
 
 
-def loadTalosLegs(modelPath='/opt/openrobots/share/example-robot-data'):
-    robot = loadTalos(modelPath=modelPath)
+def loadTalosLegs(modelPath=None):
+    URDF_FILENAME = "talos_reduced.urdf"
     SRDF_FILENAME = "talos.srdf"
     SRDF_SUBPATH = "/talos_data/srdf/" + SRDF_FILENAME
+    URDF_SUBPATH = "/talos_data/urdf/" + URDF_FILENAME
+    if modelPath is None:
+        modelPath = getModelPath(URDF_SUBPATH)
+    robot = loadTalos(modelPath=modelPath)
     legMaxId = 14
 
     m1 = robot.model
@@ -116,9 +105,11 @@ def loadTalosLegs(modelPath='/opt/openrobots/share/example-robot-data'):
     return robot
 
 
-def loadHyQ(modelPath='/opt/openrobots/share/example-robot-data'):
+def loadHyQ(modelPath=None):
     URDF_FILENAME = "hyq_no_sensors.urdf"
     URDF_SUBPATH = "/hyq_description/robots/" + URDF_FILENAME
+    if modelPath is None:
+        modelPath = getModelPath(URDF_SUBPATH)
     robot = RobotWrapper.BuildFromURDF(modelPath + URDF_SUBPATH, [modelPath], pinocchio.JointModelFreeFlyer())
     # TODO define default position inside srdf
     robot.q0.flat[7:] = [-0.2, 0.75, -1.5, -0.2, -0.75, 1.5, -0.2, 0.75, -1.5, -0.2, -0.75, 1.5]
