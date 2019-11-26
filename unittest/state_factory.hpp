@@ -13,6 +13,7 @@
 #include "crocoddyl/core/states/unicycle.hpp"
 #include "crocoddyl/core/numdiff/state.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
+#include "example-robot-data/path.hpp"
 
 #ifndef CROCODDYL_STATE_FACTORY_HPP_
 #define CROCODDYL_STATE_FACTORY_HPP_
@@ -54,13 +55,13 @@ class StateFactory {
         state_ = boost::make_shared<crocoddyl::StateVector>(nx_);
         break;
       case StateTypes::StateMultibodyTalosArm:
-        construct_state_multibody(TALOS_ARM_URDF, false);
+        construct_state_multibody(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf", false);
         break;
       case StateTypes::StateMultibodyHyQ:
-        construct_state_multibody(HYQ_URDF);
+        construct_state_multibody(EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/robots/hyq_no_sensors.urdf");
         break;
       case StateTypes::StateMultibodyTalos:
-        construct_state_multibody(TALOS_URDF);
+        construct_state_multibody(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/urdf/talos_reduced.urdf");
         break;
       case StateTypes::StateMultibodyRandomHumanoid:
         construct_state_multibody();
