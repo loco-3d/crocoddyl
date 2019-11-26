@@ -33,7 +33,7 @@ class CostModelFrameTranslation : public CostModelAbstract {
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
   boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
-  const FrameTranslation& get_xref() const;
+  FrameTranslation& get_xref();
 
  private:
   FrameTranslation xref_;
