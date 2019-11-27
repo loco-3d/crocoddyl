@@ -31,7 +31,7 @@ class CostModelFramePlacement : public CostModelAbstract {
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
   boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
-  FramePlacement& get_Mref();
+  const FramePlacement& get_Mref() const;
 
  private:
   FramePlacement Mref_;
