@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2019, LAAS-CNRS, The University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -79,7 +79,7 @@ void exposeCostFrameTranslation() {
            ":param data: Pinocchio data\n"
            ":return cost data.")
       .add_property("xref", bp::make_function(&CostModelFrameTranslation::get_xref, bp::return_internal_reference<>()),
-                    "reference frame translation");
+                    &CostModelFrameTranslation::set_xref, "reference frame translation");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataFrameTranslation> >();
 

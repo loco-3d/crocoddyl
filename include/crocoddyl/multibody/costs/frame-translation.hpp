@@ -2,7 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2019, LAAS-CNRS, The University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,6 +34,7 @@ class CostModelFrameTranslation : public CostModelAbstract {
   boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
   const FrameTranslation& get_xref() const;
+  void set_xref(const FrameTranslation& xref_in);
 
  private:
   FrameTranslation xref_;
