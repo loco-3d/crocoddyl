@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2019, LAAS-CNRS, The University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -78,5 +78,10 @@ boost::shared_ptr<CostDataAbstract> CostModelFramePlacement::createData(pinocchi
 }
 
 const FramePlacement& CostModelFramePlacement::get_Mref() const { return Mref_; }
+
+void CostModelFramePlacement::set_Mref(const FramePlacement& Mref_in) {
+  Mref_ = Mref_in;
+  oMf_inv_ = Mref_.oMf.inverse();
+}
 
 }  // namespace crocoddyl
