@@ -1,13 +1,14 @@
 import numpy as np
+from numpy.linalg import norm
+
+import eigenpy
 import pinocchio
-# --- DDP
-# --- DDP
-# --- DDP
 from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, ContactModel6D, ContactModelMultiple,
                        CostModelControl, CostModelFrameTranslation, CostModelState, CostModelSum,
                        DifferentialActionModelFloatingInContact, DifferentialActionModelFullyActuated,
                        IntegratedActionModelEuler, ShootingProblem, SolverDDP, StatePinocchio, a2m, loadTalosArm)
-from numpy.linalg import norm
+
+eigenpy.switchToNumpyMatrix()
 
 
 def absmax(A):

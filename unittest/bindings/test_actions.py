@@ -2,12 +2,15 @@ import sys
 import unittest
 from random import randint
 
+import example_robot_data
 import numpy as np
 
 import crocoddyl
+import eigenpy
 import pinocchio
 from crocoddyl.utils import DifferentialFreeFwdDynamicsDerived, DifferentialLQRDerived, LQRDerived, UnicycleDerived
-import example_robot_data
+
+eigenpy.switchToNumpyMatrix()
 
 
 class ActionModelAbstractTestCase(unittest.TestCase):

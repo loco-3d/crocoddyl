@@ -2,11 +2,14 @@ import sys
 import unittest
 from random import randint
 
+import example_robot_data
 import numpy as np
 
 import crocoddyl
+import eigenpy
 from crocoddyl.utils import StateMultibodyDerived, StateVectorDerived
-import example_robot_data
+
+eigenpy.switchToNumpyMatrix()
 
 
 class StateAbstractTestCase(unittest.TestCase):

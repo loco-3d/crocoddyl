@@ -2,12 +2,15 @@ import sys
 import unittest
 from random import randint
 
+import example_robot_data
 import numpy as np
 
 import crocoddyl
+import eigenpy
 import pinocchio
-from crocoddyl.utils import UnicycleDerived, DifferentialFreeFwdDynamicsDerived
-import example_robot_data
+from crocoddyl.utils import DifferentialFreeFwdDynamicsDerived, UnicycleDerived
+
+eigenpy.switchToNumpyMatrix()
 
 
 class ShootingProblemTestCase(unittest.TestCase):

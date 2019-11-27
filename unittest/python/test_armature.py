@@ -11,12 +11,16 @@ The only "new" functionality to be tested here is the use of low-armature in the
 Any stronger test here is welcome.
 '''
 import numpy as np
+
+import eigenpy
 import pinocchio
 from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, ContactModel6D, ContactModelMultiple,
                        CostModelCoM, CostModelControl, CostModelFramePlacement, CostModelState, CostModelSum,
                        DifferentialActionModelFloatingInContact, IntegratedActionModelEuler, ShootingProblem,
                        SolverDDP, StatePinocchio, a2m, loadTalosLegs, m2a)
 from pinocchio.utils import eye, zero
+
+eigenpy.switchToNumpyMatrix()
 
 robot = loadTalosLegs()
 robot.model.armature[6:] = .01

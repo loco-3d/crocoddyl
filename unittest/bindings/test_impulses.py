@@ -1,13 +1,16 @@
+import collections
 import sys
 import unittest
 
+import example_robot_data
 import numpy as np
-import collections
 
 import crocoddyl
+import eigenpy
 import pinocchio
 from crocoddyl.utils import Impulse3DDerived, Impulse6DDerived
-import example_robot_data
+
+eigenpy.switchToNumpyMatrix()
 
 
 class ImpulseModelAbstractTestCase(unittest.TestCase):

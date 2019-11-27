@@ -1,14 +1,17 @@
 import sys
 import unittest
 
+import example_robot_data
 import numpy as np
 
 import crocoddyl
+import eigenpy
 import pinocchio
 from crocoddyl.utils import (CoMPositionCostDerived, ControlCostDerived, FramePlacementCostDerived,
-                             FrameTranslationCostDerived, FrameRotationCostDerived, FrameVelocityCostDerived,
+                             FrameRotationCostDerived, FrameTranslationCostDerived, FrameVelocityCostDerived,
                              StateCostDerived)
-import example_robot_data
+
+eigenpy.switchToNumpyMatrix()
 
 
 class CostModelAbstractTestCase(unittest.TestCase):

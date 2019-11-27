@@ -1,13 +1,17 @@
 from functools import partial
 
 import numpy as np
+from numpy.linalg import inv, norm, pinv
+
+import eigenpy
 import pinocchio
 from crocoddyl import loadTalosArm
 from crocoddyl.utils import EPS
-from numpy.linalg import inv, norm, pinv
 from pinocchio import aba, rnea
 from pinocchio.utils import cross, rand, skew, zero
 from testutils import NUMDIFF_MODIFIER, assertNumDiff, df_dq, df_dx
+
+eigenpy.switchToNumpyMatrix()
 
 robot = loadTalosArm()
 model = robot.model
