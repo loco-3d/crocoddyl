@@ -68,6 +68,43 @@ class SimpleQuadrupedalGaitProblem:
         problem = crocoddyl.ShootingProblem(x0, comModels, comModels[-1])
         return problem
 
+    def createCoMGoalProblem(self, x0, comGoTo, timeStep, numKnots):
+        """ Create a shooting problem for a CoM position goal task.
+
+        :param x0: initial state
+        :param comGoTo: CoM position change target
+        :param timeStep: step time for each knot
+        :param numKnots: number of knots per each phase
+        :return shooting problem
+        """
+        # Compute the current foot positions
+        q0 = self.rmodel.referenceConfigurations["standing"]
+        pinocchio.forwardKinematics(self.rmodel, self.rdata, q0)
+        pinocchio.updateFramePlacements(self.rmodel, self.rdata)
+        com0 = pinocchio.centerOfMass(self.rmodel, self.rdata, q0)
+
+        # Defining the action models along the time instances
+        comModels = []
+
+        # Creating the action model for the CoM task
+        comForwardModels = [
+            self.createSwingFootModel(
+                timeStep,
+                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+            ) for k in range(numKnots)
+        ]
+        comForwardTermModel = self.createSwingFootModel(timeStep,
+                                                        [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+                                                        com0 + np.matrix([comGoTo, 0., 0.]).T)
+        comForwardTermModel.differential.costs.costs['comTrack'].weight = 1e6
+
+        # Adding the CoM tasks
+        comModels += comForwardModels + [comForwardTermModel]
+
+        # Defining the shooting problem
+        problem = crocoddyl.ShootingProblem(x0, comModels, comModels[-1])
+        return problem
+
     def createWalkingProblem(self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots):
         """ Create a shooting problem for a simple walking gait.
 

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2019, LAAS-CNRS, The University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -79,7 +79,7 @@ void exposeCostFramePlacement() {
            ":param data: Pinocchio data\n"
            ":return cost data.")
       .add_property("Mref", bp::make_function(&CostModelFramePlacement::get_Mref, bp::return_internal_reference<>()),
-                    "reference frame placement");
+                    &CostModelFramePlacement::set_Mref, "reference frame placement");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataFramePlacement> >();
 

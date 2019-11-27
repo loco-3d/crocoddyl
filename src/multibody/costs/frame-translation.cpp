@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2019, LAAS-CNRS, The University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -73,5 +73,9 @@ boost::shared_ptr<CostDataAbstract> CostModelFrameTranslation::createData(pinocc
 }
 
 const FrameTranslation& CostModelFrameTranslation::get_xref() const { return xref_; }
+
+void CostModelFrameTranslation::set_xref(const FrameTranslation& xref_in) {
+  xref_ = xref_in;
+}
 
 }  // namespace crocoddyl
