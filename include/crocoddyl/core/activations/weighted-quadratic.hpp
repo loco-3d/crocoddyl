@@ -24,6 +24,7 @@ class ActivationModelWeightedQuad : public ActivationModelAbstract {
   boost::shared_ptr<ActivationDataAbstract> createData();
 
   const Eigen::VectorXd& get_weights() const;
+  void set_weights(const Eigen::VectorXd& weights);
 
  private:
   Eigen::VectorXd weights_;

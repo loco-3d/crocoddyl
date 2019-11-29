@@ -50,4 +50,6 @@ boost::shared_ptr<ActivationDataAbstract> ActivationModelWeightedQuad::createDat
 
 const Eigen::VectorXd& ActivationModelWeightedQuad::get_weights() const { return weights_; }
 
+void ActivationModelWeightedQuad::set_weights(const Eigen::VectorXd& weights) { weights_ = weights; }
+
 }  // namespace crocoddyl

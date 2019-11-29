@@ -45,7 +45,7 @@ void exposeActivationWeightedQuad() {
       .add_property(
           "weights",
           bp::make_function(&ActivationModelWeightedQuad::get_weights, bp::return_value_policy<bp::return_by_value>()),
-          "weights of the quadratic term");
+          &ActivationModelWeightedQuad::set_weights, "weights of the quadratic term");
 }
 
 }  // namespace python
