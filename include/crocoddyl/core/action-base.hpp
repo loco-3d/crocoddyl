@@ -45,8 +45,8 @@ class ActionModelAbstract {
   const Eigen::VectorXd& get_u_ub() const;
   bool const& get_has_control_limits() const;
 
-  void set_u_lb(const Eigen::Ref<const Eigen::VectorXd>& u_in);
-  void set_u_ub(const Eigen::Ref<const Eigen::VectorXd>& u_in);
+  void set_u_lb(const Eigen::VectorXd& u_in);
+  void set_u_ub(const Eigen::VectorXd& u_in);
 
  protected:
   std::size_t nu_;                          //!< Control dimension

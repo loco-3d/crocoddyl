@@ -46,7 +46,7 @@ const Eigen::VectorXd& DifferentialActionModelAbstract::get_u_lb() const { retur
 
 const Eigen::VectorXd& DifferentialActionModelAbstract::get_u_ub() const { return u_ub_; }
 
-void DifferentialActionModelAbstract::set_u_lb(const Eigen::Ref<const Eigen::VectorXd>& u_lb) {
+void DifferentialActionModelAbstract::set_u_lb(const Eigen::VectorXd& u_lb) {
   if (static_cast<std::size_t>(u_lb.size()) != nu_) {
     throw CrocoddylException("lower bound has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
@@ -54,7 +54,7 @@ void DifferentialActionModelAbstract::set_u_lb(const Eigen::Ref<const Eigen::Vec
   update_has_control_limits();
 }
 
-void DifferentialActionModelAbstract::set_u_ub(const Eigen::Ref<const Eigen::VectorXd>& u_ub) {
+void DifferentialActionModelAbstract::set_u_ub(const Eigen::VectorXd& u_ub) {
   if (static_cast<std::size_t>(u_ub.size()) != nu_) {
     throw CrocoddylException("upper bound has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
