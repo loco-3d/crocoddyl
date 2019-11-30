@@ -81,4 +81,6 @@ boost::shared_ptr<CostDataAbstract> CostModelContactForce::createData(pinocchio:
 
 const FrameForce& CostModelContactForce::get_fref() const { return fref_; }
 
+void CostModelContactForce::set_fref(const FrameForce& fref_in) { fref_ = fref_in; }
+
 }  // namespace crocoddyl

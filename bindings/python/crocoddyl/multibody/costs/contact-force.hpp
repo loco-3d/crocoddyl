@@ -79,7 +79,7 @@ void exposeCostContactForce() {
            ":param data: Pinocchio data\n"
            ":return cost data.")
       .add_property("fref", bp::make_function(&CostModelContactForce::get_fref, bp::return_internal_reference<>()),
-                    "reference contact force");
+                    &CostModelContactForce::set_fref, "reference contact force");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataContactForce> >();
 

@@ -82,4 +82,9 @@ boost::shared_ptr<CostDataAbstract> CostModelFrameRotation::createData(pinocchio
 
 const FrameRotation& CostModelFrameRotation::get_Rref() const { return Rref_; }
 
+void CostModelFrameRotation::set_Rref(const FrameRotation& Rref_in) {
+  Rref_ = Rref_in;
+  oRf_inv_ = Rref_.oRf.transpose();
+}
+
 }  // namespace crocoddyl

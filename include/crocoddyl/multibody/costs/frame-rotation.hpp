@@ -32,6 +32,7 @@ class CostModelFrameRotation : public CostModelAbstract {
   boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
   const FrameRotation& get_Rref() const;
+  void set_Rref(const FrameRotation& Rref_in);
 
  private:
   FrameRotation Rref_;

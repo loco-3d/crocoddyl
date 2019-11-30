@@ -33,6 +33,7 @@ class CostModelCentroidalMomentum : public CostModelAbstract {
   boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
   const Vector6d& get_ref() const;
+  void set_ref(const Vector6d& ref_in);
 
  private:
   Vector6d ref_;

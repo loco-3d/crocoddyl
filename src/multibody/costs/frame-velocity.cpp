@@ -80,4 +80,6 @@ boost::shared_ptr<CostDataAbstract> CostModelFrameVelocity::createData(pinocchio
 
 const FrameMotion& CostModelFrameVelocity::get_vref() const { return vref_; }
 
+void CostModelFrameVelocity::set_vref(const FrameMotion& vref_in) { vref_ = vref_in; }
+
 }  // namespace crocoddyl

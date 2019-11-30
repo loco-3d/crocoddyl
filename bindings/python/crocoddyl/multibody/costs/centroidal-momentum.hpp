@@ -82,7 +82,7 @@ void exposeCostCentroidalMomentum() {
       .add_property(
           "ref",
           bp::make_function(&CostModelCentroidalMomentum::get_ref, bp::return_value_policy<bp::return_by_value>()),
-          "reference centroidal momentum");
+          &CostModelCentroidalMomentum::set_ref, "reference centroidal momentum");
 }
 
 }  // namespace python

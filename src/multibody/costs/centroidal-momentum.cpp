@@ -81,4 +81,6 @@ boost::shared_ptr<CostDataAbstract> CostModelCentroidalMomentum::createData(pino
 
 const Vector6d& CostModelCentroidalMomentum::get_ref() const { return ref_; }
 
+void CostModelCentroidalMomentum::set_ref(const Vector6d& ref_in) { ref_ = ref_in; }
+
 }  // namespace crocoddyl

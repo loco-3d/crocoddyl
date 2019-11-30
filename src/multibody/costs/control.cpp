@@ -76,4 +76,6 @@ void CostModelControl::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
 
 const Eigen::VectorXd& CostModelControl::get_uref() const { return uref_; }
 
+void CostModelControl::set_uref(const Eigen::VectorXd& uref_in) { uref_ = uref_in; }
+
 }  // namespace crocoddyl

@@ -133,4 +133,6 @@ boost::shared_ptr<CostDataAbstract> CostModelState::createData(pinocchio::Data* 
 
 const Eigen::VectorXd& CostModelState::get_xref() const { return xref_; }
 
+void CostModelState::set_xref(const Eigen::VectorXd& xref_in) { xref_ = xref_in; }
+
 }  // namespace crocoddyl

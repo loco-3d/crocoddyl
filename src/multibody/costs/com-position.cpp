@@ -71,6 +71,6 @@ boost::shared_ptr<CostDataAbstract> CostModelCoMPosition::createData(pinocchio::
 
 const Eigen::Vector3d& CostModelCoMPosition::get_cref() const { return cref_; }
 
-void CostModelCoMPosition::set_cref(Eigen::Vector3d cref_in) { cref_ = cref_in; }
+void CostModelCoMPosition::set_cref(const Eigen::Vector3d& cref_in) { cref_ = cref_in; }
 
 }  // namespace crocoddyl

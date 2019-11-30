@@ -79,7 +79,7 @@ void exposeCostFrameVelocity() {
            ":param data: Pinocchio data\n"
            ":return cost data.")
       .add_property("vref", bp::make_function(&CostModelFrameVelocity::get_vref, bp::return_internal_reference<>()),
-                    "reference frame velocity");
+                    &CostModelFrameVelocity::set_vref, "reference frame velocity");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataFrameVelocity> >();
 
