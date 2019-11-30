@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS, The University of Edinburgh
+// Copyright (C) 2018-2020, LAAS-CNRS, The University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,6 +13,7 @@
 #include <boost/make_shared.hpp>
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/utils/math.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 

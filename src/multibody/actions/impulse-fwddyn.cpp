@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,7 +36,9 @@ ActionModelImpulseFwdDynamics::~ActionModelImpulseFwdDynamics() {}
 void ActionModelImpulseFwdDynamics::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                                          const Eigen::Ref<const Eigen::VectorXd>& x,
                                          const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw CrocoddylException("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
 
   const std::size_t& nq = state_->get_nq();
   const std::size_t& nv = state_->get_nv();
@@ -75,7 +77,9 @@ void ActionModelImpulseFwdDynamics::calc(const boost::shared_ptr<ActionDataAbstr
 void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                              const Eigen::Ref<const Eigen::VectorXd>& x,
                                              const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw CrocoddylException("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
 
   const std::size_t& nv = state_->get_nv();
   const std::size_t& ni = impulses_->get_ni();
@@ -137,14 +141,13 @@ const double& ActionModelImpulseFwdDynamics::get_restitution_coefficient() const
 const double& ActionModelImpulseFwdDynamics::get_damping_factor() const { return JMinvJt_damping_; }
 
 void ActionModelImpulseFwdDynamics::set_armature(const Eigen::VectorXd& armature) {
-  assert(static_cast<std::size_t>(armature.size()) == state_->get_nv() &&
-         "The armature dimension is wrong, we cannot set it.");
   if (static_cast<std::size_t>(armature.size()) != state_->get_nv()) {
-    std::cout << "The armature dimension is wrong, we cannot set it." << std::endl;
-  } else {
-    armature_ = armature;
-    with_armature_ = false;
+    throw CrocoddylException("The armature dimension is wrong (it should be " + std::to_string(state_->get_nv()) +
+                             ")");
   }
+
+  armature_ = armature;
+  with_armature_ = false;
 }
 
 void ActionModelImpulseFwdDynamics::set_restitution_coefficient(const double& r_coeff) { r_coeff_ = r_coeff; }

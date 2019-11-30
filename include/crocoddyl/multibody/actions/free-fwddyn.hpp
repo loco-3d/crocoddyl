@@ -13,6 +13,7 @@
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/multibody/costs/cost-sum.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 #include <pinocchio/multibody/data.hpp>
 
 namespace crocoddyl {

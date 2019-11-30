@@ -27,7 +27,10 @@ DifferentialActionModelFreeFwdDynamics::DifferentialActionModelFreeFwdDynamics(
       pinocchio_(state->get_pinocchio()),
       with_armature_(true),
       armature_(Eigen::VectorXd::Zero(state->get_nv())) {
-  assert(costs_->get_nu() == nu_ && "Costs doesn't have the same control dimension");
+  if (costs_->get_nu() != nu_) {
+    throw CrocoddylException("Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) +
+                             ")");
+  }
 }
 
 DifferentialActionModelFreeFwdDynamics::~DifferentialActionModelFreeFwdDynamics() {}
@@ -35,8 +38,12 @@ DifferentialActionModelFreeFwdDynamics::~DifferentialActionModelFreeFwdDynamics(
 void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                   const Eigen::Ref<const Eigen::VectorXd>& x,
                                                   const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
-  assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw CrocoddylException("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw CrocoddylException("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
 
   DifferentialActionDataFreeFwdDynamics* d = static_cast<DifferentialActionDataFreeFwdDynamics*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_->get_nq());
@@ -67,8 +74,12 @@ void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<Differ
 void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                       const Eigen::Ref<const Eigen::VectorXd>& x,
                                                       const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
-  assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw CrocoddylException("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw CrocoddylException("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
 
   const std::size_t& nv = state_->get_nv();
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_->get_nq());
@@ -116,14 +127,13 @@ const boost::shared_ptr<CostModelSum>& DifferentialActionModelFreeFwdDynamics::g
 const Eigen::VectorXd& DifferentialActionModelFreeFwdDynamics::get_armature() const { return armature_; }
 
 void DifferentialActionModelFreeFwdDynamics::set_armature(const Eigen::VectorXd& armature) {
-  assert(static_cast<std::size_t>(armature.size()) == state_->get_nv() &&
-         "The armature dimension is wrong, we cannot set it.");
   if (static_cast<std::size_t>(armature.size()) != state_->get_nv()) {
-    std::cout << "The armature dimension is wrong, we cannot set it." << std::endl;
-  } else {
-    armature_ = armature;
-    with_armature_ = false;
+    throw CrocoddylException("The armature dimension is wrong (it should be " + std::to_string(state_->get_nv()) +
+                             ")");
   }
+
+  armature_ = armature;
+  with_armature_ = false;
 }
 
 }  // namespace crocoddyl

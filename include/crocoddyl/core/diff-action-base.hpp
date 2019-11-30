@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS, The University of Edinburgh
+// Copyright (C) 2018-2020, LAAS-CNRS, The University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,9 +9,10 @@
 #ifndef CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_
 #define CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_
 
-#include "crocoddyl/core/state-base.hpp"
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include "crocoddyl/core/state-base.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
