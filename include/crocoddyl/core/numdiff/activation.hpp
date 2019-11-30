@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS, New York University, Max Planck Gesellshaft
+// Copyright (C) 2018-2020, LAAS-CNRS, New York University, Max Planck Gesellshaft,
+// University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -70,13 +71,13 @@ class ActivationModelNumDiff : public ActivationModelAbstract {
 
  private:
   /**
-   * @brief This is the model to compute the finite differenciation from
+   * @brief This is the model to compute the finite differentiation from
    */
   boost::shared_ptr<ActivationModelAbstract> model_;
 
   /**
    * @brief This is the numerical disturbance value used during the numerical
-   * differenciations
+   * differentiation
    */
   double disturbance_;
 };

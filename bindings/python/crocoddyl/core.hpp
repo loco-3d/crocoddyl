@@ -17,6 +17,7 @@
 #include "python/crocoddyl/core/integrator/euler.hpp"
 #include "python/crocoddyl/core/numdiff/action.hpp"
 #include "python/crocoddyl/core/numdiff/diff-action.hpp"
+#include "python/crocoddyl/core/numdiff/activation.hpp"
 #include "python/crocoddyl/core/optctrl/shooting.hpp"
 #include "python/crocoddyl/core/solver-base.hpp"
 #include "python/crocoddyl/core/states/euclidean.hpp"
