@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -66,7 +66,7 @@ void exposeActivationAbstract() {
   bp::register_ptr_to_python<boost::shared_ptr<ActivationDataAbstract> >();
 
   bp::class_<ActivationDataAbstract, boost::noncopyable>(
-      "ActivationDataAbstract", "Abstract class for activation datas.\n\n",
+      "ActivationDataAbstract", "Abstract class for activation data.\n\n",
       bp::init<ActivationModelAbstract*>(bp::args(" self", " model"),
                                          "Create common data shared between AMs.\n\n"
                                          "The action data uses the model in order to first process it.\n"
