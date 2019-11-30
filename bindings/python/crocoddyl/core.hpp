@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,6 +30,7 @@
 #include "python/crocoddyl/core/solvers/box-ddp.hpp"
 #include "python/crocoddyl/core/solvers/ddp.hpp"
 #include "python/crocoddyl/core/solvers/fddp.hpp"
+#include "python/crocoddyl/core/utils/callbacks.hpp"
 #include "python/crocoddyl/core/utils/callbacks.hpp"
 
 namespace crocoddyl {
