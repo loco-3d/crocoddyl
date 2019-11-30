@@ -74,4 +74,94 @@ boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelLQR::cr
   return boost::make_shared<DifferentialActionDataLQR>(this);
 }
 
+const Eigen::MatrixXd& DifferentialActionModelLQR::get_Fq() const { return Fq_; }
+
+const Eigen::MatrixXd& DifferentialActionModelLQR::get_Fv() const { return Fv_; }
+
+const Eigen::MatrixXd& DifferentialActionModelLQR::get_Fu() const { return Fu_; }
+
+const Eigen::VectorXd& DifferentialActionModelLQR::get_f0() const { return f0_; }
+
+const Eigen::VectorXd& DifferentialActionModelLQR::get_lx() const { return lx_; }
+
+const Eigen::VectorXd& DifferentialActionModelLQR::get_lu() const { return lu_; }
+
+const Eigen::MatrixXd& DifferentialActionModelLQR::get_Lxx() const { return Lxx_; }
+
+const Eigen::MatrixXd& DifferentialActionModelLQR::get_Lxu() const { return Lxu_; }
+
+const Eigen::MatrixXd& DifferentialActionModelLQR::get_Luu() const { return Luu_; }
+
+void DifferentialActionModelLQR::set_Fq(const Eigen::MatrixXd& Fq) {
+  if (static_cast<std::size_t>(Fq.rows()) != state_->get_nq() ||
+      static_cast<std::size_t>(Fq.cols()) != state_->get_nq()) {
+    throw CrocoddylException("Fq has wrong dimension (it should be " + std::to_string(state_->get_nq()) + "," +
+                             std::to_string(state_->get_nq()) + ")");
+  }
+  Fq_ = Fq;
+}
+
+void DifferentialActionModelLQR::set_Fv(const Eigen::MatrixXd& Fv) {
+  if (static_cast<std::size_t>(Fv.rows()) != state_->get_nv() ||
+      static_cast<std::size_t>(Fv.cols()) != state_->get_nv()) {
+    throw CrocoddylException("Fv has wrong dimension (it should be " + std::to_string(state_->get_nv()) + "," +
+                             std::to_string(state_->get_nv()) + ")");
+  }
+  Fv_ = Fv;
+}
+
+void DifferentialActionModelLQR::set_Fu(const Eigen::MatrixXd& Fu) {
+  if (static_cast<std::size_t>(Fu.rows()) != state_->get_nq() || static_cast<std::size_t>(Fu.cols()) != nu_) {
+    throw CrocoddylException("Fu has wrong dimension (it should be " + std::to_string(state_->get_nq()) + "," +
+                             std::to_string(nu_) + ")");
+  }
+  Fu_ = Fu;
+}
+
+void DifferentialActionModelLQR::set_f0(const Eigen::VectorXd& f0) {
+  if (static_cast<std::size_t>(f0.size()) != state_->get_nv()) {
+    throw CrocoddylException("f0 has wrong dimension (it should be " + std::to_string(state_->get_nv()) + ")");
+  }
+  f0_ = f0;
+}
+
+void DifferentialActionModelLQR::set_lx(const Eigen::VectorXd& lx) {
+  if (static_cast<std::size_t>(lx.size()) != state_->get_nx()) {
+    throw CrocoddylException("lx has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  lx_ = lx;
+}
+
+void DifferentialActionModelLQR::set_lu(const Eigen::VectorXd& lu) {
+  if (static_cast<std::size_t>(lu.size()) != nu_) {
+    throw CrocoddylException("lu has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
+  lu_ = lu;
+}
+
+void DifferentialActionModelLQR::set_Lxx(const Eigen::MatrixXd& Lxx) {
+  if (static_cast<std::size_t>(Lxx.rows()) != state_->get_nx() ||
+      static_cast<std::size_t>(Lxx.cols()) != state_->get_nx()) {
+    throw CrocoddylException("Lxx has wrong dimension (it should be " + std::to_string(state_->get_nx()) + "," +
+                             std::to_string(state_->get_nx()) + ")");
+  }
+  Lxx_ = Lxx;
+}
+
+void DifferentialActionModelLQR::set_Lxu(const Eigen::MatrixXd& Lxu) {
+  if (static_cast<std::size_t>(Lxu.rows()) != state_->get_nx() || static_cast<std::size_t>(Lxu.cols()) != nu_) {
+    throw CrocoddylException("Lxu has wrong dimension (it should be " + std::to_string(state_->get_nx()) + "," +
+                             std::to_string(nu_) + ")");
+  }
+  Lxu_ = Lxu;
+}
+
+void DifferentialActionModelLQR::set_Luu(const Eigen::MatrixXd& Luu) {
+  if (static_cast<std::size_t>(Luu.rows()) != nu_ || static_cast<std::size_t>(Luu.cols()) != nu_) {
+    throw CrocoddylException("Fq has wrong dimension (it should be " + std::to_string(nu_) + "," +
+                             std::to_string(nu_) + ")");
+  }
+  Luu_ = Luu;
+}
+
 }  // namespace crocoddyl
