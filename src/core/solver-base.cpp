@@ -30,8 +30,8 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
   models_.resize(T + 1);
   datas_.resize(T + 1);
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = problem_->running_models_[t];
-    const boost::shared_ptr<ActionDataAbstract>& data = problem_->running_datas_[t];
+    const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
+    const boost::shared_ptr<ActionDataAbstract>& data = problem_->get_runningDatas()[t];
     const std::size_t& nu = model->get_nu();
 
     xs_[t] = model->get_state()->zero();
@@ -39,9 +39,9 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
     models_[t] = model;
     datas_[t] = data;
   }
-  xs_.back() = problem_->terminal_model_->get_state()->zero();
-  models_.back() = problem_->terminal_model_;
-  datas_.back() = problem_->terminal_data_;
+  xs_.back() = problem_->get_terminalModel()->get_state()->zero();
+  models_.back() = problem_->get_terminalModel();
+  datas_.back() = problem_->get_terminalData();
 }
 
 SolverAbstract::~SolverAbstract() {}
@@ -52,9 +52,9 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
 
   if (xs_warm.size() == 0) {
     for (std::size_t t = 0; t < T; ++t) {
-      xs_[t] = problem_->running_models_[t]->get_state()->zero();
+      xs_[t] = problem_->get_runningModels()[t]->get_state()->zero();
     }
-    xs_.back() = problem_->terminal_model_->get_state()->zero();
+    xs_.back() = problem_->get_terminalModel()->get_state()->zero();
   } else {
     assert(xs_warm.size() == T + 1);
     std::copy(xs_warm.begin(), xs_warm.end(), xs_.begin());
@@ -62,7 +62,7 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
 
   if (us_warm.size() == 0) {
     for (std::size_t t = 0; t < T; ++t) {
-      const std::size_t& nu = problem_->running_models_[t]->get_nu();
+      const std::size_t& nu = problem_->get_runningModels()[t]->get_nu();
       us_[t] = Eigen::VectorXd::Zero(nu);
     }
   } else {

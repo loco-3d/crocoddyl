@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,23 +32,22 @@ class ShootingProblem {
   const Eigen::VectorXd& get_x0() const;
   void set_x0(Eigen::VectorXd x0_in);
 
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& get_runningModels();
-  const boost::shared_ptr<ActionModelAbstract>& get_terminalModel();
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& get_runningDatas();
-  const boost::shared_ptr<ActionDataAbstract>& get_terminalData();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& get_runningModels() const;
+  const boost::shared_ptr<ActionModelAbstract>& get_terminalModel() const;
+  const std::vector<boost::shared_ptr<ActionDataAbstract> >& get_runningDatas() const;
+  const boost::shared_ptr<ActionDataAbstract>& get_terminalData() const;
 
+ protected:
+  double cost_;
+  std::size_t T_;
+  Eigen::VectorXd x0_;
   boost::shared_ptr<ActionModelAbstract> terminal_model_;
   boost::shared_ptr<ActionDataAbstract> terminal_data_;
   std::vector<boost::shared_ptr<ActionModelAbstract> > running_models_;
   std::vector<boost::shared_ptr<ActionDataAbstract> > running_datas_;
 
- protected:
-  void allocateData();
-  std::size_t T_;
-  Eigen::VectorXd x0_;
-
  private:
-  double cost_;
+  void allocateData();
 };
 
 }  // namespace crocoddyl

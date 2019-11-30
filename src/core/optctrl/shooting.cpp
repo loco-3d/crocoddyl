@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -111,16 +111,16 @@ void ShootingProblem::allocateData() {
   terminal_data_ = terminal_model_->createData();
 }
 
-const std::vector<boost::shared_ptr<ActionModelAbstract> >& ShootingProblem::get_runningModels() {
+const std::vector<boost::shared_ptr<ActionModelAbstract> >& ShootingProblem::get_runningModels() const {
   return running_models_;
 }
 
-const boost::shared_ptr<ActionModelAbstract>& ShootingProblem::get_terminalModel() { return terminal_model_; }
+const boost::shared_ptr<ActionModelAbstract>& ShootingProblem::get_terminalModel() const { return terminal_model_; }
 
-const std::vector<boost::shared_ptr<ActionDataAbstract> >& ShootingProblem::get_runningDatas() {
+const std::vector<boost::shared_ptr<ActionDataAbstract> >& ShootingProblem::get_runningDatas() const {
   return running_datas_;
 }
 
-const boost::shared_ptr<ActionDataAbstract>& ShootingProblem::get_terminalData() { return terminal_data_; }
+const boost::shared_ptr<ActionDataAbstract>& ShootingProblem::get_terminalData() const { return terminal_data_; }
 
 }  // namespace crocoddyl

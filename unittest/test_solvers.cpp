@@ -79,7 +79,7 @@ void test_solver_against_kkt_solver(SolverTypes::Type solver_type, ActionModelTy
   std::vector<Eigen::VectorXd> xs;
   std::vector<Eigen::VectorXd> us;
   for (std::size_t i = 0; i < T; ++i) {
-    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = problem->running_models_[i];
+    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = problem->get_runningModels()[i];
     xs.push_back(problem->get_x0());
     us.push_back(Eigen::VectorXd::Zero(model->get_nu()));
   }
