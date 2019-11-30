@@ -22,13 +22,17 @@ class ActivationModelAbstract_wrap : public ActivationModelAbstract, public bp::
       : ActivationModelAbstract(nr), bp::wrapper<ActivationModelAbstract>() {}
 
   void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r) {
-    assert(static_cast<std::size_t>(r.size()) == nr_ && "r has wrong dimension");
+    if (static_cast<std::size_t>(r.size()) != nr_) {
+      throw CrocoddylException("r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+    }
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)r);
   }
 
   void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r,
                 const bool& recalc = true) {
-    assert(static_cast<std::size_t>(r.size()) == nr_ && "r has wrong dimension");
+    if (static_cast<std::size_t>(r.size()) != nr_) {
+      throw CrocoddylException("r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+    }
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)r, recalc);
   }
 };

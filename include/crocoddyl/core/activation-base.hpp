@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,6 +12,7 @@
 #include <Eigen/Dense>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
