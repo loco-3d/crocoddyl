@@ -29,7 +29,16 @@ ActionModelImpulseFwdDynamics::ActionModelImpulseFwdDynamics(boost::shared_ptr<S
       r_coeff_(r_coeff),
       JMinvJt_damping_(JMinvJt_damping),
       enable_force_(enable_force),
-      gravity_(state->get_pinocchio().gravity) {}
+      gravity_(state->get_pinocchio().gravity) {
+  if (r_coeff_ < 0.) {
+    r_coeff_ = 0.;
+    throw CrocoddylException("The restitution coefficient has to be positive, set to 0");
+  }
+  if (JMinvJt_damping_ < 0.) {
+    JMinvJt_damping_ = 0.;
+    throw CrocoddylException("The damping factor has to be positive, set to 0");
+  }
+}
 
 ActionModelImpulseFwdDynamics::~ActionModelImpulseFwdDynamics() {}
 
@@ -145,13 +154,22 @@ void ActionModelImpulseFwdDynamics::set_armature(const Eigen::VectorXd& armature
     throw CrocoddylException("The armature dimension is wrong (it should be " + std::to_string(state_->get_nv()) +
                              ")");
   }
-
   armature_ = armature;
   with_armature_ = false;
 }
 
-void ActionModelImpulseFwdDynamics::set_restitution_coefficient(const double& r_coeff) { r_coeff_ = r_coeff; }
+void ActionModelImpulseFwdDynamics::set_restitution_coefficient(const double& r_coeff) {
+  if (r_coeff < 0.) {
+    throw CrocoddylException("The restitution coefficient has to be positive");
+  }
+  r_coeff_ = r_coeff;
+}
 
-void ActionModelImpulseFwdDynamics::set_damping_factor(const double& damping) { JMinvJt_damping_ = damping; }
+void ActionModelImpulseFwdDynamics::set_damping_factor(const double& damping) {
+  if (damping < 0.) {
+    throw CrocoddylException("The damping factor has to be positive");
+  }
+  JMinvJt_damping_ = damping;
+}
 
 }  // namespace crocoddyl

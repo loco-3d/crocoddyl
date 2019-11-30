@@ -127,7 +127,7 @@ void exposeActionAbstract() {
 
   bp::class_<ActionDataAbstract, boost::noncopyable>(
       "ActionDataAbstract",
-      "Abstract class for action datas.\n\n"
+      "Abstract class for action data.\n\n"
       "In crocoddyl, an action data contains all the required information for processing an\n"
       "user-defined action model. The action data typically is allocated onces by running\n"
       "model.createData() and contains the first- and second- order derivatives of the dynamics\n"

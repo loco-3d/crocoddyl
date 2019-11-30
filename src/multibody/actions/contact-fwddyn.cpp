@@ -29,6 +29,10 @@ DifferentialActionModelContactFwdDynamics::DifferentialActionModelContactFwdDyna
       armature_(Eigen::VectorXd::Zero(state->get_nv())),
       JMinvJt_damping_(fabs(JMinvJt_damping)),
       enable_force_(enable_force) {
+  if (JMinvJt_damping_ < 0.) {
+    JMinvJt_damping_ = 0.;
+    throw CrocoddylException("The damping factor has to be positive, set to 0");
+  }
   if (contacts_->get_nu() != nu_) {
     throw CrocoddylException("Contacts doesn't have the same control dimension (it should be " + std::to_string(nu_) +
                              ")");
@@ -165,12 +169,14 @@ void DifferentialActionModelContactFwdDynamics::set_armature(const Eigen::Vector
     throw CrocoddylException("The armature dimension is wrong (it should be " + std::to_string(state_->get_nv()) +
                              ")");
   }
-
   armature_ = armature;
   with_armature_ = false;
 }
 
 void DifferentialActionModelContactFwdDynamics::set_damping_factor(const double& damping) {
+  if (damping < 0.) {
+    throw CrocoddylException("The damping factor has to be positive");
+  }
   JMinvJt_damping_ = damping;
 }
 
