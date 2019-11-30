@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS, New York University, Max Planck Gesellshaft
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh, New York University,
+// Max Planck Gesellshaft
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -21,17 +22,29 @@ Eigen::VectorXd StateNumDiff::rand() const { return state_->rand(); }
 
 void StateNumDiff::diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
                         Eigen::Ref<Eigen::VectorXd> dxout) const {
-  assert(static_cast<std::size_t>(x0.size()) == nx_ && "x0 has wrong dimension");
-  assert(static_cast<std::size_t>(x1.size()) == nx_ && "x1 has wrong dimension");
-  assert(static_cast<std::size_t>(dxout.size()) == ndx_ && "output must be pre-allocated");
+  if (static_cast<std::size_t>(x0.size()) != nx_) {
+    throw CrocoddylException("x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
+  }
+  if (static_cast<std::size_t>(x1.size()) != nx_) {
+    throw CrocoddylException("x1 has wrong dimension (it should be " + std::to_string(nx_) + ")");
+  }
+  if (static_cast<std::size_t>(dxout.size()) != ndx_) {
+    throw CrocoddylException("dxout has wrong dimension (it should be " + std::to_string(ndx_) + ")");
+  }
   state_->diff(x0, x1, dxout);
 }
 
 void StateNumDiff::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                              Eigen::Ref<Eigen::VectorXd> xout) const {
-  assert(static_cast<std::size_t>(x.size()) == nx_ && "x has wrong dimension");
-  assert(static_cast<std::size_t>(dx.size()) == ndx_ && "dx has wrong dimension");
-  assert(static_cast<std::size_t>(xout.size()) == nx_ && "output must be pre-allocated");
+  if (static_cast<std::size_t>(x.size()) != nx_) {
+    throw CrocoddylException("x has wrong dimension (it should be " + std::to_string(nx_) + ")");
+  }
+  if (static_cast<std::size_t>(dx.size()) != ndx_) {
+    throw CrocoddylException("dx has wrong dimension (it should be " + std::to_string(ndx_) + ")");
+  }
+  if (static_cast<std::size_t>(xout.size()) != nx_) {
+    throw CrocoddylException("xout has wrong dimension (it should be " + std::to_string(nx_) + ")");
+  }
   state_->integrate(x, dx, xout);
 }
 
@@ -39,8 +52,12 @@ void StateNumDiff::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eige
                          Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
                          Jcomponent firstsecond) const {
   assert(is_a_Jcomponent(firstsecond) && ("firstsecond must be one of the Jcomponent {both, first, second}"));
-  assert(static_cast<std::size_t>(x0.size()) == nx_ && "x0 has wrong dimension");
-  assert(static_cast<std::size_t>(x1.size()) == nx_ && "x1 has wrong dimension");
+  if (static_cast<std::size_t>(x0.size()) != nx_) {
+    throw CrocoddylException("x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
+  }
+  if (static_cast<std::size_t>(x1.size()) != nx_) {
+    throw CrocoddylException("x1 has wrong dimension (it should be " + std::to_string(nx_) + ")");
+  }
   Eigen::VectorXd tmp_x_ = Eigen::VectorXd::Zero(nx_);
   Eigen::VectorXd dx_ = Eigen::VectorXd::Zero(ndx_);
   Eigen::VectorXd dx0_ = Eigen::VectorXd::Zero(ndx_);
@@ -48,8 +65,10 @@ void StateNumDiff::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eige
   dx_.setZero();
   diff(x0, x1, dx0_);
   if (firstsecond == first || firstsecond == both) {
-    assert(static_cast<std::size_t>(Jfirst.rows()) == ndx_ && static_cast<std::size_t>(Jfirst.cols()) == ndx_ &&
-           "Jfirst must be of the good size");
+    if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
+      throw CrocoddylException("Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," +
+                               std::to_string(ndx_) + ")");
+    }
     Jfirst.setZero();
     for (std::size_t i = 0; i < ndx_; ++i) {
       dx_(i) = disturbance_;
@@ -65,8 +84,10 @@ void StateNumDiff::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eige
     Jfirst /= disturbance_;
   }
   if (firstsecond == second || firstsecond == both) {
-    assert(static_cast<std::size_t>(Jsecond.rows()) == ndx_ && static_cast<std::size_t>(Jsecond.cols()) == ndx_ &&
-           "Jfirst must be of the good size");
+    if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
+      throw CrocoddylException("Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
+                               std::to_string(ndx_) + ")");
+    }
 
     Jsecond.setZero();
     for (std::size_t i = 0; i < ndx_; ++i) {
@@ -87,10 +108,13 @@ void StateNumDiff::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eige
 void StateNumDiff::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                               Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
                               Jcomponent firstsecond) const {
-  assert((firstsecond == first || firstsecond == second || firstsecond == both) &&
-         ("firstsecond must be one of the Jcomponent {both, first, second}"));
-  assert(static_cast<std::size_t>(x.size()) == nx_ && "x has wrong dimension");
-  assert(static_cast<std::size_t>(dx.size()) == ndx_ && "dx has wrong dimension");
+  assert(is_a_Jcomponent(firstsecond) && ("firstsecond must be one of the Jcomponent {both, first, second}"));
+  if (static_cast<std::size_t>(x.size()) != nx_) {
+    throw CrocoddylException("x has wrong dimension (it should be " + std::to_string(nx_) + ")");
+  }
+  if (static_cast<std::size_t>(dx.size()) != ndx_) {
+    throw CrocoddylException("dx has wrong dimension (it should be " + std::to_string(ndx_) + ")");
+  }
   Eigen::VectorXd tmp_x_ = Eigen::VectorXd::Zero(nx_);
   Eigen::VectorXd dx_ = Eigen::VectorXd::Zero(ndx_);
   Eigen::VectorXd x0_ = Eigen::VectorXd::Zero(nx_);
@@ -99,8 +123,10 @@ void StateNumDiff::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const 
   integrate(x, dx, x0_);
 
   if (firstsecond == first || firstsecond == both) {
-    assert(static_cast<std::size_t>(Jfirst.rows()) == ndx_ && static_cast<std::size_t>(Jfirst.cols()) == ndx_ &&
-           "Jfirst must be of the good size");
+    if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
+      throw CrocoddylException("Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," +
+                               std::to_string(ndx_) + ")");
+    }
     Jfirst.setZero();
     for (std::size_t i = 0; i < ndx_; ++i) {
       dx_(i) = disturbance_;
@@ -116,8 +142,10 @@ void StateNumDiff::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const 
     Jfirst /= disturbance_;
   }
   if (firstsecond == second || firstsecond == both) {
-    assert(static_cast<std::size_t>(Jsecond.rows()) == ndx_ && static_cast<std::size_t>(Jsecond.cols()) == ndx_ &&
-           "Jfirst must be of the good size");
+    if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
+      throw CrocoddylException("Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
+                               std::to_string(ndx_) + ")");
+    }
     Jsecond.setZero();
     for (std::size_t i = 0; i < ndx_; ++i) {
       dx_(i) = disturbance_;
