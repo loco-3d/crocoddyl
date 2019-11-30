@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -15,14 +15,18 @@ CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<State
                                                          boost::shared_ptr<ActivationModelAbstract> activation,
                                                          const Vector6d& ref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), ref_(ref) {
-  assert(activation_->get_nr() == 6 && "nr is not equals to 6");
+  if (activation_->get_nr() != 6) {
+    throw CrocoddylException("nr is equals to 6");
+  }
 }
 
 CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state,
                                                          boost::shared_ptr<ActivationModelAbstract> activation,
                                                          const Vector6d& ref)
     : CostModelAbstract(state, activation), ref_(ref) {
-  assert(activation_->get_nr() == 6 && "nr is not equals to 6");
+  if (activation_->get_nr() != 6) {
+    throw CrocoddylException("nr is equals to 6");
+  }
 }
 
 CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6d& ref,

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,9 +41,15 @@ void CostModelSum::removeCost(const std::string& name) {
 
 void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
-  assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
-  assert(data->costs.size() == costs_.size() && "it doesn't match the number of cost datas and models");
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw CrocoddylException("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw CrocoddylException("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
+  if (data->costs.size() != costs_.size()) {
+    throw CrocoddylException("it doesn't match the number of cost datas and models");
+  }
   data->cost = 0.;
   std::size_t nr = 0;
 
@@ -67,9 +73,15 @@ void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen:
 
 void CostModelSum::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                             const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
-  assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
-  assert(data->costs.size() == costs_.size() && "it doesn't match the number of cost datas and models");
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw CrocoddylException("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw CrocoddylException("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
+  if (data->costs.size() != costs_.size()) {
+    throw CrocoddylException("it doesn't match the number of cost datas and models");
+  }
   if (recalc) {
     calc(data, x, u);
   }

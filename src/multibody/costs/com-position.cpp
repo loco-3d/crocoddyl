@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,14 +14,18 @@ CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> sta
                                            boost::shared_ptr<ActivationModelAbstract> activation,
                                            const Eigen::Vector3d& cref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), cref_(cref) {
-  assert(activation_->get_nr() == 3 && "nr is not equals to 3");
+  if (activation_->get_nr() != 3) {
+    throw CrocoddylException("nr is equals to 3");
+  }
 }
 
 CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> state,
                                            boost::shared_ptr<ActivationModelAbstract> activation,
                                            const Eigen::Vector3d& cref)
     : CostModelAbstract(state, activation), cref_(cref) {
-  assert(activation_->get_nr() == 3 && "nr is not equals to 3");
+  if (activation_->get_nr() != 3) {
+    throw CrocoddylException("nr is equals to 3");
+  }
 }
 
 CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> state, const Eigen::Vector3d& cref,

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS, The University of Edinburgh
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -15,14 +15,18 @@ CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMult
                                                      boost::shared_ptr<ActivationModelAbstract> activation,
                                                      const FrameTranslation& xref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), xref_(xref) {
-  assert(activation_->get_nr() == 3 && "nr is not equals to 3");
+  if (activation_->get_nr() != 3) {
+    throw CrocoddylException("nr is equals to 3");
+  }
 }
 
 CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state,
                                                      boost::shared_ptr<ActivationModelAbstract> activation,
                                                      const FrameTranslation& xref)
     : CostModelAbstract(state, activation), xref_(xref) {
-  assert(activation_->get_nr() == 3 && "nr is not equals to 3");
+  if (activation_->get_nr() != 3) {
+    throw CrocoddylException("nr is equals to 3");
+  }
 }
 
 CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state,
