@@ -12,7 +12,9 @@ namespace crocoddyl {
 
 ActuationModelAbstract::ActuationModelAbstract(boost::shared_ptr<StateAbstract> state, const std::size_t& nu)
     : nu_(nu), state_(state) {
-  assert(nu_ != 0 && "nu cannot be zero");
+  if (nu_ == 0) {
+    throw CrocoddylException("nu cannot be zero");
+  }
 }
 
 ActuationModelAbstract::~ActuationModelAbstract() {}
