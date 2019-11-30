@@ -18,7 +18,7 @@ namespace crocoddyl {
 ShootingProblem::ShootingProblem(const Eigen::VectorXd& x0,
                                  const std::vector<boost::shared_ptr<ActionModelAbstract> >& running_models,
                                  boost::shared_ptr<ActionModelAbstract> terminal_model)
-    : terminal_model_(terminal_model), running_models_(running_models), T_(running_models.size()), x0_(x0), cost_(0.) {
+    : cost_(0.), T_(running_models.size()), x0_(x0), terminal_model_(terminal_model), running_models_(running_models) {
   if (static_cast<std::size_t>(x0.size()) != running_models_[0]->get_state()->get_nx()) {
     throw CrocoddylException("x0 has wrong dimension (it should be " +
                              std::to_string(running_models_[0]->get_state()->get_nx()) + ")");
