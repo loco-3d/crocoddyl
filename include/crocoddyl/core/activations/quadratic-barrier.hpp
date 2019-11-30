@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,14 +10,23 @@
 #define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_BARRIER_HPP_
 
 #include "crocoddyl/core/activation-base.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
 struct ActivationBounds {
   ActivationBounds(const Eigen::VectorXd& lower, const Eigen::VectorXd& upper, const double& b = 1.)
       : lb(lower), ub(upper), beta(b) {
-    assert(lb.size() == ub.size() && "The lower and upper bounds don't have the same dimension.");
-    assert((beta >= 0 && beta <= 1.) && "The range of beta is between 0 and 1.");
+    if (lb.size() != ub.size()) {
+      throw CrocoddylException("The lower and upper bounds don't have the same dimension (lb,ub dimensions equal to " +
+                               std::to_string(lb.size()) + "," + std::to_string(ub.size()) + ", respectively)");
+    }
+    if (beta < 0 || beta > 1.) {
+      throw CrocoddylException("The range of beta is between 0 and 1");
+    }
+    if (!((lb - ub).array() <= 0).all()) {
+      throw CrocoddylException("The lower and upper bounds are badly defined");
+    }
 
     if (beta >= 0 && beta <= 1.) {
       Eigen::VectorXd m = 0.5 * (lower + upper);

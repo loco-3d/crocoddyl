@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -17,7 +17,9 @@ ActivationModelWeightedQuad::~ActivationModelWeightedQuad() {}
 
 void ActivationModelWeightedQuad::calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                                        const Eigen::Ref<const Eigen::VectorXd>& r) {
-  assert(static_cast<std::size_t>(r.size()) == nr_ && "r has wrong dimension");
+  if (static_cast<std::size_t>(r.size()) != nr_) {
+    throw CrocoddylException("r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+  }
   boost::shared_ptr<ActivationDataWeightedQuad> d = boost::static_pointer_cast<ActivationDataWeightedQuad>(data);
 
   d->Wr = weights_.cwiseProduct(r);
@@ -26,7 +28,9 @@ void ActivationModelWeightedQuad::calc(const boost::shared_ptr<ActivationDataAbs
 
 void ActivationModelWeightedQuad::calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
                                            const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc) {
-  assert(static_cast<std::size_t>(r.size()) == nr_ && "r has wrong dimension");
+  if (static_cast<std::size_t>(r.size()) != nr_) {
+    throw CrocoddylException("r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+  }
   if (recalc) {
     calc(data, r);
   }
@@ -50,6 +54,13 @@ boost::shared_ptr<ActivationDataAbstract> ActivationModelWeightedQuad::createDat
 
 const Eigen::VectorXd& ActivationModelWeightedQuad::get_weights() const { return weights_; }
 
-void ActivationModelWeightedQuad::set_weights(const Eigen::VectorXd& weights) { weights_ = weights; }
+void ActivationModelWeightedQuad::set_weights(const Eigen::VectorXd& weights) {
+  if (weights.size() != weights_.size()) {
+    throw CrocoddylException("weight vector has wrong dimension (it should be " + std::to_string(weights_.size()) +
+                             ")");
+  }
+
+  weights_ = weights;
+}
 
 }  // namespace crocoddyl

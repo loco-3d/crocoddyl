@@ -10,6 +10,7 @@
 #define CROCODDYL_CORE_ACTIVATIONS_SMOOTH_ABS_HPP_
 
 #include "crocoddyl/core/activation-base.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 

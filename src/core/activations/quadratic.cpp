@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,13 +16,17 @@ ActivationModelQuad::~ActivationModelQuad() {}
 
 void ActivationModelQuad::calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                                const Eigen::Ref<const Eigen::VectorXd>& r) {
-  assert(static_cast<std::size_t>(r.size()) == nr_ && "r has wrong dimension");
+  if (static_cast<std::size_t>(r.size()) != nr_) {
+    throw CrocoddylException("r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+  }
   data->a_value = 0.5 * r.transpose() * r;
 }
 
 void ActivationModelQuad::calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
                                    const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc) {
-  assert(static_cast<std::size_t>(r.size()) == nr_ && "r has wrong dimension");
+  if (static_cast<std::size_t>(r.size()) != nr_) {
+    throw CrocoddylException("r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+  }
   if (recalc) {
     calc(data, r);
   }
