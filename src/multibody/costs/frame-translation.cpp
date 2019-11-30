@@ -74,8 +74,6 @@ boost::shared_ptr<CostDataAbstract> CostModelFrameTranslation::createData(pinocc
 
 const FrameTranslation& CostModelFrameTranslation::get_xref() const { return xref_; }
 
-void CostModelFrameTranslation::set_xref(const FrameTranslation& xref_in) {
-  xref_ = xref_in;
-}
+void CostModelFrameTranslation::set_xref(const FrameTranslation& xref_in) { xref_ = xref_in; }
 
 }  // namespace crocoddyl
