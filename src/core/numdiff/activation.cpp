@@ -55,12 +55,19 @@ void ActivationModelNumDiff::calcDiff(const boost::shared_ptr<ActivationDataAbst
   data->Arr.noalias() = data->Ar * data->Ar.transpose();
 }
 
+boost::shared_ptr<ActivationDataAbstract> ActivationModelNumDiff::createData() {
+  return boost::make_shared<ActivationDataNumDiff>(this);
+}
+
 const boost::shared_ptr<ActivationModelAbstract>& ActivationModelNumDiff::get_model() const { return model_; }
 
 const double& ActivationModelNumDiff::get_disturbance() const { return disturbance_; }
 
-boost::shared_ptr<ActivationDataAbstract> ActivationModelNumDiff::createData() {
-  return boost::make_shared<ActivationDataNumDiff>(this);
+void ActivationModelNumDiff::set_disturbance(const double& disturbance) {
+  if (disturbance < 0.) {
+    throw CrocoddylException("Disturbance value is positive");
+  }
+  disturbance_ = disturbance;
 }
 
 }  // namespace crocoddyl

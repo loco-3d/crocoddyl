@@ -101,18 +101,25 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
   }
 }
 
+boost::shared_ptr<ActionDataAbstract> ActionModelNumDiff::createData() {
+  return boost::make_shared<ActionDataNumDiff>(this);
+}
+
 const boost::shared_ptr<ActionModelAbstract>& ActionModelNumDiff::get_model() const { return model_; }
 
 const double& ActionModelNumDiff::get_disturbance() const { return disturbance_; }
+
+void ActionModelNumDiff::set_disturbance(const double& disturbance) {
+  if (disturbance < 0.) {
+    throw CrocoddylException("Disturbance value is positive");
+  }
+  disturbance_ = disturbance;
+}
 
 bool ActionModelNumDiff::get_with_gauss_approx() { return model_->get_nr() > 0; }
 
 void ActionModelNumDiff::assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& /** x */) {
   // do nothing in the general case
-}
-
-boost::shared_ptr<ActionDataAbstract> ActionModelNumDiff::createData() {
-  return boost::make_shared<ActionDataNumDiff>(this);
 }
 
 }  // namespace crocoddyl

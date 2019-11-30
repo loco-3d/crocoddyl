@@ -30,6 +30,7 @@ class DifferentialActionModelNumDiff : public DifferentialActionModelAbstract {
 
   const boost::shared_ptr<DifferentialActionModelAbstract>& get_model() const;
   const double& get_disturbance() const;
+  void set_disturbance(const double& disturbance);
   bool get_with_gauss_approx();
 
  private:

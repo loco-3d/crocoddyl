@@ -61,6 +61,13 @@ class ActivationModelNumDiff : public ActivationModelAbstract {
    */
   const double& get_disturbance() const;
 
+  /**
+   * @brief Set the disturbance_ object
+   *
+   * @param disturbance is the value used to find the numerical derivative
+   */
+  void set_disturbance(const double& disturbance);
+
  private:
   /**
    * @brief This is the model to compute the finite differenciation from

@@ -160,4 +160,13 @@ void StateNumDiff::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const 
   }
 }
 
+const double& StateNumDiff::get_disturbance() const { return disturbance_; }
+
+void StateNumDiff::set_disturbance(const double& disturbance) {
+  if (disturbance < 0.) {
+    throw CrocoddylException("Disturbance value is positive");
+  }
+  disturbance_ = disturbance;
+}
+
 }  // namespace crocoddyl
