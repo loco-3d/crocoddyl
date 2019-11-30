@@ -31,6 +31,11 @@ IntegratedActionModelEuler::IntegratedActionModelEuler(boost::shared_ptr<Differe
     set_u_lb(differential_->get_u_lb());
     set_u_ub(differential_->get_u_ub());
   }
+  if (time_step_ < 0.) {
+    time_step_ = 1e-3;
+    time_step2_ = time_step_ * time_step_;
+    throw CrocoddylException("dt has positive value, set to 1e-3");
+  }
   if (time_step == 0.) {
     enable_integration_ = false;
   }
@@ -132,6 +137,9 @@ const boost::shared_ptr<DifferentialActionModelAbstract>& IntegratedActionModelE
 const double& IntegratedActionModelEuler::get_dt() const { return time_step_; }
 
 void IntegratedActionModelEuler::set_dt(double dt) {
+  if (dt < 0.) {
+    throw CrocoddylException("dt has positive value");
+  }
   time_step_ = dt;
   time_step2_ = dt * dt;
 }
