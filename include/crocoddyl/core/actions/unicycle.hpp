@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,6 +11,7 @@
 
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"
+#include <stdexcept>
 
 namespace crocoddyl {
 

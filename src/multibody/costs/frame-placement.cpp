@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS, The University of Edinburgh
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -15,14 +15,18 @@ CostModelFramePlacement::CostModelFramePlacement(boost::shared_ptr<StateMultibod
                                                  boost::shared_ptr<ActivationModelAbstract> activation,
                                                  const FramePlacement& Mref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
-  assert(activation_->get_nr() == 6 && "nr is not equals to 6");
+  if (activation_->get_nr() != 6) {
+    throw std::invalid_argument("nr is equals to 6");
+  }
 }
 
 CostModelFramePlacement::CostModelFramePlacement(boost::shared_ptr<StateMultibody> state,
                                                  boost::shared_ptr<ActivationModelAbstract> activation,
                                                  const FramePlacement& Mref)
     : CostModelAbstract(state, activation), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
-  assert(activation_->get_nr() == 6 && "nr is not equals to 6");
+  if (activation_->get_nr() != 6) {
+    throw std::invalid_argument("nr is equals to 6");
+  }
 }
 
 CostModelFramePlacement::CostModelFramePlacement(boost::shared_ptr<StateMultibody> state, const FramePlacement& Mref,

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,24 +13,28 @@ namespace crocoddyl {
 
 CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state,
                                                          boost::shared_ptr<ActivationModelAbstract> activation,
-                                                         const Vector6d& ref, const std::size_t& nu)
-    : CostModelAbstract(state, activation, nu), ref_(ref) {
-  assert(activation_->get_nr() == 6 && "nr is not equals to 6");
+                                                         const Vector6d& mref, const std::size_t& nu)
+    : CostModelAbstract(state, activation, nu), mref_(mref) {
+  if (activation_->get_nr() != 6) {
+    throw std::invalid_argument("nr is equals to 6");
+  }
 }
 
 CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state,
                                                          boost::shared_ptr<ActivationModelAbstract> activation,
-                                                         const Vector6d& ref)
-    : CostModelAbstract(state, activation), ref_(ref) {
-  assert(activation_->get_nr() == 6 && "nr is not equals to 6");
+                                                         const Vector6d& mref)
+    : CostModelAbstract(state, activation), mref_(mref) {
+  if (activation_->get_nr() != 6) {
+    throw std::invalid_argument("nr is equals to 6");
+  }
 }
 
-CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6d& ref,
+CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6d& mref,
                                                          const std::size_t& nu)
-    : CostModelAbstract(state, 6, nu), ref_(ref) {}
+    : CostModelAbstract(state, 6, nu), mref_(mref) {}
 
-CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6d& ref)
-    : CostModelAbstract(state, 6), ref_(ref) {}
+CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6d& mref)
+    : CostModelAbstract(state, 6), mref_(mref) {}
 
 CostModelCentroidalMomentum::~CostModelCentroidalMomentum() {}
 
@@ -38,7 +42,7 @@ void CostModelCentroidalMomentum::calc(const boost::shared_ptr<CostDataAbstract>
                                        const Eigen::Ref<const Eigen::VectorXd>&,
                                        const Eigen::Ref<const Eigen::VectorXd>&) {
   // Compute the cost residual give the reference CentroidalMomentum
-  data->r = data->pinocchio->hg.toVector() - ref_;
+  data->r = data->pinocchio->hg.toVector() - mref_;
 
   activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;
@@ -75,6 +79,8 @@ boost::shared_ptr<CostDataAbstract> CostModelCentroidalMomentum::createData(pino
   return boost::make_shared<CostDataCentroidalMomentum>(this, data);
 }
 
-const Vector6d& CostModelCentroidalMomentum::get_ref() const { return ref_; }
+const Vector6d& CostModelCentroidalMomentum::get_mref() const { return mref_; }
+
+void CostModelCentroidalMomentum::set_mref(const Vector6d& mref_in) { mref_ = mref_in; }
 
 }  // namespace crocoddyl

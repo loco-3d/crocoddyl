@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS, New York University, Max Planck Gesellshaft
+// Copyright (C) 2018-2020, LAAS-CNRS, New York University, Max Planck Gesellschaft,
+// University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,9 +10,9 @@
 #ifndef CROCODDYL_CORE_NUMDIFF_ACTIVATION_HPP_
 #define CROCODDYL_CORE_NUMDIFF_ACTIVATION_HPP_
 
-#include "crocoddyl/core/activation-base.hpp"
 #include <vector>
 #include <iostream>
+#include "crocoddyl/core/activation-base.hpp"
 
 namespace crocoddyl {
 
@@ -61,15 +62,22 @@ class ActivationModelNumDiff : public ActivationModelAbstract {
    */
   const double& get_disturbance() const;
 
+  /**
+   * @brief Set the disturbance_ object
+   *
+   * @param disturbance is the value used to find the numerical derivative
+   */
+  void set_disturbance(const double& disturbance);
+
  private:
   /**
-   * @brief This is the model to compute the finite differenciation from
+   * @brief This is the model to compute the finite differentiation from
    */
   boost::shared_ptr<ActivationModelAbstract> model_;
 
   /**
    * @brief This is the numerical disturbance value used during the numerical
-   * differenciations
+   * differentiation
    */
   double disturbance_;
 };

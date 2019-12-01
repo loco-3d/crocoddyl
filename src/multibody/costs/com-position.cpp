@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,14 +14,18 @@ CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> sta
                                            boost::shared_ptr<ActivationModelAbstract> activation,
                                            const Eigen::Vector3d& cref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), cref_(cref) {
-  assert(activation_->get_nr() == 3 && "nr is not equals to 3");
+  if (activation_->get_nr() != 3) {
+    throw std::invalid_argument("nr is equals to 3");
+  }
 }
 
 CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> state,
                                            boost::shared_ptr<ActivationModelAbstract> activation,
                                            const Eigen::Vector3d& cref)
     : CostModelAbstract(state, activation), cref_(cref) {
-  assert(activation_->get_nr() == 3 && "nr is not equals to 3");
+  if (activation_->get_nr() != 3) {
+    throw std::invalid_argument("nr is equals to 3");
+  }
 }
 
 CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> state, const Eigen::Vector3d& cref,
@@ -67,6 +71,6 @@ boost::shared_ptr<CostDataAbstract> CostModelCoMPosition::createData(pinocchio::
 
 const Eigen::Vector3d& CostModelCoMPosition::get_cref() const { return cref_; }
 
-void CostModelCoMPosition::set_cref(Eigen::Vector3d cref_in) { cref_ = cref_in; }
+void CostModelCoMPosition::set_cref(const Eigen::Vector3d& cref_in) { cref_ = cref_in; }
 
 }  // namespace crocoddyl

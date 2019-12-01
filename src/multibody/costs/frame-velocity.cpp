@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,14 +16,18 @@ CostModelFrameVelocity::CostModelFrameVelocity(boost::shared_ptr<StateMultibody>
                                                boost::shared_ptr<ActivationModelAbstract> activation,
                                                const FrameMotion& vref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), vref_(vref) {
-  assert(activation_->get_nr() == 6 && "nr is not equals to 6");
+  if (activation_->get_nr() != 6) {
+    throw std::invalid_argument("nr is equals to 6");
+  }
 }
 
 CostModelFrameVelocity::CostModelFrameVelocity(boost::shared_ptr<StateMultibody> state,
                                                boost::shared_ptr<ActivationModelAbstract> activation,
                                                const FrameMotion& vref)
     : CostModelAbstract(state, activation), vref_(vref) {
-  assert(activation_->get_nr() == 6 && "nr is not equals to 6");
+  if (activation_->get_nr() != 6) {
+    throw std::invalid_argument("nr is equals to 6");
+  }
 }
 
 CostModelFrameVelocity::CostModelFrameVelocity(boost::shared_ptr<StateMultibody> state, const FrameMotion& vref,
@@ -75,5 +79,7 @@ boost::shared_ptr<CostDataAbstract> CostModelFrameVelocity::createData(pinocchio
 }
 
 const FrameMotion& CostModelFrameVelocity::get_vref() const { return vref_; }
+
+void CostModelFrameVelocity::set_vref(const FrameMotion& vref_in) { vref_ = vref_in; }
 
 }  // namespace crocoddyl

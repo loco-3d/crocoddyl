@@ -31,6 +31,7 @@ class CostModelControl : public CostModelAbstract {
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
 
   const Eigen::VectorXd& get_uref() const;
+  void set_uref(const Eigen::VectorXd& uref_in);
 
  private:
   Eigen::VectorXd uref_;

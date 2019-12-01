@@ -94,6 +94,13 @@ class ActionModelNumDiff : public ActionModelAbstract {
   const double& get_disturbance() const;
 
   /**
+   * @brief Set the disturbance_ object
+   *
+   * @param disturbance is the value used to find the numerical derivative
+   */
+  void set_disturbance(const double& disturbance);
+
+  /**
    * @brief Identify if the Gauss approximation is going to be used or not.
    *
    * @return true

@@ -4,6 +4,8 @@ from example_robot_data import getModelPath, readParamsFromSrdf
 import pinocchio
 from pinocchio.robot_wrapper import RobotWrapper
 
+pinocchio.switchToNumpyMatrix()
+
 
 def loadTalosArm(modelPath=None, freeFloating=False):
     URDF_FILENAME = "talos_left_arm.urdf"

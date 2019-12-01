@@ -10,6 +10,7 @@
 #define CROCODDYL_CORE_ACTIVATIONS_WEIGHTED_QUADRATIC_HPP_
 
 #include "crocoddyl/core/activation-base.hpp"
+#include <stdexcept>
 
 namespace crocoddyl {
 
@@ -24,6 +25,7 @@ class ActivationModelWeightedQuad : public ActivationModelAbstract {
   boost::shared_ptr<ActivationDataAbstract> createData();
 
   const Eigen::VectorXd& get_weights() const;
+  void set_weights(const Eigen::VectorXd& weights);
 
  private:
   Eigen::VectorXd weights_;

@@ -12,6 +12,7 @@
 #include <Eigen/Core>
 #include <vector>
 #include <string>
+#include <stdexcept>
 
 namespace crocoddyl {
 

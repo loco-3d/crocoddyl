@@ -13,10 +13,8 @@ namespace crocoddyl {
 ActuationModelFloatingBase::ActuationModelFloatingBase(boost::shared_ptr<StateMultibody> state)
     : ActuationModelAbstract(state, state->get_nv() - 6) {
   pinocchio::JointModelFreeFlyer ff_joint;
-  assert(state->get_pinocchio().joints[1].shortname() == ff_joint.shortname() &&
-         "The first joint has to be free-flyer");
   if (state->get_pinocchio().joints[1].shortname() != ff_joint.shortname()) {
-    std::cout << "Warning: the first joint has to be a free-flyer" << std::endl;
+    throw std::invalid_argument("the first joint has to be free-flyer");
   }
 }
 
@@ -25,7 +23,9 @@ ActuationModelFloatingBase::~ActuationModelFloatingBase() {}
 void ActuationModelFloatingBase::calc(const boost::shared_ptr<ActuationDataAbstract>& data,
                                       const Eigen::Ref<const Eigen::VectorXd>&,
                                       const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
   data->tau.tail(nu_) = u;
 }
 

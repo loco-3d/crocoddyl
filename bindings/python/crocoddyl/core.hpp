@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -17,6 +17,7 @@
 #include "python/crocoddyl/core/integrator/euler.hpp"
 #include "python/crocoddyl/core/numdiff/action.hpp"
 #include "python/crocoddyl/core/numdiff/diff-action.hpp"
+#include "python/crocoddyl/core/numdiff/activation.hpp"
 #include "python/crocoddyl/core/optctrl/shooting.hpp"
 #include "python/crocoddyl/core/solver-base.hpp"
 #include "python/crocoddyl/core/states/euclidean.hpp"

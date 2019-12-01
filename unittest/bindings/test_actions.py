@@ -6,11 +6,10 @@ import example_robot_data
 import numpy as np
 
 import crocoddyl
-import eigenpy
 import pinocchio
 from crocoddyl.utils import DifferentialFreeFwdDynamicsDerived, DifferentialLQRDerived, LQRDerived, UnicycleDerived
 
-eigenpy.switchToNumpyMatrix()
+pinocchio.switchToNumpyMatrix()
 
 
 class ActionModelAbstractTestCase(unittest.TestCase):

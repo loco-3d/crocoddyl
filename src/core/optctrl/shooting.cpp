@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,17 +18,23 @@ namespace crocoddyl {
 ShootingProblem::ShootingProblem(const Eigen::VectorXd& x0,
                                  const std::vector<boost::shared_ptr<ActionModelAbstract> >& running_models,
                                  boost::shared_ptr<ActionModelAbstract> terminal_model)
-    : terminal_model_(terminal_model), running_models_(running_models), T_(running_models.size()), x0_(x0), cost_(0.) {
-  assert(static_cast<std::size_t>(x0_.size()) == running_models_[0]->get_state()->get_nx() &&
-         "x0 has wrong dimension");
+    : cost_(0.), T_(running_models.size()), x0_(x0), terminal_model_(terminal_model), running_models_(running_models) {
+  if (static_cast<std::size_t>(x0.size()) != running_models_[0]->get_state()->get_nx()) {
+    throw std::invalid_argument("x0 has wrong dimension (it should be " +
+                                std::to_string(running_models_[0]->get_state()->get_nx()) + ")");
+  }
   allocateData();
 }
 
 ShootingProblem::~ShootingProblem() {}
 
 double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us) {
-  assert(xs.size() == T_ + 1 && "Wrong dimension of the state trajectory, it should be T + 1.");
-  assert(us.size() == T_ && "Wrong dimension of the control trajectory, it should be T.");
+  if (xs.size() != T_ + 1) {
+    throw std::invalid_argument("xs has wrong dimension (it should be " + std::to_string(T_ + 1) + ")");
+  }
+  if (us.size() != T_) {
+    throw std::invalid_argument("us has wrong dimension (it should be " + std::to_string(T_) + ")");
+  }
 
   cost_ = 0;
   for (std::size_t i = 0; i < T_; ++i) {
@@ -46,8 +52,12 @@ double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::
 }
 
 double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us) {
-  assert(xs.size() == T_ + 1 && "Wrong dimension of the state trajectory, it should be T + 1.");
-  assert(us.size() == T_ && "Wrong dimension of the control trajectory, it should be T.");
+  if (xs.size() != T_ + 1) {
+    throw std::invalid_argument("xs has wrong dimension (it should be " + std::to_string(T_ + 1) + ")");
+  }
+  if (us.size() != T_) {
+    throw std::invalid_argument("us has wrong dimension (it should be " + std::to_string(T_) + ")");
+  }
 
   cost_ = 0;
   std::size_t i;
@@ -70,8 +80,12 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const s
 }
 
 void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us, std::vector<Eigen::VectorXd>& xs) {
-  assert(us.size() == T_ && "Wrong dimension of the control trajectory, it should be T.");
-  assert(xs.size() == T_ + 1 && "Wrong dimension of the state trajectory, it should be T + 1.");
+  if (xs.size() != T_ + 1) {
+    throw std::invalid_argument("xs has wrong dimension (it should be " + std::to_string(T_ + 1) + ")");
+  }
+  if (us.size() != T_) {
+    throw std::invalid_argument("us has wrong dimension (it should be " + std::to_string(T_) + ")");
+  }
 
   xs[0] = x0_;
   for (std::size_t i = 0; i < T_; ++i) {
@@ -98,8 +112,9 @@ const std::size_t& ShootingProblem::get_T() const { return T_; }
 const Eigen::VectorXd& ShootingProblem::get_x0() const { return x0_; }
 
 void ShootingProblem::set_x0(Eigen::VectorXd x0_in) {
-  if (x0_in.size() != x0_.size()) throw std::invalid_argument("Invalid size of x0 provided.");
-
+  if (x0_in.size() != x0_.size()) {
+    throw std::invalid_argument("invalid size of x0 provided.");
+  }
   x0_ = x0_in;
 }
 
@@ -111,16 +126,16 @@ void ShootingProblem::allocateData() {
   terminal_data_ = terminal_model_->createData();
 }
 
-const std::vector<boost::shared_ptr<ActionModelAbstract> >& ShootingProblem::get_runningModels() {
+const std::vector<boost::shared_ptr<ActionModelAbstract> >& ShootingProblem::get_runningModels() const {
   return running_models_;
 }
 
-const boost::shared_ptr<ActionModelAbstract>& ShootingProblem::get_terminalModel() { return terminal_model_; }
+const boost::shared_ptr<ActionModelAbstract>& ShootingProblem::get_terminalModel() const { return terminal_model_; }
 
-const std::vector<boost::shared_ptr<ActionDataAbstract> >& ShootingProblem::get_runningDatas() {
+const std::vector<boost::shared_ptr<ActionDataAbstract> >& ShootingProblem::get_runningDatas() const {
   return running_datas_;
 }
 
-const boost::shared_ptr<ActionDataAbstract>& ShootingProblem::get_terminalData() { return terminal_data_; }
+const boost::shared_ptr<ActionDataAbstract>& ShootingProblem::get_terminalData() const { return terminal_data_; }
 
 }  // namespace crocoddyl

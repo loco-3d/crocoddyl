@@ -19,7 +19,10 @@ ContactModelMultiple::ContactModelMultiple(boost::shared_ptr<StateMultibody> sta
 ContactModelMultiple::~ContactModelMultiple() {}
 
 void ContactModelMultiple::addContact(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact) {
-  assert(contact->get_nu() == nu_ && "Contact item doesn't have the same control dimension");
+  if (contact->get_nu() != nu_) {
+    throw std::invalid_argument("contact item doesn't have the the same control dimension (" + std::to_string(nu_) +
+                                ")");
+  }
   std::pair<ContactModelContainer::iterator, bool> ret =
       contacts_.insert(std::make_pair(name, ContactItem(name, contact)));
   if (ret.second == false) {
@@ -41,7 +44,9 @@ void ContactModelMultiple::removeContact(const std::string& name) {
 
 void ContactModelMultiple::calc(const boost::shared_ptr<ContactDataMultiple>& data,
                                 const Eigen::Ref<const Eigen::VectorXd>& x) {
-  assert(data->contacts.size() == contacts_.size() && "it doesn't match the number of contact datas and models");
+  if (data->contacts.size() != contacts_.size()) {
+    throw std::invalid_argument("it doesn't match the number of contact datas and models");
+  }
   std::size_t nc = 0;
 
   const std::size_t& nv = state_->get_nv();
@@ -63,7 +68,9 @@ void ContactModelMultiple::calc(const boost::shared_ptr<ContactDataMultiple>& da
 
 void ContactModelMultiple::calcDiff(const boost::shared_ptr<ContactDataMultiple>& data,
                                     const Eigen::Ref<const Eigen::VectorXd>& x, const bool& recalc) {
-  assert(data->contacts.size() == contacts_.size() && "it doesn't match the number of contact datas and models");
+  if (data->contacts.size() != contacts_.size()) {
+    throw std::invalid_argument("it doesn't match the number of contact datas and models");
+  }
   if (recalc) {
     calc(data, x);
   }
@@ -87,15 +94,20 @@ void ContactModelMultiple::calcDiff(const boost::shared_ptr<ContactDataMultiple>
 
 void ContactModelMultiple::updateAcceleration(const boost::shared_ptr<ContactDataMultiple>& data,
                                               const Eigen::VectorXd& dv) const {
-  assert(static_cast<std::size_t>(dv.size()) == state_->get_nv() && "dv has wrong dimension");
-
+  if (static_cast<std::size_t>(dv.size()) != state_->get_nv()) {
+    throw std::invalid_argument("dv has wrong dimension (it should be " + std::to_string(state_->get_nv()) + ")");
+  }
   data->dv = dv;
 }
 
 void ContactModelMultiple::updateForce(const boost::shared_ptr<ContactDataMultiple>& data,
                                        const Eigen::VectorXd& force) {
-  assert(static_cast<std::size_t>(force.size()) == nc_ && "force has wrong dimension, it should be nc vector");
-  assert(data->contacts.size() == contacts_.size() && "it doesn't match the number of contact datas and models");
+  if (static_cast<std::size_t>(force.size()) != nc_) {
+    throw std::invalid_argument("force has wrong dimension (it should be " + std::to_string(nc_) + ")");
+  }
+  if (static_cast<std::size_t>(data->contacts.size()) != contacts_.size()) {
+    throw std::invalid_argument("it doesn't match the number of contact datas and models");
+  }
   std::size_t nc = 0;
 
   for (ForceIterator it = data->fext.begin(); it != data->fext.end(); ++it) {
@@ -120,21 +132,28 @@ void ContactModelMultiple::updateForce(const boost::shared_ptr<ContactDataMultip
 
 void ContactModelMultiple::updateAccelerationDiff(const boost::shared_ptr<ContactDataMultiple>& data,
                                                   const Eigen::MatrixXd& ddv_dx) const {
-  assert((static_cast<std::size_t>(ddv_dx.rows()) == state_->get_nv() &&
-          static_cast<std::size_t>(ddv_dx.cols()) == state_->get_ndx()) &&
-         "ddv_dx has wrong dimension");
-
+  if (static_cast<std::size_t>(ddv_dx.rows()) != state_->get_nv() ||
+      static_cast<std::size_t>(ddv_dx.cols()) != state_->get_ndx()) {
+    throw std::invalid_argument("ddv_dx has wrong dimension (it should be " + std::to_string(state_->get_nv()) + "," +
+                                std::to_string(state_->get_ndx()) + ")");
+  }
   data->ddv_dx = ddv_dx;
 }
 
 void ContactModelMultiple::updateForceDiff(const boost::shared_ptr<ContactDataMultiple>& data,
                                            const Eigen::MatrixXd& df_dx, const Eigen::MatrixXd& df_du) const {
   const std::size_t& ndx = state_->get_ndx();
-  assert((static_cast<std::size_t>(df_dx.rows()) == nc_ || static_cast<std::size_t>(df_dx.cols()) == ndx) &&
-         "df_dx has wrong dimension");
-  assert((static_cast<std::size_t>(df_du.rows()) == nc_ || static_cast<std::size_t>(df_du.cols()) == nu_) &&
-         "df_du has wrong dimension");
-  assert(data->contacts.size() == contacts_.size() && "it doesn't match the number of contact datas and models");
+  if (static_cast<std::size_t>(df_dx.rows()) != nc_ || static_cast<std::size_t>(df_dx.cols()) != ndx) {
+    throw std::invalid_argument("df_dx has wrong dimension (it should be " + std::to_string(nc_) + "," +
+                                std::to_string(ndx) + ")");
+  }
+  if (static_cast<std::size_t>(df_du.rows()) != nc_ || static_cast<std::size_t>(df_du.cols()) != nu_) {
+    throw std::invalid_argument("df_du has wrong dimension (it should be " + std::to_string(nc_) + "," +
+                                std::to_string(nu_) + ")");
+  }
+  if (static_cast<std::size_t>(data->contacts.size()) != contacts_.size()) {
+    throw std::invalid_argument("it doesn't match the number of contact datas and models");
+  }
   std::size_t nc = 0;
 
   ContactModelContainer::const_iterator it_m, end_m;

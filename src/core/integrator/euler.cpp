@@ -1,12 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/integrator/euler.hpp"
+#include <iostream>
 
 namespace crocoddyl {
 
@@ -31,6 +32,11 @@ IntegratedActionModelEuler::IntegratedActionModelEuler(boost::shared_ptr<Differe
     set_u_lb(differential_->get_u_lb());
     set_u_ub(differential_->get_u_ub());
   }
+  if (time_step_ < 0.) {
+    time_step_ = 1e-3;
+    time_step2_ = time_step_ * time_step_;
+    std::cerr << "Warning: dt has positive value, set to 1e-3" << std::endl;
+  }
   if (time_step == 0.) {
     enable_integration_ = false;
   }
@@ -41,8 +47,12 @@ IntegratedActionModelEuler::~IntegratedActionModelEuler() {}
 void IntegratedActionModelEuler::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                                       const Eigen::Ref<const Eigen::VectorXd>& x,
                                       const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
-  assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
 
   // Static casting the data
   boost::shared_ptr<IntegratedActionDataEuler> d = boost::static_pointer_cast<IntegratedActionDataEuler>(data);
@@ -72,8 +82,12 @@ void IntegratedActionModelEuler::calc(const boost::shared_ptr<ActionDataAbstract
 void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                           const Eigen::Ref<const Eigen::VectorXd>& x,
                                           const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
-  assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
 
   const std::size_t& nv = differential_->get_state()->get_nv();
   if (recalc) {
@@ -124,6 +138,9 @@ const boost::shared_ptr<DifferentialActionModelAbstract>& IntegratedActionModelE
 const double& IntegratedActionModelEuler::get_dt() const { return time_step_; }
 
 void IntegratedActionModelEuler::set_dt(double dt) {
+  if (dt < 0.) {
+    throw std::invalid_argument("dt has positive value");
+  }
   time_step_ = dt;
   time_step2_ = dt * dt;
 }

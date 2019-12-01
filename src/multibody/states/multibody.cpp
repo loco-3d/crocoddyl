@@ -20,7 +20,7 @@ StateMultibody::StateMultibody(pinocchio::Model& model)
 
   // In a multibody system, we could define the first joint using Lie groups.
   // The current cases are free-flyer (SE3) and spherical (S03).
-  // Instead simple represents any joint that can model within the Eucliden manifold.
+  // Instead simple represents any joint that can model within the Euclidean manifold.
   // The rest of joints use Euclidean algebra. We use this fact for computing Jdiff.
   if (model.joints[1].shortname() == "JointModelFreeFlyer") {
     joint_type_ = FreeFlyer;
@@ -41,9 +41,15 @@ Eigen::VectorXd StateMultibody::rand() const {
 
 void StateMultibody::diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
                           Eigen::Ref<Eigen::VectorXd> dxout) const {
-  assert(static_cast<std::size_t>(x0.size()) == nx_ && "x0 has wrong dimension");
-  assert(static_cast<std::size_t>(x1.size()) == nx_ && "x1 has wrong dimension");
-  assert(static_cast<std::size_t>(dxout.size()) == ndx_ && "Output must be pre-allocated");
+  if (static_cast<std::size_t>(x0.size()) != nx_) {
+    throw std::invalid_argument("x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
+  }
+  if (static_cast<std::size_t>(x1.size()) != nx_) {
+    throw std::invalid_argument("x1 has wrong dimension (it should be " + std::to_string(nx_) + ")");
+  }
+  if (static_cast<std::size_t>(dxout.size()) != ndx_) {
+    throw std::invalid_argument("dxout has wrong dimension (it should be " + std::to_string(ndx_) + ")");
+  }
 
   pinocchio::difference(pinocchio_, x0.head(nq_), x1.head(nq_), dxout.head(nv_));
   dxout.tail(nv_) = x1.tail(nv_) - x0.tail(nv_);
@@ -51,9 +57,15 @@ void StateMultibody::diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eig
 
 void StateMultibody::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                                Eigen::Ref<Eigen::VectorXd> xout) const {
-  assert(static_cast<std::size_t>(x.size()) == nx_ && "x has wrong dimension");
-  assert(static_cast<std::size_t>(dx.size()) == ndx_ && "dx has wrong dimension");
-  assert(static_cast<std::size_t>(xout.size()) == nx_ && "Output must be pre-allocated");
+  if (static_cast<std::size_t>(x.size()) != nx_) {
+    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(nx_) + ")");
+  }
+  if (static_cast<std::size_t>(dx.size()) != ndx_) {
+    throw std::invalid_argument("dx has wrong dimension (it should be " + std::to_string(ndx_) + ")");
+  }
+  if (static_cast<std::size_t>(xout.size()) != nx_) {
+    throw std::invalid_argument("xout has wrong dimension (it should be " + std::to_string(nx_) + ")");
+  }
 
   pinocchio::integrate(pinocchio_, x.head(nq_), dx.head(nv_), xout.head(nq_));
   xout.tail(nv_) = x.tail(nv_) + dx.tail(nv_);
@@ -62,16 +74,22 @@ void StateMultibody::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const
 void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
                            Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
                            Jcomponent firstsecond) const {
-  assert(static_cast<std::size_t>(x0.size()) == nx_ && "x0 has wrong dimension");
-  assert(static_cast<std::size_t>(x1.size()) == nx_ && "x1 has wrong dimension");
   assert(is_a_Jcomponent(firstsecond) && ("firstsecond must be one of the Jcomponent {both, first, second}"));
+  if (static_cast<std::size_t>(x0.size()) != nx_) {
+    throw std::invalid_argument("x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
+  }
+  if (static_cast<std::size_t>(x1.size()) != nx_) {
+    throw std::invalid_argument("x1 has wrong dimension (it should be " + std::to_string(nx_) + ")");
+  }
 
   typedef Eigen::Block<Eigen::Ref<Eigen::MatrixXd>, -1, 1, true> NColAlignedVectorBlock;
   typedef Eigen::Block<Eigen::Ref<Eigen::MatrixXd> > MatrixBlock;
 
   if (firstsecond == first) {
-    assert(static_cast<std::size_t>(Jfirst.rows()) == ndx_ && static_cast<std::size_t>(Jfirst.cols()) == ndx_ &&
-           "Jfirst must be of the good size");
+    if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
+      throw std::invalid_argument("Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," +
+                                  std::to_string(ndx_) + ")");
+    }
     Jfirst.setZero();
     NColAlignedVectorBlock dx = Jfirst.rightCols<1>();
     MatrixBlock Jdq = Jfirst.bottomLeftCorner(nv_, nv_);
@@ -84,8 +102,10 @@ void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Ei
     dx.setZero();
     Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = -1;
   } else if (firstsecond == second) {
-    assert(static_cast<std::size_t>(Jsecond.rows()) == ndx_ && static_cast<std::size_t>(Jsecond.cols()) == ndx_ &&
-           "Jsecond must be of the good size");
+    if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
+      throw std::invalid_argument("Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
+                                  std::to_string(ndx_) + ")");
+    }
 
     Jsecond.setZero();
     NColAlignedVectorBlock dx = Jsecond.rightCols<1>();
@@ -99,10 +119,14 @@ void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Ei
     dx.setZero();
     Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = 1;
   } else {  // computing both
-    assert(static_cast<std::size_t>(Jfirst.rows()) == ndx_ && static_cast<std::size_t>(Jfirst.cols()) == ndx_ &&
-           "Jfirst must be of the good size");
-    assert(static_cast<std::size_t>(Jsecond.rows()) == ndx_ && static_cast<std::size_t>(Jsecond.cols()) == ndx_ &&
-           "Jsecond must be of the good size");
+    if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
+      throw std::invalid_argument("Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," +
+                                  std::to_string(ndx_) + ")");
+    }
+    if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
+      throw std::invalid_argument("Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
+                                  std::to_string(ndx_) + ")");
+    }
     Jfirst.setZero();
     Jsecond.setZero();
 
@@ -134,30 +158,41 @@ void StateMultibody::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Ei
 void StateMultibody::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x,
                                 const Eigen::Ref<const Eigen::VectorXd>& dx, Eigen::Ref<Eigen::MatrixXd> Jfirst,
                                 Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent firstsecond) const {
-  assert(static_cast<std::size_t>(x.size()) == nx_ && "x has wrong dimension");
-  assert(static_cast<std::size_t>(dx.size()) == ndx_ && "dx has wrong dimension");
-  assert((firstsecond == first || firstsecond == second || firstsecond == both) &&
-         ("firstsecond must be one of the Jcomponent {both, first, second}"));
+  assert(is_a_Jcomponent(firstsecond) && ("firstsecond must be one of the Jcomponent {both, first, second}"));
+  if (static_cast<std::size_t>(x.size()) != nx_) {
+    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(nx_) + ")");
+  }
+  if (static_cast<std::size_t>(dx.size()) != ndx_) {
+    throw std::invalid_argument("dx has wrong dimension (it should be " + std::to_string(ndx_) + ")");
+  }
 
   if (firstsecond == first) {
-    assert(static_cast<std::size_t>(Jfirst.rows()) == ndx_ && static_cast<std::size_t>(Jfirst.cols()) == ndx_ &&
-           "Jfirst must be of the good size");
+    if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
+      throw std::invalid_argument("Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," +
+                                  std::to_string(ndx_) + ")");
+    }
     Jfirst.setZero();
 
     pinocchio::dIntegrate(pinocchio_, x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_), pinocchio::ARG0);
     Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = 1;
   } else if (firstsecond == second) {
-    assert(static_cast<std::size_t>(Jsecond.rows()) == ndx_ && static_cast<std::size_t>(Jsecond.cols()) == ndx_ &&
-           "Jsecond must be of the good size");
+    if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
+      throw std::invalid_argument("Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
+                                  std::to_string(ndx_) + ")");
+    }
     Jsecond.setZero();
 
     pinocchio::dIntegrate(pinocchio_, x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_), pinocchio::ARG1);
     Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = 1;
   } else {  // computing both
-    assert(static_cast<std::size_t>(Jfirst.rows()) == ndx_ && static_cast<std::size_t>(Jfirst.cols()) == ndx_ &&
-           "Jfirst must be of the good size");
-    assert(static_cast<std::size_t>(Jsecond.rows()) == ndx_ && static_cast<std::size_t>(Jsecond.cols()) == ndx_ &&
-           "Jsecond must be of the good size");
+    if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
+      throw std::invalid_argument("Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," +
+                                  std::to_string(ndx_) + ")");
+    }
+    if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
+      throw std::invalid_argument("Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
+                                  std::to_string(ndx_) + ")");
+    }
 
     // Computing Jfirst
     Jfirst.setZero();

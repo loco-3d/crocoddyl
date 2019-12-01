@@ -5,14 +5,13 @@ This is an integrative test where we checked that the DDP solver generates a CoM
 import numpy as np
 from numpy.linalg import norm
 
-import eigenpy
 import pinocchio
 from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, ContactModel3D, ContactModelMultiple,
                        CostModelCoM, CostModelControl, CostModelState, CostModelSum,
                        DifferentialActionModelFloatingInContact, IntegratedActionModelEuler, ShootingProblem,
                        SolverDDP, StatePinocchio, a2m, loadHyQ, m2a)
 
-eigenpy.switchToNumpyMatrix()
+pinocchio.switchToNumpyMatrix()
 
 
 class SimpleQuadrupedProblem:

@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS, New York University, Max Planck Gesellshaft
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh, New York University,
+// Max Planck Gesellschaft
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -23,8 +24,12 @@ DifferentialActionModelNumDiff::~DifferentialActionModelNumDiff() {}
 void DifferentialActionModelNumDiff::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                           const Eigen::Ref<const Eigen::VectorXd>& x,
                                           const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
-  assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
   DifferentialActionDataNumDiff* data_nd = static_cast<DifferentialActionDataNumDiff*>(data.get());
   model_->calc(data_nd->data_0, x, u);
   data->cost = data_nd->data_0->cost;
@@ -34,8 +39,12 @@ void DifferentialActionModelNumDiff::calc(const boost::shared_ptr<DifferentialAc
 void DifferentialActionModelNumDiff::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                               const Eigen::Ref<const Eigen::VectorXd>& x,
                                               const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
-  assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
   boost::shared_ptr<DifferentialActionDataNumDiff> data_nd =
       boost::static_pointer_cast<DifferentialActionDataNumDiff>(data);
 
@@ -87,20 +96,27 @@ void DifferentialActionModelNumDiff::calcDiff(const boost::shared_ptr<Differenti
   }
 }
 
+boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelNumDiff::createData() {
+  return boost::make_shared<DifferentialActionDataNumDiff>(this);
+}
+
 const boost::shared_ptr<DifferentialActionModelAbstract>& DifferentialActionModelNumDiff::get_model() const {
   return model_;
 }
 
 const double& DifferentialActionModelNumDiff::get_disturbance() const { return disturbance_; }
 
+void DifferentialActionModelNumDiff::set_disturbance(const double& disturbance) {
+  if (disturbance < 0.) {
+    throw std::invalid_argument("Disturbance value is positive");
+  }
+  disturbance_ = disturbance;
+}
+
 bool DifferentialActionModelNumDiff::get_with_gauss_approx() { return with_gauss_approx_; }
 
 void DifferentialActionModelNumDiff::assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& /** x */) {
   // TODO(cmastalli): First we need to do it AMNumDiff and then to replicate it.
-}
-
-boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelNumDiff::createData() {
-  return boost::make_shared<DifferentialActionDataNumDiff>(this);
 }
 
 }  // namespace crocoddyl

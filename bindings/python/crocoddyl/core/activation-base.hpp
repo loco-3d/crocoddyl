@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,13 +22,17 @@ class ActivationModelAbstract_wrap : public ActivationModelAbstract, public bp::
       : ActivationModelAbstract(nr), bp::wrapper<ActivationModelAbstract>() {}
 
   void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r) {
-    assert(static_cast<std::size_t>(r.size()) == nr_ && "r has wrong dimension");
+    if (static_cast<std::size_t>(r.size()) != nr_) {
+      throw std::invalid_argument("r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+    }
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)r);
   }
 
   void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r,
                 const bool& recalc = true) {
-    assert(static_cast<std::size_t>(r.size()) == nr_ && "r has wrong dimension");
+    if (static_cast<std::size_t>(r.size()) != nr_) {
+      throw std::invalid_argument("r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+    }
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)r, recalc);
   }
 };
@@ -66,7 +70,7 @@ void exposeActivationAbstract() {
   bp::register_ptr_to_python<boost::shared_ptr<ActivationDataAbstract> >();
 
   bp::class_<ActivationDataAbstract, boost::noncopyable>(
-      "ActivationDataAbstract", "Abstract class for activation datas.\n\n",
+      "ActivationDataAbstract", "Abstract class for activation data.\n\n",
       bp::init<ActivationModelAbstract*>(bp::args(" self", " model"),
                                          "Create common data shared between AMs.\n\n"
                                          "The action data uses the model in order to first process it.\n"

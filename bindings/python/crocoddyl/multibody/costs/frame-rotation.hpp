@@ -79,7 +79,7 @@ void exposeCostFrameRotation() {
            ":param data: Pinocchio data\n"
            ":return cost data.")
       .add_property("Rref", bp::make_function(&CostModelFrameRotation::get_Rref, bp::return_internal_reference<>()),
-                    "reference frame rotation");
+                    &CostModelFrameRotation::set_Rref, "reference frame rotation");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataFrameRotation> >();
 

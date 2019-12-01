@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,6 +14,7 @@
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
 #include "crocoddyl/multibody/costs/cost-sum.hpp"
+#include <stdexcept>
 #include <pinocchio/multibody/data.hpp>
 
 namespace crocoddyl {

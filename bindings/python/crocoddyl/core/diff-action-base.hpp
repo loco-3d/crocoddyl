@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,16 +24,24 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
 
   void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
-    assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
-    assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
+    if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+      throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    }
+    if (static_cast<std::size_t>(u.size()) != nu_) {
+      throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    }
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
   void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                 const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
                 const bool& recalc = true) {
-    assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
-    assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
+    if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+      throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    }
+    if (static_cast<std::size_t>(u.size()) != nu_) {
+      throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    }
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
 };
@@ -114,7 +122,7 @@ void exposeDifferentialActionAbstract() {
 
   bp::class_<DifferentialActionDataAbstract, boost::noncopyable>(
       "DifferentialActionDataAbstract",
-      "Abstract class for differential action datas.\n\n"
+      "Abstract class for differential action data.\n\n"
       "In crocoddyl, an action data contains all the required information for processing an\n"
       "user-defined action model. The action data typically is allocated onces by running\n"
       "model.createData() and contains the first- and second- order derivatives of the dynamics\n"

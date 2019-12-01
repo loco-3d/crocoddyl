@@ -65,7 +65,37 @@ void exposeDifferentialActionLQR() {
                                                 const Eigen::VectorXd&, const bool&)>(
           "calcDiff", &DifferentialActionModelLQR::calcDiff_wrap, bp::args(" self", " data", " x", " recalc"))
       .def("createData", &DifferentialActionModelLQR::createData, bp::args(" self"),
-           "Create the differential LQR action data.");
+           "Create the differential LQR action data.")
+      .add_property(
+          "Fq", bp::make_function(&DifferentialActionModelLQR::get_Fq, bp::return_value_policy<bp::return_by_value>()),
+          &DifferentialActionModelLQR::set_Fq, "Jacobian of the dynamics")
+      .add_property(
+          "Fv", bp::make_function(&DifferentialActionModelLQR::get_Fv, bp::return_value_policy<bp::return_by_value>()),
+          &DifferentialActionModelLQR::set_Fv, "Jacobian of the dynamics")
+      .add_property(
+          "Fu", bp::make_function(&DifferentialActionModelLQR::get_Fu, bp::return_value_policy<bp::return_by_value>()),
+          &DifferentialActionModelLQR::set_Fu, "Jacobian of the dynamics")
+      .add_property(
+          "f0", bp::make_function(&DifferentialActionModelLQR::get_f0, bp::return_value_policy<bp::return_by_value>()),
+          &DifferentialActionModelLQR::set_f0, "dynamics drift")
+      .add_property(
+          "lx", bp::make_function(&DifferentialActionModelLQR::get_lx, bp::return_value_policy<bp::return_by_value>()),
+          &DifferentialActionModelLQR::set_lx, "Jacobian of the cost")
+      .add_property(
+          "lu", bp::make_function(&DifferentialActionModelLQR::get_lu, bp::return_value_policy<bp::return_by_value>()),
+          &DifferentialActionModelLQR::set_lu, "Jacobian of the cost")
+      .add_property(
+          "Lxx",
+          bp::make_function(&DifferentialActionModelLQR::get_Lxx, bp::return_value_policy<bp::return_by_value>()),
+          &DifferentialActionModelLQR::set_Lxx, "Hessian of the cost")
+      .add_property(
+          "Lxu",
+          bp::make_function(&DifferentialActionModelLQR::get_Lxu, bp::return_value_policy<bp::return_by_value>()),
+          &DifferentialActionModelLQR::set_Lxu, "Hessian of the cost")
+      .add_property(
+          "Luu",
+          bp::make_function(&DifferentialActionModelLQR::get_Luu, bp::return_value_policy<bp::return_by_value>()),
+          &DifferentialActionModelLQR::set_Luu, "Hessian of the cost");
 
   boost::python::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataLQR> >();
 

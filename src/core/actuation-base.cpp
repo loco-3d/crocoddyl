@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,7 +12,9 @@ namespace crocoddyl {
 
 ActuationModelAbstract::ActuationModelAbstract(boost::shared_ptr<StateAbstract> state, const std::size_t& nu)
     : nu_(nu), state_(state) {
-  assert(nu_ != 0 && "nu cannot be zero");
+  if (nu_ == 0) {
+    throw std::invalid_argument("nu cannot be zero");
+  }
 }
 
 ActuationModelAbstract::~ActuationModelAbstract() {}

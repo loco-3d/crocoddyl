@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -17,7 +17,9 @@ ActivationModelQuadraticBarrier::~ActivationModelQuadraticBarrier() {}
 
 void ActivationModelQuadraticBarrier::calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                                            const Eigen::Ref<const Eigen::VectorXd>& r) {
-  assert(static_cast<std::size_t>(r.size()) == nr_ && "r has wrong dimension");
+  if (static_cast<std::size_t>(r.size()) != nr_) {
+    throw std::invalid_argument("r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+  }
   boost::shared_ptr<ActivationDataQuadraticBarrier> d =
       boost::static_pointer_cast<ActivationDataQuadraticBarrier>(data);
 
@@ -28,7 +30,9 @@ void ActivationModelQuadraticBarrier::calc(const boost::shared_ptr<ActivationDat
 
 void ActivationModelQuadraticBarrier::calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
                                                const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc) {
-  assert(static_cast<std::size_t>(r.size()) == nr_ && "r has wrong dimension");
+  if (static_cast<std::size_t>(r.size()) != nr_) {
+    throw std::invalid_argument("r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+  }
   if (recalc) {
     calc(data, r);
   }

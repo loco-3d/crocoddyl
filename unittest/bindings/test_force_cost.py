@@ -3,6 +3,8 @@ import pinocchio
 import example_robot_data
 import numpy as np
 
+crocoddyl.switchToNumpyMatrix()
+
 # Create robot model and data
 ROBOT_MODEL = example_robot_data.loadICub().model
 ROBOT_DATA = ROBOT_MODEL.createData()

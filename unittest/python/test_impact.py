@@ -8,9 +8,7 @@ from crocoddyl.impact import CostModelImpactWholeBody
 from pinocchio.utils import zero
 from testutils import NUMDIFF_MODIFIER, assertNumDiff, df_dq
 
-import eigenpy
-
-eigenpy.switchToNumpyMatrix()
+pinocchio.switchToNumpyMatrix()
 
 # --- TALOS ARM
 robot = loadTalosArm(freeFloating=False)

@@ -32,6 +32,7 @@ class CostModelFrameVelocity : public CostModelAbstract {
   boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
   const FrameMotion& get_vref() const;
+  void set_vref(const FrameMotion& vref_in);
 
  private:
   FrameMotion vref_;

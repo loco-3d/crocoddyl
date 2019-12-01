@@ -63,7 +63,8 @@ class StateNumDiff : public StateAbstract {
   void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                   Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
                   Jcomponent firstsecond = both) const;
-  const double& get_disturbance() const { return disturbance_; }
+  const double& get_disturbance() const;
+  void set_disturbance(const double& disturbance);
 
  private:
   /**

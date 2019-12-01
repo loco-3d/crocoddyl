@@ -37,6 +37,7 @@ class CostModelState : public CostModelAbstract {
   boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
   const Eigen::VectorXd& get_xref() const;
+  void set_xref(const Eigen::VectorXd& xref_in);
 
  private:
   Eigen::VectorXd xref_;

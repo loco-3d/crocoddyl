@@ -30,7 +30,7 @@ void SolverBoxDDP::allocateData() {
   const std::size_t& T = problem_->get_T();
   Quu_inv_.resize(T);
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = problem_->running_models_[t];
+    const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
     const std::size_t& nu = model->get_nu();
 
     // Store the largest number of controls across all models to allocate u_ll_, u_hl_
@@ -44,15 +44,15 @@ void SolverBoxDDP::allocateData() {
 }
 
 void SolverBoxDDP::computeGains(const std::size_t& t) {
-  if (problem_->running_models_[t]->get_nu() > 0) {
-    if (!problem_->running_models_[t]->get_has_control_limits()) {
+  if (problem_->get_runningModels()[t]->get_nu() > 0) {
+    if (!problem_->get_runningModels()[t]->get_has_control_limits()) {
       // No control limits on this model: Use vanilla DDP
       SolverDDP::computeGains(t);
       return;
     }
 
-    u_ll_ = problem_->running_models_[t]->get_u_lb() - us_[t];
-    u_hl_ = problem_->running_models_[t]->get_u_ub() - us_[t];
+    u_ll_ = problem_->get_runningModels()[t]->get_u_lb() - us_[t];
+    u_hl_ = problem_->get_runningModels()[t]->get_u_ub() - us_[t];
 
     BoxQPSolution boxqp_sol = BoxQP(Quu_[t], Qu_[t], u_ll_, u_hl_, us_[t], 0.1, 100, 1e-5, ureg_);
 
@@ -70,14 +70,15 @@ void SolverBoxDDP::computeGains(const std::size_t& t) {
 }
 
 void SolverBoxDDP::forwardPass(const double& steplength) {
-  assert(steplength <= 1. && "Step length has to be <= 1.");
-  assert(steplength >= 0. && "Step length has to be >= 0.");
+  if (steplength > 1. || steplength < 0.) {
+    throw std::invalid_argument("invalid step length, value is between 0. to 1.");
+  }
   cost_try_ = 0.;
   xnext_ = problem_->get_x0();
   const std::size_t& T = problem_->get_T();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& m = problem_->running_models_[t];
-    const boost::shared_ptr<ActionDataAbstract>& d = problem_->running_datas_[t];
+    const boost::shared_ptr<ActionModelAbstract>& m = problem_->get_runningModels()[t];
+    const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
     if ((is_feasible_) || (steplength == 1)) {
       xs_try_[t] = xnext_;
     } else {
@@ -96,15 +97,15 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
     cost_try_ += d->cost;
 
     if (raiseIfNaN(cost_try_)) {
-      throw "forward_error";
+      throw std::runtime_error("forward_error");
     }
     if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
-      throw "forward_error";
+      throw std::runtime_error("forward_error");
     }
   }
 
-  const boost::shared_ptr<ActionModelAbstract>& m = problem_->terminal_model_;
-  const boost::shared_ptr<ActionDataAbstract>& d = problem_->terminal_data_;
+  const boost::shared_ptr<ActionModelAbstract>& m = problem_->get_terminalModel();
+  const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
 
   if ((is_feasible_) || (steplength == 1)) {
     xs_try_.back() = xnext_;
@@ -115,7 +116,7 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
   cost_try_ += d->cost;
 
   if (raiseIfNaN(cost_try_)) {
-    throw "forward_error";
+    throw std::runtime_error("forward_error");
   }
 }
 

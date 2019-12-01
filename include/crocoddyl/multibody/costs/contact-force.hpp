@@ -32,6 +32,7 @@ class CostModelContactForce : public CostModelAbstract {
   boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
   const FrameForce& get_fref() const;
+  void set_fref(const FrameForce& fref);
 
  protected:
   FrameForce fref_;

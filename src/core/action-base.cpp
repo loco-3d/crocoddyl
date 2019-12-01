@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS, The University of Edinburgh
+// Copyright (C) 2018-2020, LAAS-CNRS, The University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,8 +35,12 @@ void ActionModelAbstract::calcDiff(const boost::shared_ptr<ActionDataAbstract>& 
 void ActionModelAbstract::quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<Eigen::VectorXd> u,
                                       const Eigen::Ref<const Eigen::VectorXd>& x, const std::size_t& maxiter,
                                       const double& tol) {
-  assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
-  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
 
   const std::size_t& ndx = state_->get_ndx();
   Eigen::VectorXd dx = Eigen::VectorXd::Zero(ndx);
@@ -70,14 +74,18 @@ const Eigen::VectorXd& ActionModelAbstract::get_u_lb() const { return u_lb_; }
 
 const Eigen::VectorXd& ActionModelAbstract::get_u_ub() const { return u_ub_; }
 
-void ActionModelAbstract::set_u_lb(const Eigen::Ref<const Eigen::VectorXd>& u_lb) {
-  assert(nu_ == static_cast<std::size_t>(u_lb.size()) && "u_lb has wrong dimension");
+void ActionModelAbstract::set_u_lb(const Eigen::VectorXd& u_lb) {
+  if (static_cast<std::size_t>(u_lb.size()) != nu_) {
+    throw std::invalid_argument("lower bound has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
   u_lb_ = u_lb;
   update_has_control_limits();
 }
 
-void ActionModelAbstract::set_u_ub(const Eigen::Ref<const Eigen::VectorXd>& u_ub) {
-  assert(nu_ == static_cast<std::size_t>(u_ub.size()) && "u_ub has wrong dimension");
+void ActionModelAbstract::set_u_ub(const Eigen::VectorXd& u_ub) {
+  if (static_cast<std::size_t>(u_ub.size()) != nu_) {
+    throw std::invalid_argument("upper bound has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
   u_ub_ = u_ub;
   update_has_control_limits();
 }

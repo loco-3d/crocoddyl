@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,8 +29,18 @@ DifferentialActionModelContactFwdDynamics::DifferentialActionModelContactFwdDyna
       armature_(Eigen::VectorXd::Zero(state->get_nv())),
       JMinvJt_damping_(fabs(JMinvJt_damping)),
       enable_force_(enable_force) {
-  assert(contacts_->get_nu() == nu_ && "Contacts doesn't have the same control dimension");
-  assert(costs_->get_nu() == nu_ && "Costs doesn't have the same control dimension");
+  if (JMinvJt_damping_ < 0.) {
+    JMinvJt_damping_ = 0.;
+    throw std::invalid_argument("The damping factor has to be positive, set to 0");
+  }
+  if (contacts_->get_nu() != nu_) {
+    throw std::invalid_argument("Contacts doesn't have the same control dimension (it should be " +
+                                std::to_string(nu_) + ")");
+  }
+  if (costs_->get_nu() != nu_) {
+    throw std::invalid_argument("Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) +
+                                ")");
+  }
 
   set_u_lb(-1. * pinocchio_.effortLimit.tail(nu_));
   set_u_ub(+1. * pinocchio_.effortLimit.tail(nu_));
@@ -41,8 +51,12 @@ DifferentialActionModelContactFwdDynamics::~DifferentialActionModelContactFwdDyn
 void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                      const Eigen::Ref<const Eigen::VectorXd>& x,
                                                      const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
-  assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
 
   DifferentialActionDataContactFwdDynamics* d = static_cast<DifferentialActionDataContactFwdDynamics*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(state_->get_nq());
@@ -82,8 +96,12 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
                                                          const Eigen::Ref<const Eigen::VectorXd>& x,
                                                          const Eigen::Ref<const Eigen::VectorXd>& u,
                                                          const bool& recalc) {
-  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
-  assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
 
   const std::size_t& nv = state_->get_nv();
   const std::size_t& nc = contacts_->get_nc();
@@ -147,17 +165,18 @@ const Eigen::VectorXd& DifferentialActionModelContactFwdDynamics::get_armature()
 const double& DifferentialActionModelContactFwdDynamics::get_damping_factor() const { return JMinvJt_damping_; }
 
 void DifferentialActionModelContactFwdDynamics::set_armature(const Eigen::VectorXd& armature) {
-  assert(static_cast<std::size_t>(armature.size()) == state_->get_nv() &&
-         "The armature dimension is wrong, we cannot set it.");
   if (static_cast<std::size_t>(armature.size()) != state_->get_nv()) {
-    std::cout << "The armature dimension is wrong, we cannot set it." << std::endl;
-  } else {
-    armature_ = armature;
-    with_armature_ = false;
+    throw std::invalid_argument("The armature dimension is wrong (it should be " + std::to_string(state_->get_nv()) +
+                                ")");
   }
+  armature_ = armature;
+  with_armature_ = false;
 }
 
 void DifferentialActionModelContactFwdDynamics::set_damping_factor(const double& damping) {
+  if (damping < 0.) {
+    throw std::invalid_argument("The damping factor has to be positive");
+  }
   JMinvJt_damping_ = damping;
 }
 

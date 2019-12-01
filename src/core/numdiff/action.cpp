@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS, New York University, Max Planck Gesellshaft
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh, New York University,
+// Max Planck Gesellschaft
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,8 +20,12 @@ ActionModelNumDiff::~ActionModelNumDiff() {}
 
 void ActionModelNumDiff::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                               const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) {
-  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
-  assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
   boost::shared_ptr<ActionDataNumDiff> data_nd = boost::static_pointer_cast<ActionDataNumDiff>(data);
   model_->calc(data_nd->data_0, x, u);
   data->cost = data_nd->data_0->cost;
@@ -30,8 +35,12 @@ void ActionModelNumDiff::calc(const boost::shared_ptr<ActionDataAbstract>& data,
 void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                   const Eigen::Ref<const Eigen::VectorXd>& x,
                                   const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
-  assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
   boost::shared_ptr<ActionDataNumDiff> data_nd = boost::static_pointer_cast<ActionDataNumDiff>(data);
 
   if (recalc) {
@@ -92,18 +101,25 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
   }
 }
 
+boost::shared_ptr<ActionDataAbstract> ActionModelNumDiff::createData() {
+  return boost::make_shared<ActionDataNumDiff>(this);
+}
+
 const boost::shared_ptr<ActionModelAbstract>& ActionModelNumDiff::get_model() const { return model_; }
 
 const double& ActionModelNumDiff::get_disturbance() const { return disturbance_; }
+
+void ActionModelNumDiff::set_disturbance(const double& disturbance) {
+  if (disturbance < 0.) {
+    throw std::invalid_argument("Disturbance value is positive");
+  }
+  disturbance_ = disturbance;
+}
 
 bool ActionModelNumDiff::get_with_gauss_approx() { return model_->get_nr() > 0; }
 
 void ActionModelNumDiff::assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& /** x */) {
   // do nothing in the general case
-}
-
-boost::shared_ptr<ActionDataAbstract> ActionModelNumDiff::createData() {
-  return boost::make_shared<ActionDataNumDiff>(this);
 }
 
 }  // namespace crocoddyl

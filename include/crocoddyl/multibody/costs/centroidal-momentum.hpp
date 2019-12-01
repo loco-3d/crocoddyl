@@ -18,12 +18,12 @@ typedef Eigen::Matrix<double, 6, 1> Vector6d;
 class CostModelCentroidalMomentum : public CostModelAbstract {
  public:
   CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state,
-                              boost::shared_ptr<ActivationModelAbstract> activation, const Vector6d& ref,
+                              boost::shared_ptr<ActivationModelAbstract> activation, const Vector6d& mref,
                               const std::size_t& nu);
   CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state,
-                              boost::shared_ptr<ActivationModelAbstract> activation, const Vector6d& ref);
-  CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6d& ref, const std::size_t& nu);
-  CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6d& ref);
+                              boost::shared_ptr<ActivationModelAbstract> activation, const Vector6d& mref);
+  CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6d& mref, const std::size_t& nu);
+  CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6d& mref);
   ~CostModelCentroidalMomentum();
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -32,10 +32,11 @@ class CostModelCentroidalMomentum : public CostModelAbstract {
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
   boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
-  const Vector6d& get_ref() const;
+  const Vector6d& get_mref() const;
+  void set_mref(const Vector6d& mref_in);
 
  private:
-  Vector6d ref_;
+  Vector6d mref_;
 };
 
 struct CostDataCentroidalMomentum : public CostDataAbstract {

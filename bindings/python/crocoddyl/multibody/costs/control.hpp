@@ -81,7 +81,7 @@ void exposeCostControl() {
                                                     bp::args(" self", " data", " x", " recalc"))
       .add_property("uref",
                     bp::make_function(&CostModelControl::get_uref, bp::return_value_policy<bp::return_by_value>()),
-                    "reference control");
+                    &CostModelControl::set_uref, "reference control");
 }
 
 }  // namespace python

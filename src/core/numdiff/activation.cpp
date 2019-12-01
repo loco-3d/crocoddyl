@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS, New York University, Max Planck Gesellshaft
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh, New York University,
+// Max Planck Gesellschaft
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,7 +20,9 @@ ActivationModelNumDiff::~ActivationModelNumDiff() {}
 
 void ActivationModelNumDiff::calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                                   const Eigen::Ref<const Eigen::VectorXd>& r) {
-  assert(static_cast<std::size_t>(r.size()) == model_->get_nr() && "r has wrong dimension");
+  if (static_cast<std::size_t>(r.size()) != model_->get_nr()) {
+    throw std::invalid_argument("r has wrong dimension (it should be " + std::to_string(model_->get_nr()) + ")");
+  }
   boost::shared_ptr<ActivationDataNumDiff> data_nd = boost::static_pointer_cast<ActivationDataNumDiff>(data);
   model_->calc(data_nd->data_0, r);
   data->a_value = data_nd->data_0->a_value;
@@ -27,7 +30,9 @@ void ActivationModelNumDiff::calc(const boost::shared_ptr<ActivationDataAbstract
 
 void ActivationModelNumDiff::calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
                                       const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc) {
-  assert(static_cast<std::size_t>(r.size()) == model_->get_nr() && "r has wrong dimension");
+  if (static_cast<std::size_t>(r.size()) != model_->get_nr()) {
+    throw std::invalid_argument("r has wrong dimension (it should be " + std::to_string(model_->get_nr()) + ")");
+  }
   boost::shared_ptr<ActivationDataNumDiff> data_nd = boost::static_pointer_cast<ActivationDataNumDiff>(data);
 
   if (recalc) {
@@ -50,12 +55,19 @@ void ActivationModelNumDiff::calcDiff(const boost::shared_ptr<ActivationDataAbst
   data->Arr.noalias() = data->Ar * data->Ar.transpose();
 }
 
+boost::shared_ptr<ActivationDataAbstract> ActivationModelNumDiff::createData() {
+  return boost::make_shared<ActivationDataNumDiff>(this);
+}
+
 const boost::shared_ptr<ActivationModelAbstract>& ActivationModelNumDiff::get_model() const { return model_; }
 
 const double& ActivationModelNumDiff::get_disturbance() const { return disturbance_; }
 
-boost::shared_ptr<ActivationDataAbstract> ActivationModelNumDiff::createData() {
-  return boost::make_shared<ActivationDataNumDiff>(this);
+void ActivationModelNumDiff::set_disturbance(const double& disturbance) {
+  if (disturbance < 0.) {
+    throw std::invalid_argument("Disturbance value is positive");
+  }
+  disturbance_ = disturbance;
 }
 
 }  // namespace crocoddyl

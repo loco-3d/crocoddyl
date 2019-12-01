@@ -30,8 +30,7 @@ class CostModelCoMPosition : public CostModelAbstract {
   boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
   const Eigen::Vector3d& get_cref() const;
-  // Ideally "const Eigen::Ref<const Eigen::Vector3d>&", but eigenpy appears to have issues
-  void set_cref(Eigen::Vector3d cref_in);
+  void set_cref(const Eigen::Vector3d& cref_in);
 
  private:
   Eigen::Vector3d cref_;
