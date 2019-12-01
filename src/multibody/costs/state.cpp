@@ -133,6 +133,11 @@ boost::shared_ptr<CostDataAbstract> CostModelState::createData(pinocchio::Data* 
 
 const Eigen::VectorXd& CostModelState::get_xref() const { return xref_; }
 
-void CostModelState::set_xref(const Eigen::VectorXd& xref_in) { xref_ = xref_in; }
+void CostModelState::set_xref(const Eigen::VectorXd& xref_in) {
+  if (static_cast<std::size_t>(xref_in.size()) != state_->get_nx()) {
+    throw std::invalid_argument("xref has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  xref_ = xref_in;
+}
 
 }  // namespace crocoddyl
