@@ -48,7 +48,7 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
     while (true) {
       try {
         computeDirection(recalc);
-      } catch (std::invalid_argument& e) {
+      } catch (std::runtime_error& e) {
         recalc = false;
         increaseRegularization();
         if (xreg_ == regmax_) {
@@ -68,7 +68,7 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
 
       try {
         dV_ = tryStep(steplength_);
-      } catch (std::invalid_argument& e) {
+      } catch (std::runtime_error& e) {
         continue;
       }
       dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
@@ -212,10 +212,10 @@ void SolverDDP::backwardPass() {
     }
 
     if (raiseIfNaN(Vx_[t].lpNorm<Eigen::Infinity>())) {
-      throw std::invalid_argument("backward_error");
+      throw std::runtime_error("backward_error");
     }
     if (raiseIfNaN(Vxx_[t].lpNorm<Eigen::Infinity>())) {
-      throw std::invalid_argument("backward_error");
+      throw std::runtime_error("backward_error");
     }
   }
 }
@@ -237,10 +237,10 @@ void SolverDDP::forwardPass(const double& steplength) {
     cost_try_ += d->cost;
 
     if (raiseIfNaN(cost_try_)) {
-      throw std::invalid_argument("forward_error");
+      throw std::runtime_error("forward_error");
     }
     if (raiseIfNaN(xs_try_[t + 1].lpNorm<Eigen::Infinity>())) {
-      throw std::invalid_argument("forward_error");
+      throw std::runtime_error("forward_error");
     }
   }
 
@@ -250,7 +250,7 @@ void SolverDDP::forwardPass(const double& steplength) {
   cost_try_ += d->cost;
 
   if (raiseIfNaN(cost_try_)) {
-    throw std::invalid_argument("forward_error");
+    throw std::runtime_error("forward_error");
   }
 }
 

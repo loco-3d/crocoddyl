@@ -40,7 +40,7 @@ bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
     while (true) {
       try {
         computeDirection(recalc);
-      } catch (std::invalid_argument& e) {
+      } catch (std::runtime_error& e) {
         recalc = false;
         if (xreg_ == regmax_) {
           return false;
@@ -56,7 +56,7 @@ bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
       steplength_ = *it;
       try {
         dV_ = tryStep(steplength_);
-      } catch (std::invalid_argument& e) {
+      } catch (std::runtime_error& e) {
         continue;
       }
       dVexp_ = steplength_ * d_[0] + 0.5 * steplength_ * steplength_ * d_[1];

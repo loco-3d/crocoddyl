@@ -97,10 +97,10 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
     cost_try_ += d->cost;
 
     if (raiseIfNaN(cost_try_)) {
-      throw std::invalid_argument("forward_error");
+      throw std::runtime_error("forward_error");
     }
     if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
-      throw std::invalid_argument("forward_error");
+      throw std::runtime_error("forward_error");
     }
   }
 
@@ -116,7 +116,7 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
   cost_try_ += d->cost;
 
   if (raiseIfNaN(cost_try_)) {
-    throw std::invalid_argument("forward_error");
+    throw std::runtime_error("forward_error");
   }
 }
 

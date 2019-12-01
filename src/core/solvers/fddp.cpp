@@ -33,7 +33,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
     while (true) {
       try {
         computeDirection(recalc);
-      } catch (std::invalid_argument& e) {
+      } catch (std::runtime_error& e) {
         recalc = false;
         increaseRegularization();
         if (xreg_ == regmax_) {
@@ -53,7 +53,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
 
       try {
         dV_ = tryStep(steplength_);
-      } catch (std::invalid_argument& e) {
+      } catch (std::runtime_error& e) {
         continue;
       }
       expectedImprovement();
@@ -182,10 +182,10 @@ void SolverFDDP::forwardPass(const double& steplength) {
     cost_try_ += d->cost;
 
     if (raiseIfNaN(cost_try_)) {
-      throw std::invalid_argument("forward_error");
+      throw std::runtime_error("forward_error");
     }
     if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
-      throw std::invalid_argument("forward_error");
+      throw std::runtime_error("forward_error");
     }
   }
 
@@ -201,7 +201,7 @@ void SolverFDDP::forwardPass(const double& steplength) {
   cost_try_ += d->cost;
 
   if (raiseIfNaN(cost_try_)) {
-    throw std::invalid_argument("forward_error");
+    throw std::runtime_error("forward_error");
   }
 }
 
