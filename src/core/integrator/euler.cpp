@@ -7,6 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/integrator/euler.hpp"
+#include <iostream>
 
 namespace crocoddyl {
 
@@ -34,7 +35,7 @@ IntegratedActionModelEuler::IntegratedActionModelEuler(boost::shared_ptr<Differe
   if (time_step_ < 0.) {
     time_step_ = 1e-3;
     time_step2_ = time_step_ * time_step_;
-    throw std::invalid_argument("dt has positive value, set to 1e-3");
+    std::cerr << "Warning: dt has positive value, set to 1e-3" << std::endl;
   }
   if (time_step == 0.) {
     enable_integration_ = false;
