@@ -8,6 +8,8 @@ import pinocchio
 from crocoddyl.utils import FreeFloatingActuationDerived, FullActuationDerived
 import example_robot_data
 
+crocoddyl.switchToNumpyMatrix()
+
 
 class ActuationModelAbstractTestCase(unittest.TestCase):
     STATE = None

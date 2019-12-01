@@ -10,7 +10,7 @@ from crocoddyl.utils import (CoMPositionCostDerived, ControlCostDerived, FramePl
                              FrameRotationCostDerived, FrameTranslationCostDerived, FrameVelocityCostDerived,
                              StateCostDerived)
 
-pinocchio.switchToNumpyMatrix()
+crocoddyl.switchToNumpyMatrix()
 
 
 class CostModelAbstractTestCase(unittest.TestCase):

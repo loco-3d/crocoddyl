@@ -8,7 +8,7 @@ import numpy as np
 import crocoddyl
 from crocoddyl.utils import StateMultibodyDerived, StateVectorDerived
 
-pinocchio.switchToNumpyMatrix()
+crocoddyl.switchToNumpyMatrix()
 
 
 class StateAbstractTestCase(unittest.TestCase):
