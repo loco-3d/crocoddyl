@@ -1,12 +1,11 @@
 import numpy as np
 
-import eigenpy
 import pinocchio
 from crocoddyl import loadTalosArm
 from crocoddyl.utils import EPS
 from testutils import NUMDIFF_MODIFIER, assertNumDiff, df_dq
 
-eigenpy.switchToNumpyMatrix()
+pinocchio.switchToNumpyMatrix()
 
 robot = loadTalosArm()
 rmodel = robot.model

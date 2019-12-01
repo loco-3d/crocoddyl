@@ -6,10 +6,9 @@ import example_robot_data
 import numpy as np
 
 import crocoddyl
-import eigenpy
 from crocoddyl.utils import StateMultibodyDerived, StateVectorDerived
 
-eigenpy.switchToNumpyMatrix()
+pinocchio.switchToNumpyMatrix()
 
 
 class StateAbstractTestCase(unittest.TestCase):
