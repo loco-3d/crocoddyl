@@ -11,7 +11,7 @@
 
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
+#include <stdexcept>
 
 namespace crocoddyl {
 

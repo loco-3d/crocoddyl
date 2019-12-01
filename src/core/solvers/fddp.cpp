@@ -33,7 +33,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
     while (true) {
       try {
         computeDirection(recalc);
-      } catch (CrocoddylException& e) {
+      } catch (std::invalid_argument& e) {
         recalc = false;
         increaseRegularization();
         if (xreg_ == regmax_) {
@@ -53,7 +53,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
 
       try {
         dV_ = tryStep(steplength_);
-      } catch (CrocoddylException& e) {
+      } catch (std::invalid_argument& e) {
         continue;
       }
       expectedImprovement();
@@ -162,7 +162,7 @@ double SolverFDDP::calc() {
 
 void SolverFDDP::forwardPass(const double& steplength) {
   if (steplength > 1. || steplength < 0.) {
-    throw CrocoddylException("invalid step length, value is between 0. to 1.");
+    throw std::invalid_argument("invalid step length, value is between 0. to 1.");
   }
   cost_try_ = 0.;
   xnext_ = problem_->get_x0();
@@ -182,10 +182,10 @@ void SolverFDDP::forwardPass(const double& steplength) {
     cost_try_ += d->cost;
 
     if (raiseIfNaN(cost_try_)) {
-      throw CrocoddylException("forward_error");
+      throw std::invalid_argument("forward_error");
     }
     if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
-      throw CrocoddylException("forward_error");
+      throw std::invalid_argument("forward_error");
     }
   }
 
@@ -201,7 +201,7 @@ void SolverFDDP::forwardPass(const double& steplength) {
   cost_try_ += d->cost;
 
   if (raiseIfNaN(cost_try_)) {
-    throw CrocoddylException("forward_error");
+    throw std::invalid_argument("forward_error");
   }
 }
 

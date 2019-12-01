@@ -13,7 +13,7 @@
 #include <boost/make_shared.hpp>
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/utils/math.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
+#include <stdexcept>
 
 namespace crocoddyl {
 

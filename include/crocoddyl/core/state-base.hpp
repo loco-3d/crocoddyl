@@ -12,7 +12,7 @@
 #include <Eigen/Core>
 #include <vector>
 #include <string>
-#include "crocoddyl/core/utils/exception.hpp"
+#include <stdexcept>
 
 namespace crocoddyl {
 

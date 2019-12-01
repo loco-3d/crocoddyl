@@ -14,7 +14,7 @@
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
 #include "crocoddyl/multibody/costs/cost-sum.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
+#include <stdexcept>
 #include <pinocchio/multibody/data.hpp>
 
 namespace crocoddyl {

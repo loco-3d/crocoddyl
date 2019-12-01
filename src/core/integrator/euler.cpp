@@ -34,7 +34,7 @@ IntegratedActionModelEuler::IntegratedActionModelEuler(boost::shared_ptr<Differe
   if (time_step_ < 0.) {
     time_step_ = 1e-3;
     time_step2_ = time_step_ * time_step_;
-    throw CrocoddylException("dt has positive value, set to 1e-3");
+    throw std::invalid_argument("dt has positive value, set to 1e-3");
   }
   if (time_step == 0.) {
     enable_integration_ = false;
@@ -47,10 +47,10 @@ void IntegratedActionModelEuler::calc(const boost::shared_ptr<ActionDataAbstract
                                       const Eigen::Ref<const Eigen::VectorXd>& x,
                                       const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw CrocoddylException("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw CrocoddylException("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
   // Static casting the data
@@ -82,10 +82,10 @@ void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbst
                                           const Eigen::Ref<const Eigen::VectorXd>& x,
                                           const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw CrocoddylException("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw CrocoddylException("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
   const std::size_t& nv = differential_->get_state()->get_nv();
@@ -138,7 +138,7 @@ const double& IntegratedActionModelEuler::get_dt() const { return time_step_; }
 
 void IntegratedActionModelEuler::set_dt(double dt) {
   if (dt < 0.) {
-    throw CrocoddylException("dt has positive value");
+    throw std::invalid_argument("dt has positive value");
   }
   time_step_ = dt;
   time_step2_ = dt * dt;

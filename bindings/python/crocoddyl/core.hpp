@@ -32,7 +32,6 @@
 #include "python/crocoddyl/core/solvers/ddp.hpp"
 #include "python/crocoddyl/core/solvers/fddp.hpp"
 #include "python/crocoddyl/core/utils/callbacks.hpp"
-#include "python/crocoddyl/core/utils/callbacks.hpp"
 
 namespace crocoddyl {
 namespace python {

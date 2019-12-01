@@ -15,7 +15,7 @@ CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> sta
                                            const Eigen::Vector3d& cref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), cref_(cref) {
   if (activation_->get_nr() != 3) {
-    throw CrocoddylException("nr is equals to 3");
+    throw std::invalid_argument("nr is equals to 3");
   }
 }
 
@@ -24,7 +24,7 @@ CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> sta
                                            const Eigen::Vector3d& cref)
     : CostModelAbstract(state, activation), cref_(cref) {
   if (activation_->get_nr() != 3) {
-    throw CrocoddylException("nr is equals to 3");
+    throw std::invalid_argument("nr is equals to 3");
   }
 }
 

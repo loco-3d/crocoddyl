@@ -32,11 +32,11 @@ ActionModelImpulseFwdDynamics::ActionModelImpulseFwdDynamics(boost::shared_ptr<S
       gravity_(state->get_pinocchio().gravity) {
   if (r_coeff_ < 0.) {
     r_coeff_ = 0.;
-    throw CrocoddylException("The restitution coefficient has to be positive, set to 0");
+    throw std::invalid_argument("The restitution coefficient has to be positive, set to 0");
   }
   if (JMinvJt_damping_ < 0.) {
     JMinvJt_damping_ = 0.;
-    throw CrocoddylException("The damping factor has to be positive, set to 0");
+    throw std::invalid_argument("The damping factor has to be positive, set to 0");
   }
 }
 
@@ -46,7 +46,7 @@ void ActionModelImpulseFwdDynamics::calc(const boost::shared_ptr<ActionDataAbstr
                                          const Eigen::Ref<const Eigen::VectorXd>& x,
                                          const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw CrocoddylException("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
 
   const std::size_t& nq = state_->get_nq();
@@ -87,7 +87,7 @@ void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataA
                                              const Eigen::Ref<const Eigen::VectorXd>& x,
                                              const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw CrocoddylException("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
 
   const std::size_t& nv = state_->get_nv();
@@ -151,8 +151,8 @@ const double& ActionModelImpulseFwdDynamics::get_damping_factor() const { return
 
 void ActionModelImpulseFwdDynamics::set_armature(const Eigen::VectorXd& armature) {
   if (static_cast<std::size_t>(armature.size()) != state_->get_nv()) {
-    throw CrocoddylException("The armature dimension is wrong (it should be " + std::to_string(state_->get_nv()) +
-                             ")");
+    throw std::invalid_argument("The armature dimension is wrong (it should be " + std::to_string(state_->get_nv()) +
+                                ")");
   }
   armature_ = armature;
   with_armature_ = false;
@@ -160,14 +160,14 @@ void ActionModelImpulseFwdDynamics::set_armature(const Eigen::VectorXd& armature
 
 void ActionModelImpulseFwdDynamics::set_restitution_coefficient(const double& r_coeff) {
   if (r_coeff < 0.) {
-    throw CrocoddylException("The restitution coefficient has to be positive");
+    throw std::invalid_argument("The restitution coefficient has to be positive");
   }
   r_coeff_ = r_coeff;
 }
 
 void ActionModelImpulseFwdDynamics::set_damping_factor(const double& damping) {
   if (damping < 0.) {
-    throw CrocoddylException("The damping factor has to be positive");
+    throw std::invalid_argument("The damping factor has to be positive");
   }
   JMinvJt_damping_ = damping;
 }

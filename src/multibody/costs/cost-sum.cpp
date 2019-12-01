@@ -42,13 +42,13 @@ void CostModelSum::removeCost(const std::string& name) {
 void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw CrocoddylException("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw CrocoddylException("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   if (data->costs.size() != costs_.size()) {
-    throw CrocoddylException("it doesn't match the number of cost datas and models");
+    throw std::invalid_argument("it doesn't match the number of cost datas and models");
   }
   data->cost = 0.;
   std::size_t nr = 0;
@@ -74,13 +74,13 @@ void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen:
 void CostModelSum::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                             const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw CrocoddylException("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw CrocoddylException("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   if (data->costs.size() != costs_.size()) {
-    throw CrocoddylException("it doesn't match the number of cost datas and models");
+    throw std::invalid_argument("it doesn't match the number of cost datas and models");
   }
   if (recalc) {
     calc(data, x, u);

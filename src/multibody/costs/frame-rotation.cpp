@@ -16,7 +16,7 @@ CostModelFrameRotation::CostModelFrameRotation(boost::shared_ptr<StateMultibody>
                                                const FrameRotation& Rref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), Rref_(Rref), oRf_inv_(Rref.oRf.transpose()) {
   if (activation_->get_nr() != 3) {
-    throw CrocoddylException("nr is equals to 3");
+    throw std::invalid_argument("nr is equals to 3");
   }
 }
 
@@ -25,7 +25,7 @@ CostModelFrameRotation::CostModelFrameRotation(boost::shared_ptr<StateMultibody>
                                                const FrameRotation& Rref)
     : CostModelAbstract(state, activation), Rref_(Rref), oRf_inv_(Rref.oRf.transpose()) {
   if (activation_->get_nr() != 3) {
-    throw CrocoddylException("nr is equals to 3");
+    throw std::invalid_argument("nr is equals to 3");
   }
 }
 

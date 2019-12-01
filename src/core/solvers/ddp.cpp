@@ -48,7 +48,7 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
     while (true) {
       try {
         computeDirection(recalc);
-      } catch (CrocoddylException& e) {
+      } catch (std::invalid_argument& e) {
         recalc = false;
         increaseRegularization();
         if (xreg_ == regmax_) {
@@ -68,7 +68,7 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
 
       try {
         dV_ = tryStep(steplength_);
-      } catch (CrocoddylException& e) {
+      } catch (std::invalid_argument& e) {
         continue;
       }
       dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
@@ -212,17 +212,17 @@ void SolverDDP::backwardPass() {
     }
 
     if (raiseIfNaN(Vx_[t].lpNorm<Eigen::Infinity>())) {
-      throw CrocoddylException("backward_error");
+      throw std::invalid_argument("backward_error");
     }
     if (raiseIfNaN(Vxx_[t].lpNorm<Eigen::Infinity>())) {
-      throw CrocoddylException("backward_error");
+      throw std::invalid_argument("backward_error");
     }
   }
 }
 
 void SolverDDP::forwardPass(const double& steplength) {
   if (steplength > 1. || steplength < 0.) {
-    throw CrocoddylException("invalid step length, value is between 0. to 1.");
+    throw std::invalid_argument("invalid step length, value is between 0. to 1.");
   }
   cost_try_ = 0.;
   const std::size_t& T = problem_->get_T();
@@ -237,10 +237,10 @@ void SolverDDP::forwardPass(const double& steplength) {
     cost_try_ += d->cost;
 
     if (raiseIfNaN(cost_try_)) {
-      throw CrocoddylException("forward_error");
+      throw std::invalid_argument("forward_error");
     }
     if (raiseIfNaN(xs_try_[t + 1].lpNorm<Eigen::Infinity>())) {
-      throw CrocoddylException("forward_error");
+      throw std::invalid_argument("forward_error");
     }
   }
 
@@ -250,7 +250,7 @@ void SolverDDP::forwardPass(const double& steplength) {
   cost_try_ += d->cost;
 
   if (raiseIfNaN(cost_try_)) {
-    throw CrocoddylException("forward_error");
+    throw std::invalid_argument("forward_error");
   }
 }
 

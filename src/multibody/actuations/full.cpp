@@ -14,7 +14,7 @@ ActuationModelFull::ActuationModelFull(boost::shared_ptr<StateMultibody> state)
     : ActuationModelAbstract(state, state->get_nv()) {
   pinocchio::JointModelFreeFlyer ff_joint;
   if (state->get_pinocchio().joints[1].shortname() == ff_joint.shortname()) {
-    throw CrocoddylException("the first joint cannot be free-flyer");
+    throw std::invalid_argument("the first joint cannot be free-flyer");
   }
 }
 
@@ -23,7 +23,7 @@ ActuationModelFull::~ActuationModelFull() {}
 void ActuationModelFull::calc(const boost::shared_ptr<ActuationDataAbstract>& data,
                               const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw CrocoddylException("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   data->tau = u;
 }

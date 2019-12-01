@@ -71,7 +71,7 @@ void SolverBoxDDP::computeGains(const std::size_t& t) {
 
 void SolverBoxDDP::forwardPass(const double& steplength) {
   if (steplength > 1. || steplength < 0.) {
-    throw CrocoddylException("invalid step length, value is between 0. to 1.");
+    throw std::invalid_argument("invalid step length, value is between 0. to 1.");
   }
   cost_try_ = 0.;
   xnext_ = problem_->get_x0();
@@ -97,10 +97,10 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
     cost_try_ += d->cost;
 
     if (raiseIfNaN(cost_try_)) {
-      throw CrocoddylException("forward_error");
+      throw std::invalid_argument("forward_error");
     }
     if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
-      throw CrocoddylException("forward_error");
+      throw std::invalid_argument("forward_error");
     }
   }
 
@@ -116,7 +116,7 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
   cost_try_ += d->cost;
 
   if (raiseIfNaN(cost_try_)) {
-    throw CrocoddylException("forward_error");
+    throw std::invalid_argument("forward_error");
   }
 }
 

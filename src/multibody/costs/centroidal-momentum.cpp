@@ -16,7 +16,7 @@ CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<State
                                                          const Vector6d& mref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), mref_(mref) {
   if (activation_->get_nr() != 6) {
-    throw CrocoddylException("nr is equals to 6");
+    throw std::invalid_argument("nr is equals to 6");
   }
 }
 
@@ -25,7 +25,7 @@ CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<State
                                                          const Vector6d& mref)
     : CostModelAbstract(state, activation), mref_(mref) {
   if (activation_->get_nr() != 6) {
-    throw CrocoddylException("nr is equals to 6");
+    throw std::invalid_argument("nr is equals to 6");
   }
 }
 

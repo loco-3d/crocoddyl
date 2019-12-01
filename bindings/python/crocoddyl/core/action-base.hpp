@@ -24,10 +24,10 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-      throw CrocoddylException("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+      throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
     }
     if (static_cast<std::size_t>(u.size()) != nu_) {
-      throw CrocoddylException("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+      throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
     }
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
@@ -35,10 +35,10 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
   void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-      throw CrocoddylException("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+      throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
     }
     if (static_cast<std::size_t>(u.size()) != nu_) {
-      throw CrocoddylException("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+      throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
     }
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }

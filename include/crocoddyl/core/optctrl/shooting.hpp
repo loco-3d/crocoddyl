@@ -11,7 +11,7 @@
 
 #include <vector>
 #include "crocoddyl/core/action-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
+#include <stdexcept>
 
 namespace crocoddyl {
 

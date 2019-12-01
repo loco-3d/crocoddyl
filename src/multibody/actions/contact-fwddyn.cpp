@@ -31,15 +31,15 @@ DifferentialActionModelContactFwdDynamics::DifferentialActionModelContactFwdDyna
       enable_force_(enable_force) {
   if (JMinvJt_damping_ < 0.) {
     JMinvJt_damping_ = 0.;
-    throw CrocoddylException("The damping factor has to be positive, set to 0");
+    throw std::invalid_argument("The damping factor has to be positive, set to 0");
   }
   if (contacts_->get_nu() != nu_) {
-    throw CrocoddylException("Contacts doesn't have the same control dimension (it should be " + std::to_string(nu_) +
-                             ")");
+    throw std::invalid_argument("Contacts doesn't have the same control dimension (it should be " +
+                                std::to_string(nu_) + ")");
   }
   if (costs_->get_nu() != nu_) {
-    throw CrocoddylException("Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) +
-                             ")");
+    throw std::invalid_argument("Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) +
+                                ")");
   }
 
   set_u_lb(-1. * pinocchio_.effortLimit.tail(nu_));
@@ -52,10 +52,10 @@ void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<Dif
                                                      const Eigen::Ref<const Eigen::VectorXd>& x,
                                                      const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw CrocoddylException("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw CrocoddylException("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
   DifferentialActionDataContactFwdDynamics* d = static_cast<DifferentialActionDataContactFwdDynamics*>(data.get());
@@ -97,10 +97,10 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
                                                          const Eigen::Ref<const Eigen::VectorXd>& u,
                                                          const bool& recalc) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw CrocoddylException("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw CrocoddylException("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
   const std::size_t& nv = state_->get_nv();
@@ -166,8 +166,8 @@ const double& DifferentialActionModelContactFwdDynamics::get_damping_factor() co
 
 void DifferentialActionModelContactFwdDynamics::set_armature(const Eigen::VectorXd& armature) {
   if (static_cast<std::size_t>(armature.size()) != state_->get_nv()) {
-    throw CrocoddylException("The armature dimension is wrong (it should be " + std::to_string(state_->get_nv()) +
-                             ")");
+    throw std::invalid_argument("The armature dimension is wrong (it should be " + std::to_string(state_->get_nv()) +
+                                ")");
   }
   armature_ = armature;
   with_armature_ = false;
@@ -175,7 +175,7 @@ void DifferentialActionModelContactFwdDynamics::set_armature(const Eigen::Vector
 
 void DifferentialActionModelContactFwdDynamics::set_damping_factor(const double& damping) {
   if (damping < 0.) {
-    throw CrocoddylException("The damping factor has to be positive");
+    throw std::invalid_argument("The damping factor has to be positive");
   }
   JMinvJt_damping_ = damping;
 }

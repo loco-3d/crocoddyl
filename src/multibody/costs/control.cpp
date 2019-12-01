@@ -14,7 +14,7 @@ CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state,
                                    boost::shared_ptr<ActivationModelAbstract> activation, const Eigen::VectorXd& uref)
     : CostModelAbstract(state, activation, static_cast<std::size_t>(uref.size())), uref_(uref) {
   if (activation_->get_nr() != nu_) {
-    throw CrocoddylException("nr is equals to " + std::to_string(nu_));
+    throw std::invalid_argument("nr is equals to " + std::to_string(nu_));
   }
 }
 
@@ -26,7 +26,7 @@ CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state,
                                    boost::shared_ptr<ActivationModelAbstract> activation, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), uref_(Eigen::VectorXd::Zero(nu)) {
   if (activation_->get_nr() != nu_) {
-    throw CrocoddylException("nr is equals to " + std::to_string(nu_));
+    throw std::invalid_argument("nr is equals to " + std::to_string(nu_));
   }
 }
 
@@ -45,10 +45,10 @@ CostModelControl::~CostModelControl() {}
 void CostModelControl::calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>&,
                             const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (nu_ == 0) {
-    throw CrocoddylException("it seems to be an autonomous system, if so, don't add this cost function");
+    throw std::invalid_argument("it seems to be an autonomous system, if so, don't add this cost function");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw CrocoddylException("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
   data->r = u - uref_;
@@ -60,10 +60,10 @@ void CostModelControl::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                 const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
                                 const bool& recalc) {
   if (nu_ == 0) {
-    throw CrocoddylException("it seems to be an autonomous system, if so, don't add this cost function");
+    throw std::invalid_argument("it seems to be an autonomous system, if so, don't add this cost function");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw CrocoddylException("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
   if (recalc) {

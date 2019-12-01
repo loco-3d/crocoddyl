@@ -10,7 +10,7 @@
 #define CROCODDYL_CORE_ACTIVATIONS_WEIGHTED_QUADRATIC_HPP_
 
 #include "crocoddyl/core/activation-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
+#include <stdexcept>
 
 namespace crocoddyl {
 

@@ -14,7 +14,7 @@ ActuationModelFloatingBase::ActuationModelFloatingBase(boost::shared_ptr<StateMu
     : ActuationModelAbstract(state, state->get_nv() - 6) {
   pinocchio::JointModelFreeFlyer ff_joint;
   if (state->get_pinocchio().joints[1].shortname() != ff_joint.shortname()) {
-    throw CrocoddylException("the first joint has to be free-flyer");
+    throw std::invalid_argument("the first joint has to be free-flyer");
   }
 }
 
@@ -24,7 +24,7 @@ void ActuationModelFloatingBase::calc(const boost::shared_ptr<ActuationDataAbstr
                                       const Eigen::Ref<const Eigen::VectorXd>&,
                                       const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw CrocoddylException("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   data->tau.tail(nu_) = u;
 }
