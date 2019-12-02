@@ -1,12 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/solvers/ddp.hpp"
+#include <iostream>
 
 namespace crocoddyl {
 
@@ -17,7 +18,8 @@ SolverDDP::SolverDDP(boost::shared_ptr<ShootingProblem> problem)
       regmax_(1e9),
       cost_try_(0.),
       th_grad_(1e-12),
-      th_step_(0.5),
+      th_stepdec_(0.5),
+      th_stepinc_(0.01),
       was_feasible_(false) {
   allocateData();
 
@@ -25,6 +27,11 @@ SolverDDP::SolverDDP(boost::shared_ptr<ShootingProblem> problem)
   alphas_.resize(n_alphas);
   for (std::size_t n = 0; n < n_alphas; ++n) {
     alphas_[n] = 1. / pow(2., static_cast<double>(n));
+  }
+  if (th_stepinc_ < alphas_[n_alphas - 1]) {
+    th_stepinc_ = alphas_[n_alphas - 1];
+    std::cerr << "Warning: th_stepinc has higher value than lowest alpha value, set to "
+              << std::to_string(alphas_[n_alphas - 1]) << std::endl;
   }
 }
 
@@ -82,10 +89,10 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
       }
     }
 
-    if (steplength_ > th_step_) {
+    if (steplength_ > th_stepdec_) {
       decreaseRegularization();
     }
-    if (steplength_ == alphas_.back()) {
+    if (steplength_ <= th_stepinc_) {
       increaseRegularization();
       if (xreg_ == regmax_) {
         return false;
@@ -257,6 +264,10 @@ void SolverDDP::forwardPass(const double& steplength) {
 void SolverDDP::computeGains(const std::size_t& t) {
   if (problem_->get_runningModels()[t]->get_nu() > 0) {
     Quu_llt_[t].compute(Quu_[t]);
+    Eigen::ComputationInfo info = Quu_llt_[t].info();
+    if (info != Eigen::Success) {
+      throw std::runtime_error("backward_error");
+    }
     K_[t] = Qxu_[t].transpose();
     Quu_llt_[t].solveInPlace(K_[t]);
     k_[t] = Qu_[t];
@@ -348,7 +359,9 @@ const double& SolverDDP::get_regmax() const { return regmax_; }
 
 const std::vector<double>& SolverDDP::get_alphas() const { return alphas_; }
 
-const double& SolverDDP::get_th_step() const { return th_step_; }
+const double& SolverDDP::get_th_stepdec() const { return th_stepdec_; }
+
+const double& SolverDDP::get_th_stepinc() const { return th_stepinc_; }
 
 const double& SolverDDP::get_th_grad() const { return th_grad_; }
 
@@ -372,16 +385,64 @@ const std::vector<Eigen::VectorXd>& SolverDDP::get_k() const { return k_; }
 
 const std::vector<Eigen::VectorXd>& SolverDDP::get_gaps() const { return gaps_; }
 
-void SolverDDP::set_regfactor(double regfactor) { regfactor_ = regfactor; }
+void SolverDDP::set_regfactor(double regfactor) {
+  if (regfactor <= 1.) {
+    throw std::invalid_argument("regfactor value is higher than 1.");
+  }
+  regfactor_ = regfactor;
+}
 
-void SolverDDP::set_regmin(double regmin) { regmin_ = regmin; }
+void SolverDDP::set_regmin(double regmin) {
+  if (0. > regmin) {
+    throw std::invalid_argument("regmin value has to be positive.");
+  }
+  regmin_ = regmin;
+}
 
-void SolverDDP::set_regmax(double regmax) { regmax_ = regmax; }
+void SolverDDP::set_regmax(double regmax) {
+  if (0. > regmax) {
+    throw std::invalid_argument("regmax value has to be positive.");
+  }
+  regmax_ = regmax;
+}
 
-void SolverDDP::set_alphas(const std::vector<double>& alphas) { alphas_ = alphas; }
+void SolverDDP::set_alphas(const std::vector<double>& alphas) {
+  double prev_alpha = alphas[0];
+  if (prev_alpha != 1.) {
+    std::cerr << "Warning: alpha[0] should be 1" << std::endl;
+  }
+  for (std::size_t i = 1; i < alphas.size(); ++i) {
+    double alpha = alphas[i];
+    if (0. >= alpha) {
+      throw std::invalid_argument("alpha values has to be positive.");
+    }
+    if (alpha >= prev_alpha) {
+      throw std::invalid_argument("alpha values are monotonously decreasing.");
+    }
+    prev_alpha = alpha;
+  }
+  alphas_ = alphas;
+}
 
-void SolverDDP::set_th_step(double th_step) { th_step_ = th_step; }
+void SolverDDP::set_th_stepdec(double th_stepdec) {
+  if (0. >= th_stepdec && th_stepdec >= 1.) {
+    throw std::invalid_argument("th_stepdec value should between 0 and 1.");
+  }
+  th_stepdec_ = th_stepdec;
+}
 
-void SolverDDP::set_th_grad(double th_grad) { th_grad_ = th_grad; }
+void SolverDDP::set_th_stepinc(double th_stepinc) {
+  if (0. >= th_stepinc && th_stepinc >= 1.) {
+    throw std::invalid_argument("th_stepinc value should between 0 and 1.");
+  }
+  th_stepinc_ = th_stepinc;
+}
+
+void SolverDDP::set_th_grad(double th_grad) {
+  if (0. > th_grad) {
+    throw std::invalid_argument("th_grad value has to be positive.");
+  }
+  th_grad_ = th_grad;
+}
 
 }  // namespace crocoddyl

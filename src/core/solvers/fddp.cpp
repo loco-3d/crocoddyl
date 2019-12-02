@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS, The University of Edinburgh
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -78,10 +78,10 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
       }
     }
 
-    if (steplength_ > th_step_) {
+    if (steplength_ > th_stepdec_) {
       decreaseRegularization();
     }
-    if (steplength_ == alphas_.back()) {
+    if (steplength_ <= th_stepinc_) {
       increaseRegularization();
       if (xreg_ == regmax_) {
         return false;
@@ -207,6 +207,11 @@ void SolverFDDP::forwardPass(const double& steplength) {
 
 double SolverFDDP::get_th_acceptnegstep() const { return th_acceptnegstep_; }
 
-void SolverFDDP::set_th_acceptnegstep(double th_acceptnegstep) { th_acceptnegstep_ = th_acceptnegstep; }
+void SolverFDDP::set_th_acceptnegstep(double th_acceptnegstep) {
+  if (0. > th_acceptnegstep) {
+    throw std::invalid_argument("th_acceptnegstep value has to be positive.");
+  }
+  th_acceptnegstep_ = th_acceptnegstep;
+}
 
 }  // namespace crocoddyl
