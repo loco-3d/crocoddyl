@@ -8,6 +8,10 @@ jobs:
       env: CMAKE_BUILD_TYPE=Debug
     - dist: bionic
       env: CMAKE_BUILD_TYPE=Release
+    - dist: xenial
+      env: CMAKE_BUILD_TYPE=Debug
+    - dist: xenial
+      env: CMAKE_BUILD_TYPE=Release
     - dist: bionic
       env: CHECK_CLANG_FORMAT=1
 
