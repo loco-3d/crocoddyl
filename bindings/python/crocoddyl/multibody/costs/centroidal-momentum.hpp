@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,7 +80,7 @@ void exposeCostCentroidalMomentum() {
            ":param data: Pinocchio data\n"
            ":return cost data.")
       .add_property(
-          "ref",
+          "href",
           bp::make_function(&CostModelCentroidalMomentum::get_href, bp::return_value_policy<bp::return_by_value>()),
           &CostModelCentroidalMomentum::set_href, "reference centroidal momentum");
 
