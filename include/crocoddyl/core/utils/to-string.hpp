@@ -6,20 +6,22 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#if __cplusplus >= 201103L
 #ifndef CROCODDYL_CORE_UTILS_TO_STRING_HPP_
 #define CROCODDYL_CORE_UTILS_TO_STRING_HPP_
 
 #include <sstream>
 
-namespace crocoddyl {
+namespace std {
 
 template <typename T>
-std::string to_string(T Number) {
+std::string to_string(T number) {
   std::ostringstream ss;
-  ss << Number;
+  ss << number;
   return ss.str();
 }
 
-}  // namespace crocoddyl
+}  // namespace std
 
 #endif  // CROCODDYL_CORE_UTILS_TO_STRING_HPP_
+#endif  // __cplusplus__ >= 201103L

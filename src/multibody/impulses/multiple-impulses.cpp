@@ -86,7 +86,7 @@ void ImpulseModelMultiple::calcDiff(const boost::shared_ptr<ImpulseDataMultiple>
 void ImpulseModelMultiple::updateVelocity(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                           const Eigen::VectorXd& vnext) const {
   if (static_cast<std::size_t>(vnext.size()) != state_->get_nv()) {
-    throw std::invalid_argument("vnext has wrong dimension (it should be " + to_string(state_->get_nv()) + ")");
+    throw std::invalid_argument("vnext has wrong dimension (it should be " + std::to_string(state_->get_nv()) + ")");
   }
   data->vnext = vnext;
 }
@@ -94,7 +94,7 @@ void ImpulseModelMultiple::updateVelocity(const boost::shared_ptr<ImpulseDataMul
 void ImpulseModelMultiple::updateForce(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                        const Eigen::VectorXd& force) {
   if (static_cast<std::size_t>(force.size()) != ni_) {
-    throw std::invalid_argument("force has wrong dimension (it should be " + to_string(ni_) + ")");
+    throw std::invalid_argument("force has wrong dimension (it should be " + std::to_string(ni_) + ")");
   }
   if (static_cast<std::size_t>(data->impulses.size()) != impulses_.size()) {
     throw std::invalid_argument("it doesn't match the number of impulse datas and models");
@@ -125,8 +125,8 @@ void ImpulseModelMultiple::updateVelocityDiff(const boost::shared_ptr<ImpulseDat
                                               const Eigen::MatrixXd& dvnext_dx) const {
   if (static_cast<std::size_t>(dvnext_dx.rows()) != state_->get_nv() ||
       static_cast<std::size_t>(dvnext_dx.cols()) != state_->get_ndx()) {
-    throw std::invalid_argument("dvnext_dx has wrong dimension (it should be " + to_string(state_->get_nv()) + "," +
-                                to_string(state_->get_ndx()) + ")");
+    throw std::invalid_argument("dvnext_dx has wrong dimension (it should be " + std::to_string(state_->get_nv()) +
+                                "," + std::to_string(state_->get_ndx()) + ")");
   }
   data->dvnext_dx = dvnext_dx;
 }
@@ -135,8 +135,8 @@ void ImpulseModelMultiple::updateForceDiff(const boost::shared_ptr<ImpulseDataMu
                                            const Eigen::MatrixXd& df_dq) const {
   const std::size_t& nv = state_->get_nv();
   if (static_cast<std::size_t>(df_dq.rows()) != ni_ || static_cast<std::size_t>(df_dq.cols()) != nv) {
-    throw std::invalid_argument("df_dq has wrong dimension (it should be " + to_string(ni_) + "," + to_string(nv) +
-                                ")");
+    throw std::invalid_argument("df_dq has wrong dimension (it should be " + std::to_string(ni_) + "," +
+                                std::to_string(nv) + ")");
   }
   if (static_cast<std::size_t>(data->impulses.size()) != impulses_.size()) {
     throw std::invalid_argument("it doesn't match the number of impulse datas and models");

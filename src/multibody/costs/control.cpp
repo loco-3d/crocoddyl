@@ -14,7 +14,7 @@ CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state,
                                    boost::shared_ptr<ActivationModelAbstract> activation, const Eigen::VectorXd& uref)
     : CostModelAbstract(state, activation, static_cast<std::size_t>(uref.size())), uref_(uref) {
   if (activation_->get_nr() != nu_) {
-    throw std::invalid_argument("nr is equals to " + to_string(nu_));
+    throw std::invalid_argument("nr is equals to " + std::to_string(nu_));
   }
 }
 
@@ -26,7 +26,7 @@ CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state,
                                    boost::shared_ptr<ActivationModelAbstract> activation, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), uref_(Eigen::VectorXd::Zero(nu)) {
   if (activation_->get_nr() != nu_) {
-    throw std::invalid_argument("nr is equals to " + to_string(nu_));
+    throw std::invalid_argument("nr is equals to " + std::to_string(nu_));
   }
 }
 
@@ -48,7 +48,7 @@ void CostModelControl::calc(const boost::shared_ptr<CostDataAbstract>& data, con
     throw std::invalid_argument("it seems to be an autonomous system, if so, don't add this cost function");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw std::invalid_argument("u has wrong dimension (it should be " + to_string(nu_) + ")");
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
   data->r = u - uref_;
@@ -63,7 +63,7 @@ void CostModelControl::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
     throw std::invalid_argument("it seems to be an autonomous system, if so, don't add this cost function");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw std::invalid_argument("u has wrong dimension (it should be " + to_string(nu_) + ")");
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
   if (recalc) {
@@ -78,7 +78,7 @@ const Eigen::VectorXd& CostModelControl::get_uref() const { return uref_; }
 
 void CostModelControl::set_uref(const Eigen::VectorXd& uref_in) {
   if (static_cast<std::size_t>(uref_in.size()) != nu_) {
-    throw std::invalid_argument("uref has wrong dimension (it should be " + to_string(nu_) + ")");
+    throw std::invalid_argument("uref has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   uref_ = uref_in;
 }

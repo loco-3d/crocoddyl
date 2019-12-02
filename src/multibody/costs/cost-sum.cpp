@@ -42,10 +42,10 @@ void CostModelSum::removeCost(const std::string& name) {
 void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw std::invalid_argument("x has wrong dimension (it should be " + to_string(state_->get_nx()) + ")");
+    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw std::invalid_argument("u has wrong dimension (it should be " + to_string(nu_) + ")");
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   if (data->costs.size() != costs_.size()) {
     throw std::invalid_argument("it doesn't match the number of cost datas and models");
@@ -74,10 +74,10 @@ void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen:
 void CostModelSum::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                             const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw std::invalid_argument("x has wrong dimension (it should be " + to_string(state_->get_nx()) + ")");
+    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw std::invalid_argument("u has wrong dimension (it should be " + to_string(nu_) + ")");
+    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   if (data->costs.size() != costs_.size()) {
     throw std::invalid_argument("it doesn't match the number of cost datas and models");
