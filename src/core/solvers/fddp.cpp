@@ -78,10 +78,10 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
       }
     }
 
-    if (steplength_ > th_step_) {
+    if (steplength_ > th_stepdec_) {
       decreaseRegularization();
     }
-    if (steplength_ == alphas_.back()) {
+    if (steplength_ <= th_stepinc_) {
       increaseRegularization();
       if (xreg_ == regmax_) {
         return false;

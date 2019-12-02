@@ -109,10 +109,15 @@ void exposeSolverDDP() {
       .add_property("regMax",
                     bp::make_function(&SolverDDP::get_regmax, bp::return_value_policy<bp::copy_const_reference>()),
                     bp::make_function(&SolverDDP::set_regmax), "maximum regularization value.")
-      .add_property("th_step",
-                    bp::make_function(&SolverDDP::get_th_step, bp::return_value_policy<bp::copy_const_reference>()),
-                    bp::make_function(&SolverDDP::set_th_step),
+      .add_property("th_stepdec",
+                    bp::make_function(&SolverDDP::get_th_stepdec, bp::return_value_policy<bp::copy_const_reference>()),
+                    bp::make_function(&SolverDDP::set_th_stepdec),
                     "threshold for decreasing the regularization after approving a step (higher values decreases the "
+                    "regularization)")
+      .add_property("th_stepinc",
+                    bp::make_function(&SolverDDP::get_th_stepinc, bp::return_value_policy<bp::copy_const_reference>()),
+                    bp::make_function(&SolverDDP::set_th_stepinc),
+                    "threshold for increasing the regularization after approving a step (higher values decreases the "
                     "regularization)")
       .add_property("th_grad",
                     bp::make_function(&SolverDDP::get_th_grad, bp::return_value_policy<bp::copy_const_reference>()),

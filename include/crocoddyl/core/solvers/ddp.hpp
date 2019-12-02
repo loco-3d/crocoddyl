@@ -42,7 +42,8 @@ class SolverDDP : public SolverAbstract {
   const double& get_regmin() const;
   const double& get_regmax() const;
   const std::vector<double>& get_alphas() const;
-  const double& get_th_step() const;
+  const double& get_th_stepdec() const;
+  const double& get_th_stepinc() const;
   const double& get_th_grad() const;
   const std::vector<Eigen::MatrixXd>& get_Vxx() const;
   const std::vector<Eigen::VectorXd>& get_Vx() const;
@@ -59,7 +60,8 @@ class SolverDDP : public SolverAbstract {
   void set_regmin(double regmin);
   void set_regmax(double regmax);
   void set_alphas(const std::vector<double>& alphas);
-  void set_th_step(double th_step);
+  void set_th_stepdec(double th_step);
+  void set_th_stepinc(double th_step);
   void set_th_grad(double th_grad);
 
  protected:
@@ -92,7 +94,8 @@ class SolverDDP : public SolverAbstract {
   std::vector<Eigen::VectorXd> Quuk_;
   std::vector<double> alphas_;
   double th_grad_;
-  double th_step_;
+  double th_stepdec_;
+  double th_stepinc_;
   bool was_feasible_;
 };
 

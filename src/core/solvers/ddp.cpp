@@ -17,7 +17,8 @@ SolverDDP::SolverDDP(boost::shared_ptr<ShootingProblem> problem)
       regmax_(1e9),
       cost_try_(0.),
       th_grad_(1e-12),
-      th_step_(0.5),
+      th_stepdec_(0.5),
+      th_stepinc_(0.01),
       was_feasible_(false) {
   allocateData();
 
@@ -82,10 +83,10 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
       }
     }
 
-    if (steplength_ > th_step_) {
+    if (steplength_ > th_stepdec_) {
       decreaseRegularization();
     }
-    if (steplength_ == alphas_.back()) {
+    if (steplength_ <= th_stepinc_) {
       increaseRegularization();
       if (xreg_ == regmax_) {
         return false;
@@ -352,7 +353,9 @@ const double& SolverDDP::get_regmax() const { return regmax_; }
 
 const std::vector<double>& SolverDDP::get_alphas() const { return alphas_; }
 
-const double& SolverDDP::get_th_step() const { return th_step_; }
+const double& SolverDDP::get_th_stepdec() const { return th_stepdec_; }
+
+const double& SolverDDP::get_th_stepinc() const { return th_stepinc_; }
 
 const double& SolverDDP::get_th_grad() const { return th_grad_; }
 
@@ -384,7 +387,9 @@ void SolverDDP::set_regmax(double regmax) { regmax_ = regmax; }
 
 void SolverDDP::set_alphas(const std::vector<double>& alphas) { alphas_ = alphas; }
 
-void SolverDDP::set_th_step(double th_step) { th_step_ = th_step; }
+void SolverDDP::set_th_stepdec(double th_stepdec) { th_stepdec_ = th_stepdec; }
+
+void SolverDDP::set_th_stepinc(double th_stepinc) { th_stepinc_ = th_stepinc; }
 
 void SolverDDP::set_th_grad(double th_grad) { th_grad_ = th_grad; }
 
