@@ -1,6 +1,7 @@
-dist: bionic
 language: cpp
-sudo: required
+os: [
+  "linux"
+]
 
 jobs:
   include:
