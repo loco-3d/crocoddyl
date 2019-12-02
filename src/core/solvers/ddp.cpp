@@ -265,7 +265,7 @@ void SolverDDP::computeGains(const std::size_t& t) {
   if (problem_->get_runningModels()[t]->get_nu() > 0) {
     Quu_llt_[t].compute(Quu_[t]);
     Eigen::ComputationInfo info = Quu_llt_[t].info();
-    if (info != Eigen::ComputationInfo::Success) {
+    if (info != Eigen::Success) {
       throw std::runtime_error("backward_error");
     }
     K_[t] = Qxu_[t].transpose();
