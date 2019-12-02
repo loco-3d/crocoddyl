@@ -24,7 +24,7 @@ void ActuationModelFloatingBase::calc(const boost::shared_ptr<ActuationDataAbstr
                                       const Eigen::Ref<const Eigen::VectorXd>&,
                                       const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw std::invalid_argument("u has wrong dimension (it should be " + to_string(nu_) + ")");
   }
   data->tau.tail(nu_) = u;
 }

@@ -21,7 +21,7 @@ ShootingProblem::ShootingProblem(const Eigen::VectorXd& x0,
     : cost_(0.), T_(running_models.size()), x0_(x0), terminal_model_(terminal_model), running_models_(running_models) {
   if (static_cast<std::size_t>(x0.size()) != running_models_[0]->get_state()->get_nx()) {
     throw std::invalid_argument("x0 has wrong dimension (it should be " +
-                                std::to_string(running_models_[0]->get_state()->get_nx()) + ")");
+                                to_string(running_models_[0]->get_state()->get_nx()) + ")");
   }
   allocateData();
 }
@@ -30,10 +30,10 @@ ShootingProblem::~ShootingProblem() {}
 
 double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us) {
   if (xs.size() != T_ + 1) {
-    throw std::invalid_argument("xs has wrong dimension (it should be " + std::to_string(T_ + 1) + ")");
+    throw std::invalid_argument("xs has wrong dimension (it should be " + to_string(T_ + 1) + ")");
   }
   if (us.size() != T_) {
-    throw std::invalid_argument("us has wrong dimension (it should be " + std::to_string(T_) + ")");
+    throw std::invalid_argument("us has wrong dimension (it should be " + to_string(T_) + ")");
   }
 
   cost_ = 0;
@@ -53,10 +53,10 @@ double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::
 
 double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us) {
   if (xs.size() != T_ + 1) {
-    throw std::invalid_argument("xs has wrong dimension (it should be " + std::to_string(T_ + 1) + ")");
+    throw std::invalid_argument("xs has wrong dimension (it should be " + to_string(T_ + 1) + ")");
   }
   if (us.size() != T_) {
-    throw std::invalid_argument("us has wrong dimension (it should be " + std::to_string(T_) + ")");
+    throw std::invalid_argument("us has wrong dimension (it should be " + to_string(T_) + ")");
   }
 
   cost_ = 0;
@@ -81,10 +81,10 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const s
 
 void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us, std::vector<Eigen::VectorXd>& xs) {
   if (xs.size() != T_ + 1) {
-    throw std::invalid_argument("xs has wrong dimension (it should be " + std::to_string(T_ + 1) + ")");
+    throw std::invalid_argument("xs has wrong dimension (it should be " + to_string(T_ + 1) + ")");
   }
   if (us.size() != T_) {
-    throw std::invalid_argument("us has wrong dimension (it should be " + std::to_string(T_) + ")");
+    throw std::invalid_argument("us has wrong dimension (it should be " + to_string(T_) + ")");
   }
 
   xs[0] = x0_;

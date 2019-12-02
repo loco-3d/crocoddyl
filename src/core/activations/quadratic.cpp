@@ -17,7 +17,7 @@ ActivationModelQuad::~ActivationModelQuad() {}
 void ActivationModelQuad::calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                                const Eigen::Ref<const Eigen::VectorXd>& r) {
   if (static_cast<std::size_t>(r.size()) != nr_) {
-    throw std::invalid_argument("r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+    throw std::invalid_argument("r has wrong dimension (it should be " + to_string(nr_) + ")");
   }
   data->a_value = 0.5 * r.transpose() * r;
 }
@@ -25,7 +25,7 @@ void ActivationModelQuad::calc(const boost::shared_ptr<ActivationDataAbstract>& 
 void ActivationModelQuad::calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
                                    const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc) {
   if (static_cast<std::size_t>(r.size()) != nr_) {
-    throw std::invalid_argument("r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+    throw std::invalid_argument("r has wrong dimension (it should be " + to_string(nr_) + ")");
   }
   if (recalc) {
     calc(data, r);

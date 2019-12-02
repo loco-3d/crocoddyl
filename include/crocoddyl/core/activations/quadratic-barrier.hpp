@@ -20,7 +20,7 @@ struct ActivationBounds {
     if (lb.size() != ub.size()) {
       throw std::invalid_argument(
           "The lower and upper bounds don't have the same dimension (lb,ub dimensions equal to " +
-          std::to_string(lb.size()) + "," + std::to_string(ub.size()) + ", respectively)");
+          to_string(lb.size()) + "," + to_string(ub.size()) + ", respectively)");
     }
     if (beta < 0 || beta > 1.) {
       throw std::invalid_argument("The range of beta is between 0 and 1");

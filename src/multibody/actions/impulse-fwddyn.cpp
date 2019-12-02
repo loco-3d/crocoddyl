@@ -46,7 +46,7 @@ void ActionModelImpulseFwdDynamics::calc(const boost::shared_ptr<ActionDataAbstr
                                          const Eigen::Ref<const Eigen::VectorXd>& x,
                                          const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw std::invalid_argument("x has wrong dimension (it should be " + to_string(state_->get_nx()) + ")");
   }
 
   const std::size_t& nq = state_->get_nq();
@@ -87,7 +87,7 @@ void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataA
                                              const Eigen::Ref<const Eigen::VectorXd>& x,
                                              const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw std::invalid_argument("x has wrong dimension (it should be " + to_string(state_->get_nx()) + ")");
   }
 
   const std::size_t& nv = state_->get_nv();
@@ -151,8 +151,7 @@ const double& ActionModelImpulseFwdDynamics::get_damping_factor() const { return
 
 void ActionModelImpulseFwdDynamics::set_armature(const Eigen::VectorXd& armature) {
   if (static_cast<std::size_t>(armature.size()) != state_->get_nv()) {
-    throw std::invalid_argument("The armature dimension is wrong (it should be " + std::to_string(state_->get_nv()) +
-                                ")");
+    throw std::invalid_argument("The armature dimension is wrong (it should be " + to_string(state_->get_nv()) + ")");
   }
   armature_ = armature;
   with_armature_ = false;

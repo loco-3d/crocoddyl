@@ -9,11 +9,12 @@
 #ifndef CROCODDYL_MULTIBODY_COST_BASE_HPP_
 #define CROCODDYL_MULTIBODY_COST_BASE_HPP_
 
-#include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/core/activation-base.hpp"
 #include <pinocchio/multibody/data.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include "crocoddyl/multibody/states/multibody.hpp"
+#include "crocoddyl/core/activation-base.hpp"
+#include "crocoddyl/core/utils/to-string.hpp"
 
 namespace crocoddyl {
 

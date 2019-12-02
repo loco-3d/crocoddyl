@@ -28,10 +28,10 @@ ActionModelLQR::~ActionModelLQR() {}
 void ActionModelLQR::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                           const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw std::invalid_argument("x has wrong dimension (it should be " + to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw std::invalid_argument("u has wrong dimension (it should be " + to_string(nu_) + ")");
   }
 
   if (drift_free_) {
@@ -46,10 +46,10 @@ void ActionModelLQR::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                               const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
                               const bool& recalc) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw std::invalid_argument("x has wrong dimension (it should be " + to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw std::invalid_argument("u has wrong dimension (it should be " + to_string(nu_) + ")");
   }
 
   if (recalc) {
@@ -85,37 +85,37 @@ const Eigen::MatrixXd& ActionModelLQR::get_Luu() const { return Luu_; }
 void ActionModelLQR::set_Fx(const Eigen::MatrixXd& Fx) {
   if (static_cast<std::size_t>(Fx.rows()) != state_->get_nx() ||
       static_cast<std::size_t>(Fx.cols()) != state_->get_nx()) {
-    throw std::invalid_argument("Fx has wrong dimension (it should be " + std::to_string(state_->get_nx()) + "," +
-                                std::to_string(state_->get_nx()) + ")");
+    throw std::invalid_argument("Fx has wrong dimension (it should be " + to_string(state_->get_nx()) + "," +
+                                to_string(state_->get_nx()) + ")");
   }
   Fx_ = Fx;
 }
 
 void ActionModelLQR::set_Fu(const Eigen::MatrixXd& Fu) {
   if (static_cast<std::size_t>(Fu.rows()) != state_->get_nx() || static_cast<std::size_t>(Fu.cols()) != nu_) {
-    throw std::invalid_argument("Fu has wrong dimension (it should be " + std::to_string(state_->get_nx()) + "," +
-                                std::to_string(nu_) + ")");
+    throw std::invalid_argument("Fu has wrong dimension (it should be " + to_string(state_->get_nx()) + "," +
+                                to_string(nu_) + ")");
   }
   Fu_ = Fu;
 }
 
 void ActionModelLQR::set_f0(const Eigen::VectorXd& f0) {
   if (static_cast<std::size_t>(f0.size()) != state_->get_nx()) {
-    throw std::invalid_argument("f0 has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw std::invalid_argument("f0 has wrong dimension (it should be " + to_string(state_->get_nx()) + ")");
   }
   f0_ = f0;
 }
 
 void ActionModelLQR::set_lx(const Eigen::VectorXd& lx) {
   if (static_cast<std::size_t>(lx.size()) != state_->get_nx()) {
-    throw std::invalid_argument("lx has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw std::invalid_argument("lx has wrong dimension (it should be " + to_string(state_->get_nx()) + ")");
   }
   lx_ = lx;
 }
 
 void ActionModelLQR::set_lu(const Eigen::VectorXd& lu) {
   if (static_cast<std::size_t>(lu.size()) != nu_) {
-    throw std::invalid_argument("lu has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw std::invalid_argument("lu has wrong dimension (it should be " + to_string(nu_) + ")");
   }
   lu_ = lu;
 }
@@ -123,24 +123,23 @@ void ActionModelLQR::set_lu(const Eigen::VectorXd& lu) {
 void ActionModelLQR::set_Lxx(const Eigen::MatrixXd& Lxx) {
   if (static_cast<std::size_t>(Lxx.rows()) != state_->get_nx() ||
       static_cast<std::size_t>(Lxx.cols()) != state_->get_nx()) {
-    throw std::invalid_argument("Lxx has wrong dimension (it should be " + std::to_string(state_->get_nx()) + "," +
-                                std::to_string(state_->get_nx()) + ")");
+    throw std::invalid_argument("Lxx has wrong dimension (it should be " + to_string(state_->get_nx()) + "," +
+                                to_string(state_->get_nx()) + ")");
   }
   Lxx_ = Lxx;
 }
 
 void ActionModelLQR::set_Lxu(const Eigen::MatrixXd& Lxu) {
   if (static_cast<std::size_t>(Lxu.rows()) != state_->get_nx() || static_cast<std::size_t>(Lxu.cols()) != nu_) {
-    throw std::invalid_argument("Lxu has wrong dimension (it should be " + std::to_string(state_->get_nx()) + "," +
-                                std::to_string(nu_) + ")");
+    throw std::invalid_argument("Lxu has wrong dimension (it should be " + to_string(state_->get_nx()) + "," +
+                                to_string(nu_) + ")");
   }
   Lxu_ = Lxu;
 }
 
 void ActionModelLQR::set_Luu(const Eigen::MatrixXd& Luu) {
   if (static_cast<std::size_t>(Luu.rows()) != nu_ || static_cast<std::size_t>(Luu.cols()) != nu_) {
-    throw std::invalid_argument("Fq has wrong dimension (it should be " + std::to_string(nu_) + "," +
-                                std::to_string(nu_) + ")");
+    throw std::invalid_argument("Fq has wrong dimension (it should be " + to_string(nu_) + "," + to_string(nu_) + ")");
   }
   Luu_ = Luu;
 }
