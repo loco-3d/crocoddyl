@@ -13,8 +13,8 @@ namespace crocoddyl {
 
 CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state,
                                                          boost::shared_ptr<ActivationModelAbstract> activation,
-                                                         const Vector6d& mref, const std::size_t& nu)
-    : CostModelAbstract(state, activation, nu), mref_(mref) {
+                                                         const Vector6d& href, const std::size_t& nu)
+    : CostModelAbstract(state, activation, nu), href_(href) {
   if (activation_->get_nr() != 6) {
     throw std::invalid_argument("nr is equals to 6");
   }
@@ -22,19 +22,19 @@ CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<State
 
 CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state,
                                                          boost::shared_ptr<ActivationModelAbstract> activation,
-                                                         const Vector6d& mref)
-    : CostModelAbstract(state, activation), mref_(mref) {
+                                                         const Vector6d& href)
+    : CostModelAbstract(state, activation), href_(href) {
   if (activation_->get_nr() != 6) {
     throw std::invalid_argument("nr is equals to 6");
   }
 }
 
-CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6d& mref,
+CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6d& href,
                                                          const std::size_t& nu)
-    : CostModelAbstract(state, 6, nu), mref_(mref) {}
+    : CostModelAbstract(state, 6, nu), href_(href) {}
 
-CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6d& mref)
-    : CostModelAbstract(state, 6), mref_(mref) {}
+CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6d& href)
+    : CostModelAbstract(state, 6), href_(href) {}
 
 CostModelCentroidalMomentum::~CostModelCentroidalMomentum() {}
 
@@ -42,7 +42,7 @@ void CostModelCentroidalMomentum::calc(const boost::shared_ptr<CostDataAbstract>
                                        const Eigen::Ref<const Eigen::VectorXd>&,
                                        const Eigen::Ref<const Eigen::VectorXd>&) {
   // Compute the cost residual give the reference CentroidalMomentum
-  data->r = data->pinocchio->hg.toVector() - mref_;
+  data->r = data->pinocchio->hg.toVector() - href_;
 
   activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;
@@ -61,8 +61,7 @@ void CostModelCentroidalMomentum::calcDiff(const boost::shared_ptr<CostDataAbstr
   Eigen::Ref<pinocchio::Data::Matrix6x> Rv = data->Rx.rightCols(nv);
 
   activation_->calcDiff(data->activation, data->r, recalc);
-  pinocchio::getCentroidalDynamicsDerivatives(state_->get_pinocchio(), *data->pinocchio, Rq, d->hdot_partial_dq,
-                                              d->hdot_partial_dv, Rv);
+  pinocchio::getCentroidalDynamicsDerivatives(state_->get_pinocchio(), *data->pinocchio, Rq, d->dhd_dq, d->dhd_dv, Rv);
 
   // The derivative computation in pinocchio does not take the frame of reference into
   // account. So we need to update the com frame as well.
@@ -79,8 +78,8 @@ boost::shared_ptr<CostDataAbstract> CostModelCentroidalMomentum::createData(pino
   return boost::make_shared<CostDataCentroidalMomentum>(this, data);
 }
 
-const Vector6d& CostModelCentroidalMomentum::get_mref() const { return mref_; }
+const Vector6d& CostModelCentroidalMomentum::get_href() const { return href_; }
 
-void CostModelCentroidalMomentum::set_mref(const Vector6d& mref_in) { mref_ = mref_in; }
+void CostModelCentroidalMomentum::set_href(const Vector6d& href_in) { href_ = href_in; }
 
 }  // namespace crocoddyl
