@@ -207,6 +207,11 @@ void SolverFDDP::forwardPass(const double& steplength) {
 
 double SolverFDDP::get_th_acceptnegstep() const { return th_acceptnegstep_; }
 
-void SolverFDDP::set_th_acceptnegstep(double th_acceptnegstep) { th_acceptnegstep_ = th_acceptnegstep; }
+void SolverFDDP::set_th_acceptnegstep(double th_acceptnegstep) {
+  if (0. > th_acceptnegstep) {
+    throw std::invalid_argument("th_acceptnegstep value has to be positive.");
+  }
+  th_acceptnegstep_ = th_acceptnegstep;
+}
 
 }  // namespace crocoddyl
