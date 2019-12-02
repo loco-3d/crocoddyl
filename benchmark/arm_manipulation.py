@@ -8,6 +8,8 @@ import sys
 import time
 import subprocess
 
+crocoddyl.switchToNumpyMatrix()
+
 # First, let's load the Pinocchio model for the Talos arm.
 ROBOT = example_robot_data.loadTalosArm()
 N = 100  # number of nodes

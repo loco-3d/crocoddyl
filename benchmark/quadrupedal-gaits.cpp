@@ -9,6 +9,7 @@
 #include <ctime>
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/parsers/srdf.hpp>
+#include <example-robot-data/path.hpp>
 #include "crocoddyl/multibody/utils/quadruped-gaits.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/solvers/fddp.hpp"
@@ -21,11 +22,13 @@ int main(int argc, char* argv[]) {
     T = atoi(argv[1]);
   }
 
-  pinocchio::Model rmodel;
-  pinocchio::urdf::buildModel(HYQ_URDF, pinocchio::JointModelFreeFlyer(), rmodel);
-  pinocchio::srdf::loadReferenceConfigurations(rmodel, HYQ_SRDF, false);
+  pinocchio::Model model;
+  pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/robots/hyq_no_sensors.urdf",
+                              pinocchio::JointModelFreeFlyer(), model);
+  pinocchio::srdf::loadReferenceConfigurations(model, EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/srdf/hyq.srdf",
+                                               false);
 
-  crocoddyl::SimpleQuadrupedGaitProblem gait(rmodel, "lf_foot", "rf_foot", "lh_foot", "rh_foot");
+  crocoddyl::SimpleQuadrupedGaitProblem gait(model, "lf_foot", "rf_foot", "lh_foot", "rh_foot");
 
   const Eigen::VectorXd& x0 = gait.get_defaultState();
 

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,19 +47,19 @@ struct CostDataFrameVelocity : public CostDataAbstract {
         joint(model->get_state()->get_pinocchio().frames[model->get_vref().frame].parent),
         vr(pinocchio::Motion::Zero()),
         fXj(model->get_state()->get_pinocchio().frames[model->get_vref().frame].placement.inverse().toActionMatrix()),
-        v_partial_dq(6, model->get_state()->get_nv()),
-        v_partial_dv(6, model->get_state()->get_nv()),
+        dv_dq(6, model->get_state()->get_nv()),
+        dv_dv(6, model->get_state()->get_nv()),
         Arr_Rx(6, model->get_state()->get_nv()) {
-    v_partial_dq.fill(0);
-    v_partial_dv.fill(0);
+    dv_dq.fill(0);
+    dv_dv.fill(0);
     Arr_Rx.fill(0);
   }
 
   pinocchio::JointIndex joint;
   pinocchio::Motion vr;
   pinocchio::SE3::ActionMatrixType fXj;
-  pinocchio::Data::Matrix6x v_partial_dq;
-  pinocchio::Data::Matrix6x v_partial_dv;
+  pinocchio::Data::Matrix6x dv_dq;
+  pinocchio::Data::Matrix6x dv_dv;
   pinocchio::Data::Matrix6x Arr_Rx;
 };
 

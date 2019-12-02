@@ -32,11 +32,11 @@ class CostModelCentroidalMomentum : public CostModelAbstract {
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
   boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
 
-  const Vector6d& get_mref() const;
-  void set_mref(const Vector6d& mref_in);
+  const Vector6d& get_href() const;
+  void set_href(const Vector6d& mref_in);
 
  private:
-  Vector6d mref_;
+  Vector6d href_;
 };
 
 struct CostDataCentroidalMomentum : public CostDataAbstract {
@@ -45,14 +45,14 @@ struct CostDataCentroidalMomentum : public CostDataAbstract {
   template <typename Model>
   CostDataCentroidalMomentum(Model* const model, pinocchio::Data* const data)
       : CostDataAbstract(model, data),
-        hdot_partial_dq(6, model->get_state()->get_nv()),
-        hdot_partial_dv(6, model->get_state()->get_nv()) {
-    hdot_partial_dq.fill(0);
-    hdot_partial_dv.fill(0);
+        dhd_dq(6, model->get_state()->get_nv()),
+        dhd_dv(6, model->get_state()->get_nv()) {
+    dhd_dq.fill(0);
+    dhd_dv.fill(0);
   }
 
-  pinocchio::Data::Matrix6x hdot_partial_dq;
-  pinocchio::Data::Matrix6x hdot_partial_dv;
+  pinocchio::Data::Matrix6x dhd_dq;
+  pinocchio::Data::Matrix6x dhd_dv;
   pinocchio::Data::Matrix6x Arr_Rx;
 };
 

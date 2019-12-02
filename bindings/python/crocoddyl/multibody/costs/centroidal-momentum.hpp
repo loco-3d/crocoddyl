@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,9 +80,25 @@ void exposeCostCentroidalMomentum() {
            ":param data: Pinocchio data\n"
            ":return cost data.")
       .add_property(
-          "ref",
-          bp::make_function(&CostModelCentroidalMomentum::get_mref, bp::return_value_policy<bp::return_by_value>()),
-          &CostModelCentroidalMomentum::set_mref, "reference centroidal momentum");
+          "href",
+          bp::make_function(&CostModelCentroidalMomentum::get_href, bp::return_value_policy<bp::return_by_value>()),
+          &CostModelCentroidalMomentum::set_href, "reference centroidal momentum");
+
+  bp::class_<CostDataCentroidalMomentum, bp::bases<CostDataAbstract> >(
+      "CostDataCentroidalMomentum", "Data for centroidal momentum cost.\n\n",
+      bp::init<CostModelCentroidalMomentum*, pinocchio::Data*>(
+          bp::args(" self", " model", " data"),
+          "Create centroidal momentum cost data.\n\n"
+          ":param model: centroidal momentum cost model\n"
+          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property(
+          "dhd_dq",
+          bp::make_getter(&CostDataCentroidalMomentum::dhd_dq, bp::return_value_policy<bp::return_by_value>()),
+          "Jacobian of the centroidal momentum")
+      .add_property(
+          "dhd_dv",
+          bp::make_getter(&CostDataCentroidalMomentum::dhd_dv, bp::return_value_policy<bp::return_by_value>()),
+          "Jacobian of the centroidal momentum");
 }
 
 }  // namespace python
