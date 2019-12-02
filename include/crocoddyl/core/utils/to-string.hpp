@@ -6,7 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#if __cplusplus >= 201103L
+#if __cplusplus < 201103L
 #ifndef CROCODDYL_CORE_UTILS_TO_STRING_HPP_
 #define CROCODDYL_CORE_UTILS_TO_STRING_HPP_
 
