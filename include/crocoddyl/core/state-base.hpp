@@ -13,6 +13,7 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include "crocoddyl/core/utils/to-string.hpp"
 
 namespace crocoddyl {
 

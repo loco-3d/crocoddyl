@@ -9,10 +9,11 @@
 #ifndef CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_
 #define CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_
 
+#include <stdexcept>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include "crocoddyl/core/state-base.hpp"
-#include <stdexcept>
+#include "crocoddyl/core/utils/to-string.hpp"
 
 namespace crocoddyl {
 

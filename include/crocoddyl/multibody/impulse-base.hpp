@@ -9,9 +9,10 @@
 #ifndef CROCODDYL_MULTIBODY_IMPULSE_BASE_HPP_
 #define CROCODDYL_MULTIBODY_IMPULSE_BASE_HPP_
 
-#include "crocoddyl/multibody/states/multibody.hpp"
 #include <pinocchio/multibody/data.hpp>
 #include <pinocchio/spatial/force.hpp>
+#include "crocoddyl/multibody/states/multibody.hpp"
+#include "crocoddyl/core/utils/to-string.hpp"
 
 namespace crocoddyl {
 
