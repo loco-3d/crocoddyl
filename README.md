@@ -27,6 +27,7 @@ The source code is released under the [BSD 3-Clause license](LICENSE).
 **With additional support from the Gepetto team at LAAS-CNRS and MEMMO project. For more details see Section Credits**
 
 [![License BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg?style=flat)](https://tldrlegal.com/license/bsd-3-clause-license-%28revised%29#fulltext)
+[![CI build status](https://travis-ci.org/loco-3d/crocoddyl.svg?branch=master)](https://travis-ci.org/loco-3d/crocoddyl)
 [![pipeline status](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/pipeline.svg)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/pipelines?ref=devel)
 [![coverage report](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/coverage.svg)](https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/devel/coverage/)
 [![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/loco-3d/crocoddyl)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/-/tags)
