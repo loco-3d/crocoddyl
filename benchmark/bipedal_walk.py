@@ -6,6 +6,8 @@ import numpy as np
 import sys
 import time
 
+crocoddyl.switchToNumpyMatrix()
+
 T = int(sys.argv[1]) if (len(sys.argv) > 1) else int(5e3)  # number of trials
 MAXITER = 1
 GAIT = "walking"  # 55 nodes

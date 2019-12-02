@@ -8,6 +8,7 @@
 
 #include <ctime>
 #include <pinocchio/parsers/urdf.hpp>
+#include <example-robot-data/path.hpp>
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
@@ -28,10 +29,10 @@ int main(int argc, char* argv[]) {
     T = atoi(argv[1]);
   }
 
-  pinocchio::Model robot_model;
-  pinocchio::urdf::buildModel(TALOS_ARM_URDF, robot_model);
+  pinocchio::Model model;
+  pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf", model);
   boost::shared_ptr<crocoddyl::StateMultibody> state =
-      boost::make_shared<crocoddyl::StateMultibody>(boost::ref(robot_model));
+      boost::make_shared<crocoddyl::StateMultibody>(boost::ref(model));
 
   Eigen::VectorXd q0(state->get_nq());
   Eigen::VectorXd x0(state->get_nx());
@@ -43,7 +44,7 @@ int main(int argc, char* argv[]) {
   // For this particular example, we formulate three running-cost functions:
   // goal-tracking cost, state and control regularization; and one terminal-cost:
   // goal cost. First, let's create the common cost functions.
-  crocoddyl::FramePlacement Mref(robot_model.getFrameId("gripper_left_joint"),
+  crocoddyl::FramePlacement Mref(model.getFrameId("gripper_left_joint"),
                                  pinocchio::SE3(Eigen::Matrix3d::Identity(), Eigen::Vector3d(.0, .0, .4)));
   boost::shared_ptr<crocoddyl::CostModelAbstract> goalTrackingCost =
       boost::make_shared<crocoddyl::CostModelFramePlacement>(state, Mref);
