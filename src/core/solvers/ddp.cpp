@@ -1,12 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/solvers/ddp.hpp"
+#include <iostream>
 
 namespace crocoddyl {
 
@@ -26,6 +27,11 @@ SolverDDP::SolverDDP(boost::shared_ptr<ShootingProblem> problem)
   alphas_.resize(n_alphas);
   for (std::size_t n = 0; n < n_alphas; ++n) {
     alphas_[n] = 1. / pow(2., static_cast<double>(n));
+  }
+  if (th_stepinc_ < alphas_[n_alphas - 1]) {
+    th_stepinc_ = alphas_[n_alphas - 1];
+    std::cerr << "Warning: th_stepinc has higher value than lowest alpha value, set to "
+              << std::to_string(alphas_[n_alphas - 1]) << std::endl;
   }
 }
 
