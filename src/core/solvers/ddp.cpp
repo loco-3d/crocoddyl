@@ -385,21 +385,21 @@ const std::vector<Eigen::VectorXd>& SolverDDP::get_k() const { return k_; }
 
 const std::vector<Eigen::VectorXd>& SolverDDP::get_gaps() const { return gaps_; }
 
-void SolverDDP::set_regfactor(double regfactor) {
+void SolverDDP::set_regfactor(const double& regfactor) {
   if (regfactor <= 1.) {
     throw std::invalid_argument("regfactor value is higher than 1.");
   }
   regfactor_ = regfactor;
 }
 
-void SolverDDP::set_regmin(double regmin) {
+void SolverDDP::set_regmin(const double& regmin) {
   if (0. > regmin) {
     throw std::invalid_argument("regmin value has to be positive.");
   }
   regmin_ = regmin;
 }
 
-void SolverDDP::set_regmax(double regmax) {
+void SolverDDP::set_regmax(const double& regmax) {
   if (0. > regmax) {
     throw std::invalid_argument("regmax value has to be positive.");
   }
@@ -424,21 +424,21 @@ void SolverDDP::set_alphas(const std::vector<double>& alphas) {
   alphas_ = alphas;
 }
 
-void SolverDDP::set_th_stepdec(double th_stepdec) {
+void SolverDDP::set_th_stepdec(const double& th_stepdec) {
   if (0. >= th_stepdec && th_stepdec >= 1.) {
     throw std::invalid_argument("th_stepdec value should between 0 and 1.");
   }
   th_stepdec_ = th_stepdec;
 }
 
-void SolverDDP::set_th_stepinc(double th_stepinc) {
+void SolverDDP::set_th_stepinc(const double& th_stepinc) {
   if (0. >= th_stepinc && th_stepinc >= 1.) {
     throw std::invalid_argument("th_stepinc value should between 0 and 1.");
   }
   th_stepinc_ = th_stepinc;
 }
 
-void SolverDDP::set_th_grad(double th_grad) {
+void SolverDDP::set_th_grad(const double& th_grad) {
   if (0. > th_grad) {
     throw std::invalid_argument("th_grad value has to be positive.");
   }

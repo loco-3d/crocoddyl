@@ -111,7 +111,7 @@ const std::size_t& ShootingProblem::get_T() const { return T_; }
 
 const Eigen::VectorXd& ShootingProblem::get_x0() const { return x0_; }
 
-void ShootingProblem::set_x0(Eigen::VectorXd x0_in) {
+void ShootingProblem::set_x0(const Eigen::VectorXd& x0_in) {
   if (x0_in.size() != x0_.size()) {
     throw std::invalid_argument("invalid size of x0 provided.");
   }
