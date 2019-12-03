@@ -143,12 +143,45 @@ struct CostDataSum {
   Eigen::MatrixXd get_Lxu() const { return Lxu; }
   Eigen::MatrixXd get_Luu() const { return Luu; }
 
-  void set_r(const Eigen::VectorXd& _r) { r = _r; }
-  void set_Lx(const Eigen::VectorXd& _Lx) { Lx = _Lx; }
-  void set_Lu(const Eigen::VectorXd& _Lu) { Lu = _Lu; }
-  void set_Lxx(const Eigen::MatrixXd& _Lxx) { Lxx = _Lxx; }
-  void set_Lxu(const Eigen::MatrixXd& _Lxu) { Lxu = _Lxu; }
-  void set_Luu(const Eigen::MatrixXd& _Luu) { Luu = _Luu; }
+  void set_r(const Eigen::VectorXd& _r) {
+    if (r.size() != _r.size()) {
+      throw std::invalid_argument("r has wrong dimension (it should be " + std::to_string(r.size()) + ")");
+    }
+    r = _r;
+  }
+  void set_Lx(const Eigen::VectorXd& _Lx) {
+    if (Lx.size() != _Lx.size()) {
+      throw std::invalid_argument("Lx has wrong dimension (it should be " + std::to_string(Lx.size()) + ")");
+    }
+    Lx = _Lx;
+  }
+  void set_Lu(const Eigen::VectorXd& _Lu) {
+    if (Lu.size() != _Lu.size()) {
+      throw std::invalid_argument("Lu has wrong dimension (it should be " + std::to_string(Lu.size()) + ")");
+    }
+    Lu = _Lu;
+  }
+  void set_Lxx(const Eigen::MatrixXd& _Lxx) {
+    if (Lxx.rows() != _Lxx.rows() && Lxx.cols() != _Lxx.cols()) {
+      throw std::invalid_argument("Lxx has wrong dimension (it should be " + std::to_string(Lxx.rows()) + ", " +
+                                  std::to_string(Lxx.cols()) + ")");
+    }
+    Lxx = _Lxx;
+  }
+  void set_Lxu(const Eigen::MatrixXd& _Lxu) {
+    if (Lxu.rows() != _Lxu.rows() && Lxu.cols() != _Lxu.cols()) {
+      throw std::invalid_argument("Lxu has wrong dimension (it should be " + std::to_string(Lxu.rows()) + ", " +
+                                  std::to_string(Lxu.cols()) + ")");
+    }
+    Lxu = _Lxu;
+  }
+  void set_Luu(const Eigen::MatrixXd& _Luu) {
+    if (Luu.rows() != _Luu.rows() && Luu.cols() != _Luu.cols()) {
+      throw std::invalid_argument("Luu has wrong dimension (it should be " + std::to_string(Luu.rows()) + ", " +
+                                  std::to_string(Luu.cols()) + ")");
+    }
+    Luu = _Luu;
+  }
 
   // Creates internal data in case we don't share it externally
   Eigen::VectorXd r_internal;
