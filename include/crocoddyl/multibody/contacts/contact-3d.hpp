@@ -52,8 +52,9 @@ struct ContactData3D : public ContactDataAbstract {
         fXjdv_dq(6, model->get_state()->get_nv()),
         fXjda_dq(6, model->get_state()->get_nv()),
         fXjda_dv(6, model->get_state()->get_nv()) {
-    joint = model->get_state()->get_pinocchio().frames[model->get_xref().frame].parent;
-    jMf = model->get_state()->get_pinocchio().frames[model->get_xref().frame].placement;
+    frame = model->get_xref().frame;
+    joint = model->get_state()->get_pinocchio().frames[frame].parent;
+    jMf = model->get_state()->get_pinocchio().frames[frame].placement;
     fXj = jMf.inverse().toActionMatrix();
     fJf.fill(0);
     v_partial_dq.fill(0);

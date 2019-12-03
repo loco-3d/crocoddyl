@@ -127,6 +127,7 @@ void exposeContactAbstract() {
                     bp::make_getter(&ContactDataAbstract::df_du, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ContactDataAbstract::df_du), "Jacobian of the contact forces")
       .def_readwrite("joint", &ContactDataAbstract::joint, "joint index of the contact frame")
+      .def_readwrite("frame", &ContactDataAbstract::frame, "frame index of the contact frame")
       .def_readwrite("f", &ContactDataAbstract::f,
                      "external spatial force at the parent joint level. Note that we could compute the force at the "
                      "contact frame by using jMf (i.e. data.jMF.actInv(data.f)");
