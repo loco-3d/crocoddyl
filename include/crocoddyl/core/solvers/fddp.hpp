@@ -31,7 +31,7 @@ class SolverFDDP : public SolverDDP {
   virtual void forwardPass(const double& stepLength);
 
   double get_th_acceptnegstep() const;
-  void set_th_acceptnegstep(double th_acceptnegstep);
+  void set_th_acceptnegstep(const double& th_acceptnegstep);
 
  protected:
   double dg_;

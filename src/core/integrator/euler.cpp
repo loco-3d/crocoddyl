@@ -137,7 +137,7 @@ const boost::shared_ptr<DifferentialActionModelAbstract>& IntegratedActionModelE
 
 const double& IntegratedActionModelEuler::get_dt() const { return time_step_; }
 
-void IntegratedActionModelEuler::set_dt(double dt) {
+void IntegratedActionModelEuler::set_dt(const double& dt) {
   if (dt < 0.) {
     throw std::invalid_argument("dt has positive value");
   }

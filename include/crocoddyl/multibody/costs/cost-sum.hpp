@@ -143,12 +143,12 @@ struct CostDataSum {
   Eigen::MatrixXd get_Lxu() const { return Lxu; }
   Eigen::MatrixXd get_Luu() const { return Luu; }
 
-  void set_r(Eigen::VectorXd _r) { r = _r; }
-  void set_Lx(Eigen::VectorXd _Lx) { Lx = _Lx; }
-  void set_Lu(Eigen::VectorXd _Lu) { Lu = _Lu; }
-  void set_Lxx(Eigen::MatrixXd _Lxx) { Lxx = _Lxx; }
-  void set_Lxu(Eigen::MatrixXd _Lxu) { Lxu = _Lxu; }
-  void set_Luu(Eigen::MatrixXd _Luu) { Luu = _Luu; }
+  void set_r(const Eigen::VectorXd& _r) { r = _r; }
+  void set_Lx(const Eigen::VectorXd& _Lx) { Lx = _Lx; }
+  void set_Lu(const Eigen::VectorXd& _Lu) { Lu = _Lu; }
+  void set_Lxx(const Eigen::MatrixXd& _Lxx) { Lxx = _Lxx; }
+  void set_Lxu(const Eigen::MatrixXd& _Lxu) { Lxu = _Lxu; }
+  void set_Luu(const Eigen::MatrixXd& _Luu) { Luu = _Luu; }
 
   // Creates internal data in case we don't share it externally
   Eigen::VectorXd r_internal;

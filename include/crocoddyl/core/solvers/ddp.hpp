@@ -56,13 +56,13 @@ class SolverDDP : public SolverAbstract {
   const std::vector<Eigen::VectorXd>& get_k() const;
   const std::vector<Eigen::VectorXd>& get_gaps() const;
 
-  void set_regfactor(double reg_factor);
-  void set_regmin(double regmin);
-  void set_regmax(double regmax);
+  void set_regfactor(const double& reg_factor);
+  void set_regmin(const double& regmin);
+  void set_regmax(const double& regmax);
   void set_alphas(const std::vector<double>& alphas);
-  void set_th_stepdec(double th_step);
-  void set_th_stepinc(double th_step);
-  void set_th_grad(double th_grad);
+  void set_th_stepdec(const double& th_step);
+  void set_th_stepinc(const double& th_step);
+  void set_th_grad(const double& th_grad);
 
  protected:
   double regfactor_;
