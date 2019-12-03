@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -89,7 +89,7 @@ void exposeImpulseAbstract() {
   bp::register_ptr_to_python<boost::shared_ptr<ImpulseDataAbstract> >();
 
   bp::class_<ImpulseDataAbstract, boost::noncopyable>(
-      "ImpulseDataAbstract", "Abstract class for impulse datas.\n\n",
+      "ImpulseDataAbstract", "Abstract class for impulse data.\n\n",
       bp::init<ImpulseModelAbstract*, pinocchio::Data*>(
           bp::args(" self", " model", " data"),
           "Create common data shared between impulse models.\n\n"
@@ -103,6 +103,7 @@ void exposeImpulseAbstract() {
                     bp::make_getter(&ImpulseDataAbstract::dv0_dq, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ImpulseDataAbstract::dv0_dq), "Jacobian of the previous impulse velocity")
       .def_readwrite("joint", &ImpulseDataAbstract::joint, "joint index of the impulse frame")
+      .def_readwrite("frame", &ImpulseDataAbstract::frame, "frame index of the impulse frame")
       .def_readwrite("f", &ImpulseDataAbstract::f, "external spatial forces");
 }
 
