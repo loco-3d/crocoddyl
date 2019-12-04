@@ -9,6 +9,7 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_CORE_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_CORE_HPP_
 
+#include "python/crocoddyl/core/data-collector-base.hpp"
 #include "python/crocoddyl/core/state-base.hpp"
 #include "python/crocoddyl/core/actuation-base.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
@@ -37,6 +38,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeCore() {
+  exposeDataCollector();
   exposeStateAbstract();
   exposeActuationAbstract();
   exposeActionAbstract();
