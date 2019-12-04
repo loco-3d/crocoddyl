@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,6 +10,7 @@
 #define CROCODDYL_MULTIBODY_COSTS_COM_POSITION_HPP_
 
 #include "crocoddyl/multibody/cost-base.hpp"
+#include "crocoddyl/multibody/data/multibody.hpp"
 
 namespace crocoddyl {
 
@@ -27,7 +28,7 @@ class CostModelCoMPosition : public CostModelAbstract {
             const Eigen::Ref<const Eigen::VectorXd>& u);
   void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
-  boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
+  boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
   const Eigen::Vector3d& get_cref() const;
   void set_cref(const Eigen::Vector3d& cref_in);
@@ -40,11 +41,20 @@ struct CostDataCoMPosition : public CostDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  CostDataCoMPosition(Model* const model, pinocchio::Data* const data)
+  CostDataCoMPosition(Model* const model, DataCollectorAbstract* const data)
       : CostDataAbstract(model, data), Arr_Jcom(3, model->get_state()->get_nv()) {
     Arr_Jcom.fill(0);
+    // Check that proper shared data has been passed
+    DataCollectorMultibody* d = dynamic_cast<DataCollectorMultibody*>(shared_data);
+    if (d == NULL) {
+      throw std::invalid_argument("The shared data should be derived from DataCollectorMultibody");
+    }
+
+    // Avoids data casting at runtime
+    pinocchio = d->pinocchio;
   }
 
+  pinocchio::Data* pinocchio;
   pinocchio::Data::Matrix3x Arr_Jcom;
 };
 

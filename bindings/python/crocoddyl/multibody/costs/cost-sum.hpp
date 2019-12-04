@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -100,7 +100,7 @@ void exposeCostSum() {
       .def("createData", &CostModelSum::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args(" self", " data"),
            "Create the total cost data.\n\n"
-           ":param data: Pinocchio data\n"
+           ":param data: shared data\n"
            ":return total cost data.")
       .add_property("state",
                     bp::make_function(&CostModelSum::get_state, bp::return_value_policy<bp::return_by_value>()),
@@ -115,10 +115,10 @@ void exposeCostSum() {
 
   bp::class_<CostDataSum, boost::shared_ptr<CostDataSum>, boost::noncopyable>(
       "CostDataSum", "Class for total cost data.\n\n",
-      bp::init<CostModelSum*, pinocchio::Data*>(bp::args(" self", " model", " data"),
-                                                "Create total cost data.\n\n"
-                                                ":param model: total cost model\n"
-                                                ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
+      bp::init<CostModelSum*, DataCollectorAbstract*>(bp::args(" self", " model", " data"),
+                                                      "Create total cost data.\n\n"
+                                                      ":param model: total cost model\n"
+                                                      ":param data: shared data")[bp::with_custodian_and_ward<1, 3>()])
       .def("shareMemory", &CostDataSum::shareMemory<DifferentialActionDataAbstract>, bp::args(" self", " model"),
            "Share memory with a given differential action data\n\n"
            ":param model: differential action data that we want to share memory")
@@ -127,8 +127,8 @@ void exposeCostSum() {
            ":param model: action data that we want to share memory")
       .add_property("costs", bp::make_getter(&CostDataSum::costs, bp::return_value_policy<bp::return_by_value>()),
                     "stack of costs data")
-      .add_property("pinocchio", bp::make_getter(&CostDataSum::pinocchio, bp::return_internal_reference<>()),
-                    "pinocchio data")
+      .add_property("shared_data", bp::make_getter(&CostDataSum::shared_data, bp::return_internal_reference<>()),
+                    "shared data")
       .add_property("cost", bp::make_getter(&CostDataSum::cost, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&CostDataSum::cost), "cost value")
       .add_property("r", bp::make_function(&CostDataSum::get_r, bp::return_value_policy<bp::return_by_value>()),

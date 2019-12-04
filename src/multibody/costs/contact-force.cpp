@@ -75,7 +75,7 @@ void CostModelContactForce::calcDiff(const boost::shared_ptr<CostDataAbstract>& 
   data->Luu.noalias() = df_du.transpose() * d->Arr_Ru;
 }
 
-boost::shared_ptr<CostDataAbstract> CostModelContactForce::createData(pinocchio::Data* const data) {
+boost::shared_ptr<CostDataAbstract> CostModelContactForce::createData(DataCollectorAbstract* const data) {
   return boost::make_shared<CostDataContactForce>(this, data);
 }
 

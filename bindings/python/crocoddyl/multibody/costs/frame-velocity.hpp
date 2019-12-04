@@ -76,7 +76,7 @@ void exposeCostFrameVelocity() {
            "Create the frame velocity cost data.\n\n"
            "Each cost model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined cost.\n"
-           ":param data: Pinocchio data\n"
+           ":param data: shared data\n"
            ":return cost data.")
       .add_property("vref", bp::make_function(&CostModelFrameVelocity::get_vref, bp::return_internal_reference<>()),
                     &CostModelFrameVelocity::set_vref, "reference frame velocity");
@@ -85,11 +85,11 @@ void exposeCostFrameVelocity() {
 
   bp::class_<CostDataFrameVelocity, bp::bases<CostDataAbstract> >(
       "CostDataFrameVelocity", "Data for frame velocity cost.\n\n",
-      bp::init<CostModelFrameVelocity*, pinocchio::Data*>(
+      bp::init<CostModelFrameVelocity*, DataCollectorAbstract*>(
           bp::args(" self", " model", " data"),
           "Create frame velocity cost data.\n\n"
           ":param model: frame Velocity cost model\n"
-          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("joint", bp::make_getter(&CostDataFrameVelocity::joint), "joint index")
       .add_property("vr", bp::make_getter(&CostDataFrameVelocity::vr, bp::return_value_policy<bp::return_by_value>()),
                     "error velocity of the frame")

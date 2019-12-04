@@ -120,6 +120,10 @@ void exposeDifferentialActionContactFwdDynamics() {
                     bp::make_getter(&DifferentialActionDataContactFwdDynamics::contacts,
                                     bp::return_value_policy<bp::return_by_value>()),
                     "contacts data")
+      .add_property(
+          "multibody",
+          bp::make_getter(&DifferentialActionDataContactFwdDynamics::multibody, bp::return_internal_reference<>()),
+          "multibody data")
       .add_property("costs",
                     bp::make_getter(&DifferentialActionDataContactFwdDynamics::costs,
                                     bp::return_value_policy<bp::return_by_value>()),

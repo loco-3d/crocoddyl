@@ -9,13 +9,13 @@
 #ifndef CROCODDYL_MULTIBODY_ACTIONS_CONTACT_FWDDYN_HPP_
 #define CROCODDYL_MULTIBODY_ACTIONS_CONTACT_FWDDYN_HPP_
 
+#include <stdexcept>
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
+#include "crocoddyl/multibody/data/multibody-in-contact.hpp"
 #include "crocoddyl/multibody/costs/cost-sum.hpp"
-#include <stdexcept>
-#include <pinocchio/multibody/data.hpp>
 
 namespace crocoddyl {
 
@@ -63,13 +63,14 @@ struct DifferentialActionDataContactFwdDynamics : public DifferentialActionDataA
   explicit DifferentialActionDataContactFwdDynamics(Model* const model)
       : DifferentialActionDataAbstract(model),
         pinocchio(pinocchio::Data(model->get_pinocchio())),
+        contacts(model->get_contacts()->createData(&pinocchio)),
+        multibody(&pinocchio, contacts.get()),
+        costs(model->get_costs()->createData(&multibody)),
         Kinv(model->get_state()->get_nv() + model->get_contacts()->get_nc(),
              model->get_state()->get_nv() + model->get_contacts()->get_nc()),
         df_dx(model->get_contacts()->get_nc(), model->get_state()->get_ndx()),
         df_du(model->get_contacts()->get_nc(), model->get_nu()) {
     actuation = model->get_actuation()->createData();
-    contacts = model->get_contacts()->createData(&pinocchio);
-    costs = model->get_costs()->createData(&pinocchio);
     costs->shareMemory(this);
     Kinv.fill(0);
     df_dx.fill(0);
@@ -79,6 +80,7 @@ struct DifferentialActionDataContactFwdDynamics : public DifferentialActionDataA
   pinocchio::Data pinocchio;
   boost::shared_ptr<ActuationDataAbstract> actuation;
   boost::shared_ptr<ContactDataMultiple> contacts;
+  DataCollectorMultibodyInContact multibody;
   boost::shared_ptr<CostDataSum> costs;
   Eigen::MatrixXd Kinv;
   Eigen::MatrixXd df_dx;

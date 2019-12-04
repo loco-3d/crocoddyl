@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -76,7 +76,7 @@ void exposeCostContactForce() {
            "Create the contact force cost data.\n\n"
            "Each cost model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined cost.\n"
-           ":param data: Pinocchio data\n"
+           ":param data: shared data\n"
            ":return cost data.")
       .add_property("fref", bp::make_function(&CostModelContactForce::get_fref, bp::return_internal_reference<>()),
                     &CostModelContactForce::set_fref, "reference contact force");
@@ -85,11 +85,11 @@ void exposeCostContactForce() {
 
   bp::class_<CostDataContactForce, bp::bases<CostDataAbstract> >(
       "CostDataContactForce", "Data for contact force cost.\n\n",
-      bp::init<CostModelContactForce*, pinocchio::Data*>(
+      bp::init<CostModelContactForce*, DataCollectorAbstract*>(
           bp::args(" self", " model", " data"),
           "Create contact force cost data.\n\n"
           ":param model: contact force cost model\n"
-          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("Arr_Ru",
                     bp::make_getter(&CostDataContactForce::Arr_Ru, bp::return_value_policy<bp::return_by_value>()),
                     "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)")

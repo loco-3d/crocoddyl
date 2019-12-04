@@ -9,12 +9,12 @@
 #ifndef CROCODDYL_MULTIBODY_ACTIONS_FREE_FWDDYN_HPP_
 #define CROCODDYL_MULTIBODY_ACTIONS_FREE_FWDDYN_HPP_
 
-#include "crocoddyl/core/diff-action-base.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/core/actuation-base.hpp"
-#include "crocoddyl/multibody/costs/cost-sum.hpp"
 #include <stdexcept>
-#include <pinocchio/multibody/data.hpp>
+#include "crocoddyl/core/diff-action-base.hpp"
+#include "crocoddyl/core/actuation-base.hpp"
+#include "crocoddyl/multibody/data/multibody.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
+#include "crocoddyl/multibody/costs/cost-sum.hpp"
 
 namespace crocoddyl {
 
@@ -53,11 +53,12 @@ struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbst
   explicit DifferentialActionDataFreeFwdDynamics(Model* const model)
       : DifferentialActionDataAbstract(model),
         pinocchio(pinocchio::Data(model->get_pinocchio())),
+        multibody(&pinocchio),
+        costs(model->get_costs()->createData(&multibody)),
         Minv(model->get_state()->get_nv(), model->get_state()->get_nv()),
         u_drift(model->get_nu()),
         dtau_dx(model->get_nu(), model->get_state()->get_ndx()) {
     actuation = model->get_actuation()->createData();
-    costs = model->get_costs()->createData(&pinocchio);
     costs->shareMemory(this);
     Minv.fill(0);
     u_drift.fill(0);
@@ -65,6 +66,7 @@ struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbst
   }
 
   pinocchio::Data pinocchio;
+  DataCollectorMultibody multibody;
   boost::shared_ptr<ActuationDataAbstract> actuation;
   boost::shared_ptr<CostDataSum> costs;
   Eigen::MatrixXd Minv;

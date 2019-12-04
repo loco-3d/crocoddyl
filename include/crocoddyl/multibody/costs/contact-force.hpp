@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,6 +11,7 @@
 
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
+#include "crocoddyl/multibody/data/multibody-in-contact.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 
 namespace crocoddyl {
@@ -29,7 +30,7 @@ class CostModelContactForce : public CostModelAbstract {
             const Eigen::Ref<const Eigen::VectorXd>& u);
   void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
-  boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
+  boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
   const FrameForce& get_fref() const;
   void set_fref(const FrameForce& fref);
@@ -42,10 +43,21 @@ struct CostDataContactForce : public CostDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  CostDataContactForce(Model* const model, pinocchio::Data* const data)
+  CostDataContactForce(Model* const model, DataCollectorAbstract* const data)
       : CostDataAbstract(model, data), Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
     Arr_Ru.fill(0);
+
+    // Check that proper shared data has been passed
+    DataCollectorMultibodyInContact* d = dynamic_cast<DataCollectorMultibodyInContact*>(shared_data);
+    if (d == NULL) {
+      throw std::invalid_argument("The shared data should be derived from DataCollectorMultibodyInContact");
+    }
+
+    // Avoids data casting at runtime
+    pinocchio = d->pinocchio;
   }
+
+  pinocchio::Data* pinocchio;
   boost::shared_ptr<ContactDataAbstract> contact_;
   Eigen::MatrixXd Arr_Ru;
 };

@@ -44,7 +44,7 @@ class CostModelSum {
             const Eigen::Ref<const Eigen::VectorXd>& u);
   void calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
-  boost::shared_ptr<CostDataSum> createData(pinocchio::Data* const data);
+  boost::shared_ptr<CostDataSum> createData(DataCollectorAbstract* const data);
 
   void calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
   void calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
@@ -95,14 +95,14 @@ struct CostDataSum {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  CostDataSum(Model* const model, pinocchio::Data* const data)
+  CostDataSum(Model* const model, DataCollectorAbstract* const data)
       : r_internal(model->get_nr()),
         Lx_internal(model->get_state()->get_ndx()),
         Lu_internal(model->get_nu()),
         Lxx_internal(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
         Lxu_internal(model->get_state()->get_ndx(), model->get_nu()),
         Luu_internal(model->get_nu(), model->get_nu()),
-        pinocchio(data),
+        shared_data(data),
         cost(0.),
         r(r_internal.data(), model->get_nr()),
         Lx(Lx_internal.data(), model->get_state()->get_ndx()),
@@ -192,7 +192,7 @@ struct CostDataSum {
   Eigen::MatrixXd Luu_internal;
 
   CostModelSum::CostDataContainer costs;
-  pinocchio::Data* pinocchio;
+  DataCollectorAbstract* shared_data;
   double cost;
   Eigen::Map<Eigen::VectorXd> r;
   Eigen::Map<Eigen::VectorXd> Lx;

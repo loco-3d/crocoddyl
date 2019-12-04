@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -76,7 +76,7 @@ void exposeCostFrameRotation() {
            "Create the frame rotation cost data.\n\n"
            "Each cost model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined cost.\n"
-           ":param data: Pinocchio data\n"
+           ":param data: shared data\n"
            ":return cost data.")
       .add_property("Rref", bp::make_function(&CostModelFrameRotation::get_Rref, bp::return_internal_reference<>()),
                     &CostModelFrameRotation::set_Rref, "reference frame rotation");
@@ -85,11 +85,11 @@ void exposeCostFrameRotation() {
 
   bp::class_<CostDataFrameRotation, bp::bases<CostDataAbstract> >(
       "CostDataFrameRotation", "Data for frame rotation cost.\n\n",
-      bp::init<CostModelFrameRotation*, pinocchio::Data*>(
+      bp::init<CostModelFrameRotation*, DataCollectorAbstract*>(
           bp::args(" self", " model", " data"),
           "Create frame rotation cost data.\n\n"
           ":param model: frame rotation cost model\n"
-          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("r", bp::make_getter(&CostDataFrameRotation::r, bp::return_value_policy<bp::return_by_value>()),
                     "cost residual")
       .add_property("rRf",

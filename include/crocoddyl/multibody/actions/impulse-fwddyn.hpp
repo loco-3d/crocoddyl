@@ -9,13 +9,13 @@
 #ifndef CROCODDYL_MULTIBODY_ACTIONS_IMPULSE_FWDDYN_HPP_
 #define CROCODDYL_MULTIBODY_ACTIONS_IMPULSE_FWDDYN_HPP_
 
+#include <stdexcept>
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
+#include "crocoddyl/multibody/data/multibody-in-impulse.hpp"
 #include "crocoddyl/multibody/costs/cost-sum.hpp"
-#include <stdexcept>
-#include <pinocchio/multibody/data.hpp>
 
 namespace crocoddyl {
 
@@ -63,12 +63,13 @@ struct ActionDataImpulseFwdDynamics : public ActionDataAbstract {
   explicit ActionDataImpulseFwdDynamics(Model* const model)
       : ActionDataAbstract(model),
         pinocchio(pinocchio::Data(model->get_pinocchio())),
+        impulses(model->get_impulses()->createData(&pinocchio)),
+        multibody(&pinocchio, impulses.get()),
+        costs(model->get_costs()->createData(&multibody)),
         vnone(model->get_state()->get_nv()),
         Kinv(model->get_state()->get_nv() + model->get_impulses()->get_ni(),
              model->get_state()->get_nv() + model->get_impulses()->get_ni()),
         df_dq(model->get_impulses()->get_ni(), model->get_state()->get_nv()) {
-    impulses = model->get_impulses()->createData(&pinocchio);
-    costs = model->get_costs()->createData(&pinocchio);
     costs->shareMemory(this);
     vnone.fill(0);
     Kinv.fill(0);
@@ -77,6 +78,7 @@ struct ActionDataImpulseFwdDynamics : public ActionDataAbstract {
 
   pinocchio::Data pinocchio;
   boost::shared_ptr<ImpulseDataMultiple> impulses;
+  DataCollectorMultibodyInImpulse multibody;
   boost::shared_ptr<CostDataSum> costs;
   Eigen::VectorXd vnone;
   Eigen::MatrixXd Kinv;

@@ -10,6 +10,7 @@
 #define CROCODDYL_MULTIBODY_COSTS_FRAME_VELOCITY_HPP_
 
 #include "crocoddyl/multibody/cost-base.hpp"
+#include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 
 namespace crocoddyl {
@@ -29,7 +30,7 @@ class CostModelFrameVelocity : public CostModelAbstract {
             const Eigen::Ref<const Eigen::VectorXd>& u);
   void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
-  boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
+  boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
   const FrameMotion& get_vref() const;
   void set_vref(const FrameMotion& vref_in);
@@ -42,7 +43,7 @@ struct CostDataFrameVelocity : public CostDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  CostDataFrameVelocity(Model* const model, pinocchio::Data* const data)
+  CostDataFrameVelocity(Model* const model, DataCollectorAbstract* const data)
       : CostDataAbstract(model, data),
         joint(model->get_state()->get_pinocchio().frames[model->get_vref().frame].parent),
         vr(pinocchio::Motion::Zero()),
@@ -53,8 +54,17 @@ struct CostDataFrameVelocity : public CostDataAbstract {
     dv_dq.fill(0);
     dv_dv.fill(0);
     Arr_Rx.fill(0);
+    // Check that proper shared data has been passed
+    DataCollectorMultibody* d = dynamic_cast<DataCollectorMultibody*>(shared_data);
+    if (d == NULL) {
+      throw std::invalid_argument("The shared data should be derived from DataCollectorMultibody");
+    }
+
+    // Avoids data casting at runtime
+    pinocchio = d->pinocchio;
   }
 
+  pinocchio::Data* pinocchio;
   pinocchio::JointIndex joint;
   pinocchio::Motion vr;
   pinocchio::SE3::ActionMatrixType fXj;

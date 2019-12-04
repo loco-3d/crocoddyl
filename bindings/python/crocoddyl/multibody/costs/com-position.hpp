@@ -76,7 +76,7 @@ void exposeCostCoMPosition() {
            "Create the CoM position cost data.\n\n"
            "Each cost model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined cost.\n"
-           ":param data: Pinocchio data\n"
+           ":param data: shared data\n"
            ":return cost data.")
       .add_property("cref",
                     bp::make_function(&CostModelCoMPosition::get_cref, bp::return_value_policy<bp::return_by_value>()),

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -103,7 +103,7 @@ void exposeCostMultibody() {
            "Create the cost data.\n\n"
            "Each cost model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined cost.\n"
-           ":param data: Pinocchio data\n"
+           ":param data: shared data\n"
            ":return cost data.")
       .add_property(
           "state",
@@ -120,14 +120,14 @@ void exposeCostMultibody() {
   bp::register_ptr_to_python<boost::shared_ptr<CostDataAbstract> >();
 
   bp::class_<CostDataAbstract, boost::noncopyable>(
-      "CostDataAbstract", "Abstract class for cost datas.\n\n",
-      bp::init<CostModelAbstract*, pinocchio::Data*>(
+      "CostDataAbstract", "Abstract class for cost data.\n\n",
+      bp::init<CostModelAbstract*, DataCollectorAbstract*>(
           bp::args(" self", " model", " data"),
           "Create common data shared between cost models.\n\n"
           ":param model: cost model\n"
-          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("pinocchio", bp::make_getter(&CostDataAbstract::pinocchio, bp::return_internal_reference<>()),
-                    "pinocchio data")
+          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("shared_data", bp::make_getter(&CostDataAbstract::shared_data, bp::return_internal_reference<>()),
+                    "shared data")
       .add_property("activation",
                     bp::make_getter(&CostDataAbstract::activation, bp::return_value_policy<bp::return_by_value>()),
                     "terminal data")

@@ -42,7 +42,8 @@ void CostModelCentroidalMomentum::calc(const boost::shared_ptr<CostDataAbstract>
                                        const Eigen::Ref<const Eigen::VectorXd>&,
                                        const Eigen::Ref<const Eigen::VectorXd>&) {
   // Compute the cost residual give the reference CentroidalMomentum
-  data->r = data->pinocchio->hg.toVector() - href_;
+  CostDataCentroidalMomentum* d = static_cast<CostDataCentroidalMomentum*>(data.get());
+  data->r = d->pinocchio->hg.toVector() - href_;
 
   activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;
@@ -61,12 +62,12 @@ void CostModelCentroidalMomentum::calcDiff(const boost::shared_ptr<CostDataAbstr
   Eigen::Ref<pinocchio::Data::Matrix6x> Rv = data->Rx.rightCols(nv);
 
   activation_->calcDiff(data->activation, data->r, recalc);
-  pinocchio::getCentroidalDynamicsDerivatives(state_->get_pinocchio(), *data->pinocchio, Rq, d->dhd_dq, d->dhd_dv, Rv);
+  pinocchio::getCentroidalDynamicsDerivatives(state_->get_pinocchio(), *d->pinocchio, Rq, d->dhd_dq, d->dhd_dv, Rv);
 
   // The derivative computation in pinocchio does not take the frame of reference into
   // account. So we need to update the com frame as well.
-  for (int i = 0; i < data->pinocchio->Jcom.cols(); ++i) {
-    data->Rx.block<3, 1>(3, i) -= data->pinocchio->Jcom.col(i).cross(data->pinocchio->hg.linear());
+  for (int i = 0; i < d->pinocchio->Jcom.cols(); ++i) {
+    data->Rx.block<3, 1>(3, i) -= d->pinocchio->Jcom.col(i).cross(d->pinocchio->hg.linear());
   }
 
   d->Arr_Rx.noalias() = data->activation->Arr * data->Rx;
@@ -74,7 +75,7 @@ void CostModelCentroidalMomentum::calcDiff(const boost::shared_ptr<CostDataAbstr
   data->Lxx.noalias() = data->Rx.transpose() * d->Arr_Rx;
 }
 
-boost::shared_ptr<CostDataAbstract> CostModelCentroidalMomentum::createData(pinocchio::Data* const data) {
+boost::shared_ptr<CostDataAbstract> CostModelCentroidalMomentum::createData(DataCollectorAbstract* const data) {
   return boost::make_shared<CostDataCentroidalMomentum>(this, data);
 }
 
