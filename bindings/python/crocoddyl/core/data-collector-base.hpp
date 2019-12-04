@@ -18,7 +18,8 @@ namespace bp = boost::python;
 
 void exposeDataCollector() {
   bp::class_<DataCollectorAbstract, boost::noncopyable>(
-      "DataCollectorAbstract", "Abstract class for common collection of data used in different objects in action model.\n\n",
+      "DataCollectorAbstract",
+      "Abstract class for common collection of data used in different objects in action model.\n\n",
       bp::init<>(bp::args("self")));
 }
 

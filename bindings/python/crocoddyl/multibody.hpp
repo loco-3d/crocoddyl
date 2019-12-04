@@ -10,6 +10,9 @@
 #define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_HPP_
 
 #include "python/crocoddyl/multibody/frames.hpp"
+#include "python/crocoddyl/multibody/data/multibody.hpp"
+#include "python/crocoddyl/multibody/data/multibody-in-contact.hpp"
+#include "python/crocoddyl/multibody/data/multibody-in-impulse.hpp"
 #include "python/crocoddyl/multibody/states/multibody.hpp"
 #include "python/crocoddyl/multibody/actuations/floating-base.hpp"
 #include "python/crocoddyl/multibody/actuations/full.hpp"
@@ -41,6 +44,9 @@ namespace python {
 
 void exposeMultibody() {
   exposeFrames();
+  exposeDataCollectorMultibody();
+  exposeDataCollectorMultibodyInContact();
+  exposeDataCollectorMultibodyInImpulse();
   exposeStateMultibody();
   exposeActuationFloatingBase();
   exposeActuationFull();
