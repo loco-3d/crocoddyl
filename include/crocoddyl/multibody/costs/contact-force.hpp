@@ -54,7 +54,19 @@ struct CostDataContactForce : public CostDataAbstract {
     }
 
     // Avoids data casting at runtime
-    // TODO(cmastalli): find proper contact
+    std::string frame_name = model->get_state()->get_pinocchio().frames[model->get_fref().frame].name;
+    bool found_contact = false;
+    for (ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
+         it != d->contacts->contacts.end(); ++it) {
+      if (it->second->frame == model->get_fref().frame) {
+        found_contact = true;
+        contact = it->second;
+        break;
+      }
+      if (!found_contact) {
+        throw std::domain_error("there isn't defined contact data for " + frame_name);
+      }
+    }
   }
 
   boost::shared_ptr<ContactDataAbstract> contact;

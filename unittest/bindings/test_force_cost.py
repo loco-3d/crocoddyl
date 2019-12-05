@@ -25,16 +25,10 @@ COSTS.addCost(
                                     ACTUATION.nu), 1.)
 MODEL = crocoddyl.DifferentialActionModelContactFwdDynamics(ROBOT_STATE, ACTUATION, CONTACTS, COSTS, 0., True)
 DATA = MODEL.createData()
-DATA.costs.costs["force"].contact = DATA.multibody.contacts.contacts["r_sole_contact"]
 
 # Created DAM numdiff
 MODEL_ND = crocoddyl.DifferentialActionModelNumDiff(MODEL, False)
 dnum = MODEL_ND.createData()
-for d in dnum.data_x:
-    d.costs.costs["force"].contact = d.multibody.contacts.contacts["r_sole_contact"]
-for d in dnum.data_u:
-    d.costs.costs["force"].contact = d.multibody.contacts.contacts["r_sole_contact"]
-dnum.data_0.costs.costs["force"].contact = dnum.data_0.multibody.contacts.contacts["r_sole_contact"]
 
 x = ROBOT_STATE.rand()
 u = pinocchio.utils.rand(ACTUATION.nu)
