@@ -98,10 +98,6 @@ void exposeDifferentialActionFreeFwdDynamics() {
           "multibody",
           bp::make_getter(&DifferentialActionDataFreeFwdDynamics::multibody, bp::return_internal_reference<>()),
           "multibody data")
-      .add_property("actuation",
-                    bp::make_getter(&DifferentialActionDataFreeFwdDynamics::actuation,
-                                    bp::return_value_policy<bp::return_by_value>()),
-                    "actuation data")
       .add_property("costs",
                     bp::make_getter(&DifferentialActionDataFreeFwdDynamics::costs,
                                     bp::return_value_policy<bp::return_by_value>()),

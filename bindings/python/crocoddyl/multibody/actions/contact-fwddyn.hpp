@@ -112,10 +112,6 @@ void exposeDifferentialActionContactFwdDynamics() {
           "pinocchio",
           bp::make_getter(&DifferentialActionDataContactFwdDynamics::pinocchio, bp::return_internal_reference<>()),
           "pinocchio data")
-      .add_property("actuation",
-                    bp::make_getter(&DifferentialActionDataContactFwdDynamics::actuation,
-                                    bp::return_value_policy<bp::return_by_value>()),
-                    "actuation data")
       .add_property(
           "multibody",
           bp::make_getter(&DifferentialActionDataContactFwdDynamics::multibody, bp::return_internal_reference<>()),

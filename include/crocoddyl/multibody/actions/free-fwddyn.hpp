@@ -53,12 +53,11 @@ struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbst
   explicit DifferentialActionDataFreeFwdDynamics(Model* const model)
       : DifferentialActionDataAbstract(model),
         pinocchio(pinocchio::Data(model->get_pinocchio())),
-        multibody(&pinocchio),
+        multibody(&pinocchio, model->get_actuation()->createData()),
         costs(model->get_costs()->createData(&multibody)),
         Minv(model->get_state()->get_nv(), model->get_state()->get_nv()),
         u_drift(model->get_nu()),
         dtau_dx(model->get_nu(), model->get_state()->get_ndx()) {
-    actuation = model->get_actuation()->createData();
     costs->shareMemory(this);
     Minv.fill(0);
     u_drift.fill(0);
@@ -66,8 +65,7 @@ struct DifferentialActionDataFreeFwdDynamics : public DifferentialActionDataAbst
   }
 
   pinocchio::Data pinocchio;
-  DataCollectorMultibody multibody;
-  boost::shared_ptr<ActuationDataAbstract> actuation;
+  DataCollectorActMultibody multibody;
   boost::shared_ptr<CostDataSum> costs;
   Eigen::MatrixXd Minv;
   Eigen::VectorXd u_drift;
