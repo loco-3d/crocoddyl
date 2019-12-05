@@ -63,9 +63,9 @@ struct CostDataContactForce : public CostDataAbstract {
         contact = it->second;
         break;
       }
-      if (!found_contact) {
-        throw std::domain_error("there isn't defined contact data for " + frame_name);
-      }
+    }
+    if (!found_contact) {
+      throw std::domain_error("there isn't defined contact data for " + frame_name);
     }
   }
 
