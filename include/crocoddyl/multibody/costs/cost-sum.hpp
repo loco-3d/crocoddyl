@@ -162,21 +162,21 @@ struct CostDataSum {
     Lu = _Lu;
   }
   void set_Lxx(const Eigen::MatrixXd& _Lxx) {
-    if (Lxx.rows() != _Lxx.rows() && Lxx.cols() != _Lxx.cols()) {
+    if (Lxx.rows() != _Lxx.rows() || Lxx.cols() != _Lxx.cols()) {
       throw std::invalid_argument("Lxx has wrong dimension (it should be " + std::to_string(Lxx.rows()) + ", " +
                                   std::to_string(Lxx.cols()) + ")");
     }
     Lxx = _Lxx;
   }
   void set_Lxu(const Eigen::MatrixXd& _Lxu) {
-    if (Lxu.rows() != _Lxu.rows() && Lxu.cols() != _Lxu.cols()) {
+    if (Lxu.rows() != _Lxu.rows() || Lxu.cols() != _Lxu.cols()) {
       throw std::invalid_argument("Lxu has wrong dimension (it should be " + std::to_string(Lxu.rows()) + ", " +
                                   std::to_string(Lxu.cols()) + ")");
     }
     Lxu = _Lxu;
   }
   void set_Luu(const Eigen::MatrixXd& _Luu) {
-    if (Luu.rows() != _Luu.rows() && Luu.cols() != _Luu.cols()) {
+    if (Luu.rows() != _Luu.rows() || Luu.cols() != _Luu.cols()) {
       throw std::invalid_argument("Luu has wrong dimension (it should be " + std::to_string(Luu.rows()) + ", " +
                                   std::to_string(Luu.cols()) + ")");
     }
