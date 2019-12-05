@@ -11,7 +11,7 @@
 
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
-#include "crocoddyl/multibody/data/multibody-in-contact.hpp"
+#include "crocoddyl/multibody/data/contacts.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 
 namespace crocoddyl {

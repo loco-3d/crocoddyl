@@ -6,25 +6,23 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_DATA_MULTIBODY_IN_CONTACT_HPP_
-#define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_DATA_MULTIBODY_IN_CONTACT_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_DATA_CONTACTS_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_DATA_CONTACTS_HPP_
 
-#include "crocoddyl/multibody/data/multibody-in-contact.hpp"
+#include "crocoddyl/multibody/data/contacts.hpp"
 
 namespace crocoddyl {
 namespace python {
 
-void exposeDataCollectorMultibodyInContact() {
+void exposeDataCollectorContacts() {
   bp::class_<DataCollectorContact, bp::bases<DataCollectorAbstract> >(
       "DataCollectorContact", "Class for common contact data between cost functions.\n\n",
-      bp::init<boost::shared_ptr<ContactDataMultiple> >(
-          bp::args("self", "contacts"),
-          "Create contact shared data.\n\n"
-          ":param contacts: contacts data"))
-      .add_property(
-          "contacts",
-          bp::make_getter(&DataCollectorContact::contacts, bp::return_value_policy<bp::return_by_value>()),
-          "contacts data");
+      bp::init<boost::shared_ptr<ContactDataMultiple> >(bp::args("self", "contacts"),
+                                                        "Create contact shared data.\n\n"
+                                                        ":param contacts: contacts data"))
+      .add_property("contacts",
+                    bp::make_getter(&DataCollectorContact::contacts, bp::return_value_policy<bp::return_by_value>()),
+                    "contacts data");
 
   bp::class_<DataCollectorMultibodyInContact, bp::bases<DataCollectorMultibody, DataCollectorContact> >(
       "DataCollectorMultibodyInContact", "Class for common multibody in contact data between cost functions.\n\n",
@@ -38,4 +36,4 @@ void exposeDataCollectorMultibodyInContact() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // BINDINGS_PYTHON_CROCODDYL_MULTIBODY_DATA_MULTIBODY_IN_CONTACT_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_MULTIBODY_DATA_CONTACTS_HPP_

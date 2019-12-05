@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_CORE_DATA_MULTIBODY_IN_CONTACT_HPP_
-#define CROCODDYL_CORE_DATA_MULTIBODY_IN_CONTACT_HPP_
+#ifndef CROCODDYL_CORE_DATA_CONTACTS_HPP_
+#define CROCODDYL_CORE_DATA_CONTACTS_HPP_
 
 #include <boost/shared_ptr.hpp>
 #include "crocoddyl/multibody/data/multibody.hpp"
@@ -22,7 +22,6 @@ struct DataCollectorContact : virtual DataCollectorAbstract {
 
   boost::shared_ptr<ContactDataMultiple> contacts;
 };
-
 
 struct DataCollectorMultibodyInContact : DataCollectorMultibody, DataCollectorContact {
   DataCollectorMultibodyInContact(pinocchio::Data* const data, boost::shared_ptr<ContactDataMultiple> contacts)

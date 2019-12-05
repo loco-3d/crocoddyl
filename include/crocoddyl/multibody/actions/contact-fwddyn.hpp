@@ -14,7 +14,7 @@
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
-#include "crocoddyl/multibody/data/multibody-in-contact.hpp"
+#include "crocoddyl/multibody/data/contacts.hpp"
 #include "crocoddyl/multibody/costs/cost-sum.hpp"
 
 namespace crocoddyl {

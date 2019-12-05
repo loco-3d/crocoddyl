@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_CORE_DATA_MULTIBODY_IN_IMPULSE_HPP_
-#define CROCODDYL_CORE_DATA_MULTIBODY_IN_IMPULSE_HPP_
+#ifndef CROCODDYL_CORE_DATA_IMPULSES_HPP_
+#define CROCODDYL_CORE_DATA_IMPULSES_HPP_
 
 #include <boost/shared_ptr.hpp>
 #include "crocoddyl/multibody/data/multibody.hpp"

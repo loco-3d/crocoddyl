@@ -11,8 +11,8 @@
 
 #include "python/crocoddyl/multibody/frames.hpp"
 #include "python/crocoddyl/multibody/data/multibody.hpp"
-#include "python/crocoddyl/multibody/data/multibody-in-contact.hpp"
-#include "python/crocoddyl/multibody/data/multibody-in-impulse.hpp"
+#include "python/crocoddyl/multibody/data/contacts.hpp"
+#include "python/crocoddyl/multibody/data/impulses.hpp"
 #include "python/crocoddyl/multibody/states/multibody.hpp"
 #include "python/crocoddyl/multibody/actuations/floating-base.hpp"
 #include "python/crocoddyl/multibody/actuations/full.hpp"
@@ -45,8 +45,8 @@ namespace python {
 void exposeMultibody() {
   exposeFrames();
   exposeDataCollectorMultibody();
-  exposeDataCollectorMultibodyInContact();
-  exposeDataCollectorMultibodyInImpulse();
+  exposeDataCollectorContacts();
+  exposeDataCollectorImpulses();
   exposeStateMultibody();
   exposeActuationFloatingBase();
   exposeActuationFull();

@@ -6,25 +6,23 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_DATA_MULTIBODY_IN_IMPULSE_HPP_
-#define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_DATA_MULTIBODY_IN_IMPULSE_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_DATA_IMPULSES_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_DATA_IMPULSES_HPP_
 
-#include "crocoddyl/multibody/data/multibody-in-impulse.hpp"
+#include "crocoddyl/multibody/data/impulses.hpp"
 
 namespace crocoddyl {
 namespace python {
 
-void exposeDataCollectorMultibodyInImpulse() {
+void exposeDataCollectorImpulses() {
   bp::class_<DataCollectorImpulse, bp::bases<DataCollectorAbstract> >(
       "DataCollectorImpulse", "Class for common impulse data between cost functions.\n\n",
-      bp::init<boost::shared_ptr<ImpulseDataMultiple> >(
-          bp::args("self", "impulses"),
-          "Create multibody shared data.\n\n"
-          ":param impulses: impulses data"))
-      .add_property(
-          "impulses",
-          bp::make_getter(&DataCollectorMultibodyInImpulse::impulses, bp::return_value_policy<bp::return_by_value>()),
-          "impulses data");
+      bp::init<boost::shared_ptr<ImpulseDataMultiple> >(bp::args("self", "impulses"),
+                                                        "Create multibody shared data.\n\n"
+                                                        ":param impulses: impulses data"))
+      .add_property("impulses",
+                    bp::make_getter(&DataCollectorImpulse::impulses, bp::return_value_policy<bp::return_by_value>()),
+                    "impulses data");
 
   bp::class_<DataCollectorMultibodyInImpulse, bp::bases<DataCollectorMultibody, DataCollectorImpulse> >(
       "DataCollectorMultibodyInImpulse", "Class for common multibody in impulse data between cost functions.\n\n",
@@ -38,4 +36,4 @@ void exposeDataCollectorMultibodyInImpulse() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // BINDINGS_PYTHON_CROCODDYL_MULTIBODY_DATA_MULTIBODY_IN_IMPULSE_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_MULTIBODY_DATA_IMPULSES_HPP_
