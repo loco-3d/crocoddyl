@@ -58,7 +58,7 @@ struct CostDataContactForce : public CostDataAbstract {
   }
 
   pinocchio::Data* pinocchio;
-  boost::shared_ptr<ContactDataAbstract> contact_;
+  boost::shared_ptr<ContactDataAbstract> contact;
   Eigen::MatrixXd Arr_Ru;
 };
 
