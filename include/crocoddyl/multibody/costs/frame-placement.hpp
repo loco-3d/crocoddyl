@@ -56,7 +56,7 @@ struct CostDataFramePlacement : public CostDataAbstract {
     fJf.fill(0);
     Arr_J.fill(0);
     // Check that proper shared data has been passed
-    DataCollectorMultibody* d = dynamic_cast<DataCollectorMultibody*>(shared_data);
+    DataCollectorMultibody* d = dynamic_cast<DataCollectorMultibody*>(shared);
     if (d == NULL) {
       throw std::invalid_argument("The shared data should be derived from DataCollectorMultibody");
     }

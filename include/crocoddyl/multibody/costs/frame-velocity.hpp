@@ -55,7 +55,7 @@ struct CostDataFrameVelocity : public CostDataAbstract {
     dv_dv.fill(0);
     Arr_Rx.fill(0);
     // Check that proper shared data has been passed
-    DataCollectorMultibody* d = dynamic_cast<DataCollectorMultibody*>(shared_data);
+    DataCollectorMultibody* d = dynamic_cast<DataCollectorMultibody*>(shared);
     if (d == NULL) {
       throw std::invalid_argument("The shared data should be derived from DataCollectorMultibody");
     }

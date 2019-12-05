@@ -127,8 +127,7 @@ void exposeCostSum() {
            ":param model: action data that we want to share memory")
       .add_property("costs", bp::make_getter(&CostDataSum::costs, bp::return_value_policy<bp::return_by_value>()),
                     "stack of costs data")
-      .add_property("shared_data", bp::make_getter(&CostDataSum::shared_data, bp::return_internal_reference<>()),
-                    "shared data")
+      .add_property("shared", bp::make_getter(&CostDataSum::shared, bp::return_internal_reference<>()), "shared data")
       .add_property("cost", bp::make_getter(&CostDataSum::cost, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&CostDataSum::cost), "cost value")
       .add_property("r", bp::make_function(&CostDataSum::get_r, bp::return_value_policy<bp::return_by_value>()),

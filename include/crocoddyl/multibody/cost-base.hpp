@@ -86,7 +86,7 @@ struct CostDataAbstract {
 
   template <typename Model>
   CostDataAbstract(Model* const model, DataCollectorAbstract* const data)
-      : shared_data(data),
+      : shared(data),
         activation(model->get_activation()->createData()),
         cost(0.),
         Lx(model->get_state()->get_ndx()),
@@ -108,7 +108,7 @@ struct CostDataAbstract {
   }
   virtual ~CostDataAbstract() {}
 
-  DataCollectorAbstract* shared_data;
+  DataCollectorAbstract* shared;
   boost::shared_ptr<ActivationDataAbstract> activation;
   double cost;
   Eigen::VectorXd Lx;

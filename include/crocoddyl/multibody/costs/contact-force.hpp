@@ -48,7 +48,7 @@ struct CostDataContactForce : public CostDataAbstract {
     Arr_Ru.fill(0);
 
     // Check that proper shared data has been passed
-    DataCollectorMultibodyInContact* d = dynamic_cast<DataCollectorMultibodyInContact*>(shared_data);
+    DataCollectorMultibodyInContact* d = dynamic_cast<DataCollectorMultibodyInContact*>(shared);
     if (d == NULL) {
       throw std::invalid_argument("The shared data should be derived from DataCollectorMultibodyInContact");
     }

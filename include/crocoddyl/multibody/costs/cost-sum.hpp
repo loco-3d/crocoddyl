@@ -102,7 +102,7 @@ struct CostDataSum {
         Lxx_internal(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
         Lxu_internal(model->get_state()->get_ndx(), model->get_nu()),
         Luu_internal(model->get_nu(), model->get_nu()),
-        shared_data(data),
+        shared(data),
         cost(0.),
         r(r_internal.data(), model->get_nr()),
         Lx(Lx_internal.data(), model->get_state()->get_ndx()),
@@ -192,7 +192,7 @@ struct CostDataSum {
   Eigen::MatrixXd Luu_internal;
 
   CostModelSum::CostDataContainer costs;
-  DataCollectorAbstract* shared_data;
+  DataCollectorAbstract* shared;
   double cost;
   Eigen::Map<Eigen::VectorXd> r;
   Eigen::Map<Eigen::VectorXd> Lx;

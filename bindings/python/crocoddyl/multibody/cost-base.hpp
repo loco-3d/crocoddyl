@@ -126,7 +126,7 @@ void exposeCostMultibody() {
           "Create common data shared between cost models.\n\n"
           ":param model: cost model\n"
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("shared_data", bp::make_getter(&CostDataAbstract::shared_data, bp::return_internal_reference<>()),
+      .add_property("shared", bp::make_getter(&CostDataAbstract::shared, bp::return_internal_reference<>()),
                     "shared data")
       .add_property("activation",
                     bp::make_getter(&CostDataAbstract::activation, bp::return_value_policy<bp::return_by_value>()),

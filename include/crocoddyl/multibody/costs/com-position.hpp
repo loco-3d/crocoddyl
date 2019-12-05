@@ -45,7 +45,7 @@ struct CostDataCoMPosition : public CostDataAbstract {
       : CostDataAbstract(model, data), Arr_Jcom(3, model->get_state()->get_nv()) {
     Arr_Jcom.fill(0);
     // Check that proper shared data has been passed
-    DataCollectorMultibody* d = dynamic_cast<DataCollectorMultibody*>(shared_data);
+    DataCollectorMultibody* d = dynamic_cast<DataCollectorMultibody*>(shared);
     if (d == NULL) {
       throw std::invalid_argument("The shared data should be derived from DataCollectorMultibody");
     }
