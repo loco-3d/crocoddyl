@@ -15,6 +15,7 @@
 #include "python/crocoddyl/core/action-base.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
+#include "python/crocoddyl/core/data/actuation.hpp"
 #include "python/crocoddyl/core/integrator/euler.hpp"
 #include "python/crocoddyl/core/numdiff/action.hpp"
 #include "python/crocoddyl/core/numdiff/diff-action.hpp"
@@ -44,6 +45,7 @@ void exposeCore() {
   exposeActionAbstract();
   exposeDifferentialActionAbstract();
   exposeActivationAbstract();
+  exposeDataCollectorActuation();
   exposeIntegratedActionEuler();
   exposeActionNumDiff();
   exposeDifferentialActionNumDiff();
