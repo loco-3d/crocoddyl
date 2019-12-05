@@ -59,7 +59,7 @@ struct CostDataFrameRotation : public CostDataAbstract {
     // Check that proper shared data has been passed
     DataCollectorMultibody* d = dynamic_cast<DataCollectorMultibody*>(shared);
     if (d == NULL) {
-      throw std::invalid_argument("The shared data should be derived from DataCollectorMultibody");
+      throw std::invalid_argument("the shared data should be derived from DataCollectorMultibody");
     }
 
     // Avoids data casting at runtime
