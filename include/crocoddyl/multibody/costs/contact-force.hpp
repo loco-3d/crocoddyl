@@ -48,16 +48,15 @@ struct CostDataContactForce : public CostDataAbstract {
     Arr_Ru.fill(0);
 
     // Check that proper shared data has been passed
-    DataCollectorMultibodyInContact* d = dynamic_cast<DataCollectorMultibodyInContact*>(shared);
+    DataCollectorContact* d = dynamic_cast<DataCollectorContact*>(shared);
     if (d == NULL) {
       throw std::invalid_argument("The shared data should be derived from DataCollectorMultibodyInContact");
     }
 
     // Avoids data casting at runtime
-    pinocchio = d->pinocchio;
+    // TODO(cmastalli): find proper contact
   }
 
-  pinocchio::Data* pinocchio;
   boost::shared_ptr<ContactDataAbstract> contact;
   Eigen::MatrixXd Arr_Ru;
 };
