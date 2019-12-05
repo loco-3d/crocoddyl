@@ -16,6 +16,7 @@ INCLUDE(cmake/base.cmake)
 INCLUDE(cmake/test.cmake)
 INCLUDE(cmake/boost.cmake)
 INCLUDE(cmake/python.cmake)
+INCLUDE(cmake/apple.cmake)
 
 # Print initial message
 MESSAGE("${PROJECT_DESCRIPTION}, version ${PROJECT_VERSION}")
@@ -48,6 +49,9 @@ ENDIF()
 
 COMPUTE_PROJECT_ARGS(PROJECT_ARGS LANGUAGES CXX)
 PROJECT(${PROJECT_NAME} ${PROJECT_ARGS})
+
+# If needed, fix CMake policy for APPLE systems
+APPLY_DEFAULT_APPLE_CONFIGURATION()
 
 # Add the different required and optional dependencies
 ADD_REQUIRED_DEPENDENCY("eigen3 >= 3.0.5")
