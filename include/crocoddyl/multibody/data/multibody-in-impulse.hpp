@@ -15,12 +15,18 @@
 
 namespace crocoddyl {
 
-struct DataCollectorMultibodyInImpulse : DataCollectorMultibody {
-  DataCollectorMultibodyInImpulse(pinocchio::Data* const data, boost::shared_ptr<ImpulseDataMultiple> impulses)
-      : DataCollectorMultibody(data), impulses(impulses) {}
-  virtual ~DataCollectorMultibodyInImpulse() {}
+struct DataCollectorImpulse : virtual DataCollectorAbstract {
+  DataCollectorImpulse(boost::shared_ptr<ImpulseDataMultiple> impulses)
+      : DataCollectorAbstract(), impulses(impulses) {}
+  virtual ~DataCollectorImpulse() {}
 
   boost::shared_ptr<ImpulseDataMultiple> impulses;
+};
+
+struct DataCollectorMultibodyInImpulse : DataCollectorMultibody, DataCollectorImpulse {
+  DataCollectorMultibodyInImpulse(pinocchio::Data* const data, boost::shared_ptr<ImpulseDataMultiple> impulses)
+      : DataCollectorMultibody(data), DataCollectorImpulse(impulses) {}
+  virtual ~DataCollectorMultibodyInImpulse() {}
 };
 
 }  // namespace crocoddyl

@@ -14,7 +14,7 @@
 
 namespace crocoddyl {
 
-struct DataCollectorMultibody : DataCollectorAbstract {
+struct DataCollectorMultibody : virtual DataCollectorAbstract {
   DataCollectorMultibody(pinocchio::Data* const data) : pinocchio(data) {}
   virtual ~DataCollectorMultibody() {}
 
