@@ -6,16 +6,16 @@ SET(PROJECT_NAME crocoddyl)
 SET(PROJECT_DESCRIPTION "Contact RObot COntrol by Differential DYnamic programming Library (Crocoddyl)")
 SET(PROJECT_URL https://gepgitlab.laas.fr/${PROJECT_NAMESPACE}/${PROJECT_NAME})
 
+# Check if the submodule cmake have been initialized
+IF(NOT EXISTS "${CMAKE_SOURCE_DIR}/cmake/base.cmake")
+  MESSAGE(FATAL_ERROR "\nPlease run the following command first:\ngit submodule update --init\n")
+ENDIF()
+
 # Include important cmake modules
-INCLUDE(cmake/base.cmake RESULT_VARIABLE SUBMODULE_FOUND)
+INCLUDE(cmake/base.cmake)
 INCLUDE(cmake/test.cmake)
 INCLUDE(cmake/boost.cmake)
 INCLUDE(cmake/python.cmake)
-
-# Check if the cmake (git submodule) have been initialized
-IF(SUBMODULE_FOUND STREQUAL "NOTFOUND")
-  MESSAGE(FATAL_ERROR "\nPlease run the following command first:\ngit submodule update --init\n")
-ENDIF(SUBMODULE_FOUND STREQUAL "NOTFOUND")
 
 # Print initial message
 MESSAGE("${PROJECT_DESCRIPTION}, version ${PROJECT_VERSION}")
