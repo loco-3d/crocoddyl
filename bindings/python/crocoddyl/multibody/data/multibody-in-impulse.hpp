@@ -21,7 +21,7 @@ void exposeDataCollectorMultibodyInImpulse() {
           bp::args("self", "data", "impulses"),
           "Create multibody shared data.\n\n"
           ":param data: Pinocchio data\n"
-          ":param impulses: impulses data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+          ":param impulses: impulses data")[bp::with_custodian_and_ward<1, 2>()])
       .add_property(
           "impulses",
           bp::make_getter(&DataCollectorMultibodyInImpulse::impulses, bp::return_value_policy<bp::return_by_value>()),

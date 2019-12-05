@@ -21,7 +21,7 @@ void exposeDataCollectorMultibodyInContact() {
           bp::args("self", "data", "contacts"),
           "Create multibody shared data.\n\n"
           ":param data: Pinocchio data\n"
-          ":param contacts: contacts data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+          ":param contacts: contacts data")[bp::with_custodian_and_ward<1, 2>()])
       .add_property(
           "contacts",
           bp::make_getter(&DataCollectorMultibodyInContact::contacts, bp::return_value_policy<bp::return_by_value>()),
