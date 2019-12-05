@@ -62,21 +62,21 @@ void ActionModelImpulseFwdDynamics::calc(const boost::shared_ptr<ActionDataAbstr
   if (!with_armature_) {
     d->pinocchio.M.diagonal() += armature_;
   }
-  impulses_->calc(d->impulses, x);
+  impulses_->calc(d->multibody.impulses, x);
 
 #ifndef NDEBUG
-  Eigen::FullPivLU<Eigen::MatrixXd> Jc_lu(d->impulses->Jc);
+  Eigen::FullPivLU<Eigen::MatrixXd> Jc_lu(d->multibody.impulses->Jc);
 
-  if (Jc_lu.rank() < d->impulses->Jc.rows()) {
+  if (Jc_lu.rank() < d->multibody.impulses->Jc.rows()) {
     assert(JMinvJt_damping_ > 0. && "It is needed a damping factor since the contact Jacobian is not full-rank");
   }
 #endif
 
-  pinocchio::impulseDynamics(pinocchio_, d->pinocchio, v, d->impulses->Jc, r_coeff_, JMinvJt_damping_);
+  pinocchio::impulseDynamics(pinocchio_, d->pinocchio, v, d->multibody.impulses->Jc, r_coeff_, JMinvJt_damping_);
   d->xnext.head(nq) = q;
   d->xnext.tail(nv) = d->pinocchio.dq_after;
-  impulses_->updateVelocity(d->impulses, d->pinocchio.dq_after);
-  impulses_->updateForce(d->impulses, d->pinocchio.impulse_c);
+  impulses_->updateVelocity(d->multibody.impulses, d->pinocchio.dq_after);
+  impulses_->updateForce(d->multibody.impulses, d->pinocchio.impulse_c);
 
   // Computing the cost value and residuals
   costs_->calc(d->costs, x, u);
@@ -103,12 +103,12 @@ void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataA
   // Computing the dynamics derivatives
   pinocchio_.gravity.setZero();
   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, d->vnone, d->pinocchio.dq_after - v,
-                                    d->impulses->fext);
+                                    d->multibody.impulses->fext);
   pinocchio_.gravity = gravity_;
-  pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->impulses->Jc, d->Kinv);
+  pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->multibody.impulses->Jc, d->Kinv);
 
   pinocchio::computeForwardKinematicsDerivatives(pinocchio_, d->pinocchio, q, d->pinocchio.dq_after, d->vnone);
-  impulses_->calcDiff(d->impulses, x, false);
+  impulses_->calcDiff(d->multibody.impulses, x, false);
 
   Eigen::Block<Eigen::MatrixXd> a_partial_dtau = d->Kinv.topLeftCorner(nv, nv);
   Eigen::Block<Eigen::MatrixXd> a_partial_da = d->Kinv.topRightCorner(nv, ni);
@@ -118,15 +118,15 @@ void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataA
   d->Fx.topLeftCorner(nv, nv).setIdentity();
   d->Fx.topRightCorner(nv, nv).setZero();
   d->Fx.bottomLeftCorner(nv, nv).noalias() = -a_partial_dtau * d->pinocchio.dtau_dq;
-  d->Fx.bottomLeftCorner(nv, nv).noalias() -= a_partial_da * d->impulses->dv0_dq;
+  d->Fx.bottomLeftCorner(nv, nv).noalias() -= a_partial_da * d->multibody.impulses->dv0_dq;
   d->Fx.bottomRightCorner(nv, nv).noalias() = a_partial_dtau * d->pinocchio.M.selfadjointView<Eigen::Upper>();
 
   // Computing the cost derivatives
   if (enable_force_) {
     d->df_dq.noalias() = f_partial_dtau * d->pinocchio.dtau_dq;
-    d->df_dq.noalias() += f_partial_da * d->impulses->dv0_dq;
-    impulses_->updateVelocityDiff(d->impulses, d->Fx.bottomRows(nv));
-    impulses_->updateForceDiff(d->impulses, d->df_dq);
+    d->df_dq.noalias() += f_partial_da * d->multibody.impulses->dv0_dq;
+    impulses_->updateVelocityDiff(d->multibody.impulses, d->Fx.bottomRows(nv));
+    impulses_->updateForceDiff(d->multibody.impulses, d->df_dq);
   }
   costs_->calcDiff(d->costs, x, u, false);
 }

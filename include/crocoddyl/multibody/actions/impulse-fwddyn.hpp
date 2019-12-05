@@ -63,8 +63,7 @@ struct ActionDataImpulseFwdDynamics : public ActionDataAbstract {
   explicit ActionDataImpulseFwdDynamics(Model* const model)
       : ActionDataAbstract(model),
         pinocchio(pinocchio::Data(model->get_pinocchio())),
-        impulses(model->get_impulses()->createData(&pinocchio)),
-        multibody(&pinocchio, impulses.get()),
+        multibody(&pinocchio, model->get_impulses()->createData(&pinocchio)),
         costs(model->get_costs()->createData(&multibody)),
         vnone(model->get_state()->get_nv()),
         Kinv(model->get_state()->get_nv() + model->get_impulses()->get_ni(),
@@ -77,7 +76,6 @@ struct ActionDataImpulseFwdDynamics : public ActionDataAbstract {
   }
 
   pinocchio::Data pinocchio;
-  boost::shared_ptr<ImpulseDataMultiple> impulses;
   DataCollectorMultibodyInImpulse multibody;
   boost::shared_ptr<CostDataSum> costs;
   Eigen::VectorXd vnone;

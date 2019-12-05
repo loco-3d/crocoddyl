@@ -17,14 +17,15 @@ namespace python {
 void exposeDataCollectorMultibodyInContact() {
   bp::class_<DataCollectorMultibodyInContact, bp::bases<DataCollectorMultibody> >(
       "DataCollectorMultibodyInContact", "Class for common multibody in contact data between cost functions.\n\n",
-      bp::init<pinocchio::Data*, ContactDataMultiple*>(
+      bp::init<pinocchio::Data*, boost::shared_ptr<ContactDataMultiple> >(
           bp::args("self", "data", "contacts"),
           "Create multibody shared data.\n\n"
           ":param data: Pinocchio data\n"
           ":param contacts: contacts data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("contacts",
-                    bp::make_getter(&DataCollectorMultibodyInContact::contacts, bp::return_internal_reference<>()),
-                    "contacts data");
+      .add_property(
+          "contacts",
+          bp::make_getter(&DataCollectorMultibodyInContact::contacts, bp::return_value_policy<bp::return_by_value>()),
+          "contacts data");
 }
 
 }  // namespace python

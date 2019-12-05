@@ -43,7 +43,7 @@ void CostModelContactForce::calc(const boost::shared_ptr<CostDataAbstract>& data
   CostDataContactForce* d = static_cast<CostDataContactForce*>(data.get());
 
   // We transform the force to the contact frame
-  data->r = (d->contact_->jMf.actInv(d->contact_->f) - fref_.oFf).toVector();
+  data->r = (d->contact->jMf.actInv(d->contact->f) - fref_.oFf).toVector();
 
   // Compute the cost
   activation_->calc(data->activation, data->r);
@@ -59,8 +59,8 @@ void CostModelContactForce::calcDiff(const boost::shared_ptr<CostDataAbstract>& 
 
   CostDataContactForce* d = static_cast<CostDataContactForce*>(data.get());
 
-  const Eigen::MatrixXd& df_dx = d->contact_->df_dx;
-  const Eigen::MatrixXd& df_du = d->contact_->df_du;
+  const Eigen::MatrixXd& df_dx = d->contact->df_dx;
+  const Eigen::MatrixXd& df_du = d->contact->df_du;
 
   activation_->calcDiff(data->activation, data->r, recalc);
   data->Rx = df_dx;

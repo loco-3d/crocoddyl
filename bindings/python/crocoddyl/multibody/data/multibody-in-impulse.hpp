@@ -17,14 +17,15 @@ namespace python {
 void exposeDataCollectorMultibodyInImpulse() {
   bp::class_<DataCollectorMultibodyInImpulse, bp::bases<DataCollectorMultibody> >(
       "DataCollectorMultibodyInImpulse", "Class for common multibody in impulse data between cost functions.\n\n",
-      bp::init<pinocchio::Data*, ImpulseDataMultiple*>(
+      bp::init<pinocchio::Data*, boost::shared_ptr<ImpulseDataMultiple> >(
           bp::args("self", "data", "impulses"),
           "Create multibody shared data.\n\n"
           ":param data: Pinocchio data\n"
           ":param impulses: impulses data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("impulses",
-                    bp::make_getter(&DataCollectorMultibodyInImpulse::impulses, bp::return_internal_reference<>()),
-                    "impulses data");
+      .add_property(
+          "impulses",
+          bp::make_getter(&DataCollectorMultibodyInImpulse::impulses, bp::return_value_policy<bp::return_by_value>()),
+          "impulses data");
 }
 
 }  // namespace python

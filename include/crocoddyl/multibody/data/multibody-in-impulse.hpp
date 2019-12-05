@@ -9,17 +9,18 @@
 #ifndef CROCODDYL_CORE_DATA_MULTIBODY_IN_IMPULSE_HPP_
 #define CROCODDYL_CORE_DATA_MULTIBODY_IN_IMPULSE_HPP_
 
+#include <boost/shared_ptr.hpp>
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
 
 namespace crocoddyl {
 
 struct DataCollectorMultibodyInImpulse : DataCollectorMultibody {
-  DataCollectorMultibodyInImpulse(pinocchio::Data* const data, ImpulseDataMultiple* const impulses)
+  DataCollectorMultibodyInImpulse(pinocchio::Data* const data, boost::shared_ptr<ImpulseDataMultiple> impulses)
       : DataCollectorMultibody(data), impulses(impulses) {}
   virtual ~DataCollectorMultibodyInImpulse() {}
 
-  ImpulseDataMultiple* impulses;
+  boost::shared_ptr<ImpulseDataMultiple> impulses;
 };
 
 }  // namespace crocoddyl

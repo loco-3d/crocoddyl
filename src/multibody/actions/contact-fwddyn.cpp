@@ -71,21 +71,21 @@ void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<Dif
     d->pinocchio.M.diagonal() += armature_;
   }
   actuation_->calc(d->actuation, x, u);
-  contacts_->calc(d->contacts, x);
+  contacts_->calc(d->multibody.contacts, x);
 
 #ifndef NDEBUG
-  Eigen::FullPivLU<Eigen::MatrixXd> Jc_lu(d->contacts->Jc);
+  Eigen::FullPivLU<Eigen::MatrixXd> Jc_lu(d->multibody.contacts->Jc);
 
-  if (Jc_lu.rank() < d->contacts->Jc.rows()) {
+  if (Jc_lu.rank() < d->multibody.contacts->Jc.rows()) {
     assert(JMinvJt_damping_ > 0. && "A damping factor is needed as the contact Jacobian is not full-rank");
   }
 #endif
 
-  pinocchio::forwardDynamics(pinocchio_, d->pinocchio, d->actuation->tau, d->contacts->Jc, d->contacts->a0,
-                             JMinvJt_damping_);
+  pinocchio::forwardDynamics(pinocchio_, d->pinocchio, d->actuation->tau, d->multibody.contacts->Jc,
+                             d->multibody.contacts->a0, JMinvJt_damping_);
   d->xout = d->pinocchio.ddq;
-  contacts_->updateAcceleration(d->contacts, d->pinocchio.ddq);
-  contacts_->updateForce(d->contacts, d->pinocchio.lambda_c);
+  contacts_->updateAcceleration(d->multibody.contacts, d->pinocchio.ddq);
+  contacts_->updateForce(d->multibody.contacts, d->pinocchio.lambda_c);
 
   // Computing the cost value and residuals
   costs_->calc(d->costs, x, u);
@@ -114,11 +114,11 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
   }
 
   // Computing the dynamics derivatives
-  pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout, d->contacts->fext);
-  pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->contacts->Jc, d->Kinv);
+  pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout, d->multibody.contacts->fext);
+  pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->multibody.contacts->Jc, d->Kinv);
 
   actuation_->calcDiff(d->actuation, x, u, false);
-  contacts_->calcDiff(d->contacts, x, false);
+  contacts_->calcDiff(d->multibody.contacts, x, false);
 
   Eigen::Block<Eigen::MatrixXd> a_partial_dtau = d->Kinv.topLeftCorner(nv, nv);
   Eigen::Block<Eigen::MatrixXd> a_partial_da = d->Kinv.topRightCorner(nv, nc);
@@ -127,7 +127,7 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
 
   d->Fx.leftCols(nv).noalias() = -a_partial_dtau * d->pinocchio.dtau_dq;
   d->Fx.rightCols(nv).noalias() = -a_partial_dtau * d->pinocchio.dtau_dv;
-  d->Fx.noalias() -= a_partial_da * d->contacts->da0_dx;
+  d->Fx.noalias() -= a_partial_da * d->multibody.contacts->da0_dx;
   d->Fx.noalias() += a_partial_dtau * d->actuation->dtau_dx;
   d->Fu.noalias() = a_partial_dtau * d->actuation->dtau_du;
 
@@ -135,11 +135,11 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
   if (enable_force_) {
     d->df_dx.leftCols(nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dq;
     d->df_dx.rightCols(nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dv;
-    d->df_dx.noalias() += f_partial_da * d->contacts->da0_dx;
+    d->df_dx.noalias() += f_partial_da * d->multibody.contacts->da0_dx;
     d->df_dx.noalias() -= f_partial_dtau * d->actuation->dtau_dx;
     d->df_du.noalias() = -f_partial_dtau * d->actuation->dtau_du;
-    contacts_->updateAccelerationDiff(d->contacts, d->Fx.bottomRows(nv));
-    contacts_->updateForceDiff(d->contacts, d->df_dx, d->df_du);
+    contacts_->updateAccelerationDiff(d->multibody.contacts, d->Fx.bottomRows(nv));
+    contacts_->updateForceDiff(d->multibody.contacts, d->df_dx, d->df_du);
   }
   costs_->calcDiff(d->costs, x, u, false);
 }
