@@ -24,8 +24,8 @@ struct DataCollectorImpulse : virtual DataCollectorAbstract {
 };
 
 struct DataCollectorMultibodyInImpulse : DataCollectorMultibody, DataCollectorImpulse {
-  DataCollectorMultibodyInImpulse(pinocchio::Data* const data, boost::shared_ptr<ImpulseDataMultiple> impulses)
-      : DataCollectorMultibody(data), DataCollectorImpulse(impulses) {}
+  DataCollectorMultibodyInImpulse(pinocchio::Data* const pinocchio, boost::shared_ptr<ImpulseDataMultiple> impulses)
+      : DataCollectorMultibody(pinocchio), DataCollectorImpulse(impulses) {}
   virtual ~DataCollectorMultibodyInImpulse() {}
 };
 

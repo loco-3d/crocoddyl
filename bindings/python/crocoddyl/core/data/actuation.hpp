@@ -16,13 +16,14 @@ namespace python {
 
 void exposeDataCollectorActuation() {
   bp::class_<DataCollectorActuation, bp::bases<DataCollectorAbstract> >(
-      "DataCollectorActuation", "Class for common actuation data between cost functions.\n\n",
+      "DataCollectorActuation", "Actuation data collector.\n\n",
       bp::init<boost::shared_ptr<ActuationDataAbstract> >(bp::args("self", "actuation"),
-                                                        "Create actuation shared data.\n\n"
-                                                        ":param actuation: actuation data"))
-      .add_property("actuation",
-                    bp::make_getter(&DataCollectorActuation::actuation, bp::return_value_policy<bp::return_by_value>()),
-                    "actuation data");
+                                                          "Create actuation data collection.\n\n"
+                                                          ":param actuation: actuation data"))
+      .add_property(
+          "actuation",
+          bp::make_getter(&DataCollectorActuation::actuation, bp::return_value_policy<bp::return_by_value>()),
+          "actuation data");
 }
 
 }  // namespace python

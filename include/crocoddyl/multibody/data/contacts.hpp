@@ -24,9 +24,17 @@ struct DataCollectorContact : virtual DataCollectorAbstract {
 };
 
 struct DataCollectorMultibodyInContact : DataCollectorMultibody, DataCollectorContact {
-  DataCollectorMultibodyInContact(pinocchio::Data* const data, boost::shared_ptr<ContactDataMultiple> contacts)
-      : DataCollectorMultibody(data), DataCollectorContact(contacts) {}
+  DataCollectorMultibodyInContact(pinocchio::Data* const pinocchio, boost::shared_ptr<ContactDataMultiple> contacts)
+      : DataCollectorMultibody(pinocchio), DataCollectorContact(contacts) {}
   virtual ~DataCollectorMultibodyInContact() {}
+};
+
+struct DataCollectorActMultibodyInContact : DataCollectorMultibodyInContact, DataCollectorActuation {
+  DataCollectorActMultibodyInContact(pinocchio::Data* const pinocchio,
+                                     boost::shared_ptr<ActuationDataAbstract> actuation,
+                                     boost::shared_ptr<ContactDataMultiple> contacts)
+      : DataCollectorMultibodyInContact(pinocchio, contacts), DataCollectorActuation(actuation) {}
+  virtual ~DataCollectorActMultibodyInContact() {}
 };
 
 }  // namespace crocoddyl

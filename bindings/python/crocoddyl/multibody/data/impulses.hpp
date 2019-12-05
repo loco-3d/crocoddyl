@@ -16,20 +16,20 @@ namespace python {
 
 void exposeDataCollectorImpulses() {
   bp::class_<DataCollectorImpulse, bp::bases<DataCollectorAbstract> >(
-      "DataCollectorImpulse", "Class for common impulse data between cost functions.\n\n",
+      "DataCollectorImpulse", "Impulse data collector.\n\n",
       bp::init<boost::shared_ptr<ImpulseDataMultiple> >(bp::args("self", "impulses"),
-                                                        "Create multibody shared data.\n\n"
+                                                        "Create impulse data collection.\n\n"
                                                         ":param impulses: impulses data"))
       .add_property("impulses",
                     bp::make_getter(&DataCollectorImpulse::impulses, bp::return_value_policy<bp::return_by_value>()),
                     "impulses data");
 
   bp::class_<DataCollectorMultibodyInImpulse, bp::bases<DataCollectorMultibody, DataCollectorImpulse> >(
-      "DataCollectorMultibodyInImpulse", "Class for common multibody in impulse data between cost functions.\n\n",
+      "DataCollectorMultibodyInImpulse", "Data collector for multibody systems in impulse.\n\n",
       bp::init<pinocchio::Data*, boost::shared_ptr<ImpulseDataMultiple> >(
-          bp::args("self", "data", "impulses"),
-          "Create multibody shared data.\n\n"
-          ":param data: Pinocchio data\n"
+          bp::args("self", "pinocchio", "impulses"),
+          "Create multibody data collection.\n\n"
+          ":param pinocchio: Pinocchio data\n"
           ":param impulses: impulses data")[bp::with_custodian_and_ward<1, 2>()]);
 }
 

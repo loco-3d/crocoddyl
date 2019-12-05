@@ -11,6 +11,7 @@
 
 #include <pinocchio/multibody/data.hpp>
 #include "crocoddyl/core/data-collector-base.hpp"
+#include "crocoddyl/core/data/actuation.hpp"
 
 namespace crocoddyl {
 
@@ -19,6 +20,12 @@ struct DataCollectorMultibody : virtual DataCollectorAbstract {
   virtual ~DataCollectorMultibody() {}
 
   pinocchio::Data* pinocchio;
+};
+
+struct DataCollectorActMultibody : DataCollectorMultibody, DataCollectorActuation {
+  DataCollectorActMultibody(pinocchio::Data* const pinocchio, boost::shared_ptr<ActuationDataAbstract> actuation)
+      : DataCollectorMultibody(pinocchio), DataCollectorActuation(actuation) {}
+  virtual ~DataCollectorActMultibody() {}
 };
 
 }  // namespace crocoddyl
