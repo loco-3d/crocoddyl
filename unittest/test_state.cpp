@@ -277,7 +277,7 @@ void test_velocity_from_Jintegrate_Jdiff(StateTypes::Type state_type) {
 
 //----------------------------------------------------------------------------//
 
-void register_state_unit_tests(StateTypes::Type state_type, test_suite & ts) {
+void register_state_unit_tests(StateTypes::Type state_type, test_suite& ts) {
   ts.add(BOOST_TEST_CASE(boost::bind(&test_state_dimension, state_type)));
   ts.add(BOOST_TEST_CASE(boost::bind(&test_integrate_against_difference, state_type)));
   ts.add(BOOST_TEST_CASE(boost::bind(&test_difference_against_integrate, state_type)));
@@ -287,16 +287,15 @@ void register_state_unit_tests(StateTypes::Type state_type, test_suite & ts) {
   ts.add(BOOST_TEST_CASE(boost::bind(&test_Jint_num_diff_firstsecond, state_type)));
   ts.add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_against_numdiff, state_type)));
   ts.add(BOOST_TEST_CASE(boost::bind(&test_Jintegrate_against_numdiff, state_type)));
-  ts.add(
-      BOOST_TEST_CASE(boost::bind(&test_Jdiff_and_Jintegrate_are_inverses, state_type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_and_Jintegrate_are_inverses, state_type)));
   ts.add(BOOST_TEST_CASE(boost::bind(&test_velocity_from_Jintegrate_Jdiff, state_type)));
 }
 
 bool init_function() {
   for (size_t i = 0; i < StateTypes::all.size(); ++i) {
     const std::string test_name = "test_" + std::to_string(i);
-    test_suite * ts = BOOST_TEST_SUITE(test_name);
-    register_state_unit_tests(StateTypes::all[i],*ts);
+    test_suite* ts = BOOST_TEST_SUITE(test_name);
+    register_state_unit_tests(StateTypes::all[i], *ts);
     framework::master_test_suite().add(ts);
   }
   return true;

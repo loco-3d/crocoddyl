@@ -154,19 +154,18 @@ void test_partial_derivatives_against_numdiff(TestTypes::Type test_type) {
 
 //----------------------------------------------------------------------------//
 
-void register_action_model_unit_tests(TestTypes::Type test_type, test_suite & ts) {
+void register_action_model_unit_tests(TestTypes::Type test_type, test_suite& ts) {
   ts.add(BOOST_TEST_CASE(boost::bind(&test_construct_data, test_type)));
   ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_state, test_type)));
   ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, test_type)));
-  ts.add(
-      BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, test_type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, test_type)));
 }
 
 bool init_function() {
   for (size_t i = 0; i < TestTypes::all.size(); ++i) {
     const std::string test_name = "test_" + std::to_string(i);
-    test_suite * ts = BOOST_TEST_SUITE(test_name);
-    register_action_model_unit_tests(TestTypes::all[i],*ts);
+    test_suite* ts = BOOST_TEST_SUITE(test_name);
+    register_action_model_unit_tests(TestTypes::all[i], *ts);
     framework::master_test_suite().add(ts);
   }
   return true;

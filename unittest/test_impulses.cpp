@@ -167,7 +167,7 @@ void test_update_force_diff(ImpulseModelTypes::Type test_type) {
 
 //----------------------------------------------------------------------------//
 
-void register_unit_tests(ImpulseModelTypes::Type test_type, test_suite & ts) {
+void register_unit_tests(ImpulseModelTypes::Type test_type, test_suite& ts) {
   ts.add(BOOST_TEST_CASE(boost::bind(&test_construct_data, test_type)));
   ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_no_computation, test_type)));
   ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_fetch_jacobians, test_type)));
@@ -180,8 +180,8 @@ void register_unit_tests(ImpulseModelTypes::Type test_type, test_suite & ts) {
 bool init_function() {
   for (size_t i = 0; i < ImpulseModelTypes::all.size(); ++i) {
     const std::string test_name = "test_" + std::to_string(i);
-    test_suite * ts = BOOST_TEST_SUITE(test_name);
-    register_unit_tests(ImpulseModelTypes::all[i],*ts);
+    test_suite* ts = BOOST_TEST_SUITE(test_name);
+    register_unit_tests(ImpulseModelTypes::all[i], *ts);
     framework::master_test_suite().add(ts);
   }
   return true;
