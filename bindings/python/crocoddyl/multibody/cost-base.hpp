@@ -9,6 +9,7 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COST_BASE_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COST_BASE_HPP_
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 
 namespace crocoddyl {
@@ -34,15 +35,15 @@ class CostModelAbstract_wrap : public CostModelAbstract, public bp::wrapper<Cost
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
-    assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
-    assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
+    assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx() , "x has wrong dimension");
+    assert_pretty((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) , "u has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
   void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
-    assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
-    assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
+    assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx() , "x has wrong dimension");
+    assert_pretty((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) , "u has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
 };

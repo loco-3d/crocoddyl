@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
 #include "crocoddyl/multibody/costs/frame-velocity.hpp"
@@ -17,7 +18,7 @@ CostModelFrameVelocity::CostModelFrameVelocity(boost::shared_ptr<StateMultibody>
                                                const FrameMotion& vref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), vref_(vref) {
   if (activation_->get_nr() != 6) {
-    throw std::invalid_argument("nr is equals to 6");
+    throw_pretty("Invalid argument: " << "nr is equals to 6");
   }
 }
 
@@ -26,7 +27,7 @@ CostModelFrameVelocity::CostModelFrameVelocity(boost::shared_ptr<StateMultibody>
                                                const FrameMotion& vref)
     : CostModelAbstract(state, activation), vref_(vref) {
   if (activation_->get_nr() != 6) {
-    throw std::invalid_argument("nr is equals to 6");
+    throw_pretty("Invalid argument: " << "nr is equals to 6");
   }
 }
 

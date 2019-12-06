@@ -7,6 +7,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/numdiff/activation.hpp"
 
 namespace crocoddyl {
@@ -21,7 +22,7 @@ ActivationModelNumDiff::~ActivationModelNumDiff() {}
 void ActivationModelNumDiff::calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                                   const Eigen::Ref<const Eigen::VectorXd>& r) {
   if (static_cast<std::size_t>(r.size()) != model_->get_nr()) {
-    throw std::invalid_argument("r has wrong dimension (it should be " + std::to_string(model_->get_nr()) + ")");
+    throw_pretty("Invalid argument: " << "r has wrong dimension (it should be " + std::to_string(model_->get_nr()) + ")");
   }
   boost::shared_ptr<ActivationDataNumDiff> data_nd = boost::static_pointer_cast<ActivationDataNumDiff>(data);
   model_->calc(data_nd->data_0, r);
@@ -31,7 +32,7 @@ void ActivationModelNumDiff::calc(const boost::shared_ptr<ActivationDataAbstract
 void ActivationModelNumDiff::calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
                                       const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc) {
   if (static_cast<std::size_t>(r.size()) != model_->get_nr()) {
-    throw std::invalid_argument("r has wrong dimension (it should be " + std::to_string(model_->get_nr()) + ")");
+    throw_pretty("Invalid argument: " << "r has wrong dimension (it should be " + std::to_string(model_->get_nr()) + ")");
   }
   boost::shared_ptr<ActivationDataNumDiff> data_nd = boost::static_pointer_cast<ActivationDataNumDiff>(data);
 
@@ -65,7 +66,7 @@ const double& ActivationModelNumDiff::get_disturbance() const { return disturban
 
 void ActivationModelNumDiff::set_disturbance(const double& disturbance) {
   if (disturbance < 0.) {
-    throw std::invalid_argument("Disturbance value is positive");
+    throw_pretty("Invalid argument: " << "Disturbance value is positive");
   }
   disturbance_ = disturbance;
 }

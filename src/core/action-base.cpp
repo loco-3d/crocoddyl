@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/action-base.hpp"
 
 namespace crocoddyl {
@@ -36,10 +37,10 @@ void ActionModelAbstract::quasiStatic(const boost::shared_ptr<ActionDataAbstract
                                       const Eigen::Ref<const Eigen::VectorXd>& x, const std::size_t& maxiter,
                                       const double& tol) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw_pretty("Invalid argument: " << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw_pretty("Invalid argument: " << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
 
   const std::size_t& ndx = state_->get_ndx();
@@ -76,7 +77,7 @@ const Eigen::VectorXd& ActionModelAbstract::get_u_ub() const { return u_ub_; }
 
 void ActionModelAbstract::set_u_lb(const Eigen::VectorXd& u_lb) {
   if (static_cast<std::size_t>(u_lb.size()) != nu_) {
-    throw std::invalid_argument("lower bound has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw_pretty("Invalid argument: " << "lower bound has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   u_lb_ = u_lb;
   update_has_control_limits();
@@ -84,7 +85,7 @@ void ActionModelAbstract::set_u_lb(const Eigen::VectorXd& u_lb) {
 
 void ActionModelAbstract::set_u_ub(const Eigen::VectorXd& u_ub) {
   if (static_cast<std::size_t>(u_ub.size()) != nu_) {
-    throw std::invalid_argument("upper bound has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw_pretty("Invalid argument: " << "upper bound has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   u_ub_ = u_ub;
   update_has_control_limits();

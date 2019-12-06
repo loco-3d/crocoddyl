@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/impulses/impulse-3d.hpp"
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
@@ -39,7 +40,7 @@ void ImpulseModel3D::calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data
 
 void ImpulseModel3D::updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force) {
   if (force.size() != 3) {
-    throw std::invalid_argument("lambda has wrong dimension (it should be 3)");
+    throw_pretty("Invalid argument: " << "lambda has wrong dimension (it should be 3)");
   }
   boost::shared_ptr<ImpulseData3D> d = boost::static_pointer_cast<ImpulseData3D>(data);
   data->f = d->jMf.act(pinocchio::Force(force, Eigen::Vector3d::Zero()));

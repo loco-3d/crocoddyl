@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include <iostream>
 #include "crocoddyl/core/solvers/box-ddp.hpp"
 
@@ -71,7 +72,7 @@ void SolverBoxDDP::computeGains(const std::size_t& t) {
 
 void SolverBoxDDP::forwardPass(const double& steplength) {
   if (steplength > 1. || steplength < 0.) {
-    throw std::invalid_argument("invalid step length, value is between 0. to 1.");
+    throw_pretty("Invalid argument: " << "invalid step length, value is between 0. to 1.");
   }
   cost_try_ = 0.;
   xnext_ = problem_->get_x0();
@@ -97,10 +98,10 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
     cost_try_ += d->cost;
 
     if (raiseIfNaN(cost_try_)) {
-      throw std::runtime_error("forward_error");
+      throw_pretty("forward_error");
     }
     if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
-      throw std::runtime_error("forward_error");
+      throw_pretty("forward_error");
     }
   }
 
@@ -116,7 +117,7 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
   cost_try_ += d->cost;
 
   if (raiseIfNaN(cost_try_)) {
-    throw std::runtime_error("forward_error");
+    throw_pretty("forward_error");
   }
 }
 
