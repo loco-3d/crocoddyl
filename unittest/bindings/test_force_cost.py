@@ -3,6 +3,8 @@ import pinocchio
 import example_robot_data
 import numpy as np
 
+from test_utils import NUMDIFF_MODIFIER, assertNumDiff
+
 crocoddyl.switchToNumpyMatrix()
 
 # Create robot model and data
@@ -38,7 +40,9 @@ x = ROBOT_STATE.rand()
 u = pinocchio.utils.rand(ACTUATION.nu)
 MODEL.calcDiff(DATA, x, u)
 MODEL_ND.calcDiff(dnum, x, u)
-assert (np.allclose(DATA.Fx, dnum.Fx, atol=3e5 * MODEL_ND.disturbance))
-assert (np.allclose(DATA.Fu, dnum.Fu, atol=3e5 * MODEL_ND.disturbance))
-assert (np.allclose(DATA.Lx, dnum.Lx, atol=3e5 * MODEL_ND.disturbance))
-assert (np.allclose(DATA.Lu, dnum.Lu, atol=3e5 * MODEL_ND.disturbance))
+assertNumDiff(DATA.Fx, dnum.Fx, NUMDIFF_MODIFIER *
+              MODEL_ND.disturbance)  # threshold was 2.7e-2, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(DATA.Fu, dnum.Fu, NUMDIFF_MODIFIER * MODEL_ND.disturbance)  # threshold was 7e-3, is now 2.11e-4 (se
+assertNumDiff(DATA.Lx, dnum.Lx, NUMDIFF_MODIFIER *
+              MODEL_ND.disturbance)  # threshold was 2.7e-2, is now 2.11e-4 (see assertNumDiff.__doc__)
+assertNumDiff(DATA.Lu, dnum.Lu, NUMDIFF_MODIFIER * MODEL_ND.disturbance)  # threshold was 7e-3, is now 2.11e-4 (se
