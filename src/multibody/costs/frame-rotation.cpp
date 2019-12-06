@@ -79,7 +79,7 @@ void CostModelFrameRotation::calcDiff(const boost::shared_ptr<CostDataAbstract>&
   data->Lxx.topLeftCorner(nv, nv).noalias() = d->J.transpose() * d->Arr_J;
 }
 
-boost::shared_ptr<CostDataAbstract> CostModelFrameRotation::createData(pinocchio::Data* const data) {
+boost::shared_ptr<CostDataAbstract> CostModelFrameRotation::createData(DataCollectorAbstract* const data) {
   return boost::make_shared<CostDataFrameRotation>(this, data);
 }
 

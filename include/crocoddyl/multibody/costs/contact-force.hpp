@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,6 +11,7 @@
 
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
+#include "crocoddyl/multibody/data/contacts.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 
 namespace crocoddyl {
@@ -29,7 +30,7 @@ class CostModelContactForce : public CostModelAbstract {
             const Eigen::Ref<const Eigen::VectorXd>& u);
   void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
-  boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
+  boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
   const FrameForce& get_fref() const;
   void set_fref(const FrameForce& fref);
@@ -42,11 +43,33 @@ struct CostDataContactForce : public CostDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  CostDataContactForce(Model* const model, pinocchio::Data* const data)
+  CostDataContactForce(Model* const model, DataCollectorAbstract* const data)
       : CostDataAbstract(model, data), Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
     Arr_Ru.fill(0);
+
+    // Check that proper shared data has been passed
+    DataCollectorContact* d = dynamic_cast<DataCollectorContact*>(shared);
+    if (d == NULL) {
+      throw std::invalid_argument("the shared data should be derived from DataCollectorContact");
+    }
+
+    // Avoids data casting at runtime
+    std::string frame_name = model->get_state()->get_pinocchio().frames[model->get_fref().frame].name;
+    bool found_contact = false;
+    for (ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
+         it != d->contacts->contacts.end(); ++it) {
+      if (it->second->frame == model->get_fref().frame) {
+        found_contact = true;
+        contact = it->second;
+        break;
+      }
+    }
+    if (!found_contact) {
+      throw std::domain_error("there isn't defined contact data for " + frame_name);
+    }
   }
-  boost::shared_ptr<ContactDataAbstract> contact_;
+
+  boost::shared_ptr<ContactDataAbstract> contact;
   Eigen::MatrixXd Arr_Ru;
 };
 

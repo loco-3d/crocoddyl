@@ -24,8 +24,9 @@ class CostModelAbstractTestCase(unittest.TestCase):
         self.x = self.ROBOT_STATE.rand()
         self.u = pinocchio.utils.rand(self.ROBOT_MODEL.nv)
 
-        self.data = self.COST.createData(self.robot_data)
-        self.data_der = self.COST_DER.createData(self.robot_data)
+        self.multibody_data = crocoddyl.DataCollectorMultibody(self.robot_data)
+        self.data = self.COST.createData(self.multibody_data)
+        self.data_der = self.COST_DER.createData(self.multibody_data)
 
         nq, nv = self.ROBOT_MODEL.nq, self.ROBOT_MODEL.nv
         pinocchio.forwardKinematics(self.ROBOT_MODEL, self.robot_data, self.x[:nq], self.x[nq:])
@@ -79,8 +80,9 @@ class CostModelSumTestCase(unittest.TestCase):
         self.cost_sum = crocoddyl.CostModelSum(self.ROBOT_STATE)
         self.cost_sum.addCost('myCost', self.COST, 1.)
 
-        self.data = self.COST.createData(self.robot_data)
-        self.data_sum = self.cost_sum.createData(self.robot_data)
+        self.multibody_data = crocoddyl.DataCollectorMultibody(self.robot_data)
+        self.data = self.COST.createData(self.multibody_data)
+        self.data_sum = self.cost_sum.createData(self.multibody_data)
 
         nq, nv = self.ROBOT_MODEL.nq, self.ROBOT_MODEL.nv
         pinocchio.forwardKinematics(self.ROBOT_MODEL, self.robot_data, self.x[:nq], self.x[nq:])

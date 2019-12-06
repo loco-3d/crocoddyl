@@ -77,7 +77,7 @@ void exposeCostCentroidalMomentum() {
            "Create the centroidal momentum cost data.\n\n"
            "Each cost model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined cost.\n"
-           ":param data: Pinocchio data\n"
+           ":param data: shared data\n"
            ":return cost data.")
       .add_property(
           "href",
@@ -86,11 +86,11 @@ void exposeCostCentroidalMomentum() {
 
   bp::class_<CostDataCentroidalMomentum, bp::bases<CostDataAbstract> >(
       "CostDataCentroidalMomentum", "Data for centroidal momentum cost.\n\n",
-      bp::init<CostModelCentroidalMomentum*, pinocchio::Data*>(
+      bp::init<CostModelCentroidalMomentum*, DataCollectorAbstract*>(
           bp::args(" self", " model", " data"),
           "Create centroidal momentum cost data.\n\n"
           ":param model: centroidal momentum cost model\n"
-          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property(
           "dhd_dq",
           bp::make_getter(&CostDataCentroidalMomentum::dhd_dq, bp::return_value_policy<bp::return_by_value>()),

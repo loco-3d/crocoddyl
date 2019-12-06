@@ -43,7 +43,8 @@ CostModelCoMPosition::~CostModelCoMPosition() {}
 void CostModelCoMPosition::calc(const boost::shared_ptr<CostDataAbstract>& data,
                                 const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>&) {
   // Compute the cost residual give the reference CoMPosition position
-  data->r = data->pinocchio->com[0] - cref_;
+  CostDataCoMPosition* d = static_cast<CostDataCoMPosition*>(data.get());
+  data->r = d->pinocchio->com[0] - cref_;
 
   // Compute the cost
   activation_->calc(data->activation, data->r);
@@ -62,13 +63,13 @@ void CostModelCoMPosition::calcDiff(const boost::shared_ptr<CostDataAbstract>& d
   // Compute the derivatives of the frame placement
   const std::size_t& nv = state_->get_nv();
   activation_->calcDiff(data->activation, data->r, recalc);
-  data->Rx.leftCols(nv) = data->pinocchio->Jcom;
-  data->Lx.head(nv).noalias() = data->pinocchio->Jcom.transpose() * data->activation->Ar;
-  d->Arr_Jcom.noalias() = data->activation->Arr * data->pinocchio->Jcom;
-  data->Lxx.topLeftCorner(nv, nv).noalias() = data->pinocchio->Jcom.transpose() * d->Arr_Jcom;
+  data->Rx.leftCols(nv) = d->pinocchio->Jcom;
+  data->Lx.head(nv).noalias() = d->pinocchio->Jcom.transpose() * data->activation->Ar;
+  d->Arr_Jcom.noalias() = data->activation->Arr * d->pinocchio->Jcom;
+  data->Lxx.topLeftCorner(nv, nv).noalias() = d->pinocchio->Jcom.transpose() * d->Arr_Jcom;
 }
 
-boost::shared_ptr<CostDataAbstract> CostModelCoMPosition::createData(pinocchio::Data* const data) {
+boost::shared_ptr<CostDataAbstract> CostModelCoMPosition::createData(DataCollectorAbstract* const data) {
   return boost::make_shared<CostDataCoMPosition>(this, data);
 }
 

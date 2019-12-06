@@ -146,7 +146,7 @@ void CostModelState::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
   data->Lxx.noalias() = data->Rx.transpose() * d->Arr_Rx;
 }
 
-boost::shared_ptr<CostDataAbstract> CostModelState::createData(pinocchio::Data* const data) {
+boost::shared_ptr<CostDataAbstract> CostModelState::createData(DataCollectorAbstract* const data) {
   return boost::make_shared<CostDataState>(this, data);
 }
 

@@ -123,7 +123,7 @@ void CostModelSum::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Ei
   }
 }
 
-boost::shared_ptr<CostDataSum> CostModelSum::createData(pinocchio::Data* const data) {
+boost::shared_ptr<CostDataSum> CostModelSum::createData(DataCollectorAbstract* const data) {
   return boost::make_shared<CostDataSum>(this, data);
 }
 

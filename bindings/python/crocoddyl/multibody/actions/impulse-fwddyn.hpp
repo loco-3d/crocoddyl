@@ -110,10 +110,9 @@ void exposeActionImpulseFwdDynamics() {
       .add_property("pinocchio",
                     bp::make_getter(&ActionDataImpulseFwdDynamics::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
-      .add_property(
-          "impulses",
-          bp::make_getter(&ActionDataImpulseFwdDynamics::impulses, bp::return_value_policy<bp::return_by_value>()),
-          "impulses data")
+      .add_property("multibody",
+                    bp::make_getter(&ActionDataImpulseFwdDynamics::multibody, bp::return_internal_reference<>()),
+                    "multibody data")
       .add_property(
           "costs",
           bp::make_getter(&ActionDataImpulseFwdDynamics::costs, bp::return_value_policy<bp::return_by_value>()),
