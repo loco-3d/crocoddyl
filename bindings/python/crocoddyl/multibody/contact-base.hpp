@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -52,37 +52,35 @@ void exposeContactAbstract() {
       "The calc and calcDiff functions compute the contact Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, int, bp::optional<int> >(
-          bp::args(" self", " state", " nc", " nu=state.nv"),
+          bp::args("self", "state", "nc", "nu"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param nc: dimension of contact model\n"
           ":param nu: dimension of the control vector"))
-      .def("calc", pure_virtual(&ContactModelAbstract_wrap::calc), bp::args(" self", " data", " x"),
+      .def("calc", pure_virtual(&ContactModelAbstract_wrap::calc), bp::args("self", "data", "x"),
            "Compute the contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
            ":param data: contact data\n"
            ":param x: state vector")
-      .def("calcDiff", pure_virtual(&ContactModelAbstract_wrap::calcDiff),
-           bp::args(" self", " data", " x", " recalc=True"),
+      .def("calcDiff", pure_virtual(&ContactModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "recalc"),
            "Compute the derivatives of contact holonomic constraint.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
            ":param data: contact data\n"
            ":param x: state vector\n"
            ":param recalc: If true, it updates the contact Jacobian and drift.")
-      .def("updateForce", pure_virtual(&ContactModelAbstract_wrap::updateForce), bp::args(" self", " data", " force"),
+      .def("updateForce", pure_virtual(&ContactModelAbstract_wrap::updateForce), bp::args("self", "data", "force"),
            "Convert the force into a stack of spatial forces.\n\n"
            ":param data: contact data\n"
            ":param force: force vector (dimension nc)")
-      .def("updateForceDiff", &ContactModelAbstract_wrap::updateForceDiff,
-           bp::args(" self", " data", " df_dx", " df_du"),
+      .def("updateForceDiff", &ContactModelAbstract_wrap::updateForceDiff, bp::args("self", "data", "df_dx", "df_du"),
            "Update the Jacobians of the force.\n\n"
            ":param data: contact data\n"
            ":param df_dx: Jacobian of the force with respect to the state\n"
            ":param df_du: Jacobian of the force with respect to the control")
       .def("createData", &ContactModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
-           bp::args(" self", " data"),
+           bp::args("self", "data"),
            "Create the contact data.\n\n"
            "Each contact model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined contact.\n"
@@ -104,7 +102,7 @@ void exposeContactAbstract() {
   bp::class_<ContactDataAbstract, boost::noncopyable>(
       "ContactDataAbstract", "Abstract class for contact datas.\n\n",
       bp::init<ContactModelAbstract*, pinocchio::Data*>(
-          bp::args(" self", " model", " data"),
+          bp::args("self", "model", "data"),
           "Create common data shared between contact models.\n\n"
           ":param model: contact model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])

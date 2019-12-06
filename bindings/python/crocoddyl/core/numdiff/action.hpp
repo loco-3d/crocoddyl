@@ -20,11 +20,11 @@ void exposeActionNumDiff() {
   bp::class_<ActionModelNumDiff, bp::bases<ActionModelAbstract> >(
       "ActionModelNumDiff", "Abstract class for computing calcDiff by using numerical differentiation.\n\n",
       bp::init<boost::shared_ptr<ActionModelAbstract> >(
-          bp::args(" self", " model"),
+          bp::args("self", "model"),
           "Initialize the action model NumDiff.\n\n"
           ":param model: action model where we compute the derivatives through NumDiff"))
       .def("calc", &ActionModelNumDiff::calc_wrap,
-           ActionModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
+           ActionModel_calc_wraps(bp::args("self", "data", "x", "u"),
                                   "Compute the next state and cost value.\n\n"
                                   "The system evolution is described in model.\n"
                                   ":param data: NumDiff action data\n"
@@ -32,22 +32,22 @@ void exposeActionNumDiff() {
                                   ":param u: time-discrete control input"))
       .def<void (ActionModelNumDiff::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
                                         const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &ActionModelNumDiff::calcDiff_wrap, bp::args(" self", " data", " x", " u=None", " recalc=True"),
+          "calcDiff", &ActionModelNumDiff::calcDiff_wrap, bp::args("self", "data", "x", "u", "recalc"),
           "Compute the derivatives of the dynamics and cost functions.\n\n"
           "It computes the Jacobian and Hessian using numerical differentiation.\n"
           ":param data: NumDiff action data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n"
-          ":param recalc: If true, it updates the state evolution and the cost value.")
+          ":param recalc: If true, it updates the state evolution and the cost value (default True).")
       .def<void (ActionModelNumDiff::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
                                         const Eigen::VectorXd&)>("calcDiff", &ActionModelNumDiff::calcDiff_wrap,
-                                                                 bp::args(" self", " data", " x", " u"))
+                                                                 bp::args("self", "data", "x", "u"))
       .def<void (ActionModelNumDiff::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&)>(
-          "calcDiff", &ActionModelNumDiff::calcDiff_wrap, bp::args(" self", " data", " x"))
+          "calcDiff", &ActionModelNumDiff::calcDiff_wrap, bp::args("self", "data", "x"))
       .def<void (ActionModelNumDiff::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
                                         const bool&)>("calcDiff", &ActionModelNumDiff::calcDiff_wrap,
-                                                      bp::args(" self", " data", " x", " recalc"))
-      .def("createData", &ActionModelNumDiff::createData, bp::args(" self"),
+                                                      bp::args("self", "data", "x", "recalc"))
+      .def("createData", &ActionModelNumDiff::createData, bp::args("self"),
            "Create the action data.\n\n"
            "Each action model (AM) has its own data that needs to be allocated.\n"
            "This function returns the allocated data for a predefined AM.\n"
@@ -68,7 +68,7 @@ void exposeActionNumDiff() {
 
   bp::class_<ActionDataNumDiff, bp::bases<ActionDataAbstract> >(
       "ActionDataNumDiff", "Numerical differentiation action data.",
-      bp::init<ActionModelNumDiff*>(bp::args(" self", " model"),
+      bp::init<ActionModelNumDiff*>(bp::args("self", "model"),
                                     "Create numerical differentiation action data.\n\n"
                                     ":param model: numdiff action model"))
       .add_property("Rx", bp::make_getter(&ActionDataNumDiff::Rx, bp::return_value_policy<bp::return_by_value>()),

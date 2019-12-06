@@ -20,21 +20,21 @@ void exposeCostFrameTranslation() {
   bp::class_<CostModelFrameTranslation, bp::bases<CostModelAbstract> >(
       "CostModelFrameTranslation",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameTranslation, int>(
-          bp::args(" self", " state", " activation", " xref", " nu"),
+          bp::args("self", "state", "activation", "xref", "nu"),
           "Initialize the frame translation cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param xref: reference frame translation\n"
           ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameTranslation>(
-          bp::args(" self", " state", " activation", " xref"),
+          bp::args("self", "state", "activation", "xref"),
           "Initialize the frame translation cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param xref: reference frame translation"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameTranslation, int>(
-          bp::args(" self", " state", " xref", " nu"),
+          bp::args("self", "state", "xref", "nu"),
           "Initialize the frame translation cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(3).\n"
@@ -42,37 +42,36 @@ void exposeCostFrameTranslation() {
           ":param xref: reference frame translation\n"
           ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameTranslation>(
-          bp::args(" self", " state", " xref"),
+          bp::args("self", "state", "xref"),
           "Initialize the frame translation cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(3), and nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
           ":param xref: reference frame translation"))
       .def("calc", &CostModelFrameTranslation::calc_wrap,
-           CostModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
+           CostModel_calc_wraps(bp::args("self", "data", "x", "u"),
                                 "Compute the frame translation cost.\n\n"
                                 ":param data: cost data\n"
                                 ":param x: time-discrete state vector\n"
                                 ":param u: time-discrete control input"))
       .def<void (CostModelFrameTranslation::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                                const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &CostModelFrameTranslation::calcDiff_wrap,
-          bp::args(" self", " data", " x", " u=None", " recalc=True"),
+          "calcDiff", &CostModelFrameTranslation::calcDiff_wrap, bp::args("self", "data", "x", "u", "recalc"),
           "Compute the derivatives of the frame translation cost.\n\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n"
-          ":param recalc: If true, it updates the state evolution and the cost value.")
+          ":param recalc: If true, it updates the state evolution and the cost value (default True).")
       .def<void (CostModelFrameTranslation::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                                const Eigen::VectorXd&)>(
-          "calcDiff", &CostModelFrameTranslation::calcDiff_wrap, bp::args(" self", " data", " x", " u"))
+          "calcDiff", &CostModelFrameTranslation::calcDiff_wrap, bp::args("self", "data", "x", "u"))
       .def<void (CostModelFrameTranslation::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
-          "calcDiff", &CostModelFrameTranslation::calcDiff_wrap, bp::args(" self", " data", " x"))
+          "calcDiff", &CostModelFrameTranslation::calcDiff_wrap, bp::args("self", "data", "x"))
       .def<void (CostModelFrameTranslation::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                                const bool&)>("calcDiff", &CostModelFrameTranslation::calcDiff_wrap,
-                                                             bp::args(" self", " data", " x", " recalc"))
+                                                             bp::args("self", "data", "x", "recalc"))
       .def("createData", &CostModelFrameTranslation::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
-           bp::args(" self", " data"),
+           bp::args("self", "data"),
            "Create the frame translation cost data.\n\n"
            "Each cost model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined cost.\n"
@@ -86,7 +85,7 @@ void exposeCostFrameTranslation() {
   bp::class_<CostDataFrameTranslation, bp::bases<CostDataAbstract> >(
       "CostDataFrameTranslation", "Data for frame translation cost.\n\n",
       bp::init<CostModelFrameTranslation*, DataCollectorAbstract*>(
-          bp::args(" self", " model", " data"),
+          bp::args("self", "model", "data"),
           "Create frame translation cost data.\n\n"
           ":param model: frame translation cost model\n"
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])

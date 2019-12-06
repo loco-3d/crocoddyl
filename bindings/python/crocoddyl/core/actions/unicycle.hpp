@@ -26,9 +26,9 @@ void exposeActionUnicycle() {
       "by (v,w). Note that the state is defined only with the position. On the\n"
       "other hand, we define the quadratic cost functions for the state and\n"
       "control.",
-      bp::init<>(bp::args(" self"), "Initialize the unicycle action model."))
+      bp::init<>(bp::args("self"), "Initialize the unicycle action model."))
       .def("calc", &ActionModelUnicycle::calc_wrap,
-           ActionModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
+           ActionModel_calc_wraps(bp::args("self", "data", "x", "u"),
                                   "Compute the next state and cost value.\n\n"
                                   "It describes the time-discrete evolution of the unicycle system.\n"
                                   "Additionally it computes the cost value associated to this discrete\n"
@@ -38,7 +38,7 @@ void exposeActionUnicycle() {
                                   ":param u: time-discrete control input"))
       .def<void (ActionModelUnicycle::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
                                          const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &ActionModelUnicycle::calcDiff_wrap, bp::args(" self", " data", " x", " u=None", " recalc=True"),
+          "calcDiff", &ActionModelUnicycle::calcDiff_wrap, bp::args("self", "data", "x", "u", "recalc"),
           "Compute the derivatives of the unicycle dynamics and cost functions.\n\n"
           "It computes the partial derivatives of the unicycle system and the\n"
           "cost function. If recalc == True, it first updates the state evolution\n"
@@ -47,16 +47,16 @@ void exposeActionUnicycle() {
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n"
-          ":param recalc: If true, it updates the state evolution and the cost value.")
+          ":param recalc: If true, it updates the state evolution and the cost value (default True).")
       .def<void (ActionModelUnicycle::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
                                          const Eigen::VectorXd&)>("calcDiff", &ActionModelUnicycle::calcDiff_wrap,
-                                                                  bp::args(" self", " data", " x", " u"))
+                                                                  bp::args("self", "data", "x", "u"))
       .def<void (ActionModelUnicycle::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&)>(
-          "calcDiff", &ActionModelUnicycle::calcDiff_wrap, bp::args(" self", " data", " x"))
+          "calcDiff", &ActionModelUnicycle::calcDiff_wrap, bp::args("self", "data", "x"))
       .def<void (ActionModelUnicycle::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
                                          const bool&)>("calcDiff", &ActionModelUnicycle::calcDiff_wrap,
-                                                       bp::args(" self", " data", " x", " recalc"))
-      .def("createData", &ActionModelUnicycle::createData, bp::args(" self"), "Create the unicycle action data.")
+                                                       bp::args("self", "data", "x", "recalc"))
+      .def("createData", &ActionModelUnicycle::createData, bp::args("self"), "Create the unicycle action data.")
       .add_property(
           "costWeights",
           bp::make_function(&ActionModelUnicycle::get_cost_weights, bp::return_value_policy<bp::return_by_value>()),
@@ -69,7 +69,7 @@ void exposeActionUnicycle() {
       "Action data for the Unicycle system.\n\n"
       "The unicycle data, apart of common one, contains the cost residuals used\n"
       "for the computation of calc and calcDiff.",
-      bp::init<ActionModelUnicycle*>(bp::args(" self", " model"),
+      bp::init<ActionModelUnicycle*>(bp::args("self", "model"),
                                      "Create unicycle data.\n\n"
                                      ":param model: unicycle action model"));
 }

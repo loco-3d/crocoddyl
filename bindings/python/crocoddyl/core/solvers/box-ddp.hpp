@@ -21,7 +21,7 @@ void exposeSolverBoxDDP() {
       "SolverBoxDDP",
       "Box-constrained DDP solver.\n\n"
       ":param shootingProblem: shooting problem (list of action models along trajectory.)",
-      bp::init<boost::shared_ptr<ShootingProblem> >(bp::args(" self", " problem"),
+      bp::init<boost::shared_ptr<ShootingProblem> >(bp::args("self", "problem"),
                                                     "Initialize the vector dimension.\n\n"
                                                     ":param problem: shooting problem."));
 }

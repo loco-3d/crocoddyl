@@ -41,25 +41,25 @@ void exposeShootingProblem() {
       "models.",
       bp::init<Eigen::VectorXd, std::vector<boost::shared_ptr<ActionModelAbstract> >,
                boost::shared_ptr<ActionModelAbstract> >(
-          bp::args(" self", " initialState", " runningModels", " terminalModel"),
+          bp::args("self", "initialState", "runningModels", "terminalModel"),
           "Initialize the shooting problem.\n\n"
           ":param initialState: initial state\n"
           ":param runningModels: running action models\n"
           ":param terminalModel: terminal action model"))
-      .def("calc", &ShootingProblem::calc, bp::args(" self", " xs", " us"),
+      .def("calc", &ShootingProblem::calc, bp::args("self", "xs", "us"),
            "Compute the cost and the next states.\n\n"
            "First, it computes the next state and cost for each action model\n"
            "along a state and control trajectory.\n"
            ":param xs: time-discrete state trajectory\n"
            ":param us: time-discrete control sequence\n"
            ":returns the total cost value")
-      .def("calcDiff", &ShootingProblem::calcDiff, bp::args(" self", " xs", " us"),
+      .def("calcDiff", &ShootingProblem::calcDiff, bp::args("self", "xs", "us"),
            "Compute the cost-and-dynamics derivatives.\n\n"
            "These quantities are computed along a given pair of trajectories xs\n"
            "(states) and us (controls).\n"
            ":param xs: time-discrete state trajectory\n"
            ":param us: time-discrete control sequence")
-      .def("rollout", &ShootingProblem::rollout_us, bp::args(" self", " us"),
+      .def("rollout", &ShootingProblem::rollout_us, bp::args("self", "us"),
            "Integrate the dynamics given a control sequence.\n\n"
            "Rollout the dynamics give a sequence of control commands\n"
            ":param us: time-discrete control sequence")
