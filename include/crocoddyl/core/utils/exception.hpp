@@ -12,6 +12,12 @@
 #include <exception>
 #include <sstream>
 
+#if __cplusplus >= 201103L  // We are using C++11 or a later version
+#define NOEXCEPT noexcept
+#else
+#define NOEXCEPT throw()
+#endif
+
 #define throw_pretty(m)                                                            \
   {                                                                                \
     std::stringstream ss;                                                          \
@@ -31,7 +37,8 @@ namespace crocoddyl {
 class Exception : public std::exception {
  public:
   explicit Exception(const std::string &msg, const char *file, const char *func, int line);
-  virtual const char *what() const noexcept;
+  virtual ~Exception() NOEXCEPT;
+  virtual const char *what() const NOEXCEPT;
 
   std::string msg_;
 };
