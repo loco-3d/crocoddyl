@@ -117,9 +117,8 @@ bool init_function() {
 
   for (size_t action_type = 0; action_type < ActionModelTypes::all.size(); ++action_type) {
     const std::string test_name = "test_action_" + std::to_string(action_type);
-    test_suite * ts = BOOST_TEST_SUITE(test_name);
-    ts->add(
-        BOOST_TEST_CASE(boost::bind(&test_kkt_dimension, ActionModelTypes::all[action_type], nb_running_models)));
+    test_suite* ts = BOOST_TEST_SUITE(test_name);
+    ts->add(BOOST_TEST_CASE(boost::bind(&test_kkt_dimension, ActionModelTypes::all[action_type], nb_running_models)));
     ts->add(BOOST_TEST_CASE(
         boost::bind(&test_kkt_search_direction, ActionModelTypes::all[action_type], nb_running_models)));
     framework::master_test_suite().add(ts);
@@ -128,12 +127,11 @@ bool init_function() {
   // We start from 1 as 0 is the kkt solver
   for (size_t solver_type = 1; solver_type < SolverTypes::all.size(); ++solver_type) {
     for (size_t action_type = 0; action_type < ActionModelTypes::all.size(); ++action_type) {
-      const std::string test_name = "test_solver_" + std::to_string(solver_type) 
-                                  + "_action_" + std::to_string(action_type);
-      test_suite * ts = BOOST_TEST_SUITE(test_name);
-      ts->add(
-          BOOST_TEST_CASE(boost::bind(&test_solver_against_kkt_solver, SolverTypes::all[solver_type],
-                                      ActionModelTypes::all[action_type], nb_running_models)));
+      const std::string test_name =
+          "test_solver_" + std::to_string(solver_type) + "_action_" + std::to_string(action_type);
+      test_suite* ts = BOOST_TEST_SUITE(test_name);
+      ts->add(BOOST_TEST_CASE(boost::bind(&test_solver_against_kkt_solver, SolverTypes::all[solver_type],
+                                          ActionModelTypes::all[action_type], nb_running_models)));
       framework::master_test_suite().add(ts);
     }
   }

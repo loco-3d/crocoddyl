@@ -19,4 +19,3 @@ struct DataCollectorAbstract {
 }  // namespace crocoddyl
 
 #endif  // CROCODDYL_CORE_DATA_COLLECTOR_BASE_HPP_
-
