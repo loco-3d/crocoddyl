@@ -13,12 +13,7 @@ from crocoddyl.utils import a2m, m2a
 from pinocchio.utils import rand
 from test_utils import NUMDIFF_MODIFIER, assertNumDiff
 
-
-def absmax(A):
-    return np.max(abs(A))
-
-
-# Loading Talos arm with FF TODO use a bided or quadruped
+# Loading Talos arm with FF TODO use a biped or quadruped
 # -----------------------------------------------------------------------------
 robot = loadANYmal()
 robot.model.armature[6:] = 1.
