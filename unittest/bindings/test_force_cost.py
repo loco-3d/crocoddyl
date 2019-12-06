@@ -13,10 +13,14 @@ ROBOT_DATA = ROBOT_MODEL.createData()
 ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 ACTUATION = crocoddyl.ActuationModelFloatingBase(ROBOT_STATE)
 CONTACTS = crocoddyl.ContactModelMultiple(ROBOT_STATE, ACTUATION.nu)
-CONTACT_6D = crocoddyl.ContactModel6D(
+CONTACT_6D_1 = crocoddyl.ContactModel6D(
     ROBOT_STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId('r_sole'), pinocchio.SE3.Random()), ACTUATION.nu,
     pinocchio.utils.rand(2))
-CONTACTS.addContact("r_sole_contact", CONTACT_6D)
+CONTACT_6D_2 = crocoddyl.ContactModel6D(
+    ROBOT_STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId('l_sole'), pinocchio.SE3.Random()), ACTUATION.nu,
+    pinocchio.utils.rand(2))
+CONTACTS.addContact("r_sole_contact", CONTACT_6D_1)
+CONTACTS.addContact("l_sole_contact", CONTACT_6D_2)
 COSTS = crocoddyl.CostModelSum(ROBOT_STATE, ACTUATION.nu, False)
 COSTS.addCost(
     "force",
@@ -25,22 +29,16 @@ COSTS.addCost(
                                     ACTUATION.nu), 1.)
 MODEL = crocoddyl.DifferentialActionModelContactFwdDynamics(ROBOT_STATE, ACTUATION, CONTACTS, COSTS, 0., True)
 DATA = MODEL.createData()
-DATA.costs.costs["force"].contact = DATA.contacts.contacts["r_sole_contact"]
 
 # Created DAM numdiff
-MODEL_ND = crocoddyl.DifferentialActionModelNumDiff(MODEL, False)
+MODEL_ND = crocoddyl.DifferentialActionModelNumDiff(MODEL)
 dnum = MODEL_ND.createData()
-for d in dnum.data_x:
-    d.costs.costs["force"].contact = d.contacts.contacts["r_sole_contact"]
-for d in dnum.data_u:
-    d.costs.costs["force"].contact = d.contacts.contacts["r_sole_contact"]
-dnum.data_0.costs.costs["force"].contact = dnum.data_0.contacts.contacts["r_sole_contact"]
 
 x = ROBOT_STATE.rand()
 u = pinocchio.utils.rand(ACTUATION.nu)
 MODEL.calcDiff(DATA, x, u)
 MODEL_ND.calcDiff(dnum, x, u)
-np.allclose(DATA.Fx, dnum.Fx, atol=MODEL_ND.disturbance)
-np.allclose(DATA.Fu, dnum.Fu, atol=MODEL_ND.disturbance)
-np.allclose(DATA.Lx, dnum.Lx, atol=MODEL_ND.disturbance)
-np.allclose(DATA.Lu, dnum.Lu, atol=MODEL_ND.disturbance)
+assert (np.allclose(DATA.Fx, dnum.Fx, atol=1e5 * MODEL_ND.disturbance))
+assert (np.allclose(DATA.Fu, dnum.Fu, atol=1e5 * MODEL_ND.disturbance))
+assert (np.allclose(DATA.Lx, dnum.Lx, atol=1e5 * MODEL_ND.disturbance))
+assert (np.allclose(DATA.Lu, dnum.Lu, atol=1e5 * MODEL_ND.disturbance))

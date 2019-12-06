@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS, The University of Edinburgh
+// Copyright (C) 2018-2020, LAAS-CNRS, The University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,6 +10,7 @@
 #define CROCODDYL_MULTIBODY_COSTS_FRAME_PLACEMENT_HPP_
 
 #include "crocoddyl/multibody/cost-base.hpp"
+#include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 
 namespace crocoddyl {
@@ -29,7 +30,7 @@ class CostModelFramePlacement : public CostModelAbstract {
             const Eigen::Ref<const Eigen::VectorXd>& u);
   void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
-  boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
+  boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
   const FramePlacement& get_Mref() const;
   void set_Mref(const FramePlacement& Mref_in);
@@ -43,7 +44,7 @@ struct CostDataFramePlacement : public CostDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  CostDataFramePlacement(Model* const model, pinocchio::Data* const data)
+  CostDataFramePlacement(Model* const model, DataCollectorAbstract* const data)
       : CostDataAbstract(model, data),
         J(6, model->get_state()->get_nv()),
         rJf(6, 6),
@@ -54,8 +55,17 @@ struct CostDataFramePlacement : public CostDataAbstract {
     rJf.fill(0);
     fJf.fill(0);
     Arr_J.fill(0);
+    // Check that proper shared data has been passed
+    DataCollectorMultibody* d = dynamic_cast<DataCollectorMultibody*>(shared);
+    if (d == NULL) {
+      throw std::invalid_argument("the shared data should be derived from DataCollectorMultibody");
+    }
+
+    // Avoids data casting at runtime
+    pinocchio = d->pinocchio;
   }
 
+  pinocchio::Data* pinocchio;
   pinocchio::Motion::Vector6 r;
   pinocchio::SE3 rMf;
   pinocchio::Data::Matrix6x J;

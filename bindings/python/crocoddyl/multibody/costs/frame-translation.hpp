@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS, The University of Edinburgh
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -76,7 +76,7 @@ void exposeCostFrameTranslation() {
            "Create the frame translation cost data.\n\n"
            "Each cost model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined cost.\n"
-           ":param data: Pinocchio data\n"
+           ":param data: shared data\n"
            ":return cost data.")
       .add_property("xref", bp::make_function(&CostModelFrameTranslation::get_xref, bp::return_internal_reference<>()),
                     &CostModelFrameTranslation::set_xref, "reference frame translation");
@@ -85,11 +85,11 @@ void exposeCostFrameTranslation() {
 
   bp::class_<CostDataFrameTranslation, bp::bases<CostDataAbstract> >(
       "CostDataFrameTranslation", "Data for frame translation cost.\n\n",
-      bp::init<CostModelFrameTranslation*, pinocchio::Data*>(
+      bp::init<CostModelFrameTranslation*, DataCollectorAbstract*>(
           bp::args(" self", " model", " data"),
           "Create frame translation cost data.\n\n"
           ":param model: frame translation cost model\n"
-          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("J", bp::make_getter(&CostDataFrameTranslation::J, bp::return_value_policy<bp::return_by_value>()),
                     "Jacobian at the error point")
       .add_property("fJf",

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,7 +43,8 @@ struct ImpulseData6D : public ImpulseDataAbstract {
         fJf(6, model->get_state()->get_nv()),
         v_partial_dq(6, model->get_state()->get_nv()),
         v_partial_dv(6, model->get_state()->get_nv()) {
-    joint = model->get_state()->get_pinocchio().frames[model->get_frame()].parent;
+    frame = model->get_frame();
+    joint = model->get_state()->get_pinocchio().frames[frame].parent;
     fJf.fill(0);
     v_partial_dq.fill(0);
     v_partial_dv.fill(0);

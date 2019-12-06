@@ -77,7 +77,7 @@ void CostModelFramePlacement::calcDiff(const boost::shared_ptr<CostDataAbstract>
   data->Lxx.topLeftCorner(nv, nv).noalias() = d->J.transpose() * d->Arr_J;
 }
 
-boost::shared_ptr<CostDataAbstract> CostModelFramePlacement::createData(pinocchio::Data* const data) {
+boost::shared_ptr<CostDataAbstract> CostModelFramePlacement::createData(DataCollectorAbstract* const data) {
   return boost::make_shared<CostDataFramePlacement>(this, data);
 }
 

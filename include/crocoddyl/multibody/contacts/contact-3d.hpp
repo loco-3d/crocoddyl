@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,10 +9,10 @@
 #ifndef CROCODDYL_MULTIBODY_CONTACTS_CONTACT_3D_HPP_
 #define CROCODDYL_MULTIBODY_CONTACTS_CONTACT_3D_HPP_
 
-#include "crocoddyl/multibody/contact-base.hpp"
-#include "crocoddyl/multibody/frames.hpp"
 #include <pinocchio/spatial/motion.hpp>
 #include <pinocchio/multibody/data.hpp>
+#include "crocoddyl/multibody/contact-base.hpp"
+#include "crocoddyl/multibody/frames.hpp"
 
 namespace crocoddyl {
 
@@ -52,8 +52,9 @@ struct ContactData3D : public ContactDataAbstract {
         fXjdv_dq(6, model->get_state()->get_nv()),
         fXjda_dq(6, model->get_state()->get_nv()),
         fXjda_dv(6, model->get_state()->get_nv()) {
-    joint = model->get_state()->get_pinocchio().frames[model->get_xref().frame].parent;
-    jMf = model->get_state()->get_pinocchio().frames[model->get_xref().frame].placement;
+    frame = model->get_xref().frame;
+    joint = model->get_state()->get_pinocchio().frames[frame].parent;
+    jMf = model->get_state()->get_pinocchio().frames[frame].placement;
     fXj = jMf.inverse().toActionMatrix();
     fJf.fill(0);
     v_partial_dq.fill(0);
