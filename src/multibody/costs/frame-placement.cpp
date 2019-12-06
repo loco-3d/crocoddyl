@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include <pinocchio/algorithm/frames.hpp>
 #include "crocoddyl/multibody/costs/frame-placement.hpp"
 
@@ -16,7 +17,8 @@ CostModelFramePlacement::CostModelFramePlacement(boost::shared_ptr<StateMultibod
                                                  const FramePlacement& Mref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
   if (activation_->get_nr() != 6) {
-    throw std::invalid_argument("nr is equals to 6");
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to 6");
   }
 }
 
@@ -25,7 +27,8 @@ CostModelFramePlacement::CostModelFramePlacement(boost::shared_ptr<StateMultibod
                                                  const FramePlacement& Mref)
     : CostModelAbstract(state, activation), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
   if (activation_->get_nr() != 6) {
-    throw std::invalid_argument("nr is equals to 6");
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to 6");
   }
 }
 

@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
 
 namespace crocoddyl {
@@ -21,11 +22,11 @@ ContactModelAbstract::~ContactModelAbstract() {}
 
 void ContactModelAbstract::updateForceDiff(const boost::shared_ptr<ContactDataAbstract>& data,
                                            const Eigen::MatrixXd& df_dx, const Eigen::MatrixXd& df_du) const {
-  assert(
-      (static_cast<std::size_t>(df_dx.rows()) == nc_ || static_cast<std::size_t>(df_dx.cols()) == state_->get_nx()) &&
+  assert_pretty(
+      (static_cast<std::size_t>(df_dx.rows()) == nc_ || static_cast<std::size_t>(df_dx.cols()) == state_->get_nx()),
       "df_dx has wrong dimension");
-  assert((static_cast<std::size_t>(df_du.rows()) == nc_ || static_cast<std::size_t>(df_du.cols()) == nu_) &&
-         "df_du has wrong dimension");
+  assert_pretty((static_cast<std::size_t>(df_du.rows()) == nc_ || static_cast<std::size_t>(df_du.cols()) == nu_),
+                "df_du has wrong dimension");
   data->df_dx = df_dx;
   data->df_du = df_du;
 }

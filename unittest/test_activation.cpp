@@ -10,6 +10,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include <iterator>
 #include <Eigen/Dense>
 #include <pinocchio/fwd.hpp>
@@ -69,7 +70,7 @@ class Factory {
         model_ = boost::make_shared<crocoddyl::ActivationModelWeightedQuad>(weights);
         break;
       default:
-        throw std::runtime_error(__FILE__ ":\n Construct wrong TestTypes::Type");
+        throw_pretty(__FILE__ ":\n Construct wrong TestTypes::Type");
         break;
     }
   }

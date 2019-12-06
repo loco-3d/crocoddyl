@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
 #include <pinocchio/algorithm/aba.hpp>
 #include <pinocchio/algorithm/aba-derivatives.hpp>
@@ -28,8 +29,8 @@ DifferentialActionModelFreeFwdDynamics::DifferentialActionModelFreeFwdDynamics(
       with_armature_(true),
       armature_(Eigen::VectorXd::Zero(state->get_nv())) {
   if (costs_->get_nu() != nu_) {
-    throw std::invalid_argument("Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) +
-                                ")");
+    throw_pretty("Invalid argument: "
+                 << "Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
   }
 }
 
@@ -39,10 +40,12 @@ void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<Differ
                                                   const Eigen::Ref<const Eigen::VectorXd>& x,
                                                   const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw_pretty("Invalid argument: "
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
   DifferentialActionDataFreeFwdDynamics* d = static_cast<DifferentialActionDataFreeFwdDynamics*>(data.get());
@@ -75,10 +78,12 @@ void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<Di
                                                       const Eigen::Ref<const Eigen::VectorXd>& x,
                                                       const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw std::invalid_argument("u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw_pretty("Invalid argument: "
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
   const std::size_t& nv = state_->get_nv();
@@ -128,8 +133,8 @@ const Eigen::VectorXd& DifferentialActionModelFreeFwdDynamics::get_armature() co
 
 void DifferentialActionModelFreeFwdDynamics::set_armature(const Eigen::VectorXd& armature) {
   if (static_cast<std::size_t>(armature.size()) != state_->get_nv()) {
-    throw std::invalid_argument("The armature dimension is wrong (it should be " + std::to_string(state_->get_nv()) +
-                                ")");
+    throw_pretty("Invalid argument: "
+                 << "The armature dimension is wrong (it should be " + std::to_string(state_->get_nv()) + ")");
   }
 
   armature_ = armature;

@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include <iostream>
 #include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/multibody/impulses/impulse-3d.hpp"
@@ -135,7 +136,7 @@ class ImpulseModelFactory {
         break;
 
       default:
-        throw std::runtime_error(__FILE__ ": Wrong ImpulseModelTypes::Type given");
+        throw_pretty(__FILE__ ": Wrong ImpulseModelTypes::Type given");
         break;
     }
   }

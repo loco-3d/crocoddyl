@@ -11,6 +11,7 @@ SET(${PROJECT_NAME}_SOURCES
   core/numdiff/diff-action.cpp
   core/numdiff/activation.cpp
   core/utils/callbacks.cpp
+  core/utils/exception.cpp
   core/optctrl/shooting.cpp
   core/solvers/ddp.cpp
   core/solvers/fddp.cpp

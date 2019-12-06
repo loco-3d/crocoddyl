@@ -9,6 +9,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include <iterator>
 #include <Eigen/Dense>
 #include <pinocchio/fwd.hpp>
@@ -49,7 +50,7 @@ class DifferentialActionModelFactory {
         diff_action_model_ = boost::make_shared<crocoddyl::DifferentialActionModelLQR>(nq_, nu_, driftfree_);
         break;
       default:
-        throw std::runtime_error(__FILE__ ": Wrong TestTypes::Type given");
+        throw_pretty(__FILE__ ": Wrong TestTypes::Type given");
         break;
     }
   }
