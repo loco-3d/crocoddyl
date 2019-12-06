@@ -19,7 +19,8 @@ ActivationModelWeightedQuad::~ActivationModelWeightedQuad() {}
 void ActivationModelWeightedQuad::calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                                        const Eigen::Ref<const Eigen::VectorXd>& r) {
   if (static_cast<std::size_t>(r.size()) != nr_) {
-    throw_pretty("Invalid argument: " << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+    throw_pretty("Invalid argument: "
+                 << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
   }
   boost::shared_ptr<ActivationDataWeightedQuad> d = boost::static_pointer_cast<ActivationDataWeightedQuad>(data);
 
@@ -30,7 +31,8 @@ void ActivationModelWeightedQuad::calc(const boost::shared_ptr<ActivationDataAbs
 void ActivationModelWeightedQuad::calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
                                            const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc) {
   if (static_cast<std::size_t>(r.size()) != nr_) {
-    throw_pretty("Invalid argument: " << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+    throw_pretty("Invalid argument: "
+                 << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
   }
   if (recalc) {
     calc(data, r);
@@ -40,7 +42,7 @@ void ActivationModelWeightedQuad::calcDiff(const boost::shared_ptr<ActivationDat
   data->Ar = d->Wr;
   // The Hessian has constant values which were set in createData.
 #ifndef NDEBUG
-  assert_pretty(data->Arr == Arr_ , "Arr has wrong value");
+  assert_pretty(data->Arr == Arr_, "Arr has wrong value");
 #endif
 }
 
@@ -59,8 +61,8 @@ const Eigen::VectorXd& ActivationModelWeightedQuad::get_weights() const { return
 
 void ActivationModelWeightedQuad::set_weights(const Eigen::VectorXd& weights) {
   if (weights.size() != weights_.size()) {
-    throw_pretty("Invalid argument: " << "weight vector has wrong dimension (it should be " + std::to_string(weights_.size()) +
-                                ")");
+    throw_pretty("Invalid argument: "
+                 << "weight vector has wrong dimension (it should be " + std::to_string(weights_.size()) + ")");
   }
 
   weights_ = weights;

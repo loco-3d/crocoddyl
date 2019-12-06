@@ -22,10 +22,12 @@ ActionModelNumDiff::~ActionModelNumDiff() {}
 void ActionModelNumDiff::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                               const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: " << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: " << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw_pretty("Invalid argument: "
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   boost::shared_ptr<ActionDataNumDiff> data_nd = boost::static_pointer_cast<ActionDataNumDiff>(data);
   model_->calc(data_nd->data_0, x, u);
@@ -37,10 +39,12 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
                                   const Eigen::Ref<const Eigen::VectorXd>& x,
                                   const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: " << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: " << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw_pretty("Invalid argument: "
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   boost::shared_ptr<ActionDataNumDiff> data_nd = boost::static_pointer_cast<ActionDataNumDiff>(data);
 
@@ -112,7 +116,8 @@ const double& ActionModelNumDiff::get_disturbance() const { return disturbance_;
 
 void ActionModelNumDiff::set_disturbance(const double& disturbance) {
   if (disturbance < 0.) {
-    throw_pretty("Invalid argument: " << "Disturbance value is positive");
+    throw_pretty("Invalid argument: "
+                 << "Disturbance value is positive");
   }
   disturbance_ = disturbance;
 }

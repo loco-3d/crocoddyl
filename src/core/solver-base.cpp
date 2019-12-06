@@ -57,7 +57,8 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
     }
     xs_.back() = problem_->get_terminalModel()->get_state()->zero();
   } else {
-    assert_pretty(xs_warm.size() == T + 1, "Warm start state has wrong dimension, got " << xs_warm.size() << " expecting " << (T+1));
+    assert_pretty(xs_warm.size() == T + 1,
+                  "Warm start state has wrong dimension, got " << xs_warm.size() << " expecting " << (T + 1));
     std::copy(xs_warm.begin(), xs_warm.end(), xs_.begin());
   }
 
@@ -67,7 +68,8 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
       us_[t] = Eigen::VectorXd::Zero(nu);
     }
   } else {
-    assert_pretty(us_warm.size() == T, "Warm start control has wrong dimension, got " << us_warm.size() << " expecting " << T);
+    assert_pretty(us_warm.size() == T,
+                  "Warm start control has wrong dimension, got " << us_warm.size() << " expecting " << T);
     std::copy(us_warm.begin(), us_warm.end(), us_.begin());
   }
   is_feasible_ = is_feasible;

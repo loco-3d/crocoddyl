@@ -72,7 +72,8 @@ void SolverBoxDDP::computeGains(const std::size_t& t) {
 
 void SolverBoxDDP::forwardPass(const double& steplength) {
   if (steplength > 1. || steplength < 0.) {
-    throw_pretty("Invalid argument: " << "invalid step length, value is between 0. to 1.");
+    throw_pretty("Invalid argument: "
+                 << "invalid step length, value is between 0. to 1.");
   }
   cost_try_ = 0.;
   xnext_ = problem_->get_x0();

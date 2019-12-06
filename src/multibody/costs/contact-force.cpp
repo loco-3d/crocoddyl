@@ -16,7 +16,8 @@ CostModelContactForce::CostModelContactForce(boost::shared_ptr<StateMultibody> s
                                              const FrameForce& fref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), fref_(fref) {
   if (activation_->get_nr() != 6) {
-    throw_pretty("Invalid argument: " << "nr is equals to 6");
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to 6");
   }
 }
 
@@ -25,7 +26,8 @@ CostModelContactForce::CostModelContactForce(boost::shared_ptr<StateMultibody> s
                                              const FrameForce& fref)
     : CostModelAbstract(state, activation), fref_(fref) {
   if (activation_->get_nr() != 6) {
-    throw_pretty("Invalid argument: " << "nr is equals to 6");
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to 6");
   }
 }
 

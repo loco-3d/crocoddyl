@@ -17,7 +17,8 @@ CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMult
                                                      const FrameTranslation& xref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), xref_(xref) {
   if (activation_->get_nr() != 3) {
-    throw_pretty("Invalid argument: " << "nr is equals to 3");
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to 3");
   }
 }
 
@@ -26,7 +27,8 @@ CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMult
                                                      const FrameTranslation& xref)
     : CostModelAbstract(state, activation), xref_(xref) {
   if (activation_->get_nr() != 3) {
-    throw_pretty("Invalid argument: " << "nr is equals to 3");
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to 3");
   }
 }
 

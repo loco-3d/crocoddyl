@@ -163,7 +163,8 @@ double SolverFDDP::calc() {
 
 void SolverFDDP::forwardPass(const double& steplength) {
   if (steplength > 1. || steplength < 0.) {
-    throw_pretty("Invalid argument: " << "invalid step length, value is between 0. to 1.");
+    throw_pretty("Invalid argument: "
+                 << "invalid step length, value is between 0. to 1.");
   }
   cost_try_ = 0.;
   xnext_ = problem_->get_x0();
@@ -210,7 +211,8 @@ double SolverFDDP::get_th_acceptnegstep() const { return th_acceptnegstep_; }
 
 void SolverFDDP::set_th_acceptnegstep(const double& th_acceptnegstep) {
   if (0. > th_acceptnegstep) {
-    throw_pretty("Invalid argument: " << "th_acceptnegstep value has to be positive.");
+    throw_pretty("Invalid argument: "
+                 << "th_acceptnegstep value has to be positive.");
   }
   th_acceptnegstep_ = th_acceptnegstep;
 }

@@ -25,7 +25,8 @@ void ContactModelAbstract::updateForceDiff(const boost::shared_ptr<ContactDataAb
   assert_pretty(
       (static_cast<std::size_t>(df_dx.rows()) == nc_ || static_cast<std::size_t>(df_dx.cols()) == state_->get_nx()),
       "df_dx has wrong dimension");
-  assert_pretty((static_cast<std::size_t>(df_du.rows()) == nc_ || static_cast<std::size_t>(df_du.cols()) == nu_) , "df_du has wrong dimension");
+  assert_pretty((static_cast<std::size_t>(df_du.rows()) == nc_ || static_cast<std::size_t>(df_du.cols()) == nu_),
+                "df_du has wrong dimension");
   data->df_dx = df_dx;
   data->df_du = df_du;
 }

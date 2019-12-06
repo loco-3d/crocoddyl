@@ -49,10 +49,12 @@ void IntegratedActionModelEuler::calc(const boost::shared_ptr<ActionDataAbstract
                                       const Eigen::Ref<const Eigen::VectorXd>& x,
                                       const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: " << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: " << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw_pretty("Invalid argument: "
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
   // Static casting the data
@@ -84,10 +86,12 @@ void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbst
                                           const Eigen::Ref<const Eigen::VectorXd>& x,
                                           const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: " << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: " << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw_pretty("Invalid argument: "
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
   const std::size_t& nv = differential_->get_state()->get_nv();
@@ -140,7 +144,8 @@ const double& IntegratedActionModelEuler::get_dt() const { return time_step_; }
 
 void IntegratedActionModelEuler::set_dt(const double& dt) {
   if (dt < 0.) {
-    throw_pretty("Invalid argument: " << "dt has positive value");
+    throw_pretty("Invalid argument: "
+                 << "dt has positive value");
   }
   time_step_ = dt;
   time_step2_ = dt * dt;

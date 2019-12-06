@@ -39,7 +39,8 @@ void ImpulseModel6D::calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data
 
 void ImpulseModel6D::updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force) {
   if (force.size() != 6) {
-    throw_pretty("Invalid argument: " << "lambda has wrong dimension (it should be 6)");
+    throw_pretty("Invalid argument: "
+                 << "lambda has wrong dimension (it should be 6)");
   }
   boost::shared_ptr<ImpulseData6D> d = boost::static_pointer_cast<ImpulseData6D>(data);
   data->f = d->jMf.act(pinocchio::Force(force));

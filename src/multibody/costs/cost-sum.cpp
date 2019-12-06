@@ -20,7 +20,7 @@ CostModelSum::CostModelSum(boost::shared_ptr<StateMultibody> state, const bool& 
 CostModelSum::~CostModelSum() {}
 
 void CostModelSum::addCost(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, const double& weight) {
-  assert_pretty(cost->get_nu() == nu_ , "Cost item doesn't have the same control dimension");
+  assert_pretty(cost->get_nu() == nu_, "Cost item doesn't have the same control dimension");
   std::pair<CostModelContainer::iterator, bool> ret =
       costs_.insert(std::make_pair(name, CostItem(name, cost, weight)));
   if (ret.second == false) {
@@ -43,13 +43,16 @@ void CostModelSum::removeCost(const std::string& name) {
 void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: " << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: " << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw_pretty("Invalid argument: "
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   if (data->costs.size() != costs_.size()) {
-    throw_pretty("Invalid argument: " << "it doesn't match the number of cost datas and models");
+    throw_pretty("Invalid argument: "
+                 << "it doesn't match the number of cost datas and models");
   }
   data->cost = 0.;
   std::size_t nr = 0;
@@ -60,7 +63,7 @@ void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen:
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const CostItem& m_i = it_m->second;
     boost::shared_ptr<CostDataAbstract>& d_i = it_d->second;
-    assert_pretty(it_m->first == it_d->first , "it doesn't match the cost name between data and model");
+    assert_pretty(it_m->first == it_d->first, "it doesn't match the cost name between data and model");
 
     m_i.cost->calc(d_i, x, u);
     data->cost += m_i.weight * d_i->cost;
@@ -75,13 +78,16 @@ void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen:
 void CostModelSum::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                             const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: " << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: " << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw_pretty("Invalid argument: "
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   if (data->costs.size() != costs_.size()) {
-    throw_pretty("Invalid argument: " << "it doesn't match the number of cost datas and models");
+    throw_pretty("Invalid argument: "
+                 << "it doesn't match the number of cost datas and models");
   }
   if (recalc) {
     calc(data, x, u);
@@ -100,7 +106,7 @@ void CostModelSum::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Ei
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const CostItem& m_i = it_m->second;
     boost::shared_ptr<CostDataAbstract>& d_i = it_d->second;
-    assert_pretty(it_m->first == it_d->first , "it doesn't match the cost name between data and model");
+    assert_pretty(it_m->first == it_d->first, "it doesn't match the cost name between data and model");
 
     m_i.cost->calcDiff(d_i, x, u);
     data->Lx += m_i.weight * d_i->Lx;

@@ -17,7 +17,7 @@ DifferentialActionModelNumDiff::DifferentialActionModelNumDiff(
     : DifferentialActionModelAbstract(model->get_state(), model->get_nu(), model->get_nr()), model_(model) {
   with_gauss_approx_ = with_gauss_approx;
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
-  assert_pretty((!with_gauss_approx_ || nr_ > 1) , "No Gauss approximation possible with nr = 1");
+  assert_pretty((!with_gauss_approx_ || nr_ > 1), "No Gauss approximation possible with nr = 1");
 }
 
 DifferentialActionModelNumDiff::~DifferentialActionModelNumDiff() {}
@@ -26,10 +26,12 @@ void DifferentialActionModelNumDiff::calc(const boost::shared_ptr<DifferentialAc
                                           const Eigen::Ref<const Eigen::VectorXd>& x,
                                           const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: " << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: " << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw_pretty("Invalid argument: "
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   DifferentialActionDataNumDiff* data_nd = static_cast<DifferentialActionDataNumDiff*>(data.get());
   model_->calc(data_nd->data_0, x, u);
@@ -41,10 +43,12 @@ void DifferentialActionModelNumDiff::calcDiff(const boost::shared_ptr<Differenti
                                               const Eigen::Ref<const Eigen::VectorXd>& x,
                                               const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: " << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: " << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    throw_pretty("Invalid argument: "
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   boost::shared_ptr<DifferentialActionDataNumDiff> data_nd =
       boost::static_pointer_cast<DifferentialActionDataNumDiff>(data);
@@ -109,7 +113,8 @@ const double& DifferentialActionModelNumDiff::get_disturbance() const { return d
 
 void DifferentialActionModelNumDiff::set_disturbance(const double& disturbance) {
   if (disturbance < 0.) {
-    throw_pretty("Invalid argument: " << "Disturbance value is positive");
+    throw_pretty("Invalid argument: "
+                 << "Disturbance value is positive");
   }
   disturbance_ = disturbance;
 }

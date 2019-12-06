@@ -19,7 +19,8 @@ ActivationModelQuadraticBarrier::~ActivationModelQuadraticBarrier() {}
 void ActivationModelQuadraticBarrier::calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                                            const Eigen::Ref<const Eigen::VectorXd>& r) {
   if (static_cast<std::size_t>(r.size()) != nr_) {
-    throw_pretty("Invalid argument: " << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+    throw_pretty("Invalid argument: "
+                 << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
   }
   boost::shared_ptr<ActivationDataQuadraticBarrier> d =
       boost::static_pointer_cast<ActivationDataQuadraticBarrier>(data);
@@ -32,7 +33,8 @@ void ActivationModelQuadraticBarrier::calc(const boost::shared_ptr<ActivationDat
 void ActivationModelQuadraticBarrier::calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
                                                const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc) {
   if (static_cast<std::size_t>(r.size()) != nr_) {
-    throw_pretty("Invalid argument: " << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+    throw_pretty("Invalid argument: "
+                 << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
   }
   if (recalc) {
     calc(data, r);

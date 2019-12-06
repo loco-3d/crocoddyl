@@ -10,17 +10,13 @@
 
 namespace crocoddyl {
 
-Exception::Exception(const std::string &msg, const char *file, const char *func, int line)
-{
-    msg_ = "In " + std::string(file) + "\n";
-    msg_ += std::string(func) + " ";
-    msg_ += std::to_string(line) + "\n";
-    msg_ += msg;
+Exception::Exception(const std::string &msg, const char *file, const char *func, int line) {
+  msg_ = "In " + std::string(file) + "\n";
+  msg_ += std::string(func) + " ";
+  msg_ += std::to_string(line) + "\n";
+  msg_ += msg;
 }
 
-const char *Exception::what() const noexcept
-{
-    return msg_.c_str();
-}
+const char *Exception::what() const noexcept { return msg_.c_str(); }
 
 }  // namespace crocoddyl

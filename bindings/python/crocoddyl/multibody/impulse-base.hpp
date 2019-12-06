@@ -22,18 +22,18 @@ class ImpulseModelAbstract_wrap : public ImpulseModelAbstract, public bp::wrappe
   ImpulseModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, int ni) : ImpulseModelAbstract(state, ni) {}
 
   void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
-    assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx() , "x has wrong dimension");
+    assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(), "x has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x);
   }
 
   void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const bool& recalc = true) {
-    assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx() , "x has wrong dimension");
+    assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(), "x has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, recalc);
   }
 
   void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force) {
-    assert_pretty(static_cast<std::size_t>(force.size()) == ni_ , "force has wrong dimension");
+    assert_pretty(static_cast<std::size_t>(force.size()) == ni_, "force has wrong dimension");
     return bp::call<void>(this->get_override("updateForce").ptr(), data, force);
   }
 };

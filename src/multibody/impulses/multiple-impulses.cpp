@@ -38,7 +38,8 @@ void ImpulseModelMultiple::removeImpulse(const std::string& name) {
 void ImpulseModelMultiple::calc(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                 const Eigen::Ref<const Eigen::VectorXd>& x) {
   if (data->impulses.size() != impulses_.size()) {
-    throw_pretty("Invalid argument: " << "it doesn't match the number of impulse datas and models");
+    throw_pretty("Invalid argument: "
+                 << "it doesn't match the number of impulse datas and models");
   }
   std::size_t ni = 0;
 
@@ -49,7 +50,7 @@ void ImpulseModelMultiple::calc(const boost::shared_ptr<ImpulseDataMultiple>& da
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const ImpulseItem& m_i = it_m->second;
     boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
-    assert_pretty(it_m->first == it_d->first , "it doesn't match the impulse name between data and model");
+    assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between data and model");
 
     m_i.impulse->calc(d_i, x);
     const std::size_t& ni_i = m_i.impulse->get_ni();
@@ -61,7 +62,8 @@ void ImpulseModelMultiple::calc(const boost::shared_ptr<ImpulseDataMultiple>& da
 void ImpulseModelMultiple::calcDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                     const Eigen::Ref<const Eigen::VectorXd>& x, const bool& recalc) {
   if (data->impulses.size() != impulses_.size()) {
-    throw_pretty("Invalid argument: " << "it doesn't match the number of impulse datas and models");
+    throw_pretty("Invalid argument: "
+                 << "it doesn't match the number of impulse datas and models");
   }
   if (recalc) {
     calc(data, x);
@@ -75,7 +77,7 @@ void ImpulseModelMultiple::calcDiff(const boost::shared_ptr<ImpulseDataMultiple>
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const ImpulseItem& m_i = it_m->second;
     boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
-    assert_pretty(it_m->first == it_d->first , "it doesn't match the impulse name between data and model");
+    assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between data and model");
 
     m_i.impulse->calcDiff(d_i, x, false);
     const std::size_t& ni_i = m_i.impulse->get_ni();
@@ -87,7 +89,8 @@ void ImpulseModelMultiple::calcDiff(const boost::shared_ptr<ImpulseDataMultiple>
 void ImpulseModelMultiple::updateVelocity(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                           const Eigen::VectorXd& vnext) const {
   if (static_cast<std::size_t>(vnext.size()) != state_->get_nv()) {
-    throw_pretty("Invalid argument: " << "vnext has wrong dimension (it should be " + std::to_string(state_->get_nv()) + ")");
+    throw_pretty("Invalid argument: "
+                 << "vnext has wrong dimension (it should be " + std::to_string(state_->get_nv()) + ")");
   }
   data->vnext = vnext;
 }
@@ -95,10 +98,12 @@ void ImpulseModelMultiple::updateVelocity(const boost::shared_ptr<ImpulseDataMul
 void ImpulseModelMultiple::updateForce(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                        const Eigen::VectorXd& force) {
   if (static_cast<std::size_t>(force.size()) != ni_) {
-    throw_pretty("Invalid argument: " << "force has wrong dimension (it should be " + std::to_string(ni_) + ")");
+    throw_pretty("Invalid argument: "
+                 << "force has wrong dimension (it should be " + std::to_string(ni_) + ")");
   }
   if (static_cast<std::size_t>(data->impulses.size()) != impulses_.size()) {
-    throw_pretty("Invalid argument: " << "it doesn't match the number of impulse datas and models");
+    throw_pretty("Invalid argument: "
+                 << "it doesn't match the number of impulse datas and models");
   }
   std::size_t ni = 0;
 
@@ -112,7 +117,7 @@ void ImpulseModelMultiple::updateForce(const boost::shared_ptr<ImpulseDataMultip
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const ImpulseItem& m_i = it_m->second;
     boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
-    assert_pretty(it_m->first == it_d->first , "it doesn't match the impulse name between data and model");
+    assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between data and model");
 
     const std::size_t& ni_i = m_i.impulse->get_ni();
     const Eigen::VectorBlock<const Eigen::VectorXd, Eigen::Dynamic> force_i = force.segment(ni, ni_i);
@@ -126,8 +131,9 @@ void ImpulseModelMultiple::updateVelocityDiff(const boost::shared_ptr<ImpulseDat
                                               const Eigen::MatrixXd& dvnext_dx) const {
   if (static_cast<std::size_t>(dvnext_dx.rows()) != state_->get_nv() ||
       static_cast<std::size_t>(dvnext_dx.cols()) != state_->get_ndx()) {
-    throw_pretty("Invalid argument: " << "dvnext_dx has wrong dimension (it should be " + std::to_string(state_->get_nv()) +
-                                "," + std::to_string(state_->get_ndx()) + ")");
+    throw_pretty("Invalid argument: "
+                 << "dvnext_dx has wrong dimension (it should be " + std::to_string(state_->get_nv()) + "," +
+                        std::to_string(state_->get_ndx()) + ")");
   }
   data->dvnext_dx = dvnext_dx;
 }
@@ -136,11 +142,12 @@ void ImpulseModelMultiple::updateForceDiff(const boost::shared_ptr<ImpulseDataMu
                                            const Eigen::MatrixXd& df_dq) const {
   const std::size_t& nv = state_->get_nv();
   if (static_cast<std::size_t>(df_dq.rows()) != ni_ || static_cast<std::size_t>(df_dq.cols()) != nv) {
-    throw_pretty("Invalid argument: " << "df_dq has wrong dimension (it should be " + std::to_string(ni_) + "," +
-                                std::to_string(nv) + ")");
+    throw_pretty("Invalid argument: "
+                 << "df_dq has wrong dimension (it should be " + std::to_string(ni_) + "," + std::to_string(nv) + ")");
   }
   if (static_cast<std::size_t>(data->impulses.size()) != impulses_.size()) {
-    throw_pretty("Invalid argument: " << "it doesn't match the number of impulse datas and models");
+    throw_pretty("Invalid argument: "
+                 << "it doesn't match the number of impulse datas and models");
   }
   std::size_t ni = 0;
 
@@ -150,7 +157,7 @@ void ImpulseModelMultiple::updateForceDiff(const boost::shared_ptr<ImpulseDataMu
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const ImpulseItem& m_i = it_m->second;
     const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
-    assert_pretty(it_m->first == it_d->first , "it doesn't match the impulse name between data and model");
+    assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between data and model");
 
     const std::size_t& ni_i = m_i.impulse->get_ni();
     const Eigen::Block<const Eigen::MatrixXd> df_dq_i = df_dq.block(ni, 0, ni_i, nv);

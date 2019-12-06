@@ -68,7 +68,8 @@ void ContactModel6D::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data
 
 void ContactModel6D::updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& force) {
   if (force.size() != 6) {
-    throw_pretty("Invalid argument: " << "lambda has wrong dimension (it should be 6)");
+    throw_pretty("Invalid argument: "
+                 << "lambda has wrong dimension (it should be 6)");
   }
   ContactData6D* d = static_cast<ContactData6D*>(data.get());
   data->f = d->jMf.act(pinocchio::Force(force));

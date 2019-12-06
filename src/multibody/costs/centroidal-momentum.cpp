@@ -17,7 +17,8 @@ CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<State
                                                          const Vector6d& href, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), href_(href) {
   if (activation_->get_nr() != 6) {
-    throw_pretty("Invalid argument: " << "nr is equals to 6");
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to 6");
   }
 }
 
@@ -26,7 +27,8 @@ CostModelCentroidalMomentum::CostModelCentroidalMomentum(boost::shared_ptr<State
                                                          const Vector6d& href)
     : CostModelAbstract(state, activation), href_(href) {
   if (activation_->get_nr() != 6) {
-    throw_pretty("Invalid argument: " << "nr is equals to 6");
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to 6");
   }
 }
 
