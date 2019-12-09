@@ -20,7 +20,9 @@ CostModelSum::CostModelSum(boost::shared_ptr<StateMultibody> state, const bool& 
 CostModelSum::~CostModelSum() {}
 
 void CostModelSum::addCost(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, const double& weight) {
-  assert_pretty(cost->get_nu() == nu_, "Cost item doesn't have the same control dimension");
+  if (cost->get_nu() != nu_) {
+    throw_pretty("Cost item doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
+  }
   std::pair<CostModelContainer::iterator, bool> ret =
       costs_.insert(std::make_pair(name, CostItem(name, cost, weight)));
   if (ret.second == false) {

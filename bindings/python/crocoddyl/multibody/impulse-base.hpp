@@ -49,31 +49,30 @@ void exposeImpulseAbstract() {
       "It defines a template for impulse models.\n"
       "The calc and calcDiff functions compute the impulse Jacobian\n"
       "the derivatives respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, int>(bp::args(" self", " state", " ni"),
+      bp::init<boost::shared_ptr<StateMultibody>, int>(bp::args("self", "state", "ni"),
                                                        "Initialize the impulse model.\n\n"
                                                        ":param state: state of the multibody system\n"
                                                        ":param ni: dimension of impulse model"))
-      .def("calc", pure_virtual(&ImpulseModelAbstract_wrap::calc), bp::args(" self", " data", " x"),
+      .def("calc", pure_virtual(&ImpulseModelAbstract_wrap::calc), bp::args("self", "data", "x"),
            "Compute the impulse Jacobian\n"
            ":param data: impulse data\n"
            ":param x: state vector")
-      .def("calcDiff", pure_virtual(&ImpulseModelAbstract_wrap::calcDiff),
-           bp::args(" self", " data", " x", " recalc=True"),
+      .def("calcDiff", pure_virtual(&ImpulseModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "recalc"),
            "Compute the derivatives of impulse Jacobian\n"
            ":param data: impulse data\n"
            ":param x: state vector\n"
            ":param recalc: If true, it updates the impulse Jacobian")
-      .def("updateForce", pure_virtual(&ImpulseModelAbstract_wrap::updateForce), bp::args(" self", " data", " force"),
+      .def("updateForce", pure_virtual(&ImpulseModelAbstract_wrap::updateForce), bp::args("self", "data", "force"),
            "Convert the force into a stack of spatial forces.\n\n"
            ":param data: impulse data\n"
            ":param force: force vector (dimension ni)")
-      .def("updateForceDiff", &ImpulseModelAbstract_wrap::updateForceDiff, bp::args(" self", " data", " df_dq"),
+      .def("updateForceDiff", &ImpulseModelAbstract_wrap::updateForceDiff, bp::args("self", "data", "df_dq"),
            "Update the Jacobian of the impulse force.\n\n"
            "The Jacobian df_dv is zero, then we ignore it\n"
            ":param data: impulse data\n"
            ":param df_dq: Jacobian of the impulse force (dimension ni*nv)")
       .def("createData", &ImpulseModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
-           bp::args(" self", " data"),
+           bp::args("self", "data"),
            "Create the impulse data.\n\n"
            "Each impulse model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined impulse.\n"
@@ -92,7 +91,7 @@ void exposeImpulseAbstract() {
   bp::class_<ImpulseDataAbstract, boost::noncopyable>(
       "ImpulseDataAbstract", "Abstract class for impulse data.\n\n",
       bp::init<ImpulseModelAbstract*, pinocchio::Data*>(
-          bp::args(" self", " model", " data"),
+          bp::args("self", "model", "data"),
           "Create common data shared between impulse models.\n\n"
           ":param model: impulse model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])

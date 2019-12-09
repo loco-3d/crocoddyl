@@ -34,7 +34,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
     while (true) {
       try {
         computeDirection(recalc);
-      } catch (std::runtime_error& e) {
+      } catch (std::exception& e) {
         recalc = false;
         increaseRegularization();
         if (xreg_ == regmax_) {
@@ -54,7 +54,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
 
       try {
         dV_ = tryStep(steplength_);
-      } catch (std::runtime_error& e) {
+      } catch (std::exception& e) {
         continue;
       }
       expectedImprovement();

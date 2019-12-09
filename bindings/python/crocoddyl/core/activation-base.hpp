@@ -49,21 +49,20 @@ void exposeActivationAbstract() {
       "In crocoddyl, an activation model takes the residual vector and computes the activation\n"
       "value and its derivatives from it. Activation value and its derivatives are computed by\n"
       "calc() and calcDiff(), respectively.",
-      bp::init<int>(bp::args(" self", " nr"),
+      bp::init<int>(bp::args("self", "nr"),
                     "Initialize the activation model.\n\n"
                     ":param nr: dimension of the cost-residual vector"))
-      .def("calc", pure_virtual(&ActivationModelAbstract_wrap::calc), bp::args(" self", " data", " r"),
+      .def("calc", pure_virtual(&ActivationModelAbstract_wrap::calc), bp::args("self", "data", "r"),
            "Compute the activation value.\n\n"
            ":param data: activation data\n"
            ":param r: residual vector")
-      .def("calcDiff", pure_virtual(&ActivationModelAbstract_wrap::calcDiff),
-           bp::args(" self", " data", " r", " recalc=True"),
+      .def("calcDiff", pure_virtual(&ActivationModelAbstract_wrap::calcDiff), bp::args("self", "data", "r", "recalc"),
            "Compute the derivatives of the residual.\n\n"
            "It computes the partial derivatives of the residual vector function\n"
            ":param data: activation data\n"
            ":param r: residual vector \n"
            ":param recalc: If true, it updates the residual value.")
-      .def("createData", &ActivationModelAbstract_wrap::createData, bp::args(" self"),
+      .def("createData", &ActivationModelAbstract_wrap::createData, bp::args("self"),
            "Create the activation data.\n\n")
       .add_property(
           "nr",
@@ -74,7 +73,7 @@ void exposeActivationAbstract() {
 
   bp::class_<ActivationDataAbstract, boost::noncopyable>(
       "ActivationDataAbstract", "Abstract class for activation data.\n\n",
-      bp::init<ActivationModelAbstract*>(bp::args(" self", " model"),
+      bp::init<ActivationModelAbstract*>(bp::args("self", "model"),
                                          "Create common data shared between AMs.\n\n"
                                          "The action data uses the model in order to first process it.\n"
                                          ":param model: action model"))

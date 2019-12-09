@@ -22,16 +22,16 @@ void exposeActivationWeightedQuad() {
       "Weighted quadratic activation model.\n\n"
       "A weighted quadratic action describes a quadratic function that depends on the residual,\n"
       "i.e. 0.5 *||r||_w^2.",
-      bp::init<Eigen::VectorXd>(bp::args(" self", " weights"),
+      bp::init<Eigen::VectorXd>(bp::args("self", "weights"),
                                 "Initialize the activation model.\n\n"
                                 ":param weights: weights vector, note that nr=weights.size()"))
-      .def("calc", &ActivationModelWeightedQuad::calc_wrap, bp::args(" self", " data", " r"),
+      .def("calc", &ActivationModelWeightedQuad::calc_wrap, bp::args("self", "data", "r"),
            "Compute the 0.5 * ||r||_w^2.\n\n"
            ":param data: activation data\n"
            ":param r: residual vector")
       .def<void (ActivationModelWeightedQuad::*)(const boost::shared_ptr<ActivationDataAbstract>&,
                                                  const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &ActivationModelWeightedQuad::calcDiff_wrap, bp::args(" self", " data", " r", " recalc=True"),
+          "calcDiff", &ActivationModelWeightedQuad::calcDiff_wrap, bp::args("self", "data", "r", "recalc"),
           "Compute the derivatives of a quadratic function.\n\n"
           ":param data: activation data\n"
           "Note that the Hessian is constant, so we don't write again this value.\n"
@@ -39,8 +39,8 @@ void exposeActivationWeightedQuad() {
           ":param recalc: If true, it updates the residual value.")
       .def<void (ActivationModelWeightedQuad::*)(const boost::shared_ptr<ActivationDataAbstract>&,
                                                  const Eigen::VectorXd&)>(
-          "calcDiff", &ActivationModelWeightedQuad::calcDiff_wrap, bp::args(" self", " data", " r"))
-      .def("createData", &ActivationModelWeightedQuad::createData, bp::args(" self"),
+          "calcDiff", &ActivationModelWeightedQuad::calcDiff_wrap, bp::args("self", "data", "r"))
+      .def("createData", &ActivationModelWeightedQuad::createData, bp::args("self"),
            "Create the weighted quadratic action data.")
       .add_property(
           "weights",

@@ -65,13 +65,13 @@ void exposeDifferentialActionAbstract() {
       "computing the dynamics, cost functions and their derivatives. These computations are\n"
       "mainly carry on inside calc() and calcDiff(), respectively.",
       bp::init<boost::shared_ptr<StateAbstract>, int, bp::optional<int> >(
-          bp::args(" self", " state", " nu", " nr=1"),
+          bp::args("self", "state", "nu", "nr"),
           "Initialize the differential action model.\n\n"
           "You can also describe autonomous systems by setting nu = 0.\n"
           ":param state: state\n"
           ":param nu: dimension of control vector\n"
-          ":param nr: dimension of cost-residual vector)"))
-      .def("calc", pure_virtual(&DifferentialActionModelAbstract_wrap::calc), bp::args(" self", " data", " x", " u"),
+          ":param nr: dimension of cost-residual vector (default 1)"))
+      .def("calc", pure_virtual(&DifferentialActionModelAbstract_wrap::calc), bp::args("self", "data", "x", "u"),
            "Compute the state evolution and cost value.\n\n"
            "First, it describes the time-continuous evolution of our dynamical system\n"
            "in which along predefined integrated action self we might obtain the\n"
@@ -82,7 +82,7 @@ void exposeDifferentialActionAbstract() {
            ":param x: state vector\n"
            ":param u: control input")
       .def("calcDiff", pure_virtual(&DifferentialActionModelAbstract_wrap::calcDiff),
-           bp::args(" self", " data", " x", " u", " recalc=True"),
+           bp::args("self", "data", "x", "u", "recalc"),
            "Compute the derivatives of the dynamics and cost functions.\n\n"
            "It computes the partial derivatives of the dynamical system and the cost\n"
            "function. If recalc == True, it first updates the state evolution and\n"
@@ -91,8 +91,8 @@ void exposeDifferentialActionAbstract() {
            ":param data: differential action data\n"
            ":param x: state vector\n"
            ":param u: control input\n"
-           ":param recalc: If true, it updates the state evolution and the cost value.")
-      .def("createData", &DifferentialActionModelAbstract_wrap::createData, bp::args(" self"),
+           ":param recalc: If true, it updates the state evolution and the cost value (default True).")
+      .def("createData", &DifferentialActionModelAbstract_wrap::createData, bp::args("self"),
            "Create the differential action data.\n\n"
            "Each differential action model has its own data that needs to be\n"
            "allocated. This function returns the allocated data for a predefined\n"
@@ -133,7 +133,7 @@ void exposeDifferentialActionAbstract() {
       "model.createData() and contains the first- and second- order derivatives of the dynamics\n"
       "and cost function, respectively.",
       bp::init<DifferentialActionModelAbstract*>(
-          bp::args(" self", " model"),
+          bp::args("self", "model"),
           "Create common data shared between DAMs.\n\n"
           "The differential action data uses the model in order to first process it.\n"
           ":param model: differential action model"))

@@ -38,7 +38,7 @@ void exposeImpulseMultiple() {
 
   bp::class_<ImpulseItem, boost::noncopyable>(
       "ImpulseItem", "Describe a impulse item.\n\n",
-      bp::init<std::string, boost::shared_ptr<ImpulseModelAbstract> >(bp::args(" self", " name", " impulse"),
+      bp::init<std::string, boost::shared_ptr<ImpulseModelAbstract> >(bp::args("self", "name", "impulse"),
                                                                       "Initialize the impulse item.\n\n"
                                                                       ":param name: impulse name\n"
                                                                       ":param impulse: impulse model"))
@@ -50,17 +50,17 @@ void exposeImpulseMultiple() {
 
   bp::class_<ImpulseModelMultiple, boost::noncopyable>(
       "ImpulseModelMultiple",
-      bp::init<boost::shared_ptr<StateMultibody> >(bp::args(" self", " state"),
+      bp::init<boost::shared_ptr<StateMultibody> >(bp::args("self", "state"),
                                                    "Initialize the multiple impulse model.\n\n"
                                                    ":param state: state of the multibody system"))
-      .def("addImpulse", &ImpulseModelMultiple::addImpulse, bp::args(" self", " name", " impulse"),
+      .def("addImpulse", &ImpulseModelMultiple::addImpulse, bp::args("self", "name", "impulse"),
            "Add a impulse item.\n\n"
            ":param name: impulse name\n"
            ":param impulse: impulse model")
-      .def("removeImpulse", &ImpulseModelMultiple::removeImpulse, bp::args(" self", " name"),
+      .def("removeImpulse", &ImpulseModelMultiple::removeImpulse, bp::args("self", "name"),
            "Remove a impulse item.\n\n"
            ":param name: impulse name")
-      .def("calc", &ImpulseModelMultiple::calc_wrap, bp::args(" self", " data", " x"),
+      .def("calc", &ImpulseModelMultiple::calc_wrap, bp::args("self", "data", "x"),
            "Compute the total impulse Jacobian and drift.\n\n"
            "The rigid impulse model throught acceleration-base holonomic constraint\n"
            "of the impulse frame placement.\n"
@@ -68,32 +68,32 @@ void exposeImpulseMultiple() {
            ":param x: state vector")
       .def("calcDiff", &ImpulseModelMultiple::calcDiff_wrap,
            ImpulseModelMultiple_calcDiff_wraps(
-               bp::args(" self", " data", " x", " recalc=True"),
+               bp::args("self", "data", "x", "recalc"),
                "Compute the derivatives of the total impulse holonomic constraint.\n\n"
                "The rigid impulse model throught acceleration-base holonomic constraint\n"
                "of the impulse frame placement.\n"
                ":param data: impulse data\n"
                ":param x: state vector\n"
                ":param recalc: If true, it updates the impulse Jacobian and drift."))
-      .def("updateVelocity", &ImpulseModelMultiple::updateVelocity, bp::args(" self", " data", " vnext"),
+      .def("updateVelocity", &ImpulseModelMultiple::updateVelocity, bp::args("self", "data", "vnext"),
            "Update the velocity after impulse.\n\n"
            ":param data: impulse data\n"
            ":param vnext: velocity after impulse (dimension nv)")
-      .def("updateForce", &ImpulseModelMultiple::updateForce, bp::args(" self", " data", " lambda"),
+      .def("updateForce", &ImpulseModelMultiple::updateForce, bp::args("self", "data", "lambda"),
            "Convert the force into a stack of spatial forces.\n\n"
            ":param data: impulse data\n"
            ":param force: force vector (dimension ni)")
-      .def("updateVelocityDiff", &ImpulseModelMultiple::updateVelocityDiff, bp::args(" self", " data", " dvnext_dx"),
+      .def("updateVelocityDiff", &ImpulseModelMultiple::updateVelocityDiff, bp::args("self", "data", "dvnext_dx"),
            "Update the velocity after impulse.\n\n"
            ":param data: impulse data\n"
            ":param dvnext_dx: Jacobian of the impulse velocity (dimension nv*ndx)")
-      .def("updateForceDiff", &ImpulseModelMultiple::updateForceDiff, bp::args(" self", " data", " df_dq"),
+      .def("updateForceDiff", &ImpulseModelMultiple::updateForceDiff, bp::args("self", "data", "df_dq"),
            "Update the Jacobian of the impulse force.\n\n"
            "The Jacobian df_dv is zero, then we ignore it\n"
            ":param data: impulse data\n"
            ":param df_dq: Jacobian of the impulse force (dimension ni*nv)")
       .def("createData", &ImpulseModelMultiple::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
-           bp::args(" self", " data"),
+           bp::args("self", "data"),
            "Create the total impulse data.\n\n"
            ":param data: Pinocchio data\n"
            ":return total impulse data.")
@@ -111,7 +111,7 @@ void exposeImpulseMultiple() {
   bp::class_<ImpulseDataMultiple, boost::shared_ptr<ImpulseDataMultiple>, bp::bases<ImpulseDataAbstract> >(
       "ImpulseDataMultiple", "Data class for multiple impulses.\n\n",
       bp::init<ImpulseModelMultiple*, pinocchio::Data*>(
-          bp::args(" self", " model", " data"),
+          bp::args("self", "model", "data"),
           "Create multiimpulse data.\n\n"
           ":param model: multiimpulse model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])

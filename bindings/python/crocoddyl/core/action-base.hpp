@@ -64,13 +64,13 @@ void exposeActionAbstract() {
       "derivatives. These computations are mainly carry on inside calc() and calcDiff(),\n"
       "respectively.",
       bp::init<boost::shared_ptr<StateAbstract>, int, bp::optional<int> >(
-          bp::args(" self", " state", " nu", " nr=1"),
+          bp::args("self", "state", "nu", "nr"),
           "Initialize the action model.\n\n"
           "You can also describe autonomous systems by setting nu = 0.\n"
           ":param state: state description,\n"
           ":param nu: dimension of control vector,\n"
-          ":param nr: dimension of the cost-residual vector"))
-      .def("calc", pure_virtual(&ActionModelAbstract_wrap::calc), bp::args(" self", " data", " x", " u"),
+          ":param nr: dimension of the cost-residual vector (default 1)"))
+      .def("calc", pure_virtual(&ActionModelAbstract_wrap::calc), bp::args("self", "data", "x", "u"),
            "Compute the next state and cost value.\n\n"
            "It describes the time-discrete evolution of our dynamical system\n"
            "in which we obtain the next state. Additionally it computes the\n"
@@ -78,8 +78,7 @@ void exposeActionAbstract() {
            ":param data: action data\n"
            ":param x: time-discrete state vector\n"
            ":param u: time-discrete control input")
-      .def("calcDiff", pure_virtual(&ActionModelAbstract_wrap::calcDiff),
-           bp::args(" self", " data", " x", " u", " recalc=True"),
+      .def("calcDiff", pure_virtual(&ActionModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u", "recalc"),
            "Compute the derivatives of the dynamics and cost functions.\n\n"
            "It computes the partial derivatives of the dynamical system and the\n"
            "cost function. If recalc == True, it first updates the state evolution\n"
@@ -88,22 +87,22 @@ void exposeActionAbstract() {
            ":param data: action data\n"
            ":param x: time-discrete state vector\n"
            ":param u: time-discrete control input\n"
-           ":param recalc: If true, it updates the state evolution and the cost value.")
-      .def("createData", &ActionModelAbstract_wrap::createData, bp::args(" self"),
+           ":param recalc: If true, it updates the state evolution and the cost value (default True).")
+      .def("createData", &ActionModelAbstract_wrap::createData, bp::args("self"),
            "Create the action data.\n\n"
            "Each action model (AM) has its own data that needs to be allocated.\n"
            "This function returns the allocated data for a predefined AM.\n"
            ":return AM data.")
       .def("quasiStatic", &ActionModelAbstract_wrap::quasiStatic_wrap,
            ActionModel_quasiStatic_wraps(
-               bp::args(" self", " data", " x", " maxiter=100", " tol=1e-9"),
+               bp::args("self", "data", "x", "maxiter", "tol"),
                "Compute the quasic-static control given a state.\n\n"
                "It runs an iterative Newton step in order to compute the quasic-static regime\n"
                "given a state configuration.\n"
                ":param data: action data\n"
                ":param x: discrete-time state vector\n"
                ":param maxiter: maximum allowed number of iterations\n"
-               ":param tol: stopping tolerance criteria\n"
+               ":param tol: stopping tolerance criteria (default 1e-9)\n"
                ":return u: quasic-static control"))
       .add_property(
           "nu", bp::make_function(&ActionModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
@@ -137,7 +136,7 @@ void exposeActionAbstract() {
       "user-defined action model. The action data typically is allocated onces by running\n"
       "model.createData() and contains the first- and second- order derivatives of the dynamics\n"
       "and cost function, respectively.",
-      bp::init<ActionModelAbstract*>(bp::args(" self", " model"),
+      bp::init<ActionModelAbstract*>(bp::args("self", "model"),
                                      "Create common data shared between AMs.\n\n"
                                      "The action data uses the model in order to first process it.\n"
                                      ":param model: action model"))
