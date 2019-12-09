@@ -13,6 +13,7 @@
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/data/contacts.hpp"
 #include "crocoddyl/multibody/frames.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -50,7 +51,7 @@ struct CostDataContactForce : public CostDataAbstract {
     // Check that proper shared data has been passed
     DataCollectorContact* d = dynamic_cast<DataCollectorContact*>(shared);
     if (d == NULL) {
-      throw std::invalid_argument("the shared data should be derived from DataCollectorContact");
+      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorContact");
     }
 
     // Avoids data casting at runtime
@@ -65,7 +66,7 @@ struct CostDataContactForce : public CostDataAbstract {
       }
     }
     if (!found_contact) {
-      throw std::domain_error("there isn't defined contact data for " + frame_name);
+      throw_pretty("Domain error: there isn't defined contact data for " + frame_name);
     }
   }
 

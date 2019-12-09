@@ -11,6 +11,7 @@
 
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -54,7 +55,7 @@ struct CostDataCentroidalMomentum : public CostDataAbstract {
     // Check that proper shared data has been passed
     DataCollectorMultibody* d = dynamic_cast<DataCollectorMultibody*>(shared);
     if (d == NULL) {
-      throw std::invalid_argument("the shared data should be derived from DataCollectorMultibody");
+      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibody");
     }
 
     // Avoids data casting at runtime
