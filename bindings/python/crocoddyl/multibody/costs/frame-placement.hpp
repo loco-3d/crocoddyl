@@ -20,21 +20,21 @@ void exposeCostFramePlacement() {
   bp::class_<CostModelFramePlacement, bp::bases<CostModelAbstract> >(
       "CostModelFramePlacement",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FramePlacement, int>(
-          bp::args(" self", " state", " activation", " Mref", " nu"),
+          bp::args("self", "state", "activation", "Mref", "nu"),
           "Initialize the frame placement cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param Mref: reference frame placement\n"
           ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FramePlacement>(
-          bp::args(" self", " state", " activation", " Mref"),
+          bp::args("self", "state", "activation", "Mref"),
           "Initialize the frame placement cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param Mref: reference frame placement"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FramePlacement, int>(
-          bp::args(" self", " state", " Mref", " nu"),
+          bp::args("self", "state", "Mref", "nu"),
           "Initialize the frame placement cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(6).\n"
@@ -42,37 +42,36 @@ void exposeCostFramePlacement() {
           ":param Mref: reference frame placement\n"
           ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FramePlacement>(
-          bp::args(" self", " state", " Mref"),
+          bp::args("self", "state", "Mref"),
           "Initialize the frame placement cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(6), and nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
           ":param Mref: reference frame placement"))
       .def("calc", &CostModelFramePlacement::calc_wrap,
-           CostModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
+           CostModel_calc_wraps(bp::args("self", "data", "x", "u"),
                                 "Compute the frame placement cost.\n\n"
                                 ":param data: cost data\n"
                                 ":param x: time-discrete state vector\n"
                                 ":param u: time-discrete control input"))
       .def<void (CostModelFramePlacement::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                              const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &CostModelFramePlacement::calcDiff_wrap,
-          bp::args(" self", " data", " x", " u=None", " recalc=True"),
+          "calcDiff", &CostModelFramePlacement::calcDiff_wrap, bp::args("self", "data", "x", "u", "recalc"),
           "Compute the derivatives of the frame placement cost.\n\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n"
-          ":param recalc: If true, it updates the state evolution and the cost value.")
+          ":param recalc: If true, it updates the state evolution and the cost value (default True).")
       .def<void (CostModelFramePlacement::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                              const Eigen::VectorXd&)>(
-          "calcDiff", &CostModelFramePlacement::calcDiff_wrap, bp::args(" self", " data", " x", " u"))
+          "calcDiff", &CostModelFramePlacement::calcDiff_wrap, bp::args("self", "data", "x", "u"))
       .def<void (CostModelFramePlacement::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
-          "calcDiff", &CostModelFramePlacement::calcDiff_wrap, bp::args(" self", " data", " x"))
+          "calcDiff", &CostModelFramePlacement::calcDiff_wrap, bp::args("self", "data", "x"))
       .def<void (CostModelFramePlacement::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                              const bool&)>("calcDiff", &CostModelFramePlacement::calcDiff_wrap,
-                                                           bp::args(" self", " data", " x", " recalc"))
+                                                           bp::args("self", "data", "x", "recalc"))
       .def("createData", &CostModelFramePlacement::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
-           bp::args(" self", " data"),
+           bp::args("self", "data"),
            "Create the frame placement cost data.\n\n"
            "Each cost model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined cost.\n"
@@ -86,7 +85,7 @@ void exposeCostFramePlacement() {
   bp::class_<CostDataFramePlacement, bp::bases<CostDataAbstract> >(
       "CostDataFramePlacement", "Data for frame placement cost.\n\n",
       bp::init<CostModelFramePlacement*, DataCollectorAbstract*>(
-          bp::args(" self", " model", " data"),
+          bp::args("self", "model", "data"),
           "Create frame placement cost data.\n\n"
           ":param model: frame placement cost model\n"
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])

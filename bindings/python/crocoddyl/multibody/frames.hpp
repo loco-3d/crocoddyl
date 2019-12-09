@@ -22,7 +22,7 @@ void exposeFrames() {
       "FrameTranslation",
       "Frame translation describe using Pinocchio.\n\n"
       "It defines a frame translation (3D vector) for a given frame ID",
-      bp::init<FrameIndex, Eigen::Vector3d>(bp::args(" self", " frame", " oxf"),
+      bp::init<FrameIndex, Eigen::Vector3d>(bp::args("self", "frame", "oxf"),
                                             "Initialize the frame translation.\n\n"
                                             ":param frame: frame ID\n"
                                             ":param oxf: Frame translation w.r.t. the origin"))
@@ -35,7 +35,7 @@ void exposeFrames() {
       "FrameRotation",
       "Frame rotation describe using Pinocchio.\n\n"
       "It defines a frame rotation (rotation matrix) for a given frame ID",
-      bp::init<FrameIndex, Eigen::Matrix3d>(bp::args(" self", " frame", " oRf"),
+      bp::init<FrameIndex, Eigen::Matrix3d>(bp::args("self", "frame", "oRf"),
                                             "Initialize the frame translation.\n\n"
                                             ":param frame: frame ID\n"
                                             ":param oRf: Frame rotation w.r.t. the origin"))
@@ -48,7 +48,7 @@ void exposeFrames() {
       "FramePlacement",
       "Frame placement describe using Pinocchio.\n\n"
       "It defines a frame placement (SE(3) point) for a given frame ID",
-      bp::init<FrameIndex, pinocchio::SE3>(bp::args(" self", " frame", " oMf"),
+      bp::init<FrameIndex, pinocchio::SE3>(bp::args("self", "frame", "oMf"),
                                            "Initialize the frame placement.\n\n"
                                            ":param frame: frame ID\n"
                                            ":param oMf: Frame placement w.r.t. the origin"))
@@ -60,7 +60,7 @@ void exposeFrames() {
       "FrameMotion",
       "Frame motion describe using Pinocchio.\n\n"
       "It defines a frame motion (tangent of SE(3) point) for a given frame ID",
-      bp::init<FrameIndex, pinocchio::Motion>(bp::args(" self", " frame", " oMf"),
+      bp::init<FrameIndex, pinocchio::Motion>(bp::args("self", "frame", "oMf"),
                                               "Initialize the frame motion.\n\n"
                                               ":param frame: frame ID\n"
                                               ":param oMf: Frame motion w.r.t. the origin"))
@@ -72,7 +72,7 @@ void exposeFrames() {
       "FrameForce",
       "Frame force describe using Pinocchio.\n\n"
       "It defines a frame motion (tangent of SE(3) point) for a given frame ID",
-      bp::init<FrameIndex, pinocchio::Force>(bp::args(" self", " frame", " oFf"),
+      bp::init<FrameIndex, pinocchio::Force>(bp::args("self", "frame", "oFf"),
                                              "Initialize the frame motion.\n\n"
                                              ":param frame: frame ID\n"
                                              ":param oFf: Frame force w.r.t. the origin"))

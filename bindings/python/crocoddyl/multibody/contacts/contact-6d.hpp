@@ -24,38 +24,38 @@ void exposeContact6D() {
       "The calc and calcDiff functions compute the contact Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, FramePlacement, int, bp::optional<Eigen::Vector2d> >(
-          bp::args(" self", " state", " Mref", " nu=state.nv", " gains=np.matrix([ [0.],[0.] ])"),
+          bp::args("self", "state", "Mref", "nu", "gains"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param Mref: reference frame placement\n"
           ":param nu: dimension of control vector\n"
-          ":param gains: gains of the contact model"))
+          ":param gains: gains of the contact model (default np.matrix([ [0.],[0.] ]))"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FramePlacement, bp::optional<Eigen::Vector2d> >(
-          bp::args(" self", " state", " Mref", " gains=np.matrix([ [0.],[0.] ])"),
+          bp::args("self", "state", "Mref", "gains"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param Mref: reference frame placement\n"
           ":param gains = gains of the contact model"))
-      .def("calc", &ContactModel6D::calc_wrap, bp::args(" self", " data", " x"),
+      .def("calc", &ContactModel6D::calc_wrap, bp::args("self", "data", "x"),
            "Compute the 6D contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
            ":param data: contact data\n"
            ":param x: state vector")
       .def("calcDiff", &ContactModel6D::calcDiff_wrap,
-           ContactModel_calcDiff_wraps(bp::args(" self", " data", " x", " recalc=True"),
+           ContactModel_calcDiff_wraps(bp::args("self", "data", "x", "recalc"),
                                        "Compute the derivatives of the 6D contact holonomic constraint.\n\n"
                                        "The rigid contact model throught acceleration-base holonomic constraint\n"
                                        "of the contact frame placement.\n"
                                        ":param data: cost data\n"
                                        ":param x: state vector\n"
                                        ":param recalc: If true, it updates the contact Jacobian and drift."))
-      .def("updateForce", &ContactModel6D::updateForce, bp::args(" self", " data", " force"),
+      .def("updateForce", &ContactModel6D::updateForce, bp::args("self", "data", "force"),
            "Convert the Lagrangian into a stack of spatial forces.\n\n"
            ":param data: cost data\n"
            ":param force: force vector (dimension 6)")
       .def("createData", &ContactModel6D::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
-           bp::args(" self", " data"),
+           bp::args("self", "data"),
            "Create the 6D contact data.\n\n"
            "Each contact model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined cost.\n"
@@ -72,7 +72,7 @@ void exposeContact6D() {
   bp::class_<ContactData6D, bp::bases<ContactDataAbstract> >(
       "ContactData6D", "Data for 6D contact.\n\n",
       bp::init<ContactModel6D*, pinocchio::Data*>(
-          bp::args(" self", " model", " data"),
+          bp::args("self", "model", "data"),
           "Create 6D contact data.\n\n"
           ":param model: 6D contact model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])

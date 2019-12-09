@@ -1,7 +1,7 @@
 import numpy as np
 
 EPS = np.finfo(float).eps
-NUMDIFF_MODIFIER = 1e4
+NUMDIFF_MODIFIER = 3e4
 
 
 class NumDiffException(Exception):

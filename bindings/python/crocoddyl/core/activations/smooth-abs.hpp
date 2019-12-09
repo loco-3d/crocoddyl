@@ -22,24 +22,24 @@ void exposeActivationSmoothAbs() {
       "Smooth-absolute activation model.\n\n"
       "It describes a smooth representation of an absolute activation (1-norm), i.e.\n"
       "sqrt{1 + ||r||^2}.",
-      bp::init<int>(bp::args(" self", " nr"),
+      bp::init<int>(bp::args("self", "nr"),
                     "Initialize the activation model.\n\n"
                     ":param nr: dimension of the cost-residual vector"))
-      .def("calc", &ActivationModelSmoothAbs::calc_wrap, bp::args(" self", " data", " r"),
+      .def("calc", &ActivationModelSmoothAbs::calc_wrap, bp::args("self", "data", "r"),
            "Compute the sqrt{1 + ||r||^2}.\n\n"
            ":param data: activation data\n"
            ":param r: residual vector")
       .def<void (ActivationModelSmoothAbs::*)(const boost::shared_ptr<ActivationDataAbstract>&, const Eigen::VectorXd&,
                                               const bool&)>("calcDiff", &ActivationModelSmoothAbs::calcDiff_wrap,
-                                                            bp::args(" self", " data", " r", " recalc=True"),
+                                                            bp::args("self", "data", "r", "recalc"),
                                                             "Compute the derivatives of a smoot-abs function.\n\n"
                                                             ":param data: activation data\n"
                                                             ":param r: residual vector \n"
                                                             ":param recalc: If true, it updates the residual value.")
       .def<void (ActivationModelSmoothAbs::*)(const boost::shared_ptr<ActivationDataAbstract>&,
                                               const Eigen::VectorXd&)>(
-          "calcDiff", &ActivationModelSmoothAbs::calcDiff_wrap, bp::args(" self", " data", " r"))
-      .def("createData", &ActivationModelSmoothAbs::createData, bp::args(" self"),
+          "calcDiff", &ActivationModelSmoothAbs::calcDiff_wrap, bp::args("self", "data", "r"))
+      .def("createData", &ActivationModelSmoothAbs::createData, bp::args("self"),
            "Create the smooth-abs activation data.\n\n");
 }
 

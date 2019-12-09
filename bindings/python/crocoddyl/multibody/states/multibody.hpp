@@ -28,23 +28,23 @@ void exposeStateMultibody() {
       "Jacobians for the differentiate and integrate operators. Note that this code\n"
       "can be reused in any robot that is described through its Pinocchio model.",
       bp::init<pinocchio::Model&>(
-          bp::args(" self", " pinocchioModel"),
+          bp::args("self", "pinocchioModel"),
           "Initialize the multibody state given a Pinocchio model.\n\n"
           ":param pinocchioModel: pinocchio model (i.e. multibody model)")[bp::with_custodian_and_ward<1, 2>()])
-      .def("zero", &StateMultibody::zero, bp::args(" self"),
+      .def("zero", &StateMultibody::zero, bp::args("self"),
            "Return the neutral robot configuration with zero velocity.\n\n"
            ":return neutral robot configuration with zero velocity")
-      .def("rand", &StateMultibody::rand, bp::args(" self"),
+      .def("rand", &StateMultibody::rand, bp::args("self"),
            "Return a random reference state.\n\n"
            ":return random reference state")
-      .def("diff", &StateMultibody::diff_wrap, bp::args(" self", " x0", " x1"),
+      .def("diff", &StateMultibody::diff_wrap, bp::args("self", "x0", "x1"),
            "Operator that differentiates the two robot states.\n\n"
            "It returns the value of x1 [-] x0 operation. This operator uses the Lie\n"
            "algebra since the robot's root could lie in the SE(3) manifold.\n"
            ":param x0: current state (dim state.nx()).\n"
            ":param x1: next state (dim state.nx()).\n"
            ":return x1 - x0 value (dim state.nx()).")
-      .def("integrate", &StateMultibody::integrate_wrap, bp::args(" self", " x", " dx"),
+      .def("integrate", &StateMultibody::integrate_wrap, bp::args("self", "x", "dx"),
            "Operator that integrates the current robot state.\n\n"
            "It returns the value of x [+] dx operation. This operator uses the Lie\n"
            "algebra since the robot's root could lie in the SE(3) manifold.\n"
@@ -54,7 +54,7 @@ void exposeStateMultibody() {
            ":param dx: displacement of the state (dim state.ndx()).\n"
            ":return x + dx value (dim state.nx()).")
       .def("Jdiff", &StateMultibody::Jdiff_wrap,
-           Jdiffs(bp::args(" self", " x0", " x1", " firstsecond = 'both'"),
+           Jdiffs(bp::args("self", "x0", "x1", "firstsecond"),
                   "Compute the partial derivatives of the diff operator.\n\n"
                   "Both Jacobian matrices are represented throught an identity matrix, with the exception\n"
                   "that the robot's root is defined as free-flying joint (SE(3)). By default, this\n"
@@ -66,7 +66,7 @@ void exposeStateMultibody() {
                   ":param firstsecond: desired partial derivative\n"
                   ":return the partial derivative(s) of the diff(x0, x1) function"))
       .def("Jintegrate", &StateMultibody::Jintegrate_wrap,
-           Jintegrates(bp::args(" self", " x", " dx", " firstsecond = 'both'"),
+           Jintegrates(bp::args("self", "x", "dx", "firstsecond"),
                        "Compute the partial derivatives of arithmetic addition.\n\n"
                        "Both Jacobian matrices are represented throught an identity matrix. with the exception\n"
                        "that the robot's root is defined as free-flying joint (SE(3)). By default, this\n"

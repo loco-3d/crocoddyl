@@ -29,13 +29,13 @@ void exposeDifferentialActionLQR() {
       "where Fq, Fv, Fu and f0 are randomly chosen constant terms. On the other\n"
       "hand the cost function is given by\n"
       "  l(x,u) = 1/2 [x,u].T [Lxx Lxu; Lxu.T Luu] [x,u] + [lx,lu].T [x,u].",
-      bp::init<int, int, bp::optional<bool> >(bp::args(" self", " nq", " nu", " driftFree=True"),
+      bp::init<int, int, bp::optional<bool> >(bp::args("self", "nq", "nu", "driftFree"),
                                               "Initialize the differential LQR action model.\n\n"
                                               ":param nx: dimension of the state vector\n"
                                               ":param nu: dimension of the control vector\n"
-                                              ":param driftFree: enable/disable the bias term of the linear dynamics"))
+                                              ":param driftFree: enable/disable the bias term of the linear dynamics (default True)"))
       .def("calc", &DifferentialActionModelLQR::calc_wrap,
-           DiffActionModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
+           DiffActionModel_calc_wraps(bp::args("self", "data", "x", "u"),
                                       "Compute the next state and cost value.\n\n"
                                       "It describes the time-continuous evolution of the LQR system. Additionally it\n"
                                       "computes the cost value associated to this discrete state and control pair.\n"
@@ -44,8 +44,7 @@ void exposeDifferentialActionLQR() {
                                       ":param u: time-continuous control input"))
       .def<void (DifferentialActionModelLQR::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                 const Eigen::VectorXd&, const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &DifferentialActionModelLQR::calcDiff_wrap,
-          bp::args(" self", " data", " x", " u=None", " recalc=True"),
+          "calcDiff", &DifferentialActionModelLQR::calcDiff_wrap, bp::args("self", "data", "x", "u", "recalc"),
           "Compute the derivatives of the differential LQR dynamics and cost functions.\n\n"
           "It computes the partial derivatives of the differential LQR system and the\n"
           "cost function. If recalc == True, it first updates the state evolution\n"
@@ -54,17 +53,17 @@ void exposeDifferentialActionLQR() {
           ":param data: action data\n"
           ":param x: time-continuous state vector\n"
           ":param u: time-continuous control input\n"
-          ":param recalc: If true, it updates the state evolution and the cost value.")
+          ":param recalc: If true, it updates the state evolution and the cost value (default True).")
       .def<void (DifferentialActionModelLQR::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                 const Eigen::VectorXd&, const Eigen::VectorXd&)>(
-          "calcDiff", &DifferentialActionModelLQR::calcDiff_wrap, bp::args(" self", " data", " x", " u"))
+          "calcDiff", &DifferentialActionModelLQR::calcDiff_wrap, bp::args("self", "data", "x", "u"))
       .def<void (DifferentialActionModelLQR::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                 const Eigen::VectorXd&)>(
-          "calcDiff", &DifferentialActionModelLQR::calcDiff_wrap, bp::args(" self", " data", " x"))
+          "calcDiff", &DifferentialActionModelLQR::calcDiff_wrap, bp::args("self", "data", "x"))
       .def<void (DifferentialActionModelLQR::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                 const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &DifferentialActionModelLQR::calcDiff_wrap, bp::args(" self", " data", " x", " recalc"))
-      .def("createData", &DifferentialActionModelLQR::createData, bp::args(" self"),
+          "calcDiff", &DifferentialActionModelLQR::calcDiff_wrap, bp::args("self", "data", "x", "recalc"))
+      .def("createData", &DifferentialActionModelLQR::createData, bp::args("self"),
            "Create the differential LQR action data.")
       .add_property(
           "Fq", bp::make_function(&DifferentialActionModelLQR::get_Fq, bp::return_value_policy<bp::return_by_value>()),
@@ -101,7 +100,7 @@ void exposeDifferentialActionLQR() {
 
   bp::class_<DifferentialActionDataLQR, bp::bases<DifferentialActionDataAbstract> >(
       "DifferentialActionDataLQR", "Action data for the differential LQR system.",
-      bp::init<DifferentialActionModelLQR*>(bp::args(" self", " model"),
+      bp::init<DifferentialActionModelLQR*>(bp::args("self", "model"),
                                             "Create differential LQR data.\n\n"
                                             ":param model: differential LQR action model"));
 }

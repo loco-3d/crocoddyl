@@ -59,48 +59,47 @@ void exposeCostMultibody() {
       "It defines a template of cost model whose residual and derivatives can be retrieved from\n"
       "Pinocchio data, through the calc and calcDiff functions, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, int,
-               bp::optional<bool> >(bp::args(" self", " state", " activation", " nu=model.nv", " withResiduals=True"),
+               bp::optional<bool> >(bp::args("self", "state", "activation", "nu", "withResiduals"),
                                     "Initialize the cost model.\n\n"
                                     ":param state: state of the multibody system\n"
                                     ":param activation: Activation model\n"
-                                    ":param nu: dimension of control vector\n"
-                                    ":param withResiduals: true if the cost function has residuals"))
+                                    ":param nu: dimension of control vector (default model.nv)\n"
+                                    ":param withResiduals: true if the cost function has residuals (default True)"))
       .def(
           bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, bp::optional<bool> >(
-              bp::args(" self", " state", " activation", " withResiduals=True"),
+              bp::args("self", "state", "activation", "withResiduals"),
               "Initialize the cost model.\n\n"
               ":param state: state of the multibody system\n"
               ":param activation: Activation model\n"
-              ":param withResiduals: true if the cost function has residuals"))
+              ":param withResiduals: true if the cost function has residuals (default True)"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, int, int, bp::optional<bool> >(
-          bp::args(" self", " state", " nr", " nu=model.nv", " withResiduals=True"),
+          bp::args("self", "state", "nr", "nu", "withResiduals"),
           "Initialize the cost model.\n\n"
           "For this case the default activation model is quadratic, i.e. crocoddyl.ActivationModelQuad(nr).\n"
           ":param state: state of the multibody system\n"
           ":param nr: dimension of cost vector\n"
-          ":param nu: dimension of control vector\n"
-          ":param withResiduals: true if the cost function has residuals"))
+          ":param nu: dimension of control vector (default model.nv)\n"
+          ":param withResiduals: true if the cost function has residuals (default True)"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, int, bp::optional<bool> >(
-          bp::args(" self", " state", " nr", " withResiduals=True"),
+          bp::args("self", "state", "nr", "withResiduals"),
           "Initialize the cost model.\n\n"
           "For this case the default activation model is quadratic, i.e. crocoddyl.ActivationModelQuad(nr).\n"
           ":param state: state of the multibody system\n"
           ":param nr: dimension of cost vector\n"
-          ":param withResiduals: true if the cost function has residuals"))
-      .def("calc", pure_virtual(&CostModelAbstract_wrap::calc), bp::args(" self", " data", " x", " u"),
+          ":param withResiduals: true if the cost function has residuals (default True)"))
+      .def("calc", pure_virtual(&CostModelAbstract_wrap::calc), bp::args("self", "data", "x", "u"),
            "Compute the cost value and its residuals.\n\n"
            ":param data: cost data\n"
            ":param x: state vector\n"
            ":param u: control input")
-      .def("calcDiff", pure_virtual(&CostModelAbstract_wrap::calcDiff),
-           bp::args(" self", " data", " x", " u", " recalc=True"),
+      .def("calcDiff", pure_virtual(&CostModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u", "recalc"),
            "Compute the derivatives of the cost function and its residuals.\n\n"
            ":param data: cost data\n"
            ":param x: state vector\n"
            ":param u: control input\n"
            ":param recalc: If true, it updates the cost value.")
       .def("createData", &CostModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
-           bp::args(" self", " data"),
+           bp::args("self", "data"),
            "Create the cost data.\n\n"
            "Each cost model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined cost.\n"
@@ -123,7 +122,7 @@ void exposeCostMultibody() {
   bp::class_<CostDataAbstract, boost::noncopyable>(
       "CostDataAbstract", "Abstract class for cost data.\n\n",
       bp::init<CostModelAbstract*, DataCollectorAbstract*>(
-          bp::args(" self", " model", " data"),
+          bp::args("self", "model", "data"),
           "Create common data shared between cost models.\n\n"
           ":param model: cost model\n"
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
