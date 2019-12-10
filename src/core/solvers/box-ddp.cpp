@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include <iostream>
+#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/solvers/box-ddp.hpp"
 
 namespace crocoddyl {
@@ -55,7 +55,7 @@ void SolverBoxDDP::computeGains(const std::size_t& t) {
     u_ll_ = problem_->get_runningModels()[t]->get_u_lb() - us_[t];
     u_hl_ = problem_->get_runningModels()[t]->get_u_ub() - us_[t];
 
-    BoxQPSolution boxqp_sol = BoxQP(Quu_[t], Qu_[t], u_ll_, u_hl_, us_[t], 0.1, 100, 1e-5, ureg_);
+    BoxQPSolution boxqp_sol = BoxQP(Quu_[t], Qu_[t], u_ll_, u_hl_, us_[t], 100, 0.1, 1e-5, ureg_);
 
     Quu_inv_[t].setZero();
     for (size_t i = 0; i < boxqp_sol.free_idx.size(); ++i)

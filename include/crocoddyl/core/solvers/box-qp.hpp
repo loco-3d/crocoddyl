@@ -19,6 +19,7 @@
 #include <vector>
 
 namespace crocoddyl {
+
 struct BoxQPSolution {
   BoxQPSolution(const Eigen::MatrixXd& Hff_inv_in, const Eigen::VectorXd& x_in, const std::vector<size_t>& free_idx_in,
                 const std::vector<size_t>& clamped_idx_in)
@@ -32,35 +33,35 @@ struct BoxQPSolution {
 
 // Based on Yuval Tassa's BoxQP
 // Cf. https://www.mathworks.com/matlabcentral/fileexchange/52069-ilqg-ddp-trajectory-optimization
-inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, const Eigen::VectorXd& b_low,
-                           const Eigen::VectorXd& b_high, const Eigen::VectorXd& x_init, const double gamma,
-                           const int max_iterations, const double epsilon, const double lambda) {
-  if (max_iterations < 0) {
+inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, const Eigen::VectorXd& lb,
+                           const Eigen::VectorXd& ub, const Eigen::VectorXd& xinit, const int maxiter = 100,
+                           const double th_acceptstep = 0.1, const double th_grad = 1e-9, const double reg = 1e-9) {
+  if (maxiter < 0) {
     throw_pretty("Max iterations needs to be positive.");
   }
 
   int it = 0;
-  Eigen::VectorXd delta_xf(x_init.size()), x = x_init;
+  Eigen::VectorXd delta_xf(xinit.size()), x = xinit;
   std::vector<size_t> clamped_idx, free_idx;
-  Eigen::VectorXd grad = q + H * x_init;
+  Eigen::VectorXd grad = q + H * xinit;
   Eigen::MatrixXd Hff, Hfc, Hff_inv(H.rows(), H.cols());
   Eigen::LLT<Eigen::MatrixXd> Hff_inv_llt = Eigen::LLT<Eigen::MatrixXd>(H.rows());
 
-  Hff_inv_llt.compute(Eigen::MatrixXd::Identity(H.rows(), H.cols()) * lambda + H);
+  Hff_inv_llt.compute(Eigen::MatrixXd::Identity(H.rows(), H.cols()) * reg + H);
   Hff_inv_llt.solveInPlace(Hff_inv);
 
-  if (grad.lpNorm<Eigen::Infinity>() <= epsilon) {
-    return BoxQPSolution(Hff_inv, x_init, free_idx, clamped_idx);
+  if (grad.lpNorm<Eigen::Infinity>() <= th_grad) {
+    return BoxQPSolution(Hff_inv, xinit, free_idx, clamped_idx);
   }
 
-  while (grad.lpNorm<Eigen::Infinity>() > epsilon && it < max_iterations) {
+  while (grad.lpNorm<Eigen::Infinity>() > th_grad && it < maxiter) {
     ++it;
     grad.noalias() = q + H * x;
     clamped_idx.clear();
     free_idx.clear();
 
     for (int i = 0; i < grad.size(); ++i) {
-      if ((x(i) == b_low(i) && grad(i) > 0) || (x(i) == b_high(i) && grad(i) < 0)) {
+      if ((x(i) == lb(i) && grad(i) > 0) || (x(i) == ub(i) && grad(i) < 0)) {
         clamped_idx.push_back(i);
       } else {
         free_idx.push_back(i);
@@ -103,10 +104,10 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
 
     // The dimension of Hff has changed - reinitialise LLT
     // Hff_inv_llt = Eigen::LLT<Eigen::MatrixXd>(Hff.rows());
-    // Hff_inv_llt.compute(Eigen::MatrixXd::Identity(Hff.rows(), Hff.cols()) * lambda + Hff);
+    // Hff_inv_llt.compute(Eigen::MatrixXd::Identity(Hff.rows(), Hff.cols()) * reg + Hff);
     // Hff_inv_llt.solveInPlace(Hff_inv);
-    // TODO: Use Cholesky, however, often unstable without adapting lambda.
-    Hff_inv = (Eigen::MatrixXd::Identity(Hff.rows(), Hff.cols()) * lambda + Hff).inverse();
+    // TODO: Use Cholesky, however, often unstable without adapting reg.
+    Hff_inv = (Eigen::MatrixXd::Identity(Hff.rows(), Hff.cols()) * reg + Hff).inverse();
 
     if (clamped_idx.size() == 0) {
       // std::cout << "Hff_inv=" << Hff_inv.rows() << "x" << Hff_inv.cols() << ", q_free=" << q_free.size() << ",
@@ -124,7 +125,7 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
     for (int ai = 0; ai < alpha_space.rows(); ++ai) {
       x_new = x;
       for (size_t i = 0; i < free_idx.size(); ++i) {
-        x_new(free_idx[i]) = std::max(std::min(x(free_idx[i]) + alpha_space[ai] * delta_xf(i), b_high(i)), b_low(i));
+        x_new(free_idx[i]) = std::max(std::min(x(free_idx[i]) + alpha_space[ai] * delta_xf(i), ub(i)), lb(i));
       }
 
       double f_new = (0.5 * x_new.transpose() * H * x_new + q.transpose() * x_new)(0);
@@ -132,7 +133,7 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
 
       // armijo criterion>
       double armijo_coef = (f_old - f_new) / (grad.transpose() * x_diff + 1e-5);
-      if (armijo_coef > gamma) {
+      if (armijo_coef > th_acceptstep) {
         armijo_reached = true;
         x = x_new;
         break;
@@ -146,14 +147,6 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
   return BoxQPSolution(Hff_inv, x, free_idx, clamped_idx);
 }
 
-inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, const Eigen::VectorXd& b_low,
-                           const Eigen::VectorXd& b_high, const Eigen::VectorXd& x_init) {
-  const double epsilon = 1e-5;
-  const double gamma = 0.1;
-  const int max_iterations = 100;
-  const double lambda = 1e-5;
-  return BoxQP(H, q, b_low, b_high, x_init, gamma, max_iterations, epsilon, lambda);
-}
 }  // namespace crocoddyl
 
 #endif  // CROCODDYL_CORE_SOLVERS_BOX_QP_HPP_
