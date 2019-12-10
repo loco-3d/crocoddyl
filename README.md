@@ -22,7 +22,7 @@ It uses **Pinocchio** for fast computation of robot dynamics and its analytical 
 
 The source code is released under the [BSD 3-Clause license](LICENSE).
 
-**Authors:** [Carlos Mastalli](https://cmastalli.github.io/) and Rohan Budhiraja <br />
+**Authors:** [Carlos Mastalli](https://cmastalli.github.io/) and [Rohan Budhiraja](https://scholar.google.com/citations?user=NW9Io9AAAAAJ) <br />
 **Instructors:** Nicolas Mansard <br />
 **With additional support from the Gepetto team at LAAS-CNRS and MEMMO project. For more details see Section Credits**
 
@@ -187,7 +187,7 @@ The following people have been involved in the development of **Crocoddyl**:
 
 - [Carlos Mastalli](https://cmastalli.github.io/) (University of Edinburgh): main developer and manager of the project
 - [Nicolas Mansard](http://projects.laas.fr/gepetto/index.php/Members/NicolasMansard) (LAAS-CNRS): project instructor
-- [Rohan Budhiraja](https://scholar.google.com/citations?user=NW9Io9AAAAAJ) (LAAS-CNRS): features extension
+- [Rohan Budhiraja](https://scholar.google.com/citations?user=NW9Io9AAAAAJ) (LAAS-CNRS): core development and features extension
 - [Justin Carpentier](https://jcarpent.github.io/) (INRIA): efficient analytical rigid-body dynamics derivatives
 - [Maximilien Naveau](https://scholar.google.fr/citations?user=y_-cGlUAAAAJ&hl=fr) (MPI): unit-test support
 - [Guilhem Saurel](http://projects.laas.fr/gepetto/index.php/Members/GuilhemSaurel) (LAAS-CNRS): continuous integration and deployment
@@ -198,4 +198,4 @@ The following people have been involved in the development of **Crocoddyl**:
 
 ## Acknowledgments
 
-The development of **Pinocchio** is supported by the [EU MEMMO project](http://www.memmo-project.eu/), the [Gepetto team](http://projects.laas.fr/gepetto/) [@LAAS-CNRS](http://www.laas.fr), and the [Statistical Machine Learning and Motor Control Group](http://wcms.inf.ed.ac.uk/ipab/slmc) [@University of Edinburgh](https://www.edinburgh-robotics.org/).
+The development of **Crocoddyl** is supported by the [EU MEMMO project](http://www.memmo-project.eu/), the [Gepetto team](http://projects.laas.fr/gepetto/) [@LAAS-CNRS](http://www.laas.fr), and the [Statistical Machine Learning and Motor Control Group](http://wcms.inf.ed.ac.uk/ipab/slmc) [@University of Edinburgh](https://www.edinburgh-robotics.org/).
