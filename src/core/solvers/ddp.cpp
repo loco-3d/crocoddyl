@@ -6,9 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <iostream>
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
-#include <iostream>
 
 namespace crocoddyl {
 
