@@ -23,11 +23,12 @@ void exposeActionLQR() {
       "A Linear-Quadratic Regulator problem has a transition model of the form\n"
       "xnext(x,u) = Fx*x + Fu*u + f0. Its cost function is quadratic of the\n"
       "form: 1/2 [x,u].T [Lxx Lxu; Lxu.T Luu] [x,u] + [lx,lu].T [x,u].",
-      bp::init<int, int, bp::optional<bool> >(bp::args("self", "nx", "nu", "driftFree"),
-                                              "Initialize the LQR action model.\n\n"
-                                              ":param nx: dimension of the state vector\n"
-                                              ":param nu: dimension of the control vector\n"
-                                              ":param driftFree: enable/disable the bias term of the linear dynamics (default True)"))
+      bp::init<int, int, bp::optional<bool> >(
+          bp::args("self", "nx", "nu", "driftFree"),
+          "Initialize the LQR action model.\n\n"
+          ":param nx: dimension of the state vector\n"
+          ":param nu: dimension of the control vector\n"
+          ":param driftFree: enable/disable the bias term of the linear dynamics (default True)"))
       .def("calc", &ActionModelLQR::calc_wrap,
            ActionModel_calc_wraps(bp::args("self", "data", "x", "u"),
                                   "Compute the next state and cost value.\n\n"
