@@ -20,7 +20,9 @@ crocoddyl.switchToNumpyMatrix()
 # Loading the anymal model
 anymal = example_robot_data.loadANYmal()
 robot_model = anymal.model
-
+lims = robot_model.effortLimit
+lims *= 0.5  ## reduced artificially the torque limits
+robot_model.effortLimit = lims
 # Setting up the 3d walking problem
 lfFoot, rfFoot, lhFoot, rhFoot = 'LF_FOOT', 'RF_FOOT', 'LH_FOOT', 'RH_FOOT'
 gait = SimpleQuadrupedalGaitProblem(robot_model, lfFoot, rfFoot, lhFoot, rhFoot)
@@ -60,7 +62,8 @@ us = [m.quasiStatic(d, robot_model.defaultState) for m, d in list(zip(boxddp.mod
 
 # Solve the DDP problem
 boxddp_start = time.time()
-boxddp.solve(xs, us, 1000, False, 0.1)
+boxddp.th_stop = 1e-6
+boxddp.solve(xs, us, 200, False, 0.1)
 boxddp_end = time.time()
 print("[Box-DDP] Solved in", boxddp_end - boxddp_start, "-", boxddp.iter, "iterations")
 
