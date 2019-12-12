@@ -9,10 +9,10 @@
 #ifndef CROCODDYL_CORE_SOLVERS_BOX_QP_HPP_
 #define CROCODDYL_CORE_SOLVERS_BOX_QP_HPP_
 
-#include "crocoddyl/core/utils/exception.hpp"
-#include <Eigen/Cholesky>
-#include <Eigen/Dense>
 #include <vector>
+#include <Eigen/Dense>
+#include <Eigen/Cholesky>
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
