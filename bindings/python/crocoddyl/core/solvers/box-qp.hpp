@@ -58,7 +58,26 @@ void exposeSolverBoxQP() {
            ":param q: gradient (dimension nx)\n"
            ":param lb: lower bound (dimension nx)\n"
            ":param ub: upper bound (dimension nx)\n"
-           ":param xinit: initial guess");
+           ":param xinit: initial guess")
+      .add_property("solution",
+                    bp::make_function(&BoxQP::get_solution, bp::return_value_policy<bp::copy_const_reference>()),
+                    "QP solution.")
+      .add_property("nx", bp::make_function(&BoxQP::get_nx, bp::return_value_policy<bp::copy_const_reference>()),
+                    bp::make_function(&BoxQP::set_nx), "dimension of the decision vector.")
+      .add_property("maxiter",
+                    bp::make_function(&BoxQP::get_maxiter, bp::return_value_policy<bp::copy_const_reference>()),
+                    bp::make_function(&BoxQP::set_maxiter), "maximum number of allowed iterations.")
+      .add_property("th_acceptstep",
+                    bp::make_function(&BoxQP::get_th_acceptstep, bp::return_value_policy<bp::copy_const_reference>()),
+                    bp::make_function(&BoxQP::set_th_acceptstep), "acceptable reduction ration.")
+      .add_property("th_grad",
+                    bp::make_function(&BoxQP::get_th_grad, bp::return_value_policy<bp::copy_const_reference>()),
+                    bp::make_function(&BoxQP::set_th_grad), "convergence tolerance.")
+      .add_property("reg", bp::make_function(&BoxQP::get_reg, bp::return_value_policy<bp::copy_const_reference>()),
+                    bp::make_function(&BoxQP::set_reg), "regularization value.")
+      .add_property("alphas",
+                    bp::make_function(&BoxQP::get_alphas, bp::return_value_policy<bp::copy_const_reference>()),
+                    bp::make_function(&BoxQP::set_alphas), "list of step length (alpha) values");
 }
 
 }  // namespace python
