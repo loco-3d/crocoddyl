@@ -22,6 +22,8 @@ BoxQP::BoxQP(const std::size_t nx, std::size_t maxiter, const double th_acceptst
       xnew_(nx),
       g_(nx),
       dx_(nx) {
+  clamped_idx_.reserve(nx_);
+  free_idx_.reserve(nx_);
   const std::size_t& n_alphas_ = 10;
   alphas_.resize(n_alphas_);
   for (std::size_t n = 0; n < n_alphas_; ++n) {
@@ -85,12 +87,16 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H, const Eigen::VectorX
       if (k == 0) {  // compute the inverse of the free Hessian
         Hff_.resize(nf_, nf_);
         for (std::size_t i = 0; i < nf_; ++i) {
+          const std::size_t& fi = free_idx_[i];
           for (std::size_t j = 0; j < nf_; ++j) {
-            Hff_(i, j) = H(free_idx_[i], free_idx_[j]);
+            Hff_(i, j) = H(fi, free_idx_[j]);
           }
         }
+        if (reg_ != 0.) {
+            Hff_.diagonal().array() += reg_;
+        }
         Hff_inv_llt_ = Eigen::LLT<Eigen::MatrixXd>(nf_);
-        Hff_inv_llt_.compute(Eigen::MatrixXd::Identity(nf_, nf_) * reg_ + Hff_);
+        Hff_inv_llt_.compute(Hff_);
         Eigen::ComputationInfo info = Hff_inv_llt_.info();
         if (info != Eigen::Success) {
           throw_pretty("backward_error");
@@ -105,7 +111,7 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H, const Eigen::VectorX
       return solution_;
     }
 
-    // Compute the search direaction as Newton step along the free space
+    // Compute the search direction as Newton step along the free space
     qf_.resize(nf_);
     xf_.resize(nf_);
     xc_.resize(nc_);
@@ -113,15 +119,20 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H, const Eigen::VectorX
     Hff_.resize(nf_, nf_);
     Hfc_.resize(nf_, nc_);
     for (std::size_t i = 0; i < nf_; ++i) {
-      qf_(i) = q(free_idx_[i]);
-      xf_(i) = x_(free_idx_[i]);
+      const std::size_t& fi = free_idx_[i];
+      qf_(i) = q(fi);
+      xf_(i) = x_(fi);
       for (std::size_t j = 0; j < nf_; ++j) {
-        Hff_(i, j) = H(free_idx_[i], free_idx_[j]);
+        Hff_(i, j) = H(fi, free_idx_[j]);
       }
       for (std::size_t j = 0; j < nc_; ++j) {
-        xc_(j) = x_(clamped_idx_[j]);
-        Hfc_(i, j) = H(free_idx_[i], clamped_idx_[j]);
+        const std::size_t cj = clamped_idx_[j];
+        xc_(j) = x_(cj);
+        Hfc_(i, j) = H(fi, cj);
       }
+    }
+    if (reg_ != 0.) {
+        Hff_.diagonal().array() += reg_;
     }
     Hff_inv_llt_ = Eigen::LLT<Eigen::MatrixXd>(nf_);
     Hff_inv_llt_.compute(Hff_);
@@ -142,7 +153,7 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H, const Eigen::VectorX
       dx_(free_idx_[i]) = dxf_(i);
     }
 
-    // There is not improvement anymore
+    // There is not improving anymore
     if (dx_.lpNorm<Eigen::Infinity>() < th_grad_) {
       solution_.Hff_inv = Hff_inv_;
       solution_.x = x_;
