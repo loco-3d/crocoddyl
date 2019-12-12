@@ -46,7 +46,7 @@ void SolverBoxDDP::allocateData() {
 
 void SolverBoxDDP::computeGains(const std::size_t& t) {
   if (problem_->get_runningModels()[t]->get_nu() > 0) {
-    if (!problem_->get_runningModels()[t]->get_has_control_limits()) {
+    if (!problem_->get_runningModels()[t]->get_has_control_limits() || !is_feasible_) {
       // No control limits on this model: Use vanilla DDP
       SolverDDP::computeGains(t);
       return;
