@@ -67,7 +67,7 @@ void exposeSolverBoxQP() {
       .add_property("maxiter",
                     bp::make_function(&BoxQP::get_maxiter, bp::return_value_policy<bp::copy_const_reference>()),
                     bp::make_function(&BoxQP::set_maxiter), "maximum number of allowed iterations.")
-      .add_property("th_acceptstep",
+      .add_property("th_acceptStep",
                     bp::make_function(&BoxQP::get_th_acceptstep, bp::return_value_policy<bp::copy_const_reference>()),
                     bp::make_function(&BoxQP::set_th_acceptstep), "acceptable reduction ration.")
       .add_property("th_grad",
