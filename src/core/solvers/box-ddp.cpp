@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019, CNRS-LAAS, The University of Edinburgh
+// Copyright (C) 2018-2020, CNRS-LAAS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,7 +12,8 @@
 
 namespace crocoddyl {
 
-SolverBoxDDP::SolverBoxDDP(boost::shared_ptr<ShootingProblem> problem) : SolverDDP(problem) {
+SolverBoxDDP::SolverBoxDDP(boost::shared_ptr<ShootingProblem> problem)
+    : SolverDDP(problem), qp_(problem->get_runningModels()[0]->get_nu(), 100, 0.1, 1e-5, 0.) {
   allocateData();
 
   const std::size_t& n_alphas = 10;
@@ -55,7 +56,7 @@ void SolverBoxDDP::computeGains(const std::size_t& t) {
     u_ll_ = problem_->get_runningModels()[t]->get_u_lb() - us_[t];
     u_hl_ = problem_->get_runningModels()[t]->get_u_ub() - us_[t];
 
-    BoxQPSolution boxqp_sol = BoxQP(Quu_[t], Qu_[t], u_ll_, u_hl_, k_[t], 100, 0.1, 1e-5, 0.);
+    const BoxQPSolution& boxqp_sol = qp_.solve(Quu_[t], Qu_[t], u_ll_, u_hl_, k_[t]);
 
     Quu_inv_[t].setZero();
     for (size_t i = 0; i < boxqp_sol.free_idx.size(); ++i)

@@ -38,21 +38,27 @@ void exposeSolverBoxQP() {
                     bp::make_getter(&BoxQPSolution::clamped_idx, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&BoxQPSolution::clamped_idx), "clamped indexes");
 
-  bp::def("BoxQP", BoxQP, bp::args("H", "q", "lb", "ub", "xinit", "maxiter", "th_acceptstep", "th_grad", "reg"),
-          "Projected-Newton QP for only bound constraints.\n\n"
-          "It solves a QP problem with bound constraints of the form:\n"
-          "    x = argmin 0.5 x^T H x + q^T x\n"
-          "    subject to:   lb <= x <= ub"
-          "where nx is the number of decision variables."
-          ":param H: Hessian (dimension nx * nx)\n"
-          ":param q: gradient (dimension nx)\n"
-          ":param lb: lower bound (dimension nx)\n"
-          ":param ub: upper bound (dimension nx)\n"
-          ":param xinit: initial guess\n"
-          ":param maxiter: maximum number of allowed iterations\n"
-          ":param th_acceptstep: acceptance step condition\n"
-          ":param th_grad: gradient tolerance condition\n"
-          ":param reg: regularization");
+  bp::class_<BoxQP>("BoxQP",
+                    "Projected-Newton QP for only bound constraints.\n\n"
+                    "It solves a QP problem with bound constraints of the form:\n"
+                    "    x = argmin 0.5 x^T H x + q^T x\n"
+                    "    subject to:   lb <= x <= ub"
+                    "where nx is the number of decision variables.",
+                    bp::init<std::size_t, std::size_t, double, double, double>(
+                        bp::args("self", "nx", "maxiter", "th_acceptstep", "th_grad", "reg"),
+                        "Initialize the Projected-Newton QP for bound constraints.\n\n"
+                        ":param maxiter: maximum number of allowed iterations (default 100)\n"
+                        ":param th_acceptstep: acceptance step condition (default 0.1)\n"
+                        ":param th_grad: gradient tolerance condition (default 1e-9)\n"
+                        ":param reg: regularization (default 1e-9)"))
+      .def("solve", &BoxQP::solve, bp::return_value_policy<bp::return_by_value>(),
+           bp::args("H", "q", "lb", "ub", "xinit"),
+           "Compute the solution of bound-constrained QP based on Newton projection.\n\n"
+           ":param H: Hessian (dimension nx * nx)\n"
+           ":param q: gradient (dimension nx)\n"
+           ":param lb: lower bound (dimension nx)\n"
+           ":param ub: upper bound (dimension nx)\n"
+           ":param xinit: initial guess");
 }
 
 }  // namespace python

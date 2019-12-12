@@ -28,6 +28,7 @@ class SolverBoxDDP : public SolverDDP {
   virtual void forwardPass(const double& steplength);
 
  protected:
+  BoxQP qp_;
   std::vector<Eigen::MatrixXd> Quu_inv_;
   Eigen::VectorXd u_ll_;
   Eigen::VectorXd u_hl_;
