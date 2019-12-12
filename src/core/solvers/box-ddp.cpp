@@ -65,8 +65,6 @@ void SolverBoxDDP::computeGains(const std::size_t& t) {
     // Compute controls
     K_[t].noalias() = Quu_inv_[t] * Qxu_[t].transpose();
     k_[t].noalias() = -boxqp_sol.x;
-
-    for (size_t j = 0; j < boxqp_sol.clamped_idx.size(); ++j) K_[t](boxqp_sol.clamped_idx[j]) = 0.0;
   }
 }
 
