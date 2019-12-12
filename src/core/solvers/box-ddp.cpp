@@ -58,14 +58,21 @@ void SolverBoxDDP::computeGains(const std::size_t& t) {
 
     const BoxQPSolution& boxqp_sol = qp_.solve(Quu_[t], Qu_[t], u_ll_, u_hl_, k_[t]);
 
-    Quu_inv_[t].setZero();
-    for (size_t i = 0; i < boxqp_sol.free_idx.size(); ++i)
-      for (size_t j = 0; j < boxqp_sol.free_idx.size(); ++j)
-        Quu_inv_[t](boxqp_sol.free_idx[i], boxqp_sol.free_idx[j]) = boxqp_sol.Hff_inv(i, j);
-
     // Compute controls
+    Quu_inv_[t].setZero();
+    for (std::size_t i = 0; i < boxqp_sol.free_idx.size(); ++i) {
+      for (std::size_t j = 0; j < boxqp_sol.free_idx.size(); ++j) {
+        Quu_inv_[t](boxqp_sol.free_idx[i], boxqp_sol.free_idx[j]) = boxqp_sol.Hff_inv(i, j);
+      }
+    }
     K_[t].noalias() = Quu_inv_[t] * Qxu_[t].transpose();
     k_[t].noalias() = -boxqp_sol.x;
+
+    // The box-QP clamped the gradient direction; this is important for accounting
+    // the algorithm advancement (i.e. stopping criteria)
+    for (std::size_t i = 0; i < boxqp_sol.clamped_idx.size(); ++ i) {
+      Qu_[t][boxqp_sol.clamped_idx[i]] = 0.;
+    }
   }
 }
 
