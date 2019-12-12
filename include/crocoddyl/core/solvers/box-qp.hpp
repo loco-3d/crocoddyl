@@ -94,7 +94,7 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
     const std::size_t& nc = clamped_idx.size();
     const std::size_t& nf = free_idx.size();
     if (g.lpNorm<Eigen::Infinity>() <= th_grad || nf == 0) {
-      if (k == 0) { // compute the inverse of the free Hessian
+      if (k == 0) {  // compute the inverse of the free Hessian
         Hff.resize(nf, nf);
         for (std::size_t i = 0; i < nf; ++i) {
           for (std::size_t j = 0; j < nf; ++j) {

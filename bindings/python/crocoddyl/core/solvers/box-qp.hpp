@@ -38,8 +38,7 @@ void exposeSolverBoxQP() {
                     bp::make_getter(&BoxQPSolution::clamped_idx, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&BoxQPSolution::clamped_idx), "clamped indexes");
 
-  bp::def("BoxQP", BoxQP,
-          bp::args("H", "q", "lb", "ub", "xinit", "maxiter", "th_acceptstep", "th_grad", "reg"),
+  bp::def("BoxQP", BoxQP, bp::args("H", "q", "lb", "ub", "xinit", "maxiter", "th_acceptstep", "th_grad", "reg"),
           "Projected-Newton QP for only bound constraints.\n\n"
           "It solves a QP problem with bound constraints of the form:\n"
           "    x = argmin 0.5 x^T H x + q^T x\n"
