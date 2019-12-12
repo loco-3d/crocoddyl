@@ -1,16 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <ctime>
 #include "crocoddyl/core/states/euclidean.hpp"
 #include "crocoddyl/core/actions/lqr.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
+#include "crocoddyl/core/utils/timer.hpp"
 
 int main(int argc, char* argv[]) {
   unsigned int NX = 37;
@@ -41,16 +41,11 @@ int main(int argc, char* argv[]) {
   }
 
   // Solving the optimal control problem
-  struct timespec start, finish;
-  double elapsed;
   Eigen::ArrayXd duration(T);
   for (unsigned int i = 0; i < T; ++i) {
-    clock_gettime(CLOCK_MONOTONIC, &start);
+    crocoddyl::Timer timer;
     ddp.solve(xs, us, MAXITER);
-    clock_gettime(CLOCK_MONOTONIC, &finish);
-    elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
-    elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;
-    duration[i] = elapsed / 1000.;
+    duration[i] = timer.get_duration();
   }
 
   double avrg_duration = duration.sum() / T;
@@ -60,12 +55,9 @@ int main(int argc, char* argv[]) {
 
   // Running calc
   for (unsigned int i = 0; i < T; ++i) {
-    clock_gettime(CLOCK_MONOTONIC, &start);
+    crocoddyl::Timer timer;
     problem->calc(xs, us);
-    clock_gettime(CLOCK_MONOTONIC, &finish);
-    elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
-    elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;
-    duration[i] = elapsed / 1000.;
+    duration[i] = timer.get_duration();
   }
 
   avrg_duration = duration.sum() / T;
@@ -76,12 +68,9 @@ int main(int argc, char* argv[]) {
 
   // Running calcDiff
   for (unsigned int i = 0; i < T; ++i) {
-    clock_gettime(CLOCK_MONOTONIC, &start);
+    crocoddyl::Timer timer;
     problem->calcDiff(xs, us);
-    clock_gettime(CLOCK_MONOTONIC, &finish);
-    elapsed = static_cast<double>(finish.tv_sec - start.tv_sec) * 1000000;
-    elapsed += static_cast<double>(finish.tv_nsec - start.tv_nsec) / 1000;
-    duration[i] = elapsed / 1000.;
+    duration[i] = timer.get_duration();
   }
 
   avrg_duration = duration.sum() / T;
