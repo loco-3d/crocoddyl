@@ -38,6 +38,19 @@ class BoxQP {
 
   const BoxQPSolution& solve(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, const Eigen::VectorXd& lb,
                              const Eigen::VectorXd& ub, const Eigen::VectorXd& xinit);
+  const BoxQPSolution& get_solution() const;
+  const std::size_t& get_nx() const;
+  const std::size_t& get_maxiter() const;
+  const double& get_th_acceptstep() const;
+  const double& get_th_grad() const;
+  const double& get_reg() const;
+  const std::vector<double>& get_alphas() const;
+  void set_nx(const std::size_t& nx);
+  void set_maxiter(const std::size_t& maxiter);
+  void set_th_acceptstep(const double& th_acceptstep);
+  void set_th_grad(const double& th_grad);
+  void set_reg(const double& reg);
+  void set_alphas(const std::vector<double>& alphas);
 
  private:
   std::size_t nx_;

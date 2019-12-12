@@ -9,6 +9,9 @@
 #ifndef CROCODDYL_CORE_SOLVERS_BOX_QP_HXX_
 #define CROCODDYL_CORE_SOLVERS_BOX_QP_HXX_
 
+#include <iostream>
+#include "crocoddyl/core/utils/exception.hpp"
+
 namespace crocoddyl {
 
 BoxQP::BoxQP(const std::size_t nx, std::size_t maxiter, const double th_acceptstep, const double th_grad,
@@ -93,7 +96,7 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H, const Eigen::VectorX
           }
         }
         if (reg_ != 0.) {
-            Hff_.diagonal().array() += reg_;
+          Hff_.diagonal().array() += reg_;
         }
         Hff_inv_llt_ = Eigen::LLT<Eigen::MatrixXd>(nf_);
         Hff_inv_llt_.compute(Hff_);
@@ -132,7 +135,7 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H, const Eigen::VectorX
       }
     }
     if (reg_ != 0.) {
-        Hff_.diagonal().array() += reg_;
+      Hff_.diagonal().array() += reg_;
     }
     Hff_inv_llt_ = Eigen::LLT<Eigen::MatrixXd>(nf_);
     Hff_inv_llt_.compute(Hff_);
@@ -181,6 +184,74 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H, const Eigen::VectorX
   solution_.free_idx = free_idx_;
   solution_.clamped_idx = clamped_idx_;
   return solution_;
+}
+
+const BoxQPSolution& BoxQP::get_solution() const { return solution_; }
+
+const std::size_t& BoxQP::get_nx() const { return nx_; }
+
+const std::size_t& BoxQP::get_maxiter() const { return maxiter_; }
+
+const double& BoxQP::get_th_acceptstep() const { return th_acceptstep_; }
+
+const double& BoxQP::get_th_grad() const { return th_grad_; }
+
+const double& BoxQP::get_reg() const { return reg_; }
+
+const std::vector<double>& BoxQP::get_alphas() const { return alphas_; }
+
+void BoxQP::set_nx(const std::size_t& nx) {
+  nx_ = nx;
+  x_ = Eigen::VectorXd::Zero(nx);
+  xnew_ = Eigen::VectorXd::Zero(nx);
+  g_ = Eigen::VectorXd::Zero(nx);
+  dx_ = Eigen::VectorXd::Zero(nx);
+}
+
+void BoxQP::set_maxiter(const std::size_t& maxiter) { maxiter_ = maxiter; }
+
+void BoxQP::set_th_acceptstep(const double& th_acceptstep) {
+  if (0. >= th_acceptstep && th_acceptstep >= 0.5) {
+    throw_pretty("Invalid argument: "
+                 << "th_acceptstep value should between 0 and 0.5");
+  }
+  th_acceptstep_ = th_acceptstep;
+}
+
+void BoxQP::set_th_grad(const double& th_grad) {
+  if (0. > th_grad) {
+    throw_pretty("Invalid argument: "
+                 << "th_grad value has to be positive.");
+  }
+  th_grad_ = th_grad;
+}
+
+void BoxQP::set_reg(const double& reg) {
+  if (0. > reg) {
+    throw_pretty("Invalid argument: "
+                 << "reg value has to be positive.");
+  }
+  reg_ = reg;
+}
+
+void BoxQP::set_alphas(const std::vector<double>& alphas) {
+  double prev_alpha = alphas[0];
+  if (prev_alpha != 1.) {
+    std::cerr << "Warning: alpha[0] should be 1" << std::endl;
+  }
+  for (std::size_t i = 1; i < alphas.size(); ++i) {
+    double alpha = alphas[i];
+    if (0. >= alpha) {
+      throw_pretty("Invalid argument: "
+                   << "alpha values has to be positive.");
+    }
+    if (alpha >= prev_alpha) {
+      throw_pretty("Invalid argument: "
+                   << "alpha values are monotonously decreasing.");
+    }
+    prev_alpha = alpha;
+  }
+  alphas_ = alphas;
 }
 
 }  // namespace crocoddyl
