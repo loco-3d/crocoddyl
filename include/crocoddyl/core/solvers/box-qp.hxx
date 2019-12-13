@@ -25,6 +25,18 @@ BoxQP::BoxQP(const std::size_t nx, std::size_t maxiter, const double th_acceptst
       xnew_(nx),
       g_(nx),
       dx_(nx) {
+  // Check if values have a proper range
+  if (0. >= th_acceptstep && th_acceptstep >= 0.5) {
+    std::cerr << "Warning: th_acceptstep value should between 0 and 0.5" << std::endl;
+  }
+  if (0. > th_grad) {
+    std::cerr << "Warning: th_grad value has to be positive." << std::endl;
+  }
+  if (0. > reg) {
+    std::cerr << "Warning: reg value has to be positive." << std::endl;
+  }
+
+  // Reserve the space and compute alphas
   clamped_idx_.reserve(nx_);
   free_idx_.reserve(nx_);
   const std::size_t& n_alphas_ = 10;
