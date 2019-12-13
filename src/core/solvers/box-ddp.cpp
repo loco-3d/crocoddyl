@@ -70,7 +70,7 @@ void SolverBoxDDP::computeGains(const std::size_t& t) {
 
     // The box-QP clamped the gradient direction; this is important for accounting
     // the algorithm advancement (i.e. stopping criteria)
-    for (std::size_t i = 0; i < boxqp_sol.clamped_idx.size(); ++ i) {
+    for (std::size_t i = 0; i < boxqp_sol.clamped_idx.size(); ++i) {
       Qu_[t][boxqp_sol.clamped_idx[i]] = 0.;
     }
   }
