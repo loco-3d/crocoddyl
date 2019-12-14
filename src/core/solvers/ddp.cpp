@@ -157,6 +157,10 @@ double SolverDDP::calc() {
       const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
       model->get_state()->diff(xs_[t + 1], d->xnext, gaps_[t + 1]);
     }
+  } else if (!was_feasible_) {  // closing the gaps
+    for (std::vector<Eigen::VectorXd>::iterator it = gaps_.begin(); it != gaps_.end(); ++it) {
+      it->setZero();
+    }
   }
   return cost_;
 }
