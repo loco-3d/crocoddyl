@@ -128,4 +128,6 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
   }
 }
 
+const std::vector<Eigen::MatrixXd>& SolverBoxDDP::get_Quu_inv() const { return Quu_inv_; }
+
 }  // namespace crocoddyl
