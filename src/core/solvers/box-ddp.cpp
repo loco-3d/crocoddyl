@@ -35,14 +35,14 @@ void SolverBoxDDP::allocateData() {
     const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
     const std::size_t& nu = model->get_nu();
 
-    // Store the largest number of controls across all models to allocate u_ll_, u_hl_
+    // Store the largest number of controls across all models to allocate du_lb_, du_ub_
     if (nu > nu_max) nu_max = nu;
 
     Quu_inv_[t] = Eigen::MatrixXd::Zero(nu, nu);
   }
 
-  u_ll_.resize(nu_max);
-  u_hl_.resize(nu_max);
+  du_lb_.resize(nu_max);
+  du_ub_.resize(nu_max);
 }
 
 void SolverBoxDDP::computeGains(const std::size_t& t) {
@@ -53,10 +53,10 @@ void SolverBoxDDP::computeGains(const std::size_t& t) {
       return;
     }
 
-    u_ll_ = problem_->get_runningModels()[t]->get_u_lb() - us_[t];
-    u_hl_ = problem_->get_runningModels()[t]->get_u_ub() - us_[t];
+    du_lb_ = problem_->get_runningModels()[t]->get_u_lb() - us_[t];
+    du_ub_ = problem_->get_runningModels()[t]->get_u_ub() - us_[t];
 
-    const BoxQPSolution& boxqp_sol = qp_.solve(Quu_[t], Qu_[t], u_ll_, u_hl_, k_[t]);
+    const BoxQPSolution& boxqp_sol = qp_.solve(Quu_[t], Qu_[t], du_lb_, du_ub_, k_[t]);
 
     // Compute controls
     Quu_inv_[t].setZero();
