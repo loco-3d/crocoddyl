@@ -21,6 +21,11 @@ SolverBoxDDP::SolverBoxDDP(boost::shared_ptr<ShootingProblem> problem)
   for (std::size_t n = 0; n < n_alphas; ++n) {
     alphas_[n] = 1. / pow(2., static_cast<double>(n));
   }
+  // Change the default convergence tolerance since the gradient of the Lagrangian is smaller
+  // than an unconstrained OC problem (i.e. gradient = Qu - mu^T * C where mu > 0 and C defines
+  // the inequality matrix that bounds the control). We opted for this method since we don't
+  // have access to the mu from the box QP.
+  th_stop_ = 5e-6;
 }
 
 SolverBoxDDP::~SolverBoxDDP() {}
