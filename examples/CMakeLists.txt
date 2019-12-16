@@ -3,9 +3,9 @@ SET(${PROJECT_NAME}_EXAMPLES_PYTHON
   quadrotor
   arm_manipulation
   bipedal_walk
-  bipedal_walk_boxddp
+  bipedal_walk_ubound
   quadrupedal_gaits
-  quadrupedal_walk_boxddp
+  quadrupedal_walk_ubound
   )
 
 FOREACH(examples ${${PROJECT_NAME}_EXAMPLES_PYTHON})
