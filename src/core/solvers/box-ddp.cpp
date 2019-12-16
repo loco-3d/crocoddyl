@@ -24,8 +24,7 @@ SolverBoxDDP::SolverBoxDDP(boost::shared_ptr<ShootingProblem> problem)
   // Change the default convergence tolerance since the gradient of the Lagrangian is smaller
   // than an unconstrained OC problem (i.e. gradient = Qu - mu^T * C where mu > 0 and C defines
   // the inequality matrix that bounds the control); and we don't have access to mu from the
-  // box QP. Instead, we opted for using du, rather than the gradient, since it has shown to be
-  // more robust between the various examples.
+  // box QP.
   th_stop_ = 5e-5;
 }
 

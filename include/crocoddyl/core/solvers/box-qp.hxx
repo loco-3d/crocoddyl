@@ -168,15 +168,6 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H, const Eigen::VectorX
       dx_(free_idx_[i]) = dxf_(i);
     }
 
-    // There is not improving anymore
-    if (dx_.lpNorm<Eigen::Infinity>() < th_grad_) {
-      solution_.Hff_inv = Hff_inv_;
-      solution_.x = x_;
-      solution_.free_idx = free_idx_;
-      solution_.clamped_idx = clamped_idx_;
-      return solution_;
-    }
-
     // Try different step lengths
     double fold = 0.5 * x_.dot(H * x_) + q.dot(x_);
     for (std::vector<double>::const_iterator it = alphas_.begin(); it != alphas_.end(); ++it) {
