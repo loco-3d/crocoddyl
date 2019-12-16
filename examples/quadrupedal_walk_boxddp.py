@@ -62,7 +62,7 @@ us = [m.quasiStatic(d, robot_model.defaultState) for m, d in list(zip(boxddp.mod
 
 # Solve the DDP problem
 boxddp_start = time.time()
-boxddp.solve(xs, us, 200, False, 0.1)
+boxddp.solve(xs, us, 100, False, 0.1)
 boxddp_end = time.time()
 print("[Box-DDP] Solved in", boxddp_end - boxddp_start, "-", boxddp.iter, "iterations")
 
