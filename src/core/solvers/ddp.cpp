@@ -81,12 +81,14 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
       }
       dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
 
-      if (d_[0] < th_grad_ || !is_feasible_ || dV_ > th_acceptstep_ * dVexp_) {
-        was_feasible_ = is_feasible_;
-        setCandidate(xs_try_, us_try_, true);
-        cost_ = cost_try_;
-        recalc = true;
-        break;
+      if (dVexp_ > 0) {  // descend direction
+        if (d_[0] < th_grad_ || !is_feasible_ || dV_ > th_acceptstep_ * dVexp_) {
+          was_feasible_ = is_feasible_;
+          setCandidate(xs_try_, us_try_, true);
+          cost_ = cost_try_;
+          recalc = true;
+          break;
+        }
       }
     }
 
