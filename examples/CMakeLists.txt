@@ -3,10 +3,12 @@ SET(${PROJECT_NAME}_EXAMPLES_PYTHON
   quadrotor
   quadrotor_ubound
   arm_manipulation
-  bipedal_walk
-  bipedal_walk_ubound
   quadrupedal_gaits
   quadrupedal_walk_ubound
+  bipedal_walk
+  bipedal_walk_ubound
+  humanoid_manipulation
+  humanoid_manipulation_ubound
   )
 
 FOREACH(examples ${${PROJECT_NAME}_EXAMPLES_PYTHON})
