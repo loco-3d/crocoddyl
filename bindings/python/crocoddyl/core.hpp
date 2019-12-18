@@ -34,6 +34,7 @@
 #include "python/crocoddyl/core/solvers/fddp.hpp"
 #include "python/crocoddyl/core/solvers/box-qp.hpp"
 #include "python/crocoddyl/core/solvers/box-ddp.hpp"
+#include "python/crocoddyl/core/solvers/box-fddp.hpp"
 #include "python/crocoddyl/core/utils/callbacks.hpp"
 
 namespace crocoddyl {
@@ -64,6 +65,7 @@ void exposeCore() {
   exposeSolverFDDP();
   exposeSolverBoxQP();
   exposeSolverBoxDDP();
+  exposeSolverBoxFDDP();
   exposeCallbacks();
 }
 
