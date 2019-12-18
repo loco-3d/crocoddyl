@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <iostream>
 #include "crocoddyl/core/solvers/box-qp.hpp"
 #include "crocoddyl/core/utils/timer.hpp"
 

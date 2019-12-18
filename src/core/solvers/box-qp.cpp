@@ -6,10 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_CORE_SOLVERS_BOX_QP_HXX_
-#define CROCODDYL_CORE_SOLVERS_BOX_QP_HXX_
-
 #include <iostream>
+#include "crocoddyl/core/solvers/box-qp.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -258,5 +256,3 @@ void BoxQP::set_alphas(const std::vector<double>& alphas) {
 }
 
 }  // namespace crocoddyl
-
-#endif  // CROCODDYL_CORE_SOLVERS_BOX_QP_HXX_

@@ -82,7 +82,4 @@ class BoxQP {
 
 }  // namespace crocoddyl
 
-/* --- Details -------------------------------------------------------------------- */
-#include "crocoddyl/core/solvers/box-qp.hxx"
-
 #endif  // CROCODDYL_CORE_SOLVERS_BOX_QP_HPP_
