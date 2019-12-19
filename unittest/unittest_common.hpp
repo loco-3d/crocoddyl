@@ -17,6 +17,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include <Eigen/Dense>
 #include <boost/bind.hpp>
 #include <boost/test/included/unit_test.hpp>
@@ -36,12 +37,12 @@ class CaptureIOStream {
     m_pipe[READ] = 0;
     m_pipe[WRITE] = 0;
     if (pipe(m_pipe) == -1) {
-      throw std::runtime_error("Cannot create pipe.");
+      throw_pretty("Cannot create pipe.");
     }
     m_oldStdOut = dup(fileno(stdout));
     m_oldStdErr = dup(fileno(stderr));
     if (m_oldStdOut == -1 || m_oldStdErr == -1) {
-      throw std::runtime_error("Cannot redirect stdout or stderr.");
+      throw_pretty("Cannot redirect stdout or stderr.");
     }
 
     m_init = true;

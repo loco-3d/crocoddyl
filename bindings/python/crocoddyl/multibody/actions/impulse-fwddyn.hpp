@@ -26,7 +26,7 @@ void exposeActionImpulseFwdDynamics() {
       "stack of cost functions are implemented in CostModelSum().",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ImpulseModelMultiple>,
                boost::shared_ptr<CostModelSum>, bp::optional<double, double, bool> >(
-          bp::args(" self", " state", " impulses", " costs", " r_coeff=0.", " inv_damping=0.", "enable_force=False"),
+          bp::args("self", "state", " impulses", "costs", "r_coeff=0.", "inv_damping", "enable_force"),
           "Initialize the impulse forward-dynamics action model.\n\n"
           "The damping factor is needed when the contact Jacobian is not full-rank. Otherwise,\n"
           "a good damping factor could be 1e-12. In addition, if you have cost based on forces,\n"
@@ -34,12 +34,13 @@ void exposeActionImpulseFwdDynamics() {
           ":param state: multibody state\n"
           ":param impulses: multiple impulse model\n"
           ":param costs: stack of cost functions\n"
-          ":param r_coeff: restitution coefficient\n"
-          ":param inv_damping: Damping factor for cholesky decomposition of JMinvJt\n"
-          ":param enable_force: Enable the computation of force Jacobians")[bp::with_custodian_and_ward<1, 3>()])
+          ":param r_coeff: restitution coefficient (default 0.)\n"
+          ":param inv_damping: Damping factor for cholesky decomposition of JMinvJt (default 0.)\n"
+          ":param enable_force: Enable the computation of force Jacobians (default False)")
+          [bp::with_custodian_and_ward<1, 3>()])
       .def("calc", &ActionModelImpulseFwdDynamics::calc_wrap,
            ActionModel_calc_wraps(
-               bp::args(" self", " data", " x", " u=None"),
+               bp::args("self", "data", "x", "u"),
                "Compute the next state and cost value.\n\n"
                "It describes the time-continuous evolution of the multibody system with impulse. The\n"
                "impulses are modelled as holonomic constraints.\n"
@@ -49,8 +50,7 @@ void exposeActionImpulseFwdDynamics() {
                ":param u: time-continuous control input"))
       .def<void (ActionModelImpulseFwdDynamics::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                                    const Eigen::VectorXd&, const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &ActionModelImpulseFwdDynamics::calcDiff_wrap,
-          bp::args(" self", " data", " x", " u=None", " recalc=True"),
+          "calcDiff", &ActionModelImpulseFwdDynamics::calcDiff_wrap, bp::args("self", "data", "x", "u", "recalc"),
           "Compute the derivatives of the differential multibody system and its cost\n"
           "functions.\n\n"
           "It computes the partial derivatives of the differential multibody system and the\n"
@@ -60,17 +60,17 @@ void exposeActionImpulseFwdDynamics() {
           ":param data: impulse forward-dynamics action data\n"
           ":param x: time-continuous state vector\n"
           ":param u: time-continuous control input\n"
-          ":param recalc: If true, it updates the state evolution and the cost value.")
+          ":param recalc: If true, it updates the state evolution and the cost value (default True).")
       .def<void (ActionModelImpulseFwdDynamics::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                                    const Eigen::VectorXd&, const Eigen::VectorXd&)>(
-          "calcDiff", &ActionModelImpulseFwdDynamics::calcDiff_wrap, bp::args(" self", " data", " x", " u"))
+          "calcDiff", &ActionModelImpulseFwdDynamics::calcDiff_wrap, bp::args("self", "data", "x", "u"))
       .def<void (ActionModelImpulseFwdDynamics::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                                    const Eigen::VectorXd&)>(
-          "calcDiff", &ActionModelImpulseFwdDynamics::calcDiff_wrap, bp::args(" self", " data", " x"))
+          "calcDiff", &ActionModelImpulseFwdDynamics::calcDiff_wrap, bp::args("self", "data", "x"))
       .def<void (ActionModelImpulseFwdDynamics::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                                    const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &ActionModelImpulseFwdDynamics::calcDiff_wrap, bp::args(" self", " data", " x", " recalc"))
-      .def("createData", &ActionModelImpulseFwdDynamics::createData, bp::args(" self"),
+          "calcDiff", &ActionModelImpulseFwdDynamics::calcDiff_wrap, bp::args("self", "data", "x", "recalc"))
+      .def("createData", &ActionModelImpulseFwdDynamics::createData, bp::args("self"),
            "Create the impulse forward dynamics differential action data.")
       .add_property(
           "pinocchio",
@@ -104,16 +104,15 @@ void exposeActionImpulseFwdDynamics() {
 
   bp::class_<ActionDataImpulseFwdDynamics, bp::bases<ActionDataAbstract> >(
       "ActionDataImpulseFwdDynamics", "Action data for the impulse forward dynamics system.",
-      bp::init<ActionModelImpulseFwdDynamics*>(bp::args(" self", " model"),
+      bp::init<ActionModelImpulseFwdDynamics*>(bp::args("self", "model"),
                                                "Create impulse forward-dynamics action data.\n\n"
                                                ":param model: impulse forward-dynamics action model"))
       .add_property("pinocchio",
                     bp::make_getter(&ActionDataImpulseFwdDynamics::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
-      .add_property(
-          "impulses",
-          bp::make_getter(&ActionDataImpulseFwdDynamics::impulses, bp::return_value_policy<bp::return_by_value>()),
-          "impulses data")
+      .add_property("multibody",
+                    bp::make_getter(&ActionDataImpulseFwdDynamics::multibody, bp::return_internal_reference<>()),
+                    "multibody data")
       .add_property(
           "costs",
           bp::make_getter(&ActionDataImpulseFwdDynamics::costs, bp::return_value_policy<bp::return_by_value>()),

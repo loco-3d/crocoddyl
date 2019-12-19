@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/costs/contact-force.hpp"
 
 namespace crocoddyl {
@@ -15,7 +16,8 @@ CostModelContactForce::CostModelContactForce(boost::shared_ptr<StateMultibody> s
                                              const FrameForce& fref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), fref_(fref) {
   if (activation_->get_nr() != 6) {
-    throw std::invalid_argument("nr is equals to 6");
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to 6");
   }
 }
 
@@ -24,7 +26,8 @@ CostModelContactForce::CostModelContactForce(boost::shared_ptr<StateMultibody> s
                                              const FrameForce& fref)
     : CostModelAbstract(state, activation), fref_(fref) {
   if (activation_->get_nr() != 6) {
-    throw std::invalid_argument("nr is equals to 6");
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to 6");
   }
 }
 
@@ -43,7 +46,7 @@ void CostModelContactForce::calc(const boost::shared_ptr<CostDataAbstract>& data
   CostDataContactForce* d = static_cast<CostDataContactForce*>(data.get());
 
   // We transform the force to the contact frame
-  data->r = (d->contact_->jMf.actInv(d->contact_->f) - fref_.oFf).toVector();
+  data->r = (d->contact->jMf.actInv(d->contact->f) - fref_.oFf).toVector();
 
   // Compute the cost
   activation_->calc(data->activation, data->r);
@@ -59,8 +62,8 @@ void CostModelContactForce::calcDiff(const boost::shared_ptr<CostDataAbstract>& 
 
   CostDataContactForce* d = static_cast<CostDataContactForce*>(data.get());
 
-  const Eigen::MatrixXd& df_dx = d->contact_->df_dx;
-  const Eigen::MatrixXd& df_du = d->contact_->df_du;
+  const Eigen::MatrixXd& df_dx = d->contact->df_dx;
+  const Eigen::MatrixXd& df_du = d->contact->df_du;
 
   activation_->calcDiff(data->activation, data->r, recalc);
   data->Rx = df_dx;
@@ -75,7 +78,7 @@ void CostModelContactForce::calcDiff(const boost::shared_ptr<CostDataAbstract>& 
   data->Luu.noalias() = df_du.transpose() * d->Arr_Ru;
 }
 
-boost::shared_ptr<CostDataAbstract> CostModelContactForce::createData(pinocchio::Data* const data) {
+boost::shared_ptr<CostDataAbstract> CostModelContactForce::createData(DataCollectorAbstract* const data) {
   return boost::make_shared<CostDataContactForce>(this, data);
 }
 

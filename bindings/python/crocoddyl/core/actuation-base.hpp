@@ -9,6 +9,7 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_CORE_ACTUATION_BASE_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_CORE_ACTUATION_BASE_HPP_
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
 
 namespace crocoddyl {
@@ -23,15 +24,15 @@ class ActuationModelAbstract_wrap : public ActuationModelAbstract, public bp::wr
 
   void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
-    assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
-    assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
+    assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(), "x has wrong dimension");
+    assert_pretty(static_cast<std::size_t>(u.size()) == nu_, "u has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
   void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
-    assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
-    assert(static_cast<std::size_t>(u.size()) == nu_ && "u has wrong dimension");
+    assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(), "x has wrong dimension");
+    assert_pretty(static_cast<std::size_t>(u.size()) == nu_, "u has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
 };
@@ -48,18 +49,18 @@ void exposeActuationAbstract() {
       "time), where a is the actuation signal of our system, and it also computes the derivatives\n"
       "of this model. These computations are mainly carry on inside calc() and calcDiff(),\n"
       "respectively.",
-      bp::init<boost::shared_ptr<StateAbstract>, int>(bp::args(" self", " state", " nu"),
+      bp::init<boost::shared_ptr<StateAbstract>, int>(bp::args("self", "state", "nu"),
                                                       "Initialize the actuation model.\n\n"
                                                       ":param state: state description,\n"
                                                       ":param nu: dimension of control vector"))
-      .def("calc", pure_virtual(&ActuationModelAbstract_wrap::calc), bp::args(" self", " data", " x", " u"),
+      .def("calc", pure_virtual(&ActuationModelAbstract_wrap::calc), bp::args("self", "data", "x", "u"),
            "Compute the actuation signal from the control input u.\n\n"
            "It describes the time-continuos evolution of the actuation model.\n"
            ":param data: actuation data\n"
            ":param x: state vector\n"
            ":param u: control input")
       .def("calcDiff", pure_virtual(&ActuationModelAbstract_wrap::calcDiff),
-           bp::args(" self", " data", " x", " u", " recalc=True"),
+           bp::args("self", "data", "x", "u", "recalc"),
            "Compute the derivatives of the actuation model.\n\n"
            "It computes the partial derivatives of the actuation model which is\n"
            "describes in continouos time.\n"
@@ -67,7 +68,7 @@ void exposeActuationAbstract() {
            ":param x: state vector\n"
            ":param u: control input\n"
            ":param recalc: If true, it updates the actuation signal.")
-      .def("createData", &ActuationModelAbstract_wrap::createData, bp::args(" self"),
+      .def("createData", &ActuationModelAbstract_wrap::createData, bp::args("self"),
            "Create the actuation data.\n\n"
            "Each actuation model (AM) has its own data that needs to be allocated.\n"
            "This function returns the allocated data for a predefined AM.\n"
@@ -89,7 +90,7 @@ void exposeActuationAbstract() {
       "In crocoddyl, an actuation data contains all the required information for processing an\n"
       "user-defined actuation model. The actuation data typically is allocated onces by running\n"
       "model.createData().",
-      bp::init<ActuationModelAbstract*>(bp::args(" self", " model"),
+      bp::init<ActuationModelAbstract*>(bp::args("self", "model"),
                                         "Create common data shared between actuation models.\n\n"
                                         "The actuation data uses the model in order to first process it.\n"
                                         ":param model: actuation model"))

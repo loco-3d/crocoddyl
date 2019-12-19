@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, New York University, Max Planck Gesellschaft
+// Copyright (C) 2018-2020, LAAS-CNRS, New York University, Max Planck Gesellschaft, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,6 +9,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include <iterator>
 #include <Eigen/Dense>
 #include <pinocchio/fwd.hpp>
@@ -49,7 +50,7 @@ class DifferentialActionModelFactory {
         diff_action_model_ = boost::make_shared<crocoddyl::DifferentialActionModelLQR>(nq_, nu_, driftfree_);
         break;
       default:
-        throw std::runtime_error(__FILE__ ": Wrong TestTypes::Type given");
+        throw_pretty(__FILE__ ": Wrong TestTypes::Type given");
         break;
     }
   }
@@ -154,17 +155,19 @@ void test_partial_derivatives_against_numdiff(TestTypes::Type test_type) {
 
 //----------------------------------------------------------------------------//
 
-void register_action_model_unit_tests(TestTypes::Type test_type) {
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_construct_data, test_type)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_state, test_type)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, test_type)));
-  framework::master_test_suite().add(
-      BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, test_type)));
+void register_action_model_unit_tests(TestTypes::Type test_type, test_suite& ts) {
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_construct_data, test_type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_state, test_type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, test_type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, test_type)));
 }
 
 bool init_function() {
   for (size_t i = 0; i < TestTypes::all.size(); ++i) {
-    register_action_model_unit_tests(TestTypes::all[i]);
+    const std::string test_name = "test_" + std::to_string(i);
+    test_suite* ts = BOOST_TEST_SUITE(test_name);
+    register_action_model_unit_tests(TestTypes::all[i], *ts);
+    framework::master_test_suite().add(ts);
   }
   return true;
 }

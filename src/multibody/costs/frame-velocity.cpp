@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
 #include "crocoddyl/multibody/costs/frame-velocity.hpp"
@@ -17,7 +18,8 @@ CostModelFrameVelocity::CostModelFrameVelocity(boost::shared_ptr<StateMultibody>
                                                const FrameMotion& vref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), vref_(vref) {
   if (activation_->get_nr() != 6) {
-    throw std::invalid_argument("nr is equals to 6");
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to 6");
   }
 }
 
@@ -26,7 +28,8 @@ CostModelFrameVelocity::CostModelFrameVelocity(boost::shared_ptr<StateMultibody>
                                                const FrameMotion& vref)
     : CostModelAbstract(state, activation), vref_(vref) {
   if (activation_->get_nr() != 6) {
-    throw std::invalid_argument("nr is equals to 6");
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to 6");
   }
 }
 
@@ -44,7 +47,7 @@ void CostModelFrameVelocity::calc(const boost::shared_ptr<CostDataAbstract>& dat
   CostDataFrameVelocity* d = static_cast<CostDataFrameVelocity*>(data.get());
 
   // Compute the frame velocity w.r.t. the reference frame
-  d->vr = pinocchio::getFrameVelocity(state_->get_pinocchio(), *data->pinocchio, vref_.frame) - vref_.oMf;
+  d->vr = pinocchio::getFrameVelocity(state_->get_pinocchio(), *d->pinocchio, vref_.frame) - vref_.oMf;
   data->r = d->vr.toVector();
 
   // Compute the cost
@@ -61,8 +64,8 @@ void CostModelFrameVelocity::calcDiff(const boost::shared_ptr<CostDataAbstract>&
 
   // Get the partial derivatives of the local frame velocity
   CostDataFrameVelocity* d = static_cast<CostDataFrameVelocity*>(data.get());
-  pinocchio::getJointVelocityDerivatives(state_->get_pinocchio(), *data->pinocchio, d->joint, pinocchio::LOCAL,
-                                         d->dv_dq, d->dv_dv);
+  pinocchio::getJointVelocityDerivatives(state_->get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL, d->dv_dq,
+                                         d->dv_dv);
 
   // Compute the derivatives of the frame velocity
   const std::size_t& nv = state_->get_nv();
@@ -74,7 +77,7 @@ void CostModelFrameVelocity::calcDiff(const boost::shared_ptr<CostDataAbstract>&
   data->Lxx.noalias() = data->Rx.transpose() * d->Arr_Rx;
 }
 
-boost::shared_ptr<CostDataAbstract> CostModelFrameVelocity::createData(pinocchio::Data* const data) {
+boost::shared_ptr<CostDataAbstract> CostModelFrameVelocity::createData(DataCollectorAbstract* const data) {
   return boost::make_shared<CostDataFrameVelocity>(this, data);
 }
 

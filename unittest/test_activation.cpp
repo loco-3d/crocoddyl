@@ -2,7 +2,7 @@
 // BSD 3-Clause License
 //
 // Copyright (C) 2018-2020, LAAS-CNRS, New York University, Max Planck Gesellschaft
-//                          University of Edinburgh
+//                          University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,6 +10,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include <iterator>
 #include <Eigen/Dense>
 #include <pinocchio/fwd.hpp>
@@ -69,7 +70,7 @@ class Factory {
         model_ = boost::make_shared<crocoddyl::ActivationModelWeightedQuad>(weights);
         break;
       default:
-        throw std::runtime_error(__FILE__ ":\n Construct wrong TestTypes::Type");
+        throw_pretty(__FILE__ ":\n Construct wrong TestTypes::Type");
         break;
     }
   }
@@ -146,15 +147,18 @@ void test_partial_derivatives_against_numdiff(TestTypes::Type test_type) {
 
 //----------------------------------------------------------------------------//
 
-void register_unit_tests(TestTypes::Type type) {
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_construct_data, type)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_value, type)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, type)));
+void register_unit_tests(TestTypes::Type type, test_suite& ts) {
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_construct_data, type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_value, type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, type)));
 }
 
 bool init_function() {
   for (size_t i = 0; i < TestTypes::all.size(); ++i) {
-    register_unit_tests(TestTypes::all[i]);
+    const std::string test_name = "test_" + std::to_string(i);
+    test_suite* ts = BOOST_TEST_SUITE(test_name);
+    register_unit_tests(TestTypes::all[i], *ts);
+    framework::master_test_suite().add(ts);
   }
   return true;
 }

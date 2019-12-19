@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/parsers/sample-models.hpp>
 #include "crocoddyl/core/state-base.hpp"
@@ -67,7 +68,7 @@ class StateFactory {
         construct_state_multibody();
         break;
       default:
-        throw std::runtime_error(__FILE__ ": Wrong StateTypes::Type given");
+        throw_pretty(__FILE__ ": Wrong StateTypes::Type given");
         break;
     }
   }

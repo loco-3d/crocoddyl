@@ -9,6 +9,7 @@
 #ifndef CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_BARRIER_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_BARRIER_HPP_
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/activation-base.hpp"
 #include <stdexcept>
 
@@ -18,15 +19,17 @@ struct ActivationBounds {
   ActivationBounds(const Eigen::VectorXd& lower, const Eigen::VectorXd& upper, const double& b = 1.)
       : lb(lower), ub(upper), beta(b) {
     if (lb.size() != ub.size()) {
-      throw std::invalid_argument(
-          "The lower and upper bounds don't have the same dimension (lb,ub dimensions equal to " +
-          std::to_string(lb.size()) + "," + std::to_string(ub.size()) + ", respectively)");
+      throw_pretty("Invalid argument: "
+                   << "The lower and upper bounds don't have the same dimension (lb,ub dimensions equal to " +
+                          std::to_string(lb.size()) + "," + std::to_string(ub.size()) + ", respectively)");
     }
     if (beta < 0 || beta > 1.) {
-      throw std::invalid_argument("The range of beta is between 0 and 1");
+      throw_pretty("Invalid argument: "
+                   << "The range of beta is between 0 and 1");
     }
     if (!((lb - ub).array() <= 0).all()) {
-      throw std::invalid_argument("The lower and upper bounds are badly defined");
+      throw_pretty("Invalid argument: "
+                   << "The lower and upper bounds are badly defined");
     }
 
     if (beta >= 0 && beta <= 1.) {
@@ -37,7 +40,7 @@ struct ActivationBounds {
     } else {
       beta = 1.;
     }
-    assert(((lb - ub).array() <= 0).all() && "The lower and upper bounds are badly defined");
+    assert_pretty(((lb - ub).array() <= 0).all(), "The lower and upper bounds are badly defined");
   }
   ActivationBounds(const ActivationBounds& bounds) : lb(bounds.lb), ub(bounds.ub), beta(bounds.beta) {}
   ActivationBounds() : beta(1.) {}

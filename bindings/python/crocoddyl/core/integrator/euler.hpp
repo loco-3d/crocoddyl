@@ -24,13 +24,13 @@ void exposeIntegratedActionEuler() {
       "integrator) give a differential action model, i.e.:\n"
       "  [q+, v+] = State.integrate([q, v], [v + a * dt, a * dt] * dt).",
       bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, bp::optional<double, bool> >(
-          bp::args(" self", " diffModel", " stepTime", " withCostResidual"),
+          bp::args("self", "diffModel", "stepTime", "withCostResidual"),
           "Initialize the sympletic Euler integrator.\n\n"
           ":param diffModel: differential action model\n"
           ":param stepTime: step time\n"
           ":param withCostResidual: includes the cost residuals and derivatives."))
       .def("calc", &IntegratedActionModelEuler::calc_wrap,
-           ActionModel_calc_wraps(bp::args(" self", " data", " x", " u=None"),
+           ActionModel_calc_wraps(bp::args("self", "data", "x", "u"),
                                   "Compute the time-discrete evolution of a differential action model.\n\n"
                                   "It describes the time-discrete evolution of action model.\n"
                                   ":param data: action data\n"
@@ -38,8 +38,7 @@ void exposeIntegratedActionEuler() {
                                   ":param u: control input"))
       .def<void (IntegratedActionModelEuler::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
                                                 const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &IntegratedActionModelEuler::calcDiff_wrap,
-          bp::args(" self", " data", " x", " u=None", " recalc=True"),
+          "calcDiff", &IntegratedActionModelEuler::calcDiff_wrap, bp::args("self", "data", "x", "u", "recalc"),
           "Compute the time-discrete derivatives of a differential action model.\n\n"
           "It computes the time-discrete partial derivatives of a differential\n"
           "action model. If recalc == True, it first updates the state evolution\n"
@@ -48,16 +47,16 @@ void exposeIntegratedActionEuler() {
           ":param data: action data\n"
           ":param x: state vector\n"
           ":param u: control input\n"
-          ":param recalc: If true, it updates the state evolution and the cost value.")
+          ":param recalc: If true, it updates the state evolution and the cost value (default True).")
       .def<void (IntegratedActionModelEuler::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
                                                 const Eigen::VectorXd&)>(
-          "calcDiff", &IntegratedActionModelEuler::calcDiff_wrap, bp::args(" self", " data", " x", " u"))
+          "calcDiff", &IntegratedActionModelEuler::calcDiff_wrap, bp::args("self", "data", "x", "u"))
       .def<void (IntegratedActionModelEuler::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&)>(
-          "calcDiff", &IntegratedActionModelEuler::calcDiff_wrap, bp::args(" self", " data", " x"))
+          "calcDiff", &IntegratedActionModelEuler::calcDiff_wrap, bp::args("self", "data", "x"))
       .def<void (IntegratedActionModelEuler::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
                                                 const bool&)>("calcDiff", &IntegratedActionModelEuler::calcDiff_wrap,
-                                                              bp::args(" self", " data", " x", " recalc"))
-      .def("createData", &IntegratedActionModelEuler::createData, bp::args(" self"),
+                                                              bp::args("self", "data", "x", "recalc"))
+      .def("createData", &IntegratedActionModelEuler::createData, bp::args("self"),
            "Create the Euler integrator data.")
       .add_property("differential",
                     bp::make_function(&IntegratedActionModelEuler::get_differential,
@@ -71,7 +70,7 @@ void exposeIntegratedActionEuler() {
 
   bp::class_<IntegratedActionDataEuler, bp::bases<ActionDataAbstract> >(
       "IntegratedActionDataEuler", "Sympletic Euler integrator data.",
-      bp::init<IntegratedActionModelEuler*>(bp::args(" self", " model"),
+      bp::init<IntegratedActionModelEuler*>(bp::args("self", "model"),
                                             "Create sympletic Euler integrator data.\n\n"
                                             ":param model: sympletic Euler integrator model"))
       .add_property(

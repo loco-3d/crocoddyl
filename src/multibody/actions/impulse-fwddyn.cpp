@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/actions/impulse-fwddyn.hpp"
 #include <pinocchio/algorithm/compute-all-terms.hpp>
 #include <pinocchio/algorithm/frames.hpp>
@@ -32,11 +33,13 @@ ActionModelImpulseFwdDynamics::ActionModelImpulseFwdDynamics(boost::shared_ptr<S
       gravity_(state->get_pinocchio().gravity) {
   if (r_coeff_ < 0.) {
     r_coeff_ = 0.;
-    throw std::invalid_argument("The restitution coefficient has to be positive, set to 0");
+    throw_pretty("Invalid argument: "
+                 << "The restitution coefficient has to be positive, set to 0");
   }
   if (JMinvJt_damping_ < 0.) {
     JMinvJt_damping_ = 0.;
-    throw std::invalid_argument("The damping factor has to be positive, set to 0");
+    throw_pretty("Invalid argument: "
+                 << "The damping factor has to be positive, set to 0");
   }
 }
 
@@ -46,7 +49,8 @@ void ActionModelImpulseFwdDynamics::calc(const boost::shared_ptr<ActionDataAbstr
                                          const Eigen::Ref<const Eigen::VectorXd>& x,
                                          const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
 
   const std::size_t& nq = state_->get_nq();
@@ -62,21 +66,21 @@ void ActionModelImpulseFwdDynamics::calc(const boost::shared_ptr<ActionDataAbstr
   if (!with_armature_) {
     d->pinocchio.M.diagonal() += armature_;
   }
-  impulses_->calc(d->impulses, x);
+  impulses_->calc(d->multibody.impulses, x);
 
 #ifndef NDEBUG
-  Eigen::FullPivLU<Eigen::MatrixXd> Jc_lu(d->impulses->Jc);
+  Eigen::FullPivLU<Eigen::MatrixXd> Jc_lu(d->multibody.impulses->Jc);
 
-  if (Jc_lu.rank() < d->impulses->Jc.rows()) {
-    assert(JMinvJt_damping_ > 0. && "It is needed a damping factor since the contact Jacobian is not full-rank");
+  if (Jc_lu.rank() < d->multibody.impulses->Jc.rows()) {
+    assert_pretty(JMinvJt_damping_ > 0., "It is needed a damping factor since the contact Jacobian is not full-rank");
   }
 #endif
 
-  pinocchio::impulseDynamics(pinocchio_, d->pinocchio, v, d->impulses->Jc, r_coeff_, JMinvJt_damping_);
+  pinocchio::impulseDynamics(pinocchio_, d->pinocchio, v, d->multibody.impulses->Jc, r_coeff_, JMinvJt_damping_);
   d->xnext.head(nq) = q;
   d->xnext.tail(nv) = d->pinocchio.dq_after;
-  impulses_->updateVelocity(d->impulses, d->pinocchio.dq_after);
-  impulses_->updateForce(d->impulses, d->pinocchio.impulse_c);
+  impulses_->updateVelocity(d->multibody.impulses, d->pinocchio.dq_after);
+  impulses_->updateForce(d->multibody.impulses, d->pinocchio.impulse_c);
 
   // Computing the cost value and residuals
   costs_->calc(d->costs, x, u);
@@ -87,7 +91,8 @@ void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataA
                                              const Eigen::Ref<const Eigen::VectorXd>& x,
                                              const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
 
   const std::size_t& nv = state_->get_nv();
@@ -103,12 +108,12 @@ void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataA
   // Computing the dynamics derivatives
   pinocchio_.gravity.setZero();
   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, d->vnone, d->pinocchio.dq_after - v,
-                                    d->impulses->fext);
+                                    d->multibody.impulses->fext);
   pinocchio_.gravity = gravity_;
-  pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->impulses->Jc, d->Kinv);
+  pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->multibody.impulses->Jc, d->Kinv);
 
   pinocchio::computeForwardKinematicsDerivatives(pinocchio_, d->pinocchio, q, d->pinocchio.dq_after, d->vnone);
-  impulses_->calcDiff(d->impulses, x, false);
+  impulses_->calcDiff(d->multibody.impulses, x, false);
 
   Eigen::Block<Eigen::MatrixXd> a_partial_dtau = d->Kinv.topLeftCorner(nv, nv);
   Eigen::Block<Eigen::MatrixXd> a_partial_da = d->Kinv.topRightCorner(nv, ni);
@@ -118,15 +123,15 @@ void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataA
   d->Fx.topLeftCorner(nv, nv).setIdentity();
   d->Fx.topRightCorner(nv, nv).setZero();
   d->Fx.bottomLeftCorner(nv, nv).noalias() = -a_partial_dtau * d->pinocchio.dtau_dq;
-  d->Fx.bottomLeftCorner(nv, nv).noalias() -= a_partial_da * d->impulses->dv0_dq;
+  d->Fx.bottomLeftCorner(nv, nv).noalias() -= a_partial_da * d->multibody.impulses->dv0_dq;
   d->Fx.bottomRightCorner(nv, nv).noalias() = a_partial_dtau * d->pinocchio.M.selfadjointView<Eigen::Upper>();
 
   // Computing the cost derivatives
   if (enable_force_) {
     d->df_dq.noalias() = f_partial_dtau * d->pinocchio.dtau_dq;
-    d->df_dq.noalias() += f_partial_da * d->impulses->dv0_dq;
-    impulses_->updateVelocityDiff(d->impulses, d->Fx.bottomRows(nv));
-    impulses_->updateForceDiff(d->impulses, d->df_dq);
+    d->df_dq.noalias() += f_partial_da * d->multibody.impulses->dv0_dq;
+    impulses_->updateVelocityDiff(d->multibody.impulses, d->Fx.bottomRows(nv));
+    impulses_->updateForceDiff(d->multibody.impulses, d->df_dq);
   }
   costs_->calcDiff(d->costs, x, u, false);
 }
@@ -151,8 +156,8 @@ const double& ActionModelImpulseFwdDynamics::get_damping_factor() const { return
 
 void ActionModelImpulseFwdDynamics::set_armature(const Eigen::VectorXd& armature) {
   if (static_cast<std::size_t>(armature.size()) != state_->get_nv()) {
-    throw std::invalid_argument("The armature dimension is wrong (it should be " + std::to_string(state_->get_nv()) +
-                                ")");
+    throw_pretty("Invalid argument: "
+                 << "The armature dimension is wrong (it should be " + std::to_string(state_->get_nv()) + ")");
   }
   armature_ = armature;
   with_armature_ = false;
@@ -160,14 +165,16 @@ void ActionModelImpulseFwdDynamics::set_armature(const Eigen::VectorXd& armature
 
 void ActionModelImpulseFwdDynamics::set_restitution_coefficient(const double& r_coeff) {
   if (r_coeff < 0.) {
-    throw std::invalid_argument("The restitution coefficient has to be positive");
+    throw_pretty("Invalid argument: "
+                 << "The restitution coefficient has to be positive");
   }
   r_coeff_ = r_coeff;
 }
 
 void ActionModelImpulseFwdDynamics::set_damping_factor(const double& damping) {
   if (damping < 0.) {
-    throw std::invalid_argument("The damping factor has to be positive");
+    throw_pretty("Invalid argument: "
+                 << "The damping factor has to be positive");
   }
   JMinvJt_damping_ = damping;
 }

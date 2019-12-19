@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -56,7 +56,7 @@ void CostModelAbstract::calcDiff(const boost::shared_ptr<CostDataAbstract>& data
   calcDiff(data, x, unone_);
 }
 
-boost::shared_ptr<CostDataAbstract> CostModelAbstract::createData(pinocchio::Data* const data) {
+boost::shared_ptr<CostDataAbstract> CostModelAbstract::createData(DataCollectorAbstract* const data) {
   return boost::make_shared<CostDataAbstract>(this, data);
 }
 

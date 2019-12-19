@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,8 +49,9 @@ struct ContactData6D : public ContactDataAbstract {
         a_partial_dq(6, model->get_state()->get_nv()),
         a_partial_dv(6, model->get_state()->get_nv()),
         a_partial_da(6, model->get_state()->get_nv()) {
-    joint = model->get_state()->get_pinocchio().frames[model->get_Mref().frame].parent;
-    jMf = model->get_state()->get_pinocchio().frames[model->get_Mref().frame].placement;
+    frame = model->get_Mref().frame;
+    joint = model->get_state()->get_pinocchio().frames[frame].parent;
+    jMf = model->get_state()->get_pinocchio().frames[frame].placement;
     fXj = jMf.inverse().toActionMatrix();
     v_partial_dq.fill(0);
     a_partial_dq.fill(0);
