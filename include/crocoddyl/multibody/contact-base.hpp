@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,6 +63,7 @@ struct ContactDataAbstract {
   ContactDataAbstract(Model* const model, pinocchio::Data* const data)
       : pinocchio(data),
         joint(0),
+        frame(0),
         jMf(pinocchio::SE3::Identity()),
         fXj(jMf.inverse().toActionMatrix()),
         Jc(model->get_nc(), model->get_state()->get_nv()),
@@ -81,6 +82,7 @@ struct ContactDataAbstract {
 
   pinocchio::Data* pinocchio;
   pinocchio::JointIndex joint;
+  pinocchio::FrameIndex frame;
   pinocchio::SE3 jMf;
   pinocchio::SE3::ActionMatrixType fXj;
   Eigen::MatrixXd Jc;

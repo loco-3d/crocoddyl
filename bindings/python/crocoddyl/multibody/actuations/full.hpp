@@ -19,17 +19,17 @@ namespace bp = boost::python;
 void exposeActuationFull() {
   bp::class_<ActuationModelFull, bp::bases<ActuationModelAbstract> >(
       "ActuationModelFull", "Full actuation models.",
-      bp::init<boost::shared_ptr<StateMultibody> >(bp::args(" self", " state"),
+      bp::init<boost::shared_ptr<StateMultibody> >(bp::args("self", "state"),
                                                    "Initialize the full actuation model.\n\n"
                                                    ":param state: state of multibody system"))
-      .def("calc", &ActuationModelFull::calc_wrap, bp::args(" self", " data", " x", " u"),
+      .def("calc", &ActuationModelFull::calc_wrap, bp::args("self", "data", "x", "u"),
            "Compute the actuation signal from the control input u.\n\n"
            ":param data: full actuation data\n"
            ":param x: state vector\n"
            ":param u: control input")
       .def("calcDiff", &ActuationModelFull::calcDiff_wrap,
            ActuationModel_calcDiff_wraps(
-               bp::args(" self", " data", " x", " u", " recalc=True"),
+               bp::args("self", "data", "x", "u", "recalc"),
                "Compute the derivatives of the actuation model.\n\n"
                "It computes the partial derivatives of the full actuation. It assumes that you\n"
                "create the data using this class. The reason is that the derivatives are constant and\n"
@@ -38,7 +38,7 @@ void exposeActuationFull() {
                ":param x: state vector\n"
                ":param u: control input\n"
                ":param recalc: If true, it updates the actuation signal."))
-      .def("createData", &ActuationModelFull::createData, bp::args(" self"),
+      .def("createData", &ActuationModelFull::createData, bp::args("self"),
            "Create the full actuation data.\n\n"
            "Each actuation model (AM) has its own data that needs to be allocated.\n"
            "This function returns the allocated data for a predefined AM.\n"

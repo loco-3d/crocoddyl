@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,6 +9,7 @@
 #ifndef CROCODDYL_MULTIBODY_COSTS_COST_SUM_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_COST_SUM_HPP_
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include <string>
 #include <map>
 #include <utility>
@@ -44,7 +45,7 @@ class CostModelSum {
             const Eigen::Ref<const Eigen::VectorXd>& u);
   void calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
-  boost::shared_ptr<CostDataSum> createData(pinocchio::Data* const data);
+  boost::shared_ptr<CostDataSum> createData(DataCollectorAbstract* const data);
 
   void calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
   void calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
@@ -95,14 +96,14 @@ struct CostDataSum {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  CostDataSum(Model* const model, pinocchio::Data* const data)
+  CostDataSum(Model* const model, DataCollectorAbstract* const data)
       : r_internal(model->get_nr()),
         Lx_internal(model->get_state()->get_ndx()),
         Lu_internal(model->get_nu()),
         Lxx_internal(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
         Lxu_internal(model->get_state()->get_ndx(), model->get_nu()),
         Luu_internal(model->get_nu(), model->get_nu()),
-        pinocchio(data),
+        shared(data),
         cost(0.),
         r(r_internal.data(), model->get_nr()),
         Lx(Lx_internal.data(), model->get_state()->get_ndx()),
@@ -143,12 +144,51 @@ struct CostDataSum {
   Eigen::MatrixXd get_Lxu() const { return Lxu; }
   Eigen::MatrixXd get_Luu() const { return Luu; }
 
-  void set_r(Eigen::VectorXd _r) { r = _r; }
-  void set_Lx(Eigen::VectorXd _Lx) { Lx = _Lx; }
-  void set_Lu(Eigen::VectorXd _Lu) { Lu = _Lu; }
-  void set_Lxx(Eigen::MatrixXd _Lxx) { Lxx = _Lxx; }
-  void set_Lxu(Eigen::MatrixXd _Lxu) { Lxu = _Lxu; }
-  void set_Luu(Eigen::MatrixXd _Luu) { Luu = _Luu; }
+  void set_r(const Eigen::VectorXd& _r) {
+    if (r.size() != _r.size()) {
+      throw_pretty("Invalid argument: "
+                   << "r has wrong dimension (it should be " + std::to_string(r.size()) + ")");
+    }
+    r = _r;
+  }
+  void set_Lx(const Eigen::VectorXd& _Lx) {
+    if (Lx.size() != _Lx.size()) {
+      throw_pretty("Invalid argument: "
+                   << "Lx has wrong dimension (it should be " + std::to_string(Lx.size()) + ")");
+    }
+    Lx = _Lx;
+  }
+  void set_Lu(const Eigen::VectorXd& _Lu) {
+    if (Lu.size() != _Lu.size()) {
+      throw_pretty("Invalid argument: "
+                   << "Lu has wrong dimension (it should be " + std::to_string(Lu.size()) + ")");
+    }
+    Lu = _Lu;
+  }
+  void set_Lxx(const Eigen::MatrixXd& _Lxx) {
+    if (Lxx.rows() != _Lxx.rows() || Lxx.cols() != _Lxx.cols()) {
+      throw_pretty("Invalid argument: "
+                   << "Lxx has wrong dimension (it should be " + std::to_string(Lxx.rows()) + ", " +
+                          std::to_string(Lxx.cols()) + ")");
+    }
+    Lxx = _Lxx;
+  }
+  void set_Lxu(const Eigen::MatrixXd& _Lxu) {
+    if (Lxu.rows() != _Lxu.rows() || Lxu.cols() != _Lxu.cols()) {
+      throw_pretty("Invalid argument: "
+                   << "Lxu has wrong dimension (it should be " + std::to_string(Lxu.rows()) + ", " +
+                          std::to_string(Lxu.cols()) + ")");
+    }
+    Lxu = _Lxu;
+  }
+  void set_Luu(const Eigen::MatrixXd& _Luu) {
+    if (Luu.rows() != _Luu.rows() || Luu.cols() != _Luu.cols()) {
+      throw_pretty("Invalid argument: "
+                   << "Luu has wrong dimension (it should be " + std::to_string(Luu.rows()) + ", " +
+                          std::to_string(Luu.cols()) + ")");
+    }
+    Luu = _Luu;
+  }
 
   // Creates internal data in case we don't share it externally
   Eigen::VectorXd r_internal;
@@ -159,7 +199,7 @@ struct CostDataSum {
   Eigen::MatrixXd Luu_internal;
 
   CostModelSum::CostDataContainer costs;
-  pinocchio::Data* pinocchio;
+  DataCollectorAbstract* shared;
   double cost;
   Eigen::Map<Eigen::VectorXd> r;
   Eigen::Map<Eigen::VectorXd> Lx;

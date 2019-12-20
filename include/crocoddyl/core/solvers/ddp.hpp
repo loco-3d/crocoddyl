@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS, The University of Edinburgh
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,7 +42,8 @@ class SolverDDP : public SolverAbstract {
   const double& get_regmin() const;
   const double& get_regmax() const;
   const std::vector<double>& get_alphas() const;
-  const double& get_th_step() const;
+  const double& get_th_stepdec() const;
+  const double& get_th_stepinc() const;
   const double& get_th_grad() const;
   const std::vector<Eigen::MatrixXd>& get_Vxx() const;
   const std::vector<Eigen::VectorXd>& get_Vx() const;
@@ -55,12 +56,13 @@ class SolverDDP : public SolverAbstract {
   const std::vector<Eigen::VectorXd>& get_k() const;
   const std::vector<Eigen::VectorXd>& get_gaps() const;
 
-  void set_regfactor(double reg_factor);
-  void set_regmin(double regmin);
-  void set_regmax(double regmax);
+  void set_regfactor(const double& reg_factor);
+  void set_regmin(const double& regmin);
+  void set_regmax(const double& regmax);
   void set_alphas(const std::vector<double>& alphas);
-  void set_th_step(double th_step);
-  void set_th_grad(double th_grad);
+  void set_th_stepdec(const double& th_step);
+  void set_th_stepinc(const double& th_step);
+  void set_th_grad(const double& th_grad);
 
  protected:
   double regfactor_;
@@ -92,7 +94,8 @@ class SolverDDP : public SolverAbstract {
   std::vector<Eigen::VectorXd> Quuk_;
   std::vector<double> alphas_;
   double th_grad_;
-  double th_step_;
+  double th_stepdec_;
+  double th_stepinc_;
   bool was_feasible_;
 };
 

@@ -13,6 +13,7 @@
 #ifndef CROCODDYL_CORE_SOLVERS_BOX_QP_HPP_
 #define CROCODDYL_CORE_SOLVERS_BOX_QP_HPP_
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include <Eigen/Cholesky>
 #include <Eigen/Dense>
 #include <vector>
@@ -35,7 +36,7 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
                            const Eigen::VectorXd& b_high, const Eigen::VectorXd& x_init, const double gamma,
                            const int max_iterations, const double epsilon, const double lambda) {
   if (max_iterations < 0) {
-    throw std::runtime_error("Max iterations needs to be positive.");
+    throw_pretty("Max iterations needs to be positive.");
   }
 
   int it = 0;

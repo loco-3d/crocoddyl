@@ -9,6 +9,7 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_CORE_STATE_BASE_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_CORE_STATE_BASE_HPP_
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include <string>
 #include "crocoddyl/core/state-base.hpp"
 
@@ -28,10 +29,12 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
   Eigen::VectorXd diff_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0,
                             const Eigen::Ref<const Eigen::VectorXd>& x1) const {
     if (static_cast<std::size_t>(x0.size()) != nx_) {
-      throw std::invalid_argument("x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
+      throw_pretty("Invalid argument: "
+                   << "x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
     }
     if (static_cast<std::size_t>(x1.size()) != nx_) {
-      throw std::invalid_argument("x1 has wrong dimension (it should be " + std::to_string(nx_) + ")");
+      throw_pretty("Invalid argument: "
+                   << "x1 has wrong dimension (it should be " + std::to_string(nx_) + ")");
     }
     return bp::call<Eigen::VectorXd>(this->get_override("diff").ptr(), (Eigen::VectorXd)x0, (Eigen::VectorXd)x1);
   }
@@ -44,10 +47,12 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
   Eigen::VectorXd integrate_wrap(const Eigen::Ref<const Eigen::VectorXd>& x,
                                  const Eigen::Ref<const Eigen::VectorXd>& dx) const {
     if (static_cast<std::size_t>(x.size()) != nx_) {
-      throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(nx_) + ")");
+      throw_pretty("Invalid argument: "
+                   << "x has wrong dimension (it should be " + std::to_string(nx_) + ")");
     }
     if (static_cast<std::size_t>(dx.size()) != ndx_) {
-      throw std::invalid_argument("dx has wrong dimension (it should be " + std::to_string(ndx_) + ")");
+      throw_pretty("Invalid argument: "
+                   << "dx has wrong dimension (it should be " + std::to_string(ndx_) + ")");
     }
     return bp::call<Eigen::VectorXd>(this->get_override("integrate").ptr(), (Eigen::VectorXd)x, (Eigen::VectorXd)dx);
   }
@@ -89,13 +94,15 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
 
   bp::list Jdiff_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
                       std::string firstsecond) const {
-    assert((firstsecond == "both" || firstsecond == "first" || firstsecond == "second") &&
-           "firstsecond must be one of the Jcomponent {both, first, second}");
+    assert_pretty((firstsecond == "both" || firstsecond == "first" || firstsecond == "second"),
+                  "firstsecond must be one of the Jcomponent {both, first, second}");
     if (static_cast<std::size_t>(x0.size()) != nx_) {
-      throw std::invalid_argument("x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
+      throw_pretty("Invalid argument: "
+                   << "x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
     }
     if (static_cast<std::size_t>(x1.size()) != nx_) {
-      throw std::invalid_argument("x1 has wrong dimension (it should be " + std::to_string(nx_) + ")");
+      throw_pretty("Invalid argument: "
+                   << "x1 has wrong dimension (it should be " + std::to_string(nx_) + ")");
     }
 
     if (firstsecond == "both") {
@@ -144,13 +151,15 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
 
   bp::list Jintegrate_wrap(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                            std::string firstsecond) const {
-    assert((firstsecond == "both" || firstsecond == "first" || firstsecond == "second") &&
-           "firstsecond must be one of the Jcomponent {both, first, second}");
+    assert_pretty((firstsecond == "both" || firstsecond == "first" || firstsecond == "second"),
+                  "firstsecond must be one of the Jcomponent {both, first, second}");
     if (static_cast<std::size_t>(x.size()) != nx_) {
-      throw std::invalid_argument("x has wrong dimension (it should be " + std::to_string(nx_) + ")");
+      throw_pretty("Invalid argument: "
+                   << "x has wrong dimension (it should be " + std::to_string(nx_) + ")");
     }
     if (static_cast<std::size_t>(dx.size()) != ndx_) {
-      throw std::invalid_argument("dx has wrong dimension (it should be " + std::to_string(ndx_) + ")");
+      throw_pretty("Invalid argument: "
+                   << "dx has wrong dimension (it should be " + std::to_string(ndx_) + ")");
     }
 
     if (firstsecond == "both") {
@@ -182,32 +191,31 @@ void exposeStateAbstract() {
       "on the state manifold M or to advance the state given a tangential velocity (Tx M).\n"
       "Therefore the points x, x1 and x2 belongs to the manifold M; and dx or x1 [-] x2 lie\n"
       "on its tangential space.",
-      bp::init<int, int>(bp::args(" self", " nx", " ndx"),
+      bp::init<int, int>(bp::args("self", "nx", "ndx"),
                          "Initialize the state dimensions.\n\n"
                          ":param nx: dimension of state configuration vector\n"
                          ":param ndx: dimension of state tangent vector"))
-      .def("zero", pure_virtual(&StateAbstract_wrap::zero), bp::args(" self"),
+      .def("zero", pure_virtual(&StateAbstract_wrap::zero), bp::args("self"),
            "Return a zero reference state.\n\n"
            ":return zero reference state")
-      .def("rand", pure_virtual(&StateAbstract_wrap::rand), bp::args(" self"),
+      .def("rand", pure_virtual(&StateAbstract_wrap::rand), bp::args("self"),
            "Return a random reference state.\n\n"
            ":return random reference state")
-      .def("diff", pure_virtual(&StateAbstract_wrap::diff_wrap), bp::args(" self", " x0", " x1"),
+      .def("diff", pure_virtual(&StateAbstract_wrap::diff_wrap), bp::args("self", "x0", "x1"),
            "Operator that differentiates the two state points.\n\n"
            "It returns the value of x1 [-] x0 operation. Note tha x0 and x1 are points in the state\n"
            "manifold (in M). Instead the operator result lies in the tangent-space of M.\n"
            ":param x0: current state (dim state.nx).\n"
            ":param x1: next state (dim state.nx).\n"
            ":return x1 [-] x0 value (dim state.ndx).")
-      .def("integrate", pure_virtual(&StateAbstract_wrap::integrate), bp::args(" self", " x", " dx"),
+      .def("integrate", pure_virtual(&StateAbstract_wrap::integrate), bp::args("self", "x", "dx"),
            "Operator that integrates the current state.\n\n"
            "It returns the value of x [+] dx operation. x and dx are points in the state.diff(x0,x1) (in M)\n"
            "and its tangent, respectively. Note that the operator result lies on M too.\n"
            ":param x: current state (dim state.nx).\n"
            ":param dx: displacement of the state (dim state.ndx).\n"
            ":return x [+] dx value (dim state.nx).")
-      .def("Jdiff", pure_virtual(&StateAbstract_wrap::Jdiff_wrap),
-           bp::args(" self", " x0", " x1", " firstsecond = 'both'"),
+      .def("Jdiff", pure_virtual(&StateAbstract_wrap::Jdiff_wrap), bp::args("self", "x0", "x1", "firstsecond"),
            "Compute the partial derivatives of difference operator.\n\n"
            "The difference operator (x1 [-] x0) is defined by diff(x0, x1). Instead Jdiff\n"
            "computes its partial derivatives, i.e. \\partial{diff(x0, x1)}{x0} and\n"
@@ -220,7 +228,7 @@ void exposeStateAbstract() {
            ":param firstsecond: desired partial derivative\n"
            ":return the partial derivative(s) of the diff(x0, x1) function")
       .def("Jintegrate", pure_virtual(&StateAbstract_wrap::Jintegrate_wrap),
-           bp::args(" self", " x", " dx", " firstsecond = 'both'"),
+           bp::args("self", "x", "dx", "firstsecond"),
            "Compute the partial derivatives of integrate operator.\n\n"
            "The integrate operator (x [+] dx) is defined by integrate(x, dx). Instead Jintegrate\n"
            "computes its partial derivatives, i.e. \\partial{integrate(x, dx)}{x} and\n"

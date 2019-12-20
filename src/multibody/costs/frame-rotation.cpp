@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include <pinocchio/algorithm/frames.hpp>
 #include "crocoddyl/multibody/costs/frame-rotation.hpp"
 
@@ -16,7 +17,8 @@ CostModelFrameRotation::CostModelFrameRotation(boost::shared_ptr<StateMultibody>
                                                const FrameRotation& Rref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), Rref_(Rref), oRf_inv_(Rref.oRf.transpose()) {
   if (activation_->get_nr() != 3) {
-    throw std::invalid_argument("nr is equals to 3");
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to 3");
   }
 }
 
@@ -25,7 +27,8 @@ CostModelFrameRotation::CostModelFrameRotation(boost::shared_ptr<StateMultibody>
                                                const FrameRotation& Rref)
     : CostModelAbstract(state, activation), Rref_(Rref), oRf_inv_(Rref.oRf.transpose()) {
   if (activation_->get_nr() != 3) {
-    throw std::invalid_argument("nr is equals to 3");
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to 3");
   }
 }
 
@@ -76,7 +79,7 @@ void CostModelFrameRotation::calcDiff(const boost::shared_ptr<CostDataAbstract>&
   data->Lxx.topLeftCorner(nv, nv).noalias() = d->J.transpose() * d->Arr_J;
 }
 
-boost::shared_ptr<CostDataAbstract> CostModelFrameRotation::createData(pinocchio::Data* const data) {
+boost::shared_ptr<CostDataAbstract> CostModelFrameRotation::createData(DataCollectorAbstract* const data) {
   return boost::make_shared<CostDataFrameRotation>(this, data);
 }
 

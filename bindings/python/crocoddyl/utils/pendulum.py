@@ -6,7 +6,7 @@ import numpy as np
 class CostModelDoublePendulum(crocoddyl.CostModelAbstract):
     def __init__(self, state, activation, nu):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(state.ndx)
-        crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
+        crocoddyl.CostModelAbstract.__init__(self, state, activation, nu=nu)
 
     def calc(self, data, x, u):
         c1, c2 = np.cos(x[0, 0]), np.cos(x[1, 0])

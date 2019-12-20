@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 
 namespace crocoddyl {
@@ -17,8 +18,8 @@ ImpulseModelAbstract::~ImpulseModelAbstract() {}
 
 void ImpulseModelAbstract::updateForceDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
                                            const Eigen::MatrixXd& df_dq) const {
-  assert(
-      (static_cast<std::size_t>(df_dq.rows()) == ni_ || static_cast<std::size_t>(df_dq.cols()) == state_->get_nv()) &&
+  assert_pretty(
+      (static_cast<std::size_t>(df_dq.rows()) == ni_ || static_cast<std::size_t>(df_dq.cols()) == state_->get_nv()),
       "df_dq has wrong dimension");
   data->df_dq = df_dq;
 }

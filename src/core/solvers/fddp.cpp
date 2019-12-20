@@ -1,11 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS, The University of Edinburgh
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/solvers/fddp.hpp"
 
 namespace crocoddyl {
@@ -33,7 +34,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
     while (true) {
       try {
         computeDirection(recalc);
-      } catch (std::runtime_error& e) {
+      } catch (std::exception& e) {
         recalc = false;
         increaseRegularization();
         if (xreg_ == regmax_) {
@@ -53,7 +54,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
 
       try {
         dV_ = tryStep(steplength_);
-      } catch (std::runtime_error& e) {
+      } catch (std::exception& e) {
         continue;
       }
       expectedImprovement();
@@ -78,10 +79,10 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
       }
     }
 
-    if (steplength_ > th_step_) {
+    if (steplength_ > th_stepdec_) {
       decreaseRegularization();
     }
-    if (steplength_ == alphas_.back()) {
+    if (steplength_ <= th_stepinc_) {
       increaseRegularization();
       if (xreg_ == regmax_) {
         return false;
@@ -162,7 +163,8 @@ double SolverFDDP::calc() {
 
 void SolverFDDP::forwardPass(const double& steplength) {
   if (steplength > 1. || steplength < 0.) {
-    throw std::invalid_argument("invalid step length, value is between 0. to 1.");
+    throw_pretty("Invalid argument: "
+                 << "invalid step length, value is between 0. to 1.");
   }
   cost_try_ = 0.;
   xnext_ = problem_->get_x0();
@@ -182,10 +184,10 @@ void SolverFDDP::forwardPass(const double& steplength) {
     cost_try_ += d->cost;
 
     if (raiseIfNaN(cost_try_)) {
-      throw std::runtime_error("forward_error");
+      throw_pretty("forward_error");
     }
     if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
-      throw std::runtime_error("forward_error");
+      throw_pretty("forward_error");
     }
   }
 
@@ -201,12 +203,18 @@ void SolverFDDP::forwardPass(const double& steplength) {
   cost_try_ += d->cost;
 
   if (raiseIfNaN(cost_try_)) {
-    throw std::runtime_error("forward_error");
+    throw_pretty("forward_error");
   }
 }
 
 double SolverFDDP::get_th_acceptnegstep() const { return th_acceptnegstep_; }
 
-void SolverFDDP::set_th_acceptnegstep(double th_acceptnegstep) { th_acceptnegstep_ = th_acceptnegstep; }
+void SolverFDDP::set_th_acceptnegstep(const double& th_acceptnegstep) {
+  if (0. > th_acceptnegstep) {
+    throw_pretty("Invalid argument: "
+                 << "th_acceptnegstep value has to be positive.");
+  }
+  th_acceptnegstep_ = th_acceptnegstep;
+}
 
 }  // namespace crocoddyl

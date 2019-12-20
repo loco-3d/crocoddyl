@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,6 +9,7 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COST_BASE_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COST_BASE_HPP_
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 
 namespace crocoddyl {
@@ -34,15 +35,15 @@ class CostModelAbstract_wrap : public CostModelAbstract, public bp::wrapper<Cost
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
-    assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
-    assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
+    assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(), "x has wrong dimension");
+    assert_pretty((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0), "u has wrong dimension");
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
   void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
-    assert(static_cast<std::size_t>(x.size()) == state_->get_nx() && "x has wrong dimension");
-    assert((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0) && "u has wrong dimension");
+    assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(), "x has wrong dimension");
+    assert_pretty((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0), "u has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
   }
 };
@@ -58,52 +59,51 @@ void exposeCostMultibody() {
       "It defines a template of cost model whose residual and derivatives can be retrieved from\n"
       "Pinocchio data, through the calc and calcDiff functions, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, int,
-               bp::optional<bool> >(bp::args(" self", " state", " activation", " nu=model.nv", " withResiduals=True"),
+               bp::optional<bool> >(bp::args("self", "state", "activation", "nu", "withResiduals"),
                                     "Initialize the cost model.\n\n"
                                     ":param state: state of the multibody system\n"
                                     ":param activation: Activation model\n"
-                                    ":param nu: dimension of control vector\n"
-                                    ":param withResiduals: true if the cost function has residuals"))
+                                    ":param nu: dimension of control vector (default model.nv)\n"
+                                    ":param withResiduals: true if the cost function has residuals (default True)"))
       .def(
           bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, bp::optional<bool> >(
-              bp::args(" self", " state", " activation", " withResiduals=True"),
+              bp::args("self", "state", "activation", "withResiduals"),
               "Initialize the cost model.\n\n"
               ":param state: state of the multibody system\n"
               ":param activation: Activation model\n"
-              ":param withResiduals: true if the cost function has residuals"))
+              ":param withResiduals: true if the cost function has residuals (default True)"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, int, int, bp::optional<bool> >(
-          bp::args(" self", " state", " nr", " nu=model.nv", " withResiduals=True"),
+          bp::args("self", "state", "nr", "nu", "withResiduals"),
           "Initialize the cost model.\n\n"
           "For this case the default activation model is quadratic, i.e. crocoddyl.ActivationModelQuad(nr).\n"
           ":param state: state of the multibody system\n"
           ":param nr: dimension of cost vector\n"
-          ":param nu: dimension of control vector\n"
-          ":param withResiduals: true if the cost function has residuals"))
+          ":param nu: dimension of control vector (default model.nv)\n"
+          ":param withResiduals: true if the cost function has residuals (default True)"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, int, bp::optional<bool> >(
-          bp::args(" self", " state", " nr", " withResiduals=True"),
+          bp::args("self", "state", "nr", "withResiduals"),
           "Initialize the cost model.\n\n"
           "For this case the default activation model is quadratic, i.e. crocoddyl.ActivationModelQuad(nr).\n"
           ":param state: state of the multibody system\n"
           ":param nr: dimension of cost vector\n"
-          ":param withResiduals: true if the cost function has residuals"))
-      .def("calc", pure_virtual(&CostModelAbstract_wrap::calc), bp::args(" self", " data", " x", " u"),
+          ":param withResiduals: true if the cost function has residuals (default True)"))
+      .def("calc", pure_virtual(&CostModelAbstract_wrap::calc), bp::args("self", "data", "x", "u"),
            "Compute the cost value and its residuals.\n\n"
            ":param data: cost data\n"
            ":param x: state vector\n"
            ":param u: control input")
-      .def("calcDiff", pure_virtual(&CostModelAbstract_wrap::calcDiff),
-           bp::args(" self", " data", " x", " u", " recalc=True"),
+      .def("calcDiff", pure_virtual(&CostModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u", "recalc"),
            "Compute the derivatives of the cost function and its residuals.\n\n"
            ":param data: cost data\n"
            ":param x: state vector\n"
            ":param u: control input\n"
            ":param recalc: If true, it updates the cost value.")
       .def("createData", &CostModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
-           bp::args(" self", " data"),
+           bp::args("self", "data"),
            "Create the cost data.\n\n"
            "Each cost model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined cost.\n"
-           ":param data: Pinocchio data\n"
+           ":param data: shared data\n"
            ":return cost data.")
       .add_property(
           "state",
@@ -120,14 +120,14 @@ void exposeCostMultibody() {
   bp::register_ptr_to_python<boost::shared_ptr<CostDataAbstract> >();
 
   bp::class_<CostDataAbstract, boost::noncopyable>(
-      "CostDataAbstract", "Abstract class for cost datas.\n\n",
-      bp::init<CostModelAbstract*, pinocchio::Data*>(
-          bp::args(" self", " model", " data"),
+      "CostDataAbstract", "Abstract class for cost data.\n\n",
+      bp::init<CostModelAbstract*, DataCollectorAbstract*>(
+          bp::args("self", "model", "data"),
           "Create common data shared between cost models.\n\n"
           ":param model: cost model\n"
-          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("pinocchio", bp::make_getter(&CostDataAbstract::pinocchio, bp::return_internal_reference<>()),
-                    "pinocchio data")
+          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("shared", bp::make_getter(&CostDataAbstract::shared, bp::return_internal_reference<>()),
+                    "shared data")
       .add_property("activation",
                     bp::make_getter(&CostDataAbstract::activation, bp::return_value_policy<bp::return_by_value>()),
                     "terminal data")

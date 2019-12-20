@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include <iterator>
 #include <pinocchio/fwd.hpp>
 
@@ -57,7 +58,7 @@ class ActionModelFactory {
         action_model_ = boost::make_shared<crocoddyl::ActionModelLQR>(nx_, nu_, false);
         break;
       default:
-        throw std::runtime_error(__FILE__ ": Wrong ActionModelTypes::Type given");
+        throw_pretty(__FILE__ ": Wrong ActionModelTypes::Type given");
         break;
     }
   }

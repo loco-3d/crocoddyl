@@ -38,7 +38,7 @@ void exposeContactMultiple() {
 
   bp::class_<ContactItem, boost::noncopyable>(
       "ContactItem", "Describe a contact item.\n\n",
-      bp::init<std::string, boost::shared_ptr<ContactModelAbstract> >(bp::args(" self", " name", " contact"),
+      bp::init<std::string, boost::shared_ptr<ContactModelAbstract> >(bp::args("self", "name", " contact"),
                                                                       "Initialize the contact item.\n\n"
                                                                       ":param name: contact name\n"
                                                                       ":param contact: contact model"))
@@ -50,18 +50,18 @@ void exposeContactMultiple() {
 
   bp::class_<ContactModelMultiple, boost::noncopyable>(
       "ContactModelMultiple",
-      bp::init<boost::shared_ptr<StateMultibody>, bp::optional<int> >(bp::args(" self", " state", " nu=state.nv"),
+      bp::init<boost::shared_ptr<StateMultibody>, bp::optional<int> >(bp::args("self", "state", "nu"),
                                                                       "Initialize the multiple contact model.\n\n"
                                                                       ":param state: state of the multibody system\n"
                                                                       ":param nu: dimension of control vector"))
-      .def("addContact", &ContactModelMultiple::addContact, bp::args(" self", " name", " contact"),
+      .def("addContact", &ContactModelMultiple::addContact, bp::args("self", "name", " contact"),
            "Add a contact item.\n\n"
            ":param name: contact name\n"
            ":param contact: contact model")
-      .def("removeContact", &ContactModelMultiple::removeContact, bp::args(" self", " name"),
+      .def("removeContact", &ContactModelMultiple::removeContact, bp::args("self", "name"),
            "Remove a contact item.\n\n"
            ":param name: contact name")
-      .def("calc", &ContactModelMultiple::calc_wrap, bp::args(" self", " data", " x"),
+      .def("calc", &ContactModelMultiple::calc_wrap, bp::args("self", "data", "x"),
            "Compute the total contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
@@ -69,28 +69,28 @@ void exposeContactMultiple() {
            ":param x: state vector")
       .def("calcDiff", &ContactModelMultiple::calcDiff_wrap,
            ContactModelMultiple_calcDiff_wraps(
-               bp::args(" self", " data", " x", " recalc=True"),
+               bp::args("self", "data", "x", "recalc"),
                "Compute the derivatives of the total contact holonomic constraint.\n\n"
                "The rigid contact model throught acceleration-base holonomic constraint\n"
                "of the contact frame placement.\n"
                ":param data: contact data\n"
                ":param x: state vector\n"
                ":param recalc: If true, it updates the contact Jacobian and drift."))
-      .def("updateAcceleration", &ContactModelMultiple::updateAcceleration, bp::args(" self", " data", " dv"),
+      .def("updateAcceleration", &ContactModelMultiple::updateAcceleration, bp::args("self", "data", "dv"),
            "Update the constrained acceleration.\n\n"
            ":param data: contact data\n"
            ":param dv: constrained acceleration (dimension nv)")
-      .def("updateForce", &ContactModelMultiple::updateForce, bp::args(" self", " data", " force"),
+      .def("updateForce", &ContactModelMultiple::updateForce, bp::args("self", "data", "force"),
            "Convert the force into a stack of spatial forces.\n\n"
            ":param data: contact data\n"
            ":param force: force vector (dimension nc)")
-      .def("updateForceDiff", &ContactModelMultiple::updateForceDiff, bp::args(" self", " data", " df_dx", " df_du"),
+      .def("updateForceDiff", &ContactModelMultiple::updateForceDiff, bp::args("self", "data", "df_dx", "df_du"),
            "Update the Jacobians of the force.\n\n"
            ":param data: contact data\n"
            ":param df_dx: Jacobian of the force with respect to the state (dimension nc*ndx)\n"
            ":param df_du: Jacobian of the force with respect to the control (dimension nc*nu)")
       .def("createData", &ContactModelMultiple::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
-           bp::args(" self", " data"),
+           bp::args("self", "data"),
            "Create the total contact data.\n\n"
            ":param data: Pinocchio data\n"
            ":return total contact data.")
@@ -111,7 +111,7 @@ void exposeContactMultiple() {
   bp::class_<ContactDataMultiple, boost::shared_ptr<ContactDataMultiple>, bp::bases<ContactDataAbstract> >(
       "ContactDataMultiple", "Data class for multiple contacts.\n\n",
       bp::init<ContactModelMultiple*, pinocchio::Data*>(
-          bp::args(" self", " model", " data"),
+          bp::args("self", "model", "data"),
           "Create multicontact data.\n\n"
           ":param model: multicontact model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])

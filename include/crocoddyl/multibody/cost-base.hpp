@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,10 +9,10 @@
 #ifndef CROCODDYL_MULTIBODY_COST_BASE_HPP_
 #define CROCODDYL_MULTIBODY_COST_BASE_HPP_
 
-#include <pinocchio/multibody/data.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include "crocoddyl/multibody/states/multibody.hpp"
+#include "crocoddyl/core/data-collector-base.hpp"
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/utils/to-string.hpp"
 
@@ -35,7 +35,7 @@ class CostModelAbstract {
                     const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
   virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                         const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) = 0;
-  virtual boost::shared_ptr<CostDataAbstract> createData(pinocchio::Data* const data);
+  virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
   void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
@@ -85,8 +85,8 @@ struct CostDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Model>
-  CostDataAbstract(Model* const model, pinocchio::Data* const data)
-      : pinocchio(data),
+  CostDataAbstract(Model* const model, DataCollectorAbstract* const data)
+      : shared(data),
         activation(model->get_activation()->createData()),
         cost(0.),
         Lx(model->get_state()->get_ndx()),
@@ -108,7 +108,7 @@ struct CostDataAbstract {
   }
   virtual ~CostDataAbstract() {}
 
-  pinocchio::Data* pinocchio;
+  DataCollectorAbstract* shared;
   boost::shared_ptr<ActivationDataAbstract> activation;
   double cost;
   Eigen::VectorXd Lx;

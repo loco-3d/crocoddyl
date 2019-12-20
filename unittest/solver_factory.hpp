@@ -7,6 +7,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/solver-base.hpp"
 #include "crocoddyl/core/solvers/kkt.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
@@ -59,7 +60,7 @@ class SolverFactory {
         solver_ = boost::make_shared<crocoddyl::SolverFDDP>(problem_);
         break;
       default:
-        throw std::runtime_error(__FILE__ ": Wrong SolverTypes::Type given");
+        throw_pretty(__FILE__ ": Wrong SolverTypes::Type given");
         break;
     }
   }

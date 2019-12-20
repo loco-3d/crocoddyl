@@ -20,22 +20,22 @@ void exposeActivationNumDiff() {
   bp::class_<ActivationModelNumDiff, bp::bases<ActivationModelAbstract> >(
       "ActivationModelNumDiff", "Abstract class for computing calcDiff by using numerical differentiation.\n\n",
       bp::init<boost::shared_ptr<ActivationModelAbstract> >(
-          bp::args(" self", " model"),
+          bp::args("self", "model"),
           "Initialize the activation model NumDiff.\n\n"
           ":param model: activation model where we compute the derivatives through NumDiff"))
-      .def("calc", &ActivationModelNumDiff::calc_wrap, bp::args(" self", "data", "r"),
+      .def("calc", &ActivationModelNumDiff::calc_wrap, bp::args("self", "data", "r"),
            "Compute the activation value.\n\n"
            "The activation evolution is described in model.\n"
            ":param data: NumDiff action data\n"
            ":param r: residual vector")
       .def<void (ActivationModelNumDiff::*)(const boost::shared_ptr<ActivationDataAbstract>&, const Eigen::VectorXd&,
                                             const bool&)>(
-          "calcDiff", &ActivationModelNumDiff::calcDiff_wrap, bp::args("self", "data", "r", "recalc=True"),
+          "calcDiff", &ActivationModelNumDiff::calcDiff_wrap, bp::args("self", "data", "r", "recalc"),
           "Compute the derivatives of the residual.\n\n"
           "It computes the Jacobian and Hessian using numerical differentiation.\n"
           ":param data: NumDiff action data\n"
           ":param r: residual vector\n"
-          ":param recalc: If true, it updates the residual vector.")
+          ":param recalc: If true, it updates the residual vector (default True).")
       .def<void (ActivationModelNumDiff::*)(const boost::shared_ptr<ActivationDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &ActivationModelNumDiff::calcDiff_wrap, bp::args("self", "data", "r"))
       .def("createData", &ActivationModelNumDiff::createData, bp::args("self"),

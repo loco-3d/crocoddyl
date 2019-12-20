@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include <pinocchio/algorithm/frames.hpp>
 #include "crocoddyl/multibody/costs/frame-translation.hpp"
 
@@ -16,7 +17,8 @@ CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMult
                                                      const FrameTranslation& xref, const std::size_t& nu)
     : CostModelAbstract(state, activation, nu), xref_(xref) {
   if (activation_->get_nr() != 3) {
-    throw std::invalid_argument("nr is equals to 3");
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to 3");
   }
 }
 
@@ -25,7 +27,8 @@ CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMult
                                                      const FrameTranslation& xref)
     : CostModelAbstract(state, activation), xref_(xref) {
   if (activation_->get_nr() != 3) {
-    throw std::invalid_argument("nr is equals to 3");
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to 3");
   }
 }
 
@@ -43,7 +46,8 @@ void CostModelFrameTranslation::calc(const boost::shared_ptr<CostDataAbstract>& 
                                      const Eigen::Ref<const Eigen::VectorXd>&,
                                      const Eigen::Ref<const Eigen::VectorXd>&) {
   // Compute the frame translation w.r.t. the reference frame
-  data->r = data->pinocchio->oMf[xref_.frame].translation() - xref_.oxf;
+  CostDataFrameTranslation* d = static_cast<CostDataFrameTranslation*>(data.get());
+  data->r = d->pinocchio->oMf[xref_.frame].translation() - xref_.oxf;
 
   // Compute the cost
   activation_->calc(data->activation, data->r);
@@ -72,7 +76,7 @@ void CostModelFrameTranslation::calcDiff(const boost::shared_ptr<CostDataAbstrac
   d->Lxx.topLeftCorner(nv, nv) = d->J.transpose() * d->activation->Arr * d->J;
 }
 
-boost::shared_ptr<CostDataAbstract> CostModelFrameTranslation::createData(pinocchio::Data* const data) {
+boost::shared_ptr<CostDataAbstract> CostModelFrameTranslation::createData(DataCollectorAbstract* const data) {
   return boost::make_shared<CostDataFrameTranslation>(this, data);
 }
 

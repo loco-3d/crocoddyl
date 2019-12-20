@@ -28,7 +28,7 @@ class IntegratedActionModelEuler : public ActionModelAbstract {
 
   const boost::shared_ptr<DifferentialActionModelAbstract>& get_differential() const;
   const double& get_dt() const;
-  void set_dt(double dt);
+  void set_dt(const double& dt);
 
  private:
   boost::shared_ptr<DifferentialActionModelAbstract> differential_;

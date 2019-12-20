@@ -1,13 +1,18 @@
-dist: bionic
 language: cpp
-sudo: required
+os: [
+  "linux"
+]
 
 jobs:
   include:
     - dist: bionic
-      env: CMAKE_BUILD_TYPE=Debug
+      env: CMAKE_BUILD_TYPE=Debug DIST=bionic
     - dist: bionic
-      env: CMAKE_BUILD_TYPE=Release
+      env: CMAKE_BUILD_TYPE=Release DIST=bionic
+    - dist: xenial
+      env: CMAKE_BUILD_TYPE=Debug DIST=xenial
+    - dist: xenial
+      env: CMAKE_BUILD_TYPE=Release DIST=xenial
     - dist: bionic
       env: CHECK_CLANG_FORMAT=1
 

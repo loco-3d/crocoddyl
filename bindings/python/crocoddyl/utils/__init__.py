@@ -273,8 +273,9 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
 
         # We cannot abstract data in Python bindings, let's create this internal data inside model
         self.pinocchioData = pinocchio.Data(self.state.pinocchio)
+        self.multibodyData = crocoddyl.DataCollectorMultibody(self.pinocchioData)
         self.actuationData = self.actuation.createData()
-        self.costsData = self.costs.createData(self.pinocchioData)
+        self.costsData = self.costs.createData(self.multibodyData)
         self.Minv = None
 
     def calc(self, data, x, u=None):
@@ -424,7 +425,7 @@ class CoMPositionCostDerived(crocoddyl.CostModelAbstract):
         self.cref = cref
 
     def calc(self, data, x, u):
-        data.r = data.pinocchio.com[0] - self.cref
+        data.r = data.shared.pinocchio.com[0] - self.cref
         self.activation.calc(data.activation, data.r)
         data.cost = data.activation.a
 
@@ -432,11 +433,13 @@ class CoMPositionCostDerived(crocoddyl.CostModelAbstract):
         if recalc:
             self.calc(data, x, u)
         self.activation.calcDiff(data.activation, data.r, recalc)
-        data.Rx = np.hstack([data.pinocchio.Jcom, pinocchio.utils.zero((self.activation.nr, self.state.nv))])
-        data.Lx = np.vstack([data.pinocchio.Jcom.T * data.activation.Ar, pinocchio.utils.zero((self.state.nv, 1))])
+        data.Rx = np.hstack([data.shared.pinocchio.Jcom, pinocchio.utils.zero((self.activation.nr, self.state.nv))])
+        data.Lx = np.vstack(
+            [data.shared.pinocchio.Jcom.T * data.activation.Ar,
+             pinocchio.utils.zero((self.state.nv, 1))])
         data.Lxx = np.vstack([
             np.hstack([
-                data.pinocchio.Jcom.T * data.activation.Arr * data.pinocchio.Jcom,
+                data.shared.pinocchio.Jcom.T * data.activation.Arr * data.shared.pinocchio.Jcom,
                 pinocchio.utils.zero((self.state.nv, self.state.nv))
             ]),
             pinocchio.utils.zero((self.state.nv, self.state.ndx))
@@ -450,7 +453,7 @@ class FramePlacementCostDerived(crocoddyl.CostModelAbstract):
         self.Mref = Mref
 
     def calc(self, data, x, u):
-        data.rMf = self.Mref.oMf.inverse() * data.pinocchio.oMf[self.Mref.frame]
+        data.rMf = self.Mref.oMf.inverse() * data.shared.pinocchio.oMf[self.Mref.frame]
         data.r = pinocchio.log(data.rMf).vector
         self.activation.calc(data.activation, data.r)
         data.cost = data.activation.a
@@ -458,9 +461,9 @@ class FramePlacementCostDerived(crocoddyl.CostModelAbstract):
     def calcDiff(self, data, x, u, recalc=True):
         if recalc:
             self.calc(data, x, u)
-        pinocchio.updateFramePlacements(self.state.pinocchio, data.pinocchio)
+        pinocchio.updateFramePlacements(self.state.pinocchio, data.shared.pinocchio)
         data.rJf = pinocchio.Jlog6(data.rMf)
-        data.fJf = pinocchio.getFrameJacobian(self.state.pinocchio, data.pinocchio, self.Mref.frame,
+        data.fJf = pinocchio.getFrameJacobian(self.state.pinocchio, data.shared.pinocchio, self.Mref.frame,
                                               pinocchio.ReferenceFrame.LOCAL)
         data.J = data.rJf * data.fJf
         self.activation.calcDiff(data.activation, data.r, recalc)
@@ -480,16 +483,16 @@ class FrameTranslationCostDerived(crocoddyl.CostModelAbstract):
         self.xref = xref
 
     def calc(self, data, x, u):
-        data.r = data.pinocchio.oMf[self.xref.frame].translation - self.xref.oxf
+        data.r = data.shared.pinocchio.oMf[self.xref.frame].translation - self.xref.oxf
         self.activation.calc(data.activation, data.r)
         data.cost = data.activation.a
 
     def calcDiff(self, data, x, u, recalc=True):
         if recalc:
             self.calc(data, x, u)
-        pinocchio.updateFramePlacements(self.state.pinocchio, data.pinocchio)
-        data.R = data.pinocchio.oMf[self.xref.frame].rotation
-        data.J = data.R * pinocchio.getFrameJacobian(self.state.pinocchio, data.pinocchio, self.xref.frame,
+        pinocchio.updateFramePlacements(self.state.pinocchio, data.shared.pinocchio)
+        data.R = data.shared.pinocchio.oMf[self.xref.frame].rotation
+        data.J = data.R * pinocchio.getFrameJacobian(self.state.pinocchio, data.shared.pinocchio, self.xref.frame,
                                                      pinocchio.ReferenceFrame.LOCAL)[:3, :]
         self.activation.calcDiff(data.activation, data.r, recalc)
         data.Rx = np.hstack([data.J, pinocchio.utils.zero((self.activation.nr, self.state.nv))])
@@ -508,7 +511,7 @@ class FrameRotationCostDerived(crocoddyl.CostModelAbstract):
         self.Rref = Rref
 
     def calc(self, data, x, u):
-        data.rRf = self.Rref.oRf.transpose() * data.pinocchio.oMf[self.Rref.frame].rotation
+        data.rRf = self.Rref.oRf.transpose() * data.shared.pinocchio.oMf[self.Rref.frame].rotation
         data.r = pinocchio.log3(data.rRf)
         self.activation.calc(data.activation, data.r)
         data.cost = data.activation.a
@@ -516,9 +519,9 @@ class FrameRotationCostDerived(crocoddyl.CostModelAbstract):
     def calcDiff(self, data, x, u, recalc=True):
         if recalc:
             self.calc(data, x, u)
-        pinocchio.updateFramePlacements(self.state.pinocchio, data.pinocchio)
+        pinocchio.updateFramePlacements(self.state.pinocchio, data.shared.pinocchio)
         data.rJf = pinocchio.Jlog3(data.rRf)
-        data.fJf = pinocchio.getFrameJacobian(self.state.pinocchio, data.pinocchio, self.Rref.frame,
+        data.fJf = pinocchio.getFrameJacobian(self.state.pinocchio, data.shared.pinocchio, self.Rref.frame,
                                               pinocchio.ReferenceFrame.LOCAL)[:3, :]
         data.J = data.rJf * data.fJf
         self.activation.calcDiff(data.activation, data.r, recalc)
@@ -540,7 +543,7 @@ class FrameVelocityCostDerived(crocoddyl.CostModelAbstract):
         self.fXj = state.pinocchio.frames[vref.frame].placement.inverse().action
 
     def calc(self, data, x, u):
-        data.r = (pinocchio.getFrameVelocity(self.state.pinocchio, data.pinocchio, self.vref.frame) -
+        data.r = (pinocchio.getFrameVelocity(self.state.pinocchio, data.shared.pinocchio, self.vref.frame) -
                   self.vref.oMf).vector
         self.activation.calc(data.activation, data.r)
         data.cost = data.activation.a
@@ -548,7 +551,7 @@ class FrameVelocityCostDerived(crocoddyl.CostModelAbstract):
     def calcDiff(self, data, x, u, recalc=True):
         if recalc:
             self.calc(data, x, u)
-        v_partial_dq, v_partial_dv = pinocchio.getJointVelocityDerivatives(self.state.pinocchio, data.pinocchio,
+        v_partial_dq, v_partial_dv = pinocchio.getJointVelocityDerivatives(self.state.pinocchio, data.shared.pinocchio,
                                                                            self.joint, pinocchio.ReferenceFrame.LOCAL)
 
         self.activation.calcDiff(data.activation, data.r, recalc)

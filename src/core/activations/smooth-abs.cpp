@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/activations/smooth-abs.hpp"
 
 namespace crocoddyl {
@@ -17,7 +18,8 @@ ActivationModelSmoothAbs::~ActivationModelSmoothAbs() {}
 void ActivationModelSmoothAbs::calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                                     const Eigen::Ref<const Eigen::VectorXd>& r) {
   if (static_cast<std::size_t>(r.size()) != nr_) {
-    throw std::invalid_argument("r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+    throw_pretty("Invalid argument: "
+                 << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
   }
   boost::shared_ptr<ActivationDataSmoothAbs> d = boost::static_pointer_cast<ActivationDataSmoothAbs>(data);
 
@@ -28,7 +30,8 @@ void ActivationModelSmoothAbs::calc(const boost::shared_ptr<ActivationDataAbstra
 void ActivationModelSmoothAbs::calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
                                         const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc) {
   if (static_cast<std::size_t>(r.size()) != nr_) {
-    throw std::invalid_argument("r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+    throw_pretty("Invalid argument: "
+                 << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
   }
   if (recalc) {
     calc(data, r);

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -60,6 +60,7 @@ struct ImpulseDataAbstract {
   ImpulseDataAbstract(Model* const model, pinocchio::Data* const data)
       : pinocchio(data),
         joint(0),
+        frame(0),
         Jc(model->get_ni(), model->get_state()->get_nv()),
         dv0_dq(model->get_ni(), model->get_state()->get_nv()),
         df_dq(model->get_ni(), model->get_state()->get_nv()),
@@ -72,6 +73,7 @@ struct ImpulseDataAbstract {
 
   pinocchio::Data* pinocchio;
   pinocchio::JointIndex joint;
+  pinocchio::FrameIndex frame;
   Eigen::MatrixXd Jc;
   Eigen::MatrixXd dv0_dq;
   Eigen::MatrixXd df_dq;
