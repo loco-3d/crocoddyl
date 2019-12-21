@@ -69,7 +69,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
           break;
         }
       } else {  // reducing the gaps by allowing a small increment in the cost value
-        if (d_[0] < th_grad_ || dV_ < th_acceptnegstep_ * dVexp_) {
+        if (d_[0] < th_grad_ || dV_ > th_acceptnegstep_ * dVexp_) {
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
           cost_ = cost_try_;
