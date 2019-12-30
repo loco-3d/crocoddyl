@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,6 +10,7 @@
 #define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_HPP_
 
 #include "python/crocoddyl/multibody/frames.hpp"
+#include "python/crocoddyl/multibody/friction-cone.hpp"
 #include "python/crocoddyl/multibody/data/multibody.hpp"
 #include "python/crocoddyl/multibody/data/contacts.hpp"
 #include "python/crocoddyl/multibody/data/impulses.hpp"
@@ -44,6 +45,7 @@ namespace python {
 
 void exposeMultibody() {
   exposeFrames();
+  exposeFrictionCone();
   exposeDataCollectorMultibody();
   exposeDataCollectorContacts();
   exposeDataCollectorImpulses();

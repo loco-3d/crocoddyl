@@ -28,6 +28,7 @@ SET(${PROJECT_NAME}_SOURCES
   multibody/cost-base.cpp
   multibody/contact-base.cpp
   multibody/impulse-base.cpp
+  multibody/friction-cone.cpp
   multibody/impulses/multiple-impulses.cpp
   multibody/impulses/impulse-3d.cpp
   multibody/impulses/impulse-6d.cpp
