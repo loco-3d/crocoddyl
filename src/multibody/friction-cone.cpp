@@ -56,12 +56,12 @@ void FrictionCone::update(const Eigen::Vector3d& normal, const double& mu, bool 
     mu_ *= cos(theta / 2.);
   }
 
+  Eigen::Matrix3d c_R_o = Eigen::Quaterniond::FromTwoVectors(nsurf_, Eigen::Vector3d::UnitZ()).toRotationMatrix();
   for (std::size_t i = 0; i < nf_ / 2; ++i) {
     double theta_i = theta * static_cast<double>(i);
     Eigen::Vector3d tsurf_i = Eigen::Vector3d(cos(theta_i), sin(theta_i), 0.);
-    Eigen::Quaterniond q = Eigen::Quaterniond::FromTwoVectors(nsurf_, Eigen::Vector3d::UnitZ());
-    A_.row(2 * i) = (q.toRotationMatrix() * (-mu_ * Eigen::Vector3d::UnitZ() + tsurf_i)).transpose();
-    A_.row(2 * i + 1) = (q.toRotationMatrix() * (-mu_ * Eigen::Vector3d::UnitZ() - tsurf_i)).transpose();
+    A_.row(2 * i) = (-mu_ * Eigen::Vector3d::UnitZ() + tsurf_i).transpose() * c_R_o;
+    A_.row(2 * i + 1) = (-mu_ * Eigen::Vector3d::UnitZ() - tsurf_i).transpose() * c_R_o;
     lb_(2 * i) = -std::numeric_limits<double>::max();
     lb_(2 * i + 1) = -std::numeric_limits<double>::max();
     ub_(2 * i) = 0.;
