@@ -10,7 +10,6 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include <iterator>
 #include <Eigen/Dense>
 #include <pinocchio/fwd.hpp>
@@ -22,6 +21,7 @@
 #include "crocoddyl/core/activations/smooth-abs.hpp"
 #include "crocoddyl/core/activations/weighted-quadratic.hpp"
 #include "crocoddyl/core/numdiff/activation.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 using namespace boost::unit_test;
 
