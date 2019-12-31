@@ -154,8 +154,7 @@ IntType random_int_in_range(IntType first = 0, IntType last = 10) {
 }
 
 template <typename RealType>
-RealType random_real_in_range( RealType first = 0, RealType last = 1 )
-{
+RealType random_real_in_range(RealType first = 0, RealType last = 1) {
 #if __cplusplus >= 201103L
   return std::uniform_real_distribution<RealType>(first, last)(rng);
 #else
