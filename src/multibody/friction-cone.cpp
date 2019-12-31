@@ -38,7 +38,7 @@ void FrictionCone::update(const Eigen::Vector3d& normal, const double& mu, bool 
   max_nforce_ = max_nforce;
 
   // Sanity checks
-  if (normal.norm() != 1.) {
+  if (!normal.isUnitary()) {
     nsurf_ /= normal.norm();
     std::cerr << "Warning: normal is not an unitary vector, then we normalized it" << std::endl;
   }
