@@ -30,6 +30,15 @@ void test_constructor() {
   BOOST_CHECK(static_cast<std::size_t>(cone.get_ub().size()) == nf + 1);
 }
 
+void test_inner_approximation_of_friction_cone() {
+  Eigen::Vector3d cone_normal = Eigen::Vector3d::UnitZ();
+  double mu = random_real_in_range(0.01, 1.);
+  std::size_t nf = 2 * random_int_in_range(2, 16);
+  bool inner_appr = true;
+  crocoddyl::FrictionCone cone(cone_normal, mu, nf, inner_appr);
+  BOOST_CHECK_CLOSE(cone.get_mu(), mu * cos((2 * M_PI / static_cast<double>(nf)) / 2.), 1e-9);
+}
+
 void test_force_along_friction_cone_normal() {
   // Create the friction cone
   Eigen::Vector3d cone_normal = Eigen::Vector3d::Random();
@@ -114,6 +123,7 @@ void test_force_parallel_to_friction_cone_normal() {
 
 void register_unit_tests() {
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_constructor)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_inner_approximation_of_friction_cone)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_force_along_friction_cone_normal)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_negative_force_along_friction_cone_normal)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_force_parallel_to_friction_cone_normal)));
