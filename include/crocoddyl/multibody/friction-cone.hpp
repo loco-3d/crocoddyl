@@ -19,6 +19,7 @@ class FrictionCone {
 
   FrictionCone(const Eigen::Vector3d& normal, const double& mu, std::size_t nf = 4, bool inner_appr = true,
                const double& min_nforce = 0., const double& max_nforce = std::numeric_limits<double>::max());
+  FrictionCone(const FrictionCone& cone);
   ~FrictionCone();
 
   void update(const Eigen::Vector3d& normal, const double& mu, bool inner_appr = true, const double& min_nforce = 0.,

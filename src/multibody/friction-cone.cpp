@@ -27,6 +27,17 @@ FrictionCone::FrictionCone(const Eigen::Vector3d& normal, const double& mu, std:
   update(normal, mu, inner_appr, min_nforce, max_nforce);
 }
 
+FrictionCone::FrictionCone(const FrictionCone& cone)
+    : A_(cone.get_A()),
+      lb_(cone.get_lb()),
+      ub_(cone.get_ub()),
+      nsurf_(cone.get_nsurf()),
+      mu_(cone.get_mu()),
+      nf_(cone.get_nf()),
+      inner_appr_(cone.get_inner_appr()),
+      min_nforce_(cone.get_min_nforce()),
+      max_nforce_(cone.get_max_nforce()) {}
+
 FrictionCone::~FrictionCone() {}
 
 void FrictionCone::update(const Eigen::Vector3d& normal, const double& mu, bool inner_appr, const double& min_nforce,
