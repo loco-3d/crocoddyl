@@ -42,7 +42,9 @@ MODEL.calcDiff(DATA, x, u)
 MODEL_ND.calcDiff(dnum, x, u)
 assertNumDiff(DATA.Fx, dnum.Fx, NUMDIFF_MODIFIER *
               MODEL_ND.disturbance)  # threshold was 2.7e-2, is now 2.11e-4 (see assertNumDiff.__doc__)
-assertNumDiff(DATA.Fu, dnum.Fu, NUMDIFF_MODIFIER * MODEL_ND.disturbance)  # threshold was 7e-3, is now 2.11e-4 (se
+assertNumDiff(DATA.Fu, dnum.Fu, NUMDIFF_MODIFIER *
+              MODEL_ND.disturbance)  # threshold was 2.7e-2, is now 2.11e-4 (see assertNumDiff.__doc__)
 assertNumDiff(DATA.Lx, dnum.Lx, NUMDIFF_MODIFIER *
               MODEL_ND.disturbance)  # threshold was 2.7e-2, is now 2.11e-4 (see assertNumDiff.__doc__)
-assertNumDiff(DATA.Lu, dnum.Lu, NUMDIFF_MODIFIER * MODEL_ND.disturbance)  # threshold was 7e-3, is now 2.11e-4 (se
+assertNumDiff(DATA.Lu, dnum.Lu, NUMDIFF_MODIFIER *
+              MODEL_ND.disturbance)  # threshold was 2.7e-2, is now 2.11e-4 (see assertNumDiff.__doc__)
