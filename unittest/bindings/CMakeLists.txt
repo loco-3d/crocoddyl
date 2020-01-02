@@ -6,6 +6,7 @@ SET(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
   solvers
   costs
   force_cost
+  friction_cone_cost
   momemtum_cost
   contacts
   impulses
