@@ -35,11 +35,11 @@ CostModelContactFrictionCone::CostModelContactFrictionCone(boost::shared_ptr<Sta
 CostModelContactFrictionCone::CostModelContactFrictionCone(boost::shared_ptr<StateMultibody> state,
                                                            const FrictionCone& cone, const FrameIndex& frame,
                                                            const std::size_t& nu)
-    : CostModelAbstract(state, 6, nu), friction_cone_(cone), frame_(frame) {}
+    : CostModelAbstract(state, cone.get_nf() + 1, nu), friction_cone_(cone), frame_(frame) {}
 
 CostModelContactFrictionCone::CostModelContactFrictionCone(boost::shared_ptr<StateMultibody> state,
                                                            const FrictionCone& cone, const FrameIndex& frame)
-    : CostModelAbstract(state, 6), friction_cone_(cone), frame_(frame) {}
+    : CostModelAbstract(state, cone.get_nf() + 1), friction_cone_(cone), frame_(frame) {}
 
 CostModelContactFrictionCone::~CostModelContactFrictionCone() {}
 
