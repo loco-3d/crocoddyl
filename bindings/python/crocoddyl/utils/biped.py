@@ -18,8 +18,9 @@ class SimpleBipedGaitProblem:
         q0 = self.rmodel.referenceConfigurations["half_sitting"]
         self.rmodel.defaultState = np.concatenate([q0, np.zeros((self.rmodel.nv, 1))])
         self.firstStep = True
-        # Remove the armature
-        # self.rmodel.armature[6:] = 1.
+        # Defining the friction coefficient and normal
+        self.mu = 0.7
+        self.nsurf = np.matrix([0., 0., 1.]).T
 
     def createWalkingProblem(self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots):
         """ Create a shooting problem for a simple walking gait.
@@ -189,6 +190,12 @@ class SimpleBipedGaitProblem:
         if isinstance(comTask, np.ndarray):
             comTrack = crocoddyl.CostModelCoMPosition(self.state, comTask, self.actuation.nu)
             costModel.addCost("comTrack", comTrack, 1e6)
+        for i in supportFootIds:
+            cone = crocoddyl.FrictionCone(self.nsurf, self.mu, 4, False)
+            frictionCone = crocoddyl.CostModelContactFrictionCone(
+                self.state, crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(cone.lb, cone.ub)),
+                cone, i, self.actuation.nu)
+            costModel.addCost(self.rmodel.frames[i].name + "_frictionCone", frictionCone, 1e1)
         if swingFootTask is not None:
             for i in swingFootTask:
                 footTrack = crocoddyl.CostModelFramePlacement(self.state, i, self.actuation.nu)
@@ -205,7 +212,7 @@ class SimpleBipedGaitProblem:
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
         dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
-                                                                     costModel)
+                                                                     costModel, 0., True)
         model = crocoddyl.IntegratedActionModelEuler(dmodel, timeStep)
         return model
 
@@ -241,6 +248,12 @@ class SimpleBipedGaitProblem:
 
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, self.actuation.nu)
+        for i in supportFootIds:
+            cone = crocoddyl.FrictionCone(self.nsurf, self.mu, 4, False)
+            frictionCone = crocoddyl.CostModelContactFrictionCone(
+                self.state, crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(cone.lb, cone.ub)),
+                cone, i, self.actuation.nu)
+            costModel.addCost(self.rmodel.frames[i].name + "_frictionCone", frictionCone, 1e1)
         if swingFootTask is not None:
             for i in swingFootTask:
                 footTrack = crocoddyl.CostModelFramePlacement(self.state, i, self.actuation.nu)
@@ -260,7 +273,7 @@ class SimpleBipedGaitProblem:
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
         dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
-                                                                     costModel)
+                                                                     costModel, 0., True)
         model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.)
         return model
 
