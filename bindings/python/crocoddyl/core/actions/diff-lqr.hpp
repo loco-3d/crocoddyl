@@ -29,11 +29,12 @@ void exposeDifferentialActionLQR() {
       "where Fq, Fv, Fu and f0 are randomly chosen constant terms. On the other\n"
       "hand the cost function is given by\n"
       "  l(x,u) = 1/2 [x,u].T [Lxx Lxu; Lxu.T Luu] [x,u] + [lx,lu].T [x,u].",
-      bp::init<int, int, bp::optional<bool> >(bp::args("self", "nq", "nu", "driftFree"),
-                                              "Initialize the differential LQR action model.\n\n"
-                                              ":param nx: dimension of the state vector\n"
-                                              ":param nu: dimension of the control vector\n"
-                                              ":param driftFree: enable/disable the bias term of the linear dynamics (default True)"))
+      bp::init<int, int, bp::optional<bool> >(
+          bp::args("self", "nq", "nu", "driftFree"),
+          "Initialize the differential LQR action model.\n\n"
+          ":param nx: dimension of the state vector\n"
+          ":param nu: dimension of the control vector\n"
+          ":param driftFree: enable/disable the bias term of the linear dynamics (default True)"))
       .def("calc", &DifferentialActionModelLQR::calc_wrap,
            DiffActionModel_calc_wraps(bp::args("self", "data", "x", "u"),
                                       "Compute the next state and cost value.\n\n"

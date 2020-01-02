@@ -1,8 +1,6 @@
 import crocoddyl
-import pinocchio
 import example_robot_data
-import numpy as np
-
+import pinocchio
 from test_utils import NUMDIFF_MODIFIER, assertNumDiff
 
 crocoddyl.switchToNumpyMatrix()
