@@ -11,6 +11,8 @@
 
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
+#include "crocoddyl/multibody/contacts/contact-3d.hpp"
+#include "crocoddyl/multibody/contacts/contact-6d.hpp"
 #include "crocoddyl/multibody/data/contacts.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/multibody/friction-cone.hpp"
@@ -53,7 +55,9 @@ struct CostDataContactFrictionCone : public CostDataAbstract {
 
   template <typename Model>
   CostDataContactFrictionCone(Model* const model, DataCollectorAbstract* const data)
-      : CostDataAbstract(model, data), Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
+      : CostDataAbstract(model, data),
+        Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()),
+        more_than_3_constraints(false) {
     Arr_Ru.fill(0);
 
     // Check that proper shared data has been passed
@@ -68,8 +72,20 @@ struct CostDataContactFrictionCone : public CostDataAbstract {
     for (ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
          it != d->contacts->contacts.end(); ++it) {
       if (it->second->frame == model->get_frame()) {
-        found_contact = true;
-        contact = it->second;
+        ContactData3D* d3d = dynamic_cast<ContactData3D*>(it->second.get());
+        if (d3d != NULL) {
+          found_contact = true;
+          contact = it->second;
+          break;
+        }
+        ContactData6D* d6d = dynamic_cast<ContactData6D*>(it->second.get());
+        if (d6d != NULL) {
+          more_than_3_constraints = true;
+          found_contact = true;
+          contact = it->second;
+          break;
+        }
+        throw_pretty("Domain error: there isn't defined at least a 3d contact for " + frame_name);
         break;
       }
     }
@@ -80,6 +96,7 @@ struct CostDataContactFrictionCone : public CostDataAbstract {
 
   boost::shared_ptr<ContactDataAbstract> contact;
   Eigen::MatrixXd Arr_Ru;
+  bool more_than_3_constraints;
 };
 
 }  // namespace crocoddyl
