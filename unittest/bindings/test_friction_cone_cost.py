@@ -30,16 +30,17 @@ activation = crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBound
 COSTS.addCost(
     "r_sole_friction_cone",
     crocoddyl.CostModelContactFrictionCone(ROBOT_STATE, activation, frictionCone, ROBOT_MODEL.getFrameId('r_sole'),
-                                           ACTUATION.nu), 0.1)
+                                           ACTUATION.nu), 1.)
 COSTS.addCost(
     "l_sole_friction_cone",
     crocoddyl.CostModelContactFrictionCone(ROBOT_STATE, activation, frictionCone, ROBOT_MODEL.getFrameId('l_sole'),
-                                           ACTUATION.nu), 0.1)
+                                           ACTUATION.nu), 1.)
 MODEL = crocoddyl.DifferentialActionModelContactFwdDynamics(ROBOT_STATE, ACTUATION, CONTACTS, COSTS, 0., True)
 DATA = MODEL.createData()
 
 # Created DAM numdiff
 MODEL_ND = crocoddyl.DifferentialActionModelNumDiff(MODEL)
+MODEL_ND.disturbance *= 10
 dnum = MODEL_ND.createData()
 
 x = ROBOT_STATE.rand()
