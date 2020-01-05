@@ -15,6 +15,9 @@ crocoddyl.switchToNumpyMatrix()
 
 # Creating the lower-body part of Talos
 talos_legs = example_robot_data.loadTalosLegs()
+lims = talos_legs.model.effortLimit
+lims *= 0.5  # reduced artificially the torque limits
+talos_legs.model.effortLimit = lims
 
 # Defining the initial state of the robot
 q0 = talos_legs.model.referenceConfigurations['half_sitting'].copy()
@@ -43,7 +46,7 @@ for i, phase in enumerate(GAITPHASES):
     for key, value in phase.items():
         if key == 'walking':
             # Creating a walking problem
-            ddp[i] = crocoddyl.SolverDDP(
+            ddp[i] = crocoddyl.SolverBoxDDP(
                 gait.createWalkingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                           value['stepKnots'], value['supportKnots']))
 

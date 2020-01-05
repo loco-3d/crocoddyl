@@ -6,9 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <iostream>
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
-#include <iostream>
 
 namespace crocoddyl {
 
@@ -81,12 +81,14 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
       }
       dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
 
-      if (d_[0] < th_grad_ || !is_feasible_ || dV_ > th_acceptstep_ * dVexp_) {
-        was_feasible_ = is_feasible_;
-        setCandidate(xs_try_, us_try_, true);
-        cost_ = cost_try_;
-        recalc = true;
-        break;
+      if (dVexp_ >= 0) {  // descend direction
+        if (d_[0] < th_grad_ || !is_feasible_ || dV_ > th_acceptstep_ * dVexp_) {
+          was_feasible_ = is_feasible_;
+          setCandidate(xs_try_, us_try_, true);
+          cost_ = cost_try_;
+          recalc = true;
+          break;
+        }
       }
     }
 
@@ -156,6 +158,10 @@ double SolverDDP::calc() {
       const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
       const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
       model->get_state()->diff(xs_[t + 1], d->xnext, gaps_[t + 1]);
+    }
+  } else if (!was_feasible_) {  // closing the gaps
+    for (std::vector<Eigen::VectorXd>::iterator it = gaps_.begin(); it != gaps_.end(); ++it) {
+      it->setZero();
     }
   }
   return cost_;
@@ -266,7 +272,7 @@ void SolverDDP::forwardPass(const double& steplength) {
 void SolverDDP::computeGains(const std::size_t& t) {
   if (problem_->get_runningModels()[t]->get_nu() > 0) {
     Quu_llt_[t].compute(Quu_[t]);
-    Eigen::ComputationInfo info = Quu_llt_[t].info();
+    const Eigen::ComputationInfo& info = Quu_llt_[t].info();
     if (info != Eigen::Success) {
       throw_pretty("backward_error");
     }

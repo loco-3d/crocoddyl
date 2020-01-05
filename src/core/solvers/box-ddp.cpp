@@ -1,18 +1,19 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019, CNRS-LAAS, The University of Edinburgh
+// Copyright (C) 2018-2020, CNRS-LAAS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include <iostream>
+#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/solvers/box-ddp.hpp"
 
 namespace crocoddyl {
 
-SolverBoxDDP::SolverBoxDDP(boost::shared_ptr<ShootingProblem> problem) : SolverDDP(problem) {
+SolverBoxDDP::SolverBoxDDP(boost::shared_ptr<ShootingProblem> problem)
+    : SolverDDP(problem), qp_(problem->get_runningModels()[0]->get_nu(), 100, 0.1, 1e-5, 0.) {
   allocateData();
 
   const std::size_t& n_alphas = 10;
@@ -20,6 +21,11 @@ SolverBoxDDP::SolverBoxDDP(boost::shared_ptr<ShootingProblem> problem) : SolverD
   for (std::size_t n = 0; n < n_alphas; ++n) {
     alphas_[n] = 1. / pow(2., static_cast<double>(n));
   }
+  // Change the default convergence tolerance since the gradient of the Lagrangian is smaller
+  // than an unconstrained OC problem (i.e. gradient = Qu - mu^T * C where mu > 0 and C defines
+  // the inequality matrix that bounds the control); and we don't have access to mu from the
+  // box QP.
+  th_stop_ = 5e-5;
 }
 
 SolverBoxDDP::~SolverBoxDDP() {}
@@ -34,39 +40,44 @@ void SolverBoxDDP::allocateData() {
     const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
     const std::size_t& nu = model->get_nu();
 
-    // Store the largest number of controls across all models to allocate u_ll_, u_hl_
+    // Store the largest number of controls across all models to allocate du_lb_, du_ub_
     if (nu > nu_max) nu_max = nu;
 
     Quu_inv_[t] = Eigen::MatrixXd::Zero(nu, nu);
   }
 
-  u_ll_.resize(nu_max);
-  u_hl_.resize(nu_max);
+  du_lb_.resize(nu_max);
+  du_ub_.resize(nu_max);
 }
 
 void SolverBoxDDP::computeGains(const std::size_t& t) {
   if (problem_->get_runningModels()[t]->get_nu() > 0) {
-    if (!problem_->get_runningModels()[t]->get_has_control_limits()) {
+    if (!problem_->get_runningModels()[t]->get_has_control_limits() || !is_feasible_) {
       // No control limits on this model: Use vanilla DDP
       SolverDDP::computeGains(t);
       return;
     }
 
-    u_ll_ = problem_->get_runningModels()[t]->get_u_lb() - us_[t];
-    u_hl_ = problem_->get_runningModels()[t]->get_u_ub() - us_[t];
+    du_lb_ = problem_->get_runningModels()[t]->get_u_lb() - us_[t];
+    du_ub_ = problem_->get_runningModels()[t]->get_u_ub() - us_[t];
 
-    BoxQPSolution boxqp_sol = BoxQP(Quu_[t], Qu_[t], u_ll_, u_hl_, us_[t], 0.1, 100, 1e-5, ureg_);
-
-    Quu_inv_[t].setZero();
-    for (size_t i = 0; i < boxqp_sol.free_idx.size(); ++i)
-      for (size_t j = 0; j < boxqp_sol.free_idx.size(); ++j)
-        Quu_inv_[t](boxqp_sol.free_idx[i], boxqp_sol.free_idx[j]) = boxqp_sol.Hff_inv(i, j);
+    const BoxQPSolution& boxqp_sol = qp_.solve(Quu_[t], Qu_[t], du_lb_, du_ub_, k_[t]);
 
     // Compute controls
+    Quu_inv_[t].setZero();
+    for (std::size_t i = 0; i < boxqp_sol.free_idx.size(); ++i) {
+      for (std::size_t j = 0; j < boxqp_sol.free_idx.size(); ++j) {
+        Quu_inv_[t](boxqp_sol.free_idx[i], boxqp_sol.free_idx[j]) = boxqp_sol.Hff_inv(i, j);
+      }
+    }
     K_[t].noalias() = Quu_inv_[t] * Qxu_[t].transpose();
     k_[t].noalias() = -boxqp_sol.x;
 
-    for (size_t j = 0; j < boxqp_sol.clamped_idx.size(); ++j) K_[t](boxqp_sol.clamped_idx[j]) = 0.0;
+    // The box-QP clamped the gradient direction; this is important for accounting
+    // the algorithm advancement (i.e. stopping criteria)
+    for (std::size_t i = 0; i < boxqp_sol.clamped_idx.size(); ++i) {
+      Qu_[t](boxqp_sol.clamped_idx[i]) = 0.;
+    }
   }
 }
 
@@ -121,5 +132,7 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
     throw_pretty("forward_error");
   }
 }
+
+const std::vector<Eigen::MatrixXd>& SolverBoxDDP::get_Quu_inv() const { return Quu_inv_; }
 
 }  // namespace crocoddyl
