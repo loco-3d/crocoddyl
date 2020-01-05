@@ -149,7 +149,7 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H, const Eigen::VectorX
     }
     Hff_inv_llt_ = Eigen::LLT<Eigen::MatrixXd>(nf_);
     Hff_inv_llt_.compute(Hff_);
-    Eigen::ComputationInfo info = Hff_inv_llt_.info();
+    const Eigen::ComputationInfo& info = Hff_inv_llt_.info();
     if (info != Eigen::Success) {
       throw_pretty("backward_error");
     }
