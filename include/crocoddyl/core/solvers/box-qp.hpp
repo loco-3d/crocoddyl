@@ -23,7 +23,7 @@ struct BoxQPSolution {
       : Hff_inv(Hff_inv), x(x), free_idx(free_idx), clamped_idx(clamped_idx) {}
 
   Eigen::MatrixXd Hff_inv;
-  Eigen::MatrixXd x;
+  Eigen::VectorXd x;
   std::vector<size_t> free_idx;
   std::vector<size_t> clamped_idx;
 };
@@ -60,6 +60,8 @@ class BoxQP {
   double th_grad_;
   double reg_;
 
+  double fold_;
+  double fnew_;
   std::size_t nf_;
   std::size_t nc_;
   std::vector<double> alphas_;
@@ -73,11 +75,8 @@ class BoxQP {
   Eigen::VectorXd xc_;
   Eigen::VectorXd dxf_;
   Eigen::MatrixXd Hff_;
-  Eigen::MatrixXd Hff_inv_;
   Eigen::MatrixXd Hfc_;
   Eigen::LLT<Eigen::MatrixXd> Hff_inv_llt_;
-  std::vector<size_t> clamped_idx_;
-  std::vector<size_t> free_idx_;
 };
 
 }  // namespace crocoddyl
