@@ -272,7 +272,7 @@ void SolverDDP::forwardPass(const double& steplength) {
 void SolverDDP::computeGains(const std::size_t& t) {
   if (problem_->get_runningModels()[t]->get_nu() > 0) {
     Quu_llt_[t].compute(Quu_[t]);
-    Eigen::ComputationInfo info = Quu_llt_[t].info();
+    const Eigen::ComputationInfo& info = Quu_llt_[t].info();
     if (info != Eigen::Success) {
       throw_pretty("backward_error");
     }
