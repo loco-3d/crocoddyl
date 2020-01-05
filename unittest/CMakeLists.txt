@@ -1,3 +1,8 @@
+IF(BUILD_PYTHON_INTERFACE)
+  ADD_SUBDIRECTORY(bindings)
+ENDIF(BUILD_PYTHON_INTERFACE)
+
+
 ADD_SUBDIRECTORY(python)
 
 SET(${PROJECT_NAME}_CPP_TESTS
@@ -16,6 +21,7 @@ SET(${PROJECT_NAME}_CPP_TESTS
   test_diff_actions
   test_impulses
   test_multiple_impulses
+  test_friction_cone
   # test_costs
   # test_contacts
   # test_boxsolvers
@@ -54,8 +60,3 @@ ENDMACRO(ADD_CPP_UNIT_TEST NAME PKGS)
 FOREACH(TEST ${${PROJECT_NAME}_CPP_TESTS})
   ADD_CPP_UNIT_TEST(${TEST} "eigen3;pinocchio;example-robot-data")
 ENDFOREACH(TEST ${${PROJECT_NAME}_CPP_TESTS})
-
-
-IF(BUILD_PYTHON_INTERFACE)
-  ADD_SUBDIRECTORY(bindings)
-ENDIF(BUILD_PYTHON_INTERFACE)

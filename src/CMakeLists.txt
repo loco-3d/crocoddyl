@@ -28,6 +28,7 @@ SET(${PROJECT_NAME}_SOURCES
   multibody/cost-base.cpp
   multibody/contact-base.cpp
   multibody/impulse-base.cpp
+  multibody/friction-cone.cpp
   multibody/impulses/multiple-impulses.cpp
   multibody/impulses/impulse-3d.cpp
   multibody/impulses/impulse-6d.cpp
@@ -43,6 +44,7 @@ SET(${PROJECT_NAME}_SOURCES
   multibody/costs/frame-rotation.cpp
   multibody/costs/frame-velocity.cpp
   multibody/costs/contact-force.cpp
+  multibody/costs/contact-friction-cone.cpp
   multibody/costs/centroidal-momentum.cpp
   multibody/contacts/multiple-contacts.cpp
   multibody/contacts/contact-3d.cpp

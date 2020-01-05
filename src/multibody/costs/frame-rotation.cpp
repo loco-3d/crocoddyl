@@ -63,7 +63,6 @@ void CostModelFrameRotation::calcDiff(const boost::shared_ptr<CostDataAbstract>&
   }
   // Update the frame placements
   CostDataFrameRotation* d = static_cast<CostDataFrameRotation*>(data.get());
-  pinocchio::updateFramePlacements(state_->get_pinocchio(), *d->pinocchio);
 
   // // Compute the frame Jacobian at the error point
   pinocchio::Jlog3(d->rRf, d->rJf);

@@ -19,9 +19,10 @@ namespace bp = boost::python;
 void exposeActivationQuadraticBarrier() {
   bp::class_<ActivationBounds>("ActivationBounds",
                                "Activation bounds.\n\n"
-                               "The activation bounds describes the lower and upper vector plus it activation range\n"
-                               "(between 0 and 1), its default value is 1.",
-                               bp::init<Eigen::VectorXd, Eigen::VectorXd, double>(
+                               "The activation bounds describe the lower and upper vector plus it activation range\n"
+                               "(between 0 and 1), its default value is 1. Note that a full activation is defined by\n"
+                               "1 and the activation range is equally distributed between the lower and upper bounds.",
+                               bp::init<Eigen::VectorXd, Eigen::VectorXd, bp::optional<double> >(
                                    bp::args("self", "lb", "ub", "beta"),
                                    "Initialize the activation model.\n\n"
                                    ":param lb: lower bounds\n"
@@ -37,8 +38,8 @@ void exposeActivationQuadraticBarrier() {
       "ActivationModelQuadraticBarrier",
       "Inequality activation model.\n\n"
       "The activation is zero when r is between the lower (lb) and upper (ub) bounds, beta\n"
-      "determines how much of the total range is not activated (default 0.9). This is the\n"
-      "activation equations:\n"
+      "determines how much of the total range is not activated. This is the activation\n"
+      "equations:\n"
       "a(r) = 0.5 * ||r||^2 for lb < r < ub\n"
       "a(r) = 0. for lb >= r >= ub.",
       bp::init<ActivationBounds>(bp::args("self", "bounds"),

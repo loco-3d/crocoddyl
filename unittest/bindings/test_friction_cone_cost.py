@@ -1,6 +1,8 @@
 import crocoddyl
-import example_robot_data
 import pinocchio
+import example_robot_data
+import numpy as np
+
 from test_utils import NUMDIFF_MODIFIER, assertNumDiff
 
 crocoddyl.switchToNumpyMatrix()
@@ -13,25 +15,32 @@ ROBOT_DATA = ROBOT_MODEL.createData()
 ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 ACTUATION = crocoddyl.ActuationModelFloatingBase(ROBOT_STATE)
 CONTACTS = crocoddyl.ContactModelMultiple(ROBOT_STATE, ACTUATION.nu)
-CONTACT_6D_1 = crocoddyl.ContactModel6D(
+CONTACT_6D = crocoddyl.ContactModel6D(
     ROBOT_STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId('r_sole'), pinocchio.SE3.Random()), ACTUATION.nu,
     pinocchio.utils.rand(2))
-CONTACT_6D_2 = crocoddyl.ContactModel6D(
-    ROBOT_STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId('l_sole'), pinocchio.SE3.Random()), ACTUATION.nu,
-    pinocchio.utils.rand(2))
-CONTACTS.addContact("r_sole_contact", CONTACT_6D_1)
-CONTACTS.addContact("l_sole_contact", CONTACT_6D_2)
-COSTS = crocoddyl.CostModelSum(ROBOT_STATE, ACTUATION.nu, False)
+CONTACT_3D = crocoddyl.ContactModel3D(
+    ROBOT_STATE, crocoddyl.FrameTranslation(ROBOT_MODEL.getFrameId('l_sole'),
+                                            pinocchio.SE3.Random().translation), ACTUATION.nu, pinocchio.utils.rand(2))
+CONTACTS.addContact("r_sole_contact", CONTACT_6D)
+CONTACTS.addContact("l_sole_contact", CONTACT_3D)
+COSTS = crocoddyl.CostModelSum(ROBOT_STATE, ACTUATION.nu, True)
+
+frictionCone = crocoddyl.FrictionCone(np.matrix([0., 0., 1.]).T, 0.7, 4, False)
+activation = crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(frictionCone.lb, frictionCone.ub))
 COSTS.addCost(
-    "force",
-    crocoddyl.CostModelContactForce(ROBOT_STATE,
-                                    crocoddyl.FrameForce(ROBOT_MODEL.getFrameId('r_sole'), pinocchio.Force.Random()),
-                                    ACTUATION.nu), 1.)
+    "r_sole_friction_cone",
+    crocoddyl.CostModelContactFrictionCone(ROBOT_STATE, activation, frictionCone, ROBOT_MODEL.getFrameId('r_sole'),
+                                           ACTUATION.nu), 1.)
+COSTS.addCost(
+    "l_sole_friction_cone",
+    crocoddyl.CostModelContactFrictionCone(ROBOT_STATE, activation, frictionCone, ROBOT_MODEL.getFrameId('l_sole'),
+                                           ACTUATION.nu), 1.)
 MODEL = crocoddyl.DifferentialActionModelContactFwdDynamics(ROBOT_STATE, ACTUATION, CONTACTS, COSTS, 0., True)
 DATA = MODEL.createData()
 
 # Created DAM numdiff
 MODEL_ND = crocoddyl.DifferentialActionModelNumDiff(MODEL)
+MODEL_ND.disturbance *= 10
 dnum = MODEL_ND.createData()
 
 x = ROBOT_STATE.rand()

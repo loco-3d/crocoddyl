@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -17,17 +17,26 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include <Eigen/Dense>
 #include <boost/bind.hpp>
 #include <boost/test/included/unit_test.hpp>
 #include <boost/test/execution_monitor.hpp>  // for execution_exception
 #include <boost/function.hpp>
 
+#if __cplusplus >= 201103L
+#include <random>
+std::mt19937 rng;
+#else
+#include <boost/random.hpp>
+#include <boost/nondet_random.hpp>
+boost::random::mt19937 rng;
+#endif
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <string>
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl_unit_test {
 
@@ -133,6 +142,24 @@ std::string GetErrorMessages(boost::function<int(void)> function_with_errors) {
   }
   capture_ios.endCapture();
   return capture_ios.str();
+}
+
+template <typename IntType>
+IntType random_int_in_range(IntType first = 0, IntType last = 10) {
+#if __cplusplus >= 201103L
+  return std::uniform_int_distribution<IntType>(first, last)(rng);
+#else
+  return boost::random::uniform_int_distribution<IntType>(first, last)(rng);
+#endif
+}
+
+template <typename RealType>
+RealType random_real_in_range(RealType first = 0, RealType last = 1) {
+#if __cplusplus >= 201103L
+  return std::uniform_real_distribution<RealType>(first, last)(rng);
+#else
+  return boost::random::uniform_real_distribution<RealType>(first, last)(rng);
+#endif
 }
 
 }  // namespace crocoddyl_unit_test

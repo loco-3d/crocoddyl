@@ -118,14 +118,14 @@ class GepettoDisplay:
             if hasattr(data, "differential"):
                 if isinstance(data.differential, libcrocoddyl_pywrap.DifferentialActionDataContactFwdDynamics):
                     fc = []
-                    for key, contact in data.differential.contacts.contacts.items():
+                    for key, contact in data.differential.multibody.contacts.contacts.items():
                         oMf = contact.pinocchio.oMi[contact.joint] * contact.jMf
                         force = contact.jMf.actInv(contact.f)
                         fc.append({"key": str(contact.joint), "oMf": oMf, "f": force})
                     fs.append(fc)
             elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
                 fc = []
-                for key, impulse in data.impulses.impulses.items():
+                for key, impulse in data.multibody.impulses.impulses.items():
                     force = impulse.jMf.actInv(impulse.f)
                     oMf = impulse.pinocchio.oMi[impulse.joint] * impulse.jMf
                     fc.append({"key": str(impulse.joint), "oMf": oMf, "f": force})

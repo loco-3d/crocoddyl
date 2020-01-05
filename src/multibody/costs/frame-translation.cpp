@@ -62,7 +62,6 @@ void CostModelFrameTranslation::calcDiff(const boost::shared_ptr<CostDataAbstrac
   }
   // Update the frame placements
   CostDataFrameTranslation* d = static_cast<CostDataFrameTranslation*>(data.get());
-  pinocchio::updateFramePlacements(state_->get_pinocchio(), *d->pinocchio);
 
   // Compute the frame Jacobian at the error point
   pinocchio::getFrameJacobian(state_->get_pinocchio(), *d->pinocchio, xref_.frame, pinocchio::LOCAL, d->fJf);

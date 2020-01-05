@@ -129,7 +129,7 @@ void exposeContactAbstract() {
       .def_readwrite("frame", &ContactDataAbstract::frame, "frame index of the contact frame")
       .def_readwrite("f", &ContactDataAbstract::f,
                      "external spatial force at the parent joint level. Note that we could compute the force at the "
-                     "contact frame by using jMf (i.e. data.jMF.actInv(data.f)");
+                     "contact frame by using jMf (i.e. data.jMf.actInv(data.f)");
 }
 
 }  // namespace python
