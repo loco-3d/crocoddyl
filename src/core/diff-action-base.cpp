@@ -68,7 +68,7 @@ void DifferentialActionModelAbstract::set_u_ub(const Eigen::VectorXd& u_ub) {
 }
 
 void DifferentialActionModelAbstract::update_has_control_limits() {
-  has_control_limits_ = u_lb_.allFinite() && u_ub_.allFinite();
+  has_control_limits_ = isfinite(u_lb_.array()).any() && isfinite(u_ub_.array()).any();
 }
 
 }  // namespace crocoddyl

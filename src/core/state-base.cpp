@@ -54,6 +54,6 @@ void StateAbstract::set_ub(const Eigen::VectorXd& ub) {
   update_has_limits();
 }
 
-void StateAbstract::update_has_limits() { has_limits_ = lb_.allFinite() && ub_.allFinite(); }
+void StateAbstract::update_has_limits() { has_limits_ = isfinite(lb_.array()).any() && isfinite(ub_.array()).any(); }
 
 }  // namespace crocoddyl
