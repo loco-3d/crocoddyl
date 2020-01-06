@@ -77,6 +77,8 @@ const Eigen::VectorXd& ActionModelAbstract::get_u_lb() const { return u_lb_; }
 
 const Eigen::VectorXd& ActionModelAbstract::get_u_ub() const { return u_ub_; }
 
+bool const& ActionModelAbstract::get_has_control_limits() const { return has_control_limits_; }
+
 void ActionModelAbstract::set_u_lb(const Eigen::VectorXd& u_lb) {
   if (static_cast<std::size_t>(u_lb.size()) != nu_) {
     throw_pretty("Invalid argument: "
@@ -94,8 +96,6 @@ void ActionModelAbstract::set_u_ub(const Eigen::VectorXd& u_ub) {
   u_ub_ = u_ub;
   update_has_control_limits();
 }
-
-bool const& ActionModelAbstract::get_has_control_limits() const { return has_control_limits_; }
 
 void ActionModelAbstract::update_has_control_limits() { has_control_limits_ = u_lb_.allFinite() && u_ub_.allFinite(); }
 
