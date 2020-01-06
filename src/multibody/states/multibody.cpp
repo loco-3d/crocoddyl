@@ -23,11 +23,22 @@ StateMultibody::StateMultibody(pinocchio::Model& model)
   // The current cases are free-flyer (SE3) and spherical (S03).
   // Instead simple represents any joint that can model within the Euclidean manifold.
   // The rest of joints use Euclidean algebra. We use this fact for computing Jdiff.
+  std::size_t nq0 = 0;
   if (model.joints[1].shortname() == "JointModelFreeFlyer") {
     joint_type_ = FreeFlyer;
-  } else if (model.joints[1].shortname() == "JointDataSphericalZYX") {
+    // Define internally the free-flyer limits
+    nq0 = 7;
+    lb_.head<7>() = -std::numeric_limits<double>::infinity() * Eigen::VectorXd::Ones(7);
+    ub_.head<7>() = std::numeric_limits<double>::infinity() * Eigen::VectorXd::Ones(7);
+  } else if (model.joints[1].shortname() == "JointModelSphericalZYX") {
     joint_type_ = Spherical;
   }
+
+  lb_.segment(nq0, nq_ - nq0) = pinocchio_.lowerPositionLimit.tail(nq_ - nq0);
+  ub_.segment(nq0, nq_ - nq0) = pinocchio_.upperPositionLimit.tail(nq_ - nq0);
+  lb_.tail(nv_) = -pinocchio_.velocityLimit;
+  ub_.tail(nv_) = pinocchio_.velocityLimit;
+  update_has_limits();
 }
 
 StateMultibody::~StateMultibody() {}
