@@ -23,6 +23,8 @@ void test_state_dimension(StateTypes::Type state_type) {
   BOOST_CHECK(static_cast<std::size_t>(state->rand().size()) == factory.get_nx());
   BOOST_CHECK(state->get_nx() == (state->get_nq() + state->get_nv()));
   BOOST_CHECK(state->get_ndx() == (2 * state->get_nv()));
+  BOOST_CHECK(static_cast<std::size_t>(state->get_lb().size()) == factory.get_nx());
+  BOOST_CHECK(static_cast<std::size_t>(state->get_ub().size()) == factory.get_nx());
 }
 
 void test_integrate_against_difference(StateTypes::Type state_type) {
