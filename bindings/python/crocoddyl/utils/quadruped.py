@@ -447,12 +447,11 @@ class SimpleQuadrupedalGaitProblem:
         costModel.addCost("stateReg", stateReg, 1e1)
         costModel.addCost("ctrlReg", ctrlReg, 1e-1)
 
-        lb = self.state.diff(0*self.state.lb, self.state.lb)
-        ub = self.state.diff(0*self.state.ub, self.state.ub)
-        stateBounds = crocoddyl.CostModelState(self.state,
-                                            crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(lb, ub)),
-                                            0*self.rmodel.defaultState,
-                                            self.actuation.nu)
+        lb = self.state.diff(0 * self.state.lb, self.state.lb)
+        ub = self.state.diff(0 * self.state.ub, self.state.ub)
+        stateBounds = crocoddyl.CostModelState(
+            self.state, crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(lb, ub)),
+            0 * self.rmodel.defaultState, self.actuation.nu)
         # costModel.addCost("stateBounds", stateBounds, 1e3)
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
