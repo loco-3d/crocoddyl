@@ -10,9 +10,9 @@ jobs:
     - dist: bionic
       env: CMAKE_BUILD_TYPE=Release DIST=bionic
     - dist: xenial
-      env: CMAKE_BUILD_TYPE=Debug DIST=xenial
+      env: CMAKE_BUILD_TYPE=Debug DIST=xenial -DCMAKE_CXX_STANDARD=11
     - dist: xenial
-      env: CMAKE_BUILD_TYPE=Release DIST=xenial
+      env: CMAKE_BUILD_TYPE=Release DIST=xenial -DCMAKE_CXX_STANDARD=11
     - dist: bionic
       env: CHECK_CLANG_FORMAT=1
 
