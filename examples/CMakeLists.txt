@@ -16,4 +16,9 @@ FOREACH(examples ${${PROJECT_NAME}_EXAMPLES_PYTHON})
   ADD_CUSTOM_TARGET("examples-${examples}"
     ${CMAKE_COMMAND} -E env PYTHONPATH=$ENV{PYTHONPATH}:${PROJECT_BINARY_DIR}/bindings/python
     ${PYTHON_EXECUTABLE} -c "import ${examples}" \${INPUT})
+
+  # examples are too slow in Debug mode to be used as tests
+  IF(CMAKE_BUILD_TYPE STREQUAL "Release")
+    ADD_PYTHON_UNIT_TEST("example-python-${examples}" "examples/${examples}.py" bindings/python)
+  ENDIF(CMAKE_BUILD_TYPE STREQUAL "Release")
 ENDFOREACH(examples ${${PROJECT_NAME}_EXAMPLES_PYTHON})
