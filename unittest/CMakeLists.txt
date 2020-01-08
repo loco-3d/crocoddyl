@@ -21,12 +21,14 @@ SET(${PROJECT_NAME}_CPP_TESTS
   test_diff_actions
   test_impulses
   test_multiple_impulses
+  test_costs
   test_friction_cone
-  # test_costs
   # test_contacts
   test_boxqp
   test_solvers
 )
+
+INCLUDE_DIRECTORIES(.)
 
 MACRO(ADD_TEST_CFLAGS target flag)
   SET_PROPERTY(TARGET ${target} APPEND_STRING PROPERTY COMPILE_FLAGS " ${flag}")
@@ -35,7 +37,7 @@ ENDMACRO(ADD_TEST_CFLAGS)
 MACRO(ADD_CPP_UNIT_TEST NAME PKGS)
   set(unittest_name ${NAME})
 
-  ADD_UNIT_TEST(${unittest_name} ${NAME}.cpp crocoddyl_state_factory.hpp)
+  ADD_UNIT_TEST(${unittest_name} ${NAME}.cpp)
 
   SET_TARGET_PROPERTIES(${unittest_name} PROPERTIES LINKER_LANGUAGE CXX)
 
