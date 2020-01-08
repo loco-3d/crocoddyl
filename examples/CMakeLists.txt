@@ -16,4 +16,5 @@ FOREACH(examples ${${PROJECT_NAME}_EXAMPLES_PYTHON})
   ADD_CUSTOM_TARGET("examples-${examples}"
     ${CMAKE_COMMAND} -E env PYTHONPATH=$ENV{PYTHONPATH}:${PROJECT_BINARY_DIR}/bindings/python
     ${PYTHON_EXECUTABLE} -c "import ${examples}" \${INPUT})
+  ADD_PYTHON_UNIT_TEST("example-python-${examples}" "examples/${examples}.py" bindings/python)
 ENDFOREACH(examples ${${PROJECT_NAME}_EXAMPLES_PYTHON})
