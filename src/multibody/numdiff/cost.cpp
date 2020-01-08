@@ -12,33 +12,26 @@
 
 namespace crocoddyl {
 
-CostNumDiffModel::CostNumDiffModel(const boost::shared_ptr<CostModelAbstract>& model):
-  CostModelAbstract(model->get_state(), model->get_activation(), model->get_nu(), model->get_with_residuals()),
-  model_(model)
-{
-  disturbance_ = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());  
+CostNumDiffModel::CostNumDiffModel(const boost::shared_ptr<CostModelAbstract>& model)
+    : CostModelAbstract(model->get_state(), model->get_activation(), model->get_nu(), model->get_with_residuals()),
+      model_(model) {
+  disturbance_ = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
 }
 
-CostNumDiffModel::~CostNumDiffModel(){}
+CostNumDiffModel::~CostNumDiffModel() {}
 
 void CostNumDiffModel::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                            const Eigen::Ref<const Eigen::VectorXd>& x,
-                            const Eigen::Ref<const Eigen::VectorXd>& u)
-{
-  boost::shared_ptr<CostDataNumDiff> data_nd =
-      boost::static_pointer_cast<CostDataNumDiff>(data);
+                            const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) {
+  boost::shared_ptr<CostDataNumDiff> data_nd = boost::static_pointer_cast<CostDataNumDiff>(data);
   data_nd->data_0->cost = 0.0;
   model_->calc(data_nd->data_0, x, u);
   data_nd->cost = data_nd->data_0->cost;
 }
 
 void CostNumDiffModel::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                const Eigen::Ref<const Eigen::VectorXd>& x,
-                                const Eigen::Ref<const Eigen::VectorXd>& u,
-                                const bool& recalc)
-{
-  boost::shared_ptr<CostDataNumDiff> data_nd =
-      boost::static_pointer_cast<CostDataNumDiff>(data);
+                                const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
+                                const bool& recalc) {
+  boost::shared_ptr<CostDataNumDiff> data_nd = boost::static_pointer_cast<CostDataNumDiff>(data);
 
   if (recalc) {
     model_->calc(data_nd->data_0, x, u);
@@ -56,8 +49,7 @@ void CostNumDiffModel::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
     data_nd->dx(ix) = disturbance_;
     model_->get_state()->integrate(x, data_nd->dx, data_nd->xp);
     // call the update function on the pinocchio data
-    for (size_t i=0 ; i<reevals_.size() ; ++i)
-    {
+    for (size_t i = 0; i < reevals_.size(); ++i) {
       reevals_[i](data_nd->xp);
     }
     // cost(x+dx, u)
@@ -74,9 +66,8 @@ void CostNumDiffModel::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
   // Computing the d cost(x,u) / du
   data_nd->du.setZero();
   // call the update function on the pinocchio data
-  for (size_t i=0 ; i<reevals_.size() ; ++i)
-  {
-      reevals_[i](x);
+  for (size_t i = 0; i < reevals_.size(); ++i) {
+    reevals_[i](x);
   }
   for (unsigned iu = 0; iu < model_->get_nu(); ++iu) {
     // up = u + du
@@ -104,9 +95,8 @@ void CostNumDiffModel::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
   }
 }
 
-boost::shared_ptr<CostDataAbstract> CostNumDiffModel::createData(DataCollectorAbstract* const data)
-{
-    return boost::make_shared<CostDataNumDiff>(this, data);
+boost::shared_ptr<CostDataAbstract> CostNumDiffModel::createData(DataCollectorAbstract* const data) {
+  return boost::make_shared<CostDataNumDiff>(this, data);
 }
 
 const boost::shared_ptr<CostModelAbstract>& CostNumDiffModel::get_model() const { return model_; }
@@ -117,6 +107,6 @@ void CostNumDiffModel::set_disturbance(const double& disturbance) { disturbance_
 
 bool CostNumDiffModel::get_with_gauss_approx() { return activation_->get_nr() > 0; }
 
-void CostNumDiffModel::set_reevals(const std::vector<ReevaluationFunction>& reevals){ reevals_ = reevals; }
+void CostNumDiffModel::set_reevals(const std::vector<ReevaluationFunction>& reevals) { reevals_ = reevals; }
 
-}
+}  // namespace crocoddyl

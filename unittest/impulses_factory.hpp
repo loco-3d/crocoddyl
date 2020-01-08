@@ -146,9 +146,9 @@ class ImpulseModelFactory {
   double num_diff_modifier_;
 
  private:
-  ImpulseModelTypes::Type test_type_;                         //!< The type of impulse to test
+  ImpulseModelTypes::Type test_type_;                           //!< The type of impulse to test
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> impulse_;  //!< The pointer to the impulse model
-  boost::shared_ptr<StateFactory> state_factory_;             //!< The pointer to the multibody state factory
+  boost::shared_ptr<StateFactory> state_factory_;               //!< The pointer to the multibody state factory
 };
 
 boost::shared_ptr<ImpulseModelFactory> create_random_factory() {

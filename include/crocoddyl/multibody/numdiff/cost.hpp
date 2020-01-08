@@ -30,15 +30,12 @@ typedef boost::function<void(const Eigen::VectorXd&)> ReevaluationFunction;
  * @brief Compute all the pinocchio data needed for the numerical
  * differentation. We use the address of the object to avoid a copy from the
  * "boost::bind".
- * 
+ *
  * @param model is the rigid body robot model.
  * @param data contains the results of the computations.
  * @param x is the state vector.
  */
-void updateAllPinocchio(pinocchio::Model* const model,
-                        pinocchio::Data* data,
-                        const Eigen::VectorXd& x)
-{
+void updateAllPinocchio(pinocchio::Model* const model, pinocchio::Data* data, const Eigen::VectorXd& x) {
   const Eigen::VectorXd& q = x.segment(0, model->nq);
   const Eigen::VectorXd& v = x.segment(model->nq, model->nv);
   Eigen::VectorXd a = Eigen::VectorXd::Zero(model->nv);
@@ -49,8 +46,7 @@ void updateAllPinocchio(pinocchio::Model* const model,
   pinocchio::updateFramePlacements(*model, *data);
   pinocchio::jacobianCenterOfMass(*model, *data, q);
   pinocchio::computeCentroidalMomentum(*model, *data, q, v);
-  pinocchio::computeCentroidalDynamicsDerivatives(
-      *model, *data, q, v, a, tmp, tmp, tmp, tmp);
+  pinocchio::computeCentroidalDynamicsDerivatives(*model, *data, q, v, a, tmp, tmp, tmp, tmp);
 }
 
 class CostNumDiffModel : public CostModelAbstract {
@@ -164,7 +160,7 @@ struct CostDataNumDiff : public CostDataAbstract {
     xp.setZero();
     du.setZero();
     up.setZero();
-    
+
     const std::size_t& ndx = model->get_model()->get_state()->get_ndx();
     const std::size_t& nu = model->get_model()->get_nu();
     data_0 = model->get_model()->createData(shared_data);

@@ -40,7 +40,7 @@ const std::vector<ActivationModelTypes::Type> ActivationModelTypes::all(Activati
 
 class ActivationModelFactory {
  public:
-  ActivationModelFactory(ActivationModelTypes::Type test_type, std::size_t nr=5) {
+  ActivationModelFactory(ActivationModelTypes::Type test_type, std::size_t nr = 5) {
     test_type_ = test_type;
 
     nr_ = nr;
@@ -51,7 +51,8 @@ class ActivationModelFactory {
 
     switch (test_type_) {
       case ActivationModelTypes::ActivationModelQuadraticBarrier:
-        activation_ = boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(crocoddyl::ActivationBounds(lb, ub));
+        activation_ =
+            boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(crocoddyl::ActivationBounds(lb, ub));
         break;
       case ActivationModelTypes::ActivationModelQuad:
         activation_ = boost::make_shared<crocoddyl::ActivationModelQuad>(nr_);

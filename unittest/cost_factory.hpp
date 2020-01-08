@@ -31,19 +31,20 @@
 namespace crocoddyl_unit_test {
 
 struct CostModelTypes {
-  enum Type { // CostModelCentroidalMomentum, // @todo Figure out the pinocchio callbacks.
-              CostModelCoMPosition,
-              // CostModelContactForce, // @todo Figure out the contacts creations.
-              CostModelControl,
-              // CostModelSum, // @todo Implement a separate unittests for this one?
-              // CostModelFrameForce, // @todo Implement the CostModelFrameForce class.
-              CostModelFramePlacement,
-              CostModelFrameRotation,
-              CostModelFrameTranslation,
-              CostModelFrameVelocity,
-              // CostModelImpulse,  // @todo Implement the CostModelImpulses class.
-              CostModelState,
-              NbCostModelTypes };
+  enum Type {  // CostModelCentroidalMomentum, // @todo Figure out the pinocchio callbacks.
+    CostModelCoMPosition,
+    // CostModelContactForce, // @todo Figure out the contacts creations.
+    CostModelControl,
+    // CostModelSum, // @todo Implement a separate unittests for this one?
+    // CostModelFrameForce, // @todo Implement the CostModelFrameForce class.
+    CostModelFramePlacement,
+    CostModelFrameRotation,
+    CostModelFrameTranslation,
+    CostModelFrameVelocity,
+    // CostModelImpulse,  // @todo Implement the CostModelImpulses class.
+    CostModelState,
+    NbCostModelTypes
+  };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
@@ -57,46 +58,59 @@ struct CostModelTypes {
 const std::vector<CostModelTypes::Type> CostModelTypes::all(CostModelTypes::init_all());
 
 std::ostream& operator<<(std::ostream& os, CostModelTypes::Type type) {
-    switch(type) {
-      // case CostModelCentroidalMomentum : os << "CostModelCentroidalMomentum"; break;
-      case CostModelTypes::CostModelCoMPosition : os << "CostModelCoMPosition"; break;
-      // case CostModelContactForce : os << "CostModelContactForce"; break;
-      case CostModelTypes::CostModelControl : os << "CostModelControl"; break;
-      // case CostModelSum : os << "CostModelSum"; break;
-      // case CostModelFrameForce : os << "CostModelFrameForce"; break;
-      case CostModelTypes::CostModelFramePlacement : os << "CostModelFramePlacement"; break;
-      case CostModelTypes::CostModelFrameRotation : os << "CostModelFrameRotation"; break;
-      case CostModelTypes::CostModelFrameTranslation : os << "CostModelFrameTranslation"; break;
-      case CostModelTypes::CostModelFrameVelocity : os << "CostModelFrameVelocity"; break;
-      // case CostModelImpulse : os << "CostModelImpulse"; break;
-      case CostModelTypes::CostModelState : os << "CostModelState"; break;
-      case CostModelTypes::NbCostModelTypes : os << "NbCostModelTypes"; break;
-      default: break;
-    }
-    return os;
+  switch (type) {
+    // case CostModelCentroidalMomentum : os << "CostModelCentroidalMomentum"; break;
+    case CostModelTypes::CostModelCoMPosition:
+      os << "CostModelCoMPosition";
+      break;
+    // case CostModelContactForce : os << "CostModelContactForce"; break;
+    case CostModelTypes::CostModelControl:
+      os << "CostModelControl";
+      break;
+    // case CostModelSum : os << "CostModelSum"; break;
+    // case CostModelFrameForce : os << "CostModelFrameForce"; break;
+    case CostModelTypes::CostModelFramePlacement:
+      os << "CostModelFramePlacement";
+      break;
+    case CostModelTypes::CostModelFrameRotation:
+      os << "CostModelFrameRotation";
+      break;
+    case CostModelTypes::CostModelFrameTranslation:
+      os << "CostModelFrameTranslation";
+      break;
+    case CostModelTypes::CostModelFrameVelocity:
+      os << "CostModelFrameVelocity";
+      break;
+    // case CostModelImpulse : os << "CostModelImpulse"; break;
+    case CostModelTypes::CostModelState:
+      os << "CostModelState";
+      break;
+    case CostModelTypes::NbCostModelTypes:
+      os << "NbCostModelTypes";
+      break;
+    default:
+      break;
+  }
+  return os;
 }
 
 class CostModelFactory {
  public:
-  CostModelFactory(CostModelTypes::Type test_type,
-                   ActivationModelTypes::Type activation_type,
-                   StateTypes::Type state_multibody_type):
-  state_factory_(state_multibody_type),
-  state_multibody_(boost::static_pointer_cast<crocoddyl::StateMultibody>(
-      state_factory_.get_state())),
-  // Setup some reference for the costs.
-  frame_index_(5), // @todo Maybe find a way to randomize using an end-effector?
-  mom_ref_(crocoddyl::Vector6d::Random()),
-  com_ref_(Eigen::Vector3d::Random()),
-  force_ref_(frame_index_,
-             pinocchio::Force(crocoddyl::Vector6d::Random())),
-  u_ref_(Eigen::VectorXd::Random(state_multibody_->get_nv())),
-  frame_(pinocchio::SE3::Random()),
-  frame_ref_(frame_index_, frame_),
-  rotation_ref_(frame_index_, frame_.rotation()),
-  translation_ref_(frame_index_, frame_.translation()),
-  velocity_ref_(frame_index_, pinocchio::Motion::Random())
-  {
+  CostModelFactory(CostModelTypes::Type test_type, ActivationModelTypes::Type activation_type,
+                   StateTypes::Type state_multibody_type)
+      : state_factory_(state_multibody_type),
+        state_multibody_(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_.get_state())),
+        // Setup some reference for the costs.
+        frame_index_(5),  // @todo Maybe find a way to randomize using an end-effector?
+        mom_ref_(crocoddyl::Vector6d::Random()),
+        com_ref_(Eigen::Vector3d::Random()),
+        force_ref_(frame_index_, pinocchio::Force(crocoddyl::Vector6d::Random())),
+        u_ref_(Eigen::VectorXd::Random(state_multibody_->get_nv())),
+        frame_(pinocchio::SE3::Random()),
+        frame_ref_(frame_index_, frame_),
+        rotation_ref_(frame_index_, frame_.rotation()),
+        translation_ref_(frame_index_, frame_.translation()),
+        velocity_ref_(frame_index_, pinocchio::Motion::Random()) {
     num_diff_modifier_ = 1e4;
     type_ = test_type;
 
@@ -109,8 +123,8 @@ class CostModelFactory {
       //   break;
       case CostModelTypes::CostModelCoMPosition:
         activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, 3);
-        cost_ = boost::make_shared<crocoddyl::CostModelCoMPosition>(
-            state_multibody_, activation_factory_->get_activation(), com_ref_);
+        cost_ = boost::make_shared<crocoddyl::CostModelCoMPosition>(state_multibody_,
+                                                                    activation_factory_->get_activation(), com_ref_);
         break;
       // case CostModelTypes::CostModelContactForce:
       //   activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, 6);
@@ -119,8 +133,8 @@ class CostModelFactory {
       //   break;
       case CostModelTypes::CostModelControl:
         activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, state_multibody_->get_nv());
-        cost_ = boost::make_shared<crocoddyl::CostModelControl>(
-            state_multibody_, activation_factory_->get_activation(), u_ref_);
+        cost_ = boost::make_shared<crocoddyl::CostModelControl>(state_multibody_,
+                                                                activation_factory_->get_activation(), u_ref_);
         break;
       // case CostModelTypes::CostModelSum:
       //   break;
@@ -150,8 +164,8 @@ class CostModelFactory {
       //   break;
       case CostModelTypes::CostModelState:
         activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, state_multibody_->get_nx());
-        cost_ = boost::make_shared<crocoddyl::CostModelState>(
-            state_multibody_, activation_factory_->get_activation(), state_multibody_->rand());
+        cost_ = boost::make_shared<crocoddyl::CostModelState>(state_multibody_, activation_factory_->get_activation(),
+                                                              state_multibody_->rand());
         break;
       default:
         throw_pretty(__FILE__ ": Wrong CostModelTypes::Type given");
@@ -172,7 +186,7 @@ class CostModelFactory {
   boost::shared_ptr<ActivationModelFactory> activation_factory_;
   StateFactory state_factory_;
   boost::shared_ptr<crocoddyl::StateMultibody> state_multibody_;
-  
+
   // some reference:
   crocoddyl::FrameIndex frame_index_;
   crocoddyl::Vector6d mom_ref_;
