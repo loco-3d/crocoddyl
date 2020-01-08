@@ -6,13 +6,13 @@ os: [
 jobs:
   include:
     - dist: bionic
-      env: CMAKE_BUILD_TYPE=Debug DIST=bionic
+      env: CMAKE_BUILD_TYPE=Debug DIST=bionic CTEST_OUTPUT_ON_FAILURE=1
     - dist: bionic
-      env: CMAKE_BUILD_TYPE=Release DIST=bionic
+      env: CMAKE_BUILD_TYPE=Release DIST=bionic CTEST_OUTPUT_ON_FAILURE=1
     - dist: xenial
-      env: CMAKE_BUILD_TYPE=Debug DIST=xenial
+      env: CMAKE_BUILD_TYPE=Debug DIST=xenial CTEST_OUTPUT_ON_FAILURE=1 CMAKE_CXX_STANDARD=11
     - dist: xenial
-      env: CMAKE_BUILD_TYPE=Release DIST=xenial
+      env: CMAKE_BUILD_TYPE=Release DIST=xenial CTEST_OUTPUT_ON_FAILURE=1 CMAKE_CXX_STANDARD=11
     - dist: bionic
       env: CHECK_CLANG_FORMAT=1
 
