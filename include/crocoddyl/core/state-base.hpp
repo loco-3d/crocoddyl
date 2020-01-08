@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,7 +13,7 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
-#include "crocoddyl/core/utils/to-string.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -46,11 +46,23 @@ class StateAbstract {
   const std::size_t& get_nq() const;
   const std::size_t& get_nv() const;
 
+  const Eigen::VectorXd& get_lb() const;
+  const Eigen::VectorXd& get_ub() const;
+  bool const& get_has_limits() const;
+
+  void set_lb(const Eigen::VectorXd& lb);
+  void set_ub(const Eigen::VectorXd& ub);
+
+  void update_has_limits();
+
  protected:
-  std::size_t nx_;
-  std::size_t ndx_;
-  std::size_t nq_;
-  std::size_t nv_;
+  std::size_t nx_;      //!< State dimension
+  std::size_t ndx_;     //!< State rate dimension
+  std::size_t nq_;      //!< Configuration dimension
+  std::size_t nv_;      //!< Velocity dimension
+  Eigen::VectorXd lb_;  //!< Lower state limits
+  Eigen::VectorXd ub_;  //!< Upper state limits
+  bool has_limits_;     //!< Indicates whether any of the state limits is finite
 
 #ifdef PYTHON_BINDINGS
 

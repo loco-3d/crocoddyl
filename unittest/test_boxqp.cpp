@@ -29,8 +29,8 @@ void test_unconstrained_qp_with_identity_hessian() {
 
   Eigen::MatrixXd hessian = Eigen::MatrixXd::Identity(nx, nx);
   Eigen::VectorXd gradient = Eigen::VectorXd::Random(nx);
-  Eigen::VectorXd lb = -std::numeric_limits<double>::max() * Eigen::VectorXd::Ones(nx);
-  Eigen::VectorXd ub = std::numeric_limits<double>::max() * Eigen::VectorXd::Ones(nx);
+  Eigen::VectorXd lb = -std::numeric_limits<double>::infinity() * Eigen::VectorXd::Ones(nx);
+  Eigen::VectorXd ub = std::numeric_limits<double>::infinity() * Eigen::VectorXd::Ones(nx);
   Eigen::VectorXd xinit(nx);
   crocoddyl::BoxQPSolution sol = boxqp.solve(hessian, gradient, lb, ub, xinit);
 
@@ -60,8 +60,8 @@ void test_unconstrained_qp() {
   Eigen::MatrixXd hessian = H.transpose() * H;
   hessian = 0.5 * (hessian + hessian.transpose()).eval();
   Eigen::VectorXd gradient = Eigen::VectorXd::Random(nx);
-  Eigen::VectorXd lb = -std::numeric_limits<double>::max() * Eigen::VectorXd::Ones(nx);
-  Eigen::VectorXd ub = std::numeric_limits<double>::max() * Eigen::VectorXd::Ones(nx);
+  Eigen::VectorXd lb = -std::numeric_limits<double>::infinity() * Eigen::VectorXd::Ones(nx);
+  Eigen::VectorXd ub = std::numeric_limits<double>::infinity() * Eigen::VectorXd::Ones(nx);
   Eigen::VectorXd xinit(nx);
   crocoddyl::BoxQPSolution sol = boxqp.solve(hessian, gradient, lb, ub, xinit);
 
