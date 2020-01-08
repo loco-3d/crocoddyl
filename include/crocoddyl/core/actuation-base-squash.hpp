@@ -16,8 +16,7 @@ class ActuationModelSquashingAbstract : public ActuationModelAbstract {
                         const bool& recalc = true) = 0;
 
         virtual void calcSquash(const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
-        virtual void calcSquashDiff(const Eigen::Ref<const Eigen::VectorXd>& u,
-                        const bool& recalc = true) = 0;
+        virtual void calcSquashDiff(const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
     
     protected:
         Eigen::VectorXd v_; // Squashing function output
