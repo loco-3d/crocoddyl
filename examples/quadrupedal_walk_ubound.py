@@ -6,7 +6,6 @@ import time
 
 import example_robot_data
 import numpy as np
-import matplotlib.pyplot as plt
 
 import crocoddyl
 import pinocchio
@@ -70,7 +69,6 @@ print("[Box-DDP] Solved in", boxddp_end - boxddp_start, "-", boxddp.iter, "itera
 # Plotting the entire motion
 if WITHPLOT:
     # Plot control vs limits
-    fig = plt.figure(1)
     plotSolution(boxddp, bounds=True, figIndex=1, show=False)
 
     # Plot convergence
@@ -81,9 +79,8 @@ if WITHPLOT:
                               log.gm_stops,
                               log.th_stops,
                               log.steps,
-                              figIndex=3)
-
-    plt.show()
+                              figIndex=3,
+                              show=True)
 
 # Display the entire motion
 if WITHDISPLAY:
