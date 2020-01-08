@@ -45,17 +45,17 @@ class ActionModelFactory {
       case ActionModelTypes::ActionModelUnicycle:
         nx_ = 3;
         nu_ = 2;
-        action_model_ = boost::make_shared<crocoddyl::ActionModelUnicycle>();
+        action_ = boost::make_shared<crocoddyl::ActionModelUnicycle>();
         break;
       case ActionModelTypes::ActionModelLQRDriftFree:
         nx_ = 80;
         nu_ = 40;
-        action_model_ = boost::make_shared<crocoddyl::ActionModelLQR>(nx_, nu_, true);
+        action_ = boost::make_shared<crocoddyl::ActionModelLQR>(nx_, nu_, true);
         break;
       case ActionModelTypes::ActionModelLQR:
         nx_ = 80;
         nu_ = 40;
-        action_model_ = boost::make_shared<crocoddyl::ActionModelLQR>(nx_, nu_, false);
+        action_ = boost::make_shared<crocoddyl::ActionModelLQR>(nx_, nu_, false);
         break;
       default:
         throw_pretty(__FILE__ ": Wrong ActionModelTypes::Type given");
@@ -65,7 +65,7 @@ class ActionModelFactory {
 
   ~ActionModelFactory() {}
 
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> get_action_model() { return action_model_; }
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> get_action() { return action_; }
 
   const std::size_t& get_nx() { return nx_; }
   double get_num_diff_modifier() { return num_diff_modifier_; }
@@ -76,7 +76,7 @@ class ActionModelFactory {
   double num_diff_modifier_;
   bool driftfree_;
   ActionModelTypes::Type action_type_;
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> action_model_;
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> action_;
 };
 
 }  // namespace crocoddyl_unit_test

@@ -38,9 +38,19 @@ struct StateTypes {
     }
     return v;
   }
+  static std::vector<Type> init_multibody() {
+    std::vector<Type> v;
+    v.clear();
+    for (int i = StateMultibodyTalosArm; i < NbStateTypes; ++i) {
+      v.push_back((Type)i);
+    }
+    return v;
+  }
   static const std::vector<Type> all;
+  static const std::vector<Type> all_multibody;
 };
 const std::vector<StateTypes::Type> StateTypes::all(StateTypes::init_all());
+const std::vector<StateTypes::Type> StateTypes::all_multibody(StateTypes::init_multibody());
 
 class StateFactory {
  public:
