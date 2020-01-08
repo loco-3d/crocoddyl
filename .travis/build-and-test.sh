@@ -14,19 +14,3 @@ fi
 
 make -j1
 make test
-
-# Run the examples in Release mode
-if [ $CMAKE_BUILD_TYPE == "Release" ]
-then
-  # Examples
-  make -s examples-double_pendulum
-  make -s examples-quadrotor
-  make -s examples-quadrotor_ubound
-  make -s examples-arm_manipulation
-  make -s examples-bipedal_walk
-  make -s examples-bipedal_walk_ubound
-  make -s examples-quadrupedal_gaits
-  make -s examples-quadrupedal_walk_ubound
-  make -s examples-humanoid_manipulation
-  make -s examples-humanoid_manipulation_ubound
-fi
