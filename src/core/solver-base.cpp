@@ -93,7 +93,6 @@ const std::vector<Eigen::VectorXd>& SolverAbstract::get_us() const { return us_;
 
 const bool& SolverAbstract::get_isFeasible() const { return is_feasible_; }
 
-const std::size_t& SolverAbstract::get_iter() const { return iter_; }
 
 const double& SolverAbstract::get_cost() const { return cost_; }
 
@@ -111,6 +110,11 @@ const double& SolverAbstract::get_dV() const { return dV_; }
 
 const double& SolverAbstract::get_dVexp() const { return dVexp_; }
 
+const double& SolverAbstract::get_th_acceptstep() const { return th_acceptstep_; }
+
+const double& SolverAbstract::get_th_stop() const { return th_stop_; }
+
+const std::size_t& SolverAbstract::get_iter() const { return iter_; }
 bool raiseIfNaN(const double& value) {
   if (std::isnan(value) || std::isinf(value) || value >= 1e30) {
     return true;

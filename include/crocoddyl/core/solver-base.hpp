@@ -44,7 +44,6 @@ class SolverAbstract {
   const std::vector<Eigen::VectorXd>& get_xs() const;
   const std::vector<Eigen::VectorXd>& get_us() const;
   const bool& get_isFeasible() const;
-  const std::size_t& get_iter() const;
   const double& get_cost() const;
   const double& get_stop() const;
   const Eigen::Vector2d& get_d() const;
@@ -53,6 +52,9 @@ class SolverAbstract {
   const double& get_stepLength() const;
   const double& get_dV() const;
   const double& get_dVexp() const;
+  const double& get_th_acceptstep() const;
+  const double& get_th_stop() const;
+  const std::size_t& get_iter() const;
 
  protected:
   boost::shared_ptr<ShootingProblem> problem_;
