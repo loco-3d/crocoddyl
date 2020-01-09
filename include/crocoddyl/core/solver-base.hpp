@@ -43,13 +43,13 @@ class SolverAbstract {
   const std::vector<boost::shared_ptr<ActionDataAbstract> >& get_datas() const;
   const std::vector<Eigen::VectorXd>& get_xs() const;
   const std::vector<Eigen::VectorXd>& get_us() const;
-  const bool& get_isFeasible() const;
+  const bool& get_is_feasible() const;
   const double& get_cost() const;
   const double& get_stop() const;
   const Eigen::Vector2d& get_d() const;
   const double& get_xreg() const;
   const double& get_ureg() const;
-  const double& get_stepLength() const;
+  const double& get_steplength() const;
   const double& get_dV() const;
   const double& get_dVexp() const;
   const double& get_th_acceptstep() const;

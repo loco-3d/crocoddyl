@@ -91,7 +91,7 @@ const std::vector<Eigen::VectorXd>& SolverAbstract::get_xs() const { return xs_;
 
 const std::vector<Eigen::VectorXd>& SolverAbstract::get_us() const { return us_; }
 
-const bool& SolverAbstract::get_isFeasible() const { return is_feasible_; }
+const bool& SolverAbstract::get_is_feasible() const { return is_feasible_; }
 
 const double& SolverAbstract::get_cost() const { return cost_; }
 
@@ -103,7 +103,7 @@ const double& SolverAbstract::get_xreg() const { return xreg_; }
 
 const double& SolverAbstract::get_ureg() const { return ureg_; }
 
-const double& SolverAbstract::get_stepLength() const { return steplength_; }
+const double& SolverAbstract::get_steplength() const { return steplength_; }
 
 const double& SolverAbstract::get_dV() const { return dV_; }
 
