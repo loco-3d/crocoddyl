@@ -132,7 +132,7 @@ void SolverAbstract::set_ureg(const double& ureg) {
 }
 
 void SolverAbstract::set_th_acceptstep(const double& th_acceptstep) {
-  if (0. >= th_acceptstep && th_acceptstep >= 1) {
+  if (0. >= th_acceptstep || th_acceptstep > 1) {
     throw_pretty("Invalid argument: "
                  << "th_acceptstep value should between 0 and 1.");
   }
