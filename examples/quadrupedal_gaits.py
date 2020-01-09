@@ -133,13 +133,8 @@ if WITHDISPLAY:
 
 # Plotting the entire motion
 if WITHPLOT:
-    xs = []
-    us = []
-    for i, phase in enumerate(GAITPHASES):
-        xs.extend(ddp[i].xs[:-1])
-        us.extend(ddp[i].us)
     log = ddp[0].getCallbacks()[0]
-    plotSolution(anymal.model, xs, us, figIndex=1, show=False)
+    plotSolution(ddp, figIndex=1, show=False)
 
     for i, phase in enumerate(GAITPHASES):
         title = phase.keys()[0] + " (phase " + str(i) + ")"

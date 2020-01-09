@@ -250,7 +250,17 @@ void exposeStateAbstract() {
                     "dimension of configuration vector")
       .add_property("nv",
                     bp::make_function(&StateAbstract_wrap::get_nv, bp::return_value_policy<bp::return_by_value>()),
-                    "dimension of configuration tangent vector");
+                    "dimension of configuration tangent vector")
+      .add_property(
+          "has_limits",
+          bp::make_function(&StateAbstract_wrap::get_has_limits, bp::return_value_policy<bp::return_by_value>()),
+          "indicates whether problem has finite state limits")
+      .add_property("lb",
+                    bp::make_function(&StateAbstract_wrap::get_lb, bp::return_value_policy<bp::return_by_value>()),
+                    &StateAbstract_wrap::set_lb, "lower state limits")
+      .add_property("ub",
+                    bp::make_function(&StateAbstract_wrap::get_ub, bp::return_value_policy<bp::return_by_value>()),
+                    &StateAbstract_wrap::set_ub, "upper state limits");
 }
 
 }  // namespace python

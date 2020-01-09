@@ -6,11 +6,10 @@ import time
 
 import example_robot_data
 import numpy as np
-import matplotlib.pyplot as plt
 
 import crocoddyl
 import pinocchio
-from crocoddyl.utils.quadruped import SimpleQuadrupedalGaitProblem
+from crocoddyl.utils.quadruped import SimpleQuadrupedalGaitProblem, plotSolution
 
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
@@ -70,13 +69,7 @@ print("[Box-DDP] Solved in", boxddp_end - boxddp_start, "-", boxddp.iter, "itera
 # Plotting the entire motion
 if WITHPLOT:
     # Plot control vs limits
-    fig = plt.figure(1)
-    plt.title('Control ($u$)')
-    crocoddyl.plotOCSolution(us=boxddp.us, figIndex=1, show=False)
-    plt.xlim(0, len(boxddp.us) - 1)
-    plt.hlines(boxddp.models()[0].u_lb, 0, len(boxddp.us) - 1, 'r')
-    plt.hlines(boxddp.models()[0].u_ub, 0, len(boxddp.us) - 1, 'r')
-    plt.tight_layout()
+    plotSolution(boxddp, bounds=True, figIndex=1, show=False)
 
     # Plot convergence
     log = boxddp.getCallbacks()[0]
@@ -86,9 +79,8 @@ if WITHPLOT:
                               log.gm_stops,
                               log.th_stops,
                               log.steps,
-                              figIndex=2)
-
-    plt.show()
+                              figIndex=3,
+                              show=True)
 
 # Display the entire motion
 if WITHDISPLAY:

@@ -9,9 +9,10 @@
 #ifndef CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_BARRIER_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_BARRIER_HPP_
 
+#include <stdexcept>
+#include <math.h>
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/activation-base.hpp"
-#include <stdexcept>
 
 namespace crocoddyl {
 
@@ -27,9 +28,13 @@ struct ActivationBounds {
       throw_pretty("Invalid argument: "
                    << "The range of beta is between 0 and 1");
     }
-    if (!((lb - ub).array() <= 0).all()) {
-      throw_pretty("Invalid argument: "
-                   << "The lower and upper bounds are badly defined");
+    for (std::size_t i = 0; i < static_cast<std::size_t>(lb.size()); ++i) {
+      if (std::isfinite(lb(i)) && std::isfinite(ub(i))) {
+        if (lb(i) - ub(i) > 0) {
+          throw_pretty("Invalid argument: "
+                       << "The lower and upper bounds are badly defined; ub has to be bigger / equals to lb");
+        }
+      }
     }
 
     if (beta >= 0 && beta <= 1.) {
@@ -40,7 +45,6 @@ struct ActivationBounds {
     } else {
       beta = 1.;
     }
-    assert_pretty(((lb - ub).array() <= 0).all(), "The lower and upper bounds are badly defined");
   }
   ActivationBounds(const ActivationBounds& bounds) : lb(bounds.lb), ub(bounds.ub), beta(bounds.beta) {}
   ActivationBounds() : beta(1.) {}

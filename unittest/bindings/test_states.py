@@ -27,6 +27,8 @@ class StateAbstractTestCase(unittest.TestCase):
         # Checking the dimension of zero and random states
         self.assertEqual(self.STATE.zero().shape, (self.NX, 1), "Wrong dimension of zero state.")
         self.assertEqual(self.STATE.rand().shape, (self.NX, 1), "Wrong dimension of random state.")
+        self.assertEqual(self.STATE.lb.shape, (self.NX, 1), "Wrong dimension of lower bound.")
+        self.assertEqual(self.STATE.ub.shape, (self.NX, 1), "Wrong dimension of lower bound.")
 
     def test_python_derived_diff(self):
         x0 = self.STATE.rand()
