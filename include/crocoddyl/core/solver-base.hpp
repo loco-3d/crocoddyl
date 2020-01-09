@@ -56,6 +56,8 @@ class SolverAbstract {
   const double& get_th_stop() const;
   const std::size_t& get_iter() const;
 
+  void set_xs(const std::vector<Eigen::VectorXd>& xs);
+  void set_us(const std::vector<Eigen::VectorXd>& us);
   void set_xreg(const double& xreg);
   void set_ureg(const double& ureg);
   void set_th_acceptstep(const double& th_acceptstep);
