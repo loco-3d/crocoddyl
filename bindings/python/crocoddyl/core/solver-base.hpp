@@ -21,6 +21,11 @@ namespace bp = boost::python;
 
 class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbstract> {
  public:
+  using SolverAbstract::cost_;
+  using SolverAbstract::is_feasible_;
+  using SolverAbstract::iter_;
+  using SolverAbstract::steplength_;
+
   explicit SolverAbstract_wrap(boost::shared_ptr<ShootingProblem> problem)
       : SolverAbstract(problem), bp::wrapper<SolverAbstract>() {}
   ~SolverAbstract_wrap() {}
@@ -165,14 +170,8 @@ void exposeSolverAbstract() {
       .add_property(
           "us", bp::make_function(&SolverAbstract_wrap::get_us, bp::return_value_policy<bp::copy_const_reference>()),
           bp::make_function(&SolverAbstract_wrap::set_us), "control sequence")
-      .add_property("isFeasible",
-                    bp::make_function(&SolverAbstract_wrap::get_is_feasible,
-                                      bp::return_value_policy<bp::copy_const_reference>()),
-                    "feasible (xs,us)")
-      .add_property(
-          "cost",
-          bp::make_function(&SolverAbstract_wrap::get_cost, bp::return_value_policy<bp::copy_const_reference>()),
-          "total cost")
+      .def_readwrite("isFeasible", &SolverAbstract_wrap::is_feasible_, "feasible (xs,us)")
+      .def_readwrite("cost", &SolverAbstract_wrap::cost_, "total cost")
       .add_property(
           "x_reg",
           bp::make_function(&SolverAbstract_wrap::get_xreg, bp::return_value_policy<bp::copy_const_reference>()),
@@ -181,11 +180,7 @@ void exposeSolverAbstract() {
           "u_reg",
           bp::make_function(&SolverAbstract_wrap::get_ureg, bp::return_value_policy<bp::copy_const_reference>()),
           bp::make_function(&SolverAbstract_wrap::set_ureg), "control regularization")
-      .add_property(
-          "stepLength",
-          bp::make_function(&SolverAbstract_wrap::get_steplength, bp::return_value_policy<bp::copy_const_reference>()),
-          "applied step length")
-      .add_property("th_acceptStep",
+      .def_readwrite("stepLength", &SolverAbstract_wrap::steplength_, "applied step length")      .add_property("th_acceptStep",
                     bp::make_function(&SolverAbstract_wrap::get_th_acceptstep,
                                       bp::return_value_policy<bp::copy_const_reference>()),
                     bp::make_function(&SolverAbstract_wrap::set_th_acceptstep), "threshold for step acceptance")
@@ -193,10 +188,7 @@ void exposeSolverAbstract() {
           "th_stop",
           bp::make_function(&SolverAbstract_wrap::get_th_stop, bp::return_value_policy<bp::copy_const_reference>()),
           bp::make_function(&SolverAbstract_wrap::set_th_stop), "threshold for stopping criteria")
-      .add_property(
-          "iter",
-          bp::make_function(&SolverAbstract_wrap::get_iter, bp::return_value_policy<bp::copy_const_reference>()),
-          "number of iterations runned in solve()");
+      .def_readwrite("iter", &SolverAbstract_wrap::iter_, "number of iterations runned in solve()");
 
   bp::class_<CallbackAbstract_wrap, boost::noncopyable>(
       "CallbackAbstract",
