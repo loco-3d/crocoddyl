@@ -438,7 +438,7 @@ void SolverDDP::set_alphas(const std::vector<double>& alphas) {
 }
 
 void SolverDDP::set_th_stepdec(const double& th_stepdec) {
-  if (0. >= th_stepdec && th_stepdec >= 1.) {
+  if (0. >= th_stepdec || th_stepdec > 1.) {
     throw_pretty("Invalid argument: "
                  << "th_stepdec value should between 0 and 1.");
   }
@@ -446,7 +446,7 @@ void SolverDDP::set_th_stepdec(const double& th_stepdec) {
 }
 
 void SolverDDP::set_th_stepinc(const double& th_stepinc) {
-  if (0. >= th_stepinc && th_stepinc >= 1.) {
+  if (0. >= th_stepinc || th_stepinc > 1.) {
     throw_pretty("Invalid argument: "
                  << "th_stepinc value should between 0 and 1.");
   }

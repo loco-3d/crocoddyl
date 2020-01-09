@@ -43,16 +43,25 @@ class SolverAbstract {
   const std::vector<boost::shared_ptr<ActionDataAbstract> >& get_datas() const;
   const std::vector<Eigen::VectorXd>& get_xs() const;
   const std::vector<Eigen::VectorXd>& get_us() const;
-  const bool& get_isFeasible() const;
-  const std::size_t& get_iter() const;
+  const bool& get_is_feasible() const;
   const double& get_cost() const;
   const double& get_stop() const;
   const Eigen::Vector2d& get_d() const;
   const double& get_xreg() const;
   const double& get_ureg() const;
-  const double& get_stepLength() const;
+  const double& get_steplength() const;
   const double& get_dV() const;
   const double& get_dVexp() const;
+  const double& get_th_acceptstep() const;
+  const double& get_th_stop() const;
+  const std::size_t& get_iter() const;
+
+  void set_xs(const std::vector<Eigen::VectorXd>& xs);
+  void set_us(const std::vector<Eigen::VectorXd>& us);
+  void set_xreg(const double& xreg);
+  void set_ureg(const double& ureg);
+  void set_th_acceptstep(const double& th_acceptstep);
+  void set_th_stop(const double& th_stop);
 
  protected:
   boost::shared_ptr<ShootingProblem> problem_;
