@@ -77,9 +77,9 @@ void exposeIntegratedActionEuler() {
           "differential",
           bp::make_getter(&IntegratedActionDataEuler::differential, bp::return_value_policy<bp::return_by_value>()),
           "differential action data")
-      .add_property(
-          "dx", bp::make_getter(&IntegratedActionDataEuler::ddx_dx, bp::return_value_policy<bp::return_by_value>()),
-          "state rate.")
+      .add_property("dx",
+                    bp::make_getter(&IntegratedActionDataEuler::dx, bp::return_value_policy<bp::return_by_value>()),
+                    "state rate.")
       .add_property(
           "ddx_dx",
           bp::make_getter(&IntegratedActionDataEuler::ddx_dx, bp::return_value_policy<bp::return_by_value>()),
