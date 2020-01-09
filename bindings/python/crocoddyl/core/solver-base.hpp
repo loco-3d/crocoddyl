@@ -149,21 +149,21 @@ void exposeSolverAbstract() {
            "Each iteration, the solver calls these set of functions in order to\n"
            "allowed user the diagnostic of the solver's performance.\n"
            ":param callbacks: set of callback functions.")
-      .def("getCallbacks", &SolverAbstract_wrap::getCallbacks, bp::return_value_policy<bp::return_by_value>(),
+      .def("getCallbacks", &SolverAbstract_wrap::getCallbacks, bp::return_value_policy<bp::copy_const_reference>(),
            bp::args("self"),
            "Return the list of callback functions using for diagnostic.\n\n"
            ":return set of callback functions.")
       .add_property(
           "problem",
-          bp::make_function(&SolverAbstract_wrap::get_problem, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&SolverAbstract_wrap::get_problem, bp::return_value_policy<bp::copy_const_reference>()),
           "shooting problem")
-      .def("models", &SolverAbstract_wrap::get_models, bp::return_value_policy<bp::return_by_value>(), "models")
-      .def("datas", &SolverAbstract_wrap::get_datas, bp::return_value_policy<bp::return_by_value>(), "datas")
+      .def("models", &SolverAbstract_wrap::get_models, bp::return_value_policy<bp::copy_const_reference>(), "models")
+      .def("datas", &SolverAbstract_wrap::get_datas, bp::return_value_policy<bp::copy_const_reference>(), "datas")
       .add_property("xs",
-                    bp::make_function(&SolverAbstract_wrap::get_xs, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&SolverAbstract_wrap::get_xs, bp::return_value_policy<bp::copy_const_reference>()),
                     bp::make_function(&SolverAbstract_wrap::set_xs), "state trajectory")
       .add_property("us",
-                    bp::make_function(&SolverAbstract_wrap::get_us, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&SolverAbstract_wrap::get_us, bp::return_value_policy<bp::copy_const_reference>()),
                     bp::make_function(&SolverAbstract_wrap::set_us), "control sequence")
       .add_property("isFeasible",
                     bp::make_function(&SolverAbstract_wrap::get_is_feasible,
