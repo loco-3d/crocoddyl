@@ -7,10 +7,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_CORE_ACTIVATION_BASE_SQUASH_HPP_
-#define CROCODDYL_CORE_ACTIVATION_BASE_SQUASH_HPP_
+#ifndef CROCODDYL_CORE_ACTIVATION_SQUASH_BASE_HPP_
+#define CROCODDYL_CORE_ACTIVATION_SQUASH_BASE_HPP_
 
-#include <Eigen/Dense>
 #include "crocoddyl/core/actuation-base.hpp"
 
 namespace crocoddyl {
@@ -36,4 +35,4 @@ class ActuationModelSquashingAbstract : public ActuationModelAbstract {
 
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_CORE_ACTIVATION_BASE_SQUASH_HPP_
+#endif  // CROCODDYL_CORE_ACTIVATION_SQUASH_BASE_HPP_
