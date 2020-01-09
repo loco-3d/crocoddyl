@@ -159,12 +159,12 @@ void exposeSolverAbstract() {
           "shooting problem")
       .def("models", &SolverAbstract_wrap::get_models, bp::return_value_policy<bp::copy_const_reference>(), "models")
       .def("datas", &SolverAbstract_wrap::get_datas, bp::return_value_policy<bp::copy_const_reference>(), "datas")
-      .add_property("xs",
-                    bp::make_function(&SolverAbstract_wrap::get_xs, bp::return_value_policy<bp::copy_const_reference>()),
-                    bp::make_function(&SolverAbstract_wrap::set_xs), "state trajectory")
-      .add_property("us",
-                    bp::make_function(&SolverAbstract_wrap::get_us, bp::return_value_policy<bp::copy_const_reference>()),
-                    bp::make_function(&SolverAbstract_wrap::set_us), "control sequence")
+      .add_property(
+          "xs", bp::make_function(&SolverAbstract_wrap::get_xs, bp::return_value_policy<bp::copy_const_reference>()),
+          bp::make_function(&SolverAbstract_wrap::set_xs), "state trajectory")
+      .add_property(
+          "us", bp::make_function(&SolverAbstract_wrap::get_us, bp::return_value_policy<bp::copy_const_reference>()),
+          bp::make_function(&SolverAbstract_wrap::set_us), "control sequence")
       .add_property("isFeasible",
                     bp::make_function(&SolverAbstract_wrap::get_is_feasible,
                                       bp::return_value_policy<bp::copy_const_reference>()),
