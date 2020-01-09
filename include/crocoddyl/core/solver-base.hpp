@@ -56,6 +56,11 @@ class SolverAbstract {
   const double& get_th_stop() const;
   const std::size_t& get_iter() const;
 
+  void set_xreg(const double& xreg);
+  void set_ureg(const double& ureg);
+  void set_th_acceptstep(const double& th_acceptstep);
+  void set_th_stop(const double& th_stop);
+
  protected:
   boost::shared_ptr<ShootingProblem> problem_;
   std::vector<boost::shared_ptr<ActionModelAbstract> > models_;
