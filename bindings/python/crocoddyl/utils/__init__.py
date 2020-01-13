@@ -757,12 +757,13 @@ class DDPDerived(crocoddyl.SolverAbstract):
                 except ArithmeticError:
                     continue
                 self.dV_exp = a * (d1 + .5 * d2 * a)
-                if d1 < self.th_grad or not self.isFeasible or self.dV > self.th_acceptStep * self.dV_exp:
-                    # Accept step
-                    self.wasFeasible = self.isFeasible
-                    self.setCandidate(self.xs_try, self.us_try, True)
-                    self.cost = self.cost_try
-                    break
+                if self.dV_exp >= 0:
+                    if d1 < self.th_grad or not self.isFeasible or self.dV > self.th_acceptStep * self.dV_exp:
+                        # Accept step
+                        self.wasFeasible = self.isFeasible
+                        self.setCandidate(self.xs_try, self.us_try, True)
+                        self.cost = self.cost_try
+                        break
             if a > self.th_step:
                 self.decreaseRegularization()
             if a == self.alphas[-1]:
