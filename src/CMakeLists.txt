@@ -6,6 +6,7 @@ SET(${PROJECT_NAME}_SOURCES
   core/diff-action-base.cpp
   core/activation-base.cpp
   core/solver-base.cpp
+  core/squashing-base.cpp
   core/integrator/euler.cpp
   core/numdiff/state.cpp
   core/numdiff/action.cpp
