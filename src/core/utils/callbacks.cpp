@@ -40,8 +40,8 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
       std::cout << std::scientific << std::setprecision(5) << solver.get_cost() << "  ";
       std::cout << solver.get_stop() << "  " << -solver.get_d()[1] << "  ";
       std::cout << solver.get_xreg() << "  " << solver.get_ureg() << "   ";
-      std::cout << std::fixed << std::setprecision(4) << solver.get_stepLength() << "     ";
-      std::cout << solver.get_isFeasible() << '\n';
+      std::cout << std::fixed << std::setprecision(4) << solver.get_steplength() << "     ";
+      std::cout << solver.get_is_feasible() << '\n';
       break;
     }
     case _2: {
@@ -49,8 +49,8 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
       std::cout << std::scientific << std::setprecision(5) << solver.get_cost() << "  ";
       std::cout << solver.get_stop() << "  " << -solver.get_d()[1] << "  ";
       std::cout << solver.get_xreg() << "  " << solver.get_ureg() << "   ";
-      std::cout << std::fixed << std::setprecision(4) << solver.get_stepLength() << "     ";
-      std::cout << solver.get_isFeasible() << "  ";
+      std::cout << std::fixed << std::setprecision(4) << solver.get_steplength() << "     ";
+      std::cout << solver.get_is_feasible() << "  ";
       std::cout << std::scientific << std::setprecision(5) << solver.get_dV() << "  ";
       std::cout << solver.get_dVexp() << '\n';
       break;
@@ -60,8 +60,8 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
       std::cout << std::scientific << std::setprecision(5) << solver.get_cost() << "  ";
       std::cout << solver.get_stop() << "  " << -solver.get_d()[1] << "  ";
       std::cout << solver.get_xreg() << "  " << solver.get_ureg() << "   ";
-      std::cout << std::fixed << std::setprecision(4) << solver.get_stepLength() << "     ";
-      std::cout << solver.get_isFeasible() << '\n';
+      std::cout << std::fixed << std::setprecision(4) << solver.get_steplength() << "     ";
+      std::cout << solver.get_is_feasible() << '\n';
     }
   }
 }

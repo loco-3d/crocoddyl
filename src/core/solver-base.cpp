@@ -91,9 +91,7 @@ const std::vector<Eigen::VectorXd>& SolverAbstract::get_xs() const { return xs_;
 
 const std::vector<Eigen::VectorXd>& SolverAbstract::get_us() const { return us_; }
 
-const bool& SolverAbstract::get_isFeasible() const { return is_feasible_; }
-
-const std::size_t& SolverAbstract::get_iter() const { return iter_; }
+const bool& SolverAbstract::get_is_feasible() const { return is_feasible_; }
 
 const double& SolverAbstract::get_cost() const { return cost_; }
 
@@ -105,11 +103,91 @@ const double& SolverAbstract::get_xreg() const { return xreg_; }
 
 const double& SolverAbstract::get_ureg() const { return ureg_; }
 
-const double& SolverAbstract::get_stepLength() const { return steplength_; }
+const double& SolverAbstract::get_steplength() const { return steplength_; }
 
 const double& SolverAbstract::get_dV() const { return dV_; }
 
 const double& SolverAbstract::get_dVexp() const { return dVexp_; }
+
+const double& SolverAbstract::get_th_acceptstep() const { return th_acceptstep_; }
+
+const double& SolverAbstract::get_th_stop() const { return th_stop_; }
+
+const std::size_t& SolverAbstract::get_iter() const { return iter_; }
+
+void SolverAbstract::set_xs(const std::vector<Eigen::VectorXd>& xs) {
+  const std::size_t& T = problem_->get_T();
+  if (xs.size() != T + 1) {
+    throw_pretty("Invalid argument: "
+                 << "xs list has to be " + std::to_string(T + 1));
+  }
+
+  for (std::size_t t = 0; t < T; ++t) {
+    const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
+    const std::size_t& nx = model->get_state()->get_nx();
+    if (static_cast<std::size_t>(xs[t].size()) != nx) {
+      throw_pretty("Invalid argument: "
+                   << "xs[" + std::to_string(t) + "] has wrong dimension (it should be " + std::to_string(nx) + ")")
+    }
+  }
+  const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_terminalModel();
+  const std::size_t& nx = model->get_state()->get_nx();
+  if (static_cast<std::size_t>(xs[T].size()) != nx) {
+    throw_pretty("Invalid argument: "
+                 << "xs[" + std::to_string(T) + "] has wrong dimension (it should be " + std::to_string(nx) + ")")
+  }
+  xs_ = xs;
+}
+
+void SolverAbstract::set_us(const std::vector<Eigen::VectorXd>& us) {
+  const std::size_t& T = problem_->get_T();
+  if (us.size() != T) {
+    throw_pretty("Invalid argument: "
+                 << "us list has to be " + std::to_string(T));
+  }
+
+  for (std::size_t t = 0; t < T; ++t) {
+    const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
+    const std::size_t& nu = model->get_nu();
+    if (static_cast<std::size_t>(us[t].size()) != nu && nu != 0) {
+      throw_pretty("Invalid argument: "
+                   << "us[" + std::to_string(t) + "] has wrong dimension (it should be " + std::to_string(nu) + ")")
+    }
+  }
+  us_ = us;
+}
+
+void SolverAbstract::set_xreg(const double& xreg) {
+  if (xreg < 0.) {
+    throw_pretty("Invalid argument: "
+                 << "xreg value has to be positive.");
+  }
+  xreg_ = xreg;
+}
+
+void SolverAbstract::set_ureg(const double& ureg) {
+  if (ureg < 0.) {
+    throw_pretty("Invalid argument: "
+                 << "ureg value has to be positive.");
+  }
+  ureg_ = ureg;
+}
+
+void SolverAbstract::set_th_acceptstep(const double& th_acceptstep) {
+  if (0. >= th_acceptstep || th_acceptstep > 1) {
+    throw_pretty("Invalid argument: "
+                 << "th_acceptstep value should between 0 and 1.");
+  }
+  th_acceptstep_ = th_acceptstep;
+}
+
+void SolverAbstract::set_th_stop(const double& th_stop) {
+  if (th_stop <= 0.) {
+    throw_pretty("Invalid argument: "
+                 << "th_stop value has to higher than 0.");
+  }
+  th_stop_ = th_stop;
+}
 
 bool raiseIfNaN(const double& value) {
   if (std::isnan(value) || std::isinf(value) || value >= 1e30) {
