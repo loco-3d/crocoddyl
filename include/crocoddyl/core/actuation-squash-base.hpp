@@ -1,4 +1,14 @@
-#include <Eigen/Dense>
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2019-2020, University of Edinburgh,
+//                          Universitat Politecnica de Catalunya
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+#ifndef CROCODDYL_CORE_ACTIVATION_SQUASH_BASE_HPP_
+#define CROCODDYL_CORE_ACTIVATION_SQUASH_BASE_HPP_
 
 #include "crocoddyl/core/actuation-base.hpp"
 
@@ -22,4 +32,7 @@ class ActuationModelSquashingAbstract : public ActuationModelAbstract {
   Eigen::VectorXd v_;      // Squashing function output
   Eigen::MatrixXd dv_du_;  // Squashing function Jacobian wrt control input u
 };
+
 }  // namespace crocoddyl
+
+#endif  // CROCODDYL_CORE_ACTIVATION_SQUASH_BASE_HPP_

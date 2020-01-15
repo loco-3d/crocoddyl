@@ -1,7 +1,7 @@
 SET(${PROJECT_NAME}_SOURCES
   core/state-base.cpp
   core/actuation-base.cpp
-  core/actuation-base-squash.cpp
+  core/actuation-squash-base.cpp
   core/action-base.cpp
   core/diff-action-base.cpp
   core/activation-base.cpp
