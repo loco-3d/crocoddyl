@@ -11,10 +11,11 @@
 
 namespace crocoddyl {
 
-ActuationModelSquashingAbstract::ActuationModelSquashingAbstract(boost::shared_ptr<StateAbstract> state,
-                                                                 const std::size_t& nu)
-    : ActuationModelAbstract(state, nu) {}
+ActuationModelSquashingAbstract::ActuationModelSquashingAbstract(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<SquashingModelAbstract> squashing, const std::size_t& nu)
+    : ActuationModelAbstract(state, nu), squashing_(squashing) {}
 
 ActuationModelSquashingAbstract::~ActuationModelSquashingAbstract() {}
+
+const boost::shared_ptr<SquashingModelAbstract>& ActuationModelSquashingAbstract::get_squashing() const {return squashing_; }
 
 }  // namespace crocoddyl
