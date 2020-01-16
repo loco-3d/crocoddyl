@@ -12,6 +12,7 @@
 
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/core/squashing-base.hpp"
+#include "crocoddyl/core/data/squashing.hpp"
 
 namespace crocoddyl {
 
@@ -25,11 +26,22 @@ class ActuationModelSquashingAbstract : public ActuationModelAbstract {
   virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data,
                         const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
                         const bool& recalc = true) = 0;
-  
+  boost::shared_ptr<ActuationDataAbstract> createData();
+
   const boost::shared_ptr<SquashingModelAbstract>& get_squashing() const;
 
  protected:
   boost::shared_ptr<SquashingModelAbstract> squashing_;
+};
+
+struct ActuationDataSquashing : public ActuationDataAbstract {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  template<typename Model>
+  explicit ActuationDataSquashing(Model * const model)
+      : ActuationDataAbstract(model), squashing(model->get_squashing()->createData()) {}
+  
+  DataCollectorSquashing squashing;
 };
 
 }  // namespace crocoddyl

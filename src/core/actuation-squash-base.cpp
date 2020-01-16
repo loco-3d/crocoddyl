@@ -16,6 +16,10 @@ ActuationModelSquashingAbstract::ActuationModelSquashingAbstract(boost::shared_p
 
 ActuationModelSquashingAbstract::~ActuationModelSquashingAbstract() {}
 
+boost::shared_ptr<ActuationDataAbstract> ActuationModelSquashingAbstract::createData() {
+  return boost::make_shared<ActuationDataSquashing>(this);
+}
+
 const boost::shared_ptr<SquashingModelAbstract>& ActuationModelSquashingAbstract::get_squashing() const {return squashing_; }
 
 }  // namespace crocoddyl
