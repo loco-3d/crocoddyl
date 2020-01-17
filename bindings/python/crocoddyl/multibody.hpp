@@ -20,6 +20,8 @@
 #include "python/crocoddyl/multibody/cost-base.hpp"
 #include "python/crocoddyl/multibody/contact-base.hpp"
 #include "python/crocoddyl/multibody/impulse-base.hpp"
+#include "python/crocoddyl/multibody/impulse-cost-base.hpp"
+#include "python/crocoddyl/multibody/impulse-costs/com-position.hpp"
 #include "python/crocoddyl/multibody/costs/cost-sum.hpp"
 #include "python/crocoddyl/multibody/costs/state.hpp"
 #include "python/crocoddyl/multibody/costs/control.hpp"
@@ -56,6 +58,8 @@ void exposeMultibody() {
   exposeCostMultibody();
   exposeContactAbstract();
   exposeImpulseAbstract();
+  exposeImpulseCostMultibody();
+  exposeImpulseCostCoM();
   exposeCostSum();
   exposeCostState();
   exposeCostControl();

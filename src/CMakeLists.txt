@@ -36,6 +36,8 @@ SET(${PROJECT_NAME}_SOURCES
   multibody/states/multibody.cpp
   multibody/actuations/floating-base.cpp
   multibody/actuations/full.cpp
+  multibody/impulse-cost-base.cpp
+  multibody/impulse-costs/com-position.cpp
   multibody/costs/cost-sum.cpp
   multibody/costs/state.cpp
   multibody/costs/control.cpp
