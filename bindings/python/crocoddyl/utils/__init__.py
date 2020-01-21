@@ -288,7 +288,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
 
         # Computing the dynamics using ABA or manually for armature case
         if self.enable_force:
-            data.xout = pinocchio.aba(self.state.pinocchio, self.pinocchioData, q, v, u)
+            data.xout = pinocchio.aba(self.state.pinocchio, self.pinocchioData, q, v, tau)
         else:
             pinocchio.computeAllTerms(self.state.pinocchio, self.pinocchioData, q, v)
             data.M = self.pinocchioData.M
@@ -308,6 +308,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
         nq, nv = self.state.nq, self.state.nv
         q, v = x[:nq], x[-nv:]
         self.actuation.calcDiff(self.actuationData, x, u)
+        tau = self.actuationData.tau
 
         if u is None:
             u = self.unone
@@ -316,7 +317,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
             pinocchio.computeJointJacobians(self.state.pinocchio, self.pinocchioData, q)
         # Computing the dynamics derivatives
         if self.enable_force:
-            pinocchio.computeABADerivatives(self.state.pinocchio, self.pinocchioData, q, v, u)
+            pinocchio.computeABADerivatives(self.state.pinocchio, self.pinocchioData, q, v, tau)
             ddq_dq = self.pinocchioData.ddq_dq
             ddq_dv = self.pinocchioData.ddq_dv
             data.Fx = np.hstack([ddq_dq, ddq_dv]) + self.pinocchioData.Minv * self.actuationData.dtau_dx
