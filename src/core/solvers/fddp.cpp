@@ -60,7 +60,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
       expectedImprovement();
       dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
 
-      if (dVexp_ > 0) {  // descend direction
+      if (dVexp_ >= 0) {  // descend direction
         if (d_[0] < th_grad_ || dV_ > th_acceptstep_ * dVexp_) {
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
@@ -69,7 +69,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
           break;
         }
       } else {  // reducing the gaps by allowing a small increment in the cost value
-        if (d_[0] < th_grad_ || dV_ < th_acceptnegstep_ * dVexp_) {
+        if (d_[0] < th_grad_ || dV_ > th_acceptnegstep_ * dVexp_) {
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
           cost_ = cost_try_;
