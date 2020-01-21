@@ -305,7 +305,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
 
     def calcDiff(self, data, x, u=None, recalc=True):
         self.costsData.shareMemory(data)
-        nq, nv = self.state.nv, self.state.nq
+        nq, nv = self.state.nq, self.state.nv
         q, v = x[:nq], x[-nv:]
         self.actuation.calcDiff(self.actuationData, x, u)
 
