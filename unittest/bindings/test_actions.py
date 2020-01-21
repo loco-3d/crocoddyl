@@ -128,8 +128,12 @@ class AnymalFreeFwdDynamicsTest(ActionModelAbstractTestCase):
 
 if __name__ == '__main__':
     test_classes_to_run = [
-        UnicycleTest, LQRTest, DifferentialLQRTest, TalosArmFreeFwdDynamicsTest,
-        TalosArmFreeFwdDynamicsWithArmatureTest, AnymalFreeFwdDynamicsTest,
+        UnicycleTest,
+        LQRTest,
+        DifferentialLQRTest,
+        TalosArmFreeFwdDynamicsTest,
+        TalosArmFreeFwdDynamicsWithArmatureTest,
+        AnymalFreeFwdDynamicsTest,
     ]
     loader = unittest.TestLoader()
     suites_list = []
