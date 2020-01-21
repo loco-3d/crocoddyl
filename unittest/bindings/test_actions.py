@@ -115,10 +115,21 @@ class TalosArmFreeFwdDynamicsWithArmatureTest(ActionModelAbstractTestCase):
     MODEL_DER.set_armature(0.1 * np.matrix(np.ones(ROBOT_MODEL.nv)).T)
 
 
+class AnymalFreeFwdDynamicsTest(ActionModelAbstractTestCase):
+    ROBOT_MODEL = example_robot_data.loadANYmal().model
+    STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+    ACTUATION = crocoddyl.ActuationModelFloatingBase(STATE)
+    COST_SUM = crocoddyl.CostModelSum(STATE, ACTUATION.nu)
+    COST_SUM.addCost("xReg", crocoddyl.CostModelState(STATE, ACTUATION.nu), 1e-7)
+    COST_SUM.addCost("uReg", crocoddyl.CostModelControl(STATE, ACTUATION.nu), 1e-7)
+    MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
+    MODEL_DER = DifferentialFreeFwdDynamicsDerived(STATE, ACTUATION, COST_SUM)
+
+
 if __name__ == '__main__':
     test_classes_to_run = [
         UnicycleTest, LQRTest, DifferentialLQRTest, TalosArmFreeFwdDynamicsTest,
-        TalosArmFreeFwdDynamicsWithArmatureTest
+        TalosArmFreeFwdDynamicsWithArmatureTest, AnymalFreeFwdDynamicsTest,
     ]
     loader = unittest.TestLoader()
     suites_list = []
