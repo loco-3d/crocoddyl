@@ -25,6 +25,7 @@ class GepettoDisplay:
         # Visuals properties
         self.floorGroup = "world/floor"
         self.forceGroup = "world/robot/contact_forces"
+        self.frictionGroup = "world/robot/friction_cone"
         self.frameTrajGroup = "world/robot/frame_trajectory"
         self.backgroundColor = [1., 1., 1., 1.]
         self.floorScale = [0.5, 0.5, 0.5]
@@ -32,6 +33,13 @@ class GepettoDisplay:
         self.forceRadius = 0.015
         self.forceLength = 0.5
         self.forceColor = [1., 0., 1., 1.]
+        self.frictionConeRays = True
+        self.frictionConeColor1 =  [0., 0.4, 0.79, 0.5]
+        self.frictionConeColor2 = [0., 0.4, 0.79, 0.5]
+        self.activeContacts = {}
+        for n in frameNames:
+            parentId = robot.model.frames[robot.model.getFrameId(n)].parent
+            self.activeContacts[str(parentId)] = True
         self.frameTrajNames = []
         for n in frameNames:
             self.frameTrajNames.append(robot.model.getFrameId(n))
@@ -50,14 +58,18 @@ class GepettoDisplay:
                                for m in self.robot.model.inertias) * np.linalg.norm(self.robot.model.gravity.linear)
         self.x_axis = np.matrix([1., 0., 0.]).T
         self.robot.viewer.gui.createGroup(self.forceGroup)
+        self.robot.viewer.gui.createGroup(self.frictionGroup)
         self.robot.viewer.gui.createGroup(self.frameTrajGroup)
 
     def display(self, xs, fs=[], ps=[], dts=[], factor=1.):
+        cones = dict()
         if fs:
             for f in fs[0]:
                 key = f["key"]
                 self.robot.viewer.gui.addArrow(self.forceGroup + "/" + key, self.forceRadius, self.forceLength,
                                                self.forceColor)
+                self.robot.viewer.gui.setFloatProperty(self.forceGroup + "/" + key, "Alpha", 1.)
+                cones[key] = self.createCone(key, 0.2)
         if ps:
             for key, p in ps.items():
                 self.robot.viewer.gui.addCurve(self.frameTrajGroup + "/" + str(key), p, self.frameTrajColor[key])
@@ -70,20 +82,30 @@ class GepettoDisplay:
         for i, x in enumerate(xs):
             if not i % S:
                 if fs:
-                    self.robot.viewer.gui.setFloatProperty(self.forceGroup, "Alpha", 0.)
-                    for f in fs[i]:
-                        key = f["key"]
-                        self.robot.viewer.gui.setFloatProperty(self.forceGroup + "/" + key, "Alpha", 1.)
+                    self.activeContacts = {k: False for k, c in self.activeContacts.items()}
                     for f in fs[i]:
                         key = f["key"]
                         pose = f["oMf"]
                         wrench = f["f"]
+                        # Display the contact forces
                         R = rotationMatrixFromTwoVectors(self.x_axis, wrench.linear)
                         forcePose = pinocchio.se3ToXYZQUATtuple(pinocchio.SE3(R, pose.translation))
                         forceMagnitud = np.linalg.norm(wrench.linear) / self.totalWeight
                         self.robot.viewer.gui.setVector3Property(self.forceGroup + "/" + key, "Scale",
                                                                  [1. * forceMagnitud, 1., 1.])
                         self.robot.viewer.gui.applyConfiguration(self.forceGroup + "/" + key, forcePose)
+                        self.robot.viewer.gui.setVisibility(self.forceGroup + "/" + key, "ON")
+                        # Display the friction cones
+                        position = pose
+                        position.rotation = np.eye(3) # TODO(cmastalli): parse orientation of the cone
+                        self.robot.viewer.gui.applyConfiguration(cones[key], list(np.array(pinocchio.se3ToXYZQUAT(position)).squeeze()))
+                        self.robot.viewer.gui.setVisibility(cones[key], "ALWAYS_ON_TOP")
+                        self.robot.viewer.gui.setVisibility(cones[key], "ON")
+                        self.activeContacts[key] = True
+                for key, c in self.activeContacts.items():
+                    if c == False:
+                        self.robot.viewer.gui.setVisibility(self.forceGroup + "/" + key, "OFF")
+                        self.robot.viewer.gui.setVisibility(cones[key], "OFF")
                 self.robot.display(x[:self.robot.nq])
                 time.sleep(dts[i] * factor)
 
@@ -145,6 +167,36 @@ class GepettoDisplay:
                         pose = data.pinocchio.oMf[key]
                         p.append(np.asarray(pose.translation.T).reshape(-1).tolist())
         return ps
+
+    def createCone(self, cone_name, scale=1., mu=0.7):
+        m_generatrices = np.matrix(np.empty([3, 4]))
+        m_generatrices[:, 0] = np.matrix([np.sqrt(2) / 2. * mu, np.sqrt(2) / 2. * mu, 1.]).T
+        m_generatrices[:, 0] = m_generatrices[:, 0] / np.linalg.norm(m_generatrices[:, 0])
+        m_generatrices[:, 1] = m_generatrices[:, 0]
+        m_generatrices[0, 1] *= -1.
+        m_generatrices[:, 2] = m_generatrices[:, 0]
+        m_generatrices[:2, 2] *= -1.
+        m_generatrices[:, 3] = m_generatrices[:, 0]
+        m_generatrices[1, 3] *= -1.
+        generatrices = m_generatrices
+        v = [[0., 0., 0.]]
+        for k in range(m_generatrices.shape[1]):
+            v.append(m_generatrices[:3, k].T.tolist()[0])
+        v.append(m_generatrices[:3, 0].T.tolist()[0])
+        coneGroup = self.frictionGroup + "/" + cone_name
+        self.robot.viewer.gui.createGroup(coneGroup)
+
+        meshGroup = coneGroup + "/cone"
+        result = self.robot.viewer.gui.addCurve(meshGroup, v, self.frictionConeColor1)
+        self.robot.viewer.gui.setCurveMode(meshGroup, 'TRIANGLE_FAN')
+        if self.frictionConeRays:
+            lineGroup = coneGroup + "/lines"
+            self.robot.viewer.gui.createGroup(lineGroup)
+            for k in range(m_generatrices.shape[1]):
+                l = self.robot.viewer.gui.addLine(lineGroup + "/" + str(k), [0., 0., 0.],
+                                                  m_generatrices[:3, k].T.tolist()[0], self.frictionConeColor2)
+        self.robot.viewer.gui.setScale(coneGroup, [scale, scale, scale])
+        return coneGroup
 
 
 class CallbackDisplay(libcrocoddyl_pywrap.CallbackAbstract):
