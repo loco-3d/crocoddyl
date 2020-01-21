@@ -262,3 +262,17 @@ def plotConvergence(costs, muLM, muV, gamma, theta, alpha, figIndex=1, show=True
     plt.xlabel("iteration")
     if show:
         plt.show()
+
+
+def saveOCSolution(filename, xs, us, ks=None, Ks=None):
+    import pickle
+    data = {"xs": xs, "us": us, "ks": ks, "Ks": Ks}
+    with open(filename, "wb") as f:
+        pickle.dump(data, f)
+
+
+def saveConvergence(filename, costs, muLM, muV, gamma, theta, alpha):
+    import pickle
+    data = {"costs": costs, "muLM": muLM, "muV": muV, "gamma": gamma, "theta": theta, "alpha": alpha}
+    with open(filename, "wb") as f:
+        pickle.dump(data, f)
