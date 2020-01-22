@@ -35,13 +35,16 @@ class GepettoDisplay:
         self.forceRadius = 0.015
         self.forceLength = 0.5
         self.forceColor = [1., 0., 1., 1.]
+        self.frictionConeScale = 0.2
         self.frictionConeRays = True
-        self.frictionConeColor1 =  [0., 0.4, 0.79, 0.5]
+        self.frictionConeColor1 = [0., 0.4, 0.79, 0.5]
         self.frictionConeColor2 = [0., 0.4, 0.79, 0.5]
         self.activeContacts = {}
+        self.frictionMu = {}
         for n in frameNames:
             parentId = robot.model.frames[robot.model.getFrameId(n)].parent
             self.activeContacts[str(parentId)] = True
+            self.frictionMu[str(parentId)] = 0.7
         self.frameTrajNames = []
         for n in frameNames:
             self.frameTrajNames.append(str(robot.model.getFrameId(n)))
@@ -65,12 +68,9 @@ class GepettoDisplay:
         self.robot.viewer.gui.createGroup(self.frameTrajGroup)
         self.addForceArrows()
         self.addFrameCurves()
+        self.addFrictionCones()
 
     def display(self, xs, fs=[], ps=[], dts=[], factor=1.):
-        if fs:
-            for f in fs[0]:
-                key = f["key"]
-                self.createCone(key, 0.2, mu=f["mu"])
         if ps:
             for key, p in ps.items():
                 self.robot.viewer.gui.setCurvePoints(self.frameTrajGroup + "/" + key, p)
@@ -98,7 +98,9 @@ class GepettoDisplay:
                         position = pose
                         position.rotation = rotationMatrixFromTwoVectors(self.z_axis, f["nsurf"])
                         frictionName = self.frictionGroup + "/" + key
-                        self.robot.viewer.gui.applyConfiguration(frictionName, list(np.array(pinocchio.se3ToXYZQUAT(position)).squeeze()))
+                        self.setConeMu(key, f["mu"])
+                        self.robot.viewer.gui.applyConfiguration(
+                            frictionName, list(np.array(pinocchio.se3ToXYZQUAT(position)).squeeze()))
                         self.robot.viewer.gui.setVisibility(frictionName, "ON")
                         self.activeContacts[key] = True
                 for key, c in self.activeContacts.items():
@@ -139,10 +141,14 @@ class GepettoDisplay:
             self.robot.viewer.gui.addArrow(forceName, self.forceRadius, self.forceLength, self.forceColor)
             self.robot.viewer.gui.setFloatProperty(forceName, "Alpha", 1.)
 
+    def addFrictionCones(self):
+        for key in self.activeContacts:
+            self.createCone(key, self.frictionConeScale, mu=0.7)
+
     def addFrameCurves(self):
         for key in self.frameTrajNames:
             frameName = self.frameTrajGroup + "/" + key
-            self.robot.viewer.gui.addCurve(frameName, [np.array([0.,0.,0.]).tolist()] * 2, self.frameTrajColor[key])
+            self.robot.viewer.gui.addCurve(frameName, [np.array([0., 0., 0.]).tolist()] * 2, self.frameTrajColor[key])
             self.robot.viewer.gui.setCurveLineWidth(frameName, self.frameTrajLineWidth)
 
     def getForceTrajectoryFromSolver(self, solver):
@@ -156,7 +162,7 @@ class GepettoDisplay:
                         oMf = contact.pinocchio.oMi[contact.joint] * contact.jMf
                         force = contact.jMf.actInv(contact.f)
                         nsurf = np.matrix([0., 0., 1.]).T
-                        mu = 1.
+                        mu = 0.7
                         for k, c in model.differential.costs.costs.items():
                             if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
                                 if contact.joint == self.robot.model.frames[c.cost.frame].parent:
@@ -171,7 +177,7 @@ class GepettoDisplay:
                     oMf = impulse.pinocchio.oMi[impulse.joint] * impulse.jMf
                     force = impulse.jMf.actInv(impulse.f)
                     nsurf = np.matrix([0., 0., 1.]).T
-                    mu = 1.
+                    mu = 0.7
                     for k, c in model.costs.costs.items():
                         if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
                             if impulse.joint == self.robot.model.frames[c.cost.frame].parent:
@@ -225,6 +231,21 @@ class GepettoDisplay:
                 l = self.robot.viewer.gui.addLine(lineGroup + "/" + str(k), [0., 0., 0.],
                                                   m_generatrices[:3, k].T.tolist()[0], self.frictionConeColor2)
         self.robot.viewer.gui.setScale(coneGroup, [scale, scale, scale])
+
+    def setConeMu(self, coneName, mu):
+        current_mu = self.frictionMu[coneName]
+        if mu != current_mu:
+            self.frictionMu[coneName] = mu
+            coneGroup = self.frictionGroup + "/" + coneName
+
+            self.robot.viewer.gui.deleteNode(coneGroup + "/lines/0", "")
+            self.robot.viewer.gui.deleteNode(coneGroup + "/lines/1", "")
+            self.robot.viewer.gui.deleteNode(coneGroup + "/lines/2", "")
+            self.robot.viewer.gui.deleteNode(coneGroup + "/lines/3", "")
+            self.robot.viewer.gui.deleteNode(coneGroup + "/lines", "")
+            self.robot.viewer.gui.deleteNode(coneGroup + "/cone", "")
+            self.robot.viewer.gui.deleteNode(coneGroup, "")
+            self.createCone(coneName, self.frictionConeScale, mu)
 
 
 class CallbackDisplay(libcrocoddyl_pywrap.CallbackAbstract):
