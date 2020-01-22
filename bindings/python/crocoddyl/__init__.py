@@ -11,6 +11,8 @@ def rotationMatrixFromTwoVectors(a, b):
     b_copy = b / np.linalg.norm(b)
     a_cross_b = pinocchio.utils.cross(a_copy, b_copy)
     s = np.linalg.norm(a_cross_b)
+    if s == 0:
+        return np.matrix(np.eye(3))
     c = np.asscalar(a_copy.T * b_copy)
     ab_skew = pinocchio.utils.skew(a_cross_b)
     return np.matrix(np.eye(3)) + ab_skew + ab_skew * ab_skew * (1 - c) / s**2
@@ -25,6 +27,7 @@ class GepettoDisplay:
         # Visuals properties
         self.floorGroup = "world/floor"
         self.forceGroup = "world/robot/contact_forces"
+        self.frictionGroup = "world/robot/friction_cone"
         self.frameTrajGroup = "world/robot/frame_trajectory"
         self.backgroundColor = [1., 1., 1., 1.]
         self.floorScale = [0.5, 0.5, 0.5]
@@ -32,9 +35,19 @@ class GepettoDisplay:
         self.forceRadius = 0.015
         self.forceLength = 0.5
         self.forceColor = [1., 0., 1., 1.]
+        self.frictionConeScale = 0.2
+        self.frictionConeRays = True
+        self.frictionConeColor1 = [0., 0.4, 0.79, 0.5]
+        self.frictionConeColor2 = [0., 0.4, 0.79, 0.5]
+        self.activeContacts = {}
+        self.frictionMu = {}
+        for n in frameNames:
+            parentId = robot.model.frames[robot.model.getFrameId(n)].parent
+            self.activeContacts[str(parentId)] = True
+            self.frictionMu[str(parentId)] = 0.7
         self.frameTrajNames = []
         for n in frameNames:
-            self.frameTrajNames.append(robot.model.getFrameId(n))
+            self.frameTrajNames.append(str(robot.model.getFrameId(n)))
         self.frameTrajColor = {}
         self.frameTrajLineWidth = 10
         for fr in self.frameTrajNames:
@@ -49,20 +62,18 @@ class GepettoDisplay:
         self.totalWeight = sum(m.mass
                                for m in self.robot.model.inertias) * np.linalg.norm(self.robot.model.gravity.linear)
         self.x_axis = np.matrix([1., 0., 0.]).T
+        self.z_axis = np.matrix([0., 0., 1.]).T
         self.robot.viewer.gui.createGroup(self.forceGroup)
+        self.robot.viewer.gui.createGroup(self.frictionGroup)
         self.robot.viewer.gui.createGroup(self.frameTrajGroup)
+        self.addForceArrows()
+        self.addFrameCurves()
+        self.addFrictionCones()
 
     def display(self, xs, fs=[], ps=[], dts=[], factor=1.):
-        if fs:
-            for f in fs[0]:
-                key = f["key"]
-                self.robot.viewer.gui.addArrow(self.forceGroup + "/" + key, self.forceRadius, self.forceLength,
-                                               self.forceColor)
         if ps:
             for key, p in ps.items():
-                self.robot.viewer.gui.addCurve(self.frameTrajGroup + "/" + str(key), p, self.frameTrajColor[key])
-                self.robot.viewer.gui.setCurveLineWidth(self.frameTrajGroup + "/" + str(key), self.frameTrajLineWidth)
-                self.robot.viewer.gui.setCurvePoints(self.frameTrajGroup + "/" + str(key), p)
+                self.robot.viewer.gui.setCurvePoints(self.frameTrajGroup + "/" + key, p)
         if not dts:
             dts = [0.] * len(xs)
 
@@ -70,20 +81,32 @@ class GepettoDisplay:
         for i, x in enumerate(xs):
             if not i % S:
                 if fs:
-                    self.robot.viewer.gui.setFloatProperty(self.forceGroup, "Alpha", 0.)
-                    for f in fs[i]:
-                        key = f["key"]
-                        self.robot.viewer.gui.setFloatProperty(self.forceGroup + "/" + key, "Alpha", 1.)
+                    self.activeContacts = {k: False for k, c in self.activeContacts.items()}
                     for f in fs[i]:
                         key = f["key"]
                         pose = f["oMf"]
                         wrench = f["f"]
+                        # Display the contact forces
                         R = rotationMatrixFromTwoVectors(self.x_axis, wrench.linear)
                         forcePose = pinocchio.se3ToXYZQUATtuple(pinocchio.SE3(R, pose.translation))
                         forceMagnitud = np.linalg.norm(wrench.linear) / self.totalWeight
-                        self.robot.viewer.gui.setVector3Property(self.forceGroup + "/" + key, "Scale",
-                                                                 [1. * forceMagnitud, 1., 1.])
-                        self.robot.viewer.gui.applyConfiguration(self.forceGroup + "/" + key, forcePose)
+                        forceName = self.forceGroup + "/" + key
+                        self.robot.viewer.gui.setVector3Property(forceName, "Scale", [1. * forceMagnitud, 1., 1.])
+                        self.robot.viewer.gui.applyConfiguration(forceName, forcePose)
+                        self.robot.viewer.gui.setVisibility(forceName, "ON")
+                        # Display the friction cones
+                        position = pose
+                        position.rotation = rotationMatrixFromTwoVectors(self.z_axis, f["nsurf"])
+                        frictionName = self.frictionGroup + "/" + key
+                        self.setConeMu(key, f["mu"])
+                        self.robot.viewer.gui.applyConfiguration(
+                            frictionName, list(np.array(pinocchio.se3ToXYZQUAT(position)).squeeze()))
+                        self.robot.viewer.gui.setVisibility(frictionName, "ON")
+                        self.activeContacts[key] = True
+                for key, c in self.activeContacts.items():
+                    if c == False:
+                        self.robot.viewer.gui.setVisibility(self.forceGroup + "/" + key, "OFF")
+                        self.robot.viewer.gui.setVisibility(self.frictionGroup + "/" + key, "OFF")
                 self.robot.display(x[:self.robot.nq])
                 time.sleep(dts[i] * factor)
 
@@ -112,39 +135,117 @@ class GepettoDisplay:
         self.robot.viewer.gui.setColor(self.floorGroup + "/flat", self.floorColor)
         self.robot.viewer.gui.setLightingMode(self.floorGroup + "/flat", "OFF")
 
+    def addForceArrows(self):
+        for key in self.activeContacts:
+            forceName = self.forceGroup + "/" + key
+            self.robot.viewer.gui.addArrow(forceName, self.forceRadius, self.forceLength, self.forceColor)
+            self.robot.viewer.gui.setFloatProperty(forceName, "Alpha", 1.)
+
+    def addFrictionCones(self):
+        for key in self.activeContacts:
+            self.createCone(key, self.frictionConeScale, mu=0.7)
+
+    def addFrameCurves(self):
+        for key in self.frameTrajNames:
+            frameName = self.frameTrajGroup + "/" + key
+            self.robot.viewer.gui.addCurve(frameName, [np.array([0., 0., 0.]).tolist()] * 2, self.frameTrajColor[key])
+            self.robot.viewer.gui.setCurveLineWidth(frameName, self.frameTrajLineWidth)
+
     def getForceTrajectoryFromSolver(self, solver):
         fs = []
-        for data in solver.datas():
+        for i, data in enumerate(solver.datas()):
+            model = solver.models()[i]
             if hasattr(data, "differential"):
                 if isinstance(data.differential, libcrocoddyl_pywrap.DifferentialActionDataContactFwdDynamics):
                     fc = []
                     for key, contact in data.differential.multibody.contacts.contacts.items():
                         oMf = contact.pinocchio.oMi[contact.joint] * contact.jMf
                         force = contact.jMf.actInv(contact.f)
-                        fc.append({"key": str(contact.joint), "oMf": oMf, "f": force})
+                        nsurf = np.matrix([0., 0., 1.]).T
+                        mu = 0.7
+                        for k, c in model.differential.costs.costs.items():
+                            if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
+                                if contact.joint == self.robot.model.frames[c.cost.frame].parent:
+                                    nsurf = c.cost.friction_cone.nsurf
+                                    mu = c.cost.friction_cone.mu
+                                    continue
+                        fc.append({"key": str(contact.joint), "oMf": oMf, "f": force, "nsurf": nsurf, "mu": mu})
                     fs.append(fc)
             elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
                 fc = []
                 for key, impulse in data.multibody.impulses.impulses.items():
-                    force = impulse.jMf.actInv(impulse.f)
                     oMf = impulse.pinocchio.oMi[impulse.joint] * impulse.jMf
-                    fc.append({"key": str(impulse.joint), "oMf": oMf, "f": force})
+                    force = impulse.jMf.actInv(impulse.f)
+                    nsurf = np.matrix([0., 0., 1.]).T
+                    mu = 0.7
+                    for k, c in model.costs.costs.items():
+                        if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
+                            if impulse.joint == self.robot.model.frames[c.cost.frame].parent:
+                                nsurf = c.cost.friction_cone.nsurf
+                                mu = c.cost.friction_cone.mu
+                                continue
+                    fc.append({"key": str(impulse.joint), "oMf": oMf, "f": force, "nsurf": nsurf, "mu": mu})
                 fs.append(fc)
         return fs
 
     def getFrameTrajectoryFromSolver(self, solver):
         ps = {fr: [] for fr in self.frameTrajNames}
         for key, p in ps.items():
+            frameId = int(key)
             for data in solver.datas():
                 if hasattr(data, "differential"):
                     if hasattr(data.differential, "pinocchio"):
-                        pose = data.differential.pinocchio.oMf[key]
+                        pose = data.differential.pinocchio.oMf[frameId]
                         p.append(np.asarray(pose.translation.T).reshape(-1).tolist())
                 elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
                     if hasattr(data, "pinocchio"):
-                        pose = data.pinocchio.oMf[key]
+                        pose = data.pinocchio.oMf[frameId]
                         p.append(np.asarray(pose.translation.T).reshape(-1).tolist())
         return ps
+
+    def createCone(self, coneName, scale=1., mu=0.7):
+        m_generatrices = np.matrix(np.empty([3, 4]))
+        m_generatrices[:, 0] = np.matrix([np.sqrt(2) / 2. * mu, np.sqrt(2) / 2. * mu, 1.]).T
+        m_generatrices[:, 0] = m_generatrices[:, 0] / np.linalg.norm(m_generatrices[:, 0])
+        m_generatrices[:, 1] = m_generatrices[:, 0]
+        m_generatrices[0, 1] *= -1.
+        m_generatrices[:, 2] = m_generatrices[:, 0]
+        m_generatrices[:2, 2] *= -1.
+        m_generatrices[:, 3] = m_generatrices[:, 0]
+        m_generatrices[1, 3] *= -1.
+        generatrices = m_generatrices
+        v = [[0., 0., 0.]]
+        for k in range(m_generatrices.shape[1]):
+            v.append(m_generatrices[:3, k].T.tolist()[0])
+        v.append(m_generatrices[:3, 0].T.tolist()[0])
+        coneGroup = self.frictionGroup + "/" + coneName
+        self.robot.viewer.gui.createGroup(coneGroup)
+
+        meshGroup = coneGroup + "/cone"
+        result = self.robot.viewer.gui.addCurve(meshGroup, v, self.frictionConeColor1)
+        self.robot.viewer.gui.setCurveMode(meshGroup, 'TRIANGLE_FAN')
+        if self.frictionConeRays:
+            lineGroup = coneGroup + "/lines"
+            self.robot.viewer.gui.createGroup(lineGroup)
+            for k in range(m_generatrices.shape[1]):
+                l = self.robot.viewer.gui.addLine(lineGroup + "/" + str(k), [0., 0., 0.],
+                                                  m_generatrices[:3, k].T.tolist()[0], self.frictionConeColor2)
+        self.robot.viewer.gui.setScale(coneGroup, [scale, scale, scale])
+
+    def setConeMu(self, coneName, mu):
+        current_mu = self.frictionMu[coneName]
+        if mu != current_mu:
+            self.frictionMu[coneName] = mu
+            coneGroup = self.frictionGroup + "/" + coneName
+
+            self.robot.viewer.gui.deleteNode(coneGroup + "/lines/0", "")
+            self.robot.viewer.gui.deleteNode(coneGroup + "/lines/1", "")
+            self.robot.viewer.gui.deleteNode(coneGroup + "/lines/2", "")
+            self.robot.viewer.gui.deleteNode(coneGroup + "/lines/3", "")
+            self.robot.viewer.gui.deleteNode(coneGroup + "/lines", "")
+            self.robot.viewer.gui.deleteNode(coneGroup + "/cone", "")
+            self.robot.viewer.gui.deleteNode(coneGroup, "")
+            self.createCone(coneName, self.frictionConeScale, mu)
 
 
 class CallbackDisplay(libcrocoddyl_pywrap.CallbackAbstract):
