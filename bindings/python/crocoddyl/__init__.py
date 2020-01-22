@@ -11,6 +11,8 @@ def rotationMatrixFromTwoVectors(a, b):
     b_copy = b / np.linalg.norm(b)
     a_cross_b = pinocchio.utils.cross(a_copy, b_copy)
     s = np.linalg.norm(a_cross_b)
+    if s == 0:
+        return np.matrix(np.eye(3))
     c = np.asscalar(a_copy.T * b_copy)
     ab_skew = pinocchio.utils.skew(a_cross_b)
     return np.matrix(np.eye(3)) + ab_skew + ab_skew * ab_skew * (1 - c) / s**2
@@ -57,6 +59,7 @@ class GepettoDisplay:
         self.totalWeight = sum(m.mass
                                for m in self.robot.model.inertias) * np.linalg.norm(self.robot.model.gravity.linear)
         self.x_axis = np.matrix([1., 0., 0.]).T
+        self.z_axis = np.matrix([0., 0., 1.]).T
         self.robot.viewer.gui.createGroup(self.forceGroup)
         self.robot.viewer.gui.createGroup(self.frictionGroup)
         self.robot.viewer.gui.createGroup(self.frameTrajGroup)
@@ -69,7 +72,7 @@ class GepettoDisplay:
                 self.robot.viewer.gui.addArrow(self.forceGroup + "/" + key, self.forceRadius, self.forceLength,
                                                self.forceColor)
                 self.robot.viewer.gui.setFloatProperty(self.forceGroup + "/" + key, "Alpha", 1.)
-                cones[key] = self.createCone(key, 0.2)
+                cones[key] = self.createCone(key, 0.2, mu=f["mu"])
         if ps:
             for key, p in ps.items():
                 self.robot.viewer.gui.addCurve(self.frameTrajGroup + "/" + str(key), p, self.frameTrajColor[key])
@@ -97,7 +100,7 @@ class GepettoDisplay:
                         self.robot.viewer.gui.setVisibility(self.forceGroup + "/" + key, "ON")
                         # Display the friction cones
                         position = pose
-                        position.rotation = np.eye(3) # TODO(cmastalli): parse orientation of the cone
+                        position.rotation = rotationMatrixFromTwoVectors(self.z_axis, f["nsurf"])
                         self.robot.viewer.gui.applyConfiguration(cones[key], list(np.array(pinocchio.se3ToXYZQUAT(position)).squeeze()))
                         self.robot.viewer.gui.setVisibility(cones[key], "ALWAYS_ON_TOP")
                         self.robot.viewer.gui.setVisibility(cones[key], "ON")
@@ -136,21 +139,38 @@ class GepettoDisplay:
 
     def getForceTrajectoryFromSolver(self, solver):
         fs = []
-        for data in solver.datas():
+        for i, data in enumerate(solver.datas()):
+            model = solver.models()[i]
             if hasattr(data, "differential"):
                 if isinstance(data.differential, libcrocoddyl_pywrap.DifferentialActionDataContactFwdDynamics):
                     fc = []
                     for key, contact in data.differential.multibody.contacts.contacts.items():
                         oMf = contact.pinocchio.oMi[contact.joint] * contact.jMf
                         force = contact.jMf.actInv(contact.f)
-                        fc.append({"key": str(contact.joint), "oMf": oMf, "f": force})
+                        nsurf = np.matrix([0., 0., 1.]).T
+                        mu = 1.
+                        for k, c in model.differential.costs.costs.items():
+                            if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
+                                if contact.joint == self.robot.model.frames[c.cost.frame].parent:
+                                    nsurf = c.cost.friction_cone.nsurf
+                                    mu = c.cost.friction_cone.mu
+                                    continue
+                        fc.append({"key": str(contact.joint), "oMf": oMf, "f": force, "nsurf": nsurf, "mu": mu})
                     fs.append(fc)
             elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
                 fc = []
                 for key, impulse in data.multibody.impulses.impulses.items():
-                    force = impulse.jMf.actInv(impulse.f)
                     oMf = impulse.pinocchio.oMi[impulse.joint] * impulse.jMf
-                    fc.append({"key": str(impulse.joint), "oMf": oMf, "f": force})
+                    force = impulse.jMf.actInv(impulse.f)
+                    nsurf = np.matrix([0., 0., 1.]).T
+                    mu = 1.
+                    for k, c in model.costs.costs.items():
+                        if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
+                            if impulse.joint == self.robot.model.frames[c.cost.frame].parent:
+                                nsurf = c.cost.friction_cone.nsurf
+                                mu = c.cost.friction_cone.mu
+                                continue
+                    fc.append({"key": str(impulse.joint), "oMf": oMf, "f": force, "nsurf": nsurf, "mu": mu})
                 fs.append(fc)
         return fs
 
