@@ -19,12 +19,13 @@ def rotationMatrixFromTwoVectors(a, b):
 
 
 class GepettoDisplay:
-    def __init__(self, robot, rate=-1, freq=1, cameraTF=None, floor=True, frameNames=[]):
+    def __init__(self, robot, rate=-1, freq=1, cameraTF=None, floor=True, frameNames=[], visibility=False):
         self.robot = robot
         self.rate = rate
         self.freq = freq
 
         # Visuals properties
+        self.fullVisibility = visibility
         self.floorGroup = "world/floor"
         self.forceGroup = "world/robot/contact_forces"
         self.frictionGroup = "world/robot/friction_cone"
@@ -140,7 +141,8 @@ class GepettoDisplay:
             forceName = self.forceGroup + "/" + key
             self.robot.viewer.gui.addArrow(forceName, self.forceRadius, self.forceLength, self.forceColor)
             self.robot.viewer.gui.setFloatProperty(forceName, "Alpha", 1.)
-        self.robot.viewer.gui.setVisibility(self.forceGroup, "ALWAYS_ON_TOP")
+        if self.fullVisibility:
+            self.robot.viewer.gui.setVisibility(self.forceGroup, "ALWAYS_ON_TOP")
 
     def addFrictionCones(self):
         for key in self.activeContacts:
@@ -151,7 +153,8 @@ class GepettoDisplay:
             frameName = self.frameTrajGroup + "/" + key
             self.robot.viewer.gui.addCurve(frameName, [np.array([0., 0., 0.]).tolist()] * 2, self.frameTrajColor[key])
             self.robot.viewer.gui.setCurveLineWidth(frameName, self.frameTrajLineWidth)
-            self.robot.viewer.gui.setVisibility(frameName, "ALWAYS_ON_TOP")
+            if self.fullVisibility:
+                self.robot.viewer.gui.setVisibility(frameName, "ALWAYS_ON_TOP")
 
     def getForceTrajectoryFromSolver(self, solver):
         fs = []
@@ -233,8 +236,9 @@ class GepettoDisplay:
                 l = self.robot.viewer.gui.addLine(lineGroup + "/" + str(k), [0., 0., 0.],
                                                   m_generatrices[:3, k].T.tolist()[0], self.frictionConeColor2)
         self.robot.viewer.gui.setScale(coneGroup, [scale, scale, scale])
-        self.robot.viewer.gui.setVisibility(meshGroup, "ALWAYS_ON_TOP")
-        self.robot.viewer.gui.setVisibility(lineGroup, "ALWAYS_ON_TOP")
+        if self.fullVisibility:
+            self.robot.viewer.gui.setVisibility(meshGroup, "ALWAYS_ON_TOP")
+            self.robot.viewer.gui.setVisibility(lineGroup, "ALWAYS_ON_TOP")
 
     def setConeMu(self, coneName, mu):
         current_mu = self.frictionMu[coneName]
