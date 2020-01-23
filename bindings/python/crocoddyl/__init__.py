@@ -381,3 +381,21 @@ def saveConvergence(filename, costs, muLM, muV, gamma, theta, alpha):
     data = {"costs": costs, "muLM": muLM, "muV": muV, "gamma": gamma, "theta": theta, "alpha": alpha}
     with open(filename, "wb") as f:
         pickle.dump(data, f)
+
+
+def saveLogfile(filename, log):
+    import pickle
+    data = {
+        "xs": log.xs,
+        "us": log.us,
+        "fs": log.fs,
+        "steps": log.steps,
+        "iters": log.iters,
+        "costs": log.costs,
+        "muLM": log.u_regs,
+        "muV": log.x_regs,
+        "stops": log.stops,
+        "grads": log.grads
+    }
+    with open(filename, "wb") as f:
+        pickle.dump(data, f)
