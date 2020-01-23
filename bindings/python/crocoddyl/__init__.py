@@ -281,7 +281,7 @@ class CallbackLogger(libcrocoddyl_pywrap.CallbackAbstract):
         import copy
         self.xs = copy.copy(solver.xs)
         self.us = copy.copy(solver.us)
-        self.fs.append(copy.copy(solver.gaps))
+        self.fs.append(copy.copy(solver.fs))
         self.steps.append(solver.stepLength)
         self.iters.append(solver.iter)
         self.costs.append(solver.cost)
