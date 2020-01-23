@@ -180,7 +180,8 @@ void exposeSolverAbstract() {
           "u_reg",
           bp::make_function(&SolverAbstract_wrap::get_ureg, bp::return_value_policy<bp::copy_const_reference>()),
           bp::make_function(&SolverAbstract_wrap::set_ureg), "control regularization")
-      .def_readwrite("stepLength", &SolverAbstract_wrap::steplength_, "applied step length")      .add_property("th_acceptStep",
+      .def_readwrite("stepLength", &SolverAbstract_wrap::steplength_, "applied step length")
+      .add_property("th_acceptStep",
                     bp::make_function(&SolverAbstract_wrap::get_th_acceptstep,
                                       bp::return_value_policy<bp::copy_const_reference>()),
                     bp::make_function(&SolverAbstract_wrap::set_th_acceptstep), "threshold for step acceptance")
