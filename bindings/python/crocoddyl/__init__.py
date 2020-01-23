@@ -274,8 +274,8 @@ class CallbackLogger(libcrocoddyl_pywrap.CallbackAbstract):
         self.costs = []
         self.control_regs = []
         self.state_regs = []
-        self.th_stops = []
-        self.gm_stops = []
+        self.stops = []
+        self.grads = []
 
     def __call__(self, solver):
         import copy
@@ -287,8 +287,8 @@ class CallbackLogger(libcrocoddyl_pywrap.CallbackAbstract):
         self.costs.append(solver.cost)
         self.control_regs.append(solver.u_reg)
         self.state_regs.append(solver.x_reg)
-        self.th_stops.append(solver.stoppingCriteria())
-        self.gm_stops.append(-np.asscalar(solver.expectedImprovement()[1]))
+        self.stops.append(solver.stoppingCriteria())
+        self.grads.append(-np.asscalar(solver.expectedImprovement()[1]))
 
 
 def plotOCSolution(xs=None, us=None, figIndex=1, show=True):
