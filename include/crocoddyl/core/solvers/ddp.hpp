@@ -54,7 +54,7 @@ class SolverDDP : public SolverAbstract {
   const std::vector<Eigen::VectorXd>& get_Qu() const;
   const std::vector<Eigen::MatrixXd>& get_K() const;
   const std::vector<Eigen::VectorXd>& get_k() const;
-  const std::vector<Eigen::VectorXd>& get_gaps() const;
+  const std::vector<Eigen::VectorXd>& get_fs() const;
 
   void set_regfactor(const double& reg_factor);
   void set_regmin(const double& regmin);
@@ -84,7 +84,7 @@ class SolverDDP : public SolverAbstract {
   std::vector<Eigen::VectorXd> Qu_;
   std::vector<Eigen::MatrixXd> K_;
   std::vector<Eigen::VectorXd> k_;
-  std::vector<Eigen::VectorXd> gaps_;
+  std::vector<Eigen::VectorXd> fs_;
 
   Eigen::VectorXd xnext_;
   Eigen::MatrixXd FxTVxx_p_;

@@ -109,11 +109,11 @@ const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
   if (!is_feasible_) {
     problem_->get_runningModels().back()->get_state()->diff(xs_try_.back(), xs_.back(), dx_.back());
     fTVxx_p_.noalias() = Vxx_.back() * dx_.back();
-    dv_ -= gaps_.back().dot(fTVxx_p_);
+    dv_ -= fs_.back().dot(fTVxx_p_);
     for (std::size_t t = 0; t < T; ++t) {
       problem_->get_runningModels()[t]->get_state()->diff(xs_try_[t], xs_[t], dx_[t]);
       fTVxx_p_.noalias() = Vxx_[t] * dx_[t];
-      dv_ -= gaps_[t].dot(fTVxx_p_);
+      dv_ -= fs_[t].dot(fTVxx_p_);
     }
   }
   d_[0] = dg_ + dv_;
@@ -126,17 +126,17 @@ void SolverFDDP::updateExpectedImprovement() {
   dq_ = 0;
   const std::size_t& T = this->problem_->get_T();
   if (!is_feasible_) {
-    dg_ -= Vx_.back().dot(gaps_.back());
-    fTVxx_p_.noalias() = Vxx_.back() * gaps_.back();
-    dq_ += gaps_.back().dot(fTVxx_p_);
+    dg_ -= Vx_.back().dot(fs_.back());
+    fTVxx_p_.noalias() = Vxx_.back() * fs_.back();
+    dq_ += fs_.back().dot(fTVxx_p_);
   }
   for (std::size_t t = 0; t < T; ++t) {
     dg_ += Qu_[t].dot(k_[t]);
     dq_ -= k_[t].dot(Quuk_[t]);
     if (!is_feasible_) {
-      dg_ -= Vx_[t].dot(gaps_[t]);
-      fTVxx_p_.noalias() = Vxx_[t] * gaps_[t];
-      dq_ += gaps_[t].dot(fTVxx_p_);
+      dg_ -= Vx_[t].dot(fs_[t]);
+      fTVxx_p_.noalias() = Vxx_[t] * fs_[t];
+      dq_ += fs_[t].dot(fTVxx_p_);
     }
   }
 }
@@ -145,16 +145,16 @@ double SolverFDDP::calc() {
   cost_ = problem_->calcDiff(xs_, us_);
   if (!is_feasible_) {
     const Eigen::VectorXd& x0 = problem_->get_x0();
-    problem_->get_runningModels()[0]->get_state()->diff(xs_[0], x0, gaps_[0]);
+    problem_->get_runningModels()[0]->get_state()->diff(xs_[0], x0, fs_[0]);
 
     const std::size_t& T = problem_->get_T();
     for (std::size_t t = 0; t < T; ++t) {
       const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
       const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
-      model->get_state()->diff(xs_[t + 1], d->xnext, gaps_[t + 1]);
+      model->get_state()->diff(xs_[t + 1], d->xnext, fs_[t + 1]);
     }
   } else if (!was_feasible_) {
-    for (std::vector<Eigen::VectorXd>::iterator it = gaps_.begin(); it != gaps_.end(); ++it) {
+    for (std::vector<Eigen::VectorXd>::iterator it = fs_.begin(); it != fs_.end(); ++it) {
       it->setZero();
     }
   }
@@ -175,7 +175,7 @@ void SolverFDDP::forwardPass(const double& steplength) {
     if ((is_feasible_) || (steplength == 1)) {
       xs_try_[t] = xnext_;
     } else {
-      m->get_state()->integrate(xnext_, gaps_[t] * (steplength - 1), xs_try_[t]);
+      m->get_state()->integrate(xnext_, fs_[t] * (steplength - 1), xs_try_[t]);
     }
     m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
     us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
@@ -197,7 +197,7 @@ void SolverFDDP::forwardPass(const double& steplength) {
   if ((is_feasible_) || (steplength == 1)) {
     xs_try_.back() = xnext_;
   } else {
-    m->get_state()->integrate(xnext_, gaps_.back() * (steplength - 1), xs_try_.back());
+    m->get_state()->integrate(xnext_, fs_.back() * (steplength - 1), xs_try_.back());
   }
   m->calc(d, xs_try_.back());
   cost_try_ += d->cost;

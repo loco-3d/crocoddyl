@@ -151,16 +151,16 @@ double SolverDDP::calc() {
   cost_ = problem_->calcDiff(xs_, us_);
   if (!is_feasible_) {
     const Eigen::VectorXd& x0 = problem_->get_x0();
-    problem_->get_runningModels()[0]->get_state()->diff(xs_[0], x0, gaps_[0]);
+    problem_->get_runningModels()[0]->get_state()->diff(xs_[0], x0, fs_[0]);
 
     const std::size_t& T = problem_->get_T();
     for (std::size_t t = 0; t < T; ++t) {
       const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
       const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
-      model->get_state()->diff(xs_[t + 1], d->xnext, gaps_[t + 1]);
+      model->get_state()->diff(xs_[t + 1], d->xnext, fs_[t + 1]);
     }
   } else if (!was_feasible_) {  // closing the gaps
-    for (std::vector<Eigen::VectorXd>::iterator it = gaps_.begin(); it != gaps_.end(); ++it) {
+    for (std::vector<Eigen::VectorXd>::iterator it = fs_.begin(); it != fs_.end(); ++it) {
       it->setZero();
     }
   }
@@ -177,7 +177,7 @@ void SolverDDP::backwardPass() {
   }
 
   if (!is_feasible_) {
-    Vx_.back().noalias() += Vxx_.back() * gaps_.back();
+    Vx_.back().noalias() += Vxx_.back() * fs_.back();
   }
 
   for (int t = static_cast<int>(problem_->get_T()) - 1; t >= 0; --t) {
@@ -222,7 +222,7 @@ void SolverDDP::backwardPass() {
 
     // Compute and store the Vx gradient at end of the interval (rollout state)
     if (!is_feasible_) {
-      Vx_[t].noalias() += Vxx_[t] * gaps_[t];
+      Vx_[t].noalias() += Vxx_[t] * fs_[t];
     }
 
     if (raiseIfNaN(Vx_[t].lpNorm<Eigen::Infinity>())) {
@@ -310,7 +310,7 @@ void SolverDDP::allocateData() {
   Qu_.resize(T);
   K_.resize(T);
   k_.resize(T);
-  gaps_.resize(T + 1);
+  fs_.resize(T + 1);
 
   xs_try_.resize(T + 1);
   us_try_.resize(T);
@@ -335,7 +335,7 @@ void SolverDDP::allocateData() {
     Qu_[t] = Eigen::VectorXd::Zero(nu);
     K_[t] = Eigen::MatrixXd::Zero(nu, ndx);
     k_[t] = Eigen::VectorXd::Zero(nu);
-    gaps_[t] = Eigen::VectorXd::Zero(ndx);
+    fs_[t] = Eigen::VectorXd::Zero(ndx);
 
     if (t == 0) {
       xs_try_[t] = problem_->get_x0();
@@ -353,7 +353,7 @@ void SolverDDP::allocateData() {
   Vxx_.back() = Eigen::MatrixXd::Zero(ndx, ndx);
   Vx_.back() = Eigen::VectorXd::Zero(ndx);
   xs_try_.back() = problem_->get_terminalModel()->get_state()->zero();
-  gaps_.back() = Eigen::VectorXd::Zero(ndx);
+  fs_.back() = Eigen::VectorXd::Zero(ndx);
 
   FxTVxx_p_ = Eigen::MatrixXd::Zero(ndx, ndx);
   fTVxx_p_ = Eigen::VectorXd::Zero(ndx);
@@ -391,7 +391,7 @@ const std::vector<Eigen::MatrixXd>& SolverDDP::get_K() const { return K_; }
 
 const std::vector<Eigen::VectorXd>& SolverDDP::get_k() const { return k_; }
 
-const std::vector<Eigen::VectorXd>& SolverDDP::get_gaps() const { return gaps_; }
+const std::vector<Eigen::VectorXd>& SolverDDP::get_fs() const { return fs_; }
 
 void SolverDDP::set_regfactor(const double& regfactor) {
   if (regfactor <= 1.) {
