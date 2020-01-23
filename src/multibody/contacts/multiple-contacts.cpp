@@ -22,7 +22,7 @@ ContactModelMultiple::~ContactModelMultiple() {}
 void ContactModelMultiple::addContact(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact) {
   if (contact->get_nu() != nu_) {
     throw_pretty("Invalid argument: "
-                 << "contact item doesn't have the the same control dimension (" + std::to_string(nu_) + ")");
+                 << "contact item doesn't have the same control dimension (" + std::to_string(nu_) + ")");
   }
   std::pair<ContactModelContainer::iterator, bool> ret =
       contacts_.insert(std::make_pair(name, ContactItem(name, contact)));

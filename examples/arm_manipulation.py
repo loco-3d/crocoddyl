@@ -96,4 +96,4 @@ if WITHPLOT:
 # Visualizing the solution in gepetto-viewer
 if WITHDISPLAY:
     display = crocoddyl.GepettoDisplay(talos_arm, 4, 4, cameraTF)
-    display.display(talos_arm, ddp.xs, None, runningModel.dt)
+    display.displayFromSolver(ddp)
