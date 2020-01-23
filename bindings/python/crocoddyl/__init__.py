@@ -272,8 +272,8 @@ class CallbackLogger(libcrocoddyl_pywrap.CallbackAbstract):
         self.steps = []
         self.iters = []
         self.costs = []
-        self.control_regs = []
-        self.state_regs = []
+        self.u_regs = []
+        self.x_regs = []
         self.stops = []
         self.grads = []
 
@@ -285,8 +285,8 @@ class CallbackLogger(libcrocoddyl_pywrap.CallbackAbstract):
         self.steps.append(solver.stepLength)
         self.iters.append(solver.iter)
         self.costs.append(solver.cost)
-        self.control_regs.append(solver.u_reg)
-        self.state_regs.append(solver.x_reg)
+        self.u_regs.append(solver.u_reg)
+        self.x_regs.append(solver.x_reg)
         self.stops.append(solver.stoppingCriteria())
         self.grads.append(-np.asscalar(solver.expectedImprovement()[1]))
 

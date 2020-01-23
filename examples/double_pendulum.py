@@ -62,10 +62,10 @@ if WITHPLOT:
     log = fddp.getCallbacks()[0]
     crocoddyl.plotOCSolution(log.xs, log.us, figIndex=1, show=False)
     crocoddyl.plotConvergence(log.costs,
-                              log.control_regs,
-                              log.state_regs,
-                              log.gm_stops,
-                              log.th_stops,
+                              log.u_regs,
+                              log.x_regs,
+                              log.grads,
+                              log.stops,
                               log.steps,
                               figIndex=2)
 
