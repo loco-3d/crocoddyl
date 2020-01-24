@@ -452,7 +452,8 @@ class SimpleQuadrupedalGaitProblem:
         stateBounds = crocoddyl.CostModelState(
             self.state, crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(lb, ub)),
             0 * self.rmodel.defaultState, self.actuation.nu)
-        # costModel.addCost("stateBounds", stateBounds, 1e3)
+        costModel.addCost("stateBounds", stateBounds, 1e3)
+
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
         dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
