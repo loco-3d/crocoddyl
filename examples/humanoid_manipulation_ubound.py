@@ -16,7 +16,7 @@ crocoddyl.switchToNumpyMatrix()
 robot = example_robot_data.loadTalos()
 rmodel = robot.model
 lims = rmodel.effortLimit
-# lims[19:] *= 0.3  # reduced artificially the torque limits
+# lims[19:] *= 0.5  # reduced artificially the torque limits
 rmodel.effortLimit = lims
 
 # Create data structures
