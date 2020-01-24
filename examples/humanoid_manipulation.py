@@ -2,11 +2,13 @@ import os
 import sys
 
 import crocoddyl
+from crocoddyl.utils.biped import plotSolution
 import numpy as np
 import example_robot_data
 import pinocchio
 
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
+WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
 crocoddyl.switchToNumpyMatrix()
 
@@ -119,10 +121,21 @@ problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 
 # Creating the DDP solver for this OC problem, defining a logger
 ddp = crocoddyl.SolverFDDP(problem)
-if WITHDISPLAY:
+if WITHDISPLAY and WITHPLOT:
+    ddp.setCallbacks([
+        crocoddyl.CallbackLogger(),
+        crocoddyl.CallbackVerbose(),
+        crocoddyl.CallbackDisplay(crocoddyl.GepettoDisplay(robot, 4, 4, frameNames=[rightFoot, leftFoot]))
+    ])
+elif WITHDISPLAY:
     ddp.setCallbacks([
         crocoddyl.CallbackVerbose(),
         crocoddyl.CallbackDisplay(crocoddyl.GepettoDisplay(robot, 4, 4, frameNames=[rightFoot, leftFoot]))
+    ])
+elif WITHPLOT:
+    ddp.setCallbacks([
+        crocoddyl.CallbackLogger(),
+        crocoddyl.CallbackVerbose()
     ])
 else:
     ddp.setCallbacks([crocoddyl.CallbackVerbose()])
@@ -148,3 +161,16 @@ print('Finally reached = ', finalPosEff)
 print('Distance between hand and target = ', np.linalg.norm(finalPosEff - target))
 print('Distance to default state = ', np.linalg.norm(rmodel.defaultState - np.array(xT.flat)))
 print('XY distance to CoM reference = ', np.linalg.norm(com[:2] - comRef[:2]))
+
+# Plotting the entire motion
+if WITHPLOT:
+    log = ddp.getCallbacks()[0]
+    plotSolution(ddp, bounds=False, figIndex=1, show=False)
+
+    crocoddyl.plotConvergence(log.costs,
+                              log.u_regs,
+                              log.x_regs,
+                              log.grads,
+                              log.stops,
+                              log.steps,
+                              figIndex=3)
