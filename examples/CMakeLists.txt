@@ -1,5 +1,6 @@
 SET(${PROJECT_NAME}_EXAMPLES_PYTHON
   double_pendulum
+  boxfddp_vs_boxddp
   quadrotor
   quadrotor_ubound
   arm_manipulation

@@ -80,13 +80,7 @@ boxddp.solve([], [], 200)
 if WITHPLOT:
     log = boxddp.getCallbacks()[0]
     crocoddyl.plotOCSolution(log.xs, log.us, figIndex=1, show=False)
-    crocoddyl.plotConvergence(log.costs,
-                              log.control_regs,
-                              log.state_regs,
-                              log.gm_stops,
-                              log.th_stops,
-                              log.steps,
-                              figIndex=2)
+    crocoddyl.plotConvergence(log.costs, log.u_regs, log.x_regs, log.grads, log.stops, log.steps, figIndex=2)
 
 # Display the entire motion
 if WITHDISPLAY:

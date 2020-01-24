@@ -64,24 +64,24 @@ class SolverAbstract {
   void set_th_stop(const double& th_stop);
 
  protected:
-  boost::shared_ptr<ShootingProblem> problem_;
-  std::vector<boost::shared_ptr<ActionModelAbstract> > models_;
-  std::vector<boost::shared_ptr<ActionDataAbstract> > datas_;
-  std::vector<Eigen::VectorXd> xs_;
-  std::vector<Eigen::VectorXd> us_;
-  std::vector<boost::shared_ptr<CallbackAbstract> > callbacks_;
-  bool is_feasible_;
-  double cost_;
-  double stop_;
-  Eigen::Vector2d d_;
-  double xreg_;
-  double ureg_;
-  double steplength_;
-  double dV_;
-  double dVexp_;
-  double th_acceptstep_;
-  double th_stop_;
-  std::size_t iter_;
+  boost::shared_ptr<ShootingProblem> problem_;                   //!< optimal control problem
+  std::vector<boost::shared_ptr<ActionModelAbstract> > models_;  //!< Models defined in the problem
+  std::vector<boost::shared_ptr<ActionDataAbstract> > datas_;    //!< Data for all action models along the problem
+  std::vector<Eigen::VectorXd> xs_;                              //!< State trajectory
+  std::vector<Eigen::VectorXd> us_;                              //!< Control trajectory
+  std::vector<boost::shared_ptr<CallbackAbstract> > callbacks_;  //!< Callback functions
+  bool is_feasible_;                                             //!< Label that indicates is the iteration is feasible
+  double cost_;                                                  //!< Total cost
+  double stop_;                                                  //!< Value computed by stoppingCriteria
+  Eigen::Vector2d d_;                                            //!< LQ approximation of the expected improvement
+  double xreg_;                                                  //!< Current state regularization value
+  double ureg_;                                                  //!< Current control regularization values
+  double steplength_;                                            //!< Current applied step-length
+  double dV_;                                                    //!< Cost reduction obtained by tryStep
+  double dVexp_;                                                 //!< Expected cost reduction
+  double th_acceptstep_;                                         //!< Threshold used for accepting step
+  double th_stop_;                                               //!< Tolerance for stopping the algorithm
+  std::size_t iter_;                                             //!< Number of iteration performed by the solver
 };
 
 class CallbackAbstract {

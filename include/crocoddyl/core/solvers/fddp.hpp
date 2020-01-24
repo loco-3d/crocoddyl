@@ -39,7 +39,7 @@ class SolverFDDP : public SolverDDP {
   double dv_;
 
  private:
-  double th_acceptnegstep_;
+  double th_acceptnegstep_;  //!< Threshold used for accepting step along ascent direction
 };
 
 }  // namespace crocoddyl
