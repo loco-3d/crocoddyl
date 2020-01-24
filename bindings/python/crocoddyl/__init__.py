@@ -295,7 +295,7 @@ class CallbackLogger(libcrocoddyl_pywrap.CallbackAbstract):
         self.grads.append(-np.asscalar(solver.expectedImprovement()[1]))
 
 
-def plotOCSolution(xs=None, us=None, figIndex=1, show=True):
+def plotOCSolution(xs=None, us=None, figIndex=1, show=True, figTitle=""):
     import matplotlib.pyplot as plt
     import numpy as np
     plt.rcParams["pdf.fonttype"] = 42
@@ -324,6 +324,7 @@ def plotOCSolution(xs=None, us=None, figIndex=1, show=True):
         plt.subplot(xsPlotIdx)
         [plt.plot(X[i], label="x" + str(i)) for i in range(nx)]
         plt.legend()
+        plt.title(figTitle, fontsize=14)
 
     # Plotting the control commands
     if us is not None:
@@ -341,12 +342,12 @@ def plotConvergence(costs, muLM, muV, gamma, theta, alpha, figIndex=1, show=True
     plt.rcParams["pdf.fonttype"] = 42
     plt.rcParams["ps.fonttype"] = 42
     plt.figure(figIndex, figsize=(6.4, 8))
-    plt.suptitle(figTitle, fontsize=14)
 
     # Plotting the total cost sequence
     plt.subplot(511)
     plt.ylabel("cost")
     plt.plot(costs)
+    plt.title(figTitle, fontsize=14)
 
     # Ploting mu sequences
     plt.subplot(512)
