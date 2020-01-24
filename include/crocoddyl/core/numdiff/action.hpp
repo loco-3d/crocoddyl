@@ -123,7 +123,7 @@ class ActionModelNumDiff : public ActionModelAbstract {
   void assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& x);
 
   /**
-   * @brief This is the model to compute the finite differenciation from
+   * @brief This is the model to compute the finite differentiation from
    */
   boost::shared_ptr<ActionModelAbstract> model_;
 
