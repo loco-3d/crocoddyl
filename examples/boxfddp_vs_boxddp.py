@@ -32,11 +32,13 @@ lfFoot, rfFoot, lhFoot, rhFoot = 'LF_FOOT', 'RF_FOOT', 'LH_FOOT', 'RH_FOOT'
 gait = SimpleQuadrupedalGaitProblem(anymal.model, lfFoot, rfFoot, lhFoot, rhFoot)
 
 # Defining the walking gait parameters
-jumping_gait = {'jumpHeight': 0.15,
-        'jumpLength': [0.3, 0., 0.],
-        'timeStep': 1e-2,
-        'groundKnots': 20,
-        'flyingKnots': 20}
+jumping_gait = {
+    'jumpHeight': 0.15,
+    'jumpLength': [0.3, 0., 0.],
+    'timeStep': 1e-2,
+    'groundKnots': 20,
+    'flyingKnots': 20
+}
 
 cameraTF = [2., 2.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 
@@ -48,18 +50,11 @@ boxddp = crocoddyl.SolverBoxDDP(
     gait.createJumpingProblem(x0, jumping_gait['jumpHeight'], jumping_gait['jumpLength'], jumping_gait['timeStep'],
                               jumping_gait['groundKnots'], jumping_gait['flyingKnots']))
 
-
 # Added the callback functions
 if WITHDISPLAY and WITHPLOT:
     display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
-    boxfddp.setCallbacks(
-        [crocoddyl.CallbackLogger(),
-         crocoddyl.CallbackVerbose(),
-         crocoddyl.CallbackDisplay(display)])
-    boxddp.setCallbacks(
-        [crocoddyl.CallbackLogger(),
-         crocoddyl.CallbackVerbose(),
-         crocoddyl.CallbackDisplay(display)])
+    boxfddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    boxddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHDISPLAY:
     display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
     boxfddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])

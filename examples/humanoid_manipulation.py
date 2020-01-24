@@ -133,10 +133,7 @@ elif WITHDISPLAY:
         crocoddyl.CallbackDisplay(crocoddyl.GepettoDisplay(robot, 4, 4, frameNames=[rightFoot, leftFoot]))
     ])
 elif WITHPLOT:
-    ddp.setCallbacks([
-        crocoddyl.CallbackLogger(),
-        crocoddyl.CallbackVerbose()
-    ])
+    ddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
 else:
     ddp.setCallbacks([crocoddyl.CallbackVerbose()])
 
@@ -167,10 +164,4 @@ if WITHPLOT:
     log = ddp.getCallbacks()[0]
     plotSolution(ddp, bounds=False, figIndex=1, show=False)
 
-    crocoddyl.plotConvergence(log.costs,
-                              log.u_regs,
-                              log.x_regs,
-                              log.grads,
-                              log.stops,
-                              log.steps,
-                              figIndex=3)
+    crocoddyl.plotConvergence(log.costs, log.u_regs, log.x_regs, log.grads, log.stops, log.steps, figIndex=3)

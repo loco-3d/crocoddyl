@@ -63,7 +63,6 @@ contactModel1Foot.addContact(rightFoot + "_contact", supportContactModelRight)
 contactModel2Feet.addContact(leftFoot + "_contact", supportContactModelLeft)
 contactModel2Feet.addContact(rightFoot + "_contact", supportContactModelRight)
 
-
 # Cost for self-collision
 maxfloat = sys.float_info.max
 xlb = np.vstack([
@@ -95,7 +94,7 @@ Pref = crocoddyl.FramePlacement(endEffectorId, pinocchio.SE3(np.eye(3), np.matri
 handTrackingCost = crocoddyl.CostModelFramePlacement(
     state, crocoddyl.ActivationModelWeightedQuad(np.matrix(handTrackingWeights**2).T), Pref, actuation.nu)
 
-footTrackingWeights = np.array([1, 1, 0.1]  + [1.] * 3)
+footTrackingWeights = np.array([1, 1, 0.1] + [1.] * 3)
 Pref = crocoddyl.FramePlacement(leftFootId, pinocchio.SE3(np.eye(3), np.matrix([0., 0.4, 0.]).T))
 footTrackingCost1 = crocoddyl.CostModelFramePlacement(
     state, crocoddyl.ActivationModelWeightedQuad(np.matrix(footTrackingWeights**2).T), Pref, actuation.nu)
@@ -135,10 +134,14 @@ terminalCostModel.addCost("stateReg", xRegTermCost, 1e-3)
 terminalCostModel.addCost("limitCost", limitCost, 1e3)
 
 # Create the action model
-dmodelRunning1 = crocoddyl.DifferentialActionModelContactFwdDynamics(state, actuation, contactModel2Feet, runningCostModel1)
-dmodelRunning2 = crocoddyl.DifferentialActionModelContactFwdDynamics(state, actuation, contactModel1Foot, runningCostModel2)
-dmodelRunning3 = crocoddyl.DifferentialActionModelContactFwdDynamics(state, actuation, contactModel1Foot, runningCostModel3)
-dmodelTerminal = crocoddyl.DifferentialActionModelContactFwdDynamics(state, actuation, contactModel1Foot, terminalCostModel)
+dmodelRunning1 = crocoddyl.DifferentialActionModelContactFwdDynamics(state, actuation, contactModel2Feet,
+                                                                     runningCostModel1)
+dmodelRunning2 = crocoddyl.DifferentialActionModelContactFwdDynamics(state, actuation, contactModel1Foot,
+                                                                     runningCostModel2)
+dmodelRunning3 = crocoddyl.DifferentialActionModelContactFwdDynamics(state, actuation, contactModel1Foot,
+                                                                     runningCostModel3)
+dmodelTerminal = crocoddyl.DifferentialActionModelContactFwdDynamics(state, actuation, contactModel1Foot,
+                                                                     terminalCostModel)
 
 runningModel1 = crocoddyl.IntegratedActionModelEuler(dmodelRunning1, DT)
 runningModel2 = crocoddyl.IntegratedActionModelEuler(dmodelRunning2, DT)
