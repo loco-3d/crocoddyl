@@ -10,6 +10,7 @@ SET(${PROJECT_NAME}_EXAMPLES_PYTHON
   bipedal_walk_ubound
   humanoid_manipulation
   humanoid_manipulation_ubound
+  humanoid_taichi
   )
 
 FOREACH(examples ${${PROJECT_NAME}_EXAMPLES_PYTHON})
