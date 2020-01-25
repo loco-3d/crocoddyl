@@ -96,18 +96,20 @@ if WITHDISPLAY:
 
 # Plotting the entire motion
 if WITHPLOT:
-    log = boxfddp.getCallbacks()[0]
     plotSolution(boxfddp, figIndex=1, figTitle="Box-FDDP", show=False)
     plotSolution(boxddp, figIndex=3, figTitle="Box-DDP", show=False)
 
+    log = boxfddp.getCallbacks()[0]
     crocoddyl.plotConvergence(log.costs,
                               log.u_regs,
                               log.x_regs,
                               log.grads,
                               log.stops,
                               log.steps,
+                              show=False,
                               figTitle="Box-FDDP",
                               figIndex=5)
+    log = boxddp.getCallbacks()[0]
     crocoddyl.plotConvergence(log.costs,
                               log.u_regs,
                               log.x_regs,
