@@ -61,10 +61,7 @@ xs = [robot_model.defaultState] * len(boxddp.models())
 us = [m.quasiStatic(d, robot_model.defaultState) for m, d in list(zip(boxddp.models(), boxddp.datas()))[:-1]]
 
 # Solve the DDP problem
-boxddp_start = time.time()
 boxddp.solve(xs, us, 100, False, 0.1)
-boxddp_end = time.time()
-print("[Box-DDP] Solved in", boxddp_end - boxddp_start, "-", boxddp.iter, "iterations")
 
 # Plotting the entire motion
 if WITHPLOT:

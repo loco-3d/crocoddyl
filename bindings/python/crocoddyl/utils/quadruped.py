@@ -452,7 +452,8 @@ class SimpleQuadrupedalGaitProblem:
         stateBounds = crocoddyl.CostModelState(
             self.state, crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(lb, ub)),
             0 * self.rmodel.defaultState, self.actuation.nu)
-        # costModel.addCost("stateBounds", stateBounds, 1e3)
+        costModel.addCost("stateBounds", stateBounds, 1e3)
+
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
         dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
@@ -555,7 +556,7 @@ class SimpleQuadrupedalGaitProblem:
         return model
 
 
-def plotSolution(solver, bounds=True, figIndex=1, show=True):
+def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
     import matplotlib.pyplot as plt
     xs, us = [], []
     if bounds:
@@ -604,6 +605,7 @@ def plotSolution(solver, bounds=True, figIndex=1, show=True):
 
     # Plotting the joint positions, velocities and torques
     plt.figure(figIndex)
+    plt.suptitle(figTitle)
     legJointNames = ['HAA', 'HFE', 'KFE']
     # LF foot
     plt.subplot(4, 3, 1)
@@ -704,6 +706,7 @@ def plotSolution(solver, bounds=True, figIndex=1, show=True):
     plt.xlabel('knots')
 
     plt.figure(figIndex + 1)
+    plt.suptitle(figTitle)
     rdata = rmodel.createData()
     Cx = []
     Cy = []
