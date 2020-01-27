@@ -934,7 +934,7 @@ class FDDPDerived(DDPDerived):
                         self.cost = self.cost_try
                         break
                 else:  # reducing the gaps by allowing a small increment in the cost value
-                    if d1 < self.th_grad or self.dV > self.th_acceptNegStep * self.dV_exp:
+                    if self.dV > self.th_acceptNegStep * self.dV_exp:
                         self.wasFeasible = self.isFeasible
                         self.setCandidate(self.xs_try, self.us_try, (self.wasFeasible or a == 1))
                         self.cost = self.cost_try
