@@ -17,8 +17,8 @@ Contact RObot COntrol by Differential DYnamic programming Library (crocoddyl)
 
 **[Crocoddyl](https://cmastalli.github.io/publications/crocoddyl20unpub.html)** is an optimal control library for robot control under contact sequence.
 Its solver is based on an efficient Differential Dynamic Programming (DDP) algorithm.
-**Crocoddyl** computes optimal trajectories along to optimal feedback gains.
-It uses **Pinocchio** for fast computation of robot dynamics and its analytical derivatives.
+**Crocoddyl** computes optimal trajectories along with optimal feedback gains.
+It uses **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)** for fast computation of robots dynamics and their analytical derivatives.
 
 The source code is released under the [BSD 3-Clause license](LICENSE).
 
@@ -47,8 +47,8 @@ If you want to follow the current developments, you can directly refer to the [d
 **Crocoddyl** is versatible:
 
  * various optimal control solvers (DDP, FDDP, BoxDDP, etc) - single and multi-shooting methods
- * analytical and sparse derivatives
- * geometrical systems friendly (with SE(3) manifold support)
+ * analytical and sparse derivatives via **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**
+ * Euclidian and non-Euclidian geometry friendly via **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**
  * handle autonomous and nonautomous dynamical systems
  * numerical differentiation support
 <!-- * automatic differentiation support -->
@@ -58,7 +58,7 @@ If you want to follow the current developments, you can directly refer to the [d
  * cache friendly,
  * multi-thread friendly
  * Python bindings (including models and solvers abstractions)
- * C++98/11/14/17/20 compliant
+ * C++ 98/11/14/17/20 compliant
  * extensively tested
  <!-- * automatic code generation support -->
  
