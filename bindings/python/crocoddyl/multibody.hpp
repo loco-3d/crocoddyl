@@ -20,19 +20,18 @@
 #include "python/crocoddyl/multibody/cost-base.hpp"
 #include "python/crocoddyl/multibody/contact-base.hpp"
 #include "python/crocoddyl/multibody/impulse-base.hpp"
-#include "python/crocoddyl/multibody/impulse-cost-base.hpp"
-#include "python/crocoddyl/multibody/impulse-costs/com-position.hpp"
 #include "python/crocoddyl/multibody/costs/cost-sum.hpp"
 #include "python/crocoddyl/multibody/costs/state.hpp"
 #include "python/crocoddyl/multibody/costs/control.hpp"
 #include "python/crocoddyl/multibody/costs/com-position.hpp"
+#include "python/crocoddyl/multibody/costs/centroidal-momentum.hpp"
 #include "python/crocoddyl/multibody/costs/frame-placement.hpp"
 #include "python/crocoddyl/multibody/costs/frame-translation.hpp"
 #include "python/crocoddyl/multibody/costs/frame-rotation.hpp"
 #include "python/crocoddyl/multibody/costs/frame-velocity.hpp"
 #include "python/crocoddyl/multibody/costs/contact-force.hpp"
 #include "python/crocoddyl/multibody/costs/contact-friction-cone.hpp"
-#include "python/crocoddyl/multibody/costs/centroidal-momentum.hpp"
+#include "python/crocoddyl/multibody/costs/impulse-com-position.hpp"
 #include "python/crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "python/crocoddyl/multibody/contacts/contact-3d.hpp"
 #include "python/crocoddyl/multibody/contacts/contact-6d.hpp"
@@ -58,19 +57,18 @@ void exposeMultibody() {
   exposeCostMultibody();
   exposeContactAbstract();
   exposeImpulseAbstract();
-  exposeImpulseCostMultibody();
-  exposeImpulseCostCoM();
   exposeCostSum();
   exposeCostState();
   exposeCostControl();
   exposeCostCoMPosition();
+  exposeCostCentroidalMomentum();
   exposeCostFramePlacement();
   exposeCostFrameTranslation();
   exposeCostFrameRotation();
   exposeCostFrameVelocity();
   exposeCostContactForce();
   exposeCostContactFrictionCone();
-  exposeCostCentroidalMomentum();
+  exposeCostImpulseCoM();
   exposeContactMultiple();
   exposeContact3D();
   exposeContact6D();

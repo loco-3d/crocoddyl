@@ -7,30 +7,29 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/multibody/impulse-costs/com-position.hpp"
+#include "crocoddyl/multibody/costs/impulse-com-position.hpp"
 #include <pinocchio/algorithm/center-of-mass.hpp>
 #include <pinocchio/algorithm/center-of-mass-derivatives.hpp>
 
 namespace crocoddyl {
 
-ImpulseCostModelCoM::ImpulseCostModelCoM(boost::shared_ptr<StateMultibody> state,
+CostModelImpulseCoM::CostModelImpulseCoM(boost::shared_ptr<StateMultibody> state,
                                          boost::shared_ptr<ActivationModelAbstract> activation)
-    : ImpulseCostModelAbstract(state, activation) {
+    : CostModelAbstract(state, activation) {
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 3");
   }
 }
 
-ImpulseCostModelCoM::ImpulseCostModelCoM(boost::shared_ptr<StateMultibody> state)
-    : ImpulseCostModelAbstract(state, 3) {}
+CostModelImpulseCoM::CostModelImpulseCoM(boost::shared_ptr<StateMultibody> state) : CostModelAbstract(state, 3) {}
 
-ImpulseCostModelCoM::~ImpulseCostModelCoM() {}
+CostModelImpulseCoM::~CostModelImpulseCoM() {}
 
-void ImpulseCostModelCoM::calc(const boost::shared_ptr<ImpulseCostDataAbstract>& data,
-                               const Eigen::Ref<const Eigen::VectorXd>& x) {
+void CostModelImpulseCoM::calc(const boost::shared_ptr<CostDataAbstract>& data,
+                               const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>&) {
   // Compute the cost residual give the reference CoM position
-  ImpulseCostDataCoM* d = static_cast<ImpulseCostDataCoM*>(data.get());
+  CostDataImpulseCoM* d = static_cast<CostDataImpulseCoM*>(data.get());
   const std::size_t& nq = state_->get_nq();
   const std::size_t& nv = state_->get_nv();
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> q = x.head(nq);
@@ -44,13 +43,14 @@ void ImpulseCostModelCoM::calc(const boost::shared_ptr<ImpulseCostDataAbstract>&
   data->cost = data->activation->a_value;
 }
 
-void ImpulseCostModelCoM::calcDiff(const boost::shared_ptr<ImpulseCostDataAbstract>& data,
-                                   const Eigen::Ref<const Eigen::VectorXd>& x, const bool& recalc) {
+void CostModelImpulseCoM::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+                                   const Eigen::Ref<const Eigen::VectorXd>& x,
+                                   const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
   if (recalc) {
-    calc(data, x);
+    calc(data, x, u);
   }
 
-  ImpulseCostDataCoM* d = static_cast<ImpulseCostDataCoM*>(data.get());
+  CostDataImpulseCoM* d = static_cast<CostDataImpulseCoM*>(data.get());
 
   // Compute the derivatives of the frame placement
   const std::size_t& nv = state_->get_nv();
@@ -59,8 +59,9 @@ void ImpulseCostModelCoM::calcDiff(const boost::shared_ptr<ImpulseCostDataAbstra
 
   pinocchio::getCenterOfMassVelocityDerivatives(state_->get_pinocchio(), d->pinocchio_dv, d->dvc_dq);
   pinocchio::jacobianCenterOfMass(state_->get_pinocchio(), d->pinocchio_dv, false);
-  data->Rx.leftCols(nv) = d->dvc_dq + d->pinocchio_dv.Jcom * data->impulses->dvnext_dx.leftCols(nv);
-  d->ddv_dv = data->impulses->dvnext_dx.rightCols(ndx - nv);
+  data->Rx.leftCols(nv) = d->dvc_dq;
+  data->Rx.leftCols(nv).noalias() += d->pinocchio_dv.Jcom * d->impulses->dvnext_dx.leftCols(nv);
+  d->ddv_dv = d->impulses->dvnext_dx.rightCols(ndx - nv);
   d->ddv_dv.diagonal().array() -= 1;
   data->Rx.rightCols(ndx - nv).noalias() = d->pinocchio_dv.Jcom * d->ddv_dv;
 
@@ -69,8 +70,8 @@ void ImpulseCostModelCoM::calcDiff(const boost::shared_ptr<ImpulseCostDataAbstra
   data->Lxx.noalias() = data->Rx.transpose() * d->Arr_Rx;
 }
 
-boost::shared_ptr<ImpulseCostDataAbstract> ImpulseCostModelCoM::createData(DataCollectorAbstract* const data) {
-  return boost::make_shared<ImpulseCostDataCoM>(this, data);
+boost::shared_ptr<CostDataAbstract> CostModelImpulseCoM::createData(DataCollectorAbstract* const data) {
+  return boost::make_shared<CostDataImpulseCoM>(this, data);
 }
 
 }  // namespace crocoddyl
