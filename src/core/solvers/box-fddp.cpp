@@ -1,19 +1,19 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, CNRS-LAAS, University of Edinburgh
+// Copyright (C) 2018-2020, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/core/solvers/box-ddp.hpp"
+#include "crocoddyl/core/solvers/box-fddp.hpp"
 
 namespace crocoddyl {
 
-SolverBoxDDP::SolverBoxDDP(boost::shared_ptr<ShootingProblem> problem)
-    : SolverDDP(problem), qp_(problem->get_runningModels()[0]->get_nu(), 100, 0.1, 1e-5, 0.) {
+SolverBoxFDDP::SolverBoxFDDP(boost::shared_ptr<ShootingProblem> problem)
+    : SolverFDDP(problem), qp_(problem->get_runningModels()[0]->get_nu(), 100, 0.1, 1e-5, 0.) {
   allocateData();
 
   const std::size_t& n_alphas = 10;
@@ -28,9 +28,9 @@ SolverBoxDDP::SolverBoxDDP(boost::shared_ptr<ShootingProblem> problem)
   th_stop_ = 5e-5;
 }
 
-SolverBoxDDP::~SolverBoxDDP() {}
+SolverBoxFDDP::~SolverBoxFDDP() {}
 
-void SolverBoxDDP::allocateData() {
+void SolverBoxFDDP::allocateData() {
   SolverDDP::allocateData();
 
   std::size_t nu_max = 0;
@@ -50,11 +50,11 @@ void SolverBoxDDP::allocateData() {
   du_ub_.resize(nu_max);
 }
 
-void SolverBoxDDP::computeGains(const std::size_t& t) {
+void SolverBoxFDDP::computeGains(const std::size_t& t) {
   if (problem_->get_runningModels()[t]->get_nu() > 0) {
     if (!problem_->get_runningModels()[t]->get_has_control_limits() || !is_feasible_) {
       // No control limits on this model: Use vanilla DDP
-      SolverDDP::computeGains(t);
+      SolverFDDP::computeGains(t);
       return;
     }
 
@@ -81,7 +81,7 @@ void SolverBoxDDP::computeGains(const std::size_t& t) {
   }
 }
 
-void SolverBoxDDP::forwardPass(const double& steplength) {
+void SolverBoxFDDP::forwardPass(const double& steplength) {
   if (steplength > 1. || steplength < 0.) {
     throw_pretty("Invalid argument: "
                  << "invalid step length, value is between 0. to 1.");
@@ -133,6 +133,6 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
   }
 }
 
-const std::vector<Eigen::MatrixXd>& SolverBoxDDP::get_Quu_inv() const { return Quu_inv_; }
+const std::vector<Eigen::MatrixXd>& SolverBoxFDDP::get_Quu_inv() const { return Quu_inv_; }
 
 }  // namespace crocoddyl

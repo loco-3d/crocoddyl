@@ -98,8 +98,7 @@ void exposeSolverDDP() {
       .add_property("Qu", make_function(&SolverDDP::get_Qu, bp::return_value_policy<bp::copy_const_reference>()), "Qu")
       .add_property("K", make_function(&SolverDDP::get_K, bp::return_value_policy<bp::copy_const_reference>()), "K")
       .add_property("k", make_function(&SolverDDP::get_k, bp::return_value_policy<bp::copy_const_reference>()), "k")
-      .add_property("gaps", make_function(&SolverDDP::get_gaps, bp::return_value_policy<bp::copy_const_reference>()),
-                    "gaps")
+      .add_property("fs", make_function(&SolverDDP::get_fs, bp::return_value_policy<bp::copy_const_reference>()), "fs")
       .add_property("regFactor",
                     bp::make_function(&SolverDDP::get_regfactor, bp::return_value_policy<bp::copy_const_reference>()),
                     bp::make_function(&SolverDDP::set_regfactor),

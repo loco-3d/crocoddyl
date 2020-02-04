@@ -54,7 +54,7 @@ class SolverDDP : public SolverAbstract {
   const std::vector<Eigen::VectorXd>& get_Qu() const;
   const std::vector<Eigen::MatrixXd>& get_K() const;
   const std::vector<Eigen::VectorXd>& get_k() const;
-  const std::vector<Eigen::VectorXd>& get_gaps() const;
+  const std::vector<Eigen::VectorXd>& get_fs() const;
 
   void set_regfactor(const double& reg_factor);
   void set_regmin(const double& regmin);
@@ -65,26 +65,26 @@ class SolverDDP : public SolverAbstract {
   void set_th_grad(const double& th_grad);
 
  protected:
-  double regfactor_;
-  double regmin_;
-  double regmax_;
+  double regfactor_;  //!< Regularization factor used to decrease / increase it
+  double regmin_;     //!< Minimum allowed regularization value
+  double regmax_;     //!< Maximum allowed regularization value
 
-  double cost_try_;
-  std::vector<Eigen::VectorXd> xs_try_;
-  std::vector<Eigen::VectorXd> us_try_;
+  double cost_try_;                      //!< Total cost computed by line-search procedure
+  std::vector<Eigen::VectorXd> xs_try_;  //!< State trajectory computed by line-search procedure
+  std::vector<Eigen::VectorXd> us_try_;  //!< Control trajectory computed by line-search procedure
   std::vector<Eigen::VectorXd> dx_;
 
   // allocate data
-  std::vector<Eigen::MatrixXd> Vxx_;
-  std::vector<Eigen::VectorXd> Vx_;
-  std::vector<Eigen::MatrixXd> Qxx_;
-  std::vector<Eigen::MatrixXd> Qxu_;
-  std::vector<Eigen::MatrixXd> Quu_;
-  std::vector<Eigen::VectorXd> Qx_;
-  std::vector<Eigen::VectorXd> Qu_;
-  std::vector<Eigen::MatrixXd> K_;
-  std::vector<Eigen::VectorXd> k_;
-  std::vector<Eigen::VectorXd> gaps_;
+  std::vector<Eigen::MatrixXd> Vxx_;  //!< Hessian of the Value function
+  std::vector<Eigen::VectorXd> Vx_;   //!< Gradient of the Value function
+  std::vector<Eigen::MatrixXd> Qxx_;  //!< Hessian of the Hamiltonian
+  std::vector<Eigen::MatrixXd> Qxu_;  //!< Hessian of the Hamiltonian
+  std::vector<Eigen::MatrixXd> Quu_;  //!< Hessian of the Hamiltonian
+  std::vector<Eigen::VectorXd> Qx_;   //!< Gradient of the Hamiltonian
+  std::vector<Eigen::VectorXd> Qu_;   //!< Gradient of the Hamiltonian
+  std::vector<Eigen::MatrixXd> K_;    //!< Feedback gains
+  std::vector<Eigen::VectorXd> k_;    //!< Feed-forward terms
+  std::vector<Eigen::VectorXd> fs_;   //!< Gaps/defects between shooting nodes
 
   Eigen::VectorXd xnext_;
   Eigen::MatrixXd FxTVxx_p_;
@@ -92,11 +92,11 @@ class SolverDDP : public SolverAbstract {
   Eigen::VectorXd fTVxx_p_;
   std::vector<Eigen::LLT<Eigen::MatrixXd> > Quu_llt_;
   std::vector<Eigen::VectorXd> Quuk_;
-  std::vector<double> alphas_;
-  double th_grad_;
-  double th_stepdec_;
-  double th_stepinc_;
-  bool was_feasible_;
+  std::vector<double> alphas_;  //!< Set of step lengths using by the line-search procedure
+  double th_grad_;              //!< Tolerance of the expected gradient used for testing the step
+  double th_stepdec_;           //!< Step-length threshold used to decrease regularization
+  double th_stepinc_;           //!< Step-length threshold used to increase regularization
+  bool was_feasible_;           //!< Label that indicates in the previous iterate was feasible
 };
 
 }  // namespace crocoddyl

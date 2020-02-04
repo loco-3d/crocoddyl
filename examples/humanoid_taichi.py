@@ -15,6 +15,9 @@ crocoddyl.switchToNumpyMatrix()
 # Load robot
 robot = example_robot_data.loadTalos()
 rmodel = robot.model
+lims = rmodel.effortLimit
+# lims[19:] *= 0.5  # reduced artificially the torque limits
+rmodel.effortLimit = lims
 
 # Create data structures
 rdata = rmodel.createData()
@@ -23,7 +26,7 @@ actuation = crocoddyl.ActuationModelFloatingBase(state)
 
 # Set integration time
 DT = 5e-2
-T = 60
+T = 40
 target = np.array([0.4, 0, 1.2])
 
 # Initialize reference state, target and reference CoM
@@ -49,15 +52,16 @@ if WITHDISPLAY:
     display.robot.viewer.gui.addSphere('world/point', .05, [1., 0., 0., 1.])  # radius = .1, RGBA=1001
     display.robot.viewer.gui.applyConfiguration('world/point', target.tolist() + [0., 0., 0., 1.])  # xyz+quaternion
 
-# Add contact to the model
-contactModel = crocoddyl.ContactModelMultiple(state, actuation.nu)
+# Create two contact models used along the motion
+contactModel1Foot = crocoddyl.ContactModelMultiple(state, actuation.nu)
+contactModel2Feet = crocoddyl.ContactModelMultiple(state, actuation.nu)
 framePlacementLeft = crocoddyl.FramePlacement(leftFootId, pinocchio.SE3.Identity())
-supportContactModelLeft = crocoddyl.ContactModel6D(state, framePlacementLeft, actuation.nu, np.matrix([0, 0]).T)
-contactModel.addContact(leftFoot + "_contact", supportContactModelLeft)
 framePlacementRight = crocoddyl.FramePlacement(rightFootId, pinocchio.SE3.Identity())
-supportContactModelRight = crocoddyl.ContactModel6D(state, framePlacementRight, actuation.nu, np.matrix([0, 0]).T)
-contactModel.addContact(rightFoot + "_contact", supportContactModelRight)
-contactData = contactModel.createData(rdata)
+supportContactModelLeft = crocoddyl.ContactModel6D(state, framePlacementLeft, actuation.nu, np.matrix([0, 40]).T)
+supportContactModelRight = crocoddyl.ContactModel6D(state, framePlacementRight, actuation.nu, np.matrix([0, 40]).T)
+contactModel1Foot.addContact(rightFoot + "_contact", supportContactModelRight)
+contactModel2Feet.addContact(leftFoot + "_contact", supportContactModelLeft)
+contactModel2Feet.addContact(rightFoot + "_contact", supportContactModelRight)
 
 # Cost for self-collision
 maxfloat = sys.float_info.max
@@ -84,43 +88,72 @@ uRegCost = crocoddyl.CostModelControl(state, actuation.nu)
 xRegTermCost = crocoddyl.CostModelState(state, crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeightsTerm**2).T),
                                         rmodel.defaultState, actuation.nu)
 
-# Cost for target reaching
-goaltrackingWeights = np.array([1] * 3 + [0.0001] * 3)
-framePoseEff = pinocchio.SE3.Identity()
-framePoseEff.translation = np.matrix(target).T
-Pref = crocoddyl.FramePlacement(endEffectorId, framePoseEff)
-goalTrackingCost = crocoddyl.CostModelFramePlacement(
-    state, crocoddyl.ActivationModelWeightedQuad(np.matrix(goaltrackingWeights**2).T), Pref, actuation.nu)
+# Cost for target reaching: hand and foot
+handTrackingWeights = np.array([1] * 3 + [0.0001] * 3)
+Pref = crocoddyl.FramePlacement(endEffectorId, pinocchio.SE3(np.eye(3), np.matrix(target).T))
+handTrackingCost = crocoddyl.CostModelFramePlacement(
+    state, crocoddyl.ActivationModelWeightedQuad(np.matrix(handTrackingWeights**2).T), Pref, actuation.nu)
+
+footTrackingWeights = np.array([1, 1, 0.1] + [1.] * 3)
+Pref = crocoddyl.FramePlacement(leftFootId, pinocchio.SE3(np.eye(3), np.matrix([0., 0.4, 0.]).T))
+footTrackingCost1 = crocoddyl.CostModelFramePlacement(
+    state, crocoddyl.ActivationModelWeightedQuad(np.matrix(footTrackingWeights**2).T), Pref, actuation.nu)
+Pref = crocoddyl.FramePlacement(leftFootId, pinocchio.SE3(np.eye(3), np.matrix([0.3, 0.15, 0.35]).T))
+footTrackingCost2 = crocoddyl.CostModelFramePlacement(
+    state, crocoddyl.ActivationModelWeightedQuad(np.matrix(footTrackingWeights**2).T), Pref, actuation.nu)
 
 # Cost for CoM reference
 comTrack = crocoddyl.CostModelCoMPosition(state, comRef, actuation.nu)
 
-# Create cost model per each action model
-runningCostModel = crocoddyl.CostModelSum(state, actuation.nu)
+# Create cost model per each action model. We divide the motion in 3 phases plus its terminal model
+runningCostModel1 = crocoddyl.CostModelSum(state, actuation.nu)
+runningCostModel2 = crocoddyl.CostModelSum(state, actuation.nu)
+runningCostModel3 = crocoddyl.CostModelSum(state, actuation.nu)
 terminalCostModel = crocoddyl.CostModelSum(state, actuation.nu)
 
 # Then let's added the running and terminal cost functions
-runningCostModel.addCost("gripperPose", goalTrackingCost, 1e2)
-runningCostModel.addCost("stateReg", xRegCost, 1e-3)
-runningCostModel.addCost("ctrlReg", uRegCost, 1e-4)
-runningCostModel.addCost("limitCost", limitCost, 1e3)
+runningCostModel1.addCost("gripperPose", handTrackingCost, 1e2)
+runningCostModel1.addCost("stateReg", xRegCost, 1e-3)
+runningCostModel1.addCost("ctrlReg", uRegCost, 1e-4)
+runningCostModel1.addCost("limitCost", limitCost, 1e3)
 
-terminalCostModel.addCost("gripperPose", goalTrackingCost, 1e2)
+runningCostModel2.addCost("gripperPose", handTrackingCost, 1e2)
+runningCostModel2.addCost("footPose", footTrackingCost1, 1e1)
+runningCostModel2.addCost("stateReg", xRegCost, 1e-3)
+runningCostModel2.addCost("ctrlReg", uRegCost, 1e-4)
+runningCostModel2.addCost("limitCost", limitCost, 1e3)
+
+runningCostModel3.addCost("gripperPose", handTrackingCost, 1e2)
+runningCostModel3.addCost("footPose", footTrackingCost2, 1e1)
+runningCostModel3.addCost("stateReg", xRegCost, 1e-3)
+runningCostModel3.addCost("ctrlReg", uRegCost, 1e-4)
+runningCostModel3.addCost("limitCost", limitCost, 1e3)
+
+terminalCostModel.addCost("gripperPose", handTrackingCost, 1e2)
 terminalCostModel.addCost("stateReg", xRegTermCost, 1e-3)
 terminalCostModel.addCost("limitCost", limitCost, 1e3)
 
 # Create the action model
-dmodelRunning = crocoddyl.DifferentialActionModelContactFwdDynamics(state, actuation, contactModel, runningCostModel)
-dmodelTerminal = crocoddyl.DifferentialActionModelContactFwdDynamics(state, actuation, contactModel, terminalCostModel)
-runningModel = crocoddyl.IntegratedActionModelEuler(dmodelRunning, DT)
+dmodelRunning1 = crocoddyl.DifferentialActionModelContactFwdDynamics(state, actuation, contactModel2Feet,
+                                                                     runningCostModel1)
+dmodelRunning2 = crocoddyl.DifferentialActionModelContactFwdDynamics(state, actuation, contactModel1Foot,
+                                                                     runningCostModel2)
+dmodelRunning3 = crocoddyl.DifferentialActionModelContactFwdDynamics(state, actuation, contactModel1Foot,
+                                                                     runningCostModel3)
+dmodelTerminal = crocoddyl.DifferentialActionModelContactFwdDynamics(state, actuation, contactModel1Foot,
+                                                                     terminalCostModel)
+
+runningModel1 = crocoddyl.IntegratedActionModelEuler(dmodelRunning1, DT)
+runningModel2 = crocoddyl.IntegratedActionModelEuler(dmodelRunning2, DT)
+runningModel3 = crocoddyl.IntegratedActionModelEuler(dmodelRunning3, DT)
 terminalModel = crocoddyl.IntegratedActionModelEuler(dmodelTerminal, 0)
 
 # Problem definition
 x0 = np.concatenate([q0, pinocchio.utils.zero(state.nv)])
-problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
+problem = crocoddyl.ShootingProblem(x0, [runningModel1] * T + [runningModel2] * T + [runningModel3] * T, terminalModel)
 
 # Creating the DDP solver for this OC problem, defining a logger
-ddp = crocoddyl.SolverFDDP(problem)
+ddp = crocoddyl.SolverBoxFDDP(problem)
 if WITHDISPLAY and WITHPLOT:
     ddp.setCallbacks([
         crocoddyl.CallbackLogger(),
@@ -140,7 +173,8 @@ else:
 # Solving it with the DDP algorithm
 xs = [rmodel.defaultState] * len(ddp.models())
 us = [m.quasiStatic(d, rmodel.defaultState) for m, d in list(zip(ddp.models(), ddp.datas()))[:-1]]
-ddp.solve(xs, us, 500, False, 0.1)
+ddp.th_stop = 1e-7
+ddp.solve(xs, us, 500, False, 1e-9)
 ddp.calc()
 
 # Visualizing the solution in gepetto-viewer
