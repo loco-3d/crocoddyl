@@ -53,6 +53,31 @@ void exposeCostImpulseCoM() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
            ":return cost data.");
+
+  bp::register_ptr_to_python<boost::shared_ptr<CostDataImpulseCoM> >();
+
+  bp::class_<CostDataImpulseCoM, bp::bases<CostDataAbstract> >(
+      "CostDataImpulseCoM", "Data for impulse CoM cost.\n\n",
+      bp::init<CostModelContactForce*, DataCollectorAbstract*>(
+          bp::args("self", "model", "data"),
+          "Create contact force cost data.\n\n"
+          ":param model: contact force cost model\n"
+          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("impulses",
+                    bp::make_getter(&CostDataImpulseCoM::impulses, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_setter(&CostDataImpulseCoM::impulses), "impulses data associated with the current cost")
+      .add_property("Arr_Rx",
+                    bp::make_getter(&CostDataImpulseCoM::Arr_Rx, bp::return_value_policy<bp::return_by_value>()),
+                    "Intermediate product of Arr (2nd deriv of Activation) with Rx (deriv of residue)")
+      .add_property("dvc_dq",
+                    bp::make_getter(&CostDataImpulseCoM::dvc_dq, bp::return_value_policy<bp::return_by_value>()),
+                    "Jacobian of the CoM velocity")
+      .add_property("ddv_dv",
+                    bp::make_getter(&CostDataImpulseCoM::ddv_dv, bp::return_value_policy<bp::return_by_value>()),
+                    "Jacobian of the impulse velocity")
+      .add_property("pinocchio_internal",
+                    bp::make_getter(&CostDataImpulseCoM::pinocchio_internal, bp::return_internal_reference<>()),
+                    "internal pinocchio data used for extra computations");
 }
 
 }  // namespace python

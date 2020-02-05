@@ -39,7 +39,7 @@ struct CostDataImpulseCoM : public CostDataAbstract {
         Arr_Rx(3, model->get_state()->get_nv()),
         dvc_dq(3, model->get_state()->get_nv()),
         ddv_dv(model->get_state()->get_nv(), model->get_state()->get_nv()),
-        pinocchio_dv(pinocchio::Data(model->get_state()->get_pinocchio())) {
+        pinocchio_internal(pinocchio::Data(model->get_state()->get_pinocchio())) {
     Arr_Rx.fill(0);
     dvc_dq.fill(0);
     ddv_dv.fill(0);
@@ -57,7 +57,7 @@ struct CostDataImpulseCoM : public CostDataAbstract {
   Eigen::Matrix3Xd Arr_Rx;
   Eigen::Matrix3Xd dvc_dq;
   Eigen::MatrixXd ddv_dv;
-  pinocchio::Data pinocchio_dv;
+  pinocchio::Data pinocchio_internal;
 };
 
 }  // namespace crocoddyl
