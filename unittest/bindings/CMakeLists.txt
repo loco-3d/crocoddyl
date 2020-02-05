@@ -5,11 +5,12 @@ SET(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
   shooting
   solvers
   costs
+  contacts
+  impulses
   force_cost
   friction_cone_cost
   momemtum_cost
-  contacts
-  impulses
+  impulse_com_cost
   )
 
 FOREACH(TEST ${${PROJECT_NAME}_PYTHON_BINDINGS_TESTS})
