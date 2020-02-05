@@ -21,6 +21,7 @@
 #include "crocoddyl/core/activations/weighted-quadratic.hpp"
 #include "crocoddyl/core/activations/smooth-abs.hpp"
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
+#include "crocoddyl/core/activations/weighted-quadratic-barrier.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 using namespace boost::unit_test;
@@ -31,6 +32,7 @@ struct TestTypes {
     ActivationModelWeightedQuad,
     ActivationModelSmoothAbs,
     ActivationModelQuadraticBarrier,
+    ActivationModelWeightedQuadraticBarrier,
     NbTestTypes
   };
   static std::vector<Type> init_all() {
@@ -68,6 +70,9 @@ class Factory {
         break;
       case TestTypes::ActivationModelQuadraticBarrier:
         model_ = boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(crocoddyl::ActivationBounds(lb, ub));
+        break;
+      case TestTypes::ActivationModelWeightedQuadraticBarrier:
+        model_ = boost::make_shared<crocoddyl::ActivationModelWeightedQuadraticBarrier>(crocoddyl::ActivationBounds(lb, ub), weights);
         break;
       default:
         throw_pretty(__FILE__ ":\n Construct wrong TestTypes::Type");
