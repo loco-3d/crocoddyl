@@ -15,14 +15,14 @@ namespace crocoddyl {
 
 CostModelImpulseCoM::CostModelImpulseCoM(boost::shared_ptr<StateMultibody> state,
                                          boost::shared_ptr<ActivationModelAbstract> activation)
-    : CostModelAbstract(state, activation) {
+    : CostModelAbstract(state, activation, 0, true) {
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 3");
   }
 }
 
-CostModelImpulseCoM::CostModelImpulseCoM(boost::shared_ptr<StateMultibody> state) : CostModelAbstract(state, 3) {}
+CostModelImpulseCoM::CostModelImpulseCoM(boost::shared_ptr<StateMultibody> state) : CostModelAbstract(state, 3, 0, true) {}
 
 CostModelImpulseCoM::~CostModelImpulseCoM() {}
 

@@ -48,29 +48,15 @@ struct CostDataImpulseCoM : public CostDataAbstract {
     if (d == NULL) {
       throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibodyInImpulse");
     }
-    // Avoids data casting at runtime
-    // std::string frame_name = model->get_state()->get_pinocchio().frames[model->get_fref().frame].name;
-    // bool found_contact = false;
-    // for (ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
-    //      it != d->contacts->contacts.end(); ++it) {
-    //   if (it->second->frame == model->get_fref().frame) {
-    //     found_contact = true;
-    //     contact = it->second;
-    //     break;
-    //   }
-    // }
-    // if (!found_contact) {
-    //   throw_pretty("Domain error: there isn't defined contact data for " + frame_name);
-    // }
     pinocchio = d->pinocchio;
     impulses = d->impulses;
   }
 
   pinocchio::Data* pinocchio;
   boost::shared_ptr<crocoddyl::ImpulseDataMultiple> impulses;
-  pinocchio::Data::Matrix3x Arr_Rx;
-  pinocchio::Data::Matrix3x dvc_dq;
-  pinocchio::Data::Matrix3x ddv_dv;
+  Eigen::Matrix3Xd Arr_Rx;
+  Eigen::Matrix3Xd dvc_dq;
+  Eigen::MatrixXd ddv_dv;
   pinocchio::Data pinocchio_dv;
 };
 
