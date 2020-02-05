@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_POSITION_HPP_
-#define CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_POSITION_HPP_
+#ifndef CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_HPP_
+#define CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_HPP_
 
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
@@ -62,4 +62,4 @@ struct CostDataImpulseCoM : public CostDataAbstract {
 
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_POSITION_HPP_
+#endif  // CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_HPP_

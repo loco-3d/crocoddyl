@@ -6,10 +6,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_POSITION_HPP_
-#define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_POSITION_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_HPP_
 
-#include "crocoddyl/multibody/costs/impulse-com-position.hpp"
+#include "crocoddyl/multibody/costs/impulse-com.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -58,4 +58,4 @@ void exposeCostImpulseCoM() {
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_POSITION_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_HPP_
