@@ -22,7 +22,8 @@ CostModelImpulseCoM::CostModelImpulseCoM(boost::shared_ptr<StateMultibody> state
   }
 }
 
-CostModelImpulseCoM::CostModelImpulseCoM(boost::shared_ptr<StateMultibody> state) : CostModelAbstract(state, 3, 0, true) {}
+CostModelImpulseCoM::CostModelImpulseCoM(boost::shared_ptr<StateMultibody> state)
+    : CostModelAbstract(state, 3, 0, true) {}
 
 CostModelImpulseCoM::~CostModelImpulseCoM() {}
 

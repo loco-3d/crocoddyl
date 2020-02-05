@@ -18,12 +18,15 @@ namespace bp = boost::python;
 
 void exposeCostImpulseCoM() {
   bp::class_<CostModelImpulseCoM, bp::bases<CostModelAbstract> >(
-      "CostModelImpulseCoM", bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract> >(
-                                 bp::args("self", "state", "activation"),
-                                 "Initialize the CoM position cost model for impulse dynamics.\n\n"
-                                 "For this case the default nu is equals to model.nv.\n"
-                                 ":param state: state of the multibody system\n"
-                                 ":param activation: activation model"))
+      "CostModelImpulseCoM",
+      "Penalize the impulse on the CoM as the sum-of-square of ||Jcom * (vnext-v)||,\n"
+      "with vnext the velocity after impact and v the velocity before impact.",
+      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract> >(
+          bp::args("self", "state", "activation"),
+          "Initialize the CoM position cost model for impulse dynamics.\n\n"
+          "For this case the default nu is equals to model.nv.\n"
+          ":param state: state of the multibody system\n"
+          ":param activation: activation model"))
       .def(bp::init<boost::shared_ptr<StateMultibody> >(
           bp::args("self", "state"),
           "Initialize the CoM position cost model for impulse dynamics.\n\n"
