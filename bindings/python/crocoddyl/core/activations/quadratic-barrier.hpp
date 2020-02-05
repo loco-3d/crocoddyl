@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,7 +24,7 @@ void exposeActivationQuadraticBarrier() {
                                "1 and the activation range is equally distributed between the lower and upper bounds.",
                                bp::init<Eigen::VectorXd, Eigen::VectorXd, bp::optional<double> >(
                                    bp::args("self", "lb", "ub", "beta"),
-                                   "Initialize the activation model.\n\n"
+                                   "Initialize the activation bounds.\n\n"
                                    ":param lb: lower bounds\n"
                                    ":param ub: upper bounds\n"
                                    ":param beta: range of activation (between 0 to 1, default 1)"))
@@ -44,9 +44,7 @@ void exposeActivationQuadraticBarrier() {
       "a(r) = 0. for lb >= r >= ub.",
       bp::init<ActivationBounds>(bp::args("self", "bounds"),
                                  "Initialize the activation model.\n\n"
-                                 ":param bounds: activation bounds\n"
-                                 ":param ub: upper bounds\n"
-                                 ":param beta: range of activation (between 0 to 1)"))
+                                 ":param bounds: activation bounds"))
       .def("calc", &ActivationModelQuadraticBarrier::calc_wrap, bp::args("self", "data", "r"),
            "Compute the inequality activation.\n\n"
            ":param data: activation data\n"
