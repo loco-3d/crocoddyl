@@ -72,7 +72,8 @@ class Factory {
         model_ = boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(crocoddyl::ActivationBounds(lb, ub));
         break;
       case TestTypes::ActivationModelWeightedQuadraticBarrier:
-        model_ = boost::make_shared<crocoddyl::ActivationModelWeightedQuadraticBarrier>(crocoddyl::ActivationBounds(lb, ub), weights);
+        model_ = boost::make_shared<crocoddyl::ActivationModelWeightedQuadraticBarrier>(
+            crocoddyl::ActivationBounds(lb, ub), weights);
         break;
       default:
         throw_pretty(__FILE__ ":\n Construct wrong TestTypes::Type");
