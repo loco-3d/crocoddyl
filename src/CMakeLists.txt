@@ -41,13 +41,14 @@ SET(${PROJECT_NAME}_SOURCES
   multibody/costs/state.cpp
   multibody/costs/control.cpp
   multibody/costs/com-position.cpp
+  multibody/costs/centroidal-momentum.cpp
   multibody/costs/frame-placement.cpp
   multibody/costs/frame-translation.cpp
   multibody/costs/frame-rotation.cpp
   multibody/costs/frame-velocity.cpp
   multibody/costs/contact-force.cpp
   multibody/costs/contact-friction-cone.cpp
-  multibody/costs/centroidal-momentum.cpp
+  multibody/costs/impulse-com.cpp
   multibody/contacts/multiple-contacts.cpp
   multibody/contacts/contact-3d.cpp
   multibody/contacts/contact-6d.cpp
