@@ -142,7 +142,7 @@ void SolverFDDP::updateExpectedImprovement() {
   }
 }
 
-double SolverFDDP::calc() {
+double SolverFDDP::calcDiff() {
   cost_ = problem_->calcDiff(xs_, us_);
   if (!is_feasible_) {
     const Eigen::VectorXd& x0 = problem_->get_x0();

@@ -119,7 +119,7 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
 
 void SolverDDP::computeDirection(const bool& recalc) {
   if (recalc) {
-    calc();
+    calcDiff();
   }
   backwardPass();
 }
@@ -148,7 +148,7 @@ const Eigen::Vector2d& SolverDDP::expectedImprovement() {
   return d_;
 }
 
-double SolverDDP::calc() {
+double SolverDDP::calcDiff() {
   cost_ = problem_->calcDiff(xs_, us_);
   if (!is_feasible_) {
     const Eigen::VectorXd& x0 = problem_->get_x0();
