@@ -55,7 +55,8 @@ double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::
   return cost_;
 }
 
-double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us) {
+double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us,
+                                 const bool& recalc) {
   if (xs.size() != T_ + 1) {
     throw_pretty("Invalid argument: "
                  << "xs has wrong dimension (it should be " + std::to_string(T_ + 1) + ")");
@@ -73,14 +74,14 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const s
 #pragma omp parallel for
 #endif
   for (i = 0; i < T_; ++i) {
-    running_models_[i]->calcDiff(running_datas_[i], xs[i], us[i]);
+    running_models_[i]->calcDiff(running_datas_[i], xs[i], us[i], recalc);
   }
 
   for (std::size_t i = 0; i < T_; ++i) {
     cost_ += running_datas_[i]->cost;
   }
 
-  terminal_model_->calcDiff(terminal_data_, xs.back());
+  terminal_model_->calcDiff(terminal_data_, xs.back(), recalc);
   cost_ += terminal_data_->cost;
   return cost_;
 }

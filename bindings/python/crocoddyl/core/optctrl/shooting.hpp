@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,6 +18,8 @@ namespace crocoddyl {
 namespace python {
 
 namespace bp = boost::python;
+
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ShootingProblem_calcDiff_wraps, ShootingProblem::calcDiff, 2, 3)
 
 void exposeShootingProblem() {
   // Register custom converters between std::vector and Python list
@@ -53,12 +55,15 @@ void exposeShootingProblem() {
            ":param xs: time-discrete state trajectory\n"
            ":param us: time-discrete control sequence\n"
            ":returns the total cost value")
-      .def("calcDiff", &ShootingProblem::calcDiff, bp::args("self", "xs", "us"),
-           "Compute the cost-and-dynamics derivatives.\n\n"
-           "These quantities are computed along a given pair of trajectories xs\n"
-           "(states) and us (controls).\n"
-           ":param xs: time-discrete state trajectory\n"
-           ":param us: time-discrete control sequence")
+      .def("calcDiff", &ShootingProblem::calcDiff,
+           ShootingProblem_calcDiff_wraps(bp::args("self", "xs", "us", "recalc"),
+                                          "Compute the cost-and-dynamics derivatives.\n\n"
+                                          "These quantities are computed along a given pair of trajectories xs\n"
+                                          "(states) and us (controls).\n"
+                                          ":param xs: time-discrete state trajectory\n"
+                                          ":param us: time-discrete control sequence\n"
+                                          ":param recalc: If true, it updates the state evolution and the cost value "
+                                          "for each node (default True)"))
       .def("rollout", &ShootingProblem::rollout_us, bp::args("self", "us"),
            "Integrate the dynamics given a control sequence.\n\n"
            "Rollout the dynamics give a sequence of control commands\n"
