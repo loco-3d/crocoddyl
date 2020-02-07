@@ -32,7 +32,8 @@ class ActionModelAbstract {
   virtual boost::shared_ptr<ActionDataAbstract> createData();
 
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
-  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
+  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+                const bool& recalc = true);
 
   void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<Eigen::VectorXd> u,
                    const Eigen::Ref<const Eigen::VectorXd>& x, const std::size_t& maxiter = 100,
