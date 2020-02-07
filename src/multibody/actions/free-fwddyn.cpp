@@ -69,7 +69,6 @@ void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<Differ
   }
 
   // Computing the cost value and residuals
-  pinocchio::updateFramePlacements(pinocchio_, d->pinocchio);
   costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
 }
