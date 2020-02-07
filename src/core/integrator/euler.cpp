@@ -141,4 +141,17 @@ void IntegratedActionModelEuler::set_dt(const double& dt) {
   time_step2_ = dt * dt;
 }
 
+void IntegratedActionModelEuler::set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model) {
+  const std::size_t& nu = model->get_nu();
+  if (nu_ != nu) {
+    nu_ = nu;
+    unone_ = Eigen::VectorXd::Zero(nu_);
+  }
+  nr_ = model->get_nr();
+  state_ = model->get_state();
+  differential_ = model;
+  set_u_lb(differential_->get_u_lb());
+  set_u_ub(differential_->get_u_ub());
+}
+
 }  // namespace crocoddyl
