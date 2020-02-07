@@ -70,13 +70,11 @@ void exposeShootingProblem() {
       .add_property(
           "runningModels",
           bp::make_function(&ShootingProblem::get_runningModels, bp::return_value_policy<bp::return_by_value>()),
-          &ShootingProblem::set_runningModels,
-          "running models")
+          &ShootingProblem::set_runningModels, "running models")
       .add_property(
           "terminalModel",
           bp::make_function(&ShootingProblem::get_terminalModel, bp::return_value_policy<bp::return_by_value>()),
-          &ShootingProblem::set_terminalModel,
-          "terminal model")
+          &ShootingProblem::set_terminalModel, "terminal model")
       .add_property(
           "runningDatas",
           bp::make_function(&ShootingProblem::get_runningDatas, bp::return_value_policy<bp::return_by_value>()),
