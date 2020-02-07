@@ -52,13 +52,13 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
   }
   was_feasible_ = false;
 
-  bool recalc = true;
+  bool recalcDiff = true;
   for (iter_ = 0; iter_ < maxiter; ++iter_) {
     while (true) {
       try {
-        computeDirection(recalc);
+        computeDirection(recalcDiff);
       } catch (std::exception& e) {
-        recalc = false;
+        recalcDiff = false;
         increaseRegularization();
         if (xreg_ == regmax_) {
           return false;
@@ -71,7 +71,7 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
     expectedImprovement();
 
     // We need to recalculate the derivatives when the step length passes
-    recalc = false;
+    recalcDiff = false;
     for (std::vector<double>::const_iterator it = alphas_.begin(); it != alphas_.end(); ++it) {
       steplength_ = *it;
 
@@ -87,7 +87,7 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, true);
           cost_ = cost_try_;
-          recalc = true;
+          recalcDiff = true;
           break;
         }
       }
@@ -117,8 +117,8 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
   return false;
 }
 
-void SolverDDP::computeDirection(const bool& recalc) {
-  if (recalc) {
+void SolverDDP::computeDirection(const bool& recalcDiff) {
+  if (recalcDiff) {
     calcDiff();
   }
   backwardPass();
