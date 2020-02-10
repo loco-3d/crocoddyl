@@ -68,7 +68,6 @@ void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<Dif
 
   // Computing the forward dynamics with the holonomic constraints defined by the contact model
   pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, v);
-  pinocchio::updateFramePlacements(pinocchio_, d->pinocchio);
   pinocchio::computeCentroidalMomentum(pinocchio_, d->pinocchio);
 
   if (!with_armature_) {
