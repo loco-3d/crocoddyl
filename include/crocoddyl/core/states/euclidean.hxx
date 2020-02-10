@@ -6,21 +6,19 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/core/states/euclidean.hpp"
-
 namespace crocoddyl {
-
-StateVector::StateVector(const std::size_t& nx) : StateAbstract(nx, nx) {}
-
-StateVector::~StateVector() {}
-
-Eigen::VectorXd StateVector::zero() const { return Eigen::VectorXd::Zero(nx_); }
-
-Eigen::VectorXd StateVector::rand() const { return Eigen::VectorXd::Random(nx_); }
-
-void StateVector::diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-                       Eigen::Ref<Eigen::VectorXd> dxout) const {
+  
+template <typename Scalar>
+StateVectorTpl<Scalar>::StateVectorTpl(const std::size_t& nx) : StateAbstractTpl<Scalar>(nx, nx) {}
+template <typename Scalar>
+StateVectorTpl<Scalar>::~StateVectorTpl() {}
+template <typename Scalar>
+typename MathBaseTpl<Scalar>::VectorXs StateVectorTpl<Scalar>::zero() const { return MathBase::VectorXs::Zero(nx_); }
+template <typename Scalar>
+typename MathBaseTpl<Scalar>::VectorXs StateVectorTpl<Scalar>::rand() const { return MathBase::VectorXs::Random(nx_); }
+template <typename Scalar>
+void StateVectorTpl<Scalar>::diff(const Eigen::Ref<const typename MathBase::VectorXs>& x0, const Eigen::Ref<const typename MathBase::VectorXs>& x1,
+                       Eigen::Ref<typename MathBase::VectorXs> dxout) const {
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty("Invalid argument: "
                  << "x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
@@ -35,9 +33,9 @@ void StateVector::diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen:
   }
   dxout = x1 - x0;
 }
-
-void StateVector::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
-                            Eigen::Ref<Eigen::VectorXd> xout) const {
+template <typename Scalar>
+void StateVectorTpl<Scalar>::integrate(const Eigen::Ref<const typename MathBase::VectorXs>& x, const Eigen::Ref<const typename MathBase::VectorXs>& dx,
+                            Eigen::Ref<typename MathBase::VectorXs> xout) const {
   if (static_cast<std::size_t>(x.size()) != nx_) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(nx_) + ")");
@@ -52,9 +50,9 @@ void StateVector::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Ei
   }
   xout = x + dx;
 }
-
-void StateVector::Jdiff(const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>&,
-                        Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
+template <typename Scalar>
+void StateVectorTpl<Scalar>::Jdiff(const Eigen::Ref<const typename MathBase::VectorXs>&, const Eigen::Ref<const typename MathBase::VectorXs>&,
+                        Eigen::Ref<typename MathBase::MatrixXs> Jfirst, Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
                         Jcomponent firstsecond) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
   if (firstsecond == first || firstsecond == both) {
@@ -64,7 +62,7 @@ void StateVector::Jdiff(const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::R
                           ")");
     }
     Jfirst.setZero();
-    Jfirst.diagonal() = Eigen::VectorXd::Constant(ndx_, -1.);
+    Jfirst.diagonal() = MathBase::VectorXs::Constant(ndx_, -1.);
   }
   if (firstsecond == second || firstsecond == both) {
     if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
@@ -73,12 +71,12 @@ void StateVector::Jdiff(const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::R
                           std::to_string(ndx_) + ")");
     }
     Jsecond.setZero();
-    Jsecond.diagonal() = Eigen::VectorXd::Constant(ndx_, 1.);
+    Jsecond.diagonal() = MathBase::VectorXs::Constant(ndx_, 1.);
   }
 }
-
-void StateVector::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>&,
-                             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
+template <typename Scalar>
+void StateVectorTpl<Scalar>::Jintegrate(const Eigen::Ref<const typename MathBase::VectorXs>&, const Eigen::Ref<const typename MathBase::VectorXs>&,
+                             Eigen::Ref<typename MathBase::MatrixXs> Jfirst, Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
                              Jcomponent firstsecond) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
   if (firstsecond == first || firstsecond == both) {
@@ -88,7 +86,7 @@ void StateVector::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>&, const Eig
                           ")");
     }
     Jfirst.setZero();
-    Jfirst.diagonal() = Eigen::VectorXd::Constant(ndx_, 1.);
+    Jfirst.diagonal() = MathBase::VectorXs::Constant(ndx_, 1.);
   }
   if (firstsecond == second || firstsecond == both) {
     if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
@@ -97,7 +95,7 @@ void StateVector::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>&, const Eig
                           std::to_string(ndx_) + ")");
     }
     Jsecond.setZero();
-    Jsecond.diagonal() = Eigen::VectorXd::Constant(ndx_, 1.);
+    Jsecond.diagonal() = MathBase::VectorXs::Constant(ndx_, 1.);
   }
 }
 
