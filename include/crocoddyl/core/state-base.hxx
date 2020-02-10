@@ -5,38 +5,39 @@
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
-
-#include "crocoddyl/core/state-base.hpp"
+#include <crocoddyl/core/mathbase.hpp>
 
 namespace crocoddyl {
-
-StateAbstract::StateAbstract(const std::size_t& nx, const std::size_t& ndx)
+template <typename Scalar>
+StateAbstractTpl<Scalar>::StateAbstractTpl(const std::size_t& nx, const std::size_t& ndx)
     : nx_(nx),
       ndx_(ndx),
-      lb_(Eigen::VectorXd::Constant(nx_, -std::numeric_limits<double>::infinity())),
-      ub_(Eigen::VectorXd::Constant(nx_, std::numeric_limits<double>::infinity())),
+      lb_(MathBase::VectorXs::Constant(nx_, -std::numeric_limits<Scalar>::infinity())),
+      ub_(MathBase::VectorXs::Constant(nx_, std::numeric_limits<Scalar>::infinity())),
       has_limits_(false) {
   nv_ = ndx / 2;
   nq_ = nx_ - nv_;
 }
 
-StateAbstract::~StateAbstract() {}
+template <typename Scalar>
+StateAbstractTpl<Scalar>::~StateAbstractTpl() {}
 
-const std::size_t& StateAbstract::get_nx() const { return nx_; }
-
-const std::size_t& StateAbstract::get_ndx() const { return ndx_; }
-
-const std::size_t& StateAbstract::get_nq() const { return nq_; }
-
-const std::size_t& StateAbstract::get_nv() const { return nv_; }
-
-const Eigen::VectorXd& StateAbstract::get_lb() const { return lb_; }
-
-const Eigen::VectorXd& StateAbstract::get_ub() const { return ub_; }
-
-bool const& StateAbstract::get_has_limits() const { return has_limits_; }
-
-void StateAbstract::set_lb(const Eigen::VectorXd& lb) {
+template <typename Scalar>
+const std::size_t& StateAbstractTpl<Scalar>::get_nx() const { return nx_; }
+template <typename Scalar>
+const std::size_t& StateAbstractTpl<Scalar>::get_ndx() const { return ndx_; }
+template <typename Scalar>
+const std::size_t& StateAbstractTpl<Scalar>::get_nq() const { return nq_; }
+template <typename Scalar>
+const std::size_t& StateAbstractTpl<Scalar>::get_nv() const { return nv_; }
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& StateAbstractTpl<Scalar>::get_lb() const { return lb_; }
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& StateAbstractTpl<Scalar>::get_ub() const { return ub_; }
+template <typename Scalar>
+bool const& StateAbstractTpl<Scalar>::get_has_limits() const { return has_limits_; }
+template <typename Scalar>
+void StateAbstractTpl<Scalar>::set_lb(const typename MathBase::VectorXs& lb) {
   if (static_cast<std::size_t>(lb.size()) != nx_) {
     throw_pretty("Invalid argument: "
                  << "lower bound has wrong dimension (it should be " + std::to_string(nx_) + ")");
@@ -44,8 +45,8 @@ void StateAbstract::set_lb(const Eigen::VectorXd& lb) {
   lb_ = lb;
   update_has_limits();
 }
-
-void StateAbstract::set_ub(const Eigen::VectorXd& ub) {
+template <typename Scalar>
+void StateAbstractTpl<Scalar>::set_ub(const typename MathBase::VectorXs& ub) {
   if (static_cast<std::size_t>(ub.size()) != nx_) {
     throw_pretty("Invalid argument: "
                  << "upper bound has wrong dimension (it should be " + std::to_string(nx_) + ")");
@@ -53,7 +54,7 @@ void StateAbstract::set_ub(const Eigen::VectorXd& ub) {
   ub_ = ub;
   update_has_limits();
 }
-
-void StateAbstract::update_has_limits() { has_limits_ = isfinite(lb_.array()).any() && isfinite(ub_.array()).any(); }
+template <typename Scalar>
+void StateAbstractTpl<Scalar>::update_has_limits() { has_limits_ = isfinite(lb_.array()).any() && isfinite(ub_.array()).any(); }
 
 }  // namespace crocoddyl
