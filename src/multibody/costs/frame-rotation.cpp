@@ -46,6 +46,7 @@ void CostModelFrameRotation::calc(const boost::shared_ptr<CostDataAbstract>& dat
   CostDataFrameRotation* d = static_cast<CostDataFrameRotation*>(data.get());
 
   // Compute the frame placement w.r.t. the reference frame
+  pinocchio::updateFramePlacement(state_->get_pinocchio(), *d->pinocchio,Rref_.frame);
   d->rRf.noalias() = oRf_inv_ * d->pinocchio->oMf[Rref_.frame].rotation();
   d->r = pinocchio::log3(d->rRf);
   data->r = d->r;  // this is needed because we overwrite it

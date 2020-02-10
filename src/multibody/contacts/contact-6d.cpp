@@ -27,7 +27,7 @@ ContactModel6D::~ContactModel6D() {}
 void ContactModel6D::calc(const boost::shared_ptr<ContactDataAbstract>& data,
                           const Eigen::Ref<const Eigen::VectorXd>&) {
   ContactData6D* d = static_cast<ContactData6D*>(data.get());
-
+  pinocchio::updateFramePlacement(state_->get_pinocchio(), *d->pinocchio, Mref_.frame);
   pinocchio::getFrameJacobian(state_->get_pinocchio(), *d->pinocchio, Mref_.frame, pinocchio::LOCAL, d->Jc);
 
   d->a = pinocchio::getFrameAcceleration(state_->get_pinocchio(), *d->pinocchio, Mref_.frame);

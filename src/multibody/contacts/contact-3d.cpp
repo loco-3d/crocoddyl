@@ -26,6 +26,7 @@ ContactModel3D::~ContactModel3D() {}
 void ContactModel3D::calc(const boost::shared_ptr<ContactDataAbstract>& data,
                           const Eigen::Ref<const Eigen::VectorXd>&) {
   ContactData3D* d = static_cast<ContactData3D*>(data.get());
+  pinocchio::updateFramePlacement(state_->get_pinocchio(), *d->pinocchio, xref_.frame);
   d->v = pinocchio::getFrameVelocity(state_->get_pinocchio(), *d->pinocchio, xref_.frame);
   d->vw = d->v.angular();
   d->vv = d->v.linear();
