@@ -14,33 +14,70 @@
 #include <stdexcept>
 
 namespace crocoddyl {
-
-class ActionModelUnicycle : public ActionModelAbstract {
+template <typename _Scalar>
+class ActionModelUnicycleTpl : public ActionModelAbstractTpl<_Scalar> {
  public:
-  ActionModelUnicycle();
-  ~ActionModelUnicycle();
+  typedef _Scalar Scalar;
+  typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
+  typedef ActionModelAbstractTpl<Scalar> Base;
+  typedef MathBaseTpl<Scalar> MathBase;
+  using Base::nu_;                          //!< Control dimension
+  using Base::nr_;                          //!< Dimension of the cost residual
+  using Base::state_;  //!< Model of the state
+  using Base::unone_;                   //!< Neutral state
+  using Base::u_lb_;                    //!< Lower control limits
+  using Base::u_ub_;                    //!< Upper control limits
+  bool has_control_limits_;                 //!< Indicates whether any of the control limits 
+  ActionModelUnicycleTpl();
+  ~ActionModelUnicycleTpl();
 
-  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-            const Eigen::Ref<const Eigen::VectorXd>& u);
-  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u);
+  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const typename MathBase::VectorXs>& x,
+            const Eigen::Ref<const typename MathBase::VectorXs>& u);
+  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const typename MathBase::VectorXs>& x,
+                const Eigen::Ref<const typename MathBase::VectorXs>& u);
   boost::shared_ptr<ActionDataAbstract> createData();
 
-  const Eigen::Vector2d& get_cost_weights() const;
-  void set_cost_weights(const Eigen::Vector2d& weights);
+  const typename MathBase::Vector2s& get_cost_weights() const;
+  void set_cost_weights(const typename MathBase::Vector2s& weights);
 
  private:
-  Eigen::Vector2d cost_weights_;
-  double dt_;
+  typename MathBase::Vector2s cost_weights_;
+  Scalar dt_;
 };
 
-struct ActionDataUnicycle : public ActionDataAbstract {
+template <typename _Scalar>
+struct ActionDataUnicycleTpl : public ActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef ActionDataAbstractTpl<Scalar> Base;
+  using Base::cost;
+  using Base::xnext;
+  using Base::r;
+  using Base::Fx;
+  using Base::Fu;
+  using Base::Lx;
+  using Base::Lu;
+  using Base::Lxx;
+  using Base::Lxu;
+  using Base::Luu;
+  
   template <typename Model>
-  explicit ActionDataUnicycle(Model* const model) : ActionDataAbstract(model) {}
+  explicit ActionDataUnicycleTpl(Model* const model) : ActionDataAbstractTpl<Scalar>(model) {}
+
+  
 };
 
+typedef ActionModelUnicycleTpl<double> ActionModelUnicycle;
+typedef ActionDataUnicycleTpl<double> ActionDataUnicycle;
+  
 }  // namespace crocoddyl
+
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include <crocoddyl/core/actions/unicycle.hxx>
 
 #endif  // CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_
