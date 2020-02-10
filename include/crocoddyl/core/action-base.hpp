@@ -18,44 +18,51 @@
 
 namespace crocoddyl {
 
-struct ActionDataAbstract;  // forward declaration
+template <typename _Scalar>
+struct ActionDataAbstractTpl;  // forward declaration
 
-class ActionModelAbstract {
+template <typename _Scalar>
+class ActionModelAbstractTpl {
  public:
-  ActionModelAbstract(boost::shared_ptr<StateAbstract> state, const std::size_t& nu, const std::size_t& nr = 0);
-  virtual ~ActionModelAbstract();
 
-  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                    const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
-  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                        const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
+  typedef _Scalar Scalar;
+  typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
+  typedef MathBaseTpl<Scalar> MathBase;
+  
+  ActionModelAbstractTpl(boost::shared_ptr<StateAbstractTpl<Scalar> > state, const std::size_t& nu, const std::size_t& nr = 0);
+  virtual ~ActionModelAbstractTpl();
+
+  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const typename MathBase::VectorXs>& x,
+                    const Eigen::Ref<const typename MathBase::VectorXs>& u) = 0;
+  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const typename MathBase::VectorXs>& x,
+                        const Eigen::Ref<const typename MathBase::VectorXs>& u) = 0;
   virtual boost::shared_ptr<ActionDataAbstract> createData();
 
-  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
-  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
+  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const typename MathBase::VectorXs>& x);
+  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const typename MathBase::VectorXs>& x);
 
-  void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<Eigen::VectorXd> u,
-                   const Eigen::Ref<const Eigen::VectorXd>& x, const std::size_t& maxiter = 100,
-                   const double& tol = 1e-9);
+  void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<typename MathBase::VectorXs> u,
+                   const Eigen::Ref<const typename MathBase::VectorXs>& x, const std::size_t& maxiter = 100,
+                   const Scalar& tol = 1e-9);
 
   const std::size_t& get_nu() const;
   const std::size_t& get_nr() const;
   const boost::shared_ptr<StateAbstract>& get_state() const;
 
-  const Eigen::VectorXd& get_u_lb() const;
-  const Eigen::VectorXd& get_u_ub() const;
+  const typename MathBase::VectorXs& get_u_lb() const;
+  const typename MathBase::VectorXs& get_u_ub() const;
   bool const& get_has_control_limits() const;
 
-  void set_u_lb(const Eigen::VectorXd& u_lb);
-  void set_u_ub(const Eigen::VectorXd& u_ub);
+  void set_u_lb(const typename MathBase::VectorXs& u_lb);
+  void set_u_ub(const typename MathBase::VectorXs& u_ub);
 
  protected:
   std::size_t nu_;                          //!< Control dimension
   std::size_t nr_;                          //!< Dimension of the cost residual
   boost::shared_ptr<StateAbstract> state_;  //!< Model of the state
-  Eigen::VectorXd unone_;                   //!< Neutral state
-  Eigen::VectorXd u_lb_;                    //!< Lower control limits
-  Eigen::VectorXd u_ub_;                    //!< Upper control limits
+  typename MathBase::VectorXs unone_;                   //!< Neutral state
+  typename MathBase::VectorXs u_lb_;                    //!< Lower control limits
+  typename MathBase::VectorXs u_ub_;                    //!< Upper control limits
   bool has_control_limits_;                 //!< Indicates whether any of the control limits is finite
 
   void update_has_control_limits();
@@ -63,8 +70,8 @@ class ActionModelAbstract {
 #ifdef PYTHON_BINDINGS
 
  public:
-  void calc_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x,
-                 const Eigen::VectorXd& u = Eigen::VectorXd()) {
+  void calc_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const typename MathBase::VectorXs& x,
+                 const typename MathBase::VectorXs& u =typename MathBase::VectorXs()) {
     if (u.size() == 0) {
       calc(data, x);
     } else {
@@ -72,17 +79,20 @@ class ActionModelAbstract {
     }
   }
 
-  void calcDiff_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x,
-                     const Eigen::VectorXd& u) {
+  void calcDiff_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const typename MathBase::VectorXs& x,
+                     const typename MathBase::VectorXs& u) {
     calcDiff(data, x, u);
   }
-  void calcDiff_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x) {
+  void calcDiff_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const typename MathBase::VectorXs& x) {
+    calcDiff(data, x, unone_);
+  }
+  void calcDiff_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const typename MathBase::VectorXs& x, const bool& recalc) {
     calcDiff(data, x, unone_);
   }
 
-  Eigen::VectorXd quasiStatic_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x,
-                                   const std::size_t& maxiter = 100, const double& tol = 1e-9) {
-    Eigen::VectorXd u(nu_);
+  typename MathBase::VectorXs quasiStatic_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const typename MathBase::VectorXs& x,
+                                   const std::size_t& maxiter = 100, const Scalar& tol = 1e-9) {
+    typename MathBase::VectorXs u(nu_);
     u.setZero();
     quasiStatic(data, u, x, maxiter, tol);
     return u;
@@ -90,12 +100,15 @@ class ActionModelAbstract {
 
 #endif
 };
-
-struct ActionDataAbstract {
+template <typename _Scalar>
+struct ActionDataAbstractTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  template <typename Model>
-  explicit ActionDataAbstract(Model* const model)
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+
+  template <class Model>
+  explicit ActionDataAbstractTpl(Model* const model)
       : cost(0.),
         xnext(model->get_state()->get_nx()),
         r(model->get_nr()),
@@ -116,20 +129,30 @@ struct ActionDataAbstract {
     Lxu.setZero();
     Luu.setZero();
   }
-  virtual ~ActionDataAbstract() {}
+  virtual ~ActionDataAbstractTpl() {}
 
-  double cost;
-  Eigen::VectorXd xnext;
-  Eigen::VectorXd r;
-  Eigen::MatrixXd Fx;
-  Eigen::MatrixXd Fu;
-  Eigen::VectorXd Lx;
-  Eigen::VectorXd Lu;
-  Eigen::MatrixXd Lxx;
-  Eigen::MatrixXd Lxu;
-  Eigen::MatrixXd Luu;
+  Scalar cost;
+  typename MathBase::VectorXs xnext;
+  typename MathBase::VectorXs r;
+  typename MathBase::MatrixXs Fx;
+  typename MathBase::MatrixXs Fu;
+  typename MathBase::VectorXs Lx;
+  typename MathBase::VectorXs Lu;
+  typename MathBase::MatrixXs Lxx;
+  typename MathBase::MatrixXs Lxu;
+  typename MathBase::MatrixXs Luu;
 };
 
+  
+typedef ActionDataAbstractTpl<double> ActionDataAbstract;
+typedef ActionModelAbstractTpl<double> ActionModelAbstract;
+
 }  // namespace crocoddyl
+
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include <crocoddyl/core/action-base.hxx>
 
 #endif  // CROCODDYL_CORE_ACTION_BASE_HPP_
