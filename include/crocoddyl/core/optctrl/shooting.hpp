@@ -26,18 +26,21 @@ class ShootingProblem {
   ~ShootingProblem();
 
   double calc(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us);
-  double calcDiff(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us);
+  double calcDiff(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us,
+                  const bool& recalc = true);
   void rollout(const std::vector<Eigen::VectorXd>& us, std::vector<Eigen::VectorXd>& xs);
   std::vector<Eigen::VectorXd> rollout_us(const std::vector<Eigen::VectorXd>& us);
 
   const std::size_t& get_T() const;
   const Eigen::VectorXd& get_x0() const;
-  void set_x0(const Eigen::VectorXd& x0_in);
-
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& get_runningModels() const;
   const boost::shared_ptr<ActionModelAbstract>& get_terminalModel() const;
   const std::vector<boost::shared_ptr<ActionDataAbstract> >& get_runningDatas() const;
   const boost::shared_ptr<ActionDataAbstract>& get_terminalData() const;
+
+  void set_x0(const Eigen::VectorXd& x0_in);
+  void set_runningModels(const std::vector<boost::shared_ptr<ActionModelAbstract> >& models);
+  void set_terminalModel(boost::shared_ptr<ActionModelAbstract> model);
 
  protected:
   double cost_;

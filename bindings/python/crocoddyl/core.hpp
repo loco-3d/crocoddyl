@@ -29,11 +29,13 @@
 #include "python/crocoddyl/core/activations/quadratic.hpp"
 #include "python/crocoddyl/core/activations/weighted-quadratic.hpp"
 #include "python/crocoddyl/core/activations/quadratic-barrier.hpp"
+#include "python/crocoddyl/core/activations/weighted-quadratic-barrier.hpp"
 #include "python/crocoddyl/core/activations/smooth-abs.hpp"
 #include "python/crocoddyl/core/solvers/ddp.hpp"
 #include "python/crocoddyl/core/solvers/fddp.hpp"
 #include "python/crocoddyl/core/solvers/box-qp.hpp"
 #include "python/crocoddyl/core/solvers/box-ddp.hpp"
+#include "python/crocoddyl/core/solvers/box-fddp.hpp"
 #include "python/crocoddyl/core/utils/callbacks.hpp"
 
 namespace crocoddyl {
@@ -59,11 +61,13 @@ void exposeCore() {
   exposeActivationQuad();
   exposeActivationWeightedQuad();
   exposeActivationQuadraticBarrier();
+  exposeActivationWeightedQuadraticBarrier();
   exposeActivationSmoothAbs();
   exposeSolverDDP();
   exposeSolverFDDP();
   exposeSolverBoxQP();
   exposeSolverBoxDDP();
+  exposeSolverBoxFDDP();
   exposeCallbacks();
 }
 

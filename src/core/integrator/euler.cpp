@@ -20,19 +20,8 @@ IntegratedActionModelEuler::IntegratedActionModelEuler(boost::shared_ptr<Differe
       time_step2_(time_step * time_step),
       with_cost_residual_(with_cost_residual),
       enable_integration_(true) {
-  const std::size_t& ntau = differential_->get_nu();
-  if (ntau < nu_) {
-    Eigen::VectorXd lb = Eigen::VectorXd::Constant(nu_, -std::numeric_limits<double>::infinity());
-    lb.tail(ntau) = differential_->get_u_lb();
-    set_u_lb(lb);
-
-    Eigen::VectorXd ub = Eigen::VectorXd::Constant(nu_, std::numeric_limits<double>::infinity());
-    ub.tail(ntau) = differential_->get_u_ub();
-    set_u_ub(ub);
-  } else {
-    set_u_lb(differential_->get_u_lb());
-    set_u_ub(differential_->get_u_ub());
-  }
+  set_u_lb(differential_->get_u_lb());
+  set_u_ub(differential_->get_u_ub());
   if (time_step_ < 0.) {
     time_step_ = 1e-3;
     time_step2_ = time_step_ * time_step_;
@@ -150,6 +139,19 @@ void IntegratedActionModelEuler::set_dt(const double& dt) {
   }
   time_step_ = dt;
   time_step2_ = dt * dt;
+}
+
+void IntegratedActionModelEuler::set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model) {
+  const std::size_t& nu = model->get_nu();
+  if (nu_ != nu) {
+    nu_ = nu;
+    unone_ = Eigen::VectorXd::Zero(nu_);
+  }
+  nr_ = model->get_nr();
+  state_ = model->get_state();
+  differential_ = model;
+  set_u_lb(differential_->get_u_lb());
+  set_u_ub(differential_->get_u_ub());
 }
 
 }  // namespace crocoddyl

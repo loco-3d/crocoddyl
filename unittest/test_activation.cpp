@@ -16,21 +16,23 @@
 #include <boost/test/included/unit_test.hpp>
 #include <boost/bind.hpp>
 #include "crocoddyl/core/activation-base.hpp"
-#include "crocoddyl/core/activations/quadratic-barrier.hpp"
-#include "crocoddyl/core/activations/quadratic.hpp"
-#include "crocoddyl/core/activations/smooth-abs.hpp"
-#include "crocoddyl/core/activations/weighted-quadratic.hpp"
 #include "crocoddyl/core/numdiff/activation.hpp"
+#include "crocoddyl/core/activations/quadratic.hpp"
+#include "crocoddyl/core/activations/weighted-quadratic.hpp"
+#include "crocoddyl/core/activations/smooth-abs.hpp"
+#include "crocoddyl/core/activations/quadratic-barrier.hpp"
+#include "crocoddyl/core/activations/weighted-quadratic-barrier.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 using namespace boost::unit_test;
 
 struct TestTypes {
   enum Type {
-    ActivationModelQuadraticBarrier,
     ActivationModelQuad,
-    ActivationModelSmoothAbs,
     ActivationModelWeightedQuad,
+    ActivationModelSmoothAbs,
+    ActivationModelQuadraticBarrier,
+    ActivationModelWeightedQuadraticBarrier,
     NbTestTypes
   };
   static std::vector<Type> init_all() {
@@ -57,17 +59,21 @@ class Factory {
     Eigen::VectorXd weights = Eigen::VectorXd::Random(nr_);
 
     switch (test_type_) {
-      case TestTypes::ActivationModelQuadraticBarrier:
-        model_ = boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(crocoddyl::ActivationBounds(lb, ub));
-        break;
       case TestTypes::ActivationModelQuad:
         model_ = boost::make_shared<crocoddyl::ActivationModelQuad>(nr_);
+        break;
+      case TestTypes::ActivationModelWeightedQuad:
+        model_ = boost::make_shared<crocoddyl::ActivationModelWeightedQuad>(weights);
         break;
       case TestTypes::ActivationModelSmoothAbs:
         model_ = boost::make_shared<crocoddyl::ActivationModelSmoothAbs>(nr_);
         break;
-      case TestTypes::ActivationModelWeightedQuad:
-        model_ = boost::make_shared<crocoddyl::ActivationModelWeightedQuad>(weights);
+      case TestTypes::ActivationModelQuadraticBarrier:
+        model_ = boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(crocoddyl::ActivationBounds(lb, ub));
+        break;
+      case TestTypes::ActivationModelWeightedQuadraticBarrier:
+        model_ = boost::make_shared<crocoddyl::ActivationModelWeightedQuadraticBarrier>(
+            crocoddyl::ActivationBounds(lb, ub), weights);
         break;
       default:
         throw_pretty(__FILE__ ":\n Construct wrong TestTypes::Type");

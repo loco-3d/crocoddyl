@@ -57,6 +57,7 @@ void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<Differ
   // Computing the dynamics using ABA or manually for armature case
   if (with_armature_) {
     d->xout = pinocchio::aba(pinocchio_, d->pinocchio, q, v, d->multibody.actuation->tau);
+    pinocchio::updateGlobalPlacements(pinocchio_, d->pinocchio);
   } else {
     pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, v);
     d->pinocchio.M.diagonal() += armature_;
@@ -68,8 +69,6 @@ void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<Differ
   }
 
   // Computing the cost value and residuals
-  pinocchio::forwardKinematics(pinocchio_, d->pinocchio, q, v);
-  pinocchio::updateFramePlacements(pinocchio_, d->pinocchio);
   costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
 }
@@ -100,10 +99,9 @@ void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<Di
 
   // Computing the dynamics derivatives
   if (with_armature_) {
-    pinocchio::computeABADerivatives(pinocchio_, d->pinocchio, q, v, d->multibody.actuation->tau);
-    d->Fx.leftCols(nv) = d->pinocchio.ddq_dq;
-    d->Fx.rightCols(nv) = d->pinocchio.ddq_dv;
-    d->Fx += d->pinocchio.Minv * d->multibody.actuation->dtau_dx;
+    pinocchio::computeABADerivatives(pinocchio_, d->pinocchio, q, v, d->multibody.actuation->tau, d->Fx.leftCols(nv),
+                                     d->Fx.rightCols(nv), d->pinocchio.Minv);
+    d->Fx.noalias() += d->pinocchio.Minv * d->multibody.actuation->dtau_dx;
     d->Fu.noalias() = d->pinocchio.Minv * d->multibody.actuation->dtau_du;
   } else {
     pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout);

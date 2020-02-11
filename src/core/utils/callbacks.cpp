@@ -51,8 +51,8 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
       std::cout << solver.get_xreg() << "  " << solver.get_ureg() << "   ";
       std::cout << std::fixed << std::setprecision(4) << solver.get_steplength() << "     ";
       std::cout << solver.get_is_feasible() << "  ";
-      std::cout << std::scientific << std::setprecision(5) << solver.get_dV() << "  ";
-      std::cout << solver.get_dVexp() << '\n';
+      std::cout << std::scientific << std::setprecision(5) << solver.get_dVexp() << "  ";
+      std::cout << solver.get_dV() << '\n';
       break;
     }
     default: {

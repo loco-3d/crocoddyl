@@ -61,7 +61,7 @@ void exposeIntegratedActionEuler() {
       .add_property("differential",
                     bp::make_function(&IntegratedActionModelEuler::get_differential,
                                       bp::return_value_policy<bp::return_by_value>()),
-                    "differential action model")
+                    &IntegratedActionModelEuler::set_differential, "differential action model")
       .add_property(
           "dt", bp::make_function(&IntegratedActionModelEuler::get_dt, bp::return_value_policy<bp::return_by_value>()),
           &IntegratedActionModelEuler::set_dt, "step time");

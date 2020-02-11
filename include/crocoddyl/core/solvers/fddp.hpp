@@ -27,7 +27,7 @@ class SolverFDDP : public SolverDDP {
                      const bool& is_feasible = false, const double& regInit = 1e-9);
   virtual const Eigen::Vector2d& expectedImprovement();
   void updateExpectedImprovement();
-  virtual double calc();
+  virtual double calcDiff();
   virtual void forwardPass(const double& stepLength);
 
   double get_th_acceptnegstep() const;
@@ -39,7 +39,7 @@ class SolverFDDP : public SolverDDP {
   double dv_;
 
  private:
-  double th_acceptnegstep_;
+  double th_acceptnegstep_;  //!< Threshold used for accepting step along ascent direction
 };
 
 }  // namespace crocoddyl

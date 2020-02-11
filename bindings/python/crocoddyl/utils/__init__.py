@@ -288,7 +288,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
 
         # Computing the dynamics using ABA or manually for armature case
         if self.enable_force:
-            data.xout = pinocchio.aba(self.state.pinocchio, self.pinocchioData, q, v, u)
+            data.xout = pinocchio.aba(self.state.pinocchio, self.pinocchioData, q, v, tau)
         else:
             pinocchio.computeAllTerms(self.state.pinocchio, self.pinocchioData, q, v)
             data.M = self.pinocchioData.M
@@ -305,9 +305,10 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
 
     def calcDiff(self, data, x, u=None, recalc=True):
         self.costsData.shareMemory(data)
-        nq, nv = self.state.nv, self.state.nq
+        nq, nv = self.state.nq, self.state.nv
         q, v = x[:nq], x[-nv:]
         self.actuation.calcDiff(self.actuationData, x, u)
+        tau = self.actuationData.tau
 
         if u is None:
             u = self.unone
@@ -316,7 +317,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
             pinocchio.computeJointJacobians(self.state.pinocchio, self.pinocchioData, q)
         # Computing the dynamics derivatives
         if self.enable_force:
-            pinocchio.computeABADerivatives(self.state.pinocchio, self.pinocchioData, q, v, u)
+            pinocchio.computeABADerivatives(self.state.pinocchio, self.pinocchioData, q, v, tau)
             ddq_dq = self.pinocchioData.ddq_dq
             ddq_dv = self.pinocchioData.ddq_dv
             data.Fx = np.hstack([ddq_dq, ddq_dv]) + self.pinocchioData.Minv * self.actuationData.dtau_dx
@@ -757,12 +758,13 @@ class DDPDerived(crocoddyl.SolverAbstract):
                 except ArithmeticError:
                     continue
                 self.dV_exp = a * (d1 + .5 * d2 * a)
-                if d1 < self.th_grad or not self.isFeasible or self.dV > self.th_acceptStep * self.dV_exp:
-                    # Accept step
-                    self.wasFeasible = self.isFeasible
-                    self.setCandidate(self.xs_try, self.us_try, True)
-                    self.cost = self.cost_try
-                    break
+                if self.dV_exp >= 0:
+                    if d1 < self.th_grad or not self.isFeasible or self.dV > self.th_acceptStep * self.dV_exp:
+                        # Accept step
+                        self.wasFeasible = self.isFeasible
+                        self.setCandidate(self.xs_try, self.us_try, True)
+                        self.cost = self.cost_try
+                        break
             if a > self.th_step:
                 self.decreaseRegularization()
             if a == self.alphas[-1]:
@@ -925,14 +927,14 @@ class FDDPDerived(DDPDerived):
                 d1, d2 = self.expectedImprovement()
 
                 self.dV_exp = a * (d1 + .5 * d2 * a)
-                if self.dV_exp > 0.:  # descend direction
+                if self.dV_exp >= 0.:  # descend direction
                     if d1 < self.th_grad or self.dV > self.th_acceptStep * self.dV_exp:
                         self.wasFeasible = self.isFeasible
                         self.setCandidate(self.xs_try, self.us_try, (self.wasFeasible or a == 1))
                         self.cost = self.cost_try
                         break
                 else:  # reducing the gaps by allowing a small increment in the cost value
-                    if d1 < self.th_grad or self.dV < self.th_acceptNegStep * self.dV_exp:
+                    if self.dV > self.th_acceptNegStep * self.dV_exp:
                         self.wasFeasible = self.isFeasible
                         self.setCandidate(self.xs_try, self.us_try, (self.wasFeasible or a == 1))
                         self.cost = self.cost_try

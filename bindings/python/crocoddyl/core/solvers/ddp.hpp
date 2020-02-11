@@ -71,7 +71,7 @@ void exposeSolverDDP() {
            "For computing the expected improvement, you need to compute first\n"
            "the search direction by running computeDirection. The quadratic\n"
            "improvement model is described as dV = f_0 - f_+ = d1*a + d2*a**2/2.")
-      .def("calc", &SolverDDP::calc, bp::args("self"),
+      .def("calcDiff", &SolverDDP::calcDiff, bp::args("self"),
            "Update the Jacobian and Hessian of the optimal control problem\n\n"
            "These derivatives are computed around the guess state and control\n"
            "trajectory. These trajectory can be set by using setCandidate.\n"
@@ -98,8 +98,7 @@ void exposeSolverDDP() {
       .add_property("Qu", make_function(&SolverDDP::get_Qu, bp::return_value_policy<bp::copy_const_reference>()), "Qu")
       .add_property("K", make_function(&SolverDDP::get_K, bp::return_value_policy<bp::copy_const_reference>()), "K")
       .add_property("k", make_function(&SolverDDP::get_k, bp::return_value_policy<bp::copy_const_reference>()), "k")
-      .add_property("gaps", make_function(&SolverDDP::get_gaps, bp::return_value_policy<bp::copy_const_reference>()),
-                    "gaps")
+      .add_property("fs", make_function(&SolverDDP::get_fs, bp::return_value_policy<bp::copy_const_reference>()), "fs")
       .add_property("regFactor",
                     bp::make_function(&SolverDDP::get_regfactor, bp::return_value_policy<bp::copy_const_reference>()),
                     bp::make_function(&SolverDDP::set_regfactor),

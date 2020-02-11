@@ -20,6 +20,7 @@ SET(${PROJECT_NAME}_SOURCES
   core/solvers/kkt.cpp
   core/solvers/box-qp.cpp
   core/solvers/box-ddp.cpp
+  core/solvers/box-fddp.cpp
   core/states/euclidean.cpp
   core/actions/unicycle.cpp
   core/actions/lqr.cpp
@@ -27,6 +28,7 @@ SET(${PROJECT_NAME}_SOURCES
   core/activations/quadratic.cpp
   core/activations/weighted-quadratic.cpp
   core/activations/quadratic-barrier.cpp
+  core/activations/weighted-quadratic-barrier.cpp
   core/activations/smooth-abs.cpp
   multibody/cost-base.cpp
   multibody/contact-base.cpp
@@ -42,13 +44,14 @@ SET(${PROJECT_NAME}_SOURCES
   multibody/costs/state.cpp
   multibody/costs/control.cpp
   multibody/costs/com-position.cpp
+  multibody/costs/centroidal-momentum.cpp
   multibody/costs/frame-placement.cpp
   multibody/costs/frame-translation.cpp
   multibody/costs/frame-rotation.cpp
   multibody/costs/frame-velocity.cpp
   multibody/costs/contact-force.cpp
   multibody/costs/contact-friction-cone.cpp
-  multibody/costs/centroidal-momentum.cpp
+  multibody/costs/impulse-com.cpp
   multibody/contacts/multiple-contacts.cpp
   multibody/contacts/contact-3d.cpp
   multibody/contacts/contact-6d.cpp

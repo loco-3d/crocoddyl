@@ -55,7 +55,8 @@ double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::
   return cost_;
 }
 
-double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us) {
+double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us,
+                                 const bool& recalc) {
   if (xs.size() != T_ + 1) {
     throw_pretty("Invalid argument: "
                  << "xs has wrong dimension (it should be " + std::to_string(T_ + 1) + ")");
@@ -73,14 +74,14 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const s
 #pragma omp parallel for
 #endif
   for (i = 0; i < T_; ++i) {
-    running_models_[i]->calcDiff(running_datas_[i], xs[i], us[i]);
+    running_models_[i]->calcDiff(running_datas_[i], xs[i], us[i], recalc);
   }
 
   for (std::size_t i = 0; i < T_; ++i) {
     cost_ += running_datas_[i]->cost;
   }
 
-  terminal_model_->calcDiff(terminal_data_, xs.back());
+  terminal_model_->calcDiff(terminal_data_, xs.back(), recalc);
   cost_ += terminal_data_->cost;
   return cost_;
 }
@@ -119,14 +120,6 @@ const std::size_t& ShootingProblem::get_T() const { return T_; }
 
 const Eigen::VectorXd& ShootingProblem::get_x0() const { return x0_; }
 
-void ShootingProblem::set_x0(const Eigen::VectorXd& x0_in) {
-  if (x0_in.size() != x0_.size()) {
-    throw_pretty("Invalid argument: "
-                 << "invalid size of x0 provided.");
-  }
-  x0_ = x0_in;
-}
-
 void ShootingProblem::allocateData() {
   for (std::size_t i = 0; i < T_; ++i) {
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
@@ -146,5 +139,28 @@ const std::vector<boost::shared_ptr<ActionDataAbstract> >& ShootingProblem::get_
 }
 
 const boost::shared_ptr<ActionDataAbstract>& ShootingProblem::get_terminalData() const { return terminal_data_; }
+
+void ShootingProblem::set_x0(const Eigen::VectorXd& x0_in) {
+  if (x0_in.size() != x0_.size()) {
+    throw_pretty("Invalid argument: "
+                 << "invalid size of x0 provided.");
+  }
+  x0_ = x0_in;
+}
+
+void ShootingProblem::set_runningModels(const std::vector<boost::shared_ptr<ActionModelAbstract> >& models) {
+  T_ = models.size();
+  running_models_ = models;
+  running_datas_.clear();
+  for (std::size_t i = 0; i < T_; ++i) {
+    const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
+    running_datas_.push_back(model->createData());
+  }
+}
+
+void ShootingProblem::set_terminalModel(boost::shared_ptr<ActionModelAbstract> model) {
+  terminal_model_ = model;
+  terminal_data_ = terminal_model_->createData();
+}
 
 }  // namespace crocoddyl
