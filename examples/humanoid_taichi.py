@@ -176,7 +176,6 @@ us = [m.quasiStatic(d, rmodel.defaultState) for m, d in list(zip(ddp.models(), d
 ddp.th_stop = 1e-7
 ddp.solve(xs, us, 500, False, 1e-9)
 
-
 # Visualizing the solution in gepetto-viewer
 if WITHDISPLAY:
     display.displayFromSolver(ddp)

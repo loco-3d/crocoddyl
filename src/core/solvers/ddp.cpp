@@ -250,7 +250,7 @@ void SolverDDP::forwardPass(const double& steplength) {
     m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
     us_try_[t].noalias() = us_[t];
     us_try_[t].noalias() -= k_[t] * steplength;
-    us_try_[t].noalias()-= K_[t] * dx_[t];
+    us_try_[t].noalias() -= K_[t] * dx_[t];
     m->calc(d, xs_try_[t], us_try_[t]);
     xs_try_[t + 1] = d->xnext;
     cost_try_ += d->cost;

@@ -142,7 +142,6 @@ xs = [rmodel.defaultState] * len(ddp.models())
 us = [m.quasiStatic(d, rmodel.defaultState) for m, d in list(zip(ddp.models(), ddp.datas()))[:-1]]
 ddp.solve(xs, us, 500, False, 0.1)
 
-
 # Visualizing the solution in gepetto-viewer
 if WITHDISPLAY:
     display.displayFromSolver(ddp)
