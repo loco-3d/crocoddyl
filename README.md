@@ -128,10 +128,10 @@ You can run examples, unit-tests and benchmarks from your build dir:
 cd build
 make test
 make -s examples-quadrupedal_gaits INPUT="display plot" # enable display and plot
-make -s benchmarks-quadrupedal_gaits INPUT="100 walk" # number of trials ; type of gait
+make -s benchmarks-cpp-quadrupedal_gaits INPUT="100 walk" # number of trials ; type of gait
 ```
 
-Alternatively, you cansee the 3D result and/or graphs of your run examples, you can use
+Alternatively, you can see the 3D result and/or graphs of your run examples (through gepetto-viewer and matplotlib), you can use
 
 ```bash
 export CROCODDYL_DISPLAY=1
@@ -150,10 +150,11 @@ If you want to learn about Crocoddyl, take a look at the Jupyter notebooks. Star
 
 To cite **Crocoddyl** in your academic research, please use the following bibtex lines:
 ```tex
-@unpublished{mastalli2020crocoddyl,
+@inproceedings{mastalli20crocoddyl,
   author={Mastalli, Carlos and Budhiraja, Rohan and Merkt, Wolfgang and Saurel, Guilhem and Hammoud, Bilal
-  and Naveau, Maximilien and Carpentier, Justin and Vijayakumar, Sethu and Mansard, Nicolas},
+  and Naveau, Maximilien and Carpentier, Justin, Righetti, Ludovic and Vijayakumar, Sethu and Mansard, Nicolas},
   title={{Crocoddyl: An Efficient and Versatile Framework for Multi-Contact Optimal Control}},
+  booktitle = {IEEE International Conference on Robotics and Automation (ICRA)},
   year={2020}
 }
 ```
@@ -171,10 +172,11 @@ The rest of the publications describes different component of **Crocoddyl**:
 
 
 ### Publications
-- C. Mastalli et al. [Crocoddyl: An Efficient and Versatile Framework for Multi-Contact Optimal Control](https://cmastalli.github.io/publications/crocoddyl20unpub.html), pre-print, 2020
+- C. Mastalli et al. [Crocoddyl: An Efficient and Versatile Framework for Multi-Contact Optimal Control](https://cmastalli.github.io/publications/crocoddyl20icra.html), IEEE International Conference on Robotics and Automation (ICRA), 2020
 - R. Budhiraja, J. Carpentier, C. Mastalli and N. Mansard. [Differential Dynamic Programming for Multi-Phase Rigid Contact Dynamics](https://cmastalli.github.io/publications/mddp18.html), IEEE RAS International Conference on Humanoid Robots (ICHR), 2018
 - Y. Tassa, N. Mansard, E. Todorov. [Control-Limited Differential Dynamic Programming](https://homes.cs.washington.edu/~todorov/papers/TassaICRA14.pdf), IEEE International Conference on Automation and Robotics (ICRA), 2014
 - R. Budhiraja, J. Carpentier and N. Mansard. [Dynamics Consensus between Centroidal and Whole-Body Models for Locomotion of Legged Robots](https://hal.laas.fr/hal-01875031/document), IEEE International Conference on Automation and Robotics (ICRA), 2019
+- T. G. Lembono, C. Mastally, P. Fernbach, N. Mansard and S. Calinon. [Learning How to Walk: Warm-starting Optimal Control Solver with Memory of Motion](https://arxiv.org/abs/2001.11751), IEEE International Conference on Robotics and Automation (ICRA), 2020
 
 
 ## Questions and Issues
