@@ -71,7 +71,7 @@ void exposeSolverDDP() {
            "For computing the expected improvement, you need to compute first\n"
            "the search direction by running computeDirection. The quadratic\n"
            "improvement model is described as dV = f_0 - f_+ = d1*a + d2*a**2/2.")
-      .def("calc", &SolverDDP::calc, bp::args("self"),
+      .def("calcDiff", &SolverDDP::calcDiff, bp::args("self"),
            "Update the Jacobian and Hessian of the optimal control problem\n\n"
            "These derivatives are computed around the guess state and control\n"
            "trajectory. These trajectory can be set by using setCandidate.\n"

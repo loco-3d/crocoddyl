@@ -47,7 +47,7 @@ void CostModelFrameTranslation::calc(const boost::shared_ptr<CostDataAbstract>& 
                                      const Eigen::Ref<const Eigen::VectorXd>&) {
   // Compute the frame translation w.r.t. the reference frame
   CostDataFrameTranslation* d = static_cast<CostDataFrameTranslation*>(data.get());
-  pinocchio::updateFramePlacement(state_->get_pinocchio(), *d->pinocchio,xref_.frame);
+  pinocchio::updateFramePlacement(state_->get_pinocchio(), *d->pinocchio, xref_.frame);
   data->r = d->pinocchio->oMf[xref_.frame].translation() - xref_.oxf;
 
   // Compute the cost
