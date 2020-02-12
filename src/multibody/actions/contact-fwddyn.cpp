@@ -98,7 +98,7 @@ void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<Dif
 void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                          const Eigen::Ref<const Eigen::VectorXd>& x,
                                                          const Eigen::Ref<const Eigen::VectorXd>& u,
-                                                         const bool& recalc) {
+                                                         const bool&) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -114,9 +114,6 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(nv);
 
   DifferentialActionDataContactFwdDynamics* d = static_cast<DifferentialActionDataContactFwdDynamics*>(data.get());
-  if (recalc) {
-    calc(data, x, u);
-  }
 
   // Computing the dynamics derivatives
   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout, d->multibody.contacts->fext);

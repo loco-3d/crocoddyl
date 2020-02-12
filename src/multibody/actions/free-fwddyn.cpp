@@ -75,7 +75,7 @@ void DifferentialActionModelFreeFwdDynamics::calc(const boost::shared_ptr<Differ
 
 void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                       const Eigen::Ref<const Eigen::VectorXd>& x,
-                                                      const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
+                                                      const Eigen::Ref<const Eigen::VectorXd>& u, const bool&) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -90,10 +90,6 @@ void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<Di
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(nv);
 
   DifferentialActionDataFreeFwdDynamics* d = static_cast<DifferentialActionDataFreeFwdDynamics*>(data.get());
-  if (recalc) {
-    calc(data, x, u);
-    pinocchio::computeJointJacobians(pinocchio_, d->pinocchio);
-  }
 
   actuation_->calcDiff(d->multibody.actuation, x, u, false);
 

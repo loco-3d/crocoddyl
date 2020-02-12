@@ -37,7 +37,7 @@ void ActionModelNumDiff::calc(const boost::shared_ptr<ActionDataAbstract>& data,
 
 void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                   const Eigen::Ref<const Eigen::VectorXd>& x,
-                                  const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
+                                  const Eigen::Ref<const Eigen::VectorXd>& u, const bool&) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -47,10 +47,7 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   boost::shared_ptr<ActionDataNumDiff> data_nd = boost::static_pointer_cast<ActionDataNumDiff>(data);
-
-  if (recalc) {
-    model_->calc(data_nd->data_0, x, u);
-  }
+  
   const Eigen::VectorXd& xn0 = data_nd->data_0->xnext;
   const double& c0 = data_nd->data_0->cost;
   data->xnext = data_nd->data_0->xnext;

@@ -55,17 +55,14 @@ void CostModelContactForce::calc(const boost::shared_ptr<CostDataAbstract>& data
 
 void CostModelContactForce::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                      const Eigen::Ref<const Eigen::VectorXd>& x,
-                                     const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  if (recalc) {
-    calc(data, x, u);
-  }
+                                     const Eigen::Ref<const Eigen::VectorXd>& u, const bool&) {
 
   CostDataContactForce* d = static_cast<CostDataContactForce*>(data.get());
 
   const Eigen::MatrixXd& df_dx = d->contact->df_dx;
   const Eigen::MatrixXd& df_du = d->contact->df_du;
 
-  activation_->calcDiff(data->activation, data->r, recalc);
+  activation_->calcDiff(data->activation, data->r, false);
   data->Rx = df_dx;
   data->Ru = df_du;
   data->Lx.noalias() = df_dx.transpose() * data->activation->Ar;

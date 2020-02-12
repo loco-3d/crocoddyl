@@ -25,14 +25,12 @@ void ActivationModelQuad::calc(const boost::shared_ptr<ActivationDataAbstract>& 
 }
 
 void ActivationModelQuad::calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
-                                   const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc) {
+                                   const Eigen::Ref<const Eigen::VectorXd>& r, const bool&) {
   if (static_cast<std::size_t>(r.size()) != nr_) {
     throw_pretty("Invalid argument: "
                  << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
   }
-  if (recalc) {
-    calc(data, r);
-  }
+
   data->Ar = r;
   // The Hessian has constant values which were set in createData.
   assert_pretty(data->Arr == Eigen::MatrixXd::Identity(nr_, nr_), "Arr has wrong value");

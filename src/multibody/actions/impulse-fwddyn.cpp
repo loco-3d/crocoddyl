@@ -91,7 +91,7 @@ void ActionModelImpulseFwdDynamics::calc(const boost::shared_ptr<ActionDataAbstr
 
 void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                              const Eigen::Ref<const Eigen::VectorXd>& x,
-                                             const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
+                                             const Eigen::Ref<const Eigen::VectorXd>& u, const bool&) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -103,9 +103,6 @@ void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataA
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(nv);
 
   ActionDataImpulseFwdDynamics* d = static_cast<ActionDataImpulseFwdDynamics*>(data.get());
-  if (recalc) {
-    calc(data, x, u);
-  }
 
   // Computing the dynamics derivatives
   pinocchio_.gravity.setZero();

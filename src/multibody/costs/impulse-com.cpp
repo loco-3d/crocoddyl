@@ -46,17 +46,13 @@ void CostModelImpulseCoM::calc(const boost::shared_ptr<CostDataAbstract>& data,
 
 void CostModelImpulseCoM::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                    const Eigen::Ref<const Eigen::VectorXd>& x,
-                                   const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  if (recalc) {
-    calc(data, x, u);
-  }
-
+                                   const Eigen::Ref<const Eigen::VectorXd>& u, const bool&) {
   CostDataImpulseCoM* d = static_cast<CostDataImpulseCoM*>(data.get());
 
   // Compute the derivatives of the frame placement
   const std::size_t& nv = state_->get_nv();
   const std::size_t& ndx = state_->get_ndx();
-  activation_->calcDiff(data->activation, data->r, recalc);
+  activation_->calcDiff(data->activation, data->r, false);
 
   pinocchio::getCenterOfMassVelocityDerivatives(state_->get_pinocchio(), d->pinocchio_internal, d->dvc_dq);
   pinocchio::jacobianCenterOfMass(state_->get_pinocchio(), d->pinocchio_internal, false);

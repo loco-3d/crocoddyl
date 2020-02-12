@@ -47,7 +47,7 @@ void ActionModelLQR::calc(const boost::shared_ptr<ActionDataAbstract>& data,
 
 void ActionModelLQR::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                               const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
-                              const bool& recalc) {
+                              const bool&) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -57,9 +57,6 @@ void ActionModelLQR::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  if (recalc) {
-    calc(data, x, u);
-  }
   data->Lx = lx_ + Lxx_ * x + Lxu_ * u;
   data->Lu = lu_ + Lxu_.transpose() * x + Luu_ * u;
   data->Fx = Fx_;

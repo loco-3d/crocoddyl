@@ -58,10 +58,8 @@ void CostModelFrameRotation::calc(const boost::shared_ptr<CostDataAbstract>& dat
 
 void CostModelFrameRotation::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                       const Eigen::Ref<const Eigen::VectorXd>& x,
-                                      const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  if (recalc) {
-    calc(data, x, u);
-  }
+                                      const Eigen::Ref<const Eigen::VectorXd>& u, const bool&) {
+
   // Update the frame placements
   CostDataFrameRotation* d = static_cast<CostDataFrameRotation*>(data.get());
 
@@ -72,7 +70,7 @@ void CostModelFrameRotation::calcDiff(const boost::shared_ptr<CostDataAbstract>&
 
   // Compute the derivatives of the frame placement
   const std::size_t& nv = state_->get_nv();
-  activation_->calcDiff(data->activation, data->r, recalc);
+  activation_->calcDiff(data->activation, data->r, false);
   data->Rx.leftCols(nv) = d->J;
   data->Lx.head(nv).noalias() = d->J.transpose() * data->activation->Ar;
   d->Arr_J.noalias() = data->activation->Arr * d->J;

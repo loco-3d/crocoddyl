@@ -60,13 +60,10 @@ void ImpulseModelMultiple::calc(const boost::shared_ptr<ImpulseDataMultiple>& da
 }
 
 void ImpulseModelMultiple::calcDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
-                                    const Eigen::Ref<const Eigen::VectorXd>& x, const bool& recalc) {
+                                    const Eigen::Ref<const Eigen::VectorXd>& x, const bool&) {
   if (data->impulses.size() != impulses_.size()) {
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of impulse datas and models");
-  }
-  if (recalc) {
-    calc(data, x);
   }
   std::size_t ni = 0;
 
