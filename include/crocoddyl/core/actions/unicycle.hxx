@@ -7,7 +7,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/core/actions/unicycle.hpp"
 
 namespace crocoddyl {
 template <typename Scalar>
