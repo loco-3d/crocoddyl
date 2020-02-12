@@ -52,6 +52,7 @@ void ActionModelAbstract::quasiStatic(const boost::shared_ptr<ActionDataAbstract
   } else {
     Eigen::VectorXd du = Eigen::VectorXd::Zero(nu_);
     for (std::size_t i = 0; i < maxiter; ++i) {
+      calc(data, x, u);
       calcDiff(data, x, u);
       state_->diff(x, data->xnext, dx);
       du = -pseudoInverse(data->Fu) * data->Fx * dx;

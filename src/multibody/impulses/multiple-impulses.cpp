@@ -76,7 +76,7 @@ void ImpulseModelMultiple::calcDiff(const boost::shared_ptr<ImpulseDataMultiple>
     boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
     assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between data and model");
 
-    m_i.impulse->calcDiff(d_i, x, true);
+    m_i.impulse->calcDiff(d_i, x);
     const std::size_t& ni_i = m_i.impulse->get_ni();
     data->dv0_dq.block(ni, 0, ni_i, nv) = d_i->dv0_dq;
     ni += ni_i;

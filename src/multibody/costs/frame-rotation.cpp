@@ -70,7 +70,7 @@ void CostModelFrameRotation::calcDiff(const boost::shared_ptr<CostDataAbstract>&
 
   // Compute the derivatives of the frame placement
   const std::size_t& nv = state_->get_nv();
-  activation_->calcDiff(data->activation, data->r, true);
+  activation_->calcDiff(data->activation, data->r);
   data->Rx.leftCols(nv) = d->J;
   data->Lx.head(nv).noalias() = d->J.transpose() * data->activation->Ar;
   d->Arr_J.noalias() = data->activation->Arr * d->J;

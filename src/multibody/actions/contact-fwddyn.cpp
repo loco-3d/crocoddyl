@@ -119,8 +119,8 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout, d->multibody.contacts->fext);
   pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->multibody.contacts->Jc, d->Kinv);
 
-  actuation_->calcDiff(d->multibody.actuation, x, u, true);
-  contacts_->calcDiff(d->multibody.contacts, x, true);
+  actuation_->calcDiff(d->multibody.actuation, x, u);
+  contacts_->calcDiff(d->multibody.contacts, x);
 
   Eigen::Block<Eigen::MatrixXd> a_partial_dtau = d->Kinv.topLeftCorner(nv, nv);
   Eigen::Block<Eigen::MatrixXd> a_partial_da = d->Kinv.topRightCorner(nv, nc);
@@ -143,7 +143,7 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
     contacts_->updateAccelerationDiff(d->multibody.contacts, d->Fx.bottomRows(nv));
     contacts_->updateForceDiff(d->multibody.contacts, d->df_dx, d->df_du);
   }
-  costs_->calcDiff(d->costs, x, u, true);
+  costs_->calcDiff(d->costs, x, u);
 }
 
 boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelContactFwdDynamics::createData() {

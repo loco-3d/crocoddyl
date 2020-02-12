@@ -91,7 +91,7 @@ void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<Di
 
   DifferentialActionDataFreeFwdDynamics* d = static_cast<DifferentialActionDataFreeFwdDynamics*>(data.get());
 
-  actuation_->calcDiff(d->multibody.actuation, x, u, true);
+  actuation_->calcDiff(d->multibody.actuation, x, u);
 
   // Computing the dynamics derivatives
   if (with_armature_) {
@@ -108,7 +108,7 @@ void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<Di
   }
 
   // Computing the cost derivatives
-  costs_->calcDiff(d->costs, x, u, true);
+  costs_->calcDiff(d->costs, x, u);
 }
 
 boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelFreeFwdDynamics::createData() {
