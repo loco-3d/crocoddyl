@@ -46,7 +46,6 @@ class ShootingProblemTestCase(unittest.TestCase):
         self.assertAlmostEqual(cost, costDer, 10, "Wrong cost value")
         for d1, d2 in zip(self.PROBLEM.runningDatas, self.PROBLEM_DER.runningDatas):
             self.assertTrue(np.allclose(d1.xnext, d2.xnext, atol=1e-9), "Next state doesn't match.")
-            print d1.Lx.T, d2.Lx.T
             self.assertTrue(np.allclose(d1.Lx, d2.Lx, atol=1e-9), "Lx doesn't match.")
             self.assertTrue(np.allclose(d1.Lu, d2.Lu, atol=1e-9), "Lu doesn't match.")
             self.assertTrue(np.allclose(d1.Lxx, d2.Lxx, atol=1e-9), "Lxx doesn't match.")
