@@ -6,8 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/core/optctrl/shooting.hpp"
 #include <iostream>
 #ifdef WITH_MULTITHREADING
 #include <omp.h>
@@ -16,9 +14,10 @@
 
 namespace crocoddyl {
 
-ShootingProblem::ShootingProblem(const Eigen::VectorXd& x0,
-                                 const std::vector<boost::shared_ptr<ActionModelAbstract> >& running_models,
-                                 boost::shared_ptr<ActionModelAbstract> terminal_model)
+template <typename Scalar>
+ShootingProblemTpl<Scalar>::ShootingProblemTpl(const VectorXs& x0,
+                                               const std::vector<boost::shared_ptr<ActionModelAbstract> >& running_models,
+                                               boost::shared_ptr<ActionModelAbstract> terminal_model)
     : cost_(0.), T_(running_models.size()), x0_(x0), terminal_model_(terminal_model), running_models_(running_models) {
   if (static_cast<std::size_t>(x0.size()) != running_models_[0]->get_state()->get_nx()) {
     throw_pretty("Invalid argument: "
@@ -27,10 +26,11 @@ ShootingProblem::ShootingProblem(const Eigen::VectorXd& x0,
   }
   allocateData();
 }
-
-ShootingProblem::~ShootingProblem() {}
-
-double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us) {
+template <typename Scalar>
+ShootingProblemTpl<Scalar>::~ShootingProblemTpl() {}
+template <typename Scalar>
+Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs,
+                                        const std::vector<VectorXs>& us) {
   if (xs.size() != T_ + 1) {
     throw_pretty("Invalid argument: "
                  << "xs has wrong dimension (it should be " + std::to_string(T_ + 1) + ")");
@@ -55,8 +55,8 @@ double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::
   cost_ += terminal_data_->cost;
   return cost_;
 }
-
-double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us) {
+template <typename Scalar>
+Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, const std::vector<VectorXs>& us) {
   if (xs.size() != T_ + 1) {
     throw_pretty("Invalid argument: "
                  << "xs has wrong dimension (it should be " + std::to_string(T_ + 1) + ")");
@@ -84,8 +84,8 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const s
 
   return cost_;
 }
-
-void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us, std::vector<Eigen::VectorXd>& xs) {
+template <typename Scalar>
+void ShootingProblemTpl<Scalar>::rollout(const std::vector<VectorXs>& us, std::vector<VectorXs>& xs) {
   if (xs.size() != T_ + 1) {
     throw_pretty("Invalid argument: "
                  << "xs has wrong dimension (it should be " + std::to_string(T_ + 1) + ")");
@@ -99,55 +99,55 @@ void ShootingProblem::rollout(const std::vector<Eigen::VectorXd>& us, std::vecto
   for (std::size_t i = 0; i < T_; ++i) {
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
     const boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
-    const Eigen::VectorXd& x = xs[i];
-    const Eigen::VectorXd& u = us[i];
+    const VectorXs& x = xs[i];
+    const VectorXs& u = us[i];
 
     model->calc(data, x, u);
     xs[i + 1] = data->xnext;
   }
   terminal_model_->calc(terminal_data_, xs.back());
 }
-
-std::vector<Eigen::VectorXd> ShootingProblem::rollout_us(const std::vector<Eigen::VectorXd>& us) {
-  std::vector<Eigen::VectorXd> xs;
+template <typename Scalar>
+std::vector<typename MathBaseTpl<Scalar>::VectorXs> ShootingProblemTpl<Scalar>::rollout_us(const std::vector<VectorXs>& us) {
+  std::vector<VectorXs> xs;
   xs.resize(T_ + 1);
   rollout(us, xs);
   return xs;
 }
-
-const std::size_t& ShootingProblem::get_T() const { return T_; }
-
-const Eigen::VectorXd& ShootingProblem::get_x0() const { return x0_; }
-
-void ShootingProblem::allocateData() {
+template <typename Scalar>
+const std::size_t& ShootingProblemTpl<Scalar>::get_T() const { return T_; }
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& ShootingProblemTpl<Scalar>::get_x0() const { return x0_; }
+template <typename Scalar>
+void ShootingProblemTpl<Scalar>::allocateData() {
   for (std::size_t i = 0; i < T_; ++i) {
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
     running_datas_.push_back(model->createData());
   }
   terminal_data_ = terminal_model_->createData();
 }
-
-const std::vector<boost::shared_ptr<ActionModelAbstract> >& ShootingProblem::get_runningModels() const {
+template <typename Scalar>
+const std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > >& ShootingProblemTpl<Scalar>::get_runningModels() const {
   return running_models_;
 }
-
-const boost::shared_ptr<ActionModelAbstract>& ShootingProblem::get_terminalModel() const { return terminal_model_; }
-
-const std::vector<boost::shared_ptr<ActionDataAbstract> >& ShootingProblem::get_runningDatas() const {
+template <typename Scalar>
+const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >& ShootingProblemTpl<Scalar>::get_terminalModel() const { return terminal_model_; }
+template <typename Scalar>
+const std::vector<boost::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> > >& ShootingProblemTpl<Scalar>::get_runningDatas() const {
   return running_datas_;
 }
-
-const boost::shared_ptr<ActionDataAbstract>& ShootingProblem::get_terminalData() const { return terminal_data_; }
-
-void ShootingProblem::set_x0(const Eigen::VectorXd& x0_in) {
+template <typename Scalar>
+const boost::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> >& ShootingProblemTpl<Scalar>::get_terminalData() const { return terminal_data_; }
+template <typename Scalar>
+void ShootingProblemTpl<Scalar>::set_x0(const VectorXs& x0_in) {
   if (x0_in.size() != x0_.size()) {
     throw_pretty("Invalid argument: "
                  << "invalid size of x0 provided.");
   }
   x0_ = x0_in;
 }
-
-void ShootingProblem::set_runningModels(const std::vector<boost::shared_ptr<ActionModelAbstract> >& models) {
+template <typename Scalar>
+void ShootingProblemTpl<Scalar>::set_runningModels(const std::vector<boost::shared_ptr<ActionModelAbstract> >& models) {
   T_ = models.size();
   running_models_ = models;
   running_datas_.clear();
@@ -156,8 +156,8 @@ void ShootingProblem::set_runningModels(const std::vector<boost::shared_ptr<Acti
     running_datas_.push_back(model->createData());
   }
 }
-
-void ShootingProblem::set_terminalModel(boost::shared_ptr<ActionModelAbstract> model) {
+template <typename Scalar>
+void ShootingProblemTpl<Scalar>::set_terminalModel(boost::shared_ptr<ActionModelAbstract> model) {
   terminal_model_ = model;
   terminal_data_ = terminal_model_->createData();
 }
