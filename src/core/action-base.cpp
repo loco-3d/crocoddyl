@@ -30,7 +30,7 @@ void ActionModelAbstract::calc(const boost::shared_ptr<ActionDataAbstract>& data
 
 void ActionModelAbstract::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                    const Eigen::Ref<const Eigen::VectorXd>& x, const bool&) {
-  calcDiff(data, x, unone_, false);
+  calcDiff(data, x, unone_);
 }
 
 void ActionModelAbstract::quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<Eigen::VectorXd> u,

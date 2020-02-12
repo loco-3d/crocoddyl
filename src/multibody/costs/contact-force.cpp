@@ -62,7 +62,7 @@ void CostModelContactForce::calcDiff(const boost::shared_ptr<CostDataAbstract>& 
   const Eigen::MatrixXd& df_dx = d->contact->df_dx;
   const Eigen::MatrixXd& df_du = d->contact->df_du;
 
-  activation_->calcDiff(data->activation, data->r, false);
+  activation_->calcDiff(data->activation, data->r);
   data->Rx = df_dx;
   data->Ru = df_du;
   data->Lx.noalias() = df_dx.transpose() * data->activation->Ar;

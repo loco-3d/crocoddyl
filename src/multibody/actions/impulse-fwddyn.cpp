@@ -112,7 +112,7 @@ void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataA
   pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->multibody.impulses->Jc, d->Kinv);
 
   pinocchio::computeForwardKinematicsDerivatives(pinocchio_, d->pinocchio, q, d->pinocchio.dq_after, d->vnone);
-  impulses_->calcDiff(d->multibody.impulses, x, false);
+  impulses_->calcDiff(d->multibody.impulses, x);
 
   Eigen::Block<Eigen::MatrixXd> a_partial_dtau = d->Kinv.topLeftCorner(nv, nv);
   Eigen::Block<Eigen::MatrixXd> a_partial_da = d->Kinv.topRightCorner(nv, ni);
@@ -132,7 +132,7 @@ void ActionModelImpulseFwdDynamics::calcDiff(const boost::shared_ptr<ActionDataA
     impulses_->updateVelocityDiff(d->multibody.impulses, d->Fx.bottomRows(nv));
     impulses_->updateForceDiff(d->multibody.impulses, d->df_dq);
   }
-  costs_->calcDiff(d->costs, x, u, false);
+  costs_->calcDiff(d->costs, x, u);
 }
 
 boost::shared_ptr<ActionDataAbstract> ActionModelImpulseFwdDynamics::createData() {

@@ -90,7 +90,7 @@ void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbst
   boost::shared_ptr<IntegratedActionDataEuler> d = boost::static_pointer_cast<IntegratedActionDataEuler>(data);
 
   // Computing the derivatives for the time-continuous model (i.e. differential model)
-  differential_->calcDiff(d->differential, x, u, false);
+  differential_->calcDiff(d->differential, x, u);
   differential_->get_state()->Jintegrate(x, d->dx, d->dxnext_dx, d->dxnext_ddx);
 
   d->Fx = d->dxnext_dx;

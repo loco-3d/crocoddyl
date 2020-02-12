@@ -137,7 +137,7 @@ void CostModelState::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
 
   CostDataState* d = static_cast<CostDataState*>(data.get());
   state_->Jdiff(xref_, x, data->Rx, data->Rx, second);
-  activation_->calcDiff(data->activation, data->r,false);
+  activation_->calcDiff(data->activation, data->r,true);
   data->Lx.noalias() = data->Rx.transpose() * data->activation->Ar;
   d->Arr_Rx.noalias() = data->activation->Arr * data->Rx;
   data->Lxx.noalias() = data->Rx.transpose() * d->Arr_Rx;

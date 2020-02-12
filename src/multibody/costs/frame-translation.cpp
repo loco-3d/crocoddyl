@@ -67,7 +67,7 @@ void CostModelFrameTranslation::calcDiff(const boost::shared_ptr<CostDataAbstrac
 
   // Compute the derivatives of the frame placement
   const std::size_t& nv = state_->get_nv();
-  activation_->calcDiff(d->activation, d->r, false);
+  activation_->calcDiff(d->activation, d->r);
   d->Rx.leftCols(nv) = d->J;
   d->Lx.head(nv) = d->J.transpose() * d->activation->Ar;
   d->Lxx.topLeftCorner(nv, nv) = d->J.transpose() * d->activation->Arr * d->J;

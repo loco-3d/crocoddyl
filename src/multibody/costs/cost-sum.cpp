@@ -107,7 +107,7 @@ void CostModelSum::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Ei
     boost::shared_ptr<CostDataAbstract>& d_i = it_d->second;
     assert_pretty(it_m->first == it_d->first, "it doesn't match the cost name between data and model");
 
-    m_i.cost->calcDiff(d_i, x, u, false);
+    m_i.cost->calcDiff(d_i, x, u, true);
     data->Lx += m_i.weight * d_i->Lx;
     data->Lu += m_i.weight * d_i->Lu;
     data->Lxx += m_i.weight * d_i->Lxx;

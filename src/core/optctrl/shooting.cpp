@@ -89,9 +89,9 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const s
 #pragma omp parallel for
 #endif
   for (i = 0; i < T_; ++i) {
-    running_models_[i]->calcDiff(running_datas_[i], xs[i], us[i], false);
+    running_models_[i]->calcDiff(running_datas_[i], xs[i], us[i]);
   }
-  terminal_model_->calcDiff(terminal_data_, xs.back(), false);
+  terminal_model_->calcDiff(terminal_data_, xs.back());
 
   cost_ = 0;
   for (std::size_t i = 0; i < T_; ++i) {

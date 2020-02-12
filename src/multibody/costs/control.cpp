@@ -73,7 +73,7 @@ void CostModelControl::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  activation_->calcDiff(data->activation, data->r, false);
+  activation_->calcDiff(data->activation, data->r);
   data->Lu = data->activation->Ar;
   data->Luu.diagonal() = data->activation->Arr.diagonal();
 }

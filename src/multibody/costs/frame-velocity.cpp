@@ -67,7 +67,7 @@ void CostModelFrameVelocity::calcDiff(const boost::shared_ptr<CostDataAbstract>&
 
   // Compute the derivatives of the frame velocity
   const std::size_t& nv = state_->get_nv();
-  activation_->calcDiff(data->activation, data->r, false);
+  activation_->calcDiff(data->activation, data->r, true);
   data->Rx.leftCols(nv).noalias() = d->fXj * d->dv_dq;
   data->Rx.rightCols(nv).noalias() = d->fXj * d->dv_dv;
   data->Lx.noalias() = data->Rx.transpose() * data->activation->Ar;

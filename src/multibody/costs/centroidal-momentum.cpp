@@ -61,7 +61,7 @@ void CostModelCentroidalMomentum::calcDiff(const boost::shared_ptr<CostDataAbstr
   Eigen::Ref<pinocchio::Data::Matrix6x> Rq = data->Rx.leftCols(nv);
   Eigen::Ref<pinocchio::Data::Matrix6x> Rv = data->Rx.rightCols(nv);
 
-  activation_->calcDiff(data->activation, data->r, false);
+  activation_->calcDiff(data->activation, data->r);
   pinocchio::getCentroidalDynamicsDerivatives(state_->get_pinocchio(), *d->pinocchio, Rq, d->dhd_dq, d->dhd_dv, Rv);
 
   // The derivative computation in pinocchio does not take the frame of reference into

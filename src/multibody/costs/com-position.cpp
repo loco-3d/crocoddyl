@@ -59,7 +59,7 @@ void CostModelCoMPosition::calcDiff(const boost::shared_ptr<CostDataAbstract>& d
 
   // Compute the derivatives of the frame placement
   const std::size_t& nv = state_->get_nv();
-  activation_->calcDiff(data->activation, data->r, false);
+  activation_->calcDiff(data->activation, data->r, true);
   data->Rx.leftCols(nv) = d->pinocchio->Jcom;
   data->Lx.head(nv).noalias() = d->pinocchio->Jcom.transpose() * data->activation->Ar;
   d->Arr_Jcom.noalias() = data->activation->Arr * d->pinocchio->Jcom;
