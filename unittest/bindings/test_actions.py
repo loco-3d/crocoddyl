@@ -44,7 +44,10 @@ class ActionModelAbstractTestCase(unittest.TestCase):
 
     def test_calcDiff(self):
         # Run calcDiff for both action models
+        self.MODEL.calc(self.DATA, self.x, self.u)
         self.MODEL.calcDiff(self.DATA, self.x, self.u)
+
+        self.MODEL_DER.calc(self.DATA_DER, self.x, self.u)
         self.MODEL_DER.calcDiff(self.DATA_DER, self.x, self.u)
         # Checking the next state value
         if isinstance(self.MODEL, crocoddyl.ActionModelAbstract):

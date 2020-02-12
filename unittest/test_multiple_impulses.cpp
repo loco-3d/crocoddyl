@@ -257,6 +257,7 @@ void test_calc_diff() {
 
   // pinocchio data have been filled so the results of this operation are
   // none null matrices
+  model.calc(data, dx);
   model.calcDiff(data, dx, true);
 
   // Check that nothing has been computed and that all value are initialized to 0
