@@ -92,7 +92,7 @@ void DifferentialActionModelFreeFwdDynamics::calcDiff(const boost::shared_ptr<Di
   DifferentialActionDataFreeFwdDynamics* d = static_cast<DifferentialActionDataFreeFwdDynamics*>(data.get());
   if (recalc) {
     calc(data, x, u);
-    pinocchio::computeJointJacobians(pinocchio_, d->pinocchio, q);
+    pinocchio::computeJointJacobians(pinocchio_, d->pinocchio);
   }
 
   actuation_->calcDiff(d->multibody.actuation, x, u, false);
