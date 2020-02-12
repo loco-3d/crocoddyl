@@ -47,7 +47,7 @@ void ActionModelNumDiff::calcDiff(const boost::shared_ptr<ActionDataAbstract>& d
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   boost::shared_ptr<ActionDataNumDiff> data_nd = boost::static_pointer_cast<ActionDataNumDiff>(data);
-  
+
   const Eigen::VectorXd& xn0 = data_nd->data_0->xnext;
   const double& c0 = data_nd->data_0->cost;
   data->xnext = data_nd->data_0->xnext;

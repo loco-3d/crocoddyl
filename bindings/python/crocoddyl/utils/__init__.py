@@ -315,7 +315,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
             pinocchio.computeJointJacobians(self.state.pinocchio, self.pinocchioData, q)
 
         self.actuation.calcDiff(self.actuationData, x, u)
-        tau = self.actuationData.tau            
+        tau = self.actuationData.tau
         # Computing the dynamics derivatives
         if self.enable_force:
             pinocchio.computeABADerivatives(self.state.pinocchio, self.pinocchioData, q, v, tau)

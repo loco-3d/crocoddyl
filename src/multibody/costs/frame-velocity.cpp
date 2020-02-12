@@ -58,8 +58,6 @@ void CostModelFrameVelocity::calc(const boost::shared_ptr<CostDataAbstract>& dat
 void CostModelFrameVelocity::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                       const Eigen::Ref<const Eigen::VectorXd>& x,
                                       const Eigen::Ref<const Eigen::VectorXd>& u, const bool&) {
-
-
   // Get the partial derivatives of the local frame velocity
   CostDataFrameVelocity* d = static_cast<CostDataFrameVelocity*>(data.get());
   pinocchio::getJointVelocityDerivatives(state_->get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL, d->dv_dq,

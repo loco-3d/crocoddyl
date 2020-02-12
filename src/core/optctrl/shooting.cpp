@@ -49,10 +49,10 @@ double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::
     model->calc(data, x, u);
   }
   terminal_model_->calc(terminal_data_, xs.back());
-  
+
   for (std::size_t i = 0; i < T_; ++i) {
     cost_ += running_datas_[i]->cost;
-  }  
+  }
   cost_ += terminal_data_->cost;
   return cost_;
 }
@@ -74,7 +74,6 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const s
   omp_set_num_threads(NUM_THREADS);
 #endif
 
-  
   if (recalc) {
 #ifdef WITH_MULTITHREADING
 #pragma omp parallel for
@@ -84,7 +83,7 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const s
     }
     terminal_model_->calc(terminal_data_, xs.back());
   }
-  
+
 #ifdef WITH_MULTITHREADING
 #pragma omp parallel for
 #endif

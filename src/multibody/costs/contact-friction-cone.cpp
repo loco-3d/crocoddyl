@@ -60,7 +60,6 @@ void CostModelContactFrictionCone::calc(const boost::shared_ptr<CostDataAbstract
 void CostModelContactFrictionCone::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                             const Eigen::Ref<const Eigen::VectorXd>& x,
                                             const Eigen::Ref<const Eigen::VectorXd>& u, const bool&) {
-
   CostDataContactFrictionCone* d = static_cast<CostDataContactFrictionCone*>(data.get());
 
   const Eigen::MatrixXd& df_dx = d->contact->df_dx;

@@ -1,7 +1,6 @@
 import crocoddyl
 import pinocchio
 import example_robot_data
-import numpy as np
 
 from test_utils import NUMDIFF_MODIFIER, assertNumDiff
 
@@ -31,7 +30,7 @@ MODEL_ND.disturbance *= 10
 dnum = MODEL_ND.createData()
 
 x = ROBOT_STATE.rand()
-u = pinocchio.utils.rand(0)  #(ACTUATION.nu)
+u = pinocchio.utils.rand(0)  # (ACTUATION.nu)
 MODEL.calc(DATA, x, u)
 MODEL.calcDiff(DATA, x, u)
 MODEL_ND.calc(dnum, x, u)
