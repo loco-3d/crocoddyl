@@ -46,11 +46,13 @@ double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::
     const boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
     const Eigen::VectorXd& x = xs[i];
     const Eigen::VectorXd& u = us[i];
-
     model->calc(data, x, u);
-    cost_ += data->cost;
   }
   terminal_model_->calc(terminal_data_, xs.back());
+  
+  for (std::size_t i = 0; i < T_; ++i) {
+    cost_ += running_datas_[i]->cost;
+  }  
   cost_ += terminal_data_->cost;
   return cost_;
 }
@@ -66,23 +68,37 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const s
                  << "us has wrong dimension (it should be " + std::to_string(T_) + ")");
   }
 
-  cost_ = 0;
   std::size_t i;
 
 #ifdef WITH_MULTITHREADING
   omp_set_num_threads(NUM_THREADS);
+#endif
+
+  
+  if (recalc) {
+#ifdef WITH_MULTITHREADING
+#pragma omp parallel for
+#endif
+    for (i = 0; i < T_; ++i) {
+      running_models_[i]->calc(running_datas_[i], xs[i], us[i]);
+    }
+    terminal_model_->calc(terminal_data_, xs.back());
+  }
+  
+#ifdef WITH_MULTITHREADING
 #pragma omp parallel for
 #endif
   for (i = 0; i < T_; ++i) {
-    running_models_[i]->calcDiff(running_datas_[i], xs[i], us[i], recalc);
+    running_models_[i]->calcDiff(running_datas_[i], xs[i], us[i], false);
   }
+  terminal_model_->calcDiff(terminal_data_, xs.back(), false);
 
+  cost_ = 0;
   for (std::size_t i = 0; i < T_; ++i) {
     cost_ += running_datas_[i]->cost;
   }
-
-  terminal_model_->calcDiff(terminal_data_, xs.back(), recalc);
   cost_ += terminal_data_->cost;
+
   return cost_;
 }
 
