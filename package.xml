@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>crocoddyl</name>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <description>Crocoddyl optimal control library</description>
-  <!-- The maintainers listed here are for receiving emails e.g. from the ROS buildfarm. 
+  <!-- The maintainers listed here are for receiving emails e.g. from the ROS buildfarm.
   Please check the README.md at the repository URL for additional detail. -->
   <maintainer email="carlos.mastalli@gmail.com">Carlos Mastalli</maintainer>
   <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
