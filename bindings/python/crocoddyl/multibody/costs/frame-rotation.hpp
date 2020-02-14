@@ -55,21 +55,14 @@ void exposeCostFrameRotation() {
                                 ":param x: time-discrete state vector\n"
                                 ":param u: time-discrete control input"))
       .def<void (CostModelFrameRotation::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                            const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &CostModelFrameRotation::calcDiff_wrap, bp::args("self", "data", "x", "u", "recalc"),
+                                            const Eigen::VectorXd&)>(
+          "calcDiff", &CostModelFrameRotation::calcDiff_wrap, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the frame rotation cost.\n\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input\n"
-          ":param recalc: If true, it updates the state evolution and the cost value (default True).")
-      .def<void (CostModelFrameRotation::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                            const Eigen::VectorXd&)>(
-          "calcDiff", &CostModelFrameRotation::calcDiff_wrap, bp::args("self", "data", "x", "u"))
+          ":param u: time-discrete control input\n")
       .def<void (CostModelFrameRotation::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &CostModelFrameRotation::calcDiff_wrap, bp::args("self", "data", "x"))
-      .def<void (CostModelFrameRotation::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                            const bool&)>("calcDiff", &CostModelFrameRotation::calcDiff_wrap,
-                                                          bp::args("self", "data", "x", "recalc"))
       .def("createData", &CostModelFrameRotation::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the frame rotation cost data.\n\n"

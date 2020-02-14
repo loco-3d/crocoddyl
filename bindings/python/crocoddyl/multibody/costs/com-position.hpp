@@ -55,21 +55,15 @@ void exposeCostCoMPosition() {
                                 ":param x: time-discrete state vector\n"
                                 ":param u: time-discrete control input"))
       .def<void (CostModelCoMPosition::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                          const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &CostModelCoMPosition::calcDiff_wrap, bp::args("self", "data", "x", "u", "recalc"),
+                                          const Eigen::VectorXd&)>(
+          "calcDiff", &CostModelCoMPosition::calcDiff_wrap, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the CoM position cost.\n\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input\n"
-          ":param recalc: If true, it updates the state evolution and the cost value (default True).")
-      .def<void (CostModelCoMPosition::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                          const Eigen::VectorXd&)>("calcDiff", &CostModelCoMPosition::calcDiff_wrap,
-                                                                   bp::args("self", "data", "x", "u"))
+          ":param u: time-discrete control input\n")
+
       .def<void (CostModelCoMPosition::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &CostModelCoMPosition::calcDiff_wrap, bp::args("self", "data", "x"))
-      .def<void (CostModelCoMPosition::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                          const bool&)>("calcDiff", &CostModelCoMPosition::calcDiff_wrap,
-                                                        bp::args("self", "data", "x", "recalc"))
       .def("createData", &CostModelCoMPosition::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the CoM position cost data.\n\n"

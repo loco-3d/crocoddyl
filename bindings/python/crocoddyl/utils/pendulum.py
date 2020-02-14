@@ -15,13 +15,11 @@ class CostModelDoublePendulum(crocoddyl.CostModelAbstract):
         self.activation.calc(data.activation, data.r)
         data.cost = data.activation.a
 
-    def calcDiff(self, data, x, u, recalc=True):
-        if recalc:
-            self.calc(data, x, u)
+    def calcDiff(self, data, x, u):
         c1, c2 = np.cos(x[0, 0]), np.cos(x[1, 0])
         s1, s2 = np.sin(x[0, 0]), np.sin(x[1, 0])
 
-        self.activation.calcDiff(data.activation, data.r, recalc)
+        self.activation.calcDiff(data.activation, data.r)
 
         J = pinocchio.utils.zero((6, 4))
         J[:2, :2] = np.diag([c1, c2])
@@ -51,9 +49,7 @@ class ActuationModelDoublePendulum(crocoddyl.ActuationModelAbstract):
             S[1] = 1
         data.tau = S * u
 
-    def calcDiff(self, data, x, u, recalc=True):
-        if recalc:
-            self.calc(data, x, u)
+    def calcDiff(self, data, x, u):
 
         S = pinocchio.utils.zero((self.nv, self.nu))
         if self.actLink == 1:

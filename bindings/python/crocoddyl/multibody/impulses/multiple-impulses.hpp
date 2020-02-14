@@ -22,8 +22,6 @@ namespace python {
 
 namespace bp = boost::python;
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ImpulseModelMultiple_calcDiff_wraps, ImpulseModelMultiple::calcDiff_wrap, 2, 3)
-
 void exposeImpulseMultiple() {
   // Register custom converters between std::map and Python dict
   typedef boost::shared_ptr<ImpulseDataAbstract> ImpulseDataPtr;
@@ -67,14 +65,12 @@ void exposeImpulseMultiple() {
            ":param data: impulse data\n"
            ":param x: state vector")
       .def("calcDiff", &ImpulseModelMultiple::calcDiff_wrap,
-           ImpulseModelMultiple_calcDiff_wraps(
-               bp::args("self", "data", "x", "recalc"),
+               bp::args("self", "data", "x"),
                "Compute the derivatives of the total impulse holonomic constraint.\n\n"
                "The rigid impulse model throught acceleration-base holonomic constraint\n"
                "of the impulse frame placement.\n"
                ":param data: impulse data\n"
-               ":param x: state vector\n"
-               ":param recalc: If true, it updates the impulse Jacobian and drift."))
+               ":param x: state vector\n")
       .def("updateVelocity", &ImpulseModelMultiple::updateVelocity, bp::args("self", "data", "vnext"),
            "Update the velocity after impulse.\n\n"
            ":param data: impulse data\n"

@@ -39,8 +39,8 @@ void exposeActionLQR() {
                                   ":param x: time-discrete state vector\n"
                                   ":param u: time-discrete control input"))
       .def<void (ActionModelLQR::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
-                                    const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &ActionModelLQR::calcDiff_wrap, bp::args("self", "data", "x", "u", "recalc"),
+                                    const Eigen::VectorXd&)>(
+          "calcDiff", &ActionModelLQR::calcDiff_wrap, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the LQR dynamics and cost functions.\n\n"
           "It computes the partial derivatives of the LQR system and the\n"
           "cost function. If recalc == True, it first updates the state evolution\n"
@@ -48,16 +48,9 @@ void exposeActionLQR() {
           "action model (i.e. dynamical system and cost function).\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input\n"
-          ":param recalc: If true, it updates the state evolution and the cost value (default True).")
-      .def<void (ActionModelLQR::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
-                                    const Eigen::VectorXd&)>("calcDiff", &ActionModelLQR::calcDiff_wrap,
-                                                             bp::args("self", "data", "x", "u"))
+          ":param u: time-discrete control input\n")
       .def<void (ActionModelLQR::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &ActionModelLQR::calcDiff_wrap, bp::args("self", "data", "x"))
-      .def<void (ActionModelLQR::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
-                                    const bool&)>("calcDiff", &ActionModelLQR::calcDiff_wrap,
-                                                  bp::args("self", "data", "x", "recalc"))
       .def("createData", &ActionModelLQR::createData, bp::args("self"), "Create the LQR action data.")
       .add_property("Fx", bp::make_function(&ActionModelLQR::get_Fx, bp::return_value_policy<bp::return_by_value>()),
                     &ActionModelLQR::set_Fx, "Jacobian of the dynamics")

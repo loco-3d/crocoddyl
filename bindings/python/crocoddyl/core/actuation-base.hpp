@@ -30,14 +30,13 @@ class ActuationModelAbstract_wrap : public ActuationModelAbstract, public bp::wr
   }
 
   void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
+                const Eigen::Ref<const Eigen::VectorXd>& u) {
     assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(), "x has wrong dimension");
     assert_pretty(static_cast<std::size_t>(u.size()) == nu_, "u has wrong dimension");
-    return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
+    return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 };
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ActuationModel_calcDiff_wraps, ActuationModelAbstract::calcDiff_wrap, 3, 4)
 
 void exposeActuationAbstract() {
   bp::register_ptr_to_python<boost::shared_ptr<ActuationModelAbstract> >();
@@ -60,14 +59,13 @@ void exposeActuationAbstract() {
            ":param x: state vector\n"
            ":param u: control input")
       .def("calcDiff", pure_virtual(&ActuationModelAbstract_wrap::calcDiff),
-           bp::args("self", "data", "x", "u", "recalc"),
+           bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the actuation model.\n\n"
            "It computes the partial derivatives of the actuation model which is\n"
            "describes in continouos time.\n"
            ":param data: actuation data\n"
            ":param x: state vector\n"
-           ":param u: control input\n"
-           ":param recalc: If true, it updates the actuation signal.")
+           ":param u: control input\n")
       .def("createData", &ActuationModelAbstract_wrap::createData, bp::args("self"),
            "Create the actuation data.\n\n"
            "Each actuation model (AM) has its own data that needs to be allocated.\n"

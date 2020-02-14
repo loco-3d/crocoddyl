@@ -56,21 +56,16 @@ void exposeCostCentroidalMomentum() {
                                 ":param x: time-discrete state vector\n"
                                 ":param u: time-discrete control input"))
       .def<void (CostModelCentroidalMomentum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                                 const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &CostModelCentroidalMomentum::calcDiff_wrap, bp::args("self", "data", "x", "u", "recalc"),
+                                                 const Eigen::VectorXd&)>(
+          "calcDiff", &CostModelCentroidalMomentum::calcDiff_wrap, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the centroidal momentum cost.\n\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input\n"
-          ":param recalc: If true, it updates the state evolution and the cost value (default True).")
-      .def<void (CostModelCentroidalMomentum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                                 const Eigen::VectorXd&)>(
-          "calcDiff", &CostModelCentroidalMomentum::calcDiff_wrap, bp::args("self", "data", "x", "u"))
+          ":param u: time-discrete control input\n")
       .def<void (CostModelCentroidalMomentum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &CostModelCentroidalMomentum::calcDiff_wrap, bp::args("self", "data", "x"))
-      .def<void (CostModelCentroidalMomentum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                                 const bool&)>("calcDiff", &CostModelCentroidalMomentum::calcDiff_wrap,
-                                                               bp::args("self", "data", "x", "recalc"))
+      .def<void (CostModelCentroidalMomentum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>("calcDiff", &CostModelCentroidalMomentum::calcDiff_wrap,
+                                                                                                                      bp::args("self", "data", "x"))
       .def("createData", &CostModelCentroidalMomentum::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the centroidal momentum cost data.\n\n"

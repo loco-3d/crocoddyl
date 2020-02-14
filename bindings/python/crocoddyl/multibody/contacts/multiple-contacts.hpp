@@ -22,8 +22,6 @@ namespace python {
 
 namespace bp = boost::python;
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ContactModelMultiple_calcDiff_wraps, ContactModelMultiple::calcDiff_wrap, 2, 3)
-
 void exposeContactMultiple() {
   // Register custom converters between std::map and Python dict
   typedef boost::shared_ptr<ContactDataAbstract> ContactDataPtr;
@@ -68,14 +66,12 @@ void exposeContactMultiple() {
            ":param data: contact data\n"
            ":param x: state vector")
       .def("calcDiff", &ContactModelMultiple::calcDiff_wrap,
-           ContactModelMultiple_calcDiff_wraps(
-               bp::args("self", "data", "x", "recalc"),
+               bp::args("self", "data", "x"),
                "Compute the derivatives of the total contact holonomic constraint.\n\n"
                "The rigid contact model throught acceleration-base holonomic constraint\n"
                "of the contact frame placement.\n"
                ":param data: contact data\n"
-               ":param x: state vector\n"
-               ":param recalc: If true, it updates the contact Jacobian and drift."))
+               ":param x: state vector\n")
       .def("updateAcceleration", &ContactModelMultiple::updateAcceleration, bp::args("self", "data", "dv"),
            "Update the constrained acceleration.\n\n"
            ":param data: contact data\n"

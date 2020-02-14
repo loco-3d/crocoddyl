@@ -37,8 +37,7 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
   }
 
   void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
-                const bool& recalc = true) {
+                const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
       throw_pretty("Invalid argument: "
                    << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -47,7 +46,7 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
       throw_pretty("Invalid argument: "
                    << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
     }
-    return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
+    return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 };
 
@@ -82,7 +81,7 @@ void exposeDifferentialActionAbstract() {
            ":param x: state vector\n"
            ":param u: control input")
       .def("calcDiff", pure_virtual(&DifferentialActionModelAbstract_wrap::calcDiff),
-           bp::args("self", "data", "x", "u", "recalc"),
+           bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the dynamics and cost functions.\n\n"
            "It computes the partial derivatives of the dynamical system and the cost\n"
            "function. If recalc == True, it first updates the state evolution and\n"
@@ -90,8 +89,7 @@ void exposeDifferentialActionAbstract() {
            "time-continuous action model (i.e. dynamical system and cost function).\n"
            ":param data: differential action data\n"
            ":param x: state vector\n"
-           ":param u: control input\n"
-           ":param recalc: If true, it updates the state evolution and the cost value (default True).")
+           ":param u: control input\n")
       .def("createData", &DifferentialActionModelAbstract_wrap::createData, bp::args("self"),
            "Create the differential action data.\n\n"
            "Each differential action model has its own data that needs to be\n"

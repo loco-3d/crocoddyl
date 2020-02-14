@@ -41,10 +41,10 @@ class CostModelAbstract_wrap : public CostModelAbstract, public bp::wrapper<Cost
   }
 
   void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
+                const Eigen::Ref<const Eigen::VectorXd>& u) {
     assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(), "x has wrong dimension");
     assert_pretty((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0), "u has wrong dimension");
-    return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
+    return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 };
 
@@ -92,12 +92,11 @@ void exposeCostMultibody() {
            ":param data: cost data\n"
            ":param x: state vector\n"
            ":param u: control input")
-      .def("calcDiff", pure_virtual(&CostModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u", "recalc"),
+      .def("calcDiff", pure_virtual(&CostModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the cost function and its residuals.\n\n"
            ":param data: cost data\n"
            ":param x: state vector\n"
-           ":param u: control input\n"
-           ":param recalc: If true, it updates the cost value.")
+           ":param u: control input\n")
       .def("createData", &CostModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the cost data.\n\n"

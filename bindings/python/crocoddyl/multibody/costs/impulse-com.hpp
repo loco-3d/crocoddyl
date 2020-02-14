@@ -37,15 +37,11 @@ void exposeCostImpulseCoM() {
            "Compute the CoM position cost.\n\n"
            ":param data: cost data\n"
            ":param x: time-discrete state vector")
-      .def<void (CostModelImpulseCoM::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                         const bool&)>(
-          "calcDiff", &CostModelImpulseCoM::calcDiff_wrap, bp::args("self", "data", "x", "recalc"),
+      .def<void (CostModelImpulseCoM::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
+          "calcDiff", &CostModelImpulseCoM::calcDiff_wrap, bp::args("self", "data", "x"),
           "Compute the derivatives of the CoM position cost for impulse dynamics.\n\n"
           ":param data: action data\n"
-          ":param x: time-discrete state vector\n"
-          ":param recalc: If true, it updates the state evolution and the cost value (default True).")
-      .def<void (CostModelImpulseCoM::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
-          "calcDiff", &CostModelImpulseCoM::calcDiff_wrap, bp::args("self", "data", "x"))
+          ":param x: time-discrete state vector\n")
       .def("createData", &CostModelImpulseCoM::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the CoM position cost data.\n\n"
