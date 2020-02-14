@@ -113,7 +113,10 @@ class CostModelSumTestCase(unittest.TestCase):
 
     def test_calcDiff(self):
         # Run calc for both action models
+        self.COST.calc(self.data, self.x, self.u)
         self.COST.calcDiff(self.data, self.x, self.u)
+        
+        self.cost_sum.calc(self.data_sum, self.x, self.u)
         self.cost_sum.calcDiff(self.data_sum, self.x, self.u)
         # Checking the cost value and its residual
         self.assertAlmostEqual(self.data.cost, self.data_sum.cost, 10, "Wrong cost value.")
