@@ -64,8 +64,8 @@ void exposeCostCentroidalMomentum() {
           ":param u: time-discrete control input\n")
       .def<void (CostModelCentroidalMomentum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &CostModelCentroidalMomentum::calcDiff_wrap, bp::args("self", "data", "x"))
-      .def<void (CostModelCentroidalMomentum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>("calcDiff", &CostModelCentroidalMomentum::calcDiff_wrap,
-                                                                                                                      bp::args("self", "data", "x"))
+      .def<void (CostModelCentroidalMomentum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
+          "calcDiff", &CostModelCentroidalMomentum::calcDiff_wrap, bp::args("self", "data", "x"))
       .def("createData", &CostModelCentroidalMomentum::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the centroidal momentum cost data.\n\n"

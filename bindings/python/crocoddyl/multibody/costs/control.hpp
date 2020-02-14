@@ -64,12 +64,12 @@ void exposeCostControl() {
                                 ":param x: time-discrete state vector\n"
                                 ":param u: time-discrete control input"))
       .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                      const Eigen::VectorXd&)>(
-          "calcDiff", &CostModelControl::calcDiff_wrap, bp::args("self", "data", "x", "u"),
-          "Compute the derivatives of the control cost.\n\n"
-          ":param data: action data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input\n")
+                                      const Eigen::VectorXd&)>("calcDiff", &CostModelControl::calcDiff_wrap,
+                                                               bp::args("self", "data", "x", "u"),
+                                                               "Compute the derivatives of the control cost.\n\n"
+                                                               ":param data: action data\n"
+                                                               ":param x: time-discrete state vector\n"
+                                                               ":param u: time-discrete control input\n")
 
       .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &CostModelControl::calcDiff_wrap, bp::args("self", "data", "x"))

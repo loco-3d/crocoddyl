@@ -27,7 +27,6 @@ class ImpulseModelAbstract_wrap : public ImpulseModelAbstract, public bp::wrappe
   }
 
   void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
-
     assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(), "x has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x);
   }

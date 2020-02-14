@@ -30,15 +30,14 @@ void exposeActuationFloatingBase() {
            ":param data: floating-base actuation data\n"
            ":param x: state vector\n"
            ":param u: control input")
-      .def("calcDiff", &ActuationModelFloatingBase::calcDiff_wrap,
-               bp::args("self", "data", "x", "u"),
-               "Compute the derivatives of the actuation model.\n\n"
-               "It computes the partial derivatives of the floating-base actuation. It assumes that you\n"
-               "create the data using this class. The reason is that the derivatives are constant and\n"
-               "defined in createData. The derivatives are constant, so we don't write again these values.\n"
-               ":param data: floating-base actuation data\n"
-               ":param x: state vector\n"
-               ":param u: control input\n")
+      .def("calcDiff", &ActuationModelFloatingBase::calcDiff_wrap, bp::args("self", "data", "x", "u"),
+           "Compute the derivatives of the actuation model.\n\n"
+           "It computes the partial derivatives of the floating-base actuation. It assumes that you\n"
+           "create the data using this class. The reason is that the derivatives are constant and\n"
+           "defined in createData. The derivatives are constant, so we don't write again these values.\n"
+           ":param data: floating-base actuation data\n"
+           ":param x: state vector\n"
+           ":param u: control input\n")
       .def("createData", &ActuationModelFloatingBase::createData, bp::args("self"),
            "Create the floating-base actuation data.\n\n"
            "Each actuation model (AM) has its own data that needs to be allocated.\n"

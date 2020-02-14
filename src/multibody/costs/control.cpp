@@ -62,7 +62,8 @@ void CostModelControl::calc(const boost::shared_ptr<CostDataAbstract>& data, con
 }
 
 void CostModelControl::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) {
+                                const Eigen::Ref<const Eigen::VectorXd>& x,
+                                const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (nu_ == 0) {
     throw_pretty("Invalid argument: "
                  << "it seems to be an autonomous system, if so, don't add this cost function");

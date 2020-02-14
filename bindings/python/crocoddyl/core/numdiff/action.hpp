@@ -30,14 +30,14 @@ void exposeActionNumDiff() {
                                   ":param data: NumDiff action data\n"
                                   ":param x: time-discrete state vector\n"
                                   ":param u: time-discrete control input"))
-    .def<void (ActionModelNumDiff::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
-                                      const Eigen::VectorXd&)>(
-                                                                            "calcDiff", &ActionModelNumDiff::calcDiff_wrap, bp::args("self", "data", "x", "u"),
-                                                                            "Compute the derivatives of the dynamics and cost functions.\n\n"
-                                                                            "It computes the Jacobian and Hessian using numerical differentiation.\n"
-                                                                            ":param data: NumDiff action data\n"
-                                                                            ":param x: time-discrete state vector\n"
-                                                                            ":param u: time-discrete control input\n")
+      .def<void (ActionModelNumDiff::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
+                                        const Eigen::VectorXd&)>(
+          "calcDiff", &ActionModelNumDiff::calcDiff_wrap, bp::args("self", "data", "x", "u"),
+          "Compute the derivatives of the dynamics and cost functions.\n\n"
+          "It computes the Jacobian and Hessian using numerical differentiation.\n"
+          ":param data: NumDiff action data\n"
+          ":param x: time-discrete state vector\n"
+          ":param u: time-discrete control input\n")
       .def<void (ActionModelNumDiff::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &ActionModelNumDiff::calcDiff_wrap, bp::args("self", "data", "x"))
       .def("createData", &ActionModelNumDiff::createData, bp::args("self"),

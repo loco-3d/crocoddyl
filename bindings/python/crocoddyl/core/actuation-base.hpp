@@ -37,7 +37,6 @@ class ActuationModelAbstract_wrap : public ActuationModelAbstract, public bp::wr
   }
 };
 
-
 void exposeActuationAbstract() {
   bp::register_ptr_to_python<boost::shared_ptr<ActuationModelAbstract> >();
 
@@ -58,8 +57,7 @@ void exposeActuationAbstract() {
            ":param data: actuation data\n"
            ":param x: state vector\n"
            ":param u: control input")
-      .def("calcDiff", pure_virtual(&ActuationModelAbstract_wrap::calcDiff),
-           bp::args("self", "data", "x", "u"),
+      .def("calcDiff", pure_virtual(&ActuationModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the actuation model.\n\n"
            "It computes the partial derivatives of the actuation model which is\n"
            "describes in continouos time.\n"

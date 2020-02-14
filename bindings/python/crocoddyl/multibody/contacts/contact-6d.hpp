@@ -42,13 +42,12 @@ void exposeContact6D() {
            "of the contact frame placement.\n"
            ":param data: contact data\n"
            ":param x: state vector")
-      .def("calcDiff", &ContactModel6D::calcDiff_wrap,
-           bp::args("self", "data", "x"),
-                                       "Compute the derivatives of the 6D contact holonomic constraint.\n\n"
-                                       "The rigid contact model throught acceleration-base holonomic constraint\n"
-                                       "of the contact frame placement.\n"
-                                       ":param data: cost data\n"
-                                       ":param x: state vector\n")
+      .def("calcDiff", &ContactModel6D::calcDiff_wrap, bp::args("self", "data", "x"),
+           "Compute the derivatives of the 6D contact holonomic constraint.\n\n"
+           "The rigid contact model throught acceleration-base holonomic constraint\n"
+           "of the contact frame placement.\n"
+           ":param data: cost data\n"
+           ":param x: state vector\n")
       .def("updateForce", &ContactModel6D::updateForce, bp::args("self", "data", "force"),
            "Convert the Lagrangian into a stack of spatial forces.\n\n"
            ":param data: cost data\n"

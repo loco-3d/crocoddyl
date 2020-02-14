@@ -26,7 +26,8 @@ class ContactModelAbstract {
 
   virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data,
                     const Eigen::Ref<const Eigen::VectorXd>& x) = 0;
-  virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) = 0;
+  virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
+                        const Eigen::Ref<const Eigen::VectorXd>& x) = 0;
 
   virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& force) = 0;
   void updateForceDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::MatrixXd& df_dx,

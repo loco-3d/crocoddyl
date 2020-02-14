@@ -26,7 +26,8 @@ class ShootingProblem {
   ~ShootingProblem();
 
   double calc(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us);
-  double calcDiff(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us, const bool& recalc = true);
+  double calcDiff(const std::vector<Eigen::VectorXd>& xs, const std::vector<Eigen::VectorXd>& us,
+                  const bool& recalc = true);
   void rollout(const std::vector<Eigen::VectorXd>& us, std::vector<Eigen::VectorXd>& xs);
   std::vector<Eigen::VectorXd> rollout_us(const std::vector<Eigen::VectorXd>& us);
 

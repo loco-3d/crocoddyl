@@ -48,18 +48,17 @@ void exposeDifferentialActionContactFwdDynamics() {
                ":param x: time-continuous state vector\n"
                ":param u: time-continuous control input"))
       .def<void (DifferentialActionModelContactFwdDynamics::*)(
-          const boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::VectorXd&, const Eigen::VectorXd&)>
-              ("calcDiff", &DifferentialActionModelContactFwdDynamics::calcDiff_wrap,
-               bp::args("self", "data", "x", "u"),
-               "Compute the derivatives of the differential multibody system and its cost\n"
-               "functions.\n\n"
-               "It computes the partial derivatives of the differential multibody system and the\n"
-               "cost function. If recalc == True, it first updates the state evolution\n"
-               "and cost value. This function builds a quadratic approximation of the\n"
-               "action model (i.e. dynamical system and cost function).\n"
-               ":param data: contact forward-dynamics action data\n"
-               ":param x: time-continuous state vector\n"
-               ":param u: time-continuous control input\n")
+          const boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::VectorXd&, const Eigen::VectorXd&)>(
+          "calcDiff", &DifferentialActionModelContactFwdDynamics::calcDiff_wrap, bp::args("self", "data", "x", "u"),
+          "Compute the derivatives of the differential multibody system and its cost\n"
+          "functions.\n\n"
+          "It computes the partial derivatives of the differential multibody system and the\n"
+          "cost function. If recalc == True, it first updates the state evolution\n"
+          "and cost value. This function builds a quadratic approximation of the\n"
+          "action model (i.e. dynamical system and cost function).\n"
+          ":param data: contact forward-dynamics action data\n"
+          ":param x: time-continuous state vector\n"
+          ":param u: time-continuous control input\n")
       .def<void (DifferentialActionModelContactFwdDynamics::*)(
           const boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::VectorXd&, const Eigen::VectorXd&)>(
           "calcDiff", &DifferentialActionModelContactFwdDynamics::calcDiff_wrap, bp::args("self", "data", "x", "u"))
