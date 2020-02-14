@@ -20,8 +20,7 @@ class ActivationModelQuad : public ActivationModelAbstract {
   ~ActivationModelQuad();
 
   void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r);
-  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r,
-                const bool& recalc = true);
+  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r);
   boost::shared_ptr<ActivationDataAbstract> createData();
 };
 

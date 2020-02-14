@@ -25,8 +25,7 @@ class DifferentialActionModelLQR : public DifferentialActionModelAbstract {
   void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u);
   void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
-                const bool& recalc = true);
+                const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u);
   boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
   const Eigen::MatrixXd& get_Fq() const;

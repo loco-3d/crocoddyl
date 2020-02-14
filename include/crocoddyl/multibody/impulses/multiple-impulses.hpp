@@ -40,8 +40,7 @@ class ImpulseModelMultiple {
   void removeImpulse(const std::string& name);
 
   void calc(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
-  void calcDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const bool& recalc = true);
+  void calcDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
 
   void updateVelocity(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::VectorXd& vnext) const;
   void updateForce(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::VectorXd& force);
@@ -63,9 +62,8 @@ class ImpulseModelMultiple {
  public:
   void calc_wrap(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::VectorXd& x) { calc(data, x); }
 
-  void calcDiff_wrap(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::VectorXd& x,
-                     const bool& recalc = true) {
-    calcDiff(data, x, recalc);
+  void calcDiff_wrap(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::VectorXd& x) {
+    calcDiff(data, x);
   }
 
 #endif

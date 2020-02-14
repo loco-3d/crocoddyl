@@ -83,7 +83,6 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const s
     }
     terminal_model_->calc(terminal_data_, xs.back());
   }
-
 #ifdef WITH_MULTITHREADING
 #pragma omp parallel for
 #endif

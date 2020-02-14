@@ -128,8 +128,7 @@ void CostModelState::calc(const boost::shared_ptr<CostDataAbstract>& data, const
 }
 
 void CostModelState::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                              const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
-                              const bool&) {
+                              const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");

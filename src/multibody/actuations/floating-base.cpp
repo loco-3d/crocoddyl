@@ -34,7 +34,7 @@ void ActuationModelFloatingBase::calc(const boost::shared_ptr<ActuationDataAbstr
 
 void ActuationModelFloatingBase::calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data,
                                           const Eigen::Ref<const Eigen::VectorXd>& x,
-                                          const Eigen::Ref<const Eigen::VectorXd>& u, const bool&) {
+                                          const Eigen::Ref<const Eigen::VectorXd>& u) {
   // The derivatives has constant values which were set in createData.
 #ifndef NDEBUG
   assert_pretty(data->dtau_dx == Eigen::MatrixXd::Zero(state_->get_nv(), state_->get_ndx()),

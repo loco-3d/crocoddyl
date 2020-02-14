@@ -28,12 +28,11 @@ class ActionModelAbstract {
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                     const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
   virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                        const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) = 0;
+                        const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
   virtual boost::shared_ptr<ActionDataAbstract> createData();
 
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
-  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const bool& recalc = true);
+  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
 
   void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<Eigen::VectorXd> u,
                    const Eigen::Ref<const Eigen::VectorXd>& x, const std::size_t& maxiter = 100,
@@ -74,18 +73,11 @@ class ActionModelAbstract {
   }
 
   void calcDiff_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x,
-                     const Eigen::VectorXd& u, const bool& recalc) {
-    calcDiff(data, x, u, recalc);
-  }
-  void calcDiff_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x,
                      const Eigen::VectorXd& u) {
-    calcDiff(data, x, u, true);
+    calcDiff(data, x, u);
   }
   void calcDiff_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x) {
-    calcDiff(data, x, unone_, true);
-  }
-  void calcDiff_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x, const bool& recalc) {
-    calcDiff(data, x, unone_, recalc);
+    calcDiff(data, x, unone_);
   }
 
   Eigen::VectorXd quasiStatic_wrap(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::VectorXd& x,

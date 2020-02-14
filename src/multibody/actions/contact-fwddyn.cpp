@@ -97,7 +97,7 @@ void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<Dif
 
 void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                          const Eigen::Ref<const Eigen::VectorXd>& x,
-                                                         const Eigen::Ref<const Eigen::VectorXd>& u, const bool&) {
+                                                         const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");

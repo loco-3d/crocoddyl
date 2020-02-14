@@ -31,7 +31,7 @@ void ActivationModelNumDiff::calc(const boost::shared_ptr<ActivationDataAbstract
 }
 
 void ActivationModelNumDiff::calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
-                                      const Eigen::Ref<const Eigen::VectorXd>& r, const bool&) {
+                                      const Eigen::Ref<const Eigen::VectorXd>& r) {
   if (static_cast<std::size_t>(r.size()) != model_->get_nr()) {
     throw_pretty("Invalid argument: "
                  << "r has wrong dimension (it should be " + std::to_string(model_->get_nr()) + ")");

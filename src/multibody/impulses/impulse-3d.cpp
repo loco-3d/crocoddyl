@@ -27,7 +27,7 @@ void ImpulseModel3D::calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
 }
 
 void ImpulseModel3D::calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                              const Eigen::Ref<const Eigen::VectorXd>& x, const bool&) {
+                              const Eigen::Ref<const Eigen::VectorXd>& x) {
   boost::shared_ptr<ImpulseData3D> d = boost::static_pointer_cast<ImpulseData3D>(data);
   pinocchio::getJointVelocityDerivatives(state_->get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                          d->v_partial_dq, d->v_partial_dv);

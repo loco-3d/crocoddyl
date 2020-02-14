@@ -58,7 +58,7 @@ void CostModelFrameRotation::calc(const boost::shared_ptr<CostDataAbstract>& dat
 
 void CostModelFrameRotation::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                       const Eigen::Ref<const Eigen::VectorXd>& x,
-                                      const Eigen::Ref<const Eigen::VectorXd>& u, const bool&) {
+                                      const Eigen::Ref<const Eigen::VectorXd>& u) {
   // Update the frame placements
   CostDataFrameRotation* d = static_cast<CostDataFrameRotation*>(data.get());
 

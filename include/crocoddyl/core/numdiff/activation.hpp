@@ -38,8 +38,7 @@ class ActivationModelNumDiff : public ActivationModelAbstract {
   /**
    * @brief @copydoc ActivationModelAbstract::calcDiff()
    */
-  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r,
-                const bool& recalc = true);
+  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r);
 
   /**
    * @brief Create a Data object from the given model.
