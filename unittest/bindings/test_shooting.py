@@ -41,8 +41,11 @@ class ShootingProblemTestCase(unittest.TestCase):
 
     def test_calcDiff(self):
         # Running calc functions
-        cost = self.PROBLEM.calcDiff(self.xs, self.us, True)
-        costDer = self.PROBLEM_DER.calcDiff(self.xs, self.us, True)
+        cost = self.PROBLEM.calc(self.xs, self.us)
+        costDer = self.PROBLEM_DER.calc(self.xs, self.us)
+
+        cost = self.PROBLEM.calcDiff(self.xs, self.us)
+        costDer = self.PROBLEM_DER.calcDiff(self.xs, self.us)
         self.assertAlmostEqual(cost, costDer, 10, "Wrong cost value")
         for d1, d2 in zip(self.PROBLEM.runningDatas, self.PROBLEM_DER.runningDatas):
             self.assertTrue(np.allclose(d1.xnext, d2.xnext, atol=1e-9), "Next state doesn't match.")
