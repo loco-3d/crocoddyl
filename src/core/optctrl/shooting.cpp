@@ -47,8 +47,7 @@ double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::
     running_models_[i]->calc(running_datas_[i], xs[i], us[i]);
   }
   terminal_model_->calc(terminal_data_, xs.back());
-  
-  
+
   cost_ = 0;
   for (std::size_t i = 0; i < T_; ++i) {
     cost_ += running_datas_[i]->cost;

@@ -149,7 +149,7 @@ const Eigen::Vector2d& SolverDDP::expectedImprovement() {
 }
 
 double SolverDDP::calcDiff() {
-  if (iter_==0) problem_->calc(xs_,us_);
+  if (iter_ == 0) problem_->calc(xs_, us_);
   cost_ = problem_->calcDiff(xs_, us_);
   if (!is_feasible_) {
     const Eigen::VectorXd& x0 = problem_->get_x0();

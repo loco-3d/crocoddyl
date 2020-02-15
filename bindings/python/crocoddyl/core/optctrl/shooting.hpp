@@ -53,13 +53,12 @@ void exposeShootingProblem() {
            ":param xs: time-discrete state trajectory\n"
            ":param us: time-discrete control sequence\n"
            ":returns the total cost value")
-      .def("calcDiff", &ShootingProblem::calcDiff,
-bp::args("self", "xs", "us"),
-                                          "Compute the cost-and-dynamics derivatives.\n\n"
-                                          "These quantities are computed along a given pair of trajectories xs\n"
-                                          "(states) and us (controls).\n"
-                                          ":param xs: time-discrete state trajectory\n"
-                                          ":param us: time-discrete control sequence\n")
+      .def("calcDiff", &ShootingProblem::calcDiff, bp::args("self", "xs", "us"),
+           "Compute the cost-and-dynamics derivatives.\n\n"
+           "These quantities are computed along a given pair of trajectories xs\n"
+           "(states) and us (controls).\n"
+           ":param xs: time-discrete state trajectory\n"
+           ":param us: time-discrete control sequence\n")
       .def("rollout", &ShootingProblem::rollout_us, bp::args("self", "us"),
            "Integrate the dynamics given a control sequence.\n\n"
            "Rollout the dynamics give a sequence of control commands\n"
