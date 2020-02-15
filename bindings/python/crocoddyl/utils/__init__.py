@@ -670,6 +670,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
         self.th_step = .5
 
     def calc(self):
+        self.cost = self.problem.calc(self.xs, self.us)
         self.cost = self.problem.calcDiff(self.xs, self.us)
         if not self.isFeasible:
             self.gaps[0] = self.problem.runningModels[0].state.diff(self.xs[0], self.problem.x0)
@@ -957,6 +958,7 @@ class FDDPDerived(DDPDerived):
         return np.matrix([d1, d2]).T
 
     def calc(self):
+        self.cost = self.problem.calc(self.xs, self.us)
         self.cost = self.problem.calcDiff(self.xs, self.us)
         if not self.isFeasible:
             self.gaps[0] = self.problem.runningModels[0].state.diff(self.xs[0], self.problem.x0)
