@@ -40,16 +40,16 @@ double ShootingProblem::calc(const std::vector<Eigen::VectorXd>& xs, const std::
                  << "us has wrong dimension (it should be " + std::to_string(T_) + ")");
   }
 
-  cost_ = 0;
+#ifdef WITH_MULTITHREADING
+#pragma omp parallel for
+#endif
   for (std::size_t i = 0; i < T_; ++i) {
-    const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
-    const boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
-    const Eigen::VectorXd& x = xs[i];
-    const Eigen::VectorXd& u = us[i];
-    model->calc(data, x, u);
+    running_models_[i]->calc(running_datas_[i], xs[i], us[i]);
   }
   terminal_model_->calc(terminal_data_, xs.back());
-
+  
+  
+  cost_ = 0;
   for (std::size_t i = 0; i < T_; ++i) {
     cost_ += running_datas_[i]->cost;
   }
@@ -70,18 +70,8 @@ double ShootingProblem::calcDiff(const std::vector<Eigen::VectorXd>& xs, const s
 
   std::size_t i;
 
-#ifdef WITH_MULTITHREADING
-  omp_set_num_threads(NUM_THREADS);
-#endif
-
   if (recalc) {
-#ifdef WITH_MULTITHREADING
-#pragma omp parallel for
-#endif
-    for (i = 0; i < T_; ++i) {
-      running_models_[i]->calc(running_datas_[i], xs[i], us[i]);
-    }
-    terminal_model_->calc(terminal_data_, xs.back());
+    calc(xs,us);
   }
 #ifdef WITH_MULTITHREADING
 #pragma omp parallel for
