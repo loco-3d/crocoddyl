@@ -1,6 +1,8 @@
 #!/bin/bash
 set -xe
 
+echo $PYTHONPATH
+
 # Exit if in format testing mode
 if [ $CHECK_CLANG_FORMAT ]; then exit 0; fi
 
