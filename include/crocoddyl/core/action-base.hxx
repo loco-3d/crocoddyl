@@ -22,6 +22,16 @@ ActionModelAbstractTpl<Scalar>::ActionModelAbstractTpl(boost::shared_ptr<StateAb
       u_ub_(MathBase::VectorXs::Constant(nu, std::numeric_limits<Scalar>::infinity())),
       has_control_limits_(false) {}
 template <typename Scalar>
+ActionModelAbstractTpl<Scalar>::ActionModelAbstractTpl()
+    : nu_(0),
+      nr_(0),
+      state_(NULL),
+      unone_(MathBase::VectorXs::Zero(0)),
+      u_lb_(MathBase::VectorXs::Constant(0, -std::numeric_limits<Scalar>::infinity())),
+      u_ub_(MathBase::VectorXs::Constant(0, std::numeric_limits<Scalar>::infinity())),
+      has_control_limits_(false) {}
+
+template <typename Scalar>
 ActionModelAbstractTpl<Scalar>::~ActionModelAbstractTpl() {}
 template <typename Scalar>
   void ActionModelAbstractTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
