@@ -58,8 +58,8 @@ void CostModelFramePlacement::calc(const boost::shared_ptr<CostDataAbstract>& da
 }
 
 void CostModelFramePlacement::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                       const Eigen::Ref<const Eigen::VectorXd>& x,
-                                       const Eigen::Ref<const Eigen::VectorXd>& u) {
+                                       const Eigen::Ref<const Eigen::VectorXd>&,
+                                       const Eigen::Ref<const Eigen::VectorXd>&) {
   // Update the frame placements
   CostDataFramePlacement* d = static_cast<CostDataFramePlacement*>(data.get());
 

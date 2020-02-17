@@ -45,8 +45,8 @@ void CostModelImpulseCoM::calc(const boost::shared_ptr<CostDataAbstract>& data,
 }
 
 void CostModelImpulseCoM::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                   const Eigen::Ref<const Eigen::VectorXd>& x,
-                                   const Eigen::Ref<const Eigen::VectorXd>& u) {
+                                   const Eigen::Ref<const Eigen::VectorXd>&,
+                                   const Eigen::Ref<const Eigen::VectorXd>&) {
   CostDataImpulseCoM* d = static_cast<CostDataImpulseCoM*>(data.get());
 
   // Compute the derivatives of the frame placement

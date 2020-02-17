@@ -52,8 +52,8 @@ void CostModelCoMPosition::calc(const boost::shared_ptr<CostDataAbstract>& data,
 }
 
 void CostModelCoMPosition::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                    const Eigen::Ref<const Eigen::VectorXd>& x,
-                                    const Eigen::Ref<const Eigen::VectorXd>& u) {
+                                    const Eigen::Ref<const Eigen::VectorXd>&,
+                                    const Eigen::Ref<const Eigen::VectorXd>&) {
   CostDataCoMPosition* d = static_cast<CostDataCoMPosition*>(data.get());
 
   // Compute the derivatives of the frame placement

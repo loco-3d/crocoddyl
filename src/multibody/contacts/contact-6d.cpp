@@ -44,7 +44,7 @@ void ContactModel6D::calc(const boost::shared_ptr<ContactDataAbstract>& data,
 }
 
 void ContactModel6D::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
-                              const Eigen::Ref<const Eigen::VectorXd>& x) {
+                              const Eigen::Ref<const Eigen::VectorXd>&) {
   ContactData6D* d = static_cast<ContactData6D*>(data.get());
   pinocchio::getJointAccelerationDerivatives(state_->get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                              d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);

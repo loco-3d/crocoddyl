@@ -32,8 +32,7 @@ void ActuationModelFull::calc(const boost::shared_ptr<ActuationDataAbstract>& da
 }
 
 void ActuationModelFull::calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data,
-                                  const Eigen::Ref<const Eigen::VectorXd>& x,
-                                  const Eigen::Ref<const Eigen::VectorXd>& u) {
+                                  const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>&) {
   // The derivatives has constant values which were set in createData.
   assert_pretty(data->dtau_dx == Eigen::MatrixXd::Zero(state_->get_nv(), state_->get_ndx()),
                 "dtau_dx has wrong value");

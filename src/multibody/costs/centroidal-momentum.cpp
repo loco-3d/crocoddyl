@@ -53,8 +53,8 @@ void CostModelCentroidalMomentum::calc(const boost::shared_ptr<CostDataAbstract>
 }
 
 void CostModelCentroidalMomentum::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                           const Eigen::Ref<const Eigen::VectorXd>& x,
-                                           const Eigen::Ref<const Eigen::VectorXd>& u) {
+                                           const Eigen::Ref<const Eigen::VectorXd>&,
+                                           const Eigen::Ref<const Eigen::VectorXd>&) {
   CostDataCentroidalMomentum* d = static_cast<CostDataCentroidalMomentum*>(data.get());
   const std::size_t& nv = state_->get_nv();
   Eigen::Ref<pinocchio::Data::Matrix6x> Rq = data->Rx.leftCols(nv);
