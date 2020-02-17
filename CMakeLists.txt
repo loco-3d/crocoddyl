@@ -20,7 +20,7 @@ INCLUDE(cmake/apple.cmake)
 
 # Print initial message
 MESSAGE("${PROJECT_DESCRIPTION}, version ${PROJECT_VERSION}")
-MESSAGE("Copyright (C) 2018-2020 CNRS-LAAS")
+MESSAGE("Copyright (C) 2018-2019 CNRS-LAAS")
 MESSAGE("Copyright (C) 2019-2020 University of Edinburgh")
 MESSAGE("All rights reserved.")
 MESSAGE("Released under the BSD 3-Clause License.")
