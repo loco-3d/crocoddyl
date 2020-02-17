@@ -57,6 +57,7 @@ model.calcDiff(data, x, u)
 
 mnum = DifferentialActionModelNumDiff(model, False)
 dnum = mnum.createData()
+mnum.calc(dnum, x, u)
 mnum.calcDiff(dnum, x, u)
 
 model.costs.addCost("momentum", CostModelMomentum(State, a2m(np.random.rand(6)), actModel.nu), 1.)
@@ -66,11 +67,13 @@ data = model.createData()
 cmodel = model.costs.costs['momentum'].cost
 cdata = data.costs.costs['momentum']
 
+model.calc(data, x, u)
 model.calcDiff(data, x, u)
 
 mnum = DifferentialActionModelNumDiff(model, False)
 dnum = mnum.createData()
 
+mnum.calc(dnum, x, u)
 mnum.calcDiff(dnum, x, u)
 assertNumDiff(data.Fx, dnum.Fx,
               NUMDIFF_MODIFIER * mnum.disturbance)  # threshold was 2.7e-2, is now 2.11e-4 (see assertNumDiff.__doc__)

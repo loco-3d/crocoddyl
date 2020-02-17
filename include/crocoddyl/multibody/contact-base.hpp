@@ -26,8 +26,8 @@ class ContactModelAbstract {
 
   virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data,
                     const Eigen::Ref<const Eigen::VectorXd>& x) = 0;
-  virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                        const bool& recalc = true) = 0;
+  virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
+                        const Eigen::Ref<const Eigen::VectorXd>& x) = 0;
 
   virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& force) = 0;
   void updateForceDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::MatrixXd& df_dx,
@@ -48,9 +48,8 @@ class ContactModelAbstract {
  public:
   void calc_wrap(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& x) { calc(data, x); }
 
-  void calcDiff_wrap(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& x,
-                     const bool& recalc = true) {
-    calcDiff(data, x, recalc);
+  void calcDiff_wrap(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& x) {
+    calcDiff(data, x);
   }
 
 #endif

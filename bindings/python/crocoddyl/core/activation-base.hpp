@@ -30,13 +30,12 @@ class ActivationModelAbstract_wrap : public ActivationModelAbstract, public bp::
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)r);
   }
 
-  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r,
-                const bool& recalc = true) {
+  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
-    return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)r, recalc);
+    return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)r);
   }
 };
 
@@ -56,12 +55,11 @@ void exposeActivationAbstract() {
            "Compute the activation value.\n\n"
            ":param data: activation data\n"
            ":param r: residual vector")
-      .def("calcDiff", pure_virtual(&ActivationModelAbstract_wrap::calcDiff), bp::args("self", "data", "r", "recalc"),
+      .def("calcDiff", pure_virtual(&ActivationModelAbstract_wrap::calcDiff), bp::args("self", "data", "r"),
            "Compute the derivatives of the residual.\n\n"
            "It computes the partial derivatives of the residual vector function\n"
            ":param data: activation data\n"
-           ":param r: residual vector \n"
-           ":param recalc: If true, it updates the residual value.")
+           ":param r: residual vector \n")
       .def("createData", &ActivationModelAbstract_wrap::createData, bp::args("self"),
            "Create the activation data.\n\n")
       .add_property(

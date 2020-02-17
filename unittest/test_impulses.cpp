@@ -85,6 +85,7 @@ void test_calc_diff_no_computation(ImpulseModelTypes::Type test_type) {
 
   // Getting the jacobian from the model
   Eigen::VectorXd dx;
+  model->calc(data, dx);
   model->calcDiff(data, dx);
 
   // Check that nothing has been computed and that all value are initialized to 0
@@ -114,6 +115,7 @@ void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type test_type) {
 
   // Getting the jacobian from the model
   Eigen::VectorXd dx;
+  model->calc(data, dx);
   model->calcDiff(data, dx);
 
   // Check that nothing has been computed and that all value are initialized to 0

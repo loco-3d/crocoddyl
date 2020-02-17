@@ -25,8 +25,7 @@ class ContactModel6D : public ContactModelAbstract {
   ~ContactModel6D();
 
   void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
-  void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const bool& recalc = true);
+  void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
   void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& force);
   boost::shared_ptr<ContactDataAbstract> createData(pinocchio::Data* const data);
 

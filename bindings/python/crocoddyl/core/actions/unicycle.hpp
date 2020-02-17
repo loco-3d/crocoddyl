@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,25 +37,19 @@ void exposeActionUnicycle() {
                                   ":param x: time-discrete state vector\n"
                                   ":param u: time-discrete control input"))
       .def<void (ActionModelUnicycle::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
-                                         const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &ActionModelUnicycle::calcDiff_wrap, bp::args("self", "data", "x", "u", "recalc"),
+                                         const Eigen::VectorXd&)>(
+          "calcDiff", &ActionModelUnicycle::calcDiff_wrap, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the unicycle dynamics and cost functions.\n\n"
           "It computes the partial derivatives of the unicycle system and the\n"
-          "cost function. If recalc == True, it first updates the state evolution\n"
-          "and cost value. This function builds a quadratic approximation of the\n"
+          "cost function. It assumes that calc has been run first.\n"
+          "This function builds a quadratic approximation of the\n"
           "action model (i.e. dynamical system and cost function).\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input\n"
-          ":param recalc: If true, it updates the state evolution and the cost value (default True).")
-      .def<void (ActionModelUnicycle::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
-                                         const Eigen::VectorXd&)>("calcDiff", &ActionModelUnicycle::calcDiff_wrap,
-                                                                  bp::args("self", "data", "x", "u"))
+          ":param u: time-discrete control input\n")
+
       .def<void (ActionModelUnicycle::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &ActionModelUnicycle::calcDiff_wrap, bp::args("self", "data", "x"))
-      .def<void (ActionModelUnicycle::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
-                                         const bool&)>("calcDiff", &ActionModelUnicycle::calcDiff_wrap,
-                                                       bp::args("self", "data", "x", "recalc"))
       .def("createData", &ActionModelUnicycle::createData, bp::args("self"), "Create the unicycle action data.")
       .add_property(
           "costWeights",

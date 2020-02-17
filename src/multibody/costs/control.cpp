@@ -62,8 +62,7 @@ void CostModelControl::calc(const boost::shared_ptr<CostDataAbstract>& data, con
 }
 
 void CostModelControl::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
-                                const bool& recalc) {
+                                const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (nu_ == 0) {
     throw_pretty("Invalid argument: "
                  << "it seems to be an autonomous system, if so, don't add this cost function");
@@ -73,10 +72,7 @@ void CostModelControl::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  if (recalc) {
-    calc(data, x, u);
-  }
-  activation_->calcDiff(data->activation, data->r, recalc);
+  activation_->calcDiff(data->activation, data->r);
   data->Lu = data->activation->Ar;
   data->Luu.diagonal() = data->activation->Arr.diagonal();
 }

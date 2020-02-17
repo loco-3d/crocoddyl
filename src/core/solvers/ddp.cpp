@@ -149,8 +149,8 @@ const Eigen::Vector2d& SolverDDP::expectedImprovement() {
 }
 
 double SolverDDP::calcDiff() {
-  bool recalc = (iter_ > 0) ? false : true;
-  cost_ = problem_->calcDiff(xs_, us_, recalc);
+  if (iter_ == 0) problem_->calc(xs_, us_);
+  cost_ = problem_->calcDiff(xs_, us_);
   if (!is_feasible_) {
     const Eigen::VectorXd& x0 = problem_->get_x0();
     problem_->get_runningModels()[0]->get_state()->diff(xs_[0], x0, fs_[0]);

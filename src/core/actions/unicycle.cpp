@@ -40,7 +40,7 @@ void ActionModelUnicycle::calc(const boost::shared_ptr<ActionDataAbstract>& data
 
 void ActionModelUnicycle::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                    const Eigen::Ref<const Eigen::VectorXd>& x,
-                                   const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
+                                   const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -50,9 +50,6 @@ void ActionModelUnicycle::calcDiff(const boost::shared_ptr<ActionDataAbstract>& 
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  if (recalc) {
-    calc(data, x, u);
-  }
   ActionDataUnicycle* d = static_cast<ActionDataUnicycle*>(data.get());
 
   // Cost derivatives

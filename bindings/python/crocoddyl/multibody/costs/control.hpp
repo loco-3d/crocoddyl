@@ -64,21 +64,15 @@ void exposeCostControl() {
                                 ":param x: time-discrete state vector\n"
                                 ":param u: time-discrete control input"))
       .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                      const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &CostModelControl::calcDiff_wrap, bp::args("self", "data", "x", "u", "recalc"),
-          "Compute the derivatives of the control cost.\n\n"
-          ":param data: action data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input\n"
-          ":param recalc: If true, it updates the state evolution and the cost value (default True).")
-      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                       const Eigen::VectorXd&)>("calcDiff", &CostModelControl::calcDiff_wrap,
-                                                               bp::args("self", "data", "x", "u"))
+                                                               bp::args("self", "data", "x", "u"),
+                                                               "Compute the derivatives of the control cost.\n\n"
+                                                               ":param data: action data\n"
+                                                               ":param x: time-discrete state vector\n"
+                                                               ":param u: time-discrete control input\n")
+
       .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &CostModelControl::calcDiff_wrap, bp::args("self", "data", "x"))
-      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                      const bool&)>("calcDiff", &CostModelControl::calcDiff_wrap,
-                                                    bp::args("self", "data", "x", "recalc"))
       .add_property("uref",
                     bp::make_function(&CostModelControl::get_uref, bp::return_value_policy<bp::return_by_value>()),
                     &CostModelControl::set_uref, "reference control");

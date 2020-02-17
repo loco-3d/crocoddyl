@@ -55,21 +55,15 @@ void exposeCostFramePlacement() {
                                 ":param x: time-discrete state vector\n"
                                 ":param u: time-discrete control input"))
       .def<void (CostModelFramePlacement::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                             const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &CostModelFramePlacement::calcDiff_wrap, bp::args("self", "data", "x", "u", "recalc"),
+                                             const Eigen::VectorXd&)>(
+          "calcDiff", &CostModelFramePlacement::calcDiff_wrap, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the frame placement cost.\n\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input\n"
-          ":param recalc: If true, it updates the state evolution and the cost value (default True).")
-      .def<void (CostModelFramePlacement::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                             const Eigen::VectorXd&)>(
-          "calcDiff", &CostModelFramePlacement::calcDiff_wrap, bp::args("self", "data", "x", "u"))
+          ":param u: time-discrete control input\n")
       .def<void (CostModelFramePlacement::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &CostModelFramePlacement::calcDiff_wrap, bp::args("self", "data", "x"))
-      .def<void (CostModelFramePlacement::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                             const bool&)>("calcDiff", &CostModelFramePlacement::calcDiff_wrap,
-                                                           bp::args("self", "data", "x", "recalc"))
+
       .def("createData", &CostModelFramePlacement::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the frame placement cost data.\n\n"

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,25 +37,20 @@ void exposeIntegratedActionEuler() {
                                   ":param x: state vector\n"
                                   ":param u: control input"))
       .def<void (IntegratedActionModelEuler::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
-                                                const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &IntegratedActionModelEuler::calcDiff_wrap, bp::args("self", "data", "x", "u", "recalc"),
+                                                const Eigen::VectorXd&)>(
+          "calcDiff", &IntegratedActionModelEuler::calcDiff_wrap, bp::args("self", "data", "x", "u"),
           "Compute the time-discrete derivatives of a differential action model.\n\n"
           "It computes the time-discrete partial derivatives of a differential\n"
-          "action model. If recalc == True, it first updates the state evolution\n"
-          "and cost value. This function builds a quadratic approximation of the\n"
+          "action model. It assumes that calc has been run first.\n"
+          "This function builds a quadratic approximation of the\n"
           "action model (i.e. dynamical system and cost function).\n"
           ":param data: action data\n"
           ":param x: state vector\n"
-          ":param u: control input\n"
-          ":param recalc: If true, it updates the state evolution and the cost value (default True).")
-      .def<void (IntegratedActionModelEuler::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
-                                                const Eigen::VectorXd&)>(
-          "calcDiff", &IntegratedActionModelEuler::calcDiff_wrap, bp::args("self", "data", "x", "u"))
+          ":param u: control input\n")
+
       .def<void (IntegratedActionModelEuler::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &IntegratedActionModelEuler::calcDiff_wrap, bp::args("self", "data", "x"))
-      .def<void (IntegratedActionModelEuler::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
-                                                const bool&)>("calcDiff", &IntegratedActionModelEuler::calcDiff_wrap,
-                                                              bp::args("self", "data", "x", "recalc"))
+
       .def("createData", &IntegratedActionModelEuler::createData, bp::args("self"),
            "Create the Euler integrator data.")
       .add_property("differential",

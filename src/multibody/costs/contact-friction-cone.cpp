@@ -58,19 +58,15 @@ void CostModelContactFrictionCone::calc(const boost::shared_ptr<CostDataAbstract
 }
 
 void CostModelContactFrictionCone::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                            const Eigen::Ref<const Eigen::VectorXd>& x,
-                                            const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
-  if (recalc) {
-    calc(data, x, u);
-  }
-
+                                            const Eigen::Ref<const Eigen::VectorXd>&,
+                                            const Eigen::Ref<const Eigen::VectorXd>&) {
   CostDataContactFrictionCone* d = static_cast<CostDataContactFrictionCone*>(data.get());
 
   const Eigen::MatrixXd& df_dx = d->contact->df_dx;
   const Eigen::MatrixXd& df_du = d->contact->df_du;
   const FrictionCone::MatrixX3& A = friction_cone_.get_A();
 
-  activation_->calcDiff(data->activation, data->r, recalc);
+  activation_->calcDiff(data->activation, data->r);
   if (d->more_than_3_constraints) {
     data->Rx.noalias() = A * df_dx.topRows<3>();
     data->Ru.noalias() = A * df_du.topRows<3>();

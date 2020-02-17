@@ -20,8 +20,7 @@ class ActivationModelWeightedQuad : public ActivationModelAbstract {
   ~ActivationModelWeightedQuad();
 
   void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r);
-  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r,
-                const bool& recalc = true);
+  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r);
   boost::shared_ptr<ActivationDataAbstract> createData();
 
   const Eigen::VectorXd& get_weights() const;

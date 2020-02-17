@@ -27,7 +27,7 @@ class ActivationModelAbstract {
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                     const Eigen::Ref<const Eigen::VectorXd>& r) = 0;
   virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
-                        const Eigen::Ref<const Eigen::VectorXd>& r, const bool& recalc = true) = 0;
+                        const Eigen::Ref<const Eigen::VectorXd>& r) = 0;
   virtual boost::shared_ptr<ActivationDataAbstract> createData();
 
   const std::size_t& get_nr() const;
@@ -40,12 +40,8 @@ class ActivationModelAbstract {
  public:
   void calc_wrap(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::VectorXd& r) { calc(data, r); }
 
-  void calcDiff_wrap(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::VectorXd& r,
-                     const bool& recalc) {
-    calcDiff(data, r, recalc);
-  }
   void calcDiff_wrap(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::VectorXd& r) {
-    calcDiff(data, r, true);
+    calcDiff(data, r);
   }
 
 #endif

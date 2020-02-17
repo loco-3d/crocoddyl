@@ -41,6 +41,9 @@ class ShootingProblemTestCase(unittest.TestCase):
 
     def test_calcDiff(self):
         # Running calc functions
+        cost = self.PROBLEM.calc(self.xs, self.us)
+        costDer = self.PROBLEM_DER.calc(self.xs, self.us)
+
         cost = self.PROBLEM.calcDiff(self.xs, self.us)
         costDer = self.PROBLEM_DER.calcDiff(self.xs, self.us)
         self.assertAlmostEqual(cost, costDer, 10, "Wrong cost value")

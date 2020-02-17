@@ -26,10 +26,9 @@ class ImpulseModelAbstract_wrap : public ImpulseModelAbstract, public bp::wrappe
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x);
   }
 
-  void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const bool& recalc = true) {
+  void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
     assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(), "x has wrong dimension");
-    return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, recalc);
+    return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x);
   }
 
   void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force) {
@@ -37,8 +36,6 @@ class ImpulseModelAbstract_wrap : public ImpulseModelAbstract, public bp::wrappe
     return bp::call<void>(this->get_override("updateForce").ptr(), data, force);
   }
 };
-
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ImpulseModel_calcDiff_wraps, ImpulseModelAbstract::calcDiff_wrap, 2, 3)
 
 void exposeImpulseAbstract() {
   bp::register_ptr_to_python<boost::shared_ptr<ImpulseModelAbstract> >();
@@ -57,11 +54,10 @@ void exposeImpulseAbstract() {
            "Compute the impulse Jacobian\n"
            ":param data: impulse data\n"
            ":param x: state vector")
-      .def("calcDiff", pure_virtual(&ImpulseModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "recalc"),
+      .def("calcDiff", pure_virtual(&ImpulseModelAbstract_wrap::calcDiff), bp::args("self", "data", "x"),
            "Compute the derivatives of impulse Jacobian\n"
            ":param data: impulse data\n"
-           ":param x: state vector\n"
-           ":param recalc: If true, it updates the impulse Jacobian")
+           ":param x: state vector\n")
       .def("updateForce", pure_virtual(&ImpulseModelAbstract_wrap::updateForce), bp::args("self", "data", "force"),
            "Convert the force into a stack of spatial forces.\n\n"
            ":param data: impulse data\n"

@@ -45,7 +45,9 @@ dnum = MODEL_ND.createData()
 
 x = ROBOT_STATE.rand()
 u = pinocchio.utils.rand(ACTUATION.nu)
+MODEL.calc(DATA, x, u)
 MODEL.calcDiff(DATA, x, u)
+MODEL_ND.calc(dnum, x, u)
 MODEL_ND.calcDiff(dnum, x, u)
 assertNumDiff(DATA.Fx, dnum.Fx, NUMDIFF_MODIFIER *
               MODEL_ND.disturbance)  # threshold was 2.7e-2, is now 2.11e-4 (see assertNumDiff.__doc__)

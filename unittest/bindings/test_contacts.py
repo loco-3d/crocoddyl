@@ -45,8 +45,10 @@ class ContactModelAbstractTestCase(unittest.TestCase):
 
     def test_calcDiff(self):
         # Run calc for both action models
-        self.CONTACT.calcDiff(self.data, self.x, True)
-        self.CONTACT_DER.calcDiff(self.data_der, self.x, True)
+        self.CONTACT.calc(self.data, self.x)
+        self.CONTACT.calcDiff(self.data, self.x)
+        self.CONTACT_DER.calc(self.data_der, self.x)
+        self.CONTACT_DER.calcDiff(self.data_der, self.x)
         # Checking the Jacobians of the contact constraint
         self.assertTrue(np.allclose(self.data.da0_dx, self.data_der.da0_dx, atol=1e-9),
                         "Wrong derivatives of the desired contact acceleration (da0_dx).")
@@ -94,8 +96,10 @@ class ContactModelMultipleAbstractTestCase(unittest.TestCase):
     def test_calcDiff(self):
         # Run calc for both action models
         for contact, data in zip(self.CONTACTS.values(), self.datas.values()):
-            contact.calcDiff(data, self.x, True)
-        self.contactSum.calcDiff(self.dataSum, self.x, True)
+            contact.calc(data, self.x)
+            contact.calcDiff(data, self.x)
+        self.contactSum.calc(self.dataSum, self.x)
+        self.contactSum.calcDiff(self.dataSum, self.x)
         # Checking the Jacobians of the contact constraint
         da0_dx = np.vstack([data.da0_dx for data in self.datas.values()])
         self.assertTrue(np.allclose(self.dataSum.da0_dx, da0_dx, atol=1e-9),

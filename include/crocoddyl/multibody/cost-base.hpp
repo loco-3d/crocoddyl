@@ -34,7 +34,7 @@ class CostModelAbstract {
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                     const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
   virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                        const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) = 0;
+                        const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
@@ -64,18 +64,11 @@ class CostModelAbstract {
   }
 
   void calcDiff_wrap(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x,
-                     const Eigen::VectorXd& u, const bool& recalc) {
-    calcDiff(data, x, u, recalc);
-  }
-  void calcDiff_wrap(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x,
                      const Eigen::VectorXd& u) {
-    calcDiff(data, x, u, true);
+    calcDiff(data, x, u);
   }
   void calcDiff_wrap(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x) {
-    calcDiff(data, x, unone_, true);
-  }
-  void calcDiff_wrap(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x, const bool& recalc) {
-    calcDiff(data, x, unone_, recalc);
+    calcDiff(data, x, unone_);
   }
 
 #endif

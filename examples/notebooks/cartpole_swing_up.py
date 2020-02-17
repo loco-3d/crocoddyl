@@ -49,7 +49,7 @@ class DifferentialActionModelCartpole:
         data.cost = .5 * sum(data.costResiduals**2)
         return data.xout, data.cost
 
-    def calcDiff(model, data, x, u=None, recalc=True):
+    def calcDiff(model, data, x, u=None):
         # Advance user might implement the derivatives
         pass
 

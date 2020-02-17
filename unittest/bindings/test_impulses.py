@@ -44,8 +44,11 @@ class ImpulseModelAbstractTestCase(unittest.TestCase):
 
     def test_calcDiff(self):
         # Run calc for both action models
-        self.IMPULSE.calcDiff(self.data, self.x, True)
-        self.IMPULSE_DER.calcDiff(self.data_der, self.x, True)
+        self.IMPULSE.calc(self.data, self.x)
+        self.IMPULSE.calcDiff(self.data, self.x)
+
+        self.IMPULSE_DER.calc(self.data_der, self.x)
+        self.IMPULSE_DER.calcDiff(self.data_der, self.x)
         # Checking the Jacobians of the contact constraint
         self.assertTrue(np.allclose(self.data.dv0_dq, self.data_der.dv0_dq, atol=1e-9),
                         "Wrong Jacobian of the acceleration before impulse (dv0_dq).")
@@ -91,8 +94,10 @@ class ImpulseModelMultipleAbstractTestCase(unittest.TestCase):
     def test_calcDiff(self):
         # Run calc for both action models
         for impulse, data in zip(self.IMPULSES.values(), self.datas.values()):
-            impulse.calcDiff(data, self.x, True)
-        self.impulseSum.calcDiff(self.dataSum, self.x, True)
+            impulse.calc(data, self.x)
+            impulse.calcDiff(data, self.x)
+        self.impulseSum.calc(self.dataSum, self.x)
+        self.impulseSum.calcDiff(self.dataSum, self.x)
         # Checking the Jacobians of the contact constraint
         dv0_dq = np.vstack([data.dv0_dq for data in self.datas.values()])
         self.assertTrue(np.allclose(self.dataSum.dv0_dq, dv0_dq, atol=1e-9),

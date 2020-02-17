@@ -139,7 +139,10 @@ void test_partial_derivatives_against_numdiff(TestTypes::Type test_type) {
   const Eigen::VectorXd& r = Eigen::VectorXd::Random(model->get_nr());
 
   // Computing the action derivatives
+  model->calc(data, r);
   model->calcDiff(data, r);
+
+  model_num_diff.calc(data_num_diff, r);
   model_num_diff.calcDiff(data_num_diff, r);
 
   // Checking the partial derivatives against NumDiff

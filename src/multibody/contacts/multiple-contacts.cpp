@@ -69,13 +69,10 @@ void ContactModelMultiple::calc(const boost::shared_ptr<ContactDataMultiple>& da
 }
 
 void ContactModelMultiple::calcDiff(const boost::shared_ptr<ContactDataMultiple>& data,
-                                    const Eigen::Ref<const Eigen::VectorXd>& x, const bool& recalc) {
+                                    const Eigen::Ref<const Eigen::VectorXd>& x) {
   if (data->contacts.size() != contacts_.size()) {
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of contact datas and models");
-  }
-  if (recalc) {
-    calc(data, x);
   }
   std::size_t nc = 0;
 
@@ -88,7 +85,7 @@ void ContactModelMultiple::calcDiff(const boost::shared_ptr<ContactDataMultiple>
     boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
     assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
 
-    m_i.contact->calcDiff(d_i, x, false);
+    m_i.contact->calcDiff(d_i, x);
     const std::size_t& nc_i = m_i.contact->get_nc();
     data->da0_dx.block(nc, 0, nc_i, ndx) = d_i->da0_dx;
     nc += nc_i;

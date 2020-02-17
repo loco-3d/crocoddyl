@@ -29,8 +29,8 @@ void DifferentialActionModelAbstract::calc(const boost::shared_ptr<DifferentialA
 }
 
 void DifferentialActionModelAbstract::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                                               const Eigen::Ref<const Eigen::VectorXd>& x, const bool& recalc) {
-  calcDiff(data, x, unone_, recalc);
+                                               const Eigen::Ref<const Eigen::VectorXd>& x) {
+  calcDiff(data, x, unone_);
 }
 
 boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelAbstract::createData() {

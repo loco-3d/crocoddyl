@@ -29,8 +29,8 @@ void ActionModelAbstract::calc(const boost::shared_ptr<ActionDataAbstract>& data
 }
 
 void ActionModelAbstract::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
-                                   const Eigen::Ref<const Eigen::VectorXd>& x, const bool& recalc) {
-  calcDiff(data, x, unone_, recalc);
+                                   const Eigen::Ref<const Eigen::VectorXd>& x) {
+  calcDiff(data, x, unone_);
 }
 
 void ActionModelAbstract::quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<Eigen::VectorXd> u,
@@ -52,6 +52,7 @@ void ActionModelAbstract::quasiStatic(const boost::shared_ptr<ActionDataAbstract
   } else {
     Eigen::VectorXd du = Eigen::VectorXd::Zero(nu_);
     for (std::size_t i = 0; i < maxiter; ++i) {
+      calc(data, x, u);
       calcDiff(data, x, u);
       state_->diff(x, data->xnext, dx);
       du = -pseudoInverse(data->Fu) * data->Fx * dx;

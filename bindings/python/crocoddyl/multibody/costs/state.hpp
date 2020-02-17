@@ -80,20 +80,14 @@ void exposeCostState() {
                                 ":param x: time-discrete state vector\n"
                                 ":param u: time-discrete control input"))
       .def<void (CostModelState::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                    const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &CostModelState::calcDiff_wrap, bp::args("self", "data", "x", "u", "recalc"),
-          "Compute the derivatives of the state cost.\n\n"
-          ":param data: action data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input\n"
-          ":param recalc: If true, it updates the state evolution and the cost value (default True).")
-      .def<void (CostModelState::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
                                     const Eigen::VectorXd&)>("calcDiff", &CostModelState::calcDiff_wrap,
-                                                             bp::args("self", "data", "x", "u"))
+                                                             bp::args("self", "data", "x", "u"),
+                                                             "Compute the derivatives of the state cost.\n\n"
+                                                             ":param data: action data\n"
+                                                             ":param x: time-discrete state vector\n"
+                                                             ":param u: time-discrete control input\n")
       .def<void (CostModelState::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &CostModelState::calcDiff_wrap, bp::args("self", "data", "x"))
-      .def<void (CostModelState::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &CostModelState::calcDiff_wrap, bp::args("self", "data", "x", "recalc"))
       .add_property("xref",
                     bp::make_function(&CostModelState::get_xref, bp::return_value_policy<bp::return_by_value>()),
                     "reference state")

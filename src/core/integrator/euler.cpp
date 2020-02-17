@@ -74,7 +74,7 @@ void IntegratedActionModelEuler::calc(const boost::shared_ptr<ActionDataAbstract
 
 void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                           const Eigen::Ref<const Eigen::VectorXd>& x,
-                                          const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc) {
+                                          const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -85,15 +85,12 @@ void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbst
   }
 
   const std::size_t& nv = differential_->get_state()->get_nv();
-  if (recalc) {
-    calc(data, x, u);
-  }
 
   // Static casting the data
   boost::shared_ptr<IntegratedActionDataEuler> d = boost::static_pointer_cast<IntegratedActionDataEuler>(data);
 
   // Computing the derivatives for the time-continuous model (i.e. differential model)
-  differential_->calcDiff(d->differential, x, u, false);
+  differential_->calcDiff(d->differential, x, u);
   differential_->get_state()->Jintegrate(x, d->dx, d->dxnext_dx, d->dxnext_ddx);
 
   d->Fx = d->dxnext_dx;

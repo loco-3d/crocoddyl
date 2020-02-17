@@ -29,16 +29,13 @@ void exposeActivationSmoothAbs() {
            "Compute the sqrt{1 + ||r||^2}.\n\n"
            ":param data: activation data\n"
            ":param r: residual vector")
-      .def<void (ActivationModelSmoothAbs::*)(const boost::shared_ptr<ActivationDataAbstract>&, const Eigen::VectorXd&,
-                                              const bool&)>("calcDiff", &ActivationModelSmoothAbs::calcDiff_wrap,
-                                                            bp::args("self", "data", "r", "recalc"),
-                                                            "Compute the derivatives of a smoot-abs function.\n\n"
-                                                            ":param data: activation data\n"
-                                                            ":param r: residual vector \n"
-                                                            ":param recalc: If true, it updates the residual value.")
       .def<void (ActivationModelSmoothAbs::*)(const boost::shared_ptr<ActivationDataAbstract>&,
                                               const Eigen::VectorXd&)>(
-          "calcDiff", &ActivationModelSmoothAbs::calcDiff_wrap, bp::args("self", "data", "r"))
+          "calcDiff", &ActivationModelSmoothAbs::calcDiff_wrap, bp::args("self", "data", "r"),
+          "Compute the derivatives of a smoot-abs function.\n\n"
+          ":param data: activation data\n"
+          ":param r: residual vector \n")
+
       .def("createData", &ActivationModelSmoothAbs::createData, bp::args("self"),
            "Create the smooth-abs activation data.\n\n");
 }

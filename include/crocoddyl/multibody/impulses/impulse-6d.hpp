@@ -21,8 +21,7 @@ class ImpulseModel6D : public ImpulseModelAbstract {
   ~ImpulseModel6D();
 
   void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
-  void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const bool& recalc = true);
+  void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
   void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force);
   boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::Data* const data);
 

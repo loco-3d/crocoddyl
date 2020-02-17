@@ -36,7 +36,7 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
   }
 
   void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true) {
+                const Eigen::Ref<const Eigen::VectorXd>& u) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
       throw_pretty("Invalid argument: "
                    << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -45,7 +45,7 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
       throw_pretty("Invalid argument: "
                    << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
     }
-    return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u, recalc);
+    return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 };
 
@@ -78,16 +78,15 @@ void exposeActionAbstract() {
            ":param data: action data\n"
            ":param x: time-discrete state vector\n"
            ":param u: time-discrete control input")
-      .def("calcDiff", pure_virtual(&ActionModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u", "recalc"),
+      .def("calcDiff", pure_virtual(&ActionModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the dynamics and cost functions.\n\n"
            "It computes the partial derivatives of the dynamical system and the\n"
-           "cost function. If recalc == True, it first updates the state evolution\n"
-           "and cost value. This function builds a quadratic approximation of the\n"
+           "cost function. It assumes that calc has been run first.\n"
+           "This function builds a quadratic approximation of the\n"
            "action model (i.e. linear dynamics and quadratic cost).\n"
            ":param data: action data\n"
            ":param x: time-discrete state vector\n"
-           ":param u: time-discrete control input\n"
-           ":param recalc: If true, it updates the state evolution and the cost value (default True).")
+           ":param u: time-discrete control input\n")
       .def("createData", &ActionModelAbstract_wrap::createData, bp::args("self"),
            "Create the action data.\n\n"
            "Each action model (AM) has its own data that needs to be allocated.\n"

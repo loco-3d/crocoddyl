@@ -170,6 +170,7 @@ const std::size_t& SolverKKT::get_ndx() const { return ndx_; }
 const std::size_t& SolverKKT::get_nu() const { return nu_; }
 
 double SolverKKT::calc() {
+  cost_ = problem_->calc(xs_, us_);
   cost_ = problem_->calcDiff(xs_, us_);
 
   // offset on constraint xnext = f(x,u) due to x0 = ref.

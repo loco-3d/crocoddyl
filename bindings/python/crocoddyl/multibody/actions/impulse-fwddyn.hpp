@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,27 +49,21 @@ void exposeActionImpulseFwdDynamics() {
                ":param x: time-continuous state vector\n"
                ":param u: time-continuous control input"))
       .def<void (ActionModelImpulseFwdDynamics::*)(const boost::shared_ptr<ActionDataAbstract>&,
-                                                   const Eigen::VectorXd&, const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &ActionModelImpulseFwdDynamics::calcDiff_wrap, bp::args("self", "data", "x", "u", "recalc"),
+                                                   const Eigen::VectorXd&, const Eigen::VectorXd&)>(
+          "calcDiff", &ActionModelImpulseFwdDynamics::calcDiff_wrap, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the differential multibody system and its cost\n"
           "functions.\n\n"
           "It computes the partial derivatives of the differential multibody system and the\n"
-          "cost function. If recalc == True, it first updates the state evolution\n"
-          "and cost value. This function builds a quadratic approximation of the\n"
+          "cost function. It assumes that calc has been run first.\n"
+          "This function builds a quadratic approximation of the\n"
           "action model (i.e. dynamical system and cost function).\n"
           ":param data: impulse forward-dynamics action data\n"
           ":param x: time-continuous state vector\n"
           ":param u: time-continuous control input\n"
-          ":param recalc: If true, it updates the state evolution and the cost value (default True).")
-      .def<void (ActionModelImpulseFwdDynamics::*)(const boost::shared_ptr<ActionDataAbstract>&,
-                                                   const Eigen::VectorXd&, const Eigen::VectorXd&)>(
-          "calcDiff", &ActionModelImpulseFwdDynamics::calcDiff_wrap, bp::args("self", "data", "x", "u"))
+          "")
       .def<void (ActionModelImpulseFwdDynamics::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                                    const Eigen::VectorXd&)>(
           "calcDiff", &ActionModelImpulseFwdDynamics::calcDiff_wrap, bp::args("self", "data", "x"))
-      .def<void (ActionModelImpulseFwdDynamics::*)(const boost::shared_ptr<ActionDataAbstract>&,
-                                                   const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &ActionModelImpulseFwdDynamics::calcDiff_wrap, bp::args("self", "data", "x", "recalc"))
       .def("createData", &ActionModelImpulseFwdDynamics::createData, bp::args("self"),
            "Create the impulse forward dynamics differential action data.")
       .add_property(

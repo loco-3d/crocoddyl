@@ -83,20 +83,14 @@ void exposeCostSum() {
                                    ":param x: time-discrete state vector\n"
                                    ":param u: time-discrete control input"))
       .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataSum>&, const Eigen::VectorXd&,
-                                  const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &CostModelSum::calcDiff_wrap, bp::args("self", "data", "x", "u", "recalc"),
-          "Compute the derivatives of the total cost.\n\n"
-          ":param data: action data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input\n"
-          ":param recalc: If true, it updates the state evolution and the cost value (default True).")
-      .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataSum>&, const Eigen::VectorXd&,
                                   const Eigen::VectorXd&)>("calcDiff", &CostModelSum::calcDiff_wrap,
-                                                           bp::args("self", "data", "x", "u"))
+                                                           bp::args("self", "data", "x", "u"),
+                                                           "Compute the derivatives of the total cost.\n\n"
+                                                           ":param data: action data\n"
+                                                           ":param x: time-discrete state vector\n"
+                                                           ":param u: time-discrete control input\n")
       .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataSum>&, const Eigen::VectorXd&)>(
           "calcDiff", &CostModelSum::calcDiff_wrap, bp::args("self", "data", "x"))
-      .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataSum>&, const Eigen::VectorXd&, const bool&)>(
-          "calcDiff", &CostModelSum::calcDiff_wrap, bp::args("self", "data", "x", "recalc"))
       .def("createData", &CostModelSum::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the total cost data.\n\n"

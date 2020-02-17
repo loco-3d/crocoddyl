@@ -30,8 +30,8 @@ int calc(crocoddyl::ImpulseModelMultiple& model, boost::shared_ptr<crocoddyl::Im
 }
 
 int calcDiff(crocoddyl::ImpulseModelMultiple& model, boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data,
-             Eigen::VectorXd& dx, bool recalc) {
-  model.calcDiff(data, dx, recalc);
+             Eigen::VectorXd& dx) {
+  model.calcDiff(data, dx);
   return 0;
 }
 
@@ -257,7 +257,8 @@ void test_calc_diff() {
 
   // pinocchio data have been filled so the results of this operation are
   // none null matrices
-  model.calcDiff(data, dx, true);
+  model.calc(data, dx);
+  model.calcDiff(data, dx);
 
   // Check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(!data->Jc.isZero());
@@ -300,7 +301,7 @@ void test_calc_diff_no_recalc() {
 
   // pinocchio data have not been filled so the results of this operation are
   // null matrices
-  model.calcDiff(data, dx, false);
+  model.calcDiff(data, dx);
 
   // Check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(data->Jc.isZero());
@@ -334,7 +335,8 @@ void test_calc_diff_no_computation() {
 
   // pinocchio data have not been filled so the results of this operation are
   // null matrices
-  model.calcDiff(data, dx, true);
+  model.calc(data, dx);
+  model.calcDiff(data, dx);
 
   // Check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(data->Jc.hasNaN() || data->Jc.isZero());

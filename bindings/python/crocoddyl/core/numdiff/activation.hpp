@@ -28,16 +28,12 @@ void exposeActivationNumDiff() {
            "The activation evolution is described in model.\n"
            ":param data: NumDiff action data\n"
            ":param r: residual vector")
-      .def<void (ActivationModelNumDiff::*)(const boost::shared_ptr<ActivationDataAbstract>&, const Eigen::VectorXd&,
-                                            const bool&)>(
-          "calcDiff", &ActivationModelNumDiff::calcDiff_wrap, bp::args("self", "data", "r", "recalc"),
+      .def<void (ActivationModelNumDiff::*)(const boost::shared_ptr<ActivationDataAbstract>&, const Eigen::VectorXd&)>(
+          "calcDiff", &ActivationModelNumDiff::calcDiff_wrap, bp::args("self", "data", "r"),
           "Compute the derivatives of the residual.\n\n"
           "It computes the Jacobian and Hessian using numerical differentiation.\n"
           ":param data: NumDiff action data\n"
-          ":param r: residual vector\n"
-          ":param recalc: If true, it updates the residual vector (default True).")
-      .def<void (ActivationModelNumDiff::*)(const boost::shared_ptr<ActivationDataAbstract>&, const Eigen::VectorXd&)>(
-          "calcDiff", &ActivationModelNumDiff::calcDiff_wrap, bp::args("self", "data", "r"))
+          ":param r: residual vector\n")
       .def("createData", &ActivationModelNumDiff::createData, bp::args("self"),
            "Create the activation data.\n\n"
            "Each activation model (AM) has its own data that needs to be allocated.\n"

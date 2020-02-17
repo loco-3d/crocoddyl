@@ -97,8 +97,7 @@ void DifferentialActionModelContactFwdDynamics::calc(const boost::shared_ptr<Dif
 
 void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                          const Eigen::Ref<const Eigen::VectorXd>& x,
-                                                         const Eigen::Ref<const Eigen::VectorXd>& u,
-                                                         const bool& recalc) {
+                                                         const Eigen::Ref<const Eigen::VectorXd>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -114,16 +113,13 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
   const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v = x.tail(nv);
 
   DifferentialActionDataContactFwdDynamics* d = static_cast<DifferentialActionDataContactFwdDynamics*>(data.get());
-  if (recalc) {
-    calc(data, x, u);
-  }
 
   // Computing the dynamics derivatives
   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout, d->multibody.contacts->fext);
   pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->multibody.contacts->Jc, d->Kinv);
 
-  actuation_->calcDiff(d->multibody.actuation, x, u, false);
-  contacts_->calcDiff(d->multibody.contacts, x, false);
+  actuation_->calcDiff(d->multibody.actuation, x, u);
+  contacts_->calcDiff(d->multibody.contacts, x);
 
   Eigen::Block<Eigen::MatrixXd> a_partial_dtau = d->Kinv.topLeftCorner(nv, nv);
   Eigen::Block<Eigen::MatrixXd> a_partial_da = d->Kinv.topRightCorner(nv, nc);
@@ -146,7 +142,7 @@ void DifferentialActionModelContactFwdDynamics::calcDiff(const boost::shared_ptr
     contacts_->updateAccelerationDiff(d->multibody.contacts, d->Fx.bottomRows(nv));
     contacts_->updateForceDiff(d->multibody.contacts, d->df_dx, d->df_du);
   }
-  costs_->calcDiff(d->costs, x, u, false);
+  costs_->calcDiff(d->costs, x, u);
 }
 
 boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelContactFwdDynamics::createData() {

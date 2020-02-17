@@ -28,10 +28,9 @@ class ContactModelAbstract_wrap : public ContactModelAbstract, public bp::wrappe
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x);
   }
 
-  void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const bool& recalc = true) {
+  void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
     assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(), "x has wrong dimension");
-    return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, recalc);
+    return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x);
   }
 
   void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& force) {
@@ -39,8 +38,6 @@ class ContactModelAbstract_wrap : public ContactModelAbstract, public bp::wrappe
     return bp::call<void>(this->get_override("updateForce").ptr(), data, force);
   }
 };
-
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ContactModel_calcDiff_wraps, ContactModelAbstract::calcDiff_wrap, 2, 3)
 
 void exposeContactAbstract() {
   bp::register_ptr_to_python<boost::shared_ptr<ContactModelAbstract> >();
@@ -63,13 +60,12 @@ void exposeContactAbstract() {
            "of the contact frame placement.\n"
            ":param data: contact data\n"
            ":param x: state vector")
-      .def("calcDiff", pure_virtual(&ContactModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "recalc"),
+      .def("calcDiff", pure_virtual(&ContactModelAbstract_wrap::calcDiff), bp::args("self", "data", "x"),
            "Compute the derivatives of contact holonomic constraint.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
            ":param data: contact data\n"
-           ":param x: state vector\n"
-           ":param recalc: If true, it updates the contact Jacobian and drift.")
+           ":param x: state vector\n")
       .def("updateForce", pure_virtual(&ContactModelAbstract_wrap::updateForce), bp::args("self", "data", "force"),
            "Convert the force into a stack of spatial forces.\n\n"
            ":param data: contact data\n"
