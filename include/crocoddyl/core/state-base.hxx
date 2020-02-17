@@ -20,6 +20,14 @@ StateAbstractTpl<Scalar>::StateAbstractTpl(const std::size_t& nx, const std::siz
 }
 
 template <typename Scalar>
+StateAbstractTpl<Scalar>::StateAbstractTpl()
+    : nx_(0),
+      ndx_(0),
+      lb_(MathBase::VectorXs::Constant(nx_, -std::numeric_limits<Scalar>::infinity())),
+      ub_(MathBase::VectorXs::Constant(nx_, std::numeric_limits<Scalar>::infinity())),
+      has_limits_(false) {}
+
+template <typename Scalar>
 StateAbstractTpl<Scalar>::~StateAbstractTpl() {}
 
 template <typename Scalar>

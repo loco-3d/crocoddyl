@@ -32,6 +32,7 @@ class StateAbstractTpl {
   typedef MathBaseTpl<Scalar> MathBase;
   
   StateAbstractTpl(const std::size_t& nx, const std::size_t& ndx);
+  StateAbstractTpl();
   virtual ~StateAbstractTpl();
 
   virtual typename MathBase::VectorXs zero() const = 0;
