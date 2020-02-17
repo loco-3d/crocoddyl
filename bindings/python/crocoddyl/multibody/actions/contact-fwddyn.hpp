@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,8 +53,8 @@ void exposeDifferentialActionContactFwdDynamics() {
           "Compute the derivatives of the differential multibody system and its cost\n"
           "functions.\n\n"
           "It computes the partial derivatives of the differential multibody system and the\n"
-          "cost function. If recalc == True, it first updates the state evolution\n"
-          "and cost value. This function builds a quadratic approximation of the\n"
+          "cost function. It assumes that calc has been run first.\n"
+          "This function builds a quadratic approximation of the\n"
           "action model (i.e. dynamical system and cost function).\n"
           ":param data: contact forward-dynamics action data\n"
           ":param x: time-continuous state vector\n"

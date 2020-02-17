@@ -81,8 +81,8 @@ void exposeActionAbstract() {
       .def("calcDiff", pure_virtual(&ActionModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the dynamics and cost functions.\n\n"
            "It computes the partial derivatives of the dynamical system and the\n"
-           "cost function. If recalc == True, it first updates the state evolution\n"
-           "and cost value. This function builds a quadratic approximation of the\n"
+           "cost function. It assumes that calc has been run first.\n"
+           "This function builds a quadratic approximation of the\n"
            "action model (i.e. linear dynamics and quadratic cost).\n"
            ":param data: action data\n"
            ":param x: time-discrete state vector\n"

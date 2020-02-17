@@ -84,8 +84,8 @@ void exposeDifferentialActionAbstract() {
            bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the dynamics and cost functions.\n\n"
            "It computes the partial derivatives of the dynamical system and the cost\n"
-           "function. If recalc == True, it first updates the state evolution and\n"
-           "cost value. This function builds a quadratic approximation of the\n"
+           "function. It assumes that calc has been run first.\n"
+           "This function builds a quadratic approximation of the\n"
            "time-continuous action model (i.e. dynamical system and cost function).\n"
            ":param data: differential action data\n"
            ":param x: state vector\n"
