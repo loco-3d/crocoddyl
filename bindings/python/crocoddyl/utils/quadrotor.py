@@ -39,9 +39,7 @@ class ActuationModelUAM(crocoddyl.ActuationModelAbstract):
     def calc(self, data, x, u):
         data.tau = self.S * u
 
-    def calcDiff(self, data, x, u, recalc=True):
-        if recalc:
-            self.calc(data, x, u)
+    def calcDiff(self, data, x, u):
         data.dtau_du = self.S
 
 
