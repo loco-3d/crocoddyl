@@ -32,7 +32,7 @@ void ActuationModelFloatingBase::calc(const boost::shared_ptr<ActuationDataAbstr
   data->tau.tail(nu_) = u;
 }
 
-void ActuationModelFloatingBase::calcDiff(const boost::shared_ptr<ActuationDataAbstract>&,
+void ActuationModelFloatingBase::calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data,
                                           const Eigen::Ref<const Eigen::VectorXd>&,
                                           const Eigen::Ref<const Eigen::VectorXd>&) {
   // The derivatives has constant values which were set in createData.
