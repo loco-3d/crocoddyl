@@ -11,17 +11,18 @@
 #include <iostream>
 
 namespace crocoddyl {
-
-IntegratedActionModelEuler::IntegratedActionModelEuler(boost::shared_ptr<DifferentialActionModelAbstract> model,
-                                                       const double& time_step, const bool& with_cost_residual)
+  
+template<typename Scalar>
+IntegratedActionModelEulerTpl<Scalar>::IntegratedActionModelEulerTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
+                                                       const Scalar& time_step, const bool& with_cost_residual)
     : ActionModelAbstract(model->get_state(), model->get_nu(), model->get_nr()),
       differential_(model),
       time_step_(time_step),
       time_step2_(time_step * time_step),
       with_cost_residual_(with_cost_residual),
       enable_integration_(true) {
-  set_u_lb(differential_->get_u_lb());
-  set_u_ub(differential_->get_u_ub());
+  Base::set_u_lb(differential_->get_u_lb());
+  Base::set_u_ub(differential_->get_u_ub());
   if (time_step_ < 0.) {
     time_step_ = 1e-3;
     time_step2_ = time_step_ * time_step_;
@@ -32,11 +33,13 @@ IntegratedActionModelEuler::IntegratedActionModelEuler(boost::shared_ptr<Differe
   }
 }
 
-IntegratedActionModelEuler::~IntegratedActionModelEuler() {}
-
-void IntegratedActionModelEuler::calc(const boost::shared_ptr<ActionDataAbstract>& data,
-                                      const Eigen::Ref<const Eigen::VectorXd>& x,
-                                      const Eigen::Ref<const Eigen::VectorXd>& u) {
+template<typename Scalar>
+IntegratedActionModelEulerTpl<Scalar>::~IntegratedActionModelEulerTpl() {}
+  
+template<typename Scalar>
+void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>& data,
+                                      const Eigen::Ref<const VectorXs>& x,
+                                      const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -53,9 +56,9 @@ void IntegratedActionModelEuler::calc(const boost::shared_ptr<ActionDataAbstract
   differential_->calc(d->differential, x, u);
 
   // Computing the next state (discrete time)
-  const Eigen::VectorBlock<const Eigen::Ref<const Eigen::VectorXd>, Eigen::Dynamic> v =
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
       x.tail(differential_->get_state()->get_nv());
-  const Eigen::VectorXd& a = d->differential->xout;
+  const VectorXs& a = d->differential->xout;
   if (enable_integration_) {
     d->dx << v * time_step_ + a * time_step2_, a * time_step_;
     differential_->get_state()->integrate(x, d->dx, d->xnext);
@@ -72,9 +75,10 @@ void IntegratedActionModelEuler::calc(const boost::shared_ptr<ActionDataAbstract
   }
 }
 
-void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
-                                          const Eigen::Ref<const Eigen::VectorXd>& x,
-                                          const Eigen::Ref<const Eigen::VectorXd>& u) {
+template<typename Scalar>
+void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+                                          const Eigen::Ref<const VectorXs>& x,
+                                          const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -95,8 +99,8 @@ void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbst
 
   d->Fx = d->dxnext_dx;
   if (enable_integration_) {
-    const Eigen::MatrixXd& da_dx = d->differential->Fx;
-    const Eigen::MatrixXd& da_du = d->differential->Fu;
+    const MatrixXs& da_dx = d->differential->Fx;
+    const MatrixXs& da_du = d->differential->Fu;
     d->ddx_dx << da_dx * time_step_, da_dx;
     d->ddx_du << da_du * time_step_, da_du;
     for (std::size_t i = 0; i < nv; ++i) {
@@ -119,17 +123,21 @@ void IntegratedActionModelEuler::calcDiff(const boost::shared_ptr<ActionDataAbst
   }
 }
 
-boost::shared_ptr<ActionDataAbstract> IntegratedActionModelEuler::createData() {
+template<typename Scalar>
+boost::shared_ptr<ActionDataAbstractTpl<Scalar> > IntegratedActionModelEulerTpl<Scalar>::createData() {
   return boost::make_shared<IntegratedActionDataEuler>(this);
 }
 
-const boost::shared_ptr<DifferentialActionModelAbstract>& IntegratedActionModelEuler::get_differential() const {
+template<typename Scalar>
+const boost::shared_ptr<DifferentialActionModelAbstractTpl<Scalar> >& IntegratedActionModelEulerTpl<Scalar>::get_differential() const {
   return differential_;
 }
 
-const double& IntegratedActionModelEuler::get_dt() const { return time_step_; }
+template<typename Scalar>
+const Scalar& IntegratedActionModelEulerTpl<Scalar>::get_dt() const { return time_step_; }
 
-void IntegratedActionModelEuler::set_dt(const double& dt) {
+template<typename Scalar>
+void IntegratedActionModelEulerTpl<Scalar>::set_dt(const Scalar& dt) {
   if (dt < 0.) {
     throw_pretty("Invalid argument: "
                  << "dt has positive value");
@@ -138,17 +146,18 @@ void IntegratedActionModelEuler::set_dt(const double& dt) {
   time_step2_ = dt * dt;
 }
 
-void IntegratedActionModelEuler::set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model) {
+template<typename Scalar>
+void IntegratedActionModelEulerTpl<Scalar>::set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model) {
   const std::size_t& nu = model->get_nu();
   if (nu_ != nu) {
     nu_ = nu;
-    unone_ = Eigen::VectorXd::Zero(nu_);
+    unone_ = VectorXs::Zero(nu_);
   }
   nr_ = model->get_nr();
   state_ = model->get_state();
   differential_ = model;
-  set_u_lb(differential_->get_u_lb());
-  set_u_ub(differential_->get_u_ub());
+  Base::set_u_lb(differential_->get_u_lb());
+  Base::set_u_ub(differential_->get_u_ub());
 }
 
 }  // namespace crocoddyl

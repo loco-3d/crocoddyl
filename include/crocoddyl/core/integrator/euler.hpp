@@ -14,56 +14,109 @@
 
 namespace crocoddyl {
 
-class IntegratedActionModelEuler : public ActionModelAbstract {
- public:
-  IntegratedActionModelEuler(boost::shared_ptr<DifferentialActionModelAbstract> model, const double& time_step = 1e-3,
-                             const bool& with_cost_residual = true);
-  ~IntegratedActionModelEuler();
+template<typename Scalar> struct IntegratedActionDataEulerTpl;
 
-  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-            const Eigen::Ref<const Eigen::VectorXd>& u);
-  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u);
+  
+template<typename _Scalar>
+class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
+ public:
+
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef ActionModelAbstractTpl<Scalar> Base;
+  typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
+  typedef DifferentialActionModelAbstractTpl<Scalar> DifferentialActionModelAbstract;
+  typedef IntegratedActionDataEulerTpl<Scalar> IntegratedActionDataEuler;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+  
+  IntegratedActionModelEulerTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
+                                const Scalar& time_step = 1e-3,
+                                const bool& with_cost_residual = true);
+  ~IntegratedActionModelEulerTpl();
+
+  void calc(const boost::shared_ptr<ActionDataAbstract>& data,
+            const Eigen::Ref<const VectorXs>& x,
+            const Eigen::Ref<const VectorXs>& u);
+  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+                const Eigen::Ref<const VectorXs>& x,
+                const Eigen::Ref<const VectorXs>& u);
   boost::shared_ptr<ActionDataAbstract> createData();
 
   const boost::shared_ptr<DifferentialActionModelAbstract>& get_differential() const;
-  const double& get_dt() const;
+  const Scalar& get_dt() const;
 
-  void set_dt(const double& dt);
+  void set_dt(const Scalar& dt);
   void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model);
 
- private:
+
+ protected:
+  using Base::nu_;                          //!< Control dimension
+  using Base::nr_;                          //!< Dimension of the cost residual
+  using Base::state_;  //!< Model of the state
+  using Base::unone_;                   //!< Neutral state
+  using Base::u_lb_;                    //!< Lower control limits
+  using Base::u_ub_;                    //!< Upper control limits
+  using Base::has_control_limits_;      //!< Indicates whether any of the control limits
+  
+private:
   boost::shared_ptr<DifferentialActionModelAbstract> differential_;
-  double time_step_;
-  double time_step2_;
+  Scalar time_step_;
+  Scalar time_step2_;
   bool with_cost_residual_;
   bool enable_integration_;
 };
 
-struct IntegratedActionDataEuler : public ActionDataAbstract {
+template<typename _Scalar>
+struct IntegratedActionDataEulerTpl: public ActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef ActionDataAbstractTpl<Scalar> Base;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+
   template <typename Model>
-  explicit IntegratedActionDataEuler(Model* const model) : ActionDataAbstract(model) {
+  explicit IntegratedActionDataEulerTpl(Model* const model) : Base(model) {
     differential = model->get_differential()->createData();
     const std::size_t& ndx = model->get_state()->get_ndx();
     const std::size_t& nu = model->get_nu();
-    dx = Eigen::VectorXd::Zero(ndx);
-    ddx_dx = Eigen::MatrixXd::Zero(ndx, ndx);
-    ddx_du = Eigen::MatrixXd::Zero(ndx, nu);
-    dxnext_dx = Eigen::MatrixXd::Zero(ndx, ndx);
-    dxnext_ddx = Eigen::MatrixXd::Zero(ndx, ndx);
+    dx = VectorXs::Zero(ndx);
+    ddx_dx = MatrixXs::Zero(ndx, ndx);
+    ddx_du = MatrixXs::Zero(ndx, nu);
+    dxnext_dx = MatrixXs::Zero(ndx, ndx);
+    dxnext_ddx = MatrixXs::Zero(ndx, ndx);
   }
-  ~IntegratedActionDataEuler() {}
+  ~IntegratedActionDataEulerTpl() {}
 
   boost::shared_ptr<DifferentialActionDataAbstract> differential;
-  Eigen::VectorXd dx;
-  Eigen::MatrixXd ddx_dx;
-  Eigen::MatrixXd ddx_du;
-  Eigen::MatrixXd dxnext_dx;
-  Eigen::MatrixXd dxnext_ddx;
+  VectorXs dx;
+  MatrixXs ddx_dx;
+  MatrixXs ddx_du;
+  MatrixXs dxnext_dx;
+  MatrixXs dxnext_ddx;
+
+  using Base::cost;
+  using Base::xnext;
+  using Base::r;
+  using Base::Fx;
+  using Base::Fu;
+  using Base::Lx;
+  using Base::Lu;
+  using Base::Lxx;
+  using Base::Lxu;
+  using Base::Luu;
 };
 
+typedef IntegratedActionModelEulerTpl<double> IntegratedActionModelEuler;
+typedef IntegratedActionDataEulerTpl<double> IntegratedActionDataEuler;
+  
 }  // namespace crocoddyl
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "crocoddyl/core/integrator/euler.hxx"
 
 #endif  // CROCODDYL_CORE_INTEGRATOR_EULER_HPP_
