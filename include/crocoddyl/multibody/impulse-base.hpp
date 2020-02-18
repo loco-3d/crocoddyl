@@ -16,22 +16,31 @@
 
 namespace crocoddyl {
 
-struct ImpulseDataAbstract;  // forward declaration
+template<typename Scalar> struct ImpulseDataAbstractTpl;  // forward declaration
 
-class ImpulseModelAbstract {
+template<typename _Scalar>
+class ImpulseModelAbstractTpl {
  public:
-  ImpulseModelAbstract(boost::shared_ptr<StateMultibody> state, const std::size_t& ni);
-  ~ImpulseModelAbstract();
+  
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef StateMultibodyTpl<Scalar> StateMultibody;
+  typedef ImpulseDataAbstractTpl<Scalar> ImpulseDataAbstract;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+  
+  ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& ni);
+  ~ImpulseModelAbstractTpl();
 
   virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                    const Eigen::Ref<const Eigen::VectorXd>& x) = 0;
+                    const Eigen::Ref<const VectorXs>& x) = 0;
   virtual void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                        const Eigen::Ref<const Eigen::VectorXd>& x) = 0;
+                        const Eigen::Ref<const VectorXs>& x) = 0;
 
-  virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force) = 0;
-  void updateForceDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::MatrixXd& df_dq) const;
+  virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& force) = 0;
+  void updateForceDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const MatrixXs& df_dq) const;
 
-  virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::Data* const data);
+  virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
   const boost::shared_ptr<StateMultibody>& get_state() const;
   const std::size_t& get_ni() const;
@@ -43,42 +52,56 @@ class ImpulseModelAbstract {
 #ifdef PYTHON_BINDINGS
 
  public:
-  void calc_wrap(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& x) { calc(data, x); }
+  void calc_wrap(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& x) { calc(data, x); }
 
-  void calcDiff_wrap(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& x) {
+  void calcDiff_wrap(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& x) {
     calcDiff(data, x);
   }
 
 #endif
 };
 
-struct ImpulseDataAbstract {
+template<typename _Scalar>
+struct ImpulseDataAbstractTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+  
   template <typename Model>
-  ImpulseDataAbstract(Model* const model, pinocchio::Data* const data)
+  ImpulseDataAbstractTpl(Model* const model, pinocchio::DataTpl<Scalar>* const data)
       : pinocchio(data),
         joint(0),
         frame(0),
         Jc(model->get_ni(), model->get_state()->get_nv()),
         dv0_dq(model->get_ni(), model->get_state()->get_nv()),
         df_dq(model->get_ni(), model->get_state()->get_nv()),
-        f(pinocchio::Force::Zero()) {
+        f(pinocchio::ForceTpl<Scalar>::Zero()) {
     Jc.fill(0);
     dv0_dq.fill(0);
     df_dq.fill(0);
   }
-  virtual ~ImpulseDataAbstract() {}
+  virtual ~ImpulseDataAbstractTpl() {}
 
-  pinocchio::Data* pinocchio;
+  pinocchio::DataTpl<Scalar>* pinocchio;
   pinocchio::JointIndex joint;
   pinocchio::FrameIndex frame;
-  Eigen::MatrixXd Jc;
-  Eigen::MatrixXd dv0_dq;
-  Eigen::MatrixXd df_dq;
-  pinocchio::Force f;
+  MatrixXs Jc;
+  MatrixXs dv0_dq;
+  MatrixXs df_dq;
+  pinocchio::ForceTpl<Scalar> f;
 };
 
+typedef ImpulseModelAbstractTpl<double> ImpulseModelAbstract;
+typedef ImpulseDataAbstractTpl<double> ImpulseDataAbstract;
+  
 }  // namespace crocoddyl
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "crocoddyl/multibody/impulse-base.hxx"
 
 #endif  // CROCODDYL_MULTIBODY_IMPULSE_BASE_HPP_
