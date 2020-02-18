@@ -65,7 +65,7 @@ class ActivationModelWeightedQuadraticBarrierTpl : public ActivationModelAbstrac
   };
 
   const ActivationBounds& get_bounds() const { return bounds_; };
-  const Eigen::VectorXd& get_weights() const  { return weights_; };
+  const VectorXs& get_weights() const  { return weights_; };
   void set_bounds(const ActivationBounds& bounds) { bounds_ = bounds; };
   void set_weights(const VectorXs& weights) {
     if (weights.size() != weights_.size()) {
