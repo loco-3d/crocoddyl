@@ -6,25 +6,26 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
-
 namespace crocoddyl {
 
-ContactModelMultiple::ContactModelMultiple(boost::shared_ptr<StateMultibody> state, const std::size_t& nu)
+template<typename Scalar>
+ContactModelMultipleTpl<Scalar>::ContactModelMultipleTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu)
     : state_(state), nc_(0), nu_(nu) {}
 
-ContactModelMultiple::ContactModelMultiple(boost::shared_ptr<StateMultibody> state)
+template<typename Scalar>
+ContactModelMultipleTpl<Scalar>::ContactModelMultipleTpl(boost::shared_ptr<StateMultibody> state)
     : state_(state), nc_(0), nu_(state->get_nv()) {}
 
-ContactModelMultiple::~ContactModelMultiple() {}
+template<typename Scalar>
+ContactModelMultipleTpl<Scalar>::~ContactModelMultipleTpl() {}
 
-void ContactModelMultiple::addContact(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact) {
+template<typename Scalar>
+void ContactModelMultipleTpl<Scalar>::addContact(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact) {
   if (contact->get_nu() != nu_) {
     throw_pretty("Invalid argument: "
                  << "contact item doesn't have the same control dimension (" + std::to_string(nu_) + ")");
   }
-  std::pair<ContactModelContainer::iterator, bool> ret =
+  std::pair<typename ContactModelContainer::iterator, bool> ret =
       contacts_.insert(std::make_pair(name, ContactItem(name, contact)));
   if (ret.second == false) {
     std::cout << "Warning: this contact item already existed, we cannot add it" << std::endl;
@@ -33,8 +34,9 @@ void ContactModelMultiple::addContact(const std::string& name, boost::shared_ptr
   }
 }
 
-void ContactModelMultiple::removeContact(const std::string& name) {
-  ContactModelContainer::iterator it = contacts_.find(name);
+template<typename Scalar>
+void ContactModelMultipleTpl<Scalar>::removeContact(const std::string& name) {
+  typename ContactModelContainer::iterator it = contacts_.find(name);
   if (it != contacts_.end()) {
     nc_ -= it->second.contact->get_nc();
     contacts_.erase(it);
@@ -43,8 +45,9 @@ void ContactModelMultiple::removeContact(const std::string& name) {
   }
 }
 
-void ContactModelMultiple::calc(const boost::shared_ptr<ContactDataMultiple>& data,
-                                const Eigen::Ref<const Eigen::VectorXd>& x) {
+template<typename Scalar>
+void ContactModelMultipleTpl<Scalar>::calc(const boost::shared_ptr<ContactDataMultiple>& data,
+                                           const Eigen::Ref<const VectorXs>& x) {
   if (data->contacts.size() != contacts_.size()) {
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of contact datas and models");
@@ -52,8 +55,8 @@ void ContactModelMultiple::calc(const boost::shared_ptr<ContactDataMultiple>& da
   std::size_t nc = 0;
 
   const std::size_t& nv = state_->get_nv();
-  ContactModelContainer::iterator it_m, end_m;
-  ContactDataContainer::iterator it_d, end_d;
+  typename ContactModelContainer::iterator it_m, end_m;
+  typename ContactDataContainer::iterator it_d, end_d;
   for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const ContactItem& m_i = it_m->second;
@@ -68,8 +71,9 @@ void ContactModelMultiple::calc(const boost::shared_ptr<ContactDataMultiple>& da
   }
 }
 
-void ContactModelMultiple::calcDiff(const boost::shared_ptr<ContactDataMultiple>& data,
-                                    const Eigen::Ref<const Eigen::VectorXd>& x) {
+template<typename Scalar>
+void ContactModelMultipleTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataMultiple>& data,
+                                    const Eigen::Ref<const VectorXs>& x) {
   if (data->contacts.size() != contacts_.size()) {
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of contact datas and models");
@@ -77,8 +81,8 @@ void ContactModelMultiple::calcDiff(const boost::shared_ptr<ContactDataMultiple>
   std::size_t nc = 0;
 
   const std::size_t& ndx = state_->get_ndx();
-  ContactModelContainer::iterator it_m, end_m;
-  ContactDataContainer::iterator it_d, end_d;
+  typename ContactModelContainer::iterator it_m, end_m;
+  typename ContactDataContainer::iterator it_d, end_d;
   for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const ContactItem& m_i = it_m->second;
@@ -92,8 +96,9 @@ void ContactModelMultiple::calcDiff(const boost::shared_ptr<ContactDataMultiple>
   }
 }
 
-void ContactModelMultiple::updateAcceleration(const boost::shared_ptr<ContactDataMultiple>& data,
-                                              const Eigen::VectorXd& dv) const {
+template<typename Scalar>
+void ContactModelMultipleTpl<Scalar>::updateAcceleration(const boost::shared_ptr<ContactDataMultiple>& data,
+                                              const VectorXs& dv) const {
   if (static_cast<std::size_t>(dv.size()) != state_->get_nv()) {
     throw_pretty("Invalid argument: "
                  << "dv has wrong dimension (it should be " + std::to_string(state_->get_nv()) + ")");
@@ -101,8 +106,9 @@ void ContactModelMultiple::updateAcceleration(const boost::shared_ptr<ContactDat
   data->dv = dv;
 }
 
-void ContactModelMultiple::updateForce(const boost::shared_ptr<ContactDataMultiple>& data,
-                                       const Eigen::VectorXd& force) {
+template<typename Scalar>
+void ContactModelMultipleTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataMultiple>& data,
+                                       const VectorXs& force) {
   if (static_cast<std::size_t>(force.size()) != nc_) {
     throw_pretty("Invalid argument: "
                  << "force has wrong dimension (it should be " + std::to_string(nc_) + ")");
@@ -114,11 +120,11 @@ void ContactModelMultiple::updateForce(const boost::shared_ptr<ContactDataMultip
   std::size_t nc = 0;
 
   for (ForceIterator it = data->fext.begin(); it != data->fext.end(); ++it) {
-    *it = pinocchio::Force::Zero();
+    *it = pinocchio::ForceTpl<Scalar>::Zero();
   }
 
-  ContactModelContainer::iterator it_m, end_m;
-  ContactDataContainer::iterator it_d, end_d;
+  typename ContactModelContainer::iterator it_m, end_m;
+  typename ContactDataContainer::iterator it_d, end_d;
   for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const ContactItem& m_i = it_m->second;
@@ -126,15 +132,16 @@ void ContactModelMultiple::updateForce(const boost::shared_ptr<ContactDataMultip
     assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
 
     const std::size_t& nc_i = m_i.contact->get_nc();
-    const Eigen::VectorBlock<const Eigen::VectorXd, Eigen::Dynamic> force_i = force.segment(nc, nc_i);
+    const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i = force.segment(nc, nc_i);
     m_i.contact->updateForce(d_i, force_i);
     data->fext[d_i->joint] = d_i->f;
     nc += nc_i;
   }
 }
 
-void ContactModelMultiple::updateAccelerationDiff(const boost::shared_ptr<ContactDataMultiple>& data,
-                                                  const Eigen::MatrixXd& ddv_dx) const {
+template<typename Scalar>
+void ContactModelMultipleTpl<Scalar>::updateAccelerationDiff(const boost::shared_ptr<ContactDataMultiple>& data,
+                                                  const MatrixXs& ddv_dx) const {
   if (static_cast<std::size_t>(ddv_dx.rows()) != state_->get_nv() ||
       static_cast<std::size_t>(ddv_dx.cols()) != state_->get_ndx()) {
     throw_pretty("Invalid argument: "
@@ -144,8 +151,9 @@ void ContactModelMultiple::updateAccelerationDiff(const boost::shared_ptr<Contac
   data->ddv_dx = ddv_dx;
 }
 
-void ContactModelMultiple::updateForceDiff(const boost::shared_ptr<ContactDataMultiple>& data,
-                                           const Eigen::MatrixXd& df_dx, const Eigen::MatrixXd& df_du) const {
+template<typename Scalar>
+void ContactModelMultipleTpl<Scalar>::updateForceDiff(const boost::shared_ptr<ContactDataMultiple>& data,
+                                           const MatrixXs& df_dx, const MatrixXs& df_du) const {
   const std::size_t& ndx = state_->get_ndx();
   if (static_cast<std::size_t>(df_dx.rows()) != nc_ || static_cast<std::size_t>(df_dx.cols()) != ndx) {
     throw_pretty("Invalid argument: "
@@ -163,8 +171,8 @@ void ContactModelMultiple::updateForceDiff(const boost::shared_ptr<ContactDataMu
   }
   std::size_t nc = 0;
 
-  ContactModelContainer::const_iterator it_m, end_m;
-  ContactDataContainer::const_iterator it_d, end_d;
+  typename ContactModelContainer::const_iterator it_m, end_m;
+  typename ContactDataContainer::const_iterator it_d, end_d;
   for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const ContactItem& m_i = it_m->second;
@@ -172,23 +180,28 @@ void ContactModelMultiple::updateForceDiff(const boost::shared_ptr<ContactDataMu
     assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
 
     std::size_t const& nc_i = m_i.contact->get_nc();
-    const Eigen::Block<const Eigen::MatrixXd> df_dx_i = df_dx.block(nc, 0, nc_i, ndx);
-    const Eigen::Block<const Eigen::MatrixXd> df_du_i = df_du.block(nc, 0, nc_i, nu_);
+    const Eigen::Block<const MatrixXs> df_dx_i = df_dx.block(nc, 0, nc_i, ndx);
+    const Eigen::Block<const MatrixXs> df_du_i = df_du.block(nc, 0, nc_i, nu_);
     m_i.contact->updateForceDiff(d_i, df_dx_i, df_du_i);
     nc += nc_i;
   }
 }
 
-boost::shared_ptr<ContactDataMultiple> ContactModelMultiple::createData(pinocchio::Data* const data) {
+template<typename Scalar>
+boost::shared_ptr<ContactDataMultipleTpl<Scalar> > ContactModelMultipleTpl<Scalar>::createData(pinocchio::DataTpl<Scalar>* const data) {
   return boost::make_shared<ContactDataMultiple>(this, data);
 }
 
-const boost::shared_ptr<StateMultibody>& ContactModelMultiple::get_state() const { return state_; }
+template<typename Scalar>
+const boost::shared_ptr<StateMultibodyTpl<Scalar> >& ContactModelMultipleTpl<Scalar>::get_state() const { return state_; }
 
-const ContactModelMultiple::ContactModelContainer& ContactModelMultiple::get_contacts() const { return contacts_; }
+template<typename Scalar>
+const typename ContactModelMultipleTpl<Scalar>::ContactModelContainer& ContactModelMultipleTpl<Scalar>::get_contacts() const { return contacts_; }
 
-const std::size_t& ContactModelMultiple::get_nc() const { return nc_; }
+template<typename Scalar>
+const std::size_t& ContactModelMultipleTpl<Scalar>::get_nc() const { return nc_; }
 
-const std::size_t& ContactModelMultiple::get_nu() const { return nu_; }
+template<typename Scalar>
+const std::size_t& ContactModelMultipleTpl<Scalar>::get_nu() const { return nu_; }
 
 }  // namespace crocoddyl

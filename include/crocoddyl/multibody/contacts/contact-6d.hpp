@@ -16,34 +16,71 @@
 
 namespace crocoddyl {
 
-class ContactModel6D : public ContactModelAbstract {
+template<typename Scalar> struct ContactData6DTpl;
+  
+template <typename _Scalar>
+class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
  public:
-  ContactModel6D(boost::shared_ptr<StateMultibody> state, const FramePlacement& xref, const std::size_t& nu,
-                 const Eigen::Vector2d& gains = Eigen::Vector2d::Zero());
-  ContactModel6D(boost::shared_ptr<StateMultibody> state, const FramePlacement& xref,
-                 const Eigen::Vector2d& gains = Eigen::Vector2d::Zero());
-  ~ContactModel6D();
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef ContactModelAbstractTpl<Scalar> Base;
+  typedef StateMultibodyTpl<Scalar> StateMultibody;
+  typedef ContactDataAbstractTpl<Scalar> ContactDataAbstract;
+  typedef ContactData6DTpl<Scalar> ContactData6D;
+  typedef FramePlacementTpl<Scalar> FramePlacement;
+  typedef typename MathBase::Vector2s Vector2s;
+  typedef typename MathBase::Vector3s Vector3s;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+  
+  ContactModel6DTpl(boost::shared_ptr<StateMultibody> state,
+                    const FramePlacement& xref, const std::size_t& nu,
+                    const Vector2s& gains = Vector2s::Zero());
+  ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& xref,
+                    const Vector2s& gains = Vector2s::Zero());
+  ~ContactModel6DTpl();
 
-  void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
-  void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
-  void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::VectorXd& force);
-  boost::shared_ptr<ContactDataAbstract> createData(pinocchio::Data* const data);
+  void calc(const boost::shared_ptr<ContactDataAbstract>& data,
+            const Eigen::Ref<const VectorXs>& x);
+  void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
+                const Eigen::Ref<const VectorXs>& x);
+  void updateForce(const boost::shared_ptr<ContactDataAbstract>& data,
+                   const VectorXs& force);
+  boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
   const FramePlacement& get_Mref() const;
-  const Eigen::Vector2d& get_gains() const;
+  const Vector2s& get_gains() const;
 
- private:
+protected:
+  using Base::state_;
+  using Base::nc_;
+  using Base::nu_;
+  
+private:
   FramePlacement Mref_;
-  Eigen::Vector2d gains_;
+  Vector2s gains_;
 };
 
-struct ContactData6D : public ContactDataAbstract {
+template<typename _Scalar>
+struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef ContactDataAbstractTpl<Scalar> Base;
+  typedef typename MathBase::Vector2s Vector2s;
+  typedef typename MathBase::Matrix3s Matrix3s;
+  typedef typename MathBase::Matrix6xs Matrix6xs;
+  typedef typename MathBase::Matrix6s Matrix6s;
+
+  typedef typename MathBase::Vector3s Vector3s;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+
   template <typename Model>
-  ContactData6D(Model* const model, pinocchio::Data* const data)
+  ContactData6DTpl(Model* const model, pinocchio::DataTpl<Scalar>* const data)
       : ContactDataAbstract(model, data),
-        rMf(pinocchio::SE3::Identity()),
+        rMf(pinocchio::SE3Tpl<Scalar>::Identity()),
         v_partial_dq(6, model->get_state()->get_nv()),
         a_partial_dq(6, model->get_state()->get_nv()),
         a_partial_dv(6, model->get_state()->get_nv()),
@@ -59,16 +96,35 @@ struct ContactData6D : public ContactDataAbstract {
     rMf_Jlog6.fill(0);
   }
 
-  pinocchio::SE3 rMf;
-  pinocchio::Motion v;
-  pinocchio::Motion a;
-  pinocchio::Data::Matrix6x v_partial_dq;
-  pinocchio::Data::Matrix6x a_partial_dq;
-  pinocchio::Data::Matrix6x a_partial_dv;
-  pinocchio::Data::Matrix6x a_partial_da;
-  pinocchio::SE3::Matrix6 rMf_Jlog6;
+  pinocchio::SE3Tpl<Scalar> rMf;
+  pinocchio::MotionTpl<Scalar> v;
+  pinocchio::MotionTpl<Scalar> a;
+  Matrix6xs v_partial_dq;
+  Matrix6xs a_partial_dq;
+  Matrix6xs a_partial_dv;
+  Matrix6xs a_partial_da;
+  Matrix6s rMf_Jlog6;
+
+  using Base::pinocchio;
+  using Base::joint;
+  using Base::frame;
+  using Base::jMf;
+  using Base::fXj;
+  using Base::Jc;
+  using Base::a0;
+  using Base::da0_dx;
+  using Base::df_dx;
+  using Base::df_du;
+  using Base::f;
 };
+  
+typedef ContactModel6DTpl<double> ContactModel6D;
+typedef ContactData6DTpl<double> ContactData6D;
 
 }  // namespace crocoddyl
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "crocoddyl/multibody/contacts/contact-6d.hxx"
 
 #endif  // CROCODDYL_MULTIBODY_CONTACTS_CONTACT_6D_HPP_

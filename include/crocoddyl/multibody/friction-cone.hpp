@@ -9,7 +9,6 @@
 #ifndef CROCODDYL_MULTIBODY_FRICTION_CONE_HPP_
 #define CROCODDYL_MULTIBODY_FRICTION_CONE_HPP_
 
-#include <Eigen/Dense>
 #include "crocoddyl/core/mathbase.hpp"
 
 namespace crocoddyl {
