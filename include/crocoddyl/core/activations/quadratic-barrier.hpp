@@ -16,9 +16,18 @@
 
 namespace crocoddyl {
 
-struct ActivationBounds {
-  ActivationBounds(const Eigen::VectorXd& lower, const Eigen::VectorXd& upper, const double& b = 1.)
-      : lb(lower), ub(upper), beta(b) {
+template<typename Scalar> struct ActivationDataQuadraticBarrierTpl;
+
+template<typename _Scalar>
+struct ActivationBoundsTpl {
+
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+  
+  ActivationBoundsTpl(const VectorXs& lower, const VectorXs& upper, const Scalar& b = 1.)
+    : lb(lower), ub(upper), beta(b) {
     if (lb.size() != ub.size()) {
       throw_pretty("Invalid argument: "
                    << "The lower and upper bounds don't have the same dimension (lb,ub dimensions equal to " +
@@ -38,52 +47,108 @@ struct ActivationBounds {
     }
 
     if (beta >= 0 && beta <= 1.) {
-      Eigen::VectorXd m = 0.5 * (lower + upper);
-      Eigen::VectorXd d = 0.5 * (upper - lower);
+      VectorXs m = 0.5 * (lower + upper);
+      VectorXs d = 0.5 * (upper - lower);
       lb = m - beta * d;
       ub = m + beta * d;
     } else {
       beta = 1.;
     }
   }
-  ActivationBounds(const ActivationBounds& bounds) : lb(bounds.lb), ub(bounds.ub), beta(bounds.beta) {}
-  ActivationBounds() : beta(1.) {}
+  ActivationBoundsTpl(const ActivationBoundsTpl& bounds) : lb(bounds.lb), ub(bounds.ub), beta(bounds.beta) {}
+  ActivationBoundsTpl() : beta(1.) {}
 
-  Eigen::VectorXd lb;
-  Eigen::VectorXd ub;
-  double beta;
+  VectorXs lb;
+  VectorXs ub;
+  Scalar beta;
 };
 
-class ActivationModelQuadraticBarrier : public ActivationModelAbstract {
+template<typename _Scalar>
+class ActivationModelQuadraticBarrierTpl : public ActivationModelAbstractTpl<_Scalar> {
  public:
-  explicit ActivationModelQuadraticBarrier(const ActivationBounds& bounds);
-  ~ActivationModelQuadraticBarrier();
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef ActivationModelAbstractTpl<Scalar> Base;
+  typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
+  typedef ActivationDataQuadraticBarrierTpl<Scalar> ActivationDataQuadraticBarrier;
+  typedef ActivationBoundsTpl<Scalar> ActivationBounds;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+  
+  explicit ActivationModelQuadraticBarrierTpl(const ActivationBounds& bounds) 
+    : Base(bounds.lb.size()), bounds_(bounds) {};
+  ~ActivationModelQuadraticBarrierTpl() {};
 
-  void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r);
-  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r);
-  boost::shared_ptr<ActivationDataAbstract> createData();
+  void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
+            const Eigen::Ref<const VectorXs>& r) {
 
-  const ActivationBounds& get_bounds() const;
-  void set_bounds(const ActivationBounds& bounds);
+    if (static_cast<std::size_t>(r.size()) != nr_) {
+      throw_pretty("Invalid argument: "
+                   << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+    }
 
+    boost::shared_ptr<ActivationDataQuadraticBarrier> d =
+      boost::static_pointer_cast<ActivationDataQuadraticBarrier>(data);
+    
+    d->rlb_min_ = (r - bounds_.lb).array().min(0.);
+    d->rub_max_ = (r - bounds_.ub).array().max(0.);
+    data->a_value = 0.5 * d->rlb_min_.matrix().squaredNorm() + 0.5 * d->rub_max_.matrix().squaredNorm();
+    
+  };
+  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
+                const Eigen::Ref<const VectorXs>& r) {
+
+  if (static_cast<std::size_t>(r.size()) != nr_) {
+    throw_pretty("Invalid argument: "
+                 << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+  }
+  
+  boost::shared_ptr<ActivationDataQuadraticBarrier> d =
+    boost::static_pointer_cast<ActivationDataQuadraticBarrier>(data);
+  data->Ar = (d->rlb_min_ + d->rub_max_).matrix();
+  data->Arr.diagonal() = (((r - bounds_.lb).array() <= 0.) + ((r - bounds_.ub).array() >= 0.)).matrix().template cast<Scalar>();
+  };
+  boost::shared_ptr<ActivationDataAbstract> createData(){
+    return boost::make_shared<ActivationDataQuadraticBarrier>(this);
+  };
+
+  const ActivationBounds& get_bounds() const { return bounds_; };
+  void set_bounds(const ActivationBounds& bounds) { bounds_ = bounds; };
+
+
+protected:
+  using Base::nr_;
  private:
   ActivationBounds bounds_;
 };
 
-struct ActivationDataQuadraticBarrier : public ActivationDataAbstract {
+template<typename _Scalar>
+struct ActivationDataQuadraticBarrierTpl : public ActivationDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::ArrayXs ArrayXs;
+  typedef ActivationDataAbstractTpl<Scalar> Base;
+  
   template <typename Activation>
-  explicit ActivationDataQuadraticBarrier(Activation* const activation)
-      : ActivationDataAbstract(activation), rlb_min_(activation->get_nr()), rub_max_(activation->get_nr()) {
+  explicit ActivationDataQuadraticBarrierTpl(Activation* const activation)
+      : Base(activation), rlb_min_(activation->get_nr()), rub_max_(activation->get_nr()) {
     rlb_min_.fill(0);
     rub_max_.fill(0);
   }
-
-  Eigen::ArrayXd rlb_min_;
-  Eigen::ArrayXd rub_max_;
+  
+  ArrayXs rlb_min_;
+  ArrayXs rub_max_;
+  using Base::a_value;
+  using Base::Ar;
+  using Base::Arr;
 };
-
+  
+  typedef ActivationDataQuadraticBarrierTpl<double> ActivationDataQuadraticBarrier;
+  typedef ActivationModelQuadraticBarrierTpl<double> ActivationModelQuadraticBarrier;
+  typedef ActivationBoundsTpl<double> ActivationBounds;
+  
 }  // namespace crocoddyl
 
 #endif  // CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_BARRIER_HPP_
