@@ -11,17 +11,21 @@
 
 namespace crocoddyl {
 
-ContactModelAbstract::ContactModelAbstract(boost::shared_ptr<StateMultibody> state, const std::size_t& nc,
+template<typename Scalar>
+ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nc,
                                            const std::size_t& nu)
     : state_(state), nc_(nc), nu_(nu) {}
 
-ContactModelAbstract::ContactModelAbstract(boost::shared_ptr<StateMultibody> state, const std::size_t& nc)
+template<typename Scalar>
+ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nc)
     : state_(state), nc_(nc), nu_(state->get_nv()) {}
 
-ContactModelAbstract::~ContactModelAbstract() {}
+template<typename Scalar>
+ContactModelAbstractTpl<Scalar>::~ContactModelAbstractTpl() {}
 
-void ContactModelAbstract::updateForceDiff(const boost::shared_ptr<ContactDataAbstract>& data,
-                                           const Eigen::MatrixXd& df_dx, const Eigen::MatrixXd& df_du) const {
+template<typename Scalar>
+void ContactModelAbstractTpl<Scalar>::updateForceDiff(const boost::shared_ptr<ContactDataAbstract>& data,
+                                           const MatrixXs& df_dx, const MatrixXs& df_du) const {
   assert_pretty(
       (static_cast<std::size_t>(df_dx.rows()) == nc_ || static_cast<std::size_t>(df_dx.cols()) == state_->get_nx()),
       "df_dx has wrong dimension");
@@ -31,14 +35,18 @@ void ContactModelAbstract::updateForceDiff(const boost::shared_ptr<ContactDataAb
   data->df_du = df_du;
 }
 
-boost::shared_ptr<ContactDataAbstract> ContactModelAbstract::createData(pinocchio::Data* const data) {
+template<typename Scalar>
+boost::shared_ptr<ContactDataAbstractTpl<Scalar> > ContactModelAbstractTpl<Scalar>::createData(pinocchio::DataTpl<Scalar>* const data) {
   return boost::make_shared<ContactDataAbstract>(this, data);
 }
 
-const boost::shared_ptr<StateMultibody>& ContactModelAbstract::get_state() const { return state_; }
+template<typename Scalar>
+const boost::shared_ptr<StateMultibodyTpl<Scalar> >& ContactModelAbstractTpl<Scalar>::get_state() const { return state_; }
 
-const std::size_t& ContactModelAbstract::get_nc() const { return nc_; }
+template<typename Scalar>
+const std::size_t& ContactModelAbstractTpl<Scalar>::get_nc() const { return nc_; }
 
-const std::size_t& ContactModelAbstract::get_nu() const { return nu_; }
+template<typename Scalar>
+const std::size_t& ContactModelAbstractTpl<Scalar>::get_nu() const { return nu_; }
 
 }  // namespace crocoddyl
