@@ -24,8 +24,12 @@ public:
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> VectorXs;
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> MatrixXs;
   typedef Eigen::Array<Scalar, Eigen::Dynamic, 1> ArrayXs;
-  typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 3> MatrixX3s;
   typedef Eigen::Quaternion<Scalar> Quaternions;
+
+  typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 3> MatrixX3s;
+  typedef Eigen::Matrix<Scalar,6,Eigen::Dynamic> Matrix6xs;
+  typedef Eigen::Matrix<Scalar,6,6> Matrix6s;
+  
 };
 
 }
