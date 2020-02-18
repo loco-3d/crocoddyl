@@ -7,17 +7,3 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/activation-base.hpp"
-
-namespace crocoddyl {
-
-ActivationModelAbstract::ActivationModelAbstract(const std::size_t& nr) : nr_(nr) {}
-
-ActivationModelAbstract::~ActivationModelAbstract() {}
-
-boost::shared_ptr<ActivationDataAbstract> ActivationModelAbstract::createData() {
-  return boost::make_shared<ActivationDataAbstract>(this);
-}
-
-const std::size_t& ActivationModelAbstract::get_nr() const { return nr_; }
-
-}  // namespace crocoddyl

@@ -13,24 +13,33 @@
 #include <Eigen/Dense>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <crocoddyl/core/mathbase.hpp>
 #include "crocoddyl/core/utils/to-string.hpp"
 
 namespace crocoddyl {
+template<typename _Scalar>
+struct ActivationDataAbstractTpl;  // forward declaration
 
-struct ActivationDataAbstract;  // forward declaration
-
-class ActivationModelAbstract {
+template<typename _Scalar>
+class ActivationModelAbstractTpl {
  public:
-  explicit ActivationModelAbstract(const std::size_t& nr);
-  virtual ~ActivationModelAbstract();
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
-  virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
-                    const Eigen::Ref<const Eigen::VectorXd>& r) = 0;
-  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
-                        const Eigen::Ref<const Eigen::VectorXd>& r) = 0;
-  virtual boost::shared_ptr<ActivationDataAbstract> createData();
+  explicit ActivationModelAbstractTpl(const std::size_t& nr)  : nr_(nr) {};
+  virtual ~ActivationModelAbstractTpl() {};
 
-  const std::size_t& get_nr() const;
+  virtual void calc(const boost::shared_ptr<ActivationDataAbstractTpl<Scalar> >& data,
+                    const Eigen::Ref<const VectorXs>& r) = 0;
+  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstractTpl<Scalar> >& data,
+                        const Eigen::Ref<const VectorXs>& r) = 0;
+  virtual boost::shared_ptr<ActivationDataAbstractTpl<Scalar> > createData() {
+    return boost::make_shared<ActivationDataAbstractTpl<Scalar> >(this);
+  };
+
+  const std::size_t& get_nr() const { return nr_; };
 
  protected:
   std::size_t nr_;
@@ -38,29 +47,39 @@ class ActivationModelAbstract {
 #ifdef PYTHON_BINDINGS
 
  public:
-  void calc_wrap(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::VectorXd& r) { calc(data, r); }
+  void calc_wrap(const boost::shared_ptr<ActivationDataAbstractTpl<Scalar> >& data, const VectorXs& r) { calc(data, r); }
 
-  void calcDiff_wrap(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::VectorXd& r) {
+  void calcDiff_wrap(const boost::shared_ptr<ActivationDataAbstractTpl<Scalar> >& data, const VectorXs& r) {
     calcDiff(data, r);
   }
 
 #endif
 };
 
-struct ActivationDataAbstract {
+template <typename _Scalar>
+struct ActivationDataAbstractTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   template <typename Activation>
-  explicit ActivationDataAbstract(Activation* const activation)
+  explicit ActivationDataAbstractTpl(Activation* const activation)
       : a_value(0.),
-        Ar(Eigen::VectorXd::Zero(activation->get_nr())),
-        Arr(Eigen::MatrixXd::Zero(activation->get_nr(), activation->get_nr())) {}
-  virtual ~ActivationDataAbstract() {}
+        Ar(VectorXs::Zero(activation->get_nr())),
+        Arr(MatrixXs::Zero(activation->get_nr(), activation->get_nr())) {}
+  virtual ~ActivationDataAbstractTpl() {}
 
-  double a_value;
-  Eigen::VectorXd Ar;
-  Eigen::MatrixXd Arr;
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+  
+  Scalar a_value;
+  VectorXs Ar;
+  MatrixXs Arr;
 };
+
+typedef ActivationModelAbstractTpl<double> ActivationModelAbstract;
+typedef ActivationDataAbstractTpl<double> ActivationDataAbstract; 
+
 
 }  // namespace crocoddyl
 
