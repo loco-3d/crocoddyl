@@ -11,11 +11,14 @@
 
 namespace crocoddyl {
 
-struct DataCollectorAbstract {
-  DataCollectorAbstract() {}
-  virtual ~DataCollectorAbstract() {}
+template<typename Scalar>
+struct DataCollectorAbstractTpl {
+  DataCollectorAbstractTpl() {}
+  virtual ~DataCollectorAbstractTpl() {}
 };
 
+typedef DataCollectorAbstractTpl<double> DataCollectorAbstract;
+  
 }  // namespace crocoddyl
 
 #endif  // CROCODDYL_CORE_DATA_COLLECTOR_BASE_HPP_
