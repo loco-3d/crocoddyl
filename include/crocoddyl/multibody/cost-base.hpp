@@ -148,6 +148,6 @@ typedef CostDataAbstractTpl<double> CostDataAbstract;
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
-#include "crocoddyl/multibody/cost-base.hpp"
+#include "crocoddyl/multibody/cost-base.hxx"
 
 #endif  // CROCODDYL_MULTIBODY_COST_BASE_HPP_
