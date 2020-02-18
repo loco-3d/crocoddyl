@@ -447,8 +447,8 @@ class SimpleQuadrupedalGaitProblem:
         costModel.addCost("stateReg", stateReg, 1e1)
         costModel.addCost("ctrlReg", ctrlReg, 1e-1)
 
-        lb = self.state.diff(0 * self.state.lb, self.state.lb)
-        ub = self.state.diff(0 * self.state.ub, self.state.ub)
+        lb = np.vstack([ self.state.lb[1:self.state.nv+1], self.state.lb[-self.state.nv:] ])
+        ub = np.vstack([ self.state.ub[1:self.state.nv+1], self.state.ub[-self.state.nv:] ])
         stateBounds = crocoddyl.CostModelState(
             self.state, crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(lb, ub)),
             0 * self.rmodel.defaultState, self.actuation.nu)
