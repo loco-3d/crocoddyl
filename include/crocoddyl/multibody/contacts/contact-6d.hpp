@@ -79,7 +79,7 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
 
   template <typename Model>
   ContactData6DTpl(Model* const model, pinocchio::DataTpl<Scalar>* const data)
-      : ContactDataAbstract(model, data),
+      : Base(model, data),
         rMf(pinocchio::SE3Tpl<Scalar>::Identity()),
         v_partial_dq(6, model->get_state()->get_nv()),
         a_partial_dq(6, model->get_state()->get_nv()),
