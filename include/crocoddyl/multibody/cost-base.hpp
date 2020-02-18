@@ -15,30 +15,48 @@
 #include "crocoddyl/core/data-collector-base.hpp"
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/utils/to-string.hpp"
+#include "crocoddyl/core/activations/quadratic.hpp"
 
 namespace crocoddyl {
+  
+template<typename Scalar>
+struct CostDataAbstractTpl;  // forward declaration
 
-struct CostDataAbstract;  // forward declaration
+template<typename _Scalar>
+class CostModelAbstractTpl {
+public:
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef StateMultibodyTpl<Scalar> StateMultibody;
+  typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
+  typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
+  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+  
+  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+                       boost::shared_ptr<ActivationModelAbstract> activation,
+                       const std::size_t& nu, const bool& with_residuals = true);
+  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+                       boost::shared_ptr<ActivationModelAbstract> activation,
+                       const bool& with_residuals = true);
+  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+                       const std::size_t& nr, const std::size_t& nu,
+                       const bool& with_residuals = true);
+  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+                       const std::size_t& nr,
+                       const bool& with_residuals = true);
+  ~CostModelAbstractTpl();
 
-class CostModelAbstract {
- public:
-  CostModelAbstract(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-                    const std::size_t& nu, const bool& with_residuals = true);
-  CostModelAbstract(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-                    const bool& with_residuals = true);
-  CostModelAbstract(boost::shared_ptr<StateMultibody> state, const std::size_t& nr, const std::size_t& nu,
-                    const bool& with_residuals = true);
-  CostModelAbstract(boost::shared_ptr<StateMultibody> state, const std::size_t& nr, const bool& with_residuals = true);
-  ~CostModelAbstract();
-
-  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                    const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
-  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                        const Eigen::Ref<const Eigen::VectorXd>& u) = 0;
+  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u) = 0;
+  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                        const Eigen::Ref<const VectorXs>& u) = 0;
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
-  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
+  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   const boost::shared_ptr<StateMultibody>& get_state() const;
   const boost::shared_ptr<ActivationModelAbstract>& get_activation() const;
@@ -49,13 +67,13 @@ class CostModelAbstract {
   boost::shared_ptr<ActivationModelAbstract> activation_;
   std::size_t nu_;
   bool with_residuals_;
-  Eigen::VectorXd unone_;
+  VectorXs unone_;
 
 #ifdef PYTHON_BINDINGS
 
  public:
-  void calc_wrap(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x,
-                 const Eigen::VectorXd& u = Eigen::VectorXd()) {
+  void calc_wrap(const boost::shared_ptr<CostDataAbstract>& data, const VectorXs& x,
+                 const VectorXs& u = VectorXs()) {
     if (u.size() == 0) {
       calc(data, x);
     } else {
@@ -63,22 +81,30 @@ class CostModelAbstract {
     }
   }
 
-  void calcDiff_wrap(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x,
-                     const Eigen::VectorXd& u) {
+  void calcDiff_wrap(const boost::shared_ptr<CostDataAbstract>& data, const VectorXs& x,
+                     const VectorXs& u) {
     calcDiff(data, x, u);
   }
-  void calcDiff_wrap(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::VectorXd& x) {
+  void calcDiff_wrap(const boost::shared_ptr<CostDataAbstract>& data, const VectorXs& x) {
     calcDiff(data, x, unone_);
   }
 
 #endif
 };
 
-struct CostDataAbstract {
+template<typename _Scalar>
+struct CostDataAbstractTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
+  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+  
   template <typename Model>
-  CostDataAbstract(Model* const model, DataCollectorAbstract* const data)
+  CostDataAbstractTpl(Model* const model, DataCollectorAbstract* const data)
       : shared(data),
         activation(model->get_activation()->createData()),
         cost(0.),
@@ -99,21 +125,29 @@ struct CostDataAbstract {
     Rx.fill(0);
     Ru.fill(0);
   }
-  virtual ~CostDataAbstract() {}
+  virtual ~CostDataAbstractTpl() {}
 
   DataCollectorAbstract* shared;
   boost::shared_ptr<ActivationDataAbstract> activation;
-  double cost;
-  Eigen::VectorXd Lx;
-  Eigen::VectorXd Lu;
-  Eigen::MatrixXd Lxx;
-  Eigen::MatrixXd Lxu;
-  Eigen::MatrixXd Luu;
-  Eigen::VectorXd r;
-  Eigen::MatrixXd Rx;
-  Eigen::MatrixXd Ru;
+  Scalar cost;
+  VectorXs Lx;
+  VectorXs Lu;
+  MatrixXs Lxx;
+  MatrixXs Lxu;
+  MatrixXs Luu;
+  VectorXs r;
+  MatrixXs Rx;
+  MatrixXs Ru;
 };
 
+typedef CostModelAbstractTpl<double> CostModelAbstract;
+typedef CostDataAbstractTpl<double> CostDataAbstract;
+  
 }  // namespace crocoddyl
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "crocoddyl/multibody/cost-base.hpp"
 
 #endif  // CROCODDYL_MULTIBODY_COST_BASE_HPP_
