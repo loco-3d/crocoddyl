@@ -10,7 +10,7 @@
 #define CROCODDYL_CORE_ACTUATION_BASE_HPP_
 
 #include <stdexcept>
-#include <Eigen/Dense>
+#include "crocoddyl/core/mathbase.hpp"
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include "crocoddyl/core/state-base.hpp"

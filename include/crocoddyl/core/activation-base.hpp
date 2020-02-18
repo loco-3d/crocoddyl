@@ -10,11 +10,11 @@
 #define CROCODDYL_CORE_ACTIVATION_BASE_HPP_
 
 #include <stdexcept>
-#include <Eigen/Dense>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include <crocoddyl/core/mathbase.hpp>
 #include "crocoddyl/core/utils/to-string.hpp"
+
 
 namespace crocoddyl {
 template<typename _Scalar>
