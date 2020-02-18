@@ -10,43 +10,50 @@
 #include "crocoddyl/multibody/costs/control.hpp"
 
 namespace crocoddyl {
-
-CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state,
-                                   boost::shared_ptr<ActivationModelAbstract> activation, const Eigen::VectorXd& uref)
-    : CostModelAbstract(state, activation, static_cast<std::size_t>(uref.size())), uref_(uref) {
+template<typename Scalar>
+CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<StateMultibody> state,
+                                                 boost::shared_ptr<ActivationModelAbstract> activation, const VectorXs& uref)
+    : Base(state, activation, static_cast<std::size_t>(uref.size())), uref_(uref) {
   if (activation_->get_nr() != nu_) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(nu_));
   }
 }
 
-CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state,
+template<typename Scalar>
+CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<StateMultibody> state,
                                    boost::shared_ptr<ActivationModelAbstract> activation)
-    : CostModelAbstract(state, activation), uref_(Eigen::VectorXd::Zero(activation->get_nr())) {}
+    : Base(state, activation), uref_(VectorXs::Zero(activation->get_nr())) {}
 
-CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state,
+template<typename Scalar>
+CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<StateMultibody> state,
                                    boost::shared_ptr<ActivationModelAbstract> activation, const std::size_t& nu)
-    : CostModelAbstract(state, activation, nu), uref_(Eigen::VectorXd::Zero(nu)) {
+    : Base(state, activation, nu), uref_(VectorXs::Zero(nu)) {
   if (activation_->get_nr() != nu_) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(nu_));
   }
 }
 
-CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state, const Eigen::VectorXd& uref)
-    : CostModelAbstract(state, static_cast<std::size_t>(uref.size()), static_cast<std::size_t>(uref.size())),
+template<typename Scalar>
+CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<StateMultibody> state, const VectorXs& uref)
+    : Base(state, static_cast<std::size_t>(uref.size()), static_cast<std::size_t>(uref.size())),
       uref_(uref) {}
 
-CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state)
-    : CostModelAbstract(state, state->get_nv()), uref_(Eigen::VectorXd::Zero(state->get_nv())) {}
+template<typename Scalar>
+CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<StateMultibody> state)
+    : Base(state, state->get_nv()), uref_(VectorXs::Zero(state->get_nv())) {}
 
-CostModelControl::CostModelControl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu)
-    : CostModelAbstract(state, nu, nu), uref_(Eigen::VectorXd::Zero(nu)) {}
+template<typename Scalar>
+CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu)
+    : Base(state, nu, nu), uref_(VectorXs::Zero(nu)) {}
 
-CostModelControl::~CostModelControl() {}
+template<typename Scalar>
+CostModelControlTpl<Scalar>::~CostModelControlTpl() {}
 
-void CostModelControl::calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>&,
-                            const Eigen::Ref<const Eigen::VectorXd>& u) {
+template<typename Scalar>
+void CostModelControlTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>&,
+                            const Eigen::Ref<const VectorXs>& u) {
   if (nu_ == 0) {
     throw_pretty("Invalid argument: "
                  << "it seems to be an autonomous system, if so, don't add this cost function");
@@ -61,8 +68,9 @@ void CostModelControl::calc(const boost::shared_ptr<CostDataAbstract>& data, con
   data->cost = data->activation->a_value;
 }
 
-void CostModelControl::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>& u) {
+template<typename Scalar>
+void CostModelControlTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+                                const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>& u) {
   if (nu_ == 0) {
     throw_pretty("Invalid argument: "
                  << "it seems to be an autonomous system, if so, don't add this cost function");
@@ -77,9 +85,11 @@ void CostModelControl::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
   data->Luu.diagonal() = data->activation->Arr.diagonal();
 }
 
-const Eigen::VectorXd& CostModelControl::get_uref() const { return uref_; }
+template<typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& CostModelControlTpl<Scalar>::get_uref() const { return uref_; }
 
-void CostModelControl::set_uref(const Eigen::VectorXd& uref_in) {
+template<typename Scalar>
+void CostModelControlTpl<Scalar>::set_uref(const VectorXs& uref_in) {
   if (static_cast<std::size_t>(uref_in.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "uref has wrong dimension (it should be " + std::to_string(nu_) + ")");
