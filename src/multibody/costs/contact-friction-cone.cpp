@@ -64,7 +64,7 @@ void CostModelContactFrictionCone::calcDiff(const boost::shared_ptr<CostDataAbst
 
   const Eigen::MatrixXd& df_dx = d->contact->df_dx;
   const Eigen::MatrixXd& df_du = d->contact->df_du;
-  const FrictionCone::MatrixX3& A = friction_cone_.get_A();
+  const FrictionCone::MatrixX3s& A = friction_cone_.get_A();
 
   activation_->calcDiff(data->activation, data->r);
   if (d->more_than_3_constraints) {

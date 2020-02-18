@@ -19,12 +19,13 @@ public:
 
   typedef _Scalar Scalar;
   typedef Eigen::Matrix<Scalar, 2, 1> Vector2s;
-  typedef Eigen::Matrix<Scalar, 2, 1> Vector3s;
+  typedef Eigen::Matrix<Scalar, 3, 1> Vector3s;
+  typedef Eigen::Matrix<Scalar, 3, 3> Matrix3s;
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> VectorXs;
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> MatrixXs;
   typedef Eigen::Array<Scalar, Eigen::Dynamic, 1> ArrayXs;
-
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 3> MatrixX3s;
+  typedef Eigen::Quaternion<Scalar> Quaternions;
 };
 
 }
