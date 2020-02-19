@@ -21,13 +21,7 @@ class ActionModelUnicycleTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef ActionModelAbstractTpl<Scalar> Base;
   typedef MathBaseTpl<Scalar> MathBase;
-  using Base::nu_;                          //!< Control dimension
-  using Base::nr_;                          //!< Dimension of the cost residual
-  using Base::state_;  //!< Model of the state
-  using Base::unone_;                   //!< Neutral state
-  using Base::u_lb_;                    //!< Lower control limits
-  using Base::u_ub_;                    //!< Upper control limits
-  bool has_control_limits_;                 //!< Indicates whether any of the control limits 
+  
   ActionModelUnicycleTpl();
   ~ActionModelUnicycleTpl();
 
@@ -39,7 +33,16 @@ class ActionModelUnicycleTpl : public ActionModelAbstractTpl<_Scalar> {
 
   const typename MathBase::Vector2s& get_cost_weights() const;
   void set_cost_weights(const typename MathBase::Vector2s& weights);
-
+  
+protected:
+  using Base::nu_;                          //!< Control dimension
+  using Base::nr_;                          //!< Dimension of the cost residual
+  using Base::state_;  //!< Model of the state
+  using Base::unone_;                   //!< Neutral state
+  using Base::u_lb_;                    //!< Lower control limits
+  using Base::u_ub_;                    //!< Upper control limits
+  using Base::has_control_limits_;      //!< Indicates whether any of the control limits
+  
  private:
   typename MathBase::Vector2s cost_weights_;
   Scalar dt_;

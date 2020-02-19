@@ -87,7 +87,7 @@ protected:
 template<typename _Scalar>
 struct DifferentialActionDataLQRTpl : public DifferentialActionDataAbstractTpl<_Scalar> {
 
-    typedef _Scalar Scalar;
+  typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef DifferentialActionDataAbstractTpl<Scalar> Base;
   typedef typename MathBase::VectorXs VectorXs;
