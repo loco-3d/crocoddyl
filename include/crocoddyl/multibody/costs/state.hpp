@@ -85,7 +85,7 @@ struct CostDataStateTpl : public CostDataAbstractTpl<_Scalar> {
   
   template <typename Model>
   CostDataStateTpl(Model* const model, DataCollectorAbstract* const data)
-      : CostDataAbstract(model, data), Arr_Rx(model->get_activation()->get_nr(), model->get_state()->get_ndx()) {
+      : Base(model, data), Arr_Rx(model->get_activation()->get_nr(), model->get_state()->get_ndx()) {
     Arr_Rx.fill(0);
   }
   

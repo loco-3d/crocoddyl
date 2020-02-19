@@ -12,39 +12,46 @@
 #include "crocoddyl/multibody/costs/frame-velocity.hpp"
 
 namespace crocoddyl {
-
-CostModelFrameVelocity::CostModelFrameVelocity(boost::shared_ptr<StateMultibody> state,
+  
+template<typename Scalar>
+CostModelFrameVelocityTpl<Scalar>::CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
                                                boost::shared_ptr<ActivationModelAbstract> activation,
                                                const FrameMotion& vref, const std::size_t& nu)
-    : CostModelAbstract(state, activation, nu), vref_(vref) {
+    : Base(state, activation, nu), vref_(vref) {
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 6");
   }
 }
 
-CostModelFrameVelocity::CostModelFrameVelocity(boost::shared_ptr<StateMultibody> state,
+template<typename Scalar>  
+CostModelFrameVelocityTpl<Scalar>::CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
                                                boost::shared_ptr<ActivationModelAbstract> activation,
                                                const FrameMotion& vref)
-    : CostModelAbstract(state, activation), vref_(vref) {
+    : Base(state, activation), vref_(vref) {
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 6");
   }
 }
 
-CostModelFrameVelocity::CostModelFrameVelocity(boost::shared_ptr<StateMultibody> state, const FrameMotion& vref,
+  
+template<typename Scalar>
+CostModelFrameVelocityTpl<Scalar>::CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state, const FrameMotion& vref,
                                                const std::size_t& nu)
-    : CostModelAbstract(state, 6, nu), vref_(vref) {}
+    : Base(state, 6, nu), vref_(vref) {}
 
-CostModelFrameVelocity::CostModelFrameVelocity(boost::shared_ptr<StateMultibody> state, const FrameMotion& vref)
-    : CostModelAbstract(state, 6), vref_(vref) {}
+template<typename Scalar>
+CostModelFrameVelocityTpl<Scalar>::CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state, const FrameMotion& vref)
+    : Base(state, 6), vref_(vref) {}
 
-CostModelFrameVelocity::~CostModelFrameVelocity() {}
+template<typename Scalar>
+CostModelFrameVelocityTpl<Scalar>::~CostModelFrameVelocityTpl() {}
 
-void CostModelFrameVelocity::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                  const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>&) {
-  CostDataFrameVelocity* d = static_cast<CostDataFrameVelocity*>(data.get());
+template<typename Scalar>
+void CostModelFrameVelocityTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
+                                  const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
+  CostDataFrameVelocityTpl<Scalar>* d = static_cast<CostDataFrameVelocityTpl<Scalar>* >(data.get());
 
   // Compute the frame velocity w.r.t. the reference frame
   d->vr = pinocchio::getFrameVelocity(state_->get_pinocchio(), *d->pinocchio, vref_.frame) - vref_.oMf;
@@ -55,11 +62,13 @@ void CostModelFrameVelocity::calc(const boost::shared_ptr<CostDataAbstract>& dat
   data->cost = data->activation->a_value;
 }
 
-void CostModelFrameVelocity::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                      const Eigen::Ref<const Eigen::VectorXd>&,
-                                      const Eigen::Ref<const Eigen::VectorXd>&) {
+template<typename Scalar>
+void CostModelFrameVelocityTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+                                      const Eigen::Ref<const VectorXs>&,
+                                      const Eigen::Ref<const VectorXs>&) {
   // Get the partial derivatives of the local frame velocity
-  CostDataFrameVelocity* d = static_cast<CostDataFrameVelocity*>(data.get());
+  CostDataFrameVelocityTpl<Scalar>* d =
+    static_cast<CostDataFrameVelocityTpl<Scalar>* >(data.get());
   pinocchio::getJointVelocityDerivatives(state_->get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL, d->dv_dq,
                                          d->dv_dv);
 
@@ -73,12 +82,15 @@ void CostModelFrameVelocity::calcDiff(const boost::shared_ptr<CostDataAbstract>&
   data->Lxx.noalias() = data->Rx.transpose() * d->Arr_Rx;
 }
 
-boost::shared_ptr<CostDataAbstract> CostModelFrameVelocity::createData(DataCollectorAbstract* const data) {
-  return boost::make_shared<CostDataFrameVelocity>(this, data);
+template<typename Scalar>
+boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelFrameVelocityTpl<Scalar>::createData(DataCollectorAbstract* const data) {
+  return boost::make_shared<CostDataFrameVelocityTpl<Scalar> >(this, data);
 }
 
-const FrameMotion& CostModelFrameVelocity::get_vref() const { return vref_; }
+template<typename Scalar>
+const FrameMotionTpl<Scalar>& CostModelFrameVelocityTpl<Scalar>::get_vref() const { return vref_; }
 
-void CostModelFrameVelocity::set_vref(const FrameMotion& vref_in) { vref_ = vref_in; }
+template<typename Scalar>
+void CostModelFrameVelocityTpl<Scalar>::set_vref(const FrameMotion& vref_in) { vref_ = vref_in; }
 
 }  // namespace crocoddyl

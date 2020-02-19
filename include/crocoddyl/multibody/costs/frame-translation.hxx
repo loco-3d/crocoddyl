@@ -12,41 +12,48 @@
 
 namespace crocoddyl {
 
-CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state,
+template<typename Scalar>
+CostModelFrameTranslationTpl<Scalar>::CostModelFrameTranslationTpl(boost::shared_ptr<StateMultibody> state,
                                                      boost::shared_ptr<ActivationModelAbstract> activation,
                                                      const FrameTranslation& xref, const std::size_t& nu)
-    : CostModelAbstract(state, activation, nu), xref_(xref) {
+    : Base(state, activation, nu), xref_(xref) {
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 3");
   }
 }
 
-CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state,
+template<typename Scalar>
+CostModelFrameTranslationTpl<Scalar>::CostModelFrameTranslationTpl(boost::shared_ptr<StateMultibody> state,
                                                      boost::shared_ptr<ActivationModelAbstract> activation,
                                                      const FrameTranslation& xref)
-    : CostModelAbstract(state, activation), xref_(xref) {
+    : Base(state, activation), xref_(xref) {
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 3");
   }
 }
 
-CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state,
+template<typename Scalar>
+CostModelFrameTranslationTpl<Scalar>::CostModelFrameTranslationTpl(boost::shared_ptr<StateMultibody> state,
                                                      const FrameTranslation& xref, const std::size_t& nu)
-    : CostModelAbstract(state, 3, nu), xref_(xref) {}
+    : Base(state, 3, nu), xref_(xref) {}
 
-CostModelFrameTranslation::CostModelFrameTranslation(boost::shared_ptr<StateMultibody> state,
+template<typename Scalar>
+CostModelFrameTranslationTpl<Scalar>::CostModelFrameTranslationTpl(boost::shared_ptr<StateMultibody> state,
                                                      const FrameTranslation& xref)
-    : CostModelAbstract(state, 3), xref_(xref) {}
+    : Base(state, 3), xref_(xref) {}
 
-CostModelFrameTranslation::~CostModelFrameTranslation() {}
+template<typename Scalar>
+CostModelFrameTranslationTpl<Scalar>::~CostModelFrameTranslationTpl() {}
 
-void CostModelFrameTranslation::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                     const Eigen::Ref<const Eigen::VectorXd>&,
-                                     const Eigen::Ref<const Eigen::VectorXd>&) {
+template<typename Scalar>
+void CostModelFrameTranslationTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
+                                     const Eigen::Ref<const VectorXs>&,
+                                     const Eigen::Ref<const VectorXs>&) {
   // Compute the frame translation w.r.t. the reference frame
-  CostDataFrameTranslation* d = static_cast<CostDataFrameTranslation*>(data.get());
+  CostDataFrameTranslationTpl<Scalar>* d =
+    static_cast<CostDataFrameTranslationTpl<Scalar>* >(data.get());
   pinocchio::updateFramePlacement(state_->get_pinocchio(), *d->pinocchio, xref_.frame);
   data->r = d->pinocchio->oMf[xref_.frame].translation() - xref_.oxf;
 
@@ -55,15 +62,17 @@ void CostModelFrameTranslation::calc(const boost::shared_ptr<CostDataAbstract>& 
   data->cost = data->activation->a_value;
 }
 
-void CostModelFrameTranslation::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                         const Eigen::Ref<const Eigen::VectorXd>&,
-                                         const Eigen::Ref<const Eigen::VectorXd>&) {
+template<typename Scalar>
+void CostModelFrameTranslationTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+                                         const Eigen::Ref<const VectorXs>&,
+                                         const Eigen::Ref<const VectorXs>&) {
   // Update the frame placements
-  CostDataFrameTranslation* d = static_cast<CostDataFrameTranslation*>(data.get());
+  CostDataFrameTranslationTpl<Scalar>* d =
+    static_cast<CostDataFrameTranslationTpl<Scalar>* >(data.get());
 
   // Compute the frame Jacobian at the error point
   pinocchio::getFrameJacobian(state_->get_pinocchio(), *d->pinocchio, xref_.frame, pinocchio::LOCAL, d->fJf);
-  d->J = d->pinocchio->oMf[xref_.frame].rotation() * d->fJf.topRows<3>();
+  d->J = d->pinocchio->oMf[xref_.frame].rotation() * d->fJf.template topRows<3>();
 
   // Compute the derivatives of the frame placement
   const std::size_t& nv = state_->get_nv();
@@ -73,12 +82,15 @@ void CostModelFrameTranslation::calcDiff(const boost::shared_ptr<CostDataAbstrac
   d->Lxx.topLeftCorner(nv, nv) = d->J.transpose() * d->activation->Arr * d->J;
 }
 
-boost::shared_ptr<CostDataAbstract> CostModelFrameTranslation::createData(DataCollectorAbstract* const data) {
-  return boost::make_shared<CostDataFrameTranslation>(this, data);
+template<typename Scalar>
+boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelFrameTranslationTpl<Scalar>::createData(DataCollectorAbstract* const data) {
+  return boost::make_shared<CostDataFrameTranslationTpl<Scalar> >(this, data);
 }
 
-const FrameTranslation& CostModelFrameTranslation::get_xref() const { return xref_; }
+template<typename Scalar>
+const FrameTranslationTpl<Scalar>& CostModelFrameTranslationTpl<Scalar>::get_xref() const { return xref_; }
 
-void CostModelFrameTranslation::set_xref(const FrameTranslation& xref_in) { xref_ = xref_in; }
+template<typename Scalar>
+void CostModelFrameTranslationTpl<Scalar>::set_xref(const FrameTranslation& xref_in) { xref_ = xref_in; }
 
 }  // namespace crocoddyl

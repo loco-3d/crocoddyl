@@ -17,8 +17,8 @@ DifferentialActionModelAbstractTpl<Scalar>::DifferentialActionModelAbstractTpl(b
       nr_(nr),
       state_(state),
       unone_(VectorXs::Zero(nu)),
-      u_lb_(VectorXs::Constant(nu, -std::numeric_limits<double>::infinity())),
-      u_ub_(VectorXs::Constant(nu, std::numeric_limits<double>::infinity())),
+      u_lb_(VectorXs::Constant(nu, -std::numeric_limits<Scalar>::infinity())),
+      u_ub_(VectorXs::Constant(nu, std::numeric_limits<Scalar>::infinity())),
       has_control_limits_(false) {}
 
 template <typename Scalar>

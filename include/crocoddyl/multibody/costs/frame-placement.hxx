@@ -12,39 +12,46 @@
 
 namespace crocoddyl {
 
-CostModelFramePlacement::CostModelFramePlacement(boost::shared_ptr<StateMultibody> state,
+template<typename Scalar>
+CostModelFramePlacementTpl<Scalar>::CostModelFramePlacementTpl(boost::shared_ptr<StateMultibody> state,
                                                  boost::shared_ptr<ActivationModelAbstract> activation,
                                                  const FramePlacement& Mref, const std::size_t& nu)
-    : CostModelAbstract(state, activation, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
+    : Base(state, activation, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 6");
   }
 }
 
-CostModelFramePlacement::CostModelFramePlacement(boost::shared_ptr<StateMultibody> state,
+template<typename Scalar>
+CostModelFramePlacementTpl<Scalar>::CostModelFramePlacementTpl(boost::shared_ptr<StateMultibody> state,
                                                  boost::shared_ptr<ActivationModelAbstract> activation,
                                                  const FramePlacement& Mref)
-    : CostModelAbstract(state, activation), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
+    : Base(state, activation), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 6");
   }
 }
 
-CostModelFramePlacement::CostModelFramePlacement(boost::shared_ptr<StateMultibody> state, const FramePlacement& Mref,
+template<typename Scalar>
+CostModelFramePlacementTpl<Scalar>::CostModelFramePlacementTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& Mref,
                                                  const std::size_t& nu)
-    : CostModelAbstract(state, 6, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {}
+    : Base(state, 6, nu), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {}
 
-CostModelFramePlacement::CostModelFramePlacement(boost::shared_ptr<StateMultibody> state, const FramePlacement& Mref)
-    : CostModelAbstract(state, 6), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {}
+template<typename Scalar>
+CostModelFramePlacementTpl<Scalar>::CostModelFramePlacementTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& Mref)
+    : Base(state, 6), Mref_(Mref), oMf_inv_(Mref.oMf.inverse()) {}
 
-CostModelFramePlacement::~CostModelFramePlacement() {}
+template<typename Scalar>
+CostModelFramePlacementTpl<Scalar>::~CostModelFramePlacementTpl() {}
 
-void CostModelFramePlacement::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                   const Eigen::Ref<const Eigen::VectorXd>&,
-                                   const Eigen::Ref<const Eigen::VectorXd>&) {
-  CostDataFramePlacement* d = static_cast<CostDataFramePlacement*>(data.get());
+template<typename Scalar>
+void CostModelFramePlacementTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
+                                   const Eigen::Ref<const VectorXs>&,
+                                   const Eigen::Ref<const VectorXs>&) {
+  CostDataFramePlacementTpl<Scalar>* d =
+    static_cast<CostDataFramePlacementTpl<Scalar>* >(data.get());
 
   // Compute the frame placement w.r.t. the reference frame
   pinocchio::updateFramePlacement(state_->get_pinocchio(), *d->pinocchio, Mref_.frame);
@@ -57,11 +64,13 @@ void CostModelFramePlacement::calc(const boost::shared_ptr<CostDataAbstract>& da
   d->cost = d->activation->a_value;
 }
 
-void CostModelFramePlacement::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                       const Eigen::Ref<const Eigen::VectorXd>&,
-                                       const Eigen::Ref<const Eigen::VectorXd>&) {
+template<typename Scalar>
+void CostModelFramePlacementTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+                                       const Eigen::Ref<const VectorXs>&,
+                                       const Eigen::Ref<const VectorXs>&) {
   // Update the frame placements
-  CostDataFramePlacement* d = static_cast<CostDataFramePlacement*>(data.get());
+  CostDataFramePlacementTpl<Scalar>* d =
+    static_cast<CostDataFramePlacementTpl<Scalar>* >(data.get());
 
   // Compute the frame Jacobian at the error point
   pinocchio::Jlog6(d->rMf, d->rJf);
@@ -77,13 +86,16 @@ void CostModelFramePlacement::calcDiff(const boost::shared_ptr<CostDataAbstract>
   data->Lxx.topLeftCorner(nv, nv).noalias() = d->J.transpose() * d->Arr_J;
 }
 
-boost::shared_ptr<CostDataAbstract> CostModelFramePlacement::createData(DataCollectorAbstract* const data) {
-  return boost::make_shared<CostDataFramePlacement>(this, data);
+template<typename Scalar>
+boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelFramePlacementTpl<Scalar>::createData(DataCollectorAbstract* const data) {
+  return boost::make_shared<CostDataFramePlacementTpl<Scalar> >(this, data);
 }
 
-const FramePlacement& CostModelFramePlacement::get_Mref() const { return Mref_; }
+template<typename Scalar>
+const FramePlacementTpl<Scalar>& CostModelFramePlacementTpl<Scalar>::get_Mref() const { return Mref_; }
 
-void CostModelFramePlacement::set_Mref(const FramePlacement& Mref_in) {
+template<typename Scalar>
+void CostModelFramePlacementTpl<Scalar>::set_Mref(const FramePlacement& Mref_in) {
   Mref_ = Mref_in;
   oMf_inv_ = Mref_.oMf.inverse();
 }
