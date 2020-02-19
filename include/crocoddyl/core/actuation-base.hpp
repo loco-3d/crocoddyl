@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_CORE_ACTUATION_BASE_HPP_
 #define CROCODDYL_CORE_ACTUATION_BASE_HPP_
-
+#include "crocoddyl/core/fwd.hpp"
 #include <stdexcept>
 #include "crocoddyl/core/mathbase.hpp"
 #include <boost/shared_ptr.hpp>
@@ -17,8 +17,6 @@
 #include "crocoddyl/core/utils/to-string.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 namespace crocoddyl {
-
-template<typename Scalar> struct ActuationDataAbstractTpl;  // forward declaration
 
 template<typename _Scalar>
 class ActuationModelAbstractTpl {
@@ -95,8 +93,6 @@ struct ActuationDataAbstractTpl {
   MatrixXs dtau_du;
 };
 
-typedef ActuationDataAbstractTpl<double> ActuationDataAbstract;
-typedef ActuationModelAbstractTpl<double> ActuationModelAbstract;
   
   
 }  // namespace crocoddyl

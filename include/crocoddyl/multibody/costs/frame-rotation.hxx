@@ -67,7 +67,8 @@ void CostModelFrameRotationTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDat
                                       const Eigen::Ref<const VectorXs>&,
                                       const Eigen::Ref<const VectorXs>&) {
   // Update the frame placements
-  CostDataFrameRotation* d = static_cast<CostDataFrameRotation*>(data.get());
+  CostDataFrameRotationTpl<Scalar>* d =
+    static_cast<CostDataFrameRotationTpl<Scalar>*>(data.get());
 
   // // Compute the frame Jacobian at the error point
   pinocchio::Jlog3(d->rRf, d->rJf);

@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_ACTUATIONS_FULL_HPP_
 #define CROCODDYL_MULTIBODY_ACTUATIONS_FULL_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 
@@ -66,7 +66,6 @@ protected:
 
 };
 
-typedef ActuationModelFullTpl<double> ActuationModelFull;
 
 }  // namespace crocoddyl
 

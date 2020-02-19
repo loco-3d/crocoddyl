@@ -10,6 +10,7 @@
 #define CROCODDYL_CORE_ACTIVATION_BASE_HPP_
 
 #include <stdexcept>
+#include "crocoddyl/core/fwd.hpp"
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include <crocoddyl/core/mathbase.hpp>
@@ -17,8 +18,6 @@
 
 
 namespace crocoddyl {
-template<typename _Scalar>
-struct ActivationDataAbstractTpl;  // forward declaration
 
 template<typename _Scalar>
 class ActivationModelAbstractTpl {
@@ -77,8 +76,6 @@ struct ActivationDataAbstractTpl {
   MatrixXs Arr;
 };
 
-typedef ActivationModelAbstractTpl<double> ActivationModelAbstract;
-typedef ActivationDataAbstractTpl<double> ActivationDataAbstract; 
 
 
 }  // namespace crocoddyl

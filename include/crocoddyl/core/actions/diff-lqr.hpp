@@ -8,16 +8,13 @@
 
 #ifndef CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_
 #define CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_
-
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"
 #include <stdexcept>
 
 namespace crocoddyl {
-
-template<typename Scalar>
-struct DifferentialActionDataLQRTpl;  // forward declaration
-
+  
 template<typename _Scalar>
 class DifferentialActionModelLQRTpl : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
@@ -117,8 +114,6 @@ struct DifferentialActionDataLQRTpl : public DifferentialActionDataAbstractTpl<_
   
 };
 
-typedef DifferentialActionModelLQRTpl<double> DifferentialActionModelLQR;
-typedef DifferentialActionDataLQRTpl<double> DifferentialActionDataLQR;
   
 }  // namespace crocoddyl
 

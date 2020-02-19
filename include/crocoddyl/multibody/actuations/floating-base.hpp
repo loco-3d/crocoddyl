@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_ACTUATIONS_FLOATING_BASE_HPP_
 #define CROCODDYL_MULTIBODY_ACTUATIONS_FLOATING_BASE_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
@@ -76,7 +76,6 @@ public:
 #endif
 };
 
-  typedef ActuationModelFloatingBaseTpl<double> ActuationModelFloatingBase;
 }  // namespace crocoddyl
 
 #endif  // CROCODDYL_MULTIBODY_ACTUATIONS_FLOATING_BASE_HPP_

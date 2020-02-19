@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_COSTS_FRAME_PLACEMENT_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_FRAME_PLACEMENT_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/frames.hpp"
@@ -82,7 +82,7 @@ struct CostDataFramePlacementTpl : public CostDataAbstractTpl<_Scalar> {
   
   template <typename Model>
   CostDataFramePlacementTpl(Model* const model, DataCollectorAbstract* const data)
-      : CostDataAbstract(model, data),
+      : Base(model, data),
         J(6, model->get_state()->get_nv()),
         rJf(6, 6),
         fJf(6, model->get_state()->get_nv()),
@@ -124,8 +124,6 @@ struct CostDataFramePlacementTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::Ru;
 };
 
-typedef CostModelFramePlacementTpl<double> CostModelFramePlacement;
-typedef CostDataFramePlacementTpl<double> CostDataFramePlacement;
   
 }  // namespace crocoddyl
 

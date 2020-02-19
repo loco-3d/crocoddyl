@@ -153,7 +153,7 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(const boost:
   
 template<typename Scalar>
 boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > DifferentialActionModelContactFwdDynamicsTpl<Scalar>::createData() {
-  return boost::make_shared<DifferentialActionDataContactFwdDynamics>(this);
+  return boost::make_shared<DifferentialActionDataContactFwdDynamicsTpl<Scalar> >(this);
 }
   
 template<typename Scalar>

@@ -8,15 +8,13 @@
 
 #ifndef CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_BARRIER_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_BARRIER_HPP_
-
+#include "crocoddyl/core/fwd.hpp"
 #include <stdexcept>
 #include <math.h>
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/activation-base.hpp"
 
 namespace crocoddyl {
-
-template<typename Scalar> struct ActivationDataQuadraticBarrierTpl;
 
 template<typename _Scalar>
 struct ActivationBoundsTpl {
@@ -145,9 +143,6 @@ struct ActivationDataQuadraticBarrierTpl : public ActivationDataAbstractTpl<_Sca
   using Base::Arr;
 };
   
-  typedef ActivationDataQuadraticBarrierTpl<double> ActivationDataQuadraticBarrier;
-  typedef ActivationModelQuadraticBarrierTpl<double> ActivationModelQuadraticBarrier;
-  typedef ActivationBoundsTpl<double> ActivationBounds;
   
 }  // namespace crocoddyl
 

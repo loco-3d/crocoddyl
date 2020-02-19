@@ -8,14 +8,12 @@
 
 #ifndef CROCODDYL_CORE_ACTIVATIONS_SMOOTH_ABS_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_SMOOTH_ABS_HPP_
-
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include <stdexcept>
 
 namespace crocoddyl {
-
-template<typename _Scalar> struct ActivationDataSmoothAbsTpl;
   
 template<typename _Scalar>
 class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
@@ -83,8 +81,6 @@ struct ActivationDataSmoothAbsTpl : public ActivationDataAbstractTpl<_Scalar> {
   using Base::Arr;
 };
 
-typedef ActivationModelSmoothAbsTpl<double> ActivationModelSmoothAbs;
-typedef ActivationDataSmoothAbsTpl<double> ActivationDataSmoothAbs;
   
 }  // namespace crocoddyl
 

@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_COSTS_CONTACT_FORCE_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_CONTACT_FORCE_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/data/contacts.hpp"
@@ -122,8 +122,6 @@ struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
   
 };
 
-  typedef CostModelContactForceTpl<double> CostModelContactForce;  
-  typedef CostDataContactForceTpl<double> CostDataContactForce;
   
 }  // namespace crocoddyl
 /* --- Details -------------------------------------------------------------- */

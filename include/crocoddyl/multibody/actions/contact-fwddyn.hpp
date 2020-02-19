@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_ACTIONS_CONTACT_FWDDYN_HPP_
 #define CROCODDYL_MULTIBODY_ACTIONS_CONTACT_FWDDYN_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include <stdexcept>
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
@@ -124,8 +124,6 @@ struct DifferentialActionDataContactFwdDynamicsTpl : public DifferentialActionDa
 
 };
 
-typedef DifferentialActionModelContactFwdDynamicsTpl<double> DifferentialActionModelContactFwdDynamics;
-typedef DifferentialActionDataContactFwdDynamicsTpl<double> DifferentialActionDataContactFwdDynamics;  
 }  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */

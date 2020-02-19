@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_
 #define CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_
-
+#include "crocoddyl/core/fwd.hpp"
 #include <stdexcept>
 #include <vector>
 #include "crocoddyl/core/utils/exception.hpp"
@@ -65,7 +65,6 @@ class ShootingProblemTpl {
   void allocateData();
 };
 
-typedef ShootingProblemTpl<double> ShootingProblem;
   
 }  // namespace crocoddyl
 

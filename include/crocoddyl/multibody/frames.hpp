@@ -9,7 +9,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_FRAMES_HPP_
 #define CROCODDYL_MULTIBODY_FRAMES_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/mathbase.hpp"
 #include <pinocchio/spatial/se3.hpp>
 #include <pinocchio/spatial/motion.hpp>
@@ -89,11 +89,6 @@ struct FrameForceTpl {
   pinocchio::ForceTpl<Scalar> oFf;
 };
 
-typedef FrameTranslationTpl<double> FrameTranslation;
-typedef FrameRotationTpl<double> FrameRotation;
-typedef FramePlacementTpl<double> FramePlacement;
-typedef FrameMotionTpl<double> FrameMotion;
-typedef FrameForceTpl<double> FrameForce;
   
 }  // namespace crocoddyl
 

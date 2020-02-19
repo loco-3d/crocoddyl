@@ -9,7 +9,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_COSTS_FRAME_TRANSLATION_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_FRAME_TRANSLATION_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/frames.hpp"
@@ -114,8 +114,6 @@ struct CostDataFrameTranslationTpl : public CostDataAbstractTpl<_Scalar> {
 
 };
 
-typedef CostModelFrameTranslationTpl<double> CostModelFrameTranslation;
-typedef CostDataFrameTranslationTpl<double> CostDataFrameTranslation;
     
 }  // namespace crocoddyl
 

@@ -12,15 +12,13 @@
 #include <stdexcept>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/utils/math.hpp"
 #include "crocoddyl/core/utils/to-string.hpp"
 
 namespace crocoddyl {
-
-template <typename _Scalar>
-struct ActionDataAbstractTpl;  // forward declaration
-
+  
 template <typename _Scalar>
 class ActionModelAbstractTpl {
  public:
@@ -50,7 +48,7 @@ class ActionModelAbstractTpl {
 
   const std::size_t& get_nu() const;
   const std::size_t& get_nr() const;
-  const boost::shared_ptr<StateAbstract>& get_state() const;
+  const boost::shared_ptr<StateAbstractTpl<Scalar> >& get_state() const;
 
   const typename MathBase::VectorXs& get_u_lb() const;
   const typename MathBase::VectorXs& get_u_ub() const;
@@ -62,7 +60,7 @@ class ActionModelAbstractTpl {
  protected:
   std::size_t nu_;                          //!< Control dimension
   std::size_t nr_;                          //!< Dimension of the cost residual
-  boost::shared_ptr<StateAbstract> state_;  //!< Model of the state
+  boost::shared_ptr<StateAbstractTpl<Scalar> > state_;  //!< Model of the state
   typename MathBase::VectorXs unone_;                   //!< Neutral state
   typename MathBase::VectorXs u_lb_;                    //!< Lower control limits
   typename MathBase::VectorXs u_ub_;                    //!< Upper control limits
@@ -144,8 +142,6 @@ struct ActionDataAbstractTpl {
 };
 
   
-typedef ActionDataAbstractTpl<double> ActionDataAbstract;
-typedef ActionModelAbstractTpl<double> ActionModelAbstract;
 
 }  // namespace crocoddyl
 

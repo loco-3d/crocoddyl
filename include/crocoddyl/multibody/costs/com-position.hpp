@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_COSTS_COM_POSITION_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_COM_POSITION_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
@@ -109,8 +109,6 @@ struct CostDataCoMPositionTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::Ru;
 };
 
-  typedef CostModelCoMPositionTpl<double> CostModelCoMPosition;
-  typedef CostDataCoMPositionTpl<double> CostDataCoMPosition;
 }  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */

@@ -15,7 +15,7 @@ namespace crocoddyl {
 template<typename Scalar>
 IntegratedActionModelEulerTpl<Scalar>::IntegratedActionModelEulerTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
                                                        const Scalar& time_step, const bool& with_cost_residual)
-    : ActionModelAbstract(model->get_state(), model->get_nu(), model->get_nr()),
+    : Base(model->get_state(), model->get_nu(), model->get_nr()),
       differential_(model),
       time_step_(time_step),
       time_step2_(time_step * time_step),

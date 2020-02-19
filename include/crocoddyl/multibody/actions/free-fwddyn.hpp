@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_ACTIONS_FREE_FWDDYN_HPP_
 #define CROCODDYL_MULTIBODY_ACTIONS_FREE_FWDDYN_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include <stdexcept>
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
@@ -111,8 +111,6 @@ struct DifferentialActionDataFreeFwdDynamicsTpl : public DifferentialActionDataA
 
 };
 
-typedef DifferentialActionModelFreeFwdDynamicsTpl<double> DifferentialActionModelFreeFwdDynamics;  
-typedef DifferentialActionDataFreeFwdDynamicsTpl<double> DifferentialActionDataFreeFwdDynamics;
   
 }  // namespace crocoddyl
 

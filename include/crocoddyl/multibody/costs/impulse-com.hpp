@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/multibody/data/impulses.hpp"
@@ -89,7 +89,7 @@ struct CostDataImpulseCoMTpl : public CostDataAbstractTpl<_Scalar> {
   }
 
   pinocchio::DataTpl<Scalar>* pinocchio;
-  boost::shared_ptr<crocoddyl::ImpulseDataMultiple> impulses;
+  boost::shared_ptr<crocoddyl::ImpulseDataMultipleTpl<Scalar> > impulses;
   Matrix3xs Arr_Rx;
   Matrix3xs dvc_dq;
   MatrixXs ddv_dv;
@@ -108,8 +108,6 @@ struct CostDataImpulseCoMTpl : public CostDataAbstractTpl<_Scalar> {
   
 };
 
-  typedef CostModelImpulseCoMTpl<double> CostModelImpulseCoM;
-  typedef CostDataImpulseCoMTpl<double> CostDataImpulseCoM;  
   
 }  // namespace crocoddyl
 

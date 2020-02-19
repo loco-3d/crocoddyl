@@ -12,6 +12,7 @@
 #include <string>
 #include <map>
 #include <utility>
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 
@@ -27,8 +28,6 @@ struct ImpulseItemTpl {
   std::string name;
   boost::shared_ptr<ImpulseModelAbstractTpl<Scalar> > impulse;
 };
-
-template<typename Scalar> struct ImpulseDataMultipleTpl;  // forward declaration
 
 template<typename _Scalar>
 class ImpulseModelMultipleTpl {
@@ -134,9 +133,6 @@ struct ImpulseDataMultipleTpl : ImpulseDataAbstractTpl<_Scalar> {
   
 };
   
-typedef ImpulseItemTpl<double> ImpulseItem;
-typedef ImpulseModelMultipleTpl<double> ImpulseModelMultiple;
-typedef ImpulseDataMultipleTpl<double> ImpulseDataMultiple;
   
 }  // namespace crocoddyl
 /* --- Details -------------------------------------------------------------- */

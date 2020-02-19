@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_CORE_DATA_CONTACTS_HPP_
 #define CROCODDYL_CORE_DATA_CONTACTS_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include <boost/shared_ptr.hpp>
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
@@ -40,9 +40,6 @@ struct DataCollectorActMultibodyInContactTpl : DataCollectorMultibodyInContactTp
   virtual ~DataCollectorActMultibodyInContactTpl() {}
 };
 
-typedef DataCollectorContactTpl<double> DataCollectorContact;
-typedef DataCollectorMultibodyInContactTpl<double> DataCollectorMultibodyInContact;
-typedef DataCollectorActMultibodyInContactTpl<double> DataCollectorActMultibodyInContact;
   
 }  // namespace crocoddyl
 

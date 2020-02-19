@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_COSTS_FRAME_ROTATION_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_FRAME_ROTATION_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/frames.hpp"
@@ -126,8 +126,6 @@ struct CostDataFrameRotationTpl : public CostDataAbstractTpl<_Scalar> {
   
 };
 
-typedef CostModelFrameRotationTpl<double> CostModelFrameRotation;
-typedef CostDataFrameRotationTpl<double> CostDataFrameRotation;
   
 }  // namespace crocoddyl
 

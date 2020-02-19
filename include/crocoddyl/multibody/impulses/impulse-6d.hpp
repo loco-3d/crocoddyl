@@ -8,14 +8,12 @@
 
 #ifndef CROCODDYL_MULTIBODY_IMPULSES_IMPULSE_6D_HPP_
 #define CROCODDYL_MULTIBODY_IMPULSES_IMPULSE_6D_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 #include <pinocchio/spatial/motion.hpp>
 #include <pinocchio/multibody/data.hpp>
 
 namespace crocoddyl {
-
-template<typename Scalar> struct ImpulseData6DTpl;
 
 template <typename _Scalar>
 class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
@@ -95,8 +93,6 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   
 };
 
-typedef ImpulseModel6DTpl<double> ImpulseModel6D;
-typedef ImpulseData6DTpl<double> ImpulseData6D;
   
 }  // namespace crocoddyl
 

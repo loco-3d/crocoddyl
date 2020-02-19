@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_
 #define CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_
-
+#include "crocoddyl/core/fwd.hpp"
 #include <stdexcept>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -16,9 +16,6 @@
 #include "crocoddyl/core/utils/to-string.hpp"
 
 namespace crocoddyl {
-
-template<typename _Scalar>
-struct DifferentialActionDataAbstractTpl;  // forward declaration
 
 /**
  * @brief This class DifferentialActionModelAbstract represents a first-order
@@ -155,8 +152,6 @@ struct DifferentialActionDataAbstractTpl {
   MatrixXs Luu;
 };
 
-typedef DifferentialActionModelAbstractTpl<double> DifferentialActionModelAbstract;
-typedef DifferentialActionDataAbstractTpl<double> DifferentialActionDataAbstract;
   
 }  // namespace crocoddyl
 

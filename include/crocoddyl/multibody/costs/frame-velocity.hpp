@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_COSTS_FRAME_VELOCITY_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_FRAME_VELOCITY_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/frames.hpp"
@@ -79,7 +79,7 @@ struct CostDataFrameVelocityTpl : public CostDataAbstractTpl<_Scalar> {
 
   template <typename Model>
   CostDataFrameVelocityTpl(Model* const model, DataCollectorAbstract* const data)
-      : CostDataAbstract(model, data),
+      : Base(model, data),
         joint(model->get_state()->get_pinocchio().frames[model->get_vref().frame].parent),
         vr(pinocchio::MotionTpl<Scalar>::Zero()),
         fXj(model->get_state()->get_pinocchio().frames[model->get_vref().frame].placement.inverse().toActionMatrix()),
@@ -122,8 +122,6 @@ struct CostDataFrameVelocityTpl : public CostDataAbstractTpl<_Scalar> {
   
 };
 
-typedef CostModelFrameVelocityTpl<double> CostModelFrameVelocity;
-typedef CostDataFrameVelocityTpl<double> CostDataFrameVelocity;
   
 }  // namespace crocoddyl
 

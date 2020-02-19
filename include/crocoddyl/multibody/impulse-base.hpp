@@ -8,15 +8,13 @@
 
 #ifndef CROCODDYL_MULTIBODY_IMPULSE_BASE_HPP_
 #define CROCODDYL_MULTIBODY_IMPULSE_BASE_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include <pinocchio/multibody/data.hpp>
 #include <pinocchio/spatial/force.hpp>
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/core/utils/to-string.hpp"
 
 namespace crocoddyl {
-
-template<typename Scalar> struct ImpulseDataAbstractTpl;  // forward declaration
 
 template<typename _Scalar>
 class ImpulseModelAbstractTpl {
@@ -94,8 +92,6 @@ struct ImpulseDataAbstractTpl {
   pinocchio::ForceTpl<Scalar> f;
 };
 
-typedef ImpulseModelAbstractTpl<double> ImpulseModelAbstract;
-typedef ImpulseDataAbstractTpl<double> ImpulseDataAbstract;
   
 }  // namespace crocoddyl
 

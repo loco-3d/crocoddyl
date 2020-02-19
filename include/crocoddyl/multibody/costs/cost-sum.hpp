@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_COSTS_COST_SUM_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_COST_SUM_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include <string>
 #include <map>
@@ -29,9 +29,6 @@ struct CostItemTpl {
   Scalar weight;
 };
   
-template<typename Scalar>
-struct CostDataSumTpl;  // forward declaration
-
 template<typename _Scalar>
 class CostModelSumTpl {
  public:
@@ -236,9 +233,6 @@ struct CostDataSumTpl {
   MatrixXs Ru;
 };
 
-  typedef CostItemTpl<double> CostItem;
-  typedef CostModelSumTpl<double> CostModelSum;
-  typedef CostDataSumTpl<double> CostDataSum;
 
 }  // namespace crocoddyl
 

@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_CONTACTS_CONTACT_3D_HPP_
 #define CROCODDYL_MULTIBODY_CONTACTS_CONTACT_3D_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include <pinocchio/spatial/motion.hpp>
 #include <pinocchio/multibody/data.hpp>
 #include <pinocchio/algorithm/frames.hpp>
@@ -19,8 +19,6 @@
 #include "crocoddyl/multibody/contact-base.hpp"
 
 namespace crocoddyl {
-
-template<typename Scalar> struct ContactData3DTpl;
   
 template <typename _Scalar>
 class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
@@ -139,8 +137,6 @@ struct ContactData3DTpl : public ContactDataAbstractTpl<_Scalar> {
   
 };
 
-typedef ContactModel3DTpl<double> ContactModel3D;
-typedef ContactData3DTpl<double> ContactData3D;
   
   
 }  // namespace crocoddyl

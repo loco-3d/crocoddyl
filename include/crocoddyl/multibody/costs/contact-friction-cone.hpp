@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_COSTS_CONTACT_FRICTION_CONE_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_CONTACT_FRICTION_CONE_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"
@@ -97,7 +97,8 @@ struct CostDataContactFrictionConeTpl : public CostDataAbstractTpl<_Scalar> {
     Arr_Ru.fill(0);
 
     // Check that proper shared data has been passed
-    DataCollectorContact* d = dynamic_cast<DataCollectorContact*>(shared);
+    DataCollectorContactTpl<Scalar>* d =
+      dynamic_cast<DataCollectorContactTpl<Scalar>* >(shared);
     if (d == NULL) {
       throw_pretty("Invalid argument: the shared data should be derived from DataCollectorContact");
     }
@@ -146,8 +147,6 @@ struct CostDataContactFrictionConeTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::Ru;  
 };
 
-  typedef CostModelContactFrictionConeTpl<double> CostModelContactFrictionCone;
-  typedef CostDataContactFrictionConeTpl<double> CostDataContactFrictionCone;
   
 }  // namespace crocoddyl
 

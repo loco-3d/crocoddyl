@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_COST_BASE_HPP_
 #define CROCODDYL_MULTIBODY_COST_BASE_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include "crocoddyl/multibody/states/multibody.hpp"
@@ -19,9 +19,6 @@
 
 namespace crocoddyl {
   
-template<typename Scalar>
-struct CostDataAbstractTpl;  // forward declaration
-
 template<typename _Scalar>
 class CostModelAbstractTpl {
 public:
@@ -140,8 +137,6 @@ struct CostDataAbstractTpl {
   MatrixXs Ru;
 };
 
-typedef CostModelAbstractTpl<double> CostModelAbstract;
-typedef CostDataAbstractTpl<double> CostDataAbstract;
   
 }  // namespace crocoddyl
 

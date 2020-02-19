@@ -52,7 +52,8 @@ template<typename Scalar>
 void CostModelContactFrictionConeTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
                                         const Eigen::Ref<const VectorXs>&,
                                         const Eigen::Ref<const VectorXs>&) {
-  CostDataContactFrictionCone* d = static_cast<CostDataContactFrictionCone*>(data.get());
+  CostDataContactFrictionConeTpl<Scalar>* d =
+    static_cast<CostDataContactFrictionConeTpl<Scalar>* >(data.get());
 
   // Compute the residual of the friction cone. Note that we need to transform the force
   // to the contact frame

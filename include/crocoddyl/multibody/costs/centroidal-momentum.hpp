@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_COSTS_MOMENTUM_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_MOMENTUM_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
@@ -117,8 +117,6 @@ struct CostDataCentroidalMomentumTpl : public CostDataAbstractTpl<_Scalar> {
   
 };
 
-  typedef CostModelCentroidalMomentumTpl<double> CostModelCentroidalMomentum;
-  typedef CostDataCentroidalMomentumTpl<double> CostDataCentroidalMomentum;
   
 }  // namespace crocoddyl
 

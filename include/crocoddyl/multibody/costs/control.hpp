@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 
 namespace crocoddyl {
@@ -59,7 +59,6 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
   VectorXs uref_;
 };
 
-  typedef CostModelControlTpl<double> CostModelControl;
   
 }  // namespace crocoddyl
 

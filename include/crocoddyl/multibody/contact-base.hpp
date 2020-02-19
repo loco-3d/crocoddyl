@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_CONTACT_BASE_HPP_
 #define CROCODDYL_MULTIBODY_CONTACT_BASE_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include <pinocchio/multibody/data.hpp>
 #include <pinocchio/spatial/force.hpp>
 #include "crocoddyl/core/mathbase.hpp"
@@ -16,9 +16,6 @@
 #include "crocoddyl/core/utils/to-string.hpp"
 
 namespace crocoddyl {
-
-template<typename Scalar>
-struct ContactDataAbstractTpl;  // forward declaration
 
 template<typename _Scalar>
 class ContactModelAbstractTpl {
@@ -111,8 +108,6 @@ struct ContactDataAbstractTpl {
   pinocchio::ForceTpl<Scalar> f;
 };
 
-typedef ContactModelAbstractTpl<double> ContactModelAbstract;
-typedef ContactDataAbstractTpl<double> ContactDataAbstract;
   
   
 }  // namespace crocoddyl

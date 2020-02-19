@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_CORE_STATES_EUCLIDEAN_HPP_
 #define CROCODDYL_CORE_STATES_EUCLIDEAN_HPP_
-
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/state-base.hpp"
 
@@ -45,7 +45,6 @@ class StateVectorTpl : public StateAbstractTpl<_Scalar> {
 };
 
 
-typedef StateVectorTpl<double> StateVector;
 
 }  // namespace crocoddyl
 

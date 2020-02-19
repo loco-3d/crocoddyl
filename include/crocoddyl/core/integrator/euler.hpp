@@ -8,14 +8,11 @@
 
 #ifndef CROCODDYL_CORE_INTEGRATOR_EULER_HPP_
 #define CROCODDYL_CORE_INTEGRATOR_EULER_HPP_
-
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 
 namespace crocoddyl {
-
-template<typename Scalar> struct IntegratedActionDataEulerTpl;
-
   
 template<typename _Scalar>
 class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
@@ -90,7 +87,7 @@ struct IntegratedActionDataEulerTpl: public ActionDataAbstractTpl<_Scalar> {
   }
   ~IntegratedActionDataEulerTpl() {}
 
-  boost::shared_ptr<DifferentialActionDataAbstract> differential;
+  boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > differential;
   VectorXs dx;
   MatrixXs ddx_dx;
   MatrixXs ddx_du;
@@ -109,8 +106,6 @@ struct IntegratedActionDataEulerTpl: public ActionDataAbstractTpl<_Scalar> {
   using Base::Luu;
 };
 
-typedef IntegratedActionModelEulerTpl<double> IntegratedActionModelEuler;
-typedef IntegratedActionDataEulerTpl<double> IntegratedActionDataEuler;
   
 }  // namespace crocoddyl
 

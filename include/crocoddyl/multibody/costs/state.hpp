@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_COSTS_STATE_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_STATE_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 
@@ -106,8 +106,6 @@ struct CostDataStateTpl : public CostDataAbstractTpl<_Scalar> {
 
   
 };
-  typedef CostModelStateTpl<double> CostModelState;
-  typedef CostDataStateTpl<double> CostDataState;
   
 }  // namespace crocoddyl
 

@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_
 #define CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_
-
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"
 #include <stdexcept>
@@ -72,8 +72,6 @@ struct ActionDataUnicycleTpl : public ActionDataAbstractTpl<_Scalar> {
   
 };
 
-typedef ActionModelUnicycleTpl<double> ActionModelUnicycle;
-typedef ActionDataUnicycleTpl<double> ActionDataUnicycle;
   
 }  // namespace crocoddyl
 

@@ -8,9 +8,8 @@
 
 #ifndef CROCODDYL_CORE_STATE_BASE_HPP_
 #define CROCODDYL_CORE_STATE_BASE_HPP_
-
+#include "crocoddyl/core/fwd.hpp"
 #include <crocoddyl/core/mathbase.hpp>
-
 #include <vector>
 #include <string>
 #include <stdexcept>
@@ -129,7 +128,6 @@ class StateAbstractTpl {
 #endif
 };
 
-typedef StateAbstractTpl<double> StateAbstract; 
 
 }  // namespace crocoddyl
 

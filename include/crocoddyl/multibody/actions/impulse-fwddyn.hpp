@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_ACTIONS_IMPULSE_FWDDYN_HPP_
 #define CROCODDYL_MULTIBODY_ACTIONS_IMPULSE_FWDDYN_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include <stdexcept>
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/action-base.hpp"
@@ -123,8 +123,6 @@ struct ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
   MatrixXs df_dq;
 };
 
-  typedef ActionModelImpulseFwdDynamicsTpl<double> ActionModelImpulseFwdDynamics;
-  typedef ActionDataImpulseFwdDynamicsTpl<double> ActionDataImpulseFwdDynamics;
   
 }  // namespace crocoddyl
 

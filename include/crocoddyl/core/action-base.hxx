@@ -83,7 +83,7 @@ const std::size_t& ActionModelAbstractTpl<Scalar>::get_nu() const { return nu_; 
 template <typename Scalar>
 const std::size_t& ActionModelAbstractTpl<Scalar>::get_nr() const { return nr_; }
 template <typename Scalar>
-const boost::shared_ptr<StateAbstract>& ActionModelAbstractTpl<Scalar>::get_state() const { return state_; }
+const boost::shared_ptr<StateAbstractTpl<Scalar> >& ActionModelAbstractTpl<Scalar>::get_state() const { return state_; }
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::VectorXs& ActionModelAbstractTpl<Scalar>::get_u_lb() const { return u_lb_; }
 template <typename Scalar>

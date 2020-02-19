@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_CONTACTS_MULTIPLE_CONTACTS_HPP_
 #define CROCODDYL_MULTIBODY_CONTACTS_MULTIPLE_CONTACTS_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include <string>
 #include <map>
 #include <utility>
@@ -28,8 +28,6 @@ struct ContactItemTpl {
   boost::shared_ptr<ContactModelAbstractTpl<Scalar> > contact;
 };
   
-template<typename Scalar> struct ContactDataMultipleTpl;  // forward declaration
-
 template<typename _Scalar>
 class ContactModelMultipleTpl {
 public:
@@ -118,7 +116,7 @@ struct ContactDataMultipleTpl : ContactDataAbstractTpl<_Scalar> {
 
   template <typename Model>
   ContactDataMultipleTpl(Model* const model, pinocchio::DataTpl<Scalar>* const data)
-      : ContactDataAbstract(model, data),
+      : Base(model, data),
         dv(model->get_state()->get_nv()),
         ddv_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
         fext(model->get_state()->get_pinocchio().njoints, pinocchio::ForceTpl<Scalar>::Zero()) {
@@ -137,9 +135,6 @@ struct ContactDataMultipleTpl : ContactDataAbstractTpl<_Scalar> {
   pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar> > fext;
 };
 
-typedef ContactItemTpl<double> ContactItem;
-typedef ContactModelMultipleTpl<double> ContactModelMultiple;
-typedef ContactDataMultipleTpl<double> ContactDataMultiple;
   
 }  // namespace crocoddyl
 

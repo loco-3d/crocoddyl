@@ -8,7 +8,7 @@
 
 #ifndef CROCODDYL_CORE_DATA_MULTIBODY_HPP_
 #define CROCODDYL_CORE_DATA_MULTIBODY_HPP_
-
+#include "crocoddyl/multibody/fwd.hpp"
 #include <pinocchio/multibody/data.hpp>
 #include "crocoddyl/core/data-collector-base.hpp"
 #include "crocoddyl/core/data/actuation.hpp"
@@ -30,8 +30,6 @@ struct DataCollectorActMultibodyTpl : DataCollectorMultibodyTpl<Scalar>, DataCol
   virtual ~DataCollectorActMultibodyTpl() {}
 };
 
-typedef DataCollectorMultibodyTpl<double> DataCollectorMultibody;
-typedef DataCollectorActMultibodyTpl<double> DataCollectorActMultibody;
   
 }  // namespace crocoddyl
 

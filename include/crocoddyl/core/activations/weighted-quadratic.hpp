@@ -8,14 +8,12 @@
 
 #ifndef CROCODDYL_CORE_ACTIVATIONS_WEIGHTED_QUADRATIC_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_WEIGHTED_QUADRATIC_HPP_
-
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/activation-base.hpp"
 #include <stdexcept>
 
 namespace crocoddyl {
-
-template<typename _Scalar> struct ActivationDataWeightedQuadTpl;
   
 template<typename _Scalar>
 class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
@@ -105,8 +103,6 @@ struct ActivationDataWeightedQuadTpl : public ActivationDataAbstractTpl<_Scalar>
   VectorXs Wr;
 };
 
-typedef ActivationModelWeightedQuadTpl<double> ActivationModelWeightedQuad;
-typedef ActivationDataWeightedQuadTpl<double> ActivationDataWeightedQuad;
   
 }  // namespace crocoddyl
 
