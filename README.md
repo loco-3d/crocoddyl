@@ -15,7 +15,7 @@ Contact RObot COntrol by Differential DYnamic programming Library (crocoddyl)
 
 ## <img align="center" height="20" src="https://i.imgur.com/vAYeCzC.png"/> Introduction
 
-**[Crocoddyl](https://cmastalli.github.io/publications/crocoddyl20unpub.html)** is an optimal control library for robot control under contact sequence.
+**[Crocoddyl](https://cmastalli.github.io/publications/crocoddyl20icra.html)** is an optimal control library for robot control under contact sequence.
 Its solver is based on an efficient Differential Dynamic Programming (DDP) algorithm.
 **Crocoddyl** computes optimal trajectories along with optimal feedback gains.
 It uses **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)** for fast computation of robots dynamics and their analytical derivatives.
@@ -194,7 +194,7 @@ The following people have been involved in the development of **Crocoddyl**:
 - [Justin Carpentier](https://jcarpent.github.io/) (INRIA): efficient analytical rigid-body dynamics derivatives
 - [Maximilien Naveau](https://scholar.google.fr/citations?user=y_-cGlUAAAAJ&hl=fr) (MPI): unit-test support
 - [Guilhem Saurel](http://projects.laas.fr/gepetto/index.php/Members/GuilhemSaurel) (LAAS-CNRS): continuous integration and deployment
-- [Wolfgang Merkt](http://www.wolfgangmerkt.com/research/) (University of Edinburgh): feature extension and debugging
+- [Wolfgang Merkt](http://www.wolfgangmerkt.com/research/) (University of Oxford): feature extension and debugging
 - [Josep Martí Saumell](https://www.iri.upc.edu/staff/jmarti) (UPC): feature extension
 - [Bilal Hammoud](https://scholar.google.com/citations?hl=en&user=h_4NKpsAAAAJ) (MPI): features extension
 
