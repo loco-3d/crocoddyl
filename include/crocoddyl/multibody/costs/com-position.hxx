@@ -11,39 +11,46 @@
 
 namespace crocoddyl {
 
-CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> state,
+template<typename Scalar>
+CostModelCoMPositionTpl<Scalar>::CostModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state,
                                            boost::shared_ptr<ActivationModelAbstract> activation,
-                                           const Eigen::Vector3d& cref, const std::size_t& nu)
-    : CostModelAbstract(state, activation, nu), cref_(cref) {
+                                           const Vector3s& cref, const std::size_t& nu)
+    : Base(state, activation, nu), cref_(cref) {
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 3");
   }
 }
 
-CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> state,
+template<typename Scalar>
+CostModelCoMPositionTpl<Scalar>::CostModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state,
                                            boost::shared_ptr<ActivationModelAbstract> activation,
-                                           const Eigen::Vector3d& cref)
-    : CostModelAbstract(state, activation), cref_(cref) {
+                                           const Vector3s& cref)
+    : Base(state, activation), cref_(cref) {
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 3");
   }
 }
 
-CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> state, const Eigen::Vector3d& cref,
+template<typename Scalar>
+CostModelCoMPositionTpl<Scalar>::CostModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state, const Vector3s& cref,
                                            const std::size_t& nu)
-    : CostModelAbstract(state, 3, nu), cref_(cref) {}
+    : Base(state, 3, nu), cref_(cref) {}
 
-CostModelCoMPosition::CostModelCoMPosition(boost::shared_ptr<StateMultibody> state, const Eigen::Vector3d& cref)
-    : CostModelAbstract(state, 3), cref_(cref) {}
+template<typename Scalar>
+CostModelCoMPositionTpl<Scalar>::CostModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state, const Vector3s& cref)
+    : Base(state, 3), cref_(cref) {}
 
-CostModelCoMPosition::~CostModelCoMPosition() {}
+template<typename Scalar>
+CostModelCoMPositionTpl<Scalar>::~CostModelCoMPositionTpl() {}
 
-void CostModelCoMPosition::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>&) {
+template<typename Scalar>
+void CostModelCoMPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
+                                const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   // Compute the cost residual give the reference CoMPosition position
-  CostDataCoMPosition* d = static_cast<CostDataCoMPosition*>(data.get());
+  CostDataCoMPositionTpl<Scalar>* d =
+    static_cast<CostDataCoMPositionTpl<Scalar>* >(data.get());
   data->r = d->pinocchio->com[0] - cref_;
 
   // Compute the cost
@@ -51,10 +58,12 @@ void CostModelCoMPosition::calc(const boost::shared_ptr<CostDataAbstract>& data,
   data->cost = data->activation->a_value;
 }
 
-void CostModelCoMPosition::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                    const Eigen::Ref<const Eigen::VectorXd>&,
-                                    const Eigen::Ref<const Eigen::VectorXd>&) {
-  CostDataCoMPosition* d = static_cast<CostDataCoMPosition*>(data.get());
+template<typename Scalar>
+void CostModelCoMPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+                                    const Eigen::Ref<const VectorXs>&,
+                                    const Eigen::Ref<const VectorXs>&) {
+  CostDataCoMPositionTpl<Scalar>* d =
+    static_cast<CostDataCoMPositionTpl<Scalar>* >(data.get());
 
   // Compute the derivatives of the frame placement
   const std::size_t& nv = state_->get_nv();
@@ -65,12 +74,15 @@ void CostModelCoMPosition::calcDiff(const boost::shared_ptr<CostDataAbstract>& d
   data->Lxx.topLeftCorner(nv, nv).noalias() = d->pinocchio->Jcom.transpose() * d->Arr_Jcom;
 }
 
-boost::shared_ptr<CostDataAbstract> CostModelCoMPosition::createData(DataCollectorAbstract* const data) {
-  return boost::make_shared<CostDataCoMPosition>(this, data);
+template<typename Scalar>
+boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelCoMPositionTpl<Scalar>::createData(DataCollectorAbstract* const data) {
+  return boost::make_shared<CostDataCoMPositionTpl<Scalar> >(this, data);
 }
 
-const Eigen::Vector3d& CostModelCoMPosition::get_cref() const { return cref_; }
+template<typename Scalar>
+const typename MathBaseTpl<Scalar>::Vector3s& CostModelCoMPositionTpl<Scalar>::get_cref() const { return cref_; }
 
-void CostModelCoMPosition::set_cref(const Eigen::Vector3d& cref_in) { cref_ = cref_in; }
+template<typename Scalar>
+void CostModelCoMPositionTpl<Scalar>::set_cref(const Vector3s& cref_in) { cref_ = cref_in; }
 
 }  // namespace crocoddyl

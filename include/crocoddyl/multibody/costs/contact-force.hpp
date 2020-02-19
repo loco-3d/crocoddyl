@@ -17,39 +17,75 @@
 
 namespace crocoddyl {
 
-class CostModelContactForce : public CostModelAbstract {
+template<typename _Scalar>
+class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
  public:
-  CostModelContactForce(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-                        const FrameForce& fref, const std::size_t& nu);
-  CostModelContactForce(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-                        const FrameForce& fref);
-  CostModelContactForce(boost::shared_ptr<StateMultibody> state, const FrameForce& fref, const std::size_t& nu);
-  CostModelContactForce(boost::shared_ptr<StateMultibody> state, const FrameForce& fref);
-  ~CostModelContactForce();
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef CostModelAbstractTpl<Scalar> Base;
+  typedef StateMultibodyTpl<Scalar> StateMultibody;
+  typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
+  typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
+  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+  typedef FrameForceTpl<Scalar> FrameForce;
+  typedef typename MathBase::Vector6s Vector6s;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+  
+  CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
+                           boost::shared_ptr<ActivationModelAbstract> activation,
+                           const FrameForce& fref, const std::size_t& nu);
+  CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
+                           boost::shared_ptr<ActivationModelAbstract> activation,
+                           const FrameForce& fref);
+  CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
+                           const FrameForce& fref, const std::size_t& nu);
+  CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref);
+  ~CostModelContactForceTpl();
 
-  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-            const Eigen::Ref<const Eigen::VectorXd>& u);
-  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u);
+  void calc(const boost::shared_ptr<CostDataAbstract>& data,
+            const Eigen::Ref<const VectorXs>& x,
+            const Eigen::Ref<const VectorXs>& u);
+  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+                const Eigen::Ref<const VectorXs>& x,
+                const Eigen::Ref<const VectorXs>& u);
   boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
   const FrameForce& get_fref() const;
   void set_fref(const FrameForce& fref);
 
+protected:
+  using Base::state_;
+  using Base::activation_;
+  using Base::nu_;
+  using Base::with_residuals_;
+  using Base::unone_;
+  
  protected:
   FrameForce fref_;
 };
 
-struct CostDataContactForce : public CostDataAbstract {
+template<typename _Scalar>
+struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef CostDataAbstractTpl<Scalar> Base;
+  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+  typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+  typedef typename MathBase::Matrix6xs Matrix6xs;
+  
   template <typename Model>
-  CostDataContactForce(Model* const model, DataCollectorAbstract* const data)
-      : CostDataAbstract(model, data), Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
+  CostDataContactForceTpl(Model* const model, DataCollectorAbstract* const data)
+      : Base(model, data), Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
     Arr_Ru.fill(0);
 
     // Check that proper shared data has been passed
-    DataCollectorContact* d = dynamic_cast<DataCollectorContact*>(shared);
+    DataCollectorContactTpl<Scalar>* d =
+      dynamic_cast<DataCollectorContactTpl<Scalar>* >(shared);
     if (d == NULL) {
       throw_pretty("Invalid argument: the shared data should be derived from DataCollectorContact");
     }
@@ -57,7 +93,7 @@ struct CostDataContactForce : public CostDataAbstract {
     // Avoids data casting at runtime
     std::string frame_name = model->get_state()->get_pinocchio().frames[model->get_fref().frame].name;
     bool found_contact = false;
-    for (ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
+    for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
          it != d->contacts->contacts.end(); ++it) {
       if (it->second->frame == model->get_fref().frame) {
         found_contact = true;
@@ -70,10 +106,30 @@ struct CostDataContactForce : public CostDataAbstract {
     }
   }
 
-  boost::shared_ptr<ContactDataAbstract> contact;
-  Eigen::MatrixXd Arr_Ru;
+  boost::shared_ptr<ContactDataAbstractTpl<Scalar> > contact;
+  MatrixXs Arr_Ru;
+  using Base::shared;
+  using Base::activation;
+  using Base::cost;
+  using Base::Lx;
+  using Base::Lu;
+  using Base::Lxx;
+  using Base::Lxu;
+  using Base::Luu;
+  using Base::r;
+  using Base::Rx;
+  using Base::Ru;
+  
 };
 
+  typedef CostModelContactForceTpl<double> CostModelContactForce;  
+  typedef CostDataContactForceTpl<double> CostDataContactForce;
+  
 }  // namespace crocoddyl
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "crocoddyl/multibody/costs/contact-force.hxx"
+
 
 #endif  // CROCODDYL_MULTIBODY_COSTS_CONTACT_FORCE_HPP_
