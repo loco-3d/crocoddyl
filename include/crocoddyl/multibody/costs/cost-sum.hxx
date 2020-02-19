@@ -10,20 +10,28 @@
 #include "crocoddyl/multibody/costs/cost-sum.hpp"
 
 namespace crocoddyl {
-
-CostModelSum::CostModelSum(boost::shared_ptr<StateMultibody> state, const std::size_t& nu, const bool& with_residuals)
+  
+template<typename Scalar>
+CostModelSumTpl<Scalar>::CostModelSumTpl(boost::shared_ptr<StateMultibody> state,
+                                         const std::size_t& nu, const bool& with_residuals)
     : state_(state), nu_(nu), nr_(0), with_residuals_(with_residuals) {}
-
-CostModelSum::CostModelSum(boost::shared_ptr<StateMultibody> state, const bool& with_residuals)
+  
+template<typename Scalar>
+CostModelSumTpl<Scalar>::CostModelSumTpl(boost::shared_ptr<StateMultibody> state,
+                                         const bool& with_residuals)
     : state_(state), nu_(state->get_nv()), nr_(0), with_residuals_(with_residuals) {}
-
-CostModelSum::~CostModelSum() {}
-
-void CostModelSum::addCost(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, const double& weight) {
+  
+template<typename Scalar>
+CostModelSumTpl<Scalar>::~CostModelSumTpl() {}
+  
+template<typename Scalar>
+void CostModelSumTpl<Scalar>::addCost(const std::string& name,
+                                      boost::shared_ptr<CostModelAbstract> cost,
+                                      const Scalar& weight) {
   if (cost->get_nu() != nu_) {
     throw_pretty("Cost item doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
   }
-  std::pair<CostModelContainer::iterator, bool> ret =
+  std::pair<typename CostModelContainer::iterator, bool> ret =
       costs_.insert(std::make_pair(name, CostItem(name, cost, weight)));
   if (ret.second == false) {
     std::cout << "Warning: this cost item already existed, we cannot add it" << std::endl;
@@ -31,9 +39,10 @@ void CostModelSum::addCost(const std::string& name, boost::shared_ptr<CostModelA
     nr_ += cost->get_activation()->get_nr();
   }
 }
-
-void CostModelSum::removeCost(const std::string& name) {
-  CostModelContainer::iterator it = costs_.find(name);
+  
+template<typename Scalar>
+void CostModelSumTpl<Scalar>::removeCost(const std::string& name) {
+  typename CostModelContainer::iterator it = costs_.find(name);
   if (it != costs_.end()) {
     nr_ -= it->second.cost->get_activation()->get_nr();
     costs_.erase(it);
@@ -41,9 +50,11 @@ void CostModelSum::removeCost(const std::string& name) {
     std::cout << "Warning: this cost item doesn't exist, we cannot remove it" << std::endl;
   }
 }
-
-void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                        const Eigen::Ref<const Eigen::VectorXd>& u) {
+  
+template<typename Scalar>
+void CostModelSumTpl<Scalar>::calc(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data,
+                                   const Eigen::Ref<const VectorXs>& x,
+                                   const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -59,8 +70,8 @@ void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen:
   data->cost = 0.;
   std::size_t nr = 0;
 
-  CostModelContainer::iterator it_m, end_m;
-  CostDataContainer::iterator it_d, end_d;
+  typename CostModelContainer::iterator it_m, end_m;
+  typename CostDataContainer::iterator it_d, end_d;
   for (it_m = costs_.begin(), end_m = costs_.end(), it_d = data->costs.begin(), end_d = data->costs.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const CostItem& m_i = it_m->second;
@@ -76,9 +87,11 @@ void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen:
     }
   }
 }
-
-void CostModelSum::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                            const Eigen::Ref<const Eigen::VectorXd>& u) {
+  
+template<typename Scalar>
+void CostModelSumTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data,
+                                       const Eigen::Ref<const VectorXs>& x,
+                                       const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -99,8 +112,8 @@ void CostModelSum::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Ei
   data->Luu.fill(0);
 
   const std::size_t& ndx = state_->get_ndx();
-  CostModelContainer::iterator it_m, end_m;
-  CostDataContainer::iterator it_d, end_d;
+  typename CostModelContainer::iterator it_m, end_m;
+  typename CostDataContainer::iterator it_d, end_d;
   for (it_m = costs_.begin(), end_m = costs_.end(), it_d = data->costs.begin(), end_d = data->costs.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const CostItem& m_i = it_m->second;
@@ -122,24 +135,33 @@ void CostModelSum::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Ei
   }
 }
 
-boost::shared_ptr<CostDataSum> CostModelSum::createData(DataCollectorAbstract* const data) {
-  return boost::make_shared<CostDataSum>(this, data);
+template<typename Scalar>  
+boost::shared_ptr<CostDataSumTpl<Scalar> > CostModelSumTpl<Scalar>::createData(DataCollectorAbstract* const data) {
+  return boost::make_shared<CostDataSumTpl<Scalar> >(this, data);
 }
 
-void CostModelSum::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
+template<typename Scalar>  
+void CostModelSumTpl<Scalar>::calc(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data,
+                                   const Eigen::Ref<const VectorXs>& x) {
   calc(data, x, unone_);
 }
-
-void CostModelSum::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
+  
+template<typename Scalar>
+void CostModelSumTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data,
+                                       const Eigen::Ref<const VectorXs>& x) {
   calcDiff(data, x, unone_);
 }
-
-const boost::shared_ptr<StateMultibody>& CostModelSum::get_state() const { return state_; }
-
-const CostModelSum::CostModelContainer& CostModelSum::get_costs() const { return costs_; }
-
-const std::size_t& CostModelSum::get_nu() const { return nu_; }
-
-const std::size_t& CostModelSum::get_nr() const { return nr_; }
+  
+template<typename Scalar>
+const boost::shared_ptr<StateMultibodyTpl<Scalar> >& CostModelSumTpl<Scalar>::get_state() const { return state_; }
+  
+template<typename Scalar>
+const typename CostModelSumTpl<Scalar>::CostModelContainer& CostModelSumTpl<Scalar>::get_costs() const { return costs_; }
+  
+template<typename Scalar>
+const std::size_t& CostModelSumTpl<Scalar>::get_nu() const { return nu_; }
+  
+template<typename Scalar>
+const std::size_t& CostModelSumTpl<Scalar>::get_nr() const { return nr_; }
 
 }  // namespace crocoddyl
