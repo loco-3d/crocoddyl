@@ -81,8 +81,8 @@ struct CostDataFrameRotationTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix3xs Matrix3xs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
 
-  template <typename Model>
-  CostDataFrameRotationTpl(Model* const model, DataCollectorAbstract* const data)
+  template<template<typename Scalar> class Model>
+  CostDataFrameRotationTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data),
         J(3, model->get_state()->get_nv()),
         rJf(3, 3),

@@ -103,8 +103,8 @@ struct ImpulseDataMultipleTpl : ImpulseDataAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   
-  template <typename Model>
-  ImpulseDataMultipleTpl(Model* const model, pinocchio::DataTpl<Scalar>* const data)
+  template <template<typename Scalar> class Model>
+  ImpulseDataMultipleTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
       : Base(model, data),
         vnext(model->get_state()->get_nv()),
         dvnext_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()),

@@ -114,8 +114,8 @@ struct ContactDataMultipleTpl : ContactDataAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
   
 
-  template <typename Model>
-  ContactDataMultipleTpl(Model* const model, pinocchio::DataTpl<Scalar>* const data)
+  template<template<typename Scalar> class Model>
+  ContactDataMultipleTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
       : Base(model, data),
         dv(model->get_state()->get_nv()),
         ddv_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()),

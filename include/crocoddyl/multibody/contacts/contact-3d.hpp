@@ -77,8 +77,8 @@ struct ContactData3DTpl : public ContactDataAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   
-  template <typename Model>
-  ContactData3DTpl(Model* const model, pinocchio::DataTpl<Scalar>* const data)
+  template<template<typename Scalar> class Model>
+  ContactData3DTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
       : Base(model, data),
         fJf(6, model->get_state()->get_nv()),
         v_partial_dq(6, model->get_state()->get_nv()),

@@ -116,8 +116,8 @@ struct DifferentialActionDataAbstractTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   
-  template <typename Model>
-  explicit DifferentialActionDataAbstractTpl(Model* const model)
+  template<template<typename Scalar> class Model>
+  explicit DifferentialActionDataAbstractTpl(Model<Scalar>* const model)
       : cost(0.),
         xout(model->get_state()->get_nv()),
         Fx(model->get_state()->get_nv(), model->get_state()->get_ndx()),

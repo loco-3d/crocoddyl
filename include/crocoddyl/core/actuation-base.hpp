@@ -77,8 +77,8 @@ struct ActuationDataAbstractTpl {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   
-  template <typename Model>
-  explicit ActuationDataAbstractTpl(Model* const model)
+  template<template<typename Scalar> class Model>
+  explicit ActuationDataAbstractTpl(Model<Scalar>* const model)
       : tau(model->get_state()->get_nv()),
         dtau_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
         dtau_du(model->get_state()->get_nv(), model->get_nu()) {

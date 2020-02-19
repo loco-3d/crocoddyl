@@ -81,8 +81,8 @@ struct CostDataFrameTranslationTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix3xs Matrix3xs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
   
-  template <typename Model>
-  CostDataFrameTranslationTpl(Model* const model, DataCollectorAbstract* const data)
+  template<template<typename Scalar> class Model>
+  CostDataFrameTranslationTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data), J(3, model->get_state()->get_nv()), fJf(6, model->get_state()->get_nv()) {
     J.fill(0);
     fJf.fill(0);

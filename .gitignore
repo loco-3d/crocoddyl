@@ -10,3 +10,4 @@ build*/*
 *.pdf
 .clang-format
 .vscode/
+*#*#

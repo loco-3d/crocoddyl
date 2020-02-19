@@ -68,8 +68,8 @@ struct CostDataImpulseCoMTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix6s Matrix6s;
   typedef typename MathBase::Vector6s Vector6s;
   
-  template <typename Model>
-  CostDataImpulseCoMTpl(Model* const model, DataCollectorAbstract* const data)
+  template <template<typename Scalar> class Model>
+  CostDataImpulseCoMTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data),
         Arr_Rx(3, model->get_state()->get_nv()),
         dvc_dq(3, model->get_state()->get_nv()),

@@ -80,8 +80,8 @@ struct CostDataCentroidalMomentumTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix6s Matrix6s;
   typedef typename MathBase::Vector6s Vector6s;
 
-  template <typename Model>
-  CostDataCentroidalMomentumTpl(Model* const model, DataCollectorAbstract* const data)
+  template<template<typename Scalar> class Model>
+  CostDataCentroidalMomentumTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data),
         dhd_dq(6, model->get_state()->get_nv()),
         dhd_dv(6, model->get_state()->get_nv()) {

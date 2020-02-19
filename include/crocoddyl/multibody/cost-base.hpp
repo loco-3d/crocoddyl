@@ -100,8 +100,8 @@ struct CostDataAbstractTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   
-  template <typename Model>
-  CostDataAbstractTpl(Model* const model, DataCollectorAbstract* const data)
+  template<template<typename Scalar> class Model>
+  CostDataAbstractTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : shared(data),
         activation(model->get_activation()->createData()),
         cost(0.),

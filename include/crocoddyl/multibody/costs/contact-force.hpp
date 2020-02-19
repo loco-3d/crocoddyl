@@ -78,8 +78,8 @@ struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
   
-  template <typename Model>
-  CostDataContactForceTpl(Model* const model, DataCollectorAbstract* const data)
+  template<template<typename Scalar> class Model>
+  CostDataContactForceTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data), Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
     Arr_Ru.fill(0);
 

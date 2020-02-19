@@ -66,8 +66,8 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   
-  template <typename Model>
-  ImpulseData3DTpl(Model* const model, pinocchio::DataTpl<Scalar>* const data)
+  template <template<typename Scalar> class Model>
+  ImpulseData3DTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
       : Base(model, data),
         jMf(model->get_state()->get_pinocchio().frames[model->get_frame()].placement),
         fXj(jMf.inverse().toActionMatrix()),

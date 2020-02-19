@@ -66,8 +66,8 @@ struct ActionDataUnicycleTpl : public ActionDataAbstractTpl<_Scalar> {
   using Base::Lxu;
   using Base::Luu;
   
-  template <typename Model>
-  explicit ActionDataUnicycleTpl(Model* const model) : ActionDataAbstractTpl<Scalar>(model) {}
+  template<template<typename Scalar> class Model>
+  explicit ActionDataUnicycleTpl(Model<Scalar>* const model) : ActionDataAbstractTpl<Scalar>(model) {}
 
   
 };

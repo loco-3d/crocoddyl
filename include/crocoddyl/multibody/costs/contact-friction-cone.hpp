@@ -89,8 +89,8 @@ struct CostDataContactFrictionConeTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
   
-  template <typename Model>
-  CostDataContactFrictionConeTpl(Model* const model, DataCollectorAbstract* const data)
+  template<template<typename Scalar> class Model>
+  CostDataContactFrictionConeTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data),
         Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()),
         more_than_3_constraints(false) {

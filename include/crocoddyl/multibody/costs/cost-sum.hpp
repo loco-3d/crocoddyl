@@ -117,8 +117,8 @@ struct CostDataSumTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   
-  template <typename Model>
-  CostDataSumTpl(Model* const model, DataCollectorAbstract* const data)
+  template<template<typename Scalar> class Model>
+  CostDataSumTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : r_internal(model->get_nr()),
         Lx_internal(model->get_state()->get_ndx()),
         Lu_internal(model->get_nu()),

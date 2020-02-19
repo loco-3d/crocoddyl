@@ -74,8 +74,8 @@ struct ContactDataAbstractTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   
-  template <typename Model>
-  ContactDataAbstractTpl(Model* const model, pinocchio::DataTpl<Scalar>* const data)
+  template<template<typename Scalar> class Model>
+  ContactDataAbstractTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
       : pinocchio(data),
         joint(0),
         frame(0),

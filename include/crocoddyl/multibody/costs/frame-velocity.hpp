@@ -77,8 +77,8 @@ struct CostDataFrameVelocityTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
 
-  template <typename Model>
-  CostDataFrameVelocityTpl(Model* const model, DataCollectorAbstract* const data)
+  template<template<typename Scalar> class Model>
+  CostDataFrameVelocityTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data),
         joint(model->get_state()->get_pinocchio().frames[model->get_vref().frame].parent),
         vr(pinocchio::MotionTpl<Scalar>::Zero()),

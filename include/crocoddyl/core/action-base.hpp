@@ -105,8 +105,8 @@ struct ActionDataAbstractTpl {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
 
-  template <class Model>
-  explicit ActionDataAbstractTpl(Model* const model)
+  template <template<typename Scalar> class Model>
+  explicit ActionDataAbstractTpl(Model<Scalar>* const model)
       : cost(0.),
         xnext(model->get_state()->get_nx()),
         r(model->get_nr()),

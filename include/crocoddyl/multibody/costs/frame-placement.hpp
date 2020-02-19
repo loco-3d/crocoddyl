@@ -80,8 +80,8 @@ struct CostDataFramePlacementTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix6s Matrix6s;
   typedef typename MathBase::Vector6s Vector6s;
   
-  template <typename Model>
-  CostDataFramePlacementTpl(Model* const model, DataCollectorAbstract* const data)
+  template<template<typename Scalar> class Model>
+  CostDataFramePlacementTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data),
         J(6, model->get_state()->get_nv()),
         rJf(6, 6),

@@ -78,8 +78,8 @@ struct CostDataCoMPositionTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix6s Matrix6s;
   typedef typename MathBase::Vector6s Vector6s;
 
-  template <typename Model>
-  CostDataCoMPositionTpl(Model* const model, DataCollectorAbstract* const data)
+  template<template<typename Scalar> class Model>
+  CostDataCoMPositionTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data), Arr_Jcom(3, model->get_state()->get_nv()) {
     Arr_Jcom.fill(0);
     // Check that proper shared data has been passed

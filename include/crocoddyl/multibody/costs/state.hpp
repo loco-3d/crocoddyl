@@ -83,8 +83,8 @@ struct CostDataStateTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   
-  template <typename Model>
-  CostDataStateTpl(Model* const model, DataCollectorAbstract* const data)
+  template <template<typename Scalar> class Model>
+  CostDataStateTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data), Arr_Rx(model->get_activation()->get_nr(), model->get_state()->get_ndx()) {
     Arr_Rx.fill(0);
   }

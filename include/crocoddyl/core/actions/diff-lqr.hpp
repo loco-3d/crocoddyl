@@ -90,8 +90,8 @@ struct DifferentialActionDataLQRTpl : public DifferentialActionDataAbstractTpl<_
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   
-  template <typename Model>
-  explicit DifferentialActionDataLQRTpl(Model* const model) : Base(model) {
+  template<template<typename Scalar> class Model>
+  explicit DifferentialActionDataLQRTpl(Model<Scalar>* const model) : Base(model) {
     // Setting the linear model and quadratic cost here because they are constant
     Fx.leftCols(model->get_state()->get_nq()) = model->get_Fq();
     Fx.rightCols(model->get_state()->get_nv()) = model->get_Fv();
