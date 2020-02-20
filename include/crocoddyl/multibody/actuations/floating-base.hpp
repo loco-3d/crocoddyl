@@ -43,7 +43,7 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
     data->tau.tail(nu_) = u;
   };
 
-  void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& /*data*/, const Eigen::Ref<const VectorXs>& /*x*/,
+  void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& /*x*/,
                 const Eigen::Ref<const VectorXs>& /*u*/) {
     // The derivatives has constant values which were set in createData.
 #ifndef NDEBUG
