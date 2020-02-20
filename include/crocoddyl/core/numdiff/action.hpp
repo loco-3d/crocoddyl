@@ -13,7 +13,6 @@
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/action-base.hpp"
 #include <vector>
-#include <iostream>
 
 namespace crocoddyl {
 
