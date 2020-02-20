@@ -15,7 +15,7 @@
 
 namespace crocoddyl {
 
-template<typename Scalar>
+template <typename Scalar>
 struct DataCollectorContactTpl : virtual DataCollectorAbstractTpl<Scalar> {
   DataCollectorContactTpl<Scalar>(boost::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts)
       : DataCollectorAbstractTpl<Scalar>(), contacts(contacts) {}
@@ -24,23 +24,25 @@ struct DataCollectorContactTpl : virtual DataCollectorAbstractTpl<Scalar> {
   boost::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts;
 };
 
-template<typename Scalar>
+template <typename Scalar>
 struct DataCollectorMultibodyInContactTpl : DataCollectorMultibodyTpl<Scalar>, DataCollectorContactTpl<Scalar> {
-  DataCollectorMultibodyInContactTpl(pinocchio::DataTpl<Scalar>* const pinocchio, boost::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts)
+  DataCollectorMultibodyInContactTpl(pinocchio::DataTpl<Scalar>* const pinocchio,
+                                     boost::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts)
       : DataCollectorMultibodyTpl<Scalar>(pinocchio), DataCollectorContactTpl<Scalar>(contacts) {}
   virtual ~DataCollectorMultibodyInContactTpl() {}
 };
 
-template<typename Scalar>
-struct DataCollectorActMultibodyInContactTpl : DataCollectorMultibodyInContactTpl<Scalar>, DataCollectorActuationTpl<Scalar> {
+template <typename Scalar>
+struct DataCollectorActMultibodyInContactTpl : DataCollectorMultibodyInContactTpl<Scalar>,
+                                               DataCollectorActuationTpl<Scalar> {
   DataCollectorActMultibodyInContactTpl(pinocchio::DataTpl<Scalar>* const pinocchio,
-                                     boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation,
-                                     boost::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts)
-      : DataCollectorMultibodyInContactTpl<Scalar>(pinocchio, contacts), DataCollectorActuationTpl<Scalar>(actuation) {}
+                                        boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation,
+                                        boost::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts)
+      : DataCollectorMultibodyInContactTpl<Scalar>(pinocchio, contacts),
+        DataCollectorActuationTpl<Scalar>(actuation) {}
   virtual ~DataCollectorActMultibodyInContactTpl() {}
 };
 
-  
 }  // namespace crocoddyl
 
 #endif  // CROCODDYL_CORE_DATA_MULTIBODY_IN_CONTACT_HPP_

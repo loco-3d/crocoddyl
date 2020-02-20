@@ -12,8 +12,8 @@
 #include "crocoddyl/core/mathbase.hpp"
 
 namespace crocoddyl {
-  
-template<typename _Scalar>
+
+template <typename _Scalar>
 class FrictionConeTpl {
  public:
   typedef _Scalar Scalar;
@@ -26,12 +26,11 @@ class FrictionConeTpl {
   typedef typename MathBase::Quaternions Quaternions;
 
   FrictionConeTpl(const Vector3s& normal, const Scalar& mu, std::size_t nf = 4, bool inner_appr = true,
-               const Scalar& min_nforce = 0., const Scalar& max_nforce = std::numeric_limits<Scalar>::max());
+                  const Scalar& min_nforce = 0., const Scalar& max_nforce = std::numeric_limits<Scalar>::max());
   FrictionConeTpl(const FrictionConeTpl<Scalar>& cone);
   ~FrictionConeTpl();
 
-  void update(const Vector3s& normal, const Scalar& mu, bool inner_appr = true,
-              const Scalar& min_nforce = 0.,
+  void update(const Vector3s& normal, const Scalar& mu, bool inner_appr = true, const Scalar& min_nforce = 0.,
               const Scalar& max_nforce = std::numeric_limits<Scalar>::max());
 
   const MatrixX3s& get_A() const;
@@ -56,7 +55,6 @@ class FrictionConeTpl {
   Scalar max_nforce_;
 };
 
-  
 }  // namespace crocoddyl
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */

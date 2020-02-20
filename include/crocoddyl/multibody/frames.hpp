@@ -23,9 +23,8 @@ template <typename _Scalar>
 struct FrameTranslationTpl {
   typedef _Scalar Scalar;
   typedef typename MathBaseTpl<Scalar>::Vector3s Vector3s;
-  
-  FrameTranslationTpl(const FrameIndex& frame,
-                   const Vector3s& oxf) : frame(frame), oxf(oxf) {}
+
+  FrameTranslationTpl(const FrameIndex& frame, const Vector3s& oxf) : frame(frame), oxf(oxf) {}
   friend std::ostream& operator<<(std::ostream& os, const FrameTranslationTpl<Scalar>& X) {
     os << "      frame: " << X.frame << std::endl << "translation: " << std::endl << X.oxf.transpose() << std::endl;
     return os;
@@ -39,7 +38,7 @@ template <typename _Scalar>
 struct FrameRotationTpl {
   typedef _Scalar Scalar;
   typedef typename MathBaseTpl<Scalar>::Matrix3s Matrix3s;
-  
+
   FrameRotationTpl(const FrameIndex& frame, const Matrix3s& oRf) : frame(frame), oRf(oRf) {}
   friend std::ostream& operator<<(std::ostream& os, const FrameRotationTpl<Scalar>& X) {
     os << "   frame: " << X.frame << std::endl << "rotation: " << std::endl << X.oRf << std::endl;
@@ -89,7 +88,6 @@ struct FrameForceTpl {
   pinocchio::ForceTpl<Scalar> oFf;
 };
 
-  
 }  // namespace crocoddyl
 
 #endif  // CROCODDYL_MULTIBODY_FRAMES_HPP_

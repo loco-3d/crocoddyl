@@ -15,7 +15,7 @@
 
 namespace crocoddyl {
 
-template<typename Scalar>
+template <typename Scalar>
 struct DataCollectorMultibodyTpl : virtual DataCollectorAbstractTpl<Scalar> {
   DataCollectorMultibodyTpl(pinocchio::DataTpl<Scalar>* const data) : pinocchio(data) {}
   virtual ~DataCollectorMultibodyTpl() {}
@@ -23,14 +23,14 @@ struct DataCollectorMultibodyTpl : virtual DataCollectorAbstractTpl<Scalar> {
   pinocchio::DataTpl<Scalar>* pinocchio;
 };
 
-template<typename Scalar>
+template <typename Scalar>
 struct DataCollectorActMultibodyTpl : DataCollectorMultibodyTpl<Scalar>, DataCollectorActuationTpl<Scalar> {
-  DataCollectorActMultibodyTpl(pinocchio::DataTpl<Scalar>* const pinocchio, boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation)
+  DataCollectorActMultibodyTpl(pinocchio::DataTpl<Scalar>* const pinocchio,
+                               boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation)
       : DataCollectorMultibodyTpl<Scalar>(pinocchio), DataCollectorActuationTpl<Scalar>(actuation) {}
   virtual ~DataCollectorActMultibodyTpl() {}
 };
 
-  
 }  // namespace crocoddyl
 
 #endif  // CROCODDYL_CORE_DATA_MULTIBODY_HPP_

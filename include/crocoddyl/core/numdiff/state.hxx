@@ -11,22 +11,26 @@
 
 namespace crocoddyl {
 
-template<typename Scalar>  
+template <typename Scalar>
 StateNumDiffTpl<Scalar>::StateNumDiffTpl(boost::shared_ptr<Base> state)
     : Base(state->get_nx(), state->get_ndx()), state_(state), disturbance_(1e-6) {}
-  
-template<typename Scalar>  
+
+template <typename Scalar>
 StateNumDiffTpl<Scalar>::~StateNumDiffTpl() {}
-  
-template<typename Scalar>  
-typename MathBaseTpl<Scalar>::VectorXs StateNumDiffTpl<Scalar>::zero() const { return state_->zero(); }
-  
-template<typename Scalar>  
-typename MathBaseTpl<Scalar>::VectorXs StateNumDiffTpl<Scalar>::rand() const { return state_->rand(); }
-  
-template<typename Scalar>  
+
+template <typename Scalar>
+typename MathBaseTpl<Scalar>::VectorXs StateNumDiffTpl<Scalar>::zero() const {
+  return state_->zero();
+}
+
+template <typename Scalar>
+typename MathBaseTpl<Scalar>::VectorXs StateNumDiffTpl<Scalar>::rand() const {
+  return state_->rand();
+}
+
+template <typename Scalar>
 void StateNumDiffTpl<Scalar>::diff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
-                        Eigen::Ref<VectorXs> dxout) const {
+                                   Eigen::Ref<VectorXs> dxout) const {
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty("Invalid argument: "
                  << "x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
@@ -41,10 +45,10 @@ void StateNumDiffTpl<Scalar>::diff(const Eigen::Ref<const VectorXs>& x0, const E
   }
   state_->diff(x0, x1, dxout);
 }
-  
-template<typename Scalar>  
+
+template <typename Scalar>
 void StateNumDiffTpl<Scalar>::integrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
-                             Eigen::Ref<VectorXs> xout) const {
+                                        Eigen::Ref<VectorXs> xout) const {
   if (static_cast<std::size_t>(x.size()) != nx_) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(nx_) + ")");
@@ -59,11 +63,11 @@ void StateNumDiffTpl<Scalar>::integrate(const Eigen::Ref<const VectorXs>& x, con
   }
   state_->integrate(x, dx, xout);
 }
-  
-template<typename Scalar>  
+
+template <typename Scalar>
 void StateNumDiffTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
-                         Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
-                         Jcomponent firstsecond) const {
+                                    Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
+                                    Jcomponent firstsecond) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty("Invalid argument: "
@@ -121,12 +125,10 @@ void StateNumDiffTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, const 
     Jsecond /= disturbance_;
   }
 }
-  
-template<typename Scalar>  
-void StateNumDiffTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x,
-                                         const Eigen::Ref<const VectorXs>& dx,
-                                         Eigen::Ref<MatrixXs> Jfirst,
-                                         Eigen::Ref<MatrixXs> Jsecond,
+
+template <typename Scalar>
+void StateNumDiffTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
+                                         Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
                                          Jcomponent firstsecond) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
   if (static_cast<std::size_t>(x.size()) != nx_) {
@@ -183,11 +185,13 @@ void StateNumDiffTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x,
     Jsecond /= disturbance_;
   }
 }
-  
-template<typename Scalar>  
-const Scalar& StateNumDiffTpl<Scalar>::get_disturbance() const { return disturbance_; }
-  
-template<typename Scalar>  
+
+template <typename Scalar>
+const Scalar& StateNumDiffTpl<Scalar>::get_disturbance() const {
+  return disturbance_;
+}
+
+template <typename Scalar>
 void StateNumDiffTpl<Scalar>::set_disturbance(const Scalar& disturbance) {
   if (disturbance < 0.) {
     throw_pretty("Invalid argument: "

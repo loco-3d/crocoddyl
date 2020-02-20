@@ -16,24 +16,21 @@
 
 namespace crocoddyl {
 
-template<typename _Scalar>
+template <typename _Scalar>
 class ImpulseModelAbstractTpl {
  public:
-  
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ImpulseDataAbstractTpl<Scalar> ImpulseDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
+
   ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& ni);
   ~ImpulseModelAbstractTpl();
 
-  virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x) = 0;
-  virtual void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x) = 0;
+  virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) = 0;
+  virtual void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) = 0;
 
   virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& force) = 0;
   void updateForceDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const MatrixXs& df_dq) const;
@@ -52,14 +49,12 @@ class ImpulseModelAbstractTpl {
  public:
   void calc_wrap(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& x) { calc(data, x); }
 
-  void calcDiff_wrap(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& x) {
-    calcDiff(data, x);
-  }
+  void calcDiff_wrap(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& x) { calcDiff(data, x); }
 
 #endif
 };
 
-template<typename _Scalar>
+template <typename _Scalar>
 struct ImpulseDataAbstractTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -67,8 +62,8 @@ struct ImpulseDataAbstractTpl {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
-  template<template<typename Scalar> class Model>
+
+  template <template <typename Scalar> class Model>
   ImpulseDataAbstractTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
       : pinocchio(data),
         joint(0),
@@ -92,7 +87,6 @@ struct ImpulseDataAbstractTpl {
   pinocchio::ForceTpl<Scalar> f;
 };
 
-  
 }  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */

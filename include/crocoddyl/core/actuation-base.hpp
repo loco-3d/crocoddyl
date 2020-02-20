@@ -18,7 +18,7 @@
 #include "crocoddyl/core/utils/exception.hpp"
 namespace crocoddyl {
 
-template<typename _Scalar>
+template <typename _Scalar>
 class ActuationModelAbstractTpl {
  public:
   typedef _Scalar Scalar;
@@ -34,12 +34,12 @@ class ActuationModelAbstractTpl {
                    << "nu cannot be zero");
     }
   };
-  virtual ~ActuationModelAbstractTpl() {};
-  
+  virtual ~ActuationModelAbstractTpl(){};
+
   virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u) = 0;
-  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) = 0;
+  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                        const Eigen::Ref<const VectorXs>& u) = 0;
   virtual boost::shared_ptr<ActuationDataAbstract> createData() {
     return boost::make_shared<ActuationDataAbstract>(this);
   };
@@ -54,20 +54,18 @@ class ActuationModelAbstractTpl {
 #ifdef PYTHON_BINDINGS
 
  public:
-  void calc_wrap(const boost::shared_ptr<ActuationDataAbstract>& data, const VectorXs& x,
-                 const VectorXs& u) {
+  void calc_wrap(const boost::shared_ptr<ActuationDataAbstract>& data, const VectorXs& x, const VectorXs& u) {
     calc(data, x, u);
   }
 
-  void calcDiff_wrap(const boost::shared_ptr<ActuationDataAbstract>& data, const VectorXs& x,
-                     const VectorXs& u) {
+  void calcDiff_wrap(const boost::shared_ptr<ActuationDataAbstract>& data, const VectorXs& x, const VectorXs& u) {
     calcDiff(data, x, u);
   }
 
 #endif
 };
-  
-template<typename _Scalar>
+
+template <typename _Scalar>
 struct ActuationDataAbstractTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -76,8 +74,7 @@ struct ActuationDataAbstractTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  
-  template<template<typename Scalar> class Model>
+  template <template <typename Scalar> class Model>
   explicit ActuationDataAbstractTpl(Model<Scalar>* const model)
       : tau(model->get_state()->get_nv()),
         dtau_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
@@ -93,8 +90,6 @@ struct ActuationDataAbstractTpl {
   MatrixXs dtau_du;
 };
 
-  
-  
 }  // namespace crocoddyl
 
 #endif  // CROCODDYL_CORE_ACTUATION_BASE_HPP_

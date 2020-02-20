@@ -9,8 +9,8 @@
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
-  
-template<typename Scalar>
+
+template <typename Scalar>
 ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(const std::size_t& nx, const std::size_t& nu, bool drift_free)
     : Base(boost::make_shared<StateVector>(nx), nu, 0), drift_free_(drift_free) {
   // TODO(cmastalli): substitute by random (vectors) and random-orthogonal (matrices)
@@ -23,14 +23,13 @@ ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(const std::size_t& nx, const std::s
   lx_ = VectorXs::Ones(nx);
   lu_ = VectorXs::Ones(nu);
 }
-  
-template<typename Scalar>
+
+template <typename Scalar>
 ActionModelLQRTpl<Scalar>::~ActionModelLQRTpl() {}
-  
-template<typename Scalar>
+
+template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>& data,
-                                     const Eigen::Ref<const VectorXs>& x,
-                                     const Eigen::Ref<const VectorXs>& u) {
+                                     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -47,11 +46,10 @@ void ActionModelLQRTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>
   }
   data->cost = 0.5 * x.dot(Lxx_ * x) + 0.5 * u.dot(Luu_ * u) + x.dot(Lxu_ * u) + lx_.dot(x) + lu_.dot(u);
 }
-  
-template<typename Scalar>
+
+template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
-                                         const Eigen::Ref<const VectorXs>& x,
-                                         const Eigen::Ref<const VectorXs>& u) {
+                                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -69,35 +67,53 @@ void ActionModelLQRTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstr
   data->Lxu = Lxu_;
   data->Luu = Luu_;
 }
-  
-template<typename Scalar>
-boost::shared_ptr<ActionDataAbstractTpl<Scalar> > ActionModelLQRTpl<Scalar>::createData() { return boost::make_shared<ActionDataLQRTpl<Scalar> >(this); }
-  
-template<typename Scalar>
-const typename MathBaseTpl<Scalar>::MatrixXs& ActionModelLQRTpl<Scalar>::get_Fx() const { return Fx_; }
-  
-template<typename Scalar>
-const typename MathBaseTpl<Scalar>::MatrixXs& ActionModelLQRTpl<Scalar>::get_Fu() const { return Fu_; }
-  
-template<typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& ActionModelLQRTpl<Scalar>::get_f0() const { return f0_; }
-  
-template<typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& ActionModelLQRTpl<Scalar>::get_lx() const { return lx_; }
-  
-template<typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& ActionModelLQRTpl<Scalar>::get_lu() const { return lu_; }
-  
-template<typename Scalar>
-const typename MathBaseTpl<Scalar>::MatrixXs& ActionModelLQRTpl<Scalar>::get_Lxx() const { return Lxx_; }
-  
-template<typename Scalar>
-const typename MathBaseTpl<Scalar>::MatrixXs& ActionModelLQRTpl<Scalar>::get_Lxu() const { return Lxu_; }
-  
-template<typename Scalar>
-const typename MathBaseTpl<Scalar>::MatrixXs& ActionModelLQRTpl<Scalar>::get_Luu() const { return Luu_; }
-  
-template<typename Scalar>
+
+template <typename Scalar>
+boost::shared_ptr<ActionDataAbstractTpl<Scalar> > ActionModelLQRTpl<Scalar>::createData() {
+  return boost::make_shared<ActionDataLQRTpl<Scalar> >(this);
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::MatrixXs& ActionModelLQRTpl<Scalar>::get_Fx() const {
+  return Fx_;
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::MatrixXs& ActionModelLQRTpl<Scalar>::get_Fu() const {
+  return Fu_;
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& ActionModelLQRTpl<Scalar>::get_f0() const {
+  return f0_;
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& ActionModelLQRTpl<Scalar>::get_lx() const {
+  return lx_;
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& ActionModelLQRTpl<Scalar>::get_lu() const {
+  return lu_;
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::MatrixXs& ActionModelLQRTpl<Scalar>::get_Lxx() const {
+  return Lxx_;
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::MatrixXs& ActionModelLQRTpl<Scalar>::get_Lxu() const {
+  return Lxu_;
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::MatrixXs& ActionModelLQRTpl<Scalar>::get_Luu() const {
+  return Luu_;
+}
+
+template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::set_Fx(const MatrixXs& Fx) {
   if (static_cast<std::size_t>(Fx.rows()) != state_->get_nx() ||
       static_cast<std::size_t>(Fx.cols()) != state_->get_nx()) {
@@ -107,8 +123,8 @@ void ActionModelLQRTpl<Scalar>::set_Fx(const MatrixXs& Fx) {
   }
   Fx_ = Fx;
 }
-  
-template<typename Scalar>
+
+template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::set_Fu(const MatrixXs& Fu) {
   if (static_cast<std::size_t>(Fu.rows()) != state_->get_nx() || static_cast<std::size_t>(Fu.cols()) != nu_) {
     throw_pretty("Invalid argument: "
@@ -117,8 +133,8 @@ void ActionModelLQRTpl<Scalar>::set_Fu(const MatrixXs& Fu) {
   }
   Fu_ = Fu;
 }
-  
-template<typename Scalar>
+
+template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::set_f0(const VectorXs& f0) {
   if (static_cast<std::size_t>(f0.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
@@ -126,8 +142,8 @@ void ActionModelLQRTpl<Scalar>::set_f0(const VectorXs& f0) {
   }
   f0_ = f0;
 }
-  
-template<typename Scalar>
+
+template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::set_lx(const VectorXs& lx) {
   if (static_cast<std::size_t>(lx.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
@@ -135,8 +151,8 @@ void ActionModelLQRTpl<Scalar>::set_lx(const VectorXs& lx) {
   }
   lx_ = lx;
 }
-  
-template<typename Scalar>
+
+template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::set_lu(const VectorXs& lu) {
   if (static_cast<std::size_t>(lu.size()) != nu_) {
     throw_pretty("Invalid argument: "
@@ -144,8 +160,8 @@ void ActionModelLQRTpl<Scalar>::set_lu(const VectorXs& lu) {
   }
   lu_ = lu;
 }
-  
-template<typename Scalar>
+
+template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::set_Lxx(const MatrixXs& Lxx) {
   if (static_cast<std::size_t>(Lxx.rows()) != state_->get_nx() ||
       static_cast<std::size_t>(Lxx.cols()) != state_->get_nx()) {
@@ -155,8 +171,8 @@ void ActionModelLQRTpl<Scalar>::set_Lxx(const MatrixXs& Lxx) {
   }
   Lxx_ = Lxx;
 }
-  
-template<typename Scalar>
+
+template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::set_Lxu(const MatrixXs& Lxu) {
   if (static_cast<std::size_t>(Lxu.rows()) != state_->get_nx() || static_cast<std::size_t>(Lxu.cols()) != nu_) {
     throw_pretty("Invalid argument: "
@@ -165,8 +181,8 @@ void ActionModelLQRTpl<Scalar>::set_Lxu(const MatrixXs& Lxu) {
   }
   Lxu_ = Lxu;
 }
-  
-template<typename Scalar>
+
+template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::set_Luu(const MatrixXs& Luu) {
   if (static_cast<std::size_t>(Luu.rows()) != nu_ || static_cast<std::size_t>(Luu.cols()) != nu_) {
     throw_pretty("Invalid argument: "

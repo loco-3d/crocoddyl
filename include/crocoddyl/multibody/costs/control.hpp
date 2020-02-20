@@ -13,7 +13,7 @@
 
 namespace crocoddyl {
 
-template<typename _Scalar>
+template <typename _Scalar>
 class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
@@ -26,14 +26,11 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
-  CostModelControlTpl(boost::shared_ptr<StateMultibody> state,
-                      boost::shared_ptr<ActivationModelAbstract> activation,
+
+  CostModelControlTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
                       const VectorXs& uref);
-  CostModelControlTpl(boost::shared_ptr<StateMultibody> state,
-                      boost::shared_ptr<ActivationModelAbstract> activation);
-  CostModelControlTpl(boost::shared_ptr<StateMultibody> state,
-                      boost::shared_ptr<ActivationModelAbstract> activation,
+  CostModelControlTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation);
+  CostModelControlTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
                       const std::size_t& nu);
   CostModelControlTpl(boost::shared_ptr<StateMultibody> state, const VectorXs& uref);
   explicit CostModelControlTpl(boost::shared_ptr<StateMultibody> state);
@@ -49,19 +46,17 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
   void set_uref(const VectorXs& uref_in);
 
  protected:
-  using Base::state_;
   using Base::activation_;
   using Base::nu_;
-  using Base::with_residuals_;
+  using Base::state_;
   using Base::unone_;
-  
+  using Base::with_residuals_;
+
  private:
   VectorXs uref_;
 };
 
-  
 }  // namespace crocoddyl
-
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */

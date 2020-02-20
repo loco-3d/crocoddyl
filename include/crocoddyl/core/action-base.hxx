@@ -12,8 +12,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ActionModelAbstractTpl<Scalar>::ActionModelAbstractTpl(boost::shared_ptr<StateAbstractTpl<Scalar> > state,
-                                                       const std::size_t& nu,
-                                                       const std::size_t& nr)
+                                                       const std::size_t& nu, const std::size_t& nr)
     : nu_(nu),
       nr_(nr),
       state_(state),
@@ -34,19 +33,20 @@ ActionModelAbstractTpl<Scalar>::ActionModelAbstractTpl()
 template <typename Scalar>
 ActionModelAbstractTpl<Scalar>::~ActionModelAbstractTpl() {}
 template <typename Scalar>
-  void ActionModelAbstractTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
-                               const Eigen::Ref<const typename MathBase::VectorXs>& x) {
+void ActionModelAbstractTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
+                                          const Eigen::Ref<const typename MathBase::VectorXs>& x) {
   calc(data, x, unone_);
 }
 template <typename Scalar>
 void ActionModelAbstractTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
-                                   const Eigen::Ref<const typename MathBase::VectorXs>& x) {
+                                              const Eigen::Ref<const typename MathBase::VectorXs>& x) {
   calcDiff(data, x, unone_);
 }
 template <typename Scalar>
-void ActionModelAbstractTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data, Eigen::Ref<typename MathBase::VectorXs> u,
-                                      const Eigen::Ref<const typename MathBase::VectorXs>& x, const std::size_t& maxiter,
-                                      const Scalar& tol) {
+void ActionModelAbstractTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
+                                                 Eigen::Ref<typename MathBase::VectorXs> u,
+                                                 const Eigen::Ref<const typename MathBase::VectorXs>& x,
+                                                 const std::size_t& maxiter, const Scalar& tol) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
@@ -79,17 +79,29 @@ boost::shared_ptr<ActionDataAbstractTpl<Scalar> > ActionModelAbstractTpl<Scalar>
   return boost::make_shared<ActionDataAbstractTpl<Scalar> >(this);
 }
 template <typename Scalar>
-const std::size_t& ActionModelAbstractTpl<Scalar>::get_nu() const { return nu_; }
+const std::size_t& ActionModelAbstractTpl<Scalar>::get_nu() const {
+  return nu_;
+}
 template <typename Scalar>
-const std::size_t& ActionModelAbstractTpl<Scalar>::get_nr() const { return nr_; }
+const std::size_t& ActionModelAbstractTpl<Scalar>::get_nr() const {
+  return nr_;
+}
 template <typename Scalar>
-const boost::shared_ptr<StateAbstractTpl<Scalar> >& ActionModelAbstractTpl<Scalar>::get_state() const { return state_; }
+const boost::shared_ptr<StateAbstractTpl<Scalar> >& ActionModelAbstractTpl<Scalar>::get_state() const {
+  return state_;
+}
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& ActionModelAbstractTpl<Scalar>::get_u_lb() const { return u_lb_; }
+const typename MathBaseTpl<Scalar>::VectorXs& ActionModelAbstractTpl<Scalar>::get_u_lb() const {
+  return u_lb_;
+}
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& ActionModelAbstractTpl<Scalar>::get_u_ub() const { return u_ub_; }
+const typename MathBaseTpl<Scalar>::VectorXs& ActionModelAbstractTpl<Scalar>::get_u_ub() const {
+  return u_ub_;
+}
 template <typename Scalar>
-bool const& ActionModelAbstractTpl<Scalar>::get_has_control_limits() const { return has_control_limits_; }
+bool const& ActionModelAbstractTpl<Scalar>::get_has_control_limits() const {
+  return has_control_limits_;
+}
 template <typename Scalar>
 void ActionModelAbstractTpl<Scalar>::set_u_lb(const typename MathBase::VectorXs& u_lb) {
   if (static_cast<std::size_t>(u_lb.size()) != nu_) {

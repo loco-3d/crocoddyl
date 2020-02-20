@@ -7,18 +7,23 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace crocoddyl {
-  
+
 template <typename Scalar>
 StateVectorTpl<Scalar>::StateVectorTpl(const std::size_t& nx) : StateAbstractTpl<Scalar>(nx, nx) {}
 template <typename Scalar>
 StateVectorTpl<Scalar>::~StateVectorTpl() {}
 template <typename Scalar>
-typename MathBaseTpl<Scalar>::VectorXs StateVectorTpl<Scalar>::zero() const { return MathBase::VectorXs::Zero(nx_); }
+typename MathBaseTpl<Scalar>::VectorXs StateVectorTpl<Scalar>::zero() const {
+  return MathBase::VectorXs::Zero(nx_);
+}
 template <typename Scalar>
-typename MathBaseTpl<Scalar>::VectorXs StateVectorTpl<Scalar>::rand() const { return MathBase::VectorXs::Random(nx_); }
+typename MathBaseTpl<Scalar>::VectorXs StateVectorTpl<Scalar>::rand() const {
+  return MathBase::VectorXs::Random(nx_);
+}
 template <typename Scalar>
-void StateVectorTpl<Scalar>::diff(const Eigen::Ref<const typename MathBase::VectorXs>& x0, const Eigen::Ref<const typename MathBase::VectorXs>& x1,
-                       Eigen::Ref<typename MathBase::VectorXs> dxout) const {
+void StateVectorTpl<Scalar>::diff(const Eigen::Ref<const typename MathBase::VectorXs>& x0,
+                                  const Eigen::Ref<const typename MathBase::VectorXs>& x1,
+                                  Eigen::Ref<typename MathBase::VectorXs> dxout) const {
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty("Invalid argument: "
                  << "x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
@@ -34,8 +39,9 @@ void StateVectorTpl<Scalar>::diff(const Eigen::Ref<const typename MathBase::Vect
   dxout = x1 - x0;
 }
 template <typename Scalar>
-void StateVectorTpl<Scalar>::integrate(const Eigen::Ref<const typename MathBase::VectorXs>& x, const Eigen::Ref<const typename MathBase::VectorXs>& dx,
-                            Eigen::Ref<typename MathBase::VectorXs> xout) const {
+void StateVectorTpl<Scalar>::integrate(const Eigen::Ref<const typename MathBase::VectorXs>& x,
+                                       const Eigen::Ref<const typename MathBase::VectorXs>& dx,
+                                       Eigen::Ref<typename MathBase::VectorXs> xout) const {
   if (static_cast<std::size_t>(x.size()) != nx_) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(nx_) + ")");
@@ -51,9 +57,10 @@ void StateVectorTpl<Scalar>::integrate(const Eigen::Ref<const typename MathBase:
   xout = x + dx;
 }
 template <typename Scalar>
-void StateVectorTpl<Scalar>::Jdiff(const Eigen::Ref<const typename MathBase::VectorXs>&, const Eigen::Ref<const typename MathBase::VectorXs>&,
-                        Eigen::Ref<typename MathBase::MatrixXs> Jfirst, Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
-                        Jcomponent firstsecond) const {
+void StateVectorTpl<Scalar>::Jdiff(const Eigen::Ref<const typename MathBase::VectorXs>&,
+                                   const Eigen::Ref<const typename MathBase::VectorXs>&,
+                                   Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
+                                   Eigen::Ref<typename MathBase::MatrixXs> Jsecond, Jcomponent firstsecond) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
   if (firstsecond == first || firstsecond == both) {
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
@@ -75,9 +82,11 @@ void StateVectorTpl<Scalar>::Jdiff(const Eigen::Ref<const typename MathBase::Vec
   }
 }
 template <typename Scalar>
-void StateVectorTpl<Scalar>::Jintegrate(const Eigen::Ref<const typename MathBase::VectorXs>&, const Eigen::Ref<const typename MathBase::VectorXs>&,
-                             Eigen::Ref<typename MathBase::MatrixXs> Jfirst, Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
-                             Jcomponent firstsecond) const {
+void StateVectorTpl<Scalar>::Jintegrate(const Eigen::Ref<const typename MathBase::VectorXs>&,
+                                        const Eigen::Ref<const typename MathBase::VectorXs>&,
+                                        Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
+                                        Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
+                                        Jcomponent firstsecond) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
   if (firstsecond == first || firstsecond == both) {
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {

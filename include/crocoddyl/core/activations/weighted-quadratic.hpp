@@ -14,8 +14,8 @@
 #include <stdexcept>
 
 namespace crocoddyl {
-  
-template<typename _Scalar>
+
+template <typename _Scalar>
 class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
@@ -25,61 +25,57 @@ class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar
   typedef ActivationDataWeightedQuadTpl<Scalar> ActivationDataWeightedQuad;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
-  explicit ActivationModelWeightedQuadTpl(const VectorXs& weights)
-    : Base(weights.size()), weights_(weights) {};
-  ~ActivationModelWeightedQuadTpl() {};
 
-  void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& r) {
+  explicit ActivationModelWeightedQuadTpl(const VectorXs& weights) : Base(weights.size()), weights_(weights){};
+  ~ActivationModelWeightedQuadTpl(){};
+
+  void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
     boost::shared_ptr<ActivationDataWeightedQuad> d = boost::static_pointer_cast<ActivationDataWeightedQuad>(data);
-    
+
     d->Wr = weights_.cwiseProduct(r);
     data->a_value = 0.5 * r.dot(d->Wr);
   };
-  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>& r) {
+  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
-    
+
     boost::shared_ptr<ActivationDataWeightedQuad> d = boost::static_pointer_cast<ActivationDataWeightedQuad>(data);
-  data->Ar = d->Wr;
-  // The Hessian has constant values which were set in createData.
+    data->Ar = d->Wr;
+    // The Hessian has constant values which were set in createData.
 #ifndef NDEBUG
-  assert_pretty(data->Arr == Arr_, "Arr has wrong value");
+    assert_pretty(data->Arr == Arr_, "Arr has wrong value");
 #endif
   };
   boost::shared_ptr<ActivationDataAbstract> createData() {
-    boost::shared_ptr<ActivationDataWeightedQuad> data =
-      boost::make_shared<ActivationDataWeightedQuad>(this);
+    boost::shared_ptr<ActivationDataWeightedQuad> data = boost::make_shared<ActivationDataWeightedQuad>(this);
     data->Arr.diagonal() = weights_;
 
 #ifndef NDEBUG
     Arr_ = data->Arr;
 #endif
-    
+
     return data;
   };
 
-  const VectorXs& get_weights() const  { return weights_; };
+  const VectorXs& get_weights() const { return weights_; };
   void set_weights(const VectorXs& weights) {
-  if (weights.size() != weights_.size()) {
-    throw_pretty("Invalid argument: "
-                 << "weight vector has wrong dimension (it should be " + std::to_string(weights_.size()) + ")");
-  }
+    if (weights.size() != weights_.size()) {
+      throw_pretty("Invalid argument: "
+                   << "weight vector has wrong dimension (it should be " + std::to_string(weights_.size()) + ")");
+    }
 
-  weights_ = weights;
-};
+    weights_ = weights;
+  };
 
-protected:
+ protected:
   using Base::nr_;
-  
+
  private:
   VectorXs weights_;
 
@@ -88,14 +84,14 @@ protected:
 #endif
 };
 
-template<typename _Scalar>
+template <typename _Scalar>
 struct ActivationDataWeightedQuadTpl : public ActivationDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef ActivationDataAbstractTpl<Scalar> Base;
-  
+
   template <typename Activation>
   explicit ActivationDataWeightedQuadTpl(Activation* const activation)
       : Base(activation), Wr(VectorXs::Zero(activation->get_nr())) {}
@@ -103,7 +99,6 @@ struct ActivationDataWeightedQuadTpl : public ActivationDataAbstractTpl<_Scalar>
   VectorXs Wr;
 };
 
-  
 }  // namespace crocoddyl
 
 #endif  // CROCODDYL_CORE_ACTIVATIONS_WEIGHTED_QUADRATIC_HPP_

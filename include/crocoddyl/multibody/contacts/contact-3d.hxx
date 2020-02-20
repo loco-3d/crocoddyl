@@ -9,15 +9,12 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state,
-                                             const FrameTranslation& xref,
-                                             const std::size_t& nu,
-                                             const Vector2s& gains)
+ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
+                                             const std::size_t& nu, const Vector2s& gains)
     : Base(state, 3, nu), xref_(xref), gains_(gains) {}
 
 template <typename Scalar>
-ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state,
-                                             const FrameTranslation& xref,
+ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
                                              const Vector2s& gains)
     : Base(state, 3), xref_(xref), gains_(gains) {}
 
@@ -59,8 +56,9 @@ void ContactModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   d->fXjdv_dq.noalias() = d->fXj * d->v_partial_dq;
   d->fXjda_dq.noalias() = d->fXj * d->a_partial_dq;
   d->fXjda_dv.noalias() = d->fXj * d->a_partial_dv;
-  d->da0_dx.leftCols(nv).noalias() =
-      d->fXjda_dq.template topRows<3>() + d->vw_skew * d->fXjdv_dq.template topRows<3>() - d->vv_skew * d->fXjdv_dq.template bottomRows<3>();
+  d->da0_dx.leftCols(nv).noalias() = d->fXjda_dq.template topRows<3>() +
+                                     d->vw_skew * d->fXjdv_dq.template topRows<3>() -
+                                     d->vv_skew * d->fXjdv_dq.template bottomRows<3>();
   d->da0_dx.rightCols(nv).noalias() =
       d->fXjda_dv.template topRows<3>() + d->vw_skew * d->Jc - d->vv_skew * d->fJf.template bottomRows<3>();
 
@@ -75,7 +73,8 @@ void ContactModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
 }
 
 template <typename Scalar>
-void ContactModel3DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force) {
+void ContactModel3DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataAbstract>& data,
+                                            const VectorXs& force) {
   if (force.size() != 3) {
     throw_pretty("Invalid argument: "
                  << "lambda has wrong dimension (it should be 3)");
@@ -85,14 +84,19 @@ void ContactModel3DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataA
 }
 
 template <typename Scalar>
-boost::shared_ptr<ContactDataAbstractTpl<Scalar> > ContactModel3DTpl<Scalar>::createData(pinocchio::DataTpl<Scalar>* const data) {
+boost::shared_ptr<ContactDataAbstractTpl<Scalar> > ContactModel3DTpl<Scalar>::createData(
+    pinocchio::DataTpl<Scalar>* const data) {
   return boost::make_shared<ContactData3D>(this, data);
 }
 
 template <typename Scalar>
-const FrameTranslationTpl<Scalar>& ContactModel3DTpl<Scalar>::get_xref() const { return xref_; }
+const FrameTranslationTpl<Scalar>& ContactModel3DTpl<Scalar>::get_xref() const {
+  return xref_;
+}
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector2s& ContactModel3DTpl<Scalar>::get_gains() const { return gains_; }
+const typename MathBaseTpl<Scalar>::Vector2s& ContactModel3DTpl<Scalar>::get_gains() const {
+  return gains_;
+}
 
 }  // namespace crocoddyl

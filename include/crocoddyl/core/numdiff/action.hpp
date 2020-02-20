@@ -47,7 +47,7 @@ namespace crocoddyl {
  * In the case that the cost does not have a residual we set the Hessian to
  * \f$ 0 \f$, i.e. \f$ L_{xx} = L_{xu} = L_{uu} = 0 \f$.
  */
-  
+
 template <typename _Scalar>
 class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
  public:
@@ -57,7 +57,7 @@ class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
   typedef typename MathBaseTpl<Scalar>::MatrixXs MatrixXs;
-  
+
   /**
    * @brief Construct a new ActionModelNumDiff object
    *
@@ -118,17 +118,15 @@ class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
    */
   bool get_with_gauss_approx();
 
+ protected:
+  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
+  using Base::nr_;                  //!< Dimension of the cost residual
+  using Base::nu_;                  //!< Control dimension
+  using Base::state_;               //!< Model of the state
+  using Base::u_lb_;                //!< Lower control limits
+  using Base::u_ub_;                //!< Upper control limits
+  using Base::unone_;               //!< Neutral state
 
-protected:
-  using Base::nu_;                          //!< Control dimension
-  using Base::nr_;                          //!< Dimension of the cost residual
-  using Base::state_;  //!< Model of the state
-  using Base::unone_;                   //!< Neutral state
-  using Base::u_lb_;                    //!< Lower control limits
-  using Base::u_ub_;                    //!< Upper control limits
-  using Base::has_control_limits_;      //!< Indicates whether any of the control limits
-
-  
  private:
   /**
    * @brief Make sure that when we finite difference the Action Model, the user
@@ -147,7 +145,6 @@ protected:
    * @brief This is the model to compute the finite differentiation from
    */
 
-  
   boost::shared_ptr<Base> model_;
 
   /**
@@ -157,10 +154,10 @@ protected:
   Scalar disturbance_;
 };
 
-template<typename _Scalar>  
+template <typename _Scalar>
 struct ActionDataNumDiffTpl : public ActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    typedef _Scalar Scalar;
+  typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActionDataAbstractTpl<Scalar> Base;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
@@ -172,7 +169,7 @@ struct ActionDataNumDiffTpl : public ActionDataAbstractTpl<_Scalar> {
    * @tparam Model is the type of the ActionModel.
    * @param model is the object to compute the numerical differentiation from.
    */
-  template <template<typename Scalar> class Model>
+  template <template <typename Scalar> class Model>
   explicit ActionDataNumDiffTpl(Model<Scalar>* const model)
       : Base(model),
         Rx(model->get_model()->get_nr(), model->get_model()->get_state()->get_ndx()),
@@ -196,28 +193,26 @@ struct ActionDataNumDiffTpl : public ActionDataAbstractTpl<_Scalar> {
       data_u.push_back(model->get_model()->createData());
     }
   }
-  
+
   using Base::cost;
-  using Base::xnext;
-  using Base::r;
-  using Base::Fx;
   using Base::Fu;
-  using Base::Lx;
+  using Base::Fx;
   using Base::Lu;
-  using Base::Lxx;
-  using Base::Lxu;
   using Base::Luu;
-  
-  MatrixXs Rx;  //!< Cost residual jacobian: \f$ \frac{d r(x,u)}{dx} \f$
-  MatrixXs Ru;  //!< Cost residual jacobian: \f$ \frac{d r(x,u)}{du} \f$
-  VectorXs dx;  //!< State disturbance
-  VectorXs du;  //!< Control disturbance
-  VectorXs xp;  //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$"
+  using Base::Lx;
+  using Base::Lxu;
+  using Base::Lxx;
+  using Base::r;
+  using Base::xnext;
+
+  MatrixXs Rx;                     //!< Cost residual jacobian: \f$ \frac{d r(x,u)}{dx} \f$
+  MatrixXs Ru;                     //!< Cost residual jacobian: \f$ \frac{d r(x,u)}{du} \f$
+  VectorXs dx;                     //!< State disturbance
+  VectorXs du;                     //!< Control disturbance
+  VectorXs xp;                     //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$"
   boost::shared_ptr<Base> data_0;  //!< The data that contains the final results
-  std::vector<boost::shared_ptr<Base> >
-      data_x;  //!< The temporary data associated with the state variation
-  std::vector<boost::shared_ptr<Base> >
-      data_u;  //!< The temporary data associated with the control variation
+  std::vector<boost::shared_ptr<Base> > data_x;  //!< The temporary data associated with the state variation
+  std::vector<boost::shared_ptr<Base> > data_u;  //!< The temporary data associated with the control variation
 };
 
 }  // namespace crocoddyl
@@ -226,6 +221,5 @@ struct ActionDataNumDiffTpl : public ActionDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include <crocoddyl/core/numdiff/action.hxx>
-
 
 #endif  // CROCODDYL_CORE_NUMDIFF_ACTION_HPP_

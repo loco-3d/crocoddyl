@@ -14,9 +14,8 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ImpulseModel3DTpl<Scalar>::ImpulseModel3DTpl(boost::shared_ptr<StateMultibody> state,
-                                             const std::size_t& frame)
-  : Base(state, 3), frame_(frame) {}
+ImpulseModel3DTpl<Scalar>::ImpulseModel3DTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& frame)
+    : Base(state, 3), frame_(frame) {}
 
 template <typename Scalar>
 ImpulseModel3DTpl<Scalar>::~ImpulseModel3DTpl() {}
@@ -40,7 +39,8 @@ void ImpulseModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ImpulseDataAbst
 }
 
 template <typename Scalar>
-void ImpulseModel3DTpl<Scalar>::updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& force) {
+void ImpulseModel3DTpl<Scalar>::updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data,
+                                            const VectorXs& force) {
   if (force.size() != 3) {
     throw_pretty("Invalid argument: "
                  << "lambda has wrong dimension (it should be 3)");
@@ -50,11 +50,14 @@ void ImpulseModel3DTpl<Scalar>::updateForce(const boost::shared_ptr<ImpulseDataA
 }
 
 template <typename Scalar>
-boost::shared_ptr<ImpulseDataAbstractTpl<Scalar> > ImpulseModel3DTpl<Scalar>::createData(pinocchio::DataTpl<Scalar>* const data) {
+boost::shared_ptr<ImpulseDataAbstractTpl<Scalar> > ImpulseModel3DTpl<Scalar>::createData(
+    pinocchio::DataTpl<Scalar>* const data) {
   return boost::make_shared<ImpulseData3D>(this, data);
 }
 
 template <typename Scalar>
-const std::size_t& ImpulseModel3DTpl<Scalar>::get_frame() const { return frame_; }
+const std::size_t& ImpulseModel3DTpl<Scalar>::get_frame() const {
+  return frame_;
+}
 
 }  // namespace crocoddyl

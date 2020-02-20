@@ -31,19 +31,33 @@ template <typename Scalar>
 StateAbstractTpl<Scalar>::~StateAbstractTpl() {}
 
 template <typename Scalar>
-const std::size_t& StateAbstractTpl<Scalar>::get_nx() const { return nx_; }
+const std::size_t& StateAbstractTpl<Scalar>::get_nx() const {
+  return nx_;
+}
 template <typename Scalar>
-const std::size_t& StateAbstractTpl<Scalar>::get_ndx() const { return ndx_; }
+const std::size_t& StateAbstractTpl<Scalar>::get_ndx() const {
+  return ndx_;
+}
 template <typename Scalar>
-const std::size_t& StateAbstractTpl<Scalar>::get_nq() const { return nq_; }
+const std::size_t& StateAbstractTpl<Scalar>::get_nq() const {
+  return nq_;
+}
 template <typename Scalar>
-const std::size_t& StateAbstractTpl<Scalar>::get_nv() const { return nv_; }
+const std::size_t& StateAbstractTpl<Scalar>::get_nv() const {
+  return nv_;
+}
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& StateAbstractTpl<Scalar>::get_lb() const { return lb_; }
+const typename MathBaseTpl<Scalar>::VectorXs& StateAbstractTpl<Scalar>::get_lb() const {
+  return lb_;
+}
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& StateAbstractTpl<Scalar>::get_ub() const { return ub_; }
+const typename MathBaseTpl<Scalar>::VectorXs& StateAbstractTpl<Scalar>::get_ub() const {
+  return ub_;
+}
 template <typename Scalar>
-bool const& StateAbstractTpl<Scalar>::get_has_limits() const { return has_limits_; }
+bool const& StateAbstractTpl<Scalar>::get_has_limits() const {
+  return has_limits_;
+}
 template <typename Scalar>
 void StateAbstractTpl<Scalar>::set_lb(const typename MathBase::VectorXs& lb) {
   if (static_cast<std::size_t>(lb.size()) != nx_) {
@@ -63,6 +77,8 @@ void StateAbstractTpl<Scalar>::set_ub(const typename MathBase::VectorXs& ub) {
   update_has_limits();
 }
 template <typename Scalar>
-void StateAbstractTpl<Scalar>::update_has_limits() { has_limits_ = isfinite(lb_.array()).any() && isfinite(ub_.array()).any(); }
+void StateAbstractTpl<Scalar>::update_has_limits() {
+  has_limits_ = isfinite(lb_.array()).any() && isfinite(ub_.array()).any();
+}
 
 }  // namespace crocoddyl

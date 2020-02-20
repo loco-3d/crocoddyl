@@ -17,8 +17,8 @@
 #include "crocoddyl/multibody/costs/cost-sum.hpp"
 
 namespace crocoddyl {
-  
-template<typename _Scalar>
+
+template <typename _Scalar>
 class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
@@ -30,17 +30,16 @@ class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModel
   typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
+
   DifferentialActionModelFreeFwdDynamicsTpl(boost::shared_ptr<StateMultibody> state,
-                                         boost::shared_ptr<ActuationModelAbstract> actuation,
-                                         boost::shared_ptr<CostModelSum> costs);
+                                            boost::shared_ptr<ActuationModelAbstract> actuation,
+                                            boost::shared_ptr<CostModelSum> costs);
   ~DifferentialActionModelFreeFwdDynamicsTpl();
 
-  void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& x,
+  void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+  void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                const Eigen::Ref<const VectorXs>& u);
   boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
   const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
@@ -49,16 +48,15 @@ class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModel
   const VectorXs& get_armature() const;
   void set_armature(const VectorXs& armature);
 
-protected:
-  using Base::nu_;                          //!< Control dimension
-  using Base::nr_;                          //!< Dimension of the cost residual
-  using Base::state_;  //!< Model of the state
-  using Base::unone_;                   //!< Neutral state
-  using Base::u_lb_;                    //!< Lower control limits
-  using Base::u_ub_;                    //!< Upper control limits
-  using Base::has_control_limits_;    //!< Indicates whether any of the control limits 
+ protected:
+  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
+  using Base::nr_;                  //!< Dimension of the cost residual
+  using Base::nu_;                  //!< Control dimension
+  using Base::state_;               //!< Model of the state
+  using Base::u_lb_;                //!< Lower control limits
+  using Base::u_ub_;                //!< Upper control limits
+  using Base::unone_;               //!< Neutral state
 
-  
  private:
   boost::shared_ptr<ActuationModelAbstract> actuation_;
   boost::shared_ptr<CostModelSum> costs_;
@@ -66,8 +64,8 @@ protected:
   bool with_armature_;
   VectorXs armature_;
 };
-  
-template<typename _Scalar>
+
+template <typename _Scalar>
 struct DifferentialActionDataFreeFwdDynamicsTpl : public DifferentialActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;
@@ -76,7 +74,7 @@ struct DifferentialActionDataFreeFwdDynamicsTpl : public DifferentialActionDataA
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  template <template<typename Scalar> class Model>
+  template <template <typename Scalar> class Model>
   explicit DifferentialActionDataFreeFwdDynamicsTpl(Model<Scalar>* const model)
       : Base(model),
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
@@ -99,25 +97,22 @@ struct DifferentialActionDataFreeFwdDynamicsTpl : public DifferentialActionDataA
   MatrixXs dtau_dx;
 
   using Base::cost;
-  using Base::xout;
-  using Base::Fx;
   using Base::Fu;
-  using Base::r;
-  using Base::Lx;
+  using Base::Fx;
   using Base::Lu;
-  using Base::Lxx;
-  using Base::Lxu;
   using Base::Luu;
-
+  using Base::Lx;
+  using Base::Lxu;
+  using Base::Lxx;
+  using Base::r;
+  using Base::xout;
 };
 
-  
 }  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include <crocoddyl/multibody/actions/free-fwddyn.hxx>
-
 
 #endif  // CROCODDYL_MULTIBODY_ACTIONS_FREE_FWDDYN_HPP_

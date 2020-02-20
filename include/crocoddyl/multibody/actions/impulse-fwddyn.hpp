@@ -26,10 +26,9 @@
 #include <pinocchio/algorithm/rnea-derivatives.hpp>
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
 
-
 namespace crocoddyl {
 
-template<typename _Scalar>
+template <typename _Scalar>
 class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
@@ -41,20 +40,16 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
   typedef ImpulseModelMultipleTpl<Scalar> ImpulseModelMultiple;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
+
   ActionModelImpulseFwdDynamicsTpl(boost::shared_ptr<StateMultibody> state,
                                    boost::shared_ptr<ImpulseModelMultiple> impulses,
-                                   boost::shared_ptr<CostModelSum> costs,
-                                   const Scalar& r_coeff = 0.,
-                                   const Scalar& JMinvJt_damping = 0.,
-                                   const bool& enable_force = false);
+                                   boost::shared_ptr<CostModelSum> costs, const Scalar& r_coeff = 0.,
+                                   const Scalar& JMinvJt_damping = 0., const bool& enable_force = false);
   ~ActionModelImpulseFwdDynamicsTpl();
 
-  void calc(const boost::shared_ptr<ActionDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& x,
+  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>& x,
+  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u);
   boost::shared_ptr<ActionDataAbstract> createData();
 
@@ -69,15 +64,15 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
   void set_restitution_coefficient(const Scalar& r_coeff);
   void set_damping_factor(const Scalar& damping);
 
-protected:
-  using Base::nu_;                          //!< Control dimension
-  using Base::nr_;                          //!< Dimension of the cost residual
-  using Base::state_;  //!< Model of the state
-  using Base::unone_;                   //!< Neutral state
-  using Base::u_lb_;                    //!< Lower control limits
-  using Base::u_ub_;                    //!< Upper control limits
-  using Base::has_control_limits_;      //!< Indicates whether any of the control limits
-  
+ protected:
+  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
+  using Base::nr_;                  //!< Dimension of the cost residual
+  using Base::nu_;                  //!< Control dimension
+  using Base::state_;               //!< Model of the state
+  using Base::u_lb_;                //!< Lower control limits
+  using Base::u_ub_;                //!< Upper control limits
+  using Base::unone_;               //!< Neutral state
+
  private:
   boost::shared_ptr<ImpulseModelMultiple> impulses_;
   boost::shared_ptr<CostModelSum> costs_;
@@ -89,8 +84,8 @@ protected:
   bool enable_force_;
   pinocchio::MotionTpl<Scalar> gravity_;
 };
-  
-template<typename _Scalar>
+
+template <typename _Scalar>
 struct ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;
@@ -98,8 +93,8 @@ struct ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
   typedef ActionDataAbstractTpl<Scalar> Base;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
-  template <template<typename Scalar> class Model>
+
+  template <template <typename Scalar> class Model>
   explicit ActionDataImpulseFwdDynamicsTpl(Model<Scalar>* const model)
       : Base(model),
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
@@ -123,7 +118,6 @@ struct ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
   MatrixXs df_dq;
 };
 
-  
 }  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */

@@ -17,19 +17,18 @@
 
 namespace crocoddyl {
 
-template<typename Scalar>
+template <typename Scalar>
 struct CostItemTpl {
   CostItemTpl() {}
-  CostItemTpl(const std::string& name,
-              boost::shared_ptr<CostModelAbstractTpl<Scalar> > cost, const Scalar& weight)
+  CostItemTpl(const std::string& name, boost::shared_ptr<CostModelAbstractTpl<Scalar> > cost, const Scalar& weight)
       : name(name), cost(cost), weight(weight) {}
 
   std::string name;
   boost::shared_ptr<CostModelAbstractTpl<Scalar> > cost;
   Scalar weight;
 };
-  
-template<typename _Scalar>
+
+template <typename _Scalar>
 class CostModelSumTpl {
  public:
   typedef _Scalar Scalar;
@@ -41,32 +40,25 @@ class CostModelSumTpl {
   typedef CostItemTpl<Scalar> CostItem;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
+
   typedef std::map<std::string, CostItem> CostModelContainer;
   typedef std::map<std::string, boost::shared_ptr<CostDataAbstract> > CostDataContainer;
 
-  CostModelSumTpl(boost::shared_ptr<StateMultibody> state,
-                  const std::size_t& nu, const bool& with_residuals = true);
-  explicit CostModelSumTpl(boost::shared_ptr<StateMultibody> state,
-                           const bool& with_residuals = true);
+  CostModelSumTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu, const bool& with_residuals = true);
+  explicit CostModelSumTpl(boost::shared_ptr<StateMultibody> state, const bool& with_residuals = true);
   ~CostModelSumTpl();
 
-  void addCost(const std::string& name,
-               boost::shared_ptr<CostModelAbstract> cost, const Scalar& weight);
+  void addCost(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, const Scalar& weight);
   void removeCost(const std::string& name);
 
-  void calc(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data,
-            const Eigen::Ref<const VectorXs>& x,
+  void calc(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data,
-                const Eigen::Ref<const VectorXs>& x,
+  void calcDiff(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data, const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u);
   boost::shared_ptr<CostDataSumTpl<Scalar> > createData(DataCollectorAbstract* const data);
 
-  void calc(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data,
-            const Eigen::Ref<const VectorXs>& x);
-  void calcDiff(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data,
-                const Eigen::Ref<const VectorXs>& x);
+  void calc(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data, const Eigen::Ref<const VectorXs>& x);
+  void calcDiff(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data, const Eigen::Ref<const VectorXs>& x);
 
   const boost::shared_ptr<StateMultibody>& get_state() const;
   const CostModelContainer& get_costs() const;
@@ -93,8 +85,7 @@ class CostModelSumTpl {
     }
   }
 
-  void calcDiff_wrap(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data,
-                     const VectorXs& x, const VectorXs& u) {
+  void calcDiff_wrap(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data, const VectorXs& x, const VectorXs& u) {
     calcDiff(data, x, u);
   }
   void calcDiff_wrap(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data, const VectorXs& x) {
@@ -104,7 +95,7 @@ class CostModelSumTpl {
 #endif
 };
 
-template<typename _Scalar>
+template <typename _Scalar>
 struct CostDataSumTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;
@@ -116,8 +107,8 @@ struct CostDataSumTpl {
   typedef CostItemTpl<Scalar> CostItem;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
-  template<template<typename Scalar> class Model>
+
+  template <template <typename Scalar> class Model>
   CostDataSumTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : r_internal(model->get_nr()),
         Lx_internal(model->get_state()->get_ndx()),
@@ -232,7 +223,6 @@ struct CostDataSumTpl {
   MatrixXs Rx;
   MatrixXs Ru;
 };
-
 
 }  // namespace crocoddyl
 

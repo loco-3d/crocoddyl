@@ -16,16 +16,15 @@
 
 namespace crocoddyl {
 
-template<typename _Scalar>
+template <typename _Scalar>
 class StateNumDiffTpl : public StateAbstractTpl<_Scalar> {
  public:
-
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef StateAbstractTpl<_Scalar> Base;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
+
   explicit StateNumDiffTpl(boost::shared_ptr<Base> state);
   ~StateNumDiffTpl();
 
@@ -50,9 +49,8 @@ class StateNumDiffTpl : public StateAbstractTpl<_Scalar> {
    * @param Jsecond
    * @param firstsecond
    */
-  void Jdiff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
-             Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
-             Jcomponent firstsecond = both) const;
+  void Jdiff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1, Eigen::Ref<MatrixXs> Jfirst,
+             Eigen::Ref<MatrixXs> Jsecond, Jcomponent firstsecond = both) const;
   /**
    * @brief This computes the Jacobian of the integrate method by finite
    * differentiation:
@@ -69,8 +67,7 @@ class StateNumDiffTpl : public StateAbstractTpl<_Scalar> {
    * @param firstsecond
    */
   void Jintegrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
-                  Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
-                  Jcomponent firstsecond = both) const;
+                  Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond, Jcomponent firstsecond = both) const;
   const Scalar& get_disturbance() const;
   void set_disturbance(const Scalar& disturbance);
 
@@ -84,16 +81,15 @@ class StateNumDiffTpl : public StateAbstractTpl<_Scalar> {
    * @brief This the increment used in the finite differentiation and integration.
    */
   Scalar disturbance_;
-protected:
-  using Base::nx_;
+
+ protected:
+  using Base::has_limits_;
+  using Base::lb_;
   using Base::ndx_;
   using Base::nq_;
   using Base::nv_;
-  using Base::lb_;
+  using Base::nx_;
   using Base::ub_;
-  using Base::has_limits_;
-
-  
 };
 
 }  // namespace crocoddyl

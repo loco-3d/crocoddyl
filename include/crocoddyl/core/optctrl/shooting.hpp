@@ -27,18 +27,14 @@ class ShootingProblemTpl {
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
-  
-  ShootingProblemTpl(const VectorXs& x0,
-                     const std::vector<boost::shared_ptr<ActionModelAbstract> >& running_models,
+
+  ShootingProblemTpl(const VectorXs& x0, const std::vector<boost::shared_ptr<ActionModelAbstract> >& running_models,
                      boost::shared_ptr<ActionModelAbstract> terminal_model);
   ~ShootingProblemTpl();
 
-  Scalar calc(const std::vector<VectorXs>& xs,
-              const std::vector<VectorXs>& us);
-  Scalar calcDiff(const std::vector<VectorXs>& xs,
-                  const std::vector<VectorXs>& us);
-  void rollout(const std::vector<VectorXs>& us,
-               std::vector<VectorXs>& xs);
+  Scalar calc(const std::vector<VectorXs>& xs, const std::vector<VectorXs>& us);
+  Scalar calcDiff(const std::vector<VectorXs>& xs, const std::vector<VectorXs>& us);
+  void rollout(const std::vector<VectorXs>& us, std::vector<VectorXs>& xs);
   std::vector<VectorXs> rollout_us(const std::vector<VectorXs>& us);
 
   const std::size_t& get_T() const;
@@ -65,7 +61,6 @@ class ShootingProblemTpl {
   void allocateData();
 };
 
-  
 }  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */

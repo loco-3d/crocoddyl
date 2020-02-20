@@ -15,15 +15,13 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ContactModel6DTpl<Scalar>::ContactModel6DTpl(boost::shared_ptr<StateMultibody> state,
-                                             const FramePlacement& Mref,
-                                             const std::size_t& nu,
-                                             const Vector2s& gains)
+ContactModel6DTpl<Scalar>::ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& Mref,
+                                             const std::size_t& nu, const Vector2s& gains)
     : Base(state, 6, nu), Mref_(Mref), gains_(gains) {}
 
 template <typename Scalar>
 ContactModel6DTpl<Scalar>::ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& Mref,
-                               const Vector2s& gains)
+                                             const Vector2s& gains)
     : Base(state, 6), Mref_(Mref), gains_(gains) {}
 
 template <typename Scalar>
@@ -51,7 +49,7 @@ void ContactModel6DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract
 
 template <typename Scalar>
 void ContactModel6DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
-                              const Eigen::Ref<const VectorXs>&) {
+                                         const Eigen::Ref<const VectorXs>&) {
   ContactData6D* d = static_cast<ContactData6D*>(data.get());
   pinocchio::getJointAccelerationDerivatives(state_->get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                              d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
@@ -70,7 +68,8 @@ void ContactModel6DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
 }
 
 template <typename Scalar>
-void ContactModel6DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force) {
+void ContactModel6DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataAbstract>& data,
+                                            const VectorXs& force) {
   if (force.size() != 6) {
     throw_pretty("Invalid argument: "
                  << "lambda has wrong dimension (it should be 6)");
@@ -80,14 +79,19 @@ void ContactModel6DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataA
 }
 
 template <typename Scalar>
-boost::shared_ptr<ContactDataAbstractTpl<Scalar> > ContactModel6DTpl<Scalar>::createData(pinocchio::DataTpl<Scalar>* const data) {
+boost::shared_ptr<ContactDataAbstractTpl<Scalar> > ContactModel6DTpl<Scalar>::createData(
+    pinocchio::DataTpl<Scalar>* const data) {
   return boost::make_shared<ContactData6D>(this, data);
 }
 
 template <typename Scalar>
-const FramePlacementTpl<Scalar>& ContactModel6DTpl<Scalar>::get_Mref() const { return Mref_; }
+const FramePlacementTpl<Scalar>& ContactModel6DTpl<Scalar>::get_Mref() const {
+  return Mref_;
+}
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector2s& ContactModel6DTpl<Scalar>::get_gains() const { return gains_; }
+const typename MathBaseTpl<Scalar>::Vector2s& ContactModel6DTpl<Scalar>::get_gains() const {
+  return gains_;
+}
 
 }  // namespace crocoddyl

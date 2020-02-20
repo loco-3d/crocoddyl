@@ -10,10 +10,9 @@
 #include <iostream>
 
 namespace crocoddyl {
-  
-template<typename Scalar>
-FrictionConeTpl<Scalar>::FrictionConeTpl(const Vector3s& normal, const Scalar& mu,
-                                         std::size_t nf, bool inner_appr,
+
+template <typename Scalar>
+FrictionConeTpl<Scalar>::FrictionConeTpl(const Vector3s& normal, const Scalar& mu, std::size_t nf, bool inner_appr,
                                          const Scalar& min_nforce, const Scalar& max_nforce)
     : nf_(nf) {
   if (nf_ % 2 != 0) {
@@ -28,7 +27,7 @@ FrictionConeTpl<Scalar>::FrictionConeTpl(const Vector3s& normal, const Scalar& m
   update(normal, mu, inner_appr, min_nforce, max_nforce);
 }
 
-template<typename Scalar>
+template <typename Scalar>
 FrictionConeTpl<Scalar>::FrictionConeTpl(const FrictionConeTpl<Scalar>& cone)
     : A_(cone.get_A()),
       lb_(cone.get_lb()),
@@ -40,14 +39,12 @@ FrictionConeTpl<Scalar>::FrictionConeTpl(const FrictionConeTpl<Scalar>& cone)
       min_nforce_(cone.get_min_nforce()),
       max_nforce_(cone.get_max_nforce()) {}
 
-template<typename Scalar>
+template <typename Scalar>
 FrictionConeTpl<Scalar>::~FrictionConeTpl() {}
 
-template<typename Scalar>
-void FrictionConeTpl<Scalar>::update(const Vector3s& normal,
-                                     const Scalar& mu, bool inner_appr,
-                                     const Scalar& min_nforce,
-                                     const Scalar& max_nforce) {
+template <typename Scalar>
+void FrictionConeTpl<Scalar>::update(const Vector3s& normal, const Scalar& mu, bool inner_appr,
+                                     const Scalar& min_nforce, const Scalar& max_nforce) {
   nsurf_ = normal;
   mu_ = mu;
   inner_appr_ = inner_appr;
@@ -89,31 +86,49 @@ void FrictionConeTpl<Scalar>::update(const Vector3s& normal,
   ub_(nf_) = max_nforce_;
 }
 
-template<typename Scalar>
-const typename MathBaseTpl<Scalar>::MatrixX3s& FrictionConeTpl<Scalar>::get_A() const { return A_; }
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::MatrixX3s& FrictionConeTpl<Scalar>::get_A() const {
+  return A_;
+}
 
-template<typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& FrictionConeTpl<Scalar>::get_lb() const { return lb_; }
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& FrictionConeTpl<Scalar>::get_lb() const {
+  return lb_;
+}
 
-template<typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& FrictionConeTpl<Scalar>::get_ub() const { return ub_; }
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& FrictionConeTpl<Scalar>::get_ub() const {
+  return ub_;
+}
 
-template<typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector3s& FrictionConeTpl<Scalar>::get_nsurf() const { return nsurf_; }
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::Vector3s& FrictionConeTpl<Scalar>::get_nsurf() const {
+  return nsurf_;
+}
 
-template<typename Scalar>
-const Scalar& FrictionConeTpl<Scalar>::get_mu() const { return mu_; }
+template <typename Scalar>
+const Scalar& FrictionConeTpl<Scalar>::get_mu() const {
+  return mu_;
+}
 
-template<typename Scalar>
-const std::size_t& FrictionConeTpl<Scalar>::get_nf() const { return nf_; }
+template <typename Scalar>
+const std::size_t& FrictionConeTpl<Scalar>::get_nf() const {
+  return nf_;
+}
 
-template<typename Scalar>
-const bool& FrictionConeTpl<Scalar>::get_inner_appr() const { return inner_appr_; }
+template <typename Scalar>
+const bool& FrictionConeTpl<Scalar>::get_inner_appr() const {
+  return inner_appr_;
+}
 
-template<typename Scalar>
-const Scalar& FrictionConeTpl<Scalar>::get_min_nforce() const { return min_nforce_; }
+template <typename Scalar>
+const Scalar& FrictionConeTpl<Scalar>::get_min_nforce() const {
+  return min_nforce_;
+}
 
-template<typename Scalar>
-const Scalar& FrictionConeTpl<Scalar>::get_max_nforce() const { return max_nforce_; }
+template <typename Scalar>
+const Scalar& FrictionConeTpl<Scalar>::get_max_nforce() const {
+  return max_nforce_;
+}
 
 }  // namespace crocoddyl

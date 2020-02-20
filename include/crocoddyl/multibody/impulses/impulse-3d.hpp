@@ -29,29 +29,26 @@ class ImpulseModel3DTpl : public ImpulseModelAbstractTpl<_Scalar> {
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
+
   ImpulseModel3DTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& frame);
   ~ImpulseModel3DTpl();
 
-  void calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& x);
-  void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>& x);
-  void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                   const VectorXs& force);
+  void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& force);
   boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
-  
+
   const std::size_t& get_frame() const;
-  
-protected:
-  using Base::state_;
+
+ protected:
   using Base::ni_;
-  
-private:
+  using Base::state_;
+
+ private:
   std::size_t frame_;
 };
 
-template <typename _Scalar>  
+template <typename _Scalar>
 struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -65,8 +62,8 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
 
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
-  template <template<typename Scalar> class Model>
+
+  template <template <typename Scalar> class Model>
   ImpulseData3DTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
       : Base(model, data),
         jMf(model->get_state()->get_pinocchio().frames[model->get_frame()].placement),
@@ -87,17 +84,15 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   Matrix6xs v_partial_dq;
   Matrix6xs v_partial_dv;
 
-  using Base::pinocchio;
-  using Base::joint;
+  using Base::df_dq;
+  using Base::dv0_dq;
+  using Base::f;
   using Base::frame;
   using Base::Jc;
-  using Base::dv0_dq;
-  using Base::df_dq;
-  using Base::f;
-  
+  using Base::joint;
+  using Base::pinocchio;
 };
 
-  
 }  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */

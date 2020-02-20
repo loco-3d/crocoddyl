@@ -17,7 +17,7 @@
 
 namespace crocoddyl {
 
-template<typename _Scalar>
+template <typename _Scalar>
 struct ContactItemTpl {
   typedef _Scalar Scalar;
   ContactItemTpl() {}
@@ -27,28 +27,27 @@ struct ContactItemTpl {
   std::string name;
   boost::shared_ptr<ContactModelAbstractTpl<Scalar> > contact;
 };
-  
-template<typename _Scalar>
+
+template <typename _Scalar>
 class ContactModelMultipleTpl {
-public:
+ public:
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ContactDataAbstractTpl<Scalar> ContactDataAbstract;
   typedef ContactDataMultipleTpl<Scalar> ContactDataMultiple;
   typedef ContactModelAbstractTpl<Scalar> ContactModelAbstract;
-  
+
   typedef ContactItemTpl<Scalar> ContactItem;
-  
+
   typedef typename MathBase::Vector2s Vector2s;
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
+
   typedef std::map<std::string, ContactItem> ContactModelContainer;
   typedef std::map<std::string, boost::shared_ptr<ContactDataAbstract> > ContactDataContainer;
-  typedef typename pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar> >::iterator
-  ForceIterator;
+  typedef typename pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar> >::iterator ForceIterator;
 
   ContactModelMultipleTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu);
   ContactModelMultipleTpl(boost::shared_ptr<StateMultibody> state);
@@ -57,19 +56,13 @@ public:
   void addContact(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact);
   void removeContact(const std::string& name);
 
-  void calc(const boost::shared_ptr<ContactDataMultiple>& data,
-            const Eigen::Ref<const VectorXs>& x);
-  void calcDiff(const boost::shared_ptr<ContactDataMultiple>& data,
-                const Eigen::Ref<const VectorXs>& x);
+  void calc(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::Ref<const VectorXs>& x);
+  void calcDiff(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::Ref<const VectorXs>& x);
 
-  void updateAcceleration(const boost::shared_ptr<ContactDataMultiple>& data,
-                          const VectorXs& dv) const;
-  void updateForce(const boost::shared_ptr<ContactDataMultiple>& data,
-                   const VectorXs& force);
-  void updateAccelerationDiff(const boost::shared_ptr<ContactDataMultiple>& data,
-                              const MatrixXs& ddv_dx) const;
-  void updateForceDiff(const boost::shared_ptr<ContactDataMultiple>& data,
-                       const MatrixXs& df_dx,
+  void updateAcceleration(const boost::shared_ptr<ContactDataMultiple>& data, const VectorXs& dv) const;
+  void updateForce(const boost::shared_ptr<ContactDataMultiple>& data, const VectorXs& force);
+  void updateAccelerationDiff(const boost::shared_ptr<ContactDataMultiple>& data, const MatrixXs& ddv_dx) const;
+  void updateForceDiff(const boost::shared_ptr<ContactDataMultiple>& data, const MatrixXs& df_dx,
                        const MatrixXs& df_du) const;
   boost::shared_ptr<ContactDataMultiple> createData(pinocchio::DataTpl<Scalar>* const data);
 
@@ -89,14 +82,12 @@ public:
  public:
   void calc_wrap(const boost::shared_ptr<ContactDataMultiple>& data, const VectorXs& x) { calc(data, x); }
 
-  void calcDiff_wrap(const boost::shared_ptr<ContactDataMultiple>& data, const VectorXs& x) {
-    calcDiff(data, x);
-  }
+  void calcDiff_wrap(const boost::shared_ptr<ContactDataMultiple>& data, const VectorXs& x) { calcDiff(data, x); }
 
 #endif
 };
 
-template<typename _Scalar>
+template <typename _Scalar>
 struct ContactDataMultipleTpl : ContactDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;
@@ -104,7 +95,7 @@ struct ContactDataMultipleTpl : ContactDataAbstractTpl<_Scalar> {
   typedef ContactDataAbstractTpl<Scalar> Base;
   typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
   typedef ContactItemTpl<Scalar> ContactItem;
-  
+
   typedef typename MathBase::Vector2s Vector2s;
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::Matrix3s Matrix3s;
@@ -112,9 +103,8 @@ struct ContactDataMultipleTpl : ContactDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix6s Matrix6s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
 
-  template<template<typename Scalar> class Model>
+  template <template <typename Scalar> class Model>
   ContactDataMultipleTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
       : Base(model, data),
         dv(model->get_state()->get_nv()),
@@ -135,7 +125,6 @@ struct ContactDataMultipleTpl : ContactDataAbstractTpl<_Scalar> {
   pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar> > fext;
 };
 
-  
 }  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */

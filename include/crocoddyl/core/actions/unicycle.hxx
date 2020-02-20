@@ -10,16 +10,16 @@
 
 namespace crocoddyl {
 template <typename Scalar>
-ActionModelUnicycleTpl<Scalar>::ActionModelUnicycleTpl() :
-  ActionModelAbstractTpl<Scalar>(boost::make_shared<StateVectorTpl<Scalar> >(3), 2, 5), dt_(0.1) {
+ActionModelUnicycleTpl<Scalar>::ActionModelUnicycleTpl()
+    : ActionModelAbstractTpl<Scalar>(boost::make_shared<StateVectorTpl<Scalar> >(3), 2, 5), dt_(0.1) {
   cost_weights_ << 10., 1.;
 }
 template <typename Scalar>
 ActionModelUnicycleTpl<Scalar>::~ActionModelUnicycleTpl() {}
 template <typename Scalar>
 void ActionModelUnicycleTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
-                               const Eigen::Ref<const typename MathBase::VectorXs>& x,
-                               const Eigen::Ref<const typename MathBase::VectorXs>& u) {
+                                          const Eigen::Ref<const typename MathBase::VectorXs>& x,
+                                          const Eigen::Ref<const typename MathBase::VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -39,8 +39,8 @@ void ActionModelUnicycleTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbst
 }
 template <typename Scalar>
 void ActionModelUnicycleTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
-                                   const Eigen::Ref<const typename MathBase::VectorXs>& x,
-                                   const Eigen::Ref<const typename MathBase::VectorXs>& u) {
+                                              const Eigen::Ref<const typename MathBase::VectorXs>& x,
+                                              const Eigen::Ref<const typename MathBase::VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -71,8 +71,12 @@ boost::shared_ptr<ActionDataAbstractTpl<Scalar> > ActionModelUnicycleTpl<Scalar>
   return boost::make_shared<ActionDataUnicycleTpl<Scalar> >(this);
 }
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector2s& ActionModelUnicycleTpl<Scalar>::get_cost_weights() const { return cost_weights_; }
+const typename MathBaseTpl<Scalar>::Vector2s& ActionModelUnicycleTpl<Scalar>::get_cost_weights() const {
+  return cost_weights_;
+}
 template <typename Scalar>
-void ActionModelUnicycleTpl<Scalar>::set_cost_weights(const typename MathBase::Vector2s& weights) { cost_weights_ = weights; }
+void ActionModelUnicycleTpl<Scalar>::set_cost_weights(const typename MathBase::Vector2s& weights) {
+  cost_weights_ = weights;
+}
 
 }  // namespace crocoddyl

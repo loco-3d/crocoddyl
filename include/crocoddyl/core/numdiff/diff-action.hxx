@@ -11,23 +11,23 @@
 #include "crocoddyl/core/numdiff/diff-action.hpp"
 
 namespace crocoddyl {
-  
-template<typename Scalar>
-DifferentialActionModelNumDiffTpl<Scalar>::DifferentialActionModelNumDiffTpl(
-    boost::shared_ptr<Base> model, bool with_gauss_approx)
+
+template <typename Scalar>
+DifferentialActionModelNumDiffTpl<Scalar>::DifferentialActionModelNumDiffTpl(boost::shared_ptr<Base> model,
+                                                                             bool with_gauss_approx)
     : Base(model->get_state(), model->get_nu(), model->get_nr()), model_(model) {
   with_gauss_approx_ = with_gauss_approx;
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon());
   assert_pretty((!with_gauss_approx_ || nr_ > 1), "No Gauss approximation possible with nr = 1");
 }
-  
-template<typename Scalar>
+
+template <typename Scalar>
 DifferentialActionModelNumDiffTpl<Scalar>::~DifferentialActionModelNumDiffTpl() {}
-  
-template<typename Scalar>
+
+template <typename Scalar>
 void DifferentialActionModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                                          const Eigen::Ref<const VectorXs>& x,
-                                          const Eigen::Ref<const VectorXs>& u) {
+                                                     const Eigen::Ref<const VectorXs>& x,
+                                                     const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -41,11 +41,11 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<Dif
   data->cost = data_nd->data_0->cost;
   data->xout = data_nd->data_0->xout;
 }
-  
-template<typename Scalar>
+
+template <typename Scalar>
 void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                                              const Eigen::Ref<const VectorXs>& x,
-                                              const Eigen::Ref<const VectorXs>& u) {
+                                                         const Eigen::Ref<const VectorXs>& x,
+                                                         const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -101,21 +101,24 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
     data->Luu = data_nd->Ru.transpose() * data_nd->Ru;
   }
 }
-  
-template<typename Scalar>
+
+template <typename Scalar>
 boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > DifferentialActionModelNumDiffTpl<Scalar>::createData() {
   return boost::make_shared<DifferentialActionDataNumDiff>(this);
 }
-  
-template<typename Scalar>
-const boost::shared_ptr<DifferentialActionModelAbstractTpl<Scalar> >& DifferentialActionModelNumDiffTpl<Scalar>::get_model() const {
+
+template <typename Scalar>
+const boost::shared_ptr<DifferentialActionModelAbstractTpl<Scalar> >&
+DifferentialActionModelNumDiffTpl<Scalar>::get_model() const {
   return model_;
 }
-  
-template<typename Scalar>
-const Scalar& DifferentialActionModelNumDiffTpl<Scalar>::get_disturbance() const { return disturbance_; }
-  
-template<typename Scalar>
+
+template <typename Scalar>
+const Scalar& DifferentialActionModelNumDiffTpl<Scalar>::get_disturbance() const {
+  return disturbance_;
+}
+
+template <typename Scalar>
 void DifferentialActionModelNumDiffTpl<Scalar>::set_disturbance(const Scalar& disturbance) {
   if (disturbance < 0.) {
     throw_pretty("Invalid argument: "
@@ -123,11 +126,13 @@ void DifferentialActionModelNumDiffTpl<Scalar>::set_disturbance(const Scalar& di
   }
   disturbance_ = disturbance;
 }
-  
-template<typename Scalar>
-bool DifferentialActionModelNumDiffTpl<Scalar>::get_with_gauss_approx() { return with_gauss_approx_; }
-  
-template<typename Scalar>
+
+template <typename Scalar>
+bool DifferentialActionModelNumDiffTpl<Scalar>::get_with_gauss_approx() {
+  return with_gauss_approx_;
+}
+
+template <typename Scalar>
 void DifferentialActionModelNumDiffTpl<Scalar>::assertStableStateFD(const Eigen::Ref<const VectorXs>& /** x */) {
   // TODO(cmastalli): First we need to do it AMNumDiff and then to replicate it.
 }

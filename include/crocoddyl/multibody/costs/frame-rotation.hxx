@@ -11,11 +11,11 @@
 #include "crocoddyl/multibody/costs/frame-rotation.hpp"
 
 namespace crocoddyl {
-  
-template<typename Scalar>
+
+template <typename Scalar>
 CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
-                                               boost::shared_ptr<ActivationModelAbstract> activation,
-                                               const FrameRotation& Rref, const std::size_t& nu)
+                                                             boost::shared_ptr<ActivationModelAbstract> activation,
+                                                             const FrameRotation& Rref, const std::size_t& nu)
     : Base(state, activation, nu), Rref_(Rref), oRf_inv_(Rref.oRf.transpose()) {
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
@@ -23,10 +23,10 @@ CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<S
   }
 }
 
-template<typename Scalar>
+template <typename Scalar>
 CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
-                                               boost::shared_ptr<ActivationModelAbstract> activation,
-                                               const FrameRotation& Rref)
+                                                             boost::shared_ptr<ActivationModelAbstract> activation,
+                                                             const FrameRotation& Rref)
     : Base(state, activation), Rref_(Rref), oRf_inv_(Rref.oRf.transpose()) {
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
@@ -34,22 +34,23 @@ CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<S
   }
 }
 
-template<typename Scalar>
-CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state, const FrameRotation& Rref,
-                                               const std::size_t& nu)
+template <typename Scalar>
+CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
+                                                             const FrameRotation& Rref, const std::size_t& nu)
     : Base(state, 3, nu), Rref_(Rref), oRf_inv_(Rref.oRf.transpose()) {}
 
-template<typename Scalar>
-CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state, const FrameRotation& Rref)
+template <typename Scalar>
+CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
+                                                             const FrameRotation& Rref)
     : Base(state, 3), Rref_(Rref), oRf_inv_(Rref.oRf.transpose()) {}
 
-template<typename Scalar>
+template <typename Scalar>
 CostModelFrameRotationTpl<Scalar>::~CostModelFrameRotationTpl() {}
 
-template<typename Scalar>
+template <typename Scalar>
 void CostModelFrameRotationTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                  const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
-  CostDataFrameRotationTpl<Scalar>* d = static_cast<CostDataFrameRotationTpl<Scalar> *>(data.get());
+                                             const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
+  CostDataFrameRotationTpl<Scalar>* d = static_cast<CostDataFrameRotationTpl<Scalar>*>(data.get());
 
   // Compute the frame placement w.r.t. the reference frame
   pinocchio::updateFramePlacement(state_->get_pinocchio(), *d->pinocchio, Rref_.frame);
@@ -62,13 +63,12 @@ void CostModelFrameRotationTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbs
   d->cost = d->activation->a_value;
 }
 
-template<typename Scalar>
+template <typename Scalar>
 void CostModelFrameRotationTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                      const Eigen::Ref<const VectorXs>&,
-                                      const Eigen::Ref<const VectorXs>&) {
+                                                 const Eigen::Ref<const VectorXs>&,
+                                                 const Eigen::Ref<const VectorXs>&) {
   // Update the frame placements
-  CostDataFrameRotationTpl<Scalar>* d =
-    static_cast<CostDataFrameRotationTpl<Scalar>*>(data.get());
+  CostDataFrameRotationTpl<Scalar>* d = static_cast<CostDataFrameRotationTpl<Scalar>*>(data.get());
 
   // // Compute the frame Jacobian at the error point
   pinocchio::Jlog3(d->rRf, d->rJf);
@@ -84,15 +84,18 @@ void CostModelFrameRotationTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDat
   data->Lxx.topLeftCorner(nv, nv).noalias() = d->J.transpose() * d->Arr_J;
 }
 
-template<typename Scalar>
-boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelFrameRotationTpl<Scalar>::createData(DataCollectorAbstract* const data) {
+template <typename Scalar>
+boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelFrameRotationTpl<Scalar>::createData(
+    DataCollectorAbstract* const data) {
   return boost::make_shared<CostDataFrameRotationTpl<Scalar> >(this, data);
 }
 
-template<typename Scalar>
-const FrameRotationTpl<Scalar>& CostModelFrameRotationTpl<Scalar>::get_Rref() const { return Rref_; }
+template <typename Scalar>
+const FrameRotationTpl<Scalar>& CostModelFrameRotationTpl<Scalar>::get_Rref() const {
+  return Rref_;
+}
 
-template<typename Scalar>
+template <typename Scalar>
 void CostModelFrameRotationTpl<Scalar>::set_Rref(const FrameRotation& Rref_in) {
   Rref_ = Rref_in;
   oRf_inv_ = Rref_.oRf.transpose();

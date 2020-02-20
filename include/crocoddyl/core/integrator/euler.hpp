@@ -13,11 +13,10 @@
 #include "crocoddyl/core/diff-action-base.hpp"
 
 namespace crocoddyl {
-  
-template<typename _Scalar>
+
+template <typename _Scalar>
 class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
  public:
-
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActionModelAbstractTpl<Scalar> Base;
@@ -26,17 +25,14 @@ class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef IntegratedActionDataEulerTpl<Scalar> IntegratedActionDataEuler;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
+
   IntegratedActionModelEulerTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
-                                const Scalar& time_step = 1e-3,
-                                const bool& with_cost_residual = true);
+                                const Scalar& time_step = 1e-3, const bool& with_cost_residual = true);
   ~IntegratedActionModelEulerTpl();
 
-  void calc(const boost::shared_ptr<ActionDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& x,
+  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>& x,
+  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u);
   boost::shared_ptr<ActionDataAbstract> createData();
 
@@ -46,17 +42,16 @@ class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
   void set_dt(const Scalar& dt);
   void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model);
 
-
  protected:
-  using Base::nu_;                          //!< Control dimension
-  using Base::nr_;                          //!< Dimension of the cost residual
-  using Base::state_;  //!< Model of the state
-  using Base::unone_;                   //!< Neutral state
-  using Base::u_lb_;                    //!< Lower control limits
-  using Base::u_ub_;                    //!< Upper control limits
-  using Base::has_control_limits_;      //!< Indicates whether any of the control limits
-  
-private:
+  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
+  using Base::nr_;                  //!< Dimension of the cost residual
+  using Base::nu_;                  //!< Control dimension
+  using Base::state_;               //!< Model of the state
+  using Base::u_lb_;                //!< Lower control limits
+  using Base::u_ub_;                //!< Upper control limits
+  using Base::unone_;               //!< Neutral state
+
+ private:
   boost::shared_ptr<DifferentialActionModelAbstract> differential_;
   Scalar time_step_;
   Scalar time_step2_;
@@ -64,8 +59,8 @@ private:
   bool enable_integration_;
 };
 
-template<typename _Scalar>
-struct IntegratedActionDataEulerTpl: public ActionDataAbstractTpl<_Scalar> {
+template <typename _Scalar>
+struct IntegratedActionDataEulerTpl : public ActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -74,7 +69,7 @@ struct IntegratedActionDataEulerTpl: public ActionDataAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  template<template<typename Scalar> class Model>
+  template <template <typename Scalar> class Model>
   explicit IntegratedActionDataEulerTpl(Model<Scalar>* const model) : Base(model) {
     differential = model->get_differential()->createData();
     const std::size_t& ndx = model->get_state()->get_ndx();
@@ -95,18 +90,17 @@ struct IntegratedActionDataEulerTpl: public ActionDataAbstractTpl<_Scalar> {
   MatrixXs dxnext_ddx;
 
   using Base::cost;
-  using Base::xnext;
-  using Base::r;
-  using Base::Fx;
   using Base::Fu;
-  using Base::Lx;
+  using Base::Fx;
   using Base::Lu;
-  using Base::Lxx;
-  using Base::Lxu;
   using Base::Luu;
+  using Base::Lx;
+  using Base::Lxu;
+  using Base::Lxx;
+  using Base::r;
+  using Base::xnext;
 };
 
-  
 }  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */

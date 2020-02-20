@@ -15,7 +15,7 @@
 #include <pinocchio/multibody/data.hpp>
 
 namespace crocoddyl {
-  
+
 template <typename _Scalar>
 class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
  public:
@@ -30,36 +30,32 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
-  ContactModel6DTpl(boost::shared_ptr<StateMultibody> state,
-                    const FramePlacement& xref, const std::size_t& nu,
+
+  ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& xref, const std::size_t& nu,
                     const Vector2s& gains = Vector2s::Zero());
   ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& xref,
                     const Vector2s& gains = Vector2s::Zero());
   ~ContactModel6DTpl();
 
-  void calc(const boost::shared_ptr<ContactDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& x);
-  void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>& x);
-  void updateForce(const boost::shared_ptr<ContactDataAbstract>& data,
-                   const VectorXs& force);
+  void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force);
   boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
   const FramePlacement& get_Mref() const;
   const Vector2s& get_gains() const;
 
-protected:
-  using Base::state_;
+ protected:
   using Base::nc_;
   using Base::nu_;
-  
-private:
+  using Base::state_;
+
+ private:
   FramePlacement Mref_;
   Vector2s gains_;
 };
 
-template<typename _Scalar>
+template <typename _Scalar>
 struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -75,7 +71,7 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  template<template<typename Scalar> class Model>
+  template <template <typename Scalar> class Model>
   ContactData6DTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
       : Base(model, data),
         rMf(pinocchio::SE3Tpl<Scalar>::Identity()),
@@ -103,19 +99,18 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
   Matrix6xs a_partial_da;
   Matrix6s rMf_Jlog6;
 
-  using Base::pinocchio;
-  using Base::joint;
-  using Base::frame;
-  using Base::jMf;
-  using Base::fXj;
-  using Base::Jc;
   using Base::a0;
   using Base::da0_dx;
-  using Base::df_dx;
   using Base::df_du;
+  using Base::df_dx;
   using Base::f;
+  using Base::frame;
+  using Base::fXj;
+  using Base::Jc;
+  using Base::jMf;
+  using Base::joint;
+  using Base::pinocchio;
 };
-  
 
 }  // namespace crocoddyl
 /* --- Details -------------------------------------------------------------- */

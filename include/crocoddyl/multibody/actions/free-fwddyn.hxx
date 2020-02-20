@@ -19,7 +19,7 @@
 
 namespace crocoddyl {
 
-template<typename Scalar>
+template <typename Scalar>
 DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::DifferentialActionModelFreeFwdDynamicsTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation,
     boost::shared_ptr<CostModelSum> costs)
@@ -34,14 +34,14 @@ DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::DifferentialActionModelFreeFw
                  << "Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
   }
 }
-  
-template<typename Scalar>
+
+template <typename Scalar>
 DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::~DifferentialActionModelFreeFwdDynamicsTpl() {}
-  
-template<typename Scalar>
-void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                                                  const Eigen::Ref<const VectorXs>& x,
-                                                  const Eigen::Ref<const VectorXs>& u) {
+
+template <typename Scalar>
+void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calc(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+    const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -52,7 +52,7 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calc(const boost::shared
   }
 
   DifferentialActionDataFreeFwdDynamicsTpl<Scalar>* d =
-    static_cast<DifferentialActionDataFreeFwdDynamicsTpl<Scalar>* >(data.get());
+      static_cast<DifferentialActionDataFreeFwdDynamicsTpl<Scalar>*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
 
@@ -76,11 +76,11 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calc(const boost::shared
   costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
 }
-  
-template<typename Scalar>
-void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                                                      const Eigen::Ref<const VectorXs>& x,
-                                                      const Eigen::Ref<const VectorXs>& u) {
+
+template <typename Scalar>
+void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+    const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -95,7 +95,7 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calcDiff(const boost::sh
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(nv);
 
   DifferentialActionDataFreeFwdDynamicsTpl<Scalar>* d =
-    static_cast<DifferentialActionDataFreeFwdDynamicsTpl<Scalar>* >(data.get());
+      static_cast<DifferentialActionDataFreeFwdDynamicsTpl<Scalar>*>(data.get());
 
   actuation_->calcDiff(d->multibody.actuation, x, u);
 
@@ -116,27 +116,36 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calcDiff(const boost::sh
   // Computing the cost derivatives
   costs_->calcDiff(d->costs, x, u);
 }
-  
-template<typename Scalar>
-boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::createData() {
+
+template <typename Scalar>
+boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
+DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::createData() {
   return boost::make_shared<DifferentialActionDataFreeFwdDynamicsTpl<Scalar> >(this);
 }
-  
-template<typename Scalar>
-pinocchio::ModelTpl<Scalar>& DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_pinocchio() const { return pinocchio_; }
-  
-template<typename Scalar>
-const boost::shared_ptr<ActuationModelAbstractTpl<Scalar> >& DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_actuation() const {
+
+template <typename Scalar>
+pinocchio::ModelTpl<Scalar>& DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_pinocchio() const {
+  return pinocchio_;
+}
+
+template <typename Scalar>
+const boost::shared_ptr<ActuationModelAbstractTpl<Scalar> >&
+DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_actuation() const {
   return actuation_;
 }
-  
-template<typename Scalar>
-const boost::shared_ptr<CostModelSumTpl<Scalar> >& DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_costs() const { return costs_; }
-  
-template<typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_armature() const { return armature_; }
-  
-template<typename Scalar>
+
+template <typename Scalar>
+const boost::shared_ptr<CostModelSumTpl<Scalar> >& DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_costs()
+    const {
+  return costs_;
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_armature() const {
+  return armature_;
+}
+
+template <typename Scalar>
 void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::set_armature(const VectorXs& armature) {
   if (static_cast<std::size_t>(armature.size()) != state_->get_nv()) {
     throw_pretty("Invalid argument: "

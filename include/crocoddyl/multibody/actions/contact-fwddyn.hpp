@@ -19,9 +19,8 @@
 
 namespace crocoddyl {
 
-template<typename _Scalar>
-class DifferentialActionModelContactFwdDynamicsTpl :
-    public DifferentialActionModelAbstractTpl<_Scalar> {
+template <typename _Scalar>
+class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
   typedef DifferentialActionModelAbstractTpl<Scalar> Base;
@@ -33,19 +32,17 @@ class DifferentialActionModelContactFwdDynamicsTpl :
   typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
+
   DifferentialActionModelContactFwdDynamicsTpl(boost::shared_ptr<StateMultibody> state,
                                                boost::shared_ptr<ActuationModelFloatingBase> actuation,
                                                boost::shared_ptr<ContactModelMultiple> contacts,
-                                               boost::shared_ptr<CostModelSum> costs, const Scalar& JMinvJt_damping = 0.,
-                                               const bool& enable_force = false);
+                                               boost::shared_ptr<CostModelSum> costs,
+                                               const Scalar& JMinvJt_damping = 0., const bool& enable_force = false);
   ~DifferentialActionModelContactFwdDynamicsTpl();
 
-  void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& x,
+  void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>& x,
+  void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u);
   boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
@@ -59,15 +56,15 @@ class DifferentialActionModelContactFwdDynamicsTpl :
   void set_armature(const VectorXs& armature);
   void set_damping_factor(const Scalar& damping);
 
-protected:
-  using Base::nu_;                          //!< Control dimension
-  using Base::nr_;                          //!< Dimension of the cost residual
-  using Base::state_;  //!< Model of the state
-  using Base::unone_;                   //!< Neutral state
-  using Base::u_lb_;                    //!< Lower control limits
-  using Base::u_ub_;                    //!< Upper control limits
-  using Base::has_control_limits_;    //!< Indicates whether any of the control limits 
-  
+ protected:
+  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
+  using Base::nr_;                  //!< Dimension of the cost residual
+  using Base::nu_;                  //!< Control dimension
+  using Base::state_;               //!< Model of the state
+  using Base::u_lb_;                //!< Lower control limits
+  using Base::u_ub_;                //!< Upper control limits
+  using Base::unone_;               //!< Neutral state
+
  private:
   boost::shared_ptr<ActuationModelFloatingBase> actuation_;
   boost::shared_ptr<ContactModelMultiple> contacts_;
@@ -79,7 +76,7 @@ protected:
   bool enable_force_;
 };
 
-template<typename _Scalar>
+template <typename _Scalar>
 struct DifferentialActionDataContactFwdDynamicsTpl : public DifferentialActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;
@@ -88,7 +85,7 @@ struct DifferentialActionDataContactFwdDynamicsTpl : public DifferentialActionDa
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  template <template<typename Scalar> class Model>
+  template <template <typename Scalar> class Model>
   explicit DifferentialActionDataContactFwdDynamicsTpl(Model<Scalar>* const model)
       : Base(model),
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
@@ -112,16 +109,15 @@ struct DifferentialActionDataContactFwdDynamicsTpl : public DifferentialActionDa
   MatrixXs df_du;
 
   using Base::cost;
-  using Base::xout;
-  using Base::Fx;
   using Base::Fu;
-  using Base::r;
-  using Base::Lx;
+  using Base::Fx;
   using Base::Lu;
-  using Base::Lxx;
-  using Base::Lxu;
   using Base::Luu;
-
+  using Base::Lx;
+  using Base::Lxu;
+  using Base::Lxx;
+  using Base::r;
+  using Base::xout;
 };
 
 }  // namespace crocoddyl
@@ -130,6 +126,5 @@ struct DifferentialActionDataContactFwdDynamicsTpl : public DifferentialActionDa
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include <crocoddyl/multibody/actions/contact-fwddyn.hxx>
-
 
 #endif  // CROCODDYL_MULTIBODY_ACTIONS_CONTACT_FWDDYN_HPP_

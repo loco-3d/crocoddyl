@@ -14,10 +14,9 @@
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
 
-
 namespace crocoddyl {
 
-template<typename Scalar>
+template <typename Scalar>
 struct DataCollectorImpulseTpl : virtual DataCollectorAbstractTpl<Scalar> {
   DataCollectorImpulseTpl(boost::shared_ptr<ImpulseDataMultipleTpl<Scalar> > impulses)
       : DataCollectorAbstractTpl<Scalar>(), impulses(impulses) {}
@@ -26,14 +25,14 @@ struct DataCollectorImpulseTpl : virtual DataCollectorAbstractTpl<Scalar> {
   boost::shared_ptr<ImpulseDataMultipleTpl<Scalar> > impulses;
 };
 
-template<typename Scalar>
+template <typename Scalar>
 struct DataCollectorMultibodyInImpulseTpl : DataCollectorMultibodyTpl<Scalar>, DataCollectorImpulseTpl<Scalar> {
-  DataCollectorMultibodyInImpulseTpl(pinocchio::DataTpl<Scalar>* const pinocchio, boost::shared_ptr<ImpulseDataMultipleTpl<Scalar> > impulses)
+  DataCollectorMultibodyInImpulseTpl(pinocchio::DataTpl<Scalar>* const pinocchio,
+                                     boost::shared_ptr<ImpulseDataMultipleTpl<Scalar> > impulses)
       : DataCollectorMultibodyTpl<Scalar>(pinocchio), DataCollectorImpulseTpl<Scalar>(impulses) {}
   virtual ~DataCollectorMultibodyInImpulseTpl() {}
 };
 
-  
 }  // namespace crocoddyl
 
 #endif  // CROCODDYL_CORE_DATA_MULTIBODY_IN_IMPULSE_HPP_

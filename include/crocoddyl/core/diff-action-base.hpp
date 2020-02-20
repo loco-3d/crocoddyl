@@ -37,7 +37,7 @@ namespace crocoddyl {
  * So \f$ xout \f$ is interpreted here as \f$ vdout \f$ or \f$ aout \f$.
  */
 
-template<typename _Scalar>
+template <typename _Scalar>
 class DifferentialActionModelAbstractTpl {
  public:
   typedef _Scalar Scalar;
@@ -46,21 +46,19 @@ class DifferentialActionModelAbstractTpl {
   typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
-  DifferentialActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
-                                     const std::size_t& nu,
+
+  DifferentialActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nu,
                                      const std::size_t& nr = 0);
   virtual ~DifferentialActionModelAbstractTpl();
 
-  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) = 0;
+  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u) = 0;
   virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) = 0;
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
   void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
-  void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>& x);
+  void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   const std::size_t& get_nu() const;
   const std::size_t& get_nr() const;
@@ -77,9 +75,9 @@ class DifferentialActionModelAbstractTpl {
   std::size_t nu_;                          //!< Control dimension
   std::size_t nr_;                          //!< Dimension of the cost residual
   boost::shared_ptr<StateAbstract> state_;  //!< Model of the state
-  VectorXs unone_;                   //!< Neutral state
-  VectorXs u_lb_;                    //!< Lower control limits
-  VectorXs u_ub_;                    //!< Upper control limits
+  VectorXs unone_;                          //!< Neutral state
+  VectorXs u_lb_;                           //!< Lower control limits
+  VectorXs u_ub_;                           //!< Upper control limits
   bool has_control_limits_;                 //!< Indicates whether any of the control limits is finite
 
   void update_has_control_limits();
@@ -107,7 +105,7 @@ class DifferentialActionModelAbstractTpl {
 #endif
 };
 
-template<typename _Scalar>
+template <typename _Scalar>
 struct DifferentialActionDataAbstractTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -115,8 +113,8 @@ struct DifferentialActionDataAbstractTpl {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
-  template<template<typename Scalar> class Model>
+
+  template <template <typename Scalar> class Model>
   explicit DifferentialActionDataAbstractTpl(Model<Scalar>* const model)
       : cost(0.),
         xout(model->get_state()->get_nv()),
@@ -152,7 +150,6 @@ struct DifferentialActionDataAbstractTpl {
   MatrixXs Luu;
 };
 
-  
 }  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */

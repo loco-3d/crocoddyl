@@ -17,10 +17,9 @@
 
 namespace crocoddyl {
 
-template<typename _Scalar>
+template <typename _Scalar>
 class ActivationModelNumDiffTpl : public ActivationModelAbstractTpl<_Scalar> {
  public:
-
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActivationModelAbstractTpl<Scalar> Base;
@@ -28,7 +27,6 @@ class ActivationModelNumDiffTpl : public ActivationModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  
   /**
    * @brief Construct a new ActivationModelNumDiff object
    *
@@ -44,8 +42,7 @@ class ActivationModelNumDiffTpl : public ActivationModelAbstractTpl<_Scalar> {
   /**
    * @brief @copydoc Base::calc()
    */
-  void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& r);
+  void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r);
 
   /**
    * @brief @copydoc Base::calcDiff()
@@ -91,26 +88,26 @@ class ActivationModelNumDiffTpl : public ActivationModelAbstractTpl<_Scalar> {
    * differentiation
    */
   Scalar disturbance_;
-protected:
+
+ protected:
   using Base::nr_;
-  
 };
-  
-template<typename _Scalar>
+
+template <typename _Scalar>
 struct ActivationDataNumDiffTpl : public ActivationDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef ActivationDataAbstractTpl<Scalar> Base;
-  
+
   /**
    * @brief Construct a new ActivationDataNumDiff object
    *
    * @tparam Model is the type of the ActivationModel.
    * @param model is the object to compute the numerical differentiation from.
    */
-  template <template<typename Scalar> class Model>
+  template <template <typename Scalar> class Model>
   explicit ActivationDataNumDiffTpl(Model<Scalar>* const model)
       : Base(model), dr(model->get_model()->get_nr()), rp(model->get_model()->get_nr()) {
     dr.setZero();
@@ -128,18 +125,15 @@ struct ActivationDataNumDiffTpl : public ActivationDataAbstractTpl<_Scalar> {
     }
   }
 
-  VectorXs dr;  //!< disturbance: \f$ [\hdot \;\; disturbance \;\; \hdot] \f$
-  VectorXs rp;  //!< The input + the disturbance on one DoF "\f$ r^+ = rp =  \int r + dr \f$"
+  VectorXs dr;                     //!< disturbance: \f$ [\hdot \;\; disturbance \;\; \hdot] \f$
+  VectorXs rp;                     //!< The input + the disturbance on one DoF "\f$ r^+ = rp =  \int r + dr \f$"
   boost::shared_ptr<Base> data_0;  //!< The data that contains the final results
-  std::vector<boost::shared_ptr<Base> >
-      data_rp;  //!< The temporary data associated with the input variation
-  std::vector<boost::shared_ptr<Base> >
-      data_r2p;  //!< The temporary data associated with the input variation
+  std::vector<boost::shared_ptr<Base> > data_rp;   //!< The temporary data associated with the input variation
+  std::vector<boost::shared_ptr<Base> > data_r2p;  //!< The temporary data associated with the input variation
 
   using Base::a_value;
   using Base::Ar;
   using Base::Arr;
-  
 };
 
 }  // namespace crocoddyl

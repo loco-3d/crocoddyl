@@ -18,7 +18,7 @@
 
 namespace crocoddyl {
 
-template<typename _Scalar>
+template <typename _Scalar>
 struct ImpulseItemTpl {
   typedef _Scalar Scalar;
   ImpulseItemTpl() {}
@@ -29,7 +29,7 @@ struct ImpulseItemTpl {
   boost::shared_ptr<ImpulseModelAbstractTpl<Scalar> > impulse;
 };
 
-template<typename _Scalar>
+template <typename _Scalar>
 class ImpulseModelMultipleTpl {
  public:
   typedef _Scalar Scalar;
@@ -38,15 +38,14 @@ class ImpulseModelMultipleTpl {
   typedef ImpulseDataAbstractTpl<Scalar> ImpulseDataAbstract;
   typedef ImpulseDataMultipleTpl<Scalar> ImpulseDataMultiple;
   typedef ImpulseModelAbstractTpl<Scalar> ImpulseModelAbstract;
-  
+
   typedef ImpulseItemTpl<Scalar> ImpulseItem;
-  
+
   typedef typename MathBase::Vector2s Vector2s;
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  
   typedef std::map<std::string, ImpulseItem> ImpulseModelContainer;
   typedef std::map<std::string, boost::shared_ptr<ImpulseDataAbstract> > ImpulseDataContainer;
   typedef typename pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar> >::iterator ForceIterator;
@@ -80,15 +79,12 @@ class ImpulseModelMultipleTpl {
  public:
   void calc_wrap(const boost::shared_ptr<ImpulseDataMultiple>& data, const VectorXs& x) { calc(data, x); }
 
-  void calcDiff_wrap(const boost::shared_ptr<ImpulseDataMultiple>& data, const VectorXs& x) {
-    calcDiff(data, x);
-  }
+  void calcDiff_wrap(const boost::shared_ptr<ImpulseDataMultiple>& data, const VectorXs& x) { calcDiff(data, x); }
 
 #endif
 };
 
-
-template<typename _Scalar>  
+template <typename _Scalar>
 struct ImpulseDataMultipleTpl : ImpulseDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;
@@ -97,13 +93,13 @@ struct ImpulseDataMultipleTpl : ImpulseDataAbstractTpl<_Scalar> {
   typedef ImpulseModelMultipleTpl<Scalar> ImpulseModelMultiple;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ImpulseItemTpl<Scalar> ImpulseItem;
-  
+
   typedef typename MathBase::Vector2s Vector2s;
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
-  template <template<typename Scalar> class Model>
+
+  template <template <typename Scalar> class Model>
   ImpulseDataMultipleTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
       : Base(model, data),
         vnext(model->get_state()->get_nv()),
@@ -123,17 +119,15 @@ struct ImpulseDataMultipleTpl : ImpulseDataAbstractTpl<_Scalar> {
   typename ImpulseModelMultiple::ImpulseDataContainer impulses;
   pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar> > fext;
 
-  using Base::pinocchio;
-  using Base::joint;
+  using Base::df_dq;
+  using Base::dv0_dq;
+  using Base::f;
   using Base::frame;
   using Base::Jc;
-  using Base::dv0_dq;
-  using Base::df_dq;
-  using Base::f;
-  
+  using Base::joint;
+  using Base::pinocchio;
 };
-  
-  
+
 }  // namespace crocoddyl
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */

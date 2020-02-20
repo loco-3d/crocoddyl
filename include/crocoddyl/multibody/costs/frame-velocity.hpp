@@ -16,7 +16,7 @@
 
 namespace crocoddyl {
 
-template<typename _Scalar>
+template <typename _Scalar>
 class CostModelFrameVelocityTpl : public CostModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
@@ -32,43 +32,38 @@ class CostModelFrameVelocityTpl : public CostModelAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix3s Matrix3s;
 
   CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
-                         boost::shared_ptr<ActivationModelAbstract> activation,
-                         const FrameMotion& Fref,
-                         const std::size_t& nu);
+                            boost::shared_ptr<ActivationModelAbstract> activation, const FrameMotion& Fref,
+                            const std::size_t& nu);
   CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
-                            boost::shared_ptr<ActivationModelAbstract> activation,
-                            const FrameMotion& Fref);
+                            boost::shared_ptr<ActivationModelAbstract> activation, const FrameMotion& Fref);
   CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state, const FrameMotion& vref, const std::size_t& nu);
   CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state, const FrameMotion& vref);
   ~CostModelFrameVelocityTpl();
 
-  void calc(const boost::shared_ptr<CostDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& x,
+  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>& x,
+  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u);
   boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
   const FrameMotion& get_vref() const;
   void set_vref(const FrameMotion& vref_in);
 
-protected:
-  using Base::state_;
+ protected:
   using Base::activation_;
   using Base::nu_;
-  using Base::with_residuals_;
+  using Base::state_;
   using Base::unone_;
-  
+  using Base::with_residuals_;
+
  private:
   FrameMotion vref_;
 };
 
-
-template<typename _Scalar> 
+template <typename _Scalar>
 struct CostDataFrameVelocityTpl : public CostDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;
@@ -77,7 +72,7 @@ struct CostDataFrameVelocityTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
 
-  template<template<typename Scalar> class Model>
+  template <template <typename Scalar> class Model>
   CostDataFrameVelocityTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data),
         joint(model->get_state()->get_pinocchio().frames[model->get_vref().frame].parent),
@@ -90,8 +85,7 @@ struct CostDataFrameVelocityTpl : public CostDataAbstractTpl<_Scalar> {
     dv_dv.fill(0);
     Arr_Rx.fill(0);
     // Check that proper shared data has been passed
-    DataCollectorMultibodyTpl<Scalar>* d =
-      dynamic_cast<DataCollectorMultibodyTpl<Scalar>* >(shared);
+    DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
     if (d == NULL) {
       throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibody");
     }
@@ -108,27 +102,24 @@ struct CostDataFrameVelocityTpl : public CostDataAbstractTpl<_Scalar> {
   Matrix6xs dv_dv;
   Matrix6xs Arr_Rx;
 
-  using Base::shared;
   using Base::activation;
   using Base::cost;
-  using Base::Lx;
   using Base::Lu;
-  using Base::Lxx;
-  using Base::Lxu;
   using Base::Luu;
+  using Base::Lx;
+  using Base::Lxu;
+  using Base::Lxx;
   using Base::r;
-  using Base::Rx;
   using Base::Ru;
-  
+  using Base::Rx;
+  using Base::shared;
 };
 
-  
 }  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/costs/frame-velocity.hxx"
-
 
 #endif  // CROCODDYL_MULTIBODY_COSTS_FRAME_VELOCITY_HPP_

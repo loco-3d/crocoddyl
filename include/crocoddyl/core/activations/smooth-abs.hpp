@@ -14,8 +14,8 @@
 #include <stdexcept>
 
 namespace crocoddyl {
-  
-template<typename _Scalar>
+
+template <typename _Scalar>
 class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
@@ -25,41 +25,36 @@ class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
   typedef ActivationDataSmoothAbsTpl<Scalar> ActivationDataSmoothAbs;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
-  explicit ActivationModelSmoothAbsTpl(const std::size_t& nr) : Base(nr) {};
-  ~ActivationModelSmoothAbsTpl() {};
 
-  void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& r) {
+  explicit ActivationModelSmoothAbsTpl(const std::size_t& nr) : Base(nr){};
+  ~ActivationModelSmoothAbsTpl(){};
+
+  void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
     boost::shared_ptr<ActivationDataSmoothAbs> d = boost::static_pointer_cast<ActivationDataSmoothAbs>(data);
-    
+
     d->a = (r.array().cwiseAbs2().array() + 1).array().cwiseSqrt();
     data->a_value = d->a.sum();
   };
-  
-  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>& r) {
+
+  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
-    
+
     boost::shared_ptr<ActivationDataSmoothAbs> d = boost::static_pointer_cast<ActivationDataSmoothAbs>(data);
     data->Ar = r.cwiseProduct(d->a.cwiseInverse());
     data->Arr.diagonal() = d->a.cwiseProduct(d->a).cwiseProduct(d->a).cwiseInverse();
   };
-  
-  boost::shared_ptr<ActivationDataAbstract> createData() {
-    return boost::make_shared<ActivationDataSmoothAbs>(this);
-  };
 
-protected:
+  boost::shared_ptr<ActivationDataAbstract> createData() { return boost::make_shared<ActivationDataSmoothAbs>(this); };
+
+ protected:
   using Base::nr_;
-  
 };
 
 template <typename _Scalar>
@@ -70,7 +65,7 @@ struct ActivationDataSmoothAbsTpl : public ActivationDataAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
+
   template <typename Activation>
   explicit ActivationDataSmoothAbsTpl(Activation* const activation)
       : Base(activation), a(VectorXs::Zero(activation->get_nr())) {
@@ -81,7 +76,6 @@ struct ActivationDataSmoothAbsTpl : public ActivationDataAbstractTpl<_Scalar> {
   using Base::Arr;
 };
 
-  
 }  // namespace crocoddyl
 
 #endif  // CROCODDYL_CORE_ACTIVATIONS_SMOOTH_ABS_HPP_

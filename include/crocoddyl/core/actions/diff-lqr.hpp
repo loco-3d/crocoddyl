@@ -14,11 +14,10 @@
 #include <stdexcept>
 
 namespace crocoddyl {
-  
-template<typename _Scalar>
+
+template <typename _Scalar>
 class DifferentialActionModelLQRTpl : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
-
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef DifferentialActionModelAbstractTpl<Scalar> Base;
@@ -27,16 +26,14 @@ class DifferentialActionModelLQRTpl : public DifferentialActionModelAbstractTpl<
   typedef DifferentialActionDataLQRTpl<Scalar> DifferentialActionDataLQR;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
-  DifferentialActionModelLQRTpl(const std::size_t& nq, const std::size_t& nu,
-                                bool drift_free = true);
+
+  DifferentialActionModelLQRTpl(const std::size_t& nq, const std::size_t& nu, bool drift_free = true);
   ~DifferentialActionModelLQRTpl();
 
-  void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& x,
+  void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+  void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                const Eigen::Ref<const VectorXs>& u);
   boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
   const MatrixXs& get_Fq() const;
@@ -59,14 +56,14 @@ class DifferentialActionModelLQRTpl : public DifferentialActionModelAbstractTpl<
   void set_Lxu(const MatrixXs& Lxu);
   void set_Luu(const MatrixXs& Luu);
 
-protected:
-  using Base::nu_;                          //!< Control dimension
-  using Base::nr_;                          //!< Dimension of the cost residual
-  using Base::state_;  //!< Model of the state
-  using Base::unone_;                   //!< Neutral state
-  using Base::u_lb_;                    //!< Lower control limits
-  using Base::u_ub_;                    //!< Upper control limits
-  using Base::has_control_limits_;    //!< Indicates whether any of the control limits 
+ protected:
+  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
+  using Base::nr_;                  //!< Dimension of the cost residual
+  using Base::nu_;                  //!< Control dimension
+  using Base::state_;               //!< Model of the state
+  using Base::u_lb_;                //!< Lower control limits
+  using Base::u_ub_;                //!< Upper control limits
+  using Base::unone_;               //!< Neutral state
 
  private:
   bool drift_free_;
@@ -81,16 +78,15 @@ protected:
   VectorXs lu_;
 };
 
-template<typename _Scalar>
+template <typename _Scalar>
 struct DifferentialActionDataLQRTpl : public DifferentialActionDataAbstractTpl<_Scalar> {
-
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef DifferentialActionDataAbstractTpl<Scalar> Base;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
-  template<template<typename Scalar> class Model>
+
+  template <template <typename Scalar> class Model>
   explicit DifferentialActionDataLQRTpl(Model<Scalar>* const model) : Base(model) {
     // Setting the linear model and quadratic cost here because they are constant
     Fx.leftCols(model->get_state()->get_nq()) = model->get_Fq();
@@ -102,19 +98,17 @@ struct DifferentialActionDataLQRTpl : public DifferentialActionDataAbstractTpl<_
   }
 
   using Base::cost;
-  using Base::xout;
-  using Base::Fx;
   using Base::Fu;
-  using Base::r;
-  using Base::Lx;
+  using Base::Fx;
   using Base::Lu;
-  using Base::Lxx;
-  using Base::Lxu;
   using Base::Luu;
-  
+  using Base::Lx;
+  using Base::Lxu;
+  using Base::Lxx;
+  using Base::r;
+  using Base::xout;
 };
 
-  
 }  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */

@@ -16,11 +16,10 @@
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
 
 namespace crocoddyl {
-  
-template<typename Scalar>
+
+template <typename Scalar>
 DifferentialActionModelContactFwdDynamicsTpl<Scalar>::DifferentialActionModelContactFwdDynamicsTpl(
-    boost::shared_ptr<StateMultibody> state,
-    boost::shared_ptr<ActuationModelFloatingBase> actuation,
+    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelFloatingBase> actuation,
     boost::shared_ptr<ContactModelMultiple> contacts, boost::shared_ptr<CostModelSum> costs,
     const Scalar& JMinvJt_damping, const bool& enable_force)
     : Base(state, actuation->get_nu(), costs->get_nr()),
@@ -50,13 +49,13 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::DifferentialActionModelCon
   Base::set_u_ub(+1. * pinocchio_.effortLimit.tail(nu_));
 }
 
-template<typename Scalar>
+template <typename Scalar>
 DifferentialActionModelContactFwdDynamicsTpl<Scalar>::~DifferentialActionModelContactFwdDynamicsTpl() {}
 
-template<typename Scalar>
-void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                                                     const Eigen::Ref<const VectorXs>& x,
-                                                     const Eigen::Ref<const VectorXs>& u) {
+template <typename Scalar>
+void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+    const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -66,7 +65,8 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(const boost::sha
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  DifferentialActionDataContactFwdDynamicsTpl<Scalar>* d = static_cast<DifferentialActionDataContactFwdDynamicsTpl<Scalar>* >(data.get());
+  DifferentialActionDataContactFwdDynamicsTpl<Scalar>* d =
+      static_cast<DifferentialActionDataContactFwdDynamicsTpl<Scalar>*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
 
@@ -98,11 +98,11 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(const boost::sha
   costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
 }
-  
-template<typename Scalar>
-void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                                                         const Eigen::Ref<const VectorXs>& x,
-                                                         const Eigen::Ref<const VectorXs>& u) {
+
+template <typename Scalar>
+void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+    const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -117,8 +117,8 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(const boost:
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(nv);
 
-  DifferentialActionDataContactFwdDynamicsTpl<Scalar> * d =
-    static_cast<DifferentialActionDataContactFwdDynamicsTpl<Scalar>* >(data.get());
+  DifferentialActionDataContactFwdDynamicsTpl<Scalar>* d =
+      static_cast<DifferentialActionDataContactFwdDynamicsTpl<Scalar>*>(data.get());
 
   // Computing the dynamics derivatives
   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout, d->multibody.contacts->fext);
@@ -150,35 +150,48 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(const boost:
   }
   costs_->calcDiff(d->costs, x, u);
 }
-  
-template<typename Scalar>
-boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > DifferentialActionModelContactFwdDynamicsTpl<Scalar>::createData() {
+
+template <typename Scalar>
+boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
+DifferentialActionModelContactFwdDynamicsTpl<Scalar>::createData() {
   return boost::make_shared<DifferentialActionDataContactFwdDynamicsTpl<Scalar> >(this);
 }
-  
-template<typename Scalar>
-pinocchio::ModelTpl<Scalar>& DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_pinocchio() const { return pinocchio_; }
-  
-template<typename Scalar>
-const boost::shared_ptr<ActuationModelFloatingBaseTpl<Scalar> >& DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_actuation() const {
+
+template <typename Scalar>
+pinocchio::ModelTpl<Scalar>& DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_pinocchio() const {
+  return pinocchio_;
+}
+
+template <typename Scalar>
+const boost::shared_ptr<ActuationModelFloatingBaseTpl<Scalar> >&
+DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_actuation() const {
   return actuation_;
 }
-  
-template<typename Scalar>
-const boost::shared_ptr<ContactModelMultipleTpl<Scalar> >& DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_contacts() const {
+
+template <typename Scalar>
+const boost::shared_ptr<ContactModelMultipleTpl<Scalar> >&
+DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_contacts() const {
   return contacts_;
 }
-  
-template<typename Scalar>
-const boost::shared_ptr<CostModelSumTpl<Scalar> >& DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_costs() const { return costs_; }
-  
-template<typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_armature() const { return armature_; }
-  
-template<typename Scalar>
-const Scalar& DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_damping_factor() const { return JMinvJt_damping_; }
-  
-template<typename Scalar>
+
+template <typename Scalar>
+const boost::shared_ptr<CostModelSumTpl<Scalar> >& DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_costs()
+    const {
+  return costs_;
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_armature()
+    const {
+  return armature_;
+}
+
+template <typename Scalar>
+const Scalar& DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_damping_factor() const {
+  return JMinvJt_damping_;
+}
+
+template <typename Scalar>
 void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::set_armature(const VectorXs& armature) {
   if (static_cast<std::size_t>(armature.size()) != state_->get_nv()) {
     throw_pretty("Invalid argument: "
@@ -187,8 +200,8 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::set_armature(const Ve
   armature_ = armature;
   with_armature_ = false;
 }
-  
-template<typename Scalar>
+
+template <typename Scalar>
 void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::set_damping_factor(const Scalar& damping) {
   if (damping < 0.) {
     throw_pretty("Invalid argument: "

@@ -15,16 +15,15 @@
 
 namespace crocoddyl {
 
-template<typename Scalar>
+template <typename Scalar>
 struct DataCollectorActuationTpl : virtual DataCollectorAbstractTpl<Scalar> {
   DataCollectorActuationTpl(boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation)
-    : DataCollectorAbstractTpl<Scalar>(), actuation(actuation) {}
+      : DataCollectorAbstractTpl<Scalar>(), actuation(actuation) {}
   virtual ~DataCollectorActuationTpl() {}
 
   boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation;
 };
 
-  
 }  // namespace crocoddyl
 
 #endif  // CROCODDYL_CORE_DATA_ACTUATION_HPP_

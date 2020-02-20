@@ -20,7 +20,7 @@
 
 namespace crocoddyl {
 
-template<typename _Scalar>
+template <typename _Scalar>
 class CostModelContactFrictionConeTpl : public CostModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
@@ -37,23 +37,19 @@ class CostModelContactFrictionConeTpl : public CostModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::MatrixX3s MatrixX3s;
-  
+
   CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
-                                  boost::shared_ptr<ActivationModelAbstract> activation,
-                                  const FrictionCone& cone,
+                                  boost::shared_ptr<ActivationModelAbstract> activation, const FrictionCone& cone,
                                   const FrameIndex& frame, const std::size_t& nu);
   CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
-                                  boost::shared_ptr<ActivationModelAbstract> activation,
-                                  const FrictionCone& cone,
+                                  boost::shared_ptr<ActivationModelAbstract> activation, const FrictionCone& cone,
                                   const FrameIndex& frame);
-  CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
-                                  const FrictionCone& cone,
+  CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state, const FrictionCone& cone,
                                   const FrameIndex& frame, const std::size_t& nu);
-  CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
-                                  const FrictionCone& cone,
+  CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state, const FrictionCone& cone,
                                   const FrameIndex& frame);
   ~CostModelContactFrictionConeTpl();
-  
+
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
   void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -65,19 +61,19 @@ class CostModelContactFrictionConeTpl : public CostModelAbstractTpl<_Scalar> {
   void set_friction_cone(const FrictionCone& cone);
   void set_frame(const FrameIndex& frame);
 
-protected:
-  using Base::state_;
+ protected:
   using Base::activation_;
   using Base::nu_;
-  using Base::with_residuals_;
+  using Base::state_;
   using Base::unone_;
-  
+  using Base::with_residuals_;
+
  protected:
   FrictionCone friction_cone_;
   FrameIndex frame_;
 };
 
-template<typename _Scalar>
+template <typename _Scalar>
 struct CostDataContactFrictionConeTpl : public CostDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;
@@ -88,8 +84,8 @@ struct CostDataContactFrictionConeTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
-  
-  template<template<typename Scalar> class Model>
+
+  template <template <typename Scalar> class Model>
   CostDataContactFrictionConeTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data),
         Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()),
@@ -97,8 +93,7 @@ struct CostDataContactFrictionConeTpl : public CostDataAbstractTpl<_Scalar> {
     Arr_Ru.fill(0);
 
     // Check that proper shared data has been passed
-    DataCollectorContactTpl<Scalar>* d =
-      dynamic_cast<DataCollectorContactTpl<Scalar>* >(shared);
+    DataCollectorContactTpl<Scalar>* d = dynamic_cast<DataCollectorContactTpl<Scalar>*>(shared);
     if (d == NULL) {
       throw_pretty("Invalid argument: the shared data should be derived from DataCollectorContact");
     }
@@ -109,13 +104,13 @@ struct CostDataContactFrictionConeTpl : public CostDataAbstractTpl<_Scalar> {
     for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
          it != d->contacts->contacts.end(); ++it) {
       if (it->second->frame == model->get_frame()) {
-        ContactData3DTpl<Scalar>* d3d = dynamic_cast<ContactData3DTpl<Scalar>* >(it->second.get());
+        ContactData3DTpl<Scalar>* d3d = dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
         if (d3d != NULL) {
           found_contact = true;
           contact = it->second;
           break;
         }
-        ContactData6DTpl<Scalar>* d6d = dynamic_cast<ContactData6DTpl<Scalar> *>(it->second.get());
+        ContactData6DTpl<Scalar>* d6d = dynamic_cast<ContactData6DTpl<Scalar>*>(it->second.get());
         if (d6d != NULL) {
           more_than_3_constraints = true;
           found_contact = true;
@@ -134,20 +129,19 @@ struct CostDataContactFrictionConeTpl : public CostDataAbstractTpl<_Scalar> {
   boost::shared_ptr<ContactDataAbstractTpl<Scalar> > contact;
   MatrixXs Arr_Ru;
   bool more_than_3_constraints;
-  using Base::shared;
   using Base::activation;
   using Base::cost;
-  using Base::Lx;
   using Base::Lu;
-  using Base::Lxx;
-  using Base::Lxu;
   using Base::Luu;
+  using Base::Lx;
+  using Base::Lxu;
+  using Base::Lxx;
   using Base::r;
+  using Base::Ru;
   using Base::Rx;
-  using Base::Ru;  
+  using Base::shared;
 };
 
-  
 }  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */

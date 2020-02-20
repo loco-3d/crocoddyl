@@ -16,10 +16,9 @@
 #include <crocoddyl/core/mathbase.hpp>
 #include "crocoddyl/core/utils/to-string.hpp"
 
-
 namespace crocoddyl {
 
-template<typename _Scalar>
+template <typename _Scalar>
 class ActivationModelAbstractTpl {
  public:
   typedef _Scalar Scalar;
@@ -27,8 +26,8 @@ class ActivationModelAbstractTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  explicit ActivationModelAbstractTpl(const std::size_t& nr)  : nr_(nr) {};
-  virtual ~ActivationModelAbstractTpl() {};
+  explicit ActivationModelAbstractTpl(const std::size_t& nr) : nr_(nr){};
+  virtual ~ActivationModelAbstractTpl(){};
 
   virtual void calc(const boost::shared_ptr<ActivationDataAbstractTpl<Scalar> >& data,
                     const Eigen::Ref<const VectorXs>& r) = 0;
@@ -46,7 +45,9 @@ class ActivationModelAbstractTpl {
 #ifdef PYTHON_BINDINGS
 
  public:
-  void calc_wrap(const boost::shared_ptr<ActivationDataAbstractTpl<Scalar> >& data, const VectorXs& r) { calc(data, r); }
+  void calc_wrap(const boost::shared_ptr<ActivationDataAbstractTpl<Scalar> >& data, const VectorXs& r) {
+    calc(data, r);
+  }
 
   void calcDiff_wrap(const boost::shared_ptr<ActivationDataAbstractTpl<Scalar> >& data, const VectorXs& r) {
     calcDiff(data, r);
@@ -70,13 +71,11 @@ struct ActivationDataAbstractTpl {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
+
   Scalar a_value;
   VectorXs Ar;
   MatrixXs Arr;
 };
-
-
 
 }  // namespace crocoddyl
 

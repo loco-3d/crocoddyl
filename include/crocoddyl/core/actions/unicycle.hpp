@@ -21,28 +21,29 @@ class ActionModelUnicycleTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef ActionModelAbstractTpl<Scalar> Base;
   typedef MathBaseTpl<Scalar> MathBase;
-  
+
   ActionModelUnicycleTpl();
   ~ActionModelUnicycleTpl();
 
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const typename MathBase::VectorXs>& x,
             const Eigen::Ref<const typename MathBase::VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const typename MathBase::VectorXs>& x,
+  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+                const Eigen::Ref<const typename MathBase::VectorXs>& x,
                 const Eigen::Ref<const typename MathBase::VectorXs>& u);
   boost::shared_ptr<ActionDataAbstract> createData();
 
   const typename MathBase::Vector2s& get_cost_weights() const;
   void set_cost_weights(const typename MathBase::Vector2s& weights);
-  
-protected:
-  using Base::nu_;                          //!< Control dimension
-  using Base::nr_;                          //!< Dimension of the cost residual
-  using Base::state_;  //!< Model of the state
-  using Base::unone_;                   //!< Neutral state
-  using Base::u_lb_;                    //!< Lower control limits
-  using Base::u_ub_;                    //!< Upper control limits
-  using Base::has_control_limits_;      //!< Indicates whether any of the control limits
-  
+
+ protected:
+  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
+  using Base::nr_;                  //!< Dimension of the cost residual
+  using Base::nu_;                  //!< Control dimension
+  using Base::state_;               //!< Model of the state
+  using Base::u_lb_;                //!< Lower control limits
+  using Base::u_ub_;                //!< Upper control limits
+  using Base::unone_;               //!< Neutral state
+
  private:
   typename MathBase::Vector2s cost_weights_;
   Scalar dt_;
@@ -56,25 +57,21 @@ struct ActionDataUnicycleTpl : public ActionDataAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActionDataAbstractTpl<Scalar> Base;
   using Base::cost;
-  using Base::xnext;
-  using Base::r;
-  using Base::Fx;
   using Base::Fu;
-  using Base::Lx;
+  using Base::Fx;
   using Base::Lu;
-  using Base::Lxx;
-  using Base::Lxu;
   using Base::Luu;
-  
-  template<template<typename Scalar> class Model>
-  explicit ActionDataUnicycleTpl(Model<Scalar>* const model) : ActionDataAbstractTpl<Scalar>(model) {}
+  using Base::Lx;
+  using Base::Lxu;
+  using Base::Lxx;
+  using Base::r;
+  using Base::xnext;
 
-  
+  template <template <typename Scalar> class Model>
+  explicit ActionDataUnicycleTpl(Model<Scalar>* const model) : ActionDataAbstractTpl<Scalar>(model) {}
 };
 
-  
 }  // namespace crocoddyl
-
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */

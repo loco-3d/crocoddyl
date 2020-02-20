@@ -15,7 +15,7 @@
 
 namespace crocoddyl {
 
-template<typename _Scalar>
+template <typename _Scalar>
 class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
@@ -24,26 +24,24 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
   typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
-  explicit ActivationModelQuadTpl(const std::size_t& nr) : Base(nr) {};
-  ~ActivationModelQuadTpl() {};
 
-  void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& r) {
+  explicit ActivationModelQuadTpl(const std::size_t& nr) : Base(nr){};
+  ~ActivationModelQuadTpl(){};
+
+  void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
     data->a_value = 0.5 * r.transpose() * r;
   };
-  
-  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>& r) {
+
+  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
-    
+
     data->Ar = r;
     // The Hessian has constant values which were set in createData.
     assert_pretty(data->Arr == MatrixXs::Identity(nr_, nr_), "Arr has wrong value");
@@ -54,13 +52,11 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
     data->Arr.diagonal().fill(1.);
     return data;
   };
-  
-protected:
+
+ protected:
   using Base::nr_;
-  
 };
 
-  
 }  // namespace crocoddyl
 
 #endif  // CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_

@@ -14,10 +14,9 @@
 
 namespace crocoddyl {
 
-template<typename _Scalar>
+template <typename _Scalar>
 class CostModelStateTpl : public CostModelAbstractTpl<_Scalar> {
  public:
-
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostModelAbstractTpl<Scalar> Base;
@@ -28,31 +27,24 @@ class CostModelStateTpl : public CostModelAbstractTpl<_Scalar> {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
-  CostModelStateTpl(boost::shared_ptr<StateMultibody> state,
-                    boost::shared_ptr<ActivationModelAbstract> activation,
+
+  CostModelStateTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
                     const VectorXs& xref, const std::size_t& nu);
-  CostModelStateTpl(boost::shared_ptr<StateMultibody> state,
-                    boost::shared_ptr<ActivationModelAbstract> activation,
+  CostModelStateTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
                     const VectorXs& xref);
-  CostModelStateTpl(boost::shared_ptr<StateMultibody> state, const VectorXs& xref,
-                    const std::size_t& nu);
+  CostModelStateTpl(boost::shared_ptr<StateMultibody> state, const VectorXs& xref, const std::size_t& nu);
   CostModelStateTpl(boost::shared_ptr<StateMultibody> state, const VectorXs& xref);
-  CostModelStateTpl(boost::shared_ptr<StateMultibody> state,
-                    boost::shared_ptr<ActivationModelAbstract> activation,
+  CostModelStateTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
                     const std::size_t& nu);
   CostModelStateTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu);
-  CostModelStateTpl(boost::shared_ptr<StateMultibody> state,
-                    boost::shared_ptr<ActivationModelAbstract> activation);
+  CostModelStateTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation);
   explicit CostModelStateTpl(boost::shared_ptr<StateMultibody> state);
 
   ~CostModelStateTpl();
 
-  void calc(const boost::shared_ptr<CostDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& x,
+  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>& x,
+  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u);
   boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
@@ -60,18 +52,17 @@ class CostModelStateTpl : public CostModelAbstractTpl<_Scalar> {
   void set_xref(const VectorXs& xref_in);
 
  protected:
-  using Base::state_;
   using Base::activation_;
   using Base::nu_;
-  using Base::with_residuals_;
+  using Base::state_;
   using Base::unone_;
+  using Base::with_residuals_;
 
-  
  private:
   VectorXs xref_;
 };
 
-template<typename _Scalar>
+template <typename _Scalar>
 struct CostDataStateTpl : public CostDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -82,31 +73,27 @@ struct CostDataStateTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  
-  template <template<typename Scalar> class Model>
+  template <template <typename Scalar> class Model>
   CostDataStateTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data), Arr_Rx(model->get_activation()->get_nr(), model->get_state()->get_ndx()) {
     Arr_Rx.fill(0);
   }
-  
+
   MatrixXs Arr_Rx;
 
-  using Base::shared;
   using Base::activation;
   using Base::cost;
-  using Base::Lx;
   using Base::Lu;
-  using Base::Lxx;
-  using Base::Lxu;
   using Base::Luu;
+  using Base::Lx;
+  using Base::Lxu;
+  using Base::Lxx;
   using Base::r;
-  using Base::Rx;
   using Base::Ru;
-
-
-  
+  using Base::Rx;
+  using Base::shared;
 };
-  
+
 }  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */

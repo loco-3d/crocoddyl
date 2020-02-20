@@ -11,19 +11,19 @@
 #include "crocoddyl/core/numdiff/action.hpp"
 
 namespace crocoddyl {
-  
-template<typename Scalar>
+
+template <typename Scalar>
 ActionModelNumDiffTpl<Scalar>::ActionModelNumDiffTpl(boost::shared_ptr<Base> model)
     : Base(model->get_state(), model->get_nu(), model->get_nr()), model_(model) {
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon());
 }
-  
-template<typename Scalar>
+
+template <typename Scalar>
 ActionModelNumDiffTpl<Scalar>::~ActionModelNumDiffTpl() {}
-  
-template<typename Scalar>
+
+template <typename Scalar>
 void ActionModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>& data,
-                              const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
+                                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -33,16 +33,16 @@ void ActionModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstr
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   boost::shared_ptr<ActionDataNumDiffTpl<Scalar> > data_nd =
-    boost::static_pointer_cast<ActionDataNumDiffTpl<Scalar> >(data);
+      boost::static_pointer_cast<ActionDataNumDiffTpl<Scalar> >(data);
   model_->calc(data_nd->data_0, x, u);
   data->cost = data_nd->data_0->cost;
   data->xnext = data_nd->data_0->xnext;
 }
-  
-template<typename Scalar>
+
+template <typename Scalar>
 void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
-                                  const Eigen::Ref<const VectorXs>& x,
-                                  const Eigen::Ref<const VectorXs>& u) {
+                                             const Eigen::Ref<const VectorXs>& x,
+                                             const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -51,7 +51,8 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-  boost::shared_ptr<ActionDataNumDiffTpl<Scalar> > data_nd = boost::static_pointer_cast<ActionDataNumDiffTpl<Scalar> >(data);
+  boost::shared_ptr<ActionDataNumDiffTpl<Scalar> > data_nd =
+      boost::static_pointer_cast<ActionDataNumDiffTpl<Scalar> >(data);
 
   const VectorXs& xn0 = data_nd->data_0->xnext;
   const Scalar& c0 = data_nd->data_0->cost;
@@ -107,19 +108,23 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
     data->Luu.fill(0.0);
   }
 }
-  
-template<typename Scalar>
+
+template <typename Scalar>
 boost::shared_ptr<ActionDataAbstractTpl<Scalar> > ActionModelNumDiffTpl<Scalar>::createData() {
   return boost::make_shared<ActionDataNumDiffTpl<Scalar> >(this);
 }
-  
-template<typename Scalar>
-const boost::shared_ptr<ActionModelAbstractTpl<Scalar> >& ActionModelNumDiffTpl<Scalar>::get_model() const { return model_; }
-  
-template<typename Scalar>
-const Scalar& ActionModelNumDiffTpl<Scalar>::get_disturbance() const { return disturbance_; }
-  
-template<typename Scalar>
+
+template <typename Scalar>
+const boost::shared_ptr<ActionModelAbstractTpl<Scalar> >& ActionModelNumDiffTpl<Scalar>::get_model() const {
+  return model_;
+}
+
+template <typename Scalar>
+const Scalar& ActionModelNumDiffTpl<Scalar>::get_disturbance() const {
+  return disturbance_;
+}
+
+template <typename Scalar>
 void ActionModelNumDiffTpl<Scalar>::set_disturbance(const Scalar& disturbance) {
   if (disturbance < 0.) {
     throw_pretty("Invalid argument: "
@@ -127,11 +132,13 @@ void ActionModelNumDiffTpl<Scalar>::set_disturbance(const Scalar& disturbance) {
   }
   disturbance_ = disturbance;
 }
-  
-template<typename Scalar>
-bool ActionModelNumDiffTpl<Scalar>::get_with_gauss_approx() { return model_->get_nr() > 0; }
-  
-template<typename Scalar>
+
+template <typename Scalar>
+bool ActionModelNumDiffTpl<Scalar>::get_with_gauss_approx() {
+  return model_->get_nr() > 0;
+}
+
+template <typename Scalar>
 void ActionModelNumDiffTpl<Scalar>::assertStableStateFD(const Eigen::Ref<const VectorXs>& /** x */) {
   // do nothing in the general case
 }

@@ -11,10 +11,10 @@
 
 namespace crocoddyl {
 
-template<typename Scalar>  
+template <typename Scalar>
 CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
-                                             boost::shared_ptr<ActivationModelAbstract> activation,
-                                             const FrameForce& fref, const std::size_t& nu)
+                                                           boost::shared_ptr<ActivationModelAbstract> activation,
+                                                           const FrameForce& fref, const std::size_t& nu)
     : Base(state, activation, nu), fref_(fref) {
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
@@ -22,10 +22,10 @@ CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<Sta
   }
 }
 
-template<typename Scalar>  
+template <typename Scalar>
 CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
-                                             boost::shared_ptr<ActivationModelAbstract> activation,
-                                             const FrameForce& fref)
+                                                           boost::shared_ptr<ActivationModelAbstract> activation,
+                                                           const FrameForce& fref)
     : Base(state, activation), fref_(fref) {
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
@@ -33,24 +33,24 @@ CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<Sta
   }
 }
 
-template<typename Scalar>  
-CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref,
-                                             const std::size_t& nu)
+template <typename Scalar>
+CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
+                                                           const FrameForce& fref, const std::size_t& nu)
     : Base(state, 6, nu), fref_(fref) {}
-  
-template<typename Scalar>  
-CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref)
+
+template <typename Scalar>
+CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
+                                                           const FrameForce& fref)
     : Base(state, 6), fref_(fref) {}
-  
-template<typename Scalar>  
+
+template <typename Scalar>
 CostModelContactForceTpl<Scalar>::~CostModelContactForceTpl() {}
-  
-template<typename Scalar>  
+
+template <typename Scalar>
 void CostModelContactForceTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                 const Eigen::Ref<const VectorXs>& /*x*/,
-                                 const Eigen::Ref<const VectorXs>& /*u*/) {
-  CostDataContactForceTpl<Scalar>* d =
-    static_cast<CostDataContactForceTpl<Scalar>* >(data.get());
+                                            const Eigen::Ref<const VectorXs>& /*x*/,
+                                            const Eigen::Ref<const VectorXs>& /*u*/) {
+  CostDataContactForceTpl<Scalar>* d = static_cast<CostDataContactForceTpl<Scalar>*>(data.get());
 
   // We transform the force to the contact frame
   data->r = (d->contact->jMf.actInv(d->contact->f) - fref_.oFf).toVector();
@@ -59,13 +59,11 @@ void CostModelContactForceTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbst
   activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;
 }
-  
-template<typename Scalar>  
+
+template <typename Scalar>
 void CostModelContactForceTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                     const Eigen::Ref<const VectorXs>&,
-                                     const Eigen::Ref<const VectorXs>&) {
-  CostDataContactForceTpl<Scalar>* d =
-    static_cast<CostDataContactForceTpl<Scalar>*>(data.get());
+                                                const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
+  CostDataContactForceTpl<Scalar>* d = static_cast<CostDataContactForceTpl<Scalar>*>(data.get());
 
   const MatrixXs& df_dx = d->contact->df_dx;
   const MatrixXs& df_du = d->contact->df_du;
@@ -83,15 +81,20 @@ void CostModelContactForceTpl<Scalar>::calcDiff(const boost::shared_ptr<CostData
   data->Luu.noalias() = df_du.transpose() * d->Arr_Ru;
 }
 
-template<typename Scalar>    
-boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelContactForceTpl<Scalar>::createData(DataCollectorAbstract* const data) {
+template <typename Scalar>
+boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelContactForceTpl<Scalar>::createData(
+    DataCollectorAbstract* const data) {
   return boost::make_shared<CostDataContactForceTpl<Scalar> >(this, data);
 }
-  
-template<typename Scalar>  
-const FrameForceTpl<Scalar>& CostModelContactForceTpl<Scalar>::get_fref() const { return fref_; }
-  
-template<typename Scalar>  
-void CostModelContactForceTpl<Scalar>::set_fref(const FrameForce& fref_in) { fref_ = fref_in; }
+
+template <typename Scalar>
+const FrameForceTpl<Scalar>& CostModelContactForceTpl<Scalar>::get_fref() const {
+  return fref_;
+}
+
+template <typename Scalar>
+void CostModelContactForceTpl<Scalar>::set_fref(const FrameForce& fref_in) {
+  fref_ = fref_in;
+}
 
 }  // namespace crocoddyl

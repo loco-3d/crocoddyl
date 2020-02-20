@@ -14,29 +14,31 @@
 
 namespace crocoddyl {
 
-template<typename _Scalar>
+template <typename _Scalar>
 class StateVectorTpl : public StateAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
-  
+
   explicit StateVectorTpl(const std::size_t& nx);
   ~StateVectorTpl();
 
   typename MathBase::VectorXs zero() const;
   typename MathBase::VectorXs rand() const;
-  void diff(const Eigen::Ref<const typename MathBase::VectorXs>& x0, const Eigen::Ref<const typename MathBase::VectorXs>& x1,
+  void diff(const Eigen::Ref<const typename MathBase::VectorXs>& x0,
+            const Eigen::Ref<const typename MathBase::VectorXs>& x1,
             Eigen::Ref<typename MathBase::VectorXs> dxout) const;
-  void integrate(const Eigen::Ref<const typename MathBase::VectorXs>& x, const Eigen::Ref<const typename MathBase::VectorXs>& dx,
+  void integrate(const Eigen::Ref<const typename MathBase::VectorXs>& x,
+                 const Eigen::Ref<const typename MathBase::VectorXs>& dx,
                  Eigen::Ref<typename MathBase::VectorXs> xout) const;
-  void Jdiff(const Eigen::Ref<const typename MathBase::VectorXs>&, const Eigen::Ref<const typename MathBase::VectorXs>&,
-             Eigen::Ref<typename MathBase::MatrixXs> Jfirst, Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
-             Jcomponent firstsecond = both) const;
-  void Jintegrate(const Eigen::Ref<const typename MathBase::VectorXs>&, const Eigen::Ref<const typename MathBase::VectorXs>&,
-                  Eigen::Ref<typename MathBase::MatrixXs> Jfirst, Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
-                  Jcomponent firstsecond = both) const;
+  void Jdiff(const Eigen::Ref<const typename MathBase::VectorXs>&,
+             const Eigen::Ref<const typename MathBase::VectorXs>&, Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
+             Eigen::Ref<typename MathBase::MatrixXs> Jsecond, Jcomponent firstsecond = both) const;
+  void Jintegrate(const Eigen::Ref<const typename MathBase::VectorXs>&,
+                  const Eigen::Ref<const typename MathBase::VectorXs>&, Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
+                  Eigen::Ref<typename MathBase::MatrixXs> Jsecond, Jcomponent firstsecond = both) const;
 
-protected:
+ protected:
   using StateAbstractTpl<Scalar>::nx_;
   using StateAbstractTpl<Scalar>::ndx_;
   using StateAbstractTpl<Scalar>::nq_;
@@ -44,11 +46,7 @@ protected:
   using StateAbstractTpl<Scalar>::lb_;
   using StateAbstractTpl<Scalar>::ub_;
   using StateAbstractTpl<Scalar>::has_limits_;
-
-  
 };
-
-
 
 }  // namespace crocoddyl
 
@@ -56,6 +54,5 @@ protected:
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/states/euclidean.hxx"
-
 
 #endif  // CROCODDYL_CORE_STATES_EUCLIDEAN_HPP_

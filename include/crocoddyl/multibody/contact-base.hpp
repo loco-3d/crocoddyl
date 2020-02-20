@@ -17,7 +17,7 @@
 
 namespace crocoddyl {
 
-template<typename _Scalar>
+template <typename _Scalar>
 class ContactModelAbstractTpl {
  public:
   typedef _Scalar Scalar;
@@ -26,21 +26,16 @@ class ContactModelAbstractTpl {
   typedef ContactDataAbstractTpl<Scalar> ContactDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
-  ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
-                          const std::size_t& nc, const std::size_t& nu);
+
+  ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nc, const std::size_t& nu);
   ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nc);
   ~ContactModelAbstractTpl();
 
-  virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x) = 0;
-  virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x) = 0;
+  virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) = 0;
+  virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) = 0;
 
-  virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data,
-                           const VectorXs& force) = 0;
-  void updateForceDiff(const boost::shared_ptr<ContactDataAbstract>& data,
-                       const MatrixXs& df_dx,
+  virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force) = 0;
+  void updateForceDiff(const boost::shared_ptr<ContactDataAbstract>& data, const MatrixXs& df_dx,
                        const MatrixXs& df_du) const;
   virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
@@ -58,14 +53,12 @@ class ContactModelAbstractTpl {
  public:
   void calc_wrap(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& x) { calc(data, x); }
 
-  void calcDiff_wrap(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& x) {
-    calcDiff(data, x);
-  }
+  void calcDiff_wrap(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& x) { calcDiff(data, x); }
 
 #endif
 };
 
-template<typename _Scalar>
+template <typename _Scalar>
 struct ContactDataAbstractTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -73,8 +66,8 @@ struct ContactDataAbstractTpl {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
-  template<template<typename Scalar> class Model>
+
+  template <template <typename Scalar> class Model>
   ContactDataAbstractTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
       : pinocchio(data),
         joint(0),
@@ -108,8 +101,6 @@ struct ContactDataAbstractTpl {
   pinocchio::ForceTpl<Scalar> f;
 };
 
-  
-  
 }  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */

@@ -18,10 +18,10 @@
 #include "crocoddyl/core/activations/quadratic.hpp"
 
 namespace crocoddyl {
-  
-template<typename _Scalar>
+
+template <typename _Scalar>
 class CostModelAbstractTpl {
-public:
+ public:
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
@@ -31,18 +31,14 @@ public:
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
-  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
-                       boost::shared_ptr<ActivationModelAbstract> activation,
+
+  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
                        const std::size_t& nu, const bool& with_residuals = true);
-  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
-                       boost::shared_ptr<ActivationModelAbstract> activation,
+  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
                        const bool& with_residuals = true);
-  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
-                       const std::size_t& nr, const std::size_t& nu,
+  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nr, const std::size_t& nu,
                        const bool& with_residuals = true);
-  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
-                       const std::size_t& nr,
+  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nr,
                        const bool& with_residuals = true);
   ~CostModelAbstractTpl();
 
@@ -69,8 +65,7 @@ public:
 #ifdef PYTHON_BINDINGS
 
  public:
-  void calc_wrap(const boost::shared_ptr<CostDataAbstract>& data, const VectorXs& x,
-                 const VectorXs& u = VectorXs()) {
+  void calc_wrap(const boost::shared_ptr<CostDataAbstract>& data, const VectorXs& x, const VectorXs& u = VectorXs()) {
     if (u.size() == 0) {
       calc(data, x);
     } else {
@@ -78,18 +73,15 @@ public:
     }
   }
 
-  void calcDiff_wrap(const boost::shared_ptr<CostDataAbstract>& data, const VectorXs& x,
-                     const VectorXs& u) {
+  void calcDiff_wrap(const boost::shared_ptr<CostDataAbstract>& data, const VectorXs& x, const VectorXs& u) {
     calcDiff(data, x, u);
   }
-  void calcDiff_wrap(const boost::shared_ptr<CostDataAbstract>& data, const VectorXs& x) {
-    calcDiff(data, x, unone_);
-  }
+  void calcDiff_wrap(const boost::shared_ptr<CostDataAbstract>& data, const VectorXs& x) { calcDiff(data, x, unone_); }
 
 #endif
 };
 
-template<typename _Scalar>
+template <typename _Scalar>
 struct CostDataAbstractTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -99,8 +91,8 @@ struct CostDataAbstractTpl {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
-  template<template<typename Scalar> class Model>
+
+  template <template <typename Scalar> class Model>
   CostDataAbstractTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : shared(data),
         activation(model->get_activation()->createData()),
@@ -137,7 +129,6 @@ struct CostDataAbstractTpl {
   MatrixXs Ru;
 };
 
-  
 }  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */

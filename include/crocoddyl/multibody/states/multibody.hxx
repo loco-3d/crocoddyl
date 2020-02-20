@@ -41,12 +41,14 @@ StateMultibodyTpl<Scalar>::StateMultibodyTpl(pinocchio::ModelTpl<Scalar>& model)
   ub_.tail(nv_) = pinocchio_.velocityLimit;
   Base::update_has_limits();
 }
-  
+
 template <typename Scalar>
 StateMultibodyTpl<Scalar>::~StateMultibodyTpl() {}
 
-template <typename Scalar>  
-typename MathBaseTpl<Scalar>::VectorXs StateMultibodyTpl<Scalar>::zero() const { return x0_; }
+template <typename Scalar>
+typename MathBaseTpl<Scalar>::VectorXs StateMultibodyTpl<Scalar>::zero() const {
+  return x0_;
+}
 
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::VectorXs StateMultibodyTpl<Scalar>::rand() const {
@@ -57,7 +59,7 @@ typename MathBaseTpl<Scalar>::VectorXs StateMultibodyTpl<Scalar>::rand() const {
 
 template <typename Scalar>
 void StateMultibodyTpl<Scalar>::diff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
-                          Eigen::Ref<VectorXs> dxout) const {
+                                     Eigen::Ref<VectorXs> dxout) const {
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty("Invalid argument: "
                  << "x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
@@ -77,7 +79,7 @@ void StateMultibodyTpl<Scalar>::diff(const Eigen::Ref<const VectorXs>& x0, const
 
 template <typename Scalar>
 void StateMultibodyTpl<Scalar>::integrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
-                               Eigen::Ref<VectorXs> xout) const {
+                                          Eigen::Ref<VectorXs> xout) const {
   if (static_cast<std::size_t>(x.size()) != nx_) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(nx_) + ")");
@@ -97,8 +99,8 @@ void StateMultibodyTpl<Scalar>::integrate(const Eigen::Ref<const VectorXs>& x, c
 
 template <typename Scalar>
 void StateMultibodyTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
-                           Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
-                           Jcomponent firstsecond) const {
+                                      Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
+                                      Jcomponent firstsecond) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty("Invalid argument: "
@@ -187,9 +189,9 @@ void StateMultibodyTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, cons
 }
 
 template <typename Scalar>
-void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x,
-                                const Eigen::Ref<const VectorXs>& dx, Eigen::Ref<MatrixXs> Jfirst,
-                                Eigen::Ref<MatrixXs> Jsecond, Jcomponent firstsecond) const {
+void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
+                                           Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
+                                           Jcomponent firstsecond) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
   if (static_cast<std::size_t>(x.size()) != nx_) {
     throw_pretty("Invalid argument: "
@@ -245,12 +247,13 @@ void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x,
 }
 
 template <typename Scalar>
-pinocchio::ModelTpl<Scalar>&
-StateMultibodyTpl<Scalar>::get_pinocchio() const { return pinocchio_; }
+pinocchio::ModelTpl<Scalar>& StateMultibodyTpl<Scalar>::get_pinocchio() const {
+  return pinocchio_;
+}
 
 template <typename Scalar>
 void StateMultibodyTpl<Scalar>::updateJdiff(const Eigen::Ref<const MatrixXs>& Jdq, Eigen::Ref<MatrixXs> Jd,
-                                 bool positive) const {
+                                            bool positive) const {
   if (positive) {
     Jd.diagonal() = Jdq.diagonal();
 

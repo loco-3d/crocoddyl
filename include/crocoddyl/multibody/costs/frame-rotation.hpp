@@ -15,8 +15,8 @@
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
-  
-template<typename _Scalar>
+
+template <typename _Scalar>
 class CostModelFrameRotationTpl : public CostModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
@@ -30,18 +30,14 @@ class CostModelFrameRotationTpl : public CostModelAbstractTpl<_Scalar> {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::Matrix3s Matrix3s;
-  
+
   CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
-                            boost::shared_ptr<ActivationModelAbstract> activation,
-                            const FrameRotation& Fref,
+                            boost::shared_ptr<ActivationModelAbstract> activation, const FrameRotation& Fref,
                             const std::size_t& nu);
   CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
-                            boost::shared_ptr<ActivationModelAbstract> activation,
-                            const FrameRotation& Fref);
-  CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
-                            const FrameRotation& Fref, const std::size_t& nu);
-  CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
-                            const FrameRotation& Fref);
+                            boost::shared_ptr<ActivationModelAbstract> activation, const FrameRotation& Fref);
+  CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state, const FrameRotation& Fref, const std::size_t& nu);
+  CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state, const FrameRotation& Fref);
   ~CostModelFrameRotationTpl();
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -53,20 +49,19 @@ class CostModelFrameRotationTpl : public CostModelAbstractTpl<_Scalar> {
   const FrameRotation& get_Rref() const;
   void set_Rref(const FrameRotation& Rref_in);
 
-protected:
-  using Base::state_;
+ protected:
   using Base::activation_;
   using Base::nu_;
-  using Base::with_residuals_;
+  using Base::state_;
   using Base::unone_;
-  
+  using Base::with_residuals_;
+
  private:
   FrameRotation Rref_;
   Matrix3s oRf_inv_;
 };
 
-
-template<typename _Scalar> 
+template <typename _Scalar>
 struct CostDataFrameRotationTpl : public CostDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;
@@ -81,7 +76,7 @@ struct CostDataFrameRotationTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix3xs Matrix3xs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
 
-  template<template<typename Scalar> class Model>
+  template <template <typename Scalar> class Model>
   CostDataFrameRotationTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data),
         J(3, model->get_state()->get_nv()),
@@ -95,7 +90,7 @@ struct CostDataFrameRotationTpl : public CostDataAbstractTpl<_Scalar> {
     fJf.fill(0);
     Arr_J.fill(0);
     // Check that proper shared data has been passed
-    DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>* >(shared);
+    DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
     if (d == NULL) {
       throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibody");
     }
@@ -112,27 +107,24 @@ struct CostDataFrameRotationTpl : public CostDataAbstractTpl<_Scalar> {
   Matrix6xs fJf;
   Matrix3xs Arr_J;
 
-  using Base::shared;
   using Base::activation;
   using Base::cost;
-  using Base::Lx;
   using Base::Lu;
-  using Base::Lxx;
-  using Base::Lxu;
   using Base::Luu;
-  //using Base::r;
-  using Base::Rx;
+  using Base::Lx;
+  using Base::Lxu;
+  using Base::Lxx;
+  using Base::shared;
+  // using Base::r;
   using Base::Ru;
-  
+  using Base::Rx;
 };
 
-  
 }  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/costs/frame-rotation.hxx"
-
 
 #endif  // CROCODDYL_MULTIBODY_COSTS_FRAME_ROTATION_HPP_

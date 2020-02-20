@@ -12,7 +12,8 @@ namespace crocoddyl {
 
 template <typename Scalar>
 DifferentialActionModelAbstractTpl<Scalar>::DifferentialActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
-                                                                 const std::size_t& nu, const std::size_t& nr)
+                                                                               const std::size_t& nu,
+                                                                               const std::size_t& nr)
     : nu_(nu),
       nr_(nr),
       state_(state),
@@ -26,38 +27,51 @@ DifferentialActionModelAbstractTpl<Scalar>::~DifferentialActionModelAbstractTpl(
 
 template <typename Scalar>
 void DifferentialActionModelAbstractTpl<Scalar>::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                                           const Eigen::Ref<const VectorXs>& x) {
+                                                      const Eigen::Ref<const VectorXs>& x) {
   calc(data, x, unone_);
 }
 
 template <typename Scalar>
-void DifferentialActionModelAbstractTpl<Scalar>::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                                               const Eigen::Ref<const VectorXs>& x) {
+void DifferentialActionModelAbstractTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) {
   calcDiff(data, x, unone_);
 }
 
 template <typename Scalar>
-boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > DifferentialActionModelAbstractTpl<Scalar>::createData() {
+boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
+DifferentialActionModelAbstractTpl<Scalar>::createData() {
   return boost::make_shared<DifferentialActionDataAbstract>(this);
 }
 
 template <typename Scalar>
-const std::size_t& DifferentialActionModelAbstractTpl<Scalar>::get_nu() const { return nu_; }
+const std::size_t& DifferentialActionModelAbstractTpl<Scalar>::get_nu() const {
+  return nu_;
+}
 
 template <typename Scalar>
-const std::size_t& DifferentialActionModelAbstractTpl<Scalar>::get_nr() const { return nr_; }
+const std::size_t& DifferentialActionModelAbstractTpl<Scalar>::get_nr() const {
+  return nr_;
+}
 
 template <typename Scalar>
-const boost::shared_ptr<StateAbstractTpl<Scalar> >& DifferentialActionModelAbstractTpl<Scalar>::get_state() const { return state_; }
+const boost::shared_ptr<StateAbstractTpl<Scalar> >& DifferentialActionModelAbstractTpl<Scalar>::get_state() const {
+  return state_;
+}
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelAbstractTpl<Scalar>::get_u_lb() const { return u_lb_; }
+const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelAbstractTpl<Scalar>::get_u_lb() const {
+  return u_lb_;
+}
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelAbstractTpl<Scalar>::get_u_ub() const { return u_ub_; }
+const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelAbstractTpl<Scalar>::get_u_ub() const {
+  return u_ub_;
+}
 
 template <typename Scalar>
-bool const& DifferentialActionModelAbstractTpl<Scalar>::get_has_control_limits() const { return has_control_limits_; }
+bool const& DifferentialActionModelAbstractTpl<Scalar>::get_has_control_limits() const {
+  return has_control_limits_;
+}
 
 template <typename Scalar>
 void DifferentialActionModelAbstractTpl<Scalar>::set_u_lb(const VectorXs& u_lb) {

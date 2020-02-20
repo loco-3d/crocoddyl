@@ -17,7 +17,7 @@
 
 namespace crocoddyl {
 
-template<typename _Scalar>
+template <typename _Scalar>
 class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
@@ -32,41 +32,37 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
   typedef typename MathBase::Vector6s Vector6s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
+
   CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
-                           boost::shared_ptr<ActivationModelAbstract> activation,
-                           const FrameForce& fref, const std::size_t& nu);
+                           boost::shared_ptr<ActivationModelAbstract> activation, const FrameForce& fref,
+                           const std::size_t& nu);
   CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
-                           boost::shared_ptr<ActivationModelAbstract> activation,
-                           const FrameForce& fref);
-  CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
-                           const FrameForce& fref, const std::size_t& nu);
+                           boost::shared_ptr<ActivationModelAbstract> activation, const FrameForce& fref);
+  CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref, const std::size_t& nu);
   CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref);
   ~CostModelContactForceTpl();
 
-  void calc(const boost::shared_ptr<CostDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& x,
+  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>& x,
+  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u);
   boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
   const FrameForce& get_fref() const;
   void set_fref(const FrameForce& fref);
 
-protected:
-  using Base::state_;
+ protected:
   using Base::activation_;
   using Base::nu_;
-  using Base::with_residuals_;
+  using Base::state_;
   using Base::unone_;
-  
+  using Base::with_residuals_;
+
  protected:
   FrameForce fref_;
 };
 
-template<typename _Scalar>
+template <typename _Scalar>
 struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;
@@ -77,15 +73,14 @@ struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
-  
-  template<template<typename Scalar> class Model>
+
+  template <template <typename Scalar> class Model>
   CostDataContactForceTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data), Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
     Arr_Ru.fill(0);
 
     // Check that proper shared data has been passed
-    DataCollectorContactTpl<Scalar>* d =
-      dynamic_cast<DataCollectorContactTpl<Scalar>* >(shared);
+    DataCollectorContactTpl<Scalar>* d = dynamic_cast<DataCollectorContactTpl<Scalar>*>(shared);
     if (d == NULL) {
       throw_pretty("Invalid argument: the shared data should be derived from DataCollectorContact");
     }
@@ -108,26 +103,23 @@ struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
 
   boost::shared_ptr<ContactDataAbstractTpl<Scalar> > contact;
   MatrixXs Arr_Ru;
-  using Base::shared;
   using Base::activation;
   using Base::cost;
-  using Base::Lx;
   using Base::Lu;
-  using Base::Lxx;
-  using Base::Lxu;
   using Base::Luu;
+  using Base::Lx;
+  using Base::Lxu;
+  using Base::Lxx;
   using Base::r;
-  using Base::Rx;
   using Base::Ru;
-  
+  using Base::Rx;
+  using Base::shared;
 };
 
-  
 }  // namespace crocoddyl
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/costs/contact-force.hxx"
-
 
 #endif  // CROCODDYL_MULTIBODY_COSTS_CONTACT_FORCE_HPP_

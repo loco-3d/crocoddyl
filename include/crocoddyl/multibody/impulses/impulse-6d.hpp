@@ -28,7 +28,7 @@ class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
+
   ImpulseModel6DTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& frame);
   ~ImpulseModel6DTpl();
 
@@ -39,14 +39,13 @@ class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
 
   const std::size_t& get_frame() const;
 
-protected:
-  using Base::state_;
+ protected:
   using Base::ni_;
-  
+  using Base::state_;
+
  private:
   std::size_t frame_;
 };
-
 
 template <typename _Scalar>
 struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
@@ -62,9 +61,9 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  template<template<typename Scalar> class Model>
+  template <template <typename Scalar> class Model>
   ImpulseData6DTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
-    : Base(model, data),
+      : Base(model, data),
         jMf(model->get_state()->get_pinocchio().frames[model->get_frame()].placement),
         fXj(jMf.inverse().toActionMatrix()),
         fJf(6, model->get_state()->get_nv()),
@@ -83,19 +82,16 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   Matrix6xs v_partial_dq;
   Matrix6xs v_partial_dv;
 
-  using Base::pinocchio;
-  using Base::joint;
+  using Base::df_dq;
+  using Base::dv0_dq;
+  using Base::f;
   using Base::frame;
   using Base::Jc;
-  using Base::dv0_dq;
-  using Base::df_dq;
-  using Base::f;  
-  
+  using Base::joint;
+  using Base::pinocchio;
 };
 
-  
 }  // namespace crocoddyl
-
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */

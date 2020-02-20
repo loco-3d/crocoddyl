@@ -15,8 +15,8 @@
 #include <stdexcept>
 
 namespace crocoddyl {
-  
-template<typename _Scalar>
+
+template <typename _Scalar>
 class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
@@ -26,15 +26,13 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
+
   ActionModelLQRTpl(const std::size_t& nx, const std::size_t& nu, bool drift_free = true);
   ~ActionModelLQRTpl();
 
-  void calc(const boost::shared_ptr<ActionDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& x,
+  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>& x,
+  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u);
   boost::shared_ptr<ActionDataAbstract> createData();
 
@@ -56,15 +54,15 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   void set_Lxu(const MatrixXs& Lxu);
   void set_Luu(const MatrixXs& Luu);
 
-protected:
-  using Base::nu_;                          //!< Control dimension
-  using Base::nr_;                          //!< Dimension of the cost residual
-  using Base::state_;  //!< Model of the state
-  using Base::unone_;                   //!< Neutral state
-  using Base::u_lb_;                    //!< Lower control limits
-  using Base::u_ub_;                    //!< Upper control limits
-  using Base::has_control_limits_;      //!< Indicates whether any of the control limits
-  
+ protected:
+  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
+  using Base::nr_;                  //!< Dimension of the cost residual
+  using Base::nu_;                  //!< Control dimension
+  using Base::state_;               //!< Model of the state
+  using Base::u_lb_;                //!< Lower control limits
+  using Base::u_ub_;                //!< Upper control limits
+  using Base::unone_;               //!< Neutral state
+
  private:
   bool drift_free_;
   MatrixXs Fx_;
@@ -77,13 +75,13 @@ protected:
   VectorXs lu_;
 };
 
-template<typename _Scalar>  
+template <typename _Scalar>
 struct ActionDataLQRTpl : public ActionDataAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActionDataAbstractTpl<Scalar> Base;
 
-  template<template<typename Scalar> class Model>
+  template <template <typename Scalar> class Model>
   explicit ActionDataLQRTpl(Model<Scalar>* const model) : Base(model) {
     // Setting the linear model and quadratic cost here because they are constant
     Fx = model->get_Fx();
@@ -94,16 +92,15 @@ struct ActionDataLQRTpl : public ActionDataAbstractTpl<_Scalar> {
   }
 
   using Base::cost;
-  using Base::xnext;
-  using Base::r;
-  using Base::Fx;
   using Base::Fu;
-  using Base::Lx;
+  using Base::Fx;
   using Base::Lu;
-  using Base::Lxx;
-  using Base::Lxu;
   using Base::Luu;
-  
+  using Base::Lx;
+  using Base::Lxu;
+  using Base::Lxx;
+  using Base::r;
+  using Base::xnext;
 };
 
 }  // namespace crocoddyl
@@ -112,6 +109,5 @@ struct ActionDataLQRTpl : public ActionDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include <crocoddyl/core/actions/lqr.hxx>
-
 
 #endif  // CROCODDYL_CORE_ACTIONS_LQR_HPP_

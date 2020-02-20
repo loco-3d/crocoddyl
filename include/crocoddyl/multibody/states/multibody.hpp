@@ -14,7 +14,7 @@
 
 namespace crocoddyl {
 
-template<typename _Scalar>
+template <typename _Scalar>
 class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
@@ -34,36 +34,31 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
             Eigen::Ref<VectorXs> dxout) const;
   void integrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
                  Eigen::Ref<VectorXs> xout) const;
-  void Jdiff(const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&,
-             Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
-             Jcomponent firstsecond = both) const;
-  void Jintegrate(const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&,
-                  Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
-                  Jcomponent firstsecond = both) const;
+  void Jdiff(const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&, Eigen::Ref<MatrixXs> Jfirst,
+             Eigen::Ref<MatrixXs> Jsecond, Jcomponent firstsecond = both) const;
+  void Jintegrate(const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&, Eigen::Ref<MatrixXs> Jfirst,
+                  Eigen::Ref<MatrixXs> Jsecond, Jcomponent firstsecond = both) const;
 
   pinocchio::ModelTpl<Scalar>& get_pinocchio() const;
 
-protected:
-  using Base::nx_;
+ protected:
+  using Base::has_limits_;
+  using Base::lb_;
   using Base::ndx_;
   using Base::nq_;
   using Base::nv_;
-  using Base::lb_;
+  using Base::nx_;
   using Base::ub_;
-  using Base::has_limits_;
 
  private:
-  void updateJdiff(const Eigen::Ref<const MatrixXs>& Jdq, Eigen::Ref<MatrixXs> Jd_,
-                   bool positive = true) const;
+  void updateJdiff(const Eigen::Ref<const MatrixXs>& Jdq, Eigen::Ref<MatrixXs> Jd_, bool positive = true) const;
 
   pinocchio::ModelTpl<Scalar>& pinocchio_;
   VectorXs x0_;
   JointType joint_type_;
 };
 
-  
 }  // namespace crocoddyl
-
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */

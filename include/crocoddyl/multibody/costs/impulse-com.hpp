@@ -17,10 +17,10 @@
 
 namespace crocoddyl {
 
-template<typename _Scalar>
+template <typename _Scalar>
 class CostModelImpulseCoMTpl : public CostModelAbstractTpl<_Scalar> {
  public:
-    typedef _Scalar Scalar;
+  typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostModelAbstractTpl<Scalar> Base;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
@@ -31,30 +31,27 @@ class CostModelImpulseCoMTpl : public CostModelAbstractTpl<_Scalar> {
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
+
   CostModelImpulseCoMTpl(boost::shared_ptr<StateMultibody> state,
                          boost::shared_ptr<ActivationModelAbstract> activation);
   CostModelImpulseCoMTpl(boost::shared_ptr<StateMultibody> state);
   ~CostModelImpulseCoMTpl();
 
-  void calc(const boost::shared_ptr<CostDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& x,
+  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>& x,
+  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u);
   boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-protected:
-  using Base::state_;
+ protected:
   using Base::activation_;
   using Base::nu_;
-  using Base::with_residuals_;
+  using Base::state_;
   using Base::unone_;
-
+  using Base::with_residuals_;
 };
 
-template<typename _Scalar>
+template <typename _Scalar>
 struct CostDataImpulseCoMTpl : public CostDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;
@@ -67,8 +64,8 @@ struct CostDataImpulseCoMTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix6xs Matrix6xs;
   typedef typename MathBase::Matrix6s Matrix6s;
   typedef typename MathBase::Vector6s Vector6s;
-  
-  template <template<typename Scalar> class Model>
+
+  template <template <typename Scalar> class Model>
   CostDataImpulseCoMTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data),
         Arr_Rx(3, model->get_state()->get_nv()),
@@ -79,8 +76,7 @@ struct CostDataImpulseCoMTpl : public CostDataAbstractTpl<_Scalar> {
     dvc_dq.fill(0);
     ddv_dv.fill(0);
     // Check that proper shared data has been passed
-    DataCollectorMultibodyInImpulseTpl<Scalar>* d =
-      dynamic_cast<DataCollectorMultibodyInImpulseTpl<Scalar>* >(shared);
+    DataCollectorMultibodyInImpulseTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyInImpulseTpl<Scalar>*>(shared);
     if (d == NULL) {
       throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibodyInImpulse");
     }
@@ -94,27 +90,24 @@ struct CostDataImpulseCoMTpl : public CostDataAbstractTpl<_Scalar> {
   Matrix3xs dvc_dq;
   MatrixXs ddv_dv;
   pinocchio::DataTpl<Scalar> pinocchio_internal;
-  using Base::shared;
   using Base::activation;
   using Base::cost;
-  using Base::Lx;
   using Base::Lu;
-  using Base::Lxx;
-  using Base::Lxu;
   using Base::Luu;
+  using Base::Lx;
+  using Base::Lxu;
+  using Base::Lxx;
   using Base::r;
-  using Base::Rx;
   using Base::Ru;
-  
+  using Base::Rx;
+  using Base::shared;
 };
 
-  
 }  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/costs/impulse-com.hxx"
-
 
 #endif  // CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_HPP_
