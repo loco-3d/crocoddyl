@@ -30,8 +30,8 @@ void ActionModelUnicycleTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbst
   }
 
   ActionDataUnicycleTpl<Scalar>* d = static_cast<ActionDataUnicycleTpl<Scalar>*>(data.get());
-  const Scalar& c = std::cos(x[2]);
-  const Scalar& s = std::sin(x[2]);
+  const Scalar& c = cos(x[2]);
+  const Scalar& s = sin(x[2]);
   d->xnext << x[0] + c * u[0] * dt_, x[1] + s * u[0] * dt_, x[2] + u[1] * dt_;
   d->r.template head<3>() = cost_weights_[0] * x;
   d->r.template tail<2>() = cost_weights_[1] * u;
@@ -61,8 +61,8 @@ void ActionModelUnicycleTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionData
   d->Luu.diagonal() << w_u, w_u;
 
   // Dynamic derivatives
-  const Scalar& c = std::cos(x[2]);
-  const Scalar& s = std::sin(x[2]);
+  const Scalar& c = cos(x[2]);
+  const Scalar& s = sin(x[2]);
   d->Fx << 1., 0., -s * u[0] * dt_, 0., 1., c * u[0] * dt_, 0., 0., 1.;
   d->Fu << c * dt_, 0., s * dt_, 0., 0., dt_;
 }
