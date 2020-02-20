@@ -8,21 +8,25 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/core/numdiff/state.hpp"
 
 namespace crocoddyl {
 
-StateNumDiff::StateNumDiff(boost::shared_ptr<StateAbstract> state)
-    : StateAbstract(state->get_nx(), state->get_ndx()), state_(state), disturbance_(1e-6) {}
-
-StateNumDiff::~StateNumDiff() {}
-
-Eigen::VectorXd StateNumDiff::zero() const { return state_->zero(); }
-
-Eigen::VectorXd StateNumDiff::rand() const { return state_->rand(); }
-
-void StateNumDiff::diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-                        Eigen::Ref<Eigen::VectorXd> dxout) const {
+template<typename Scalar>  
+StateNumDiffTpl<Scalar>::StateNumDiffTpl(boost::shared_ptr<Base> state)
+    : Base(state->get_nx(), state->get_ndx()), state_(state), disturbance_(1e-6) {}
+  
+template<typename Scalar>  
+StateNumDiffTpl<Scalar>::~StateNumDiffTpl() {}
+  
+template<typename Scalar>  
+typename MathBaseTpl<Scalar>::VectorXs StateNumDiffTpl<Scalar>::zero() const { return state_->zero(); }
+  
+template<typename Scalar>  
+typename MathBaseTpl<Scalar>::VectorXs StateNumDiffTpl<Scalar>::rand() const { return state_->rand(); }
+  
+template<typename Scalar>  
+void StateNumDiffTpl<Scalar>::diff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
+                        Eigen::Ref<VectorXs> dxout) const {
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty("Invalid argument: "
                  << "x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
@@ -37,9 +41,10 @@ void StateNumDiff::diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen
   }
   state_->diff(x0, x1, dxout);
 }
-
-void StateNumDiff::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
-                             Eigen::Ref<Eigen::VectorXd> xout) const {
+  
+template<typename Scalar>  
+void StateNumDiffTpl<Scalar>::integrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
+                             Eigen::Ref<VectorXs> xout) const {
   if (static_cast<std::size_t>(x.size()) != nx_) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(nx_) + ")");
@@ -54,9 +59,10 @@ void StateNumDiff::integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const E
   }
   state_->integrate(x, dx, xout);
 }
-
-void StateNumDiff::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-                         Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
+  
+template<typename Scalar>  
+void StateNumDiffTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
+                         Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
                          Jcomponent firstsecond) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
   if (static_cast<std::size_t>(x0.size()) != nx_) {
@@ -67,9 +73,9 @@ void StateNumDiff::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eige
     throw_pretty("Invalid argument: "
                  << "x1 has wrong dimension (it should be " + std::to_string(nx_) + ")");
   }
-  Eigen::VectorXd tmp_x_ = Eigen::VectorXd::Zero(nx_);
-  Eigen::VectorXd dx_ = Eigen::VectorXd::Zero(ndx_);
-  Eigen::VectorXd dx0_ = Eigen::VectorXd::Zero(ndx_);
+  VectorXs tmp_x_ = VectorXs::Zero(nx_);
+  VectorXs dx_ = VectorXs::Zero(ndx_);
+  VectorXs dx0_ = VectorXs::Zero(ndx_);
 
   dx_.setZero();
   diff(x0, x1, dx0_);
@@ -115,10 +121,13 @@ void StateNumDiff::Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eige
     Jsecond /= disturbance_;
   }
 }
-
-void StateNumDiff::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
-                              Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
-                              Jcomponent firstsecond) const {
+  
+template<typename Scalar>  
+void StateNumDiffTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x,
+                                         const Eigen::Ref<const VectorXs>& dx,
+                                         Eigen::Ref<MatrixXs> Jfirst,
+                                         Eigen::Ref<MatrixXs> Jsecond,
+                                         Jcomponent firstsecond) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
   if (static_cast<std::size_t>(x.size()) != nx_) {
     throw_pretty("Invalid argument: "
@@ -128,9 +137,9 @@ void StateNumDiff::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const 
     throw_pretty("Invalid argument: "
                  << "dx has wrong dimension (it should be " + std::to_string(ndx_) + ")");
   }
-  Eigen::VectorXd tmp_x_ = Eigen::VectorXd::Zero(nx_);
-  Eigen::VectorXd dx_ = Eigen::VectorXd::Zero(ndx_);
-  Eigen::VectorXd x0_ = Eigen::VectorXd::Zero(nx_);
+  VectorXs tmp_x_ = VectorXs::Zero(nx_);
+  VectorXs dx_ = VectorXs::Zero(ndx_);
+  VectorXs x0_ = VectorXs::Zero(nx_);
 
   // x0_ = integrate(x, dx)
   integrate(x, dx, x0_);
@@ -174,10 +183,12 @@ void StateNumDiff::Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const 
     Jsecond /= disturbance_;
   }
 }
-
-const double& StateNumDiff::get_disturbance() const { return disturbance_; }
-
-void StateNumDiff::set_disturbance(const double& disturbance) {
+  
+template<typename Scalar>  
+const Scalar& StateNumDiffTpl<Scalar>::get_disturbance() const { return disturbance_; }
+  
+template<typename Scalar>  
+void StateNumDiffTpl<Scalar>::set_disturbance(const Scalar& disturbance) {
   if (disturbance < 0.) {
     throw_pretty("Invalid argument: "
                  << "Disturbance value is positive");

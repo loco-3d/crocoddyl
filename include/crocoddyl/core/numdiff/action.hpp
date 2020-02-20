@@ -10,6 +10,7 @@
 #ifndef CROCODDYL_CORE_NUMDIFF_ACTION_HPP_
 #define CROCODDYL_CORE_NUMDIFF_ACTION_HPP_
 
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/action-base.hpp"
 #include <vector>
 #include <iostream>
@@ -46,31 +47,40 @@ namespace crocoddyl {
  * In the case that the cost does not have a residual we set the Hessian to
  * \f$ 0 \f$, i.e. \f$ L_{xx} = L_{xu} = L_{uu} = 0 \f$.
  */
-class ActionModelNumDiff : public ActionModelAbstract {
+  
+template <typename _Scalar>
+class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
  public:
+  typedef _Scalar Scalar;
+  typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
+  typedef ActionModelAbstractTpl<Scalar> Base;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
+  typedef typename MathBaseTpl<Scalar>::MatrixXs MatrixXs;
+  
   /**
    * @brief Construct a new ActionModelNumDiff object
    *
    * @param model
    */
-  explicit ActionModelNumDiff(boost::shared_ptr<ActionModelAbstract> model);
+  explicit ActionModelNumDiffTpl(boost::shared_ptr<Base> model);
 
   /**
    * @brief Destroy the ActionModelNumDiff object
    */
-  ~ActionModelNumDiff();
+  ~ActionModelNumDiffTpl();
 
   /**
-   * @brief @copydoc ActionModelAbstract::calc()
+   * @brief @copydoc Base::calc()
    */
-  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-            const Eigen::Ref<const Eigen::VectorXd>& u);
+  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+            const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc ActionModelAbstract::calcDiff()
+   * @brief @copydoc Base::calcDiff()
    */
-  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u);
+  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Create a Data object from the given model.
@@ -82,23 +92,23 @@ class ActionModelNumDiff : public ActionModelAbstract {
   /**
    * @brief Get the model_ object
    *
-   * @return ActionModelAbstract&
+   * @return Base&
    */
-  const boost::shared_ptr<ActionModelAbstract>& get_model() const;
+  const boost::shared_ptr<Base>& get_model() const;
 
   /**
    * @brief Get the disturbance_ object
    *
-   * @return const double&
+   * @return const Scalar&
    */
-  const double& get_disturbance() const;
+  const Scalar& get_disturbance() const;
 
   /**
    * @brief Set the disturbance_ object
    *
    * @param disturbance is the value used to find the numerical derivative
    */
-  void set_disturbance(const double& disturbance);
+  void set_disturbance(const Scalar& disturbance);
 
   /**
    * @brief Identify if the Gauss approximation is going to be used or not.
@@ -108,6 +118,17 @@ class ActionModelNumDiff : public ActionModelAbstract {
    */
   bool get_with_gauss_approx();
 
+
+protected:
+  using Base::nu_;                          //!< Control dimension
+  using Base::nr_;                          //!< Dimension of the cost residual
+  using Base::state_;  //!< Model of the state
+  using Base::unone_;                   //!< Neutral state
+  using Base::u_lb_;                    //!< Lower control limits
+  using Base::u_ub_;                    //!< Upper control limits
+  using Base::has_control_limits_;      //!< Indicates whether any of the control limits
+
+  
  private:
   /**
    * @brief Make sure that when we finite difference the Action Model, the user
@@ -120,31 +141,40 @@ class ActionModelNumDiff : public ActionModelAbstract {
    *
    * @param x is the state at which the check is performed.
    */
-  void assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& x);
+  void assertStableStateFD(const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief This is the model to compute the finite differentiation from
    */
-  boost::shared_ptr<ActionModelAbstract> model_;
+
+  
+  boost::shared_ptr<Base> model_;
 
   /**
    * @brief This is the numerical disturbance value used during the numerical
    * differenciations
    */
-  double disturbance_;
+  Scalar disturbance_;
 };
 
-struct ActionDataNumDiff : public ActionDataAbstract {
+template<typename _Scalar>  
+struct ActionDataNumDiffTpl : public ActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef ActionDataAbstractTpl<Scalar> Base;
+  typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
+  typedef typename MathBaseTpl<Scalar>::MatrixXs MatrixXs;
+
   /**
    * @brief Construct a new ActionDataNumDiff object
    *
    * @tparam Model is the type of the ActionModel.
    * @param model is the object to compute the numerical differentiation from.
    */
-  template <typename Model>
-  explicit ActionDataNumDiff(Model* const model)
-      : ActionDataAbstract(model),
+  template <template<typename Scalar> class Model>
+  explicit ActionDataNumDiffTpl(Model<Scalar>* const model)
+      : Base(model),
         Rx(model->get_model()->get_nr(), model->get_model()->get_state()->get_ndx()),
         Ru(model->get_model()->get_nr(), model->get_model()->get_nu()),
         dx(model->get_model()->get_state()->get_ndx()),
@@ -166,19 +196,36 @@ struct ActionDataNumDiff : public ActionDataAbstract {
       data_u.push_back(model->get_model()->createData());
     }
   }
-
-  Eigen::MatrixXd Rx;  //!< Cost residual jacobian: \f$ \frac{d r(x,u)}{dx} \f$
-  Eigen::MatrixXd Ru;  //!< Cost residual jacobian: \f$ \frac{d r(x,u)}{du} \f$
-  Eigen::VectorXd dx;  //!< State disturbance
-  Eigen::VectorXd du;  //!< Control disturbance
-  Eigen::VectorXd xp;  //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$"
-  boost::shared_ptr<ActionDataAbstract> data_0;  //!< The data that contains the final results
-  std::vector<boost::shared_ptr<ActionDataAbstract> >
+  
+  using Base::cost;
+  using Base::xnext;
+  using Base::r;
+  using Base::Fx;
+  using Base::Fu;
+  using Base::Lx;
+  using Base::Lu;
+  using Base::Lxx;
+  using Base::Lxu;
+  using Base::Luu;
+  
+  MatrixXs Rx;  //!< Cost residual jacobian: \f$ \frac{d r(x,u)}{dx} \f$
+  MatrixXs Ru;  //!< Cost residual jacobian: \f$ \frac{d r(x,u)}{du} \f$
+  VectorXs dx;  //!< State disturbance
+  VectorXs du;  //!< Control disturbance
+  VectorXs xp;  //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$"
+  boost::shared_ptr<Base> data_0;  //!< The data that contains the final results
+  std::vector<boost::shared_ptr<Base> >
       data_x;  //!< The temporary data associated with the state variation
-  std::vector<boost::shared_ptr<ActionDataAbstract> >
+  std::vector<boost::shared_ptr<Base> >
       data_u;  //!< The temporary data associated with the control variation
 };
 
 }  // namespace crocoddyl
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include <crocoddyl/core/numdiff/action.hxx>
+
 
 #endif  // CROCODDYL_CORE_NUMDIFF_ACTION_HPP_

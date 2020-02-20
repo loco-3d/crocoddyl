@@ -1,3 +1,5 @@
+#ifndef CROCODDYL_CORE_FWD_HPP_
+#define CROCODDYL_CORE_FWD_HPP_
 
 namespace crocoddyl {
   //DiffAction
@@ -8,6 +10,8 @@ namespace crocoddyl {
   //Actions
   template<typename Scalar> class ActionModelUnicycleTpl;
   template<typename Scalar> class ActionDataUnicycleTpl;
+  template<typename Scalar> class ActionModelLQRTpl;
+  template<typename Scalar> class ActionDataLQRTpl;
   //DataCollector
   template<typename Scalar> class DataCollectorAbstractTpl;
   //Activations
@@ -39,7 +43,16 @@ namespace crocoddyl {
   //ActionData
   template<typename Scalar> class ActionDataAbstractTpl;
   template<typename Scalar> class ActionModelAbstractTpl;
-  
+  //Numdiff
+  template<typename Scalar> class ActionModelNumDiffTpl;
+  template<typename Scalar> class ActionDataNumDiffTpl;
+  template<typename Scalar> class DifferentialActionModelNumDiffTpl;
+  template<typename Scalar> class DifferentialActionDataNumDiffTpl;
+  template<typename Scalar> class ActivationModelNumDiffTpl;
+  template<typename Scalar> class ActivationDataNumDiffTpl;
+  template<typename Scalar> class StateNumDiffTpl;
+
+  /********************Template Instantiation*************/
   typedef DifferentialActionModelAbstractTpl<double> DifferentialActionModelAbstract;
   typedef DifferentialActionDataAbstractTpl<double> DifferentialActionDataAbstract;
   typedef DifferentialActionModelLQRTpl<double> DifferentialActionModelLQR;
@@ -47,7 +60,9 @@ namespace crocoddyl {
 
   typedef ActionModelUnicycleTpl<double> ActionModelUnicycle;
   typedef ActionDataUnicycleTpl<double> ActionDataUnicycle;
-
+  typedef ActionModelLQRTpl<double> ActionModelLQR;
+  typedef ActionDataLQRTpl<double> ActionDataLQR;
+  
   typedef DataCollectorAbstractTpl<double> DataCollectorAbstract;
 
   typedef ActivationDataQuadraticBarrierTpl<double> ActivationDataQuadraticBarrier;
@@ -79,4 +94,14 @@ namespace crocoddyl {
   typedef ActionDataAbstractTpl<double> ActionDataAbstract;
   typedef ActionModelAbstractTpl<double> ActionModelAbstract;
 
+  typedef ActionModelNumDiffTpl<double> ActionModelNumDiff;
+  typedef ActionDataNumDiffTpl<double> ActionDataNumDiff;
+  typedef DifferentialActionModelNumDiffTpl<double> DifferentialActionModelNumDiff;
+  typedef DifferentialActionDataNumDiffTpl<double> DifferentialActionDataNumDiff;
+  typedef ActivationModelNumDiffTpl<double> ActivationModelNumDiff;
+  typedef ActivationDataNumDiffTpl<double> ActivationDataNumDiff;
+  typedef StateNumDiffTpl<double> StateNumDiff;
+  
 }
+
+#endif  // CROCODDYL_CORE_FWD_HPP_

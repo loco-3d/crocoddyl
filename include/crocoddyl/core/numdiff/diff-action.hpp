@@ -14,43 +14,71 @@
 #include <iostream>
 
 namespace crocoddyl {
-
-class DifferentialActionModelNumDiff : public DifferentialActionModelAbstract {
+  
+template<typename _Scalar>
+class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
-  explicit DifferentialActionModelNumDiff(boost::shared_ptr<DifferentialActionModelAbstract> model,
-                                          bool with_gauss_approx = false);
-  ~DifferentialActionModelNumDiff();
+    typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef DifferentialActionModelAbstractTpl<Scalar> Base;
+  typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
+  typedef DifferentialActionDataNumDiffTpl<Scalar> DifferentialActionDataNumDiff;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
-  void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-            const Eigen::Ref<const Eigen::VectorXd>& u);
+  
+  explicit DifferentialActionModelNumDiffTpl(boost::shared_ptr<Base> model,
+                                             bool with_gauss_approx = false);
+  ~DifferentialActionModelNumDiffTpl();
+
+  void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+            const Eigen::Ref<const VectorXs>& x,
+            const Eigen::Ref<const VectorXs>& u);
   void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u);
+                const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
   boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
-  const boost::shared_ptr<DifferentialActionModelAbstract>& get_model() const;
-  const double& get_disturbance() const;
-  void set_disturbance(const double& disturbance);
+  const boost::shared_ptr<Base>& get_model() const;
+  const Scalar& get_disturbance() const;
+  void set_disturbance(const Scalar& disturbance);
   bool get_with_gauss_approx();
 
- private:
-  void assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& x);
+protected:
+  using Base::nu_;                          //!< Control dimension
+  using Base::nr_;                          //!< Dimension of the cost residual
+  using Base::state_;  //!< Model of the state
+  using Base::unone_;                   //!< Neutral state
+  using Base::u_lb_;                    //!< Lower control limits
+  using Base::u_ub_;                    //!< Upper control limits
+  using Base::has_control_limits_;    //!< Indicates whether any of the control limits 
 
-  boost::shared_ptr<DifferentialActionModelAbstract> model_;
+  
+ private:
+  void assertStableStateFD(const Eigen::Ref<const VectorXs>& x);
+  boost::shared_ptr<Base> model_;
   bool with_gauss_approx_;
-  double disturbance_;
+  Scalar disturbance_;
 };
 
-struct DifferentialActionDataNumDiff : public DifferentialActionDataAbstract {
+template<typename _Scalar>
+struct DifferentialActionDataNumDiffTpl : public DifferentialActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef DifferentialActionDataAbstractTpl<Scalar> Base;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+
   /**
    * @brief Construct a new ActionDataNumDiff object
    *
    * @tparam Model is the type of the ActionModel.
    * @param model is the object to compute the numerical differentiation from.
    */
-  template <typename Model>
-  explicit DifferentialActionDataNumDiff(Model* const model)
-      : DifferentialActionDataAbstract(model),
+  template<template<typename Scalar> class Model>
+  explicit DifferentialActionDataNumDiffTpl(Model<Scalar>* const model)
+      : Base(model),
         Rx(model->get_model()->get_nr(), model->get_model()->get_state()->get_ndx()),
         Ru(model->get_model()->get_nr(), model->get_model()->get_nu()),
         dx(model->get_model()->get_state()->get_ndx()),
@@ -73,16 +101,34 @@ struct DifferentialActionDataNumDiff : public DifferentialActionDataAbstract {
     }
   }
 
-  Eigen::MatrixXd Rx;
-  Eigen::MatrixXd Ru;
-  Eigen::VectorXd dx;
-  Eigen::VectorXd du;
-  Eigen::VectorXd xp;
-  boost::shared_ptr<DifferentialActionDataAbstract> data_0;
-  std::vector<boost::shared_ptr<DifferentialActionDataAbstract> > data_x;
-  std::vector<boost::shared_ptr<DifferentialActionDataAbstract> > data_u;
+  MatrixXs Rx;
+  MatrixXs Ru;
+  VectorXs dx;
+  VectorXs du;
+  VectorXs xp;
+  boost::shared_ptr<Base> data_0;
+  std::vector<boost::shared_ptr<Base> > data_x;
+  std::vector<boost::shared_ptr<Base> > data_u;
+
+  using Base::cost;
+  using Base::xout;
+  using Base::Fx;
+  using Base::Fu;
+  using Base::r;
+  using Base::Lx;
+  using Base::Lu;
+  using Base::Lxx;
+  using Base::Lxu;
+  using Base::Luu;
+
 };
 
 }  // namespace crocoddyl
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "crocoddyl/core/numdiff/diff-action.hxx"
+
 
 #endif  // CROCODDYL_CORE_NUMDIFF_DIFF_ACTION_HPP_

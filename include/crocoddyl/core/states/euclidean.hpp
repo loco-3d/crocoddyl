@@ -19,13 +19,6 @@ class StateVectorTpl : public StateAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
-  using StateAbstractTpl<Scalar>::nx_;
-  using StateAbstractTpl<Scalar>::ndx_;
-  using StateAbstractTpl<Scalar>::nq_;
-  using StateAbstractTpl<Scalar>::nv_;
-  using StateAbstractTpl<Scalar>::lb_;
-  using StateAbstractTpl<Scalar>::ub_;
-  using StateAbstractTpl<Scalar>::has_limits_;
   
   explicit StateVectorTpl(const std::size_t& nx);
   ~StateVectorTpl();
@@ -42,6 +35,17 @@ class StateVectorTpl : public StateAbstractTpl<_Scalar> {
   void Jintegrate(const Eigen::Ref<const typename MathBase::VectorXs>&, const Eigen::Ref<const typename MathBase::VectorXs>&,
                   Eigen::Ref<typename MathBase::MatrixXs> Jfirst, Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
                   Jcomponent firstsecond = both) const;
+
+protected:
+  using StateAbstractTpl<Scalar>::nx_;
+  using StateAbstractTpl<Scalar>::ndx_;
+  using StateAbstractTpl<Scalar>::nq_;
+  using StateAbstractTpl<Scalar>::nv_;
+  using StateAbstractTpl<Scalar>::lb_;
+  using StateAbstractTpl<Scalar>::ub_;
+  using StateAbstractTpl<Scalar>::has_limits_;
+
+  
 };
 
 

@@ -11,20 +11,23 @@
 #include "crocoddyl/core/numdiff/diff-action.hpp"
 
 namespace crocoddyl {
-
-DifferentialActionModelNumDiff::DifferentialActionModelNumDiff(
-    boost::shared_ptr<DifferentialActionModelAbstract> model, bool with_gauss_approx)
-    : DifferentialActionModelAbstract(model->get_state(), model->get_nu(), model->get_nr()), model_(model) {
+  
+template<typename Scalar>
+DifferentialActionModelNumDiffTpl<Scalar>::DifferentialActionModelNumDiffTpl(
+    boost::shared_ptr<Base> model, bool with_gauss_approx)
+    : Base(model->get_state(), model->get_nu(), model->get_nr()), model_(model) {
   with_gauss_approx_ = with_gauss_approx;
-  disturbance_ = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
+  disturbance_ = std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon());
   assert_pretty((!with_gauss_approx_ || nr_ > 1), "No Gauss approximation possible with nr = 1");
 }
-
-DifferentialActionModelNumDiff::~DifferentialActionModelNumDiff() {}
-
-void DifferentialActionModelNumDiff::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                                          const Eigen::Ref<const Eigen::VectorXd>& x,
-                                          const Eigen::Ref<const Eigen::VectorXd>& u) {
+  
+template<typename Scalar>
+DifferentialActionModelNumDiffTpl<Scalar>::~DifferentialActionModelNumDiffTpl() {}
+  
+template<typename Scalar>
+void DifferentialActionModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                                          const Eigen::Ref<const VectorXs>& x,
+                                          const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -38,10 +41,11 @@ void DifferentialActionModelNumDiff::calc(const boost::shared_ptr<DifferentialAc
   data->cost = data_nd->data_0->cost;
   data->xout = data_nd->data_0->xout;
 }
-
-void DifferentialActionModelNumDiff::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                                              const Eigen::Ref<const Eigen::VectorXd>& x,
-                                              const Eigen::Ref<const Eigen::VectorXd>& u) {
+  
+template<typename Scalar>
+void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                                              const Eigen::Ref<const VectorXs>& x,
+                                              const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -53,8 +57,8 @@ void DifferentialActionModelNumDiff::calcDiff(const boost::shared_ptr<Differenti
   boost::shared_ptr<DifferentialActionDataNumDiff> data_nd =
       boost::static_pointer_cast<DifferentialActionDataNumDiff>(data);
 
-  const Eigen::VectorXd& xn0 = data_nd->data_0->xout;
-  const double& c0 = data_nd->data_0->cost;
+  const VectorXs& xn0 = data_nd->data_0->xout;
+  const Scalar& c0 = data_nd->data_0->cost;
   data->xout = data_nd->data_0->xout;
   data->cost = data_nd->data_0->cost;
 
@@ -67,8 +71,8 @@ void DifferentialActionModelNumDiff::calcDiff(const boost::shared_ptr<Differenti
     model_->get_state()->integrate(x, data_nd->dx, data_nd->xp);
     model_->calc(data_nd->data_x[ix], data_nd->xp, u);
 
-    const Eigen::VectorXd& xn = data_nd->data_x[ix]->xout;
-    const double& c = data_nd->data_x[ix]->cost;
+    const VectorXs& xn = data_nd->data_x[ix]->xout;
+    const Scalar& c = data_nd->data_x[ix]->cost;
     data->Fx.col(ix) = (xn - xn0) / disturbance_;
 
     data->Lx(ix) = (c - c0) / disturbance_;
@@ -82,8 +86,8 @@ void DifferentialActionModelNumDiff::calcDiff(const boost::shared_ptr<Differenti
     data_nd->du(iu) = disturbance_;
     model_->calc(data_nd->data_u[iu], x, u + data_nd->du);
 
-    const Eigen::VectorXd& xn = data_nd->data_u[iu]->xout;
-    const double& c = data_nd->data_u[iu]->cost;
+    const VectorXs& xn = data_nd->data_u[iu]->xout;
+    const Scalar& c = data_nd->data_u[iu]->cost;
     data->Fu.col(iu) = (xn - xn0) / disturbance_;
 
     data->Lu(iu) = (c - c0) / disturbance_;
@@ -97,28 +101,34 @@ void DifferentialActionModelNumDiff::calcDiff(const boost::shared_ptr<Differenti
     data->Luu = data_nd->Ru.transpose() * data_nd->Ru;
   }
 }
-
-boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionModelNumDiff::createData() {
+  
+template<typename Scalar>
+boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > DifferentialActionModelNumDiffTpl<Scalar>::createData() {
   return boost::make_shared<DifferentialActionDataNumDiff>(this);
 }
-
-const boost::shared_ptr<DifferentialActionModelAbstract>& DifferentialActionModelNumDiff::get_model() const {
+  
+template<typename Scalar>
+const boost::shared_ptr<DifferentialActionModelAbstractTpl<Scalar> >& DifferentialActionModelNumDiffTpl<Scalar>::get_model() const {
   return model_;
 }
-
-const double& DifferentialActionModelNumDiff::get_disturbance() const { return disturbance_; }
-
-void DifferentialActionModelNumDiff::set_disturbance(const double& disturbance) {
+  
+template<typename Scalar>
+const Scalar& DifferentialActionModelNumDiffTpl<Scalar>::get_disturbance() const { return disturbance_; }
+  
+template<typename Scalar>
+void DifferentialActionModelNumDiffTpl<Scalar>::set_disturbance(const Scalar& disturbance) {
   if (disturbance < 0.) {
     throw_pretty("Invalid argument: "
                  << "Disturbance value is positive");
   }
   disturbance_ = disturbance;
 }
-
-bool DifferentialActionModelNumDiff::get_with_gauss_approx() { return with_gauss_approx_; }
-
-void DifferentialActionModelNumDiff::assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& /** x */) {
+  
+template<typename Scalar>
+bool DifferentialActionModelNumDiffTpl<Scalar>::get_with_gauss_approx() { return with_gauss_approx_; }
+  
+template<typename Scalar>
+void DifferentialActionModelNumDiffTpl<Scalar>::assertStableStateFD(const Eigen::Ref<const VectorXs>& /** x */) {
   // TODO(cmastalli): First we need to do it AMNumDiff and then to replicate it.
 }
 

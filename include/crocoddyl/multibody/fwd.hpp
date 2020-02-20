@@ -1,4 +1,5 @@
-
+#ifndef CROCODDYL_MULTIBODY_FWD_HPP_
+#define CROCODDYL_MULTIBODY_FWD_HPP_
 
 namespace crocoddyl {
   //Actuation
@@ -164,3 +165,5 @@ namespace crocoddyl {
   typedef ImpulseDataMultipleTpl<double> ImpulseDataMultiple;
 
 }
+
+#endif //CROCODDYL_MULTIBODY_FWD_HPP_
