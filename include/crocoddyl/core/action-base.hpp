@@ -29,8 +29,6 @@ class ActionModelAbstractTpl {
   ActionModelAbstractTpl(boost::shared_ptr<StateAbstractTpl<Scalar> > state, const std::size_t& nu,
                          const std::size_t& nr = 0);
 
-  ActionModelAbstractTpl();
-
   virtual ~ActionModelAbstractTpl();
 
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data,
