@@ -8,6 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_COSTS_CONTACT_FORCE_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_CONTACT_FORCE_HPP_
+
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"

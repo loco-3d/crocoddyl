@@ -8,10 +8,12 @@
 
 #ifndef CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_
 #define CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_
+
+#include <stdexcept>
+
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"
-#include <stdexcept>
 
 namespace crocoddyl {
 

@@ -8,10 +8,12 @@
 
 #ifndef CROCODDYL_CORE_ACTIVATIONS_SMOOTH_ABS_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_SMOOTH_ABS_HPP_
+
+#include <stdexcept>
+
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
-#include <stdexcept>
 
 namespace crocoddyl {
 

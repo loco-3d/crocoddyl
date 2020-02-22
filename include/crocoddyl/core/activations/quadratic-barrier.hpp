@@ -8,9 +8,11 @@
 
 #ifndef CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_BARRIER_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_BARRIER_HPP_
-#include "crocoddyl/core/fwd.hpp"
+
 #include <stdexcept>
 #include <math.h>
+
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/activation-base.hpp"
 

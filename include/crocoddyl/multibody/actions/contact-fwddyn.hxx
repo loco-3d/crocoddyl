@@ -8,6 +8,7 @@
 
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
+
 #include <pinocchio/algorithm/compute-all-terms.hpp>
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/contact-dynamics.hpp>

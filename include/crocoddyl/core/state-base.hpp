@@ -8,11 +8,13 @@
 
 #ifndef CROCODDYL_CORE_STATE_BASE_HPP_
 #define CROCODDYL_CORE_STATE_BASE_HPP_
-#include "crocoddyl/core/fwd.hpp"
-#include <crocoddyl/core/mathbase.hpp>
+
 #include <vector>
 #include <string>
 #include <stdexcept>
+
+#include "crocoddyl/core/fwd.hpp"
+#include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -139,6 +141,6 @@ class StateAbstractTpl {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
-#include <crocoddyl/core/state-base.hxx>
+#include "crocoddyl/core/state-base.hxx"
 
 #endif  // CROCODDYL_CORE_STATE_BASE_HPP_

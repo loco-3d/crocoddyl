@@ -8,6 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_FRICTION_CONE_HPP_
 #define CROCODDYL_MULTIBODY_FRICTION_CONE_HPP_
+
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/mathbase.hpp"
 

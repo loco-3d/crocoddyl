@@ -9,9 +9,10 @@
 #ifndef CROCODDYL_CORE_NUMDIFF_DIFF_ACTION_HPP_
 #define CROCODDYL_CORE_NUMDIFF_DIFF_ACTION_HPP_
 
-#include "crocoddyl/core/diff-action-base.hpp"
 #include <vector>
 #include <iostream>
+
+#include "crocoddyl/core/diff-action-base.hpp"
 
 namespace crocoddyl {
 

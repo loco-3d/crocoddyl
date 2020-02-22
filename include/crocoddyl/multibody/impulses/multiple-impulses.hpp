@@ -12,6 +12,7 @@
 #include <string>
 #include <map>
 #include <utility>
+
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"

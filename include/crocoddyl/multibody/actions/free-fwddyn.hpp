@@ -8,8 +8,10 @@
 
 #ifndef CROCODDYL_MULTIBODY_ACTIONS_FREE_FWDDYN_HPP_
 #define CROCODDYL_MULTIBODY_ACTIONS_FREE_FWDDYN_HPP_
-#include "crocoddyl/multibody/fwd.hpp"
+
 #include <stdexcept>
+
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"

@@ -11,6 +11,7 @@
 
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
+
 #include <pinocchio/spatial/motion.hpp>
 #include <pinocchio/multibody/data.hpp>
 

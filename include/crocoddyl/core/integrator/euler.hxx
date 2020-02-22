@@ -6,9 +6,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <iostream>
+
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
-#include <iostream>
 
 namespace crocoddyl {
 

@@ -8,8 +8,10 @@
 
 #ifndef CROCODDYL_MULTIBODY_ACTIONS_IMPULSE_FWDDYN_HPP_
 #define CROCODDYL_MULTIBODY_ACTIONS_IMPULSE_FWDDYN_HPP_
-#include "crocoddyl/multibody/fwd.hpp"
+
 #include <stdexcept>
+
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"

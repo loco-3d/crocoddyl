@@ -8,6 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_COSTS_FRAME_PLACEMENT_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_FRAME_PLACEMENT_HPP_
+
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"

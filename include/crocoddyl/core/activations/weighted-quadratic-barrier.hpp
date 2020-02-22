@@ -8,6 +8,7 @@
 
 #ifndef CROCODDYL_CORE_ACTIVATIONS_WEIGHTED_QUADRATIC_BARRIER_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_WEIGHTED_QUADRATIC_BARRIER_HPP_
+
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"

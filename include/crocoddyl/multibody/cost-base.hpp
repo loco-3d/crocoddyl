@@ -8,9 +8,11 @@
 
 #ifndef CROCODDYL_MULTIBODY_COST_BASE_HPP_
 #define CROCODDYL_MULTIBODY_COST_BASE_HPP_
-#include "crocoddyl/multibody/fwd.hpp"
+
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/core/data-collector-base.hpp"
 #include "crocoddyl/core/activation-base.hpp"

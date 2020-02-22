@@ -9,6 +9,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_COSTS_FRAME_TRANSLATION_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_FRAME_TRANSLATION_HPP_
+
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"

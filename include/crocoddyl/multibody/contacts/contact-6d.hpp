@@ -8,9 +8,11 @@
 
 #ifndef CROCODDYL_MULTIBODY_CONTACTS_CONTACT_6D_HPP_
 #define CROCODDYL_MULTIBODY_CONTACTS_CONTACT_6D_HPP_
+
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/frames.hpp"
+
 #include <pinocchio/spatial/motion.hpp>
 #include <pinocchio/multibody/data.hpp>
 

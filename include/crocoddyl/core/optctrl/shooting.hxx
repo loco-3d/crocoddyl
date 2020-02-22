@@ -6,7 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
 #ifdef WITH_MULTITHREADING
 #include <omp.h>
 #define NUM_THREADS WITH_NTHREADS

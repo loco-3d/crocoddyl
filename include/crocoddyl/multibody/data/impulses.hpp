@@ -10,6 +10,7 @@
 #define CROCODDYL_CORE_DATA_IMPULSES_HPP_
 
 #include <boost/shared_ptr.hpp>
+
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"

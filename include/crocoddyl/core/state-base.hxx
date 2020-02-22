@@ -5,7 +5,7 @@
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
-#include <crocoddyl/core/mathbase.hpp>
+#include "crocoddyl/core/mathbase.hpp"
 
 namespace crocoddyl {
 template <typename Scalar>

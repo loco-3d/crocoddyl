@@ -8,6 +8,7 @@
 
 #ifndef CROCODDYL_CORE_INTEGRATOR_EULER_HPP_
 #define CROCODDYL_CORE_INTEGRATOR_EULER_HPP_
+
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"

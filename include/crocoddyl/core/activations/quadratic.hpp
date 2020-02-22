@@ -8,9 +8,10 @@
 
 #ifndef CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_
+
+#include <stdexcept>
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/activation-base.hpp"
-#include <stdexcept>
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {

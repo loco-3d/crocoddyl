@@ -8,10 +8,12 @@
 
 #ifndef CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_
 #define CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_
-#include "crocoddyl/core/fwd.hpp"
+
 #include <stdexcept>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/utils/to-string.hpp"
 
@@ -155,5 +157,5 @@ struct DifferentialActionDataAbstractTpl {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
-#include <crocoddyl/core/diff-action-base.hxx>
+#include "crocoddyl/core/diff-action-base.hxx"
 #endif  // CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_

@@ -8,6 +8,7 @@
 
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/costs/centroidal-momentum.hpp"
+
 #include <pinocchio/algorithm/centroidal-derivatives.hpp>
 
 namespace crocoddyl {

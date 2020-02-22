@@ -8,12 +8,14 @@
 
 #ifndef CROCODDYL_MULTIBODY_CONTACT_BASE_HPP_
 #define CROCODDYL_MULTIBODY_CONTACT_BASE_HPP_
+
 #include "crocoddyl/multibody/fwd.hpp"
-#include <pinocchio/multibody/data.hpp>
-#include <pinocchio/spatial/force.hpp>
 #include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/core/utils/to-string.hpp"
+
+#include <pinocchio/multibody/data.hpp>
+#include <pinocchio/spatial/force.hpp>
 
 namespace crocoddyl {
 

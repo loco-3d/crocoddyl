@@ -8,6 +8,7 @@
 
 #ifndef CROCODDYL_CORE_DATA_COLLECTOR_BASE_HPP_
 #define CROCODDYL_CORE_DATA_COLLECTOR_BASE_HPP_
+
 #include "crocoddyl/core/fwd.hpp"
 
 namespace crocoddyl {

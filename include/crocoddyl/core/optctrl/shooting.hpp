@@ -8,9 +8,10 @@
 
 #ifndef CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_
 #define CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_
-#include "crocoddyl/core/fwd.hpp"
+
 #include <stdexcept>
 #include <vector>
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/utils/to-string.hpp"
@@ -66,6 +67,6 @@ class ShootingProblemTpl {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
-#include <crocoddyl/core/optctrl/shooting.hxx>
+#include "crocoddyl/core/optctrl/shooting.hxx"
 
 #endif  // CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_

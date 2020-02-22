@@ -12,6 +12,7 @@
 #include <stdexcept>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/utils/math.hpp"
@@ -148,6 +149,6 @@ struct ActionDataAbstractTpl {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
-#include <crocoddyl/core/action-base.hxx>
+#include "crocoddyl/core/action-base.hxx"
 
 #endif  // CROCODDYL_CORE_ACTION_BASE_HPP_

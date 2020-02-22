@@ -10,10 +10,11 @@
 #define CROCODDYL_CORE_ACTIVATION_BASE_HPP_
 
 #include <stdexcept>
-#include "crocoddyl/core/fwd.hpp"
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
-#include <crocoddyl/core/mathbase.hpp>
+
+#include "crocoddyl/core/fwd.hpp"
+#include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/core/utils/to-string.hpp"
 
 namespace crocoddyl {

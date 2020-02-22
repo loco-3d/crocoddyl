@@ -8,6 +8,7 @@
 
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
+
 #include <pinocchio/algorithm/aba.hpp>
 #include <pinocchio/algorithm/aba-derivatives.hpp>
 #include <pinocchio/algorithm/rnea-derivatives.hpp>

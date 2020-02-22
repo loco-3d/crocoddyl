@@ -8,8 +8,10 @@
 
 #ifndef CROCODDYL_CORE_DATA_CONTACTS_HPP_
 #define CROCODDYL_CORE_DATA_CONTACTS_HPP_
-#include "crocoddyl/multibody/fwd.hpp"
+
 #include <boost/shared_ptr.hpp>
+
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 

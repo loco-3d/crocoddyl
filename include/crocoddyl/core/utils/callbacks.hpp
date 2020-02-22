@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <iomanip>
+
 #include "crocoddyl/core/solver-base.hpp"
 
 namespace crocoddyl {

@@ -10,9 +10,10 @@
 #ifndef CROCODDYL_CORE_NUMDIFF_ACTION_HPP_
 #define CROCODDYL_CORE_NUMDIFF_ACTION_HPP_
 
+#include <vector>
+
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/action-base.hpp"
-#include <vector>
 
 namespace crocoddyl {
 
@@ -219,6 +220,6 @@ struct ActionDataNumDiffTpl : public ActionDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
-#include <crocoddyl/core/numdiff/action.hxx>
+#include "crocoddyl/core/numdiff/action.hxx"
 
 #endif  // CROCODDYL_CORE_NUMDIFF_ACTION_HPP_

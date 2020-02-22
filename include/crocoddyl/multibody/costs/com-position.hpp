@@ -8,6 +8,7 @@
 
 #ifndef CROCODDYL_MULTIBODY_COSTS_COM_POSITION_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_COM_POSITION_HPP_
+
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"

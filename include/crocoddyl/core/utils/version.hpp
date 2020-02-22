@@ -11,6 +11,7 @@
 
 #include <string>
 #include <sstream>
+
 #include "crocoddyl/config.hh"
 
 namespace crocoddyl {

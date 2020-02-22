@@ -9,9 +9,11 @@
 
 #ifndef CROCODDYL_CORE_NUMDIFF_STATE_HPP_
 #define CROCODDYL_CORE_NUMDIFF_STATE_HPP_
-#include <crocoddyl/core/fwd.hpp>
+
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
+
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
 
 namespace crocoddyl {

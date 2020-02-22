@@ -12,6 +12,7 @@
 
 #include <Eigen/Dense>
 #include <Eigen/Cholesky>
+
 #include "crocoddyl/core/solver-base.hpp"
 
 namespace crocoddyl {
