@@ -10,16 +10,20 @@ namespace crocoddyl {
 
 template <typename Scalar>
 StateVectorTpl<Scalar>::StateVectorTpl(const std::size_t& nx) : StateAbstractTpl<Scalar>(nx, nx) {}
+
 template <typename Scalar>
 StateVectorTpl<Scalar>::~StateVectorTpl() {}
+
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::VectorXs StateVectorTpl<Scalar>::zero() const {
   return MathBase::VectorXs::Zero(nx_);
 }
+
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::VectorXs StateVectorTpl<Scalar>::rand() const {
   return MathBase::VectorXs::Random(nx_);
 }
+
 template <typename Scalar>
 void StateVectorTpl<Scalar>::diff(const Eigen::Ref<const typename MathBase::VectorXs>& x0,
                                   const Eigen::Ref<const typename MathBase::VectorXs>& x1,
@@ -38,6 +42,7 @@ void StateVectorTpl<Scalar>::diff(const Eigen::Ref<const typename MathBase::Vect
   }
   dxout = x1 - x0;
 }
+
 template <typename Scalar>
 void StateVectorTpl<Scalar>::integrate(const Eigen::Ref<const typename MathBase::VectorXs>& x,
                                        const Eigen::Ref<const typename MathBase::VectorXs>& dx,
@@ -56,6 +61,7 @@ void StateVectorTpl<Scalar>::integrate(const Eigen::Ref<const typename MathBase:
   }
   xout = x + dx;
 }
+
 template <typename Scalar>
 void StateVectorTpl<Scalar>::Jdiff(const Eigen::Ref<const typename MathBase::VectorXs>&,
                                    const Eigen::Ref<const typename MathBase::VectorXs>&,
@@ -81,6 +87,7 @@ void StateVectorTpl<Scalar>::Jdiff(const Eigen::Ref<const typename MathBase::Vec
     Jsecond.diagonal() = MathBase::VectorXs::Constant(ndx_, 1.);
   }
 }
+
 template <typename Scalar>
 void StateVectorTpl<Scalar>::Jintegrate(const Eigen::Ref<const typename MathBase::VectorXs>&,
                                         const Eigen::Ref<const typename MathBase::VectorXs>&,

@@ -14,8 +14,10 @@ ActionModelUnicycleTpl<Scalar>::ActionModelUnicycleTpl()
     : ActionModelAbstractTpl<Scalar>(boost::make_shared<StateVectorTpl<Scalar> >(3), 2, 5), dt_(0.1) {
   cost_weights_ << 10., 1.;
 }
+
 template <typename Scalar>
 ActionModelUnicycleTpl<Scalar>::~ActionModelUnicycleTpl() {}
+
 template <typename Scalar>
 void ActionModelUnicycleTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
                                           const Eigen::Ref<const typename MathBase::VectorXs>& x,
@@ -37,6 +39,7 @@ void ActionModelUnicycleTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbst
   d->r.template tail<2>() = cost_weights_[1] * u;
   d->cost = 0.5 * d->r.transpose() * d->r;
 }
+
 template <typename Scalar>
 void ActionModelUnicycleTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
                                               const Eigen::Ref<const typename MathBase::VectorXs>& x,
@@ -66,14 +69,17 @@ void ActionModelUnicycleTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionData
   d->Fx << 1., 0., -s * u[0] * dt_, 0., 1., c * u[0] * dt_, 0., 0., 1.;
   d->Fu << c * dt_, 0., s * dt_, 0., 0., dt_;
 }
+
 template <typename Scalar>
 boost::shared_ptr<ActionDataAbstractTpl<Scalar> > ActionModelUnicycleTpl<Scalar>::createData() {
   return boost::make_shared<ActionDataUnicycleTpl<Scalar> >(this);
 }
+
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Vector2s& ActionModelUnicycleTpl<Scalar>::get_cost_weights() const {
   return cost_weights_;
 }
+
 template <typename Scalar>
 void ActionModelUnicycleTpl<Scalar>::set_cost_weights(const typename MathBase::Vector2s& weights) {
   cost_weights_ = weights;

@@ -25,8 +25,10 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
   }
   allocateData();
 }
+
 template <typename Scalar>
 ShootingProblemTpl<Scalar>::~ShootingProblemTpl() {}
+
 template <typename Scalar>
 Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs, const std::vector<VectorXs>& us) {
   if (xs.size() != T_ + 1) {
@@ -53,6 +55,7 @@ Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs, const s
   cost_ += terminal_data_->cost;
   return cost_;
 }
+
 template <typename Scalar>
 Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, const std::vector<VectorXs>& us) {
   if (xs.size() != T_ + 1) {
@@ -82,6 +85,7 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, con
 
   return cost_;
 }
+
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::rollout(const std::vector<VectorXs>& us, std::vector<VectorXs>& xs) {
   if (xs.size() != T_ + 1) {
@@ -105,6 +109,7 @@ void ShootingProblemTpl<Scalar>::rollout(const std::vector<VectorXs>& us, std::v
   }
   terminal_model_->calc(terminal_data_, xs.back());
 }
+
 template <typename Scalar>
 std::vector<typename MathBaseTpl<Scalar>::VectorXs> ShootingProblemTpl<Scalar>::rollout_us(
     const std::vector<VectorXs>& us) {
@@ -113,14 +118,17 @@ std::vector<typename MathBaseTpl<Scalar>::VectorXs> ShootingProblemTpl<Scalar>::
   rollout(us, xs);
   return xs;
 }
+
 template <typename Scalar>
 const std::size_t& ShootingProblemTpl<Scalar>::get_T() const {
   return T_;
 }
+
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::VectorXs& ShootingProblemTpl<Scalar>::get_x0() const {
   return x0_;
 }
+
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::allocateData() {
   for (std::size_t i = 0; i < T_; ++i) {
@@ -129,26 +137,31 @@ void ShootingProblemTpl<Scalar>::allocateData() {
   }
   terminal_data_ = terminal_model_->createData();
 }
+
 template <typename Scalar>
 const std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > >&
 ShootingProblemTpl<Scalar>::get_runningModels() const {
   return running_models_;
 }
+
 template <typename Scalar>
 const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >& ShootingProblemTpl<Scalar>::get_terminalModel()
     const {
   return terminal_model_;
 }
+
 template <typename Scalar>
 const std::vector<boost::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> > >&
 ShootingProblemTpl<Scalar>::get_runningDatas() const {
   return running_datas_;
 }
+
 template <typename Scalar>
 const boost::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> >& ShootingProblemTpl<Scalar>::get_terminalData()
     const {
   return terminal_data_;
 }
+
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::set_x0(const VectorXs& x0_in) {
   if (x0_in.size() != x0_.size()) {
@@ -157,6 +170,7 @@ void ShootingProblemTpl<Scalar>::set_x0(const VectorXs& x0_in) {
   }
   x0_ = x0_in;
 }
+
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::set_runningModels(
     const std::vector<boost::shared_ptr<ActionModelAbstract> >& models) {
@@ -168,6 +182,7 @@ void ShootingProblemTpl<Scalar>::set_runningModels(
     running_datas_.push_back(model->createData());
   }
 }
+
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::set_terminalModel(boost::shared_ptr<ActionModelAbstract> model) {
   terminal_model_ = model;
