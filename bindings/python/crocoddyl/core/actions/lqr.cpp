@@ -7,8 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
-#include "crocoddyl/core/actions/lqr.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
+#include "crocoddyl/core/actions/lqr.hpp"
 
 namespace crocoddyl {
 namespace python {

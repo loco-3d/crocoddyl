@@ -7,8 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
-#include "crocoddyl/core/actions/unicycle.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
+#include "crocoddyl/core/actions/unicycle.hpp"
 
 namespace crocoddyl {
 namespace python {

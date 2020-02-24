@@ -7,9 +7,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
-#include "crocoddyl/core/numdiff/diff-action.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
+#include "crocoddyl/core/numdiff/diff-action.hpp"
 
 namespace crocoddyl {
 namespace python {

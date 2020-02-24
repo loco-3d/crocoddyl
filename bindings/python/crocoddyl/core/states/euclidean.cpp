@@ -7,8 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
-#include "crocoddyl/core/states/euclidean.hpp"
 #include "python/crocoddyl/core/state-base.hpp"
+#include "crocoddyl/core/states/euclidean.hpp"
 
 namespace crocoddyl {
 namespace python {

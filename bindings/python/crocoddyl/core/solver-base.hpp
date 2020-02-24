@@ -12,9 +12,7 @@
 
 #include <vector>
 #include <memory>
-#include "python/crocoddyl/core/core.hpp"
 #include "crocoddyl/core/solver-base.hpp"
-#include "python/crocoddyl/utils/vector-converter.hpp"
 
 namespace crocoddyl {
 namespace python {

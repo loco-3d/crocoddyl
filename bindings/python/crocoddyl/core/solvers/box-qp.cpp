@@ -7,8 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
-#include "crocoddyl/core/solvers/box-qp.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
+#include "crocoddyl/core/solvers/box-qp.hpp"
 
 namespace crocoddyl {
 namespace python {
