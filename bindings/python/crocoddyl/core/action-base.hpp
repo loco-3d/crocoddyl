@@ -9,7 +9,6 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_CORE_ACTION_BASE_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_CORE_ACTION_BASE_HPP_
 
-#include "python/crocoddyl/core/core.hpp"
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 

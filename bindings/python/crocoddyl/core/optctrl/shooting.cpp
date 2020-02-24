@@ -9,8 +9,8 @@
 #include <vector>
 #include <memory>
 #include "python/crocoddyl/core/core.hpp"
-#include "crocoddyl/core/optctrl/shooting.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
+#include "crocoddyl/core/optctrl/shooting.hpp"
 
 namespace crocoddyl {
 namespace python {

@@ -7,8 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
-#include "crocoddyl/core/activations/smooth-abs.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
+#include "crocoddyl/core/activations/smooth-abs.hpp"
 
 namespace crocoddyl {
 namespace python {

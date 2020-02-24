@@ -7,8 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
-#include "crocoddyl/core/numdiff/activation.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
+#include "crocoddyl/core/numdiff/activation.hpp"
 
 namespace crocoddyl {
 namespace python {
