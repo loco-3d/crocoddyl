@@ -8,13 +8,9 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
-#include "crocoddyl/core/action-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 namespace python {
-
-namespace bp = boost::python;
 
 void exposeActionAbstract() {
   bp::register_ptr_to_python<boost::shared_ptr<ActionModelAbstract> >();
