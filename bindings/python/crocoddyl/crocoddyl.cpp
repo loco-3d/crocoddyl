@@ -1,19 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS, INRIA
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#define PYTHON_BINDINGS
-
-#include <pinocchio/fwd.hpp>
-#include <boost/python.hpp>
-#include <eigenpy/eigenpy.hpp>
-
-#include "python/crocoddyl/core.hpp"
-#include "python/crocoddyl/multibody.hpp"
+#include "python/crocoddyl/fwd.hpp"
 #include "crocoddyl/core/utils/version.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
 
