@@ -10,6 +10,7 @@
 #define CROCODDYL_CORE_MATHBASE_HPP_
 
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 
 namespace crocoddyl {
 
