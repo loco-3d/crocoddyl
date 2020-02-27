@@ -85,11 +85,11 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
     joint = model->get_state()->get_pinocchio().frames[frame].parent;
     jMf = model->get_state()->get_pinocchio().frames[frame].placement;
     fXj = jMf.inverse().toActionMatrix();
-    v_partial_dq.fill(0);
-    a_partial_dq.fill(0);
-    a_partial_dv.fill(0);
-    a_partial_da.fill(0);
-    rMf_Jlog6.fill(0);
+    v_partial_dq.setZero();
+    a_partial_dq.setZero();
+    a_partial_dv.setZero();
+    a_partial_da.setZero();
+    rMf_Jlog6.setZero();
   }
 
   pinocchio::SE3Tpl<Scalar> rMf;

@@ -34,7 +34,7 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
-    data->a_value = 0.5 * r.transpose() * r;
+    data->a_value = (Scalar(0.5) * r.transpose() * r)[0];
   };
 
   void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
@@ -50,7 +50,7 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
 
   boost::shared_ptr<ActivationDataAbstract> createData() {
     boost::shared_ptr<ActivationDataAbstract> data = boost::make_shared<ActivationDataAbstract>(this);
-    data->Arr.diagonal().fill(1.);
+    data->Arr.diagonal().fill((Scalar)1.);
     return data;
   };
 

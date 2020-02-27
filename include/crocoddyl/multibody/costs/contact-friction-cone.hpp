@@ -91,7 +91,7 @@ struct CostDataContactFrictionConeTpl : public CostDataAbstractTpl<_Scalar> {
       : Base(model, data),
         Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()),
         more_than_3_constraints(false) {
-    Arr_Ru.fill(0);
+    Arr_Ru.setZero();
 
     // Check that proper shared data has been passed
     DataCollectorContactTpl<Scalar>* d = dynamic_cast<DataCollectorContactTpl<Scalar>*>(shared);

@@ -82,9 +82,9 @@ struct CostDataFrameVelocityTpl : public CostDataAbstractTpl<_Scalar> {
         dv_dq(6, model->get_state()->get_nv()),
         dv_dv(6, model->get_state()->get_nv()),
         Arr_Rx(6, model->get_state()->get_nv()) {
-    dv_dq.fill(0);
-    dv_dv.fill(0);
-    Arr_Rx.fill(0);
+    dv_dq.setZero();
+    dv_dv.setZero();
+    Arr_Rx.setZero();
     // Check that proper shared data has been passed
     DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
     if (d == NULL) {

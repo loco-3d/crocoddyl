@@ -103,9 +103,9 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
     data->Lxu = data_nd->Rx.transpose() * data_nd->Ru;
     data->Luu = data_nd->Ru.transpose() * data_nd->Ru;
   } else {
-    data->Lxx.fill(0.0);
-    data->Lxu.fill(0.0);
-    data->Luu.fill(0.0);
+    data->Lxx.setZero();
+    data->Lxu.setZero();
+    data->Luu.setZero();
   }
 }
 

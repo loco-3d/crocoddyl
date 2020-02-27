@@ -77,7 +77,7 @@ struct CostDataStateTpl : public CostDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   CostDataStateTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data), Arr_Rx(model->get_activation()->get_nr(), model->get_state()->get_ndx()) {
-    Arr_Rx.fill(0);
+    Arr_Rx.setZero();
   }
 
   MatrixXs Arr_Rx;

@@ -74,9 +74,9 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
         v_partial_dv(6, model->get_state()->get_nv()) {
     frame = model->get_frame();
     joint = model->get_state()->get_pinocchio().frames[frame].parent;
-    fJf.fill(0);
-    v_partial_dq.fill(0);
-    v_partial_dv.fill(0);
+    fJf.setZero();
+    v_partial_dq.setZero();
+    v_partial_dv.setZero();
   }
 
   pinocchio::SE3Tpl<Scalar> jMf;

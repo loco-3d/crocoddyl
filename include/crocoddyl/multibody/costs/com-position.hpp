@@ -78,7 +78,7 @@ struct CostDataCoMPositionTpl : public CostDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   CostDataCoMPositionTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data), Arr_Jcom(3, model->get_state()->get_nv()) {
-    Arr_Jcom.fill(0);
+    Arr_Jcom.setZero();
     // Check that proper shared data has been passed
     DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
     if (d == NULL) {

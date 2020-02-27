@@ -86,9 +86,9 @@ struct DifferentialActionDataFreeFwdDynamicsTpl : public DifferentialActionDataA
         u_drift(model->get_nu()),
         dtau_dx(model->get_nu(), model->get_state()->get_ndx()) {
     costs->shareMemory(this);
-    Minv.fill(0);
-    u_drift.fill(0);
-    dtau_dx.fill(0);
+    Minv.setZero();
+    u_drift.setZero();
+    dtau_dx.setZero();
   }
 
   pinocchio::DataTpl<Scalar> pinocchio;

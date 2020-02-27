@@ -54,7 +54,7 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
   };
   boost::shared_ptr<ActuationDataAbstract> createData() {
     boost::shared_ptr<ActuationDataAbstract> data = boost::make_shared<ActuationDataAbstract>(this);
-    data->dtau_du.diagonal(-6).fill(1.);
+    data->dtau_du.diagonal(-6).fill((Scalar)1.);
 
 #ifndef NDEBUG
     dtau_du_ = data->dtau_du;

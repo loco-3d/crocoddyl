@@ -130,7 +130,7 @@ void StateMultibodyTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, cons
 
     Jdq.setZero();
     dx.setZero();
-    Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = -1;
+    Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)-1;
   } else if (firstsecond == second) {
     if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
       throw_pretty("Invalid argument: "
@@ -148,7 +148,7 @@ void StateMultibodyTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, cons
 
     Jdq.setZero();
     dx.setZero();
-    Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = 1;
+    Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
   } else {  // computing both
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
       throw_pretty("Invalid argument: "
@@ -172,7 +172,7 @@ void StateMultibodyTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, cons
     updateJdiff(Jdq1, Jfirst.topLeftCorner(nv_, nv_), false);
     Jdq1.setZero();
     dx1.setZero();
-    Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = -1;
+    Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)-1;
 
     // Computing Jsecond
     NColAlignedVectorBlock dx2 = Jsecond.template rightCols<1>();
@@ -184,7 +184,7 @@ void StateMultibodyTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, cons
 
     dx2.setZero();
     Jdq2.setZero();
-    Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = 1;
+    Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
   }
 }
 
@@ -211,7 +211,7 @@ void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, 
     Jfirst.setZero();
 
     pinocchio::dIntegrate(pinocchio_, x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_), pinocchio::ARG0);
-    Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = 1;
+    Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
   } else if (firstsecond == second) {
     if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
       throw_pretty("Invalid argument: "
@@ -221,7 +221,7 @@ void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, 
     Jsecond.setZero();
 
     pinocchio::dIntegrate(pinocchio_, x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_), pinocchio::ARG1);
-    Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = 1;
+    Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
   } else {  // computing both
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
       throw_pretty("Invalid argument: "
@@ -237,12 +237,12 @@ void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, 
     // Computing Jfirst
     Jfirst.setZero();
     pinocchio::dIntegrate(pinocchio_, x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_), pinocchio::ARG0);
-    Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = 1;
+    Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
 
     // Computing Jsecond
     Jsecond.setZero();
     pinocchio::dIntegrate(pinocchio_, x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_), pinocchio::ARG1);
-    Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = 1;
+    Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
   }
 }
 

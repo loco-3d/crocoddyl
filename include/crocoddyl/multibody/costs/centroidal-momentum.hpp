@@ -78,8 +78,8 @@ struct CostDataCentroidalMomentumTpl : public CostDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   CostDataCentroidalMomentumTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data), dhd_dq(6, model->get_state()->get_nv()), dhd_dv(6, model->get_state()->get_nv()) {
-    dhd_dq.fill(0);
-    dhd_dv.fill(0);
+    dhd_dq.setZero();
+    dhd_dv.setZero();
 
     // Check that proper shared data has been passed
     DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);

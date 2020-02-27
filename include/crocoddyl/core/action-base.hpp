@@ -101,6 +101,7 @@ class ActionModelAbstractTpl {
 
 #endif
 };
+
 template <typename _Scalar>
 struct ActionDataAbstractTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW

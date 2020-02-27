@@ -74,9 +74,9 @@ struct ImpulseDataAbstractTpl {
         dv0_dq(model->get_ni(), model->get_state()->get_nv()),
         df_dq(model->get_ni(), model->get_state()->get_nv()),
         f(pinocchio::ForceTpl<Scalar>::Zero()) {
-    Jc.fill(0);
-    dv0_dq.fill(0);
-    df_dq.fill(0);
+    Jc.setZero();
+    dv0_dq.setZero();
+    df_dq.setZero();
   }
   virtual ~ImpulseDataAbstractTpl() {}
 

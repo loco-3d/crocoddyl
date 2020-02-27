@@ -98,9 +98,9 @@ struct DifferentialActionDataContactFwdDynamicsTpl : public DifferentialActionDa
         df_dx(model->get_contacts()->get_nc(), model->get_state()->get_ndx()),
         df_du(model->get_contacts()->get_nc(), model->get_nu()) {
     costs->shareMemory(this);
-    Kinv.fill(0);
-    df_dx.fill(0);
-    df_du.fill(0);
+    Kinv.setZero();
+    df_dx.setZero();
+    df_du.setZero();
   }
 
   pinocchio::DataTpl<Scalar> pinocchio;

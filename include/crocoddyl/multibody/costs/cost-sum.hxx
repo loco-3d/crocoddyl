@@ -101,11 +101,11 @@ void CostModelSumTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataSumTpl<Sc
                  << "it doesn't match the number of cost datas and models");
   }
   std::size_t nr = 0;
-  data->Lx.fill(0);
-  data->Lu.fill(0);
-  data->Lxx.fill(0);
-  data->Lxu.fill(0);
-  data->Luu.fill(0);
+  data->Lx.setZero();
+  data->Lu.setZero();
+  data->Lxx.setZero();
+  data->Lxu.setZero();
+  data->Luu.setZero();
 
   const std::size_t& ndx = state_->get_ndx();
   typename CostModelContainer::iterator it_m, end_m;

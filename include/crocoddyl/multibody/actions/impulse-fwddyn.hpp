@@ -107,9 +107,9 @@ struct ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
              model->get_state()->get_nv() + model->get_impulses()->get_ni()),
         df_dq(model->get_impulses()->get_ni(), model->get_state()->get_nv()) {
     costs->shareMemory(this);
-    vnone.fill(0);
-    Kinv.fill(0);
-    df_dq.fill(0);
+    vnone.setZero();
+    Kinv.setZero();
+    df_dq.setZero();
   }
 
   pinocchio::DataTpl<Scalar> pinocchio;

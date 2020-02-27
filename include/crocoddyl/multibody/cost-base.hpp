@@ -107,14 +107,14 @@ struct CostDataAbstractTpl {
         r(model->get_activation()->get_nr()),
         Rx(model->get_activation()->get_nr(), model->get_state()->get_ndx()),
         Ru(model->get_activation()->get_nr(), model->get_nu()) {
-    Lx.fill(0);
-    Lu.fill(0);
-    Lxx.fill(0);
-    Lxu.fill(0);
-    Luu.fill(0);
-    r.fill(0);
-    Rx.fill(0);
-    Ru.fill(0);
+    Lx.setZero();
+    Lu.setZero();
+    Lxx.setZero();
+    Lxu.setZero();
+    Luu.setZero();
+    r.setZero();
+    Rx.setZero();
+    Ru.setZero();
   }
   virtual ~CostDataAbstractTpl() {}
 

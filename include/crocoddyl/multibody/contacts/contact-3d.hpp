@@ -90,19 +90,19 @@ struct ContactData3DTpl : public ContactDataAbstractTpl<_Scalar> {
     joint = model->get_state()->get_pinocchio().frames[frame].parent;
     jMf = model->get_state()->get_pinocchio().frames[frame].placement;
     fXj = jMf.inverse().toActionMatrix();
-    fJf.fill(0);
-    v_partial_dq.fill(0);
-    a_partial_dq.fill(0);
-    a_partial_dv.fill(0);
-    a_partial_da.fill(0);
-    fXjdv_dq.fill(0);
-    fXjda_dq.fill(0);
-    fXjda_dv.fill(0);
-    vv.fill(0);
-    vw.fill(0);
-    vv_skew.fill(0);
-    vw_skew.fill(0);
-    oRf.fill(0);
+    fJf.setZero();
+    v_partial_dq.setZero();
+    a_partial_dq.setZero();
+    a_partial_dv.setZero();
+    a_partial_da.setZero();
+    fXjdv_dq.setZero();
+    fXjda_dq.setZero();
+    fXjda_dv.setZero();
+    vv.setZero();
+    vw.setZero();
+    vv_skew.setZero();
+    vw_skew.setZero();
+    oRf.setZero();
   }
 
   pinocchio::MotionTpl<Scalar> v;

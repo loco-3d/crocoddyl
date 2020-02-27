@@ -84,12 +84,12 @@ struct CostDataFrameRotationTpl : public CostDataAbstractTpl<_Scalar> {
         rJf(3, 3),
         fJf(6, model->get_state()->get_nv()),
         Arr_J(3, model->get_state()->get_nv()) {
-    r.fill(0);
+    r.setZero();
     rRf.setIdentity();
-    J.fill(0);
-    rJf.fill(0);
-    fJf.fill(0);
-    Arr_J.fill(0);
+    J.setZero();
+    rJf.setZero();
+    fJf.setZero();
+    Arr_J.setZero();
     // Check that proper shared data has been passed
     DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
     if (d == NULL) {

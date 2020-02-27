@@ -112,8 +112,8 @@ struct ContactDataMultipleTpl : ContactDataAbstractTpl<_Scalar> {
         dv(model->get_state()->get_nv()),
         ddv_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
         fext(model->get_state()->get_pinocchio().njoints, pinocchio::ForceTpl<Scalar>::Zero()) {
-    dv.fill(0);
-    ddv_dx.fill(0);
+    dv.setZero();
+    ddv_dx.setZero();
     for (typename ContactModelMultiple::ContactModelContainer::const_iterator it = model->get_contacts().begin();
          it != model->get_contacts().end(); ++it) {
       const ContactItem& item = it->second;

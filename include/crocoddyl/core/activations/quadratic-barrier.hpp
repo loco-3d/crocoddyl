@@ -25,7 +25,7 @@ struct ActivationBoundsTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ActivationBoundsTpl(const VectorXs& lower, const VectorXs& upper, const Scalar& b = 1.)
+  ActivationBoundsTpl(const VectorXs& lower, const VectorXs& upper, const Scalar& b = (Scalar)1.)
       : lb(lower), ub(upper), beta(b) {
     if (lb.size() != ub.size()) {
       throw_pretty("Invalid argument: "
@@ -46,8 +46,8 @@ struct ActivationBoundsTpl {
     }
 
     if (beta >= 0 && beta <= 1.) {
-      VectorXs m = 0.5 * (lower + upper);
-      VectorXs d = 0.5 * (upper - lower);
+      VectorXs m = (Scalar)0.5 * (lower + upper);
+      VectorXs d = (Scalar)0.5 * (upper - lower);
       lb = m - beta * d;
       ub = m + beta * d;
     } else {
@@ -89,7 +89,8 @@ class ActivationModelQuadraticBarrierTpl : public ActivationModelAbstractTpl<_Sc
 
     d->rlb_min_ = (r - bounds_.lb).array().min(0.);
     d->rub_max_ = (r - bounds_.ub).array().max(0.);
-    data->a_value = 0.5 * d->rlb_min_.matrix().squaredNorm() + 0.5 * d->rub_max_.matrix().squaredNorm();
+    data->a_value =
+        Scalar(0.5) * d->rlb_min_.matrix().squaredNorm() + Scalar(0.5) * d->rub_max_.matrix().squaredNorm();
   };
   void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
@@ -129,8 +130,8 @@ struct ActivationDataQuadraticBarrierTpl : public ActivationDataAbstractTpl<_Sca
   template <typename Activation>
   explicit ActivationDataQuadraticBarrierTpl(Activation* const activation)
       : Base(activation), rlb_min_(activation->get_nr()), rub_max_(activation->get_nr()) {
-    rlb_min_.fill(0);
-    rub_max_.fill(0);
+    rlb_min_.setZero();
+    rub_max_.setZero();
   }
 
   ArrayXs rlb_min_;

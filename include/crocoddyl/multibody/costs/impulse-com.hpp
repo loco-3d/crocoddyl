@@ -73,9 +73,9 @@ struct CostDataImpulseCoMTpl : public CostDataAbstractTpl<_Scalar> {
         dvc_dq(3, model->get_state()->get_nv()),
         ddv_dv(model->get_state()->get_nv(), model->get_state()->get_nv()),
         pinocchio_internal(pinocchio::DataTpl<Scalar>(model->get_state()->get_pinocchio())) {
-    Arr_Rx.fill(0);
-    dvc_dq.fill(0);
-    ddv_dv.fill(0);
+    Arr_Rx.setZero();
+    dvc_dq.setZero();
+    ddv_dv.setZero();
     // Check that proper shared data has been passed
     DataCollectorMultibodyInImpulseTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyInImpulseTpl<Scalar>*>(shared);
     if (d == NULL) {

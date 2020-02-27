@@ -78,8 +78,8 @@ struct CostDataFrameTranslationTpl : public CostDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   CostDataFrameTranslationTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data), J(3, model->get_state()->get_nv()), fJf(6, model->get_state()->get_nv()) {
-    J.fill(0);
-    fJf.fill(0);
+    J.setZero();
+    fJf.setZero();
     // Check that proper shared data has been passed
     DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
     if (d == NULL) {

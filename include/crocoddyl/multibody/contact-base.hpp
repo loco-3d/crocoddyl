@@ -82,11 +82,11 @@ struct ContactDataAbstractTpl {
         df_dx(model->get_nc(), model->get_state()->get_ndx()),
         df_du(model->get_nc(), model->get_nu()),
         f(pinocchio::ForceTpl<Scalar>::Zero()) {
-    Jc.fill(0);
-    a0.fill(0);
-    da0_dx.fill(0);
-    df_dx.fill(0);
-    df_du.fill(0);
+    Jc.setZero();
+    a0.setZero();
+    da0_dx.setZero();
+    df_dx.setZero();
+    df_du.setZero();
   }
   virtual ~ContactDataAbstractTpl() {}
 

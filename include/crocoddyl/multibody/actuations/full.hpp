@@ -53,7 +53,7 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
 
   boost::shared_ptr<ActuationDataAbstract> createData() {
     boost::shared_ptr<ActuationDataAbstract> data = boost::make_shared<ActuationDataAbstract>(this);
-    data->dtau_du.diagonal().fill(1);
+    data->dtau_du.diagonal().fill((Scalar)1);
     return data;
   };
 

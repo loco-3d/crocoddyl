@@ -106,8 +106,8 @@ struct ImpulseDataMultipleTpl : ImpulseDataAbstractTpl<_Scalar> {
         vnext(model->get_state()->get_nv()),
         dvnext_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
         fext(model->get_state()->get_pinocchio().njoints, pinocchio::ForceTpl<Scalar>::Zero()) {
-    vnext.fill(0);
-    dvnext_dx.fill(0);
+    vnext.setZero();
+    dvnext_dx.setZero();
     for (typename ImpulseModelMultiple::ImpulseModelContainer::const_iterator it = model->get_impulses().begin();
          it != model->get_impulses().end(); ++it) {
       const ImpulseItem& item = it->second;
