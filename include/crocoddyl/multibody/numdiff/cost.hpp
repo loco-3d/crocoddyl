@@ -80,7 +80,7 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
    * @brief @copydoc ActionModelAbstract::calcDiff()
    */
   void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                const Eigen::Ref<const VectorXs>& u, const bool& recalc = true);
+                const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Create a Data object
@@ -156,7 +156,7 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
    *
    * @param x is the state at which the check is performed.
    */
-  virtual void assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/){};
+  void assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/);
 };
 
 template <typename _Scalar>

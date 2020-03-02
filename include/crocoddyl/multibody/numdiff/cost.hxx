@@ -32,14 +32,9 @@ void CostModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>
 
 template <typename Scalar>
 void CostModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                           const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u,
-                                           const bool& recalc) {
+                                           const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   boost::shared_ptr<CostDataNumDiffTpl<Scalar> > data_nd =
       boost::static_pointer_cast<CostDataNumDiffTpl<Scalar> >(data);
-
-  if (recalc) {
-    model_->calc(data_nd->data_0, x, u);
-  }
 
   const Scalar& c0 = data_nd->data_0->cost;
   data_nd->cost = c0;
@@ -128,6 +123,11 @@ bool CostModelNumDiffTpl<Scalar>::get_with_gauss_approx() {
 template <typename Scalar>
 void CostModelNumDiffTpl<Scalar>::set_reevals(const std::vector<ReevaluationFunction>& reevals) {
   reevals_ = reevals;
+}
+
+template <typename Scalar>
+void CostModelNumDiffTpl<Scalar>::assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/) {
+  // do nothing in the general case
 }
 
 }  // namespace crocoddyl
