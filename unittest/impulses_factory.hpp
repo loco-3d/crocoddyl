@@ -6,12 +6,12 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include <iostream>
 #include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/multibody/impulses/impulse-3d.hpp"
 #include "crocoddyl/multibody/impulses/impulse-6d.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 #include "state_factory.hpp"
 
 #ifndef CROCODDYL_IMPULSES_FACTORY_HPP_
