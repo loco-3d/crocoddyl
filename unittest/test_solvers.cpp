@@ -20,7 +20,7 @@ using namespace crocoddyl_unit_test;
 void test_kkt_dimension(ActionModelTypes::Type action_type, size_t nb_running_models) {
   // Create the kkt solver
   SolverFactory factory(SolverTypes::SolverKKT, action_type, nb_running_models);
-  boost::shared_ptr<crocoddyl::SolverKKT> kkt = boost::static_pointer_cast<crocoddyl::SolverKKT>(factory.get_solver());
+  boost::shared_ptr<crocoddyl::SolverKKT> kkt = boost::static_pointer_cast<crocoddyl::SolverKKT>(factory.create());
 
   // define some aliases
   const std::size_t& T = kkt->get_problem()->get_T();
@@ -41,7 +41,7 @@ void test_kkt_dimension(ActionModelTypes::Type action_type, size_t nb_running_mo
 void test_kkt_search_direction(ActionModelTypes::Type action_type, size_t nb_running_models) {
   // Create the kkt solver
   SolverFactory factory(SolverTypes::SolverKKT, action_type, nb_running_models);
-  boost::shared_ptr<crocoddyl::SolverKKT> kkt = boost::static_pointer_cast<crocoddyl::SolverKKT>(factory.get_solver());
+  boost::shared_ptr<crocoddyl::SolverKKT> kkt = boost::static_pointer_cast<crocoddyl::SolverKKT>(factory.create());
 
   // Compute the search direction
   kkt->computeDirection();
@@ -66,7 +66,7 @@ void test_solver_against_kkt_solver(SolverTypes::Type solver_type, ActionModelTy
   // Create the solver
   SolverFactory solver_factory(solver_type, action_type, nb_running_models);
   boost::shared_ptr<crocoddyl::SolverAbstract> solver =
-      boost::static_pointer_cast<crocoddyl::SolverKKT>(solver_factory.get_solver());
+      boost::static_pointer_cast<crocoddyl::SolverKKT>(solver_factory.create());
 
   // Get the pointer to the problem so we can create the equivalent kkt solver.
   const boost::shared_ptr<crocoddyl::ShootingProblem>& problem = solver->get_problem();

@@ -127,7 +127,7 @@ class StateFactory {
     nx_ = pinocchio_model_.nq + pinocchio_model_.nv;
   }
 
-  boost::shared_ptr<crocoddyl::StateAbstract> get_state() { return state_; }
+  boost::shared_ptr<crocoddyl::StateAbstract> create() { return state_; }
   const std::size_t& get_nx() { return nx_; }
   double get_num_diff_modifier() { return num_diff_modifier_; }
   const pinocchio::Model& get_pinocchio_model() { return pinocchio_model_; }

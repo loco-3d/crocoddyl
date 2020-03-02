@@ -19,7 +19,7 @@ using namespace crocoddyl_unit_test;
 void test_construct_data(ActivationModelTypes::Type test_type) {
   // create the model
   ActivationModelFactory factory(test_type);
-  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.get_activation();
+  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.create();
 
   // create the corresponding data object
   boost::shared_ptr<crocoddyl::ActivationDataAbstract> data = model->createData();
@@ -28,7 +28,7 @@ void test_construct_data(ActivationModelTypes::Type test_type) {
 void test_calc_returns_a_value(ActivationModelTypes::Type test_type) {
   // create the model
   ActivationModelFactory factory(test_type);
-  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.get_activation();
+  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.create();
 
   // create the corresponding data object
   boost::shared_ptr<crocoddyl::ActivationDataAbstract> data = model->createData();
@@ -47,7 +47,7 @@ void test_calc_returns_a_value(ActivationModelTypes::Type test_type) {
 void test_partial_derivatives_against_numdiff(ActivationModelTypes::Type test_type) {
   // create the model
   ActivationModelFactory factory(test_type);
-  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.get_activation();
+  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.create();
 
   // create the corresponding data object and set the cost to nan
   boost::shared_ptr<crocoddyl::ActivationDataAbstract> data = model->createData();

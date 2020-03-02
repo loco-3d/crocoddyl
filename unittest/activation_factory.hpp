@@ -94,7 +94,7 @@ class ActivationModelFactory {
 
   ~ActivationModelFactory() {}
 
-  boost::shared_ptr<crocoddyl::ActivationModelAbstract> get_activation() { return activation_; }
+  boost::shared_ptr<crocoddyl::ActivationModelAbstract> create() { return activation_; }
   const std::size_t& get_nr() { return nr_; }
   double get_num_diff_modifier() { return num_diff_modifier_; }
 

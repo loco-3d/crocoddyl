@@ -42,9 +42,9 @@ class SolverFactory {
     action_factory_ = boost::make_shared<ActionModelFactory>(action_type);
     nb_running_models_ = nb_running_models;
 
-    running_models_.resize(nb_running_models_, action_factory_->get_action());
-    problem_ = boost::make_shared<crocoddyl::ShootingProblem>(action_factory_->get_action()->get_state()->zero(),
-                                                              running_models_, action_factory_->get_action());
+    running_models_.resize(nb_running_models_, action_factory_->create());
+    problem_ = boost::make_shared<crocoddyl::ShootingProblem>(action_factory_->create()->get_state()->zero(),
+                                                              running_models_, action_factory_->create());
 
     switch (solver_type_) {
       case SolverTypes::SolverKKT:
@@ -67,7 +67,7 @@ class SolverFactory {
 
   ~SolverFactory() {}
 
-  boost::shared_ptr<crocoddyl::SolverAbstract> get_solver() { return solver_; }
+  boost::shared_ptr<crocoddyl::SolverAbstract> create() { return solver_; }
 
  private:
   size_t nb_running_models_;                              //!< This is the number of models in the shooting problem.

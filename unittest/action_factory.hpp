@@ -65,7 +65,7 @@ class ActionModelFactory {
 
   ~ActionModelFactory() {}
 
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> get_action() { return action_; }
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> create() { return action_; }
 
   const std::size_t& get_nx() { return nx_; }
   double get_num_diff_modifier() { return num_diff_modifier_; }

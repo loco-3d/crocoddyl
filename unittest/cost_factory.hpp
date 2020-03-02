@@ -109,7 +109,7 @@ class CostModelFactory {
   CostModelFactory(CostModelTypes::Type test_type, ActivationModelTypes::Type activation_type,
                    StateTypes::Type state_multibody_type)
       : state_factory_(state_multibody_type),
-        state_multibody_(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_.get_state())),
+        state_multibody_(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_.create())),
         // Setup some reference for the costs.
         frame_index_(state_multibody_->get_pinocchio().frames.size() - 1),
         mom_ref_(Vector6d::Random()),
@@ -129,22 +129,22 @@ class CostModelFactory {
       // case CostModelTypes::CostModelCentroidalMomentum:
       //   activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, 6);
       //   cost_ = boost::make_shared<crocoddyl::CostModelCentroidalMomentum>(
-      //       state_multibody_, activation_factory_->get_activation(), mom_ref_);
+      //       state_multibody_, activation_factory_->create(), mom_ref_);
       //   break;
       case CostModelTypes::CostModelCoMPosition:
         activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, 3);
         cost_ = boost::make_shared<crocoddyl::CostModelCoMPosition>(state_multibody_,
-                                                                    activation_factory_->get_activation(), com_ref_);
+                                                                    activation_factory_->create(), com_ref_);
         break;
       // case CostModelTypes::CostModelContactForce:
       //   activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, 6);
       //   cost_ = boost::make_shared<crocoddyl::CostModelContactForce>(
-      //       state_multibody_, activation_factory_->get_activation(), force_ref_);
+      //       state_multibody_, activation_factory_->create(), force_ref_);
       //   break;
       case CostModelTypes::CostModelControl:
         activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, state_multibody_->get_nv());
         cost_ = boost::make_shared<crocoddyl::CostModelControl>(state_multibody_,
-                                                                activation_factory_->get_activation(), u_ref_);
+                                                                activation_factory_->create(), u_ref_);
         break;
       // case CostModelTypes::CostModelSum:
       //   break;
@@ -153,28 +153,28 @@ class CostModelFactory {
       case CostModelTypes::CostModelFramePlacement:
         activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, 6);
         cost_ = boost::make_shared<crocoddyl::CostModelFramePlacement>(
-            state_multibody_, activation_factory_->get_activation(), frame_ref_);
+            state_multibody_, activation_factory_->create(), frame_ref_);
         break;
       case CostModelTypes::CostModelFrameRotation:
         activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, 3);
         cost_ = boost::make_shared<crocoddyl::CostModelFrameRotation>(
-            state_multibody_, activation_factory_->get_activation(), rotation_ref_);
+            state_multibody_, activation_factory_->create(), rotation_ref_);
         break;
       case CostModelTypes::CostModelFrameTranslation:
         activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, 3);
         cost_ = boost::make_shared<crocoddyl::CostModelFrameTranslation>(
-            state_multibody_, activation_factory_->get_activation(), translation_ref_);
+            state_multibody_, activation_factory_->create(), translation_ref_);
         break;
       case CostModelTypes::CostModelFrameVelocity:
         activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, 6);
         cost_ = boost::make_shared<crocoddyl::CostModelFrameVelocity>(
-            state_multibody_, activation_factory_->get_activation(), velocity_ref_);
+            state_multibody_, activation_factory_->create(), velocity_ref_);
         break;
       // case CostModelTypes::CostModelImpulse:
       //   break;
       case CostModelTypes::CostModelState:
         activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, state_multibody_->get_nx());
-        cost_ = boost::make_shared<crocoddyl::CostModelState>(state_multibody_, activation_factory_->get_activation(),
+        cost_ = boost::make_shared<crocoddyl::CostModelState>(state_multibody_, activation_factory_->create(),
                                                               state_multibody_->rand());
         break;
       default:
@@ -185,7 +185,7 @@ class CostModelFactory {
 
   ~CostModelFactory() {}
 
-  boost::shared_ptr<crocoddyl::CostModelAbstract> get_cost() { return cost_; }
+  boost::shared_ptr<crocoddyl::CostModelAbstract> create() { return cost_; }
   double get_num_diff_modifier() { return num_diff_modifier_; }
 
  private:

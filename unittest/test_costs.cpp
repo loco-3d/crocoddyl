@@ -22,7 +22,7 @@ void test_construct_data(CostModelTypes::Type cost_type, ActivationModelTypes::T
                          StateTypes::Type state_multibody_type) {
   // create the model
   CostModelFactory factory(cost_type, activation_type, state_multibody_type);
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model = factory.get_cost();
+  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model = factory.create();
 
   // create the corresponding data object
   pinocchio::Data pinocchio_data(model->get_state()->get_pinocchio());
@@ -34,7 +34,7 @@ void test_calc_returns_a_cost(CostModelTypes::Type cost_type, ActivationModelTyp
                               StateTypes::Type state_multibody_type) {
   // create the model
   CostModelFactory factory(cost_type, activation_type, state_multibody_type);
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model = factory.get_cost();
+  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model = factory.create();
 
   // create the corresponding data object
   pinocchio::Data pinocchio_data(model->get_state()->get_pinocchio());
@@ -55,7 +55,7 @@ void test_calc_against_numdiff(CostModelTypes::Type cost_type, ActivationModelTy
                                StateTypes::Type state_multibody_type) {
   // create the model
   CostModelFactory factory(cost_type, activation_type, state_multibody_type);
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model = factory.get_cost();
+  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model = factory.create();
 
   // create the corresponding data object
   pinocchio::Data pinocchio_data(model->get_state()->get_pinocchio());
@@ -84,7 +84,7 @@ void test_partial_derivatives_against_numdiff(CostModelTypes::Type cost_type,
                                               StateTypes::Type state_multibody_type) {
   // create the model
   CostModelFactory factory(cost_type, activation_type, state_multibody_type);
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model = factory.get_cost();
+  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model = factory.create();
 
   // create the corresponding data object
   pinocchio::Model& pinocchio_model = model->get_state()->get_pinocchio();
