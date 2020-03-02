@@ -49,7 +49,7 @@ void updateAllPinocchio(pinocchio::Model* const model, pinocchio::Data* data, co
 }
 
 template <typename _Scalar>
-class CostNumDiffModelTpl : public CostModelAbstractTpl<_Scalar> {
+class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
@@ -59,16 +59,16 @@ class CostNumDiffModelTpl : public CostModelAbstractTpl<_Scalar> {
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
 
   /**
-   * @brief Construct a new CostNumDiffModel object from a CostModelAbstract.
+   * @brief Construct a new CostModelNumDiff object from a CostModelAbstract.
    *
    * @param model
    */
-  CostNumDiffModelTpl(const boost::shared_ptr<Base>& model);
+  explicit CostModelNumDiffTpl(const boost::shared_ptr<Base>& model);
 
   /**
-   * @brief Default destructor of the CostNumDiffModel object
+   * @brief Default destructor of the CostModelNumDiff object
    */
-  ~CostNumDiffModelTpl();
+  ~CostModelNumDiffTpl();
 
   /**
    * @brief @copydoc ActionModelAbstract::calc()
@@ -129,6 +129,12 @@ class CostNumDiffModelTpl : public CostModelAbstractTpl<_Scalar> {
   void set_reevals(const std::vector<ReevaluationFunction>& reevals);
 
  protected:
+  using Base::activation_;
+  using Base::nu_;
+  using Base::state_;
+  using Base::unone_;
+  using Base::with_residuals_;
+
   /** @brief Model of the cost. */
   boost::shared_ptr<Base> model_;
 
@@ -150,7 +156,7 @@ class CostNumDiffModelTpl : public CostModelAbstractTpl<_Scalar> {
    *
    * @param x is the state at which the check is performed.
    */
-  virtual void assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& /*x*/){};
+  virtual void assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/){};
 };
 
 template <typename _Scalar>
@@ -188,7 +194,6 @@ struct CostDataNumDiffTpl : public CostDataAbstractTpl<_Scalar> {
 
   virtual ~CostDataNumDiffTpl() {}
 
-  using Base::shared;
   using Base::activation;
   using Base::cost;
   using Base::Lu;
@@ -199,6 +204,7 @@ struct CostDataNumDiffTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::r;
   using Base::Ru;
   using Base::Rx;
+  using Base::shared;
 
   VectorXs dx;  //!< State disturbance.
   VectorXs xp;  //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$".
@@ -210,5 +216,10 @@ struct CostDataNumDiffTpl : public CostDataAbstractTpl<_Scalar> {
 };
 
 }  // namespace crocoddyl
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "crocoddyl/multibody/numdiff/cost.hxx"
 
 #endif  // CROCODDYL_MULTIBODY_NUMDIFF_COST_HPP_

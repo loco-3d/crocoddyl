@@ -11,32 +11,37 @@
 
 namespace crocoddyl {
 
-CostNumDiffModel::CostNumDiffModel(const boost::shared_ptr<CostModelAbstract>& model)
-    : CostModelAbstract(model->get_state(), model->get_activation(), model->get_nu(), model->get_with_residuals()),
-      model_(model) {
-  disturbance_ = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
+template <typename Scalar>
+CostModelNumDiffTpl<Scalar>::CostModelNumDiffTpl(const boost::shared_ptr<Base>& model)
+    : Base(model->get_state(), model->get_activation(), model->get_nu(), model->get_with_residuals()), model_(model) {
+  disturbance_ = std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon());
 }
 
-CostNumDiffModel::~CostNumDiffModel() {}
+template <typename Scalar>
+CostModelNumDiffTpl<Scalar>::~CostModelNumDiffTpl() {}
 
-void CostNumDiffModel::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                            const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) {
-  boost::shared_ptr<CostDataNumDiff> data_nd = boost::static_pointer_cast<CostDataNumDiff>(data);
+template <typename Scalar>
+void CostModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
+                                       const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
+  boost::shared_ptr<CostDataNumDiffTpl<Scalar> > data_nd =
+      boost::static_pointer_cast<CostDataNumDiffTpl<Scalar> >(data);
   data_nd->data_0->cost = 0.0;
   model_->calc(data_nd->data_0, x, u);
   data_nd->cost = data_nd->data_0->cost;
 }
 
-void CostNumDiffModel::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u,
-                                const bool& recalc) {
-  boost::shared_ptr<CostDataNumDiff> data_nd = boost::static_pointer_cast<CostDataNumDiff>(data);
+template <typename Scalar>
+void CostModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+                                           const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u,
+                                           const bool& recalc) {
+  boost::shared_ptr<CostDataNumDiffTpl<Scalar> > data_nd =
+      boost::static_pointer_cast<CostDataNumDiffTpl<Scalar> >(data);
 
   if (recalc) {
     model_->calc(data_nd->data_0, x, u);
   }
 
-  const double& c0 = data_nd->data_0->cost;
+  const Scalar& c0 = data_nd->data_0->cost;
   data_nd->cost = c0;
 
   assertStableStateFD(x);
@@ -94,18 +99,35 @@ void CostNumDiffModel::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
   }
 }
 
-boost::shared_ptr<CostDataAbstract> CostNumDiffModel::createData(DataCollectorAbstract* const data) {
-  return boost::make_shared<CostDataNumDiff>(this, data);
+template <typename Scalar>
+boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelNumDiffTpl<Scalar>::createData(
+    DataCollectorAbstract* const data) {
+  return boost::make_shared<CostDataNumDiffTpl<Scalar> >(this, data);
 }
 
-const boost::shared_ptr<CostModelAbstract>& CostNumDiffModel::get_model() const { return model_; }
+template <typename Scalar>
+const boost::shared_ptr<CostModelAbstractTpl<Scalar> >& CostModelNumDiffTpl<Scalar>::get_model() const {
+  return model_;
+}
 
-const double& CostNumDiffModel::get_disturbance() const { return disturbance_; }
+template <typename Scalar>
+const Scalar& CostModelNumDiffTpl<Scalar>::get_disturbance() const {
+  return disturbance_;
+}
 
-void CostNumDiffModel::set_disturbance(const double& disturbance) { disturbance_ = disturbance; }
+template <typename Scalar>
+void CostModelNumDiffTpl<Scalar>::set_disturbance(const Scalar& disturbance) {
+  disturbance_ = disturbance;
+}
 
-bool CostNumDiffModel::get_with_gauss_approx() { return activation_->get_nr() > 0; }
+template <typename Scalar>
+bool CostModelNumDiffTpl<Scalar>::get_with_gauss_approx() {
+  return activation_->get_nr() > 0;
+}
 
-void CostNumDiffModel::set_reevals(const std::vector<ReevaluationFunction>& reevals) { reevals_ = reevals; }
+template <typename Scalar>
+void CostModelNumDiffTpl<Scalar>::set_reevals(const std::vector<ReevaluationFunction>& reevals) {
+  reevals_ = reevals;
+}
 
 }  // namespace crocoddyl
