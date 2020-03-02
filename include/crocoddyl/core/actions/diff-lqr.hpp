@@ -9,61 +9,87 @@
 #ifndef CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_
 #define CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_
 
+#include <stdexcept>
+
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"
-#include <stdexcept>
 
 namespace crocoddyl {
 
-struct DifferentialActionDataLQR;  // forward declaration
-
-class DifferentialActionModelLQR : public DifferentialActionModelAbstract {
+template <typename _Scalar>
+class DifferentialActionModelLQRTpl : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
-  DifferentialActionModelLQR(const std::size_t& nq, const std::size_t& nu, bool drift_free = true);
-  ~DifferentialActionModelLQR();
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef DifferentialActionModelAbstractTpl<Scalar> Base;
+  typedef StateVectorTpl<Scalar> StateVector;
+  typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
+  typedef DifferentialActionDataLQRTpl<Scalar> DifferentialActionDataLQR;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
-  void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-            const Eigen::Ref<const Eigen::VectorXd>& u);
-  void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u);
+  DifferentialActionModelLQRTpl(const std::size_t& nq, const std::size_t& nu, bool drift_free = true);
+  ~DifferentialActionModelLQRTpl();
+
+  void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+            const Eigen::Ref<const VectorXs>& u);
+  void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                const Eigen::Ref<const VectorXs>& u);
   boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
-  const Eigen::MatrixXd& get_Fq() const;
-  const Eigen::MatrixXd& get_Fv() const;
-  const Eigen::MatrixXd& get_Fu() const;
-  const Eigen::VectorXd& get_f0() const;
-  const Eigen::VectorXd& get_lx() const;
-  const Eigen::VectorXd& get_lu() const;
-  const Eigen::MatrixXd& get_Lxx() const;
-  const Eigen::MatrixXd& get_Lxu() const;
-  const Eigen::MatrixXd& get_Luu() const;
+  const MatrixXs& get_Fq() const;
+  const MatrixXs& get_Fv() const;
+  const MatrixXs& get_Fu() const;
+  const VectorXs& get_f0() const;
+  const VectorXs& get_lx() const;
+  const VectorXs& get_lu() const;
+  const MatrixXs& get_Lxx() const;
+  const MatrixXs& get_Lxu() const;
+  const MatrixXs& get_Luu() const;
 
-  void set_Fq(const Eigen::MatrixXd& Fq);
-  void set_Fv(const Eigen::MatrixXd& Fv);
-  void set_Fu(const Eigen::MatrixXd& Fu);
-  void set_f0(const Eigen::VectorXd& f0);
-  void set_lx(const Eigen::VectorXd& lx);
-  void set_lu(const Eigen::VectorXd& lu);
-  void set_Lxx(const Eigen::MatrixXd& Lxx);
-  void set_Lxu(const Eigen::MatrixXd& Lxu);
-  void set_Luu(const Eigen::MatrixXd& Luu);
+  void set_Fq(const MatrixXs& Fq);
+  void set_Fv(const MatrixXs& Fv);
+  void set_Fu(const MatrixXs& Fu);
+  void set_f0(const VectorXs& f0);
+  void set_lx(const VectorXs& lx);
+  void set_lu(const VectorXs& lu);
+  void set_Lxx(const MatrixXs& Lxx);
+  void set_Lxu(const MatrixXs& Lxu);
+  void set_Luu(const MatrixXs& Luu);
+
+ protected:
+  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
+  using Base::nr_;                  //!< Dimension of the cost residual
+  using Base::nu_;                  //!< Control dimension
+  using Base::state_;               //!< Model of the state
+  using Base::u_lb_;                //!< Lower control limits
+  using Base::u_ub_;                //!< Upper control limits
+  using Base::unone_;               //!< Neutral state
 
  private:
   bool drift_free_;
-  Eigen::MatrixXd Fq_;
-  Eigen::MatrixXd Fv_;
-  Eigen::MatrixXd Fu_;
-  Eigen::VectorXd f0_;
-  Eigen::MatrixXd Lxx_;
-  Eigen::MatrixXd Lxu_;
-  Eigen::MatrixXd Luu_;
-  Eigen::VectorXd lx_;
-  Eigen::VectorXd lu_;
+  MatrixXs Fq_;
+  MatrixXs Fv_;
+  MatrixXs Fu_;
+  VectorXs f0_;
+  MatrixXs Lxx_;
+  MatrixXs Lxu_;
+  MatrixXs Luu_;
+  VectorXs lx_;
+  VectorXs lu_;
 };
 
-struct DifferentialActionDataLQR : public DifferentialActionDataAbstract {
-  template <typename Model>
-  explicit DifferentialActionDataLQR(Model* const model) : DifferentialActionDataAbstract(model) {
+template <typename _Scalar>
+struct DifferentialActionDataLQRTpl : public DifferentialActionDataAbstractTpl<_Scalar> {
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef DifferentialActionDataAbstractTpl<Scalar> Base;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+
+  template <template <typename Scalar> class Model>
+  explicit DifferentialActionDataLQRTpl(Model<Scalar>* const model) : Base(model) {
     // Setting the linear model and quadratic cost here because they are constant
     Fx.leftCols(model->get_state()->get_nq()) = model->get_Fq();
     Fx.rightCols(model->get_state()->get_nv()) = model->get_Fv();
@@ -72,8 +98,23 @@ struct DifferentialActionDataLQR : public DifferentialActionDataAbstract {
     Luu = model->get_Luu();
     Lxu = model->get_Lxu();
   }
+
+  using Base::cost;
+  using Base::Fu;
+  using Base::Fx;
+  using Base::Lu;
+  using Base::Luu;
+  using Base::Lx;
+  using Base::Lxu;
+  using Base::Lxx;
+  using Base::r;
+  using Base::xout;
 };
 
 }  // namespace crocoddyl
 
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "crocoddyl/core/actions/diff-lqr.hxx"
 #endif  // CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_

@@ -12,21 +12,30 @@
 
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
+
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
 
 namespace crocoddyl {
 
-class StateNumDiff : public StateAbstract {
+template <typename _Scalar>
+class StateNumDiffTpl : public StateAbstractTpl<_Scalar> {
  public:
-  explicit StateNumDiff(boost::shared_ptr<StateAbstract> state);
-  ~StateNumDiff();
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef StateAbstractTpl<_Scalar> Base;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
-  Eigen::VectorXd zero() const;
-  Eigen::VectorXd rand() const;
-  void diff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-            Eigen::Ref<Eigen::VectorXd> dxout) const;
-  void integrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
-                 Eigen::Ref<Eigen::VectorXd> xout) const;
+  explicit StateNumDiffTpl(boost::shared_ptr<Base> state);
+  ~StateNumDiffTpl();
+
+  VectorXs zero() const;
+  VectorXs rand() const;
+  void diff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
+            Eigen::Ref<VectorXs> dxout) const;
+  void integrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
+                 Eigen::Ref<VectorXs> xout) const;
   /**
    * @brief This computes the Jacobian of the diff method by finite
    * differentiation:
@@ -42,9 +51,8 @@ class StateNumDiff : public StateAbstract {
    * @param Jsecond
    * @param firstsecond
    */
-  void Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
-             Jcomponent firstsecond = both) const;
+  void Jdiff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1, Eigen::Ref<MatrixXs> Jfirst,
+             Eigen::Ref<MatrixXs> Jsecond, Jcomponent firstsecond = both) const;
   /**
    * @brief This computes the Jacobian of the integrate method by finite
    * differentiation:
@@ -60,24 +68,37 @@ class StateNumDiff : public StateAbstract {
    * @param Jsecond
    * @param firstsecond
    */
-  void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
-                  Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
-                  Jcomponent firstsecond = both) const;
-  const double& get_disturbance() const;
-  void set_disturbance(const double& disturbance);
+  void Jintegrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
+                  Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond, Jcomponent firstsecond = both) const;
+  const Scalar& get_disturbance() const;
+  void set_disturbance(const Scalar& disturbance);
 
  private:
   /**
    * @brief This is the state we need to compute the numerical differentiation
    * from.
    */
-  boost::shared_ptr<StateAbstract> state_;
+  boost::shared_ptr<Base> state_;
   /**
    * @brief This the increment used in the finite differentiation and integration.
    */
-  double disturbance_;
+  Scalar disturbance_;
+
+ protected:
+  using Base::has_limits_;
+  using Base::lb_;
+  using Base::ndx_;
+  using Base::nq_;
+  using Base::nv_;
+  using Base::nx_;
+  using Base::ub_;
 };
 
 }  // namespace crocoddyl
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "crocoddyl/core/numdiff/state.hxx"
 
 #endif  // CROCODDYL_CORE_NUMDIFF_STATE_HPP_

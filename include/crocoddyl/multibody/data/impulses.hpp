@@ -10,23 +10,28 @@
 #define CROCODDYL_CORE_DATA_IMPULSES_HPP_
 
 #include <boost/shared_ptr.hpp>
+
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
 
 namespace crocoddyl {
 
-struct DataCollectorImpulse : virtual DataCollectorAbstract {
-  DataCollectorImpulse(boost::shared_ptr<ImpulseDataMultiple> impulses)
-      : DataCollectorAbstract(), impulses(impulses) {}
-  virtual ~DataCollectorImpulse() {}
+template <typename Scalar>
+struct DataCollectorImpulseTpl : virtual DataCollectorAbstractTpl<Scalar> {
+  DataCollectorImpulseTpl(boost::shared_ptr<ImpulseDataMultipleTpl<Scalar> > impulses)
+      : DataCollectorAbstractTpl<Scalar>(), impulses(impulses) {}
+  virtual ~DataCollectorImpulseTpl() {}
 
-  boost::shared_ptr<ImpulseDataMultiple> impulses;
+  boost::shared_ptr<ImpulseDataMultipleTpl<Scalar> > impulses;
 };
 
-struct DataCollectorMultibodyInImpulse : DataCollectorMultibody, DataCollectorImpulse {
-  DataCollectorMultibodyInImpulse(pinocchio::Data* const pinocchio, boost::shared_ptr<ImpulseDataMultiple> impulses)
-      : DataCollectorMultibody(pinocchio), DataCollectorImpulse(impulses) {}
-  virtual ~DataCollectorMultibodyInImpulse() {}
+template <typename Scalar>
+struct DataCollectorMultibodyInImpulseTpl : DataCollectorMultibodyTpl<Scalar>, DataCollectorImpulseTpl<Scalar> {
+  DataCollectorMultibodyInImpulseTpl(pinocchio::DataTpl<Scalar>* const pinocchio,
+                                     boost::shared_ptr<ImpulseDataMultipleTpl<Scalar> > impulses)
+      : DataCollectorMultibodyTpl<Scalar>(pinocchio), DataCollectorImpulseTpl<Scalar>(impulses) {}
+  virtual ~DataCollectorMultibodyInImpulseTpl() {}
 };
 
 }  // namespace crocoddyl

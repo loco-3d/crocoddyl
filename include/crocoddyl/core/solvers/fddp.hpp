@@ -11,6 +11,7 @@
 
 #include <Eigen/Cholesky>
 #include <vector>
+
 #include "crocoddyl/core/solvers/ddp.hpp"
 
 namespace crocoddyl {

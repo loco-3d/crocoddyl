@@ -12,6 +12,7 @@
 #include <vector>
 #include <Eigen/Dense>
 #include <Eigen/Cholesky>
+
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {

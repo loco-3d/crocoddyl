@@ -9,6 +9,7 @@
 #ifndef CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_HPP_
 
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/multibody/data/impulses.hpp"
@@ -17,34 +18,66 @@
 
 namespace crocoddyl {
 
-class CostModelImpulseCoM : public CostModelAbstract {
+template <typename _Scalar>
+class CostModelImpulseCoMTpl : public CostModelAbstractTpl<_Scalar> {
  public:
-  CostModelImpulseCoM(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation);
-  CostModelImpulseCoM(boost::shared_ptr<StateMultibody> state);
-  ~CostModelImpulseCoM();
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef CostModelAbstractTpl<Scalar> Base;
+  typedef StateMultibodyTpl<Scalar> StateMultibody;
+  typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
+  typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
+  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+  typedef typename MathBase::Vector3s Vector3s;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
-  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-            const Eigen::Ref<const Eigen::VectorXd>& u);
-  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u);
+  CostModelImpulseCoMTpl(boost::shared_ptr<StateMultibody> state,
+                         boost::shared_ptr<ActivationModelAbstract> activation);
+  CostModelImpulseCoMTpl(boost::shared_ptr<StateMultibody> state);
+  ~CostModelImpulseCoMTpl();
+
+  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+            const Eigen::Ref<const VectorXs>& u);
+  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                const Eigen::Ref<const VectorXs>& u);
   boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
+
+ protected:
+  using Base::activation_;
+  using Base::nu_;
+  using Base::state_;
+  using Base::unone_;
+  using Base::with_residuals_;
 };
 
-struct CostDataImpulseCoM : public CostDataAbstract {
+template <typename _Scalar>
+struct CostDataImpulseCoMTpl : public CostDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef CostDataAbstractTpl<Scalar> Base;
+  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+  typedef typename MathBase::Matrix3xs Matrix3xs;
+  typedef typename MathBase::Matrix6xs Matrix6xs;
+  typedef typename MathBase::Matrix6s Matrix6s;
+  typedef typename MathBase::Vector6s Vector6s;
 
-  template <typename Model>
-  CostDataImpulseCoM(Model* const model, DataCollectorAbstract* const data)
-      : CostDataAbstract(model, data),
+  template <template <typename Scalar> class Model>
+  CostDataImpulseCoMTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
+      : Base(model, data),
         Arr_Rx(3, model->get_state()->get_nv()),
         dvc_dq(3, model->get_state()->get_nv()),
         ddv_dv(model->get_state()->get_nv(), model->get_state()->get_nv()),
-        pinocchio_internal(pinocchio::Data(model->get_state()->get_pinocchio())) {
-    Arr_Rx.fill(0);
-    dvc_dq.fill(0);
-    ddv_dv.fill(0);
+        pinocchio_internal(pinocchio::DataTpl<Scalar>(model->get_state()->get_pinocchio())) {
+    Arr_Rx.setZero();
+    dvc_dq.setZero();
+    ddv_dv.setZero();
     // Check that proper shared data has been passed
-    DataCollectorMultibodyInImpulse* d = dynamic_cast<DataCollectorMultibodyInImpulse*>(shared);
+    DataCollectorMultibodyInImpulseTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyInImpulseTpl<Scalar>*>(shared);
     if (d == NULL) {
       throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibodyInImpulse");
     }
@@ -52,14 +85,30 @@ struct CostDataImpulseCoM : public CostDataAbstract {
     impulses = d->impulses;
   }
 
-  pinocchio::Data* pinocchio;
-  boost::shared_ptr<crocoddyl::ImpulseDataMultiple> impulses;
-  Eigen::Matrix3Xd Arr_Rx;
-  Eigen::Matrix3Xd dvc_dq;
-  Eigen::MatrixXd ddv_dv;
-  pinocchio::Data pinocchio_internal;
+  pinocchio::DataTpl<Scalar>* pinocchio;
+  boost::shared_ptr<crocoddyl::ImpulseDataMultipleTpl<Scalar> > impulses;
+  Matrix3xs Arr_Rx;
+  Matrix3xs dvc_dq;
+  MatrixXs ddv_dv;
+  pinocchio::DataTpl<Scalar> pinocchio_internal;
+  using Base::activation;
+  using Base::cost;
+  using Base::Lu;
+  using Base::Luu;
+  using Base::Lx;
+  using Base::Lxu;
+  using Base::Lxx;
+  using Base::r;
+  using Base::Ru;
+  using Base::Rx;
+  using Base::shared;
 };
 
 }  // namespace crocoddyl
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "crocoddyl/multibody/costs/impulse-com.hxx"
 
 #endif  // CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_HPP_

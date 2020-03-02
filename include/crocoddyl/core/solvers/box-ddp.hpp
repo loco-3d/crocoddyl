@@ -11,6 +11,7 @@
 
 #include <Eigen/Cholesky>
 #include <vector>
+
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/solvers/box-qp.hpp"
 

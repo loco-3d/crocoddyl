@@ -12,33 +12,43 @@
 
 #include <vector>
 #include <iostream>
+
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/activation-base.hpp"
 
 namespace crocoddyl {
 
-class ActivationModelNumDiff : public ActivationModelAbstract {
+template <typename _Scalar>
+class ActivationModelNumDiffTpl : public ActivationModelAbstractTpl<_Scalar> {
  public:
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef ActivationModelAbstractTpl<Scalar> Base;
+  typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+
   /**
    * @brief Construct a new ActivationModelNumDiff object
    *
    * @param model
    */
-  explicit ActivationModelNumDiff(boost::shared_ptr<ActivationModelAbstract> model);
+  explicit ActivationModelNumDiffTpl(boost::shared_ptr<Base> model);
 
   /**
    * @brief Destroy the ActivationModelNumDiff object
    */
-  ~ActivationModelNumDiff();
+  ~ActivationModelNumDiffTpl();
 
   /**
-   * @brief @copydoc ActivationModelAbstract::calc()
+   * @brief @copydoc Base::calc()
    */
-  void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r);
+  void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r);
 
   /**
-   * @brief @copydoc ActivationModelAbstract::calcDiff()
+   * @brief @copydoc Base::calcDiff()
    */
-  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r);
+  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r);
 
   /**
    * @brief Create a Data object from the given model.
@@ -50,48 +60,57 @@ class ActivationModelNumDiff : public ActivationModelAbstract {
   /**
    * @brief Get the model_ object
    *
-   * @return ActivationModelAbstract&
+   * @return Base&
    */
-  const boost::shared_ptr<ActivationModelAbstract>& get_model() const;
+  const boost::shared_ptr<Base>& get_model() const;
 
   /**
    * @brief Get the disturbance_ object
    *
-   * @return const double&
+   * @return const Scalar&
    */
-  const double& get_disturbance() const;
+  const Scalar& get_disturbance() const;
 
   /**
    * @brief Set the disturbance_ object
    *
    * @param disturbance is the value used to find the numerical derivative
    */
-  void set_disturbance(const double& disturbance);
+  void set_disturbance(const Scalar& disturbance);
 
  private:
   /**
    * @brief This is the model to compute the finite differentiation from
    */
-  boost::shared_ptr<ActivationModelAbstract> model_;
+  boost::shared_ptr<Base> model_;
 
   /**
    * @brief This is the numerical disturbance value used during the numerical
    * differentiation
    */
-  double disturbance_;
+  Scalar disturbance_;
+
+ protected:
+  using Base::nr_;
 };
 
-struct ActivationDataNumDiff : public ActivationDataAbstract {
+template <typename _Scalar>
+struct ActivationDataNumDiffTpl : public ActivationDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef ActivationDataAbstractTpl<Scalar> Base;
+
   /**
    * @brief Construct a new ActivationDataNumDiff object
    *
    * @tparam Model is the type of the ActivationModel.
    * @param model is the object to compute the numerical differentiation from.
    */
-  template <typename Model>
-  explicit ActivationDataNumDiff(Model* const model)
-      : ActivationDataAbstract(model), dr(model->get_model()->get_nr()), rp(model->get_model()->get_nr()) {
+  template <template <typename Scalar> class Model>
+  explicit ActivationDataNumDiffTpl(Model<Scalar>* const model)
+      : Base(model), dr(model->get_model()->get_nr()), rp(model->get_model()->get_nr()) {
     dr.setZero();
     rp.setZero();
     data_0 = model->get_model()->createData();
@@ -107,15 +126,22 @@ struct ActivationDataNumDiff : public ActivationDataAbstract {
     }
   }
 
-  Eigen::VectorXd dr;  //!< disturbance: \f$ [\hdot \;\; disturbance \;\; \hdot] \f$
-  Eigen::VectorXd rp;  //!< The input + the disturbance on one DoF "\f$ r^+ = rp =  \int r + dr \f$"
-  boost::shared_ptr<ActivationDataAbstract> data_0;  //!< The data that contains the final results
-  std::vector<boost::shared_ptr<ActivationDataAbstract> >
-      data_rp;  //!< The temporary data associated with the input variation
-  std::vector<boost::shared_ptr<ActivationDataAbstract> >
-      data_r2p;  //!< The temporary data associated with the input variation
+  VectorXs dr;                     //!< disturbance: \f$ [\hdot \;\; disturbance \;\; \hdot] \f$
+  VectorXs rp;                     //!< The input + the disturbance on one DoF "\f$ r^+ = rp =  \int r + dr \f$"
+  boost::shared_ptr<Base> data_0;  //!< The data that contains the final results
+  std::vector<boost::shared_ptr<Base> > data_rp;   //!< The temporary data associated with the input variation
+  std::vector<boost::shared_ptr<Base> > data_r2p;  //!< The temporary data associated with the input variation
+
+  using Base::a_value;
+  using Base::Ar;
+  using Base::Arr;
 };
 
 }  // namespace crocoddyl
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "crocoddyl/core/numdiff/activation.hxx"
 
 #endif  // CROCODDYL_CORE_NUMDIFF_ACTIVATION_HPP_

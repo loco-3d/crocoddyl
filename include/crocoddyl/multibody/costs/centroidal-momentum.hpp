@@ -9,51 +9,80 @@
 #ifndef CROCODDYL_MULTIBODY_COSTS_MOMENTUM_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_MOMENTUM_HPP_
 
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
-typedef Eigen::Matrix<double, 6, 1> Vector6d;
-
-class CostModelCentroidalMomentum : public CostModelAbstract {
+template <typename _Scalar>
+class CostModelCentroidalMomentumTpl : public CostModelAbstractTpl<_Scalar> {
  public:
-  CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state,
-                              boost::shared_ptr<ActivationModelAbstract> activation, const Vector6d& mref,
-                              const std::size_t& nu);
-  CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state,
-                              boost::shared_ptr<ActivationModelAbstract> activation, const Vector6d& mref);
-  CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6d& mref, const std::size_t& nu);
-  CostModelCentroidalMomentum(boost::shared_ptr<StateMultibody> state, const Vector6d& mref);
-  ~CostModelCentroidalMomentum();
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef CostModelAbstractTpl<Scalar> Base;
+  typedef StateMultibodyTpl<Scalar> StateMultibody;
+  typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
+  typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
+  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+  typedef typename MathBase::Vector6s Vector6s;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+  typedef typename MathBase::Matrix6xs Matrix6xs;
 
-  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-            const Eigen::Ref<const Eigen::VectorXd>& u);
-  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u);
+  CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
+                                 boost::shared_ptr<ActivationModelAbstract> activation, const Vector6s& mref,
+                                 const std::size_t& nu);
+  CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
+                                 boost::shared_ptr<ActivationModelAbstract> activation, const Vector6s& mref);
+  CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state, const Vector6s& mref, const std::size_t& nu);
+  CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state, const Vector6s& mref);
+  ~CostModelCentroidalMomentumTpl();
+
+  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+            const Eigen::Ref<const VectorXs>& u);
+  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                const Eigen::Ref<const VectorXs>& u);
   boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-  const Vector6d& get_href() const;
-  void set_href(const Vector6d& mref_in);
+  const Vector6s& get_href() const;
+  void set_href(const Vector6s& mref_in);
+
+ protected:
+  using Base::activation_;
+  using Base::nu_;
+  using Base::state_;
+  using Base::unone_;
+  using Base::with_residuals_;
 
  private:
-  Vector6d href_;
+  Vector6s href_;
 };
 
-struct CostDataCentroidalMomentum : public CostDataAbstract {
+template <typename _Scalar>
+struct CostDataCentroidalMomentumTpl : public CostDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  template <typename Model>
-  CostDataCentroidalMomentum(Model* const model, DataCollectorAbstract* const data)
-      : CostDataAbstract(model, data),
-        dhd_dq(6, model->get_state()->get_nv()),
-        dhd_dv(6, model->get_state()->get_nv()) {
-    dhd_dq.fill(0);
-    dhd_dv.fill(0);
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef CostDataAbstractTpl<Scalar> Base;
+  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+  typedef typename MathBase::Matrix6xs Matrix6xs;
+  typedef typename MathBase::Matrix6s Matrix6s;
+  typedef typename MathBase::Vector6s Vector6s;
+
+  template <template <typename Scalar> class Model>
+  CostDataCentroidalMomentumTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
+      : Base(model, data), dhd_dq(6, model->get_state()->get_nv()), dhd_dv(6, model->get_state()->get_nv()) {
+    dhd_dq.setZero();
+    dhd_dv.setZero();
 
     // Check that proper shared data has been passed
-    DataCollectorMultibody* d = dynamic_cast<DataCollectorMultibody*>(shared);
+    DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
     if (d == NULL) {
       throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibody");
     }
@@ -62,12 +91,28 @@ struct CostDataCentroidalMomentum : public CostDataAbstract {
     pinocchio = d->pinocchio;
   }
 
-  pinocchio::Data* pinocchio;
-  pinocchio::Data::Matrix6x dhd_dq;
-  pinocchio::Data::Matrix6x dhd_dv;
-  pinocchio::Data::Matrix6x Arr_Rx;
+  pinocchio::DataTpl<Scalar>* pinocchio;
+  Matrix6xs dhd_dq;
+  Matrix6xs dhd_dv;
+  Matrix6xs Arr_Rx;
+  using Base::activation;
+  using Base::cost;
+  using Base::Lu;
+  using Base::Luu;
+  using Base::Lx;
+  using Base::Lxu;
+  using Base::Lxx;
+  using Base::r;
+  using Base::Ru;
+  using Base::Rx;
+  using Base::shared;
 };
 
 }  // namespace crocoddyl
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "crocoddyl/multibody/costs/centroidal-momentum.hxx"
 
 #endif  // CROCODDYL_MULTIBODY_COSTS_MOMENTUM_HPP_

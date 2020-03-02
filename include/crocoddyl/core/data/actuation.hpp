@@ -10,17 +10,20 @@
 #define CROCODDYL_CORE_DATA_ACTUATION_HPP_
 
 #include <boost/shared_ptr.hpp>
+
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/data-collector-base.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
 
 namespace crocoddyl {
 
-struct DataCollectorActuation : virtual DataCollectorAbstract {
-  DataCollectorActuation(boost::shared_ptr<ActuationDataAbstract> actuation)
-      : DataCollectorAbstract(), actuation(actuation) {}
-  virtual ~DataCollectorActuation() {}
+template <typename Scalar>
+struct DataCollectorActuationTpl : virtual DataCollectorAbstractTpl<Scalar> {
+  DataCollectorActuationTpl(boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation)
+      : DataCollectorAbstractTpl<Scalar>(), actuation(actuation) {}
+  virtual ~DataCollectorActuationTpl() {}
 
-  boost::shared_ptr<ActuationDataAbstract> actuation;
+  boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation;
 };
 
 }  // namespace crocoddyl
