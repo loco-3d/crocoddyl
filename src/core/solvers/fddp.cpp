@@ -108,7 +108,7 @@ const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
   dv_ = 0;
   const std::size_t& T = this->problem_->get_T();
   if (!is_feasible_) {
-    problem_->get_runningModels().back()->get_state()->diff(xs_try_.back(), xs_.back(), dx_.back());
+    problem_->get_terminalModel()->get_state()->diff(xs_try_.back(), xs_.back(), dx_.back());
     fTVxx_p_.noalias() = Vxx_.back() * dx_.back();
     dv_ -= fs_.back().dot(fTVxx_p_);
     for (std::size_t t = 0; t < T; ++t) {
