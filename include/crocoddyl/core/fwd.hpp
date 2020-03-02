@@ -1,91 +1,136 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
 #ifndef CROCODDYL_CORE_FWD_HPP_
 #define CROCODDYL_CORE_FWD_HPP_
 
 namespace crocoddyl {
+
 // DiffAction
 template <typename Scalar>
 class DifferentialActionModelAbstractTpl;
+
 template <typename Scalar>
 class DifferentialActionDataAbstractTpl;
+
 template <typename Scalar>
 class DifferentialActionModelLQRTpl;
+
 template <typename Scalar>
 class DifferentialActionDataLQRTpl;
+
 // Actions
 template <typename Scalar>
 class ActionModelUnicycleTpl;
+
 template <typename Scalar>
 class ActionDataUnicycleTpl;
+
 template <typename Scalar>
 class ActionModelLQRTpl;
+
 template <typename Scalar>
 class ActionDataLQRTpl;
+
 // DataCollector
 template <typename Scalar>
 class DataCollectorAbstractTpl;
+
 // Activations
 template <typename Scalar>
 class ActivationDataQuadraticBarrierTpl;
+
 template <typename Scalar>
 class ActivationModelQuadraticBarrierTpl;
+
 template <typename Scalar>
 class ActivationBoundsTpl;
+
 template <typename Scalar>
 class ActivationModelWeightedQuadraticBarrierTpl;
+
 template <typename Scalar>
 class ActivationModelQuadTpl;
+
 template <typename Scalar>
 class ActivationModelWeightedQuadTpl;
+
 template <typename Scalar>
 class ActivationDataWeightedQuadTpl;
+
 template <typename Scalar>
 class ActivationModelSmoothAbsTpl;
+
 template <typename Scalar>
 class ActivationDataSmoothAbsTpl;
+
 template <typename Scalar>
 class ActivationModelAbstractTpl;
+
 template <typename Scalar>
 class ActivationDataAbstractTpl;
+
 // State
 template <typename Scalar>
 class StateAbstractTpl;
+
 // Actuations
 template <typename Scalar>
 class ActuationDataAbstractTpl;
+
 template <typename Scalar>
 class ActuationModelAbstractTpl;
+
 // shooting
 template <typename Scalar>
 class ShootingProblemTpl;
+
 // IAMs
 template <typename Scalar>
 class IntegratedActionModelEulerTpl;
+
 template <typename Scalar>
 class IntegratedActionDataEulerTpl;
+
 // State
 template <typename Scalar>
 class StateVectorTpl;
+
 // Datacollect
 template <typename Scalar>
 class DataCollectorActuationTpl;
+
 // ActionData
 template <typename Scalar>
 class ActionDataAbstractTpl;
+
 template <typename Scalar>
 class ActionModelAbstractTpl;
+
 // Numdiff
 template <typename Scalar>
 class ActionModelNumDiffTpl;
+
 template <typename Scalar>
 class ActionDataNumDiffTpl;
+
 template <typename Scalar>
 class DifferentialActionModelNumDiffTpl;
+
 template <typename Scalar>
 class DifferentialActionDataNumDiffTpl;
+
 template <typename Scalar>
 class ActivationModelNumDiffTpl;
+
 template <typename Scalar>
 class ActivationDataNumDiffTpl;
+
 template <typename Scalar>
 class StateNumDiffTpl;
 
