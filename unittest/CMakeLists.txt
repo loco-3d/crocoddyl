@@ -21,8 +21,8 @@ SET(${PROJECT_NAME}_CPP_TESTS
   test_diff_actions
   test_impulses
   test_multiple_impulses
-  test_costs
   test_friction_cone
+  test_costs
   # test_contacts
   test_boxqp
   test_solvers
