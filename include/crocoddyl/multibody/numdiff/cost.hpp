@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, New York University,
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh, New York University,
 //                          Max Planck Gesellschaft
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -11,6 +11,7 @@
 #define CROCODDYL_MULTIBODY_NUMDIFF_COST_HPP_
 
 #include <boost/function.hpp>
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "pinocchio/algorithm/kinematics.hpp"
 #include "pinocchio/algorithm/jacobian.hpp"
@@ -21,14 +22,12 @@
 
 namespace crocoddyl {
 
-struct CostDataNumDiff;  // forward declaration
-
 // Simple renaming that ease the code writing.
 typedef boost::function<void(const Eigen::VectorXd&)> ReevaluationFunction;
 
 /**
  * @brief Compute all the pinocchio data needed for the numerical
- * differentation. We use the address of the object to avoid a copy from the
+ * differentiation. We use the address of the object to avoid a copy from the
  * "boost::bind".
  *
  * @param model is the rigid body robot model.
@@ -49,31 +48,39 @@ void updateAllPinocchio(pinocchio::Model* const model, pinocchio::Data* data, co
   pinocchio::computeCentroidalDynamicsDerivatives(*model, *data, q, v, a, tmp, tmp, tmp, tmp);
 }
 
-class CostNumDiffModel : public CostModelAbstract {
+template <typename _Scalar>
+class CostNumDiffModelTpl : public CostModelAbstractTpl<_Scalar> {
  public:
+  typedef _Scalar Scalar;
+  typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
+  typedef CostModelAbstractTpl<Scalar> Base;
+  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
+
   /**
    * @brief Construct a new CostNumDiffModel object from a CostModelAbstract.
    *
    * @param model
    */
-  CostNumDiffModel(const boost::shared_ptr<CostModelAbstract>& model);
+  CostNumDiffModelTpl(const boost::shared_ptr<Base>& model);
 
   /**
    * @brief Default destructor of the CostNumDiffModel object
    */
-  ~CostNumDiffModel();
+  ~CostNumDiffModelTpl();
 
   /**
    * @brief @copydoc ActionModelAbstract::calc()
    */
-  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-            const Eigen::Ref<const Eigen::VectorXd>& u);
+  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+            const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief @copydoc ActionModelAbstract::calcDiff()
    */
-  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u, const bool& recalc = true);
+  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                const Eigen::Ref<const VectorXs>& u, const bool& recalc = true);
 
   /**
    * @brief Create a Data object
@@ -88,21 +95,21 @@ class CostNumDiffModel : public CostModelAbstract {
    *
    * @return CostModelAbstract&
    */
-  const boost::shared_ptr<CostModelAbstract>& get_model() const;
+  const boost::shared_ptr<Base>& get_model() const;
 
   /**
    * @brief Get the disturbance_ object
    *
-   * @return const double&
+   * @return const Scalar&
    */
-  const double& get_disturbance() const;
+  const Scalar& get_disturbance() const;
 
   /**
    * @brief Set the disturbance_ object
    *
    * @param disturbance is the value used to find the numerical derivative
    */
-  void set_disturbance(const double& disturbance);
+  void set_disturbance(const Scalar& disturbance);
 
   /**
    * @brief Identify if the Gauss approximation is going to be used or not.
@@ -123,10 +130,10 @@ class CostNumDiffModel : public CostModelAbstract {
 
  protected:
   /** @brief Model of the cost. */
-  boost::shared_ptr<CostModelAbstract> model_;
+  boost::shared_ptr<Base> model_;
 
   /** @brief Numerical disturbance used in the numerical differentiation. */
-  double disturbance_;
+  Scalar disturbance_;
 
   /** @brief Functions that needs execution before calc or calcDiff. */
   std::vector<ReevaluationFunction> reevals_;
@@ -146,12 +153,19 @@ class CostNumDiffModel : public CostModelAbstract {
   virtual void assertStableStateFD(const Eigen::Ref<const Eigen::VectorXd>& /*x*/){};
 };
 
-struct CostDataNumDiff : public CostDataAbstract {
+template <typename _Scalar>
+struct CostDataNumDiffTpl : public CostDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef CostDataAbstractTpl<Scalar> Base;
+  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+  typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
+  typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
 
-  template <typename Model>
-  explicit CostDataNumDiff(Model* const model, DataCollectorAbstract* const shared_data)
-      : CostDataAbstract(model, shared_data),
+  template <template <typename Scalar> class Model>
+  explicit CostDataNumDiffTpl(Model<Scalar>* const model, DataCollectorAbstract* const shared_data)
+      : Base(model, shared_data),
         dx(model->get_state()->get_ndx()),
         xp(model->get_state()->get_nx()),
         du(model->get_nu()),
@@ -172,16 +186,27 @@ struct CostDataNumDiff : public CostDataAbstract {
     }
   }
 
-  virtual ~CostDataNumDiff() {}
-  Eigen::VectorXd dx;  //!< State disturbance.
-  Eigen::VectorXd xp;  //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$".
-  Eigen::VectorXd du;  //!< Control disturbance.
-  Eigen::VectorXd up;  //!< The integrated control from the disturbance on one DoF "\f$ \int u du_i = u + du \f$".
-  boost::shared_ptr<CostDataAbstract> data_0;  //!< The data at the approximation point.
-  std::vector<boost::shared_ptr<CostDataAbstract> >
-      data_x;  //!< The temporary data associated with the state variation.
-  std::vector<boost::shared_ptr<CostDataAbstract> >
-      data_u;  //!< The temporary data associated with the control variation.
+  virtual ~CostDataNumDiffTpl() {}
+
+  using Base::shared;
+  using Base::activation;
+  using Base::cost;
+  using Base::Lu;
+  using Base::Luu;
+  using Base::Lx;
+  using Base::Lxu;
+  using Base::Lxx;
+  using Base::r;
+  using Base::Ru;
+  using Base::Rx;
+
+  VectorXs dx;  //!< State disturbance.
+  VectorXs xp;  //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$".
+  VectorXs du;  //!< Control disturbance.
+  VectorXs up;  //!< The integrated control from the disturbance on one DoF "\f$ \int u du_i = u + du \f$".
+  boost::shared_ptr<Base> data_0;                //!< The data at the approximation point.
+  std::vector<boost::shared_ptr<Base> > data_x;  //!< The temporary data associated with the state variation.
+  std::vector<boost::shared_ptr<Base> > data_u;  //!< The temporary data associated with the control variation.
 };
 
 }  // namespace crocoddyl
