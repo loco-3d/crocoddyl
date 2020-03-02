@@ -7,6 +7,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_ALTERNATIVE_INIT_API
+
 #include "cost_factory.hpp"
 #include "unittest_common.hpp"
 
@@ -60,7 +63,7 @@ void test_calc_against_numdiff(CostModelTypes::Type cost_type, ActivationModelTy
   const boost::shared_ptr<crocoddyl::CostDataAbstract>& data = model->createData(&shared_data);
 
   // Create the equivalent num diff model and data.
-  crocoddyl::CostNumDiffModel model_num_diff(model);
+  crocoddyl::CostModelNumDiff model_num_diff(model);
   const boost::shared_ptr<crocoddyl::CostDataAbstract>& data_num_diff = model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
@@ -90,7 +93,7 @@ void test_partial_derivatives_against_numdiff(CostModelTypes::Type cost_type,
   const boost::shared_ptr<crocoddyl::CostDataAbstract>& data = model->createData(&shared_data);
 
   // Create the equivalent num diff model and data.
-  crocoddyl::CostNumDiffModel model_num_diff(model);
+  crocoddyl::CostModelNumDiff model_num_diff(model);
   const boost::shared_ptr<crocoddyl::CostDataAbstract>& data_num_diff = model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
@@ -106,8 +109,11 @@ void test_partial_derivatives_against_numdiff(CostModelTypes::Type cost_type,
   model_num_diff.set_reevals(reevals);
 
   // Computing the action derivatives
+  model->calc(data, x, u);
   model->calcDiff(data, x, u);
-  // Computing the action derivatives via numerical differientiation
+
+  // Computing the action derivatives via numerical differentiation
+  model_num_diff.calc(data_num_diff, x, u);
   model_num_diff.calcDiff(data_num_diff, x, u);
 
   // Checking the partial derivatives against NumDiff
@@ -144,7 +150,8 @@ bool init_function() {
     for (size_t activation_type = 0; activation_type < ActivationModelTypes::all.size(); ++activation_type) {
       for (size_t state_type = 0; state_type < StateTypes::all_multibody.size(); ++state_type) {
         std::ostringstream test_name;
-        test_name << "test_" << CostModelTypes::all[cost_type] << "_" << activation_type << "_" << state_type;
+        test_name << "test_" << CostModelTypes::all[cost_type] << "_" << ActivationModelTypes::all[activation_type]
+                  << "_" << StateTypes::all[state_type];
         test_suite* ts = BOOST_TEST_SUITE(test_name.str());
         std::cout << "Running " << test_name.str() << std::endl;
         register_action_model_unit_tests(CostModelTypes::all[cost_type], ActivationModelTypes::all[activation_type],

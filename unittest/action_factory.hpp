@@ -6,7 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include <iterator>
 #include <pinocchio/fwd.hpp>
 
@@ -15,6 +14,7 @@
 #include "crocoddyl/core/actions/unicycle.hpp"
 #include "crocoddyl/core/actions/diff-lqr.hpp"
 #include "crocoddyl/core/numdiff/action.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 #ifndef CROCODDYL_ACTION_FACTORY_HPP_
 #define CROCODDYL_ACTION_FACTORY_HPP_

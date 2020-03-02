@@ -8,7 +8,7 @@
 
 #include <pinocchio/fwd.hpp>
 
-#include "crocoddyl/multibody/costs/centroidal-momentum.hpp"
+// #include "crocoddyl/multibody/costs/centroidal-momentum.hpp"
 #include "crocoddyl/multibody/costs/com-position.hpp"
 #include "crocoddyl/multibody/costs/contact-force.hpp"
 #include "crocoddyl/multibody/costs/control.hpp"
@@ -31,7 +31,8 @@
 namespace crocoddyl_unit_test {
 
 struct CostModelTypes {
-  enum Type {  // CostModelCentroidalMomentum, // @todo Figure out the pinocchio callbacks.
+  enum Type {
+    // CostModelCentroidalMomentum, // @todo Figure out the pinocchio callbacks.
     CostModelCoMPosition,
     // CostModelContactForce, // @todo Figure out the contacts creations.
     CostModelControl,
@@ -96,15 +97,18 @@ std::ostream& operator<<(std::ostream& os, CostModelTypes::Type type) {
 
 class CostModelFactory {
  public:
+  typedef crocoddyl::MathBaseTpl<double> MathBase;
+  typedef typename MathBase::Vector6s Vector6d;
+
   CostModelFactory(CostModelTypes::Type test_type, ActivationModelTypes::Type activation_type,
                    StateTypes::Type state_multibody_type)
       : state_factory_(state_multibody_type),
         state_multibody_(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_.get_state())),
         // Setup some reference for the costs.
-        frame_index_(5),  // @todo Maybe find a way to randomize using an end-effector?
-        mom_ref_(crocoddyl::Vector6d::Random()),
+        frame_index_(state_multibody_->get_pinocchio().frames.size() - 1),
+        mom_ref_(Vector6d::Random()),
         com_ref_(Eigen::Vector3d::Random()),
-        force_ref_(frame_index_, pinocchio::Force(crocoddyl::Vector6d::Random())),
+        force_ref_(frame_index_, pinocchio::Force(Vector6d::Random())),
         u_ref_(Eigen::VectorXd::Random(state_multibody_->get_nv())),
         frame_(pinocchio::SE3::Random()),
         frame_ref_(frame_index_, frame_),
@@ -189,7 +193,7 @@ class CostModelFactory {
 
   // some reference:
   crocoddyl::FrameIndex frame_index_;
-  crocoddyl::Vector6d mom_ref_;
+  Vector6d mom_ref_;
   Eigen::Vector3d com_ref_;
   crocoddyl::FrameForce force_ref_;
   Eigen::VectorXd u_ref_;
