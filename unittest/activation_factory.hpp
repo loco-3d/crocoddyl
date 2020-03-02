@@ -38,6 +38,29 @@ struct ActivationModelTypes {
 };
 const std::vector<ActivationModelTypes::Type> ActivationModelTypes::all(ActivationModelTypes::init_all());
 
+std::ostream& operator<<(std::ostream& os, ActivationModelTypes::Type type) {
+  switch (type) {
+    case ActivationModelTypes::ActivationModelQuadraticBarrier:
+      os << "ActivationModelQuadraticBarrier";
+      break;
+    case ActivationModelTypes::ActivationModelQuad:
+      os << "ActivationModelQuad";
+      break;
+    case ActivationModelTypes::ActivationModelSmoothAbs:
+      os << "ActivationModelSmoothAbs";
+      break;
+    case ActivationModelTypes::ActivationModelWeightedQuad:
+      os << "ActivationModelWeightedQuad";
+      break;
+    case ActivationModelTypes::NbActivationModelTypes:
+      os << "NbActivationModelTypes";
+      break;
+    default:
+      break;
+  }
+  return os;
+}
+
 class ActivationModelFactory {
  public:
   ActivationModelFactory(ActivationModelTypes::Type test_type, std::size_t nr = 5) {

@@ -52,6 +52,32 @@ struct StateTypes {
 const std::vector<StateTypes::Type> StateTypes::all(StateTypes::init_all());
 const std::vector<StateTypes::Type> StateTypes::all_multibody(StateTypes::init_multibody());
 
+std::ostream& operator<<(std::ostream& os, StateTypes::Type type) {
+  switch (type) {
+    case StateTypes::StateVector:
+      os << "StateVector";
+      break;
+    case StateTypes::StateMultibodyTalosArm:
+      os << "StateMultibodyTalosArm";
+      break;
+    case StateTypes::StateMultibodyHyQ:
+      os << "StateMultibodyHyQ";
+      break;
+    case StateTypes::StateMultibodyTalos:
+      os << "StateMultibodyTalos";
+      break;
+    case StateTypes::StateMultibodyRandomHumanoid:
+      os << "StateMultibodyRandomHumanoid";
+      break;
+    case StateTypes::NbStateTypes:
+      os << "NbStateTypes";
+      break;
+    default:
+      break;
+  }
+  return os;
+}
+
 class StateFactory {
  public:
   StateFactory(StateTypes::Type type) {
