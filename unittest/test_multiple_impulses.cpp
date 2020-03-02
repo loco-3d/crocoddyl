@@ -76,7 +76,7 @@ void test_addImpulse() {
   impulse_factories.push_back(create_random_factory());
 
   // add an impulse object to the container
-  model.addImpulse("random_impulse", impulse_factories[0]->get_model());
+  model.addImpulse("random_impulse", impulse_factories[0]->get_impulse());
 
   // Test the final size of the map
   BOOST_CHECK(model.get_impulses().size() == 1);
@@ -93,12 +93,12 @@ void test_addImpulse_error_message() {
   impulse_factories.push_back(create_random_factory());
 
   // add twice the same impulse object to the container
-  model.addImpulse("random_impulse", impulse_factories[0]->get_model());
+  model.addImpulse("random_impulse", impulse_factories[0]->get_impulse());
 
   // Expect a cout message here
   CaptureIOStream capture_ios;
   capture_ios.beginCapture();
-  model.addImpulse("random_impulse", impulse_factories[0]->get_model());
+  model.addImpulse("random_impulse", impulse_factories[0]->get_impulse());
   capture_ios.endCapture();
 
   // Test that the error message is sent.
@@ -118,7 +118,7 @@ void test_removeImpulse() {
   impulse_factories.push_back(create_random_factory());
 
   // add an impulse object to the container
-  model.addImpulse("random_impulse", impulse_factories[0]->get_model());
+  model.addImpulse("random_impulse", impulse_factories[0]->get_impulse());
 
   // add an impulse object to the container
   model.removeImpulse("random_impulse");
@@ -164,7 +164,7 @@ void test_calc() {
     impulse_factories.push_back(create_random_factory());
     std::ostringstream os;
     os << "random_impulse_" << i;
-    model.addImpulse(os.str(), impulse_factories.back()->get_model());
+    model.addImpulse(os.str(), impulse_factories.back()->get_impulse());
   }
 
   // create the data of the multiple-impulses
@@ -203,7 +203,7 @@ void test_calc_no_computation() {
     impulse_factories.push_back(create_random_factory());
     std::ostringstream os;
     os << "random_impulse_" << i;
-    model.addImpulse(os.str(), impulse_factories.back()->get_model());
+    model.addImpulse(os.str(), impulse_factories.back()->get_impulse());
   }
 
   // create the data of the multiple-impulses
@@ -238,7 +238,7 @@ void test_calc_diff() {
     impulse_factories.push_back(create_random_factory());
     std::ostringstream os;
     os << "random_impulse_" << i;
-    model.addImpulse(os.str(), impulse_factories.back()->get_model());
+    model.addImpulse(os.str(), impulse_factories.back()->get_impulse());
   }
 
   // create the data of the multiple-impulses
@@ -282,7 +282,7 @@ void test_calc_diff_no_recalc() {
     impulse_factories.push_back(create_random_factory());
     std::ostringstream os;
     os << "random_impulse_" << i;
-    model.addImpulse(os.str(), impulse_factories.back()->get_model());
+    model.addImpulse(os.str(), impulse_factories.back()->get_impulse());
   }
 
   // create the data of the multiple-impulses
@@ -324,7 +324,7 @@ void test_calc_diff_no_computation() {
     impulse_factories.push_back(create_random_factory());
     std::ostringstream os;
     os << "random_impulse_" << i;
-    model.addImpulse(os.str(), impulse_factories.back()->get_model());
+    model.addImpulse(os.str(), impulse_factories.back()->get_impulse());
   }
 
   // create the data of the multiple-impulses
@@ -360,7 +360,7 @@ void test_updateForce() {
     impulse_factories.push_back(create_random_factory());
     std::ostringstream os;
     os << "random_impulse_" << i;
-    model.addImpulse(os.str(), impulse_factories.back()->get_model());
+    model.addImpulse(os.str(), impulse_factories.back()->get_impulse());
   }
 
   // create the data of the multiple-impulses
@@ -405,7 +405,7 @@ void test_updateVelocityDiff() {
     impulse_factories.push_back(create_random_factory());
     std::ostringstream os;
     os << "random_impulse_" << i;
-    model.addImpulse(os.str(), impulse_factories.back()->get_model());
+    model.addImpulse(os.str(), impulse_factories.back()->get_impulse());
   }
 
   // create the data of the multiple-impulses
@@ -436,7 +436,7 @@ void test_updateForceDiff() {
     impulse_factories.push_back(create_random_factory());
     std::ostringstream os;
     os << "random_impulse_" << i;
-    model.addImpulse(os.str(), impulse_factories.back()->get_model());
+    model.addImpulse(os.str(), impulse_factories.back()->get_impulse());
   }
 
   // create the data of the multiple-impulses
@@ -472,12 +472,12 @@ void test_assert_updateForceDiff_assert_mismatch_model_data() {
     {
       std::ostringstream os;
       os << "random_impulse1_" << i;
-      model1.addImpulse(os.str(), impulse_factories.back()->get_model());
+      model1.addImpulse(os.str(), impulse_factories.back()->get_impulse());
     }
     {
       std::ostringstream os;
       os << "random_impulse2_" << i;
-      model2.addImpulse(os.str(), impulse_factories.back()->get_model());
+      model2.addImpulse(os.str(), impulse_factories.back()->get_impulse());
     }
   }
 
@@ -531,7 +531,7 @@ void test_get_impulses() {
     impulse_factories.push_back(create_random_factory());
     std::ostringstream os;
     os << "random_impulse_" << i;
-    model.addImpulse(os.str(), impulse_factories.back()->get_model());
+    model.addImpulse(os.str(), impulse_factories.back()->get_impulse());
   }
 
   // get the impulses
@@ -561,7 +561,7 @@ void test_get_ni() {
     impulse_factories.push_back(create_random_factory());
     std::ostringstream os;
     os << "random_impulse_" << i;
-    model.addImpulse(os.str(), impulse_factories.back()->get_model());
+    model.addImpulse(os.str(), impulse_factories.back()->get_impulse());
   }
 
   // compute ni
