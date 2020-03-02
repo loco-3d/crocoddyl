@@ -146,7 +146,7 @@ void register_action_model_unit_tests(CostModelTypes::Type cost_type, Activation
 
 bool init_function() {
   // Test all costs available with all the activation types with all available states types.
-  for (size_t cost_type = 0; cost_type < std::min((size_t)6 /*7*/, CostModelTypes::all.size()); ++cost_type) {
+  for (size_t cost_type = 0; cost_type < CostModelTypes::all.size(); ++cost_type) {
     for (size_t activation_type = 0; activation_type < ActivationModelTypes::all.size(); ++activation_type) {
       for (size_t state_type = 0; state_type < StateTypes::all_multibody.size(); ++state_type) {
         std::ostringstream test_name;
