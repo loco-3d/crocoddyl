@@ -210,7 +210,6 @@ class CostModelFactory {
   crocoddyl::FrameMotion velocity_ref_;
 };
 
-
 /**
  * @brief Compute all the pinocchio data needed for the numerical
  * differentiation. We use the address of the object to avoid a copy from the
@@ -233,7 +232,6 @@ void updateAllPinocchio(pinocchio::Model* const model, pinocchio::Data* data, co
   pinocchio::computeCentroidalMomentum(*model, *data, q, v);
   pinocchio::computeCentroidalDynamicsDerivatives(*model, *data, q, v, a, tmp, tmp, tmp, tmp);
 }
-
 
 }  // namespace crocoddyl_unit_test
 
