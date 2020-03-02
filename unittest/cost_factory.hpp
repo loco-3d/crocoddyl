@@ -18,14 +18,11 @@
 #include "crocoddyl/multibody/costs/control.hpp"
 #include "crocoddyl/multibody/costs/com-position.hpp"
 // #include "crocoddyl/multibody/costs/centroidal-momentum.hpp"
-// #include "crocoddyl/multibody/costs/cost-sum.hpp"
 #include "crocoddyl/multibody/costs/frame-placement.hpp"
 #include "crocoddyl/multibody/costs/frame-rotation.hpp"
 #include "crocoddyl/multibody/costs/frame-translation.hpp"
 #include "crocoddyl/multibody/costs/frame-velocity.hpp"
-#include "crocoddyl/multibody/costs/contact-force.hpp"
-// #include "crocoddyl/multibody/costs/contact-force.hpp"
-// #include "crocoddyl/multibody/costs/impulse.hpp"
+// #include "crocoddyl/multibody/costs/cost-sum.hpp"
 #include "crocoddyl/multibody/numdiff/cost.hpp"
 
 #include "state_factory.hpp"
@@ -41,14 +38,12 @@ struct CostModelTypes {
     CostModelState,
     CostModelControl,
     CostModelCoMPosition,
-    // CostModelCentroidalMomentum, // @todo Figure out the pinocchio callbacks.
-    // CostModelSum, // @todo Implement a separate unittests for this one?
+    // CostModelCentroidalMomentum,  // @todo Figure out the pinocchio callbacks.
     CostModelFramePlacement,
     CostModelFrameRotation,
     CostModelFrameTranslation,
     CostModelFrameVelocity,
-    // CostModelContactForce, // @todo Implement the CostModelFrameForce class.
-    // CostModelImpulse,  // @todo Implement the CostModelImpulses class.
+    // CostModelSum, // @todo Implement a separate unittests for this one?
     NbCostModelTypes
   };
   static std::vector<Type> init_all() {
@@ -77,9 +72,6 @@ std::ostream& operator<<(std::ostream& os, CostModelTypes::Type type) {
     // case CostModelTypes::CostModelCentroidalMomentum:
     //   os << "CostModelCentroidalMomentum";
     //   break;
-    // case CostModelTypes::CostModelSum:
-    //   os << "CostModelSum";
-    //   break;
     case CostModelTypes::CostModelFramePlacement:
       os << "CostModelFramePlacement";
       break;
@@ -92,11 +84,8 @@ std::ostream& operator<<(std::ostream& os, CostModelTypes::Type type) {
     case CostModelTypes::CostModelFrameVelocity:
       os << "CostModelFrameVelocity";
       break;
-    // case CostModelTypes::CostModelContactForce:
-    //   os << "CostModelContactForce";
-    //   break;
-    // case CostModelTypes::CostModelImpulse:
-    //   os << "CostModelImpulse";
+    // case CostModelTypes::CostModelSum:
+    //   os << "CostModelSum";
     //   break;
     case CostModelTypes::NbCostModelTypes:
       os << "NbCostModelTypes";
@@ -149,12 +138,8 @@ class CostModelFactory {
         break;
       // case CostModelTypes::CostModelCentroidalMomentum:
       //   activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, 6);
-      //   cost_ = boost::make_shared<crocoddyl::CostModelCentroidalMomentum>(
-      //       state_multibody_, activation_factory_->create(), mom_ref_);
-      //   break;
-      // case CostModelTypes::CostModelSum:
-      //   break;
-      // case CostModelTypes::CostModelFrameForce:
+      //   cost_ = boost::make_shared<crocoddyl::CostModelCentroidalMomentum>(state_multibody_,
+      //                                                                      activation_factory_->create(), mom_ref_);
       //   break;
       case CostModelTypes::CostModelFramePlacement:
         activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, 6);
@@ -176,12 +161,7 @@ class CostModelFactory {
         cost_ = boost::make_shared<crocoddyl::CostModelFrameVelocity>(state_multibody_, activation_factory_->create(),
                                                                       velocity_ref_);
         break;
-      // case CostModelTypes::CostModelContactForce:
-      //   activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, 6);
-      //   cost_ = boost::make_shared<crocoddyl::CostModelContactForce>(
-      //       state_multibody_, activation_factory_->create(), force_ref_);
-      //   break;
-      // case CostModelTypes::CostModelImpulse:
+      // case CostModelTypes::CostModelSum:
       //   break;
       default:
         throw_pretty(__FILE__ ": Wrong CostModelTypes::Type given");
