@@ -78,4 +78,9 @@ const std::size_t& CostModelAbstractTpl<Scalar>::get_nu() const {
   return nu_;
 }
 
+template <typename Scalar>
+const bool& CostModelAbstractTpl<Scalar>::get_with_residuals() const {
+  return with_residuals_;
+}
+
 }  // namespace crocoddyl

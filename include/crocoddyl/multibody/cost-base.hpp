@@ -56,6 +56,7 @@ class CostModelAbstractTpl {
   const boost::shared_ptr<StateMultibody>& get_state() const;
   const boost::shared_ptr<ActivationModelAbstract>& get_activation() const;
   const std::size_t& get_nu() const;
+  const bool& get_with_residuals() const;
 
  protected:
   boost::shared_ptr<StateMultibody> state_;
