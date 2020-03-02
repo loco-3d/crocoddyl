@@ -22,9 +22,6 @@
 
 namespace crocoddyl {
 
-// Simple renaming that ease the code writing.
-typedef boost::function<void(const Eigen::VectorXd&)> ReevaluationFunction;
-
 /**
  * @brief Compute all the pinocchio data needed for the numerical
  * differentiation. We use the address of the object to avoid a copy from the
@@ -57,6 +54,7 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
+  typedef boost::function<void(const typename MathBaseTpl<Scalar>::VectorXs&)> ReevaluationFunction;
 
   /**
    * @brief Construct a new CostModelNumDiff object from a CostModelAbstract.

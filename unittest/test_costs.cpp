@@ -104,7 +104,7 @@ void test_partial_derivatives_against_numdiff(CostModelTypes::Type cost_type,
   crocoddyl::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
 
   // set the function that needs to be called at every step of the numdiff
-  std::vector<crocoddyl::ReevaluationFunction> reevals;
+  std::vector<crocoddyl::CostModelNumDiff::ReevaluationFunction> reevals;
   reevals.push_back(boost::bind(&crocoddyl::updateAllPinocchio, &pinocchio_model, &pinocchio_data, _1));
   model_num_diff.set_reevals(reevals);
 
