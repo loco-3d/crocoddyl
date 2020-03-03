@@ -498,7 +498,7 @@ class FrameRotationCostDerived(crocoddyl.CostModelAbstract):
         pinocchio.updateFramePlacements(self.state.pinocchio, data.shared.pinocchio)
         data.rJf = pinocchio.Jlog3(data.rRf)
         data.fJf = pinocchio.getFrameJacobian(self.state.pinocchio, data.shared.pinocchio, self.Rref.frame,
-                                              pinocchio.ReferenceFrame.LOCAL)[:3, :]
+                                              pinocchio.ReferenceFrame.LOCAL)[3:, :]
         data.J = data.rJf * data.fJf
         self.activation.calcDiff(data.activation, data.r)
         data.Rx = np.hstack([data.J, pinocchio.utils.zero((self.activation.nr, self.state.nv))])

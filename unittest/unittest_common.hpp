@@ -17,6 +17,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include <iterator>
 #include <Eigen/Dense>
 #include <boost/bind.hpp>
 #include <boost/test/included/unit_test.hpp>

@@ -7,6 +7,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_ALTERNATIVE_INIT_API
+
 #include "state_factory.hpp"
 #include "unittest_common.hpp"
 
@@ -17,7 +20,7 @@ using namespace crocoddyl_unit_test;
 
 void test_state_dimension(StateTypes::Type state_type) {
   StateFactory factory(state_type);
-  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Checking the dimension of zero and random states
   BOOST_CHECK(static_cast<std::size_t>(state->zero().size()) == factory.get_nx());
   BOOST_CHECK(static_cast<std::size_t>(state->rand().size()) == factory.get_nx());
@@ -29,7 +32,7 @@ void test_state_dimension(StateTypes::Type state_type) {
 
 void test_integrate_against_difference(StateTypes::Type state_type) {
   StateFactory factory(state_type);
-  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Generating random states
   const Eigen::VectorXd& x1 = state->rand();
   const Eigen::VectorXd& x2 = state->rand();
@@ -49,7 +52,7 @@ void test_integrate_against_difference(StateTypes::Type state_type) {
 
 void test_difference_against_integrate(StateTypes::Type state_type) {
   StateFactory factory(state_type);
-  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Generating random states
   const Eigen::VectorXd& x = state->rand();
   const Eigen::VectorXd& dx = Eigen::VectorXd::Random(state->get_ndx());
@@ -66,7 +69,7 @@ void test_difference_against_integrate(StateTypes::Type state_type) {
 
 void test_Jdiff_firstsecond(StateTypes::Type state_type) {
   StateFactory factory(state_type);
-  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Generating random values for the initial and terminal states
   const Eigen::VectorXd& x1 = state->rand();
   const Eigen::VectorXd& x2 = state->rand();
@@ -89,7 +92,7 @@ void test_Jdiff_firstsecond(StateTypes::Type state_type) {
 
 void test_Jint_firstsecond(StateTypes::Type state_type) {
   StateFactory factory(state_type);
-  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Generating random values for the initial and terminal states
   const Eigen::VectorXd& x = state->rand();
   const Eigen::VectorXd& dx = Eigen::VectorXd::Random(state->get_ndx());
@@ -112,7 +115,7 @@ void test_Jint_firstsecond(StateTypes::Type state_type) {
 
 void test_Jdiff_num_diff_firstsecond(StateTypes::Type state_type) {
   StateFactory factory(state_type);
-  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Generating random values for the initial and terminal states
   const Eigen::VectorXd& x1 = state->rand();
   const Eigen::VectorXd& x2 = state->rand();
@@ -138,7 +141,7 @@ void test_Jdiff_num_diff_firstsecond(StateTypes::Type state_type) {
 
 void test_Jint_num_diff_firstsecond(StateTypes::Type state_type) {
   StateFactory factory(state_type);
-  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Generating random values for the initial and terminal states
   const Eigen::VectorXd& x = state->rand();
   const Eigen::VectorXd& dx = Eigen::VectorXd::Random(state->get_ndx());
@@ -164,7 +167,7 @@ void test_Jint_num_diff_firstsecond(StateTypes::Type state_type) {
 
 void test_Jdiff_against_numdiff(StateTypes::Type state_type) {
   StateFactory factory(state_type);
-  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Generating random values for the initial and terminal states
   const Eigen::VectorXd& x1 = state->rand();
   const Eigen::VectorXd& x2 = state->rand();
@@ -190,7 +193,7 @@ void test_Jdiff_against_numdiff(StateTypes::Type state_type) {
 
 void test_Jintegrate_against_numdiff(StateTypes::Type state_type) {
   StateFactory factory(state_type);
-  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Generating random values for the initial state and its rate of change
   const Eigen::VectorXd& x = state->rand();
   const Eigen::VectorXd& dx = Eigen::VectorXd::Random(state->get_ndx());
@@ -215,7 +218,7 @@ void test_Jintegrate_against_numdiff(StateTypes::Type state_type) {
 
 void test_Jdiff_and_Jintegrate_are_inverses(StateTypes::Type state_type) {
   StateFactory factory(state_type);
-  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Generating random states
   const Eigen::VectorXd& x1 = state->rand();
   const Eigen::VectorXd& dx = Eigen::VectorXd::Random(state->get_ndx());
@@ -238,7 +241,7 @@ void test_Jdiff_and_Jintegrate_are_inverses(StateTypes::Type state_type) {
 
 void test_velocity_from_Jintegrate_Jdiff(StateTypes::Type state_type) {
   StateFactory factory(state_type);
-  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Generating random states
   const Eigen::VectorXd& x1 = state->rand();
   Eigen::VectorXd dx = Eigen::VectorXd::Random(state->get_ndx());

@@ -57,7 +57,7 @@ class DifferentialActionModelFactory {
 
   ~DifferentialActionModelFactory() {}
 
-  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> get_diff_action_model() { return diff_action_model_; }
+  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create() { return diff_action_model_; }
 
   double get_num_diff_modifier() { return num_diff_modifier_; }
 
@@ -75,7 +75,7 @@ class DifferentialActionModelFactory {
 void test_construct_data(TestTypes::Type test_type) {
   // create the model
   DifferentialActionModelFactory factory(test_type);
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.get_diff_action_model();
+  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create();
 
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data = model->createData();
@@ -84,7 +84,7 @@ void test_construct_data(TestTypes::Type test_type) {
 void test_calc_returns_state(TestTypes::Type test_type) {
   // create the model
   DifferentialActionModelFactory factory(test_type);
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.get_diff_action_model();
+  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create();
 
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data = model->createData();
@@ -102,7 +102,7 @@ void test_calc_returns_state(TestTypes::Type test_type) {
 void test_calc_returns_a_cost(TestTypes::Type test_type) {
   // create the model
   DifferentialActionModelFactory factory(test_type);
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.get_diff_action_model();
+  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create();
 
   // create the corresponding data object and set the cost to nan
   const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data = model->createData();
@@ -120,7 +120,7 @@ void test_calc_returns_a_cost(TestTypes::Type test_type) {
 void test_partial_derivatives_against_numdiff(TestTypes::Type test_type) {
   // create the model
   DifferentialActionModelFactory factory(test_type);
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.get_diff_action_model();
+  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create();
 
   // create the corresponding data object and set the cost to nan
   const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data = model->createData();

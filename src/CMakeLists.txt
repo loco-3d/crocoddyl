@@ -57,6 +57,7 @@ SET(${PROJECT_NAME}_SOURCES
   multibody/actions/contact-fwddyn.cpp
   multibody/actions/impulse-fwddyn.cpp
   multibody/utils/quadruped-gaits.cpp
+  multibody/numdiff/cost.cpp
   )
 
 IF(UNIX)

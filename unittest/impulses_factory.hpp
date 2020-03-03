@@ -6,12 +6,12 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include <iostream>
 #include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/multibody/impulses/impulse-3d.hpp"
 #include "crocoddyl/multibody/impulses/impulse-6d.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 #include "state_factory.hpp"
 
 #ifndef CROCODDYL_IMPULSES_FACTORY_HPP_
@@ -88,51 +88,51 @@ class ImpulseModelFactory {
       case ImpulseModelTypes::ImpulseModel3DTalosArm:
         state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyTalosArm);
         frame = state_factory_->get_pinocchio_model().getFrameId("gripper_left_fingertip_1_link");
-        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->get_state());
-        model_.reset(new crocoddyl::ImpulseModel3D(state, frame));
+        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->create());
+        impulse_.reset(new crocoddyl::ImpulseModel3D(state, frame));
         break;
       case ImpulseModelTypes::ImpulseModel3DHyQ:
         state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyHyQ);
         frame = state_factory_->get_pinocchio_model().getFrameId("lf_foot");
-        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->get_state());
-        model_.reset(new crocoddyl::ImpulseModel3D(state, frame));
+        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->create());
+        impulse_.reset(new crocoddyl::ImpulseModel3D(state, frame));
         break;
       case ImpulseModelTypes::ImpulseModel3DTalos:
         state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyTalos);
         frame = state_factory_->get_pinocchio_model().getFrameId("gripper_left_fingertip_1_link");
-        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->get_state());
-        model_.reset(new crocoddyl::ImpulseModel3D(state, frame));
+        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->create());
+        impulse_.reset(new crocoddyl::ImpulseModel3D(state, frame));
         break;
       case ImpulseModelTypes::ImpulseModel3DRandomHumanoid:
         state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyRandomHumanoid);
         frame = state_factory_->get_pinocchio_model().getFrameId("rleg6_body");
-        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->get_state());
-        model_.reset(new crocoddyl::ImpulseModel3D(state, frame));
+        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->create());
+        impulse_.reset(new crocoddyl::ImpulseModel3D(state, frame));
         break;
 
       case ImpulseModelTypes::ImpulseModel6DTalosArm:
         state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyTalosArm);
         frame = state_factory_->get_pinocchio_model().getFrameId("gripper_left_fingertip_1_link");
-        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->get_state());
-        model_.reset(new crocoddyl::ImpulseModel6D(state, frame));
+        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->create());
+        impulse_.reset(new crocoddyl::ImpulseModel6D(state, frame));
         break;
       case ImpulseModelTypes::ImpulseModel6DHyQ:
         state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyHyQ);
         frame = state_factory_->get_pinocchio_model().getFrameId("lf_foot");
-        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->get_state());
-        model_.reset(new crocoddyl::ImpulseModel6D(state, frame));
+        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->create());
+        impulse_.reset(new crocoddyl::ImpulseModel6D(state, frame));
         break;
       case ImpulseModelTypes::ImpulseModel6DTalos:
         state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyTalos);
         frame = state_factory_->get_pinocchio_model().getFrameId("gripper_left_fingertip_1_link");
-        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->get_state());
-        model_.reset(new crocoddyl::ImpulseModel6D(state, frame));
+        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->create());
+        impulse_.reset(new crocoddyl::ImpulseModel6D(state, frame));
         break;
       case ImpulseModelTypes::ImpulseModel6DRandomHumanoid:
         state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyRandomHumanoid);
         frame = state_factory_->get_pinocchio_model().getFrameId("rleg6_body");
-        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->get_state());
-        model_.reset(new crocoddyl::ImpulseModel6D(state, frame));
+        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->create());
+        impulse_.reset(new crocoddyl::ImpulseModel6D(state, frame));
         break;
 
       default:
@@ -141,14 +141,14 @@ class ImpulseModelFactory {
     }
   }
 
-  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> get_model() { return model_; }
+  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> create() { return impulse_; }
   boost::shared_ptr<StateFactory> get_state_factory() { return state_factory_; }
   double num_diff_modifier_;
 
  private:
-  ImpulseModelTypes::Type test_type_;                         //!< The type of impulse to test
-  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model_;  //!< The pointer to the impulse model
-  boost::shared_ptr<StateFactory> state_factory_;             //!< The pointer to the multibody state factory
+  ImpulseModelTypes::Type test_type_;                           //!< The type of impulse to test
+  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> impulse_;  //!< The pointer to the impulse model
+  boost::shared_ptr<StateFactory> state_factory_;               //!< The pointer to the multibody state factory
 };
 
 boost::shared_ptr<ImpulseModelFactory> create_random_factory() {

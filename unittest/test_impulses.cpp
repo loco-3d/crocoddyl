@@ -7,6 +7,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_ALTERNATIVE_INIT_API
+
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
 #include <pinocchio/algorithm/frames.hpp>
 
@@ -21,7 +24,7 @@ using namespace boost::unit_test;
 void test_construct_data(ImpulseModelTypes::Type test_type) {
   // create the model
   ImpulseModelFactory factory(test_type);
-  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.get_model();
+  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.create();
 
   // create the corresponding data object
   pinocchio::Data pinocchio_data(factory.get_state_factory()->get_pinocchio_model());
@@ -31,7 +34,7 @@ void test_construct_data(ImpulseModelTypes::Type test_type) {
 void test_calc_no_computation(ImpulseModelTypes::Type test_type) {
   // create the model
   ImpulseModelFactory factory(test_type);
-  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.get_model();
+  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.create();
 
   // create the corresponding data object
   pinocchio::Data pinocchio_data(factory.get_state_factory()->get_pinocchio_model());
@@ -51,7 +54,7 @@ void test_calc_no_computation(ImpulseModelTypes::Type test_type) {
 void test_calc_fetch_jacobians(ImpulseModelTypes::Type test_type) {
   // create the model
   ImpulseModelFactory factory(test_type);
-  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.get_model();
+  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.create();
 
   // create the corresponding data object
   const pinocchio::Model& pinocchio_model = factory.get_state_factory()->get_pinocchio_model();
@@ -77,7 +80,7 @@ void test_calc_fetch_jacobians(ImpulseModelTypes::Type test_type) {
 void test_calc_diff_no_computation(ImpulseModelTypes::Type test_type) {
   // create the model
   ImpulseModelFactory factory(test_type);
-  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.get_model();
+  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.create();
 
   // create the corresponding data object
   pinocchio::Data pinocchio_data(factory.get_state_factory()->get_pinocchio_model());
@@ -98,7 +101,7 @@ void test_calc_diff_no_computation(ImpulseModelTypes::Type test_type) {
 void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type test_type) {
   // create the model
   ImpulseModelFactory factory(test_type);
-  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.get_model();
+  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.create();
 
   // create the corresponding data object
   const pinocchio::Model& pinocchio_model = factory.get_state_factory()->get_pinocchio_model();
@@ -128,7 +131,7 @@ void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type test_type) {
 void test_update_force(ImpulseModelTypes::Type test_type) {
   // create the model
   ImpulseModelFactory factory(test_type);
-  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.get_model();
+  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.create();
 
   // create the corresponding data object
   const pinocchio::Model& pinocchio_model = factory.get_state_factory()->get_pinocchio_model();
@@ -149,7 +152,7 @@ void test_update_force(ImpulseModelTypes::Type test_type) {
 void test_update_force_diff(ImpulseModelTypes::Type test_type) {
   // create the model
   ImpulseModelFactory factory(test_type);
-  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.get_model();
+  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.create();
 
   // create the corresponding data object
   const pinocchio::Model& pinocchio_model = factory.get_state_factory()->get_pinocchio_model();
