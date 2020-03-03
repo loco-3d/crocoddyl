@@ -1,20 +1,20 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/parsers/sample-models.hpp>
+#include <example-robot-data/path.hpp>
+
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"
-#include "crocoddyl/core/states/unicycle.hpp"
-#include "crocoddyl/core/numdiff/state.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
-#include "example-robot-data/path.hpp"
+#include "crocoddyl/core/numdiff/state.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 #ifndef CROCODDYL_STATE_FACTORY_HPP_
 #define CROCODDYL_STATE_FACTORY_HPP_
