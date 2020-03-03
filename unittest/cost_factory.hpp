@@ -109,7 +109,6 @@ class CostModelFactory {
         frame_index_(state_multibody_->get_pinocchio().frames.size() - 1),
         mom_ref_(Vector6d::Random()),
         com_ref_(Eigen::Vector3d::Random()),
-        force_ref_(frame_index_, pinocchio::Force(Vector6d::Random())),
         u_ref_(Eigen::VectorXd::Random(state_multibody_->get_nv())),
         frame_(pinocchio::SE3::Random()),
         frame_ref_(frame_index_, frame_),
@@ -187,7 +186,6 @@ class CostModelFactory {
   crocoddyl::FrameIndex frame_index_;
   Vector6d mom_ref_;
   Eigen::Vector3d com_ref_;
-  crocoddyl::FrameForce force_ref_;
   Eigen::VectorXd u_ref_;
   pinocchio::SE3 frame_;
   crocoddyl::FramePlacement frame_ref_;
