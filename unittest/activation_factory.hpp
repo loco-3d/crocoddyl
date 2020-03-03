@@ -7,11 +7,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/activation-base.hpp"
-#include "crocoddyl/core/activations/quadratic-barrier.hpp"
-#include "crocoddyl/core/activations/weighted-quadratic-barrier.hpp"
 #include "crocoddyl/core/activations/quadratic.hpp"
 #include "crocoddyl/core/activations/smooth-abs.hpp"
 #include "crocoddyl/core/activations/weighted-quadratic.hpp"
+#include "crocoddyl/core/activations/quadratic-barrier.hpp"
+#include "crocoddyl/core/activations/weighted-quadratic-barrier.hpp"
 #include "crocoddyl/core/numdiff/activation.hpp"
 
 #ifndef CROCODDYL_ACTIVATION_FACTORY_HPP_
@@ -21,11 +21,11 @@ namespace crocoddyl_unit_test {
 
 struct ActivationModelTypes {
   enum Type {
-    ActivationModelQuadraticBarrier,
-    ActivationModelWeightedQuadraticBarrier,
     ActivationModelQuad,
     ActivationModelSmoothAbs,
     ActivationModelWeightedQuad,
+    ActivationModelQuadraticBarrier,
+    ActivationModelWeightedQuadraticBarrier,
     NbActivationModelTypes
   };
   static std::vector<Type> init_all() {
@@ -42,12 +42,6 @@ const std::vector<ActivationModelTypes::Type> ActivationModelTypes::all(Activati
 
 std::ostream& operator<<(std::ostream& os, ActivationModelTypes::Type type) {
   switch (type) {
-    case ActivationModelTypes::ActivationModelQuadraticBarrier:
-      os << "ActivationModelQuadraticBarrier";
-      break;
-    case ActivationModelTypes::ActivationModelWeightedQuadraticBarrier:
-      os << "ActivationModelWeightedQuadraticBarrier";
-      break;
     case ActivationModelTypes::ActivationModelQuad:
       os << "ActivationModelQuad";
       break;
@@ -56,6 +50,12 @@ std::ostream& operator<<(std::ostream& os, ActivationModelTypes::Type type) {
       break;
     case ActivationModelTypes::ActivationModelWeightedQuad:
       os << "ActivationModelWeightedQuad";
+      break;
+    case ActivationModelTypes::ActivationModelQuadraticBarrier:
+      os << "ActivationModelQuadraticBarrier";
+      break;
+    case ActivationModelTypes::ActivationModelWeightedQuadraticBarrier:
+      os << "ActivationModelWeightedQuadraticBarrier";
       break;
     case ActivationModelTypes::NbActivationModelTypes:
       os << "NbActivationModelTypes";
@@ -69,23 +69,13 @@ std::ostream& operator<<(std::ostream& os, ActivationModelTypes::Type type) {
 class ActivationModelFactory {
  public:
   ActivationModelFactory(ActivationModelTypes::Type test_type, std::size_t nr = 5) {
-    test_type_ = test_type;
-
     nr_ = nr;
     num_diff_modifier_ = 1e4;
     Eigen::VectorXd lb = Eigen::VectorXd::Random(nr_);
     Eigen::VectorXd ub = lb + Eigen::VectorXd::Ones(nr_) + Eigen::VectorXd::Random(nr_);
     Eigen::VectorXd weights = Eigen::VectorXd::Random(nr_);
 
-    switch (test_type_) {
-      case ActivationModelTypes::ActivationModelQuadraticBarrier:
-        activation_ =
-            boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(crocoddyl::ActivationBounds(lb, ub));
-        break;
-      case ActivationModelTypes::ActivationModelWeightedQuadraticBarrier:
-        activation_ = boost::make_shared<crocoddyl::ActivationModelWeightedQuadraticBarrier>(
-            crocoddyl::ActivationBounds(lb, ub), weights);
-        break;
+    switch (test_type) {
       case ActivationModelTypes::ActivationModelQuad:
         activation_ = boost::make_shared<crocoddyl::ActivationModelQuad>(nr_);
         break;
@@ -94,6 +84,14 @@ class ActivationModelFactory {
         break;
       case ActivationModelTypes::ActivationModelWeightedQuad:
         activation_ = boost::make_shared<crocoddyl::ActivationModelWeightedQuad>(weights);
+        break;
+      case ActivationModelTypes::ActivationModelQuadraticBarrier:
+        activation_ =
+            boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(crocoddyl::ActivationBounds(lb, ub));
+        break;
+      case ActivationModelTypes::ActivationModelWeightedQuadraticBarrier:
+        activation_ = boost::make_shared<crocoddyl::ActivationModelWeightedQuadraticBarrier>(
+            crocoddyl::ActivationBounds(lb, ub), weights);
         break;
       default:
         throw_pretty(__FILE__ ":\n Construct wrong ActivationModelTypes::Type");
@@ -111,7 +109,6 @@ class ActivationModelFactory {
   double num_diff_modifier_;
   std::size_t nr_;
   boost::shared_ptr<crocoddyl::ActivationModelAbstract> activation_;
-  ActivationModelTypes::Type test_type_;
 };
 
 }  // namespace crocoddyl_unit_test
