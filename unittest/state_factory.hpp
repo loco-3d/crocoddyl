@@ -84,9 +84,8 @@ class StateFactory {
     // default initialization
     nx_ = 0;
     num_diff_modifier_ = 1e4;
-    state_type_ = type;
 
-    switch (state_type_) {
+    switch (type) {
       case StateTypes::StateVector:
         nx_ = 80;
         state_ = boost::make_shared<crocoddyl::StateVector>(nx_);
@@ -114,7 +113,7 @@ class StateFactory {
   void construct_state_multibody(const std::string& urdf_file = "", bool free_flyer = true) {
     if (urdf_file.size() != 0) {
       if (free_flyer) {
-        pinocchio::urdf::buildModel(urdf_file, free_flyer_joint_, pinocchio_model_);
+        pinocchio::urdf::buildModel(urdf_file, pinocchio::JointModelFreeFlyer(), pinocchio_model_);
         pinocchio_model_.lowerPositionLimit.segment<7>(0).fill(-1.);
         pinocchio_model_.upperPositionLimit.segment<7>(0).fill(1.);
       } else {
@@ -135,11 +134,9 @@ class StateFactory {
   const pinocchio::Model& get_pinocchio_model() { return pinocchio_model_; }
 
  private:
-  StateTypes::Type state_type_;                        //!< The current type to test
   boost::shared_ptr<crocoddyl::StateAbstract> state_;  //!< The pointer to the state in testing
   std::size_t nx_;                                     //!< The size of the StateVector to test.
   double num_diff_modifier_;                           //!< Multiplier of the precision during the tests.
-  pinocchio::JointModelFreeFlyer free_flyer_joint_;    //!< The free flyer joint to build the pinocchio model.
   pinocchio::Model pinocchio_model_;                   //!< The pinocchio_model to build the StateMultibody.
 };
 
