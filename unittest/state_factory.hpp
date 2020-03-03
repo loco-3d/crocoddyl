@@ -115,13 +115,15 @@ class StateFactory {
     if (urdf_file.size() != 0) {
       if (free_flyer) {
         pinocchio::urdf::buildModel(urdf_file, free_flyer_joint_, pinocchio_model_);
-        pinocchio_model_.lowerPositionLimit.head<3>().fill(-1.0);
-        pinocchio_model_.upperPositionLimit.head<3>().fill(1.0);
+        pinocchio_model_.lowerPositionLimit.segment<7>(0).fill(-1.);
+        pinocchio_model_.upperPositionLimit.segment<7>(0).fill(1.);
       } else {
         pinocchio::urdf::buildModel(urdf_file, pinocchio_model_);
       }
     } else {
       pinocchio::buildModels::humanoidRandom(pinocchio_model_, free_flyer);
+      pinocchio_model_.lowerPositionLimit.segment<7>(0).fill(-1.);
+      pinocchio_model_.upperPositionLimit.segment<7>(0).fill(1.);
     }
     state_ = boost::make_shared<crocoddyl::StateMultibody>(boost::ref(pinocchio_model_));
     nx_ = pinocchio_model_.nq + pinocchio_model_.nv;
