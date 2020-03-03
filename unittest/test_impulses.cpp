@@ -7,6 +7,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_ALTERNATIVE_INIT_API
+
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
 #include <pinocchio/algorithm/frames.hpp>
 
