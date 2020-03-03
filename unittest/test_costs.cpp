@@ -151,7 +151,7 @@ bool init_function() {
       for (size_t state_type = 0; state_type < StateTypes::all_multibody.size(); ++state_type) {
         std::ostringstream test_name;
         test_name << "test_" << CostModelTypes::all[cost_type] << "_" << ActivationModelTypes::all[activation_type]
-                  << "_" << StateTypes::all[state_type];
+                  << "_" << StateTypes::all_multibody[state_type];
         test_suite* ts = BOOST_TEST_SUITE(test_name.str());
         std::cout << "Running " << test_name.str() << std::endl;
         register_action_model_unit_tests(CostModelTypes::all[cost_type], ActivationModelTypes::all[activation_type],
