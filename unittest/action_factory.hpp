@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,8 +10,8 @@
 #include <pinocchio/fwd.hpp>
 
 #include "crocoddyl/core/action-base.hpp"
-#include "crocoddyl/core/actions/lqr.hpp"
 #include "crocoddyl/core/actions/unicycle.hpp"
+#include "crocoddyl/core/actions/lqr.hpp"
 #include "crocoddyl/core/actions/diff-lqr.hpp"
 #include "crocoddyl/core/numdiff/action.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
@@ -39,9 +39,8 @@ class ActionModelFactory {
  public:
   ActionModelFactory(ActionModelTypes::Type type) {
     num_diff_modifier_ = 1e4;
-    action_type_ = type;
 
-    switch (action_type_) {
+    switch (type) {
       case ActionModelTypes::ActionModelUnicycle:
         nx_ = 3;
         nu_ = 2;
@@ -74,8 +73,6 @@ class ActionModelFactory {
   std::size_t nx_;
   std::size_t nu_;
   double num_diff_modifier_;
-  bool driftfree_;
-  ActionModelTypes::Type action_type_;
   boost::shared_ptr<crocoddyl::ActionModelAbstract> action_;
 };
 
