@@ -212,6 +212,7 @@ void updateAllPinocchio(pinocchio::Model* const model, pinocchio::Data* data, co
   Eigen::Matrix<double, 6, Eigen::Dynamic> tmp;
   tmp.resize(6, model->nv);
   pinocchio::forwardKinematics(*model, *data, q);
+  pinocchio::computeForwardKinematicsDerivatives(*model, *data, q, v, a);
   pinocchio::computeJointJacobians(*model, *data, q);
   pinocchio::updateFramePlacements(*model, *data);
   pinocchio::jacobianCenterOfMass(*model, *data, q);
