@@ -37,14 +37,20 @@ void test_calc_returns_a_cost(CostModelTypes::Type cost_type, ActivationModelTyp
   const boost::shared_ptr<crocoddyl::CostModelAbstract>& model = factory.create();
 
   // create the corresponding data object
-  pinocchio::Data pinocchio_data(model->get_state()->get_pinocchio());
+  pinocchio::Model& pinocchio_model = model->get_state()->get_pinocchio();
+  pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
   const boost::shared_ptr<crocoddyl::CostDataAbstract>& data = model->createData(&shared_data);
   data->cost = nan("");
 
-  // Getting the cost value computed by calc()
+  // Generating random values for the state and control
   const Eigen::VectorXd& x = model->get_state()->rand();
   const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+
+  // Compute all the pinocchio function needed for the models.
+  crocoddyl_unit_test::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
+
+  // Getting the cost value computed by calc()
   model->calc(data, x, u);
 
   // Checking that calc returns a cost value
@@ -58,7 +64,8 @@ void test_calc_against_numdiff(CostModelTypes::Type cost_type, ActivationModelTy
   const boost::shared_ptr<crocoddyl::CostModelAbstract>& model = factory.create();
 
   // create the corresponding data object
-  pinocchio::Data pinocchio_data(model->get_state()->get_pinocchio());
+  pinocchio::Model& pinocchio_model = model->get_state()->get_pinocchio();
+  pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
   const boost::shared_ptr<crocoddyl::CostDataAbstract>& data = model->createData(&shared_data);
 
@@ -69,6 +76,9 @@ void test_calc_against_numdiff(CostModelTypes::Type cost_type, ActivationModelTy
   // Generating random values for the state and control
   const Eigen::VectorXd& x = model->get_state()->rand();
   const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+
+  // Compute all the pinocchio function needed for the models.
+  crocoddyl_unit_test::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
 
   // Computing the action derivatives
   model->calc(data, x, u);
@@ -149,9 +159,6 @@ bool init_function() {
   for (size_t cost_type = 0; cost_type < CostModelTypes::all.size(); ++cost_type) {
     for (size_t activation_type = 0; activation_type < ActivationModelTypes::all.size(); ++activation_type) {
       for (size_t state_type = 0; state_type < StateTypes::all_multibody.size(); ++state_type) {
-        if (StateTypes::all_multibody[state_type] == StateTypes::StateMultibodyRandomHumanoid) {
-          continue;
-        }
         std::ostringstream test_name;
         test_name << "test_" << CostModelTypes::all[cost_type] << "_" << ActivationModelTypes::all[activation_type]
                   << "_" << StateTypes::all_multibody[state_type];
