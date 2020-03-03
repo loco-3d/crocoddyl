@@ -149,6 +149,9 @@ bool init_function() {
   for (size_t cost_type = 0; cost_type < CostModelTypes::all.size(); ++cost_type) {
     for (size_t activation_type = 0; activation_type < ActivationModelTypes::all.size(); ++activation_type) {
       for (size_t state_type = 0; state_type < StateTypes::all_multibody.size(); ++state_type) {
+        if (StateTypes::all_multibody[state_type] == StateTypes::StateMultibodyRandomHumanoid) {
+          continue;
+        }
         std::ostringstream test_name;
         test_name << "test_" << CostModelTypes::all[cost_type] << "_" << ActivationModelTypes::all[activation_type]
                   << "_" << StateTypes::all_multibody[state_type];
