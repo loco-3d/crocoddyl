@@ -8,6 +8,7 @@
 
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
+#include "crocoddyl/core/activations/weighted-quadratic-barrier.hpp"
 #include "crocoddyl/core/activations/quadratic.hpp"
 #include "crocoddyl/core/activations/smooth-abs.hpp"
 #include "crocoddyl/core/activations/weighted-quadratic.hpp"
@@ -21,6 +22,7 @@ namespace crocoddyl_unit_test {
 struct ActivationModelTypes {
   enum Type {
     ActivationModelQuadraticBarrier,
+    ActivationModelWeightedQuadraticBarrier,
     ActivationModelQuad,
     ActivationModelSmoothAbs,
     ActivationModelWeightedQuad,
@@ -42,6 +44,9 @@ std::ostream& operator<<(std::ostream& os, ActivationModelTypes::Type type) {
   switch (type) {
     case ActivationModelTypes::ActivationModelQuadraticBarrier:
       os << "ActivationModelQuadraticBarrier";
+      break;
+    case ActivationModelTypes::ActivationModelWeightedQuadraticBarrier:
+      os << "ActivationModelWeightedQuadraticBarrier";
       break;
     case ActivationModelTypes::ActivationModelQuad:
       os << "ActivationModelQuad";
@@ -76,6 +81,10 @@ class ActivationModelFactory {
       case ActivationModelTypes::ActivationModelQuadraticBarrier:
         activation_ =
             boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(crocoddyl::ActivationBounds(lb, ub));
+        break;
+      case ActivationModelTypes::ActivationModelWeightedQuadraticBarrier:
+        activation_ = boost::make_shared<crocoddyl::ActivationModelWeightedQuadraticBarrier>(
+            crocoddyl::ActivationBounds(lb, ub), weights);
         break;
       case ActivationModelTypes::ActivationModelQuad:
         activation_ = boost::make_shared<crocoddyl::ActivationModelQuad>(nr_);
