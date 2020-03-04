@@ -36,6 +36,32 @@ struct SolverTypes {
 };
 const std::vector<SolverTypes::Type> SolverTypes::all(SolverTypes::init_all());
 
+std::ostream& operator<<(std::ostream& os, SolverTypes::Type type) {
+  switch (type) {
+    case SolverTypes::SolverKKT:
+      os << "SolverKKT";
+      break;
+    case SolverTypes::SolverDDP:
+      os << "SolverDDP";
+      break;
+    case SolverTypes::SolverFDDP:
+      os << "SolverFDDP";
+      break;
+    case SolverTypes::SolverBoxDDP:
+      os << "SolverBoxDDP";
+      break;
+    case SolverTypes::SolverBoxFDDP:
+      os << "SolverBoxFDDP";
+      break;
+    case SolverTypes::NbSolverTypes:
+      os << "NbCostModelTypes";
+      break;
+    default:
+      break;
+  }
+  return os;
+}
+
 class SolverFactory {
  public:
   SolverFactory(SolverTypes::Type solver_type, ActionModelTypes::Type action_type, size_t nb_running_models) {
