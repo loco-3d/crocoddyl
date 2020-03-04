@@ -12,6 +12,8 @@
 #include "crocoddyl/core/solvers/kkt.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/solvers/fddp.hpp"
+#include "crocoddyl/core/solvers/box-ddp.hpp"
+#include "crocoddyl/core/solvers/box-fddp.hpp"
 
 #include "action.hpp"
 
@@ -21,7 +23,13 @@
 namespace crocoddyl_unit_test {
 
 struct SolverTypes {
-  enum Type { SolverKKT, SolverDDP, SolverFDDP, SolverBoxDDP, NbSolverTypes };
+  enum Type {
+    SolverKKT,
+    SolverDDP,
+    SolverFDDP,
+    SolverBoxDDP,
+    SolverBoxFDDP,
+    NbSolverTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
@@ -57,7 +65,10 @@ class SolverFactory {
         solver_ = boost::make_shared<crocoddyl::SolverFDDP>(problem_);
         break;
       case SolverTypes::SolverBoxDDP:
-        solver_ = boost::make_shared<crocoddyl::SolverFDDP>(problem_);
+        solver_ = boost::make_shared<crocoddyl::SolverBoxDDP>(problem_);
+        break;
+      case SolverTypes::SolverBoxFDDP:
+        solver_ = boost::make_shared<crocoddyl::SolverBoxFDDP>(problem_);
         break;
       default:
         throw_pretty(__FILE__ ": Wrong SolverTypes::Type given");
