@@ -13,7 +13,7 @@
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
 #include <pinocchio/algorithm/frames.hpp>
 
-#include "impulses_factory.hpp"
+#include "factory/impulse.hpp"
 #include "unittest_common.hpp"
 
 using namespace crocoddyl_unit_test;

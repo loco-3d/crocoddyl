@@ -14,6 +14,7 @@
 #include <pinocchio/fwd.hpp>
 #include <boost/test/included/unit_test.hpp>
 #include <boost/bind.hpp>
+
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/actions/diff-lqr.hpp"
 #include "crocoddyl/core/numdiff/diff-action.hpp"

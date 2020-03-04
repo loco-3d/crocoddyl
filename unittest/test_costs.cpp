@@ -10,7 +10,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
-#include "cost_factory.hpp"
+#include "factory/cost.hpp"
 #include "unittest_common.hpp"
 
 using namespace boost::unit_test;

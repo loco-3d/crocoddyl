@@ -9,7 +9,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/utils/callbacks.hpp"
-#include "solver_factory.hpp"
+#include "factory/solver.hpp"
 #include "unittest_common.hpp"
 
 using namespace boost::unit_test;

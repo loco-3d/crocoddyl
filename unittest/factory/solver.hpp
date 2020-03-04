@@ -13,7 +13,7 @@
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/solvers/fddp.hpp"
 
-#include "action_factory.hpp"
+#include "action.hpp"
 
 #ifndef CROCODDYL_STATE_FACTORY_HPP_
 #define CROCODDYL_STATE_FACTORY_HPP_

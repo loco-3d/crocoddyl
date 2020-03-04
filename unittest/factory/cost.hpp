@@ -25,8 +25,8 @@
 // #include "crocoddyl/multibody/costs/cost-sum.hpp"
 #include "crocoddyl/multibody/numdiff/cost.hpp"
 
-#include "state_factory.hpp"
-#include "activation_factory.hpp"
+#include "state.hpp"
+#include "activation.hpp"
 
 #ifndef CROCODDYL_COST_FACTORY_HPP_
 #define CROCODDYL_COST_FACTORY_HPP_

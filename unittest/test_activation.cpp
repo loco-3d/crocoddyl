@@ -7,10 +7,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "activation_factory.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
+#include "factory/activation.hpp"
 #include "unittest_common.hpp"
 
-#include "crocoddyl/core/utils/exception.hpp"
 using namespace boost::unit_test;
 using namespace crocoddyl_unit_test;
 
