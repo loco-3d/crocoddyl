@@ -7,7 +7,7 @@ ADD_SUBDIRECTORY(python)
 
 SET(${PROJECT_NAME}_CPP_TESTS
   # testutils
-  test_state
+  test_states
   # test_rk4
   # test_quadruped
   # test_locomotion
