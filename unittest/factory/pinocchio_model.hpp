@@ -16,13 +16,7 @@
 namespace crocoddyl_unit_test {
 
 struct PinocchioModelTypes {
-  enum Type {
-    TalosArm,
-    HyQ,
-    Talos,
-    RandomHumanoid,
-    NbPinocchioModelTypes
-  };
+  enum Type { TalosArm, HyQ, Talos, RandomHumanoid, NbPinocchioModelTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
@@ -63,15 +57,23 @@ class PinocchioModelFactory {
   PinocchioModelFactory(PinocchioModelTypes::Type type) {
     switch (type) {
       case PinocchioModelTypes::TalosArm:
+        frame_name_ = "gripper_left_fingertip_1_link";
+        frame_id_ = model_->getFrameId(frame_name_);
         construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf", false);
         break;
       case PinocchioModelTypes::HyQ:
+        frame_name_ = "lf_foot";
+        frame_id_ = model_->getFrameId(frame_name_);
         construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/robots/hyq_no_sensors.urdf", false);
         break;
       case PinocchioModelTypes::Talos:
+        frame_name_ = "gripper_left_fingertip_1_link";
+        frame_id_ = model_->getFrameId(frame_name_);
         construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_reduced.urdf");
         break;
       case PinocchioModelTypes::RandomHumanoid:
+        frame_name_ = "rleg6_body";
+        frame_id_ = model_->getFrameId(frame_name_);
         construct_model();
         break;
       case PinocchioModelTypes::NbPinocchioModelTypes:
@@ -106,8 +108,9 @@ class PinocchioModelFactory {
 
  private:
   boost::shared_ptr<pinocchio::Model> model_;  //!< The pointer to the state in testing
+  std::string frame_name_;
+  std::size_t frame_id_;
 };
-
 
 }  // namespace crocoddyl_unit_test
 
