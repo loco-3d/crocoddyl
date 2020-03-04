@@ -54,7 +54,7 @@ std::ostream& operator<<(std::ostream& os, SolverTypes::Type type) {
       os << "SolverBoxFDDP";
       break;
     case SolverTypes::NbSolverTypes:
-      os << "NbCostModelTypes";
+      os << "NbSolverTypes";
       break;
     default:
       break;

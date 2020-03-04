@@ -35,6 +35,26 @@ struct ActionModelTypes {
 };
 const std::vector<ActionModelTypes::Type> ActionModelTypes::all(ActionModelTypes::init_all());
 
+std::ostream& operator<<(std::ostream& os, ActionModelTypes::Type type) {
+  switch (type) {
+    case ActionModelTypes::ActionModelUnicycle:
+      os << "ActionModelUnicycle";
+      break;
+    case ActionModelTypes::ActionModelLQRDriftFree:
+      os << "ActionModelLQRDriftFree";
+      break;
+    case ActionModelTypes::ActionModelLQR:
+      os << "ActionModelLQR";
+      break;
+    case ActionModelTypes::NbActionModelTypes:
+      os << "NbActionModelTypes";
+      break;
+    default:
+      break;
+  }
+  return os;
+}
+
 class ActionModelFactory {
  public:
   ActionModelFactory(ActionModelTypes::Type type) {
