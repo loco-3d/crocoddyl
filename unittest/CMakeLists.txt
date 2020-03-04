@@ -16,7 +16,7 @@ SET(${PROJECT_NAME}_CPP_TESTS
   # test_dse3
   # test_armature
   # test_actuation
-  test_activation
+  test_activations
   test_actions
   test_diff_actions
   test_impulses

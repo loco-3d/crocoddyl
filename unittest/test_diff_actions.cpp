@@ -168,8 +168,10 @@ void register_action_model_unit_tests(TestTypes::Type test_type, test_suite& ts)
 
 bool init_function() {
   for (size_t i = 0; i < TestTypes::all.size(); ++i) {
-    const std::string test_name = "test_" + std::to_string(i);
-    test_suite* ts = BOOST_TEST_SUITE(test_name);
+    std::ostringstream test_name;
+    test_name << "test_" << TestTypes::all[i];
+    test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+    std::cout << "Running " << test_name.str() << std::endl;
     register_action_model_unit_tests(TestTypes::all[i], *ts);
     framework::master_test_suite().add(ts);
   }
