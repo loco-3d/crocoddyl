@@ -18,8 +18,8 @@ using namespace crocoddyl_unit_test;
 
 //----------------------------------------------------------------------------//
 
-void test_state_dimension(StateTypes::Type state_type) {
-  StateFactory factory(state_type);
+void test_state_dimension(StateTypes::Type state_type, PinocchioModelTypes::Type model_type) {
+  StateFactory factory(state_type, model_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Checking the dimension of zero and random states
   BOOST_CHECK(static_cast<std::size_t>(state->zero().size()) == factory.get_nx());
@@ -30,8 +30,8 @@ void test_state_dimension(StateTypes::Type state_type) {
   BOOST_CHECK(static_cast<std::size_t>(state->get_ub().size()) == factory.get_nx());
 }
 
-void test_integrate_against_difference(StateTypes::Type state_type) {
-  StateFactory factory(state_type);
+void test_integrate_against_difference(StateTypes::Type state_type, PinocchioModelTypes::Type model_type) {
+  StateFactory factory(state_type, model_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Generating random states
   const Eigen::VectorXd& x1 = state->rand();
@@ -50,8 +50,8 @@ void test_integrate_against_difference(StateTypes::Type state_type) {
   BOOST_CHECK(dxi.isMuchSmallerThan(1.0, 1e-9));
 }
 
-void test_difference_against_integrate(StateTypes::Type state_type) {
-  StateFactory factory(state_type);
+void test_difference_against_integrate(StateTypes::Type state_type, PinocchioModelTypes::Type model_type) {
+  StateFactory factory(state_type, model_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Generating random states
   const Eigen::VectorXd& x = state->rand();
@@ -67,8 +67,8 @@ void test_difference_against_integrate(StateTypes::Type state_type) {
   BOOST_CHECK((dxd - dx).isMuchSmallerThan(1.0, 1e-9));
 }
 
-void test_Jdiff_firstsecond(StateTypes::Type state_type) {
-  StateFactory factory(state_type);
+void test_Jdiff_firstsecond(StateTypes::Type state_type, PinocchioModelTypes::Type model_type) {
+  StateFactory factory(state_type, model_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Generating random values for the initial and terminal states
   const Eigen::VectorXd& x1 = state->rand();
@@ -90,8 +90,8 @@ void test_Jdiff_firstsecond(StateTypes::Type state_type) {
   BOOST_CHECK((Jdiff_second - Jdiff_both_second).isMuchSmallerThan(1.0, 1e-9));
 }
 
-void test_Jint_firstsecond(StateTypes::Type state_type) {
-  StateFactory factory(state_type);
+void test_Jint_firstsecond(StateTypes::Type state_type, PinocchioModelTypes::Type model_type) {
+  StateFactory factory(state_type, model_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Generating random values for the initial and terminal states
   const Eigen::VectorXd& x = state->rand();
@@ -104,7 +104,7 @@ void test_Jint_firstsecond(StateTypes::Type state_type) {
   state->Jintegrate(x, dx, Jint_first, Jint_tmp, crocoddyl::first);
   state->Jintegrate(x, dx, Jint_tmp, Jint_second, crocoddyl::second);
 
-  // Computing the partial derivatives of the interence function separately
+  // Computing the partial derivatives of the integrate function separately
   Eigen::MatrixXd Jint_both_first(state->get_ndx(), state->get_ndx());
   Eigen::MatrixXd Jint_both_second(state->get_ndx(), state->get_ndx());
   state->Jintegrate(x, dx, Jint_both_first, Jint_both_second);
@@ -113,8 +113,8 @@ void test_Jint_firstsecond(StateTypes::Type state_type) {
   BOOST_CHECK((Jint_second - Jint_both_second).isMuchSmallerThan(1.0, 1e-9));
 }
 
-void test_Jdiff_num_diff_firstsecond(StateTypes::Type state_type) {
-  StateFactory factory(state_type);
+void test_Jdiff_num_diff_firstsecond(StateTypes::Type state_type, PinocchioModelTypes::Type model_type) {
+  StateFactory factory(state_type, model_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Generating random values for the initial and terminal states
   const Eigen::VectorXd& x1 = state->rand();
@@ -139,8 +139,8 @@ void test_Jdiff_num_diff_firstsecond(StateTypes::Type state_type) {
   BOOST_CHECK((Jdiff_num_diff_second - Jdiff_num_diff_both_second).isMuchSmallerThan(1.0, 1e-9));
 }
 
-void test_Jint_num_diff_firstsecond(StateTypes::Type state_type) {
-  StateFactory factory(state_type);
+void test_Jint_num_diff_firstsecond(StateTypes::Type state_type, PinocchioModelTypes::Type model_type) {
+  StateFactory factory(state_type, model_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Generating random values for the initial and terminal states
   const Eigen::VectorXd& x = state->rand();
@@ -165,8 +165,8 @@ void test_Jint_num_diff_firstsecond(StateTypes::Type state_type) {
   BOOST_CHECK((Jint_num_diff_second - Jint_num_diff_both_second).isMuchSmallerThan(1.0, 1e-9));
 }
 
-void test_Jdiff_against_numdiff(StateTypes::Type state_type) {
-  StateFactory factory(state_type);
+void test_Jdiff_against_numdiff(StateTypes::Type state_type, PinocchioModelTypes::Type model_type) {
+  StateFactory factory(state_type, model_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Generating random values for the initial and terminal states
   const Eigen::VectorXd& x1 = state->rand();
@@ -191,8 +191,8 @@ void test_Jdiff_against_numdiff(StateTypes::Type state_type) {
   BOOST_CHECK((Jdiff_2 - Jdiff_num_2).isMuchSmallerThan(1.0, tol));
 }
 
-void test_Jintegrate_against_numdiff(StateTypes::Type state_type) {
-  StateFactory factory(state_type);
+void test_Jintegrate_against_numdiff(StateTypes::Type state_type, PinocchioModelTypes::Type model_type) {
+  StateFactory factory(state_type, model_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Generating random values for the initial state and its rate of change
   const Eigen::VectorXd& x = state->rand();
@@ -216,8 +216,8 @@ void test_Jintegrate_against_numdiff(StateTypes::Type state_type) {
   BOOST_CHECK((Jint_2 - Jint_num_2).isMuchSmallerThan(1.0, tol));
 }
 
-void test_Jdiff_and_Jintegrate_are_inverses(StateTypes::Type state_type) {
-  StateFactory factory(state_type);
+void test_Jdiff_and_Jintegrate_are_inverses(StateTypes::Type state_type, PinocchioModelTypes::Type model_type) {
+  StateFactory factory(state_type, model_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Generating random states
   const Eigen::VectorXd& x1 = state->rand();
@@ -239,8 +239,8 @@ void test_Jdiff_and_Jintegrate_are_inverses(StateTypes::Type state_type) {
   BOOST_CHECK((dX_dDX - dDX_dX.inverse()).isMuchSmallerThan(1.0, 1e-9));
 }
 
-void test_velocity_from_Jintegrate_Jdiff(StateTypes::Type state_type) {
-  StateFactory factory(state_type);
+void test_velocity_from_Jintegrate_Jdiff(StateTypes::Type state_type, PinocchioModelTypes::Type model_type) {
+  StateFactory factory(state_type, model_type);
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create();
   // Generating random states
   const Eigen::VectorXd& x1 = state->rand();
@@ -282,28 +282,39 @@ void test_velocity_from_Jintegrate_Jdiff(StateTypes::Type state_type) {
 
 //----------------------------------------------------------------------------//
 
-void register_state_unit_tests(StateTypes::Type state_type, test_suite& ts) {
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_state_dimension, state_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_integrate_against_difference, state_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_difference_against_integrate, state_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_firstsecond, state_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jint_firstsecond, state_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_num_diff_firstsecond, state_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jint_num_diff_firstsecond, state_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_against_numdiff, state_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jintegrate_against_numdiff, state_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_and_Jintegrate_are_inverses, state_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_velocity_from_Jintegrate_Jdiff, state_type)));
+void register_state_unit_tests(StateTypes::Type state_type, PinocchioModelTypes::Type model_type, test_suite& ts) {
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_state_dimension, state_type, model_type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_integrate_against_difference, state_type, model_type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_difference_against_integrate, state_type, model_type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_firstsecond, state_type, model_type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jint_firstsecond, state_type, model_type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_num_diff_firstsecond, state_type, model_type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jint_num_diff_firstsecond, state_type, model_type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_against_numdiff, state_type, model_type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jintegrate_against_numdiff, state_type, model_type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_and_Jintegrate_are_inverses, state_type, model_type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_velocity_from_Jintegrate_Jdiff, state_type, model_type)));
 }
 
 bool init_function() {
   for (size_t i = 0; i < StateTypes::all.size(); ++i) {
-    std::ostringstream test_name;
-    test_name << "test_" << StateTypes::all[i];
-    test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-    std::cout << "Running " << test_name.str() << std::endl;
-    register_state_unit_tests(StateTypes::all[i], *ts);
-    framework::master_test_suite().add(ts);
+    if (StateTypes::all[i] == StateTypes::StateMultibody) {
+      for (size_t j = 0; j < PinocchioModelTypes::all.size(); ++j) {
+        std::ostringstream test_name;
+        test_name << "test_" << StateTypes::all[i] << PinocchioModelTypes::all[j];
+        test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+        std::cout << "Running " << test_name.str() << std::endl;
+        register_state_unit_tests(StateTypes::all[i], PinocchioModelTypes::all[j], *ts);
+        framework::master_test_suite().add(ts);
+      }
+    } else {
+      std::ostringstream test_name;
+      test_name << "test_" << StateTypes::all[i];
+      test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+      std::cout << "Running " << test_name.str() << std::endl;
+      register_state_unit_tests(StateTypes::all[i], PinocchioModelTypes::NbPinocchioModelTypes, *ts);
+      framework::master_test_suite().add(ts);
+    }
   }
   return true;
 }

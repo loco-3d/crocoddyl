@@ -16,20 +16,15 @@
 #include "crocoddyl/core/numdiff/state.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
+#include "pinocchio_model.hpp"
+
 #ifndef CROCODDYL_STATE_FACTORY_HPP_
 #define CROCODDYL_STATE_FACTORY_HPP_
 
 namespace crocoddyl_unit_test {
 
 struct StateTypes {
-  enum Type {
-    StateVector,
-    StateMultibodyTalosArm,
-    StateMultibodyHyQ,
-    StateMultibodyTalos,
-    StateMultibodyRandomHumanoid,
-    NbStateTypes
-  };
+  enum Type { StateVector, StateMultibody, NbStateTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
@@ -38,38 +33,18 @@ struct StateTypes {
     }
     return v;
   }
-  static std::vector<Type> init_multibody() {
-    std::vector<Type> v;
-    v.clear();
-    for (int i = StateMultibodyTalosArm; i < NbStateTypes; ++i) {
-      v.push_back((Type)i);
-    }
-    return v;
-  }
   static const std::vector<Type> all;
-  static const std::vector<Type> all_multibody;
 };
 const std::vector<StateTypes::Type> StateTypes::all(StateTypes::init_all());
-const std::vector<StateTypes::Type> StateTypes::all_multibody(StateTypes::init_multibody());
 
 std::ostream& operator<<(std::ostream& os, StateTypes::Type type) {
   switch (type) {
     case StateTypes::StateVector:
       os << "StateVector";
       break;
-    case StateTypes::StateMultibodyTalosArm:
-      os << "StateMultibodyTalosArm";
+    case StateTypes::StateMultibody:
+      os << "StateMultibody";
       break;
-    case StateTypes::StateMultibodyHyQ:
-      os << "StateMultibodyHyQ";
-      break;
-    case StateTypes::StateMultibodyTalos:
-      os << "StateMultibodyTalos";
-      break;
-    case StateTypes::StateMultibodyRandomHumanoid:
-      os << "StateMultibodyRandomHumanoid";
-      break;
-    case StateTypes::NbStateTypes:
       os << "NbStateTypes";
       break;
     default:
@@ -80,27 +55,22 @@ std::ostream& operator<<(std::ostream& os, StateTypes::Type type) {
 
 class StateFactory {
  public:
-  StateFactory(StateTypes::Type type) {
-    // default initialization
+  StateFactory(StateTypes::Type state_type,
+               PinocchioModelTypes::Type model_type = PinocchioModelTypes::NbPinocchioModelTypes) {
     nx_ = 0;
     num_diff_modifier_ = 1e4;
+    PinocchioModelFactory factory(model_type);
+    boost::shared_ptr<pinocchio::Model> model;
 
-    switch (type) {
+    switch (state_type) {
       case StateTypes::StateVector:
         nx_ = 80;
         state_ = boost::make_shared<crocoddyl::StateVector>(nx_);
         break;
-      case StateTypes::StateMultibodyTalosArm:
-        construct_state_multibody(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf", false);
-        break;
-      case StateTypes::StateMultibodyHyQ:
-        construct_state_multibody(EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/robots/hyq_no_sensors.urdf");
-        break;
-      case StateTypes::StateMultibodyTalos:
-        construct_state_multibody(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/urdf/talos_reduced.urdf");
-        break;
-      case StateTypes::StateMultibodyRandomHumanoid:
-        construct_state_multibody();
+      case StateTypes::StateMultibody:
+        model = factory.create();
+        nx_ = model->nq + model->nv;
+        state_ = boost::make_shared<crocoddyl::StateMultibody>(model);
         break;
       default:
         throw_pretty(__FILE__ ": Wrong StateTypes::Type given");
@@ -110,34 +80,14 @@ class StateFactory {
 
   ~StateFactory() {}
 
-  void construct_state_multibody(const std::string& urdf_file = "", bool free_flyer = true) {
-    if (urdf_file.size() != 0) {
-      if (free_flyer) {
-        pinocchio::urdf::buildModel(urdf_file, pinocchio::JointModelFreeFlyer(), pinocchio_model_);
-        pinocchio_model_.lowerPositionLimit.segment<7>(0).fill(-1.);
-        pinocchio_model_.upperPositionLimit.segment<7>(0).fill(1.);
-      } else {
-        pinocchio::urdf::buildModel(urdf_file, pinocchio_model_);
-      }
-    } else {
-      pinocchio::buildModels::humanoidRandom(pinocchio_model_, free_flyer);
-      pinocchio_model_.lowerPositionLimit.segment<7>(0).fill(-1.);
-      pinocchio_model_.upperPositionLimit.segment<7>(0).fill(1.);
-    }
-    state_ = boost::make_shared<crocoddyl::StateMultibody>(boost::ref(pinocchio_model_));
-    nx_ = pinocchio_model_.nq + pinocchio_model_.nv;
-  }
-
   boost::shared_ptr<crocoddyl::StateAbstract> create() { return state_; }
   const std::size_t& get_nx() { return nx_; }
   double get_num_diff_modifier() { return num_diff_modifier_; }
-  const pinocchio::Model& get_pinocchio_model() { return pinocchio_model_; }
 
  private:
   boost::shared_ptr<crocoddyl::StateAbstract> state_;  //!< The pointer to the state in testing
   std::size_t nx_;                                     //!< The size of the StateVector to test.
   double num_diff_modifier_;                           //!< Multiplier of the precision during the tests.
-  pinocchio::Model pinocchio_model_;                   //!< The pinocchio_model to build the StateMultibody.
 };
 
 }  // namespace crocoddyl_unit_test

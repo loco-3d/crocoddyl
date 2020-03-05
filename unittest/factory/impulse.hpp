@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -20,17 +20,7 @@
 namespace crocoddyl_unit_test {
 
 struct ImpulseModelTypes {
-  enum Type {
-    ImpulseModel3DTalosArm,
-    ImpulseModel3DHyQ,
-    ImpulseModel3DTalos,
-    ImpulseModel3DRandomHumanoid,
-    ImpulseModel6DTalosArm,
-    ImpulseModel6DHyQ,
-    ImpulseModel6DTalos,
-    ImpulseModel6DRandomHumanoid,
-    NbImpulseModelTypes
-  };
+  enum Type { ImpulseModel3D, ImpulseModel6D, NbImpulseModelTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
@@ -45,32 +35,17 @@ const std::vector<ImpulseModelTypes::Type> ImpulseModelTypes::all(ImpulseModelTy
 
 std::ostream& operator<<(std::ostream& os, const ImpulseModelTypes::Type& type) {
   switch (type) {
-    case ImpulseModelTypes::ImpulseModel3DTalosArm:
-      os << "ImpulseModel3DTalosArm";
+    case ImpulseModelTypes::ImpulseModel3D:
+      os << "ImpulseModel3D";
       break;
-    case ImpulseModelTypes::ImpulseModel3DHyQ:
-      os << "ImpulseModel3DHyQ";
+    case ImpulseModelTypes::ImpulseModel6D:
+      os << "ImpulseModel6D";
       break;
-    case ImpulseModelTypes::ImpulseModel3DTalos:
-      os << "ImpulseModel3DTalos";
-      break;
-    case ImpulseModelTypes::ImpulseModel3DRandomHumanoid:
-      os << "ImpulseModel3DRandomHumanoid";
-      break;
-    case ImpulseModelTypes::ImpulseModel6DTalosArm:
-      os << "ImpulseModel6DTalosArm";
-      break;
-    case ImpulseModelTypes::ImpulseModel6DHyQ:
-      os << "ImpulseModel6DHyQ";
-      break;
-    case ImpulseModelTypes::ImpulseModel6DTalos:
-      os << "ImpulseModel6DTalos";
-      break;
-    case ImpulseModelTypes::ImpulseModel6DRandomHumanoid:
-      os << "ImpulseModel6DRandomHumanoid";
+    case ImpulseModelTypes::NbImpulseModelTypes:
+      os << "NbImpulseModelTypes";
       break;
     default:
-      os << "Unkown type";
+      os << "Unknown type";
       break;
   }
   return os;
@@ -78,77 +53,32 @@ std::ostream& operator<<(std::ostream& os, const ImpulseModelTypes::Type& type) 
 
 class ImpulseModelFactory {
  public:
-  ImpulseModelFactory(ImpulseModelTypes::Type type) {
-    test_type_ = type;
+  ImpulseModelFactory(ImpulseModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) {
+    PinocchioModelFactory model_factory(model_type);
+    StateFactory state_factory(StateTypes::StateMultibody, model_type);
+    boost::shared_ptr<crocoddyl::StateMultibody> state =
+        boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create());
+    pinocchio_model_ = state->get_pinocchio();
 
-    size_t frame = 0;
-    boost::shared_ptr<crocoddyl::StateMultibody> state;
-
-    switch (test_type_) {
-      case ImpulseModelTypes::ImpulseModel3DTalosArm:
-        state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyTalosArm);
-        frame = state_factory_->get_pinocchio_model().getFrameId("gripper_left_fingertip_1_link");
-        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->create());
-        impulse_.reset(new crocoddyl::ImpulseModel3D(state, frame));
+    switch (impulse_type) {
+      case ImpulseModelTypes::ImpulseModel3D:
+        impulse_ = boost::make_shared<crocoddyl::ImpulseModel3D>(state, model_factory.get_frame_id());
         break;
-      case ImpulseModelTypes::ImpulseModel3DHyQ:
-        state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyHyQ);
-        frame = state_factory_->get_pinocchio_model().getFrameId("lf_foot");
-        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->create());
-        impulse_.reset(new crocoddyl::ImpulseModel3D(state, frame));
+      case ImpulseModelTypes::ImpulseModel6D:
+        impulse_ = boost::make_shared<crocoddyl::ImpulseModel6D>(state, model_factory.get_frame_id());
         break;
-      case ImpulseModelTypes::ImpulseModel3DTalos:
-        state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyTalos);
-        frame = state_factory_->get_pinocchio_model().getFrameId("gripper_left_fingertip_1_link");
-        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->create());
-        impulse_.reset(new crocoddyl::ImpulseModel3D(state, frame));
-        break;
-      case ImpulseModelTypes::ImpulseModel3DRandomHumanoid:
-        state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyRandomHumanoid);
-        frame = state_factory_->get_pinocchio_model().getFrameId("rleg6_body");
-        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->create());
-        impulse_.reset(new crocoddyl::ImpulseModel3D(state, frame));
-        break;
-
-      case ImpulseModelTypes::ImpulseModel6DTalosArm:
-        state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyTalosArm);
-        frame = state_factory_->get_pinocchio_model().getFrameId("gripper_left_fingertip_1_link");
-        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->create());
-        impulse_.reset(new crocoddyl::ImpulseModel6D(state, frame));
-        break;
-      case ImpulseModelTypes::ImpulseModel6DHyQ:
-        state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyHyQ);
-        frame = state_factory_->get_pinocchio_model().getFrameId("lf_foot");
-        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->create());
-        impulse_.reset(new crocoddyl::ImpulseModel6D(state, frame));
-        break;
-      case ImpulseModelTypes::ImpulseModel6DTalos:
-        state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyTalos);
-        frame = state_factory_->get_pinocchio_model().getFrameId("gripper_left_fingertip_1_link");
-        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->create());
-        impulse_.reset(new crocoddyl::ImpulseModel6D(state, frame));
-        break;
-      case ImpulseModelTypes::ImpulseModel6DRandomHumanoid:
-        state_factory_ = boost::make_shared<StateFactory>(StateTypes::StateMultibodyRandomHumanoid);
-        frame = state_factory_->get_pinocchio_model().getFrameId("rleg6_body");
-        state = boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->create());
-        impulse_.reset(new crocoddyl::ImpulseModel6D(state, frame));
-        break;
-
       default:
         throw_pretty(__FILE__ ": Wrong ImpulseModelTypes::Type given");
         break;
     }
   }
 
-  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> create() { return impulse_; }
-  boost::shared_ptr<StateFactory> get_state_factory() { return state_factory_; }
-  double num_diff_modifier_;
+  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> create() const { return impulse_; }
+  boost::shared_ptr<pinocchio::Model> get_pinocchio_model() const { return pinocchio_model_; }
 
  private:
-  ImpulseModelTypes::Type test_type_;                           //!< The type of impulse to test
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> impulse_;  //!< The pointer to the impulse model
-  boost::shared_ptr<StateFactory> state_factory_;               //!< The pointer to the multibody state factory
+  boost::shared_ptr<pinocchio::Model> pinocchio_model_;         //!< Pinocchio model
 };
 
 boost::shared_ptr<ImpulseModelFactory> create_random_factory() {
@@ -159,9 +89,11 @@ boost::shared_ptr<ImpulseModelFactory> create_random_factory() {
   }
   boost::shared_ptr<ImpulseModelFactory> ptr;
   if (rand() % 2 == 0) {
-    ptr = boost::make_shared<ImpulseModelFactory>(ImpulseModelTypes::ImpulseModel3DRandomHumanoid);
+    ptr = boost::make_shared<ImpulseModelFactory>(ImpulseModelTypes::ImpulseModel3D,
+                                                  PinocchioModelTypes::RandomHumanoid);
   } else {
-    ptr = boost::make_shared<ImpulseModelFactory>(ImpulseModelTypes::ImpulseModel6DRandomHumanoid);
+    ptr = boost::make_shared<ImpulseModelFactory>(ImpulseModelTypes::ImpulseModel6D,
+                                                  PinocchioModelTypes::RandomHumanoid);
   }
   return ptr;
 }

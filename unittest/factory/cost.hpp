@@ -102,11 +102,11 @@ class CostModelFactory {
   typedef typename MathBase::Vector6s Vector6d;
 
   CostModelFactory(CostModelTypes::Type test_type, ActivationModelTypes::Type activation_type,
-                   StateTypes::Type state_multibody_type)
-      : state_factory_(state_multibody_type),
+                   StateTypes::Type state_multibody_type, PinocchioModelTypes::Type model_type)
+      : state_factory_(state_multibody_type, model_type),
         state_multibody_(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_.create())),
         // Setup some reference for the costs.
-        frame_index_(state_multibody_->get_pinocchio().frames.size() - 1),
+        frame_index_(state_multibody_->get_pinocchio()->frames.size() - 1),
         mom_ref_(Vector6d::Random()),
         com_ref_(Eigen::Vector3d::Random()),
         u_ref_(Eigen::VectorXd::Random(state_multibody_->get_nv())),
