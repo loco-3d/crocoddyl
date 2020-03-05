@@ -87,7 +87,7 @@ struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
     }
 
     // Avoids data casting at runtime
-    std::string frame_name = model->get_state()->get_pinocchio().frames[model->get_fref().frame].name;
+    std::string frame_name = model->get_state()->get_pinocchio()->frames[model->get_fref().frame].name;
     bool found_contact = false;
     for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
          it != d->contacts->contacts.end(); ++it) {

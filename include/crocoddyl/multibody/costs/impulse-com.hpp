@@ -72,7 +72,7 @@ struct CostDataImpulseCoMTpl : public CostDataAbstractTpl<_Scalar> {
         Arr_Rx(3, model->get_state()->get_nv()),
         dvc_dq(3, model->get_state()->get_nv()),
         ddv_dv(model->get_state()->get_nv(), model->get_state()->get_nv()),
-        pinocchio_internal(pinocchio::DataTpl<Scalar>(model->get_state()->get_pinocchio())) {
+        pinocchio_internal(pinocchio::DataTpl<Scalar>(*model->get_state()->get_pinocchio().get())) {
     Arr_Rx.setZero();
     dvc_dq.setZero();
     ddv_dv.setZero();

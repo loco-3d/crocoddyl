@@ -54,7 +54,7 @@ void CostModelFrameRotationTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbs
   CostDataFrameRotationTpl<Scalar>* d = static_cast<CostDataFrameRotationTpl<Scalar>*>(data.get());
 
   // Compute the frame placement w.r.t. the reference frame
-  pinocchio::updateFramePlacement(state_->get_pinocchio(), *d->pinocchio, Rref_.frame);
+  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, Rref_.frame);
   d->rRf.noalias() = oRf_inv_ * d->pinocchio->oMf[Rref_.frame].rotation();
   d->r = pinocchio::log3(d->rRf);
   data->r = d->r;  // this is needed because we overwrite it
@@ -73,7 +73,7 @@ void CostModelFrameRotationTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDat
 
   // // Compute the frame Jacobian at the error point
   pinocchio::Jlog3(d->rRf, d->rJf);
-  pinocchio::getFrameJacobian(state_->get_pinocchio(), *d->pinocchio, Rref_.frame, pinocchio::LOCAL, d->fJf);
+  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, Rref_.frame, pinocchio::LOCAL, d->fJf);
   d->J.noalias() = d->rJf * d->fJf.template bottomRows<3>();
 
   // Compute the derivatives of the frame placement

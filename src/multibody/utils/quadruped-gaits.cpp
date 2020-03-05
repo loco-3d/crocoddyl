@@ -23,7 +23,7 @@ SimpleQuadrupedGaitProblem::SimpleQuadrupedGaitProblem(const pinocchio::Model& r
           lh_foot, (pinocchio::FrameType)(pinocchio::JOINT | pinocchio::FIXED_JOINT | pinocchio::BODY))),
       rh_foot_id_(rmodel_.getFrameId(
           rh_foot, (pinocchio::FrameType)(pinocchio::JOINT | pinocchio::FIXED_JOINT | pinocchio::BODY))),
-      state_(boost::make_shared<crocoddyl::StateMultibody>(boost::ref(rmodel_))),
+      state_(boost::make_shared<crocoddyl::StateMultibody>(boost::make_shared<pinocchio::Model>(rmodel_))),
       actuation_(boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state_)),
       firtstep_(true),
       defaultstate_(rmodel_.nq + rmodel_.nv) {

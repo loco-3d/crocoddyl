@@ -25,15 +25,15 @@ template <typename Scalar>
 void ContactModel3DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract>& data,
                                      const Eigen::Ref<const VectorXs>&) {
   ContactData3D* d = static_cast<ContactData3D*>(data.get());
-  pinocchio::updateFramePlacement(state_->get_pinocchio(), *d->pinocchio, xref_.frame);
-  d->v = pinocchio::getFrameVelocity(state_->get_pinocchio(), *d->pinocchio, xref_.frame);
+  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame);
+  d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame);
   d->vw = d->v.angular();
   d->vv = d->v.linear();
 
-  pinocchio::getFrameJacobian(state_->get_pinocchio(), *d->pinocchio, xref_.frame, pinocchio::LOCAL, d->fJf);
+  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame, pinocchio::LOCAL, d->fJf);
   d->Jc = d->fJf.template topRows<3>();
 
-  d->a = pinocchio::getFrameAcceleration(state_->get_pinocchio(), *d->pinocchio, xref_.frame);
+  d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame);
   d->a0 = d->a.linear() + d->vw.cross(d->vv);
 
   if (gains_[0] != 0.) {
@@ -48,7 +48,7 @@ template <typename Scalar>
 void ContactModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
                                          const Eigen::Ref<const VectorXs>&) {
   ContactData3D* d = static_cast<ContactData3D*>(data.get());
-  pinocchio::getJointAccelerationDerivatives(state_->get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
+  pinocchio::getJointAccelerationDerivatives(*state_->get_pinocchio().get(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                              d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
   const std::size_t& nv = state_->get_nv();
   pinocchio::skew(d->vv, d->vv_skew);

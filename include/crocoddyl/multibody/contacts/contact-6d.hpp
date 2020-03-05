@@ -82,8 +82,8 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
         a_partial_dv(6, model->get_state()->get_nv()),
         a_partial_da(6, model->get_state()->get_nv()) {
     frame = model->get_Mref().frame;
-    joint = model->get_state()->get_pinocchio().frames[frame].parent;
-    jMf = model->get_state()->get_pinocchio().frames[frame].placement;
+    joint = model->get_state()->get_pinocchio()->frames[frame].parent;
+    jMf = model->get_state()->get_pinocchio()->frames[frame].placement;
     fXj = jMf.inverse().toActionMatrix();
     v_partial_dq.setZero();
     a_partial_dq.setZero();

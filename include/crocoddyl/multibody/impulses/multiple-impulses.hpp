@@ -105,7 +105,7 @@ struct ImpulseDataMultipleTpl : ImpulseDataAbstractTpl<_Scalar> {
       : Base(model, data),
         vnext(model->get_state()->get_nv()),
         dvnext_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
-        fext(model->get_state()->get_pinocchio().njoints, pinocchio::ForceTpl<Scalar>::Zero()) {
+        fext(model->get_state()->get_pinocchio()->njoints, pinocchio::ForceTpl<Scalar>::Zero()) {
     vnext.setZero();
     dvnext_dx.setZero();
     for (typename ImpulseModelMultiple::ImpulseModelContainer::const_iterator it = model->get_impulses().begin();

@@ -41,7 +41,7 @@ void CostModelImpulseCoMTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstra
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(nq);
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(nv);
 
-  pinocchio::centerOfMass(state_->get_pinocchio(), d->pinocchio_internal, q, d->impulses->vnext - v);
+  pinocchio::centerOfMass(*state_->get_pinocchio().get(), d->pinocchio_internal, q, d->impulses->vnext - v);
   data->r = d->pinocchio_internal.vcom[0];
 
   // Compute the cost
@@ -59,8 +59,8 @@ void CostModelImpulseCoMTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAb
   const std::size_t& ndx = state_->get_ndx();
   activation_->calcDiff(data->activation, data->r);
 
-  pinocchio::getCenterOfMassVelocityDerivatives(state_->get_pinocchio(), d->pinocchio_internal, d->dvc_dq);
-  pinocchio::jacobianCenterOfMass(state_->get_pinocchio(), d->pinocchio_internal, false);
+  pinocchio::getCenterOfMassVelocityDerivatives(*state_->get_pinocchio().get(), d->pinocchio_internal, d->dvc_dq);
+  pinocchio::jacobianCenterOfMass(*state_->get_pinocchio().get(), d->pinocchio_internal, false);
   data->Rx.leftCols(nv) = d->dvc_dq;
   data->Rx.leftCols(nv).noalias() += d->pinocchio_internal.Jcom * d->impulses->dvnext_dx.leftCols(nv);
   d->ddv_dv = d->impulses->dvnext_dx.rightCols(ndx - nv);

@@ -100,7 +100,7 @@ struct CostDataContactFrictionConeTpl : public CostDataAbstractTpl<_Scalar> {
     }
 
     // Avoids data casting at runtime
-    std::string frame_name = model->get_state()->get_pinocchio().frames[model->get_frame()].name;
+    std::string frame_name = model->get_state()->get_pinocchio()->frames[model->get_frame()].name;
     bool found_contact = false;
     for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
          it != d->contacts->contacts.end(); ++it) {

@@ -27,7 +27,7 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
   explicit ActuationModelFullTpl(boost::shared_ptr<StateMultibody> state) : Base(state, state->get_nv()) {
     pinocchio::JointModelFreeFlyerTpl<Scalar> ff_joint;
-    if (state->get_pinocchio().joints[1].shortname() == ff_joint.shortname()) {
+    if (state->get_pinocchio()->joints[1].shortname() == ff_joint.shortname()) {
       throw_pretty("Invalid argument: "
                    << "the first joint cannot be free-flyer");
     }

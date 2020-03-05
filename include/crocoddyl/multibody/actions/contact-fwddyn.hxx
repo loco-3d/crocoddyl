@@ -27,7 +27,7 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::DifferentialActionModelCon
       actuation_(actuation),
       contacts_(contacts),
       costs_(costs),
-      pinocchio_(state->get_pinocchio()),
+      pinocchio_(*state->get_pinocchio().get()),
       with_armature_(true),
       armature_(VectorXs::Zero(state->get_nv())),
       JMinvJt_damping_(fabs(JMinvJt_damping)),
