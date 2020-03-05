@@ -115,7 +115,6 @@ class CostModelFactory {
         rotation_ref_(frame_index_, frame_.rotation()),
         translation_ref_(frame_index_, frame_.translation()),
         velocity_ref_(frame_index_, pinocchio::Motion::Random()) {
-    num_diff_modifier_ = 1e4;
     type_ = test_type;
 
     // Construct the different cost.
@@ -171,10 +170,8 @@ class CostModelFactory {
   ~CostModelFactory() {}
 
   boost::shared_ptr<crocoddyl::CostModelAbstract> create() { return cost_; }
-  double get_num_diff_modifier() { return num_diff_modifier_; }
 
  private:
-  double num_diff_modifier_;
   std::size_t nu_;
   CostModelTypes::Type type_;
   boost::shared_ptr<crocoddyl::CostModelAbstract> cost_;

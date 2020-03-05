@@ -58,7 +58,6 @@ class StateFactory {
   StateFactory(StateTypes::Type state_type,
                PinocchioModelTypes::Type model_type = PinocchioModelTypes::NbPinocchioModelTypes) {
     nx_ = 0;
-    num_diff_modifier_ = 1e4;
     PinocchioModelFactory factory(model_type);
     boost::shared_ptr<pinocchio::Model> model;
 
@@ -82,12 +81,10 @@ class StateFactory {
 
   boost::shared_ptr<crocoddyl::StateAbstract> create() { return state_; }
   const std::size_t& get_nx() { return nx_; }
-  double get_num_diff_modifier() { return num_diff_modifier_; }
 
  private:
   boost::shared_ptr<crocoddyl::StateAbstract> state_;  //!< The pointer to the state in testing
   std::size_t nx_;                                     //!< The size of the StateVector to test.
-  double num_diff_modifier_;                           //!< Multiplier of the precision during the tests.
 };
 
 }  // namespace crocoddyl_unit_test

@@ -87,7 +87,7 @@ void test_partial_derivatives_against_numdiff(ActionModelTypes::Type action_mode
   model_num_diff.calcDiff(data_num_diff, x, u);
 
   // Checking the partial derivatives against NumDiff
-  double tol = factory.get_num_diff_modifier() * model_num_diff.get_disturbance();
+  double tol = NUMDIFF_MODIFIER * model_num_diff.get_disturbance();
   BOOST_CHECK((data->Fx - data_num_diff->Fx).isMuchSmallerThan(1.0, tol));
   BOOST_CHECK((data->Fu - data_num_diff->Fu).isMuchSmallerThan(1.0, tol));
   BOOST_CHECK((data->Lx - data_num_diff->Lx).isMuchSmallerThan(1.0, tol));

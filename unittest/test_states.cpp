@@ -186,7 +186,7 @@ void test_Jdiff_against_numdiff(StateTypes::Type state_type, PinocchioModelTypes
 
   // Checking the partial derivatives against NumDiff
   // The previous tolerance was 10*disturbance
-  double tol = factory.get_num_diff_modifier() * state_num_diff.get_disturbance();
+  double tol = NUMDIFF_MODIFIER * state_num_diff.get_disturbance();
   BOOST_CHECK((Jdiff_1 - Jdiff_num_1).isMuchSmallerThan(1.0, tol));
   BOOST_CHECK((Jdiff_2 - Jdiff_num_2).isMuchSmallerThan(1.0, tol));
 }
@@ -211,7 +211,7 @@ void test_Jintegrate_against_numdiff(StateTypes::Type state_type, PinocchioModel
 
   // Checking the partial derivatives against NumDiff
   // The previous tolerance was 10*disturbance
-  double tol = factory.get_num_diff_modifier() * state_num_diff.get_disturbance();
+  double tol = NUMDIFF_MODIFIER * state_num_diff.get_disturbance();
   BOOST_CHECK((Jint_1 - Jint_num_1).isMuchSmallerThan(1.0, tol));
   BOOST_CHECK((Jint_2 - Jint_num_2).isMuchSmallerThan(1.0, tol));
 }
