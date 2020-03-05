@@ -28,7 +28,7 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
 
   explicit ActuationModelFloatingBaseTpl(boost::shared_ptr<StateMultibody> state) : Base(state, state->get_nv() - 6) {
     pinocchio::JointModelFreeFlyerTpl<Scalar> ff_joint;
-    if (state->get_pinocchio().joints[1].shortname() != ff_joint.shortname()) {
+    if (state->get_pinocchio()->joints[1].shortname() != ff_joint.shortname()) {
       throw_pretty("Invalid argument: "
                    << "the first joint has to be free-flyer");
     }

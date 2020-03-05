@@ -70,7 +70,6 @@ class ActivationModelFactory {
  public:
   ActivationModelFactory(ActivationModelTypes::Type test_type, std::size_t nr = 5) {
     nr_ = nr;
-    num_diff_modifier_ = 1e4;
     Eigen::VectorXd lb = Eigen::VectorXd::Random(nr_);
     Eigen::VectorXd ub = lb + Eigen::VectorXd::Ones(nr_) + Eigen::VectorXd::Random(nr_);
     Eigen::VectorXd weights = Eigen::VectorXd::Random(nr_);
@@ -103,10 +102,8 @@ class ActivationModelFactory {
 
   boost::shared_ptr<crocoddyl::ActivationModelAbstract> create() { return activation_; }
   const std::size_t& get_nr() { return nr_; }
-  double get_num_diff_modifier() { return num_diff_modifier_; }
 
  private:
-  double num_diff_modifier_;
   std::size_t nr_;
   boost::shared_ptr<crocoddyl::ActivationModelAbstract> activation_;
 };

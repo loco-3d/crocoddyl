@@ -55,7 +55,7 @@ void CostModelFrameVelocityTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbs
   CostDataFrameVelocityTpl<Scalar>* d = static_cast<CostDataFrameVelocityTpl<Scalar>*>(data.get());
 
   // Compute the frame velocity w.r.t. the reference frame
-  d->vr = pinocchio::getFrameVelocity(state_->get_pinocchio(), *d->pinocchio, vref_.frame) - vref_.oMf;
+  d->vr = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, vref_.frame) - vref_.oMf;
   data->r = d->vr.toVector();
 
   // Compute the cost
@@ -69,8 +69,8 @@ void CostModelFrameVelocityTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDat
                                                  const Eigen::Ref<const VectorXs>&) {
   // Get the partial derivatives of the local frame velocity
   CostDataFrameVelocityTpl<Scalar>* d = static_cast<CostDataFrameVelocityTpl<Scalar>*>(data.get());
-  pinocchio::getJointVelocityDerivatives(state_->get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL, d->dv_dq,
-                                         d->dv_dv);
+  pinocchio::getJointVelocityDerivatives(*state_->get_pinocchio().get(), *d->pinocchio, d->joint, pinocchio::LOCAL,
+                                         d->dv_dq, d->dv_dv);
 
   // Compute the derivatives of the frame velocity
   const std::size_t& nv = state_->get_nv();

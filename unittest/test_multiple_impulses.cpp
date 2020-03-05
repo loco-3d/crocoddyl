@@ -10,7 +10,7 @@
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
 #include <pinocchio/algorithm/frames.hpp>
 
-#include "impulses_factory.hpp"
+#include "factory/impulse.hpp"
 #include "unittest_common.hpp"
 
 using namespace crocoddyl_unit_test;
@@ -57,7 +57,7 @@ int updateForceDiff(crocoddyl::ImpulseModelMultiple& model, boost::shared_ptr<cr
 
 void test_constructor() {
   // Setup the test
-  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  StateFactory state_factory(StateTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
 
   // Test the initial size of the map
@@ -66,7 +66,7 @@ void test_constructor() {
 
 void test_addImpulse() {
   // Setup the test
-  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  StateFactory state_factory(StateTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
 
   // create and impulse object
@@ -82,7 +82,7 @@ void test_addImpulse() {
 
 void test_addImpulse_error_message() {
   // Setup the test
-  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  StateFactory state_factory(StateTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
 
   // create an impulse object
@@ -106,7 +106,7 @@ void test_addImpulse_error_message() {
 
 void test_removeImpulse() {
   // Setup the test
-  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  StateFactory state_factory(StateTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
 
   // create and impulse object
@@ -125,7 +125,7 @@ void test_removeImpulse() {
 
 void test_removeImpulse_error_message() {
   // Setup the test
-  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  StateFactory state_factory(StateTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
 
   // create and impulse object
@@ -146,11 +146,11 @@ void test_removeImpulse_error_message() {
 
 void test_calc() {
   // Setup the test
-  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  StateFactory state_factory(StateTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
   // create the corresponding data object
-  pinocchio::Model pinocchio_model = state_factory.get_pinocchio_model();
-  pinocchio::Data pinocchio_data(state_factory.get_pinocchio_model());
+  const pinocchio::Model& pinocchio_model = *model.get_state()->get_pinocchio().get();
+  pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
   std::vector<boost::shared_ptr<ImpulseModelFactory> > impulse_factories;
@@ -185,10 +185,10 @@ void test_calc() {
 
 void test_calc_no_computation() {
   // Setup the test
-  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  StateFactory state_factory(StateTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
   // create the corresponding data object
-  pinocchio::Data pinocchio_data(state_factory.get_pinocchio_model());
+  pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
   std::vector<boost::shared_ptr<ImpulseModelFactory> > impulse_factories;
@@ -218,11 +218,11 @@ void test_calc_no_computation() {
 
 void test_calc_diff() {
   // Setup the test
-  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  StateFactory state_factory(StateTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
   // create the corresponding data object
-  pinocchio::Model pinocchio_model = state_factory.get_pinocchio_model();
-  pinocchio::Data pinocchio_data(state_factory.get_pinocchio_model());
+  const pinocchio::Model& pinocchio_model = *model.get_state()->get_pinocchio().get();
+  pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
   std::vector<boost::shared_ptr<ImpulseModelFactory> > impulse_factories;
@@ -261,11 +261,11 @@ void test_calc_diff() {
 
 void test_calc_diff_no_recalc() {
   // Setup the test
-  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  StateFactory state_factory(StateTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
   // create the corresponding data object
-  pinocchio::Model pinocchio_model = state_factory.get_pinocchio_model();
-  pinocchio::Data pinocchio_data(state_factory.get_pinocchio_model());
+  const pinocchio::Model& pinocchio_model = *model.get_state()->get_pinocchio().get();
+  pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
   std::vector<boost::shared_ptr<ImpulseModelFactory> > impulse_factories;
@@ -303,10 +303,10 @@ void test_calc_diff_no_recalc() {
 
 void test_calc_diff_no_computation() {
   // Setup the test
-  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  StateFactory state_factory(StateTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
   // create the corresponding data object
-  pinocchio::Data pinocchio_data(state_factory.get_pinocchio_model());
+  pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
   std::vector<boost::shared_ptr<ImpulseModelFactory> > impulse_factories;
@@ -337,11 +337,11 @@ void test_calc_diff_no_computation() {
 
 void test_updateForce() {
   // Setup the test
-  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  StateFactory state_factory(StateTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
   // create the corresponding data object
-  const pinocchio::Model& pinocchio_model = state_factory.get_pinocchio_model();
-  pinocchio::Data pinocchio_data(state_factory.get_pinocchio_model());
+  const pinocchio::Model& pinocchio_model = *model.get_state()->get_pinocchio().get();
+  pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
   std::vector<boost::shared_ptr<ImpulseModelFactory> > impulse_factories;
@@ -382,10 +382,10 @@ void test_updateForce() {
 
 void test_updateVelocityDiff() {
   // Setup the test
-  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  StateFactory state_factory(StateTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
   // create the corresponding data object
-  pinocchio::Data pinocchio_data(state_factory.get_pinocchio_model());
+  pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
   std::vector<boost::shared_ptr<ImpulseModelFactory> > impulse_factories;
@@ -412,10 +412,10 @@ void test_updateVelocityDiff() {
 
 void test_updateForceDiff() {
   // Setup the test
-  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  StateFactory state_factory(StateTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
   // create the corresponding data object
-  pinocchio::Data pinocchio_data(state_factory.get_pinocchio_model());
+  pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
   std::vector<boost::shared_ptr<ImpulseModelFactory> > impulse_factories;
@@ -444,13 +444,13 @@ void test_updateForceDiff() {
 
 void test_assert_updateForceDiff_assert_mismatch_model_data() {
   // Setup the test
-  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  StateFactory state_factory(StateTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
   crocoddyl::ImpulseModelMultiple model1(
       boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
   crocoddyl::ImpulseModelMultiple model2(
       boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
   // create the corresponding data object
-  pinocchio::Data pinocchio_data(state_factory.get_pinocchio_model());
+  pinocchio::Data pinocchio_data(*model1.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
   std::vector<boost::shared_ptr<ImpulseModelFactory> > impulse_factories;
@@ -496,7 +496,7 @@ void test_assert_updateForceDiff_assert_mismatch_model_data() {
 
 void test_create() {
   // Setup the test
-  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  StateFactory state_factory(StateTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
 
   // Test
@@ -505,10 +505,10 @@ void test_create() {
 
 void test_get_impulses() {
   // Setup the test
-  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  StateFactory state_factory(StateTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
   // create the corresponding data object
-  pinocchio::Data pinocchio_data(state_factory.get_pinocchio_model());
+  pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
   std::vector<boost::shared_ptr<ImpulseModelFactory> > impulse_factories;
@@ -534,10 +534,10 @@ void test_get_impulses() {
 
 void test_get_ni() {
   // Setup the test
-  StateFactory state_factory(StateTypes::StateMultibodyRandomHumanoid);
+  StateFactory state_factory(StateTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
   // create the corresponding data object
-  pinocchio::Data pinocchio_data(state_factory.get_pinocchio_model());
+  pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
   std::vector<boost::shared_ptr<ImpulseModelFactory> > impulse_factories;

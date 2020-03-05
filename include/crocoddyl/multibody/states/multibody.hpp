@@ -25,7 +25,7 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
 
   enum JointType { FreeFlyer = 0, Spherical, Simple };
 
-  explicit StateMultibodyTpl(pinocchio::ModelTpl<Scalar>& model);
+  explicit StateMultibodyTpl(boost::shared_ptr<pinocchio::ModelTpl<Scalar> > model);
   ~StateMultibodyTpl();
 
   VectorXs zero() const;
@@ -39,7 +39,7 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
   void Jintegrate(const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&, Eigen::Ref<MatrixXs> Jfirst,
                   Eigen::Ref<MatrixXs> Jsecond, Jcomponent firstsecond = both) const;
 
-  pinocchio::ModelTpl<Scalar>& get_pinocchio() const;
+  const boost::shared_ptr<pinocchio::ModelTpl<Scalar> >& get_pinocchio() const;
 
  protected:
   using Base::has_limits_;
@@ -53,7 +53,7 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
  private:
   void updateJdiff(const Eigen::Ref<const MatrixXs>& Jdq, Eigen::Ref<MatrixXs> Jd_, bool positive = true) const;
 
-  pinocchio::ModelTpl<Scalar>& pinocchio_;
+  boost::shared_ptr<pinocchio::ModelTpl<Scalar> > pinocchio_;
   VectorXs x0_;
   JointType joint_type_;
 };

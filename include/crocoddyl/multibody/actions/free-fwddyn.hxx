@@ -27,7 +27,7 @@ DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::DifferentialActionModelFreeFw
     : Base(state, actuation->get_nu(), costs->get_nr()),
       actuation_(actuation),
       costs_(costs),
-      pinocchio_(state->get_pinocchio()),
+      pinocchio_(*state->get_pinocchio().get()),
       with_armature_(true),
       armature_(VectorXs::Zero(state->get_nv())) {
   if (costs_->get_nu() != nu_) {

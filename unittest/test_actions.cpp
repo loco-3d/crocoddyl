@@ -10,7 +10,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
-#include "action_factory.hpp"
+#include "factory/action.hpp"
 #include "unittest_common.hpp"
 
 using namespace boost::unit_test;
@@ -87,7 +87,7 @@ void test_partial_derivatives_against_numdiff(ActionModelTypes::Type action_mode
   model_num_diff.calcDiff(data_num_diff, x, u);
 
   // Checking the partial derivatives against NumDiff
-  double tol = factory.get_num_diff_modifier() * model_num_diff.get_disturbance();
+  double tol = NUMDIFF_MODIFIER * model_num_diff.get_disturbance();
   BOOST_CHECK((data->Fx - data_num_diff->Fx).isMuchSmallerThan(1.0, tol));
   BOOST_CHECK((data->Fu - data_num_diff->Fu).isMuchSmallerThan(1.0, tol));
   BOOST_CHECK((data->Lx - data_num_diff->Lx).isMuchSmallerThan(1.0, tol));
@@ -114,8 +114,10 @@ void register_action_model_unit_tests(ActionModelTypes::Type action_model_type, 
 
 bool init_function() {
   for (size_t i = 0; i < ActionModelTypes::all.size(); ++i) {
-    const std::string test_name = "test_" + std::to_string(i);
-    test_suite* ts = BOOST_TEST_SUITE(test_name);
+    std::ostringstream test_name;
+    test_name << "test_" << ActionModelTypes::all[i];
+    test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+    std::cout << "Running " << test_name.str() << std::endl;
     register_action_model_unit_tests(ActionModelTypes::all[i], *ts);
     framework::master_test_suite().add(ts);
   }

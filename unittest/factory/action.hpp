@@ -35,11 +35,29 @@ struct ActionModelTypes {
 };
 const std::vector<ActionModelTypes::Type> ActionModelTypes::all(ActionModelTypes::init_all());
 
+std::ostream& operator<<(std::ostream& os, ActionModelTypes::Type type) {
+  switch (type) {
+    case ActionModelTypes::ActionModelUnicycle:
+      os << "ActionModelUnicycle";
+      break;
+    case ActionModelTypes::ActionModelLQRDriftFree:
+      os << "ActionModelLQRDriftFree";
+      break;
+    case ActionModelTypes::ActionModelLQR:
+      os << "ActionModelLQR";
+      break;
+    case ActionModelTypes::NbActionModelTypes:
+      os << "NbActionModelTypes";
+      break;
+    default:
+      break;
+  }
+  return os;
+}
+
 class ActionModelFactory {
  public:
   ActionModelFactory(ActionModelTypes::Type type) {
-    num_diff_modifier_ = 1e4;
-
     switch (type) {
       case ActionModelTypes::ActionModelUnicycle:
         nx_ = 3;
@@ -67,12 +85,10 @@ class ActionModelFactory {
   boost::shared_ptr<crocoddyl::ActionModelAbstract> create() { return action_; }
 
   const std::size_t& get_nx() { return nx_; }
-  double get_num_diff_modifier() { return num_diff_modifier_; }
 
  private:
   std::size_t nx_;
   std::size_t nu_;
-  double num_diff_modifier_;
   boost::shared_ptr<crocoddyl::ActionModelAbstract> action_;
 };
 

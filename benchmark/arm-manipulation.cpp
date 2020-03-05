@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
   pinocchio::Model model;
   pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf", model);
   boost::shared_ptr<crocoddyl::StateMultibody> state =
-      boost::make_shared<crocoddyl::StateMultibody>(boost::ref(model));
+      boost::make_shared<crocoddyl::StateMultibody>(boost::make_shared<pinocchio::Model>(model));
 
   Eigen::VectorXd q0(state->get_nq());
   Eigen::VectorXd x0(state->get_nx());

@@ -25,14 +25,14 @@ void ImpulseModel6DTpl<Scalar>::calc(const boost::shared_ptr<ImpulseDataAbstract
                                      const Eigen::Ref<const VectorXs>&) {
   boost::shared_ptr<ImpulseData6D> d = boost::static_pointer_cast<ImpulseData6D>(data);
 
-  pinocchio::getFrameJacobian(state_->get_pinocchio(), *d->pinocchio, frame_, pinocchio::LOCAL, d->Jc);
+  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, frame_, pinocchio::LOCAL, d->Jc);
 }
 
 template <typename Scalar>
 void ImpulseModel6DTpl<Scalar>::calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
                                          const Eigen::Ref<const VectorXs>&) {
   boost::shared_ptr<ImpulseData6D> d = boost::static_pointer_cast<ImpulseData6D>(data);
-  pinocchio::getJointVelocityDerivatives(state_->get_pinocchio(), *d->pinocchio, d->joint, pinocchio::LOCAL,
+  pinocchio::getJointVelocityDerivatives(*state_->get_pinocchio().get(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                          d->v_partial_dq, d->v_partial_dv);
   d->dv0_dq.noalias() = d->fXj * d->v_partial_dq;
 }

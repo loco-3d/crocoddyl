@@ -111,7 +111,7 @@ struct ContactDataMultipleTpl : ContactDataAbstractTpl<_Scalar> {
       : Base(model, data),
         dv(model->get_state()->get_nv()),
         ddv_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
-        fext(model->get_state()->get_pinocchio().njoints, pinocchio::ForceTpl<Scalar>::Zero()) {
+        fext(model->get_state()->get_pinocchio()->njoints, pinocchio::ForceTpl<Scalar>::Zero()) {
     dv.setZero();
     ddv_dx.setZero();
     for (typename ContactModelMultiple::ContactModelContainer::const_iterator it = model->get_contacts().begin();

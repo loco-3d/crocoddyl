@@ -6,18 +6,11 @@ ENDIF(BUILD_PYTHON_INTERFACE)
 ADD_SUBDIRECTORY(python)
 
 SET(${PROJECT_NAME}_CPP_TESTS
-  # testutils
-  test_state
-  # test_rk4
-  # test_quadruped
-  # test_locomotion
-  # test_impact
-  # test_dynamic_derivatives
-  # test_dse3
-  # test_armature
+  test_states
   # test_actuation
-  test_activation
+  test_activations
   test_actions
+  # test_integrators
   test_diff_actions
   test_impulses
   test_multiple_impulses

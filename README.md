@@ -138,6 +138,12 @@ export CROCODDYL_DISPLAY=1
 export CROCODDYL_PLOT=1
 ```
 
+After installation, you could run the examples as follows:
+
+```bash
+python -m crocoddyl.examples.quadrupedal_gaits "display" "plot" # enable display and plot
+```
+
 If you want to learn about Crocoddyl, take a look at the Jupyter notebooks. Start in the following order.
 - [examples/notebooks/unicycle_towards_origin.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/unicycle_towards_origin.ipynb)
 - [examples/notebooks/cartpole_swing_up.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/cartpole_swing_up.py)

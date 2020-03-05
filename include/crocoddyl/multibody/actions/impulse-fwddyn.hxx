@@ -16,13 +16,13 @@ ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
     : Base(state, 0, costs->get_nr()),
       impulses_(impulses),
       costs_(costs),
-      pinocchio_(state->get_pinocchio()),
+      pinocchio_(*state->get_pinocchio().get()),
       with_armature_(true),
       armature_(VectorXs::Zero(state->get_nv())),
       r_coeff_(r_coeff),
       JMinvJt_damping_(JMinvJt_damping),
       enable_force_(enable_force),
-      gravity_(state->get_pinocchio().gravity) {
+      gravity_(state->get_pinocchio()->gravity) {
   if (r_coeff_ < 0.) {
     r_coeff_ = 0.;
     throw_pretty("Invalid argument: "

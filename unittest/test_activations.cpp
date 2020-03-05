@@ -7,10 +7,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "activation_factory.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
+#include "factory/activation.hpp"
 #include "unittest_common.hpp"
 
-#include "crocoddyl/core/utils/exception.hpp"
 using namespace boost::unit_test;
 using namespace crocoddyl_unit_test;
 
@@ -66,7 +66,7 @@ void test_partial_derivatives_against_numdiff(ActivationModelTypes::Type test_ty
   model_num_diff.calcDiff(data_num_diff, r);
 
   // Checking the partial derivatives against NumDiff
-  double tol = factory.get_num_diff_modifier() * model_num_diff.get_disturbance();
+  double tol = NUMDIFF_MODIFIER * model_num_diff.get_disturbance();
   BOOST_CHECK(std::abs(data->a_value - data_num_diff->a_value) < tol);
   BOOST_CHECK((data->Ar - data_num_diff->Ar).isMuchSmallerThan(1.0, tol));
 
@@ -84,8 +84,10 @@ void register_unit_tests(ActivationModelTypes::Type type, test_suite& ts) {
 
 bool init_function() {
   for (size_t i = 0; i < ActivationModelTypes::all.size(); ++i) {
-    const std::string test_name = "test_" + std::to_string(i);
-    test_suite* ts = BOOST_TEST_SUITE(test_name);
+    std::ostringstream test_name;
+    test_name << "test_" << ActivationModelTypes::all[i];
+    test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+    std::cout << "Running " << test_name.str() << std::endl;
     register_unit_tests(ActivationModelTypes::all[i], *ts);
     framework::master_test_suite().add(ts);
   }

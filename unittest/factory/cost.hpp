@@ -25,8 +25,8 @@
 // #include "crocoddyl/multibody/costs/cost-sum.hpp"
 #include "crocoddyl/multibody/numdiff/cost.hpp"
 
-#include "state_factory.hpp"
-#include "activation_factory.hpp"
+#include "state.hpp"
+#include "activation.hpp"
 
 #ifndef CROCODDYL_COST_FACTORY_HPP_
 #define CROCODDYL_COST_FACTORY_HPP_
@@ -102,11 +102,11 @@ class CostModelFactory {
   typedef typename MathBase::Vector6s Vector6d;
 
   CostModelFactory(CostModelTypes::Type test_type, ActivationModelTypes::Type activation_type,
-                   StateTypes::Type state_multibody_type)
-      : state_factory_(state_multibody_type),
+                   StateTypes::Type state_multibody_type, PinocchioModelTypes::Type model_type)
+      : state_factory_(state_multibody_type, model_type),
         state_multibody_(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_.create())),
         // Setup some reference for the costs.
-        frame_index_(state_multibody_->get_pinocchio().frames.size() - 1),
+        frame_index_(state_multibody_->get_pinocchio()->frames.size() - 1),
         mom_ref_(Vector6d::Random()),
         com_ref_(Eigen::Vector3d::Random()),
         u_ref_(Eigen::VectorXd::Random(state_multibody_->get_nv())),
@@ -115,7 +115,6 @@ class CostModelFactory {
         rotation_ref_(frame_index_, frame_.rotation()),
         translation_ref_(frame_index_, frame_.translation()),
         velocity_ref_(frame_index_, pinocchio::Motion::Random()) {
-    num_diff_modifier_ = 1e4;
     type_ = test_type;
 
     // Construct the different cost.
@@ -171,10 +170,8 @@ class CostModelFactory {
   ~CostModelFactory() {}
 
   boost::shared_ptr<crocoddyl::CostModelAbstract> create() { return cost_; }
-  double get_num_diff_modifier() { return num_diff_modifier_; }
 
  private:
-  double num_diff_modifier_;
   std::size_t nu_;
   CostModelTypes::Type type_;
   boost::shared_ptr<crocoddyl::CostModelAbstract> cost_;
