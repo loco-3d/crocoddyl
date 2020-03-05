@@ -57,24 +57,24 @@ class PinocchioModelFactory {
   PinocchioModelFactory(PinocchioModelTypes::Type type) {
     switch (type) {
       case PinocchioModelTypes::TalosArm:
+        construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf", false);
         frame_name_ = "gripper_left_fingertip_1_link";
         frame_id_ = model_->getFrameId(frame_name_);
-        construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf", false);
         break;
       case PinocchioModelTypes::HyQ:
+        construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/robots/hyq_no_sensors.urdf", false);
         frame_name_ = "lf_foot";
         frame_id_ = model_->getFrameId(frame_name_);
-        construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/robots/hyq_no_sensors.urdf", false);
         break;
       case PinocchioModelTypes::Talos:
+        construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_reduced.urdf");
         frame_name_ = "gripper_left_fingertip_1_link";
         frame_id_ = model_->getFrameId(frame_name_);
-        construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_reduced.urdf");
         break;
       case PinocchioModelTypes::RandomHumanoid:
+        construct_model();
         frame_name_ = "rleg6_body";
         frame_id_ = model_->getFrameId(frame_name_);
-        construct_model();
         break;
       case PinocchioModelTypes::NbPinocchioModelTypes:
         break;
@@ -87,29 +87,30 @@ class PinocchioModelFactory {
   ~PinocchioModelFactory() {}
 
   void construct_model(const std::string& urdf_file = "", bool free_flyer = true) {
-    pinocchio::Model pinocchio_model;
+    model_ = boost::make_shared<pinocchio::Model>();
     if (urdf_file.size() != 0) {
       if (free_flyer) {
-        pinocchio::urdf::buildModel(urdf_file, pinocchio::JointModelFreeFlyer(), pinocchio_model);
-        pinocchio_model.lowerPositionLimit.segment<7>(0).fill(-1.);
-        pinocchio_model.upperPositionLimit.segment<7>(0).fill(1.);
+        pinocchio::urdf::buildModel(urdf_file, pinocchio::JointModelFreeFlyer(), *model_.get());
+        model_->lowerPositionLimit.segment<7>(0).fill(-1.);
+        model_->upperPositionLimit.segment<7>(0).fill(1.);
       } else {
-        pinocchio::urdf::buildModel(urdf_file, pinocchio_model);
+        pinocchio::urdf::buildModel(urdf_file, *model_.get());
       }
     } else {
-      pinocchio::buildModels::humanoidRandom(pinocchio_model, free_flyer);
-      pinocchio_model.lowerPositionLimit.segment<7>(0).fill(-1.);
-      pinocchio_model.upperPositionLimit.segment<7>(0).fill(1.);
+      pinocchio::buildModels::humanoidRandom(*model_.get(), free_flyer);
+      model_->lowerPositionLimit.segment<7>(0).fill(-1.);
+      model_->upperPositionLimit.segment<7>(0).fill(1.);
     }
-    model_ = boost::make_shared<pinocchio::Model>(pinocchio_model);
   }
 
-  boost::shared_ptr<pinocchio::Model> create() { return model_; }
+  boost::shared_ptr<pinocchio::Model> create() const { return model_; }
+  const std::string& get_frame_name() const { return frame_name_; }
+  const std::size_t& get_frame_id() const { return frame_id_; }
 
  private:
   boost::shared_ptr<pinocchio::Model> model_;  //!< The pointer to the state in testing
-  std::string frame_name_;
-  std::size_t frame_id_;
+  std::string frame_name_;                     //!< Frame name for unittesting
+  std::size_t frame_id_;                       //!< Frame id for unittesting
 };
 
 }  // namespace crocoddyl_unit_test
