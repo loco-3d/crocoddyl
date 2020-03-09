@@ -2,7 +2,7 @@
 // BSD 3-Clause License
 //
 // Copyright (C) 2018-2020, LAAS-CNRS, New York University, Max Planck Gesellschaft,
-//                          INRIA
+//                          INRIA, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -21,9 +21,9 @@ using namespace boost::unit_test;
 
 //----------------------------------------------------------------------------//
 
-void test_construct_data(ImpulseModelTypes::Type test_type, PinocchioModelTypes::Type model_type) {
+void test_construct_data(ImpulseModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) {
   // create the model
-  ImpulseModelFactory factory(test_type, model_type);
+  ImpulseModelFactory factory(impulse_type, model_type);
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.create();
 
   // create the corresponding data object
@@ -31,9 +31,9 @@ void test_construct_data(ImpulseModelTypes::Type test_type, PinocchioModelTypes:
   boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
 }
 
-void test_calc_no_computation(ImpulseModelTypes::Type test_type, PinocchioModelTypes::Type model_type) {
+void test_calc_no_computation(ImpulseModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) {
   // create the model
-  ImpulseModelFactory factory(test_type, model_type);
+  ImpulseModelFactory factory(impulse_type, model_type);
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.create();
 
   // create the corresponding data object
@@ -51,9 +51,9 @@ void test_calc_no_computation(ImpulseModelTypes::Type test_type, PinocchioModelT
   BOOST_CHECK(data->df_dq.isZero());
 }
 
-void test_calc_fetch_jacobians(ImpulseModelTypes::Type test_type, PinocchioModelTypes::Type model_type) {
+void test_calc_fetch_jacobians(ImpulseModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) {
   // create the model
-  ImpulseModelFactory factory(test_type, model_type);
+  ImpulseModelFactory factory(impulse_type, model_type);
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.create();
 
   // create the corresponding data object
@@ -77,9 +77,9 @@ void test_calc_fetch_jacobians(ImpulseModelTypes::Type test_type, PinocchioModel
   BOOST_CHECK(data->df_dq.isZero());
 }
 
-void test_calc_diff_no_computation(ImpulseModelTypes::Type test_type, PinocchioModelTypes::Type model_type) {
+void test_calc_diff_no_computation(ImpulseModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) {
   // create the model
-  ImpulseModelFactory factory(test_type, model_type);
+  ImpulseModelFactory factory(impulse_type, model_type);
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.create();
 
   // create the corresponding data object
@@ -98,9 +98,9 @@ void test_calc_diff_no_computation(ImpulseModelTypes::Type test_type, PinocchioM
   BOOST_CHECK(data->df_dq.isZero());
 }
 
-void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type test_type, PinocchioModelTypes::Type model_type) {
+void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) {
   // create the model
-  ImpulseModelFactory factory(test_type, model_type);
+  ImpulseModelFactory factory(impulse_type, model_type);
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.create();
 
   // create the corresponding data object
@@ -128,9 +128,9 @@ void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type test_type, Pinocch
   BOOST_CHECK(data->df_dq.isZero());
 }
 
-void test_update_force(ImpulseModelTypes::Type test_type, PinocchioModelTypes::Type model_type) {
+void test_update_force(ImpulseModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) {
   // create the model
-  ImpulseModelFactory factory(test_type, model_type);
+  ImpulseModelFactory factory(impulse_type, model_type);
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.create();
 
   // create the corresponding data object
@@ -150,9 +150,9 @@ void test_update_force(ImpulseModelTypes::Type test_type, PinocchioModelTypes::T
   BOOST_CHECK(data->df_dq.isZero());
 }
 
-void test_update_force_diff(ImpulseModelTypes::Type test_type, PinocchioModelTypes::Type model_type) {
+void test_update_force_diff(ImpulseModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) {
   // create the model
-  ImpulseModelFactory factory(test_type, model_type);
+  ImpulseModelFactory factory(impulse_type, model_type);
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.create();
 
   // create the corresponding data object
