@@ -149,7 +149,7 @@ void test_calc() {
   StateFactory state_factory(StateTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
   // create the corresponding data object
-  const pinocchio::Model& pinocchio_model = *model.get_state()->get_pinocchio().get();
+  pinocchio::Model& pinocchio_model = *model.get_state()->get_pinocchio().get();
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
@@ -165,16 +165,12 @@ void test_calc() {
   boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data = model.createData(&pinocchio_data);
 
   // Compute the jacobian and check that the impulse models fetch it.
-  Eigen::VectorXd q = model.get_state()->rand().segment(0, model.get_state()->get_nq());
-  pinocchio::computeJointJacobians(pinocchio_model, pinocchio_data, q);
-  pinocchio::updateFramePlacements(pinocchio_model, pinocchio_data);
-
-  // create a dummy state vector (not used for the impulses)
-  Eigen::VectorXd dx;
+  Eigen::VectorXd x = model.get_state()->rand();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
 
   // pinocchio data have not been filled so the results of this operation are
   // null matrices
-  model.calc(data, dx);
+  model.calc(data, x);
 
   // Check that only the Jacobian has been filled
   BOOST_CHECK(!data->Jc.isZero());
@@ -221,7 +217,7 @@ void test_calc_diff() {
   StateFactory state_factory(StateTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
   // create the corresponding data object
-  const pinocchio::Model& pinocchio_model = *model.get_state()->get_pinocchio().get();
+  pinocchio::Model& pinocchio_model = *model.get_state()->get_pinocchio().get();
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
@@ -237,20 +233,13 @@ void test_calc_diff() {
   boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data = model.createData(&pinocchio_data);
 
   // Compute the jacobian and check that the impulse models fetch it.
-  Eigen::VectorXd q = model.get_state()->rand().segment(0, model.get_state()->get_nq());
-  Eigen::VectorXd v = Eigen::VectorXd::Random(model.get_state()->get_nv());
-  Eigen::VectorXd a = Eigen::VectorXd::Random(model.get_state()->get_nv());
-  pinocchio::computeJointJacobians(pinocchio_model, pinocchio_data, q);
-  pinocchio::updateFramePlacements(pinocchio_model, pinocchio_data);
-  pinocchio::computeForwardKinematicsDerivatives(pinocchio_model, pinocchio_data, q, v, a);
-
-  // create a dummy state vector (not used for the impulses)
-  Eigen::VectorXd dx;
+  Eigen::VectorXd x = model.get_state()->rand();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
 
   // pinocchio data have been filled so the results of this operation are
   // none null matrices
-  model.calc(data, dx);
-  model.calcDiff(data, dx);
+  model.calc(data, x);
+  model.calcDiff(data, x);
 
   // Check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(!data->Jc.isZero());
@@ -264,7 +253,7 @@ void test_calc_diff_no_recalc() {
   StateFactory state_factory(StateTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
   // create the corresponding data object
-  const pinocchio::Model& pinocchio_model = *model.get_state()->get_pinocchio().get();
+  pinocchio::Model& pinocchio_model = *model.get_state()->get_pinocchio().get();
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
@@ -280,19 +269,12 @@ void test_calc_diff_no_recalc() {
   boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data = model.createData(&pinocchio_data);
 
   // Compute the jacobian and check that the impulse models fetch it.
-  Eigen::VectorXd q = model.get_state()->rand().segment(0, model.get_state()->get_nq());
-  Eigen::VectorXd v = Eigen::VectorXd::Random(model.get_state()->get_nv());
-  Eigen::VectorXd a = Eigen::VectorXd::Random(model.get_state()->get_nv());
-  pinocchio::computeJointJacobians(pinocchio_model, pinocchio_data, q);
-  pinocchio::updateFramePlacements(pinocchio_model, pinocchio_data);
-  pinocchio::computeForwardKinematicsDerivatives(pinocchio_model, pinocchio_data, q, v, a);
-
-  // create a dummy state vector (not used for the impulses)
-  Eigen::VectorXd dx;
+  Eigen::VectorXd x = model.get_state()->rand();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
 
   // pinocchio data have not been filled so the results of this operation are
   // null matrices
-  model.calcDiff(data, dx);
+  model.calcDiff(data, x);
 
   // Check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(data->Jc.isZero());
