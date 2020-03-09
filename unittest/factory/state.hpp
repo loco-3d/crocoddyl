@@ -21,7 +21,8 @@
 #ifndef CROCODDYL_STATE_FACTORY_HPP_
 #define CROCODDYL_STATE_FACTORY_HPP_
 
-namespace crocoddyl_unit_test {
+namespace crocoddyl {
+namespace unittest {
 
 struct StateTypes {
   enum Type { StateVector, StateMultibody, NbStateTypes };
@@ -87,6 +88,7 @@ class StateFactory {
   std::size_t nx_;                                     //!< The size of the StateVector to test.
 };
 
-}  // namespace crocoddyl_unit_test
+}  // namespace unittest
+}  // namespace crocoddyl
 
 #endif  // CROCODDYL_STATE_FACTORY_HPP_

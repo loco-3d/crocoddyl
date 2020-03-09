@@ -20,7 +20,8 @@
 #ifndef CROCODDYL_STATE_FACTORY_HPP_
 #define CROCODDYL_STATE_FACTORY_HPP_
 
-namespace crocoddyl_unit_test {
+namespace crocoddyl {
+namespace unittest {
 
 struct SolverTypes {
   enum Type { SolverKKT, SolverDDP, SolverFDDP, SolverBoxDDP, SolverBoxFDDP, NbSolverTypes };
@@ -110,6 +111,7 @@ class SolverFactory {
   boost::shared_ptr<crocoddyl::ShootingProblem> problem_;  //!< The pointer to the shooting problem in testing
 };
 
-}  // namespace crocoddyl_unit_test
+}  // namespace unittest
+}  // namespace crocoddyl
 
 #endif  // CROCODDYL_STATE_FACTORY_HPP_

@@ -13,8 +13,8 @@
 #include "factory/impulse.hpp"
 #include "unittest_common.hpp"
 
-using namespace crocoddyl_unit_test;
 using namespace boost::unit_test;
+using namespace crocoddyl::unittest;
 
 //----------------------------------------------------------------------------//
 

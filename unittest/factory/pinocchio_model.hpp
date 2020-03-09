@@ -22,7 +22,8 @@
 #ifndef CROCODDYL_PINOCCHIO_MODEL_FACTORY_HPP_
 #define CROCODDYL_PINOCCHIO_MODEL_FACTORY_HPP_
 
-namespace crocoddyl_unit_test {
+namespace crocoddyl {
+namespace unittest {
 
 struct PinocchioModelTypes {
   enum Type { TalosArm, HyQ, Talos, RandomHumanoid, NbPinocchioModelTypes };
@@ -146,6 +147,7 @@ void updateAllPinocchio(pinocchio::Model* const model, pinocchio::Data* data, co
   pinocchio::computeCentroidalDynamicsDerivatives(*model, *data, q, v, a, tmp, tmp, tmp, tmp);
 }
 
-}  // namespace crocoddyl_unit_test
+}  // namespace unittest
+}  // namespace crocoddyl
 
 #endif  // CROCODDYL_PINOCCHIO_MODEL_FACTORY_HPP_

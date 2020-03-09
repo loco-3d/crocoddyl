@@ -17,7 +17,8 @@
 #ifndef CROCODDYL_IMPULSES_FACTORY_HPP_
 #define CROCODDYL_IMPULSES_FACTORY_HPP_
 
-namespace crocoddyl_unit_test {
+namespace crocoddyl {
+namespace unittest {
 
 struct ImpulseModelTypes {
   enum Type { ImpulseModel3D, ImpulseModel6D, NbImpulseModelTypes };
@@ -98,6 +99,7 @@ boost::shared_ptr<ImpulseModelFactory> create_random_factory() {
   return ptr;
 }
 
-}  // namespace crocoddyl_unit_test
+}  // namespace unittest
+}  // namespace crocoddyl
 
 #endif  // CROCODDYL_IMPULSES_FACTORY_HPP_

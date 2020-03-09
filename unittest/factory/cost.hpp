@@ -23,7 +23,8 @@
 #ifndef CROCODDYL_COST_FACTORY_HPP_
 #define CROCODDYL_COST_FACTORY_HPP_
 
-namespace crocoddyl_unit_test {
+namespace crocoddyl {
+namespace unittest {
 
 struct CostModelTypes {
   enum Type {
@@ -183,6 +184,7 @@ class CostModelFactory {
   crocoddyl::FrameMotion velocity_ref_;
 };
 
-}  // namespace crocoddyl_unit_test
+}  // namespace unittest
+}  // namespace crocoddyl
 
 #endif  // CROCODDYL_COST_FACTORY_HPP_

@@ -17,7 +17,8 @@
 #ifndef CROCODDYL_CONTACTS_FACTORY_HPP_
 #define CROCODDYL_CONTACTS_FACTORY_HPP_
 
-namespace crocoddyl_unit_test {
+namespace crocoddyl {
+namespace unittest {
 
 struct ContactModelTypes {
   enum Type { ContactModel3D, ContactModel6D, NbContactModelTypes };
@@ -100,6 +101,7 @@ boost::shared_ptr<ContactModelFactory> create_random_factory() {
   return ptr;
 }
 
-}  // namespace crocoddyl_unit_test
+}  // namespace unittest
+}  // namespace crocoddyl
 
 #endif  // CROCODDYL_CONTACTS_FACTORY_HPP_

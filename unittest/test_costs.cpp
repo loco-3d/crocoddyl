@@ -14,7 +14,7 @@
 #include "unittest_common.hpp"
 
 using namespace boost::unit_test;
-using namespace crocoddyl_unit_test;
+using namespace crocoddyl::unittest;
 
 //----------------------------------------------------------------------------//
 
@@ -48,7 +48,7 @@ void test_calc_returns_a_cost(CostModelTypes::Type cost_type, ActivationModelTyp
   const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
-  crocoddyl_unit_test::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
 
   // Getting the cost value computed by calc()
   model->calc(data, x, u);
@@ -78,7 +78,7 @@ void test_calc_against_numdiff(CostModelTypes::Type cost_type, ActivationModelTy
   const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
-  crocoddyl_unit_test::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
 
   // Computing the action derivatives
   model->calc(data, x, u);
@@ -111,11 +111,11 @@ void test_partial_derivatives_against_numdiff(CostModelTypes::Type cost_type,
   const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
-  crocoddyl_unit_test::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
 
   // set the function that needs to be called at every step of the numdiff
   std::vector<crocoddyl::CostModelNumDiff::ReevaluationFunction> reevals;
-  reevals.push_back(boost::bind(&crocoddyl_unit_test::updateAllPinocchio, &pinocchio_model, &pinocchio_data, _1));
+  reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio, &pinocchio_model, &pinocchio_data, _1));
   model_num_diff.set_reevals(reevals);
 
   // Computing the action derivatives

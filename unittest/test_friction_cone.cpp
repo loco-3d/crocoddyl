@@ -11,7 +11,7 @@
 #include "unittest_common.hpp"
 
 using namespace boost::unit_test;
-using namespace crocoddyl_unit_test;
+using namespace crocoddyl::unittest;
 
 void test_constructor() {
   // Create the friction cone

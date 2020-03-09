@@ -15,7 +15,7 @@
 #include "factory/contact.hpp"
 #include "unittest_common.hpp"
 
-using namespace crocoddyl_unit_test;
+using namespace crocoddyl::unittest;
 using namespace boost::unit_test;
 
 //----------------------------------------------------------------------------//
@@ -64,7 +64,7 @@ void test_calc_fetch_jacobians(ContactModelTypes::Type contact_type, PinocchioMo
 
   // Compute the jacobian and check that the impulse model fetch it.
   Eigen::VectorXd x = model->get_state()->rand();
-  crocoddyl_unit_test::updateAllPinocchio(pinocchio_model.get(), &pinocchio_data, x);
+  crocoddyl::unittest::updateAllPinocchio(pinocchio_model.get(), &pinocchio_data, x);
 
   // Getting the jacobian from the model
   model->calc(data, x);
@@ -113,7 +113,7 @@ void test_calc_diff_fetch_derivatives(ContactModelTypes::Type contact_type, Pino
 
   // Compute the jacobian and check that the impulse model fetch it.
   Eigen::VectorXd x = model->get_state()->rand();
-  crocoddyl_unit_test::updateAllPinocchio(pinocchio_model.get(), &pinocchio_data, x);
+  crocoddyl::unittest::updateAllPinocchio(pinocchio_model.get(), &pinocchio_data, x);
 
   // Getting the jacobian from the model
   model->calc(data, x);
