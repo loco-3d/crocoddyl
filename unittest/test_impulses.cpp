@@ -62,9 +62,8 @@ void test_calc_fetch_jacobians(ImpulseModelTypes::Type impulse_type, PinocchioMo
   boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
 
   // Compute the jacobian and check that the impulse model fetch it.
-  Eigen::VectorXd q = model->get_state()->rand().segment(0, model->get_state()->get_nq());
-  pinocchio::computeJointJacobians(*pinocchio_model.get(), pinocchio_data, q);
-  pinocchio::updateFramePlacements(*pinocchio_model.get(), pinocchio_data);
+  Eigen::VectorXd x = model->get_state()->rand();
+  crocoddyl_unit_test::updateAllPinocchio(pinocchio_model.get(), &pinocchio_data, x);
 
   // Getting the jacobian from the model
   Eigen::VectorXd dx;
@@ -109,12 +108,8 @@ void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type impulse_type, Pino
   boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
 
   // Compute the jacobian and check that the impulse model fetch it.
-  Eigen::VectorXd q = model->get_state()->rand().segment(0, model->get_state()->get_nq());
-  Eigen::VectorXd v = Eigen::VectorXd::Random(model->get_state()->get_nv());
-  Eigen::VectorXd a = Eigen::VectorXd::Random(model->get_state()->get_nv());
-  pinocchio::computeJointJacobians(*pinocchio_model.get(), pinocchio_data, q);
-  pinocchio::updateFramePlacements(*pinocchio_model.get(), pinocchio_data);
-  pinocchio::computeForwardKinematicsDerivatives(*pinocchio_model.get(), pinocchio_data, q, v, a);
+  Eigen::VectorXd x = model->get_state()->rand();
+  crocoddyl_unit_test::updateAllPinocchio(pinocchio_model.get(), &pinocchio_data, x);
 
   // Getting the jacobian from the model
   Eigen::VectorXd dx;
