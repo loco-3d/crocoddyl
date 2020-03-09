@@ -40,8 +40,8 @@ int updateForce(crocoddyl::ContactModelMultiple& model, boost::shared_ptr<crocod
   return 0;
 }
 
-int updateAccelerationDiff(crocoddyl::ContactModelMultiple& model, boost::shared_ptr<crocoddyl::ContactDataMultiple> data,
-                       const Eigen::MatrixXd& ddv_dx) {
+int updateAccelerationDiff(crocoddyl::ContactModelMultiple& model,
+                           boost::shared_ptr<crocoddyl::ContactDataMultiple> data, const Eigen::MatrixXd& ddv_dx) {
   model.updateAccelerationDiff(data, ddv_dx);
   return 0;
 }
