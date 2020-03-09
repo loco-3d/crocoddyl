@@ -322,7 +322,7 @@ void test_updateForce() {
   StateFactory state_factory(StateTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
   // create the corresponding data object
-  const pinocchio::Model& pinocchio_model = *model.get_state()->get_pinocchio().get();
+  pinocchio::Model& pinocchio_model = *model.get_state()->get_pinocchio().get();
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
@@ -338,12 +338,8 @@ void test_updateForce() {
   boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data = model.createData(&pinocchio_data);
 
   // Compute the jacobian and check that the impulse model fetch it.
-  Eigen::VectorXd q = model.get_state()->rand().segment(0, model.get_state()->get_nq());
-  Eigen::VectorXd v = Eigen::VectorXd::Random(model.get_state()->get_nv());
-  Eigen::VectorXd a = Eigen::VectorXd::Random(model.get_state()->get_nv());
-  pinocchio::computeJointJacobians(pinocchio_model, pinocchio_data, q);
-  pinocchio::updateFramePlacements(pinocchio_model, pinocchio_data);
-  pinocchio::computeForwardKinematicsDerivatives(pinocchio_model, pinocchio_data, q, v, a);
+  Eigen::VectorXd x = model.get_state()->rand();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
 
   // create random forces
   Eigen::VectorXd forces = Eigen::VectorXd::Random(model.get_ni());
