@@ -208,8 +208,6 @@ void test_calc_no_computation() {
 
   // Check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(data->Jc.hasNaN() || data->Jc.isZero());
-  std::cout << data->a0 << std::endl << std::endl;
-  BOOST_CHECK(data->a0.hasNaN() || data->a0.isZero());
   BOOST_CHECK(data->da0_dx.hasNaN() || data->da0_dx.isZero());
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
@@ -320,8 +318,6 @@ void test_calc_diff_no_computation() {
 
   // Check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(data->Jc.hasNaN() || data->Jc.isZero());
-  std::cout << data->a0 << std::endl << std::endl;
-  BOOST_CHECK(data->a0.hasNaN() || data->a0.isZero());
   BOOST_CHECK(data->da0_dx.hasNaN() || data->da0_dx.isZero());
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
