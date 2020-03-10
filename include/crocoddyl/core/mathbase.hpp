@@ -17,6 +17,8 @@ namespace crocoddyl {
 template <typename _Scalar>
 struct MathBaseTpl {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef Eigen::Matrix<Scalar, 2, 1> Vector2s;
   typedef Eigen::Matrix<Scalar, 3, 1> Vector3s;
