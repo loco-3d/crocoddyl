@@ -19,7 +19,8 @@
 #ifndef CROCODDYL_ACTION_FACTORY_HPP_
 #define CROCODDYL_ACTION_FACTORY_HPP_
 
-namespace crocoddyl_unit_test {
+namespace crocoddyl {
+namespace unittest {
 
 struct ActionModelTypes {
   enum Type { ActionModelUnicycle, ActionModelLQRDriftFree, ActionModelLQR, NbActionModelTypes };
@@ -92,6 +93,7 @@ class ActionModelFactory {
   boost::shared_ptr<crocoddyl::ActionModelAbstract> action_;
 };
 
-}  // namespace crocoddyl_unit_test
+}  // namespace unittest
+}  // namespace crocoddyl
 
 #endif  // CROCODDYL_ACTION_FACTORY_HPP_

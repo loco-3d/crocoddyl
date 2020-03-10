@@ -17,7 +17,8 @@
 #ifndef CROCODDYL_ACTIVATION_FACTORY_HPP_
 #define CROCODDYL_ACTIVATION_FACTORY_HPP_
 
-namespace crocoddyl_unit_test {
+namespace crocoddyl {
+namespace unittest {
 
 struct ActivationModelTypes {
   enum Type {
@@ -108,6 +109,7 @@ class ActivationModelFactory {
   boost::shared_ptr<crocoddyl::ActivationModelAbstract> activation_;
 };
 
-}  // namespace crocoddyl_unit_test
+}  // namespace unittest
+}  // namespace crocoddyl
 
 #endif  // CROCODDYL_ACTIVATION_FACTORY_HPP_

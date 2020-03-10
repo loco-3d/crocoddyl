@@ -6,14 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <pinocchio/fwd.hpp>
-#include <pinocchio/algorithm/kinematics.hpp>
-#include <pinocchio/algorithm/jacobian.hpp>
-#include <pinocchio/algorithm/frames.hpp>
-#include <pinocchio/algorithm/center-of-mass.hpp>
-#include <pinocchio/algorithm/centroidal.hpp>
-#include <pinocchio/algorithm/centroidal-derivatives.hpp>
-
 #include "crocoddyl/multibody/costs/state.hpp"
 #include "crocoddyl/multibody/costs/control.hpp"
 #include "crocoddyl/multibody/costs/com-position.hpp"
@@ -31,7 +23,8 @@
 #ifndef CROCODDYL_COST_FACTORY_HPP_
 #define CROCODDYL_COST_FACTORY_HPP_
 
-namespace crocoddyl_unit_test {
+namespace crocoddyl {
+namespace unittest {
 
 struct CostModelTypes {
   enum Type {
@@ -191,30 +184,7 @@ class CostModelFactory {
   crocoddyl::FrameMotion velocity_ref_;
 };
 
-/**
- * @brief Compute all the pinocchio data needed for the numerical
- * differentiation. We use the address of the object to avoid a copy from the
- * "boost::bind".
- *
- * @param model is the rigid body robot model.
- * @param data contains the results of the computations.
- * @param x is the state vector.
- */
-void updateAllPinocchio(pinocchio::Model* const model, pinocchio::Data* data, const Eigen::VectorXd& x) {
-  const Eigen::VectorXd& q = x.segment(0, model->nq);
-  const Eigen::VectorXd& v = x.segment(model->nq, model->nv);
-  Eigen::VectorXd a = Eigen::VectorXd::Zero(model->nv);
-  Eigen::Matrix<double, 6, Eigen::Dynamic> tmp;
-  tmp.resize(6, model->nv);
-  pinocchio::forwardKinematics(*model, *data, q);
-  pinocchio::computeForwardKinematicsDerivatives(*model, *data, q, v, a);
-  pinocchio::computeJointJacobians(*model, *data, q);
-  pinocchio::updateFramePlacements(*model, *data);
-  pinocchio::jacobianCenterOfMass(*model, *data, q);
-  pinocchio::computeCentroidalMomentum(*model, *data, q, v);
-  pinocchio::computeCentroidalDynamicsDerivatives(*model, *data, q, v, a, tmp, tmp, tmp, tmp);
-}
-
-}  // namespace crocoddyl_unit_test
+}  // namespace unittest
+}  // namespace crocoddyl
 
 #endif  // CROCODDYL_COST_FACTORY_HPP_

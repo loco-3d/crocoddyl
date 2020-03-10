@@ -41,7 +41,8 @@ boost::random::mt19937 rng;
 #include <string>
 #include "crocoddyl/core/utils/exception.hpp"
 
-namespace crocoddyl_unit_test {
+namespace crocoddyl {
+namespace unittest {
 
 class CaptureIOStream {
  public:
@@ -165,6 +166,7 @@ RealType random_real_in_range(RealType first = 0, RealType last = 1) {
 #endif
 }
 
-}  // namespace crocoddyl_unit_test
+}  // namespace unittest
+}  // namespace crocoddyl
 
 #endif  // CROCODDYL_UNITTEST_COMMON_HPP_
