@@ -133,9 +133,9 @@ void test_partial_derivatives_against_numdiff(CostModelTypes::Type cost_type,
   BOOST_CHECK((data->Lu - data_num_diff->Lu).isMuchSmallerThan(1.0, tol));
   if (model_num_diff.get_with_gauss_approx()) {
     // The num diff is not precise enough to be tested here.
-    // BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isMuchSmallerThan(1.0, tol));
-    // BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isMuchSmallerThan(1.0, tol));
-    // BOOST_CHECK((data->Luu - data_num_diff->Luu).isMuchSmallerThan(1.0, tol));
+    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isMuchSmallerThan(1.0, tol));
+    BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isMuchSmallerThan(1.0, tol));
+    BOOST_CHECK((data->Luu - data_num_diff->Luu).isMuchSmallerThan(1.0, tol));
   } else {
     BOOST_CHECK((data_num_diff->Lxx).isMuchSmallerThan(1.0, tol));
     BOOST_CHECK((data_num_diff->Lxu).isMuchSmallerThan(1.0, tol));
@@ -162,14 +162,21 @@ bool init_function() {
       for (size_t state_type = 0; state_type < StateTypes::all.size(); ++state_type) {
         if (StateTypes::all[state_type] == StateTypes::StateMultibody) {
           for (size_t model_type = 0; model_type < PinocchioModelTypes::all.size(); ++model_type) {
-            std::ostringstream test_name;
-            test_name << "test_" << CostModelTypes::all[cost_type] << "_" << StateTypes::all[state_type]
-                      << PinocchioModelTypes::all[model_type];
-            test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-            std::cout << "Running " << test_name.str() << std::endl;
-            register_cost_model_unit_tests(CostModelTypes::all[cost_type], ActivationModelTypes::all[activation_type],
-                                           StateTypes::all[state_type], PinocchioModelTypes::all[model_type], *ts);
-            framework::master_test_suite().add(ts);
+            // @todo(cmastalli) Currently, the cost num-diff class uses the residual vector to retrieve second order derivatives.
+            // This is method is OK if we use the quadratic activation model.
+            // We need to work on the numerical differentiation of second order derivatives
+            if (ActivationModelTypes::all[activation_type] == ActivationModelTypes::ActivationModelQuad) {
+              std::ostringstream test_name;
+              test_name << "test_" << CostModelTypes::all[cost_type] << "_"
+                        << ActivationModelTypes::all[activation_type] << "_" << StateTypes::all[state_type]
+                        << PinocchioModelTypes::all[model_type];
+              test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+              std::cout << "Running " << test_name.str() << std::endl;
+              register_cost_model_unit_tests(CostModelTypes::all[cost_type],
+                                             ActivationModelTypes::all[activation_type], StateTypes::all[state_type],
+                                             PinocchioModelTypes::all[model_type], *ts);
+              framework::master_test_suite().add(ts);
+            }
           }
         } else {
           // @todo(cmastalli) it would be important to have this option once we have a cost-base class that it is
