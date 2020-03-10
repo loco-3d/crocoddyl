@@ -138,10 +138,11 @@ void updateAllPinocchio(pinocchio::Model* const model, pinocchio::Data* data, co
   Eigen::VectorXd a = Eigen::VectorXd::Zero(model->nv);
   Eigen::Matrix<double, 6, Eigen::Dynamic> tmp;
   tmp.resize(6, model->nv);
-  pinocchio::forwardKinematics(*model, *data, q);
+  pinocchio::forwardKinematics(*model, *data, q, v, a);
   pinocchio::computeForwardKinematicsDerivatives(*model, *data, q, v, a);
   pinocchio::computeJointJacobians(*model, *data, q);
   pinocchio::updateFramePlacements(*model, *data);
+  pinocchio::centerOfMass(*model, *data, q, v, a);
   pinocchio::jacobianCenterOfMass(*model, *data, q);
   pinocchio::computeCentroidalMomentum(*model, *data, q, v);
   pinocchio::computeCentroidalDynamicsDerivatives(*model, *data, q, v, a, tmp, tmp, tmp, tmp);
