@@ -38,7 +38,10 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstr
 
   const Scalar& c0 = data_nd->data_0->cost;
   data_nd->cost = c0;
-
+  if (get_with_gauss_approx()) {
+    model_->get_activation()->calc(data_nd->data_0->activation, data_nd->data_0->r);
+    model_->get_activation()->calcDiff(data_nd->data_0->activation, data_nd->data_0->r);
+  }
   assertStableStateFD(x);
 
   // Computing the d cost(x,u) / dx
@@ -84,9 +87,9 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstr
   }
 
   if (get_with_gauss_approx()) {
-    data_nd->Lxx = data_nd->Rx.transpose() * data_nd->Rx;
-    data_nd->Lxu = data_nd->Rx.transpose() * data_nd->Ru;
-    data_nd->Luu = data_nd->Ru.transpose() * data_nd->Ru;
+    data_nd->Lxx = data_nd->Rx.transpose() * data_nd->data_0->activation->Arr * data_nd->Rx;
+    data_nd->Lxu = data_nd->Rx.transpose() * data_nd->data_0->activation->Arr * data_nd->Ru;
+    data_nd->Luu = data_nd->Ru.transpose() * data_nd->data_0->activation->Arr * data_nd->Ru;
   } else {
     data_nd->Lxx.fill(0.0);
     data_nd->Lxu.fill(0.0);

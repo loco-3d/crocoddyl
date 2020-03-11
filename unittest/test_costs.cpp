@@ -162,21 +162,14 @@ bool init_function() {
       for (size_t state_type = 0; state_type < StateTypes::all.size(); ++state_type) {
         if (StateTypes::all[state_type] == StateTypes::StateMultibody) {
           for (size_t model_type = 0; model_type < PinocchioModelTypes::all.size(); ++model_type) {
-            // @todo(cmastalli) Currently, the cost num-diff class uses the residual vector to retrieve second order
-            // derivatives. This is method is OK if we use the quadratic activation model. We need to work on the
-            // numerical differentiation of second order derivatives
-            if (ActivationModelTypes::all[activation_type] == ActivationModelTypes::ActivationModelQuad) {
-              std::ostringstream test_name;
-              test_name << "test_" << CostModelTypes::all[cost_type] << "_"
-                        << ActivationModelTypes::all[activation_type] << "_" << StateTypes::all[state_type]
-                        << PinocchioModelTypes::all[model_type];
-              test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-              std::cout << "Running " << test_name.str() << std::endl;
-              register_cost_model_unit_tests(CostModelTypes::all[cost_type],
-                                             ActivationModelTypes::all[activation_type], StateTypes::all[state_type],
-                                             PinocchioModelTypes::all[model_type], *ts);
-              framework::master_test_suite().add(ts);
-            }
+            std::ostringstream test_name;
+            test_name << "test_" << CostModelTypes::all[cost_type] << "_" << ActivationModelTypes::all[activation_type]
+                      << "_" << StateTypes::all[state_type] << PinocchioModelTypes::all[model_type];
+            test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+            std::cout << "Running " << test_name.str() << std::endl;
+            register_cost_model_unit_tests(CostModelTypes::all[cost_type], ActivationModelTypes::all[activation_type],
+                                           StateTypes::all[state_type], PinocchioModelTypes::all[model_type], *ts);
+            framework::master_test_suite().add(ts);
           }
         } else {
           // @todo(cmastalli) it would be important to have this option once we have a cost-base class that it is
