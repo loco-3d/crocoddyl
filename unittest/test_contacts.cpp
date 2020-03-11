@@ -94,7 +94,6 @@ void test_calc_diff_no_computation(ContactModelTypes::Type contact_type, Pinocch
 
   // Check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(data->Jc.hasNaN() || data->Jc.isZero());
-  BOOST_CHECK(data->a0.isZero());
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
   BOOST_CHECK(data->df_du.isZero());
