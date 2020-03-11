@@ -162,9 +162,9 @@ bool init_function() {
       for (size_t state_type = 0; state_type < StateTypes::all.size(); ++state_type) {
         if (StateTypes::all[state_type] == StateTypes::StateMultibody) {
           for (size_t model_type = 0; model_type < PinocchioModelTypes::all.size(); ++model_type) {
-            // @todo(cmastalli) Currently, the cost num-diff class uses the residual vector to retrieve second order derivatives.
-            // This is method is OK if we use the quadratic activation model.
-            // We need to work on the numerical differentiation of second order derivatives
+            // @todo(cmastalli) Currently, the cost num-diff class uses the residual vector to retrieve second order
+            // derivatives. This is method is OK if we use the quadratic activation model. We need to work on the
+            // numerical differentiation of second order derivatives
             if (ActivationModelTypes::all[activation_type] == ActivationModelTypes::ActivationModelQuad) {
               std::ostringstream test_name;
               test_name << "test_" << CostModelTypes::all[cost_type] << "_"
