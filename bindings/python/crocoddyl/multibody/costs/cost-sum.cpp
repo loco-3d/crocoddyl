@@ -30,7 +30,7 @@ void exposeCostSum() {
   bp::register_ptr_to_python<boost::shared_ptr<CostItem> >();
   bp::to_python_converter<std::map<std::string, CostItemPtr, std::less<std::string>,
                                    std::allocator<std::pair<const std::string, CostItemPtr> > >,
-                          map_to_dict<std::string, CostItemPtr> >();
+                          map_to_dict<std::string, CostItemPtr, false> >();
   bp::to_python_converter<std::map<std::string, CostDataPtr, std::less<std::string>,
                                    std::allocator<std::pair<const std::string, CostDataPtr> > >,
                           map_to_dict<std::string, CostDataPtr, false> >();
