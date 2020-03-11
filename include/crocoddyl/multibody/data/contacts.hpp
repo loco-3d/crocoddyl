@@ -19,6 +19,8 @@ namespace crocoddyl {
 
 template <typename Scalar>
 struct DataCollectorContactTpl : virtual DataCollectorAbstractTpl<Scalar> {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   DataCollectorContactTpl<Scalar>(boost::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts)
       : DataCollectorAbstractTpl<Scalar>(), contacts(contacts) {}
   virtual ~DataCollectorContactTpl() {}
@@ -28,6 +30,8 @@ struct DataCollectorContactTpl : virtual DataCollectorAbstractTpl<Scalar> {
 
 template <typename Scalar>
 struct DataCollectorMultibodyInContactTpl : DataCollectorMultibodyTpl<Scalar>, DataCollectorContactTpl<Scalar> {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   DataCollectorMultibodyInContactTpl(pinocchio::DataTpl<Scalar>* const pinocchio,
                                      boost::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts)
       : DataCollectorMultibodyTpl<Scalar>(pinocchio), DataCollectorContactTpl<Scalar>(contacts) {}
@@ -37,6 +41,8 @@ struct DataCollectorMultibodyInContactTpl : DataCollectorMultibodyTpl<Scalar>, D
 template <typename Scalar>
 struct DataCollectorActMultibodyInContactTpl : DataCollectorMultibodyInContactTpl<Scalar>,
                                                DataCollectorActuationTpl<Scalar> {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   DataCollectorActMultibodyInContactTpl(pinocchio::DataTpl<Scalar>* const pinocchio,
                                         boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation,
                                         boost::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts)
