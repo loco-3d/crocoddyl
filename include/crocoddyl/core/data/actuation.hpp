@@ -19,6 +19,8 @@ namespace crocoddyl {
 
 template <typename Scalar>
 struct DataCollectorActuationTpl : virtual DataCollectorAbstractTpl<Scalar> {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   DataCollectorActuationTpl(boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation)
       : DataCollectorAbstractTpl<Scalar>(), actuation(actuation) {}
   virtual ~DataCollectorActuationTpl() {}

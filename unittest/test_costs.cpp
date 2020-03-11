@@ -133,9 +133,9 @@ void test_partial_derivatives_against_numdiff(CostModelTypes::Type cost_type,
   BOOST_CHECK((data->Lu - data_num_diff->Lu).isMuchSmallerThan(1.0, tol));
   if (model_num_diff.get_with_gauss_approx()) {
     // The num diff is not precise enough to be tested here.
-    // BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isMuchSmallerThan(1.0, tol));
-    // BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isMuchSmallerThan(1.0, tol));
-    // BOOST_CHECK((data->Luu - data_num_diff->Luu).isMuchSmallerThan(1.0, tol));
+    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isMuchSmallerThan(1.0, tol));
+    BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isMuchSmallerThan(1.0, tol));
+    BOOST_CHECK((data->Luu - data_num_diff->Luu).isMuchSmallerThan(1.0, tol));
   } else {
     BOOST_CHECK((data_num_diff->Lxx).isMuchSmallerThan(1.0, tol));
     BOOST_CHECK((data_num_diff->Lxu).isMuchSmallerThan(1.0, tol));
@@ -163,8 +163,8 @@ bool init_function() {
         if (StateTypes::all[state_type] == StateTypes::StateMultibody) {
           for (size_t model_type = 0; model_type < PinocchioModelTypes::all.size(); ++model_type) {
             std::ostringstream test_name;
-            test_name << "test_" << CostModelTypes::all[cost_type] << "_" << StateTypes::all[state_type]
-                      << PinocchioModelTypes::all[model_type];
+            test_name << "test_" << CostModelTypes::all[cost_type] << "_" << ActivationModelTypes::all[activation_type]
+                      << "_" << StateTypes::all[state_type] << PinocchioModelTypes::all[model_type];
             test_suite* ts = BOOST_TEST_SUITE(test_name.str());
             std::cout << "Running " << test_name.str() << std::endl;
             register_cost_model_unit_tests(CostModelTypes::all[cost_type], ActivationModelTypes::all[activation_type],
