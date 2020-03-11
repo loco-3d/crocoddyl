@@ -43,7 +43,7 @@ class CostModelSumTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  typedef std::map<std::string, CostItem> CostModelContainer;
+  typedef std::map<std::string, boost::shared_ptr<CostItem> > CostModelContainer;
   typedef std::map<std::string, boost::shared_ptr<CostDataAbstract> > CostDataContainer;
 
   CostModelSumTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu, const bool& with_residuals = true);
@@ -136,8 +136,8 @@ struct CostDataSumTpl {
     Luu.setZero();
     for (typename CostModelSumTpl<Scalar>::CostModelContainer::const_iterator it = model->get_costs().begin();
          it != model->get_costs().end(); ++it) {
-      const CostItem& item = it->second;
-      costs.insert(std::make_pair(item.name, item.cost->createData(data)));
+      const boost::shared_ptr<CostItem>& item = it->second;
+      costs.insert(std::make_pair(item->name, item->cost->createData(data)));
     }
   }
 

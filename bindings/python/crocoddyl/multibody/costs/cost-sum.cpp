@@ -24,14 +24,15 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(CostModelSum_calc_wraps, CostModelSum::ca
 
 void exposeCostSum() {
   // Register custom converters between std::map and Python dict
+  typedef boost::shared_ptr<CostItem> CostItemPtr;
   typedef boost::shared_ptr<CostDataAbstract> CostDataPtr;
-  bp::to_python_converter<std::map<std::string, CostItem, std::less<std::string>,
-                                   std::allocator<std::pair<const std::string, CostItem> > >,
-                          map_to_dict<std::string, CostItem> >();
+  bp::to_python_converter<std::map<std::string, CostItemPtr, std::less<std::string>,
+                                   std::allocator<std::pair<const std::string, CostItemPtr> > >,
+                          map_to_dict<std::string, CostItemPtr> >();
   bp::to_python_converter<std::map<std::string, CostDataPtr, std::less<std::string>,
                                    std::allocator<std::pair<const std::string, CostDataPtr> > >,
                           map_to_dict<std::string, CostDataPtr, false> >();
-  dict_to_map<std::string, CostItem>().from_python();
+  dict_to_map<std::string, CostItemPtr>().from_python();
   dict_to_map<std::string, CostDataPtr>().from_python();
 
   bp::class_<CostItem, boost::noncopyable>(
