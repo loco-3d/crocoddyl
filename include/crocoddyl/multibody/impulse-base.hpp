@@ -72,8 +72,8 @@ struct ImpulseDataAbstractTpl {
         frame(0),
         Jc(model->get_ni(), model->get_state()->get_nv()),
         dv0_dq(model->get_ni(), model->get_state()->get_nv()),
-        df_dq(model->get_ni(), model->get_state()->get_nv()),
-        f(pinocchio::ForceTpl<Scalar>::Zero()) {
+        f(pinocchio::ForceTpl<Scalar>::Zero()),
+        df_dq(model->get_ni(), model->get_state()->get_nv()) {
     Jc.setZero();
     dv0_dq.setZero();
     df_dq.setZero();
@@ -85,8 +85,8 @@ struct ImpulseDataAbstractTpl {
   pinocchio::FrameIndex frame;
   MatrixXs Jc;
   MatrixXs dv0_dq;
-  MatrixXs df_dq;
   pinocchio::ForceTpl<Scalar> f;
+  MatrixXs df_dq;
 };
 
 }  // namespace crocoddyl
