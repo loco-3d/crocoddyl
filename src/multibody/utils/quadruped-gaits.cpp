@@ -287,7 +287,7 @@ boost::shared_ptr<ActionModelAbstract> SimpleQuadrupedGaitProblem::createImpulse
   }
 
   // Creating the cost model for a contact phase
-  boost::shared_ptr<crocoddyl::CostModelSum> cost_model = boost::make_shared<crocoddyl::CostModelSum>(state_, 0, true);
+  boost::shared_ptr<crocoddyl::CostModelSum> cost_model = boost::make_shared<crocoddyl::CostModelSum>(state_, 0);
   if (!foot_swing_task.empty()) {
     for (std::vector<crocoddyl::FramePlacement>::const_iterator it = foot_swing_task.begin();
          it != foot_swing_task.end(); ++it) {

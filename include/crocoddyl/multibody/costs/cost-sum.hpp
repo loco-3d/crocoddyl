@@ -46,8 +46,8 @@ class CostModelSumTpl {
   typedef std::map<std::string, boost::shared_ptr<CostItem> > CostModelContainer;
   typedef std::map<std::string, boost::shared_ptr<CostDataAbstract> > CostDataContainer;
 
-  CostModelSumTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu, const bool& with_residuals = true);
-  explicit CostModelSumTpl(boost::shared_ptr<StateMultibody> state, const bool& with_residuals = true);
+  CostModelSumTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu);
+  explicit CostModelSumTpl(boost::shared_ptr<StateMultibody> state);
   ~CostModelSumTpl();
 
   void addCost(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, const Scalar& weight);
@@ -72,7 +72,6 @@ class CostModelSumTpl {
   CostModelContainer costs_;
   std::size_t nu_;
   std::size_t nr_;
-  bool with_residuals_;
   VectorXs unone_;
 
 #ifdef PYTHON_BINDINGS
@@ -112,23 +111,18 @@ struct CostDataSumTpl {
 
   template <template <typename Scalar> class Model>
   CostDataSumTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : r_internal(model->get_nr()),
-        Lx_internal(model->get_state()->get_ndx()),
+      : Lx_internal(model->get_state()->get_ndx()),
         Lu_internal(model->get_nu()),
         Lxx_internal(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
         Lxu_internal(model->get_state()->get_ndx(), model->get_nu()),
         Luu_internal(model->get_nu(), model->get_nu()),
         shared(data),
         cost(0.),
-        r(r_internal.data(), model->get_nr()),
         Lx(Lx_internal.data(), model->get_state()->get_ndx()),
         Lu(Lu_internal.data(), model->get_nu()),
         Lxx(Lxx_internal.data(), model->get_state()->get_ndx(), model->get_state()->get_ndx()),
         Lxu(Lxu_internal.data(), model->get_state()->get_ndx(), model->get_nu()),
-        Luu(Luu_internal.data(), model->get_nu(), model->get_nu()),
-        Rx(model->get_nr(), model->get_state()->get_ndx()),
-        Ru(model->get_nr(), model->get_nu()) {
-    r.setZero();
+        Luu(Luu_internal.data(), model->get_nu(), model->get_nu()) {
     Lx.setZero();
     Lu.setZero();
     Lxx.setZero();
@@ -144,7 +138,6 @@ struct CostDataSumTpl {
   template <class ActionData>
   void shareMemory(ActionData* const data) {
     // Share memory with the differential action data
-    new (&r) Eigen::Map<VectorXs>(data->r.data(), data->r.size());
     new (&Lx) Eigen::Map<VectorXs>(data->Lx.data(), data->Lx.size());
     new (&Lu) Eigen::Map<VectorXs>(data->Lu.data(), data->Lu.size());
     new (&Lxx) Eigen::Map<MatrixXs>(data->Lxx.data(), data->Lxx.rows(), data->Lxx.cols());
@@ -152,20 +145,12 @@ struct CostDataSumTpl {
     new (&Luu) Eigen::Map<MatrixXs>(data->Luu.data(), data->Luu.rows(), data->Luu.cols());
   }
 
-  VectorXs get_r() const { return r; }
   VectorXs get_Lx() const { return Lx; }
   VectorXs get_Lu() const { return Lu; }
   MatrixXs get_Lxx() const { return Lxx; }
   MatrixXs get_Lxu() const { return Lxu; }
   MatrixXs get_Luu() const { return Luu; }
 
-  void set_r(const VectorXs& _r) {
-    if (r.size() != _r.size()) {
-      throw_pretty("Invalid argument: "
-                   << "r has wrong dimension (it should be " + std::to_string(r.size()) + ")");
-    }
-    r = _r;
-  }
   void set_Lx(const VectorXs& _Lx) {
     if (Lx.size() != _Lx.size()) {
       throw_pretty("Invalid argument: "
@@ -206,7 +191,6 @@ struct CostDataSumTpl {
   }
 
   // Creates internal data in case we don't share it externally
-  VectorXs r_internal;
   VectorXs Lx_internal;
   VectorXs Lu_internal;
   MatrixXs Lxx_internal;
@@ -216,14 +200,11 @@ struct CostDataSumTpl {
   typename CostModelSumTpl<Scalar>::CostDataContainer costs;
   DataCollectorAbstract* shared;
   Scalar cost;
-  Eigen::Map<VectorXs> r;
   Eigen::Map<VectorXs> Lx;
   Eigen::Map<VectorXs> Lu;
   Eigen::Map<MatrixXs> Lxx;
   Eigen::Map<MatrixXs> Lxu;
   Eigen::Map<MatrixXs> Luu;
-  MatrixXs Rx;
-  MatrixXs Ru;
 };
 
 }  // namespace crocoddyl

@@ -13,7 +13,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 CostModelNumDiffTpl<Scalar>::CostModelNumDiffTpl(const boost::shared_ptr<Base>& model)
-    : Base(model->get_state(), model->get_activation(), model->get_nu(), model->get_with_residuals()), model_(model) {
+    : Base(model->get_state(), model->get_activation(), model->get_nu()), model_(model) {
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon());
 }
 

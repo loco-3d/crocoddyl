@@ -12,13 +12,12 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-CostModelSumTpl<Scalar>::CostModelSumTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu,
-                                         const bool& with_residuals)
-    : state_(state), nu_(nu), nr_(0), with_residuals_(with_residuals) {}
+CostModelSumTpl<Scalar>::CostModelSumTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu)
+    : state_(state), nu_(nu), nr_(0) {}
 
 template <typename Scalar>
-CostModelSumTpl<Scalar>::CostModelSumTpl(boost::shared_ptr<StateMultibody> state, const bool& with_residuals)
-    : state_(state), nu_(state->get_nv()), nr_(0), with_residuals_(with_residuals) {}
+CostModelSumTpl<Scalar>::CostModelSumTpl(boost::shared_ptr<StateMultibody> state)
+    : state_(state), nu_(state->get_nv()), nr_(0) {}
 
 template <typename Scalar>
 CostModelSumTpl<Scalar>::~CostModelSumTpl() {}
@@ -65,7 +64,6 @@ void CostModelSumTpl<Scalar>::calc(const boost::shared_ptr<CostDataSumTpl<Scalar
                  << "it doesn't match the number of cost datas and models");
   }
   data->cost = 0.;
-  std::size_t nr = 0;
 
   typename CostModelContainer::iterator it_m, end_m;
   typename CostDataContainer::iterator it_d, end_d;
@@ -77,11 +75,6 @@ void CostModelSumTpl<Scalar>::calc(const boost::shared_ptr<CostDataSumTpl<Scalar
 
     m_i->cost->calc(d_i, x, u);
     data->cost += m_i->weight * d_i->cost;
-    if (with_residuals_) {
-      const std::size_t& nr_i = m_i->cost->get_activation()->get_nr();
-      data->r.segment(nr, nr_i) = sqrt(m_i->weight) * d_i->r;
-      nr += nr_i;
-    }
   }
 }
 
@@ -100,14 +93,12 @@ void CostModelSumTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataSumTpl<Sc
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of cost datas and models");
   }
-  std::size_t nr = 0;
   data->Lx.setZero();
   data->Lu.setZero();
   data->Lxx.setZero();
   data->Lxu.setZero();
   data->Luu.setZero();
 
-  const std::size_t& ndx = state_->get_ndx();
   typename CostModelContainer::iterator it_m, end_m;
   typename CostDataContainer::iterator it_d, end_d;
   for (it_m = costs_.begin(), end_m = costs_.end(), it_d = data->costs.begin(), end_d = data->costs.end();
@@ -122,12 +113,6 @@ void CostModelSumTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataSumTpl<Sc
     data->Lxx += m_i->weight * d_i->Lxx;
     data->Lxu += m_i->weight * d_i->Lxu;
     data->Luu += m_i->weight * d_i->Luu;
-    if (with_residuals_) {
-      const std::size_t& nr_i = m_i->cost->get_activation()->get_nr();
-      data->Rx.block(nr, 0, nr_i, ndx) = sqrt(m_i->weight) * d_i->Rx;
-      data->Ru.block(nr, 0, nr_i, nu_) = sqrt(m_i->weight) * d_i->Ru;
-      nr += nr_i;
-    }
   }
 }
 

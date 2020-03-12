@@ -23,7 +23,7 @@ CONTACT_3D = crocoddyl.ContactModel3D(
                                             pinocchio.SE3.Random().translation), ACTUATION.nu, pinocchio.utils.rand(2))
 CONTACTS.addContact("r_sole_contact", CONTACT_6D)
 CONTACTS.addContact("l_sole_contact", CONTACT_3D)
-COSTS = crocoddyl.CostModelSum(ROBOT_STATE, ACTUATION.nu, True)
+COSTS = crocoddyl.CostModelSum(ROBOT_STATE, ACTUATION.nu)
 
 frictionCone = crocoddyl.FrictionCone(np.matrix([0., 0., 1.]).T, 0.7, 4, False)
 activation = crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(frictionCone.lb, frictionCone.ub))

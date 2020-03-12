@@ -18,18 +18,18 @@ namespace python {
 class CostModelAbstract_wrap : public CostModelAbstract, public bp::wrapper<CostModelAbstract> {
  public:
   CostModelAbstract_wrap(boost::shared_ptr<StateMultibody> state,
-                         boost::shared_ptr<ActivationModelAbstract> activation, int nu, bool with_residuals = true)
-      : CostModelAbstract(state, activation, nu, with_residuals) {}
+                         boost::shared_ptr<ActivationModelAbstract> activation, int nu)
+      : CostModelAbstract(state, activation, nu) {}
 
   CostModelAbstract_wrap(boost::shared_ptr<StateMultibody> state,
-                         boost::shared_ptr<ActivationModelAbstract> activation, bool with_residuals = true)
-      : CostModelAbstract(state, activation, with_residuals) {}
+                         boost::shared_ptr<ActivationModelAbstract> activation)
+      : CostModelAbstract(state, activation) {}
 
-  CostModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, int nr, int nu, bool with_residuals = true)
-      : CostModelAbstract(state, nr, nu, with_residuals), bp::wrapper<CostModelAbstract>() {}
+  CostModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, int nr, int nu)
+      : CostModelAbstract(state, nr, nu), bp::wrapper<CostModelAbstract>() {}
 
-  CostModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, int nr, bool with_residuals = true)
-      : CostModelAbstract(state, nr, with_residuals), bp::wrapper<CostModelAbstract>() {}
+  CostModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, int nr)
+      : CostModelAbstract(state, nr), bp::wrapper<CostModelAbstract>() {}
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {

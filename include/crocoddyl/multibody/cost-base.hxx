@@ -11,35 +11,24 @@ namespace crocoddyl {
 template <typename Scalar>
 CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
                                                    boost::shared_ptr<ActivationModelAbstract> activation,
-                                                   const std::size_t& nu, const bool& with_residuals)
-    : state_(state), activation_(activation), nu_(nu), with_residuals_(with_residuals), unone_(VectorXs::Zero(nu)) {}
+                                                   const std::size_t& nu)
+    : state_(state), activation_(activation), nu_(nu), unone_(VectorXs::Zero(nu)) {}
 
 template <typename Scalar>
 CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
-                                                   boost::shared_ptr<ActivationModelAbstract> activation,
-                                                   const bool& with_residuals)
-    : state_(state),
-      activation_(activation),
-      nu_(state->get_nv()),
-      with_residuals_(with_residuals),
-      unone_(VectorXs::Zero(state->get_nv())) {}
+                                                   boost::shared_ptr<ActivationModelAbstract> activation)
+    : state_(state), activation_(activation), nu_(state->get_nv()), unone_(VectorXs::Zero(state->get_nv())) {}
 
 template <typename Scalar>
 CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nr,
-                                                   const std::size_t& nu, const bool& with_residuals)
-    : state_(state),
-      activation_(boost::make_shared<ActivationModelQuad>(nr)),
-      nu_(nu),
-      with_residuals_(with_residuals),
-      unone_(VectorXs::Zero(nu)) {}
+                                                   const std::size_t& nu)
+    : state_(state), activation_(boost::make_shared<ActivationModelQuad>(nr)), nu_(nu), unone_(VectorXs::Zero(nu)) {}
 
 template <typename Scalar>
-CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nr,
-                                                   const bool& with_residuals)
+CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nr)
     : state_(state),
       activation_(boost::make_shared<ActivationModelQuad>(nr)),
       nu_(state->get_nv()),
-      with_residuals_(with_residuals),
       unone_(VectorXs::Zero(state->get_nv())) {}
 
 template <typename Scalar>
@@ -76,11 +65,6 @@ const boost::shared_ptr<ActivationModelAbstractTpl<Scalar> >& CostModelAbstractT
 template <typename Scalar>
 const std::size_t& CostModelAbstractTpl<Scalar>::get_nu() const {
   return nu_;
-}
-
-template <typename Scalar>
-const bool& CostModelAbstractTpl<Scalar>::get_with_residuals() const {
-  return with_residuals_;
 }
 
 }  // namespace crocoddyl

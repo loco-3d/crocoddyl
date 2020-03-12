@@ -21,7 +21,7 @@ CONTACT_6D_2 = crocoddyl.ContactModel6D(
     pinocchio.utils.rand(2))
 CONTACTS.addContact("r_sole_contact", CONTACT_6D_1)
 CONTACTS.addContact("l_sole_contact", CONTACT_6D_2)
-COSTS = crocoddyl.CostModelSum(ROBOT_STATE, ACTUATION.nu, False)
+COSTS = crocoddyl.CostModelSum(ROBOT_STATE, ACTUATION.nu)
 COSTS.addCost(
     "force",
     crocoddyl.CostModelContactForce(ROBOT_STATE,
