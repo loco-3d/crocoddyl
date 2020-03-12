@@ -66,13 +66,13 @@ void exposeActuationAbstract() {
                                         "The actuation data uses the model in order to first process it.\n"
                                         ":param model: actuation model"))
       .add_property("tau",
-                    bp::make_getter(&ActuationDataAbstract::tau, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_getter(&ActuationDataAbstract::tau, bp::return_internal_reference<>()),
                     bp::make_setter(&ActuationDataAbstract::tau), "actuation-force signal")
       .add_property("dtau_dx",
-                    bp::make_getter(&ActuationDataAbstract::dtau_dx, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_getter(&ActuationDataAbstract::dtau_dx, bp::return_internal_reference<>()),
                     bp::make_setter(&ActuationDataAbstract::dtau_dx), "Jacobian of the actuation model")
       .add_property("dtau_du",
-                    bp::make_getter(&ActuationDataAbstract::dtau_du, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_getter(&ActuationDataAbstract::dtau_du, bp::return_internal_reference<>()),
                     bp::make_setter(&ActuationDataAbstract::dtau_du), "Jacobian of the actuation model");
 }
 

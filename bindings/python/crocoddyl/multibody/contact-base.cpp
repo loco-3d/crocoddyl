@@ -81,18 +81,18 @@ void exposeContactAbstract() {
                     "local frame placement of the contact frame")
       .add_property("fXj", bp::make_getter(&ContactDataAbstract::fXj, bp::return_value_policy<bp::return_by_value>()),
                     "action matrix from contact to local frames")
-      .add_property("Jc", bp::make_getter(&ContactDataAbstract::Jc, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("Jc", bp::make_getter(&ContactDataAbstract::Jc, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataAbstract::Jc), "contact Jacobian")
-      .add_property("a0", bp::make_getter(&ContactDataAbstract::a0, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("a0", bp::make_getter(&ContactDataAbstract::a0, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataAbstract::a0), "desired contact acceleration")
       .add_property("da0_dx",
-                    bp::make_getter(&ContactDataAbstract::da0_dx, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_getter(&ContactDataAbstract::da0_dx, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataAbstract::da0_dx), "Jacobian of the desired contact acceleration")
       .add_property("df_dx",
-                    bp::make_getter(&ContactDataAbstract::df_dx, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_getter(&ContactDataAbstract::df_dx, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataAbstract::df_dx), "Jacobian of the contact forces")
       .add_property("df_du",
-                    bp::make_getter(&ContactDataAbstract::df_du, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_getter(&ContactDataAbstract::df_du, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataAbstract::df_du), "Jacobian of the contact forces")
       .def_readwrite("joint", &ContactDataAbstract::joint, "joint index of the contact frame")
       .def_readwrite("frame", &ContactDataAbstract::frame, "frame index of the contact frame")
