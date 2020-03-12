@@ -41,13 +41,13 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   virtual ~CostModelNumDiffTpl();
 
   /**
-   * @brief @copydoc ActionModelAbstract::calc()
+   * @brief @copydoc CostModelAbstract::calc()
    */
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc ActionModelAbstract::calcDiff()
+   * @brief @copydoc CostModelAbstract::calcDiff()
    */
   void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u);
@@ -90,9 +90,8 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   bool get_with_gauss_approx();
 
   /**
-   * @brief Register functions that take a pinocchio model, a pinocchio
-   * data, a state and a control. These function are called during the
-   * evaluation of the gradient and hessian.
+   * @brief Register functions that updates the shared data computed for a system rollout
+   * The updated data is used to evaluate of the gradient and hessian.
    *
    * @param reevals are the registered functions.
    */

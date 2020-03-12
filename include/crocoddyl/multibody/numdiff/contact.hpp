@@ -38,19 +38,19 @@ class ContactModelNumDiffTpl : public ContactModelAbstractTpl<_Scalar> {
   virtual ~ContactModelNumDiffTpl();
 
   /**
-   * @brief @copydoc ActionModelAbstract::calc()
+   * @brief @copydoc ContactModelAbstract::calc()
    */
   void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
-   * @brief @copydoc ActionModelAbstract::calcDiff()
+   * @brief @copydoc ContactModelAbstract::calcDiff()
    */
   void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create a Data object
    *
-   * @param data is the DataCollector used by the original model.
+   * @param data is the Pinocchio data
    * @return boost::shared_ptr<ContactModelAbstract>
    */
   boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
@@ -77,9 +77,8 @@ class ContactModelNumDiffTpl : public ContactModelAbstractTpl<_Scalar> {
   void set_disturbance(const Scalar& disturbance);
 
   /**
-   * @brief Register functions that take a pinocchio model, a pinocchio
-   * data, a state and a control. These function are called during the
-   * evaluation of the gradient and hessian.
+   * @brief Register functions that take a pinocchio model, a pinocchio data, a state and a control.
+   * The updated data is used to evaluate of the gradient and hessian.
    *
    * @param reevals are the registered functions.
    */
@@ -125,9 +124,7 @@ struct ContactDataNumDiffTpl : public ContactDataAbstractTpl<_Scalar> {
 
   template <template <typename Scalar> class Model>
   explicit ContactDataNumDiffTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
-      : Base(model, data),
-        dx(model->get_state()->get_ndx()),
-        xp(model->get_state()->get_nx()) {
+      : Base(model, data), dx(model->get_state()->get_ndx()), xp(model->get_state()->get_nx()) {
     dx.setZero();
     xp.setZero();
 
@@ -140,13 +137,14 @@ struct ContactDataNumDiffTpl : public ContactDataAbstractTpl<_Scalar> {
 
   virtual ~ContactDataNumDiffTpl() {}
 
-  using Base::pinocchio;
   using Base::a0;
   using Base::da0_dx;
+  using Base::f;
+  using Base::pinocchio;
 
-  VectorXs dx;  //!< State disturbance.
-  VectorXs xp;  //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$".
-  boost::shared_ptr<Base> data_0;                //!< The data at the approximation point.
+  VectorXs dx;                     //!< State disturbance.
+  VectorXs xp;                     //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$".
+  boost::shared_ptr<Base> data_0;  //!< The data at the approximation point.
   std::vector<boost::shared_ptr<Base> > data_x;  //!< The temporary data associated with the state variation.
 };
 
