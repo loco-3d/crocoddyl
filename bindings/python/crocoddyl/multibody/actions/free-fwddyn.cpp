@@ -92,11 +92,11 @@ void exposeDifferentialActionFreeFwdDynamics() {
                     "total cost data")
       .add_property("Minv",
                     bp::make_getter(&DifferentialActionDataFreeFwdDynamics::Minv,
-                                    bp::return_value_policy<bp::return_by_value>()),
+                                    bp::return_internal_reference<>()),
                     "inverse of the joint-space inertia matrix")
       .add_property("u_drift",
                     bp::make_getter(&DifferentialActionDataFreeFwdDynamics::u_drift,
-                                    bp::return_value_policy<bp::return_by_value>()),
+                                    bp::return_internal_reference<>()),
                     "force-bias vector that accounts for control, Coriolis and gravitational effects");
 }
 

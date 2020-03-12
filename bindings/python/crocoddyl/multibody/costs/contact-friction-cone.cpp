@@ -91,7 +91,7 @@ void exposeCostContactFrictionCone() {
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property(
           "Arr_Ru",
-          bp::make_getter(&CostDataContactFrictionCone::Arr_Ru, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_getter(&CostDataContactFrictionCone::Arr_Ru, bp::return_internal_reference<>()),
           "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)")
       .add_property(
           "contact",

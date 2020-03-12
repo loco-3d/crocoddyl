@@ -84,11 +84,11 @@ void exposeCostCentroidalMomentum() {
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property(
           "dhd_dq",
-          bp::make_getter(&CostDataCentroidalMomentum::dhd_dq, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_getter(&CostDataCentroidalMomentum::dhd_dq, bp::return_internal_reference<>()),
           "Jacobian of the centroidal momentum")
       .add_property(
           "dhd_dv",
-          bp::make_getter(&CostDataCentroidalMomentum::dhd_dv, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_getter(&CostDataCentroidalMomentum::dhd_dv, bp::return_internal_reference<>()),
           "Jacobian of the centroidal momentum");
 }
 

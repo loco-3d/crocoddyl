@@ -68,10 +68,10 @@ void exposeImpulseAbstract() {
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
       .add_property("pinocchio", bp::make_getter(&ImpulseDataAbstract::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
-      .add_property("Jc", bp::make_getter(&ImpulseDataAbstract::Jc, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("Jc", bp::make_getter(&ImpulseDataAbstract::Jc, bp::return_internal_reference<>()),
                     bp::make_setter(&ImpulseDataAbstract::Jc), "impulse Jacobian")
       .add_property("dv0_dq",
-                    bp::make_getter(&ImpulseDataAbstract::dv0_dq, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_getter(&ImpulseDataAbstract::dv0_dq, bp::return_internal_reference<>()),
                     bp::make_setter(&ImpulseDataAbstract::dv0_dq), "Jacobian of the previous impulse velocity")
       .def_readwrite("joint", &ImpulseDataAbstract::joint, "joint index of the impulse frame")
       .def_readwrite("frame", &ImpulseDataAbstract::frame, "frame index of the impulse frame")

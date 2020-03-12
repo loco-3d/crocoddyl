@@ -25,9 +25,9 @@ void exposeActivationQuadraticBarrier() {
                                    ":param lb: lower bounds\n"
                                    ":param ub: upper bounds\n"
                                    ":param beta: range of activation (between 0 to 1, default 1)"))
-      .add_property("lb", bp::make_getter(&ActivationBounds::lb, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("lb", bp::make_getter(&ActivationBounds::lb, bp::return_internal_reference<>()),
                     "lower bounds")
-      .add_property("ub", bp::make_getter(&ActivationBounds::ub, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("ub", bp::make_getter(&ActivationBounds::ub, bp::return_internal_reference<>()),
                     "upper bounds")
       .add_property("beta", &ActivationBounds::beta, "beta");
 

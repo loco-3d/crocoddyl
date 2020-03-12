@@ -109,11 +109,11 @@ void exposeActionImpulseFwdDynamics() {
           bp::make_getter(&ActionDataImpulseFwdDynamics::costs, bp::return_value_policy<bp::return_by_value>()),
           "total cost data")
       .add_property(
-          "Kinv", bp::make_getter(&ActionDataImpulseFwdDynamics::Kinv, bp::return_value_policy<bp::return_by_value>()),
+          "Kinv", bp::make_getter(&ActionDataImpulseFwdDynamics::Kinv, bp::return_internal_reference<>()),
           "inverse of the KKT matrix")
       .add_property(
           "df_dq",
-          bp::make_getter(&ActionDataImpulseFwdDynamics::df_dq, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_getter(&ActionDataImpulseFwdDynamics::df_dq, bp::return_internal_reference<>()),
           "Jacobian of the impulse force");
 }
 
