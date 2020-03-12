@@ -92,17 +92,17 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
     rMf_Jlog6.setZero();
   }
 
-  using Base::pinocchio;
-  using Base::joint;
-  using Base::frame;
-  using Base::jMf;
-  using Base::fXj;
-  using Base::Jc;
   using Base::a0;
   using Base::da0_dx;
-  using Base::f;
   using Base::df_du;
   using Base::df_dx;
+  using Base::f;
+  using Base::frame;
+  using Base::fXj;
+  using Base::Jc;
+  using Base::jMf;
+  using Base::joint;
+  using Base::pinocchio;
 
   pinocchio::SE3Tpl<Scalar> rMf;
   pinocchio::MotionTpl<Scalar> v;

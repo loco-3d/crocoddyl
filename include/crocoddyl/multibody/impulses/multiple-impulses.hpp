@@ -115,13 +115,13 @@ struct ImpulseDataMultipleTpl : ImpulseDataAbstractTpl<_Scalar> {
     }
   }
 
-  using Base::pinocchio;
-  using Base::joint;
-  using Base::frame;
-  using Base::Jc;
+  using Base::df_dq;
   using Base::dv0_dq;
   using Base::f;
-  using Base::df_dq;
+  using Base::frame;
+  using Base::Jc;
+  using Base::joint;
+  using Base::pinocchio;
 
   VectorXs vnext;
   MatrixXs dvnext_dx;

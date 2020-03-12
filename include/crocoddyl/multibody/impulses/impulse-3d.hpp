@@ -79,13 +79,13 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
     v_partial_dv.setZero();
   }
 
-  using Base::pinocchio;
-  using Base::joint;
+  using Base::df_dq;
+  using Base::dv0_dq;
+  using Base::f;
   using Base::frame;
   using Base::Jc;
-  using Base::dv0_dq;
-  using Base::df_dq;
-  using Base::f;
+  using Base::joint;
+  using Base::pinocchio;
 
   pinocchio::SE3Tpl<Scalar> jMf;
   typename pinocchio::SE3Tpl<Scalar>::ActionMatrixType fXj;
