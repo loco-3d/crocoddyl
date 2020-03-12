@@ -31,7 +31,7 @@ class ContactModelAbstractTpl {
 
   ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nc, const std::size_t& nu);
   ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nc);
-  ~ContactModelAbstractTpl();
+  virtual ~ContactModelAbstractTpl();
 
   virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) = 0;
   virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) = 0;
