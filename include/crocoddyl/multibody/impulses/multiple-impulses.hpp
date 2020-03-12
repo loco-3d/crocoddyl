@@ -115,21 +115,22 @@ struct ImpulseDataMultipleTpl : ImpulseDataAbstractTpl<_Scalar> {
     }
   }
 
+  using Base::pinocchio;
+  using Base::joint;
+  using Base::frame;
+  using Base::Jc;
+  using Base::dv0_dq;
+  using Base::f;
+  using Base::df_dq;
+
   VectorXs vnext;
   MatrixXs dvnext_dx;
   typename ImpulseModelMultiple::ImpulseDataContainer impulses;
   pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar> > fext;
-
-  using Base::df_dq;
-  using Base::dv0_dq;
-  using Base::f;
-  using Base::frame;
-  using Base::Jc;
-  using Base::joint;
-  using Base::pinocchio;
 };
 
 }  // namespace crocoddyl
+
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */

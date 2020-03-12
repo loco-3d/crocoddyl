@@ -78,19 +78,19 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
     v_partial_dv.setZero();
   }
 
+  using Base::pinocchio;
+  using Base::joint;
+  using Base::frame;
+  using Base::Jc;
+  using Base::dv0_dq;
+  using Base::df_dq;
+  using Base::f;
+
   pinocchio::SE3Tpl<Scalar> jMf;
   typename pinocchio::SE3Tpl<Scalar>::ActionMatrixType fXj;
   Matrix6xs fJf;
   Matrix6xs v_partial_dq;
   Matrix6xs v_partial_dv;
-
-  using Base::df_dq;
-  using Base::dv0_dq;
-  using Base::f;
-  using Base::frame;
-  using Base::Jc;
-  using Base::joint;
-  using Base::pinocchio;
 };
 
 }  // namespace crocoddyl
