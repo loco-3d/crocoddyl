@@ -51,7 +51,8 @@ void ContactModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDat
     }
     // contact(x+dx, u)
     model_->calc(data_nd->data_x[ix], data_nd->xp);
-    data_nd->da0_dx(ix) = (data_nd->data_x[ix]->a0 - a0) / disturbance_;
+    data_nd->da0_dx.col(ix) = (data_nd->data_x[ix]->a0 - a0) / disturbance_;
+    data_nd->dx(ix) = 0.0;
   }
 }
 
