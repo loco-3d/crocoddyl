@@ -25,6 +25,7 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
+  typedef typename MathBaseTpl<Scalar>::MatrixXs MatrixXs;
   typedef boost::function<void(const typename MathBaseTpl<Scalar>::VectorXs&)> ReevaluationFunction;
 
   /**
@@ -37,16 +38,16 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Default destructor of the CostModelNumDiff object
    */
-  ~CostModelNumDiffTpl();
+  virtual ~CostModelNumDiffTpl();
 
   /**
-   * @brief @copydoc ActionModelAbstract::calc()
+   * @brief @copydoc CostModelAbstract::calc()
    */
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc ActionModelAbstract::calcDiff()
+   * @brief @copydoc CostModelAbstract::calcDiff()
    */
   void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u);
@@ -89,9 +90,8 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   bool get_with_gauss_approx();
 
   /**
-   * @brief Register functions that take a pinocchio model, a pinocchio
-   * data, a state and a control. These function are called during the
-   * evaluation of the gradient and hessian.
+   * @brief Register functions that updates the shared data computed for a system rollout
+   * The updated data is used to evaluate of the gradient and hessian.
    *
    * @param reevals are the registered functions.
    */
@@ -102,7 +102,6 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::nu_;
   using Base::state_;
   using Base::unone_;
-  using Base::with_residuals_;
 
   /** @brief Model of the cost. */
   boost::shared_ptr<Base> model_;

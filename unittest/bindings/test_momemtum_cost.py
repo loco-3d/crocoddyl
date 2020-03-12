@@ -47,8 +47,8 @@ contactModel.addContact("LF_FOOT_contact", contactModel6)
 
 contactData = contactModel.createData(rdata)
 
-model = DifferentialActionModelFloatingInContact(State, actModel, contactModel,
-                                                 CostModelSum(State, actModel.nu, False), 0., True)
+model = DifferentialActionModelFloatingInContact(State, actModel, contactModel, CostModelSum(State, actModel.nu), 0.,
+                                                 True)
 
 data = model.createData()
 

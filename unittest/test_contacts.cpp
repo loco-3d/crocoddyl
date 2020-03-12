@@ -45,7 +45,6 @@ void test_calc_no_computation(ContactModelTypes::Type contact_type, PinocchioMod
 
   // Check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(data->Jc.hasNaN() || data->Jc.isZero());
-  BOOST_CHECK(data->a0.isZero());
   BOOST_CHECK(data->da0_dx.isZero());
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
@@ -174,6 +173,45 @@ void test_update_force_diff(ContactModelTypes::Type contact_type, PinocchioModel
   BOOST_CHECK(!data->df_du.isZero());
 }
 
+void test_partial_derivatives_against_numdiff(ContactModelTypes::Type contact_type,
+                                              PinocchioModelTypes::Type model_type) {
+  // create the model
+  ContactModelFactory factory(contact_type, model_type);
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create();
+
+  // create the corresponding data object
+  pinocchio::Model& pinocchio_model = *model->get_state()->get_pinocchio().get();
+  pinocchio::Data pinocchio_data(pinocchio_model);
+  boost::shared_ptr<crocoddyl::ContactDataAbstract> data = model->createData(&pinocchio_data);
+
+  // Create the equivalent num diff model and data.
+  crocoddyl::ContactModelNumDiff model_num_diff(model);
+  const boost::shared_ptr<crocoddyl::ContactDataAbstract>& data_num_diff = model_num_diff.createData(&pinocchio_data);
+
+  // Generating random values for the state
+  const Eigen::VectorXd& x = model->get_state()->rand();
+
+  // Compute all the pinocchio function needed for the models.
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
+
+  // set the function that needs to be called at every step of the numdiff
+  std::vector<crocoddyl::ContactModelNumDiff::ReevaluationFunction> reevals;
+  reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio, &pinocchio_model, &pinocchio_data, _1));
+  model_num_diff.set_reevals(reevals);
+
+  // Computing the action derivatives
+  model->calc(data, x);
+  model->calcDiff(data, x);
+
+  // Computing the action derivatives via numerical differentiation
+  model_num_diff.calc(data_num_diff, x);
+  model_num_diff.calcDiff(data_num_diff, x);
+
+  // Checking the partial derivatives against NumDiff
+  double tol = NUMDIFF_MODIFIER * model_num_diff.get_disturbance();
+  BOOST_CHECK((data->da0_dx - data_num_diff->da0_dx).isMuchSmallerThan(1.0, tol));
+}
+
 //----------------------------------------------------------------------------//
 
 void register_contact_model_unit_tests(ContactModelTypes::Type contact_type, PinocchioModelTypes::Type model_type,
@@ -185,6 +223,7 @@ void register_contact_model_unit_tests(ContactModelTypes::Type contact_type, Pin
   ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_fetch_derivatives, contact_type, model_type)));
   ts.add(BOOST_TEST_CASE(boost::bind(&test_update_force, contact_type, model_type)));
   ts.add(BOOST_TEST_CASE(boost::bind(&test_update_force_diff, contact_type, model_type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, contact_type, model_type)));
 }
 
 bool init_function() {

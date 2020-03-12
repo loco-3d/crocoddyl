@@ -105,6 +105,18 @@ struct ContactData3DTpl : public ContactDataAbstractTpl<_Scalar> {
     oRf.setZero();
   }
 
+  using Base::a0;
+  using Base::da0_dx;
+  using Base::df_du;
+  using Base::df_dx;
+  using Base::f;
+  using Base::frame;
+  using Base::fXj;
+  using Base::Jc;
+  using Base::jMf;
+  using Base::joint;
+  using Base::pinocchio;
+
   pinocchio::MotionTpl<Scalar> v;
   pinocchio::MotionTpl<Scalar> a;
   Matrix6xs fJf;
@@ -120,18 +132,6 @@ struct ContactData3DTpl : public ContactDataAbstractTpl<_Scalar> {
   Matrix3s vv_skew;
   Matrix3s vw_skew;
   Matrix3s oRf;
-
-  using Base::a0;
-  using Base::da0_dx;
-  using Base::df_du;
-  using Base::df_dx;
-  using Base::f;
-  using Base::frame;
-  using Base::fXj;
-  using Base::Jc;
-  using Base::jMf;
-  using Base::joint;
-  using Base::pinocchio;
 };
 
 }  // namespace crocoddyl

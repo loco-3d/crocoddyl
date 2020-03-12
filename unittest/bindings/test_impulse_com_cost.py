@@ -18,7 +18,7 @@ IMPULSE_6D = crocoddyl.ImpulseModel6D(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sol
 IMPULSE_3D = crocoddyl.ImpulseModel3D(ROBOT_STATE, ROBOT_MODEL.getFrameId('l_sole'))
 IMPULSES.addImpulse("r_sole_impulse", IMPULSE_6D)
 IMPULSES.addImpulse("l_sole_impulse", IMPULSE_3D)
-COSTS = crocoddyl.CostModelSum(ROBOT_STATE, 0, True)
+COSTS = crocoddyl.CostModelSum(ROBOT_STATE, 0)
 
 COSTS.addCost("impulse_com", crocoddyl.CostModelImpulseCoM(ROBOT_STATE), 1.)
 MODEL = crocoddyl.ActionModelImpulseFwdDynamics(ROBOT_STATE, IMPULSES, COSTS, 0., 0., True)

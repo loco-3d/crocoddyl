@@ -35,13 +35,10 @@ class CostModelAbstractTpl {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-                       const std::size_t& nu, const bool& with_residuals = true);
-  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-                       const bool& with_residuals = true);
-  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nr, const std::size_t& nu,
-                       const bool& with_residuals = true);
-  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nr,
-                       const bool& with_residuals = true);
+                       const std::size_t& nu);
+  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation);
+  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nr, const std::size_t& nu);
+  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nr);
   ~CostModelAbstractTpl();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -56,13 +53,11 @@ class CostModelAbstractTpl {
   const boost::shared_ptr<StateMultibody>& get_state() const;
   const boost::shared_ptr<ActivationModelAbstract>& get_activation() const;
   const std::size_t& get_nu() const;
-  const bool& get_with_residuals() const;
 
  protected:
   boost::shared_ptr<StateMultibody> state_;
   boost::shared_ptr<ActivationModelAbstract> activation_;
   std::size_t nu_;
-  bool with_residuals_;
   VectorXs unone_;
 
 #ifdef PYTHON_BINDINGS

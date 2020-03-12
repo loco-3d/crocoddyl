@@ -52,12 +52,11 @@ void exposeCostSum() {
   bp::register_ptr_to_python<boost::shared_ptr<CostModelSum> >();
 
   bp::class_<CostModelSum, boost::noncopyable>(
-      "CostModelSum", bp::init<boost::shared_ptr<StateMultibody>, std::size_t, bool>(
-                          bp::args("self", "state", "nu", "withResiduals"),
-                          "Initialize the total cost model.\n\n"
-                          ":param state: state of the multibody system\n"
-                          ":param nu: dimension of control vector\n"
-                          ":param withResiduals: true if the cost function has residuals (default True)"))
+      "CostModelSum",
+      bp::init<boost::shared_ptr<StateMultibody>, std::size_t>(bp::args("self", "state", "nu"),
+                                                               "Initialize the total cost model.\n\n"
+                                                               ":param state: state of the multibody system\n"
+                                                               ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, std::size_t>(
           bp::args("self", "state", "nu"),
           "Initialize the total cost model.\n\n"
@@ -125,8 +124,6 @@ void exposeCostSum() {
       .add_property("shared", bp::make_getter(&CostDataSum::shared, bp::return_internal_reference<>()), "shared data")
       .add_property("cost", bp::make_getter(&CostDataSum::cost, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&CostDataSum::cost), "cost value")
-      .add_property("r", bp::make_function(&CostDataSum::get_r, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_function(&CostDataSum::set_r), "cost residual")
       .add_property("Lx", bp::make_function(&CostDataSum::get_Lx, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_function(&CostDataSum::set_Lx), "Jacobian of the cost")
       .add_property("Lu", bp::make_function(&CostDataSum::get_Lu, bp::return_value_policy<bp::return_by_value>()),
@@ -136,11 +133,7 @@ void exposeCostSum() {
       .add_property("Lxu", bp::make_function(&CostDataSum::get_Lxu, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_function(&CostDataSum::set_Lxu), "Hessian of the cost")
       .add_property("Luu", bp::make_function(&CostDataSum::get_Luu, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_function(&CostDataSum::set_Luu), "Hessian of the cost")
-      .add_property("Rx", bp::make_getter(&CostDataSum::Rx, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&CostDataSum::Rx), "Jacobian of the cost residual")
-      .add_property("Ru", bp::make_getter(&CostDataSum::Ru, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&CostDataSum::Ru), "Jacobian of the cost residual");
+                    bp::make_function(&CostDataSum::set_Luu), "Hessian of the cost");
 }
 
 }  // namespace python

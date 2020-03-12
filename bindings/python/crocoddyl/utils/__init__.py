@@ -370,7 +370,10 @@ class StateCostDerived(crocoddyl.CostModelAbstract):
     def __init__(self, state, activation=None, xref=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(state.ndx)
         self.xref = xref if xref is not None else state.zero()
-        crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
+        if nu is None:
+            crocoddyl.CostModelAbstract.__init__(self, state, activation)
+        else:
+            crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
 
     def calc(self, data, x, u):
         data.r = self.state.diff(self.xref, x)
@@ -405,7 +408,10 @@ class ControlCostDerived(crocoddyl.CostModelAbstract):
 class CoMPositionCostDerived(crocoddyl.CostModelAbstract):
     def __init__(self, state, activation=None, cref=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(3)
-        crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
+        if nu is None:
+            crocoddyl.CostModelAbstract.__init__(self, state, activation)
+        else:
+            crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
         self.cref = cref
 
     def calc(self, data, x, u):
@@ -431,7 +437,10 @@ class CoMPositionCostDerived(crocoddyl.CostModelAbstract):
 class FramePlacementCostDerived(crocoddyl.CostModelAbstract):
     def __init__(self, state, activation=None, Mref=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(6)
-        crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
+        if nu is None:
+            crocoddyl.CostModelAbstract.__init__(self, state, activation)
+        else:
+            crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
         self.Mref = Mref
 
     def calc(self, data, x, u):
@@ -459,7 +468,10 @@ class FramePlacementCostDerived(crocoddyl.CostModelAbstract):
 class FrameTranslationCostDerived(crocoddyl.CostModelAbstract):
     def __init__(self, state, activation=None, xref=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(3)
-        crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
+        if nu is None:
+            crocoddyl.CostModelAbstract.__init__(self, state, activation)
+        else:
+            crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
         self.xref = xref
 
     def calc(self, data, x, u):
@@ -485,7 +497,10 @@ class FrameTranslationCostDerived(crocoddyl.CostModelAbstract):
 class FrameRotationCostDerived(crocoddyl.CostModelAbstract):
     def __init__(self, state, activation=None, Rref=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(3)
-        crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
+        if nu is None:
+            crocoddyl.CostModelAbstract.__init__(self, state, activation)
+        else:
+            crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
         self.Rref = Rref
 
     def calc(self, data, x, u):
@@ -513,7 +528,10 @@ class FrameRotationCostDerived(crocoddyl.CostModelAbstract):
 class FrameVelocityCostDerived(crocoddyl.CostModelAbstract):
     def __init__(self, state, activation=None, vref=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(6)
-        crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
+        if nu is None:
+            crocoddyl.CostModelAbstract.__init__(self, state, activation)
+        else:
+            crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
         self.vref = vref
         self.joint = state.pinocchio.frames[vref.frame].parent
         self.fXj = state.pinocchio.frames[vref.frame].placement.inverse().action

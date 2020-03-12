@@ -92,15 +92,6 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
     rMf_Jlog6.setZero();
   }
 
-  pinocchio::SE3Tpl<Scalar> rMf;
-  pinocchio::MotionTpl<Scalar> v;
-  pinocchio::MotionTpl<Scalar> a;
-  Matrix6xs v_partial_dq;
-  Matrix6xs a_partial_dq;
-  Matrix6xs a_partial_dv;
-  Matrix6xs a_partial_da;
-  Matrix6s rMf_Jlog6;
-
   using Base::a0;
   using Base::da0_dx;
   using Base::df_du;
@@ -112,6 +103,15 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
   using Base::jMf;
   using Base::joint;
   using Base::pinocchio;
+
+  pinocchio::SE3Tpl<Scalar> rMf;
+  pinocchio::MotionTpl<Scalar> v;
+  pinocchio::MotionTpl<Scalar> a;
+  Matrix6xs v_partial_dq;
+  Matrix6xs a_partial_dq;
+  Matrix6xs a_partial_dv;
+  Matrix6xs a_partial_da;
+  Matrix6s rMf_Jlog6;
 };
 
 }  // namespace crocoddyl

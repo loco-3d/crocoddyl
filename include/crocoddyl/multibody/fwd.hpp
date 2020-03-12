@@ -51,6 +51,12 @@ class CostModelNumDiffTpl;
 template <typename Scalar>
 class CostDataNumDiffTpl;
 
+template <typename Scalar>
+class ContactModelNumDiffTpl;
+
+template <typename Scalar>
+class ContactDataNumDiffTpl;
+
 // Frames
 template <typename Scalar>
 class FrameTranslationTpl;
@@ -245,6 +251,8 @@ typedef DifferentialActionDataContactFwdDynamicsTpl<double> DifferentialActionDa
 
 typedef CostModelNumDiffTpl<double> CostModelNumDiff;
 typedef CostDataNumDiffTpl<double> CostDataNumDiff;
+typedef ContactModelNumDiffTpl<double> ContactModelNumDiff;
+typedef ContactDataNumDiffTpl<double> ContactDataNumDiff;
 
 typedef FrameTranslationTpl<double> FrameTranslation;
 typedef FrameRotationTpl<double> FrameRotation;

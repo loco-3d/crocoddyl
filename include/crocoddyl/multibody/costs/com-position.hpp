@@ -54,7 +54,6 @@ class CostModelCoMPositionTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::nu_;
   using Base::state_;
   using Base::unone_;
-  using Base::with_residuals_;
 
  private:
   Vector3s cref_;

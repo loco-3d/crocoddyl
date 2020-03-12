@@ -7,11 +7,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
+
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"
 #include "crocoddyl/multibody/contacts/contact-6d.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/multibody/numdiff/contact.hpp"
+
 #include "state.hpp"
 
 #ifndef CROCODDYL_CONTACTS_FACTORY_HPP_

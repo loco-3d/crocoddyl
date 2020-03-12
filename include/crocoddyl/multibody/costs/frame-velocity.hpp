@@ -55,7 +55,6 @@ class CostModelFrameVelocityTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::nu_;
   using Base::state_;
   using Base::unone_;
-  using Base::with_residuals_;
 
  private:
   FrameMotion vref_;

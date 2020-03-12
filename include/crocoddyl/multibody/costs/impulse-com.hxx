@@ -17,7 +17,7 @@ namespace crocoddyl {
 template <typename Scalar>
 CostModelImpulseCoMTpl<Scalar>::CostModelImpulseCoMTpl(boost::shared_ptr<StateMultibody> state,
                                                        boost::shared_ptr<ActivationModelAbstract> activation)
-    : Base(state, activation, 0, true) {
+    : Base(state, activation, 0) {
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 3");
@@ -25,8 +25,7 @@ CostModelImpulseCoMTpl<Scalar>::CostModelImpulseCoMTpl(boost::shared_ptr<StateMu
 }
 
 template <typename Scalar>
-CostModelImpulseCoMTpl<Scalar>::CostModelImpulseCoMTpl(boost::shared_ptr<StateMultibody> state)
-    : Base(state, 3, 0, true) {}
+CostModelImpulseCoMTpl<Scalar>::CostModelImpulseCoMTpl(boost::shared_ptr<StateMultibody> state) : Base(state, 3, 0) {}
 
 template <typename Scalar>
 CostModelImpulseCoMTpl<Scalar>::~CostModelImpulseCoMTpl() {}
