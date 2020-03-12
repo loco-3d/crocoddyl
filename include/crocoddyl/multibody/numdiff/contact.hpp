@@ -48,6 +48,11 @@ class ContactModelNumDiffTpl : public ContactModelAbstractTpl<_Scalar> {
   void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
+   * @brief @copydoc ContactModelAbstract::updateForce()
+   */
+  void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force);
+
+  /**
    * @brief Create a Data object
    *
    * @param data is the Pinocchio data

@@ -57,6 +57,20 @@ void ContactModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDat
 }
 
 template <typename Scalar>
+void ContactModelNumDiffTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataAbstract>& data,
+                                                 const VectorXs& force) {
+  if (static_cast<std::size_t>(force.size()) != model_->get_nc()) {
+    throw_pretty("Invalid argument: "
+                 << "lambda has wrong dimension (it should be " << model_->get_nc() << ")");
+  }
+
+  boost::shared_ptr<ContactDataNumDiffTpl<Scalar> > data_nd =
+      boost::static_pointer_cast<ContactDataNumDiffTpl<Scalar> >(data);
+
+  model_->updateForce(data_nd->data_0, force);
+}
+
+template <typename Scalar>
 boost::shared_ptr<ContactDataAbstractTpl<Scalar> > ContactModelNumDiffTpl<Scalar>::createData(
     pinocchio::DataTpl<Scalar>* const data) {
   return boost::make_shared<ContactDataNumDiffTpl<Scalar> >(this, data);
