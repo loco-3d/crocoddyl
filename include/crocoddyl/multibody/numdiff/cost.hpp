@@ -25,6 +25,7 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
+  typedef typename MathBaseTpl<Scalar>::MatrixXs MatrixXs;
   typedef boost::function<void(const typename MathBaseTpl<Scalar>::VectorXs&)> ReevaluationFunction;
 
   /**
@@ -37,7 +38,7 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Default destructor of the CostModelNumDiff object
    */
-  ~CostModelNumDiffTpl();
+  virtual ~CostModelNumDiffTpl();
 
   /**
    * @brief @copydoc ActionModelAbstract::calc()
