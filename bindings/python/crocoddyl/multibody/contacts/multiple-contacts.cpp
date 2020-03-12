@@ -108,8 +108,7 @@ void exposeContactMultiple() {
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("dv", bp::make_getter(&ContactDataMultiple::dv, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataMultiple::dv), "constrained acceleration in generalized coordinates")
-      .add_property("ddv_dx",
-                    bp::make_getter(&ContactDataMultiple::ddv_dx, bp::return_internal_reference<>()),
+      .add_property("ddv_dx", bp::make_getter(&ContactDataMultiple::ddv_dx, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataMultiple::ddv_dx),
                     "Jacobian of the constrained acceleration in generalized coordinates")
       .add_property("contacts",

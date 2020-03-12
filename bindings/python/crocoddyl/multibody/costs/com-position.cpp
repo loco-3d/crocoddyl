@@ -68,8 +68,7 @@ void exposeCostCoMPosition() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
            ":return cost data.")
-      .add_property("cref",
-                    bp::make_function(&CostModelCoMPosition::get_cref, bp::return_internal_reference<>()),
+      .add_property("cref", bp::make_function(&CostModelCoMPosition::get_cref, bp::return_internal_reference<>()),
                     &CostModelCoMPosition::set_cref, "reference CoM position");
 }
 

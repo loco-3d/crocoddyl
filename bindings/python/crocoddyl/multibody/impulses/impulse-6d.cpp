@@ -65,11 +65,9 @@ void exposeImpulse6D() {
                     "action matrix from impulse to local frames")
       .add_property("fJf", bp::make_getter(&ImpulseData6D::fJf, bp::return_internal_reference<>()),
                     "local Jacobian of the impulse frame")
-      .add_property("v_partial_dq",
-                    bp::make_getter(&ImpulseData6D::v_partial_dq, bp::return_internal_reference<>()),
+      .add_property("v_partial_dq", bp::make_getter(&ImpulseData6D::v_partial_dq, bp::return_internal_reference<>()),
                     "Jacobian of the spatial body velocity")
-      .add_property("v_partial_dv",
-                    bp::make_getter(&ImpulseData6D::v_partial_dv, bp::return_internal_reference<>()),
+      .add_property("v_partial_dv", bp::make_getter(&ImpulseData6D::v_partial_dv, bp::return_internal_reference<>()),
                     "Jacobian of the spatial body velocity");
 }
 

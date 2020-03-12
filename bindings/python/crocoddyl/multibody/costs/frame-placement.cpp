@@ -87,11 +87,9 @@ void exposeCostFramePlacement() {
                     "error frame placement of the frame")
       .add_property("J", bp::make_getter(&CostDataFramePlacement::J, bp::return_internal_reference<>()),
                     "Jacobian at the error point")
-      .add_property("rJf",
-                    bp::make_getter(&CostDataFramePlacement::rJf, bp::return_internal_reference<>()),
+      .add_property("rJf", bp::make_getter(&CostDataFramePlacement::rJf, bp::return_internal_reference<>()),
                     "error Jacobian of the frame")
-      .add_property("fJf",
-                    bp::make_getter(&CostDataFramePlacement::fJf, bp::return_internal_reference<>()),
+      .add_property("fJf", bp::make_getter(&CostDataFramePlacement::fJf, bp::return_internal_reference<>()),
                     "local Jacobian of the frame");
 }
 

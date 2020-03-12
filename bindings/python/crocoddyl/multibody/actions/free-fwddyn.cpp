@@ -65,11 +65,11 @@ void exposeDifferentialActionFreeFwdDynamics() {
                     bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_costs,
                                       bp::return_value_policy<bp::return_by_value>()),
                     "total cost model")
-      .add_property("armature",
-                    bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_armature,
-                                      bp::return_internal_reference<>()),
-                    bp::make_function(&DifferentialActionModelFreeFwdDynamics::set_armature),
-                    "set an armature mechanism in the joints");
+      .add_property(
+          "armature",
+          bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_armature, bp::return_internal_reference<>()),
+          bp::make_function(&DifferentialActionModelFreeFwdDynamics::set_armature),
+          "set an armature mechanism in the joints");
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataFreeFwdDynamics> >();
 
@@ -91,13 +91,12 @@ void exposeDifferentialActionFreeFwdDynamics() {
                                     bp::return_value_policy<bp::return_by_value>()),
                     "total cost data")
       .add_property("Minv",
-                    bp::make_getter(&DifferentialActionDataFreeFwdDynamics::Minv,
-                                    bp::return_internal_reference<>()),
+                    bp::make_getter(&DifferentialActionDataFreeFwdDynamics::Minv, bp::return_internal_reference<>()),
                     "inverse of the joint-space inertia matrix")
-      .add_property("u_drift",
-                    bp::make_getter(&DifferentialActionDataFreeFwdDynamics::u_drift,
-                                    bp::return_internal_reference<>()),
-                    "force-bias vector that accounts for control, Coriolis and gravitational effects");
+      .add_property(
+          "u_drift",
+          bp::make_getter(&DifferentialActionDataFreeFwdDynamics::u_drift, bp::return_internal_reference<>()),
+          "force-bias vector that accounts for control, Coriolis and gravitational effects");
 }
 
 }  // namespace python

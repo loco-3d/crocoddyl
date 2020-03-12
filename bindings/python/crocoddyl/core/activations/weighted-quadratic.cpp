@@ -35,10 +35,9 @@ void exposeActivationWeightedQuad() {
           ":param r: residual vector \n")
       .def("createData", &ActivationModelWeightedQuad::createData, bp::args("self"),
            "Create the weighted quadratic action data.")
-      .add_property(
-          "weights",
-          bp::make_function(&ActivationModelWeightedQuad::get_weights, bp::return_internal_reference<>()),
-          &ActivationModelWeightedQuad::set_weights, "weights of the quadratic term");
+      .add_property("weights",
+                    bp::make_function(&ActivationModelWeightedQuad::get_weights, bp::return_internal_reference<>()),
+                    &ActivationModelWeightedQuad::set_weights, "weights of the quadratic term");
 }
 
 }  // namespace python

@@ -110,18 +110,17 @@ void exposeDifferentialActionContactFwdDynamics() {
                     bp::make_getter(&DifferentialActionDataContactFwdDynamics::costs,
                                     bp::return_value_policy<bp::return_by_value>()),
                     "total cost data")
-      .add_property("Kinv",
-                    bp::make_getter(&DifferentialActionDataContactFwdDynamics::Kinv,
-                                    bp::return_internal_reference<>()),
-                    "inverse of the KKT matrix")
-      .add_property("df_dx",
-                    bp::make_getter(&DifferentialActionDataContactFwdDynamics::df_dx,
-                                    bp::return_internal_reference<>()),
-                    "Jacobian of the contact force")
-      .add_property("df_du",
-                    bp::make_getter(&DifferentialActionDataContactFwdDynamics::df_du,
-                                    bp::return_internal_reference<>()),
-                    "Jacobian of the contact force");
+      .add_property(
+          "Kinv", bp::make_getter(&DifferentialActionDataContactFwdDynamics::Kinv, bp::return_internal_reference<>()),
+          "inverse of the KKT matrix")
+      .add_property(
+          "df_dx",
+          bp::make_getter(&DifferentialActionDataContactFwdDynamics::df_dx, bp::return_internal_reference<>()),
+          "Jacobian of the contact force")
+      .add_property(
+          "df_du",
+          bp::make_getter(&DifferentialActionDataContactFwdDynamics::df_du, bp::return_internal_reference<>()),
+          "Jacobian of the contact force");
 }
 
 }  // namespace python

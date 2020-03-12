@@ -81,8 +81,7 @@ void exposeCostFrameTranslation() {
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("J", bp::make_getter(&CostDataFrameTranslation::J, bp::return_internal_reference<>()),
                     "Jacobian at the error point")
-      .add_property("fJf",
-                    bp::make_getter(&CostDataFrameTranslation::fJf, bp::return_internal_reference<>()),
+      .add_property("fJf", bp::make_getter(&CostDataFrameTranslation::fJf, bp::return_internal_reference<>()),
                     "local Jacobian of the frame");
 }
 

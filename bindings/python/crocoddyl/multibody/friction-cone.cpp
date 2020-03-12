@@ -37,8 +37,7 @@ void exposeFrictionCone() {
                     "inequality lower bound")
       .add_property("ub", bp::make_function(&FrictionCone::get_ub, bp::return_internal_reference<>()),
                     "inequality upper bound")
-      .add_property("nsurf",
-                    bp::make_function(&FrictionCone::get_nsurf, bp::return_internal_reference<>()),
+      .add_property("nsurf", bp::make_function(&FrictionCone::get_nsurf, bp::return_internal_reference<>()),
                     "normal vector")
       .add_property("mu", bp::make_function(&FrictionCone::get_mu, bp::return_value_policy<bp::return_by_value>()),
                     "friction coefficient")

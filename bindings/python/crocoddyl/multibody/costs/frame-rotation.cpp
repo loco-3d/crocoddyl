@@ -81,16 +81,13 @@ void exposeCostFrameRotation() {
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("r", bp::make_getter(&CostDataFrameRotation::r, bp::return_internal_reference<>()),
                     "cost residual")
-      .add_property("rRf",
-                    bp::make_getter(&CostDataFrameRotation::rRf, bp::return_internal_reference<>()),
+      .add_property("rRf", bp::make_getter(&CostDataFrameRotation::rRf, bp::return_internal_reference<>()),
                     "rotation error of the frame")
       .add_property("J", bp::make_getter(&CostDataFrameRotation::J, bp::return_internal_reference<>()),
                     "Jacobian at the error point")
-      .add_property("rJf",
-                    bp::make_getter(&CostDataFrameRotation::rJf, bp::return_internal_reference<>()),
+      .add_property("rJf", bp::make_getter(&CostDataFrameRotation::rJf, bp::return_internal_reference<>()),
                     "error Jacobian of the frame")
-      .add_property("fJf",
-                    bp::make_getter(&CostDataFrameRotation::fJf, bp::return_internal_reference<>()),
+      .add_property("fJf", bp::make_getter(&CostDataFrameRotation::fJf, bp::return_internal_reference<>()),
                     "local Jacobian of the frame");
 }
 

@@ -85,11 +85,9 @@ void exposeCostFrameVelocity() {
       .add_property("fXj",
                     bp::make_getter(&CostDataFrameVelocity::fXj, bp::return_value_policy<bp::return_by_value>()),
                     "action matrix from contact to local frames")
-      .add_property("dv_dq",
-                    bp::make_getter(&CostDataFrameVelocity::dv_dq, bp::return_internal_reference<>()),
+      .add_property("dv_dq", bp::make_getter(&CostDataFrameVelocity::dv_dq, bp::return_internal_reference<>()),
                     "Jacobian of the spatial body velocity")
-      .add_property("dv_dv",
-                    bp::make_getter(&CostDataFrameVelocity::dv_dv, bp::return_internal_reference<>()),
+      .add_property("dv_dv", bp::make_getter(&CostDataFrameVelocity::dv_dv, bp::return_internal_reference<>()),
                     "Jacobian of the spatial body velocity");
 }
 

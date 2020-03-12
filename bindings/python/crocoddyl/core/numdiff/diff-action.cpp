@@ -77,21 +77,16 @@ void exposeDifferentialActionNumDiff() {
       bp::init<DifferentialActionModelNumDiff*>(bp::args("self", "model"),
                                                 "Create numerical differentiation diff-action data.\n\n"
                                                 ":param model: numdiff diff-action model"))
-      .add_property(
-          "Rx", bp::make_getter(&DifferentialActionDataNumDiff::Rx, bp::return_internal_reference<>()),
-          "Jacobian of the cost residual.")
-      .add_property(
-          "Ru", bp::make_getter(&DifferentialActionDataNumDiff::Ru, bp::return_internal_reference<>()),
-          "Jacobian of the cost residual.")
-      .add_property(
-          "dx", bp::make_getter(&DifferentialActionDataNumDiff::dx, bp::return_internal_reference<>()),
-          "state disturbance.")
-      .add_property(
-          "du", bp::make_getter(&DifferentialActionDataNumDiff::du, bp::return_internal_reference<>()),
-          "control disturbance.")
-      .add_property(
-          "xp", bp::make_getter(&DifferentialActionDataNumDiff::xp, bp::return_internal_reference<>()),
-          "rate state after disturbance.")
+      .add_property("Rx", bp::make_getter(&DifferentialActionDataNumDiff::Rx, bp::return_internal_reference<>()),
+                    "Jacobian of the cost residual.")
+      .add_property("Ru", bp::make_getter(&DifferentialActionDataNumDiff::Ru, bp::return_internal_reference<>()),
+                    "Jacobian of the cost residual.")
+      .add_property("dx", bp::make_getter(&DifferentialActionDataNumDiff::dx, bp::return_internal_reference<>()),
+                    "state disturbance.")
+      .add_property("du", bp::make_getter(&DifferentialActionDataNumDiff::du, bp::return_internal_reference<>()),
+                    "control disturbance.")
+      .add_property("xp", bp::make_getter(&DifferentialActionDataNumDiff::xp, bp::return_internal_reference<>()),
+                    "rate state after disturbance.")
       .add_property(
           "data_0",
           bp::make_getter(&DifferentialActionDataNumDiff::data_0, bp::return_value_policy<bp::return_by_value>()),
