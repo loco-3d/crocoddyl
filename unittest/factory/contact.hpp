@@ -57,6 +57,8 @@ std::ostream& operator<<(std::ostream& os, const ContactModelTypes::Type& type) 
 
 class ContactModelFactory {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   ContactModelFactory(ContactModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) {
     PinocchioModelFactory model_factory(model_type);
     StateFactory state_factory(StateTypes::StateMultibody, model_type);

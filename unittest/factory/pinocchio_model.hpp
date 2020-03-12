@@ -64,6 +64,8 @@ std::ostream& operator<<(std::ostream& os, PinocchioModelTypes::Type type) {
 
 class PinocchioModelFactory {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   PinocchioModelFactory(PinocchioModelTypes::Type type) {
     switch (type) {
       case PinocchioModelTypes::TalosArm:
