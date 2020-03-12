@@ -86,7 +86,7 @@ void exposeCostState() {
       .def<void (CostModelState::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &CostModelState::calcDiff_wrap, bp::args("self", "data", "x"))
       .add_property("xref",
-                    bp::make_function(&CostModelState::get_xref, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&CostModelState::get_xref, bp::return_internal_reference<>()),
                     "reference state")
       .def("createData", &CostModelState::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),

@@ -59,30 +59,30 @@ void exposeDifferentialActionLQR() {
       .def("createData", &DifferentialActionModelLQR::createData, bp::args("self"),
            "Create the differential LQR action data.")
       .add_property(
-          "Fq", bp::make_function(&DifferentialActionModelLQR::get_Fq, bp::return_value_policy<bp::return_by_value>()),
+          "Fq", bp::make_function(&DifferentialActionModelLQR::get_Fq, bp::return_internal_reference<>()),
           &DifferentialActionModelLQR::set_Fq, "Jacobian of the dynamics")
       .add_property(
-          "Fv", bp::make_function(&DifferentialActionModelLQR::get_Fv, bp::return_value_policy<bp::return_by_value>()),
+          "Fv", bp::make_function(&DifferentialActionModelLQR::get_Fv, bp::return_internal_reference<>()),
           &DifferentialActionModelLQR::set_Fv, "Jacobian of the dynamics")
       .add_property(
-          "Fu", bp::make_function(&DifferentialActionModelLQR::get_Fu, bp::return_value_policy<bp::return_by_value>()),
+          "Fu", bp::make_function(&DifferentialActionModelLQR::get_Fu, bp::return_internal_reference<>()),
           &DifferentialActionModelLQR::set_Fu, "Jacobian of the dynamics")
       .add_property(
-          "f0", bp::make_function(&DifferentialActionModelLQR::get_f0, bp::return_value_policy<bp::return_by_value>()),
+          "f0", bp::make_function(&DifferentialActionModelLQR::get_f0, bp::return_internal_reference<>()),
           &DifferentialActionModelLQR::set_f0, "dynamics drift")
       .add_property(
-          "lx", bp::make_function(&DifferentialActionModelLQR::get_lx, bp::return_value_policy<bp::return_by_value>()),
+          "lx", bp::make_function(&DifferentialActionModelLQR::get_lx, bp::return_internal_reference<>()),
           &DifferentialActionModelLQR::set_lx, "Jacobian of the cost")
       .add_property(
-          "lu", bp::make_function(&DifferentialActionModelLQR::get_lu, bp::return_value_policy<bp::return_by_value>()),
+          "lu", bp::make_function(&DifferentialActionModelLQR::get_lu, bp::return_internal_reference<>()),
           &DifferentialActionModelLQR::set_lu, "Jacobian of the cost")
       .add_property(
           "Lxx",
-          bp::make_function(&DifferentialActionModelLQR::get_Lxx, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&DifferentialActionModelLQR::get_Lxx, bp::return_internal_reference<>()),
           &DifferentialActionModelLQR::set_Lxx, "Hessian of the cost")
       .add_property(
           "Lxu",
-          bp::make_function(&DifferentialActionModelLQR::get_Lxu, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&DifferentialActionModelLQR::get_Lxu, bp::return_internal_reference<>()),
           &DifferentialActionModelLQR::set_Lxu, "Hessian of the cost")
       .add_property(
           "Luu",

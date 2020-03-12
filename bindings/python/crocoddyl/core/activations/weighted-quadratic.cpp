@@ -37,7 +37,7 @@ void exposeActivationWeightedQuad() {
            "Create the weighted quadratic action data.")
       .add_property(
           "weights",
-          bp::make_function(&ActivationModelWeightedQuad::get_weights, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&ActivationModelWeightedQuad::get_weights, bp::return_internal_reference<>()),
           &ActivationModelWeightedQuad::set_weights, "weights of the quadratic term");
 }
 

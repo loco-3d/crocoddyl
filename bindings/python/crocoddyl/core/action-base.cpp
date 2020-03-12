@@ -79,11 +79,11 @@ void exposeActionAbstract() {
                     "indicates whether problem has finite control limits")
       .add_property(
           "u_lb",
-          bp::make_function(&ActionModelAbstract_wrap::get_u_lb, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&ActionModelAbstract_wrap::get_u_lb, bp::return_internal_reference<>()),
           &ActionModelAbstract_wrap::set_u_lb, "lower control limits")
       .add_property(
           "u_ub",
-          bp::make_function(&ActionModelAbstract_wrap::get_u_ub, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&ActionModelAbstract_wrap::get_u_ub, bp::return_internal_reference<>()),
           &ActionModelAbstract_wrap::set_u_ub, "upper control limits");
 
   bp::register_ptr_to_python<boost::shared_ptr<ActionDataAbstract> >();

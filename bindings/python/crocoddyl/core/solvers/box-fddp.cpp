@@ -21,7 +21,7 @@ void exposeSolverBoxFDDP() {
                                                     "Initialize the vector dimension.\n\n"
                                                     ":param problem: shooting problem."))
       .add_property("Quu_inv",
-                    make_function(&SolverBoxFDDP::get_Quu_inv, bp::return_value_policy<bp::copy_const_reference>()),
+                    make_function(&SolverBoxFDDP::get_Quu_inv, bp::return_internal_reference<>()),
                     "inverse of the Quu computed by the box QP");
 }
 

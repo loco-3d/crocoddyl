@@ -67,7 +67,7 @@ void exposeDifferentialActionFreeFwdDynamics() {
                     "total cost model")
       .add_property("armature",
                     bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_armature,
-                                      bp::return_value_policy<bp::return_by_value>()),
+                                      bp::return_internal_reference<>()),
                     bp::make_function(&DifferentialActionModelFreeFwdDynamics::set_armature),
                     "set an armature mechanism in the joints");
 

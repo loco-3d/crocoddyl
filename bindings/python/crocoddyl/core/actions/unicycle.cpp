@@ -50,7 +50,7 @@ void exposeActionUnicycle() {
       .def("createData", &ActionModelUnicycle::createData, bp::args("self"), "Create the unicycle action data.")
       .add_property(
           "costWeights",
-          bp::make_function(&ActionModelUnicycle::get_cost_weights, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&ActionModelUnicycle::get_cost_weights, bp::return_internal_reference<>()),
           bp::make_function(&ActionModelUnicycle::set_cost_weights), "cost weights");
 
   bp::register_ptr_to_python<boost::shared_ptr<ActionDataUnicycle> >();
