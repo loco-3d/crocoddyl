@@ -142,10 +142,10 @@ struct ContactDataNumDiffTpl : public ContactDataAbstractTpl<_Scalar> {
 
   virtual ~ContactDataNumDiffTpl() {}
 
+  using Base::pinocchio;
   using Base::a0;
   using Base::da0_dx;
   using Base::f;
-  using Base::pinocchio;
 
   VectorXs dx;                     //!< State disturbance.
   VectorXs xp;                     //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$".
