@@ -51,7 +51,7 @@ class ImpulseModelMultipleTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  typedef std::map<std::string, ImpulseItem> ImpulseModelContainer;
+  typedef std::map<std::string, boost::shared_ptr<ImpulseItem> > ImpulseModelContainer;
   typedef std::map<std::string, boost::shared_ptr<ImpulseDataAbstract> > ImpulseDataContainer;
   typedef typename pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar> >::iterator ForceIterator;
 
@@ -114,8 +114,8 @@ struct ImpulseDataMultipleTpl : ImpulseDataAbstractTpl<_Scalar> {
     dvnext_dx.setZero();
     for (typename ImpulseModelMultiple::ImpulseModelContainer::const_iterator it = model->get_impulses().begin();
          it != model->get_impulses().end(); ++it) {
-      const ImpulseItem& item = it->second;
-      impulses.insert(std::make_pair(item.name, item.impulse->createData(data)));
+      const boost::shared_ptr<ImpulseItem>& item = it->second;
+      impulses.insert(std::make_pair(item->name, item->impulse->createData(data)));
     }
   }
 

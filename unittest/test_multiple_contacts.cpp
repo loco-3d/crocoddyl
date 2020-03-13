@@ -545,7 +545,7 @@ void test_get_nc() {
   std::size_t ni = 0;
   crocoddyl::ContactModelMultiple::ContactModelContainer::const_iterator it_m, end_m;
   for (it_m = model.get_contacts().begin(), end_m = model.get_contacts().end(); it_m != end_m; ++it_m) {
-    ni += it_m->second.contact->get_nc();
+    ni += it_m->second->contact->get_nc();
   }
 
   BOOST_CHECK(ni == model.get_nc());

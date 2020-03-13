@@ -20,15 +20,18 @@ namespace python {
 
 void exposeImpulseMultiple() {
   // Register custom converters between std::map and Python dict
+  typedef boost::shared_ptr<ImpulseItem> ImpulseItemPtr;
   typedef boost::shared_ptr<ImpulseDataAbstract> ImpulseDataPtr;
-  bp::to_python_converter<std::map<std::string, ImpulseItem, std::less<std::string>,
-                                   std::allocator<std::pair<const std::string, ImpulseItem> > >,
-                          map_to_dict<std::string, ImpulseItem> >();
+  bp::to_python_converter<std::map<std::string, ImpulseItemPtr, std::less<std::string>,
+                                   std::allocator<std::pair<const std::string, ImpulseItemPtr> > >,
+                          map_to_dict<std::string, ImpulseItemPtr, false> >();
   bp::to_python_converter<std::map<std::string, ImpulseDataPtr, std::less<std::string>,
                                    std::allocator<std::pair<const std::string, ImpulseDataPtr> > >,
                           map_to_dict<std::string, ImpulseDataPtr, false> >();
-  dict_to_map<std::string, ImpulseItem>().from_python();
+  dict_to_map<std::string, ImpulseItemPtr>().from_python();
   dict_to_map<std::string, ImpulseDataPtr>().from_python();
+
+  bp::register_ptr_to_python<boost::shared_ptr<ImpulseItem> >();
 
   bp::class_<ImpulseItem, boost::noncopyable>(
       "ImpulseItem", "Describe a impulse item.\n\n",

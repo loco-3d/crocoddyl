@@ -51,7 +51,7 @@ class ContactModelMultipleTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  typedef std::map<std::string, ContactItem> ContactModelContainer;
+  typedef std::map<std::string, boost::shared_ptr<ContactItem> > ContactModelContainer;
   typedef std::map<std::string, boost::shared_ptr<ContactDataAbstract> > ContactDataContainer;
   typedef typename pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar> >::iterator ForceIterator;
 
@@ -121,8 +121,8 @@ struct ContactDataMultipleTpl : ContactDataAbstractTpl<_Scalar> {
     ddv_dx.setZero();
     for (typename ContactModelMultiple::ContactModelContainer::const_iterator it = model->get_contacts().begin();
          it != model->get_contacts().end(); ++it) {
-      const ContactItem& item = it->second;
-      contacts.insert(std::make_pair(item.name, item.contact->createData(data)));
+      const boost::shared_ptr<ContactItem>& item = it->second;
+      contacts.insert(std::make_pair(item->name, item->contact->createData(data)));
     }
   }
 

@@ -530,7 +530,7 @@ void test_get_ni() {
   std::size_t ni = 0;
   crocoddyl::ImpulseModelMultiple::ImpulseModelContainer::const_iterator it_m, end_m;
   for (it_m = model.get_impulses().begin(), end_m = model.get_impulses().end(); it_m != end_m; ++it_m) {
-    ni += it_m->second.impulse->get_ni();
+    ni += it_m->second->impulse->get_ni();
   }
 
   BOOST_CHECK(ni == model.get_ni());
