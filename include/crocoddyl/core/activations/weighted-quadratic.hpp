@@ -31,7 +31,7 @@ class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar
   explicit ActivationModelWeightedQuadTpl(const VectorXs& weights) : Base(weights.size()), weights_(weights){};
   ~ActivationModelWeightedQuadTpl(){};
 
-  void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
+  virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
@@ -41,7 +41,8 @@ class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar
     d->Wr = weights_.cwiseProduct(r);
     data->a_value = 0.5 * r.dot(d->Wr);
   };
-  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
+
+  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
@@ -54,7 +55,8 @@ class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar
     assert_pretty(data->Arr == Arr_, "Arr has wrong value");
 #endif
   };
-  boost::shared_ptr<ActivationDataAbstract> createData() {
+
+  virtual boost::shared_ptr<ActivationDataAbstract> createData() {
     boost::shared_ptr<ActivationDataWeightedQuad> data = boost::make_shared<ActivationDataWeightedQuad>(this);
     data->Arr.diagonal() = weights_;
 
