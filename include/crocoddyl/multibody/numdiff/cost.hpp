@@ -130,6 +130,7 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
 template <typename _Scalar>
 struct CostDataNumDiffTpl : public CostDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;

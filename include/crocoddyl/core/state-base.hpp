@@ -28,6 +28,8 @@ inline bool is_a_Jcomponent(Jcomponent firstsecond) {
 template <typename _Scalar>
 class StateAbstractTpl {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
 

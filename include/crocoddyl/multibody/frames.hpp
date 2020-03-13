@@ -2,7 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -23,6 +23,8 @@ typedef std::size_t FrameIndex;
 
 template <typename _Scalar>
 struct FrameTranslationTpl {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef typename MathBaseTpl<Scalar>::Vector3s Vector3s;
 
@@ -38,6 +40,8 @@ struct FrameTranslationTpl {
 
 template <typename _Scalar>
 struct FrameRotationTpl {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef typename MathBaseTpl<Scalar>::Matrix3s Matrix3s;
 
@@ -53,7 +57,10 @@ struct FrameRotationTpl {
 
 template <typename _Scalar>
 struct FramePlacementTpl {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
+
   FramePlacementTpl(const FrameIndex& frame, const pinocchio::SE3Tpl<Scalar>& oMf) : frame(frame), oMf(oMf) {}
   friend std::ostream& operator<<(std::ostream& os, const FramePlacementTpl<Scalar>& X) {
     os << "    frame: " << X.frame << std::endl << "placement: " << std::endl << X.oMf << std::endl;
@@ -66,7 +73,10 @@ struct FramePlacementTpl {
 
 template <typename _Scalar>
 struct FrameMotionTpl {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
+
   FrameMotionTpl(const FrameIndex& frame, const pinocchio::MotionTpl<Scalar>& oMf) : frame(frame), oMf(oMf) {}
   friend std::ostream& operator<<(std::ostream& os, const FrameMotionTpl<Scalar>& X) {
     os << " frame: " << X.frame << std::endl << "motion: " << std::endl << X.oMf << std::endl;
@@ -79,7 +89,10 @@ struct FrameMotionTpl {
 
 template <typename _Scalar>
 struct FrameForceTpl {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
+
   FrameForceTpl(const FrameIndex& frame, const pinocchio::ForceTpl<Scalar>& oFf) : frame(frame), oFf(oFf) {}
   friend std::ostream& operator<<(std::ostream& os, const FrameForceTpl<Scalar>& X) {
     os << "frame: " << X.frame << std::endl << "force: " << std::endl << X.oFf << std::endl;

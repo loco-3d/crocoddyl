@@ -91,6 +91,8 @@ std::ostream& operator<<(std::ostream& os, CostModelTypes::Type type) {
 
 class CostModelFactory {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef crocoddyl::MathBaseTpl<double> MathBase;
   typedef typename MathBase::Vector6s Vector6d;
 

@@ -21,6 +21,8 @@ namespace crocoddyl {
 template <typename _Scalar>
 class StateNumDiffTpl : public StateAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef StateAbstractTpl<_Scalar> Base;

@@ -51,6 +51,8 @@ namespace crocoddyl {
 template <typename _Scalar>
 class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef ActionModelAbstractTpl<Scalar> Base;
@@ -157,6 +159,7 @@ class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
 template <typename _Scalar>
 struct ActionDataNumDiffTpl : public ActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActionDataAbstractTpl<Scalar> Base;

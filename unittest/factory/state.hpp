@@ -56,6 +56,8 @@ std::ostream& operator<<(std::ostream& os, StateTypes::Type type) {
 
 class StateFactory {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   StateFactory(StateTypes::Type state_type,
                PinocchioModelTypes::Type model_type = PinocchioModelTypes::NbPinocchioModelTypes) {
     nx_ = 0;

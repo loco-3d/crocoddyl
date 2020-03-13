@@ -20,6 +20,8 @@ namespace crocoddyl {
 template <typename _Scalar>
 class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ImpulseModelAbstractTpl<Scalar> Base;

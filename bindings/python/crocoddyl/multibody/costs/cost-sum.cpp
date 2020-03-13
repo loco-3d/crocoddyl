@@ -26,8 +26,6 @@ void exposeCostSum() {
   // Register custom converters between std::map and Python dict
   typedef boost::shared_ptr<CostItem> CostItemPtr;
   typedef boost::shared_ptr<CostDataAbstract> CostDataPtr;
-
-  bp::register_ptr_to_python<boost::shared_ptr<CostItem> >();
   bp::to_python_converter<std::map<std::string, CostItemPtr, std::less<std::string>,
                                    std::allocator<std::pair<const std::string, CostItemPtr> > >,
                           map_to_dict<std::string, CostItemPtr, false> >();
@@ -36,6 +34,8 @@ void exposeCostSum() {
                           map_to_dict<std::string, CostDataPtr, false> >();
   dict_to_map<std::string, CostItemPtr>().from_python();
   dict_to_map<std::string, CostDataPtr>().from_python();
+
+  bp::register_ptr_to_python<boost::shared_ptr<CostItem> >();
 
   bp::class_<CostItem, boost::noncopyable>(
       "CostItem", "Describe a cost item.\n\n",

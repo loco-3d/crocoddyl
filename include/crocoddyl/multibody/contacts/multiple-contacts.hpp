@@ -21,6 +21,8 @@ namespace crocoddyl {
 
 template <typename _Scalar>
 struct ContactItemTpl {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   ContactItemTpl() {}
   ContactItemTpl(const std::string& name, boost::shared_ptr<ContactModelAbstractTpl<Scalar> > contact)
@@ -33,6 +35,8 @@ struct ContactItemTpl {
 template <typename _Scalar>
 class ContactModelMultipleTpl {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
@@ -47,7 +51,7 @@ class ContactModelMultipleTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  typedef std::map<std::string, ContactItem> ContactModelContainer;
+  typedef std::map<std::string, boost::shared_ptr<ContactItem> > ContactModelContainer;
   typedef std::map<std::string, boost::shared_ptr<ContactDataAbstract> > ContactDataContainer;
   typedef typename pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar> >::iterator ForceIterator;
 
@@ -92,6 +96,7 @@ class ContactModelMultipleTpl {
 template <typename _Scalar>
 struct ContactDataMultipleTpl : ContactDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ContactDataAbstractTpl<Scalar> Base;
@@ -116,8 +121,8 @@ struct ContactDataMultipleTpl : ContactDataAbstractTpl<_Scalar> {
     ddv_dx.setZero();
     for (typename ContactModelMultiple::ContactModelContainer::const_iterator it = model->get_contacts().begin();
          it != model->get_contacts().end(); ++it) {
-      const ContactItem& item = it->second;
-      contacts.insert(std::make_pair(item.name, item.contact->createData(data)));
+      const boost::shared_ptr<ContactItem>& item = it->second;
+      contacts.insert(std::make_pair(item->name, item->contact->createData(data)));
     }
   }
 

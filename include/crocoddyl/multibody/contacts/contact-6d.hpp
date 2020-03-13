@@ -21,6 +21,8 @@ namespace crocoddyl {
 template <typename _Scalar>
 class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ContactModelAbstractTpl<Scalar> Base;

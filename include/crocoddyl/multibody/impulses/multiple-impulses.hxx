@@ -22,7 +22,7 @@ template <typename Scalar>
 void ImpulseModelMultipleTpl<Scalar>::addImpulse(const std::string& name,
                                                  boost::shared_ptr<ImpulseModelAbstract> impulse) {
   std::pair<typename ImpulseModelContainer::iterator, bool> ret =
-      impulses_.insert(std::make_pair(name, ImpulseItem(name, impulse)));
+      impulses_.insert(std::make_pair(name, boost::make_shared<ImpulseItem>(name, impulse)));
   if (ret.second == false) {
     std::cout << "Warning: this impulse item already existed, we cannot add it" << std::endl;
   } else {
@@ -34,7 +34,7 @@ template <typename Scalar>
 void ImpulseModelMultipleTpl<Scalar>::removeImpulse(const std::string& name) {
   typename ImpulseModelContainer::iterator it = impulses_.find(name);
   if (it != impulses_.end()) {
-    ni_ -= it->second.impulse->get_ni();
+    ni_ -= it->second->impulse->get_ni();
     impulses_.erase(it);
   } else {
     std::cout << "Warning: this impulse item doesn't exist, we cannot remove it" << std::endl;
@@ -55,12 +55,12 @@ void ImpulseModelMultipleTpl<Scalar>::calc(const boost::shared_ptr<ImpulseDataMu
   typename ImpulseDataContainer::iterator it_d, end_d;
   for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-    const ImpulseItem& m_i = it_m->second;
-    boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
+    const boost::shared_ptr<ImpulseItem>& m_i = it_m->second;
+    const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
     assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between data and model");
 
-    m_i.impulse->calc(d_i, x);
-    const std::size_t& ni_i = m_i.impulse->get_ni();
+    m_i->impulse->calc(d_i, x);
+    const std::size_t& ni_i = m_i->impulse->get_ni();
     data->Jc.block(ni, 0, ni_i, nv) = d_i->Jc;
     ni += ni_i;
   }
@@ -80,12 +80,12 @@ void ImpulseModelMultipleTpl<Scalar>::calcDiff(const boost::shared_ptr<ImpulseDa
   typename ImpulseDataContainer::iterator it_d, end_d;
   for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-    const ImpulseItem& m_i = it_m->second;
-    boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
+    const boost::shared_ptr<ImpulseItem>& m_i = it_m->second;
+    const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
     assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between data and model");
 
-    m_i.impulse->calcDiff(d_i, x);
-    const std::size_t& ni_i = m_i.impulse->get_ni();
+    m_i->impulse->calcDiff(d_i, x);
+    const std::size_t& ni_i = m_i->impulse->get_ni();
     data->dv0_dq.block(ni, 0, ni_i, nv) = d_i->dv0_dq;
     ni += ni_i;
   }
@@ -122,13 +122,13 @@ void ImpulseModelMultipleTpl<Scalar>::updateForce(const boost::shared_ptr<Impuls
   typename ImpulseDataContainer::iterator it_d, end_d;
   for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-    const ImpulseItem& m_i = it_m->second;
-    boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
+    const boost::shared_ptr<ImpulseItem>& m_i = it_m->second;
+    const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
     assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between data and model");
 
-    const std::size_t& ni_i = m_i.impulse->get_ni();
+    const std::size_t& ni_i = m_i->impulse->get_ni();
     const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i = force.segment(ni, ni_i);
-    m_i.impulse->updateForce(d_i, force_i);
+    m_i->impulse->updateForce(d_i, force_i);
     data->fext[d_i->joint] = d_i->f;
     ni += ni_i;
   }
@@ -164,13 +164,13 @@ void ImpulseModelMultipleTpl<Scalar>::updateForceDiff(const boost::shared_ptr<Im
   typename ImpulseDataContainer::const_iterator it_d, end_d;
   for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-    const ImpulseItem& m_i = it_m->second;
+    const boost::shared_ptr<ImpulseItem>& m_i = it_m->second;
     const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
     assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between data and model");
 
-    const std::size_t& ni_i = m_i.impulse->get_ni();
+    const std::size_t& ni_i = m_i->impulse->get_ni();
     const Eigen::Block<const MatrixXs> df_dq_i = df_dq.block(ni, 0, ni_i, nv);
-    m_i.impulse->updateForceDiff(d_i, df_dq_i);
+    m_i->impulse->updateForceDiff(d_i, df_dq_i);
     ni += ni_i;
   }
 }

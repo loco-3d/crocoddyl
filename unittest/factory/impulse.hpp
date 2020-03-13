@@ -54,6 +54,8 @@ std::ostream& operator<<(std::ostream& os, const ImpulseModelTypes::Type& type) 
 
 class ImpulseModelFactory {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   ImpulseModelFactory(ImpulseModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) {
     PinocchioModelFactory model_factory(model_type);
     StateFactory state_factory(StateTypes::StateMultibody, model_type);
