@@ -20,6 +20,8 @@ namespace crocoddyl {
 template <typename _Scalar>
 class CostModelFramePlacementTpl : public CostModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostModelAbstractTpl<Scalar> Base;
@@ -65,6 +67,7 @@ class CostModelFramePlacementTpl : public CostModelAbstractTpl<_Scalar> {
 template <typename _Scalar>
 struct CostDataFramePlacementTpl : public CostDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;

@@ -21,6 +21,8 @@ namespace crocoddyl {
 
 template <typename _Scalar>
 struct ContactItemTpl {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   ContactItemTpl() {}
   ContactItemTpl(const std::string& name, boost::shared_ptr<ContactModelAbstractTpl<Scalar> > contact)
@@ -33,6 +35,8 @@ struct ContactItemTpl {
 template <typename _Scalar>
 class ContactModelMultipleTpl {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
@@ -92,6 +96,7 @@ class ContactModelMultipleTpl {
 template <typename _Scalar>
 struct ContactDataMultipleTpl : ContactDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ContactDataAbstractTpl<Scalar> Base;

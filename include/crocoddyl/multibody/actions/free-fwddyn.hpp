@@ -23,6 +23,8 @@ namespace crocoddyl {
 template <typename _Scalar>
 class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef DifferentialActionModelAbstractTpl<Scalar> Base;
   typedef MathBaseTpl<Scalar> MathBase;

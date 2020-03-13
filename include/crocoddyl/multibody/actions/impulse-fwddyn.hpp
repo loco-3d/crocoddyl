@@ -33,6 +33,8 @@ namespace crocoddyl {
 template <typename _Scalar>
 class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef ActionModelAbstractTpl<Scalar> Base;
   typedef MathBaseTpl<Scalar> MathBase;

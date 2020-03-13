@@ -21,6 +21,8 @@ namespace crocoddyl {
 
 template <typename Scalar>
 struct CostItemTpl {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   CostItemTpl() {}
   CostItemTpl(const std::string& name, boost::shared_ptr<CostModelAbstractTpl<Scalar> > cost, const Scalar& weight)
       : name(name), cost(cost), weight(weight) {}
@@ -33,6 +35,8 @@ struct CostItemTpl {
 template <typename _Scalar>
 class CostModelSumTpl {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
@@ -99,6 +103,7 @@ class CostModelSumTpl {
 template <typename _Scalar>
 struct CostDataSumTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef StateMultibodyTpl<Scalar> StateMultibody;

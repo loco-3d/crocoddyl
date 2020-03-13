@@ -19,6 +19,8 @@ namespace crocoddyl {
 
 class SolverKKT : public SolverAbstract {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   explicit SolverKKT(boost::shared_ptr<ShootingProblem> problem);
   ~SolverKKT();
 

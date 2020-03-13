@@ -18,6 +18,8 @@ namespace crocoddyl {
 template <typename _Scalar>
 class ContactModelNumDiffTpl : public ContactModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef ContactDataAbstractTpl<Scalar> ContactDataAbstract;
   typedef ContactModelAbstractTpl<Scalar> Base;

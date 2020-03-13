@@ -21,7 +21,9 @@ namespace crocoddyl {
 
 template <typename _Scalar>
 struct ImpulseItemTpl {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;
+
   ImpulseItemTpl() {}
   ImpulseItemTpl(const std::string& name, boost::shared_ptr<ImpulseModelAbstractTpl<Scalar> > impulse)
       : name(name), impulse(impulse) {}
@@ -33,6 +35,8 @@ struct ImpulseItemTpl {
 template <typename _Scalar>
 class ImpulseModelMultipleTpl {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
