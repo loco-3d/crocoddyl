@@ -26,18 +26,20 @@ class StateVectorTpl : public StateAbstractTpl<_Scalar> {
 
   typename MathBase::VectorXs zero() const;
   typename MathBase::VectorXs rand() const;
-  void diff(const Eigen::Ref<const typename MathBase::VectorXs>& x0,
-            const Eigen::Ref<const typename MathBase::VectorXs>& x1,
-            Eigen::Ref<typename MathBase::VectorXs> dxout) const;
-  void integrate(const Eigen::Ref<const typename MathBase::VectorXs>& x,
-                 const Eigen::Ref<const typename MathBase::VectorXs>& dx,
-                 Eigen::Ref<typename MathBase::VectorXs> xout) const;
-  void Jdiff(const Eigen::Ref<const typename MathBase::VectorXs>&,
-             const Eigen::Ref<const typename MathBase::VectorXs>&, Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
-             Eigen::Ref<typename MathBase::MatrixXs> Jsecond, Jcomponent firstsecond = both) const;
-  void Jintegrate(const Eigen::Ref<const typename MathBase::VectorXs>&,
-                  const Eigen::Ref<const typename MathBase::VectorXs>&, Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
-                  Eigen::Ref<typename MathBase::MatrixXs> Jsecond, Jcomponent firstsecond = both) const;
+  virtual void diff(const Eigen::Ref<const typename MathBase::VectorXs>& x0,
+                    const Eigen::Ref<const typename MathBase::VectorXs>& x1,
+                    Eigen::Ref<typename MathBase::VectorXs> dxout) const;
+  virtual void integrate(const Eigen::Ref<const typename MathBase::VectorXs>& x,
+                         const Eigen::Ref<const typename MathBase::VectorXs>& dx,
+                         Eigen::Ref<typename MathBase::VectorXs> xout) const;
+  virtual void Jdiff(const Eigen::Ref<const typename MathBase::VectorXs>&,
+                     const Eigen::Ref<const typename MathBase::VectorXs>&,
+                     Eigen::Ref<typename MathBase::MatrixXs> Jfirst, Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
+                     Jcomponent firstsecond = both) const;
+  virtual void Jintegrate(const Eigen::Ref<const typename MathBase::VectorXs>&,
+                          const Eigen::Ref<const typename MathBase::VectorXs>&,
+                          Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
+                          Eigen::Ref<typename MathBase::MatrixXs> Jsecond, Jcomponent firstsecond = both) const;
 
  protected:
   using StateAbstractTpl<Scalar>::nx_;

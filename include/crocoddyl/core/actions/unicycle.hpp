@@ -27,12 +27,13 @@ class ActionModelUnicycleTpl : public ActionModelAbstractTpl<_Scalar> {
   ActionModelUnicycleTpl();
   ~ActionModelUnicycleTpl();
 
-  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const typename MathBase::VectorXs>& x,
-            const Eigen::Ref<const typename MathBase::VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
-                const Eigen::Ref<const typename MathBase::VectorXs>& x,
-                const Eigen::Ref<const typename MathBase::VectorXs>& u);
-  boost::shared_ptr<ActionDataAbstract> createData();
+  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data,
+                    const Eigen::Ref<const typename MathBase::VectorXs>& x,
+                    const Eigen::Ref<const typename MathBase::VectorXs>& u);
+  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+                        const Eigen::Ref<const typename MathBase::VectorXs>& x,
+                        const Eigen::Ref<const typename MathBase::VectorXs>& u);
+  virtual boost::shared_ptr<ActionDataAbstract> createData();
 
   const typename MathBase::Vector2s& get_cost_weights() const;
   void set_cost_weights(const typename MathBase::Vector2s& weights);

@@ -45,11 +45,11 @@ class CostModelStateTpl : public CostModelAbstractTpl<_Scalar> {
 
   ~CostModelStateTpl();
 
-  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-            const Eigen::Ref<const VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                const Eigen::Ref<const VectorXs>& u);
-  boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
+  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
+  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                        const Eigen::Ref<const VectorXs>& u);
+  virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
   const VectorXs& get_xref() const;
   void set_xref(const VectorXs& xref_in);

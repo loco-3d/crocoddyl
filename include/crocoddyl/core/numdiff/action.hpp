@@ -75,21 +75,21 @@ class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
   /**
    * @brief @copydoc Base::calc()
    */
-  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-            const Eigen::Ref<const VectorXs>& u);
+  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief @copydoc Base::calcDiff()
    */
-  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                const Eigen::Ref<const VectorXs>& u);
+  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                        const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Create a Data object from the given model.
    *
    * @return boost::shared_ptr<ActionDataAbstract>
    */
-  boost::shared_ptr<ActionDataAbstract> createData();
+  virtual boost::shared_ptr<ActionDataAbstract> createData();
 
   /**
    * @brief Get the model_ object

@@ -33,11 +33,11 @@ class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
                                 const Scalar& time_step = 1e-3, const bool& with_cost_residual = true);
   ~IntegratedActionModelEulerTpl();
 
-  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-            const Eigen::Ref<const VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                const Eigen::Ref<const VectorXs>& u);
-  boost::shared_ptr<ActionDataAbstract> createData();
+  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
+  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                        const Eigen::Ref<const VectorXs>& u);
+  virtual boost::shared_ptr<ActionDataAbstract> createData();
 
   const boost::shared_ptr<DifferentialActionModelAbstract>& get_differential() const;
   const Scalar& get_dt() const;

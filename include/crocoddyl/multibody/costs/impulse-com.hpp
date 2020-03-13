@@ -40,11 +40,11 @@ class CostModelImpulseCoMTpl : public CostModelAbstractTpl<_Scalar> {
   CostModelImpulseCoMTpl(boost::shared_ptr<StateMultibody> state);
   ~CostModelImpulseCoMTpl();
 
-  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-            const Eigen::Ref<const VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                const Eigen::Ref<const VectorXs>& u);
-  boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
+  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
+  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                        const Eigen::Ref<const VectorXs>& u);
+  virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
  protected:
   using Base::activation_;

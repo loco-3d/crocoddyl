@@ -32,14 +32,15 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
 
   VectorXs zero() const;
   VectorXs rand() const;
-  void diff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
-            Eigen::Ref<VectorXs> dxout) const;
-  void integrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
-                 Eigen::Ref<VectorXs> xout) const;
-  void Jdiff(const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&, Eigen::Ref<MatrixXs> Jfirst,
-             Eigen::Ref<MatrixXs> Jsecond, Jcomponent firstsecond = both) const;
-  void Jintegrate(const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&, Eigen::Ref<MatrixXs> Jfirst,
-                  Eigen::Ref<MatrixXs> Jsecond, Jcomponent firstsecond = both) const;
+  virtual void diff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
+                    Eigen::Ref<VectorXs> dxout) const;
+  virtual void integrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
+                         Eigen::Ref<VectorXs> xout) const;
+  virtual void Jdiff(const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&, Eigen::Ref<MatrixXs> Jfirst,
+                     Eigen::Ref<MatrixXs> Jsecond, Jcomponent firstsecond = both) const;
+  virtual void Jintegrate(const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&,
+                          Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
+                          Jcomponent firstsecond = both) const;
 
   const boost::shared_ptr<pinocchio::ModelTpl<Scalar> >& get_pinocchio() const;
 

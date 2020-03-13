@@ -31,7 +31,7 @@ class ActivationModelWeightedQuadraticBarrierTpl : public ActivationModelAbstrac
       : Base(bounds.lb.size()), bounds_(bounds), weights_(weights){};
   ~ActivationModelWeightedQuadraticBarrierTpl(){};
 
-  void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
+  virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
@@ -46,7 +46,7 @@ class ActivationModelWeightedQuadraticBarrierTpl : public ActivationModelAbstrac
     data->a_value = 0.5 * d->rlb_min_.matrix().squaredNorm() + 0.5 * d->rub_max_.matrix().squaredNorm();
   };
 
-  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
+  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
@@ -60,7 +60,7 @@ class ActivationModelWeightedQuadraticBarrierTpl : public ActivationModelAbstrac
     data->Arr.diagonal().array() *= weights_.array();
   };
 
-  boost::shared_ptr<ActivationDataAbstract> createData() {
+  virtual boost::shared_ptr<ActivationDataAbstract> createData() {
     return boost::make_shared<ActivationDataQuadraticBarrier>(this);
   };
 

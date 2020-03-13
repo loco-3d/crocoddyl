@@ -45,11 +45,11 @@ class CostModelFrameTranslationTpl : public CostModelAbstractTpl<_Scalar> {
   CostModelFrameTranslationTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref);
   ~CostModelFrameTranslationTpl();
 
-  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-            const Eigen::Ref<const VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                const Eigen::Ref<const VectorXs>& u);
-  boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
+  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
+  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                        const Eigen::Ref<const VectorXs>& u);
+  virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
   const FrameTranslation& get_xref() const;
   void set_xref(const FrameTranslation& xref_in);

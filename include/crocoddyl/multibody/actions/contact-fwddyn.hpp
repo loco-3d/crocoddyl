@@ -44,11 +44,11 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
                                                const Scalar& JMinvJt_damping = 0., const bool& enable_force = false);
   ~DifferentialActionModelContactFwdDynamicsTpl();
 
-  void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-            const Eigen::Ref<const VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                const Eigen::Ref<const VectorXs>& u);
-  boost::shared_ptr<DifferentialActionDataAbstract> createData();
+  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
+  virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+  virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
   const boost::shared_ptr<ActuationModelFloatingBase>& get_actuation() const;
   const boost::shared_ptr<ContactModelMultiple>& get_contacts() const;

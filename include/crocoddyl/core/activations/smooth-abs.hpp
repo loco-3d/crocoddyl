@@ -31,7 +31,7 @@ class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
   explicit ActivationModelSmoothAbsTpl(const std::size_t& nr) : Base(nr){};
   ~ActivationModelSmoothAbsTpl(){};
 
-  void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
+  virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
@@ -42,7 +42,7 @@ class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
     data->a_value = d->a.sum();
   };
 
-  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
+  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
@@ -53,7 +53,9 @@ class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
     data->Arr.diagonal() = d->a.cwiseProduct(d->a).cwiseProduct(d->a).cwiseInverse();
   };
 
-  boost::shared_ptr<ActivationDataAbstract> createData() { return boost::make_shared<ActivationDataSmoothAbs>(this); };
+  virtual boost::shared_ptr<ActivationDataAbstract> createData() {
+    return boost::make_shared<ActivationDataSmoothAbs>(this);
+  };
 
  protected:
   using Base::nr_;

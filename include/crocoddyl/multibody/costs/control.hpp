@@ -40,10 +40,10 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
   CostModelControlTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu);
   ~CostModelControlTpl();
 
-  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-            const Eigen::Ref<const VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                const Eigen::Ref<const VectorXs>& u);
+  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
+  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                        const Eigen::Ref<const VectorXs>& u);
 
   const VectorXs& get_uref() const;
   void set_uref(const VectorXs& uref_in);

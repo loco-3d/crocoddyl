@@ -43,11 +43,11 @@ class CostModelFrameVelocityTpl : public CostModelAbstractTpl<_Scalar> {
   CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state, const FrameMotion& vref);
   ~CostModelFrameVelocityTpl();
 
-  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-            const Eigen::Ref<const VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                const Eigen::Ref<const VectorXs>& u);
-  boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
+  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
+  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                        const Eigen::Ref<const VectorXs>& u);
+  virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
   const FrameMotion& get_vref() const;
   void set_vref(const FrameMotion& vref_in);

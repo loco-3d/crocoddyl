@@ -43,19 +43,19 @@ class ActivationModelNumDiffTpl : public ActivationModelAbstractTpl<_Scalar> {
   /**
    * @brief @copydoc Base::calc()
    */
-  void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r);
+  virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r);
 
   /**
    * @brief @copydoc Base::calcDiff()
    */
-  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r);
+  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r);
 
   /**
    * @brief Create a Data object from the given model.
    *
    * @return boost::shared_ptr<ActivationDataAbstract>
    */
-  boost::shared_ptr<ActivationDataAbstract> createData();
+  virtual boost::shared_ptr<ActivationDataAbstract> createData();
 
   /**
    * @brief Get the model_ object

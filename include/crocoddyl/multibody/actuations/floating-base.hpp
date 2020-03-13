@@ -35,8 +35,8 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
   };
   ~ActuationModelFloatingBaseTpl(){};
 
-  void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& /*x*/,
-            const Eigen::Ref<const VectorXs>& u) {
+  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& /*x*/,
+                    const Eigen::Ref<const VectorXs>& u) {
     if (static_cast<std::size_t>(u.size()) != nu_) {
       throw_pretty("Invalid argument: "
                    << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
@@ -44,15 +44,16 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
     data->tau.tail(nu_) = u;
   };
 
-  void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& /*x*/,
-                const Eigen::Ref<const VectorXs>& /*u*/) {
+  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& /*x*/,
+                        const Eigen::Ref<const VectorXs>& /*u*/) {
     // The derivatives has constant values which were set in createData.
 #ifndef NDEBUG
     assert_pretty(data->dtau_dx == MatrixXs::Zero(state_->get_nv(), state_->get_ndx()), "dtau_dx has wrong value");
     assert_pretty(data->dtau_du == dtau_du_, "dtau_du has wrong value");
 #endif
   };
-  boost::shared_ptr<ActuationDataAbstract> createData() {
+
+  virtual boost::shared_ptr<ActuationDataAbstract> createData() {
     boost::shared_ptr<ActuationDataAbstract> data = boost::make_shared<ActuationDataAbstract>(this);
     data->dtau_du.diagonal(-6).fill((Scalar)1.);
 

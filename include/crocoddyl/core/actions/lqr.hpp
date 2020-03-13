@@ -31,11 +31,11 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   ActionModelLQRTpl(const std::size_t& nx, const std::size_t& nu, bool drift_free = true);
   ~ActionModelLQRTpl();
 
-  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-            const Eigen::Ref<const VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                const Eigen::Ref<const VectorXs>& u);
-  boost::shared_ptr<ActionDataAbstract> createData();
+  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
+  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                        const Eigen::Ref<const VectorXs>& u);
+  virtual boost::shared_ptr<ActionDataAbstract> createData();
 
   const MatrixXs& get_Fx() const;
   const MatrixXs& get_Fu() const;

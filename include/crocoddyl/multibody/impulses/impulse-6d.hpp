@@ -36,10 +36,10 @@ class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
   ImpulseModel6DTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& frame);
   ~ImpulseModel6DTpl();
 
-  void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
-  void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
-  void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& force);
-  boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
+  virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& force);
+  virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
   const std::size_t& get_frame() const;
 

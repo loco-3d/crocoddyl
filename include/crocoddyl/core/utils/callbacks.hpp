@@ -22,7 +22,7 @@ class CallbackVerbose : public CallbackAbstract {
   explicit CallbackVerbose(VerboseLevel level = _1);
   ~CallbackVerbose();
 
-  void operator()(SolverAbstract& solver);
+  virtual void operator()(SolverAbstract& solver);
 
  private:
   VerboseLevel level;

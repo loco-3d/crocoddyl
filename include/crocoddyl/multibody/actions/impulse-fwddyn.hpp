@@ -51,11 +51,11 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
                                    const Scalar& JMinvJt_damping = 0., const bool& enable_force = false);
   ~ActionModelImpulseFwdDynamicsTpl();
 
-  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-            const Eigen::Ref<const VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                const Eigen::Ref<const VectorXs>& u);
-  boost::shared_ptr<ActionDataAbstract> createData();
+  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
+  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                        const Eigen::Ref<const VectorXs>& u);
+  virtual boost::shared_ptr<ActionDataAbstract> createData();
 
   const boost::shared_ptr<ImpulseModelMultiple>& get_impulses() const;
   const boost::shared_ptr<CostModelSum>& get_costs() const;

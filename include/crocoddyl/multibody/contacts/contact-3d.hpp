@@ -44,10 +44,10 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
                     const Vector2s& gains = Vector2s::Zero());
   ~ContactModel3DTpl();
 
-  void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
-  void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
-  void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force);
-  boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
+  virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force);
+  virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
   const FrameTranslation& get_xref() const;
   const Vector2s& get_gains() const;

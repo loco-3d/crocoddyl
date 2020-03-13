@@ -29,7 +29,7 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
   explicit ActivationModelQuadTpl(const std::size_t& nr) : Base(nr){};
   ~ActivationModelQuadTpl(){};
 
-  void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
+  virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
@@ -37,7 +37,7 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
     data->a_value = (Scalar(0.5) * r.transpose() * r)[0];
   };
 
-  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
+  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
@@ -48,7 +48,7 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
     assert_pretty(data->Arr == MatrixXs::Identity(nr_, nr_), "Arr has wrong value");
   };
 
-  boost::shared_ptr<ActivationDataAbstract> createData() {
+  virtual boost::shared_ptr<ActivationDataAbstract> createData() {
     boost::shared_ptr<ActivationDataAbstract> data = boost::make_shared<ActivationDataAbstract>(this);
     data->Arr.diagonal().fill((Scalar)1.);
     return data;
