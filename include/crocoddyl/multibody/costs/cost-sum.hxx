@@ -70,7 +70,7 @@ void CostModelSumTpl<Scalar>::calc(const boost::shared_ptr<CostDataSumTpl<Scalar
   for (it_m = costs_.begin(), end_m = costs_.end(), it_d = data->costs.begin(), end_d = data->costs.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const boost::shared_ptr<CostItem>& m_i = it_m->second;
-    boost::shared_ptr<CostDataAbstract>& d_i = it_d->second;
+    const boost::shared_ptr<CostDataAbstract>& d_i = it_d->second;
     assert_pretty(it_m->first == it_d->first, "it doesn't match the cost name between data and model");
 
     m_i->cost->calc(d_i, x, u);
@@ -104,7 +104,7 @@ void CostModelSumTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataSumTpl<Sc
   for (it_m = costs_.begin(), end_m = costs_.end(), it_d = data->costs.begin(), end_d = data->costs.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const boost::shared_ptr<CostItem>& m_i = it_m->second;
-    boost::shared_ptr<CostDataAbstract>& d_i = it_d->second;
+    const boost::shared_ptr<CostDataAbstract>& d_i = it_d->second;
     assert_pretty(it_m->first == it_d->first, "it doesn't match the cost name between data and model");
 
     m_i->cost->calcDiff(d_i, x, u);
