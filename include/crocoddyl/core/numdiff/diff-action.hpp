@@ -30,11 +30,11 @@ class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstract
   explicit DifferentialActionModelNumDiffTpl(boost::shared_ptr<Base> model, bool with_gauss_approx = false);
   ~DifferentialActionModelNumDiffTpl();
 
-  void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-            const Eigen::Ref<const VectorXs>& u);
-  void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                const Eigen::Ref<const VectorXs>& u);
-  boost::shared_ptr<DifferentialActionDataAbstract> createData();
+  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
+  virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+  virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
   const boost::shared_ptr<Base>& get_model() const;
   const Scalar& get_disturbance() const;
