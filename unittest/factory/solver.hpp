@@ -65,6 +65,8 @@ std::ostream& operator<<(std::ostream& os, SolverTypes::Type type) {
 
 class SolverFactory {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   SolverFactory(SolverTypes::Type solver_type, ActionModelTypes::Type action_type, size_t nb_running_models) {
     // default initialization
     solver_type_ = solver_type;
