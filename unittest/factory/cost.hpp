@@ -16,6 +16,7 @@
 #include "crocoddyl/multibody/costs/frame-rotation.hpp"
 #include "crocoddyl/multibody/costs/frame-translation.hpp"
 #include "crocoddyl/multibody/costs/frame-velocity.hpp"
+#include "crocoddyl/multibody/costs/contact-friction-cone.hpp"
 #include "crocoddyl/multibody/costs/cost-sum.hpp"
 #include "crocoddyl/multibody/numdiff/cost.hpp"
 
