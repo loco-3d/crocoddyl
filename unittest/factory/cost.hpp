@@ -14,7 +14,7 @@
 #include "crocoddyl/multibody/costs/frame-rotation.hpp"
 #include "crocoddyl/multibody/costs/frame-translation.hpp"
 #include "crocoddyl/multibody/costs/frame-velocity.hpp"
-// #include "crocoddyl/multibody/costs/cost-sum.hpp"
+#include "crocoddyl/multibody/costs/cost-sum.hpp"
 #include "crocoddyl/multibody/numdiff/cost.hpp"
 
 #include "state.hpp"
@@ -36,7 +36,6 @@ struct CostModelTypes {
     CostModelFrameRotation,
     CostModelFrameTranslation,
     CostModelFrameVelocity,
-    // CostModelSum, // @todo Implement a separate unittests for this one?
     NbCostModelTypes
   };
   static std::vector<Type> init_all() {
@@ -154,8 +153,6 @@ class CostModelFactory {
         cost_ = boost::make_shared<crocoddyl::CostModelFrameVelocity>(state_multibody_, activation_factory_->create(),
                                                                       velocity_ref_);
         break;
-      // case CostModelTypes::CostModelSum:
-      //   break;
       default:
         throw_pretty(__FILE__ ": Wrong CostModelTypes::Type given");
         break;
