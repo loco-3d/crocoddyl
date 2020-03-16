@@ -56,8 +56,9 @@ int updateForceDiff(crocoddyl::ContactModelMultiple& model, boost::shared_ptr<cr
 
 void test_constructor() {
   // Setup the test
-  StateModelFactory state_factory(StateModelTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
-  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
+  StateModelFactory state_factory;
+  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
+      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
 
   // Test the initial size of the map
   BOOST_CHECK(model.get_contacts().size() == 0);
@@ -65,15 +66,12 @@ void test_constructor() {
 
 void test_addContact() {
   // Setup the test
-  StateModelFactory state_factory(StateModelTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
-  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
-
-  // create and contact object
-  std::vector<boost::shared_ptr<ContactModelFactory> > contact_factories;
-  contact_factories.push_back(create_random_factory());
+  StateModelFactory state_factory;
+  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
+      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
 
   // add an contact object to the container
-  model.addContact("random_contact", contact_factories[0]->create());
+  model.addContact("random_contact", create_random_contact());
 
   // Test the final size of the map
   BOOST_CHECK(model.get_contacts().size() == 1);
@@ -81,20 +79,20 @@ void test_addContact() {
 
 void test_addContact_error_message() {
   // Setup the test
-  StateModelFactory state_factory(StateModelTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
-  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
+  StateModelFactory state_factory;
+  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
+      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
 
   // create an contact object
-  std::vector<boost::shared_ptr<ContactModelFactory> > contact_factories;
-  contact_factories.push_back(create_random_factory());
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact = create_random_contact();
 
   // add twice the same contact object to the container
-  model.addContact("random_contact", contact_factories[0]->create());
+  model.addContact("random_contact", rand_contact);
 
   // Expect a cout message here
   CaptureIOStream capture_ios;
   capture_ios.beginCapture();
-  model.addContact("random_contact", contact_factories[0]->create());
+  model.addContact("random_contact", rand_contact);
   capture_ios.endCapture();
 
   // Test that the error message is sent.
@@ -105,15 +103,12 @@ void test_addContact_error_message() {
 
 void test_removeContact() {
   // Setup the test
-  StateModelFactory state_factory(StateModelTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
-  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
-
-  // create and contact object
-  std::vector<boost::shared_ptr<ContactModelFactory> > contact_factories;
-  contact_factories.push_back(create_random_factory());
+  StateModelFactory state_factory;
+  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
+      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
 
   // add an contact object to the container
-  model.addContact("random_contact", contact_factories[0]->create());
+  model.addContact("random_contact", create_random_contact());
 
   // add an contact object to the container
   model.removeContact("random_contact");
@@ -124,12 +119,9 @@ void test_removeContact() {
 
 void test_removeContact_error_message() {
   // Setup the test
-  StateModelFactory state_factory(StateModelTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
-  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
-
-  // create and contact object
-  std::vector<boost::shared_ptr<ContactModelFactory> > contact_factories;
-  contact_factories.push_back(create_random_factory());
+  StateModelFactory state_factory;
+  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
+      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
 
   // remove a none existing contact form the container, we expect a cout message here
   CaptureIOStream capture_ios;
@@ -145,19 +137,18 @@ void test_removeContact_error_message() {
 
 void test_calc() {
   // Setup the test
-  StateModelFactory state_factory(StateModelTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
-  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
+  StateModelFactory state_factory;
+  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
+      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
   // create the corresponding data object
   pinocchio::Model& pinocchio_model = *model.get_state()->get_pinocchio().get();
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some contact objects
-  std::vector<boost::shared_ptr<ContactModelFactory> > contact_factories;
   for (unsigned i = 0; i < 5; ++i) {
-    contact_factories.push_back(create_random_factory());
     std::ostringstream os;
     os << "random_contact_" << i;
-    model.addContact(os.str(), contact_factories.back()->create());
+    model.addContact(os.str(), create_random_contact());
   }
 
   // create the data of the multiple-contacts
@@ -182,18 +173,17 @@ void test_calc() {
 
 void test_calc_no_computation() {
   // Setup the test
-  StateModelFactory state_factory(StateModelTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
-  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
+  StateModelFactory state_factory;
+  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
+      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
   // create the corresponding data object
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some contact objects
-  std::vector<boost::shared_ptr<ContactModelFactory> > contact_factories;
   for (unsigned i = 0; i < 5; ++i) {
-    contact_factories.push_back(create_random_factory());
     std::ostringstream os;
     os << "random_contact_" << i;
-    model.addContact(os.str(), contact_factories.back()->create());
+    model.addContact(os.str(), create_random_contact());
   }
 
   // create the data of the multiple-contacts
@@ -202,8 +192,7 @@ void test_calc_no_computation() {
   // create a dummy state vector (not used for the contacts)
   Eigen::VectorXd dx;
 
-  // pinocchio data have not been filled so the results of this operation are
-  // null matrices
+  // pinocchio data have not been filled so the results of this operation are null matrices
   model.calc(data, dx);
 
   // Check that nothing has been computed and that all value are initialized to 0
@@ -216,19 +205,18 @@ void test_calc_no_computation() {
 
 void test_calc_diff() {
   // Setup the test
-  StateModelFactory state_factory(StateModelTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
-  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
+  StateModelFactory state_factory;
+  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
+      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
   // create the corresponding data object
   pinocchio::Model& pinocchio_model = *model.get_state()->get_pinocchio().get();
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some contact objects
-  std::vector<boost::shared_ptr<ContactModelFactory> > contact_factories;
   for (unsigned i = 0; i < 5; ++i) {
-    contact_factories.push_back(create_random_factory());
     std::ostringstream os;
     os << "random_contact_" << i;
-    model.addContact(os.str(), contact_factories.back()->create());
+    model.addContact(os.str(), create_random_contact());
   }
 
   // create the data of the multiple-contacts
@@ -254,19 +242,19 @@ void test_calc_diff() {
 
 void test_calc_diff_no_recalc() {
   // Setup the test
-  StateModelFactory state_factory(StateModelTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
-  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
+  StateModelFactory state_factory;
+  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
+      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
+
   // create the corresponding data object
   pinocchio::Model& pinocchio_model = *model.get_state()->get_pinocchio().get();
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some contact objects
-  std::vector<boost::shared_ptr<ContactModelFactory> > contact_factories;
   for (unsigned i = 0; i < 5; ++i) {
-    contact_factories.push_back(create_random_factory());
     std::ostringstream os;
     os << "random_contact_" << i;
-    model.addContact(os.str(), contact_factories.back()->create());
+    model.addContact(os.str(), create_random_contact());
   }
 
   // create the data of the multiple-contacts
@@ -276,8 +264,7 @@ void test_calc_diff_no_recalc() {
   Eigen::VectorXd x = model.get_state()->rand();
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
 
-  // pinocchio data have not been filled so the results of this operation are
-  // null matrices
+  // pinocchio data have not been filled so the results of this operation are null matrices
   model.calcDiff(data, x);
 
   // Check that nothing has been computed and that all value are initialized to 0
@@ -291,18 +278,18 @@ void test_calc_diff_no_recalc() {
 
 void test_calc_diff_no_computation() {
   // Setup the test
-  StateModelFactory state_factory(StateModelTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
-  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
+  StateModelFactory state_factory;
+  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
+      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
+
   // create the corresponding data object
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some contact objects
-  std::vector<boost::shared_ptr<ContactModelFactory> > contact_factories;
   for (unsigned i = 0; i < 5; ++i) {
-    contact_factories.push_back(create_random_factory());
     std::ostringstream os;
     os << "random_contact_" << i;
-    model.addContact(os.str(), contact_factories.back()->create());
+    model.addContact(os.str(), create_random_contact());
   }
 
   // create the data of the multiple-contacts
@@ -326,19 +313,19 @@ void test_calc_diff_no_computation() {
 
 void test_updateForce() {
   // Setup the test
-  StateModelFactory state_factory(StateModelTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
-  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
+  StateModelFactory state_factory;
+  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
+      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
+
   // create the corresponding data object
   const pinocchio::Model& pinocchio_model = *model.get_state()->get_pinocchio().get();
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some contact objects
-  std::vector<boost::shared_ptr<ContactModelFactory> > contact_factories;
   for (unsigned i = 0; i < 5; ++i) {
-    contact_factories.push_back(create_random_factory());
     std::ostringstream os;
     os << "random_contact_" << i;
-    model.addContact(os.str(), contact_factories.back()->create());
+    model.addContact(os.str(), create_random_contact());
   }
 
   // create the data of the multiple-contacts
@@ -373,26 +360,24 @@ void test_updateForce() {
 
 void test_updateAccelerationDiff() {
   // Setup the test
-  StateModelFactory state_factory(StateModelTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
-  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
+  StateModelFactory state_factory;
+  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
+      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
   // create the corresponding data object
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some contact objects
-  std::vector<boost::shared_ptr<ContactModelFactory> > contact_factories;
   for (unsigned i = 0; i < 5; ++i) {
-    contact_factories.push_back(create_random_factory());
     std::ostringstream os;
     os << "random_contact_" << i;
-    model.addContact(os.str(), contact_factories.back()->create());
+    model.addContact(os.str(), create_random_contact());
   }
 
   // create the data of the multiple-contacts
   boost::shared_ptr<crocoddyl::ContactDataMultiple> data = model.createData(&pinocchio_data);
 
   // create the velocity diff
-  Eigen::MatrixXd ddv_dx =
-      Eigen::MatrixXd::Random(state_factory.create()->get_nv(), state_factory.create()->get_ndx());
+  Eigen::MatrixXd ddv_dx = Eigen::MatrixXd::Random(model.get_state()->get_nv(), model.get_state()->get_ndx());
 
   // call the update
   model.updateAccelerationDiff(data, ddv_dx);
@@ -403,26 +388,25 @@ void test_updateAccelerationDiff() {
 
 void test_updateForceDiff() {
   // Setup the test
-  StateModelFactory state_factory(StateModelTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
-  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
+  StateModelFactory state_factory;
+  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
+      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
   // create the corresponding data object
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some contact objects
-  std::vector<boost::shared_ptr<ContactModelFactory> > contact_factories;
   for (unsigned i = 0; i < 5; ++i) {
-    contact_factories.push_back(create_random_factory());
     std::ostringstream os;
     os << "random_contact_" << i;
-    model.addContact(os.str(), contact_factories.back()->create());
+    model.addContact(os.str(), create_random_contact());
   }
 
   // create the data of the multiple-contacts
   boost::shared_ptr<crocoddyl::ContactDataMultiple> data = model.createData(&pinocchio_data);
 
   // create force diff
-  Eigen::MatrixXd df_dx = Eigen::MatrixXd::Random(model.get_nc(), state_factory.create()->get_nv());
-  Eigen::MatrixXd df_du = Eigen::MatrixXd::Random(model.get_nc(), state_factory.create()->get_nv());
+  Eigen::MatrixXd df_dx = Eigen::MatrixXd::Random(model.get_nc(), model.get_state()->get_nv());
+  Eigen::MatrixXd df_du = Eigen::MatrixXd::Random(model.get_nc(), model.get_state()->get_nv());
 
   // call update force diff
   model.updateForceDiff(data, df_dx, df_du);
@@ -436,27 +420,26 @@ void test_updateForceDiff() {
 
 void test_assert_updateForceDiff_assert_mismatch_model_data() {
   // Setup the test
-  StateModelFactory state_factory(StateModelTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
-  crocoddyl::ContactModelMultiple model1(
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
-  crocoddyl::ContactModelMultiple model2(
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
+  StateModelFactory state_factory;
+  crocoddyl::ContactModelMultiple model1(boost::static_pointer_cast<crocoddyl::StateMultibody>(
+      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
+  crocoddyl::ContactModelMultiple model2(boost::static_pointer_cast<crocoddyl::StateMultibody>(
+      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
   // create the corresponding data object
   pinocchio::Data pinocchio_data(*model1.get_state()->get_pinocchio().get());
 
   // create and add some contact objects
-  std::vector<boost::shared_ptr<ContactModelFactory> > contact_factories;
   for (unsigned i = 0; i < 5; ++i) {
-    contact_factories.push_back(create_random_factory());
+    boost::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact = create_random_contact();
     {
       std::ostringstream os;
       os << "random_contact1_" << i;
-      model1.addContact(os.str(), contact_factories.back()->create());
+      model1.addContact(os.str(), rand_contact);
     }
     {
       std::ostringstream os;
       os << "random_contact2_" << i;
-      model2.addContact(os.str(), contact_factories.back()->create());
+      model2.addContact(os.str(), rand_contact);
     }
   }
 
@@ -465,8 +448,8 @@ void test_assert_updateForceDiff_assert_mismatch_model_data() {
   boost::shared_ptr<crocoddyl::ContactDataMultiple> data2 = model2.createData(&pinocchio_data);
 
   // create force diff
-  Eigen::MatrixXd df_dx = Eigen::MatrixXd::Random(model1.get_nc(), state_factory.create()->get_nv());
-  Eigen::MatrixXd df_du = Eigen::MatrixXd::Random(model1.get_nc(), state_factory.create()->get_nv());
+  Eigen::MatrixXd df_dx = Eigen::MatrixXd::Random(model1.get_nc(), model1.get_state()->get_nv());
+  Eigen::MatrixXd df_du = Eigen::MatrixXd::Random(model1.get_nc(), model1.get_state()->get_nv());
 
   // call that trigger assert
   std::string error_message = GetErrorMessages(boost::bind(&updateForceDiff, model1, data2, df_dx, df_du));
@@ -487,29 +470,19 @@ void test_assert_updateForceDiff_assert_mismatch_model_data() {
   BOOST_CHECK(error_message.find(assert_argument) != std::string::npos);
 }
 
-void test_create() {
-  // Setup the test
-  StateModelFactory state_factory(StateModelTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
-  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
-
-  // Test
-  BOOST_CHECK(state_factory.create() == model.get_state());
-}
-
 void test_get_contacts() {
   // Setup the test
-  StateModelFactory state_factory(StateModelTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
-  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
+  StateModelFactory state_factory;
+  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
+      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
   // create the corresponding data object
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some contact objects
-  std::vector<boost::shared_ptr<ContactModelFactory> > contact_factories;
   for (unsigned i = 0; i < 5; ++i) {
-    contact_factories.push_back(create_random_factory());
     std::ostringstream os;
     os << "random_contact_" << i;
-    model.addContact(os.str(), contact_factories.back()->create());
+    model.addContact(os.str(), create_random_contact());
   }
 
   // get the contacts
@@ -527,18 +500,18 @@ void test_get_contacts() {
 
 void test_get_nc() {
   // Setup the test
-  StateModelFactory state_factory(StateModelTypes::StateMultibody, PinocchioModelTypes::RandomHumanoid);
-  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create()));
+  StateModelFactory state_factory;
+  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
+      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
+
   // create the corresponding data object
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some contact objects
-  std::vector<boost::shared_ptr<ContactModelFactory> > contact_factories;
   for (unsigned i = 0; i < 5; ++i) {
-    contact_factories.push_back(create_random_factory());
     std::ostringstream os;
     os << "random_contact_" << i;
-    model.addContact(os.str(), contact_factories.back()->create());
+    model.addContact(os.str(), create_random_contact());
   }
 
   // compute ni
@@ -565,7 +538,6 @@ void register_unit_tests() {
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_no_computation)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_updateForce)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_updateAccelerationDiff)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_create)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_get_contacts)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_get_nc)));
 }

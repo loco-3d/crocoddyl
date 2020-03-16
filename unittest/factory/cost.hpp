@@ -92,89 +92,64 @@ class CostModelFactory {
   typedef crocoddyl::MathBaseTpl<double> MathBase;
   typedef typename MathBase::Vector6s Vector6d;
 
-  CostModelFactory(CostModelTypes::Type cost_type, ActivationModelTypes::Type activation_type,
-                   StateModelTypes::Type state_multibody_type, PinocchioModelTypes::Type model_type)
-      : state_factory_(boost::make_shared<StateModelFactory>(state_multibody_type, model_type)),
-        state_multibody_(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->create())),
-        // Setup some reference for the costs.
-        frame_index_(state_multibody_->get_pinocchio()->frames.size() - 1),
-        mom_ref_(Vector6d::Random()),
-        com_ref_(Eigen::Vector3d::Random()),
-        u_ref_(Eigen::VectorXd::Random(state_multibody_->get_nv())),
-        frame_(pinocchio::SE3::Random()),
-        frame_ref_(frame_index_, frame_),
-        rotation_ref_(frame_index_, frame_.rotation()),
-        translation_ref_(frame_index_, frame_.translation()),
-        velocity_ref_(frame_index_, pinocchio::Motion::Random()) {
-    // Construct the different cost.
+  explicit CostModelFactory() {}
+  ~CostModelFactory() {}
+
+  boost::shared_ptr<crocoddyl::CostModelAbstract> create(CostModelTypes::Type cost_type,
+                                                         StateModelTypes::Type state_type,
+                                                         ActivationModelTypes::Type activation_type) {
+    StateModelFactory state_factory;
+    ActivationModelFactory activation_factory;
+    boost::shared_ptr<crocoddyl::CostModelAbstract> cost;
+    boost::shared_ptr<crocoddyl::StateMultibody> state =
+        boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type));
+    crocoddyl::FrameIndex frame_index = state->get_pinocchio()->frames.size() - 1;
+    pinocchio::SE3 frame_SE3 = pinocchio::SE3::Random();
+
     switch (cost_type) {
       case CostModelTypes::CostModelState:
-        activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, state_multibody_->get_ndx());
-        cost_ = boost::make_shared<crocoddyl::CostModelState>(state_multibody_, activation_factory_->create(),
-                                                              state_multibody_->rand());
+        cost = boost::make_shared<crocoddyl::CostModelState>(
+            state, activation_factory.create(activation_type, state->get_ndx()), state->rand());
         break;
       case CostModelTypes::CostModelControl:
-        activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, state_multibody_->get_nv());
-        cost_ =
-            boost::make_shared<crocoddyl::CostModelControl>(state_multibody_, activation_factory_->create(), u_ref_);
+        cost = boost::make_shared<crocoddyl::CostModelControl>(
+            state, activation_factory.create(activation_type, state->get_nv()),
+            Eigen::VectorXd::Random(state->get_nv()));
         break;
       case CostModelTypes::CostModelCoMPosition:
-        activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, 3);
-        cost_ = boost::make_shared<crocoddyl::CostModelCoMPosition>(state_multibody_, activation_factory_->create(),
-                                                                    com_ref_);
+        cost = boost::make_shared<crocoddyl::CostModelCoMPosition>(
+            state, activation_factory.create(activation_type, 3), Eigen::Vector3d::Random());
         break;
       // case CostModelTypes::CostModelCentroidalMomentum:
-      //   activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, 6);
-      //   cost_ = boost::make_shared<crocoddyl::CostModelCentroidalMomentum>(state_multibody_,
-      //                                                                      activation_factory_->create(), mom_ref_);
+      //   cost = boost::make_shared<crocoddyl::CostModelCentroidalMomentum>(state_,
+      //                                                                      activation_factory.create(activation_type,
+      //                                                                      6), Vector6d::Random());
       //   break;
       case CostModelTypes::CostModelFramePlacement:
-        activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, 6);
-        cost_ = boost::make_shared<crocoddyl::CostModelFramePlacement>(state_multibody_, activation_factory_->create(),
-                                                                       frame_ref_);
+        cost = boost::make_shared<crocoddyl::CostModelFramePlacement>(
+            state, activation_factory.create(activation_type, 6), crocoddyl::FramePlacement(frame_index, frame_SE3));
         break;
       case CostModelTypes::CostModelFrameRotation:
-        activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, 3);
-        cost_ = boost::make_shared<crocoddyl::CostModelFrameRotation>(state_multibody_, activation_factory_->create(),
-                                                                      rotation_ref_);
+        cost = boost::make_shared<crocoddyl::CostModelFrameRotation>(
+            state, activation_factory.create(activation_type, 3),
+            crocoddyl::FrameRotation(frame_index, frame_SE3.rotation()));
         break;
       case CostModelTypes::CostModelFrameTranslation:
-        activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, 3);
-        cost_ = boost::make_shared<crocoddyl::CostModelFrameTranslation>(
-            state_multibody_, activation_factory_->create(), translation_ref_);
+        cost = boost::make_shared<crocoddyl::CostModelFrameTranslation>(
+            state, activation_factory.create(activation_type, 3),
+            crocoddyl::FrameTranslation(frame_index, frame_SE3.translation()));
         break;
       case CostModelTypes::CostModelFrameVelocity:
-        activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, 6);
-        cost_ = boost::make_shared<crocoddyl::CostModelFrameVelocity>(state_multibody_, activation_factory_->create(),
-                                                                      velocity_ref_);
+        cost = boost::make_shared<crocoddyl::CostModelFrameVelocity>(
+            state, activation_factory.create(activation_type, 6),
+            crocoddyl::FrameMotion(frame_index, pinocchio::Motion::Random()));
         break;
       default:
         throw_pretty(__FILE__ ": Wrong CostModelTypes::Type given");
         break;
     }
+    return cost;
   }
-
-  ~CostModelFactory() {}
-
-  boost::shared_ptr<crocoddyl::CostModelAbstract> create() { return cost_; }
-
- private:
-  std::size_t nu_;
-  boost::shared_ptr<crocoddyl::CostModelAbstract> cost_;
-  boost::shared_ptr<ActivationModelFactory> activation_factory_;
-  boost::shared_ptr<StateModelFactory> state_factory_;
-  boost::shared_ptr<crocoddyl::StateMultibody> state_multibody_;
-
-  // some reference:
-  crocoddyl::FrameIndex frame_index_;
-  Vector6d mom_ref_;
-  Eigen::Vector3d com_ref_;
-  Eigen::VectorXd u_ref_;
-  pinocchio::SE3 frame_;
-  crocoddyl::FramePlacement frame_ref_;
-  crocoddyl::FrameRotation rotation_ref_;
-  crocoddyl::FrameTranslation translation_ref_;
-  crocoddyl::FrameMotion velocity_ref_;
 };
 
 }  // namespace unittest

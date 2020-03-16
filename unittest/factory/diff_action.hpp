@@ -9,7 +9,6 @@
 #include <iterator>
 #include <pinocchio/fwd.hpp>
 
-#include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/actions/diff-lqr.hpp"
 #include "crocoddyl/core/numdiff/diff-action.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
@@ -54,32 +53,27 @@ std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type ty
 
 class DifferentialActionModelFactory {
  public:
-  DifferentialActionModelFactory(DifferentialActionModelTypes::Type type) {
+  explicit DifferentialActionModelFactory() {}
+  ~DifferentialActionModelFactory() {}
+
+  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create(DifferentialActionModelTypes::Type type) {
+    boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> action;
     switch (type) {
       case DifferentialActionModelTypes::DifferentialActionModelLQR:
-        nq_ = 40;
-        nu_ = 40;
-        action_ = boost::make_shared<crocoddyl::DifferentialActionModelLQR>(nq_, nu_, false);
+        action = boost::make_shared<crocoddyl::DifferentialActionModelLQR>(40, 40, false);
         break;
       case DifferentialActionModelTypes::DifferentialActionModelLQRDriftFree:
-        nq_ = 40;
-        nu_ = 40;
-        action_ = boost::make_shared<crocoddyl::DifferentialActionModelLQR>(nq_, nu_, true);
+        action = boost::make_shared<crocoddyl::DifferentialActionModelLQR>(40, 40, true);
         break;
       default:
         throw_pretty(__FILE__ ": Wrong DifferentialActionModelTypes::Type given");
         break;
     }
+
+    return action;
   }
 
-  ~DifferentialActionModelFactory() {}
-
-  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create() { return action_; }
-
-  const std::size_t& get_nq() { return nq_; }
-
  private:
-  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> action_;
   std::size_t nq_;
   std::size_t nu_;
 };

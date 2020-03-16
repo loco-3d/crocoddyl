@@ -59,51 +59,46 @@ class ContactModelFactory {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  ContactModelFactory(ContactModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) {
-    PinocchioModelFactory model_factory(model_type);
-    StateModelFactory state_factory(StateModelTypes::StateMultibody, model_type);
-    boost::shared_ptr<crocoddyl::StateMultibody> state =
-        boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create());
-    pinocchio_model_ = state->get_pinocchio();
+  explicit ContactModelFactory() {}
+  ~ContactModelFactory() {}
 
-    switch (impulse_type) {
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> create(ContactModelTypes::Type contact_type,
+                                                            PinocchioModelTypes::Type model_type) const {
+    PinocchioModelFactory model_factory(model_type);
+    boost::shared_ptr<crocoddyl::StateMultibody> state =
+        boost::make_shared<crocoddyl::StateMultibody>(model_factory.create());
+    boost::shared_ptr<crocoddyl::ContactModelAbstract> contact;
+    switch (contact_type) {
       case ContactModelTypes::ContactModel3D:
-        impulse_ = boost::make_shared<crocoddyl::ContactModel3D>(
+        contact = boost::make_shared<crocoddyl::ContactModel3D>(
             state, crocoddyl::FrameTranslation(model_factory.get_frame_id(), Eigen::Vector3d::Zero()));
         break;
       case ContactModelTypes::ContactModel6D:
-        impulse_ = boost::make_shared<crocoddyl::ContactModel6D>(
+        contact = boost::make_shared<crocoddyl::ContactModel6D>(
             state, crocoddyl::FramePlacement(model_factory.get_frame_id(), pinocchio::SE3()));
         break;
       default:
         throw_pretty(__FILE__ ": Wrong ContactModelTypes::Type given");
         break;
     }
+    return contact;
   }
-
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> create() const { return impulse_; }
-  boost::shared_ptr<pinocchio::Model> get_pinocchio_model() const { return pinocchio_model_; }
-
- private:
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> impulse_;  //!< The pointer to the impulse model
-  boost::shared_ptr<pinocchio::Model> pinocchio_model_;         //!< Pinocchio model
 };
 
-boost::shared_ptr<ContactModelFactory> create_random_factory() {
+boost::shared_ptr<crocoddyl::ContactModelAbstract> create_random_contact() {
   static bool once = true;
   if (once) {
     srand((unsigned)time(NULL));
     once = false;
   }
-  boost::shared_ptr<ContactModelFactory> ptr;
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> contact;
+  ContactModelFactory factory;
   if (rand() % 2 == 0) {
-    ptr = boost::make_shared<ContactModelFactory>(ContactModelTypes::ContactModel3D,
-                                                  PinocchioModelTypes::RandomHumanoid);
+    contact = factory.create(ContactModelTypes::ContactModel3D, PinocchioModelTypes::RandomHumanoid);
   } else {
-    ptr = boost::make_shared<ContactModelFactory>(ContactModelTypes::ContactModel6D,
-                                                  PinocchioModelTypes::RandomHumanoid);
+    contact = factory.create(ContactModelTypes::ContactModel6D, PinocchioModelTypes::RandomHumanoid);
   }
-  return ptr;
+  return contact;
 }
 
 }  // namespace unittest

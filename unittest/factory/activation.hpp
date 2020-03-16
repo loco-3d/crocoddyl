@@ -69,44 +69,40 @@ std::ostream& operator<<(std::ostream& os, ActivationModelTypes::Type type) {
 
 class ActivationModelFactory {
  public:
-  ActivationModelFactory(ActivationModelTypes::Type test_type, std::size_t nr = 5) {
-    nr_ = nr;
-    Eigen::VectorXd lb = Eigen::VectorXd::Random(nr_);
-    Eigen::VectorXd ub = lb + Eigen::VectorXd::Ones(nr_) + Eigen::VectorXd::Random(nr_);
-    Eigen::VectorXd weights = Eigen::VectorXd::Random(nr_);
+  explicit ActivationModelFactory() {}
+  ~ActivationModelFactory() {}
 
-    switch (test_type) {
+  boost::shared_ptr<crocoddyl::ActivationModelAbstract> create(ActivationModelTypes::Type activation_type,
+                                                               std::size_t nr = 5) {
+    boost::shared_ptr<crocoddyl::ActivationModelAbstract> activation;
+    Eigen::VectorXd lb = Eigen::VectorXd::Random(nr);
+    Eigen::VectorXd ub = lb + Eigen::VectorXd::Ones(nr) + Eigen::VectorXd::Random(nr);
+    Eigen::VectorXd weights = Eigen::VectorXd::Random(nr);
+
+    switch (activation_type) {
       case ActivationModelTypes::ActivationModelQuad:
-        activation_ = boost::make_shared<crocoddyl::ActivationModelQuad>(nr_);
+        activation = boost::make_shared<crocoddyl::ActivationModelQuad>(nr);
         break;
       case ActivationModelTypes::ActivationModelSmoothAbs:
-        activation_ = boost::make_shared<crocoddyl::ActivationModelSmoothAbs>(nr_);
+        activation = boost::make_shared<crocoddyl::ActivationModelSmoothAbs>(nr);
         break;
       case ActivationModelTypes::ActivationModelWeightedQuad:
-        activation_ = boost::make_shared<crocoddyl::ActivationModelWeightedQuad>(weights);
+        activation = boost::make_shared<crocoddyl::ActivationModelWeightedQuad>(weights);
         break;
       case ActivationModelTypes::ActivationModelQuadraticBarrier:
-        activation_ =
+        activation =
             boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(crocoddyl::ActivationBounds(lb, ub));
         break;
       case ActivationModelTypes::ActivationModelWeightedQuadraticBarrier:
-        activation_ = boost::make_shared<crocoddyl::ActivationModelWeightedQuadraticBarrier>(
+        activation = boost::make_shared<crocoddyl::ActivationModelWeightedQuadraticBarrier>(
             crocoddyl::ActivationBounds(lb, ub), weights);
         break;
       default:
         throw_pretty(__FILE__ ":\n Construct wrong ActivationModelTypes::Type");
         break;
     }
+    return activation;
   }
-
-  ~ActivationModelFactory() {}
-
-  boost::shared_ptr<crocoddyl::ActivationModelAbstract> create() { return activation_; }
-  const std::size_t& get_nr() { return nr_; }
-
- private:
-  std::size_t nr_;
-  boost::shared_ptr<crocoddyl::ActivationModelAbstract> activation_;
 };
 
 }  // namespace unittest

@@ -17,19 +17,19 @@ using namespace crocoddyl::unittest;
 
 //----------------------------------------------------------------------------//
 
-void test_construct_data(DifferentialActionModelTypes::Type test_type) {
+void test_construct_data(DifferentialActionModelTypes::Type action_type) {
   // create the model
-  DifferentialActionModelFactory factory(test_type);
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create();
+  DifferentialActionModelFactory factory;
+  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create(action_type);
 
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data = model->createData();
 }
 
-void test_calc_returns_state(DifferentialActionModelTypes::Type test_type) {
+void test_calc_returns_state(DifferentialActionModelTypes::Type action_type) {
   // create the model
-  DifferentialActionModelFactory factory(test_type);
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create();
+  DifferentialActionModelFactory factory;
+  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create(action_type);
 
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data = model->createData();
@@ -44,10 +44,10 @@ void test_calc_returns_state(DifferentialActionModelTypes::Type test_type) {
   BOOST_CHECK(static_cast<std::size_t>(data->xout.size()) == model->get_state()->get_nv());
 }
 
-void test_calc_returns_a_cost(DifferentialActionModelTypes::Type test_type) {
+void test_calc_returns_a_cost(DifferentialActionModelTypes::Type action_type) {
   // create the model
-  DifferentialActionModelFactory factory(test_type);
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create();
+  DifferentialActionModelFactory factory;
+  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create(action_type);
 
   // create the corresponding data object and set the cost to nan
   const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data = model->createData();
@@ -62,10 +62,10 @@ void test_calc_returns_a_cost(DifferentialActionModelTypes::Type test_type) {
   BOOST_CHECK(!std::isnan(data->cost));
 }
 
-void test_partial_derivatives_against_numdiff(DifferentialActionModelTypes::Type test_type) {
+void test_partial_derivatives_against_numdiff(DifferentialActionModelTypes::Type action_type) {
   // create the model
-  DifferentialActionModelFactory factory(test_type);
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create();
+  DifferentialActionModelFactory factory;
+  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create(action_type);
 
   // create the corresponding data object and set the cost to nan
   const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data = model->createData();
@@ -103,11 +103,11 @@ void test_partial_derivatives_against_numdiff(DifferentialActionModelTypes::Type
 
 //----------------------------------------------------------------------------//
 
-void register_action_model_unit_tests(DifferentialActionModelTypes::Type test_type, test_suite& ts) {
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_construct_data, test_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_state, test_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, test_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, test_type)));
+void register_action_model_unit_tests(DifferentialActionModelTypes::Type action_type, test_suite& ts) {
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_construct_data, action_type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_state, action_type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, action_type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, action_type)));
 }
 
 bool init_function() {

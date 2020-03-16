@@ -56,49 +56,45 @@ class ImpulseModelFactory {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  ImpulseModelFactory(ImpulseModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) {
-    PinocchioModelFactory model_factory(model_type);
-    StateModelFactory state_factory(StateModelTypes::StateMultibody, model_type);
-    boost::shared_ptr<crocoddyl::StateMultibody> state =
-        boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create());
-    pinocchio_model_ = state->get_pinocchio();
+  explicit ImpulseModelFactory() {}
+  ~ImpulseModelFactory() {}
 
+  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> create(ImpulseModelTypes::Type impulse_type,
+                                                            PinocchioModelTypes::Type model_type) {
+    boost::shared_ptr<crocoddyl::ImpulseModelAbstract> impulse;
+    PinocchioModelFactory model_factory(model_type);
+    boost::shared_ptr<crocoddyl::StateMultibody> state =
+        boost::make_shared<crocoddyl::StateMultibody>(model_factory.create());
+    boost::shared_ptr<crocoddyl::ContactModelAbstract> contact;
     switch (impulse_type) {
       case ImpulseModelTypes::ImpulseModel3D:
-        impulse_ = boost::make_shared<crocoddyl::ImpulseModel3D>(state, model_factory.get_frame_id());
+        impulse = boost::make_shared<crocoddyl::ImpulseModel3D>(state, model_factory.get_frame_id());
         break;
       case ImpulseModelTypes::ImpulseModel6D:
-        impulse_ = boost::make_shared<crocoddyl::ImpulseModel6D>(state, model_factory.get_frame_id());
+        impulse = boost::make_shared<crocoddyl::ImpulseModel6D>(state, model_factory.get_frame_id());
         break;
       default:
         throw_pretty(__FILE__ ": Wrong ImpulseModelTypes::Type given");
         break;
     }
+    return impulse;
   }
-
-  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> create() const { return impulse_; }
-  boost::shared_ptr<pinocchio::Model> get_pinocchio_model() const { return pinocchio_model_; }
-
- private:
-  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> impulse_;  //!< The pointer to the impulse model
-  boost::shared_ptr<pinocchio::Model> pinocchio_model_;         //!< Pinocchio model
 };
 
-boost::shared_ptr<ImpulseModelFactory> create_random_factory() {
+boost::shared_ptr<crocoddyl::ImpulseModelAbstract> create_random_impulse() {
   static bool once = true;
   if (once) {
     srand((unsigned)time(NULL));
     once = false;
   }
-  boost::shared_ptr<ImpulseModelFactory> ptr;
+  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> impulse;
+  ImpulseModelFactory factory;
   if (rand() % 2 == 0) {
-    ptr = boost::make_shared<ImpulseModelFactory>(ImpulseModelTypes::ImpulseModel3D,
-                                                  PinocchioModelTypes::RandomHumanoid);
+    impulse = factory.create(ImpulseModelTypes::ImpulseModel3D, PinocchioModelTypes::RandomHumanoid);
   } else {
-    ptr = boost::make_shared<ImpulseModelFactory>(ImpulseModelTypes::ImpulseModel6D,
-                                                  PinocchioModelTypes::RandomHumanoid);
+    impulse = factory.create(ImpulseModelTypes::ImpulseModel6D, PinocchioModelTypes::RandomHumanoid);
   }
-  return ptr;
+  return impulse;
 }
 
 }  // namespace unittest
