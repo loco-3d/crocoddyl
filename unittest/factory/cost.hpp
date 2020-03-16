@@ -92,10 +92,10 @@ class CostModelFactory {
   typedef crocoddyl::MathBaseTpl<double> MathBase;
   typedef typename MathBase::Vector6s Vector6d;
 
-  CostModelFactory(CostModelTypes::Type test_type, ActivationModelTypes::Type activation_type,
+  CostModelFactory(CostModelTypes::Type cost_type, ActivationModelTypes::Type activation_type,
                    StateTypes::Type state_multibody_type, PinocchioModelTypes::Type model_type)
-      : state_factory_(state_multibody_type, model_type),
-        state_multibody_(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_.create())),
+      : state_factory_(boost::make_shared<StateFactory>(state_multibody_type, model_type)),
+        state_multibody_(boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory_->create())),
         // Setup some reference for the costs.
         frame_index_(state_multibody_->get_pinocchio()->frames.size() - 1),
         mom_ref_(Vector6d::Random()),
@@ -106,10 +106,8 @@ class CostModelFactory {
         rotation_ref_(frame_index_, frame_.rotation()),
         translation_ref_(frame_index_, frame_.translation()),
         velocity_ref_(frame_index_, pinocchio::Motion::Random()) {
-    type_ = test_type;
-
     // Construct the different cost.
-    switch (type_) {
+    switch (cost_type) {
       case CostModelTypes::CostModelState:
         activation_factory_ = boost::make_shared<ActivationModelFactory>(activation_type, state_multibody_->get_ndx());
         cost_ = boost::make_shared<crocoddyl::CostModelState>(state_multibody_, activation_factory_->create(),
@@ -162,10 +160,9 @@ class CostModelFactory {
 
  private:
   std::size_t nu_;
-  CostModelTypes::Type type_;
   boost::shared_ptr<crocoddyl::CostModelAbstract> cost_;
   boost::shared_ptr<ActivationModelFactory> activation_factory_;
-  StateFactory state_factory_;
+  boost::shared_ptr<StateFactory> state_factory_;
   boost::shared_ptr<crocoddyl::StateMultibody> state_multibody_;
 
   // some reference:
