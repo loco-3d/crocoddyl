@@ -19,6 +19,8 @@
 
 #include <example-robot-data/path.hpp>
 
+#include "crocoddyl/core/utils/exception.hpp"
+
 #ifndef CROCODDYL_PINOCCHIO_MODEL_FACTORY_HPP_
 #define CROCODDYL_PINOCCHIO_MODEL_FACTORY_HPP_
 

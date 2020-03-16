@@ -6,17 +6,17 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <pinocchio/fwd.hpp>
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/parsers/sample-models.hpp>
 #include <example-robot-data/path.hpp>
 
+#include "pinocchio_model.hpp"
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/core/numdiff/state.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
-
-#include "pinocchio_model.hpp"
 
 #ifndef CROCODDYL_STATE_FACTORY_HPP_
 #define CROCODDYL_STATE_FACTORY_HPP_

@@ -7,12 +7,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
+#include "state.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/multibody/impulses/impulse-3d.hpp"
 #include "crocoddyl/multibody/impulses/impulse-6d.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
-#include "state.hpp"
 
 #ifndef CROCODDYL_IMPULSES_FACTORY_HPP_
 #define CROCODDYL_IMPULSES_FACTORY_HPP_

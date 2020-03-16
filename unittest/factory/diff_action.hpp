@@ -6,9 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <iterator>
-#include <pinocchio/fwd.hpp>
-
 #include "crocoddyl/core/actions/diff-lqr.hpp"
 #include "crocoddyl/core/numdiff/diff-action.hpp"
 #include "crocoddyl/core/utils/exception.hpp"

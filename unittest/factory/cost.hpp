@@ -6,6 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "state.hpp"
+#include "activation.hpp"
 #include "crocoddyl/multibody/costs/state.hpp"
 #include "crocoddyl/multibody/costs/control.hpp"
 #include "crocoddyl/multibody/costs/com-position.hpp"
@@ -16,9 +18,6 @@
 #include "crocoddyl/multibody/costs/frame-velocity.hpp"
 #include "crocoddyl/multibody/costs/cost-sum.hpp"
 #include "crocoddyl/multibody/numdiff/cost.hpp"
-
-#include "state.hpp"
-#include "activation.hpp"
 
 #ifndef CROCODDYL_COST_FACTORY_HPP_
 #define CROCODDYL_COST_FACTORY_HPP_

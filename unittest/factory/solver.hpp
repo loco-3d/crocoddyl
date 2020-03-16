@@ -7,6 +7,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "action.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/solver-base.hpp"
 #include "crocoddyl/core/solvers/kkt.hpp"
@@ -14,8 +15,6 @@
 #include "crocoddyl/core/solvers/fddp.hpp"
 #include "crocoddyl/core/solvers/box-ddp.hpp"
 #include "crocoddyl/core/solvers/box-fddp.hpp"
-
-#include "action.hpp"
 
 #ifndef CROCODDYL_STATE_FACTORY_HPP_
 #define CROCODDYL_STATE_FACTORY_HPP_
