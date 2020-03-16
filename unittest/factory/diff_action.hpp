@@ -29,7 +29,9 @@ struct DifferentialActionModelTypes {
     DifferentialActionModelLQRDriftFree,
     DifferentialActionModelFreeFwdDynamics_TalosArm,
     DifferentialActionModelContactFwdDynamics_HyQ,
-    DifferentialActionModelContactFwdDynamics_Talos,
+    // DifferentialActionModelContactFwdDynamics_Talos,
+    DifferentialActionModelContactFwdDynamicsWithFriction_HyQ,
+    // DifferentialActionModelContactFwdDynamicsWithFriction_Talos,
     NbDifferentialActionModelTypes
   };
   static std::vector<Type> init_all() {
@@ -59,9 +61,17 @@ std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type ty
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_HyQ:
       os << "DifferentialActionModelContactFwdDynamics_HyQ";
       break;
-    case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos:
-      os << "DifferentialActionModelContactFwdDynamics_Talos";
+    // todo(cmastalli): investigate why the error is 10e-3
+    // case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos:
+    //   os << "DifferentialActionModelContactFwdDynamics_Talos";
+    //   break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_HyQ:
+      os << "DifferentialActionModelContactFwdDynamicsWithFriction_HyQ";
       break;
+    // todo(cmastalli): investigate why the error is 10e-3
+    // case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_Talos:
+    //   os << "DifferentialActionModelContactFwdDynamicsWithFriction_Talos";
+    //   break;
     case DifferentialActionModelTypes::NbDifferentialActionModelTypes:
       os << "NbDifferentialActionModelTypes";
       break;
@@ -89,11 +99,17 @@ class DifferentialActionModelFactory {
         action = create_freeFwdDynamics(StateModelTypes::StateMultibody_TalosArm);
         break;
       case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_HyQ:
+        action = create_contactFwdDynamics(StateModelTypes::StateMultibody_HyQ, false);
+        break;
+        //   case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos:
+        //     action = create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos, false);
+        //     break;
+      case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_HyQ:
         action = create_contactFwdDynamics(StateModelTypes::StateMultibody_HyQ);
         break;
-      case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos:
-        action = create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos);
-        break;
+        //   case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_Talos:
+        //     action = create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos);
+        //     break;
       default:
         throw_pretty(__FILE__ ": Wrong DifferentialActionModelTypes::Type given");
         break;
@@ -128,7 +144,7 @@ class DifferentialActionModelFactory {
   }
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create_contactFwdDynamics(
-      StateModelTypes::Type state_type) {
+      StateModelTypes::Type state_type, bool with_friction = true) {
     boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> action;
     boost::shared_ptr<crocoddyl::StateMultibody> state;
     boost::shared_ptr<crocoddyl::ActuationModelFloatingBase> actuation;
@@ -166,22 +182,28 @@ class DifferentialActionModelFactory {
                                       crocoddyl::FrameTranslation(state->get_pinocchio()->getFrameId("rh_foot"),
                                                                   Eigen::Vector3d::Zero()),
                                       actuation->get_nu()));
-        cost->addCost("lf_cone",
-                      boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
-                          state, activation, cone, state->get_pinocchio()->getFrameId("lf_foot"), actuation->get_nu()),
-                      0.1);
-        cost->addCost("rf_cone",
-                      boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
-                          state, activation, cone, state->get_pinocchio()->getFrameId("rf_foot"), actuation->get_nu()),
-                      0.1);
-        cost->addCost("lh_cone",
-                      boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
-                          state, activation, cone, state->get_pinocchio()->getFrameId("lh_foot"), actuation->get_nu()),
-                      0.1);
-        cost->addCost("rh_cone",
-                      boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
-                          state, activation, cone, state->get_pinocchio()->getFrameId("rh_foot"), actuation->get_nu()),
-                      0.1);
+        if (with_friction) {
+          cost->addCost(
+              "lf_cone",
+              boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
+                  state, activation, cone, state->get_pinocchio()->getFrameId("lf_foot"), actuation->get_nu()),
+              0.1);
+          cost->addCost(
+              "rf_cone",
+              boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
+                  state, activation, cone, state->get_pinocchio()->getFrameId("rf_foot"), actuation->get_nu()),
+              0.1);
+          cost->addCost(
+              "lh_cone",
+              boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
+                  state, activation, cone, state->get_pinocchio()->getFrameId("lh_foot"), actuation->get_nu()),
+              0.1);
+          cost->addCost(
+              "rh_cone",
+              boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
+                  state, activation, cone, state->get_pinocchio()->getFrameId("rh_foot"), actuation->get_nu()),
+              0.1);
+        }
         break;
       case StateModelTypes::StateMultibody_Talos:
         contact->addContact("lf", boost::make_shared<crocoddyl::ContactModel6D>(
@@ -194,32 +216,29 @@ class DifferentialActionModelFactory {
                                       crocoddyl::FramePlacement(state->get_pinocchio()->getFrameId("right_sole_link"),
                                                                 pinocchio::SE3().Identity()),
                                       actuation->get_nu()));
-        cost->addCost(
-            "lf_cone",
-            boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
-                state, activation, cone, state->get_pinocchio()->getFrameId("left_sole_link"), actuation->get_nu()),
-            0.01);
-        cost->addCost(
-            "rf_cone",
-            boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
-                state, activation, cone, state->get_pinocchio()->getFrameId("right_sole_link"), actuation->get_nu()),
-            0.01);
+        if (with_friction) {
+          cost->addCost(
+              "lf_cone",
+              boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
+                  state, activation, cone, state->get_pinocchio()->getFrameId("left_sole_link"), actuation->get_nu()),
+              0.01);
+          cost->addCost(
+              "rf_cone",
+              boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
+                  state, activation, cone, state->get_pinocchio()->getFrameId("right_sole_link"), actuation->get_nu()),
+              0.01);
+        }
         break;
       default:
         throw_pretty(__FILE__ ": Wrong StateModelTypes::Type given");
         break;
     }
-
     cost->addCost("state",
                   CostModelFactory().create(CostModelTypes::CostModelState, state_type,
                                             ActivationModelTypes::ActivationModelQuad, actuation->get_nu()),
                   1.);
     cost->addCost("control",
                   CostModelFactory().create(CostModelTypes::CostModelControl, state_type,
-                                            ActivationModelTypes::ActivationModelQuad, actuation->get_nu()),
-                  1.);
-    cost->addCost("frame",
-                  CostModelFactory().create(CostModelTypes::CostModelFramePlacement, state_type,
                                             ActivationModelTypes::ActivationModelQuad, actuation->get_nu()),
                   1.);
     action = boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics>(state, actuation, contact, cost,
