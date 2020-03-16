@@ -96,7 +96,8 @@ class CostModelFactory {
 
   boost::shared_ptr<crocoddyl::CostModelAbstract> create(CostModelTypes::Type cost_type,
                                                          StateModelTypes::Type state_type,
-                                                         ActivationModelTypes::Type activation_type) {
+                                                         ActivationModelTypes::Type activation_type,
+                                                         std::size_t nu = std::numeric_limits<std::size_t>::max()) {
     StateModelFactory state_factory;
     ActivationModelFactory activation_factory;
     boost::shared_ptr<crocoddyl::CostModelAbstract> cost;
@@ -104,44 +105,46 @@ class CostModelFactory {
         boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type));
     crocoddyl::FrameIndex frame_index = state->get_pinocchio()->frames.size() - 1;
     pinocchio::SE3 frame_SE3 = pinocchio::SE3::Random();
-
+    if (nu == std::numeric_limits<std::size_t>::max()) {
+      nu = state->get_nv();
+    }
     switch (cost_type) {
       case CostModelTypes::CostModelState:
         cost = boost::make_shared<crocoddyl::CostModelState>(
-            state, activation_factory.create(activation_type, state->get_ndx()), state->rand());
+            state, activation_factory.create(activation_type, state->get_ndx()), state->rand(), nu);
         break;
       case CostModelTypes::CostModelControl:
-        cost = boost::make_shared<crocoddyl::CostModelControl>(
-            state, activation_factory.create(activation_type, state->get_nv()),
-            Eigen::VectorXd::Random(state->get_nv()));
+        cost = boost::make_shared<crocoddyl::CostModelControl>(state, activation_factory.create(activation_type, nu),
+                                                               Eigen::VectorXd::Random(nu));
         break;
       case CostModelTypes::CostModelCoMPosition:
         cost = boost::make_shared<crocoddyl::CostModelCoMPosition>(
-            state, activation_factory.create(activation_type, 3), Eigen::Vector3d::Random());
+            state, activation_factory.create(activation_type, 3), Eigen::Vector3d::Random(), nu);
         break;
       // case CostModelTypes::CostModelCentroidalMomentum:
       //   cost = boost::make_shared<crocoddyl::CostModelCentroidalMomentum>(state_,
       //                                                                      activation_factory.create(activation_type,
-      //                                                                      6), Vector6d::Random());
+      //                                                                      6), Vector6d::Random(), nu);
       //   break;
       case CostModelTypes::CostModelFramePlacement:
         cost = boost::make_shared<crocoddyl::CostModelFramePlacement>(
-            state, activation_factory.create(activation_type, 6), crocoddyl::FramePlacement(frame_index, frame_SE3));
+            state, activation_factory.create(activation_type, 6), crocoddyl::FramePlacement(frame_index, frame_SE3),
+            nu);
         break;
       case CostModelTypes::CostModelFrameRotation:
         cost = boost::make_shared<crocoddyl::CostModelFrameRotation>(
             state, activation_factory.create(activation_type, 3),
-            crocoddyl::FrameRotation(frame_index, frame_SE3.rotation()));
+            crocoddyl::FrameRotation(frame_index, frame_SE3.rotation()), nu);
         break;
       case CostModelTypes::CostModelFrameTranslation:
         cost = boost::make_shared<crocoddyl::CostModelFrameTranslation>(
             state, activation_factory.create(activation_type, 3),
-            crocoddyl::FrameTranslation(frame_index, frame_SE3.translation()));
+            crocoddyl::FrameTranslation(frame_index, frame_SE3.translation()), nu);
         break;
       case CostModelTypes::CostModelFrameVelocity:
         cost = boost::make_shared<crocoddyl::CostModelFrameVelocity>(
             state, activation_factory.create(activation_type, 6),
-            crocoddyl::FrameMotion(frame_index, pinocchio::Motion::Random()));
+            crocoddyl::FrameMotion(frame_index, pinocchio::Motion::Random()), nu);
         break;
       default:
         throw_pretty(__FILE__ ": Wrong CostModelTypes::Type given");
