@@ -76,7 +76,7 @@ class PinocchioModelFactory {
         frame_id_ = model_->getFrameId(frame_name_);
         break;
       case PinocchioModelTypes::HyQ:
-        construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/robots/hyq_no_sensors.urdf", false);
+        construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/robots/hyq_no_sensors.urdf");
         frame_name_ = "lf_foot";
         frame_id_ = model_->getFrameId(frame_name_);
         break;
