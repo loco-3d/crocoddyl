@@ -80,7 +80,7 @@ void test_calc_against_numdiff(CostModelTypes::Type cost_type, ActivationModelTy
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
 
-  // Computing the action derivatives
+  // Computing the cost derivatives
   model->calc(data, x, u);
 
   model_num_diff.calc(data_num_diff, x, u);
@@ -118,11 +118,11 @@ void test_partial_derivatives_against_numdiff(CostModelTypes::Type cost_type,
   reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio, &pinocchio_model, &pinocchio_data, _1));
   model_num_diff.set_reevals(reevals);
 
-  // Computing the action derivatives
+  // Computing the cost derivatives
   model->calc(data, x, u);
   model->calcDiff(data, x, u);
 
-  // Computing the action derivatives via numerical differentiation
+  // Computing the cost derivatives via numerical differentiation
   model_num_diff.calc(data_num_diff, x, u);
   model_num_diff.calcDiff(data_num_diff, x, u);
 

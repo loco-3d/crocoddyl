@@ -199,11 +199,11 @@ void test_partial_derivatives_against_numdiff(ContactModelTypes::Type contact_ty
   reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio, &pinocchio_model, &pinocchio_data, _1));
   model_num_diff.set_reevals(reevals);
 
-  // Computing the action derivatives
+  // Computing the contact derivatives
   model->calc(data, x);
   model->calcDiff(data, x);
 
-  // Computing the action derivatives via numerical differentiation
+  // Computing the contact derivatives via numerical differentiation
   model_num_diff.calc(data_num_diff, x);
   model_num_diff.calcDiff(data_num_diff, x);
 

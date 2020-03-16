@@ -58,7 +58,7 @@ void test_partial_derivatives_against_numdiff(ActivationModelTypes::Type test_ty
   // Generating random values for the state and control
   const Eigen::VectorXd& r = Eigen::VectorXd::Random(model->get_nr());
 
-  // Computing the action derivatives
+  // Computing the activation derivatives
   model->calc(data, r);
   model->calcDiff(data, r);
 
