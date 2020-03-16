@@ -9,9 +9,12 @@
 #include "state.hpp"
 #include "actuation.hpp"
 #include "cost.hpp"
+#include "contact.hpp"
+#include "crocoddyl/core/numdiff/diff-action.hpp"
 #include "crocoddyl/core/actions/diff-lqr.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
-#include "crocoddyl/core/numdiff/diff-action.hpp"
+#include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
+#include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 #ifndef CROCODDYL_ACTION_FACTORY_HPP_
@@ -25,6 +28,8 @@ struct DifferentialActionModelTypes {
     DifferentialActionModelLQR,
     DifferentialActionModelLQRDriftFree,
     DifferentialActionModelFreeFwdDynamics_TalosArm,
+    DifferentialActionModelContactFwdDynamics_HyQ,
+    DifferentialActionModelContactFwdDynamics_Talos,
     NbDifferentialActionModelTypes
   };
   static std::vector<Type> init_all() {
@@ -50,6 +55,12 @@ std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type ty
       break;
     case DifferentialActionModelTypes::DifferentialActionModelFreeFwdDynamics_TalosArm:
       os << "DifferentialActionModelFreeFwdDynamics_TalosArm";
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_HyQ:
+      os << "DifferentialActionModelContactFwdDynamics_HyQ";
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos:
+      os << "DifferentialActionModelContactFwdDynamics_Talos";
       break;
     case DifferentialActionModelTypes::NbDifferentialActionModelTypes:
       os << "NbDifferentialActionModelTypes";
@@ -77,6 +88,12 @@ class DifferentialActionModelFactory {
       case DifferentialActionModelTypes::DifferentialActionModelFreeFwdDynamics_TalosArm:
         action = create_freeFwdDynamics(StateModelTypes::StateMultibody_TalosArm);
         break;
+      case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_HyQ:
+        action = create_contactFwdDynamics(StateModelTypes::StateMultibody_HyQ);
+        break;
+      case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos:
+        action = create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos);
+        break;
       default:
         throw_pretty(__FILE__ ": Wrong DifferentialActionModelTypes::Type given");
         break;
@@ -93,7 +110,7 @@ class DifferentialActionModelFactory {
     boost::shared_ptr<crocoddyl::CostModelSum> cost;
     state = boost::static_pointer_cast<crocoddyl::StateMultibody>(StateModelFactory().create(state_type));
     actuation = ActuationModelFactory().create(ActuationModelTypes::ActuationModelFull, state_type);
-    cost = boost::make_shared<crocoddyl::CostModelSum>(state, state->get_nv());
+    cost = boost::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu());
     cost->addCost("state",
                   CostModelFactory().create(CostModelTypes::CostModelState, state_type,
                                             ActivationModelTypes::ActivationModelQuad),
@@ -107,6 +124,76 @@ class DifferentialActionModelFactory {
                                             ActivationModelTypes::ActivationModelQuad),
                   1.);
     action = boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(state, actuation, cost);
+    return action;
+  }
+
+  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create_contactFwdDynamics(
+      StateModelTypes::Type state_type) {
+    boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> action;
+    boost::shared_ptr<crocoddyl::StateMultibody> state;
+    boost::shared_ptr<crocoddyl::ActuationModelFloatingBase> actuation;
+    boost::shared_ptr<crocoddyl::ContactModelMultiple> contact;
+    boost::shared_ptr<crocoddyl::CostModelSum> cost;
+    state = boost::static_pointer_cast<crocoddyl::StateMultibody>(StateModelFactory().create(state_type));
+    actuation = boost::static_pointer_cast<crocoddyl::ActuationModelFloatingBase>(
+        ActuationModelFactory().create(ActuationModelTypes::ActuationModelFloatingBase, state_type));
+    contact = boost::make_shared<crocoddyl::ContactModelMultiple>(state, actuation->get_nu());
+    cost = boost::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu());
+
+    switch (state_type) {
+      case StateModelTypes::StateMultibody_HyQ:
+        contact->addContact("lf", boost::make_shared<crocoddyl::ContactModel3D>(
+                                      state,
+                                      crocoddyl::FrameTranslation(state->get_pinocchio()->getFrameId("lf_foot"),
+                                                                  Eigen::Vector3d::Zero()),
+                                      actuation->get_nu()));
+        contact->addContact("rf", boost::make_shared<crocoddyl::ContactModel3D>(
+                                      state,
+                                      crocoddyl::FrameTranslation(state->get_pinocchio()->getFrameId("rf_foot"),
+                                                                  Eigen::Vector3d::Zero()),
+                                      actuation->get_nu()));
+        contact->addContact("lh", boost::make_shared<crocoddyl::ContactModel3D>(
+                                      state,
+                                      crocoddyl::FrameTranslation(state->get_pinocchio()->getFrameId("lh_foot"),
+                                                                  Eigen::Vector3d::Zero()),
+                                      actuation->get_nu()));
+        contact->addContact("rh", boost::make_shared<crocoddyl::ContactModel3D>(
+                                      state,
+                                      crocoddyl::FrameTranslation(state->get_pinocchio()->getFrameId("rh_foot"),
+                                                                  Eigen::Vector3d::Zero()),
+                                      actuation->get_nu()));
+        break;
+      case StateModelTypes::StateMultibody_Talos:
+        contact->addContact("lf", boost::make_shared<crocoddyl::ContactModel6D>(
+                                      state,
+                                      crocoddyl::FramePlacement(state->get_pinocchio()->getFrameId("left_sole_link"),
+                                                                pinocchio::SE3().Identity()),
+                                      actuation->get_nu()));
+        contact->addContact("rf", boost::make_shared<crocoddyl::ContactModel6D>(
+                                      state,
+                                      crocoddyl::FramePlacement(state->get_pinocchio()->getFrameId("right_sole_link"),
+                                                                pinocchio::SE3().Identity()),
+                                      actuation->get_nu()));
+        break;
+      default:
+        throw_pretty(__FILE__ ": Wrong StateModelTypes::Type given");
+        break;
+    }
+
+    cost->addCost("state",
+                  CostModelFactory().create(CostModelTypes::CostModelState, state_type,
+                                            ActivationModelTypes::ActivationModelQuad, actuation->get_nu()),
+                  1.);
+    cost->addCost("control",
+                  CostModelFactory().create(CostModelTypes::CostModelControl, state_type,
+                                            ActivationModelTypes::ActivationModelQuad, actuation->get_nu()),
+                  1.);
+    cost->addCost("frame",
+                  CostModelFactory().create(CostModelTypes::CostModelFramePlacement, state_type,
+                                            ActivationModelTypes::ActivationModelQuad, actuation->get_nu()),
+                  1.);
+    action = boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics>(state, actuation, contact, cost,
+                                                                                      0., true);
     return action;
   }
 };
