@@ -9,15 +9,15 @@ SET(${PROJECT_NAME}_CPP_TESTS
   test_states
   # test_actuation
   test_activations
-  test_actions
-  # test_integrators
-  test_diff_actions
-  test_friction_cone
   test_costs
   test_contacts
   test_impulses
   test_multiple_contacts
   test_multiple_impulses
+  test_actions
+  # test_integrators
+  test_diff_actions
+  test_friction_cone
   test_boxqp
   test_solvers
 )
