@@ -76,9 +76,6 @@ std::ostream& operator<<(std::ostream& os, CostModelTypes::Type type) {
     case CostModelTypes::CostModelFrameVelocity:
       os << "CostModelFrameVelocity";
       break;
-    // case CostModelTypes::CostModelSum:
-    //   os << "CostModelSum";
-    //   break;
     case CostModelTypes::NbCostModelTypes:
       os << "NbCostModelTypes";
       break;
