@@ -61,7 +61,7 @@ class ContactModelFactory {
 
   ContactModelFactory(ContactModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) {
     PinocchioModelFactory model_factory(model_type);
-    StateFactory state_factory(StateTypes::StateMultibody, model_type);
+    StateModelFactory state_factory(StateModelTypes::StateMultibody, model_type);
     boost::shared_ptr<crocoddyl::StateMultibody> state =
         boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create());
     pinocchio_model_ = state->get_pinocchio();

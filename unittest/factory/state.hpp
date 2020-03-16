@@ -24,29 +24,29 @@
 namespace crocoddyl {
 namespace unittest {
 
-struct StateTypes {
-  enum Type { StateVector, StateMultibody, NbStateTypes };
+struct StateModelTypes {
+  enum Type { StateVector, StateMultibody, NbStateModelTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
-    for (int i = 0; i < NbStateTypes; ++i) {
+    for (int i = 0; i < NbStateModelTypes; ++i) {
       v.push_back((Type)i);
     }
     return v;
   }
   static const std::vector<Type> all;
 };
-const std::vector<StateTypes::Type> StateTypes::all(StateTypes::init_all());
+const std::vector<StateModelTypes::Type> StateModelTypes::all(StateModelTypes::init_all());
 
-std::ostream& operator<<(std::ostream& os, StateTypes::Type type) {
+std::ostream& operator<<(std::ostream& os, StateModelTypes::Type type) {
   switch (type) {
-    case StateTypes::StateVector:
+    case StateModelTypes::StateVector:
       os << "StateVector";
       break;
-    case StateTypes::StateMultibody:
+    case StateModelTypes::StateMultibody:
       os << "StateMultibody";
       break;
-      os << "NbStateTypes";
+      os << "NbStateModelTypes";
       break;
     default:
       break;
@@ -54,33 +54,33 @@ std::ostream& operator<<(std::ostream& os, StateTypes::Type type) {
   return os;
 }
 
-class StateFactory {
+class StateModelFactory {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  StateFactory(StateTypes::Type state_type,
-               PinocchioModelTypes::Type model_type = PinocchioModelTypes::NbPinocchioModelTypes) {
+  StateModelFactory(StateModelTypes::Type state_type,
+                    PinocchioModelTypes::Type model_type = PinocchioModelTypes::NbPinocchioModelTypes) {
     nx_ = 0;
     PinocchioModelFactory factory(model_type);
     boost::shared_ptr<pinocchio::Model> model;
 
     switch (state_type) {
-      case StateTypes::StateVector:
+      case StateModelTypes::StateVector:
         nx_ = 80;
         state_ = boost::make_shared<crocoddyl::StateVector>(nx_);
         break;
-      case StateTypes::StateMultibody:
+      case StateModelTypes::StateMultibody:
         model = factory.create();
         nx_ = model->nq + model->nv;
         state_ = boost::make_shared<crocoddyl::StateMultibody>(model);
         break;
       default:
-        throw_pretty(__FILE__ ": Wrong StateTypes::Type given");
+        throw_pretty(__FILE__ ": Wrong StateModelTypes::Type given");
         break;
     }
   }
 
-  ~StateFactory() {}
+  ~StateModelFactory() {}
 
   boost::shared_ptr<crocoddyl::StateAbstract> create() { return state_; }
   const std::size_t& get_nx() { return nx_; }
