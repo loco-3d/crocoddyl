@@ -9,73 +9,15 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
-#include <iterator>
-#include <Eigen/Dense>
-#include <pinocchio/fwd.hpp>
-#include <boost/test/included/unit_test.hpp>
-#include <boost/bind.hpp>
-
-#include "crocoddyl/core/diff-action-base.hpp"
-#include "crocoddyl/core/actions/diff-lqr.hpp"
-#include "crocoddyl/core/numdiff/diff-action.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
-
+#include "factory/diff_action.hpp"
 #include "unittest_common.hpp"
 
 using namespace boost::unit_test;
-
-struct TestTypes {
-  enum Type { DifferentialActionModelLQR, NbTestTypes };
-  static std::vector<Type> init_all() {
-    std::vector<Type> v;
-    v.clear();
-    for (int i = 0; i < NbTestTypes; ++i) {
-      v.push_back((Type)i);
-    }
-    return v;
-  }
-  static const std::vector<Type> all;
-};
-const std::vector<TestTypes::Type> TestTypes::all(TestTypes::init_all());
-
-class DifferentialActionModelFactory {
- public:
-  DifferentialActionModelFactory(TestTypes::Type type) {
-    // build the DifferentialActionModelLQR
-    nq_ = 40;
-    nu_ = 40;
-    driftfree_ = true;
-    num_diff_modifier_ = 1e4;
-    test_type_ = type;
-
-    switch (test_type_) {
-      case TestTypes::DifferentialActionModelLQR:
-        diff_action_model_ = boost::make_shared<crocoddyl::DifferentialActionModelLQR>(nq_, nu_, driftfree_);
-        break;
-      default:
-        throw_pretty(__FILE__ ": Wrong TestTypes::Type given");
-        break;
-    }
-  }
-
-  ~DifferentialActionModelFactory() {}
-
-  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create() { return diff_action_model_; }
-
-  double get_num_diff_modifier() { return num_diff_modifier_; }
-
- private:
-  std::size_t nq_;
-  std::size_t nu_;
-  double num_diff_modifier_;
-  bool driftfree_;
-  TestTypes::Type test_type_;
-  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> diff_action_model_;
-};
+using namespace crocoddyl::unittest;
 
 //----------------------------------------------------------------------------//
 
-void test_construct_data(TestTypes::Type test_type) {
+void test_construct_data(DifferentialActionModelTypes::Type test_type) {
   // create the model
   DifferentialActionModelFactory factory(test_type);
   const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create();
@@ -84,7 +26,7 @@ void test_construct_data(TestTypes::Type test_type) {
   const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data = model->createData();
 }
 
-void test_calc_returns_state(TestTypes::Type test_type) {
+void test_calc_returns_state(DifferentialActionModelTypes::Type test_type) {
   // create the model
   DifferentialActionModelFactory factory(test_type);
   const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create();
@@ -102,7 +44,7 @@ void test_calc_returns_state(TestTypes::Type test_type) {
   BOOST_CHECK(static_cast<std::size_t>(data->xout.size()) == model->get_state()->get_nv());
 }
 
-void test_calc_returns_a_cost(TestTypes::Type test_type) {
+void test_calc_returns_a_cost(DifferentialActionModelTypes::Type test_type) {
   // create the model
   DifferentialActionModelFactory factory(test_type);
   const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create();
@@ -120,7 +62,7 @@ void test_calc_returns_a_cost(TestTypes::Type test_type) {
   BOOST_CHECK(!std::isnan(data->cost));
 }
 
-void test_partial_derivatives_against_numdiff(TestTypes::Type test_type) {
+void test_partial_derivatives_against_numdiff(DifferentialActionModelTypes::Type test_type) {
   // create the model
   DifferentialActionModelFactory factory(test_type);
   const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create();
@@ -161,7 +103,7 @@ void test_partial_derivatives_against_numdiff(TestTypes::Type test_type) {
 
 //----------------------------------------------------------------------------//
 
-void register_action_model_unit_tests(TestTypes::Type test_type, test_suite& ts) {
+void register_action_model_unit_tests(DifferentialActionModelTypes::Type test_type, test_suite& ts) {
   ts.add(BOOST_TEST_CASE(boost::bind(&test_construct_data, test_type)));
   ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_state, test_type)));
   ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, test_type)));
@@ -169,12 +111,12 @@ void register_action_model_unit_tests(TestTypes::Type test_type, test_suite& ts)
 }
 
 bool init_function() {
-  for (size_t i = 0; i < TestTypes::all.size(); ++i) {
+  for (size_t i = 0; i < DifferentialActionModelTypes::all.size(); ++i) {
     std::ostringstream test_name;
-    test_name << "test_" << TestTypes::all[i];
+    test_name << "test_" << DifferentialActionModelTypes::all[i];
     test_suite* ts = BOOST_TEST_SUITE(test_name.str());
     std::cout << "Running " << test_name.str() << std::endl;
-    register_action_model_unit_tests(TestTypes::all[i], *ts);
+    register_action_model_unit_tests(DifferentialActionModelTypes::all[i], *ts);
     framework::master_test_suite().add(ts);
   }
   return true;
