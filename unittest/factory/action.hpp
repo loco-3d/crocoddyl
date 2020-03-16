@@ -7,12 +7,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <iterator>
-#include <pinocchio/fwd.hpp>
 
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/actions/unicycle.hpp"
 #include "crocoddyl/core/actions/lqr.hpp"
-#include "crocoddyl/core/actions/diff-lqr.hpp"
 #include "crocoddyl/core/numdiff/action.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
