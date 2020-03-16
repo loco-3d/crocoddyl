@@ -32,7 +32,8 @@ struct DifferentialActionModelTypes {
   }
   static const std::vector<Type> all;
 };
-const std::vector<DifferentialActionModelTypes::Type> DifferentialActionModelTypes::all(DifferentialActionModelTypes::init_all());
+const std::vector<DifferentialActionModelTypes::Type> DifferentialActionModelTypes::all(
+    DifferentialActionModelTypes::init_all());
 
 std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type type) {
   switch (type) {
