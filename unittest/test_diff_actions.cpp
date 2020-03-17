@@ -86,6 +86,14 @@ void test_partial_derivatives_against_numdiff(DifferentialActionModelTypes::Type
 
   // Checking the partial derivatives against NumDiff
   double tol = NUMDIFF_MODIFIER * model_num_diff.get_disturbance();
+  std::cout << (data->Fx - data_num_diff->Fx).norm() << std::endl;
+  std::cout << (data->Fu - data_num_diff->Fu).norm() << std::endl;
+  std::cout << (data->Lx - data_num_diff->Lx).norm() << std::endl;
+  std::cout << (data->Lu - data_num_diff->Lu).norm() << std::endl;
+  std::cout << (data->Lxx - data_num_diff->Lxx).norm() << std::endl;
+  std::cout << (data->Lxu - data_num_diff->Lxu).norm() << std::endl;
+  std::cout << (data->Luu - data_num_diff->Luu).norm() << std::endl;
+  std::cout << "---" << std::endl;
   BOOST_CHECK((data->Fx - data_num_diff->Fx).isMuchSmallerThan(1.0, tol));
   BOOST_CHECK((data->Fu - data_num_diff->Fu).isMuchSmallerThan(1.0, tol));
   BOOST_CHECK((data->Lx - data_num_diff->Lx).isMuchSmallerThan(1.0, tol));

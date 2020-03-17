@@ -9,8 +9,14 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
+
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
 #include <pinocchio/algorithm/frames.hpp>
+
+#include "crocoddyl/multibody/contacts/contact-3d.hpp"
+#include "crocoddyl/multibody/contacts/contact-6d.hpp"
 
 #include "factory/contact.hpp"
 #include "unittest_common.hpp"

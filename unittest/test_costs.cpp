@@ -10,6 +10,8 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include "crocoddyl/multibody/data/multibody.hpp"
+
 #include "factory/cost.hpp"
 #include "unittest_common.hpp"
 
