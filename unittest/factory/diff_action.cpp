@@ -15,8 +15,6 @@
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/multibody/costs/state.hpp"
 #include "crocoddyl/multibody/costs/control.hpp"
-// #include "crocoddyl/multibody/costs/com-position.hpp"
-// #include "crocoddyl/multibody/costs/centroidal-momentum.hpp"
 #include "crocoddyl/multibody/costs/frame-placement.hpp"
 #include "crocoddyl/multibody/costs/frame-translation.hpp"
 #include "crocoddyl/multibody/costs/contact-friction-cone.hpp"
