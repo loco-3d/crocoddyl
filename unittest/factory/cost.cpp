@@ -61,9 +61,10 @@ std::ostream& operator<<(std::ostream& os, CostModelTypes::Type type) {
 CostModelFactory::CostModelFactory() {}
 CostModelFactory::~CostModelFactory() {}
 
-boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
-    CostModelTypes::Type cost_type, StateModelTypes::Type state_type, ActivationModelTypes::Type activation_type,
-    std::size_t nu) {
+boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostModelTypes::Type cost_type,
+                                                                         StateModelTypes::Type state_type,
+                                                                         ActivationModelTypes::Type activation_type,
+                                                                         std::size_t nu) {
   StateModelFactory state_factory;
   ActivationModelFactory activation_factory;
   boost::shared_ptr<crocoddyl::CostModelAbstract> cost;

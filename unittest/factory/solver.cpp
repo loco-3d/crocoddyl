@@ -84,4 +84,3 @@ boost::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create() { return so
 
 }  // namespace unittest
 }  // namespace crocoddyl
-
