@@ -2,22 +2,39 @@ IF(BUILD_PYTHON_INTERFACE)
   ADD_SUBDIRECTORY(bindings)
 ENDIF(BUILD_PYTHON_INTERFACE)
 
-
 ADD_SUBDIRECTORY(python)
+
+
+FILE(GLOB_RECURSE ${PROJECT_NAME}_FACTORY_TEST
+  ${CMAKE_CURRENT_SOURCE_DIR}/factory/*.cpp
+  )
+
+IF(UNIX)
+  ADD_LIBRARY(${PROJECT_NAME}_unittest SHARED ${${PROJECT_NAME}_FACTORY_TEST})
+  SET_TARGET_PROPERTIES(${PROJECT_NAME}_unittest PROPERTIES LINKER_LANGUAGE CXX)
+  PKG_CONFIG_USE_DEPENDENCY(${PROJECT_NAME}_unittest eigen3)
+  PKG_CONFIG_USE_DEPENDENCY(${PROJECT_NAME}_unittest pinocchio)
+  TARGET_LINK_LIBRARIES(${PROJECT_NAME}_unittest ${PROJECT_NAME} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_SERIALIZATION_LIBRARY})
+
+  if(OPENMP_FOUND)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME}_unittest ${OpenMP_CXX_LIBRARIES})
+  ENDIF()
+ENDIF(UNIX)
+
 
 SET(${PROJECT_NAME}_CPP_TESTS
   test_states
   # test_actuation
   test_activations
-  test_actions
-  # test_integrators
-  test_diff_actions
-  test_friction_cone
   test_costs
   test_contacts
   test_impulses
   test_multiple_contacts
   test_multiple_impulses
+  test_actions
+  # test_integrators
+  test_diff_actions
+  test_friction_cone
   test_boxqp
   test_solvers
 )
@@ -47,7 +64,7 @@ MACRO(ADD_CPP_UNIT_TEST NAME PKGS)
     PKG_CONFIG_USE_DEPENDENCY(${UNITTEST_NAME} ${PKG})
   ENDFOREACH(PKG)
 
-  TARGET_LINK_LIBRARIES(${UNITTEST_NAME} ${PROJECT_NAME})
+  TARGET_LINK_LIBRARIES(${UNITTEST_NAME} ${PROJECT_NAME} ${PROJECT_NAME}_unittest)
   TARGET_LINK_LIBRARIES(${UNITTEST_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
   ADD_TEST_CFLAGS(${UNITTEST_NAME} '-DCROCODDYL_SOURCE_DIR=\\\"${${PROJECT_NAME}_SOURCE_DIR}\\\"')

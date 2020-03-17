@@ -6,88 +6,47 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <pinocchio/parsers/urdf.hpp>
-#include <pinocchio/parsers/sample-models.hpp>
-#include <example-robot-data/path.hpp>
-
-#include "crocoddyl/core/state-base.hpp"
-#include "crocoddyl/core/states/euclidean.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/core/numdiff/state.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
-
-#include "pinocchio_model.hpp"
-
 #ifndef CROCODDYL_STATE_FACTORY_HPP_
 #define CROCODDYL_STATE_FACTORY_HPP_
+
+#include "pinocchio_model.hpp"
+#include "crocoddyl/core/state-base.hpp"
+#include "crocoddyl/core/numdiff/state.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 namespace unittest {
 
-struct StateTypes {
-  enum Type { StateVector, StateMultibody, NbStateTypes };
+struct StateModelTypes {
+  enum Type {
+    StateVector,
+    StateMultibody_TalosArm,
+    StateMultibody_HyQ,
+    StateMultibody_Talos,
+    StateMultibody_RandomHumanoid,
+    NbStateModelTypes
+  };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
-    for (int i = 0; i < NbStateTypes; ++i) {
+    for (int i = 0; i < NbStateModelTypes; ++i) {
       v.push_back((Type)i);
     }
     return v;
   }
   static const std::vector<Type> all;
 };
-const std::vector<StateTypes::Type> StateTypes::all(StateTypes::init_all());
 
-std::ostream& operator<<(std::ostream& os, StateTypes::Type type) {
-  switch (type) {
-    case StateTypes::StateVector:
-      os << "StateVector";
-      break;
-    case StateTypes::StateMultibody:
-      os << "StateMultibody";
-      break;
-      os << "NbStateTypes";
-      break;
-    default:
-      break;
-  }
-  return os;
-}
+std::ostream& operator<<(std::ostream& os, StateModelTypes::Type type);
 
-class StateFactory {
+class StateModelFactory {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  StateFactory(StateTypes::Type state_type,
-               PinocchioModelTypes::Type model_type = PinocchioModelTypes::NbPinocchioModelTypes) {
-    nx_ = 0;
-    PinocchioModelFactory factory(model_type);
-    boost::shared_ptr<pinocchio::Model> model;
+  explicit StateModelFactory();
+  ~StateModelFactory();
 
-    switch (state_type) {
-      case StateTypes::StateVector:
-        nx_ = 80;
-        state_ = boost::make_shared<crocoddyl::StateVector>(nx_);
-        break;
-      case StateTypes::StateMultibody:
-        model = factory.create();
-        nx_ = model->nq + model->nv;
-        state_ = boost::make_shared<crocoddyl::StateMultibody>(model);
-        break;
-      default:
-        throw_pretty(__FILE__ ": Wrong StateTypes::Type given");
-        break;
-    }
-  }
-
-  ~StateFactory() {}
-
-  boost::shared_ptr<crocoddyl::StateAbstract> create() { return state_; }
-  const std::size_t& get_nx() { return nx_; }
-
- private:
-  boost::shared_ptr<crocoddyl::StateAbstract> state_;  //!< The pointer to the state in testing
-  std::size_t nx_;                                     //!< The size of the StateVector to test.
+  boost::shared_ptr<crocoddyl::StateAbstract> create(StateModelTypes::Type state_type) const;
 };
 
 }  // namespace unittest

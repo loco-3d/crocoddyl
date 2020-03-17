@@ -17,7 +17,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
-#define NUMDIFF_MODIFIER 1e4
+#define NUMDIFF_MODIFIER 3e4
 
 #include <iterator>
 #include <Eigen/Dense>

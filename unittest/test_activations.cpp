@@ -16,19 +16,19 @@ using namespace crocoddyl::unittest;
 
 //----------------------------------------------------------------------------//
 
-void test_construct_data(ActivationModelTypes::Type test_type) {
+void test_construct_data(ActivationModelTypes::Type activation_type) {
   // create the model
-  ActivationModelFactory factory(test_type);
-  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.create();
+  ActivationModelFactory factory;
+  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.create(activation_type);
 
   // create the corresponding data object
   boost::shared_ptr<crocoddyl::ActivationDataAbstract> data = model->createData();
 }
 
-void test_calc_returns_a_value(ActivationModelTypes::Type test_type) {
+void test_calc_returns_a_value(ActivationModelTypes::Type activation_type) {
   // create the model
-  ActivationModelFactory factory(test_type);
-  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.create();
+  ActivationModelFactory factory;
+  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.create(activation_type);
 
   // create the corresponding data object
   boost::shared_ptr<crocoddyl::ActivationDataAbstract> data = model->createData();
@@ -44,10 +44,10 @@ void test_calc_returns_a_value(ActivationModelTypes::Type test_type) {
   BOOST_CHECK(!std::isnan(data->a_value));
 }
 
-void test_partial_derivatives_against_numdiff(ActivationModelTypes::Type test_type) {
+void test_partial_derivatives_against_numdiff(ActivationModelTypes::Type activation_type) {
   // create the model
-  ActivationModelFactory factory(test_type);
-  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.create();
+  ActivationModelFactory factory;
+  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.create(activation_type);
 
   // create the corresponding data object and set the cost to nan
   boost::shared_ptr<crocoddyl::ActivationDataAbstract> data = model->createData();
@@ -58,7 +58,7 @@ void test_partial_derivatives_against_numdiff(ActivationModelTypes::Type test_ty
   // Generating random values for the state and control
   const Eigen::VectorXd& r = Eigen::VectorXd::Random(model->get_nr());
 
-  // Computing the action derivatives
+  // Computing the activation derivatives
   model->calc(data, r);
   model->calcDiff(data, r);
 
@@ -76,10 +76,10 @@ void test_partial_derivatives_against_numdiff(ActivationModelTypes::Type test_ty
 
 //----------------------------------------------------------------------------//
 
-void register_unit_tests(ActivationModelTypes::Type type, test_suite& ts) {
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_construct_data, type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_value, type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, type)));
+void register_unit_tests(ActivationModelTypes::Type activation_type, test_suite& ts) {
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_construct_data, activation_type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_value, activation_type)));
+  ts.add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, activation_type)));
 }
 
 bool init_function() {

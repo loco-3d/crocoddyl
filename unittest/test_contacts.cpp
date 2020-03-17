@@ -9,8 +9,14 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
+
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
 #include <pinocchio/algorithm/frames.hpp>
+
+#include "crocoddyl/multibody/contacts/contact-3d.hpp"
+#include "crocoddyl/multibody/contacts/contact-6d.hpp"
 
 #include "factory/contact.hpp"
 #include "unittest_common.hpp"
@@ -22,21 +28,23 @@ using namespace boost::unit_test;
 
 void test_construct_data(ContactModelTypes::Type contact_type, PinocchioModelTypes::Type model_type) {
   // create the model
-  ContactModelFactory factory(contact_type, model_type);
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create();
+  ContactModelFactory factory;
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create(contact_type, model_type);
 
   // create the corresponding data object
-  pinocchio::Data pinocchio_data(*factory.get_pinocchio_model().get());
+  const boost::shared_ptr<pinocchio::Model>& pinocchio_model = model->get_state()->get_pinocchio();
+  pinocchio::Data pinocchio_data(*pinocchio_model.get());
   boost::shared_ptr<crocoddyl::ContactDataAbstract> data = model->createData(&pinocchio_data);
 }
 
 void test_calc_no_computation(ContactModelTypes::Type contact_type, PinocchioModelTypes::Type model_type) {
   // create the model
-  ContactModelFactory factory(contact_type, model_type);
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create();
+  ContactModelFactory factory;
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create(contact_type, model_type);
 
   // create the corresponding data object
-  pinocchio::Data pinocchio_data(*factory.get_pinocchio_model().get());
+  const boost::shared_ptr<pinocchio::Model>& pinocchio_model = model->get_state()->get_pinocchio();
+  pinocchio::Data pinocchio_data(*pinocchio_model.get());
   boost::shared_ptr<crocoddyl::ContactDataAbstract> data = model->createData(&pinocchio_data);
 
   // Getting the jacobian from the model
@@ -53,11 +61,11 @@ void test_calc_no_computation(ContactModelTypes::Type contact_type, PinocchioMod
 
 void test_calc_fetch_jacobians(ContactModelTypes::Type contact_type, PinocchioModelTypes::Type model_type) {
   // create the model
-  ContactModelFactory factory(contact_type, model_type);
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create();
+  ContactModelFactory factory;
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create(contact_type, model_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<pinocchio::Model>& pinocchio_model = factory.get_pinocchio_model();
+  const boost::shared_ptr<pinocchio::Model>& pinocchio_model = model->get_state()->get_pinocchio();
   pinocchio::Data pinocchio_data(*pinocchio_model.get());
   boost::shared_ptr<crocoddyl::ContactDataAbstract> data = model->createData(&pinocchio_data);
 
@@ -79,11 +87,12 @@ void test_calc_fetch_jacobians(ContactModelTypes::Type contact_type, PinocchioMo
 
 void test_calc_diff_no_computation(ContactModelTypes::Type contact_type, PinocchioModelTypes::Type model_type) {
   // create the model
-  ContactModelFactory factory(contact_type, model_type);
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create();
+  ContactModelFactory factory;
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create(contact_type, model_type);
 
   // create the corresponding data object
-  pinocchio::Data pinocchio_data(*factory.get_pinocchio_model().get());
+  const boost::shared_ptr<pinocchio::Model>& pinocchio_model = model->get_state()->get_pinocchio();
+  pinocchio::Data pinocchio_data(*pinocchio_model.get());
   boost::shared_ptr<crocoddyl::ContactDataAbstract> data = model->createData(&pinocchio_data);
 
   // Getting the jacobian from the model
@@ -100,11 +109,11 @@ void test_calc_diff_no_computation(ContactModelTypes::Type contact_type, Pinocch
 
 void test_calc_diff_fetch_derivatives(ContactModelTypes::Type contact_type, PinocchioModelTypes::Type model_type) {
   // create the model
-  ContactModelFactory factory(contact_type, model_type);
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create();
+  ContactModelFactory factory;
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create(contact_type, model_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<pinocchio::Model>& pinocchio_model = factory.get_pinocchio_model();
+  const boost::shared_ptr<pinocchio::Model>& pinocchio_model = model->get_state()->get_pinocchio();
   pinocchio::Data pinocchio_data(*pinocchio_model.get());
   boost::shared_ptr<crocoddyl::ContactDataAbstract> data = model->createData(&pinocchio_data);
 
@@ -127,11 +136,11 @@ void test_calc_diff_fetch_derivatives(ContactModelTypes::Type contact_type, Pino
 
 void test_update_force(ContactModelTypes::Type contact_type, PinocchioModelTypes::Type model_type) {
   // create the model
-  ContactModelFactory factory(contact_type, model_type);
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create();
+  ContactModelFactory factory;
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create(contact_type, model_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<pinocchio::Model>& pinocchio_model = factory.get_pinocchio_model();
+  const boost::shared_ptr<pinocchio::Model>& pinocchio_model = model->get_state()->get_pinocchio();
   pinocchio::Data pinocchio_data(*pinocchio_model.get());
   boost::shared_ptr<crocoddyl::ContactDataAbstract> data = model->createData(&pinocchio_data);
 
@@ -151,11 +160,11 @@ void test_update_force(ContactModelTypes::Type contact_type, PinocchioModelTypes
 
 void test_update_force_diff(ContactModelTypes::Type contact_type, PinocchioModelTypes::Type model_type) {
   // create the model
-  ContactModelFactory factory(contact_type, model_type);
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create();
+  ContactModelFactory factory;
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create(contact_type, model_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<pinocchio::Model>& pinocchio_model = factory.get_pinocchio_model();
+  const boost::shared_ptr<pinocchio::Model>& pinocchio_model = model->get_state()->get_pinocchio();
   pinocchio::Data pinocchio_data(*pinocchio_model.get());
   boost::shared_ptr<crocoddyl::ContactDataAbstract> data = model->createData(&pinocchio_data);
 
@@ -176,8 +185,8 @@ void test_update_force_diff(ContactModelTypes::Type contact_type, PinocchioModel
 void test_partial_derivatives_against_numdiff(ContactModelTypes::Type contact_type,
                                               PinocchioModelTypes::Type model_type) {
   // create the model
-  ContactModelFactory factory(contact_type, model_type);
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create();
+  ContactModelFactory factory;
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create(contact_type, model_type);
 
   // create the corresponding data object
   pinocchio::Model& pinocchio_model = *model->get_state()->get_pinocchio().get();
@@ -199,11 +208,11 @@ void test_partial_derivatives_against_numdiff(ContactModelTypes::Type contact_ty
   reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio, &pinocchio_model, &pinocchio_data, _1));
   model_num_diff.set_reevals(reevals);
 
-  // Computing the action derivatives
+  // Computing the contact derivatives
   model->calc(data, x);
   model->calcDiff(data, x);
 
-  // Computing the action derivatives via numerical differentiation
+  // Computing the contact derivatives via numerical differentiation
   model_num_diff.calc(data_num_diff, x);
   model_num_diff.calcDiff(data_num_diff, x);
 

@@ -28,5 +28,5 @@ install:
   - export PYTHONPATH=/opt/openrobots/lib/python2.7/site-packages:$PYTHONPATH
 
 script:
-  - /bin/bash .travis/build-and-test.sh
-  - /bin/bash .travis/check-formatting.sh
+  - travis_wait 60 /bin/bash .travis/build-and-test.sh
+  - travis_wait 60 /bin/bash .travis/check-formatting.sh
