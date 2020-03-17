@@ -37,7 +37,7 @@ ActuationModelFactory::ActuationModelFactory() {}
 ActuationModelFactory::~ActuationModelFactory() {}
 
 boost::shared_ptr<crocoddyl::ActuationModelAbstract> ActuationModelFactory::create(
-    ActuationModelTypes::Type actuation_type, StateModelTypes::Type state_type) {
+    ActuationModelTypes::Type actuation_type, StateModelTypes::Type state_type) const {
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
   StateModelFactory factory;
   boost::shared_ptr<crocoddyl::StateAbstract> state = factory.create(state_type);

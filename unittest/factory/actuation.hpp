@@ -36,7 +36,7 @@ class ActuationModelFactory {
   ~ActuationModelFactory();
 
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> create(ActuationModelTypes::Type actuation_type,
-                                                              StateModelTypes::Type state_type);
+                                                              StateModelTypes::Type state_type) const;
 };
 
 }  // namespace unittest

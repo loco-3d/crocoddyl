@@ -39,7 +39,7 @@ class SolverFactory {
   SolverFactory(SolverTypes::Type solver_type, ActionModelTypes::Type action_type, size_t nb_running_models);
   ~SolverFactory();
 
-  boost::shared_ptr<crocoddyl::SolverAbstract> create();
+  boost::shared_ptr<crocoddyl::SolverAbstract> create() const;
 
  private:
   size_t nb_running_models_;                              //!< This is the number of models in the shooting problem.

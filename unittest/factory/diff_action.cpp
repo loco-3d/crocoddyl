@@ -65,7 +65,7 @@ DifferentialActionModelFactory::DifferentialActionModelFactory() {}
 DifferentialActionModelFactory::~DifferentialActionModelFactory() {}
 
 boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialActionModelFactory::create(
-    DifferentialActionModelTypes::Type type) {
+    DifferentialActionModelTypes::Type type) const {
   boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> action;
   switch (type) {
     case DifferentialActionModelTypes::DifferentialActionModelLQR:
@@ -80,15 +80,15 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_HyQ:
       action = create_contactFwdDynamics(StateModelTypes::StateMultibody_HyQ, false);
       break;
-        case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos:
-          action = create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos, false);
-          break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos:
+      action = create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos, false);
+      break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_HyQ:
       action = create_contactFwdDynamics(StateModelTypes::StateMultibody_HyQ);
       break;
-        case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_Talos:
-          action = create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos);
-          break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_Talos:
+      action = create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos);
+      break;
     default:
       throw_pretty(__FILE__ ": Wrong DifferentialActionModelTypes::Type given");
       break;
@@ -97,7 +97,7 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
 }
 
 boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialActionModelFactory::create_freeFwdDynamics(
-    StateModelTypes::Type state_type) {
+    StateModelTypes::Type state_type) const {
   boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> action;
   boost::shared_ptr<crocoddyl::StateMultibody> state;
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
@@ -122,7 +122,7 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
 }
 
 boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>
-DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type state_type, bool with_friction) {
+DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type state_type, bool with_friction) const {
   boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> action;
   boost::shared_ptr<crocoddyl::StateMultibody> state;
   boost::shared_ptr<crocoddyl::ActuationModelFloatingBase> actuation;

@@ -37,7 +37,7 @@ class ActionModelFactory {
   ActionModelFactory(ActionModelTypes::Type type);
   ~ActionModelFactory();
 
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> create();
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> create() const;
 
   const std::size_t& get_nx();
 

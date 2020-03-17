@@ -50,7 +50,7 @@ std::ostream& operator<<(std::ostream& os, StateModelTypes::Type type) {
 StateModelFactory::StateModelFactory() {}
 StateModelFactory::~StateModelFactory() {}
 
-boost::shared_ptr<crocoddyl::StateAbstract> StateModelFactory::create(StateModelTypes::Type state_type) {
+boost::shared_ptr<crocoddyl::StateAbstract> StateModelFactory::create(StateModelTypes::Type state_type) const {
   boost::shared_ptr<pinocchio::Model> model;
   boost::shared_ptr<crocoddyl::StateAbstract> state;
   switch (state_type) {

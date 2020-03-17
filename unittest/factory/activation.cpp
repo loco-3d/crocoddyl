@@ -49,7 +49,7 @@ ActivationModelFactory::ActivationModelFactory() {}
 ActivationModelFactory::~ActivationModelFactory() {}
 
 boost::shared_ptr<crocoddyl::ActivationModelAbstract> ActivationModelFactory::create(
-    ActivationModelTypes::Type activation_type, std::size_t nr) {
+    ActivationModelTypes::Type activation_type, std::size_t nr) const {
   boost::shared_ptr<crocoddyl::ActivationModelAbstract> activation;
   Eigen::VectorXd lb = Eigen::VectorXd::Random(nr);
   Eigen::VectorXd ub = lb + Eigen::VectorXd::Ones(nr) + Eigen::VectorXd::Random(nr);

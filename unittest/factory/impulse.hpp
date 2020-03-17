@@ -39,7 +39,7 @@ class ImpulseModelFactory {
   ~ImpulseModelFactory();
 
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> create(ImpulseModelTypes::Type impulse_type,
-                                                            PinocchioModelTypes::Type model_type);
+                                                            PinocchioModelTypes::Type model_type) const;
 };
 
 boost::shared_ptr<crocoddyl::ImpulseModelAbstract> create_random_impulse();

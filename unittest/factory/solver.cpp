@@ -80,7 +80,7 @@ SolverFactory::SolverFactory(SolverTypes::Type solver_type, ActionModelTypes::Ty
 
 SolverFactory::~SolverFactory() {}
 
-boost::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create() { return solver_; }
+boost::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create() const { return solver_; }
 
 }  // namespace unittest
 }  // namespace crocoddyl

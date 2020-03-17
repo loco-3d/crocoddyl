@@ -37,8 +37,8 @@ std::ostream& operator<<(std::ostream& os, const ImpulseModelTypes::Type& type) 
 ImpulseModelFactory::ImpulseModelFactory() {}
 ImpulseModelFactory::~ImpulseModelFactory() {}
 
-boost::shared_ptr<crocoddyl::ImpulseModelAbstract> ImpulseModelFactory::create(ImpulseModelTypes::Type impulse_type,
-                                                                               PinocchioModelTypes::Type model_type) {
+boost::shared_ptr<crocoddyl::ImpulseModelAbstract> ImpulseModelFactory::create(
+    ImpulseModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) const {
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> impulse;
   PinocchioModelFactory model_factory(model_type);
   boost::shared_ptr<crocoddyl::StateMultibody> state =

@@ -53,10 +53,9 @@ class CostModelFactory {
   explicit CostModelFactory();
   ~CostModelFactory();
 
-  boost::shared_ptr<crocoddyl::CostModelAbstract> create(CostModelTypes::Type cost_type,
-                                                         StateModelTypes::Type state_type,
-                                                         ActivationModelTypes::Type activation_type,
-                                                         std::size_t nu = std::numeric_limits<std::size_t>::max());
+  boost::shared_ptr<crocoddyl::CostModelAbstract> create(
+      CostModelTypes::Type cost_type, StateModelTypes::Type state_type, ActivationModelTypes::Type activation_type,
+      std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
 };
 
 }  // namespace unittest

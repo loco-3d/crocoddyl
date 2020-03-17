@@ -61,7 +61,7 @@ ActionModelFactory::ActionModelFactory(ActionModelTypes::Type type) {
 
 ActionModelFactory::~ActionModelFactory() {}
 
-boost::shared_ptr<crocoddyl::ActionModelAbstract> ActionModelFactory::create() { return action_; }
+boost::shared_ptr<crocoddyl::ActionModelAbstract> ActionModelFactory::create() const { return action_; }
 
 const std::size_t& ActionModelFactory::get_nx() { return nx_; }
 

@@ -46,7 +46,7 @@ class StateModelFactory {
   explicit StateModelFactory();
   ~StateModelFactory();
 
-  boost::shared_ptr<crocoddyl::StateAbstract> create(StateModelTypes::Type state_type);
+  boost::shared_ptr<crocoddyl::StateAbstract> create(StateModelTypes::Type state_type) const;
 };
 
 }  // namespace unittest

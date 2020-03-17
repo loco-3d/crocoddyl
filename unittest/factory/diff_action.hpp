@@ -48,14 +48,14 @@ class DifferentialActionModelFactory {
   explicit DifferentialActionModelFactory();
   ~DifferentialActionModelFactory();
 
-  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create(DifferentialActionModelTypes::Type type);
+  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create(DifferentialActionModelTypes::Type type) const;
 
  private:
   boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create_freeFwdDynamics(
-      StateModelTypes::Type state_type);
+      StateModelTypes::Type state_type) const;
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create_contactFwdDynamics(
-      StateModelTypes::Type state_type, bool with_friction = true);
+      StateModelTypes::Type state_type, bool with_friction = true) const;
 };
 
 }  // namespace unittest
