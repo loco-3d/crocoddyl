@@ -25,9 +25,9 @@ struct DifferentialActionModelTypes {
     DifferentialActionModelLQRDriftFree,
     DifferentialActionModelFreeFwdDynamics_TalosArm,
     DifferentialActionModelContactFwdDynamics_HyQ,
-    // DifferentialActionModelContactFwdDynamics_Talos,
+    DifferentialActionModelContactFwdDynamics_Talos,
     DifferentialActionModelContactFwdDynamicsWithFriction_HyQ,
-    // DifferentialActionModelContactFwdDynamicsWithFriction_Talos,
+    DifferentialActionModelContactFwdDynamicsWithFriction_Talos,
     NbDifferentialActionModelTypes
   };
   static std::vector<Type> init_all() {

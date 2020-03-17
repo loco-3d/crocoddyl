@@ -45,17 +45,15 @@ std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type ty
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_HyQ:
       os << "DifferentialActionModelContactFwdDynamics_HyQ";
       break;
-    // todo(cmastalli): investigate why the error is 10e-3
-    // case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos:
-    //   os << "DifferentialActionModelContactFwdDynamics_Talos";
-    //   break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos:
+      os << "DifferentialActionModelContactFwdDynamics_Talos";
+      break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_HyQ:
       os << "DifferentialActionModelContactFwdDynamicsWithFriction_HyQ";
       break;
-    // todo(cmastalli): investigate why the error is 10e-3
-    // case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_Talos:
-    //   os << "DifferentialActionModelContactFwdDynamicsWithFriction_Talos";
-    //   break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_Talos:
+      os << "DifferentialActionModelContactFwdDynamicsWithFriction_Talos";
+      break;
     case DifferentialActionModelTypes::NbDifferentialActionModelTypes:
       os << "NbDifferentialActionModelTypes";
       break;
@@ -84,15 +82,15 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_HyQ:
       action = create_contactFwdDynamics(StateModelTypes::StateMultibody_HyQ, false);
       break;
-      //   case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos:
-      //     action = create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos, false);
-      //     break;
+        case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos:
+          action = create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos, false);
+          break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_HyQ:
       action = create_contactFwdDynamics(StateModelTypes::StateMultibody_HyQ);
       break;
-      //   case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_Talos:
-      //     action = create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos);
-      //     break;
+        case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_Talos:
+          action = create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos);
+          break;
     default:
       throw_pretty(__FILE__ ": Wrong DifferentialActionModelTypes::Type given");
       break;
@@ -199,12 +197,12 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
             "lf_cone",
             boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
                 state, activation, cone, state->get_pinocchio()->getFrameId("left_sole_link"), actuation->get_nu()),
-            0.01);
+            0.001);
         cost->addCost(
             "rf_cone",
             boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
                 state, activation, cone, state->get_pinocchio()->getFrameId("right_sole_link"), actuation->get_nu()),
-            0.01);
+            0.001);
       }
       break;
     default:
