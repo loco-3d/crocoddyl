@@ -49,12 +49,11 @@ SolverFactory::SolverFactory(SolverTypes::Type solver_type, ActionModelTypes::Ty
                              size_t nb_running_models) {
   // default initialization
   solver_type_ = solver_type;
-  action_factory_ = boost::make_shared<ActionModelFactory>(action_type);
   nb_running_models_ = nb_running_models;
 
-  running_models_.resize(nb_running_models_, action_factory_->create());
-  problem_ = boost::make_shared<crocoddyl::ShootingProblem>(action_factory_->create()->get_state()->zero(),
-                                                            running_models_, action_factory_->create());
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> model = ActionModelFactory().create(action_type);
+  running_models_.resize(nb_running_models_, model);
+  problem_ = boost::make_shared<crocoddyl::ShootingProblem>(model->get_state()->zero(), running_models_, model);
 
   switch (solver_type_) {
     case SolverTypes::SolverKKT:

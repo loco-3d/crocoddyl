@@ -34,17 +34,10 @@ std::ostream& operator<<(std::ostream& os, ActionModelTypes::Type type);
 
 class ActionModelFactory {
  public:
-  ActionModelFactory(ActionModelTypes::Type type);
+  explicit ActionModelFactory();
   ~ActionModelFactory();
 
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> create() const;
-
-  const std::size_t& get_nx();
-
- private:
-  std::size_t nx_;
-  std::size_t nu_;
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> action_;
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> create(ActionModelTypes::Type type) const;
 };
 
 }  // namespace unittest

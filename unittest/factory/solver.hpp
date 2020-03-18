@@ -42,10 +42,9 @@ class SolverFactory {
   boost::shared_ptr<crocoddyl::SolverAbstract> create() const;
 
  private:
-  size_t nb_running_models_;                              //!< This is the number of models in the shooting problem.
-  SolverTypes::Type solver_type_;                         //!< The current type to test
-  boost::shared_ptr<crocoddyl::SolverAbstract> solver_;   //!< The pointer to the solver in testing
-  boost::shared_ptr<ActionModelFactory> action_factory_;  //!< The pointer to the action_model in testing
+  size_t nb_running_models_;                             //!< This is the number of models in the shooting problem.
+  SolverTypes::Type solver_type_;                        //!< The current type to test
+  boost::shared_ptr<crocoddyl::SolverAbstract> solver_;  //!< The pointer to the solver in testing
   std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> >
       running_models_;                                     //!< The list of models in the shooting problem
   boost::shared_ptr<crocoddyl::ShootingProblem> problem_;  //!< The pointer to the shooting problem in testing
