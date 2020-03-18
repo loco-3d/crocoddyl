@@ -20,8 +20,8 @@ using namespace crocoddyl::unittest;
 
 void test_construct_data(ActionModelTypes::Type action_model_type) {
   // create the model
-  ActionModelFactory factory(action_model_type);
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create();
+  ActionModelFactory factory;
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
 
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
@@ -29,8 +29,8 @@ void test_construct_data(ActionModelTypes::Type action_model_type) {
 
 void test_calc_returns_state(ActionModelTypes::Type action_model_type) {
   // create the model
-  ActionModelFactory factory(action_model_type);
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create();
+  ActionModelFactory factory;
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
 
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
@@ -43,13 +43,12 @@ void test_calc_returns_state(ActionModelTypes::Type action_model_type) {
   model->calc(data, x, u);
 
   BOOST_CHECK(static_cast<std::size_t>(data->xnext.size()) == model->get_state()->get_nx());
-  BOOST_CHECK(factory.get_nx() == model->get_state()->get_nx());
 }
 
 void test_calc_returns_a_cost(ActionModelTypes::Type action_model_type) {
   // create the model
-  ActionModelFactory factory(action_model_type);
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create();
+  ActionModelFactory factory;
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
 
   // create the corresponding data object and set the cost to nan
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
@@ -66,8 +65,8 @@ void test_calc_returns_a_cost(ActionModelTypes::Type action_model_type) {
 
 void test_partial_derivatives_against_numdiff(ActionModelTypes::Type action_model_type) {
   // create the model
-  ActionModelFactory factory(action_model_type);
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create();
+  ActionModelFactory factory;
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
 
   // create the corresponding data object and set the cost to nan
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();

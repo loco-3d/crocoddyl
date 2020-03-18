@@ -17,13 +17,13 @@ using namespace crocoddyl::unittest;
 
 //____________________________________________________________________________//
 
-void test_kkt_dimension(ActionModelTypes::Type action_type, size_t nb_running_models) {
+void test_kkt_dimension(ActionModelTypes::Type action_type, size_t T) {
   // Create the kkt solver
-  SolverFactory factory(SolverTypes::SolverKKT, action_type, nb_running_models);
-  boost::shared_ptr<crocoddyl::SolverKKT> kkt = boost::static_pointer_cast<crocoddyl::SolverKKT>(factory.create());
+  SolverFactory factory;
+  boost::shared_ptr<crocoddyl::SolverKKT> kkt =
+      boost::static_pointer_cast<crocoddyl::SolverKKT>(factory.create(SolverTypes::SolverKKT, action_type, T));
 
   // define some aliases
-  const std::size_t& T = kkt->get_problem()->get_T();
   const std::size_t& ndx = kkt->get_ndx();
   const std::size_t& nu = kkt->get_nu();
 
@@ -38,10 +38,11 @@ void test_kkt_dimension(ActionModelTypes::Type action_type, size_t nb_running_mo
 
 //____________________________________________________________________________//
 
-void test_kkt_search_direction(ActionModelTypes::Type action_type, size_t nb_running_models) {
+void test_kkt_search_direction(ActionModelTypes::Type action_type, size_t T) {
   // Create the kkt solver
-  SolverFactory factory(SolverTypes::SolverKKT, action_type, nb_running_models);
-  boost::shared_ptr<crocoddyl::SolverKKT> kkt = boost::static_pointer_cast<crocoddyl::SolverKKT>(factory.create());
+  SolverFactory factory;
+  boost::shared_ptr<crocoddyl::SolverKKT> kkt =
+      boost::static_pointer_cast<crocoddyl::SolverKKT>(factory.create(SolverTypes::SolverKKT, action_type, T));
 
   // Compute the search direction
   kkt->computeDirection();
@@ -61,12 +62,11 @@ void test_kkt_search_direction(ActionModelTypes::Type action_type, size_t nb_run
 
 //____________________________________________________________________________//
 
-void test_solver_against_kkt_solver(SolverTypes::Type solver_type, ActionModelTypes::Type action_type,
-                                    size_t nb_running_models) {
+void test_solver_against_kkt_solver(SolverTypes::Type solver_type, ActionModelTypes::Type action_type, size_t T) {
   // Create the solver
-  SolverFactory solver_factory(solver_type, action_type, nb_running_models);
+  SolverFactory solver_factory;
   boost::shared_ptr<crocoddyl::SolverAbstract> solver =
-      boost::static_pointer_cast<crocoddyl::SolverKKT>(solver_factory.create());
+      boost::static_pointer_cast<crocoddyl::SolverKKT>(solver_factory.create(solver_type, action_type, T));
 
   // Get the pointer to the problem so we can create the equivalent kkt solver.
   const boost::shared_ptr<crocoddyl::ShootingProblem>& problem = solver->get_problem();
@@ -76,7 +76,6 @@ void test_solver_against_kkt_solver(SolverTypes::Type solver_type, ActionModelTy
   cbs.push_back(boost::make_shared<crocoddyl::CallbackVerbose>());
 
   // Genreate the different state along the trajectory
-  const std::size_t& T = problem->get_T();
   std::vector<Eigen::VectorXd> xs;
   std::vector<Eigen::VectorXd> us;
   for (std::size_t i = 0; i < T; ++i) {
@@ -113,14 +112,13 @@ void test_solver_against_kkt_solver(SolverTypes::Type solver_type, ActionModelTy
 //____________________________________________________________________________//
 
 bool init_function() {
-  size_t nb_running_models = 10;
+  size_t T = 10;
 
   for (size_t action_type = 0; action_type < ActionModelTypes::all.size(); ++action_type) {
     const std::string test_name = "test_action_" + std::to_string(action_type);
     test_suite* ts = BOOST_TEST_SUITE(test_name);
-    ts->add(BOOST_TEST_CASE(boost::bind(&test_kkt_dimension, ActionModelTypes::all[action_type], nb_running_models)));
-    ts->add(BOOST_TEST_CASE(
-        boost::bind(&test_kkt_search_direction, ActionModelTypes::all[action_type], nb_running_models)));
+    ts->add(BOOST_TEST_CASE(boost::bind(&test_kkt_dimension, ActionModelTypes::all[action_type], T)));
+    ts->add(BOOST_TEST_CASE(boost::bind(&test_kkt_search_direction, ActionModelTypes::all[action_type], T)));
     framework::master_test_suite().add(ts);
   }
 
@@ -132,7 +130,7 @@ bool init_function() {
       test_suite* ts = BOOST_TEST_SUITE(test_name.str());
       std::cout << "Running " << test_name.str() << std::endl;
       ts->add(BOOST_TEST_CASE(boost::bind(&test_solver_against_kkt_solver, SolverTypes::all[solver_type],
-                                          ActionModelTypes::all[action_type], nb_running_models)));
+                                          ActionModelTypes::all[action_type], T)));
       framework::master_test_suite().add(ts);
     }
   }

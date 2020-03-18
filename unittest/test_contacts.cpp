@@ -37,28 +37,6 @@ void test_construct_data(ContactModelTypes::Type contact_type, PinocchioModelTyp
   boost::shared_ptr<crocoddyl::ContactDataAbstract> data = model->createData(&pinocchio_data);
 }
 
-void test_calc_no_computation(ContactModelTypes::Type contact_type, PinocchioModelTypes::Type model_type) {
-  // create the model
-  ContactModelFactory factory;
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create(contact_type, model_type);
-
-  // create the corresponding data object
-  const boost::shared_ptr<pinocchio::Model>& pinocchio_model = model->get_state()->get_pinocchio();
-  pinocchio::Data pinocchio_data(*pinocchio_model.get());
-  boost::shared_ptr<crocoddyl::ContactDataAbstract> data = model->createData(&pinocchio_data);
-
-  // Getting the jacobian from the model
-  Eigen::VectorXd x;
-  model->calc(data, x);
-
-  // Check that nothing has been computed and that all value are initialized to 0
-  BOOST_CHECK(data->Jc.hasNaN() || data->Jc.isZero());
-  BOOST_CHECK(data->da0_dx.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(data->df_dx.isZero());
-  BOOST_CHECK(data->df_du.isZero());
-}
-
 void test_calc_fetch_jacobians(ContactModelTypes::Type contact_type, PinocchioModelTypes::Type model_type) {
   // create the model
   ContactModelFactory factory;
@@ -80,28 +58,6 @@ void test_calc_fetch_jacobians(ContactModelTypes::Type contact_type, PinocchioMo
   BOOST_CHECK(!data->Jc.isZero());
   BOOST_CHECK(!data->a0.isZero());
   BOOST_CHECK(data->da0_dx.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(data->df_dx.isZero());
-  BOOST_CHECK(data->df_du.isZero());
-}
-
-void test_calc_diff_no_computation(ContactModelTypes::Type contact_type, PinocchioModelTypes::Type model_type) {
-  // create the model
-  ContactModelFactory factory;
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create(contact_type, model_type);
-
-  // create the corresponding data object
-  const boost::shared_ptr<pinocchio::Model>& pinocchio_model = model->get_state()->get_pinocchio();
-  pinocchio::Data pinocchio_data(*pinocchio_model.get());
-  boost::shared_ptr<crocoddyl::ContactDataAbstract> data = model->createData(&pinocchio_data);
-
-  // Getting the jacobian from the model
-  Eigen::VectorXd x;
-  model->calc(data, x);
-  model->calcDiff(data, x);
-
-  // Check that nothing has been computed and that all value are initialized to 0
-  BOOST_CHECK(data->Jc.hasNaN() || data->Jc.isZero());
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
   BOOST_CHECK(data->df_du.isZero());
@@ -226,9 +182,7 @@ void test_partial_derivatives_against_numdiff(ContactModelTypes::Type contact_ty
 void register_contact_model_unit_tests(ContactModelTypes::Type contact_type, PinocchioModelTypes::Type model_type,
                                        test_suite& ts) {
   ts.add(BOOST_TEST_CASE(boost::bind(&test_construct_data, contact_type, model_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_no_computation, contact_type, model_type)));
   ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_fetch_jacobians, contact_type, model_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_no_computation, contact_type, model_type)));
   ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_fetch_derivatives, contact_type, model_type)));
   ts.add(BOOST_TEST_CASE(boost::bind(&test_update_force, contact_type, model_type)));
   ts.add(BOOST_TEST_CASE(boost::bind(&test_update_force_diff, contact_type, model_type)));

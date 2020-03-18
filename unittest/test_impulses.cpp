@@ -37,26 +37,6 @@ void test_construct_data(ImpulseModelTypes::Type impulse_type, PinocchioModelTyp
   boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
 }
 
-void test_calc_no_computation(ImpulseModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) {
-  // create the model
-  ImpulseModelFactory factory;
-  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.create(impulse_type, model_type);
-
-  // create the corresponding data object
-  pinocchio::Data pinocchio_data(*model->get_state()->get_pinocchio().get());
-  boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
-
-  // Getting the jacobian from the model
-  Eigen::VectorXd dx;
-  model->calc(data, dx);
-
-  // Check that nothing has been computed and that all value are initialized to 0
-  BOOST_CHECK(data->Jc.hasNaN() || data->Jc.isZero());
-  BOOST_CHECK(data->dv0_dq.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(data->df_dq.isZero());
-}
-
 void test_calc_fetch_jacobians(ImpulseModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) {
   // create the model
   ImpulseModelFactory factory;
@@ -78,27 +58,6 @@ void test_calc_fetch_jacobians(ImpulseModelTypes::Type impulse_type, PinocchioMo
   // Check that only the Jacobian has been filled
   BOOST_CHECK(!data->Jc.isZero());
   BOOST_CHECK(data->dv0_dq.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(data->df_dq.isZero());
-}
-
-void test_calc_diff_no_computation(ImpulseModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) {
-  // create the model
-  ImpulseModelFactory factory;
-  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.create(impulse_type, model_type);
-
-  // create the corresponding data object
-  pinocchio::Data pinocchio_data(*model->get_state()->get_pinocchio().get());
-  boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
-
-  // Getting the jacobian from the model
-  Eigen::VectorXd dx;
-  model->calc(data, dx);
-  model->calcDiff(data, dx);
-
-  // Check that nothing has been computed and that all value are initialized to 0
-  BOOST_CHECK(data->Jc.hasNaN() || data->Jc.isZero());
-  BOOST_CHECK(data->dv0_dq.hasNaN() || data->dv0_dq.isZero());
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(data->df_dq.isZero());
 }
@@ -177,9 +136,7 @@ void test_update_force_diff(ImpulseModelTypes::Type impulse_type, PinocchioModel
 void register_impulse_model_unit_tests(ImpulseModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type,
                                        test_suite& ts) {
   ts.add(BOOST_TEST_CASE(boost::bind(&test_construct_data, impulse_type, model_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_no_computation, impulse_type, model_type)));
   ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_fetch_jacobians, impulse_type, model_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_no_computation, impulse_type, model_type)));
   ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_fetch_derivatives, impulse_type, model_type)));
   ts.add(BOOST_TEST_CASE(boost::bind(&test_update_force, impulse_type, model_type)));
   ts.add(BOOST_TEST_CASE(boost::bind(&test_update_force_diff, impulse_type, model_type)));

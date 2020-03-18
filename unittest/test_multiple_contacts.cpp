@@ -171,38 +171,6 @@ void test_calc() {
   BOOST_CHECK(data->df_du.isZero());
 }
 
-void test_calc_no_computation() {
-  // Setup the test
-  StateModelFactory state_factory;
-  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
-      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
-  // create the corresponding data object
-  pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
-
-  // create and add some contact objects
-  for (unsigned i = 0; i < 5; ++i) {
-    std::ostringstream os;
-    os << "random_contact_" << i;
-    model.addContact(os.str(), create_random_contact());
-  }
-
-  // create the data of the multiple-contacts
-  boost::shared_ptr<crocoddyl::ContactDataMultiple> data = model.createData(&pinocchio_data);
-
-  // create a dummy state vector (not used for the contacts)
-  Eigen::VectorXd dx;
-
-  // pinocchio data have not been filled so the results of this operation are null matrices
-  model.calc(data, dx);
-
-  // Check that nothing has been computed and that all value are initialized to 0
-  BOOST_CHECK(data->Jc.hasNaN() || data->Jc.isZero());
-  BOOST_CHECK(data->da0_dx.hasNaN() || data->da0_dx.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(data->df_dx.isZero());
-  BOOST_CHECK(data->df_du.isZero());
-}
-
 void test_calc_diff() {
   // Setup the test
   StateModelFactory state_factory;
@@ -271,41 +239,6 @@ void test_calc_diff_no_recalc() {
   BOOST_CHECK(data->Jc.isZero());
   BOOST_CHECK(data->a0.isZero());
   BOOST_CHECK(!data->da0_dx.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(data->df_dx.isZero());
-  BOOST_CHECK(data->df_du.isZero());
-}
-
-void test_calc_diff_no_computation() {
-  // Setup the test
-  StateModelFactory state_factory;
-  crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
-      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
-
-  // create the corresponding data object
-  pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
-
-  // create and add some contact objects
-  for (unsigned i = 0; i < 5; ++i) {
-    std::ostringstream os;
-    os << "random_contact_" << i;
-    model.addContact(os.str(), create_random_contact());
-  }
-
-  // create the data of the multiple-contacts
-  boost::shared_ptr<crocoddyl::ContactDataMultiple> data = model.createData(&pinocchio_data);
-
-  // create a dummy state vector (not used for the contacts)
-  Eigen::VectorXd dx;
-
-  // pinocchio data have not been filled so the results of this operation are
-  // null matrices
-  model.calc(data, dx);
-  model.calcDiff(data, dx);
-
-  // Check that nothing has been computed and that all value are initialized to 0
-  BOOST_CHECK(data->Jc.hasNaN() || data->Jc.isZero());
-  BOOST_CHECK(data->da0_dx.hasNaN() || data->da0_dx.isZero());
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
   BOOST_CHECK(data->df_du.isZero());
@@ -533,9 +466,7 @@ void register_unit_tests() {
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_removeContact)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_removeContact_error_message)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_no_computation)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_no_computation)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_updateForce)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_updateAccelerationDiff)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_get_contacts)));

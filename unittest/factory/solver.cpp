@@ -45,42 +45,41 @@ std::ostream& operator<<(std::ostream& os, SolverTypes::Type type) {
   return os;
 }
 
-SolverFactory::SolverFactory(SolverTypes::Type solver_type, ActionModelTypes::Type action_type,
-                             size_t nb_running_models) {
-  // default initialization
-  solver_type_ = solver_type;
-  action_factory_ = boost::make_shared<ActionModelFactory>(action_type);
-  nb_running_models_ = nb_running_models;
+SolverFactory::SolverFactory() {}
 
-  running_models_.resize(nb_running_models_, action_factory_->create());
-  problem_ = boost::make_shared<crocoddyl::ShootingProblem>(action_factory_->create()->get_state()->zero(),
-                                                            running_models_, action_factory_->create());
+SolverFactory::~SolverFactory() {}
 
-  switch (solver_type_) {
+boost::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(SolverTypes::Type solver_type,
+                                                                   ActionModelTypes::Type action_type,
+                                                                   size_t T) const {
+  boost::shared_ptr<crocoddyl::SolverAbstract> solver;
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> model = ActionModelFactory().create(action_type);
+  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > running_models(T, model);
+  boost::shared_ptr<crocoddyl::ShootingProblem> problem =
+      boost::make_shared<crocoddyl::ShootingProblem>(model->get_state()->zero(), running_models, model);
+
+  switch (solver_type) {
     case SolverTypes::SolverKKT:
-      solver_ = boost::make_shared<crocoddyl::SolverKKT>(problem_);
+      solver = boost::make_shared<crocoddyl::SolverKKT>(problem);
       break;
     case SolverTypes::SolverDDP:
-      solver_ = boost::make_shared<crocoddyl::SolverDDP>(problem_);
+      solver = boost::make_shared<crocoddyl::SolverDDP>(problem);
       break;
     case SolverTypes::SolverFDDP:
-      solver_ = boost::make_shared<crocoddyl::SolverFDDP>(problem_);
+      solver = boost::make_shared<crocoddyl::SolverFDDP>(problem);
       break;
     case SolverTypes::SolverBoxDDP:
-      solver_ = boost::make_shared<crocoddyl::SolverBoxDDP>(problem_);
+      solver = boost::make_shared<crocoddyl::SolverBoxDDP>(problem);
       break;
     case SolverTypes::SolverBoxFDDP:
-      solver_ = boost::make_shared<crocoddyl::SolverBoxFDDP>(problem_);
+      solver = boost::make_shared<crocoddyl::SolverBoxFDDP>(problem);
       break;
     default:
       throw_pretty(__FILE__ ": Wrong SolverTypes::Type given");
       break;
   }
+  return solver;
 }
-
-SolverFactory::~SolverFactory() {}
-
-boost::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create() const { return solver_; }
 
 }  // namespace unittest
 }  // namespace crocoddyl
