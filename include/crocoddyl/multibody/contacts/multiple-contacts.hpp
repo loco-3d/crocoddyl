@@ -25,11 +25,13 @@ struct ContactItemTpl {
 
   typedef _Scalar Scalar;
   ContactItemTpl() {}
-  ContactItemTpl(const std::string& name, boost::shared_ptr<ContactModelAbstractTpl<Scalar> > contact)
-      : name(name), contact(contact) {}
+  ContactItemTpl(const std::string& name, boost::shared_ptr<ContactModelAbstractTpl<Scalar> > contact,
+                 bool active = true)
+      : name(name), contact(contact), active(active) {}
 
   std::string name;
   boost::shared_ptr<ContactModelAbstractTpl<Scalar> > contact;
+  bool active;
 };
 
 template <typename _Scalar>
@@ -59,8 +61,9 @@ class ContactModelMultipleTpl {
   ContactModelMultipleTpl(boost::shared_ptr<StateMultibody> state);
   ~ContactModelMultipleTpl();
 
-  void addContact(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact);
+  void addContact(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact, bool active = true);
   void removeContact(const std::string& name);
+  void changeContactStatus(const std::string& name, bool active);
 
   void calc(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::Ref<const VectorXs>& x);
   void calcDiff(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::Ref<const VectorXs>& x);

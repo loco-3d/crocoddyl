@@ -25,11 +25,13 @@ struct ImpulseItemTpl {
   typedef _Scalar Scalar;
 
   ImpulseItemTpl() {}
-  ImpulseItemTpl(const std::string& name, boost::shared_ptr<ImpulseModelAbstractTpl<Scalar> > impulse)
-      : name(name), impulse(impulse) {}
+  ImpulseItemTpl(const std::string& name, boost::shared_ptr<ImpulseModelAbstractTpl<Scalar> > impulse,
+                 bool active = true)
+      : name(name), impulse(impulse), active(active) {}
 
   std::string name;
   boost::shared_ptr<ImpulseModelAbstractTpl<Scalar> > impulse;
+  bool active;
 };
 
 template <typename _Scalar>
@@ -58,8 +60,9 @@ class ImpulseModelMultipleTpl {
   explicit ImpulseModelMultipleTpl(boost::shared_ptr<StateMultibody> state);
   ~ImpulseModelMultipleTpl();
 
-  void addImpulse(const std::string& name, boost::shared_ptr<ImpulseModelAbstract> impulse);
+  void addImpulse(const std::string& name, boost::shared_ptr<ImpulseModelAbstract> impulse, bool active = true);
   void removeImpulse(const std::string& name);
+  void changeImpulseStatus(const std::string& name, bool active);
 
   void calc(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::Ref<const VectorXs>& x);
   void calcDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::Ref<const VectorXs>& x);

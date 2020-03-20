@@ -70,11 +70,23 @@ void test_addContact() {
   crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
       state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
 
-  // add an contact object to the container
-  model.addContact("random_contact", create_random_contact());
+  // add an active contact
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact_1 = create_random_contact();
+  model.addContact("random_contact_1", rand_contact_1);
+  BOOST_CHECK(model.get_nc() == rand_contact_1->get_nc());
 
-  // Test the final size of the map
-  BOOST_CHECK(model.get_contacts().size() == 1);
+  // add an inactive contact
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact_2 = create_random_contact();
+  model.addContact("random_contact_2", rand_contact_2, false);
+  BOOST_CHECK(model.get_nc() == rand_contact_1->get_nc());
+
+  // change the random contact 2 status
+  model.changeContactStatus("random_contact_2", true);
+  BOOST_CHECK(model.get_nc() == rand_contact_1->get_nc() + rand_contact_2->get_nc());
+
+  // change the random contact 1 status
+  model.changeContactStatus("random_contact_1", false);
+  BOOST_CHECK(model.get_nc() == rand_contact_2->get_nc());
 }
 
 void test_addContact_error_message() {
@@ -89,15 +101,21 @@ void test_addContact_error_message() {
   // add twice the same contact object to the container
   model.addContact("random_contact", rand_contact);
 
-  // Expect a cout message here
+  // test error message when we add a duplicate contact
   CaptureIOStream capture_ios;
   capture_ios.beginCapture();
   model.addContact("random_contact", rand_contact);
   capture_ios.endCapture();
-
-  // Test that the error message is sent.
   std::stringstream expected_buffer;
   expected_buffer << "Warning: this contact item already existed, we cannot add it" << std::endl;
+  BOOST_CHECK(capture_ios.str() == expected_buffer.str());
+
+  // test error message when we change the contact status of an inexistent contact
+  capture_ios.beginCapture();
+  model.changeContactStatus("no_exist_contact", true);
+  capture_ios.endCapture();
+  expected_buffer.clear();
+  expected_buffer << "Warning: this contact item doesn't exist, we cannot change its status" << std::endl;
   BOOST_CHECK(capture_ios.str() == expected_buffer.str());
 }
 
@@ -107,14 +125,14 @@ void test_removeContact() {
   crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
       state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
 
-  // add an contact object to the container
-  model.addContact("random_contact", create_random_contact());
+  // add an active contact
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact = create_random_contact();
+  model.addContact("random_contact", rand_contact);
+  BOOST_CHECK(model.get_nc() == rand_contact->get_nc());
 
-  // add an contact object to the container
+  // remove the contact
   model.removeContact("random_contact");
-
-  // Test the final size of the map
-  BOOST_CHECK(model.get_contacts().size() == 0);
+  BOOST_CHECK(model.get_nc() == 0);
 }
 
 void test_removeContact_error_message() {

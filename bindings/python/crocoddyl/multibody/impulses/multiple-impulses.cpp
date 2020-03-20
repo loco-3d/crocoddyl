@@ -18,6 +18,8 @@
 namespace crocoddyl {
 namespace python {
 
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ImpulseModelMultiple_addImpulse_wrap, ImpulseModelMultiple::addImpulse, 2, 3)
+
 void exposeImpulseMultiple() {
   // Register custom converters between std::map and Python dict
   typedef boost::shared_ptr<ImpulseItem> ImpulseItemPtr;
@@ -35,13 +37,17 @@ void exposeImpulseMultiple() {
 
   bp::class_<ImpulseItem, boost::noncopyable>(
       "ImpulseItem", "Describe a impulse item.\n\n",
-      bp::init<std::string, boost::shared_ptr<ImpulseModelAbstract> >(bp::args("self", "name", "impulse"),
-                                                                      "Initialize the impulse item.\n\n"
-                                                                      ":param name: impulse name\n"
-                                                                      ":param impulse: impulse model"))
+      bp::init<std::string, boost::shared_ptr<ImpulseModelAbstract>, bp::optional<bool> >(
+          bp::args("self", "name", "impulse", "active"),
+          "Initialize the impulse item.\n\n"
+          ":param name: impulse name\n"
+          ":param impulse: impulse model\n"
+          ":param active: True if the impulse is activated (default true)"))
       .def_readwrite("name", &ImpulseItem::name, "impulse name")
       .add_property("impulse", bp::make_getter(&ImpulseItem::impulse, bp::return_value_policy<bp::return_by_value>()),
-                    "impulse model");
+                    "impulse model")
+      .def_readwrite("active", &ImpulseItem::active, "impulse status");
+  ;
 
   bp::register_ptr_to_python<boost::shared_ptr<ImpulseModelMultiple> >();
 
@@ -50,13 +56,19 @@ void exposeImpulseMultiple() {
       bp::init<boost::shared_ptr<StateMultibody> >(bp::args("self", "state"),
                                                    "Initialize the multiple impulse model.\n\n"
                                                    ":param state: state of the multibody system"))
-      .def("addImpulse", &ImpulseModelMultiple::addImpulse, bp::args("self", "name", "impulse"),
-           "Add a impulse item.\n\n"
-           ":param name: impulse name\n"
-           ":param impulse: impulse model")
+      .def("addImpulse", &ImpulseModelMultiple::addImpulse,
+           ImpulseModelMultiple_addImpulse_wrap(bp::args("self", "name", "impulse", "active"),
+                                                "Add an impulse item.\n\n"
+                                                ":param name: impulse name\n"
+                                                ":param impulse: impulse model\n"
+                                                ":param active: True if the impulse is activated (default true)"))
       .def("removeImpulse", &ImpulseModelMultiple::removeImpulse, bp::args("self", "name"),
-           "Remove a impulse item.\n\n"
+           "Remove an impulse item.\n\n"
            ":param name: impulse name")
+      .def("changeImpulseStatus", &ImpulseModelMultiple::changeImpulseStatus, bp::args("self", "name", "active"),
+           "Change the impulse status.\n\n"
+           ":param name: impulse name\n"
+           ":param active: impulse status (true for active and false for inactive)")
       .def("calc", &ImpulseModelMultiple::calc_wrap, bp::args("self", "data", "x"),
            "Compute the total impulse Jacobian and drift.\n\n"
            "The rigid impulse model throught acceleration-base holonomic constraint\n"

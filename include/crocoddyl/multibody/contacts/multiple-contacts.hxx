@@ -22,16 +22,16 @@ ContactModelMultipleTpl<Scalar>::~ContactModelMultipleTpl() {}
 
 template <typename Scalar>
 void ContactModelMultipleTpl<Scalar>::addContact(const std::string& name,
-                                                 boost::shared_ptr<ContactModelAbstract> contact) {
+                                                 boost::shared_ptr<ContactModelAbstract> contact, bool active) {
   if (contact->get_nu() != nu_) {
     throw_pretty("Invalid argument: "
                  << "contact item doesn't have the same control dimension (" + std::to_string(nu_) + ")");
   }
   std::pair<typename ContactModelContainer::iterator, bool> ret =
-      contacts_.insert(std::make_pair(name, boost::make_shared<ContactItem>(name, contact)));
+      contacts_.insert(std::make_pair(name, boost::make_shared<ContactItem>(name, contact, active)));
   if (ret.second == false) {
     std::cout << "Warning: this contact item already existed, we cannot add it" << std::endl;
-  } else {
+  } else if (active) {
     nc_ += contact->get_nc();
   }
 }
@@ -44,6 +44,21 @@ void ContactModelMultipleTpl<Scalar>::removeContact(const std::string& name) {
     contacts_.erase(it);
   } else {
     std::cout << "Warning: this contact item doesn't exist, we cannot remove it" << std::endl;
+  }
+}
+
+template <typename Scalar>
+void ContactModelMultipleTpl<Scalar>::changeContactStatus(const std::string& name, bool active) {
+  typename ContactModelContainer::iterator it = contacts_.find(name);
+  if (it != contacts_.end()) {
+    if (active && !it->second->active) {
+      nc_ += it->second->contact->get_nc();
+    } else if (!active && it->second->active) {
+      nc_ -= it->second->contact->get_nc();
+    }
+    it->second->active = active;
+  } else {
+    std::cout << "Warning: this contact item doesn't exist, we cannot change its status" << std::endl;
   }
 }
 
@@ -62,14 +77,16 @@ void ContactModelMultipleTpl<Scalar>::calc(const boost::shared_ptr<ContactDataMu
   for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const boost::shared_ptr<ContactItem>& m_i = it_m->second;
-    const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
-    assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
+    if (m_i->active) {
+      const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+      assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
 
-    m_i->contact->calc(d_i, x);
-    const std::size_t& nc_i = m_i->contact->get_nc();
-    data->a0.segment(nc, nc_i) = d_i->a0;
-    data->Jc.block(nc, 0, nc_i, nv) = d_i->Jc;
-    nc += nc_i;
+      m_i->contact->calc(d_i, x);
+      const std::size_t& nc_i = m_i->contact->get_nc();
+      data->a0.segment(nc, nc_i) = d_i->a0;
+      data->Jc.block(nc, 0, nc_i, nv) = d_i->Jc;
+      nc += nc_i;
+    }
   }
 }
 
@@ -88,13 +105,15 @@ void ContactModelMultipleTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDa
   for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const boost::shared_ptr<ContactItem>& m_i = it_m->second;
-    const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
-    assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
+    if (m_i->active) {
+      const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+      assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
 
-    m_i->contact->calcDiff(d_i, x);
-    const std::size_t& nc_i = m_i->contact->get_nc();
-    data->da0_dx.block(nc, 0, nc_i, ndx) = d_i->da0_dx;
-    nc += nc_i;
+      m_i->contact->calcDiff(d_i, x);
+      const std::size_t& nc_i = m_i->contact->get_nc();
+      data->da0_dx.block(nc, 0, nc_i, ndx) = d_i->da0_dx;
+      nc += nc_i;
+    }
   }
 }
 
@@ -130,14 +149,16 @@ void ContactModelMultipleTpl<Scalar>::updateForce(const boost::shared_ptr<Contac
   for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const boost::shared_ptr<ContactItem>& m_i = it_m->second;
-    const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
-    assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
+    if (m_i->active) {
+      const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+      assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
 
-    const std::size_t& nc_i = m_i->contact->get_nc();
-    const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i = force.segment(nc, nc_i);
-    m_i->contact->updateForce(d_i, force_i);
-    data->fext[d_i->joint] = d_i->f;
-    nc += nc_i;
+      const std::size_t& nc_i = m_i->contact->get_nc();
+      const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i = force.segment(nc, nc_i);
+      m_i->contact->updateForce(d_i, force_i);
+      data->fext[d_i->joint] = d_i->f;
+      nc += nc_i;
+    }
   }
 }
 
@@ -178,14 +199,16 @@ void ContactModelMultipleTpl<Scalar>::updateForceDiff(const boost::shared_ptr<Co
   for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const boost::shared_ptr<ContactItem>& m_i = it_m->second;
-    const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
-    assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
+    if (m_i->active) {
+      const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+      assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
 
-    std::size_t const& nc_i = m_i->contact->get_nc();
-    const Eigen::Block<const MatrixXs> df_dx_i = df_dx.block(nc, 0, nc_i, ndx);
-    const Eigen::Block<const MatrixXs> df_du_i = df_du.block(nc, 0, nc_i, nu_);
-    m_i->contact->updateForceDiff(d_i, df_dx_i, df_du_i);
-    nc += nc_i;
+      std::size_t const& nc_i = m_i->contact->get_nc();
+      const Eigen::Block<const MatrixXs> df_dx_i = df_dx.block(nc, 0, nc_i, ndx);
+      const Eigen::Block<const MatrixXs> df_du_i = df_du.block(nc, 0, nc_i, nu_);
+      m_i->contact->updateForceDiff(d_i, df_dx_i, df_du_i);
+      nc += nc_i;
+    }
   }
 }
 
