@@ -115,7 +115,8 @@ class GepettoDisplay:
         fs = self.getForceTrajectoryFromSolver(solver)
         ps = self.getFrameTrajectoryFromSolver(solver)
 
-        dts = [m.dt if hasattr(m, "differential") else 0. for m in solver.models()]
+        models = solver.problem.runningModels + [solver.problem.terminalModel]
+        dts = [m.dt if hasattr(m, "differential") else 0. for m in models]
         self.display(solver.xs, fs, ps, dts, factor)
 
     def addRobot(self):
@@ -158,8 +159,10 @@ class GepettoDisplay:
 
     def getForceTrajectoryFromSolver(self, solver):
         fs = []
-        for i, data in enumerate(solver.datas()):
-            model = solver.models()[i]
+        models = solver.problem.runningModels + [solver.problem.terminalModel]
+        datas = solver.problem.runningDatas + [solver.problem.terminalData]
+        for i, data in enumerate(datas):
+            model = models[i]
             if hasattr(data, "differential"):
                 if isinstance(data.differential, libcrocoddyl_pywrap.DifferentialActionDataContactFwdDynamics):
                     fc = []
@@ -195,9 +198,10 @@ class GepettoDisplay:
 
     def getFrameTrajectoryFromSolver(self, solver):
         ps = {fr: [] for fr in self.frameTrajNames}
+        datas = solver.problem.runningDatas + [solver.problem.terminalData]
         for key, p in ps.items():
             frameId = int(key)
-            for data in solver.datas():
+            for data in datas:
                 if hasattr(data, "differential"):
                     if hasattr(data.differential, "pinocchio"):
                         pose = data.differential.pinocchio.oMf[frameId]
