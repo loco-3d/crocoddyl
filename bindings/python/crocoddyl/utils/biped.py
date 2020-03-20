@@ -317,21 +317,23 @@ def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
         us_lb, us_ub = [], []
         xs_lb, xs_ub = [], []
     if isinstance(solver, list):
-        rmodel = solver[0].models()[0].state.pinocchio
+        rmodel = solver[0].problem.runningModels[0].state.pinocchio
         for s in solver:
             xs.extend(s.xs[:-1])
             us.extend(s.us)
             if bounds:
-                for m in s.models():
+                models = s.problem.runningModels + [s.problem.terminalModel]
+                for m in models:
                     us_lb += [m.u_lb]
                     us_ub += [m.u_ub]
                     xs_lb += [m.state.lb]
                     xs_ub += [m.state.ub]
     else:
-        rmodel = solver.models()[0].state.pinocchio
+        rmodel = solver.problem.runningModels[0].state.pinocchio
         xs, us = solver.xs, solver.us
         if bounds:
-            for m in solver.models():
+            models = s.problem.runningModels + [s.problem.terminalModel]
+            for m in models:
                 us_lb += [m.u_lb]
                 us_ub += [m.u_ub]
                 xs_lb += [m.state.lb]
