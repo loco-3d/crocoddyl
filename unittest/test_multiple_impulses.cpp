@@ -71,11 +71,15 @@ void test_addImpulse() {
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
       state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
 
-  // add an impulse object to the container
-  model.addImpulse("random_impulse", create_random_impulse());
+  // add an active impulse
+  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> rand_impulse_1 = create_random_impulse();
+  model.addImpulse("random_impulse_1", rand_impulse_1);
+  BOOST_CHECK(model.get_ni() == rand_impulse_1->get_ni());
 
-  // Test the final size of the map
-  BOOST_CHECK(model.get_impulses().size() == 1);
+  // add an inactive impulse
+  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> rand_impulse_2 = create_random_impulse();
+  model.addImpulse("random_impulse_2", rand_impulse_2, false);
+  BOOST_CHECK(model.get_ni() == rand_impulse_1->get_ni());
 }
 
 void test_addImpulse_error_message() {
@@ -108,14 +112,14 @@ void test_removeImpulse() {
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
       state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
 
-  // add an impulse object to the container
-  model.addImpulse("random_impulse", create_random_impulse());
+  // add an active impulse
+  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> rand_impulse = create_random_impulse();
+  model.addImpulse("random_impulse", rand_impulse);
+  BOOST_CHECK(model.get_ni() == rand_impulse->get_ni());
 
-  // add an impulse object to the container
+  // remove the impulse
   model.removeImpulse("random_impulse");
-
-  // Test the final size of the map
-  BOOST_CHECK(model.get_impulses().size() == 0);
+  BOOST_CHECK(model.get_ni() == 0);
 }
 
 void test_removeImpulse_error_message() {
