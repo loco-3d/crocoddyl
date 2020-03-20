@@ -41,7 +41,7 @@ void ContactModelMultipleTpl<Scalar>::removeContact(const std::string& name) {
   typename ContactModelContainer::iterator it = contacts_.find(name);
   if (it != contacts_.end()) {
     nc_ -= it->second->contact->get_nc();
-    it->second->active = false;
+    contacts_.erase(it);
   } else {
     std::cout << "Warning: this contact item doesn't exist, we cannot remove it" << std::endl;
   }

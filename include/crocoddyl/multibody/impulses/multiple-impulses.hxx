@@ -35,7 +35,7 @@ void ImpulseModelMultipleTpl<Scalar>::removeImpulse(const std::string& name) {
   typename ImpulseModelContainer::iterator it = impulses_.find(name);
   if (it != impulses_.end()) {
     ni_ -= it->second->impulse->get_ni();
-    it->second->active = false;
+    impulses_.erase(it);
   } else {
     std::cout << "Warning: this impulse item doesn't exist, we cannot remove it" << std::endl;
   }
