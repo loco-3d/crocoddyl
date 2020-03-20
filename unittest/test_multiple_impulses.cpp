@@ -80,6 +80,14 @@ void test_addImpulse() {
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> rand_impulse_2 = create_random_impulse();
   model.addImpulse("random_impulse_2", rand_impulse_2, false);
   BOOST_CHECK(model.get_ni() == rand_impulse_1->get_ni());
+
+  // change the random impulse 2 status
+  model.changeImpulseStatus("random_impulse_2", true);
+  BOOST_CHECK(model.get_ni() == rand_impulse_1->get_ni() + rand_impulse_2->get_ni());
+
+  // change the random impulse 1 status
+  model.changeImpulseStatus("random_impulse_1", false);
+  BOOST_CHECK(model.get_ni() == rand_impulse_2->get_ni());
 }
 
 void test_addImpulse_error_message() {
@@ -94,15 +102,21 @@ void test_addImpulse_error_message() {
   // add twice the same impulse object to the container
   model.addImpulse("random_impulse", rand_impulse);
 
-  // Expect a cout message here
+  // test error message when we add a duplicate impulse
   CaptureIOStream capture_ios;
   capture_ios.beginCapture();
   model.addImpulse("random_impulse", rand_impulse);
   capture_ios.endCapture();
-
-  // Test that the error message is sent.
   std::stringstream expected_buffer;
   expected_buffer << "Warning: this impulse item already existed, we cannot add it" << std::endl;
+  BOOST_CHECK(capture_ios.str() == expected_buffer.str());
+
+  // test error message when we change the impulse status of an inexistent impulse
+  capture_ios.beginCapture();
+  model.changeImpulseStatus("no_exist_impulse", true);
+  capture_ios.endCapture();
+  expected_buffer.clear();
+  expected_buffer << "Warning: this impulse item doesn't exist, we cannot change its status" << std::endl;
   BOOST_CHECK(capture_ios.str() == expected_buffer.str());
 }
 
