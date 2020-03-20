@@ -18,6 +18,8 @@
 namespace crocoddyl {
 namespace python {
 
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ContactModelMultiple_addContact_wrap, ContactModelMultiple::addContact, 2, 3)
+
 void exposeContactMultiple() {
   // Register custom converters between std::map and Python dict
   typedef boost::shared_ptr<ContactItem> ContactItemPtr;
@@ -35,13 +37,16 @@ void exposeContactMultiple() {
 
   bp::class_<ContactItem, boost::noncopyable>(
       "ContactItem", "Describe a contact item.\n\n",
-      bp::init<std::string, boost::shared_ptr<ContactModelAbstract> >(bp::args("self", "name", " contact"),
-                                                                      "Initialize the contact item.\n\n"
-                                                                      ":param name: contact name\n"
-                                                                      ":param contact: contact model"))
+      bp::init<std::string, boost::shared_ptr<ContactModelAbstract>, bp::optional<bool> >(
+          bp::args("self", "name", "contact", "active"),
+          "Initialize the contact item.\n\n"
+          ":param name: contact name\n"
+          ":param contact: contact model\n"
+          ":param active: True if the contact is activated (default true)"))
       .def_readwrite("name", &ContactItem::name, "contact name")
       .add_property("contact", bp::make_getter(&ContactItem::contact, bp::return_value_policy<bp::return_by_value>()),
-                    "contact model");
+                    "contact model")
+      .def_readwrite("active", &ContactItem::active, "contact status");
 
   bp::register_ptr_to_python<boost::shared_ptr<ContactModelMultiple> >();
 
@@ -51,10 +56,12 @@ void exposeContactMultiple() {
                                                                       "Initialize the multiple contact model.\n\n"
                                                                       ":param state: state of the multibody system\n"
                                                                       ":param nu: dimension of control vector"))
-      .def("addContact", &ContactModelMultiple::addContact, bp::args("self", "name", " contact"),
-           "Add a contact item.\n\n"
-           ":param name: contact name\n"
-           ":param contact: contact model")
+      .def("addContact", &ContactModelMultiple::addContact,
+           ContactModelMultiple_addContact_wrap(bp::args("self", "name", "contact", "active"),
+                                                "Add a contact item.\n\n"
+                                                ":param name: contact name\n"
+                                                ":param contact: contact model\n"
+                                                ":param active: True if the contact is activated (default true)"))
       .def("removeContact", &ContactModelMultiple::removeContact, bp::args("self", "name"),
            "Remove a contact item.\n\n"
            ":param name: contact name")
