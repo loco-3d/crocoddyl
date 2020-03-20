@@ -40,8 +40,6 @@ class SolverAbstract {
   const std::vector<boost::shared_ptr<CallbackAbstract> >& getCallbacks() const;
 
   const boost::shared_ptr<ShootingProblem>& get_problem() const;
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& get_models() const;
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& get_datas() const;
   const std::vector<Eigen::VectorXd>& get_xs() const;
   const std::vector<Eigen::VectorXd>& get_us() const;
   const bool& get_is_feasible() const;
@@ -66,8 +64,6 @@ class SolverAbstract {
 
  protected:
   boost::shared_ptr<ShootingProblem> problem_;                   //!< optimal control problem
-  std::vector<boost::shared_ptr<ActionModelAbstract> > models_;  //!< Models defined in the problem
-  std::vector<boost::shared_ptr<ActionDataAbstract> > datas_;    //!< Data for all action models along the problem
   std::vector<Eigen::VectorXd> xs_;                              //!< State trajectory
   std::vector<Eigen::VectorXd> us_;                              //!< Control trajectory
   std::vector<boost::shared_ptr<CallbackAbstract> > callbacks_;  //!< Callback functions
