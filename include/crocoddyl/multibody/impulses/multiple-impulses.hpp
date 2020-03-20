@@ -62,6 +62,7 @@ class ImpulseModelMultipleTpl {
 
   void addImpulse(const std::string& name, boost::shared_ptr<ImpulseModelAbstract> impulse, bool active = true);
   void removeImpulse(const std::string& name);
+  void changeImpulseStatus(const std::string& name, bool active);
 
   void calc(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::Ref<const VectorXs>& x);
   void calcDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::Ref<const VectorXs>& x);

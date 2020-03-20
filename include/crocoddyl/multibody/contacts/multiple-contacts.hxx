@@ -48,6 +48,21 @@ void ContactModelMultipleTpl<Scalar>::removeContact(const std::string& name) {
 }
 
 template <typename Scalar>
+void ContactModelMultipleTpl<Scalar>::changeContactStatus(const std::string& name, bool active) {
+  typename ContactModelContainer::iterator it = contacts_.find(name);
+  if (it != contacts_.end()) {
+    if (active && !it->second->active) {
+      nc_ += it->second->contact->get_nc();
+    } else if (!active && it->second->active) {
+      nc_ -= it->second->contact->get_nc();
+    }
+    it->second->active = active;
+  } else {
+    std::cout << "Warning: this contact item doesn't exist, we cannot change its status" << std::endl;
+  }
+}
+
+template <typename Scalar>
 void ContactModelMultipleTpl<Scalar>::calc(const boost::shared_ptr<ContactDataMultiple>& data,
                                            const Eigen::Ref<const VectorXs>& x) {
   if (data->contacts.size() != contacts_.size()) {

@@ -65,6 +65,10 @@ void exposeImpulseMultiple() {
       .def("removeImpulse", &ImpulseModelMultiple::removeImpulse, bp::args("self", "name"),
            "Remove an impulse item.\n\n"
            ":param name: impulse name")
+      .def("changeImpulseStatus", &ImpulseModelMultiple::changeImpulseStatus, bp::args("self", "name", "active"),
+           "Change the impulse status.\n\n"
+           ":param name: impulse name\n"
+           ":param active: impulse status (true for active and false for inactive)")
       .def("calc", &ImpulseModelMultiple::calc_wrap, bp::args("self", "data", "x"),
            "Compute the total impulse Jacobian and drift.\n\n"
            "The rigid impulse model throught acceleration-base holonomic constraint\n"

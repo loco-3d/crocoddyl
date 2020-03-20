@@ -63,6 +63,7 @@ class ContactModelMultipleTpl {
 
   void addContact(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact, bool active = true);
   void removeContact(const std::string& name);
+  void changeContactStatus(const std::string& name, bool active);
 
   void calc(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::Ref<const VectorXs>& x);
   void calcDiff(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::Ref<const VectorXs>& x);

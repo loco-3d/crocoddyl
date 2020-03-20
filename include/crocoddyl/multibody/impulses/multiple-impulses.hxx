@@ -22,7 +22,7 @@ template <typename Scalar>
 void ImpulseModelMultipleTpl<Scalar>::addImpulse(const std::string& name,
                                                  boost::shared_ptr<ImpulseModelAbstract> impulse, bool active) {
   std::pair<typename ImpulseModelContainer::iterator, bool> ret =
-      impulses_.insert(std::make_pair(name, boost::make_shared<ImpulseItem>(name, impulse)));
+      impulses_.insert(std::make_pair(name, boost::make_shared<ImpulseItem>(name, impulse, active)));
   if (ret.second == false) {
     std::cout << "Warning: this impulse item already existed, we cannot add it" << std::endl;
   } else if (active) {
@@ -38,6 +38,21 @@ void ImpulseModelMultipleTpl<Scalar>::removeImpulse(const std::string& name) {
     impulses_.erase(it);
   } else {
     std::cout << "Warning: this impulse item doesn't exist, we cannot remove it" << std::endl;
+  }
+}
+
+template <typename Scalar>
+void ImpulseModelMultipleTpl<Scalar>::changeImpulseStatus(const std::string& name, bool active) {
+  typename ImpulseModelContainer::iterator it = impulses_.find(name);
+  if (it != impulses_.end()) {
+    if (active && !it->second->active) {
+      ni_ += it->second->impulse->get_ni();
+    } else if (!active && it->second->active) {
+      ni_ -= it->second->impulse->get_ni();
+    }
+    it->second->active = active;
+  } else {
+    std::cout << "Warning: this impulse item doesn't exist, we cannot change its status" << std::endl;
   }
 }
 

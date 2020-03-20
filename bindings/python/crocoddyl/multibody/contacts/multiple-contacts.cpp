@@ -65,6 +65,10 @@ void exposeContactMultiple() {
       .def("removeContact", &ContactModelMultiple::removeContact, bp::args("self", "name"),
            "Remove a contact item.\n\n"
            ":param name: contact name")
+      .def("changeContactStatus", &ContactModelMultiple::changeContactStatus, bp::args("self", "name", "active"),
+           "Change the contact status.\n\n"
+           ":param name: contact name\n"
+           ":param active: contact status (true for active and false for inactive)")
       .def("calc", &ContactModelMultiple::calc_wrap, bp::args("self", "data", "x"),
            "Compute the total contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
