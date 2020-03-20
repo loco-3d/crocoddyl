@@ -171,8 +171,8 @@ else:
     ddp.setCallbacks([crocoddyl.CallbackVerbose()])
 
 # Solving it with the DDP algorithm
-xs = [rmodel.defaultState] * len(ddp.models())
-us = [m.quasiStatic(d, rmodel.defaultState) for m, d in list(zip(ddp.models(), ddp.datas()))[:-1]]
+xs = [rmodel.defaultState] * (ddp.problem.T + 1)
+us = [m.quasiStatic(d, rmodel.defaultState) for m, d in list(zip(ddp.problem.runningModels, ddp.problem.runningDatas))]
 ddp.th_stop = 1e-7
 ddp.solve(xs, us, 500, False, 1e-9)
 

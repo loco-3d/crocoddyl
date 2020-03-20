@@ -118,8 +118,11 @@ for i, phase in enumerate(GAITPHASES):
         ddp[i].setCallbacks([crocoddyl.CallbackVerbose()])
 
     # Solving the problem with the DDP solver
-    xs = [anymal.model.defaultState] * len(ddp[i].models())
-    us = [m.quasiStatic(d, anymal.model.defaultState) for m, d in list(zip(ddp[i].models(), ddp[i].datas()))[:-1]]
+    xs = [anymal.model.defaultState] * (ddp[i].problem.T + 1)
+    us = [
+        m.quasiStatic(d, anymal.model.defaultState)
+        for m, d in list(zip(ddp[i].problem.runningModels, ddp[i].problem.runningDatas))
+    ]
     ddp[i].solve(xs, us, 100, False, 0.1)
 
     # Defining the final state as initial one for the next phase
