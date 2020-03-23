@@ -67,4 +67,28 @@ const std::size_t& CostModelAbstractTpl<Scalar>::get_nu() const {
   return nu_;
 }
 
+template <typename Scalar>
+template <class T>
+void CostModelAbstractTpl<Scalar>::set_reference(T ref) {
+  set_referenceImpl(typeid(ref), &ref);
+}
+
+template <typename Scalar>
+void CostModelAbstractTpl<Scalar>::set_referenceImpl(const std::type_info&, const void*) {
+  throw_pretty("It has not been implemented the set_referenceImpl() function");
+}
+
+template <typename Scalar>
+template <class T>
+T CostModelAbstractTpl<Scalar>::get_reference() {
+  T ref;
+  get_referenceImpl(typeid(ref), &ref);
+  return ref;
+}
+
+template <typename Scalar>
+void CostModelAbstractTpl<Scalar>::get_referenceImpl(const std::type_info&, void*) {
+  throw_pretty("It has not been implemented the set_referenceImpl() function");
+}
+
 }  // namespace crocoddyl

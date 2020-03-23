@@ -56,6 +56,14 @@ class CostModelAbstractTpl {
   const boost::shared_ptr<ActivationModelAbstract>& get_activation() const;
   const std::size_t& get_nu() const;
 
+  template <class T>
+  void set_reference(T ref);
+  virtual void set_referenceImpl(const std::type_info&, const void*);
+
+  template <class T>
+  T get_reference();
+  virtual void get_referenceImpl(const std::type_info&, void*);
+
  protected:
   boost::shared_ptr<StateMultibody> state_;
   boost::shared_ptr<ActivationModelAbstract> activation_;
