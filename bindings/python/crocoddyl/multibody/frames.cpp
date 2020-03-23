@@ -14,7 +14,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeFrames() {
-  bp::class_<FrameTranslation, boost::noncopyable>(
+  bp::class_<FrameTranslation>(
       "FrameTranslation",
       "Frame translation describe using Pinocchio.\n\n"
       "It defines a frame translation (3D vector) for a given frame ID",
@@ -27,7 +27,7 @@ void exposeFrames() {
                     bp::make_setter(&FrameTranslation::oxf), "frame translation")
       .def(PrintableVisitor<FrameTranslation>());
 
-  bp::class_<FrameRotation, boost::noncopyable>(
+  bp::class_<FrameRotation>(
       "FrameRotation",
       "Frame rotation describe using Pinocchio.\n\n"
       "It defines a frame rotation (rotation matrix) for a given frame ID",
@@ -40,7 +40,7 @@ void exposeFrames() {
                     bp::make_setter(&FrameRotation::oRf), "frame rotation")
       .def(PrintableVisitor<FrameRotation>());
 
-  bp::class_<FramePlacement, boost::noncopyable>(
+  bp::class_<FramePlacement>(
       "FramePlacement",
       "Frame placement describe using Pinocchio.\n\n"
       "It defines a frame placement (SE(3) point) for a given frame ID",
@@ -52,7 +52,7 @@ void exposeFrames() {
       .add_property("oMf", bp::make_getter(&FramePlacement::oMf, bp::return_internal_reference<>()), "frame placement")
       .def(PrintableVisitor<FramePlacement>());
 
-  bp::class_<FrameMotion, boost::noncopyable>(
+  bp::class_<FrameMotion>(
       "FrameMotion",
       "Frame motion describe using Pinocchio.\n\n"
       "It defines a frame motion (tangent of SE(3) point) for a given frame ID",
@@ -64,7 +64,7 @@ void exposeFrames() {
       .add_property("oMf", bp::make_getter(&FrameMotion::oMf, bp::return_internal_reference<>()), "frame motion")
       .def(PrintableVisitor<FrameMotion>());
 
-  bp::class_<FrameForce, boost::noncopyable>(
+  bp::class_<FrameForce>(
       "FrameForce",
       "Frame force describe using Pinocchio.\n\n"
       "It defines a frame motion (tangent of SE(3) point) for a given frame ID",
