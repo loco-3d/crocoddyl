@@ -22,6 +22,7 @@ void exposeFrames() {
                                             "Initialize the frame translation.\n\n"
                                             ":param frame: frame ID\n"
                                             ":param oxf: Frame translation w.r.t. the origin"))
+      .def(bp::init<>(bp::args("self"), "Default initialization of the frame translation."))
       .def_readwrite("frame", &FrameTranslation::frame, "frame ID")
       .add_property("oxf", bp::make_getter(&FrameTranslation::oxf, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&FrameTranslation::oxf), "frame translation")
@@ -35,6 +36,7 @@ void exposeFrames() {
                                             "Initialize the frame rotation.\n\n"
                                             ":param frame: frame ID\n"
                                             ":param oRf: Frame rotation w.r.t. the origin"))
+      .def(bp::init<>(bp::args("self"), "Default initialization of the frame rotation."))
       .def_readwrite("frame", &FrameRotation::frame, "frame ID")
       .add_property("oRf", bp::make_getter(&FrameRotation::oRf, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&FrameRotation::oRf), "frame rotation")
@@ -48,6 +50,7 @@ void exposeFrames() {
                                            "Initialize the frame placement.\n\n"
                                            ":param frame: frame ID\n"
                                            ":param oMf: Frame placement w.r.t. the origin"))
+      .def(bp::init<>(bp::args("self"), "Default initialization of the frame placement."))
       .def_readwrite("frame", &FramePlacement::frame, "frame ID")
       .add_property("oMf", bp::make_getter(&FramePlacement::oMf, bp::return_internal_reference<>()), "frame placement")
       .def(PrintableVisitor<FramePlacement>());
@@ -60,6 +63,7 @@ void exposeFrames() {
                                               "Initialize the frame motion.\n\n"
                                               ":param frame: frame ID\n"
                                               ":param oMf: Frame motion w.r.t. the origin"))
+      .def(bp::init<>(bp::args("self"), "Default initialization of the frame motion."))
       .def_readwrite("frame", &FrameMotion::frame, "frame ID")
       .add_property("oMf", bp::make_getter(&FrameMotion::oMf, bp::return_internal_reference<>()), "frame motion")
       .def(PrintableVisitor<FrameMotion>());
@@ -72,6 +76,7 @@ void exposeFrames() {
                                              "Initialize the frame force.\n\n"
                                              ":param frame: frame ID\n"
                                              ":param oFf: Frame force w.r.t. the origin"))
+      .def(bp::init<>(bp::args("self"), "Default initialization of the frame force."))
       .def_readwrite("frame", &FrameForce::frame, "frame ID")
       .add_property("oFf", bp::make_getter(&FrameForce::oFf, bp::return_internal_reference<>()), "frame force")
       .def(PrintableVisitor<FrameForce>());
