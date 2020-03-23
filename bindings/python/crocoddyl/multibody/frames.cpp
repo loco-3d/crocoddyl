@@ -32,7 +32,7 @@ void exposeFrames() {
       "Frame rotation describe using Pinocchio.\n\n"
       "It defines a frame rotation (rotation matrix) for a given frame ID",
       bp::init<FrameIndex, Eigen::Matrix3d>(bp::args("self", "frame", "oRf"),
-                                            "Initialize the frame translation.\n\n"
+                                            "Initialize the frame rotation.\n\n"
                                             ":param frame: frame ID\n"
                                             ":param oRf: Frame rotation w.r.t. the origin"))
       .def_readwrite("frame", &FrameRotation::frame, "frame ID")
@@ -69,7 +69,7 @@ void exposeFrames() {
       "Frame force describe using Pinocchio.\n\n"
       "It defines a frame motion (tangent of SE(3) point) for a given frame ID",
       bp::init<FrameIndex, pinocchio::Force>(bp::args("self", "frame", "oFf"),
-                                             "Initialize the frame motion.\n\n"
+                                             "Initialize the frame force.\n\n"
                                              ":param frame: frame ID\n"
                                              ":param oFf: Frame force w.r.t. the origin"))
       .def_readwrite("frame", &FrameForce::frame, "frame ID")
