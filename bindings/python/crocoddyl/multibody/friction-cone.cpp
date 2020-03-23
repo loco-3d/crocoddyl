@@ -13,7 +13,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeFrictionCone() {
-  bp::class_<FrictionCone, boost::noncopyable>(
+  bp::class_<FrictionCone>(
       "FrictionCone", "Model of the friction cone as lb <= Af <= ub",
       bp::init<Eigen::Vector3d, double, bp::optional<std::size_t, bool, double, double> >(
           bp::args("self", "normal", "mu", "nf", "inner_appr", "min_nforce", "max_nforce"),
