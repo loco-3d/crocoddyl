@@ -86,6 +86,13 @@ class ActuationDataAbstractTpl;
 template <typename Scalar>
 class ActuationModelAbstractTpl;
 
+// Squashing
+template <typename Scalar>
+class SquashingDataAbstractTpl;
+
+template <typename Scalar>
+class SquashingModelAbstractTpl;
+
 // shooting
 template <typename Scalar>
 class ShootingProblemTpl;
