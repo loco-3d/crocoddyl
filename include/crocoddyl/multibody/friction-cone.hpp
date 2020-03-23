@@ -28,6 +28,7 @@ class FrictionConeTpl {
   typedef typename MathBase::MatrixX3s MatrixX3s;
   typedef typename MathBase::Quaternions Quaternions;
 
+  explicit FrictionConeTpl();
   FrictionConeTpl(const Vector3s& normal, const Scalar& mu, std::size_t nf = 4, bool inner_appr = true,
                   const Scalar& min_nforce = 0., const Scalar& max_nforce = std::numeric_limits<Scalar>::max());
   FrictionConeTpl(const FrictionConeTpl<Scalar>& cone);
@@ -45,6 +46,9 @@ class FrictionConeTpl {
   const bool& get_inner_appr() const;
   const Scalar& get_min_nforce() const;
   const Scalar& get_max_nforce() const;
+
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const FrictionConeTpl<Scalar>& X);
 
  private:
   MatrixX3s A_;

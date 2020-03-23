@@ -254,6 +254,8 @@ typedef CostDataNumDiffTpl<double> CostDataNumDiff;
 typedef ContactModelNumDiffTpl<double> ContactModelNumDiff;
 typedef ContactDataNumDiffTpl<double> ContactDataNumDiff;
 
+typedef FrictionConeTpl<double> FrictionCone;
+
 typedef FrameTranslationTpl<double> FrameTranslation;
 typedef FrameRotationTpl<double> FrameRotation;
 typedef FramePlacementTpl<double> FramePlacement;
@@ -298,8 +300,6 @@ typedef ContactModel3DTpl<double> ContactModel3D;
 typedef ContactData3DTpl<double> ContactData3D;
 typedef ContactModel6DTpl<double> ContactModel6D;
 typedef ContactData6DTpl<double> ContactData6D;
-
-typedef FrictionConeTpl<double> FrictionCone;
 
 typedef StateMultibodyTpl<double> StateMultibody;
 
