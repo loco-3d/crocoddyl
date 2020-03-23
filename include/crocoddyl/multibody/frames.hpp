@@ -28,6 +28,7 @@ struct FrameTranslationTpl {
   typedef _Scalar Scalar;
   typedef typename MathBaseTpl<Scalar>::Vector3s Vector3s;
 
+  explicit FrameTranslationTpl() : frame(0), oxf(Vector3s::Zero()) {}
   FrameTranslationTpl(const FrameIndex& frame, const Vector3s& oxf) : frame(frame), oxf(oxf) {}
   friend std::ostream& operator<<(std::ostream& os, const FrameTranslationTpl<Scalar>& X) {
     os << "      frame: " << X.frame << std::endl << "translation: " << std::endl << X.oxf.transpose() << std::endl;
@@ -45,6 +46,7 @@ struct FrameRotationTpl {
   typedef _Scalar Scalar;
   typedef typename MathBaseTpl<Scalar>::Matrix3s Matrix3s;
 
+  explicit FrameRotationTpl() : frame(0), oRf(Matrix3s::Identity()) {}
   FrameRotationTpl(const FrameIndex& frame, const Matrix3s& oRf) : frame(frame), oRf(oRf) {}
   friend std::ostream& operator<<(std::ostream& os, const FrameRotationTpl<Scalar>& X) {
     os << "   frame: " << X.frame << std::endl << "rotation: " << std::endl << X.oRf << std::endl;
@@ -60,8 +62,10 @@ struct FramePlacementTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
+  typedef pinocchio::SE3Tpl<Scalar> SE3;
 
-  FramePlacementTpl(const FrameIndex& frame, const pinocchio::SE3Tpl<Scalar>& oMf) : frame(frame), oMf(oMf) {}
+  explicit FramePlacementTpl() : frame(0), oMf(SE3::Zero()) {}
+  FramePlacementTpl(const FrameIndex& frame, const SE3& oMf) : frame(frame), oMf(oMf) {}
   friend std::ostream& operator<<(std::ostream& os, const FramePlacementTpl<Scalar>& X) {
     os << "    frame: " << X.frame << std::endl << "placement: " << std::endl << X.oMf << std::endl;
     return os;
@@ -76,8 +80,10 @@ struct FrameMotionTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
+  typedef pinocchio::MotionTpl<Scalar> Motion;
 
-  FrameMotionTpl(const FrameIndex& frame, const pinocchio::MotionTpl<Scalar>& oMf) : frame(frame), oMf(oMf) {}
+  explicit FrameMotionTpl() : frame(0), oMf(Motion::Zero()) {}
+  FrameMotionTpl(const FrameIndex& frame, const Motion& oMf) : frame(frame), oMf(oMf) {}
   friend std::ostream& operator<<(std::ostream& os, const FrameMotionTpl<Scalar>& X) {
     os << " frame: " << X.frame << std::endl << "motion: " << std::endl << X.oMf << std::endl;
     return os;
@@ -92,8 +98,10 @@ struct FrameForceTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
+  typedef pinocchio::ForceTpl<Scalar> Force;
 
-  FrameForceTpl(const FrameIndex& frame, const pinocchio::ForceTpl<Scalar>& oFf) : frame(frame), oFf(oFf) {}
+  explicit FrameForceTpl() : frame(0), oFf(Force::Zero()) {}
+  FrameForceTpl(const FrameIndex& frame, const Force& oFf) : frame(frame), oFf(oFf) {}
   friend std::ostream& operator<<(std::ostream& os, const FrameForceTpl<Scalar>& X) {
     os << "frame: " << X.frame << std::endl << "force: " << std::endl << X.oFf << std::endl;
     return os;
