@@ -11,6 +11,7 @@
 #define CROCODDYL_MULTIBODY_FRAMES_HPP_
 
 #include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/multibody/friction-cone.hpp"
 #include "crocoddyl/core/mathbase.hpp"
 
 #include <pinocchio/spatial/se3.hpp>
@@ -66,7 +67,7 @@ struct FramePlacementTpl {
   typedef _Scalar Scalar;
   typedef pinocchio::SE3Tpl<Scalar> SE3;
 
-  explicit FramePlacementTpl() : frame(0), oMf(SE3::Zero()) {}
+  explicit FramePlacementTpl() : frame(0), oMf(SE3::Identity()) {}
   FramePlacementTpl(const FramePlacementTpl& value) : frame(value.frame), oMf(value.oMf) {}
   FramePlacementTpl(const FrameIndex& frame, const SE3& oMf) : frame(frame), oMf(oMf) {}
   friend std::ostream& operator<<(std::ostream& os, const FramePlacementTpl<Scalar>& X) {
@@ -114,6 +115,25 @@ struct FrameForceTpl {
 
   FrameIndex frame;
   pinocchio::ForceTpl<Scalar> oFf;
+};
+
+template <typename _Scalar>
+struct FrameFrictionConeTpl {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef FrictionConeTpl<Scalar> FrictionCone;
+
+  explicit FrameFrictionConeTpl() : frame(0), oRf(FrictionCone()) {}
+  FrameFrictionConeTpl(const FrameFrictionConeTpl& value) : frame(value.frame), oRf(value.oRf) {}
+  FrameFrictionConeTpl(const FrameIndex& frame, const FrictionCone& oRf) : frame(frame), oRf(oRf) {}
+  friend std::ostream& operator<<(std::ostream& os, const FrameFrictionConeTpl& X) {
+    os << "frame: " << X.frame << std::endl << "cone: " << std::endl << X.oRf << std::endl;
+    return os;
+  }
+
+  FrameIndex frame;
+  FrictionCone oRf;
 };
 
 }  // namespace crocoddyl

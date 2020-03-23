@@ -80,6 +80,20 @@ void exposeFrames() {
       .def_readwrite("frame", &FrameForce::frame, "frame ID")
       .add_property("oFf", bp::make_getter(&FrameForce::oFf, bp::return_internal_reference<>()), "frame force")
       .def(PrintableVisitor<FrameForce>());
+
+  bp::class_<FrameFrictionCone>(
+      "FrameFrictionCone",
+      "Frame friction cone.\n\n"
+      "It defines a friction cone for a given frame ID",
+      bp::init<FrameIndex, FrictionCone>(bp::args("self", "frame", "oRf"),
+                                         "Initialize the frame friction cone.\n\n"
+                                         ":param frame: frame ID\n"
+                                         ":param oRf: Frame friction cone w.r.t. the origin"))
+      .def(bp::init<>(bp::args("self"), "Default initialization of the frame friction cone."))
+      .def_readwrite("frame", &FrameFrictionCone::frame, "frame ID")
+      .add_property("oRf", bp::make_getter(&FrameFrictionCone::oRf, bp::return_internal_reference<>()),
+                    "frame friction cone")
+      .def(PrintableVisitor<FrameFrictionCone>());
 }
 
 }  // namespace python

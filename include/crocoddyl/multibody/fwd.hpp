@@ -73,6 +73,9 @@ class FrameMotionTpl;
 template <typename Scalar>
 class FrameForceTpl;
 
+template <typename Scalar>
+class FrameFrictionConeTpl;
+
 // Costs
 template <typename Scalar>
 class CostModelAbstractTpl;
@@ -261,6 +264,7 @@ typedef FrameRotationTpl<double> FrameRotation;
 typedef FramePlacementTpl<double> FramePlacement;
 typedef FrameMotionTpl<double> FrameMotion;
 typedef FrameForceTpl<double> FrameForce;
+typedef FrameFrictionConeTpl<double> FrameFrictionCone;
 
 typedef CostModelAbstractTpl<double> CostModelAbstract;
 typedef CostDataAbstractTpl<double> CostDataAbstract;
