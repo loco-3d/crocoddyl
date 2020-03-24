@@ -91,6 +91,12 @@ void CostModelContactFrictionConeTpl<Scalar>::calcDiff(const boost::shared_ptr<C
 }
 
 template <typename Scalar>
+boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelContactFrictionConeTpl<Scalar>::createData(
+    DataCollectorAbstract* const data) {
+  return boost::make_shared<CostDataContactFrictionConeTpl<Scalar> >(this, data);
+}
+
+template <typename Scalar>
 void CostModelContactFrictionConeTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(FrameFrictionCone)) {
     fref_ = *static_cast<const FrameFrictionCone*>(pv);
@@ -110,29 +116,13 @@ void CostModelContactFrictionConeTpl<Scalar>::get_referenceImpl(const std::type_
 }
 
 template <typename Scalar>
-boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelContactFrictionConeTpl<Scalar>::createData(
-    DataCollectorAbstract* const data) {
-  return boost::make_shared<CostDataContactFrictionConeTpl<Scalar> >(this, data);
+const FrameFrictionConeTpl<Scalar>& CostModelContactFrictionConeTpl<Scalar>::get_fref() const {
+  return fref_;
 }
 
 template <typename Scalar>
-const FrictionConeTpl<Scalar>& CostModelContactFrictionConeTpl<Scalar>::get_friction_cone() const {
-  return fref_.oRf;
-}
-
-template <typename Scalar>
-const pinocchio::FrameIndex& CostModelContactFrictionConeTpl<Scalar>::get_frame() const {
-  return fref_.frame;
-}
-
-template <typename Scalar>
-void CostModelContactFrictionConeTpl<Scalar>::set_friction_cone(const FrictionCone& cone) {
-  fref_.oRf = cone;
-}
-
-template <typename Scalar>
-void CostModelContactFrictionConeTpl<Scalar>::set_frame(const FrameIndex& frame) {
-  fref_.frame = frame;
+void CostModelContactFrictionConeTpl<Scalar>::set_fref(const FrameFrictionCone& fref_in) {
+  fref_ = fref_in;
 }
 
 }  // namespace crocoddyl

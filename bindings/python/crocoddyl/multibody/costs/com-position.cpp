@@ -69,8 +69,7 @@ void exposeCostCoMPosition() {
            ":param data: shared data\n"
            ":return cost data.")
       .add_property("reference",
-                    bp::make_function(&CostModelCoMPosition::get_reference<Eigen::Vector3d>,
-                                      bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&CostModelCoMPosition::get_cref, bp::return_value_policy<bp::return_by_value>()),
                     &CostModelCoMPosition::set_reference<Eigen::Vector3d>, "reference CoM position")
       .add_property("cref",
                     bp::make_function(&CostModelCoMPosition::get_cref, bp::return_value_policy<bp::return_by_value>()),

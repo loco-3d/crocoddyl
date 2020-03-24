@@ -60,7 +60,7 @@ class CostModelAbstractTpl {
   void set_reference(T ref);
 
   template <class T>
-  T get_reference();
+  void get_reference(T& ref);
 
  protected:
   virtual void set_referenceImpl(const std::type_info&, const void*);

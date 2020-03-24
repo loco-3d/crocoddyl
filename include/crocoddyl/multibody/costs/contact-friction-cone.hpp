@@ -59,10 +59,8 @@ class CostModelContactFrictionConeTpl : public CostModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-  const FrictionCone& get_friction_cone() const;
-  const FrameIndex& get_frame() const;
-  void set_friction_cone(const FrictionCone& cone);
-  void set_frame(const FrameIndex& frame);
+  const FrameFrictionCone& get_fref() const;
+  void set_fref(const FrameFrictionCone& fref);
 
  protected:
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
@@ -86,6 +84,7 @@ struct CostDataContactFrictionConeTpl : public CostDataAbstractTpl<_Scalar> {
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
+  typedef FrameFrictionConeTpl<Scalar> FrameFrictionCone;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
@@ -104,11 +103,12 @@ struct CostDataContactFrictionConeTpl : public CostDataAbstractTpl<_Scalar> {
     }
 
     // Avoids data casting at runtime
-    std::string frame_name = model->get_state()->get_pinocchio()->frames[model->get_frame()].name;
+    const FrameFrictionCone& fref = model->get_fref();
+    std::string frame_name = model->get_state()->get_pinocchio()->frames[fref.frame].name;
     bool found_contact = false;
     for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
          it != d->contacts->contacts.end(); ++it) {
-      if (it->second->frame == model->get_frame()) {
+      if (it->second->frame == fref.frame) {
         ContactData3DTpl<Scalar>* d3d = dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
         if (d3d != NULL) {
           found_contact = true;

@@ -68,8 +68,7 @@ void exposeCostFrameVelocity() {
            ":param data: shared data\n"
            ":return cost data.")
       .add_property("reference",
-                    bp::make_function(&CostModelFrameVelocity::get_reference<FrameMotion>,
-                                      bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&CostModelFrameVelocity::get_vref, bp::return_internal_reference<>()),
                     &CostModelFrameVelocity::set_reference<FrameMotion>, "reference frame velocity")
       .add_property("vref", bp::make_function(&CostModelFrameVelocity::get_vref, bp::return_internal_reference<>()),
                     &CostModelFrameVelocity::set_vref, "reference frame velocity");

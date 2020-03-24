@@ -80,10 +80,8 @@ void CostModelAbstractTpl<Scalar>::set_referenceImpl(const std::type_info&, cons
 
 template <typename Scalar>
 template <class T>
-T CostModelAbstractTpl<Scalar>::get_reference() {
-  T ref;
+void CostModelAbstractTpl<Scalar>::get_reference(T& ref) {
   get_referenceImpl(typeid(ref), &ref);
-  return ref;
 }
 
 template <typename Scalar>

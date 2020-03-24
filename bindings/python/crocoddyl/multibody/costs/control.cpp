@@ -71,8 +71,7 @@ void exposeCostControl() {
       .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &CostModelControl::calcDiff_wrap, bp::args("self", "data", "x"))
       .add_property("reference",
-                    bp::make_function(&CostModelControl::get_reference<Eigen::VectorXd>,
-                                      bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&CostModelControl::get_uref, bp::return_value_policy<bp::return_by_value>()),
                     &CostModelControl::set_reference<Eigen::VectorXd>, "reference control vector")
       .add_property("uref",
                     bp::make_function(&CostModelControl::get_uref, bp::return_value_policy<bp::return_by_value>()),
