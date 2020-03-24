@@ -27,12 +27,14 @@ struct CostItemTpl {
   typedef CostModelAbstractTpl<Scalar> CostModelAbstract;
 
   CostItemTpl() {}
-  CostItemTpl(const std::string& name, boost::shared_ptr<CostModelAbstractTpl<Scalar> > cost, const Scalar& weight)
-      : name(name), cost(cost), weight(weight) {}
+  CostItemTpl(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, const Scalar& weight,
+              bool active = true)
+      : name(name), cost(cost), weight(weight), active(active) {}
 
   std::string name;
   boost::shared_ptr<CostModelAbstract> cost;
   Scalar weight;
+  bool active;
 };
 
 template <typename _Scalar>
@@ -57,8 +59,10 @@ class CostModelSumTpl {
   explicit CostModelSumTpl(boost::shared_ptr<StateMultibody> state);
   ~CostModelSumTpl();
 
-  void addCost(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, const Scalar& weight);
+  void addCost(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, const Scalar& weight,
+               bool active = true);
   void removeCost(const std::string& name);
+  void changeCostStatus(const std::string& name, bool active);
 
   void calc(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
