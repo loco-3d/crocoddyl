@@ -119,5 +119,18 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostMod
   return cost;
 }
 
+boost::shared_ptr<crocoddyl::CostModelAbstract> create_random_cost() {
+  static bool once = true;
+  if (once) {
+    srand((unsigned)time(NULL));
+    once = false;
+  }
+
+  CostModelFactory factory;
+  CostModelTypes::Type rand_type = static_cast<CostModelTypes::Type>(rand() % CostModelTypes::NbCostModelTypes);
+  return factory.create(rand_type, StateModelTypes::StateMultibody_RandomHumanoid,
+                        ActivationModelTypes::ActivationModelQuad);
+}
+
 }  // namespace unittest
 }  // namespace crocoddyl
