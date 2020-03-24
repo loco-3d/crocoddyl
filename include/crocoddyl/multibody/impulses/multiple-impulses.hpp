@@ -22,15 +22,16 @@ namespace crocoddyl {
 template <typename _Scalar>
 struct ImpulseItemTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
+  typedef ImpulseModelAbstractTpl<Scalar> ImpulseModelAbstract;
 
   ImpulseItemTpl() {}
-  ImpulseItemTpl(const std::string& name, boost::shared_ptr<ImpulseModelAbstractTpl<Scalar> > impulse,
-                 bool active = true)
+  ImpulseItemTpl(const std::string& name, boost::shared_ptr<ImpulseModelAbstract> impulse, bool active = true)
       : name(name), impulse(impulse), active(active) {}
 
   std::string name;
-  boost::shared_ptr<ImpulseModelAbstractTpl<Scalar> > impulse;
+  boost::shared_ptr<ImpulseModelAbstract> impulse;
   bool active;
 };
 

@@ -19,16 +19,19 @@
 
 namespace crocoddyl {
 
-template <typename Scalar>
+template <typename _Scalar>
 struct CostItemTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef CostModelAbstractTpl<Scalar> CostModelAbstract;
 
   CostItemTpl() {}
   CostItemTpl(const std::string& name, boost::shared_ptr<CostModelAbstractTpl<Scalar> > cost, const Scalar& weight)
       : name(name), cost(cost), weight(weight) {}
 
   std::string name;
-  boost::shared_ptr<CostModelAbstractTpl<Scalar> > cost;
+  boost::shared_ptr<CostModelAbstract> cost;
   Scalar weight;
 };
 

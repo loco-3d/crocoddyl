@@ -24,13 +24,14 @@ struct ContactItemTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
+  typedef ContactModelAbstractTpl<Scalar> ContactModelAbstract;
+
   ContactItemTpl() {}
-  ContactItemTpl(const std::string& name, boost::shared_ptr<ContactModelAbstractTpl<Scalar> > contact,
-                 bool active = true)
+  ContactItemTpl(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact, bool active = true)
       : name(name), contact(contact), active(active) {}
 
   std::string name;
-  boost::shared_ptr<ContactModelAbstractTpl<Scalar> > contact;
+  boost::shared_ptr<ContactModelAbstract> contact;
   bool active;
 };
 
