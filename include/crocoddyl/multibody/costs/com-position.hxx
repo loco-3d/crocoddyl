@@ -82,8 +82,7 @@ void CostModelCoMPositionTpl<Scalar>::set_referenceImpl(const std::type_info& ti
   if (ti == typeid(Vector3s)) {
     cref_ = *static_cast<const Vector3s*>(pv);
   } else {
-    throw_pretty("Invalid argument: "
-                 << "incorrect type (it should be Vector3s)");
+    throw_pretty("Invalid argument: incorrect type (it should be Vector3s)");
   }
 }
 
@@ -95,8 +94,7 @@ void CostModelCoMPositionTpl<Scalar>::get_referenceImpl(const std::type_info& ti
     ref_map[1] = cref_[1];
     ref_map[2] = cref_[2];
   } else {
-    throw_pretty("Invalid argument: "
-                 << "incorrect type (it should be Vector3s)");
+    throw_pretty("Invalid argument: incorrect type (it should be Vector3s)");
   }
 }
 

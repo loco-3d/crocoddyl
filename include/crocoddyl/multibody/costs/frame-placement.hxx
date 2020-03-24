@@ -96,8 +96,7 @@ void CostModelFramePlacementTpl<Scalar>::set_referenceImpl(const std::type_info&
   if (ti == typeid(FramePlacement)) {
     Mref_ = *static_cast<const FramePlacement*>(pv);
   } else {
-    throw_pretty("Invalid argument: "
-                 << "incorrect type (it should be FramePlacement)");
+    throw_pretty("Invalid argument: incorrect type (it should be FramePlacement)");
   }
 }
 
@@ -107,8 +106,7 @@ void CostModelFramePlacementTpl<Scalar>::get_referenceImpl(const std::type_info&
     FramePlacement& ref_map = *static_cast<FramePlacement*>(pv);
     ref_map = Mref_;
   } else {
-    throw_pretty("Invalid argument: "
-                 << "incorrect type (it should be FramePlacement)");
+    throw_pretty("Invalid argument: incorrect type (it should be FramePlacement)");
   }
 }
 

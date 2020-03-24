@@ -95,8 +95,7 @@ void CostModelContactFrictionConeTpl<Scalar>::set_referenceImpl(const std::type_
   if (ti == typeid(FrameFrictionCone)) {
     fref_ = *static_cast<const FrameFrictionCone*>(pv);
   } else {
-    throw_pretty("Invalid argument: "
-                 << "incorrect type (it should be FrameFrictionCone)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameFrictionCone)");
   }
 }
 
@@ -106,8 +105,7 @@ void CostModelContactFrictionConeTpl<Scalar>::get_referenceImpl(const std::type_
     FrameFrictionCone& ref_map = *static_cast<FrameFrictionCone*>(pv);
     ref_map = fref_;
   } else {
-    throw_pretty("Invalid argument: "
-                 << "incorrect type (it should be FrameFrictionCone)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameFrictionCone)");
   }
 }
 

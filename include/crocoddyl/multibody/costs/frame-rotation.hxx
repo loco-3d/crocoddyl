@@ -96,8 +96,7 @@ void CostModelFrameRotationTpl<Scalar>::set_referenceImpl(const std::type_info& 
   if (ti == typeid(FrameRotation)) {
     Rref_ = *static_cast<const FrameRotation*>(pv);
   } else {
-    throw_pretty("Invalid argument: "
-                 << "incorrect type (it should be FrameRotation)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameRotation)");
   }
 }
 
@@ -107,8 +106,7 @@ void CostModelFrameRotationTpl<Scalar>::get_referenceImpl(const std::type_info& 
     FrameRotation& ref_map = *static_cast<FrameRotation*>(pv);
     ref_map = Rref_;
   } else {
-    throw_pretty("Invalid argument: "
-                 << "incorrect type (it should be FrameRotation)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameRotation)");
   }
 }
 

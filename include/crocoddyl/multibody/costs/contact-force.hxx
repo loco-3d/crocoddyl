@@ -92,8 +92,7 @@ void CostModelContactForceTpl<Scalar>::set_referenceImpl(const std::type_info& t
   if (ti == typeid(FrameForce)) {
     fref_ = *static_cast<const FrameForce*>(pv);
   } else {
-    throw_pretty("Invalid argument: "
-                 << "incorrect type (it should be FrameForce)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameForce)");
   }
 }
 
@@ -103,8 +102,7 @@ void CostModelContactForceTpl<Scalar>::get_referenceImpl(const std::type_info& t
     FrameForce& ref_map = *static_cast<FrameForce*>(pv);
     ref_map = fref_;
   } else {
-    throw_pretty("Invalid argument: "
-                 << "incorrect type (it should be FrameForce)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameForce)");
   }
 }
 

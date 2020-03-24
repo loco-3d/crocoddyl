@@ -170,8 +170,7 @@ void CostModelStateTpl<Scalar>::set_referenceImpl(const std::type_info& ti, cons
     }
     xref_ = *static_cast<const VectorXs*>(pv);
   } else {
-    throw_pretty("Invalid argument: "
-                 << "incorrect type (it should be VectorXs)");
+    throw_pretty("Invalid argument: incorrect type (it should be VectorXs)");
   }
 }
 
@@ -185,8 +184,7 @@ void CostModelStateTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void
       ref_map[i] = xref_[i];
     }
   } else {
-    throw_pretty("Invalid argument: "
-                 << "incorrect type (it should be VectorXs)");
+    throw_pretty("Invalid argument: incorrect type (it should be VectorXs)");
   }
 }
 

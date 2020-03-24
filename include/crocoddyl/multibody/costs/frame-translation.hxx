@@ -91,8 +91,7 @@ void CostModelFrameTranslationTpl<Scalar>::set_referenceImpl(const std::type_inf
   if (ti == typeid(FrameTranslation)) {
     xref_ = *static_cast<const FrameTranslation*>(pv);
   } else {
-    throw_pretty("Invalid argument: "
-                 << "incorrect type (it should be FrameTranslation)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameTranslation)");
   }
 }
 
@@ -102,8 +101,7 @@ void CostModelFrameTranslationTpl<Scalar>::get_referenceImpl(const std::type_inf
     FrameTranslation& ref_map = *static_cast<FrameTranslation*>(pv);
     ref_map = xref_;
   } else {
-    throw_pretty("Invalid argument: "
-                 << "incorrect type (it should be FrameTranslation)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameTranslation)");
   }
 }
 

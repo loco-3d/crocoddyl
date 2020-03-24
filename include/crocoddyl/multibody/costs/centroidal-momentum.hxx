@@ -95,8 +95,7 @@ void CostModelCentroidalMomentumTpl<Scalar>::set_referenceImpl(const std::type_i
   if (ti == typeid(Vector6s)) {
     href_ = *static_cast<const Vector6s*>(pv);
   } else {
-    throw_pretty("Invalid argument: "
-                 << "incorrect type (it should be Vector6s)");
+    throw_pretty("Invalid argument: incorrect type (it should be Vector6s)");
   }
 }
 
@@ -111,8 +110,7 @@ void CostModelCentroidalMomentumTpl<Scalar>::get_referenceImpl(const std::type_i
     ref_map[4] = href_[4];
     ref_map[5] = href_[5];
   } else {
-    throw_pretty("Invalid argument: "
-                 << "incorrect type (it should be Vector6s)");
+    throw_pretty("Invalid argument: incorrect type (it should be Vector6s)");
   }
 }
 

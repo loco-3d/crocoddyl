@@ -93,8 +93,7 @@ void CostModelFrameVelocityTpl<Scalar>::set_referenceImpl(const std::type_info& 
   if (ti == typeid(FrameMotion)) {
     vref_ = *static_cast<const FrameMotion*>(pv);
   } else {
-    throw_pretty("Invalid argument: "
-                 << "incorrect type (it should be FrameMotion)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameMotion)");
   }
 }
 
@@ -104,8 +103,7 @@ void CostModelFrameVelocityTpl<Scalar>::get_referenceImpl(const std::type_info& 
     FrameMotion& ref_map = *static_cast<FrameMotion*>(pv);
     ref_map = vref_;
   } else {
-    throw_pretty("Invalid argument: "
-                 << "incorrect type (it should be FrameMotion)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameMotion)");
   }
 }
 
