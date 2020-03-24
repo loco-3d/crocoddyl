@@ -67,6 +67,10 @@ void exposeCostContactFrictionCone() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
            ":return cost data.")
+      .add_property("reference",
+                    bp::make_function(&CostModelContactFrictionCone::get_reference<FrameFrictionCone>,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    &CostModelContactFrictionCone::set_reference<FrameFrictionCone>, "reference frame friction cone")
       .add_property(
           "friction_cone",
           bp::make_function(&CostModelContactFrictionCone::get_friction_cone, bp::return_internal_reference<>()),

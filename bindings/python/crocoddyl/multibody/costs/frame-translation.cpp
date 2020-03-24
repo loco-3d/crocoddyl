@@ -67,6 +67,10 @@ void exposeCostFrameTranslation() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
            ":return cost data.")
+      .add_property("reference",
+                    bp::make_function(&CostModelFrameTranslation::get_reference<FrameTranslation>,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    &CostModelFrameTranslation::set_reference<FrameTranslation>, "reference frame translation")
       .add_property("xref", bp::make_function(&CostModelFrameTranslation::get_xref, bp::return_internal_reference<>()),
                     &CostModelFrameTranslation::set_xref, "reference frame translation");
 
