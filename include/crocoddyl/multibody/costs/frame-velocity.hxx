@@ -90,7 +90,7 @@ boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelFrameVelocityTpl<Scalar
 
 template <typename Scalar>
 void CostModelFrameVelocityTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
-  if (ti == typeid(FrameTranslation)) {
+  if (ti == typeid(FrameMotion)) {
     vref_ = *static_cast<const FrameMotion*>(pv);
   } else {
     throw_pretty("Invalid argument: "

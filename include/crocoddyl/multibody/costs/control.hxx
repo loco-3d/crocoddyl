@@ -89,6 +89,10 @@ void CostModelControlTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstr
 template <typename Scalar>
 void CostModelControlTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(VectorXs)) {
+    if (static_cast<std::size_t>(static_cast<const VectorXs*>(pv)->size()) != nu_) {
+      throw_pretty("Invalid argument: "
+                   << "reference has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    }
     uref_ = *static_cast<const VectorXs*>(pv);
   } else {
     throw_pretty("Invalid argument: "
@@ -99,6 +103,8 @@ void CostModelControlTpl<Scalar>::set_referenceImpl(const std::type_info& ti, co
 template <typename Scalar>
 void CostModelControlTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
   if (ti == typeid(VectorXs)) {
+    Eigen::VectorXd& tmp = *static_cast<VectorXs*>(pv);
+    tmp.resize(nu_);
     Eigen::Map<VectorXs> ref_map(static_cast<VectorXs*>(pv)->data(), nu_);
     for (std::size_t i = 0; i < nu_; ++i) {
       ref_map[i] = uref_[i];

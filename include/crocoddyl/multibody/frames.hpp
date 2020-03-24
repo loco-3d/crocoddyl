@@ -128,7 +128,7 @@ struct FrameFrictionConeTpl {
   FrameFrictionConeTpl(const FrameFrictionConeTpl& value) : frame(value.frame), oRf(value.oRf) {}
   FrameFrictionConeTpl(const FrameIndex& frame, const FrictionCone& oRf) : frame(frame), oRf(oRf) {}
   friend std::ostream& operator<<(std::ostream& os, const FrameFrictionConeTpl& X) {
-    os << "frame: " << X.frame << std::endl << "cone: " << std::endl << X.oRf << std::endl;
+    os << "frame: " << X.frame << std::endl << " cone: " << std::endl << X.oRf << std::endl;
     return os;
   }
 
