@@ -89,6 +89,33 @@ boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelCentroidalMomentumTpl<S
     DataCollectorAbstract* const data) {
   return boost::make_shared<CostDataCentroidalMomentumTpl<Scalar> >(this, data);
 }
+
+template <typename Scalar>
+void CostModelCentroidalMomentumTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
+  if (ti == typeid(Vector6s)) {
+    href_ = *static_cast<const Vector6s*>(pv);
+  } else {
+    throw_pretty("Invalid argument: "
+                 << "incorrect type (it should be Vector6s)");
+  }
+}
+
+template <typename Scalar>
+void CostModelCentroidalMomentumTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
+  if (ti == typeid(Vector6s)) {
+    Eigen::Map<Vector6s> ref_map(static_cast<Vector6s*>(pv)->data());
+    ref_map[0] = href_[0];
+    ref_map[1] = href_[1];
+    ref_map[2] = href_[2];
+    ref_map[3] = href_[3];
+    ref_map[4] = href_[4];
+    ref_map[5] = href_[5];
+  } else {
+    throw_pretty("Invalid argument: "
+                 << "incorrect type (it should be Vector6s)");
+  }
+}
+
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Vector6s& CostModelCentroidalMomentumTpl<Scalar>::get_href() const {
   return href_;

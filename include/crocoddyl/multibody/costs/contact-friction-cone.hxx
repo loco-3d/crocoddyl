@@ -91,6 +91,27 @@ void CostModelContactFrictionConeTpl<Scalar>::calcDiff(const boost::shared_ptr<C
 }
 
 template <typename Scalar>
+void CostModelContactFrictionConeTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
+  if (ti == typeid(FrameFrictionCone)) {
+    fref_ = *static_cast<const FrameFrictionCone*>(pv);
+  } else {
+    throw_pretty("Invalid argument: "
+                 << "incorrect type (it should be FrameFrictionCone)");
+  }
+}
+
+template <typename Scalar>
+void CostModelContactFrictionConeTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
+  if (ti == typeid(FrameFrictionCone)) {
+    FrameFrictionCone& ref_map = *static_cast<FrameFrictionCone*>(pv);
+    ref_map = fref_;
+  } else {
+    throw_pretty("Invalid argument: "
+                 << "incorrect type (it should be FrameFrictionCone)");
+  }
+}
+
+template <typename Scalar>
 boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelContactFrictionConeTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
   return boost::make_shared<CostDataContactFrictionConeTpl<Scalar> >(this, data);

@@ -88,6 +88,27 @@ boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelContactForceTpl<Scalar>
 }
 
 template <typename Scalar>
+void CostModelContactForceTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
+  if (ti == typeid(FrameForce)) {
+    fref_ = *static_cast<const FrameForce*>(pv);
+  } else {
+    throw_pretty("Invalid argument: "
+                 << "incorrect type (it should be FrameForce)");
+  }
+}
+
+template <typename Scalar>
+void CostModelContactForceTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
+  if (ti == typeid(FrameForce)) {
+    FrameForce& ref_map = *static_cast<FrameForce*>(pv);
+    ref_map = fref_;
+  } else {
+    throw_pretty("Invalid argument: "
+                 << "incorrect type (it should be FrameForce)");
+  }
+}
+
+template <typename Scalar>
 const FrameForceTpl<Scalar>& CostModelContactForceTpl<Scalar>::get_fref() const {
   return fref_;
 }

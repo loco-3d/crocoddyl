@@ -87,6 +87,29 @@ void CostModelControlTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstr
 }
 
 template <typename Scalar>
+void CostModelControlTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
+  if (ti == typeid(VectorXs)) {
+    uref_ = *static_cast<const VectorXs*>(pv);
+  } else {
+    throw_pretty("Invalid argument: "
+                 << "incorrect type (it should be VectorXs)");
+  }
+}
+
+template <typename Scalar>
+void CostModelControlTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
+  if (ti == typeid(VectorXs)) {
+    Eigen::Map<VectorXs> ref_map(static_cast<VectorXs*>(pv)->data(), nu_);
+    for (std::size_t i = 0; i < nu_; ++i) {
+      ref_map[i] = uref_[i];
+    }
+  } else {
+    throw_pretty("Invalid argument: "
+                 << "incorrect type (it should be VectorXs)");
+  }
+}
+
+template <typename Scalar>
 const typename MathBaseTpl<Scalar>::VectorXs& CostModelControlTpl<Scalar>::get_uref() const {
   return uref_;
 }
