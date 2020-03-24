@@ -161,22 +161,30 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
                                                                 Eigen::Vector3d::Zero()),
                                     actuation->get_nu()));
       if (with_friction) {
-        cost->addCost("lf_cone",
-                      boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
-                          state, activation, cone, state->get_pinocchio()->getFrameId("lf_foot"), actuation->get_nu()),
-                      0.1);
-        cost->addCost("rf_cone",
-                      boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
-                          state, activation, cone, state->get_pinocchio()->getFrameId("rf_foot"), actuation->get_nu()),
-                      0.1);
-        cost->addCost("lh_cone",
-                      boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
-                          state, activation, cone, state->get_pinocchio()->getFrameId("lh_foot"), actuation->get_nu()),
-                      0.1);
-        cost->addCost("rh_cone",
-                      boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
-                          state, activation, cone, state->get_pinocchio()->getFrameId("rh_foot"), actuation->get_nu()),
-                      0.1);
+        cost->addCost(
+            "lf_cone",
+            boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
+                state, activation, crocoddyl::FrameFrictionCone(state->get_pinocchio()->getFrameId("lf_foot"), cone),
+                actuation->get_nu()),
+            0.1);
+        cost->addCost(
+            "rf_cone",
+            boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
+                state, activation, crocoddyl::FrameFrictionCone(state->get_pinocchio()->getFrameId("rf_foot"), cone),
+                actuation->get_nu()),
+            0.1);
+        cost->addCost(
+            "lh_cone",
+            boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
+                state, activation, crocoddyl::FrameFrictionCone(state->get_pinocchio()->getFrameId("lh_foot"), cone),
+                actuation->get_nu()),
+            0.1);
+        cost->addCost(
+            "rh_cone",
+            boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
+                state, activation, crocoddyl::FrameFrictionCone(state->get_pinocchio()->getFrameId("rh_foot"), cone),
+                actuation->get_nu()),
+            0.1);
       }
       break;
     case StateModelTypes::StateMultibody_Talos:
@@ -191,16 +199,18 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
                                                               pinocchio::SE3().Identity()),
                                     actuation->get_nu()));
       if (with_friction) {
-        cost->addCost(
-            "lf_cone",
-            boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
-                state, activation, cone, state->get_pinocchio()->getFrameId("left_sole_link"), actuation->get_nu()),
-            0.001);
-        cost->addCost(
-            "rf_cone",
-            boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
-                state, activation, cone, state->get_pinocchio()->getFrameId("right_sole_link"), actuation->get_nu()),
-            0.001);
+        cost->addCost("lf_cone",
+                      boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
+                          state, activation,
+                          crocoddyl::FrameFrictionCone(state->get_pinocchio()->getFrameId("left_sole_link"), cone),
+                          actuation->get_nu()),
+                      0.001);
+        cost->addCost("rf_cone",
+                      boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
+                          state, activation,
+                          crocoddyl::FrameFrictionCone(state->get_pinocchio()->getFrameId("right_sole_link"), cone),
+                          actuation->get_nu()),
+                      0.001);
       }
       break;
     default:

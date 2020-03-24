@@ -36,21 +36,21 @@ class CostModelContactFrictionConeTpl : public CostModelAbstractTpl<_Scalar> {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef FrameForceTpl<Scalar> FrameForce;
   typedef FrictionConeTpl<Scalar> FrictionCone;
+  typedef FrameFrictionConeTpl<Scalar> FrameFrictionCone;
   typedef typename MathBase::Vector6s Vector6s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::MatrixX3s MatrixX3s;
 
   CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
-                                  boost::shared_ptr<ActivationModelAbstract> activation, const FrictionCone& cone,
-                                  const FrameIndex& frame, const std::size_t& nu);
+                                  boost::shared_ptr<ActivationModelAbstract> activation, const FrameFrictionCone& fref,
+                                  const std::size_t& nu);
   CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
-                                  boost::shared_ptr<ActivationModelAbstract> activation, const FrictionCone& cone,
-                                  const FrameIndex& frame);
-  CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state, const FrictionCone& cone,
-                                  const FrameIndex& frame, const std::size_t& nu);
-  CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state, const FrictionCone& cone,
-                                  const FrameIndex& frame);
+                                  boost::shared_ptr<ActivationModelAbstract> activation,
+                                  const FrameFrictionCone& fref);
+  CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state, const FrameFrictionCone& fref,
+                                  const std::size_t& nu);
+  CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state, const FrameFrictionCone& fref);
   ~CostModelContactFrictionConeTpl();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -70,9 +70,8 @@ class CostModelContactFrictionConeTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::state_;
   using Base::unone_;
 
- protected:
-  FrictionCone friction_cone_;
-  FrameIndex frame_;
+ private:
+  FrameFrictionCone fref_;
 };
 
 template <typename _Scalar>
