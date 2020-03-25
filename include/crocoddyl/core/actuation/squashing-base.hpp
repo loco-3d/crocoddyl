@@ -1,3 +1,11 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2018-2020, University of Edinburgh, Universitat Politècinca de Catalunya
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
 #ifndef CROCODDYL_CORE_SQUASHING_BASE_HPP_
 #define CROCODDYL_CORE_SQUASHING_BASE_HPP_
 
@@ -10,8 +18,6 @@
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
-
-// struct SquashingDataAbstractTpl; // forward declaration
 
 template <typename _Scalar>
 class SquashingModelAbstractTpl {
@@ -32,34 +38,32 @@ class SquashingModelAbstractTpl {
   virtual ~SquashingModelAbstractTpl(){};
 
   virtual void calc(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const VectorXs>& u) = 0;
-  virtual void calcDiff(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const VectorXs>& u,
-                        const bool& recalc = true) = 0;
+  virtual void calcDiff(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const VectorXs>& u) = 0;
   virtual boost::shared_ptr<SquashingDataAbstract> createData() {
     return boost::make_shared<SquashingDataAbstract>(this);
   }
 
   const std::size_t& get_ns() const;
-  const VectorXs& get_in_lb() const { return in_lb_; };
-  const VectorXs& get_in_ub() const { return in_ub_; };
+  const VectorXs& get_u_lb() const { return u_lb_; };
+  const VectorXs& get_u_ub() const { return u_ub_; };
 
-  void set_in_lb(const VectorXs& in_lb) { in_lb_ = in_lb; };
-  void set_in_ub(const VectorXs& in_ub) { in_ub_ = in_ub; };
+  void set_u_lb(const VectorXs& u_lb) { u_lb_ = u_lb; };
+  void set_u_ub(const VectorXs& u_ub) { u_ub_ = u_ub; };
 
  protected:
   std::size_t ns_;
-  VectorXs out_ub_;  // Squashing function upper bound
-  VectorXs out_lb_;  // Squashing function lower bound
-  VectorXs in_ub_;   // Bound for the u variable (to apply using the Quadratic barrier)
-  VectorXs in_lb_;   // Bound for the u variable (to apply using the Quadratic barrier)
+  VectorXs s_ub_;  // Squashing function upper bound
+  VectorXs s_lb_;  // Squashing function lower bound
+  VectorXs u_ub_;  // Bound for the u variable (to apply using the Quadratic barrier)
+  VectorXs u_lb_;  // Bound for the u variable (to apply using the Quadratic barrier)
 
 #ifdef PYTHON_BINDINGS
 
  public:
   void calc_wrap(const boost::shared_ptr<SquashingDataAbstract>& data, const VectorXs& u) { calc(data, u); }
 
-  void calcDiff_wrap(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::VectorXs& u,
-                     const bool& recalc = true) {
-    calcDiff(data, u, recalc);
+  void calcDiff_wrap(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::VectorXs& u) {
+    calcDiff(data, u);
   }
 
 #endif
