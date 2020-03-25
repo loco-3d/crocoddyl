@@ -194,7 +194,7 @@ class SimpleBipedGaitProblem:
             cone = crocoddyl.FrictionCone(self.nsurf, self.mu, 4, False)
             frictionCone = crocoddyl.CostModelContactFrictionCone(
                 self.state, crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(cone.lb, cone.ub)),
-                cone, i, self.actuation.nu)
+                crocoddyl.FrameFrictionCone(i, cone), self.actuation.nu)
             costModel.addCost(self.rmodel.frames[i].name + "_frictionCone", frictionCone, 1e1)
         if swingFootTask is not None:
             for i in swingFootTask:
@@ -252,7 +252,7 @@ class SimpleBipedGaitProblem:
             cone = crocoddyl.FrictionCone(self.nsurf, self.mu, 4, False)
             frictionCone = crocoddyl.CostModelContactFrictionCone(
                 self.state, crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(cone.lb, cone.ub)),
-                cone, i, self.actuation.nu)
+                crocoddyl.FrameFrictionCone(i, cone), self.actuation.nu)
             costModel.addCost(self.rmodel.frames[i].name + "_frictionCone", frictionCone, 1e1)
         if swingFootTask is not None:
             for i in swingFootTask:

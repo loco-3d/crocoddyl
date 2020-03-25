@@ -29,11 +29,13 @@ frictionCone = crocoddyl.FrictionCone(np.matrix([0., 0., 1.]).T, 0.7, 4, False)
 activation = crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(frictionCone.lb, frictionCone.ub))
 COSTS.addCost(
     "r_sole_friction_cone",
-    crocoddyl.CostModelContactFrictionCone(ROBOT_STATE, activation, frictionCone, ROBOT_MODEL.getFrameId('r_sole'),
+    crocoddyl.CostModelContactFrictionCone(ROBOT_STATE, activation,
+                                           crocoddyl.FrameFrictionCone(ROBOT_MODEL.getFrameId('r_sole'), frictionCone),
                                            ACTUATION.nu), 1.)
 COSTS.addCost(
     "l_sole_friction_cone",
-    crocoddyl.CostModelContactFrictionCone(ROBOT_STATE, activation, frictionCone, ROBOT_MODEL.getFrameId('l_sole'),
+    crocoddyl.CostModelContactFrictionCone(ROBOT_STATE, activation,
+                                           crocoddyl.FrameFrictionCone(ROBOT_MODEL.getFrameId('l_sole'), frictionCone),
                                            ACTUATION.nu), 1.)
 MODEL = crocoddyl.DifferentialActionModelContactFwdDynamics(ROBOT_STATE, ACTUATION, CONTACTS, COSTS, 0., True)
 DATA = MODEL.createData()

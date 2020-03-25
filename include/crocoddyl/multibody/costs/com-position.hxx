@@ -78,6 +78,27 @@ boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelCoMPositionTpl<Scalar>:
 }
 
 template <typename Scalar>
+void CostModelCoMPositionTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
+  if (ti == typeid(Vector3s)) {
+    cref_ = *static_cast<const Vector3s*>(pv);
+  } else {
+    throw_pretty("Invalid argument: incorrect type (it should be Vector3s)");
+  }
+}
+
+template <typename Scalar>
+void CostModelCoMPositionTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
+  if (ti == typeid(Vector3s)) {
+    Eigen::Map<Vector3s> ref_map(static_cast<Vector3s*>(pv)->data());
+    ref_map[0] = cref_[0];
+    ref_map[1] = cref_[1];
+    ref_map[2] = cref_[2];
+  } else {
+    throw_pretty("Invalid argument: incorrect type (it should be Vector3s)");
+  }
+}
+
+template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Vector3s& CostModelCoMPositionTpl<Scalar>::get_cref() const {
   return cref_;
 }

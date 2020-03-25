@@ -16,39 +16,35 @@ namespace python {
 void exposeCostContactFrictionCone() {
   bp::class_<CostModelContactFrictionCone, bp::bases<CostModelAbstract> >(
       "CostModelContactFrictionCone",
-      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrictionCone, FrameIndex,
-               int>(bp::args("self", "state", "activation", "cone", "frame", "nu"),
-                    "Initialize the contact friction cone cost model.\n\n"
-                    ":param state: state of the multibody system\n"
-                    ":param activation: activation model\n"
-                    ":param cone: friction cone\n"
-                    ":param frame: frame index\n"
-                    ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrictionCone,
-                    FrameIndex>(bp::args("self", "state", "activation", "cone", "frame"),
-                                "Initialize the contact force cost model.\n\n"
-                                "For this case the default nu is equals to model.nv.\n"
-                                ":param state: state of the multibody system\n"
-                                ":param activation: activation model\n"
-                                ":param cone: friction cone\n"
-                                ":param frame: frame index"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, FrictionCone, FrameIndex, int>(
-          bp::args("self", "state", "cone", "frame", "nu"),
+      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameFrictionCone, int>(
+          bp::args("self", "state", "activation", "fref", "nu"),
+          "Initialize the contact friction cone cost model.\n\n"
+          ":param state: state of the multibody system\n"
+          ":param activation: activation model\n"
+          ":param fref: frame friction cone\n"
+          ":param nu: dimension of control vector"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameFrictionCone>(
+          bp::args("self", "state", "activation", "fref"),
+          "Initialize the contact force cost model.\n\n"
+          "For this case the default nu is equals to model.nv.\n"
+          ":param state: state of the multibody system\n"
+          ":param activation: activation model\n"
+          ":param fref: frame friction cone"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, FrameFrictionCone, int>(
+          bp::args("self", "state", "fref", "nu"),
           "Initialize the contact force cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(6).\n"
           ":param state: state of the multibody system\n"
-          ":param cone: friction cone\n"
-          ":param frame: frame index\n"
+          ":param fref: frame friction cone\n"
           ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, FrictionCone, FrameIndex>(
-          bp::args("self", "state", "cone", "frame"),
+      .def(bp::init<boost::shared_ptr<StateMultibody>, FrameFrictionCone>(
+          bp::args("self", "state", "fref"),
           "Initialize the contact force cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(6), and nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
-          ":param cone: friction cone\n"
-          ":param frame: frame index"))
+          ":param fref: frame friction cone"))
       .def("calc", &CostModelContactFrictionCone::calc_wrap,
            CostModel_calc_wraps(bp::args("self", "data", "x", "u"),
                                 "Compute the contact force cost.\n\n"
@@ -71,14 +67,9 @@ void exposeCostContactFrictionCone() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
            ":return cost data.")
-      .add_property(
-          "friction_cone",
-          bp::make_function(&CostModelContactFrictionCone::get_friction_cone, bp::return_internal_reference<>()),
-          &CostModelContactFrictionCone::set_friction_cone, "friction cone")
-      .add_property(
-          "frame",
-          bp::make_function(&CostModelContactFrictionCone::get_frame, bp::return_value_policy<bp::return_by_value>()),
-          &CostModelContactFrictionCone::set_frame, "frame index");
+      .add_property("reference",
+                    bp::make_function(&CostModelContactFrictionCone::get_fref, bp::return_internal_reference<>()),
+                    &CostModelContactFrictionCone::set_reference<FrameFrictionCone>, "reference frame friction cone");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataContactFrictionCone> >();
 
