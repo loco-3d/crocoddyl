@@ -93,6 +93,9 @@ class SquashingDataAbstractTpl;
 template <typename Scalar>
 class SquashingModelAbstractTpl;
 
+template <typename Scalar>
+class SquashingModelSmoothSatTpl;
+
 // shooting
 template <typename Scalar>
 class ShootingProblemTpl;

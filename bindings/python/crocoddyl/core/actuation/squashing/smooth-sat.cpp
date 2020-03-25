@@ -25,11 +25,10 @@ void exposeSquashingSmoothSat() {
            "Compute the squashing value for a given value of s, component-wise. \n\n"
            ":param data: squashing data\n"
            ":param s: control input")
-      .def("calcDiff", &SquashingModelSmoothSat::calcDiff_wrap,
-           SquashingModel_calcDiff_wraps(bp::args("self", "data", "s"),
+      .def("calcDiff", &SquashingModelSmoothSat::calcDiff_wrap, bp::args("self", "data", "s"),
                                          "Compute the derivative of the squashing function.\n\n"
                                          ":param data: squashing data\n"
-                                         ":param s: squashing input".))
+                                         ":param s: squashing input.")
       .def("createData", &SquashingModelSmoothSat::createData, bp::args("self"), "Create the squashing data.\n\n")
       .add_property(
           "smooth",

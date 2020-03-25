@@ -42,7 +42,7 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
   void calc(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const VectorXs>& s) {
     // Squashing function used: "Smooth abs":
     // s(u) = 0.5*(lb + ub + sqrt(smooth + (u - lb)^2) - sqrt(smooth + (u - ub)^2))
-    data->s = 0.5 * (Eigen::sqrt(Eigen::pow((s - u_lb_).array(), 2) + a_.array()) -
+    data->u = 0.5 * (Eigen::sqrt(Eigen::pow((s - u_lb_).array(), 2) + a_.array()) -
                      Eigen::sqrt(Eigen::pow((s - u_ub_).array(), 2) + a_.array()) + u_lb_.array() + u_ub_.array());
   }
 

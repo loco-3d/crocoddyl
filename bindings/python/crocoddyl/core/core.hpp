@@ -21,7 +21,6 @@ void exposeActionAbstract();
 void exposeDifferentialActionAbstract();
 void exposeActivationAbstract();
 void exposeSquashingAbstract();
-void exposeSquashingAbstract();
 void exposeSquashingSmoothSat();
 void exposeDataCollectorActuation();
 void exposeIntegratedActionEuler();
