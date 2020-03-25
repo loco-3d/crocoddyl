@@ -59,6 +59,10 @@ void exposeShootingProblem() {
            "Integrate the dynamics given a control sequence.\n\n"
            "Rollout the dynamics give a sequence of control commands\n"
            ":param us: time-discrete control sequence")
+      .def("updateModel", &ShootingProblem::updateModel, bp::args("self", "i", "model"),
+           "Update a model and allocated new data for a specific node.\n\n"
+           ":param i: index of the node (0 <= i <= T + 1)\n"
+           ":param model: new model")
       .add_property("T", bp::make_function(&ShootingProblem::get_T, bp::return_value_policy<bp::return_by_value>()),
                     "number of nodes")
       .add_property("x0", bp::make_function(&ShootingProblem::get_x0, bp::return_internal_reference<>()),

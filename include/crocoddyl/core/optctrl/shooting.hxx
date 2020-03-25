@@ -120,6 +120,20 @@ std::vector<typename MathBaseTpl<Scalar>::VectorXs> ShootingProblemTpl<Scalar>::
 }
 
 template <typename Scalar>
+void ShootingProblemTpl<Scalar>::updateModel(std::size_t i, boost::shared_ptr<ActionModelAbstract> model) {
+  if (i > T_ + 1) {
+    throw_pretty("Invalid argument: "
+                 << "i is bigger than the allocated horizon (it should be lower than " + std::to_string(T_) + ")");
+  }
+  if (i == T_ + 1) {
+    set_terminalModel(model);
+  } else {
+    running_models_[i] = model;
+    running_datas_[i] = model->createData();
+  }
+}
+
+template <typename Scalar>
 const std::size_t& ShootingProblemTpl<Scalar>::get_T() const {
   return T_;
 }
