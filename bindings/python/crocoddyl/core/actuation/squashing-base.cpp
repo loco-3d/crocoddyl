@@ -12,8 +12,6 @@
 namespace crocoddyl {
 namespace python {
 
-// BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SquashingModel_calcDiff_wraps, SquashingModelAbstract::calcDiff_wrap, 2, 3)
-
 void exposeSquashingAbstract() {
   bp::register_ptr_to_python<boost::shared_ptr<SquashingModelAbstract> >();
 
@@ -39,7 +37,7 @@ void exposeSquashingAbstract() {
       .add_property(
           "ns",
           bp::make_function(&SquashingModelAbstract_wrap::get_ns, bp::return_value_policy<bp::return_by_value>()),
-          "dimension of control vector")
+          "dimension of the squashing vector")
       .add_property(
           "s_lb",
           bp::make_function(&SquashingModelAbstract_wrap::get_s_lb, bp::return_value_policy<bp::return_by_value>()),
@@ -63,10 +61,10 @@ void exposeSquashingAbstract() {
                                         "Create common data shared between squashing models. \n\n"
                                         "The squashing data uses the model in order to first process it. \n"
                                         ":param model: squashing model"))
-      .add_property("u", bp::make_getter(&SquashingDataAbstract::u, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("u", bp::make_getter(&SquashingDataAbstract::u, bp::return_value_policy<bp::return_internal_reference>()),
                     bp::make_setter(&SquashingDataAbstract::u), "squashing-output")
       .add_property("du_ds",
-                    bp::make_getter(&SquashingDataAbstract::du_ds, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_getter(&SquashingDataAbstract::du_ds, bp::return_value_policy<bp::return_internal_reference>()),
                     bp::make_setter(&SquashingDataAbstract::du_ds), "Jacobian of the squashing function");
 }
 

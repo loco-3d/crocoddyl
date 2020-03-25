@@ -173,6 +173,7 @@ typedef ActuationModelAbstractTpl<double> ActuationModelAbstract;
 
 typedef SquashingDataAbstractTpl<double> SquashingDataAbstract;
 typedef SquashingModelAbstractTpl<double> SquashingModelAbstract;
+typedef SquashingModelSmoothSatTpl<double> SquashingModelSmoothSat;
 
 typedef ShootingProblemTpl<double> ShootingProblem;
 

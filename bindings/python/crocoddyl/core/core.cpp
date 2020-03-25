@@ -18,6 +18,8 @@ void exposeCore() {
   exposeActionAbstract();
   exposeDifferentialActionAbstract();
   exposeActivationAbstract();
+  exposeSquashingAbstract();
+  exposeSquashingSmoothSat();
   exposeDataCollectorActuation();
   exposeIntegratedActionEuler();
   exposeActionNumDiff();
