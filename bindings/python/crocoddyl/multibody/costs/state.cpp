@@ -93,10 +93,10 @@ void exposeCostState() {
            ":param data: shared data\n"
            ":return cost data.")
       .add_property("reference",
-                    bp::make_function(&CostModelState::get_xref, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&CostModelState::get_xref, bp::return_internal_reference<>()),
                     &CostModelState::set_reference<Eigen::VectorXd>, "reference state")
       .add_property("xref",
-                    bp::make_function(&CostModelState::get_xref, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&CostModelState::get_xref, bp::return_internal_reference<>()),
                     "reference state");
 }
 

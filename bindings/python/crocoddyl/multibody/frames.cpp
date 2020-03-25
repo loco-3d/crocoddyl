@@ -24,7 +24,7 @@ void exposeFrames() {
                                             ":param oxf: Frame translation w.r.t. the origin"))
       .def(bp::init<>(bp::args("self"), "Default initialization of the frame translation."))
       .def_readwrite("frame", &FrameTranslation::frame, "frame ID")
-      .add_property("oxf", bp::make_getter(&FrameTranslation::oxf, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("oxf", bp::make_getter(&FrameTranslation::oxf, bp::return_internal_reference<>()),
                     bp::make_setter(&FrameTranslation::oxf), "frame translation")
       .def(PrintableVisitor<FrameTranslation>());
 
@@ -37,7 +37,7 @@ void exposeFrames() {
                                                                   ":param oRf: Frame rotation w.r.t. the origin"))
       .def(bp::init<>(bp::args("self"), "Default initialization of the frame rotation."))
       .def_readwrite("frame", &FrameRotation::frame, "frame ID")
-      .add_property("oRf", bp::make_getter(&FrameRotation::oRf, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("oRf", bp::make_getter(&FrameRotation::oRf, bp::return_internal_reference<>()),
                     bp::make_setter(&FrameRotation::oRf), "frame rotation")
       .def(PrintableVisitor<FrameRotation>());
 

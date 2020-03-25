@@ -52,9 +52,9 @@ void exposeActivationNumDiff() {
       bp::init<ActivationModelNumDiff*>(bp::args("self", "model"),
                                         "Create numerical differentiation activation data.\n\n"
                                         ":param model: numdiff activation model"))
-      .add_property("dr", bp::make_getter(&ActivationDataNumDiff::dr, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("dr", bp::make_getter(&ActivationDataNumDiff::dr, bp::return_internal_reference<>()),
                     "disturbance.")
-      .add_property("rp", bp::make_getter(&ActivationDataNumDiff::rp, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("rp", bp::make_getter(&ActivationDataNumDiff::rp, bp::return_internal_reference<>()),
                     "input plus the disturbance.")
       .add_property("data_0",
                     bp::make_getter(&ActivationDataNumDiff::data_0, bp::return_value_policy<bp::return_by_value>()),

@@ -38,6 +38,8 @@ class ShootingProblemTpl {
   void rollout(const std::vector<VectorXs>& us, std::vector<VectorXs>& xs);
   std::vector<VectorXs> rollout_us(const std::vector<VectorXs>& us);
 
+  void updateModel(std::size_t i, boost::shared_ptr<ActionModelAbstract> model);
+
   const std::size_t& get_T() const;
   const VectorXs& get_x0() const;
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& get_runningModels() const;

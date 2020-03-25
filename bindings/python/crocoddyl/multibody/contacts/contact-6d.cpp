@@ -76,17 +76,13 @@ void exposeContact6D() {
                     "spatial velocity of the contact body")
       .add_property("a", bp::make_getter(&ContactData6D::a, bp::return_value_policy<bp::return_by_value>()),
                     "spatial acceleration of the contact body")
-      .add_property("v_partial_dq",
-                    bp::make_getter(&ContactData6D::v_partial_dq, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("v_partial_dq", bp::make_getter(&ContactData6D::v_partial_dq, bp::return_internal_reference<>()),
                     "Jacobian of the spatial body velocity")
-      .add_property("a_partial_dq",
-                    bp::make_getter(&ContactData6D::a_partial_dq, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("a_partial_dq", bp::make_getter(&ContactData6D::a_partial_dq, bp::return_internal_reference<>()),
                     "Jacobian of the spatial body acceleration")
-      .add_property("a_partial_dv",
-                    bp::make_getter(&ContactData6D::a_partial_dv, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("a_partial_dv", bp::make_getter(&ContactData6D::a_partial_dv, bp::return_internal_reference<>()),
                     "Jacobian of the spatial body acceleration")
-      .add_property("a_partial_da",
-                    bp::make_getter(&ContactData6D::a_partial_da, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("a_partial_da", bp::make_getter(&ContactData6D::a_partial_da, bp::return_internal_reference<>()),
                     "Jacobian of the spatial body acceleration");
 }
 
