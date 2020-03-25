@@ -51,10 +51,9 @@ void exposeActivationAbstract() {
       .add_property("a",
                     bp::make_getter(&ActivationDataAbstract::a_value, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ActivationDataAbstract::a_value), "cost value")
-      .add_property("Ar", bp::make_getter(&ActivationDataAbstract::Ar, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("Ar", bp::make_getter(&ActivationDataAbstract::Ar, bp::return_internal_reference<>()),
                     bp::make_setter(&ActivationDataAbstract::Ar), "Jacobian of the residual")
-      .add_property("Arr",
-                    bp::make_getter(&ActivationDataAbstract::Arr, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("Arr", bp::make_getter(&ActivationDataAbstract::Arr, bp::return_internal_reference<>()),
                     bp::make_setter(&ActivationDataAbstract::Arr), "Hessian of the residual");
 }
 

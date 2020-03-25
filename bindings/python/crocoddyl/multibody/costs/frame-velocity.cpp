@@ -67,6 +67,9 @@ void exposeCostFrameVelocity() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
            ":return cost data.")
+      .add_property("reference",
+                    bp::make_function(&CostModelFrameVelocity::get_vref, bp::return_internal_reference<>()),
+                    &CostModelFrameVelocity::set_reference<FrameMotion>, "reference frame velocity")
       .add_property("vref", bp::make_function(&CostModelFrameVelocity::get_vref, bp::return_internal_reference<>()),
                     &CostModelFrameVelocity::set_vref, "reference frame velocity");
 
@@ -85,11 +88,9 @@ void exposeCostFrameVelocity() {
       .add_property("fXj",
                     bp::make_getter(&CostDataFrameVelocity::fXj, bp::return_value_policy<bp::return_by_value>()),
                     "action matrix from contact to local frames")
-      .add_property("dv_dq",
-                    bp::make_getter(&CostDataFrameVelocity::dv_dq, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("dv_dq", bp::make_getter(&CostDataFrameVelocity::dv_dq, bp::return_internal_reference<>()),
                     "Jacobian of the spatial body velocity")
-      .add_property("dv_dv",
-                    bp::make_getter(&CostDataFrameVelocity::dv_dv, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("dv_dv", bp::make_getter(&CostDataFrameVelocity::dv_dv, bp::return_internal_reference<>()),
                     "Jacobian of the spatial body velocity");
 }
 

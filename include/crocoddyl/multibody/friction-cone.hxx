@@ -12,6 +12,15 @@
 namespace crocoddyl {
 
 template <typename Scalar>
+FrictionConeTpl<Scalar>::FrictionConeTpl() : nf_(4) {
+  A_.resize(nf_ + 1, 3);
+  lb_.resize(nf_ + 1);
+  ub_.resize(nf_ + 1);
+  // compute the matrix
+  update(Vector3s(0, 0, 1), 0.7, true, 0., std::numeric_limits<Scalar>::max());
+}
+
+template <typename Scalar>
 FrictionConeTpl<Scalar>::FrictionConeTpl(const Vector3s& normal, const Scalar& mu, std::size_t nf, bool inner_appr,
                                          const Scalar& min_nforce, const Scalar& max_nforce)
     : nf_(nf) {
@@ -129,6 +138,17 @@ const Scalar& FrictionConeTpl<Scalar>::get_min_nforce() const {
 template <typename Scalar>
 const Scalar& FrictionConeTpl<Scalar>::get_max_nforce() const {
   return max_nforce_;
+}
+
+template <typename Scalar>
+std::ostream& operator<<(std::ostream& os, const FrictionConeTpl<Scalar>& X) {
+  os << "    normal: " << X.get_nsurf().transpose() << std::endl;
+  os << "        mu: " << X.get_mu() << std::endl;
+  os << "        nf: " << X.get_nf() << std::endl;
+  os << "inner_appr: " << X.get_inner_appr() << std::endl;
+  os << " min_force: " << X.get_min_nforce() << std::endl;
+  os << " max_force: " << X.get_max_nforce() << std::endl;
+  return os;
 }
 
 }  // namespace crocoddyl

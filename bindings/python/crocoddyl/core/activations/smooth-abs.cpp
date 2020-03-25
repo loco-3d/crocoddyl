@@ -29,7 +29,7 @@ void exposeActivationSmoothAbs() {
       .def<void (ActivationModelSmoothAbs::*)(const boost::shared_ptr<ActivationDataAbstract>&,
                                               const Eigen::VectorXd&)>(
           "calcDiff", &ActivationModelSmoothAbs::calcDiff_wrap, bp::args("self", "data", "r"),
-          "Compute the derivatives of a smoot-abs function.\n\n"
+          "Compute the derivatives of a smooth-abs function.\n\n"
           ":param data: activation data\n"
           ":param r: residual vector \n")
 

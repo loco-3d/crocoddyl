@@ -67,6 +67,9 @@ void exposeCostFrameRotation() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
            ":return cost data.")
+      .add_property("reference",
+                    bp::make_function(&CostModelFrameRotation::get_Rref, bp::return_internal_reference<>()),
+                    &CostModelFrameRotation::set_reference<FrameRotation>, "reference frame rotation")
       .add_property("Rref", bp::make_function(&CostModelFrameRotation::get_Rref, bp::return_internal_reference<>()),
                     &CostModelFrameRotation::set_Rref, "reference frame rotation");
 
@@ -79,18 +82,15 @@ void exposeCostFrameRotation() {
           "Create frame rotation cost data.\n\n"
           ":param model: frame rotation cost model\n"
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("r", bp::make_getter(&CostDataFrameRotation::r, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("r", bp::make_getter(&CostDataFrameRotation::r, bp::return_internal_reference<>()),
                     "cost residual")
-      .add_property("rRf",
-                    bp::make_getter(&CostDataFrameRotation::rRf, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("rRf", bp::make_getter(&CostDataFrameRotation::rRf, bp::return_internal_reference<>()),
                     "rotation error of the frame")
-      .add_property("J", bp::make_getter(&CostDataFrameRotation::J, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("J", bp::make_getter(&CostDataFrameRotation::J, bp::return_internal_reference<>()),
                     "Jacobian at the error point")
-      .add_property("rJf",
-                    bp::make_getter(&CostDataFrameRotation::rJf, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("rJf", bp::make_getter(&CostDataFrameRotation::rJf, bp::return_internal_reference<>()),
                     "error Jacobian of the frame")
-      .add_property("fJf",
-                    bp::make_getter(&CostDataFrameRotation::fJf, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("fJf", bp::make_getter(&CostDataFrameRotation::fJf, bp::return_internal_reference<>()),
                     "local Jacobian of the frame");
 }
 

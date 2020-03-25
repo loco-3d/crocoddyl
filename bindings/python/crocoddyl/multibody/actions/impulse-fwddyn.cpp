@@ -76,8 +76,7 @@ void exposeActionImpulseFwdDynamics() {
           bp::make_function(&ActionModelImpulseFwdDynamics::get_costs, bp::return_value_policy<bp::return_by_value>()),
           "total cost model")
       .add_property("armature",
-                    bp::make_function(&ActionModelImpulseFwdDynamics::get_armature,
-                                      bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&ActionModelImpulseFwdDynamics::get_armature, bp::return_internal_reference<>()),
                     bp::make_function(&ActionModelImpulseFwdDynamics::set_armature),
                     "set an armature mechanism in the joints")
       .add_property("r_coeff",
@@ -108,13 +107,10 @@ void exposeActionImpulseFwdDynamics() {
           "costs",
           bp::make_getter(&ActionDataImpulseFwdDynamics::costs, bp::return_value_policy<bp::return_by_value>()),
           "total cost data")
-      .add_property(
-          "Kinv", bp::make_getter(&ActionDataImpulseFwdDynamics::Kinv, bp::return_value_policy<bp::return_by_value>()),
-          "inverse of the KKT matrix")
-      .add_property(
-          "df_dq",
-          bp::make_getter(&ActionDataImpulseFwdDynamics::df_dq, bp::return_value_policy<bp::return_by_value>()),
-          "Jacobian of the impulse force");
+      .add_property("Kinv", bp::make_getter(&ActionDataImpulseFwdDynamics::Kinv, bp::return_internal_reference<>()),
+                    "inverse of the KKT matrix")
+      .add_property("df_dq", bp::make_getter(&ActionDataImpulseFwdDynamics::df_dq, bp::return_internal_reference<>()),
+                    "Jacobian of the impulse force");
 }
 
 }  // namespace python

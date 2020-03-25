@@ -61,13 +61,13 @@ void exposeActionNumDiff() {
       bp::init<ActionModelNumDiff*>(bp::args("self", "model"),
                                     "Create numerical differentiation action data.\n\n"
                                     ":param model: numdiff action model"))
-      .add_property("Rx", bp::make_getter(&ActionDataNumDiff::Rx, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("Rx", bp::make_getter(&ActionDataNumDiff::Rx, bp::return_internal_reference<>()),
                     "Jacobian of the cost residual.")
-      .add_property("Ru", bp::make_getter(&ActionDataNumDiff::Ru, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("Ru", bp::make_getter(&ActionDataNumDiff::Ru, bp::return_internal_reference<>()),
                     "Jacobian of the cost residual.")
-      .add_property("dx", bp::make_getter(&ActionDataNumDiff::dx, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("dx", bp::make_getter(&ActionDataNumDiff::dx, bp::return_internal_reference<>()),
                     "state disturbance.")
-      .add_property("du", bp::make_getter(&ActionDataNumDiff::du, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("du", bp::make_getter(&ActionDataNumDiff::du, bp::return_internal_reference<>()),
                     "control disturbance.")
       .add_property("data_0",
                     bp::make_getter(&ActionDataNumDiff::data_0, bp::return_value_policy<bp::return_by_value>()),

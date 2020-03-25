@@ -53,6 +53,9 @@ class CostModelFrameRotationTpl : public CostModelAbstractTpl<_Scalar> {
   void set_Rref(const FrameRotation& Rref_in);
 
  protected:
+  virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
+
   using Base::activation_;
   using Base::nu_;
   using Base::state_;

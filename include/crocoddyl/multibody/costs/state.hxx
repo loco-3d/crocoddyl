@@ -162,6 +162,33 @@ boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelStateTpl<Scalar>::creat
 }
 
 template <typename Scalar>
+void CostModelStateTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
+  if (ti == typeid(VectorXs)) {
+    if (static_cast<std::size_t>(static_cast<const VectorXs*>(pv)->size()) != state_->get_nx()) {
+      throw_pretty("Invalid argument: "
+                   << "reference has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    }
+    xref_ = *static_cast<const VectorXs*>(pv);
+  } else {
+    throw_pretty("Invalid argument: incorrect type (it should be VectorXs)");
+  }
+}
+
+template <typename Scalar>
+void CostModelStateTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
+  if (ti == typeid(VectorXs)) {
+    Eigen::VectorXd& tmp = *static_cast<VectorXs*>(pv);
+    tmp.resize(state_->get_nx());
+    Eigen::Map<VectorXs> ref_map(static_cast<VectorXs*>(pv)->data(), state_->get_nx());
+    for (std::size_t i = 0; i < state_->get_nx(); ++i) {
+      ref_map[i] = xref_[i];
+    }
+  } else {
+    throw_pretty("Invalid argument: incorrect type (it should be VectorXs)");
+  }
+}
+
+template <typename Scalar>
 const typename MathBaseTpl<Scalar>::VectorXs& CostModelStateTpl<Scalar>::get_xref() const {
   return xref_;
 }
