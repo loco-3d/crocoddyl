@@ -22,8 +22,8 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
   typedef SquashingDataAbstractTpl<Scalar> SquashingDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
 
-  SquashingModelSmoothSatTpl(const Eigen::Ref<const VectorXs>& s_lb,
-                                      const Eigen::Ref<const VectorXs>& s_ub, const std::size_t& ns)
+  SquashingModelSmoothSatTpl(const Eigen::Ref<const VectorXs>& s_lb, const Eigen::Ref<const VectorXs>& s_ub,
+                             const std::size_t& ns)
       : Base(ns) {
     s_lb_ = s_lb;
     s_ub_ = s_ub;
@@ -42,13 +42,11 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
   void calc(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const VectorXs>& u) {
     // Squashing function used: "Smooth abs":
     // s(u) = 0.5*(lb + ub + sqrt(smooth + (u - lb)^2) - sqrt(smooth + (u - ub)^2))
-    data->s =
-        0.5 * (Eigen::sqrt(Eigen::pow((u - s_lb_).array(), 2) + a_.array()) -
-               Eigen::sqrt(Eigen::pow((u - s_ub_).array(), 2) + a_.array()) + s_lb_.array() + s_ub_.array());
+    data->s = 0.5 * (Eigen::sqrt(Eigen::pow((u - s_lb_).array(), 2) + a_.array()) -
+                     Eigen::sqrt(Eigen::pow((u - s_ub_).array(), 2) + a_.array()) + s_lb_.array() + s_ub_.array());
   }
 
   void calcDiff(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const VectorXs>& u) {
-
     data->ds_du.diagonal() =
         0.5 * (Eigen::pow(a_.array() + Eigen::pow((u - s_lb_).array(), 2), -0.5).array() * (u - s_lb_).array() -
                Eigen::pow(a_.array() + Eigen::pow((u - s_ub_).array(), 2), -0.5).array() * (u - s_ub_).array());
