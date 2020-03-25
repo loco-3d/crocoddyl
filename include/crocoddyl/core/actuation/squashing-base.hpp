@@ -16,7 +16,6 @@
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/core/utils/to-string.hpp"
 
 namespace crocoddyl {
 
@@ -44,7 +43,7 @@ class SquashingModelAbstractTpl {
     return boost::make_shared<SquashingDataAbstract>(this);
   }
 
-  const std::size_t& get_ns() const;
+  const std::size_t& get_ns() const { return ns_; };
   const VectorXs& get_s_lb() const { return s_lb_; };
   const VectorXs& get_s_ub() const { return s_ub_; };
 
