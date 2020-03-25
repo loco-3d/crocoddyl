@@ -171,6 +171,9 @@ typedef StateAbstractTpl<double> StateAbstract;
 typedef ActuationDataAbstractTpl<double> ActuationDataAbstract;
 typedef ActuationModelAbstractTpl<double> ActuationModelAbstract;
 
+typedef SquashingDataAbstractTpl<double> SquashingDataAbstract;
+typedef SquashingModelAbstractTpl<double> SquashingModelAbstract;
+
 typedef ShootingProblemTpl<double> ShootingProblem;
 
 typedef IntegratedActionModelEulerTpl<double> IntegratedActionModelEuler;
