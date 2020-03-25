@@ -30,7 +30,6 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
   us_.resize(T);
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
-    const boost::shared_ptr<ActionDataAbstract>& data = problem_->get_runningDatas()[t];
     const std::size_t& nu = model->get_nu();
 
     xs_[t] = model->get_state()->zero();
