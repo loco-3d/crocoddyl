@@ -9,7 +9,6 @@
 #ifndef CROCODDYL_CORE_SQUASHING_SMOOTH_SAT_HPP_
 #define CROCODDYL_CORE_SQUASHING_SMOOTH_SAT_HPP_
 
-
 #include <stdexcept>
 #include <math.h>
 
@@ -20,8 +19,7 @@
 namespace crocoddyl {
 
 template <typename _Scalar>
-class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> 
-{
+class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;

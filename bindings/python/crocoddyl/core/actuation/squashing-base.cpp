@@ -63,8 +63,7 @@ void exposeSquashingAbstract() {
                                         ":param model: squashing model"))
       .add_property("u", bp::make_getter(&SquashingDataAbstract::u, bp::return_internal_reference<>()),
                     bp::make_setter(&SquashingDataAbstract::u), "squashing-output")
-      .add_property("du_ds",
-                    bp::make_getter(&SquashingDataAbstract::du_ds, bp::return_internal_reference<>()),
+      .add_property("du_ds", bp::make_getter(&SquashingDataAbstract::du_ds, bp::return_internal_reference<>()),
                     bp::make_setter(&SquashingDataAbstract::du_ds), "Jacobian of the squashing function");
 }
 
