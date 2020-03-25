@@ -62,9 +62,7 @@ class SquashingModelAbstractTpl {
  public:
   void calc_wrap(const boost::shared_ptr<SquashingDataAbstract>& data, const VectorXs& s) { calc(data, s); }
 
-  void calcDiff_wrap(const boost::shared_ptr<SquashingDataAbstract>& data, const VectorXs& s) {
-    calcDiff(data, s);
-  }
+  void calcDiff_wrap(const boost::shared_ptr<SquashingDataAbstract>& data, const VectorXs& s) { calcDiff(data, s); }
 
 #endif
 };
