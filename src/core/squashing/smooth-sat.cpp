@@ -1,1 +1,0 @@
-#include "crocoddyl/core/squashing/smooth-sat.hpp"

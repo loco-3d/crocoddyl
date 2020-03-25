@@ -6,4 +6,4 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/squashing-base.hpp"
+#include "crocoddyl/core/actuation/squashing-base.hpp"

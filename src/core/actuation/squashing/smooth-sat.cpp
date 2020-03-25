@@ -1,0 +1,1 @@
+#include "crocoddyl/core/actuation/squashing/smooth-sat.hpp"
