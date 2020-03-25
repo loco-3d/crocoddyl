@@ -49,21 +49,21 @@ void exposeActionLQR() {
       .def<void (ActionModelLQR::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&)>(
           "calcDiff", &ActionModelLQR::calcDiff_wrap, bp::args("self", "data", "x"))
       .def("createData", &ActionModelLQR::createData, bp::args("self"), "Create the LQR action data.")
-      .add_property("Fx", bp::make_function(&ActionModelLQR::get_Fx, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("Fx", bp::make_function(&ActionModelLQR::get_Fx, bp::return_internal_reference<>()),
                     &ActionModelLQR::set_Fx, "Jacobian of the dynamics")
-      .add_property("Fu", bp::make_function(&ActionModelLQR::get_Fu, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("Fu", bp::make_function(&ActionModelLQR::get_Fu, bp::return_internal_reference<>()),
                     &ActionModelLQR::set_Fu, "Jacobian of the dynamics")
-      .add_property("f0", bp::make_function(&ActionModelLQR::get_f0, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("f0", bp::make_function(&ActionModelLQR::get_f0, bp::return_internal_reference<>()),
                     &ActionModelLQR::set_f0, "dynamics drift")
-      .add_property("lx", bp::make_function(&ActionModelLQR::get_lx, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("lx", bp::make_function(&ActionModelLQR::get_lx, bp::return_internal_reference<>()),
                     &ActionModelLQR::set_lx, "Jacobian of the cost")
-      .add_property("lu", bp::make_function(&ActionModelLQR::get_lu, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("lu", bp::make_function(&ActionModelLQR::get_lu, bp::return_internal_reference<>()),
                     &ActionModelLQR::set_lu, "Jacobian of the cost")
-      .add_property("Lxx", bp::make_function(&ActionModelLQR::get_Lxx, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("Lxx", bp::make_function(&ActionModelLQR::get_Lxx, bp::return_internal_reference<>()),
                     &ActionModelLQR::set_Lxx, "Hessian of the cost")
-      .add_property("Lxu", bp::make_function(&ActionModelLQR::get_Lxu, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("Lxu", bp::make_function(&ActionModelLQR::get_Lxu, bp::return_internal_reference<>()),
                     &ActionModelLQR::set_Lxu, "Hessian of the cost")
-      .add_property("Luu", bp::make_function(&ActionModelLQR::get_Luu, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("Luu", bp::make_function(&ActionModelLQR::get_Luu, bp::return_internal_reference<>()),
                     &ActionModelLQR::set_Luu, "Hessian of the cost");
 
   boost::python::register_ptr_to_python<boost::shared_ptr<ActionDataLQR> >();

@@ -21,10 +21,9 @@ void exposeSolverBoxQP() {
                                 ":param x: decision variable\n"
                                 ":param free_idx: free indexes\n"
                                 ":param clamped_idx: clamped indexes"))
-      .add_property("Hff_inv",
-                    bp::make_getter(&BoxQPSolution::Hff_inv, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("Hff_inv", bp::make_getter(&BoxQPSolution::Hff_inv, bp::return_internal_reference<>()),
                     bp::make_setter(&BoxQPSolution::Hff_inv), "inverse of the free Hessian matrix")
-      .add_property("x", bp::make_getter(&BoxQPSolution::x, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("x", bp::make_getter(&BoxQPSolution::x, bp::return_internal_reference<>()),
                     bp::make_setter(&BoxQPSolution::x), "decision variable")
       .add_property("free_idx",
                     bp::make_getter(&BoxQPSolution::free_idx, bp::return_value_policy<bp::return_by_value>()),

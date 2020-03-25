@@ -31,14 +31,13 @@ void exposeFrictionCone() {
            ":param inner_appr: inner or outer approximation (default True)\n"
            ":param min_nforce: minimum normal force (default 0.)\n"
            ":param max_nforce: maximum normal force (default sys.float_info.max)")
-      .add_property("A", bp::make_function(&FrictionCone::get_A, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("A", bp::make_function(&FrictionCone::get_A, bp::return_internal_reference<>()),
                     "inequality matrix")
-      .add_property("lb", bp::make_function(&FrictionCone::get_lb, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("lb", bp::make_function(&FrictionCone::get_lb, bp::return_internal_reference<>()),
                     "inequality lower bound")
-      .add_property("ub", bp::make_function(&FrictionCone::get_ub, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("ub", bp::make_function(&FrictionCone::get_ub, bp::return_internal_reference<>()),
                     "inequality upper bound")
-      .add_property("nsurf",
-                    bp::make_function(&FrictionCone::get_nsurf, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("nsurf", bp::make_function(&FrictionCone::get_nsurf, bp::return_internal_reference<>()),
                     "normal vector")
       .add_property("mu", bp::make_function(&FrictionCone::get_mu, bp::return_value_policy<bp::return_by_value>()),
                     "friction coefficient")

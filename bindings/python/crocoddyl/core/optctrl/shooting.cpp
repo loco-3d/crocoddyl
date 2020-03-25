@@ -61,7 +61,7 @@ void exposeShootingProblem() {
            ":param us: time-discrete control sequence")
       .add_property("T", bp::make_function(&ShootingProblem::get_T, bp::return_value_policy<bp::return_by_value>()),
                     "number of nodes")
-      .add_property("x0", bp::make_function(&ShootingProblem::get_x0, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("x0", bp::make_function(&ShootingProblem::get_x0, bp::return_internal_reference<>()),
                     &ShootingProblem::set_x0, "initial state")
       .add_property(
           "runningModels",

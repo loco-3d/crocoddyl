@@ -45,10 +45,10 @@ void exposeActivationWeightedQuadraticBarrier() {
                                       bp::return_value_policy<bp::return_by_value>()),
                     bp::make_function(&ActivationModelWeightedQuadraticBarrier::set_bounds),
                     "bounds (beta, lower and upper bounds)")
-      .add_property("weights",
-                    bp::make_function(&ActivationModelWeightedQuadraticBarrier::get_weights,
-                                      bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_function(&ActivationModelWeightedQuadraticBarrier::set_weights), "vector of weights");
+      .add_property(
+          "weights",
+          bp::make_function(&ActivationModelWeightedQuadraticBarrier::get_weights, bp::return_internal_reference<>()),
+          bp::make_function(&ActivationModelWeightedQuadraticBarrier::set_weights), "vector of weights");
 }
 
 }  // namespace python
