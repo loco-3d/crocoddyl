@@ -19,21 +19,21 @@ void exposeSquashingSmoothSat() {
     "Smooth Sat squashing model",
     bp::init<Eigen::VectorXd, 
              Eigen::VectorXd,
-             int>(bp::args("self", "out_lb", "out_ub", "ns"),
+             int>(bp::args("self", "u_lb", "u_ub", "ns"),
                                     "Initialize the squashing model. \n\n"
-                                    ":param out_lb: lower bound"
-                                    ":param out_lb: lower bound"
+                                    ":param u_lb: output lower bound"
+                                    ":param u_ub: output upper bound"
                                     ":param ns: dimension of the input vector"))
-    .def("calc", &SquashingModelSmoothSat::calc_wrap, bp::args("self", "data", "u"),
-      "Compute the squashing value for a given value of u, component-wise. \n\n"
+    .def("calc", &SquashingModelSmoothSat::calc_wrap, bp::args("self", "data", "s"),
+      "Compute the squashing value for a given value of s, component-wise. \n\n"
       ":param data: squashing data\n"
-      ":param u: control input")
+      ":param s: control input")
     .def("calcDiff", &SquashingModelSmoothSat::calcDiff_wrap,
       SquashingModel_calcDiff_wraps(
-      bp::args("self", "data", "u"),
+      bp::args("self", "data", "s"),
       "Compute the derivative of the squashing function.\n\n"
       ":param data: squashing data\n"
-      ":param u: control input".))
+      ":param s: squashing input".))
     .def("createData", &SquashingModelSmoothSat::createData, bp::args("self"),
       "Create the squashing data.\n\n")
     .add_property("smooth",

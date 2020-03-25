@@ -22,34 +22,34 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
   typedef SquashingDataAbstractTpl<Scalar> SquashingDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
 
-  SquashingModelSmoothSatTpl(const Eigen::Ref<const VectorXs>& s_lb, const Eigen::Ref<const VectorXs>& s_ub,
+  SquashingModelSmoothSatTpl(const Eigen::Ref<const VectorXs>& u_lb, const Eigen::Ref<const VectorXs>& u_ub,
                              const std::size_t& ns)
       : Base(ns) {
-    s_lb_ = s_lb;
-    s_ub_ = s_ub;
+    u_lb_ = u_lb;
+    u_ub_ = u_ub;
 
-    u_lb_ = s_lb_;
-    u_ub_ = s_ub_;
+    s_lb_ = u_lb_;
+    s_ub_ = u_ub_;
 
     smooth_ = 0.1;
 
-    d_ = (s_ub_ - s_lb_) * smooth_;
+    d_ = (u_ub_ - u_lb_) * smooth_;
     a_ = d_.array() * d_.array();
   }
 
   ~SquashingModelSmoothSatTpl();
 
-  void calc(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const VectorXs>& u) {
+  void calc(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const VectorXs>& s) {
     // Squashing function used: "Smooth abs":
     // s(u) = 0.5*(lb + ub + sqrt(smooth + (u - lb)^2) - sqrt(smooth + (u - ub)^2))
-    data->s = 0.5 * (Eigen::sqrt(Eigen::pow((u - s_lb_).array(), 2) + a_.array()) -
-                     Eigen::sqrt(Eigen::pow((u - s_ub_).array(), 2) + a_.array()) + s_lb_.array() + s_ub_.array());
+    data->s = 0.5 * (Eigen::sqrt(Eigen::pow((s - u_lb_).array(), 2) + a_.array()) -
+                     Eigen::sqrt(Eigen::pow((s - u_ub_).array(), 2) + a_.array()) + u_lb_.array() + u_ub_.array());
   }
 
-  void calcDiff(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const VectorXs>& u) {
-    data->ds_du.diagonal() =
-        0.5 * (Eigen::pow(a_.array() + Eigen::pow((u - s_lb_).array(), 2), -0.5).array() * (u - s_lb_).array() -
-               Eigen::pow(a_.array() + Eigen::pow((u - s_ub_).array(), 2), -0.5).array() * (u - s_ub_).array());
+  void calcDiff(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const VectorXs>& s) {
+    data->du_ds.diagonal() =
+        0.5 * (Eigen::pow(a_.array() + Eigen::pow((s - u_lb_).array(), 2), -0.5).array() * (s - u_lb_).array() -
+               Eigen::pow(a_.array() + Eigen::pow((s - u_ub_).array(), 2), -0.5).array() * (s - u_ub_).array());
   }
 
   const Scalar& get_smooth() const { return smooth_; };
@@ -60,11 +60,11 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
     }
     smooth_ = smooth;
 
-    d_ = (s_ub_ - s_lb_) * smooth_;
+    d_ = (u_ub_ - u_lb_) * smooth_;
     a_ = d_.array() * d_.array();
 
-    u_lb_ = s_lb_;
-    u_ub_ = s_ub_;
+    s_lb_ = u_lb_;
+    s_ub_ = u_ub_;
   }
 
   const VectorXs& get_d() const { return d_; };
