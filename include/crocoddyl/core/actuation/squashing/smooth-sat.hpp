@@ -87,6 +87,7 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
   using Base::u_lb_;
   using Base::u_ub_;
 };
+
 }  // namespace crocoddyl
 
 #endif  // CROCODDYL_CORE_SQUASHING_SMOOTH_SAT_HPP_

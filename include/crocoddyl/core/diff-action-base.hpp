@@ -160,4 +160,5 @@ struct DifferentialActionDataAbstractTpl {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/diff-action-base.hxx"
+
 #endif  // CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_

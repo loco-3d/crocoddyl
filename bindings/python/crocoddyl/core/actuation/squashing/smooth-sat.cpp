@@ -21,11 +21,11 @@ void exposeSquashingSmoothSat() {
                                                       ":param u_lb: output lower bound"
                                                       ":param u_ub: output upper bound"
                                                       ":param ns: dimension of the input vector"))
-      .def("calc", &SquashingModelSmoothSat::calc_wrap, bp::args("self", "data", "s"),
+      .def("calc", &SquashingModelSmoothSat::calc, bp::args("self", "data", "s"),
            "Compute the squashing value for a given value of s, component-wise. \n\n"
            ":param data: squashing data\n"
            ":param s: control input")
-      .def("calcDiff", &SquashingModelSmoothSat::calcDiff_wrap, bp::args("self", "data", "s"),
+      .def("calcDiff", &SquashingModelSmoothSat::calcDiff, bp::args("self", "data", "s"),
            "Compute the derivative of the squashing function.\n\n"
            ":param data: squashing data\n"
            ":param s: squashing input.")
