@@ -96,26 +96,25 @@ class ImpulseModelMultipleTpl {
 };
 
 template <typename _Scalar>
-struct ImpulseDataMultipleTpl : ImpulseDataAbstractTpl<_Scalar> {
+struct ImpulseDataMultipleTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
-  typedef ImpulseDataAbstractTpl<Scalar> Base;
   typedef ImpulseModelMultipleTpl<Scalar> ImpulseModelMultiple;
-  typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ImpulseItemTpl<Scalar> ImpulseItem;
-
-  typedef typename MathBase::Vector2s Vector2s;
-  typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
   ImpulseDataMultipleTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
-      : Base(model, data),
+      : Jc(model->get_ni_total(), model->get_state()->get_nv()),
+        dv0_dq(model->get_ni_total(), model->get_state()->get_nv()),
         vnext(model->get_state()->get_nv()),
         dvnext_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
         fext(model->get_state()->get_pinocchio()->njoints, pinocchio::ForceTpl<Scalar>::Zero()) {
+    Jc.setZero();
+    dv0_dq.setZero();
     vnext.setZero();
     dvnext_dx.setZero();
     for (typename ImpulseModelMultiple::ImpulseModelContainer::const_iterator it = model->get_impulses().begin();
@@ -125,14 +124,8 @@ struct ImpulseDataMultipleTpl : ImpulseDataAbstractTpl<_Scalar> {
     }
   }
 
-  using Base::df_dq;
-  using Base::dv0_dq;
-  using Base::f;
-  using Base::frame;
-  using Base::Jc;
-  using Base::joint;
-  using Base::pinocchio;
-
+  MatrixXs Jc;
+  MatrixXs dv0_dq;
   VectorXs vnext;
   MatrixXs dvnext_dx;
   typename ImpulseModelMultiple::ImpulseDataContainer impulses;
