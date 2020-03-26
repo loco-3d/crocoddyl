@@ -13,7 +13,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ImpulseModelMultipleTpl<Scalar>::ImpulseModelMultipleTpl(boost::shared_ptr<StateMultibody> state)
-    : state_(state), ni_(0) {}
+    : state_(state), ni_(0), ni_total_(0) {}
 
 template <typename Scalar>
 ImpulseModelMultipleTpl<Scalar>::~ImpulseModelMultipleTpl() {}
@@ -27,6 +27,7 @@ void ImpulseModelMultipleTpl<Scalar>::addImpulse(const std::string& name,
     std::cout << "Warning: this impulse item already existed, we cannot add it" << std::endl;
   } else if (active) {
     ni_ += impulse->get_ni();
+    ni_total_ += impulse->get_ni();
   }
 }
 
@@ -35,6 +36,7 @@ void ImpulseModelMultipleTpl<Scalar>::removeImpulse(const std::string& name) {
   typename ImpulseModelContainer::iterator it = impulses_.find(name);
   if (it != impulses_.end()) {
     ni_ -= it->second->impulse->get_ni();
+    ni_total_ -= it->second->impulse->get_ni();
     impulses_.erase(it);
   } else {
     std::cout << "Warning: this impulse item doesn't exist, we cannot remove it" << std::endl;
@@ -218,6 +220,11 @@ const typename ImpulseModelMultipleTpl<Scalar>::ImpulseModelContainer& ImpulseMo
 template <typename Scalar>
 const std::size_t& ImpulseModelMultipleTpl<Scalar>::get_ni() const {
   return ni_;
+}
+
+template <typename Scalar>
+const std::size_t& ImpulseModelMultipleTpl<Scalar>::get_ni_total() const {
+  return ni_total_;
 }
 
 }  // namespace crocoddyl
