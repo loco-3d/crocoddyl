@@ -116,6 +116,9 @@ void exposeCostSum() {
       .add_property("nu", bp::make_function(&CostModelSum::get_nu, bp::return_value_policy<bp::return_by_value>()),
                     "dimension of control vector")
       .add_property("nr", bp::make_function(&CostModelSum::get_nr, bp::return_value_policy<bp::return_by_value>()),
+                    "dimension of the residual vector of active cost")
+      .add_property("nr_total",
+                    bp::make_function(&CostModelSum::get_nr_total, bp::return_value_policy<bp::return_by_value>()),
                     "dimension of the total residual vector");
 
   bp::class_<CostDataSum, boost::shared_ptr<CostDataSum>, boost::noncopyable>(

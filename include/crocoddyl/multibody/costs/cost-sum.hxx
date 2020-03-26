@@ -13,11 +13,11 @@ namespace crocoddyl {
 
 template <typename Scalar>
 CostModelSumTpl<Scalar>::CostModelSumTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu)
-    : state_(state), nu_(nu), nr_(0) {}
+    : state_(state), nu_(nu), nr_(0), nr_total_(0) {}
 
 template <typename Scalar>
 CostModelSumTpl<Scalar>::CostModelSumTpl(boost::shared_ptr<StateMultibody> state)
-    : state_(state), nu_(state->get_nv()), nr_(0) {}
+    : state_(state), nu_(state->get_nv()), nr_(0), nr_total_(0) {}
 
 template <typename Scalar>
 CostModelSumTpl<Scalar>::~CostModelSumTpl() {}
@@ -34,6 +34,7 @@ void CostModelSumTpl<Scalar>::addCost(const std::string& name, boost::shared_ptr
     std::cout << "Warning: this cost item already existed, we cannot add it" << std::endl;
   } else if (active) {
     nr_ += cost->get_activation()->get_nr();
+    nr_total_ += cost->get_activation()->get_nr();
   }
 }
 
@@ -42,6 +43,7 @@ void CostModelSumTpl<Scalar>::removeCost(const std::string& name) {
   typename CostModelContainer::iterator it = costs_.find(name);
   if (it != costs_.end()) {
     nr_ -= it->second->cost->get_activation()->get_nr();
+    nr_total_ -= it->second->cost->get_activation()->get_nr();
     costs_.erase(it);
   } else {
     std::cout << "Warning: this cost item doesn't exist, we cannot remove it" << std::endl;
@@ -170,6 +172,11 @@ const std::size_t& CostModelSumTpl<Scalar>::get_nu() const {
 template <typename Scalar>
 const std::size_t& CostModelSumTpl<Scalar>::get_nr() const {
   return nr_;
+}
+
+template <typename Scalar>
+const std::size_t& CostModelSumTpl<Scalar>::get_nr_total() const {
+  return nr_total_;
 }
 
 }  // namespace crocoddyl

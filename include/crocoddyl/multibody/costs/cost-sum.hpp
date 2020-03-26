@@ -77,12 +77,14 @@ class CostModelSumTpl {
   const CostModelContainer& get_costs() const;
   const std::size_t& get_nu() const;
   const std::size_t& get_nr() const;
+  const std::size_t& get_nr_total() const;
 
  private:
   boost::shared_ptr<StateMultibody> state_;
   CostModelContainer costs_;
   std::size_t nu_;
   std::size_t nr_;
+  std::size_t nr_total_;
   VectorXs unone_;
 
 #ifdef PYTHON_BINDINGS
