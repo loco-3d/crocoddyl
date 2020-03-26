@@ -34,6 +34,8 @@ void ContactModelMultipleTpl<Scalar>::addContact(const std::string& name,
   } else if (active) {
     nc_ += contact->get_nc();
     nc_total_ += contact->get_nc();
+  } else if (!active) {
+    nc_total_ += contact->get_nc();
   }
 }
 
