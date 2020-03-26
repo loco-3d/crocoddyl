@@ -6,8 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <pinocchio/algorithm/kinematics-derivatives.hpp>
-#include <pinocchio/algorithm/frames.hpp>
+#include "crocoddyl/multibody/data/multibody.hpp"
 
 #include "factory/cost.hpp"
 #include "unittest_common.hpp"
@@ -116,8 +115,66 @@ void test_removeCost_error_message() {
   BOOST_CHECK(capture_ios.str() == expected_buffer.str());
 }
 
+void test_calc() {
+  // setup the test
+  StateModelFactory state_factory;
+  crocoddyl::CostModelSum model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
+      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
+  // create the corresponding data object
+  const boost::shared_ptr<crocoddyl::StateMultibody>& state = model.get_state();
+  pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
+  pinocchio::Data pinocchio_data(pinocchio_model);
+  crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
+
+  // create and add some cost objects
+  std::vector<boost::shared_ptr<crocoddyl::CostModelAbstract> > models;
+  std::vector<boost::shared_ptr<crocoddyl::CostDataAbstract> > datas;
+  for (std::size_t i = 0; i < 5; ++i) {
+    std::ostringstream os;
+    os << "random_cost_" << i;
+    const boost::shared_ptr<crocoddyl::CostModelAbstract>& m = create_random_cost();
+    model.addCost(os.str(), m, 1.);
+    models.push_back(m);
+    datas.push_back(m->createData(&shared_data));
+  }
+
+  // create the data of the cost sum
+  const boost::shared_ptr<crocoddyl::CostDataSum>& data = model.createData(&shared_data);
+
+  // compute the cost sum data for the case when all costs are defined as active
+  const Eigen::VectorXd& x1 = state->rand();
+  const Eigen::VectorXd& u1 = Eigen::VectorXd::Random(model.get_nu());
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x1);
+  model.calc(data, x1, u1);
+
+  // check that the cost has been filled
+  BOOST_CHECK(data->cost != 0.);
+
+  // check the cost against single cost computations
+  double cost = 0;
+  for (std::size_t i = 0; i < 5; ++i) {
+    models[i]->calc(datas[i], x1, u1);
+    cost += datas[i]->cost;
+  }
+  BOOST_CHECK(data->cost == cost);
+
+  // compute the cost sum data for the case when the first three costs are defined as active
+  model.changeCostStatus("random_cost_3", false);
+  model.changeCostStatus("random_cost_4", false);
+  const Eigen::VectorXd& x2 = state->rand();
+  const Eigen::VectorXd& u2 = Eigen::VectorXd::Random(model.get_nu());
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x1);
+  model.calc(data, x2, u2);
+  cost = 0;
+  for (std::size_t i = 0; i < 3; ++i) {  // we need to update data because this costs are active
+    models[i]->calc(datas[i], x2, u2);
+    cost += datas[i]->cost;
+  }
+  BOOST_CHECK(data->cost == cost);
+}
+
 void test_get_costs() {
-  // Setup the test
+  // setup the test
   StateModelFactory state_factory;
   crocoddyl::CostModelSum model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
       state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
@@ -178,6 +235,7 @@ void register_unit_tests() {
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_addCost_error_message)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_removeCost)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_removeCost_error_message)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_get_costs)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_get_nr)));
 }
