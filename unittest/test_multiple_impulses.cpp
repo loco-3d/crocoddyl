@@ -75,19 +75,23 @@ void test_addImpulse() {
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> rand_impulse_1 = create_random_impulse();
   model.addImpulse("random_impulse_1", rand_impulse_1);
   BOOST_CHECK(model.get_ni() == rand_impulse_1->get_ni());
+  BOOST_CHECK(model.get_ni_total() == rand_impulse_1->get_ni());
 
   // add an inactive impulse
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> rand_impulse_2 = create_random_impulse();
   model.addImpulse("random_impulse_2", rand_impulse_2, false);
   BOOST_CHECK(model.get_ni() == rand_impulse_1->get_ni());
+  BOOST_CHECK(model.get_ni_total() == rand_impulse_1->get_ni() + rand_impulse_2->get_ni());
 
   // change the random impulse 2 status
   model.changeImpulseStatus("random_impulse_2", true);
   BOOST_CHECK(model.get_ni() == rand_impulse_1->get_ni() + rand_impulse_2->get_ni());
+  BOOST_CHECK(model.get_ni_total() == rand_impulse_1->get_ni() + rand_impulse_2->get_ni());
 
   // change the random impulse 1 status
   model.changeImpulseStatus("random_impulse_1", false);
   BOOST_CHECK(model.get_ni() == rand_impulse_2->get_ni());
+  BOOST_CHECK(model.get_ni_total() == rand_impulse_1->get_ni() + rand_impulse_2->get_ni());
 }
 
 void test_addImpulse_error_message() {
