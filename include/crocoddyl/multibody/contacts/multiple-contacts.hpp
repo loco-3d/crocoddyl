@@ -79,12 +79,14 @@ class ContactModelMultipleTpl {
   const boost::shared_ptr<StateMultibody>& get_state() const;
   const ContactModelContainer& get_contacts() const;
   const std::size_t& get_nc() const;
+  const std::size_t& get_nc_total() const;
   const std::size_t& get_nu() const;
 
  private:
   boost::shared_ptr<StateMultibody> state_;
   ContactModelContainer contacts_;
   std::size_t nc_;
+  std::size_t nc_total_;
   std::size_t nu_;
 
 #ifdef PYTHON_BINDINGS
