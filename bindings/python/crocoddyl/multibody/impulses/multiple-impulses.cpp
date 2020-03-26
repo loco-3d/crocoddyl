@@ -127,8 +127,7 @@ void exposeImpulseMultiple() {
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("Jc", bp::make_getter(&ImpulseDataMultiple::Jc, bp::return_internal_reference<>()),
                     bp::make_setter(&ImpulseDataMultiple::Jc), "Jacobian for all impulses (active and inactive)")
-      .add_property("dv0_dq",
-                    bp::make_getter(&ImpulseDataMultiple::dv0_dq, bp::return_internal_reference<>()),
+      .add_property("dv0_dq", bp::make_getter(&ImpulseDataMultiple::dv0_dq, bp::return_internal_reference<>()),
                     bp::make_setter(&ImpulseDataMultiple::dv0_dq),
                     "Jacobian of the previous impulse velocity (active and inactive)")
       .add_property("vnext", bp::make_getter(&ImpulseDataMultiple::vnext, bp::return_internal_reference<>()),
