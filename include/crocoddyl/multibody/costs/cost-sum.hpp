@@ -115,9 +115,6 @@ struct CostDataSumTpl {
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
-  typedef StateMultibodyTpl<Scalar> StateMultibody;
-  typedef CostModelAbstractTpl<Scalar> CostModelAbstract;
-  typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef CostItemTpl<Scalar> CostItem;
   typedef typename MathBase::VectorXs VectorXs;
