@@ -74,19 +74,23 @@ void test_addContact() {
   boost::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact_1 = create_random_contact();
   model.addContact("random_contact_1", rand_contact_1);
   BOOST_CHECK(model.get_nc() == rand_contact_1->get_nc());
+  BOOST_CHECK(model.get_nc_total() == rand_contact_1->get_nc());
 
   // add an inactive contact
   boost::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact_2 = create_random_contact();
   model.addContact("random_contact_2", rand_contact_2, false);
   BOOST_CHECK(model.get_nc() == rand_contact_1->get_nc());
+  BOOST_CHECK(model.get_nc_total() == rand_contact_1->get_nc() + rand_contact_2->get_nc());
 
   // change the random contact 2 status
   model.changeContactStatus("random_contact_2", true);
   BOOST_CHECK(model.get_nc() == rand_contact_1->get_nc() + rand_contact_2->get_nc());
+  BOOST_CHECK(model.get_nc_total() == rand_contact_1->get_nc() + rand_contact_2->get_nc());
 
   // change the random contact 1 status
   model.changeContactStatus("random_contact_1", false);
   BOOST_CHECK(model.get_nc() == rand_contact_2->get_nc());
+  BOOST_CHECK(model.get_nc_total() == rand_contact_1->get_nc() + rand_contact_2->get_nc());
 }
 
 void test_addContact_error_message() {
@@ -129,10 +133,12 @@ void test_removeContact() {
   boost::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact = create_random_contact();
   model.addContact("random_contact", rand_contact);
   BOOST_CHECK(model.get_nc() == rand_contact->get_nc());
+  BOOST_CHECK(model.get_nc_total() == rand_contact->get_nc());
 
   // remove the contact
   model.removeContact("random_contact");
   BOOST_CHECK(model.get_nc() == 0);
+  BOOST_CHECK(model.get_nc_total() == 0);
 }
 
 void test_removeContact_error_message() {
