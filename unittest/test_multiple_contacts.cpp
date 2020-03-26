@@ -184,9 +184,6 @@ void test_calc() {
   BOOST_CHECK(!data->Jc.isZero());
   BOOST_CHECK(!data->a0.isZero());
   BOOST_CHECK(data->da0_dx.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(data->df_dx.isZero());
-  BOOST_CHECK(data->df_du.isZero());
 }
 
 void test_calc_diff() {
@@ -221,9 +218,6 @@ void test_calc_diff() {
   BOOST_CHECK(!data->Jc.isZero());
   BOOST_CHECK(!data->a0.isZero());
   BOOST_CHECK(!data->da0_dx.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(data->df_dx.isZero());
-  BOOST_CHECK(data->df_du.isZero());
 }
 
 void test_calc_diff_no_recalc() {
@@ -257,9 +251,6 @@ void test_calc_diff_no_recalc() {
   BOOST_CHECK(data->Jc.isZero());
   BOOST_CHECK(data->a0.isZero());
   BOOST_CHECK(!data->da0_dx.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(data->df_dx.isZero());
-  BOOST_CHECK(data->df_du.isZero());
 }
 
 void test_updateForce() {
@@ -300,13 +291,10 @@ void test_updateForce() {
   BOOST_CHECK(data->Jc.isZero());
   BOOST_CHECK(data->a0.isZero());
   BOOST_CHECK(data->da0_dx.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
   crocoddyl::ContactModelMultiple::ContactDataContainer::iterator it_d, end_d;
   for (it_d = data->contacts.begin(), end_d = data->contacts.end(); it_d != end_d; ++it_d) {
     BOOST_CHECK(!it_d->second->f.toVector().isZero());
   }
-  BOOST_CHECK(data->df_dx.isZero());
-  BOOST_CHECK(data->df_du.isZero());
 }
 
 void test_updateAccelerationDiff() {

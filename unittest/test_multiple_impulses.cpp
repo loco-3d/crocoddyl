@@ -184,8 +184,6 @@ void test_calc() {
   // Check that only the Jacobian has been filled
   BOOST_CHECK(!data->Jc.isZero());
   BOOST_CHECK(data->dv0_dq.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(data->df_dq.isZero());
 }
 
 void test_calc_diff() {
@@ -220,8 +218,6 @@ void test_calc_diff() {
   // Check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(!data->Jc.isZero());
   BOOST_CHECK(!data->dv0_dq.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(data->df_dq.isZero());
 }
 
 void test_calc_diff_no_recalc() {
@@ -255,8 +251,6 @@ void test_calc_diff_no_recalc() {
   // Check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(data->Jc.isZero());
   BOOST_CHECK(!data->dv0_dq.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(data->df_dq.isZero());
 }
 
 void test_updateForce() {
@@ -292,12 +286,10 @@ void test_updateForce() {
   // Check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(data->Jc.isZero());
   BOOST_CHECK(data->dv0_dq.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
   crocoddyl::ImpulseModelMultiple::ImpulseDataContainer::iterator it_d, end_d;
   for (it_d = data->impulses.begin(), end_d = data->impulses.end(); it_d != end_d; ++it_d) {
     BOOST_CHECK(!it_d->second->f.toVector().isZero());
   }
-  BOOST_CHECK(data->df_dq.isZero());
 }
 
 void test_updateVelocityDiff() {
