@@ -38,15 +38,14 @@ void exposeCostSum() {
 
   bp::register_ptr_to_python<boost::shared_ptr<CostItem> >();
 
-  bp::class_<CostItem, boost::noncopyable>(
-      "CostItem", "Describe a cost item.\n\n",
-      bp::init<std::string, boost::shared_ptr<CostModelAbstract>, double, bp::optional<bool> >(
-          bp::args("self", "name", "cost", "weight", "active"),
-          "Initialize the cost item.\n\n"
-          ":param name: cost name\n"
-          ":param cost: cost model\n"
-          ":param weight: cost weight\n"
-          ":param active: True if the cost is activated (default true)"))
+  bp::class_<CostItem>("CostItem", "Describe a cost item.\n\n",
+                       bp::init<std::string, boost::shared_ptr<CostModelAbstract>, double, bp::optional<bool> >(
+                           bp::args("self", "name", "cost", "weight", "active"),
+                           "Initialize the cost item.\n\n"
+                           ":param name: cost name\n"
+                           ":param cost: cost model\n"
+                           ":param weight: cost weight\n"
+                           ":param active: True if the cost is activated (default true)"))
       .def_readwrite("name", &CostItem::name, "cost name")
       .add_property("cost", bp::make_getter(&CostItem::cost, bp::return_value_policy<bp::return_by_value>()),
                     "cost model")
@@ -56,12 +55,11 @@ void exposeCostSum() {
 
   bp::register_ptr_to_python<boost::shared_ptr<CostModelSum> >();
 
-  bp::class_<CostModelSum, boost::noncopyable>(
-      "CostModelSum",
-      bp::init<boost::shared_ptr<StateMultibody>, std::size_t>(bp::args("self", "state", "nu"),
-                                                               "Initialize the total cost model.\n\n"
-                                                               ":param state: state of the multibody system\n"
-                                                               ":param nu: dimension of control vector"))
+  bp::class_<CostModelSum>("CostModelSum", bp::init<boost::shared_ptr<StateMultibody>, std::size_t>(
+                                               bp::args("self", "state", "nu"),
+                                               "Initialize the total cost model.\n\n"
+                                               ":param state: state of the multibody system\n"
+                                               ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, std::size_t>(
           bp::args("self", "state", "nu"),
           "Initialize the total cost model.\n\n"
@@ -121,7 +119,9 @@ void exposeCostSum() {
                     bp::make_function(&CostModelSum::get_nr_total, bp::return_value_policy<bp::return_by_value>()),
                     "dimension of the total residual vector");
 
-  bp::class_<CostDataSum, boost::shared_ptr<CostDataSum>, boost::noncopyable>(
+  bp::register_ptr_to_python<boost::shared_ptr<CostDataSum> >();
+
+  bp::class_<CostDataSum>(
       "CostDataSum", "Class for total cost data.\n\n",
       bp::init<CostModelSum*, DataCollectorAbstract*>(bp::args("self", "model", "data"),
                                                       "Create total cost data.\n\n"

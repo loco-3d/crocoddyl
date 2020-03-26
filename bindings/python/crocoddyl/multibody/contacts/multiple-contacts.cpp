@@ -35,14 +35,13 @@ void exposeContactMultiple() {
 
   bp::register_ptr_to_python<boost::shared_ptr<ContactItem> >();
 
-  bp::class_<ContactItem, boost::noncopyable>(
-      "ContactItem", "Describe a contact item.\n\n",
-      bp::init<std::string, boost::shared_ptr<ContactModelAbstract>, bp::optional<bool> >(
-          bp::args("self", "name", "contact", "active"),
-          "Initialize the contact item.\n\n"
-          ":param name: contact name\n"
-          ":param contact: contact model\n"
-          ":param active: True if the contact is activated (default true)"))
+  bp::class_<ContactItem>("ContactItem", "Describe a contact item.\n\n",
+                          bp::init<std::string, boost::shared_ptr<ContactModelAbstract>, bp::optional<bool> >(
+                              bp::args("self", "name", "contact", "active"),
+                              "Initialize the contact item.\n\n"
+                              ":param name: contact name\n"
+                              ":param contact: contact model\n"
+                              ":param active: True if the contact is activated (default true)"))
       .def_readwrite("name", &ContactItem::name, "contact name")
       .add_property("contact", bp::make_getter(&ContactItem::contact, bp::return_value_policy<bp::return_by_value>()),
                     "contact model")
@@ -50,7 +49,7 @@ void exposeContactMultiple() {
 
   bp::register_ptr_to_python<boost::shared_ptr<ContactModelMultiple> >();
 
-  bp::class_<ContactModelMultiple, boost::noncopyable>(
+  bp::class_<ContactModelMultiple>(
       "ContactModelMultiple",
       bp::init<boost::shared_ptr<StateMultibody>, bp::optional<int> >(bp::args("self", "state", "nu"),
                                                                       "Initialize the multiple contact model.\n\n"
@@ -117,7 +116,9 @@ void exposeContactMultiple() {
                     bp::make_function(&ContactModelMultiple::get_nu, bp::return_value_policy<bp::return_by_value>()),
                     "dimension of control vector");
 
-  bp::class_<ContactDataMultiple, boost::shared_ptr<ContactDataMultiple>, bp::bases<ContactDataAbstract> >(
+  bp::register_ptr_to_python<boost::shared_ptr<ContactDataMultiple> >();
+
+  bp::class_<ContactDataMultiple>(
       "ContactDataMultiple", "Data class for multiple contacts.\n\n",
       bp::init<ContactModelMultiple*, pinocchio::Data*>(
           bp::args("self", "model", "data"),
