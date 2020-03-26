@@ -562,6 +562,7 @@ void register_unit_tests() {
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_removeImpulse_error_message)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_no_recalc)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_updateForce)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_updateVelocityDiff)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_get_impulses)));
