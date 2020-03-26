@@ -130,10 +130,10 @@ void exposeContactMultiple() {
       .add_property("a0", bp::make_getter(&ContactDataMultiple::a0, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataMultiple::a0),
                     "desired acceleration for all contacts (active and inactive)")
-      .add_property("da0_dx",
-                    bp::make_getter(&ContactDataMultiple::da0_dx,  bp::return_internal_reference<>()),
+      .add_property("da0_dx", bp::make_getter(&ContactDataMultiple::da0_dx, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataMultiple::da0_dx),
                     "Jacobian of the desired acceleration for all contacts (active and inactive)")
+      .add_property("dv", bp::make_getter(&ContactDataMultiple::dv, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataMultiple::dv), "constrained acceleration in generalized coordinates")
       .add_property("ddv_dx", bp::make_getter(&ContactDataMultiple::ddv_dx, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataMultiple::ddv_dx),
