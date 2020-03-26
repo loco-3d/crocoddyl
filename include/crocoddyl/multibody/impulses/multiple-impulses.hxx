@@ -28,6 +28,8 @@ void ImpulseModelMultipleTpl<Scalar>::addImpulse(const std::string& name,
   } else if (active) {
     ni_ += impulse->get_ni();
     ni_total_ += impulse->get_ni();
+  } else if (!active) {
+    ni_total_ += impulse->get_ni();
   }
 }
 
