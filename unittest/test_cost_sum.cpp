@@ -36,19 +36,26 @@ void test_addCost() {
   boost::shared_ptr<crocoddyl::CostModelAbstract> rand_cost_1 = create_random_cost();
   model.addCost("random_cost_1", rand_cost_1, 1.);
   BOOST_CHECK(model.get_nr() == rand_cost_1->get_activation()->get_nr());
+  BOOST_CHECK(model.get_nr_total() == rand_cost_1->get_activation()->get_nr());
 
   // add an inactive cost
   boost::shared_ptr<crocoddyl::CostModelAbstract> rand_cost_2 = create_random_cost();
   model.addCost("random_cost_2", rand_cost_2, 1., false);
   BOOST_CHECK(model.get_nr() == rand_cost_1->get_activation()->get_nr());
+  BOOST_CHECK(model.get_nr_total() ==
+              rand_cost_1->get_activation()->get_nr() + rand_cost_2->get_activation()->get_nr());
 
   // change the random cost 2 status
   model.changeCostStatus("random_cost_2", true);
   BOOST_CHECK(model.get_nr() == rand_cost_1->get_activation()->get_nr() + rand_cost_2->get_activation()->get_nr());
+  BOOST_CHECK(model.get_nr_total() ==
+              rand_cost_1->get_activation()->get_nr() + rand_cost_2->get_activation()->get_nr());
 
   // change the random cost 1 status
   model.changeCostStatus("random_cost_1", false);
   BOOST_CHECK(model.get_nr() == rand_cost_2->get_activation()->get_nr());
+  BOOST_CHECK(model.get_nr_total() ==
+              rand_cost_1->get_activation()->get_nr() + rand_cost_2->get_activation()->get_nr());
 }
 
 void test_addCost_error_message() {
@@ -95,6 +102,7 @@ void test_removeCost() {
   // remove the cost
   model.removeCost("random_cost");
   BOOST_CHECK(model.get_nr() == 0);
+  BOOST_CHECK(model.get_nr_total() == 0);
 }
 
 void test_removeCost_error_message() {
