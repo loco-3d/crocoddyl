@@ -36,21 +36,21 @@ class CostModelContactFrictionConeTpl : public CostModelAbstractTpl<_Scalar> {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef FrameForceTpl<Scalar> FrameForce;
   typedef FrictionConeTpl<Scalar> FrictionCone;
+  typedef FrameFrictionConeTpl<Scalar> FrameFrictionCone;
   typedef typename MathBase::Vector6s Vector6s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::MatrixX3s MatrixX3s;
 
   CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
-                                  boost::shared_ptr<ActivationModelAbstract> activation, const FrictionCone& cone,
-                                  const FrameIndex& frame, const std::size_t& nu);
+                                  boost::shared_ptr<ActivationModelAbstract> activation, const FrameFrictionCone& fref,
+                                  const std::size_t& nu);
   CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
-                                  boost::shared_ptr<ActivationModelAbstract> activation, const FrictionCone& cone,
-                                  const FrameIndex& frame);
-  CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state, const FrictionCone& cone,
-                                  const FrameIndex& frame, const std::size_t& nu);
-  CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state, const FrictionCone& cone,
-                                  const FrameIndex& frame);
+                                  boost::shared_ptr<ActivationModelAbstract> activation,
+                                  const FrameFrictionCone& fref);
+  CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state, const FrameFrictionCone& fref,
+                                  const std::size_t& nu);
+  CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state, const FrameFrictionCone& fref);
   ~CostModelContactFrictionConeTpl();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -59,20 +59,20 @@ class CostModelContactFrictionConeTpl : public CostModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-  const FrictionCone& get_friction_cone() const;
-  const FrameIndex& get_frame() const;
-  void set_friction_cone(const FrictionCone& cone);
-  void set_frame(const FrameIndex& frame);
+  const FrameFrictionCone& get_fref() const;
+  void set_fref(const FrameFrictionCone& fref);
 
  protected:
+  virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
+
   using Base::activation_;
   using Base::nu_;
   using Base::state_;
   using Base::unone_;
 
- protected:
-  FrictionCone friction_cone_;
-  FrameIndex frame_;
+ private:
+  FrameFrictionCone fref_;
 };
 
 template <typename _Scalar>
@@ -84,6 +84,7 @@ struct CostDataContactFrictionConeTpl : public CostDataAbstractTpl<_Scalar> {
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
+  typedef FrameFrictionConeTpl<Scalar> FrameFrictionCone;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
@@ -102,11 +103,12 @@ struct CostDataContactFrictionConeTpl : public CostDataAbstractTpl<_Scalar> {
     }
 
     // Avoids data casting at runtime
-    std::string frame_name = model->get_state()->get_pinocchio()->frames[model->get_frame()].name;
+    const FrameFrictionCone& fref = model->get_fref();
+    std::string frame_name = model->get_state()->get_pinocchio()->frames[fref.frame].name;
     bool found_contact = false;
     for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
          it != d->contacts->contacts.end(); ++it) {
-      if (it->second->frame == model->get_frame()) {
+      if (it->second->frame == fref.frame) {
         ContactData3DTpl<Scalar>* d3d = dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
         if (d3d != NULL) {
           found_contact = true;

@@ -100,8 +100,6 @@ void exposeSolverAbstract() {
           "problem",
           bp::make_function(&SolverAbstract_wrap::get_problem, bp::return_value_policy<bp::copy_const_reference>()),
           "shooting problem")
-      .def("models", &SolverAbstract_wrap::get_models, bp::return_value_policy<bp::copy_const_reference>(), "models")
-      .def("datas", &SolverAbstract_wrap::get_datas, bp::return_value_policy<bp::copy_const_reference>(), "datas")
       .add_property(
           "xs", bp::make_function(&SolverAbstract_wrap::get_xs, bp::return_value_policy<bp::copy_const_reference>()),
           bp::make_function(&SolverAbstract_wrap::set_xs), "state trajectory")

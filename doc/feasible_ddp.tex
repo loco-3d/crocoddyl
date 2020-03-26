@@ -67,7 +67,7 @@ We also denote $f_t$ by the drift of $f$ (i.e. change in $x$ when $u$ is zero), 
 $$\min_{\dxtraj,\dutraj} \Big( \sum_{t=0}^{T-1}  \frac{1}{2} \bmat \dx^T,\du^T \emat \bmat L_{xx} & L_{xu} \\ L_{ux} & L_{uu} \emat \bmat \dx \\ \du \emat + \bmat L_x & L_u \emat \bmat \dx \\ \du \emat $$
 $$ + \frac{1}{2} \dx_T L_{xx} \dx_T + L_x \dx_T \Big)$$
 $$s.t. \quad \dx_0 = f_0 $$
-$$\quad \forall t=0\cdots T-1, \quad \dx_{t+1} = F_x \dx_t + F_u \du_t + f_t $$
+$$\quad \forall t=0\cdots T-1, \quad \dx_{t+1} = F_x \dx_t + F_u \du_t + f_{t+1} $$
 
 This problem is a quadratic program (under linear equality constraints -- QP).
 Various solutions can be chosen to solve the QP.
@@ -79,9 +79,9 @@ For understanding the nature of the problem, we will write the solution to this 
 \subsubsection{Optimality principle}
 The Lagrangian of the LQR QP is:
 $$\mathcal{L}(\dxtraj,\dutraj,\lambdatraj) = \sum_{t=0}^{T-1} \Big( \frac{1}{2} \bmat \dx_t^T,\du_t^T \emat \bmat L_{xx} & L_{xu} \\ L_{ux} & L_{uu} \emat \bmat \dx_t \\ \du_t \emat + \bmat L_x & L_u \emat \bmat \dx_t \\ \du_t \emat $$
-$$+ \lambda_t (\dx_{t+1} - F_x \dx_t - F_u \du_t - f_t ) \Big)
+$$- \lambda_{t+1} (\dx_{t+1} - F_x \dx_t - F_u \du_t - f_{t+1} ) \Big)
 %$$ $$
-+ \frac{1}{2} \dx_T L_{xx} \dx_T + L_x \dx_T $$
++ \frac{1}{2} \dx_T L_{xx} \dx_T + L_x \dx_T - \lambda_0(\dx_0 - f_0) $$
 
 \subsubsection{Solving the LQR QP}
 The optimum of the QP is reached for the zero of the gradient of $\mathcal{L}$ with respect to $\xtraj$, $\utraj$ and $\lambdatraj$, i.e. when:
@@ -115,7 +115,7 @@ F_x & -I &  & & F_u &&&&&& \\
 \lambda_0 \\
 \lambda_1 \\
 \vdots \\
-\lambda_{T-1}
+\lambda_{T}
 \emat
 %
 =
@@ -133,7 +133,7 @@ L_u \\
 f_0 \\
 f_1 \\
 \vdots \\
-f_{T-1}
+f_{T}
 \emat
 $$
 
@@ -547,3 +547,4 @@ Again, this boils down to the sum of the $Q.k$ when the gaps are all zero.
 }
 
 \end{document}
+

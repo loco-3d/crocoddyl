@@ -125,19 +125,17 @@ void exposeContactMultiple() {
           "Create multicontact data.\n\n"
           ":param model: multicontact model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("Jc", bp::make_getter(&ContactDataMultiple::Jc, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("Jc", bp::make_getter(&ContactDataMultiple::Jc, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataMultiple::Jc), "Jacobian for all contacts (active and inactive)")
-      .add_property("a0", bp::make_getter(&ContactDataMultiple::a0, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("a0", bp::make_getter(&ContactDataMultiple::a0, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataMultiple::a0),
                     "desired acceleration for all contacts (active and inactive)")
       .add_property("da0_dx",
-                    bp::make_getter(&ContactDataMultiple::da0_dx, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_getter(&ContactDataMultiple::da0_dx,  bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataMultiple::da0_dx),
                     "Jacobian of the desired acceleration for all contacts (active and inactive)")
-      .add_property("dv", bp::make_getter(&ContactDataMultiple::dv, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ContactDataMultiple::dv), "constrained acceleration in generalized coordinates")
-      .add_property("ddv_dx",
-                    bp::make_getter(&ContactDataMultiple::ddv_dx, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("ddv_dx", bp::make_getter(&ContactDataMultiple::ddv_dx, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataMultiple::ddv_dx),
                     "Jacobian of the constrained acceleration in generalized coordinates")
       .add_property("contacts",

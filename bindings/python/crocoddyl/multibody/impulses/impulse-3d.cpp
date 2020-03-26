@@ -63,13 +63,11 @@ void exposeImpulse3D() {
                     "local frame placement of the impulse frame")
       .add_property("fXj", bp::make_getter(&ImpulseData3D::fXj, bp::return_value_policy<bp::return_by_value>()),
                     "action matrix from impulse to local frames")
-      .add_property("fJf", bp::make_getter(&ImpulseData3D::fJf, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("fJf", bp::make_getter(&ImpulseData3D::fJf, bp::return_internal_reference<>()),
                     "local Jacobian of the impulse frame")
-      .add_property("v_partial_dq",
-                    bp::make_getter(&ImpulseData3D::v_partial_dq, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("v_partial_dq", bp::make_getter(&ImpulseData3D::v_partial_dq, bp::return_internal_reference<>()),
                     "Jacobian of the spatial body velocity")
-      .add_property("v_partial_dv",
-                    bp::make_getter(&ImpulseData3D::v_partial_dv, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("v_partial_dv", bp::make_getter(&ImpulseData3D::v_partial_dv, bp::return_internal_reference<>()),
                     "Jacobian of the spatial body velocity");
 }
 

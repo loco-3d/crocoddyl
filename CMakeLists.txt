@@ -56,7 +56,7 @@ APPLY_DEFAULT_APPLE_CONFIGURATION()
 
 # Add the different required and optional dependencies
 ADD_REQUIRED_DEPENDENCY("eigen3 >= 3.0.5")
-ADD_REQUIRED_DEPENDENCY("eigenpy")
+ADD_REQUIRED_DEPENDENCY("eigenpy >= 2.2.0")
 ADD_REQUIRED_DEPENDENCY("pinocchio >= 2.2.1")
 ADD_REQUIRED_DEPENDENCY("example-robot-data >= 3.1.2")
 ADD_OPTIONAL_DEPENDENCY("quadprog")

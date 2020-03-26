@@ -28,21 +28,14 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
   const std::size_t& T = problem_->get_T();
   xs_.resize(T + 1);
   us_.resize(T);
-  models_.resize(T + 1);
-  datas_.resize(T + 1);
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
-    const boost::shared_ptr<ActionDataAbstract>& data = problem_->get_runningDatas()[t];
     const std::size_t& nu = model->get_nu();
 
     xs_[t] = model->get_state()->zero();
     us_[t] = Eigen::VectorXd::Zero(nu);
-    models_[t] = model;
-    datas_[t] = data;
   }
   xs_.back() = problem_->get_terminalModel()->get_state()->zero();
-  models_.back() = problem_->get_terminalModel();
-  datas_.back() = problem_->get_terminalData();
 }
 
 SolverAbstract::~SolverAbstract() {}
@@ -82,10 +75,6 @@ void SolverAbstract::setCallbacks(const std::vector<boost::shared_ptr<CallbackAb
 const std::vector<boost::shared_ptr<CallbackAbstract> >& SolverAbstract::getCallbacks() const { return callbacks_; }
 
 const boost::shared_ptr<ShootingProblem>& SolverAbstract::get_problem() const { return problem_; }
-
-const std::vector<boost::shared_ptr<ActionModelAbstract> >& SolverAbstract::get_models() const { return models_; }
-
-const std::vector<boost::shared_ptr<ActionDataAbstract> >& SolverAbstract::get_datas() const { return datas_; }
 
 const std::vector<Eigen::VectorXd>& SolverAbstract::get_xs() const { return xs_; }
 

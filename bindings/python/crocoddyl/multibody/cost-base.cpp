@@ -89,21 +89,21 @@ void exposeCostAbstract() {
                     "terminal data")
       .add_property("cost", bp::make_getter(&CostDataAbstract::cost, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&CostDataAbstract::cost), "cost value")
-      .add_property("Lx", bp::make_getter(&CostDataAbstract::Lx, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("Lx", bp::make_getter(&CostDataAbstract::Lx, bp::return_internal_reference<>()),
                     bp::make_setter(&CostDataAbstract::Lx), "Jacobian of the cost")
-      .add_property("Lu", bp::make_getter(&CostDataAbstract::Lu, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("Lu", bp::make_getter(&CostDataAbstract::Lu, bp::return_internal_reference<>()),
                     bp::make_setter(&CostDataAbstract::Lu), "Jacobian of the cost")
-      .add_property("Lxx", bp::make_getter(&CostDataAbstract::Lxx, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("Lxx", bp::make_getter(&CostDataAbstract::Lxx, bp::return_internal_reference<>()),
                     bp::make_setter(&CostDataAbstract::Lxx), "Hessian of the cost")
-      .add_property("Lxu", bp::make_getter(&CostDataAbstract::Lxu, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("Lxu", bp::make_getter(&CostDataAbstract::Lxu, bp::return_internal_reference<>()),
                     bp::make_setter(&CostDataAbstract::Lxu), "Hessian of the cost")
-      .add_property("Luu", bp::make_getter(&CostDataAbstract::Luu, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("Luu", bp::make_getter(&CostDataAbstract::Luu, bp::return_internal_reference<>()),
                     bp::make_setter(&CostDataAbstract::Luu), "Hessian of the cost")
-      .add_property("r", bp::make_getter(&CostDataAbstract::r, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("r", bp::make_getter(&CostDataAbstract::r, bp::return_internal_reference<>()),
                     bp::make_setter(&CostDataAbstract::r), "cost residual")
-      .add_property("Rx", bp::make_getter(&CostDataAbstract::Rx, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("Rx", bp::make_getter(&CostDataAbstract::Rx, bp::return_internal_reference<>()),
                     bp::make_setter(&CostDataAbstract::Rx), "Jacobian of the cost residual")
-      .add_property("Ru", bp::make_getter(&CostDataAbstract::Ru, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("Ru", bp::make_getter(&CostDataAbstract::Ru, bp::return_internal_reference<>()),
                     bp::make_setter(&CostDataAbstract::Ru), "Jacobian of the cost residual");
 }
 

@@ -125,17 +125,15 @@ void exposeImpulseMultiple() {
           "Create multi-impulse data.\n\n"
           ":param model: multi-impulse model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("Jc", bp::make_getter(&ImpulseDataMultiple::Jc, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("Jc", bp::make_getter(&ImpulseDataMultiple::Jc, bp::return_internal_reference<>()),
                     bp::make_setter(&ImpulseDataMultiple::Jc), "Jacobian for all impulses (active and inactive)")
       .add_property("dv0_dq",
-                    bp::make_getter(&ImpulseDataMultiple::dv0_dq, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_getter(&ImpulseDataMultiple::dv0_dq, bp::return_internal_reference<>()),
                     bp::make_setter(&ImpulseDataMultiple::dv0_dq),
                     "Jacobian of the previous impulse velocity (active and inactive)")
-      .add_property("vnext",
-                    bp::make_getter(&ImpulseDataMultiple::vnext, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("vnext", bp::make_getter(&ImpulseDataMultiple::vnext, bp::return_internal_reference<>()),
                     bp::make_setter(&ImpulseDataMultiple::vnext), "impulse velocity")
-      .add_property("dvnext_dx",
-                    bp::make_getter(&ImpulseDataMultiple::dvnext_dx, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("dvnext_dx", bp::make_getter(&ImpulseDataMultiple::dvnext_dx, bp::return_internal_reference<>()),
                     bp::make_setter(&ImpulseDataMultiple::dvnext_dx), "Jacobian of the impulse velocity")
       .add_property("impulses",
                     bp::make_getter(&ImpulseDataMultiple::impulses, bp::return_value_policy<bp::return_by_value>()),
