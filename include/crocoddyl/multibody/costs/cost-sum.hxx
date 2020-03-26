@@ -35,6 +35,8 @@ void CostModelSumTpl<Scalar>::addCost(const std::string& name, boost::shared_ptr
   } else if (active) {
     nr_ += cost->get_activation()->get_nr();
     nr_total_ += cost->get_activation()->get_nr();
+  } else if (!active) {
+    nr_total_ += cost->get_activation()->get_nr();
   }
 }
 
