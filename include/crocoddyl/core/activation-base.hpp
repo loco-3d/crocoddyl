@@ -68,7 +68,7 @@ struct ActivationDataAbstractTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  template <template <typename Scalar> typename Activation>
+  template <template <typename Scalar> class Activation>
   explicit ActivationDataAbstractTpl(Activation<Scalar>* const activation)
       : a_value(0.),
         Ar(VectorXs::Zero(activation->get_nr())),
