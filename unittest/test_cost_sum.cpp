@@ -234,13 +234,12 @@ void test_calcDiff() {
     Lxu += datas[i]->Lxu;
     Luu += datas[i]->Luu;
   }
-  double tol = 1e-9;
   BOOST_CHECK(data->cost == cost);
-  BOOST_CHECK((data->Lx - Lx).isMuchSmallerThan(tol));
-  BOOST_CHECK((data->Lu - Lu).isMuchSmallerThan(tol));
-  BOOST_CHECK((data->Lxx - Lxx).isMuchSmallerThan(tol));
-  BOOST_CHECK((data->Lxu - Lxu).isMuchSmallerThan(tol));
-  BOOST_CHECK((data->Luu - Luu).isMuchSmallerThan(tol));
+  BOOST_CHECK(data->Lx == Lx);
+  BOOST_CHECK(data->Lu == Lu);
+  BOOST_CHECK(data->Lxx == Lxx);
+  BOOST_CHECK(data->Lxu == Lxu);
+  BOOST_CHECK(data->Luu == Luu);
 
   // compute the cost sum data for the case when the first three costs are defined as active
   model.changeCostStatus("random_cost_3", false);
@@ -267,96 +266,11 @@ void test_calcDiff() {
     Luu += datas[i]->Luu;
   }
   BOOST_CHECK(data->cost == cost);
-  BOOST_CHECK((data->Lx - Lx).isMuchSmallerThan(tol));
-  BOOST_CHECK((data->Lu - Lu).isMuchSmallerThan(tol));
-  BOOST_CHECK((data->Lxx - Lxx).isMuchSmallerThan(tol));
-  BOOST_CHECK((data->Lxu - Lxu).isMuchSmallerThan(tol));
-  BOOST_CHECK((data->Luu - Luu).isMuchSmallerThan(tol));
-}
-
-void test_calc_diff_no_recalc() {
-  // setup the test
-  StateModelFactory state_factory;
-  crocoddyl::CostModelSum model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
-      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
-  // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state = model.get_state();
-  pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
-  pinocchio::Data pinocchio_data(pinocchio_model);
-  crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
-
-  // create and add some cost objects
-  std::vector<boost::shared_ptr<crocoddyl::CostModelAbstract> > models;
-  std::vector<boost::shared_ptr<crocoddyl::CostDataAbstract> > datas;
-  for (std::size_t i = 0; i < 5; ++i) {
-    std::ostringstream os;
-    os << "random_cost_" << i;
-    const boost::shared_ptr<crocoddyl::CostModelAbstract>& m = create_random_cost();
-    model.addCost(os.str(), m, 1.);
-    models.push_back(m);
-    datas.push_back(m->createData(&shared_data));
-  }
-
-  // create the data of the cost sum
-  const boost::shared_ptr<crocoddyl::CostDataSum>& data = model.createData(&shared_data);
-
-  // compute the cost sum data for the case when all costs are defined as active
-  const Eigen::VectorXd& x1 = state->rand();
-  const Eigen::VectorXd& u1 = Eigen::VectorXd::Random(model.get_nu());
-  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x1);
-  model.calcDiff(data, x1, u1);
-
-  // check that the cost has been filled
-  BOOST_CHECK(data->cost == 0.);
-
-  // check the cost against single cost computations
-  Eigen::VectorXd Lx = Eigen::VectorXd::Zero(state->get_ndx());
-  Eigen::VectorXd Lu = Eigen::VectorXd::Zero(model.get_nu());
-  Eigen::MatrixXd Lxx = Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx());
-  Eigen::MatrixXd Lxu = Eigen::MatrixXd::Zero(state->get_ndx(), model.get_nu());
-  Eigen::MatrixXd Luu = Eigen::MatrixXd::Zero(model.get_nu(), model.get_nu());
-  for (std::size_t i = 0; i < 5; ++i) {
-    models[i]->calcDiff(datas[i], x1, u1);
-    Lx += datas[i]->Lx;
-    Lu += datas[i]->Lu;
-    Lxx += datas[i]->Lxx;
-    Lxu += datas[i]->Lxu;
-    Luu += datas[i]->Luu;
-  }
-  double tol = 1e-9;
-  BOOST_CHECK(data->cost == 0);
-  BOOST_CHECK((data->Lx - Lx).isMuchSmallerThan(tol));
-  BOOST_CHECK((data->Lu - Lu).isMuchSmallerThan(tol));
-  BOOST_CHECK((data->Lxx - Lxx).isMuchSmallerThan(tol));
-  BOOST_CHECK((data->Lxu - Lxu).isMuchSmallerThan(tol));
-  BOOST_CHECK((data->Luu - Luu).isMuchSmallerThan(tol));
-
-  // compute the cost sum data for the case when the first three costs are defined as active
-  model.changeCostStatus("random_cost_3", false);
-  model.changeCostStatus("random_cost_4", false);
-  const Eigen::VectorXd& x2 = state->rand();
-  const Eigen::VectorXd& u2 = Eigen::VectorXd::Random(model.get_nu());
-  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x1);
-  model.calcDiff(data, x2, u2);
-  Lx.setZero();
-  Lu.setZero();
-  Lxx.setZero();
-  Lxu.setZero();
-  Luu.setZero();
-  for (std::size_t i = 0; i < 3; ++i) {  // we need to update data because this costs are active
-    models[i]->calcDiff(datas[i], x2, u2);
-    Lx += datas[i]->Lx;
-    Lu += datas[i]->Lu;
-    Lxx += datas[i]->Lxx;
-    Lxu += datas[i]->Lxu;
-    Luu += datas[i]->Luu;
-  }
-  BOOST_CHECK(data->cost == 0.);
-  BOOST_CHECK((data->Lx - Lx).isMuchSmallerThan(tol));
-  BOOST_CHECK((data->Lu - Lu).isMuchSmallerThan(tol));
-  BOOST_CHECK((data->Lxx - Lxx).isMuchSmallerThan(tol));
-  BOOST_CHECK((data->Lxu - Lxu).isMuchSmallerThan(tol));
-  BOOST_CHECK((data->Luu - Luu).isMuchSmallerThan(tol));
+  BOOST_CHECK(data->Lx == Lx);
+  BOOST_CHECK(data->Lu == Lu);
+  BOOST_CHECK(data->Lxx == Lxx);
+  BOOST_CHECK(data->Lxu == Lxu);
+  BOOST_CHECK(data->Luu == Luu);
 }
 
 void test_get_costs() {
@@ -423,7 +337,6 @@ void register_unit_tests() {
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_removeCost_error_message)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calcDiff)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_no_recalc)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_get_costs)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_get_nr)));
 }
