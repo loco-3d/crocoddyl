@@ -156,7 +156,7 @@ void test_calc() {
   model.calc(data, x1, u1);
 
   // check that the cost has been filled
-  BOOST_CHECK(data->cost != 0.);
+  BOOST_CHECK(data->cost > 0.);
 
   // check the cost against single cost computations
   double cost = 0;
@@ -215,15 +215,15 @@ void test_calcDiff() {
   model.calcDiff(data, x1, u1);
 
   // check that the cost has been filled
-  BOOST_CHECK(data->cost != 0.);
+  BOOST_CHECK(data->cost > 0.);
 
   // check the cost against single cost computations
   double cost = 0;
-  Eigen::VectorXd Lx;
-  Eigen::VectorXd Lu;
-  Eigen::MatrixXd Lxx;
-  Eigen::MatrixXd Lxu;
-  Eigen::MatrixXd Luu;
+  Eigen::VectorXd Lx = Eigen::VectorXd::Zero(state->get_ndx());
+  Eigen::VectorXd Lu = Eigen::VectorXd::Zero(model.get_nu());;
+  Eigen::MatrixXd Lxx = Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx());
+  Eigen::MatrixXd Lxu = Eigen::MatrixXd::Zero(state->get_ndx(), model.get_nu());
+  Eigen::MatrixXd Luu = Eigen::MatrixXd::Zero(model.get_nu(), model.get_nu());
   for (std::size_t i = 0; i < 5; ++i) {
     models[i]->calc(datas[i], x1, u1);
     models[i]->calcDiff(datas[i], x1, u1);
@@ -234,12 +234,13 @@ void test_calcDiff() {
     Lxu += datas[i]->Lxu;
     Luu += datas[i]->Luu;
   }
+  double tol = 1e-9;
   BOOST_CHECK(data->cost == cost);
-  BOOST_CHECK(data->Lx == Lx);
-  BOOST_CHECK(data->Lu == Lu);
-  BOOST_CHECK(data->Lxx == Lxx);
-  BOOST_CHECK(data->Lxu == Lxu);
-  BOOST_CHECK(data->Luu == Luu);
+  BOOST_CHECK((data->Lx - Lx).isMuchSmallerThan(tol));
+  BOOST_CHECK((data->Lu - Lu).isMuchSmallerThan(tol));
+  BOOST_CHECK((data->Lxx - Lxx).isMuchSmallerThan(tol));
+  BOOST_CHECK((data->Lxu - Lxu).isMuchSmallerThan(tol));
+  BOOST_CHECK((data->Luu - Luu).isMuchSmallerThan(tol));
 
   // compute the cost sum data for the case when the first three costs are defined as active
   model.changeCostStatus("random_cost_3", false);
@@ -266,11 +267,11 @@ void test_calcDiff() {
     Luu += datas[i]->Luu;
   }
   BOOST_CHECK(data->cost == cost);
-  BOOST_CHECK(data->Lx == Lx);
-  BOOST_CHECK(data->Lu == Lu);
-  BOOST_CHECK(data->Lxx == Lxx);
-  BOOST_CHECK(data->Lxu == Lxu);
-  BOOST_CHECK(data->Luu == Luu);
+  BOOST_CHECK((data->Lx - Lx).isMuchSmallerThan(tol));
+  BOOST_CHECK((data->Lu - Lu).isMuchSmallerThan(tol));
+  BOOST_CHECK((data->Lxx - Lxx).isMuchSmallerThan(tol));
+  BOOST_CHECK((data->Lxu - Lxu).isMuchSmallerThan(tol));
+  BOOST_CHECK((data->Luu - Luu).isMuchSmallerThan(tol));
 }
 
 void test_calc_diff_no_recalc() {
@@ -309,11 +310,11 @@ void test_calc_diff_no_recalc() {
   BOOST_CHECK(data->cost == 0.);
 
   // check the cost against single cost computations
-  Eigen::VectorXd Lx;
-  Eigen::VectorXd Lu;
-  Eigen::MatrixXd Lxx;
-  Eigen::MatrixXd Lxu;
-  Eigen::MatrixXd Luu;
+  Eigen::VectorXd Lx = Eigen::VectorXd::Zero(state->get_ndx());
+  Eigen::VectorXd Lu = Eigen::VectorXd::Zero(model.get_nu());;
+  Eigen::MatrixXd Lxx = Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx());
+  Eigen::MatrixXd Lxu = Eigen::MatrixXd::Zero(state->get_ndx(), model.get_nu());
+  Eigen::MatrixXd Luu = Eigen::MatrixXd::Zero(model.get_nu(), model.get_nu());
   for (std::size_t i = 0; i < 5; ++i) {
     models[i]->calcDiff(datas[i], x1, u1);
     Lx += datas[i]->Lx;
@@ -322,12 +323,13 @@ void test_calc_diff_no_recalc() {
     Lxu += datas[i]->Lxu;
     Luu += datas[i]->Luu;
   }
+  double tol = 1e-9;
   BOOST_CHECK(data->cost == 0);
-  BOOST_CHECK(data->Lx == Lx);
-  BOOST_CHECK(data->Lu == Lu);
-  BOOST_CHECK(data->Lxx == Lxx);
-  BOOST_CHECK(data->Lxu == Lxu);
-  BOOST_CHECK(data->Luu == Luu);
+  BOOST_CHECK((data->Lx - Lx).isMuchSmallerThan(tol));
+  BOOST_CHECK((data->Lu - Lu).isMuchSmallerThan(tol));
+  BOOST_CHECK((data->Lxx - Lxx).isMuchSmallerThan(tol));
+  BOOST_CHECK((data->Lxu - Lxu).isMuchSmallerThan(tol));
+  BOOST_CHECK((data->Luu - Luu).isMuchSmallerThan(tol));
 
   // compute the cost sum data for the case when the first three costs are defined as active
   model.changeCostStatus("random_cost_3", false);
@@ -350,11 +352,11 @@ void test_calc_diff_no_recalc() {
     Luu += datas[i]->Luu;
   }
   BOOST_CHECK(data->cost == 0.);
-  BOOST_CHECK(data->Lx == Lx);
-  BOOST_CHECK(data->Lu == Lu);
-  BOOST_CHECK(data->Lxx == Lxx);
-  BOOST_CHECK(data->Lxu == Lxu);
-  BOOST_CHECK(data->Luu == Luu);
+  BOOST_CHECK((data->Lx - Lx).isMuchSmallerThan(tol));
+  BOOST_CHECK((data->Lu - Lu).isMuchSmallerThan(tol));
+  BOOST_CHECK((data->Lxx - Lxx).isMuchSmallerThan(tol));
+  BOOST_CHECK((data->Lxu - Lxu).isMuchSmallerThan(tol));
+  BOOST_CHECK((data->Luu - Luu).isMuchSmallerThan(tol));
 }
 
 void test_get_costs() {
