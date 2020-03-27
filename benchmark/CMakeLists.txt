@@ -3,6 +3,7 @@ SET(${PROJECT_NAME}_BENCHMARK
   unicycle
   lqr
   arm-manipulation
+  arm-manipulation-cg
   quadrupedal-gaits
   )
 
@@ -12,18 +13,21 @@ FOREACH(BENCHMARK_NAME ${${PROJECT_NAME}_BENCHMARK})
   ADD_CUSTOM_TARGET("benchmarks-cpp-${BENCHMARK_NAME}"
     ${BENCHMARK_NAME} \${INPUT})
 ENDFOREACH(BENCHMARK_NAME ${${PROJECT_NAME}_BENCHMARK})
+TARGET_LINK_LIBRARIES(arm-manipulation-cg ${CMAKE_DL_LIBS})
 
-SET(${PROJECT_NAME}_BENCHMARK_PYTHON
-  unicycle
-  lqr
-  arm_manipulation
-  bipedal_walk
-  quadrupedal_gaits
-  )
-
-FOREACH(BENCHMARK_NAME ${${PROJECT_NAME}_BENCHMARK_PYTHON})
-  PYTHON_BUILD(. "${BENCHMARK_NAME}.py")
-  ADD_CUSTOM_TARGET("benchmarks-py-${BENCHMARK_NAME}"
-    ${CMAKE_COMMAND} -E env PYTHONPATH=$ENV{PYTHONPATH}:${PROJECT_BINARY_DIR}/bindings/python
-    ${PYTHON_EXECUTABLE} -c "from ${BENCHMARK_NAME} import *" \${INPUT})
-ENDFOREACH(BENCHMARK_NAME ${${PROJECT_NAME}_BENCHMARK_PYTHON})
+IF(BUILD_PYTHON_INTERFACE)
+  SET(${PROJECT_NAME}_BENCHMARK_PYTHON
+    unicycle
+    lqr
+    arm_manipulation
+    bipedal_walk
+    quadrupedal_gaits
+    )
+  
+  FOREACH(BENCHMARK_NAME ${${PROJECT_NAME}_BENCHMARK_PYTHON})
+    PYTHON_BUILD(. "${BENCHMARK_NAME}.py")
+    ADD_CUSTOM_TARGET("benchmarks-py-${BENCHMARK_NAME}"
+      ${CMAKE_COMMAND} -E env PYTHONPATH=$ENV{PYTHONPATH}:${PROJECT_BINARY_DIR}/bindings/python
+      ${PYTHON_EXECUTABLE} -c "from ${BENCHMARK_NAME} import *" \${INPUT})
+  ENDFOREACH(BENCHMARK_NAME ${${PROJECT_NAME}_BENCHMARK_PYTHON})
+ENDIF(BUILD_PYTHON_INTERFACE)
