@@ -12,45 +12,48 @@
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/core/actuation/squashing-base.hpp"
-#include "crocoddyl/core/data/squashing.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
+
 template <typename _Scalar>
-class ActuationModelSquashingTpl : public ActuationModelAbstractTpl<_Scalar> {
+class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActuationModelAbstractTpl<Scalar> Base;
   typedef ActuationModelAbstractTpl<Scalar> ActuationModelAbstract;
   typedef ActuationDataAbstractTpl<Scalar> ActuationDataAbstract;
-  typedef ActuationDataSquashingTpl<Scalar> ActuationDataSquashing;
+  typedef ActuationSquashingDataTpl<Scalar> ActuationSquashingData;
   typedef SquashingModelAbstractTpl<Scalar> SquashingModelAbstract;
-  typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
+  explicit ActuationSquashingModelTpl(boost::shared_ptr<ActuationModelAbstract> actuation, boost::shared_ptr<SquashingModelAbstract> squashing, const std::size_t& nu) : Base(actuation->get_state(), nu), squashing_(squashing), actuation_(actuation) {};
   
-  explicit ActuationModelSquashingTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActuationModelAbstract> actuation, boost::shared_ptr<SquashingModelAbstract> squashing, const std::size_t& nu) : Base(state, nu), squashing_(squashing), actuation_(actuation) {};
-  
-  ~ActuationModelSquashingTpl(){};
+  ~ActuationSquashingModelTpl(){};
 
-  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u)
+  virtual void calc(const boost::shared_ptr<ActuationSquashingData>& data, const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u)
   {
-
+    squashing_->calc(data->squashing, u);
+    actuation_->calc(data->actuation, data->squashing.u);
+    data->tau = data->actuation.tau;
   };
   
-  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u)
+  virtual void calcDiff(const boost::shared_ptr<ActuationSquashingData>& data, const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u)
   {
-
+    squashing_->calcDiff(data->squashing, u);
+    squashing_->calcDiff(data->actuation, data->squashing.u);
+    data->dtau_du = data->actuation.dtau_du * data->squashing.du_ds;
   };
 
-  boost::shared_ptr<ActuationDataSquashing> createData() {
-    boost::shared_ptr<ActuationDataSquashing> data = boost::make_shared<ActuationDataSquashing>(this);
+  boost::shared_ptr<ActuationSquashingData> createData() {
+    return boost::make_shared<ActuationSquashingData>(this);
   };
 
-  const boost::shared_ptr<SquashingModelAbstract>& get_squashing() const;
-  const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
+  const boost::shared_ptr<SquashingModelAbstract>& get_squashing() const { return squashing_; };
+  const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const { return actuation_; };
 
  protected:
   boost::shared_ptr<SquashingModelAbstract> squashing_;
@@ -58,7 +61,7 @@ class ActuationModelSquashingTpl : public ActuationModelAbstractTpl<_Scalar> {
 };
 
 template <typename _Scalar>
-struct ActuationDataSquashingTpl : public ActuationDataAbstract {
+struct ActuationSquashingDataTpl : public ActuationDataAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -66,11 +69,11 @@ struct ActuationDataSquashingTpl : public ActuationDataAbstract {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  template <typename <typename Scalar> class Model>
-  explicit ActuationDataSquashingTpl(Model<Scalar>* const model)
+  template <template <typename Scalar> class Model>
+  explicit ActuationSquashingDataTpl(Model<Scalar>* const model)
       : ActuationDataAbstract(model), squashing(model->get_squashing()->createData()), actuation(model->get_actuation()->createData()) {}
   
-  ~ActuationDataSquashing() {}
+  ~ActuationSquashingDataTpl() {}
   
   ActuationDataAbstract actuation;
   SquashingDataAbstract squashing;
