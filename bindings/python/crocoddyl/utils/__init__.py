@@ -141,8 +141,9 @@ class SquashingSmoothSatDerived(crocoddyl.SquashingModelAbstract):
 
     def calcDiff(self, data, s):
         a = np.power(self.smooth * (self.u_ub - self.u_lb), 2)
-        du_ds = 0.5 * (np.multiply(np.power(a + np.power((s - self.u_lb), 2), -0.5), (s - self.u_lb)) -
-                       np.multiply(np.power(a + np.power((s - self.u_ub), 2), -0.5), (s - self.u_ub)))
+        du_ds = 0.5 * (np.multiply(np.power(a + np.power((s - self.u_lb), 2), -0.5),
+                                   (s - self.u_lb)) - np.multiply(np.power(a + np.power((s - self.u_ub), 2), -0.5),
+                                                                  (s - self.u_ub)))
         np.fill_diagonal(data.du_ds, du_ds)
 
 
@@ -598,8 +599,8 @@ class Contact3DDerived(crocoddyl.ContactModelAbstract):
         data.a0[:] = pinocchio.getFrameAcceleration(self.state.pinocchio, data.pinocchio,
                                                     self.xref.frame).linear + pinocchio.utils.cross(self.vw, self.vv)
         if self.gains[0] != 0.:
-            data.a0[:] += np.asscalar(self.gains[0]) * (
-                data.pinocchio.oMf[self.xref.frame].translation - self.xref.oxf)
+            data.a0[:] += np.asscalar(
+                self.gains[0]) * (data.pinocchio.oMf[self.xref.frame].translation - self.xref.oxf)
         if self.gains[1] != 0.:
             data.a0[:] += np.asscalar(self.gains[1]) * self.vv
 
