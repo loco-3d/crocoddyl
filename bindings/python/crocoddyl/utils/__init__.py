@@ -127,6 +127,25 @@ class StateMultibodyDerived(crocoddyl.StateAbstract):
             return np.matrix(scl.block_diag(np.linalg.inv(Jdq), np.eye(self.nv)))
 
 
+class SquashingSmoothSatDerived(crocoddyl.SquashingModelAbstract):
+    def __init__(self, u_lb, u_ub, ns):
+        self.u_lb = u_lb
+        self.u_ub = u_ub
+        self.smooth = 0.1
+        crocoddyl.SquashingModelAbstract.__init__(self, ns)
+
+    def calc(self, data, s):
+        a = np.power(self.smooth * (self.u_ub - self.u_lb), 2)
+        data.u = 0.5 * (self.u_lb + np.power(a + np.power(s - self.u_lb, 2), 0.5)) + \
+            0.5 * (self.u_ub - np.power(a + np.power(s - self.u_ub, 2), 0.5))
+
+    def calcDiff(self, data, s):
+        a = np.power(self.smooth * (self.u_ub - self.u_lb), 2)
+        du_ds = 0.5 * (np.multiply(np.power(a + np.power((s - self.u_lb), 2), -0.5), (s - self.u_lb)) -
+                       np.multiply(np.power(a + np.power((s - self.u_ub), 2), -0.5), (s - self.u_ub)))
+        np.fill_diagonal(data.du_ds, du_ds)
+
+
 class FreeFloatingActuationDerived(crocoddyl.ActuationModelAbstract):
     def __init__(self, state):
         assert (state.pinocchio.joints[1].shortname() == 'JointModelFreeFlyer')
