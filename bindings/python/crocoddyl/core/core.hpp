@@ -20,6 +20,8 @@ void exposeActuationAbstract();
 void exposeActionAbstract();
 void exposeDifferentialActionAbstract();
 void exposeActivationAbstract();
+void exposeSquashingAbstract();
+void exposeSquashingSmoothSat();
 void exposeDataCollectorActuation();
 void exposeIntegratedActionEuler();
 void exposeActionNumDiff();

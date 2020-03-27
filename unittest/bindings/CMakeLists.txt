@@ -11,6 +11,7 @@ SET(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
   friction_cone_cost
   momemtum_cost
   impulse_com_cost
+  squashing
   )
 
 FOREACH(TEST ${${PROJECT_NAME}_PYTHON_BINDINGS_TESTS})
