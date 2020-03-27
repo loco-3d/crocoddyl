@@ -43,7 +43,7 @@ class ActivationModelWeightedQuadraticBarrierTpl : public ActivationModelAbstrac
     d->rub_max_ = (r - bounds_.ub).array().max(0.);
     d->rlb_min_.array() *= weights_.array();
     d->rub_max_.array() *= weights_.array();
-    data->a_value = 0.5 * d->rlb_min_.matrix().squaredNorm() + 0.5 * d->rub_max_.matrix().squaredNorm();
+    data->a_value = Scalar(0.5) * d->rlb_min_.matrix().squaredNorm() + Scalar(0.5) * d->rub_max_.matrix().squaredNorm();
   };
 
   virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {

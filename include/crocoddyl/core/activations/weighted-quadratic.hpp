@@ -39,7 +39,7 @@ class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar
     boost::shared_ptr<ActivationDataWeightedQuad> d = boost::static_pointer_cast<ActivationDataWeightedQuad>(data);
 
     d->Wr = weights_.cwiseProduct(r);
-    data->a_value = 0.5 * r.dot(d->Wr);
+    data->a_value = Scalar(0.5) * r.dot(d->Wr);
   };
 
   virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
