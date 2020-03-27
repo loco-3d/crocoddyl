@@ -86,6 +86,16 @@ class ActuationDataAbstractTpl;
 template <typename Scalar>
 class ActuationModelAbstractTpl;
 
+// Squashing
+template <typename Scalar>
+class SquashingDataAbstractTpl;
+
+template <typename Scalar>
+class SquashingModelAbstractTpl;
+
+template <typename Scalar>
+class SquashingModelSmoothSatTpl;
+
 // shooting
 template <typename Scalar>
 class ShootingProblemTpl;
@@ -163,6 +173,10 @@ typedef StateAbstractTpl<double> StateAbstract;
 
 typedef ActuationDataAbstractTpl<double> ActuationDataAbstract;
 typedef ActuationModelAbstractTpl<double> ActuationModelAbstract;
+
+typedef SquashingDataAbstractTpl<double> SquashingDataAbstract;
+typedef SquashingModelAbstractTpl<double> SquashingModelAbstract;
+typedef SquashingModelSmoothSatTpl<double> SquashingModelSmoothSat;
 
 typedef ShootingProblemTpl<double> ShootingProblem;
 
