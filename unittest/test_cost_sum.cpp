@@ -220,7 +220,7 @@ void test_calcDiff() {
   // check the cost against single cost computations
   double cost = 0;
   Eigen::VectorXd Lx = Eigen::VectorXd::Zero(state->get_ndx());
-  Eigen::VectorXd Lu = Eigen::VectorXd::Zero(model.get_nu());;
+  Eigen::VectorXd Lu = Eigen::VectorXd::Zero(model.get_nu());
   Eigen::MatrixXd Lxx = Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx());
   Eigen::MatrixXd Lxu = Eigen::MatrixXd::Zero(state->get_ndx(), model.get_nu());
   Eigen::MatrixXd Luu = Eigen::MatrixXd::Zero(model.get_nu(), model.get_nu());
@@ -311,7 +311,7 @@ void test_calc_diff_no_recalc() {
 
   // check the cost against single cost computations
   Eigen::VectorXd Lx = Eigen::VectorXd::Zero(state->get_ndx());
-  Eigen::VectorXd Lu = Eigen::VectorXd::Zero(model.get_nu());;
+  Eigen::VectorXd Lu = Eigen::VectorXd::Zero(model.get_nu());
   Eigen::MatrixXd Lxx = Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx());
   Eigen::MatrixXd Lxu = Eigen::MatrixXd::Zero(state->get_ndx(), model.get_nu());
   Eigen::MatrixXd Luu = Eigen::MatrixXd::Zero(model.get_nu(), model.get_nu());
