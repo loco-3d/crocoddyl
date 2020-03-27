@@ -1,7 +1,6 @@
 import sys
 import unittest
 
-import example_robot_data
 import numpy as np
 
 import crocoddyl
