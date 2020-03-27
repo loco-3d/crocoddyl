@@ -137,6 +137,12 @@ class StateNumDiffTpl;
 template <typename Scalar>
 class ActuationModelNumDiffTpl;
 
+template<typename Scalar>
+class ActionModelCodeGenTpl;
+
+template<typename Scalar>
+struct ActionDataCodeGenTpl;
+
 /********************Template Instantiation*************/
 typedef DifferentialActionModelAbstractTpl<double> DifferentialActionModelAbstract;
 typedef DifferentialActionDataAbstractTpl<double> DifferentialActionDataAbstract;
