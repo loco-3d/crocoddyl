@@ -75,19 +75,23 @@ void test_addImpulse() {
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> rand_impulse_1 = create_random_impulse();
   model.addImpulse("random_impulse_1", rand_impulse_1);
   BOOST_CHECK(model.get_ni() == rand_impulse_1->get_ni());
+  BOOST_CHECK(model.get_ni_total() == rand_impulse_1->get_ni());
 
   // add an inactive impulse
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> rand_impulse_2 = create_random_impulse();
   model.addImpulse("random_impulse_2", rand_impulse_2, false);
   BOOST_CHECK(model.get_ni() == rand_impulse_1->get_ni());
+  BOOST_CHECK(model.get_ni_total() == rand_impulse_1->get_ni() + rand_impulse_2->get_ni());
 
   // change the random impulse 2 status
   model.changeImpulseStatus("random_impulse_2", true);
   BOOST_CHECK(model.get_ni() == rand_impulse_1->get_ni() + rand_impulse_2->get_ni());
+  BOOST_CHECK(model.get_ni_total() == rand_impulse_1->get_ni() + rand_impulse_2->get_ni());
 
   // change the random impulse 1 status
   model.changeImpulseStatus("random_impulse_1", false);
   BOOST_CHECK(model.get_ni() == rand_impulse_2->get_ni());
+  BOOST_CHECK(model.get_ni_total() == rand_impulse_1->get_ni() + rand_impulse_2->get_ni());
 }
 
 void test_addImpulse_error_message() {
@@ -164,28 +168,54 @@ void test_calc() {
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
-  for (unsigned i = 0; i < 5; ++i) {
+  std::vector<boost::shared_ptr<crocoddyl::ImpulseModelAbstract> > models;
+  std::vector<boost::shared_ptr<crocoddyl::ImpulseDataAbstract> > datas;
+  for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_impulse_" << i;
-    model.addImpulse(os.str(), create_random_impulse());
+    const boost::shared_ptr<crocoddyl::ImpulseModelAbstract>& m = create_random_impulse();
+    model.addImpulse(os.str(), m);
+    models.push_back(m);
+    datas.push_back(m->createData(&pinocchio_data));
   }
 
   // create the data of the multiple-impulses
   boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data = model.createData(&pinocchio_data);
 
-  // Compute the jacobian and check that the impulse models fetch it.
-  Eigen::VectorXd x = model.get_state()->rand();
-  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
+  // compute the multiple contact data for the case when all impulses are defined as active
+  Eigen::VectorXd x1 = model.get_state()->rand();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x1);
+  model.calc(data, x1);
 
-  // pinocchio data have not been filled so the results of this operation are
-  // null matrices
-  model.calc(data, x);
-
-  // Check that only the Jacobian has been filled
+  // check that only the Jacobian has been filled
   BOOST_CHECK(!data->Jc.isZero());
   BOOST_CHECK(data->dv0_dq.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(data->df_dq.isZero());
+
+  // check Jc against single impulse computations
+  std::size_t ni = 0;
+  const std::size_t& nv = model.get_state()->get_nv();
+  for (std::size_t i = 0; i < 5; ++i) {
+    const std::size_t& ni_i = models[i]->get_ni();
+    models[i]->calc(datas[i], x1);
+    BOOST_CHECK(data->Jc.block(ni, 0, ni_i, nv) == datas[i]->Jc);
+    ni += ni_i;
+  }
+  ni = 0;
+
+  // compute the multiple impulse data for the case when the first three impulses are defined as active
+  model.changeImpulseStatus("random_impulse_3", false);
+  model.changeImpulseStatus("random_impulse_4", false);
+  Eigen::VectorXd x2 = model.get_state()->rand();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x2);
+  model.calc(data, x2);
+  for (std::size_t i = 0; i < 5; ++i) {
+    const std::size_t& ni_i = models[i]->get_ni();
+    if (i < 3) {  // we need to update data because this impulses are active
+      models[i]->calc(datas[i], x2);
+    }
+    BOOST_CHECK(data->Jc.block(ni, 0, ni_i, nv) == datas[i]->Jc);
+    ni += ni_i;
+  }
 }
 
 void test_calc_diff() {
@@ -199,29 +229,60 @@ void test_calc_diff() {
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
-  for (unsigned i = 0; i < 5; ++i) {
+  std::vector<boost::shared_ptr<crocoddyl::ImpulseModelAbstract> > models;
+  std::vector<boost::shared_ptr<crocoddyl::ImpulseDataAbstract> > datas;
+  for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_impulse_" << i;
-    model.addImpulse(os.str(), create_random_impulse());
+    const boost::shared_ptr<crocoddyl::ImpulseModelAbstract>& m = create_random_impulse();
+    model.addImpulse(os.str(), m);
+    models.push_back(m);
+    datas.push_back(m->createData(&pinocchio_data));
   }
 
   // create the data of the multiple-impulses
   boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data = model.createData(&pinocchio_data);
 
-  // Compute the jacobian and check that the impulse models fetch it.
-  Eigen::VectorXd x = model.get_state()->rand();
-  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
-
-  // pinocchio data have been filled so the results of this operation are
-  // none null matrices
-  model.calc(data, x);
-  model.calcDiff(data, x);
+  // compute the multiple contact data for the case when all impulses are defined as active
+  Eigen::VectorXd x1 = model.get_state()->rand();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x1);
+  model.calc(data, x1);
+  model.calcDiff(data, x1);
 
   // Check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(!data->Jc.isZero());
   BOOST_CHECK(!data->dv0_dq.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(data->df_dq.isZero());
+
+  // check Jc against single impulse computations
+  std::size_t ni = 0;
+  const std::size_t& nv = model.get_state()->get_nv();
+  for (std::size_t i = 0; i < 5; ++i) {
+    const std::size_t& ni_i = models[i]->get_ni();
+    models[i]->calc(datas[i], x1);
+    models[i]->calcDiff(datas[i], x1);
+    BOOST_CHECK(data->Jc.block(ni, 0, ni_i, nv) == datas[i]->Jc);
+    BOOST_CHECK(data->dv0_dq.block(ni, 0, ni_i, nv) == datas[i]->dv0_dq);
+    ni += ni_i;
+  }
+  ni = 0;
+
+  // compute the multiple impulse data for the case when the first three impulses are defined as active
+  model.changeImpulseStatus("random_impulse_3", false);
+  model.changeImpulseStatus("random_impulse_4", false);
+  Eigen::VectorXd x2 = model.get_state()->rand();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x2);
+  model.calc(data, x2);
+  model.calcDiff(data, x2);
+  for (std::size_t i = 0; i < 5; ++i) {
+    const std::size_t& ni_i = models[i]->get_ni();
+    if (i < 3) {  // we need to update data because this impulses are active
+      models[i]->calc(datas[i], x2);
+      models[i]->calcDiff(datas[i], x2);
+    }
+    BOOST_CHECK(data->Jc.block(ni, 0, ni_i, nv) == datas[i]->Jc);
+    BOOST_CHECK(data->dv0_dq.block(ni, 0, ni_i, nv) == datas[i]->dv0_dq);
+    ni += ni_i;
+  }
 }
 
 void test_calc_diff_no_recalc() {
@@ -235,28 +296,56 @@ void test_calc_diff_no_recalc() {
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
-  for (unsigned i = 0; i < 5; ++i) {
+  std::vector<boost::shared_ptr<crocoddyl::ImpulseModelAbstract> > models;
+  std::vector<boost::shared_ptr<crocoddyl::ImpulseDataAbstract> > datas;
+  for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_impulse_" << i;
-    model.addImpulse(os.str(), create_random_impulse());
+    const boost::shared_ptr<crocoddyl::ImpulseModelAbstract>& m = create_random_impulse();
+    model.addImpulse(os.str(), m);
+    models.push_back(m);
+    datas.push_back(m->createData(&pinocchio_data));
   }
 
   // create the data of the multiple-impulses
   boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data = model.createData(&pinocchio_data);
 
-  // Compute the jacobian and check that the impulse models fetch it.
-  Eigen::VectorXd x = model.get_state()->rand();
-  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
-
-  // pinocchio data have not been filled so the results of this operation are
-  // null matrices
-  model.calcDiff(data, x);
+  // compute the multiple contact data for the case when all impulses are defined as active
+  Eigen::VectorXd x1 = model.get_state()->rand();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x1);
+  model.calcDiff(data, x1);
 
   // Check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(data->Jc.isZero());
   BOOST_CHECK(!data->dv0_dq.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(data->df_dq.isZero());
+
+  // check Jc against single impulse computations
+  std::size_t ni = 0;
+  const std::size_t& nv = model.get_state()->get_nv();
+  for (std::size_t i = 0; i < 5; ++i) {
+    const std::size_t& ni_i = models[i]->get_ni();
+    models[i]->calcDiff(datas[i], x1);
+    BOOST_CHECK(data->Jc.block(ni, 0, ni_i, nv).isZero());
+    BOOST_CHECK(data->dv0_dq.block(ni, 0, ni_i, nv) == datas[i]->dv0_dq);
+    ni += ni_i;
+  }
+  ni = 0;
+
+  // compute the multiple impulse data for the case when the first three impulses are defined as active
+  model.changeImpulseStatus("random_impulse_3", false);
+  model.changeImpulseStatus("random_impulse_4", false);
+  Eigen::VectorXd x2 = model.get_state()->rand();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x2);
+  model.calcDiff(data, x2);
+  for (std::size_t i = 0; i < 5; ++i) {
+    const std::size_t& ni_i = models[i]->get_ni();
+    if (i < 3) {  // we need to update data because this impulses are active
+      models[i]->calcDiff(datas[i], x2);
+    }
+    BOOST_CHECK(data->Jc.block(ni, 0, ni_i, nv).isZero());
+    BOOST_CHECK(data->dv0_dq.block(ni, 0, ni_i, nv) == datas[i]->dv0_dq);
+    ni += ni_i;
+  }
 }
 
 void test_updateForce() {
@@ -292,12 +381,10 @@ void test_updateForce() {
   // Check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(data->Jc.isZero());
   BOOST_CHECK(data->dv0_dq.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
   crocoddyl::ImpulseModelMultiple::ImpulseDataContainer::iterator it_d, end_d;
   for (it_d = data->impulses.begin(), end_d = data->impulses.end(); it_d != end_d; ++it_d) {
     BOOST_CHECK(!it_d->second->f.toVector().isZero());
   }
-  BOOST_CHECK(data->df_dq.isZero());
 }
 
 void test_updateVelocityDiff() {
@@ -479,6 +566,7 @@ void register_unit_tests() {
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_removeImpulse_error_message)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_no_recalc)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_updateForce)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_updateVelocityDiff)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_get_impulses)));

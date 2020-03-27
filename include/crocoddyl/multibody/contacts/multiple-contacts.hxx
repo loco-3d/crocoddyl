@@ -11,11 +11,11 @@ namespace crocoddyl {
 template <typename Scalar>
 ContactModelMultipleTpl<Scalar>::ContactModelMultipleTpl(boost::shared_ptr<StateMultibody> state,
                                                          const std::size_t& nu)
-    : state_(state), nc_(0), nu_(nu) {}
+    : state_(state), nc_(0), nc_total_(0), nu_(nu) {}
 
 template <typename Scalar>
 ContactModelMultipleTpl<Scalar>::ContactModelMultipleTpl(boost::shared_ptr<StateMultibody> state)
-    : state_(state), nc_(0), nu_(state->get_nv()) {}
+    : state_(state), nc_(0), nc_total_(0), nu_(state->get_nv()) {}
 
 template <typename Scalar>
 ContactModelMultipleTpl<Scalar>::~ContactModelMultipleTpl() {}
@@ -33,6 +33,9 @@ void ContactModelMultipleTpl<Scalar>::addContact(const std::string& name,
     std::cout << "Warning: this contact item already existed, we cannot add it" << std::endl;
   } else if (active) {
     nc_ += contact->get_nc();
+    nc_total_ += contact->get_nc();
+  } else if (!active) {
+    nc_total_ += contact->get_nc();
   }
 }
 
@@ -41,6 +44,7 @@ void ContactModelMultipleTpl<Scalar>::removeContact(const std::string& name) {
   typename ContactModelContainer::iterator it = contacts_.find(name);
   if (it != contacts_.end()) {
     nc_ -= it->second->contact->get_nc();
+    nc_total_ -= it->second->contact->get_nc();
     contacts_.erase(it);
   } else {
     std::cout << "Warning: this contact item doesn't exist, we cannot remove it" << std::endl;
@@ -232,6 +236,11 @@ const typename ContactModelMultipleTpl<Scalar>::ContactModelContainer& ContactMo
 template <typename Scalar>
 const std::size_t& ContactModelMultipleTpl<Scalar>::get_nc() const {
   return nc_;
+}
+
+template <typename Scalar>
+const std::size_t& ContactModelMultipleTpl<Scalar>::get_nc_total() const {
+  return nc_total_;
 }
 
 template <typename Scalar>

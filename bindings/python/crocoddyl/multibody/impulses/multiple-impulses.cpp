@@ -35,14 +35,13 @@ void exposeImpulseMultiple() {
 
   bp::register_ptr_to_python<boost::shared_ptr<ImpulseItem> >();
 
-  bp::class_<ImpulseItem, boost::noncopyable>(
-      "ImpulseItem", "Describe a impulse item.\n\n",
-      bp::init<std::string, boost::shared_ptr<ImpulseModelAbstract>, bp::optional<bool> >(
-          bp::args("self", "name", "impulse", "active"),
-          "Initialize the impulse item.\n\n"
-          ":param name: impulse name\n"
-          ":param impulse: impulse model\n"
-          ":param active: True if the impulse is activated (default true)"))
+  bp::class_<ImpulseItem>("ImpulseItem", "Describe a impulse item.\n\n",
+                          bp::init<std::string, boost::shared_ptr<ImpulseModelAbstract>, bp::optional<bool> >(
+                              bp::args("self", "name", "impulse", "active"),
+                              "Initialize the impulse item.\n\n"
+                              ":param name: impulse name\n"
+                              ":param impulse: impulse model\n"
+                              ":param active: True if the impulse is activated (default true)"))
       .def_readwrite("name", &ImpulseItem::name, "impulse name")
       .add_property("impulse", bp::make_getter(&ImpulseItem::impulse, bp::return_value_policy<bp::return_by_value>()),
                     "impulse model")
@@ -51,11 +50,10 @@ void exposeImpulseMultiple() {
 
   bp::register_ptr_to_python<boost::shared_ptr<ImpulseModelMultiple> >();
 
-  bp::class_<ImpulseModelMultiple, boost::noncopyable>(
-      "ImpulseModelMultiple",
-      bp::init<boost::shared_ptr<StateMultibody> >(bp::args("self", "state"),
-                                                   "Initialize the multiple impulse model.\n\n"
-                                                   ":param state: state of the multibody system"))
+  bp::class_<ImpulseModelMultiple>("ImpulseModelMultiple", bp::init<boost::shared_ptr<StateMultibody> >(
+                                                               bp::args("self", "state"),
+                                                               "Initialize the multiple impulse model.\n\n"
+                                                               ":param state: state of the multibody system"))
       .def("addImpulse", &ImpulseModelMultiple::addImpulse,
            ImpulseModelMultiple_addImpulse_wrap(bp::args("self", "name", "impulse", "active"),
                                                 "Add an impulse item.\n\n"
@@ -112,15 +110,26 @@ void exposeImpulseMultiple() {
           "state of the multibody system")
       .add_property("ni",
                     bp::make_function(&ImpulseModelMultiple::get_ni, bp::return_value_policy<bp::return_by_value>()),
-                    "dimension of the total impulse vector");
+                    "dimension of the active impulse vector")
+      .add_property(
+          "ni_total",
+          bp::make_function(&ImpulseModelMultiple::get_ni_total, bp::return_value_policy<bp::return_by_value>()),
+          "dimension of the total impulse vector");
 
-  bp::class_<ImpulseDataMultiple, boost::shared_ptr<ImpulseDataMultiple>, bp::bases<ImpulseDataAbstract> >(
+  bp::register_ptr_to_python<boost::shared_ptr<ImpulseDataMultiple> >();
+
+  bp::class_<ImpulseDataMultiple>(
       "ImpulseDataMultiple", "Data class for multiple impulses.\n\n",
       bp::init<ImpulseModelMultiple*, pinocchio::Data*>(
           bp::args("self", "model", "data"),
-          "Create multiimpulse data.\n\n"
-          ":param model: multiimpulse model\n"
+          "Create multi-impulse data.\n\n"
+          ":param model: multi-impulse model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("Jc", bp::make_getter(&ImpulseDataMultiple::Jc, bp::return_internal_reference<>()),
+                    bp::make_setter(&ImpulseDataMultiple::Jc), "Jacobian for all impulses (active and inactive)")
+      .add_property("dv0_dq", bp::make_getter(&ImpulseDataMultiple::dv0_dq, bp::return_internal_reference<>()),
+                    bp::make_setter(&ImpulseDataMultiple::dv0_dq),
+                    "Jacobian of the previous impulse velocity (active and inactive)")
       .add_property("vnext", bp::make_getter(&ImpulseDataMultiple::vnext, bp::return_internal_reference<>()),
                     bp::make_setter(&ImpulseDataMultiple::vnext), "impulse velocity")
       .add_property("dvnext_dx", bp::make_getter(&ImpulseDataMultiple::dvnext_dx, bp::return_internal_reference<>()),

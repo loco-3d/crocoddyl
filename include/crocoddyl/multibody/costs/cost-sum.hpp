@@ -19,17 +19,22 @@
 
 namespace crocoddyl {
 
-template <typename Scalar>
+template <typename _Scalar>
 struct CostItemTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+  typedef _Scalar Scalar;
+  typedef CostModelAbstractTpl<Scalar> CostModelAbstract;
+
   CostItemTpl() {}
-  CostItemTpl(const std::string& name, boost::shared_ptr<CostModelAbstractTpl<Scalar> > cost, const Scalar& weight)
-      : name(name), cost(cost), weight(weight) {}
+  CostItemTpl(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, const Scalar& weight,
+              bool active = true)
+      : name(name), cost(cost), weight(weight), active(active) {}
 
   std::string name;
-  boost::shared_ptr<CostModelAbstractTpl<Scalar> > cost;
+  boost::shared_ptr<CostModelAbstract> cost;
   Scalar weight;
+  bool active;
 };
 
 template <typename _Scalar>
@@ -54,8 +59,10 @@ class CostModelSumTpl {
   explicit CostModelSumTpl(boost::shared_ptr<StateMultibody> state);
   ~CostModelSumTpl();
 
-  void addCost(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, const Scalar& weight);
+  void addCost(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, const Scalar& weight,
+               bool active = true);
   void removeCost(const std::string& name);
+  void changeCostStatus(const std::string& name, bool active);
 
   void calc(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
@@ -70,12 +77,14 @@ class CostModelSumTpl {
   const CostModelContainer& get_costs() const;
   const std::size_t& get_nu() const;
   const std::size_t& get_nr() const;
+  const std::size_t& get_nr_total() const;
 
  private:
   boost::shared_ptr<StateMultibody> state_;
   CostModelContainer costs_;
   std::size_t nu_;
   std::size_t nr_;
+  std::size_t nr_total_;
   VectorXs unone_;
 
 #ifdef PYTHON_BINDINGS
@@ -106,9 +115,6 @@ struct CostDataSumTpl {
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
-  typedef StateMultibodyTpl<Scalar> StateMultibody;
-  typedef CostModelAbstractTpl<Scalar> CostModelAbstract;
-  typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef CostItemTpl<Scalar> CostItem;
   typedef typename MathBase::VectorXs VectorXs;
