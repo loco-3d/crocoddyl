@@ -102,7 +102,7 @@ void CostModelControlTpl<Scalar>::set_referenceImpl(const std::type_info& ti, co
 template <typename Scalar>
 void CostModelControlTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
   if (ti == typeid(VectorXs)) {
-    Eigen::VectorXd& tmp = *static_cast<VectorXs*>(pv);
+    VectorXs& tmp = *static_cast<VectorXs*>(pv);
     tmp.resize(nu_);
     Eigen::Map<VectorXs> ref_map(static_cast<VectorXs*>(pv)->data(), nu_);
     for (std::size_t i = 0; i < nu_; ++i) {

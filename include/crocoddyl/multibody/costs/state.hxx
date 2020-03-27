@@ -177,7 +177,7 @@ void CostModelStateTpl<Scalar>::set_referenceImpl(const std::type_info& ti, cons
 template <typename Scalar>
 void CostModelStateTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
   if (ti == typeid(VectorXs)) {
-    Eigen::VectorXd& tmp = *static_cast<VectorXs*>(pv);
+    VectorXs& tmp = *static_cast<VectorXs*>(pv);
     tmp.resize(state_->get_nx());
     Eigen::Map<VectorXs> ref_map(static_cast<VectorXs*>(pv)->data(), state_->get_nx());
     for (std::size_t i = 0; i < state_->get_nx(); ++i) {
