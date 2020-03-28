@@ -20,7 +20,7 @@ INCLUDE(cmake/apple.cmake)
 
 # Print initial message
 MESSAGE("${PROJECT_DESCRIPTION}, version ${PROJECT_VERSION}")
-MESSAGE("Copyright (C) 2018-2019 CNRS-LAAS")
+MESSAGE("Copyright (C) 2018-2020 CNRS-LAAS")
 MESSAGE("Copyright (C) 2019-2020 University of Edinburgh")
 MESSAGE("All rights reserved.")
 MESSAGE("Released under the BSD 3-Clause License.")
@@ -45,7 +45,7 @@ OPTION(BUILD_EXAMPLES "Build the examples" ON)
 
 
 IF(ENABLE_VECTORIZATION)
-  SET(CMAKE_CXX_FLAGS "-march=native -mavx")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -mavx")
 ENDIF()
 
 COMPUTE_PROJECT_ARGS(PROJECT_ARGS LANGUAGES CXX)
@@ -56,9 +56,8 @@ APPLY_DEFAULT_APPLE_CONFIGURATION()
 
 # Add the different required and optional dependencies
 ADD_REQUIRED_DEPENDENCY("eigen3 >= 3.0.5")
-ADD_REQUIRED_DEPENDENCY("eigenpy >= 2.2.0")
 ADD_REQUIRED_DEPENDENCY("pinocchio >= 2.2.1")
-ADD_REQUIRED_DEPENDENCY("example-robot-data >= 3.1.2")
+ADD_COMPILE_DEPENDENCY("example-robot-data >= 3.1.2")
 ADD_OPTIONAL_DEPENDENCY("quadprog")
 ADD_OPTIONAL_DEPENDENCY("scipy")
 
@@ -84,7 +83,6 @@ if(OPENMP_FOUND AND BUILD_WITH_MULTITHREADS)
   LIST(APPEND CFLAGS_DEPENDENCIES "-DWITH_MULTITHREADING")
 ENDIF()
 
-
 SET(BOOST_REQUIERED_COMPONENTS filesystem serialization system)
 SET(BOOST_BUILD_COMPONENTS unit_test_framework)
 SET(BOOST_OPTIONAL_COMPONENTS "")
@@ -92,6 +90,7 @@ SET(BOOST_OPTIONAL_COMPONENTS "")
 IF(BUILD_PYTHON_INTERFACE)
   SET(BOOST_OPTIONAL_COMPONENTS ${BOOST_OPTIONAL_COMPONENTS} python)
   FINDPYTHON()
+  ADD_COMPILE_DEPENDENCY("eigenpy >= 2.2.0")
   INCLUDE_DIRECTORIES(SYSTEM ${PYTHON_INCLUDE_DIRS})
 ENDIF(BUILD_PYTHON_INTERFACE)
 
@@ -101,9 +100,7 @@ SEARCH_FOR_BOOST()
 # Path to boost headers
 INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIRS})
 
-
 # Include and add the main directory
-ADD_SUBDIRECTORY(unittest/python/${PROJECT_NAME})
 ADD_SUBDIRECTORY(src)
 
 # Build the Python interface
@@ -111,6 +108,7 @@ IF(BUILD_PYTHON_INTERFACE)
   # Include and add the bindings directory
   INCLUDE_DIRECTORIES(bindings)
   ADD_SUBDIRECTORY(bindings)
+  ADD_SUBDIRECTORY(unittest/python/${PROJECT_NAME})
 ENDIF(BUILD_PYTHON_INTERFACE)
 
 # Build the unit tests
