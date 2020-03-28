@@ -27,6 +27,7 @@ SET(${PROJECT_NAME}_CPP_TESTS
   # test_actuation
   test_activations
   test_costs
+  test_cost_sum
   test_contacts
   test_impulses
   test_multiple_contacts

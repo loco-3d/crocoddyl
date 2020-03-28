@@ -74,19 +74,23 @@ void test_addContact() {
   boost::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact_1 = create_random_contact();
   model.addContact("random_contact_1", rand_contact_1);
   BOOST_CHECK(model.get_nc() == rand_contact_1->get_nc());
+  BOOST_CHECK(model.get_nc_total() == rand_contact_1->get_nc());
 
   // add an inactive contact
   boost::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact_2 = create_random_contact();
   model.addContact("random_contact_2", rand_contact_2, false);
   BOOST_CHECK(model.get_nc() == rand_contact_1->get_nc());
+  BOOST_CHECK(model.get_nc_total() == rand_contact_1->get_nc() + rand_contact_2->get_nc());
 
   // change the random contact 2 status
   model.changeContactStatus("random_contact_2", true);
   BOOST_CHECK(model.get_nc() == rand_contact_1->get_nc() + rand_contact_2->get_nc());
+  BOOST_CHECK(model.get_nc_total() == rand_contact_1->get_nc() + rand_contact_2->get_nc());
 
   // change the random contact 1 status
   model.changeContactStatus("random_contact_1", false);
   BOOST_CHECK(model.get_nc() == rand_contact_2->get_nc());
+  BOOST_CHECK(model.get_nc_total() == rand_contact_1->get_nc() + rand_contact_2->get_nc());
 }
 
 void test_addContact_error_message() {
@@ -129,10 +133,12 @@ void test_removeContact() {
   boost::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact = create_random_contact();
   model.addContact("random_contact", rand_contact);
   BOOST_CHECK(model.get_nc() == rand_contact->get_nc());
+  BOOST_CHECK(model.get_nc_total() == rand_contact->get_nc());
 
   // remove the contact
   model.removeContact("random_contact");
   BOOST_CHECK(model.get_nc() == 0);
+  BOOST_CHECK(model.get_nc_total() == 0);
 }
 
 void test_removeContact_error_message() {
@@ -163,30 +169,57 @@ void test_calc() {
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some contact objects
-  for (unsigned i = 0; i < 5; ++i) {
+  std::vector<boost::shared_ptr<crocoddyl::ContactModelAbstract> > models;
+  std::vector<boost::shared_ptr<crocoddyl::ContactDataAbstract> > datas;
+  for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_contact_" << i;
-    model.addContact(os.str(), create_random_contact());
+    const boost::shared_ptr<crocoddyl::ContactModelAbstract>& m = create_random_contact();
+    model.addContact(os.str(), m);
+    models.push_back(m);
+    datas.push_back(m->createData(&pinocchio_data));
   }
 
   // create the data of the multiple-contacts
   boost::shared_ptr<crocoddyl::ContactDataMultiple> data = model.createData(&pinocchio_data);
 
-  // Compute the jacobian and check that the contact models fetch it.
-  Eigen::VectorXd x = model.get_state()->rand();
-  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
+  // compute the multiple contact data for the case when all contacts are defined as active
+  Eigen::VectorXd x1 = model.get_state()->rand();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x1);
+  model.calc(data, x1);
 
-  // pinocchio data have not been filled so the results of this operation are
-  // null matrices
-  model.calc(data, x);
-
-  // Check that only the Jacobian has been filled
+  // check that only the Jacobian has been filled
   BOOST_CHECK(!data->Jc.isZero());
   BOOST_CHECK(!data->a0.isZero());
   BOOST_CHECK(data->da0_dx.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(data->df_dx.isZero());
-  BOOST_CHECK(data->df_du.isZero());
+
+  // check Jc and a0 against single contact computations
+  std::size_t nc = 0;
+  const std::size_t& nv = model.get_state()->get_nv();
+  for (std::size_t i = 0; i < 5; ++i) {
+    const std::size_t& nc_i = models[i]->get_nc();
+    models[i]->calc(datas[i], x1);
+    BOOST_CHECK(data->Jc.block(nc, 0, nc_i, nv) == datas[i]->Jc);
+    BOOST_CHECK(data->a0.segment(nc, nc_i) == datas[i]->a0);
+    nc += nc_i;
+  }
+  nc = 0;
+
+  // compute the multiple contact data for the case when the first three contacts are defined as active
+  model.changeContactStatus("random_contact_3", false);
+  model.changeContactStatus("random_contact_4", false);
+  Eigen::VectorXd x2 = model.get_state()->rand();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x2);
+  model.calc(data, x2);
+  for (std::size_t i = 0; i < 5; ++i) {
+    const std::size_t& nc_i = models[i]->get_nc();
+    if (i < 3) {  // we need to update data because this contacts are active
+      models[i]->calc(datas[i], x2);
+    }
+    BOOST_CHECK(data->Jc.block(nc, 0, nc_i, nv) == datas[i]->Jc);
+    BOOST_CHECK(data->a0.segment(nc, nc_i) == datas[i]->a0);
+    nc += nc_i;
+  }
 }
 
 void test_calc_diff() {
@@ -199,31 +232,64 @@ void test_calc_diff() {
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some contact objects
-  for (unsigned i = 0; i < 5; ++i) {
+  std::vector<boost::shared_ptr<crocoddyl::ContactModelAbstract> > models;
+  std::vector<boost::shared_ptr<crocoddyl::ContactDataAbstract> > datas;
+  for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_contact_" << i;
-    model.addContact(os.str(), create_random_contact());
+    const boost::shared_ptr<crocoddyl::ContactModelAbstract>& m = create_random_contact();
+    model.addContact(os.str(), m);
+    models.push_back(m);
+    datas.push_back(m->createData(&pinocchio_data));
   }
 
   // create the data of the multiple-contacts
   boost::shared_ptr<crocoddyl::ContactDataMultiple> data = model.createData(&pinocchio_data);
 
-  // Compute the jacobian and check that the contact models fetch it.
-  Eigen::VectorXd x = model.get_state()->rand();
-  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
+  // compute the multiple contact data for the case when all contacts are defined as active
+  Eigen::VectorXd x1 = model.get_state()->rand();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x1);
+  model.calc(data, x1);
+  model.calcDiff(data, x1);
 
-  // pinocchio data have been filled so the results of this operation are
-  // none null matrices
-  model.calc(data, x);
-  model.calcDiff(data, x);
-
-  // Check that nothing has been computed and that all value are initialized to 0
+  // check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(!data->Jc.isZero());
   BOOST_CHECK(!data->a0.isZero());
   BOOST_CHECK(!data->da0_dx.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(data->df_dx.isZero());
-  BOOST_CHECK(data->df_du.isZero());
+
+  // check Jc and a0 against single contact computations
+  std::size_t nc = 0;
+  const std::size_t& nv = model.get_state()->get_nv();
+  const std::size_t& ndx = model.get_state()->get_ndx();
+  for (std::size_t i = 0; i < 5; ++i) {
+    const std::size_t& nc_i = models[i]->get_nc();
+    models[i]->calc(datas[i], x1);
+    models[i]->calcDiff(datas[i], x1);
+    BOOST_CHECK(data->Jc.block(nc, 0, nc_i, nv) == datas[i]->Jc);
+    BOOST_CHECK(data->a0.segment(nc, nc_i) == datas[i]->a0);
+    BOOST_CHECK(data->da0_dx.block(nc, 0, nc_i, ndx) == datas[i]->da0_dx);
+    nc += nc_i;
+  }
+  nc = 0;
+
+  // compute the multiple contact data for the case when the first three contacts are defined as active
+  model.changeContactStatus("random_contact_3", false);
+  model.changeContactStatus("random_contact_4", false);
+  Eigen::VectorXd x2 = model.get_state()->rand();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x2);
+  model.calc(data, x2);
+  model.calcDiff(data, x2);
+  for (std::size_t i = 0; i < 5; ++i) {
+    const std::size_t& nc_i = models[i]->get_nc();
+    if (i < 3) {  // we need to update data because this contacts are active
+      models[i]->calc(datas[i], x2);
+      models[i]->calcDiff(datas[i], x2);
+    }
+    BOOST_CHECK(data->Jc.block(nc, 0, nc_i, nv) == datas[i]->Jc);
+    BOOST_CHECK(data->a0.segment(nc, nc_i) == datas[i]->a0);
+    BOOST_CHECK(data->da0_dx.block(nc, 0, nc_i, ndx) == datas[i]->da0_dx);
+    nc += nc_i;
+  }
 }
 
 void test_calc_diff_no_recalc() {
@@ -231,35 +297,65 @@ void test_calc_diff_no_recalc() {
   StateModelFactory state_factory;
   crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
       state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
-
   // create the corresponding data object
   pinocchio::Model& pinocchio_model = *model.get_state()->get_pinocchio().get();
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some contact objects
-  for (unsigned i = 0; i < 5; ++i) {
+  std::vector<boost::shared_ptr<crocoddyl::ContactModelAbstract> > models;
+  std::vector<boost::shared_ptr<crocoddyl::ContactDataAbstract> > datas;
+  for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_contact_" << i;
-    model.addContact(os.str(), create_random_contact());
+    const boost::shared_ptr<crocoddyl::ContactModelAbstract>& m = create_random_contact();
+    model.addContact(os.str(), m);
+    models.push_back(m);
+    datas.push_back(m->createData(&pinocchio_data));
   }
 
   // create the data of the multiple-contacts
   boost::shared_ptr<crocoddyl::ContactDataMultiple> data = model.createData(&pinocchio_data);
 
-  // Compute the jacobian and check that the contact models fetch it.
-  Eigen::VectorXd x = model.get_state()->rand();
-  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
+  // compute the multiple contact data for the case when all contacts are defined as active
+  Eigen::VectorXd x1 = model.get_state()->rand();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x1);
+  model.calcDiff(data, x1);
 
-  // pinocchio data have not been filled so the results of this operation are null matrices
-  model.calcDiff(data, x);
-
-  // Check that nothing has been computed and that all value are initialized to 0
+  // check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(data->Jc.isZero());
   BOOST_CHECK(data->a0.isZero());
   BOOST_CHECK(!data->da0_dx.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(data->df_dx.isZero());
-  BOOST_CHECK(data->df_du.isZero());
+
+  // check Jc and a0 against single contact computations
+  std::size_t nc = 0;
+  const std::size_t& nv = model.get_state()->get_nv();
+  const std::size_t& ndx = model.get_state()->get_ndx();
+  for (std::size_t i = 0; i < 5; ++i) {
+    const std::size_t& nc_i = models[i]->get_nc();
+    models[i]->calcDiff(datas[i], x1);
+    BOOST_CHECK(data->Jc.block(nc, 0, nc_i, nv).isZero());
+    BOOST_CHECK(data->a0.segment(nc, nc_i).isZero());
+    BOOST_CHECK(data->da0_dx.block(nc, 0, nc_i, ndx) == datas[i]->da0_dx);
+    nc += nc_i;
+  }
+  nc = 0;
+
+  // compute the multiple contact data for the case when the first three contacts are defined as active
+  model.changeContactStatus("random_contact_3", false);
+  model.changeContactStatus("random_contact_4", false);
+  Eigen::VectorXd x2 = model.get_state()->rand();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x2);
+  model.calcDiff(data, x2);
+  for (std::size_t i = 0; i < 5; ++i) {
+    const std::size_t& nc_i = models[i]->get_nc();
+    if (i < 3) {  // we need to update data because this contacts are active
+      models[i]->calcDiff(datas[i], x2);
+    }
+    BOOST_CHECK(data->Jc.block(nc, 0, nc_i, nv).isZero());
+    BOOST_CHECK(data->a0.segment(nc, nc_i).isZero());
+    BOOST_CHECK(data->da0_dx.block(nc, 0, nc_i, ndx) == datas[i]->da0_dx);
+    nc += nc_i;
+  }
 }
 
 void test_updateForce() {
@@ -300,13 +396,10 @@ void test_updateForce() {
   BOOST_CHECK(data->Jc.isZero());
   BOOST_CHECK(data->a0.isZero());
   BOOST_CHECK(data->da0_dx.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
   crocoddyl::ContactModelMultiple::ContactDataContainer::iterator it_d, end_d;
   for (it_d = data->contacts.begin(), end_d = data->contacts.end(); it_d != end_d; ++it_d) {
     BOOST_CHECK(!it_d->second->f.toVector().isZero());
   }
-  BOOST_CHECK(data->df_dx.isZero());
-  BOOST_CHECK(data->df_du.isZero());
 }
 
 void test_updateAccelerationDiff() {
@@ -485,6 +578,7 @@ void register_unit_tests() {
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_removeContact_error_message)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_no_recalc)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_updateForce)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_updateAccelerationDiff)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_get_contacts)));

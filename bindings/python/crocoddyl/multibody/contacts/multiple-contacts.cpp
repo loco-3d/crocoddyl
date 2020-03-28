@@ -35,14 +35,13 @@ void exposeContactMultiple() {
 
   bp::register_ptr_to_python<boost::shared_ptr<ContactItem> >();
 
-  bp::class_<ContactItem, boost::noncopyable>(
-      "ContactItem", "Describe a contact item.\n\n",
-      bp::init<std::string, boost::shared_ptr<ContactModelAbstract>, bp::optional<bool> >(
-          bp::args("self", "name", "contact", "active"),
-          "Initialize the contact item.\n\n"
-          ":param name: contact name\n"
-          ":param contact: contact model\n"
-          ":param active: True if the contact is activated (default true)"))
+  bp::class_<ContactItem>("ContactItem", "Describe a contact item.\n\n",
+                          bp::init<std::string, boost::shared_ptr<ContactModelAbstract>, bp::optional<bool> >(
+                              bp::args("self", "name", "contact", "active"),
+                              "Initialize the contact item.\n\n"
+                              ":param name: contact name\n"
+                              ":param contact: contact model\n"
+                              ":param active: True if the contact is activated (default true)"))
       .def_readwrite("name", &ContactItem::name, "contact name")
       .add_property("contact", bp::make_getter(&ContactItem::contact, bp::return_value_policy<bp::return_by_value>()),
                     "contact model")
@@ -50,7 +49,7 @@ void exposeContactMultiple() {
 
   bp::register_ptr_to_python<boost::shared_ptr<ContactModelMultiple> >();
 
-  bp::class_<ContactModelMultiple, boost::noncopyable>(
+  bp::class_<ContactModelMultiple>(
       "ContactModelMultiple",
       bp::init<boost::shared_ptr<StateMultibody>, bp::optional<int> >(bp::args("self", "state", "nu"),
                                                                       "Initialize the multiple contact model.\n\n"
@@ -108,18 +107,32 @@ void exposeContactMultiple() {
           "state of the multibody system")
       .add_property("nc",
                     bp::make_function(&ContactModelMultiple::get_nc, bp::return_value_policy<bp::return_by_value>()),
-                    "dimension of the total contact vector")
+                    "dimension of the active contact vector")
+      .add_property(
+          "nc_total",
+          bp::make_function(&ContactModelMultiple::get_nc_total, bp::return_value_policy<bp::return_by_value>()),
+          "dimension of the total contact vector")
       .add_property("nu",
                     bp::make_function(&ContactModelMultiple::get_nu, bp::return_value_policy<bp::return_by_value>()),
                     "dimension of control vector");
 
-  bp::class_<ContactDataMultiple, boost::shared_ptr<ContactDataMultiple>, bp::bases<ContactDataAbstract> >(
+  bp::register_ptr_to_python<boost::shared_ptr<ContactDataMultiple> >();
+
+  bp::class_<ContactDataMultiple>(
       "ContactDataMultiple", "Data class for multiple contacts.\n\n",
       bp::init<ContactModelMultiple*, pinocchio::Data*>(
           bp::args("self", "model", "data"),
           "Create multicontact data.\n\n"
           ":param model: multicontact model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("Jc", bp::make_getter(&ContactDataMultiple::Jc, bp::return_internal_reference<>()),
+                    bp::make_setter(&ContactDataMultiple::Jc), "Jacobian for all contacts (active and inactive)")
+      .add_property("a0", bp::make_getter(&ContactDataMultiple::a0, bp::return_internal_reference<>()),
+                    bp::make_setter(&ContactDataMultiple::a0),
+                    "desired acceleration for all contacts (active and inactive)")
+      .add_property("da0_dx", bp::make_getter(&ContactDataMultiple::da0_dx, bp::return_internal_reference<>()),
+                    bp::make_setter(&ContactDataMultiple::da0_dx),
+                    "Jacobian of the desired acceleration for all contacts (active and inactive)")
       .add_property("dv", bp::make_getter(&ContactDataMultiple::dv, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataMultiple::dv), "constrained acceleration in generalized coordinates")
       .add_property("ddv_dx", bp::make_getter(&ContactDataMultiple::ddv_dx, bp::return_internal_reference<>()),

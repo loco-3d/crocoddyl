@@ -63,17 +63,17 @@ template <typename _Scalar>
 struct ActivationDataAbstractTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  template <typename Activation>
-  explicit ActivationDataAbstractTpl(Activation* const activation)
-      : a_value(0.),
-        Ar(VectorXs::Zero(activation->get_nr())),
-        Arr(MatrixXs::Zero(activation->get_nr(), activation->get_nr())) {}
-  virtual ~ActivationDataAbstractTpl() {}
-
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
+
+  template <template <typename Scalar> class Activation>
+  explicit ActivationDataAbstractTpl(Activation<Scalar>* const activation)
+      : a_value(0.),
+        Ar(VectorXs::Zero(activation->get_nr())),
+        Arr(MatrixXs::Zero(activation->get_nr(), activation->get_nr())) {}
+  virtual ~ActivationDataAbstractTpl() {}
 
   Scalar a_value;
   VectorXs Ar;

@@ -20,6 +20,7 @@
 namespace crocoddyl {
 namespace python {
 
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(CostModelSum_addContact_wrap, CostModelSum::addCost, 3, 4)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(CostModelSum_calc_wraps, CostModelSum::calc_wrap, 2, 3)
 
 void exposeCostSum() {
@@ -37,26 +38,28 @@ void exposeCostSum() {
 
   bp::register_ptr_to_python<boost::shared_ptr<CostItem> >();
 
-  bp::class_<CostItem, boost::noncopyable>(
-      "CostItem", "Describe a cost item.\n\n",
-      bp::init<std::string, boost::shared_ptr<CostModelAbstract>, double>(bp::args("self", "name", "cost", "weight"),
-                                                                          "Initialize the cost item.\n\n"
-                                                                          ":param name: cost name\n"
-                                                                          ":param cost: cost model\n"
-                                                                          ":param weight: cost weight"))
+  bp::class_<CostItem>("CostItem", "Describe a cost item.\n\n",
+                       bp::init<std::string, boost::shared_ptr<CostModelAbstract>, double, bp::optional<bool> >(
+                           bp::args("self", "name", "cost", "weight", "active"),
+                           "Initialize the cost item.\n\n"
+                           ":param name: cost name\n"
+                           ":param cost: cost model\n"
+                           ":param weight: cost weight\n"
+                           ":param active: True if the cost is activated (default true)"))
       .def_readwrite("name", &CostItem::name, "cost name")
       .add_property("cost", bp::make_getter(&CostItem::cost, bp::return_value_policy<bp::return_by_value>()),
                     "cost model")
-      .def_readwrite("weight", &CostItem::weight, "cost weight");
+      .def_readwrite("weight", &CostItem::weight, "cost weight")
+      .def_readwrite("active", &CostItem::active, "cost status");
+  ;
 
   bp::register_ptr_to_python<boost::shared_ptr<CostModelSum> >();
 
-  bp::class_<CostModelSum, boost::noncopyable>(
-      "CostModelSum",
-      bp::init<boost::shared_ptr<StateMultibody>, std::size_t>(bp::args("self", "state", "nu"),
-                                                               "Initialize the total cost model.\n\n"
-                                                               ":param state: state of the multibody system\n"
-                                                               ":param nu: dimension of control vector"))
+  bp::class_<CostModelSum>("CostModelSum", bp::init<boost::shared_ptr<StateMultibody>, std::size_t>(
+                                               bp::args("self", "state", "nu"),
+                                               "Initialize the total cost model.\n\n"
+                                               ":param state: state of the multibody system\n"
+                                               ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, std::size_t>(
           bp::args("self", "state", "nu"),
           "Initialize the total cost model.\n\n"
@@ -68,14 +71,20 @@ void exposeCostSum() {
                                                         "Initialize the total cost model.\n\n"
                                                         "For this case the default nu is equals to model.nv.\n"
                                                         ":param state: state of the multibody system"))
-      .def("addCost", &CostModelSum::addCost, bp::args("self", "name", "cost", "weight"),
-           "Add a cost item.\n\n"
-           ":param name: cost name\n"
-           ":param cost: cost model\n"
-           ":param weight: cost weight")
+      .def("addCost", &CostModelSum::addCost,
+           CostModelSum_addContact_wrap(bp::args("self", "name", "cost", "weight", "active"),
+                                        "Add a cost item.\n\n"
+                                        ":param name: cost name\n"
+                                        ":param cost: cost model\n"
+                                        ":param weight: cost weight\n"
+                                        ":param active: True if the cost is activated (default true)"))
       .def("removeCost", &CostModelSum::removeCost, bp::args("self", "name"),
            "Remove a cost item.\n\n"
            ":param name: cost name")
+      .def("changeCostStatus", &CostModelSum::changeCostStatus, bp::args("self", "name", "active"),
+           "Change the cost status.\n\n"
+           ":param name: cost name\n"
+           ":param active: cost status (true for active and false for inactive)")
       .def("calc", &CostModelSum::calc_wrap,
            CostModelSum_calc_wraps(bp::args("self", "data", "x", "u"),
                                    "Compute the total cost.\n\n"
@@ -105,9 +114,14 @@ void exposeCostSum() {
       .add_property("nu", bp::make_function(&CostModelSum::get_nu, bp::return_value_policy<bp::return_by_value>()),
                     "dimension of control vector")
       .add_property("nr", bp::make_function(&CostModelSum::get_nr, bp::return_value_policy<bp::return_by_value>()),
+                    "dimension of the residual vector of active cost")
+      .add_property("nr_total",
+                    bp::make_function(&CostModelSum::get_nr_total, bp::return_value_policy<bp::return_by_value>()),
                     "dimension of the total residual vector");
 
-  bp::class_<CostDataSum, boost::shared_ptr<CostDataSum>, boost::noncopyable>(
+  bp::register_ptr_to_python<boost::shared_ptr<CostDataSum> >();
+
+  bp::class_<CostDataSum>(
       "CostDataSum", "Class for total cost data.\n\n",
       bp::init<CostModelSum*, DataCollectorAbstract*>(bp::args("self", "model", "data"),
                                                       "Create total cost data.\n\n"
