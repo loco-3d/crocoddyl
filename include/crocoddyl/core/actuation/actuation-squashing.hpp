@@ -34,21 +34,25 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
   
   ~ActuationSquashingModelTpl(){};
 
-  virtual void calc(const boost::shared_ptr<ActuationSquashingData>& data, const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u)
+  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u)
   {
-    squashing_->calc(data->squashing, u);
-    actuation_->calc(data->actuation, data->squashing.u);
-    data->tau = data->actuation.tau;
+    boost::shared_ptr<ActuationSquashingData> data_squashing = boost::static_pointer_cast<ActuationSquashingData>(data);
+    
+    squashing_->calc(data_squashing->squashing, u);
+    actuation_->calc(data_squashing->actuation, x, data_squashing->squashing->u);
+    data->tau = data_squashing->actuation->tau;
   };
   
-  virtual void calcDiff(const boost::shared_ptr<ActuationSquashingData>& data, const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u)
+  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u)
   {
-    squashing_->calcDiff(data->squashing, u);
-    squashing_->calcDiff(data->actuation, data->squashing.u);
-    data->dtau_du = data->actuation.dtau_du * data->squashing.du_ds;
+    boost::shared_ptr<ActuationSquashingData> data_squashing = boost::static_pointer_cast<ActuationSquashingData>(data);
+
+    squashing_->calcDiff(data_squashing->squashing, u);
+    actuation_->calcDiff(data_squashing->actuation, x, data_squashing->squashing->u);
+    data->dtau_du = data_squashing->actuation->dtau_du * data_squashing->squashing->du_ds;
   };
 
-  boost::shared_ptr<ActuationSquashingData> createData() {
+  boost::shared_ptr<ActuationDataAbstract> createData() {
     return boost::make_shared<ActuationSquashingData>(this);
   };
 
@@ -75,8 +79,8 @@ struct ActuationSquashingDataTpl : public ActuationDataAbstract {
   
   ~ActuationSquashingDataTpl() {}
   
-  ActuationDataAbstract actuation;
-  SquashingDataAbstract squashing;
+  boost::shared_ptr<SquashingDataAbstract> squashing;
+  boost::shared_ptr<ActuationDataAbstract> actuation;
 };
 
 }  // namespace crocoddyl
