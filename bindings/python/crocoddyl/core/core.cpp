@@ -20,6 +20,7 @@ void exposeCore() {
   exposeActivationAbstract();
   exposeSquashingAbstract();
   exposeSquashingSmoothSat();
+  exposeActuationSquashing();
   exposeDataCollectorActuation();
   exposeIntegratedActionEuler();
   exposeActionNumDiff();
