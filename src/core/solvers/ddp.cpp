@@ -246,8 +246,13 @@ void SolverDDP::forwardPass(const double& steplength) {
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionModelAbstract>& m = problem_->get_runningModels()[t];
     const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
-
-    m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
+    
+    if (t == 0) {
+      m->get_state()->diff(problem_->get_x0(), xs_[0], dx_[0]);
+    }
+    else {
+	  m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
+	}
     us_try_[t].noalias() = us_[t];
     us_try_[t].noalias() -= k_[t] * steplength;
     us_try_[t].noalias() -= K_[t] * dx_[t];

@@ -179,7 +179,12 @@ void SolverFDDP::forwardPass(const double& steplength) {
     } else {
       m->get_state()->integrate(xnext_, fs_[t] * (steplength - 1), xs_try_[t]);
     }
-    m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
+    if (t == 0) {
+      m->get_state()->diff(problem_->get_x0(), xs_[0], dx_[0]);
+    }
+    else {
+	  m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
+	}
     us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
     m->calc(d, xs_try_[t], us_try_[t]);
     xnext_ = d->xnext;
