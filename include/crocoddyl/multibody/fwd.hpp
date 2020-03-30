@@ -17,6 +17,9 @@ class ActuationModelFloatingBaseTpl;
 template <typename Scalar>
 class ActuationModelFullTpl;
 
+template <typename Scalar>
+class ActuationModelMCBaseTpl;
+
 // Contacts
 template <typename Scalar>
 class ContactModelAbstractTpl;
@@ -240,6 +243,7 @@ class ImpulseDataMultipleTpl;
 
 typedef ActuationModelFloatingBaseTpl<double> ActuationModelFloatingBase;
 typedef ActuationModelFullTpl<double> ActuationModelFull;
+typedef ActuationModelMCBaseTpl<double> ActuationModelMCBase;
 
 typedef ContactModelAbstractTpl<double> ContactModelAbstract;
 typedef ContactDataAbstractTpl<double> ContactDataAbstract;

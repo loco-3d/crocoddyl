@@ -10,11 +10,11 @@
 #define CROCODDYL_MULTIBODY_ACTUATIONS_MULTICOPTER_BASE_HPP_
 
 #include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
-
 template <typename _Scalar>
 class ActuationModelMCBaseTpl : public ActuationModelAbstractTpl<_Scalar> {
  public:
@@ -86,4 +86,4 @@ class ActuationModelMCBaseTpl : public ActuationModelAbstractTpl<_Scalar> {
 
 } // namespace crocoddyl
 
-#endif
+#endif // CROCODDYL_MULTIBODY_ACTUATIONS_MULTICOPTER_BASE_HPP_
