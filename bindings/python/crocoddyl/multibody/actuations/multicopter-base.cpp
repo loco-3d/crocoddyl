@@ -15,11 +15,12 @@ namespace python {
 void exposeActuationModelMCBase() {
   bp::class_<ActuationModelMCBase, bp::bases<ActuationModelAbstract> >(
       "ActuationModelMCBase", "Actuation models with base actuated by several propellers (e.g. aerial manipulators).",
-      bp::init<boost::shared_ptr<StateMultibody>, int, Eigen::MatrixXd >(bp::args("self", "state", "nrotors", "force_torque"),
-                                                   "Initialize the full actuation model.\n\n"
-                                                   ":param state: state of multibody system, \n"
-                                                   ":param nrotors: number of rotors of the flying base, \n"
-                                                   ":param force_torque: matrix that maps rotors thrust to generalized torque of the flying base."))
+      bp::init<boost::shared_ptr<StateMultibody>, int, Eigen::MatrixXd>(
+          bp::args("self", "state", "nrotors", "force_torque"),
+          "Initialize the full actuation model.\n\n"
+          ":param state: state of multibody system, \n"
+          ":param nrotors: number of rotors of the flying base, \n"
+          ":param force_torque: matrix that maps rotors thrust to generalized torque of the flying base."))
       .def("calc", &ActuationModelMCBase::calc_wrap, bp::args("self", "data", "x", "u"),
            "Compute the actuation signal from the control input u.\n\n"
            ":param data: multicopter-base actuation data\n"
@@ -40,7 +41,8 @@ void exposeActuationModelMCBase() {
            ":return AM data.")
       .add_property(
           "nrotors",
-          bp::make_function(&ActuationModelMCBase::get_nrotors, bp::return_value_policy<bp::copy_const_reference>()), "Number of rotors in the flying base");
+          bp::make_function(&ActuationModelMCBase::get_nrotors, bp::return_value_policy<bp::copy_const_reference>()),
+          "Number of rotors in the flying base");
 }
 
 }  // namespace python
