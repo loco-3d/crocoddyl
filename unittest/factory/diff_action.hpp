@@ -24,6 +24,7 @@ struct DifferentialActionModelTypes {
     DifferentialActionModelLQR,
     DifferentialActionModelLQRDriftFree,
     DifferentialActionModelFreeFwdDynamics_TalosArm,
+    DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed,
     DifferentialActionModelContactFwdDynamics_HyQ,
     DifferentialActionModelContactFwdDynamics_Talos,
     DifferentialActionModelContactFwdDynamicsWithFriction_HyQ,
@@ -52,7 +53,7 @@ class DifferentialActionModelFactory {
 
  private:
   boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create_freeFwdDynamics(
-      StateModelTypes::Type state_type) const;
+      StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type) const;
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create_contactFwdDynamics(
       StateModelTypes::Type state_type, bool with_friction = true) const;

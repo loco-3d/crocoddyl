@@ -30,8 +30,8 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  explicit ActuationSquashingModelTpl(boost::shared_ptr<ActuationModelAbstract> actuation,
-                                      boost::shared_ptr<SquashingModelAbstract> squashing, const std::size_t& nu)
+  ActuationSquashingModelTpl(boost::shared_ptr<ActuationModelAbstract> actuation,
+                             boost::shared_ptr<SquashingModelAbstract> squashing, const std::size_t& nu)
       : Base(actuation->get_state(), nu), squashing_(squashing), actuation_(actuation){};
 
   ~ActuationSquashingModelTpl(){};
@@ -53,7 +53,7 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
 
     squashing_->calcDiff(data_squashing->squashing, u);
     actuation_->calcDiff(data_squashing->actuation, x, data_squashing->squashing->u);
-    data->dtau_du = data_squashing->actuation->dtau_du * data_squashing->squashing->du_ds;
+    data->dtau_du.noalias() = data_squashing->actuation->dtau_du * data_squashing->squashing->du_ds;
   };
 
   boost::shared_ptr<ActuationDataAbstract> createData() { return boost::make_shared<ActuationSquashingData>(this); };
@@ -67,17 +67,18 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
 };
 
 template <typename _Scalar>
-struct ActuationSquashingDataTpl : public ActuationDataAbstract {
+struct ActuationSquashingDataTpl : public ActuationDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
+  typedef ActuationDataAbstractTpl<Scalar> Base;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
   explicit ActuationSquashingDataTpl(Model<Scalar>* const model)
-      : ActuationDataAbstract(model),
+      : Base(model),
         squashing(model->get_squashing()->createData()),
         actuation(model->get_actuation()->createData()) {}
 
@@ -85,6 +86,10 @@ struct ActuationSquashingDataTpl : public ActuationDataAbstract {
 
   boost::shared_ptr<SquashingDataAbstract> squashing;
   boost::shared_ptr<ActuationDataAbstract> actuation;
+
+  using Base::dtau_du;
+  using Base::dtau_dx;
+  using Base::tau;
 };
 
 }  // namespace crocoddyl
