@@ -27,7 +27,7 @@ class ActuationModelMCBaseTpl : public ActuationModelAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   explicit ActuationModelMCBaseTpl(boost::shared_ptr<StateMultibody> state,
-                                 std::size_t& n_rotors, const Eigen::Ref<const MatrixXs>& tau_f) : Base(state, state->get_nv() -6 + n_rotors), n_rotors_(n_rotors)
+                                 const std::size_t& n_rotors, const Eigen::Ref<const MatrixXs>& tau_f) : Base(state, state->get_nv() -6 + n_rotors), n_rotors_(n_rotors)
   {
     pinocchio::JointModelFreeFlyerTpl<Scalar> ff_joint;
     if (state->get_pinocchio()->joints[1].shortname() != ff_joint.shortname()) {
@@ -35,7 +35,7 @@ class ActuationModelMCBaseTpl : public ActuationModelAbstractTpl<_Scalar> {
                    << "the first joint has to be free-flyer");
     }
 
-    tau_f_ = MatrixXs::Zero(state_->get_nv_(), nu_);
+    tau_f_ = MatrixXs::Zero(state_->get_nv(), nu_);
     tau_f_.block(0, 0, 6, n_rotors_) = tau_f;
     if (nu_ > n_rotors_)
     {
@@ -74,13 +74,16 @@ class ActuationModelMCBaseTpl : public ActuationModelAbstractTpl<_Scalar> {
     return data;
   }
 
+  const std::size_t& get_nrotors() const { return n_rotors_; };
+
  protected: 
+  // Specific of multicopter
+  Eigen::MatrixXd tau_f_; // Matrix from rotors thrust to body force/moments
+  std::size_t n_rotors_;
+
   using Base::nu_;
   using Base::state_;
   
-  // Specific of multicopter
-  Eigen::MatrixXd tau_f_; // Matrix from rotors thrust to body force/moments
-  std::size_t& n_rotors_;
   
 };
 
