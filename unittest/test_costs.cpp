@@ -241,7 +241,7 @@ bool init_function() {
     for (size_t state_type = StateModelTypes::all[StateModelTypes::StateMultibody_TalosArm];
          state_type < StateModelTypes::all.size(); ++state_type) {
       for (size_t activation_type = 0; activation_type < ActivationModelTypes::all.size(); ++activation_type) {
-        std::ostringstream test_name;
+        boost::test_tools::output_test_stream test_name;
         test_name << "test_" << CostModelTypes::all[cost_type] << "_" << ActivationModelTypes::all[activation_type]
                   << "_" << StateModelTypes::all[state_type];
         test_suite* ts = BOOST_TEST_SUITE(test_name.str());

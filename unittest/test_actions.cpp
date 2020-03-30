@@ -113,7 +113,7 @@ void register_action_model_unit_tests(ActionModelTypes::Type action_model_type, 
 
 bool init_function() {
   for (size_t i = 0; i < ActionModelTypes::all.size(); ++i) {
-    std::ostringstream test_name;
+    boost::test_tools::output_test_stream test_name;
     test_name << "test_" << ActionModelTypes::all[i];
     test_suite* ts = BOOST_TEST_SUITE(test_name.str());
     std::cout << "Running " << test_name.str() << std::endl;
