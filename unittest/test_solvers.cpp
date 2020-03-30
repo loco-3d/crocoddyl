@@ -125,7 +125,7 @@ bool init_function() {
   // We start from 1 as 0 is the kkt solver
   for (size_t solver_type = 1; solver_type < SolverTypes::all.size(); ++solver_type) {
     for (size_t action_type = 0; action_type < ActionModelTypes::all.size(); ++action_type) {
-      std::ostringstream test_name;
+      boost::test_tools::output_test_stream test_name;
       test_name << "test_" << SolverTypes::all[solver_type] << "_" << ActionModelTypes::all[action_type];
       test_suite* ts = BOOST_TEST_SUITE(test_name.str());
       std::cout << "Running " << test_name.str() << std::endl;
