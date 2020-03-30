@@ -41,7 +41,7 @@ std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type ty
       os << "DifferentialActionModelFreeFwdDynamics_TalosArm";
       break;
     case DifferentialActionModelTypes::DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed:
-      os << "DifferentialActionModelContactFwdDynamics_Talos_Squashed";
+      os << "DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed";
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_HyQ:
       os << "DifferentialActionModelContactFwdDynamics_HyQ";
