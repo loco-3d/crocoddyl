@@ -12,8 +12,8 @@ template <typename Scalar>
 StateAbstractTpl<Scalar>::StateAbstractTpl(const std::size_t& nx, const std::size_t& ndx)
     : nx_(nx),
       ndx_(ndx),
-      lb_(MathBase::VectorXs::Constant(nx_, -std::numeric_limits<Scalar>::infinity())),
-      ub_(MathBase::VectorXs::Constant(nx_, std::numeric_limits<Scalar>::infinity())),
+      lb_(VectorXs::Constant(nx_, -std::numeric_limits<Scalar>::infinity())),
+      ub_(VectorXs::Constant(nx_, std::numeric_limits<Scalar>::infinity())),
       has_limits_(false) {
   nv_ = ndx / 2;
   nq_ = nx_ - nv_;
@@ -66,7 +66,7 @@ bool const& StateAbstractTpl<Scalar>::get_has_limits() const {
 }
 
 template <typename Scalar>
-void StateAbstractTpl<Scalar>::set_lb(const typename MathBase::VectorXs& lb) {
+void StateAbstractTpl<Scalar>::set_lb(const VectorXs& lb) {
   if (static_cast<std::size_t>(lb.size()) != nx_) {
     throw_pretty("Invalid argument: "
                  << "lower bound has wrong dimension (it should be " + std::to_string(nx_) + ")");
@@ -76,7 +76,7 @@ void StateAbstractTpl<Scalar>::set_lb(const typename MathBase::VectorXs& lb) {
 }
 
 template <typename Scalar>
-void StateAbstractTpl<Scalar>::set_ub(const typename MathBase::VectorXs& ub) {
+void StateAbstractTpl<Scalar>::set_ub(const VectorXs& ub) {
   if (static_cast<std::size_t>(ub.size()) != nx_) {
     throw_pretty("Invalid argument: "
                  << "upper bound has wrong dimension (it should be " + std::to_string(nx_) + ")");
