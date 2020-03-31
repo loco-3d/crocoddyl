@@ -40,6 +40,9 @@ void exposeDifferentialActionAbstract() {
            ":param data: differential action data\n"
            ":param x: state vector\n"
            ":param u: control input")
+      .def<void (DifferentialActionModelAbstract::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
+                                                     const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calc", &DifferentialActionModelAbstract::calc, bp::args("self", "data", "x"))
       .def("calcDiff", pure_virtual(&DifferentialActionModelAbstract_wrap::calcDiff),
            bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the dynamics and cost functions.\n\n"
@@ -50,6 +53,9 @@ void exposeDifferentialActionAbstract() {
            ":param data: differential action data\n"
            ":param x: state vector\n"
            ":param u: control input\n")
+      .def<void (DifferentialActionModelAbstract::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
+                                                     const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &DifferentialActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
       .def("createData", &DifferentialActionModelAbstract_wrap::createData, bp::args("self"),
            "Create the differential action data.\n\n"
            "Each differential action model has its own data that needs to be\n"

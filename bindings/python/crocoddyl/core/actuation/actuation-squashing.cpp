@@ -23,7 +23,7 @@ void exposeActuationSquashing() {
           bp::args("self", "actuation", "squashing", "nu"),
           "Initialize the actuation model with squashing function.\n\n"
           ":param actuation: actuation model to be squashed,\n"
-          ":param squashing: squashjng function,\n"
+          ":param squashing: squashing function,\n"
           ":param nu: number of controls"))
       .def("calc", &ActuationSquashingModel::calc, bp::args("self", "data", "x", "u"),
            "Compute the actuation signal from the squashing input u.\n\n"

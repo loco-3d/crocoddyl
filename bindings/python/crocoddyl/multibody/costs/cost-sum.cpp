@@ -21,7 +21,6 @@ namespace crocoddyl {
 namespace python {
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(CostModelSum_addContact_wrap, CostModelSum::addCost, 3, 4)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(CostModelSum_calc_wraps, CostModelSum::calc_wrap, 2, 3)
 
 void exposeCostSum() {
   // Register custom converters between std::map and Python dict
@@ -85,21 +84,24 @@ void exposeCostSum() {
            "Change the cost status.\n\n"
            ":param name: cost name\n"
            ":param active: cost status (true for active and false for inactive)")
-      .def("calc", &CostModelSum::calc_wrap,
-           CostModelSum_calc_wraps(bp::args("self", "data", "x", "u"),
-                                   "Compute the total cost.\n\n"
-                                   ":param data: cost-sum data\n"
-                                   ":param x: time-discrete state vector\n"
-                                   ":param u: time-discrete control input"))
-      .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataSum>&, const Eigen::VectorXd&,
-                                  const Eigen::VectorXd&)>("calcDiff", &CostModelSum::calcDiff_wrap,
-                                                           bp::args("self", "data", "x", "u"),
-                                                           "Compute the derivatives of the total cost.\n\n"
-                                                           ":param data: action data\n"
-                                                           ":param x: time-discrete state vector\n"
-                                                           ":param u: time-discrete control input\n")
-      .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataSum>&, const Eigen::VectorXd&)>(
-          "calcDiff", &CostModelSum::calcDiff_wrap, bp::args("self", "data", "x"))
+      .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataSum>&, const Eigen::Ref<const Eigen::VectorXd>&,
+                                  const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &CostModelSum::calc,
+                                                                             bp::args("self", "data", "x", "u"),
+                                                                             "Compute the total cost.\n\n"
+                                                                             ":param data: cost-sum data\n"
+                                                                             ":param x: time-discrete state vector\n"
+                                                                             ":param u: time-discrete control input")
+      .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataSum>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calc", &CostModelSum::calc, bp::args("self", "data", "x"))
+      .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataSum>&, const Eigen::Ref<const Eigen::VectorXd>&,
+                                  const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &CostModelSum::calcDiff, bp::args("self", "data", "x", "u"),
+          "Compute the derivatives of the total cost.\n\n"
+          ":param data: action data\n"
+          ":param x: time-discrete state vector\n"
+          ":param u: time-discrete control input\n")
+      .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataSum>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &CostModelSum::calcDiff, bp::args("self", "data", "x"))
       .def("createData", &CostModelSum::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the total cost data.\n\n"

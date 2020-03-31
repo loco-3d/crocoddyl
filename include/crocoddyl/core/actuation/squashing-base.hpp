@@ -56,15 +56,6 @@ class SquashingModelAbstractTpl {
   VectorXs u_lb_;  // Squashing function lower bound
   VectorXs s_ub_;  // Bound for the s variable (to apply using the Quadratic barrier)
   VectorXs s_lb_;  // Bound for the s variable (to apply using the Quadratic barrier)
-
-#ifdef PYTHON_BINDINGS
-
- public:
-  void calc_wrap(const boost::shared_ptr<SquashingDataAbstract>& data, const VectorXs& s) { calc(data, s); }
-
-  void calcDiff_wrap(const boost::shared_ptr<SquashingDataAbstract>& data, const VectorXs& s) { calcDiff(data, s); }
-
-#endif
 };
 
 template <typename _Scalar>

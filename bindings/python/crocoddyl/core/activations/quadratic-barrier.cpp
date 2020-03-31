@@ -40,17 +40,15 @@ void exposeActivationQuadraticBarrier() {
       bp::init<ActivationBounds>(bp::args("self", "bounds"),
                                  "Initialize the activation model.\n\n"
                                  ":param bounds: activation bounds"))
-      .def("calc", &ActivationModelQuadraticBarrier::calc_wrap, bp::args("self", "data", "r"),
+      .def("calc", &ActivationModelQuadraticBarrier::calc, bp::args("self", "data", "r"),
            "Compute the inequality activation.\n\n"
            ":param data: activation data\n"
            ":param r: residual vector")
-      .def<void (ActivationModelQuadraticBarrier::*)(const boost::shared_ptr<ActivationDataAbstract>&,
-                                                     const Eigen::VectorXd&)>(
-          "calcDiff", &ActivationModelQuadraticBarrier::calcDiff_wrap, bp::args("self", "data", "r"),
-          "Compute the derivatives of inequality activation.\n\n"
-          ":param data: activation data\n"
-          "Note that the Hessian is constant, so we don't write again this value.\n"
-          ":param r: residual vector \n")
+      .def("calcDiff", &ActivationModelQuadraticBarrier::calcDiff, bp::args("self", "data", "r"),
+           "Compute the derivatives of inequality activation.\n\n"
+           ":param data: activation data\n"
+           "Note that the Hessian is constant, so we don't write again this value.\n"
+           ":param r: residual vector \n")
       .def("createData", &ActivationModelQuadraticBarrier::createData, bp::args("self"),
            "Create the weighted quadratic action data.")
       .add_property("bounds",

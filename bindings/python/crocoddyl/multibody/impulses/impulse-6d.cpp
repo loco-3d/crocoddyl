@@ -23,13 +23,13 @@ void exposeImpulse6D() {
                                                        "Initialize the impulse model.\n\n"
                                                        ":param state: state of the multibody system\n"
                                                        ":param frame: reference frame id"))
-      .def("calc", &ImpulseModel6D::calc_wrap, bp::args("self", "data", "x"),
+      .def("calc", &ImpulseModel6D::calc, bp::args("self", "data", "x"),
            "Compute the 6D impulse Jacobian and drift.\n\n"
            "The rigid impulse model throught acceleration-base holonomic constraint\n"
            "of the impulse frame placement.\n"
            ":param data: impulse data\n"
            ":param x: state vector")
-      .def("calcDiff", &ImpulseModel6D::calcDiff_wrap, bp::args("self", "data", "x"),
+      .def("calcDiff", &ImpulseModel6D::calcDiff, bp::args("self", "data", "x"),
            "Compute the derivatives of the 6D impulse holonomic constraint.\n\n"
            "The rigid impulse model throught acceleration-base holonomic constraint\n"
            "of the impulse frame placement.\n"

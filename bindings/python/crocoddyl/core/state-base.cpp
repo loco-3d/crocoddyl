@@ -14,6 +14,12 @@ namespace python {
 void exposeStateAbstract() {
   bp::register_ptr_to_python<boost::shared_ptr<StateAbstract> >();
 
+  bp::enum_<Jcomponent>("Jcomponent")
+      .value("both", both)
+      .value("first", first)
+      .export_values()
+      .value("second", second);
+
   bp::class_<StateAbstract_wrap, boost::noncopyable>(
       "StateAbstract",
       "Abstract class for the state representation.\n\n"

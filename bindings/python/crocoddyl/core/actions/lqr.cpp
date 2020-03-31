@@ -26,18 +26,24 @@ void exposeActionLQR() {
           ":param nx: dimension of the state vector\n"
           ":param nu: dimension of the control vector\n"
           ":param driftFree: enable/disable the bias term of the linear dynamics (default True)"))
-      .def("calc", &ActionModelLQR::calc_wrap,
-           ActionModel_calc_wraps(bp::args("self", "data", "x", "u"),
-                                  "Compute the next state and cost value.\n\n"
-                                  "It describes the time-discrete evolution of the LQR system. Additionally it\n"
-                                  "computes the cost value associated to this discrete\n"
-                                  "state and control pair.\n"
-                                  ":param data: action data\n"
-                                  ":param x: time-discrete state vector\n"
-                                  ":param u: time-discrete control input"))
-      .def<void (ActionModelLQR::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&,
-                                    const Eigen::VectorXd&)>(
-          "calcDiff", &ActionModelLQR::calcDiff_wrap, bp::args("self", "data", "x", "u"),
+      .def<void (ActionModelLQR::*)(const boost::shared_ptr<ActionDataAbstract>&,
+                                    const Eigen::Ref<const Eigen::VectorXd>&,
+                                    const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calc", &ActionModelLQR::calc, bp::args("self", "data", "x", "u"),
+          "Compute the next state and cost value.\n\n"
+          "It describes the time-discrete evolution of the LQR system. Additionally it\n"
+          "computes the cost value associated to this discrete\n"
+          "state and control pair.\n"
+          ":param data: action data\n"
+          ":param x: time-discrete state vector\n"
+          ":param u: time-discrete control input")
+      .def<void (ActionModelLQR::*)(const boost::shared_ptr<ActionDataAbstract>&,
+                                    const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &ActionModelAbstract::calc,
+                                                                               bp::args("self", "data", "x"))
+      .def<void (ActionModelLQR::*)(const boost::shared_ptr<ActionDataAbstract>&,
+                                    const Eigen::Ref<const Eigen::VectorXd>&,
+                                    const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &ActionModelLQR::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the LQR dynamics and cost functions.\n\n"
           "It computes the partial derivatives of the LQR system and the\n"
           "cost function. It assumes that calc has been run first.\n"
@@ -46,8 +52,9 @@ void exposeActionLQR() {
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n")
-      .def<void (ActionModelLQR::*)(const boost::shared_ptr<ActionDataAbstract>&, const Eigen::VectorXd&)>(
-          "calcDiff", &ActionModelLQR::calcDiff_wrap, bp::args("self", "data", "x"))
+      .def<void (ActionModelLQR::*)(const boost::shared_ptr<ActionDataAbstract>&,
+                                    const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &ActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
       .def("createData", &ActionModelLQR::createData, bp::args("self"), "Create the LQR action data.")
       .add_property("Fx", bp::make_function(&ActionModelLQR::get_Fx, bp::return_internal_reference<>()),
                     &ActionModelLQR::set_Fx, "Jacobian of the dynamics")
