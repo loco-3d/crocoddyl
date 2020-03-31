@@ -88,43 +88,47 @@ class StateAbstractTpl {
     integrate(x, dx, xout);
     return xout;
   }
-  std::vector<MatrixXs> Jdiff_wrap(const VectorXs& x0, const VectorXs& x1, std::string firstsecond = "both") {
+  std::vector<MatrixXs> Jdiff_wrap(const VectorXs& x0, const VectorXs& x1, Jcomponent firstsecond = both) {
     MatrixXs Jfirst(ndx_, ndx_), Jsecond(ndx_, ndx_);
     std::vector<MatrixXs> Jacs;
-    if (firstsecond == "both") {
-      Jdiff(x0, x1, Jfirst, Jsecond, both);
-      Jacs.push_back(Jfirst);
-      Jacs.push_back(Jsecond);
-    } else if (firstsecond == "first") {
-      Jdiff(x0, x1, Jfirst, Jsecond, first);
-      Jacs.push_back(Jfirst);
-    } else if (firstsecond == "second") {
-      Jdiff(x0, x1, Jfirst, Jsecond, second);
-      Jacs.push_back(Jsecond);
-    } else {
-      Jdiff(x0, x1, Jfirst, Jsecond, both);
-      Jacs.push_back(Jfirst);
-      Jacs.push_back(Jsecond);
+    Jdiff(x0, x1, Jfirst, Jsecond, firstsecond);
+    switch (firstsecond) {
+      case both:
+        Jacs.push_back(Jfirst);
+        Jacs.push_back(Jsecond);
+        break;
+      case first:
+        Jacs.push_back(Jfirst);
+        break;
+      case second:
+        Jacs.push_back(Jsecond);
+        break;
+      default:
+        Jacs.push_back(Jfirst);
+        Jacs.push_back(Jsecond);
+        break;
     }
     return Jacs;
   }
-  std::vector<MatrixXs> Jintegrate_wrap(const VectorXs& x, const VectorXs& dx, std::string firstsecond = "both") {
+  std::vector<MatrixXs> Jintegrate_wrap(const VectorXs& x, const VectorXs& dx, Jcomponent firstsecond = both) {
     MatrixXs Jfirst(ndx_, ndx_), Jsecond(ndx_, ndx_);
     std::vector<MatrixXs> Jacs;
-    if (firstsecond == "both") {
-      Jintegrate(x, dx, Jfirst, Jsecond, both);
-      Jacs.push_back(Jfirst);
-      Jacs.push_back(Jsecond);
-    } else if (firstsecond == "first") {
-      Jintegrate(x, dx, Jfirst, Jsecond, first);
-      Jacs.push_back(Jfirst);
-    } else if (firstsecond == "second") {
-      Jintegrate(x, dx, Jfirst, Jsecond, second);
-      Jacs.push_back(Jsecond);
-    } else {
-      Jintegrate(x, dx, Jfirst, Jsecond, both);
-      Jacs.push_back(Jfirst);
-      Jacs.push_back(Jsecond);
+    Jintegrate(x, dx, Jfirst, Jsecond, firstsecond);
+    switch (firstsecond) {
+      case both:
+        Jacs.push_back(Jfirst);
+        Jacs.push_back(Jsecond);
+        break;
+      case first:
+        Jacs.push_back(Jfirst);
+        break;
+      case second:
+        Jacs.push_back(Jsecond);
+        break;
+      default:
+        Jacs.push_back(Jfirst);
+        Jacs.push_back(Jsecond);
+        break;
     }
     return Jacs;
   }
