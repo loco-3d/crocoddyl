@@ -22,16 +22,14 @@ void exposeActivationSmoothAbs() {
       bp::init<int>(bp::args("self", "nr"),
                     "Initialize the activation model.\n\n"
                     ":param nr: dimension of the cost-residual vector"))
-      .def("calc", &ActivationModelSmoothAbs::calc_wrap, bp::args("self", "data", "r"),
+      .def("calc", &ActivationModelSmoothAbs::calc, bp::args("self", "data", "r"),
            "Compute the sqrt{1 + ||r||^2}.\n\n"
            ":param data: activation data\n"
            ":param r: residual vector")
-      .def<void (ActivationModelSmoothAbs::*)(const boost::shared_ptr<ActivationDataAbstract>&,
-                                              const Eigen::VectorXd&)>(
-          "calcDiff", &ActivationModelSmoothAbs::calcDiff_wrap, bp::args("self", "data", "r"),
-          "Compute the derivatives of a smooth-abs function.\n\n"
-          ":param data: activation data\n"
-          ":param r: residual vector \n")
+      .def("calcDiff", &ActivationModelSmoothAbs::calcDiff, bp::args("self", "data", "r"),
+           "Compute the derivatives of a smooth-abs function.\n\n"
+           ":param data: activation data\n"
+           ":param r: residual vector \n")
 
       .def("createData", &ActivationModelSmoothAbs::createData, bp::args("self"),
            "Create the smooth-abs activation data.\n\n");

@@ -44,19 +44,6 @@ class ActivationModelAbstractTpl {
 
  protected:
   std::size_t nr_;
-
-#ifdef PYTHON_BINDINGS
-
- public:
-  void calc_wrap(const boost::shared_ptr<ActivationDataAbstractTpl<Scalar> >& data, const VectorXs& r) {
-    calc(data, r);
-  }
-
-  void calcDiff_wrap(const boost::shared_ptr<ActivationDataAbstractTpl<Scalar> >& data, const VectorXs& r) {
-    calcDiff(data, r);
-  }
-
-#endif
 };
 
 template <typename _Scalar>
