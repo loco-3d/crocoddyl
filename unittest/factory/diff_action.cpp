@@ -40,6 +40,9 @@ std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type ty
     case DifferentialActionModelTypes::DifferentialActionModelFreeFwdDynamics_TalosArm:
       os << "DifferentialActionModelFreeFwdDynamics_TalosArm";
       break;
+    case DifferentialActionModelTypes::DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed:
+      os << "DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed";
+      break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_HyQ:
       os << "DifferentialActionModelContactFwdDynamics_HyQ";
       break;
@@ -75,7 +78,12 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
       action = boost::make_shared<crocoddyl::DifferentialActionModelLQR>(40, 40, true);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelFreeFwdDynamics_TalosArm:
-      action = create_freeFwdDynamics(StateModelTypes::StateMultibody_TalosArm);
+      action =
+          create_freeFwdDynamics(StateModelTypes::StateMultibody_TalosArm, ActuationModelTypes::ActuationModelFull);
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed:
+      action = create_freeFwdDynamics(StateModelTypes::StateMultibody_TalosArm,
+                                      ActuationModelTypes::ActuationModelSquashingFull);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_HyQ:
       action = create_contactFwdDynamics(StateModelTypes::StateMultibody_HyQ, false);
@@ -97,13 +105,13 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
 }
 
 boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialActionModelFactory::create_freeFwdDynamics(
-    StateModelTypes::Type state_type) const {
+    StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type) const {
   boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> action;
   boost::shared_ptr<crocoddyl::StateMultibody> state;
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
   boost::shared_ptr<crocoddyl::CostModelSum> cost;
   state = boost::static_pointer_cast<crocoddyl::StateMultibody>(StateModelFactory().create(state_type));
-  actuation = ActuationModelFactory().create(ActuationModelTypes::ActuationModelFull, state_type);
+  actuation = ActuationModelFactory().create(actuation_type, state_type);
   cost = boost::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu());
   cost->addCost(
       "state",

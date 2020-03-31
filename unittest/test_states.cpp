@@ -298,7 +298,7 @@ void register_state_unit_tests(StateModelTypes::Type state_type, test_suite& ts)
 
 bool init_function() {
   for (size_t i = 0; i < StateModelTypes::all.size(); ++i) {
-    std::ostringstream test_name;
+    boost::test_tools::output_test_stream test_name;
     test_name << "test_" << StateModelTypes::all[i];
     test_suite* ts = BOOST_TEST_SUITE(test_name.str());
     std::cout << "Running " << test_name.str() << std::endl;
