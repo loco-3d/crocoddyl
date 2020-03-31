@@ -18,12 +18,12 @@ void exposeActuationFull() {
       bp::init<boost::shared_ptr<StateMultibody> >(bp::args("self", "state"),
                                                    "Initialize the full actuation model.\n\n"
                                                    ":param state: state of multibody system"))
-      .def("calc", &ActuationModelFull::calc_wrap, bp::args("self", "data", "x", "u"),
+      .def("calc", &ActuationModelFull::calc, bp::args("self", "data", "x", "u"),
            "Compute the actuation signal from the control input u.\n\n"
            ":param data: full actuation data\n"
            ":param x: state vector\n"
            ":param u: control input")
-      .def("calcDiff", &ActuationModelFull::calcDiff_wrap, bp::args("self", "data", "x", "u"),
+      .def("calcDiff", &ActuationModelFull::calcDiff, bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the actuation model.\n\n"
            "It computes the partial derivatives of the full actuation. It assumes that you\n"
            "create the data using this class. The reason is that the derivatives are constant and\n"

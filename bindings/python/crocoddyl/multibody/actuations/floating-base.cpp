@@ -20,13 +20,13 @@ void exposeActuationFloatingBase() {
       bp::init<boost::shared_ptr<StateMultibody> >(bp::args("self", "state"),
                                                    "Initialize the floating-base actuation model.\n\n"
                                                    ":param state: state of multibody system"))
-      .def("calc", &ActuationModelFloatingBase::calc_wrap, bp::args("self", "data", "x", "u"),
+      .def("calc", &ActuationModelFloatingBase::calc, bp::args("self", "data", "x", "u"),
            "Compute the actuation signal from the control input u.\n\n"
            "It describes the time-continuos evolution of the floating-base actuation model.\n"
            ":param data: floating-base actuation data\n"
            ":param x: state vector\n"
            ":param u: control input")
-      .def("calcDiff", &ActuationModelFloatingBase::calcDiff_wrap, bp::args("self", "data", "x", "u"),
+      .def("calcDiff", &ActuationModelFloatingBase::calcDiff, bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the actuation model.\n\n"
            "It computes the partial derivatives of the floating-base actuation. It assumes that you\n"
            "create the data using this class. The reason is that the derivatives are constant and\n"
