@@ -198,12 +198,19 @@ class GepettoDisplay:
 
     def getFrameTrajectoryFromSolver(self, solver):
         ps = {fr: [] for fr in self.frameTrajNames}
+        models = solver.problem.runningModels + [solver.problem.terminalModel]
         datas = solver.problem.runningDatas + [solver.problem.terminalData]
         for key, p in ps.items():
             frameId = int(key)
-            for data in datas:
+            for i, data in enumerate(datas):
+                model = models[i]
                 if hasattr(data, "differential"):
                     if hasattr(data.differential, "pinocchio"):
+                        # Update the frame placement if there is not contact.
+                        # Note that, in non-contact cases, the action model does not compute it for efficiency reason
+                        if len(data.differential.multibody.contacts.contacts.items()) == 0:
+                            pinocchio.updateFramePlacement(model.differential.pinocchio, data.differential.pinocchio,
+                                                           frameId)
                         pose = data.differential.pinocchio.oMf[frameId]
                         p.append(np.asarray(pose.translation.T).reshape(-1).tolist())
                 elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
