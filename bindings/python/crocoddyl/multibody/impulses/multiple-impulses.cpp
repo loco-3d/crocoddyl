@@ -67,13 +67,13 @@ void exposeImpulseMultiple() {
            "Change the impulse status.\n\n"
            ":param name: impulse name\n"
            ":param active: impulse status (true for active and false for inactive)")
-      .def("calc", &ImpulseModelMultiple::calc_wrap, bp::args("self", "data", "x"),
+      .def("calc", &ImpulseModelMultiple::calc, bp::args("self", "data", "x"),
            "Compute the total impulse Jacobian and drift.\n\n"
            "The rigid impulse model throught acceleration-base holonomic constraint\n"
            "of the impulse frame placement.\n"
            ":param data: impulse data\n"
            ":param x: state vector")
-      .def("calcDiff", &ImpulseModelMultiple::calcDiff_wrap, bp::args("self", "data", "x"),
+      .def("calcDiff", &ImpulseModelMultiple::calcDiff, bp::args("self", "data", "x"),
            "Compute the derivatives of the total impulse holonomic constraint.\n\n"
            "The rigid impulse model throught acceleration-base holonomic constraint\n"
            "of the impulse frame placement.\n"

@@ -47,15 +47,6 @@ class ImpulseModelAbstractTpl {
  protected:
   boost::shared_ptr<StateMultibody> state_;
   std::size_t ni_;
-
-#ifdef PYTHON_BINDINGS
-
- public:
-  void calc_wrap(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& x) { calc(data, x); }
-
-  void calcDiff_wrap(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& x) { calcDiff(data, x); }
-
-#endif
 };
 
 template <typename _Scalar>

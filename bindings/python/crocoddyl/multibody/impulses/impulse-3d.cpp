@@ -23,13 +23,13 @@ void exposeImpulse3D() {
                                                        "Initialize the 3D impulse model.\n\n"
                                                        ":param state: state of the multibody system\n"
                                                        ":param frame: reference frame id"))
-      .def("calc", &ImpulseModel3D::calc_wrap, bp::args("self", "data", "x"),
+      .def("calc", &ImpulseModel3D::calc, bp::args("self", "data", "x"),
            "Compute the 3D impulse Jacobian and drift.\n\n"
            "The rigid impulse model throught acceleration-base holonomic constraint\n"
            "of the impulse frame placement.\n"
            ":param data: impulse data\n"
            ":param x: state vector")
-      .def("calcDiff", &ImpulseModel3D::calcDiff_wrap, bp::args("self", "data", "x"),
+      .def("calcDiff", &ImpulseModel3D::calcDiff, bp::args("self", "data", "x"),
            "Compute the derivatives of the 3D impulse holonomic constraint.\n\n"
            "The rigid impulse model throught acceleration-base holonomic constraint\n"
            "of the impulse frame placement.\n"
