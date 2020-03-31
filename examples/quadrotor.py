@@ -5,7 +5,6 @@ import crocoddyl
 import pinocchio
 import numpy as np
 import example_robot_data
-from crocoddyl.utils.quadrotor import ActuationModelUAM
 
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
@@ -19,12 +18,15 @@ target_pos = np.array([1, 0, 1])
 target_quat = pinocchio.Quaternion(1, 0, 0, 0)
 
 state = crocoddyl.StateMultibody(robot_model)
-distance_rotor_COG = 0.1525
+d_cog = 0.1525
 cf = 6.6e-5
 cm = 1e-6
 u_lim = 5
 l_lim = 0.1
-actModel = ActuationModelUAM(state, '+', distance_rotor_COG, cm, cf, u_lim, l_lim)
+tau_f = np.matrix([[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 1.0, 1.0], [0.0, d_cog, 0.0, -d_cog],
+                   [-d_cog, 0.0, d_cog, 0.0], [-cm / cf, cm / cf, -cm / cf, cm / cf]])
+
+actModel = crocoddyl.ActuationModelMCBase(state, 4, tau_f)
 
 runningCostModel = crocoddyl.CostModelSum(state, actModel.nu)
 terminalCostModel = crocoddyl.CostModelSum(state, actModel.nu)

@@ -27,10 +27,10 @@ std::ostream& operator<<(std::ostream& os, ActuationModelTypes::Type type) {
     case ActuationModelTypes::ActuationModelFloatingBase:
       os << "ActuationModelFloatingBase";
       break;
-    case ActuationModelTypes::NbActuationModelTypes:
-      os << "NbActuationModelTypes";
-      break;
     case ActuationModelTypes::ActuationModelSquashingFull:
+      os << "ActuationModelSquashingFull";
+      break;
+    case ActuationModelTypes::NbActuationModelTypes:
       os << "NbActuationModelTypes";
       break;
     default:

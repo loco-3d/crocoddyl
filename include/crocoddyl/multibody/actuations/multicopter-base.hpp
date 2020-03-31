@@ -51,7 +51,7 @@ class ActuationModelMCBaseTpl : public ActuationModelAbstractTpl<_Scalar> {
                    << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
     }
 
-    data->tau = tau_f_ * u;
+    data->tau.noalias() = tau_f_ * u;
   }
   void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u) {
@@ -67,10 +67,12 @@ class ActuationModelMCBaseTpl : public ActuationModelAbstractTpl<_Scalar> {
   }
 
   const std::size_t& get_nrotors() const { return n_rotors_; };
+  const MatrixXs& get_tauf() const { return tau_f_; };
+  void set_tauf(const Eigen::Ref<const MatrixXs>& tau_f) { tau_f_ = tau_f; }
 
  protected:
   // Specific of multicopter
-  Eigen::MatrixXd tau_f_;  // Matrix from rotors thrust to body force/moments
+  MatrixXs tau_f_;  // Matrix from rotors thrust to body force/moments
   std::size_t n_rotors_;
 
   using Base::nu_;

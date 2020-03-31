@@ -42,7 +42,10 @@ void exposeActuationModelMCBase() {
       .add_property(
           "nrotors",
           bp::make_function(&ActuationModelMCBase::get_nrotors, bp::return_value_policy<bp::copy_const_reference>()),
-          "Number of rotors in the flying base");
+          "Number of rotors in the flying base")
+      .add_property("tauf",
+                    bp::make_function(&ActuationModelMCBase::get_tauf, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&ActuationModelMCBase::set_tauf), "Matrix mapping from thrusts to body torque");
 }
 
 }  // namespace python
