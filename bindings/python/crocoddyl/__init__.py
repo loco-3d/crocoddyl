@@ -173,9 +173,9 @@ class GepettoDisplay:
                         mu = 0.7
                         for k, c in model.differential.costs.costs.items():
                             if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
-                                if contact.joint == self.robot.model.frames[c.cost.frame].parent:
-                                    nsurf = c.cost.friction_cone.nsurf
-                                    mu = c.cost.friction_cone.mu
+                                if contact.joint == self.robot.model.frames[c.cost.reference.frame].parent:
+                                    nsurf = c.cost.reference.oRf.nsurf
+                                    mu = c.cost.reference.oRf.mu
                                     continue
                         fc.append({"key": str(contact.joint), "oMf": oMf, "f": force, "nsurf": nsurf, "mu": mu})
                     fs.append(fc)
