@@ -30,15 +30,25 @@ void exposeCostImpulseCoM() {
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(3), and nu is equals to model.nv.\n"
           ":param state: state of the multibody system"))
-      .def("calc", &CostModelImpulseCoM::calc_wrap, bp::args("self", "data", "x"),
-           "Compute the CoM position cost.\n\n"
-           ":param data: cost data\n"
-           ":param x: time-discrete state vector")
-      .def<void (CostModelImpulseCoM::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
-          "calcDiff", &CostModelImpulseCoM::calcDiff_wrap, bp::args("self", "data", "x"),
+      .def<void (CostModelImpulseCoM::*)(
+          const boost::shared_ptr<CostDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&,
+          const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &CostModelImpulseCoM::calc, bp::args("self", "data", "x"),
+                                                     "Compute the CoM position cost.\n\n"
+                                                     ":param data: cost data\n"
+                                                     ":param x: time-discrete state vector")
+      .def<void (CostModelImpulseCoM::*)(const boost::shared_ptr<CostDataAbstract>&,
+                                         const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &CostModelAbstract::calc,
+                                                                                    bp::args("self", "data", "x"))
+      .def<void (CostModelImpulseCoM::*)(const boost::shared_ptr<CostDataAbstract>&,
+                                         const Eigen::Ref<const Eigen::VectorXd>&,
+                                         const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &CostModelImpulseCoM::calcDiff, bp::args("self", "data", "x"),
           "Compute the derivatives of the CoM position cost for impulse dynamics.\n\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n")
+      .def<void (CostModelImpulseCoM::*)(const boost::shared_ptr<CostDataAbstract>&,
+                                         const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"))
       .def("createData", &CostModelImpulseCoM::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the CoM position cost data.\n\n"

@@ -46,23 +46,28 @@ void exposeCostCentroidalMomentum() {
           "crocoddyl.ActivationModelQuad(3), and nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
           ":param ref: reference centroidal momentum"))
-      .def("calc", &CostModelCentroidalMomentum::calc_wrap,
-           CostModel_calc_wraps(bp::args("self", "data", "x", "u"),
-                                "Compute the centroidal momentum cost.\n\n"
-                                ":param data: cost data\n"
-                                ":param x: time-discrete state vector\n"
-                                ":param u: time-discrete control input"))
-      .def<void (CostModelCentroidalMomentum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                                 const Eigen::VectorXd&)>(
-          "calcDiff", &CostModelCentroidalMomentum::calcDiff_wrap, bp::args("self", "data", "x", "u"),
+      .def<void (CostModelCentroidalMomentum::*)(const boost::shared_ptr<CostDataAbstract>&,
+                                                 const Eigen::Ref<const Eigen::VectorXd>&,
+                                                 const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calc", &CostModelCentroidalMomentum::calc, bp::args("self", "data", "x", "u"),
+          "Compute the centroidal momentum cost.\n\n"
+          ":param data: cost data\n"
+          ":param x: time-discrete state vector\n"
+          ":param u: time-discrete control input")
+      .def<void (CostModelCentroidalMomentum::*)(const boost::shared_ptr<CostDataAbstract>&,
+                                                 const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calc", &CostModelAbstract::calc, bp::args("self", "data", "x"))
+      .def<void (CostModelCentroidalMomentum::*)(const boost::shared_ptr<CostDataAbstract>&,
+                                                 const Eigen::Ref<const Eigen::VectorXd>&,
+                                                 const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &CostModelCentroidalMomentum::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the centroidal momentum cost.\n\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n")
-      .def<void (CostModelCentroidalMomentum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
-          "calcDiff", &CostModelCentroidalMomentum::calcDiff_wrap, bp::args("self", "data", "x"))
-      .def<void (CostModelCentroidalMomentum::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
-          "calcDiff", &CostModelCentroidalMomentum::calcDiff_wrap, bp::args("self", "data", "x"))
+      .def<void (CostModelCentroidalMomentum::*)(const boost::shared_ptr<CostDataAbstract>&,
+                                                 const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"))
       .def("createData", &CostModelCentroidalMomentum::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the centroidal momentum cost data.\n\n"
