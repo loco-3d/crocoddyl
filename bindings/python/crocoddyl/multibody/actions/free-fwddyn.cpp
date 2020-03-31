@@ -27,18 +27,23 @@ void exposeDifferentialActionFreeFwdDynamics() {
                                                  ":param state: multibody state\n"
                                                  ":param actuation: abstract actuation model\n"
                                                  ":param costs: stack of cost functions"))
-      .def("calc", &DifferentialActionModelFreeFwdDynamics::calc_wrap,
-           DiffActionModel_calc_wraps(
-               bp::args("self", "data", "x", "u"),
-               "Compute the next state and cost value.\n\n"
-               "It describes the time-continuous evolution of the multibody system without any contact.\n"
-               "Additionally it computes the cost value associated to this state and control pair.\n"
-               ":param data: free forward-dynamics action data\n"
-               ":param x: time-continuous state vector\n"
-               ":param u: time-continuous control input"))
       .def<void (DifferentialActionModelFreeFwdDynamics::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
-                                                            const Eigen::VectorXd&, const Eigen::VectorXd&)>(
-          "calcDiff", &DifferentialActionModelFreeFwdDynamics::calcDiff_wrap, bp::args("self", "data", "x", "u"),
+                                                            const Eigen::Ref<const Eigen::VectorXd>&,
+                                                            const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calc", &DifferentialActionModelFreeFwdDynamics::calc, bp::args("self", "data", "x", "u"),
+          "Compute the next state and cost value.\n\n"
+          "It describes the time-continuous evolution of the multibody system without any contact.\n"
+          "Additionally it computes the cost value associated to this state and control pair.\n"
+          ":param data: free forward-dynamics action data\n"
+          ":param x: time-continuous state vector\n"
+          ":param u: time-continuous control input")
+      .def<void (DifferentialActionModelFreeFwdDynamics::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
+                                                            const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calc", &DifferentialActionModelAbstract::calc, bp::args("self", "data", "x"))
+      .def<void (DifferentialActionModelFreeFwdDynamics::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
+                                                            const Eigen::Ref<const Eigen::VectorXd>&,
+                                                            const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &DifferentialActionModelFreeFwdDynamics::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the differential multibody system (free of contact) and\n"
           "its cost functions.\n\n"
           "It computes the partial derivatives of the differential multibody system and the\n"
@@ -49,8 +54,8 @@ void exposeDifferentialActionFreeFwdDynamics() {
           ":param x: time-continuous state vector\n"
           ":param u: time-continuous control input\n")
       .def<void (DifferentialActionModelFreeFwdDynamics::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
-                                                            const Eigen::VectorXd&)>(
-          "calcDiff", &DifferentialActionModelFreeFwdDynamics::calcDiff_wrap, bp::args("self", "data", "x"))
+                                                            const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &DifferentialActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
       .def("createData", &DifferentialActionModelFreeFwdDynamics::createData, bp::args("self"),
            "Create the free forward dynamics differential action data.")
       .add_property(
