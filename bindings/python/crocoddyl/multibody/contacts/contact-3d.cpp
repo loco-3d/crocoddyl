@@ -32,13 +32,13 @@ void exposeContact3D() {
           ":param state: state of the multibody system\n"
           ":param Mref: reference frame translation\n"
           ":param gains: gains of the contact model (default np.matrix([ [0.],[0.] ]))"))
-      .def("calc", &ContactModel3D::calc_wrap, bp::args("self", "data", "x"),
+      .def("calc", &ContactModel3D::calc, bp::args("self", "data", "x"),
            "Compute the 3D contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
            ":param data: contact data\n"
            ":param x: state vector")
-      .def("calcDiff", &ContactModel3D::calcDiff_wrap, bp::args("self", "data", "x"),
+      .def("calcDiff", &ContactModel3D::calcDiff, bp::args("self", "data", "x"),
            "Compute the derivatives of the 3D contact holonomic constraint.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
