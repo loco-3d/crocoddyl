@@ -89,47 +89,68 @@ void SolverBoxFDDP::forwardPass(const double& steplength) {
   cost_try_ = 0.;
   xnext_ = problem_->get_x0();
   const std::size_t& T = problem_->get_T();
-  for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& m = problem_->get_runningModels()[t];
-    const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
-    if ((is_feasible_) || (steplength == 1)) {
+  if ((is_feasible_) || (steplength == 1)) {
+    for (std::size_t t = 0; t < T; ++t) {
+      const boost::shared_ptr<ActionModelAbstract>& m = problem_->get_runningModels()[t];
+      const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
       xs_try_[t] = xnext_;
-    } else {
-      m->get_state()->integrate(xnext_, fs_[t] * (steplength - 1), xs_try_[t]);
-    }
-    m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
-    us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
+      m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
+      us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
+      if (m->get_has_control_limits()) {  // clamp control
+        us_try_[t] = us_try_[t].cwiseMax(m->get_u_lb()).cwiseMin(m->get_u_ub());
+      }
+      m->calc(d, xs_try_[t], us_try_[t]);
+      xnext_ = d->xnext;
+      cost_try_ += d->cost;
 
-    // Clamp!
-    if (m->get_has_control_limits()) {
-      us_try_[t] = us_try_[t].cwiseMax(m->get_u_lb()).cwiseMin(m->get_u_ub());
+      if (raiseIfNaN(cost_try_)) {
+        throw_pretty("forward_error");
+      }
+      if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
+        throw_pretty("forward_error");
+      }
     }
 
-    m->calc(d, xs_try_[t], us_try_[t]);
-    xnext_ = d->xnext;
+    const boost::shared_ptr<ActionModelAbstract>& m = problem_->get_terminalModel();
+    const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
+    xs_try_.back() = xnext_;
+    m->calc(d, xs_try_.back());
     cost_try_ += d->cost;
 
     if (raiseIfNaN(cost_try_)) {
       throw_pretty("forward_error");
     }
-    if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
+  } else {
+    for (std::size_t t = 0; t < T; ++t) {
+      const boost::shared_ptr<ActionModelAbstract>& m = problem_->get_runningModels()[t];
+      const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
+      m->get_state()->integrate(xnext_, fs_[t] * (steplength - 1), xs_try_[t]);
+      m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
+      us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
+      if (m->get_has_control_limits()) {  // clamp control
+        us_try_[t] = us_try_[t].cwiseMax(m->get_u_lb()).cwiseMin(m->get_u_ub());
+      }
+      m->calc(d, xs_try_[t], us_try_[t]);
+      xnext_ = d->xnext;
+      cost_try_ += d->cost;
+
+      if (raiseIfNaN(cost_try_)) {
+        throw_pretty("forward_error");
+      }
+      if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
+        throw_pretty("forward_error");
+      }
+    }
+
+    const boost::shared_ptr<ActionModelAbstract>& m = problem_->get_terminalModel();
+    const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
+    m->get_state()->integrate(xnext_, fs_.back() * (steplength - 1), xs_try_.back());
+    m->calc(d, xs_try_.back());
+    cost_try_ += d->cost;
+
+    if (raiseIfNaN(cost_try_)) {
       throw_pretty("forward_error");
     }
-  }
-
-  const boost::shared_ptr<ActionModelAbstract>& m = problem_->get_terminalModel();
-  const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
-
-  if ((is_feasible_) || (steplength == 1)) {
-    xs_try_.back() = xnext_;
-  } else {
-    m->get_state()->integrate(xnext_, fs_.back() * (steplength - 1), xs_try_.back());
-  }
-  m->calc(d, xs_try_.back());
-  cost_try_ += d->cost;
-
-  if (raiseIfNaN(cost_try_)) {
-    throw_pretty("forward_error");
   }
 }
 

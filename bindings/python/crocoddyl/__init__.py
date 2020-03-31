@@ -9,12 +9,12 @@ import time
 def rotationMatrixFromTwoVectors(a, b):
     a_copy = a / np.linalg.norm(a)
     b_copy = b / np.linalg.norm(b)
-    a_cross_b = pinocchio.utils.cross(a_copy, b_copy)
+    a_cross_b = np.cross(a_copy, b_copy, axis=0)
     s = np.linalg.norm(a_cross_b)
     if s == 0:
         return np.matrix(np.eye(3))
     c = np.asscalar(a_copy.T * b_copy)
-    ab_skew = pinocchio.utils.skew(a_cross_b)
+    ab_skew = pinocchio.skew(a_cross_b)
     return np.matrix(np.eye(3)) + ab_skew + ab_skew * ab_skew * (1 - c) / s**2
 
 
@@ -89,7 +89,7 @@ class GepettoDisplay:
                         wrench = f["f"]
                         # Display the contact forces
                         R = rotationMatrixFromTwoVectors(self.x_axis, wrench.linear)
-                        forcePose = pinocchio.se3ToXYZQUATtuple(pinocchio.SE3(R, pose.translation))
+                        forcePose = pinocchio.SE3ToXYZQUATtuple(pinocchio.SE3(R, pose.translation))
                         forceMagnitud = np.linalg.norm(wrench.linear) / self.totalWeight
                         forceName = self.forceGroup + "/" + key
                         self.robot.viewer.gui.setVector3Property(forceName, "Scale", [1. * forceMagnitud, 1., 1.])
@@ -101,7 +101,7 @@ class GepettoDisplay:
                         frictionName = self.frictionGroup + "/" + key
                         self.setConeMu(key, f["mu"])
                         self.robot.viewer.gui.applyConfiguration(
-                            frictionName, list(np.array(pinocchio.se3ToXYZQUAT(position)).squeeze()))
+                            frictionName, list(np.array(pinocchio.SE3ToXYZQUAT(position)).squeeze()))
                         self.robot.viewer.gui.setVisibility(frictionName, "ON")
                         self.activeContacts[key] = True
                 for key, c in self.activeContacts.items():
@@ -173,9 +173,9 @@ class GepettoDisplay:
                         mu = 0.7
                         for k, c in model.differential.costs.costs.items():
                             if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
-                                if contact.joint == self.robot.model.frames[c.cost.frame].parent:
-                                    nsurf = c.cost.friction_cone.nsurf
-                                    mu = c.cost.friction_cone.mu
+                                if contact.joint == self.robot.model.frames[c.cost.reference.frame].parent:
+                                    nsurf = c.cost.reference.oRf.nsurf
+                                    mu = c.cost.reference.oRf.mu
                                     continue
                         fc.append({"key": str(contact.joint), "oMf": oMf, "f": force, "nsurf": nsurf, "mu": mu})
                     fs.append(fc)
@@ -198,12 +198,19 @@ class GepettoDisplay:
 
     def getFrameTrajectoryFromSolver(self, solver):
         ps = {fr: [] for fr in self.frameTrajNames}
+        models = solver.problem.runningModels + [solver.problem.terminalModel]
         datas = solver.problem.runningDatas + [solver.problem.terminalData]
         for key, p in ps.items():
             frameId = int(key)
-            for data in datas:
+            for i, data in enumerate(datas):
+                model = models[i]
                 if hasattr(data, "differential"):
                     if hasattr(data.differential, "pinocchio"):
+                        # Update the frame placement if there is not contact.
+                        # Note that, in non-contact cases, the action model does not compute it for efficiency reason
+                        if len(data.differential.multibody.contacts.contacts.items()) == 0:
+                            pinocchio.updateFramePlacement(model.differential.pinocchio, data.differential.pinocchio,
+                                                           frameId)
                         pose = data.differential.pinocchio.oMf[frameId]
                         p.append(np.asarray(pose.translation.T).reshape(-1).tolist())
                 elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
