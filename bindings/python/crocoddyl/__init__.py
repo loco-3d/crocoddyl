@@ -9,12 +9,12 @@ import time
 def rotationMatrixFromTwoVectors(a, b):
     a_copy = a / np.linalg.norm(a)
     b_copy = b / np.linalg.norm(b)
-    a_cross_b = pinocchio.utils.cross(a_copy, b_copy)
+    a_cross_b = np.cross(a_copy, b_copy, axis=0)
     s = np.linalg.norm(a_cross_b)
     if s == 0:
         return np.matrix(np.eye(3))
     c = np.asscalar(a_copy.T * b_copy)
-    ab_skew = pinocchio.utils.skew(a_cross_b)
+    ab_skew = pinocchio.skew(a_cross_b)
     return np.matrix(np.eye(3)) + ab_skew + ab_skew * ab_skew * (1 - c) / s**2
 
 
@@ -89,7 +89,7 @@ class GepettoDisplay:
                         wrench = f["f"]
                         # Display the contact forces
                         R = rotationMatrixFromTwoVectors(self.x_axis, wrench.linear)
-                        forcePose = pinocchio.se3ToXYZQUATtuple(pinocchio.SE3(R, pose.translation))
+                        forcePose = pinocchio.SE3ToXYZQUATtuple(pinocchio.SE3(R, pose.translation))
                         forceMagnitud = np.linalg.norm(wrench.linear) / self.totalWeight
                         forceName = self.forceGroup + "/" + key
                         self.robot.viewer.gui.setVector3Property(forceName, "Scale", [1. * forceMagnitud, 1., 1.])
@@ -101,7 +101,7 @@ class GepettoDisplay:
                         frictionName = self.frictionGroup + "/" + key
                         self.setConeMu(key, f["mu"])
                         self.robot.viewer.gui.applyConfiguration(
-                            frictionName, list(np.array(pinocchio.se3ToXYZQUAT(position)).squeeze()))
+                            frictionName, list(np.array(pinocchio.SE3ToXYZQUAT(position)).squeeze()))
                         self.robot.viewer.gui.setVisibility(frictionName, "ON")
                         self.activeContacts[key] = True
                 for key, c in self.activeContacts.items():
