@@ -51,6 +51,12 @@ class StateAbstractTpl {
   virtual void Jintegrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
                           Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
                           Jcomponent firstsecond = both) const = 0;
+  VectorXs diff_dx(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1);
+  VectorXs integrate_x(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx);
+  std::vector<MatrixXs> Jdiff_Js(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
+                                 Jcomponent firstsecond = both);
+  std::vector<MatrixXs> Jintegrate_Js(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
+                                      Jcomponent firstsecond = both);
 
   const std::size_t& get_nx() const;
   const std::size_t& get_ndx() const;
@@ -74,65 +80,6 @@ class StateAbstractTpl {
   VectorXs lb_;      //!< Lower state limits
   VectorXs ub_;      //!< Upper state limits
   bool has_limits_;  //!< Indicates whether any of the state limits is finite
-
-#ifdef PYTHON_BINDINGS
-
- public:
-  VectorXs diff_wrap(const VectorXs& x0, const VectorXs& x1) {
-    VectorXs dxout = VectorXs::Zero(ndx_);
-    diff(x0, x1, dxout);
-    return dxout;
-  }
-  VectorXs integrate_wrap(const VectorXs& x, const VectorXs& dx) {
-    VectorXs xout = VectorXs::Zero(nx_);
-    integrate(x, dx, xout);
-    return xout;
-  }
-  std::vector<MatrixXs> Jdiff_wrap(const VectorXs& x0, const VectorXs& x1, Jcomponent firstsecond = both) {
-    MatrixXs Jfirst(ndx_, ndx_), Jsecond(ndx_, ndx_);
-    std::vector<MatrixXs> Jacs;
-    Jdiff(x0, x1, Jfirst, Jsecond, firstsecond);
-    switch (firstsecond) {
-      case both:
-        Jacs.push_back(Jfirst);
-        Jacs.push_back(Jsecond);
-        break;
-      case first:
-        Jacs.push_back(Jfirst);
-        break;
-      case second:
-        Jacs.push_back(Jsecond);
-        break;
-      default:
-        Jacs.push_back(Jfirst);
-        Jacs.push_back(Jsecond);
-        break;
-    }
-    return Jacs;
-  }
-  std::vector<MatrixXs> Jintegrate_wrap(const VectorXs& x, const VectorXs& dx, Jcomponent firstsecond = both) {
-    MatrixXs Jfirst(ndx_, ndx_), Jsecond(ndx_, ndx_);
-    std::vector<MatrixXs> Jacs;
-    Jintegrate(x, dx, Jfirst, Jsecond, firstsecond);
-    switch (firstsecond) {
-      case both:
-        Jacs.push_back(Jfirst);
-        Jacs.push_back(Jsecond);
-        break;
-      case first:
-        Jacs.push_back(Jfirst);
-        break;
-      case second:
-        Jacs.push_back(Jsecond);
-        break;
-      default:
-        Jacs.push_back(Jfirst);
-        Jacs.push_back(Jsecond);
-        break;
-    }
-    return Jacs;
-  }
-#endif
 };
 
 }  // namespace crocoddyl
