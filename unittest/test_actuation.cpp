@@ -95,6 +95,8 @@ bool init_function() {
                                       StateModelTypes::StateMultibody_Talos);
   register_actuation_model_unit_tests(ActuationModelTypes::ActuationModelFloatingBase,
                                       StateModelTypes::StateMultibody_RandomHumanoid);
+  register_actuation_model_unit_tests(ActuationModelTypes::ActuationModelSquashingFull,
+                                      StateModelTypes::StateMultibody_TalosArm);
   return true;
 }
 
