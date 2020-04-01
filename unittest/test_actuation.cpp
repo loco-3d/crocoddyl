@@ -87,10 +87,14 @@ void register_actuation_model_unit_tests(ActuationModelTypes::Type actuation_typ
 }
 
 bool init_function() {
-  register_actuation_model_unit_tests(ActuationModelTypes::ActuationModelFull, StateModelTypes::StateMultibody_TalosArm);
-  register_actuation_model_unit_tests(ActuationModelTypes::ActuationModelFloatingBase, StateModelTypes::StateMultibody_HyQ);
-  register_actuation_model_unit_tests(ActuationModelTypes::ActuationModelFloatingBase, StateModelTypes::StateMultibody_Talos);
-  register_actuation_model_unit_tests(ActuationModelTypes::ActuationModelFloatingBase, StateModelTypes::StateMultibody_RandomHumanoid);
+  register_actuation_model_unit_tests(ActuationModelTypes::ActuationModelFull,
+                                      StateModelTypes::StateMultibody_TalosArm);
+  register_actuation_model_unit_tests(ActuationModelTypes::ActuationModelFloatingBase,
+                                      StateModelTypes::StateMultibody_HyQ);
+  register_actuation_model_unit_tests(ActuationModelTypes::ActuationModelFloatingBase,
+                                      StateModelTypes::StateMultibody_Talos);
+  register_actuation_model_unit_tests(ActuationModelTypes::ActuationModelFloatingBase,
+                                      StateModelTypes::StateMultibody_RandomHumanoid);
   return true;
 }
 
