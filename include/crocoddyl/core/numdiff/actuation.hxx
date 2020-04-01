@@ -13,7 +13,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ActuationModelNumDiffTpl<Scalar>::ActuationModelNumDiffTpl(boost::shared_ptr<Base> model)
-    : Base(model->get_state(), model->get_nu(), model->get_nr()), model_(model) {
+    : Base(model->get_state(), model->get_nu()), model_(model) {
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon());
 }
 
@@ -60,7 +60,7 @@ void ActuationModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<Actuatio
     data_nd->dx(ix) = disturbance_;
     model_->get_state()->integrate(x, data_nd->dx, data_nd->xp);
     model_->calc(data_nd->data_x[ix], data_nd->xp, u);
-    data_nd->dtau_dx.col(ix) = (data_nd->data_x[ix]->tau0 - tau0) / disturbance_;
+    data_nd->dtau_dx.col(ix) = (data_nd->data_x[ix]->tau - tau0) / disturbance_;
     data_nd->dx(ix) = 0.0;
   }
 
@@ -69,7 +69,7 @@ void ActuationModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<Actuatio
   for (unsigned iu = 0; iu < model_->get_nu(); ++iu) {
     data_nd->du(iu) = disturbance_;
     model_->calc(data_nd->data_u[iu], x, u + data_nd->du);
-    data_nd->dtau_du.col(iu) = (data_nd->data_u[iu]->tau0 - tau0) / disturbance_;
+    data_nd->dtau_du.col(iu) = (data_nd->data_u[iu]->tau - tau0) / disturbance_;
     data_nd->du(iu) = 0.0;
   }
 }
