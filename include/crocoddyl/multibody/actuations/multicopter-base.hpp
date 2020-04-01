@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2019, LAAS-CNRS, IRI: CSIC-UPC
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,7 +16,7 @@
 
 namespace crocoddyl {
 template <typename _Scalar>
-class ActuationModelMCBaseTpl : public ActuationModelAbstractTpl<_Scalar> {
+class ActuationModelMultiCopterBaseTpl : public ActuationModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -26,8 +26,8 @@ class ActuationModelMCBaseTpl : public ActuationModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  explicit ActuationModelMCBaseTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& n_rotors,
-                                   const Eigen::Ref<const MatrixXs>& tau_f)
+  explicit ActuationModelMultiCopterBaseTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& n_rotors,
+                                            const Eigen::Ref<const MatrixXs>& tau_f)
       : Base(state, state->get_nv() - 6 + n_rotors), n_rotors_(n_rotors) {
     pinocchio::JointModelFreeFlyerTpl<Scalar> ff_joint;
     if (state->get_pinocchio()->joints[1].shortname() != ff_joint.shortname()) {
@@ -42,7 +42,7 @@ class ActuationModelMCBaseTpl : public ActuationModelAbstractTpl<_Scalar> {
           MatrixXs::Identity(nu_ - n_rotors_, nu_ - n_rotors_);
     }
   };
-  ~ActuationModelMCBaseTpl(){};
+  ~ActuationModelMultiCopterBaseTpl(){};
 
   void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u) {
