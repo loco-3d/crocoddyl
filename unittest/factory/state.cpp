@@ -38,6 +38,9 @@ std::ostream& operator<<(std::ostream& os, StateModelTypes::Type type) {
     case StateModelTypes::StateMultibody_RandomHumanoid:
       os << "StateMultibody_RandomHumanoid";
       break;
+    case StateModelTypes::StateMultibody_Hector:
+      os << "StateMultibody_HectorQuadcopter";
+      break;
     case StateModelTypes::NbStateModelTypes:
       os << "NbStateModelTypes";
       break;
@@ -71,6 +74,10 @@ boost::shared_ptr<crocoddyl::StateAbstract> StateModelFactory::create(StateModel
       break;
     case StateModelTypes::StateMultibody_RandomHumanoid:
       model = PinocchioModelFactory(PinocchioModelTypes::RandomHumanoid).create();
+      state = boost::make_shared<crocoddyl::StateMultibody>(model);
+      break;
+    case StateModelTypes::StateMultibody_Hector:
+      model = PinocchioModelFactory(PinocchioModelTypes::Hector).create();
       state = boost::make_shared<crocoddyl::StateMultibody>(model);
       break;
     default:

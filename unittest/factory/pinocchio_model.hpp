@@ -29,7 +29,7 @@ namespace crocoddyl {
 namespace unittest {
 
 struct PinocchioModelTypes {
-  enum Type { TalosArm, HyQ, Talos, RandomHumanoid, NbPinocchioModelTypes };
+  enum Type { TalosArm, HyQ, Talos, RandomHumanoid, Hector, NbPinocchioModelTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();

@@ -43,6 +43,9 @@ std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type ty
     case DifferentialActionModelTypes::DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed:
       os << "DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed";
       break;
+    case DifferentialActionModelTypes::DifferentialActionModelFreeFwdDynamics_Hector:
+      os << "DifferentialActionModelFreeFwdDynamics_Hector";
+      break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_HyQ:
       os << "DifferentialActionModelContactFwdDynamics_HyQ";
       break;
@@ -85,6 +88,10 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
       action = create_freeFwdDynamics(StateModelTypes::StateMultibody_TalosArm,
                                       ActuationModelTypes::ActuationModelSquashingFull);
       break;
+    case DifferentialActionModelTypes::DifferentialActionModelFreeFwdDynamics_Hector:
+      action = create_freeFwdDynamics(StateModelTypes::StateMultibody_Hector,
+                                      ActuationModelTypes::ActuationModelMultiCopterBase);
+      break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_HyQ:
       action = create_contactFwdDynamics(StateModelTypes::StateMultibody_HyQ, false);
       break;
@@ -113,17 +120,17 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
   state = boost::static_pointer_cast<crocoddyl::StateMultibody>(StateModelFactory().create(state_type));
   actuation = ActuationModelFactory().create(actuation_type, state_type);
   cost = boost::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu());
-  cost->addCost(
-      "state",
-      CostModelFactory().create(CostModelTypes::CostModelState, state_type, ActivationModelTypes::ActivationModelQuad),
-      1.);
+  cost->addCost("state",
+                CostModelFactory().create(CostModelTypes::CostModelState, state_type,
+                                          ActivationModelTypes::ActivationModelQuad, actuation->get_nu()),
+                1.);
   cost->addCost("control",
                 CostModelFactory().create(CostModelTypes::CostModelControl, state_type,
-                                          ActivationModelTypes::ActivationModelQuad),
+                                          ActivationModelTypes::ActivationModelQuad, actuation->get_nu()),
                 1.);
   cost->addCost("frame",
                 CostModelFactory().create(CostModelTypes::CostModelFramePlacement, state_type,
-                                          ActivationModelTypes::ActivationModelQuad),
+                                          ActivationModelTypes::ActivationModelQuad, actuation->get_nu()),
                 1.);
   action = boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(state, actuation, cost);
   return action;

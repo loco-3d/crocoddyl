@@ -25,6 +25,7 @@ struct DifferentialActionModelTypes {
     DifferentialActionModelLQRDriftFree,
     DifferentialActionModelFreeFwdDynamics_TalosArm,
     DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed,
+    DifferentialActionModelFreeFwdDynamics_Hector,
     DifferentialActionModelContactFwdDynamics_HyQ,
     DifferentialActionModelContactFwdDynamics_Talos,
     DifferentialActionModelContactFwdDynamicsWithFriction_HyQ,

@@ -42,6 +42,9 @@ std::ostream& operator<<(std::ostream& os, PinocchioModelTypes::Type type) {
     case PinocchioModelTypes::RandomHumanoid:
       os << "RandomHumanoid";
       break;
+    case PinocchioModelTypes::Hector:
+      os << "Hector";
+      break;
     case PinocchioModelTypes::NbPinocchioModelTypes:
       os << "NbPinocchioModelTypes";
       break;
@@ -76,6 +79,11 @@ PinocchioModelFactory::PinocchioModelFactory(PinocchioModelTypes::Type type) {
       frame_name_ = "rleg6_body";
       frame_id_ = model_->getFrameId(frame_name_);
       break;
+    case PinocchioModelTypes::Hector:
+      construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR "/hector_description/robots/quadrotor_base.urdf", "", true);
+      frame_name_ = "base_link";
+      frame_id_ = model_->getFrameId(frame_name_);
+      break;
     case PinocchioModelTypes::NbPinocchioModelTypes:
       break;
     default:
@@ -94,10 +102,14 @@ void PinocchioModelFactory::construct_model(const std::string& urdf_file, const 
       pinocchio::urdf::buildModel(urdf_file, pinocchio::JointModelFreeFlyer(), *model_.get());
       model_->lowerPositionLimit.segment<7>(0).fill(-1.);
       model_->upperPositionLimit.segment<7>(0).fill(1.);
-      pinocchio::srdf::loadReferenceConfigurations(*model_.get(), srdf_file, false);
+      if (srdf_file.compare("") != 0) {
+        pinocchio::srdf::loadReferenceConfigurations(*model_.get(), srdf_file, false);
+      }
     } else {
       pinocchio::urdf::buildModel(urdf_file, *model_.get());
-      pinocchio::srdf::loadReferenceConfigurations(*model_.get(), srdf_file, false);
+      if (srdf_file.compare("") != 0) {
+        pinocchio::srdf::loadReferenceConfigurations(*model_.get(), srdf_file, false);
+      }
     }
   } else {
     pinocchio::buildModels::humanoidRandom(*model_.get(), free_flyer);
