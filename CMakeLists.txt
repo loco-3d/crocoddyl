@@ -56,7 +56,7 @@ APPLY_DEFAULT_APPLE_CONFIGURATION()
 
 # Add the different required and optional dependencies
 ADD_PROJECT_DEPENDENCY(pinocchio 2.2.1 REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.2.1")
-ADD_COMPILE_DEPENDENCY("example-robot-data >= 3.1.2")
+ADD_PROJECT_DEPENDENCY(example-robot-data 3.2.0 REQUIRED PKG_CONFIG_REQUIRES "example-robot-data >= 3.2.0")
 ADD_OPTIONAL_DEPENDENCY("quadprog")
 ADD_OPTIONAL_DEPENDENCY("scipy")
 
