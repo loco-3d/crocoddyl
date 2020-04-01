@@ -45,21 +45,28 @@ void exposeCostContactForce() {
           "crocoddyl.ActivationModelQuad(6), and nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
           ":param fref: reference force\n"))
-      .def("calc", &CostModelContactForce::calc_wrap,
-           CostModel_calc_wraps(bp::args("self", "data", "x", "u"),
-                                "Compute the contact force cost.\n\n"
-                                ":param data: cost data\n"
-                                ":param x: time-discrete state vector\n"
-                                ":param u: time-discrete control input"))
-      .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                           const Eigen::VectorXd&)>(
-          "calcDiff", &CostModelContactForce::calcDiff_wrap, bp::args("self", "data", "x", "u"),
+      .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&,
+                                           const Eigen::Ref<const Eigen::VectorXd>&,
+                                           const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calc", &CostModelContactForce::calc, bp::args("self", "data", "x", "u"),
+          "Compute the contact force cost.\n\n"
+          ":param data: cost data\n"
+          ":param x: time-discrete state vector\n"
+          ":param u: time-discrete control input")
+      .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&,
+                                           const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &CostModelAbstract::calc,
+                                                                                      bp::args("self", "data", "x"))
+      .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&,
+                                           const Eigen::Ref<const Eigen::VectorXd>&,
+                                           const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &CostModelContactForce::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the contact force cost.\n\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n")
-      .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
-          "calcDiff", &CostModelContactForce::calcDiff_wrap, bp::args("self", "data", "x"))
+      .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&,
+                                           const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"))
       .def("createData", &CostModelContactForce::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the contact force cost data.\n\n"

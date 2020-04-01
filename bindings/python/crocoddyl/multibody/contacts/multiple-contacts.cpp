@@ -68,13 +68,13 @@ void exposeContactMultiple() {
            "Change the contact status.\n\n"
            ":param name: contact name\n"
            ":param active: contact status (true for active and false for inactive)")
-      .def("calc", &ContactModelMultiple::calc_wrap, bp::args("self", "data", "x"),
+      .def("calc", &ContactModelMultiple::calc, bp::args("self", "data", "x"),
            "Compute the total contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
            ":param data: contact data\n"
            ":param x: state vector")
-      .def("calcDiff", &ContactModelMultiple::calcDiff_wrap, bp::args("self", "data", "x"),
+      .def("calcDiff", &ContactModelMultiple::calcDiff, bp::args("self", "data", "x"),
            "Compute the derivatives of the total contact holonomic constraint.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"

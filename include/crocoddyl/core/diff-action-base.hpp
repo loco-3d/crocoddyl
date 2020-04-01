@@ -85,28 +85,6 @@ class DifferentialActionModelAbstractTpl {
   bool has_control_limits_;                 //!< Indicates whether any of the control limits is finite
 
   void update_has_control_limits();
-
-#ifdef PYTHON_BINDINGS
-
- public:
-  void calc_wrap(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const VectorXs& x,
-                 const VectorXs& u = VectorXs()) {
-    if (u.size() == 0) {
-      calc(data, x);
-    } else {
-      calc(data, x, u);
-    }
-  }
-
-  void calcDiff_wrap(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const VectorXs& x,
-                     const VectorXs& u) {
-    calcDiff(data, x, u);
-  }
-  void calcDiff_wrap(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const VectorXs& x) {
-    calcDiff(data, x, unone_);
-  }
-
-#endif
 };
 
 template <typename _Scalar>

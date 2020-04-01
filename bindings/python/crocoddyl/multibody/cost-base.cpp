@@ -49,11 +49,17 @@ void exposeCostAbstract() {
            ":param data: cost data\n"
            ":param x: state vector\n"
            ":param u: control input")
+      .def<void (CostModelAbstract::*)(const boost::shared_ptr<CostDataAbstract>&,
+                                       const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &CostModelAbstract::calc,
+                                                                                  bp::args("self", "data", "x"))
       .def("calcDiff", pure_virtual(&CostModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the cost function and its residuals.\n\n"
            ":param data: cost data\n"
            ":param x: state vector\n"
            ":param u: control input\n")
+      .def<void (CostModelAbstract::*)(const boost::shared_ptr<CostDataAbstract>&,
+                                       const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"))
       .def("createData", &CostModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the cost data.\n\n"

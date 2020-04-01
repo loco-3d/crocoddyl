@@ -47,8 +47,7 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
   }
 };
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ActionModel_calc_wraps, ActionModelAbstract::calc_wrap, 2, 3)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ActionModel_quasiStatic_wraps, ActionModelAbstract::quasiStatic_wrap, 2, 4)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ActionModel_quasiStatic_wraps, ActionModelAbstract::quasiStatic_x, 2, 4)
 
 }  // namespace python
 }  // namespace crocoddyl

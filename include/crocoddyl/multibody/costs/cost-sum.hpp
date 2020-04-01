@@ -86,27 +86,6 @@ class CostModelSumTpl {
   std::size_t nr_;
   std::size_t nr_total_;
   VectorXs unone_;
-
-#ifdef PYTHON_BINDINGS
-
- public:
-  void calc_wrap(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data, const VectorXs& x,
-                 const VectorXs& u = VectorXs()) {
-    if (u.size() == 0) {
-      calc(data, x);
-    } else {
-      calc(data, x, u);
-    }
-  }
-
-  void calcDiff_wrap(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data, const VectorXs& x, const VectorXs& u) {
-    calcDiff(data, x, u);
-  }
-  void calcDiff_wrap(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data, const VectorXs& x) {
-    calcDiff(data, x, unone_);
-  }
-
-#endif
 };
 
 template <typename _Scalar>

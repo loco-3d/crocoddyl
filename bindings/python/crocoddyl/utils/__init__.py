@@ -45,22 +45,27 @@ class StateVectorDerived(crocoddyl.StateAbstract):
     def integrate(self, x, dx):
         return x + dx
 
-    def Jdiff(self, x1, x2, firstsecond='both'):
-        assert (firstsecond in ['first', 'second', 'both'])
-        if firstsecond == 'both':
-            return [self.Jdiff(x1, x2, 'first'), self.Jdiff(x1, x2, 'second')]
+    def Jdiff(self, x1, x2, firstsecond=None):
+        if firstsecond is None:
+            firstsecond = crocoddyl.Jcomponent.both
+        if firstsecond.name == 'both':
+            return [self.Jdiff(x1, x2, crocoddyl.Jcomponent.first), self.Jdiff(x1, x2, crocoddyl.Jcomponent.second)]
 
         J = np.zeros([self.ndx, self.ndx])
-        if firstsecond == 'first':
+        if firstsecond.name == 'first':
             J[:, :] = -np.eye(self.ndx)
-        elif firstsecond == 'second':
+        elif firstsecond.name == 'second':
             J[:, :] = np.eye(self.ndx)
         return J
 
-    def Jintegrate(self, x, dx, firstsecond='both'):
-        assert (firstsecond in ['first', 'second', 'both'])
-        if firstsecond == 'both':
-            return [self.Jintegrate(x, dx, 'first'), self.Jintegrate(x, dx, 'second')]
+    def Jintegrate(self, x, dx, firstsecond=None):
+        if firstsecond is None:
+            firstsecond = crocoddyl.Jcomponent.both
+        if firstsecond.name == 'both':
+            return [
+                self.Jintegrate(x, dx, crocoddyl.Jcomponent.first),
+                self.Jintegrate(x, dx, crocoddyl.Jcomponent.second)
+            ]
         return np.eye(self.ndx)
 
 
@@ -95,35 +100,40 @@ class StateMultibodyDerived(crocoddyl.StateAbstract):
         qn = pinocchio.integrate(self.model, q, dq)
         return np.concatenate([qn, v + dv])
 
-    def Jdiff(self, x1, x2, firstsecond='both'):
-        assert (firstsecond in ['first', 'second', 'both'])
-        if firstsecond == 'both':
-            return [self.Jdiff(x1, x2, 'first'), self.Jdiff(x1, x2, 'second')]
+    def Jdiff(self, x1, x2, firstsecond=None):
+        if firstsecond is None:
+            firstsecond = crocoddyl.Jcomponent.both
+        if firstsecond.name == 'both':
+            return [self.Jdiff(x1, x2, crocoddyl.Jcomponent.first), self.Jdiff(x1, x2, crocoddyl.Jcomponent.second)]
 
-        if firstsecond == 'first':
+        if firstsecond.name == 'first':
             dx = self.diff(x2, x1)
             q = x2[:self.model.nq]
             dq = dx[:self.model.nv]
             Jdq = pinocchio.dIntegrate(self.model, q, dq)[1]
             return np.matrix(-scl.block_diag(np.linalg.inv(Jdq), np.eye(self.nv)))
-        elif firstsecond == 'second':
+        elif firstsecond.name == 'second':
             dx = self.diff(x1, x2)
             q = x1[:self.nq]
             dq = dx[:self.nv]
             Jdq = pinocchio.dIntegrate(self.model, q, dq)[1]
             return np.matrix(scl.block_diag(np.linalg.inv(Jdq), np.eye(self.nv)))
 
-    def Jintegrate(self, x, dx, firstsecond='both'):
-        assert (firstsecond in ['first', 'second', 'both'])
-        if firstsecond == 'both':
-            return [self.Jintegrate(x, dx, 'first'), self.Jintegrate(x, dx, 'second')]
+    def Jintegrate(self, x, dx, firstsecond=None):
+        if firstsecond is None:
+            firstsecond = crocoddyl.Jcomponent.both
+        if firstsecond.name == 'both':
+            return [
+                self.Jintegrate(x, dx, crocoddyl.Jcomponent.first),
+                self.Jintegrate(x, dx, crocoddyl.Jcomponent.second)
+            ]
 
         q = x[:self.nq]
         dq = dx[:self.nv]
         Jq, Jdq = pinocchio.dIntegrate(self.model, q, dq)
-        if firstsecond == 'first':
+        if firstsecond.name == 'first':
             return np.matrix(scl.block_diag(np.linalg.inv(Jq), np.eye(self.nv)))
-        elif firstsecond == 'second':
+        elif firstsecond.name == 'second':
             return np.matrix(scl.block_diag(np.linalg.inv(Jdq), np.eye(self.nv)))
 
 
@@ -402,7 +412,7 @@ class StateCostDerived(crocoddyl.CostModelAbstract):
         data.cost = data.activation.a
 
     def calcDiff(self, data, x, u):
-        data.Rx[:] = self.state.Jdiff(self.xref, x, 'second')[0]
+        data.Rx[:] = self.state.Jdiff(self.xref, x, crocoddyl.Jcomponent.second)[0]
         self.activation.calcDiff(data.activation, data.r)
         data.Lx[:] = data.Rx.T * data.activation.Ar
         data.Lxx[:, :] = data.Rx.T * data.activation.Arr * data.Rx

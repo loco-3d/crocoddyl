@@ -22,16 +22,15 @@ void exposeActivationQuad() {
       bp::init<int>(bp::args("self", "nr"),
                     "Initialize the activation model.\n\n"
                     ":param nr: dimension of the cost-residual vector"))
-      .def("calc", &ActivationModelQuad::calc_wrap, bp::args("self", "data", "r"),
+      .def("calc", &ActivationModelQuad::calc, bp::args("self", "data", "r"),
            "Compute the 0.5 * ||r||^2.\n\n"
            ":param data: activation data\n"
            ":param r: residual vector")
-      .def<void (ActivationModelQuad::*)(const boost::shared_ptr<ActivationDataAbstract>&, const Eigen::VectorXd&)>(
-          "calcDiff", &ActivationModelQuad::calcDiff_wrap, bp::args("self", "data", "r"),
-          "Compute the derivatives of a quadratic function.\n\n"
-          "Note that the Hessian is constant, so we don't write again this value.\n"
-          ":param data: activation data\n"
-          ":param r: residual vector \n")
+      .def("calcDiff", &ActivationModelQuad::calcDiff, bp::args("self", "data", "r"),
+           "Compute the derivatives of a quadratic function.\n\n"
+           "Note that the Hessian is constant, so we don't write again this value.\n"
+           ":param data: activation data\n"
+           ":param r: residual vector \n")
       .def("createData", &ActivationModelQuad::createData, bp::args("self"),
            "Create the quadratic activation data.\n\n");
 }

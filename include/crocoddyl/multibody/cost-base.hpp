@@ -70,24 +70,6 @@ class CostModelAbstractTpl {
   boost::shared_ptr<ActivationModelAbstract> activation_;
   std::size_t nu_;
   VectorXs unone_;
-
-#ifdef PYTHON_BINDINGS
-
- public:
-  void calc_wrap(const boost::shared_ptr<CostDataAbstract>& data, const VectorXs& x, const VectorXs& u = VectorXs()) {
-    if (u.size() == 0) {
-      calc(data, x);
-    } else {
-      calc(data, x, u);
-    }
-  }
-
-  void calcDiff_wrap(const boost::shared_ptr<CostDataAbstract>& data, const VectorXs& x, const VectorXs& u) {
-    calcDiff(data, x, u);
-  }
-  void calcDiff_wrap(const boost::shared_ptr<CostDataAbstract>& data, const VectorXs& x) { calcDiff(data, x, unone_); }
-
-#endif
 };
 
 template <typename _Scalar>

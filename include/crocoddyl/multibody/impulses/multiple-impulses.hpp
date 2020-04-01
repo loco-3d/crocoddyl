@@ -84,15 +84,6 @@ class ImpulseModelMultipleTpl {
   ImpulseModelContainer impulses_;
   std::size_t ni_;
   std::size_t ni_total_;
-
-#ifdef PYTHON_BINDINGS
-
- public:
-  void calc_wrap(const boost::shared_ptr<ImpulseDataMultiple>& data, const VectorXs& x) { calc(data, x); }
-
-  void calcDiff_wrap(const boost::shared_ptr<ImpulseDataMultiple>& data, const VectorXs& x) { calcDiff(data, x); }
-
-#endif
 };
 
 template <typename _Scalar>

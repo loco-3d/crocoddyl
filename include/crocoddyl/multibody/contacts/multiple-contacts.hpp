@@ -88,15 +88,6 @@ class ContactModelMultipleTpl {
   std::size_t nc_;
   std::size_t nc_total_;
   std::size_t nu_;
-
-#ifdef PYTHON_BINDINGS
-
- public:
-  void calc_wrap(const boost::shared_ptr<ContactDataMultiple>& data, const VectorXs& x) { calc(data, x); }
-
-  void calcDiff_wrap(const boost::shared_ptr<ContactDataMultiple>& data, const VectorXs& x) { calcDiff(data, x); }
-
-#endif
 };
 
 template <typename _Scalar>

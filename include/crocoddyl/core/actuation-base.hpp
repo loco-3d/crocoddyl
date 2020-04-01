@@ -55,19 +55,6 @@ class ActuationModelAbstractTpl {
  protected:
   std::size_t nu_;
   boost::shared_ptr<StateAbstract> state_;
-
-#ifdef PYTHON_BINDINGS
-
- public:
-  void calc_wrap(const boost::shared_ptr<ActuationDataAbstract>& data, const VectorXs& x, const VectorXs& u) {
-    calc(data, x, u);
-  }
-
-  void calcDiff_wrap(const boost::shared_ptr<ActuationDataAbstract>& data, const VectorXs& x, const VectorXs& u) {
-    calcDiff(data, x, u);
-  }
-
-#endif
 };
 
 template <typename _Scalar>

@@ -51,15 +51,6 @@ class ContactModelAbstractTpl {
   boost::shared_ptr<StateMultibody> state_;
   std::size_t nc_;
   std::size_t nu_;
-
-#ifdef PYTHON_BINDINGS
-
- public:
-  void calc_wrap(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& x) { calc(data, x); }
-
-  void calcDiff_wrap(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& x) { calcDiff(data, x); }
-
-#endif
 };
 
 template <typename _Scalar>

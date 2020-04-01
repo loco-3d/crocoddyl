@@ -54,22 +54,28 @@ void exposeCostControl() {
           "model is quadratic, i.e. crocoddyl.ActivationModelQuad(nu)\n"
           ":param state: state of the multibody system\n"
           ":param nu: dimension of control vector"))
-      .def("calc", &CostModelControl::calc_wrap,
-           CostModel_calc_wraps(bp::args("self", "data", "x", "u"),
-                                "Compute the control cost.\n\n"
-                                ":param data: cost data\n"
-                                ":param x: time-discrete state vector\n"
-                                ":param u: time-discrete control input"))
-      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&,
-                                      const Eigen::VectorXd&)>("calcDiff", &CostModelControl::calcDiff_wrap,
-                                                               bp::args("self", "data", "x", "u"),
-                                                               "Compute the derivatives of the control cost.\n\n"
-                                                               ":param data: action data\n"
-                                                               ":param x: time-discrete state vector\n"
-                                                               ":param u: time-discrete control input\n")
-
-      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&, const Eigen::VectorXd&)>(
-          "calcDiff", &CostModelControl::calcDiff_wrap, bp::args("self", "data", "x"))
+      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&,
+                                      const Eigen::Ref<const Eigen::VectorXd>&,
+                                      const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calc", &CostModelControl::calc, bp::args("self", "data", "x", "u"),
+          "Compute the control cost.\n\n"
+          ":param data: cost data\n"
+          ":param x: time-discrete state vector\n"
+          ":param u: time-discrete control input")
+      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&,
+                                      const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &CostModelAbstract::calc,
+                                                                                 bp::args("self", "data", "x"))
+      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&,
+                                      const Eigen::Ref<const Eigen::VectorXd>&,
+                                      const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &CostModelControl::calcDiff, bp::args("self", "data", "x", "u"),
+          "Compute the derivatives of the control cost.\n\n"
+          ":param data: action data\n"
+          ":param x: time-discrete state vector\n"
+          ":param u: time-discrete control input\n")
+      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&,
+                                      const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"))
       .add_property("reference", bp::make_function(&CostModelControl::get_uref, bp::return_internal_reference<>()),
                     &CostModelControl::set_reference<Eigen::VectorXd>, "reference control vector")
       .add_property("uref", bp::make_function(&CostModelControl::get_uref, bp::return_internal_reference<>()),

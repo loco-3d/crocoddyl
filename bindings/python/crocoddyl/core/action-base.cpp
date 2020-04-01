@@ -38,6 +38,9 @@ void exposeActionAbstract() {
            ":param data: action data\n"
            ":param x: time-discrete state vector\n"
            ":param u: time-discrete control input")
+      .def<void (ActionModelAbstract::*)(const boost::shared_ptr<ActionDataAbstract>&,
+                                         const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &ActionModelAbstract::calc,
+                                                                                    bp::args("self", "data", "x"))
       .def("calcDiff", pure_virtual(&ActionModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the dynamics and cost functions.\n\n"
            "It computes the partial derivatives of the dynamical system and the\n"
@@ -47,12 +50,15 @@ void exposeActionAbstract() {
            ":param data: action data\n"
            ":param x: time-discrete state vector\n"
            ":param u: time-discrete control input\n")
+      .def<void (ActionModelAbstract::*)(const boost::shared_ptr<ActionDataAbstract>&,
+                                         const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &ActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
       .def("createData", &ActionModelAbstract_wrap::createData, bp::args("self"),
            "Create the action data.\n\n"
            "Each action model (AM) has its own data that needs to be allocated.\n"
            "This function returns the allocated data for a predefined AM.\n"
            ":return AM data.")
-      .def("quasiStatic", &ActionModelAbstract_wrap::quasiStatic_wrap,
+      .def("quasiStatic", &ActionModelAbstract_wrap::quasiStatic_x,
            ActionModel_quasiStatic_wraps(
                bp::args("self", "data", "x", "maxiter", "tol"),
                "Compute the quasic-static control given a state.\n\n"
