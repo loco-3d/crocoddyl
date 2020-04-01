@@ -192,7 +192,6 @@ void register_contact_model_unit_tests(ContactModelTypes::Type contact_type, Pin
 bool init_function() {
   for (size_t contact_type = 0; contact_type < ContactModelTypes::all.size(); ++contact_type) {
     for (size_t model_type = 0; model_type < PinocchioModelTypes::all.size(); ++model_type) {
-      if (model_type == PinocchioModelTypes::Hector) continue;
       boost::test_tools::output_test_stream test_name;
       test_name << "test_" << ContactModelTypes::all[contact_type] << "_" << PinocchioModelTypes::all[model_type];
       test_suite* ts = BOOST_TEST_SUITE(test_name.str());

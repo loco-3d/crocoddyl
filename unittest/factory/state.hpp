@@ -24,7 +24,6 @@ struct StateModelTypes {
     StateMultibody_HyQ,
     StateMultibody_Talos,
     StateMultibody_RandomHumanoid,
-    StateMultibody_Hector,
     NbStateModelTypes
   };
   static std::vector<Type> init_all() {
