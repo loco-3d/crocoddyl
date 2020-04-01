@@ -24,7 +24,7 @@ ENDIF(UNIX)
 
 SET(${PROJECT_NAME}_CPP_TESTS
   test_states
-  # test_actuation
+  test_actuation
   test_activations
   test_costs
   test_cost_sum

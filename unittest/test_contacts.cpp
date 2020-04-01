@@ -179,26 +179,24 @@ void test_partial_derivatives_against_numdiff(ContactModelTypes::Type contact_ty
 
 //----------------------------------------------------------------------------//
 
-void register_contact_model_unit_tests(ContactModelTypes::Type contact_type, PinocchioModelTypes::Type model_type,
-                                       test_suite& ts) {
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_construct_data, contact_type, model_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_fetch_jacobians, contact_type, model_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_fetch_derivatives, contact_type, model_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_update_force, contact_type, model_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_update_force_diff, contact_type, model_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, contact_type, model_type)));
+void register_contact_model_unit_tests(ContactModelTypes::Type contact_type, PinocchioModelTypes::Type model_type) {
+  boost::test_tools::output_test_stream test_name;
+  test_name << "test_" << contact_type << "_" << model_type;
+  std::cout << "Running " << test_name.str() << std::endl;
+  test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_construct_data, contact_type, model_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_fetch_jacobians, contact_type, model_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_fetch_derivatives, contact_type, model_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_update_force, contact_type, model_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_update_force_diff, contact_type, model_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, contact_type, model_type)));
+  framework::master_test_suite().add(ts);
 }
 
 bool init_function() {
   for (size_t contact_type = 0; contact_type < ContactModelTypes::all.size(); ++contact_type) {
     for (size_t model_type = 0; model_type < PinocchioModelTypes::all.size(); ++model_type) {
-      boost::test_tools::output_test_stream test_name;
-      test_name << "test_" << ContactModelTypes::all[contact_type] << "_" << PinocchioModelTypes::all[model_type];
-      test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-      std::cout << "Running " << test_name.str() << std::endl;
-      register_contact_model_unit_tests(ContactModelTypes::all[contact_type], PinocchioModelTypes::all[model_type],
-                                        *ts);
-      framework::master_test_suite().add(ts);
+      register_contact_model_unit_tests(ContactModelTypes::all[contact_type], PinocchioModelTypes::all[model_type]);
     }
   }
   return true;

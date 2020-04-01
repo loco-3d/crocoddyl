@@ -11,6 +11,7 @@
 
 #include "state.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
+#include "crocoddyl/core/numdiff/actuation.hpp"
 
 namespace crocoddyl {
 namespace unittest {

@@ -282,28 +282,28 @@ void test_velocity_from_Jintegrate_Jdiff(StateModelTypes::Type state_type) {
 
 //----------------------------------------------------------------------------//
 
-void register_state_unit_tests(StateModelTypes::Type state_type, test_suite& ts) {
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_state_dimension, state_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_integrate_against_difference, state_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_difference_against_integrate, state_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_firstsecond, state_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jint_firstsecond, state_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_num_diff_firstsecond, state_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jint_num_diff_firstsecond, state_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_against_numdiff, state_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jintegrate_against_numdiff, state_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_and_Jintegrate_are_inverses, state_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_velocity_from_Jintegrate_Jdiff, state_type)));
+void register_state_unit_tests(StateModelTypes::Type state_type) {
+  boost::test_tools::output_test_stream test_name;
+  test_name << "test_" << state_type;
+  std::cout << "Running " << test_name.str() << std::endl;
+  test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_state_dimension, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_integrate_against_difference, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_difference_against_integrate, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_firstsecond, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_Jint_firstsecond, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_num_diff_firstsecond, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_Jint_num_diff_firstsecond, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_against_numdiff, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_Jintegrate_against_numdiff, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_and_Jintegrate_are_inverses, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_velocity_from_Jintegrate_Jdiff, state_type)));
+  framework::master_test_suite().add(ts);
 }
 
 bool init_function() {
   for (size_t i = 0; i < StateModelTypes::all.size(); ++i) {
-    boost::test_tools::output_test_stream test_name;
-    test_name << "test_" << StateModelTypes::all[i];
-    test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-    std::cout << "Running " << test_name.str() << std::endl;
-    register_state_unit_tests(StateModelTypes::all[i], *ts);
-    framework::master_test_suite().add(ts);
+    register_state_unit_tests(StateModelTypes::all[i]);
   }
   return true;
 }

@@ -103,21 +103,21 @@ void test_partial_derivatives_against_numdiff(DifferentialActionModelTypes::Type
 
 //----------------------------------------------------------------------------//
 
-void register_action_model_unit_tests(DifferentialActionModelTypes::Type action_type, test_suite& ts) {
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_construct_data, action_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_state, action_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, action_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, action_type)));
+void register_action_model_unit_tests(DifferentialActionModelTypes::Type action_type) {
+  boost::test_tools::output_test_stream test_name;
+  test_name << "test_" << action_type;
+  std::cout << "Running " << test_name.str() << std::endl;
+  test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_construct_data, action_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_state, action_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, action_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, action_type)));
+  framework::master_test_suite().add(ts);
 }
 
 bool init_function() {
   for (size_t i = 0; i < DifferentialActionModelTypes::all.size(); ++i) {
-    boost::test_tools::output_test_stream test_name;
-    test_name << "test_" << DifferentialActionModelTypes::all[i];
-    test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-    std::cout << "Running " << test_name.str() << std::endl;
-    register_action_model_unit_tests(DifferentialActionModelTypes::all[i], *ts);
-    framework::master_test_suite().add(ts);
+    register_action_model_unit_tests(DifferentialActionModelTypes::all[i]);
   }
   return true;
 }
