@@ -133,25 +133,23 @@ void test_update_force_diff(ImpulseModelTypes::Type impulse_type, PinocchioModel
 
 //----------------------------------------------------------------------------//
 
-void register_impulse_model_unit_tests(ImpulseModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type,
-                                       test_suite& ts) {
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_construct_data, impulse_type, model_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_fetch_jacobians, impulse_type, model_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_fetch_derivatives, impulse_type, model_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_update_force, impulse_type, model_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_update_force_diff, impulse_type, model_type)));
+void register_impulse_model_unit_tests(ImpulseModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) {
+  boost::test_tools::output_test_stream test_name;
+  test_name << "test_" << impulse_type << "_" << model_type;
+  std::cout << "Running " << test_name.str() << std::endl;
+  test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_construct_data, impulse_type, model_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_fetch_jacobians, impulse_type, model_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_fetch_derivatives, impulse_type, model_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_update_force, impulse_type, model_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_update_force_diff, impulse_type, model_type)));
+  framework::master_test_suite().add(ts);
 }
 
 bool init_function() {
   for (size_t impulse_type = 0; impulse_type < ImpulseModelTypes::all.size(); ++impulse_type) {
     for (size_t model_type = 0; model_type < PinocchioModelTypes::all.size(); ++model_type) {
-      boost::test_tools::output_test_stream test_name;
-      test_name << "test_" << ImpulseModelTypes::all[impulse_type] << "_" << PinocchioModelTypes::all[model_type];
-      test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-      std::cout << "Running " << test_name.str() << std::endl;
-      register_impulse_model_unit_tests(ImpulseModelTypes::all[impulse_type], PinocchioModelTypes::all[model_type],
-                                        *ts);
-      framework::master_test_suite().add(ts);
+      register_impulse_model_unit_tests(ImpulseModelTypes::all[impulse_type], PinocchioModelTypes::all[model_type]);
     }
   }
   return true;

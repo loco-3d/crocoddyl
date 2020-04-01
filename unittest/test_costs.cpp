@@ -225,14 +225,19 @@ void test_partial_derivatives_in_cost_sum(CostModelTypes::Type cost_type, StateM
 //----------------------------------------------------------------------------//
 
 void register_cost_model_unit_tests(CostModelTypes::Type cost_type, StateModelTypes::Type state_type,
-                                    ActivationModelTypes::Type activation_type, test_suite& ts) {
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_construct_data, cost_type, state_type, activation_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, cost_type, state_type, activation_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_against_numdiff, cost_type, state_type, activation_type)));
-  ts.add(
+                                    ActivationModelTypes::Type activation_type) {
+  boost::test_tools::output_test_stream test_name;
+  test_name << "test_" << cost_type << "_" << activation_type << "_" << state_type;
+  std::cout << "Running " << test_name.str() << std::endl;
+  test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_construct_data, cost_type, state_type, activation_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, cost_type, state_type, activation_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_against_numdiff, cost_type, state_type, activation_type)));
+  ts->add(
       BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, cost_type, state_type, activation_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_dimensions_in_cost_sum, cost_type, state_type, activation_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_in_cost_sum, cost_type, state_type, activation_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_dimensions_in_cost_sum, cost_type, state_type, activation_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_in_cost_sum, cost_type, state_type, activation_type)));
+  framework::master_test_suite().add(ts);
 }
 
 bool init_function() {
@@ -241,14 +246,8 @@ bool init_function() {
     for (size_t state_type = StateModelTypes::all[StateModelTypes::StateMultibody_TalosArm];
          state_type < StateModelTypes::all.size(); ++state_type) {
       for (size_t activation_type = 0; activation_type < ActivationModelTypes::all.size(); ++activation_type) {
-        boost::test_tools::output_test_stream test_name;
-        test_name << "test_" << CostModelTypes::all[cost_type] << "_" << ActivationModelTypes::all[activation_type]
-                  << "_" << StateModelTypes::all[state_type];
-        test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-        std::cout << "Running " << test_name.str() << std::endl;
         register_cost_model_unit_tests(CostModelTypes::all[cost_type], StateModelTypes::all[state_type],
-                                       ActivationModelTypes::all[activation_type], *ts);
-        framework::master_test_suite().add(ts);
+                                       ActivationModelTypes::all[activation_type]);
       }
     }
   }

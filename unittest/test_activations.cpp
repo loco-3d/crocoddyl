@@ -76,20 +76,20 @@ void test_partial_derivatives_against_numdiff(ActivationModelTypes::Type activat
 
 //----------------------------------------------------------------------------//
 
-void register_unit_tests(ActivationModelTypes::Type activation_type, test_suite& ts) {
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_construct_data, activation_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_value, activation_type)));
-  ts.add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, activation_type)));
+void register_unit_tests(ActivationModelTypes::Type activation_type) {
+  boost::test_tools::output_test_stream test_name;
+  test_name << "test_" << activation_type;
+  std::cout << "Running " << test_name.str() << std::endl;
+  test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_construct_data, activation_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_value, activation_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, activation_type)));
+  framework::master_test_suite().add(ts);
 }
 
 bool init_function() {
   for (size_t i = 0; i < ActivationModelTypes::all.size(); ++i) {
-    boost::test_tools::output_test_stream test_name;
-    test_name << "test_" << ActivationModelTypes::all[i];
-    test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-    std::cout << "Running " << test_name.str() << std::endl;
-    register_unit_tests(ActivationModelTypes::all[i], *ts);
-    framework::master_test_suite().add(ts);
+    register_unit_tests(ActivationModelTypes::all[i]);
   }
   return true;
 }
