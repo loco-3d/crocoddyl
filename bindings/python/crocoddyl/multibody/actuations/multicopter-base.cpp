@@ -22,12 +22,12 @@ void exposeActuationModelMultiCopterBase() {
           ":param state: state of multibody system, \n"
           ":param nrotors: number of rotors of the flying base, \n"
           ":param force_torque: matrix that maps rotors thrust to generalized torque of the flying base."))
-      .def("calc", &ActuationModelMultiCopterBase::calc_wrap, bp::args("self", "data", "x", "u"),
+      .def("calc", &ActuationModelMultiCopterBase::calc, bp::args("self", "data", "x", "u"),
            "Compute the actuation signal from the control input u.\n\n"
            ":param data: multicopter-base actuation data\n"
            ":param x: state vector\n"
            ":param u: control input")
-      .def("calcDiff", &ActuationModelMultiCopterBase::calcDiff_wrap, bp::args("self", "data", "x", "u"),
+      .def("calcDiff", &ActuationModelMultiCopterBase::calcDiff, bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the actuation model.\n\n"
            "It computes the partial derivatives of the full actuation. It assumes that you\n"
            "create the data using this class. The reason is that the derivatives are constant and\n"
