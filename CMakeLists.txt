@@ -19,11 +19,11 @@ INCLUDE(cmake/python.cmake)
 INCLUDE(cmake/apple.cmake)
 
 # Print initial message
-MESSAGE("${PROJECT_DESCRIPTION}, version ${PROJECT_VERSION}")
-MESSAGE("Copyright (C) 2018-2020 CNRS-LAAS")
-MESSAGE("Copyright (C) 2019-2020 University of Edinburgh")
-MESSAGE("All rights reserved.")
-MESSAGE("Released under the BSD 3-Clause License.")
+MESSAGE(STATUS "${PROJECT_DESCRIPTION}, version ${PROJECT_VERSION}")
+MESSAGE(STATUS "Copyright (C) 2018-2020 CNRS-LAAS")
+MESSAGE(STATUS "Copyright (C) 2019-2020 University of Edinburgh")
+MESSAGE(STATUS "All rights reserved.")
+MESSAGE(STATUS "Released under the BSD 3-Clause License.")
 
 # Set a default build type to 'Release' if none was specified
 IF(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -67,7 +67,7 @@ IF(BUILD_WITH_MULTITHREADS)
   string(REGEX MATCH "^[0-9]+$" BUILD_WITH_NTHREADS  ${BUILD_WITH_NTHREADS})
   IF(NOT BUILD_WITH_NTHREADS MATCHES "^[0-9]+$")
     SET(BUILD_WITH_NTHREADS 4)
-    MESSAGE("Warning: the number of threads have to be an interger value, set to ${BUILD_WITH_NTHREADS}")
+    MESSAGE(WARNING "the number of threads have to be an interger value, set to ${BUILD_WITH_NTHREADS}")
   ENDIF()
 ENDIF()
 
