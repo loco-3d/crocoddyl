@@ -16,30 +16,30 @@ using namespace crocoddyl::unittest;
 
 //----------------------------------------------------------------------------//
 
-void test_constructor() {
+void test_constructor(StateModelTypes::Type state_type) {
   // Setup the test
   StateModelFactory state_factory;
-  crocoddyl::CostModelSum model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
-      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
+  crocoddyl::CostModelSum model(
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type)));
 
   // Test the initial size of the map
   BOOST_CHECK(model.get_costs().size() == 0);
 }
 
-void test_addCost() {
+void test_addCost(StateModelTypes::Type state_type) {
   // Setup the test
   StateModelFactory state_factory;
-  crocoddyl::CostModelSum model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
-      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
+  crocoddyl::CostModelSum model(
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type)));
 
   // add an active cost
-  boost::shared_ptr<crocoddyl::CostModelAbstract> rand_cost_1 = create_random_cost();
+  boost::shared_ptr<crocoddyl::CostModelAbstract> rand_cost_1 = create_random_cost(state_type);
   model.addCost("random_cost_1", rand_cost_1, 1.);
   BOOST_CHECK(model.get_nr() == rand_cost_1->get_activation()->get_nr());
   BOOST_CHECK(model.get_nr_total() == rand_cost_1->get_activation()->get_nr());
 
   // add an inactive cost
-  boost::shared_ptr<crocoddyl::CostModelAbstract> rand_cost_2 = create_random_cost();
+  boost::shared_ptr<crocoddyl::CostModelAbstract> rand_cost_2 = create_random_cost(state_type);
   model.addCost("random_cost_2", rand_cost_2, 1., false);
   BOOST_CHECK(model.get_nr() == rand_cost_1->get_activation()->get_nr());
   BOOST_CHECK(model.get_nr_total() ==
@@ -58,14 +58,14 @@ void test_addCost() {
               rand_cost_1->get_activation()->get_nr() + rand_cost_2->get_activation()->get_nr());
 }
 
-void test_addCost_error_message() {
+void test_addCost_error_message(StateModelTypes::Type state_type) {
   // Setup the test
   StateModelFactory state_factory;
-  crocoddyl::CostModelSum model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
-      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
+  crocoddyl::CostModelSum model(
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type)));
 
   // create an cost object
-  boost::shared_ptr<crocoddyl::CostModelAbstract> rand_cost = create_random_cost();
+  boost::shared_ptr<crocoddyl::CostModelAbstract> rand_cost = create_random_cost(state_type);
 
   // add twice the same cost object to the container
   model.addCost("random_cost", rand_cost, 1.);
@@ -88,14 +88,14 @@ void test_addCost_error_message() {
   BOOST_CHECK(capture_ios.str() == expected_buffer.str());
 }
 
-void test_removeCost() {
+void test_removeCost(StateModelTypes::Type state_type) {
   // Setup the test
   StateModelFactory state_factory;
-  crocoddyl::CostModelSum model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
-      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
+  crocoddyl::CostModelSum model(
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type)));
 
   // add an active cost
-  boost::shared_ptr<crocoddyl::CostModelAbstract> rand_cost = create_random_cost();
+  boost::shared_ptr<crocoddyl::CostModelAbstract> rand_cost = create_random_cost(state_type);
   model.addCost("random_cost", rand_cost, 1.);
   BOOST_CHECK(model.get_nr() == rand_cost->get_activation()->get_nr());
 
@@ -105,11 +105,11 @@ void test_removeCost() {
   BOOST_CHECK(model.get_nr_total() == 0);
 }
 
-void test_removeCost_error_message() {
+void test_removeCost_error_message(StateModelTypes::Type state_type) {
   // Setup the test
   StateModelFactory state_factory;
-  crocoddyl::CostModelSum model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
-      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
+  crocoddyl::CostModelSum model(
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type)));
 
   // remove a none existing cost form the container, we expect a cout message here
   CaptureIOStream capture_ios;
@@ -123,11 +123,11 @@ void test_removeCost_error_message() {
   BOOST_CHECK(capture_ios.str() == expected_buffer.str());
 }
 
-void test_calc() {
+void test_calc(StateModelTypes::Type state_type) {
   // setup the test
   StateModelFactory state_factory;
-  crocoddyl::CostModelSum model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
-      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
+  crocoddyl::CostModelSum model(
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type)));
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::StateMultibody>& state = model.get_state();
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
@@ -140,7 +140,7 @@ void test_calc() {
   for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_cost_" << i;
-    const boost::shared_ptr<crocoddyl::CostModelAbstract>& m = create_random_cost();
+    const boost::shared_ptr<crocoddyl::CostModelAbstract>& m = create_random_cost(state_type);
     model.addCost(os.str(), m, 1.);
     models.push_back(m);
     datas.push_back(m->createData(&shared_data));
@@ -181,11 +181,11 @@ void test_calc() {
   BOOST_CHECK(data->cost == cost);
 }
 
-void test_calcDiff() {
+void test_calcDiff(StateModelTypes::Type state_type) {
   // setup the test
   StateModelFactory state_factory;
-  crocoddyl::CostModelSum model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
-      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
+  crocoddyl::CostModelSum model(
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type)));
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::StateMultibody>& state = model.get_state();
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
@@ -198,7 +198,7 @@ void test_calcDiff() {
   for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_cost_" << i;
-    const boost::shared_ptr<crocoddyl::CostModelAbstract>& m = create_random_cost();
+    const boost::shared_ptr<crocoddyl::CostModelAbstract>& m = create_random_cost(state_type);
     model.addCost(os.str(), m, 1.);
     models.push_back(m);
     datas.push_back(m->createData(&shared_data));
@@ -273,11 +273,11 @@ void test_calcDiff() {
   BOOST_CHECK(data->Luu == Luu);
 }
 
-void test_get_costs() {
+void test_get_costs(StateModelTypes::Type state_type) {
   // setup the test
   StateModelFactory state_factory;
-  crocoddyl::CostModelSum model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
-      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
+  crocoddyl::CostModelSum model(
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type)));
   // create the corresponding data object
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
@@ -285,7 +285,7 @@ void test_get_costs() {
   for (unsigned i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_cost_" << i;
-    model.addCost(os.str(), create_random_cost(), 1.);
+    model.addCost(os.str(), create_random_cost(state_type), 1.);
   }
 
   // get the contacts
@@ -301,11 +301,11 @@ void test_get_costs() {
   }
 }
 
-void test_get_nr() {
+void test_get_nr(StateModelTypes::Type state_type) {
   // Setup the test
   StateModelFactory state_factory;
-  crocoddyl::CostModelSum model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
-      state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
+  crocoddyl::CostModelSum model(
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type)));
 
   // create the corresponding data object
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
@@ -314,7 +314,7 @@ void test_get_nr() {
   for (unsigned i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_cost_" << i;
-    model.addCost(os.str(), create_random_cost(), 1.);
+    model.addCost(os.str(), create_random_cost(state_type), 1.);
   }
 
   // compute ni
@@ -329,20 +329,28 @@ void test_get_nr() {
 
 //----------------------------------------------------------------------------//
 
-void register_unit_tests() {
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_constructor)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_addCost)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_addCost_error_message)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_removeCost)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_removeCost_error_message)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calc)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_calcDiff)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_get_costs)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_get_nr)));
+void register_unit_tests(StateModelTypes::Type state_type) {
+  boost::test_tools::output_test_stream test_name;
+  test_name << "test_CostModelSum"
+            << "_" << state_type;
+  std::cout << "Running " << test_name.str() << std::endl;
+  test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_constructor, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_addCost, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_addCost_error_message, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_removeCost, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_removeCost_error_message, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_calcDiff, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_get_costs, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_get_nr, state_type)));
+  framework::master_test_suite().add(ts);
 }
 
 bool init_function() {
-  register_unit_tests();
+  register_unit_tests(StateModelTypes::StateMultibody_TalosArm);
+  register_unit_tests(StateModelTypes::StateMultibody_HyQ);
+  register_unit_tests(StateModelTypes::StateMultibody_Talos);
   return true;
 }
 

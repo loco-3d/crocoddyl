@@ -120,7 +120,7 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostMod
   return cost;
 }
 
-boost::shared_ptr<crocoddyl::CostModelAbstract> create_random_cost() {
+boost::shared_ptr<crocoddyl::CostModelAbstract> create_random_cost(StateModelTypes::Type state_type) {
   static bool once = true;
   if (once) {
     srand((unsigned)time(NULL));
@@ -129,8 +129,7 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> create_random_cost() {
 
   CostModelFactory factory;
   CostModelTypes::Type rand_type = static_cast<CostModelTypes::Type>(rand() % CostModelTypes::NbCostModelTypes);
-  return factory.create(rand_type, StateModelTypes::StateMultibody_RandomHumanoid,
-                        ActivationModelTypes::ActivationModelQuad);
+  return factory.create(rand_type, state_type, ActivationModelTypes::ActivationModelQuad);
 }
 
 }  // namespace unittest
