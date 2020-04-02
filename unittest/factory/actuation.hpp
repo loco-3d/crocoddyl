@@ -17,7 +17,13 @@ namespace crocoddyl {
 namespace unittest {
 
 struct ActuationModelTypes {
-  enum Type { ActuationModelFull, ActuationModelFloatingBase, ActuationModelSquashingFull, NbActuationModelTypes };
+  enum Type {
+    ActuationModelFull,
+    ActuationModelFloatingBase,
+    ActuationModelMultiCopterBase,
+    ActuationModelSquashingFull,
+    NbActuationModelTypes
+  };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
