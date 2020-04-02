@@ -27,13 +27,16 @@
     throw crocoddyl::Exception(ss.str(), __FILE__, __PRETTY_FUNCTION__, __LINE__); \
   }
 
+#ifndef NDEBUG
 #define assert_pretty(condition, m)                                                \
   if (!(condition)) {                                                              \
     std::stringstream ss;                                                          \
     ss << m;                                                                       \
     throw crocoddyl::Exception(ss.str(), __FILE__, __PRETTY_FUNCTION__, __LINE__); \
   }
-
+#else
+#define assert_pretty(condition, m) ((void)0)
+#endif
 namespace crocoddyl {
 
 class Exception : public std::exception {
