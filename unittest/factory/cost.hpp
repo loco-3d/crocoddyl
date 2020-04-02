@@ -58,7 +58,7 @@ class CostModelFactory {
       std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
 };
 
-boost::shared_ptr<crocoddyl::CostModelAbstract> create_random_cost();
+boost::shared_ptr<crocoddyl::CostModelAbstract> create_random_cost(StateModelTypes::Type state_type);
 
 }  // namespace unittest
 }  // namespace crocoddyl
