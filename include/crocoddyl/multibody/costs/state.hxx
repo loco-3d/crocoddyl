@@ -151,8 +151,7 @@ void CostModelStateTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstrac
   state_->Jdiff(xref_, x, data->Rx, data->Rx, second);
   activation_->calcDiff(data->activation, data->r);
   data->Lx.noalias() = data->Rx.transpose() * data->activation->Ar;
-  d->Arr_Rx.noalias() = data->activation->Arr * data->Rx;
-  data->Lxx.noalias() = data->Rx.transpose() * d->Arr_Rx;
+  data->Lxx.noalias() = data->Rx.transpose() * data->activation->Arr * data->Rx;
 }
 
 template <typename Scalar>
