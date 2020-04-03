@@ -111,43 +111,25 @@ void StateMultibodyTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, cons
                  << "x1 has wrong dimension (it should be " + std::to_string(nx_) + ")");
   }
 
-  typedef Eigen::Block<Eigen::Ref<MatrixXs>, -1, 1, true> NColAlignedVectorBlock;
-  typedef Eigen::Block<Eigen::Ref<MatrixXs> > MatrixBlock;
-
   if (firstsecond == first) {
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
       throw_pretty("Invalid argument: "
                    << "Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," + std::to_string(ndx_) +
                           ")");
     }
-    Jfirst.setZero();
-    NColAlignedVectorBlock dx = Jfirst.template rightCols<1>();
-    MatrixBlock Jdq = Jfirst.bottomLeftCorner(nv_, nv_);
 
-    diff(x1, x0, dx);
-    pinocchio::dIntegrate(*pinocchio_.get(), x1.head(nq_), dx.topRows(nv_), Jdq, pinocchio::ARG1);
-    updateJdiff(Jdq, Jfirst.topLeftCorner(nv_, nv_), false);
-
-    Jdq.setZero();
-    dx.setZero();
+    pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_),
+                           Jfirst.topLeftCorner(nv_, nv_), pinocchio::ARG0);
     Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)-1;
-  } else if (firstsecond == second) {
+  }
+  else if (firstsecond == second) {
     if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
       throw_pretty("Invalid argument: "
                    << "Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
-                          std::to_string(ndx_) + ")");
+                   std::to_string(ndx_) + ")");
     }
-
-    Jsecond.setZero();
-    NColAlignedVectorBlock dx = Jsecond.template rightCols<1>();
-    MatrixBlock Jdq = Jsecond.bottomLeftCorner(nv_, nv_);
-
-    diff(x0, x1, dx);
-    pinocchio::dIntegrate(*pinocchio_.get(), x0.head(nq_), dx.topRows(nv_), Jdq, pinocchio::ARG1);
-    updateJdiff(Jdq, Jsecond.topLeftCorner(nv_, nv_));
-
-    Jdq.setZero();
-    dx.setZero();
+    pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_),
+                          Jsecond.topLeftCorner(nv_, nv_), pinocchio::ARG1);
     Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
   } else {  // computing both
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
@@ -160,30 +142,11 @@ void StateMultibodyTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, cons
                    << "Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
                           std::to_string(ndx_) + ")");
     }
-    Jfirst.setZero();
-    Jsecond.setZero();
-
-    // Computing Jfirst
-    NColAlignedVectorBlock dx1 = Jfirst.template rightCols<1>();
-    MatrixBlock Jdq1 = Jfirst.bottomLeftCorner(nv_, nv_);
-
-    diff(x1, x0, dx1);
-    pinocchio::dIntegrate(*pinocchio_.get(), x1.head(nq_), dx1.topRows(nv_), Jdq1, pinocchio::ARG1);
-    updateJdiff(Jdq1, Jfirst.topLeftCorner(nv_, nv_), false);
-    Jdq1.setZero();
-    dx1.setZero();
+    pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_),
+                           Jfirst.topLeftCorner(nv_, nv_), pinocchio::ARG0);
+    pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_),
+                           Jsecond.topLeftCorner(nv_, nv_), pinocchio::ARG1);
     Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)-1;
-
-    // Computing Jsecond
-    NColAlignedVectorBlock dx2 = Jsecond.template rightCols<1>();
-    MatrixBlock Jdq2 = Jsecond.bottomLeftCorner(nv_, nv_);
-
-    diff(x0, x1, dx2);
-    pinocchio::dIntegrate(*pinocchio_.get(), x0.head(nq_), dx2.topRows(nv_), Jdq2, pinocchio::ARG1);
-    updateJdiff(Jdq2, Jsecond.topLeftCorner(nv_, nv_));
-
-    dx2.setZero();
-    Jdq2.setZero();
     Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
   }
 }
