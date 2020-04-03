@@ -36,7 +36,7 @@ def loadTalos(modelPath=None):
     URDF_FILENAME = "talos_reduced.urdf"
     SRDF_FILENAME = "talos.srdf"
     SRDF_SUBPATH = "/talos_data/srdf/" + SRDF_FILENAME
-    URDF_SUBPATH = "/talos_data/urdf/" + URDF_FILENAME
+    URDF_SUBPATH = "/talos_data/robots/" + URDF_FILENAME
     if modelPath is None:
         modelPath = getModelPath(URDF_SUBPATH)
     robot = RobotWrapper.BuildFromURDF(modelPath + URDF_SUBPATH, [modelPath], pinocchio.JointModelFreeFlyer())
@@ -56,7 +56,7 @@ def loadTalosLegs(modelPath=None):
     URDF_FILENAME = "talos_reduced.urdf"
     SRDF_FILENAME = "talos.srdf"
     SRDF_SUBPATH = "/talos_data/srdf/" + SRDF_FILENAME
-    URDF_SUBPATH = "/talos_data/urdf/" + URDF_FILENAME
+    URDF_SUBPATH = "/talos_data/robots/" + URDF_FILENAME
     if modelPath is None:
         modelPath = getModelPath(URDF_SUBPATH)
     robot = loadTalos(modelPath=modelPath)
