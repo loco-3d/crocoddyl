@@ -171,9 +171,8 @@ void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, 
                    << "Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," + std::to_string(ndx_) +
                           ")");
     }
-    Jfirst.setZero();
-
-    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
+    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_),
+                          Jfirst.topLeftCorner(nv_, nv_),
                           pinocchio::ARG0);
     Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
   } else if (firstsecond == second) {
@@ -182,9 +181,8 @@ void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, 
                    << "Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
                           std::to_string(ndx_) + ")");
     }
-    Jsecond.setZero();
-
-    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
+    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_),
+                          Jsecond.topLeftCorner(nv_, nv_),
                           pinocchio::ARG1);
     Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
   } else {  // computing both
@@ -200,14 +198,14 @@ void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, 
     }
 
     // Computing Jfirst
-    Jfirst.setZero();
-    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
+    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_),
+                          Jfirst.topLeftCorner(nv_, nv_),
                           pinocchio::ARG0);
     Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
 
     // Computing Jsecond
-    Jsecond.setZero();
-    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
+    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_),
+                          Jsecond.topLeftCorner(nv_, nv_),
                           pinocchio::ARG1);
     Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
   }
