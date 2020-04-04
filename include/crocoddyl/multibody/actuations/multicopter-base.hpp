@@ -53,7 +53,7 @@ class ActuationModelMultiCopterBaseTpl : public ActuationModelAbstractTpl<_Scala
   };
   ~ActuationModelMultiCopterBaseTpl(){};
 
-  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& /*x*/,
                     const Eigen::Ref<const VectorXs>& u) {
     if (static_cast<std::size_t>(u.size()) != nu_) {
       throw_pretty("Invalid argument: "
@@ -62,8 +62,8 @@ class ActuationModelMultiCopterBaseTpl : public ActuationModelAbstractTpl<_Scala
 
     data->tau.noalias() = tau_f_ * u;
   }
-  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data,
-                        const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& u) {
+  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& /*data*/,
+                        const Eigen::Ref<const Eigen::VectorXd>& /*x*/, const Eigen::Ref<const Eigen::VectorXd>& /*u*/) {
     // The derivatives has constant values which were set in createData.
   }
 
