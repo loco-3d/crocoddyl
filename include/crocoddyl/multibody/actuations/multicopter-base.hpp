@@ -17,11 +17,12 @@
 /* This actuation model is aimed for those robots whose base_link is actuated using a propulsion system, e.g.
  * a multicopter or an aerial manipulator (multicopter with a robotic arm attached).
  * Control input: the thrust (force) created by each propeller.
- * tau_f matrix: this matrix relates the thrust of each propeller to the net force and torque that it causes to the base_link.
- * For a simple quadrotor:
- * tau_f.nrows = 6, tau_f.ncols = 4
- * 
- * Reference: M. Geisert and N. Mansard, "Trajectory generation for quadrotor based systems using numerical optimal control," 2016 IEEE International Conference on Robotics and Automation (ICRA), Stockholm, 2016, pp. 2958-2964. See Section III.C  */
+ * tau_f matrix: this matrix relates the thrust of each propeller to the net force and torque that it causes to the
+ * base_link. For a simple quadrotor: tau_f.nrows = 6, tau_f.ncols = 4
+ *
+ * Reference: M. Geisert and N. Mansard, "Trajectory generation for quadrotor based systems using numerical optimal
+ * control," 2016 IEEE International Conference on Robotics and Automation (ICRA), Stockholm, 2016, pp. 2958-2964. See
+ * Section III.C  */
 
 namespace crocoddyl {
 template <typename _Scalar>
@@ -63,7 +64,8 @@ class ActuationModelMultiCopterBaseTpl : public ActuationModelAbstractTpl<_Scala
     data->tau.noalias() = tau_f_ * u;
   }
   virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& /*data*/,
-                        const Eigen::Ref<const Eigen::VectorXd>& /*x*/, const Eigen::Ref<const Eigen::VectorXd>& /*u*/) {
+                        const Eigen::Ref<const Eigen::VectorXd>& /*x*/,
+                        const Eigen::Ref<const Eigen::VectorXd>& /*u*/) {
     // The derivatives has constant values which were set in createData.
   }
 
