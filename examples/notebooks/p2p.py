@@ -7,7 +7,7 @@ robot = example_robot_data.loadTalosArm()
 robot_model = robot.model
 
 DT = 1e-3
-T = 15
+T = 150
 
 state = crocoddyl.StateMultibody(robot.model)
 
@@ -25,8 +25,9 @@ colors = [
     [1., 0., 1., 1.],
 ]
 
-robot.initViewer(loadModel=True)
-gv = robot.viewer.gui
+cameraTF = [2., 2.68, 0.54, 0.2, 0.62, 0.72, 0.22]
+display = crocoddyl.GepettoDisplay(robot, cameraTF=cameraTF, floor=False)
+gv = display.robot.viewer.gui
 for i, p in enumerate(ps):
     gv.addSphere('world/point%d' % i, .05, colors[i])
     gv.applyConfiguration('world/point%d' % i, p.tolist() + [0., 0., 0., 1.])
@@ -49,19 +50,19 @@ for p in ps:
 
     # Create the running action model
     runningCostModel = crocoddyl.CostModelSum(state)
-    runningCostModel.addCost("gripperPose", goalTrackingCost, 1.)
+    runningCostModel.addCost("gripperPose", goalTrackingCost, 1e-3)
     runningCostModel.addCost("xReg", xRegCost, 1e-4)
     runningCostModel.addCost("uReg", uRegCost, 1e-7)
     runningModels += [crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, runningCostModel)]
 
     # Create the terminal action model
     terminalCostModel = crocoddyl.CostModelSum(state)
-    terminalCostModel.addCost("gripperPose", goalTrackingCost, 1000.)
+    terminalCostModel.addCost("gripperPose", goalTrackingCost, 1.)
     terminalCostModel.addCost("xreg", xRegCost, 1e-4)
     terminalCostModel.addCost("uReg", uRegCost, 1e-7)
     terminalModels += [crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, terminalCostModel)]
 
-q0 = np.matrix([2., 1.5, -2., 0., 0., 0., 0.]).T
+q0 = np.array([2., 1.5, -2., 0., 0., 0., 0.]).T
 x0 = np.concatenate([q0, pinocchio.utils.zero(state.nv)])
 seqs = [[crocoddyl.IntegratedActionModelEuler(runningModel, DT)] * T +
         [crocoddyl.IntegratedActionModelEuler(terminalModel)]
@@ -70,7 +71,6 @@ problem = crocoddyl.ShootingProblem(x0, sum(seqs, [])[:-1], seqs[-1][-1])
 
 # Creating the DDP solver for this OC problem, defining a logger
 ddp = crocoddyl.SolverDDP(problem)
-cameraTF = [2., 2.68, 0.54, 0.2, 0.62, 0.72, 0.22]
 ddp.setCallbacks([crocoddyl.CallbackVerbose()])
 
 # Solving it with the DDP algorithm
@@ -83,7 +83,7 @@ for i in range(4, 6):
     ddp.solve(ddp.xs, ddp.us, 10)
 
 # Visualizing the solution in gepetto-viewer
-crocoddyl.displayTrajectory(robot, ddp.xs, DT)
+display.displayFromSolver(ddp)
 
 robot_data = robot_model.createData()
 for i, s in enumerate(seqs + [1]):
