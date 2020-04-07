@@ -57,7 +57,8 @@ void ActivationModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<Activat
   }
 
   // Computing the d^2 action(r) / dr^2
-  data->Arr.noalias() = data->Ar * data->Ar.transpose();
+  data_nd->Arr_.noalias() = data->Ar * data->Ar.transpose();
+  data->Arr.diagonal() = data_nd->Arr_.diagonal();
 }
 
 template <typename Scalar>
