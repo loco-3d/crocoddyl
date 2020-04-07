@@ -72,6 +72,7 @@ struct ActuationSquashingDataTpl : public ActuationDataAbstractTpl<_Scalar> {
 
   typedef _Scalar Scalar;
   typedef ActuationDataAbstractTpl<Scalar> Base;
+  typedef SquashingDataAbstractTpl<Scalar> SquashingDataAbstract;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
