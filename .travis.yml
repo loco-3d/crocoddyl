@@ -29,5 +29,5 @@ install:
   - export CMAKE_PREFIX_PATH=/opt/openrobots:$CMAKE_PREFIX_PATH
 
 script:
-  - travis_wait 60 /bin/bash .travis/build-and-test.sh
+  - travis_wait 90 /bin/bash .travis/build-and-test.sh
   - travis_wait 60 /bin/bash .travis/check-formatting.sh
