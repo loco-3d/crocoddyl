@@ -20,12 +20,13 @@ class StateVectorTpl : public StateAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
 
   explicit StateVectorTpl(const std::size_t& nx);
   ~StateVectorTpl();
 
-  typename MathBase::VectorXs zero() const;
-  typename MathBase::VectorXs rand() const;
+  virtual VectorXs zero() const;
+  virtual VectorXs rand() const;
   virtual void diff(const Eigen::Ref<const typename MathBase::VectorXs>& x0,
                     const Eigen::Ref<const typename MathBase::VectorXs>& x1,
                     Eigen::Ref<typename MathBase::VectorXs> dxout) const;
