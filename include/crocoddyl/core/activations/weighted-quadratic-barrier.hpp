@@ -29,7 +29,7 @@ class ActivationModelWeightedQuadraticBarrierTpl : public ActivationModelAbstrac
 
   explicit ActivationModelWeightedQuadraticBarrierTpl(const ActivationBounds& bounds, const VectorXs& weights)
       : Base(bounds.lb.size()), bounds_(bounds), weights_(weights){};
-  ~ActivationModelWeightedQuadraticBarrierTpl(){};
+  virtual ~ActivationModelWeightedQuadraticBarrierTpl(){};
 
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {

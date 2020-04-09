@@ -3,8 +3,6 @@ import pinocchio
 import numpy as np
 import scipy.linalg as scl
 
-crocoddyl.switchToNumpyMatrix()
-
 
 def a2m(a):
     return np.matrix(a).T

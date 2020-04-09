@@ -22,7 +22,7 @@ class SolverBoxDDP : public SolverDDP {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   explicit SolverBoxDDP(boost::shared_ptr<ShootingProblem> problem);
-  ~SolverBoxDDP();
+  virtual ~SolverBoxDDP();
 
   virtual void allocateData();
   virtual void computeGains(const std::size_t& t);

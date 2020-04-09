@@ -28,10 +28,10 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
   enum JointType { FreeFlyer = 0, Spherical, Simple };
 
   explicit StateMultibodyTpl(boost::shared_ptr<pinocchio::ModelTpl<Scalar> > model);
-  ~StateMultibodyTpl();
+  virtual ~StateMultibodyTpl();
 
-  VectorXs zero() const;
-  VectorXs rand() const;
+  virtual VectorXs zero() const;
+  virtual VectorXs rand() const;
   virtual void diff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
                     Eigen::Ref<VectorXs> dxout) const;
   virtual void integrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,

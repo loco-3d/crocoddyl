@@ -29,7 +29,7 @@ class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   explicit ActivationModelSmoothAbsTpl(const std::size_t& nr) : Base(nr){};
-  ~ActivationModelSmoothAbsTpl(){};
+  virtual ~ActivationModelSmoothAbsTpl(){};
 
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {

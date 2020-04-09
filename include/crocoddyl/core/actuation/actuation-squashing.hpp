@@ -34,7 +34,7 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
                              boost::shared_ptr<SquashingModelAbstract> squashing, const std::size_t& nu)
       : Base(actuation->get_state(), nu), squashing_(squashing), actuation_(actuation){};
 
-  ~ActuationSquashingModelTpl(){};
+  virtual ~ActuationSquashingModelTpl(){};
 
   virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u) {

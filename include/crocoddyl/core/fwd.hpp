@@ -11,45 +11,39 @@
 
 namespace crocoddyl {
 
-// DiffAction
+// differential action
 template <typename Scalar>
 class DifferentialActionModelAbstractTpl;
-
 template <typename Scalar>
-class DifferentialActionDataAbstractTpl;
+struct DifferentialActionDataAbstractTpl;
 
 template <typename Scalar>
 class DifferentialActionModelLQRTpl;
-
 template <typename Scalar>
-class DifferentialActionDataLQRTpl;
+struct DifferentialActionDataLQRTpl;
 
-// Actions
+// action
 template <typename Scalar>
 class ActionModelUnicycleTpl;
-
 template <typename Scalar>
-class ActionDataUnicycleTpl;
+struct ActionDataUnicycleTpl;
 
 template <typename Scalar>
 class ActionModelLQRTpl;
-
 template <typename Scalar>
-class ActionDataLQRTpl;
+struct ActionDataLQRTpl;
 
-// DataCollector
+// data collector
 template <typename Scalar>
-class DataCollectorAbstractTpl;
+struct DataCollectorAbstractTpl;
 
-// Activations
+// activation
 template <typename Scalar>
-class ActivationDataQuadraticBarrierTpl;
-
+struct ActivationBoundsTpl;
 template <typename Scalar>
 class ActivationModelQuadraticBarrierTpl;
-
 template <typename Scalar>
-class ActivationBoundsTpl;
+struct ActivationDataQuadraticBarrierTpl;
 
 template <typename Scalar>
 class ActivationModelWeightedQuadraticBarrierTpl;
@@ -59,45 +53,39 @@ class ActivationModelQuadTpl;
 
 template <typename Scalar>
 class ActivationModelWeightedQuadTpl;
-
 template <typename Scalar>
-class ActivationDataWeightedQuadTpl;
+struct ActivationDataWeightedQuadTpl;
 
 template <typename Scalar>
 class ActivationModelSmoothAbsTpl;
-
 template <typename Scalar>
-class ActivationDataSmoothAbsTpl;
+struct ActivationDataSmoothAbsTpl;
 
 template <typename Scalar>
 class ActivationModelAbstractTpl;
-
 template <typename Scalar>
-class ActivationDataAbstractTpl;
+struct ActivationDataAbstractTpl;
 
-// State
+// state
 template <typename Scalar>
 class StateAbstractTpl;
 
-// Actuations
-template <typename Scalar>
-class ActuationDataAbstractTpl;
-
+// actuation
 template <typename Scalar>
 class ActuationModelAbstractTpl;
-
 template <typename Scalar>
-class ActuationSquashingDataTpl;
+struct ActuationDataAbstractTpl;
 
 template <typename Scalar>
 class ActuationSquashingModelTpl;
-
-// Squashing
 template <typename Scalar>
-class SquashingDataAbstractTpl;
+struct ActuationSquashingDataTpl;
 
+// squashing
 template <typename Scalar>
 class SquashingModelAbstractTpl;
+template <typename Scalar>
+struct SquashingDataAbstractTpl;
 
 template <typename Scalar>
 class SquashingModelSmoothSatTpl;
@@ -106,24 +94,23 @@ class SquashingModelSmoothSatTpl;
 template <typename Scalar>
 class ShootingProblemTpl;
 
-// IAMs
+// integrated action
 template <typename Scalar>
 class IntegratedActionModelEulerTpl;
-
 template <typename Scalar>
-class IntegratedActionDataEulerTpl;
+struct IntegratedActionDataEulerTpl;
 
-// State
+// state
 template <typename Scalar>
 class StateVectorTpl;
 
-// Datacollect
+// data collector
 template <typename Scalar>
-class DataCollectorActuationTpl;
+struct DataCollectorActuationTpl;
 
 // ActionData
 template <typename Scalar>
-class ActionDataAbstractTpl;
+struct ActionDataAbstractTpl;
 
 template <typename Scalar>
 class ActionModelAbstractTpl;
@@ -131,21 +118,18 @@ class ActionModelAbstractTpl;
 // Numdiff
 template <typename Scalar>
 class ActionModelNumDiffTpl;
-
 template <typename Scalar>
-class ActionDataNumDiffTpl;
+struct ActionDataNumDiffTpl;
 
 template <typename Scalar>
 class DifferentialActionModelNumDiffTpl;
-
 template <typename Scalar>
-class DifferentialActionDataNumDiffTpl;
+struct DifferentialActionDataNumDiffTpl;
 
 template <typename Scalar>
 class ActivationModelNumDiffTpl;
-
 template <typename Scalar>
-class ActivationDataNumDiffTpl;
+struct ActivationDataNumDiffTpl;
 
 template <typename Scalar>
 class StateNumDiffTpl;

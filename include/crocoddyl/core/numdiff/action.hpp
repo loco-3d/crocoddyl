@@ -70,7 +70,7 @@ class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
   /**
    * @brief Destroy the ActionModelNumDiff object
    */
-  ~ActionModelNumDiffTpl();
+  virtual ~ActionModelNumDiffTpl();
 
   /**
    * @brief @copydoc Base::calc()

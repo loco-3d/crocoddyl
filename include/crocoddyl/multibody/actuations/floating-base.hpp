@@ -33,7 +33,7 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
                    << "the first joint has to be free-flyer");
     }
   };
-  ~ActuationModelFloatingBaseTpl(){};
+  virtual ~ActuationModelFloatingBaseTpl(){};
 
   virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& /*x*/,
                     const Eigen::Ref<const VectorXs>& u) {

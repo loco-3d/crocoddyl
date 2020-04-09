@@ -52,7 +52,7 @@ class ActuationModelMultiCopterBaseTpl : public ActuationModelAbstractTpl<_Scala
           MatrixXs::Identity(nu_ - n_rotors_, nu_ - n_rotors_);
     }
   };
-  ~ActuationModelMultiCopterBaseTpl(){};
+  virtual ~ActuationModelMultiCopterBaseTpl(){};
 
   virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& /*x*/,
                     const Eigen::Ref<const VectorXs>& u) {

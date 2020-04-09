@@ -30,7 +30,7 @@ class StateNumDiffTpl : public StateAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   explicit StateNumDiffTpl(boost::shared_ptr<Base> state);
-  ~StateNumDiffTpl();
+  virtual ~StateNumDiffTpl();
 
   virtual VectorXs zero() const;
   virtual VectorXs rand() const;

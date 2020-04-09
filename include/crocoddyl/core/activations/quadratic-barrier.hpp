@@ -76,7 +76,7 @@ class ActivationModelQuadraticBarrierTpl : public ActivationModelAbstractTpl<_Sc
 
   explicit ActivationModelQuadraticBarrierTpl(const ActivationBounds& bounds)
       : Base(bounds.lb.size()), bounds_(bounds){};
-  ~ActivationModelQuadraticBarrierTpl(){};
+  virtual ~ActivationModelQuadraticBarrierTpl(){};
 
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {

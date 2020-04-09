@@ -22,7 +22,7 @@ class SolverKKT : public SolverAbstract {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   explicit SolverKKT(boost::shared_ptr<ShootingProblem> problem);
-  ~SolverKKT();
+  virtual ~SolverKKT();
 
   virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
                      const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t& maxiter = 100,
@@ -70,7 +70,6 @@ class SolverKKT : public SolverAbstract {
   Eigen::VectorXd dual_;
   std::vector<double> alphas_;
   double th_grad_;
-  double th_step_;
   bool was_feasible_;
   Eigen::VectorXd kkt_primal_;
   Eigen::VectorXd dF;

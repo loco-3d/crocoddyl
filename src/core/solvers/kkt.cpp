@@ -18,7 +18,6 @@ SolverKKT::SolverKKT(boost::shared_ptr<ShootingProblem> problem)
       regmax_(1e9),
       cost_try_(0.),
       th_grad_(1e-12),
-      th_step_(0.5),
       was_feasible_(false) {
   allocateData();
   const unsigned int& n_alphas = 10;

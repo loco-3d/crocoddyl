@@ -34,7 +34,7 @@ class ImpulseModel3DTpl : public ImpulseModelAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   ImpulseModel3DTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& frame);
-  ~ImpulseModel3DTpl();
+  virtual ~ImpulseModel3DTpl();
 
   virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
   virtual void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
