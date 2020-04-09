@@ -70,7 +70,6 @@ class SolverKKT : public SolverAbstract {
   Eigen::VectorXd dual_;
   std::vector<double> alphas_;
   double th_grad_;
-  double th_step_;
   bool was_feasible_;
   Eigen::VectorXd kkt_primal_;
   Eigen::VectorXd dF;
