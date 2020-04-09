@@ -10,7 +10,8 @@
 #define CROCODDYL_MULTIBODY_FWD_HPP_
 
 namespace crocoddyl {
-// Actuation
+
+// actuation
 template <typename Scalar>
 class ActuationModelFloatingBaseTpl;
 
@@ -20,224 +21,196 @@ class ActuationModelFullTpl;
 template <typename Scalar>
 class ActuationModelMultiCopterBaseTpl;
 
-// Contacts
+// contact
 template <typename Scalar>
 class ContactModelAbstractTpl;
-
 template <typename Scalar>
-class ContactDataAbstractTpl;
+struct ContactDataAbstractTpl;
 
-// Actions
+// action
 template <typename Scalar>
 class ActionModelImpulseFwdDynamicsTpl;
-
 template <typename Scalar>
-class ActionDataImpulseFwdDynamicsTpl;
+struct ActionDataImpulseFwdDynamicsTpl;
 
-// Diffs
+// differential action
 template <typename Scalar>
 class DifferentialActionModelFreeFwdDynamicsTpl;
-
 template <typename Scalar>
-class DifferentialActionDataFreeFwdDynamicsTpl;
+struct DifferentialActionDataFreeFwdDynamicsTpl;
 
 template <typename Scalar>
 class DifferentialActionModelContactFwdDynamicsTpl;
-
 template <typename Scalar>
-class DifferentialActionDataContactFwdDynamicsTpl;
+struct DifferentialActionDataContactFwdDynamicsTpl;
 
-// Numdiff
+// numdiff
 template <typename Scalar>
 class CostModelNumDiffTpl;
-
 template <typename Scalar>
-class CostDataNumDiffTpl;
+struct CostDataNumDiffTpl;
 
 template <typename Scalar>
 class ContactModelNumDiffTpl;
+template <typename Scalar>
+struct ContactDataNumDiffTpl;
+
+// frame
+template <typename Scalar>
+struct FrameTranslationTpl;
 
 template <typename Scalar>
-class ContactDataNumDiffTpl;
-
-// Frames
-template <typename Scalar>
-class FrameTranslationTpl;
+struct FrameRotationTpl;
 
 template <typename Scalar>
-class FrameRotationTpl;
+struct FramePlacementTpl;
 
 template <typename Scalar>
-class FramePlacementTpl;
+struct FrameMotionTpl;
 
 template <typename Scalar>
-class FrameMotionTpl;
+struct FrameForceTpl;
 
 template <typename Scalar>
-class FrameForceTpl;
+struct FrameFrictionConeTpl;
 
-template <typename Scalar>
-class FrameFrictionConeTpl;
-
-// Costs
+// cost
 template <typename Scalar>
 class CostModelAbstractTpl;
-
 template <typename Scalar>
-class CostDataAbstractTpl;
+struct CostDataAbstractTpl;
 
 template <typename Scalar>
 class CostModelFrameTranslationTpl;
+template <typename Scalar>
+struct CostDataFrameTranslationTpl;
 
 template <typename Scalar>
-class CostDataFrameTranslationTpl;
-
-template <typename Scalar>
-class CostItemTpl;
-
+struct CostItemTpl;
 template <typename Scalar>
 class CostModelSumTpl;
-
 template <typename Scalar>
-class CostDataSumTpl;
+struct CostDataSumTpl;
 
 template <typename Scalar>
 class CostModelCentroidalMomentumTpl;
-
 template <typename Scalar>
-class CostDataCentroidalMomentumTpl;
+struct CostDataCentroidalMomentumTpl;
 
 template <typename Scalar>
 class CostModelCoMPositionTpl;
-
 template <typename Scalar>
-class CostDataCoMPositionTpl;
+struct CostDataCoMPositionTpl;
 
 template <typename Scalar>
 class CostModelFramePlacementTpl;
-
 template <typename Scalar>
-class CostDataFramePlacementTpl;
+struct CostDataFramePlacementTpl;
 
 template <typename Scalar>
 class CostModelImpulseCoMTpl;
-
 template <typename Scalar>
-class CostDataImpulseCoMTpl;
+struct CostDataImpulseCoMTpl;
 
 template <typename Scalar>
 class CostModelStateTpl;
-
 template <typename Scalar>
-class CostDataStateTpl;
+struct CostDataStateTpl;
 
 template <typename Scalar>
 class CostModelFrameVelocityTpl;
-
 template <typename Scalar>
-class CostDataFrameVelocityTpl;
+struct CostDataFrameVelocityTpl;
 
 template <typename Scalar>
 class CostModelContactFrictionConeTpl;
-
 template <typename Scalar>
-class CostDataContactFrictionConeTpl;
+struct CostDataContactFrictionConeTpl;
 
 template <typename Scalar>
 class CostModelContactForceTpl;
-
 template <typename Scalar>
-class CostDataContactForceTpl;
+struct CostDataContactForceTpl;
 
 template <typename Scalar>
 class CostModelControlTpl;
 
 template <typename Scalar>
 class CostModelFrameRotationTpl;
-
 template <typename Scalar>
-class CostDataFrameRotationTpl;
+struct CostDataFrameRotationTpl;
 
-// Impulses
+// impulse
 template <typename Scalar>
 class ImpulseModelAbstractTpl;
-
 template <typename Scalar>
-class ImpulseDataAbstractTpl;
+struct ImpulseDataAbstractTpl;
 
-// Contacts
+// contact
 template <typename Scalar>
-class ContactItemTpl;
-
+struct ContactItemTpl;
 template <typename Scalar>
 class ContactModelMultipleTpl;
-
 template <typename Scalar>
-class ContactDataMultipleTpl;
+struct ContactDataMultipleTpl;
 
 template <typename Scalar>
 class ContactModel3DTpl;
-
 template <typename Scalar>
-class ContactData3DTpl;
+struct ContactData3DTpl;
 
 template <typename Scalar>
 class ContactModel6DTpl;
-
 template <typename Scalar>
-class ContactData6DTpl;
+struct ContactData6DTpl;
 
-// Friction
+// friction
 template <typename Scalar>
 class FrictionConeTpl;
 
-// States
+// state
 template <typename Scalar>
 class StateMultibodyTpl;
 
-// DataCollector
+// data collector
 template <typename Scalar>
-class DataCollectorMultibodyTpl;
+struct DataCollectorMultibodyTpl;
 
 template <typename Scalar>
-class DataCollectorActMultibodyTpl;
+struct DataCollectorActMultibodyTpl;
 
 template <typename Scalar>
-class DataCollectorContactTpl;
+struct DataCollectorContactTpl;
 
 template <typename Scalar>
-class DataCollectorMultibodyInContactTpl;
+struct DataCollectorMultibodyInContactTpl;
 
 template <typename Scalar>
-class DataCollectorActMultibodyInContactTpl;
+struct DataCollectorActMultibodyInContactTpl;
 
 template <typename Scalar>
-class DataCollectorImpulseTpl;
+struct DataCollectorImpulseTpl;
 
 template <typename Scalar>
-class DataCollectorMultibodyInImpulseTpl;
+struct DataCollectorMultibodyInImpulseTpl;
 
-// Impulses
+// impulse
 template <typename Scalar>
 class ImpulseModel6DTpl;
-
 template <typename Scalar>
-class ImpulseData6DTpl;
+struct ImpulseData6DTpl;
 
 template <typename Scalar>
 class ImpulseModel3DTpl;
+template <typename Scalar>
+struct ImpulseData3DTpl;
 
 template <typename Scalar>
-class ImpulseData3DTpl;
-
-template <typename Scalar>
-class ImpulseItemTpl;
-
+struct ImpulseItemTpl;
 template <typename Scalar>
 class ImpulseModelMultipleTpl;
-
 template <typename Scalar>
-class ImpulseDataMultipleTpl;
+struct ImpulseDataMultipleTpl;
 
 /*******************************Template Instantiation**************************/
 
