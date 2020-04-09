@@ -20,19 +20,6 @@ using namespace crocoddyl::unittest;
 
 //----------------------------------------------------------------------------//
 
-void test_construct_data(CostModelTypes::Type cost_type, StateModelTypes::Type state_type,
-                         ActivationModelTypes::Type activation_type) {
-  // create the model
-  CostModelFactory factory;
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model =
-      factory.create(cost_type, state_type, activation_type);
-
-  // create the corresponding data object
-  pinocchio::Data pinocchio_data(*model->get_state()->get_pinocchio().get());
-  crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
-  const boost::shared_ptr<crocoddyl::CostDataAbstract>& data = model->createData(&shared_data);
-}
-
 void test_calc_returns_a_cost(CostModelTypes::Type cost_type, StateModelTypes::Type state_type,
                               ActivationModelTypes::Type activation_type) {
   // create the model
@@ -168,7 +155,6 @@ void test_dimensions_in_cost_sum(CostModelTypes::Type cost_type, StateModelTypes
 
   // Generating random values for the state and control
   const Eigen::VectorXd& x = state->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
@@ -230,7 +216,6 @@ void register_cost_model_unit_tests(CostModelTypes::Type cost_type, StateModelTy
   test_name << "test_" << cost_type << "_" << activation_type << "_" << state_type;
   std::cout << "Running " << test_name.str() << std::endl;
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_construct_data, cost_type, state_type, activation_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, cost_type, state_type, activation_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_against_numdiff, cost_type, state_type, activation_type)));
   ts->add(
