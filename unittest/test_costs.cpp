@@ -147,7 +147,6 @@ void test_dimensions_in_cost_sum(CostModelTypes::Type cost_type, StateModelTypes
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
-  const boost::shared_ptr<crocoddyl::CostDataAbstract>& data = model->createData(&shared_data);
 
   // create the cost sum model
   crocoddyl::CostModelSum cost_sum(state, model->get_nu());

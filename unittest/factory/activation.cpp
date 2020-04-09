@@ -53,7 +53,7 @@ boost::shared_ptr<crocoddyl::ActivationModelAbstract> ActivationModelFactory::cr
   boost::shared_ptr<crocoddyl::ActivationModelAbstract> activation;
   Eigen::VectorXd lb = Eigen::VectorXd::Random(nr);
   Eigen::VectorXd ub = lb + Eigen::VectorXd::Ones(nr) + Eigen::VectorXd::Random(nr);
-  Eigen::VectorXd weights = Eigen::VectorXd::Random(nr);
+  Eigen::VectorXd weights = 0.1 * Eigen::VectorXd::Random(nr);
 
   switch (activation_type) {
     case ActivationModelTypes::ActivationModelQuad:
