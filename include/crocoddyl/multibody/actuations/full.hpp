@@ -33,7 +33,7 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
     }
   };
 
-  ~ActuationModelFullTpl(){};
+  virtual ~ActuationModelFullTpl(){};
 
   virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& /*x*/,
                     const Eigen::Ref<const VectorXs>& u) {

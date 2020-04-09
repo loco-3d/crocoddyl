@@ -29,7 +29,7 @@ class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar
   typedef typename MathBase::MatrixXs MatrixXs;
 
   explicit ActivationModelWeightedQuadTpl(const VectorXs& weights) : Base(weights.size()), weights_(weights){};
-  ~ActivationModelWeightedQuadTpl(){};
+  virtual ~ActivationModelWeightedQuadTpl(){};
 
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {

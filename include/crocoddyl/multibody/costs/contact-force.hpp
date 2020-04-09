@@ -43,7 +43,7 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
                            boost::shared_ptr<ActivationModelAbstract> activation, const FrameForce& fref);
   CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref, const std::size_t& nu);
   CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref);
-  ~CostModelContactForceTpl();
+  virtual ~CostModelContactForceTpl();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);

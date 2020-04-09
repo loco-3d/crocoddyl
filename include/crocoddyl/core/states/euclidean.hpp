@@ -23,7 +23,7 @@ class StateVectorTpl : public StateAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
 
   explicit StateVectorTpl(const std::size_t& nx);
-  ~StateVectorTpl();
+  virtual ~StateVectorTpl();
 
   virtual VectorXs zero() const;
   virtual VectorXs rand() const;

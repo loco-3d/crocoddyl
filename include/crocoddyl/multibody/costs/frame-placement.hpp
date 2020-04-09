@@ -42,7 +42,7 @@ class CostModelFramePlacementTpl : public CostModelAbstractTpl<_Scalar> {
   CostModelFramePlacementTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& Fref,
                              const std::size_t& nu);
   CostModelFramePlacementTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& Fref);
-  ~CostModelFramePlacementTpl();
+  virtual ~CostModelFramePlacementTpl();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);

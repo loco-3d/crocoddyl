@@ -39,7 +39,7 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
                     const Vector2s& gains = Vector2s::Zero());
   ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& xref,
                     const Vector2s& gains = Vector2s::Zero());
-  ~ContactModel6DTpl();
+  virtual ~ContactModel6DTpl();
 
   virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
   virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);

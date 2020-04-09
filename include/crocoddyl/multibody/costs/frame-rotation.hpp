@@ -41,7 +41,7 @@ class CostModelFrameRotationTpl : public CostModelAbstractTpl<_Scalar> {
                             boost::shared_ptr<ActivationModelAbstract> activation, const FrameRotation& Fref);
   CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state, const FrameRotation& Fref, const std::size_t& nu);
   CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state, const FrameRotation& Fref);
-  ~CostModelFrameRotationTpl();
+  virtual ~CostModelFrameRotationTpl();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);

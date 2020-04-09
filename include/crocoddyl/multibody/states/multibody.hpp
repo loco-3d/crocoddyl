@@ -28,7 +28,7 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
   enum JointType { FreeFlyer = 0, Spherical, Simple };
 
   explicit StateMultibodyTpl(boost::shared_ptr<pinocchio::ModelTpl<Scalar> > model);
-  ~StateMultibodyTpl();
+  virtual ~StateMultibodyTpl();
 
   virtual VectorXs zero() const;
   virtual VectorXs rand() const;

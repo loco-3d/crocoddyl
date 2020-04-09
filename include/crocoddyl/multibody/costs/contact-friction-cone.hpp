@@ -51,7 +51,7 @@ class CostModelContactFrictionConeTpl : public CostModelAbstractTpl<_Scalar> {
   CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state, const FrameFrictionCone& fref,
                                   const std::size_t& nu);
   CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state, const FrameFrictionCone& fref);
-  ~CostModelContactFrictionConeTpl();
+  virtual ~CostModelContactFrictionConeTpl();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);

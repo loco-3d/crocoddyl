@@ -25,7 +25,7 @@ class ActionModelUnicycleTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
 
   ActionModelUnicycleTpl();
-  ~ActionModelUnicycleTpl();
+  virtual ~ActionModelUnicycleTpl();
 
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data,
                     const Eigen::Ref<const typename MathBase::VectorXs>& x,

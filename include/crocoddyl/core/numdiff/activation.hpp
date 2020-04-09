@@ -40,7 +40,7 @@ class ActivationModelNumDiffTpl : public ActivationModelAbstractTpl<_Scalar> {
   /**
    * @brief Destroy the ActivationModelNumDiff object
    */
-  ~ActivationModelNumDiffTpl();
+  virtual ~ActivationModelNumDiffTpl();
 
   /**
    * @brief @copydoc Base::calc()

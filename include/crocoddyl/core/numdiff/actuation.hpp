@@ -37,7 +37,7 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
   /**
    * @brief Destroy the ActuationModelNumDiff object
    */
-  ~ActuationModelNumDiffTpl();
+  virtual ~ActuationModelNumDiffTpl();
 
   /**
    * @brief @copydoc Base::calc()

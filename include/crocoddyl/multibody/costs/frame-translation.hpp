@@ -43,7 +43,7 @@ class CostModelFrameTranslationTpl : public CostModelAbstractTpl<_Scalar> {
   CostModelFrameTranslationTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
                                const std::size_t& nu);
   CostModelFrameTranslationTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref);
-  ~CostModelFrameTranslationTpl();
+  virtual ~CostModelFrameTranslationTpl();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
