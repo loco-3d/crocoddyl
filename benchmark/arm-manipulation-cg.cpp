@@ -243,6 +243,12 @@ int main(int argc, char* argv[]) {
   assert_pretty(cg_runningData->xnext.isApprox(runningData->xnext), "Problem in xnext");
   assert_pretty(cg_runningData->cost == runningData->cost, "Problem in cost");
   assert_pretty(cg_runningData->Lx.isApprox(runningData->Lx), "Problem in Lx");
+  assert_pretty(cg_runningData->Lu.isApprox(runningData->Lu), "Problem in Lu");
+  assert_pretty(cg_runningData->Lxx.isApprox(runningData->Lxx), "Problem in Lxx");
+  assert_pretty(cg_runningData->Lxu.isApprox(runningData->Lxu), "Problem in Lxu");
+  assert_pretty(cg_runningData->Luu.isApprox(runningData->Luu), "Problem in Luu");
+  assert_pretty(cg_runningData->Fx.isApprox(runningData->Fx), "Problem in Fx");
+  assert_pretty(cg_runningData->Fu.isApprox(runningData->Fu), "Problem in Fu");
   /*****************************************************************************/
 
   Eigen::ArrayXd duration_cd(T);
