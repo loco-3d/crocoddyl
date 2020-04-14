@@ -60,7 +60,7 @@ ADD_PROJECT_DEPENDENCY(example-robot-data 3.2.0 REQUIRED PKG_CONFIG_REQUIRES "ex
 ADD_OPTIONAL_DEPENDENCY("quadprog")
 ADD_OPTIONAL_DEPENDENCY("scipy")
 
-OPTION(BUILD_WITH_CODEGEN_SUPPORT "Build the library with the Code Generation support" OFF)
+OPTION(BUILD_WITH_CODEGEN_SUPPORT "Build the library with the Code Generation support" ON)
 
 OPTION(BUILD_WITH_MULTITHREADS "Build the library with the OpenMP support (required OpenMP)" OFF)
 IF(BUILD_WITH_MULTITHREADS)

@@ -6,7 +6,12 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifdef WITH_MULTITHREADING
 #include <omp.h>
+#define NTHREAD 4
+#else
+#define NTHREAD 1
+#endif
 
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/algorithm/model.hpp>
@@ -30,8 +35,6 @@
 
 #define STDDEV(vec) std::sqrt(((vec - vec.mean())) .square().sum()/(vec.size()-1))*1000
 #define AVG(vec) (vec.mean())*1000.
-
-#define NTHREAD 4
 
 int main(int argc, char* argv[]) {
   bool CALLBACKS = false;
@@ -270,16 +273,18 @@ int main(int argc, char* argv[]) {
 
   for (int ithread=0; ithread<NTHREAD; ++ithread) {
     duration_cd.setZero();
+#ifdef WITH_MULTITHREADING
     omp_set_num_threads(ithread+1);
-  
+#endif
     //Timings pyrene-arm-calc+calcDiff
     for (unsigned int i = 0; i < T; ++i) {
       crocoddyl::Timer timer;
-
+#ifdef WITH_MULTITHREADING
       #pragma omp parallel for
+#endif
       //start of calcDiff function
       for (unsigned int j = 0; j < N; ++j) {
-        runningModels[j]->calcDiff(problem->running_datas_[j], xs[j], us[j]);
+        runningModels[j]->calcDiff(problem->get_runningDatas()[j], xs[j], us[j]);
       }
       //terminalModel->calcDiff(problem->terminal_data_, xs.back());
       //end of calcdiff function
@@ -296,16 +301,18 @@ int main(int argc, char* argv[]) {
   //CALC Timings
   for (int ithread=0; ithread<NTHREAD; ++ithread) {
     duration_calc.setZero();
+#ifdef WITH_MULTITHREADING
     omp_set_num_threads(ithread+1);
-  
+#endif
     //Timings pyrene-arm-calc+calcDiff
     for (unsigned int i = 0; i < T; ++i) {
       crocoddyl::Timer timer;
-
+#ifdef WITH_MULTITHREADING
       #pragma omp parallel for
+#endif
       //start of calcDiff function
       for (unsigned int j = 0; j < N; ++j) {
-        runningModels[j]->calc(problem->running_datas_[j], xs[j], us[j]);
+        runningModels[j]->calc(problem->get_runningDatas()[j], xs[j], us[j]);
       }
       //end of calcdiff function
       duration_calc[i] = timer.get_duration();
@@ -320,19 +327,22 @@ int main(int argc, char* argv[]) {
   //differential CALC Timings
   for (int ithread=0; ithread<NTHREAD; ++ithread) {
     duration_dcalc.setZero();
+#ifdef WITH_MULTITHREADING
     omp_set_num_threads(ithread+1);
-  
+#endif  
     //Timings pyrene-arm-calc+calcDiff
     for (unsigned int i = 0; i < T; ++i) {
       crocoddyl::Timer timer;
 
+#ifdef WITH_MULTITHREADING
       #pragma omp parallel for
+#endif
       //start of calcDiff function
       for (unsigned int j = 0; j < N; ++j) {
-        boost::shared_ptr<crocoddyl::IntegratedActionModelEuler> m = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(problem->running_models_[j]);
-        boost::shared_ptr<crocoddyl::IntegratedActionDataEuler> d = boost::static_pointer_cast<crocoddyl::IntegratedActionDataEuler>(problem->running_datas_[j]);
+        boost::shared_ptr<crocoddyl::IntegratedActionModelEuler> m = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(problem->get_runningModels()[j]);
+        boost::shared_ptr<crocoddyl::IntegratedActionDataEuler> d = boost::static_pointer_cast<crocoddyl::IntegratedActionDataEuler>(problem->get_runningDatas()[j]);
         
-        m->differential_->calc(d->differential, xs[j], us[j]);
+        m->get_differential()->calc(d->differential, xs[j], us[j]);
       }
       //end of calcdiff function
       duration_dcalc[i] = timer.get_duration();
@@ -347,21 +357,24 @@ int main(int argc, char* argv[]) {
   //differential aba Timings
   for (int ithread=0; ithread<NTHREAD; ++ithread) {
     duration_dcalcpin.setZero();
+#ifdef WITH_MULTITHREADING
     omp_set_num_threads(ithread+1);
-  
+#endif
     //Timings pyrene-arm-calc+calcDiff
     for (unsigned int i = 0; i < T; ++i) {
       crocoddyl::Timer timer;
 
+#ifdef WITH_MULTITHREADING
       #pragma omp parallel for
+#endif
       //start of calcDiff function
         
       for (unsigned int j = 0; j < N; ++j) {
-        boost::shared_ptr<crocoddyl::IntegratedActionModelEuler> m = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(problem->running_models_[j]);
-        boost::shared_ptr<crocoddyl::IntegratedActionDataEuler> d = boost::static_pointer_cast<crocoddyl::IntegratedActionDataEuler>(problem->running_datas_[j]);
+        boost::shared_ptr<crocoddyl::IntegratedActionModelEuler> m = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(problem->get_runningModels()[j]);
+        boost::shared_ptr<crocoddyl::IntegratedActionDataEuler> d = boost::static_pointer_cast<crocoddyl::IntegratedActionDataEuler>(problem->get_runningDatas()[j]);
 
         boost::shared_ptr<crocoddyl::DifferentialActionDataFreeFwdDynamics> dd = boost::static_pointer_cast<crocoddyl::DifferentialActionDataFreeFwdDynamics>(d->differential);
-        boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> dm = boost::static_pointer_cast<crocoddyl::DifferentialActionModelFreeFwdDynamics>(m->differential_);
+        boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> dm = boost::static_pointer_cast<crocoddyl::DifferentialActionModelFreeFwdDynamics>(m->get_differential());
 
         Eigen::Ref<Eigen::VectorXd> q = xs[j].head(state->get_nq());
         Eigen::Ref<Eigen::VectorXd> v = xs[j].tail(state->get_nv());
@@ -381,21 +394,24 @@ int main(int argc, char* argv[]) {
   //differential aba-derivatives Timings
   for (int ithread=0; ithread<NTHREAD; ++ithread) {
     duration_diffcalcpin.setZero();
+#ifdef WITH_MULTITHREADING
     omp_set_num_threads(ithread+1);
-  
+#endif
     //Timings pyrene-arm-calc+calcDiff
     for (unsigned int i = 0; i < T; ++i) {
       crocoddyl::Timer timer;
 
+#ifdef WITH_MULTITHREADING
       #pragma omp parallel for
+#endif
       //start of calcDiff function
         
       for (unsigned int j = 0; j < N; ++j) {
-        boost::shared_ptr<crocoddyl::IntegratedActionModelEuler> m = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(problem->running_models_[j]);
-        boost::shared_ptr<crocoddyl::IntegratedActionDataEuler> d = boost::static_pointer_cast<crocoddyl::IntegratedActionDataEuler>(problem->running_datas_[j]);
+        boost::shared_ptr<crocoddyl::IntegratedActionModelEuler> m = boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(problem->get_runningModels()[j]);
+        boost::shared_ptr<crocoddyl::IntegratedActionDataEuler> d = boost::static_pointer_cast<crocoddyl::IntegratedActionDataEuler>(problem->get_runningDatas()[j]);
 
         boost::shared_ptr<crocoddyl::DifferentialActionDataFreeFwdDynamics> dd = boost::static_pointer_cast<crocoddyl::DifferentialActionDataFreeFwdDynamics>(d->differential);
-        boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> dm = boost::static_pointer_cast<crocoddyl::DifferentialActionModelFreeFwdDynamics>(m->differential_);
+        boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> dm = boost::static_pointer_cast<crocoddyl::DifferentialActionModelFreeFwdDynamics>(m->get_differential());
 
         Eigen::Ref<Eigen::VectorXd> q = xs[j].head(state->get_nq());
         Eigen::Ref<Eigen::VectorXd> v = xs[j].tail(state->get_nv());
@@ -480,16 +496,19 @@ int main(int argc, char* argv[]) {
 
   for (int ithread=0; ithread<NTHREAD; ++ithread) {
     cg_duration_cd.setZero();
+#ifdef WITH_MULTITHREADING
     omp_set_num_threads(ithread+1);
-  
+#endif
     //Timings pyrene-arm-calc+calcDiff
     for (unsigned int i = 0; i < T; ++i) {
       crocoddyl::Timer timer;
 
+#ifdef WITH_MULTITHREADING
       #pragma omp parallel for
+#endif
       //start of calcDiff function
       for (unsigned int j = 0; j < N; ++j) {
-        cg_runningModels[j]->calcDiff(cg_problem->running_datas_[j], xs[j], us[j]);
+        cg_runningModels[j]->calcDiff(cg_problem->get_runningDatas()[j], xs[j], us[j]);
       }
       //terminalModel->calcDiff(problem->terminal_data_, xs.back());
       //end of calcdiff function
@@ -505,16 +524,18 @@ int main(int argc, char* argv[]) {
   //CALC Timings
   for (int ithread=0; ithread<NTHREAD; ++ithread) {
     cg_duration_calc.setZero();
+#ifdef WITH_MULTITHREADING
     omp_set_num_threads(ithread+1);
-  
+#endif
 
     for (unsigned int i = 0; i < T; ++i) {
       crocoddyl::Timer timer;
 
+#ifdef WITH_MULTITHREADING
       #pragma omp parallel for
-
+#endif
       for (unsigned int j = 0; j < N; ++j) {
-        cg_runningModels[j]->calc(cg_problem->running_datas_[j], xs[j], us[j]);
+        cg_runningModels[j]->calc(cg_problem->get_runningDatas()[j], xs[j], us[j]);
       }
       //end of calcdiff function
       cg_duration_calc[i] = timer.get_duration();
