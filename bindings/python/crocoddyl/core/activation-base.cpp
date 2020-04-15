@@ -43,18 +43,18 @@ void exposeActivationAbstract() {
   bp::register_ptr_to_python<boost::shared_ptr<ActivationDataAbstract> >();
 
   bp::class_<ActivationDataAbstract, boost::noncopyable>(
-      "ActivationDataAbstract", "Abstract class for activation data.\n\n",
+                                                         "ActivationDataAbstract", "Abstract class for activation data.\n\n",
       bp::init<ActivationModelAbstract*>(bp::args("self", "model"),
                                          "Create common data shared between AMs.\n\n"
                                          "The action data uses the model in order to first process it.\n"
                                          ":param model: action model"))
-      .add_property("a",
-                    bp::make_getter(&ActivationDataAbstract::a_value, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActivationDataAbstract::a_value), "cost value")
-      .add_property("Ar", bp::make_getter(&ActivationDataAbstract::Ar, bp::return_internal_reference<>()),
-                    bp::make_setter(&ActivationDataAbstract::Ar), "Jacobian of the residual")
-      .add_property("Arr", bp::make_getter(&ActivationDataAbstract::Arr, bp::return_internal_reference<>()),
-                    bp::make_setter(&ActivationDataAbstract::Arr), "Hessian of the residual");
+    .add_property("a",
+                  bp::make_getter(&ActivationDataAbstract::a_value, bp::return_value_policy<bp::return_by_value>()),
+                  bp::make_setter(&ActivationDataAbstract::a_value), "cost value")
+    .add_property("Ar", bp::make_getter(&ActivationDataAbstract::Ar, bp::return_internal_reference<>()),
+                  bp::make_setter(&ActivationDataAbstract::Ar), "Jacobian of the residual")
+    .add_property("Arr", &ActivationDataAbstract::getHessianMatrix,
+                  &ActivationDataAbstract::setHessianMatrix, "Hessian of the residual");
 }
 
 }  // namespace python

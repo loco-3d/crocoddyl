@@ -66,9 +66,8 @@ void CostModelImpulseCoMTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAb
   d->ddv_dv.diagonal().array() -= 1;
   data->Rx.rightCols(ndx - nv).noalias() = d->pinocchio_internal.Jcom * d->ddv_dv;
 
-  d->Arr_Rx.noalias() = data->activation->Arr * data->Rx;
   data->Lx.noalias() = data->Rx.transpose() * data->activation->Ar;
-  data->Lxx.noalias() = data->Rx.transpose() * d->Arr_Rx;
+  data->Lxx.noalias() = data->Rx.transpose() * data->activation->Arr * data->Rx;
 }
 
 template <typename Scalar>

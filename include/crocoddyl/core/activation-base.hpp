@@ -68,6 +68,10 @@ struct ActivationDataAbstractTpl {
   Scalar a_value;
   VectorXs Ar;
   DiagonalMatrixXs Arr;
+
+  static MatrixXs getHessianMatrix(const ActivationDataAbstractTpl<Scalar>& data) { return data.Arr.diagonal().asDiagonal(); }
+  static void setHessianMatrix(ActivationDataAbstractTpl<Scalar>& data, const MatrixXs& Arr) { data.Arr.diagonal() = Arr.diagonal(); }
+  
 };
 
 }  // namespace crocoddyl
