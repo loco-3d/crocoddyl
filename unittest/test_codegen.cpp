@@ -58,9 +58,7 @@ void codegen_4DoFArm() {
   boost::shared_ptr<crocoddyl::StateMultibody> state =
     boost::make_shared<crocoddyl::StateMultibody>(boost::make_shared<pinocchio::Model>(model));
 
-  Eigen::VectorXd q0 = Eigen::VectorXd::Random(state->get_nq());
-  Eigen::VectorXd x0(state->get_nx());
-  x0 << q0, Eigen::VectorXd::Random(state->get_nv());
+  Eigen::VectorXd x0(Eigen::VectorXd::Random(state->get_nx()));
 
   
   
@@ -154,9 +152,7 @@ void codegen_4DoFArm() {
   boost::shared_ptr<crocoddyl::StateMultibodyTpl<ADScalar> > ad_state =
     boost::make_shared<crocoddyl::StateMultibodyTpl<ADScalar> >(boost::make_shared<pinocchio::ModelTpl<ADScalar> >(ad_model));
 
-  ADVectorXs ad_q0 = ADVectorXs::Random(ad_state->get_nq());
-  ADVectorXs ad_x0(ad_state->get_nx());
-  ad_x0 << ad_q0, ADVectorXs::Random(ad_state->get_nv());
+  ADVectorXs ad_x0(ADVectorXs::Random(ad_state->get_nx()));
 
   
 
@@ -207,10 +203,12 @@ void codegen_4DoFArm() {
 
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > cg_runningModel =
     boost::make_shared<crocoddyl::ActionModelCodeGenTpl<Scalar> >(ad_runningModel,
-                                                                  runningModel);
+                                                                  runningModel,
+                                                                  "pyrene_arm_running");
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > cg_terminalModel =
     boost::make_shared<crocoddyl::ActionModelCodeGenTpl<Scalar> >(ad_terminalModel,
-                                                                  terminalModel);
+                                                                  terminalModel,
+                                                                  "pyrene_arm_terminal");
   std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > >
     cg_runningModels(N, cg_runningModel);
   boost::shared_ptr<crocoddyl::ShootingProblem> cg_problem =
@@ -261,6 +259,10 @@ void codegen_bipedal() {
                               pinocchio::JointModelFreeFlyer(), model);
   model.lowerPositionLimit.head<7>().array() = -1;
   model.upperPositionLimit.head<7>().array() = 1.;
+
+
+  std::cout<<"NQ: "<<model.nq<<std::endl;
+  std::cout << "Number of nodes: " << N << std::endl;
   
   pinocchio::srdf::loadReferenceConfigurations(model,
                                                EXAMPLE_ROBOT_DATA_MODEL_DIR
@@ -275,9 +277,7 @@ void codegen_bipedal() {
   boost::shared_ptr<crocoddyl::ActuationModelFloatingBase> actuation =
        boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state);
 
-  Eigen::VectorXd q0 = Eigen::VectorXd::Random(state->get_nq());
-  Eigen::VectorXd x0(state->get_nx());
-  x0 << q0, Eigen::VectorXd::Random(state->get_nv());
+  Eigen::VectorXd x0(state->rand());
   
   crocoddyl::FramePlacement Mref(model.getFrameId("arm_right_7_joint"),
                                  pinocchio::SE3(Eigen::Matrix3d::Identity(),
@@ -386,9 +386,7 @@ void codegen_bipedal() {
   boost::shared_ptr<crocoddyl::StateMultibodyTpl<ADScalar> > ad_state =
     boost::make_shared<crocoddyl::StateMultibodyTpl<ADScalar> >(boost::make_shared<pinocchio::ModelTpl<ADScalar> >(ad_model));
 
-  ADVectorXs ad_q0 = ADVectorXs::Random(ad_state->get_nq());
-  ADVectorXs ad_x0(ad_state->get_nx());
-  ad_x0 << ad_q0, ADVectorXs::Random(ad_state->get_nv());
+  ADVectorXs ad_x0(x0.cast<ADScalar>());
 
   boost::shared_ptr<ADActuationModelFloatingBase> ad_actuation = boost::make_shared<ADActuationModelFloatingBase>(ad_state);
 
@@ -458,10 +456,12 @@ void codegen_bipedal() {
 
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > cg_runningModel =
     boost::make_shared<crocoddyl::ActionModelCodeGenTpl<Scalar> >(ad_runningModel,
-                                                                  runningModel);
+                                                                  runningModel,
+                                                                  "biped_running");
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > cg_terminalModel =
     boost::make_shared<crocoddyl::ActionModelCodeGenTpl<Scalar> >(ad_terminalModel,
-                                                                  terminalModel);
+                                                                  terminalModel,
+                                                                  "biped_terminal");
   std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > >
     cg_runningModels(N, cg_runningModel);
   boost::shared_ptr<crocoddyl::ShootingProblem> cg_problem =
