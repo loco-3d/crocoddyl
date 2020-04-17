@@ -93,11 +93,9 @@ void exposeStateAbstract() {
           "has_limits",
           bp::make_function(&StateAbstract_wrap::get_has_limits, bp::return_value_policy<bp::return_by_value>()),
           "indicates whether problem has finite state limits")
-      .add_property("lb",
-                    bp::make_getter(&StateAbstract_wrap::lb_, bp::return_internal_reference<>()),
+      .add_property("lb", bp::make_getter(&StateAbstract_wrap::lb_, bp::return_internal_reference<>()),
                     &StateAbstract_wrap::set_lb, "lower state limits")
-      .add_property("ub",
-                    bp::make_getter(&StateAbstract_wrap::ub_, bp::return_internal_reference<>()),
+      .add_property("ub", bp::make_getter(&StateAbstract_wrap::ub_, bp::return_internal_reference<>()),
                     &StateAbstract_wrap::set_ub, "upper state limits");
 }
 
