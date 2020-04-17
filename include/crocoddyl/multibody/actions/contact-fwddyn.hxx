@@ -46,8 +46,8 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::DifferentialActionModelCon
                  << "Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  Base::set_u_lb(-1. * pinocchio_.effortLimit.tail(nu_));
-  Base::set_u_ub(+1. * pinocchio_.effortLimit.tail(nu_));
+  Base::set_u_lb(Scalar(-1.) * pinocchio_.effortLimit.tail(nu_));
+  Base::set_u_ub(Scalar(+1.) * pinocchio_.effortLimit.tail(nu_));
 }
 
 template <typename Scalar>
@@ -85,7 +85,7 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
   Eigen::FullPivLU<MatrixXs> Jc_lu(d->multibody.contacts->Jc);
 
   if (Jc_lu.rank() < d->multibody.contacts->Jc.rows()) {
-    assert_pretty(JMinvJt_damping_ > 0., "A damping factor is needed as the contact Jacobian is not full-rank");
+    assert_pretty(JMinvJt_damping_ > Scalar(0.), "A damping factor is needed as the contact Jacobian is not full-rank");
   }
 #endif
 
