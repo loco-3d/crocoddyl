@@ -45,7 +45,7 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
 
     data->Ar = r;
     // The Hessian has constant values which were set in createData.
-    assert_pretty(data->Arr == MatrixXs::Identity(nr_, nr_), "Arr has wrong value");
+    assert_pretty(MatrixXs(data->Arr.diagonal().asDiagonal()).isApprox(MatrixXs::Identity(nr_, nr_)), "Arr has wrong value");
   };
 
   virtual boost::shared_ptr<ActivationDataAbstract> createData() {

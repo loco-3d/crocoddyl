@@ -52,7 +52,7 @@ class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar
     data->Ar = d->Wr;
     // The Hessian has constant values which were set in createData.
 #ifndef NDEBUG
-    assert_pretty(data->Arr == Arr_, "Arr has wrong value");
+    assert_pretty(MatrixXs(data->Arr).isApprox(Arr_), "Arr has wrong value");
 #endif
   };
 
