@@ -20,6 +20,9 @@ namespace python {
 
 class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstract> {
  public:
+  using StateAbstract::lb_;
+  using StateAbstract::ub_;
+
   StateAbstract_wrap(int nx, int ndx) : StateAbstract(nx, ndx), bp::wrapper<StateAbstract>() {}
 
   Eigen::VectorXd zero() const { return bp::call<Eigen::VectorXd>(this->get_override("zero").ptr()); }

@@ -153,7 +153,7 @@ void StateAbstractTpl<Scalar>::set_ub(const VectorXs& ub) {
 
 template <typename Scalar>
 void StateAbstractTpl<Scalar>::update_has_limits() {
-  has_limits_ = isfinite(lb_.array()).any() && isfinite(ub_.array()).any();
+  has_limits_ = isfinite(lb_.array()).any() || isfinite(ub_.array()).any();
 }
 
 }  // namespace crocoddyl
