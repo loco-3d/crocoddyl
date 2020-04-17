@@ -105,7 +105,7 @@ struct ActivationDataNumDiffTpl : public ActivationDataAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef ActivationDataAbstractTpl<Scalar> Base;
   typedef typename MathBase::MatrixXs MatrixXs;
-  
+
   /**
    * @brief Construct a new ActivationDataNumDiff object
    *
@@ -114,7 +114,7 @@ struct ActivationDataNumDiffTpl : public ActivationDataAbstractTpl<_Scalar> {
    */
   template <template <typename Scalar> class Model>
   explicit ActivationDataNumDiffTpl(Model<Scalar>* const model)
-    : Base(model), dr(model->get_model()->get_nr()), rp(model->get_model()->get_nr()), Arr_(Arr.rows(), Arr.cols()) {
+      : Base(model), dr(model->get_model()->get_nr()), rp(model->get_model()->get_nr()), Arr_(Arr.rows(), Arr.cols()) {
     dr.setZero();
     rp.setZero();
     Arr_.setZero();
@@ -130,7 +130,7 @@ struct ActivationDataNumDiffTpl : public ActivationDataAbstractTpl<_Scalar> {
       data_r2p.push_back(model->get_model()->createData());
     }
   }
-  
+
   VectorXs dr;                     //!< disturbance: \f$ [\hdot \;\; disturbance \;\; \hdot] \f$
   VectorXs rp;                     //!< The input + the disturbance on one DoF "\f$ r^+ = rp =  \int r + dr \f$"
   boost::shared_ptr<Base> data_0;  //!< The data that contains the final results

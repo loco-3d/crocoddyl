@@ -35,7 +35,6 @@ struct MathBaseTpl {
   typedef Eigen::Array<Scalar, Eigen::Dynamic, 1> ArrayXs;
   typedef Eigen::Quaternion<Scalar> Quaternions;
   typedef Eigen::DiagonalMatrix<Scalar, Eigen::Dynamic> DiagonalMatrixXs;
-  
 };
 
 }  // namespace crocoddyl

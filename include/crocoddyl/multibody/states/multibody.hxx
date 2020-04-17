@@ -118,18 +118,17 @@ void StateMultibodyTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, cons
                           ")");
     }
 
-    pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_),
-                           Jfirst.topLeftCorner(nv_, nv_), pinocchio::ARG0);
+    pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_), Jfirst.topLeftCorner(nv_, nv_),
+                           pinocchio::ARG0);
     Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)-1;
-  }
-  else if (firstsecond == second) {
+  } else if (firstsecond == second) {
     if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
       throw_pretty("Invalid argument: "
                    << "Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
-                   std::to_string(ndx_) + ")");
+                          std::to_string(ndx_) + ")");
     }
-    pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_),
-                          Jsecond.topLeftCorner(nv_, nv_), pinocchio::ARG1);
+    pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_), Jsecond.topLeftCorner(nv_, nv_),
+                           pinocchio::ARG1);
     Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
   } else {  // computing both
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
@@ -142,10 +141,10 @@ void StateMultibodyTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, cons
                    << "Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
                           std::to_string(ndx_) + ")");
     }
-    pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_),
-                           Jfirst.topLeftCorner(nv_, nv_), pinocchio::ARG0);
-    pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_),
-                           Jsecond.topLeftCorner(nv_, nv_), pinocchio::ARG1);
+    pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_), Jfirst.topLeftCorner(nv_, nv_),
+                           pinocchio::ARG0);
+    pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_), Jsecond.topLeftCorner(nv_, nv_),
+                           pinocchio::ARG1);
     Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)-1;
     Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
   }
@@ -171,8 +170,7 @@ void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, 
                    << "Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," + std::to_string(ndx_) +
                           ")");
     }
-    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_),
-                          Jfirst.topLeftCorner(nv_, nv_),
+    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
                           pinocchio::ARG0);
     Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
   } else if (firstsecond == second) {
@@ -181,8 +179,7 @@ void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, 
                    << "Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
                           std::to_string(ndx_) + ")");
     }
-    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_),
-                          Jsecond.topLeftCorner(nv_, nv_),
+    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
                           pinocchio::ARG1);
     Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
   } else {  // computing both
@@ -198,14 +195,12 @@ void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, 
     }
 
     // Computing Jfirst
-    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_),
-                          Jfirst.topLeftCorner(nv_, nv_),
+    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
                           pinocchio::ARG0);
     Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
 
     // Computing Jsecond
-    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_),
-                          Jsecond.topLeftCorner(nv_, nv_),
+    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
                           pinocchio::ARG1);
     Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
   }

@@ -61,7 +61,8 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionD
       x.tail(differential_->get_state()->get_nv());
   const VectorXs& a = d->differential->xout;
   if (enable_integration_) {
-    d->dx << v * time_step_ + a * time_step2_, a * time_step_;
+    d->dx.head(differential_->get_state()->get_nv()).noalias() = v * time_step_ + a * time_step2_;
+    d->dx.tail(differential_->get_state()->get_nv()).noalias() = a * time_step_;
     differential_->get_state()->integrate(x, d->dx, d->xnext);
     d->cost = time_step_ * d->differential->cost;
   } else {

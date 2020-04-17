@@ -137,10 +137,10 @@ class StateNumDiffTpl;
 template <typename Scalar>
 class ActuationModelNumDiffTpl;
 
-template<typename Scalar>
+template <typename Scalar>
 class ActionModelCodeGenTpl;
 
-template<typename Scalar>
+template <typename Scalar>
 struct ActionDataCodeGenTpl;
 
 /********************Template Instantiation*************/

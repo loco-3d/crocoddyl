@@ -150,23 +150,19 @@ void CostModelStateTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstrac
   CostDataStateTpl<Scalar>* d = static_cast<CostDataStateTpl<Scalar>*>(data.get());
   state_->Jdiff(xref_, x, data->Rx, data->Rx, second);
   activation_->calcDiff(data->activation, data->r);
- 
+
   const boost::shared_ptr<pinocchio::ModelTpl<Scalar> > pin_model = state_->get_pinocchio();
   typedef Eigen::Block<MatrixXs> MatrixBlock;
-  for(pinocchio::JointIndex i=1; i<(pinocchio::JointIndex) pin_model->njoints; ++i)
-  {
-    const MatrixBlock& RxBlock = data->Rx.block(pin_model->idx_vs[i], pin_model->idx_vs[i],
-                                                pin_model->nvs[i], pin_model->nvs[i]);
+  for (pinocchio::JointIndex i = 1; i < (pinocchio::JointIndex)pin_model->njoints; ++i) {
+    const MatrixBlock& RxBlock =
+        data->Rx.block(pin_model->idx_vs[i], pin_model->idx_vs[i], pin_model->nvs[i], pin_model->nvs[i]);
 
     data->Lx.segment(pin_model->idx_vs[i], pin_model->nvs[i]).noalias() =
-      RxBlock.transpose() *
-      data->activation->Ar.segment(pin_model->idx_vs[i], pin_model->nvs[i]);
-    
-    data->Lxx.block(pin_model->idx_vs[i], pin_model->idx_vs[i],
-                    pin_model->nvs[i], pin_model->nvs[i]).noalias() =
-      RxBlock.transpose() *
-      data->activation->Arr.diagonal().segment(pin_model->idx_vs[i], pin_model->nvs[i]).asDiagonal() *
-      RxBlock;
+        RxBlock.transpose() * data->activation->Ar.segment(pin_model->idx_vs[i], pin_model->nvs[i]);
+
+    data->Lxx.block(pin_model->idx_vs[i], pin_model->idx_vs[i], pin_model->nvs[i], pin_model->nvs[i]).noalias() =
+        RxBlock.transpose() *
+        data->activation->Arr.diagonal().segment(pin_model->idx_vs[i], pin_model->nvs[i]).asDiagonal() * RxBlock;
   }
   data->Lx.tail(state_->get_nv()) = data->activation->Ar.tail(state_->get_nv());
 
