@@ -119,7 +119,13 @@ void exposeCostSum() {
                     "dimension of the residual vector of active cost")
       .add_property("nr_total",
                     bp::make_function(&CostModelSum::get_nr_total, bp::return_value_policy<bp::return_by_value>()),
-                    "dimension of the total residual vector");
+                    "dimension of the total residual vector")
+      .add_property("active",
+                    bp::make_function(&CostModelSum::get_active, bp::return_value_policy<bp::return_by_value>()),
+                    "name of active cost items")
+      .def("getCostStatus", &CostModelSum::getCostStatus, bp::args("self", "name"),
+           "Return the cost status of a given cost name.\n\n"
+           ":param name: cost name");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataSum> >();
 

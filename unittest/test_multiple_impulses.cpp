@@ -112,7 +112,7 @@ void test_addImpulse_error_message() {
   model.addImpulse("random_impulse", rand_impulse);
   capture_ios.endCapture();
   std::stringstream expected_buffer;
-  expected_buffer << "Warning: this impulse item already existed, we cannot add it" << std::endl;
+  expected_buffer << "Warning: we couldn't add the random_impulse impulse item, it already existed." << std::endl;
   BOOST_CHECK(capture_ios.str() == expected_buffer.str());
 
   // test error message when we change the impulse status of an inexistent impulse
@@ -120,7 +120,8 @@ void test_addImpulse_error_message() {
   model.changeImpulseStatus("no_exist_impulse", true);
   capture_ios.endCapture();
   expected_buffer.clear();
-  expected_buffer << "Warning: this impulse item doesn't exist, we cannot change its status" << std::endl;
+  expected_buffer << "Warning: we couldn't change the status of the no_exist_impulse impulse item, it doesn't exist."
+                  << std::endl;
   BOOST_CHECK(capture_ios.str() == expected_buffer.str());
 }
 
@@ -154,7 +155,7 @@ void test_removeImpulse_error_message() {
 
   // Test that the error message is sent.
   std::stringstream expected_buffer;
-  expected_buffer << "Warning: this impulse item doesn't exist, we cannot remove it" << std::endl;
+  expected_buffer << "Warning: we couldn't remove the random_impulse impulse item, it doesn't exist." << std::endl;
   BOOST_CHECK(capture_ios.str() == expected_buffer.str());
 }
 

@@ -78,12 +78,15 @@ class ImpulseModelMultipleTpl {
   const ImpulseModelContainer& get_impulses() const;
   const std::size_t& get_ni() const;
   const std::size_t& get_ni_total() const;
+  const std::vector<std::string>& get_active() const;
+  bool getImpulseStatus(const std::string& name) const;
 
  private:
   boost::shared_ptr<StateMultibody> state_;
   ImpulseModelContainer impulses_;
   std::size_t ni_;
   std::size_t ni_total_;
+  std::vector<std::string> active_;
 };
 
 template <typename _Scalar>
