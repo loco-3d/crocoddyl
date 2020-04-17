@@ -47,9 +47,9 @@ public:
 
   ActionModelCodeGenTpl(boost::shared_ptr<ADBase> admodel,
                         boost::shared_ptr<Base> model,
+                        const std::string& library_name,
                         const std::string& function_name_calc = "calc",
-                        const std::string& function_name_calcDiff = "calcDiff",
-                        const std::string& library_name = "ammodel")
+                        const std::string& function_name_calcDiff = "calcDiff")
     : Base(model->get_state(), model->get_nu()),
       model(model),
       ad_model(admodel),

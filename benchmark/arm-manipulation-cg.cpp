@@ -208,10 +208,12 @@ int main(int argc, char* argv[]) {
 
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > cg_runningModel =
     boost::make_shared<crocoddyl::ActionModelCodeGenTpl<Scalar> >(ad_runningModel,
-                                                                  runningModel);
+                                                                  runningModel,
+                                                                  "pyrene_model_running");
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > cg_terminalModel =
     boost::make_shared<crocoddyl::ActionModelCodeGenTpl<Scalar> >(ad_terminalModel,
-                                                                  terminalModel);
+                                                                  terminalModel,
+                                                                  "pyrene_model_terminal");
   std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > >
     cg_runningModels(N, cg_runningModel);
   boost::shared_ptr<crocoddyl::ShootingProblem> cg_problem =
