@@ -24,13 +24,14 @@ template <typename Scalar>
 void ContactModelMultipleTpl<Scalar>::addContact(const std::string& name,
                                                  boost::shared_ptr<ContactModelAbstract> contact, bool active) {
   if (contact->get_nu() != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "contact item doesn't have the same control dimension (" + std::to_string(nu_) + ")");
+    throw_pretty("Invalid argument: " << name
+                                      << " contact item doesn't have the same control dimension (" +
+                                             std::to_string(nu_) + ")");
   }
   std::pair<typename ContactModelContainer::iterator, bool> ret =
       contacts_.insert(std::make_pair(name, boost::make_shared<ContactItem>(name, contact, active)));
   if (ret.second == false) {
-    std::cout << "Warning: this contact item already existed, we cannot add it" << std::endl;
+    std::cout << "Warning: we couldn't add the " << name << " contact item, it already existed." << std::endl;
   } else if (active) {
     nc_ += contact->get_nc();
     nc_total_ += contact->get_nc();
@@ -47,7 +48,7 @@ void ContactModelMultipleTpl<Scalar>::removeContact(const std::string& name) {
     nc_total_ -= it->second->contact->get_nc();
     contacts_.erase(it);
   } else {
-    std::cout << "Warning: this contact item doesn't exist, we cannot remove it" << std::endl;
+    std::cout << "Warning: we couldn't remove the " << name << " contact item, it doesn't exist." << std::endl;
   }
 }
 
@@ -62,7 +63,8 @@ void ContactModelMultipleTpl<Scalar>::changeContactStatus(const std::string& nam
     }
     it->second->active = active;
   } else {
-    std::cout << "Warning: this contact item doesn't exist, we cannot change its status" << std::endl;
+    std::cout << "Warning: we couldn't change the status of the " << name << " contact item, it doesn't exist."
+              << std::endl;
   }
 }
 
@@ -83,7 +85,8 @@ void ContactModelMultipleTpl<Scalar>::calc(const boost::shared_ptr<ContactDataMu
     const boost::shared_ptr<ContactItem>& m_i = it_m->second;
     if (m_i->active) {
       const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
-      assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
+      assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between model and data ("
+                                                    << it_m->first << " != " << it_d->first << ")");
 
       m_i->contact->calc(d_i, x);
       const std::size_t& nc_i = m_i->contact->get_nc();
@@ -111,7 +114,8 @@ void ContactModelMultipleTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDa
     const boost::shared_ptr<ContactItem>& m_i = it_m->second;
     if (m_i->active) {
       const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
-      assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
+      assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between model and data ("
+                                                    << it_m->first << " != " << it_d->first << ")");
 
       m_i->contact->calcDiff(d_i, x);
       const std::size_t& nc_i = m_i->contact->get_nc();
