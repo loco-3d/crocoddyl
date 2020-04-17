@@ -81,6 +81,8 @@ class ContactModelMultipleTpl {
   const std::size_t& get_nc() const;
   const std::size_t& get_nc_total() const;
   const std::size_t& get_nu() const;
+  const std::vector<std::string>& get_active() const;
+  bool getContactStatus(const std::string& name) const;
 
  private:
   boost::shared_ptr<StateMultibody> state_;
@@ -88,6 +90,7 @@ class ContactModelMultipleTpl {
   std::size_t nc_;
   std::size_t nc_total_;
   std::size_t nu_;
+  std::vector<std::string> active_;
 };
 
 template <typename _Scalar>

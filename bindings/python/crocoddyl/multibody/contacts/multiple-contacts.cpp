@@ -114,7 +114,14 @@ void exposeContactMultiple() {
           "dimension of the total contact vector")
       .add_property("nu",
                     bp::make_function(&ContactModelMultiple::get_nu, bp::return_value_policy<bp::return_by_value>()),
-                    "dimension of control vector");
+                    "dimension of control vector")
+      .add_property(
+          "active",
+          bp::make_function(&ContactModelMultiple::get_active, bp::return_value_policy<bp::return_by_value>()),
+          "name of active contact items")
+      .def("getContactStatus", &ContactModelMultiple::getContactStatus, bp::args("self", "name"),
+           "Return the contact status of a given contact name.\n\n"
+           ":param name: contact name");
 
   bp::register_ptr_to_python<boost::shared_ptr<ContactDataMultiple> >();
 
