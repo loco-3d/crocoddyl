@@ -114,7 +114,14 @@ void exposeImpulseMultiple() {
       .add_property(
           "ni_total",
           bp::make_function(&ImpulseModelMultiple::get_ni_total, bp::return_value_policy<bp::return_by_value>()),
-          "dimension of the total impulse vector");
+          "dimension of the total impulse vector")
+      .add_property(
+          "active",
+          bp::make_function(&ImpulseModelMultiple::get_active, bp::return_value_policy<bp::return_by_value>()),
+          "name of active impulse items")
+      .def("getImpulseStatus", &ImpulseModelMultiple::getImpulseStatus, bp::args("self", "name"),
+           "Return the impulse status of a given impulse name.\n\n"
+           ":param name: impulse name");
 
   bp::register_ptr_to_python<boost::shared_ptr<ImpulseDataMultiple> >();
 
