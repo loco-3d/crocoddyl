@@ -78,6 +78,8 @@ class CostModelSumTpl {
   const std::size_t& get_nu() const;
   const std::size_t& get_nr() const;
   const std::size_t& get_nr_total() const;
+  const std::vector<std::string>& get_active() const;
+  bool getCostStatus(const std::string& name) const;
 
  private:
   boost::shared_ptr<StateMultibody> state_;
@@ -85,6 +87,7 @@ class CostModelSumTpl {
   std::size_t nu_;
   std::size_t nr_;
   std::size_t nr_total_;
+  std::vector<std::string> active_;
   VectorXs unone_;
 };
 

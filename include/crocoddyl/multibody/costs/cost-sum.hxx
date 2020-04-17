@@ -36,6 +36,7 @@ void CostModelSumTpl<Scalar>::addCost(const std::string& name, boost::shared_ptr
   } else if (active) {
     nr_ += cost->get_activation()->get_nr();
     nr_total_ += cost->get_activation()->get_nr();
+    active_.push_back(name);
   } else if (!active) {
     nr_total_ += cost->get_activation()->get_nr();
   }
@@ -48,6 +49,7 @@ void CostModelSumTpl<Scalar>::removeCost(const std::string& name) {
     nr_ -= it->second->cost->get_activation()->get_nr();
     nr_total_ -= it->second->cost->get_activation()->get_nr();
     costs_.erase(it);
+    active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
   } else {
     std::cout << "Warning: we couldn't remove the " << name << " cost item, it doesn't exist." << std::endl;
   }
@@ -59,8 +61,10 @@ void CostModelSumTpl<Scalar>::changeCostStatus(const std::string& name, bool act
   if (it != costs_.end()) {
     if (active && !it->second->active) {
       nr_ += it->second->cost->get_activation()->get_nr();
+      active_.push_back(name);
     } else if (!active && it->second->active) {
       nr_ -= it->second->cost->get_activation()->get_nr();
+      active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
     }
     it->second->active = active;
   } else {
@@ -183,6 +187,22 @@ const std::size_t& CostModelSumTpl<Scalar>::get_nr() const {
 template <typename Scalar>
 const std::size_t& CostModelSumTpl<Scalar>::get_nr_total() const {
   return nr_total_;
+}
+
+template <typename Scalar>
+const std::vector<std::string>& CostModelSumTpl<Scalar>::get_active() const {
+  return active_;
+}
+
+template <typename Scalar>
+bool CostModelSumTpl<Scalar>::getCostStatus(const std::string& name) const {
+  typename CostModelContainer::const_iterator it = costs_.find(name);
+  if (it != costs_.end()) {
+    return it->second->active;
+  } else {
+    std::cout << "Warning: we couldn't get the status of the " << name << " cost item, it doesn't exist." << std::endl;
+    return false;
+  }
 }
 
 }  // namespace crocoddyl
