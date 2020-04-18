@@ -137,12 +137,14 @@ class StateNumDiffTpl;
 template <typename Scalar>
 class ActuationModelNumDiffTpl;
 
+#ifdef WITH_CODEGEN  
 template <typename Scalar>
 class ActionModelCodeGenTpl;
 
 template <typename Scalar>
 struct ActionDataCodeGenTpl;
-
+#endif
+  
 /********************Template Instantiation*************/
 typedef DifferentialActionModelAbstractTpl<double> DifferentialActionModelAbstract;
 typedef DifferentialActionDataAbstractTpl<double> DifferentialActionDataAbstract;
