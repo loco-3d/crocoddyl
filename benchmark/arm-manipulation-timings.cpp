@@ -6,19 +6,14 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <pinocchio/parsers/urdf.hpp>
-#include <pinocchio/parsers/srdf.hpp>
-#include <pinocchio/algorithm/model.hpp>
-#include <pinocchio/algorithm/contact-info.hpp>
-#include <pinocchio/container/aligned-vector.hpp>
-#include <example-robot-data/path.hpp>
 
+#include <pinocchio/parsers/urdf.hpp>
+#include <pinocchio/algorithm/model.hpp>
+
+#include <example-robot-data/path.hpp>
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/core/codegen/action-base.hpp"
-#include "crocoddyl/multibody/contacts/contact-6d.hpp"
-#include "crocoddyl/multibody/contacts/contact-3d.hpp"
-#include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
-#include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
+#include "crocoddyl/multibody/actions/free-fwddyn.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
 
 #include "crocoddyl/core/mathbase.hpp"
@@ -28,6 +23,7 @@
 #include "crocoddyl/multibody/costs/state.hpp"
 #include "crocoddyl/multibody/costs/control.hpp"
 #include "crocoddyl/multibody/actuations/full.hpp"
+
 #include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/utils/timer.hpp"
@@ -47,17 +43,16 @@ int main(int argc, char* argv[]) {
   /**************************DOUBLE**********************/
   /**************************DOUBLE**********************/
   /**************************DOUBLE**********************/
-  pinocchio::Model model;
+  pinocchio::Model model_full, model;
+  pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf", model_full);
+  std::vector<pinocchio::JointIndex> locked_joints;
+  locked_joints.reserve(3);
 
-  pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_reduced.urdf",
-                              pinocchio::JointModelFreeFlyer(), model);
-  model.lowerPositionLimit.head<7>().array() = -1;
-  model.upperPositionLimit.head<7>().array() = 1.;
-
-  pinocchio::srdf::loadReferenceConfigurations(model, EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf",
-                                               false);
-  const std::string RF = "leg_right_6_joint";
-  const std::string LF = "leg_left_6_joint";
+  locked_joints.push_back(5);
+  locked_joints.push_back(6);
+  locked_joints.push_back(7);
+  
+  pinocchio::buildReducedModel(model_full, locked_joints, Eigen::VectorXd::Zero(model_full.nq), model);
 
   /*************************PINOCCHIO MODEL**************/
 
@@ -67,14 +62,14 @@ int main(int argc, char* argv[]) {
 
   boost::shared_ptr<crocoddyl::StateMultibody> state =
       boost::make_shared<crocoddyl::StateMultibody>(boost::make_shared<pinocchio::Model>(model));
-  boost::shared_ptr<crocoddyl::ActuationModelFloatingBase> actuation =
-      boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state);
+  boost::shared_ptr<crocoddyl::ActuationModelFull> actuation =
+      boost::make_shared<crocoddyl::ActuationModelFull>(state);  
 
   Eigen::VectorXd q0 = Eigen::VectorXd::Random(state->get_nq());
   Eigen::VectorXd x0(state->get_nx());
   x0 << q0, Eigen::VectorXd::Random(state->get_nv());
 
-  crocoddyl::FramePlacement Mref(model.getFrameId("arm_right_7_joint"),
+  crocoddyl::FramePlacement Mref(model.getFrameId("gripper_left_joint"),
                                  pinocchio::SE3(Eigen::Matrix3d::Identity(), Eigen::Vector3d(.0, .0, .4)));
 
   boost::shared_ptr<crocoddyl::CostModelAbstract> goalTrackingCost =
@@ -95,27 +90,13 @@ int main(int argc, char* argv[]) {
   runningCostModel->addCost("uReg", uRegCost, 1e-4);
   terminalCostModel->addCost("gripperPose", goalTrackingCost, 1);
 
-  boost::shared_ptr<crocoddyl::ContactModelMultiple> contact_models =
-      boost::make_shared<crocoddyl::ContactModelMultiple>(state, actuation->get_nu());
+  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> runningDAM =
+    boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(state, actuation, runningCostModel);
 
-  crocoddyl::FramePlacement xref(model.getFrameId(RF), pinocchio::SE3::Identity());
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> support_contact_model6D =
-      boost::make_shared<crocoddyl::ContactModel6D>(state, xref, actuation->get_nu(), Eigen::Vector2d(0., 50.));
-  contact_models->addContact(model.frames[model.getFrameId(RF)].name + "_contact", support_contact_model6D);
+  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> terminalDAM =
+      boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(state, actuation, terminalCostModel);
 
-  crocoddyl::FrameTranslation x2ref(model.getFrameId(LF), Eigen::Vector3d::Zero());
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> support_contact_model3D =
-      boost::make_shared<crocoddyl::ContactModel3D>(state, x2ref, actuation->get_nu(), Eigen::Vector2d(0., 50.));
-  contact_models->addContact(model.frames[model.getFrameId(LF)].name + "_contact", support_contact_model3D);
-
-  boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> runningDAM =
-      boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics>(state, actuation, contact_models,
-                                                                               runningCostModel);
-
-  boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> terminalDAM =
-      boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics>(state, actuation, contact_models,
-                                                                               terminalCostModel);
-
+  
   boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModel =
       boost::make_shared<crocoddyl::IntegratedActionModelEuler>(runningDAM, 1e-3);
   boost::shared_ptr<crocoddyl::ActionModelAbstract> terminalModel =
@@ -131,8 +112,8 @@ int main(int argc, char* argv[]) {
 
   boost::shared_ptr<crocoddyl::ActionDataAbstract> runningModel_data = runningModel->createData();
   boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract> runningDAM_data = runningDAM->createData();
-  crocoddyl::DifferentialActionDataContactFwdDynamics* d =
-      static_cast<crocoddyl::DifferentialActionDataContactFwdDynamics*>(runningDAM_data.get());
+  crocoddyl::DifferentialActionDataFreeFwdDynamics* d =
+      static_cast<crocoddyl::DifferentialActionDataFreeFwdDynamics*>(runningDAM_data.get());
   boost::shared_ptr<crocoddyl::ActuationDataAbstract> actuation_data = actuation->createData();
   boost::shared_ptr<crocoddyl::CostDataAbstract> goalTrackingCost_data = goalTrackingCost->createData(&d->multibody);
   boost::shared_ptr<crocoddyl::CostDataAbstract> xRegCost_data = xRegCost->createData(&d->multibody);
