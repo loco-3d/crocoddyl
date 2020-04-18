@@ -38,10 +38,8 @@
 #define AVG(vec) (vec.mean())
 
 int main(int argc, char* argv[]) {
-  bool CALLBACKS = false;
   unsigned int N = 100;  // number of nodes
   unsigned int T = 5e4;  // number of trials
-  unsigned int MAXITER = 1;
   if (argc > 1) {
     T = atoi(argv[1]);
   }
