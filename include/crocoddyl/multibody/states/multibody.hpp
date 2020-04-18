@@ -54,8 +54,7 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
   using Base::ub_;
 
  private:
-  void updateJdiff(const Eigen::Ref<const MatrixXs>& Jdq, Eigen::Ref<MatrixXs> Jd_, bool positive = true) const;
-
+  
   boost::shared_ptr<pinocchio::ModelTpl<Scalar> > pinocchio_;
   VectorXs x0_;
   JointType joint_type_;

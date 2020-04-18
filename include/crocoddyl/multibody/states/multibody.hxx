@@ -211,28 +211,4 @@ const boost::shared_ptr<pinocchio::ModelTpl<Scalar> >& StateMultibodyTpl<Scalar>
   return pinocchio_;
 }
 
-template <typename Scalar>
-void StateMultibodyTpl<Scalar>::updateJdiff(const Eigen::Ref<const MatrixXs>& Jdq, Eigen::Ref<MatrixXs> Jd,
-                                            bool positive) const {
-  if (positive) {
-    Jd.diagonal() = Jdq.diagonal();
-
-    // Needed only for systems with bases defined as SE3 and S03 group
-    if (joint_type_ == FreeFlyer) {
-      Jd.template block<6, 6>(0, 0) = Jdq.template block<6, 6>(0, 0).inverse();
-    } else if (joint_type_ == Spherical) {
-      Jd.template block<3, 3>(0, 0) = Jdq.template block<3, 3>(0, 0).inverse();
-    }
-  } else {
-    Jd.diagonal() = -Jdq.diagonal();
-
-    // Needed only for systems with bases defined as SE3 and S03 group
-    if (joint_type_ == FreeFlyer) {
-      Jd.template block<6, 6>(0, 0) = -Jdq.template block<6, 6>(0, 0).inverse();
-    } else if (joint_type_ == Spherical) {
-      Jd.template block<3, 3>(0, 0) = -Jdq.template block<3, 3>(0, 0).inverse();
-    }
-  }
-}
-
 }  // namespace crocoddyl
