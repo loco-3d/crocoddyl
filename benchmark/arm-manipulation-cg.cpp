@@ -33,7 +33,7 @@
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/utils/timer.hpp"
 
-#define STDDEV(vec) std::sqrt(((vec - vec.mean())).square().sum() / (vec.size() - 1)) * 1000
+#define STDDEV(vec) std::sqrt(((vec - vec.mean())).square().sum() / (vec.size() - 1.)) * 1000
 #define AVG(vec) (vec.mean()) * 1000.
 
 int main(int argc, char* argv[]) {

@@ -147,7 +147,6 @@ void CostModelStateTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstrac
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
 
-  CostDataStateTpl<Scalar>* d = static_cast<CostDataStateTpl<Scalar>*>(data.get());
   state_->Jdiff(xref_, x, data->Rx, data->Rx, second);
   activation_->calcDiff(data->activation, data->r);
 
