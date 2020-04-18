@@ -50,6 +50,8 @@ template <typename Scalar>
 std::vector<typename MathBaseTpl<Scalar>::MatrixXs> StateAbstractTpl<Scalar>::Jdiff_Js(
     const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1, Jcomponent firstsecond) {
   MatrixXs Jfirst(ndx_, ndx_), Jsecond(ndx_, ndx_);
+  Jfirst.setZero();
+  Jsecond.setZero();
   std::vector<MatrixXs> Jacs;
   Jdiff(x0, x1, Jfirst, Jsecond, firstsecond);
   switch (firstsecond) {
