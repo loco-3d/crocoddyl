@@ -137,7 +137,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   void compileLib() {
     CppAD::cg::GccCompiler<Scalar> compiler;
     std::vector<std::string> compile_options = compiler.getCompileFlags();
-    compile_options[0] = "-Ofast";
+    compile_options[0] = "-O3";
     compiler.setCompileFlags(compile_options);
     dynamicLibManager_ptr->createDynamicLibrary(compiler, false);
   }
