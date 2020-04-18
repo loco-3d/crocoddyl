@@ -296,4 +296,4 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
 
 #endif  // WITH_CODEGEN
 
-#endif  // ifndef __pinocchio_utils_code_generator_base_hpp__
+#endif  // ifndef CROCODDYL_CORE_CODEGEN_ACTION_BASE_HPP_
