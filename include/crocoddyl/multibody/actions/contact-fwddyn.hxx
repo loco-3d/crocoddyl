@@ -84,9 +84,8 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
 #ifndef NDEBUG
   Eigen::FullPivLU<MatrixXs> Jc_lu(d->multibody.contacts->Jc);
 
-  if (Jc_lu.rank() < d->multibody.contacts->Jc.rows()) {
-    assert_pretty(JMinvJt_damping_ > Scalar(0.),
-                  "A damping factor is needed as the contact Jacobian is not full-rank");
+  if (Jc_lu.rank() < d->multibody.contacts->Jc.rows() && JMinvJt_damping_ == Scalar(0.)) {
+    throw_pretty("A damping factor is needed as the contact Jacobian is not full-rank");
   }
 #endif
 

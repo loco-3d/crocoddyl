@@ -22,9 +22,9 @@ ImpulseModelAbstractTpl<Scalar>::~ImpulseModelAbstractTpl() {}
 template <typename Scalar>
 void ImpulseModelAbstractTpl<Scalar>::updateForceDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
                                                       const MatrixXs& df_dq) const {
-  assert_pretty(
-      (static_cast<std::size_t>(df_dq.rows()) == ni_ || static_cast<std::size_t>(df_dq.cols()) == state_->get_nv()),
-      "df_dq has wrong dimension");
+  if (static_cast<std::size_t>(df_dq.rows()) != ni_ || static_cast<std::size_t>(df_dq.cols()) != state_->get_nv())
+    throw_pretty("df_dq has wrong dimension");
+
   data->df_dq = df_dq;
 }
 
