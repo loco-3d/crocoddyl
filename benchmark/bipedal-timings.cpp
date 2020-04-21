@@ -210,6 +210,28 @@ int main(int argc, char* argv[]) {
 
   duration = 0;
   timer.reset();
+  Eigen::MatrixXd Jin(Eigen::MatrixXd::Random(model.nv, 2*model.nv));
+  SMOOTH(T) {
+    pinocchio::dIntegrateTransport(model, x1s[_smooth].head(model.nq), dxs[_smooth].head(model.nv),
+                                   Jin, pinocchio::ARG0);
+  }
+  duration = timer.get_us_duration();
+  std::cout << "pin::dIntegrateTransport with aliasing(in us):\t" << duration / T << " us" << std::endl;
+
+  duration = 0;
+  timer.reset();
+  Jin = Eigen::MatrixXd::Random(model.nv, 2*model.nv);
+  Eigen::MatrixXd Jout(Eigen::MatrixXd::Random(model.nv, 2*model.nv));
+  SMOOTH(T) {
+    pinocchio::dIntegrateTransport(model, x1s[_smooth].head(model.nq), dxs[_smooth].head(model.nv),
+                                   Jin, Jout, pinocchio::ARG0);
+  }
+  duration = timer.get_us_duration();
+  std::cout << "pin::dIntegrateTransport w/o aliasing(in us):\t" << duration / T << " us" << std::endl;
+
+  
+  duration = 0;
+  timer.reset();
   SMOOTH(T) { state->Jdiff(x1s[_smooth], x2s[_smooth], Jfirst, Jsecond, crocoddyl::both); }
   duration = timer.get_us_duration();
   std::cout << "StateMultibody.Jdiff both (in us):\t\t" << duration / T << " us" << std::endl;
