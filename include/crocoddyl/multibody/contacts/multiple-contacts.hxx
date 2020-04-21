@@ -35,7 +35,9 @@ void ContactModelMultipleTpl<Scalar>::addContact(const std::string& name,
   } else if (active) {
     nc_ += contact->get_nc();
     nc_total_ += contact->get_nc();
-    active_.push_back(name);
+    std::vector<std::string>::iterator it =
+        std::lower_bound(active_.begin(), active_.end(), name, std::greater<std::string>());
+    active_.insert(it, name);
   } else if (!active) {
     nc_total_ += contact->get_nc();
   }
@@ -60,7 +62,9 @@ void ContactModelMultipleTpl<Scalar>::changeContactStatus(const std::string& nam
   if (it != contacts_.end()) {
     if (active && !it->second->active) {
       nc_ += it->second->contact->get_nc();
-      active_.push_back(name);
+      std::vector<std::string>::iterator it =
+          std::lower_bound(active_.begin(), active_.end(), name, std::greater<std::string>());
+      active_.insert(it, name);
     } else if (!active && it->second->active) {
       nc_ -= it->second->contact->get_nc();
       active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
