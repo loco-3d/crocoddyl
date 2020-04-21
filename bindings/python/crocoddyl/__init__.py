@@ -309,6 +309,29 @@ class GepettoDisplay(DisplayAbstract):
             self.createCone(coneName, self.frictionConeScale, mu)
 
 
+class MeshcatDisplay(DisplayAbstract):
+    def __init__(self, robot, rate=-1, freq=1):
+        DisplayAbstract.__init__(self, rate, freq)
+        self.robot = robot
+        robot.setVisualizer(pinocchio.visualize.MeshcatVisualizer())
+        self._addRobot()
+
+    def display(self, xs, fs=[], ps=[], dts=[], factor=1.):
+        if not dts:
+            dts = [0.] * len(xs)
+
+        S = 1 if self.rate <= 0 else max(len(xs) / self.rate, 1)
+        for i, x in enumerate(xs):
+            if not i % S:
+                self.robot.display(x[:self.robot.nq])
+                time.sleep(dts[i] * factor)
+
+    def _addRobot(self):
+        # Spawn robot model
+        self.robot.initViewer(open=True)
+        self.robot.loadViewerModel(rootNodeName="robot")
+
+
 class CallbackDisplay(libcrocoddyl_pywrap.CallbackAbstract):
     def __init__(self, display):
         libcrocoddyl_pywrap.CallbackAbstract.__init__(self)
