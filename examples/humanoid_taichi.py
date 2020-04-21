@@ -10,8 +10,6 @@ import pinocchio
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
-crocoddyl.switchToNumpyMatrix()
-
 # Load robot
 robot = example_robot_data.loadTalos()
 rmodel = robot.model
@@ -37,7 +35,7 @@ endEffectorId = rmodel.getFrameId(endEffector)
 rightFootId = rmodel.getFrameId(rightFoot)
 leftFootId = rmodel.getFrameId(leftFoot)
 q0 = rmodel.referenceConfigurations["half_sitting"]
-rmodel.defaultState = np.concatenate([q0, np.zeros((rmodel.nv, 1))])
+rmodel.defaultState = np.concatenate([q0, np.zeros(rmodel.nv)])
 pinocchio.forwardKinematics(rmodel, rdata, q0)
 pinocchio.updateFramePlacements(rmodel, rdata)
 rfPos0 = rdata.oMf[rightFootId].translation
@@ -57,23 +55,23 @@ contactModel1Foot = crocoddyl.ContactModelMultiple(state, actuation.nu)
 contactModel2Feet = crocoddyl.ContactModelMultiple(state, actuation.nu)
 framePlacementLeft = crocoddyl.FramePlacement(leftFootId, pinocchio.SE3.Identity())
 framePlacementRight = crocoddyl.FramePlacement(rightFootId, pinocchio.SE3.Identity())
-supportContactModelLeft = crocoddyl.ContactModel6D(state, framePlacementLeft, actuation.nu, np.matrix([0, 40]).T)
-supportContactModelRight = crocoddyl.ContactModel6D(state, framePlacementRight, actuation.nu, np.matrix([0, 40]).T)
+supportContactModelLeft = crocoddyl.ContactModel6D(state, framePlacementLeft, actuation.nu, np.array([0, 40]))
+supportContactModelRight = crocoddyl.ContactModel6D(state, framePlacementRight, actuation.nu, np.array([0, 40]))
 contactModel1Foot.addContact(rightFoot + "_contact", supportContactModelRight)
 contactModel2Feet.addContact(leftFoot + "_contact", supportContactModelLeft)
 contactModel2Feet.addContact(rightFoot + "_contact", supportContactModelRight)
 
 # Cost for self-collision
 maxfloat = sys.float_info.max
-xlb = np.vstack([
-    -maxfloat * np.matrix(np.ones((6, 1))),  # dimension of the SE(3) manifold
+xlb = np.concatenate([
+    -maxfloat * np.ones(6),  # dimension of the SE(3) manifold
     rmodel.lowerPositionLimit[7:],
-    -maxfloat * np.matrix(np.ones((state.nv, 1)))
+    -maxfloat * np.ones(state.nv)
 ])
-xub = np.vstack([
-    maxfloat * np.matrix(np.ones((6, 1))),  # dimension of the SE(3) manifold
+xub = np.concatenate([
+    maxfloat * np.ones(6),  # dimension of the SE(3) manifold
     rmodel.upperPositionLimit[7:],
-    maxfloat * np.matrix(np.ones((state.nv, 1)))
+    maxfloat * np.ones(state.nv)
 ])
 bounds = crocoddyl.ActivationBounds(xlb, xub, 1.)
 limitCost = crocoddyl.CostModelState(state, crocoddyl.ActivationModelQuadraticBarrier(bounds), rmodel.defaultState,
@@ -82,25 +80,28 @@ limitCost = crocoddyl.CostModelState(state, crocoddyl.ActivationModelQuadraticBa
 # Cost for state and control
 stateWeights = np.array([0] * 3 + [10.] * 3 + [0.01] * (state.nv - 6) + [10] * state.nv)
 stateWeightsTerm = np.array([0] * 3 + [10.] * 3 + [0.01] * (state.nv - 6) + [100] * state.nv)
-xRegCost = crocoddyl.CostModelState(state, crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeights**2).T),
-                                    rmodel.defaultState, actuation.nu)
+xRegCost = crocoddyl.CostModelState(state, crocoddyl.ActivationModelWeightedQuad(stateWeights**2), rmodel.defaultState,
+                                    actuation.nu)
 uRegCost = crocoddyl.CostModelControl(state, actuation.nu)
-xRegTermCost = crocoddyl.CostModelState(state, crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeightsTerm**2).T),
+xRegTermCost = crocoddyl.CostModelState(state, crocoddyl.ActivationModelWeightedQuad(stateWeightsTerm**2),
                                         rmodel.defaultState, actuation.nu)
 
 # Cost for target reaching: hand and foot
 handTrackingWeights = np.array([1] * 3 + [0.0001] * 3)
-Pref = crocoddyl.FramePlacement(endEffectorId, pinocchio.SE3(np.eye(3), np.matrix(target).T))
-handTrackingCost = crocoddyl.CostModelFramePlacement(
-    state, crocoddyl.ActivationModelWeightedQuad(np.matrix(handTrackingWeights**2).T), Pref, actuation.nu)
+Pref = crocoddyl.FramePlacement(endEffectorId, pinocchio.SE3(np.eye(3), target))
+handTrackingCost = crocoddyl.CostModelFramePlacement(state,
+                                                     crocoddyl.ActivationModelWeightedQuad(handTrackingWeights**2),
+                                                     Pref, actuation.nu)
 
 footTrackingWeights = np.array([1, 1, 0.1] + [1.] * 3)
-Pref = crocoddyl.FramePlacement(leftFootId, pinocchio.SE3(np.eye(3), np.matrix([0., 0.4, 0.]).T))
-footTrackingCost1 = crocoddyl.CostModelFramePlacement(
-    state, crocoddyl.ActivationModelWeightedQuad(np.matrix(footTrackingWeights**2).T), Pref, actuation.nu)
-Pref = crocoddyl.FramePlacement(leftFootId, pinocchio.SE3(np.eye(3), np.matrix([0.3, 0.15, 0.35]).T))
-footTrackingCost2 = crocoddyl.CostModelFramePlacement(
-    state, crocoddyl.ActivationModelWeightedQuad(np.matrix(footTrackingWeights**2).T), Pref, actuation.nu)
+Pref = crocoddyl.FramePlacement(leftFootId, pinocchio.SE3(np.eye(3), np.array([0., 0.4, 0.])))
+footTrackingCost1 = crocoddyl.CostModelFramePlacement(state,
+                                                      crocoddyl.ActivationModelWeightedQuad(footTrackingWeights**2),
+                                                      Pref, actuation.nu)
+Pref = crocoddyl.FramePlacement(leftFootId, pinocchio.SE3(np.eye(3), np.array([0.3, 0.15, 0.35])))
+footTrackingCost2 = crocoddyl.CostModelFramePlacement(state,
+                                                      crocoddyl.ActivationModelWeightedQuad(footTrackingWeights**2),
+                                                      Pref, actuation.nu)
 
 # Cost for CoM reference
 comTrack = crocoddyl.CostModelCoMPosition(state, comRef, actuation.nu)

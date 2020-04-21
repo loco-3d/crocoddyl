@@ -66,6 +66,7 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
+  const std::size_t& nc = contacts_->get_nc();
   DifferentialActionDataContactFwdDynamicsTpl<Scalar>* d =
       static_cast<DifferentialActionDataContactFwdDynamicsTpl<Scalar>*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
@@ -82,15 +83,16 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
   contacts_->calc(d->multibody.contacts, x);
 
 #ifndef NDEBUG
-  Eigen::FullPivLU<MatrixXs> Jc_lu(d->multibody.contacts->Jc);
+  Eigen::FullPivLU<MatrixXs> Jc_lu(d->multibody.contacts->Jc.topRows(nc));
 
-  if (Jc_lu.rank() < d->multibody.contacts->Jc.rows() && JMinvJt_damping_ == Scalar(0.)) {
+  if (Jc_lu.rank() < d->multibody.contacts->Jc.topRows(nc).rows() && JMinvJt_damping_ == Scalar(0.)) {
     throw_pretty("A damping factor is needed as the contact Jacobian is not full-rank");
   }
 #endif
 
-  pinocchio::forwardDynamics(pinocchio_, d->pinocchio, d->multibody.actuation->tau, d->multibody.contacts->Jc,
-                             d->multibody.contacts->a0, JMinvJt_damping_);
+  pinocchio::forwardDynamics(pinocchio_, d->pinocchio, d->multibody.actuation->tau,
+                             d->multibody.contacts->Jc.topRows(nc), d->multibody.contacts->a0.head(nc),
+                             JMinvJt_damping_);
   d->xout = d->pinocchio.ddq;
   contacts_->updateAcceleration(d->multibody.contacts, d->pinocchio.ddq);
   contacts_->updateForce(d->multibody.contacts, d->pinocchio.lambda_c);
@@ -123,7 +125,8 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
 
   // Computing the dynamics derivatives
   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout, d->multibody.contacts->fext);
-  pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->multibody.contacts->Jc, d->Kinv);
+  pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->multibody.contacts->Jc.topRows(nc),
+                                               d->Kinv);
 
   actuation_->calcDiff(d->multibody.actuation, x, u);
   contacts_->calcDiff(d->multibody.contacts, x);
@@ -135,7 +138,7 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
 
   d->Fx.leftCols(nv).noalias() = -a_partial_dtau * d->pinocchio.dtau_dq;
   d->Fx.rightCols(nv).noalias() = -a_partial_dtau * d->pinocchio.dtau_dv;
-  d->Fx.noalias() -= a_partial_da * d->multibody.contacts->da0_dx;
+  d->Fx.noalias() -= a_partial_da * d->multibody.contacts->da0_dx.topRows(nc);
   d->Fx.noalias() += a_partial_dtau * d->multibody.actuation->dtau_dx;
   d->Fu.noalias() = a_partial_dtau * d->multibody.actuation->dtau_du;
 
@@ -143,7 +146,7 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
   if (enable_force_) {
     d->df_dx.leftCols(nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dq;
     d->df_dx.rightCols(nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dv;
-    d->df_dx.noalias() += f_partial_da * d->multibody.contacts->da0_dx;
+    d->df_dx.noalias() += f_partial_da * d->multibody.contacts->da0_dx.topRows(nc);
     d->df_dx.noalias() -= f_partial_dtau * d->multibody.actuation->dtau_dx;
     d->df_du.noalias() = -f_partial_dtau * d->multibody.actuation->dtau_du;
     contacts_->updateAccelerationDiff(d->multibody.contacts, d->Fx.bottomRows(nv));
