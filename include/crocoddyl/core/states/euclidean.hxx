@@ -93,34 +93,7 @@ void StateVectorTpl<Scalar>::Jintegrate(const Eigen::Ref<const typename MathBase
                                         const Eigen::Ref<const typename MathBase::VectorXs>&,
                                         Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
                                         Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
-                                        Jcomponent firstsecond) const {
-  assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
-  if (firstsecond == first || firstsecond == both) {
-    if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
-      throw_pretty("Invalid argument: "
-                   << "Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," + std::to_string(ndx_) +
-                          ")");
-    }
-    Jfirst.setZero();
-    Jfirst.diagonal().array() = Scalar(1);
-  }
-  if (firstsecond == second || firstsecond == both) {
-    if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
-      throw_pretty("Invalid argument: "
-                   << "Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
-                          std::to_string(ndx_) + ")");
-    }
-    Jsecond.setZero();
-    Jsecond.diagonal().array() = Scalar(1);
-  }
-}
-
-template <typename Scalar>
-void StateVectorTpl<Scalar>::JintegrateOp(const Eigen::Ref<const typename MathBase::VectorXs>&,
-                                          const Eigen::Ref<const typename MathBase::VectorXs>&,
-                                          Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
-                                          Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
-                                          const Jcomponent firstsecond, const AssignmentOp op) const {
+                                        const Jcomponent firstsecond, const AssignmentOp op) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
   if (firstsecond == first || firstsecond == both) {
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {

@@ -151,67 +151,11 @@ void StateMultibodyTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, cons
 }
 
 template <typename Scalar>
-void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
-                                           Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
-                                           Jcomponent firstsecond) const {
-  assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
-  if (static_cast<std::size_t>(x.size()) != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(nx_) + ")");
-  }
-  if (static_cast<std::size_t>(dx.size()) != ndx_) {
-    throw_pretty("Invalid argument: "
-                 << "dx has wrong dimension (it should be " + std::to_string(ndx_) + ")");
-  }
-
-  if (firstsecond == first) {
-    if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
-      throw_pretty("Invalid argument: "
-                   << "Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," + std::to_string(ndx_) +
-                          ")");
-    }
-    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
-                          pinocchio::ARG0);
-    Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
-  } else if (firstsecond == second) {
-    if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
-      throw_pretty("Invalid argument: "
-                   << "Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
-                          std::to_string(ndx_) + ")");
-    }
-    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
-                          pinocchio::ARG1);
-    Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
-  } else {  // computing both
-    if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
-      throw_pretty("Invalid argument: "
-                   << "Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," + std::to_string(ndx_) +
-                          ")");
-    }
-    if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
-      throw_pretty("Invalid argument: "
-                   << "Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
-                          std::to_string(ndx_) + ")");
-    }
-
-    // Computing Jfirst
-    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
-                          pinocchio::ARG0);
-    Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
-
-    // Computing JsecondOB
-    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
-                          pinocchio::ARG1);
-    Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
-  }
-}
-
-template <typename Scalar>
-void StateMultibodyTpl<Scalar>::JintegrateOp(const Eigen::Ref<const typename MathBase::VectorXs>&x,
-                                             const Eigen::Ref<const typename MathBase::VectorXs>&dx,
-                                             Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
-                                             Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
-                                             const Jcomponent firstsecond, const AssignmentOp op) const {
+void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const typename MathBase::VectorXs>&x,
+                                           const Eigen::Ref<const typename MathBase::VectorXs>&dx,
+                                           Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
+                                           Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
+                                           const Jcomponent firstsecond, const AssignmentOp op) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
   if (firstsecond == first || firstsecond == both) {
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {

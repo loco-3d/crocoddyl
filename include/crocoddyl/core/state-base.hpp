@@ -20,7 +20,7 @@
 namespace crocoddyl {
 
 enum Jcomponent { both = 0, first = 1, second = 2 };
-enum AssignmentOp { setto = 0, addto = 1, rmfrom = 2 };
+enum AssignmentOp { setto, addto, rmfrom };
 
 inline bool is_a_Jcomponent(Jcomponent firstsecond) {
   return (firstsecond == first || firstsecond == second || firstsecond == both);
@@ -51,10 +51,7 @@ class StateAbstractTpl {
                      Jcomponent firstsecond = both) const = 0;
   virtual void Jintegrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
                           Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
-                          Jcomponent firstsecond = both) const = 0;
-  virtual void JintegrateOp(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
-                            Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
-                            const Jcomponent firstsecond, const AssignmentOp) const = 0;  
+                          const Jcomponent firstsecond=both, const AssignmentOp=setto) const = 0;  
   virtual void JintegrateTransport(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
                                    Eigen::Ref<MatrixXs> Jin, const Jcomponent firstsecond) const = 0;
   VectorXs diff_dx(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1);
@@ -62,7 +59,7 @@ class StateAbstractTpl {
   std::vector<MatrixXs> Jdiff_Js(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
                                  Jcomponent firstsecond = both);
   std::vector<MatrixXs> Jintegrate_Js(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
-                                      Jcomponent firstsecond = both);
+                                      const Jcomponent firstsecond = both, const AssignmentOp op=setto);
 
   const std::size_t& get_nx() const;
   const std::size_t& get_ndx() const;

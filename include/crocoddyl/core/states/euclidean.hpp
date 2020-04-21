@@ -38,13 +38,9 @@ class StateVectorTpl : public StateAbstractTpl<_Scalar> {
                      const Eigen::Ref<const typename MathBase::VectorXs>&,
                      Eigen::Ref<typename MathBase::MatrixXs> Jfirst, Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
                      Jcomponent firstsecond = both) const;
-  virtual void Jintegrate(const Eigen::Ref<const typename MathBase::VectorXs>&,
-                          const Eigen::Ref<const typename MathBase::VectorXs>&,
-                          Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
-                          Eigen::Ref<typename MathBase::MatrixXs> Jsecond, Jcomponent firstsecond = both) const;
-  virtual void JintegrateOp(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
-                            Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
-                            const Jcomponent firstsecond, const AssignmentOp) const;  
+  virtual void Jintegrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
+                          Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
+                          const Jcomponent firstsecond=both, const AssignmentOp=setto) const;
   virtual void JintegrateTransport(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
                                    Eigen::Ref<MatrixXs> Jin, const Jcomponent firstsecond) const;
 
