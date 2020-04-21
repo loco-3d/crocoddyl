@@ -36,7 +36,9 @@ void CostModelSumTpl<Scalar>::addCost(const std::string& name, boost::shared_ptr
   } else if (active) {
     nr_ += cost->get_activation()->get_nr();
     nr_total_ += cost->get_activation()->get_nr();
-    active_.push_back(name);
+    std::vector<std::string>::iterator it =
+        std::lower_bound(active_.begin(), active_.end(), name, std::greater<std::string>());
+    active_.insert(it, name);
   } else if (!active) {
     nr_total_ += cost->get_activation()->get_nr();
   }
@@ -61,7 +63,9 @@ void CostModelSumTpl<Scalar>::changeCostStatus(const std::string& name, bool act
   if (it != costs_.end()) {
     if (active && !it->second->active) {
       nr_ += it->second->cost->get_activation()->get_nr();
-      active_.push_back(name);
+      std::vector<std::string>::iterator it =
+          std::lower_bound(active_.begin(), active_.end(), name, std::greater<std::string>());
+      active_.insert(it, name);
     } else if (!active && it->second->active) {
       nr_ -= it->second->cost->get_activation()->get_nr();
       active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
