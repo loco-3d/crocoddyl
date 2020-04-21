@@ -50,6 +50,8 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionD
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
+  const std::size_t& nv = differential_->get_state()->get_nv();
+  
   // Static casting the data
   boost::shared_ptr<IntegratedActionDataEuler> d = boost::static_pointer_cast<IntegratedActionDataEuler>(data);
 
@@ -61,8 +63,8 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionD
       x.tail(differential_->get_state()->get_nv());
   const VectorXs& a = d->differential->xout;
   if (enable_integration_) {
-    d->dx.head(differential_->get_state()->get_nv()).noalias() = v * time_step_ + a * time_step2_;
-    d->dx.tail(differential_->get_state()->get_nv()).noalias() = a * time_step_;
+    d->dx.head(nv).noalias() = v * time_step_ + a * time_step2_;
+    d->dx.tail(nv).noalias() = a * time_step_;
     differential_->get_state()->integrate(x, d->dx, d->xnext);
     d->cost = time_step_ * d->differential->cost;
   } else {
