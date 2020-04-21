@@ -9,8 +9,6 @@ import example_robot_data
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
-crocoddyl.switchToNumpyMatrix()
-
 hector = example_robot_data.loadHector()
 robot_model = hector.model
 
@@ -23,8 +21,8 @@ cf = 6.6e-5
 cm = 1e-6
 u_lim = 5
 l_lim = 0.1
-tau_f = np.matrix([[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 1.0, 1.0], [0.0, d_cog, 0.0, -d_cog],
-                   [-d_cog, 0.0, d_cog, 0.0], [-cm / cf, cm / cf, -cm / cf, cm / cf]])
+tau_f = np.array([[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 1.0, 1.0], [0.0, d_cog, 0.0, -d_cog],
+                  [-d_cog, 0.0, d_cog, 0.0], [-cm / cf, cm / cf, -cm / cf, cm / cf]])
 
 actModel = crocoddyl.ActuationModelMultiCopterBase(state, 4, tau_f)
 
@@ -32,11 +30,9 @@ runningCostModel = crocoddyl.CostModelSum(state, actModel.nu)
 terminalCostModel = crocoddyl.CostModelSum(state, actModel.nu)
 
 # Needed objects to create the costs
-Mref = crocoddyl.FramePlacement(robot_model.getFrameId("base_link"),
-                                pinocchio.SE3(target_quat.matrix(),
-                                              np.matrix(target_pos).T))
-wBasePos, wBaseOri, wBaseVel, wBaseRate = [0.1], [1000], [1000], [10]
-stateWeights = np.matrix([wBasePos * 3 + wBaseOri * 3 + wBaseVel * robot_model.nv]).T
+Mref = crocoddyl.FramePlacement(robot_model.getFrameId("base_link"), pinocchio.SE3(target_quat.matrix(), target_pos))
+wBasePos, wBaseOri, wBaseVel = 0.1, 1000, 1000
+stateWeights = np.array([wBasePos] * 3 + [wBaseOri] * 3 + [wBaseVel] * robot_model.nv)
 
 # Costs
 goalTrackingCost = crocoddyl.CostModelFramePlacement(state, Mref, actModel.nu)
@@ -53,13 +49,12 @@ runningModel = crocoddyl.IntegratedActionModelEuler(
     crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actModel, runningCostModel), dt)
 terminalModel = crocoddyl.IntegratedActionModelEuler(
     crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actModel, terminalCostModel), dt)
-runningModel.u_lb = np.matrix([l_lim, l_lim, l_lim, l_lim]).T
-runningModel.u_ub = np.matrix([u_lim, u_lim, u_lim, u_lim]).T
+runningModel.u_lb = np.array([l_lim, l_lim, l_lim, l_lim])
+runningModel.u_ub = np.array([u_lim, u_lim, u_lim, u_lim])
 
 # Creating the shooting problem and the boxddp solver
 T = 33
-problem = crocoddyl.ShootingProblem(np.vstack([hector.q0, pinocchio.utils.zero((state.nv))]), [runningModel] * T,
-                                    terminalModel)
+problem = crocoddyl.ShootingProblem(np.concatenate([hector.q0, np.zeros(state.nv)]), [runningModel] * T, terminalModel)
 boxddp = crocoddyl.SolverBoxDDP(problem)
 boxddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
 
