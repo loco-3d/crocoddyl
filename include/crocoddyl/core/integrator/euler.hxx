@@ -24,10 +24,10 @@ IntegratedActionModelEulerTpl<Scalar>::IntegratedActionModelEulerTpl(
       enable_integration_(true) {
   Base::set_u_lb(differential_->get_u_lb());
   Base::set_u_ub(differential_->get_u_ub());
-  if (time_step_ < 0.) {
-    time_step_ = 1e-3;
+  if (time_step_ < Scalar(0.)) {
+    time_step_ = Scalar(1e-3);
     time_step2_ = time_step_ * time_step_;
-    std::cerr << "Warning: dt has positive value, set to 1e-3" << std::endl;
+    std::cerr << "Warning: dt should be positive, set to 1e-3" << std::endl;
   }
   if (time_step == 0.) {
     enable_integration_ = false;
@@ -97,19 +97,24 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
 
   // Computing the derivatives for the time-continuous model (i.e. differential model)
   differential_->calcDiff(d->differential, x, u);
-  differential_->get_state()->Jintegrate(x, d->dx, d->dxnext_dx, d->dxnext_ddx);
 
+  differential_->get_state()->Jintegrate(x, d->dx, d->dxnext_dx, d->dxnext_ddx);
+  
   d->Fx = d->dxnext_dx;
   if (enable_integration_) {
     const MatrixXs& da_dx = d->differential->Fx;
     const MatrixXs& da_du = d->differential->Fu;
-    d->ddx_dx << da_dx * time_step_, da_dx;
-    d->ddx_du << da_du * time_step_, da_du;
-    for (std::size_t i = 0; i < nv; ++i) {
-      d->ddx_dx(i, i + nv) += 1.;
-    }
-    d->Fx.noalias() += time_step_ * (d->dxnext_ddx * d->ddx_dx);
-    d->Fu.noalias() = time_step_ * (d->dxnext_ddx * d->ddx_du);
+    d->Fx.topRows(nv).noalias() =  da_dx * time_step2_;
+    d->Fx.bottomRows(nv).noalias() = da_dx * time_step_;
+    d->Fx.topRightCorner(nv, nv).diagonal().array() += Scalar(time_step_);
+
+    d->Fu.topRows(nv).noalias() =  da_du * time_step2_;
+    d->Fu.bottomRows(nv).noalias() = da_du * time_step_;
+    
+    differential_->get_state()->JintegrateTransport(x, d->dx, d->Fx, second);
+    differential_->get_state()->JintegrateOp(x, d->dx, d->Fx, d->Fx, first, addto);
+    differential_->get_state()->JintegrateTransport(x, d->dx, d->Fu, second);
+
     d->Lx = time_step_ * d->differential->Lx;
     d->Lu = time_step_ * d->differential->Lu;
     d->Lxx = time_step_ * d->differential->Lxx;
