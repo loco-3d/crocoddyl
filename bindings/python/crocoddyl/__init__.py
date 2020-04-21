@@ -10,13 +10,21 @@ import warnings
 def rotationMatrixFromTwoVectors(a, b):
     a_copy = a / np.linalg.norm(a)
     b_copy = b / np.linalg.norm(b)
-    a_cross_b = np.cross(a_copy, b_copy)
+    a_cross_b = np.cross(a_copy, b_copy, axis=0)
     s = np.linalg.norm(a_cross_b)
-    if s == 0:
-        return np.eye(3)
-    c = np.dot(a_copy, b_copy)
-    ab_skew = pinocchio.skew(a_cross_b)
-    return np.eye(3) + ab_skew + np.dot(ab_skew, ab_skew) * (1 - c) / s**2
+    if libcrocoddyl_pywrap.getNumpyType() == np.matrix:
+        warnings.warn("Numpy matrix supports will be removed in future release", DeprecationWarning, stacklevel=2)
+        if s == 0:
+            return np.matrix(np.eye(3))
+        c = np.asscalar(a_copy.T * b_copy)
+        ab_skew = pinocchio.skew(a_cross_b)
+        return np.matrix(np.eye(3)) + ab_skew + ab_skew * ab_skew * (1 - c) / s**2
+    else:
+        if s == 0:
+            return np.eye(3)
+        c = np.dot(a_copy, b_copy)
+        ab_skew = pinocchio.skew(a_cross_b)
+        return np.eye(3) + ab_skew + np.dot(ab_skew, ab_skew) * (1 - c) / s**2
 
 
 class GepettoDisplay:
@@ -74,10 +82,10 @@ class GepettoDisplay:
 
     def display(self, xs, fs=[], ps=[], dts=[], factor=1.):
         numpy_conversion = False
-        if crocoddyl.getNumpyType() == np.matrix:
+        if libcrocoddyl_pywrap.getNumpyType() == np.matrix:
             numpy_conversion = True
-            crocoddyl.switchToNumpyMatrix()
-            warnings.warn("Numpy matrix supports will be removed in future release", DeprecationWarning)
+            libcrocoddyl_pywrap.switchToNumpyMatrix()
+            warnings.warn("Numpy matrix supports will be removed in future release", DeprecationWarning, stacklevel=2)
         if ps:
             for key, p in ps.items():
                 self.robot.viewer.gui.setCurvePoints(self.frameTrajGroup + "/" + key, p)
@@ -118,14 +126,14 @@ class GepettoDisplay:
                 time.sleep(dts[i] * factor)
         if numpy_conversion:
             numpy_conversion = False
-            crocoddyl.switchToNumpyMatrix()
+            libcrocoddyl_pywrap.switchToNumpyMatrix()
 
     def displayFromSolver(self, solver, factor=1.):
         numpy_conversion = False
-        if crocoddyl.getNumpyType() == np.matrix:
+        if libcrocoddyl_pywrap.getNumpyType() == np.matrix:
             numpy_conversion = True
-            crocoddyl.switchToNumpyMatrix()
-            warnings.warn("Numpy matrix supports will be removed in future release", DeprecationWarning)
+            libcrocoddyl_pywrap.switchToNumpyMatrix()
+            warnings.warn("Numpy matrix supports will be removed in future release", DeprecationWarning, stacklevel=2)
         fs = self.getForceTrajectoryFromSolver(solver)
         ps = self.getFrameTrajectoryFromSolver(solver)
 
@@ -134,7 +142,7 @@ class GepettoDisplay:
         self.display(solver.xs, fs, ps, dts, factor)
         if numpy_conversion:
             numpy_conversion = False
-            crocoddyl.switchToNumpyMatrix()
+            libcrocoddyl_pywrap.switchToNumpyMatrix()
 
     def addRobot(self):
         # Spawn robot model
