@@ -162,6 +162,8 @@ class GepettoDisplay(DisplayAbstract):
             libcrocoddyl_pywrap.switchToNumpyMatrix()
 
     def getForceTrajectoryFromSolver(self, solver):
+        if len(self.frameTrajNames) == 0:
+            return None
         fs = []
         models = solver.problem.runningModels + [solver.problem.terminalModel]
         datas = solver.problem.runningDatas + [solver.problem.terminalData]
@@ -201,6 +203,8 @@ class GepettoDisplay(DisplayAbstract):
         return fs
 
     def getFrameTrajectoryFromSolver(self, solver):
+        if len(self.frameTrajNames) == 0:
+            return None
         ps = {fr: [] for fr in self.frameTrajNames}
         models = solver.problem.runningModels + [solver.problem.terminalModel]
         datas = solver.problem.runningDatas + [solver.problem.terminalData]
@@ -306,7 +310,7 @@ class GepettoDisplay(DisplayAbstract):
             self.robot.viewer.gui.deleteNode(coneGroup + "/lines", "")
             self.robot.viewer.gui.deleteNode(coneGroup + "/cone", "")
             self.robot.viewer.gui.deleteNode(coneGroup, "")
-            self.createCone(coneName, self.frictionConeScale, mu)
+            self._createCone(coneName, self.frictionConeScale, mu)
 
 
 class MeshcatDisplay(DisplayAbstract):
