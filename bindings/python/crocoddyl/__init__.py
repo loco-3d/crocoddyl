@@ -27,11 +27,44 @@ def rotationMatrixFromTwoVectors(a, b):
         return np.eye(3) + ab_skew + np.dot(ab_skew, ab_skew) * (1 - c) / s**2
 
 
-class GepettoDisplay:
-    def __init__(self, robot, rate=-1, freq=1, cameraTF=None, floor=True, frameNames=[], visibility=False):
-        self.robot = robot
+class DisplayAbstract:
+    def __init__(self, rate=-1, freq=1):
         self.rate = rate
         self.freq = freq
+
+    def displayFromSolver(self, solver, factor=1.):
+        numpy_conversion = False
+        if libcrocoddyl_pywrap.getNumpyType() == np.matrix:
+            numpy_conversion = True
+            libcrocoddyl_pywrap.switchToNumpyMatrix()
+            warnings.warn("Numpy matrix supports will be removed in future release", DeprecationWarning, stacklevel=2)
+        fs = self.getForceTrajectoryFromSolver(solver)
+        ps = self.getFrameTrajectoryFromSolver(solver)
+
+        models = solver.problem.runningModels + [solver.problem.terminalModel]
+        dts = [m.dt if hasattr(m, "differential") else 0. for m in models]
+        self.display(solver.xs, fs, ps, dts, factor)
+        if numpy_conversion:
+            numpy_conversion = False
+            libcrocoddyl_pywrap.switchToNumpyMatrix()
+
+    def display(self, xs, fs=[], ps=[], dts=[], factor=1.):
+        """ Display the state, force and frame trajectories"""
+        raise NotImplementedError("Not implemented yet.")
+
+    def getForceTrajectoryFromSolver(self, solver):
+        """ Get the force trajectory from the solver"""
+        return None
+
+    def getFrameTrajectoryFromSolver(self, solver):
+        """ Get the frame trajectory from the solver"""
+        return None
+
+
+class GepettoDisplay(DisplayAbstract):
+    def __init__(self, robot, rate=-1, freq=1, cameraTF=None, floor=True, frameNames=[], visibility=False):
+        DisplayAbstract.__init__(self, rate, freq)
+        self.robot = robot
 
         # Visuals properties
         self.fullVisibility = visibility
@@ -63,12 +96,12 @@ class GepettoDisplay:
         for fr in self.frameTrajNames:
             self.frameTrajColor[fr] = list(np.hstack([np.random.choice(range(256), size=3) / 256., 1.]))
 
-        self.addRobot()
-        self.setBackground()
+        self._addRobot()
+        self._setBackground()
         if cameraTF is not None:
             self.robot.viewer.gui.setCameraTransform(0, cameraTF)
         if floor:
-            self.addFloor()
+            self._addFloor()
         self.totalWeight = sum(m.mass
                                for m in self.robot.model.inertias) * np.linalg.norm(self.robot.model.gravity.linear)
         self.x_axis = np.array([1., 0., 0.])
@@ -76,9 +109,9 @@ class GepettoDisplay:
         self.robot.viewer.gui.createGroup(self.forceGroup)
         self.robot.viewer.gui.createGroup(self.frictionGroup)
         self.robot.viewer.gui.createGroup(self.frameTrajGroup)
-        self.addForceArrows()
-        self.addFrameCurves()
-        self.addFrictionCones()
+        self._addForceArrows()
+        self._addFrameCurves()
+        self._addFrictionCones()
 
     def display(self, xs, fs=[], ps=[], dts=[], factor=1.):
         numpy_conversion = False
@@ -113,7 +146,7 @@ class GepettoDisplay:
                         position = pose
                         position.rotation = rotationMatrixFromTwoVectors(self.z_axis, f["nsurf"])
                         frictionName = self.frictionGroup + "/" + key
-                        self.setConeMu(key, f["mu"])
+                        self._setConeMu(key, f["mu"])
                         self.robot.viewer.gui.applyConfiguration(
                             frictionName, list(np.array(pinocchio.SE3ToXYZQUAT(position)).squeeze()))
                         self.robot.viewer.gui.setVisibility(frictionName, "ON")
@@ -127,60 +160,6 @@ class GepettoDisplay:
         if numpy_conversion:
             numpy_conversion = False
             libcrocoddyl_pywrap.switchToNumpyMatrix()
-
-    def displayFromSolver(self, solver, factor=1.):
-        numpy_conversion = False
-        if libcrocoddyl_pywrap.getNumpyType() == np.matrix:
-            numpy_conversion = True
-            libcrocoddyl_pywrap.switchToNumpyMatrix()
-            warnings.warn("Numpy matrix supports will be removed in future release", DeprecationWarning, stacklevel=2)
-        fs = self.getForceTrajectoryFromSolver(solver)
-        ps = self.getFrameTrajectoryFromSolver(solver)
-
-        models = solver.problem.runningModels + [solver.problem.terminalModel]
-        dts = [m.dt if hasattr(m, "differential") else 0. for m in models]
-        self.display(solver.xs, fs, ps, dts, factor)
-        if numpy_conversion:
-            numpy_conversion = False
-            libcrocoddyl_pywrap.switchToNumpyMatrix()
-
-    def addRobot(self):
-        # Spawn robot model
-        self.robot.initViewer(windowName="crocoddyl", loadModel=False)
-        self.robot.loadViewerModel(rootNodeName="robot")
-
-    def setBackground(self):
-        # Set white background and floor
-        window_id = self.robot.viewer.gui.getWindowID("crocoddyl")
-        self.robot.viewer.gui.setBackgroundColor1(window_id, self.backgroundColor)
-        self.robot.viewer.gui.setBackgroundColor2(window_id, self.backgroundColor)
-
-    def addFloor(self):
-        self.robot.viewer.gui.createGroup(self.floorGroup)
-        self.robot.viewer.gui.addFloor(self.floorGroup + "/flat")
-        self.robot.viewer.gui.setScale(self.floorGroup + "/flat", self.floorScale)
-        self.robot.viewer.gui.setColor(self.floorGroup + "/flat", self.floorColor)
-        self.robot.viewer.gui.setLightingMode(self.floorGroup + "/flat", "OFF")
-
-    def addForceArrows(self):
-        for key in self.activeContacts:
-            forceName = self.forceGroup + "/" + key
-            self.robot.viewer.gui.addArrow(forceName, self.forceRadius, self.forceLength, self.forceColor)
-            self.robot.viewer.gui.setFloatProperty(forceName, "Alpha", 1.)
-        if self.fullVisibility:
-            self.robot.viewer.gui.setVisibility(self.forceGroup, "ALWAYS_ON_TOP")
-
-    def addFrictionCones(self):
-        for key in self.activeContacts:
-            self.createCone(key, self.frictionConeScale, mu=0.7)
-
-    def addFrameCurves(self):
-        for key in self.frameTrajNames:
-            frameName = self.frameTrajGroup + "/" + key
-            self.robot.viewer.gui.addCurve(frameName, [np.array([0., 0., 0.]).tolist()] * 2, self.frameTrajColor[key])
-            self.robot.viewer.gui.setCurveLineWidth(frameName, self.frameTrajLineWidth)
-            if self.fullVisibility:
-                self.robot.viewer.gui.setVisibility(frameName, "ALWAYS_ON_TOP")
 
     def getForceTrajectoryFromSolver(self, solver):
         fs = []
@@ -244,7 +223,45 @@ class GepettoDisplay:
                         p.append(np.asarray(pose.translation.T).reshape(-1).tolist())
         return ps
 
-    def createCone(self, coneName, scale=1., mu=0.7):
+    def _addRobot(self):
+        # Spawn robot model
+        self.robot.initViewer(windowName="crocoddyl", loadModel=False)
+        self.robot.loadViewerModel(rootNodeName="robot")
+
+    def _setBackground(self):
+        # Set white background and floor
+        window_id = self.robot.viewer.gui.getWindowID("crocoddyl")
+        self.robot.viewer.gui.setBackgroundColor1(window_id, self.backgroundColor)
+        self.robot.viewer.gui.setBackgroundColor2(window_id, self.backgroundColor)
+
+    def _addFloor(self):
+        self.robot.viewer.gui.createGroup(self.floorGroup)
+        self.robot.viewer.gui.addFloor(self.floorGroup + "/flat")
+        self.robot.viewer.gui.setScale(self.floorGroup + "/flat", self.floorScale)
+        self.robot.viewer.gui.setColor(self.floorGroup + "/flat", self.floorColor)
+        self.robot.viewer.gui.setLightingMode(self.floorGroup + "/flat", "OFF")
+
+    def _addForceArrows(self):
+        for key in self.activeContacts:
+            forceName = self.forceGroup + "/" + key
+            self.robot.viewer.gui.addArrow(forceName, self.forceRadius, self.forceLength, self.forceColor)
+            self.robot.viewer.gui.setFloatProperty(forceName, "Alpha", 1.)
+        if self.fullVisibility:
+            self.robot.viewer.gui.setVisibility(self.forceGroup, "ALWAYS_ON_TOP")
+
+    def _addFrictionCones(self):
+        for key in self.activeContacts:
+            self._createCone(key, self.frictionConeScale, mu=0.7)
+
+    def _addFrameCurves(self):
+        for key in self.frameTrajNames:
+            frameName = self.frameTrajGroup + "/" + key
+            self.robot.viewer.gui.addCurve(frameName, [np.array([0., 0., 0.]).tolist()] * 2, self.frameTrajColor[key])
+            self.robot.viewer.gui.setCurveLineWidth(frameName, self.frameTrajLineWidth)
+            if self.fullVisibility:
+                self.robot.viewer.gui.setVisibility(frameName, "ALWAYS_ON_TOP")
+
+    def _createCone(self, coneName, scale=1., mu=0.7):
         m_generatrices = np.matrix(np.empty([3, 4]))
         m_generatrices[:, 0] = np.matrix([np.sqrt(2) / 2. * mu, np.sqrt(2) / 2. * mu, 1.]).T
         m_generatrices[:, 0] = m_generatrices[:, 0] / np.linalg.norm(m_generatrices[:, 0])
@@ -276,7 +293,7 @@ class GepettoDisplay:
             self.robot.viewer.gui.setVisibility(meshGroup, "ALWAYS_ON_TOP")
             self.robot.viewer.gui.setVisibility(lineGroup, "ALWAYS_ON_TOP")
 
-    def setConeMu(self, coneName, mu):
+    def _setConeMu(self, coneName, mu):
         current_mu = self.frictionMu[coneName]
         if mu != current_mu:
             self.frictionMu[coneName] = mu
