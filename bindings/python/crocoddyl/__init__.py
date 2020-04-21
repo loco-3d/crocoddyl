@@ -310,11 +310,11 @@ class GepettoDisplay(DisplayAbstract):
 
 
 class MeshcatDisplay(DisplayAbstract):
-    def __init__(self, robot, rate=-1, freq=1):
+    def __init__(self, robot, rate=-1, freq=1, openWindow=True):
         DisplayAbstract.__init__(self, rate, freq)
         self.robot = robot
         robot.setVisualizer(pinocchio.visualize.MeshcatVisualizer())
-        self._addRobot()
+        self._addRobot(openWindow)
 
     def display(self, xs, fs=[], ps=[], dts=[], factor=1.):
         if not dts:
@@ -326,9 +326,9 @@ class MeshcatDisplay(DisplayAbstract):
                 self.robot.display(x[:self.robot.nq])
                 time.sleep(dts[i] * factor)
 
-    def _addRobot(self):
+    def _addRobot(self, openWindow):
         # Spawn robot model
-        self.robot.initViewer(open=True)
+        self.robot.initViewer(open=openWindow)
         self.robot.loadViewerModel(rootNodeName="robot")
 
 
