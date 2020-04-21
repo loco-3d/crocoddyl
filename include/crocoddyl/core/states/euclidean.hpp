@@ -21,6 +21,7 @@ class StateVectorTpl : public StateAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
   explicit StateVectorTpl(const std::size_t& nx);
   virtual ~StateVectorTpl();
@@ -41,8 +42,13 @@ class StateVectorTpl : public StateAbstractTpl<_Scalar> {
                           const Eigen::Ref<const typename MathBase::VectorXs>&,
                           Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
                           Eigen::Ref<typename MathBase::MatrixXs> Jsecond, Jcomponent firstsecond = both) const;
+  virtual void JintegrateOp(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
+                            Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
+                            const Jcomponent firstsecond, const AssignmentOp) const;  
+  virtual void JintegrateTransport(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
+                                   Eigen::Ref<MatrixXs> Jin, const Jcomponent firstsecond) const;
 
- protected:
+protected:
   using StateAbstractTpl<Scalar>::nx_;
   using StateAbstractTpl<Scalar>::ndx_;
   using StateAbstractTpl<Scalar>::nq_;
