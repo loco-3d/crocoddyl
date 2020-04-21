@@ -4,18 +4,19 @@ from .libcrocoddyl_pywrap import __version__
 import pinocchio
 import numpy as np
 import time
+import warnings
 
 
 def rotationMatrixFromTwoVectors(a, b):
     a_copy = a / np.linalg.norm(a)
     b_copy = b / np.linalg.norm(b)
-    a_cross_b = np.cross(a_copy, b_copy, axis=0)
+    a_cross_b = np.cross(a_copy, b_copy)
     s = np.linalg.norm(a_cross_b)
     if s == 0:
-        return np.matrix(np.eye(3))
-    c = np.asscalar(a_copy.T * b_copy)
+        return np.eye(3)
+    c = np.dot(a_copy, b_copy)
     ab_skew = pinocchio.skew(a_cross_b)
-    return np.matrix(np.eye(3)) + ab_skew + ab_skew * ab_skew * (1 - c) / s**2
+    return np.eye(3) + ab_skew + np.dot(ab_skew, ab_skew) * (1 - c) / s**2
 
 
 class GepettoDisplay:
@@ -62,8 +63,8 @@ class GepettoDisplay:
             self.addFloor()
         self.totalWeight = sum(m.mass
                                for m in self.robot.model.inertias) * np.linalg.norm(self.robot.model.gravity.linear)
-        self.x_axis = np.matrix([1., 0., 0.]).T
-        self.z_axis = np.matrix([0., 0., 1.]).T
+        self.x_axis = np.array([1., 0., 0.])
+        self.z_axis = np.array([0., 0., 1.])
         self.robot.viewer.gui.createGroup(self.forceGroup)
         self.robot.viewer.gui.createGroup(self.frictionGroup)
         self.robot.viewer.gui.createGroup(self.frameTrajGroup)
@@ -72,6 +73,11 @@ class GepettoDisplay:
         self.addFrictionCones()
 
     def display(self, xs, fs=[], ps=[], dts=[], factor=1.):
+        numpy_conversion = False
+        if crocoddyl.getNumpyType() == np.matrix:
+            numpy_conversion = True
+            crocoddyl.switchToNumpyMatrix()
+            warnings.warn("Numpy matrix supports will be removed in future release", DeprecationWarning)
         if ps:
             for key, p in ps.items():
                 self.robot.viewer.gui.setCurvePoints(self.frameTrajGroup + "/" + key, p)
@@ -110,14 +116,25 @@ class GepettoDisplay:
                         self.robot.viewer.gui.setVisibility(self.frictionGroup + "/" + key, "OFF")
                 self.robot.display(x[:self.robot.nq])
                 time.sleep(dts[i] * factor)
+        if numpy_conversion:
+            numpy_conversion = False
+            crocoddyl.switchToNumpyMatrix()
 
     def displayFromSolver(self, solver, factor=1.):
+        numpy_conversion = False
+        if crocoddyl.getNumpyType() == np.matrix:
+            numpy_conversion = True
+            crocoddyl.switchToNumpyMatrix()
+            warnings.warn("Numpy matrix supports will be removed in future release", DeprecationWarning)
         fs = self.getForceTrajectoryFromSolver(solver)
         ps = self.getFrameTrajectoryFromSolver(solver)
 
         models = solver.problem.runningModels + [solver.problem.terminalModel]
         dts = [m.dt if hasattr(m, "differential") else 0. for m in models]
         self.display(solver.xs, fs, ps, dts, factor)
+        if numpy_conversion:
+            numpy_conversion = False
+            crocoddyl.switchToNumpyMatrix()
 
     def addRobot(self):
         # Spawn robot model
@@ -169,7 +186,7 @@ class GepettoDisplay:
                     for key, contact in data.differential.multibody.contacts.contacts.items():
                         oMf = contact.pinocchio.oMi[contact.joint] * contact.jMf
                         force = contact.jMf.actInv(contact.f)
-                        nsurf = np.matrix([0., 0., 1.]).T
+                        nsurf = np.array([0., 0., 1.])
                         mu = 0.7
                         for k, c in model.differential.costs.costs.items():
                             if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
@@ -184,7 +201,7 @@ class GepettoDisplay:
                 for key, impulse in data.multibody.impulses.impulses.items():
                     oMf = impulse.pinocchio.oMi[impulse.joint] * impulse.jMf
                     force = impulse.jMf.actInv(impulse.f)
-                    nsurf = np.matrix([0., 0., 1.]).T
+                    nsurf = np.array([0., 0., 1.])
                     mu = 0.7
                     for k, c in model.costs.costs.items():
                         if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
