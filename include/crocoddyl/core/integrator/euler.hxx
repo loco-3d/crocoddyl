@@ -97,10 +97,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
 
   // Computing the derivatives for the time-continuous model (i.e. differential model)
   differential_->calcDiff(d->differential, x, u);
-
-  differential_->get_state()->Jintegrate(x, d->dx, d->dxnext_dx, d->dxnext_ddx);
   
-  d->Fx = d->dxnext_dx;
   if (enable_integration_) {
     const MatrixXs& da_dx = d->differential->Fx;
     const MatrixXs& da_du = d->differential->Fu;
@@ -112,14 +109,14 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
     d->Fu.bottomRows(nv).noalias() = da_du * time_step_;
     
     differential_->get_state()->JintegrateTransport(x, d->dx, d->Fx, second);
-    differential_->get_state()->JintegrateOp(x, d->dx, d->Fx, d->Fx, first, addto);
+    differential_->get_state()->Jintegrate(x, d->dx, d->Fx, d->Fx, first, addto);
     differential_->get_state()->JintegrateTransport(x, d->dx, d->Fu, second);
 
-    d->Lx = time_step_ * d->differential->Lx;
-    d->Lu = time_step_ * d->differential->Lu;
-    d->Lxx = time_step_ * d->differential->Lxx;
-    d->Lxu = time_step_ * d->differential->Lxu;
-    d->Luu = time_step_ * d->differential->Luu;
+    d->Lx.noalias() = time_step_ * d->differential->Lx;
+    d->Lu.noalias() = time_step_ * d->differential->Lu;
+    d->Lxx.noalias() = time_step_ * d->differential->Lxx;
+    d->Lxu.noalias() = time_step_ * d->differential->Lxu;
+    d->Luu.noalias() = time_step_ * d->differential->Luu;
   } else {
     d->Fu.setZero();
     d->Lx = d->differential->Lx;
