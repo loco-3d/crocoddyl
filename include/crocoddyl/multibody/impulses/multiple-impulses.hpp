@@ -79,6 +79,7 @@ class ImpulseModelMultipleTpl {
   const std::size_t& get_ni() const;
   const std::size_t& get_ni_total() const;
   const std::vector<std::string>& get_active() const;
+  const std::vector<std::string>& get_inactive() const;
   bool getImpulseStatus(const std::string& name) const;
 
  private:
@@ -87,6 +88,7 @@ class ImpulseModelMultipleTpl {
   std::size_t ni_;
   std::size_t ni_total_;
   std::vector<std::string> active_;
+  std::vector<std::string> inactive_;
 };
 
 template <typename _Scalar>

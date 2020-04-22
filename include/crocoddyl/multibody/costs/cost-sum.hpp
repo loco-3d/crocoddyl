@@ -79,6 +79,7 @@ class CostModelSumTpl {
   const std::size_t& get_nr() const;
   const std::size_t& get_nr_total() const;
   const std::vector<std::string>& get_active() const;
+  const std::vector<std::string>& get_inactive() const;
   bool getCostStatus(const std::string& name) const;
 
  private:
@@ -88,6 +89,7 @@ class CostModelSumTpl {
   std::size_t nr_;
   std::size_t nr_total_;
   std::vector<std::string> active_;
+  std::vector<std::string> inactive_;
   VectorXs unone_;
 };
 
