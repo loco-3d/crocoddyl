@@ -76,7 +76,6 @@ struct IntegratedActionDataEulerTpl : public ActionDataAbstractTpl<_Scalar> {
   explicit IntegratedActionDataEulerTpl(Model<Scalar>* const model) : Base(model) {
     differential = model->get_differential()->createData();
     const std::size_t& ndx = model->get_state()->get_ndx();
-    const std::size_t& nu = model->get_nu();
     dx = VectorXs::Zero(ndx);
   }
   ~IntegratedActionDataEulerTpl() {}

@@ -143,7 +143,7 @@ void StateVectorTpl<Scalar>::Jintegrate(const Eigen::Ref<const typename MathBase
 template <typename Scalar>
 void StateVectorTpl<Scalar>::JintegrateTransport(const Eigen::Ref<const typename MathBase::VectorXs>&,
                                                  const Eigen::Ref<const typename MathBase::VectorXs>&,
-                                                 Eigen::Ref<typename MathBase::MatrixXs> Jin,
+                                                 Eigen::Ref<typename MathBase::MatrixXs>,
                                                  const Jcomponent firstsecond) const {
   assert_pretty(is_a_Jcomponent(firstsecond), (""));
   if (firstsecond != first && firstsecond != second) {
