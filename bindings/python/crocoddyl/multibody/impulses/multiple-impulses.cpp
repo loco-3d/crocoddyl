@@ -119,6 +119,10 @@ void exposeImpulseMultiple() {
           "active",
           bp::make_function(&ImpulseModelMultiple::get_active, bp::return_value_policy<bp::return_by_value>()),
           "name of active impulse items")
+      .add_property(
+          "inactive",
+          bp::make_function(&ImpulseModelMultiple::get_inactive, bp::return_value_policy<bp::return_by_value>()),
+          "name of inactive impulse items")
       .def("getImpulseStatus", &ImpulseModelMultiple::getImpulseStatus, bp::args("self", "name"),
            "Return the impulse status of a given impulse name.\n\n"
            ":param name: impulse name");
