@@ -55,7 +55,7 @@ void CostModelSumTpl<Scalar>::removeCost(const std::string& name) {
     nr_total_ -= it->second->cost->get_activation()->get_nr();
     costs_.erase(it);
     active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
-    inactive_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
+    inactive_.erase(std::remove(inactive_.begin(), inactive_.end(), name), inactive_.end());
   } else {
     std::cout << "Warning: we couldn't remove the " << name << " cost item, it doesn't exist." << std::endl;
   }
@@ -70,7 +70,7 @@ void CostModelSumTpl<Scalar>::changeCostStatus(const std::string& name, bool act
       std::vector<std::string>::iterator it =
           std::lower_bound(active_.begin(), active_.end(), name, std::greater<std::string>());
       active_.insert(it, name);
-      inactive_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
+      inactive_.erase(std::remove(inactive_.begin(), inactive_.end(), name), inactive_.end());
     } else if (!active && it->second->active) {
       nr_ -= it->second->cost->get_activation()->get_nr();
       active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());

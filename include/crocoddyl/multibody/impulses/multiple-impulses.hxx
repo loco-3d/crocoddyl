@@ -47,7 +47,7 @@ void ImpulseModelMultipleTpl<Scalar>::removeImpulse(const std::string& name) {
     ni_total_ -= it->second->impulse->get_ni();
     impulses_.erase(it);
     active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
-    inactive_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
+    inactive_.erase(std::remove(inactive_.begin(), inactive_.end(), name), inactive_.end());
   } else {
     std::cout << "Warning: we couldn't remove the " << name << " impulse item, it doesn't exist." << std::endl;
   }
@@ -62,7 +62,7 @@ void ImpulseModelMultipleTpl<Scalar>::changeImpulseStatus(const std::string& nam
       std::vector<std::string>::iterator it =
           std::lower_bound(active_.begin(), active_.end(), name, std::greater<std::string>());
       active_.insert(it, name);
-      inactive_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
+      inactive_.erase(std::remove(inactive_.begin(), inactive_.end(), name), inactive_.end());
     } else if (!active && it->second->active) {
       ni_ -= it->second->impulse->get_ni();
       active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
