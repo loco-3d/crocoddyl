@@ -50,13 +50,13 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
       : Base(model->get_state(), model->get_nu()),
         model(model),
         ad_model(admodel),
-        ad_X(ad_model->get_state()->get_nx() + ad_model->get_nu()),
-        ad_X2(ad_model->get_state()->get_nx() + ad_model->get_nu()),
-        ad_calcout(ad_model->get_state()->get_nx() + 1),
         ad_data(ad_model->createData()),
         function_name_calc(function_name_calc),
         function_name_calcDiff(function_name_calcDiff),
-        library_name(library_name) {
+        library_name(library_name),
+        ad_X(ad_model->get_state()->get_nx() + ad_model->get_nu()),
+        ad_X2(ad_model->get_state()->get_nx() + ad_model->get_nu()),
+        ad_calcout(ad_model->get_state()->get_nx() + 1) {
     const std::size_t& ndx = ad_model->get_state()->get_ndx();
     const std::size_t& nu = ad_model->get_nu();
     ad_calcDiffout.resize(2 * ndx * ndx + 2 * ndx * nu + nu * nu + ndx + nu);
@@ -203,8 +203,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   using Base::u_ub_;                //!< Upper control limits
   using Base::unone_;               //!< Neutral state
 
-  boost::shared_ptr<ADBase> ad_model;
   boost::shared_ptr<Base> model;
+  boost::shared_ptr<ADBase> ad_model;
   boost::shared_ptr<ADActionDataAbstract> ad_data;
 
   /// \brief Name of the function
