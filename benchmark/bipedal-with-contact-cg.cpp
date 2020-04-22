@@ -17,7 +17,6 @@
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/parsers/srdf.hpp>
 #include <pinocchio/algorithm/model.hpp>
-#include <pinocchio/algorithm/contact-info.hpp>
 #include <pinocchio/container/aligned-vector.hpp>
 #include <example-robot-data/path.hpp>
 
