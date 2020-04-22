@@ -217,7 +217,7 @@ void codegen_4DoFArm() {
   cg_runningModel->calcDiff(cg_runningData, x_rand, u_rand);
 
   BOOST_CHECK(cg_runningData->xnext.isApprox(runningData->xnext));
-  BOOST_CHECK(cg_runningData->cost == runningData->cost);
+  BOOST_CHECK_CLOSE(cg_runningData->cost, runningData->cost, 1e-10);
   BOOST_CHECK(cg_runningData->Lx.isApprox(runningData->Lx));
   BOOST_CHECK(cg_runningData->Lu.isApprox(runningData->Lu));
   BOOST_CHECK(cg_runningData->Lxx.isApprox(runningData->Lxx));
@@ -454,7 +454,7 @@ void codegen_bipedal() {
 
   // std::cerr<<"xnext"<<std::endl;
   BOOST_CHECK(cg_runningData->xnext.isApprox(runningData->xnext));
-  BOOST_CHECK(cg_runningData->cost == runningData->cost);
+  BOOST_CHECK_CLOSE(cg_runningData->cost, runningData->cost, 1e-10);
   BOOST_CHECK(cg_runningData->Lx.isApprox(runningData->Lx));
   BOOST_CHECK(cg_runningData->Lu.isApprox(runningData->Lu));
   BOOST_CHECK(cg_runningData->Lxx.isApprox(runningData->Lxx));
