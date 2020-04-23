@@ -40,11 +40,11 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
                      Eigen::Ref<MatrixXs> Jsecond, Jcomponent firstsecond = both) const;
 
   virtual void Jintegrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
-                            Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
-                            const Jcomponent firstsecond=both, const AssignmentOp=setto) const;  
+                          Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
+                          const Jcomponent firstsecond = both, const AssignmentOp = setto) const;
   virtual void JintegrateTransport(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
                                    Eigen::Ref<MatrixXs> Jin, const Jcomponent firstsecond) const;
-  
+
   const boost::shared_ptr<pinocchio::ModelTpl<Scalar> >& get_pinocchio() const;
 
  protected:
@@ -57,7 +57,6 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
   using Base::ub_;
 
  private:
-  
   boost::shared_ptr<pinocchio::ModelTpl<Scalar> > pinocchio_;
   VectorXs x0_;
   JointType joint_type_;

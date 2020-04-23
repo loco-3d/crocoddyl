@@ -151,8 +151,8 @@ void StateMultibodyTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, cons
 }
 
 template <typename Scalar>
-void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const typename MathBase::VectorXs>&x,
-                                           const Eigen::Ref<const typename MathBase::VectorXs>&dx,
+void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const typename MathBase::VectorXs>& x,
+                                           const Eigen::Ref<const typename MathBase::VectorXs>& dx,
                                            Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
                                            Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
                                            const Jcomponent firstsecond, const AssignmentOp op) const {
@@ -163,25 +163,25 @@ void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const typename MathB
                    << "Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," + std::to_string(ndx_) +
                           ")");
     }
-    switch(op) {
-    case setto:
-      pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
-                            pinocchio::ARG0, pinocchio::SETTO);
-      Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
-      break;
-    case addto:
-      pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
-                            pinocchio::ARG0, pinocchio::ADDTO);
-      Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() += (Scalar)1;
-      break;
-    case rmfrom:
-      pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
-                            pinocchio::ARG0, pinocchio::RMTO);
-      Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() -= (Scalar)1;
-      break;
-    default:
-      throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
-      break;
+    switch (op) {
+      case setto:
+        pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
+                              pinocchio::ARG0, pinocchio::SETTO);
+        Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
+        break;
+      case addto:
+        pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
+                              pinocchio::ARG0, pinocchio::ADDTO);
+        Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() += (Scalar)1;
+        break;
+      case rmfrom:
+        pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
+                              pinocchio::ARG0, pinocchio::RMTO);
+        Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() -= (Scalar)1;
+        break;
+      default:
+        throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+        break;
     }
   }
   if (firstsecond == second || firstsecond == both) {
@@ -190,52 +190,49 @@ void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const typename MathB
                    << "Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
                           std::to_string(ndx_) + ")");
     }
-    switch(op) {
-    case setto:
-      pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
-                            pinocchio::ARG1, pinocchio::SETTO);
-      Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
-      break;
-    case addto:
-      pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
-                            pinocchio::ARG1, pinocchio::ADDTO);
-      Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() += (Scalar)1;
-      break;
-    case rmfrom:
-      pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
-                            pinocchio::ARG1, pinocchio::RMTO);
-      Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() -= (Scalar)1;
-      break;
-    default:
-      throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
-      break;
-      
+    switch (op) {
+      case setto:
+        pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
+                              pinocchio::ARG1, pinocchio::SETTO);
+        Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
+        break;
+      case addto:
+        pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
+                              pinocchio::ARG1, pinocchio::ADDTO);
+        Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() += (Scalar)1;
+        break;
+      case rmfrom:
+        pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
+                              pinocchio::ARG1, pinocchio::RMTO);
+        Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() -= (Scalar)1;
+        break;
+      default:
+        throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+        break;
     }
   }
 }
 
-
 template <typename Scalar>
-void StateMultibodyTpl<Scalar>::JintegrateTransport(const Eigen::Ref<const typename MathBase::VectorXs>&x,
-                                                    const Eigen::Ref<const typename MathBase::VectorXs>&dx,
+void StateMultibodyTpl<Scalar>::JintegrateTransport(const Eigen::Ref<const typename MathBase::VectorXs>& x,
+                                                    const Eigen::Ref<const typename MathBase::VectorXs>& dx,
                                                     Eigen::Ref<typename MathBase::MatrixXs> Jin,
                                                     const Jcomponent firstsecond) const {
   assert_pretty(is_a_Jcomponent(firstsecond), (""));
 
-  switch(firstsecond) {
-  case first:
-    pinocchio::dIntegrateTransport(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jin.topRows(nv_), pinocchio::ARG0);
-    break;
-  case second:
-    pinocchio::dIntegrateTransport(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jin.topRows(nv_), pinocchio::ARG1);
-    break;
-  default:
-    throw_pretty("Invalid argument: firstsecond must be either first or second. both not supported for this operation.");
-    break;
-  }  
-  
+  switch (firstsecond) {
+    case first:
+      pinocchio::dIntegrateTransport(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jin.topRows(nv_), pinocchio::ARG0);
+      break;
+    case second:
+      pinocchio::dIntegrateTransport(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jin.topRows(nv_), pinocchio::ARG1);
+      break;
+    default:
+      throw_pretty(
+          "Invalid argument: firstsecond must be either first or second. both not supported for this operation.");
+      break;
+  }
 }
-  
 
 template <typename Scalar>
 const boost::shared_ptr<pinocchio::ModelTpl<Scalar> >& StateMultibodyTpl<Scalar>::get_pinocchio() const {

@@ -18,8 +18,7 @@ DifferentialActionModelNumDiffTpl<Scalar>::DifferentialActionModelNumDiffTpl(boo
     : Base(model->get_state(), model->get_nu(), model->get_nr()), model_(model) {
   with_gauss_approx_ = with_gauss_approx;
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon());
-  if (with_gauss_approx_ && nr_ == 1)
-    throw_pretty("No Gauss approximation possible with nr = 1");
+  if (with_gauss_approx_ && nr_ == 1) throw_pretty("No Gauss approximation possible with nr = 1");
 }
 
 template <typename Scalar>

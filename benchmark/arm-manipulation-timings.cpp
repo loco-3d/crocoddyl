@@ -6,7 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/algorithm/model.hpp>
 
@@ -51,7 +50,7 @@ int main(int argc, char* argv[]) {
   locked_joints.push_back(5);
   locked_joints.push_back(6);
   locked_joints.push_back(7);
-  
+
   pinocchio::buildReducedModel(model_full, locked_joints, Eigen::VectorXd::Zero(model_full.nq), model);
 
   /*************************PINOCCHIO MODEL**************/
@@ -63,7 +62,7 @@ int main(int argc, char* argv[]) {
   boost::shared_ptr<crocoddyl::StateMultibody> state =
       boost::make_shared<crocoddyl::StateMultibody>(boost::make_shared<pinocchio::Model>(model));
   boost::shared_ptr<crocoddyl::ActuationModelFull> actuation =
-      boost::make_shared<crocoddyl::ActuationModelFull>(state);  
+      boost::make_shared<crocoddyl::ActuationModelFull>(state);
 
   Eigen::VectorXd q0 = Eigen::VectorXd::Random(state->get_nq());
   Eigen::VectorXd x0(state->get_nx());
@@ -91,12 +90,11 @@ int main(int argc, char* argv[]) {
   terminalCostModel->addCost("gripperPose", goalTrackingCost, 1);
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> runningDAM =
-    boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(state, actuation, runningCostModel);
+      boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(state, actuation, runningCostModel);
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> terminalDAM =
       boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(state, actuation, terminalCostModel);
 
-  
   boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModel =
       boost::make_shared<crocoddyl::IntegratedActionModelEuler>(runningDAM, 1e-3);
   boost::shared_ptr<crocoddyl::ActionModelAbstract> terminalModel =
@@ -191,25 +189,25 @@ int main(int argc, char* argv[]) {
 
   duration = 0;
   timer.reset();
-  Eigen::MatrixXd Jin(Eigen::MatrixXd::Random(model.nv, 2*model.nv));
+  Eigen::MatrixXd Jin(Eigen::MatrixXd::Random(model.nv, 2 * model.nv));
   SMOOTH(T) {
-    pinocchio::dIntegrateTransport(model, x1s[_smooth].head(model.nq), dxs[_smooth].head(model.nv),
-                                   Jin, pinocchio::ARG0);
+    pinocchio::dIntegrateTransport(model, x1s[_smooth].head(model.nq), dxs[_smooth].head(model.nv), Jin,
+                                   pinocchio::ARG0);
   }
   duration = timer.get_us_duration();
   std::cout << "pin::dIntegrateTransport with aliasing(in us):\t" << duration / T << " us" << std::endl;
 
   duration = 0;
   timer.reset();
-  Jin = Eigen::MatrixXd::Random(model.nv, 2*model.nv);
-  Eigen::MatrixXd Jout(Eigen::MatrixXd::Random(model.nv, 2*model.nv));
+  Jin = Eigen::MatrixXd::Random(model.nv, 2 * model.nv);
+  Eigen::MatrixXd Jout(Eigen::MatrixXd::Random(model.nv, 2 * model.nv));
   SMOOTH(T) {
-    pinocchio::dIntegrateTransport(model, x1s[_smooth].head(model.nq), dxs[_smooth].head(model.nv),
-                                   Jin, Jout, pinocchio::ARG0);
+    pinocchio::dIntegrateTransport(model, x1s[_smooth].head(model.nq), dxs[_smooth].head(model.nv), Jin, Jout,
+                                   pinocchio::ARG0);
   }
   duration = timer.get_us_duration();
   std::cout << "pin::dIntegrateTransport w/o aliasing(in us):\t" << duration / T << " us" << std::endl;
-  
+
   duration = 0;
   timer.reset();
   SMOOTH(T) { state->Jdiff(x1s[_smooth], x2s[_smooth], Jfirst, Jsecond, crocoddyl::both); }

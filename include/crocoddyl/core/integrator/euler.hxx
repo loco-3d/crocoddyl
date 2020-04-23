@@ -51,7 +51,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionD
   }
 
   const std::size_t& nv = differential_->get_state()->get_nv();
-  
+
   // Static casting the data
   boost::shared_ptr<IntegratedActionDataEuler> d = boost::static_pointer_cast<IntegratedActionDataEuler>(data);
 
@@ -99,17 +99,17 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
 
   // Computing the derivatives for the time-continuous model (i.e. differential model)
   differential_->calcDiff(d->differential, x, u);
-  
+
   if (enable_integration_) {
     const MatrixXs& da_dx = d->differential->Fx;
     const MatrixXs& da_du = d->differential->Fu;
-    d->Fx.topRows(nv).noalias() =  da_dx * time_step2_;
+    d->Fx.topRows(nv).noalias() = da_dx * time_step2_;
     d->Fx.bottomRows(nv).noalias() = da_dx * time_step_;
     d->Fx.topRightCorner(nv, nv).diagonal().array() += Scalar(time_step_);
 
-    d->Fu.topRows(nv).noalias() =  da_du * time_step2_;
+    d->Fu.topRows(nv).noalias() = da_du * time_step2_;
     d->Fu.bottomRows(nv).noalias() = da_du * time_step_;
-    
+
     differential_->get_state()->JintegrateTransport(x, d->dx, d->Fx, second);
     differential_->get_state()->Jintegrate(x, d->dx, d->Fx, d->Fx, first, addto);
     differential_->get_state()->JintegrateTransport(x, d->dx, d->Fu, second);

@@ -40,11 +40,11 @@ class StateVectorTpl : public StateAbstractTpl<_Scalar> {
                      Jcomponent firstsecond = both) const;
   virtual void Jintegrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
                           Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
-                          const Jcomponent firstsecond=both, const AssignmentOp=setto) const;
+                          const Jcomponent firstsecond = both, const AssignmentOp = setto) const;
   virtual void JintegrateTransport(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
                                    Eigen::Ref<MatrixXs> Jin, const Jcomponent firstsecond) const;
 
-protected:
+ protected:
   using StateAbstractTpl<Scalar>::nx_;
   using StateAbstractTpl<Scalar>::ndx_;
   using StateAbstractTpl<Scalar>::nq_;

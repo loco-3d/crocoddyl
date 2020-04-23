@@ -6,7 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifdef WITH_MULTITHREADING
 #include <omp.h>
 #define NTHREAD 4
@@ -41,7 +40,6 @@
 
 #define STDDEV(vec) std::sqrt(((vec - vec.mean())).square().sum() / (vec.size() - 1)) * 1000
 #define AVG(vec) (vec.mean()) * 1000.
-
 
 int main(int argc, char* argv[]) {
   bool CALLBACKS = false;
@@ -268,7 +266,6 @@ int main(int argc, char* argv[]) {
   boost::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> > runningData = runningModel->createData();
   VectorXs x_rand = cg_runningModel->get_state()->rand();
   VectorXs u_rand = VectorXs::Random(cg_runningModel->get_nu());
-
 
   runningModel->calc(runningData, x_rand, u_rand);
   runningModel->calcDiff(runningData, x_rand, u_rand);
@@ -498,5 +495,4 @@ int main(int argc, char* argv[]) {
               << cg_stddev_calc[ithread] << " (per nodes/thread: " << cg_avg_calc[ithread] * (ithread + 1) / N
               << " +- " << cg_stddev_calc[ithread] * (ithread + 1) / N << ")" << std::endl;
   }
-  
 }
