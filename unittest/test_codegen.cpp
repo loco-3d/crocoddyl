@@ -9,7 +9,6 @@
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/parsers/srdf.hpp>
 #include <pinocchio/algorithm/model.hpp>
-//#include <pinocchio/algorithm/contact-info.hpp>
 #include <pinocchio/container/aligned-vector.hpp>
 
 #include <example-robot-data/path.hpp>
@@ -125,7 +124,6 @@ void codegen_4DoFArm() {
   typedef CppAD::cg::CG<Scalar> CGScalar;
   typedef CppAD::AD<CGScalar> ADScalar;
   typedef crocoddyl::MathBaseTpl<ADScalar>::VectorXs ADVectorXs;
-  typedef crocoddyl::MathBaseTpl<ADScalar>::MatrixXs ADMatrixXs;
   typedef crocoddyl::MathBaseTpl<ADScalar>::Vector3s ADVector3s;
   typedef crocoddyl::MathBaseTpl<ADScalar>::Matrix3s ADMatrix3s;
   typedef crocoddyl::FramePlacementTpl<ADScalar> ADFramePlacement;
@@ -333,7 +331,6 @@ void codegen_bipedal() {
   typedef CppAD::cg::CG<Scalar> CGScalar;
   typedef CppAD::AD<CGScalar> ADScalar;
   typedef crocoddyl::MathBaseTpl<ADScalar>::VectorXs ADVectorXs;
-  typedef crocoddyl::MathBaseTpl<ADScalar>::MatrixXs ADMatrixXs;
   typedef crocoddyl::MathBaseTpl<ADScalar>::Vector2s ADVector2s;
   typedef crocoddyl::MathBaseTpl<ADScalar>::Vector3s ADVector3s;
   typedef crocoddyl::MathBaseTpl<ADScalar>::Matrix3s ADMatrix3s;
