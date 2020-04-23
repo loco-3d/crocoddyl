@@ -38,14 +38,12 @@
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/utils/timer.hpp"
 
-#define STDDEV(vec) std::sqrt(((vec - vec.mean())).square().sum() / (vec.size() - 1)) * 1000
+#define STDDEV(vec) std::sqrt(((vec - vec.mean())).square().sum() / (static_cast<double>(vec.size()) - 1)) * 1000
 #define AVG(vec) (vec.mean()) * 1000.
 
 int main(int argc, char* argv[]) {
-  bool CALLBACKS = false;
   unsigned int N = 100;  // number of nodes
   unsigned int T = 1e3;  // number of trials
-  unsigned int MAXITER = 1;
   if (argc > 1) {
     T = atoi(argv[1]);
   }
@@ -153,7 +151,6 @@ int main(int argc, char* argv[]) {
   typedef CppAD::cg::CG<Scalar> CGScalar;
   typedef CppAD::AD<CGScalar> ADScalar;
   typedef crocoddyl::MathBaseTpl<ADScalar>::VectorXs ADVectorXs;
-  typedef crocoddyl::MathBaseTpl<ADScalar>::MatrixXs ADMatrixXs;
   typedef crocoddyl::MathBaseTpl<ADScalar>::Vector2s ADVector2s;
   typedef crocoddyl::MathBaseTpl<ADScalar>::Vector3s ADVector3s;
   typedef crocoddyl::MathBaseTpl<ADScalar>::Matrix3s ADMatrix3s;
