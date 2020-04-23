@@ -187,9 +187,8 @@ void StateNumDiffTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, co
 }
 
 template <typename Scalar>
-void StateNumDiffTpl<Scalar>::JintegrateTransport(const Eigen::Ref<const VectorXs>& x,
-                                                  const Eigen::Ref<const VectorXs>&, Eigen::Ref<MatrixXs>,
-                                                  const Jcomponent firstsecond) const {}
+void StateNumDiffTpl<Scalar>::JintegrateTransport(const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&,
+                                                  Eigen::Ref<MatrixXs>, const Jcomponent) const {}
 
 template <typename Scalar>
 const Scalar& StateNumDiffTpl<Scalar>::get_disturbance() const {
