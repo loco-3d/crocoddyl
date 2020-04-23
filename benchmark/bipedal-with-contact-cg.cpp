@@ -46,7 +46,7 @@
 int main(int argc, char* argv[]) {
   bool CALLBACKS = false;
   unsigned int N = 100;  // number of nodes
-  unsigned int T = 1e2;  // number of trials
+  unsigned int T = 1e3;  // number of trials
   unsigned int MAXITER = 1;
   if (argc > 1) {
     T = atoi(argv[1]);

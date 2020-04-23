@@ -40,6 +40,9 @@ void ContactModelMultipleTpl<Scalar>::addContact(const std::string& name,
     active_.insert(it, name);
   } else if (!active) {
     nc_total_ += contact->get_nc();
+    std::vector<std::string>::iterator it =
+        std::lower_bound(inactive_.begin(), inactive_.end(), name, std::greater<std::string>());
+    inactive_.insert(it, name);
   }
 }
 
@@ -51,6 +54,7 @@ void ContactModelMultipleTpl<Scalar>::removeContact(const std::string& name) {
     nc_total_ -= it->second->contact->get_nc();
     contacts_.erase(it);
     active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
+    inactive_.erase(std::remove(inactive_.begin(), inactive_.end(), name), inactive_.end());
   } else {
     std::cout << "Warning: we couldn't remove the " << name << " contact item, it doesn't exist." << std::endl;
   }
@@ -65,9 +69,13 @@ void ContactModelMultipleTpl<Scalar>::changeContactStatus(const std::string& nam
       std::vector<std::string>::iterator it =
           std::lower_bound(active_.begin(), active_.end(), name, std::greater<std::string>());
       active_.insert(it, name);
+      inactive_.erase(std::remove(inactive_.begin(), inactive_.end(), name), inactive_.end());
     } else if (!active && it->second->active) {
       nc_ -= it->second->contact->get_nc();
       active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
+      std::vector<std::string>::iterator it =
+          std::lower_bound(inactive_.begin(), inactive_.end(), name, std::greater<std::string>());
+      inactive_.insert(it, name);
     }
     it->second->active = active;
   } else {
@@ -263,6 +271,11 @@ const std::size_t& ContactModelMultipleTpl<Scalar>::get_nu() const {
 template <typename Scalar>
 const std::vector<std::string>& ContactModelMultipleTpl<Scalar>::get_active() const {
   return active_;
+}
+
+template <typename Scalar>
+const std::vector<std::string>& ContactModelMultipleTpl<Scalar>::get_inactive() const {
+  return inactive_;
 }
 
 template <typename Scalar>

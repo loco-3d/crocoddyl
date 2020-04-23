@@ -123,6 +123,9 @@ void exposeCostSum() {
       .add_property("active",
                     bp::make_function(&CostModelSum::get_active, bp::return_value_policy<bp::return_by_value>()),
                     "name of active cost items")
+      .add_property("inactive",
+                    bp::make_function(&CostModelSum::get_inactive, bp::return_value_policy<bp::return_by_value>()),
+                    "name of inactive cost items")
       .def("getCostStatus", &CostModelSum::getCostStatus, bp::args("self", "name"),
            "Return the cost status of a given cost name.\n\n"
            ":param name: cost name");
