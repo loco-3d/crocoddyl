@@ -257,6 +257,9 @@ int main(int argc, char* argv[]) {
     cg_model->quasiStatic(cg_data, us[i], x0);
   }
 
+  crocoddyl::SolverDDP cg_ddp(problem);
+  cg_ddp.setCandidate(xs, us, false);
+  
   // Check that code-generated action model is the same as original.
   /**************************************************************************/
   boost::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> > cg_runningData = cg_runningModel->createData();
