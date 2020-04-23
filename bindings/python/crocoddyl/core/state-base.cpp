@@ -20,6 +20,12 @@ void exposeStateAbstract() {
       .export_values()
       .value("second", second);
 
+  bp::enum_<AssignmentOp>("AssignmentOp")
+      .value("setto", setto)
+      .value("addto", addto)
+      .value("rmfrom", rmfrom)
+      .export_values();
+
   bp::class_<StateAbstract_wrap, boost::noncopyable>(
       "StateAbstract",
       "Abstract class for the state representation.\n\n"
