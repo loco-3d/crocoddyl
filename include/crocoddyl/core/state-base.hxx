@@ -78,6 +78,8 @@ std::vector<typename MathBaseTpl<Scalar>::MatrixXs> StateAbstractTpl<Scalar>::Ji
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx, const Jcomponent firstsecond,
     const AssignmentOp op) {
   MatrixXs Jfirst(ndx_, ndx_), Jsecond(ndx_, ndx_);
+  Jfirst.setZero();
+  Jsecond.setZero();
   std::vector<MatrixXs> Jacs;
   Jintegrate(x, dx, Jfirst, Jsecond, firstsecond, op);
   switch (firstsecond) {
