@@ -120,6 +120,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
     d->Lxu.noalias() = time_step_ * d->differential->Lxu;
     d->Luu.noalias() = time_step_ * d->differential->Luu;
   } else {
+    differential_->get_state()->Jintegrate(x, d->dx, d->Fx,d->Fx);
     d->Fu.setZero();
     d->Lx = d->differential->Lx;
     d->Lu = d->differential->Lu;
