@@ -123,8 +123,9 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
 
   void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                   Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
-                  Jcomponent _firstsecond) const {
+                  const Jcomponent _firstsecond, const AssignmentOp _op) const {
     std::string firstsecond;
+    std::string op;
     switch (_firstsecond) {
       case first: {
         firstsecond = "first";
@@ -141,7 +142,24 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
       default: { firstsecond = "both"; }
     }
 
-    bp::list res = Jintegrate_wrap(x, dx, firstsecond);
+    switch (_op) {
+      case setto: {
+        op = "setto";
+        break;
+      }
+      case addto: {
+        op = "second";
+        break;
+      }
+      case rmfrom: {
+        op = "rmfrom";
+        break;
+      }
+      default: { op = "setto"; }
+    }
+    
+
+    bp::list res = Jintegrate_wrap(x, dx, firstsecond,op);
     if (firstsecond == "both") {
       Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
       Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[1])();
@@ -152,8 +170,14 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
     }
   }
 
+  void JintegrateTransport(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
+                           Eigen::Ref<Eigen::MatrixXd> Jin,
+                           const Jcomponent _firstsecond) const {
+  }
+
+  
   bp::list Jintegrate_wrap(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
-                           std::string firstsecond) const {
+                           std::string firstsecond, std::string op) const {
     assert_pretty((firstsecond == "both" || firstsecond == "first" || firstsecond == "second"),
                   "firstsecond must be one of the Jcomponent {both, first, second}");
     if (static_cast<std::size_t>(x.size()) != nx_) {
@@ -167,11 +191,11 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
 
     if (firstsecond == "both") {
       bp::list Jacs = bp::call<bp::list>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x,
-                                         (Eigen::VectorXd)dx, firstsecond);
+                                         (Eigen::VectorXd)dx, firstsecond, op);
       return Jacs;
     } else {
       Eigen::MatrixXd J = bp::call<Eigen::MatrixXd>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x,
-                                                    (Eigen::VectorXd)dx, firstsecond);
+                                                    (Eigen::VectorXd)dx, firstsecond, op);
       bp::list list;
       list.append(J);
       return list;
@@ -180,7 +204,7 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
 };
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Jdiffs, StateAbstract::Jdiff_Js, 2, 3)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Jintegrates, StateAbstract::Jintegrate_Js, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Jintegrates, StateAbstract::Jintegrate_Js, 2, 4)
 
 }  // namespace python
 }  // namespace crocoddyl
