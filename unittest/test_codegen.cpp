@@ -44,11 +44,8 @@
 using namespace boost::unit_test;
 using namespace crocoddyl::unittest;
 
-
-template<typename Scalar>
-const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >
-build_arm_action_model(){
-  
+template <typename Scalar>
+const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > build_arm_action_model() {
   typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::Vector3s Vector3s;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::Matrix3s Matrix3s;
@@ -69,40 +66,36 @@ build_arm_action_model(){
   typedef typename crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<Scalar> DifferentialActionModelFreeFwdDynamics;
   typedef typename crocoddyl::IntegratedActionModelEulerTpl<Scalar> IntegratedActionModelEuler;
 
-   //because urdf is not supported with all scalar types.
+  // because urdf is not supported with all scalar types.
   pinocchio::ModelTpl<double> modeld;
   pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf", modeld);
 
   pinocchio::ModelTpl<Scalar> model_full(modeld.cast<Scalar>()), model;
   std::vector<pinocchio::JointIndex> locked_joints{5, 6, 7};
   pinocchio::buildReducedModel(model_full, locked_joints, VectorXs::Zero(model_full.nq), model);
-  
+
   boost::shared_ptr<crocoddyl::StateMultibodyTpl<Scalar> > state =
       boost::make_shared<crocoddyl::StateMultibodyTpl<Scalar> >(
           boost::make_shared<pinocchio::ModelTpl<Scalar> >(model));
 
   FramePlacement Mref(model.getFrameId("gripper_left_joint"),
                       pinocchio::SE3Tpl<Scalar>(Matrix3s::Identity(), Vector3s(Scalar(0), Scalar(0), Scalar(.4))));
-  FrameTranslation Tref(model.getFrameId("gripper_left_joint"),
-                        Vector3s(Scalar(0), Scalar(0), Scalar(.4)));
-  FrameRotation Rref(model.getFrameId("gripper_left_joint"),
-                     Matrix3s::Identity());
+  FrameTranslation Tref(model.getFrameId("gripper_left_joint"), Vector3s(Scalar(0), Scalar(0), Scalar(.4)));
+  FrameRotation Rref(model.getFrameId("gripper_left_joint"), Matrix3s::Identity());
   FrameMotion Vref(model.getFrameId("gripper_left_joint"),
-                   pinocchio::MotionTpl<Scalar>(Vector3s(Scalar(0), Scalar(0), Scalar(.4)), Vector3s(Scalar(0), Scalar(0), Scalar(.4))));
-  boost::shared_ptr<CostModelAbstract> goalTrackingCost =
-    boost::make_shared<CostModelFramePlacement>(state, Mref);
+                   pinocchio::MotionTpl<Scalar>(Vector3s(Scalar(0), Scalar(0), Scalar(.4)),
+                                                Vector3s(Scalar(0), Scalar(0), Scalar(.4))));
+  boost::shared_ptr<CostModelAbstract> goalTrackingCost = boost::make_shared<CostModelFramePlacement>(state, Mref);
   boost::shared_ptr<CostModelAbstract> goalTranslationCost =
-    boost::make_shared<CostModelFrameTranslation>(state, Tref);
-  boost::shared_ptr<CostModelAbstract> goalRotationCost =
-    boost::make_shared<CostModelFrameRotation>(state, Rref);
-  boost::shared_ptr<CostModelAbstract> goalVelocityCost =
-    boost::make_shared<CostModelFrameVelocity>(state, Vref);
+      boost::make_shared<CostModelFrameTranslation>(state, Tref);
+  boost::shared_ptr<CostModelAbstract> goalRotationCost = boost::make_shared<CostModelFrameRotation>(state, Rref);
+  boost::shared_ptr<CostModelAbstract> goalVelocityCost = boost::make_shared<CostModelFrameVelocity>(state, Vref);
   boost::shared_ptr<CostModelAbstract> xRegCost = boost::make_shared<CostModelState>(state);
   boost::shared_ptr<CostModelAbstract> uRegCost = boost::make_shared<CostModelControl>(state);
-  
+
   // Create a cost model per the running and terminal action model.
   boost::shared_ptr<CostModelSum> runningCostModel = boost::make_shared<CostModelSum>(state);
-  
+
   // Then let's added the running and terminal cost functions
   runningCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1));
   runningCostModel->addCost("gripperTrans", goalTranslationCost, Scalar(1));
@@ -129,9 +122,8 @@ build_arm_action_model(){
   return runningModel;
 }
 
-template<typename Scalar>
-const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >
-build_bipedal_action_model(){
+template <typename Scalar>
+const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > build_bipedal_action_model() {
   typedef typename crocoddyl::MathBaseTpl<Scalar>::Vector2s Vector2s;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::Vector3s Vector3s;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::Vector6s Vector6s;
@@ -159,44 +151,38 @@ build_bipedal_action_model(){
 
   const std::string RF = "leg_right_6_joint";
   const std::string LF = "leg_left_6_joint";
-  
+
   pinocchio::ModelTpl<double> modeld;
   pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_reduced.urdf",
                               pinocchio::JointModelFreeFlyer(), modeld);
   modeld.lowerPositionLimit.head<7>().array() = -1;
   modeld.upperPositionLimit.head<7>().array() = 1.;
-  pinocchio::srdf::loadReferenceConfigurations(modeld,
-                                               EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf",
+  pinocchio::srdf::loadReferenceConfigurations(modeld, EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf",
                                                false);
-  
+
   pinocchio::ModelTpl<Scalar> model(modeld.cast<Scalar>());
   boost::shared_ptr<crocoddyl::StateMultibodyTpl<Scalar> > state =
       boost::make_shared<crocoddyl::StateMultibodyTpl<Scalar> >(
           boost::make_shared<pinocchio::ModelTpl<Scalar> >(model));
 
-  boost::shared_ptr<ActuationModelFloatingBase> actuation =
-      boost::make_shared<ActuationModelFloatingBase>(state);
+  boost::shared_ptr<ActuationModelFloatingBase> actuation = boost::make_shared<ActuationModelFloatingBase>(state);
 
-  FramePlacement Mref(
-                      model.getFrameId("arm_right_7_joint"),
-      pinocchio::SE3Tpl<Scalar>(Matrix3s::Identity(), Vector3s(Scalar(.0), Scalar(.0), Scalar(.4))));
+  FramePlacement Mref(model.getFrameId("arm_right_7_joint"),
+                      pinocchio::SE3Tpl<Scalar>(Matrix3s::Identity(), Vector3s(Scalar(.0), Scalar(.0), Scalar(.4))));
 
   boost::shared_ptr<CostModelAbstract> goalTrackingCost =
       boost::make_shared<CostModelFramePlacement>(state, Mref, actuation->get_nu());
   boost::shared_ptr<CostModelAbstract> centroidalCost =
-    boost::make_shared<CostModelCentroidalMomentum>(state, Vector6s::Zero(), actuation->get_nu());  
+      boost::make_shared<CostModelCentroidalMomentum>(state, Vector6s::Zero(), actuation->get_nu());
   boost::shared_ptr<CostModelAbstract> comCost =
-    boost::make_shared<CostModelCoMPosition>(state, Vector3s::Zero(), actuation->get_nu());
-  boost::shared_ptr<CostModelAbstract> contactForceCost =
-    boost::make_shared<CostModelContactForce>(state, FrameForce(model.getFrameId(RF),pinocchio::ForceTpl<Scalar>::Zero()), actuation->get_nu());  
-  boost::shared_ptr<CostModelAbstract> xRegCost =
-      boost::make_shared<CostModelState>(state, actuation->get_nu());
-  boost::shared_ptr<CostModelAbstract> uRegCost =
-      boost::make_shared<CostModelControl>(state, actuation->get_nu());
+      boost::make_shared<CostModelCoMPosition>(state, Vector3s::Zero(), actuation->get_nu());
+  boost::shared_ptr<CostModelAbstract> contactForceCost = boost::make_shared<CostModelContactForce>(
+      state, FrameForce(model.getFrameId(RF), pinocchio::ForceTpl<Scalar>::Zero()), actuation->get_nu());
+  boost::shared_ptr<CostModelAbstract> xRegCost = boost::make_shared<CostModelState>(state, actuation->get_nu());
+  boost::shared_ptr<CostModelAbstract> uRegCost = boost::make_shared<CostModelControl>(state, actuation->get_nu());
 
   // Create a cost model per the running and terminal action model.
-  boost::shared_ptr<CostModelSum> runningCostModel =
-      boost::make_shared<CostModelSum>(state, actuation->get_nu());
+  boost::shared_ptr<CostModelSum> runningCostModel = boost::make_shared<CostModelSum>(state, actuation->get_nu());
 
   // Then let's added the running and terminal cost functions
   runningCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1));
@@ -210,23 +196,21 @@ build_bipedal_action_model(){
       boost::make_shared<ContactModelMultiple>(state, actuation->get_nu());
 
   FramePlacement xref(model.getFrameId(RF), pinocchio::SE3Tpl<Scalar>::Identity());
-  boost::shared_ptr<ContactModelAbstract> support_contact_model6D = boost::make_shared<ContactModel6D>(
-      state, xref, actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
-  contact_models->addContact(model.frames[model.getFrameId(RF)].name + "_contact",
-                                support_contact_model6D);
+  boost::shared_ptr<ContactModelAbstract> support_contact_model6D =
+      boost::make_shared<ContactModel6D>(state, xref, actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
+  contact_models->addContact(model.frames[model.getFrameId(RF)].name + "_contact", support_contact_model6D);
 
   FrameTranslation x2ref(model.getFrameId(LF), Vector3s::Zero());
-  boost::shared_ptr<ContactModelAbstract> support_contact_model3D = boost::make_shared<ContactModel3D>(
-      state, x2ref, actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
-  contact_models->addContact(model.frames[model.getFrameId(LF)].name + "_contact",
-                                support_contact_model3D);
+  boost::shared_ptr<ContactModelAbstract> support_contact_model3D =
+      boost::make_shared<ContactModel3D>(state, x2ref, actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
+  contact_models->addContact(model.frames[model.getFrameId(LF)].name + "_contact", support_contact_model3D);
 
   // Next, we need to create an action model for running and terminal knots. The
   // forward dynamics (computed using ABA) are implemented
   // inside DifferentialActionModelFullyActuated.
   boost::shared_ptr<DifferentialActionModelContactFwdDynamics> runningDAM =
       boost::make_shared<DifferentialActionModelContactFwdDynamics>(state, actuation, contact_models,
-                                                                      runningCostModel);
+                                                                    runningCostModel);
 
   // VectorXs armature(state->get_nq());
   // armature << 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.;
@@ -234,9 +218,8 @@ build_bipedal_action_model(){
   // terminalDAM->set_armature(armature);
   boost::shared_ptr<ActionModelAbstract> runningModel =
       boost::make_shared<IntegratedActionModelEuler>(runningDAM, Scalar(1e-3));
-  return runningModel;  
+  return runningModel;
 }
-
 
 void test_codegen_4DoFArm() {
   typedef double Scalar;
@@ -247,9 +230,9 @@ void test_codegen_4DoFArm() {
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<ADScalar> > runningModelAD = build_arm_action_model<ADScalar>();
 
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > runningModelCG =
-    boost::make_shared<crocoddyl::ActionModelCodeGenTpl<Scalar> >(runningModelAD, runningModelD,
-                                                                  "pyrene_arm_running");
-    
+      boost::make_shared<crocoddyl::ActionModelCodeGenTpl<Scalar> >(runningModelAD, runningModelD,
+                                                                    "pyrene_arm_running");
+
   // Check that code-generated action model is the same as original.
   /**************************************************************************/
   boost::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> > runningDataCG = runningModelCG->createData();
@@ -278,12 +261,12 @@ void test_codegen_bipedal() {
   typedef CppAD::AD<CGScalar> ADScalar;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > runningModelD = build_bipedal_action_model<Scalar>();
-  boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<ADScalar> > runningModelAD = build_bipedal_action_model<ADScalar>();
+  boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<ADScalar> > runningModelAD =
+      build_bipedal_action_model<ADScalar>();
 
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > runningModelCG =
-    boost::make_shared<crocoddyl::ActionModelCodeGenTpl<Scalar> >(runningModelAD, runningModelD,
-                                                                  "pyrene_biped");
-    
+      boost::make_shared<crocoddyl::ActionModelCodeGenTpl<Scalar> >(runningModelAD, runningModelD, "pyrene_biped");
+
   // Check that code-generated action model is the same as original.
   /**************************************************************************/
   boost::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> > runningDataCG = runningModelCG->createData();

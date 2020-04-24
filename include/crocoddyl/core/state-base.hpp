@@ -50,17 +50,19 @@ class StateAbstractTpl {
                      Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
                      Jcomponent firstsecond = both) const = 0;
 
-
   /**
    *
-   * @brief   Computes the Jacobian of a small variation of the state vector or tangent vector into the tangent space at identity.
+   * @brief   Computes the Jacobian of a small variation of the state vector or tangent vector into the tangent space
+   * at identity.
    *
    * @details This jacobian has to be interpreted in terms of Lie group, not vector space: as such,
    *          it is expressed in the tangent space only, not the state space.
-   *          Calling \f$ f(x, \delta x) \f$ the integrate function, these jacobians satisfy the following relationships in the
-   *          tangent space:
-   *           - Jacobian relative to x: \f$ f(x \oplus \delta y, \delta x) \ominus f(x, \delta x) = J_x \delta y + o(\delta x)\f$.
-   *           - Jacobian relative to \delta x: \f$ f(x, \delta x + \delta y) \ominus f(x, \delta x) = J_{\delta x} \delta y + o(\delta x)\f$.
+   *          Calling \f$ f(x, \delta x) \f$ the integrate function, these jacobians satisfy the following
+   * relationships in the tangent space:
+   *           - Jacobian relative to x: \f$ f(x \oplus \delta y, \delta x) \ominus f(x, \delta x) = J_x \delta y +
+   * o(\delta x)\f$.
+   *           - Jacobian relative to \delta x: \f$ f(x, \delta x + \delta y) \ominus f(x, \delta x) = J_{\delta x}
+   * \delta y + o(\delta x)\f$.
    *
    * @param[in]  x        State Vector.
    * @param[in]  dx       Tangent vector
@@ -69,27 +71,30 @@ class StateAbstractTpl {
    * @param[in]  arg      Argument (either x or dx) with respect to which the differentiation is performed.
    * @param[in]  op       assignment operator which sets, adds, or removes the jacobian from the matrix given.
    *
-   */  
+   */
   virtual void Jintegrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
                           Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
                           const Jcomponent firstsecond = both, const AssignmentOp = setto) const = 0;
 
   /**
    *
-   * @brief   Transport a matrix from the terminal to the originate tangent space of the integrate operation, with respect to the state or the tangent vector arguments.
+   * @brief   Transport a matrix from the terminal to the originate tangent space of the integrate operation, with
+   * respect to the state or the tangent vector arguments.
    *
-   * @details This function performs the parallel transportation of an input matrix whose columns are expressed in the tangent space of the integrated element \f$ x \oplus \delta x \f$,
-   *          to the tangent space at \f$ x \f$.
-   *          In other words, this functions transforms a tangent vector expressed at \f$ x \oplus \delta x \f$ to a tangent vector expressed at \f$ x \f$, considering that the change of state between
-   *          \f$ x \oplus \delta x \f$ and \f$ x \f$ may alter the value of this tangent vector.
-   *          A typical example of parallel transportation is the action operated by a rigid transformation \f$ M \in \text{SE}(3)\f$ on a spatial velocity \f$ v \in \text{se}(3)\f$.
-   *          In the context of configuration spaces assimilated as vectorial spaces, this operation corresponds to Identity.
-   *          For Lie groups, its corresponds to the canonical vector field transportation.
+   * @details This function performs the parallel transportation of an input matrix whose columns are expressed in the
+   * tangent space of the integrated element \f$ x \oplus \delta x \f$, to the tangent space at \f$ x \f$. In other
+   * words, this functions transforms a tangent vector expressed at \f$ x \oplus \delta x \f$ to a tangent vector
+   * expressed at \f$ x \f$, considering that the change of state between \f$ x \oplus \delta x \f$ and \f$ x \f$ may
+   * alter the value of this tangent vector. A typical example of parallel transportation is the action operated by a
+   * rigid transformation \f$ M \in \text{SE}(3)\f$ on a spatial velocity \f$ v \in \text{se}(3)\f$. In the context of
+   * configuration spaces assimilated as vectorial spaces, this operation corresponds to Identity. For Lie groups, its
+   * corresponds to the canonical vector field transportation.
    *
    * @param[in]  x        State Vector.
    * @param[in]  dx       Tangent vector
    * @param[out] Jin      Input matrix (number of rows = model.nv).
-   * @param[in]  arg      Argument (either x or dx) with respect to which the differentiation of Jintegrate is performed.
+   * @param[in]  arg      Argument (either x or dx) with respect to which the differentiation of Jintegrate is
+   * performed.
    *
    */
   virtual void JintegrateTransport(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,

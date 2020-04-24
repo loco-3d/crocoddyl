@@ -228,13 +228,13 @@ void test_JintegrateTransport(StateModelTypes::Type state_type) {
   Eigen::MatrixXd Jint_2(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state->Jintegrate(x, dx, Jint_1, Jint_2);
 
-  Eigen::MatrixXd Jref(Eigen::MatrixXd::Random(state->get_ndx(), 2*state->get_ndx()));
+  Eigen::MatrixXd Jref(Eigen::MatrixXd::Random(state->get_ndx(), 2 * state->get_ndx()));
   const Eigen::MatrixXd Jtest(Jref);
 
   state->JintegrateTransport(x, dx, Jref, crocoddyl::first);
   BOOST_CHECK((Jref - Jint_1 * Jtest).isMuchSmallerThan(1.0, 1e-10));
 
-  Jref=Jtest;
+  Jref = Jtest;
   state->JintegrateTransport(x, dx, Jref, crocoddyl::second);
   BOOST_CHECK((Jref - Jint_2 * Jtest).isMuchSmallerThan(1.0, 1e-10));
 }

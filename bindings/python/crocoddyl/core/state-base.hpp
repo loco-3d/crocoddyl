@@ -157,9 +157,8 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
       }
       default: { op = "setto"; }
     }
-    
 
-    bp::list res = Jintegrate_wrap(x, dx, firstsecond,op);
+    bp::list res = Jintegrate_wrap(x, dx, firstsecond, op);
     if (firstsecond == "both") {
       Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
       Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[1])();
@@ -171,11 +170,8 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
   }
 
   void JintegrateTransport(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
-                           Eigen::Ref<Eigen::MatrixXd> Jin,
-                           const Jcomponent _firstsecond) const {
-  }
+                           Eigen::Ref<Eigen::MatrixXd> Jin, const Jcomponent _firstsecond) const {}
 
-  
   bp::list Jintegrate_wrap(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                            std::string firstsecond, std::string op) const {
     assert_pretty((firstsecond == "both" || firstsecond == "first" || firstsecond == "second"),

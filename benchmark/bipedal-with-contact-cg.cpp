@@ -259,7 +259,7 @@ int main(int argc, char* argv[]) {
 
   crocoddyl::SolverDDP cg_ddp(problem);
   cg_ddp.setCandidate(xs, us, false);
-  
+
   // Check that code-generated action model is the same as original.
   /**************************************************************************/
   boost::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> > cg_runningData = cg_runningModel->createData();
@@ -500,7 +500,7 @@ int main(int argc, char* argv[]) {
 
   cg_ddp.calcDiff();
   cg_ddp.backwardPass();
-  
+
   // Timings pyrene-biped-forwardPass
   for (unsigned int i = 0; i < T; ++i) {
     crocoddyl::Timer timer;
@@ -509,9 +509,6 @@ int main(int argc, char* argv[]) {
   }
   double cg_avg_fp = AVG(cg_duration_fp);
   double cg_stddev_fp = STDDEV(cg_duration_fp);
-  std::cout << "forwardPass with cg [mean +- stddev in us]: " << cg_avg_fp << " +- " << cg_stddev_fp << " (per nodes: " << cg_avg_fp / N
-            << " +- " << cg_stddev_fp / N << ")" << std::endl;
-
-  
-  
+  std::cout << "forwardPass with cg [mean +- stddev in us]: " << cg_avg_fp << " +- " << cg_stddev_fp
+            << " (per nodes: " << cg_avg_fp / N << " +- " << cg_stddev_fp / N << ")" << std::endl;
 }
