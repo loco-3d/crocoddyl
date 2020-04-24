@@ -75,17 +75,7 @@ void exposeIntegratedActionEuler() {
           bp::make_getter(&IntegratedActionDataEuler::differential, bp::return_value_policy<bp::return_by_value>()),
           "differential action data")
       .add_property("dx", bp::make_getter(&IntegratedActionDataEuler::dx, bp::return_internal_reference<>()),
-                    "state rate.")
-      .add_property("ddx_dx", bp::make_getter(&IntegratedActionDataEuler::ddx_dx, bp::return_internal_reference<>()),
-                    "Jacobian of the state rate with respect to the state.")
-      .add_property("ddx_du", bp::make_getter(&IntegratedActionDataEuler::ddx_du, bp::return_internal_reference<>()),
-                    "Jacobian of the state rate with respect to the control.")
-      .add_property("dxnext_dx",
-                    bp::make_getter(&IntegratedActionDataEuler::dxnext_dx, bp::return_internal_reference<>()),
-                    "Jacobian of the next state with respect to the state.")
-      .add_property("dxnext_ddx",
-                    bp::make_getter(&IntegratedActionDataEuler::dxnext_ddx, bp::return_internal_reference<>()),
-                    "Jacobian of the next state with respect to the state rate.");
+                    "state rate.");
 }
 
 }  // namespace python
