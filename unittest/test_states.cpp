@@ -216,6 +216,29 @@ void test_Jintegrate_against_numdiff(StateModelTypes::Type state_type) {
   BOOST_CHECK((Jint_2 - Jint_num_2).isMuchSmallerThan(1.0, tol));
 }
 
+void test_JintegrateTransport(StateModelTypes::Type state_type) {
+  StateModelFactory factory;
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create(state_type);
+  // Generating random values for the initial state and its rate of change
+  const Eigen::VectorXd& x = state->rand();
+  const Eigen::VectorXd& dx = Eigen::VectorXd::Random(state->get_ndx());
+
+  // Computing the partial derivatives of the difference function analytically
+  Eigen::MatrixXd Jint_1(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd Jint_2(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  state->Jintegrate(x, dx, Jint_1, Jint_2);
+
+  Eigen::MatrixXd Jref(Eigen::MatrixXd::Random(state->get_ndx(), 2*state->get_ndx()));
+  const Eigen::MatrixXd Jtest(Jref);
+
+  state->JintegrateTransport(x, dx, Jref, crocoddyl::first);
+  BOOST_CHECK((Jref - Jint_1 * Jtest).isMuchSmallerThan(1.0, 1e-10));
+
+  Jref=Jtest;
+  state->JintegrateTransport(x, dx, Jref, crocoddyl::second);
+  BOOST_CHECK((Jref - Jint_2 * Jtest).isMuchSmallerThan(1.0, 1e-10));
+}
+
 void test_Jdiff_and_Jintegrate_are_inverses(StateModelTypes::Type state_type) {
   StateModelFactory factory;
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create(state_type);
@@ -296,6 +319,7 @@ void register_state_unit_tests(StateModelTypes::Type state_type) {
   ts->add(BOOST_TEST_CASE(boost::bind(&test_Jint_num_diff_firstsecond, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_against_numdiff, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_Jintegrate_against_numdiff, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_JintegrateTransport, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_and_Jintegrate_are_inverses, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_velocity_from_Jintegrate_Jdiff, state_type)));
   framework::master_test_suite().add(ts);
