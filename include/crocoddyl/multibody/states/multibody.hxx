@@ -157,6 +157,7 @@ void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const typename MathB
                                            Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
                                            const Jcomponent firstsecond, const AssignmentOp op) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
+  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
   if (firstsecond == first || firstsecond == both) {
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
       throw_pretty("Invalid argument: "
@@ -218,7 +219,7 @@ void StateMultibodyTpl<Scalar>::JintegrateTransport(const Eigen::Ref<const typen
                                                     const Eigen::Ref<const typename MathBase::VectorXs>& dx,
                                                     Eigen::Ref<typename MathBase::MatrixXs> Jin,
                                                     const Jcomponent firstsecond) const {
-  assert_pretty(is_a_Jcomponent(firstsecond), (""));
+  assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
 
   switch (firstsecond) {
     case first:

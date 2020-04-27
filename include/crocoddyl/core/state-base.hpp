@@ -26,6 +26,8 @@ inline bool is_a_Jcomponent(Jcomponent firstsecond) {
   return (firstsecond == first || firstsecond == second || firstsecond == both);
 }
 
+inline bool is_a_AssignmentOp(AssignmentOp op) { return (op == setto || op == addto || op == rmfrom); }
+
 template <typename _Scalar>
 class StateAbstractTpl {
  public:
@@ -66,7 +68,7 @@ class StateAbstractTpl {
    *
    * @param[in]  x        State Vector.
    * @param[in]  dx       Tangent vector
-   * @param[out]  Jfirst   Jacobian of the Integrate operation wrt state vector (size ndx X ndx)
+   * @param[out] Jfirst   Jacobian of the Integrate operation wrt state vector (size ndx X ndx)
    * @param[out] Jsecond  Jacobian of the Integrate operation wrt tangent vector (size ndx X ndx)
    * @param[in]  arg      Argument (either x or dx) with respect to which the differentiation is performed.
    * @param[in]  op       assignment operator which sets, adds, or removes the jacobian from the matrix given.
