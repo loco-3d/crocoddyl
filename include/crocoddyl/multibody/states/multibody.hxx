@@ -100,7 +100,7 @@ void StateMultibodyTpl<Scalar>::integrate(const Eigen::Ref<const VectorXs>& x, c
 template <typename Scalar>
 void StateMultibodyTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
                                       Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
-                                      Jcomponent firstsecond) const {
+                                      const Jcomponent firstsecond) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty("Invalid argument: "

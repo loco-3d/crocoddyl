@@ -66,7 +66,8 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
   }
 
   void Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent firstsecond) const {
+             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
+             const Jcomponent firstsecond) const {
     bp::list res = Jdiff_wrap(x0, x1, firstsecond);
     switch (firstsecond) {
       case first: {
@@ -90,7 +91,7 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
   }
 
   bp::list Jdiff_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-                      Jcomponent firstsecond) const {
+                      const Jcomponent firstsecond) const {
     assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
     if (static_cast<std::size_t>(x0.size()) != nx_) {
       throw_pretty("Invalid argument: "

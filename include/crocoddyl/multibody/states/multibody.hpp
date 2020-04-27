@@ -37,7 +37,7 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
   virtual void integrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
                          Eigen::Ref<VectorXs> xout) const;
   virtual void Jdiff(const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&, Eigen::Ref<MatrixXs> Jfirst,
-                     Eigen::Ref<MatrixXs> Jsecond, Jcomponent firstsecond = both) const;
+                     Eigen::Ref<MatrixXs> Jsecond, const Jcomponent firstsecond = both) const;
 
   virtual void Jintegrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
                           Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,

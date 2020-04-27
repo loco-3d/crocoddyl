@@ -66,7 +66,8 @@ template <typename Scalar>
 void StateVectorTpl<Scalar>::Jdiff(const Eigen::Ref<const typename MathBase::VectorXs>&,
                                    const Eigen::Ref<const typename MathBase::VectorXs>&,
                                    Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
-                                   Eigen::Ref<typename MathBase::MatrixXs> Jsecond, Jcomponent firstsecond) const {
+                                   Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
+                                   const Jcomponent firstsecond) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
   if (firstsecond == first || firstsecond == both) {
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {

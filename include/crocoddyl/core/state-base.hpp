@@ -48,7 +48,7 @@ class StateAbstractTpl {
                          Eigen::Ref<VectorXs> xout) const = 0;
   virtual void Jdiff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
                      Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
-                     Jcomponent firstsecond = both) const = 0;
+                     const Jcomponent firstsecond = both) const = 0;
 
   /**
    *
@@ -102,7 +102,7 @@ class StateAbstractTpl {
   VectorXs diff_dx(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1);
   VectorXs integrate_x(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx);
   std::vector<MatrixXs> Jdiff_Js(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
-                                 Jcomponent firstsecond = both);
+                                 const Jcomponent firstsecond = both);
   std::vector<MatrixXs> Jintegrate_Js(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
                                       const Jcomponent firstsecond = both, const AssignmentOp op = setto);
 
