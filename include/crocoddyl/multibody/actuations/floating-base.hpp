@@ -54,9 +54,9 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
   virtual boost::shared_ptr<ActuationDataAbstract> createData() {
     boost::shared_ptr<ActuationDataAbstract> data = boost::make_shared<ActuationDataAbstract>(this);
     data->dtau_du.diagonal(-6).fill((Scalar)1.);
-
-    assert_pretty(dtau_du_ == data->dtau_du, "dtau_du has wrong value.");
-
+#ifndef NDEBUG
+    dtau_du_ = data->dtau_du;
+#endif
     return data;
   };
 
