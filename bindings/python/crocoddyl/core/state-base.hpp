@@ -91,6 +91,7 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
 
   bp::list Jdiff_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
                       Jcomponent firstsecond) const {
+    assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
     if (static_cast<std::size_t>(x0.size()) != nx_) {
       throw_pretty("Invalid argument: "
                    << "x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
@@ -154,6 +155,7 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
 
   bp::list Jintegrate_wrap(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                            const Jcomponent firstsecond, const AssignmentOp op) const {
+    assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
     if (static_cast<std::size_t>(x.size()) != nx_) {
       throw_pretty("Invalid argument: "
                    << "x has wrong dimension (it should be " + std::to_string(nx_) + ")");
