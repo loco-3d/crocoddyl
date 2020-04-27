@@ -104,7 +104,7 @@ class StateAbstractTpl {
   std::vector<MatrixXs> Jdiff_Js(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
                                  const Jcomponent firstsecond = both);
   std::vector<MatrixXs> Jintegrate_Js(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
-                                      const Jcomponent firstsecond = both, const AssignmentOp op = setto);
+                                      const Jcomponent firstsecond = both);
 
   const std::size_t& get_nx() const;
   const std::size_t& get_ndx() const;

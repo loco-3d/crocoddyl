@@ -134,7 +134,7 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
   void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                   Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
                   const Jcomponent firstsecond, const AssignmentOp op) const {
-    bp::list res = Jintegrate_wrap(x, dx, firstsecond, op);
+    bp::list res = Jintegrate_wrap(x, dx, firstsecond);
     if (firstsecond == first || firstsecond == both) {
       if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
         throw_pretty("Invalid argument: "
@@ -188,7 +188,7 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
   }
 
   bp::list Jintegrate_wrap(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
-                           const Jcomponent firstsecond, const AssignmentOp op) const {
+                           const Jcomponent firstsecond) const {
     assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
     if (static_cast<std::size_t>(x.size()) != nx_) {
       throw_pretty("Invalid argument: "
@@ -203,24 +203,24 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
     switch (firstsecond) {
       case first: {
         Eigen::MatrixXd J = bp::call<Eigen::MatrixXd>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x,
-                                                      (Eigen::VectorXd)dx, firstsecond, op);
+                                                      (Eigen::VectorXd)dx, firstsecond);
         Jacs.append(J);
         break;
       }
       case second: {
         Eigen::MatrixXd J = bp::call<Eigen::MatrixXd>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x,
-                                                      (Eigen::VectorXd)dx, firstsecond, op);
+                                                      (Eigen::VectorXd)dx, firstsecond);
         Jacs.append(J);
         break;
       }
       case both: {
         Jacs = bp::call<bp::list>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x, (Eigen::VectorXd)dx,
-                                  firstsecond, op);
+                                  firstsecond);
         break;
       }
       default: {
         Jacs = bp::call<bp::list>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x, (Eigen::VectorXd)dx,
-                                  firstsecond, op);
+                                  firstsecond);
         break;
       }
     }
@@ -232,7 +232,7 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
 };
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Jdiffs, StateAbstract::Jdiff_Js, 2, 3)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Jintegrates, StateAbstract::Jintegrate_Js, 2, 4)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Jintegrates, StateAbstract::Jintegrate_Js, 2, 3)
 
 }  // namespace python
 }  // namespace crocoddyl

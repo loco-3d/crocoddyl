@@ -72,13 +72,12 @@ void exposeStateAbstract() {
            ":param firstsecond: desired partial derivative\n"
            ":return the partial derivative(s) of the diff(x0, x1) function")
       .def("Jintegrate", pure_virtual(&StateAbstract_wrap::Jintegrate_wrap),
-           bp::args("self", "x", "dx", "firstsecond", "op"),
+           bp::args("self", "x", "dx", "firstsecond"),
            "Compute the partial derivatives of integrate operator.\n\n"
            "The integrate operator (x [+] dx) is defined by integrate(x, dx). Instead Jintegrate\n"
            "computes its partial derivatives, i.e. \\partial{integrate(x, dx)}{x} and\n"
            "\\partial{integrate(x, dx)}{dx}. By default, this function returns the derivatives of\n"
-           "the first and second argument (i.e. firstsecond='both'). However we ask for a specific\n"
-           "the assignment type argument (op = setto, addto, rmfrom).default is setto\n"
+           "the first and second argument (i.e. firstsecond='both').\n"
            "partial derivative by setting firstsecond='first' or firstsecond='second'.\n"
            ":param x: current state (dim state.nx).\n"
            ":param dx: displacement of the state (dim state.ndx).\n"
