@@ -66,39 +66,31 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
   }
 
   void Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent _firstsecond) const {
-    std::string firstsecond;
-    switch (_firstsecond) {
+             Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond, Jcomponent firstsecond) const {
+    bp::list res = Jdiff_wrap(x0, x1, firstsecond);
+    switch (firstsecond) {
       case first: {
-        firstsecond = "first";
+        Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
         break;
       }
       case second: {
-        firstsecond = "second";
+        Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
         break;
       }
       case both: {
-        firstsecond = "both";
+        Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
+        Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[1])();
         break;
       }
-      default: { firstsecond = "both"; }
-    }
-
-    bp::list res = Jdiff_wrap(x0, x1, firstsecond);
-    if (firstsecond == "both") {
-      Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
-      Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[1])();
-    } else if (firstsecond == "first") {
-      Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
-    } else if (firstsecond == "second") {
-      Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
+      default: {
+        Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
+        Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[1])();
+      }
     }
   }
 
   bp::list Jdiff_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0, const Eigen::Ref<const Eigen::VectorXd>& x1,
-                      std::string firstsecond) const {
-    assert_pretty((firstsecond == "both" || firstsecond == "first" || firstsecond == "second"),
-                  "firstsecond must be one of the Jcomponent {both, first, second}");
+                      Jcomponent firstsecond) const {
     if (static_cast<std::size_t>(x0.size()) != nx_) {
       throw_pretty("Invalid argument: "
                    << "x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
@@ -108,74 +100,60 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
                    << "x1 has wrong dimension (it should be " + std::to_string(nx_) + ")");
     }
 
-    if (firstsecond == "both") {
-      bp::list Jacs =
-          bp::call<bp::list>(this->get_override("Jdiff").ptr(), (Eigen::VectorXd)x0, (Eigen::VectorXd)x1, firstsecond);
-      return Jacs;
-    } else {
-      Eigen::MatrixXd J = bp::call<Eigen::MatrixXd>(this->get_override("Jdiff").ptr(), (Eigen::VectorXd)x0,
-                                                    (Eigen::VectorXd)x1, firstsecond);
-      bp::list list;
-      list.append(J);
-      return list;
+    bp::list Jacs;
+    switch (firstsecond) {
+      case first: {
+        Eigen::MatrixXd J = bp::call<Eigen::MatrixXd>(this->get_override("Jdiff").ptr(), (Eigen::VectorXd)x0,
+                                                      (Eigen::VectorXd)x1, firstsecond);
+        Jacs.append(J);
+        break;
+      }
+      case second: {
+        Eigen::MatrixXd J = bp::call<Eigen::MatrixXd>(this->get_override("Jdiff").ptr(), (Eigen::VectorXd)x0,
+                                                      (Eigen::VectorXd)x1, firstsecond);
+        Jacs.append(J);
+        break;
+      }
+      case both: {
+        Jacs = bp::call<bp::list>(this->get_override("Jdiff").ptr(), (Eigen::VectorXd)x0, (Eigen::VectorXd)x1,
+                                  firstsecond);
+        break;
+      }
+      default: {
+        Jacs = bp::call<bp::list>(this->get_override("Jdiff").ptr(), (Eigen::VectorXd)x0, (Eigen::VectorXd)x1,
+                                  firstsecond);
+      }
     }
+    return Jacs;
   }
 
   void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
                   Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
-                  const Jcomponent _firstsecond, const AssignmentOp _op) const {
-    std::string firstsecond;
-    std::string op;
-    switch (_firstsecond) {
+                  const Jcomponent firstsecond, const AssignmentOp op) const {
+    bp::list res = Jintegrate_wrap(x, dx, firstsecond, op);
+    switch (firstsecond) {
       case first: {
-        firstsecond = "first";
+        Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
         break;
       }
       case second: {
-        firstsecond = "second";
+        Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
         break;
       }
       case both: {
-        firstsecond = "both";
+        Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
+        Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[1])();
         break;
       }
-      default: { firstsecond = "both"; }
-    }
-
-    switch (_op) {
-      case setto: {
-        op = "setto";
-        break;
+      default: {
+        Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
+        Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[1])();
       }
-      case addto: {
-        op = "second";
-        break;
-      }
-      case rmfrom: {
-        op = "rmfrom";
-        break;
-      }
-      default: { op = "setto"; }
-    }
-
-    bp::list res = Jintegrate_wrap(x, dx, firstsecond, op);
-    if (firstsecond == "both") {
-      Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
-      Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[1])();
-    } else if (firstsecond == "first") {
-      Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
-    } else if (firstsecond == "second") {
-      Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
     }
   }
 
-  void JintegrateTransport(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
-                           Eigen::Ref<Eigen::MatrixXd> Jin, const Jcomponent _firstsecond) const {}
-
   bp::list Jintegrate_wrap(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
-                           std::string firstsecond, std::string op) const {
-    assert_pretty((firstsecond == "both" || firstsecond == "first" || firstsecond == "second"),
-                  "firstsecond must be one of the Jcomponent {both, first, second}");
+                           const Jcomponent firstsecond, const AssignmentOp op) const {
     if (static_cast<std::size_t>(x.size()) != nx_) {
       throw_pretty("Invalid argument: "
                    << "x has wrong dimension (it should be " + std::to_string(nx_) + ")");
@@ -185,18 +163,35 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
                    << "dx has wrong dimension (it should be " + std::to_string(ndx_) + ")");
     }
 
-    if (firstsecond == "both") {
-      bp::list Jacs = bp::call<bp::list>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x,
-                                         (Eigen::VectorXd)dx, firstsecond, op);
-      return Jacs;
-    } else {
-      Eigen::MatrixXd J = bp::call<Eigen::MatrixXd>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x,
-                                                    (Eigen::VectorXd)dx, firstsecond, op);
-      bp::list list;
-      list.append(J);
-      return list;
+    bp::list Jacs;
+    switch (firstsecond) {
+      case first: {
+        Eigen::MatrixXd J = bp::call<Eigen::MatrixXd>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x,
+                                                      (Eigen::VectorXd)dx, firstsecond, op);
+        Jacs.append(J);
+        break;
+      }
+      case second: {
+        Eigen::MatrixXd J = bp::call<Eigen::MatrixXd>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x,
+                                                      (Eigen::VectorXd)dx, firstsecond, op);
+        Jacs.append(J);
+        break;
+      }
+      case both: {
+        Jacs = bp::call<bp::list>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x, (Eigen::VectorXd)dx,
+                                  firstsecond, op);
+        break;
+      }
+      default: {
+        Jacs = bp::call<bp::list>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x, (Eigen::VectorXd)dx,
+                                  firstsecond, op);
+      }
     }
+    return Jacs;
   }
+
+  void JintegrateTransport(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
+                           Eigen::Ref<Eigen::MatrixXd> Jin, const Jcomponent _firstsecond) const {}
 };
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Jdiffs, StateAbstract::Jdiff_Js, 2, 3)
