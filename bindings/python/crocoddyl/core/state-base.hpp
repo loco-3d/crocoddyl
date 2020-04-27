@@ -228,7 +228,25 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
   }
 
   void JintegrateTransport(const Eigen::Ref<const Eigen::VectorXd>& x, const Eigen::Ref<const Eigen::VectorXd>& dx,
-                           Eigen::Ref<Eigen::MatrixXd> Jin, const Jcomponent _firstsecond) const {}
+                           Eigen::Ref<Eigen::MatrixXd> Jin, const Jcomponent firstsecond) const {
+    Jin = JintegrateTransport_wrap(x, dx, Jin, firstsecond);
+  }
+
+  Eigen::MatrixXd JintegrateTransport_wrap(const Eigen::Ref<const Eigen::VectorXd>& x,
+                                           const Eigen::Ref<const Eigen::VectorXd>& dx,
+                                           Eigen::Ref<Eigen::MatrixXd> Jin, const Jcomponent firstsecond) const {
+    assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
+    if (static_cast<std::size_t>(x.size()) != nx_) {
+      throw_pretty("Invalid argument: "
+                   << "x has wrong dimension (it should be " + std::to_string(nx_) + ")");
+    }
+    if (static_cast<std::size_t>(dx.size()) != ndx_) {
+      throw_pretty("Invalid argument: "
+                   << "dx has wrong dimension (it should be " + std::to_string(ndx_) + ")");
+    }
+    return bp::call<Eigen::MatrixXd>(this->get_override("JintegrateTransport").ptr(), x, dx, (Eigen::MatrixXd)Jin,
+                                     firstsecond);
+  }
 };
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Jdiffs, StateAbstract::Jdiff_Js, 2, 3)
