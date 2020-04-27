@@ -86,6 +86,7 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
       default: {
         Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
         Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[1])();
+        break;
       }
     }
   }
@@ -124,6 +125,7 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
       default: {
         Jacs = bp::call<bp::list>(this->get_override("Jdiff").ptr(), (Eigen::VectorXd)x0, (Eigen::VectorXd)x1,
                                   firstsecond);
+        break;
       }
     }
     return Jacs;
@@ -133,23 +135,54 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
                   Eigen::Ref<Eigen::MatrixXd> Jfirst, Eigen::Ref<Eigen::MatrixXd> Jsecond,
                   const Jcomponent firstsecond, const AssignmentOp op) const {
     bp::list res = Jintegrate_wrap(x, dx, firstsecond, op);
-    switch (firstsecond) {
-      case first: {
-        Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
-        break;
+    if (firstsecond == first || firstsecond == both) {
+      if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
+        throw_pretty("Invalid argument: "
+                     << "Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," +
+                            std::to_string(ndx_) + ")");
       }
-      case second: {
-        Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
-        break;
+      switch (op) {
+        case setto: {
+          Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
+          break;
+        }
+        case addto: {
+          Jfirst.derived() += bp::extract<Eigen::MatrixXd>(res[0])();
+          break;
+        }
+        case rmfrom: {
+          Jfirst.derived() -= bp::extract<Eigen::MatrixXd>(res[0])();
+          break;
+        }
+        default: {
+          throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+          break;
+        }
       }
-      case both: {
-        Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
-        Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[1])();
-        break;
+    }
+    if (firstsecond == second || firstsecond == both) {
+      if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
+        throw_pretty("Invalid argument: "
+                     << "Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
+                            std::to_string(ndx_) + ")");
       }
-      default: {
-        Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
-        Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[1])();
+      switch (op) {
+        case setto: {
+          Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
+          break;
+        }
+        case addto: {
+          Jsecond.derived() += bp::extract<Eigen::MatrixXd>(res[0])();
+          break;
+        }
+        case rmfrom: {
+          Jsecond.derived() -= bp::extract<Eigen::MatrixXd>(res[0])();
+          break;
+        }
+        default: {
+          throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+          break;
+        }
       }
     }
   }
@@ -188,6 +221,7 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
       default: {
         Jacs = bp::call<bp::list>(this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x, (Eigen::VectorXd)dx,
                                   firstsecond, op);
+        break;
       }
     }
     return Jacs;
