@@ -20,7 +20,6 @@
 #define STDDEV(vec) std::sqrt(((vec - vec.mean())).square().sum() / (double(vec.size()) - 1.))
 #define AVG(vec) (vec.mean())
 
-
 int main(int argc, char* argv[]) {
   unsigned int N = 100;  // number of nodes
   unsigned int T = 5e4;  // number of trials

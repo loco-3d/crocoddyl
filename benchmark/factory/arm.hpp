@@ -24,7 +24,6 @@
 #include "crocoddyl/multibody/costs/control.hpp"
 #include "crocoddyl/multibody/actuations/full.hpp"
 
-
 namespace crocoddyl {
 namespace benchmark {
 
