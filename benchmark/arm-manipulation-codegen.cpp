@@ -15,6 +15,7 @@
 
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/utils/timer.hpp"
+#include "crocoddyl/core/codegen/action-base.hpp"
 #include "factory/arm.hpp"
 
 #define STDDEV(vec) std::sqrt(((vec - vec.mean())).square().sum() / (double(vec.size()) - 1.))

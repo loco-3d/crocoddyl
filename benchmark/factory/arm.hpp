@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef CROCODDYL_ARM_FACTORY_HPP_
-#define CROCODDYL_ARM_FACTORY_HPP
+#define CROCODDYL_ARM_FACTORY_HPP_
 
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/algorithm/model.hpp>
@@ -15,14 +15,13 @@
 
 #include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/core/codegen/action-base.hpp"
+#include "crocoddyl/multibody/actuations/full.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
 #include "crocoddyl/multibody/costs/cost-sum.hpp"
 #include "crocoddyl/multibody/costs/frame-placement.hpp"
 #include "crocoddyl/multibody/costs/state.hpp"
 #include "crocoddyl/multibody/costs/control.hpp"
-#include "crocoddyl/multibody/actuations/full.hpp"
 
 namespace crocoddyl {
 namespace benchmark {
@@ -91,4 +90,4 @@ void build_arm_action_models(boost::shared_ptr<crocoddyl::ActionModelAbstractTpl
 }  // namespace benchmark
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_ARM_FACTORY_HPP
+#endif  // CROCODDYL_ARM_FACTORY_HPP_
