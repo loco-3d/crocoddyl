@@ -60,9 +60,9 @@ ADD_PROJECT_DEPENDENCY(example-robot-data 3.2.0 REQUIRED PKG_CONFIG_REQUIRES "ex
 ADD_OPTIONAL_DEPENDENCY("quadprog")
 ADD_OPTIONAL_DEPENDENCY("scipy")
 
-OPTION(BUILD_WITH_CODEGEN_SUPPORT "Build the library with the Code Generation support" OFF)
+OPTION(BUILD_WITH_CODEGEN_SUPPORT "Build the library with the Code Generation support (required CppADCodeGen)" OFF)
 
-OPTION(BUILD_WITH_MULTITHREADS "Build the library with the OpenMP support (required OpenMP)" OFF)
+OPTION(BUILD_WITH_MULTITHREADS "Build the library with the Multithreading support (required OpenMP)" OFF)
 IF(BUILD_WITH_MULTITHREADS)
   SET(BUILD_WITH_NTHREADS "4" CACHE STRING "Number of threads")
   string(REGEX MATCH "^[0-9]+$" BUILD_WITH_NTHREADS  ${BUILD_WITH_NTHREADS})
