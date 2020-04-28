@@ -13,30 +13,10 @@
 #define NUM_THREADS 1
 #endif
 
-#include <pinocchio/parsers/urdf.hpp>
-#include <pinocchio/parsers/srdf.hpp>
-#include <pinocchio/algorithm/model.hpp>
-#include <pinocchio/container/aligned-vector.hpp>
-#include <example-robot-data/path.hpp>
-
-#include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/core/codegen/action-base.hpp"
-#include "crocoddyl/multibody/contacts/contact-6d.hpp"
-#include "crocoddyl/multibody/contacts/contact-3d.hpp"
-#include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
-#include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
-#include "crocoddyl/core/integrator/euler.hpp"
-
-#include "crocoddyl/core/mathbase.hpp"
-
-#include "crocoddyl/multibody/costs/cost-sum.hpp"
-#include "crocoddyl/multibody/costs/frame-placement.hpp"
-#include "crocoddyl/multibody/costs/state.hpp"
-#include "crocoddyl/multibody/costs/control.hpp"
-#include "crocoddyl/multibody/actuations/full.hpp"
-#include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/utils/timer.hpp"
+#include "crocoddyl/core/codegen/action-base.hpp"
+#include "factory/biped.hpp"
 
 #define STDDEV(vec) std::sqrt(((vec - vec.mean())).square().sum() / (static_cast<double>(vec.size()) - 1))
 #define AVG(vec) (vec.mean())
@@ -48,209 +28,45 @@ int main(int argc, char* argv[]) {
     T = atoi(argv[1]);
   }
 
-  /**************************DOUBLE**********************/
-  /**************************DOUBLE**********************/
+  // Building the running and terminal models
+  typedef CppAD::AD<CppAD::cg::CG<double> > ADScalar;
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModel, terminalModel;
+  crocoddyl::benchmark::build_biped_action_models(runningModel, terminalModel);
 
-  pinocchio::Model model;
+  // Code generation of the running an terminal models
+  boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<ADScalar> > ad_runningModel, ad_terminalModel;
+  crocoddyl::benchmark::build_biped_action_models(ad_runningModel, ad_terminalModel);
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> cg_runningModel =
+      boost::make_shared<crocoddyl::ActionModelCodeGen>(ad_runningModel, runningModel,
+                                                        "biped_with_contact_running_cg");
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> cg_terminalModel =
+      boost::make_shared<crocoddyl::ActionModelCodeGen>(ad_terminalModel, terminalModel,
+                                                        "biped_with_contact_terminal_cg");
 
-  pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_reduced.urdf",
-                              pinocchio::JointModelFreeFlyer(), model);
-  model.lowerPositionLimit.head<7>().array() = -1;
-  model.upperPositionLimit.head<7>().array() = 1.;
-
-  std::cout << "NQ: " << model.nq << std::endl;
-  std::cout << "Number of nodes: " << N << std::endl << std::endl;
-
-  pinocchio::srdf::loadReferenceConfigurations(model, EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf",
-                                               false);
-  const std::string RF = "leg_right_6_joint";
-  const std::string LF = "leg_left_6_joint";
-
+  // Get the initial state
   boost::shared_ptr<crocoddyl::StateMultibody> state =
-      boost::make_shared<crocoddyl::StateMultibody>(boost::make_shared<pinocchio::Model>(model));
-
-  boost::shared_ptr<crocoddyl::ActuationModelFloatingBase> actuation =
-      boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state);
-
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(runningModel->get_state());
+  std::cout << "NQ: " << state->get_nq() << std::endl;
+  std::cout << "Number of nodes: " << N << std::endl << std::endl;
   Eigen::VectorXd x0(state->rand());
 
-  crocoddyl::FramePlacement Mref(model.getFrameId("arm_right_7_joint"),
-                                 pinocchio::SE3(Eigen::Matrix3d::Identity(), Eigen::Vector3d(.0, .0, .4)));
-
-  boost::shared_ptr<crocoddyl::CostModelAbstract> goalTrackingCost =
-      boost::make_shared<crocoddyl::CostModelFramePlacement>(state, Mref, actuation->get_nu());
-
-  boost::shared_ptr<crocoddyl::CostModelAbstract> xRegCost =
-      boost::make_shared<crocoddyl::CostModelState>(state, actuation->get_nu());
-  boost::shared_ptr<crocoddyl::CostModelAbstract> uRegCost =
-      boost::make_shared<crocoddyl::CostModelControl>(state, actuation->get_nu());
-
-  boost::shared_ptr<crocoddyl::CostModelSum> runningCostModel =
-      boost::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu());
-  boost::shared_ptr<crocoddyl::CostModelSum> terminalCostModel =
-      boost::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu());
-
-  runningCostModel->addCost("gripperPose", goalTrackingCost, 1);
-  runningCostModel->addCost("xReg", xRegCost, 1e-4);
-  runningCostModel->addCost("uReg", uRegCost, 1e-4);
-  terminalCostModel->addCost("gripperPose", goalTrackingCost, 1);
-
-  boost::shared_ptr<crocoddyl::ContactModelMultiple> contact_models =
-      boost::make_shared<crocoddyl::ContactModelMultiple>(state, actuation->get_nu());
-
-  crocoddyl::FramePlacement xref(model.getFrameId(RF), pinocchio::SE3::Identity());
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> support_contact_model6D =
-      boost::make_shared<crocoddyl::ContactModel6D>(state, xref, actuation->get_nu(), Eigen::Vector2d(0., 50.));
-  contact_models->addContact(model.frames[model.getFrameId(RF)].name + "_contact", support_contact_model6D);
-
-  crocoddyl::FrameTranslation x2ref(model.getFrameId(LF), Eigen::Vector3d::Zero());
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> support_contact_model3D =
-      boost::make_shared<crocoddyl::ContactModel3D>(state, x2ref, actuation->get_nu(), Eigen::Vector2d(0., 50.));
-  contact_models->addContact(model.frames[model.getFrameId(LF)].name + "_contact", support_contact_model3D);
-
-  boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> runningDAM =
-      boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics>(state, actuation, contact_models,
-                                                                               runningCostModel);
-
-  boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> terminalDAM =
-      boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics>(state, actuation, contact_models,
-                                                                               terminalCostModel);
-
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModel =
-      boost::make_shared<crocoddyl::IntegratedActionModelEuler>(runningDAM, 1e-3);
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> terminalModel =
-      boost::make_shared<crocoddyl::IntegratedActionModelEuler>(terminalDAM, 1e-3);
-
+  // Defining the shooting problem for both cases: with and without code generation
   std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(N, runningModel);
-
+  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > cg_runningModels(N, cg_runningModel);
   boost::shared_ptr<crocoddyl::ShootingProblem> problem =
       boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModels, terminalModel);
+  boost::shared_ptr<crocoddyl::ShootingProblem> cg_problem =
+      boost::make_shared<crocoddyl::ShootingProblem>(x0, cg_runningModels, cg_terminalModel);
+
+  // Computing the warm-start
   std::vector<Eigen::VectorXd> xs(N + 1, x0);
-
   std::vector<Eigen::VectorXd> us(N, Eigen::VectorXd::Zero(runningModel->get_nu()));
-
   for (unsigned int i = 0; i < N; ++i) {
     const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = problem->get_runningModels()[i];
     const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = problem->get_runningDatas()[i];
+    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& cg_model = cg_problem->get_runningModels()[i];
+    const boost::shared_ptr<crocoddyl::ActionDataAbstract>& cg_data = cg_problem->get_runningDatas()[i];
     model->quasiStatic(data, us[i], x0);
-  }
-
-  /**************************************Start ADScalar*******************************/
-  /**************************************Start ADScalar*******************************/
-  /**************************************Start ADScalar*******************************/
-  /**************************************Start ADScalar*******************************/
-  /**************************************Start ADScalar*******************************/
-  /**************************************Start ADScalar*******************************/
-
-  typedef double Scalar;
-  typedef crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
-
-  typedef CppAD::cg::CG<Scalar> CGScalar;
-  typedef CppAD::AD<CGScalar> ADScalar;
-  typedef crocoddyl::MathBaseTpl<ADScalar>::VectorXs ADVectorXs;
-  typedef crocoddyl::MathBaseTpl<ADScalar>::Vector2s ADVector2s;
-  typedef crocoddyl::MathBaseTpl<ADScalar>::Vector3s ADVector3s;
-  typedef crocoddyl::MathBaseTpl<ADScalar>::Matrix3s ADMatrix3s;
-  typedef crocoddyl::FramePlacementTpl<ADScalar> ADFramePlacement;
-  typedef crocoddyl::FrameTranslationTpl<ADScalar> ADFrameTranslation;
-  typedef crocoddyl::CostModelAbstractTpl<ADScalar> ADCostModelAbstract;
-  typedef crocoddyl::CostModelFramePlacementTpl<ADScalar> ADCostModelFramePlacement;
-  typedef crocoddyl::CostModelStateTpl<ADScalar> ADCostModelState;
-  typedef crocoddyl::CostModelControlTpl<ADScalar> ADCostModelControl;
-  typedef crocoddyl::CostModelSumTpl<ADScalar> ADCostModelSum;
-  typedef crocoddyl::ContactModelAbstractTpl<ADScalar> ADContactModelAbstract;
-  typedef crocoddyl::ContactModelMultipleTpl<ADScalar> ADContactModelMultiple;
-  typedef crocoddyl::ContactModel3DTpl<ADScalar> ADContactModel3D;
-  typedef crocoddyl::ContactModel6DTpl<ADScalar> ADContactModel6D;
-  typedef crocoddyl::ActionModelAbstractTpl<ADScalar> ADActionModelAbstract;
-  typedef crocoddyl::ActuationModelFloatingBaseTpl<ADScalar> ADActuationModelFloatingBase;
-  typedef crocoddyl::DifferentialActionModelContactFwdDynamicsTpl<ADScalar>
-      ADDifferentialActionModelContactFwdDynamics;
-  typedef crocoddyl::IntegratedActionModelEulerTpl<ADScalar> ADIntegratedActionModelEuler;
-
-  pinocchio::ModelTpl<ADScalar> ad_model(model.cast<ADScalar>());
-  boost::shared_ptr<crocoddyl::StateMultibodyTpl<ADScalar> > ad_state =
-      boost::make_shared<crocoddyl::StateMultibodyTpl<ADScalar> >(
-          boost::make_shared<pinocchio::ModelTpl<ADScalar> >(ad_model));
-
-  ADVectorXs ad_x0(x0.cast<ADScalar>());
-
-  boost::shared_ptr<ADActuationModelFloatingBase> ad_actuation =
-      boost::make_shared<ADActuationModelFloatingBase>(ad_state);
-
-  ADFramePlacement ad_Mref(
-      ad_model.getFrameId("arm_right_7_joint"),
-      pinocchio::SE3Tpl<ADScalar>(ADMatrix3s::Identity(), ADVector3s(ADScalar(.0), ADScalar(.0), ADScalar(.4))));
-
-  boost::shared_ptr<ADCostModelAbstract> ad_goalTrackingCost =
-      boost::make_shared<ADCostModelFramePlacement>(ad_state, ad_Mref, ad_actuation->get_nu());
-
-  boost::shared_ptr<ADCostModelAbstract> ad_xRegCost =
-      boost::make_shared<ADCostModelState>(ad_state, ad_actuation->get_nu());
-  boost::shared_ptr<ADCostModelAbstract> ad_uRegCost =
-      boost::make_shared<ADCostModelControl>(ad_state, ad_actuation->get_nu());
-
-  // Create a cost model per the running and terminal action model.
-  boost::shared_ptr<ADCostModelSum> ad_runningCostModel =
-      boost::make_shared<ADCostModelSum>(ad_state, ad_actuation->get_nu());
-  boost::shared_ptr<ADCostModelSum> ad_terminalCostModel =
-      boost::make_shared<ADCostModelSum>(ad_state, ad_actuation->get_nu());
-
-  // Then let's added the running and terminal cost functions
-  ad_runningCostModel->addCost("gripperPose", ad_goalTrackingCost, ADScalar(1));
-  ad_runningCostModel->addCost("xReg", ad_xRegCost, ADScalar(1e-4));
-  ad_runningCostModel->addCost("uReg", ad_uRegCost, ADScalar(1e-4));
-  ad_terminalCostModel->addCost("gripperPose", ad_goalTrackingCost, ADScalar(1));
-
-  boost::shared_ptr<ADContactModelMultiple> ad_contact_models =
-      boost::make_shared<ADContactModelMultiple>(ad_state, ad_actuation->get_nu());
-
-  ADFramePlacement ad_xref(ad_model.getFrameId(RF), pinocchio::SE3Tpl<ADScalar>::Identity());
-  boost::shared_ptr<ADContactModelAbstract> ad_support_contact_model6D = boost::make_shared<ADContactModel6D>(
-      ad_state, ad_xref, ad_actuation->get_nu(), ADVector2s(ADScalar(0.), ADScalar(50.)));
-  ad_contact_models->addContact(ad_model.frames[ad_model.getFrameId(RF)].name + "_contact",
-                                ad_support_contact_model6D);
-
-  ADFrameTranslation ad_x2ref(ad_model.getFrameId(LF), ADVector3s::Zero());
-  boost::shared_ptr<ADContactModelAbstract> ad_support_contact_model3D = boost::make_shared<ADContactModel3D>(
-      ad_state, ad_x2ref, ad_actuation->get_nu(), ADVector2s(ADScalar(0.), ADScalar(50.)));
-  ad_contact_models->addContact(ad_model.frames[ad_model.getFrameId(LF)].name + "_contact",
-                                ad_support_contact_model3D);
-
-  // Next, we need to create an action model for running and terminal knots. The
-  // forward dynamics (computed using ABA) are implemented
-  // inside DifferentialActionModelFullyActuated.
-  boost::shared_ptr<ADDifferentialActionModelContactFwdDynamics> ad_runningDAM =
-      boost::make_shared<ADDifferentialActionModelContactFwdDynamics>(ad_state, ad_actuation, ad_contact_models,
-                                                                      ad_runningCostModel);
-
-  boost::shared_ptr<ADDifferentialActionModelContactFwdDynamics> ad_terminalDAM =
-      boost::make_shared<ADDifferentialActionModelContactFwdDynamics>(ad_state, ad_actuation, ad_contact_models,
-                                                                      ad_terminalCostModel);
-
-  // ADVectorXs ad_armature(ad_state->get_nq());
-  // ad_armature << 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.;
-  // ad_runningDAM->set_armature(ad_armature);
-  // ad_terminalDAM->set_armature(ad_armature);
-  boost::shared_ptr<ADActionModelAbstract> ad_runningModel =
-      boost::make_shared<ADIntegratedActionModelEuler>(ad_runningDAM, ADScalar(1e-3));
-  boost::shared_ptr<ADActionModelAbstract> ad_terminalModel =
-      boost::make_shared<ADIntegratedActionModelEuler>(ad_terminalDAM, ADScalar(1e-3));
-
-  /****************************/
-
-  // For calculation and for the ShootingProblem!!
-
-  boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > cg_runningModel =
-      boost::make_shared<crocoddyl::ActionModelCodeGenTpl<Scalar> >(ad_runningModel, runningModel, "biped_running");
-  boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > cg_terminalModel =
-      boost::make_shared<crocoddyl::ActionModelCodeGenTpl<Scalar> >(ad_terminalModel, terminalModel, "biped_terminal");
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > > cg_runningModels(N, cg_runningModel);
-  boost::shared_ptr<crocoddyl::ShootingProblem> cg_problem =
-      boost::make_shared<crocoddyl::ShootingProblem>(x0, cg_runningModels, cg_terminalModel);
-  for (unsigned int i = 0; i < N; ++i) {
-    const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >& cg_model = cg_problem->get_runningModels()[i];
-    const boost::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> >& cg_data = cg_problem->get_runningDatas()[i];
     cg_model->quasiStatic(cg_data, us[i], x0);
   }
 
@@ -260,10 +76,10 @@ int main(int argc, char* argv[]) {
   crocoddyl::SolverDDP cg_ddp(cg_problem);
   ddp.setCandidate(xs, us, false);
   cg_ddp.setCandidate(xs, us, false);
-  boost::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> > cg_runningData = cg_runningModel->createData();
-  boost::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> > runningData = runningModel->createData();
-  VectorXs x_rand = cg_runningModel->get_state()->rand();
-  VectorXs u_rand = VectorXs::Random(cg_runningModel->get_nu());
+  boost::shared_ptr<crocoddyl::ActionDataAbstract> cg_runningData = cg_runningModel->createData();
+  boost::shared_ptr<crocoddyl::ActionDataAbstract> runningData = runningModel->createData();
+  Eigen::VectorXd x_rand = cg_runningModel->get_state()->rand();
+  Eigen::VectorXd u_rand = Eigen::VectorXd::Random(cg_runningModel->get_nu());
   runningModel->calc(runningData, x_rand, u_rand);
   runningModel->calcDiff(runningData, x_rand, u_rand);
   cg_runningModel->calc(cg_runningData, x_rand, u_rand);
@@ -382,7 +198,7 @@ int main(int argc, char* argv[]) {
   duration.setZero();
   for (unsigned int i = 0; i < T; ++i) {
     crocoddyl::Timer timer;
-    ddp.forwardPass(0.5);
+    ddp.forwardPass(0.005);
     duration[i] = timer.get_duration();
   }
   double avg_fp = AVG(duration);
