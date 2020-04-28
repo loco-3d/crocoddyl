@@ -13,89 +13,13 @@
 #define NUM_THREADS 1
 #endif
 
-#include <pinocchio/parsers/urdf.hpp>
-#include <pinocchio/algorithm/model.hpp>
-
-#include <example-robot-data/path.hpp>
-#include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/core/codegen/action-base.hpp"
-#include "crocoddyl/multibody/actions/free-fwddyn.hpp"
-#include "crocoddyl/core/integrator/euler.hpp"
-
-#include "crocoddyl/core/mathbase.hpp"
-
-#include "crocoddyl/multibody/costs/cost-sum.hpp"
-#include "crocoddyl/multibody/costs/frame-placement.hpp"
-#include "crocoddyl/multibody/costs/state.hpp"
-#include "crocoddyl/multibody/costs/control.hpp"
-#include "crocoddyl/multibody/actuations/full.hpp"
-#include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/utils/timer.hpp"
+#include "factory/arm.hpp"
 
 #define STDDEV(vec) std::sqrt(((vec - vec.mean())).square().sum() / (double(vec.size()) - 1.))
 #define AVG(vec) (vec.mean())
 
-template <typename Scalar>
-void build_arm_action_model(boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >& runningModel,
-                            boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >& terminalModel) {
-  typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
-  typedef typename crocoddyl::MathBaseTpl<Scalar>::Vector3s Vector3s;
-  typedef typename crocoddyl::MathBaseTpl<Scalar>::Matrix3s Matrix3s;
-  typedef typename crocoddyl::FramePlacementTpl<Scalar> FramePlacement;
-  typedef typename crocoddyl::CostModelAbstractTpl<Scalar> CostModelAbstract;
-  typedef typename crocoddyl::CostModelFramePlacementTpl<Scalar> CostModelFramePlacement;
-  typedef typename crocoddyl::CostModelStateTpl<Scalar> CostModelState;
-  typedef typename crocoddyl::CostModelControlTpl<Scalar> CostModelControl;
-  typedef typename crocoddyl::CostModelSumTpl<Scalar> CostModelSum;
-  typedef typename crocoddyl::ActuationModelFullTpl<Scalar> ActuationModelFull;
-  typedef typename crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<Scalar> DifferentialActionModelFreeFwdDynamics;
-  typedef typename crocoddyl::IntegratedActionModelEulerTpl<Scalar> IntegratedActionModelEuler;
-
-  // because urdf is not supported with all scalar types.
-  pinocchio::ModelTpl<double> modeld;
-  pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf", modeld);
-
-  pinocchio::ModelTpl<Scalar> model_full(modeld.cast<Scalar>()), model;
-  std::vector<pinocchio::JointIndex> locked_joints{5, 6, 7};
-  pinocchio::buildReducedModel(model_full, locked_joints, VectorXs::Zero(model_full.nq), model);
-
-  boost::shared_ptr<crocoddyl::StateMultibodyTpl<Scalar> > state =
-      boost::make_shared<crocoddyl::StateMultibodyTpl<Scalar> >(
-          boost::make_shared<pinocchio::ModelTpl<Scalar> >(model));
-
-  FramePlacement Mref(model.getFrameId("gripper_left_joint"),
-                      pinocchio::SE3Tpl<Scalar>(Matrix3s::Identity(), Vector3s(Scalar(0), Scalar(0), Scalar(.4))));
-  boost::shared_ptr<CostModelAbstract> goalTrackingCost = boost::make_shared<CostModelFramePlacement>(state, Mref);
-  boost::shared_ptr<CostModelAbstract> xRegCost = boost::make_shared<CostModelState>(state);
-  boost::shared_ptr<CostModelAbstract> uRegCost = boost::make_shared<CostModelControl>(state);
-
-  // Create a cost model per the running and terminal action model.
-  boost::shared_ptr<CostModelSum> runningCostModel = boost::make_shared<CostModelSum>(state);
-  boost::shared_ptr<CostModelSum> terminalCostModel = boost::make_shared<CostModelSum>(state);
-
-  // Then let's added the running and terminal cost functions
-  runningCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1));
-  runningCostModel->addCost("xReg", xRegCost, Scalar(1e-4));
-  runningCostModel->addCost("uReg", uRegCost, Scalar(1e-4));
-  terminalCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1));
-
-  // We define an actuation model
-  boost::shared_ptr<ActuationModelFull> actuation = boost::make_shared<ActuationModelFull>(state);
-
-  // Next, we need to create an action model for running and terminal knots. The
-  // forward dynamics (computed using ABA) are implemented
-  // inside DifferentialActionModelFullyActuated.
-  boost::shared_ptr<DifferentialActionModelFreeFwdDynamics> runningDAM =
-      boost::make_shared<DifferentialActionModelFreeFwdDynamics>(state, actuation, runningCostModel);
-
-  // VectorXs armature(state->get_nq());
-  // armature << 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.;
-  // runningDAM->set_armature(armature);
-  // terminalDAM->set_armature(armature);
-  runningModel = boost::make_shared<IntegratedActionModelEuler>(runningDAM, Scalar(1e-3));
-  terminalModel = boost::make_shared<IntegratedActionModelEuler>(runningDAM, Scalar(0.));
-}
 
 int main(int argc, char* argv[]) {
   unsigned int N = 100;  // number of nodes
@@ -107,11 +31,11 @@ int main(int argc, char* argv[]) {
   // Building the running and terminal models
   typedef CppAD::AD<CppAD::cg::CG<double> > ADScalar;
   boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModel, terminalModel;
-  build_arm_action_model(runningModel, terminalModel);
+  crocoddyl::benchmark::build_arm_action_models(runningModel, terminalModel);
 
   // Code generation of the running an terminal models
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<ADScalar> > ad_runningModel, ad_terminalModel;
-  build_arm_action_model(ad_runningModel, ad_terminalModel);
+  crocoddyl::benchmark::build_arm_action_models(ad_runningModel, ad_terminalModel);
   boost::shared_ptr<crocoddyl::ActionModelAbstract> cg_runningModel =
       boost::make_shared<crocoddyl::ActionModelCodeGen>(ad_runningModel, runningModel, "arm_manipulation_running_cg");
   boost::shared_ptr<crocoddyl::ActionModelAbstract> cg_terminalModel =

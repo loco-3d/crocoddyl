@@ -6,19 +6,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <pinocchio/parsers/urdf.hpp>
-#include <example-robot-data/path.hpp>
-#include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/actions/free-fwddyn.hpp"
-#include "crocoddyl/core/integrator/euler.hpp"
-#include "crocoddyl/multibody/costs/cost-sum.hpp"
-#include "crocoddyl/multibody/costs/frame-placement.hpp"
-#include "crocoddyl/multibody/costs/state.hpp"
-#include "crocoddyl/multibody/costs/control.hpp"
-#include "crocoddyl/multibody/actuations/full.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/utils/timer.hpp"
+#include "factory/arm.hpp"
 
 int main(int argc, char* argv[]) {
   bool CALLBACKS = false;
@@ -29,57 +20,18 @@ int main(int argc, char* argv[]) {
     T = atoi(argv[1]);
   }
 
-  pinocchio::Model model;
-  pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf", model);
+  // Building the running and terminal models
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModel, terminalModel;
+  crocoddyl::benchmark::build_arm_action_models(runningModel, terminalModel);
+
+  // Get the initial state
   boost::shared_ptr<crocoddyl::StateMultibody> state =
-      boost::make_shared<crocoddyl::StateMultibody>(boost::make_shared<pinocchio::Model>(model));
-
-  Eigen::VectorXd q0(state->get_nq());
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(runningModel->get_state());
+  std::cout << "NQ: " << state->get_nq() << std::endl;
+  std::cout << "Number of nodes: " << N << std::endl << std::endl;
+  Eigen::VectorXd q0 = Eigen::VectorXd::Random(state->get_nq());
   Eigen::VectorXd x0(state->get_nx());
-  q0 << 0.173046, 1., -0.52366, 0., 0., 0.1, -0.005;
-  x0 << q0, Eigen::VectorXd::Zero(state->get_nv());
-
-  // Note that we need to include a cost model (i.e. set of cost functions) in
-  // order to fully define the action model for our optimal control problem.
-  // For this particular example, we formulate three running-cost functions:
-  // goal-tracking cost, state and control regularization; and one terminal-cost:
-  // goal cost. First, let's create the common cost functions.
-  crocoddyl::FramePlacement Mref(model.getFrameId("gripper_left_joint"),
-                                 pinocchio::SE3(Eigen::Matrix3d::Identity(), Eigen::Vector3d(.0, .0, .4)));
-  boost::shared_ptr<crocoddyl::CostModelAbstract> goalTrackingCost =
-      boost::make_shared<crocoddyl::CostModelFramePlacement>(state, Mref);
-  boost::shared_ptr<crocoddyl::CostModelAbstract> xRegCost = boost::make_shared<crocoddyl::CostModelState>(state);
-  boost::shared_ptr<crocoddyl::CostModelAbstract> uRegCost = boost::make_shared<crocoddyl::CostModelControl>(state);
-
-  // Create a cost model per the running and terminal action model.
-  boost::shared_ptr<crocoddyl::CostModelSum> runningCostModel = boost::make_shared<crocoddyl::CostModelSum>(state);
-  boost::shared_ptr<crocoddyl::CostModelSum> terminalCostModel = boost::make_shared<crocoddyl::CostModelSum>(state);
-
-  // Then let's added the running and terminal cost functions
-  runningCostModel->addCost("gripperPose", goalTrackingCost, 1);
-  runningCostModel->addCost("xReg", xRegCost, 1e-4);
-  runningCostModel->addCost("uReg", uRegCost, 1e-4);
-  terminalCostModel->addCost("gripperPose", goalTrackingCost, 1);
-
-  // We define an actuation model
-  boost::shared_ptr<crocoddyl::ActuationModelFull> actuation =
-      boost::make_shared<crocoddyl::ActuationModelFull>(state);
-
-  // Next, we need to create an action model for running and terminal knots. The
-  // forward dynamics (computed using ABA) are implemented
-  // inside DifferentialActionModelFullyActuated.
-  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> runningDAM =
-      boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(state, actuation, runningCostModel);
-  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> terminalDAM =
-      boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(state, actuation, terminalCostModel);
-  Eigen::VectorXd armature(state->get_nq());
-  armature << 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.;
-  runningDAM->set_armature(armature);
-  terminalDAM->set_armature(armature);
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModel =
-      boost::make_shared<crocoddyl::IntegratedActionModelEuler>(runningDAM, 1e-3);
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> terminalModel =
-      boost::make_shared<crocoddyl::IntegratedActionModelEuler>(terminalDAM, 1e-3);
+  x0 << q0, Eigen::VectorXd::Random(state->get_nv());
 
   // For this optimal control problem, we define 100 knots (or running action
   // models) plus a terminal knot
