@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,8 +33,8 @@
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/utils/timer.hpp"
 
-#define STDDEV(vec) std::sqrt(((vec - vec.mean())).square().sum() / (double(vec.size()) - 1.)) * 1000
-#define AVG(vec) (vec.mean()) * 1000.
+#define STDDEV(vec) std::sqrt(((vec - vec.mean())).square().sum() / (double(vec.size()) - 1.))
+#define AVG(vec) (vec.mean())
 
 int main(int argc, char* argv[]) {
   unsigned int N = 100;  // number of nodes
@@ -234,34 +234,16 @@ int main(int argc, char* argv[]) {
   assert_pretty(cg_runningData->Fu.isApprox(runningData->Fu), "Problem in Fu");
   /*****************************************************************************/
 
-  Eigen::ArrayXd duration_cd(T);
-  Eigen::ArrayXd avg_cd(NUM_THREADS);
-  Eigen::ArrayXd stddev_cd(NUM_THREADS);
-
-  Eigen::ArrayXd duration_cd_wo_calc(T);
-  Eigen::ArrayXd avg_cd_wo_calc(NUM_THREADS);
-  Eigen::ArrayXd stddev_cd_wo_calc(NUM_THREADS);
-
-  Eigen::ArrayXd duration_calc(T);
-  Eigen::ArrayXd avg_calc(NUM_THREADS);
-  Eigen::ArrayXd stddev_calc(NUM_THREADS);
-
-  Eigen::ArrayXd duration_dcalc(T);
-  Eigen::ArrayXd avg_dcalc(NUM_THREADS);
-  Eigen::ArrayXd stddev_dcalc(NUM_THREADS);
-
-  Eigen::ArrayXd duration_dcalcpin(T);
-  Eigen::ArrayXd avg_dcalcpin(NUM_THREADS);
-  Eigen::ArrayXd stddev_dcalcpin(NUM_THREADS);
-
-  Eigen::ArrayXd duration_diffcalcpin(T);
-  Eigen::ArrayXd avg_diffcalcpin(NUM_THREADS);
-  Eigen::ArrayXd stddev_diffcalcpin(NUM_THREADS);
+  Eigen::ArrayXd duration(T);
+  Eigen::ArrayXd avg(NUM_THREADS);
+  Eigen::ArrayXd stddev(NUM_THREADS);
 
   problem->calc(xs, us);
 
+  /*******************************************************************************/
+  /****************************** ACTION MODEL TIMINGS ***************************/
   for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
-    duration_cd.setZero();
+    duration.setZero();
 #ifdef WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
 #endif
@@ -277,18 +259,18 @@ int main(int argc, char* argv[]) {
       }
       // terminalModel->calcDiff(problem->terminal_data_, xs.back());
       // end of calcdiff function
-      duration_cd[i] = timer.get_duration();
+      duration[i] = timer.get_duration();
     }
-    avg_cd[ithread] = AVG(duration_cd);
-    stddev_cd[ithread] = STDDEV(duration_cd);
-    std::cout << ithread + 1 << " threaded calcDiff [mean +- stddev in us]: " << avg_cd[ithread] << " +- "
-              << stddev_cd[ithread] << " (per nodes/thread: " << avg_cd[ithread] * (ithread + 1) / N << " +- "
-              << stddev_cd[ithread] * (ithread + 1) / N << ")" << std::endl;
+    avg[ithread] = AVG(duration);
+    stddev[ithread] = STDDEV(duration);
+    std::cout << ithread + 1 << " threaded calcDiff [ms]:\t" << avg[ithread] << " +- " << stddev[ithread]
+              << " (per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
+              << ")" << std::endl;
   }
 
   // CALC Timings
   for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
-    duration_calc.setZero();
+    duration.setZero();
 #ifdef WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
 #endif
@@ -303,18 +285,19 @@ int main(int argc, char* argv[]) {
         runningModels[j]->calc(problem->get_runningDatas()[j], xs[j], us[j]);
       }
       // end of calcdiff function
-      duration_calc[i] = timer.get_duration();
+      duration[i] = timer.get_duration();
     }
-    avg_calc[ithread] = AVG(duration_calc);
-    stddev_calc[ithread] = STDDEV(duration_calc);
-    std::cout << ithread + 1 << " threaded calc [mean +- stddev in us]: " << avg_calc[ithread] << " +- "
-              << stddev_calc[ithread] << " (per nodes/thread: " << avg_calc[ithread] * (ithread + 1) / N << " +- "
-              << stddev_calc[ithread] * (ithread + 1) / N << ")" << std::endl;
+    avg[ithread] = AVG(duration);
+    stddev[ithread] = STDDEV(duration);
+    std::cout << ithread + 1 << " threaded calc [ms]:    \t" << avg[ithread] << " +- " << stddev[ithread]
+              << " (per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
+              << ")" << std::endl;
   }
 
-  // differential CALC Timings
+  /*******************************************************************************/
+  /************************* DIFFERENTIAL ACTION TIMINGS *************************/
   for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
-    duration_dcalc.setZero();
+    duration.setZero();
 #ifdef WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
 #endif
@@ -335,18 +318,19 @@ int main(int argc, char* argv[]) {
         m->get_differential()->calc(d->differential, xs[j], us[j]);
       }
       // end of calcdiff function
-      duration_dcalc[i] = timer.get_duration();
+      duration[i] = timer.get_duration();
     }
-    avg_dcalc[ithread] = AVG(duration_dcalc);
-    stddev_dcalc[ithread] = STDDEV(duration_dcalc);
-    std::cout << ithread + 1 << " threaded differential calc [mean +- stddev in us]: " << avg_dcalc[ithread] << " +- "
-              << stddev_dcalc[ithread] << " (per nodes/thread: " << avg_dcalc[ithread] * (ithread + 1) / N << " +- "
-              << stddev_dcalc[ithread] * (ithread + 1) / N << ")" << std::endl;
+    avg[ithread] = AVG(duration);
+    stddev[ithread] = STDDEV(duration);
+    std::cout << ithread + 1 << " threaded diff calc [ms]: \t" << avg[ithread] << " +- " << stddev[ithread]
+              << " (per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
+              << ")" << std::endl;
   }
 
-  // differential aba Timings
+  /*******************************************************************************/
+  //************************** PINOCCHIO ABA TIMINGS *****************************/
   for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
-    duration_dcalcpin.setZero();
+    duration.setZero();
 #ifdef WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
 #endif
@@ -358,7 +342,6 @@ int main(int argc, char* argv[]) {
 #pragma omp parallel for
 #endif
       // start of calcDiff function
-
       for (unsigned int j = 0; j < N; ++j) {
         boost::shared_ptr<crocoddyl::IntegratedActionModelEuler> m =
             boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(problem->get_runningModels()[j]);
@@ -376,18 +359,18 @@ int main(int argc, char* argv[]) {
         pinocchio::aba(dm->get_pinocchio(), dd->pinocchio, q, v, us[j]);
       }
       // end of calcdiff function
-      duration_dcalcpin[i] = timer.get_duration();
+      duration[i] = timer.get_duration();
     }
-    avg_dcalcpin[ithread] = AVG(duration_dcalcpin);
-    stddev_dcalcpin[ithread] = STDDEV(duration_dcalcpin);
-    std::cout << ithread + 1 << " threaded aba [mean +- stddev in us]: " << avg_dcalcpin[ithread] << " +- "
-              << stddev_dcalcpin[ithread] << " (per nodes/thread: " << avg_dcalcpin[ithread] * (ithread + 1) / N
-              << " +- " << stddev_dcalcpin[ithread] * (ithread + 1) / N << ")" << std::endl;
+    avg[ithread] = AVG(duration);
+    stddev[ithread] = STDDEV(duration);
+    std::cout << ithread + 1 << " threaded aba [ms]:       \t" << avg[ithread] << " +- " << stddev[ithread]
+              << " (per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
+              << ")" << std::endl;
   }
 
   // differential aba-derivatives Timings
   for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
-    duration_diffcalcpin.setZero();
+    duration.setZero();
 #ifdef WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
 #endif
@@ -417,18 +400,19 @@ int main(int argc, char* argv[]) {
         pinocchio::computeABADerivatives(dm->get_pinocchio(), dd->pinocchio, q, v, us[j]);
       }
       // end of calcdiff function
-      duration_diffcalcpin[i] = timer.get_duration();
+      duration[i] = timer.get_duration();
     }
-    avg_diffcalcpin[ithread] = AVG(duration_diffcalcpin);
-    stddev_diffcalcpin[ithread] = STDDEV(duration_diffcalcpin);
-    std::cout << ithread + 1 << " threaded aba-derivs [mean +- stddev in us]: " << avg_diffcalcpin[ithread] << " +- "
-              << stddev_diffcalcpin[ithread] << " (per nodes/thread: " << avg_diffcalcpin[ithread] * (ithread + 1) / N
-              << " +- " << stddev_diffcalcpin[ithread] * (ithread + 1) / N << ")" << std::endl;
+    avg[ithread] = AVG(duration);
+    stddev[ithread] = STDDEV(duration);
+    std::cout << ithread + 1 << " threaded aba-derivs [ms]:\t" << avg[ithread] << " +- " << stddev[ithread]
+              << " (per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
+              << ")" << std::endl;
   }
 
+  /*******************************************************************************/
+  //****************** DDP BACKWARD AND FORWARD PASSES TIMINGS *******************/
   ddp.calcDiff();
   Eigen::ArrayXd duration_bp(T);
-  // std::cout << "Starting timing backwardpass"<<std::endl;
 
   // Timings pyrene-arm-backwardPass
   for (unsigned int i = 0; i < T; ++i) {
@@ -438,13 +422,10 @@ int main(int argc, char* argv[]) {
   }
   double avg_bp = AVG(duration_bp);
   double stddev_bp = STDDEV(duration_bp);
-  std::cout << "backwardPass [mean +- stddev in us]: " << avg_bp << " +- " << stddev_bp
-            << " (per nodes: " << avg_bp / N << " +- " << stddev_bp / N << ")" << std::endl;
+  std::cout << "backwardPass [us]:\t\t" << avg_bp << " +- " << stddev_bp << " (per nodes: " << avg_bp / N << " +- "
+            << stddev_bp / N << ")" << std::endl;
 
   Eigen::ArrayXd duration_fp(T);
-  // std::cout << "Starting likwid forward pass"<<std::endl;
-
-  // std::cout << "Starting timing forwardpass"<<std::endl;
 
   // Timings pyrene-arm-forwardPass
   for (unsigned int i = 0; i < T; ++i) {
@@ -454,40 +435,18 @@ int main(int argc, char* argv[]) {
   }
   double avg_fp = AVG(duration_fp);
   double stddev_fp = STDDEV(duration_fp);
-  std::cout << "forwardPass [mean +- stddev in us]: " << avg_fp << " +- " << stddev_fp << " (per nodes: " << avg_fp / N
-            << " +- " << stddev_fp / N << ")" << std::endl;
+  std::cout << "forwardPass [us]: \t\t" << avg_fp << " +- " << stddev_fp << " (per nodes: " << avg_fp / N << " +- "
+            << stddev_fp / N << ")" << std::endl;
 
-  /**********************************************/
-  /***************************CHECKING CODE GEN TIMINGS*********************/
+  /*******************************************************************************/
+  /*************************** CODE GENERATION TIMINGS ***************************/
 
-  Eigen::ArrayXd cg_duration_cd(T);
-  Eigen::ArrayXd cg_avg_cd(NUM_THREADS);
-  Eigen::ArrayXd cg_stddev_cd(NUM_THREADS);
-
-  Eigen::ArrayXd cg_duration_cd_wo_calc(T);
-  Eigen::ArrayXd cg_avg_cd_wo_calc(NUM_THREADS);
-  Eigen::ArrayXd cg_stddev_cd_wo_calc(NUM_THREADS);
-
-  Eigen::ArrayXd cg_duration_calc(T);
-  Eigen::ArrayXd cg_avg_calc(NUM_THREADS);
-  Eigen::ArrayXd cg_stddev_calc(NUM_THREADS);
-
-  Eigen::ArrayXd cg_duration_dcalc(T);
-  Eigen::ArrayXd cg_avg_dcalc(NUM_THREADS);
-  Eigen::ArrayXd cg_stddev_dcalc(NUM_THREADS);
-
-  Eigen::ArrayXd cg_duration_dcalcpin(T);
-  Eigen::ArrayXd cg_avg_dcalcpin(NUM_THREADS);
-  Eigen::ArrayXd cg_stddev_dcalcpin(NUM_THREADS);
-
-  Eigen::ArrayXd cg_duration_diffcalcpin(T);
-  Eigen::ArrayXd cg_avg_diffcalcpin(NUM_THREADS);
-  Eigen::ArrayXd cg_stddev_diffcalcpin(NUM_THREADS);
-
+  /*******************************************************************************/
+  /****************************** ACTION MODEL TIMINGS ***************************/
+  std::cout << "Code Generation:" << std::endl;
   cg_problem->calc(xs, us);
-
   for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
-    cg_duration_cd.setZero();
+    duration.setZero();
 #ifdef WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
 #endif
@@ -504,18 +463,18 @@ int main(int argc, char* argv[]) {
       }
       // terminalModel->calcDiff(problem->terminal_data_, xs.back());
       // end of calcdiff function
-      cg_duration_cd[i] = timer.get_duration();
+      duration[i] = timer.get_duration();
     }
-    cg_avg_cd[ithread] = AVG(cg_duration_cd);
-    cg_stddev_cd[ithread] = STDDEV(cg_duration_cd);
-    std::cout << ithread + 1 << " threaded calcDiff [mean +- stddev in us]: " << cg_avg_cd[ithread] << " +- "
-              << cg_stddev_cd[ithread] << " (per nodes/thread: " << cg_avg_cd[ithread] * (ithread + 1) / N << " +- "
-              << cg_stddev_cd[ithread] * (ithread + 1) / N << ")" << std::endl;
+    avg[ithread] = AVG(duration);
+    stddev[ithread] = STDDEV(duration);
+    std::cout << ithread + 1 << " threaded calcDiff [us]:\t" << avg[ithread] << " +- " << stddev[ithread]
+              << " (per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
+              << ")" << std::endl;
   }
 
   // CALC Timings
   for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
-    cg_duration_calc.setZero();
+    duration.setZero();
 #ifdef WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
 #endif
@@ -530,12 +489,37 @@ int main(int argc, char* argv[]) {
         cg_runningModels[j]->calc(cg_problem->get_runningDatas()[j], xs[j], us[j]);
       }
       // end of calcdiff function
-      cg_duration_calc[i] = timer.get_duration();
+      duration[i] = timer.get_duration();
     }
-    cg_avg_calc[ithread] = AVG(cg_duration_calc);
-    cg_stddev_calc[ithread] = STDDEV(cg_duration_calc);
-    std::cout << ithread + 1 << " threaded calc [mean +- stddev in us]: " << cg_avg_calc[ithread] << " +- "
-              << cg_stddev_calc[ithread] << " (per nodes/thread: " << cg_avg_calc[ithread] * (ithread + 1) / N
-              << " +- " << cg_stddev_calc[ithread] * (ithread + 1) / N << ")" << std::endl;
+    avg[ithread] = AVG(duration);
+    stddev[ithread] = STDDEV(duration);
+    std::cout << ithread + 1 << " threaded calc [us]:    \t" << avg[ithread] << " +- " << stddev[ithread]
+              << " (per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
+              << ")" << std::endl;
   }
+
+  /*******************************************************************************/
+  //****************** DDP BACKWARD AND FORWARD PASSES TIMINGS *******************/
+  cg_ddp.calcDiff();
+  // Timings pyrene-arm-backwardPass
+  for (unsigned int i = 0; i < T; ++i) {
+    crocoddyl::Timer timer;
+    cg_ddp.backwardPass();
+    duration_bp[i] = timer.get_duration();
+  }
+  avg_bp = AVG(duration_bp);
+  stddev_bp = STDDEV(duration_bp);
+  std::cout << "backwardPass [us]:\t\t" << avg_bp << " +- " << stddev_bp << " (per nodes: " << avg_bp / N << " +- "
+            << stddev_bp / N << ")" << std::endl;
+
+  // Timings pyrene-arm-forwardPass
+  for (unsigned int i = 0; i < T; ++i) {
+    crocoddyl::Timer timer;
+    cg_ddp.forwardPass(0.5);
+    duration_fp[i] = timer.get_duration();
+  }
+  avg_fp = AVG(duration_fp);
+  stddev_fp = STDDEV(duration_fp);
+  std::cout << "forwardPass [us]: \t\t" << avg_fp << " +- " << stddev_fp << " (per nodes: " << avg_fp / N << " +- "
+            << stddev_fp / N << ")" << std::endl;
 }
