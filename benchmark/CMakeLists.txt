@@ -3,6 +3,7 @@ SET(${PROJECT_NAME}_BENCHMARK
   unicycle
   lqr
   arm-manipulation
+  arm-manipulation-timings
   quadrupedal-gaits
   bipedal-timings
   )
