@@ -202,6 +202,11 @@ typedef ActivationDataNumDiffTpl<double> ActivationDataNumDiff;
 typedef StateNumDiffTpl<double> StateNumDiff;
 typedef ActuationModelNumDiffTpl<double> ActuationModelNumDiff;
 
+#ifdef WITH_CODEGEN
+typedef ActionModelCodeGenTpl<double> ActionModelCodeGen;
+typedef ActionDataCodeGenTpl<double> ActionDataCodeGen;
+#endif
+
 }  // namespace crocoddyl
 
 #endif  // CROCODDYL_CORE_FWD_HPP_
