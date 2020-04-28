@@ -1,18 +1,18 @@
 SET(${PROJECT_NAME}_BENCHMARK
   boxqp
-  unicycle
-  lqr
-  arm-manipulation
+  unicycle-optctrl
+  lqr-optctrl
+  arm-manipulation-optctrl
   arm-manipulation-timings
-  quadrupedal-gaits
+  quadrupedal-gaits-optctrl
   bipedal-timings
   )
 
 
 IF(BUILD_WITH_CODEGEN_SUPPORT)
   SET(${PROJECT_NAME}_CODEGEN_BENCHMARK
-    arm-manipulation-cg
-    bipedal-with-contact-cg
+    arm-manipulation-codegen
+    bipedal-with-contact-codegen
     )
   LIST(APPEND ${PROJECT_NAME}_BENCHMARK ${${PROJECT_NAME}_CODEGEN_BENCHMARK})
 ENDIF()
@@ -34,11 +34,11 @@ ENDIF()
 
 IF(BUILD_PYTHON_INTERFACE)
   SET(${PROJECT_NAME}_BENCHMARK_PYTHON
-    unicycle
-    lqr
-    arm_manipulation
-    bipedal_walk
-    quadrupedal_gaits
+    unicycle_optctrl
+    lqr_optctrl
+    arm_manipulation_optctrl
+    bipedal_walk_optctrl
+    quadrupedal_gaits_optctrl
     )
   
   FOREACH(BENCHMARK_NAME ${${PROJECT_NAME}_BENCHMARK_PYTHON})
