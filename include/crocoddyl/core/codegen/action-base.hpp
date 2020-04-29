@@ -11,7 +11,7 @@
 #define CROCODDYL_CORE_CODEGEN_ACTION_BASE_HPP_
 
 #ifdef WITH_CODEGEN
-
+#include <functional>
 #include "pinocchio/codegen/cppadcg.hpp"
 
 #include "crocoddyl/core/action-base.hpp"
@@ -45,7 +45,10 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef CppAD::ADFun<CGScalar> ADFun;
 
   ActionModelCodeGenTpl(boost::shared_ptr<ADBase> admodel, boost::shared_ptr<Base> model,
-                        const std::string& library_name, const std::string& function_name_calc = "calc",
+                        const std::string& library_name,
+                        const std::size_t n_env = 0,
+                        std::function<void(boost::shared_ptr<ADBase>, const Eigen::Ref<const ADVectorXs>&)> fn_record_env = empty_record_env,
+                        const std::string& function_name_calc = "calc",
                         const std::string& function_name_calcDiff = "calcDiff")
       : Base(model->get_state(), model->get_nu()),
         model(model),
@@ -54,8 +57,10 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         function_name_calc(function_name_calc),
         function_name_calcDiff(function_name_calcDiff),
         library_name(library_name),
-        ad_X(ad_model->get_state()->get_nx() + ad_model->get_nu()),
-        ad_X2(ad_model->get_state()->get_nx() + ad_model->get_nu()),
+        n_env(n_env),
+        fn_record_env(fn_record_env),
+        ad_X(ad_model->get_state()->get_nx() + ad_model->get_nu() + n_env),
+        ad_X2(ad_model->get_state()->get_nx() + ad_model->get_nu() + n_env),
         ad_calcout(ad_model->get_state()->get_nx() + 1) {
     const std::size_t& ndx = ad_model->get_state()->get_ndx();
     const std::size_t& nu = ad_model->get_nu();
@@ -63,9 +68,17 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     initLib();
     loadLib();
   }
+
+  static void empty_record_env(boost::shared_ptr<ADBase>, const Eigen::Ref<const ADVectorXs>&) {}
+
   void recordCalc() {
     CppAD::Independent(ad_X);
-    ad_model->calc(ad_data, ad_X.head(ad_model->get_state()->get_nx()), ad_X.tail(ad_model->get_nu()));
+    const std::size_t& nx = ad_model->get_state()->get_nx();
+    const std::size_t& nu = ad_model->get_nu();
+    
+    fn_record_env(ad_model, ad_X.tail(n_env));
+    
+    ad_model->calc(ad_data, ad_X.head(nx), ad_X.segment(nx, nu));
     collect_calcout();
     // ad_calcout.template head<1>()[0] = ad_data->cost;
     // ad_calcout.tail(ad_model->get_state()->get_nx()) = ad_data->xnext;
@@ -101,10 +114,13 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
 
   void recordCalcDiff() {
     CppAD::Independent(ad_X2);
-    // ActionDataCodeGenTpl<ADScalar>* ad_d =
-    // static_cast<ActionDataCodeGenTpl<ADScalar>*>(ad_data.get());
-    ad_model->calc(ad_data, ad_X2.head(ad_model->get_state()->get_nx()), ad_X2.tail(ad_model->get_nu()));
-    ad_model->calcDiff(ad_data, ad_X2.head(ad_model->get_state()->get_nx()), ad_X2.tail(ad_model->get_nu()));
+    const std::size_t& nx = ad_model->get_state()->get_nx();
+    const std::size_t& nu = ad_model->get_nu();
+    
+    fn_record_env(ad_model, ad_X2.tail(n_env));
+    
+    ad_model->calc(ad_data, ad_X2.head(nx), ad_X2.segment(nx, nu));
+    ad_model->calcDiff(ad_data, ad_X2.head(nx), ad_X2.segment(nx, nu));
 
     collect_calcDiffout();
     ad_calcDiff.Dependent(ad_X2, ad_calcDiffout);
@@ -167,11 +183,20 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     calcDiffFun_ptr = dynamicLib_ptr->model(function_name_calcDiff.c_str());
   }
 
+
+  void set_env(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& env_val) const{
+    ActionDataCodeGenTpl<Scalar>* d = static_cast<ActionDataCodeGenTpl<Scalar>*>(data.get());
+    d->xu.tail(n_env) = env_val;
+  }
+  
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u) {
     ActionDataCodeGenTpl<Scalar>* d = static_cast<ActionDataCodeGenTpl<Scalar>*>(data.get());
-    d->xu.head(ad_model->get_state()->get_nx()) = x;
-    d->xu.tail(ad_model->get_nu()) = u;
+    const std::size_t& nx = ad_model->get_state()->get_nx();
+    const std::size_t& nu = ad_model->get_nu();
+    
+    d->xu.head(nx) = x;
+    d->xu.segment(nx, nu) = u;
 
     calcFun_ptr->ForwardZero(d->xu, d->calcout);
     d->distribute_calcout();
@@ -180,9 +205,11 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u) {
     ActionDataCodeGenTpl<Scalar>* d = static_cast<ActionDataCodeGenTpl<Scalar>*>(data.get());
-    d->xu.head(ad_model->get_state()->get_nx()) = x;
-    d->xu.tail(ad_model->get_nu()) = u;
-
+    const std::size_t& nx = ad_model->get_state()->get_nx();
+    const std::size_t& nu = ad_model->get_nu();
+    
+    d->xu.head(nx) = x;
+    d->xu.segment(nx, nu) = u;
     calcDiffFun_ptr->ForwardZero(d->xu, d->calcDiffout);
     d->distribute_calcDiffout();
   }
@@ -209,13 +236,21 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
 
   /// \brief Name of the function
   const std::string function_name_calc, function_name_calcDiff;
+
   /// \brief Name of the library
   const std::string library_name;
 
+  /// \brief Size of the environment variables
+  const std::size_t n_env;
+  
+  /// \brief A function that updates the environment variables before starting record.
+  std::function<void(boost::shared_ptr<ADBase>, const Eigen::Ref<const ADVectorXs>&)> fn_record_env;
+  
   /// \brief Options to generate or not the source code for the evaluation function
   bool build_forward;
 
   ADVectorXs ad_X, ad_X2;
+  
   ADVectorXs ad_calcout;
   ADVectorXs ad_calcDiffout;
 
@@ -282,7 +317,9 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
 
   template <template <typename Scalar> class Model>
   explicit ActionDataCodeGenTpl(Model<Scalar>* const model)
-      : Base(model), xu(model->get_state()->get_nx() + model->get_nu()), calcout(model->get_state()->get_nx() + 1) {
+      : Base(model), calcout(model->get_state()->get_nx() + 1) {
+    ActionModelCodeGenTpl<Scalar>* m = static_cast<ActionModelCodeGenTpl<Scalar>*>(model);
+    xu.resize(m->getInputDimension());
     xu.setZero();
     calcout.setZero();
     const std::size_t& ndx = model->get_state()->get_ndx();
