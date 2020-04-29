@@ -44,6 +44,20 @@
 using namespace boost::unit_test;
 using namespace crocoddyl::unittest;
 
+
+/// \brief Changing the environment variables in a autodiff model. This function needs to be passed to the ActionModelCodeGen in order to make the calc and calcdiff be dependent on
+///        some parameter of the action model (like a cost reference). Inside the function definition, set the env_vector where you want it to be defined inside ad_model.
+/// \param[in,out] ad_model    the ActionModelCodeGen that needs to be recorded
+/// \param[in]     env_vector  the environment vector which would be set in ad_model.
+template<typename Scalar>
+void change_env(boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > ad_model,
+                const Eigen::Ref<const typename crocoddyl::MathBaseTpl<Scalar>::VectorXs>& env_vector) {
+  crocoddyl::IntegratedActionModelEulerTpl<Scalar>* m = static_cast<crocoddyl::IntegratedActionModelEulerTpl<Scalar>*>(ad_model.get());
+  crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<Scalar>* md = static_cast<crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<Scalar>*>(m->get_differential().get());
+  crocoddyl::FrameTranslationTpl<Scalar> Tref(md->get_pinocchio().getFrameId("gripper_left_joint"), env_vector);
+  md->get_costs()->get_costs().find("gripperTrans")->second->cost->set_reference(Tref);
+}
+
 template <typename Scalar>
 const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > build_arm_action_model() {
   typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
@@ -226,17 +240,30 @@ void test_codegen_4DoFArm() {
   typedef CppAD::cg::CG<Scalar> CGScalar;
   typedef CppAD::AD<CGScalar> ADScalar;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
+  typedef typename crocoddyl::MathBaseTpl<Scalar>::Vector3s Vector3s;
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > runningModelD = build_arm_action_model<Scalar>();
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<ADScalar> > runningModelAD = build_arm_action_model<ADScalar>();
 
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > runningModelCG =
       boost::make_shared<crocoddyl::ActionModelCodeGenTpl<Scalar> >(runningModelAD, runningModelD,
-                                                                    "pyrene_arm_running");
+                                                                    "pyrene_arm_running", 3, change_env<ADScalar>);
 
   // Check that code-generated action model is the same as original.
   /**************************************************************************/
   boost::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> > runningDataCG = runningModelCG->createData();
   boost::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> > runningDataD = runningModelD->createData();
+
+  
+  //Change cost reference ********************************************************/
+  const Vector3s new_ref(Vector3s::Random());  
+  crocoddyl::ActionModelCodeGenTpl<Scalar>* rmcg = static_cast<crocoddyl::ActionModelCodeGenTpl<Scalar>*>(runningModelCG.get());
+  rmcg->set_env(runningDataCG, new_ref);
+  crocoddyl::IntegratedActionModelEulerTpl<Scalar>* m = static_cast<crocoddyl::IntegratedActionModelEulerTpl<Scalar>*>(runningModelD.get());
+  crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<Scalar>* md = static_cast<crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<Scalar>*>(m->get_differential().get());
+  crocoddyl::FrameTranslationTpl<Scalar> Tref(md->get_pinocchio().getFrameId("gripper_left_joint"), new_ref);
+  md->get_costs()->get_costs().find("gripperTrans")->second->cost->set_reference(Tref);
+  /*************************************************************/
+  
   VectorXs x_rand = runningModelCG->get_state()->rand();
   VectorXs u_rand = VectorXs::Random(runningModelCG->get_nu());
   runningModelD->calc(runningDataD, x_rand, u_rand);
