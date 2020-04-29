@@ -101,10 +101,9 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calcDiff(const boost::shared_ptr<
   ActionDataImpulseFwdDynamicsTpl<Scalar>* d = static_cast<ActionDataImpulseFwdDynamicsTpl<Scalar>*>(data.get());
 
   // Computing the dynamics derivatives
-  pinocchio_.gravity.setZero();
   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, d->vnone, d->pinocchio.dq_after - v,
                                     d->multibody.impulses->fext);
-  pinocchio_.gravity = gravity_;
+  pinocchio::computeGeneralizedGravityDerivatives(pinocchio_, d->pinocchio, q, d->dgrav_dq);
   pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->multibody.impulses->Jc.topRows(ni),
                                                d->Kinv);
 
@@ -116,6 +115,7 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calcDiff(const boost::shared_ptr<
   Eigen::Block<MatrixXs> f_partial_dtau = d->Kinv.bottomLeftCorner(ni, nv);
   Eigen::Block<MatrixXs> f_partial_da = d->Kinv.bottomRightCorner(ni, ni);
 
+  d->pinocchio.dtau_dq -= d->dgrav_dq;
   d->Fx.topLeftCorner(nv, nv).setIdentity();
   d->Fx.topRightCorner(nv, nv).setZero();
   d->Fx.bottomLeftCorner(nv, nv).noalias() = -a_partial_dtau * d->pinocchio.dtau_dq;
