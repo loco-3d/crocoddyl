@@ -244,6 +244,7 @@ void test_codegen_4DoFArm() {
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > runningModelD = build_arm_action_model<Scalar>();
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<ADScalar> > runningModelAD = build_arm_action_model<ADScalar>();
 
+  // The definition of the ActionModelCodeGen takes the size of the environment variable, and the function setting the environment variable as arguments.
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > runningModelCG =
       boost::make_shared<crocoddyl::ActionModelCodeGenTpl<Scalar> >(runningModelAD, runningModelD,
                                                                     "pyrene_arm_running", 3, change_env<ADScalar>);
