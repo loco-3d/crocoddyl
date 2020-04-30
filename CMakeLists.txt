@@ -35,6 +35,7 @@ ENDIF()
 
 # Disable -Werror on Unix for now.
 SET(CXX_DISABLE_WERROR True)
+SET(PROJECT_USE_CMAKE_EXPORT True)
 
 # Create different building options
 OPTION(ENABLE_VECTORIZATION "Enable vectorization and further processor-related optimizations" OFF)

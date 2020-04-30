@@ -107,11 +107,13 @@ struct ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
         vnone(model->get_state()->get_nv()),
         Kinv(model->get_state()->get_nv() + model->get_impulses()->get_ni(),
              model->get_state()->get_nv() + model->get_impulses()->get_ni()),
-        df_dq(model->get_impulses()->get_ni(), model->get_state()->get_nv()) {
+        df_dq(model->get_impulses()->get_ni(), model->get_state()->get_nv()),
+        dgrav_dq(model->get_state()->get_nv(), model->get_state()->get_nv()) {
     costs->shareMemory(this);
     vnone.setZero();
     Kinv.setZero();
     df_dq.setZero();
+    dgrav_dq.setZero();
   }
 
   pinocchio::DataTpl<Scalar> pinocchio;
@@ -120,6 +122,7 @@ struct ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
   VectorXs vnone;
   MatrixXs Kinv;
   MatrixXs df_dq;
+  MatrixXs dgrav_dq;
 };
 
 }  // namespace crocoddyl
