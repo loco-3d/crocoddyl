@@ -89,7 +89,7 @@ void build_biped_action_models(boost::shared_ptr<crocoddyl::ActionModelAbstractT
 
   // Then let's added the running and terminal cost functions
   runningCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1));
-//   runningCostModel->addCost("comPos", comCost, Scalar(1e-7));
+  //   runningCostModel->addCost("comPos", comCost, Scalar(1e-7));
   runningCostModel->addCost("xReg", xRegCost, Scalar(1e-4));
   runningCostModel->addCost("uReg", uRegCost, Scalar(1e-4));
   terminalCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1));
