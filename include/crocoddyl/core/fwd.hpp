@@ -137,7 +137,7 @@ class StateNumDiffTpl;
 template <typename Scalar>
 class ActuationModelNumDiffTpl;
 
-#ifdef WITH_CODEGEN
+#ifdef CROCODDYL_WITH_CODEGEN
 template <typename Scalar>
 class ActionModelCodeGenTpl;
 
@@ -202,7 +202,7 @@ typedef ActivationDataNumDiffTpl<double> ActivationDataNumDiff;
 typedef StateNumDiffTpl<double> StateNumDiff;
 typedef ActuationModelNumDiffTpl<double> ActuationModelNumDiff;
 
-#ifdef WITH_CODEGEN
+#ifdef CROCODDYL_WITH_CODEGEN
 typedef ActionModelCodeGenTpl<double> ActionModelCodeGen;
 typedef ActionDataCodeGenTpl<double> ActionDataCodeGen;
 #endif
