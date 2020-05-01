@@ -13,7 +13,6 @@
 #include <example-robot-data/path.hpp>
 
 #include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/core/codegen/action-base.hpp"
 #include "crocoddyl/multibody/contacts/contact-6d.hpp"
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"

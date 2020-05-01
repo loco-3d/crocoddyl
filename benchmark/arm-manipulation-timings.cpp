@@ -11,7 +11,6 @@
 
 #include <example-robot-data/path.hpp>
 #include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/core/codegen/action-base.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
 
