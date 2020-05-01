@@ -137,6 +137,12 @@ class StateNumDiffTpl;
 template <typename Scalar>
 class ActuationModelNumDiffTpl;
 
+template <typename Scalar>
+class ActionModelCodeGenTpl;
+
+template <typename Scalar>
+struct ActionDataCodeGenTpl;
+
 /********************Template Instantiation*************/
 typedef DifferentialActionModelAbstractTpl<double> DifferentialActionModelAbstract;
 typedef DifferentialActionDataAbstractTpl<double> DifferentialActionDataAbstract;
@@ -193,6 +199,9 @@ typedef ActivationModelNumDiffTpl<double> ActivationModelNumDiff;
 typedef ActivationDataNumDiffTpl<double> ActivationDataNumDiff;
 typedef StateNumDiffTpl<double> StateNumDiff;
 typedef ActuationModelNumDiffTpl<double> ActuationModelNumDiff;
+
+typedef ActionModelCodeGenTpl<double> ActionModelCodeGen;
+typedef ActionDataCodeGenTpl<double> ActionDataCodeGen;
 
 }  // namespace crocoddyl
 

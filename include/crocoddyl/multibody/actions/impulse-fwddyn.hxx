@@ -67,8 +67,8 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calc(const boost::shared_ptr<Acti
 #ifndef NDEBUG
   Eigen::FullPivLU<MatrixXs> Jc_lu(d->multibody.impulses->Jc.topRows(ni));
 
-  if (Jc_lu.rank() < d->multibody.impulses->Jc.topRows(ni).rows()) {
-    assert_pretty(JMinvJt_damping_ > 0., "It is needed a damping factor since the contact Jacobian is not full-rank");
+  if (Jc_lu.rank() < d->multibody.impulses->Jc.topRows(ni).rows() && JMinvJt_damping_ == Scalar(0.)) {
+    throw_pretty("It is needed a damping factor since the contact Jacobian is not full-rank");
   }
 #endif
 

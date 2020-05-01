@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, University of Edinburgh
+// Copyright (C) 2018-2020, University of Edinburgh, LAAS-CNRS
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,13 +27,16 @@
     throw crocoddyl::Exception(ss.str(), __FILE__, __PRETTY_FUNCTION__, __LINE__); \
   }
 
+#ifndef NDEBUG
 #define assert_pretty(condition, m)                                                \
   if (!(condition)) {                                                              \
     std::stringstream ss;                                                          \
     ss << m;                                                                       \
     throw crocoddyl::Exception(ss.str(), __FILE__, __PRETTY_FUNCTION__, __LINE__); \
   }
-
+#else
+#define assert_pretty(condition, m) ((void)0)
+#endif
 namespace crocoddyl {
 
 class Exception : public std::exception {

@@ -39,7 +39,7 @@ class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar
     boost::shared_ptr<ActivationDataWeightedQuad> d = boost::static_pointer_cast<ActivationDataWeightedQuad>(data);
 
     d->Wr = weights_.cwiseProduct(r);
-    data->a_value = 0.5 * r.dot(d->Wr);
+    data->a_value = Scalar(0.5) * r.dot(d->Wr);
   };
 
   virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
@@ -52,7 +52,7 @@ class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar
     data->Ar = d->Wr;
     // The Hessian has constant values which were set in createData.
 #ifndef NDEBUG
-    assert_pretty(data->Arr == Arr_, "Arr has wrong value");
+    assert_pretty(MatrixXs(data->Arr).isApprox(Arr_), "Arr has wrong value");
 #endif
   };
 

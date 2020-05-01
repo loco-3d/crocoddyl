@@ -38,7 +38,7 @@ class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
     }
     boost::shared_ptr<ActivationDataSmoothAbs> d = boost::static_pointer_cast<ActivationDataSmoothAbs>(data);
 
-    d->a = (r.array().cwiseAbs2().array() + 1).array().cwiseSqrt();
+    d->a = (r.array().cwiseAbs2().array() + Scalar(1)).array().cwiseSqrt();
     data->a_value = d->a.sum();
   };
 
@@ -73,7 +73,7 @@ struct ActivationDataSmoothAbsTpl : public ActivationDataAbstractTpl<_Scalar> {
   template <typename Activation>
   explicit ActivationDataSmoothAbsTpl(Activation* const activation)
       : Base(activation), a(VectorXs::Zero(activation->get_nr())) {
-    Arr = 2 * MatrixXs::Identity(activation->get_nr(), activation->get_nr());
+    Arr.diagonal().array() = Scalar(2);
   }
 
   VectorXs a;

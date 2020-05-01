@@ -41,7 +41,8 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
                                                boost::shared_ptr<ActuationModelFloatingBase> actuation,
                                                boost::shared_ptr<ContactModelMultiple> contacts,
                                                boost::shared_ptr<CostModelSum> costs,
-                                               const Scalar& JMinvJt_damping = 0., const bool& enable_force = false);
+                                               const Scalar& JMinvJt_damping = Scalar(0.),
+                                               const bool& enable_force = false);
   virtual ~DifferentialActionModelContactFwdDynamicsTpl();
 
   virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,

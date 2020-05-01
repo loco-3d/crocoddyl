@@ -66,7 +66,8 @@ template <typename Scalar>
 void StateVectorTpl<Scalar>::Jdiff(const Eigen::Ref<const typename MathBase::VectorXs>&,
                                    const Eigen::Ref<const typename MathBase::VectorXs>&,
                                    Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
-                                   Eigen::Ref<typename MathBase::MatrixXs> Jsecond, Jcomponent firstsecond) const {
+                                   Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
+                                   const Jcomponent firstsecond) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
   if (firstsecond == first || firstsecond == both) {
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
@@ -92,17 +93,30 @@ template <typename Scalar>
 void StateVectorTpl<Scalar>::Jintegrate(const Eigen::Ref<const typename MathBase::VectorXs>&,
                                         const Eigen::Ref<const typename MathBase::VectorXs>&,
                                         Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
-                                        Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
-                                        Jcomponent firstsecond) const {
+                                        Eigen::Ref<typename MathBase::MatrixXs> Jsecond, const Jcomponent firstsecond,
+                                        const AssignmentOp op) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
+  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
   if (firstsecond == first || firstsecond == both) {
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
       throw_pretty("Invalid argument: "
                    << "Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," + std::to_string(ndx_) +
                           ")");
     }
-    Jfirst.setZero();
-    Jfirst.diagonal() = MathBase::VectorXs::Constant(ndx_, 1.);
+    switch (op) {
+      case setto:
+        Jfirst.diagonal().array() = Scalar(1.);
+        break;
+      case addto:
+        Jfirst.diagonal().array() += Scalar(1.);
+        break;
+      case rmfrom:
+        Jfirst.diagonal().array() -= Scalar(1.);
+        break;
+      default:
+        throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+        break;
+    }
   }
   if (firstsecond == second || firstsecond == both) {
     if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
@@ -110,8 +124,32 @@ void StateVectorTpl<Scalar>::Jintegrate(const Eigen::Ref<const typename MathBase
                    << "Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
                           std::to_string(ndx_) + ")");
     }
-    Jsecond.setZero();
-    Jsecond.diagonal() = MathBase::VectorXs::Constant(ndx_, 1.);
+    switch (op) {
+      case setto:
+        Jsecond.diagonal().array() = Scalar(1.);
+        break;
+      case addto:
+        Jsecond.diagonal().array() += Scalar(1.);
+        break;
+      case rmfrom:
+        Jsecond.diagonal().array() -= Scalar(1.);
+        break;
+      default:
+        throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+        break;
+    }
+  }
+}
+
+template <typename Scalar>
+void StateVectorTpl<Scalar>::JintegrateTransport(const Eigen::Ref<const typename MathBase::VectorXs>&,
+                                                 const Eigen::Ref<const typename MathBase::VectorXs>&,
+                                                 Eigen::Ref<typename MathBase::MatrixXs>,
+                                                 const Jcomponent firstsecond) const {
+  assert_pretty(is_a_Jcomponent(firstsecond), (""));
+  if (firstsecond != first && firstsecond != second) {
+    throw_pretty(
+        "Invalid argument: firstsecond must be either first or second. both not supported for this operation.");
   }
 }
 

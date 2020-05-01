@@ -129,7 +129,7 @@ void StateNumDiffTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, const 
 template <typename Scalar>
 void StateNumDiffTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
                                          Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
-                                         Jcomponent firstsecond) const {
+                                         const Jcomponent firstsecond, const AssignmentOp) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
   if (static_cast<std::size_t>(x.size()) != nx_) {
     throw_pretty("Invalid argument: "
@@ -185,6 +185,10 @@ void StateNumDiffTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, co
     Jsecond /= disturbance_;
   }
 }
+
+template <typename Scalar>
+void StateNumDiffTpl<Scalar>::JintegrateTransport(const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&,
+                                                  Eigen::Ref<MatrixXs>, const Jcomponent) const {}
 
 template <typename Scalar>
 const Scalar& StateNumDiffTpl<Scalar>::get_disturbance() const {

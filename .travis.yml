@@ -27,6 +27,7 @@ install:
   - export LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH
   - export PYTHONPATH=/opt/openrobots/lib/python2.7/site-packages:$PYTHONPATH
   - export CMAKE_PREFIX_PATH=/opt/openrobots:$CMAKE_PREFIX_PATH
+  - export ROS_PACKAGE_PATH=/opt/openrobots/share
 
 script:
   - travis_wait 90 /bin/bash .travis/build-and-test.sh

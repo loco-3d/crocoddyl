@@ -21,6 +21,7 @@ class StateVectorTpl : public StateAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
   explicit StateVectorTpl(const std::size_t& nx);
   virtual ~StateVectorTpl();
@@ -36,11 +37,12 @@ class StateVectorTpl : public StateAbstractTpl<_Scalar> {
   virtual void Jdiff(const Eigen::Ref<const typename MathBase::VectorXs>&,
                      const Eigen::Ref<const typename MathBase::VectorXs>&,
                      Eigen::Ref<typename MathBase::MatrixXs> Jfirst, Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
-                     Jcomponent firstsecond = both) const;
-  virtual void Jintegrate(const Eigen::Ref<const typename MathBase::VectorXs>&,
-                          const Eigen::Ref<const typename MathBase::VectorXs>&,
-                          Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
-                          Eigen::Ref<typename MathBase::MatrixXs> Jsecond, Jcomponent firstsecond = both) const;
+                     const Jcomponent firstsecond = both) const;
+  virtual void Jintegrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
+                          Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
+                          const Jcomponent firstsecond = both, const AssignmentOp = setto) const;
+  virtual void JintegrateTransport(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
+                                   Eigen::Ref<MatrixXs> Jin, const Jcomponent firstsecond) const;
 
  protected:
   using StateAbstractTpl<Scalar>::nx_;

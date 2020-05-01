@@ -147,12 +147,25 @@ void CostModelStateTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstrac
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
 
-  CostDataStateTpl<Scalar>* d = static_cast<CostDataStateTpl<Scalar>*>(data.get());
   state_->Jdiff(xref_, x, data->Rx, data->Rx, second);
   activation_->calcDiff(data->activation, data->r);
-  data->Lx.noalias() = data->Rx.transpose() * data->activation->Ar;
-  d->Arr_Rx.noalias() = data->activation->Arr * data->Rx;
-  data->Lxx.noalias() = data->Rx.transpose() * d->Arr_Rx;
+
+  const boost::shared_ptr<pinocchio::ModelTpl<Scalar> > pin_model = state_->get_pinocchio();
+  typedef Eigen::Block<MatrixXs> MatrixBlock;
+  for (pinocchio::JointIndex i = 1; i < (pinocchio::JointIndex)pin_model->njoints; ++i) {
+    const MatrixBlock& RxBlock =
+        data->Rx.block(pin_model->idx_vs[i], pin_model->idx_vs[i], pin_model->nvs[i], pin_model->nvs[i]);
+
+    data->Lx.segment(pin_model->idx_vs[i], pin_model->nvs[i]).noalias() =
+        RxBlock.transpose() * data->activation->Ar.segment(pin_model->idx_vs[i], pin_model->nvs[i]);
+
+    data->Lxx.block(pin_model->idx_vs[i], pin_model->idx_vs[i], pin_model->nvs[i], pin_model->nvs[i]).noalias() =
+        RxBlock.transpose() *
+        data->activation->Arr.diagonal().segment(pin_model->idx_vs[i], pin_model->nvs[i]).asDiagonal() * RxBlock;
+  }
+  data->Lx.tail(state_->get_nv()) = data->activation->Ar.tail(state_->get_nv());
+
+  data->Lxx.diagonal().tail(state_->get_nv()) = data->activation->Arr.diagonal().tail(state_->get_nv());
 }
 
 template <typename Scalar>
@@ -177,7 +190,7 @@ void CostModelStateTpl<Scalar>::set_referenceImpl(const std::type_info& ti, cons
 template <typename Scalar>
 void CostModelStateTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
   if (ti == typeid(VectorXs)) {
-    Eigen::VectorXd& tmp = *static_cast<VectorXs*>(pv);
+    VectorXs& tmp = *static_cast<VectorXs*>(pv);
     tmp.resize(state_->get_nx());
     Eigen::Map<VectorXs> ref_map(static_cast<VectorXs*>(pv)->data(), state_->get_nx());
     for (std::size_t i = 0; i < state_->get_nx(); ++i) {

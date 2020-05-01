@@ -20,6 +20,12 @@ void exposeStateAbstract() {
       .export_values()
       .value("second", second);
 
+  bp::enum_<AssignmentOp>("AssignmentOp")
+      .value("setto", setto)
+      .value("addto", addto)
+      .value("rmfrom", rmfrom)
+      .export_values();
+
   bp::class_<StateAbstract_wrap, boost::noncopyable>(
       "StateAbstract",
       "Abstract class for the state representation.\n\n"
@@ -71,7 +77,7 @@ void exposeStateAbstract() {
            "The integrate operator (x [+] dx) is defined by integrate(x, dx). Instead Jintegrate\n"
            "computes its partial derivatives, i.e. \\partial{integrate(x, dx)}{x} and\n"
            "\\partial{integrate(x, dx)}{dx}. By default, this function returns the derivatives of\n"
-           "the first and second argument (i.e. firstsecond='both'). However we ask for a specific\n"
+           "the first and second argument (i.e. firstsecond='both').\n"
            "partial derivative by setting firstsecond='first' or firstsecond='second'.\n"
            ":param x: current state (dim state.nx).\n"
            ":param dx: displacement of the state (dim state.ndx).\n"

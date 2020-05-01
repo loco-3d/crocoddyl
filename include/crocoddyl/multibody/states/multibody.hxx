@@ -100,7 +100,7 @@ void StateMultibodyTpl<Scalar>::integrate(const Eigen::Ref<const VectorXs>& x, c
 template <typename Scalar>
 void StateMultibodyTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
                                       Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
-                                      Jcomponent firstsecond) const {
+                                      const Jcomponent firstsecond) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty("Invalid argument: "
@@ -111,25 +111,15 @@ void StateMultibodyTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, cons
                  << "x1 has wrong dimension (it should be " + std::to_string(nx_) + ")");
   }
 
-  typedef Eigen::Block<Eigen::Ref<MatrixXs>, -1, 1, true> NColAlignedVectorBlock;
-  typedef Eigen::Block<Eigen::Ref<MatrixXs> > MatrixBlock;
-
   if (firstsecond == first) {
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
       throw_pretty("Invalid argument: "
                    << "Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," + std::to_string(ndx_) +
                           ")");
     }
-    Jfirst.setZero();
-    NColAlignedVectorBlock dx = Jfirst.template rightCols<1>();
-    MatrixBlock Jdq = Jfirst.bottomLeftCorner(nv_, nv_);
 
-    diff(x1, x0, dx);
-    pinocchio::dIntegrate(*pinocchio_.get(), x1.head(nq_), dx.topRows(nv_), Jdq, pinocchio::ARG1);
-    updateJdiff(Jdq, Jfirst.topLeftCorner(nv_, nv_), false);
-
-    Jdq.setZero();
-    dx.setZero();
+    pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_), Jfirst.topLeftCorner(nv_, nv_),
+                           pinocchio::ARG0);
     Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)-1;
   } else if (firstsecond == second) {
     if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
@@ -137,17 +127,8 @@ void StateMultibodyTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, cons
                    << "Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
                           std::to_string(ndx_) + ")");
     }
-
-    Jsecond.setZero();
-    NColAlignedVectorBlock dx = Jsecond.template rightCols<1>();
-    MatrixBlock Jdq = Jsecond.bottomLeftCorner(nv_, nv_);
-
-    diff(x0, x1, dx);
-    pinocchio::dIntegrate(*pinocchio_.get(), x0.head(nq_), dx.topRows(nv_), Jdq, pinocchio::ARG1);
-    updateJdiff(Jdq, Jsecond.topLeftCorner(nv_, nv_));
-
-    Jdq.setZero();
-    dx.setZero();
+    pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_), Jsecond.topLeftCorner(nv_, nv_),
+                           pinocchio::ARG1);
     Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
   } else {  // computing both
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
@@ -160,123 +141,103 @@ void StateMultibodyTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, cons
                    << "Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
                           std::to_string(ndx_) + ")");
     }
-    Jfirst.setZero();
-    Jsecond.setZero();
-
-    // Computing Jfirst
-    NColAlignedVectorBlock dx1 = Jfirst.template rightCols<1>();
-    MatrixBlock Jdq1 = Jfirst.bottomLeftCorner(nv_, nv_);
-
-    diff(x1, x0, dx1);
-    pinocchio::dIntegrate(*pinocchio_.get(), x1.head(nq_), dx1.topRows(nv_), Jdq1, pinocchio::ARG1);
-    updateJdiff(Jdq1, Jfirst.topLeftCorner(nv_, nv_), false);
-    Jdq1.setZero();
-    dx1.setZero();
+    pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_), Jfirst.topLeftCorner(nv_, nv_),
+                           pinocchio::ARG0);
+    pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_), Jsecond.topLeftCorner(nv_, nv_),
+                           pinocchio::ARG1);
     Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)-1;
-
-    // Computing Jsecond
-    NColAlignedVectorBlock dx2 = Jsecond.template rightCols<1>();
-    MatrixBlock Jdq2 = Jsecond.bottomLeftCorner(nv_, nv_);
-
-    diff(x0, x1, dx2);
-    pinocchio::dIntegrate(*pinocchio_.get(), x0.head(nq_), dx2.topRows(nv_), Jdq2, pinocchio::ARG1);
-    updateJdiff(Jdq2, Jsecond.topLeftCorner(nv_, nv_));
-
-    dx2.setZero();
-    Jdq2.setZero();
     Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
   }
 }
 
 template <typename Scalar>
-void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
-                                           Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
-                                           Jcomponent firstsecond) const {
+void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const typename MathBase::VectorXs>& x,
+                                           const Eigen::Ref<const typename MathBase::VectorXs>& dx,
+                                           Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
+                                           Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
+                                           const Jcomponent firstsecond, const AssignmentOp op) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
-  if (static_cast<std::size_t>(x.size()) != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(nx_) + ")");
-  }
-  if (static_cast<std::size_t>(dx.size()) != ndx_) {
-    throw_pretty("Invalid argument: "
-                 << "dx has wrong dimension (it should be " + std::to_string(ndx_) + ")");
-  }
-
-  if (firstsecond == first) {
+  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
+  if (firstsecond == first || firstsecond == both) {
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
       throw_pretty("Invalid argument: "
                    << "Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," + std::to_string(ndx_) +
                           ")");
     }
-    Jfirst.setZero();
-
-    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
-                          pinocchio::ARG0);
-    Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
-  } else if (firstsecond == second) {
+    switch (op) {
+      case setto:
+        pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
+                              pinocchio::ARG0, pinocchio::SETTO);
+        Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
+        break;
+      case addto:
+        pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
+                              pinocchio::ARG0, pinocchio::ADDTO);
+        Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() += (Scalar)1;
+        break;
+      case rmfrom:
+        pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
+                              pinocchio::ARG0, pinocchio::RMTO);
+        Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() -= (Scalar)1;
+        break;
+      default:
+        throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+        break;
+    }
+  }
+  if (firstsecond == second || firstsecond == both) {
     if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
       throw_pretty("Invalid argument: "
                    << "Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
                           std::to_string(ndx_) + ")");
     }
-    Jsecond.setZero();
-
-    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
-                          pinocchio::ARG1);
-    Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
-  } else {  // computing both
-    if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
-      throw_pretty("Invalid argument: "
-                   << "Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," + std::to_string(ndx_) +
-                          ")");
+    switch (op) {
+      case setto:
+        pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
+                              pinocchio::ARG1, pinocchio::SETTO);
+        Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
+        break;
+      case addto:
+        pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
+                              pinocchio::ARG1, pinocchio::ADDTO);
+        Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() += (Scalar)1;
+        break;
+      case rmfrom:
+        pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
+                              pinocchio::ARG1, pinocchio::RMTO);
+        Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() -= (Scalar)1;
+        break;
+      default:
+        throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+        break;
     }
-    if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
-      throw_pretty("Invalid argument: "
-                   << "Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
-                          std::to_string(ndx_) + ")");
-    }
+  }
+}
 
-    // Computing Jfirst
-    Jfirst.setZero();
-    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
-                          pinocchio::ARG0);
-    Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
+template <typename Scalar>
+void StateMultibodyTpl<Scalar>::JintegrateTransport(const Eigen::Ref<const typename MathBase::VectorXs>& x,
+                                                    const Eigen::Ref<const typename MathBase::VectorXs>& dx,
+                                                    Eigen::Ref<typename MathBase::MatrixXs> Jin,
+                                                    const Jcomponent firstsecond) const {
+  assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
 
-    // Computing Jsecond
-    Jsecond.setZero();
-    pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
-                          pinocchio::ARG1);
-    Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
+  switch (firstsecond) {
+    case first:
+      pinocchio::dIntegrateTransport(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jin.topRows(nv_), pinocchio::ARG0);
+      break;
+    case second:
+      pinocchio::dIntegrateTransport(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jin.topRows(nv_), pinocchio::ARG1);
+      break;
+    default:
+      throw_pretty(
+          "Invalid argument: firstsecond must be either first or second. both not supported for this operation.");
+      break;
   }
 }
 
 template <typename Scalar>
 const boost::shared_ptr<pinocchio::ModelTpl<Scalar> >& StateMultibodyTpl<Scalar>::get_pinocchio() const {
   return pinocchio_;
-}
-
-template <typename Scalar>
-void StateMultibodyTpl<Scalar>::updateJdiff(const Eigen::Ref<const MatrixXs>& Jdq, Eigen::Ref<MatrixXs> Jd,
-                                            bool positive) const {
-  if (positive) {
-    Jd.diagonal() = Jdq.diagonal();
-
-    // Needed only for systems with bases defined as SE3 and S03 group
-    if (joint_type_ == FreeFlyer) {
-      Jd.template block<6, 6>(0, 0) = Jdq.template block<6, 6>(0, 0).inverse();
-    } else if (joint_type_ == Spherical) {
-      Jd.template block<3, 3>(0, 0) = Jdq.template block<3, 3>(0, 0).inverse();
-    }
-  } else {
-    Jd.diagonal() = -Jdq.diagonal();
-
-    // Needed only for systems with bases defined as SE3 and S03 group
-    if (joint_type_ == FreeFlyer) {
-      Jd.template block<6, 6>(0, 0) = -Jdq.template block<6, 6>(0, 0).inverse();
-    } else if (joint_type_ == Spherical) {
-      Jd.template block<3, 3>(0, 0) = -Jdq.template block<3, 3>(0, 0).inverse();
-    }
-  }
 }
 
 }  // namespace crocoddyl

@@ -5,6 +5,7 @@
 *.orig
 *.ipynb_checkpoints
 build*/*
+_build*
 *.aux
 *.log
 *.pdf

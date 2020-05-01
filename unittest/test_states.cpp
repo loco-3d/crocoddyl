@@ -75,15 +75,15 @@ void test_Jdiff_firstsecond(StateModelTypes::Type state_type) {
   const Eigen::VectorXd& x2 = state->rand();
 
   // Computing the partial derivatives of the difference function separately
-  Eigen::MatrixXd Jdiff_tmp(state->get_ndx(), state->get_ndx());
-  Eigen::MatrixXd Jdiff_first(state->get_ndx(), state->get_ndx());
-  Eigen::MatrixXd Jdiff_second(state->get_ndx(), state->get_ndx());
+  Eigen::MatrixXd Jdiff_tmp(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd Jdiff_first(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd Jdiff_second(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state->Jdiff(x1, x2, Jdiff_first, Jdiff_tmp, crocoddyl::first);
   state->Jdiff(x1, x2, Jdiff_tmp, Jdiff_second, crocoddyl::second);
 
   // Computing the partial derivatives of the difference function separately
-  Eigen::MatrixXd Jdiff_both_first(state->get_ndx(), state->get_ndx());
-  Eigen::MatrixXd Jdiff_both_second(state->get_ndx(), state->get_ndx());
+  Eigen::MatrixXd Jdiff_both_first(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd Jdiff_both_second(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state->Jdiff(x1, x2, Jdiff_both_first, Jdiff_both_second);
 
   BOOST_CHECK((Jdiff_first - Jdiff_both_first).isMuchSmallerThan(1.0, 1e-9));
@@ -98,15 +98,15 @@ void test_Jint_firstsecond(StateModelTypes::Type state_type) {
   const Eigen::VectorXd& dx = Eigen::VectorXd::Random(state->get_ndx());
 
   // Computing the partial derivatives of the difference function separately
-  Eigen::MatrixXd Jint_tmp(state->get_ndx(), state->get_ndx());
-  Eigen::MatrixXd Jint_first(state->get_ndx(), state->get_ndx());
-  Eigen::MatrixXd Jint_second(state->get_ndx(), state->get_ndx());
+  Eigen::MatrixXd Jint_tmp(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd Jint_first(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd Jint_second(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state->Jintegrate(x, dx, Jint_first, Jint_tmp, crocoddyl::first);
   state->Jintegrate(x, dx, Jint_tmp, Jint_second, crocoddyl::second);
 
   // Computing the partial derivatives of the integrate function separately
-  Eigen::MatrixXd Jint_both_first(state->get_ndx(), state->get_ndx());
-  Eigen::MatrixXd Jint_both_second(state->get_ndx(), state->get_ndx());
+  Eigen::MatrixXd Jint_both_first(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd Jint_both_second(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state->Jintegrate(x, dx, Jint_both_first, Jint_both_second);
 
   BOOST_CHECK((Jint_first - Jint_both_first).isMuchSmallerThan(1.0, 1e-9));
@@ -124,15 +124,15 @@ void test_Jdiff_num_diff_firstsecond(StateModelTypes::Type state_type) {
   crocoddyl::StateNumDiff state_num_diff(state);
 
   // Computing the partial derivatives of the difference function separately
-  Eigen::MatrixXd Jdiff_num_diff_tmp(state->get_ndx(), state->get_ndx());
-  Eigen::MatrixXd Jdiff_num_diff_first(state->get_ndx(), state->get_ndx());
-  Eigen::MatrixXd Jdiff_num_diff_second(state->get_ndx(), state->get_ndx());
+  Eigen::MatrixXd Jdiff_num_diff_tmp(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd Jdiff_num_diff_first(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd Jdiff_num_diff_second(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state_num_diff.Jdiff(x1, x2, Jdiff_num_diff_first, Jdiff_num_diff_tmp, crocoddyl::first);
   state_num_diff.Jdiff(x1, x2, Jdiff_num_diff_tmp, Jdiff_num_diff_second, crocoddyl::second);
 
   // Computing the partial derivatives of the difference function separately
-  Eigen::MatrixXd Jdiff_num_diff_both_first(state->get_ndx(), state->get_ndx());
-  Eigen::MatrixXd Jdiff_num_diff_both_second(state->get_ndx(), state->get_ndx());
+  Eigen::MatrixXd Jdiff_num_diff_both_first(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd Jdiff_num_diff_both_second(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state_num_diff.Jdiff(x1, x2, Jdiff_num_diff_both_first, Jdiff_num_diff_both_second);
 
   BOOST_CHECK((Jdiff_num_diff_first - Jdiff_num_diff_both_first).isMuchSmallerThan(1.0, 1e-9));
@@ -150,15 +150,15 @@ void test_Jint_num_diff_firstsecond(StateModelTypes::Type state_type) {
   crocoddyl::StateNumDiff state_num_diff(state);
 
   // Computing the partial derivatives of the difference function separately
-  Eigen::MatrixXd Jint_num_diff_tmp(state->get_ndx(), state->get_ndx());
-  Eigen::MatrixXd Jint_num_diff_first(state->get_ndx(), state->get_ndx());
-  Eigen::MatrixXd Jint_num_diff_second(state->get_ndx(), state->get_ndx());
+  Eigen::MatrixXd Jint_num_diff_tmp(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd Jint_num_diff_first(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd Jint_num_diff_second(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state_num_diff.Jintegrate(x, dx, Jint_num_diff_first, Jint_num_diff_tmp, crocoddyl::first);
   state_num_diff.Jintegrate(x, dx, Jint_num_diff_tmp, Jint_num_diff_second, crocoddyl::second);
 
   // Computing the partial derivatives of the given function separately
-  Eigen::MatrixXd Jint_num_diff_both_first(state->get_ndx(), state->get_ndx());
-  Eigen::MatrixXd Jint_num_diff_both_second(state->get_ndx(), state->get_ndx());
+  Eigen::MatrixXd Jint_num_diff_both_first(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd Jint_num_diff_both_second(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state_num_diff.Jintegrate(x, dx, Jint_num_diff_both_first, Jint_num_diff_both_second);
 
   BOOST_CHECK((Jint_num_diff_first - Jint_num_diff_both_first).isMuchSmallerThan(1.0, 1e-9));
@@ -173,15 +173,15 @@ void test_Jdiff_against_numdiff(StateModelTypes::Type state_type) {
   const Eigen::VectorXd& x2 = state->rand();
 
   // Computing the partial derivatives of the difference function analytically
-  Eigen::MatrixXd Jdiff_1(state->get_ndx(), state->get_ndx());
-  Eigen::MatrixXd Jdiff_2(state->get_ndx(), state->get_ndx());
+  Eigen::MatrixXd Jdiff_1(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd Jdiff_2(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state->Jdiff(x1, x2, Jdiff_1, Jdiff_2, crocoddyl::first);
   state->Jdiff(x1, x2, Jdiff_1, Jdiff_2, crocoddyl::second);
 
   // Computing the partial derivatives of the difference function numerically
   crocoddyl::StateNumDiff state_num_diff(state);
-  Eigen::MatrixXd Jdiff_num_1(state->get_ndx(), state->get_ndx());
-  Eigen::MatrixXd Jdiff_num_2(state->get_ndx(), state->get_ndx());
+  Eigen::MatrixXd Jdiff_num_1(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd Jdiff_num_2(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state_num_diff.Jdiff(x1, x2, Jdiff_num_1, Jdiff_num_2);
 
   // Checking the partial derivatives against NumDiff
@@ -199,14 +199,14 @@ void test_Jintegrate_against_numdiff(StateModelTypes::Type state_type) {
   const Eigen::VectorXd& dx = Eigen::VectorXd::Random(state->get_ndx());
 
   // Computing the partial derivatives of the difference function analytically
-  Eigen::MatrixXd Jint_1(state->get_ndx(), state->get_ndx());
-  Eigen::MatrixXd Jint_2(state->get_ndx(), state->get_ndx());
+  Eigen::MatrixXd Jint_1(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd Jint_2(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state->Jintegrate(x, dx, Jint_1, Jint_2);
 
   // Computing the partial derivatives of the difference function numerically
   crocoddyl::StateNumDiff state_num_diff(state);
-  Eigen::MatrixXd Jint_num_1(state->get_ndx(), state->get_ndx());
-  Eigen::MatrixXd Jint_num_2(state->get_ndx(), state->get_ndx());
+  Eigen::MatrixXd Jint_num_1(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd Jint_num_2(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state_num_diff.Jintegrate(x, dx, Jint_num_1, Jint_num_2);
 
   // Checking the partial derivatives against NumDiff
@@ -214,6 +214,29 @@ void test_Jintegrate_against_numdiff(StateModelTypes::Type state_type) {
   double tol = NUMDIFF_MODIFIER * state_num_diff.get_disturbance();
   BOOST_CHECK((Jint_1 - Jint_num_1).isMuchSmallerThan(1.0, tol));
   BOOST_CHECK((Jint_2 - Jint_num_2).isMuchSmallerThan(1.0, tol));
+}
+
+void test_JintegrateTransport(StateModelTypes::Type state_type) {
+  StateModelFactory factory;
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create(state_type);
+  // Generating random values for the initial state and its rate of change
+  const Eigen::VectorXd& x = state->rand();
+  const Eigen::VectorXd& dx = Eigen::VectorXd::Random(state->get_ndx());
+
+  // Computing the partial derivatives of the difference function analytically
+  Eigen::MatrixXd Jint_1(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd Jint_2(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  state->Jintegrate(x, dx, Jint_1, Jint_2);
+
+  Eigen::MatrixXd Jref(Eigen::MatrixXd::Random(state->get_ndx(), 2 * state->get_ndx()));
+  const Eigen::MatrixXd Jtest(Jref);
+
+  state->JintegrateTransport(x, dx, Jref, crocoddyl::first);
+  BOOST_CHECK((Jref - Jint_1 * Jtest).isMuchSmallerThan(1.0, 1e-10));
+
+  Jref = Jtest;
+  state->JintegrateTransport(x, dx, Jref, crocoddyl::second);
+  BOOST_CHECK((Jref - Jint_2 * Jtest).isMuchSmallerThan(1.0, 1e-10));
 }
 
 void test_Jdiff_and_Jintegrate_are_inverses(StateModelTypes::Type state_type) {
@@ -226,11 +249,11 @@ void test_Jdiff_and_Jintegrate_are_inverses(StateModelTypes::Type state_type) {
   state->integrate(x1, dx, x2);
 
   // Computing the partial derivatives of the integrate and difference function
-  Eigen::MatrixXd Jx(state->get_ndx(), state->get_ndx());
-  Eigen::MatrixXd Jdx(state->get_ndx(), state->get_ndx());
+  Eigen::MatrixXd Jx(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd Jdx(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state->Jintegrate(x1, dx, Jx, Jdx);
-  Eigen::MatrixXd J1(state->get_ndx(), state->get_ndx());
-  Eigen::MatrixXd J2(state->get_ndx(), state->get_ndx());
+  Eigen::MatrixXd J1(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd J2(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state->Jdiff(x1, x2, J1, J2);
 
   // Checking that Jdiff and Jintegrate are inverses
@@ -251,11 +274,11 @@ void test_velocity_from_Jintegrate_Jdiff(StateModelTypes::Type state_type) {
   double h = 1e-8;
 
   // Computing the partial derivatives of the integrate and difference function
-  Eigen::MatrixXd Jx(state->get_ndx(), state->get_ndx());
-  Eigen::MatrixXd Jdx(state->get_ndx(), state->get_ndx());
+  Eigen::MatrixXd Jx(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd Jdx(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state->Jintegrate(x1, dx, Jx, Jdx);
-  Eigen::MatrixXd J1(state->get_ndx(), state->get_ndx());
-  Eigen::MatrixXd J2(state->get_ndx(), state->get_ndx());
+  Eigen::MatrixXd J1(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
+  Eigen::MatrixXd J2(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state->Jdiff(x1, x2, J1, J2);
 
   // Checking that computed velocity from Jintegrate
@@ -296,6 +319,7 @@ void register_state_unit_tests(StateModelTypes::Type state_type) {
   ts->add(BOOST_TEST_CASE(boost::bind(&test_Jint_num_diff_firstsecond, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_against_numdiff, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_Jintegrate_against_numdiff, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_JintegrateTransport, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_Jdiff_and_Jintegrate_are_inverses, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_velocity_from_Jintegrate_Jdiff, state_type)));
   framework::master_test_suite().add(ts);

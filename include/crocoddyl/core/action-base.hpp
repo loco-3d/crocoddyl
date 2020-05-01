@@ -81,7 +81,7 @@ struct ActionDataAbstractTpl {
 
   template <template <typename Scalar> class Model>
   explicit ActionDataAbstractTpl(Model<Scalar>* const model)
-      : cost(0.),
+      : cost(Scalar(0.)),
         xnext(model->get_state()->get_nx()),
         r(model->get_nr()),
         Fx(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
