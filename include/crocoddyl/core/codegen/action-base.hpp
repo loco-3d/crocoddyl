@@ -10,7 +10,6 @@
 #ifndef CROCODDYL_CORE_CODEGEN_ACTION_BASE_HPP_
 #define CROCODDYL_CORE_CODEGEN_ACTION_BASE_HPP_
 
-#ifdef CROCODDYL_WITH_CODEGEN
 #include <functional>
 #include "pinocchio/codegen/cppadcg.hpp"
 
@@ -328,7 +327,5 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
 };
 
 }  // namespace crocoddyl
-
-#endif  // CROCODDYL_WITH_CODEGEN
 
 #endif  // ifndef CROCODDYL_CORE_CODEGEN_ACTION_BASE_HPP_
