@@ -47,7 +47,10 @@ void build_arm_action_models(boost::shared_ptr<crocoddyl::ActionModelAbstractTpl
   pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf", modeld);
 
   pinocchio::ModelTpl<Scalar> model_full(modeld.cast<Scalar>()), model;
-  std::vector<pinocchio::JointIndex> locked_joints{5, 6, 7};
+  std::vector<pinocchio::JointIndex> locked_joints;
+  locked_joints.push_back(5);
+  locked_joints.push_back(6);
+  locked_joints.push_back(7);
   pinocchio::buildReducedModel(model_full, locked_joints, VectorXs::Zero(model_full.nq), model);
 
   boost::shared_ptr<crocoddyl::StateMultibodyTpl<Scalar> > state =
