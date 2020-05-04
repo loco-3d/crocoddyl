@@ -20,6 +20,8 @@ namespace crocoddyl {
 
 template <typename _Scalar>
 struct ActivationBoundsTpl {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
@@ -65,6 +67,8 @@ struct ActivationBoundsTpl {
 template <typename _Scalar>
 class ActivationModelQuadraticBarrierTpl : public ActivationModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActivationModelAbstractTpl<Scalar> Base;

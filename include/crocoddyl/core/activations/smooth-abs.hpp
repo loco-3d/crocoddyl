@@ -20,6 +20,8 @@ namespace crocoddyl {
 template <typename _Scalar>
 class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActivationModelAbstractTpl<Scalar> Base;
@@ -64,6 +66,7 @@ class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
 template <typename _Scalar>
 struct ActivationDataSmoothAbsTpl : public ActivationDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef ActivationDataAbstractTpl<Scalar> Base;
   typedef MathBaseTpl<Scalar> MathBase;
