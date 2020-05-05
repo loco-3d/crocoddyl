@@ -25,7 +25,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
   typedef ActionModelAbstractTpl<Scalar> Base;
-  typedef Data Data;
+  typedef ActionDataCodeGenTpl<Scalar> Data;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
   typedef typename MathBaseTpl<Scalar>::MatrixXs MatrixXs;
