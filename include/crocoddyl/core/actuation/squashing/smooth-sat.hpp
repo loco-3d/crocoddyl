@@ -21,6 +21,8 @@ namespace crocoddyl {
 template <typename _Scalar>
 class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef SquashingModelAbstractTpl<Scalar> Base;
