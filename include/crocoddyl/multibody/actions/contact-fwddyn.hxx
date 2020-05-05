@@ -32,8 +32,8 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::DifferentialActionModelCon
       armature_(VectorXs::Zero(state->get_nv())),
       JMinvJt_damping_(fabs(JMinvJt_damping)),
       enable_force_(enable_force) {
-  if (JMinvJt_damping_ < 0.) {
-    JMinvJt_damping_ = 0.;
+  if (JMinvJt_damping_ < Scalar(0.)) {
+    JMinvJt_damping_ = Scalar(0.);
     throw_pretty("Invalid argument: "
                  << "The damping factor has to be positive, set to 0");
   }

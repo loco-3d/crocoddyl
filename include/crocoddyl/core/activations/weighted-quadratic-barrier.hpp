@@ -40,8 +40,8 @@ class ActivationModelWeightedQuadraticBarrierTpl : public ActivationModelAbstrac
     }
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
-    d->rlb_min_ = (r - bounds_.lb).array().min(0.);
-    d->rub_max_ = (r - bounds_.ub).array().max(0.);
+    d->rlb_min_ = (r - bounds_.lb).array().min(Scalar(0.));
+    d->rub_max_ = (r - bounds_.ub).array().max(Scalar(0.));
     d->rlb_min_.array() *= weights_.array();
     d->rub_max_.array() *= weights_.array();
     data->a_value =
@@ -57,7 +57,7 @@ class ActivationModelWeightedQuadraticBarrierTpl : public ActivationModelAbstrac
     data->Ar = (d->rlb_min_ + d->rub_max_).matrix();
     data->Ar.array() *= weights_.array();
     data->Arr.diagonal() =
-        (((r - bounds_.lb).array() <= 0.) + ((r - bounds_.ub).array() >= 0.)).matrix().template cast<Scalar>();
+        (((r - bounds_.lb).array() <= Scalar(0.)) + ((r - bounds_.ub).array() >= 0.)).matrix().template cast<Scalar>();
     data->Arr.diagonal().array() *= weights_.array();
   };
 

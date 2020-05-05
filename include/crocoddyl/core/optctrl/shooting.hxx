@@ -17,7 +17,11 @@ template <typename Scalar>
 ShootingProblemTpl<Scalar>::ShootingProblemTpl(
     const VectorXs& x0, const std::vector<boost::shared_ptr<ActionModelAbstract> >& running_models,
     boost::shared_ptr<ActionModelAbstract> terminal_model)
-    : cost_(0.), T_(running_models.size()), x0_(x0), terminal_model_(terminal_model), running_models_(running_models) {
+    : cost_(Scalar(0.)),
+      T_(running_models.size()),
+      x0_(x0),
+      terminal_model_(terminal_model),
+      running_models_(running_models) {
   if (static_cast<std::size_t>(x0.size()) != running_models_[0]->get_state()->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x0 has wrong dimension (it should be " +
@@ -48,7 +52,7 @@ Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs, const s
   }
   terminal_model_->calc(terminal_data_, xs.back());
 
-  cost_ = 0;
+  cost_ = Scalar(0.);
   for (std::size_t i = 0; i < T_; ++i) {
     cost_ += running_datas_[i]->cost;
   }
@@ -77,7 +81,7 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, con
   }
   terminal_model_->calcDiff(terminal_data_, xs.back());
 
-  cost_ = 0;
+  cost_ = Scalar(0.);
   for (std::size_t i = 0; i < T_; ++i) {
     cost_ += running_datas_[i]->cost;
   }

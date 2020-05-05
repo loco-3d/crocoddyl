@@ -23,13 +23,13 @@ ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
       JMinvJt_damping_(JMinvJt_damping),
       enable_force_(enable_force),
       gravity_(state->get_pinocchio()->gravity) {
-  if (r_coeff_ < 0.) {
-    r_coeff_ = 0.;
+  if (r_coeff_ < Scalar(0.)) {
+    r_coeff_ = Scalar(0.);
     throw_pretty("Invalid argument: "
                  << "The restitution coefficient has to be positive, set to 0");
   }
-  if (JMinvJt_damping_ < 0.) {
-    JMinvJt_damping_ = 0.;
+  if (JMinvJt_damping_ < Scalar(0.)) {
+    JMinvJt_damping_ = Scalar(0.);
     throw_pretty("Invalid argument: "
                  << "The damping factor has to be positive, set to 0");
   }

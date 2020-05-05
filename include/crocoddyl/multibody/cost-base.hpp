@@ -87,7 +87,7 @@ struct CostDataAbstractTpl {
   CostDataAbstractTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : shared(data),
         activation(model->get_activation()->createData()),
-        cost(0.),
+        cost(Scalar(0.)),
         Lx(model->get_state()->get_ndx()),
         Lu(model->get_nu()),
         Lxx(model->get_state()->get_ndx(), model->get_state()->get_ndx()),

@@ -11,8 +11,8 @@
 namespace crocoddyl {
 template <typename Scalar>
 ActionModelUnicycleTpl<Scalar>::ActionModelUnicycleTpl()
-    : ActionModelAbstractTpl<Scalar>(boost::make_shared<StateVectorTpl<Scalar> >(3), 2, 5), dt_(0.1) {
-  cost_weights_ << 10., 1.;
+    : ActionModelAbstractTpl<Scalar>(boost::make_shared<StateVectorTpl<Scalar> >(3), 2, 5), dt_(Scalar(0.1)) {
+  cost_weights_ << Scalar(10.), Scalar(1.);
 }
 
 template <typename Scalar>
@@ -37,7 +37,7 @@ void ActionModelUnicycleTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbst
   d->xnext << x[0] + c * u[0] * dt_, x[1] + s * u[0] * dt_, x[2] + u[1] * dt_;
   d->r.template head<3>() = cost_weights_[0] * x;
   d->r.template tail<2>() = cost_weights_[1] * u;
-  d->cost = 0.5 * d->r.transpose() * d->r;
+  d->cost = Scalar(0.5) * d->r.transpose() * d->r;
 }
 
 template <typename Scalar>
