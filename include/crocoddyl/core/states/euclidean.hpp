@@ -28,16 +28,12 @@ class StateVectorTpl : public StateAbstractTpl<_Scalar> {
 
   virtual VectorXs zero() const;
   virtual VectorXs rand() const;
-  virtual void diff(const Eigen::Ref<const typename MathBase::VectorXs>& x0,
-                    const Eigen::Ref<const typename MathBase::VectorXs>& x1,
-                    Eigen::Ref<typename MathBase::VectorXs> dxout) const;
-  virtual void integrate(const Eigen::Ref<const typename MathBase::VectorXs>& x,
-                         const Eigen::Ref<const typename MathBase::VectorXs>& dx,
-                         Eigen::Ref<typename MathBase::VectorXs> xout) const;
-  virtual void Jdiff(const Eigen::Ref<const typename MathBase::VectorXs>&,
-                     const Eigen::Ref<const typename MathBase::VectorXs>&,
-                     Eigen::Ref<typename MathBase::MatrixXs> Jfirst, Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
-                     const Jcomponent firstsecond = both) const;
+  virtual void diff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
+                    Eigen::Ref<VectorXs> dxout) const;
+  virtual void integrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
+                         Eigen::Ref<VectorXs> xout) const;
+  virtual void Jdiff(const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&, Eigen::Ref<MatrixXs> Jfirst,
+                     Eigen::Ref<MatrixXs> Jsecond, const Jcomponent firstsecond = both) const;
   virtual void Jintegrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
                           Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
                           const Jcomponent firstsecond = both, const AssignmentOp = setto) const;

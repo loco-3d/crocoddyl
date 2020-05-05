@@ -20,8 +20,7 @@ ActionModelUnicycleTpl<Scalar>::~ActionModelUnicycleTpl() {}
 
 template <typename Scalar>
 void ActionModelUnicycleTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
-                                          const Eigen::Ref<const typename MathBase::VectorXs>& x,
-                                          const Eigen::Ref<const typename MathBase::VectorXs>& u) {
+                                          const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -42,8 +41,8 @@ void ActionModelUnicycleTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbst
 
 template <typename Scalar>
 void ActionModelUnicycleTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
-                                              const Eigen::Ref<const typename MathBase::VectorXs>& x,
-                                              const Eigen::Ref<const typename MathBase::VectorXs>& u) {
+                                              const Eigen::Ref<const VectorXs>& x,
+                                              const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");

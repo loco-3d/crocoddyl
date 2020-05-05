@@ -151,10 +151,8 @@ void StateMultibodyTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, cons
 }
 
 template <typename Scalar>
-void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const typename MathBase::VectorXs>& x,
-                                           const Eigen::Ref<const typename MathBase::VectorXs>& dx,
-                                           Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
-                                           Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
+void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
+                                           Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
                                            const Jcomponent firstsecond, const AssignmentOp op) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
   assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
@@ -215,9 +213,8 @@ void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const typename MathB
 }
 
 template <typename Scalar>
-void StateMultibodyTpl<Scalar>::JintegrateTransport(const Eigen::Ref<const typename MathBase::VectorXs>& x,
-                                                    const Eigen::Ref<const typename MathBase::VectorXs>& dx,
-                                                    Eigen::Ref<typename MathBase::MatrixXs> Jin,
+void StateMultibodyTpl<Scalar>::JintegrateTransport(const Eigen::Ref<const VectorXs>& x,
+                                                    const Eigen::Ref<const VectorXs>& dx, Eigen::Ref<MatrixXs> Jin,
                                                     const Jcomponent firstsecond) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
 
