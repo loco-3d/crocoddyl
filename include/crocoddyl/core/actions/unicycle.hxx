@@ -31,7 +31,7 @@ void ActionModelUnicycleTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbst
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  ActionDataUnicycleTpl<Scalar>* d = static_cast<ActionDataUnicycleTpl<Scalar>*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
   const Scalar& c = cos(x[2]);
   const Scalar& s = sin(x[2]);
   d->xnext << x[0] + c * u[0] * dt_, x[1] + s * u[0] * dt_, x[2] + u[1] * dt_;
@@ -53,7 +53,7 @@ void ActionModelUnicycleTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionData
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  ActionDataUnicycleTpl<Scalar>* d = static_cast<ActionDataUnicycleTpl<Scalar>*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
 
   // Cost derivatives
   const Scalar& w_x = cost_weights_[0] * cost_weights_[0];
@@ -72,7 +72,7 @@ void ActionModelUnicycleTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionData
 
 template <typename Scalar>
 boost::shared_ptr<ActionDataAbstractTpl<Scalar> > ActionModelUnicycleTpl<Scalar>::createData() {
-  return boost::make_shared<ActionDataUnicycleTpl<Scalar> >(this);
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>

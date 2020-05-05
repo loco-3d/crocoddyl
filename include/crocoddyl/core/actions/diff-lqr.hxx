@@ -79,7 +79,7 @@ void DifferentialActionModelLQRTpl<Scalar>::calcDiff(const boost::shared_ptr<Dif
 
 template <typename Scalar>
 boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > DifferentialActionModelLQRTpl<Scalar>::createData() {
-  return boost::make_shared<DifferentialActionDataLQR>(this);
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>

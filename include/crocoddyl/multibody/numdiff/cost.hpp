@@ -24,6 +24,7 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef CostModelAbstractTpl<Scalar> Base;
+  typedef CostDataNumDiffTpl<Scalar> Data;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;

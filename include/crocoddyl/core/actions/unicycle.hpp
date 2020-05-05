@@ -22,6 +22,7 @@ class ActionModelUnicycleTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef ActionModelAbstractTpl<Scalar> Base;
+  typedef ActionDataUnicycleTpl<Scalar> Data;
   typedef MathBaseTpl<Scalar> MathBase;
 
   ActionModelUnicycleTpl();

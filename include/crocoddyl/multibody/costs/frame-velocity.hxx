@@ -52,7 +52,7 @@ CostModelFrameVelocityTpl<Scalar>::~CostModelFrameVelocityTpl() {}
 template <typename Scalar>
 void CostModelFrameVelocityTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
                                              const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
-  CostDataFrameVelocityTpl<Scalar>* d = static_cast<CostDataFrameVelocityTpl<Scalar>*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
 
   // Compute the frame velocity w.r.t. the reference frame
   d->vr = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, vref_.frame) - vref_.oMf;
@@ -68,7 +68,7 @@ void CostModelFrameVelocityTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDat
                                                  const Eigen::Ref<const VectorXs>&,
                                                  const Eigen::Ref<const VectorXs>&) {
   // Get the partial derivatives of the local frame velocity
-  CostDataFrameVelocityTpl<Scalar>* d = static_cast<CostDataFrameVelocityTpl<Scalar>*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
   pinocchio::getJointVelocityDerivatives(*state_->get_pinocchio().get(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                          d->dv_dq, d->dv_dv);
 
@@ -85,7 +85,7 @@ void CostModelFrameVelocityTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDat
 template <typename Scalar>
 boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelFrameVelocityTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::make_shared<CostDataFrameVelocityTpl<Scalar> >(this, data);
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
 }
 
 template <typename Scalar>

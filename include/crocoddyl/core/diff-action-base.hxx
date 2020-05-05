@@ -40,7 +40,8 @@ void DifferentialActionModelAbstractTpl<Scalar>::calcDiff(
 template <typename Scalar>
 boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
 DifferentialActionModelAbstractTpl<Scalar>::createData() {
-  return boost::make_shared<DifferentialActionDataAbstract>(this);
+  return boost::allocate_shared<DifferentialActionDataAbstract>(
+      Eigen::aligned_allocator<DifferentialActionDataAbstract>(), this);
 }
 
 template <typename Scalar>

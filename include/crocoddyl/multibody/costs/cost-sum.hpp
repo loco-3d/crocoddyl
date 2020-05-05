@@ -44,6 +44,7 @@ class CostModelSumTpl {
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
+  typedef CostDataSumTpl<Scalar> CostDataSum;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostModelAbstractTpl<Scalar> CostModelAbstract;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;

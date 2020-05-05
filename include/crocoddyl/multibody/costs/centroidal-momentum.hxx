@@ -53,7 +53,7 @@ void CostModelCentroidalMomentumTpl<Scalar>::calc(const boost::shared_ptr<CostDa
                                                   const Eigen::Ref<const VectorXs>&,
                                                   const Eigen::Ref<const VectorXs>&) {
   // Compute the cost residual give the reference CentroidalMomentum
-  CostDataCentroidalMomentumTpl<Scalar>* d = static_cast<CostDataCentroidalMomentumTpl<Scalar>*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
   data->r = d->pinocchio->hg.toVector() - href_;
 
   activation_->calc(data->activation, data->r);
@@ -64,7 +64,7 @@ template <typename Scalar>
 void CostModelCentroidalMomentumTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                                       const Eigen::Ref<const VectorXs>&,
                                                       const Eigen::Ref<const VectorXs>&) {
-  CostDataCentroidalMomentumTpl<Scalar>* d = static_cast<CostDataCentroidalMomentumTpl<Scalar>*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
   const std::size_t& nv = state_->get_nv();
   Eigen::Ref<Matrix6xs> Rq = data->Rx.leftCols(nv);
   Eigen::Ref<Matrix6xs> Rv = data->Rx.rightCols(nv);
@@ -87,7 +87,7 @@ void CostModelCentroidalMomentumTpl<Scalar>::calcDiff(const boost::shared_ptr<Co
 template <typename Scalar>
 boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelCentroidalMomentumTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::make_shared<CostDataCentroidalMomentumTpl<Scalar> >(this, data);
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
 }
 
 template <typename Scalar>

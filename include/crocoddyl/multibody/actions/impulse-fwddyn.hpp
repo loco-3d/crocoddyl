@@ -37,6 +37,7 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
 
   typedef _Scalar Scalar;
   typedef ActionModelAbstractTpl<Scalar> Base;
+  typedef ActionDataImpulseFwdDynamicsTpl<Scalar> Data;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostModelSumTpl<Scalar> CostModelSum;
   typedef StateMultibodyTpl<Scalar> StateMultibody;

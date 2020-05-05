@@ -80,7 +80,7 @@ typename MathBaseTpl<Scalar>::VectorXs ActionModelAbstractTpl<Scalar>::quasiStat
 
 template <typename Scalar>
 boost::shared_ptr<ActionDataAbstractTpl<Scalar> > ActionModelAbstractTpl<Scalar>::createData() {
-  return boost::make_shared<ActionDataAbstractTpl<Scalar> >(this);
+  return boost::allocate_shared<ActionDataAbstract>(Eigen::aligned_allocator<ActionDataAbstract>(), this);
 }
 
 template <typename Scalar>

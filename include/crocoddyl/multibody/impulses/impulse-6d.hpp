@@ -25,9 +25,9 @@ class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ImpulseModelAbstractTpl<Scalar> Base;
+  typedef ImpulseData6DTpl<Scalar> Data;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ImpulseDataAbstractTpl<Scalar> ImpulseDataAbstract;
-  typedef ImpulseData6DTpl<Scalar> ImpulseData6D;
   typedef typename MathBase::Vector2s Vector2s;
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;

@@ -86,8 +86,8 @@ void CostModelSumTpl<Scalar>::changeCostStatus(const std::string& name, bool act
 }
 
 template <typename Scalar>
-void CostModelSumTpl<Scalar>::calc(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data,
-                                   const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
+void CostModelSumTpl<Scalar>::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const VectorXs>& x,
+                                   const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -119,8 +119,8 @@ void CostModelSumTpl<Scalar>::calc(const boost::shared_ptr<CostDataSumTpl<Scalar
 }
 
 template <typename Scalar>
-void CostModelSumTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data,
-                                       const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
+void CostModelSumTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const VectorXs>& x,
+                                       const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -161,7 +161,7 @@ void CostModelSumTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataSumTpl<Sc
 
 template <typename Scalar>
 boost::shared_ptr<CostDataSumTpl<Scalar> > CostModelSumTpl<Scalar>::createData(DataCollectorAbstract* const data) {
-  return boost::make_shared<CostDataSumTpl<Scalar> >(this, data);
+  return boost::allocate_shared<CostDataSum>(Eigen::aligned_allocator<CostDataSum>(), this, data);
 }
 
 template <typename Scalar>

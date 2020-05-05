@@ -49,7 +49,7 @@ template <typename Scalar>
 void CostModelCoMPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
                                            const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   // Compute the cost residual give the reference CoMPosition position
-  CostDataCoMPositionTpl<Scalar>* d = static_cast<CostDataCoMPositionTpl<Scalar>*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
   data->r = d->pinocchio->com[0] - cref_;
 
   // Compute the cost
@@ -60,7 +60,7 @@ void CostModelCoMPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstr
 template <typename Scalar>
 void CostModelCoMPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                                const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
-  CostDataCoMPositionTpl<Scalar>* d = static_cast<CostDataCoMPositionTpl<Scalar>*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
 
   // Compute the derivatives of the frame placement
   const std::size_t& nv = state_->get_nv();
@@ -74,7 +74,7 @@ void CostModelCoMPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataA
 template <typename Scalar>
 boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelCoMPositionTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::make_shared<CostDataCoMPositionTpl<Scalar> >(this, data);
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
 }
 
 template <typename Scalar>

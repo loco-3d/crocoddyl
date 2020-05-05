@@ -24,7 +24,7 @@ class ActivationModelWeightedQuadraticBarrierTpl : public ActivationModelAbstrac
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActivationModelAbstractTpl<Scalar> Base;
   typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
-  typedef ActivationDataQuadraticBarrierTpl<Scalar> ActivationDataQuadraticBarrier;
+  typedef ActivationDataQuadraticBarrierTpl<Scalar> Data;
   typedef ActivationBoundsTpl<Scalar> ActivationBounds;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
@@ -38,8 +38,7 @@ class ActivationModelWeightedQuadraticBarrierTpl : public ActivationModelAbstrac
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
-    boost::shared_ptr<ActivationDataQuadraticBarrier> d =
-        boost::static_pointer_cast<ActivationDataQuadraticBarrier>(data);
+    boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
     d->rlb_min_ = (r - bounds_.lb).array().min(0.);
     d->rub_max_ = (r - bounds_.ub).array().max(0.);
@@ -54,8 +53,7 @@ class ActivationModelWeightedQuadraticBarrierTpl : public ActivationModelAbstrac
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
-    boost::shared_ptr<ActivationDataQuadraticBarrier> d =
-        boost::static_pointer_cast<ActivationDataQuadraticBarrier>(data);
+    boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
     data->Ar = (d->rlb_min_ + d->rub_max_).matrix();
     data->Ar.array() *= weights_.array();
     data->Arr.diagonal() =
@@ -64,7 +62,7 @@ class ActivationModelWeightedQuadraticBarrierTpl : public ActivationModelAbstrac
   };
 
   virtual boost::shared_ptr<ActivationDataAbstract> createData() {
-    return boost::make_shared<ActivationDataQuadraticBarrier>(this);
+    return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   };
 
   const ActivationBounds& get_bounds() const { return bounds_; };

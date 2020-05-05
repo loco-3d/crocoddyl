@@ -46,7 +46,7 @@ class ActuationModelAbstractTpl {
   virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u) = 0;
   virtual boost::shared_ptr<ActuationDataAbstract> createData() {
-    return boost::make_shared<ActuationDataAbstract>(this);
+    return boost::allocate_shared<ActuationDataAbstract>(Eigen::aligned_allocator<ActuationDataAbstract>(), this);
   };
 
   const std::size_t& get_nu() const { return nu_; };

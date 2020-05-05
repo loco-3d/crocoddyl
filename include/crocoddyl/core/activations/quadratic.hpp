@@ -52,7 +52,8 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
   };
 
   virtual boost::shared_ptr<ActivationDataAbstract> createData() {
-    boost::shared_ptr<ActivationDataAbstract> data = boost::make_shared<ActivationDataAbstract>(this);
+    boost::shared_ptr<ActivationDataAbstract> data =
+        boost::allocate_shared<ActivationDataAbstract>(Eigen::aligned_allocator<ActivationDataAbstract>(), this);
     data->Arr.diagonal().fill((Scalar)1.);
     return data;
   };
