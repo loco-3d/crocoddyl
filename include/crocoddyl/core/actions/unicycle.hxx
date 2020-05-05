@@ -66,8 +66,11 @@ void ActionModelUnicycleTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionData
   // Dynamic derivatives
   const Scalar& c = cos(x[2]);
   const Scalar& s = sin(x[2]);
-  d->Fx << 1., 0., -s * u[0] * dt_, 0., 1., c * u[0] * dt_, 0., 0., 1.;
-  d->Fu << c * dt_, 0., s * dt_, 0., 0., dt_;
+  d->Fx(0, 2) = -s * u[0] * dt_;
+  d->Fx(1, 2) = c * u[0] * dt_;
+  d->Fu(0, 0) = c * dt_;
+  d->Fu(1, 0) = s * dt_;
+  d->Fu(2, 1) = dt_;
 }
 
 template <typename Scalar>

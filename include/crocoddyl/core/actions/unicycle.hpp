@@ -74,7 +74,9 @@ struct ActionDataUnicycleTpl : public ActionDataAbstractTpl<_Scalar> {
   using Base::xnext;
 
   template <template <typename Scalar> class Model>
-  explicit ActionDataUnicycleTpl(Model<Scalar>* const model) : ActionDataAbstractTpl<Scalar>(model) {}
+  explicit ActionDataUnicycleTpl(Model<Scalar>* const model) : Base(model) {
+    Fx.diagonal().array() = Scalar(1.);
+  }
 };
 
 }  // namespace crocoddyl
