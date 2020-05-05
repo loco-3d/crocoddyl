@@ -23,6 +23,7 @@ class ContactModelNumDiffTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef ContactDataAbstractTpl<Scalar> ContactDataAbstract;
   typedef ContactModelAbstractTpl<Scalar> Base;
+  typedef ContactDataNumDiffTpl<Scalar> Data;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
   typedef boost::function<void(const typename MathBaseTpl<Scalar>::VectorXs&)> ReevaluationFunction;

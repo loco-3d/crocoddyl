@@ -17,7 +17,7 @@ FrictionConeTpl<Scalar>::FrictionConeTpl() : nf_(4) {
   lb_.resize(nf_ + 1);
   ub_.resize(nf_ + 1);
   // compute the matrix
-  update(Vector3s(0, 0, 1), 0.7, true, 0., std::numeric_limits<Scalar>::max());
+  update(Vector3s(0, 0, 1), Scalar(0.7), true, Scalar(0.), std::numeric_limits<Scalar>::max());
 }
 
 template <typename Scalar>
@@ -65,18 +65,18 @@ void FrictionConeTpl<Scalar>::update(const Vector3s& normal, const Scalar& mu, b
     nsurf_ /= normal.norm();
     std::cerr << "Warning: normal is not an unitary vector, then we normalized it" << std::endl;
   }
-  if (min_nforce < 0.) {
-    min_nforce_ = 0.;
+  if (min_nforce < Scalar(0.)) {
+    min_nforce_ = Scalar(0.);
     std::cerr << "Warning: min_nforce has to be a positive value, set to 0" << std::endl;
   }
-  if (max_nforce < 0.) {
+  if (max_nforce < Scalar(0.)) {
     max_nforce_ = std::numeric_limits<Scalar>::max();
     std::cerr << "Warning: max_nforce has to be a positive value, set to maximun value" << std::endl;
   }
 
-  Scalar theta = 2 * M_PI / static_cast<Scalar>(nf_);
+  Scalar theta = Scalar(2) * M_PI / static_cast<Scalar>(nf_);
   if (inner_appr_) {
-    mu_ *= cos(theta / 2.);
+    mu_ *= cos(theta / Scalar(2.));
   }
 
   Matrix3s c_R_o = Quaternions::FromTwoVectors(nsurf_, Vector3s::UnitZ()).toRotationMatrix();
@@ -88,7 +88,7 @@ void FrictionConeTpl<Scalar>::update(const Vector3s& normal, const Scalar& mu, b
     lb_(2 * i) = -std::numeric_limits<Scalar>::max();
     lb_(2 * i + 1) = -std::numeric_limits<Scalar>::max();
     ub_(2 * i) = 0.;
-    ub_(2 * i + 1) = 0.;
+    ub_(2 * i + 1) = Scalar(0.);
   }
   A_.row(nf_) = nsurf_.transpose();
   lb_(nf_) = min_nforce_;

@@ -50,7 +50,7 @@ template <typename Scalar>
 void CostModelContactForceTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
                                             const Eigen::Ref<const VectorXs>& /*x*/,
                                             const Eigen::Ref<const VectorXs>& /*u*/) {
-  CostDataContactForceTpl<Scalar>* d = static_cast<CostDataContactForceTpl<Scalar>*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
 
   // We transform the force to the contact frame
   data->r = (d->contact->jMf.actInv(d->contact->f) - fref_.oFf).toVector();
@@ -63,7 +63,7 @@ void CostModelContactForceTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbst
 template <typename Scalar>
 void CostModelContactForceTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                                 const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
-  CostDataContactForceTpl<Scalar>* d = static_cast<CostDataContactForceTpl<Scalar>*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
 
   const MatrixXs& df_dx = d->contact->df_dx;
   const MatrixXs& df_du = d->contact->df_du;
@@ -84,7 +84,7 @@ void CostModelContactForceTpl<Scalar>::calcDiff(const boost::shared_ptr<CostData
 template <typename Scalar>
 boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelContactForceTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::make_shared<CostDataContactForceTpl<Scalar> >(this, data);
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
 }
 
 template <typename Scalar>

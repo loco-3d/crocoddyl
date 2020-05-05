@@ -239,7 +239,7 @@ void ContactModelMultipleTpl<Scalar>::updateForceDiff(const boost::shared_ptr<Co
 template <typename Scalar>
 boost::shared_ptr<ContactDataMultipleTpl<Scalar> > ContactModelMultipleTpl<Scalar>::createData(
     pinocchio::DataTpl<Scalar>* const data) {
-  return boost::make_shared<ContactDataMultiple>(this, data);
+  return boost::allocate_shared<ContactDataMultiple>(Eigen::aligned_allocator<ContactDataMultiple>(), this, data);
 }
 
 template <typename Scalar>

@@ -23,6 +23,7 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef ActionModelAbstractTpl<Scalar> Base;
+  typedef ActionDataLQRTpl<Scalar> Data;
   typedef StateVectorTpl<Scalar> StateVector;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;

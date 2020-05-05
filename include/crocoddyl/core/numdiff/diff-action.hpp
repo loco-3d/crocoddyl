@@ -25,8 +25,8 @@ class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstract
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef DifferentialActionModelAbstractTpl<Scalar> Base;
+  typedef DifferentialActionDataNumDiffTpl<Scalar> Data;
   typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
-  typedef DifferentialActionDataNumDiffTpl<Scalar> DifferentialActionDataNumDiff;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 

@@ -18,6 +18,8 @@
 namespace crocoddyl {
 
 struct BoxQPSolution {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   BoxQPSolution() {}
   BoxQPSolution(const Eigen::MatrixXd& Hff_inv, const Eigen::VectorXd& x, const std::vector<size_t>& free_idx,
                 const std::vector<size_t>& clamped_idx)
@@ -29,10 +31,10 @@ struct BoxQPSolution {
   std::vector<size_t> clamped_idx;
 };
 
-// Based on Yuval Tassa's BoxQP
-// Cf. https://www.mathworks.com/matlabcentral/fileexchange/52069-ilqg-ddp-trajectory-optimization
 class BoxQP {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   BoxQP(const std::size_t nx, std::size_t maxiter = 100, const double th_acceptstep = 0.1, const double th_grad = 1e-9,
         const double reg = 1e-9);
   ~BoxQP();

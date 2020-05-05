@@ -24,7 +24,7 @@ ImpulseModel3DTpl<Scalar>::~ImpulseModel3DTpl() {}
 template <typename Scalar>
 void ImpulseModel3DTpl<Scalar>::calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
                                      const Eigen::Ref<const VectorXs>&) {
-  boost::shared_ptr<ImpulseData3D> d = boost::static_pointer_cast<ImpulseData3D>(data);
+  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
   pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, frame_, pinocchio::LOCAL, d->fJf);
   d->Jc = d->fJf.template topRows<3>();
@@ -33,7 +33,7 @@ void ImpulseModel3DTpl<Scalar>::calc(const boost::shared_ptr<ImpulseDataAbstract
 template <typename Scalar>
 void ImpulseModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
                                          const Eigen::Ref<const VectorXs>&) {
-  boost::shared_ptr<ImpulseData3D> d = boost::static_pointer_cast<ImpulseData3D>(data);
+  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
   pinocchio::getJointVelocityDerivatives(*state_->get_pinocchio().get(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                          d->v_partial_dq, d->v_partial_dv);
   d->dv0_dq.noalias() = d->fXj.template topRows<3>() * d->v_partial_dq;
@@ -46,14 +46,14 @@ void ImpulseModel3DTpl<Scalar>::updateForce(const boost::shared_ptr<ImpulseDataA
     throw_pretty("Invalid argument: "
                  << "lambda has wrong dimension (it should be 3)");
   }
-  boost::shared_ptr<ImpulseData3D> d = boost::static_pointer_cast<ImpulseData3D>(data);
+  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
   data->f = d->jMf.act(pinocchio::ForceTpl<Scalar>(force, Vector3s::Zero()));
 }
 
 template <typename Scalar>
 boost::shared_ptr<ImpulseDataAbstractTpl<Scalar> > ImpulseModel3DTpl<Scalar>::createData(
     pinocchio::DataTpl<Scalar>* const data) {
-  return boost::make_shared<ImpulseData3D>(this, data);
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
 }
 
 template <typename Scalar>

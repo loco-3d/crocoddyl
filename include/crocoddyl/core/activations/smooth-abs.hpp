@@ -20,11 +20,13 @@ namespace crocoddyl {
 template <typename _Scalar>
 class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActivationModelAbstractTpl<Scalar> Base;
   typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
-  typedef ActivationDataSmoothAbsTpl<Scalar> ActivationDataSmoothAbs;
+  typedef ActivationDataSmoothAbsTpl<Scalar> Data;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
@@ -36,7 +38,7 @@ class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
-    boost::shared_ptr<ActivationDataSmoothAbs> d = boost::static_pointer_cast<ActivationDataSmoothAbs>(data);
+    boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
     d->a = (r.array().cwiseAbs2().array() + Scalar(1)).array().cwiseSqrt();
     data->a_value = d->a.sum();
@@ -48,13 +50,13 @@ class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
 
-    boost::shared_ptr<ActivationDataSmoothAbs> d = boost::static_pointer_cast<ActivationDataSmoothAbs>(data);
+    boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
     data->Ar = r.cwiseProduct(d->a.cwiseInverse());
     data->Arr.diagonal() = d->a.cwiseProduct(d->a).cwiseProduct(d->a).cwiseInverse();
   };
 
   virtual boost::shared_ptr<ActivationDataAbstract> createData() {
-    return boost::make_shared<ActivationDataSmoothAbs>(this);
+    return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   };
 
  protected:
@@ -64,6 +66,7 @@ class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
 template <typename _Scalar>
 struct ActivationDataSmoothAbsTpl : public ActivationDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef ActivationDataAbstractTpl<Scalar> Base;
   typedef MathBaseTpl<Scalar> MathBase;

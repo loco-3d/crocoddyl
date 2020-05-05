@@ -32,8 +32,8 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::DifferentialActionModelCon
       armature_(VectorXs::Zero(state->get_nv())),
       JMinvJt_damping_(fabs(JMinvJt_damping)),
       enable_force_(enable_force) {
-  if (JMinvJt_damping_ < 0.) {
-    JMinvJt_damping_ = 0.;
+  if (JMinvJt_damping_ < Scalar(0.)) {
+    JMinvJt_damping_ = Scalar(0.);
     throw_pretty("Invalid argument: "
                  << "The damping factor has to be positive, set to 0");
   }
@@ -67,8 +67,7 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
   }
 
   const std::size_t& nc = contacts_->get_nc();
-  DifferentialActionDataContactFwdDynamicsTpl<Scalar>* d =
-      static_cast<DifferentialActionDataContactFwdDynamicsTpl<Scalar>*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
 
@@ -120,8 +119,7 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(nv);
 
-  DifferentialActionDataContactFwdDynamicsTpl<Scalar>* d =
-      static_cast<DifferentialActionDataContactFwdDynamicsTpl<Scalar>*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
 
   // Computing the dynamics derivatives
   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout, d->multibody.contacts->fext);
@@ -158,7 +156,7 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
 template <typename Scalar>
 boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
 DifferentialActionModelContactFwdDynamicsTpl<Scalar>::createData() {
-  return boost::make_shared<DifferentialActionDataContactFwdDynamicsTpl<Scalar> >(this);
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>

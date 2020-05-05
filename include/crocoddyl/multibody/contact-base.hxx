@@ -40,7 +40,7 @@ void ContactModelAbstractTpl<Scalar>::updateForceDiff(const boost::shared_ptr<Co
 template <typename Scalar>
 boost::shared_ptr<ContactDataAbstractTpl<Scalar> > ContactModelAbstractTpl<Scalar>::createData(
     pinocchio::DataTpl<Scalar>* const data) {
-  return boost::make_shared<ContactDataAbstract>(this, data);
+  return boost::allocate_shared<ContactDataAbstract>(Eigen::aligned_allocator<ContactDataAbstract>(), this, data);
 }
 
 template <typename Scalar>

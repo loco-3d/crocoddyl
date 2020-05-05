@@ -24,7 +24,7 @@ ContactModel3DTpl<Scalar>::~ContactModel3DTpl() {}
 template <typename Scalar>
 void ContactModel3DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract>& data,
                                      const Eigen::Ref<const VectorXs>&) {
-  ContactData3D* d = static_cast<ContactData3D*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
   pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame);
   d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame);
   d->vw = d->v.angular();
@@ -47,7 +47,7 @@ void ContactModel3DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract
 template <typename Scalar>
 void ContactModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
                                          const Eigen::Ref<const VectorXs>&) {
-  ContactData3D* d = static_cast<ContactData3D*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
   pinocchio::getJointAccelerationDerivatives(*state_->get_pinocchio().get(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                              d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
   const std::size_t& nv = state_->get_nv();
@@ -79,14 +79,14 @@ void ContactModel3DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataA
     throw_pretty("Invalid argument: "
                  << "lambda has wrong dimension (it should be 3)");
   }
-  ContactData3D* d = static_cast<ContactData3D*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
   data->f = d->jMf.act(pinocchio::ForceTpl<Scalar>(force, Vector3s::Zero()));
 }
 
 template <typename Scalar>
 boost::shared_ptr<ContactDataAbstractTpl<Scalar> > ContactModel3DTpl<Scalar>::createData(
     pinocchio::DataTpl<Scalar>* const data) {
-  return boost::make_shared<ContactData3D>(this, data);
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
 }
 
 template <typename Scalar>

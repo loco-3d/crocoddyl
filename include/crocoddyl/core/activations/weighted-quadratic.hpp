@@ -20,11 +20,13 @@ namespace crocoddyl {
 template <typename _Scalar>
 class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActivationModelAbstractTpl<Scalar> Base;
   typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
-  typedef ActivationDataWeightedQuadTpl<Scalar> ActivationDataWeightedQuad;
+  typedef ActivationDataWeightedQuadTpl<Scalar> Data;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
@@ -36,7 +38,7 @@ class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
-    boost::shared_ptr<ActivationDataWeightedQuad> d = boost::static_pointer_cast<ActivationDataWeightedQuad>(data);
+    boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
     d->Wr = weights_.cwiseProduct(r);
     data->a_value = Scalar(0.5) * r.dot(d->Wr);
@@ -48,7 +50,7 @@ class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
 
-    boost::shared_ptr<ActivationDataWeightedQuad> d = boost::static_pointer_cast<ActivationDataWeightedQuad>(data);
+    boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
     data->Ar = d->Wr;
     // The Hessian has constant values which were set in createData.
 #ifndef NDEBUG
@@ -57,7 +59,7 @@ class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar
   };
 
   virtual boost::shared_ptr<ActivationDataAbstract> createData() {
-    boost::shared_ptr<ActivationDataWeightedQuad> data = boost::make_shared<ActivationDataWeightedQuad>(this);
+    boost::shared_ptr<Data> data = boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
     data->Arr.diagonal() = weights_;
 
 #ifndef NDEBUG
@@ -91,6 +93,7 @@ class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar
 template <typename _Scalar>
 struct ActivationDataWeightedQuadTpl : public ActivationDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;

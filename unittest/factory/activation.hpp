@@ -39,6 +39,8 @@ std::ostream& operator<<(std::ostream& os, ActivationModelTypes::Type type);
 
 class ActivationModelFactory {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   explicit ActivationModelFactory();
   ~ActivationModelFactory();
 
