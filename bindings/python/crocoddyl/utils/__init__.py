@@ -283,7 +283,8 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
         self.armature = np.matrix(np.zeros(0))
 
         # We cannot abstract data in Python bindings, let's create this internal data inside model
-        self.pinocchioData = pinocchio.Data(self.state.pinocchio)
+        # TODO(cmastalli): temporary patch of: self.pinocchioData = pinocchio.Data(self.state.pinocchio)
+        self.pinocchioData = pinocchio.Model.createData(self.state.pinocchio)
         self.multibodyData = crocoddyl.DataCollectorMultibody(self.pinocchioData)
         self.actuationData = self.actuation.createData()
         self.costsData = self.costs.createData(self.multibodyData)
@@ -296,6 +297,7 @@ class DifferentialFreeFwdDynamicsDerived(crocoddyl.DifferentialActionModelAbstra
         q, v = x[:self.state.nq], x[-self.state.nv:]
         self.actuation.calc(self.actuationData, x, u)
         tau = self.actuationData.tau
+
         # Computing the dynamics using ABA or manually for armature case
         if self.enable_force:
             data.xout[:] = pinocchio.aba(self.state.pinocchio, self.pinocchioData, q, v, tau)
