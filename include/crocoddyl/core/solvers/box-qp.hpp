@@ -31,6 +31,31 @@ struct BoxQPSolution {
   std::vector<size_t> clamped_idx;
 };
 
+/**
+ * @brief This class implements a box QP based on Projected Newton method.
+ *
+ * We consider a box QP proble of the form:
+ * \f{eqnarray*}{
+ *   \min_{\mathbf{x}} &= \frac{1}{2}\mathbf{x}^T\mathbf{H}\mathbf{x} + \mathbf{q}^T\mathbf{x} \\
+ *   \textrm{subject to} & \hspace{1em} \mathbf{\underline{b}} \leq \mathbf{x} \leq \mathbf{\bar{b}} \\
+ * \f}
+ * where \f$\mathbf{H}\f$, \f$\mathbf{q}\f$ are the Hessian and gradient of the problem,
+ * respectively, \f$\mathbf{\underline{b}}\f$, \f$\mathbf{\bar{b}}\f$ are lower and upper
+ * bounds of the decision variable \f$\mathbf{x}\f$.
+ *
+ * The algorithm procees by iteratively identifying the active bounds, and then
+ * performing a projected Newton step in the free sub-space.
+ * The projection uses the Hessian of the free sub-space and are computed using
+ * Cholesky decomposition.
+ * It uses a line search procedure with polynomial step length values in a
+ * backtracking fashion.
+ * The step are checked using an Armijo condition together L2-norm gradient.
+ *
+ * For more details about this solver, we encourage you to read the following
+ * article:
+ * D. P. Bertsekas, "Projected newton methods for optimization problems with
+ * simple constraints". SIAM Journal on Control and Optimization.
+ */
 class BoxQP {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
