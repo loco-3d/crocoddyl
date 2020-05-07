@@ -173,32 +173,34 @@ class GepettoDisplay(DisplayAbstract):
                 if isinstance(data.differential, libcrocoddyl_pywrap.DifferentialActionDataContactFwdDynamics):
                     fc = []
                     for key, contact in data.differential.multibody.contacts.contacts.items():
-                        oMf = contact.pinocchio.oMi[contact.joint] * contact.jMf
-                        force = contact.jMf.actInv(contact.f)
-                        nsurf = np.array([0., 0., 1.])
-                        mu = 0.7
-                        for k, c in model.differential.costs.costs.items():
-                            if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
-                                if contact.joint == self.robot.model.frames[c.cost.reference.frame].parent:
-                                    nsurf = c.cost.reference.oRf.nsurf
-                                    mu = c.cost.reference.oRf.mu
-                                    continue
-                        fc.append({"key": str(contact.joint), "oMf": oMf, "f": force, "nsurf": nsurf, "mu": mu})
+                        if model.differential.contacts.contacts[key].active:
+                            oMf = contact.pinocchio.oMi[contact.joint] * contact.jMf
+                            force = contact.jMf.actInv(contact.f)
+                            nsurf = np.array([0., 0., 1.])
+                            mu = 0.7
+                            for k, c in model.differential.costs.costs.items():
+                                if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
+                                    if contact.joint == self.robot.model.frames[c.cost.reference.frame].parent:
+                                        nsurf = c.cost.reference.oRf.nsurf
+                                        mu = c.cost.reference.oRf.mu
+                                        continue
+                            fc.append({"key": str(contact.joint), "oMf": oMf, "f": force, "nsurf": nsurf, "mu": mu})
                     fs.append(fc)
             elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
                 fc = []
                 for key, impulse in data.multibody.impulses.impulses.items():
-                    oMf = impulse.pinocchio.oMi[impulse.joint] * impulse.jMf
-                    force = impulse.jMf.actInv(impulse.f)
-                    nsurf = np.array([0., 0., 1.])
-                    mu = 0.7
-                    for k, c in model.costs.costs.items():
-                        if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
-                            if impulse.joint == self.robot.model.frames[c.cost.frame].parent:
-                                nsurf = c.cost.friction_cone.nsurf
-                                mu = c.cost.friction_cone.mu
-                                continue
-                    fc.append({"key": str(impulse.joint), "oMf": oMf, "f": force, "nsurf": nsurf, "mu": mu})
+                    if model.impulses.impulses[key].active:
+                        oMf = impulse.pinocchio.oMi[impulse.joint] * impulse.jMf
+                        force = impulse.jMf.actInv(impulse.f)
+                        nsurf = np.array([0., 0., 1.])
+                        mu = 0.7
+                        for k, c in model.costs.costs.items():
+                            if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
+                                if impulse.joint == self.robot.model.frames[c.cost.frame].parent:
+                                    nsurf = c.cost.friction_cone.nsurf
+                                    mu = c.cost.friction_cone.mu
+                                    continue
+                        fc.append({"key": str(impulse.joint), "oMf": oMf, "f": force, "nsurf": nsurf, "mu": mu})
                 fs.append(fc)
         return fs
 
