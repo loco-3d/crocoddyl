@@ -194,9 +194,9 @@ class StateAbstractTpl {
   virtual void JintegrateTransport(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
                                    Eigen::Ref<MatrixXs> Jin, const Jcomponent firstsecond) const = 0;
 
-  /** 
+  /**
    * @copybrief diff()
-   * 
+   *
    * @param[in]  x0     Previous state point (size `nx`)
    * @param[in]  x1     Current state point (size `nx`)
    * @return  Difference between the current and previous state points (size `ndx`)
@@ -205,16 +205,16 @@ class StateAbstractTpl {
 
   /**
    * @copybrief integrate()
-   * 
+   *
    * @param[in]  x     State point (size `nx`)
    * @param[in]  dx    Velocity vector (size `ndx`)
    * @return  Next state point (size `nx`)
    */
   VectorXs integrate_x(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx);
 
-  /** 
+  /**
    * @copybrief jdiff()
-   * 
+   *
    * @param[in]  x0     Previous state point (size `nx`)
    * @param[in]  x1     Current state point (size `nx`)
    * @return  Jacobians
@@ -224,7 +224,7 @@ class StateAbstractTpl {
 
   /**
    * @copybrief Jintegrate()
-   * 
+   *
    * @param[in]  x     State point (size `nx`)
    * @param[in]  dx    Velocity vector (size `ndx`)
    * @return  Jacobians
