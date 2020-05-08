@@ -67,7 +67,7 @@ iter 	 cost 	      stop 	    grad 	  xreg 	      ureg 	 step 	 feas
 iter 	 cost 	      stop 	    grad 	  xreg 	      ureg 	 step 	 feas
   60  8.04984e+00  8.72615e+02  1.19571e+00  1.00000e-05  1.00000e-05   0.0625     1
   61  7.98776e+00  9.84002e+02  1.13621e+00  1.00000e-05  1.00000e-05   0.0625     1
-  62  7.92728e+00  9.66788e+02  1.06750e+00  1.00000e-05  1.00000e-05   0.0625     1
+  62  7.92728e+00  9.66787e+02  1.06750e+00  1.00000e-05  1.00000e-05   0.0625     1
   63  7.85403e+00  9.07264e+02  9.99361e-01  1.00000e-05  1.00000e-05   0.1250     1
   64  7.74860e+00  1.42751e+03  9.53021e-01  1.00000e-05  1.00000e-05   0.1250     1
   65  7.57468e+00  1.15569e+03  8.46836e-01  1.00000e-05  1.00000e-05   0.2500     1
@@ -154,7 +154,7 @@ iter 	 cost 	      stop 	    grad 	  xreg 	      ureg 	 step 	 feas
  139  6.81843e+00  2.43270e-04  8.00536e-07  1.00000e-09  1.00000e-09   1.0000     1
 iter 	 cost 	      stop 	    grad 	  xreg 	      ureg 	 step 	 feas
  140  6.81843e+00  6.62800e-08  1.57323e-07  1.00000e-09  1.00000e-09   0.5000     1
-('Finally reached = ', array([3.99963367e-01, 2.37599941e-05, 1.19998324e+00]))
-('Distance between hand and target = ', 4.676946718296189e-05)
-('Distance to default state = ', 1.604679991609172)
-('XY distance to CoM reference = ', 0.09817856749718275)
+('Finally reached = ', array([3.99963367e-01, 2.37599942e-05, 1.19998324e+00]))
+('Distance between hand and target = ', 4.676946718884012e-05)
+('Distance to default state = ', 1.6046799916059178)
+('XY distance to CoM reference = ', 0.09817856749706623)
