@@ -31,6 +31,11 @@ class ShootingProblemTpl {
 
   ShootingProblemTpl(const VectorXs& x0, const std::vector<boost::shared_ptr<ActionModelAbstract> >& running_models,
                      boost::shared_ptr<ActionModelAbstract> terminal_model);
+  ShootingProblemTpl(const VectorXs& x0, const std::vector<boost::shared_ptr<ActionModelAbstract> >& running_models,
+                     boost::shared_ptr<ActionModelAbstract> terminal_model,
+                     const std::vector<boost::shared_ptr<ActionDataAbstract> >& running_datas,
+                     boost::shared_ptr<ActionDataAbstract> terminal_data);
+  ShootingProblemTpl(const ShootingProblemTpl<Scalar>& problem);
   ~ShootingProblemTpl();
 
   Scalar calc(const std::vector<VectorXs>& xs, const std::vector<VectorXs>& us);

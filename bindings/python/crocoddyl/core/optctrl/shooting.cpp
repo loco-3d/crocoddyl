@@ -36,12 +36,21 @@ void exposeShootingProblem() {
       "updates the derivatives of all action models. The last rollouts the stacks of actions\n"
       "models.",
       bp::init<Eigen::VectorXd, std::vector<boost::shared_ptr<ActionModelAbstract> >,
-               boost::shared_ptr<ActionModelAbstract> >(
-          bp::args("self", "initialState", "runningModels", "terminalModel"),
-          "Initialize the shooting problem.\n\n"
-          ":param initialState: initial state\n"
+               boost::shared_ptr<ActionModelAbstract> >(bp::args("self", "x0", "runningModels", "terminalModel"),
+                                                        "Initialize the shooting problem and allocate its data.\n\n"
+                                                        ":param x0: initial state\n"
+                                                        ":param runningModels: running action models\n"
+                                                        ":param terminalModel: terminal action model"))
+      .def(bp::init<Eigen::VectorXd, std::vector<boost::shared_ptr<ActionModelAbstract> >,
+                    boost::shared_ptr<ActionModelAbstract>, std::vector<boost::shared_ptr<ActionDataAbstract> >,
+                    boost::shared_ptr<ActionDataAbstract> >(
+          bp::args("self", "x0", "runningModels", "terminalModel", "runningDatas", "terminalData"),
+          "Initialize the shooting problem (models and datas).\n\n"
+          ":param x0: initial state\n"
           ":param runningModels: running action models\n"
-          ":param terminalModel: terminal action model"))
+          ":param terminalModel: terminal action model\n"
+          ":param runningDatas: running action datas\n"
+          ":param terminalData: terminal action data"))
       .def("calc", &ShootingProblem::calc, bp::args("self", "xs", "us"),
            "Compute the cost and the next states.\n\n"
            "First, it computes the next state and cost for each action model\n"
