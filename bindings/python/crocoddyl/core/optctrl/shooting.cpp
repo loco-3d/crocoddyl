@@ -24,6 +24,7 @@ void exposeShootingProblem() {
   bp::to_python_converter<std::vector<ActionDataPtr, std::allocator<ActionDataPtr> >,
                           vector_to_list<ActionDataPtr, false> >();
   list_to_vector().from_python<std::vector<ActionModelPtr, std::allocator<ActionModelPtr> > >();
+  list_to_vector().from_python<std::vector<ActionDataPtr, std::allocator<ActionDataPtr> > >();
 
   bp::register_ptr_to_python<boost::shared_ptr<ShootingProblem> >();
 
