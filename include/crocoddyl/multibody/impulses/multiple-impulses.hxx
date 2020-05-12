@@ -84,8 +84,8 @@ void ImpulseModelMultipleTpl<Scalar>::calc(const boost::shared_ptr<ImpulseDataMu
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of impulse datas and models");
   }
-  std::size_t ni = 0;
 
+  std::size_t ni = 0;
   const std::size_t& nv = state_->get_nv();
   typename ImpulseModelContainer::iterator it_m, end_m;
   typename ImpulseDataContainer::iterator it_d, end_d;
@@ -112,8 +112,8 @@ void ImpulseModelMultipleTpl<Scalar>::calcDiff(const boost::shared_ptr<ImpulseDa
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of impulse datas and models");
   }
-  std::size_t ni = 0;
 
+  std::size_t ni = 0;
   const std::size_t& nv = state_->get_nv();
   typename ImpulseModelContainer::iterator it_m, end_m;
   typename ImpulseDataContainer::iterator it_d, end_d;
@@ -154,12 +154,12 @@ void ImpulseModelMultipleTpl<Scalar>::updateForce(const boost::shared_ptr<Impuls
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of impulse datas and models");
   }
-  std::size_t ni = 0;
 
   for (ForceIterator it = data->fext.begin(); it != data->fext.end(); ++it) {
     *it = pinocchio::ForceTpl<Scalar>::Zero();
   }
 
+  std::size_t ni = 0;
   typename ImpulseModelContainer::iterator it_m, end_m;
   typename ImpulseDataContainer::iterator it_d, end_d;
   for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
@@ -202,8 +202,8 @@ void ImpulseModelMultipleTpl<Scalar>::updateForceDiff(const boost::shared_ptr<Im
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of impulse datas and models");
   }
-  std::size_t ni = 0;
 
+  std::size_t ni = 0;
   typename ImpulseModelContainer::const_iterator it_m, end_m;
   typename ImpulseDataContainer::const_iterator it_d, end_d;
   for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
