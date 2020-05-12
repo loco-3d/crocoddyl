@@ -106,9 +106,9 @@ struct ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
         multibody(&pinocchio, model->get_impulses()->createData(&pinocchio)),
         costs(model->get_costs()->createData(&multibody)),
         vnone(model->get_state()->get_nv()),
-        Kinv(model->get_state()->get_nv() + model->get_impulses()->get_ni(),
-             model->get_state()->get_nv() + model->get_impulses()->get_ni()),
-        df_dq(model->get_impulses()->get_ni(), model->get_state()->get_nv()),
+        Kinv(model->get_state()->get_nv() + model->get_impulses()->get_ni_total(),
+             model->get_state()->get_nv() + model->get_impulses()->get_ni_total()),
+        df_dq(model->get_impulses()->get_ni_total(), model->get_state()->get_nv()),
         dgrav_dq(model->get_state()->get_nv(), model->get_state()->get_nv()) {
     costs->shareMemory(this);
     vnone.setZero();
