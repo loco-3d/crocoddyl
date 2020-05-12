@@ -29,9 +29,9 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ContactModelAbstractTpl<Scalar> Base;
+  typedef ContactData3DTpl<Scalar> Data;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ContactDataAbstractTpl<Scalar> ContactDataAbstract;
-  typedef ContactData3DTpl<Scalar> ContactData3D;
   typedef FrameTranslationTpl<Scalar> FrameTranslation;
   typedef typename MathBase::Vector2s Vector2s;
   typedef typename MathBase::Vector3s Vector3s;

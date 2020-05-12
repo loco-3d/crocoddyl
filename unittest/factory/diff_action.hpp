@@ -46,6 +46,8 @@ std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type ty
 
 class DifferentialActionModelFactory {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   explicit DifferentialActionModelFactory();
   ~DifferentialActionModelFactory();
 

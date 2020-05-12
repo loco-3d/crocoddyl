@@ -23,6 +23,7 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActuationModelAbstractTpl<Scalar> Base;
+  typedef ActuationDataNumDiffTpl<Scalar> Data;
   typedef ActuationDataAbstractTpl<Scalar> ActuationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;

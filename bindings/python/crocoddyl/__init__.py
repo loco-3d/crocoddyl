@@ -99,7 +99,7 @@ class GepettoDisplay(DisplayAbstract):
         self._addRobot()
         self._setBackground()
         if cameraTF is not None:
-            self.robot.viewer.gui.setCameraTransform(0, cameraTF)
+            self.robot.viewer.gui.setCameraTransform(self.robot.viz.windowID, cameraTF)
         if floor:
             self._addFloor()
         self.totalWeight = sum(m.mass

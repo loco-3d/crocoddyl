@@ -49,7 +49,7 @@ void CostModelAbstractTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbst
 template <typename Scalar>
 boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelAbstractTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::make_shared<CostDataAbstract>(this, data);
+  return boost::allocate_shared<CostDataAbstract>(Eigen::aligned_allocator<CostDataAbstract>(), this, data);
 }
 
 template <typename Scalar>

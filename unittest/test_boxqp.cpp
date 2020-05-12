@@ -31,7 +31,7 @@ void test_unconstrained_qp_with_identity_hessian() {
   Eigen::VectorXd gradient = Eigen::VectorXd::Random(nx);
   Eigen::VectorXd lb = -std::numeric_limits<double>::infinity() * Eigen::VectorXd::Ones(nx);
   Eigen::VectorXd ub = std::numeric_limits<double>::infinity() * Eigen::VectorXd::Ones(nx);
-  Eigen::VectorXd xinit(nx);
+  Eigen::VectorXd xinit = Eigen::VectorXd::Random(nx);
   crocoddyl::BoxQPSolution sol = boxqp.solve(hessian, gradient, lb, ub, xinit);
 
   // Checking the solution of the problem. Note that it the negative of the gradient since Hessian
@@ -62,7 +62,7 @@ void test_unconstrained_qp() {
   Eigen::VectorXd gradient = Eigen::VectorXd::Random(nx);
   Eigen::VectorXd lb = -std::numeric_limits<double>::infinity() * Eigen::VectorXd::Ones(nx);
   Eigen::VectorXd ub = std::numeric_limits<double>::infinity() * Eigen::VectorXd::Ones(nx);
-  Eigen::VectorXd xinit(nx);
+  Eigen::VectorXd xinit = Eigen::VectorXd::Random(nx);
   crocoddyl::BoxQPSolution sol = boxqp.solve(hessian, gradient, lb, ub, xinit);
 
   // Checking the solution against the KKT solution
@@ -95,7 +95,7 @@ void test_box_qp_with_identity_hessian() {
   }
   Eigen::VectorXd lb = Eigen::VectorXd::Zero(nx);
   Eigen::VectorXd ub = Eigen::VectorXd::Ones(nx);
-  Eigen::VectorXd xinit(nx);
+  Eigen::VectorXd xinit = Eigen::VectorXd::Random(nx);
   crocoddyl::BoxQPSolution sol = boxqp.solve(hessian, gradient, lb, ub, xinit);
 
   // The analytical solution is the a bounded, and negative, gradient

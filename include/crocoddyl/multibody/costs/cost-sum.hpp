@@ -44,6 +44,7 @@ class CostModelSumTpl {
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
+  typedef CostDataSumTpl<Scalar> CostDataSum;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostModelAbstractTpl<Scalar> CostModelAbstract;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
@@ -112,7 +113,7 @@ struct CostDataSumTpl {
         Lxu_internal(model->get_state()->get_ndx(), model->get_nu()),
         Luu_internal(model->get_nu(), model->get_nu()),
         shared(data),
-        cost(0.),
+        cost(Scalar(0.)),
         Lx(Lx_internal.data(), model->get_state()->get_ndx()),
         Lu(Lu_internal.data(), model->get_nu()),
         Lxx(Lxx_internal.data(), model->get_state()->get_ndx(), model->get_state()->get_ndx()),

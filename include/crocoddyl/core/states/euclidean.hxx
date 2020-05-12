@@ -16,18 +16,17 @@ StateVectorTpl<Scalar>::~StateVectorTpl() {}
 
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::VectorXs StateVectorTpl<Scalar>::zero() const {
-  return MathBase::VectorXs::Zero(nx_);
+  return VectorXs::Zero(nx_);
 }
 
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::VectorXs StateVectorTpl<Scalar>::rand() const {
-  return MathBase::VectorXs::Random(nx_);
+  return VectorXs::Random(nx_);
 }
 
 template <typename Scalar>
-void StateVectorTpl<Scalar>::diff(const Eigen::Ref<const typename MathBase::VectorXs>& x0,
-                                  const Eigen::Ref<const typename MathBase::VectorXs>& x1,
-                                  Eigen::Ref<typename MathBase::VectorXs> dxout) const {
+void StateVectorTpl<Scalar>::diff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
+                                  Eigen::Ref<VectorXs> dxout) const {
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty("Invalid argument: "
                  << "x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
@@ -44,9 +43,8 @@ void StateVectorTpl<Scalar>::diff(const Eigen::Ref<const typename MathBase::Vect
 }
 
 template <typename Scalar>
-void StateVectorTpl<Scalar>::integrate(const Eigen::Ref<const typename MathBase::VectorXs>& x,
-                                       const Eigen::Ref<const typename MathBase::VectorXs>& dx,
-                                       Eigen::Ref<typename MathBase::VectorXs> xout) const {
+void StateVectorTpl<Scalar>::integrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
+                                       Eigen::Ref<VectorXs> xout) const {
   if (static_cast<std::size_t>(x.size()) != nx_) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(nx_) + ")");
@@ -63,10 +61,8 @@ void StateVectorTpl<Scalar>::integrate(const Eigen::Ref<const typename MathBase:
 }
 
 template <typename Scalar>
-void StateVectorTpl<Scalar>::Jdiff(const Eigen::Ref<const typename MathBase::VectorXs>&,
-                                   const Eigen::Ref<const typename MathBase::VectorXs>&,
-                                   Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
-                                   Eigen::Ref<typename MathBase::MatrixXs> Jsecond,
+void StateVectorTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&,
+                                   Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
                                    const Jcomponent firstsecond) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
   if (firstsecond == first || firstsecond == both) {
@@ -90,11 +86,9 @@ void StateVectorTpl<Scalar>::Jdiff(const Eigen::Ref<const typename MathBase::Vec
 }
 
 template <typename Scalar>
-void StateVectorTpl<Scalar>::Jintegrate(const Eigen::Ref<const typename MathBase::VectorXs>&,
-                                        const Eigen::Ref<const typename MathBase::VectorXs>&,
-                                        Eigen::Ref<typename MathBase::MatrixXs> Jfirst,
-                                        Eigen::Ref<typename MathBase::MatrixXs> Jsecond, const Jcomponent firstsecond,
-                                        const AssignmentOp op) const {
+void StateVectorTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&,
+                                        Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
+                                        const Jcomponent firstsecond, const AssignmentOp op) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
   assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
   if (firstsecond == first || firstsecond == both) {
@@ -142,10 +136,8 @@ void StateVectorTpl<Scalar>::Jintegrate(const Eigen::Ref<const typename MathBase
 }
 
 template <typename Scalar>
-void StateVectorTpl<Scalar>::JintegrateTransport(const Eigen::Ref<const typename MathBase::VectorXs>&,
-                                                 const Eigen::Ref<const typename MathBase::VectorXs>&,
-                                                 Eigen::Ref<typename MathBase::MatrixXs>,
-                                                 const Jcomponent firstsecond) const {
+void StateVectorTpl<Scalar>::JintegrateTransport(const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&,
+                                                 Eigen::Ref<MatrixXs>, const Jcomponent firstsecond) const {
   assert_pretty(is_a_Jcomponent(firstsecond), (""));
   if (firstsecond != first && firstsecond != second) {
     throw_pretty(

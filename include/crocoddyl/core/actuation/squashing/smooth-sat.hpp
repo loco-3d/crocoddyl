@@ -21,6 +21,8 @@ namespace crocoddyl {
 template <typename _Scalar>
 class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef SquashingModelAbstractTpl<Scalar> Base;
@@ -36,7 +38,7 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
     s_lb_ = u_lb_;
     s_ub_ = u_ub_;
 
-    smooth_ = 0.1;
+    smooth_ = Scalar(0.1);
 
     d_ = (u_ub_ - u_lb_) * smooth_;
     a_ = d_.array() * d_.array();
@@ -47,14 +49,16 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
   virtual void calc(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const VectorXs>& s) {
     // Squashing function used: "Smooth abs":
     // s(u) = 0.5*(lb + ub + sqrt(smooth + (u - lb)^2) - sqrt(smooth + (u - ub)^2))
-    data->u = 0.5 * (Eigen::sqrt(Eigen::pow((s - u_lb_).array(), 2) + a_.array()) -
-                     Eigen::sqrt(Eigen::pow((s - u_ub_).array(), 2) + a_.array()) + u_lb_.array() + u_ub_.array());
+    data->u =
+        Scalar(0.5) * (Eigen::sqrt(Eigen::pow((s - u_lb_).array(), 2) + a_.array()) -
+                       Eigen::sqrt(Eigen::pow((s - u_ub_).array(), 2) + a_.array()) + u_lb_.array() + u_ub_.array());
   }
 
   virtual void calcDiff(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const VectorXs>& s) {
     data->du_ds.diagonal() =
-        0.5 * (Eigen::pow(a_.array() + Eigen::pow((s - u_lb_).array(), 2), -0.5).array() * (s - u_lb_).array() -
-               Eigen::pow(a_.array() + Eigen::pow((s - u_ub_).array(), 2), -0.5).array() * (s - u_ub_).array());
+        Scalar(0.5) *
+        (Eigen::pow(a_.array() + Eigen::pow((s - u_lb_).array(), 2), Scalar(-0.5)).array() * (s - u_lb_).array() -
+         Eigen::pow(a_.array() + Eigen::pow((s - u_ub_).array(), 2), Scalar(-0.5)).array() * (s - u_ub_).array());
   }
 
   const Scalar& get_smooth() const { return smooth_; };

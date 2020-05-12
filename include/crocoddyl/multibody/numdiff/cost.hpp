@@ -19,9 +19,12 @@ namespace crocoddyl {
 template <typename _Scalar>
 class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef CostModelAbstractTpl<Scalar> Base;
+  typedef CostDataNumDiffTpl<Scalar> Data;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;

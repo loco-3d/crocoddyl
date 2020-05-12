@@ -2,7 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, INRIA
+// Copyright (C) 2018-2020, LAAS-CNRS, INRIA, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,6 +25,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
   typedef ActionModelAbstractTpl<Scalar> Base;
+  typedef ActionDataCodeGenTpl<Scalar> Data;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
   typedef typename MathBaseTpl<Scalar>::MatrixXs MatrixXs;
@@ -183,13 +184,13 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   }
 
   void set_env(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& env_val) const {
-    ActionDataCodeGenTpl<Scalar>* d = static_cast<ActionDataCodeGenTpl<Scalar>*>(data.get());
+    Data* d = static_cast<Data*>(data.get());
     d->xu.tail(n_env) = env_val;
   }
 
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u) {
-    ActionDataCodeGenTpl<Scalar>* d = static_cast<ActionDataCodeGenTpl<Scalar>*>(data.get());
+    Data* d = static_cast<Data*>(data.get());
     const std::size_t& nx = ad_model->get_state()->get_nx();
     const std::size_t& nu = ad_model->get_nu();
 
@@ -202,7 +203,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
 
   void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u) {
-    ActionDataCodeGenTpl<Scalar>* d = static_cast<ActionDataCodeGenTpl<Scalar>*>(data.get());
+    Data* d = static_cast<Data*>(data.get());
     const std::size_t& nx = ad_model->get_state()->get_nx();
     const std::size_t& nu = ad_model->get_nu();
 
@@ -213,7 +214,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   }
 
   boost::shared_ptr<ActionDataAbstract> createData() {
-    return boost::make_shared<ActionDataCodeGenTpl<Scalar> >(this);
+    return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   }
 
   /// \brief Dimension of the input vector

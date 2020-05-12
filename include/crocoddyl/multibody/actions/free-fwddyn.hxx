@@ -52,8 +52,7 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calc(
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  DifferentialActionDataFreeFwdDynamicsTpl<Scalar>* d =
-      static_cast<DifferentialActionDataFreeFwdDynamicsTpl<Scalar>*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
 
@@ -95,8 +94,7 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calcDiff(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(nv);
 
-  DifferentialActionDataFreeFwdDynamicsTpl<Scalar>* d =
-      static_cast<DifferentialActionDataFreeFwdDynamicsTpl<Scalar>*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
 
   actuation_->calcDiff(d->multibody.actuation, x, u);
 
@@ -121,7 +119,7 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calcDiff(
 template <typename Scalar>
 boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
 DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::createData() {
-  return boost::make_shared<DifferentialActionDataFreeFwdDynamicsTpl<Scalar> >(this);
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>

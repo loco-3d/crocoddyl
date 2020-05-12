@@ -37,6 +37,7 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
 
   typedef _Scalar Scalar;
   typedef ActionModelAbstractTpl<Scalar> Base;
+  typedef ActionDataImpulseFwdDynamicsTpl<Scalar> Data;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostModelSumTpl<Scalar> CostModelSum;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
@@ -47,8 +48,8 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
 
   ActionModelImpulseFwdDynamicsTpl(boost::shared_ptr<StateMultibody> state,
                                    boost::shared_ptr<ImpulseModelMultiple> impulses,
-                                   boost::shared_ptr<CostModelSum> costs, const Scalar& r_coeff = 0.,
-                                   const Scalar& JMinvJt_damping = 0., const bool& enable_force = false);
+                                   boost::shared_ptr<CostModelSum> costs, const Scalar& r_coeff = Scalar(0.),
+                                   const Scalar& JMinvJt_damping = Scalar(0.), const bool& enable_force = false);
   virtual ~ActionModelImpulseFwdDynamicsTpl();
 
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
