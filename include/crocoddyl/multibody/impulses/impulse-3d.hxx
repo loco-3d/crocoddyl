@@ -46,8 +46,7 @@ void ImpulseModel3DTpl<Scalar>::updateForce(const boost::shared_ptr<ImpulseDataA
     throw_pretty("Invalid argument: "
                  << "lambda has wrong dimension (it should be 3)");
   }
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
-  data->f = d->jMf.act(pinocchio::ForceTpl<Scalar>(force, Vector3s::Zero()));
+  data->f = data->jMf.act(pinocchio::ForceTpl<Scalar>(force, Vector3s::Zero()));
 }
 
 template <typename Scalar>

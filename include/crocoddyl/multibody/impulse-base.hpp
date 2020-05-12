@@ -63,6 +63,7 @@ struct ImpulseDataAbstractTpl {
       : pinocchio(data),
         joint(0),
         frame(0),
+        jMf(pinocchio::SE3Tpl<Scalar>::Identity()),
         Jc(model->get_ni(), model->get_state()->get_nv()),
         dv0_dq(model->get_ni(), model->get_state()->get_nv()),
         f(pinocchio::ForceTpl<Scalar>::Zero()),
@@ -76,6 +77,7 @@ struct ImpulseDataAbstractTpl {
   pinocchio::DataTpl<Scalar>* pinocchio;
   pinocchio::JointIndex joint;
   pinocchio::FrameIndex frame;
+  typename pinocchio::SE3Tpl<Scalar> jMf;
   MatrixXs Jc;
   MatrixXs dv0_dq;
   pinocchio::ForceTpl<Scalar> f;

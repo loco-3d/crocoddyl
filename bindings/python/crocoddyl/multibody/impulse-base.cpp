@@ -68,6 +68,8 @@ void exposeImpulseAbstract() {
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
       .add_property("pinocchio", bp::make_getter(&ImpulseDataAbstract::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
+      .add_property("jMf", bp::make_getter(&ImpulseDataAbstract::jMf, bp::return_value_policy<bp::return_by_value>()),
+                    "local frame placement of the impulse frame")
       .add_property("Jc", bp::make_getter(&ImpulseDataAbstract::Jc, bp::return_internal_reference<>()),
                     bp::make_setter(&ImpulseDataAbstract::Jc), "impulse Jacobian")
       .add_property("dv0_dq", bp::make_getter(&ImpulseDataAbstract::dv0_dq, bp::return_internal_reference<>()),
