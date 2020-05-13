@@ -72,7 +72,7 @@ class ImpulseModelMultipleTpl {
   void updateForce(const boost::shared_ptr<ImpulseDataMultiple>& data, const VectorXs& force);
   boost::shared_ptr<ImpulseDataMultiple> createData(pinocchio::DataTpl<Scalar>* const data);
   void updateVelocityDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, const MatrixXs& dvnext_dx) const;
-  void updateForceDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, const MatrixXs& df_dq) const;
+  void updateForceDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, const MatrixXs& df_dx) const;
 
   const boost::shared_ptr<StateMultibody>& get_state() const;
   const ImpulseModelContainer& get_impulses() const;

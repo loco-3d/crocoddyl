@@ -80,7 +80,7 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
     v_partial_dv.setZero();
   }
 
-  using Base::df_dq;
+  using Base::df_dx;
   using Base::dv0_dq;
   using Base::f;
   using Base::frame;

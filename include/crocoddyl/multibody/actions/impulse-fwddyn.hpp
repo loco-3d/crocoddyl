@@ -108,12 +108,12 @@ struct ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
         vnone(model->get_state()->get_nv()),
         Kinv(model->get_state()->get_nv() + model->get_impulses()->get_ni_total(),
              model->get_state()->get_nv() + model->get_impulses()->get_ni_total()),
-        df_dq(model->get_impulses()->get_ni_total(), model->get_state()->get_nv()),
+        df_dx(model->get_impulses()->get_ni_total(), model->get_state()->get_ndx()),
         dgrav_dq(model->get_state()->get_nv(), model->get_state()->get_nv()) {
     costs->shareMemory(this);
     vnone.setZero();
     Kinv.setZero();
-    df_dq.setZero();
+    df_dx.setZero();
     dgrav_dq.setZero();
   }
 
@@ -122,7 +122,7 @@ struct ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
   boost::shared_ptr<CostDataSumTpl<Scalar> > costs;
   VectorXs vnone;
   MatrixXs Kinv;
-  MatrixXs df_dq;
+  MatrixXs df_dx;
   MatrixXs dgrav_dq;
 };
 

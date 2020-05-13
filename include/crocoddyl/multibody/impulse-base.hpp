@@ -37,7 +37,7 @@ class ImpulseModelAbstractTpl {
   virtual void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) = 0;
 
   virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& force) = 0;
-  void updateForceDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const MatrixXs& df_dq) const;
+  void updateForceDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const MatrixXs& df_dx) const;
 
   virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
@@ -67,10 +67,10 @@ struct ImpulseDataAbstractTpl {
         Jc(model->get_ni(), model->get_state()->get_nv()),
         dv0_dq(model->get_ni(), model->get_state()->get_nv()),
         f(pinocchio::ForceTpl<Scalar>::Zero()),
-        df_dq(model->get_ni(), model->get_state()->get_nv()) {
+        df_dx(model->get_ni(), model->get_state()->get_ndx()) {
     Jc.setZero();
     dv0_dq.setZero();
-    df_dq.setZero();
+    df_dx.setZero();
   }
   virtual ~ImpulseDataAbstractTpl() {}
 
@@ -81,7 +81,7 @@ struct ImpulseDataAbstractTpl {
   MatrixXs Jc;
   MatrixXs dv0_dq;
   pinocchio::ForceTpl<Scalar> f;
-  MatrixXs df_dq;
+  MatrixXs df_dx;
 };
 
 }  // namespace crocoddyl

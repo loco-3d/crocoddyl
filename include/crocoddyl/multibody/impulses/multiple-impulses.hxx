@@ -192,11 +192,12 @@ void ImpulseModelMultipleTpl<Scalar>::updateVelocityDiff(const boost::shared_ptr
 
 template <typename Scalar>
 void ImpulseModelMultipleTpl<Scalar>::updateForceDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
-                                                      const MatrixXs& df_dq) const {
-  const std::size_t& nv = state_->get_nv();
-  if (static_cast<std::size_t>(df_dq.rows()) != ni_ || static_cast<std::size_t>(df_dq.cols()) != nv) {
+                                                      const MatrixXs& df_dx) const {
+  const std::size_t& ndx = state_->get_ndx();
+  if (static_cast<std::size_t>(df_dx.rows()) != ni_ || static_cast<std::size_t>(df_dx.cols()) != ndx) {
     throw_pretty("Invalid argument: "
-                 << "df_dq has wrong dimension (it should be " + std::to_string(ni_) + "," + std::to_string(nv) + ")");
+                 << "df_dx has wrong dimension (it should be " + std::to_string(ni_) + "," + std::to_string(ndx) +
+                        ")");
   }
   if (static_cast<std::size_t>(data->impulses.size()) != impulses_.size()) {
     throw_pretty("Invalid argument: "
@@ -214,8 +215,8 @@ void ImpulseModelMultipleTpl<Scalar>::updateForceDiff(const boost::shared_ptr<Im
       assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between data and model");
 
       const std::size_t& ni_i = m_i->impulse->get_ni();
-      const Eigen::Block<const MatrixXs> df_dq_i = df_dq.block(ni, 0, ni_i, nv);
-      m_i->impulse->updateForceDiff(d_i, df_dq_i);
+      const Eigen::Block<const MatrixXs> df_dx_i = df_dx.block(ni, 0, ni_i, ndx);
+      m_i->impulse->updateForceDiff(d_i, df_dx_i);
       ni += ni_i;
     }
   }

@@ -128,10 +128,11 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calcDiff(const boost::shared_ptr<
 
   // Computing the cost derivatives
   if (enable_force_) {
-    d->df_dq.topRows(ni).noalias() = f_partial_dtau * d->pinocchio.dtau_dq;
-    d->df_dq.topRows(ni).noalias() += f_partial_da * d->multibody.impulses->dv0_dq.topRows(ni);
+    d->df_dx.topLeftCorner(ni, nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dq;
+    d->df_dx.topLeftCorner(ni, nv).noalias() += f_partial_da * d->multibody.impulses->dv0_dq.topRows(ni);
+    d->df_dx.topRightCorner(ni, nv).noalias() = f_partial_da * d->multibody.impulses->Jc.topRows(ni);
     impulses_->updateVelocityDiff(d->multibody.impulses, d->Fx.bottomRows(nv));
-    impulses_->updateForceDiff(d->multibody.impulses, d->df_dq.topRows(ni));
+    impulses_->updateForceDiff(d->multibody.impulses, d->df_dx.topRows(ni));
   }
   costs_->calcDiff(d->costs, x, u);
 }

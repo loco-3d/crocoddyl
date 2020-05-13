@@ -52,17 +52,17 @@ void CostModelImpulseFrictionConeTpl<Scalar>::calcDiff(const boost::shared_ptr<C
   Data* d = static_cast<Data*>(data.get());
 
   const std::size_t& nv = state_->get_nv();
-  const MatrixXs& df_dq = d->impulse->df_dq;
+  const MatrixXs& df_dx = d->impulse->df_dx;
   const MatrixX3s& A = fref_.oRf.get_A();
 
   activation_->calcDiff(data->activation, data->r);
   if (d->more_than_3_constraints) {
-    data->Rx.rightCols(nv).noalias() = A * df_dq.template topRows<3>();
+    data->Rx.noalias() = A * df_dx.template topRows<3>();
   } else {
-    data->Rx.rightCols(nv).noalias() = A * df_dq;
+    data->Rx.noalias() = A * df_dx;
   }
-  data->Lx.rightCols(nv).noalias() = data->Rx.rightCols(nv).transpose() * data->activation->Ar;
-  data->Lxx.noalias() = data->Rx.transpose() * data->activation->Arr * data->Rx;  // TODO(cmastalli) sparse product
+  data->Lx.noalias() = data->Rx.transpose() * data->activation->Ar;
+  data->Lxx.noalias() = data->Rx.transpose() * data->activation->Arr * data->Rx;
 }
 
 template <typename Scalar>
