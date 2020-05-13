@@ -48,8 +48,8 @@ int updateVelocityDiff(crocoddyl::ImpulseModelMultiple& model, boost::shared_ptr
 }
 
 int updateForceDiff(crocoddyl::ImpulseModelMultiple& model, boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data,
-                    const Eigen::MatrixXd& df_dq) {
-  model.updateForceDiff(data, df_dq);
+                    const Eigen::MatrixXd& df_dx) {
+  model.updateForceDiff(data, df_dx);
   return 0;
 }
 
@@ -437,15 +437,15 @@ void test_updateForceDiff() {
   boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data = model.createData(&pinocchio_data);
 
   // create force diff
-  Eigen::MatrixXd df_dq = Eigen::MatrixXd::Random(model.get_ni(), model.get_state()->get_nv());
+  Eigen::MatrixXd df_dx = Eigen::MatrixXd::Random(model.get_ni(), model.get_state()->get_nv());
 
   // call update force diff
-  model.updateForceDiff(data, df_dq);
+  model.updateForceDiff(data, df_dx);
 
   // Test
   crocoddyl::ImpulseModelMultiple::ImpulseDataContainer::iterator it_d, end_d;
   for (it_d = data->impulses.begin(), end_d = data->impulses.end(); it_d != end_d; ++it_d) {
-    BOOST_CHECK(!it_d->second->df_dq.isZero());
+    BOOST_CHECK(!it_d->second->df_dx.isZero());
   }
 }
 
@@ -481,10 +481,10 @@ void test_assert_updateForceDiff_assert_mismatch_model_data() {
   boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data2 = model2.createData(&pinocchio_data);
 
   // create force diff
-  Eigen::MatrixXd df_dq = Eigen::MatrixXd::Random(model1.get_ni(), model1.get_state()->get_nv());
+  Eigen::MatrixXd df_dx = Eigen::MatrixXd::Random(model1.get_ni(), model1.get_state()->get_nv());
 
   // call that trigger assert
-  std::string error_message = GetErrorMessages(boost::bind(&updateForceDiff, model1, data2, df_dq));
+  std::string error_message = GetErrorMessages(boost::bind(&updateForceDiff, model1, data2, df_dx));
 
   // expected error message content
   std::string function_name =
