@@ -51,7 +51,6 @@ void CostModelImpulseFrictionConeTpl<Scalar>::calcDiff(const boost::shared_ptr<C
                                                        const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
-  const std::size_t& nv = state_->get_nv();
   const MatrixXs& df_dx = d->impulse->df_dx;
   const MatrixX3s& A = fref_.oRf.get_A();
 
