@@ -15,7 +15,7 @@ template <typename Scalar>
 CostModelImpulseFrictionConeTpl<Scalar>::CostModelImpulseFrictionConeTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
     const FrameFrictionCone& fref)
-    : Base(state, activation), fref_(fref) {
+    : Base(state, activation, 0), fref_(fref) {
   if (activation_->get_nr() != fref_.oRf.get_nf() + 1) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " << fref_.oRf.get_nf() + 1);
@@ -25,7 +25,7 @@ CostModelImpulseFrictionConeTpl<Scalar>::CostModelImpulseFrictionConeTpl(
 template <typename Scalar>
 CostModelImpulseFrictionConeTpl<Scalar>::CostModelImpulseFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
                                                                          const FrameFrictionCone& fref)
-    : Base(state, fref.oRf.get_nf() + 1), fref_(fref) {}
+    : Base(state, fref.oRf.get_nf() + 1, 0), fref_(fref) {}
 
 template <typename Scalar>
 CostModelImpulseFrictionConeTpl<Scalar>::~CostModelImpulseFrictionConeTpl() {}

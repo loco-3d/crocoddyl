@@ -58,13 +58,7 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ImpulseDataAbstractTpl<Scalar> Base;
-  typedef typename MathBase::Vector2s Vector2s;
-  typedef typename MathBase::Vector3s Vector3s;
-  typedef typename MathBase::Matrix3s Matrix3s;
   typedef typename MathBase::Matrix6xs Matrix6xs;
-
-  typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
   ImpulseData3DTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
