@@ -11,6 +11,7 @@
 
 #include <stdexcept>
 #include <vector>
+#include <boost/circular_buffer.hpp>
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/action-base.hpp"
@@ -45,7 +46,8 @@ class ShootingProblemTpl {
    * @param[in] running_models  Running action models (size \f$T\f$)
    * @param[in] terminal_model  Terminal action model
    */
-  ShootingProblemTpl(const VectorXs& x0, const std::vector<boost::shared_ptr<ActionModelAbstract> >& running_models,
+  ShootingProblemTpl(const VectorXs& x0,
+                     const boost::circular_buffer<boost::shared_ptr<ActionModelAbstract> >& running_models,
                      boost::shared_ptr<ActionModelAbstract> terminal_model);
 
   /**
@@ -57,9 +59,10 @@ class ShootingProblemTpl {
    * @param[in] running_datas   Running action datas (size \f$T\f$)
    * @param[in] terminal_data   Terminal action data
    */
-  ShootingProblemTpl(const VectorXs& x0, const std::vector<boost::shared_ptr<ActionModelAbstract> >& running_models,
+  ShootingProblemTpl(const VectorXs& x0,
+                     const boost::circular_buffer<boost::shared_ptr<ActionModelAbstract> >& running_models,
                      boost::shared_ptr<ActionModelAbstract> terminal_model,
-                     const std::vector<boost::shared_ptr<ActionDataAbstract> >& running_datas,
+                     const boost::circular_buffer<boost::shared_ptr<ActionDataAbstract> >& running_datas,
                      boost::shared_ptr<ActionDataAbstract> terminal_data);
   /**
    * @brief Initialize the shooting problem
@@ -139,7 +142,7 @@ class ShootingProblemTpl {
   /**
    * @brief Return the running models
    */
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& get_runningModels() const;
+  const boost::circular_buffer<boost::shared_ptr<ActionModelAbstract> >& get_runningModels() const;
 
   /**
    * @brief Return the terminal model
@@ -149,7 +152,7 @@ class ShootingProblemTpl {
   /**
    * @brief Return the running datas
    */
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& get_runningDatas() const;
+  const boost::circular_buffer<boost::shared_ptr<ActionDataAbstract> >& get_runningDatas() const;
 
   /**
    * @brief Return the terminal data
@@ -164,7 +167,7 @@ class ShootingProblemTpl {
   /**
    * @brief Modify the running models and allocate new data
    */
-  void set_runningModels(const std::vector<boost::shared_ptr<ActionModelAbstract> >& models);
+  void set_runningModels(const boost::circular_buffer<boost::shared_ptr<ActionModelAbstract> >& models);
 
   /**
    * @brief Modify the terminal model and allocate new data
@@ -172,13 +175,13 @@ class ShootingProblemTpl {
   void set_terminalModel(boost::shared_ptr<ActionModelAbstract> model);
 
  protected:
-  Scalar cost_;                                                          //!< Total cost
-  std::size_t T_;                                                        //!< number of running nodes
-  VectorXs x0_;                                                          //!< Initial state
-  boost::shared_ptr<ActionModelAbstract> terminal_model_;                //!< Terminal action model
-  boost::shared_ptr<ActionDataAbstract> terminal_data_;                  //!< Terminal action data
-  std::vector<boost::shared_ptr<ActionModelAbstract> > running_models_;  //!< Running action model
-  std::vector<boost::shared_ptr<ActionDataAbstract> > running_datas_;    //!< Running action data
+  Scalar cost_;                                                                     //!< Total cost
+  std::size_t T_;                                                                   //!< number of running nodes
+  VectorXs x0_;                                                                     //!< Initial state
+  boost::shared_ptr<ActionModelAbstract> terminal_model_;                           //!< Terminal action model
+  boost::shared_ptr<ActionDataAbstract> terminal_data_;                             //!< Terminal action data
+  boost::circular_buffer<boost::shared_ptr<ActionModelAbstract> > running_models_;  //!< Running action model
+  boost::circular_buffer<boost::shared_ptr<ActionDataAbstract> > running_datas_;    //!< Running action data
 
  private:
   void allocateData();

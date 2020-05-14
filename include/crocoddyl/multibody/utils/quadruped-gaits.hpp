@@ -45,7 +45,7 @@ class SimpleQuadrupedGaitProblem {
                                                                      const std::size_t stepKnots,
                                                                      const std::size_t supportKnots);
 
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > createFootStepModels(
+  boost::circular_buffer<boost::shared_ptr<crocoddyl::ActionModelAbstract> > createFootStepModels(
       double timeStep, Eigen::Vector3d& comPos0, std::vector<Eigen::Vector3d>& feetPos0, double stepLength,
       double stepHeight, std::size_t numKnots, const std::vector<pinocchio::FrameIndex>& supportFootIds,
       const std::vector<pinocchio::FrameIndex>& swingFootIds);

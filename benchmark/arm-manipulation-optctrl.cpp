@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
 
   // For this optimal control problem, we define 100 knots (or running action
   // models) plus a terminal knot
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(N, runningModel);
+  boost::circular_buffer<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(N, runningModel);
   boost::shared_ptr<crocoddyl::ShootingProblem> problem =
       boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModels, terminalModel);
   std::vector<Eigen::VectorXd> xs(N + 1, x0);

@@ -51,8 +51,8 @@ int main(int argc, char* argv[]) {
   Eigen::VectorXd x0(state->rand());
 
   // Defining the shooting problem for both cases: with and without code generation
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(N, runningModel);
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > cg_runningModels(N, cg_runningModel);
+  boost::circular_buffer<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(N, runningModel);
+  boost::circular_buffer<boost::shared_ptr<crocoddyl::ActionModelAbstract> > cg_runningModels(N, cg_runningModel);
   boost::shared_ptr<crocoddyl::ShootingProblem> problem =
       boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModels, terminalModel);
   boost::shared_ptr<crocoddyl::ShootingProblem> cg_problem =

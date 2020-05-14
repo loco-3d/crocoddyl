@@ -119,7 +119,7 @@ int main(int argc, char* argv[]) {
   boost::shared_ptr<crocoddyl::ActionModelAbstract> terminalModel =
       boost::make_shared<crocoddyl::IntegratedActionModelEuler>(terminalDAM, 1e-3);
 
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(N, runningModel);
+  boost::circular_buffer<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(N, runningModel);
 
   boost::shared_ptr<crocoddyl::ShootingProblem> problem =
       boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModels, terminalModel);

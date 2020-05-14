@@ -11,6 +11,7 @@
 
 #include <Eigen/Dense>
 #include <vector>
+#include <boost/circular_buffer.hpp>
 #include <boost/python/stl_iterator.hpp>
 #include <boost/python/to_python_converter.hpp>
 
@@ -25,6 +26,25 @@ template <class T, bool NoProxy = true>
 struct vector_to_list {
   static PyObject* convert(const std::vector<T>& vec) {
     typedef typename std::vector<T>::const_iterator const_iter;
+    bp::list* l = new boost::python::list();
+    for (const_iter it = vec.begin(); it != vec.end(); ++it) {
+      if (NoProxy) {
+        l->append(boost::ref(*it));
+      } else {
+        l->append(*it);
+      }
+    }
+    return l->ptr();
+  }
+  static PyTypeObject const* get_pytype() { return &PyList_Type; }
+};
+
+/// @note Registers converter from a provided type to the python
+///       iterable type to the.
+template <class T, bool NoProxy = true>
+struct cbuffer_to_list {
+  static PyObject* convert(const boost::circular_buffer<T>& vec) {
+    typedef typename boost::circular_buffer<T>::const_iterator const_iter;
     bp::list* l = new boost::python::list();
     for (const_iter it = vec.begin(); it != vec.end(); ++it) {
       if (NoProxy) {

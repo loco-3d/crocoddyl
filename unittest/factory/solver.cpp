@@ -54,7 +54,7 @@ boost::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(SolverTypes::
                                                                    size_t T) const {
   boost::shared_ptr<crocoddyl::SolverAbstract> solver;
   boost::shared_ptr<crocoddyl::ActionModelAbstract> model = ActionModelFactory().create(action_type);
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > running_models(T, model);
+  boost::circular_buffer<boost::shared_ptr<crocoddyl::ActionModelAbstract> > running_models(T, model);
   boost::shared_ptr<crocoddyl::ShootingProblem> problem =
       boost::make_shared<crocoddyl::ShootingProblem>(model->get_state()->zero(), running_models, model);
 

@@ -19,12 +19,12 @@ void exposeShootingProblem() {
   // Register custom converters between std::vector and Python list
   typedef boost::shared_ptr<ActionModelAbstract> ActionModelPtr;
   typedef boost::shared_ptr<ActionDataAbstract> ActionDataPtr;
-  bp::to_python_converter<std::vector<ActionModelPtr, std::allocator<ActionModelPtr> >,
-                          vector_to_list<ActionModelPtr, false> >();
-  bp::to_python_converter<std::vector<ActionDataPtr, std::allocator<ActionDataPtr> >,
-                          vector_to_list<ActionDataPtr, false> >();
-  list_to_vector().from_python<std::vector<ActionModelPtr, std::allocator<ActionModelPtr> > >();
-  list_to_vector().from_python<std::vector<ActionDataPtr, std::allocator<ActionDataPtr> > >();
+  bp::to_python_converter<boost::circular_buffer<ActionModelPtr, std::allocator<ActionModelPtr> >,
+                          cbuffer_to_list<ActionModelPtr, false> >();
+  bp::to_python_converter<boost::circular_buffer<ActionDataPtr, std::allocator<ActionDataPtr> >,
+                          cbuffer_to_list<ActionDataPtr, false> >();
+  list_to_vector().from_python<boost::circular_buffer<ActionModelPtr, std::allocator<ActionModelPtr> > >();
+  list_to_vector().from_python<boost::circular_buffer<ActionDataPtr, std::allocator<ActionDataPtr> > >();
 
   bp::register_ptr_to_python<boost::shared_ptr<ShootingProblem> >();
 
@@ -36,14 +36,15 @@ void exposeShootingProblem() {
       "first computes the set of next states and cost values per each action model. calcDiff\n"
       "updates the derivatives of all action models. The last rollouts the stacks of actions\n"
       "models.",
-      bp::init<Eigen::VectorXd, std::vector<boost::shared_ptr<ActionModelAbstract> >,
+      bp::init<Eigen::VectorXd, boost::circular_buffer<boost::shared_ptr<ActionModelAbstract> >,
                boost::shared_ptr<ActionModelAbstract> >(bp::args("self", "x0", "runningModels", "terminalModel"),
                                                         "Initialize the shooting problem and allocate its data.\n\n"
                                                         ":param x0: initial state\n"
                                                         ":param runningModels: running action models (size T)\n"
                                                         ":param terminalModel: terminal action model"))
-      .def(bp::init<Eigen::VectorXd, std::vector<boost::shared_ptr<ActionModelAbstract> >,
-                    boost::shared_ptr<ActionModelAbstract>, std::vector<boost::shared_ptr<ActionDataAbstract> >,
+      .def(bp::init<Eigen::VectorXd, boost::circular_buffer<boost::shared_ptr<ActionModelAbstract> >,
+                    boost::shared_ptr<ActionModelAbstract>,
+                    boost::circular_buffer<boost::shared_ptr<ActionDataAbstract> >,
                     boost::shared_ptr<ActionDataAbstract> >(
           bp::args("self", "x0", "runningModels", "terminalModel", "runningDatas", "terminalData"),
           "Initialize the shooting problem (models and datas).\n\n"

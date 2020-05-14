@@ -15,7 +15,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ShootingProblemTpl<Scalar>::ShootingProblemTpl(
-    const VectorXs& x0, const std::vector<boost::shared_ptr<ActionModelAbstract> >& running_models,
+    const VectorXs& x0, const boost::circular_buffer<boost::shared_ptr<ActionModelAbstract> >& running_models,
     boost::shared_ptr<ActionModelAbstract> terminal_model)
     : cost_(Scalar(0.)),
       T_(running_models.size()),
@@ -32,9 +32,9 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
 
 template <typename Scalar>
 ShootingProblemTpl<Scalar>::ShootingProblemTpl(
-    const VectorXs& x0, const std::vector<boost::shared_ptr<ActionModelAbstract> >& running_models,
+    const VectorXs& x0, const boost::circular_buffer<boost::shared_ptr<ActionModelAbstract> >& running_models,
     boost::shared_ptr<ActionModelAbstract> terminal_model,
-    const std::vector<boost::shared_ptr<ActionDataAbstract> >& running_datas,
+    const boost::circular_buffer<boost::shared_ptr<ActionDataAbstract> >& running_datas,
     boost::shared_ptr<ActionDataAbstract> terminal_data)
     : cost_(Scalar(0.)),
       T_(running_models.size()),
@@ -219,6 +219,7 @@ const typename MathBaseTpl<Scalar>::VectorXs& ShootingProblemTpl<Scalar>::get_x0
 
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::allocateData() {
+  running_datas_.set_capacity(T_);
   for (std::size_t i = 0; i < T_; ++i) {
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
     running_datas_.push_back(model->createData());
@@ -227,7 +228,7 @@ void ShootingProblemTpl<Scalar>::allocateData() {
 }
 
 template <typename Scalar>
-const std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > >&
+const boost::circular_buffer<boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > >&
 ShootingProblemTpl<Scalar>::get_runningModels() const {
   return running_models_;
 }
@@ -239,7 +240,7 @@ const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >& ShootingPro
 }
 
 template <typename Scalar>
-const std::vector<boost::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> > >&
+const boost::circular_buffer<boost::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> > >&
 ShootingProblemTpl<Scalar>::get_runningDatas() const {
   return running_datas_;
 }
@@ -261,7 +262,7 @@ void ShootingProblemTpl<Scalar>::set_x0(const VectorXs& x0_in) {
 
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::set_runningModels(
-    const std::vector<boost::shared_ptr<ActionModelAbstract> >& models) {
+    const boost::circular_buffer<boost::shared_ptr<ActionModelAbstract> >& models) {
   T_ = models.size();
   running_models_ = models;
   running_datas_.clear();

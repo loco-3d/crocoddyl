@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
   boost::shared_ptr<crocoddyl::ActionModelAbstract> model = boost::make_shared<crocoddyl::ActionModelUnicycle>();
   std::vector<Eigen::VectorXd> xs(N + 1, x0);
   std::vector<Eigen::VectorXd> us(N, Eigen::Vector2d::Zero());
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(N, model);
+  boost::circular_buffer<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(N, model);
 
   // Formulating the optimal control problem
   boost::shared_ptr<crocoddyl::ShootingProblem> problem =

@@ -53,8 +53,9 @@ boost::shared_ptr<crocoddyl::ShootingProblem> SimpleQuadrupedGaitProblem::create
   comRef[2] = rdata_.com[0][2];
 
   // Defining the action models along the time instances
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > loco3d_model;
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > rh_step, rf_step, lh_step, lf_step;
+  boost::circular_buffer<boost::shared_ptr<crocoddyl::ActionModelAbstract> > loco3d_model(2 * supportknots +
+                                                                                          4 * (stepknots + 1));
+  boost::circular_buffer<boost::shared_ptr<crocoddyl::ActionModelAbstract> > rh_step, rf_step, lh_step, lf_step;
 
   // doublesupport
   std::vector<pinocchio::FrameIndex> support_feet;
@@ -64,7 +65,7 @@ boost::shared_ptr<crocoddyl::ShootingProblem> SimpleQuadrupedGaitProblem::create
   support_feet.push_back(rh_foot_id_);
   Eigen::Vector3d nullCoM = Eigen::Vector3d::Constant(std::numeric_limits<double>::infinity());
   const std::vector<crocoddyl::FramePlacement> emptyVector;
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > doubleSupport(
+  boost::circular_buffer<boost::shared_ptr<crocoddyl::ActionModelAbstract> > doubleSupport(
       supportknots, createSwingFootModel(timestep, support_feet, nullCoM, emptyVector));
 
   const pinocchio::FrameIndex rh_s[] = {lf_foot_id_, rf_foot_id_, lh_foot_id_};
@@ -113,15 +114,17 @@ boost::shared_ptr<crocoddyl::ShootingProblem> SimpleQuadrupedGaitProblem::create
   return boost::make_shared<crocoddyl::ShootingProblem>(x0, loco3d_model, loco3d_model.back());
 }
 
-std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > SimpleQuadrupedGaitProblem::createFootStepModels(
-    double timestep, Eigen::Vector3d& com_pos0, std::vector<Eigen::Vector3d>& feet_pos0, double steplength,
-    double stepheight, std::size_t n_knots, const std::vector<pinocchio::FrameIndex>& support_foot_ids,
-    const std::vector<pinocchio::FrameIndex>& swingFootIds) {
+boost::circular_buffer<boost::shared_ptr<crocoddyl::ActionModelAbstract> >
+SimpleQuadrupedGaitProblem::createFootStepModels(double timestep, Eigen::Vector3d& com_pos0,
+                                                 std::vector<Eigen::Vector3d>& feet_pos0, double steplength,
+                                                 double stepheight, std::size_t n_knots,
+                                                 const std::vector<pinocchio::FrameIndex>& support_foot_ids,
+                                                 const std::vector<pinocchio::FrameIndex>& swingFootIds) {
   std::size_t n_legs = static_cast<std::size_t>(support_foot_ids.size() + swingFootIds.size());
   double com_percentage = static_cast<double>(swingFootIds.size()) / static_cast<double>(n_legs);
 
   // Action models for the foot swing
-  std::vector<boost::shared_ptr<ActionModelAbstract> > foot_swing_model;
+  boost::circular_buffer<boost::shared_ptr<ActionModelAbstract> > foot_swing_model(n_knots + 1);
   std::vector<crocoddyl::FramePlacement> foot_swing_task;
   for (std::size_t k = 0; k < n_knots; ++k) {
     double _kp1_n = 0;
