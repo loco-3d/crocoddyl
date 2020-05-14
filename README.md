@@ -61,7 +61,7 @@ If you want to follow the current developments, you can directly refer to the [d
  * C++ 98/11/14/17/20 compliant
  * extensively tested
  <!-- * automatic code generation support -->
- 
+
 
 ### Installation through robotpkg
 
@@ -207,4 +207,5 @@ The following people have been involved in the development of **Crocoddyl**:
 
 ## Acknowledgments
 
-The development of **Crocoddyl** is supported by the [EU MEMMO project](http://www.memmo-project.eu/), the [Gepetto team](http://projects.laas.fr/gepetto/) [@LAAS-CNRS](http://www.laas.fr), and the [Statistical Machine Learning and Motor Control Group](http://wcms.inf.ed.ac.uk/ipab/slmc) [@University of Edinburgh](https://www.edinburgh-robotics.org/).
+The development of **Crocoddyl** is supported by the [EU MEMMO project](http://www.memmo-project.eu/), and the [EU RoboCom++ project](http://robocomplusplus.eu/).
+It is maintained by the [Gepetto team](http://projects.laas.fr/gepetto/) [@LAAS-CNRS](http://www.laas.fr), and the [Statistical Machine Learning and Motor Control Group](http://wcms.inf.ed.ac.uk/ipab/slmc) [@University of Edinburgh](https://www.edinburgh-robotics.org/).
