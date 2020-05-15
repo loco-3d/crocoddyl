@@ -51,6 +51,7 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
   virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
+  virtual bool checkData(const boost::shared_ptr<DifferentialActionDataAbstract>& data);
 
   const boost::shared_ptr<ActuationModelFloatingBase>& get_actuation() const;
   const boost::shared_ptr<ContactModelMultiple>& get_contacts() const;

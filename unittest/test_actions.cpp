@@ -18,6 +18,17 @@ using namespace crocoddyl::unittest;
 
 //----------------------------------------------------------------------------//
 
+void test_check_data(ActionModelTypes::Type action_model_type) {
+  // create the model
+  ActionModelFactory factory;
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
+
+  // create the corresponding data object
+  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
+
+  BOOST_CHECK(model->checkData(data));
+}
+
 void test_calc_returns_state(ActionModelTypes::Type action_model_type) {
   // create the model
   ActionModelFactory factory;
@@ -100,6 +111,7 @@ void register_action_model_unit_tests(ActionModelTypes::Type action_model_type) 
   test_name << "test_" << action_model_type;
   std::cout << "Running " << test_name.str() << std::endl;
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_check_data, action_model_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_state, action_model_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, action_model_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, action_model_type)));

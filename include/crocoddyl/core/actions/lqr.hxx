@@ -75,6 +75,16 @@ boost::shared_ptr<ActionDataAbstractTpl<Scalar> > ActionModelLQRTpl<Scalar>::cre
 }
 
 template <typename Scalar>
+bool ActionModelLQRTpl<Scalar>::checkData(const boost::shared_ptr<ActionDataAbstract>& data) {
+  boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
+  if (d != NULL) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+template <typename Scalar>
 const typename MathBaseTpl<Scalar>::MatrixXs& ActionModelLQRTpl<Scalar>::get_Fx() const {
   return Fx_;
 }
