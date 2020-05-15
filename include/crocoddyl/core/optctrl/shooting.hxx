@@ -172,6 +172,17 @@ std::vector<typename MathBaseTpl<Scalar>::VectorXs> ShootingProblemTpl<Scalar>::
 }
 
 template <typename Scalar>
+void ShootingProblemTpl<Scalar>::pushBackRunningNode(boost::shared_ptr<ActionModelAbstract> model,
+                                                     boost::shared_ptr<ActionDataAbstract> data) {
+  if (!model->checkData(data)) {
+    throw_pretty("Invalid argument: "
+                 << "action data is not consistent with the action model")
+  }
+  running_models_.push_back(model);
+  running_datas_.push_back(data);
+}
+
+template <typename Scalar>
 void ShootingProblemTpl<Scalar>::updateNode(std::size_t i, boost::shared_ptr<ActionModelAbstract> model,
                                             boost::shared_ptr<ActionDataAbstract> data) {
   if (i > T_ + 1) {

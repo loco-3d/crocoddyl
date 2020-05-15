@@ -111,6 +111,8 @@ class ShootingProblemTpl {
    */
   std::vector<VectorXs> rollout_us(const std::vector<VectorXs>& us);
 
+  void pushBackRunningNode(boost::shared_ptr<ActionModelAbstract> model, boost::shared_ptr<ActionDataAbstract> data);
+
   /**
    * @brief Update the model and data for a specific node
    *
