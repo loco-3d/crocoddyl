@@ -54,6 +54,18 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
                  << "the number of running models and datas are not the same (" + std::to_string(T_) +
                         " != " + std::to_string(Td) + ")")
   }
+  for (std::size_t i = 0; i < T_; ++i) {
+    const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
+    const boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
+    if (!model->checkData(data)) {
+      throw_pretty("Invalid argument: "
+                   << "action data in " << i << " node is not consistent with the action model")
+    }
+  }
+  if (!terminal_model->checkData(terminal_data)) {
+    throw_pretty("Invalid argument: "
+                 << "terminal action data is not consistent with the terminal action model")
+  }
 }
 
 template <typename Scalar>
@@ -166,6 +178,11 @@ void ShootingProblemTpl<Scalar>::updateNode(std::size_t i, boost::shared_ptr<Act
     throw_pretty("Invalid argument: "
                  << "i is bigger than the allocated horizon (it should be lower than " + std::to_string(T_) + ")");
   }
+  if (!model->checkData(data)) {
+    throw_pretty("Invalid argument: "
+                 << "action data is not consistent with the action model")
+  }
+
   if (i == T_ + 1) {
     terminal_model_ = model;
     terminal_data_ = data;
