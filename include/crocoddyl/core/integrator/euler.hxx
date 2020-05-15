@@ -136,6 +136,16 @@ boost::shared_ptr<ActionDataAbstractTpl<Scalar> > IntegratedActionModelEulerTpl<
 }
 
 template <typename Scalar>
+bool IntegratedActionModelEulerTpl<Scalar>::checkData(const boost::shared_ptr<ActionDataAbstract>& data) {
+  boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
+  if (data != NULL) {
+    return differential_->checkData(d->differential);
+  } else {
+    return false;
+  }
+}
+
+template <typename Scalar>
 const boost::shared_ptr<DifferentialActionModelAbstractTpl<Scalar> >&
 IntegratedActionModelEulerTpl<Scalar>::get_differential() const {
   return differential_;

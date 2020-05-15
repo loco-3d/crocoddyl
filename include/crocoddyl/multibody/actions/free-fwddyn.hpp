@@ -46,6 +46,7 @@ class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModel
   virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
   boost::shared_ptr<DifferentialActionDataAbstract> createData();
+  virtual bool checkData(const boost::shared_ptr<DifferentialActionDataAbstract>& data);
 
   const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
   const boost::shared_ptr<CostModelSum>& get_costs() const;

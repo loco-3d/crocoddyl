@@ -40,6 +40,7 @@ class ActionModelAbstractTpl {
   virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u) = 0;
   virtual boost::shared_ptr<ActionDataAbstract> createData();
+  virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
 
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
   void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);

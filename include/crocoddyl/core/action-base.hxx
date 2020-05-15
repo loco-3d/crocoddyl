@@ -84,6 +84,11 @@ boost::shared_ptr<ActionDataAbstractTpl<Scalar> > ActionModelAbstractTpl<Scalar>
 }
 
 template <typename Scalar>
+bool ActionModelAbstractTpl<Scalar>::checkData(const boost::shared_ptr<ActionDataAbstract>&) {
+  return false;
+}
+
+template <typename Scalar>
 const std::size_t& ActionModelAbstractTpl<Scalar>::get_nu() const {
   return nu_;
 }
