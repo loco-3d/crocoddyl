@@ -174,7 +174,7 @@ elif GAIT == 'jumping':
 
 print('\033[1m')
 print('C++:')
-popen = subprocess.check_call([os.path.dirname(os.path.abspath(__file__)) + "/quadrupedal-gaits", str(T)])
+popen = subprocess.check_call([os.path.dirname(os.path.abspath(__file__)) + "/quadrupedal-gaits-optctrl", str(T)])
 
 print('Python bindings:')
 xs, us, problem = createProblem(GAITPHASE)

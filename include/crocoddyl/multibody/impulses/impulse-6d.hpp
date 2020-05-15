@@ -57,38 +57,32 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ImpulseDataAbstractTpl<Scalar> Base;
-  typedef typename MathBase::Vector2s Vector2s;
-  typedef typename MathBase::Vector3s Vector3s;
-  typedef typename MathBase::Matrix3s Matrix3s;
   typedef typename MathBase::Matrix6xs Matrix6xs;
-
-  typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
   ImpulseData6DTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
       : Base(model, data),
-        jMf(model->get_state()->get_pinocchio()->frames[model->get_frame()].placement),
-        fXj(jMf.inverse().toActionMatrix()),
         fJf(6, model->get_state()->get_nv()),
         v_partial_dq(6, model->get_state()->get_nv()),
         v_partial_dv(6, model->get_state()->get_nv()) {
     frame = model->get_frame();
     joint = model->get_state()->get_pinocchio()->frames[frame].parent;
+    jMf = model->get_state()->get_pinocchio()->frames[model->get_frame()].placement;
+    fXj = jMf.inverse().toActionMatrix();
     fJf.setZero();
     v_partial_dq.setZero();
     v_partial_dv.setZero();
   }
 
-  using Base::df_dq;
+  using Base::df_dx;
   using Base::dv0_dq;
   using Base::f;
   using Base::frame;
   using Base::Jc;
+  using Base::jMf;
   using Base::joint;
   using Base::pinocchio;
 
-  pinocchio::SE3Tpl<Scalar> jMf;
   typename pinocchio::SE3Tpl<Scalar>::ActionMatrixType fXj;
   Matrix6xs fJf;
   Matrix6xs v_partial_dq;

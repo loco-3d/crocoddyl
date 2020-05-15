@@ -70,7 +70,7 @@ def runShootingProblemCalcDiffBenchmark(xs, us, problem):
 
 print('\033[1m')
 print('C++:')
-popen = subprocess.check_call([os.path.dirname(os.path.abspath(__file__)) + "/unicycle", str(T)])
+popen = subprocess.check_call([os.path.dirname(os.path.abspath(__file__)) + "/unicycle-optctrl", str(T)])
 
 print('Python bindings:')
 xs, us, problem = createProblem(crocoddyl.ActionModelUnicycle)

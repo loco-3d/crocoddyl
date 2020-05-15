@@ -114,8 +114,8 @@ void exposeActionImpulseFwdDynamics() {
           "total cost data")
       .add_property("Kinv", bp::make_getter(&ActionDataImpulseFwdDynamics::Kinv, bp::return_internal_reference<>()),
                     "inverse of the KKT matrix")
-      .add_property("df_dq", bp::make_getter(&ActionDataImpulseFwdDynamics::df_dq, bp::return_internal_reference<>()),
-                    "Jacobian of the impulse force");
+      .add_property("df_dx", bp::make_getter(&ActionDataImpulseFwdDynamics::df_dx, bp::return_internal_reference<>()),
+                    "Jacobian of the contact impulse");
 }
 
 }  // namespace python

@@ -18,7 +18,7 @@ FOREACH(examples ${${PROJECT_NAME}_EXAMPLES_PYTHON})
   PYTHON_BUILD(. "${examples}.py")
   INSTALL(FILES ${examples}.py DESTINATION ${PYTHON_SITELIB}/${PROJECT_NAME}/examples)
   ADD_CUSTOM_TARGET("examples-${examples}"
-    ${CMAKE_COMMAND} -E env PYTHONPATH=$ENV{PYTHONPATH}:${PROJECT_BINARY_DIR}/bindings/python
+    ${CMAKE_COMMAND} -E env PYTHONPATH=${PROJECT_BINARY_DIR}/bindings/python:$ENV{PYTHONPATH}
     ${PYTHON_EXECUTABLE} -c "import ${examples}" \${INPUT})
 
   # examples are too slow in Debug mode to be used as tests

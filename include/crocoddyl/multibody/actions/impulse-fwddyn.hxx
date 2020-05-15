@@ -101,6 +101,10 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calcDiff(const boost::shared_ptr<
   Data* d = static_cast<Data*>(data.get());
 
   // Computing the dynamics derivatives
+  // We resize the Kinv matrix because Eigen cannot call block operations recursively:
+  // https://eigen.tuxfamily.org/bz/show_bug.cgi?id=408.
+  // Therefore, it is not possible to pass d->Kinv.topLeftCorner(nv + ni, nv + ni)
+  d->Kinv.resize(nv + ni, nv + ni);
   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, d->vnone, d->pinocchio.dq_after - v,
                                     d->multibody.impulses->fext);
   pinocchio::computeGeneralizedGravityDerivatives(pinocchio_, d->pinocchio, q, d->dgrav_dq);
@@ -124,10 +128,11 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calcDiff(const boost::shared_ptr<
 
   // Computing the cost derivatives
   if (enable_force_) {
-    d->df_dq.noalias() = f_partial_dtau * d->pinocchio.dtau_dq;
-    d->df_dq.noalias() += f_partial_da * d->multibody.impulses->dv0_dq.topRows(ni);
+    d->df_dx.topLeftCorner(ni, nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dq;
+    d->df_dx.topLeftCorner(ni, nv).noalias() += f_partial_da * d->multibody.impulses->dv0_dq.topRows(ni);
+    d->df_dx.topRightCorner(ni, nv).noalias() = f_partial_da * d->multibody.impulses->Jc.topRows(ni);
     impulses_->updateVelocityDiff(d->multibody.impulses, d->Fx.bottomRows(nv));
-    impulses_->updateForceDiff(d->multibody.impulses, d->df_dq);
+    impulses_->updateForceDiff(d->multibody.impulses, d->df_dx.topRows(ni));
   }
   costs_->calcDiff(d->costs, x, u);
 }
