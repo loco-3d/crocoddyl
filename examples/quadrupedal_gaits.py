@@ -138,7 +138,7 @@ if WITHPLOT:
     plotSolution(ddp, figIndex=1, show=False)
 
     for i, phase in enumerate(GAITPHASES):
-        title = phase.keys()[0] + " (phase " + str(i) + ")"
+        title = list(phase.keys())[0] + " (phase " + str(i) + ")"
         log = ddp[i].getCallbacks()[0]
         crocoddyl.plotConvergence(log.costs,
                                   log.u_regs,
