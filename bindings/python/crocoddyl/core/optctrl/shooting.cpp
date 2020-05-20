@@ -70,10 +70,18 @@ void exposeShootingProblem() {
            "Integrate the dynamics given a control sequence.\n\n"
            "Rollout the dynamics give a sequence of control commands\n"
            ":param us: time-discrete control sequence (size T)")
-      .def("pushBackRunningNode", &ShootingProblem::pushBackRunningNode, bp::args("self", "model", "data"),
-           "Put a running node onto the end of the circular buffer container and remove the first one.\n\n"
-           ":param model: new model\n"
-           ":param data: new data")
+      .def<void (ShootingProblem::*)(boost::shared_ptr<ActionModelAbstract>, boost::shared_ptr<ActionDataAbstract>)>(
+          "circularAppend", &ShootingProblem::circularAppend, bp::args("self", "model", "data"),
+          "Circular append the model and data onto the end running node.\n\n"
+          "Once we update the end running node, the first running mode is removed as in a circular buffer.\n"
+          ":param model: new model\n"
+          ":param data: new data")
+      .def<void (ShootingProblem::*)(boost::shared_ptr<ActionModelAbstract>)>(
+          "circularAppend", &ShootingProblem::circularAppend, bp::args("self", "model"),
+          "Circular append the model and data onto the end running node.\n\n"
+          "Once we update the end running node, the first running mode is removed as in a circular buffer.\n"
+          "Note that this method allocates new data for the end running node.\n"
+          ":param model: new model")
       .def("updateNode", &ShootingProblem::updateNode, bp::args("self", "i", "model", "data"),
            "Update the model and data for a specific node.\n\n"
            ":param i: index of the node (0 <= i <= T + 1)\n"

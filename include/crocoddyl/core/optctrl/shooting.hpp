@@ -108,14 +108,32 @@ class ShootingProblemTpl {
    */
   std::vector<VectorXs> rollout_us(const std::vector<VectorXs>& us);
 
-  void pushBackRunningNode(boost::shared_ptr<ActionModelAbstract> model, boost::shared_ptr<ActionDataAbstract> data);
+  /**
+   * @brief Circular append of the model and data onto the end running node
+   *
+   * Once we update the end running node, the first running mode is removed as in a circular buffer.
+   *
+   * @param[in] model  action model
+   * @param[in] data   action data
+   */
+  void circularAppend(boost::shared_ptr<ActionModelAbstract> model, boost::shared_ptr<ActionDataAbstract> data);
+
+  /**
+   * @copybrief circularAppend
+   *
+   * Once we update the end running node, the first running mode is removed as in a circular buffer.
+   * Note that this method allocates new data for the end running node.
+   *
+   * @param[in] model  action model
+   */
+  void circularAppend(boost::shared_ptr<ActionModelAbstract> model);
 
   /**
    * @brief Update the model and data for a specific node
    *
-   * @param[in] i      Node index \f$(0\leq i \leq T+1)\f$
-   * @param[in] model  Action model
-   * @param[in] data   Action data
+   * @param[in] i      node index \f$(0\leq i \leq T+1)\f$
+   * @param[in] model  action model
+   * @param[in] data   action data
    */
   void updateNode(std::size_t i, boost::shared_ptr<ActionModelAbstract> model,
                   boost::shared_ptr<ActionDataAbstract> data);
@@ -123,8 +141,8 @@ class ShootingProblemTpl {
   /**
    * @brief Update a model and allocated new data for a specific node
    *
-   * @param[in] i      Node index \f$(0\leq i \leq T+1)\f$
-   * @param[in] model  Action model
+   * @param[in] i      node index \f$(0\leq i \leq T+1)\f$
+   * @param[in] model  action model
    */
   void updateModel(std::size_t i, boost::shared_ptr<ActionModelAbstract> model);
 
