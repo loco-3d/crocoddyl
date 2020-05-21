@@ -111,8 +111,9 @@ const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
     problem_->get_terminalModel()->get_state()->diff(xs_try_.back(), xs_.back(), dx_.back());
     fTVxx_p_.noalias() = Vxx_.back() * dx_.back();
     dv_ -= fs_.back().dot(fTVxx_p_);
+    const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
     for (std::size_t t = 0; t < T; ++t) {
-      problem_->get_runningModels()[t]->get_state()->diff(xs_try_[t], xs_[t], dx_[t]);
+      models[t]->get_state()->diff(xs_try_[t], xs_[t], dx_[t]);
       fTVxx_p_.noalias() = Vxx_[t] * dx_[t];
       dv_ -= fs_[t].dot(fTVxx_p_);
     }
@@ -150,9 +151,11 @@ double SolverFDDP::calcDiff() {
     problem_->get_runningModels()[0]->get_state()->diff(xs_[0], x0, fs_[0]);
 
     const std::size_t& T = problem_->get_T();
+    const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+    const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
     for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
-      const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
+      const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+      const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
       model->get_state()->diff(xs_[t + 1], d->xnext, fs_[t + 1]);
     }
   } else if (!was_feasible_) {
@@ -171,10 +174,13 @@ void SolverFDDP::forwardPass(const double& steplength) {
   cost_try_ = 0.;
   xnext_ = problem_->get_x0();
   const std::size_t& T = problem_->get_T();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
   if ((is_feasible_) || (steplength == 1)) {
     for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& m = problem_->get_runningModels()[t];
-      const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
+      const boost::shared_ptr<ActionModelAbstract>& m = models[t];
+      const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
+
       xs_try_[t] = xnext_;
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
       us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
@@ -201,8 +207,8 @@ void SolverFDDP::forwardPass(const double& steplength) {
     }
   } else {
     for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& m = problem_->get_runningModels()[t];
-      const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
+      const boost::shared_ptr<ActionModelAbstract>& m = models[t];
+      const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
       m->get_state()->integrate(xnext_, fs_[t] * (steplength - 1), xs_try_[t]);
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
       us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];

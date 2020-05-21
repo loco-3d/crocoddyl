@@ -92,9 +92,10 @@ void SolverKKT::computeDirection(const bool& recalc) {
 
   std::size_t ix = 0;
   std::size_t iu = 0;
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    const std::size_t& ndxi = problem_->get_runningModels()[t]->get_state()->get_ndx();
-    const std::size_t& nui = problem_->get_runningModels()[t]->get_nu();
+    const std::size_t& ndxi = models[t]->get_state()->get_ndx();
+    const std::size_t& nui = models[t]->get_nu();
     dxs_[t] = p_x.segment(ix, ndxi);
     dus_[t] = p_u.segment(iu, nui);
     lambdas_[t] = dual_.segment(ix, ndxi);
@@ -108,8 +109,9 @@ void SolverKKT::computeDirection(const bool& recalc) {
 
 double SolverKKT::tryStep(const double& steplength) {
   const std::size_t& T = problem_->get_T();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& m = problem_->get_runningModels()[t];
+    const boost::shared_ptr<ActionModelAbstract>& m = models[t];
 
     m->get_state()->integrate(xs_[t], steplength * dxs_[t], xs_try_[t]);
     us_try_[t] = us_[t];
@@ -125,10 +127,12 @@ double SolverKKT::stoppingCriteria() {
   const std::size_t& T = problem_->get_T();
   std::size_t ix = 0;
   std::size_t iu = 0;
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
-    const std::size_t& ndxi = problem_->get_runningModels()[t]->get_state()->get_ndx();
-    const std::size_t& nui = problem_->get_runningModels()[t]->get_nu();
+    const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
+    const std::size_t& ndxi = models[t]->get_state()->get_ndx();
+    const std::size_t& nui = models[t]->get_nu();
 
     dF.segment(ix, ndxi) = lambdas_[t];
     dF.segment(ix, ndxi).noalias() -= d->Fx.transpose() * lambdas_[t + 1];
