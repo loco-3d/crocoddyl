@@ -37,7 +37,7 @@ The source code is released under the [BSD 3-Clause license](LICENSE).
 [![GitHub Release Date](https://img.shields.io/github/release-date/loco-3d/crocoddyl)](https://img.shields.io/github/release-date/loco-3d/crocoddyl)
 [![GitHub last commit](https://img.shields.io/github/last-commit/loco-3d/crocoddyl)](https://img.shields.io/github/last-commit/loco-3d/crocoddyl)
 
-If you want to follow the current developments, you can directly refer to the [devel branch](https://gepgitlab.laas.fr/loco-3d/cddp/tree/devel).
+If you want to follow the current developments, you can directly refer to the [devel branch](https://github.com/loco-3d/cddp/tree/devel).
 
 
 ## <img align="center" height="20" src="https://i.imgur.com/x1morBF.png"/> Installation
@@ -115,7 +115,7 @@ export PYTHONPATH=/opt/openrobots/lib/python2.7/site-packages:$PYTHONPATH
 **Crocoddyl** is c++ library with Python bindings for versatile and fast prototyping. It has the following dependencies:
 
 * [pinocchio](https://github.com/stack-of-tasks/pinocchio)
-* [example-robot-data](https://gepgitlab.laas.fr/gepetto/example-robot-data) (optional for examples, install Python loaders)
+* [example-robot-data](https://github.com/gepetto/example-robot-data) (optional for examples, install Python loaders)
 * [gepetto-viewer-corba](https://github.com/Gepetto/gepetto-viewer-corba) (optional for display)
 * [jupyter](https://jupyter.org/) (optional for notebooks)
 * [matplotlib](https://matplotlib.org/) (optional for examples)
@@ -144,11 +144,11 @@ python -m crocoddyl.examples.quadrupedal_gaits "display" "plot" # enable display
 ```
 
 If you want to learn about Crocoddyl, take a look at the Jupyter notebooks. Start in the following order.
-- [examples/notebooks/unicycle_towards_origin.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/unicycle_towards_origin.ipynb)
-- [examples/notebooks/cartpole_swing_up.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/cartpole_swing_up.py)
-- [examples/notebooks/arm_manipulation.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/arm_manipulation.ipynb)
-- [examples/notebooks/bipedal_walking.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/bipedal_walking.ipynb)
-- [examples/notebooks/introduction_to_crocoddyl.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/introduction_to_crocoddyl.ipynb)
+- [examples/notebooks/unicycle_towards_origin.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/unicycle_towards_origin.ipynb)
+- [examples/notebooks/cartpole_swing_up.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/cartpole_swing_up.py)
+- [examples/notebooks/arm_manipulation.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/arm_manipulation.ipynb)
+- [examples/notebooks/bipedal_walking.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/bipedal_walking.ipynb)
+- [examples/notebooks/introduction_to_crocoddyl.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/introduction_to_crocoddyl.ipynb)
 
 
 ## Citing Crocoddyl
@@ -168,7 +168,7 @@ and the following one to reference this website:
 @misc{crocoddylweb,
    author = {Carlos Mastalli, Rohan Budhiraja and Nicolas Mansard and others},
    title = {Crocoddyl: a fast and flexible optimal control library for robot control under contact sequence},
-   howpublished = {https://gepgitlab.laas.fr/loco-3d/crocoddyl/wikis/home},
+   howpublished = {https://github.com/loco-3d/crocoddyl/wikis/home},
    year = {2019}
 }
 ```
@@ -181,12 +181,12 @@ The rest of the publications describes different component of **Crocoddyl**:
 - R. Budhiraja, J. Carpentier, C. Mastalli and N. Mansard. [Differential Dynamic Programming for Multi-Phase Rigid Contact Dynamics](https://cmastalli.github.io/publications/mddp18.html), IEEE RAS International Conference on Humanoid Robots (ICHR), 2018
 - Y. Tassa, N. Mansard, E. Todorov. [Control-Limited Differential Dynamic Programming](https://homes.cs.washington.edu/~todorov/papers/TassaICRA14.pdf), IEEE International Conference on Automation and Robotics (ICRA), 2014
 - R. Budhiraja, J. Carpentier and N. Mansard. [Dynamics Consensus between Centroidal and Whole-Body Models for Locomotion of Legged Robots](https://hal.laas.fr/hal-01875031/document), IEEE International Conference on Automation and Robotics (ICRA), 2019
-- T. G. Lembono, C. Mastally, P. Fernbach, N. Mansard and S. Calinon. [Learning How to Walk: Warm-starting Optimal Control Solver with Memory of Motion](https://arxiv.org/abs/2001.11751), IEEE International Conference on Robotics and Automation (ICRA), 2020
+- T. G. Lembono, C. Mastalli, P. Fernbach, N. Mansard and S. Calinon. [Learning How to Walk: Warm-starting Optimal Control Solver with Memory of Motion](https://cmastalli.github.io/publications/learningwalk20icra.html), IEEE International Conference on Robotics and Automation (ICRA), 2020
 
 
 ## Questions and Issues
 
-You have a question or an issue? You may either directly open a [new issue](https://gepgitlab.laas.fr/loco-3d/crocoddyl/issues) or use the mailing list <crocoddyl@laas.fr>.
+You have a question or an issue? You may either directly open a [new issue](https://github.com/loco-3d/crocoddyl/issues) or use the mailing list <crocoddyl@laas.fr>.
 
 
 ## Credits
