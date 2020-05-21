@@ -346,12 +346,10 @@ void SolverDDP::allocateData() {
   Quu_llt_.resize(T);
   Quuk_.resize(T);
 
+  const std::size_t& nx = problem_->get_nx();
+  const std::size_t& ndx = problem_->get_ndx();
+  const std::size_t& nu = problem_->get_nu();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
-    const std::size_t& nx = model->get_state()->get_nx();
-    const std::size_t& ndx = model->get_state()->get_ndx();
-    const std::size_t& nu = model->get_nu();
-
     Vxx_[t] = Eigen::MatrixXd::Zero(ndx, ndx);
     Vx_[t] = Eigen::VectorXd::Zero(ndx);
     Qxx_[t] = Eigen::MatrixXd::Zero(ndx, ndx);
@@ -375,7 +373,6 @@ void SolverDDP::allocateData() {
     Quu_llt_[t] = Eigen::LLT<Eigen::MatrixXd>(nu);
     Quuk_[t] = Eigen::VectorXd(nu);
   }
-  const std::size_t& ndx = problem_->get_terminalModel()->get_state()->get_ndx();
   Vxx_.back() = Eigen::MatrixXd::Zero(ndx, ndx);
   Vx_.back() = Eigen::VectorXd::Zero(ndx);
   xs_try_.back() = problem_->get_terminalModel()->get_state()->zero();

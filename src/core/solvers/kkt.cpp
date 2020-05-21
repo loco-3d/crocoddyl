@@ -253,11 +253,10 @@ void SolverKKT::allocateData() {
   nx_ = 0;
   ndx_ = 0;
   nu_ = 0;
+  const std::size_t& nx = problem_->get_nx();
+  const std::size_t& ndx = problem_->get_ndx();
+  const std::size_t& nu = problem_->get_nu();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
-    const std::size_t& nx = model->get_state()->get_nx();
-    const std::size_t& ndx = model->get_state()->get_ndx();
-    const std::size_t& nu = model->get_nu();
     if (t == 0) {
       xs_try_[t] = problem_->get_x0();
     } else {
@@ -272,8 +271,8 @@ void SolverKKT::allocateData() {
     nu_ += nu;
   }
   const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_terminalModel();
-  nx_ += model->get_state()->get_nx();
-  ndx_ += model->get_state()->get_ndx();
+  nx_ += nx;
+  ndx_ += ndx;
   xs_try_.back() = problem_->get_terminalModel()->get_state()->zero();
   dxs_.back() = Eigen::VectorXd::Zero(model->get_state()->get_ndx());
   lambdas_.back() = Eigen::VectorXd::Zero(model->get_state()->get_ndx());

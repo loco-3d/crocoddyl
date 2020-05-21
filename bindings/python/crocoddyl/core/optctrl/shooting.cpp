@@ -111,14 +111,12 @@ void exposeShootingProblem() {
           "terminalData",
           bp::make_function(&ShootingProblem::get_terminalData, bp::return_value_policy<bp::return_by_value>()),
           "terminal data")
-      .add_property("nx",
-                    bp::make_function(&ShootingProblem::get_nx, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("nx", bp::make_function(&ShootingProblem::get_nx, bp::return_value_policy<bp::return_by_value>()),
                     "dimension of state tuple")
       .add_property("ndx",
                     bp::make_function(&ShootingProblem::get_ndx, bp::return_value_policy<bp::return_by_value>()),
                     "dimension of the tangent space of the state manifold")
-      .add_property("nu",
-                    bp::make_function(&ShootingProblem::get_nu, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("nu", bp::make_function(&ShootingProblem::get_nu, bp::return_value_policy<bp::return_by_value>()),
                     "dimension of the control vector");
 }
 

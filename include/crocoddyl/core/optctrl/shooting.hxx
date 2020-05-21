@@ -436,12 +436,18 @@ void ShootingProblemTpl<Scalar>::set_terminalModel(boost::shared_ptr<ActionModel
 }
 
 template <typename Scalar>
-const std::size_t& ShootingProblemTpl<Scalar>::get_nx() const { return nx_; }
+const std::size_t& ShootingProblemTpl<Scalar>::get_nx() const {
+  return nx_;
+}
 
 template <typename Scalar>
-const std::size_t& ShootingProblemTpl<Scalar>::get_ndx() const { return ndx_; }
+const std::size_t& ShootingProblemTpl<Scalar>::get_ndx() const {
+  return ndx_;
+}
 
 template <typename Scalar>
-const std::size_t& ShootingProblemTpl<Scalar>::get_nu() const { return nu_; }
+const std::size_t& ShootingProblemTpl<Scalar>::get_nu() const {
+  return nu_;
+}
 
 }  // namespace crocoddyl

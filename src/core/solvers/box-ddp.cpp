@@ -33,21 +33,14 @@ SolverBoxDDP::~SolverBoxDDP() {}
 void SolverBoxDDP::allocateData() {
   SolverDDP::allocateData();
 
-  std::size_t nu_max = 0;
   const std::size_t& T = problem_->get_T();
   Quu_inv_.resize(T);
+  const std::size_t& nu = problem_->get_nu();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
-    const std::size_t& nu = model->get_nu();
-
-    // Store the largest number of controls across all models to allocate du_lb_, du_ub_
-    if (nu > nu_max) nu_max = nu;
-
     Quu_inv_[t] = Eigen::MatrixXd::Zero(nu, nu);
   }
-
-  du_lb_.resize(nu_max);
-  du_ub_.resize(nu_max);
+  du_lb_.resize(nu);
+  du_ub_.resize(nu);
 }
 
 void SolverBoxDDP::computeGains(const std::size_t& t) {
