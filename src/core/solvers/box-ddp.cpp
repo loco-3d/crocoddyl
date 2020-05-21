@@ -97,11 +97,15 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
 
     xs_try_[t] = xnext_;
     m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
-    us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
-    if (m->get_has_control_limits()) {  // clamp control
-      us_try_[t] = us_try_[t].cwiseMax(m->get_u_lb()).cwiseMin(m->get_u_ub());
+    if (m->get_nu() != 0) {
+      us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
+      if (m->get_has_control_limits()) {  // clamp control
+        us_try_[t] = us_try_[t].cwiseMax(m->get_u_lb()).cwiseMin(m->get_u_ub());
+      }
+      m->calc(d, xs_try_[t], us_try_[t]);
+    } else {
+      m->calc(d, xs_try_[t]);
     }
-    m->calc(d, xs_try_[t], us_try_[t]);
     xnext_ = d->xnext;
     cost_try_ += d->cost;
 

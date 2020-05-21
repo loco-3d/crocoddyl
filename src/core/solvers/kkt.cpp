@@ -114,8 +114,10 @@ double SolverKKT::tryStep(const double& steplength) {
     const boost::shared_ptr<ActionModelAbstract>& m = models[t];
 
     m->get_state()->integrate(xs_[t], steplength * dxs_[t], xs_try_[t]);
-    us_try_[t] = us_[t];
-    us_try_[t] += steplength * dus_[t];
+    if (m->get_nu() != 0) {
+      us_try_[t] = us_[t];
+      us_try_[t] += steplength * dus_[t];
+    }
   }
   const boost::shared_ptr<ActionModelAbstract> m = problem_->get_terminalModel();
   m->get_state()->integrate(xs_[T], steplength * dxs_[T], xs_try_[T]);

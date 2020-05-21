@@ -132,9 +132,12 @@ void SolverFDDP::updateExpectedImprovement() {
     fTVxx_p_.noalias() = Vxx_.back() * fs_.back();
     dq_ += fs_.back().dot(fTVxx_p_);
   }
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    dg_ += Qu_[t].dot(k_[t]);
-    dq_ -= k_[t].dot(Quuk_[t]);
+    if (models[t]->get_nu() != 0) {
+      dg_ += Qu_[t].dot(k_[t]);
+      dq_ -= k_[t].dot(Quuk_[t]);
+    }
     if (!is_feasible_) {
       dg_ -= Vx_[t].dot(fs_[t]);
       fTVxx_p_.noalias() = Vxx_[t] * fs_[t];
@@ -183,8 +186,12 @@ void SolverFDDP::forwardPass(const double& steplength) {
 
       xs_try_[t] = xnext_;
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
-      us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
-      m->calc(d, xs_try_[t], us_try_[t]);
+      if (m->get_nu() != 0) {
+        us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
+        m->calc(d, xs_try_[t], us_try_[t]);
+      } else {
+        m->calc(d, xs_try_[t]);
+      }
       xnext_ = d->xnext;
       cost_try_ += d->cost;
 
@@ -211,8 +218,12 @@ void SolverFDDP::forwardPass(const double& steplength) {
       const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
       m->get_state()->integrate(xnext_, fs_[t] * (steplength - 1), xs_try_[t]);
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
-      us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
-      m->calc(d, xs_try_[t], us_try_[t]);
+      if (m->get_nu() != 0) {
+        us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
+        m->calc(d, xs_try_[t], us_try_[t]);
+      } else {
+        m->calc(d, xs_try_[t]);
+      }
       xnext_ = d->xnext;
       cost_try_ += d->cost;
 

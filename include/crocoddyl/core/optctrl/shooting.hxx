@@ -96,7 +96,11 @@ Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs, const s
 #pragma omp parallel for
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
-    running_models_[i]->calc(running_datas_[i], xs[i], us[i]);
+    if (running_models_[i]->get_nu() != 0) {
+      running_models_[i]->calc(running_datas_[i], xs[i], us[i]);
+    } else {
+      running_models_[i]->calc(running_datas_[i], xs[i]);
+    }
   }
   terminal_model_->calc(terminal_data_, xs.back());
 
@@ -125,7 +129,11 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, con
 #pragma omp parallel for
 #endif
   for (i = 0; i < T_; ++i) {
-    running_models_[i]->calcDiff(running_datas_[i], xs[i], us[i]);
+    if (running_models_[i]->get_nu() != 0) {
+      running_models_[i]->calcDiff(running_datas_[i], xs[i], us[i]);
+    } else {
+      running_models_[i]->calcDiff(running_datas_[i], xs[i]);
+    }
   }
   terminal_model_->calcDiff(terminal_data_, xs.back());
 
@@ -154,9 +162,13 @@ void ShootingProblemTpl<Scalar>::rollout(const std::vector<VectorXs>& us, std::v
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
     const boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
     const VectorXs& x = xs[i];
-    const VectorXs& u = us[i];
 
-    model->calc(data, x, u);
+    if (model->get_nu() != 0) {
+      const VectorXs& u = us[i];
+      model->calc(data, x, u);
+    } else {
+      model->calc(data, x);
+    }
     xs[i + 1] = data->xnext;
   }
   terminal_model_->calc(terminal_data_, xs.back());
