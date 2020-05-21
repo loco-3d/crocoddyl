@@ -191,6 +191,21 @@ class ShootingProblemTpl {
    */
   void set_terminalModel(boost::shared_ptr<ActionModelAbstract> model);
 
+  /**
+   * @brief Return the dimension of the state tuple
+   */
+  const std::size_t& get_nx() const;
+
+  /**
+   * @brief Return the dimension of the tangent space of the state manifold
+   */
+  const std::size_t& get_ndx() const;
+
+  /**
+   * @brief Return the dimension of the control vector
+   */
+  const std::size_t& get_nu() const;
+
  protected:
   Scalar cost_;                                                          //!< Total cost
   std::size_t T_;                                                        //!< number of running nodes
@@ -199,6 +214,9 @@ class ShootingProblemTpl {
   boost::shared_ptr<ActionDataAbstract> terminal_data_;                  //!< Terminal action data
   std::vector<boost::shared_ptr<ActionModelAbstract> > running_models_;  //!< Running action model
   std::vector<boost::shared_ptr<ActionDataAbstract> > running_datas_;    //!< Running action data
+  std::size_t nx_;                                                       //!< State dimension
+  std::size_t ndx_;                                                      //!< State rate dimension
+  std::size_t nu_;                                                       //!< Control dimension
 
  private:
   void allocateData();
