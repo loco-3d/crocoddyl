@@ -31,6 +31,54 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
 }
 
 template <typename Scalar>
+ShootingProblemTpl<Scalar>::ShootingProblemTpl(
+    const VectorXs& x0, const std::vector<boost::shared_ptr<ActionModelAbstract> >& running_models,
+    boost::shared_ptr<ActionModelAbstract> terminal_model,
+    const std::vector<boost::shared_ptr<ActionDataAbstract> >& running_datas,
+    boost::shared_ptr<ActionDataAbstract> terminal_data)
+    : cost_(Scalar(0.)),
+      T_(running_models.size()),
+      x0_(x0),
+      terminal_model_(terminal_model),
+      terminal_data_(terminal_data),
+      running_models_(running_models),
+      running_datas_(running_datas) {
+  if (static_cast<std::size_t>(x0.size()) != running_models_[0]->get_state()->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x0 has wrong dimension (it should be " +
+                        std::to_string(running_models_[0]->get_state()->get_nx()) + ")");
+  }
+  std::size_t Td = running_datas.size();
+  if (Td != T_) {
+    throw_pretty("Invalid argument: "
+                 << "the number of running models and datas are not the same (" + std::to_string(T_) +
+                        " != " + std::to_string(Td) + ")")
+  }
+  for (std::size_t i = 0; i < T_; ++i) {
+    const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
+    const boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
+    if (!model->checkData(data)) {
+      throw_pretty("Invalid argument: "
+                   << "action data in " << i << " node is not consistent with the action model")
+    }
+  }
+  if (!terminal_model->checkData(terminal_data)) {
+    throw_pretty("Invalid argument: "
+                 << "terminal action data is not consistent with the terminal action model")
+  }
+}
+
+template <typename Scalar>
+ShootingProblemTpl<Scalar>::ShootingProblemTpl(const ShootingProblemTpl<Scalar>& problem)
+    : cost_(Scalar(0.)),
+      T_(problem.get_T()),
+      x0_(problem.get_x0()),
+      terminal_model_(problem.get_terminalModel()),
+      terminal_data_(problem.get_terminalData()),
+      running_models_(problem.get_runningModels()),
+      running_datas_(problem.get_runningDatas()) {}
+
+template <typename Scalar>
 ShootingProblemTpl<Scalar>::~ShootingProblemTpl() {}
 
 template <typename Scalar>
@@ -124,13 +172,61 @@ std::vector<typename MathBaseTpl<Scalar>::VectorXs> ShootingProblemTpl<Scalar>::
 }
 
 template <typename Scalar>
+void ShootingProblemTpl<Scalar>::circularAppend(boost::shared_ptr<ActionModelAbstract> model,
+                                                boost::shared_ptr<ActionDataAbstract> data) {
+  if (!model->checkData(data)) {
+    throw_pretty("Invalid argument: "
+                 << "action data is not consistent with the action model")
+  }
+
+  for (std::size_t i = 0; i < T_ - 1; ++i) {
+    running_models_[i] = running_models_[i + 1];
+    running_datas_[i] = running_datas_[i + 1];
+  }
+  running_models_.back() = model;
+  running_datas_.back() = data;
+}
+
+template <typename Scalar>
+void ShootingProblemTpl<Scalar>::circularAppend(boost::shared_ptr<ActionModelAbstract> model) {
+  for (std::size_t i = 0; i < T_ - 1; ++i) {
+    running_models_[i] = running_models_[i + 1];
+    running_datas_[i] = running_datas_[i + 1];
+  }
+  running_models_.back() = model;
+  running_datas_.back() = model->createData();
+}
+
+template <typename Scalar>
+void ShootingProblemTpl<Scalar>::updateNode(std::size_t i, boost::shared_ptr<ActionModelAbstract> model,
+                                            boost::shared_ptr<ActionDataAbstract> data) {
+  if (i > T_ + 1) {
+    throw_pretty("Invalid argument: "
+                 << "i is bigger than the allocated horizon (it should be lower than " + std::to_string(T_) + ")");
+  }
+  if (!model->checkData(data)) {
+    throw_pretty("Invalid argument: "
+                 << "action data is not consistent with the action model")
+  }
+
+  if (i == T_ + 1) {
+    terminal_model_ = model;
+    terminal_data_ = data;
+  } else {
+    running_models_[i] = model;
+    running_datas_[i] = data;
+  }
+}
+
+template <typename Scalar>
 void ShootingProblemTpl<Scalar>::updateModel(std::size_t i, boost::shared_ptr<ActionModelAbstract> model) {
   if (i > T_ + 1) {
     throw_pretty("Invalid argument: "
                  << "i is bigger than the allocated horizon (it should be lower than " + std::to_string(T_) + ")");
   }
   if (i == T_ + 1) {
-    set_terminalModel(model);
+    terminal_model_ = model;
+    terminal_data_ = terminal_model_->createData();
   } else {
     running_models_[i] = model;
     running_datas_[i] = model->createData();

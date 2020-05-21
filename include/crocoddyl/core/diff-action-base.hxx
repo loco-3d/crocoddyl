@@ -45,6 +45,11 @@ DifferentialActionModelAbstractTpl<Scalar>::createData() {
 }
 
 template <typename Scalar>
+bool DifferentialActionModelAbstractTpl<Scalar>::checkData(const boost::shared_ptr<DifferentialActionDataAbstract>&) {
+  return false;
+}
+
+template <typename Scalar>
 const std::size_t& DifferentialActionModelAbstractTpl<Scalar>::get_nu() const {
   return nu_;
 }

@@ -84,6 +84,16 @@ boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > DifferentialAction
 }
 
 template <typename Scalar>
+bool DifferentialActionModelLQRTpl<Scalar>::checkData(const boost::shared_ptr<DifferentialActionDataAbstract>& data) {
+  boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
+  if (d != NULL) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+template <typename Scalar>
 const typename MathBaseTpl<Scalar>::MatrixXs& DifferentialActionModelLQRTpl<Scalar>::get_Fq() const {
   return Fq_;
 }
