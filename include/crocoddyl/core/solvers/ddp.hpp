@@ -17,7 +17,7 @@
 namespace crocoddyl {
 
 /**
- * @brief DDP solver
+ * @brief Differential Dynamic Programming (DDP) solver
  *
  * The DDP solver computes an optimal trajectory and control commands by iterates running `backwardPass()` and
  * `forwardPass()`. The backward-pass updates locally the quadratic approximation of the problem and computes descent
