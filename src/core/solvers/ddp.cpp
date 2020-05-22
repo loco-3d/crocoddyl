@@ -132,8 +132,11 @@ double SolverDDP::tryStep(const double& steplength) {
 double SolverDDP::stoppingCriteria() {
   stop_ = 0.;
   const std::size_t& T = this->problem_->get_T();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    stop_ += Qu_[t].squaredNorm();
+    if (models[t]->get_nu() != 0) {
+      stop_ += Qu_[t].squaredNorm();
+    }
   }
   return stop_;
 }
@@ -141,9 +144,12 @@ double SolverDDP::stoppingCriteria() {
 const Eigen::Vector2d& SolverDDP::expectedImprovement() {
   d_.fill(0);
   const std::size_t& T = this->problem_->get_T();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    d_[0] += Qu_[t].dot(k_[t]);
-    d_[1] -= k_[t].dot(Quuk_[t]);
+    if (models[t]->get_nu() != 0) {
+      d_[0] += Qu_[t].dot(k_[t]);
+      d_[1] -= k_[t].dot(Quuk_[t]);
+    }
   }
   return d_;
 }
@@ -156,9 +162,11 @@ double SolverDDP::calcDiff() {
     problem_->get_runningModels()[0]->get_state()->diff(xs_[0], x0, fs_[0]);
 
     const std::size_t& T = problem_->get_T();
+    const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+    const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
     for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
-      const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
+      const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+      const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
       model->get_state()->diff(xs_[t + 1], d->xnext, fs_[t + 1]);
     }
   } else if (!was_feasible_) {  // closing the gaps
@@ -182,40 +190,48 @@ void SolverDDP::backwardPass() {
     Vx_.back().noalias() += Vxx_.back() * fs_.back();
   }
 
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
   for (int t = static_cast<int>(problem_->get_T()) - 1; t >= 0; --t) {
-    const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
+    const boost::shared_ptr<ActionModelAbstract>& m = models[t];
+    const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
     const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
     const Eigen::VectorXd& Vx_p = Vx_[t + 1];
+    const std::size_t& nu = m->get_nu();
 
     Qxx_[t] = d->Lxx;
-    Qxu_[t] = d->Lxu;
-    Quu_[t] = d->Luu;
     Qx_[t] = d->Lx;
-    Qu_[t] = d->Lu;
     FxTVxx_p_.noalias() = d->Fx.transpose() * Vxx_p;
-    FuTVxx_p_[t].noalias() = d->Fu.transpose() * Vxx_p;
     Qxx_[t].noalias() += FxTVxx_p_ * d->Fx;
-    Qxu_[t].noalias() += FxTVxx_p_ * d->Fu;
-    Quu_[t].noalias() += FuTVxx_p_[t] * d->Fu;
     Qx_[t].noalias() += d->Fx.transpose() * Vx_p;
-    Qu_[t].noalias() += d->Fu.transpose() * Vx_p;
+    if (nu != 0) {
+      Qxu_[t] = d->Lxu;
+      Quu_[t] = d->Luu;
+      Qu_[t] = d->Lu;
+      FuTVxx_p_[t].noalias() = d->Fu.transpose() * Vxx_p;
+      Qxu_[t].noalias() += FxTVxx_p_ * d->Fu;
+      Quu_[t].noalias() += FuTVxx_p_[t] * d->Fu;
+      Qu_[t].noalias() += d->Fu.transpose() * Vx_p;
 
-    if (!std::isnan(ureg_)) {
-      Quu_[t].diagonal().array() += ureg_;
+      if (!std::isnan(ureg_)) {
+        Quu_[t].diagonal().array() += ureg_;
+      }
     }
 
     computeGains(t);
 
     Vx_[t] = Qx_[t];
-    if (std::isnan(ureg_)) {
-      Vx_[t].noalias() -= K_[t].transpose() * Qu_[t];
-    } else {
-      Quuk_[t].noalias() = Quu_[t] * k_[t];
-      Vx_[t].noalias() += K_[t].transpose() * Quuk_[t];
-      Vx_[t].noalias() -= 2 * (K_[t].transpose() * Qu_[t]);
-    }
     Vxx_[t] = Qxx_[t];
-    Vxx_[t].noalias() -= Qxu_[t] * K_[t];
+    if (nu != 0) {
+      if (std::isnan(ureg_)) {
+        Vx_[t].noalias() -= K_[t].transpose() * Qu_[t];
+      } else {
+        Quuk_[t].noalias() = Quu_[t] * k_[t];
+        Vx_[t].noalias() += K_[t].transpose() * Quuk_[t];
+        Vx_[t].noalias() -= 2 * (K_[t].transpose() * Qu_[t]);
+      }
+      Vxx_[t].noalias() -= Qxu_[t] * K_[t];
+    }
     Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose()).eval();
 
     if (!std::isnan(xreg_)) {
@@ -243,15 +259,21 @@ void SolverDDP::forwardPass(const double& steplength) {
   }
   cost_try_ = 0.;
   const std::size_t& T = problem_->get_T();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& m = problem_->get_runningModels()[t];
-    const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
+    const boost::shared_ptr<ActionModelAbstract>& m = models[t];
+    const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
 
     m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
-    us_try_[t].noalias() = us_[t];
-    us_try_[t].noalias() -= k_[t] * steplength;
-    us_try_[t].noalias() -= K_[t] * dx_[t];
-    m->calc(d, xs_try_[t], us_try_[t]);
+    if (m->get_nu() != 0) {
+      us_try_[t].noalias() = us_[t];
+      us_try_[t].noalias() -= k_[t] * steplength;
+      us_try_[t].noalias() -= K_[t] * dx_[t];
+      m->calc(d, xs_try_[t], us_try_[t]);
+    } else {
+      m->calc(d, xs_try_[t]);
+    }
     xs_try_[t + 1] = d->xnext;
     cost_try_ += d->cost;
 
@@ -324,12 +346,11 @@ void SolverDDP::allocateData() {
   Quu_llt_.resize(T);
   Quuk_.resize(T);
 
+  const std::size_t& ndx = problem_->get_ndx();
+  const std::size_t& nu = problem_->get_nu();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
-    const std::size_t& nx = model->get_state()->get_nx();
-    const std::size_t& ndx = model->get_state()->get_ndx();
-    const std::size_t& nu = model->get_nu();
-
+    const boost::shared_ptr<ActionModelAbstract>& model = models[t];
     Vxx_[t] = Eigen::MatrixXd::Zero(ndx, ndx);
     Vx_[t] = Eigen::VectorXd::Zero(ndx);
     Qxx_[t] = Eigen::MatrixXd::Zero(ndx, ndx);
@@ -344,16 +365,15 @@ void SolverDDP::allocateData() {
     if (t == 0) {
       xs_try_[t] = problem_->get_x0();
     } else {
-      xs_try_[t] = Eigen::VectorXd::Constant(nx, NAN);
+      xs_try_[t] = model->get_state()->zero();
     }
-    us_try_[t] = Eigen::VectorXd::Constant(nu, NAN);
+    us_try_[t] = Eigen::VectorXd::Zero(nu);
     dx_[t] = Eigen::VectorXd::Zero(ndx);
 
     FuTVxx_p_[t] = Eigen::MatrixXd::Zero(nu, ndx);
     Quu_llt_[t] = Eigen::LLT<Eigen::MatrixXd>(nu);
     Quuk_[t] = Eigen::VectorXd(nu);
   }
-  const std::size_t& ndx = problem_->get_terminalModel()->get_state()->get_ndx();
   Vxx_.back() = Eigen::MatrixXd::Zero(ndx, ndx);
   Vx_.back() = Eigen::VectorXd::Zero(ndx);
   xs_try_.back() = problem_->get_terminalModel()->get_state()->zero();
