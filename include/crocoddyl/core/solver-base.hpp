@@ -18,18 +18,6 @@ namespace crocoddyl {
 class CallbackAbstract;  // forward declaration
 static std::vector<Eigen::VectorXd> DEFAULT_VECTOR;
 
-// \begin{eqnarray*}
-// \mathbf{X}^*(\mathbf{\tilde{x}}_0), \mathbf{U}^*(\mathbf{\tilde{x}}_0) =
-// \begin{Bmatrix}
-// 	\mathbf{x}^*_0,\cdots,\mathbf{x}^*_N \\
-// 	\mathbf{u}^*_0,\cdots,\mathbf{u}^*_{N-1}
-// \end{Bmatrix} =
-// \argmin_{\mathbf{X},\mathbf{U}} && l_N (\mathbf{x}_N) +
-// 	\sum_{k=0}^{N-1} l_k(\mathbf{x}_t,\mathbf{u}_t) \\
-// \st && \mathbf{x}_0 = \mathbf{\tilde{x}}_0\\
-//     &&  \mathbf{x}_{k+1} = \mathbf{f}_k(\mathbf{x}_k,\mathbf{u}_k)
-// \end{eqnarray*}
-
 /**
  * @brief Abstract class for optimal control solvers
  *
@@ -295,7 +283,6 @@ class SolverAbstract {
  */
 class CallbackAbstract {
  public:
-
   /**
    * @brief Initialize the callback function
    */
@@ -304,7 +291,7 @@ class CallbackAbstract {
 
   /**
    * @brief Run the callback function given a solver
-   * 
+   *
    * @param[in]  solver solver to be diagnostic
    */
   virtual void operator()(SolverAbstract& solver) = 0;
