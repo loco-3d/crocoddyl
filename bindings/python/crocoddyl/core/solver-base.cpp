@@ -23,8 +23,8 @@ void exposeSolverAbstract() {
   bp::class_<SolverAbstract_wrap, boost::noncopyable>(
       "SolverAbstract",
       "Abstract class for optimal control solvers.\n\n"
-      "In crocoddyl, a solver resolves an optimal control solver which is formulated in a\n"
-      "problem abstraction. The main routines are computeDirection and tryStep. The former finds\n"
+      "A solver resolves an optimal control solver which is formulated in a shooting problem\n"
+      "abstraction. The main routines are computeDirection and tryStep. The former finds\n"
       "a search direction and typically computes the derivatives of each action model. The latter\n"
       "rollout the dynamics and cost (i.e. the action) to try the search direction found by\n"
       "computeDirection. Both functions used the current guess defined by setCandidate. Finally\n"
@@ -48,7 +48,7 @@ void exposeSolverAbstract() {
            "False).\n"
            ":param regInit: initial guess for the regularization value. Very low\n"
            "                values are typical used with very good guess points (init_xs, init_us).\n"
-           ":returns the optimal trajectory xopt, uopt and a boolean that describes if convergence was reached.")
+           ":returns A boolean that describes if convergence was reached.")
       .def("computeDirection", pure_virtual(&SolverAbstract_wrap::computeDirection), bp::args("self", "recalc"),
            "Compute the search direction (dx, du) for the current guess (xs, us).\n\n"
            "You must call setCandidate first in order to define the current\n"
@@ -90,7 +90,7 @@ void exposeSolverAbstract() {
       .def("setCallbacks", &SolverAbstract_wrap::setCallbacks, bp::args("self"),
            "Set a list of callback functions using for diagnostic.\n\n"
            "Each iteration, the solver calls these set of functions in order to\n"
-           "allowed user the diagnostic of the solver's performance.\n"
+           "allowed user the diagnostic of the its performance.\n"
            ":param callbacks: set of callback functions.")
       .def("getCallbacks", &SolverAbstract_wrap::getCallbacks, bp::return_value_policy<bp::copy_const_reference>(),
            bp::args("self"),
