@@ -289,7 +289,8 @@ void ShootingProblemTpl<Scalar>::updateNode(std::size_t i, boost::shared_ptr<Act
                                             boost::shared_ptr<ActionDataAbstract> data) {
   if (i > T_ + 1) {
     throw_pretty("Invalid argument: "
-                 << "i is bigger than the allocated horizon (it should be lower than " + std::to_string(T_) + ")");
+                 << "i is bigger than the allocated horizon (it should be less than or equal to " +
+                        std::to_string(T_ + 1) + ")");
   }
   if (!model->checkData(data)) {
     throw_pretty("Invalid argument: "
