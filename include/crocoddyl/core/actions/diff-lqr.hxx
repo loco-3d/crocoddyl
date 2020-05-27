@@ -51,7 +51,8 @@ void DifferentialActionModelLQRTpl<Scalar>::calc(const boost::shared_ptr<Differe
   } else {
     data->xout = Fq_ * q + Fv_ * v + Fu_ * u + f0_;
   }
-  data->cost = 0.5 * x.dot(Lxx_ * x) + 0.5 * u.dot(Luu_ * u) + x.dot(Lxu_ * u) + lx_.dot(x) + lu_.dot(u);
+  data->cost =
+      Scalar(0.5) * x.dot(Lxx_ * x) + Scalar(0.5) * u.dot(Luu_ * u) + x.dot(Lxu_ * u) + lx_.dot(x) + lu_.dot(u);
 }
 
 template <typename Scalar>
@@ -79,7 +80,7 @@ void DifferentialActionModelLQRTpl<Scalar>::calcDiff(const boost::shared_ptr<Dif
 
 template <typename Scalar>
 boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > DifferentialActionModelLQRTpl<Scalar>::createData() {
-  return boost::make_shared<DifferentialActionDataLQR>(this);
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>

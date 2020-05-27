@@ -51,7 +51,7 @@ CostModelFrameRotationTpl<Scalar>::~CostModelFrameRotationTpl() {}
 template <typename Scalar>
 void CostModelFrameRotationTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
                                              const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
-  CostDataFrameRotationTpl<Scalar>* d = static_cast<CostDataFrameRotationTpl<Scalar>*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
 
   // Compute the frame placement w.r.t. the reference frame
   pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, Rref_.frame);
@@ -69,7 +69,7 @@ void CostModelFrameRotationTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDat
                                                  const Eigen::Ref<const VectorXs>&,
                                                  const Eigen::Ref<const VectorXs>&) {
   // Update the frame placements
-  CostDataFrameRotationTpl<Scalar>* d = static_cast<CostDataFrameRotationTpl<Scalar>*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
 
   // // Compute the frame Jacobian at the error point
   pinocchio::Jlog3(d->rRf, d->rJf);
@@ -88,13 +88,14 @@ void CostModelFrameRotationTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDat
 template <typename Scalar>
 boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelFrameRotationTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::make_shared<CostDataFrameRotationTpl<Scalar> >(this, data);
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
 }
 
 template <typename Scalar>
 void CostModelFrameRotationTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(FrameRotation)) {
     Rref_ = *static_cast<const FrameRotation*>(pv);
+    oRf_inv_ = Rref_.oRf.transpose();
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameRotation)");
   }

@@ -28,10 +28,10 @@ class ActionModelAbstractTpl {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
+  typedef StateAbstractTpl<Scalar> StateAbstract;
   typedef typename MathBase::VectorXs VectorXs;
 
-  ActionModelAbstractTpl(boost::shared_ptr<StateAbstractTpl<Scalar> > state, const std::size_t& nu,
-                         const std::size_t& nr = 0);
+  ActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nu, const std::size_t& nr = 0);
 
   virtual ~ActionModelAbstractTpl();
 
@@ -51,7 +51,7 @@ class ActionModelAbstractTpl {
 
   const std::size_t& get_nu() const;
   const std::size_t& get_nr() const;
-  const boost::shared_ptr<StateAbstractTpl<Scalar> >& get_state() const;
+  const boost::shared_ptr<StateAbstract>& get_state() const;
 
   const VectorXs& get_u_lb() const;
   const VectorXs& get_u_ub() const;
@@ -61,13 +61,13 @@ class ActionModelAbstractTpl {
   void set_u_ub(const VectorXs& u_ub);
 
  protected:
-  std::size_t nu_;                                      //!< Control dimension
-  std::size_t nr_;                                      //!< Dimension of the cost residual
-  boost::shared_ptr<StateAbstractTpl<Scalar> > state_;  //!< Model of the state
-  VectorXs unone_;                                      //!< Neutral state
-  VectorXs u_lb_;                                       //!< Lower control limits
-  VectorXs u_ub_;                                       //!< Upper control limits
-  bool has_control_limits_;                             //!< Indicates whether any of the control limits is finite
+  std::size_t nu_;                          //!< Control dimension
+  std::size_t nr_;                          //!< Dimension of the cost residual
+  boost::shared_ptr<StateAbstract> state_;  //!< Model of the state
+  VectorXs unone_;                          //!< Neutral state
+  VectorXs u_lb_;                           //!< Lower control limits
+  VectorXs u_ub_;                           //!< Upper control limits
+  bool has_control_limits_;                 //!< Indicates whether any of the control limits is finite
 
   void update_has_control_limits();
 };
@@ -81,7 +81,7 @@ struct ActionDataAbstractTpl {
 
   template <template <typename Scalar> class Model>
   explicit ActionDataAbstractTpl(Model<Scalar>* const model)
-      : cost(0.),
+      : cost(Scalar(0.)),
         xnext(model->get_state()->get_nx()),
         r(model->get_nr()),
         Fx(model->get_state()->get_ndx(), model->get_state()->get_ndx()),

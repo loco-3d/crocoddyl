@@ -72,18 +72,23 @@ class ImpulseModelMultipleTpl {
   void updateForce(const boost::shared_ptr<ImpulseDataMultiple>& data, const VectorXs& force);
   boost::shared_ptr<ImpulseDataMultiple> createData(pinocchio::DataTpl<Scalar>* const data);
   void updateVelocityDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, const MatrixXs& dvnext_dx) const;
-  void updateForceDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, const MatrixXs& df_dq) const;
+  void updateForceDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, const MatrixXs& df_dx) const;
 
   const boost::shared_ptr<StateMultibody>& get_state() const;
   const ImpulseModelContainer& get_impulses() const;
   const std::size_t& get_ni() const;
   const std::size_t& get_ni_total() const;
+  const std::vector<std::string>& get_active() const;
+  const std::vector<std::string>& get_inactive() const;
+  bool getImpulseStatus(const std::string& name) const;
 
  private:
   boost::shared_ptr<StateMultibody> state_;
   ImpulseModelContainer impulses_;
   std::size_t ni_;
   std::size_t ni_total_;
+  std::vector<std::string> active_;
+  std::vector<std::string> inactive_;
 };
 
 template <typename _Scalar>

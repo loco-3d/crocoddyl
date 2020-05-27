@@ -31,8 +31,8 @@ class ActuationModelMultiCopterBaseTpl : public ActuationModelAbstractTpl<_Scala
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActuationModelAbstractTpl<Scalar> Base;
+  typedef ActuationDataAbstractTpl<Scalar> Data;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
-  typedef ActuationDataAbstractTpl<Scalar> ActuationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
@@ -52,9 +52,9 @@ class ActuationModelMultiCopterBaseTpl : public ActuationModelAbstractTpl<_Scala
           MatrixXs::Identity(nu_ - n_rotors_, nu_ - n_rotors_);
     }
   };
-  ~ActuationModelMultiCopterBaseTpl(){};
+  virtual ~ActuationModelMultiCopterBaseTpl(){};
 
-  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& /*x*/,
+  virtual void calc(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>& /*x*/,
                     const Eigen::Ref<const VectorXs>& u) {
     if (static_cast<std::size_t>(u.size()) != nu_) {
       throw_pretty("Invalid argument: "
@@ -63,17 +63,14 @@ class ActuationModelMultiCopterBaseTpl : public ActuationModelAbstractTpl<_Scala
 
     data->tau.noalias() = tau_f_ * u;
   }
-  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& /*data*/,
-                        const Eigen::Ref<const Eigen::VectorXd>& /*x*/,
-                        const Eigen::Ref<const Eigen::VectorXd>& /*u*/) {
+  virtual void calcDiff(const boost::shared_ptr<Data>& /*data*/, const Eigen::Ref<const VectorXs>& /*x*/,
+                        const Eigen::Ref<const VectorXs>& /*u*/) {
     // The derivatives has constant values which were set in createData.
   }
 
-  boost::shared_ptr<ActuationDataAbstract> createData() {
-    boost::shared_ptr<ActuationDataAbstract> data = boost::make_shared<ActuationDataAbstract>(this);
-
+  boost::shared_ptr<Data> createData() {
+    boost::shared_ptr<Data> data = boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
     data->dtau_du = tau_f_;
-
     return data;
   }
 

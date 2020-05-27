@@ -28,6 +28,7 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
 
   typedef _Scalar Scalar;
   typedef DifferentialActionModelAbstractTpl<Scalar> Base;
+  typedef DifferentialActionDataContactFwdDynamicsTpl<Scalar> Data;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostModelSumTpl<Scalar> CostModelSum;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
@@ -41,8 +42,9 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
                                                boost::shared_ptr<ActuationModelFloatingBase> actuation,
                                                boost::shared_ptr<ContactModelMultiple> contacts,
                                                boost::shared_ptr<CostModelSum> costs,
-                                               const Scalar& JMinvJt_damping = 0., const bool& enable_force = false);
-  ~DifferentialActionModelContactFwdDynamicsTpl();
+                                               const Scalar& JMinvJt_damping = Scalar(0.),
+                                               const bool& enable_force = false);
+  virtual ~DifferentialActionModelContactFwdDynamicsTpl();
 
   virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
@@ -95,10 +97,10 @@ struct DifferentialActionDataContactFwdDynamicsTpl : public DifferentialActionDa
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
         multibody(&pinocchio, model->get_actuation()->createData(), model->get_contacts()->createData(&pinocchio)),
         costs(model->get_costs()->createData(&multibody)),
-        Kinv(model->get_state()->get_nv() + model->get_contacts()->get_nc(),
-             model->get_state()->get_nv() + model->get_contacts()->get_nc()),
-        df_dx(model->get_contacts()->get_nc(), model->get_state()->get_ndx()),
-        df_du(model->get_contacts()->get_nc(), model->get_nu()) {
+        Kinv(model->get_state()->get_nv() + model->get_contacts()->get_nc_total(),
+             model->get_state()->get_nv() + model->get_contacts()->get_nc_total()),
+        df_dx(model->get_contacts()->get_nc_total(), model->get_state()->get_ndx()),
+        df_du(model->get_contacts()->get_nc_total(), model->get_nu()) {
     costs->shareMemory(this);
     Kinv.setZero();
     df_dx.setZero();

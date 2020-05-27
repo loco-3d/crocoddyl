@@ -41,6 +41,7 @@ void exposeSolverBoxQP() {
                     bp::init<std::size_t, std::size_t, double, double, double>(
                         bp::args("self", "nx", "maxiter", "th_acceptstep", "th_grad", "reg"),
                         "Initialize the Projected-Newton QP for bound constraints.\n\n"
+                        ":param nx: dimension of the decision vector\n"
                         ":param maxiter: maximum number of allowed iterations (default 100)\n"
                         ":param th_acceptstep: acceptance step condition (default 0.1)\n"
                         ":param th_grad: gradient tolerance condition (default 1e-9)\n"

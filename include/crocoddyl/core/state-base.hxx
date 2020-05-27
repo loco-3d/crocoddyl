@@ -50,6 +50,8 @@ template <typename Scalar>
 std::vector<typename MathBaseTpl<Scalar>::MatrixXs> StateAbstractTpl<Scalar>::Jdiff_Js(
     const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1, Jcomponent firstsecond) {
   MatrixXs Jfirst(ndx_, ndx_), Jsecond(ndx_, ndx_);
+  Jfirst.setZero();
+  Jsecond.setZero();
   std::vector<MatrixXs> Jacs;
   Jdiff(x0, x1, Jfirst, Jsecond, firstsecond);
   switch (firstsecond) {
@@ -73,10 +75,12 @@ std::vector<typename MathBaseTpl<Scalar>::MatrixXs> StateAbstractTpl<Scalar>::Jd
 
 template <typename Scalar>
 std::vector<typename MathBaseTpl<Scalar>::MatrixXs> StateAbstractTpl<Scalar>::Jintegrate_Js(
-    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx, Jcomponent firstsecond) {
+    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx, const Jcomponent firstsecond) {
   MatrixXs Jfirst(ndx_, ndx_), Jsecond(ndx_, ndx_);
+  Jfirst.setZero();
+  Jsecond.setZero();
   std::vector<MatrixXs> Jacs;
-  Jintegrate(x, dx, Jfirst, Jsecond, firstsecond);
+  Jintegrate(x, dx, Jfirst, Jsecond, firstsecond, setto);
   switch (firstsecond) {
     case both:
       Jacs.push_back(Jfirst);
@@ -153,7 +157,7 @@ void StateAbstractTpl<Scalar>::set_ub(const VectorXs& ub) {
 
 template <typename Scalar>
 void StateAbstractTpl<Scalar>::update_has_limits() {
-  has_limits_ = isfinite(lb_.array()).any() && isfinite(ub_.array()).any();
+  has_limits_ = isfinite(lb_.array()).any() || isfinite(ub_.array()).any();
 }
 
 }  // namespace crocoddyl

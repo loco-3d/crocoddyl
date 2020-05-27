@@ -52,7 +52,7 @@ template <typename Scalar>
 void CostModelFrameTranslationTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
                                                 const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   // Compute the frame translation w.r.t. the reference frame
-  CostDataFrameTranslationTpl<Scalar>* d = static_cast<CostDataFrameTranslationTpl<Scalar>*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
   pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame);
   data->r = d->pinocchio->oMf[xref_.frame].translation() - xref_.oxf;
 
@@ -66,7 +66,7 @@ void CostModelFrameTranslationTpl<Scalar>::calcDiff(const boost::shared_ptr<Cost
                                                     const Eigen::Ref<const VectorXs>&,
                                                     const Eigen::Ref<const VectorXs>&) {
   // Update the frame placements
-  CostDataFrameTranslationTpl<Scalar>* d = static_cast<CostDataFrameTranslationTpl<Scalar>*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
 
   // Compute the frame Jacobian at the error point
   pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame, pinocchio::LOCAL, d->fJf);
@@ -83,7 +83,7 @@ void CostModelFrameTranslationTpl<Scalar>::calcDiff(const boost::shared_ptr<Cost
 template <typename Scalar>
 boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelFrameTranslationTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::make_shared<CostDataFrameTranslationTpl<Scalar> >(this, data);
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
 }
 
 template <typename Scalar>

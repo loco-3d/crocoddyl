@@ -19,6 +19,8 @@ namespace crocoddyl {
 template <typename _Scalar>
 class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActivationModelAbstractTpl<Scalar> Base;
@@ -27,7 +29,7 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   explicit ActivationModelQuadTpl(const std::size_t& nr) : Base(nr){};
-  ~ActivationModelQuadTpl(){};
+  virtual ~ActivationModelQuadTpl(){};
 
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
@@ -45,11 +47,13 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
 
     data->Ar = r;
     // The Hessian has constant values which were set in createData.
-    assert_pretty(data->Arr == MatrixXs::Identity(nr_, nr_), "Arr has wrong value");
+    assert_pretty(MatrixXs(data->Arr.diagonal().asDiagonal()).isApprox(MatrixXs::Identity(nr_, nr_)),
+                  "Arr has wrong value");
   };
 
   virtual boost::shared_ptr<ActivationDataAbstract> createData() {
-    boost::shared_ptr<ActivationDataAbstract> data = boost::make_shared<ActivationDataAbstract>(this);
+    boost::shared_ptr<ActivationDataAbstract> data =
+        boost::allocate_shared<ActivationDataAbstract>(Eigen::aligned_allocator<ActivationDataAbstract>(), this);
     data->Arr.diagonal().fill((Scalar)1.);
     return data;
   };

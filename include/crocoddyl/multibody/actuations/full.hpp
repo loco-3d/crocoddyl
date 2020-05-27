@@ -21,8 +21,8 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActuationModelAbstractTpl<Scalar> Base;
+  typedef ActuationDataAbstractTpl<Scalar> Data;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
-  typedef ActuationDataAbstractTpl<Scalar> ActuationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   explicit ActuationModelFullTpl(boost::shared_ptr<StateMultibody> state) : Base(state, state->get_nv()) {
@@ -33,9 +33,9 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
     }
   };
 
-  ~ActuationModelFullTpl(){};
+  virtual ~ActuationModelFullTpl(){};
 
-  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& /*x*/,
+  virtual void calc(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>& /*x*/,
                     const Eigen::Ref<const VectorXs>& u) {
     if (static_cast<std::size_t>(u.size()) != nu_) {
       throw_pretty("Invalid argument: "
@@ -44,15 +44,15 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
     data->tau = u;
   };
 
-  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& /*x*/,
+  virtual void calcDiff(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>& /*x*/,
                         const Eigen::Ref<const VectorXs>& /*u*/) {
     // The derivatives has constant values which were set in createData.
     assert_pretty(data->dtau_dx == MatrixXs::Zero(state_->get_nv(), state_->get_ndx()), "dtau_dx has wrong value");
     assert_pretty(data->dtau_du == MatrixXs::Identity(state_->get_nv(), nu_), "dtau_du has wrong value");
   };
 
-  virtual boost::shared_ptr<ActuationDataAbstract> createData() {
-    boost::shared_ptr<ActuationDataAbstract> data = boost::make_shared<ActuationDataAbstract>(this);
+  virtual boost::shared_ptr<Data> createData() {
+    boost::shared_ptr<Data> data = boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
     data->dtau_du.diagonal().fill((Scalar)1);
     return data;
   };

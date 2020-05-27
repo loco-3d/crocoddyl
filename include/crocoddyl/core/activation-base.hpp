@@ -26,18 +26,18 @@ class ActivationModelAbstractTpl {
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
+  typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   explicit ActivationModelAbstractTpl(const std::size_t& nr) : nr_(nr){};
   virtual ~ActivationModelAbstractTpl(){};
 
-  virtual void calc(const boost::shared_ptr<ActivationDataAbstractTpl<Scalar> >& data,
-                    const Eigen::Ref<const VectorXs>& r) = 0;
-  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstractTpl<Scalar> >& data,
+  virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) = 0;
+  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& r) = 0;
-  virtual boost::shared_ptr<ActivationDataAbstractTpl<Scalar> > createData() {
-    return boost::make_shared<ActivationDataAbstractTpl<Scalar> >(this);
+  virtual boost::shared_ptr<ActivationDataAbstract> createData() {
+    return boost::allocate_shared<ActivationDataAbstract>(Eigen::aligned_allocator<ActivationDataAbstract>(), this);
   };
 
   const std::size_t& get_nr() const { return nr_; };
@@ -54,17 +54,25 @@ struct ActivationDataAbstractTpl {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
+  typedef typename MathBase::DiagonalMatrixXs DiagonalMatrixXs;
 
   template <template <typename Scalar> class Activation>
   explicit ActivationDataAbstractTpl(Activation<Scalar>* const activation)
-      : a_value(0.),
-        Ar(VectorXs::Zero(activation->get_nr())),
-        Arr(MatrixXs::Zero(activation->get_nr(), activation->get_nr())) {}
+      : a_value(0.), Ar(VectorXs::Zero(activation->get_nr())), Arr(DiagonalMatrixXs(activation->get_nr())) {
+    Arr.setZero();
+  }
   virtual ~ActivationDataAbstractTpl() {}
 
   Scalar a_value;
   VectorXs Ar;
-  MatrixXs Arr;
+  DiagonalMatrixXs Arr;
+
+  static MatrixXs getHessianMatrix(const ActivationDataAbstractTpl<Scalar>& data) {
+    return data.Arr.diagonal().asDiagonal();
+  }
+  static void setHessianMatrix(ActivationDataAbstractTpl<Scalar>& data, const MatrixXs& Arr) {
+    data.Arr.diagonal() = Arr.diagonal();
+  }
 };
 
 }  // namespace crocoddyl

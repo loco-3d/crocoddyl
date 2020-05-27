@@ -35,7 +35,7 @@ BIB_DIR   		=.
 # --- OBJETS ----------------------------------
 # ---------------------------------------------
 
-OBJS	=	feasible_ddp
+OBJS	=	root
 OBJS2	=	
 
 BIB	=	biblio.bib

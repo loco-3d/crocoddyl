@@ -25,13 +25,13 @@ class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstract
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef DifferentialActionModelAbstractTpl<Scalar> Base;
+  typedef DifferentialActionDataNumDiffTpl<Scalar> Data;
   typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
-  typedef DifferentialActionDataNumDiffTpl<Scalar> DifferentialActionDataNumDiff;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   explicit DifferentialActionModelNumDiffTpl(boost::shared_ptr<Base> model, bool with_gauss_approx = false);
-  ~DifferentialActionModelNumDiffTpl();
+  virtual ~DifferentialActionModelNumDiffTpl();
 
   virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);

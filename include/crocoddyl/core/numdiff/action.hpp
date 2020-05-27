@@ -56,6 +56,7 @@ class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef ActionModelAbstractTpl<Scalar> Base;
+  typedef ActionDataNumDiffTpl<Scalar> Data;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
   typedef typename MathBaseTpl<Scalar>::MatrixXs MatrixXs;
@@ -70,7 +71,7 @@ class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
   /**
    * @brief Destroy the ActionModelNumDiff object
    */
-  ~ActionModelNumDiffTpl();
+  virtual ~ActionModelNumDiffTpl();
 
   /**
    * @brief @copydoc Base::calc()

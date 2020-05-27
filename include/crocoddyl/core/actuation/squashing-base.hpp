@@ -40,7 +40,7 @@ class SquashingModelAbstractTpl {
   virtual void calc(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const VectorXs>& s) = 0;
   virtual void calcDiff(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const VectorXs>& s) = 0;
   virtual boost::shared_ptr<SquashingDataAbstract> createData() {
-    return boost::make_shared<SquashingDataAbstract>(this);
+    return boost::allocate_shared<SquashingDataAbstract>(Eigen::aligned_allocator<SquashingDataAbstract>(), this);
   }
 
   const std::size_t& get_ns() const { return ns_; };

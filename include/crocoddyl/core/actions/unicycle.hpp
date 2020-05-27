@@ -19,24 +19,27 @@ namespace crocoddyl {
 template <typename _Scalar>
 class ActionModelUnicycleTpl : public ActionModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef _Scalar Scalar;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef ActionModelAbstractTpl<Scalar> Base;
+  typedef ActionDataUnicycleTpl<Scalar> Data;
   typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::Vector2s Vector2s;
 
   ActionModelUnicycleTpl();
-  ~ActionModelUnicycleTpl();
+  virtual ~ActionModelUnicycleTpl();
 
-  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data,
-                    const Eigen::Ref<const typename MathBase::VectorXs>& x,
-                    const Eigen::Ref<const typename MathBase::VectorXs>& u);
-  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
-                        const Eigen::Ref<const typename MathBase::VectorXs>& x,
-                        const Eigen::Ref<const typename MathBase::VectorXs>& u);
+  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
+  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                        const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<ActionDataAbstract> createData();
 
-  const typename MathBase::Vector2s& get_cost_weights() const;
-  void set_cost_weights(const typename MathBase::Vector2s& weights);
+  const Vector2s& get_cost_weights() const;
+  void set_cost_weights(const Vector2s& weights);
 
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits
@@ -48,7 +51,7 @@ class ActionModelUnicycleTpl : public ActionModelAbstractTpl<_Scalar> {
   using Base::unone_;               //!< Neutral state
 
  private:
-  typename MathBase::Vector2s cost_weights_;
+  Vector2s cost_weights_;
   Scalar dt_;
 };
 
@@ -71,7 +74,9 @@ struct ActionDataUnicycleTpl : public ActionDataAbstractTpl<_Scalar> {
   using Base::xnext;
 
   template <template <typename Scalar> class Model>
-  explicit ActionDataUnicycleTpl(Model<Scalar>* const model) : ActionDataAbstractTpl<Scalar>(model) {}
+  explicit ActionDataUnicycleTpl(Model<Scalar>* const model) : Base(model) {
+    Fx.diagonal().array() = Scalar(1.);
+  }
 };
 
 }  // namespace crocoddyl

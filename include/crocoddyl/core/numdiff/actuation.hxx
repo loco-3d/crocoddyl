@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, University of Edinburgh
+// Copyright (C) 2018-2020, University of Edinburgh, LAAS-CNRS
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,8 +31,7 @@ void ActuationModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ActuationDat
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-  boost::shared_ptr<ActuationDataNumDiffTpl<Scalar> > data_nd =
-      boost::static_pointer_cast<ActuationDataNumDiffTpl<Scalar> >(data);
+  boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
   model_->calc(data_nd->data_0, x, u);
   data->tau = data_nd->data_0->tau;
 }
@@ -49,8 +48,7 @@ void ActuationModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<Actuatio
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-  boost::shared_ptr<ActuationDataNumDiffTpl<Scalar> > data_nd =
-      boost::static_pointer_cast<ActuationDataNumDiffTpl<Scalar> >(data);
+  boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
 
   const VectorXs& tau0 = data_nd->data_0->tau;
 
@@ -76,7 +74,7 @@ void ActuationModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<Actuatio
 
 template <typename Scalar>
 boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > ActuationModelNumDiffTpl<Scalar>::createData() {
-  return boost::make_shared<ActuationDataNumDiffTpl<Scalar> >(this);
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>

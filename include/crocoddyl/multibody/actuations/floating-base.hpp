@@ -21,8 +21,8 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActuationModelAbstractTpl<Scalar> Base;
+  typedef ActuationDataAbstractTpl<Scalar> Data;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
-  typedef ActuationDataAbstractTpl<Scalar> ActuationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
@@ -33,9 +33,9 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
                    << "the first joint has to be free-flyer");
     }
   };
-  ~ActuationModelFloatingBaseTpl(){};
+  virtual ~ActuationModelFloatingBaseTpl(){};
 
-  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& /*x*/,
+  virtual void calc(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>& /*x*/,
                     const Eigen::Ref<const VectorXs>& u) {
     if (static_cast<std::size_t>(u.size()) != nu_) {
       throw_pretty("Invalid argument: "
@@ -44,23 +44,19 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
     data->tau.tail(nu_) = u;
   };
 
-  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& /*x*/,
+  virtual void calcDiff(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>& /*x*/,
                         const Eigen::Ref<const VectorXs>& /*u*/) {
     // The derivatives has constant values which were set in createData.
-#ifndef NDEBUG
     assert_pretty(data->dtau_dx == MatrixXs::Zero(state_->get_nv(), state_->get_ndx()), "dtau_dx has wrong value");
     assert_pretty(data->dtau_du == dtau_du_, "dtau_du has wrong value");
-#endif
   };
 
-  virtual boost::shared_ptr<ActuationDataAbstract> createData() {
-    boost::shared_ptr<ActuationDataAbstract> data = boost::make_shared<ActuationDataAbstract>(this);
+  virtual boost::shared_ptr<Data> createData() {
+    boost::shared_ptr<Data> data = boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
     data->dtau_du.diagonal(-6).fill((Scalar)1.);
-
 #ifndef NDEBUG
     dtau_du_ = data->dtau_du;
 #endif
-
     return data;
   };
 

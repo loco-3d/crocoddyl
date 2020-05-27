@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, University of Edinburgh
+// Copyright (C) 2018-2020, University of Edinburgh, LAAS-CNRS
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -23,6 +23,7 @@ class ContactModelNumDiffTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef ContactDataAbstractTpl<Scalar> ContactDataAbstract;
   typedef ContactModelAbstractTpl<Scalar> Base;
+  typedef ContactDataNumDiffTpl<Scalar> Data;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
   typedef boost::function<void(const typename MathBaseTpl<Scalar>::VectorXs&)> ReevaluationFunction;

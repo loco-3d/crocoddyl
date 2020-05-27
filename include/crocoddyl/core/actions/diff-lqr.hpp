@@ -23,14 +23,14 @@ class DifferentialActionModelLQRTpl : public DifferentialActionModelAbstractTpl<
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef DifferentialActionModelAbstractTpl<Scalar> Base;
+  typedef DifferentialActionDataLQRTpl<Scalar> Data;
   typedef StateVectorTpl<Scalar> StateVector;
   typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
-  typedef DifferentialActionDataLQRTpl<Scalar> DifferentialActionDataLQR;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   DifferentialActionModelLQRTpl(const std::size_t& nq, const std::size_t& nu, bool drift_free = true);
-  ~DifferentialActionModelLQRTpl();
+  virtual ~DifferentialActionModelLQRTpl();
 
   virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);

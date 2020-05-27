@@ -24,10 +24,10 @@ IntegratedActionModelEulerTpl<Scalar>::IntegratedActionModelEulerTpl(
       enable_integration_(true) {
   Base::set_u_lb(differential_->get_u_lb());
   Base::set_u_ub(differential_->get_u_ub());
-  if (time_step_ < 0.) {
-    time_step_ = 1e-3;
+  if (time_step_ < Scalar(0.)) {
+    time_step_ = Scalar(1e-3);
     time_step2_ = time_step_ * time_step_;
-    std::cerr << "Warning: dt has positive value, set to 1e-3" << std::endl;
+    std::cerr << "Warning: dt should be positive, set to 1e-3" << std::endl;
   }
   if (time_step == 0.) {
     enable_integration_ = false;
@@ -50,8 +50,10 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionD
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
+  const std::size_t& nv = differential_->get_state()->get_nv();
+
   // Static casting the data
-  boost::shared_ptr<IntegratedActionDataEuler> d = boost::static_pointer_cast<IntegratedActionDataEuler>(data);
+  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
   // Computing the acceleration and cost
   differential_->calc(d->differential, x, u);
@@ -61,7 +63,8 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionD
       x.tail(differential_->get_state()->get_nv());
   const VectorXs& a = d->differential->xout;
   if (enable_integration_) {
-    d->dx << v * time_step_ + a * time_step2_, a * time_step_;
+    d->dx.head(nv).noalias() = v * time_step_ + a * time_step2_;
+    d->dx.tail(nv).noalias() = a * time_step_;
     differential_->get_state()->integrate(x, d->dx, d->xnext);
     d->cost = time_step_ * d->differential->cost;
   } else {
@@ -92,29 +95,32 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
   const std::size_t& nv = differential_->get_state()->get_nv();
 
   // Static casting the data
-  boost::shared_ptr<IntegratedActionDataEuler> d = boost::static_pointer_cast<IntegratedActionDataEuler>(data);
+  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
   // Computing the derivatives for the time-continuous model (i.e. differential model)
   differential_->calcDiff(d->differential, x, u);
-  differential_->get_state()->Jintegrate(x, d->dx, d->dxnext_dx, d->dxnext_ddx);
 
-  d->Fx = d->dxnext_dx;
   if (enable_integration_) {
     const MatrixXs& da_dx = d->differential->Fx;
     const MatrixXs& da_du = d->differential->Fu;
-    d->ddx_dx << da_dx * time_step_, da_dx;
-    d->ddx_du << da_du * time_step_, da_du;
-    for (std::size_t i = 0; i < nv; ++i) {
-      d->ddx_dx(i, i + nv) += 1.;
-    }
-    d->Fx.noalias() += time_step_ * (d->dxnext_ddx * d->ddx_dx);
-    d->Fu.noalias() = time_step_ * (d->dxnext_ddx * d->ddx_du);
-    d->Lx = time_step_ * d->differential->Lx;
-    d->Lu = time_step_ * d->differential->Lu;
-    d->Lxx = time_step_ * d->differential->Lxx;
-    d->Lxu = time_step_ * d->differential->Lxu;
-    d->Luu = time_step_ * d->differential->Luu;
+    d->Fx.topRows(nv).noalias() = da_dx * time_step2_;
+    d->Fx.bottomRows(nv).noalias() = da_dx * time_step_;
+    d->Fx.topRightCorner(nv, nv).diagonal().array() += Scalar(time_step_);
+
+    d->Fu.topRows(nv).noalias() = da_du * time_step2_;
+    d->Fu.bottomRows(nv).noalias() = da_du * time_step_;
+
+    differential_->get_state()->JintegrateTransport(x, d->dx, d->Fx, second);
+    differential_->get_state()->Jintegrate(x, d->dx, d->Fx, d->Fx, first, addto);
+    differential_->get_state()->JintegrateTransport(x, d->dx, d->Fu, second);
+
+    d->Lx.noalias() = time_step_ * d->differential->Lx;
+    d->Lu.noalias() = time_step_ * d->differential->Lu;
+    d->Lxx.noalias() = time_step_ * d->differential->Lxx;
+    d->Lxu.noalias() = time_step_ * d->differential->Lxu;
+    d->Luu.noalias() = time_step_ * d->differential->Luu;
   } else {
+    differential_->get_state()->Jintegrate(x, d->dx, d->Fx, d->Fx);
     d->Fu.setZero();
     d->Lx = d->differential->Lx;
     d->Lu = d->differential->Lu;
@@ -126,7 +132,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
 
 template <typename Scalar>
 boost::shared_ptr<ActionDataAbstractTpl<Scalar> > IntegratedActionModelEulerTpl<Scalar>::createData() {
-  return boost::make_shared<IntegratedActionDataEuler>(this);
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>

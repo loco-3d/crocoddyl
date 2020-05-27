@@ -24,12 +24,18 @@ void ImpulseModelMultipleTpl<Scalar>::addImpulse(const std::string& name,
   std::pair<typename ImpulseModelContainer::iterator, bool> ret =
       impulses_.insert(std::make_pair(name, boost::make_shared<ImpulseItem>(name, impulse, active)));
   if (ret.second == false) {
-    std::cout << "Warning: this impulse item already existed, we cannot add it" << std::endl;
+    std::cout << "Warning: we couldn't add the " << name << " impulse item, it already existed." << std::endl;
   } else if (active) {
     ni_ += impulse->get_ni();
     ni_total_ += impulse->get_ni();
+    std::vector<std::string>::iterator it =
+        std::lower_bound(active_.begin(), active_.end(), name, std::greater<std::string>());
+    active_.insert(it, name);
   } else if (!active) {
     ni_total_ += impulse->get_ni();
+    std::vector<std::string>::iterator it =
+        std::lower_bound(inactive_.begin(), inactive_.end(), name, std::greater<std::string>());
+    inactive_.insert(it, name);
   }
 }
 
@@ -40,8 +46,10 @@ void ImpulseModelMultipleTpl<Scalar>::removeImpulse(const std::string& name) {
     ni_ -= it->second->impulse->get_ni();
     ni_total_ -= it->second->impulse->get_ni();
     impulses_.erase(it);
+    active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
+    inactive_.erase(std::remove(inactive_.begin(), inactive_.end(), name), inactive_.end());
   } else {
-    std::cout << "Warning: this impulse item doesn't exist, we cannot remove it" << std::endl;
+    std::cout << "Warning: we couldn't remove the " << name << " impulse item, it doesn't exist." << std::endl;
   }
 }
 
@@ -51,12 +59,21 @@ void ImpulseModelMultipleTpl<Scalar>::changeImpulseStatus(const std::string& nam
   if (it != impulses_.end()) {
     if (active && !it->second->active) {
       ni_ += it->second->impulse->get_ni();
+      std::vector<std::string>::iterator it =
+          std::lower_bound(active_.begin(), active_.end(), name, std::greater<std::string>());
+      active_.insert(it, name);
+      inactive_.erase(std::remove(inactive_.begin(), inactive_.end(), name), inactive_.end());
     } else if (!active && it->second->active) {
       ni_ -= it->second->impulse->get_ni();
+      active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
+      std::vector<std::string>::iterator it =
+          std::lower_bound(inactive_.begin(), inactive_.end(), name, std::greater<std::string>());
+      inactive_.insert(it, name);
     }
     it->second->active = active;
   } else {
-    std::cout << "Warning: this impulse item doesn't exist, we cannot change its status" << std::endl;
+    std::cout << "Warning: we couldn't change the status of the " << name << " impulse item, it doesn't exist."
+              << std::endl;
   }
 }
 
@@ -67,8 +84,8 @@ void ImpulseModelMultipleTpl<Scalar>::calc(const boost::shared_ptr<ImpulseDataMu
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of impulse datas and models");
   }
-  std::size_t ni = 0;
 
+  std::size_t ni = 0;
   const std::size_t& nv = state_->get_nv();
   typename ImpulseModelContainer::iterator it_m, end_m;
   typename ImpulseDataContainer::iterator it_d, end_d;
@@ -77,7 +94,8 @@ void ImpulseModelMultipleTpl<Scalar>::calc(const boost::shared_ptr<ImpulseDataMu
     const boost::shared_ptr<ImpulseItem>& m_i = it_m->second;
     if (m_i->active) {
       const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
-      assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between data and model");
+      assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between model and data ("
+                                                    << it_m->first << " != " << it_d->first << ")");
 
       m_i->impulse->calc(d_i, x);
       const std::size_t& ni_i = m_i->impulse->get_ni();
@@ -94,8 +112,8 @@ void ImpulseModelMultipleTpl<Scalar>::calcDiff(const boost::shared_ptr<ImpulseDa
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of impulse datas and models");
   }
-  std::size_t ni = 0;
 
+  std::size_t ni = 0;
   const std::size_t& nv = state_->get_nv();
   typename ImpulseModelContainer::iterator it_m, end_m;
   typename ImpulseDataContainer::iterator it_d, end_d;
@@ -104,7 +122,8 @@ void ImpulseModelMultipleTpl<Scalar>::calcDiff(const boost::shared_ptr<ImpulseDa
     const boost::shared_ptr<ImpulseItem>& m_i = it_m->second;
     if (m_i->active) {
       const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
-      assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between data and model");
+      assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between model and data ("
+                                                    << it_m->first << " != " << it_d->first << ")");
 
       m_i->impulse->calcDiff(d_i, x);
       const std::size_t& ni_i = m_i->impulse->get_ni();
@@ -135,12 +154,12 @@ void ImpulseModelMultipleTpl<Scalar>::updateForce(const boost::shared_ptr<Impuls
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of impulse datas and models");
   }
-  std::size_t ni = 0;
 
   for (ForceIterator it = data->fext.begin(); it != data->fext.end(); ++it) {
     *it = pinocchio::ForceTpl<Scalar>::Zero();
   }
 
+  std::size_t ni = 0;
   typename ImpulseModelContainer::iterator it_m, end_m;
   typename ImpulseDataContainer::iterator it_d, end_d;
   for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
@@ -173,18 +192,19 @@ void ImpulseModelMultipleTpl<Scalar>::updateVelocityDiff(const boost::shared_ptr
 
 template <typename Scalar>
 void ImpulseModelMultipleTpl<Scalar>::updateForceDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
-                                                      const MatrixXs& df_dq) const {
-  const std::size_t& nv = state_->get_nv();
-  if (static_cast<std::size_t>(df_dq.rows()) != ni_ || static_cast<std::size_t>(df_dq.cols()) != nv) {
+                                                      const MatrixXs& df_dx) const {
+  const std::size_t& ndx = state_->get_ndx();
+  if (static_cast<std::size_t>(df_dx.rows()) != ni_ || static_cast<std::size_t>(df_dx.cols()) != ndx) {
     throw_pretty("Invalid argument: "
-                 << "df_dq has wrong dimension (it should be " + std::to_string(ni_) + "," + std::to_string(nv) + ")");
+                 << "df_dx has wrong dimension (it should be " + std::to_string(ni_) + "," + std::to_string(ndx) +
+                        ")");
   }
   if (static_cast<std::size_t>(data->impulses.size()) != impulses_.size()) {
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of impulse datas and models");
   }
-  std::size_t ni = 0;
 
+  std::size_t ni = 0;
   typename ImpulseModelContainer::const_iterator it_m, end_m;
   typename ImpulseDataContainer::const_iterator it_d, end_d;
   for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
@@ -195,8 +215,8 @@ void ImpulseModelMultipleTpl<Scalar>::updateForceDiff(const boost::shared_ptr<Im
       assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between data and model");
 
       const std::size_t& ni_i = m_i->impulse->get_ni();
-      const Eigen::Block<const MatrixXs> df_dq_i = df_dq.block(ni, 0, ni_i, nv);
-      m_i->impulse->updateForceDiff(d_i, df_dq_i);
+      const Eigen::Block<const MatrixXs> df_dx_i = df_dx.block(ni, 0, ni_i, ndx);
+      m_i->impulse->updateForceDiff(d_i, df_dx_i);
       ni += ni_i;
     }
   }
@@ -205,7 +225,7 @@ void ImpulseModelMultipleTpl<Scalar>::updateForceDiff(const boost::shared_ptr<Im
 template <typename Scalar>
 boost::shared_ptr<ImpulseDataMultipleTpl<Scalar> > ImpulseModelMultipleTpl<Scalar>::createData(
     pinocchio::DataTpl<Scalar>* const data) {
-  return boost::make_shared<ImpulseDataMultiple>(this, data);
+  return boost::allocate_shared<ImpulseDataMultiple>(Eigen::aligned_allocator<ImpulseDataMultiple>(), this, data);
 }
 
 template <typename Scalar>
@@ -227,6 +247,28 @@ const std::size_t& ImpulseModelMultipleTpl<Scalar>::get_ni() const {
 template <typename Scalar>
 const std::size_t& ImpulseModelMultipleTpl<Scalar>::get_ni_total() const {
   return ni_total_;
+}
+
+template <typename Scalar>
+const std::vector<std::string>& ImpulseModelMultipleTpl<Scalar>::get_active() const {
+  return active_;
+}
+
+template <typename Scalar>
+const std::vector<std::string>& ImpulseModelMultipleTpl<Scalar>::get_inactive() const {
+  return inactive_;
+}
+
+template <typename Scalar>
+bool ImpulseModelMultipleTpl<Scalar>::getImpulseStatus(const std::string& name) const {
+  typename ImpulseModelContainer::const_iterator it = impulses_.find(name);
+  if (it != impulses_.end()) {
+    return it->second->active;
+  } else {
+    std::cout << "Warning: we couldn't get the status of the " << name << " impulse item, it doesn't exist."
+              << std::endl;
+    return false;
+  }
 }
 
 }  // namespace crocoddyl

@@ -32,8 +32,7 @@ void ActionModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstr
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-  boost::shared_ptr<ActionDataNumDiffTpl<Scalar> > data_nd =
-      boost::static_pointer_cast<ActionDataNumDiffTpl<Scalar> >(data);
+  boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
   model_->calc(data_nd->data_0, x, u);
   data->cost = data_nd->data_0->cost;
   data->xnext = data_nd->data_0->xnext;
@@ -51,8 +50,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-  boost::shared_ptr<ActionDataNumDiffTpl<Scalar> > data_nd =
-      boost::static_pointer_cast<ActionDataNumDiffTpl<Scalar> >(data);
+  boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
 
   const VectorXs& xn0 = data_nd->data_0->xnext;
   const Scalar& c0 = data_nd->data_0->cost;
@@ -111,7 +109,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
 
 template <typename Scalar>
 boost::shared_ptr<ActionDataAbstractTpl<Scalar> > ActionModelNumDiffTpl<Scalar>::createData() {
-  return boost::make_shared<ActionDataNumDiffTpl<Scalar> >(this);
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>

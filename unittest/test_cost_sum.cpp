@@ -76,7 +76,7 @@ void test_addCost_error_message(StateModelTypes::Type state_type) {
   model.addCost("random_cost", rand_cost, 1.);
   capture_ios.endCapture();
   std::stringstream expected_buffer;
-  expected_buffer << "Warning: this cost item already existed, we cannot add it" << std::endl;
+  expected_buffer << "Warning: we couldn't add the random_cost cost item, it already existed." << std::endl;
   BOOST_CHECK(capture_ios.str() == expected_buffer.str());
 
   // test error message when we change the cost status of an inexistent cost
@@ -84,7 +84,8 @@ void test_addCost_error_message(StateModelTypes::Type state_type) {
   model.changeCostStatus("no_exist_cost", true);
   capture_ios.endCapture();
   expected_buffer.clear();
-  expected_buffer << "Warning: this cost item doesn't exist, we cannot change its status" << std::endl;
+  expected_buffer << "Warning: we couldn't change the status of the no_exist_cost cost item, it doesn't exist."
+                  << std::endl;
   BOOST_CHECK(capture_ios.str() == expected_buffer.str());
 }
 
@@ -119,7 +120,7 @@ void test_removeCost_error_message(StateModelTypes::Type state_type) {
 
   // Test that the error message is sent.
   std::stringstream expected_buffer;
-  expected_buffer << "Warning: this cost item doesn't exist, we cannot remove it" << std::endl;
+  expected_buffer << "Warning: we couldn't remove the random_cost cost item, it doesn't exist." << std::endl;
   BOOST_CHECK(capture_ios.str() == expected_buffer.str());
 }
 

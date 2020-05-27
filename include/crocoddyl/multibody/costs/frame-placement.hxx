@@ -51,7 +51,7 @@ CostModelFramePlacementTpl<Scalar>::~CostModelFramePlacementTpl() {}
 template <typename Scalar>
 void CostModelFramePlacementTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
                                               const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
-  CostDataFramePlacementTpl<Scalar>* d = static_cast<CostDataFramePlacementTpl<Scalar>*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
 
   // Compute the frame placement w.r.t. the reference frame
   pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, Mref_.frame);
@@ -69,7 +69,7 @@ void CostModelFramePlacementTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDa
                                                   const Eigen::Ref<const VectorXs>&,
                                                   const Eigen::Ref<const VectorXs>&) {
   // Update the frame placements
-  CostDataFramePlacementTpl<Scalar>* d = static_cast<CostDataFramePlacementTpl<Scalar>*>(data.get());
+  Data* d = static_cast<Data*>(data.get());
 
   // Compute the frame Jacobian at the error point
   pinocchio::Jlog6(d->rMf, d->rJf);
@@ -88,13 +88,14 @@ void CostModelFramePlacementTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDa
 template <typename Scalar>
 boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelFramePlacementTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::make_shared<CostDataFramePlacementTpl<Scalar> >(this, data);
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
 }
 
 template <typename Scalar>
 void CostModelFramePlacementTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(FramePlacement)) {
     Mref_ = *static_cast<const FramePlacement*>(pv);
+    oMf_inv_ = Mref_.oMf.inverse();
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FramePlacement)");
   }

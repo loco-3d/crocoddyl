@@ -25,6 +25,7 @@ class CostModelFrameVelocityTpl : public CostModelAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostModelAbstractTpl<Scalar> Base;
+  typedef CostDataFrameVelocityTpl<Scalar> Data;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
@@ -41,7 +42,7 @@ class CostModelFrameVelocityTpl : public CostModelAbstractTpl<_Scalar> {
                             boost::shared_ptr<ActivationModelAbstract> activation, const FrameMotion& Fref);
   CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state, const FrameMotion& vref, const std::size_t& nu);
   CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state, const FrameMotion& vref);
-  ~CostModelFrameVelocityTpl();
+  virtual ~CostModelFrameVelocityTpl();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);

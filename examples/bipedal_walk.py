@@ -11,8 +11,6 @@ from crocoddyl.utils.biped import SimpleBipedGaitProblem, plotSolution
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
-crocoddyl.switchToNumpyMatrix()
-
 # Creating the lower-body part of Talos
 talos_legs = example_robot_data.loadTalosLegs()
 
@@ -88,7 +86,7 @@ if WITHPLOT:
     plotSolution(ddp, bounds=False, figIndex=1, show=False)
 
     for i, phase in enumerate(GAITPHASES):
-        title = phase.keys()[0] + " (phase " + str(i) + ")"
+        title = list(phase.keys())[0] + " (phase " + str(i) + ")"
         log = ddp[i].getCallbacks()[0]
         crocoddyl.plotConvergence(log.costs,
                                   log.u_regs,

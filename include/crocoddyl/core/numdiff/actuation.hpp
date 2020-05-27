@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, University of Edinburgh
+// Copyright (C) 2018-2020, University of Edinburgh, LAAS-CNRS
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -23,6 +23,7 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActuationModelAbstractTpl<Scalar> Base;
+  typedef ActuationDataNumDiffTpl<Scalar> Data;
   typedef ActuationDataAbstractTpl<Scalar> ActuationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
@@ -37,7 +38,7 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
   /**
    * @brief Destroy the ActuationModelNumDiff object
    */
-  ~ActuationModelNumDiffTpl();
+  virtual ~ActuationModelNumDiffTpl();
 
   /**
    * @brief @copydoc Base::calc()

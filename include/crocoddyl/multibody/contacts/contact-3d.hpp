@@ -29,9 +29,9 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ContactModelAbstractTpl<Scalar> Base;
+  typedef ContactData3DTpl<Scalar> Data;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ContactDataAbstractTpl<Scalar> ContactDataAbstract;
-  typedef ContactData3DTpl<Scalar> ContactData3D;
   typedef FrameTranslationTpl<Scalar> FrameTranslation;
   typedef typename MathBase::Vector2s Vector2s;
   typedef typename MathBase::Vector3s Vector3s;
@@ -42,7 +42,7 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
                     const Vector2s& gains = Vector2s::Zero());
   ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
                     const Vector2s& gains = Vector2s::Zero());
-  ~ContactModel3DTpl();
+  virtual ~ContactModel3DTpl();
 
   virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
   virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);

@@ -23,13 +23,14 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef ActionModelAbstractTpl<Scalar> Base;
+  typedef ActionDataLQRTpl<Scalar> Data;
   typedef StateVectorTpl<Scalar> StateVector;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   ActionModelLQRTpl(const std::size_t& nx, const std::size_t& nu, bool drift_free = true);
-  ~ActionModelLQRTpl();
+  virtual ~ActionModelLQRTpl();
 
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);

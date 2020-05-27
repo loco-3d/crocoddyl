@@ -28,8 +28,8 @@ class CostModelAbstractTpl {
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
-  typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
+  typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
   typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
@@ -87,7 +87,7 @@ struct CostDataAbstractTpl {
   CostDataAbstractTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : shared(data),
         activation(model->get_activation()->createData()),
-        cost(0.),
+        cost(Scalar(0.)),
         Lx(model->get_state()->get_ndx()),
         Lu(model->get_nu()),
         Lxx(model->get_state()->get_ndx(), model->get_state()->get_ndx()),

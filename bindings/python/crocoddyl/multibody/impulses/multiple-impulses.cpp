@@ -91,11 +91,10 @@ void exposeImpulseMultiple() {
            "Update the velocity after impulse.\n\n"
            ":param data: impulse data\n"
            ":param dvnext_dx: Jacobian of the impulse velocity (dimension nv*ndx)")
-      .def("updateForceDiff", &ImpulseModelMultiple::updateForceDiff, bp::args("self", "data", "df_dq"),
+      .def("updateForceDiff", &ImpulseModelMultiple::updateForceDiff, bp::args("self", "data", "df_dx"),
            "Update the Jacobian of the impulse force.\n\n"
-           "The Jacobian df_dv is zero, then we ignore it\n"
            ":param data: impulse data\n"
-           ":param df_dq: Jacobian of the impulse force (dimension ni*nv)")
+           ":param df_dx: Jacobian of the impulse force (dimension ni*ndx)")
       .def("createData", &ImpulseModelMultiple::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the total impulse data.\n\n"
@@ -114,7 +113,18 @@ void exposeImpulseMultiple() {
       .add_property(
           "ni_total",
           bp::make_function(&ImpulseModelMultiple::get_ni_total, bp::return_value_policy<bp::return_by_value>()),
-          "dimension of the total impulse vector");
+          "dimension of the total impulse vector")
+      .add_property(
+          "active",
+          bp::make_function(&ImpulseModelMultiple::get_active, bp::return_value_policy<bp::return_by_value>()),
+          "name of active impulse items")
+      .add_property(
+          "inactive",
+          bp::make_function(&ImpulseModelMultiple::get_inactive, bp::return_value_policy<bp::return_by_value>()),
+          "name of inactive impulse items")
+      .def("getImpulseStatus", &ImpulseModelMultiple::getImpulseStatus, bp::args("self", "name"),
+           "Return the impulse status of a given impulse name.\n\n"
+           ":param name: impulse name");
 
   bp::register_ptr_to_python<boost::shared_ptr<ImpulseDataMultiple> >();
 

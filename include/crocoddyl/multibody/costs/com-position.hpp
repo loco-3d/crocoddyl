@@ -24,6 +24,7 @@ class CostModelCoMPositionTpl : public CostModelAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostModelAbstractTpl<Scalar> Base;
+  typedef CostDataCoMPositionTpl<Scalar> Data;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
@@ -40,7 +41,7 @@ class CostModelCoMPositionTpl : public CostModelAbstractTpl<_Scalar> {
                           boost::shared_ptr<ActivationModelAbstract> activation, const Vector3s& cref);
   CostModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state, const Vector3s& cref, const std::size_t& nu);
   CostModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state, const Vector3s& cref);
-  ~CostModelCoMPositionTpl();
+  virtual ~CostModelCoMPositionTpl();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);

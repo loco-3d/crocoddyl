@@ -25,6 +25,7 @@ class CostModelFrameRotationTpl : public CostModelAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostModelAbstractTpl<Scalar> Base;
+  typedef CostDataFrameRotationTpl<Scalar> Data;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
@@ -41,7 +42,7 @@ class CostModelFrameRotationTpl : public CostModelAbstractTpl<_Scalar> {
                             boost::shared_ptr<ActivationModelAbstract> activation, const FrameRotation& Fref);
   CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state, const FrameRotation& Fref, const std::size_t& nu);
   CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state, const FrameRotation& Fref);
-  ~CostModelFrameRotationTpl();
+  virtual ~CostModelFrameRotationTpl();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
@@ -74,7 +75,6 @@ struct CostDataFrameRotationTpl : public CostDataAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::Matrix3s Matrix3s;
   typedef typename MathBase::VectorXs VectorXs;

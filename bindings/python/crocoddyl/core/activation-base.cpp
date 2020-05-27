@@ -53,8 +53,8 @@ void exposeActivationAbstract() {
                     bp::make_setter(&ActivationDataAbstract::a_value), "cost value")
       .add_property("Ar", bp::make_getter(&ActivationDataAbstract::Ar, bp::return_internal_reference<>()),
                     bp::make_setter(&ActivationDataAbstract::Ar), "Jacobian of the residual")
-      .add_property("Arr", bp::make_getter(&ActivationDataAbstract::Arr, bp::return_internal_reference<>()),
-                    bp::make_setter(&ActivationDataAbstract::Arr), "Hessian of the residual");
+      .add_property("Arr", &ActivationDataAbstract::getHessianMatrix, &ActivationDataAbstract::setHessianMatrix,
+                    "Hessian of the residual");
 }
 
 }  // namespace python

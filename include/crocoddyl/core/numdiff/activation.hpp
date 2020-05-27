@@ -26,6 +26,7 @@ class ActivationModelNumDiffTpl : public ActivationModelAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActivationModelAbstractTpl<Scalar> Base;
+  typedef ActivationDataNumDiffTpl<Scalar> Data;
   typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
@@ -40,7 +41,7 @@ class ActivationModelNumDiffTpl : public ActivationModelAbstractTpl<_Scalar> {
   /**
    * @brief Destroy the ActivationModelNumDiff object
    */
-  ~ActivationModelNumDiffTpl();
+  virtual ~ActivationModelNumDiffTpl();
 
   /**
    * @brief @copydoc Base::calc()
@@ -104,6 +105,7 @@ struct ActivationDataNumDiffTpl : public ActivationDataAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef ActivationDataAbstractTpl<Scalar> Base;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
    * @brief Construct a new ActivationDataNumDiff object
@@ -113,9 +115,10 @@ struct ActivationDataNumDiffTpl : public ActivationDataAbstractTpl<_Scalar> {
    */
   template <template <typename Scalar> class Model>
   explicit ActivationDataNumDiffTpl(Model<Scalar>* const model)
-      : Base(model), dr(model->get_model()->get_nr()), rp(model->get_model()->get_nr()) {
+      : Base(model), dr(model->get_model()->get_nr()), rp(model->get_model()->get_nr()), Arr_(Arr.rows(), Arr.cols()) {
     dr.setZero();
     rp.setZero();
+    Arr_.setZero();
     data_0 = model->get_model()->createData();
     const std::size_t& nr = model->get_model()->get_nr();
     data_rp.clear();
@@ -135,6 +138,7 @@ struct ActivationDataNumDiffTpl : public ActivationDataAbstractTpl<_Scalar> {
   std::vector<boost::shared_ptr<Base> > data_rp;   //!< The temporary data associated with the input variation
   std::vector<boost::shared_ptr<Base> > data_r2p;  //!< The temporary data associated with the input variation
 
+  MatrixXs Arr_;
   using Base::a_value;
   using Base::Ar;
   using Base::Arr;
