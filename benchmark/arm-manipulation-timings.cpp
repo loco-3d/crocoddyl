@@ -123,7 +123,8 @@ int main(int argc, char* argv[]) {
 
   /********************************************************************/
 
-  double duration = 0;
+  Eigen::ArrayXd duration(T);
+
   PINOCCHIO_ALIGNED_STD_VECTOR(Eigen::VectorXd) x1s;  // (T, state->rand());
   PINOCCHIO_ALIGNED_STD_VECTOR(Eigen::VectorXd) x2s;  // (T, state->rand());
   PINOCCHIO_ALIGNED_STD_VECTOR(Eigen::VectorXd) us;   // (T, state->rand());
@@ -136,211 +137,313 @@ int main(int argc, char* argv[]) {
   }
 
   /*********************State**********************************/
+  std::cout << "Function call: \t\t\t\t"
+            << "AVG(in us)\t"
+            << "STDDEV(in us)\t"
+            << "MAX(in us)\t"
+            << "MIN(in us)" << std::endl;
 
-  duration = 0;
-  timer.reset();
+  duration.setZero();
   SMOOTH(T) {
+    timer.reset();
     pinocchio::difference(model, x1s[_smooth].head(model.nq), x2s[_smooth].head(model.nq),
                           dxs[_smooth].head(model.nv));
+    duration[_smooth] = timer.get_us_duration();
   }
-  duration = timer.get_us_duration();
-  std::cout << "pinocchio::difference (in us):\t\t\t" << duration / T << " us" << std::endl;
+  std::cout << "pinocchio::difference :\t\t\t" << AVG(duration)<<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
 
-  duration = 0;
-  timer.reset();
+  duration.setZero();
   SMOOTH(T) {
+    timer.reset();
     pinocchio::integrate(model, x1s[_smooth].head(model.nq), dxs[_smooth].head(model.nv), x2s[_smooth].head(model.nq));
+    duration[_smooth] = timer.get_us_duration();
   }
-  duration = timer.get_us_duration();
-  std::cout << "pinocchio::integrate (in us):\t\t\t" << duration / T << " us" << std::endl;
+  std::cout << "pinocchio::integrate :\t\t\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { state->diff(x1s[_smooth], x2s[_smooth], dxs[_smooth]); }
-  duration = timer.get_us_duration();
-  std::cout << "StateMultibody.diff (in us):\t\t\t" << duration / T << " us" << std::endl;
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    state->diff(x1s[_smooth], x2s[_smooth], dxs[_smooth]);
+    duration[_smooth] = timer.get_us_duration();
+  }
+  std::cout << "StateMultibody.diff :\t\t\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { state->integrate(x1s[_smooth], dxs[_smooth], x2s[_smooth]); }
-  duration = timer.get_us_duration();
-  std::cout << "StateMultibody.integrate (in us):\t\t" << duration / T << " us" << std::endl;
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    state->integrate(x1s[_smooth], dxs[_smooth], x2s[_smooth]);
+    duration[_smooth] = timer.get_us_duration();
+  }
+  std::cout << "StateMultibody.integrate :\t\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
 
   Eigen::MatrixXd Jfirst(2 * model.nv, 2 * model.nv), Jsecond(2 * model.nv, 2 * model.nv);
 
-  duration = 0;
-  timer.reset();
+  duration.setZero();
   SMOOTH(T) {
+    timer.reset();
     pinocchio::dIntegrate(model, x1s[_smooth].head(model.nq), dxs[_smooth].head(model.nv),
                           Jsecond.bottomLeftCorner(model.nv, model.nv), pinocchio::ARG1);
+    duration[_smooth] = timer.get_us_duration();
   }
-  duration = timer.get_us_duration();
-  std::cout << "pinocchio::dIntegrate ARG1 (in us):\t\t" << duration / T << " us" << std::endl;
+  std::cout << "pinocchio::dIntegrate ARG1 :\t\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
 
-  duration = 0;
-  timer.reset();
+  duration.setZero();
   SMOOTH(T) {
+    timer.reset();
     pinocchio::dIntegrate(model, x1s[_smooth].head(model.nq), dxs[_smooth].head(model.nv),
                           Jsecond.bottomLeftCorner(model.nv, model.nv), pinocchio::ARG0);
+    duration[_smooth] = timer.get_us_duration();
   }
-  duration = timer.get_us_duration();
-  std::cout << "pinocchio::dIntegrate ARG0 (in us):\t\t" << duration / T << " us" << std::endl;
+  std::cout << "pinocchio::dIntegrate ARG0 :\t\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
 
-  duration = 0;
-  timer.reset();
+  duration.setZero();
   Eigen::MatrixXd Jin(Eigen::MatrixXd::Random(model.nv, 2 * model.nv));
   SMOOTH(T) {
+    timer.reset();
     pinocchio::dIntegrateTransport(model, x1s[_smooth].head(model.nq), dxs[_smooth].head(model.nv), Jin,
                                    pinocchio::ARG0);
+    duration[_smooth] = timer.get_us_duration();
   }
-  duration = timer.get_us_duration();
-  std::cout << "pin::dIntegrateTransport with aliasing(in us):\t" << duration / T << " us" << std::endl;
+  std::cout << "pin::dIntegrateTransport with aliasing:\t" << AVG(duration) <<" us\t" << STDDEV(duration)
+            << " us\t" << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
 
-  duration = 0;
-  timer.reset();
+  duration.setZero();
   Jin = Eigen::MatrixXd::Random(model.nv, 2 * model.nv);
   Eigen::MatrixXd Jout(Eigen::MatrixXd::Random(model.nv, 2 * model.nv));
   SMOOTH(T) {
+    timer.reset();
     pinocchio::dIntegrateTransport(model, x1s[_smooth].head(model.nq), dxs[_smooth].head(model.nv), Jin, Jout,
                                    pinocchio::ARG0);
+    duration[_smooth] = timer.get_us_duration();
   }
-  duration = timer.get_us_duration();
-  std::cout << "pin::dIntegrateTransport w/o aliasing(in us):\t" << duration / T << " us" << std::endl;
+  std::cout << "pin::dIntegrateTransport w/o aliasing:\t" << AVG(duration) <<" us\t" << STDDEV(duration)
+            << " us\t" << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { state->Jdiff(x1s[_smooth], x2s[_smooth], Jfirst, Jsecond, crocoddyl::both); }
-  duration = timer.get_us_duration();
-  std::cout << "StateMultibody.Jdiff both (in us):\t\t" << duration / T << " us" << std::endl;
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    state->Jdiff(x1s[_smooth], x2s[_smooth], Jfirst, Jsecond, crocoddyl::both);
+    duration[_smooth] = timer.get_us_duration();
+  }
+  std::cout << "StateMultibody.Jdiff both :\t\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { state->Jdiff(x1s[_smooth], x2s[_smooth], Jfirst, Jsecond, crocoddyl::first); }
-  duration = timer.get_us_duration();
-  std::cout << "StateMultibody.Jdiff first (in us):\t\t" << duration / T << " us" << std::endl;
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    state->Jdiff(x1s[_smooth], x2s[_smooth], Jfirst, Jsecond, crocoddyl::first);
+    duration[_smooth] = timer.get_us_duration();
+  }
+  std::cout << "StateMultibody.Jdiff first :\t\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { state->Jdiff(x1s[_smooth], x2s[_smooth], Jfirst, Jsecond, crocoddyl::second); }
-  duration = timer.get_us_duration();
-  std::cout << "StateMultibody.Jdiff second (in us):\t\t" << duration / T << " us" << std::endl;
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    state->Jdiff(x1s[_smooth], x2s[_smooth], Jfirst, Jsecond, crocoddyl::second);
+    duration[_smooth] = timer.get_us_duration();
+  }
+  std::cout << "StateMultibody.Jdiff second :\t\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { state->Jintegrate(x1s[_smooth], dxs[_smooth], Jfirst, Jsecond, crocoddyl::both); }
-  duration = timer.get_us_duration();
-  std::cout << "StateMultibody.Jintegrate both (in us):\t\t" << duration / T << " us" << std::endl;
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    state->Jintegrate(x1s[_smooth], dxs[_smooth], Jfirst, Jsecond, crocoddyl::both);
+    duration[_smooth] = timer.get_us_duration();
+  }
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { state->Jintegrate(x1s[_smooth], dxs[_smooth], Jfirst, Jsecond, crocoddyl::first); }
-  duration = timer.get_us_duration();
-  std::cout << "StateMultibody.Jintegrate first (in us):\t" << duration / T << " us" << std::endl;
+  std::cout << "StateMultibody.Jintegrate both :\t" << AVG(duration) <<" us\t" << STDDEV(duration)
+            << " us\t" << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { state->Jintegrate(x1s[_smooth], dxs[_smooth], Jfirst, Jsecond, crocoddyl::second); }
-  duration = timer.get_us_duration();
-  std::cout << "StateMultibody.Jintegrate second (in us):\t" << duration / T << " us" << std::endl;
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    state->Jintegrate(x1s[_smooth], dxs[_smooth], Jfirst, Jsecond, crocoddyl::first);
+    duration[_smooth] = timer.get_us_duration();
+  }
+
+  std::cout << "StateMultibody.Jintegrate first :\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
+
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    state->Jintegrate(x1s[_smooth], dxs[_smooth], Jfirst, Jsecond, crocoddyl::second);
+    duration[_smooth] = timer.get_us_duration();
+  }
+
+  std::cout << "StateMultibody.Jintegrate second :\t" << AVG(duration) <<" us\t" << STDDEV(duration)
+            << " us\t" << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
 
   /**************************************************************/
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { activationQuad->calc(activationQuad_data, dxs[_smooth]); }
-  duration = timer.get_us_duration();
-  std::cout << "ActivationModelQuad.calc (in us):\t\t" << duration / T << " us" << std::endl;
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    activationQuad->calc(activationQuad_data, dxs[_smooth]);
+    duration[_smooth] = timer.get_us_duration();
+  }
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { activationQuad->calcDiff(activationQuad_data, dxs[_smooth]); }
-  duration = timer.get_us_duration();
-  std::cout << "ActivationModelQuad.calcdiff (in us):\t\t" << duration / T << " us" << std::endl;
+  std::cout << "ActivationModelQuad.calc :\t\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
+
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    activationQuad->calcDiff(activationQuad_data, dxs[_smooth]);
+    duration[_smooth] = timer.get_us_duration();
+  }
+
+  std::cout << "ActivationModelQuad.calcdiff :\t\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
 
   /*************************************Actuation*******************/
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { actuation->calc(actuation_data, x1s[_smooth], us[_smooth]); }
-  duration = timer.get_us_duration();
-  std::cout << "ActuationModelFloatingBase.calc (in us):\t" << duration / T << " us" << std::endl;
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    actuation->calc(actuation_data, x1s[_smooth], us[_smooth]);
+    duration[_smooth] = timer.get_us_duration();
+  }
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { actuation->calcDiff(actuation_data, x1s[_smooth], us[_smooth]); }
-  duration = timer.get_us_duration();
-  std::cout << "ActuationModelFloatingBase.calcdiff (in us):\t" << duration / T << " us" << std::endl;
+  std::cout << "ActuationModelFloatingBase.calc :\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
+
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    actuation->calcDiff(actuation_data, x1s[_smooth], us[_smooth]);
+    duration[_smooth] = timer.get_us_duration();
+  }
+
+  std::cout << "ActuationModelFloatingBase.calcdiff :\t" << AVG(duration) <<" us\t" << STDDEV(duration)
+            << " us\t" << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
 
   /*******************************Cost****************************/
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { goalTrackingCost->calc(goalTrackingCost_data, x1s[_smooth], us[_smooth]); }
-  duration = timer.get_us_duration();
-  std::cout << "CostModelFramePlacement.calc (in us):\t\t" << duration / T << " us" << std::endl;
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    goalTrackingCost->calc(goalTrackingCost_data, x1s[_smooth], us[_smooth]);
+    duration[_smooth] = timer.get_us_duration();
+  }
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { goalTrackingCost->calcDiff(goalTrackingCost_data, x1s[_smooth], us[_smooth]); }
-  duration = timer.get_us_duration();
-  std::cout << "CostModelFramePlacement.calcdiff (in us):\t" << duration / T << " us" << std::endl;
+  std::cout << "CostModelFramePlacement.calc :\t\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { xRegCost->calc(xRegCost_data, x1s[_smooth], us[_smooth]); }
-  duration = timer.get_us_duration();
-  std::cout << "CostModelState.calc (in us):\t\t\t" << duration / T << " us" << std::endl;
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    goalTrackingCost->calcDiff(goalTrackingCost_data, x1s[_smooth], us[_smooth]);
+    duration[_smooth] = timer.get_us_duration();
+  }
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { xRegCost->calcDiff(xRegCost_data, x1s[_smooth], us[_smooth]); }
-  duration = timer.get_us_duration();
-  std::cout << "CostModelState.calcdiff (in us):\t\t" << duration / T << " us" << std::endl;
+  std::cout << "CostModelFramePlacement.calcdiff :\t" << AVG(duration) <<" us\t" << STDDEV(duration)
+            << " us\t" << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { uRegCost->calc(uRegCost_data, x1s[_smooth], us[_smooth]); }
-  duration = timer.get_us_duration();
-  std::cout << "CostModelControl.calc (in us):\t\t\t" << duration / T << " us" << std::endl;
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    xRegCost->calc(xRegCost_data, x1s[_smooth], us[_smooth]);
+    duration[_smooth] = timer.get_us_duration();
+  }
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { uRegCost->calcDiff(uRegCost_data, x1s[_smooth], us[_smooth]); }
-  duration = timer.get_us_duration();
-  std::cout << "CostModelControl.calcdiff (in us):\t\t" << duration / T << " us" << std::endl;
+  std::cout << "CostModelState.calc :\t\t\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { runningCostModel->calc(runningCostModel_data, x1s[_smooth], us[_smooth]); }
-  duration = timer.get_us_duration();
-  std::cout << "CostModelSum calc (in us):\t\t\t" << duration / T << " us" << std::endl;
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    xRegCost->calcDiff(xRegCost_data, x1s[_smooth], us[_smooth]);
+    duration[_smooth] = timer.get_us_duration();
+  }
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { runningCostModel->calcDiff(runningCostModel_data, x1s[_smooth], us[_smooth]); }
-  duration = timer.get_us_duration();
-  std::cout << "CostModelSum calcdiff (in us):\t\t\t" << duration / T << " us" << std::endl;
+  std::cout << "CostModelState.calcdiff :\t\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { runningDAM->calc(runningDAM_data, x1s[_smooth], us[_smooth]); }
-  duration = timer.get_us_duration();
-  std::cout << "ContactDAM.calc (in us):\t\t\t" << duration / T << " us" << std::endl;
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    uRegCost->calc(uRegCost_data, x1s[_smooth], us[_smooth]);
+    duration[_smooth] = timer.get_us_duration();
+  }
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { runningDAM->calcDiff(runningDAM_data, x1s[_smooth], us[_smooth]); }
-  duration = timer.get_us_duration();
-  std::cout << "Contact DAM calcDiff (in us):\t\t\t" << duration / T << " us" << std::endl;
+  std::cout << "CostModelControl.calc :\t\t\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { runningModel->calc(runningModel_data, x1s[_smooth], us[_smooth]); }
-  duration = timer.get_us_duration();
-  std::cout << "ContactDAM+EulerIAM calc (in us):\t\t" << duration / T << " us" << std::endl;
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    uRegCost->calcDiff(uRegCost_data, x1s[_smooth], us[_smooth]);
+    duration[_smooth] = timer.get_us_duration();
+  }
 
-  duration = 0;
-  timer.reset();
-  SMOOTH(T) { runningModel->calcDiff(runningModel_data, x1s[_smooth], us[_smooth]); }
-  duration = timer.get_us_duration();
-  std::cout << "ContactDAM+EulerIAM calcDiff (in us):\t\t" << duration / T << " us" << std::endl;
+  std::cout << "CostModelControl.calcdiff :\t\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
+
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    runningCostModel->calc(runningCostModel_data, x1s[_smooth], us[_smooth]);
+    duration[_smooth] = timer.get_us_duration();
+  }
+
+  std::cout << "CostModelSum calc :\t\t\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
+
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    runningCostModel->calcDiff(runningCostModel_data, x1s[_smooth], us[_smooth]);
+    duration[_smooth] = timer.get_us_duration();
+  }
+
+  std::cout << "CostModelSum calcdiff :\t\t\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
+
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    runningDAM->calc(runningDAM_data, x1s[_smooth], us[_smooth]);
+    duration[_smooth] = timer.get_us_duration();
+  }
+
+  std::cout << "ContactDAM.calc :\t\t\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
+
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    runningDAM->calcDiff(runningDAM_data, x1s[_smooth], us[_smooth]);
+    duration[_smooth] = timer.get_us_duration();
+  }
+
+  std::cout << "Contact DAM calcDiff :\t\t\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
+
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    runningModel->calc(runningModel_data, x1s[_smooth], us[_smooth]);
+    duration[_smooth] = timer.get_us_duration();
+  }
+
+  std::cout << "ContactDAM+EulerIAM calc :\t\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
+
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    runningModel->calcDiff(runningModel_data, x1s[_smooth], us[_smooth]);
+    duration[_smooth] = timer.get_us_duration();
+  }
+
+  std::cout << "ContactDAM+EulerIAM calcDiff :\t\t" << AVG(duration) <<" us\t" << STDDEV(duration) << " us\t"
+            << duration.maxCoeff() << " us\t" << duration.minCoeff() << " us" << std::endl;
 }
