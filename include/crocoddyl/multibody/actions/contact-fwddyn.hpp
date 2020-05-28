@@ -51,6 +51,7 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
   virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
+  virtual bool checkData(const boost::shared_ptr<DifferentialActionDataAbstract>& data);
 
   const boost::shared_ptr<ActuationModelFloatingBase>& get_actuation() const;
   const boost::shared_ptr<ContactModelMultiple>& get_contacts() const;
@@ -97,10 +98,10 @@ struct DifferentialActionDataContactFwdDynamicsTpl : public DifferentialActionDa
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
         multibody(&pinocchio, model->get_actuation()->createData(), model->get_contacts()->createData(&pinocchio)),
         costs(model->get_costs()->createData(&multibody)),
-        Kinv(model->get_state()->get_nv() + model->get_contacts()->get_nc(),
-             model->get_state()->get_nv() + model->get_contacts()->get_nc()),
-        df_dx(model->get_contacts()->get_nc(), model->get_state()->get_ndx()),
-        df_du(model->get_contacts()->get_nc(), model->get_nu()) {
+        Kinv(model->get_state()->get_nv() + model->get_contacts()->get_nc_total(),
+             model->get_state()->get_nv() + model->get_contacts()->get_nc_total()),
+        df_dx(model->get_contacts()->get_nc_total(), model->get_state()->get_ndx()),
+        df_du(model->get_contacts()->get_nc_total(), model->get_nu()) {
     costs->shareMemory(this);
     Kinv.setZero();
     df_dx.setZero();

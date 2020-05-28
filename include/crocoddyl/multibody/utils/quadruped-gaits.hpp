@@ -57,7 +57,7 @@ class SimpleQuadrupedGaitProblem {
 
   boost::shared_ptr<ActionModelAbstract> createFootSwitchModel(
       const std::vector<pinocchio::FrameIndex>& supportFootIds, const std::vector<FramePlacement>& swingFootTask,
-      bool pseudoImpulse = true);
+      bool pseudoImpulse = false);
 
   boost::shared_ptr<ActionModelAbstract> createPseudoImpulseModel(
       const std::vector<pinocchio::FrameIndex>& supportFootIds, const std::vector<FramePlacement>& swingFootTask);

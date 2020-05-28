@@ -37,11 +37,10 @@ void exposeImpulseAbstract() {
            "Convert the force into a stack of spatial forces.\n\n"
            ":param data: impulse data\n"
            ":param force: force vector (dimension ni)")
-      .def("updateForceDiff", &ImpulseModelAbstract_wrap::updateForceDiff, bp::args("self", "data", "df_dq"),
+      .def("updateForceDiff", &ImpulseModelAbstract_wrap::updateForceDiff, bp::args("self", "data", "df_dx"),
            "Update the Jacobian of the impulse force.\n\n"
-           "The Jacobian df_dv is zero, then we ignore it\n"
            ":param data: impulse data\n"
-           ":param df_dq: Jacobian of the impulse force (dimension ni*nv)")
+           ":param df_dx: Jacobian of the impulse force (dimension ni*ndx)")
       .def("createData", &ImpulseModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the impulse data.\n\n"
@@ -68,13 +67,17 @@ void exposeImpulseAbstract() {
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
       .add_property("pinocchio", bp::make_getter(&ImpulseDataAbstract::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
+      .add_property("jMf", bp::make_getter(&ImpulseDataAbstract::jMf, bp::return_value_policy<bp::return_by_value>()),
+                    "local frame placement of the impulse frame")
       .add_property("Jc", bp::make_getter(&ImpulseDataAbstract::Jc, bp::return_internal_reference<>()),
                     bp::make_setter(&ImpulseDataAbstract::Jc), "impulse Jacobian")
       .add_property("dv0_dq", bp::make_getter(&ImpulseDataAbstract::dv0_dq, bp::return_internal_reference<>()),
                     bp::make_setter(&ImpulseDataAbstract::dv0_dq), "Jacobian of the previous impulse velocity")
+      .add_property("df_dx", bp::make_getter(&ImpulseDataAbstract::df_dx, bp::return_internal_reference<>()),
+                    bp::make_setter(&ImpulseDataAbstract::df_dx), "Jacobian of the contact impulse")
       .def_readwrite("joint", &ImpulseDataAbstract::joint, "joint index of the impulse frame")
       .def_readwrite("frame", &ImpulseDataAbstract::frame, "frame index of the impulse frame")
-      .def_readwrite("f", &ImpulseDataAbstract::f, "external spatial forces");
+      .def_readwrite("f", &ImpulseDataAbstract::f, "external spatial impulse");
 }
 
 }  // namespace python

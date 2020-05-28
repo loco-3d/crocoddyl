@@ -30,7 +30,8 @@ class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  explicit ActivationModelWeightedQuadTpl(const VectorXs& weights) : Base(weights.size()), weights_(weights){};
+  explicit ActivationModelWeightedQuadTpl(const VectorXs& weights)
+      : Base(weights.size()), weights_(weights), new_weights_(false){};
   virtual ~ActivationModelWeightedQuadTpl(){};
 
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
@@ -52,6 +53,10 @@ class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar
 
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
     data->Ar = d->Wr;
+    if (new_weights_) {
+      data->Arr.diagonal() = weights_;
+      new_weights_ = false;
+    }
     // The Hessian has constant values which were set in createData.
 #ifndef NDEBUG
     assert_pretty(MatrixXs(data->Arr).isApprox(Arr_), "Arr has wrong value");
@@ -77,6 +82,7 @@ class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar
     }
 
     weights_ = weights;
+    new_weights_ = true;
   };
 
  protected:
@@ -84,6 +90,7 @@ class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar
 
  private:
   VectorXs weights_;
+  bool new_weights_;
 
 #ifndef NDEBUG
   MatrixXs Arr_;

@@ -59,7 +59,7 @@ void test_calc_fetch_jacobians(ImpulseModelTypes::Type impulse_type, PinocchioMo
   BOOST_CHECK(!data->Jc.isZero());
   BOOST_CHECK(data->dv0_dq.isZero());
   BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(data->df_dq.isZero());
+  BOOST_CHECK(data->df_dx.isZero());
 }
 
 void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) {
@@ -85,7 +85,7 @@ void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type impulse_type, Pino
   BOOST_CHECK(!data->Jc.isZero());
   BOOST_CHECK(!data->dv0_dq.isZero());
   BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(data->df_dq.isZero());
+  BOOST_CHECK(data->df_dx.isZero());
 }
 
 void test_update_force(ImpulseModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) {
@@ -107,7 +107,7 @@ void test_update_force(ImpulseModelTypes::Type impulse_type, PinocchioModelTypes
   BOOST_CHECK(data->Jc.isZero());
   BOOST_CHECK(data->dv0_dq.isZero());
   BOOST_CHECK(!data->f.toVector().isZero());
-  BOOST_CHECK(data->df_dq.isZero());
+  BOOST_CHECK(data->df_dx.isZero());
 }
 
 void test_update_force_diff(ImpulseModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) {
@@ -121,14 +121,14 @@ void test_update_force_diff(ImpulseModelTypes::Type impulse_type, PinocchioModel
   boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);
 
   // Create a random force and update it
-  Eigen::MatrixXd df_dq = Eigen::MatrixXd::Random(data->df_dq.rows(), data->df_dq.cols());
-  model->updateForceDiff(data, df_dq);
+  Eigen::MatrixXd df_dx = Eigen::MatrixXd::Random(data->df_dx.rows(), data->df_dx.cols());
+  model->updateForceDiff(data, df_dx);
 
   // Check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(data->Jc.isZero());
   BOOST_CHECK(data->dv0_dq.isZero());
   BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(!data->df_dq.isZero());
+  BOOST_CHECK(!data->df_dx.isZero());
 }
 
 //----------------------------------------------------------------------------//

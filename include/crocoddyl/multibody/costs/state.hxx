@@ -150,7 +150,7 @@ void CostModelStateTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstrac
   state_->Jdiff(xref_, x, data->Rx, data->Rx, second);
   activation_->calcDiff(data->activation, data->r);
 
-  const boost::shared_ptr<pinocchio::ModelTpl<Scalar> > pin_model = state_->get_pinocchio();
+  const boost::shared_ptr<pinocchio::ModelTpl<Scalar> >& pin_model = state_->get_pinocchio();
   typedef Eigen::Block<MatrixXs> MatrixBlock;
   for (pinocchio::JointIndex i = 1; i < (pinocchio::JointIndex)pin_model->njoints; ++i) {
     const MatrixBlock& RxBlock =

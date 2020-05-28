@@ -91,11 +91,10 @@ void exposeImpulseMultiple() {
            "Update the velocity after impulse.\n\n"
            ":param data: impulse data\n"
            ":param dvnext_dx: Jacobian of the impulse velocity (dimension nv*ndx)")
-      .def("updateForceDiff", &ImpulseModelMultiple::updateForceDiff, bp::args("self", "data", "df_dq"),
+      .def("updateForceDiff", &ImpulseModelMultiple::updateForceDiff, bp::args("self", "data", "df_dx"),
            "Update the Jacobian of the impulse force.\n\n"
-           "The Jacobian df_dv is zero, then we ignore it\n"
            ":param data: impulse data\n"
-           ":param df_dq: Jacobian of the impulse force (dimension ni*nv)")
+           ":param df_dx: Jacobian of the impulse force (dimension ni*ndx)")
       .def("createData", &ImpulseModelMultiple::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the total impulse data.\n\n"

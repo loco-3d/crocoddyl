@@ -29,7 +29,7 @@ inline bool is_a_Jcomponent(Jcomponent firstsecond) {
 inline bool is_a_AssignmentOp(AssignmentOp op) { return (op == setto || op == addto || op == rmfrom); }
 
 /**
- * @brief This class abstract state representations
+ * @brief Abstract class for the state representation
  *
  * A state is represented by its operators: difference, integrates, transport and their derivatives.
  * The difference operator returns the value of \f$\mathbf{x}_{1}\ominus\mathbf{x}_{0}\f$ operation.
@@ -38,6 +38,8 @@ inline bool is_a_AssignmentOp(AssignmentOp op) { return (op == setto || op == ad
  * given a tangential velocity (\f$T_\mathbf{x} \mathcal{M}\f$). Therefore the points \f$\mathbf{x}\f$,
  * \f$\mathbf{x}_{0}\f$ and \f$\mathbf{x}_{1}\f$ belong to the manifold \f$\mathcal{M}\f$; and \f$\delta\mathbf{x}\f$
  * or \f$\mathbf{x}_{1}\ominus\mathbf{x}_{0}\f$ lie on its tangential space.
+ *
+ * \sa `diff()`, `integrate()`, `Jdiff()`, `Jintegrate()` and `JintegrateTransport()`
  */
 template <typename _Scalar>
 class StateAbstractTpl {
