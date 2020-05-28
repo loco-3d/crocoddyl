@@ -91,8 +91,8 @@ void ContactModelMultipleTpl<Scalar>::calc(const boost::shared_ptr<ContactDataMu
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of contact datas and models");
   }
-  std::size_t nc = 0;
 
+  std::size_t nc = 0;
   const std::size_t& nv = state_->get_nv();
   typename ContactModelContainer::iterator it_m, end_m;
   typename ContactDataContainer::iterator it_d, end_d;
@@ -120,8 +120,8 @@ void ContactModelMultipleTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDa
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of contact datas and models");
   }
-  std::size_t nc = 0;
 
+  std::size_t nc = 0;
   const std::size_t& ndx = state_->get_ndx();
   typename ContactModelContainer::iterator it_m, end_m;
   typename ContactDataContainer::iterator it_d, end_d;
@@ -162,12 +162,12 @@ void ContactModelMultipleTpl<Scalar>::updateForce(const boost::shared_ptr<Contac
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of contact datas and models");
   }
-  std::size_t nc = 0;
 
   for (ForceIterator it = data->fext.begin(); it != data->fext.end(); ++it) {
     *it = pinocchio::ForceTpl<Scalar>::Zero();
   }
 
+  std::size_t nc = 0;
   typename ContactModelContainer::iterator it_m, end_m;
   typename ContactDataContainer::iterator it_d, end_d;
   for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();
@@ -216,8 +216,8 @@ void ContactModelMultipleTpl<Scalar>::updateForceDiff(const boost::shared_ptr<Co
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of contact datas and models");
   }
-  std::size_t nc = 0;
 
+  std::size_t nc = 0;
   typename ContactModelContainer::const_iterator it_m, end_m;
   typename ContactDataContainer::const_iterator it_d, end_d;
   for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();

@@ -95,6 +95,7 @@ template <typename Scalar>
 void CostModelFrameRotationTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(FrameRotation)) {
     Rref_ = *static_cast<const FrameRotation*>(pv);
+    oRf_inv_ = Rref_.oRf.transpose();
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameRotation)");
   }

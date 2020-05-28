@@ -59,8 +59,6 @@ void exposeImpulse3D() {
           "Create 3D impulse data.\n\n"
           ":param model: 3D impulse model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("jMf", bp::make_getter(&ImpulseData3D::jMf, bp::return_value_policy<bp::return_by_value>()),
-                    "local frame placement of the impulse frame")
       .add_property("fXj", bp::make_getter(&ImpulseData3D::fXj, bp::return_value_policy<bp::return_by_value>()),
                     "action matrix from impulse to local frames")
       .add_property("fJf", bp::make_getter(&ImpulseData3D::fJf, bp::return_internal_reference<>()),

@@ -78,6 +78,16 @@ boost::shared_ptr<ActionDataAbstractTpl<Scalar> > ActionModelUnicycleTpl<Scalar>
 }
 
 template <typename Scalar>
+bool ActionModelUnicycleTpl<Scalar>::checkData(const boost::shared_ptr<ActionDataAbstract>& data) {
+  boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
+  if (d != NULL) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Vector2s& ActionModelUnicycleTpl<Scalar>::get_cost_weights() const {
   return cost_weights_;
 }

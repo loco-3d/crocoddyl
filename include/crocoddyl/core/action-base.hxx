@@ -25,19 +25,19 @@ template <typename Scalar>
 ActionModelAbstractTpl<Scalar>::~ActionModelAbstractTpl() {}
 
 template <typename Scalar>
-void ActionModelAbstractTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
+void ActionModelAbstractTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                                           const Eigen::Ref<const VectorXs>& x) {
   calc(data, x, unone_);
 }
 
 template <typename Scalar>
-void ActionModelAbstractTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
+void ActionModelAbstractTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                               const Eigen::Ref<const VectorXs>& x) {
   calcDiff(data, x, unone_);
 }
 
 template <typename Scalar>
-void ActionModelAbstractTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
+void ActionModelAbstractTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data,
                                                  Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
                                                  const std::size_t& maxiter, const Scalar& tol) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
@@ -81,6 +81,11 @@ typename MathBaseTpl<Scalar>::VectorXs ActionModelAbstractTpl<Scalar>::quasiStat
 template <typename Scalar>
 boost::shared_ptr<ActionDataAbstractTpl<Scalar> > ActionModelAbstractTpl<Scalar>::createData() {
   return boost::allocate_shared<ActionDataAbstract>(Eigen::aligned_allocator<ActionDataAbstract>(), this);
+}
+
+template <typename Scalar>
+bool ActionModelAbstractTpl<Scalar>::checkData(const boost::shared_ptr<ActionDataAbstract>&) {
+  return false;
 }
 
 template <typename Scalar>

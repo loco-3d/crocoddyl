@@ -57,6 +57,7 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
   virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<ActionDataAbstract> createData();
+  virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
 
   const boost::shared_ptr<ImpulseModelMultiple>& get_impulses() const;
   const boost::shared_ptr<CostModelSum>& get_costs() const;
@@ -106,14 +107,14 @@ struct ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
         multibody(&pinocchio, model->get_impulses()->createData(&pinocchio)),
         costs(model->get_costs()->createData(&multibody)),
         vnone(model->get_state()->get_nv()),
-        Kinv(model->get_state()->get_nv() + model->get_impulses()->get_ni(),
-             model->get_state()->get_nv() + model->get_impulses()->get_ni()),
-        df_dq(model->get_impulses()->get_ni(), model->get_state()->get_nv()),
+        Kinv(model->get_state()->get_nv() + model->get_impulses()->get_ni_total(),
+             model->get_state()->get_nv() + model->get_impulses()->get_ni_total()),
+        df_dx(model->get_impulses()->get_ni_total(), model->get_state()->get_ndx()),
         dgrav_dq(model->get_state()->get_nv(), model->get_state()->get_nv()) {
     costs->shareMemory(this);
     vnone.setZero();
     Kinv.setZero();
-    df_dq.setZero();
+    df_dx.setZero();
     dgrav_dq.setZero();
   }
 
@@ -122,7 +123,7 @@ struct ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
   boost::shared_ptr<CostDataSumTpl<Scalar> > costs;
   VectorXs vnone;
   MatrixXs Kinv;
-  MatrixXs df_dq;
+  MatrixXs df_dx;
   MatrixXs dgrav_dq;
 };
 

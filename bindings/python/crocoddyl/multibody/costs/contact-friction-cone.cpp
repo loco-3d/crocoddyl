@@ -25,14 +25,14 @@ void exposeCostContactFrictionCone() {
           ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameFrictionCone>(
           bp::args("self", "state", "activation", "fref"),
-          "Initialize the contact force cost model.\n\n"
+          "Initialize the contact friction cone cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param fref: frame friction cone"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameFrictionCone, int>(
           bp::args("self", "state", "fref", "nu"),
-          "Initialize the contact force cost model.\n\n"
+          "Initialize the contact friction cone cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(6).\n"
           ":param state: state of the multibody system\n"
@@ -40,7 +40,7 @@ void exposeCostContactFrictionCone() {
           ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameFrictionCone>(
           bp::args("self", "state", "fref"),
-          "Initialize the contact force cost model.\n\n"
+          "Initialize the contact friction cone cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(6), and nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
@@ -49,7 +49,7 @@ void exposeCostContactFrictionCone() {
                                                   const Eigen::Ref<const Eigen::VectorXd>&,
                                                   const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &CostModelContactFrictionCone::calc, bp::args("self", "data", "x", "u"),
-          "Compute the contact force cost.\n\n"
+          "Compute the contact friction cone cost.\n\n"
           ":param data: cost data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input")
@@ -60,7 +60,7 @@ void exposeCostContactFrictionCone() {
                                                   const Eigen::Ref<const Eigen::VectorXd>&,
                                                   const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelContactFrictionCone::calcDiff, bp::args("self", "data", "x", "u"),
-          "Compute the derivatives of the contact force cost.\n\n"
+          "Compute the derivatives of the contact friction cone cost.\n\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n")
@@ -69,7 +69,7 @@ void exposeCostContactFrictionCone() {
           "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"))
       .def("createData", &CostModelContactFrictionCone::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
-           "Create the contact force cost data.\n\n"
+           "Create the contact friction cone cost data.\n\n"
            "Each cost model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
@@ -81,11 +81,11 @@ void exposeCostContactFrictionCone() {
   bp::register_ptr_to_python<boost::shared_ptr<CostDataContactFrictionCone> >();
 
   bp::class_<CostDataContactFrictionCone, bp::bases<CostDataAbstract> >(
-      "CostDataContactFrictionCone", "Data for contact force cost.\n\n",
+      "CostDataContactFrictionCone", "Data for contact friction cone cost.\n\n",
       bp::init<CostModelContactFrictionCone*, DataCollectorAbstract*>(
           bp::args("self", "model", "data"),
-          "Create contact force cost data.\n\n"
-          ":param model: contact force cost model\n"
+          "Create contact friction cone cost data.\n\n"
+          ":param model: contact friction cone cost model\n"
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("Arr_Ru", bp::make_getter(&CostDataContactFrictionCone::Arr_Ru, bp::return_internal_reference<>()),
                     "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)")

@@ -122,6 +122,10 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
   Data* d = static_cast<Data*>(data.get());
 
   // Computing the dynamics derivatives
+  // We resize the Kinv matrix because Eigen cannot call block operations recursively:
+  // https://eigen.tuxfamily.org/bz/show_bug.cgi?id=408.
+  // Therefore, it is not possible to pass d->Kinv.topLeftCorner(nv + nc, nv + nc)
+  d->Kinv.resize(nv + nc, nv + nc);
   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout, d->multibody.contacts->fext);
   pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->multibody.contacts->Jc.topRows(nc),
                                                d->Kinv);
@@ -142,13 +146,13 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
 
   // Computing the cost derivatives
   if (enable_force_) {
-    d->df_dx.leftCols(nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dq;
-    d->df_dx.rightCols(nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dv;
-    d->df_dx.noalias() += f_partial_da * d->multibody.contacts->da0_dx.topRows(nc);
-    d->df_dx.noalias() -= f_partial_dtau * d->multibody.actuation->dtau_dx;
-    d->df_du.noalias() = -f_partial_dtau * d->multibody.actuation->dtau_du;
+    d->df_dx.topLeftCorner(nc, nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dq;
+    d->df_dx.topRightCorner(nc, nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dv;
+    d->df_dx.topRows(nc).noalias() += f_partial_da * d->multibody.contacts->da0_dx.topRows(nc);
+    d->df_dx.topRows(nc).noalias() -= f_partial_dtau * d->multibody.actuation->dtau_dx;
+    d->df_du.topRows(nc).noalias() = -f_partial_dtau * d->multibody.actuation->dtau_du;
     contacts_->updateAccelerationDiff(d->multibody.contacts, d->Fx.bottomRows(nv));
-    contacts_->updateForceDiff(d->multibody.contacts, d->df_dx, d->df_du);
+    contacts_->updateForceDiff(d->multibody.contacts, d->df_dx.topRows(nc), d->df_du.topRows(nc));
   }
   costs_->calcDiff(d->costs, x, u);
 }
@@ -157,6 +161,17 @@ template <typename Scalar>
 boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
 DifferentialActionModelContactFwdDynamicsTpl<Scalar>::createData() {
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+}
+
+template <typename Scalar>
+bool DifferentialActionModelContactFwdDynamicsTpl<Scalar>::checkData(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data) {
+  boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
+  if (d != NULL) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 template <typename Scalar>

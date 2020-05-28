@@ -123,7 +123,8 @@ int main(int argc, char* argv[]) {
     avg[ithread] = AVG(duration);
     stddev[ithread] = STDDEV(duration);
     std::cout << ithread + 1 << " threaded calcDiff [us]:\t" << avg[ithread] << " +- " << stddev[ithread]
-              << " (per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
+              << " (max: " << duration.maxCoeff() << ", min: " << duration.minCoeff()
+              << ", per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
               << ")" << std::endl;
   }
 
@@ -146,7 +147,8 @@ int main(int argc, char* argv[]) {
     avg[ithread] = AVG(duration);
     stddev[ithread] = STDDEV(duration);
     std::cout << ithread + 1 << " threaded calc [us]:    \t" << avg[ithread] << " +- " << stddev[ithread]
-              << " (per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
+              << " (max: " << duration.maxCoeff() << ", min: " << duration.minCoeff()
+              << ", per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
               << ")" << std::endl;
   }
 
@@ -167,7 +169,6 @@ int main(int argc, char* argv[]) {
             boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(problem->get_runningModels()[j]);
         boost::shared_ptr<crocoddyl::IntegratedActionDataEuler> d =
             boost::static_pointer_cast<crocoddyl::IntegratedActionDataEuler>(problem->get_runningDatas()[j]);
-
         m->get_differential()->calc(d->differential, xs[j], us[j]);
       }
       duration[i] = timer.get_us_duration();
@@ -175,7 +176,8 @@ int main(int argc, char* argv[]) {
     avg[ithread] = AVG(duration);
     stddev[ithread] = STDDEV(duration);
     std::cout << ithread + 1 << " threaded diff calc [us]: \t" << avg[ithread] << " +- " << stddev[ithread]
-              << " (per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
+              << " (max: " << duration.maxCoeff() << ", min: " << duration.minCoeff()
+              << ", per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
               << ")" << std::endl;
   }
 
@@ -191,8 +193,9 @@ int main(int argc, char* argv[]) {
   }
   double avg_bp = AVG(duration);
   double stddev_bp = STDDEV(duration);
-  std::cout << "backwardPass [us]:\t\t" << avg_bp << " +- " << stddev_bp << " (per nodes: " << avg_bp / N << " +- "
-            << stddev_bp / N << ")" << std::endl;
+  std::cout << "backwardPass [us]:\t\t" << avg_bp << " +- " << stddev_bp << " (max: " << duration.maxCoeff()
+            << ", min: " << duration.minCoeff() << ", per nodes: " << avg_bp / N << " +- " << stddev_bp / N << ")"
+            << std::endl;
 
   // Forward pass timings
   duration.setZero();
@@ -203,8 +206,9 @@ int main(int argc, char* argv[]) {
   }
   double avg_fp = AVG(duration);
   double stddev_fp = STDDEV(duration);
-  std::cout << "forwardPass [us]: \t\t" << avg_fp << " +- " << stddev_fp << " (per nodes: " << avg_fp / N << " +- "
-            << stddev_fp / N << ")" << std::endl;
+  std::cout << "forwardPass [us]: \t\t" << avg_fp << " +- " << stddev_fp << " (max: " << duration.maxCoeff()
+            << ", min: " << duration.minCoeff() << ", per nodes: " << avg_fp / N << " +- " << stddev_fp / N << ")"
+            << std::endl;
 
   /*******************************************************************************/
   /*************************** CODE GENERATION TIMINGS ***************************/
@@ -233,7 +237,8 @@ int main(int argc, char* argv[]) {
     avg[ithread] = AVG(duration);
     stddev[ithread] = STDDEV(duration);
     std::cout << ithread + 1 << " threaded calcDiff [us]:\t" << avg[ithread] << " +- " << stddev[ithread]
-              << " (per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
+              << " (max: " << duration.maxCoeff() << ", min: " << duration.minCoeff()
+              << ", per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
               << ")" << std::endl;
   }
 
@@ -256,7 +261,8 @@ int main(int argc, char* argv[]) {
     avg[ithread] = AVG(duration);
     stddev[ithread] = STDDEV(duration);
     std::cout << ithread + 1 << " threaded calc [us]:    \t" << avg[ithread] << " +- " << stddev[ithread]
-              << " (per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
+              << " (max: " << duration.maxCoeff() << ", min: " << duration.minCoeff()
+              << ", per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
               << ")" << std::endl;
   }
 
@@ -271,8 +277,9 @@ int main(int argc, char* argv[]) {
   }
   avg_bp = AVG(duration);
   stddev_bp = STDDEV(duration);
-  std::cout << "backwardPass [us]:\t\t" << avg_bp << " +- " << stddev_bp << " (per nodes: " << avg_bp / N << " +- "
-            << stddev_bp / N << ")" << std::endl;
+  std::cout << "backwardPass [us]:\t\t" << avg_bp << " +- " << stddev_bp << " (max: " << duration.maxCoeff()
+            << ", min: " << duration.minCoeff() << ", per nodes: " << avg_bp / N << " +- " << stddev_bp / N << ")"
+            << std::endl;
 
   // Forward pass timings
   for (unsigned int i = 0; i < T; ++i) {
@@ -282,6 +289,7 @@ int main(int argc, char* argv[]) {
   }
   avg_fp = AVG(duration);
   stddev_fp = STDDEV(duration);
-  std::cout << "forwardPass [us]: \t\t" << avg_fp << " +- " << stddev_fp << " (per nodes: " << avg_fp / N << " +- "
-            << stddev_fp / N << ")" << std::endl;
+  std::cout << "forwardPass [us]: \t\t" << avg_fp << " +- " << stddev_fp << " (max: " << duration.maxCoeff()
+            << ", min: " << duration.minCoeff() << ", per nodes: " << avg_fp / N << " +- " << stddev_fp / N << ")"
+            << std::endl;
 }

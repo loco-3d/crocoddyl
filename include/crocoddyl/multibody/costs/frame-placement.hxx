@@ -95,6 +95,7 @@ template <typename Scalar>
 void CostModelFramePlacementTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(FramePlacement)) {
     Mref_ = *static_cast<const FramePlacement*>(pv);
+    oMf_inv_ = Mref_.oMf.inverse();
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FramePlacement)");
   }

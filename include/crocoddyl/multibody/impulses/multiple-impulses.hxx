@@ -84,8 +84,8 @@ void ImpulseModelMultipleTpl<Scalar>::calc(const boost::shared_ptr<ImpulseDataMu
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of impulse datas and models");
   }
-  std::size_t ni = 0;
 
+  std::size_t ni = 0;
   const std::size_t& nv = state_->get_nv();
   typename ImpulseModelContainer::iterator it_m, end_m;
   typename ImpulseDataContainer::iterator it_d, end_d;
@@ -112,8 +112,8 @@ void ImpulseModelMultipleTpl<Scalar>::calcDiff(const boost::shared_ptr<ImpulseDa
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of impulse datas and models");
   }
-  std::size_t ni = 0;
 
+  std::size_t ni = 0;
   const std::size_t& nv = state_->get_nv();
   typename ImpulseModelContainer::iterator it_m, end_m;
   typename ImpulseDataContainer::iterator it_d, end_d;
@@ -154,12 +154,12 @@ void ImpulseModelMultipleTpl<Scalar>::updateForce(const boost::shared_ptr<Impuls
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of impulse datas and models");
   }
-  std::size_t ni = 0;
 
   for (ForceIterator it = data->fext.begin(); it != data->fext.end(); ++it) {
     *it = pinocchio::ForceTpl<Scalar>::Zero();
   }
 
+  std::size_t ni = 0;
   typename ImpulseModelContainer::iterator it_m, end_m;
   typename ImpulseDataContainer::iterator it_d, end_d;
   for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
@@ -192,18 +192,19 @@ void ImpulseModelMultipleTpl<Scalar>::updateVelocityDiff(const boost::shared_ptr
 
 template <typename Scalar>
 void ImpulseModelMultipleTpl<Scalar>::updateForceDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
-                                                      const MatrixXs& df_dq) const {
-  const std::size_t& nv = state_->get_nv();
-  if (static_cast<std::size_t>(df_dq.rows()) != ni_ || static_cast<std::size_t>(df_dq.cols()) != nv) {
+                                                      const MatrixXs& df_dx) const {
+  const std::size_t& ndx = state_->get_ndx();
+  if (static_cast<std::size_t>(df_dx.rows()) != ni_ || static_cast<std::size_t>(df_dx.cols()) != ndx) {
     throw_pretty("Invalid argument: "
-                 << "df_dq has wrong dimension (it should be " + std::to_string(ni_) + "," + std::to_string(nv) + ")");
+                 << "df_dx has wrong dimension (it should be " + std::to_string(ni_) + "," + std::to_string(ndx) +
+                        ")");
   }
   if (static_cast<std::size_t>(data->impulses.size()) != impulses_.size()) {
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of impulse datas and models");
   }
-  std::size_t ni = 0;
 
+  std::size_t ni = 0;
   typename ImpulseModelContainer::const_iterator it_m, end_m;
   typename ImpulseDataContainer::const_iterator it_d, end_d;
   for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
@@ -214,8 +215,8 @@ void ImpulseModelMultipleTpl<Scalar>::updateForceDiff(const boost::shared_ptr<Im
       assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between data and model");
 
       const std::size_t& ni_i = m_i->impulse->get_ni();
-      const Eigen::Block<const MatrixXs> df_dq_i = df_dq.block(ni, 0, ni_i, nv);
-      m_i->impulse->updateForceDiff(d_i, df_dq_i);
+      const Eigen::Block<const MatrixXs> df_dx_i = df_dx.block(ni, 0, ni_i, ndx);
+      m_i->impulse->updateForceDiff(d_i, df_dx_i);
       ni += ni_i;
     }
   }

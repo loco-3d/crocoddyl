@@ -123,6 +123,17 @@ DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::createData() {
 }
 
 template <typename Scalar>
+bool DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::checkData(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data) {
+  boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
+  if (d != NULL) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+template <typename Scalar>
 pinocchio::ModelTpl<Scalar>& DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_pinocchio() const {
   return pinocchio_;
 }
