@@ -5,6 +5,7 @@ SET(PROJECT_NAMESPACE loco-3d)
 SET(PROJECT_NAME crocoddyl)
 SET(PROJECT_DESCRIPTION "Contact RObot COntrol by Differential DYnamic programming Library (Crocoddyl)")
 SET(PROJECT_URL https://github.com/${PROJECT_NAMESPACE}/${PROJECT_NAME})
+SET(CMAKE_CXX_COMPILER /usr/bin/clang++-8)
 
 # Check if the submodule cmake have been initialized
 IF(NOT EXISTS "${CMAKE_SOURCE_DIR}/cmake/base.cmake")
