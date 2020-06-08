@@ -202,9 +202,9 @@ class ShootingProblemTpl {
   const std::size_t& get_ndx() const;
 
   /**
-   * @brief Return the dimension of the control vector
+   * @brief Return the maximun dimension of the control vector
    */
-  const std::size_t& get_nu() const;
+  const std::size_t& get_nu_max() const;
 
  protected:
   Scalar cost_;                                                          //!< Total cost
@@ -216,7 +216,7 @@ class ShootingProblemTpl {
   std::vector<boost::shared_ptr<ActionDataAbstract> > running_datas_;    //!< Running action data
   std::size_t nx_;                                                       //!< State dimension
   std::size_t ndx_;                                                      //!< State rate dimension
-  std::size_t nu_;                                                       //!< Control dimension
+  std::size_t nu_max_;                                                   //!< Maximun control dimension
 
  private:
   void allocateData();
