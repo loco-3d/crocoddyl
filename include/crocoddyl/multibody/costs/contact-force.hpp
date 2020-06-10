@@ -12,11 +12,15 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
+#include "crocoddyl/multibody/contacts/contact-3d.hpp"
+#include "crocoddyl/multibody/contacts/contact-6d.hpp"
 #include "crocoddyl/multibody/data/contacts.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
+
+enum ContactType { Contact3D, Contact6D, Undefined };
 
 template <typename _Scalar>
 class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
@@ -42,7 +46,9 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
                            const std::size_t& nu);
   CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
                            boost::shared_ptr<ActivationModelAbstract> activation, const FrameForce& fref);
-  CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref, const std::size_t& nu);
+  CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref, const std::size_t& nr,
+                           const std::size_t& nu);
+  CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref, const std::size_t& nr);
   CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref);
   virtual ~CostModelContactForceTpl();
 
@@ -77,6 +83,7 @@ struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
+  typedef FrameForceTpl<Scalar> FrameForce;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
@@ -85,6 +92,7 @@ struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
   CostDataContactForceTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data), Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
     Arr_Ru.setZero();
+    contact_type = Undefined;
 
     // Check that proper shared data has been passed
     DataCollectorContactTpl<Scalar>* d = dynamic_cast<DataCollectorContactTpl<Scalar>*>(shared);
@@ -93,13 +101,35 @@ struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
     }
 
     // Avoids data casting at runtime
+    const FrameForce& fref = model->get_fref();
     std::string frame_name = model->get_state()->get_pinocchio()->frames[model->get_fref().frame].name;
     bool found_contact = false;
     for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
          it != d->contacts->contacts.end(); ++it) {
-      if (it->second->frame == model->get_fref().frame) {
-        found_contact = true;
-        contact = it->second;
+      if (it->second->frame == fref.frame) {
+        ContactData3DTpl<Scalar>* d3d = dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
+        if (d3d != NULL) {
+          contact_type = Contact3D;
+          if (model->get_activation()->get_nr() != 3) {
+            throw_pretty("Domain error: nr isn't defined as 3 in the activation model for the 3d contact in " +
+                         frame_name);
+          }
+          found_contact = true;
+          contact = it->second;
+          break;
+        }
+        ContactData6DTpl<Scalar>* d6d = dynamic_cast<ContactData6DTpl<Scalar>*>(it->second.get());
+        if (d6d != NULL) {
+          contact_type = Contact6D;
+          if (model->get_activation()->get_nr() != 6) {
+            throw_pretty("Domain error: nr isn't defined as 6 in the activation model for the 3d contact in " +
+                         frame_name);
+          }
+          found_contact = true;
+          contact = it->second;
+          break;
+        }
+        throw_pretty("Domain error: there isn't defined at least a 3d contact for " + frame_name);
         break;
       }
     }
@@ -110,6 +140,7 @@ struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
 
   boost::shared_ptr<ContactDataAbstractTpl<Scalar> > contact;
   MatrixXs Arr_Ru;
+  ContactType contact_type;
   using Base::activation;
   using Base::cost;
   using Base::Lu;

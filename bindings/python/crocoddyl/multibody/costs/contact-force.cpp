@@ -19,6 +19,7 @@ void exposeCostContactForce() {
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameForce, int>(
           bp::args("self", "state", "activation", "fref", "nu"),
           "Initialize the contact force cost model.\n\n"
+          "Note that the activation.nr is lower / equals than 6.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param fref: reference contact force\n"
@@ -27,24 +28,36 @@ void exposeCostContactForce() {
           bp::args("self", "state", "activation", "fref"),
           "Initialize the contact force cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
+          "Note that the activation.nr is lower / equals than 6.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param fref: reference contact force\n"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, FrameForce, int>(
-          bp::args("self", "state", "fref", "nu"),
+      .def(bp::init<boost::shared_ptr<StateMultibody>, FrameForce, int, int>(
+          bp::args("self", "state", "fref", "nr", "nu"),
           "Initialize the contact force cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
-          "crocoddyl.ActivationModelQuad(6).\n"
+          "crocoddyl.ActivationModelQuad(nr).\n"
+          "Note that the nr is lower / equals than 6.\n"
           ":param state: state of the multibody system\n"
           ":param fref: reference contact force\n"
+          ":param nr: dimension of force vector (>= 6)\n"
           ":param nu: dimension of control vector"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, FrameForce, int>(
+          bp::args("self", "state", "fref", "nr"),
+          "Initialize the contact force cost model.\n\n"
+          "For this case the default activation model is quadratic, i.e.\n"
+          "crocoddyl.ActivationModelQuad(nr), and nu is equals to model.nv.\n"
+          "Note that the nr is lower / equals than 6.\n"
+          ":param state: state of the multibody system\n"
+          ":param fref: reference force\n"
+          ":param nr: dimension of force vector (>= 6)"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameForce>(
           bp::args("self", "state", "fref"),
           "Initialize the contact force cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(6), and nu is equals to model.nv.\n"
           ":param state: state of the multibody system\n"
-          ":param fref: reference force\n"))
+          ":param fref: reference force"))
       .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&,
                                            const Eigen::Ref<const Eigen::VectorXd>&,
                                            const Eigen::Ref<const Eigen::VectorXd>&)>(
