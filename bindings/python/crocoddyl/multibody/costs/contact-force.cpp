@@ -27,7 +27,7 @@ void exposeCostContactForce() {
       .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameForce>(
           bp::args("self", "state", "activation", "fref"),
           "Initialize the contact force cost model.\n\n"
-          "For this case the default nu is equals to model.nv.\n"
+          "For this case the default nu is equals to state.nv.\n"
           "Note that the activation.nr is lower / equals than 6.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
@@ -46,7 +46,7 @@ void exposeCostContactForce() {
           bp::args("self", "state", "fref", "nr"),
           "Initialize the contact force cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
-          "crocoddyl.ActivationModelQuad(nr), and nu is equals to model.nv.\n"
+          "crocoddyl.ActivationModelQuad(nr), and nu is equals to state.nv.\n"
           "Note that the nr is lower / equals than 6.\n"
           ":param state: state of the multibody system\n"
           ":param fref: reference force\n"
@@ -55,7 +55,7 @@ void exposeCostContactForce() {
           bp::args("self", "state", "fref"),
           "Initialize the contact force cost model.\n\n"
           "For this case the default activation model is quadratic, i.e.\n"
-          "crocoddyl.ActivationModelQuad(6), and nu is equals to model.nv.\n"
+          "crocoddyl.ActivationModelQuad(6), and nu is equals to state.nv.\n"
           ":param state: state of the multibody system\n"
           ":param fref: reference force"))
       .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&,
@@ -64,8 +64,8 @@ void exposeCostContactForce() {
           "calc", &CostModelContactForce::calc, bp::args("self", "data", "x", "u"),
           "Compute the contact force cost.\n\n"
           ":param data: cost data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input")
+          ":param x: state vector\n"
+          ":param u: control input")
       .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&,
                                            const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &CostModelAbstract::calc,
                                                                                       bp::args("self", "data", "x"))
