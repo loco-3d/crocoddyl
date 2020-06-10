@@ -16,17 +16,22 @@ CONTACTS = crocoddyl.ContactModelMultiple(ROBOT_STATE, ACTUATION.nu)
 CONTACT_6D_1 = crocoddyl.ContactModel6D(
     ROBOT_STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId('r_sole'), pinocchio.SE3.Random()), ACTUATION.nu,
     pinocchio.utils.rand(2))
-CONTACT_6D_2 = crocoddyl.ContactModel6D(
-    ROBOT_STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId('l_sole'), pinocchio.SE3.Random()), ACTUATION.nu,
-    pinocchio.utils.rand(2))
+CONTACT_3D_2 = crocoddyl.ContactModel3D(
+    ROBOT_STATE, crocoddyl.FrameTranslation(ROBOT_MODEL.getFrameId('l_sole'),
+                                            pinocchio.SE3.Random().translation), ACTUATION.nu, pinocchio.utils.rand(2))
 CONTACTS.addContact("r_sole_contact", CONTACT_6D_1)
-CONTACTS.addContact("l_sole_contact", CONTACT_6D_2)
+CONTACTS.addContact("l_sole_contact", CONTACT_3D_2)
 COSTS = crocoddyl.CostModelSum(ROBOT_STATE, ACTUATION.nu)
 COSTS.addCost(
-    "force",
+    "force_6d",
     crocoddyl.CostModelContactForce(ROBOT_STATE,
                                     crocoddyl.FrameForce(ROBOT_MODEL.getFrameId('r_sole'), pinocchio.Force.Random()),
-                                    ACTUATION.nu), 1.)
+                                    6, ACTUATION.nu), 1.)
+COSTS.addCost(
+    "force_3d",
+    crocoddyl.CostModelContactForce(ROBOT_STATE,
+                                    crocoddyl.FrameForce(ROBOT_MODEL.getFrameId('l_sole'), pinocchio.Force.Random()),
+                                    3, ACTUATION.nu), 1.)
 MODEL = crocoddyl.DifferentialActionModelContactFwdDynamics(ROBOT_STATE, ACTUATION, CONTACTS, COSTS, 0., True)
 DATA = MODEL.createData()
 
