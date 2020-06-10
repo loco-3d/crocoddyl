@@ -347,7 +347,7 @@ void SolverDDP::allocateData() {
   Quuk_.resize(T);
 
   const std::size_t& ndx = problem_->get_ndx();
-  const std::size_t& nu = problem_->get_nu();
+  const std::size_t& nu = problem_->get_nu_max();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionModelAbstract>& model = models[t];

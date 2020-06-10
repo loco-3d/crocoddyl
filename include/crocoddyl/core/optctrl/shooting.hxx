@@ -24,16 +24,12 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       running_models_(running_models),
       nx_(running_models[0]->get_state()->get_nx()),
       ndx_(running_models[0]->get_state()->get_ndx()),
-      nu_(running_models[0]->get_nu()) {
-  // This routine is needed if we define an autonomous action model in the first node
-  if (nu_ == 0) {
-    for (std::size_t i = 1; i < T_; ++i) {
-      const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
-      const std::size_t& nu = model->get_nu();
-      if (nu > 0) {
-        nu_ = nu;
-        break;
-      }
+      nu_max_(running_models[0]->get_nu()) {
+  for (std::size_t i = 1; i < T_; ++i) {
+    const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
+    const std::size_t& nu = model->get_nu();
+    if (nu_max_ < nu) {
+      nu_max_ = nu;
     }
   }
   if (static_cast<std::size_t>(x0.size()) != nx_) {
@@ -49,10 +45,6 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
     if (model->get_state()->get_ndx() != ndx_) {
       throw_pretty("Invalid argument: "
                    << "ndx in " << i << " node is not consistent with the other nodes")
-    }
-    if (model->get_nu() != 0 && model->get_nu() != nu_) {
-      throw_pretty("Invalid argument: "
-                   << "nu in " << i << " node is not consistent with the other nodes")
     }
   }
   if (terminal_model_->get_state()->get_nx() != nx_) {
@@ -81,7 +73,14 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       running_datas_(running_datas),
       nx_(running_models[0]->get_state()->get_nx()),
       ndx_(running_models[0]->get_state()->get_ndx()),
-      nu_(running_models[0]->get_nu()) {
+      nu_max_(running_models[0]->get_nu()) {
+  for (std::size_t i = 1; i < T_; ++i) {
+    const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
+    const std::size_t& nu = model->get_nu();
+    if (nu_max_ < nu) {
+      nu_max_ = nu;
+    }
+  }
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty("Invalid argument: "
                  << "x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
@@ -103,10 +102,6 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       throw_pretty("Invalid argument: "
                    << "ndx in " << i << " node is not consistent with the other nodes")
     }
-    if (model->get_nu() != 0 && model->get_nu() != nu_) {
-      throw_pretty("Invalid argument: "
-                   << "nu in " << i << " node is not consistent with the other nodes")
-    }
     if (!model->checkData(data)) {
       throw_pretty("Invalid argument: "
                    << "action data in " << i << " node is not consistent with the action model")
@@ -126,7 +121,10 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(const ShootingProblemTpl<Scalar>&
       terminal_model_(problem.get_terminalModel()),
       terminal_data_(problem.get_terminalData()),
       running_models_(problem.get_runningModels()),
-      running_datas_(problem.get_runningDatas()) {}
+      running_datas_(problem.get_runningDatas()),
+      nx_(problem.get_nx()),
+      ndx_(problem.get_ndx()),
+      nu_max_(problem.get_nu_max()) {}
 
 template <typename Scalar>
 ShootingProblemTpl<Scalar>::~ShootingProblemTpl() {}
@@ -248,9 +246,9 @@ void ShootingProblemTpl<Scalar>::circularAppend(boost::shared_ptr<ActionModelAbs
     throw_pretty("Invalid argument: "
                  << "ndx node is not consistent with the other nodes")
   }
-  if (model->get_nu() != 0 && model->get_nu() != nu_) {
+  if (model->get_nu() > nu_max_) {
     throw_pretty("Invalid argument: "
-                 << "nu node is not consistent with the other nodes")
+                 << "nu node is not bigger than the maximun nu")
   }
 
   for (std::size_t i = 0; i < T_ - 1; ++i) {
@@ -271,9 +269,9 @@ void ShootingProblemTpl<Scalar>::circularAppend(boost::shared_ptr<ActionModelAbs
     throw_pretty("Invalid argument: "
                  << "ndx node is not consistent with the other nodes")
   }
-  if (model->get_nu() != 0 && model->get_nu() != nu_) {
+  if (model->get_nu() > nu_max_) {
     throw_pretty("Invalid argument: "
-                 << "nu node is not consistent with the other nodes")
+                 << "nu node is not bigger than the maximun nu")
   }
 
   for (std::size_t i = 0; i < T_ - 1; ++i) {
@@ -289,7 +287,8 @@ void ShootingProblemTpl<Scalar>::updateNode(std::size_t i, boost::shared_ptr<Act
                                             boost::shared_ptr<ActionDataAbstract> data) {
   if (i > T_ + 1) {
     throw_pretty("Invalid argument: "
-                 << "i is bigger than the allocated horizon (it should be lower than " + std::to_string(T_) + ")");
+                 << "i is bigger than the allocated horizon (it should be less than or equal to " +
+                        std::to_string(T_ + 1) + ")");
   }
   if (!model->checkData(data)) {
     throw_pretty("Invalid argument: "
@@ -303,9 +302,9 @@ void ShootingProblemTpl<Scalar>::updateNode(std::size_t i, boost::shared_ptr<Act
     throw_pretty("Invalid argument: "
                  << "ndx node is not consistent with the other nodes")
   }
-  if (model->get_nu() != 0 && model->get_nu() != nu_) {
+  if (model->get_nu() > nu_max_) {
     throw_pretty("Invalid argument: "
-                 << "nu node is not consistent with the other nodes")
+                 << "nu node is not bigger than the maximun nu")
   }
 
   if (i == T_ + 1) {
@@ -331,9 +330,9 @@ void ShootingProblemTpl<Scalar>::updateModel(std::size_t i, boost::shared_ptr<Ac
     throw_pretty("Invalid argument: "
                  << "ndx is not consistent with the other nodes")
   }
-  if (model->get_nu() != 0 && model->get_nu() != nu_) {
+  if (model->get_nu() > nu_max_) {
     throw_pretty("Invalid argument: "
-                 << "nu is not consistent with the other nodes")
+                 << "nu node is not bigger than the maximun nu")
   }
 
   if (i == T_ + 1) {
@@ -400,9 +399,6 @@ void ShootingProblemTpl<Scalar>::set_x0(const VectorXs& x0_in) {
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::set_runningModels(
     const std::vector<boost::shared_ptr<ActionModelAbstract> >& models) {
-  T_ = models.size();
-  running_models_.clear();
-  running_datas_.clear();
   for (std::size_t i = 0; i < T_; ++i) {
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
     if (model->get_state()->get_nx() != nx_) {
@@ -413,10 +409,17 @@ void ShootingProblemTpl<Scalar>::set_runningModels(
       throw_pretty("Invalid argument: "
                    << "ndx in " << i << " node is not consistent with the other nodes")
     }
-    if (model->get_nu() != 0 && model->get_nu() != nu_) {
+    if (model->get_nu() > nu_max_) {
       throw_pretty("Invalid argument: "
-                   << "nu in " << i << " node is not consistent with the other nodes")
+                   << "nu node is not bigger than the maximun nu")
     }
+  }
+
+  T_ = models.size();
+  running_models_.clear();
+  running_datas_.clear();
+  for (std::size_t i = 0; i < T_; ++i) {
+    const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
     running_datas_.push_back(model->createData());
   }
 }
@@ -446,8 +449,8 @@ const std::size_t& ShootingProblemTpl<Scalar>::get_ndx() const {
 }
 
 template <typename Scalar>
-const std::size_t& ShootingProblemTpl<Scalar>::get_nu() const {
-  return nu_;
+const std::size_t& ShootingProblemTpl<Scalar>::get_nu_max() const {
+  return nu_max_;
 }
 
 }  // namespace crocoddyl
