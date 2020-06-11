@@ -69,27 +69,31 @@ void exposeContactMultiple() {
            ":param name: contact name\n"
            ":param active: contact status (true for active and false for inactive)")
       .def("calc", &ContactModelMultiple::calc, bp::args("self", "data", "x"),
-           "Compute the total contact Jacobian and drift.\n\n"
+           "Compute the contact Jacobian and contact acceleration.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
            ":param data: contact data\n"
            ":param x: state vector")
       .def("calcDiff", &ContactModelMultiple::calcDiff, bp::args("self", "data", "x"),
-           "Compute the derivatives of the total contact holonomic constraint.\n\n"
+           "Compute the derivatives of the contact holonomic constraint.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
            ":param data: contact data\n"
            ":param x: state vector\n")
       .def("updateAcceleration", &ContactModelMultiple::updateAcceleration, bp::args("self", "data", "dv"),
-           "Update the constrained acceleration.\n\n"
+           "Update the constrained system acceleration.\n\n"
            ":param data: contact data\n"
            ":param dv: constrained acceleration (dimension nv)")
       .def("updateForce", &ContactModelMultiple::updateForce, bp::args("self", "data", "force"),
-           "Convert the force into a stack of spatial forces.\n\n"
+           "Update the spatial force in frame coordinate.\n\n"
            ":param data: contact data\n"
            ":param force: force vector (dimension nc)")
+      .def("updateAccelerationDiff", &ContactModelMultiple::updateAccelerationDiff, bp::args("self", "data", "ddv_dx"),
+           "Update the Jacobian of the constrained system acceleration.\n\n"
+           ":param data: contact data\n"
+           ":param ddv_dx: Jacobian of the system acceleration in generalized coordinates (dimension nv*ndx)")
       .def("updateForceDiff", &ContactModelMultiple::updateForceDiff, bp::args("self", "data", "df_dx", "df_du"),
-           "Update the Jacobians of the force.\n\n"
+           "Update the Jacobians of the spatial force defined in frame coordinates.\n\n"
            ":param data: contact data\n"
            ":param df_dx: Jacobian of the force with respect to the state (dimension nc*ndx)\n"
            ":param df_du: Jacobian of the force with respect to the control (dimension nc*nu)")
@@ -137,22 +141,27 @@ void exposeContactMultiple() {
           ":param model: multicontact model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("Jc", bp::make_getter(&ContactDataMultiple::Jc, bp::return_internal_reference<>()),
-                    bp::make_setter(&ContactDataMultiple::Jc), "Jacobian for all contacts (active and inactive)")
-      .add_property("a0", bp::make_getter(&ContactDataMultiple::a0, bp::return_internal_reference<>()),
-                    bp::make_setter(&ContactDataMultiple::a0),
-                    "desired acceleration for all contacts (active and inactive)")
-      .add_property("da0_dx", bp::make_getter(&ContactDataMultiple::da0_dx, bp::return_internal_reference<>()),
-                    bp::make_setter(&ContactDataMultiple::da0_dx),
-                    "Jacobian of the desired acceleration for all contacts (active and inactive)")
+                    bp::make_setter(&ContactDataMultiple::Jc),
+                    "contact Jacobian in frame coordinate (memory defined for active and inactive contacts)")
+      .add_property(
+          "a0", bp::make_getter(&ContactDataMultiple::a0, bp::return_internal_reference<>()),
+          bp::make_setter(&ContactDataMultiple::a0),
+          "desired spatial contact acceleration in frame coordinate (memory defined for active and inactive contacts)")
+      .add_property(
+          "da0_dx", bp::make_getter(&ContactDataMultiple::da0_dx, bp::return_internal_reference<>()),
+          bp::make_setter(&ContactDataMultiple::da0_dx),
+          "Jacobian of the desired spatial contact acceleration in frame coordinate (memory defined for active and "
+          "inactive contacts)")
       .add_property("dv", bp::make_getter(&ContactDataMultiple::dv, bp::return_internal_reference<>()),
-                    bp::make_setter(&ContactDataMultiple::dv), "constrained acceleration in generalized coordinates")
+                    bp::make_setter(&ContactDataMultiple::dv),
+                    "constrained system acceleration in generalized coordinates")
       .add_property("ddv_dx", bp::make_getter(&ContactDataMultiple::ddv_dx, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataMultiple::ddv_dx),
-                    "Jacobian of the constrained acceleration in generalized coordinates")
+                    "Jacobian of the constrained system acceleration in generalized coordinates")
       .add_property("contacts",
                     bp::make_getter(&ContactDataMultiple::contacts, bp::return_value_policy<bp::return_by_value>()),
                     "stack of contacts data")
-      .def_readwrite("fext", &ContactDataMultiple::fext, "external spatial forces");
+      .def_readwrite("fext", &ContactDataMultiple::fext, "external spatial forces in join coordinates");
 }
 
 }  // namespace python
