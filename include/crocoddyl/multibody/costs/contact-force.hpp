@@ -23,21 +23,22 @@ namespace crocoddyl {
 enum ContactType { Contact3D, Contact6D, Undefined };
 
 /**
- * @brief Define a force cost function
+ * @brief Define a contact force cost function
  *
- * It builds a cost function to track a desired force of a given frame placement, i.e. the cost residual is defined as:
- * \f{equation*}{
- *   \mathbf{r} = \boldsymbol{\lambda}_i - \boldsymbol{\lambda}_i^{desired}
- * \f}
- * where \f$\boldsymbol{\lambda}_i\in\mathbb{R}^{nc}\f$ is the contact force of the frame \f$i\f$, and
- * \f$\boldsymbol{\lambda}_i^{desired}\in\mathbb{R}^{nc}\f$ is the reference force value, and \f$nc\f$ defines the
- * dimension of contact force. The cost is computed from the residual vector through an user defined action model.
- * Additionally, the reference force vector is defined using FrameForceTpl even for cased where \f$nc <
- * 6\f$.
+ * It builds a cost function that tracks a desired spatial force defined in the frame coordinate
+ * \f${}^o\underline{\boldsymbol{\lambda}}_c\in\mathbb{R}^{nc}\f$, i.e. the cost residual vector is described as:
+ * \f{equation*}{ \mathbf{r} = {}^o\underline{\boldsymbol{\lambda}}_c -
+ * {}^o\underline{\boldsymbol{\lambda}}_c^{reference},\f} where
+ * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$ is the reference spatial contact force in the frame
+ * coordinate \f$c\f$, and \f$nc\f$ defines the dimension of constrained space \f$(nc < 6)\f$. The cost is computed,
+ * from the residual vector \f$\mathbf{r}\in\mathbb{R}^{nc}\f$, through an user defined activation model. Additionally,
+ * the reference force vector is defined using FrameForceTpl even for cases where \f$nc < 6\f$.
  *
- * The force vector and its derivatives are computed by DifferentialActionModelContactFwdDynamicsTpl. These values are
- * stored in a shared data (i.e. DataCollectorContactTpl). Note that this cost function cannot be used with other
- * action models.
+ * The force vector \f${}^o\underline{\boldsymbol{\lambda}}_c\f$ and its derivatives
+ * \f$\left(\frac{\partial{}^o\underline{\boldsymbol{\lambda}}_c}{\partial\mathbf{x}},
+ * \frac{\partial{}^o\underline{\boldsymbol{\lambda}}_c}{\partial\mathbf{u}}\right)\f$ are computed by
+ * DifferentialActionModelContactFwdDynamicsTpl. These values are stored in a shared data (i.e.
+ * DataCollectorContactTpl). Note that this cost function cannot be used with other action models.
  *
  * \sa DifferentialActionModelContactFwdDynamicsTpl, DataCollectorContactTpl, ActivationModelAbstractTpl
  */
@@ -67,7 +68,8 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    *
    * @param[in] state       Multibody state
    * @param[in] activation  Activation model
-   * @param[in] fref        Reference contact force
+   * @param[in] fref        Reference spatial contact force in the frame coordinate
+   * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
    * @param[in] nu          Dimension of control vector
    */
   CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
@@ -82,7 +84,8 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    *
    * @param[in] state       Multibody state
    * @param[in] activation  Activation model
-   * @param[in] fref        Reference contact force
+   * @param[in] fref        Reference spatial contact force in the frame coordinate
+   * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
    */
   CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
                            boost::shared_ptr<ActivationModelAbstract> activation, const FrameForce& fref);
@@ -94,7 +97,8 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    * Note that the `nr`, defined in the activation model, has to be lower / equals than 6.
    *
    * @param[in] state       Multibody state
-   * @param[in] fref        Reference contact force
+   * @param[in] fref        Reference spatial contact force in the frame coordinate
+   * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
    * @param[in] nr          Dimension of residual vector
    * @param[in] nu          Dimension of control vector
    */
@@ -108,7 +112,8 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    * `state->get_nv()`. Note that the `nr`, defined in the activation model, has to be lower / equals than 6.
    *
    * @param[in] state       Multibody state
-   * @param[in] fref        Reference contact force
+   * @param[in] fref        Reference spatial contact force in the frame coordinate
+   * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
    * @param[in] nr          Dimension of residual vector
    */
   CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref, const std::size_t& nr);
@@ -120,7 +125,8 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    * equals to 6 and `state->get_nv()`, respectively.
    *
    * @param[in] state       Multibody state
-   * @param[in] fref        Reference contact force
+   * @param[in] fref        Reference spatial contact force in the frame coordinate
+   * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
    */
   CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref);
   virtual ~CostModelContactForceTpl();
@@ -132,8 +138,8 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    * DataCollectorContactTpl.
    *
    * @param[in] data  Contact force data
-   * @param[in] x     State vector
-   * @param[in] u     Control input
+   * @param[in] x     State vector \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
@@ -141,11 +147,12 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Compute the derivatives of the contact force cost
    *
-   * * The force derivatives are computed by DifferentialActionModelContactFwdDynamicsTpl and stored in
+   * The force derivatives are computed by DifferentialActionModelContactFwdDynamicsTpl and stored in
    * DataCollectorContactTpl.
+   *
    * @param[in] data  Contact force data
-   * @param[in] x     State vector
-   * @param[in] u     Control input
+   * @param[in] x     State vector \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
@@ -162,23 +169,27 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
   /**
-   * @brief Return the contact force
+   * @brief Return the reference spatial contact force in the frame coordinate
+   * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
    */
   const FrameForce& get_fref() const;
 
   /**
-   * @brief Modify the contact force
+   * @brief Modify the reference spatial contact force in the frame coordinate
+   * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
    */
   void set_fref(const FrameForce& fref);
 
  protected:
   /**
-   * @brief Return the contact force
+   * @brief Return the reference spatial contact force in the frame coordinate
+   * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
    */
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
 
   /**
-   * @brief Modify the contact force
+   * @brief Modify the reference spatial contact force in the frame coordinate
+   * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
    */
   virtual void get_referenceImpl(const std::type_info& ti, void* pv);
 
@@ -188,7 +199,8 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::unone_;
 
  protected:
-  FrameForce fref_;  //!< Contact force
+  FrameForce fref_;  //!< Reference spatial contact force in the frame coordinate
+                     //!< \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
 };
 
 template <typename _Scalar>
@@ -272,6 +284,7 @@ struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
 };
 
 }  // namespace crocoddyl
+
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */

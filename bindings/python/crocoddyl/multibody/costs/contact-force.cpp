@@ -22,7 +22,7 @@ void exposeCostContactForce() {
           "Note that the activation.nr is lower / equals than 6.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
-          ":param fref: reference contact force\n"
+          ":param fref: reference spatial contact force in the frame coordinate\n"
           ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameForce>(
           bp::args("self", "state", "activation", "fref"),
@@ -31,7 +31,7 @@ void exposeCostContactForce() {
           "Note that the activation.nr is lower / equals than 6.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
-          ":param fref: reference contact force\n"))
+          ":param fref: reference spatial contact force in the frame coordinate\n"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameForce, int, int>(
           bp::args("self", "state", "fref", "nr", "nu"),
           "Initialize the contact force cost model.\n\n"
@@ -39,7 +39,7 @@ void exposeCostContactForce() {
           "crocoddyl.ActivationModelQuad(nr).\n"
           "Note that the nr is lower / equals than 6.\n"
           ":param state: state of the multibody system\n"
-          ":param fref: reference contact force\n"
+          ":param fref: reference spatial contact force in the frame coordinate\n"
           ":param nr: dimension of force vector (>= 6)\n"
           ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameForce, int>(
@@ -49,7 +49,7 @@ void exposeCostContactForce() {
           "crocoddyl.ActivationModelQuad(nr), and nu is equals to state.nv.\n"
           "Note that the nr is lower / equals than 6.\n"
           ":param state: state of the multibody system\n"
-          ":param fref: reference force\n"
+          ":param fref: reference spatial contact force in the frame coordinate\n"
           ":param nr: dimension of force vector (>= 6)"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameForce>(
           bp::args("self", "state", "fref"),
@@ -57,7 +57,7 @@ void exposeCostContactForce() {
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(6), and nu is equals to state.nv.\n"
           ":param state: state of the multibody system\n"
-          ":param fref: reference force"))
+          ":param fref: reference spatial contact force in the frame coordinate"))
       .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&,
                                            const Eigen::Ref<const Eigen::VectorXd>&,
                                            const Eigen::Ref<const Eigen::VectorXd>&)>(
@@ -75,8 +75,8 @@ void exposeCostContactForce() {
           "calcDiff", &CostModelContactForce::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the contact force cost.\n\n"
           ":param data: action data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input\n")
+          ":param x: state vector\n"
+          ":param u: control input\n")
       .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&,
                                            const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"))
@@ -87,11 +87,11 @@ void exposeCostContactForce() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
            ":return cost data.")
-      .add_property("reference",
-                    bp::make_function(&CostModelContactForce::get_fref, bp::return_internal_reference<>()),
-                    &CostModelContactForce::set_reference<FrameForce>, "reference frame force")
+      .add_property(
+          "reference", bp::make_function(&CostModelContactForce::get_fref, bp::return_internal_reference<>()),
+          &CostModelContactForce::set_reference<FrameForce>, "reference spatial contact force in the frame coordinate")
       .add_property("fref", bp::make_function(&CostModelContactForce::get_fref, bp::return_internal_reference<>()),
-                    &CostModelContactForce::set_fref, "reference contact force");
+                    &CostModelContactForce::set_fref, "reference spatial contact force in the frame coordinate");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataContactForce> >();
 
