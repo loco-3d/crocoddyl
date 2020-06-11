@@ -39,6 +39,7 @@ void exposeMultibody() {
   exposeCostFrameRotation();
   exposeCostFrameVelocity();
   exposeCostContactForce();
+  exposeCostContactImpulse();
   exposeCostContactFrictionCone();
   exposeCostImpulseCoM();
   exposeCostImpulseFrictionCone();
