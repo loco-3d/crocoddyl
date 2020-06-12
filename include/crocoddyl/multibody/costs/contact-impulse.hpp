@@ -25,7 +25,7 @@ enum ImpulseType { Impulse3D, Impulse6D, Undefined };
 /**
  * @brief Define a contact impulse cost function
  *
- * It builds a cost function that tracks a desired spatial impulse defined in the frame coordinate
+ * It builds a cost function that tracks a desired spatial impulse defined in the contact coordinate
  * \f${}^o\underline{\boldsymbol{\Lambda}}_c\in\mathbb{R}^{nc}\f$, i.e. the cost residual vector is described as:
  * \f{equation*}{ \mathbf{r} = {}^o\underline{\boldsymbol{\Lambda}}_c -
  * {}^o\underline{\boldsymbol{\Lambda}}_c^{reference},\f} where
@@ -68,7 +68,7 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
    *
    * @param[in] state       Multibody state
    * @param[in] activation  Activation model
-   * @param[in] fref        Reference spatial contact impulse in the frame coordinate
+   * @param[in] fref        Reference spatial contact impulse in the contact coordinate
    */
   CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state,
                              boost::shared_ptr<ActivationModelAbstract> activation, const FrameForce& fref);
@@ -80,7 +80,7 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
    * Note that the `nr`, defined in the activation model, has to be lower / equals than 6.
    *
    * @param[in] state       Multibody state
-   * @param[in] fref        Reference spatial contact impulse in the frame coordinate
+   * @param[in] fref        Reference spatial contact impulse in the contact coordinate
    * \f${}^o\underline{\boldsymbol{\Lambda}}_c^{reference}\f$
    * @param[in] nr          Dimension of residual vector
    */
@@ -93,7 +93,7 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
    * equals to 6.
    *
    * @param[in] state       Multibody state
-   * @param[in] fref        Reference spatial contact impulse in the frame coordinate
+   * @param[in] fref        Reference spatial contact impulse in the contact coordinate
    * \f${}^o\underline{\boldsymbol{\Lambda}}_c^{reference}\f$
    */
   CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref);
@@ -135,26 +135,26 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
   /**
-   * @brief Return the reference spatial contact impulse in the frame coordinate
+   * @brief Return the reference spatial contact impulse in the contact coordinate
    * \f${}^o\underline{\boldsymbol{\Lambda}}_c^{reference}\f$
    */
   const FrameForce& get_fref() const;
 
   /**
-   * @brief Modify the reference spatial contact impulse in the frame coordinate
+   * @brief Modify the reference spatial contact impulse in the contact coordinate
    * \f${}^o\underline{\boldsymbol{\Lambda}}_c^{reference}\f$
    */
   void set_fref(const FrameForce& fref);
 
  protected:
   /**
-   * @brief Return the reference spatial contact impulse in the frame coordinate
+   * @brief Return the reference spatial contact impulse in the contact coordinate
    * \f${}^o\underline{\boldsymbol{\Lambda}}_c^{reference}\f$
    */
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
 
   /**
-   * @brief Modify the reference spatial contact impulse in the frame coordinate
+   * @brief Modify the reference spatial contact impulse in the contact coordinate
    * \f${}^o\underline{\boldsymbol{\Lambda}}_c^{reference}\f$
    */
   virtual void get_referenceImpl(const std::type_info& ti, void* pv);
@@ -165,7 +165,7 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::unone_;
 
  protected:
-  FrameForce fref_;  //!< Reference spatial contact impulse in the frame coordinate
+  FrameForce fref_;  //!< Reference spatial contact impulse in the contact coordinate
                      //!< \f${}^o\underline{\boldsymbol{\Lambda}}_c^{reference}\f$
 };
 

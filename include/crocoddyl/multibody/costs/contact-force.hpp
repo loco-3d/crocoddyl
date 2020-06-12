@@ -25,7 +25,7 @@ enum ContactType { Contact3D, Contact6D, Undefined };
 /**
  * @brief Define a contact force cost function
  *
- * It builds a cost function that tracks a desired spatial force defined in the frame coordinate
+ * It builds a cost function that tracks a desired spatial force defined in the contact coordinate
  * \f${}^o\underline{\boldsymbol{\lambda}}_c\in\mathbb{R}^{nc}\f$, i.e. the cost residual vector is described as:
  * \f{equation*}{ \mathbf{r} = {}^o\underline{\boldsymbol{\lambda}}_c -
  * {}^o\underline{\boldsymbol{\lambda}}_c^{reference},\f} where
@@ -68,7 +68,7 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    *
    * @param[in] state       Multibody state
    * @param[in] activation  Activation model
-   * @param[in] fref        Reference spatial contact force in the frame coordinate
+   * @param[in] fref        Reference spatial contact force in the contact coordinate
    * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
    * @param[in] nu          Dimension of control vector
    */
@@ -84,7 +84,7 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    *
    * @param[in] state       Multibody state
    * @param[in] activation  Activation model
-   * @param[in] fref        Reference spatial contact force in the frame coordinate
+   * @param[in] fref        Reference spatial contact force in the contact coordinate
    * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
    */
   CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
@@ -97,7 +97,7 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    * Note that the `nr`, defined in the activation model, has to be lower / equals than 6.
    *
    * @param[in] state       Multibody state
-   * @param[in] fref        Reference spatial contact force in the frame coordinate
+   * @param[in] fref        Reference spatial contact force in the contact coordinate
    * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
    * @param[in] nr          Dimension of residual vector
    * @param[in] nu          Dimension of control vector
@@ -112,7 +112,7 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    * `state->get_nv()`. Note that the `nr`, defined in the activation model, has to be lower / equals than 6.
    *
    * @param[in] state       Multibody state
-   * @param[in] fref        Reference spatial contact force in the frame coordinate
+   * @param[in] fref        Reference spatial contact force in the contact coordinate
    * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
    * @param[in] nr          Dimension of residual vector
    */
@@ -125,7 +125,7 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    * equals to 6 and `state->get_nv()`, respectively.
    *
    * @param[in] state       Multibody state
-   * @param[in] fref        Reference spatial contact force in the frame coordinate
+   * @param[in] fref        Reference spatial contact force in the contact coordinate
    * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
    */
   CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref);
@@ -169,26 +169,26 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
   /**
-   * @brief Return the reference spatial contact force in the frame coordinate
+   * @brief Return the reference spatial contact force in the contact coordinate
    * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
    */
   const FrameForce& get_fref() const;
 
   /**
-   * @brief Modify the reference spatial contact force in the frame coordinate
+   * @brief Modify the reference spatial contact force in the contact coordinate
    * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
    */
   void set_fref(const FrameForce& fref);
 
  protected:
   /**
-   * @brief Return the reference spatial contact force in the frame coordinate
+   * @brief Return the reference spatial contact force in the contact coordinate
    * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
    */
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
 
   /**
-   * @brief Modify the reference spatial contact force in the frame coordinate
+   * @brief Modify the reference spatial contact force in the contact coordinate
    * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
    */
   virtual void get_referenceImpl(const std::type_info& ti, void* pv);
@@ -199,7 +199,7 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::unone_;
 
  protected:
-  FrameForce fref_;  //!< Reference spatial contact force in the frame coordinate
+  FrameForce fref_;  //!< Reference spatial contact force in the contact coordinate
                      //!< \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
 };
 

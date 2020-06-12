@@ -22,7 +22,7 @@ void exposeCostContactImpulse() {
           "Note that the activation.nr is lower / equals than 6.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
-          ":param fref: reference spatial contact impulse in the frame coordinate"))
+          ":param fref: reference spatial contact impulse in the contact coordinate"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameForce, int>(
           bp::args("self", "state", "fref", "nr"),
           "Initialize the contact impulse cost model.\n\n"
@@ -30,7 +30,7 @@ void exposeCostContactImpulse() {
           "crocoddyl.ActivationModelQuad(nr).\n"
           "Note that the nr is lower / equals than 6.\n"
           ":param state: state of the multibody system\n"
-          ":param fref: reference spatial contact impulse in the frame coordinate\n"
+          ":param fref: reference spatial contact impulse in the contact coordinate\n"
           ":param nr: dimension of impulse vector (>= 6)"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameForce>(
           bp::args("self", "state", "fref"),
@@ -38,7 +38,7 @@ void exposeCostContactImpulse() {
           "For this case the default activation model is quadratic, i.e.\n"
           "crocoddyl.ActivationModelQuad(6).\n"
           ":param state: state of the multibody system\n"
-          ":param fref: reference spatial contact impulse in the frame coordinate"))
+          ":param fref: reference spatial contact impulse in the contact coordinate"))
       .def<void (CostModelContactImpulse::*)(const boost::shared_ptr<CostDataAbstract>&,
                                              const Eigen::Ref<const Eigen::VectorXd>&,
                                              const Eigen::Ref<const Eigen::VectorXd>&)>(
@@ -71,9 +71,9 @@ void exposeCostContactImpulse() {
       .add_property("reference",
                     bp::make_function(&CostModelContactImpulse::get_fref, bp::return_internal_reference<>()),
                     &CostModelContactImpulse::set_reference<FrameForce>,
-                    "reference spatial contact impulse in the frame coordinate")
+                    "reference spatial contact impulse in the contact coordinate")
       .add_property("fref", bp::make_function(&CostModelContactImpulse::get_fref, bp::return_internal_reference<>()),
-                    &CostModelContactImpulse::set_fref, "reference spatial contact impulse in the frame coordinate");
+                    &CostModelContactImpulse::set_fref, "reference spatial contact impulse in the contact coordinate");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataContactImpulse> >();
 
