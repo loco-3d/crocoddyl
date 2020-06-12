@@ -38,6 +38,7 @@ DATA = MODEL.createData()
 
 # Created DAM numdiff
 MODEL_ND = crocoddyl.DifferentialActionModelNumDiff(MODEL)
+MODEL_ND.disturbance *= 10
 dnum = MODEL_ND.createData()
 
 x = ROBOT_STATE.rand()
@@ -77,6 +78,7 @@ DATA = MODEL.createData()
 
 # Created DAM numdiff
 MODEL_ND = crocoddyl.ActionModelNumDiff(MODEL)
+MODEL_ND.disturbance *= 10
 dnum = MODEL_ND.createData()
 
 x = ROBOT_STATE.rand()
