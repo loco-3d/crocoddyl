@@ -79,7 +79,6 @@ class SolverFDDP : public SolverDDP {
    * @brief Update internal values for computing the expected improvement
    */
   void updateExpectedImprovement();
-  virtual double calcDiff();
   virtual void forwardPass(const double& stepLength);
 
   /**
