@@ -105,8 +105,9 @@ class ActivationModelQuadraticBarrierTpl : public ActivationModelAbstractTpl<_Sc
 
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
     data->Ar = (d->rlb_min_ + d->rub_max_).matrix();
-    data->Arr.diagonal() =
-      (((r - bounds_.lb).array() <= Scalar(0.)) + ((r - bounds_.ub).array() >= Scalar(0.))).matrix().template cast<Scalar>();
+    data->Arr.diagonal() = (((r - bounds_.lb).array() <= Scalar(0.)) + ((r - bounds_.ub).array() >= Scalar(0.)))
+                               .matrix()
+                               .template cast<Scalar>();
   };
 
   virtual boost::shared_ptr<ActivationDataAbstract> createData() {

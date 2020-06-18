@@ -87,9 +87,10 @@ void exposeCostContactForce() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
            ":return cost data.")
-      .add_property(
-          "reference", bp::make_function(&CostModelContactForce::get_fref, bp::return_internal_reference<>()),
-          &CostModelContactForce::set_reference<FrameForce>, "reference spatial contact force in the contact coordinates")
+      .add_property("reference",
+                    bp::make_function(&CostModelContactForce::get_fref, bp::return_internal_reference<>()),
+                    &CostModelContactForce::set_reference<FrameForce>,
+                    "reference spatial contact force in the contact coordinates")
       .add_property("fref", bp::make_function(&CostModelContactForce::get_fref, bp::return_internal_reference<>()),
                     &CostModelContactForce::set_fref, "reference spatial contact force in the contact coordinates");
 
