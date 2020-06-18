@@ -45,7 +45,7 @@ SET(PROJECT_USE_CMAKE_EXPORT True)
 OPTION(ENABLE_VECTORIZATION "Enable vectorization and further processor-related optimizations" OFF)
 OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" OFF)
 OPTION(BUILD_UNIT_TESTS "Build the unitary tests" OFF)
-OPTION(BUILD_BENCHMARK "Build the benchmark" OFF)
+OPTION(BUILD_BENCHMARK "Build the benchmark" ON)
 OPTION(BUILD_EXAMPLES "Build the examples" OFF)
 
 
@@ -67,7 +67,7 @@ ADD_OPTIONAL_DEPENDENCY("scipy")
 
 OPTION(BUILD_WITH_CODEGEN_SUPPORT "Build the library with the Code Generation support (required CppADCodeGen)" OFF)
 
-OPTION(BUILD_WITH_MULTITHREADS "Build the library with the Multithreading support (required OpenMP)" ON)
+OPTION(BUILD_WITH_MULTITHREADS "Build the library with the Multithreading support (required OpenMP)" OFF)
 IF(BUILD_WITH_MULTITHREADS)
   SET(BUILD_WITH_NTHREADS "4" CACHE STRING "Number of threads")
   string(REGEX MATCH "^[0-9]+$" BUILD_WITH_NTHREADS  ${BUILD_WITH_NTHREADS})
