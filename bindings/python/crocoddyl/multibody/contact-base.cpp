@@ -48,6 +48,9 @@ void exposeContactAbstract() {
            ":param data: contact data\n"
            ":param df_dx: Jacobian of the force with respect to the state\n"
            ":param df_du: Jacobian of the force with respect to the control")
+      .def("setZeroForce", &ContactModelAbstract_wrap::setZeroForce, bp::args("self", "data"),
+           "Set zero the spatial force.\n\n"
+           ":param data: contact data")
       .def("createData", &ContactModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the contact data.\n\n"
