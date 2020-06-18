@@ -104,7 +104,7 @@ class DifferentialActionModelAbstractTpl {
 
   /**
    * @copybrief
-   * 
+   *
    * @param[in] data  Differential action data
    * @param[in] x     State point
    */
@@ -112,7 +112,7 @@ class DifferentialActionModelAbstractTpl {
 
   /**
    * @copybrief
-   * 
+   *
    * @param[in] data  Differential action data
    * @param[in] x     State point
    */
