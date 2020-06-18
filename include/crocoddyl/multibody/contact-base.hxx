@@ -43,6 +43,12 @@ void ContactModelAbstractTpl<Scalar>::setZeroForce(const boost::shared_ptr<Conta
 }
 
 template <typename Scalar>
+void ContactModelAbstractTpl<Scalar>::setZeroForceDiff(const boost::shared_ptr<ContactDataAbstract>& data) const {
+  data->df_dx.setZero();
+  data->df_du.setZero();
+}
+
+template <typename Scalar>
 boost::shared_ptr<ContactDataAbstractTpl<Scalar> > ContactModelAbstractTpl<Scalar>::createData(
     pinocchio::DataTpl<Scalar>* const data) {
   return boost::allocate_shared<ContactDataAbstract>(Eigen::aligned_allocator<ContactDataAbstract>(), this, data);

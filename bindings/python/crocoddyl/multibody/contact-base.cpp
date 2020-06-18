@@ -51,6 +51,9 @@ void exposeContactAbstract() {
       .def("setZeroForce", &ContactModelAbstract_wrap::setZeroForce, bp::args("self", "data"),
            "Set zero the spatial force.\n\n"
            ":param data: contact data")
+      .def("setZeroForceDiff", &ContactModelAbstract_wrap::setZeroForceDiff, bp::args("self", "data"),
+           "Set zero the derivatives of the spatial force.\n\n"
+           ":param data: contact data")
       .def("createData", &ContactModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the contact data.\n\n"

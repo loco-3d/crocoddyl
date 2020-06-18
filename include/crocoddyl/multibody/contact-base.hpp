@@ -42,6 +42,7 @@ class ContactModelAbstractTpl {
   void updateForceDiff(const boost::shared_ptr<ContactDataAbstract>& data, const MatrixXs& df_dx,
                        const MatrixXs& df_du) const;
   void setZeroForce(const boost::shared_ptr<ContactDataAbstract>& data) const;
+  void setZeroForceDiff(const boost::shared_ptr<ContactDataAbstract>& data) const;
 
   virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 

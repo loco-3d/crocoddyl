@@ -224,15 +224,16 @@ void ContactModelMultipleTpl<Scalar>::updateForceDiff(const boost::shared_ptr<Co
   for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const boost::shared_ptr<ContactItem>& m_i = it_m->second;
+    const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+    assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
     if (m_i->active) {
-      const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
-      assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
-
       std::size_t const& nc_i = m_i->contact->get_nc();
       const Eigen::Block<const MatrixXs> df_dx_i = df_dx.block(nc, 0, nc_i, ndx);
       const Eigen::Block<const MatrixXs> df_du_i = df_du.block(nc, 0, nc_i, nu_);
       m_i->contact->updateForceDiff(d_i, df_dx_i, df_du_i);
       nc += nc_i;
+    } else {
+      m_i->contact->setZeroForceDiff(d_i);
     }
   }
 }
