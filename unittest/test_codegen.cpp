@@ -194,7 +194,7 @@ const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > build_bipeda
   boost::shared_ptr<CostModelAbstract> comCost =
       boost::make_shared<CostModelCoMPosition>(state, Vector3s::Zero(), actuation->get_nu());
   boost::shared_ptr<CostModelAbstract> contactForceCost = boost::make_shared<CostModelContactForce>(
-      state, FrameForce(model.getFrameId(RF), pinocchio::ForceTpl<Scalar>::Zero()), actuation->get_nu());
+      state, FrameForce(model.getFrameId(RF), pinocchio::ForceTpl<Scalar>::Zero()), 6, actuation->get_nu());
   boost::shared_ptr<CostModelAbstract> xRegCost = boost::make_shared<CostModelState>(state, actuation->get_nu());
   boost::shared_ptr<CostModelAbstract> uRegCost = boost::make_shared<CostModelControl>(state, actuation->get_nu());
 
