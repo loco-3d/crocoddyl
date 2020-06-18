@@ -165,15 +165,16 @@ void ImpulseModelMultipleTpl<Scalar>::updateForce(const boost::shared_ptr<Impuls
   for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const boost::shared_ptr<ImpulseItem>& m_i = it_m->second;
+    const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
+    assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between data and model");
     if (m_i->active) {
-      const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
-      assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between data and model");
-
       const std::size_t& ni_i = m_i->impulse->get_ni();
       const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i = force.segment(ni, ni_i);
       m_i->impulse->updateForce(d_i, force_i);
       data->fext[d_i->joint] = d_i->f;
       ni += ni_i;
+    } else {
+      m_i->impulse->setZeroForce(d_i);
     }
   }
 }

@@ -173,15 +173,16 @@ void ContactModelMultipleTpl<Scalar>::updateForce(const boost::shared_ptr<Contac
   for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const boost::shared_ptr<ContactItem>& m_i = it_m->second;
+    const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+    assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
     if (m_i->active) {
-      const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
-      assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
-
       const std::size_t& nc_i = m_i->contact->get_nc();
       const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i = force.segment(nc, nc_i);
       m_i->contact->updateForce(d_i, force_i);
       data->fext[d_i->joint] = d_i->f;
       nc += nc_i;
+    } else {
+      m_i->contact->setZeroForce(d_i);
     }
   }
 }

@@ -29,6 +29,11 @@ void ImpulseModelAbstractTpl<Scalar>::updateForceDiff(const boost::shared_ptr<Im
 }
 
 template <typename Scalar>
+void ImpulseModelAbstractTpl<Scalar>::setZeroForce(const boost::shared_ptr<ImpulseDataAbstract>& data) const {
+  data->f.setZero();
+}
+
+template <typename Scalar>
 boost::shared_ptr<ImpulseDataAbstractTpl<Scalar> > ImpulseModelAbstractTpl<Scalar>::createData(
     pinocchio::DataTpl<Scalar>* const data) {
   return boost::allocate_shared<ImpulseDataAbstract>(Eigen::aligned_allocator<ImpulseDataAbstract>(), this, data);
