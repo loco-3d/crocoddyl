@@ -73,7 +73,8 @@ void exposeCostContactImpulse() {
                     &CostModelContactImpulse::set_reference<FrameForce>,
                     "reference spatial contact impulse in the contact coordinates")
       .add_property("fref", bp::make_function(&CostModelContactImpulse::get_fref, bp::return_internal_reference<>()),
-                    &CostModelContactImpulse::set_fref, "reference spatial contact impulse in the contact coordinates");
+                    &CostModelContactImpulse::set_fref,
+                    "reference spatial contact impulse in the contact coordinates");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataContactImpulse> >();
 

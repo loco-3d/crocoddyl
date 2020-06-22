@@ -307,7 +307,7 @@ void ShootingProblemTpl<Scalar>::updateNode(std::size_t i, boost::shared_ptr<Act
                  << "nu node is not bigger than the maximun nu")
   }
 
-  if (i == T_ + 1) {
+  if (i == T_) {
     terminal_model_ = model;
     terminal_data_ = data;
   } else {
