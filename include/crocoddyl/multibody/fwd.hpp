@@ -150,6 +150,11 @@ class CostModelImpulseFrictionConeTpl;
 template <typename Scalar>
 struct CostDataImpulseFrictionConeTpl;
 
+template <typename Scalar>
+class CostModelContactCoPPositionTpl;
+template <typename Scalar>
+struct CostDataContactCoPPositionTpl;
+
 // impulse
 template <typename Scalar>
 class ImpulseModelAbstractTpl;

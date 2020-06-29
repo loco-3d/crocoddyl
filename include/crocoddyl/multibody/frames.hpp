@@ -136,6 +136,25 @@ struct FrameFrictionConeTpl {
   FrictionCone oRf;
 };
 
+template <typename _Scalar>
+struct FrameFootGeometryTpl {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef typename MathBaseTpl<Scalar>::Vector2s Vector2s;
+
+  explicit FrameFootGeometryTpl() : frame(0), dim(Vector2s::Zero()) {}
+  FrameFootGeometryTpl(const FrameFootGeometryTpl<Scalar>& value) : frame(value.frame), dim(value.dim) {}
+  FrameFootGeometryTpl(const FrameIndex& frame, const Vector2s& dim) : frame(frame), dim(dim) {}
+  friend std::ostream& operator<<(std::ostream& os, const FrameTranslationTpl<Scalar>& X) {
+    os << "      frame: " << X.frame << std::endl << "foot dimensions: " << std::endl << X.dim << std::endl;
+    return os;
+  }
+
+  FrameIndex frame; // name of the contact frame 
+  Vector2s dim; // dimension of the foot surface dim = (length, width)
+};
+
 }  // namespace crocoddyl
 
 #endif  // CROCODDYL_MULTIBODY_FRAMES_HPP_
