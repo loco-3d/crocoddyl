@@ -43,7 +43,7 @@ void CostModelContactCoPPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDa
              0, 0, -foot_geom_.dim.at(0) / 2, 0, 1, 0,
              0, 0, -foot_geom_.dim.at(0) / 2, 0, -1, 0;
 
-  // Compute the cost residual 
+  // Compute the cost residual   
   data->r.noalias() = data->A * data->f;           
 
   // Compute the cost
@@ -51,19 +51,33 @@ void CostModelContactCoPPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDa
   data->cost = data->activation->a_value;
 }
 
-template <typename Scalar> //TODO: Develop calcDiff() following contact-friction-cone.hxx + CoP derivation
-void CostModelContactCoPPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+template <typename Scalar>
+void CostModelContactCoPPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data, //TODO: Correct assignment of the derivatives?
                                                       const Eigen::Ref<const VectorXs>&, 
                                                       const Eigen::Ref<const VectorXs>&) {
   // Update all data
   Data* d = static_cast<Data*>(data.get());
 
-  // TODO: Compute derivatives of CoP (dCoP_dx, dCoP_du)
+  // Get the derivatives of the contact wrench
+  const MatrixXs& df_dx = data->f->df_dx;
+  const MatrixXs& df_du = data->f->df_du;
 
-  // TODO: Compute derivatives of the cost residual (data->Rx = A * dCoP_dx, 
-                                                   //data->Ru = A * dCoP_du)
+  //Compute the derivatives of the activation function
+  activation_->calcDiff(data->activation, data->r);
 
-  // TODO: Compute the derivatives of the cost function
+  //Compute the derivatives of the cost residual
+  data->Rx.noalias() = data->A * df_dx;
+  data->Ru.noalias() = data->A * df_du;
+  d->Arr_Ru.noalias() = data->activation->Arr * data->Ru;
+
+  //Compute the first order derivatives of the cost function
+  data->Lx.noalias() = data->Rx.transpose() * data->activation->Ar;
+  data->Lu.noalias() = data->Ru.transpose() * data->activation->Ar;
+
+  //Compute the second order derivatives of the cost function
+  data->Lxx.noalias() = data->Rx.transpose() * data->activation->Arr * data->Rx;
+  data->Lxu.noalias() = data->Rx.transpose() * d->Arr_Ru;
+  data->Luu.noalias() = data->Ru.transpose() * d->Arr_Ru;
 }
 
 template <typename Scalar>
