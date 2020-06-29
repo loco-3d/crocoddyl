@@ -29,20 +29,23 @@ void CostModelContactCoPPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDa
   data->fiMo = d->pinnochio.SE3(d->pinocchio->oMi[d->contact->joint].rotation().T, d->contact->jMf.translation());
   data->f = data->fiMo.actInv(d->contact->f);
   
-  // Compute the CoP
+  // Compute the CoP (for evaluation)
   // OC = (tau_0^p x n) / (n * f^p) compare eq.(13) in https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.138.8014&rep=rep1&type=pdf
   data->cop(-data->f.angular().at(1) / data->f.linear().at(2), data->f.angular().at(0) / data->f.linear().at(2), 0.0);
 
-  // Get foot position
-  foot_pos_ = d->pinocchio->oMf[d->contact->frame].translation();
+  // Get foot position (for evaluation)
+  // foot_pos_ = d->pinocchio->oMf[d->contact->frame].translation();   
+
+  // Define the inequality matrix as A * f <= 0
+  //Matrix3s c_R_o = Quaternions::FromTwoVectors(nsurf_, Vector3s::UnitZ()).toRotationMatrix(); TODO: Rotation necessary for each row of A?
+  data->A << 0, 0, -foot_geom_.dim.at(1) / 2, 1, 0, 0,
+             0, 0, -foot_geom_.dim.at(1) / 2, -1, 0, 0,
+             0, 0, -foot_geom_.dim.at(0) / 2, 0, 1, 0,
+             0, 0, -foot_geom_.dim.at(0) / 2, 0, -1, 0;
 
   // Compute the cost residual 
-  // Preliminarily: Simply take the difference between the computed CoP and the foot frame center position
-  // TODO: Impose inequality constraint A*r <= 0 (cmp. contact-friction-cone.hxx ) to penalize if CoP is not inside the contact area defined by 
-  data->r = foot_pos_ - data->cop;                             
-                            //      dx = max(abs(px - x) - width / 2, 0);
-                            //      dy = max(abs(py - y) - height / 2, 0);
-                            //      d =  dx * dx + dy * dy;
+  data->r.noalias() = data->A * data->f;           
+
   // Compute the cost
   activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;

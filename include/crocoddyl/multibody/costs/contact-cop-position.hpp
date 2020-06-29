@@ -124,10 +124,11 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
 
   pinocchio::DataTpl<Scalar>* pinocchio;
   MatrixXs Arr_Ru;
-  boost::shared_ptr<ContactDataAbstractTpl<Scalar> > contact; //spatial force expressed in world coordinates
-  pinocchio::SE3Tpl<Scalar> fiMo; //SE3 object with origin at contact point and rotation aligned with the world frame
-  pinocchio::ForceTpl<Scalar> f; //cartesian force expressed in world coordinates 
-  Vector3s cop;
+  boost::shared_ptr<ContactDataAbstractTpl<Scalar> > contact; // spatial force expressed in world coordinates
+  pinocchio::SE3Tpl<Scalar> fiMo; // SE3 object with origin at contact point and rotation aligned with the world frame
+  pinocchio::ForceTpl<Scalar> f; // cartesian force expressed in world coordinates 
+  MatrixX3s A; // inequality matrix
+  Vector3s cop; // center of pressure
   using Base::activation;
   using Base::cost;
   using Base::Lu;
