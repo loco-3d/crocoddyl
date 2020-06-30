@@ -296,6 +296,8 @@ typedef ImpulseDataAbstractTpl<double> ImpulseDataAbstract;
 typedef ContactItemTpl<double> ContactItem;
 typedef ContactModelMultipleTpl<double> ContactModelMultiple;
 typedef ContactDataMultipleTpl<double> ContactDataMultiple;
+typedef ContactModel3DTpl<double> ContactModel2D;
+typedef ContactData3DTpl<double> ContactData2D;
 typedef ContactModel3DTpl<double> ContactModel3D;
 typedef ContactData3DTpl<double> ContactData3D;
 typedef ContactModel6DTpl<double> ContactModel6D;
