@@ -31,8 +31,8 @@ void ContactModel2DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract
   d->vv = d->v.linear();
 
   pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame, pinocchio::LOCAL, d->fJf);
-  d->Jc.row(0) = d->fJf.template row(0);
-  d->Jc.row(1) = d->fJf.template row(2);
+  d->Jc.row(0) = d->fJf.row(0);
+  d->Jc.row(1) = d->fJf.row(2);
 
   d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame);
   Vector3s a03D = d->a.linear() + d->vw.cross(d->vv);
@@ -69,7 +69,7 @@ void ContactModel2DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
       d->vv_skew * d->fXjdv_dq.template bottomRows<3>();
   d->da0_dx.leftCols(nv).row(0) = m.row(0);
   d->da0_dx.leftCols(nv).row(1) = m.row(2);
-  MathBase::MatrixXs vw2D(3,2);
+  MatrixXs vw2D(3,2);
   vw2D.col(0) = d->vw_skew.col(0);
   vw2D.col(1) = d->vw_skew.col(2);
   m = d->fXjda_dv.template topRows<3>() + vw2D * d->Jc - d->vv_skew * d->fJf.template bottomRows<3>();
@@ -87,8 +87,8 @@ void ContactModel2DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   }
   if (gains_[1] != 0.) {
 	MatrixXs fXj2D(2,nv);
-	fXj2D.row(0) = d->fXj.template row(0);
-	fXj2D.row(1) = d->fXj.template row(2);
+	fXj2D.row(0) = d->fXj.row(0);
+	fXj2D.row(1) = d->fXj.row(2);
     d->da0_dx.leftCols(nv).noalias() += gains_[1] * fXj2D * d->v_partial_dq;
     d->da0_dx.rightCols(nv).noalias() += gains_[1] * fXj2D * d->a_partial_da;
   }
