@@ -102,7 +102,9 @@ void ContactModel2DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataA
                  << "lambda has wrong dimension (it should be 2)");
   }
   Data* d = static_cast<Data*>(data.get());
-  data->f = d->jMf.act(pinocchio::ForceTpl<Scalar>(force, Vector2s::Zero()));
+  VectorXs force_bis(3);
+  force_bis << force[0],0.0,force[1];
+  data->f = d->jMf.act(pinocchio::ForceTpl<Scalar>(force_bis, Vector3s::Zero()));
 }
 
 template <typename Scalar>
