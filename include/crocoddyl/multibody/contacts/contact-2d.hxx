@@ -63,7 +63,7 @@ void ContactModel2DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   d->fXjdv_dq.noalias() = d->fXj * d->v_partial_dq;
   d->fXjda_dq.noalias() = d->fXj * d->a_partial_dq;
   d->fXjda_dv.noalias() = d->fXj * d->a_partial_dv;
-  MathBase::MatrixXs m(3,nv); 
+  MatrixXs m(3,nv); 
   m = d->fXjda_dq.template topRows<3>() +
       d->vw_skew * d->fXjdv_dq.template topRows<3>() -
       d->vv_skew * d->fXjdv_dq.template bottomRows<3>();
@@ -78,7 +78,7 @@ void ContactModel2DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
 
   if (gains_[0] != 0.) {
     d->oRf = d->pinocchio->oMf[xref_.frame].rotation();
-    MathBase::MatrixXs oRf2D(2,2);
+    MatrixXs oRf2D(2,2);
     oRf2D(0,0) = d->oRf(0,0);
     oRf2D(1,0) = d->oRf(2,0);
     oRf2D(0,1) = d->oRf(0,2);
@@ -86,7 +86,7 @@ void ContactModel2DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
     d->da0_dx.leftCols(nv).noalias() += gains_[0] * oRf2D * d->Jc;
   }
   if (gains_[1] != 0.) {
-	MathBase::MatrixXs fXj2D(2,nv);
+	MatrixXs fXj2D(2,nv);
 	fXj2D.row(0) = d->fXj.template row(0);
 	fXj2D.row(1) = d->fXj.template row(2);
     d->da0_dx.leftCols(nv).noalias() += gains_[1] * fXj2D * d->v_partial_dq;
