@@ -31,14 +31,9 @@ void exposeDifferentialActionAbstract() {
           ":param nu: dimension of control vector\n"
           ":param nr: dimension of cost-residual vector (default 1)"))
       .def("calc", pure_virtual(&DifferentialActionModelAbstract_wrap::calc), bp::args("self", "data", "x", "u"),
-           "Compute the state evolution and cost value.\n\n"
-           "First, it describes the time-continuous evolution of our dynamical system\n"
-           "in which along predefined integrated action self we might obtain the\n"
-           "next discrete state. Indeed it computes the time derivatives of the\n"
-           "state from a predefined dynamical system. Additionally it computes the\n"
-           "cost value associated to this state and control pair.\n"
+           "Compute the system acceleration and cost value.\n\n"
            ":param data: differential action data\n"
-           ":param x: state vector\n"
+           ":param x: state tuple\n"
            ":param u: control input")
       .def<void (DifferentialActionModelAbstract::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                      const Eigen::Ref<const Eigen::VectorXd>&)>(

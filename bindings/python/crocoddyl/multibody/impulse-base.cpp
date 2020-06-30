@@ -41,6 +41,12 @@ void exposeImpulseAbstract() {
            "Update the Jacobian of the impulse force.\n\n"
            ":param data: impulse data\n"
            ":param df_dx: Jacobian of the impulse force (dimension ni*ndx)")
+      .def("setZeroForce", &ImpulseModelAbstract_wrap::setZeroForce, bp::args("self", "data"),
+           "Set zero the spatial force.\n\n"
+           ":param data: contact data")
+      .def("setZeroForceDiff", &ImpulseModelAbstract_wrap::setZeroForceDiff, bp::args("self", "data"),
+           "Set zero the derivatives of the spatial force.\n\n"
+           ":param data: contact data")
       .def("createData", &ImpulseModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the impulse data.\n\n"

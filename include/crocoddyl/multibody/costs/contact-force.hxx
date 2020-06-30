@@ -16,9 +16,9 @@ CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<Sta
                                                            boost::shared_ptr<ActivationModelAbstract> activation,
                                                            const FrameForce& fref, const std::size_t& nu)
     : Base(state, activation, nu), fref_(fref) {
-  if (activation_->get_nr() != 6) {
+  if (activation_->get_nr() > 6) {
     throw_pretty("Invalid argument: "
-                 << "nr is equals to 6");
+                 << "nr is less than 6");
   }
 }
 
@@ -27,16 +27,32 @@ CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<Sta
                                                            boost::shared_ptr<ActivationModelAbstract> activation,
                                                            const FrameForce& fref)
     : Base(state, activation), fref_(fref) {
-  if (activation_->get_nr() != 6) {
+  if (activation_->get_nr() > 6) {
     throw_pretty("Invalid argument: "
-                 << "nr is equals to 6");
+                 << "nr is less than 6");
   }
 }
 
 template <typename Scalar>
 CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
-                                                           const FrameForce& fref, const std::size_t& nu)
-    : Base(state, 6, nu), fref_(fref) {}
+                                                           const FrameForce& fref, const std::size_t& nr,
+                                                           const std::size_t& nu)
+    : Base(state, nr, nu), fref_(fref) {
+  if (nr > 6) {
+    throw_pretty("Invalid argument: "
+                 << "nr is less than 6");
+  }
+}
+
+template <typename Scalar>
+CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
+                                                           const FrameForce& fref, const std::size_t& nr)
+    : Base(state, nr), fref_(fref) {
+  if (nr > 6) {
+    throw_pretty("Invalid argument: "
+                 << "nr is less than 6");
+  }
+}
 
 template <typename Scalar>
 CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
@@ -53,7 +69,16 @@ void CostModelContactForceTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbst
   Data* d = static_cast<Data*>(data.get());
 
   // We transform the force to the contact frame
-  data->r = (d->contact->jMf.actInv(d->contact->f) - fref_.oFf).toVector();
+  switch (d->contact_type) {
+    case Contact3D:
+      data->r = (d->contact->jMf.actInv(d->contact->f) - fref_.oFf).linear();
+      break;
+    case Contact6D:
+      data->r = (d->contact->jMf.actInv(d->contact->f) - fref_.oFf).toVector();
+      break;
+    default:
+      break;
+  }
 
   // Compute the cost
   activation_->calc(data->activation, data->r);
@@ -69,16 +94,26 @@ void CostModelContactForceTpl<Scalar>::calcDiff(const boost::shared_ptr<CostData
   const MatrixXs& df_du = d->contact->df_du;
 
   activation_->calcDiff(data->activation, data->r);
-  data->Rx = df_dx;
-  data->Ru = df_du;
-  data->Lx.noalias() = df_dx.transpose() * data->activation->Ar;
-  data->Lu.noalias() = df_du.transpose() * data->activation->Ar;
+  switch (d->contact_type) {
+    case Contact3D:
+      data->Rx = df_dx.template topRows<3>();
+      data->Ru = df_du.template topRows<3>();
+      break;
+    case Contact6D:
+      data->Rx = df_dx;
+      data->Ru = df_du;
+      break;
+    default:
+      break;
+  }
+  data->Lx.noalias() = data->Rx.transpose() * data->activation->Ar;
+  data->Lu.noalias() = data->Ru.transpose() * data->activation->Ar;
 
-  d->Arr_Ru.noalias() = data->activation->Arr * df_du;
+  d->Arr_Ru.noalias() = data->activation->Arr * data->Ru;
 
-  data->Lxx.noalias() = df_dx.transpose() * data->activation->Arr * df_dx;
-  data->Lxu.noalias() = df_dx.transpose() * d->Arr_Ru;
-  data->Luu.noalias() = df_du.transpose() * d->Arr_Ru;
+  data->Lxx.noalias() = data->Rx.transpose() * data->activation->Arr * data->Rx;
+  data->Lxu.noalias() = data->Rx.transpose() * d->Arr_Ru;
+  data->Luu.noalias() = data->Ru.transpose() * d->Arr_Ru;
 }
 
 template <typename Scalar>

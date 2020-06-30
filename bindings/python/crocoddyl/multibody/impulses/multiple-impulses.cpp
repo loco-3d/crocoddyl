@@ -68,31 +68,31 @@ void exposeImpulseMultiple() {
            ":param name: impulse name\n"
            ":param active: impulse status (true for active and false for inactive)")
       .def("calc", &ImpulseModelMultiple::calc, bp::args("self", "data", "x"),
-           "Compute the total impulse Jacobian and drift.\n\n"
+           "Compute the impulse Jacobian and drift.\n\n"
            "The rigid impulse model throught acceleration-base holonomic constraint\n"
            "of the impulse frame placement.\n"
            ":param data: impulse data\n"
            ":param x: state vector")
       .def("calcDiff", &ImpulseModelMultiple::calcDiff, bp::args("self", "data", "x"),
-           "Compute the derivatives of the total impulse holonomic constraint.\n\n"
+           "Compute the derivatives of the impulse holonomic constraint.\n\n"
            "The rigid impulse model throught acceleration-base holonomic constraint\n"
            "of the impulse frame placement.\n"
            ":param data: impulse data\n"
            ":param x: state vector\n")
       .def("updateVelocity", &ImpulseModelMultiple::updateVelocity, bp::args("self", "data", "vnext"),
-           "Update the velocity after impulse.\n\n"
+           "Update the system velocity after impulse.\n\n"
            ":param data: impulse data\n"
            ":param vnext: velocity after impulse (dimension nv)")
       .def("updateForce", &ImpulseModelMultiple::updateForce, bp::args("self", "data", "lambda"),
-           "Convert the force into a stack of spatial forces.\n\n"
+           "Update the spatial impulse defined in frame coordinate.\n\n"
            ":param data: impulse data\n"
            ":param force: force vector (dimension ni)")
       .def("updateVelocityDiff", &ImpulseModelMultiple::updateVelocityDiff, bp::args("self", "data", "dvnext_dx"),
-           "Update the velocity after impulse.\n\n"
+           "Update the Jacobian of the system velocity after impulse.\n\n"
            ":param data: impulse data\n"
            ":param dvnext_dx: Jacobian of the impulse velocity (dimension nv*ndx)")
       .def("updateForceDiff", &ImpulseModelMultiple::updateForceDiff, bp::args("self", "data", "df_dx"),
-           "Update the Jacobian of the impulse force.\n\n"
+           "Update the Jacobian of the spatial impulse defined in frame coordinate.\n\n"
            ":param data: impulse data\n"
            ":param df_dx: Jacobian of the impulse force (dimension ni*ndx)")
       .def("createData", &ImpulseModelMultiple::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
@@ -141,9 +141,9 @@ void exposeImpulseMultiple() {
                     bp::make_setter(&ImpulseDataMultiple::dv0_dq),
                     "Jacobian of the previous impulse velocity (active and inactive)")
       .add_property("vnext", bp::make_getter(&ImpulseDataMultiple::vnext, bp::return_internal_reference<>()),
-                    bp::make_setter(&ImpulseDataMultiple::vnext), "impulse velocity")
+                    bp::make_setter(&ImpulseDataMultiple::vnext), "impulse system velocity")
       .add_property("dvnext_dx", bp::make_getter(&ImpulseDataMultiple::dvnext_dx, bp::return_internal_reference<>()),
-                    bp::make_setter(&ImpulseDataMultiple::dvnext_dx), "Jacobian of the impulse velocity")
+                    bp::make_setter(&ImpulseDataMultiple::dvnext_dx), "Jacobian of the impulse system velocity")
       .add_property("impulses",
                     bp::make_getter(&ImpulseDataMultiple::impulses, bp::return_value_policy<bp::return_by_value>()),
                     "stack of impulses data")

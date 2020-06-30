@@ -38,6 +38,8 @@ class ImpulseModelAbstractTpl {
 
   virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& force) = 0;
   void updateForceDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const MatrixXs& df_dx) const;
+  void setZeroForce(const boost::shared_ptr<ImpulseDataAbstract>& data) const;
+  void setZeroForceDiff(const boost::shared_ptr<ImpulseDataAbstract>& data) const;
 
   virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
