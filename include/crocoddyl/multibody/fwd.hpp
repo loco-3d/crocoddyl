@@ -165,6 +165,11 @@ template <typename Scalar>
 struct ContactDataMultipleTpl;
 
 template <typename Scalar>
+class ContactModel2DTpl;
+template <typename Scalar>
+struct ContactData2DTpl;  
+  
+template <typename Scalar>
 class ContactModel3DTpl;
 template <typename Scalar>
 struct ContactData3DTpl;
