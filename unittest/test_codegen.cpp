@@ -39,6 +39,7 @@
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
 
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
+#include "crocoddyl/core/activations/weighted-quadratic-barrier.hpp"
 
 #include "factory/solver.hpp"
 #include "unittest_common.hpp"
@@ -87,6 +88,8 @@ const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > build_arm_ac
 
   typedef typename crocoddyl::ActivationBoundsTpl<Scalar> ActivationBounds;
   typedef typename crocoddyl::ActivationModelQuadraticBarrierTpl<Scalar> ActivationModelQuadraticBarrier;
+  typedef typename crocoddyl::ActivationModelWeightedQuadraticBarrierTpl<Scalar>
+      ActivationModelWeightedQuadraticBarrier;
 
   // because urdf is not supported with all scalar types.
   pinocchio::ModelTpl<double> modeld;
@@ -129,10 +132,20 @@ const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > build_arm_ac
   // xlb.tail(model.nv) *= Scalar(-1) * std::numeric_limits<Scalar>::max();
   // xub.tail(model.nv) *= std::numeric_limits<Scalar>::max();
 
+  VectorXs xweights(model.nv + model.nv);
+  xweights.head(model.nv).fill(Scalar(10.));
+  xweights.tail(model.nv).fill(Scalar(100.));
+
   ActivationBounds bounds(xlb, xub);
   boost::shared_ptr<ActivationModelQuadraticBarrier> activation_bounded =
       boost::make_shared<ActivationModelQuadraticBarrier>(bounds);
+  boost::shared_ptr<ActivationModelWeightedQuadraticBarrier> weighted_activation_bounded =
+      boost::make_shared<ActivationModelWeightedQuadraticBarrier>(bounds, xweights);
+
   boost::shared_ptr<CostModelAbstract> jointLimitCost = boost::make_shared<CostModelState>(state, activation_bounded);
+
+  boost::shared_ptr<CostModelAbstract> jointLimitCost2 =
+      boost::make_shared<CostModelState>(state, weighted_activation_bounded);
 
   // Then let's added the running and terminal cost functions
   runningCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1));
@@ -140,6 +153,7 @@ const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > build_arm_ac
   runningCostModel->addCost("gripperRot", goalRotationCost, Scalar(1));
   runningCostModel->addCost("gripperVel", goalVelocityCost, Scalar(1));
   runningCostModel->addCost("jointLim", jointLimitCost, Scalar(1e3));
+  runningCostModel->addCost("jointLim2", jointLimitCost2, Scalar(1e3));
   runningCostModel->addCost("xReg", xRegCost, Scalar(1e-4));
   runningCostModel->addCost("uReg", uRegCost, Scalar(1e-4));
 
