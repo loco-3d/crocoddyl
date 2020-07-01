@@ -89,9 +89,9 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
     Arr_Ru.setZero();
     
     // Check that proper shared data has been passed
-    DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
+    DataCollectorContactTpl<Scalar>* d = dynamic_cast<DataCollectorContactTpl<Scalar>*>(shared);
     if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibody");
+      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorContact");
     }
 
     // Get the active 6d contact (avoids data casting at runtime)
