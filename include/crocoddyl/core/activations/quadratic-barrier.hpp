@@ -111,8 +111,8 @@ class ActivationModelQuadraticBarrierTpl : public ActivationModelAbstractTpl<_Sc
     using pinocchio::internal::if_then_else;
     for (Eigen::Index i = 0; i < data->Arr.cols(); i++) {
       data->Arr.diagonal()[i] = if_then_else(
-          pinocchio::internal::LE, r[i] - bounds_.lb[i], Scalar(0.), r[i] - bounds_.lb[i],
-          if_then_else(pinocchio::internal::GE, r[i] - bounds_.ub[i], Scalar(0.), r[i] - bounds_.ub[i], Scalar(0.)));
+          pinocchio::internal::LE, r[i] - bounds_.lb[i], Scalar(0.), Scalar(1.),
+          if_then_else(pinocchio::internal::GE, r[i] - bounds_.ub[i], Scalar(0.), Scalar(1.), Scalar(0.)));
     }
   };
 
