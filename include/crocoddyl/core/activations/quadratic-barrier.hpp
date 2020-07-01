@@ -108,12 +108,12 @@ class ActivationModelQuadraticBarrierTpl : public ActivationModelAbstractTpl<_Sc
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
     data->Ar = (d->rlb_min_ + d->rub_max_).matrix();
 
-    using pinocchio::internal::if_then_else;
     using pinocchio::internal::ComparisonOperators;
-    for(Eigen::Index i=0; i<data->Arr.cols(); i++) {
-      data->Arr.diagonal()[i] = if_then_else(LE, r[i] - bounds_.lb[i], Scalar(0.),
-                                             r[i] - bounds_.lb[i], if_then_else(GE, r[i] - bounds_.ub[i], Scalar(0.),
-                                                                          r[i] - bounds_.ub[i], Scalar(0.)));
+    using pinocchio::internal::if_then_else;
+    for (Eigen::Index i = 0; i < data->Arr.cols(); i++) {
+      data->Arr.diagonal()[i] =
+          if_then_else(LE, r[i] - bounds_.lb[i], Scalar(0.), r[i] - bounds_.lb[i],
+                       if_then_else(GE, r[i] - bounds_.ub[i], Scalar(0.), r[i] - bounds_.ub[i], Scalar(0.)));
     }
   };
 
