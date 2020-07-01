@@ -26,25 +26,25 @@ void CostModelContactCoPPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDa
   Data* d = static_cast<Data*>(data.get());
 
   // Transform the spatial force to a cartesian force expressed in world coordinates  
-  data->fiMo = d->pinnochio.SE3(d->pinocchio->oMi[d->contact->joint].rotation().T, d->contact->jMf.translation());
-  data->f = data->fiMo.actInv(d->contact->f);
+  d->fiMo = d->pinocchio.SE3(d->pinocchio->oMi[d->contact->joint].rotation(), d->contact->jMf.translation()); //TODO: Debug error: request for member ‘SE3’
+  d->f = d->fiMo.actInv(d->contact->f);
   
   // Compute the CoP (for evaluation)
   // OC = (tau_0^p x n) / (n * f^p) compare eq.(13) in https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.138.8014&rep=rep1&type=pdf
-  data->cop(-data->f.angular().at(1) / data->f.linear().at(2), data->f.angular().at(0) / data->f.linear().at(2), 0.0);
+  d->cop << -d->f.angular()[1] / d->f.linear()[2], d->f.angular()[0] / d->f.linear()[2], 0.0;
 
   // Get foot position (for evaluation)
   // foot_pos_ = d->pinocchio->oMf[d->contact->frame].translation();   
 
-  // Define the inequality matrix as A * f <= 0
+  // Define the inequality matrix as A * f <= 0 compare eq.(18-19) in https://hal.archives-ouvertes.fr/hal-02108449/document
   //Matrix3s c_R_o = Quaternions::FromTwoVectors(nsurf_, Vector3s::UnitZ()).toRotationMatrix(); TODO: Rotation necessary for each row of A?
-  data->A << 0, 0, -foot_geom_.dim.at(1) / 2, 1, 0, 0,
-             0, 0, -foot_geom_.dim.at(1) / 2, -1, 0, 0,
-             0, 0, -foot_geom_.dim.at(0) / 2, 0, 1, 0,
-             0, 0, -foot_geom_.dim.at(0) / 2, 0, -1, 0;
+  d->A << 0, 0, -foot_geom_.dim[1] / 2, 1, 0, 0,
+             0, 0, -foot_geom_.dim[1] / 2, -1, 0, 0,
+             0, 0, -foot_geom_.dim[0] / 2, 0, 1, 0,
+             0, 0, -foot_geom_.dim[0] / 2, 0, -1, 0;
 
   // Compute the cost residual   
-  data->r.noalias() = data->A * data->f;           
+  data->r.noalias() = d->A * d->f; //TODO: Debug error: no match for ‘operator*’       
 
   // Compute the cost
   activation_->calc(data->activation, data->r);
@@ -59,15 +59,15 @@ void CostModelContactCoPPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<Co
   Data* d = static_cast<Data*>(data.get());
 
   // Get the derivatives of the contact wrench
-  const MatrixXs& df_dx = data->f->df_dx;
-  const MatrixXs& df_du = data->f->df_du;
+  const MatrixXs& df_dx = d->f->df_dx; //TODO: Debug error: base operand of ‘->’ has non-pointer type
+  const MatrixXs& df_du = d->f->df_du; //TODO: Same here
 
   //Compute the derivatives of the activation function
   activation_->calcDiff(data->activation, data->r);
 
   //Compute the derivatives of the cost residual
-  data->Rx.noalias() = data->A * df_dx;
-  data->Ru.noalias() = data->A * df_du;
+  data->Rx.noalias() = d->A * df_dx;
+  data->Ru.noalias() = d->A * df_du;
   d->Arr_Ru.noalias() = data->activation->Arr * data->Ru;
 
   //Compute the first order derivatives of the cost function
