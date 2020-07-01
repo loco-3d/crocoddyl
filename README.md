@@ -147,6 +147,7 @@ If you want to learn about Crocoddyl, take a look at the Jupyter notebooks. Star
 - [examples/notebooks/unicycle_towards_origin.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/unicycle_towards_origin.ipynb)
 - [examples/notebooks/cartpole_swing_up.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/cartpole_swing_up.py)
 - [examples/notebooks/arm_manipulation.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/arm_manipulation.ipynb)
+- [examples/notebooks/whole_body_manipulation.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/whole_body_manipulation.ipynb)
 - [examples/notebooks/bipedal_walking.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/bipedal_walking.ipynb)
 - [examples/notebooks/introduction_to_crocoddyl.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/introduction_to_crocoddyl.ipynb)
 
