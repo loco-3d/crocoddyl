@@ -64,7 +64,7 @@ void exposeContact2D() {
   bp::register_ptr_to_python<boost::shared_ptr<ContactData2D> >();
 
   bp::class_<ContactData2D, bp::bases<ContactDataAbstract> >(
-      "ContactData3D", "Data for 2D contact.\n\n",
+      "ContactData2D", "Data for 2D contact.\n\n",
       bp::init<ContactModel2D*, pinocchio::Data*>(
           bp::args("self", "model", "data"),
           "Create 2D contact data.\n\n"
