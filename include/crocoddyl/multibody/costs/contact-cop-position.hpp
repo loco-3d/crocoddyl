@@ -40,6 +40,7 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
+  typedef typename MathBase::MatrixX3s MatrixX3s;
 
   CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
                           boost::shared_ptr<ActivationModelAbstract> activation,const FootGeometry& foot_geom);

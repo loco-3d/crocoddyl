@@ -14,8 +14,10 @@ namespace crocoddyl {
 template<typename _Scalar>
 CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
                                           boost::shared_ptr<ActivationModelAbstract> activation,
-                                          const FootGeometry& foot_geom)
-    : Base(state, activation), foot_geom_(foot_geom) {}
+                                          const FootGeometry& foot_geom, const Vector3s normal)
+    : Base(state, activation), foot_geom_(foot_geom) {
+      foot_geom_.update_A(); //TODO: Call here?
+    }
 
 template <typename Scalar>
 CostModelContactCoPPositionTpl<Scalar>::~CostModelContactCoPPositionTpl() {}
@@ -36,15 +38,8 @@ void CostModelContactCoPPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDa
   // Get foot position (for evaluation)
   // foot_pos_ = d->pinocchio->oMf[d->contact->frame].translation();   
 
-  // Define the inequality matrix as A * f <= 0 compare eq.(18-19) in https://hal.archives-ouvertes.fr/hal-02108449/document
-  //Matrix3s c_R_o = Quaternions::FromTwoVectors(nsurf_, Vector3s::UnitZ()).toRotationMatrix(); TODO: Rotation necessary for each row of A?
-  d->A << 0, 0, -foot_geom_.dim[1] / 2, 1, 0, 0,
-             0, 0, -foot_geom_.dim[1] / 2, -1, 0, 0,
-             0, 0, -foot_geom_.dim[0] / 2, 0, 1, 0,
-             0, 0, -foot_geom_.dim[0] / 2, 0, -1, 0;
-
-  // Compute the cost residual   
-  data->r.noalias() = d->A * d->f; //TODO: Debug error: no match for ‘operator*’       
+  // Compute the cost residual respecting A * f <= 0
+  data->r.noalias() = foot_geom_.get_A() * d->f.toVector(); //TODO: Debug error: static assertion failed: INVALID_MATRIX_PRODUCT
 
   // Compute the cost
   activation_->calc(data->activation, data->r);
@@ -59,15 +54,14 @@ void CostModelContactCoPPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<Co
   Data* d = static_cast<Data*>(data.get());
 
   // Get the derivatives of the contact wrench
-  const MatrixXs& df_dx = d->f->df_dx; //TODO: Debug error: base operand of ‘->’ has non-pointer type
-  const MatrixXs& df_du = d->f->df_du; //TODO: Same here
+  const MatrixX3s& A = foot_geom_.get_A();
 
   //Compute the derivatives of the activation function
   activation_->calcDiff(data->activation, data->r);
 
   //Compute the derivatives of the cost residual
-  data->Rx.noalias() = d->A * df_dx;
-  data->Ru.noalias() = d->A * df_du;
+  data->Rx.noalias() = A * df_dx;
+  data->Ru.noalias() = A * df_du;
   d->Arr_Ru.noalias() = data->activation->Arr * data->Ru;
 
   //Compute the first order derivatives of the cost function
