@@ -45,7 +45,7 @@ SET(PROJECT_USE_CMAKE_EXPORT True)
 OPTION(ENABLE_VECTORIZATION "Enable vectorization and further processor-related optimizations" OFF)
 OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" OFF)
 OPTION(BUILD_UNIT_TESTS "Build the unitary tests" OFF)
-OPTION(BUILD_BENCHMARK "Build the benchmark" ON)
+OPTION(BUILD_BENCHMARK "Build the benchmark" OFF)
 OPTION(BUILD_EXAMPLES "Build the examples" OFF)
 
 
