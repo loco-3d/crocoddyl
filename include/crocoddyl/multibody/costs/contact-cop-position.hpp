@@ -53,7 +53,6 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
   const FootGeometry& get_footGeom() const;
-  // TODO: Other getter/setter methods required?
 
   using Base::activation_;
   using Base::nu_;
@@ -61,8 +60,8 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::unone_;
 
   protected: 
-    FootGeometry foot_geom_; // frame name and geometrical dimension of the contact foot
-    Vector3s foot_pos_; // position of the foot w.r.t. the ground plane
+    FootGeometry foot_geom_; //!< frame name and geometrical dimension of the contact foot
+    Vector3s foot_pos_; //!< position of the foot w.r.t. the ground plane
 };
 
 template <typename _Scalar>
@@ -78,8 +77,6 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::Matrix3s Matrix3s;
-  typedef typename MathBase::Matrix3xs Matrix3xs;
-  typedef typename MathBase::MatrixX3s MatrixX3s;
   typedef typename MathBase::Matrix6xs Matrix6xs;
   typedef typename MathBase::Matrix6s Matrix6s;
   typedef typename MathBase::Vector6s Vector6s;
@@ -127,11 +124,10 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
 
   pinocchio::DataTpl<Scalar>* pinocchio;
   MatrixXs Arr_Ru;
-  boost::shared_ptr<ContactDataAbstractTpl<Scalar> > contact; // spatial force expressed in world coordinates
-  pinocchio::SE3Tpl<Scalar> fiMo; // SE3 object with origin at contact point and rotation aligned with the world frame
-  pinocchio::ForceTpl<Scalar> f; // cartesian force expressed in world coordinates 
-  MatrixX3s A; // inequality matrix
-  Vector3s cop; // center of pressure
+  boost::shared_ptr<ContactDataAbstractTpl<Scalar> > contact; //!< spatial force expressed in world coordinates
+  pinocchio::SE3Tpl<Scalar> fiMo; //!< SE3 object with origin at contact point and rotation aligned with the world frame
+  pinocchio::ForceTpl<Scalar> f; //!< cartesian force expressed in world coordinates 
+  Vector3s cop; //!< center of pressure
   using Base::activation;
   using Base::cost;
   using Base::Lu;

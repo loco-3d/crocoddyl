@@ -147,7 +147,7 @@ struct FrameFootGeometryTpl {
   explicit FrameFootGeometryTpl() : frame(0), dim(Vector2s::Zero()) {}
   FrameFootGeometryTpl(const FrameFootGeometryTpl<Scalar>& value) : frame(value.frame), dim(value.dim) {}
   FrameFootGeometryTpl(const FrameIndex& frame, const Vector2s& dim) : frame(frame), dim(dim) {}
-  friend std::ostream& operator<<(std::ostream& os, const FrameTranslationTpl<Scalar>& X) {
+  friend std::ostream& operator<<(std::ostream& os, const FrameFootGeometryTpl<Scalar>& X) {
     os << "      frame: " << X.frame << std::endl << "foot dimensions: " << std::endl << X.dim << std::endl;
     return os;
   }

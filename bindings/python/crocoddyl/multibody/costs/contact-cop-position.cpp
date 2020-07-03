@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, University of Edinburgh
+// Copyright (C) 2020, University of Duisburg-Essen, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,16 +28,16 @@ void exposeCostContactCoPPosition() {
           "calc", &CostModelContactCoPPosition::calc, bp::args("self", "data", "x", "u"),
           "Compute the contact CoP position cost.\n\n"
           ":param data: cost data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input")
+          ":param x: state vector\n"
+          ":param u: control input")
       .def<void (CostModelContactCoPPosition::*)(const boost::shared_ptr<CostDataAbstract>&,
                                                   const Eigen::Ref<const Eigen::VectorXd>&,
                                                   const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelContactCoPPosition::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the contact CoP position cost.\n\n"
           ":param data: action data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input\n")
+          ":param x: state vector\n"
+          ":param u: control input\n")
       .def("createData", &CostModelContactCoPPosition::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the contact CoP position cost data.\n\n"
@@ -47,7 +47,7 @@ void exposeCostContactCoPPosition() {
            ":return cost data.")
       .add_property("reference",
                     bp::make_function(&CostModelContactCoPPosition::get_footGeom, bp::return_internal_reference<>()),
-                    &CostModelContactCoPPosition::set_reference<FrameFootGeometry>, "reference frame friction cone");
+                    &CostModelContactCoPPosition::set_reference<FrameFootGeometry>, "reference foot geometry");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataContactCoPPosition> >();
 

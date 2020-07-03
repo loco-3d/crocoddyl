@@ -47,7 +47,7 @@ void CostModelContactCoPPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDa
 }
 
 template <typename Scalar>
-void CostModelContactCoPPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data, //TODO: Correct assignment of the derivatives?
+void CostModelContactCoPPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                                       const Eigen::Ref<const VectorXs>&, 
                                                       const Eigen::Ref<const VectorXs>&) {
   // Update all data
