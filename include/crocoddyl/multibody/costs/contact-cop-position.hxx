@@ -28,7 +28,7 @@ void CostModelContactCoPPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDa
   Data* d = static_cast<Data*>(data.get());
 
   // Transform the spatial force to a cartesian force expressed in world coordinates  
-  d->fiMo = d->pinocchio.SE3(d->pinocchio->oMi[d->contact->joint].rotation(), d->contact->jMf.translation()); //TODO: Debug error: request for member ‘SE3’
+  d->fiMo.rotation(d->pinocchio->oMi[d->contact->joint].rotation());
   d->f = d->fiMo.actInv(d->contact->f);
   
   // Compute the CoP (for evaluation)
@@ -54,6 +54,8 @@ void CostModelContactCoPPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<Co
   Data* d = static_cast<Data*>(data.get());
 
   // Get the derivatives of the contact wrench
+  const MatrixXs& df_dx = d->contact->df_dx;
+  const MatrixXs& df_du = d->contact->df_du;
   const MatrixX3s& A = foot_geom_.get_A();
 
   //Compute the derivatives of the activation function
