@@ -15,7 +15,7 @@ template<typename _Scalar>
 CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
                                           boost::shared_ptr<ActivationModelAbstract> activation,
                                           const FootGeometry& foot_geom, const Vector3s normal)
-    : Base(state, activation), foot_geom_(foot_geom) {
+    : Base(state, activation), foot_geom_(foot_geom), normal_(normal) {
       foot_geom_.update_A(); //TODO: Call here?
     }
 
@@ -33,8 +33,10 @@ void CostModelContactCoPPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDa
   
   // Compute the CoP (for evaluation)
   // OC = (tau_0^p x n) / (n * f^p) compare eq.(13) in https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.138.8014&rep=rep1&type=pdf
-  d->cop << -d->f.angular()[1] / d->f.linear()[2], d->f.angular()[0] / d->f.linear()[2], 0.0;
-
+  d->cop << normal_[1] * d->f.angular()[2] - normal_[2] * d->f.angular()[1], 
+            normal_[2] * d->f.angular()[0] - normal_[0] * d->f.angular()[2],
+            normal_[0] * d->f.angular()[1] - normal_[1] * d->f.angular()[0]; 
+  d->cop *= 1 / (normal_[0] * d->f.linear()[0] + normal_[1] * d->f.linear()[1] + normal_[2] * d->f.linear()[2]);
   // Get foot position (for evaluation)
   // foot_pos_ = d->pinocchio->oMf[d->contact->frame].translation();   
 

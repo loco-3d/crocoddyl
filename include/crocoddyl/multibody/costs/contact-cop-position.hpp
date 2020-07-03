@@ -43,7 +43,8 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixX3s MatrixX3s;
 
   CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
-                          boost::shared_ptr<ActivationModelAbstract> activation,const FootGeometry& foot_geom);
+                          boost::shared_ptr<ActivationModelAbstract> activation, const FootGeometry& foot_geom, 
+                          const Vector3s normal); //TODO: Pass as additional arg?
   virtual ~CostModelContactCoPPositionTpl();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -61,6 +62,7 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
 
   protected: 
     FootGeometry foot_geom_; //!< frame name and geometrical dimension of the contact foot
+    const Vector3s normal_; //!< vector normal to the contact surface 
     Vector3s foot_pos_; //!< position of the foot w.r.t. the ground plane
 };
 

@@ -16,12 +16,14 @@ namespace python {
 void exposeCostContactCoPPosition() {
   bp::class_<CostModelContactCoPPosition, bp::bases<CostModelAbstract> >(
       "CostModelContactCoPPosition",
-      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameFootGeometry>(
-          bp::args("self", "state", "activation", "foot_geom"),
+      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameFootGeometry, 
+      const Eigen::Ref<const Eigen::VectorXd>&>(
+          bp::args("self", "state", "activation", "foot_geom", "normal"),
           "Initialize the contact CoP position cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
-          ":param foot_geom: 2d geometry of the contact surface"))
+          ":param foot_geom: 2d geometry of the contact surface"
+          ":param normal: vector normal to the contact surface"))
       .def<void (CostModelContactCoPPosition::*)(const boost::shared_ptr<CostDataAbstract>&,
                                                   const Eigen::Ref<const Eigen::VectorXd>&,
                                                   const Eigen::Ref<const Eigen::VectorXd>&)>(
