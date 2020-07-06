@@ -142,7 +142,7 @@ struct FrameFootGeometryTpl {
 
   typedef _Scalar Scalar;
   typedef typename MathBaseTpl<Scalar>::Vector2s Vector2s;
-  typedef typename MathBaseTpl<Scalar>::MatrixX3s MatrixX3s;
+  typedef typename MathBaseTpl<Scalar>::Matrix46s Matrix46s;
 
   explicit FrameFootGeometryTpl() : frame(0), dim(Vector2s::Zero()) {}
   FrameFootGeometryTpl(const FrameFootGeometryTpl<Scalar>& value) : frame(value.frame), dim(value.dim) {}
@@ -161,13 +161,13 @@ struct FrameFootGeometryTpl {
         0, 0, -dim[0] / 2, 0, -1, 0;
   }
 
-  const MatrixX3s& get_A() const {
+  const Matrix46s& get_A() const {
     return A_;
 }
 
   FrameIndex frame; //!< name of the contact frame 
   Vector2s dim; //!< dimension of the foot surface dim = (length, width)
-  MatrixX3s A_; //!< inequality matrix
+  Matrix46s A_; //!< inequality matrix
 };
 
 }  // namespace crocoddyl

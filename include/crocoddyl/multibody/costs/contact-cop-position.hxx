@@ -31,7 +31,7 @@ void CostModelContactCoPPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDa
   d->fiMo.rotation(d->pinocchio->oMi[d->contact->joint].rotation());
   d->f = d->fiMo.actInv(d->contact->f);
   
-  // Compute the CoP (for evaluation)
+  // Compute the CoP (TODO: Remove after evaluation)
   // OC = (tau_0^p x n) / (n * f^p) compare eq.(13) in https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.138.8014&rep=rep1&type=pdf
   d->cop << normal_[1] * d->f.angular()[2] - normal_[2] * d->f.angular()[1], 
             normal_[2] * d->f.angular()[0] - normal_[0] * d->f.angular()[2],
@@ -56,9 +56,9 @@ void CostModelContactCoPPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<Co
   Data* d = static_cast<Data*>(data.get());
 
   // Get the derivatives of the contact wrench
-  const MatrixXs& df_dx = d->contact->df_dx;
+  const MatrixXs& df_dx = d->contact->df_dx; // TODO: Evantually transform derivative to Caron frame
   const MatrixXs& df_du = d->contact->df_du;
-  const MatrixX3s& A = foot_geom_.get_A();
+  const Matrix46s& A = foot_geom_.get_A();
 
   //Compute the derivatives of the activation function
   activation_->calcDiff(data->activation, data->r);
