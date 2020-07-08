@@ -35,5 +35,4 @@ def animateCartpole(xs, sleep=50):
 
     anim = animation.FuncAnimation(fig, animate, init_func=init, frames=len(xs), interval=sleep, blit=True)
     print("... processing done")
-    plt.show()
     return anim
