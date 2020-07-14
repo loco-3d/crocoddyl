@@ -1,11 +1,11 @@
-##########################################################################
-################## TODO: Create the DDP solver and run it ###############
-###########################################################################
+# #########################################################################
+# ################# TODO: Create the DDP solver and run it ###############
+# ##########################################################################
 
 # Creating the DDP solver
 ddp = crocoddyl.SolverDDP(problem)
-ddp.setCallbacks([crocoddyl.CallbackDDPVerbose()])
+ddp.setCallbacks([crocoddyl.CallbackVerbose()])
 
 # Solving this problem
-done = ddp.solve(1000)
-print done
+done = ddp.solve()
+print(done)
