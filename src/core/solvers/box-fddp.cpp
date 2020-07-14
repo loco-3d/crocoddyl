@@ -33,21 +33,14 @@ SolverBoxFDDP::~SolverBoxFDDP() {}
 void SolverBoxFDDP::allocateData() {
   SolverDDP::allocateData();
 
-  std::size_t nu_max = 0;
   const std::size_t& T = problem_->get_T();
   Quu_inv_.resize(T);
+  const std::size_t& nu = problem_->get_nu_max();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
-    const std::size_t& nu = model->get_nu();
-
-    // Store the largest number of controls across all models to allocate du_lb_, du_ub_
-    if (nu > nu_max) nu_max = nu;
-
     Quu_inv_[t] = Eigen::MatrixXd::Zero(nu, nu);
   }
-
-  du_lb_.resize(nu_max);
-  du_ub_.resize(nu_max);
+  du_lb_.resize(nu);
+  du_ub_.resize(nu);
 }
 
 void SolverBoxFDDP::computeGains(const std::size_t& t) {
@@ -89,17 +82,24 @@ void SolverBoxFDDP::forwardPass(const double& steplength) {
   cost_try_ = 0.;
   xnext_ = problem_->get_x0();
   const std::size_t& T = problem_->get_T();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
   if ((is_feasible_) || (steplength == 1)) {
     for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& m = problem_->get_runningModels()[t];
-      const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
+      const boost::shared_ptr<ActionModelAbstract>& m = models[t];
+      const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
+
       xs_try_[t] = xnext_;
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
-      us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
-      if (m->get_has_control_limits()) {  // clamp control
-        us_try_[t] = us_try_[t].cwiseMax(m->get_u_lb()).cwiseMin(m->get_u_ub());
+      if (m->get_nu() != 0) {
+        us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
+        if (m->get_has_control_limits()) {  // clamp control
+          us_try_[t] = us_try_[t].cwiseMax(m->get_u_lb()).cwiseMin(m->get_u_ub());
+        }
+        m->calc(d, xs_try_[t], us_try_[t]);
+      } else {
+        m->calc(d, xs_try_[t]);
       }
-      m->calc(d, xs_try_[t], us_try_[t]);
       xnext_ = d->xnext;
       cost_try_ += d->cost;
 
@@ -122,15 +122,20 @@ void SolverBoxFDDP::forwardPass(const double& steplength) {
     }
   } else {
     for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& m = problem_->get_runningModels()[t];
-      const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
+      const boost::shared_ptr<ActionModelAbstract>& m = models[t];
+      const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
+
       m->get_state()->integrate(xnext_, fs_[t] * (steplength - 1), xs_try_[t]);
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
-      us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
-      if (m->get_has_control_limits()) {  // clamp control
-        us_try_[t] = us_try_[t].cwiseMax(m->get_u_lb()).cwiseMin(m->get_u_ub());
+      if (m->get_nu() != 0) {
+        us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
+        if (m->get_has_control_limits()) {  // clamp control
+          us_try_[t] = us_try_[t].cwiseMax(m->get_u_lb()).cwiseMin(m->get_u_ub());
+        }
+        m->calc(d, xs_try_[t], us_try_[t]);
+      } else {
+        m->calc(d, xs_try_[t]);
       }
-      m->calc(d, xs_try_[t], us_try_[t]);
       xnext_ = d->xnext;
       cost_try_ += d->cost;
 

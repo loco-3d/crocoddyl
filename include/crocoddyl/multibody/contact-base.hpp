@@ -41,6 +41,9 @@ class ContactModelAbstractTpl {
   virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force) = 0;
   void updateForceDiff(const boost::shared_ptr<ContactDataAbstract>& data, const MatrixXs& df_dx,
                        const MatrixXs& df_du) const;
+  void setZeroForce(const boost::shared_ptr<ContactDataAbstract>& data) const;
+  void setZeroForceDiff(const boost::shared_ptr<ContactDataAbstract>& data) const;
+
   virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
   const boost::shared_ptr<StateMultibody>& get_state() const;

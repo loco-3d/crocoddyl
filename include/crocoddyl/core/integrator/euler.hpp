@@ -38,6 +38,7 @@ class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
   virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<ActionDataAbstract> createData();
+  virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
 
   const boost::shared_ptr<DifferentialActionModelAbstract>& get_differential() const;
   const Scalar& get_dt() const;

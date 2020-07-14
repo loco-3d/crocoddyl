@@ -1,9 +1,11 @@
 # Use this function inside DifferentialActionModel.calc by setting:
 #      xddot, thddot = cartpole_dynamics(self, data, x, u)
+
+
 def cartpole_dynamics(model, data, x, u):
     # Getting the state and control variables
-    th, thdot = np.asscalar(x[1]), np.asscalar(x[3])
-    f = np.asscalar(u[0])
+    th, thdot = x[1].item(), x[3].item()
+    f = u[0].item()
 
     # Shortname for system parameters
     m1, m2, l, g = model.m1, model.m2, model.l, model.g
