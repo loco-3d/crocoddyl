@@ -175,7 +175,9 @@ class GepettoDisplay(DisplayAbstract):
                     for key, contact in data.differential.multibody.contacts.contacts.items():
                         if model.differential.contacts.contacts[key].active:
                             oMf = contact.pinocchio.oMi[contact.joint] * contact.jMf
-                            force = contact.jMf.actInv(contact.f)
+                            fiMo = pinocchio.SE3(contact.pinocchio.oMi[contact.joint].rotation.T,
+                                                 contact.jMf.translation)
+                            force = fiMo.actInv(contact.f)
                             nsurf = np.array([0., 0., 1.])
                             mu = 0.7
                             for k, c in model.differential.costs.costs.items():
@@ -191,7 +193,8 @@ class GepettoDisplay(DisplayAbstract):
                 for key, impulse in data.multibody.impulses.impulses.items():
                     if model.impulses.impulses[key].active:
                         oMf = impulse.pinocchio.oMi[impulse.joint] * impulse.jMf
-                        force = impulse.jMf.actInv(impulse.f)
+                        fiMo = pinocchio.SE3(impulse.pinocchio.oMi[impulse.joint].rotation.T, impulse.jMf.translation)
+                        force = fiMo.actInv(impulse.f)
                         nsurf = np.array([0., 0., 1.])
                         mu = 0.7
                         for k, c in model.costs.costs.items():

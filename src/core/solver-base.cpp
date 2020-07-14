@@ -30,10 +30,9 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
   us_.resize(T);
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
-    const std::size_t& nu = model->get_nu();
 
     xs_[t] = model->get_state()->zero();
-    us_[t] = Eigen::VectorXd::Zero(nu);
+    us_[t] = Eigen::VectorXd::Zero(problem_->get_nu_max());
   }
   xs_.back() = problem_->get_terminalModel()->get_state()->zero();
 }
@@ -57,8 +56,7 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
 
   if (us_warm.size() == 0) {
     for (std::size_t t = 0; t < T; ++t) {
-      const std::size_t& nu = problem_->get_runningModels()[t]->get_nu();
-      us_[t] = Eigen::VectorXd::Zero(nu);
+      us_[t] = Eigen::VectorXd::Zero(problem_->get_nu_max());
     }
   } else {
     assert_pretty(us_warm.size() == T,
@@ -111,16 +109,13 @@ void SolverAbstract::set_xs(const std::vector<Eigen::VectorXd>& xs) {
                  << "xs list has to be " + std::to_string(T + 1));
   }
 
+  const std::size_t& nx = problem_->get_nx();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
-    const std::size_t& nx = model->get_state()->get_nx();
     if (static_cast<std::size_t>(xs[t].size()) != nx) {
       throw_pretty("Invalid argument: "
                    << "xs[" + std::to_string(t) + "] has wrong dimension (it should be " + std::to_string(nx) + ")")
     }
   }
-  const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_terminalModel();
-  const std::size_t& nx = model->get_state()->get_nx();
   if (static_cast<std::size_t>(xs[T].size()) != nx) {
     throw_pretty("Invalid argument: "
                  << "xs[" + std::to_string(T) + "] has wrong dimension (it should be " + std::to_string(nx) + ")")
@@ -135,10 +130,9 @@ void SolverAbstract::set_us(const std::vector<Eigen::VectorXd>& us) {
                  << "us list has to be " + std::to_string(T));
   }
 
+  const std::size_t& nu = problem_->get_nu_max();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
-    const std::size_t& nu = model->get_nu();
-    if (static_cast<std::size_t>(us[t].size()) != nu && nu != 0) {
+    if (static_cast<std::size_t>(us[t].size()) != nu) {
       throw_pretty("Invalid argument: "
                    << "us[" + std::to_string(t) + "] has wrong dimension (it should be " + std::to_string(nu) + ")")
     }

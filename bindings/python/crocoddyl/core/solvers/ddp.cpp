@@ -78,7 +78,7 @@ void exposeSolverDDP() {
            "compute. These terms are computed by running calc.")
       .def("forwardPass", &SolverDDP::forwardPass, bp::args("self", " stepLength=1"),
            "Run the forward pass or rollout\n\n"
-           "It rollouts the action model give the computed policy (feedforward terns and feedback\n"
+           "It rollouts the action model given the computed policy (feedforward terns and feedback\n"
            "gains) by the backwardPass. We can define different step lengths\n"
            ":param stepLength: applied step length (<= 1. and >= 0.)")
       .add_property("Vxx", make_function(&SolverDDP::get_Vxx, bp::return_value_policy<bp::copy_const_reference>()),

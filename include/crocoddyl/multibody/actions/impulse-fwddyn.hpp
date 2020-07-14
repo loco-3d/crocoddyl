@@ -57,6 +57,7 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
   virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<ActionDataAbstract> createData();
+  virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
 
   const boost::shared_ptr<ImpulseModelMultiple>& get_impulses() const;
   const boost::shared_ptr<CostModelSum>& get_costs() const;
