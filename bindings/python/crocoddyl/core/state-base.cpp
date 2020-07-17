@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/state-base.hpp"
 
 namespace crocoddyl {

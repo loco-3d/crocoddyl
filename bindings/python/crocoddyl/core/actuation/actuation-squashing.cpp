@@ -7,7 +7,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
-
 #include "crocoddyl/core/actuation/actuation-squashing.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
