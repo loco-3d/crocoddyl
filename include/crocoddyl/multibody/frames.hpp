@@ -136,40 +136,6 @@ struct FrameFrictionConeTpl {
   FrictionCone oRf;
 };
 
-template <typename _Scalar>
-struct FrameFootGeometryTpl {
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-  typedef _Scalar Scalar;
-  typedef typename MathBaseTpl<Scalar>::Vector2s Vector2s;
-  typedef typename MathBaseTpl<Scalar>::Matrix46s Matrix46s;
-
-  explicit FrameFootGeometryTpl() : frame(0), dim(Vector2s::Zero()) {}
-  FrameFootGeometryTpl(const FrameFootGeometryTpl<Scalar>& value) : frame(value.frame), dim(value.dim) {}
-  FrameFootGeometryTpl(const FrameIndex& frame, const Vector2s& dim) : frame(frame), dim(dim) {}
-  friend std::ostream& operator<<(std::ostream& os, const FrameFootGeometryTpl<Scalar>& X) {
-    os << "      frame: " << X.frame << std::endl << "foot dimensions: " << std::endl << X.dim << std::endl;
-    return os;
-  }
-
-  // Define the inequality matrix A to implement A * f <= 0 compare eq.(18-19) in https://hal.archives-ouvertes.fr/hal-02108449/document
-  //Matrix3s c_R_o = Quaternions::FromTwoVectors(nsurf_, Vector3s::UnitZ()).toRotationMatrix(); TODO: Rotation necessary for each row of A?
-  void update_A() {
-    A_ << 0, 0, -dim[1] / 2, 1, 0, 0,
-        0, 0, -dim[1] / 2, -1, 0, 0,
-        0, 0, -dim[0] / 2, 0, 1, 0,
-        0, 0, -dim[0] / 2, 0, -1, 0;
-  }
-
-  const Matrix46s& get_A() const {
-    return A_;
-}
-
-  FrameIndex frame; //!< name of the contact frame 
-  Vector2s dim; //!< dimension of the foot surface dim = (length, width)
-  Matrix46s A_; //!< inequality matrix
-};
-
 }  // namespace crocoddyl
 
 #endif  // CROCODDYL_MULTIBODY_FRAMES_HPP_

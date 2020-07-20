@@ -16,14 +16,16 @@ namespace python {
 void exposeCostContactCoPPosition() {
   bp::class_<CostModelContactCoPPosition, bp::bases<CostModelAbstract> >(
       "CostModelContactCoPPosition",
-      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameFootGeometry, 
-      const Eigen::Ref<const Eigen::VectorXd>&>(
-          bp::args("self", "state", "activation", "foot_geom", "normal"),
+      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, 
+      const std::size_t&, const Eigen::Ref<const Eigen::VectorXd>&, const Eigen::Ref<const Eigen::VectorXd>&, int>(
+          bp::args("self", "state", "activation", "frame_id", "cop_region", "normal", "nu"),
           "Initialize the contact CoP position cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
-          ":param foot_geom: 2d geometry of the contact surface"
-          ":param normal: vector normal to the contact surface"))
+          ":param frame_id: contact frame id"
+          ":param cop_region_: desired 2d area (length, width) of the CoP defined w.r.t. the contact frame"
+          ":param normal: vector normal to the contact surface"
+          ":param nu: dimension of control vector"))
       .def<void (CostModelContactCoPPosition::*)(const boost::shared_ptr<CostDataAbstract>&,
                                                   const Eigen::Ref<const Eigen::VectorXd>&,
                                                   const Eigen::Ref<const Eigen::VectorXd>&)>(
@@ -46,10 +48,7 @@ void exposeCostContactCoPPosition() {
            "Each cost model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
-           ":return cost data.")
-      .add_property("reference",
-                    bp::make_function(&CostModelContactCoPPosition::get_footGeom, bp::return_internal_reference<>()),
-                    &CostModelContactCoPPosition::set_reference<FrameFootGeometry>, "reference foot geometry");
+           ":return cost data.");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataContactCoPPosition> >();
 

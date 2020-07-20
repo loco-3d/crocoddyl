@@ -35,17 +35,16 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
   typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef FrameFootGeometryTpl<Scalar> FootGeometry;
   typedef typename MathBase::Vector2s Vector2s;
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::MatrixX3s MatrixX3s;
-  typedef typename MathBaseTpl<Scalar>::Matrix46s Matrix46s;
+  typedef typename MathBase::Matrix46s Matrix46s;
 
   CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
-                          boost::shared_ptr<ActivationModelAbstract> activation, const FootGeometry& foot_geom, 
-                          const Vector3s normal); //TODO: Pass as additional arg?
+                          boost::shared_ptr<ActivationModelAbstract> activation, const std::size_t& frame_id, 
+                          const Vector2s& cop_region, const Vector3s& normal, const std::size_t& nu);
   virtual ~CostModelContactCoPPositionTpl();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -54,17 +53,20 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-  const FootGeometry& get_footGeom() const;
+  const std::size_t& get_frame_id() const;
+  const Vector2s& get_cop_region() const;
+  const Vector3s& get_normal() const;
 
+ protected:
   using Base::activation_;
   using Base::nu_;
   using Base::state_;
   using Base::unone_;
 
-  protected: 
-    FootGeometry foot_geom_; //!< frame name and geometrical dimension of the contact foot
-    const Vector3s normal_; //!< vector normal to the contact surface 
-    Vector3s foot_pos_; //!< position of the foot w.r.t. the ground plane
+ private: 
+  const std::size_t frame_id_; //!< contact frame id
+  const Vector2s cop_region_; //!< desired 2d area (length, width) of the CoP defined w.r.t. the contact frame
+  const Vector3s normal_; //!< vector normal to the contact surface 
 };
 
 template <typename _Scalar>
@@ -75,7 +77,7 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef FrameFootGeometryTpl<Scalar> FootGeometry;
+  typedef typename MathBase::Vector2s Vector2s;
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
@@ -83,26 +85,36 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix6xs Matrix6xs;
   typedef typename MathBase::Matrix6s Matrix6s;
   typedef typename MathBase::Vector6s Vector6s;
+  typedef typename MathBase::Matrix46s Matrix46s;
 
   template <template <typename Scalar> class Model>
   CostDataContactCoPPositionTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data), Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
     Arr_Ru.setZero();
-    fiMo.translation(contact->jMf.translation());
-    
+        
     // Check that proper shared data has been passed
     DataCollectorContactTpl<Scalar>* d = dynamic_cast<DataCollectorContactTpl<Scalar>*>(shared);
     if (d == NULL) {
       throw_pretty("Invalid argument: the shared data should be derived from DataCollectorContact");
     }
 
+    //Get model parameters
+    frame_id = model->get_frame_id();
+    cop_region = model->get_cop_region();
+    normal = model->get_normal();
+
+    //Compute the inequality matrix
+    A << 0, 0, cop_region[0] / 2, 0, -1, 0,
+        0, 0, cop_region[0] / 2, 0, 1, 0,
+        0, 0, cop_region[1] / 2, 1, 0, 0,
+        0, 0, cop_region[1] / 2, -1, 0, 0;
+
     // Get the active 6d contact (avoids data casting at runtime)
-    const FootGeometry& foot_geom = model->get_footGeom();
-    std::string frame_name = model->get_state()->get_pinocchio()->frames[model->get_footGeom().frame].name;
+    std::string frame_name = model->get_state()->get_pinocchio()->frames[frame_id].name;
     bool found_contact = false;
     for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
          it != d->contacts->contacts.end(); ++it) {
-      if (it->second->frame == foot_geom.frame) {
+      if (it->second->frame == frame_id) {
         ContactData3DTpl<Scalar>* d3d = dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
         if (d3d != NULL) {
           throw_pretty("Domain error: a 6d contact model is required in " +
@@ -111,10 +123,6 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
         }
         ContactData6DTpl<Scalar>* d6d = dynamic_cast<ContactData6DTpl<Scalar>*>(it->second.get());
         if (d6d != NULL) {
-          if (model->get_activation()->get_nr() != 6) {
-            throw_pretty("Domain error: nr isn't defined as 6 in the activation model for the 3d contact in " +
-                         frame_name);
-          }
           found_contact = true;
           contact = it->second;
           break;
@@ -128,10 +136,12 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
 
   pinocchio::DataTpl<Scalar>* pinocchio;
   MatrixXs Arr_Ru;
-  boost::shared_ptr<ContactDataAbstractTpl<Scalar> > contact; //!< spatial force expressed in world coordinates
-  pinocchio::SE3Tpl<Scalar> fiMo; //!< SE3 object with origin at contact point and rotation aligned with the world frame
-  pinocchio::ForceTpl<Scalar> f; //!< cartesian force expressed in world coordinates 
-  Vector3s cop; //!< center of pressure
+  boost::shared_ptr<ContactDataAbstractTpl<Scalar> > contact; //!< contact force
+  pinocchio::ForceTpl<Scalar> f; //!< transformed contact force
+  std::size_t frame_id; //!< contact frame id
+  Vector2s cop_region; //!< desired 2d area (length, width) of the CoP defined w.r.t. the contact frame
+  Vector3s normal; //!< vector normal to the contact surface 
+  Matrix46s A; //!< inequality matrix constraining the CoP position
   using Base::activation;
   using Base::cost;
   using Base::Lu;

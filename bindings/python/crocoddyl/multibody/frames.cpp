@@ -90,18 +90,6 @@ void exposeFrames() {
       .add_property("oRf", bp::make_getter(&FrameFrictionCone::oRf, bp::return_internal_reference<>()),
                     "frame friction cone")
       .def(PrintableVisitor<FrameFrictionCone>());
-
-  bp::class_<FrameFootGeometry>("FrameFootGeometry",
-                                "Frame foot geometry.\n\n"
-                                "It defines the geometry of the contact surface for a given frame ID",
-                                bp::init<FrameIndex, Eigen::Vector2d>(bp::args("self", "frame", "dim"),
-                                                                    "Initialize the frame foot geometry.\n\n"
-                                                                    ":param frame: frame ID\n"
-                                                                    ":param dim: 2d-vector containg the length and width of the foot"))
-      .def(bp::init<>(bp::args("self"), "Default initialization of the frame friction cone."))
-      .def_readwrite("frame", &FrameFootGeometry::frame, "frame ID")
-      .add_property("dim", bp::make_getter(&FrameFootGeometry::dim, bp::return_internal_reference<>()), "frame foot geometry")
-      .def(PrintableVisitor<FrameFootGeometry>());
 }
 
 }  // namespace python
