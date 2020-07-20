@@ -14,6 +14,7 @@
 #include "crocoddyl/multibody/friction-cone.hpp"
 #include "crocoddyl/core/mathbase.hpp"
 
+#include <pinocchio/multibody/fwd.hpp>
 #include <pinocchio/spatial/se3.hpp>
 #include <pinocchio/spatial/motion.hpp>
 #include <pinocchio/spatial/force.hpp>
@@ -86,16 +87,31 @@ struct FrameMotionTpl {
   typedef _Scalar Scalar;
   typedef pinocchio::MotionTpl<Scalar> Motion;
 
-  explicit FrameMotionTpl() : frame(0), oMf(Motion::Zero()) {}
-  FrameMotionTpl(const FrameMotionTpl<Scalar>& value) : frame(value.frame), oMf(value.oMf) {}
-  FrameMotionTpl(const FrameIndex& frame, const Motion& oMf) : frame(frame), oMf(oMf) {}
+  explicit FrameMotionTpl() : frame(0), oMf(Motion::Zero()), reference(pinocchio::LOCAL) {}
+  FrameMotionTpl(const FrameMotionTpl<Scalar>& value)
+      : frame(value.frame), oMf(value.oMf), reference(value.reference) {}
+  FrameMotionTpl(const FrameIndex& frame, const Motion& oMf, pinocchio::ReferenceFrame reference = pinocchio::LOCAL)
+      : frame(frame), oMf(oMf), reference(reference) {}
   friend std::ostream& operator<<(std::ostream& os, const FrameMotionTpl<Scalar>& X) {
-    os << " frame: " << X.frame << std::endl << "motion: " << std::endl << X.oMf << std::endl;
+    os << "     frame: " << X.frame << std::endl;
+    os << "    motion: " << std::endl << X.oMf;
+    switch (X.reference) {
+      case pinocchio::WORLD:
+        os << " reference: WORLD" << std::endl;
+        break;
+      case pinocchio::LOCAL:
+        os << " reference: LOCAL" << std::endl;
+        break;
+      case pinocchio::LOCAL_WORLD_ALIGNED:
+        os << " reference: LOCAL_WORLD_ALIGNED" << std::endl;
+        break;
+    }
     return os;
   }
 
   FrameIndex frame;
   pinocchio::MotionTpl<Scalar> oMf;
+  pinocchio::ReferenceFrame reference;
 };
 
 template <typename _Scalar>
