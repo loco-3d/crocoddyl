@@ -56,7 +56,6 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
 
   const CoPSupport& get_copSupport() const;
 
- protected:
   using Base::activation_;
   using Base::nu_;
   using Base::state_;
@@ -88,7 +87,8 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
   CostDataContactCoPPositionTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data), Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
     Arr_Ru.setZero();
-        
+    fiMo.translation(contact->jMf.translation());
+    
     // Check that proper shared data has been passed
     DataCollectorContactTpl<Scalar>* d = dynamic_cast<DataCollectorContactTpl<Scalar>*>(shared);
     if (d == NULL) {
@@ -110,6 +110,10 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
         }
         ContactData6DTpl<Scalar>* d6d = dynamic_cast<ContactData6DTpl<Scalar>*>(it->second.get());
         if (d6d != NULL) {
+          if (model->get_activation()->get_nr() != 6) {
+            throw_pretty("Domain error: nr isn't defined as 6 in the activation model for the 3d contact in " +
+                         frame_name);
+          }
           found_contact = true;
           contact = it->second;
           break;

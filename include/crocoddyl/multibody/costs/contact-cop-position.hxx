@@ -27,8 +27,18 @@ void CostModelContactCoPPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDa
                                            const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
-  // Transform the contact force
-  d->f = d->contact->jMf.actInv(d->contact->f);
+  // Transform the spatial force to a cartesian force expressed in world coordinates  
+  d->fiMo.rotation(d->pinocchio->oMi[d->contact->joint].rotation());
+  d->f = d->fiMo.actInv(d->contact->f);
+  
+  // Compute the CoP (TODO: Remove after evaluation)
+  // OC = (tau_0^p x n) / (n * f^p) compare eq.(13) in https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.138.8014&rep=rep1&type=pdf
+  d->cop << normal_[1] * d->f.angular()[2] - normal_[2] * d->f.angular()[1], 
+            normal_[2] * d->f.angular()[0] - normal_[0] * d->f.angular()[2],
+            normal_[0] * d->f.angular()[1] - normal_[1] * d->f.angular()[0]; 
+  d->cop *= 1 / (normal_[0] * d->f.linear()[0] + normal_[1] * d->f.linear()[1] + normal_[2] * d->f.linear()[2]);
+  // Get foot position (for evaluation)
+  // foot_pos_ = d->pinocchio->oMf[d->contact->frame].translation();   
 
   // Compute the cost residual respecting A * f
   data->r.noalias() = cop_support_.get_A() * d->f.toVector();
@@ -46,7 +56,7 @@ void CostModelContactCoPPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<Co
   Data* d = static_cast<Data*>(data.get());
 
   // Get the derivatives of the contact wrench
-  const MatrixXs& df_dx = d->contact->df_dx;
+  const MatrixXs& df_dx = d->contact->df_dx; // TODO: Evantually transform derivative to Caron frame
   const MatrixXs& df_du = d->contact->df_du;
   const Matrix46& A = cop_support_.get_A();
 
