@@ -62,9 +62,9 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::state_;
   using Base::unone_;
 
-  protected: 
-    CoPSupport cop_support_; //!< frame name and geometrical dimension of the contact foot
-    const Vector3s normal_; //!< vector normal to the contact surface 
+ private: 
+  CoPSupport cop_support_; //!< frame name and geometrical dimension of the contact foot
+  Vector3s normal_; //!< vector normal to the contact surface 
 };
 
 template <typename _Scalar>
@@ -83,7 +83,6 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix6xs Matrix6xs;
   typedef typename MathBase::Matrix6s Matrix6s;
   typedef typename MathBase::Vector6s Vector6s;
-  typedef typename MathBase::Matrix46s Matrix46s;
 
   template <template <typename Scalar> class Model>
   CostDataContactCoPPositionTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
@@ -95,17 +94,6 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
     if (d == NULL) {
       throw_pretty("Invalid argument: the shared data should be derived from DataCollectorContact");
     }
-
-    //Get model parameters
-    frame_id = model->get_frame_id();
-    cop_region = model->get_cop_region();
-    normal = model->get_normal();
-
-    //Compute the inequality matrix
-    A << 0, 0, cop_region[0] / 2, 0, -1, 0,
-        0, 0, cop_region[0] / 2, 0, 1, 0,
-        0, 0, cop_region[1] / 2, 1, 0, 0,
-        0, 0, cop_region[1] / 2, -1, 0, 0;
 
     // Get the active 6d contact (avoids data casting at runtime)
     const CoPSupport& cop_support = model->get_copSupport();

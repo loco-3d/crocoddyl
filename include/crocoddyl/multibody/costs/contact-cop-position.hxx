@@ -79,14 +79,4 @@ const FrameCoPSupportTpl<Scalar>& CostModelContactCoPPositionTpl<Scalar>::get_co
   return cop_support_;
 }
 
-template<typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector2s& CostModelContactCoPPositionTpl<Scalar>::get_cop_region() const {
-  return cop_region_;
-}
-
-template<typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector3s& CostModelContactCoPPositionTpl<Scalar>::get_normal() const {
-  return normal_;
-}
-
 }  // namespace crocoddyl
