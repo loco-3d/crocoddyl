@@ -18,12 +18,10 @@ void exposeDifferentialActionNumDiff() {
   // Register custom converters between std::vector and Python list
   typedef boost::shared_ptr<DifferentialActionModelAbstract> DifferentialActionModelPtr;
   typedef boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionDataPtr;
-  bp::to_python_converter<std::vector<DifferentialActionModelPtr, std::allocator<DifferentialActionModelPtr> >,
-                          vector_to_list<DifferentialActionModelPtr, false> >();
-  bp::to_python_converter<std::vector<DifferentialActionDataPtr, std::allocator<DifferentialActionDataPtr> >,
-                          vector_to_list<DifferentialActionDataPtr, false> >();
-  list_to_vector()
-      .from_python<std::vector<DifferentialActionModelPtr, std::allocator<DifferentialActionModelPtr> > >();
+  StdVectorPythonVisitor<DifferentialActionModelPtr, std::allocator<DifferentialActionModelPtr>, true>::expose(
+      "StdVec_DiffActionModel");
+  StdVectorPythonVisitor<DifferentialActionDataPtr, std::allocator<DifferentialActionDataPtr>, true>::expose(
+      "StdVec_DiffActionData");
 
   bp::class_<DifferentialActionModelNumDiff, bp::bases<DifferentialActionModelAbstract> >(
       "DifferentialActionModelNumDiff",

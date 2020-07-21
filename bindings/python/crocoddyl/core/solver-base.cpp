@@ -16,9 +16,7 @@ namespace python {
 void exposeSolverAbstract() {
   // Register custom converters between std::vector and Python list
   typedef boost::shared_ptr<CallbackAbstract> CallbackAbstractPtr;
-  bp::to_python_converter<std::vector<CallbackAbstractPtr, std::allocator<CallbackAbstractPtr> >,
-                          vector_to_list<CallbackAbstractPtr, false> >();
-  list_to_vector().from_python<std::vector<CallbackAbstractPtr, std::allocator<CallbackAbstractPtr> > >();
+  StdVectorPythonVisitor<CallbackAbstractPtr, std::allocator<CallbackAbstractPtr>, true>::expose("StdVec_Callback");
 
   bp::class_<SolverAbstract_wrap, boost::noncopyable>(
       "SolverAbstract",
