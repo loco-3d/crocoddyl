@@ -11,6 +11,10 @@ ROBOT_DATA = ROBOT_MODEL.createData()
 ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 ACTUATION = crocoddyl.ActuationModelFloatingBase(ROBOT_STATE)
 
+# Create friction cone and its activation
+activation = crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(
+                np.array([0] * 4), np.array([np.inf] * 4)))
+
 # Contact CoP position cost unittest
 CONTACTS = crocoddyl.ContactModelMultiple(ROBOT_STATE, ACTUATION.nu)
 CONTACT_6D_RF = crocoddyl.ContactModel6D(

@@ -56,6 +56,7 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
 
   const CoPSupport& get_copSupport() const;
 
+ protected:
   using Base::activation_;
   using Base::nu_;
   using Base::state_;
@@ -82,18 +83,29 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix6xs Matrix6xs;
   typedef typename MathBase::Matrix6s Matrix6s;
   typedef typename MathBase::Vector6s Vector6s;
+  typedef typename MathBase::Matrix46s Matrix46s;
 
   template <template <typename Scalar> class Model>
   CostDataContactCoPPositionTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data), Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
     Arr_Ru.setZero();
-    fiMo.translation(contact->jMf.translation());
-    
+        
     // Check that proper shared data has been passed
     DataCollectorContactTpl<Scalar>* d = dynamic_cast<DataCollectorContactTpl<Scalar>*>(shared);
     if (d == NULL) {
       throw_pretty("Invalid argument: the shared data should be derived from DataCollectorContact");
     }
+
+    //Get model parameters
+    frame_id = model->get_frame_id();
+    cop_region = model->get_cop_region();
+    normal = model->get_normal();
+
+    //Compute the inequality matrix
+    A << 0, 0, cop_region[0] / 2, 0, -1, 0,
+        0, 0, cop_region[0] / 2, 0, 1, 0,
+        0, 0, cop_region[1] / 2, 1, 0, 0,
+        0, 0, cop_region[1] / 2, -1, 0, 0;
 
     // Get the active 6d contact (avoids data casting at runtime)
     const CoPSupport& cop_support = model->get_copSupport();
@@ -110,10 +122,6 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
         }
         ContactData6DTpl<Scalar>* d6d = dynamic_cast<ContactData6DTpl<Scalar>*>(it->second.get());
         if (d6d != NULL) {
-          if (model->get_activation()->get_nr() != 6) {
-            throw_pretty("Domain error: nr isn't defined as 6 in the activation model for the 3d contact in " +
-                         frame_name);
-          }
           found_contact = true;
           contact = it->second;
           break;
