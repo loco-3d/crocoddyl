@@ -75,7 +75,7 @@ template <typename Scalar>
 struct FrameFrictionConeTpl;
 
 template <typename Scalar>
-struct FrameFootGeometryTpl;
+struct FrameCoPSupportTpl;
 
 // cost
 template <typename Scalar>
@@ -260,7 +260,7 @@ typedef FramePlacementTpl<double> FramePlacement;
 typedef FrameMotionTpl<double> FrameMotion;
 typedef FrameForceTpl<double> FrameForce;
 typedef FrameFrictionConeTpl<double> FrameFrictionCone;
-typedef FrameFootGeometryTpl<double> FrameFootGeometry;
+typedef FrameCoPSupportTpl<double> FrameCoPSupport;
 
 typedef CostModelAbstractTpl<double> CostModelAbstract;
 typedef CostDataAbstractTpl<double> CostDataAbstract;

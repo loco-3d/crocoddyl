@@ -11,6 +11,10 @@ ROBOT_DATA = ROBOT_MODEL.createData()
 ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 ACTUATION = crocoddyl.ActuationModelFloatingBase(ROBOT_STATE)
 
+# Create friction cone and its activation
+activation = crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(
+                np.array([0] * 4), np.array([np.inf] * 4)))
+
 # Contact CoP position cost unittest
 CONTACTS = crocoddyl.ContactModelMultiple(ROBOT_STATE, ACTUATION.nu)
 CONTACT_6D_RF = crocoddyl.ContactModel6D(
@@ -22,14 +26,16 @@ CONTACT_6D_LF = crocoddyl.ContactModel6D(
 CONTACTS.addContact("r_sole_contact", CONTACT_6D_RF)
 CONTACTS.addContact("l_sole_contact", CONTACT_6D_LF)
 COSTS = crocoddyl.CostModelSum(ROBOT_STATE, ACTUATION.nu)
-COSTS.addCost(
-    "r_sole_cop",
-    crocoddyl.CostModelContactCoPPosition(ROBOT_STATE, crocoddyl.ActivationModelQuad(4), # TODO: Hard coded dim?
-    crocoddyl.FrameFootGeometry(ROBOT_MODEL.getFrameId('r_sole'), (20, 8)), 1.), [0, 0, 1])
-COSTS.addCost(
-    "l_sole_cop",
-    crocoddyl.CostModelContactCoPPosition(ROBOT_STATE, crocoddyl.ActivationModelQuad(4), 
-    crocoddyl.FrameFootGeometry(ROBOT_MODEL.getFrameId('l_sole'), (20, 8)), 1.), [0, 0, 1])
+CoPCostRF = crocoddyl.CostModelContactCoPPosition(
+    ROBOT_STATE, activation, 
+    crocoddyl.FrameCoPSupport(ROBOT_MODEL.getFrameId('r_sole'), np.array([0.01, 0.01])),
+    np.array([0, 0, 1]), ACTUATION.nu)
+CoPCostLF = crocoddyl.CostModelContactCoPPosition(
+    ROBOT_STATE, activation, 
+    crocoddyl.FrameCoPSupport(ROBOT_MODEL.getFrameId('l_sole'), np.array([0.01, 0.01])),
+    np.array([0, 0, 1]), ACTUATION.nu)
+COSTS.addCost("r_sole_cop", CoPCostRF, 1)
+COSTS.addCost("l_sole_cop", CoPCostLF, 1)
 MODEL = crocoddyl.DifferentialActionModelContactFwdDynamics(ROBOT_STATE, ACTUATION, CONTACTS, COSTS, 0., True)
 DATA = MODEL.createData()
 

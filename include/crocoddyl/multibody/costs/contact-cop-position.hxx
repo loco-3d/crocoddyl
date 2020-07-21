@@ -14,9 +14,9 @@ namespace crocoddyl {
 template<typename _Scalar>
 CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
                                           boost::shared_ptr<ActivationModelAbstract> activation,
-                                          const FootGeometry& foot_geom, const Vector3s normal)
-    : Base(state, activation), foot_geom_(foot_geom), normal_(normal) {
-      foot_geom_.update_A(); //TODO: Call here?
+                                          const CoPSupport& cop_support, const Vector3s& normal, const std::size_t& nu)
+    : Base(state, activation, nu), cop_support_(cop_support), normal_(normal) {
+      cop_support_.update_A();
     }
 
 template <typename Scalar>
@@ -27,21 +27,11 @@ void CostModelContactCoPPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDa
                                            const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
-  // Transform the spatial force to a cartesian force expressed in world coordinates  
-  d->fiMo.rotation(d->pinocchio->oMi[d->contact->joint].rotation());
-  d->f = d->fiMo.actInv(d->contact->f);
-  
-  // Compute the CoP (TODO: Remove after evaluation)
-  // OC = (tau_0^p x n) / (n * f^p) compare eq.(13) in https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.138.8014&rep=rep1&type=pdf
-  d->cop << normal_[1] * d->f.angular()[2] - normal_[2] * d->f.angular()[1], 
-            normal_[2] * d->f.angular()[0] - normal_[0] * d->f.angular()[2],
-            normal_[0] * d->f.angular()[1] - normal_[1] * d->f.angular()[0]; 
-  d->cop *= 1 / (normal_[0] * d->f.linear()[0] + normal_[1] * d->f.linear()[1] + normal_[2] * d->f.linear()[2]);
-  // Get foot position (for evaluation)
-  // foot_pos_ = d->pinocchio->oMf[d->contact->frame].translation();   
+  // Transform the contact force
+  d->f = d->contact->jMf.actInv(d->contact->f);
 
-  // Compute the cost residual respecting A * f <= 0
-  data->r.noalias() = foot_geom_.get_A() * d->f.toVector(); //TODO: Debug error: static assertion failed: INVALID_MATRIX_PRODUCT
+  // Compute the cost residual respecting A * f
+  data->r.noalias() = cop_support_.get_A() * d->f.toVector();
 
   // Compute the cost
   activation_->calc(data->activation, data->r);
@@ -56,9 +46,9 @@ void CostModelContactCoPPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<Co
   Data* d = static_cast<Data*>(data.get());
 
   // Get the derivatives of the contact wrench
-  const MatrixXs& df_dx = d->contact->df_dx; // TODO: Evantually transform derivative to Caron frame
+  const MatrixXs& df_dx = d->contact->df_dx;
   const MatrixXs& df_du = d->contact->df_du;
-  const Matrix46s& A = foot_geom_.get_A();
+  const Matrix46& A = cop_support_.get_A();
 
   //Compute the derivatives of the activation function
   activation_->calcDiff(data->activation, data->r);
@@ -85,8 +75,8 @@ boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelContactCoPPositionTpl<S
 }
 
 template<typename Scalar>
-const FrameFootGeometryTpl<Scalar>& CostModelContactCoPPositionTpl<Scalar>::get_footGeom() const {
-  return foot_geom_;
+const FrameCoPSupportTpl<Scalar>& CostModelContactCoPPositionTpl<Scalar>::get_copSupport() const {
+  return cop_support_;
 }
 
 }  // namespace crocoddyl

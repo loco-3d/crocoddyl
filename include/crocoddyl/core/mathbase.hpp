@@ -25,7 +25,6 @@ struct MathBaseTpl {
   typedef Eigen::Matrix<Scalar, 6, 1> Vector6s;
   typedef Eigen::Matrix<Scalar, 3, 3> Matrix3s;
   typedef Eigen::Matrix<Scalar, 6, 6> Matrix6s;
-  typedef Eigen::Matrix<Scalar, 4, 6> Matrix46s;
 
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 3> MatrixX3s;
   typedef Eigen::Matrix<Scalar, 3, Eigen::Dynamic> Matrix3xs;

@@ -91,17 +91,17 @@ void exposeFrames() {
                     "frame friction cone")
       .def(PrintableVisitor<FrameFrictionCone>());
 
-  bp::class_<FrameFootGeometry>("FrameFootGeometry",
+  bp::class_<FrameCoPSupport>("FrameCoPSupport",
                                 "Frame foot geometry.\n\n"
                                 "It defines the geometry of the contact surface for a given frame ID",
-                                bp::init<FrameIndex, Eigen::Vector2d>(bp::args("self", "frame", "dim"),
+                                bp::init<FrameIndex, Eigen::Vector2d>(bp::args("self", "frame", "support_region"),
                                                                     "Initialize the frame foot geometry.\n\n"
                                                                     ":param frame: frame ID\n"
-                                                                    ":param dim: 2d-vector containg the length and width of the foot"))
+                                                                    ":param support_region: 2d-vector containg the length and width of the foot"))
       .def(bp::init<>(bp::args("self"), "Default initialization of the frame friction cone."))
-      .def_readwrite("frame", &FrameFootGeometry::frame, "frame ID")
-      .add_property("dim", bp::make_getter(&FrameFootGeometry::dim, bp::return_internal_reference<>()), "frame foot geometry")
-      .def(PrintableVisitor<FrameFootGeometry>());
+      .def_readwrite("frame", &FrameCoPSupport::frame, "frame ID")
+      .add_property("support_region", bp::make_getter(&FrameCoPSupport::support_region, bp::return_internal_reference<>()), "frame foot geometry")
+      .def(PrintableVisitor<FrameCoPSupport>());
 }
 
 }  // namespace python
