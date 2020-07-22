@@ -118,6 +118,7 @@ class SolverDDP : public SolverAbstract {
    *
    * @param  stepLength  applied step length (\f$0\leq\alpha\leq1\f$)
    */
+   
   virtual void forwardPass(const double& stepLength);
 
   /**
@@ -134,6 +135,8 @@ class SolverDDP : public SolverAbstract {
    * state and control regularization values.
    */
   virtual void computeGains(const std::size_t& t);
+  
+  std::vector<Eigen::MatrixXd> computeKp(const std::size_t& t, const Eigen::MatrixXd& dWp);
 
   /**
    * @brief Increase the state and control regularization values by a `regfactor_` factor
