@@ -43,9 +43,9 @@ SET(PROJECT_USE_CMAKE_EXPORT True)
 
 # Create different building options
 OPTION(ENABLE_VECTORIZATION "Enable vectorization and further processor-related optimizations" OFF)
-OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" ON)
+OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" OFF)
 OPTION(BUILD_UNIT_TESTS "Build the unitary tests" OFF)
-OPTION(BUILD_BENCHMARK "Build the benchmark" ON)
+OPTION(BUILD_BENCHMARK "Build the benchmark" OFF)
 OPTION(BUILD_EXAMPLES "Build the examples" OFF)
 
 
@@ -103,7 +103,7 @@ if(OPENMP_FOUND AND BUILD_WITH_MULTITHREADS)
   SET(OMP_NUM_THREADS ${BUILD_WITH_NTHREADS})
 ENDIF()
 
-SET(BOOST_REQUIERED_COMPONENTS filesystem serialization system)
+SET(BOOST_REQUIERED_COMPONENTS filesystem serialization system thread date_time)
 SET(BOOST_BUILD_COMPONENTS unit_test_framework)
 SET(BOOST_OPTIONAL_COMPONENTS "")
 
