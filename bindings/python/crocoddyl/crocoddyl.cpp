@@ -30,8 +30,8 @@ BOOST_PYTHON_MODULE(libcrocoddyl_pywrap) {
   eigenpy::enableEigenPySpecific<MatrixX3>();
 
   // Register converters between std::vector and Python list
-  StdVectorPythonVisitor<VectorX>::expose("StdVec_VectorX");
-  StdVectorPythonVisitor<MatrixX>::expose("StdVec_MatrixX");
+  StdVectorPythonVisitor<VectorX, std::allocator<VectorX>, true>::expose("StdVec_VectorX");
+  StdVectorPythonVisitor<MatrixX, std::allocator<MatrixX>, true>::expose("StdVec_MatrixX");
 
   exposeCore();
   exposeMultibody();
