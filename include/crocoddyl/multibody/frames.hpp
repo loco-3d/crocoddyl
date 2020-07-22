@@ -137,7 +137,7 @@ struct FrameFrictionConeTpl {
 };
 
 template <typename _Scalar>
-struct FrameCoPSupportTpl {
+class FrameCoPSupportTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -145,17 +145,25 @@ struct FrameCoPSupportTpl {
   typedef typename MathBaseTpl<Scalar>::Vector3s Vector3s;
   typedef Eigen::Matrix<Scalar, 4, 6> Matrix46;
 
-  explicit FrameCoPSupportTpl() : frame(0), support_region(Vector2s::Zero()), normal(Vector3s::Zero()) {}
+ public:
+  explicit FrameCoPSupportTpl() : frame_(0), support_region_(Vector2s::Zero()), normal_(Vector3s::Zero()) {
+    update_A();
+  }
   FrameCoPSupportTpl(const FrameCoPSupportTpl<Scalar>& value)
-      : frame(value.frame), support_region(value.support_region), normal(value.normal) {}
+      : frame_(value.get_frame()),
+        support_region_(value.get_support_region()),
+        normal_(value.get_normal()),
+        A_(value.get_A()) {}
   FrameCoPSupportTpl(const FrameIndex& frame, const Vector2s& support_region, const Vector3s& normal)
-      : frame(frame), support_region(support_region), normal(normal) {}
+      : frame_(frame), support_region_(support_region), normal_(normal) {
+    update_A();
+  }
   friend std::ostream& operator<<(std::ostream& os, const FrameCoPSupportTpl<Scalar>& X) {
-    os << "      frame: " << X.frame << std::endl
+    os << "          frame: " << X.get_frame() << std::endl
        << "foot dimensions: " << std::endl
-       << X.support_region << std::endl
-       << "contact normal: " << std::endl
-       << X.normal << std::endl;
+       << X.get_support_region() << std::endl
+       << " contact normal: " << std::endl
+       << X.get_normal() << std::endl;
     return os;
   }
 
@@ -164,18 +172,29 @@ struct FrameCoPSupportTpl {
   // Matrix3s c_R_o = Quaternions::FromTwoVectors(nsurf_, Vector3s::UnitZ()).toRotationMatrix(); TODO: Rotation
   // necessary for each row of A?
   void update_A() {
-    A << Scalar(0), Scalar(0), support_region[0] / Scalar(2), Scalar(0), Scalar(-1), Scalar(0), Scalar(0), Scalar(0),
-        support_region[0] / Scalar(2), Scalar(0), Scalar(1), Scalar(0), Scalar(0), Scalar(0),
-        support_region[1] / Scalar(2), Scalar(1), Scalar(0), Scalar(0), Scalar(0), Scalar(0),
-        support_region[1] / Scalar(2), Scalar(-1), Scalar(0), Scalar(0);
+    A_ << Scalar(0), Scalar(0), support_region_[0] / Scalar(2), Scalar(0), Scalar(-1), Scalar(0), Scalar(0), Scalar(0),
+        support_region_[0] / Scalar(2), Scalar(0), Scalar(1), Scalar(0), Scalar(0), Scalar(0),
+        support_region_[1] / Scalar(2), Scalar(1), Scalar(0), Scalar(0), Scalar(0), Scalar(0),
+        support_region_[1] / Scalar(2), Scalar(-1), Scalar(0), Scalar(0);
   }
 
-  const Matrix46& get_A() const { return A; }
+  void set_frame(FrameIndex frame) { frame_ = frame; }
+  void set_support_region(const Vector2s& support_region) {
+    support_region_ = support_region;
+    update_A();
+  }
+  void set_normal(const Vector3s& normal) { normal_ = normal; }
 
-  FrameIndex frame;         //!< ID of the contact frame
-  Vector2s support_region;  //!< dimension of the foot surface dim = (length, width)
-  Vector3s normal;          //!< vector normal to the contact surface
-  Matrix46 A;               //!< inequality matrix
+  const FrameIndex& get_frame() const { return frame_; }
+  const Vector2s& get_support_region() const { return support_region_; }
+  const Vector3s& get_normal() const { return normal_; }
+  const Matrix46& get_A() const { return A_; }
+
+ private:
+  FrameIndex frame_;         //!< ID of the contact frame
+  Vector2s support_region_;  //!< dimension of the foot surface dim = (length, width)
+  Vector3s normal_;          //!< vector normal to the contact surface
+  Matrix46 A_;               //!< inequality matrix
 };
 
 }  // namespace crocoddyl

@@ -14,10 +14,8 @@ namespace crocoddyl {
 template <typename _Scalar>
 CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-    const CoPSupport& cop_support, const std::size_t& nu)
-    : Base(state, activation, nu), cop_support_(cop_support) {
-  cop_support_.update_A();
-}
+    const FrameCoPSupport& cop_support, const std::size_t& nu)
+    : Base(state, activation, nu), cop_support_(cop_support) {}
 
 template <typename Scalar>
 CostModelContactCoPPositionTpl<Scalar>::~CostModelContactCoPPositionTpl() {}
@@ -28,11 +26,8 @@ void CostModelContactCoPPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDa
                                                   const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
-  // Transform the contact force
-  d->f = d->contact->jMf.actInv(d->contact->f);
-
   // Compute the cost residual respecting A * f
-  data->r.noalias() = cop_support_.get_A() * d->f.toVector();
+  data->r.noalias() = cop_support_.get_A() * d->contact->jMf.actInv(d->contact->f).toVector();
 
   // Compute the cost
   activation_->calc(data->activation, data->r);

@@ -102,12 +102,17 @@ void exposeFrames() {
           ":param support_region: dimension of the foot surface dim = (length, width)\n"
           ":param normal: vector normal to the contact surface "))
       .def(bp::init<>(bp::args("self"), "Default initialization of the frame CoP support."))
-      .def_readwrite("frame", &FrameCoPSupport::frame, "frame ID")
+      .def("update_A", &FrameCoPSupport::update_A, "update the matrix that defines the support region")
+      .add_property("frame",
+                    bp::make_function(&FrameCoPSupport::get_frame, bp::return_value_policy<bp::return_by_value>()),
+                    &FrameCoPSupport::set_frame, "frame ID")
       .add_property("support_region",
-                    bp::make_getter(&FrameCoPSupport::support_region, bp::return_internal_reference<>()),
-                    "support region")
-      .add_property("normal", bp::make_getter(&FrameCoPSupport::normal, bp::return_internal_reference<>()),
-                    "contact normal")
+                    bp::make_function(&FrameCoPSupport::get_support_region, bp::return_internal_reference<>()),
+                    &FrameCoPSupport::set_support_region, "support region")
+      .add_property("normal", bp::make_function(&FrameCoPSupport::get_normal, bp::return_internal_reference<>()),
+                    &FrameCoPSupport::set_normal, "contact normal")
+      .add_property("A", bp::make_function(&FrictionCone::get_A, bp::return_internal_reference<>()),
+                    "inequality matrix")
       .def(PrintableVisitor<FrameCoPSupport>());
 }
 

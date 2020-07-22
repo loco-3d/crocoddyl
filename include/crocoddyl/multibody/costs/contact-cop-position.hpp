@@ -35,7 +35,7 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
   typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef FrameCoPSupportTpl<Scalar> CoPSupport;
+  typedef FrameCoPSupportTpl<Scalar> FrameCoPSupport;
   typedef typename MathBase::Vector2s Vector2s;
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
@@ -44,8 +44,8 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   typedef Eigen::Matrix<Scalar, 4, 6> Matrix46;
 
   CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
-                                 boost::shared_ptr<ActivationModelAbstract> activation, const CoPSupport& cop_support,
-                                 const std::size_t& nu);
+                                 boost::shared_ptr<ActivationModelAbstract> activation,
+                                 const FrameCoPSupport& cop_support, const std::size_t& nu);
   virtual ~CostModelContactCoPPositionTpl();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -54,7 +54,7 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-  const CoPSupport& get_copSupport() const;
+  const FrameCoPSupport& get_copSupport() const;
 
  protected:
   using Base::activation_;
@@ -63,7 +63,7 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::unone_;
 
  private:
-  CoPSupport cop_support_;  //!< frame name and geometrical dimension of the contact foot
+  FrameCoPSupport cop_support_;  //!< frame name and geometrical dimension of the contact foot
 };
 
 template <typename _Scalar>
@@ -74,7 +74,7 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef FrameCoPSupportTpl<Scalar> CoPSupport;
+  typedef FrameCoPSupportTpl<Scalar> FrameCoPSupport;
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
@@ -95,12 +95,12 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
     }
 
     // Get the active 6d contact (avoids data casting at runtime)
-    const CoPSupport& cop_support = model->get_copSupport();
-    std::string frame_name = model->get_state()->get_pinocchio()->frames[cop_support.frame].name;
+    const FrameCoPSupport& cop_support = model->get_copSupport();
+    std::string frame_name = model->get_state()->get_pinocchio()->frames[cop_support.get_frame()].name;
     bool found_contact = false;
     for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
          it != d->contacts->contacts.end(); ++it) {
-      if (it->second->frame == cop_support.frame) {
+      if (it->second->frame == cop_support.get_frame()) {
         ContactData3DTpl<Scalar>* d3d = dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
         if (d3d != NULL) {
           throw_pretty("Domain error: a 6d contact model is required in " + frame_name +
@@ -123,7 +123,6 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
   pinocchio::DataTpl<Scalar>* pinocchio;
   MatrixXs Arr_Ru;
   boost::shared_ptr<ContactDataAbstractTpl<Scalar> > contact;  //!< contact force
-  pinocchio::ForceTpl<Scalar> f;                               //!< transformed contact force
   using Base::activation;
   using Base::cost;
   using Base::Lu;
