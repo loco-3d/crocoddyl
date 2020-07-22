@@ -17,6 +17,29 @@ CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(
     const FrameCoPSupport& cop_support, const std::size_t& nu)
     : Base(state, activation, nu), cop_support_(cop_support) {}
 
+template <typename _Scalar>
+CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(
+    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
+    const FrameCoPSupport& cop_support)
+    : Base(state, activation), cop_support_(cop_support) {}
+
+template <typename _Scalar>
+CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
+                                                                        const FrameCoPSupport& cop_support,
+                                                                        const std::size_t& nu)
+    : Base(state,
+           boost::make_shared<ActivationModelQuadraticBarrier>(
+               ActivationBounds(VectorXs::Zero(4), std::numeric_limits<_Scalar>::max() * VectorXs::Ones(4))),
+           nu),
+      cop_support_(cop_support) {}
+
+template <typename _Scalar>
+CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
+                                                                        const FrameCoPSupport& cop_support)
+    : Base(state, boost::make_shared<ActivationModelQuadraticBarrier>(
+                      ActivationBounds(VectorXs::Zero(4), std::numeric_limits<_Scalar>::max() * VectorXs::Ones(4)))),
+      cop_support_(cop_support) {}
+
 template <typename Scalar>
 CostModelContactCoPPositionTpl<Scalar>::~CostModelContactCoPPositionTpl() {}
 

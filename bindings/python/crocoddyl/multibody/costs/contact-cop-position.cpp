@@ -17,14 +17,29 @@ void exposeCostContactCoPPosition() {
   bp::class_<CostModelContactCoPPosition, bp::bases<CostModelAbstract> >(
       "CostModelContactCoPPosition",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameCoPSupport, int>(
-          bp::args("self", "state", "activation",
-                   "cop_support"
-                   "nu"),
+          bp::args("self", "state", "activation", "cop_support", "nu"),
           "Initialize the contact CoP position cost model.\n\n"
           ":param state: state of the multibody system\n"
-          ":param activation: activation model\n"
-          ":param cop_support: contact frame ID and cop support region"
+          ":param activation: activation model (default ActivationModelQuadraticBarrier)\n"
+          ":param cop_support: contact frame ID and cop support region\n"
           ":param nu: dimension of control vector"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameCoPSupport>(
+          bp::args("self", "state", "activation", "cop_support"),
+          "Initialize the contact CoP position cost model.\n\n"
+          ":param state: state of the multibody system\n"
+          ":param activation: activation model (default ActivationModelQuadraticBarrier)\n"
+          ":param cop_support: contact frame ID and cop support region"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, FrameCoPSupport, int>(
+          bp::args("self", "state", "cop_support", "nu"),
+          "Initialize the contact CoP position cost model.\n\n"
+          ":param state: state of the multibody system\n"
+          ":param cop_support: contact frame ID and cop support region\n"
+          ":param nu: dimension of control vector"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, FrameCoPSupport>(
+          bp::args("self", "state", "cop_support"),
+          "Initialize the contact CoP position cost model.\n\n"
+          ":param state: state of the multibody system\n"
+          ":param cop_support: contact frame ID and cop support region"))
       .def<void (CostModelContactCoPPosition::*)(const boost::shared_ptr<CostDataAbstract>&,
                                                  const Eigen::Ref<const Eigen::VectorXd>&,
                                                  const Eigen::Ref<const Eigen::VectorXd>&)>(

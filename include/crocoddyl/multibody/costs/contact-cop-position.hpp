@@ -17,6 +17,7 @@
 #include "crocoddyl/multibody/data/contacts.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
+#include "crocoddyl/core/activations/quadratic-barrier.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -33,7 +34,8 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
-  typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
+  typedef ActivationModelQuadraticBarrierTpl<Scalar> ActivationModelQuadraticBarrier;
+  typedef ActivationBoundsTpl<Scalar> ActivationBounds;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef FrameCoPSupportTpl<Scalar> FrameCoPSupport;
   typedef typename MathBase::Vector2s Vector2s;
@@ -46,6 +48,12 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
                                  boost::shared_ptr<ActivationModelAbstract> activation,
                                  const FrameCoPSupport& cop_support, const std::size_t& nu);
+  CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
+                                 boost::shared_ptr<ActivationModelAbstract> activation,
+                                 const FrameCoPSupport& cop_support);
+  CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state, const FrameCoPSupport& cop_support,
+                                 const std::size_t& nu);
+  CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state, const FrameCoPSupport& cop_support);
   virtual ~CostModelContactCoPPositionTpl();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
