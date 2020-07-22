@@ -13,90 +13,137 @@
 #include <map>
 #include <boost/python/stl_iterator.hpp>
 #include <boost/python/to_python_converter.hpp>
+#include <boost/python/suite/indexing/map_indexing_suite.hpp>
+#include "python/crocoddyl/utils/vector-converter.hpp"
 
 namespace crocoddyl {
 namespace python {
 
 namespace bp = boost::python;
 
-/// @note Registers converter from a provided type to the python
-///       iterable type to the.
-template <class K, class V, bool NoProxy = true>
-struct map_to_dict {
-  static PyObject* convert(const std::map<K, V>& map) {
-    bp::dict* dict = new boost::python::dict();
-    typename std::map<K, V>::const_iterator it;
-    for (it = map.begin(); it != map.end(); ++it) {
-      if (NoProxy) {
-        dict->setdefault(it->first, boost::ref(it->second));
-      } else {
-        dict->setdefault(it->first, it->second);
-      }
-    }
-    return dict->ptr();
+/**
+ * @brief Create a pickle interface for the std::map
+ *
+ * @param[in] Container  Map type to be pickled
+ * \sa Pickle
+ */
+template <typename Container>
+struct PickleMap : public PickleVector<Container> {
+  static void setstate(bp::object op, bp::tuple tup) {
+    Container& o = bp::extract<Container&>(op)();
+    bp::stl_input_iterator<typename Container::value_type> begin(tup[0]), end;
+    o.insert(begin, end);
   }
-  static PyTypeObject const* get_pytype() { return &PyDict_Type; }
 };
 
 /// Conversion from dict to map solution proposed in
 /// https://stackoverflow.com/questions/6116345/boostpython-possible-to-automatically-convert-from-dict-stdmap
 /// This template encapsulates the conversion machinery.
-template <typename key_t, typename val_t>
+template <typename Container>
 struct dict_to_map {
-  /// The type of the map we convert the Python dict into
-  typedef std::map<key_t, val_t> map_t;
-
-  dict_to_map& from_python() {
+  static void register_converter() {
     boost::python::converter::registry::push_back(&dict_to_map::convertible, &dict_to_map::construct,
-                                                  boost::python::type_id<map_t>());
-    // Support chaining.
-    return *this;
+                                                  boost::python::type_id<Container>());
   }
 
   /// Check if conversion is possible
-  static void* convertible(PyObject* object) { return PyObject_GetIter(object) ? object : NULL; }
+  static void* convertible(PyObject* object) {
+    namespace python = boost::python;
+
+    // Check if it is a list
+    if (!PyList_Check(object)) return 0;
+
+    // Retrieve the underlying list
+    bp::object bp_obj(bp::handle<>(bp::borrowed(object)));
+    python::list bp_list(bp_obj);
+    python::ssize_t list_size = python::len(bp_list);
+
+    // Check if all the elements contained in the current vector is of type T
+    for (python::ssize_t k = 0; k < list_size; ++k) {
+      python::extract<typename Container::value_type> elt(bp_list[k]);
+      if (!elt.check()) return 0;
+    }
+    return object;
+  }
 
   /// Perform the conversion
-  static void construct(PyObject* objptr, boost::python::converter::rvalue_from_python_stage1_data* data) {
-    // convert the PyObject pointed to by `objptr` to a boost::python::dict
-    boost::python::handle<> objhandle(boost::python::borrowed(objptr));  // "smart ptr"
-    boost::python::dict d(objhandle);
+  static void construct(PyObject* object, boost::python::converter::rvalue_from_python_stage1_data* data) {
+    namespace python = boost::python;
+    // convert the PyObject pointed to by `object` to a boost::python::dict
+    python::handle<> handle(python::borrowed(object));  // "smart ptr"
+    python::dict dict(handle);
 
     // get a pointer to memory into which we construct the map
     // this is provided by the Python runtime
-    void* storage =
-        reinterpret_cast<boost::python::converter::rvalue_from_python_storage<map_t>*>(data)->storage.bytes;
+    typedef python::converter::rvalue_from_python_storage<Container> storage_type;
+    void* storage = reinterpret_cast<storage_type*>(data)->storage.bytes;
 
     // placement-new allocate the result
-    new (storage) map_t();
+    new (storage) Container();
 
-    // iterate over the dictionary `d`, fill up the map `m`
-    map_t& m(*(static_cast<map_t*>(storage)));
-    boost::python::list keys(d.keys());
-    int keycount(static_cast<int>(boost::python::len(keys)));
+    // iterate over the dictionary `dict`, fill up the map `map`
+    Container& map(*(static_cast<Container*>(storage)));
+    python::list keys(dict.keys());
+    int keycount(static_cast<int>(python::len(keys)));
     for (int i = 0; i < keycount; ++i) {
       // get the key
-      boost::python::object keyobj(keys[i]);
-      boost::python::extract<key_t> keyproxy(keyobj);
+      python::object keyobj(keys[i]);
+      python::extract<typename Container::key_type> keyproxy(keyobj);
       if (!keyproxy.check()) {
         PyErr_SetString(PyExc_KeyError, "Bad key type");
-        boost::python::throw_error_already_set();
+        python::throw_error_already_set();
       }
-      key_t key = keyproxy();
+      typename Container::key_type key = keyproxy();
 
       // get the corresponding value
-      boost::python::object valobj(d[keyobj]);
-      boost::python::extract<val_t> valproxy(valobj);
+      python::object valobj(dict[keyobj]);
+      python::extract<typename Container::mapped_type> valproxy(valobj);
       if (!valproxy.check()) {
         PyErr_SetString(PyExc_ValueError, "Bad value type");
-        boost::python::throw_error_already_set();
+        python::throw_error_already_set();
       }
-      val_t val = valproxy();
-      m[key] = val;
+      typename Container::mapped_type val = valproxy();
+      map[key] = val;
     }
 
     // remember the location for later
     data->convertible = storage;
+  }
+
+  static boost::python::dict todict(Container& self) {
+    namespace python = boost::python;
+    typedef python::iterator<Container> iterator;
+    python::dict dict(iterator()(self));
+    return dict;
+  }
+};
+
+/**
+ * @brief Expose an std::map from a type given as template argument.
+ *
+ * @param[in] T          Type to expose as std::map<T>.
+ * @param[in] Compare    Type for the Compare in std::map<T,Compare,Allocator>.
+ * @param[in] Allocator  Type for the Allocator in std::map<T,Compare,Allocator>.
+ * @param[in] NoProxy    When set to false, the elements will be copied when returned to Python.
+ */
+template <class Key, class T, class Compare = std::less<Key>,
+          class Allocator = std::allocator<std::pair<const Key, T> >, bool NoProxy = false>
+struct StdMapPythonVisitor
+    : public boost::python::map_indexing_suite<typename std::map<Key, T, Compare, Allocator>, NoProxy>,
+      public dict_to_map<std::map<Key, T, Compare, Allocator> > {
+  typedef std::map<Key, T, Compare, Allocator> Container;
+  typedef dict_to_map<Container> FromPythonDictConverter;
+
+  static void expose(const std::string& class_name, const std::string& doc_string = "") {
+    namespace bp = boost::python;
+
+    bp::class_<Container>(class_name.c_str(), doc_string.c_str())
+        .def(StdMapPythonVisitor())
+        .def("todict", &FromPythonDictConverter::todict, bp::arg("self"),
+             "Returns the std::map as a Python dictionary.")
+        .def_pickle(PickleMap<Container>());
+    // Register conversion
+    FromPythonDictConverter::register_converter();
   }
 };
 
