@@ -75,4 +75,23 @@ const FrameCoPSupportTpl<Scalar>& CostModelContactCoPPositionTpl<Scalar>::get_co
   return cop_support_;
 }
 
+template <typename Scalar>
+void CostModelContactCoPPositionTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
+  if (ti == typeid(FrameCoPSupport)) {
+    cop_support_ = *static_cast<const FrameCoPSupport*>(pv);
+  } else {
+    throw_pretty("Invalid argument: incorrect type (it should be FrameCoPSupport)");
+  }
+}
+
+template <typename Scalar>
+void CostModelContactCoPPositionTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
+  if (ti == typeid(FrameCoPSupport)) {
+    FrameCoPSupport& ref_map = *static_cast<FrameCoPSupport*>(pv);
+    ref_map = cop_support_;
+  } else {
+    throw_pretty("Invalid argument: incorrect type (it should be FrameCoPSupport)");
+  }
+}
+
 }  // namespace crocoddyl

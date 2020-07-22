@@ -57,6 +57,9 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   const FrameCoPSupport& get_copSupport() const;
 
  protected:
+  virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
+
   using Base::activation_;
   using Base::nu_;
   using Base::state_;
@@ -95,7 +98,8 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
     }
 
     // Get the active 6d contact (avoids data casting at runtime)
-    const FrameCoPSupport& cop_support = model->get_copSupport();
+    FrameCoPSupport cop_support;
+    model->get_reference(cop_support);
     std::string frame_name = model->get_state()->get_pinocchio()->frames[cop_support.get_frame()].name;
     bool found_contact = false;
     for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
