@@ -803,7 +803,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
         self.u_reg = self.x_reg
 
     def allocateData(self):
-        models = self.problem.runningModels + [self.problem.terminalModel]
+        models = self.problem.runningModels.tolist() + [self.problem.terminalModel]
         self.Vxx = [a2m(np.zeros([m.state.ndx, m.state.ndx])) for m in models]
         self.Vx = [a2m(np.zeros([m.state.ndx])) for m in models]
 
