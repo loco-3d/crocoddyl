@@ -45,7 +45,7 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
 
   CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
                           boost::shared_ptr<ActivationModelAbstract> activation, const CoPSupport& cop_support, 
-                          const Vector3s& normal, const std::size_t& nu);
+                          const std::size_t& nu);
   virtual ~CostModelContactCoPPositionTpl();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -64,7 +64,6 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
 
  private: 
   CoPSupport cop_support_; //!< frame name and geometrical dimension of the contact foot
-  Vector3s normal_; //!< vector normal to the contact surface 
 };
 
 template <typename _Scalar>

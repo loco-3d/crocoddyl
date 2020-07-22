@@ -14,8 +14,8 @@ namespace crocoddyl {
 template<typename _Scalar>
 CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
                                           boost::shared_ptr<ActivationModelAbstract> activation,
-                                          const CoPSupport& cop_support, const Vector3s& normal, const std::size_t& nu)
-    : Base(state, activation, nu), cop_support_(cop_support), normal_(normal) {
+                                          const CoPSupport& cop_support, const std::size_t& nu)
+    : Base(state, activation, nu), cop_support_(cop_support) {
       cop_support_.update_A();
     }
 

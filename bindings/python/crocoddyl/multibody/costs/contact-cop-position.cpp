@@ -17,13 +17,12 @@ void exposeCostContactCoPPosition() {
   bp::class_<CostModelContactCoPPosition, bp::bases<CostModelAbstract> >(
       "CostModelContactCoPPosition",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameCoPSupport, 
-      const Eigen::Ref<const Eigen::VectorXd>&, int>(
-          bp::args("self", "state", "activation", "cop_support", "normal", "nu"),
+      int>(
+          bp::args("self", "state", "activation", "cop_support" "nu"),
           "Initialize the contact CoP position cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param cop_support: contact frame ID and cop support region"
-          ":param normal: vector normal to the contact surface"
           ":param nu: dimension of control vector"))
       .def<void (CostModelContactCoPPosition::*)(const boost::shared_ptr<CostDataAbstract>&,
                                                   const Eigen::Ref<const Eigen::VectorXd>&,
