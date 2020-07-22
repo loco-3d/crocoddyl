@@ -155,10 +155,10 @@ struct FrameCoPSupportTpl {
   // Define the inequality matrix A to implement A * f <= 0 compare eq.(18-19) in https://hal.archives-ouvertes.fr/hal-02108449/document
   //Matrix3s c_R_o = Quaternions::FromTwoVectors(nsurf_, Vector3s::UnitZ()).toRotationMatrix(); TODO: Rotation necessary for each row of A?
   void update_A() {
-  A_ << 0, 0, support_region[0] / 2, 0, -1, 0,
-        0, 0, support_region[0] / 2, 0, 1, 0,
-        0, 0, support_region[1] / 2, 1, 0, 0,
-        0, 0, support_region[1] / 2, -1, 0, 0;
+  A_ << Scalar(0), Scalar(0), support_region[0] / Scalar(2), Scalar(0), Scalar(-1), Scalar(0),
+        Scalar(0), Scalar(0), support_region[0] / Scalar(2), Scalar(0), Scalar(1), Scalar(0),
+        Scalar(0), Scalar(0), support_region[1] / Scalar(2), Scalar(1), Scalar(0), Scalar(0),
+        Scalar(0), Scalar(0), support_region[1] / Scalar(2), Scalar(-1), Scalar(0), Scalar(0);
   }
 
   const Matrix46& get_A() const {
