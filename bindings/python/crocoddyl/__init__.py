@@ -330,7 +330,7 @@ class MeshcatDisplay(DisplayAbstract):
         if not dts:
             dts = [0.] * len(xs)
 
-        S = 1 if self.rate <= 0 else max(len(xs) / self.rate, 1)
+        S = 1 if self.rate <= 0 else max(len(xs) // self.rate, 1)
         for i, x in enumerate(xs):
             if not i % S:
                 self.robot.display(x[:self.robot.nq])
