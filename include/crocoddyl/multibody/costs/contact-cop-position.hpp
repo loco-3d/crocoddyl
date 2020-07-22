@@ -44,8 +44,8 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   typedef Eigen::Matrix<Scalar, 4, 6> Matrix46;
 
   CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
-                          boost::shared_ptr<ActivationModelAbstract> activation, const CoPSupport& cop_support, 
-                          const std::size_t& nu);
+                                 boost::shared_ptr<ActivationModelAbstract> activation, const CoPSupport& cop_support,
+                                 const std::size_t& nu);
   virtual ~CostModelContactCoPPositionTpl();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -62,8 +62,8 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::state_;
   using Base::unone_;
 
- private: 
-  CoPSupport cop_support_; //!< frame name and geometrical dimension of the contact foot
+ private:
+  CoPSupport cop_support_;  //!< frame name and geometrical dimension of the contact foot
 };
 
 template <typename _Scalar>
@@ -87,7 +87,7 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
   CostDataContactCoPPositionTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data), Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
     Arr_Ru.setZero();
-        
+
     // Check that proper shared data has been passed
     DataCollectorContactTpl<Scalar>* d = dynamic_cast<DataCollectorContactTpl<Scalar>*>(shared);
     if (d == NULL) {
@@ -103,8 +103,8 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
       if (it->second->frame == cop_support.frame) {
         ContactData3DTpl<Scalar>* d3d = dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
         if (d3d != NULL) {
-          throw_pretty("Domain error: a 6d contact model is required in " +
-                         frame_name + "in order to compute the CoP");
+          throw_pretty("Domain error: a 6d contact model is required in " + frame_name +
+                       "in order to compute the CoP");
           break;
         }
         ContactData6DTpl<Scalar>* d6d = dynamic_cast<ContactData6DTpl<Scalar>*>(it->second.get());
@@ -122,8 +122,8 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
 
   pinocchio::DataTpl<Scalar>* pinocchio;
   MatrixXs Arr_Ru;
-  boost::shared_ptr<ContactDataAbstractTpl<Scalar> > contact; //!< contact force
-  pinocchio::ForceTpl<Scalar> f; //!< transformed contact force
+  boost::shared_ptr<ContactDataAbstractTpl<Scalar> > contact;  //!< contact force
+  pinocchio::ForceTpl<Scalar> f;                               //!< transformed contact force
   using Base::activation;
   using Base::cost;
   using Base::Lu;

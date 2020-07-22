@@ -91,18 +91,23 @@ void exposeFrames() {
                     "frame friction cone")
       .def(PrintableVisitor<FrameFrictionCone>());
 
-  bp::class_<FrameCoPSupport>("FrameCoPSupport",
-                                "Frame foot geometry.\n\n"
-                                "It defines the ID of the contact frame, the geometry of the contact surface and the contact normal",
-                                bp::init<FrameIndex, Eigen::Vector2d, Eigen::Vector3d>(bp::args("self", "frame", "support_region", "normal"),
-                                                                    "Initialize the frame foot geometry.\n\n"
-                                                                    ":param frame: ID of the contact frame \n"
-                                                                    ":param support_region: dimension of the foot surface dim = (length, width)\n"
-                                                                    ":param normal: vector normal to the contact surface "))
+  bp::class_<FrameCoPSupport>(
+      "FrameCoPSupport",
+      "Frame foot geometry.\n\n"
+      "It defines the ID of the contact frame, the geometry of the contact surface and the contact normal",
+      bp::init<FrameIndex, Eigen::Vector2d, Eigen::Vector3d>(
+          bp::args("self", "frame", "support_region", "normal"),
+          "Initialize the frame foot geometry.\n\n"
+          ":param frame: ID of the contact frame \n"
+          ":param support_region: dimension of the foot surface dim = (length, width)\n"
+          ":param normal: vector normal to the contact surface "))
       .def(bp::init<>(bp::args("self"), "Default initialization of the frame CoP support."))
       .def_readwrite("frame", &FrameCoPSupport::frame, "frame ID")
-      .add_property("support_region", bp::make_getter(&FrameCoPSupport::support_region, bp::return_internal_reference<>()), "support region")
-      .add_property("normal", bp::make_getter(&FrameCoPSupport::normal, bp::return_internal_reference<>()), "contact normal")
+      .add_property("support_region",
+                    bp::make_getter(&FrameCoPSupport::support_region, bp::return_internal_reference<>()),
+                    "support region")
+      .add_property("normal", bp::make_getter(&FrameCoPSupport::normal, bp::return_internal_reference<>()),
+                    "contact normal")
       .def(PrintableVisitor<FrameCoPSupport>());
 }
 

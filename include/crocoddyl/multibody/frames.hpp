@@ -146,30 +146,36 @@ struct FrameCoPSupportTpl {
   typedef Eigen::Matrix<Scalar, 4, 6> Matrix46;
 
   explicit FrameCoPSupportTpl() : frame(0), support_region(Vector2s::Zero()), normal(Vector3s::Zero()) {}
-  FrameCoPSupportTpl(const FrameCoPSupportTpl<Scalar>& value) : frame(value.frame), support_region(value.support_region), normal(value.normal) {}
-  FrameCoPSupportTpl(const FrameIndex& frame, const Vector2s& support_region, const Vector3s& normal) : frame(frame), support_region(support_region), normal(normal) {}
+  FrameCoPSupportTpl(const FrameCoPSupportTpl<Scalar>& value)
+      : frame(value.frame), support_region(value.support_region), normal(value.normal) {}
+  FrameCoPSupportTpl(const FrameIndex& frame, const Vector2s& support_region, const Vector3s& normal)
+      : frame(frame), support_region(support_region), normal(normal) {}
   friend std::ostream& operator<<(std::ostream& os, const FrameCoPSupportTpl<Scalar>& X) {
-    os << "      frame: " << X.frame << std::endl << "foot dimensions: " << std::endl << X.support_region << std::endl << "contact normal: " << std::endl << X.normal << std::endl;
+    os << "      frame: " << X.frame << std::endl
+       << "foot dimensions: " << std::endl
+       << X.support_region << std::endl
+       << "contact normal: " << std::endl
+       << X.normal << std::endl;
     return os;
   }
 
-  // Define the inequality matrix A to implement A * f <= 0 compare eq.(18-19) in https://hal.archives-ouvertes.fr/hal-02108449/document
-  //Matrix3s c_R_o = Quaternions::FromTwoVectors(nsurf_, Vector3s::UnitZ()).toRotationMatrix(); TODO: Rotation necessary for each row of A?
+  // Define the inequality matrix A to implement A * f <= 0 compare eq.(18-19) in
+  // https://hal.archives-ouvertes.fr/hal-02108449/document
+  // Matrix3s c_R_o = Quaternions::FromTwoVectors(nsurf_, Vector3s::UnitZ()).toRotationMatrix(); TODO: Rotation
+  // necessary for each row of A?
   void update_A() {
-  A << Scalar(0), Scalar(0), support_region[0] / Scalar(2), Scalar(0), Scalar(-1), Scalar(0),
-        Scalar(0), Scalar(0), support_region[0] / Scalar(2), Scalar(0), Scalar(1), Scalar(0),
-        Scalar(0), Scalar(0), support_region[1] / Scalar(2), Scalar(1), Scalar(0), Scalar(0),
-        Scalar(0), Scalar(0), support_region[1] / Scalar(2), Scalar(-1), Scalar(0), Scalar(0);
+    A << Scalar(0), Scalar(0), support_region[0] / Scalar(2), Scalar(0), Scalar(-1), Scalar(0), Scalar(0), Scalar(0),
+        support_region[0] / Scalar(2), Scalar(0), Scalar(1), Scalar(0), Scalar(0), Scalar(0),
+        support_region[1] / Scalar(2), Scalar(1), Scalar(0), Scalar(0), Scalar(0), Scalar(0),
+        support_region[1] / Scalar(2), Scalar(-1), Scalar(0), Scalar(0);
   }
 
-  const Matrix46& get_A() const {
-    return A;
-}
+  const Matrix46& get_A() const { return A; }
 
-  FrameIndex frame; //!< ID of the contact frame 
-  Vector2s support_region; //!< dimension of the foot surface dim = (length, width)
-  Vector3s normal; //!< vector normal to the contact surface 
-  Matrix46 A; //!< inequality matrix
+  FrameIndex frame;         //!< ID of the contact frame
+  Vector2s support_region;  //!< dimension of the foot surface dim = (length, width)
+  Vector3s normal;          //!< vector normal to the contact surface
+  Matrix46 A;               //!< inequality matrix
 };
 
 }  // namespace crocoddyl

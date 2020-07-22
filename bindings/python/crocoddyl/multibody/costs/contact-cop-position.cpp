@@ -16,25 +16,26 @@ namespace python {
 void exposeCostContactCoPPosition() {
   bp::class_<CostModelContactCoPPosition, bp::bases<CostModelAbstract> >(
       "CostModelContactCoPPosition",
-      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameCoPSupport, 
-      int>(
-          bp::args("self", "state", "activation", "cop_support" "nu"),
+      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameCoPSupport, int>(
+          bp::args("self", "state", "activation",
+                   "cop_support"
+                   "nu"),
           "Initialize the contact CoP position cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param cop_support: contact frame ID and cop support region"
           ":param nu: dimension of control vector"))
       .def<void (CostModelContactCoPPosition::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                                  const Eigen::Ref<const Eigen::VectorXd>&,
-                                                  const Eigen::Ref<const Eigen::VectorXd>&)>(
+                                                 const Eigen::Ref<const Eigen::VectorXd>&,
+                                                 const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &CostModelContactCoPPosition::calc, bp::args("self", "data", "x", "u"),
           "Compute the contact CoP position cost.\n\n"
           ":param data: cost data\n"
           ":param x: state vector\n"
           ":param u: control input")
       .def<void (CostModelContactCoPPosition::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                                  const Eigen::Ref<const Eigen::VectorXd>&,
-                                                  const Eigen::Ref<const Eigen::VectorXd>&)>(
+                                                 const Eigen::Ref<const Eigen::VectorXd>&,
+                                                 const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelContactCoPPosition::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the contact CoP position cost.\n\n"
           ":param data: action data\n"
