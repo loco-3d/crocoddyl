@@ -21,21 +21,20 @@ namespace python {
 namespace bp = boost::python;
 
 /**
- * @brief Create a pickle interface for the std::vector and aligned vector
+ * @brief Create a pickle interface for the std::vector
  *
- * @param[in] VecType Vector Type to pickle
- *
+ * @param[in] Container  Vector type to be pickled
  * \sa Pickle
  */
-template <typename VecType>
+template <typename Container>
 struct PickleVector : boost::python::pickle_suite {
-  static boost::python::tuple getinitargs(const VecType&) { return boost::python::make_tuple(); }
+  static boost::python::tuple getinitargs(const Container&) { return boost::python::make_tuple(); }
   static boost::python::tuple getstate(boost::python::object op) {
-    return boost::python::make_tuple(boost::python::list(boost::python::extract<const VecType&>(op)()));
+    return boost::python::make_tuple(boost::python::list(boost::python::extract<const Container&>(op)()));
   }
   static void setstate(boost::python::object op, boost::python::tuple tup) {
-    VecType& o = boost::python::extract<VecType&>(op)();
-    boost::python::stl_input_iterator<typename VecType::value_type> begin(tup[0]), end;
+    Container& o = boost::python::extract<Container&>(op)();
+    boost::python::stl_input_iterator<typename Container::value_type> begin(tup[0]), end;
     o.insert(o.begin(), begin, end);
   }
 };
