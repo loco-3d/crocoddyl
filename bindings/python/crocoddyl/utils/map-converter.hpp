@@ -52,18 +52,7 @@ struct dict_to_map {
     namespace python = boost::python;
 
     // Check if it is a list
-    if (!PyList_Check(object)) return 0;
-
-    // Retrieve the underlying list
-    bp::object bp_obj(bp::handle<>(bp::borrowed(object)));
-    python::list bp_list(bp_obj);
-    python::ssize_t list_size = python::len(bp_list);
-
-    // Check if all the elements contained in the current vector is of type T
-    for (python::ssize_t k = 0; k < list_size; ++k) {
-      python::extract<typename Container::value_type> elt(bp_list[k]);
-      if (!elt.check()) return 0;
-    }
+    if (!PyObject_GetIter(object)) return 0;
     return object;
   }
 
@@ -113,8 +102,11 @@ struct dict_to_map {
 
   static boost::python::dict todict(Container& self) {
     namespace python = boost::python;
-    typedef python::iterator<Container> iterator;
-    python::dict dict(iterator()(self));
+    python::dict dict;
+    typename Container::const_iterator it;
+    for (it = self.begin(); it != self.end(); ++it) {
+      dict.setdefault(it->first, it->second);
+    }
     return dict;
   }
 };
