@@ -14,6 +14,7 @@
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -50,8 +51,8 @@ class CostModelFrameVelocityTpl : public CostModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-  const FrameMotion& get_vref() const;
-  void set_vref(const FrameMotion& vref_in);
+  DEPRECATED("Use set_reference<FrameMotionTpl<Scalar> >()", void set_vref(const FrameMotion& vref_in);)
+  DEPRECATED("Use get_reference<FrameMotionTpl<Scalar> >()", const FrameMotion& get_vref() const;)
 
  protected:
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);

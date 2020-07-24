@@ -17,6 +17,7 @@
 #include "crocoddyl/multibody/data/contacts.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -168,17 +169,8 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    */
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-  /**
-   * @brief Return the reference spatial contact force in the contact coordinates
-   * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
-   */
-  const FrameForce& get_fref() const;
-
-  /**
-   * @brief Modify the reference spatial contact force in the contact coordinates
-   * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
-   */
-  void set_fref(const FrameForce& fref);
+  DEPRECATED("Use set_reference<FrameForceTpl<Scalar> >()", void set_fref(const FrameForce& fref);)
+  DEPRECATED("Use get_reference<FrameForceTpl<Scalar> >()", const FrameForce& get_fref() const;)
 
  protected:
   /**
@@ -230,8 +222,8 @@ struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
     }
 
     // Avoids data casting at runtime
-    const FrameForce& fref = model->get_fref();
-    std::string frame_name = model->get_state()->get_pinocchio()->frames[model->get_fref().frame].name;
+    FrameForce fref = model->template get_reference<FrameForce>();
+    std::string frame_name = model->get_state()->get_pinocchio()->frames[fref.frame].name;
     bool found_contact = false;
     for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
          it != d->contacts->contacts.end(); ++it) {
