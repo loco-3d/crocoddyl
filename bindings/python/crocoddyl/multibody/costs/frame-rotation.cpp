@@ -74,7 +74,7 @@ void exposeCostFrameRotation() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
            ":return cost data.")
-      .add_property("reference", bp::make_function(&CostModelFrameRotation::get_reference<FrameRotation>),
+      .add_property("reference", &CostModelFrameRotation::get_reference<FrameRotation>,
                     &CostModelFrameRotation::set_reference<FrameRotation>, "reference frame rotation")
       .add_property("Rref", bp::make_function(&CostModelFrameRotation::get_reference<FrameRotation>),
                     &CostModelFrameRotation::set_reference<FrameRotation>, "reference frame rotation");

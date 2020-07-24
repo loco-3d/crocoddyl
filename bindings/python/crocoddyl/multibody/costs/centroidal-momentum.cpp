@@ -75,9 +75,7 @@ void exposeCostCentroidalMomentum() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
            ":return cost data.")
-      .add_property("reference",
-                    bp::make_function(&CostModelCentroidalMomentum::get_reference<MathBaseTpl<double>::Vector6s>,
-                                      bp::return_value_policy<bp::return_by_value>()),
+      .add_property("reference", &CostModelCentroidalMomentum::get_reference<MathBaseTpl<double>::Vector6s>,
                     &CostModelCentroidalMomentum::set_reference<MathBaseTpl<double>::Vector6s>,
                     "reference centroidal momentum")
       .add_property("href",
