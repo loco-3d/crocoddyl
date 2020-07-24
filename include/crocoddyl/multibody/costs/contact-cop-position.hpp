@@ -152,11 +152,6 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
    */
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-  /**
-   * @brief Return the cop parameter, i.e. contat frame id and support region
-   */
-  const FrameCoPSupport& get_copSupport() const;
-
  protected:
   /**
    * @brief Return the cop
@@ -206,8 +201,7 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
     }
 
     // Get the active 6d contact (avoids data casting at runtime)
-    FrameCoPSupport cop_support;
-    model->get_reference(cop_support);
+    FrameCoPSupport cop_support = model->template get_reference<FrameCoPSupport>();
     std::string frame_name = model->get_state()->get_pinocchio()->frames[cop_support.get_frame()].name;
     bool found_contact = false;
     for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();

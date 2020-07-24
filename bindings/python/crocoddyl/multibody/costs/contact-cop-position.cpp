@@ -63,8 +63,7 @@ void exposeCostContactCoPPosition() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
            ":return cost data.")
-      .add_property("reference",
-                    bp::make_function(&CostModelContactCoPPosition::get_copSupport, bp::return_internal_reference<>()),
+      .add_property("reference", &CostModelContactCoPPosition::get_reference<FrameCoPSupport>,
                     &CostModelContactCoPPosition::set_reference<FrameCoPSupport>, "reference foot geometry");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataContactCoPPosition> >();
