@@ -1,5 +1,5 @@
 def cartpole_analytical_derivatives(model, data, x, u=None):
-    if u is None: 
+    if u is None:
         u = model.unone
 
     # Getting the state and control variables
