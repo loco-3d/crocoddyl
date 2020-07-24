@@ -136,6 +136,55 @@ struct FrameFrictionConeTpl {
   FrictionCone oRf;
 };
 
+template <typename _Scalar>
+class FrameCoPSupportTpl {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef typename MathBaseTpl<Scalar>::Vector2s Vector2s;
+  typedef typename MathBaseTpl<Scalar>::Vector3s Vector3s;
+  typedef Eigen::Matrix<Scalar, 4, 6> Matrix46;
+
+ public:
+  explicit FrameCoPSupportTpl() : frame_(0), support_region_(Vector2s::Zero()) { update_A(); }
+  FrameCoPSupportTpl(const FrameCoPSupportTpl<Scalar>& value)
+      : frame_(value.get_frame()), support_region_(value.get_support_region()), A_(value.get_A()) {}
+  FrameCoPSupportTpl(const FrameIndex& frame, const Vector2s& support_region)
+      : frame_(frame), support_region_(support_region) {
+    update_A();
+  }
+  friend std::ostream& operator<<(std::ostream& os, const FrameCoPSupportTpl<Scalar>& X) {
+    os << "          frame: " << X.get_frame() << std::endl
+       << "foot dimensions: " << std::endl
+       << X.get_support_region() << std::endl;
+    return os;
+  }
+
+  // Define the inequality matrix A to implement A * f >= 0. Compare eq.(18-19) in
+  // https://hal.archives-ouvertes.fr/hal-02108449/document
+  void update_A() {
+    A_ << Scalar(0), Scalar(0), support_region_[0] / Scalar(2), Scalar(0), Scalar(-1), Scalar(0), Scalar(0), Scalar(0),
+        support_region_[0] / Scalar(2), Scalar(0), Scalar(1), Scalar(0), Scalar(0), Scalar(0),
+        support_region_[1] / Scalar(2), Scalar(1), Scalar(0), Scalar(0), Scalar(0), Scalar(0),
+        support_region_[1] / Scalar(2), Scalar(-1), Scalar(0), Scalar(0);
+  }
+
+  void set_frame(FrameIndex frame) { frame_ = frame; }
+  void set_support_region(const Vector2s& support_region) {
+    support_region_ = support_region;
+    update_A();
+  }
+
+  const FrameIndex& get_frame() const { return frame_; }
+  const Vector2s& get_support_region() const { return support_region_; }
+  const Matrix46& get_A() const { return A_; }
+
+ private:
+  FrameIndex frame_;         //!< contact frame ID
+  Vector2s support_region_;  //!< cop support region = (length, width)
+  Matrix46 A_;               //!< inequality matrix
+};
+
 }  // namespace crocoddyl
 
 #endif  // CROCODDYL_MULTIBODY_FRAMES_HPP_
