@@ -76,8 +76,8 @@ void exposeCostFrameVelocity() {
            ":return cost data.")
       .add_property("reference", bp::make_function(&CostModelFrameVelocity::get_reference<FrameMotion>),
                     &CostModelFrameVelocity::set_reference<FrameMotion>, "reference frame velocity")
-      .add_property("vref", bp::make_function(&CostModelFrameVelocity::get_vref, bp::return_internal_reference<>()),
-                    &CostModelFrameVelocity::set_vref, "reference frame velocity");
+      .add_property("vref", bp::make_function(&CostModelFrameVelocity::get_reference<FrameMotion>),
+                    &CostModelFrameVelocity::set_reference<FrameMotion>, "reference frame velocity");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataFrameVelocity> >();
 

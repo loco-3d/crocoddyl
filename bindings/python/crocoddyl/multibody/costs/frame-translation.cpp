@@ -76,8 +76,8 @@ void exposeCostFrameTranslation() {
            ":return cost data.")
       .add_property("reference", bp::make_function(&CostModelFrameTranslation::get_reference<FrameTranslation>),
                     &CostModelFrameTranslation::set_reference<FrameTranslation>, "reference frame translation")
-      .add_property("xref", bp::make_function(&CostModelFrameTranslation::get_xref, bp::return_internal_reference<>()),
-                    &CostModelFrameTranslation::set_xref, "reference frame translation");
+      .add_property("xref", bp::make_function(&CostModelFrameTranslation::get_reference<FrameTranslation>),
+                    &CostModelFrameTranslation::set_reference<FrameTranslation>, "reference frame translation");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataFrameTranslation> >();
 

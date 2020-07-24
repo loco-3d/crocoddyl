@@ -90,8 +90,9 @@ void exposeCostContactForce() {
       .add_property("reference", bp::make_function(&CostModelContactForce::get_reference<FrameForce>),
                     &CostModelContactForce::set_reference<FrameForce>,
                     "reference spatial contact force in the contact coordinates")
-      .add_property("fref", bp::make_function(&CostModelContactForce::get_fref, bp::return_internal_reference<>()),
-                    &CostModelContactForce::set_fref, "reference spatial contact force in the contact coordinates");
+      .add_property("fref", bp::make_function(&CostModelContactForce::get_reference<FrameForce>),
+                    &CostModelContactForce::set_reference<FrameForce>,
+                    "reference spatial contact force in the contact coordinates");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataContactForce> >();
 

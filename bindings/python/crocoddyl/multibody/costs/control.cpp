@@ -78,8 +78,8 @@ void exposeCostControl() {
           "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"))
       .add_property("reference", bp::make_function(&CostModelControl::get_reference<Eigen::VectorXd>),
                     &CostModelControl::set_reference<Eigen::VectorXd>, "reference control vector")
-      .add_property("uref", bp::make_function(&CostModelControl::get_uref, bp::return_internal_reference<>()),
-                    &CostModelControl::set_uref, "reference control");
+      .add_property("uref", bp::make_function(&CostModelControl::get_reference<Eigen::VectorXd>),
+                    &CostModelControl::set_reference<Eigen::VectorXd>, "reference control vector");
 }
 
 }  // namespace python

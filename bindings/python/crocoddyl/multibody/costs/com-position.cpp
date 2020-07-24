@@ -76,8 +76,8 @@ void exposeCostCoMPosition() {
            ":return cost data.")
       .add_property("reference", bp::make_function(&CostModelCoMPosition::get_reference<Eigen::Vector3d>),
                     &CostModelCoMPosition::set_reference<Eigen::Vector3d>, "reference CoM position")
-      .add_property("cref", bp::make_function(&CostModelCoMPosition::get_cref, bp::return_internal_reference<>()),
-                    &CostModelCoMPosition::set_cref, "reference CoM position");
+      .add_property("cref", bp::make_function(&CostModelCoMPosition::get_reference<Eigen::Vector3d>),
+                    &CostModelCoMPosition::set_reference<Eigen::Vector3d>, "reference CoM position");
 }
 
 }  // namespace python

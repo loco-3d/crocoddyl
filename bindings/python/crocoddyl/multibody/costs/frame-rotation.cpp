@@ -76,8 +76,8 @@ void exposeCostFrameRotation() {
            ":return cost data.")
       .add_property("reference", bp::make_function(&CostModelFrameRotation::get_reference<FrameRotation>),
                     &CostModelFrameRotation::set_reference<FrameRotation>, "reference frame rotation")
-      .add_property("Rref", bp::make_function(&CostModelFrameRotation::get_Rref, bp::return_internal_reference<>()),
-                    &CostModelFrameRotation::set_Rref, "reference frame rotation");
+      .add_property("Rref", bp::make_function(&CostModelFrameRotation::get_reference<FrameRotation>),
+                    &CostModelFrameRotation::set_reference<FrameRotation>, "reference frame rotation");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataFrameRotation> >();
 

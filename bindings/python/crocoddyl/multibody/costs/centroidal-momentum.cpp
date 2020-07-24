@@ -80,10 +80,11 @@ void exposeCostCentroidalMomentum() {
                                       bp::return_value_policy<bp::return_by_value>()),
                     &CostModelCentroidalMomentum::set_reference<MathBaseTpl<double>::Vector6s>,
                     "reference centroidal momentum")
-      .add_property(
-          "href",
-          bp::make_function(&CostModelCentroidalMomentum::get_href, bp::return_value_policy<bp::return_by_value>()),
-          &CostModelCentroidalMomentum::set_href, "reference centroidal momentum");
+      .add_property("href",
+                    bp::make_function(&CostModelCentroidalMomentum::get_reference<MathBaseTpl<double>::Vector6s>,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    &CostModelCentroidalMomentum::set_reference<MathBaseTpl<double>::Vector6s>,
+                    "reference centroidal momentum");
 
   bp::class_<CostDataCentroidalMomentum, bp::bases<CostDataAbstract> >(
       "CostDataCentroidalMomentum", "Data for centroidal momentum cost.\n\n",
