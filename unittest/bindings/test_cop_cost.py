@@ -28,12 +28,10 @@ CONTACTS.addContact("l_sole_contact", CONTACT_6D_LF)
 COSTS = crocoddyl.CostModelSum(ROBOT_STATE, ACTUATION.nu)
 CoPCostRF = crocoddyl.CostModelContactCoPPosition(
     ROBOT_STATE, activation,
-    crocoddyl.FrameCoPSupport(ROBOT_MODEL.getFrameId('r_sole'), np.array([0.01, 0.01]), np.array([0, 0, 1])),
-    ACTUATION.nu)
+    crocoddyl.FrameCoPSupport(ROBOT_MODEL.getFrameId('r_sole'), np.array([0.01, 0.01])), ACTUATION.nu)
 CoPCostLF = crocoddyl.CostModelContactCoPPosition(
     ROBOT_STATE, activation,
-    crocoddyl.FrameCoPSupport(ROBOT_MODEL.getFrameId('l_sole'), np.array([0.01, 0.01]), np.array([0, 0, 1])),
-    ACTUATION.nu)
+    crocoddyl.FrameCoPSupport(ROBOT_MODEL.getFrameId('l_sole'), np.array([0.01, 0.01])), ACTUATION.nu)
 COSTS.addCost("r_sole_cop", CoPCostRF, 1)
 COSTS.addCost("l_sole_cop", CoPCostLF, 1)
 MODEL = crocoddyl.DifferentialActionModelContactFwdDynamics(ROBOT_STATE, ACTUATION, CONTACTS, COSTS, 0., True)
