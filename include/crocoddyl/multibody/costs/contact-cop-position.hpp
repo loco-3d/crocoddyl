@@ -22,6 +22,26 @@
 
 namespace crocoddyl {
 
+/**
+ * @brief Define a center of pressure cost function
+ *
+ * It builds a cost function that bounds the center of pressure (cop) for one contact surface to
+ * lie inside a certain geometric area defined around the reference contact frame. The cost residual 
+ * vector is described as \mathbf{r} = \mathbf{A} \cdot \mathbf{f} \geq \mathbf{0}, where \mathbf{A}=
+ * \begin{bmatrix} 0 & 0 & X/2 & 0 & -1 & 0 \\ 0 & 0 & X/2 & 0 & 1 & 0 \\ 0 & 0 & Y/2 & 1 & 0 & 0 \\ 
+ * 0 & 0 & Y/2 & -1 & 0 & 0 \end{bmatrix} is the inequality matrix and \mathbf{f} is the reference spatial 
+ * contact force in the frame coordinate. The constraints for the cop to lie inside the convex hull of 
+ * the foot, see eq.(18-19) of https://hal.archives-ouvertes.fr/hal-02108449/document can be written as:
+ * \begin{align}\begin{split}\tau^x &\leq Yf^z \\-\tau^x &\leq Yf^z \\\tau^y &\leq Yf^z \\-\tau^y &\leq Yf^z 
+ * \end{split}\end{align}$`
+ * The cost is computed, from the residual vector \mathbf{r}, through an user defined activation model. 
+ * Additionally, the contact frame id, the desired support region for the cop and the inequality matrix 
+ * are handled within FrameCoPSupportTpl. The force vector \mathbf{f} and its derivatives are computed by 
+ * DifferentialActionModelContactFwdDynamicsTpl. These values are stored in a shared data (i.e.
+ * DataCollectorContactTpl). Note that this cost function cannot be used with other action models.
+ *
+ * \sa DifferentialActionModelContactFwdDynamicsTpl, DataCollectorContactTpl, ActivationModelAbstractTpl
+ */
 template <typename _Scalar>
 class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
  public:
@@ -45,27 +65,107 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixX3s MatrixX3s;
   typedef Eigen::Matrix<Scalar, 4, 6> Matrix46;
 
+  /**
+   * @brief Initialize the cop cost model
+   *
+   * @param[in] state        Multibody state
+   * @param[in] activation   Activation model
+   * @param[in] cop_support  ID of contact frame and support region of the cop
+   * @param[in] nu           Dimension of control vector
+   */
   CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
                                  boost::shared_ptr<ActivationModelAbstract> activation,
                                  const FrameCoPSupport& cop_support, const std::size_t& nu);
+
+  /**
+   * @brief Initialize the cop cost model
+   * 
+   * For this case the default nu is equal to `state->get_nv()`.
+   *
+   * @param[in] state        Multibody state
+   * @param[in] activation   Activation model
+   * @param[in] cop_support  ID of contact frame and support region of the cop
+   */
   CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
                                  boost::shared_ptr<ActivationModelAbstract> activation,
                                  const FrameCoPSupport& cop_support);
+
+  /**
+   * @brief Initialize the cop cost model
+   *
+   * For this case the default activation model is quadratic barrier, i.e. 
+   * `ActivationModelQuadraticBarrierTpl(ActivationBounds(0, inf))`.
+   * 
+   * @param[in] state        Multibody state
+   * @param[in] cop_support  ID of contact frame and support region of the cop
+   * @param[in] nu           Dimension of control vector
+   */
   CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state, const FrameCoPSupport& cop_support,
                                  const std::size_t& nu);
+
+    /**
+   * @brief Initialize the cop cost model
+   * 
+   * For this case the default activation model is quadratic barrier, i.e. 
+   * `ActivationModelQuadraticBarrierTpl(ActivationBounds(0, inf))` and is equal to `state->get_nv().
+   *
+   * @param[in] state        Multibody state
+   * @param[in] cop_support  ID of contact frame and support region of the cop
+   */
   CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state, const FrameCoPSupport& cop_support);
   virtual ~CostModelContactCoPPositionTpl();
 
+  /**
+   * @brief Compute the cop cost
+   *
+   * The cop residual is computed based on the A matrix, the force vector is computed by 
+   * DifferentialActionModelContactFwdDynamicsTpl and the results are stored in DataCollectorContactTpl.
+   *
+   * @param[in] data  cop data
+   * @param[in] x     State vector \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Compute the derivatives of the cop cost
+   *
+   * The cop derivatives are based on the force derivatives computed by 
+   * DifferentialActionModelContactFwdDynamicsTpl and stored in DataCollectorContactTpl.
+   *
+   * @param[in] data  cop data
+   * @param[in] x     State vector \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
   virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Create the cop cost data
+   *
+   * Each cost model has its own data that needs to be allocated. 
+   * This function returns the allocated data for a predefined cost.
+   *
+   * @param[in] data  shared data (it should be of type DataCollectorContactTpl)
+   * @return the cost data.
+   */
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
+  /**
+   * @brief Return the cop parameter, i.e. contat frame id and support region
+   */
   const FrameCoPSupport& get_copSupport() const;
 
  protected:
+  /**
+   * @brief Return the cop 
+   */
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
+
+    /**
+   * @brief Modify the cop 
+   */
   virtual void get_referenceImpl(const std::type_info& ti, void* pv);
 
   using Base::activation_;
@@ -74,7 +174,7 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::unone_;
 
  private:
-  FrameCoPSupport cop_support_;  //!< frame name and geometrical dimension of the contact foot
+  FrameCoPSupport cop_support_;  //!< frame name of the contact foot and support region of the cop
 };
 
 template <typename _Scalar>

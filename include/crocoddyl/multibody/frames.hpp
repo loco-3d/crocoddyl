@@ -164,10 +164,8 @@ class FrameCoPSupportTpl {
     return os;
   }
 
-  // Define the inequality matrix A to implement A * f <= 0 compare eq.(18-19) in
+  // Define the inequality matrix A to implement A * f >= 0. Compare eq.(18-19) in
   // https://hal.archives-ouvertes.fr/hal-02108449/document
-  // Matrix3s c_R_o = Quaternions::FromTwoVectors(nsurf_, Vector3s::UnitZ()).toRotationMatrix(); TODO: Rotation
-  // necessary for each row of A?
   void update_A() {
     A_ << Scalar(0), Scalar(0), support_region_[0] / Scalar(2), Scalar(0), Scalar(-1), Scalar(0), Scalar(0), Scalar(0),
         support_region_[0] / Scalar(2), Scalar(0), Scalar(1), Scalar(0), Scalar(0), Scalar(0),
@@ -186,8 +184,8 @@ class FrameCoPSupportTpl {
   const Matrix46& get_A() const { return A_; }
 
  private:
-  FrameIndex frame_;         //!< ID of the contact frame
-  Vector2s support_region_;  //!< dimension of the foot surface dim = (length, width)
+  FrameIndex frame_;         //!< contact frame ID
+  Vector2s support_region_;  //!< cop support region = (length, width)
   Matrix46 A_;               //!< inequality matrix
 };
 

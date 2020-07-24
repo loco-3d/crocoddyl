@@ -49,7 +49,7 @@ void CostModelContactCoPPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDa
                                                   const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
-  // Compute the cost residual respecting A * f
+  // Compute the cost residual r =  A * f
   data->r.noalias() = cop_support_.get_A() * d->contact->jMf.actInv(d->contact->f).toVector();
 
   // Compute the cost
@@ -64,7 +64,7 @@ void CostModelContactCoPPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<Co
   // Update all data
   Data* d = static_cast<Data*>(data.get());
 
-  // Get the derivatives of the contact wrench
+  // Get the derivatives of the local contact wrench
   const MatrixXs& df_dx = d->contact->df_dx;
   const MatrixXs& df_du = d->contact->df_du;
   const Matrix46& A = cop_support_.get_A();
