@@ -94,11 +94,6 @@ boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelContactCoPPositionTpl<S
 }
 
 template <typename Scalar>
-const FrameCoPSupportTpl<Scalar>& CostModelContactCoPPositionTpl<Scalar>::get_copSupport() const {
-  return cop_support_;
-}
-
-template <typename Scalar>
 void CostModelContactCoPPositionTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(FrameCoPSupport)) {
     cop_support_ = *static_cast<const FrameCoPSupport*>(pv);
@@ -108,7 +103,7 @@ void CostModelContactCoPPositionTpl<Scalar>::set_referenceImpl(const std::type_i
 }
 
 template <typename Scalar>
-void CostModelContactCoPPositionTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
+void CostModelContactCoPPositionTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
   if (ti == typeid(FrameCoPSupport)) {
     FrameCoPSupport& ref_map = *static_cast<FrameCoPSupport*>(pv);
     ref_map = cop_support_;

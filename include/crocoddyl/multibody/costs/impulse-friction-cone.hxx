@@ -80,7 +80,7 @@ void CostModelImpulseFrictionConeTpl<Scalar>::set_referenceImpl(const std::type_
 }
 
 template <typename Scalar>
-void CostModelImpulseFrictionConeTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
+void CostModelImpulseFrictionConeTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
   if (ti == typeid(FrameFrictionCone)) {
     FrameFrictionCone& ref_map = *static_cast<FrameFrictionCone*>(pv);
     ref_map = fref_;

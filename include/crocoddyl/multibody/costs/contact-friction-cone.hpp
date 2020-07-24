@@ -18,6 +18,7 @@
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/multibody/friction-cone.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -60,12 +61,12 @@ class CostModelContactFrictionConeTpl : public CostModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-  const FrameFrictionCone& get_fref() const;
-  void set_fref(const FrameFrictionCone& fref);
+  DEPRECATED("Use set_reference<FrameFrictionConeTpl<Scalar> >()", void set_fref(const FrameFrictionCone& fref);)
+  DEPRECATED("Use get_reference<FrameFrictionConeTpl<Scalar> >()", const FrameFrictionCone& get_fref() const;)
 
  protected:
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
   using Base::activation_;
   using Base::nu_;
@@ -104,7 +105,7 @@ struct CostDataContactFrictionConeTpl : public CostDataAbstractTpl<_Scalar> {
     }
 
     // Avoids data casting at runtime
-    const FrameFrictionCone& fref = model->get_fref();
+    FrameFrictionCone fref = model->template get_reference<FrameFrictionCone>();
     std::string frame_name = model->get_state()->get_pinocchio()->frames[fref.frame].name;
     bool found_contact = false;
     for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();

@@ -102,7 +102,7 @@ void CostModelFramePlacementTpl<Scalar>::set_referenceImpl(const std::type_info&
 }
 
 template <typename Scalar>
-void CostModelFramePlacementTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
+void CostModelFramePlacementTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
   if (ti == typeid(FramePlacement)) {
     FramePlacement& ref_map = *static_cast<FramePlacement*>(pv);
     ref_map = Mref_;

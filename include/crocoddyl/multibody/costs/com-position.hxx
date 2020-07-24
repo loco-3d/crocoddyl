@@ -87,7 +87,7 @@ void CostModelCoMPositionTpl<Scalar>::set_referenceImpl(const std::type_info& ti
 }
 
 template <typename Scalar>
-void CostModelCoMPositionTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
+void CostModelCoMPositionTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
   if (ti == typeid(Vector3s)) {
     Eigen::Map<Vector3s> ref_map(static_cast<Vector3s*>(pv)->data());
     ref_map[0] = cref_[0];

@@ -100,7 +100,7 @@ void CostModelControlTpl<Scalar>::set_referenceImpl(const std::type_info& ti, co
 }
 
 template <typename Scalar>
-void CostModelControlTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
+void CostModelControlTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
   if (ti == typeid(VectorXs)) {
     VectorXs& tmp = *static_cast<VectorXs*>(pv);
     tmp.resize(nu_);

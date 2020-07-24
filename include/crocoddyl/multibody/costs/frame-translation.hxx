@@ -96,7 +96,7 @@ void CostModelFrameTranslationTpl<Scalar>::set_referenceImpl(const std::type_inf
 }
 
 template <typename Scalar>
-void CostModelFrameTranslationTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
+void CostModelFrameTranslationTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
   if (ti == typeid(FrameTranslation)) {
     FrameTranslation& ref_map = *static_cast<FrameTranslation*>(pv);
     ref_map = xref_;
