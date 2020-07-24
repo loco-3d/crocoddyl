@@ -9,6 +9,7 @@
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/costs/contact-force.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -90,8 +91,11 @@ void exposeCostContactForce() {
       .add_property("reference", &CostModelContactForce::get_reference<FrameForce>,
                     &CostModelContactForce::set_reference<FrameForce>,
                     "reference spatial contact force in the contact coordinates")
-      .add_property("fref", bp::make_function(&CostModelContactForce::get_reference<FrameForce>),
-                    &CostModelContactForce::set_reference<FrameForce>,
+      .add_property("fref",
+                    bp::make_function(&CostModelContactForce::get_reference<FrameForce>,
+                                      deprecated<>("Deprecated. Use reference.")),
+                    bp::make_function(&CostModelContactForce::set_reference<FrameForce>,
+                                      deprecated<>("Deprecated. Use reference.")),
                     "reference spatial contact force in the contact coordinates");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataContactForce> >();

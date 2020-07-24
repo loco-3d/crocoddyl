@@ -9,6 +9,7 @@
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/costs/frame-placement.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -76,8 +77,12 @@ void exposeCostFramePlacement() {
            ":return cost data.")
       .add_property("reference", &CostModelFramePlacement::get_reference<FramePlacement>,
                     &CostModelFramePlacement::set_reference<FramePlacement>, "reference frame placement")
-      .add_property("Mref", bp::make_function(&CostModelFramePlacement::get_reference<FramePlacement>),
-                    &CostModelFramePlacement::set_reference<FramePlacement>, "reference frame placement");
+      .add_property("Mref",
+                    bp::make_function(&CostModelFramePlacement::get_reference<FramePlacement>,
+                                      deprecated<>("Deprecated. Use reference.")),
+                    bp::make_function(&CostModelFramePlacement::set_reference<FramePlacement>,
+                                      deprecated<>("Deprecated. Use reference.")),
+                    "reference frame placement");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataFramePlacement> >();
 

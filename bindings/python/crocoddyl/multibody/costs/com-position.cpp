@@ -9,6 +9,7 @@
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/costs/com-position.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -76,8 +77,12 @@ void exposeCostCoMPosition() {
            ":return cost data.")
       .add_property("reference", &CostModelCoMPosition::get_reference<Eigen::Vector3d>,
                     &CostModelCoMPosition::set_reference<Eigen::Vector3d>, "reference CoM position")
-      .add_property("cref", bp::make_function(&CostModelCoMPosition::get_reference<Eigen::Vector3d>),
-                    &CostModelCoMPosition::set_reference<Eigen::Vector3d>, "reference CoM position");
+      .add_property("cref",
+                    bp::make_function(&CostModelCoMPosition::get_reference<Eigen::Vector3d>,
+                                      deprecated<>("Deprecated. Use reference.")),
+                    bp::make_function(&CostModelCoMPosition::set_reference<Eigen::Vector3d>,
+                                      deprecated<>("Deprecated. Use reference.")),
+                    "reference CoM position");
 }
 
 }  // namespace python

@@ -9,6 +9,7 @@
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/costs/frame-translation.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -76,8 +77,12 @@ void exposeCostFrameTranslation() {
            ":return cost data.")
       .add_property("reference", &CostModelFrameTranslation::get_reference<FrameTranslation>,
                     &CostModelFrameTranslation::set_reference<FrameTranslation>, "reference frame translation")
-      .add_property("xref", bp::make_function(&CostModelFrameTranslation::get_reference<FrameTranslation>),
-                    &CostModelFrameTranslation::set_reference<FrameTranslation>, "reference frame translation");
+      .add_property("xref",
+                    bp::make_function(&CostModelFrameTranslation::get_reference<FrameTranslation>,
+                                      deprecated<>("Deprecated. Use reference.")),
+                    bp::make_function(&CostModelFrameTranslation::set_reference<FrameTranslation>,
+                                      deprecated<>("Deprecated. Use reference.")),
+                    "reference frame translation");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataFrameTranslation> >();
 

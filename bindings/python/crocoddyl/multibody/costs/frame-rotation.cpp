@@ -9,6 +9,7 @@
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/costs/frame-rotation.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -76,8 +77,12 @@ void exposeCostFrameRotation() {
            ":return cost data.")
       .add_property("reference", &CostModelFrameRotation::get_reference<FrameRotation>,
                     &CostModelFrameRotation::set_reference<FrameRotation>, "reference frame rotation")
-      .add_property("Rref", bp::make_function(&CostModelFrameRotation::get_reference<FrameRotation>),
-                    &CostModelFrameRotation::set_reference<FrameRotation>, "reference frame rotation");
+      .add_property("Rref",
+                    bp::make_function(&CostModelFrameRotation::get_reference<FrameRotation>,
+                                      deprecated<>("Deprecated. Use reference.")),
+                    bp::make_function(&CostModelFrameRotation::set_reference<FrameRotation>,
+                                      deprecated<>("Deprecated. Use reference.")),
+                    "reference frame rotation");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataFrameRotation> >();
 

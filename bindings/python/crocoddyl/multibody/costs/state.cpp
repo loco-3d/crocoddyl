@@ -9,6 +9,7 @@
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/costs/state.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -100,8 +101,12 @@ void exposeCostState() {
            ":return cost data.")
       .add_property("reference", &CostModelState::get_reference<Eigen::VectorXd>,
                     &CostModelState::set_reference<Eigen::VectorXd>, "reference state")
-      .add_property("xref", bp::make_function(&CostModelState::get_reference<Eigen::VectorXd>),
-                    &CostModelState::set_reference<Eigen::VectorXd>, "reference state");
+      .add_property("xref",
+                    bp::make_function(&CostModelState::get_reference<Eigen::VectorXd>,
+                                      deprecated<>("Deprecated. Use reference.")),
+                    bp::make_function(&CostModelState::set_reference<Eigen::VectorXd>,
+                                      deprecated<>("Deprecated. Use reference.")),
+                    "reference state");
 }
 
 }  // namespace python

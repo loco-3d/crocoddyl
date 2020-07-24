@@ -9,6 +9,7 @@
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/costs/frame-velocity.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -76,8 +77,12 @@ void exposeCostFrameVelocity() {
            ":return cost data.")
       .add_property("reference", &CostModelFrameVelocity::get_reference<FrameMotion>,
                     &CostModelFrameVelocity::set_reference<FrameMotion>, "reference frame velocity")
-      .add_property("vref", bp::make_function(&CostModelFrameVelocity::get_reference<FrameMotion>),
-                    &CostModelFrameVelocity::set_reference<FrameMotion>, "reference frame velocity");
+      .add_property("vref",
+                    bp::make_function(&CostModelFrameVelocity::get_reference<FrameMotion>,
+                                      deprecated<>("Deprecated. Use reference.")),
+                    bp::make_function(&CostModelFrameVelocity::set_reference<FrameMotion>,
+                                      deprecated<>("Deprecated. Use reference.")),
+                    "reference frame velocity");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataFrameVelocity> >();
 

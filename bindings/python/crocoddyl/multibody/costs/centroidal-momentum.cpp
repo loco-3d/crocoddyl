@@ -9,6 +9,7 @@
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/costs/centroidal-momentum.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -80,8 +81,9 @@ void exposeCostCentroidalMomentum() {
                     "reference centroidal momentum")
       .add_property("href",
                     bp::make_function(&CostModelCentroidalMomentum::get_reference<MathBaseTpl<double>::Vector6s>,
-                                      bp::return_value_policy<bp::return_by_value>()),
-                    &CostModelCentroidalMomentum::set_reference<MathBaseTpl<double>::Vector6s>,
+                                      deprecated<>("Deprecated. Use reference.")),
+                    bp::make_function(&CostModelCentroidalMomentum::set_reference<MathBaseTpl<double>::Vector6s>,
+                                      deprecated<>("Deprecated. Use reference.")),
                     "reference centroidal momentum");
 
   bp::class_<CostDataCentroidalMomentum, bp::bases<CostDataAbstract> >(
